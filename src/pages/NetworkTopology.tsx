@@ -67,30 +67,30 @@ export function NetworkTopology() {
       </div>
 
       <div className="bg-gray-50 p-6 rounded-lg">
-        {regions.length === 0 ? (
-          <div className="text-center py-12">
+        {regions.length === 0 && (
+          <div className="text-center py-8 mb-6">
             <div className="text-4xl mb-4">🗺️</div>
             <h3 className="text-lg font-semibold mb-2">No topology defined yet</h3>
             <p className="text-gray-600 mb-4">
               Start by creating your first region to build your network topology
             </p>
           </div>
-        ) : (
-          <TopologyTree
-            regions={regions}
-            cities={cities}
-            nodes={nodes}
-            onCreateRegion={createRegion}
-            onCreateCity={createCity}
-            onCreateNode={createNode}
-            onUpdateRegion={updateRegion}
-            onUpdateCity={updateCity}
-            onUpdateNode={updateNode}
-            onDeleteRegion={deleteRegion}
-            onDeleteCity={deleteCity}
-            onDeleteNode={deleteNode}
-          />
         )}
+        
+        <TopologyTree
+          regions={regions}
+          cities={cities}
+          nodes={nodes}
+          onCreateRegion={createRegion}
+          onCreateCity={createCity}
+          onCreateNode={createNode}
+          onUpdateRegion={updateRegion}
+          onUpdateCity={updateCity}
+          onUpdateNode={updateNode}
+          onDeleteRegion={deleteRegion}
+          onDeleteCity={deleteCity}
+          onDeleteNode={deleteNode}
+        />
       </div>
     </div>
   )
