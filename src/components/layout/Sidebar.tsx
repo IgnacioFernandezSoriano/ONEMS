@@ -20,6 +20,12 @@ export function Sidebar() {
       icon: '📊',
     },
     {
+      path: '/topology',
+      label: 'Network Topology',
+      icon: '🗺️',
+      roles: ['admin', 'superadmin'],
+    },
+    {
       path: '/settings',
       label: 'Settings',
       icon: '⚙️',
