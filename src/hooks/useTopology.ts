@@ -40,21 +40,23 @@ export function useTopology() {
 
   // Region operations
   const createRegion = async (data: { name: string; code: string; description?: string }) => {
-    const { error } = await supabase.from('regions').insert(data)
+    const { data: newRegion, error } = await supabase.from('regions').insert(data).select().single()
     if (error) throw error
-    await fetchAll()
+    setRegions([...regions, newRegion])
   }
 
   const updateRegion = async (id: string, data: Partial<Region>) => {
-    const { error } = await supabase.from('regions').update(data).eq('id', id)
+    const { data: updated, error } = await supabase.from('regions').update(data).eq('id', id).select().single()
     if (error) throw error
-    await fetchAll()
+    setRegions(regions.map(r => r.id === id ? updated : r))
   }
 
   const deleteRegion = async (id: string) => {
     const { error } = await supabase.from('regions').delete().eq('id', id)
     if (error) throw error
-    await fetchAll()
+    setRegions(regions.filter(r => r.id !== id))
+    setCities(cities.filter(c => c.region_id !== id))
+    setNodes(nodes.filter(n => !cities.some(c => c.id === n.city_id && c.region_id === id)))
   }
 
   // City operations
@@ -65,21 +67,22 @@ export function useTopology() {
     latitude?: number
     longitude?: number
   }) => {
-    const { error } = await supabase.from('cities').insert(data)
+    const { data: newCity, error } = await supabase.from('cities').insert(data).select().single()
     if (error) throw error
-    await fetchAll()
+    setCities([...cities, newCity])
   }
 
   const updateCity = async (id: string, data: Partial<City>) => {
-    const { error } = await supabase.from('cities').update(data).eq('id', id)
+    const { data: updated, error } = await supabase.from('cities').update(data).eq('id', id).select().single()
     if (error) throw error
-    await fetchAll()
+    setCities(cities.map(c => c.id === id ? updated : c))
   }
 
   const deleteCity = async (id: string) => {
     const { error } = await supabase.from('cities').delete().eq('id', id)
     if (error) throw error
-    await fetchAll()
+    setCities(cities.filter(c => c.id !== id))
+    setNodes(nodes.filter(n => n.city_id !== id))
   }
 
   // Node operations
@@ -99,19 +102,28 @@ export function useTopology() {
     })
 
     if (error) throw error
-    await fetchAll()
+    
+    // Fetch the newly created node
+    const { data: newNode, error: fetchError } = await supabase
+      .from('nodes')
+      .select('*')
+      .eq('auto_id', autoIdData)
+      .single()
+    
+    if (fetchError) throw fetchError
+    setNodes([...nodes, newNode])
   }
 
   const updateNode = async (id: string, data: Partial<Node>) => {
-    const { error } = await supabase.from('nodes').update(data).eq('id', id)
+    const { data: updated, error } = await supabase.from('nodes').update(data).eq('id', id).select().single()
     if (error) throw error
-    await fetchAll()
+    setNodes(nodes.map(n => n.id === id ? updated : n))
   }
 
   const deleteNode = async (id: string) => {
     const { error } = await supabase.from('nodes').delete().eq('id', id)
     if (error) throw error
-    await fetchAll()
+    setNodes(nodes.filter(n => n.id !== id))
   }
 
   return {
