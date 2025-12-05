@@ -67,8 +67,14 @@ export function TopologyTree({
   }
 
   const handleSubmit = async (data: any) => {
-    await modal.onSubmit(data)
-    setModal(null)
+    try {
+      await modal.onSubmit(data)
+      setModal(null)
+      // Estado de expansión se mantiene automáticamente
+    } catch (error) {
+      console.error('Error submitting:', error)
+      throw error
+    }
   }
 
   return (
