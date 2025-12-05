@@ -9,6 +9,7 @@ import { Accounts } from './pages/Settings/Accounts'
 import { AllUsers } from './pages/Settings/AllUsers'
 import { Users } from './pages/Admin/Users'
 import { CountryTopology } from './pages/CountryTopology'
+import { Carriers } from './pages/Carriers'
 
 function App() {
   return (
@@ -31,6 +32,16 @@ function App() {
                       element={
                         <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
                           <CountryTopology />
+                        </ProtectedRoute>
+                      }
+                    />
+                    
+                    {/* Carriers - for admin and superadmin */}
+                    <Route
+                      path="/carriers"
+                      element={
+                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                          <Carriers />
                         </ProtectedRoute>
                       }
                     />

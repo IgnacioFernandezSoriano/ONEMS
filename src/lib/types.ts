@@ -36,6 +36,29 @@ export interface City {
   updated_at: string
 }
 
+export interface Carrier {
+  id: string
+  account_id: string
+  code: string
+  name: string
+  type?: string
+  status: 'active' | 'inactive'
+  created_at: string
+  updated_at: string
+}
+
+export interface Product {
+  id: string
+  account_id: string
+  carrier_id: string
+  code: string
+  description: string
+  standard_delivery_hours: number
+  status: 'active' | 'inactive'
+  created_at: string
+  updated_at: string
+}
+
 export interface Node {
   id: string
   account_id: string

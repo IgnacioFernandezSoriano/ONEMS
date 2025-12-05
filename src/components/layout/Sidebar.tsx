@@ -26,6 +26,12 @@ export function Sidebar() {
       roles: ['admin', 'superadmin'],
     },
     {
+      path: '/carriers',
+      label: 'Carriers',
+      icon: '🚚',
+      roles: ['admin', 'superadmin'],
+    },
+    {
       path: '/settings',
       label: 'Settings',
       icon: '⚙️',
