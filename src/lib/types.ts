@@ -39,10 +39,7 @@ export interface Node {
   account_id: string
   city_id: string
   auto_id: string
-  name?: string
-  node_type: 'core' | 'edge' | 'access'
-  ip_address?: string
-  status: 'active' | 'inactive' | 'maintenance'
+  status: 'active' | 'inactive'
   created_at: string
   updated_at: string
 }

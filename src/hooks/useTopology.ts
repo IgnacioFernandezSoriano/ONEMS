@@ -83,12 +83,7 @@ export function useTopology() {
   }
 
   // Node operations
-  const createNode = async (data: {
-    city_id: string
-    name?: string
-    node_type?: 'core' | 'edge' | 'access'
-    ip_address?: string
-  }) => {
+  const createNode = async (data: { city_id: string }) => {
     // Generate auto_id
     const { data: autoIdData, error: autoIdError } = await supabase.rpc(
       'generate_node_auto_id',
@@ -98,8 +93,9 @@ export function useTopology() {
     if (autoIdError) throw autoIdError
 
     const { error } = await supabase.from('nodes').insert({
-      ...data,
+      city_id: data.city_id,
       auto_id: autoIdData,
+      status: 'active',
     })
 
     if (error) throw error

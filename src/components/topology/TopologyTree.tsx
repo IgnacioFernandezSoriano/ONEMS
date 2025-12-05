@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Modal } from '@/components/common/Modal'
 import { RegionForm } from './RegionForm'
 import { CityForm } from './CityForm'
-import { NodeForm } from './NodeForm'
+
 import type { Region, City, Node } from '@/lib/types'
 
 interface TopologyTreeProps {
@@ -135,13 +135,7 @@ export function TopologyTree({
                             {city.name} ({city.code})
                           </span>
                           <button
-                            onClick={() =>
-                              setModal({
-                                type: 'node',
-                                cityId: city.id,
-                                onSubmit: onCreateNode,
-                              })
-                            }
+                            onClick={() => onCreateNode({ city_id: city.id })}
                             className="px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700"
                           >
                             + Node
@@ -166,21 +160,23 @@ export function TopologyTree({
                                 className="flex items-center gap-2 p-2 hover:bg-gray-50 text-sm"
                               >
                                 <span className="text-base">🔷</span>
-                                <span className="font-mono text-blue-600">{node.auto_id}</span>
-                                {node.name && <span className="text-gray-600">- {node.name}</span>}
-                                <span className="text-xs bg-gray-100 px-2 py-1 rounded">
-                                  {node.node_type}
+                                <span className="font-mono text-blue-600 flex-1">{node.auto_id}</span>
+                                <span
+                                  className={`text-xs px-2 py-1 rounded ${
+                                    node.status === 'active'
+                                      ? 'bg-green-100 text-green-700'
+                                      : 'bg-gray-100 text-gray-700'
+                                  }`}
+                                >
+                                  {node.status}
                                 </span>
-                                {node.ip_address && (
-                                  <span className="text-xs text-gray-500">{node.ip_address}</span>
-                                )}
                                 <button
                                   onClick={() => {
                                     if (confirm('Delete this node?')) {
                                       onDeleteNode(node.id)
                                     }
                                   }}
-                                  className="ml-auto px-2 py-1 text-xs text-red-600 hover:bg-red-50 rounded"
+                                  className="px-2 py-1 text-xs text-red-600 hover:bg-red-50 rounded"
                                 >
                                   Delete
                                 </button>
@@ -209,13 +205,7 @@ export function TopologyTree({
         <Modal
           isOpen={true}
           onClose={() => setModal(null)}
-          title={
-            modal.type === 'region'
-              ? 'Create Region'
-              : modal.type === 'city'
-              ? 'Create City'
-              : 'Create Node'
-          }
+          title={modal.type === 'region' ? 'Create Region' : 'Create City'}
         >
           {modal.type === 'region' && (
             <RegionForm onSubmit={handleSubmit} onCancel={() => setModal(null)} />
@@ -227,13 +217,7 @@ export function TopologyTree({
               onCancel={() => setModal(null)}
             />
           )}
-          {modal.type === 'node' && (
-            <NodeForm
-              cityId={modal.cityId}
-              onSubmit={handleSubmit}
-              onCancel={() => setModal(null)}
-            />
-          )}
+
         </Modal>
       )}
     </>
