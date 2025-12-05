@@ -21,7 +21,7 @@ export function Sidebar() {
     },
     {
       path: '/topology',
-      label: 'Network Topology',
+      label: 'Country Topology',
       icon: '🗺️',
       roles: ['admin', 'superadmin'],
     },

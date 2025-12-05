@@ -2,7 +2,7 @@ import { useTopology } from '@/hooks/useTopology'
 import { TopologyTree } from '@/components/topology/TopologyTree'
 import { PageHeader } from '@/components/common/PageHeader'
 
-export function NetworkTopology() {
+export function CountryTopology() {
   const {
     regions,
     cities,
@@ -46,9 +46,9 @@ export function NetworkTopology() {
 
   return (
     <div className="p-8">
-      <PageHeader title="Network Topology" />
+      <PageHeader title="Country Topology" />
       <p className="text-gray-600 mb-6">
-        Define and manage your network infrastructure hierarchy
+        Define and manage your country network infrastructure hierarchy
       </p>
 
       <div className="grid grid-cols-3 gap-4 mb-6">
@@ -72,7 +72,7 @@ export function NetworkTopology() {
             <div className="text-4xl mb-4">🗺️</div>
             <h3 className="text-lg font-semibold mb-2">No topology defined yet</h3>
             <p className="text-gray-600 mb-4">
-              Start by creating your first region to build your network topology
+              Start by creating your first region to build your country topology
             </p>
           </div>
         )}

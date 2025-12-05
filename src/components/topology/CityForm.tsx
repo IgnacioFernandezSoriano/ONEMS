@@ -14,8 +14,10 @@ export function CityForm({ city, regionId, onSubmit, onCancel }: CityFormProps) 
     region_id: regionId,
     name: city?.name || '',
     code: city?.code || '',
+    classification: city?.classification || 'C',
     latitude: city?.latitude?.toString() || '',
     longitude: city?.longitude?.toString() || '',
+    status: city?.status || 'active',
   })
   const [loading, setLoading] = useState(false)
 
@@ -27,6 +29,8 @@ export function CityForm({ city, regionId, onSubmit, onCancel }: CityFormProps) 
         region_id: formData.region_id,
         name: formData.name,
         code: formData.code,
+        classification: formData.classification,
+        status: formData.status,
       }
       if (formData.latitude) data.latitude = parseFloat(formData.latitude)
       if (formData.longitude) data.longitude = parseFloat(formData.longitude)
@@ -62,6 +66,33 @@ export function CityForm({ city, regionId, onSubmit, onCancel }: CityFormProps) 
           placeholder="e.g., MAD, BCN"
           maxLength={10}
         />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-1">Classification *</label>
+        <select
+          required
+          value={formData.classification}
+          onChange={(e) => setFormData({ ...formData, classification: e.target.value as any })}
+          className="w-full px-3 py-2 border rounded-md"
+        >
+          <option value="A">A - Major City</option>
+          <option value="B">B - Medium City</option>
+          <option value="C">C - Small City</option>
+        </select>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-1">Status *</label>
+        <select
+          required
+          value={formData.status}
+          onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
+          className="w-full px-3 py-2 border rounded-md"
+        >
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
       </div>
 
       <div className="grid grid-cols-2 gap-4">

@@ -12,7 +12,9 @@ export function RegionForm({ region, onSubmit, onCancel }: RegionFormProps) {
   const [formData, setFormData] = useState({
     name: region?.name || '',
     code: region?.code || '',
+    country_code: region?.country_code || '',
     description: region?.description || '',
+    status: region?.status || 'active',
   })
   const [loading, setLoading] = useState(false)
 
@@ -51,6 +53,32 @@ export function RegionForm({ region, onSubmit, onCancel }: RegionFormProps) {
           placeholder="e.g., ES, FR"
           maxLength={10}
         />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-1">Country Code *</label>
+        <input
+          type="text"
+          required
+          value={formData.country_code}
+          onChange={(e) => setFormData({ ...formData, country_code: e.target.value.toUpperCase() })}
+          className="w-full px-3 py-2 border rounded-md"
+          placeholder="e.g., ES, FR"
+          maxLength={2}
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-1">Status *</label>
+        <select
+          required
+          value={formData.status}
+          onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
+          className="w-full px-3 py-2 border rounded-md"
+        >
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
       </div>
 
       <div>

@@ -8,7 +8,7 @@ import { Settings } from './pages/Settings/Settings'
 import { Accounts } from './pages/Settings/Accounts'
 import { AllUsers } from './pages/Settings/AllUsers'
 import { Users } from './pages/Admin/Users'
-import { NetworkTopology } from './pages/NetworkTopology'
+import { CountryTopology } from './pages/CountryTopology'
 
 function App() {
   return (
@@ -25,12 +25,12 @@ function App() {
                   <Routes>
                     <Route path="/dashboard" element={<Dashboard />} />
                     
-                    {/* Network Topology - for admin and superadmin */}
+                    {/* Country Topology - for admin and superadmin */}
                     <Route
                       path="/topology"
                       element={
                         <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
-                          <NetworkTopology />
+                          <CountryTopology />
                         </ProtectedRoute>
                       }
                     />

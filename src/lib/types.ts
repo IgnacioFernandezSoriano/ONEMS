@@ -15,6 +15,7 @@ export interface Region {
   account_id: string
   name: string
   code: string
+  country_code?: string
   description?: string
   status: 'active' | 'inactive'
   created_at: string
@@ -27,6 +28,7 @@ export interface City {
   region_id: string
   name: string
   code: string
+  classification?: 'A' | 'B' | 'C'
   latitude?: number
   longitude?: number
   status: 'active' | 'inactive'

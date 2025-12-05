@@ -91,6 +91,27 @@ export function TopologyTree({
                 <span className="font-medium flex-1">
                   {region.name} ({region.code})
                 </span>
+                <span
+                  className={`text-xs px-2 py-1 rounded ${
+                    region.status === 'active'
+                      ? 'bg-green-100 text-green-700'
+                      : 'bg-gray-100 text-gray-700'
+                  }`}
+                >
+                  {region.status}
+                </span>
+                <button
+                  onClick={() =>
+                    setModal({
+                      type: 'region',
+                      region: region,
+                      onSubmit: (data: any) => onUpdateRegion(region.id, data),
+                    })
+                  }
+                  className="px-3 py-1 text-sm text-blue-600 hover:bg-blue-50 rounded"
+                >
+                  Edit
+                </button>
                 <button
                   onClick={() =>
                     setModal({
@@ -133,7 +154,34 @@ export function TopologyTree({
                           <span className="text-lg">🏙️</span>
                           <span className="flex-1">
                             {city.name} ({city.code})
+                            {city.classification && (
+                              <span className="ml-2 text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded">
+                                Class {city.classification}
+                              </span>
+                            )}
                           </span>
+                          <span
+                            className={`text-xs px-2 py-1 rounded ${
+                              city.status === 'active'
+                                ? 'bg-green-100 text-green-700'
+                                : 'bg-gray-100 text-gray-700'
+                            }`}
+                          >
+                            {city.status}
+                          </span>
+                          <button
+                            onClick={() =>
+                              setModal({
+                                type: 'city',
+                                regionId: city.region_id,
+                                city: city,
+                                onSubmit: (data: any) => onUpdateCity(city.id, data),
+                              })
+                            }
+                            className="px-2 py-1 text-xs text-blue-600 hover:bg-blue-50 rounded"
+                          >
+                            Edit
+                          </button>
                           <button
                             onClick={() => onCreateNode({ city_id: city.id })}
                             className="px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700"
@@ -205,13 +253,26 @@ export function TopologyTree({
         <Modal
           isOpen={true}
           onClose={() => setModal(null)}
-          title={modal.type === 'region' ? 'Create Region' : 'Create City'}
+          title={
+            modal.type === 'region'
+              ? modal.region
+                ? 'Edit Region'
+                : 'Create Region'
+              : modal.city
+              ? 'Edit City'
+              : 'Create City'
+          }
         >
           {modal.type === 'region' && (
-            <RegionForm onSubmit={handleSubmit} onCancel={() => setModal(null)} />
+            <RegionForm
+              region={modal.region}
+              onSubmit={handleSubmit}
+              onCancel={() => setModal(null)}
+            />
           )}
           {modal.type === 'city' && (
             <CityForm
+              city={modal.city}
               regionId={modal.regionId}
               onSubmit={handleSubmit}
               onCancel={() => setModal(null)}
