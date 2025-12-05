@@ -22,7 +22,7 @@ export function Accounts() {
     setIsModalOpen(true)
   }
 
-  const handleSubmit = async (data: { name: string; slug: string; status?: string }) => {
+  const handleSubmit = async (data: { name: string; slug: string; status?: 'active' | 'inactive' }) => {
     if (selectedAccount) {
       await updateAccount(selectedAccount.id, data)
     } else {

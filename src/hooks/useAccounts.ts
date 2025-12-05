@@ -31,7 +31,7 @@ export function useAccounts() {
   const createAccount = async (account: { name: string; slug: string }) => {
     const { data, error } = await supabase
       .from('accounts')
-      .insert(account)
+      .insert(account as any)
       .select()
       .single()
 
@@ -43,7 +43,7 @@ export function useAccounts() {
   const updateAccount = async (id: string, updates: Partial<Account>) => {
     const { error } = await supabase
       .from('accounts')
-      .update(updates)
+      .update(updates as any)
       .eq('id', id)
 
     if (error) throw error

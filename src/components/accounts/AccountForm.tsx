@@ -4,14 +4,14 @@ import type { Account } from '@/lib/types'
 
 interface AccountFormProps {
   account?: Account
-  onSubmit: (data: { name: string; slug: string; status?: string }) => Promise<void>
+  onSubmit: (data: { name: string; slug: string; status?: 'active' | 'inactive' }) => Promise<void>
   onCancel: () => void
 }
 
 export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
   const [name, setName] = useState(account?.name || '')
   const [slug, setSlug] = useState(account?.slug || '')
-  const [status, setStatus] = useState(account?.status || 'active')
+  const [status, setStatus] = useState<'active' | 'inactive'>(account?.status || 'active')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -77,7 +77,7 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
           <select
             id="status"
             value={status}
-            onChange={(e) => setStatus(e.target.value)}
+            onChange={(e) => setStatus(e.target.value as 'active' | 'inactive')}
             className="w-full px-3 py-2 border border-gray-300 rounded-md"
           >
             <option value="active">Active</option>

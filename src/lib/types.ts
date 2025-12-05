@@ -30,13 +30,34 @@ export type Database = {
     Tables: {
       accounts: {
         Row: Account
-        Insert: Omit<Account, 'id' | 'created_at' | 'updated_at'>
-        Update: Partial<Omit<Account, 'id' | 'created_at' | 'updated_at'>>
+        Insert: {
+          name: string
+          slug: string
+          status?: Status
+        }
+        Update: {
+          name?: string
+          slug?: string
+          status?: Status
+        }
       }
       profiles: {
         Row: Profile
-        Insert: Omit<Profile, 'created_at' | 'updated_at'>
-        Update: Partial<Omit<Profile, 'id' | 'created_at' | 'updated_at'>>
+        Insert: {
+          id: string
+          email: string
+          full_name?: string | null
+          role: Role
+          account_id?: string | null
+          status?: Status
+        }
+        Update: {
+          email?: string
+          full_name?: string | null
+          role?: Role
+          account_id?: string | null
+          status?: Status
+        }
       }
     }
   }

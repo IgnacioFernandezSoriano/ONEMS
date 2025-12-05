@@ -17,9 +17,9 @@ export function UserForm({ user, onSubmit, onCancel }: UserFormProps) {
   const [email, setEmail] = useState(user?.email || '')
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState(user?.full_name || '')
-  const [role, setRole] = useState(user?.role || 'user')
+  const [role, setRole] = useState<'superadmin' | 'admin' | 'user'>(user?.role || 'user')
   const [accountId, setAccountId] = useState(user?.account_id || profile?.account_id || '')
-  const [status, setStatus] = useState(user?.status || 'active')
+  const [status, setStatus] = useState<'active' | 'inactive'>(user?.status || 'active')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -113,7 +113,7 @@ export function UserForm({ user, onSubmit, onCancel }: UserFormProps) {
         <select
           id="role"
           value={role}
-          onChange={(e) => setRole(e.target.value)}
+          onChange={(e) => setRole(e.target.value as 'superadmin' | 'admin' | 'user')}
           className="w-full px-3 py-2 border border-gray-300 rounded-md"
         >
           {isSuperadmin && <option value="superadmin">{ROLE_LABELS.superadmin}</option>}
@@ -153,7 +153,7 @@ export function UserForm({ user, onSubmit, onCancel }: UserFormProps) {
           <select
             id="status"
             value={status}
-            onChange={(e) => setStatus(e.target.value)}
+            onChange={(e) => setStatus(e.target.value as 'active' | 'inactive')}
             className="w-full px-3 py-2 border border-gray-300 rounded-md"
           >
             <option value="active">Active</option>

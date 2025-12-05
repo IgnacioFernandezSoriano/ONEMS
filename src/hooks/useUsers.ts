@@ -53,7 +53,7 @@ export function useUsers() {
         full_name: userData.full_name,
         role: userData.role,
         account_id: userData.account_id || null,
-      })
+      } as any)
 
     if (profileError) throw profileError
     await fetchUsers()
@@ -62,7 +62,7 @@ export function useUsers() {
   const updateUser = async (id: string, updates: Partial<ProfileWithAccount>) => {
     const { error } = await supabase
       .from('profiles')
-      .update(updates)
+      .update(updates as any)
       .eq('id', id)
 
     if (error) throw error
@@ -73,7 +73,7 @@ export function useUsers() {
     // Nota: Esto solo desactiva el perfil, no elimina el usuario de Auth
     const { error } = await supabase
       .from('profiles')
-      .update({ status: 'inactive' })
+      .update({ status: 'inactive' } as any)
       .eq('id', id)
 
     if (error) throw error
