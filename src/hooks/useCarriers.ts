@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
-import type { Carrier, Product } from '@/lib/types'
+import type { Carrier, Product, Material } from '@/lib/types'
 
 export function useCarriers() {
   const [carriers, setCarriers] = useState<Carrier[]>([])
   const [products, setProducts] = useState<Product[]>([])
+  const [materials, setMaterials] = useState<Material[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -13,16 +14,19 @@ export function useCarriers() {
       setLoading(true)
       setError(null)
 
-      const [carriersRes, productsRes] = await Promise.all([
+      const [carriersRes, productsRes, materialsRes] = await Promise.all([
         supabase.from('carriers').select('*').order('name'),
         supabase.from('products').select('*').order('code'),
+        supabase.from('materials').select('*').order('code'),
       ])
 
       if (carriersRes.error) throw carriersRes.error
       if (productsRes.error) throw productsRes.error
+      if (materialsRes.error) throw materialsRes.error
 
       setCarriers(carriersRes.data || [])
       setProducts(productsRes.data || [])
+      setMaterials(materialsRes.data || [])
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -77,11 +81,39 @@ export function useCarriers() {
     const { error } = await supabase.from('products').delete().eq('id', id)
     if (error) throw error
     setProducts(products.filter(p => p.id !== id))
+    setMaterials(materials.filter(m => m.product_id !== id))
+  }
+
+  // Material operations
+  const createMaterial = async (data: {
+    product_id: string
+    code: string
+    name: string
+    unit_measure?: string
+    description?: string
+    status?: string
+  }) => {
+    const { data: newMaterial, error } = await supabase.from('materials').insert(data).select().single()
+    if (error) throw error
+    setMaterials([...materials, newMaterial])
+  }
+
+  const updateMaterial = async (id: string, data: Partial<Material>) => {
+    const { data: updated, error } = await supabase.from('materials').update(data).eq('id', id).select().single()
+    if (error) throw error
+    setMaterials(materials.map(m => m.id === id ? updated : m))
+  }
+
+  const deleteMaterial = async (id: string) => {
+    const { error } = await supabase.from('materials').delete().eq('id', id)
+    if (error) throw error
+    setMaterials(materials.filter(m => m.id !== id))
   }
 
   return {
     carriers,
     products,
+    materials,
     loading,
     error,
     createCarrier,
@@ -90,6 +122,9 @@ export function useCarriers() {
     createProduct,
     updateProduct,
     deleteProduct,
+    createMaterial,
+    updateMaterial,
+    deleteMaterial,
     refresh: fetchAll,
   }
 }

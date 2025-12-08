@@ -5,6 +5,7 @@ export function Carriers() {
   const {
     carriers,
     products,
+    materials,
     loading,
     error,
     createCarrier,
@@ -13,6 +14,9 @@ export function Carriers() {
     createProduct,
     updateProduct,
     deleteProduct,
+    createMaterial,
+    updateMaterial,
+    deleteMaterial,
   } = useCarriers()
 
   if (loading) {
@@ -33,6 +37,7 @@ export function Carriers() {
 
   const totalCarriers = carriers.length
   const totalProducts = products.length
+  const totalMaterials = materials.length
 
   return (
     <div className="space-y-6">
@@ -41,7 +46,7 @@ export function Carriers() {
         <p className="text-gray-600 mt-1">Manage shipping carriers and their products</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white p-6 rounded-lg border">
           <div className="text-3xl font-bold text-blue-600">{totalCarriers}</div>
           <div className="text-sm text-gray-600 mt-1">Carriers</div>
@@ -49,6 +54,10 @@ export function Carriers() {
         <div className="bg-white p-6 rounded-lg border">
           <div className="text-3xl font-bold text-green-600">{totalProducts}</div>
           <div className="text-sm text-gray-600 mt-1">Products</div>
+        </div>
+        <div className="bg-white p-6 rounded-lg border">
+          <div className="text-3xl font-bold text-purple-600">{totalMaterials}</div>
+          <div className="text-sm text-gray-600 mt-1">Materials</div>
         </div>
       </div>
 
@@ -65,12 +74,16 @@ export function Carriers() {
       <CarriersTree
         carriers={carriers}
         products={products}
+        materials={materials}
         onCreateCarrier={createCarrier}
         onCreateProduct={createProduct}
+        onCreateMaterial={createMaterial}
         onUpdateCarrier={updateCarrier}
         onUpdateProduct={updateProduct}
+        onUpdateMaterial={updateMaterial}
         onDeleteCarrier={deleteCarrier}
         onDeleteProduct={deleteProduct}
+        onDeleteMaterial={deleteMaterial}
       />
     </div>
   )

@@ -59,6 +59,19 @@ export interface Product {
   updated_at: string
 }
 
+export interface Material {
+  id: string
+  account_id: string
+  product_id: string
+  code: string
+  name: string
+  unit_measure?: string
+  description?: string
+  status: 'active' | 'inactive'
+  created_at: string
+  updated_at: string
+}
+
 export interface Node {
   id: string
   account_id: string
