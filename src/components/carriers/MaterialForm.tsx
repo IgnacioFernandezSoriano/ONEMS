@@ -14,6 +14,7 @@ export function MaterialForm({ material, productId, onSubmit, onCancel }: Materi
     code: material?.code || '',
     name: material?.name || '',
     unit_measure: material?.unit_measure || '',
+    quantity: material?.quantity || 1,
     description: material?.description || '',
     status: material?.status || 'active',
   })
@@ -72,6 +73,20 @@ export function MaterialForm({ material, productId, onSubmit, onCancel }: Materi
           onChange={(e) => setFormData({ ...formData, unit_measure: e.target.value })}
           className="w-full px-3 py-2 border border-gray-300 rounded-md"
           placeholder="units, kg, etc."
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Quantity *
+        </label>
+        <input
+          type="number"
+          min="1"
+          required
+          value={formData.quantity}
+          onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) || 1 })}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md"
         />
       </div>
 

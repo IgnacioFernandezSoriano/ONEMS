@@ -66,6 +66,7 @@ export interface Material {
   code: string
   name: string
   unit_measure?: string
+  quantity: number
   description?: string
   status: 'active' | 'inactive'
   created_at: string

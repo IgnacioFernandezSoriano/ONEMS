@@ -231,6 +231,9 @@ export function CarriersTree({
                                 <span className="text-base">📋</span>
                                 <span className="font-medium">{material.name}</span>
                                 <span className="text-gray-500">({material.code})</span>
+                                <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded font-medium">
+                                  Qty: {material.quantity}
+                                </span>
                                 {material.unit_measure && (
                                   <span className="text-xs bg-gray-50 px-2 py-1 rounded">
                                     {material.unit_measure}
