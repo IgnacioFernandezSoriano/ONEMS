@@ -138,8 +138,17 @@ export function TerritoryEquityTable({ data, onCityClick }: TerritoryEquityTable
               onClick={() => handleSort('standardDays')}
             >
               <div className="flex items-center justify-end gap-1">
-                J+K <SortIcon field="standardDays" />
-                <Tooltip content="Allowed days (weighted avg from delivery standards)" />
+                Standard (days) <SortIcon field="standardDays" />
+                <Tooltip content="J+K Standard: Allowed days (weighted avg from delivery standards)" />
+              </div>
+            </th>
+            <th
+              className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+              onClick={() => handleSort('actualDays')}
+            >
+              <div className="flex items-center justify-end gap-1">
+                Actual (days) <SortIcon field="actualDays" />
+                <Tooltip content="J+K Actual: Average business transit days from shipments" />
               </div>
             </th>
             <th
@@ -243,6 +252,9 @@ export function TerritoryEquityTable({ data, onCityClick }: TerritoryEquityTable
                 {city.standardDays.toFixed(1)}
               </td>
               <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
+                {city.actualDays.toFixed(1)}
+              </td>
+              <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
                 {city.actualPercentage.toFixed(1)}%
               </td>
               <td
@@ -283,7 +295,8 @@ export function TerritoryEquityTable({ data, onCityClick }: TerritoryEquityTable
                           <th className="text-right py-1 px-2">Compliant</th>
                           <th className="text-right py-1 px-2">Actual %</th>
                           <th className="text-right py-1 px-2">Standard %</th>
-                          <th className="text-right py-1 px-2">J+K</th>
+                          <th className="text-right py-1 px-2">Std (days)</th>
+                          <th className="text-right py-1 px-2">Actual (days)</th>
                           <th className="text-right py-1 px-2">Deviation</th>
                           <th className="text-right py-1 px-2">Inbound %</th>
                           <th className="text-right py-1 px-2">Outbound %</th>
@@ -299,6 +312,7 @@ export function TerritoryEquityTable({ data, onCityClick }: TerritoryEquityTable
                             <td className="py-1 px-2 text-right text-gray-700">{cp.actualPercentage.toFixed(1)}%</td>
                             <td className="py-1 px-2 text-right text-gray-700">{cp.standardPercentage.toFixed(1)}%</td>
                             <td className="py-1 px-2 text-right text-gray-700">{cp.standardDays.toFixed(1)}</td>
+                            <td className="py-1 px-2 text-right text-gray-700">{cp.actualDays.toFixed(1)}</td>
                             <td className={`py-1 px-2 text-right font-medium ${
                               cp.deviation >= 0 ? 'text-green-600' : 'text-red-600'
                             }`}>

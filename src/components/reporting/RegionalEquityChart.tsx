@@ -10,6 +10,8 @@ export function RegionalEquityChart({ data }: RegionalEquityChartProps) {
     region: region.regionName,
     actual: region.actualPercentage,
     standard: region.standardPercentage,
+    standardDays: region.standardDays,
+    actualDays: region.actualDays,
     status: region.status,
   }));
 
@@ -43,7 +45,23 @@ export function RegionalEquityChart({ data }: RegionalEquityChartProps) {
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis type="number" domain={[0, 100]} label={{ value: 'Compliance %', position: 'bottom' }} />
           <YAxis type="category" dataKey="region" />
-          <Tooltip formatter={(value: number) => `${value.toFixed(1)}%`} />
+          <Tooltip 
+            content={({ active, payload }) => {
+              if (active && payload && payload.length) {
+                const data = payload[0].payload;
+                return (
+                  <div className="bg-white p-3 border border-gray-300 rounded shadow-lg">
+                    <p className="font-semibold">{data.region}</p>
+                    <p className="text-blue-600">Actual: {data.actual.toFixed(1)}%</p>
+                    <p className="text-gray-600">Standard: {data.standard.toFixed(1)}%</p>
+                    <p className="text-gray-500 text-sm mt-1">Std (days): {data.standardDays.toFixed(1)}</p>
+                    <p className="text-gray-500 text-sm">Actual (days): {data.actualDays.toFixed(1)}</p>
+                  </div>
+                );
+              }
+              return null;
+            }}
+          />
           <ReferenceLine
             x={avgStandard}
             stroke="#ef4444"

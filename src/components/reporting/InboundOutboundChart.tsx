@@ -16,6 +16,8 @@ export function InboundOutboundChart({ data }: InboundOutboundChartProps) {
     inbound: city.inboundPercentage,
     outbound: city.outboundPercentage,
     standard: city.standardPercentage,
+    standardDays: city.standardDays,
+    actualDays: city.actualDays,
   }));
 
   // Calculate average standard for reference line
@@ -31,7 +33,25 @@ export function InboundOutboundChart({ data }: InboundOutboundChartProps) {
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="city" angle={-45} textAnchor="end" height={80} />
           <YAxis domain={[0, 100]} label={{ value: 'Compliance %', angle: -90, position: 'insideLeft' }} />
-          <Tooltip formatter={(value: number) => `${value.toFixed(1)}%`} />
+          <Tooltip 
+            formatter={(value: number) => `${value.toFixed(1)}%`}
+            content={({ active, payload }) => {
+              if (active && payload && payload.length) {
+                const data = payload[0].payload;
+                return (
+                  <div className="bg-white p-3 border border-gray-300 rounded shadow-lg">
+                    <p className="font-semibold">{data.city}</p>
+                    <p className="text-blue-600">Inbound: {data.inbound.toFixed(1)}%</p>
+                    <p className="text-green-600">Outbound: {data.outbound.toFixed(1)}%</p>
+                    <p className="text-gray-600">Standard: {data.standard.toFixed(1)}%</p>
+                    <p className="text-gray-500 text-sm mt-1">Std (days): {data.standardDays.toFixed(1)}</p>
+                    <p className="text-gray-500 text-sm">Actual (days): {data.actualDays.toFixed(1)}</p>
+                  </div>
+                );
+              }
+              return null;
+            }}
+          />
           <Legend />
           <ReferenceLine
             y={avgStandard}
