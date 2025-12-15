@@ -73,6 +73,8 @@ export default function TerritoryEquity() {
       'CP Actual %',
       'CP Standard %',
       'CP Deviation',
+      'CP Inbound %',
+      'CP Outbound %',
     ];
 
     const rows: string[][] = [];
@@ -101,6 +103,8 @@ export default function TerritoryEquity() {
             cp.actualPercentage.toFixed(1),
             cp.standardPercentage.toFixed(1),
             cp.deviation.toFixed(1),
+            cp.inboundPercentage.toFixed(1),
+            cp.outboundPercentage.toFixed(1),
           ]);
         });
       } else {
@@ -119,6 +123,8 @@ export default function TerritoryEquity() {
           city.inboundPercentage.toFixed(1),
           city.outboundPercentage.toFixed(1),
           city.directionGap.toFixed(1),
+          '',
+          '',
           '',
           '',
           '',
@@ -163,6 +169,8 @@ export default function TerritoryEquity() {
       'CP Actual %',
       'CP Standard %',
       'CP Deviation',
+      'CP Inbound %',
+      'CP Outbound %',
     ];
 
     const rows: string[][] = [];
@@ -190,6 +198,8 @@ export default function TerritoryEquity() {
             cp.actualPercentage.toFixed(1),
             cp.standardPercentage.toFixed(1),
             cp.deviation.toFixed(1),
+            cp.inboundPercentage.toFixed(1),
+            cp.outboundPercentage.toFixed(1),
           ]);
         });
       } else {
@@ -207,6 +217,8 @@ export default function TerritoryEquity() {
           region.inboundPercentage.toFixed(1),
           region.outboundPercentage.toFixed(1),
           region.underservedCitiesCount.toString(),
+          '',
+          '',
           '',
           '',
           '',
@@ -488,6 +500,15 @@ export default function TerritoryEquity() {
 
               {/* Treemap Visualization */}
               <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <h3 className="text-lg font-semibold">City Service Equity Treemap</h3>
+                  <div className="group relative">
+                    <Info className="h-4 w-4 text-gray-400 cursor-help" />
+                    <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg z-10">
+                      Visual representation of cities sized by population and colored by compliance status. Green indicates compliant cities, yellow shows warnings, and red highlights critical underperformance.
+                    </div>
+                  </div>
+                </div>
                 <TerritoryEquityTreemap data={cityData} />
               </div>
 

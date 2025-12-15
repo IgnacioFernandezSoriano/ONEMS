@@ -170,6 +170,12 @@ export function RegionDetailModal({ region, onClose }: RegionDetailModalProps) {
                       <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
                         Deviation
                       </th>
+                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
+                        Inbound %
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
+                        Outbound %
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -196,6 +202,12 @@ export function RegionDetailModal({ region, onClose }: RegionDetailModalProps) {
                         >
                           {cp.deviation >= 0 ? '+' : ''}
                           {cp.deviation.toFixed(1)}%
+                        </td>
+                        <td className="px-4 py-3 text-sm text-right text-blue-600">
+                          {cp.inboundPercentage.toFixed(1)}%
+                        </td>
+                        <td className="px-4 py-3 text-sm text-right text-green-600">
+                          {cp.outboundPercentage.toFixed(1)}%
                         </td>
                       </tr>
                     ))}

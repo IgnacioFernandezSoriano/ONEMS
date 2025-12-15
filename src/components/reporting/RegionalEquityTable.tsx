@@ -227,6 +227,8 @@ export function RegionalEquityTable({ data, onRegionClick }: RegionalEquityTable
                           <th className="text-right py-1 px-2">Actual %</th>
                           <th className="text-right py-1 px-2">Standard %</th>
                           <th className="text-right py-1 px-2">Deviation</th>
+                          <th className="text-right py-1 px-2">Inbound %</th>
+                          <th className="text-right py-1 px-2">Outbound %</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -243,6 +245,8 @@ export function RegionalEquityTable({ data, onRegionClick }: RegionalEquityTable
                             }`}>
                               {cp.deviation >= 0 ? '+' : ''}{cp.deviation.toFixed(1)}%
                             </td>
+                            <td className="py-1 px-2 text-right text-blue-600">{cp.inboundPercentage.toFixed(1)}%</td>
+                            <td className="py-1 px-2 text-right text-green-600">{cp.outboundPercentage.toFixed(1)}%</td>
                           </tr>
                         ))}
                       </tbody>

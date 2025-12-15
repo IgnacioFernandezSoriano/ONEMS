@@ -148,6 +148,8 @@ export interface CityEquityData {
     actualPercentage: number;
     standardPercentage: number;
     deviation: number;
+    inboundPercentage: number;
+    outboundPercentage: number;
   }>;
   
   // RLS
@@ -179,6 +181,8 @@ export interface RegionEquityData {
     actualPercentage: number;
     standardPercentage: number;
     deviation: number;
+    inboundPercentage: number;
+    outboundPercentage: number;
   }>;
   
   accountId: string;

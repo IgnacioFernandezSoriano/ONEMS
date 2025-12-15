@@ -116,7 +116,16 @@ export function useTerritoryEquityData(
             outbound: { total: number; compliant: number };
             standardsSum: number;
             standardsCount: number;
-            carrierProduct: Map<string, { carrier: string; product: string; total: number; compliant: number }>;
+            carrierProduct: Map<string, { 
+              carrier: string; 
+              product: string; 
+              total: number; 
+              compliant: number;
+              inbound: { total: number; compliant: number };
+              outbound: { total: number; compliant: number };
+              standardsSum: number;
+              standardsCount: number;
+            }>;
           }
         >();
 
@@ -145,18 +154,37 @@ export function useTerritoryEquityData(
               product: shipment.product_name,
               total: 0,
               compliant: 0,
+              inbound: { total: 0, compliant: 0 },
+              outbound: { total: 0, compliant: 0 },
+              standardsSum: 0,
+              standardsCount: 0,
             });
           }
           const cpStats = destStats.carrierProduct.get(cpKey)!;
           cpStats.total++;
-          if (shipment.on_time_delivery) cpStats.compliant++;
-
-          // Lookup standard for this route
+          cpStats.inbound.total++;
+          if (shipment.on_time_delivery) {
+            cpStats.compliant++;
+            cpStats.inbound.compliant++;
+          }
+          
+          // Lookup IDs for standard
           const carrierId = carrierNameToIdMap.get(shipment.carrier_name);
           const productId = productDescToIdMap.get(shipment.product_name);
           const originCityId = cityNameToIdMap.get(shipment.origin_city_name);
           const destCityId = cityNameToIdMap.get(shipment.destination_city_name);
+          
+          // Add standard for this carrier/product
+          if (carrierId && productId && originCityId && destCityId) {
+            const key = `${carrierId}|${productId}|${originCityId}|${destCityId}`;
+            const standard = standardsMap.get(key);
+            if (standard && standard.success_percentage) {
+              cpStats.standardsSum += standard.success_percentage;
+              cpStats.standardsCount++;
+            }
+          }
 
+          // Also add to city-level standard
           if (carrierId && productId && originCityId && destCityId) {
             const key = `${carrierId}|${productId}|${originCityId}|${destCityId}`;
             const standard = standardsMap.get(key);
@@ -190,11 +218,34 @@ export function useTerritoryEquityData(
               product: shipment.product_name,
               total: 0,
               compliant: 0,
+              inbound: { total: 0, compliant: 0 },
+              outbound: { total: 0, compliant: 0 },
+              standardsSum: 0,
+              standardsCount: 0,
             });
           }
           const cpStatsOrigin = originStats.carrierProduct.get(cpKeyOrigin)!;
           cpStatsOrigin.total++;
-          if (shipment.on_time_delivery) cpStatsOrigin.compliant++;
+          cpStatsOrigin.outbound.total++;
+          if (shipment.on_time_delivery) {
+            cpStatsOrigin.compliant++;
+            cpStatsOrigin.outbound.compliant++;
+          }
+          
+          // Add standard for this carrier/product (outbound)
+          const carrierIdOut = carrierNameToIdMap.get(shipment.carrier_name);
+          const productIdOut = productDescToIdMap.get(shipment.product_name);
+          const originCityIdOut = cityNameToIdMap.get(shipment.origin_city_name);
+          const destCityIdOut = cityNameToIdMap.get(shipment.destination_city_name);
+          
+          if (carrierIdOut && productIdOut && originCityIdOut && destCityIdOut) {
+            const keyOut = `${carrierIdOut}|${productIdOut}|${originCityIdOut}|${destCityIdOut}`;
+            const standardOut = standardsMap.get(keyOut);
+            if (standardOut && standardOut.success_percentage) {
+              cpStatsOrigin.standardsSum += standardOut.success_percentage;
+              cpStatsOrigin.standardsCount++;
+            }
+          }
         });
 
         // 5. Build CityEquityData array
@@ -238,15 +289,24 @@ export function useTerritoryEquityData(
             const directionGap = Math.abs(inboundPercentage - outboundPercentage);
 
             // Build carrier/product breakdown
-            const carrierProductBreakdown = Array.from(stats.carrierProduct.values()).map(cp => ({
-              carrier: cp.carrier,
-              product: cp.product,
-              totalShipments: cp.total,
-              compliantShipments: cp.compliant,
-              actualPercentage: cp.total > 0 ? (cp.compliant / cp.total) * 100 : 0,
-              standardPercentage: 95, // Default, could be calculated from standards
-              deviation: (cp.total > 0 ? (cp.compliant / cp.total) * 100 : 0) - 95,
-            })).sort((a, b) => b.totalShipments - a.totalShipments);
+            const carrierProductBreakdown = Array.from(stats.carrierProduct.values()).map(cp => {
+              const cpActualPercentage = cp.total > 0 ? (cp.compliant / cp.total) * 100 : 0;
+              const cpStandardPercentage = cp.standardsCount > 0 ? cp.standardsSum / cp.standardsCount : 95;
+              const cpInboundPercentage = cp.inbound.total > 0 ? (cp.inbound.compliant / cp.inbound.total) * 100 : 0;
+              const cpOutboundPercentage = cp.outbound.total > 0 ? (cp.outbound.compliant / cp.outbound.total) * 100 : 0;
+              
+              return {
+                carrier: cp.carrier,
+                product: cp.product,
+                totalShipments: cp.total,
+                compliantShipments: cp.compliant,
+                actualPercentage: cpActualPercentage,
+                standardPercentage: cpStandardPercentage,
+                deviation: cpActualPercentage - cpStandardPercentage,
+                inboundPercentage: cpInboundPercentage,
+                outboundPercentage: cpOutboundPercentage,
+              };
+            }).sort((a, b) => b.totalShipments - a.totalShipments);
 
             return {
               cityId,
@@ -370,7 +430,16 @@ export function useTerritoryEquityData(
             inboundCompliant: number;
             outboundShipments: number;
             outboundCompliant: number;
-            carrierProduct: Map<string, { carrier: string; product: string; total: number; compliant: number }>;
+            carrierProduct: Map<string, { 
+              carrier: string; 
+              product: string; 
+              total: number; 
+              compliant: number;
+              inbound: { total: number; compliant: number };
+              outbound: { total: number; compliant: number };
+              standardsSum: number;
+              standardsCount: number;
+            }>;
           }
         >();
 
@@ -416,11 +485,21 @@ export function useTerritoryEquityData(
                   product: cp.product,
                   total: 0,
                   compliant: 0,
+                  inbound: { total: 0, compliant: 0 },
+                  outbound: { total: 0, compliant: 0 },
+                  standardsSum: 0,
+                  standardsCount: 0,
                 });
               }
               const cpStats = regionStats.carrierProduct.get(cpKey)!;
               cpStats.total += cp.totalShipments;
               cpStats.compliant += cp.compliantShipments;
+              cpStats.inbound.total += cp.totalShipments * (cp.inboundPercentage / 100);
+              cpStats.inbound.compliant += cp.compliantShipments * (cp.inboundPercentage / 100);
+              cpStats.outbound.total += cp.totalShipments * (cp.outboundPercentage / 100);
+              cpStats.outbound.compliant += cp.compliantShipments * (cp.outboundPercentage / 100);
+              cpStats.standardsSum += cp.standardPercentage;
+              cpStats.standardsCount++;
             });
           }
         });
@@ -451,15 +530,24 @@ export function useTerritoryEquityData(
             const directionGap = Math.abs(inboundPercentage - outboundPercentage);
 
             // Build carrier/product breakdown
-            const carrierProductBreakdown = Array.from(stats.carrierProduct.values()).map(cp => ({
-              carrier: cp.carrier,
-              product: cp.product,
-              totalShipments: cp.total,
-              compliantShipments: cp.compliant,
-              actualPercentage: cp.total > 0 ? (cp.compliant / cp.total) * 100 : 0,
-              standardPercentage: 95,
-              deviation: (cp.total > 0 ? (cp.compliant / cp.total) * 100 : 0) - 95,
-            })).sort((a, b) => b.totalShipments - a.totalShipments);
+            const carrierProductBreakdown = Array.from(stats.carrierProduct.values()).map(cp => {
+              const cpActualPercentage = cp.total > 0 ? (cp.compliant / cp.total) * 100 : 0;
+              const cpStandardPercentage = cp.standardsCount > 0 ? cp.standardsSum / cp.standardsCount : 95;
+              const cpInboundPercentage = cp.inbound.total > 0 ? (cp.inbound.compliant / cp.inbound.total) * 100 : 0;
+              const cpOutboundPercentage = cp.outbound.total > 0 ? (cp.outbound.compliant / cp.outbound.total) * 100 : 0;
+              
+              return {
+                carrier: cp.carrier,
+                product: cp.product,
+                totalShipments: cp.total,
+                compliantShipments: cp.compliant,
+                actualPercentage: cpActualPercentage,
+                standardPercentage: cpStandardPercentage,
+                deviation: cpActualPercentage - cpStandardPercentage,
+                inboundPercentage: cpInboundPercentage,
+                outboundPercentage: cpOutboundPercentage,
+              };
+            }).sort((a, b) => b.totalShipments - a.totalShipments);
 
             return {
               regionId,
