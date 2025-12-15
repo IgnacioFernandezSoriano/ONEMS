@@ -10,6 +10,17 @@ interface TerritoryEquityTableProps {
 export function TerritoryEquityTable({ data, onCityClick }: TerritoryEquityTableProps) {
   const [sortField, setSortField] = useState<keyof CityEquityData>('deviation');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+
+  const toggleRow = (cityId: string) => {
+    const newExpanded = new Set(expandedRows);
+    if (newExpanded.has(cityId)) {
+      newExpanded.delete(cityId);
+    } else {
+      newExpanded.add(cityId);
+    }
+    setExpandedRows(newExpanded);
+  };
 
   const handleSort = (field: keyof CityEquityData) => {
     if (sortField === field) {
@@ -67,6 +78,7 @@ export function TerritoryEquityTable({ data, onCityClick }: TerritoryEquityTable
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
+            <th className="px-4 py-3 w-10"></th>
             <th
               className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
               onClick={() => handleSort('cityName')}
@@ -179,7 +191,22 @@ export function TerritoryEquityTable({ data, onCityClick }: TerritoryEquityTable
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
           {sortedData.map((city) => (
+            <>
             <tr key={city.cityId} className="hover:bg-gray-50">
+              <td className="px-4 py-3 whitespace-nowrap text-center">
+                {city.carrierProductBreakdown && city.carrierProductBreakdown.length > 0 && (
+                  <button
+                    onClick={() => toggleRow(city.cityId)}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    {expandedRows.has(city.cityId) ? (
+                      <ChevronUp className="w-4 h-4" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4" />
+                    )}
+                  </button>
+                )}
+              </td>
               <td className="px-4 py-3 whitespace-nowrap">
                 <button
                   onClick={() => onCityClick?.(city)}
@@ -231,6 +258,45 @@ export function TerritoryEquityTable({ data, onCityClick }: TerritoryEquityTable
                 {city.directionGap.toFixed(1)}%
               </td>
             </tr>
+            {expandedRows.has(city.cityId) && city.carrierProductBreakdown && city.carrierProductBreakdown.length > 0 && (
+              <tr key={`${city.cityId}-breakdown`} className="bg-gray-50">
+                <td colSpan={13} className="px-4 py-2">
+                  <div className="ml-8">
+                    <table className="min-w-full text-sm">
+                      <thead>
+                        <tr className="text-xs text-gray-500">
+                          <th className="text-left py-1 px-2">Carrier</th>
+                          <th className="text-left py-1 px-2">Product</th>
+                          <th className="text-right py-1 px-2">Shipments</th>
+                          <th className="text-right py-1 px-2">Compliant</th>
+                          <th className="text-right py-1 px-2">Actual %</th>
+                          <th className="text-right py-1 px-2">Standard %</th>
+                          <th className="text-right py-1 px-2">Deviation</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {city.carrierProductBreakdown.map((cp, idx) => (
+                          <tr key={idx} className="border-t border-gray-200">
+                            <td className="py-1 px-2 text-gray-700">{cp.carrier}</td>
+                            <td className="py-1 px-2 text-gray-700">{cp.product}</td>
+                            <td className="py-1 px-2 text-right text-gray-700">{cp.totalShipments}</td>
+                            <td className="py-1 px-2 text-right text-gray-700">{cp.compliantShipments}</td>
+                            <td className="py-1 px-2 text-right text-gray-700">{cp.actualPercentage.toFixed(1)}%</td>
+                            <td className="py-1 px-2 text-right text-gray-700">{cp.standardPercentage.toFixed(1)}%</td>
+                            <td className={`py-1 px-2 text-right font-medium ${
+                              cp.deviation >= 0 ? 'text-green-600' : 'text-red-600'
+                            }`}>
+                              {cp.deviation >= 0 ? '+' : ''}{cp.deviation.toFixed(1)}%
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+            )}
+            </>
           ))}
         </tbody>
       </table>

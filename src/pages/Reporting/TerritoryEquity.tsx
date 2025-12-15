@@ -66,23 +66,69 @@ export default function TerritoryEquity() {
       'Inbound %',
       'Outbound %',
       'Direction Gap',
+      'Carrier',
+      'Product',
+      'CP Shipments',
+      'CP Compliant',
+      'CP Actual %',
+      'CP Standard %',
+      'CP Deviation',
     ];
 
-    const rows = cityData.map((city) => [
-      city.cityName,
-      city.regionName || '',
-      city.classification || '',
-      city.population || '',
-      city.totalShipments,
-      city.compliantShipments,
-      city.standardPercentage.toFixed(1),
-      city.actualPercentage.toFixed(1),
-      city.deviation.toFixed(1),
-      city.status,
-      city.inboundPercentage.toFixed(1),
-      city.outboundPercentage.toFixed(1),
-      city.directionGap.toFixed(1),
-    ]);
+    const rows: string[][] = [];
+    cityData.forEach((city) => {
+      if (city.carrierProductBreakdown && city.carrierProductBreakdown.length > 0) {
+        // Add row for each carrier/product
+        city.carrierProductBreakdown.forEach((cp) => {
+          rows.push([
+            city.cityName,
+            city.regionName || '',
+            city.classification || '',
+            city.population?.toString() || '',
+            city.totalShipments.toString(),
+            city.compliantShipments.toString(),
+            city.standardPercentage.toFixed(1),
+            city.actualPercentage.toFixed(1),
+            city.deviation.toFixed(1),
+            city.status,
+            city.inboundPercentage.toFixed(1),
+            city.outboundPercentage.toFixed(1),
+            city.directionGap.toFixed(1),
+            cp.carrier,
+            cp.product,
+            cp.totalShipments.toString(),
+            cp.compliantShipments.toString(),
+            cp.actualPercentage.toFixed(1),
+            cp.standardPercentage.toFixed(1),
+            cp.deviation.toFixed(1),
+          ]);
+        });
+      } else {
+        // Add city row without breakdown
+        rows.push([
+          city.cityName,
+          city.regionName || '',
+          city.classification || '',
+          city.population?.toString() || '',
+          city.totalShipments.toString(),
+          city.compliantShipments.toString(),
+          city.standardPercentage.toFixed(1),
+          city.actualPercentage.toFixed(1),
+          city.deviation.toFixed(1),
+          city.status,
+          city.inboundPercentage.toFixed(1),
+          city.outboundPercentage.toFixed(1),
+          city.directionGap.toFixed(1),
+          '',
+          '',
+          '',
+          '',
+          '',
+          '',
+          '',
+        ]);
+      }
+    });
 
     const csv = [headers, ...rows].map((row) => row.join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
@@ -110,22 +156,67 @@ export default function TerritoryEquity() {
       'Inbound %',
       'Outbound %',
       'Underserved Cities',
+      'Carrier',
+      'Product',
+      'CP Shipments',
+      'CP Compliant',
+      'CP Actual %',
+      'CP Standard %',
+      'CP Deviation',
     ];
 
-    const rows = regionData.map((region) => [
-      region.regionName,
-      region.totalCities,
-      region.totalPopulation || '',
-      region.totalShipments,
-      region.compliantShipments,
-      region.standardPercentage.toFixed(1),
-      region.actualPercentage.toFixed(1),
-      region.deviation.toFixed(1),
-      region.status,
-      region.inboundPercentage.toFixed(1),
-      region.outboundPercentage.toFixed(1),
-      region.underservedCitiesCount,
-    ]);
+    const rows: string[][] = [];
+    regionData.forEach((region) => {
+      if (region.carrierProductBreakdown && region.carrierProductBreakdown.length > 0) {
+        // Add row for each carrier/product
+        region.carrierProductBreakdown.forEach((cp) => {
+          rows.push([
+            region.regionName,
+            region.totalCities.toString(),
+            region.totalPopulation?.toString() || '',
+            region.totalShipments.toString(),
+            region.compliantShipments.toString(),
+            region.standardPercentage.toFixed(1),
+            region.actualPercentage.toFixed(1),
+            region.deviation.toFixed(1),
+            region.status,
+            region.inboundPercentage.toFixed(1),
+            region.outboundPercentage.toFixed(1),
+            region.underservedCitiesCount.toString(),
+            cp.carrier,
+            cp.product,
+            cp.totalShipments.toString(),
+            cp.compliantShipments.toString(),
+            cp.actualPercentage.toFixed(1),
+            cp.standardPercentage.toFixed(1),
+            cp.deviation.toFixed(1),
+          ]);
+        });
+      } else {
+        // Add region row without breakdown
+        rows.push([
+          region.regionName,
+          region.totalCities.toString(),
+          region.totalPopulation?.toString() || '',
+          region.totalShipments.toString(),
+          region.compliantShipments.toString(),
+          region.standardPercentage.toFixed(1),
+          region.actualPercentage.toFixed(1),
+          region.deviation.toFixed(1),
+          region.status,
+          region.inboundPercentage.toFixed(1),
+          region.outboundPercentage.toFixed(1),
+          region.underservedCitiesCount.toString(),
+          '',
+          '',
+          '',
+          '',
+          '',
+          '',
+          '',
+        ]);
+      }
+    });
 
     const csv = [headers, ...rows].map((row) => row.join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });

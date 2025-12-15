@@ -139,6 +139,17 @@ export interface CityEquityData {
   // Direction Analysis
   directionGap: number;
   
+  // Carrier/Product Breakdown
+  carrierProductBreakdown?: Array<{
+    carrier: string;
+    product: string;
+    totalShipments: number;
+    compliantShipments: number;
+    actualPercentage: number;
+    standardPercentage: number;
+    deviation: number;
+  }>;
+  
   // RLS
   accountId: string;
 }
@@ -158,6 +169,18 @@ export interface RegionEquityData {
   inboundPercentage: number;
   outboundPercentage: number;
   directionGap: number;
+  
+  // Carrier/Product Breakdown
+  carrierProductBreakdown?: Array<{
+    carrier: string;
+    product: string;
+    totalShipments: number;
+    compliantShipments: number;
+    actualPercentage: number;
+    standardPercentage: number;
+    deviation: number;
+  }>;
+  
   accountId: string;
 }
 

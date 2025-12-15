@@ -116,6 +116,7 @@ export function useTerritoryEquityData(
             outbound: { total: number; compliant: number };
             standardsSum: number;
             standardsCount: number;
+            carrierProduct: Map<string, { carrier: string; product: string; total: number; compliant: number }>;
           }
         >();
 
@@ -128,12 +129,27 @@ export function useTerritoryEquityData(
               outbound: { total: 0, compliant: 0 },
               standardsSum: 0,
               standardsCount: 0,
+              carrierProduct: new Map(),
             });
           }
 
           const destStats = cityStatsMap.get(destCity)!;
           destStats.inbound.total++;
           if (shipment.on_time_delivery) destStats.inbound.compliant++;
+          
+          // Track carrier/product breakdown for destination
+          const cpKey = `${shipment.carrier_name}|${shipment.product_name}`;
+          if (!destStats.carrierProduct.has(cpKey)) {
+            destStats.carrierProduct.set(cpKey, {
+              carrier: shipment.carrier_name,
+              product: shipment.product_name,
+              total: 0,
+              compliant: 0,
+            });
+          }
+          const cpStats = destStats.carrierProduct.get(cpKey)!;
+          cpStats.total++;
+          if (shipment.on_time_delivery) cpStats.compliant++;
 
           // Lookup standard for this route
           const carrierId = carrierNameToIdMap.get(shipment.carrier_name);
@@ -158,12 +174,27 @@ export function useTerritoryEquityData(
               outbound: { total: 0, compliant: 0 },
               standardsSum: 0,
               standardsCount: 0,
+              carrierProduct: new Map(),
             });
           }
 
           const originStats = cityStatsMap.get(originCity)!;
           originStats.outbound.total++;
           if (shipment.on_time_delivery) originStats.outbound.compliant++;
+          
+          // Track carrier/product breakdown for origin
+          const cpKeyOrigin = `${shipment.carrier_name}|${shipment.product_name}`;
+          if (!originStats.carrierProduct.has(cpKeyOrigin)) {
+            originStats.carrierProduct.set(cpKeyOrigin, {
+              carrier: shipment.carrier_name,
+              product: shipment.product_name,
+              total: 0,
+              compliant: 0,
+            });
+          }
+          const cpStatsOrigin = originStats.carrierProduct.get(cpKeyOrigin)!;
+          cpStatsOrigin.total++;
+          if (shipment.on_time_delivery) cpStatsOrigin.compliant++;
         });
 
         // 5. Build CityEquityData array
@@ -206,6 +237,17 @@ export function useTerritoryEquityData(
               stats.outbound.total > 0 ? (stats.outbound.compliant / stats.outbound.total) * 100 : 0;
             const directionGap = Math.abs(inboundPercentage - outboundPercentage);
 
+            // Build carrier/product breakdown
+            const carrierProductBreakdown = Array.from(stats.carrierProduct.values()).map(cp => ({
+              carrier: cp.carrier,
+              product: cp.product,
+              totalShipments: cp.total,
+              compliantShipments: cp.compliant,
+              actualPercentage: cp.total > 0 ? (cp.compliant / cp.total) * 100 : 0,
+              standardPercentage: 95, // Default, could be calculated from standards
+              deviation: (cp.total > 0 ? (cp.compliant / cp.total) * 100 : 0) - 95,
+            })).sort((a, b) => b.totalShipments - a.totalShipments);
+
             return {
               cityId,
               cityName,
@@ -228,6 +270,7 @@ export function useTerritoryEquityData(
               outboundCompliant: stats.outbound.compliant,
               outboundPercentage,
               directionGap,
+              carrierProductBreakdown,
               accountId,
             };
           })
@@ -327,6 +370,7 @@ export function useTerritoryEquityData(
             inboundCompliant: number;
             outboundShipments: number;
             outboundCompliant: number;
+            carrierProduct: Map<string, { carrier: string; product: string; total: number; compliant: number }>;
           }
         >();
 
@@ -345,6 +389,7 @@ export function useTerritoryEquityData(
               inboundCompliant: 0,
               outboundShipments: 0,
               outboundCompliant: 0,
+              carrierProduct: new Map(),
             });
           }
 
@@ -360,6 +405,24 @@ export function useTerritoryEquityData(
           regionStats.outboundShipments += city.outboundShipments;
           regionStats.outboundCompliant += city.outboundCompliant;
           if (city.status === 'critical') regionStats.underservedCities++;
+          
+          // Aggregate carrier/product breakdown
+          if (city.carrierProductBreakdown) {
+            city.carrierProductBreakdown.forEach(cp => {
+              const cpKey = `${cp.carrier}|${cp.product}`;
+              if (!regionStats.carrierProduct.has(cpKey)) {
+                regionStats.carrierProduct.set(cpKey, {
+                  carrier: cp.carrier,
+                  product: cp.product,
+                  total: 0,
+                  compliant: 0,
+                });
+              }
+              const cpStats = regionStats.carrierProduct.get(cpKey)!;
+              cpStats.total += cp.totalShipments;
+              cpStats.compliant += cp.compliantShipments;
+            });
+          }
         });
 
         const regionEquityData: RegionEquityData[] = Array.from(regionStatsMap.entries()).map(
@@ -387,6 +450,17 @@ export function useTerritoryEquityData(
               : 0;
             const directionGap = Math.abs(inboundPercentage - outboundPercentage);
 
+            // Build carrier/product breakdown
+            const carrierProductBreakdown = Array.from(stats.carrierProduct.values()).map(cp => ({
+              carrier: cp.carrier,
+              product: cp.product,
+              totalShipments: cp.total,
+              compliantShipments: cp.compliant,
+              actualPercentage: cp.total > 0 ? (cp.compliant / cp.total) * 100 : 0,
+              standardPercentage: 95,
+              deviation: (cp.total > 0 ? (cp.compliant / cp.total) * 100 : 0) - 95,
+            })).sort((a, b) => b.totalShipments - a.totalShipments);
+
             return {
               regionId,
               regionName: stats.regionName,
@@ -402,6 +476,7 @@ export function useTerritoryEquityData(
               inboundPercentage,
               outboundPercentage,
               directionGap,
+              carrierProductBreakdown,
               accountId: accountId!,
             };
           }
