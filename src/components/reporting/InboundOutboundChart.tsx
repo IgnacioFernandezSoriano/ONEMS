@@ -15,15 +15,18 @@ export function InboundOutboundChart({ data }: InboundOutboundChartProps) {
     city: city.cityName,
     inbound: city.inboundPercentage,
     outbound: city.outboundPercentage,
-    standard: city.standardPercentage,
-    standardDays: city.standardDays,
-    actualDays: city.actualDays,
+    inboundStandardPercentage: city.inboundStandardPercentage,
+    outboundStandardPercentage: city.outboundStandardPercentage,
+    inboundStandardDays: city.inboundStandardDays,
+    inboundActualDays: city.inboundActualDays,
+    outboundStandardDays: city.outboundStandardDays,
+    outboundActualDays: city.outboundActualDays,
   }));
 
-  // Calculate average standard for reference line
+  // Calculate average standard for reference line (using inbound as reference)
   const avgStandard =
     chartData.length > 0
-      ? chartData.reduce((sum, d) => sum + d.standard, 0) / chartData.length
+      ? chartData.reduce((sum, d) => sum + d.inboundStandardPercentage, 0) / chartData.length
       : 90;
 
   return (
@@ -40,12 +43,17 @@ export function InboundOutboundChart({ data }: InboundOutboundChartProps) {
                 const data = payload[0].payload;
                 return (
                   <div className="bg-white p-3 border border-gray-300 rounded shadow-lg">
-                    <p className="font-semibold">{data.city}</p>
-                    <p className="text-blue-600">Inbound: {data.inbound.toFixed(1)}%</p>
-                    <p className="text-green-600">Outbound: {data.outbound.toFixed(1)}%</p>
-                    <p className="text-gray-600">Standard: {data.standard.toFixed(1)}%</p>
-                    <p className="text-gray-500 text-sm mt-1">J+K Std: {data.standardDays.toFixed(1)} days</p>
-                    <p className="text-gray-500 text-sm">J+K Actual: {data.actualDays.toFixed(1)} days</p>
+                    <p className="font-semibold mb-2">{data.city}</p>
+                    <div className="mb-2">
+                      <p className="text-blue-600 font-medium">Inbound:</p>
+                      <p className="text-sm ml-2">Std %: {data.inboundStandardPercentage.toFixed(1)}% | Actual %: {data.inbound.toFixed(1)}%</p>
+                      <p className="text-sm ml-2">J+K Std: {data.inboundStandardDays.toFixed(1)} days | J+K Actual: {data.inboundActualDays.toFixed(1)} days</p>
+                    </div>
+                    <div>
+                      <p className="text-green-600 font-medium">Outbound:</p>
+                      <p className="text-sm ml-2">Std %: {data.outboundStandardPercentage.toFixed(1)}% | Actual %: {data.outbound.toFixed(1)}%</p>
+                      <p className="text-sm ml-2">J+K Std: {data.outboundStandardDays.toFixed(1)} days | J+K Actual: {data.outboundActualDays.toFixed(1)} days</p>
+                    </div>
                   </div>
                 );
               }

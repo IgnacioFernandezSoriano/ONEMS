@@ -55,98 +55,55 @@ export default function TerritoryEquity() {
 
     const headers = [
       'City',
+      'Direction',
       'Region',
       'Classification',
       'Population',
-      'Total Shipments',
+      'Shipments',
       'Compliant',
       'Standard %',
+      'Actual %',
       'J+K Std',
       'J+K Actual',
-      'Actual %',
       'Deviation',
       'Status',
-      'Inbound %',
-      'Outbound %',
-      'Direction Gap',
-      'Carrier',
-      'Product',
-      'CP Shipments',
-      'CP Compliant',
-      'CP Actual %',
-      'CP Standard %',
-      'CP J+K Std',
-      'CP J+K Actual',
-      'CP Deviation',
-      'CP Inbound %',
-      'CP Outbound %',
     ];
 
     const rows: string[][] = [];
     cityData.forEach((city) => {
-      if (city.carrierProductBreakdown && city.carrierProductBreakdown.length > 0) {
-        // Add row for each carrier/product
-        city.carrierProductBreakdown.forEach((cp) => {
-          rows.push([
-            city.cityName,
-            city.regionName || '',
-            city.classification || '',
-            city.population?.toString() || '',
-            city.totalShipments.toString(),
-            city.compliantShipments.toString(),
-            city.standardPercentage.toFixed(1),
-            city.standardDays.toFixed(1),
-            city.actualDays.toFixed(1),
-            city.actualPercentage.toFixed(1),
-            city.deviation.toFixed(1),
-            city.status,
-            city.inboundPercentage.toFixed(1),
-            city.outboundPercentage.toFixed(1),
-            city.directionGap.toFixed(1),
-            cp.carrier,
-            cp.product,
-            cp.totalShipments.toString(),
-            cp.compliantShipments.toString(),
-            cp.actualPercentage.toFixed(1),
-            cp.standardPercentage.toFixed(1),
-            cp.standardDays.toFixed(1),
-            cp.actualDays.toFixed(1),
-            cp.deviation.toFixed(1),
-            cp.inboundPercentage.toFixed(1),
-            cp.outboundPercentage.toFixed(1),
-          ]);
-        });
-      } else {
-        // Add city row without breakdown
-        rows.push([
-          city.cityName,
-          city.regionName || '',
-          city.classification || '',
-          city.population?.toString() || '',
-          city.totalShipments.toString(),
-          city.compliantShipments.toString(),
-          city.standardPercentage.toFixed(1),
-          city.standardDays.toFixed(1),
-          city.actualDays.toFixed(1),
-          city.actualPercentage.toFixed(1),
-          city.deviation.toFixed(1),
-          city.status,
-          city.inboundPercentage.toFixed(1),
-          city.outboundPercentage.toFixed(1),
-          city.directionGap.toFixed(1),
-          '',
-          '',
-          '',
-          '',
-          '',
-          '',
-          '',
-          '',
-          '',
-          '',
-          '',
-        ]);
-      }
+      // Inbound row
+      rows.push([
+        city.cityName,
+        'Inbound',
+        city.regionName || '',
+        city.classification || '',
+        city.population?.toString() || '',
+        city.inboundShipments.toString(),
+        city.inboundCompliant.toString(),
+        city.inboundStandardPercentage.toFixed(1),
+        city.inboundPercentage.toFixed(1),
+        city.inboundStandardDays.toFixed(1),
+        city.inboundActualDays.toFixed(1),
+        city.inboundDeviation.toFixed(1),
+        city.inboundDeviation >= 0 ? 'compliant' : (city.inboundPercentage < 80 ? 'critical' : 'warning'),
+      ]);
+      
+      // Outbound row
+      rows.push([
+        city.cityName,
+        'Outbound',
+        city.regionName || '',
+        city.classification || '',
+        city.population?.toString() || '',
+        city.outboundShipments.toString(),
+        city.outboundCompliant.toString(),
+        city.outboundStandardPercentage.toFixed(1),
+        city.outboundPercentage.toFixed(1),
+        city.outboundStandardDays.toFixed(1),
+        city.outboundActualDays.toFixed(1),
+        city.outboundDeviation.toFixed(1),
+        city.outboundDeviation >= 0 ? 'compliant' : (city.outboundPercentage < 80 ? 'critical' : 'warning'),
+      ]);
     });
 
     const csv = [headers, ...rows].map((row) => row.join(',')).join('\n');
@@ -164,95 +121,49 @@ export default function TerritoryEquity() {
 
     const headers = [
       'Region',
+      'Direction',
       'Cities',
       'Population',
-      'Total Shipments',
-      'Compliant',
       'Standard %',
+      'Actual %',
       'J+K Std',
       'J+K Actual',
-      'Actual %',
       'Deviation',
       'Status',
-      'Inbound %',
-      'Outbound %',
       'Underserved Cities',
-      'Carrier',
-      'Product',
-      'CP Shipments',
-      'CP Compliant',
-      'CP Actual %',
-      'CP Standard %',
-      'CP J+K Std',
-      'CP J+K Actual',
-      'CP Deviation',
-      'CP Inbound %',
-      'CP Outbound %',
     ];
 
     const rows: string[][] = [];
     regionData.forEach((region) => {
-      if (region.carrierProductBreakdown && region.carrierProductBreakdown.length > 0) {
-        // Add row for each carrier/product
-        region.carrierProductBreakdown.forEach((cp) => {
-          rows.push([
-            region.regionName,
-            region.totalCities.toString(),
-            region.totalPopulation?.toString() || '',
-            region.totalShipments.toString(),
-            region.compliantShipments.toString(),
-            region.standardPercentage.toFixed(1),
-            region.standardDays.toFixed(1),
-            region.actualDays.toFixed(1),
-            region.actualPercentage.toFixed(1),
-            region.deviation.toFixed(1),
-            region.status,
-            region.inboundPercentage.toFixed(1),
-            region.outboundPercentage.toFixed(1),
-            region.underservedCitiesCount.toString(),
-            cp.carrier,
-            cp.product,
-            cp.totalShipments.toString(),
-            cp.compliantShipments.toString(),
-            cp.actualPercentage.toFixed(1),
-            cp.standardPercentage.toFixed(1),
-            cp.standardDays.toFixed(1),
-            cp.actualDays.toFixed(1),
-            cp.deviation.toFixed(1),
-            cp.inboundPercentage.toFixed(1),
-            cp.outboundPercentage.toFixed(1),
-          ]);
-        });
-      } else {
-        // Add region row without breakdown
-        rows.push([
-          region.regionName,
-          region.totalCities.toString(),
-          region.totalPopulation?.toString() || '',
-          region.totalShipments.toString(),
-          region.compliantShipments.toString(),
-          region.standardPercentage.toFixed(1),
-          region.standardDays.toFixed(1),
-          region.actualDays.toFixed(1),
-          region.actualPercentage.toFixed(1),
-          region.deviation.toFixed(1),
-          region.status,
-          region.inboundPercentage.toFixed(1),
-          region.outboundPercentage.toFixed(1),
-          region.underservedCitiesCount.toString(),
-          '',
-          '',
-          '',
-          '',
-          '',
-          '',
-          '',
-          '',
-          '',
-          '',
-          '',
-        ]);
-      }
+      // Inbound row
+      rows.push([
+        region.regionName,
+        'Inbound',
+        region.totalCities.toString(),
+        region.totalPopulation?.toString() || '',
+        region.inboundStandardPercentage.toFixed(1),
+        region.inboundPercentage.toFixed(1),
+        region.inboundStandardDays.toFixed(1),
+        region.inboundActualDays.toFixed(1),
+        region.inboundDeviation.toFixed(1),
+        region.inboundDeviation >= 0 ? 'compliant' : (region.inboundPercentage < 80 ? 'critical' : 'warning'),
+        region.underservedCitiesCount.toString(),
+      ]);
+      
+      // Outbound row
+      rows.push([
+        region.regionName,
+        'Outbound',
+        region.totalCities.toString(),
+        region.totalPopulation?.toString() || '',
+        region.outboundStandardPercentage.toFixed(1),
+        region.outboundPercentage.toFixed(1),
+        region.outboundStandardDays.toFixed(1),
+        region.outboundActualDays.toFixed(1),
+        region.outboundDeviation.toFixed(1),
+        region.outboundDeviation >= 0 ? 'compliant' : (region.outboundPercentage < 80 ? 'critical' : 'warning'),
+        region.underservedCitiesCount.toString(),
+      ]);
     });
 
     const csv = [headers, ...rows].map((row) => row.join(',')).join('\n');
@@ -400,15 +311,18 @@ export default function TerritoryEquity() {
             <Tooltip content={tooltips.topBestServed} />
           </div>
           <div className="space-y-2">
-            <div className="grid grid-cols-5 gap-1 text-xs font-medium text-gray-500 border-b pb-1">
+            <div className="grid grid-cols-7 gap-1 text-xs font-medium text-gray-500 border-b pb-1">
+              <div>City</div>
               <div className="text-right">Compl.</div>
               <div className="text-right">Std.</div>
+              <div className="text-right">J+K Std</div>
+              <div className="text-right">J+K Actual</div>
               <div className="text-right">Inb.</div>
               <div className="text-right">Outb.</div>
-              <div>City</div>
             </div>
             {metrics?.topBestCities.slice(0, 3).map((city, idx) => (
-              <div key={idx} className="grid grid-cols-5 gap-1 text-xs">
+              <div key={idx} className="grid grid-cols-7 gap-1 text-xs">
+                <div className="font-medium truncate">{city.cityName}</div>
                 <div className="text-right font-semibold text-green-600">
                   {city.actualPercentage.toFixed(1)}%
                 </div>
@@ -416,12 +330,17 @@ export default function TerritoryEquity() {
                   {city.standardPercentage.toFixed(1)}%
                 </div>
                 <div className="text-right text-gray-600">
+                  {city.standardDays.toFixed(1)}
+                </div>
+                <div className="text-right text-gray-600">
+                  {city.actualDays.toFixed(1)}
+                </div>
+                <div className="text-right text-gray-600">
                   {city.inboundPercentage.toFixed(1)}%
                 </div>
                 <div className="text-right text-gray-600">
                   {city.outboundPercentage.toFixed(1)}%
                 </div>
-                <div className="font-medium truncate">{city.cityName}</div>
               </div>
             ))}
             {(!metrics?.topBestCities || metrics.topBestCities.length === 0) && (
@@ -440,15 +359,18 @@ export default function TerritoryEquity() {
             <Tooltip content={tooltips.topWorstServed} />
           </div>
           <div className="space-y-2">
-            <div className="grid grid-cols-5 gap-1 text-xs font-medium text-gray-500 border-b pb-1">
+            <div className="grid grid-cols-7 gap-1 text-xs font-medium text-gray-500 border-b pb-1">
+              <div>City</div>
               <div className="text-right">Compl.</div>
               <div className="text-right">Std.</div>
+              <div className="text-right">J+K Std</div>
+              <div className="text-right">J+K Actual</div>
               <div className="text-right">Inb.</div>
               <div className="text-right">Outb.</div>
-              <div>City</div>
             </div>
             {metrics?.topWorstCities.filter(c => c.status === 'critical' || c.status === 'warning').slice(0, 3).map((city, idx) => (
-              <div key={idx} className="grid grid-cols-5 gap-1 text-xs">
+              <div key={idx} className="grid grid-cols-7 gap-1 text-xs">
+                <div className="font-medium truncate">{city.cityName}</div>
                 <div className="text-right font-semibold text-red-600">
                   {city.actualPercentage.toFixed(1)}%
                 </div>
@@ -456,12 +378,17 @@ export default function TerritoryEquity() {
                   {city.standardPercentage.toFixed(1)}%
                 </div>
                 <div className="text-right text-gray-600">
+                  {city.standardDays.toFixed(1)}
+                </div>
+                <div className="text-right text-gray-600">
+                  {city.actualDays.toFixed(1)}
+                </div>
+                <div className="text-right text-gray-600">
                   {city.inboundPercentage.toFixed(1)}%
                 </div>
                 <div className="text-right text-gray-600">
                   {city.outboundPercentage.toFixed(1)}%
                 </div>
-                <div className="font-medium truncate">{city.cityName}</div>
               </div>
             ))}
             {(!metrics?.topWorstCities || metrics.topWorstCities.filter(c => c.status === 'critical' || c.status === 'warning').length === 0) && (

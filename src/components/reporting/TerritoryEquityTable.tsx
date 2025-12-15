@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronUp, Info } from 'lucide-react';
+import { ChevronDown, ChevronUp, ArrowDown, ArrowUp } from 'lucide-react';
 import type { CityEquityData } from '@/types/reporting';
 
 interface TerritoryEquityTableProps {
@@ -7,22 +7,67 @@ interface TerritoryEquityTableProps {
   onCityClick?: (city: CityEquityData) => void;
 }
 
+type DirectionRow = {
+  cityId: string;
+  cityName: string;
+  direction: 'inbound' | 'outbound';
+  regionName: string | null;
+  classification: string | null;
+  population: number | null;
+  shipments: number;
+  compliant: number;
+  standardPercentage: number;
+  actualPercentage: number;
+  standardDays: number;
+  actualDays: number;
+  deviation: number;
+  status: 'compliant' | 'warning' | 'critical';
+  originalCity: CityEquityData;
+};
+
 export function TerritoryEquityTable({ data, onCityClick }: TerritoryEquityTableProps) {
-  const [sortField, setSortField] = useState<keyof CityEquityData>('deviation');
+  const [sortField, setSortField] = useState<keyof DirectionRow>('deviation');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
-  const toggleRow = (cityId: string) => {
-    const newExpanded = new Set(expandedRows);
-    if (newExpanded.has(cityId)) {
-      newExpanded.delete(cityId);
-    } else {
-      newExpanded.add(cityId);
-    }
-    setExpandedRows(newExpanded);
-  };
+  // Convert each city into two rows (inbound + outbound)
+  const directionRows: DirectionRow[] = data.flatMap((city) => [
+    {
+      cityId: `${city.cityId}-inbound`,
+      cityName: city.cityName,
+      direction: 'inbound' as const,
+      regionName: city.regionName,
+      classification: city.classification,
+      population: city.population,
+      shipments: city.inboundShipments,
+      compliant: city.inboundCompliant,
+      standardPercentage: city.inboundStandardPercentage,
+      actualPercentage: city.inboundPercentage,
+      standardDays: city.inboundStandardDays,
+      actualDays: city.inboundActualDays,
+      deviation: city.inboundDeviation,
+      status: city.inboundDeviation >= 0 ? 'compliant' : (city.inboundPercentage < 80 ? 'critical' : 'warning'),
+      originalCity: city,
+    },
+    {
+      cityId: `${city.cityId}-outbound`,
+      cityName: city.cityName,
+      direction: 'outbound' as const,
+      regionName: city.regionName,
+      classification: city.classification,
+      population: city.population,
+      shipments: city.outboundShipments,
+      compliant: city.outboundCompliant,
+      standardPercentage: city.outboundStandardPercentage,
+      actualPercentage: city.outboundPercentage,
+      standardDays: city.outboundStandardDays,
+      actualDays: city.outboundActualDays,
+      deviation: city.outboundDeviation,
+      status: city.outboundDeviation >= 0 ? 'compliant' : (city.outboundPercentage < 80 ? 'critical' : 'warning'),
+      originalCity: city,
+    },
+  ]);
 
-  const handleSort = (field: keyof CityEquityData) => {
+  const handleSort = (field: keyof DirectionRow) => {
     if (sortField === field) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
@@ -31,7 +76,7 @@ export function TerritoryEquityTable({ data, onCityClick }: TerritoryEquityTable
     }
   };
 
-  const sortedData = [...data].sort((a, b) => {
+  const sortedData = [...directionRows].sort((a, b) => {
     const aVal = a[sortField];
     const bVal = b[sortField];
     const multiplier = sortDirection === 'asc' ? 1 : -1;
@@ -42,7 +87,7 @@ export function TerritoryEquityTable({ data, onCityClick }: TerritoryEquityTable
     return String(aVal || '').localeCompare(String(bVal || '')) * multiplier;
   });
 
-  const SortIcon = ({ field }: { field: keyof CityEquityData }) => {
+  const SortIcon = ({ field }: { field: keyof DirectionRow }) => {
     if (sortField !== field) return null;
     return sortDirection === 'asc' ? (
       <ChevronUp className="w-4 h-4 inline ml-1" />
@@ -51,284 +96,158 @@ export function TerritoryEquityTable({ data, onCityClick }: TerritoryEquityTable
     );
   };
 
-  const getStatusIcon = (status: string) => {
+  const getStatusIcon = (status: 'compliant' | 'warning' | 'critical') => {
     switch (status) {
       case 'compliant':
-        return '✅';
+        return <span className="text-green-500">●</span>;
       case 'warning':
-        return '⚠️';
+        return <span className="text-amber-500">●</span>;
       case 'critical':
-        return '🔴';
-      default:
-        return '';
+        return <span className="text-red-500">●</span>;
     }
   };
-
-  const Tooltip = ({ content }: { content: string }) => (
-    <div className="group relative inline-block">
-      <Info className="w-4 h-4 text-gray-400 cursor-help" />
-      <div className="invisible group-hover:visible absolute z-10 w-64 p-2 mt-1 text-sm text-white bg-gray-900 rounded-lg shadow-lg -left-28">
-        {content}
-      </div>
-    </div>
-  );
 
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
-            <th className="px-4 py-3 w-10"></th>
             <th
               className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
               onClick={() => handleSort('cityName')}
             >
-              <div className="flex items-center gap-1">
-                City <SortIcon field="cityName" />
-                <Tooltip content="Click to view city details" />
-              </div>
+              City <SortIcon field="cityName" />
+            </th>
+            <th
+              className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+              onClick={() => handleSort('direction')}
+            >
+              Direction <SortIcon field="direction" />
             </th>
             <th
               className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
               onClick={() => handleSort('regionName')}
             >
-              <div className="flex items-center gap-1">
-                Region <SortIcon field="regionName" />
-                <Tooltip content="Regulatory region (official boundaries)" />
-              </div>
+              Region <SortIcon field="regionName" />
             </th>
             <th
               className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
               onClick={() => handleSort('classification')}
             >
-              <div className="flex items-center gap-1">
-                Class <SortIcon field="classification" />
-                <Tooltip content="capital = Capital city, major = Major city, minor = Small city" />
-              </div>
+              Class <SortIcon field="classification" />
             </th>
             <th
               className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
               onClick={() => handleSort('population')}
             >
-              <div className="flex items-center justify-end gap-1">
-                Population <SortIcon field="population" />
-                <Tooltip content="Total population of the city" />
-              </div>
+              Population <SortIcon field="population" />
             </th>
             <th
               className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-              onClick={() => handleSort('totalShipments')}
+              onClick={() => handleSort('shipments')}
             >
-              <div className="flex items-center justify-end gap-1">
-                Total <SortIcon field="totalShipments" />
-                <Tooltip content="Total shipments (inbound + outbound)" />
-              </div>
+                Total <SortIcon field="shipments" />
             </th>
             <th
               className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
               onClick={() => handleSort('standardPercentage')}
             >
-              <div className="flex items-center justify-end gap-1">
                 Standard % <SortIcon field="standardPercentage" />
-                <Tooltip content="Expected compliance (weighted avg of delivery standards)" />
-              </div>
-            </th>
-            <th
-              className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-              onClick={() => handleSort('standardDays')}
-            >
-              <div className="flex items-center justify-end gap-1">
-                J+K Std <SortIcon field="standardDays" />
-                <Tooltip content="J+K Standard: Allowed days (weighted avg from delivery standards)" />
-              </div>
-            </th>
-            <th
-              className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-              onClick={() => handleSort('actualDays')}
-            >
-              <div className="flex items-center justify-end gap-1">
-                J+K Actual <SortIcon field="actualDays" />
-                <Tooltip content="J+K Actual: Average business transit days from shipments" />
-              </div>
             </th>
             <th
               className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
               onClick={() => handleSort('actualPercentage')}
             >
-              <div className="flex items-center justify-end gap-1">
                 Actual % <SortIcon field="actualPercentage" />
-                <Tooltip content="Actual compliance (on-time deliveries / total)" />
-              </div>
+            </th>
+            <th
+              className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+              onClick={() => handleSort('standardDays')}
+            >
+                J+K Std <SortIcon field="standardDays" />
+            </th>
+            <th
+              className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+              onClick={() => handleSort('actualDays')}
+            >
+                J+K Actual <SortIcon field="actualDays" />
             </th>
             <th
               className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
               onClick={() => handleSort('deviation')}
             >
-              <div className="flex items-center justify-end gap-1">
                 Deviation <SortIcon field="deviation" />
-                <Tooltip content="Difference: Actual % - Standard %" />
-              </div>
             </th>
             <th
               className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
               onClick={() => handleSort('status')}
             >
-              <div className="flex items-center justify-center gap-1">
                 Status <SortIcon field="status" />
-                <Tooltip content="Compliant / Warning / Critical" />
-              </div>
-            </th>
-            <th
-              className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-              onClick={() => handleSort('inboundPercentage')}
-            >
-              <div className="flex items-center justify-end gap-1">
-                Inbound % <SortIcon field="inboundPercentage" />
-                <Tooltip content="Compliance for arrivals (city as destination)" />
-              </div>
-            </th>
-            <th
-              className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-              onClick={() => handleSort('outboundPercentage')}
-            >
-              <div className="flex items-center justify-end gap-1">
-                Outbound % <SortIcon field="outboundPercentage" />
-                <Tooltip content="Compliance for departures (city as origin)" />
-              </div>
-            </th>
-            <th
-              className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-              onClick={() => handleSort('directionGap')}
-            >
-              <div className="flex items-center justify-end gap-1">
-                Direction Gap <SortIcon field="directionGap" />
-                <Tooltip content="Absolute difference: |Inbound % - Outbound %|" />
-              </div>
             </th>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {sortedData.map((city) => (
-            <>
-            <tr key={city.cityId} className="hover:bg-gray-50">
-              <td className="px-4 py-3 whitespace-nowrap text-center">
-                {city.carrierProductBreakdown && city.carrierProductBreakdown.length > 0 && (
-                  <button
-                    onClick={() => toggleRow(city.cityId)}
-                    className="text-gray-500 hover:text-gray-700"
-                  >
-                    {expandedRows.has(city.cityId) ? (
-                      <ChevronUp className="w-4 h-4" />
-                    ) : (
-                      <ChevronDown className="w-4 h-4" />
-                    )}
-                  </button>
-                )}
-              </td>
+          {sortedData.map((row) => (
+            <tr key={row.cityId} className="hover:bg-gray-50">
               <td className="px-4 py-3 whitespace-nowrap">
                 <button
-                  onClick={() => onCityClick?.(city)}
+                  onClick={() => onCityClick?.(row.originalCity)}
                   className="text-blue-600 hover:text-blue-800 hover:underline font-medium text-left"
                 >
-                  {city.cityName}
+                  {row.cityName}
                 </button>
               </td>
+              <td className="px-4 py-3 whitespace-nowrap text-sm">
+                <div className="flex items-center gap-1">
+                  {row.direction === 'inbound' ? (
+                    <>
+                      <ArrowDown className="w-4 h-4 text-blue-600" />
+                      <span className="text-blue-600 font-medium">Inbound</span>
+                    </>
+                  ) : (
+                    <>
+                      <ArrowUp className="w-4 h-4 text-green-600" />
+                      <span className="text-green-600 font-medium">Outbound</span>
+                    </>
+                  )}
+                </div>
+              </td>
               <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                {city.regionName || '-'}
+                {row.regionName || '-'}
               </td>
               <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
-                {city.classification || '-'}
+                {row.classification || '-'}
               </td>
               <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
-                {city.population ? city.population.toLocaleString() : '-'}
+                {row.population ? row.population.toLocaleString() : '-'}
               </td>
               <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
-                {city.totalShipments}
+                {row.shipments}
               </td>
               <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
-                {city.standardPercentage.toFixed(1)}%
+                {row.standardPercentage.toFixed(1)}%
               </td>
               <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
-                {city.standardDays.toFixed(1)}
+                {row.actualPercentage.toFixed(1)}%
               </td>
               <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
-                {city.actualDays.toFixed(1)}
+                {row.standardDays.toFixed(1)}
               </td>
               <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
-                {city.actualPercentage.toFixed(1)}%
+                {row.actualDays.toFixed(1)}
               </td>
               <td
                 className={`px-4 py-3 whitespace-nowrap text-sm text-right font-medium ${
-                  city.deviation >= 0 ? 'text-green-600' : 'text-red-600'
+                  row.deviation >= 0 ? 'text-green-600' : 'text-red-600'
                 }`}
               >
-                {city.deviation >= 0 ? '+' : ''}
-                {city.deviation.toFixed(1)}%
+                {row.deviation >= 0 ? '+' : ''}
+                {row.deviation.toFixed(1)}%
               </td>
               <td className="px-4 py-3 whitespace-nowrap text-center text-lg">
-                {getStatusIcon(city.status)}
-              </td>
-              <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
-                {city.inboundPercentage.toFixed(1)}%
-              </td>
-              <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
-                {city.outboundPercentage.toFixed(1)}%
-              </td>
-              <td
-                className={`px-4 py-3 whitespace-nowrap text-sm text-right ${
-                  city.directionGap > 15 ? 'text-amber-600 font-semibold' : 'text-gray-700'
-                }`}
-              >
-                {city.directionGap.toFixed(1)}%
+                {getStatusIcon(row.status)}
               </td>
             </tr>
-            {expandedRows.has(city.cityId) && city.carrierProductBreakdown && city.carrierProductBreakdown.length > 0 && (
-              <tr key={`${city.cityId}-breakdown`} className="bg-gray-50">
-                <td colSpan={13} className="px-4 py-2">
-                  <div className="ml-8">
-                    <table className="min-w-full text-sm">
-                      <thead>
-                        <tr className="text-xs text-gray-500">
-                          <th className="text-left py-1 px-2">Carrier</th>
-                          <th className="text-left py-1 px-2">Product</th>
-                          <th className="text-right py-1 px-2">Shipments</th>
-                          <th className="text-right py-1 px-2">Compliant</th>
-                          <th className="text-right py-1 px-2">Actual %</th>
-                          <th className="text-right py-1 px-2">Standard %</th>
-                          <th className="text-right py-1 px-2">Std (days)</th>
-                          <th className="text-right py-1 px-2">Actual (days)</th>
-                          <th className="text-right py-1 px-2">Deviation</th>
-                          <th className="text-right py-1 px-2">Inbound %</th>
-                          <th className="text-right py-1 px-2">Outbound %</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {city.carrierProductBreakdown.map((cp, idx) => (
-                          <tr key={idx} className="border-t border-gray-200">
-                            <td className="py-1 px-2 text-gray-700">{cp.carrier}</td>
-                            <td className="py-1 px-2 text-gray-700">{cp.product}</td>
-                            <td className="py-1 px-2 text-right text-gray-700">{cp.totalShipments}</td>
-                            <td className="py-1 px-2 text-right text-gray-700">{cp.compliantShipments}</td>
-                            <td className="py-1 px-2 text-right text-gray-700">{cp.actualPercentage.toFixed(1)}%</td>
-                            <td className="py-1 px-2 text-right text-gray-700">{cp.standardPercentage.toFixed(1)}%</td>
-                            <td className="py-1 px-2 text-right text-gray-700">{cp.standardDays.toFixed(1)}</td>
-                            <td className="py-1 px-2 text-right text-gray-700">{cp.actualDays.toFixed(1)}</td>
-                            <td className={`py-1 px-2 text-right font-medium ${
-                              cp.deviation >= 0 ? 'text-green-600' : 'text-red-600'
-                            }`}>
-                              {cp.deviation >= 0 ? '+' : ''}{cp.deviation.toFixed(1)}%
-                            </td>
-                            <td className="py-1 px-2 text-right text-blue-600">{cp.inboundPercentage.toFixed(1)}%</td>
-                            <td className="py-1 px-2 text-right text-green-600">{cp.outboundPercentage.toFixed(1)}%</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </td>
-              </tr>
-            )}
-            </>
           ))}
         </tbody>
       </table>

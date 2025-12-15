@@ -102,26 +102,58 @@ export function RegionDetailModal({ region, onClose }: RegionDetailModalProps) {
             <h3 className="text-lg font-semibold text-gray-900 mb-3">Directional Analysis</h3>
             <div className="space-y-3">
               <div className="bg-blue-50 p-4 rounded-lg">
-                <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-gray-700 mb-2">Inbound (Arrivals)</p>
+                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-gray-600">Inbound (Arrivals):</p>
-                    <p className="text-sm text-gray-700">Compliance for shipments arriving to this region</p>
+                    <p className="text-xs text-gray-600">Actual %:</p>
+                    <p className="text-lg font-bold text-blue-600">{region.inboundPercentage.toFixed(1)}%</p>
                   </div>
-                  <p className="text-2xl font-bold text-blue-600">
-                    {region.inboundPercentage.toFixed(1)}%
-                  </p>
+                  <div>
+                    <p className="text-xs text-gray-600">Standard %:</p>
+                    <p className="text-sm font-medium">{region.inboundStandardPercentage.toFixed(1)}%</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-600">Deviation:</p>
+                    <p className={`text-sm font-medium ${region.inboundDeviation >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {region.inboundDeviation >= 0 ? '+' : ''}{region.inboundDeviation.toFixed(1)}%
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-600">J+K Std:</p>
+                    <p className="text-sm font-medium">{region.inboundStandardDays.toFixed(1)} days</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-600">J+K Actual:</p>
+                    <p className="text-sm font-medium">{region.inboundActualDays.toFixed(1)} days</p>
+                  </div>
                 </div>
               </div>
 
               <div className="bg-green-50 p-4 rounded-lg">
-                <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-gray-700 mb-2">Outbound (Departures)</p>
+                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-gray-600">Outbound (Departures):</p>
-                    <p className="text-sm text-gray-700">Compliance for shipments departing from this region</p>
+                    <p className="text-xs text-gray-600">Actual %:</p>
+                    <p className="text-lg font-bold text-green-600">{region.outboundPercentage.toFixed(1)}%</p>
                   </div>
-                  <p className="text-2xl font-bold text-green-600">
-                    {region.outboundPercentage.toFixed(1)}%
-                  </p>
+                  <div>
+                    <p className="text-xs text-gray-600">Standard %:</p>
+                    <p className="text-sm font-medium">{region.outboundStandardPercentage.toFixed(1)}%</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-600">Deviation:</p>
+                    <p className={`text-sm font-medium ${region.outboundDeviation >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {region.outboundDeviation >= 0 ? '+' : ''}{region.outboundDeviation.toFixed(1)}%
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-600">J+K Std:</p>
+                    <p className="text-sm font-medium">{region.outboundStandardDays.toFixed(1)} days</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-600">J+K Actual:</p>
+                    <p className="text-sm font-medium">{region.outboundActualDays.toFixed(1)} days</p>
+                  </div>
                 </div>
               </div>
 

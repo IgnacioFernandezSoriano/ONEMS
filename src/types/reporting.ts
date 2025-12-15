@@ -132,11 +132,19 @@ export interface CityEquityData {
   inboundShipments: number;
   inboundCompliant: number;
   inboundPercentage: number;
+  inboundStandardPercentage: number;
+  inboundStandardDays: number;
+  inboundActualDays: number;
+  inboundDeviation: number;
   
   // Outbound (City as Origin)
   outboundShipments: number;
   outboundCompliant: number;
   outboundPercentage: number;
+  outboundStandardPercentage: number;
+  outboundStandardDays: number;
+  outboundActualDays: number;
+  outboundDeviation: number;
   
   // Direction Analysis
   directionGap: number;
@@ -174,8 +182,21 @@ export interface RegionEquityData {
   deviation: number;
   status: 'compliant' | 'warning' | 'critical';
   underservedCitiesCount: number;
+  
+  // Inbound metrics
   inboundPercentage: number;
+  inboundStandardPercentage: number;
+  inboundStandardDays: number;
+  inboundActualDays: number;
+  inboundDeviation: number;
+  
+  // Outbound metrics
   outboundPercentage: number;
+  outboundStandardPercentage: number;
+  outboundStandardDays: number;
+  outboundActualDays: number;
+  outboundDeviation: number;
+  
   directionGap: number;
   
   // Carrier/Product Breakdown
@@ -209,6 +230,8 @@ export interface TerritoryEquityMetrics {
     actualPercentage: number;
     deviation: number;
     standardPercentage: number;
+    standardDays: number;
+    actualDays: number;
     inboundPercentage: number;
     outboundPercentage: number;
   }>;
@@ -217,6 +240,8 @@ export interface TerritoryEquityMetrics {
     actualPercentage: number;
     deviation: number;
     standardPercentage: number;
+    standardDays: number;
+    actualDays: number;
     inboundPercentage: number;
     outboundPercentage: number;
     status: 'compliant' | 'warning' | 'critical';

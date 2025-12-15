@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, ArrowDown, ArrowUp } from 'lucide-react';
 import type { RegionEquityData } from '@/types/reporting';
 
 interface RegionalEquityTableProps {
@@ -7,22 +7,67 @@ interface RegionalEquityTableProps {
   onRegionClick?: (region: RegionEquityData) => void;
 }
 
+type DirectionRow = {
+  regionId: string;
+  regionName: string;
+  direction: 'inbound' | 'outbound';
+  totalCities: number;
+  totalPopulation: number;
+  shipments: number;
+  compliant: number;
+  standardPercentage: number;
+  actualPercentage: number;
+  standardDays: number;
+  actualDays: number;
+  deviation: number;
+  status: 'compliant' | 'warning' | 'critical';
+  underservedCitiesCount: number;
+  originalRegion: RegionEquityData;
+};
+
 export function RegionalEquityTable({ data, onRegionClick }: RegionalEquityTableProps) {
-  const [sortField, setSortField] = useState<keyof RegionEquityData>('deviation');
+  const [sortField, setSortField] = useState<keyof DirectionRow>('deviation');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
-  const toggleRow = (regionId: string) => {
-    const newExpanded = new Set(expandedRows);
-    if (newExpanded.has(regionId)) {
-      newExpanded.delete(regionId);
-    } else {
-      newExpanded.add(regionId);
-    }
-    setExpandedRows(newExpanded);
-  };
+  // Convert each region into two rows (inbound + outbound)
+  const directionRows: DirectionRow[] = data.flatMap((region) => [
+    {
+      regionId: `${region.regionId}-inbound`,
+      regionName: region.regionName,
+      direction: 'inbound' as const,
+      totalCities: region.totalCities,
+      totalPopulation: region.totalPopulation,
+      shipments: Math.round(region.totalShipments * (region.inboundPercentage / 100)), // Approximate
+      compliant: region.compliantShipments,
+      standardPercentage: region.inboundStandardPercentage,
+      actualPercentage: region.inboundPercentage,
+      standardDays: region.inboundStandardDays,
+      actualDays: region.inboundActualDays,
+      deviation: region.inboundDeviation,
+      status: region.inboundDeviation >= 0 ? 'compliant' : (region.inboundPercentage < 80 ? 'critical' : 'warning'),
+      underservedCitiesCount: region.underservedCitiesCount,
+      originalRegion: region,
+    },
+    {
+      regionId: `${region.regionId}-outbound`,
+      regionName: region.regionName,
+      direction: 'outbound' as const,
+      totalCities: region.totalCities,
+      totalPopulation: region.totalPopulation,
+      shipments: Math.round(region.totalShipments * (region.outboundPercentage / 100)), // Approximate
+      compliant: region.compliantShipments,
+      standardPercentage: region.outboundStandardPercentage,
+      actualPercentage: region.outboundPercentage,
+      standardDays: region.outboundStandardDays,
+      actualDays: region.outboundActualDays,
+      deviation: region.outboundDeviation,
+      status: region.outboundDeviation >= 0 ? 'compliant' : (region.outboundPercentage < 80 ? 'critical' : 'warning'),
+      underservedCitiesCount: region.underservedCitiesCount,
+      originalRegion: region,
+    },
+  ]);
 
-  const handleSort = (field: keyof RegionEquityData) => {
+  const handleSort = (field: keyof DirectionRow) => {
     if (sortField === field) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
@@ -31,7 +76,7 @@ export function RegionalEquityTable({ data, onRegionClick }: RegionalEquityTable
     }
   };
 
-  const sortedData = [...data].sort((a, b) => {
+  const sortedData = [...directionRows].sort((a, b) => {
     const aVal = a[sortField];
     const bVal = b[sortField];
     const multiplier = sortDirection === 'asc' ? 1 : -1;
@@ -42,7 +87,7 @@ export function RegionalEquityTable({ data, onRegionClick }: RegionalEquityTable
     return String(aVal || '').localeCompare(String(bVal || '')) * multiplier;
   });
 
-  const SortIcon = ({ field }: { field: keyof RegionEquityData }) => {
+  const SortIcon = ({ field }: { field: keyof DirectionRow }) => {
     if (sortField !== field) return null;
     return sortDirection === 'asc' ? (
       <ChevronUp className="w-4 h-4 inline ml-1" />
@@ -51,16 +96,14 @@ export function RegionalEquityTable({ data, onRegionClick }: RegionalEquityTable
     );
   };
 
-  const getStatusIcon = (status: string) => {
+  const getStatusIcon = (status: 'compliant' | 'warning' | 'critical') => {
     switch (status) {
       case 'compliant':
-        return '✅';
+        return <span className="text-green-500">●</span>;
       case 'warning':
-        return '⚠️';
+        return <span className="text-amber-500">●</span>;
       case 'critical':
-        return '🔴';
-      default:
-        return '';
+        return <span className="text-red-500">●</span>;
     }
   };
 
@@ -69,12 +112,17 @@ export function RegionalEquityTable({ data, onRegionClick }: RegionalEquityTable
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
-            <th className="px-4 py-3 w-10"></th>
             <th
               className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
               onClick={() => handleSort('regionName')}
             >
               Region <SortIcon field="regionName" />
+            </th>
+            <th
+              className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+              onClick={() => handleSort('direction')}
+            >
+              Direction <SortIcon field="direction" />
             </th>
             <th
               className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
@@ -90,15 +138,21 @@ export function RegionalEquityTable({ data, onRegionClick }: RegionalEquityTable
             </th>
             <th
               className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-              onClick={() => handleSort('totalShipments')}
+              onClick={() => handleSort('shipments')}
             >
-              Total Shipments <SortIcon field="totalShipments" />
+              Total Shipments <SortIcon field="shipments" />
             </th>
             <th
               className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
               onClick={() => handleSort('standardPercentage')}
             >
               Standard % <SortIcon field="standardPercentage" />
+            </th>
+            <th
+              className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+              onClick={() => handleSort('actualPercentage')}
+            >
+              Actual % <SortIcon field="actualPercentage" />
             </th>
             <th
               className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
@@ -114,36 +168,12 @@ export function RegionalEquityTable({ data, onRegionClick }: RegionalEquityTable
             </th>
             <th
               className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-              onClick={() => handleSort('actualPercentage')}
-            >
-              Actual % <SortIcon field="actualPercentage" />
-            </th>
-            <th
-              className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
               onClick={() => handleSort('deviation')}
             >
               Deviation <SortIcon field="deviation" />
             </th>
             <th
               className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-              onClick={() => handleSort('inboundPercentage')}
-            >
-              Inbound % <SortIcon field="inboundPercentage" />
-            </th>
-            <th
-              className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-              onClick={() => handleSort('outboundPercentage')}
-            >
-              Outbound % <SortIcon field="outboundPercentage" />
-            </th>
-            <th
-              className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-              onClick={() => handleSort('directionGap')}
-            >
-              Direction Gap <SortIcon field="directionGap" />
-            </th>
-            <th
-              className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
               onClick={() => handleSort('status')}
             >
               Status <SortIcon field="status" />
@@ -157,132 +187,76 @@ export function RegionalEquityTable({ data, onRegionClick }: RegionalEquityTable
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {sortedData.map((region) => (
-            <>
-            <tr key={region.regionId} className="hover:bg-gray-50">
-              <td className="px-4 py-3 whitespace-nowrap text-center">
-                {region.carrierProductBreakdown && region.carrierProductBreakdown.length > 0 && (
-                  <button
-                    onClick={() => toggleRow(region.regionId)}
-                    className="text-gray-500 hover:text-gray-700"
-                  >
-                    {expandedRows.has(region.regionId) ? (
-                      <ChevronUp className="w-4 h-4" />
-                    ) : (
-                      <ChevronDown className="w-4 h-4" />
-                    )}
-                  </button>
-                )}
-              </td>
+          {sortedData.map((row) => (
+            <tr key={row.regionId} className="hover:bg-gray-50">
               <td className="px-4 py-3 whitespace-nowrap font-medium text-gray-900">
                 {onRegionClick ? (
                   <button
-                    onClick={() => onRegionClick(region)}
+                    onClick={() => onRegionClick(row.originalRegion)}
                     className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
                   >
-                    {region.regionName}
+                    {row.regionName}
                   </button>
                 ) : (
-                  region.regionName
+                  row.regionName
                 )}
               </td>
-              <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
-                {region.totalCities}
+              <td className="px-4 py-3 whitespace-nowrap text-sm">
+                <div className="flex items-center gap-1">
+                  {row.direction === 'inbound' ? (
+                    <>
+                      <ArrowDown className="w-4 h-4 text-blue-600" />
+                      <span className="text-blue-600 font-medium">Inbound</span>
+                    </>
+                  ) : (
+                    <>
+                      <ArrowUp className="w-4 h-4 text-green-600" />
+                      <span className="text-green-600 font-medium">Outbound</span>
+                    </>
+                  )}
+                </div>
               </td>
               <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
-                {region.totalPopulation.toLocaleString()}
+                {row.totalCities}
               </td>
               <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
-                {region.totalShipments}
+                {row.totalPopulation.toLocaleString()}
               </td>
               <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
-                {(region.standardPercentage || 0).toFixed(1)}%
+                {row.shipments}
               </td>
               <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
-                {(region.standardDays || 0).toFixed(1)}
+                {(row.standardPercentage || 0).toFixed(1)}%
               </td>
               <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
-                {(region.actualDays || 0).toFixed(1)}
+                {(row.actualPercentage || 0).toFixed(1)}%
               </td>
               <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
-                {(region.actualPercentage || 0).toFixed(1)}%
+                {(row.standardDays || 0).toFixed(1)}
+              </td>
+              <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
+                {(row.actualDays || 0).toFixed(1)}
               </td>
               <td
                 className={`px-4 py-3 whitespace-nowrap text-sm text-right font-medium ${
-                  region.deviation >= 0 ? 'text-green-600' : 'text-red-600'
+                  row.deviation >= 0 ? 'text-green-600' : 'text-red-600'
                 }`}
               >
-                {(region.deviation || 0) >= 0 ? '+' : ''}
-                {(region.deviation || 0).toFixed(1)}%
-              </td>
-              <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
-                {(region.inboundPercentage || 0).toFixed(1)}%
-              </td>
-              <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
-                {(region.outboundPercentage || 0).toFixed(1)}%
-              </td>
-              <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
-                {(region.directionGap || 0).toFixed(1)}%
+                {row.deviation >= 0 ? '+' : ''}
+                {row.deviation.toFixed(1)}%
               </td>
               <td className="px-4 py-3 whitespace-nowrap text-center text-lg">
-                {getStatusIcon(region.status)}
+                {getStatusIcon(row.status)}
               </td>
               <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
-                {region.underservedCitiesCount}
+                {row.underservedCitiesCount}
               </td>
             </tr>
-            {expandedRows.has(region.regionId) && region.carrierProductBreakdown && region.carrierProductBreakdown.length > 0 && (
-              <tr key={`${region.regionId}-breakdown`} className="bg-gray-50">
-                <td colSpan={13} className="px-4 py-2">
-                  <div className="ml-8">
-                    <table className="min-w-full text-sm">
-                      <thead>
-                        <tr className="text-xs text-gray-500">
-                          <th className="text-left py-1 px-2">Carrier</th>
-                          <th className="text-left py-1 px-2">Product</th>
-                          <th className="text-right py-1 px-2">Shipments</th>
-                          <th className="text-right py-1 px-2">Compliant</th>
-                          <th className="text-right py-1 px-2">Actual %</th>
-                          <th className="text-right py-1 px-2">Standard %</th>
-                          <th className="text-right py-1 px-2">Std (days)</th>
-                          <th className="text-right py-1 px-2">Actual (days)</th>
-                          <th className="text-right py-1 px-2">Deviation</th>
-                          <th className="text-right py-1 px-2">Inbound %</th>
-                          <th className="text-right py-1 px-2">Outbound %</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {region.carrierProductBreakdown.map((cp, idx) => (
-                          <tr key={idx} className="border-t border-gray-200">
-                            <td className="py-1 px-2 text-gray-700">{cp.carrier}</td>
-                            <td className="py-1 px-2 text-gray-700">{cp.product}</td>
-                            <td className="py-1 px-2 text-right text-gray-700">{cp.totalShipments}</td>
-                            <td className="py-1 px-2 text-right text-gray-700">{cp.compliantShipments}</td>
-                            <td className="py-1 px-2 text-right text-gray-700">{cp.actualPercentage.toFixed(1)}%</td>
-                            <td className="py-1 px-2 text-right text-gray-700">{cp.standardPercentage.toFixed(1)}%</td>
-                            <td className="py-1 px-2 text-right text-gray-700">{cp.standardDays.toFixed(1)}</td>
-                            <td className="py-1 px-2 text-right text-gray-700">{cp.actualDays.toFixed(1)}</td>
-                            <td className={`py-1 px-2 text-right font-medium ${
-                              cp.deviation >= 0 ? 'text-green-600' : 'text-red-600'
-                            }`}>
-                              {cp.deviation >= 0 ? '+' : ''}{cp.deviation.toFixed(1)}%
-                            </td>
-                            <td className="py-1 px-2 text-right text-blue-600">{cp.inboundPercentage.toFixed(1)}%</td>
-                            <td className="py-1 px-2 text-right text-green-600">{cp.outboundPercentage.toFixed(1)}%</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </td>
-              </tr>
-            )}
-            </>
           ))}
         </tbody>
       </table>
       {sortedData.length === 0 && (
-        <div className="text-center py-8 text-gray-500">No regional data available</div>
+        <div className="text-center py-8 text-gray-500">No data available</div>
       )}
     </div>
   );

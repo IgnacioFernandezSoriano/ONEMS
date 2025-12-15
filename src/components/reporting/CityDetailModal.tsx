@@ -102,30 +102,66 @@ export function CityDetailModal({ city, onClose }: CityDetailModalProps) {
             <h3 className="text-lg font-semibold text-gray-900 mb-3">Directional Analysis</h3>
             <div className="space-y-3">
               <div className="bg-blue-50 p-4 rounded-lg">
-                <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-gray-700 mb-2">Inbound (Arrivals)</p>
+                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-gray-600">Inbound (Arrivals):</p>
-                    <p className="text-sm text-gray-700">
-                      {city.inboundShipments || 0} shipments, {city.inboundCompliant || 0} compliant
+                    <p className="text-xs text-gray-600">Shipments:</p>
+                    <p className="text-sm font-medium">{city.inboundShipments || 0} ({city.inboundCompliant || 0} compliant)</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-600">Actual %:</p>
+                    <p className="text-lg font-bold text-blue-600">{city.inboundPercentage.toFixed(1)}%</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-600">Standard %:</p>
+                    <p className="text-sm font-medium">{city.inboundStandardPercentage.toFixed(1)}%</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-600">Deviation:</p>
+                    <p className={`text-sm font-medium ${city.inboundDeviation >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {city.inboundDeviation >= 0 ? '+' : ''}{city.inboundDeviation.toFixed(1)}%
                     </p>
                   </div>
-                  <p className="text-2xl font-bold text-blue-600">
-                    {city.inboundPercentage.toFixed(1)}%
-                  </p>
+                  <div>
+                    <p className="text-xs text-gray-600">J+K Std:</p>
+                    <p className="text-sm font-medium">{city.inboundStandardDays.toFixed(1)} days</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-600">J+K Actual:</p>
+                    <p className="text-sm font-medium">{city.inboundActualDays.toFixed(1)} days</p>
+                  </div>
                 </div>
               </div>
 
               <div className="bg-green-50 p-4 rounded-lg">
-                <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-gray-700 mb-2">Outbound (Departures)</p>
+                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-gray-600">Outbound (Departures):</p>
-                    <p className="text-sm text-gray-700">
-                      {city.outboundShipments || 0} shipments, {city.outboundCompliant || 0} compliant
+                    <p className="text-xs text-gray-600">Shipments:</p>
+                    <p className="text-sm font-medium">{city.outboundShipments || 0} ({city.outboundCompliant || 0} compliant)</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-600">Actual %:</p>
+                    <p className="text-lg font-bold text-green-600">{city.outboundPercentage.toFixed(1)}%</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-600">Standard %:</p>
+                    <p className="text-sm font-medium">{city.outboundStandardPercentage.toFixed(1)}%</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-600">Deviation:</p>
+                    <p className={`text-sm font-medium ${city.outboundDeviation >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {city.outboundDeviation >= 0 ? '+' : ''}{city.outboundDeviation.toFixed(1)}%
                     </p>
                   </div>
-                  <p className="text-2xl font-bold text-green-600">
-                    {city.outboundPercentage.toFixed(1)}%
-                  </p>
+                  <div>
+                    <p className="text-xs text-gray-600">J+K Std:</p>
+                    <p className="text-sm font-medium">{city.outboundStandardDays.toFixed(1)} days</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-600">J+K Actual:</p>
+                    <p className="text-sm font-medium">{city.outboundActualDays.toFixed(1)} days</p>
+                  </div>
                 </div>
               </div>
 

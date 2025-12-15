@@ -10,8 +10,14 @@ export function RegionalEquityChart({ data }: RegionalEquityChartProps) {
     region: region.regionName,
     actual: region.actualPercentage,
     standard: region.standardPercentage,
-    standardDays: region.standardDays,
-    actualDays: region.actualDays,
+    inboundStandardPercentage: region.inboundStandardPercentage,
+    inboundPercentage: region.inboundPercentage,
+    inboundStandardDays: region.inboundStandardDays,
+    inboundActualDays: region.inboundActualDays,
+    outboundStandardPercentage: region.outboundStandardPercentage,
+    outboundPercentage: region.outboundPercentage,
+    outboundStandardDays: region.outboundStandardDays,
+    outboundActualDays: region.outboundActualDays,
     status: region.status,
   }));
 
@@ -51,11 +57,17 @@ export function RegionalEquityChart({ data }: RegionalEquityChartProps) {
                 const data = payload[0].payload;
                 return (
                   <div className="bg-white p-3 border border-gray-300 rounded shadow-lg">
-                    <p className="font-semibold">{data.region}</p>
-                    <p className="text-blue-600">Actual: {data.actual.toFixed(1)}%</p>
-                    <p className="text-gray-600">Standard: {data.standard.toFixed(1)}%</p>
-                    <p className="text-gray-500 text-sm mt-1">J+K Std: {data.standardDays.toFixed(1)} days</p>
-                    <p className="text-gray-500 text-sm">J+K Actual: {data.actualDays.toFixed(1)} days</p>
+                    <p className="font-semibold mb-2">{data.region}</p>
+                    <div className="mb-2">
+                      <p className="text-blue-600 font-medium">Inbound:</p>
+                      <p className="text-sm ml-2">Std %: {data.inboundStandardPercentage.toFixed(1)}% | Actual %: {data.inboundPercentage.toFixed(1)}%</p>
+                      <p className="text-sm ml-2">J+K Std: {data.inboundStandardDays.toFixed(1)} days | J+K Actual: {data.inboundActualDays.toFixed(1)} days</p>
+                    </div>
+                    <div>
+                      <p className="text-green-600 font-medium">Outbound:</p>
+                      <p className="text-sm ml-2">Std %: {data.outboundStandardPercentage.toFixed(1)}% | Actual %: {data.outboundPercentage.toFixed(1)}%</p>
+                      <p className="text-sm ml-2">J+K Std: {data.outboundStandardDays.toFixed(1)} days | J+K Actual: {data.outboundActualDays.toFixed(1)} days</p>
+                    </div>
                   </div>
                 );
               }
