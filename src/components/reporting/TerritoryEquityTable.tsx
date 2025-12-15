@@ -138,7 +138,7 @@ export function TerritoryEquityTable({ data, onCityClick }: TerritoryEquityTable
               onClick={() => handleSort('standardDays')}
             >
               <div className="flex items-center justify-end gap-1">
-                Standard (days) <SortIcon field="standardDays" />
+                J+K Std <SortIcon field="standardDays" />
                 <Tooltip content="J+K Standard: Allowed days (weighted avg from delivery standards)" />
               </div>
             </th>
@@ -147,7 +147,7 @@ export function TerritoryEquityTable({ data, onCityClick }: TerritoryEquityTable
               onClick={() => handleSort('actualDays')}
             >
               <div className="flex items-center justify-end gap-1">
-                Actual (days) <SortIcon field="actualDays" />
+                J+K Actual <SortIcon field="actualDays" />
                 <Tooltip content="J+K Actual: Average business transit days from shipments" />
               </div>
             </th>

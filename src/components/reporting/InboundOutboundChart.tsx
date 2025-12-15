@@ -44,8 +44,8 @@ export function InboundOutboundChart({ data }: InboundOutboundChartProps) {
                     <p className="text-blue-600">Inbound: {data.inbound.toFixed(1)}%</p>
                     <p className="text-green-600">Outbound: {data.outbound.toFixed(1)}%</p>
                     <p className="text-gray-600">Standard: {data.standard.toFixed(1)}%</p>
-                    <p className="text-gray-500 text-sm mt-1">Std (days): {data.standardDays.toFixed(1)}</p>
-                    <p className="text-gray-500 text-sm">Actual (days): {data.actualDays.toFixed(1)}</p>
+                    <p className="text-gray-500 text-sm mt-1">J+K Std: {data.standardDays.toFixed(1)} days</p>
+                    <p className="text-gray-500 text-sm">J+K Actual: {data.actualDays.toFixed(1)} days</p>
                   </div>
                 );
               }

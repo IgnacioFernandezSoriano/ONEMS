@@ -199,8 +199,12 @@ export function useTerritoryEquityData(
                 cpStats.standardsSum += standard.success_percentage;
                 cpStats.standardsCount++;
               }
-              if (standard.allowed_days) {
-                cpStats.standardDaysSum += standard.allowed_days;
+              // Convert standard_time to days based on time_unit
+              if (standard.standard_time != null) {
+                const allowedDays = standard.time_unit === 'days' 
+                  ? standard.standard_time 
+                  : (standard.standard_time / 24);
+                cpStats.standardDaysSum += allowedDays;
                 cpStats.standardDaysCount++;
               }
             }
@@ -221,8 +225,12 @@ export function useTerritoryEquityData(
                 destStats.standardsSum += standard.success_percentage;
                 destStats.standardsCount++;
               }
-              if (standard.allowed_days) {
-                destStats.standardDaysSum += standard.allowed_days;
+              // Convert standard_time to days based on time_unit
+              if (standard.standard_time != null) {
+                const allowedDays = standard.time_unit === 'days' 
+                  ? standard.standard_time 
+                  : (standard.standard_time / 24);
+                destStats.standardDaysSum += allowedDays;
                 destStats.standardDaysCount++;
               }
             }
@@ -294,8 +302,12 @@ export function useTerritoryEquityData(
                 cpStatsOrigin.standardsSum += standardOut.success_percentage;
                 cpStatsOrigin.standardsCount++;
               }
-              if (standardOut.allowed_days) {
-                cpStatsOrigin.standardDaysSum += standardOut.allowed_days;
+              // Convert standard_time to days based on time_unit
+              if (standardOut.standard_time != null) {
+                const allowedDays = standardOut.time_unit === 'days' 
+                  ? standardOut.standard_time 
+                  : (standardOut.standard_time / 24);
+                cpStatsOrigin.standardDaysSum += allowedDays;
                 cpStatsOrigin.standardDaysCount++;
               }
             }

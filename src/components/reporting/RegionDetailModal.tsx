@@ -168,10 +168,10 @@ export function RegionDetailModal({ region, onClose }: RegionDetailModalProps) {
                         Standard %
                       </th>
                       <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                        Std (days)
+                        J+K Std
                       </th>
                       <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                        Actual (days)
+                        J+K Actual
                       </th>
                       <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
                         Deviation

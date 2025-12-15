@@ -104,13 +104,13 @@ export function RegionalEquityTable({ data, onRegionClick }: RegionalEquityTable
               className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
               onClick={() => handleSort('standardDays')}
             >
-              Standard (days) <SortIcon field="standardDays" />
+              J+K Std <SortIcon field="standardDays" />
             </th>
             <th
               className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
               onClick={() => handleSort('actualDays')}
             >
-              Actual (days) <SortIcon field="actualDays" />
+              J+K Actual <SortIcon field="actualDays" />
             </th>
             <th
               className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
