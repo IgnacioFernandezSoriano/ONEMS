@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
+import { ReportingFiltersProvider } from './contexts/ReportingFiltersContext'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import { MainLayout } from './components/layout/MainLayout'
 import { Login } from './pages/Login'
@@ -10,6 +11,19 @@ import { AllUsers } from './pages/Settings/AllUsers'
 import { Users } from './pages/Admin/Users'
 import { CountryTopology } from './pages/CountryTopology'
 import { Carriers } from './pages/Carriers'
+import { MaterialCatalogPage } from './pages/MaterialCatalog'
+import { DeliveryStandards } from './pages/DeliveryStandards'
+import { AllocationPlanGenerator } from './pages/AllocationPlanGenerator'
+import NodeLoadBalancing from './pages/NodeLoadBalancing'
+import { AllocationPlans } from './pages/AllocationPlans'
+import { Panelists } from './pages/Panelists'
+import OneDB from './pages/OneDB'
+import ReportingDashboard from './pages/Reporting/Dashboard'
+import ComplianceReport from './pages/Reporting/ComplianceReport'
+import TerritoryEquity from './pages/Reporting/TerritoryEquity'
+import ShipmentTracking from './pages/Reporting/ShipmentTracking'
+import JKAnalysis from './pages/Reporting/JKAnalysis'
+import AccountReportingConfig from './pages/Settings/AccountReportingConfig'
 
 function App() {
   return (
@@ -22,7 +36,8 @@ function App() {
             path="/*"
             element={
               <ProtectedRoute>
-                <MainLayout>
+                <ReportingFiltersProvider>
+                  <MainLayout>
                   <Routes>
                     <Route path="/dashboard" element={<Dashboard />} />
                     
@@ -42,6 +57,132 @@ function App() {
                       element={
                         <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
                           <Carriers />
+                        </ProtectedRoute>
+                      }
+                    />
+                    
+                    {/* Material Catalog - for admin and superadmin */}
+                    <Route
+                      path="/material-catalog"
+                      element={
+                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                          <MaterialCatalogPage />
+                        </ProtectedRoute>
+                      }
+                    />
+                    
+                    {/* Delivery Standards - for admin and superadmin */}
+                    <Route
+                      path="/delivery-standards"
+                      element={
+                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                          <DeliveryStandards />
+                        </ProtectedRoute>
+                      }
+                    />
+                    
+                    {/* Allocation Plan Generator - for admin and superadmin */}
+                    <Route
+                      path="/allocation-plan-generator"
+                      element={
+                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                          <AllocationPlanGenerator />
+                        </ProtectedRoute>
+                      }
+                    />
+                    
+                    {/* Node Load Balancing - for admin and superadmin */}
+                    <Route
+                      path="/node-load-balancing"
+                      element={
+                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                          <NodeLoadBalancing />
+                        </ProtectedRoute>
+                      }
+                    />
+                    
+                    {/* Allocation Plans - for admin and superadmin */}
+                    <Route
+                      path="/allocation-plans"
+                      element={
+                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                          <AllocationPlans />
+                        </ProtectedRoute>
+                      }
+                    />
+                    
+                    {/* Panelists - for admin and superadmin */}
+                    <Route
+                      path="/panelists"
+                      element={
+                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                          <Panelists />
+                        </ProtectedRoute>
+                      }
+                    />
+                    
+                    {/* ONE DB - for admin and superadmin */}
+                    <Route
+                      path="/one-db"
+                      element={
+                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                          <OneDB />
+                        </ProtectedRoute>
+                      }
+                    />
+                    
+                    {/* Reporting redirect */}
+                    <Route
+                      path="/reporting"
+                      element={<Navigate to="/reporting/dashboard" replace />}
+                    />
+                    
+                    {/* Reporting Dashboard - for admin and superadmin */}
+                    <Route
+                      path="/reporting/dashboard"
+                      element={
+                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                          <ReportingDashboard />
+                        </ProtectedRoute>
+                      }
+                    />
+                    
+                    {/* Reporting Compliance - for admin and superadmin */}
+                    <Route
+                      path="/reporting/compliance"
+                      element={
+                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                          <ComplianceReport />
+                        </ProtectedRoute>
+                      }
+                    />
+                    
+                    {/* Territory Equity Report - for admin and superadmin */}
+                    <Route
+                      path="/reporting/territory-equity"
+                      element={
+                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                          <TerritoryEquity />
+                        </ProtectedRoute>
+                      }
+                    />
+                    
+                    {/* Reporting Tracking - for admin and superadmin */}
+                    <Route
+                      path="/reporting/tracking"
+                      element={
+                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                          <ShipmentTracking />
+                        </ProtectedRoute>
+                      }
+                    />
+                    
+                    {/* Reporting J+K Analysis - for admin and superadmin */}
+                    <Route
+                      path="/reporting/jk-analysis"
+                      element={
+                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                          <JKAnalysis />
                         </ProtectedRoute>
                       }
                     />
@@ -71,6 +212,14 @@ function App() {
                         </ProtectedRoute>
                       }
                     />
+                    <Route
+                      path="/settings/reporting-config"
+                      element={
+                        <ProtectedRoute allowedRoles={['superadmin']}>
+                          <AccountReportingConfig />
+                        </ProtectedRoute>
+                      }
+                    />
                     
                     {/* Users route - for admin and superadmin */}
                     <Route
@@ -85,6 +234,7 @@ function App() {
                     <Route path="/" element={<Navigate to="/dashboard" />} />
                   </Routes>
                 </MainLayout>
+                </ReportingFiltersProvider>
               </ProtectedRoute>
             }
           />

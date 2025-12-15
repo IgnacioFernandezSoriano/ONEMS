@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
-import type { Carrier, Product, Material } from '@/lib/types'
+import type { Carrier, Product, ProductMaterial } from '@/lib/types'
 
 export function useCarriers() {
   const [carriers, setCarriers] = useState<Carrier[]>([])
   const [products, setProducts] = useState<Product[]>([])
-  const [materials, setMaterials] = useState<Material[]>([])
+  const [productMaterials, setProductMaterials] = useState<ProductMaterial[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -14,19 +14,22 @@ export function useCarriers() {
       setLoading(true)
       setError(null)
 
-      const [carriersRes, productsRes, materialsRes] = await Promise.all([
+      const [carriersRes, productsRes, productMaterialsRes] = await Promise.all([
         supabase.from('carriers').select('*').order('name'),
         supabase.from('products').select('*').order('code'),
-        supabase.from('materials').select('*').order('code'),
+        supabase
+          .from('product_materials')
+          .select('*, material_catalog(*)')
+          .order('created_at'),
       ])
 
       if (carriersRes.error) throw carriersRes.error
       if (productsRes.error) throw productsRes.error
-      if (materialsRes.error) throw materialsRes.error
+      if (productMaterialsRes.error) throw productMaterialsRes.error
 
       setCarriers(carriersRes.data || [])
       setProducts(productsRes.data || [])
-      setMaterials(materialsRes.data || [])
+      setProductMaterials(productMaterialsRes.data || [])
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -81,39 +84,47 @@ export function useCarriers() {
     const { error } = await supabase.from('products').delete().eq('id', id)
     if (error) throw error
     setProducts(products.filter(p => p.id !== id))
-    setMaterials(materials.filter(m => m.product_id !== id))
+    setProductMaterials(productMaterials.filter(pm => pm.product_id !== id))
   }
 
-  // Material operations
-  const createMaterial = async (data: {
+  // Product-Material operations (new catalog system)
+  const addMaterialToProduct = async (data: {
     product_id: string
-    code: string
-    name: string
-    unit_measure?: string
-    description?: string
-    status?: string
+    material_id: string
+    quantity: number
   }) => {
-    const { data: newMaterial, error } = await supabase.from('materials').insert(data).select().single()
+    const { data: newPM, error } = await supabase
+      .from('product_materials')
+      .insert(data)
+      .select('*, material_catalog(*)')
+      .single()
+    
     if (error) throw error
-    setMaterials([...materials, newMaterial])
+    setProductMaterials([...productMaterials, newPM])
   }
 
-  const updateMaterial = async (id: string, data: Partial<Material>) => {
-    const { data: updated, error } = await supabase.from('materials').update(data).eq('id', id).select().single()
+  const updateProductMaterial = async (id: string, data: { quantity: number }) => {
+    const { data: updated, error } = await supabase
+      .from('product_materials')
+      .update(data)
+      .eq('id', id)
+      .select('*, material_catalog(*)')
+      .single()
+    
     if (error) throw error
-    setMaterials(materials.map(m => m.id === id ? updated : m))
+    setProductMaterials(productMaterials.map(pm => pm.id === id ? updated : pm))
   }
 
-  const deleteMaterial = async (id: string) => {
-    const { error } = await supabase.from('materials').delete().eq('id', id)
+  const removeProductMaterial = async (id: string) => {
+    const { error } = await supabase.from('product_materials').delete().eq('id', id)
     if (error) throw error
-    setMaterials(materials.filter(m => m.id !== id))
+    setProductMaterials(productMaterials.filter(pm => pm.id !== id))
   }
 
   return {
     carriers,
     products,
-    materials,
+    productMaterials,
     loading,
     error,
     createCarrier,
@@ -122,9 +133,9 @@ export function useCarriers() {
     createProduct,
     updateProduct,
     deleteProduct,
-    createMaterial,
-    updateMaterial,
-    deleteMaterial,
+    addMaterialToProduct,
+    updateProductMaterial,
+    removeProductMaterial,
     refresh: fetchAll,
   }
 }

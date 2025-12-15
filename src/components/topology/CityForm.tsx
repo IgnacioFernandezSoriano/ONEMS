@@ -14,7 +14,7 @@ export function CityForm({ city, regionId, onSubmit, onCancel }: CityFormProps) 
     region_id: regionId,
     name: city?.name || '',
     code: city?.code || '',
-    classification: city?.classification || 'C',
+    population: city?.population?.toString() || '',
     latitude: city?.latitude?.toString() || '',
     longitude: city?.longitude?.toString() || '',
     status: city?.status || 'active',
@@ -29,9 +29,9 @@ export function CityForm({ city, regionId, onSubmit, onCancel }: CityFormProps) 
         region_id: formData.region_id,
         name: formData.name,
         code: formData.code,
-        classification: formData.classification,
         status: formData.status,
       }
+      if (formData.population) data.population = parseInt(formData.population)
       if (formData.latitude) data.latitude = parseFloat(formData.latitude)
       if (formData.longitude) data.longitude = parseFloat(formData.longitude)
       
@@ -69,17 +69,22 @@ export function CityForm({ city, regionId, onSubmit, onCancel }: CityFormProps) 
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">Classification *</label>
-        <select
-          required
-          value={formData.classification}
-          onChange={(e) => setFormData({ ...formData, classification: e.target.value as any })}
+        <label className="block text-sm font-medium mb-1">
+          Population
+          <span className="text-xs text-gray-500 ml-2">(optional)</span>
+        </label>
+        <input
+          type="number"
+          min="1"
+          step="1"
+          value={formData.population}
+          onChange={(e) => setFormData({ ...formData, population: e.target.value })}
           className="w-full px-3 py-2 border rounded-md"
-        >
-          <option value="A">A - Major City</option>
-          <option value="B">B - Medium City</option>
-          <option value="C">C - Small City</option>
-        </select>
+          placeholder="e.g., 3200000"
+        />
+        <p className="text-xs text-gray-500 mt-1">
+          Total population of the city (used for impact analysis in reporting)
+        </p>
       </div>
 
       <div>

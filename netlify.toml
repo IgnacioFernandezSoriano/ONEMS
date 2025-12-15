@@ -1,6 +1,10 @@
 [build]
-  command = "npm run build"
+  command = "pnpm install && pnpm build"
   publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+  NPM_FLAGS = "--version"
 
 [[redirects]]
   from = "/*"

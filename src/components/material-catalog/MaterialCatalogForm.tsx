@@ -1,20 +1,18 @@
-import { useState, useEffect } from 'react'
-import type { Material } from '@/lib/types'
+import { useState } from 'react'
+import type { MaterialCatalog } from '@/lib/types'
 import { Button } from '@/components/common/Button'
 
-interface MaterialFormProps {
-  material?: Material
-  productId: string
+interface MaterialCatalogFormProps {
+  material?: MaterialCatalog
   onSubmit: (data: any) => Promise<void>
   onCancel: () => void
 }
 
-export function MaterialForm({ material, productId, onSubmit, onCancel }: MaterialFormProps) {
+export function MaterialCatalogForm({ material, onSubmit, onCancel }: MaterialCatalogFormProps) {
   const [formData, setFormData] = useState({
     code: material?.code || '',
     name: material?.name || '',
     unit_measure: material?.unit_measure || '',
-    quantity: material?.quantity || 1,
     description: material?.description || '',
     status: material?.status || 'active',
   })
@@ -24,10 +22,7 @@ export function MaterialForm({ material, productId, onSubmit, onCancel }: Materi
     e.preventDefault()
     setLoading(true)
     try {
-      await onSubmit({
-        ...formData,
-        product_id: productId,
-      })
+      await onSubmit(formData)
     } finally {
       setLoading(false)
     }
@@ -73,20 +68,6 @@ export function MaterialForm({ material, productId, onSubmit, onCancel }: Materi
           onChange={(e) => setFormData({ ...formData, unit_measure: e.target.value })}
           className="w-full px-3 py-2 border border-gray-300 rounded-md"
           placeholder="units, kg, etc."
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Quantity *
-        </label>
-        <input
-          type="number"
-          min="1"
-          required
-          value={formData.quantity}
-          onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) || 1 })}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md"
         />
       </div>
 

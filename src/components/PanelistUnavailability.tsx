@@ -1,0 +1,592 @@
+import { useState, useEffect, useMemo } from 'react'
+import { usePanelistUnavailability } from '@/lib/hooks/usePanelistUnavailability'
+import { supabase } from '@/lib/supabase'
+import type { Panelist, PanelistUnavailability } from '@/lib/types'
+
+export function PanelistUnavailabilityComponent() {
+  const { unavailabilityPeriods, loading, error, createUnavailabilityPeriod, updateUnavailabilityPeriod, deleteUnavailabilityPeriod } = usePanelistUnavailability()
+  const [showModal, setShowModal] = useState(false)
+  const [editingPeriod, setEditingPeriod] = useState<any>(null)
+  const [panelists, setPanelists] = useState<Panelist[]>([])
+  
+  // Filters state
+  const [showFilters, setShowFilters] = useState(true)
+  const [filters, setFilters] = useState({
+    panelist_id: '',
+    status: '',
+    reason: '',
+    date_range: 'all' as 'all' | 'current' | 'upcoming' | 'past',
+    search: '',
+  })
+
+  // Selection state
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  
+  // Form state
+  const [formData, setFormData] = useState({
+    panelist_id: '',
+    start_date: '',
+    end_date: '',
+    reason: 'vacation' as 'vacation' | 'sick' | 'personal' | 'training' | 'other',
+    notes: '',
+    status: 'active' as 'active' | 'cancelled',
+  })
+
+  useEffect(() => {
+    fetchPanelists()
+  }, [])
+
+  const fetchPanelists = async () => {
+    const { data } = await supabase
+      .from('panelists')
+      .select('*, node:nodes(*, city:cities(*))')
+      .eq('status', 'active')
+      .order('panelist_code')
+    if (data) setPanelists(data as any)
+  }
+
+  // Filtered periods
+  const filteredPeriods = useMemo(() => {
+    if (!unavailabilityPeriods) return []
+    
+    const today = new Date().toISOString().split('T')[0]
+    
+    return unavailabilityPeriods.filter(period => {
+      if (filters.panelist_id && period.panelist_id !== filters.panelist_id) return false
+      if (filters.status && period.status !== filters.status) return false
+      if (filters.reason && period.reason !== filters.reason) return false
+      
+      // Date range filter
+      if (filters.date_range === 'current') {
+        if (period.start_date > today || period.end_date < today) return false
+      } else if (filters.date_range === 'upcoming') {
+        if (period.start_date <= today) return false
+      } else if (filters.date_range === 'past') {
+        if (period.end_date >= today) return false
+      }
+      
+      if (filters.search) {
+        const search = filters.search.toLowerCase()
+        const matchesPanelist = period.panelist?.name?.toLowerCase().includes(search)
+        const matchesNotes = period.notes?.toLowerCase().includes(search)
+        if (!matchesPanelist && !matchesNotes) return false
+      }
+      return true
+    })
+  }, [unavailabilityPeriods, filters])
+
+  // Selection handlers
+  const handleSelectAll = () => {
+    if (selectedIds.size === filteredPeriods.length) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(filteredPeriods.map(p => p.id)))
+    }
+  }
+
+  const handleSelectOne = (id: string) => {
+    const newSelected = new Set(selectedIds)
+    if (newSelected.has(id)) {
+      newSelected.delete(id)
+    } else {
+      newSelected.add(id)
+    }
+    setSelectedIds(newSelected)
+  }
+
+  // Bulk operations
+  const handleBulkCancel = async () => {
+    if (!confirm(`Are you sure you want to cancel ${selectedIds.size} unavailability period(s)?`)) return
+    
+    for (const id of selectedIds) {
+      await updateUnavailabilityPeriod(id, { status: 'cancelled' })
+    }
+    setSelectedIds(new Set())
+  }
+
+  const handleBulkDelete = async () => {
+    if (!confirm(`Are you sure you want to delete ${selectedIds.size} unavailability period(s)? This action cannot be undone.`)) return
+    
+    for (const id of selectedIds) {
+      await deleteUnavailabilityPeriod(id)
+    }
+    setSelectedIds(new Set())
+  }
+
+  const clearFilters = () => {
+    setFilters({
+      panelist_id: '',
+      status: '',
+      reason: '',
+      date_range: 'all',
+      search: '',
+    })
+  }
+
+  const handleOpenModal = (period?: any) => {
+    if (period) {
+      setEditingPeriod(period)
+      setFormData({
+        panelist_id: period.panelist_id,
+        start_date: period.start_date,
+        end_date: period.end_date,
+        reason: period.reason,
+        notes: period.notes || '',
+        status: period.status,
+      })
+    } else {
+      setEditingPeriod(null)
+      setFormData({
+        panelist_id: '',
+        start_date: '',
+        end_date: '',
+        reason: 'vacation',
+        notes: '',
+        status: 'active',
+      })
+    }
+    setShowModal(true)
+  }
+
+  const handleCloseModal = () => {
+    setShowModal(false)
+    setEditingPeriod(null)
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    try {
+      if (editingPeriod) {
+        await updateUnavailabilityPeriod(editingPeriod.id, formData)
+      } else {
+        await createUnavailabilityPeriod(formData)
+      }
+      handleCloseModal()
+    } catch (err) {
+      console.error('Error saving unavailability period:', err)
+      alert('Error saving unavailability period')
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this unavailability period?')) return
+    await deleteUnavailabilityPeriod(id)
+  }
+
+  const handleToggleStatus = async (period: any) => {
+    const newStatus = period.status === 'active' ? 'cancelled' : 'active'
+    await updateUnavailabilityPeriod(period.id, { status: newStatus })
+  }
+
+  const getStatusBadgeClass = (status: string) => {
+    switch (status) {
+      case 'active':
+        return 'bg-green-100 text-green-800'
+      case 'cancelled':
+        return 'bg-gray-100 text-gray-800'
+      default:
+        return 'bg-gray-100 text-gray-800'
+    }
+  }
+
+  const getReasonBadgeClass = (reason: string) => {
+    switch (reason) {
+      case 'vacation':
+        return 'bg-blue-100 text-blue-800'
+      case 'sick':
+        return 'bg-red-100 text-red-800'
+      case 'personal':
+        return 'bg-purple-100 text-purple-800'
+      case 'training':
+        return 'bg-yellow-100 text-yellow-800'
+      case 'other':
+        return 'bg-gray-100 text-gray-800'
+      default:
+        return 'bg-gray-100 text-gray-800'
+    }
+  }
+
+  const isCurrentPeriod = (startDate: string, endDate: string) => {
+    const today = new Date().toISOString().split('T')[0]
+    return startDate <= today && endDate >= today
+  }
+
+  if (loading) return <div className="p-6">Loading...</div>
+  if (error) return <div className="p-6 text-red-600">Error: {error}</div>
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h2 className="text-xl font-bold">Unavailability Periods</h2>
+          <p className="text-sm text-gray-600 mt-1">
+            Manage panelist unavailability periods for automatic sample reassignment
+          </p>
+        </div>
+        <button
+          onClick={() => handleOpenModal()}
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+        >
+          + Add Unavailability Period
+        </button>
+      </div>
+
+      {/* Filters */}
+      <div className="bg-white rounded-lg shadow mb-6">
+        <div 
+          className="p-4 flex justify-between items-center cursor-pointer border-b"
+          onClick={() => setShowFilters(!showFilters)}
+        >
+          <h3 className="font-semibold">Filters</h3>
+          <span className="text-gray-500">{showFilters ? '▼' : '▶'}</span>
+        </div>
+        
+        {showFilters && (
+          <div className="p-4 grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Search
+              </label>
+              <input
+                type="text"
+                value={filters.search}
+                onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+                placeholder="Panelist name, notes..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Panelist
+              </label>
+              <select
+                value={filters.panelist_id}
+                onChange={(e) => setFilters({ ...filters, panelist_id: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              >
+                <option value="">All Panelists</option>
+                {panelists.map(panelist => (
+                  <option key={panelist.id} value={panelist.id}>
+                    {panelist.panelist_code} - {panelist.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Date Range
+              </label>
+              <select
+                value={filters.date_range}
+                onChange={(e) => setFilters({ ...filters, date_range: e.target.value as any })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              >
+                <option value="all">All Periods</option>
+                <option value="current">Current (Active Now)</option>
+                <option value="upcoming">Upcoming</option>
+                <option value="past">Past</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Reason
+              </label>
+              <select
+                value={filters.reason}
+                onChange={(e) => setFilters({ ...filters, reason: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              >
+                <option value="">All Reasons</option>
+                <option value="vacation">Vacation</option>
+                <option value="sick">Sick Leave</option>
+                <option value="personal">Personal</option>
+                <option value="training">Training</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Status
+              </label>
+              <select
+                value={filters.status}
+                onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              >
+                <option value="">All Status</option>
+                <option value="active">Active</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+
+            <div className="md:col-span-5 flex justify-end">
+              <button
+                onClick={clearFilters}
+                className="text-sm text-gray-600 hover:text-gray-800"
+              >
+                Clear Filters
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Bulk Operations Panel */}
+      {selectedIds.size > 0 && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex items-center justify-between">
+          <span className="text-sm font-medium text-blue-900">
+            {selectedIds.size} period(s) selected
+          </span>
+          <div className="flex gap-2">
+            <button
+              onClick={handleBulkCancel}
+              className="px-3 py-1 bg-yellow-600 text-white text-sm rounded hover:bg-yellow-700"
+            >
+              Cancel Periods
+            </button>
+            <button
+              onClick={handleBulkDelete}
+              className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
+            >
+              Delete
+            </button>
+            <button
+              onClick={() => setSelectedIds(new Set())}
+              className="px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300"
+            >
+              Clear Selection
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Table */}
+      <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b">
+              <tr>
+                <th className="px-6 py-3 text-left">
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.size === filteredPeriods.length && filteredPeriods.length > 0}
+                    onChange={handleSelectAll}
+                    className="rounded"
+                  />
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Panelist</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Start Date</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">End Date</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Duration</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Reason</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Notes</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {filteredPeriods.length > 0 ? (
+                filteredPeriods.map((period) => {
+                  const isCurrent = isCurrentPeriod(period.start_date, period.end_date)
+                  const duration = Math.ceil((new Date(period.end_date).getTime() - new Date(period.start_date).getTime()) / (1000 * 60 * 60 * 24)) + 1
+                  
+                  return (
+                    <tr key={period.id} className={`hover:bg-gray-50 ${isCurrent ? 'bg-yellow-50' : ''}`}>
+                      <td className="px-6 py-4">
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.has(period.id)}
+                          onChange={() => handleSelectOne(period.id)}
+                          className="rounded"
+                        />
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        <div className="font-medium">{period.panelist?.name || '-'}</div>
+                        <div className="text-gray-500 text-xs font-mono">{period.panelist?.panelist_code || '-'}</div>
+                      </td>
+                      <td className="px-6 py-4 text-sm">{period.start_date}</td>
+                      <td className="px-6 py-4 text-sm">{period.end_date}</td>
+                      <td className="px-6 py-4 text-sm">
+                        {duration} day{duration !== 1 ? 's' : ''}
+                        {isCurrent && <span className="ml-2 text-xs text-yellow-700 font-semibold">● ACTIVE NOW</span>}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getReasonBadgeClass(period.reason)}`}>
+                          {period.reason}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadgeClass(period.status)}`}>
+                          {period.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm max-w-xs truncate">{period.notes || '-'}</td>
+                      <td className="px-6 py-4 text-sm">
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleOpenModal(period)}
+                            className="text-blue-600 hover:text-blue-800"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleToggleStatus(period)}
+                            className="text-yellow-600 hover:text-yellow-800"
+                          >
+                            {period.status === 'active' ? 'Cancel' : 'Activate'}
+                          </button>
+                          <button
+                            onClick={() => handleDelete(period.id)}
+                            className="text-red-600 hover:text-red-800"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })
+              ) : (
+                <tr>
+                  <td colSpan={9} className="px-6 py-4 text-center text-gray-500">
+                    No unavailability periods found. {filters.search || filters.panelist_id || filters.status || filters.reason || filters.date_range !== 'all' ? 'Try adjusting your filters.' : 'Click "Add Unavailability Period" to create one.'}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg w-full max-w-md max-h-[90vh] flex flex-col">
+            <div className="p-6 border-b">
+              <h2 className="text-xl font-bold">
+                {editingPeriod ? 'Edit Unavailability Period' : 'Add Unavailability Period'}
+              </h2>
+            </div>
+            <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+              <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Panelist <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={formData.panelist_id}
+                    onChange={(e) => setFormData({ ...formData, panelist_id: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    required
+                  >
+                    <option value="">Select a panelist</option>
+                    {panelists.map((panelist: any) => (
+                      <option key={panelist.id} value={panelist.id}>
+                        {panelist.panelist_code} - {panelist.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Start Date <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      value={formData.start_date}
+                      onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      End Date <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      value={formData.end_date}
+                      onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                      required
+                      min={formData.start_date}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Reason <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={formData.reason}
+                    onChange={(e) => setFormData({ ...formData, reason: e.target.value as any })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    required
+                  >
+                    <option value="vacation">Vacation</option>
+                    <option value="sick">Sick Leave</option>
+                    <option value="personal">Personal</option>
+                    <option value="training">Training</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Notes
+                  </label>
+                  <textarea
+                    value={formData.notes}
+                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    rows={3}
+                    placeholder="Additional information about this unavailability period..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Status
+                  </label>
+                  <select
+                    value={formData.status}
+                    onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  >
+                    <option value="active">Active</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="border-t p-6 flex gap-2">
+                <button
+                  type="submit"
+                  className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                >
+                  {editingPeriod ? 'Update' : 'Create'}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCloseModal}
+                  className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}

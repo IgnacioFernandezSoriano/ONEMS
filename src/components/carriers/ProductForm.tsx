@@ -14,6 +14,7 @@ export function ProductForm({ product, carrierId, onSubmit, onCancel }: ProductF
     code: product?.code || '',
     description: product?.description || '',
     standard_delivery_hours: product?.standard_delivery_hours?.toString() || '',
+    time_unit: product?.time_unit || 'hours',
     status: product?.status || 'active',
   })
   const [loading, setLoading] = useState(false)
@@ -27,6 +28,7 @@ export function ProductForm({ product, carrierId, onSubmit, onCancel }: ProductF
         code: formData.code,
         description: formData.description,
         standard_delivery_hours: parseInt(formData.standard_delivery_hours),
+        time_unit: formData.time_unit,
         status: formData.status,
       }
       
@@ -63,17 +65,31 @@ export function ProductForm({ product, carrierId, onSubmit, onCancel }: ProductF
         />
       </div>
 
-      <div>
-        <label className="block text-sm font-medium mb-1">Standard Delivery Hours *</label>
-        <input
-          type="number"
-          required
-          min="1"
-          value={formData.standard_delivery_hours}
-          onChange={(e) => setFormData({ ...formData, standard_delivery_hours: e.target.value })}
-          className="w-full px-3 py-2 border rounded-md"
-          placeholder="e.g., 24"
-        />
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">Standard Delivery Time *</label>
+          <input
+            type="number"
+            required
+            min="1"
+            value={formData.standard_delivery_hours}
+            onChange={(e) => setFormData({ ...formData, standard_delivery_hours: e.target.value })}
+            className="w-full px-3 py-2 border rounded-md"
+            placeholder="e.g., 24"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Time Unit *</label>
+          <select
+            required
+            value={formData.time_unit}
+            onChange={(e) => setFormData({ ...formData, time_unit: e.target.value as 'hours' | 'days' })}
+            className="w-full px-3 py-2 border rounded-md"
+          >
+            <option value="hours">Hours</option>
+            <option value="days">Days</option>
+          </select>
+        </div>
       </div>
 
       <div>

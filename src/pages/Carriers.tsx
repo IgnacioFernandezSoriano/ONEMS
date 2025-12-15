@@ -5,7 +5,7 @@ export function Carriers() {
   const {
     carriers,
     products,
-    materials,
+    productMaterials,
     loading,
     error,
     createCarrier,
@@ -14,9 +14,9 @@ export function Carriers() {
     createProduct,
     updateProduct,
     deleteProduct,
-    createMaterial,
-    updateMaterial,
-    deleteMaterial,
+    addMaterialToProduct,
+    updateProductMaterial,
+    removeProductMaterial,
   } = useCarriers()
 
   if (loading) {
@@ -37,7 +37,7 @@ export function Carriers() {
 
   const totalCarriers = carriers.length
   const totalProducts = products.length
-  const totalMaterials = materials.length
+  const totalMaterials = productMaterials.length
 
   return (
     <div className="space-y-6">
@@ -57,7 +57,7 @@ export function Carriers() {
         </div>
         <div className="bg-white p-6 rounded-lg border">
           <div className="text-3xl font-bold text-purple-600">{totalMaterials}</div>
-          <div className="text-sm text-gray-600 mt-1">Materials</div>
+          <div className="text-sm text-gray-600 mt-1">Material Assignments</div>
         </div>
       </div>
 
@@ -74,16 +74,16 @@ export function Carriers() {
       <CarriersTree
         carriers={carriers}
         products={products}
-        materials={materials}
+        productMaterials={productMaterials}
         onCreateCarrier={createCarrier}
         onCreateProduct={createProduct}
-        onCreateMaterial={createMaterial}
         onUpdateCarrier={updateCarrier}
         onUpdateProduct={updateProduct}
-        onUpdateMaterial={updateMaterial}
         onDeleteCarrier={deleteCarrier}
         onDeleteProduct={deleteProduct}
-        onDeleteMaterial={deleteMaterial}
+        onAddMaterialToProduct={addMaterialToProduct}
+        onUpdateProductMaterial={updateProductMaterial}
+        onRemoveProductMaterial={removeProductMaterial}
       />
     </div>
   )

@@ -2,37 +2,37 @@ import { useState } from 'react'
 import { Modal } from '@/components/common/Modal'
 import { CarrierForm } from './CarrierForm'
 import { ProductForm } from './ProductForm'
-import { MaterialForm } from './MaterialForm'
-import type { Carrier, Product, Material } from '@/lib/types'
+import { MaterialSelector } from './MaterialSelector'
+import type { Carrier, Product, ProductMaterial } from '@/lib/types'
 
 interface CarriersTreeProps {
   carriers: Carrier[]
   products: Product[]
-  materials: Material[]
+  productMaterials: ProductMaterial[]
   onCreateCarrier: (data: any) => Promise<void>
   onCreateProduct: (data: any) => Promise<void>
-  onCreateMaterial: (data: any) => Promise<void>
   onUpdateCarrier: (id: string, data: any) => Promise<void>
   onUpdateProduct: (id: string, data: any) => Promise<void>
-  onUpdateMaterial: (id: string, data: any) => Promise<void>
   onDeleteCarrier: (id: string) => Promise<void>
   onDeleteProduct: (id: string) => Promise<void>
-  onDeleteMaterial: (id: string) => Promise<void>
+  onAddMaterialToProduct: (data: { product_id: string; material_id: string; quantity: number }) => Promise<void>
+  onUpdateProductMaterial: (id: string, data: { quantity: number }) => Promise<void>
+  onRemoveProductMaterial: (id: string) => Promise<void>
 }
 
 export function CarriersTree({
   carriers,
   products,
-  materials,
+  productMaterials,
   onCreateCarrier,
   onCreateProduct,
-  onCreateMaterial,
   onUpdateCarrier,
   onUpdateProduct,
-  onUpdateMaterial,
   onDeleteCarrier,
   onDeleteProduct,
-  onDeleteMaterial,
+  onAddMaterialToProduct,
+  onUpdateProductMaterial,
+  onRemoveProductMaterial,
 }: CarriersTreeProps) {
   const [expandedCarriers, setExpandedCarriers] = useState<Set<string>>(new Set())
   const [expandedProducts, setExpandedProducts] = useState<Set<string>>(new Set())
@@ -63,7 +63,7 @@ export function CarriersTree({
   }
 
   const getMaterialsForProduct = (productId: string) => {
-    return materials.filter((m) => m.product_id === productId)
+    return productMaterials.filter((pm) => pm.product_id === productId)
   }
 
   const handleSubmit = async (data: any) => {
@@ -75,15 +75,41 @@ export function CarriersTree({
     }
   }
 
-  const handleDelete = async (type: 'carrier' | 'product' | 'material', id: string, name: string) => {
+  const handleDelete = async (type: 'carrier' | 'product', id: string, name: string) => {
     if (!confirm(`Are you sure you want to delete ${name}?`)) return
     
     try {
       if (type === 'carrier') await onDeleteCarrier(id)
       else if (type === 'product') await onDeleteProduct(id)
-      else await onDeleteMaterial(id)
     } catch (error) {
       console.error('Error deleting:', error)
+    }
+  }
+
+  const handleRemoveMaterial = async (pmId: string, materialName: string) => {
+    if (!confirm(`Remove material "${materialName}" from this product?`)) return
+    
+    try {
+      await onRemoveProductMaterial(pmId)
+    } catch (error) {
+      console.error('Error removing material:', error)
+    }
+  }
+
+  const handleUpdateQuantity = async (pmId: string, currentQty: number, materialName: string) => {
+    const newQty = prompt(`Enter new quantity for "${materialName}":`, currentQty.toString())
+    if (!newQty) return
+    
+    const quantity = parseFloat(newQty)
+    if (isNaN(quantity) || quantity <= 0) {
+      alert('Please enter a valid positive number')
+      return
+    }
+    
+    try {
+      await onUpdateProductMaterial(pmId, { quantity })
+    } catch (error) {
+      console.error('Error updating quantity:', error)
     }
   }
 
@@ -157,7 +183,7 @@ export function CarriersTree({
               {isExpanded && (
                 <div className="ml-6 space-y-2 mt-2">
                   {carrierProducts.map((product) => {
-                    const productMaterials = getMaterialsForProduct(product.id)
+                    const productMats = getMaterialsForProduct(product.id)
                     const isProductExpanded = expandedProducts.has(product.id)
 
                     return (
@@ -203,9 +229,8 @@ export function CarriersTree({
                               onClick={() =>
                                 setModal({
                                   title: 'Add Material',
-                                  type: 'material',
+                                  type: 'material-selector',
                                   productId: product.id,
-                                  onSubmit: onCreateMaterial,
                                 })
                               }
                               className="text-sm bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
@@ -223,55 +248,53 @@ export function CarriersTree({
 
                         {isProductExpanded && (
                           <div className="ml-6 space-y-1 mt-2">
-                            {productMaterials.map((material) => (
-                              <div
-                                key={material.id}
-                                className="flex items-center gap-2 py-1 text-sm border-l-2 border-green-300 pl-4"
-                              >
-                                <span className="text-base">📋</span>
-                                <span className="font-medium">{material.name}</span>
-                                <span className="text-gray-500">({material.code})</span>
-                                <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded font-medium">
-                                  Qty: {material.quantity}
-                                </span>
-                                {material.unit_measure && (
-                                  <span className="text-xs bg-gray-50 px-2 py-1 rounded">
-                                    {material.unit_measure}
-                                  </span>
-                                )}
-                                <span
-                                  className={`text-xs px-2 py-1 rounded ${
-                                    material.status === 'active'
-                                      ? 'bg-green-100 text-green-800'
-                                      : 'bg-gray-100 text-gray-800'
-                                  }`}
-                                >
-                                  {material.status}
-                                </span>
-                                <div className="ml-auto flex gap-2">
-                                  <button
-                                    onClick={() =>
-                                      setModal({
-                                        title: 'Edit Material',
-                                        type: 'material',
-                                        data: material,
-                                        productId: product.id,
-                                        onSubmit: (data: any) => onUpdateMaterial(material.id, data),
-                                      })
-                                    }
-                                    className="text-blue-600 hover:text-blue-800"
-                                  >
-                                    Edit
-                                  </button>
-                                  <button
-                                    onClick={() => handleDelete('material', material.id, material.name)}
-                                    className="text-red-600 hover:text-red-800"
-                                  >
-                                    Delete
-                                  </button>
-                                </div>
+                            {productMats.length === 0 ? (
+                              <div className="text-sm text-gray-500 italic py-2">
+                                No materials assigned yet
                               </div>
-                            ))}
+                            ) : (
+                              productMats.map((pm) => (
+                                <div
+                                  key={pm.id}
+                                  className="flex items-center gap-2 py-1 text-sm border-l-2 border-green-300 pl-4"
+                                >
+                                  <span className="text-base">📋</span>
+                                  <span className="font-medium">{pm.material_catalog?.name}</span>
+                                  <span className="text-gray-500">({pm.material_catalog?.code})</span>
+                                  <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded font-medium">
+                                    Qty: {pm.quantity}
+                                  </span>
+                                  {pm.material_catalog?.unit_measure && (
+                                    <span className="text-xs bg-gray-50 px-2 py-1 rounded">
+                                      {pm.material_catalog.unit_measure}
+                                    </span>
+                                  )}
+                                  <span
+                                    className={`text-xs px-2 py-1 rounded ${
+                                      pm.material_catalog?.status === 'active'
+                                        ? 'bg-green-100 text-green-800'
+                                        : 'bg-gray-100 text-gray-800'
+                                    }`}
+                                  >
+                                    {pm.material_catalog?.status}
+                                  </span>
+                                  <div className="ml-auto flex gap-2">
+                                    <button
+                                      onClick={() => handleUpdateQuantity(pm.id, pm.quantity, pm.material_catalog?.name || '')}
+                                      className="text-blue-600 hover:text-blue-800"
+                                    >
+                                      Edit Qty
+                                    </button>
+                                    <button
+                                      onClick={() => handleRemoveMaterial(pm.id, pm.material_catalog?.name || '')}
+                                      className="text-red-600 hover:text-red-800"
+                                    >
+                                      Remove
+                                    </button>
+                                  </div>
+                                </div>
+                              ))
+                            )}
                           </div>
                         )}
                       </div>
@@ -318,11 +341,20 @@ export function CarriersTree({
               onCancel={() => setModal(null)}
             />
           )}
-          {modal.type === 'material' && (
-            <MaterialForm
-              material={modal.data}
+          {modal.type === 'material-selector' && (
+            <MaterialSelector
               productId={modal.productId}
-              onSubmit={handleSubmit}
+              onSelect={async (materialId, quantity) => {
+                await onAddMaterialToProduct({
+                  product_id: modal.productId,
+                  material_id: materialId,
+                  quantity,
+                })
+                setModal(null)
+              }}
+              onCreateNew={async (data, quantity) => {
+                // This is handled inside MaterialSelector
+              }}
               onCancel={() => setModal(null)}
             />
           )}
