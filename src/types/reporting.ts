@@ -122,6 +122,7 @@ export interface CityEquityData {
   totalShipments: number;
   compliantShipments: number;
   standardPercentage: number;  // Weighted avg from delivery_standards
+  standardDays: number;  // J+K: Weighted avg allowed_days from delivery_standards
   actualPercentage: number;
   deviation: number;
   status: 'compliant' | 'warning' | 'critical';
@@ -147,6 +148,7 @@ export interface CityEquityData {
     compliantShipments: number;
     actualPercentage: number;
     standardPercentage: number;
+    standardDays: number;  // J+K
     deviation: number;
     inboundPercentage: number;
     outboundPercentage: number;
@@ -164,6 +166,7 @@ export interface RegionEquityData {
   totalShipments: number;
   compliantShipments: number;
   standardPercentage: number;
+  standardDays: number;  // J+K
   actualPercentage: number;
   deviation: number;
   status: 'compliant' | 'warning' | 'critical';
@@ -180,6 +183,7 @@ export interface RegionEquityData {
     compliantShipments: number;
     actualPercentage: number;
     standardPercentage: number;
+    standardDays: number;  // J+K
     deviation: number;
     inboundPercentage: number;
     outboundPercentage: number;

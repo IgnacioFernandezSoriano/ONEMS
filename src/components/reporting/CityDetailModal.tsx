@@ -172,6 +172,9 @@ export function CityDetailModal({ city, onClose }: CityDetailModalProps) {
                         Standard %
                       </th>
                       <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
+                        J+K
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
                         Deviation
                       </th>
                       <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
@@ -198,6 +201,9 @@ export function CityDetailModal({ city, onClose }: CityDetailModalProps) {
                         </td>
                         <td className="px-4 py-3 text-sm text-right text-gray-900">
                           {cp.standardPercentage.toFixed(1)}%
+                        </td>
+                        <td className="px-4 py-3 text-sm text-right text-gray-900">
+                          {cp.standardDays.toFixed(1)}
                         </td>
                         <td
                           className={`px-4 py-3 text-sm text-right font-medium ${

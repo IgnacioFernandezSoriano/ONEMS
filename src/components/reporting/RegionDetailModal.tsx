@@ -168,6 +168,9 @@ export function RegionDetailModal({ region, onClose }: RegionDetailModalProps) {
                         Standard %
                       </th>
                       <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
+                        J+K
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
                         Deviation
                       </th>
                       <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
@@ -194,6 +197,9 @@ export function RegionDetailModal({ region, onClose }: RegionDetailModalProps) {
                         </td>
                         <td className="px-4 py-3 text-sm text-right text-gray-900">
                           {cp.standardPercentage.toFixed(1)}%
+                        </td>
+                        <td className="px-4 py-3 text-sm text-right text-gray-900">
+                          {cp.standardDays.toFixed(1)}
                         </td>
                         <td
                           className={`px-4 py-3 text-sm text-right font-medium ${

@@ -102,6 +102,12 @@ export function RegionalEquityTable({ data, onRegionClick }: RegionalEquityTable
             </th>
             <th
               className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+              onClick={() => handleSort('standardDays')}
+            >
+              J+K <SortIcon field="standardDays" />
+            </th>
+            <th
+              className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
               onClick={() => handleSort('actualPercentage')}
             >
               Actual % <SortIcon field="actualPercentage" />
@@ -187,6 +193,9 @@ export function RegionalEquityTable({ data, onRegionClick }: RegionalEquityTable
                 {(region.standardPercentage || 0).toFixed(1)}%
               </td>
               <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
+                {(region.standardDays || 0).toFixed(1)}
+              </td>
+              <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
                 {(region.actualPercentage || 0).toFixed(1)}%
               </td>
               <td
@@ -226,6 +235,7 @@ export function RegionalEquityTable({ data, onRegionClick }: RegionalEquityTable
                           <th className="text-right py-1 px-2">Compliant</th>
                           <th className="text-right py-1 px-2">Actual %</th>
                           <th className="text-right py-1 px-2">Standard %</th>
+                          <th className="text-right py-1 px-2">J+K</th>
                           <th className="text-right py-1 px-2">Deviation</th>
                           <th className="text-right py-1 px-2">Inbound %</th>
                           <th className="text-right py-1 px-2">Outbound %</th>
@@ -240,6 +250,7 @@ export function RegionalEquityTable({ data, onRegionClick }: RegionalEquityTable
                             <td className="py-1 px-2 text-right text-gray-700">{cp.compliantShipments}</td>
                             <td className="py-1 px-2 text-right text-gray-700">{cp.actualPercentage.toFixed(1)}%</td>
                             <td className="py-1 px-2 text-right text-gray-700">{cp.standardPercentage.toFixed(1)}%</td>
+                            <td className="py-1 px-2 text-right text-gray-700">{cp.standardDays.toFixed(1)}</td>
                             <td className={`py-1 px-2 text-right font-medium ${
                               cp.deviation >= 0 ? 'text-green-600' : 'text-red-600'
                             }`}>
