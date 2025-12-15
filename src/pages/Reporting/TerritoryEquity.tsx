@@ -8,13 +8,14 @@ import { RegionalEquityChart } from '@/components/reporting/RegionalEquityChart'
 import { CityDetailModal } from '@/components/reporting/CityDetailModal';
 import { TerritoryEquityFilters } from '@/components/reporting/TerritoryEquityFilters';
 import { TerritoryEquityTreemap } from '@/components/reporting/TerritoryEquityTreemap';
+import { TerritoryEquityMap } from '@/components/reporting/TerritoryEquityMap';
 import { useEquityAuditExport } from '@/hooks/reporting/useEquityAuditExport';
-import { Info, Download, TrendingUp, Users, AlertTriangle, Award, FileText } from 'lucide-react';
+import { Info, Download, TrendingUp, Users, AlertTriangle, Award, FileText, Map } from 'lucide-react';
 import type { CityEquityData, TerritoryEquityFilters as Filters } from '@/types/reporting';
 
 export default function TerritoryEquity() {
   const { profile } = useAuth();
-  const [activeTab, setActiveTab] = useState<'city' | 'regional'>('city');
+  const [activeTab, setActiveTab] = useState<'city' | 'regional' | 'map'>('city');
   const [selectedCity, setSelectedCity] = useState<CityEquityData | null>(null);
   const [filters, setFilters] = useState<Filters>({
     startDate: '',
@@ -126,22 +127,13 @@ export default function TerritoryEquity() {
             Analyze service equity across cities and regions
           </p>
         </div>
-        <div className="flex gap-2">
-          <button
-            onClick={handleExportAuditReport}
-            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-          >
-            <FileText className="w-4 h-4" />
-            Export Audit Report
-          </button>
-          <button
-            onClick={handleExportCSV}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            <Download className="w-4 h-4" />
-            Export CSV
-          </button>
-        </div>
+        <button
+          onClick={handleExportAuditReport}
+          className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+        >
+          <FileText className="w-4 h-4" />
+          Export Audit Report
+        </button>
       </div>
 
       {/* Filters */}
@@ -314,6 +306,17 @@ export default function TerritoryEquity() {
             >
               Regional Analysis
             </button>
+            <button
+              onClick={() => setActiveTab('map')}
+              className={`px-6 py-3 font-medium transition-colors flex items-center gap-2 ${
+                activeTab === 'map'
+                  ? 'border-b-2 border-blue-600 text-blue-600'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <Map className="w-4 h-4" />
+              Geographic View
+            </button>
           </div>
         </div>
 
@@ -335,7 +338,16 @@ export default function TerritoryEquity() {
 
               {/* City Table */}
               <div>
-                <h3 className="text-lg font-semibold mb-4">City Equity Details</h3>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold">City Equity Details</h3>
+                  <button
+                    onClick={handleExportCSV}
+                    className="flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                  >
+                    <Download className="w-4 h-4" />
+                    Export CSV
+                  </button>
+                </div>
                 <TerritoryEquityTable data={cityData} onCityClick={setSelectedCity} />
               </div>
             </div>
@@ -353,6 +365,21 @@ export default function TerritoryEquity() {
               <div>
                 <h3 className="text-lg font-semibold mb-4">Regional Equity Details</h3>
                 <RegionalEquityTable data={regionData} />
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'map' && (
+            <div className="space-y-6">
+              <div>
+                <div className="mb-4">
+                  <h3 className="text-lg font-semibold mb-2">Geographic Distribution</h3>
+                  <p className="text-sm text-gray-600">
+                    Interactive map showing service equity across cities. Circle size represents population, color indicates compliance status.
+                    Click on any city marker to view detailed information.
+                  </p>
+                </div>
+                <TerritoryEquityMap data={cityData} />
               </div>
             </div>
           )}

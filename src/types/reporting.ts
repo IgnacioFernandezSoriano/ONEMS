@@ -115,6 +115,8 @@ export interface CityEquityData {
   regionName: string | null;
   classification: 'capital' | 'major' | 'minor' | null;
   population: number | null;
+  latitude?: number | null;
+  longitude?: number | null;
   
   // Overall Metrics
   totalShipments: number;

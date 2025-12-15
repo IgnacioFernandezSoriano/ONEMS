@@ -177,6 +177,8 @@ export function useTerritoryEquityData(
             const regionName = city.region_name;
             const classification = city.classification || null;
             const population = city.population || null;
+            const latitude = city.latitude || null;
+            const longitude = city.longitude || null;
 
             const totalShipments = stats.inbound.total + stats.outbound.total;
             const compliantShipments = stats.inbound.compliant + stats.outbound.compliant;
@@ -211,6 +213,8 @@ export function useTerritoryEquityData(
               regionName,
               classification,
               population,
+              latitude,
+              longitude,
               totalShipments,
               compliantShipments,
               standardPercentage,
@@ -227,7 +231,7 @@ export function useTerritoryEquityData(
               accountId,
             };
           })
-          .filter((c): c is CityEquityData => c !== null);
+          .filter((c) => c !== null) as CityEquityData[];
 
         // 6. Apply filters (Direction, Equity Status, Region)
         let filteredCityData = cityEquityData;
