@@ -1,287 +1,217 @@
 import { X } from 'lucide-react';
 import type { RegionEquityData } from '@/types/reporting';
-import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
 
 interface RegionDetailModalProps {
   region: RegionEquityData;
   onClose: () => void;
-  accountId: string;
-  filters?: {
-    carrier?: string;
-    product?: string;
-  };
 }
 
-interface CarrierProductData {
-  carrier: string;
-  product: string;
-  totalShipments: number;
-  compliantShipments: number;
-  actualPercentage: number;
-  standardPercentage: number;
-  deviation: number;
-}
+export function RegionDetailModal({ region, onClose }: RegionDetailModalProps) {
+  const carrierProductData = region.carrierProductBreakdown || [];
 
-export function RegionDetailModal({ region, onClose, accountId, filters }: RegionDetailModalProps) {
-  const [carrierProductData, setCarrierProductData] = useState<CarrierProductData[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    loadCarrierProductData();
-  }, [region.regionId, accountId, filters]);
-
-  const loadCarrierProductData = async () => {
-    try {
-      setLoading(true);
-
-      // Build query for shipments in this region
-      let query = supabase
-        .from('shipments')
-        .select(`
-          carrier_name,
-          product_name,
-          on_time_delivery,
-          origin_city_name,
-          destination_city_name
-        `)
-        .eq('account_id', accountId)
-        .or(`origin_city_name.in.(${await getCitiesInRegion()}),destination_city_name.in.(${await getCitiesInRegion()})`);
-
-      // Apply filters
-      if (filters?.carrier) {
-        query = query.eq('carrier_name', filters.carrier);
-      }
-      if (filters?.product) {
-        query = query.eq('product_name', filters.product);
-      }
-
-      const { data: shipments, error } = await query;
-
-      if (error) throw error;
-
-      // Get delivery standards
-      const { data: standards } = await supabase
-        .from('delivery_standards')
-        .select('carrier_id, product_id, origin_city_id, destination_city_id, success_percentage')
-        .eq('account_id', accountId);
-
-      // Group by carrier and product
-      const grouped = (shipments || []).reduce((acc: any, shipment: any) => {
-        const key = `${shipment.carrier_name}|${shipment.product_name}`;
-        if (!acc[key]) {
-          acc[key] = {
-            carrier: shipment.carrier_name,
-            product: shipment.product_name,
-            total: 0,
-            compliant: 0,
-            standardsSum: 0,
-            standardsCount: 0,
-          };
-        }
-        acc[key].total++;
-        if (shipment.on_time_delivery) acc[key].compliant++;
-        return acc;
-      }, {});
-
-      // Calculate percentages
-      const result: CarrierProductData[] = Object.values(grouped).map((item: any) => {
-        const actualPercentage = item.total > 0 ? (item.compliant / item.total) * 100 : 0;
-        const standardPercentage = 95; // Default, could be calculated from standards
-        const deviation = actualPercentage - standardPercentage;
-
-        return {
-          carrier: item.carrier,
-          product: item.product,
-          totalShipments: item.total,
-          compliantShipments: item.compliant,
-          actualPercentage,
-          standardPercentage,
-          deviation,
-        };
-      });
-
-      // Sort by total shipments descending
-      result.sort((a, b) => b.totalShipments - a.totalShipments);
-
-      setCarrierProductData(result);
-    } catch (error) {
-      console.error('Error loading carrier/product data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getCitiesInRegion = async () => {
-    const { data: cities } = await supabase
-      .from('cities')
-      .select('name')
-      .eq('region_id', region.regionId)
-      .eq('account_id', accountId);
-
-    return (cities || []).map(c => `"${c.name}"`).join(',');
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'compliant':
-        return '✅';
-      case 'warning':
-        return '⚠️';
-      case 'critical':
-        return '🔴';
-      default:
-        return '';
-    }
+  const getStatusBadge = (status: string) => {
+    const styles = {
+      compliant: 'bg-green-100 text-green-800',
+      warning: 'bg-amber-100 text-amber-800',
+      critical: 'bg-red-100 text-red-800',
+    };
+    return styles[status as keyof typeof styles] || 'bg-gray-100 text-gray-800';
   };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[85vh] overflow-y-auto">
-        {/* Header */}
-        <div className="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
+      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
           <h2 className="text-2xl font-bold text-gray-900">Region Details: {region.regionName}</h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 transition-colors"
+            className="text-gray-400 hover:text-gray-600 transition-colors"
           >
             <X className="w-6 h-6" />
           </button>
         </div>
 
-        {/* Content */}
         <div className="p-6 space-y-6">
           {/* Basic Information */}
-          <section>
-            <h3 className="text-lg font-semibold text-gray-900 mb-3 border-b pb-2">
-              Regional Summary
-            </h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">Regional Summary</h3>
+            <div className="grid grid-cols-3 gap-4">
               <div>
-                <span className="text-sm text-gray-600">Total Cities:</span>
-                <p className="font-medium">{region.totalCities}</p>
+                <p className="text-sm text-gray-500">Total Cities:</p>
+                <p className="font-medium text-gray-900">{region.totalCities}</p>
               </div>
               <div>
-                <span className="text-sm text-gray-600">Total Population:</span>
-                <p className="font-medium">
-                  {region.totalPopulation ? region.totalPopulation.toLocaleString() : 'N/A'}
+                <p className="text-sm text-gray-500">Population:</p>
+                <p className="font-medium text-gray-900">
+                  {region.totalPopulation.toLocaleString()}
                 </p>
               </div>
               <div>
-                <span className="text-sm text-gray-600">Total Shipments:</span>
-                <p className="font-medium">{region.totalShipments}</p>
+                <p className="text-sm text-gray-500">Total Shipments:</p>
+                <p className="font-medium text-gray-900">{region.totalShipments}</p>
               </div>
+            </div>
+          </div>
+
+          {/* Performance Metrics */}
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">Performance Metrics</h3>
+            <div className="grid grid-cols-3 gap-4">
               <div>
-                <span className="text-sm text-gray-600">Compliant Shipments:</span>
-                <p className="font-medium">
-                  {region.compliantShipments} ({(region.actualPercentage || 0).toFixed(1)}%)
+                <p className="text-sm text-gray-500">Compliant:</p>
+                <p className="font-medium text-gray-900">
+                  {region.compliantShipments} ({region.actualPercentage.toFixed(1)}%)
                 </p>
               </div>
               <div>
-                <span className="text-sm text-gray-600">Standard:</span>
-                <p className="font-medium">{(region.standardPercentage || 0).toFixed(1)}%</p>
+                <p className="text-sm text-gray-500">Standard:</p>
+                <p className="font-medium text-gray-900">{region.standardPercentage.toFixed(1)}%</p>
               </div>
               <div>
-                <span className="text-sm text-gray-600">Deviation:</span>
+                <p className="text-sm text-gray-500">Deviation:</p>
                 <p
                   className={`font-medium ${
                     region.deviation >= 0 ? 'text-green-600' : 'text-red-600'
                   }`}
                 >
-                  {(region.deviation || 0) >= 0 ? '+' : ''}
-                  {(region.deviation || 0).toFixed(1)}%
+                  {region.deviation >= 0 ? '+' : ''}
+                  {region.deviation.toFixed(1)}%
                 </p>
               </div>
               <div>
-                <span className="text-sm text-gray-600">Status:</span>
-                <p className="font-medium">
-                  {getStatusIcon(region.status)} {region.status}
-                </p>
+                <p className="text-sm text-gray-500">Status:</p>
+                <span
+                  className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${getStatusBadge(
+                    region.status
+                  )}`}
+                >
+                  {region.status === 'compliant' && '✅ compliant'}
+                  {region.status === 'warning' && '⚠️ warning'}
+                  {region.status === 'critical' && '🔴 critical'}
+                </span>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Underserved Cities:</p>
+                <p className="font-medium text-gray-900">{region.underservedCitiesCount}</p>
               </div>
             </div>
-          </section>
+          </div>
 
           {/* Directional Analysis */}
-          <section>
-            <h3 className="text-lg font-semibold text-gray-900 mb-3 border-b pb-2">
-              Directional Analysis
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div className="p-3 bg-blue-50 rounded">
-                <span className="text-sm text-gray-600">Inbound (Arrivals):</span>
-                <p className="text-2xl font-bold text-blue-600">
-                  {(region.inboundPercentage || 0).toFixed(1)}%
-                </p>
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">Directional Analysis</h3>
+            <div className="space-y-3">
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">Inbound (Arrivals):</p>
+                    <p className="text-sm text-gray-700">Compliance for shipments arriving to this region</p>
+                  </div>
+                  <p className="text-2xl font-bold text-blue-600">
+                    {region.inboundPercentage.toFixed(1)}%
+                  </p>
+                </div>
               </div>
-              <div className="p-3 bg-green-50 rounded">
-                <span className="text-sm text-gray-600">Outbound (Departures):</span>
-                <p className="text-2xl font-bold text-green-600">
-                  {(region.outboundPercentage || 0).toFixed(1)}%
-                </p>
+
+              <div className="bg-green-50 p-4 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">Outbound (Departures):</p>
+                    <p className="text-sm text-gray-700">Compliance for shipments departing from this region</p>
+                  </div>
+                  <p className="text-2xl font-bold text-green-600">
+                    {region.outboundPercentage.toFixed(1)}%
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">Direction Gap:</p>
+                    <p className="text-xs text-gray-500">
+                      {region.directionGap > 5 ? '⚠️ Imbalanced service' : '✅ Balanced service'}
+                    </p>
+                  </div>
+                  <p className="text-2xl font-bold text-gray-700">
+                    {region.directionGap.toFixed(1)}%
+                  </p>
+                </div>
               </div>
             </div>
-          </section>
+          </div>
 
           {/* Carrier & Product Breakdown */}
-          <section>
-            <h3 className="text-lg font-semibold text-gray-900 mb-3 border-b pb-2">
-              Carrier & Product Breakdown
-              {filters?.carrier && <span className="text-sm font-normal text-gray-500 ml-2">(Filtered by: {filters.carrier})</span>}
-              {filters?.product && <span className="text-sm font-normal text-gray-500 ml-2">(Filtered by: {filters.product})</span>}
-            </h3>
-            {loading ? (
-              <div className="text-center py-8 text-gray-500">Loading...</div>
-            ) : carrierProductData.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">No data available</div>
-            ) : (
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">Carrier & Product Breakdown</h3>
+            {carrierProductData.length > 0 ? (
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="bg-gray-50 border-b">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
                     <tr>
-                      <th className="text-left px-3 py-2 font-medium text-gray-600">Carrier</th>
-                      <th className="text-left px-3 py-2 font-medium text-gray-600">Product</th>
-                      <th className="text-right px-3 py-2 font-medium text-gray-600">Shipments</th>
-                      <th className="text-right px-3 py-2 font-medium text-gray-600">Compliant</th>
-                      <th className="text-right px-3 py-2 font-medium text-gray-600">Actual %</th>
-                      <th className="text-right px-3 py-2 font-medium text-gray-600">Standard %</th>
-                      <th className="text-right px-3 py-2 font-medium text-gray-600">Deviation</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Carrier
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Product
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
+                        Shipments
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
+                        Compliant
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
+                        Actual %
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
+                        Standard %
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
+                        Deviation
+                      </th>
                     </tr>
                   </thead>
-                  <tbody>
-                    {carrierProductData.map((item, idx) => (
-                      <tr key={idx} className="border-b hover:bg-gray-50">
-                        <td className="px-3 py-2 font-medium">{item.carrier}</td>
-                        <td className="px-3 py-2">{item.product}</td>
-                        <td className="px-3 py-2 text-right">{item.totalShipments}</td>
-                        <td className="px-3 py-2 text-right">{item.compliantShipments}</td>
-                        <td className="px-3 py-2 text-right font-medium">
-                          {item.actualPercentage.toFixed(1)}%
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {carrierProductData.map((cp, idx) => (
+                      <tr key={idx} className="hover:bg-gray-50">
+                        <td className="px-4 py-3 text-sm text-gray-900">{cp.carrier}</td>
+                        <td className="px-4 py-3 text-sm text-gray-900">{cp.product}</td>
+                        <td className="px-4 py-3 text-sm text-right text-gray-900">
+                          {cp.totalShipments}
                         </td>
-                        <td className="px-3 py-2 text-right text-gray-600">
-                          {item.standardPercentage.toFixed(1)}%
+                        <td className="px-4 py-3 text-sm text-right text-gray-900">
+                          {cp.compliantShipments}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-right text-gray-900">
+                          {cp.actualPercentage.toFixed(1)}%
+                        </td>
+                        <td className="px-4 py-3 text-sm text-right text-gray-900">
+                          {cp.standardPercentage.toFixed(1)}%
                         </td>
                         <td
-                          className={`px-3 py-2 text-right font-medium ${
-                            item.deviation >= 0 ? 'text-green-600' : 'text-red-600'
+                          className={`px-4 py-3 text-sm text-right font-medium ${
+                            cp.deviation >= 0 ? 'text-green-600' : 'text-red-600'
                           }`}
                         >
-                          {item.deviation >= 0 ? '+' : ''}
-                          {item.deviation.toFixed(1)}%
+                          {cp.deviation >= 0 ? '+' : ''}
+                          {cp.deviation.toFixed(1)}%
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
+            ) : (
+              <p className="text-center py-8 text-gray-500">No data available</p>
             )}
-          </section>
+          </div>
         </div>
 
-        {/* Footer */}
-        <div className="sticky bottom-0 bg-gray-50 border-t px-6 py-4">
+        <div className="sticky bottom-0 bg-gray-50 px-6 py-4 border-t border-gray-200">
           <button
             onClick={onClose}
-            className="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded transition-colors"
+            className="w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
           >
             Close
           </button>

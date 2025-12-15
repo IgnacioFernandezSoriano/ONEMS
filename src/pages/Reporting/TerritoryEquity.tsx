@@ -560,28 +560,18 @@ export default function TerritoryEquity() {
       </div>
 
       {/* City Detail Modal */}
-      {selectedCity && profile?.account_id && (
+      {selectedCity && (
         <CityDetailModal
           city={selectedCity}
           onClose={() => setSelectedCity(null)}
-          accountId={profile.account_id}
-          filters={{
-            carrier: filters.carrier,
-            product: filters.product,
-          }}
         />
       )}
 
       {/* Region Detail Modal */}
-      {selectedRegion && profile?.account_id && (
+      {selectedRegion && (
         <RegionDetailModal
           region={selectedRegion}
           onClose={() => setSelectedRegion(null)}
-          accountId={profile.account_id}
-          filters={{
-            carrier: filters.carrier,
-            product: filters.product,
-          }}
         />
       )}
     </div>
