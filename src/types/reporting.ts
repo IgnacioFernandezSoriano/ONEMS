@@ -173,11 +173,18 @@ export interface TerritoryEquityMetrics {
     cityName: string;
     actualPercentage: number;
     deviation: number;
+    standardPercentage: number;
+    inboundPercentage: number;
+    outboundPercentage: number;
   }>;
   topWorstCities: Array<{
     cityName: string;
     actualPercentage: number;
     deviation: number;
+    standardPercentage: number;
+    inboundPercentage: number;
+    outboundPercentage: number;
+    status: 'compliant' | 'warning' | 'critical';
   }>;
   
   // Totals

@@ -59,9 +59,10 @@ export function TerritoryEquityMap({ data }: TerritoryEquityMapProps) {
 
   // Calculate circle radius based on population
   const getRadius = (population: number | null) => {
-    if (!population) return 5;
-    // Scale: 100k pop = 5px, 1M pop = 15px, 5M pop = 30px
-    return Math.max(5, Math.min(30, Math.log10(population) * 5));
+    if (!population) return 8;
+    // Square root scale for better visual differentiation
+    // 100k = 10px, 500k = 22px, 1M = 32px, 2M = 45px, 5M = 71px (capped at 50)
+    return Math.max(8, Math.min(50, Math.sqrt(population / 10000)));
   };
 
   // Get color based on equity status

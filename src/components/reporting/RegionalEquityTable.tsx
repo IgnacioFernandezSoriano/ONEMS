@@ -4,9 +4,10 @@ import type { RegionEquityData } from '@/types/reporting';
 
 interface RegionalEquityTableProps {
   data: RegionEquityData[];
+  onRegionClick?: (region: RegionEquityData) => void;
 }
 
-export function RegionalEquityTable({ data }: RegionalEquityTableProps) {
+export function RegionalEquityTable({ data, onRegionClick }: RegionalEquityTableProps) {
   const [sortField, setSortField] = useState<keyof RegionEquityData>('deviation');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
@@ -135,7 +136,16 @@ export function RegionalEquityTable({ data }: RegionalEquityTableProps) {
           {sortedData.map((region) => (
             <tr key={region.regionId} className="hover:bg-gray-50">
               <td className="px-4 py-3 whitespace-nowrap font-medium text-gray-900">
-                {region.regionName}
+                {onRegionClick ? (
+                  <button
+                    onClick={() => onRegionClick(region)}
+                    className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                  >
+                    {region.regionName}
+                  </button>
+                ) : (
+                  region.regionName
+                )}
               </td>
               <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
                 {region.totalCities}

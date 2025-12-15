@@ -294,6 +294,9 @@ export function useTerritoryEquityData(
           cityName: c.cityName,
           actualPercentage: c.actualPercentage,
           deviation: c.deviation,
+          standardPercentage: c.standardPercentage,
+          inboundPercentage: c.inboundPercentage,
+          outboundPercentage: c.outboundPercentage,
         }));
         const topWorstCities = sortedByDeviation
           .slice(-3)
@@ -302,6 +305,10 @@ export function useTerritoryEquityData(
             cityName: c.cityName,
             actualPercentage: c.actualPercentage,
             deviation: c.deviation,
+            standardPercentage: c.standardPercentage,
+            inboundPercentage: c.inboundPercentage,
+            outboundPercentage: c.outboundPercentage,
+            status: c.status,
           }));
 
         // 8. Aggregate by region

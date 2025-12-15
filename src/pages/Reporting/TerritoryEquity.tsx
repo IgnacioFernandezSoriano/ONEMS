@@ -6,17 +6,19 @@ import { RegionalEquityTable } from '@/components/reporting/RegionalEquityTable'
 import { InboundOutboundChart } from '@/components/reporting/InboundOutboundChart';
 import { RegionalEquityChart } from '@/components/reporting/RegionalEquityChart';
 import { CityDetailModal } from '@/components/reporting/CityDetailModal';
+import { RegionDetailModal } from '@/components/reporting/RegionDetailModal';
 import { TerritoryEquityFilters } from '@/components/reporting/TerritoryEquityFilters';
 import { TerritoryEquityTreemap } from '@/components/reporting/TerritoryEquityTreemap';
 import { TerritoryEquityMap } from '@/components/reporting/TerritoryEquityMap';
 import { useEquityAuditExport } from '@/hooks/reporting/useEquityAuditExport';
 import { Info, Download, TrendingUp, Users, AlertTriangle, Award, FileText, Map } from 'lucide-react';
-import type { CityEquityData, TerritoryEquityFilters as Filters } from '@/types/reporting';
+import type { CityEquityData, RegionEquityData, TerritoryEquityFilters as Filters } from '@/types/reporting';
 
 export default function TerritoryEquity() {
   const { profile } = useAuth();
   const [activeTab, setActiveTab] = useState<'city' | 'regional' | 'map'>('city');
   const [selectedCity, setSelectedCity] = useState<CityEquityData | null>(null);
+  const [selectedRegion, setSelectedRegion] = useState<RegionEquityData | null>(null);
   const [filters, setFilters] = useState<Filters>({
     startDate: '',
     endDate: '',
@@ -88,6 +90,49 @@ export default function TerritoryEquity() {
     const a = document.createElement('a');
     a.href = url;
     a.download = `territory-equity-report-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExportRegionalCSV = () => {
+    if (regionData.length === 0) return;
+
+    const headers = [
+      'Region',
+      'Cities',
+      'Population',
+      'Total Shipments',
+      'Compliant',
+      'Standard %',
+      'Actual %',
+      'Deviation',
+      'Status',
+      'Inbound %',
+      'Outbound %',
+      'Underserved Cities',
+    ];
+
+    const rows = regionData.map((region) => [
+      region.regionName,
+      region.totalCities,
+      region.totalPopulation || '',
+      region.totalShipments,
+      region.compliantShipments,
+      region.standardPercentage.toFixed(1),
+      region.actualPercentage.toFixed(1),
+      region.deviation.toFixed(1),
+      region.status,
+      region.inboundPercentage.toFixed(1),
+      region.outboundPercentage.toFixed(1),
+      region.underservedCitiesCount,
+    ]);
+
+    const csv = [headers, ...rows].map((row) => row.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `regional-equity-report-${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -202,39 +247,7 @@ export default function TerritoryEquity() {
           </div>
         </div>
 
-        {/* KPI 4: Top 3 Best Served Cities */}
-        <div className="bg-white rounded-lg shadow p-6 col-span-1 md:col-span-2 lg:col-span-1">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-medium text-gray-600 flex items-center gap-2">
-              <Award className="w-4 h-4 text-green-600" />
-              Top 3 Best Served Cities
-            </h3>
-            <Tooltip content="Three cities with highest positive deviation from standard." />
-          </div>
-          <div className="space-y-2">
-            <div className="grid grid-cols-3 gap-2 text-xs font-medium text-gray-500 border-b pb-1">
-              <div className="text-right">Compliance</div>
-              <div className="text-right">Deviation</div>
-              <div>City</div>
-            </div>
-            {metrics?.topBestCities.slice(0, 3).map((city, idx) => (
-              <div key={idx} className="grid grid-cols-3 gap-2 text-sm">
-                <div className="text-right font-semibold text-green-600">
-                  {city.actualPercentage.toFixed(1)}%
-                </div>
-                <div className="text-right text-green-600">
-                  +{city.deviation.toFixed(1)}%
-                </div>
-                <div className="font-medium truncate">{city.cityName}</div>
-              </div>
-            ))}
-            {(!metrics?.topBestCities || metrics.topBestCities.length === 0) && (
-              <div className="text-sm text-gray-500 text-center py-2">No data</div>
-            )}
-          </div>
-        </div>
-
-        {/* KPI 5: Citizens Affected */}
+        {/* KPI 5: Citizens Affected (moved here to be next to Underserved Cities) */}
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-gray-600">Citizens Affected</h3>
@@ -249,6 +262,46 @@ export default function TerritoryEquity() {
           </div>
         </div>
 
+        {/* KPI 4: Top 3 Best Served Cities */}
+        <div className="bg-white rounded-lg shadow p-6 col-span-1 md:col-span-2 lg:col-span-1">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-medium text-gray-600 flex items-center gap-2">
+              <Award className="w-4 h-4 text-green-600" />
+              Top 3 Best Served Cities
+            </h3>
+            <Tooltip content="Three cities with highest positive deviation from standard." />
+          </div>
+          <div className="space-y-2">
+            <div className="grid grid-cols-5 gap-1 text-xs font-medium text-gray-500 border-b pb-1">
+              <div className="text-right">Compl.</div>
+              <div className="text-right">Std.</div>
+              <div className="text-right">Inb.</div>
+              <div className="text-right">Outb.</div>
+              <div>City</div>
+            </div>
+            {metrics?.topBestCities.slice(0, 3).map((city, idx) => (
+              <div key={idx} className="grid grid-cols-5 gap-1 text-xs">
+                <div className="text-right font-semibold text-green-600">
+                  {city.actualPercentage.toFixed(1)}%
+                </div>
+                <div className="text-right text-gray-600">
+                  {city.standardPercentage.toFixed(1)}%
+                </div>
+                <div className="text-right text-gray-600">
+                  {city.inboundPercentage.toFixed(1)}%
+                </div>
+                <div className="text-right text-gray-600">
+                  {city.outboundPercentage.toFixed(1)}%
+                </div>
+                <div className="font-medium truncate">{city.cityName}</div>
+              </div>
+            ))}
+            {(!metrics?.topBestCities || metrics.topBestCities.length === 0) && (
+              <div className="text-sm text-gray-500 text-center py-2">No data</div>
+            )}
+          </div>
+        </div>
+
         {/* KPI 6: Top 3 Worst Served Cities */}
         <div className="bg-white rounded-lg shadow p-6 col-span-1 md:col-span-2 lg:col-span-1">
           <div className="flex items-center justify-between mb-3">
@@ -256,27 +309,35 @@ export default function TerritoryEquity() {
               <AlertTriangle className="w-4 h-4 text-red-600" />
               Top 3 Worst Served Cities
             </h3>
-            <Tooltip content="Three cities with lowest (most negative) deviation from standard." />
+            <Tooltip content="Three cities with lowest (most negative) deviation from standard. Only shows cities with critical or warning status." />
           </div>
           <div className="space-y-2">
-            <div className="grid grid-cols-3 gap-2 text-xs font-medium text-gray-500 border-b pb-1">
-              <div className="text-right">Compliance</div>
-              <div className="text-right">Deviation</div>
+            <div className="grid grid-cols-5 gap-1 text-xs font-medium text-gray-500 border-b pb-1">
+              <div className="text-right">Compl.</div>
+              <div className="text-right">Std.</div>
+              <div className="text-right">Inb.</div>
+              <div className="text-right">Outb.</div>
               <div>City</div>
             </div>
-            {metrics?.topWorstCities.slice(0, 3).map((city, idx) => (
-              <div key={idx} className="grid grid-cols-3 gap-2 text-sm">
+            {metrics?.topWorstCities.filter(c => c.status === 'critical' || c.status === 'warning').slice(0, 3).map((city, idx) => (
+              <div key={idx} className="grid grid-cols-5 gap-1 text-xs">
                 <div className="text-right font-semibold text-red-600">
                   {city.actualPercentage.toFixed(1)}%
                 </div>
-                <div className="text-right text-red-600">
-                  {city.deviation.toFixed(1)}%
+                <div className="text-right text-gray-600">
+                  {city.standardPercentage.toFixed(1)}%
+                </div>
+                <div className="text-right text-gray-600">
+                  {city.inboundPercentage.toFixed(1)}%
+                </div>
+                <div className="text-right text-gray-600">
+                  {city.outboundPercentage.toFixed(1)}%
                 </div>
                 <div className="font-medium truncate">{city.cityName}</div>
               </div>
             ))}
-            {(!metrics?.topWorstCities || metrics.topWorstCities.length === 0) && (
-              <div className="text-sm text-gray-500 text-center py-2">No data</div>
+            {(!metrics?.topWorstCities || metrics.topWorstCities.filter(c => c.status === 'critical' || c.status === 'warning').length === 0) && (
+              <div className="text-sm text-gray-500 text-center py-2">No underserved cities</div>
             )}
           </div>
         </div>
@@ -325,9 +386,12 @@ export default function TerritoryEquity() {
             <div className="space-y-6">
               {/* Inbound vs Outbound Chart */}
               <div>
-                <h3 className="text-lg font-semibold mb-4">
-                  Inbound vs Outbound Comparison (Top 10 by Direction Gap)
-                </h3>
+                <div className="flex items-center gap-2 mb-4">
+                  <h3 className="text-lg font-semibold">
+                    Inbound vs Outbound Comparison (Top 10 by Direction Gap)
+                  </h3>
+                  <Tooltip content="Shows the 10 cities with the largest difference between inbound (arrivals) and outbound (departures) compliance rates. Large gaps indicate directional service imbalances that may require route-specific interventions." />
+                </div>
                 <InboundOutboundChart data={cityData} />
               </div>
 
@@ -339,7 +403,10 @@ export default function TerritoryEquity() {
               {/* City Table */}
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold">City Equity Details</h3>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-lg font-semibold">City Equity Details</h3>
+                    <Tooltip content="Complete breakdown of service equity metrics for each city. Click on any city name to view detailed carrier and product performance. Sort by any column to identify patterns." />
+                  </div>
                   <button
                     onClick={handleExportCSV}
                     className="flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
@@ -357,14 +424,29 @@ export default function TerritoryEquity() {
             <div className="space-y-6">
               {/* Regional Chart */}
               <div>
-                <h3 className="text-lg font-semibold mb-4">Regional Equity Comparison</h3>
+                <div className="flex items-center gap-2 mb-4">
+                  <h3 className="text-lg font-semibold">Regional Equity Comparison</h3>
+                  <Tooltip content="Visual comparison of actual compliance rates across regions. Bar color indicates status (green=compliant, amber=warning, red=critical). Red dashed line shows the average standard threshold." />
+                </div>
                 <RegionalEquityChart data={regionData} />
               </div>
 
               {/* Regional Table */}
               <div>
-                <h3 className="text-lg font-semibold mb-4">Regional Equity Details</h3>
-                <RegionalEquityTable data={regionData} />
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-lg font-semibold">Regional Equity Details</h3>
+                    <Tooltip content="Aggregated service equity metrics by region. Click on any region name to view detailed carrier and product breakdown. Helps identify geographic patterns in service quality." />
+                  </div>
+                  <button
+                    onClick={handleExportRegionalCSV}
+                    className="flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                  >
+                    <Download className="w-4 h-4" />
+                    Export CSV
+                  </button>
+                </div>
+                <RegionalEquityTable data={regionData} onRegionClick={setSelectedRegion} />
               </div>
             </div>
           )}
@@ -387,8 +469,29 @@ export default function TerritoryEquity() {
       </div>
 
       {/* City Detail Modal */}
-      {selectedCity && (
-        <CityDetailModal city={selectedCity} onClose={() => setSelectedCity(null)} />
+      {selectedCity && profile?.account_id && (
+        <CityDetailModal
+          city={selectedCity}
+          onClose={() => setSelectedCity(null)}
+          accountId={profile.account_id}
+          filters={{
+            carrier: filters.carrier,
+            product: filters.product,
+          }}
+        />
+      )}
+
+      {/* Region Detail Modal */}
+      {selectedRegion && profile?.account_id && (
+        <RegionDetailModal
+          region={selectedRegion}
+          onClose={() => setSelectedRegion(null)}
+          accountId={profile.account_id}
+          filters={{
+            carrier: filters.carrier,
+            product: filters.product,
+          }}
+        />
       )}
     </div>
   );

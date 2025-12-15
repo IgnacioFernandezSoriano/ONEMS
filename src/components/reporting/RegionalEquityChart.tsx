@@ -1,4 +1,4 @@
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceLine, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine, ResponsiveContainer, Cell } from 'recharts';
 import type { RegionEquityData } from '@/types/reporting';
 
 interface RegionalEquityChartProps {
@@ -44,7 +44,6 @@ export function RegionalEquityChart({ data }: RegionalEquityChartProps) {
           <XAxis type="number" domain={[0, 100]} label={{ value: 'Compliance %', position: 'bottom' }} />
           <YAxis type="category" dataKey="region" />
           <Tooltip formatter={(value: number) => `${value.toFixed(1)}%`} />
-          <Legend />
           <ReferenceLine
             x={avgStandard}
             stroke="#ef4444"

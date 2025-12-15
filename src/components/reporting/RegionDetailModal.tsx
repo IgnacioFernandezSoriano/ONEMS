@@ -1,10 +1,10 @@
 import { X } from 'lucide-react';
-import type { CityEquityData } from '@/types/reporting';
+import type { RegionEquityData } from '@/types/reporting';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 
-interface CityDetailModalProps {
-  city: CityEquityData;
+interface RegionDetailModalProps {
+  region: RegionEquityData;
   onClose: () => void;
   accountId: string;
   filters?: {
@@ -23,19 +23,19 @@ interface CarrierProductData {
   deviation: number;
 }
 
-export function CityDetailModal({ city, onClose, accountId, filters }: CityDetailModalProps) {
+export function RegionDetailModal({ region, onClose, accountId, filters }: RegionDetailModalProps) {
   const [carrierProductData, setCarrierProductData] = useState<CarrierProductData[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadCarrierProductData();
-  }, [city.cityId, accountId, filters]);
+  }, [region.regionId, accountId, filters]);
 
   const loadCarrierProductData = async () => {
     try {
       setLoading(true);
 
-      // Build query for shipments involving this city
+      // Build query for shipments in this region
       let query = supabase
         .from('shipments')
         .select(`
@@ -46,7 +46,7 @@ export function CityDetailModal({ city, onClose, accountId, filters }: CityDetai
           destination_city_name
         `)
         .eq('account_id', accountId)
-        .or(`origin_city_name.eq.${city.cityName},destination_city_name.eq.${city.cityName}`);
+        .or(`origin_city_name.in.(${await getCitiesInRegion()}),destination_city_name.in.(${await getCitiesInRegion()})`);
 
       // Apply filters
       if (filters?.carrier) {
@@ -60,6 +60,12 @@ export function CityDetailModal({ city, onClose, accountId, filters }: CityDetai
 
       if (error) throw error;
 
+      // Get delivery standards
+      const { data: standards } = await supabase
+        .from('delivery_standards')
+        .select('carrier_id, product_id, origin_city_id, destination_city_id, success_percentage')
+        .eq('account_id', accountId);
+
       // Group by carrier and product
       const grouped = (shipments || []).reduce((acc: any, shipment: any) => {
         const key = `${shipment.carrier_name}|${shipment.product_name}`;
@@ -69,6 +75,8 @@ export function CityDetailModal({ city, onClose, accountId, filters }: CityDetai
             product: shipment.product_name,
             total: 0,
             compliant: 0,
+            standardsSum: 0,
+            standardsCount: 0,
           };
         }
         acc[key].total++;
@@ -79,7 +87,7 @@ export function CityDetailModal({ city, onClose, accountId, filters }: CityDetai
       // Calculate percentages
       const result: CarrierProductData[] = Object.values(grouped).map((item: any) => {
         const actualPercentage = item.total > 0 ? (item.compliant / item.total) * 100 : 0;
-        const standardPercentage = 95; // Default
+        const standardPercentage = 95; // Default, could be calculated from standards
         const deviation = actualPercentage - standardPercentage;
 
         return {
@@ -104,6 +112,16 @@ export function CityDetailModal({ city, onClose, accountId, filters }: CityDetai
     }
   };
 
+  const getCitiesInRegion = async () => {
+    const { data: cities } = await supabase
+      .from('cities')
+      .select('name')
+      .eq('region_id', region.regionId)
+      .eq('account_id', accountId);
+
+    return (cities || []).map(c => `"${c.name}"`).join(',');
+  };
+
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'compliant':
@@ -117,18 +135,12 @@ export function CityDetailModal({ city, onClose, accountId, filters }: CityDetai
     }
   };
 
-  const getDirectionGapStatus = (gap: number) => {
-    if (gap < 5) return 'balanced';
-    if (gap < 15) return 'moderate';
-    return 'significant';
-  };
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[85vh] overflow-y-auto">
         {/* Header */}
         <div className="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-gray-900">City Details: {city.cityName}</h2>
+          <h2 className="text-2xl font-bold text-gray-900">Region Details: {region.regionName}</h2>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700 transition-colors"
@@ -142,61 +154,48 @@ export function CityDetailModal({ city, onClose, accountId, filters }: CityDetai
           {/* Basic Information */}
           <section>
             <h3 className="text-lg font-semibold text-gray-900 mb-3 border-b pb-2">
-              Basic Information
+              Regional Summary
             </h3>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <div>
-                <span className="text-sm text-gray-600">Region:</span>
-                <p className="font-medium">{city.regionName || 'N/A'}</p>
+                <span className="text-sm text-gray-600">Total Cities:</span>
+                <p className="font-medium">{region.totalCities}</p>
               </div>
               <div>
-                <span className="text-sm text-gray-600">Classification:</span>
-                <p className="font-medium capitalize">{city.classification || 'N/A'}</p>
-              </div>
-              <div>
-                <span className="text-sm text-gray-600">Population:</span>
+                <span className="text-sm text-gray-600">Total Population:</span>
                 <p className="font-medium">
-                  {city.population ? city.population.toLocaleString() : 'N/A'}
+                  {region.totalPopulation ? region.totalPopulation.toLocaleString() : 'N/A'}
                 </p>
               </div>
-            </div>
-          </section>
-
-          {/* Performance Metrics */}
-          <section>
-            <h3 className="text-lg font-semibold text-gray-900 mb-3 border-b pb-2">
-              Performance Metrics
-            </h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <div>
                 <span className="text-sm text-gray-600">Total Shipments:</span>
-                <p className="font-medium">{city.totalShipments}</p>
+                <p className="font-medium">{region.totalShipments}</p>
               </div>
               <div>
-                <span className="text-sm text-gray-600">Compliant:</span>
+                <span className="text-sm text-gray-600">Compliant Shipments:</span>
                 <p className="font-medium">
-                  {city.compliantShipments} ({(city.actualPercentage || 0).toFixed(1)}%)
+                  {region.compliantShipments} ({(region.actualPercentage || 0).toFixed(1)}%)
                 </p>
               </div>
               <div>
                 <span className="text-sm text-gray-600">Standard:</span>
-                <p className="font-medium">{(city.standardPercentage || 0).toFixed(1)}%</p>
+                <p className="font-medium">{(region.standardPercentage || 0).toFixed(1)}%</p>
               </div>
               <div>
                 <span className="text-sm text-gray-600">Deviation:</span>
                 <p
                   className={`font-medium ${
-                    city.deviation >= 0 ? 'text-green-600' : 'text-red-600'
+                    region.deviation >= 0 ? 'text-green-600' : 'text-red-600'
                   }`}
                 >
-                  {(city.deviation || 0) >= 0 ? '+' : ''}
-                  {(city.deviation || 0).toFixed(1)}%
+                  {(region.deviation || 0) >= 0 ? '+' : ''}
+                  {(region.deviation || 0).toFixed(1)}%
                 </p>
               </div>
               <div>
                 <span className="text-sm text-gray-600">Status:</span>
                 <p className="font-medium">
-                  {getStatusIcon(city.status)} {city.status}
+                  {getStatusIcon(region.status)} {region.status}
                 </p>
               </div>
             </div>
@@ -207,45 +206,18 @@ export function CityDetailModal({ city, onClose, accountId, filters }: CityDetai
             <h3 className="text-lg font-semibold text-gray-900 mb-3 border-b pb-2">
               Directional Analysis
             </h3>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center p-3 bg-blue-50 rounded">
-                <div>
-                  <span className="text-sm text-gray-600">Inbound (Arrivals):</span>
-                  <p className="font-medium">
-                    {city.inboundShipments} shipments, {city.inboundCompliant} compliant
-                  </p>
-                </div>
-                <div className="text-2xl font-bold text-blue-600">
-                  {(city.inboundPercentage || 0).toFixed(1)}%
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="p-3 bg-blue-50 rounded">
+                <span className="text-sm text-gray-600">Inbound (Arrivals):</span>
+                <p className="text-2xl font-bold text-blue-600">
+                  {(region.inboundPercentage || 0).toFixed(1)}%
+                </p>
               </div>
-              <div className="flex justify-between items-center p-3 bg-green-50 rounded">
-                <div>
-                  <span className="text-sm text-gray-600">Outbound (Departures):</span>
-                  <p className="font-medium">
-                    {city.outboundShipments} shipments, {city.outboundCompliant} compliant
-                  </p>
-                </div>
-                <div className="text-2xl font-bold text-green-600">
-                  {(city.outboundPercentage || 0).toFixed(1)}%
-                </div>
-              </div>
-              <div className="flex justify-between items-center p-3 bg-gray-50 rounded">
-                <div>
-                  <span className="text-sm text-gray-600">Direction Gap:</span>
-                  <p className="text-xs text-gray-500">
-                    {getDirectionGapStatus(city.directionGap) === 'balanced' && '✅ Balanced service'}
-                    {getDirectionGapStatus(city.directionGap) === 'moderate' && '⚠️ Moderate disparity'}
-                    {getDirectionGapStatus(city.directionGap) === 'significant' && '🔴 Significant disparity'}
-                  </p>
-                </div>
-                <div
-                  className={`text-2xl font-bold ${
-                    city.directionGap > 15 ? 'text-amber-600' : 'text-gray-700'
-                  }`}
-                >
-                  {(city.directionGap || 0).toFixed(1)}%
-                </div>
+              <div className="p-3 bg-green-50 rounded">
+                <span className="text-sm text-gray-600">Outbound (Departures):</span>
+                <p className="text-2xl font-bold text-green-600">
+                  {(region.outboundPercentage || 0).toFixed(1)}%
+                </p>
               </div>
             </div>
           </section>
