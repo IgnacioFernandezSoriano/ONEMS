@@ -184,6 +184,8 @@ export interface RegionEquityData {
   underservedCitiesCount: number;
   
   // Inbound metrics
+  inboundShipments: number;
+  inboundCompliant: number;
   inboundPercentage: number;
   inboundStandardPercentage: number;
   inboundStandardDays: number;
@@ -191,6 +193,8 @@ export interface RegionEquityData {
   inboundDeviation: number;
   
   // Outbound metrics
+  outboundShipments: number;
+  outboundCompliant: number;
   outboundPercentage: number;
   outboundStandardPercentage: number;
   outboundStandardDays: number;

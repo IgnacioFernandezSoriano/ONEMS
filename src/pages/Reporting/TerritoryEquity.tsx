@@ -63,47 +63,159 @@ export default function TerritoryEquity() {
       'Compliant',
       'Standard %',
       'Actual %',
+      'Deviation',
       'J+K Std',
       'J+K Actual',
-      'Deviation',
       'Status',
+      'Carrier',
+      'Product',
+      'CP Shipments',
+      'CP Compliant',
+      'CP Standard %',
+      'CP Actual %',
+      'CP Deviation',
+      'CP J+K Std',
+      'CP J+K Actual',
     ];
 
     const rows: string[][] = [];
     cityData.forEach((city) => {
-      // Inbound row
-      rows.push([
-        city.cityName,
-        'Inbound',
-        city.regionName || '',
-        city.classification || '',
-        city.population?.toString() || '',
-        city.inboundShipments.toString(),
-        city.inboundCompliant.toString(),
-        city.inboundStandardPercentage.toFixed(1),
-        city.inboundPercentage.toFixed(1),
-        city.inboundStandardDays.toFixed(1),
-        city.inboundActualDays.toFixed(1),
-        city.inboundDeviation.toFixed(1),
-        city.inboundDeviation >= 0 ? 'compliant' : (city.inboundPercentage < 80 ? 'critical' : 'warning'),
-      ]);
+      const hasBreakdown = city.carrierProductBreakdown && city.carrierProductBreakdown.length > 0;
       
-      // Outbound row
-      rows.push([
-        city.cityName,
-        'Outbound',
-        city.regionName || '',
-        city.classification || '',
-        city.population?.toString() || '',
-        city.outboundShipments.toString(),
-        city.outboundCompliant.toString(),
-        city.outboundStandardPercentage.toFixed(1),
-        city.outboundPercentage.toFixed(1),
-        city.outboundStandardDays.toFixed(1),
-        city.outboundActualDays.toFixed(1),
-        city.outboundDeviation.toFixed(1),
-        city.outboundDeviation >= 0 ? 'compliant' : (city.outboundPercentage < 80 ? 'critical' : 'warning'),
-      ]);
+      if (hasBreakdown) {
+        // Inbound rows with carrier/product breakdown
+        const inboundBreakdown = city.carrierProductBreakdown?.filter(cp => cp.inboundPercentage > 0) || [];
+        if (inboundBreakdown.length > 0) {
+          inboundBreakdown.forEach(cp => {
+            rows.push([
+              city.cityName,
+              'Inbound',
+              city.regionName || '',
+              city.classification || '',
+              city.population?.toString() || '',
+              city.inboundShipments.toString(),
+              city.inboundCompliant.toString(),
+              city.inboundStandardPercentage.toFixed(1),
+              city.inboundPercentage.toFixed(1),
+              city.inboundDeviation.toFixed(1),
+              city.inboundStandardDays.toFixed(1),
+              city.inboundActualDays.toFixed(1),
+              city.inboundDeviation >= 0 ? 'compliant' : (city.inboundPercentage < 80 ? 'critical' : 'warning'),
+              cp.carrier,
+              cp.product,
+              cp.totalShipments.toString(),
+              cp.compliantShipments.toString(),
+              cp.standardPercentage.toFixed(1),
+              cp.actualPercentage.toFixed(1),
+              cp.deviation.toFixed(1),
+              cp.standardDays.toFixed(1),
+              cp.actualDays.toFixed(1),
+            ]);
+          });
+        } else {
+          // Inbound row without breakdown
+          rows.push([
+            city.cityName,
+            'Inbound',
+            city.regionName || '',
+            city.classification || '',
+            city.population?.toString() || '',
+            city.inboundShipments.toString(),
+            city.inboundCompliant.toString(),
+            city.inboundStandardPercentage.toFixed(1),
+            city.inboundPercentage.toFixed(1),
+            city.inboundDeviation.toFixed(1),
+            city.inboundStandardDays.toFixed(1),
+            city.inboundActualDays.toFixed(1),
+            city.inboundDeviation >= 0 ? 'compliant' : (city.inboundPercentage < 80 ? 'critical' : 'warning'),
+            '', '', '', '', '', '', '', '', '',
+          ]);
+        }
+        
+        // Outbound rows with carrier/product breakdown
+        const outboundBreakdown = city.carrierProductBreakdown?.filter(cp => cp.outboundPercentage > 0) || [];
+        if (outboundBreakdown.length > 0) {
+          outboundBreakdown.forEach(cp => {
+            rows.push([
+              city.cityName,
+              'Outbound',
+              city.regionName || '',
+              city.classification || '',
+              city.population?.toString() || '',
+              city.outboundShipments.toString(),
+              city.outboundCompliant.toString(),
+              city.outboundStandardPercentage.toFixed(1),
+              city.outboundPercentage.toFixed(1),
+              city.outboundDeviation.toFixed(1),
+              city.outboundStandardDays.toFixed(1),
+              city.outboundActualDays.toFixed(1),
+              city.outboundDeviation >= 0 ? 'compliant' : (city.outboundPercentage < 80 ? 'critical' : 'warning'),
+              cp.carrier,
+              cp.product,
+              cp.totalShipments.toString(),
+              cp.compliantShipments.toString(),
+              cp.standardPercentage.toFixed(1),
+              cp.actualPercentage.toFixed(1),
+              cp.deviation.toFixed(1),
+              cp.standardDays.toFixed(1),
+              cp.actualDays.toFixed(1),
+            ]);
+          });
+        } else {
+          // Outbound row without breakdown
+          rows.push([
+            city.cityName,
+            'Outbound',
+            city.regionName || '',
+            city.classification || '',
+            city.population?.toString() || '',
+            city.outboundShipments.toString(),
+            city.outboundCompliant.toString(),
+            city.outboundStandardPercentage.toFixed(1),
+            city.outboundPercentage.toFixed(1),
+            city.outboundDeviation.toFixed(1),
+            city.outboundStandardDays.toFixed(1),
+            city.outboundActualDays.toFixed(1),
+            city.outboundDeviation >= 0 ? 'compliant' : (city.outboundPercentage < 80 ? 'critical' : 'warning'),
+            '', '', '', '', '', '', '', '', '',
+          ]);
+        }
+      } else {
+        // No breakdown - just inbound and outbound rows
+        rows.push([
+          city.cityName,
+          'Inbound',
+          city.regionName || '',
+          city.classification || '',
+          city.population?.toString() || '',
+          city.inboundShipments.toString(),
+          city.inboundCompliant.toString(),
+          city.inboundStandardPercentage.toFixed(1),
+          city.inboundPercentage.toFixed(1),
+          city.inboundDeviation.toFixed(1),
+          city.inboundStandardDays.toFixed(1),
+          city.inboundActualDays.toFixed(1),
+          city.inboundDeviation >= 0 ? 'compliant' : (city.inboundPercentage < 80 ? 'critical' : 'warning'),
+          '', '', '', '', '', '', '', '', '',
+        ]);
+        
+        rows.push([
+          city.cityName,
+          'Outbound',
+          city.regionName || '',
+          city.classification || '',
+          city.population?.toString() || '',
+          city.outboundShipments.toString(),
+          city.outboundCompliant.toString(),
+          city.outboundStandardPercentage.toFixed(1),
+          city.outboundPercentage.toFixed(1),
+          city.outboundDeviation.toFixed(1),
+          city.outboundStandardDays.toFixed(1),
+          city.outboundActualDays.toFixed(1),
+          city.outboundDeviation >= 0 ? 'compliant' : (city.outboundPercentage < 80 ? 'critical' : 'warning'),
+          '', '', '', '', '', '', '', '', '',
+        ]);
+      }
     });
 
     const csv = [headers, ...rows].map((row) => row.join(',')).join('\n');
@@ -126,44 +238,146 @@ export default function TerritoryEquity() {
       'Population',
       'Standard %',
       'Actual %',
+      'Deviation',
       'J+K Std',
       'J+K Actual',
-      'Deviation',
       'Status',
       'Underserved Cities',
+      'Carrier',
+      'Product',
+      'CP Shipments',
+      'CP Compliant',
+      'CP Standard %',
+      'CP Actual %',
+      'CP Deviation',
+      'CP J+K Std',
+      'CP J+K Actual',
     ];
 
     const rows: string[][] = [];
     regionData.forEach((region) => {
-      // Inbound row
-      rows.push([
-        region.regionName,
-        'Inbound',
-        region.totalCities.toString(),
-        region.totalPopulation?.toString() || '',
-        region.inboundStandardPercentage.toFixed(1),
-        region.inboundPercentage.toFixed(1),
-        region.inboundStandardDays.toFixed(1),
-        region.inboundActualDays.toFixed(1),
-        region.inboundDeviation.toFixed(1),
-        region.inboundDeviation >= 0 ? 'compliant' : (region.inboundPercentage < 80 ? 'critical' : 'warning'),
-        region.underservedCitiesCount.toString(),
-      ]);
+      const hasBreakdown = region.carrierProductBreakdown && region.carrierProductBreakdown.length > 0;
       
-      // Outbound row
-      rows.push([
-        region.regionName,
-        'Outbound',
-        region.totalCities.toString(),
-        region.totalPopulation?.toString() || '',
-        region.outboundStandardPercentage.toFixed(1),
-        region.outboundPercentage.toFixed(1),
-        region.outboundStandardDays.toFixed(1),
-        region.outboundActualDays.toFixed(1),
-        region.outboundDeviation.toFixed(1),
-        region.outboundDeviation >= 0 ? 'compliant' : (region.outboundPercentage < 80 ? 'critical' : 'warning'),
-        region.underservedCitiesCount.toString(),
-      ]);
+      if (hasBreakdown) {
+        // Inbound rows with carrier/product breakdown
+        const inboundBreakdown = region.carrierProductBreakdown?.filter(cp => cp.inboundPercentage > 0) || [];
+        if (inboundBreakdown.length > 0) {
+          inboundBreakdown.forEach(cp => {
+            rows.push([
+              region.regionName,
+              'Inbound',
+              region.totalCities.toString(),
+              region.totalPopulation?.toString() || '',
+              region.inboundStandardPercentage.toFixed(1),
+              region.inboundPercentage.toFixed(1),
+              region.inboundDeviation.toFixed(1),
+              region.inboundStandardDays.toFixed(1),
+              region.inboundActualDays.toFixed(1),
+              region.inboundDeviation >= 0 ? 'compliant' : (region.inboundPercentage < 80 ? 'critical' : 'warning'),
+              region.underservedCitiesCount.toString(),
+              cp.carrier,
+              cp.product,
+              cp.totalShipments.toString(),
+              cp.compliantShipments.toString(),
+              cp.standardPercentage.toFixed(1),
+              cp.actualPercentage.toFixed(1),
+              cp.deviation.toFixed(1),
+              cp.standardDays.toFixed(1),
+              cp.actualDays.toFixed(1),
+            ]);
+          });
+        } else {
+          rows.push([
+            region.regionName,
+            'Inbound',
+            region.totalCities.toString(),
+            region.totalPopulation?.toString() || '',
+            region.inboundStandardPercentage.toFixed(1),
+            region.inboundPercentage.toFixed(1),
+            region.inboundDeviation.toFixed(1),
+            region.inboundStandardDays.toFixed(1),
+            region.inboundActualDays.toFixed(1),
+            region.inboundDeviation >= 0 ? 'compliant' : (region.inboundPercentage < 80 ? 'critical' : 'warning'),
+            region.underservedCitiesCount.toString(),
+            '', '', '', '', '', '', '', '', '',
+          ]);
+        }
+        
+        // Outbound rows with carrier/product breakdown
+        const outboundBreakdown = region.carrierProductBreakdown?.filter(cp => cp.outboundPercentage > 0) || [];
+        if (outboundBreakdown.length > 0) {
+          outboundBreakdown.forEach(cp => {
+            rows.push([
+              region.regionName,
+              'Outbound',
+              region.totalCities.toString(),
+              region.totalPopulation?.toString() || '',
+              region.outboundStandardPercentage.toFixed(1),
+              region.outboundPercentage.toFixed(1),
+              region.outboundDeviation.toFixed(1),
+              region.outboundStandardDays.toFixed(1),
+              region.outboundActualDays.toFixed(1),
+              region.outboundDeviation >= 0 ? 'compliant' : (region.outboundPercentage < 80 ? 'critical' : 'warning'),
+              region.underservedCitiesCount.toString(),
+              cp.carrier,
+              cp.product,
+              cp.totalShipments.toString(),
+              cp.compliantShipments.toString(),
+              cp.standardPercentage.toFixed(1),
+              cp.actualPercentage.toFixed(1),
+              cp.deviation.toFixed(1),
+              cp.standardDays.toFixed(1),
+              cp.actualDays.toFixed(1),
+            ]);
+          });
+        } else {
+          rows.push([
+            region.regionName,
+            'Outbound',
+            region.totalCities.toString(),
+            region.totalPopulation?.toString() || '',
+            region.outboundStandardPercentage.toFixed(1),
+            region.outboundPercentage.toFixed(1),
+            region.outboundDeviation.toFixed(1),
+            region.outboundStandardDays.toFixed(1),
+            region.outboundActualDays.toFixed(1),
+            region.outboundDeviation >= 0 ? 'compliant' : (region.outboundPercentage < 80 ? 'critical' : 'warning'),
+            region.underservedCitiesCount.toString(),
+            '', '', '', '', '', '', '', '', '',
+          ]);
+        }
+      } else {
+        // No breakdown
+        rows.push([
+          region.regionName,
+          'Inbound',
+          region.totalCities.toString(),
+          region.totalPopulation?.toString() || '',
+          region.inboundStandardPercentage.toFixed(1),
+          region.inboundPercentage.toFixed(1),
+          region.inboundDeviation.toFixed(1),
+          region.inboundStandardDays.toFixed(1),
+          region.inboundActualDays.toFixed(1),
+          region.inboundDeviation >= 0 ? 'compliant' : (region.inboundPercentage < 80 ? 'critical' : 'warning'),
+          region.underservedCitiesCount.toString(),
+          '', '', '', '', '', '', '', '', '',
+        ]);
+        
+        rows.push([
+          region.regionName,
+          'Outbound',
+          region.totalCities.toString(),
+          region.totalPopulation?.toString() || '',
+          region.outboundStandardPercentage.toFixed(1),
+          region.outboundPercentage.toFixed(1),
+          region.outboundDeviation.toFixed(1),
+          region.outboundStandardDays.toFixed(1),
+          region.outboundActualDays.toFixed(1),
+          region.outboundDeviation >= 0 ? 'compliant' : (region.outboundPercentage < 80 ? 'critical' : 'warning'),
+          region.underservedCitiesCount.toString(),
+          '', '', '', '', '', '', '', '', '',
+        ]);
+      }
     });
 
     const csv = [headers, ...rows].map((row) => row.join(',')).join('\n');
