@@ -147,13 +147,40 @@ export default function JKPerformance() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Weekly Samples Chart */}
         <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Weekly Sample Volume</h3>
+          <div className="flex items-center gap-2 mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">Weekly Sample Volume</h3>
+            <div className="group relative">
+              <Info className="w-4 h-4 text-gray-400 cursor-help" />
+              <div className="invisible group-hover:visible absolute z-10 w-80 p-3 bg-gray-900 text-white text-xs rounded shadow-lg left-0 top-6">
+                <div className="absolute -top-1 left-4 w-2 h-2 bg-gray-900 transform rotate-45"></div>
+                <p className="mb-2"><strong>Weekly Sample Volume</strong></p>
+                <p className="mb-2">Shows the number of shipments analyzed per week in the selected date range.</p>
+                <p className="mb-2"><strong>Color Coding:</strong> Green (20% above average), Blue (above average), Yellow (80-100% of average), Red (below 80% of average).</p>
+                <p><strong>Purpose:</strong> Identify weeks with low sample sizes that may affect statistical reliability. Minimum 30 samples/week recommended.</p>
+              </div>
+            </div>
+          </div>
           <WeeklySamplesChart data={weeklySamples} />
         </div>
 
         {/* Performance Distribution */}
         <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Performance Distribution</h3>
+          <div className="flex items-center gap-2 mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">Performance Distribution</h3>
+            <div className="group relative">
+              <Info className="w-4 h-4 text-gray-400 cursor-help" />
+              <div className="invisible group-hover:visible absolute z-10 w-80 p-3 bg-gray-900 text-white text-xs rounded shadow-lg left-0 top-6">
+                <div className="absolute -top-1 left-4 w-2 h-2 bg-gray-900 transform rotate-45"></div>
+                <p className="mb-2"><strong>Performance Distribution</strong></p>
+                <p className="mb-2">Shows how shipments are distributed by actual transit time vs. delivery standard (J+K Std).</p>
+                <p className="mb-2"><strong>Categories:</strong></p>
+                <p className="mb-1">• <span className="text-red-400">After Standard</span>: Delivered AFTER J+K Std (late)</p>
+                <p className="mb-1">• <span className="text-green-400">Before/On-Time</span>: Delivered WITHIN J+K Std (on-time)</p>
+                <p className="mb-2">• <span className="text-blue-400">On Standard</span>: Delivered EXACTLY on J+K Std day</p>
+                <p><strong>Purpose:</strong> Visualize overall network performance. Large red bars indicate systematic delays.</p>
+              </div>
+            </div>
+          </div>
           <PerformanceDistributionChart routeData={routeData} maxDays={maxDays} />
         </div>
       </div>
