@@ -1,20 +1,21 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useReportingFilters } from '@/contexts/ReportingFiltersContext';
 import { useJKPerformance } from '@/hooks/reporting/useJKPerformance';
 import { KPICard } from '@/components/reporting/KPICard';
 import { ReportFilters } from '@/components/reporting/ReportFilters';
-import { Package, Clock, CheckCircle, AlertTriangle, Info } from 'lucide-react';
+import { Package, Clock, CheckCircle, AlertTriangle, Info, FileDown } from 'lucide-react';
 import { WeeklySamplesChart } from '@/components/reporting/WeeklySamplesChart';
 import { PerformanceDistributionChart } from '@/components/reporting/PerformanceDistributionChart';
 import { CumulativeDistributionTable } from '@/components/reporting/CumulativeDistributionTable';
 import { CumulativeDistributionChart } from '@/components/reporting/CumulativeDistributionChart';
+import { exportRouteCSV, exportCityCSV, exportRegionCSV, exportCarrierProductCSV, exportCumulativeCSV } from '@/utils/jkExportCSV';
 
 export default function JKPerformance() {
   const { profile } = useAuth();
   const accountId = profile?.account_id || undefined;
   const { filters, setFilters, resetFilters } = useReportingFilters();
-  const [activeTab, setActiveTab] = useState<'route' | 'city' | 'region' | 'carrier' | 'product' | 'cumulative'>('route');
+  const [activeTab, setActiveTab] = useState<'route' | 'city' | 'region' | 'carrier' | 'cumulative'>('route');
   const [cumulativeView, setCumulativeView] = useState<'table' | 'chart'>('chart');
 
   const {
@@ -163,8 +164,7 @@ export default function JKPerformance() {
               { id: 'route', label: 'Route Analysis' },
               { id: 'city', label: 'City Analysis' },
               { id: 'region', label: 'Region Analysis' },
-              { id: 'carrier', label: 'Carrier Analysis' },
-              { id: 'product', label: 'Product Analysis' },
+              { id: 'carrier', label: 'Carrier → Product' },
               { id: 'cumulative', label: 'Cumulative Distribution' },
             ].map((tab) => (
               <button
@@ -185,9 +185,18 @@ export default function JKPerformance() {
         <div className="p-6">
           {activeTab === 'route' && (
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Route Performance ({routeData.length} routes)
-              </h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Route Performance ({routeData.length} routes)
+                </h3>
+                <button
+                  onClick={() => exportRouteCSV(routeData)}
+                  className="flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                >
+                  <FileDown className="w-4 h-4" />
+                  Export CSV
+                </button>
+              </div>
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
@@ -236,9 +245,18 @@ export default function JKPerformance() {
 
           {activeTab === 'city' && (
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                City Performance ({cityData.length} entries)
-              </h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  City Performance ({cityData.length} entries)
+                </h3>
+                <button
+                  onClick={() => exportCityCSV(cityData)}
+                  className="flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                >
+                  <FileDown className="w-4 h-4" />
+                  Export CSV
+                </button>
+              </div>
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
@@ -289,9 +307,18 @@ export default function JKPerformance() {
 
           {activeTab === 'region' && (
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Region Performance ({regionData.length} entries)
-              </h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Region Performance ({regionData.length} entries)
+                </h3>
+                <button
+                  onClick={() => exportRegionCSV(regionData)}
+                  className="flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                >
+                  <FileDown className="w-4 h-4" />
+                  Export CSV
+                </button>
+              </div>
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
@@ -342,68 +369,23 @@ export default function JKPerformance() {
 
           {activeTab === 'carrier' && (
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Carrier Performance ({carrierData.length} carriers)
-              </h3>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Carrier</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Routes</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Samples</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">J+K Std</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">J+K Actual</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Deviation</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">On-Time %</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Problem Routes</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {carrierData.map((carrier, idx) => {
-                      const deviationColor = carrier.deviation <= 0 ? 'text-green-600' : carrier.deviation <= 1 ? 'text-yellow-600' : 'text-red-600';
-                      const onTimeColor = carrier.onTimePercentage >= 95 ? 'text-green-600 font-semibold' : carrier.onTimePercentage >= 90 ? 'text-yellow-600' : 'text-red-600 font-semibold';
-                      const statusColor = carrier.status === 'compliant' ? 'bg-green-500' : carrier.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500';
-                      
-                      return (
-                        <tr key={idx} className="hover:bg-gray-50">
-                          <td className="px-3 py-2 text-sm font-medium text-gray-900">{carrier.carrier}</td>
-                          <td className="px-3 py-2 text-sm text-gray-600">{carrier.routes}</td>
-                          <td className="px-3 py-2 text-sm text-gray-900">{carrier.totalSamples}</td>
-                          <td className="px-3 py-2 text-sm text-gray-900">{carrier.jkStandard.toFixed(1)}</td>
-                          <td className="px-3 py-2 text-sm text-gray-900">{carrier.jkActual.toFixed(1)}</td>
-                          <td className={`px-3 py-2 text-sm ${deviationColor}`}>
-                            {carrier.deviation > 0 ? '+' : ''}{carrier.deviation.toFixed(1)}
-                          </td>
-                          <td className={`px-3 py-2 text-sm ${onTimeColor}`}>
-                            {carrier.onTimePercentage.toFixed(1)}%
-                          </td>
-                          <td className="px-3 py-2 text-sm text-red-600 font-semibold">
-                            {carrier.problematicRoutes}
-                          </td>
-                          <td className="px-3 py-2">
-                            <div className={`w-3 h-3 rounded-full ${statusColor}`} />
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Carrier → Product Performance ({carrierData.length} carriers)
+                </h3>
+                <button
+                  onClick={() => exportCarrierProductCSV(carrierData)}
+                  className="flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                >
+                  <FileDown className="w-4 h-4" />
+                  Export CSV
+                </button>
               </div>
-            </div>
-          )}
-
-          {activeTab === 'product' && (
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Product Performance ({productData.length} products)
-              </h3>
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Carrier / Product</th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Routes</th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Samples</th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">J+K Std</th>
@@ -415,31 +397,60 @@ export default function JKPerformance() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {productData.map((product, idx) => {
-                      const deviationColor = product.deviation <= 0 ? 'text-green-600' : product.deviation <= 1 ? 'text-yellow-600' : 'text-red-600';
-                      const onTimeColor = product.onTimePercentage >= 95 ? 'text-green-600 font-semibold' : product.onTimePercentage >= 90 ? 'text-yellow-600' : 'text-red-600 font-semibold';
-                      const statusColor = product.status === 'compliant' ? 'bg-green-500' : product.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500';
+                    {carrierData.map((carrier, carrierIdx) => {
+                      const carrierDeviationColor = carrier.deviation <= 0 ? 'text-green-600' : carrier.deviation <= 1 ? 'text-yellow-600' : 'text-red-600';
+                      const carrierOnTimeColor = carrier.onTimePercentage >= 95 ? 'text-green-600 font-semibold' : carrier.onTimePercentage >= 90 ? 'text-yellow-600' : 'text-red-600 font-semibold';
+                      const carrierStatusColor = carrier.status === 'compliant' ? 'bg-green-500' : carrier.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500';
                       
                       return (
-                        <tr key={idx} className="hover:bg-gray-50">
-                          <td className="px-3 py-2 text-sm font-medium text-gray-900">{product.product}</td>
-                          <td className="px-3 py-2 text-sm text-gray-600">{product.routes}</td>
-                          <td className="px-3 py-2 text-sm text-gray-900">{product.totalSamples}</td>
-                          <td className="px-3 py-2 text-sm text-gray-900">{product.jkStandard.toFixed(1)}</td>
-                          <td className="px-3 py-2 text-sm text-gray-900">{product.jkActual.toFixed(1)}</td>
-                          <td className={`px-3 py-2 text-sm ${deviationColor}`}>
-                            {product.deviation > 0 ? '+' : ''}{product.deviation.toFixed(1)}
-                          </td>
-                          <td className={`px-3 py-2 text-sm ${onTimeColor}`}>
-                            {product.onTimePercentage.toFixed(1)}%
-                          </td>
-                          <td className="px-3 py-2 text-sm text-red-600 font-semibold">
-                            {product.problematicRoutes}
-                          </td>
-                          <td className="px-3 py-2">
-                            <div className={`w-3 h-3 rounded-full ${statusColor}`} />
-                          </td>
-                        </tr>
+                        <React.Fragment key={carrierIdx}>
+                          {/* Carrier Row */}
+                          <tr className="bg-blue-50 hover:bg-blue-100">
+                            <td className="px-3 py-2 text-sm font-bold text-gray-900">{carrier.carrier}</td>
+                            <td className="px-3 py-2 text-sm font-semibold text-gray-700">{carrier.routes}</td>
+                            <td className="px-3 py-2 text-sm font-semibold text-gray-900">{carrier.totalSamples}</td>
+                            <td className="px-3 py-2 text-sm font-semibold text-gray-900">{carrier.jkStandard.toFixed(1)}</td>
+                            <td className="px-3 py-2 text-sm font-semibold text-gray-900">{carrier.jkActual.toFixed(1)}</td>
+                            <td className={`px-3 py-2 text-sm font-semibold ${carrierDeviationColor}`}>
+                              {carrier.deviation > 0 ? '+' : ''}{carrier.deviation.toFixed(1)}
+                            </td>
+                            <td className={`px-3 py-2 text-sm ${carrierOnTimeColor}`}>
+                              {carrier.onTimePercentage.toFixed(1)}%
+                            </td>
+                            <td className="px-3 py-2 text-sm text-red-600 font-semibold">
+                              {carrier.problematicRoutes}
+                            </td>
+                            <td className="px-3 py-2">
+                              <div className={`w-3 h-3 rounded-full ${carrierStatusColor}`} />
+                            </td>
+                          </tr>
+                          {/* Product Rows */}
+                          {carrier.products.map((product, productIdx) => {
+                            const productDeviationColor = product.deviation <= 0 ? 'text-green-600' : product.deviation <= 1 ? 'text-yellow-600' : 'text-red-600';
+                            const productOnTimeColor = product.onTimePercentage >= 95 ? 'text-green-600 font-semibold' : product.onTimePercentage >= 90 ? 'text-yellow-600' : 'text-red-600 font-semibold';
+                            const productStatusColor = product.status === 'compliant' ? 'bg-green-500' : product.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500';
+                            
+                            return (
+                              <tr key={`${carrierIdx}-${productIdx}`} className="hover:bg-gray-50">
+                                <td className="px-3 py-2 pl-8 text-sm text-gray-700">↳ {product.product}</td>
+                                <td className="px-3 py-2 text-sm text-gray-600">{product.routes}</td>
+                                <td className="px-3 py-2 text-sm text-gray-900">{product.totalSamples}</td>
+                                <td className="px-3 py-2 text-sm text-gray-900">{product.jkStandard.toFixed(1)}</td>
+                                <td className="px-3 py-2 text-sm text-gray-900">{product.jkActual.toFixed(1)}</td>
+                                <td className={`px-3 py-2 text-sm ${productDeviationColor}`}>
+                                  {product.deviation > 0 ? '+' : ''}{product.deviation.toFixed(1)}
+                                </td>
+                                <td className={`px-3 py-2 text-sm ${productOnTimeColor}`}>
+                                  {product.onTimePercentage.toFixed(1)}%
+                                </td>
+                                <td className="px-3 py-2 text-sm text-gray-400">-</td>
+                                <td className="px-3 py-2">
+                                  <div className={`w-3 h-3 rounded-full ${productStatusColor}`} />
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </React.Fragment>
                       );
                     })}
                   </tbody>
@@ -455,6 +466,25 @@ export default function JKPerformance() {
                   Cumulative Distribution Analysis
                 </h3>
                 <div className="flex gap-2">
+                  {cumulativeView === 'table' && (
+                    <button
+                      onClick={() => exportCumulativeCSV(routeData.map(route => ({
+                        routeKey: route.routeKey,
+                        originCity: route.originCity,
+                        destinationCity: route.destinationCity,
+                        carrier: route.carrier,
+                        product: route.product,
+                        jkStandard: route.jkStandard,
+                        standardPercentage: route.standardPercentage,
+                        distribution: route.distribution,
+                        totalSamples: route.totalSamples,
+                      })), maxDays)}
+                      className="flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                    >
+                      <FileDown className="w-4 h-4" />
+                      Export CSV
+                    </button>
+                  )}
                   <button
                     onClick={() => setCumulativeView('chart')}
                     className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
