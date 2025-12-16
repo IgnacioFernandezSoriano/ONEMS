@@ -10,6 +10,7 @@ import { PerformanceDistributionChart } from '@/components/reporting/Performance
 import { CumulativeDistributionTable } from '@/components/reporting/CumulativeDistributionTable';
 import { CumulativeDistributionChart } from '@/components/reporting/CumulativeDistributionChart';
 import { exportRouteCSV, exportCityCSV, exportRegionCSV, exportCarrierProductCSV, exportCumulativeCSV } from '@/utils/jkExportCSV';
+import { ColumnTooltip } from '@/components/reporting/ColumnTooltip';
 
 export default function JKPerformance() {
   const { profile } = useAuth();
@@ -77,7 +78,8 @@ export default function JKPerformance() {
             <p className="mb-3"><strong>J+K Actual:</strong> Average actual transit time in business days from shipment data.</p>
             <p className="mb-3"><strong>Deviation:</strong> Difference between Actual and Standard. Positive values indicate delays.</p>
             <p className="mb-3"><strong>On-Time %:</strong> Percentage of shipments delivered within or before the standard time.</p>
-            <p className="mb-3"><strong>Color Coding:</strong> Green (≥95% on-time), Yellow (90-95%), Red (&lt;90%). Use this to prioritize interventions.</p>
+            <p className="mb-3"><strong>Std %:</strong> Target success percentage defined in delivery_standards table (e.g., 85%, 95%). This is route-specific and dynamic.</p>
+            <p className="mb-3"><strong>Color Coding:</strong> Green (≥95% on-time), Yellow (90-95%), Red (&lt;90%) are visual guides. Actual compliance is measured against route-specific Std % from delivery_standards.</p>
           </div>
         </div>
       </div>
@@ -121,9 +123,9 @@ export default function JKPerformance() {
           trendValue={`${metrics.onTimeSamples.toLocaleString()} on-time`}
           color={metrics.onTimePercentage >= 95 ? 'green' : metrics.onTimePercentage >= 90 ? 'amber' : 'red'}
           tooltip={{
-            description: "Percentage of shipments delivered within or before the standard delivery time.",
-            interpretation: "≥95% is excellent, 90-95% is acceptable, <90% requires intervention.",
-            utility: "Key performance indicator for service quality. Use to set performance targets and track compliance."
+            description: "Percentage of shipments delivered within or before the standard delivery time (J+K Std).",
+            interpretation: "Thresholds are dynamic and defined in delivery_standards table per route. Green (≥95%), Yellow (90-95%), Red (<90%) are visual guides only.",
+            utility: "Key performance indicator for service quality. Compare against route-specific standard percentage (Std %) from delivery_standards."
           }}
         />
         <KPICard
@@ -134,8 +136,8 @@ export default function JKPerformance() {
           trendValue="Require intervention"
           color={metrics.problematicRoutes === 0 ? 'green' : metrics.problematicRoutes <= 3 ? 'amber' : 'red'}
           tooltip={{
-            description: "Number of routes with on-time performance below 90% (critical threshold).",
-            interpretation: "Routes consistently failing to meet delivery standards. Require immediate investigation and corrective action.",
+            description: "Number of routes with on-time performance below 90%.",
+            interpretation: "Routes failing to meet their delivery standards. Critical threshold (90%) is a general guide; actual standards vary per route in delivery_standards table.",
             utility: "Prioritization tool for operational improvements. Focus resources on these routes first."
           }}
         />
@@ -201,13 +203,48 @@ export default function JKPerformance() {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Route</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Samples</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">J+K Std</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">J+K Actual</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Deviation</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">On-Time %</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <div className="flex items-center gap-1">
+                          Route
+                          <ColumnTooltip content="Origin city → Destination city. Each route is unique by carrier, product, and city pair." />
+                        </div>
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <div className="flex items-center gap-1">
+                          Samples
+                          <ColumnTooltip content="Total number of shipments for this route in the selected date range. Minimum 30 samples recommended for statistical significance." />
+                        </div>
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <div className="flex items-center gap-1">
+                          J+K Std
+                          <ColumnTooltip content="Expected delivery time in days from delivery_standards table. Automatically converted from hours if needed (hours/24)." />
+                        </div>
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <div className="flex items-center gap-1">
+                          J+K Actual
+                          <ColumnTooltip content="Average actual transit time in business days for all shipments on this route. Calculated from shipments.business_transit_days field." />
+                        </div>
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <div className="flex items-center gap-1">
+                          Deviation
+                          <ColumnTooltip content="Difference between J+K Actual and J+K Std (Actual - Standard). Positive values indicate delays, negative values indicate early delivery." />
+                        </div>
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <div className="flex items-center gap-1">
+                          On-Time %
+                          <ColumnTooltip content="Percentage of shipments delivered within or before J+K Std. Compare against route-specific Std % from delivery_standards (not shown in this table)." />
+                        </div>
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <div className="flex items-center gap-1">
+                          Status
+                          <ColumnTooltip content="Visual indicator: Green (compliant, ≥95%), Yellow (warning, 90-95%), Red (critical, <90%). These are general guides; actual standards are route-specific." />
+                        </div>
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -261,15 +298,33 @@ export default function JKPerformance() {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">City</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Direction</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Region</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Samples</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">J+K Std</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">J+K Actual</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Deviation</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">On-Time %</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <div className="flex items-center gap-1">City <ColumnTooltip content="City name aggregating all routes where this city is origin or destination." /></div>
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <div className="flex items-center gap-1">Direction <ColumnTooltip content="Inbound (city is destination) or Outbound (city is origin). Shows traffic flow direction." /></div>
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <div className="flex items-center gap-1">Region <ColumnTooltip content="Geographic region to which this city belongs (from topology.regions table)." /></div>
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <div className="flex items-center gap-1">Samples <ColumnTooltip content="Total shipments aggregated across all routes involving this city in the specified direction." /></div>
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <div className="flex items-center gap-1">J+K Std <ColumnTooltip content="Weighted average of J+K standards across all routes involving this city. Routes with more shipments have higher weight." /></div>
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <div className="flex items-center gap-1">J+K Actual <ColumnTooltip content="Weighted average of actual transit times across all routes involving this city." /></div>
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <div className="flex items-center gap-1">Deviation <ColumnTooltip content="Weighted average deviation (Actual - Standard) across all routes involving this city." /></div>
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <div className="flex items-center gap-1">On-Time % <ColumnTooltip content="Percentage of all shipments (across all routes) delivered on-time for this city." /></div>
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <div className="flex items-center gap-1">Status <ColumnTooltip content="Visual indicator based on on-time percentage: Green (≥95%), Yellow (90-95%), Red (<90%)." /></div>
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -323,15 +378,33 @@ export default function JKPerformance() {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Region</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Direction</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Cities</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Samples</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">J+K Std</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">J+K Actual</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Deviation</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">On-Time %</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <div className="flex items-center gap-1">Region <ColumnTooltip content="Geographic region aggregating all cities and routes within it (from topology.regions table)." /></div>
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <div className="flex items-center gap-1">Direction <ColumnTooltip content="Inbound (region is destination) or Outbound (region is origin). Shows regional traffic flow." /></div>
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <div className="flex items-center gap-1">Cities <ColumnTooltip content="Number of unique cities in this region with shipment data in the specified direction." /></div>
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <div className="flex items-center gap-1">Samples <ColumnTooltip content="Total shipments aggregated across all routes involving cities in this region." /></div>
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <div className="flex items-center gap-1">J+K Std <ColumnTooltip content="Weighted average of J+K standards across all routes in this region. Routes with more shipments have higher weight." /></div>
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <div className="flex items-center gap-1">J+K Actual <ColumnTooltip content="Weighted average of actual transit times across all routes in this region." /></div>
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <div className="flex items-center gap-1">Deviation <ColumnTooltip content="Weighted average deviation (Actual - Standard) across all routes in this region." /></div>
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <div className="flex items-center gap-1">On-Time % <ColumnTooltip content="Percentage of all shipments (across all routes) delivered on-time in this region." /></div>
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <div className="flex items-center gap-1">Status <ColumnTooltip content="Visual indicator based on on-time percentage: Green (≥95%), Yellow (90-95%), Red (<90%)." /></div>
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -385,15 +458,33 @@ export default function JKPerformance() {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Carrier / Product</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Routes</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Samples</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">J+K Std</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">J+K Actual</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Deviation</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">On-Time %</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Problem Routes</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <div className="flex items-center gap-1">Carrier / Product <ColumnTooltip content="Hierarchical view: Carrier rows (blue background) show aggregated metrics. Product rows (indented with ↳) show metrics for each product under that carrier." /></div>
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <div className="flex items-center gap-1">Routes <ColumnTooltip content="Number of unique routes (city pairs) served by this carrier or product." /></div>
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <div className="flex items-center gap-1">Samples <ColumnTooltip content="Total shipments for this carrier or product across all routes." /></div>
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <div className="flex items-center gap-1">J+K Std <ColumnTooltip content="Weighted average of J+K standards across all routes for this carrier or product." /></div>
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <div className="flex items-center gap-1">J+K Actual <ColumnTooltip content="Weighted average of actual transit times across all routes for this carrier or product." /></div>
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <div className="flex items-center gap-1">Deviation <ColumnTooltip content="Weighted average deviation (Actual - Standard) across all routes for this carrier or product." /></div>
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <div className="flex items-center gap-1">On-Time % <ColumnTooltip content="Percentage of all shipments delivered on-time for this carrier or product." /></div>
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <div className="flex items-center gap-1">Problem Routes <ColumnTooltip content="Number of routes with on-time performance <90%. Only shown at carrier level (products show '-')." /></div>
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <div className="flex items-center gap-1">Status <ColumnTooltip content="Visual indicator: Green (≥95%), Yellow (90-95%), Red (<90%). Shown for both carriers and products." /></div>
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">

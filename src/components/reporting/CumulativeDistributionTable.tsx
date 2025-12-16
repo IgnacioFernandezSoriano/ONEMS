@@ -1,4 +1,5 @@
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
+import { ColumnTooltip } from './ColumnTooltip';
 
 interface RouteDistribution {
   routeKey: string;
@@ -78,19 +79,34 @@ export function CumulativeDistributionTable({ routes, maxDays }: CumulativeDistr
         <thead className="bg-gray-50">
           <tr>
             <th className="sticky left-0 z-10 bg-gray-50 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
-              Route
+              <div className="flex items-center gap-1">
+                Route
+                <ColumnTooltip content="Origin → Destination city pair. Each route shows cumulative delivery percentages by day." />
+              </div>
             </th>
             <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Carrier
+              <div className="flex items-center gap-1">
+                Carrier
+                <ColumnTooltip content="Shipping carrier for this route." />
+              </div>
             </th>
             <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Product
+              <div className="flex items-center gap-1">
+                Product
+                <ColumnTooltip content="Service product (e.g., Express 24 horas) for this route." />
+              </div>
             </th>
             <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-              J+K Std
+              <div className="flex items-center gap-1 justify-center">
+                J+K Std
+                <ColumnTooltip content="Expected delivery time in days from delivery_standards. Column header turns green when it matches this value." />
+              </div>
             </th>
             <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Std %
+              <div className="flex items-center gap-1 justify-center">
+                Std %
+                <ColumnTooltip content="Target success percentage from delivery_standards (e.g., 85%, 95%). This is the threshold the route must meet." />
+              </div>
             </th>
             {dayColumns.map(day => {
               // Check if this day matches any route's standard
