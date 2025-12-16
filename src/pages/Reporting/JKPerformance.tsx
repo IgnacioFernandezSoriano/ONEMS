@@ -7,12 +7,15 @@ import { ReportFilters } from '@/components/reporting/ReportFilters';
 import { Package, Clock, CheckCircle, AlertTriangle, Info } from 'lucide-react';
 import { WeeklySamplesChart } from '@/components/reporting/WeeklySamplesChart';
 import { PerformanceDistributionChart } from '@/components/reporting/PerformanceDistributionChart';
+import { CumulativeDistributionTable } from '@/components/reporting/CumulativeDistributionTable';
+import { CumulativeDistributionChart } from '@/components/reporting/CumulativeDistributionChart';
 
 export default function JKPerformance() {
   const { profile } = useAuth();
   const accountId = profile?.account_id || undefined;
   const { filters, setFilters, resetFilters } = useReportingFilters();
-  const [activeTab, setActiveTab] = useState<'route' | 'city' | 'region' | 'carrier' | 'product'>('route');
+  const [activeTab, setActiveTab] = useState<'route' | 'city' | 'region' | 'carrier' | 'product' | 'cumulative'>('route');
+  const [cumulativeView, setCumulativeView] = useState<'table' | 'chart'>('chart');
 
   const {
     routeData,
@@ -162,6 +165,7 @@ export default function JKPerformance() {
               { id: 'region', label: 'Region Analysis' },
               { id: 'carrier', label: 'Carrier Analysis' },
               { id: 'product', label: 'Product Analysis' },
+              { id: 'cumulative', label: 'Cumulative Distribution' },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -441,6 +445,70 @@ export default function JKPerformance() {
                   </tbody>
                 </table>
               </div>
+            </div>
+          )}
+
+          {activeTab === 'cumulative' && (
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Cumulative Distribution Analysis
+                </h3>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setCumulativeView('chart')}
+                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                      cumulativeView === 'chart'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    Chart View
+                  </button>
+                  <button
+                    onClick={() => setCumulativeView('table')}
+                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                      cumulativeView === 'table'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    Table View
+                  </button>
+                </div>
+              </div>
+
+              {cumulativeView === 'chart' ? (
+                <CumulativeDistributionChart
+                  routes={routeData.map(route => ({
+                    routeKey: route.routeKey,
+                    originCity: route.originCity,
+                    destinationCity: route.destinationCity,
+                    carrier: route.carrier,
+                    product: route.product,
+                    jkStandard: route.jkStandard,
+                    standardPercentage: route.onTimePercentage >= 95 ? 95 : 85,
+                    distribution: route.distribution,
+                    totalSamples: route.totalSamples,
+                  }))}
+                  maxDays={maxDays}
+                />
+              ) : (
+                <CumulativeDistributionTable
+                  routes={routeData.map(route => ({
+                    routeKey: route.routeKey,
+                    originCity: route.originCity,
+                    destinationCity: route.destinationCity,
+                    carrier: route.carrier,
+                    product: route.product,
+                    jkStandard: route.jkStandard,
+                    standardPercentage: route.onTimePercentage >= 95 ? 95 : 85,
+                    distribution: route.distribution,
+                    totalSamples: route.totalSamples,
+                  }))}
+                  maxDays={maxDays}
+                />
+              )}
             </div>
           )}
         </div>
