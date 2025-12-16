@@ -487,7 +487,7 @@ export default function JKPerformance() {
                     carrier: route.carrier,
                     product: route.product,
                     jkStandard: route.jkStandard,
-                    standardPercentage: route.onTimePercentage >= 95 ? 95 : 85,
+                    standardPercentage: route.standardPercentage,
                     distribution: route.distribution,
                     totalSamples: route.totalSamples,
                   }))}
@@ -502,7 +502,7 @@ export default function JKPerformance() {
                     carrier: route.carrier,
                     product: route.product,
                     jkStandard: route.jkStandard,
-                    standardPercentage: route.onTimePercentage >= 95 ? 95 : 85,
+                    standardPercentage: route.standardPercentage,
                     distribution: route.distribution,
                     totalSamples: route.totalSamples,
                   }))}

@@ -68,6 +68,9 @@ export function CumulativeDistributionChart({ routes, maxDays, selectedRoute }: 
         cumulativePercentage,
         isBeforeOrAtStandard: day <= Math.round(avgStandard),
       });
+
+      // Stop when we reach 100%
+      if (cumulativePercentage >= 99.9) break;
     }
 
     return {
@@ -111,7 +114,8 @@ export function CumulativeDistributionChart({ routes, maxDays, selectedRoute }: 
         <BarChart 
           data={chartData} 
           margin={{ top: 20, right: 30, left: 20, bottom: 40 }}
-          barCategoryGap="20%"
+          barCategoryGap={5}
+          barGap={2}
         >
           <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
           <XAxis 
