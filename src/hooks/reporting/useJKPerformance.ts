@@ -13,6 +13,8 @@ export interface JKRouteData {
   deviation: number; // actual - standard
   onTimePercentage: number;
   onTimeSamples: number;
+  beforeStandardSamples: number; // samples delivered before standard
+  afterStandardSamples: number; // samples delivered after standard
   distribution: Map<number, number>; // day -> count
   status: 'compliant' | 'warning' | 'critical';
 }
@@ -278,6 +280,9 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
             status = 'warning';
           }
 
+          const beforeStandardSamples = route.samples.filter(d => d < route.jkStandard).length;
+          const afterStandardSamples = route.samples.filter(d => d > route.jkStandard).length;
+
           return {
             routeKey: key,
             originCity: route.originCity,
@@ -290,6 +295,8 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
             deviation,
             onTimePercentage,
             onTimeSamples: route.onTimeSamples,
+            beforeStandardSamples,
+            afterStandardSamples,
             distribution: route.distribution,
             status,
           };
