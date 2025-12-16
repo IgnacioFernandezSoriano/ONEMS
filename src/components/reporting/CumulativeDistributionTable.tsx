@@ -30,7 +30,7 @@ export function CumulativeDistributionTable({ routes, maxDays }: CumulativeDistr
     let maxNeededDay = maxDisplayDays;
     routes.forEach(route => {
       let cumulative = 0;
-      for (let day = 1; day <= maxDisplayDays; day++) {
+      for (let day = 0; day <= maxDisplayDays; day++) {
         cumulative += route.distribution.get(day) || 0;
         const percentage = route.totalSamples > 0 ? (cumulative / route.totalSamples) * 100 : 0;
         if (percentage >= 99.9) {
@@ -40,7 +40,7 @@ export function CumulativeDistributionTable({ routes, maxDays }: CumulativeDistr
       }
     });
     
-    const days = Array.from({ length: Math.min(maxNeededDay + 1, maxDisplayDays) }, (_, i) => i + 1);
+    const days = Array.from({ length: Math.min(maxNeededDay + 1, maxDisplayDays) }, (_, i) => i);
 
     // Calculate cumulative percentages for each route
     const data = routes.map(route => {

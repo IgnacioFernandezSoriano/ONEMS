@@ -57,7 +57,7 @@ export function CumulativeDistributionChart({ routes, maxDays, selectedRoute }: 
     const data: any[] = [];
     let cumulativeCount = 0;
 
-    for (let day = 1; day <= maxDisplayDays; day++) {
+    for (let day = 0; day <= maxDisplayDays; day++) {
       const count = aggregatedDistribution.get(day) || 0;
       cumulativeCount += count;
       const cumulativePercentage = totalSamples > 0 ? (cumulativeCount / totalSamples) * 100 : 0;
@@ -108,12 +108,17 @@ export function CumulativeDistributionChart({ routes, maxDays, selectedRoute }: 
     return null;
   };
 
+  // Calculate chart width based on number of bars
+  const chartWidth = Math.max(400, Math.min(800, chartData.length * 80 + 150));
+
   return (
-    <div className="w-full h-96">
-      <ResponsiveContainer width="100%" height="100%">
+    <div className="w-full h-96 flex justify-center">
+      <div style={{ width: chartWidth, height: '100%' }}>
         <BarChart
+          width={chartWidth}
+          height={384}
           data={chartData}
-          margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+          margin={{ top: 20, right: 30, left: 60, bottom: 20 }}
           barSize={40}
         >
           <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -181,7 +186,7 @@ export function CumulativeDistributionChart({ routes, maxDays, selectedRoute }: 
             ))}
           </Bar>
         </BarChart>
-      </ResponsiveContainer>
+      </div>
       <div className="mt-4 text-xs text-gray-500 text-center">
         Cumulative percentage of deliveries by transit days. 
         <span className="text-green-600 font-medium"> Green</span> bars indicate days within standard,
