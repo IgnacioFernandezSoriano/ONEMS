@@ -111,11 +111,10 @@ export function CumulativeDistributionChart({ routes, maxDays, selectedRoute }: 
   return (
     <div className="w-full h-96">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart 
-          data={chartData} 
-          margin={{ top: 20, right: 30, left: 20, bottom: 40 }}
-          barCategoryGap={5}
-          barGap={2}
+        <BarChart
+          data={chartData}
+          margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+          barSize={40}
         >
           <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
           <XAxis 
