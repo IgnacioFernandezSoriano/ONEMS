@@ -21,8 +21,7 @@ import OneDB from './pages/OneDB'
 import ReportingDashboard from './pages/Reporting/Dashboard'
 import ComplianceReport from './pages/Reporting/ComplianceReport'
 import TerritoryEquity from './pages/Reporting/TerritoryEquity'
-import ShipmentTracking from './pages/Reporting/ShipmentTracking'
-import JKAnalysis from './pages/Reporting/JKAnalysis'
+import JKPerformance from './pages/Reporting/JKPerformance'
 import AccountReportingConfig from './pages/Settings/AccountReportingConfig'
 
 function App() {
@@ -166,27 +165,15 @@ function App() {
                         </ProtectedRoute>
                       }
                     />
-                    
-                    {/* Reporting Tracking - for admin and superadmin */}
+                                    {/* Reporting J+K Performance - for admin and superadmin */}
                     <Route
-                      path="/reporting/tracking"
+                      path="/reporting/jk-performance"
                       element={
                         <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
-                          <ShipmentTracking />
+                          <JKPerformance />
                         </ProtectedRoute>
                       }
-                    />
-                    
-                    {/* Reporting J+K Analysis - for admin and superadmin */}
-                    <Route
-                      path="/reporting/jk-analysis"
-                      element={
-                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
-                          <JKAnalysis />
-                        </ProtectedRoute>
-                      }
-                    />
-                    
+                    />                 
                     {/* Settings routes - only for superadmin */}
                     <Route
                       path="/settings"
