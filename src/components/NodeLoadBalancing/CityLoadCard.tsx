@@ -270,36 +270,60 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
               <div className="mb-3">
                 <p className="text-xs font-medium text-gray-700 mb-1">📊 Optimization:</p>
                 <ul className="text-xs text-gray-600 space-y-1 ml-4">
-                  {monthlyStddev > 15 && (
-                    <li className="flex items-start gap-1">
-                      <span className="text-red-600">•</span>
-                      <span>Very high standard deviation ({monthlyStddev.toFixed(1)}). Urgent balancing recommended to improve distribution.</span>
-                    </li>
-                  )}
-                  {monthlyStddev > 10 && monthlyStddev <= 15 && (
-                    <li className="flex items-start gap-1">
-                      <span className="text-orange-600">•</span>
-                      <span>Moderate standard deviation ({monthlyStddev.toFixed(1)}). Balancing could improve efficiency.</span>
-                    </li>
-                  )}
-                  {monthlyStddev > 5 && monthlyStddev <= 10 && (
-                    <li className="flex items-start gap-1">
-                      <span className="text-yellow-600">•</span>
-                      <span>Acceptable standard deviation ({monthlyStddev.toFixed(1)}). Reasonably balanced distribution.</span>
-                    </li>
-                  )}
-                  {monthlyStddev <= 5 && (
-                    <li className="flex items-start gap-1">
-                      <span className="text-green-600">•</span>
-                      <span>Optimal distribution achieved (stddev: {monthlyStddev.toFixed(1)}). No balancing required.</span>
-                    </li>
-                  )}
-                  {avgPerNode > 15 && nodes.length < 3 && (
-                    <li className="flex items-start gap-1">
-                      <span className="text-orange-600">•</span>
-                      <span>Consider adding more nodes. Current average ({avgPerNode.toFixed(1)}) exceeds recommended capacity.</span>
-                    </li>
-                  )}
+                  {(() => {
+                    // Analyze individual cells
+                    const saturatedCells: string[] = [];
+                    const highCells: string[] = [];
+                    const normalCells: string[] = [];
+                    
+                    nodes.forEach(nodeCode => {
+                      weeks.forEach(week => {
+                        const count = matrix[nodeCode]?.[week]?.shipment_count || 0;
+                        const cellId = `${nodeCode}-W${week}`;
+                        if (count >= saturatedThreshold) {
+                          saturatedCells.push(cellId);
+                        } else if (count >= highThreshold) {
+                          highCells.push(cellId);
+                        } else {
+                          normalCells.push(cellId);
+                        }
+                      });
+                    });
+                    
+                    const totalCells = nodes.length * weeks.length;
+                    const saturatedPct = (saturatedCells.length / totalCells) * 100;
+                    const highPct = (highCells.length / totalCells) * 100;
+                    const normalPct = (normalCells.length / totalCells) * 100;
+                    
+                    return (
+                      <>
+                        {saturatedCells.length > 0 && (
+                          <li className="flex items-start gap-1">
+                            <span className="text-red-600">•</span>
+                            <span><strong>Critical:</strong> {saturatedCells.length} cells ({saturatedPct.toFixed(0)}%) are saturated (≥{saturatedThreshold.toFixed(1)} shipments). Urgent balancing required.</span>
+                          </li>
+                        )}
+                        {highCells.length > 0 && (
+                          <li className="flex items-start gap-1">
+                            <span className="text-orange-600">•</span>
+                            <span><strong>Warning:</strong> {highCells.length} cells ({highPct.toFixed(0)}%) have high load (≥{highThreshold.toFixed(1)} shipments). Consider preventive balancing.</span>
+                          </li>
+                        )}
+                        {saturatedCells.length === 0 && highCells.length === 0 && (
+                          <li className="flex items-start gap-1">
+                            <span className="text-green-600">•</span>
+                            <span><strong>Optimal:</strong> All {totalCells} cells are within normal range (&lt;{highThreshold.toFixed(1)} shipments). No balancing required.</span>
+                          </li>
+                        )}
+                        {normalCells.length > 0 && (saturatedCells.length > 0 || highCells.length > 0) && (
+                          <li className="flex items-start gap-1">
+                            <span className="text-blue-600">•</span>
+                            <span>{normalCells.length} cells ({normalPct.toFixed(0)}%) are operating normally.</span>
+                          </li>
+                        )}
+                      </>
+                    );
+                  })()}
                 </ul>
               </div>
 
@@ -307,36 +331,55 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
               <div className="mb-3">
                 <p className="text-xs font-medium text-gray-700 mb-1">🎯 Suggested Actions:</p>
                 <ul className="text-xs text-gray-600 space-y-1 ml-4">
-                  {hasSaturatedNodes && (
-                    <li className="flex items-start gap-1">
-                      <span className="text-red-600">•</span>
-                      <span><strong>Urgent:</strong> Balance now to reduce saturation in critical nodes.</span>
-                    </li>
-                  )}
-                  {hasHighNodes && !hasSaturatedNodes && (
-                    <li className="flex items-start gap-1">
-                      <span className="text-orange-600">•</span>
-                      <span>Some nodes have high load. Balance preventively to avoid saturation.</span>
-                    </li>
-                  )}
                   {(() => {
-                    const overloadedWeeks = weeks.filter(w => weekAverages[w] > avgPerNode * 1.3);
-                    if (overloadedWeeks.length > 0) {
-                      return (
-                        <li className="flex items-start gap-1">
-                          <span className="text-orange-600">•</span>
-                          <span>Overloaded weeks detected: {overloadedWeeks.map(w => `W${w}`).join(', ')}. Redistribute load across weeks.</span>
-                        </li>
-                      );
-                    }
-                    return null;
+                    // Find specific problematic cells
+                    const saturatedCells: {node: string, week: number, count: number}[] = [];
+                    const highCells: {node: string, week: number, count: number}[] = [];
+                    
+                    nodes.forEach(nodeCode => {
+                      weeks.forEach(week => {
+                        const count = matrix[nodeCode]?.[week]?.shipment_count || 0;
+                        if (count >= saturatedThreshold) {
+                          saturatedCells.push({node: nodeCode, week, count});
+                        } else if (count >= highThreshold) {
+                          highCells.push({node: nodeCode, week, count});
+                        }
+                      });
+                    });
+                    
+                    // Group by node
+                    const saturatedNodes = [...new Set(saturatedCells.map(c => c.node))];
+                    const highNodes = [...new Set(highCells.map(c => c.node))];
+                    
+                    return (
+                      <>
+                        {saturatedCells.length > 0 && (
+                          <li className="flex items-start gap-1">
+                            <span className="text-red-600">•</span>
+                            <span><strong>Urgent:</strong> Balance immediately. Saturated cells in nodes: {saturatedNodes.join(', ')}.</span>
+                          </li>
+                        )}
+                        {highCells.length > 0 && saturatedCells.length === 0 && (
+                          <li className="flex items-start gap-1">
+                            <span className="text-orange-600">•</span>
+                            <span><strong>Preventive:</strong> Balance recommended. High load cells in nodes: {highNodes.join(', ')}.</span>
+                          </li>
+                        )}
+                        {saturatedCells.length === 0 && highCells.length === 0 && (
+                          <li className="flex items-start gap-1">
+                            <span className="text-green-600">•</span>
+                            <span>No action required. All cells are within acceptable range.</span>
+                          </li>
+                        )}
+                        {(saturatedCells.length > 0 || highCells.length > 0) && (
+                          <li className="flex items-start gap-1">
+                            <span className="text-blue-600">•</span>
+                            <span>Use the "Auto-Balance" button below to redistribute load automatically.</span>
+                          </li>
+                        )}
+                      </>
+                    );
                   })()}
-                  {!hasSaturatedNodes && !hasHighNodes && monthlyStddev <= 5 && (
-                    <li className="flex items-start gap-1">
-                      <span className="text-green-600">•</span>
-                      <span>System operating optimally. Maintain regular monitoring.</span>
-                    </li>
-                  )}
                 </ul>
               </div>
 
@@ -344,30 +387,52 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
               <div>
                 <p className="text-xs font-medium text-gray-700 mb-1">📈 Additional Statistics:</p>
                 <ul className="text-xs text-gray-600 space-y-1 ml-4">
-                  <li className="flex items-start gap-1">
-                    <span className="text-blue-600">•</span>
-                    <span>Nodes requiring attention: {(() => {
-                      const saturated = new Set(cityData.filter(d => d.saturation_level === 'saturated').map(d => d.node_code));
-                      const high = new Set(cityData.filter(d => d.saturation_level === 'high').map(d => d.node_code));
-                      const needAttention = [...saturated, ...high];
-                      return needAttention.length > 0 ? needAttention.join(', ') : 'None';
-                    })()}</span>
-                  </li>
-                  <li className="flex items-start gap-1">
-                    <span className="text-blue-600">•</span>
-                    <span>Week with highest load: W{(() => {
-                      const maxWeek = weeks.reduce((max, w) => weekTotals[w] > weekTotals[max] ? w : max, weeks[0]);
-                      return maxWeek;
-                    })()} ({weekTotals[weeks.reduce((max, w) => weekTotals[w] > weekTotals[max] ? w : max, weeks[0])]} shipments)</span>
-                  </li>
-                  <li className="flex items-start gap-1">
-                    <span className="text-blue-600">•</span>
-                    <span>Comparison with reference: Current average {avgPerNode.toFixed(1)} vs reference {cityData[0]?.reference_load || 6} samples/node</span>
-                  </li>
-                  <li className="flex items-start gap-1">
-                    <span className="text-blue-600">•</span>
-                    <span>Capacity utilized: {((avgPerNode / (cityData[0]?.reference_load || 6)) * 100).toFixed(0)}% of reference capacity</span>
-                  </li>
+                  {(() => {
+                    // Find cell with max load
+                    let maxCell = {node: '', week: 0, count: 0};
+                    nodes.forEach(nodeCode => {
+                      weeks.forEach(week => {
+                        const count = matrix[nodeCode]?.[week]?.shipment_count || 0;
+                        if (count > maxCell.count) {
+                          maxCell = {node: nodeCode, week, count};
+                        }
+                      });
+                    });
+                    
+                    // Find cells above threshold
+                    const problematicCells: string[] = [];
+                    nodes.forEach(nodeCode => {
+                      weeks.forEach(week => {
+                        const count = matrix[nodeCode]?.[week]?.shipment_count || 0;
+                        if (count >= highThreshold) {
+                          problematicCells.push(`${nodeCode}/W${week}`);
+                        }
+                      });
+                    });
+                    
+                    return (
+                      <>
+                        {maxCell.count > 0 && (
+                          <li className="flex items-start gap-1">
+                            <span className="text-blue-600">•</span>
+                            <span>Highest load cell: {maxCell.node} / W{maxCell.week} ({maxCell.count} shipments)</span>
+                          </li>
+                        )}
+                        <li className="flex items-start gap-1">
+                          <span className="text-blue-600">•</span>
+                          <span>Cells requiring attention: {problematicCells.length > 0 ? problematicCells.slice(0, 5).join(', ') + (problematicCells.length > 5 ? ` +${problematicCells.length - 5} more` : '') : 'None'}</span>
+                        </li>
+                        <li className="flex items-start gap-1">
+                          <span className="text-blue-600">•</span>
+                          <span>Thresholds: High ≥{highThreshold.toFixed(1)}, Saturated ≥{saturatedThreshold.toFixed(1)} shipments/cell</span>
+                        </li>
+                        <li className="flex items-start gap-1">
+                          <span className="text-blue-600">•</span>
+                          <span>Reference: {referenceLoad} samples/node, {deviationPercent.toFixed(0)}% tolerance</span>
+                        </li>
+                      </>
+                    );
+                  })()}
                 </ul>
               </div>
             </div>
