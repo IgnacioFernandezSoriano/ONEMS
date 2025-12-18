@@ -1,6 +1,7 @@
 -- Drop existing function
 DROP FUNCTION IF EXISTS rpc_balance_node_load_by_period(uuid, date, date, boolean);
 
+-- V4: Added NULLIF to prevent division by zero errors
 -- Create improved aliquot balancing function with round-robin distribution
 CREATE OR REPLACE FUNCTION rpc_balance_node_load_by_period(
   p_city_id UUID,
