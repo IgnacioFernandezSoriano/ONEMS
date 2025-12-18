@@ -57,17 +57,25 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
     weekStddevs[week] = weekData[0]?.city_weekly_stddev || 0;
   });
 
-  const getLoadColor = (count: number, avg: number) => {
-    const percentage = (count / avg) * 100;
-    if (percentage > 150) return 'text-red-700';
-    if (percentage > 120) return 'text-orange-600';
+  // Get reference load and deviation from cityData
+  const referenceLoad = cityData[0]?.reference_load || 6;
+  const deviationPercent = cityData[0]?.deviation_threshold 
+    ? ((cityData[0].deviation_threshold - referenceLoad) / referenceLoad) * 100 
+    : 20;
+  
+  // Calculate thresholds based on reference and deviation
+  const highThreshold = referenceLoad * (1 + deviationPercent / 100);
+  const saturatedThreshold = referenceLoad * (1 + (deviationPercent * 1.5) / 100);
+
+  const getLoadColor = (count: number) => {
+    if (count >= saturatedThreshold) return 'text-red-700';
+    if (count >= highThreshold) return 'text-orange-600';
     return 'text-green-700';
   };
 
-  const getLoadIcon = (count: number, avg: number) => {
-    const percentage = (count / avg) * 100;
-    if (percentage > 150) return '🔴';
-    if (percentage > 120) return '🟡';
+  const getLoadIcon = (count: number) => {
+    if (count >= saturatedThreshold) return '🔴';
+    if (count >= highThreshold) return '🟡';
     return '🟢';
   };
 
@@ -155,9 +163,21 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {nodes.map((nodeCode) => (
+            {nodes.map((nodeCode) => {
+              // Get panelist name for this node
+              const nodeData = cityData.find(d => d.node_code === nodeCode);
+              const panelistName = nodeData?.panelist_name;
+              
+              return (
               <tr key={nodeCode} className="hover:bg-gray-50">
-                <td className="px-4 py-3 font-medium text-gray-900">{nodeCode}</td>
+                <td className="px-4 py-3">
+                  <div className="flex flex-col">
+                    <span className="font-medium text-gray-900">{nodeCode}</span>
+                    <span className="text-xs text-gray-500">
+                      {panelistName || 'No panelist'}
+                    </span>
+                  </div>
+                </td>
                 {weeks.map((week) => {
                   const data = matrix[nodeCode]?.[week];
                   if (!data) {
@@ -171,11 +191,10 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
                     <td key={week} className="px-4 py-3 text-center">
                       <span
                         className={`inline-flex items-center gap-1 font-medium ${getLoadColor(
-                          data.shipment_count,
-                          weekAverages[week]
+                          data.shipment_count
                         )}`}
                       >
-                        <span>{getLoadIcon(data.shipment_count, weekAverages[week])}</span>
+                        <span>{getLoadIcon(data.shipment_count)}</span>
                         {data.shipment_count}
                       </span>
                     </td>
@@ -186,7 +205,8 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
                 </td>
                 <td className="px-4 py-3 text-center">{getStatusBadge(nodeCode)}</td>
               </tr>
-            ))}
+              );
+            })}
 
             {/* Totals Row */}
             <tr className="bg-gray-50 font-semibold border-t-2 border-gray-300">

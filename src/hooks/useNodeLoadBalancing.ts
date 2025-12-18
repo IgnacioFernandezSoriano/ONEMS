@@ -5,6 +5,7 @@ export interface NodeLoadData {
   account_id: string;
   node_id: string;
   node_code: string;
+  panelist_name?: string;
   city_name: string;
   city_id: string;
   week_number: number;
