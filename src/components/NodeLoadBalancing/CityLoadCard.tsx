@@ -217,6 +217,125 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
         </table>
       </div>
 
+      {/* Recommendations Section */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-t border-gray-200">
+        <div className="flex items-start gap-3">
+          <div className="flex-shrink-0 mt-1">
+            <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+            </svg>
+          </div>
+          <div className="flex-1">
+            <h4 className="text-sm font-semibold text-gray-900 mb-3">💡 Recomendaciones</h4>
+            
+            {/* Optimization Recommendations */}
+            <div className="mb-3">
+              <p className="text-xs font-medium text-gray-700 mb-1">📊 Optimización:</p>
+              <ul className="text-xs text-gray-600 space-y-1 ml-4">
+                {monthlyStddev > 15 && (
+                  <li className="flex items-start gap-1">
+                    <span className="text-red-600">•</span>
+                    <span>Desviación estándar muy alta ({monthlyStddev.toFixed(1)}). Se recomienda balancear urgentemente para mejorar la distribución.</span>
+                  </li>
+                )}
+                {monthlyStddev > 10 && monthlyStddev <= 15 && (
+                  <li className="flex items-start gap-1">
+                    <span className="text-orange-600">•</span>
+                    <span>Desviación estándar moderada ({monthlyStddev.toFixed(1)}). El balanceo podría mejorar la eficiencia.</span>
+                  </li>
+                )}
+                {monthlyStddev > 5 && monthlyStddev <= 10 && (
+                  <li className="flex items-start gap-1">
+                    <span className="text-yellow-600">•</span>
+                    <span>Desviación estándar aceptable ({monthlyStddev.toFixed(1)}). Distribución razonablemente equilibrada.</span>
+                  </li>
+                )}
+                {monthlyStddev <= 5 && (
+                  <li className="flex items-start gap-1">
+                    <span className="text-green-600">•</span>
+                    <span>Distribución óptima alcanzada (stddev: {monthlyStddev.toFixed(1)}). No se requiere balanceo.</span>
+                  </li>
+                )}
+                {avgPerNode > 15 && nodes.length < 3 && (
+                  <li className="flex items-start gap-1">
+                    <span className="text-orange-600">•</span>
+                    <span>Considera agregar más nodos. Promedio actual ({avgPerNode.toFixed(1)}) supera la capacidad recomendada.</span>
+                  </li>
+                )}
+              </ul>
+            </div>
+
+            {/* Action Recommendations */}
+            <div className="mb-3">
+              <p className="text-xs font-medium text-gray-700 mb-1">🎯 Acciones Sugeridas:</p>
+              <ul className="text-xs text-gray-600 space-y-1 ml-4">
+                {hasSaturatedNodes && (
+                  <li className="flex items-start gap-1">
+                    <span className="text-red-600">•</span>
+                    <span><strong>Urgente:</strong> Balancear ahora para reducir saturación en nodos críticos.</span>
+                  </li>
+                )}
+                {hasHighNodes && !hasSaturatedNodes && (
+                  <li className="flex items-start gap-1">
+                    <span className="text-orange-600">•</span>
+                    <span>Algunos nodos tienen carga alta. Balancear preventivamente para evitar saturación.</span>
+                  </li>
+                )}
+                {(() => {
+                  const overloadedWeeks = weeks.filter(w => weekAverages[w] > avgPerNode * 1.3);
+                  if (overloadedWeeks.length > 0) {
+                    return (
+                      <li className="flex items-start gap-1">
+                        <span className="text-orange-600">•</span>
+                        <span>Semanas sobrecargadas detectadas: {overloadedWeeks.map(w => `W${w}`).join(', ')}. Redistribuir carga entre semanas.</span>
+                      </li>
+                    );
+                  }
+                  return null;
+                })()}
+                {!hasSaturatedNodes && !hasHighNodes && monthlyStddev <= 5 && (
+                  <li className="flex items-start gap-1">
+                    <span className="text-green-600">•</span>
+                    <span>Sistema operando óptimamente. Mantener monitoreo regular.</span>
+                  </li>
+                )}
+              </ul>
+            </div>
+
+            {/* Additional Statistics */}
+            <div>
+              <p className="text-xs font-medium text-gray-700 mb-1">📈 Estadísticas Adicionales:</p>
+              <ul className="text-xs text-gray-600 space-y-1 ml-4">
+                <li className="flex items-start gap-1">
+                  <span className="text-blue-600">•</span>
+                  <span>Nodos que necesitan atención: {(() => {
+                    const saturated = new Set(cityData.filter(d => d.saturation_level === 'saturated').map(d => d.node_code));
+                    const high = new Set(cityData.filter(d => d.saturation_level === 'high').map(d => d.node_code));
+                    const needAttention = [...saturated, ...high];
+                    return needAttention.length > 0 ? needAttention.join(', ') : 'Ninguno';
+                  })()}</span>
+                </li>
+                <li className="flex items-start gap-1">
+                  <span className="text-blue-600">•</span>
+                  <span>Semana con mayor carga: W{(() => {
+                    const maxWeek = weeks.reduce((max, w) => weekTotals[w] > weekTotals[max] ? w : max, weeks[0]);
+                    return maxWeek;
+                  })()} ({weekTotals[weeks.reduce((max, w) => weekTotals[w] > weekTotals[max] ? w : max, weeks[0])]} shipments)</span>
+                </li>
+                <li className="flex items-start gap-1">
+                  <span className="text-blue-600">•</span>
+                  <span>Comparación con referencia: Promedio actual {avgPerNode.toFixed(1)} vs referencia {cityData[0]?.reference_load || 6} muestras/nodo</span>
+                </li>
+                <li className="flex items-start gap-1">
+                  <span className="text-blue-600">•</span>
+                  <span>Capacidad utilizada: {((avgPerNode / (cityData[0]?.reference_load || 6)) * 100).toFixed(0)}% de la capacidad de referencia</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Actions */}
       <div className="bg-gray-50 px-6 py-4 border-t border-gray-200 flex items-center gap-3">
         <div className="group relative">
