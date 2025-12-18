@@ -1,6 +1,6 @@
 -- Function to analyze node load for a date period with custom reference and deviation
--- V7: Fixed origin_city_id error - these fields don't exist in allocation_plan_details
---     Simplified logic: count shipments where node is origin, regardless of city match
+-- V8: Fixed type mismatch - cast panelist_name to TEXT to match return type
+--     V7: Fixed origin_city_id error - simplified to count origin shipments only
 
 -- Drop existing function first
 DROP FUNCTION IF EXISTS rpc_get_node_load_by_period(uuid,date,date,numeric,numeric);
@@ -80,7 +80,7 @@ BEGIN
       p_account_id AS account_id,
       n.id AS node_id,
       n.auto_id AS node_code,
-      pan.name AS panelist_name,
+      pan.name::TEXT AS panelist_name,
       c.name AS city_name,
       c.id AS city_id,
       w.week_num,
@@ -195,5 +195,6 @@ GRANT EXECUTE ON FUNCTION rpc_get_node_load_by_period TO authenticated;
 
 COMMENT ON FUNCTION rpc_get_node_load_by_period IS 
 'Analyzes node load distribution for a custom date period using allocation_plan_details.
+V8: Fixed type mismatch - cast panelist_name to TEXT to match return type.
 V7: Fixed origin_city_id error - simplified to count only origin shipments per node.
 Includes panelist_name for each node.';
