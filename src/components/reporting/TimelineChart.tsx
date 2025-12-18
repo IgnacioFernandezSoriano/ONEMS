@@ -38,7 +38,7 @@ export function TimelineChart({ data }: TimelineChartProps) {
             label={{ value: 'Business Days', angle: -90, position: 'insideLeft' }}
           />
           <Tooltip 
-            formatter={(value: number | undefined) => value !== undefined ? value.toFixed(1) : ''}
+            formatter={(value: any) => typeof value === 'number' ? value.toFixed(1) : ''}
             labelFormatter={(label) => `Shipment: ${label}`}
           />
           <Legend 
