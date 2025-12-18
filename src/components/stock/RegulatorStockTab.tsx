@@ -1,10 +1,11 @@
 import React, { useState, useMemo } from 'react'
-import { Search, Filter, RotateCcw } from 'lucide-react'
+import { Search, Filter, RotateCcw, Download } from 'lucide-react'
 import { useStockManagement } from '../../hooks/useStockManagement'
 import { useMaterialCatalog } from '../../hooks/useMaterialCatalog'
 import { SmartTooltip } from '../common/SmartTooltip'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
+import { downloadCSV } from '../../lib/exportUtils'
 
 export default function RegulatorStockTab() {
   const { regulatorStocks, loading, updateRegulatorStock, reload } = useStockManagement()
@@ -56,6 +57,24 @@ export default function RegulatorStockTab() {
     setSearchTerm('')
     setSelectedMaterialId('')
     setShowLowStockOnly(false)
+  }
+
+  const handleExportCSV = () => {
+    if (filteredStocks.length === 0) {
+      alert('No stock data to export')
+      return
+    }
+
+    const csvData = filteredStocks.map(stock => ({
+      'Material Code': stock.material?.code || 'N/A',
+      'Material Name': stock.material?.name || 'Unknown',
+      'Quantity': stock.quantity,
+      'Unit': stock.material?.unit_measure || 'un',
+      'Minimum': stock.min_stock || 0,
+      'Status': stock.min_stock && stock.quantity < stock.min_stock ? 'Low Stock' : 'Normal'
+    }))
+
+    downloadCSV(csvData, `regulator-stock-${new Date().toISOString().split('T')[0]}.csv`)
   }
 
   const getStatusBadge = (stock: typeof regulatorStocks[0]) => {
@@ -150,14 +169,21 @@ export default function RegulatorStockTab() {
           </div>
         </div>
 
-        {/* Reset Button */}
-        <div className="mt-4">
+        {/* Action Buttons */}
+        <div className="mt-4 flex items-center gap-2">
           <button
             onClick={handleResetFilters}
             className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
             <RotateCcw className="h-4 w-4 mr-2" />
             Reset Filters
+          </button>
+          <button
+            onClick={handleExportCSV}
+            className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Export CSV
           </button>
         </div>
       </div>
@@ -189,9 +215,6 @@ export default function RegulatorStockTab() {
                     Minimum
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Maximum
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -220,11 +243,6 @@ export default function RegulatorStockTab() {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">
                           {stock.min_stock || 0}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
-                          {stock.max_stock || 0}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">

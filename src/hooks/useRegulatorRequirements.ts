@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 import { calculateMaterialRequirements } from '../lib/materialCalculator'
@@ -33,6 +33,66 @@ export function useRegulatorRequirements() {
   const [error, setError] = useState<string | null>(null)
   const [requirements, setRequirements] = useState<MaterialRequirementPeriod[]>([])
 
+  const loadAllRequirements = useCallback(async () => {
+    if (!profile?.account_id) return
+
+    setLoading(true)
+    try {
+      const { data, error: loadError } = await supabase
+        .from('material_requirements_periods')
+        .select(`
+          *,
+          material:material_catalog(code, name, unit_measure)
+        `)
+        .eq('account_id', profile.account_id)
+        .neq('status', 'received') // Show all pending and ordered
+        .order('created_at', { ascending: false })
+
+      if (loadError) throw loadError
+
+      // Get current stocks to calculate net quantity
+      const materialIds = (data || []).map(item => item.material_id)
+      const { data: stocks } = await supabase
+        .from('material_stocks')
+        .select('material_id, quantity')
+        .eq('account_id', profile.account_id)
+        .in('material_id', materialIds)
+
+      const stockMap: Record<string, number> = {}
+      if (stocks) {
+        stocks.forEach(s => {
+          stockMap[s.material_id] = s.quantity
+        })
+      }
+
+      const formatted = (data || []).map(item => {
+        const currentStock = stockMap[item.material_id] || 0
+        const netQuantity = Math.max(0, item.quantity_needed - currentStock)
+        return {
+          ...item,
+          material_code: item.material?.code || 'N/A',
+          material_name: item.material?.name || 'No name',
+          unit_measure: item.material?.unit_measure || 'un',
+          net_quantity: netQuantity
+        }
+      })
+
+      setRequirements(formatted)
+    } catch (err) {
+      console.error('Error loading all requirements:', err)
+      setError(err instanceof Error ? err.message : 'Error loading requirements')
+    } finally {
+      setLoading(false)
+    }
+  }, [profile?.account_id])
+
+  // Load all requirements on mount
+  useEffect(() => {
+    if (profile?.account_id) {
+      loadAllRequirements()
+    }
+  }, [profile?.account_id, loadAllRequirements])
+
   const calculate = useCallback(async (startDate: string, endDate: string) => {
     if (!profile?.account_id) {
       setError('No account ID found')
@@ -52,59 +112,119 @@ export function useRegulatorRequirements() {
       )
 
 
-      // 2. Check existing requirements for this period
-      const { data: existingRequirements } = await supabase
+      // 2. Get ALL existing pending requirements (to unify by material)
+      const { data: allPendingRequirements } = await supabase
         .from('material_requirements_periods')
-        .select('material_id, status, quantity_needed')
+        .select('id, material_id, period_start, period_end, quantity_needed, plans_count')
         .eq('account_id', profile.account_id)
-        .eq('period_start', startDate)
-        .eq('period_end', endDate)
+        .eq('status', 'pending')
+        .in('material_id', calculatedRequirements.map(r => r.material_id))
 
-      const existingMap: Record<string, { status: string; quantity_needed: number }> = {}
-      if (existingRequirements) {
-        existingRequirements.forEach(r => {
-          existingMap[r.material_id] = { status: r.status, quantity_needed: r.quantity_needed }
+      // Group pending requirements by material
+      const pendingByMaterial: Record<string, Array<{
+        id: string
+        period_start: string
+        period_end: string
+        quantity_needed: number
+        plans_count: number
+      }>> = {}
+      
+      if (allPendingRequirements) {
+        allPendingRequirements.forEach(r => {
+          if (!pendingByMaterial[r.material_id]) {
+            pendingByMaterial[r.material_id] = []
+          }
+          pendingByMaterial[r.material_id].push(r)
         })
       }
 
-      // 3. Upsert or insert new requirements
+      // 3. Get current stocks to calculate net quantity
+      const materialIds = calculatedRequirements.map(r => r.material_id)
+      const { data: stocks } = await supabase
+        .from('material_stocks')
+        .select('material_id, quantity')
+        .eq('account_id', profile.account_id)
+        .in('material_id', materialIds)
+
+      const stockMap: Record<string, number> = {}
+      if (stocks) {
+        stocks.forEach(s => {
+          stockMap[s.material_id] = s.quantity
+        })
+      }
+
+      // Get ordered quantities (in transit) for this period
+      const { data: orderedRequirements } = await supabase
+        .from('material_requirements_periods')
+        .select('material_id, quantity_ordered')
+        .eq('account_id', profile.account_id)
+        .eq('status', 'ordered')
+        .in('material_id', materialIds)
+
+      const orderedMap: Record<string, number> = {}
+      if (orderedRequirements) {
+        orderedRequirements.forEach(r => {
+          orderedMap[r.material_id] = (orderedMap[r.material_id] || 0) + (r.quantity_ordered || 0)
+        })
+      }
+
+      // 4. Process each calculated requirement and unify pending ones
       for (const req of calculatedRequirements) {
-        const existing = existingMap[req.material_id]
+        const currentStock = stockMap[req.material_id] || 0
+        const quantityOrdered = orderedMap[req.material_id] || 0
         
-        if (existing) {
-          // If already ordered or received, create a NEW line instead of updating
-          if (existing.status === 'ordered' || existing.status === 'received') {
-            // Only create new line if quantity changed
-            if (existing.quantity_needed !== req.quantity_needed) {
-              await supabase
-                .from('material_requirements_periods')
-                .insert({
-                  account_id: profile.account_id,
-                  period_start: startDate,
-                  period_end: endDate,
-                  material_id: req.material_id,
-                  quantity_needed: req.quantity_needed,
-                  plans_count: req.plans_count,
-                  status: 'pending'
-                })
-            }
-          } else {
-            // Status is 'pending', safe to update
-            await supabase
-              .from('material_requirements_periods')
-              .update({
-                quantity_needed: req.quantity_needed,
-                plans_count: req.plans_count,
-                updated_at: new Date().toISOString()
-              })
-              .eq('account_id', profile.account_id)
-              .eq('period_start', startDate)
-              .eq('period_end', endDate)
-              .eq('material_id', req.material_id)
-              .eq('status', 'pending')
-          }
+        // Net Quantity = Needed - Current Stock - Already Ordered (in transit)
+        const netQuantity = Math.max(0, req.quantity_needed - currentStock - quantityOrdered)
+        
+        // Skip if we have enough stock + ordered
+        if (netQuantity === 0) {
+          continue
+        }
+
+        const existingPending = pendingByMaterial[req.material_id] || []
+        
+        if (existingPending.length > 0) {
+          // Unify all pending requirements for this material
+          // Calculate unified period (earliest start, latest end)
+          const allPeriods = [...existingPending, { period_start: startDate, period_end: endDate }]
+          const earliestStart = allPeriods.reduce((min, p) => 
+            p.period_start < min ? p.period_start : min, 
+            allPeriods[0].period_start
+          )
+          const latestEnd = allPeriods.reduce((max, p) => 
+            p.period_end > max ? p.period_end : max, 
+            allPeriods[0].period_end
+          )
+          
+          // Sum all quantities
+          const totalQuantityNeeded = existingPending.reduce((sum, p) => sum + p.quantity_needed, 0) + req.quantity_needed
+          const totalPlansCount = existingPending.reduce((sum, p) => sum + p.plans_count, 0) + req.plans_count
+          
+          // Delete all existing pending records for this material
+          await supabase
+            .from('material_requirements_periods')
+            .delete()
+            .eq('account_id', profile.account_id)
+            .eq('material_id', req.material_id)
+            .eq('status', 'pending')
+          
+          // Insert unified requirement
+          await supabase
+            .from('material_requirements_periods')
+            .insert({
+              account_id: profile.account_id,
+              period_start: earliestStart,
+              period_end: latestEnd,
+              material_id: req.material_id,
+              quantity_needed: totalQuantityNeeded,
+              plans_count: totalPlansCount,
+              status: 'pending'
+            })
+          
+          // Clear from map to avoid reprocessing
+          delete pendingByMaterial[req.material_id]
         } else {
-          // New requirement, insert
+          // No existing pending, insert new
           await supabase
             .from('material_requirements_periods')
             .insert({
@@ -119,8 +239,8 @@ export function useRegulatorRequirements() {
         }
       }
 
-      // 3. Load persisted requirements for this period
-      await loadRequirements(startDate, endDate)
+      // 5. Load all persisted requirements (not just this period)
+      await loadAllRequirements()
     } catch (err) {
       console.error('Error calculating regulator requirements:', err)
       setError(err instanceof Error ? err.message : 'Error calculating requirements')
@@ -219,16 +339,13 @@ export function useRegulatorRequirements() {
 
       if (updateError) throw updateError
 
-      // Reload current requirements
-      if (requirements.length > 0) {
-        const firstReq = requirements[0]
-        await loadRequirements(firstReq.period_start, firstReq.period_end)
-      }
+      // Reload all requirements
+      await loadAllRequirements()
     } catch (err) {
       console.error('Error marking as ordered:', err)
       throw err
     }
-  }, [requirements, loadRequirements, profile?.account_id])
+  }, [loadAllRequirements, profile?.account_id])
 
   const updateQuantityReceived = useCallback(async (
     requirementId: string,
@@ -258,16 +375,13 @@ export function useRegulatorRequirements() {
 
       if (updateError) throw updateError
 
-      // Reload current requirements
-      if (requirements.length > 0) {
-        const firstReq = requirements[0]
-        await loadRequirements(firstReq.period_start, firstReq.period_end)
-      }
+      // Reload all requirements
+      await loadAllRequirements()
     } catch (err) {
       console.error('Error updating quantity received:', err)
       throw err
     }
-  }, [requirements, loadRequirements])
+  }, [loadAllRequirements])
 
   const receivePO = useCallback(async (
     requirementId: string,
@@ -346,21 +460,35 @@ export function useRegulatorRequirements() {
         })
         .eq('id', requirementId)
 
-      // 4. Reload requirements (will exclude received items)
-      if (requirements.length > 0) {
-        const firstReq = requirements[0]
-        await loadRequirements(firstReq.period_start, firstReq.period_end)
-      }
+      // 4. Reload all requirements (will exclude received items)
+      await loadAllRequirements()
     } catch (err) {
       console.error('Error receiving PO:', err)
       throw err
     }
-  }, [profile?.account_id, requirements, loadRequirements])
+  }, [profile?.account_id, loadAllRequirements])
 
   const reset = useCallback(() => {
     setRequirements([])
     setError(null)
   }, [])
+
+  const deleteRequirement = useCallback(async (requirementId: string) => {
+    try {
+      const { error: deleteError } = await supabase
+        .from('material_requirements_periods')
+        .delete()
+        .eq('id', requirementId)
+
+      if (deleteError) throw deleteError
+
+      // Reload all requirements
+      await loadAllRequirements()
+    } catch (err) {
+      console.error('Error deleting requirement:', err)
+      throw err
+    }
+  }, [loadAllRequirements])
 
   return {
     loading,
@@ -368,9 +496,11 @@ export function useRegulatorRequirements() {
     requirements,
     calculate,
     loadRequirements,
+    loadAllRequirements,
     markAsOrdered,
     receivePO,
     updateQuantityReceived,
+    deleteRequirement,
     reset
   }
 }

@@ -1,13 +1,12 @@
 import React, { useState, useMemo } from 'react'
-import { Package, Search, Filter, RotateCcw, Send, Trash2, AlertCircle, CheckCircle, Clock, Download, FileText, ChevronDown, ChevronUp, Info, Calendar, CheckSquare, Square } from 'lucide-react'
+import { Search, Truck, Calendar, Filter, RotateCcw, CheckSquare, Square, Send, Package } from 'lucide-react'
 import { useStockManagement } from '../../hooks/useStockManagement'
 import { useProposedShipments } from '../../hooks/useProposedShipments'
 import { useMaterialCatalog } from '../../hooks/useMaterialCatalog'
 import { SmartTooltip } from '../common/SmartTooltip'
-import { downloadCSV, generatePackingListPDF, printPDF } from '../../lib/exportUtils'
 
 export default function ShipmentsTab() {
-  const { shipments, loading: loadingShipments, createShipment, updateShipmentStatus, deleteShipment, reload } = useStockManagement()
+  const { shipments, loading: loadingShipments, createShipment, updateShipmentStatus, reload } = useStockManagement()
   const { proposedShipments, loading: loadingProposed, calculate } = useProposedShipments()
   const { catalog: materials } = useMaterialCatalog()
 
@@ -20,7 +19,6 @@ export default function ShipmentsTab() {
   const [selectedPanelistId, setSelectedPanelistId] = useState<string>('')
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
   const [isFiltersCollapsed, setIsFiltersCollapsed] = useState(false)
-  const [isMetricsCollapsed, setIsMetricsCollapsed] = useState(false)
 
   // Generate year range (current year to current year + 10)
   const yearRange = useMemo(() => {
@@ -110,15 +108,6 @@ export default function ShipmentsTab() {
     return filteredShipments.filter(s => s.status === 'pending')
   }, [filteredShipments])
 
-  // Calculate metrics
-  const metrics = useMemo(() => {
-    const pending = pendingShipments.length
-    const confirmed = filteredShipments.filter(s => s.status === 'sent').length
-    const totalItems = pendingShipments.reduce((sum, s) => sum + (s.items?.length || 0), 0)
-    
-    return { pending, confirmed, totalItems }
-  }, [pendingShipments, filteredShipments])
-
   const handleCalculate = () => {
     if (!startDate || !endDate) {
       alert('Please select both start and end dates')
@@ -127,46 +116,12 @@ export default function ShipmentsTab() {
     calculate(startDate, endDate)
   }
 
-  const formatDateLocal = (date: Date) => {
-    const y = date.getFullYear()
-    const m = String(date.getMonth() + 1).padStart(2, '0')
-    const d = String(date.getDate()).padStart(2, '0')
-    return `${y}-${m}-${d}`
-  }
-
   const handleMonthSelect = (year: number, month: number) => {
     const firstDay = new Date(year, month - 1, 1)
     const lastDay = new Date(year, month, 0)
     
-    setStartDate(formatDateLocal(firstDay))
-    setEndDate(formatDateLocal(lastDay))
-  }
-
-  const handleFirstSemesterSelect = () => {
-    const currentYear = new Date().getFullYear()
-    const firstDay = new Date(currentYear, 0, 1) // Jan 1
-    const lastDay = new Date(currentYear, 5, 30) // Jun 30
-    
-    setStartDate(formatDateLocal(firstDay))
-    setEndDate(formatDateLocal(lastDay))
-  }
-
-  const handleSecondSemesterSelect = () => {
-    const currentYear = new Date().getFullYear()
-    const firstDay = new Date(currentYear, 6, 1) // Jul 1
-    const lastDay = new Date(currentYear, 11, 31) // Dec 31
-    
-    setStartDate(formatDateLocal(firstDay))
-    setEndDate(formatDateLocal(lastDay))
-  }
-
-  const handleYearSelect = () => {
-    const currentYear = new Date().getFullYear()
-    const firstDay = new Date(currentYear, 0, 1) // Jan 1
-    const lastDay = new Date(currentYear, 11, 31) // Dec 31
-    
-    setStartDate(formatDateLocal(firstDay))
-    setEndDate(formatDateLocal(lastDay))
+    setStartDate(firstDay.toISOString().split('T')[0])
+    setEndDate(lastDay.toISOString().split('T')[0])
   }
 
   const handleResetFilters = () => {
@@ -264,71 +219,6 @@ export default function ShipmentsTab() {
     }
   }
 
-  const handleDelete = async (shipmentId: string) => {
-    const confirmed = confirm('Are you sure you want to delete this shipment?')
-    if (!confirmed) return
-
-    try {
-      await deleteShipment(shipmentId)
-      alert('Shipment deleted successfully')
-      setSelectedShipmentIds(new Set())
-    } catch (error: any) {
-      alert(`Error deleting shipment: ${error.message}`)
-    }
-  }
-
-  const handleDeleteSelected = async () => {
-    if (selectedShipmentIds.size === 0) return
-    
-    const confirmed = confirm(`Delete ${selectedShipmentIds.size} shipment(s)? This action cannot be undone.`)
-    if (!confirmed) return
-
-    try {
-      for (const shipmentId of selectedShipmentIds) {
-        await deleteShipment(shipmentId)
-      }
-      alert(`${selectedShipmentIds.size} shipment(s) deleted successfully`)
-      setSelectedShipmentIds(new Set())
-    } catch (error: any) {
-      alert(`Error deleting shipments: ${error.message}`)
-    }
-  }
-
-  const handleExportCSV = () => {
-    if (selectedShipmentIds.size === 0) {
-      alert('Please select shipments to export')
-      return
-    }
-
-    const selectedData = pendingShipments
-      .filter(s => selectedShipmentIds.has(s.id))
-      .flatMap(s => 
-        s.items?.map((item: any) => ({
-          'Shipment ID': s.id.substring(0, 8),
-          'Panelist': s.panelist?.name || 'N/A',
-          'Panelist Code': s.panelist?.panelist_code || 'N/A',
-          'Material Code': item.material_code || 'N/A',
-          'Material Name': item.material_name || 'Unknown',
-          'Quantity': item.quantity_sent,
-          'Unit': item.unit_measure || 'un',
-          'Expected Date': s.expected_date ? new Date(s.expected_date).toLocaleDateString() : 'N/A'
-        })) || []
-      )
-
-    downloadCSV(selectedData, `shipments-${new Date().toISOString().split('T')[0]}.csv`)
-  }
-
-  const handleGeneratePackingList = () => {
-    if (selectedShipmentIds.size === 0) {
-      alert('Please select shipments to generate packing list')
-      return
-    }
-
-    const selectedData = pendingShipments.filter(s => selectedShipmentIds.has(s.id))
-    const htmlContent = generatePackingListPDF(selectedData, 'ONEMS')
-    printPDF(htmlContent, 'packing-list.pdf')
-  }
-
   const months = [
     { num: 1, name: 'Jan' }, { num: 2, name: 'Feb' }, { num: 3, name: 'Mar' },
     { num: 4, name: 'Apr' }, { num: 5, name: 'May' }, { num: 6, name: 'Jun' },
@@ -338,63 +228,7 @@ export default function ShipmentsTab() {
 
   return (
     <div className="space-y-6">
-      {/* Metrics Cards */}
-      {pendingShipments.length > 0 && (
-        <div className="bg-white border border-gray-200 rounded-lg">
-          <button
-            onClick={() => setIsMetricsCollapsed(!isMetricsCollapsed)}
-            className="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-gray-50"
-          >
-            <div className="flex items-center gap-2">
-              <Package className="h-4 w-4 text-gray-500" />
-              <span className="font-medium text-gray-900">Metrics Overview</span>
-            </div>
-            {isMetricsCollapsed ? (
-              <ChevronDown className="h-4 w-4 text-gray-500" />
-            ) : (
-              <ChevronUp className="h-4 w-4 text-gray-500" />
-            )}
-          </button>
-
-          {!isMetricsCollapsed && (
-            <div className="px-4 pb-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-yellow-800">Pending Shipments</p>
-                      <p className="text-2xl font-bold text-yellow-900 mt-1">{metrics.pending}</p>
-                    </div>
-                    <AlertCircle className="h-8 w-8 text-yellow-600" />
-                  </div>
-                </div>
-
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-green-800">Confirmed Shipments</p>
-                      <p className="text-2xl font-bold text-green-900 mt-1">{metrics.confirmed}</p>
-                    </div>
-                    <CheckCircle className="h-8 w-8 text-green-600" />
-                  </div>
-                </div>
-
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-blue-800">Total Items Pending</p>
-                      <p className="text-2xl font-bold text-blue-900 mt-1">{metrics.totalItems}</p>
-                    </div>
-                    <Package className="h-8 w-8 text-blue-600" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Calculate Shipments Section */}
+      {/* Filters Section */}
       <div className="bg-white border border-gray-200 rounded-lg">
         <button
           onClick={() => setIsFiltersCollapsed(!isFiltersCollapsed)}
@@ -402,8 +236,7 @@ export default function ShipmentsTab() {
         >
           <div className="flex items-center gap-2">
             <Filter className="h-4 w-4 text-gray-500" />
-            <span className="font-medium text-gray-900">Calculate & Generate Shipments</span>
-            <SmartTooltip content="Use this section to calculate material requirements for panelists based on allocation plans, then generate shipments to send materials to them" />
+            <span className="font-medium text-gray-900">Filters</span>
           </div>
           <span className="text-sm text-gray-500">
             {isFiltersCollapsed ? 'Show' : 'Hide'}
@@ -502,24 +335,6 @@ export default function ShipmentsTab() {
                       {month.name}
                     </button>
                   ))}
-                  <button
-                    onClick={handleFirstSemesterSelect}
-                    className="px-2 py-1 text-xs font-medium rounded border border-green-300 bg-green-50 hover:bg-green-100 hover:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
-                  >
-                    1st Semester
-                  </button>
-                  <button
-                    onClick={handleSecondSemesterSelect}
-                    className="px-2 py-1 text-xs font-medium rounded border border-teal-300 bg-teal-50 hover:bg-teal-100 hover:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
-                  >
-                    2nd Semester
-                  </button>
-                  <button
-                    onClick={handleYearSelect}
-                    className="px-2 py-1 text-xs font-medium rounded border border-purple-300 bg-purple-50 hover:bg-purple-100 hover:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  >
-                    Year
-                  </button>
                 </div>
               </div>
             </div>
@@ -536,32 +351,13 @@ export default function ShipmentsTab() {
               </button>
 
               {filteredProposedShipments.length > 0 && (
-                <>
-                  <button
-                    onClick={handleGenerateShipments}
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                  >
-                    <Package className="h-4 w-4 mr-2" />
-                    Generate Shipments ({filteredProposedShipments.filter(ps => ps.panelist_id).length})
-                  </button>
-                  <SmartTooltip content="Generate shipments for panelists based on allocation plans. The system will:
-
-1. Analyze all allocation plans in the date range
-2. Group materials by panelist (based on origin_panelist_id)
-3. Calculate quantity needed per material per panelist
-4. Discount panelist stock (if panelist already has the material)
-5. Create shipment records with status 'pending'
-
-Unification Logic:
-- If a pending shipment already exists for the same panelist, it will be unified
-- All materials for that panelist will be consolidated into one shipment
-- Quantities will be summed
-- The expected date will be updated to the most recent
-
-Note: Only panelists with assigned allocation plans will have shipments generated">
-                    <Info className="h-5 w-5 text-green-500 cursor-help" />
-                  </SmartTooltip>
-                </>
+                <button
+                  onClick={handleGenerateShipments}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                >
+                  <Package className="h-4 w-4 mr-2" />
+                  Generate Shipments ({filteredProposedShipments.filter(ps => ps.panelist_id).length})
+                </button>
               )}
 
               <button
@@ -589,11 +385,10 @@ Note: Only panelists with assigned allocation plans will have shipments generate
         </div>
       )}
 
-      {/* Shipments Filters */}
+      {/* Shipments History Filters */}
       <div className="bg-white border border-gray-200 rounded-lg">
-        <div className="px-4 py-3 border-b border-gray-200 flex items-center gap-2">
-          <h3 className="text-lg font-medium text-gray-900">Shipments</h3>
-          <SmartTooltip content="View and manage all generated shipments. Filter by status, panelist, or material to find specific shipments. Pending shipments can be confirmed for sending." />
+        <div className="px-4 py-3 border-b border-gray-200">
+          <h3 className="text-lg font-medium text-gray-900">Shipments History</h3>
         </div>
         <div className="px-4 py-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -676,36 +471,13 @@ Note: Only panelists with assigned allocation plans will have shipments generate
               Pending Shipments ({pendingShipments.length})
             </h3>
             {selectedShipmentIds.size > 0 && (
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={handleSendSelected}
-                  className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                >
-                  <Send className="h-4 w-4 mr-1" />
-                  Send {selectedShipmentIds.size} Selected
-                </button>
-                <button
-                  onClick={handleExportCSV}
-                  className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                >
-                  <Download className="h-4 w-4 mr-1" />
-                  Export CSV
-                </button>
-                <button
-                  onClick={handleGeneratePackingList}
-                  className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                >
-                  <FileText className="h-4 w-4 mr-1" />
-                  Packing List PDF
-                </button>
-                <button
-                  onClick={handleDeleteSelected}
-                  className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                >
-                  <Trash2 className="h-4 w-4 mr-1" />
-                  Delete {selectedShipmentIds.size} Selected
-                </button>
-              </div>
+              <button
+                onClick={handleSendSelected}
+                className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                <Send className="h-4 w-4 mr-1" />
+                Send {selectedShipmentIds.size} Selected
+              </button>
             )}
           </div>
 
@@ -800,21 +572,13 @@ Note: Only panelists with assigned allocation plans will have shipments generate
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => handleSendShipment(shipment.id)}
-                          className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                        >
-                          <Send className="h-4 w-4 mr-1" />
-                          Send
-                        </button>
-                        <button
-                          onClick={() => handleDelete(shipment.id)}
-                          className="inline-flex items-center px-2 py-1.5 border border-transparent text-sm font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
+                      <button
+                        onClick={() => handleSendShipment(shipment.id)}
+                        className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      >
+                        <Send className="h-4 w-4 mr-1" />
+                        Send
+                      </button>
                     </td>
                   </tr>
                 ))}

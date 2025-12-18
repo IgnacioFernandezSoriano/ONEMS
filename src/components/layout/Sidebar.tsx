@@ -136,11 +136,11 @@ export function Sidebar() {
       ],
     },
     {
-      label: 'Reporting',
+      label: 'REPORTING',
       items: [
         {
           path: '/reporting',
-          label: 'Reporting',
+          label: 'E2E',
           icon: BarChart3,
           roles: ['admin', 'superadmin'],
           children: [

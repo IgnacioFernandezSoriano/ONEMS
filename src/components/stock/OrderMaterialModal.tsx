@@ -3,14 +3,14 @@ import { X, ShoppingCart } from 'lucide-react'
 
 interface OrderMaterialModalProps {
   requirement: {
-    id?: string
+    id: string
     material_id: string
     material_code: string
     material_name: string
     unit_measure: string
     net_quantity: number
   }
-  onConfirm: (materialId: string, quantity: number) => void
+  onConfirm: (quantity: number) => void
   onClose: () => void
 }
 
@@ -23,7 +23,7 @@ export default function OrderMaterialModal({ requirement, onConfirm, onClose }: 
       alert('Quantity must be greater than 0')
       return
     }
-    onConfirm(requirement.material_id, quantity)
+    onConfirm(quantity)
   }
 
   return (

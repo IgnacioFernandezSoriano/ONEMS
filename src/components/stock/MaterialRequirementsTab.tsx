@@ -1,15 +1,16 @@
-import { useState, useMemo } from 'react'
-import { Search, Calendar, Filter, RotateCcw, CheckSquare, Square, ShoppingCart, Package } from 'lucide-react'
+import React, { useState, useMemo } from 'react'
+import { Package, Calendar, Filter, RotateCcw, CheckSquare, Square, ShoppingCart, Trash2, AlertCircle, Clock, Download, FileText, ChevronDown, ChevronUp, Info } from 'lucide-react'
 import { useStockManagement } from '../../hooks/useStockManagement'
 import { useRegulatorRequirements } from '../../hooks/useRegulatorRequirements'
 import { useMaterialCatalog } from '../../hooks/useMaterialCatalog'
 import { SmartTooltip } from '../common/SmartTooltip'
 import OrderMaterialModal from './OrderMaterialModal'
 import ReceivePOModal from './ReceivePOModal'
+import { downloadCSV, generatePurchaseOrderPDF, printPDF } from '../../lib/exportUtils'
 
 export default function MaterialRequirementsTab() {
   const { regulatorStocks, reload } = useStockManagement()
-  const { requirements, loading: loadingRequirements, calculate, markAsOrdered, receivePO } = useRegulatorRequirements()
+  const { requirements, loading: loadingRequirements, calculate, markAsOrdered, receivePO, deleteRequirement } = useRegulatorRequirements()
   const { catalog: materials } = useMaterialCatalog()
 
   // Filters
@@ -19,6 +20,7 @@ export default function MaterialRequirementsTab() {
   const [selectedStatus, setSelectedStatus] = useState<string>('')
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
   const [isFiltersCollapsed, setIsFiltersCollapsed] = useState(false)
+  const [isMetricsCollapsed, setIsMetricsCollapsed] = useState(false)
 
   // Selection for bulk actions
   const [selectedRequirements, setSelectedRequirements] = useState<Set<string>>(new Set())
@@ -78,6 +80,15 @@ export default function MaterialRequirementsTab() {
     })
   }, [filteredRequirements, regulatorStocks])
 
+  // Calculate metrics
+  const metrics = useMemo(() => {
+    const pending = enrichedRequirements.filter(r => r.status === 'pending').length
+    const ordered = enrichedRequirements.filter(r => r.status === 'ordered').length
+    const totalQuantity = enrichedRequirements.reduce((sum, r) => sum + r.net_quantity, 0)
+    
+    return { pending, ordered, totalQuantity }
+  }, [enrichedRequirements])
+
   const handleCalculate = () => {
     if (!startDate || !endDate) {
       alert('Please select both start and end dates')
@@ -87,12 +98,46 @@ export default function MaterialRequirementsTab() {
     setSelectedRequirements(new Set())
   }
 
+  const formatDateLocal = (date: Date) => {
+    const y = date.getFullYear()
+    const m = String(date.getMonth() + 1).padStart(2, '0')
+    const d = String(date.getDate()).padStart(2, '0')
+    return `${y}-${m}-${d}`
+  }
+
   const handleMonthSelect = (year: number, month: number) => {
     const firstDay = new Date(year, month - 1, 1)
     const lastDay = new Date(year, month, 0)
     
-    setStartDate(firstDay.toISOString().split('T')[0])
-    setEndDate(lastDay.toISOString().split('T')[0])
+    setStartDate(formatDateLocal(firstDay))
+    setEndDate(formatDateLocal(lastDay))
+  }
+
+  const handleFirstSemesterSelect = () => {
+    const currentYear = new Date().getFullYear()
+    const firstDay = new Date(currentYear, 0, 1) // Jan 1
+    const lastDay = new Date(currentYear, 5, 30) // Jun 30
+    
+    setStartDate(formatDateLocal(firstDay))
+    setEndDate(formatDateLocal(lastDay))
+  }
+
+  const handleSecondSemesterSelect = () => {
+    const currentYear = new Date().getFullYear()
+    const firstDay = new Date(currentYear, 6, 1) // Jul 1
+    const lastDay = new Date(currentYear, 11, 31) // Dec 31
+    
+    setStartDate(formatDateLocal(firstDay))
+    setEndDate(formatDateLocal(lastDay))
+  }
+
+  const handleYearSelect = () => {
+    const currentYear = new Date().getFullYear()
+    const firstDay = new Date(currentYear, 0, 1) // Jan 1
+    const lastDay = new Date(currentYear, 11, 31) // Dec 31
+    
+    setStartDate(formatDateLocal(firstDay))
+    setEndDate(formatDateLocal(lastDay))
   }
 
   const handleResetFilters = () => {
@@ -144,6 +189,68 @@ export default function MaterialRequirementsTab() {
     setSelectedRequirements(new Set())
   }
 
+  const handleDelete = async (requirementId: string) => {
+    const confirmed = confirm('Are you sure you want to delete this requirement?')
+    if (!confirmed) return
+
+    try {
+      await deleteRequirement(requirementId)
+      alert('Requirement deleted successfully')
+    } catch (error: any) {
+      alert(`Error deleting requirement: ${error.message}`)
+    }
+  }
+
+  const handleDeleteSelected = async () => {
+    if (selectedRequirements.size === 0) return
+    
+    const confirmed = confirm(`Delete ${selectedRequirements.size} requirement(s)? This action cannot be undone.`)
+    if (!confirmed) return
+
+    try {
+      for (const reqId of selectedRequirements) {
+        await deleteRequirement(reqId)
+      }
+      alert(`${selectedRequirements.size} requirement(s) deleted successfully`)
+      setSelectedRequirements(new Set())
+    } catch (error: any) {
+      alert(`Error deleting requirements: ${error.message}`)
+    }
+  }
+
+  const handleExportCSV = () => {
+    if (selectedRequirements.size === 0) {
+      alert('Please select requirements to export')
+      return
+    }
+
+    const selectedData = enrichedRequirements
+      .filter(r => selectedRequirements.has(r.id))
+      .map(r => ({
+        'Material Code': r.material_code,
+        'Material Name': r.material_name,
+        'Quantity Needed': r.quantity_needed,
+        'Current Stock': r.current_stock,
+        'Net Quantity': r.net_quantity,
+        'Unit': r.unit_measure,
+        'Status': r.status,
+        'Period': `${r.period_start} to ${r.period_end}`
+      }))
+
+    downloadCSV(selectedData, `material-requirements-${new Date().toISOString().split('T')[0]}.csv`)
+  }
+
+  const handleGeneratePDF = () => {
+    if (selectedRequirements.size === 0) {
+      alert('Please select requirements to generate purchase order')
+      return
+    }
+
+    const selectedData = enrichedRequirements.filter(r => selectedRequirements.has(r.id))
+    const htmlContent = generatePurchaseOrderPDF(selectedData, 'ONEMS')
+    printPDF(htmlContent, 'purchase-order.pdf')
+  }
+
   const getStatusBadge = (status: string) => {
     const styles = {
       pending: 'bg-yellow-100 text-yellow-800',
@@ -160,6 +267,52 @@ export default function MaterialRequirementsTab() {
 
   return (
     <div className="space-y-6">
+      {/* Metrics Cards */}
+      {enrichedRequirements.length > 0 && (
+        <div className="bg-white border border-gray-200 rounded-lg">
+          <button
+            onClick={() => setIsMetricsCollapsed(!isMetricsCollapsed)}
+            className="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-gray-50"
+          >
+            <div className="flex items-center gap-2">
+              <Package className="h-4 w-4 text-gray-500" />
+              <span className="font-medium text-gray-900">Metrics Overview</span>
+            </div>
+            {isMetricsCollapsed ? (
+              <ChevronDown className="h-4 w-4 text-gray-500" />
+            ) : (
+              <ChevronUp className="h-4 w-4 text-gray-500" />
+            )}
+          </button>
+
+          {!isMetricsCollapsed && (
+            <div className="px-4 pb-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-yellow-800">Pending Requirements</p>
+                      <p className="text-2xl font-bold text-yellow-900 mt-1">{metrics.pending}</p>
+                    </div>
+                    <AlertCircle className="h-8 w-8 text-yellow-600" />
+                  </div>
+                </div>
+
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-blue-800">Ordered</p>
+                      <p className="text-2xl font-bold text-blue-900 mt-1">{metrics.ordered}</p>
+                    </div>
+                    <Clock className="h-8 w-8 text-blue-600" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Filters */}
       <div className="bg-gray-50 border border-gray-200 rounded-lg">
         <button
@@ -182,7 +335,7 @@ export default function MaterialRequirementsTab() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
                   Start Date
-                  <SmartTooltip content="Start date for allocation plans to include" />
+                  <SmartTooltip content="Select the start date of the period for which you want to calculate material requirements based on allocation plans" />
                 </label>
                 <input
                   type="date"
@@ -195,7 +348,7 @@ export default function MaterialRequirementsTab() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
                   End Date
-                  <SmartTooltip content="End date for allocation plans to include" />
+                  <SmartTooltip content="Select the end date of the period. The system will analyze all allocation plans within this date range to determine material needs" />
                 </label>
                 <input
                   type="date"
@@ -208,7 +361,7 @@ export default function MaterialRequirementsTab() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
                   Material
-                  <SmartTooltip content="Filter by specific material" />
+                  <SmartTooltip content="Filter calculated requirements by a specific material to focus on individual items" />
                 </label>
                 <select
                   value={selectedMaterialId}
@@ -225,7 +378,7 @@ export default function MaterialRequirementsTab() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
                   Status
-                  <SmartTooltip content="Filter by requirement status" />
+                  <SmartTooltip content="Filter requirements by their current status: Pending (not yet ordered), Ordered (purchase order placed), or Received (materials in stock)" />
                 </label>
                 <select
                   value={selectedStatus}
@@ -245,7 +398,7 @@ export default function MaterialRequirementsTab() {
               <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
                 <Calendar className="h-4 w-4" />
                 Quick Month Selection
-                <SmartTooltip content="Click a month to set start/end dates for that entire month" />
+                <SmartTooltip content="Click any month button to automatically set the start and end dates for that entire month. This is the fastest way to calculate requirements for a specific month." />
               </label>
               <div className="flex items-center gap-2">
                 <select
@@ -262,11 +415,29 @@ export default function MaterialRequirementsTab() {
                     <button
                       key={month.num}
                       onClick={() => handleMonthSelect(selectedYear, month.num)}
-                      className="px-2 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="px-3 py-1 text-sm font-medium rounded-md border border-gray-300 hover:bg-blue-50 hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       {month.name}
                     </button>
                   ))}
+                  <button
+                    onClick={handleFirstSemesterSelect}
+                    className="px-3 py-1 text-sm font-medium rounded-md border border-green-300 bg-green-50 hover:bg-green-100 hover:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  >
+                    1st Semester
+                  </button>
+                  <button
+                    onClick={handleSecondSemesterSelect}
+                    className="px-3 py-1 text-sm font-medium rounded-md border border-teal-300 bg-teal-50 hover:bg-teal-100 hover:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  >
+                    2nd Semester
+                  </button>
+                  <button
+                    onClick={handleYearSelect}
+                    className="px-3 py-1 text-sm font-medium rounded-md border border-purple-300 bg-purple-50 hover:bg-purple-100 hover:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  >
+                    Year
+                  </button>
                 </div>
               </div>
             </div>
@@ -275,18 +446,35 @@ export default function MaterialRequirementsTab() {
             <div className="flex items-center gap-2">
               <button
                 onClick={handleCalculate}
-                disabled={loadingRequirements}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                disabled={loadingRequirements || !startDate || !endDate}
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Search className="h-4 w-4 mr-2" />
+                <Package className="h-4 w-4 mr-2" />
                 {loadingRequirements ? 'Calculating...' : 'Calculate Requirements'}
               </button>
+              <SmartTooltip content="Calculate material requirements for the selected period. The system will:
+
+1. Analyze all allocation plans in the date range
+2. Calculate total material needed per product
+3. Discount panelist stock (if panelist already has the material)
+4. Discount regulator stock
+5. Discount already ordered quantities (in transit)
+6. Add safety stock if current stock is below minimum
+
+Formula: Net Quantity = (Needed - Panelist Stock - Regulator Stock - Ordered) + Safety Stock
+
+Unification Logic:
+- If multiple pending requirements exist for the same material, they will be unified into one record
+- The period will span from the earliest start date to the latest end date
+- Quantities will be summed">
+                <Info className="h-5 w-5 text-blue-500 cursor-help" />
+              </SmartTooltip>
 
               <button
                 onClick={handleResetFilters}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
-                <RotateCcw className="h-4 w-4 mr-2" />
+                <RotateCcw className="h-4 w-4 mr-1" />
                 Reset
               </button>
             </div>
@@ -301,17 +489,40 @@ export default function MaterialRequirementsTab() {
             <h3 className="text-lg font-medium text-gray-900">
               Material Requirements ({enrichedRequirements.length})
             </h3>
-            {selectedRequirements.size > 0 && (
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={handleMarkSelectedAsOrdered}
-                  className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
-                >
-                  <ShoppingCart className="h-4 w-4 mr-1" />
-                  Order {selectedRequirements.size} Selected
-                </button>
-              </div>
-            )}
+            <div className="flex items-center gap-2">
+              {selectedRequirements.size > 0 && (
+                <>
+                  <button
+                    onClick={handleMarkSelectedAsOrdered}
+                    className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  >
+                    <ShoppingCart className="h-4 w-4 mr-1" />
+                    Mark {selectedRequirements.size} as Ordered
+                  </button>
+                  <button
+                    onClick={handleExportCSV}
+                    className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  >
+                    <Download className="h-4 w-4 mr-1" />
+                    Export CSV
+                  </button>
+                  <button
+                    onClick={handleGeneratePDF}
+                    className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  >
+                    <FileText className="h-4 w-4 mr-1" />
+                    Purchase Order PDF
+                  </button>
+                  <button
+                    onClick={handleDeleteSelected}
+                    className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                  >
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    Delete {selectedRequirements.size} Selected
+                  </button>
+                </>
+              )}
+            </div>
           </div>
 
           <div className="overflow-x-auto">
@@ -335,37 +546,37 @@ export default function MaterialRequirementsTab() {
                     Material
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Period
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Quantity Needed
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Current Stock
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Net Quantity
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Quantity Ordered
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Received
+                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Net Quantity
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {enrichedRequirements.map((requirement) => (
-                  <tr key={requirement.id} className={selectedRequirements.has(requirement.id) ? 'bg-blue-50' : ''}>
+                {enrichedRequirements.map((req) => (
+                  <tr key={req.id} className={selectedRequirements.has(req.id) ? 'bg-blue-50' : ''}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <button
-                        onClick={() => handleToggleSelection(requirement.id)}
+                        onClick={() => handleToggleSelection(req.id)}
                         className="text-gray-400 hover:text-gray-600"
                       >
-                        {selectedRequirements.has(requirement.id) ? (
+                        {selectedRequirements.has(req.id) ? (
                           <CheckSquare className="h-5 w-5 text-blue-600" />
                         ) : (
                           <Square className="h-5 w-5" />
@@ -373,64 +584,56 @@ export default function MaterialRequirementsTab() {
                       </button>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm font-medium text-gray-900">
-                        {requirement.material_code}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {requirement.material_name}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-semibold text-gray-900">
-                        {requirement.quantity_needed.toLocaleString()} {requirement.unit_measure}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {requirement.plans_count} plan(s)
-                      </div>
+                      <div className="text-sm font-medium text-gray-900">{req.material_code}</div>
+                      <div className="text-sm text-gray-500">{req.material_name}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
-                        {requirement.current_stock.toLocaleString()} {requirement.unit_measure}
+                        {new Date(req.period_start).toLocaleDateString()} - {new Date(req.period_end).toLocaleDateString()}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className={`text-sm font-semibold ${requirement.net_quantity > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                        {requirement.net_quantity.toLocaleString()} {requirement.unit_measure}
-                      </div>
+                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <div className="text-sm font-medium text-gray-900">{req.quantity_needed.toLocaleString()}</div>
+                      <div className="text-xs text-gray-500">{req.unit_measure}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {requirement.quantity_ordered.toLocaleString()} {requirement.unit_measure}
-                      </div>
+                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <div className="text-sm text-gray-900">{req.current_stock.toLocaleString()}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {requirement.quantity_received.toLocaleString()} {requirement.unit_measure}
-                      </div>
+                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <div className="text-sm text-orange-900">{(req.quantity_ordered || 0).toLocaleString()}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {getStatusBadge(requirement.status)}
+                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <div className="text-sm font-bold text-blue-900">{req.net_quantity.toLocaleString()}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        {requirement.status === 'pending' && (
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      {getStatusBadge(req.status)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <div className="flex items-center justify-center gap-2">
+                        {req.status === 'pending' && (
                           <button
-                            onClick={() => handleOrder(requirement)}
-                            className="inline-flex items-center px-2 py-1 border border-transparent text-xs font-medium rounded text-orange-700 bg-orange-100 hover:bg-orange-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+                            onClick={() => handleOrder(req)}
+                            className="inline-flex items-center px-2 py-1 border border-transparent text-xs font-medium rounded text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                           >
                             <ShoppingCart className="h-3 w-3 mr-1" />
                             Order
                           </button>
                         )}
-                        {requirement.status === 'ordered' && (
+                        {req.status === 'ordered' && (
                           <button
-                            onClick={() => handleReceive(requirement)}
-                            className="inline-flex items-center px-2 py-1 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                            onClick={() => handleReceive(req)}
+                            className="inline-flex items-center px-2 py-1 border border-transparent text-xs font-medium rounded text-green-700 bg-green-100 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                           >
                             <Package className="h-3 w-3 mr-1" />
-                            Receive PO
+                            Receive
                           </button>
                         )}
+                        <button
+                          onClick={() => handleDelete(req.id)}
+                          className="inline-flex items-center px-2 py-1 border border-transparent text-xs font-medium rounded text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -445,12 +648,12 @@ export default function MaterialRequirementsTab() {
       {showOrderModal && selectedRequirement && (
         <OrderMaterialModal
           requirement={selectedRequirement}
-          onConfirm={async (materialId, quantity) => {
-            await markAsOrdered(selectedRequirement.id, quantity)
+          onClose={() => {
             setShowOrderModal(false)
             setSelectedRequirement(null)
           }}
-          onClose={() => {
+          onConfirm={async (quantity) => {
+            await markAsOrdered(selectedRequirement.id, Number(quantity))
             setShowOrderModal(false)
             setSelectedRequirement(null)
           }}
@@ -460,15 +663,15 @@ export default function MaterialRequirementsTab() {
       {showReceiveModal && selectedRequirement && (
         <ReceivePOModal
           requirement={selectedRequirement}
-          onConfirm={async (requirementId, quantity) => {
-            await receivePO(requirementId, quantity)
-            await reload()
-            setShowReceiveModal(false)
-            setSelectedRequirement(null)
-          }}
           onClose={() => {
             setShowReceiveModal(false)
             setSelectedRequirement(null)
+          }}
+          onConfirm={async (quantity) => {
+            await receivePO(selectedRequirement.id, Number(quantity))
+            setShowReceiveModal(false)
+            setSelectedRequirement(null)
+            reload()
           }}
         />
       )}

@@ -68,29 +68,6 @@ export default function StockManagement() {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-1 lg:grid-cols-1">
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <Truck className="h-6 w-6 text-orange-600" />
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate flex items-center gap-1">
-                    Pending Shipments
-                    <SmartTooltip content="Number of shipments generated but not yet sent to panelists" />
-                  </dt>
-                  <dd className="text-lg font-semibold text-gray-900">
-                    {loading ? '...' : pendingShipments}
-                  </dd>
-                </dl>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Tabs */}
       <div className="bg-white shadow rounded-lg">
         <div className="border-b border-gray-200">

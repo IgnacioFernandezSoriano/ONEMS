@@ -288,7 +288,62 @@ export function useStockManagement() {
     notes?: string
   }) => {
     try {
-      // Create shipment
+      // Check for existing pending shipments for this panelist
+      const { data: existingShipments } = await supabase
+        .from('material_shipments')
+        .select(`
+          id,
+          expected_date,
+          items:material_shipment_items(material_id, quantity_sent)
+        `)
+        .eq('account_id', accountId)
+        .eq('panelist_id', shipment.panelist_id)
+        .eq('status', 'pending')
+
+      // Group existing items by material
+      const existingItemsMap: Record<string, { shipment_id: string; quantity: number }> = {}
+      if (existingShipments && existingShipments.length > 0) {
+        existingShipments.forEach(s => {
+          if (s.items) {
+            s.items.forEach((item: any) => {
+              if (!existingItemsMap[item.material_id]) {
+                existingItemsMap[item.material_id] = { shipment_id: s.id, quantity: 0 }
+              }
+              existingItemsMap[item.material_id].quantity += item.quantity_sent
+            })
+          }
+        })
+      }
+
+      // Unify: Delete all existing pending shipments for this panelist
+      if (existingShipments && existingShipments.length > 0) {
+        const shipmentIds = existingShipments.map(s => s.id)
+        
+        await supabase
+          .from('material_shipment_items')
+          .delete()
+          .in('material_shipment_id', shipmentIds)
+        
+        await supabase
+          .from('material_shipments')
+          .delete()
+          .in('id', shipmentIds)
+      }
+
+      // Merge new items with existing
+      const mergedItems: Record<string, number> = {}
+      
+      // Add existing quantities
+      Object.keys(existingItemsMap).forEach(materialId => {
+        mergedItems[materialId] = existingItemsMap[materialId].quantity
+      })
+      
+      // Add new quantities
+      shipment.items.forEach(item => {
+        mergedItems[item.material_id] = (mergedItems[item.material_id] || 0) + item.quantity_sent
+      })
+
+      // Create unified shipment
       const { data: shipmentData, error: shipmentError } = await supabase
         .from('material_shipments')
         .insert({
@@ -296,9 +351,9 @@ export function useStockManagement() {
           panelist_id: shipment.panelist_id,
           status: 'pending',
           shipment_date: shipment.shipment_date,
-          expected_date: shipment.expected_date,
+          expected_date: shipment.expected_date || new Date().toISOString(),
           tracking_number: shipment.tracking_number,
-          total_items: shipment.items.length,
+          total_items: Object.keys(mergedItems).length,
           notes: shipment.notes,
           created_by: profile?.id
         })
@@ -307,12 +362,12 @@ export function useStockManagement() {
 
       if (shipmentError) throw shipmentError
 
-      // Create shipment items
-      const itemsToInsert = shipment.items.map(item => ({
+      // Create unified shipment items
+      const itemsToInsert = Object.entries(mergedItems).map(([material_id, quantity]) => ({
         account_id: accountId,
         material_shipment_id: shipmentData.id,
-        material_id: item.material_id,
-        quantity_sent: item.quantity_sent
+        material_id,
+        quantity_sent: quantity
       }))
 
       const { error: itemsError } = await supabase
@@ -347,7 +402,7 @@ export function useStockManagement() {
         .select(`
           *,
           items:material_shipment_items(*),
-          panelist:panelists(first_name, last_name)
+          panelist:panelists(name, panelist_code)
         `)
         .eq('id', shipmentId)
         .single()
@@ -362,7 +417,7 @@ export function useStockManagement() {
 
       if (error) throw error
 
-      // If changing to 'sent', update stocks and create movements
+      // If changing to 'sent', update stocks, create movements, and DELETE the shipment
       if (status === 'sent' && shipment.items) {
         for (const item of shipment.items) {
           // 1. Decrement regulator stock
@@ -416,9 +471,9 @@ export function useStockManagement() {
               movement_type: 'dispatch',
               quantity: item.quantity_sent,
               from_location: 'Regulator',
-              to_location: `${shipment.panelist?.first_name} ${shipment.panelist?.last_name}`,
+              to_location: shipment.panelist?.name || 'Unknown Panelist',
               reference_id: shipmentId,
-              notes: `Shipment to ${shipment.panelist?.first_name} ${shipment.panelist?.last_name}`,
+              notes: `Shipment to ${shipment.panelist?.name || 'Unknown Panelist'}`,
               created_by: profile?.id
             })
 
@@ -431,12 +486,23 @@ export function useStockManagement() {
               movement_type: 'receipt',
               quantity: item.quantity_sent,
               from_location: 'Regulator',
-              to_location: `${shipment.panelist?.first_name} ${shipment.panelist?.last_name}`,
+              to_location: shipment.panelist?.name || 'Unknown Panelist',
               reference_id: shipmentId,
-              notes: `Received by ${shipment.panelist?.first_name} ${shipment.panelist?.last_name}`,
+              notes: `Received by ${shipment.panelist?.name || 'Unknown Panelist'}`,
               created_by: profile?.id
             })
         }
+
+        // 5. DELETE the shipment after confirming (status = 'sent')
+        await supabase
+          .from('material_shipment_items')
+          .delete()
+          .eq('shipment_id', shipmentId)
+
+        await supabase
+          .from('material_shipments')
+          .delete()
+          .eq('id', shipmentId)
       }
 
       await loadData()
@@ -468,6 +534,31 @@ export function useStockManagement() {
     }
   }
 
+  const deleteShipment = async (shipmentId: string) => {
+    try {
+      // Delete shipment items first (foreign key constraint)
+      const { error: itemsError } = await supabase
+        .from('material_shipment_items')
+        .delete()
+        .eq('shipment_id', shipmentId)
+
+      if (itemsError) throw itemsError
+
+      // Delete shipment
+      const { error: shipmentError } = await supabase
+        .from('material_shipments')
+        .delete()
+        .eq('id', shipmentId)
+
+      if (shipmentError) throw shipmentError
+
+      await loadData()
+    } catch (err: any) {
+      console.error('Error deleting shipment:', err)
+      throw err
+    }
+  }
+
   return {
     regulatorStocks,
     panelistStocks,
@@ -480,6 +571,7 @@ export function useStockManagement() {
     createMovement,
     createShipment,
     updateShipmentStatus,
+    deleteShipment,
     updateSettings,
     reload: loadData
   }

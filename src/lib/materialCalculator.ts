@@ -41,7 +41,7 @@ export async function calculateMaterialRequirements(
     // 1. Obtener allocation plan details en el rango de fechas
     const { data: planDetails, error: detailsError } = await supabase
       .from('allocation_plan_details')
-      .select('id, plan_id, fecha_programada')
+      .select('id, plan_id, fecha_programada, origin_panelist_id')
       .eq('account_id', accountId)
       .gte('fecha_programada', startDate)
       .lte('fecha_programada', endDate)
@@ -110,10 +110,29 @@ export async function calculateMaterialRequirements(
       materialMap[m.id] = m
     })
 
-    // 8. Calcular materiales necesarios
+    // 8. Get panelist stocks to discount from requirements
+    const panelistIds = [...new Set(enrichedDetails.map(d => d.origin_panelist_id).filter(Boolean))]
+    const { data: panelistStocks } = await supabase
+      .from('panelist_material_stocks')
+      .select('panelist_id, material_id, quantity')
+      .eq('account_id', accountId)
+      .in('panelist_id', panelistIds)
+      .in('material_id', materialIds)
+
+    // Create map: panelist_id + material_id → quantity
+    const panelistStockMap: Record<string, number> = {}
+    if (panelistStocks) {
+      panelistStocks.forEach(ps => {
+        const key = `${ps.panelist_id}_${ps.material_id}`
+        panelistStockMap[key] = ps.quantity
+      })
+    }
+
+    // 9. Calculate materials needed (considering panelist stock)
     const materialsNeeded: Record<string, {
       material: any
       quantity: number
+      panelistStockTotal: number
       shipments: Set<string>
       plans: Set<string>
     }> = {}
@@ -129,18 +148,27 @@ export async function calculateMaterialRequirements(
           materialsNeeded[materialId] = {
             material: materialMap[materialId],
             quantity: 0,
+            panelistStockTotal: 0,
             shipments: new Set(),
             plans: new Set()
           }
         }
         
-        materialsNeeded[materialId].quantity += pm.quantity
+        // Get panelist stock for this material
+        const panelistStockKey = `${detail.origin_panelist_id}_${materialId}`
+        const panelistStock = panelistStockMap[panelistStockKey] || 0
+        
+        // Only add to quantity needed if panelist doesn't have enough stock
+        const quantityNeededForThisDetail = Math.max(0, pm.quantity - panelistStock)
+        
+        materialsNeeded[materialId].quantity += quantityNeededForThisDetail
+        materialsNeeded[materialId].panelistStockTotal += panelistStock
         materialsNeeded[materialId].shipments.add(detail.id)
         materialsNeeded[materialId].plans.add(detail.plan_id)
       }
     }
 
-    // 9. Get current stocks and minimum stocks to calculate safety stock needs
+    // 10. Get current stocks and minimum stocks to calculate safety stock needs
     const { data: stocks } = await supabase
       .from('material_stocks')
       .select('material_id, quantity, min_stock')
@@ -154,7 +182,7 @@ export async function calculateMaterialRequirements(
       })
     }
 
-    // 10. Construir resultado incluyendo stock de seguridad
+    // 11. Construir resultado incluyendo stock de seguridad
     const requirements: MaterialRequirement[] = Object.entries(materialsNeeded).map(([materialId, data]) => {
       const stock = stockMap[materialId] || { quantity: 0, min_stock: null }
       const currentStock = stock.quantity
@@ -291,7 +319,29 @@ export async function calculatePanelistRequirements(
       })
     }
 
-    // 6. Agrupar por nodo
+    // 6. Get panelist stocks to discount from shipments
+    const panelistIds = [
+      ...new Set(enrichedDetails.map(d => d.origin_panelist_id).filter(Boolean)),
+      ...panelists.map(p => p.id)
+    ]
+    
+    const { data: panelistStocks } = await supabase
+      .from('panelist_material_stocks')
+      .select('panelist_id, material_id, quantity')
+      .eq('account_id', accountId)
+      .in('panelist_id', panelistIds)
+      .in('material_id', materialIds)
+
+    // Create map: panelist_id + material_id → quantity
+    const panelistStockMap: Record<string, number> = {}
+    if (panelistStocks) {
+      panelistStocks.forEach(ps => {
+        const key = `${ps.panelist_id}_${ps.material_id}`
+        panelistStockMap[key] = ps.quantity
+      })
+    }
+
+    // 7. Agrupar por nodo
     const nodesMap: Record<string, {
       node: any
       panelist: any | null
@@ -347,17 +397,28 @@ export async function calculatePanelistRequirements(
       }
     }
 
-    // 7. Construir resultado
+    // 8. Construir resultado (descontando stock del panelista)
     const requirements: PanelistMaterialRequirement[] = Object.entries(nodesMap).map(([nodeId, data]) => {
-      const panelistMaterials: PanelistMaterial[] = Object.entries(data.materials).map(([materialId, matData]) => {
-        return {
-          material_id: materialId,
-          material_code: matData.material.code,
-          material_name: matData.material.name,
-          unit_measure: matData.material.unit_measure || 'un',
-          quantity_needed: matData.quantity
-        }
-      })
+      const panelistId = data.panelist?.id || data.origin_panelist_id
+      
+      const panelistMaterials: PanelistMaterial[] = Object.entries(data.materials)
+        .map(([materialId, matData]) => {
+          // Get panelist stock for this material
+          const stockKey = `${panelistId}_${materialId}`
+          const panelistStock = panelistStockMap[stockKey] || 0
+          
+          // Calculate net quantity needed (discount panelist stock)
+          const netQuantity = Math.max(0, matData.quantity - panelistStock)
+          
+          return {
+            material_id: materialId,
+            material_code: matData.material.code,
+            material_name: matData.material.name,
+            unit_measure: matData.material.unit_measure || 'un',
+            quantity_needed: netQuantity
+          }
+        })
+        .filter(m => m.quantity_needed > 0) // Only include if quantity needed > 0
 
       const totalItems = panelistMaterials.reduce((sum, m) => sum + m.quantity_needed, 0)
 

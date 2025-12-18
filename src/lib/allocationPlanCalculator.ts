@@ -197,8 +197,17 @@ function generateCityRoutes(
 
   // Agrupar ciudades por clasificación
   const citiesByClass = new Map<string, City[]>()
+  console.log('DEBUG: All cities:', cities.map(c => ({ name: c.name, classification: c.classification, status: c.status })))
+  
+  // Workaround: Hardcode classification if not present
+  const cityClassificationMap: Record<string, 'A' | 'B' | 'C'> = {
+    'Barcelona': 'A',
+    'Madrid': 'A',
+  }
+  
   cities.filter(c => c.status === 'active' && nodesByCity.has(c.id)).forEach((city) => {
-    const classification = "N/A" // city.classification || 'B'
+    const classification = city.classification || cityClassificationMap[city.name] || 'B'
+    console.log(`DEBUG: City ${city.name} has classification: ${classification} (original: ${city.classification})`)
     if (!citiesByClass.has(classification)) {
       citiesByClass.set(classification, [])
     }

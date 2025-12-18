@@ -1,9 +1,10 @@
-import { useState } from 'react'
-import { Search, User, Package, Edit } from 'lucide-react'
+import React, { useState, useMemo } from 'react'
+import { Search, User, Package, Edit, Download } from 'lucide-react'
 import { useStockManagement } from '../../hooks/useStockManagement'
 import { SmartTooltip } from '../common/SmartTooltip'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
+import { downloadCSV } from '../../lib/exportUtils'
 
 export default function PanelistStockTab() {
   const { panelistStocks, loading } = useStockManagement()
@@ -57,6 +58,24 @@ export default function PanelistStockTab() {
     return acc
   }, {} as Record<string, { panelist: any; stocks: typeof panelistStocks }>)
 
+  const handleExportCSV = () => {
+    if (filteredStocks.length === 0) {
+      alert('No stock data to export')
+      return
+    }
+
+    const csvData = filteredStocks.map(stock => ({
+      'Panelist Code': stock.panelist?.panelist_code || 'N/A',
+      'Panelist Name': stock.panelist?.name || 'Unknown',
+      'Material Code': stock.material?.code || 'N/A',
+      'Material Name': stock.material?.name || 'Unknown',
+      'Quantity': stock.quantity,
+      'Unit': stock.material?.unit_measure || 'un'
+    }))
+
+    downloadCSV(csvData, `panelist-stock-${new Date().toISOString().split('T')[0]}.csv`)
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -98,6 +117,14 @@ export default function PanelistStockTab() {
             ))}
           </select>
         </div>
+
+        <button
+          onClick={handleExportCSV}
+          className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+        >
+          <Download className="h-4 w-4 mr-2" />
+          Export CSV
+        </button>
       </div>
 
       {/* Grouped Stock Display */}
@@ -311,10 +338,10 @@ export default function PanelistStockTab() {
                     
                     // Update panelist stock
                     const { error: updateError } = await supabase
-                      .from('panelist_stock')
+                      .from('panelist_material_stocks')
                       .update({ 
                         quantity: qty,
-                        last_updated: new Date().toISOString()
+                        updated_at: new Date().toISOString()
                       })
                       .eq('id', selectedStock.id)
 
@@ -326,7 +353,7 @@ export default function PanelistStockTab() {
                       .insert({
                         account_id: selectedStock.account_id,
                         material_id: selectedStock.material_id,
-                        panelist_id: selectedStock.panelist_id,
+                        reference_id: selectedStock.panelist_id,
                         movement_type: 'adjustment',
                         quantity: qty - selectedStock.quantity,
                         from_location: 'panelist',

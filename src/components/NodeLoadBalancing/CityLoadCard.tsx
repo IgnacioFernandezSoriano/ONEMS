@@ -19,7 +19,12 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
   // Calculate city stats
   const totalShipments = cityData.reduce((sum, d) => sum + d.shipment_count, 0);
   const avgPerNode = totalShipments / nodes.length;
-  const monthlyStddev = cityData[0]?.city_monthly_stddev || 0;
+  const monthlyStddev = cityData[0]?.city_monthly_stddev || cityData[0]?.city_period_stddev || 0;
+  
+  // Always allow balancing (user can force it)
+  const hasSaturatedNodes = cityData.some((d) => d.saturation_level === 'saturated');
+  const hasHighNodes = cityData.some((d) => d.saturation_level === 'high');
+  const needsBalancing = true;  // Always allow balancing
 
   // Create matrix data structure
   const matrix: { [nodeCode: string]: { [week: number]: NodeLoadData } } = {};
@@ -217,11 +222,26 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
         <div className="group relative">
           <button
             onClick={onBalance}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
+            disabled={!needsBalancing}
+            className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              needsBalancing
+                ? 'bg-blue-600 text-white hover:bg-blue-700 cursor-pointer'
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            }`}
           >
             <span>⚖️</span>
             Auto-Balance {cityName}
           </button>
+          {!needsBalancing && (
+            <div className="invisible group-hover:visible absolute z-10 w-64 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg bottom-full left-0 mb-2">
+              <p className="font-semibold mb-1">Balance Not Needed</p>
+              <p>
+                {monthlyStddev < 5
+                  ? 'Load is already well balanced (stddev < 5)'
+                  : 'No saturated or high load nodes detected'}
+              </p>
+            </div>
+          )}
         </div>
         <span className="group relative">
           <svg
@@ -235,16 +255,36 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
               clipRule="evenodd"
             />
           </svg>
-          <div className="invisible group-hover:visible absolute z-10 w-96 p-3 bg-gray-900 text-white text-sm rounded-lg shadow-lg bottom-full left-0 mb-2">
-            <p className="font-semibold mb-2">Auto-Balance Mechanism</p>
+          <div className="invisible group-hover:visible absolute z-10 w-[480px] p-4 bg-gray-900 text-white text-xs rounded-lg shadow-lg bottom-full left-0 mb-2">
+            <p className="font-semibold mb-2 text-sm">🎯 Algoritmo de Balanceo de Matriz Alícuota</p>
+            
             <p className="mb-2">
-              <strong>How it works:</strong> The system analyzes shipment distribution across nodes and weeks, identifying overloaded nodes (&gt;150% avg) and underutilized nodes (&lt;80% avg).
+              <strong>Concepto:</strong> Trata toda la matriz (nodos × semanas) como un espacio único de distribución. Objetivo: que todas las celdas se acerquen al promedio global.
             </p>
+            
             <p className="mb-2">
-              <strong>Algorithm:</strong> Moves shipments from saturated nodes to nodes with available capacity, prioritizing moves within the same week to maintain temporal distribution.
+              <strong>Cálculo del objetivo:</strong><br/>
+              Promedio objetivo = Total shipments / (Nodos × Semanas)<br/>
+              <em>Ejemplo: 305 shipments / (1 nodo × 5 semanas) = 61 por celda</em>
             </p>
-            <p>
-              <strong>Result:</strong> Reduces load variance, prevents node saturation, and improves overall system efficiency. Preview shows proposed changes before applying.
+            
+            <p className="mb-2">
+              <strong>Proceso:</strong>
+            </p>
+            <ol className="list-decimal list-inside space-y-1 mb-2 ml-2">
+              <li>Identifica celdas sobrecargadas (&gt; objetivo × 1.2)</li>
+              <li>Identifica celdas subcargadas (&lt; objetivo × 0.9)</li>
+              <li>Mueve shipments de celdas sobrecargadas a subcargadas</li>
+              <li>Actualiza fecha_programada y node_id en allocation_plan_details</li>
+              <li>Minimiza la desviación estándar de toda la matriz</li>
+            </ol>
+            
+            <p className="mb-2">
+              <strong>Resultado:</strong> Distribución equitativa que reduce varianza, previene saturación y optimiza la eficiencia del sistema.
+            </p>
+            
+            <p className="text-yellow-300">
+              ⚠️ El preview muestra los cambios propuestos. Debes confirmar para aplicarlos al Allocation Plan.
             </p>
           </div>
         </span>

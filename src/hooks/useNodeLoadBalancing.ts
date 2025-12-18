@@ -8,8 +8,10 @@ export interface NodeLoadData {
   city_name: string;
   city_id: string;
   week_number: number;
-  month: number;
-  year: number;
+  week_start_date?: string;
+  week_end_date?: string;
+  month?: number;
+  year?: number;
   shipment_count: number;
   sent_count: number;
   received_count: number;
@@ -18,12 +20,18 @@ export interface NodeLoadData {
   city_weekly_stddev: number;
   city_weekly_total: number;
   city_node_count: number;
-  city_monthly_avg: number;
-  city_monthly_stddev: number;
-  city_monthly_total: number;
+  city_monthly_avg?: number;
+  city_monthly_stddev?: number;
+  city_monthly_total?: number;
+  city_period_avg: number;
+  city_period_stddev: number;
+  city_period_total: number;
+  total_weeks_in_period: number;
   saturation_level: 'normal' | 'high' | 'saturated';
   load_percentage: number;
   excess_load: number;
+  reference_load: number;
+  deviation_threshold: number;
 }
 
 export interface CityLoadSummary {
@@ -36,6 +44,12 @@ export interface CityLoadSummary {
   saturated_nodes: number;
   high_nodes: number;
   normal_nodes: number;
+}
+
+export interface MatrixCell {
+  node_code: string;
+  week_num: number;
+  load_count: number;
 }
 
 export interface BalanceResult {
@@ -54,11 +68,25 @@ export interface BalanceResult {
     shipment_ids: string[];
     count: number;
   }>;
+  matrix_before?: MatrixCell[];
+  matrix_after?: MatrixCell[];
+  nodes_count?: number;
+  avg_load_per_node?: number;
+  max_acceptable_load?: number;
+  nodes_needed?: number;
+  reference_load?: number;
+  deviation_percent?: number;
   message: string;
   error?: string;
 }
 
-export const useNodeLoadBalancing = (accountId: string | undefined, month: number, year: number) => {
+export const useNodeLoadBalancing = (
+  accountId: string | undefined, 
+  startDate: string, 
+  endDate: string,
+  referenceLoad: number = 6,
+  deviationPercent: number = 20
+) => {
   const [loadData, setLoadData] = useState<NodeLoadData[]>([]);
   const [citySummaries, setCitySummaries] = useState<CityLoadSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -74,17 +102,25 @@ export const useNodeLoadBalancing = (accountId: string | undefined, month: numbe
       setLoading(true);
       setError(null);
 
-      console.log('[useNodeLoadBalancing] Fetching data with:', { accountId, month, year });
+      console.log('[useNodeLoadBalancing] Fetching data with:', { accountId, startDate, endDate, referenceLoad, deviationPercent });
+
+      // Skip if dates are not set
+      if (!startDate || !endDate) {
+        console.log('[useNodeLoadBalancing] No dates provided, skipping fetch');
+        setLoadData([]);
+        setCitySummaries([]);
+        setLoading(false);
+        return;
+      }
 
       const { data, error: fetchError } = await supabase
-        .from('v_node_load_analysis')
-        .select('*')
-        .eq('account_id', accountId)
-        .eq('month', month)
-        .eq('year', year)
-        .order('city_name')
-        .order('week_number')
-        .order('node_code');
+        .rpc('rpc_get_node_load_by_period', {
+          p_account_id: accountId,
+          p_start_date: startDate,
+          p_end_date: endDate,
+          p_reference_load: referenceLoad,
+          p_deviation_percent: deviationPercent
+        });
 
       console.log('[useNodeLoadBalancing] Query result:', { 
         dataCount: data?.length || 0, 
@@ -129,7 +165,7 @@ export const useNodeLoadBalancing = (accountId: string | undefined, month: numbe
       const totalShipments = cityData.reduce((sum, item) => sum + item.shipment_count, 0);
       const nodeCount = new Set(cityData.map((item) => item.node_id)).size;
       const avgPerNode = totalShipments / nodeCount;
-      const monthlyStddev = cityData[0].city_monthly_stddev;
+      const monthlyStddev = cityData[0].city_period_stddev || cityData[0].city_monthly_stddev || 0;
 
       const saturatedNodes = new Set(
         cityData.filter((item) => item.saturation_level === 'saturated').map((item) => item.node_id)
@@ -159,10 +195,10 @@ export const useNodeLoadBalancing = (accountId: string | undefined, month: numbe
 
   const previewBalance = async (cityId: string): Promise<BalanceResult> => {
     try {
-      const { data, error: rpcError } = await supabase.rpc('rpc_balance_node_load', {
+      const { data, error: rpcError } = await supabase.rpc('rpc_balance_node_load_by_period', {
         p_city_id: cityId,
-        p_month: month,
-        p_year: year,
+        p_start_date: startDate,
+        p_end_date: endDate,
         p_apply_changes: false, // Preview only
       });
 
@@ -186,10 +222,10 @@ export const useNodeLoadBalancing = (accountId: string | undefined, month: numbe
 
   const applyBalance = async (cityId: string): Promise<BalanceResult> => {
     try {
-      const { data, error: rpcError } = await supabase.rpc('rpc_balance_node_load', {
+      const { data, error: rpcError } = await supabase.rpc('rpc_balance_node_load_by_period', {
         p_city_id: cityId,
-        p_month: month,
-        p_year: year,
+        p_start_date: startDate,
+        p_end_date: endDate,
         p_apply_changes: true, // Apply changes
       });
 
@@ -216,7 +252,7 @@ export const useNodeLoadBalancing = (accountId: string | undefined, month: numbe
 
   useEffect(() => {
     fetchLoadData();
-  }, [accountId, month, year]);
+  }, [accountId, startDate, endDate, referenceLoad, deviationPercent]);
 
   return {
     loadData,

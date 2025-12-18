@@ -7,12 +7,15 @@ import { BalancePreviewModal } from '../components/NodeLoadBalancing/BalancePrev
 export default function NodeLoadBalancing() {
   const { user, profile } = useAuth();
   const currentDate = new Date();
-  const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth() + 1);
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
   const [showFilters, setShowFilters] = useState(true);
+  const [referenceLoad, setReferenceLoad] = useState(6); // Default reference samples per node
+  const [deviationPercent, setDeviationPercent] = useState(20); // Default 20% deviation
 
   const { loadData, citySummaries, loading, error, refetch, previewBalance, applyBalance } =
-    useNodeLoadBalancing(profile?.account_id || undefined, selectedMonth, selectedYear);
+    useNodeLoadBalancing(profile?.account_id || undefined, startDate, endDate, referenceLoad, deviationPercent);
 
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
@@ -90,7 +93,71 @@ export default function NodeLoadBalancing() {
     });
   };
 
+  // Date formatting helper
+  const formatDateLocal = (date: Date) => {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  };
 
+  // Month selection handlers
+  const handleMonthSelect = (year: number, month: number) => {
+    const firstDay = new Date(year, month - 1, 1);
+    const lastDay = new Date(year, month, 0);
+    setStartDate(formatDateLocal(firstDay));
+    setEndDate(formatDateLocal(lastDay));
+  };
+
+  const handleFirstSemesterSelect = () => {
+    const currentYear = new Date().getFullYear();
+    const firstDay = new Date(currentYear, 0, 1);
+    const lastDay = new Date(currentYear, 5, 30);
+    setStartDate(formatDateLocal(firstDay));
+    setEndDate(formatDateLocal(lastDay));
+  };
+
+  const handleSecondSemesterSelect = () => {
+    const currentYear = new Date().getFullYear();
+    const firstDay = new Date(currentYear, 6, 1);
+    const lastDay = new Date(currentYear, 11, 31);
+    setStartDate(formatDateLocal(firstDay));
+    setEndDate(formatDateLocal(lastDay));
+  };
+
+  const handleYearSelect = () => {
+    const currentYear = new Date().getFullYear();
+    const firstDay = new Date(currentYear, 0, 1);
+    const lastDay = new Date(currentYear, 11, 31);
+    setStartDate(formatDateLocal(firstDay));
+    setEndDate(formatDateLocal(lastDay));
+  };
+
+  const handleResetFilters = () => {
+    setStartDate('');
+    setEndDate('');
+    setSelectedYear(new Date().getFullYear());
+    setReferenceLoad(63);
+    setDeviationPercent(20);
+  };
+
+  // Month names for buttons
+  const months = [
+    { num: 1, name: 'Jan' }, { num: 2, name: 'Feb' }, { num: 3, name: 'Mar' },
+    { num: 4, name: 'Apr' }, { num: 5, name: 'May' }, { num: 6, name: 'Jun' },
+    { num: 7, name: 'Jul' }, { num: 8, name: 'Aug' }, { num: 9, name: 'Sep' },
+    { num: 10, name: 'Oct' }, { num: 11, name: 'Nov' }, { num: 12, name: 'Dec' }
+  ];
+
+  // Generate year range
+  const yearRange = React.useMemo(() => {
+    const currentYear = new Date().getFullYear();
+    const years = [];
+    for (let i = currentYear; i <= currentYear + 10; i++) {
+      years.push(i);
+    }
+    return years;
+  }, []);
 
   // Calculate system-wide stats
   const totalSaturated = citySummaries.reduce((sum, city) => sum + city.saturated_nodes, 0);
@@ -198,46 +265,144 @@ export default function NodeLoadBalancing() {
 
         {/* Filter Content */}
         {showFilters && (
-          <div className="p-4">
-            <div className="grid grid-cols-2 gap-4">
+          <div className="p-4 space-y-4">
+            {/* Date Range Filters */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="flex items-center gap-1 text-sm font-medium text-gray-700 mb-1">
-                  <svg className="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
-                  </svg>
-                  Month
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Start Date
                 </label>
-                <select
-                  value={selectedMonth}
-                  onChange={(e) => setSelectedMonth(Number(e.target.value))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
-                    <option key={month} value={month}>
-                      {new Date(2000, month - 1).toLocaleString('en', { month: 'long' })}
-                    </option>
-                  ))}
-                </select>
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
               </div>
               <div>
-                <label className="flex items-center gap-1 text-sm font-medium text-gray-700 mb-1">
-                  <svg className="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
-                  </svg>
-                  Year
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  End Date
                 </label>
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
+              </div>
+            </div>
+
+            {/* Quick Date Selection */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Quick Selection
+              </label>
+              <div className="flex items-center gap-2 mb-2">
                 <select
                   value={selectedYear}
-                  onChange={(e) => setSelectedYear(Number(e.target.value))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                  className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                 >
-                  {[2024, 2025, 2026].map((year) => (
-                    <option key={year} value={year}>
-                      {year}
-                    </option>
+                  {yearRange.map(year => (
+                    <option key={year} value={year}>{year}</option>
                   ))}
                 </select>
               </div>
+              <div className="flex flex-wrap gap-1">
+                {months.map(month => (
+                  <button
+                    key={month.num}
+                    onClick={() => handleMonthSelect(selectedYear, month.num)}
+                    className="px-2 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    {month.name}
+                  </button>
+                ))}
+                <button
+                  onClick={handleFirstSemesterSelect}
+                  className="px-2 py-1 text-xs font-medium rounded border border-green-300 bg-green-50 hover:bg-green-100 hover:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+                >
+                  1st Semester
+                </button>
+                <button
+                  onClick={handleSecondSemesterSelect}
+                  className="px-2 py-1 text-xs font-medium rounded border border-teal-300 bg-teal-50 hover:bg-teal-100 hover:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                >
+                  2nd Semester
+                </button>
+                <button
+                  onClick={handleYearSelect}
+                  className="px-2 py-1 text-xs font-medium rounded border border-purple-300 bg-purple-50 hover:bg-purple-100 hover:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                >
+                  Year
+                </button>
+              </div>
+            </div>
+
+            {/* Load Balancing Criteria */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
+              <div>
+                <label className="flex items-center gap-1 text-sm font-medium text-gray-700 mb-1">
+                  Reference Samples/Node
+                  <span className="group relative">
+                    <svg className="w-4 h-4 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                    </svg>
+                    <div className="invisible group-hover:visible absolute z-10 w-72 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg bottom-full left-0 mb-2">
+                      <p className="font-semibold mb-1">Reference Load</p>
+                      <p className="mb-2">Define el número esperado de samples que cada nodo debería manejar en promedio durante el periodo seleccionado.</p>
+                      <p className="mb-2"><strong>Ejemplo:</strong> Si esperas 63 samples por nodo, este será tu valor de referencia.</p>
+                      <p>Este valor se usa junto con el % de desviación para clasificar nodos como Normal, High Load o Saturated.</p>
+                    </div>
+                  </span>
+                </label>
+                <input
+                  type="number"
+                  value={referenceLoad}
+                  onChange={(e) => setReferenceLoad(Number(e.target.value))}
+                  min="1"
+                  className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
+                <p className="mt-1 text-xs text-gray-500">Expected average samples per node</p>
+              </div>
+              <div>
+                <label className="flex items-center gap-1 text-sm font-medium text-gray-700 mb-1">
+                  Deviation Tolerance (%)
+                  <span className="group relative">
+                    <svg className="w-4 h-4 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                    </svg>
+                    <div className="invisible group-hover:visible absolute z-10 w-72 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg bottom-full left-0 mb-2">
+                      <p className="font-semibold mb-1">Deviation Tolerance</p>
+                      <p className="mb-2">Porcentaje de desviación aceptable respecto al valor de referencia.</p>
+                      <p className="mb-2"><strong>Clasificación:</strong></p>
+                      <p className="mb-1">• <strong>Normal:</strong> &lt; Ref × (1 + %)</p>
+                      <p className="mb-1">• <strong>High Load:</strong> ≥ Ref × (1 + %)</p>
+                      <p className="mb-2">• <strong>Saturated:</strong> ≥ Ref × (1 + % × 1.5)</p>
+                      <p><strong>Ejemplo:</strong> Con Ref=63 y %=20, Normal &lt; 75.6, High ≥ 75.6, Saturated ≥ 81.9</p>
+                    </div>
+                  </span>
+                </label>
+                <input
+                  type="number"
+                  value={deviationPercent}
+                  onChange={(e) => setDeviationPercent(Number(e.target.value))}
+                  min="0"
+                  max="100"
+                  className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
+                <p className="mt-1 text-xs text-gray-500">Acceptable deviation from reference</p>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex items-center gap-2 pt-2">
+              <button
+                onClick={handleResetFilters}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                Reset
+              </button>
             </div>
           </div>
         )}
