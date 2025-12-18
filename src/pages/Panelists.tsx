@@ -3,6 +3,7 @@ import { usePanelists } from '@/lib/hooks/usePanelists'
 import { supabase } from '@/lib/supabase'
 import type { Node, City, Panelist } from '@/lib/types'
 import { PanelistUnavailabilityComponent } from '@/components/PanelistUnavailability'
+import { SmartTooltip } from '@/components/common/SmartTooltip'
 
 export function Panelists() {
   const { panelists, loading, error, createPanelist, updatePanelist, deletePanelist } = usePanelists()
@@ -32,6 +33,7 @@ export function Panelists() {
     name: '',
     email: '',
     mobile: '',
+    telegram_id: '',
     address_line1: '',
     address_line2: '',
     postal_code: '',
@@ -138,6 +140,7 @@ export function Panelists() {
         name: panelist.name,
         email: panelist.email,
         mobile: panelist.mobile,
+        telegram_id: panelist.telegram_id || '',
         address_line1: panelist.address_line1 || '',
         address_line2: panelist.address_line2 || '',
         postal_code: panelist.postal_code || '',
@@ -153,6 +156,7 @@ export function Panelists() {
         name: '',
         email: '',
         mobile: '',
+        telegram_id: '',
         address_line1: '',
         address_line2: '',
         postal_code: '',
@@ -208,174 +212,336 @@ export function Panelists() {
   if (loading) return <div className="p-6">Loading...</div>
   if (error) return <div className="p-6 text-red-600">Error: {error}</div>
 
+  // Calculate stats
+  const stats = {
+    total: panelists?.length || 0,
+    active: panelists?.filter(p => p.status === 'active').length || 0,
+    inactive: panelists?.filter(p => p.status === 'inactive').length || 0,
+  }
+
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Panelists Management</h1>
-        {activeTab === 'panelists' && (
-          <button
-            onClick={() => handleOpenModal()}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-          >
-            + Add Panelist
-          </button>
-        )}
+    <div className="p-8">
+      {/* Header with Tooltip and Create Button */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold text-gray-900">Panelists Management</h1>
+            <SmartTooltip content="About Panelists Management - Purpose: Manage the network of panelists who send and receive shipments across your topology. Key Features: Register panelists with contact details, assign them to specific nodes, track availability periods, manage Telegram integration for notifications, and monitor panelist activity. Usage: Add panelists, assign to nodes, set unavailability periods, configure Telegram for automated notifications, and use in allocation planning.">
+              <svg className="w-5 h-5 text-gray-400 hover:text-gray-600 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </SmartTooltip>
+          </div>
+        </div>
+        <p className="text-gray-600">
+          Manage panelists and their availability for deliveries
+        </p>
       </div>
 
-      {/* Tabs */}
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-3 gap-6 mb-8">
+        {/* Total Panelists */}
+        <div className="bg-gradient-to-br from-blue-50 to-white border border-blue-100 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium text-blue-700">Total Panelists</span>
+            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+            </div>
+          </div>
+          <div className="text-3xl font-bold text-gray-900">{stats.total}</div>
+          <div className="text-xs text-gray-500 mt-1">All panelists in system</div>
+        </div>
+
+        {/* Active Panelists */}
+        <div className="bg-gradient-to-br from-green-50 to-white border border-green-100 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium text-green-700">Active</span>
+            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+              <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+          </div>
+          <div className="text-3xl font-bold text-gray-900">{stats.active}</div>
+          <div className="text-xs text-gray-500 mt-1">Available for deliveries</div>
+        </div>
+
+        {/* Inactive Panelists */}
+        <div className="bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium text-gray-700">Inactive</span>
+            <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+              </svg>
+            </div>
+          </div>
+          <div className="text-3xl font-bold text-gray-900">{stats.inactive}</div>
+          <div className="text-xs text-gray-500 mt-1">Not available</div>
+        </div>
+      </div>
+
+      {/* Tabs with Tooltips */}
       <div className="mb-6 border-b border-gray-200">
         <nav className="-mb-px flex space-x-8">
-          <button
-            onClick={() => setActiveTab('panelists')}
-            className={`py-4 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'panelists'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-          >
-            Panelists
-          </button>
-          <button
-            onClick={() => setActiveTab('unavailability')}
-            className={`py-4 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'unavailability'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-          >
-            Unavailability Periods
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setActiveTab('panelists')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'panelists'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Panelists
+            </button>
+            <SmartTooltip content="Panelists Tab - View and manage all panelists in your network. Filter by city, node, or status. Use bulk operations to activate, deactivate, or delete multiple panelists at once.">
+              <svg className="w-4 h-4 text-gray-400 hover:text-gray-600 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </SmartTooltip>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setActiveTab('unavailability')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'unavailability'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Unavailability Periods
+            </button>
+            <SmartTooltip content="Unavailability Periods - Define time periods when panelists are not available for deliveries (vacations, sick leave, etc.). This ensures accurate allocation planning and prevents assignments to unavailable panelists.">
+              <svg className="w-4 h-4 text-gray-400 hover:text-gray-600 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </SmartTooltip>
+          </div>
         </nav>
       </div>
 
       {/* Panelists Tab Content */}
       {activeTab === 'panelists' && (
         <>
-          {/* Filters */}
-          <div className="bg-white rounded-lg shadow mb-6">
-        <div 
-          className="p-4 flex justify-between items-center cursor-pointer border-b"
-          onClick={() => setShowFilters(!showFilters)}
-        >
-          <h2 className="font-semibold">Filters</h2>
-          <span className="text-gray-500">{showFilters ? '▼' : '▶'}</span>
-        </div>
-        
-        {showFilters && (
-          <div className="p-4 grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Search
-              </label>
-              <input
-                type="text"
-                value={filters.search}
-                onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                placeholder="Code, name, email..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                City
-              </label>
-              <select
-                value={filters.city_id}
-                onChange={(e) => setFilters({ ...filters, city_id: e.target.value, node_id: '' })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-              >
-                <option value="">All Cities</option>
-                {cities.map(city => (
-                  <option key={city.id} value={city.id}>{city.name}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Node {filters.city_id && <span className="text-xs text-gray-500">(filtered by city)</span>}
-              </label>
-              <select
-                value={filters.node_id}
-                onChange={(e) => setFilters({ ...filters, node_id: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-              >
-                <option value="">All Nodes</option>
-                {nodes
-                  .filter((node: any) => !filters.city_id || node.city_id === filters.city_id)
-                  .map((node: any) => (
-                    <option key={node.id} value={node.id}>
-                      {node.auto_id} {node.city?.name ? `- ${node.city.name}` : ''}
-                    </option>
-                  ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Status
-              </label>
-              <select
-                value={filters.status}
-                onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-              >
-                <option value="">All Status</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
-            </div>
-
-            <div className="md:col-span-4 flex justify-end">
+          {/* Filters Section */}
+          <div className="bg-white rounded-lg shadow p-4 mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="p-1 hover:bg-gray-100 rounded transition-colors"
+                  title={showFilters ? "Collapse filters" : "Expand filters"}
+                >
+                  {showFilters ? (
+                    <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                    </svg>
+                  ) : (
+                    <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  )}
+                </button>
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                </svg>
+                <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
+                {(filters.search || filters.city_id || filters.node_id || filters.status) && (
+                  <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">
+                    Active
+                  </span>
+                )}
+              </div>
               <button
                 onClick={clearFilters}
-                className="text-sm text-gray-600 hover:text-gray-800"
+                className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                title="Reset all filters"
               >
-                Clear Filters
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Reset
               </button>
             </div>
+        
+            {showFilters && (
+              <div className="border-t border-gray-200 pt-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  {/* Search Input */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <div className="flex items-center gap-1">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        Search
+                      </div>
+                    </label>
+                    <input
+                      type="text"
+                      value={filters.search}
+                      onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+                      placeholder="Code, name, email..."
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    />
+                  </div>
+
+                  {/* City Select */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <div className="flex items-center gap-1">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                        City
+                      </div>
+                    </label>
+                    <select
+                      value={filters.city_id}
+                      onChange={(e) => setFilters({ ...filters, city_id: e.target.value, node_id: '' })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    >
+                      <option value="">All Cities</option>
+                      {cities.map(city => (
+                        <option key={city.id} value={city.id}>{city.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Node Select */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <div className="flex items-center gap-1">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
+                        </svg>
+                        Node
+                        {filters.city_id && <span className="text-xs text-gray-500 font-normal">(filtered by city)</span>}
+                      </div>
+                    </label>
+                    <select
+                      value={filters.node_id}
+                      onChange={(e) => setFilters({ ...filters, node_id: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    >
+                      <option value="">All Nodes</option>
+                      {nodes
+                        .filter((node: any) => !filters.city_id || node.city_id === filters.city_id)
+                        .map((node: any) => (
+                          <option key={node.id} value={node.id}>
+                            {node.auto_id} {node.city?.name ? `- ${node.city.name}` : ''}
+                          </option>
+                        ))}
+              </select>
+            </div>
+
+                  {/* Status Select */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <div className="flex items-center gap-1">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Status
+                      </div>
+                    </label>
+                    <select
+                      value={filters.status}
+                      onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    >
+                      <option value="">All Status</option>
+                      <option value="active">Active</option>
+                      <option value="inactive">Inactive</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-        )}
-      </div>
 
       {/* Bulk Operations Panel */}
       {selectedIds.size > 0 && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex items-center justify-between">
-          <span className="text-sm font-medium text-blue-900">
-            {selectedIds.size} panelist(s) selected
-          </span>
-          <div className="flex gap-2">
-            <button
-              onClick={handleBulkActivate}
-              className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
-            >
-              Activate
-            </button>
-            <button
-              onClick={handleBulkDeactivate}
-              className="px-3 py-1 bg-yellow-600 text-white text-sm rounded hover:bg-yellow-700"
-            >
-              Deactivate
-            </button>
-            <button
-              onClick={handleBulkDelete}
-              className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
-            >
-              Delete
-            </button>
-            <button
-              onClick={() => setSelectedIds(new Set())}
-              className="px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300"
-            >
-              Clear Selection
-            </button>
+        <div className="bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-4 mb-6 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                </svg>
+              </div>
+              <div>
+                <div className="text-sm font-semibold text-blue-900">
+                  {selectedIds.size} panelist{selectedIds.size > 1 ? 's' : ''} selected
+                </div>
+                <div className="text-xs text-blue-700">
+                  Choose an action to apply to all selected items
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={handleBulkActivate}
+                className="flex items-center gap-1.5 px-3 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors shadow-sm"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Activate
+              </button>
+              <button
+                onClick={handleBulkDeactivate}
+                className="flex items-center gap-1.5 px-3 py-2 bg-yellow-600 text-white text-sm font-medium rounded-lg hover:bg-yellow-700 transition-colors shadow-sm"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Deactivate
+              </button>
+              <button
+                onClick={handleBulkDelete}
+                className="flex items-center gap-1.5 px-3 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors shadow-sm"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Delete
+              </button>
+              <button
+                onClick={() => setSelectedIds(new Set())}
+                className="flex items-center gap-1.5 px-3 py-2 bg-white text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors shadow-sm border border-gray-300"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Clear
+              </button>
+            </div>
           </div>
         </div>
       )}
 
       {/* Table */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
+        {/* Table Header */}
+        <div className="p-4 border-b flex justify-between items-center">
+          <div>
+            <h2 className="text-xl font-bold">Panelists</h2>
+            <p className="text-sm text-gray-600 mt-1">
+              Manage panelist profiles and assignments
+            </p>
+          </div>
+          <button
+            onClick={() => handleOpenModal()}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+          >
+            + Add Panelist
+          </button>
+        </div>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50 border-b">
@@ -425,25 +591,44 @@ export function Panelists() {
                         {panelist.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm">
-                      <div className="flex gap-2">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleOpenModal(panelist)}
-                          className="text-blue-600 hover:text-blue-800"
+                          className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          title="Edit panelist"
                         >
-                          Edit
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
                         </button>
                         <button
                           onClick={() => handleToggleStatus(panelist)}
-                          className="text-yellow-600 hover:text-yellow-800"
+                          className={`p-1.5 rounded-lg transition-colors ${
+                            panelist.status === 'active'
+                              ? 'text-yellow-600 hover:bg-yellow-50'
+                              : 'text-green-600 hover:bg-green-50'
+                          }`}
+                          title={panelist.status === 'active' ? 'Deactivate panelist' : 'Activate panelist'}
                         >
-                          {panelist.status === 'active' ? 'Deactivate' : 'Activate'}
+                          {panelist.status === 'active' ? (
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          ) : (
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          )}
                         </button>
                         <button
                           onClick={() => handleDelete(panelist.id)}
-                          className="text-red-600 hover:text-red-800"
+                          className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          title="Delete panelist"
                         >
-                          Delete
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
                         </button>
                       </div>
                     </td>
@@ -521,6 +706,19 @@ export function Panelists() {
                   onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                   required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Telegram ID
+                </label>
+                <input
+                  type="text"
+                  value={formData.telegram_id}
+                  onChange={(e) => setFormData({ ...formData, telegram_id: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  placeholder="@username or numeric ID"
                 />
               </div>
 

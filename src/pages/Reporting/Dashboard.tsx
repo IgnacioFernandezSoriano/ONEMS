@@ -8,7 +8,7 @@ import { ReportFilters } from '@/components/reporting/ReportFilters';
 import DualLineChart from '@/components/reporting/DualLineChart';
 import CarrierProductOverview from '@/components/reporting/CarrierProductOverview';
 import { TrendingUp, Package, Clock, CheckCircle, Info } from 'lucide-react';
-
+import { SmartTooltip } from '@/components/common/SmartTooltip';
 export default function Dashboard() {
   const { profile } = useAuth();
   const accountId = profile?.account_id || undefined;
@@ -17,7 +17,9 @@ export default function Dashboard() {
     originCity: filters.originCity,
     destinationCity: filters.destinationCity,
     carrier: filters.carrier,
-    product: filters.product
+    product: filters.product,
+    dateFrom: filters.startDate,
+    dateTo: filters.endDate
   });
 
   const { data: carrierProductData, loading: carrierProductLoading } = useCarrierProductOverview(
@@ -74,20 +76,7 @@ export default function Dashboard() {
           <h1 className="text-2xl font-bold text-gray-900">General Performance Dashboard</h1>
           <p className="text-gray-600 mt-1">Overall compliance and transit time metrics</p>
         </div>
-        <div className="group relative">
-          <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg cursor-help">
-            <Info className="w-5 h-5 text-blue-600" />
-            <span className="text-sm font-medium text-blue-900">About this Report</span>
-          </div>
-          <div className="invisible group-hover:visible absolute z-10 w-96 p-4 bg-white border border-gray-200 rounded-lg shadow-xl text-sm text-gray-700 right-0 top-12">
-            <div className="absolute -top-1 right-8 w-2 h-2 bg-white border-l border-t border-gray-200 transform rotate-45"></div>
-            <h3 className="font-bold text-gray-900 mb-3">General Performance Dashboard</h3>
-            <p className="mb-3"><strong>Purpose:</strong> Provides a high-level overview of delivery performance across your entire ecosystem. This is the starting point for regulatory analysis.</p>
-            <p className="mb-3"><strong>What you'll see:</strong> Overall compliance rates, average transit times, shipment volumes, and temporal trends. When no filters are applied, you'll also see a breakdown by carrier and product.</p>
-            <p className="mb-3"><strong>Regulatory Objective:</strong> Quickly assess the overall health of the delivery network, identify underperforming carriers, and detect emerging compliance issues before they become systemic problems.</p>
-            <p className="text-xs text-gray-500"><strong>Next Steps:</strong> Use filters to drill down into specific carriers, products, or routes. Navigate to other reports for detailed analysis of problem areas.</p>
-          </div>
-        </div>
+        <SmartTooltip content="General Performance Dashboard: Provides a high-level overview of delivery performance across your entire ecosystem. This is the starting point for regulatory analysis. You'll see overall compliance rates, average transit times, shipment volumes, and temporal trends. When no filters are applied, you'll also see a breakdown by carrier and product. Use this dashboard to quickly assess the overall health of the delivery network, identify underperforming carriers, and detect emerging compliance issues before they become systemic problems. Use filters to drill down into specific carriers, products, or routes, and navigate to other reports for detailed analysis." />
       </div>
 
       <ReportFilters filters={filters} onChange={setFilters} onReset={resetFilters} />
@@ -150,16 +139,7 @@ export default function Dashboard() {
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-gray-900">Performance Trend</h2>
-          <div className="group relative">
-            <Info className="w-5 h-5 text-gray-400 hover:text-blue-600 cursor-help" />
-            <div className="invisible group-hover:visible absolute z-10 w-80 p-4 bg-white border border-gray-200 rounded-lg shadow-lg text-sm text-gray-700 right-0 top-8">
-              <div className="absolute -top-1 right-4 w-2 h-2 bg-white border-l border-t border-gray-200 transform rotate-45"></div>
-              <p className="font-semibold mb-2">Performance Trend Over Time</p>
-              <p className="mb-2"><strong>Description:</strong> Dual-axis chart showing compliance percentage (green line) and average transit days (blue line) over the selected time period.</p>
-              <p className="mb-2"><strong>Interpretation:</strong> Upward compliance trend indicates improving service quality. Downward transit days show faster deliveries. Look for correlations between both metrics.</p>
-              <p><strong>Regulatory Use:</strong> Identify seasonal patterns, detect performance degradation, and verify if improvement plans are working. Use for trend analysis in enforcement proceedings.</p>
-            </div>
-          </div>
+          <SmartTooltip content="Performance Trend Over Time: Dual-axis chart showing compliance percentage (green line) and average transit days (blue line) over the selected time period. Upward compliance trend indicates improving service quality. Downward transit days show faster deliveries. Look for correlations between both metrics. Use to identify seasonal patterns, detect performance degradation, and verify if improvement plans are working." />
         </div>
         <DualLineChart data={data} />
       </div>
@@ -168,16 +148,7 @@ export default function Dashboard() {
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-900">Carrier & Product Overview</h2>
-            <div className="group relative">
-              <Info className="w-5 h-5 text-gray-400 hover:text-blue-600 cursor-help" />
-              <div className="invisible group-hover:visible absolute z-10 w-80 p-4 bg-white border border-gray-200 rounded-lg shadow-lg text-sm text-gray-700 right-0 top-8">
-                <div className="absolute -top-1 right-4 w-2 h-2 bg-white border-l border-t border-gray-200 transform rotate-45"></div>
-                <p className="font-semibold mb-2">Ecosystem Overview Table</p>
-                <p className="mb-2"><strong>Description:</strong> Summary table showing performance for each carrier-product combination in your ecosystem. Sorted by worst compliance first.</p>
-                <p className="mb-2"><strong>Interpretation:</strong> Green checkmarks indicate good compliance (≥95%). Warning icons highlight problem areas. Use trend arrows to see if performance is improving or declining.</p>
-                <p><strong>Regulatory Use:</strong> Quick identification of non-compliant carriers for investigation. Prioritize enforcement actions on carriers with lowest compliance and highest shipment volumes.</p>
-              </div>
-            </div>
+            <SmartTooltip content="Ecosystem Overview Table: Summary showing performance for each carrier-product combination in your ecosystem. Sorted by worst on-time percentage first. Shows Routes (unique city pairs), Samples (total shipments), J+K Std (expected transit days), J+K Actual (real transit days), Deviation (difference), On-Time % (percentage delivered on time), Problem Routes (routes with <90% on-time), and Status (visual indicator). Use for quick identification of non-compliant carriers for investigation and to prioritize enforcement actions." />
           </div>
           <CarrierProductOverview 
             data={carrierProductData} 

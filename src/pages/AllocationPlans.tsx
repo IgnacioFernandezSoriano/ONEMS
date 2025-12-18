@@ -3,7 +3,10 @@ import { useAllocationPlanDetails } from '@/lib/hooks/useAllocationPlanDetails'
 import { AllocationPlanFilters } from '@/components/allocation-plans/AllocationPlanFilters'
 import { AllocationPlanDetailRow } from '@/components/allocation-plans/AllocationPlanDetailRow'
 import { BulkOperationsPanel } from '@/components/allocation-plans/BulkOperationsPanel'
+import { RecordModal } from '@/components/allocation-plans/RecordModal'
 import { PageHeader } from '@/components/common/PageHeader'
+import { SortableHeader } from '@/components/common/SortableHeader'
+import { SmartTooltip } from '@/components/common/SmartTooltip'
 
 export function AllocationPlans() {
   const {
@@ -17,6 +20,7 @@ export function AllocationPlans() {
     loading,
     error,
     updateDetail,
+    createDetail,
     bulkUpdateDetails,
     bulkDeleteDetails,
     getNodesByCity,
@@ -38,10 +42,40 @@ export function AllocationPlans() {
   })
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [sortField, setSortField] = useState<string>('')
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
+  const [showRecordModal, setShowRecordModal] = useState(false)
+  const [editingRecord, setEditingRecord] = useState<any | null>(null)
 
-  // Filter details
+  // Modal handlers
+  const handleAddRecord = () => {
+    setEditingRecord(null)
+    setShowRecordModal(true)
+  }
+
+  const handleEditRecord = (record: any) => {
+    setEditingRecord(record)
+    setShowRecordModal(true)
+  }
+
+  const handleCloseModal = () => {
+    setShowRecordModal(false)
+    setEditingRecord(null)
+  }
+
+  // Sort handler
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortField(field)
+      setSortDirection('asc')
+    }
+  }
+
+  // Filter and sort details
   const filteredDetails = useMemo(() => {
-    return details.filter((detail) => {
+    let filtered = details.filter((detail) => {
       if (filters.planId && detail.plan?.id !== filters.planId) return false
       if (filters.carrierId && detail.carrier?.id !== filters.carrierId) return false
       if (filters.productId && detail.product?.id !== filters.productId) return false
@@ -66,21 +100,99 @@ export function AllocationPlans() {
       if (filters.availabilityIssue) {
         const originStatus = detail.origin_availability_status
         const destStatus = detail.destination_availability_status
+        const hasOriginPanelist = !!detail.origin_panelist_id
+        const hasDestPanelist = !!detail.destination_panelist_id
         
         if (filters.availabilityIssue === 'unavailable') {
           if (originStatus !== 'unavailable' && destStatus !== 'unavailable') return false
         } else if (filters.availabilityIssue === 'unassigned') {
-          if (originStatus !== 'unassigned' && destStatus !== 'unassigned') return false
+          if (hasOriginPanelist && hasDestPanelist) return false
         } else if (filters.availabilityIssue === 'inactive') {
           if (originStatus !== 'inactive' && destStatus !== 'inactive') return false
         } else if (filters.availabilityIssue === 'any_issue') {
-          if (originStatus === 'available' && destStatus === 'available') return false
+          if (hasOriginPanelist && hasDestPanelist && originStatus === 'available' && destStatus === 'available') return false
         }
       }
       
       return true
     })
-  }, [details, filters])
+
+    // Apply sorting
+    if (sortField) {
+      filtered.sort((a, b) => {
+        let aVal: any
+        let bVal: any
+
+        switch (sortField) {
+          case 'plan':
+            aVal = a.plan?.plan_name || ''
+            bVal = b.plan?.plan_name || ''
+            break
+          case 'carrier':
+            aVal = a.carrier?.name || ''
+            bVal = b.carrier?.name || ''
+            break
+          case 'product':
+            aVal = a.product?.description || ''
+            bVal = b.product?.description || ''
+            break
+          case 'originCity':
+            aVal = a.origin_city?.name || ''
+            bVal = b.origin_city?.name || ''
+            break
+          case 'originNode':
+            aVal = a.origin_node?.auto_id || ''
+            bVal = b.origin_node?.auto_id || ''
+            break
+          case 'destCity':
+            aVal = a.destination_city?.name || ''
+            bVal = b.destination_city?.name || ''
+            break
+          case 'destNode':
+            aVal = a.destination_node?.auto_id || ''
+            bVal = b.destination_node?.auto_id || ''
+            break
+          case 'date':
+            aVal = a.fecha_programada || ''
+            bVal = b.fecha_programada || ''
+            break
+          case 'week':
+            aVal = a.week_number || 0
+            bVal = b.week_number || 0
+            break
+          case 'tagId':
+            aVal = a.tag_id || ''
+            bVal = b.tag_id || ''
+            break
+          case 'originPanelist':
+            aVal = a.origin_panelist?.name || ''
+            bVal = b.origin_panelist?.name || ''
+            break
+          case 'destPanelist':
+            aVal = a.destination_panelist?.name || ''
+            bVal = b.destination_panelist?.name || ''
+            break
+          case 'status':
+            aVal = a.status || ''
+            bVal = b.status || ''
+            break
+          default:
+            return 0
+        }
+
+        if (typeof aVal === 'string') {
+          aVal = aVal.toLowerCase()
+          bVal = bVal.toLowerCase()
+        }
+
+        if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1
+        if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1
+        return 0
+      })
+    }
+
+    return filtered
+  }, [details, filters, sortField, sortDirection])
 
   // Calculate availability issue counts
   const availabilityCounts = useMemo(() => {
@@ -90,17 +202,39 @@ export function AllocationPlans() {
         d.destination_availability_status === 'unavailable'
       ).length,
       unassigned: details.filter(d => 
-        d.origin_availability_status === 'unassigned' || 
-        d.destination_availability_status === 'unassigned'
+        !d.origin_panelist_id || !d.destination_panelist_id
       ).length,
       inactive: details.filter(d => 
         d.origin_availability_status === 'inactive' || 
         d.destination_availability_status === 'inactive'
       ).length,
       any_issue: details.filter(d => 
+        !d.origin_panelist_id || 
+        !d.destination_panelist_id ||
         d.origin_availability_status !== 'available' || 
         d.destination_availability_status !== 'available'
       ).length,
+    }
+  }, [details])
+
+  // Calculate delayed shipments (scheduled date < today AND status != 'received')
+  const delayedCounts = useMemo(() => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    
+    const delayed = details.filter(d => {
+      if (!d.fecha_programada) return false
+      const scheduledDate = new Date(d.fecha_programada)
+      return scheduledDate < today && d.status !== 'received'
+    })
+    
+    return {
+      total: delayed.length,
+      pending: delayed.filter(d => d.status === 'pending' || d.status === 'notified').length,
+      sent: delayed.filter(d => d.status === 'sent').length,
+      cancelled: delayed.filter(d => d.status === 'cancelled').length,
+      invalid: delayed.filter(d => d.status === 'invalid').length,
+      transfer_error: delayed.filter(d => d.status === 'transfer_error').length,
     }
   }, [details])
 
@@ -123,6 +257,21 @@ export function AllocationPlans() {
       availabilityIssue: '',
       tagId: '',
     })
+  }
+
+  const handleCardClick = (filterType: string, filterValue: string) => {
+    handleClearFilters()
+    if (filterType === 'status') {
+      setFilters(prev => ({ ...prev, status: filterValue }))
+    } else if (filterType === 'availabilityIssue') {
+      setFilters(prev => ({ ...prev, availabilityIssue: filterValue }))
+    } else if (filterType === 'delayed') {
+      // For delayed, set end date to yesterday
+      const yesterday = new Date()
+      yesterday.setDate(yesterday.getDate() - 1)
+      const endDate = yesterday.toISOString().split('T')[0]
+      setFilters(prev => ({ ...prev, endDate, status: filterValue }))
+    }
   }
 
   const handleToggleSelect = (id: string) => {
@@ -294,7 +443,248 @@ export function AllocationPlans() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Allocation Plans" />
+      {/* Header with Tooltip */}
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold text-gray-900">Allocation Plans</h1>
+            <SmartTooltip content="Allocation Plans Management - Purpose: View and manage generated allocation plans with detailed shipment assignments between origin and destination nodes. Key Features: Track scheduled shipments, monitor panelist assignments, identify availability issues, and perform bulk operations on multiple records. Usage: Filter plans by criteria, review assignments, update nodes or dates in bulk, cancel or reprocess shipments, and export data for analysis.">
+              <svg
+                className="w-5 h-5 text-gray-400 hover:text-gray-600 cursor-help"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <circle cx="12" cy="12" r="10" strokeWidth="2" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 16v-4m0-4h.01" />
+              </svg>
+            </SmartTooltip>
+          </div>
+          <p className="text-gray-600 mt-1">View and manage generated allocation plans</p>
+        </div>
+      </div>
+
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {/* Total & Pending */}
+        <div className="bg-gradient-to-br from-blue-50 to-white p-6 rounded-lg shadow hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-medium text-blue-600">Total & Pending</p>
+              <SmartTooltip content="Total allocation records and pending shipments awaiting execution." />
+            </div>
+            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-gray-600">📊 Total</span>
+              <span className="text-lg font-bold text-blue-600">{details.length}</span>
+            </div>
+            <div className="flex items-center justify-between pt-2 border-t border-blue-100">
+              <span className="text-xs text-gray-600">⏳ Pending</span>
+              <button
+                onClick={() => handleCardClick('status', 'pending')}
+                className="text-lg font-bold text-amber-600 hover:text-amber-700 hover:underline cursor-pointer transition-colors"
+              >
+                {details.filter(d => d.status === 'pending' || d.status === 'notified').length}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Shipment Status Breakdown */}
+        <div className="bg-gradient-to-br from-green-50 to-white p-6 rounded-lg shadow hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-sm font-medium text-green-600">Shipment Status</p>
+            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+              <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+              </svg>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-gray-600">Pending</span>
+              <button
+                onClick={() => handleCardClick('status', 'pending')}
+                className="text-sm font-semibold text-amber-600 hover:text-amber-700 hover:underline cursor-pointer transition-colors"
+              >
+                {details.filter(d => d.status === 'pending' || d.status === 'notified').length}
+              </button>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-gray-600">Sent</span>
+              <button
+                onClick={() => handleCardClick('status', 'sent')}
+                className="text-sm font-semibold text-blue-600 hover:text-blue-700 hover:underline cursor-pointer transition-colors"
+              >
+                {details.filter(d => d.status === 'sent').length}
+              </button>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-gray-600">Received</span>
+              <button
+                onClick={() => handleCardClick('status', 'received')}
+                className="text-sm font-semibold text-green-600 hover:text-green-700 hover:underline cursor-pointer transition-colors"
+              >
+                {details.filter(d => d.status === 'received').length}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Availability Issues */}
+        <div className="bg-gradient-to-br from-red-50 to-white p-6 rounded-lg shadow hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-medium text-red-600">Availability Issues</p>
+              <SmartTooltip content="Shipments with panelist availability problems. Unavailable: Panelist not available on scheduled date. Unassigned: No panelist assigned to route. Inactive: Assigned panelist is inactive. Action required: Review and reassign panelists or adjust scheduled dates." />
+            </div>
+            <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+              <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-600">⚠️ Unavailable</span>
+                <SmartTooltip content="Panelist not available on the scheduled date. Review panelist calendar and either reassign to another panelist or change the scheduled date." />
+              </div>
+              <button
+                onClick={() => handleCardClick('availabilityIssue', 'unavailable')}
+                className="text-sm font-semibold text-red-600 hover:text-red-700 hover:underline cursor-pointer transition-colors"
+              >
+                {availabilityCounts.unavailable}
+              </button>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-600">📋 Unassigned</span>
+                <SmartTooltip content="No panelist assigned to this route. Assign a panelist from the available pool for the origin and destination nodes." />
+              </div>
+              <button
+                onClick={() => handleCardClick('availabilityIssue', 'unassigned')}
+                className="text-sm font-semibold text-orange-600 hover:text-orange-700 hover:underline cursor-pointer transition-colors"
+              >
+                {availabilityCounts.unassigned}
+              </button>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-600">❌ Inactive</span>
+                <SmartTooltip content="Assigned panelist is marked as inactive. Reassign to an active panelist to proceed with the shipment." />
+              </div>
+              <button
+                onClick={() => handleCardClick('availabilityIssue', 'inactive')}
+                className="text-sm font-semibold text-gray-600 hover:text-gray-700 hover:underline cursor-pointer transition-colors"
+              >
+                {availabilityCounts.inactive}
+              </button>
+            </div>
+            <div className="flex items-center justify-between pt-2 border-t border-red-100">
+              <span className="text-xs font-medium text-gray-700">Total Issues</span>
+              <button
+                onClick={() => handleCardClick('availabilityIssue', 'any_issue')}
+                className="text-lg font-bold text-red-600 hover:text-red-700 hover:underline cursor-pointer transition-colors"
+              >
+                {availabilityCounts.any_issue}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Delayed Shipments */}
+        <div className="bg-gradient-to-br from-orange-50 to-white p-6 rounded-lg shadow hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-medium text-orange-600">Delayed Shipments</p>
+              <SmartTooltip content="Shipments scheduled before today but not yet received. Breakdown by status: Pending (not sent), Sent (awaiting receipt), Cancelled, Invalid, Transfer Error. Action required: Review and expedite or update status." />
+            </div>
+            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+              <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-600">⏳ Pending</span>
+                <SmartTooltip content="Delayed shipments not yet sent. Send immediately or reschedule." />
+              </div>
+              <button
+                onClick={() => handleCardClick('delayed', 'pending')}
+                className="text-sm font-semibold text-amber-600 hover:text-amber-700 hover:underline cursor-pointer transition-colors"
+              >
+                {delayedCounts.pending}
+              </button>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-600">📦 Sent</span>
+                <SmartTooltip content="Delayed shipments sent but not received. Follow up with panelists." />
+              </div>
+              <button
+                onClick={() => handleCardClick('delayed', 'sent')}
+                className="text-sm font-semibold text-blue-600 hover:text-blue-700 hover:underline cursor-pointer transition-colors"
+              >
+                {delayedCounts.sent}
+              </button>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-600">❌ Cancelled</span>
+                <SmartTooltip content="Delayed shipments that were cancelled." />
+              </div>
+              <button
+                onClick={() => handleCardClick('delayed', 'cancelled')}
+                className="text-sm font-semibold text-gray-600 hover:text-gray-700 hover:underline cursor-pointer transition-colors"
+              >
+                {delayedCounts.cancelled}
+              </button>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-600">⚠️ Invalid</span>
+                <SmartTooltip content="Delayed shipments marked as invalid." />
+              </div>
+              <button
+                onClick={() => handleCardClick('delayed', 'invalid')}
+                className="text-sm font-semibold text-gray-600 hover:text-gray-700 hover:underline cursor-pointer transition-colors"
+              >
+                {delayedCounts.invalid}
+              </button>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-600">🔄 Transfer Error</span>
+                <SmartTooltip content="Delayed shipments with transfer errors. Reprocess or fix manually." />
+              </div>
+              <button
+                onClick={() => handleCardClick('delayed', 'transfer_error')}
+                className="text-sm font-semibold text-gray-600 hover:text-gray-700 hover:underline cursor-pointer transition-colors"
+              >
+                {delayedCounts.transfer_error}
+              </button>
+            </div>
+            <div className="flex items-center justify-between pt-2 border-t border-orange-100">
+              <span className="text-xs font-medium text-gray-700">Total Delayed</span>
+              <button
+                onClick={() => handleCardClick('delayed', '')}
+                className="text-lg font-bold text-orange-600 hover:text-orange-700 hover:underline cursor-pointer transition-colors"
+              >
+                {delayedCounts.total}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <AllocationPlanFilters
         filters={filters}
@@ -328,6 +718,15 @@ export function AllocationPlans() {
             <h2 className="text-lg font-medium">
               Allocation Plan Details ({filteredDetails.length})
             </h2>
+            <button
+              onClick={handleAddRecord}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+              </svg>
+              Add Record
+            </button>
           </div>
         </div>
 
@@ -350,51 +749,21 @@ export function AllocationPlans() {
                         className="rounded border-gray-300"
                       />
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Plan
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Carrier
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Product
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Origin City
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Origin Node
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Dest. City
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Dest. Node
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Scheduled Date
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Week
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Tag ID
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Origin Panelist
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Origin Status
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Dest. Panelist
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Dest. Status
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Status
-                    </th>
+                    <SortableHeader field="plan" label="Plan" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The allocation plan name that this shipment belongs to." />
+                    <SortableHeader field="carrier" label="Carrier" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The logistics carrier responsible for this shipment." />
+                    <SortableHeader field="product" label="Product" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The carrier product/service type used for this shipment." />
+                    <SortableHeader field="originCity" label="Origin City" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The city where the package is picked up." />
+                    <SortableHeader field="originNode" label="Origin Node" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The specific node within the origin city where pickup occurs." />
+                    <SortableHeader field="destCity" label="Dest. City" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The city where the package is delivered." />
+                    <SortableHeader field="destNode" label="Dest. Node" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The specific node within the destination city where delivery occurs." />
+                    <SortableHeader field="date" label="Scheduled Date" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The date when this shipment is scheduled to be executed." />
+                    <SortableHeader field="week" label="Week" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The ISO week number of the scheduled date (1-53)." />
+                    <SortableHeader field="tagId" label="Tag ID" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The physical tag identifier assigned to track this shipment." />
+                    <SortableHeader field="originPanelist" label="Origin Panelist" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The panelist assigned to send the package from the origin node." />
+                    <SortableHeader field="originStatus" label="Origin Status" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="Origin panelist availability: Available, Unavailable (not available on date), Unassigned (no panelist), or Inactive." />
+                    <SortableHeader field="destPanelist" label="Dest. Panelist" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The panelist assigned to receive the package at the destination node." />
+                    <SortableHeader field="destStatus" label="Dest. Status" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="Destination panelist availability: Available, Unavailable (not available on date), Unassigned (no panelist), or Inactive." />
+                    <SortableHeader field="status" label="Status" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="Shipment status: Pending (not started), Notified, Sent (dispatched), Received (delivered), Cancelled, Invalid, or Transfer Error." />
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                       Actions
                     </th>
@@ -410,6 +779,7 @@ export function AllocationPlans() {
                       selected={selectedIds.has(detail.id)}
                       onToggleSelect={() => handleToggleSelect(detail.id)}
                       onUpdate={updateDetail}
+                      onEdit={handleEditRecord}
                       getNodesByCity={getNodesByCity}
                     />
                   ))}
@@ -419,6 +789,20 @@ export function AllocationPlans() {
           </div>
         )}
       </div>
+
+      <RecordModal
+        isOpen={showRecordModal}
+        onClose={handleCloseModal}
+        onCreate={createDetail}
+        onUpdate={updateDetail}
+        editRecord={editingRecord}
+        plans={plans}
+        carriers={carriers}
+        products={products}
+        cities={cities}
+        nodes={nodes}
+        getNodesByCity={getNodesByCity}
+      />
     </div>
   )
 }

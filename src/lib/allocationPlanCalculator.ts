@@ -62,28 +62,34 @@ export function autoFillMatrix(matrix: Partial<CityDistributionMatrix>): CityDis
     'AA', 'AB', 'AC', 'BA', 'BB', 'BC', 'CA', 'CB', 'CC',
   ]
   let total = 0
-  let emptyCount = 0
+  const emptyKeys: (keyof CityDistributionMatrix)[] = []
 
   keys.forEach((key) => {
     const value = matrix[key]
     if (value !== undefined && value !== null && value !== 0) {
       total += value
     } else {
-      emptyCount++
+      emptyKeys.push(key)
     }
   })
 
   if (total >= 100) return matrix as CityDistributionMatrix
 
   const remaining = 100 - total
-  const fillValue = emptyCount > 0 ? remaining / emptyCount : 0
+  const emptyCount = emptyKeys.length
+  
+  if (emptyCount === 0) return matrix as CityDistributionMatrix
+
+  // Distribute remaining percentage as integers
+  const baseValue = Math.floor(remaining / emptyCount)
+  const remainder = remaining - (baseValue * emptyCount)
 
   const filled: CityDistributionMatrix = { ...matrix } as CityDistributionMatrix
-  keys.forEach((key) => {
-    const value = matrix[key]
-    if (value === undefined || value === null || value === 0) {
-      filled[key] = fillValue
-    }
+  
+  // Fill empty cells with base value
+  emptyKeys.forEach((key, index) => {
+    // Add 1 to first 'remainder' cells to reach exactly 100%
+    filled[key] = baseValue + (index < remainder ? 1 : 0)
   })
 
   return filled
@@ -98,28 +104,34 @@ export function autoFillSeasonal(seasonal: Partial<SeasonalDistribution>): Seaso
     'jul', 'aug', 'sep', 'oct', 'nov', 'dec',
   ]
   let total = 0
-  let emptyCount = 0
+  const emptyMonths: (keyof SeasonalDistribution)[] = []
 
   months.forEach((month) => {
     const value = seasonal[month]
     if (value !== undefined && value !== null && value !== 0) {
       total += value
     } else {
-      emptyCount++
+      emptyMonths.push(month)
     }
   })
 
   if (total >= 100) return seasonal as SeasonalDistribution
 
   const remaining = 100 - total
-  const fillValue = emptyCount > 0 ? remaining / emptyCount : 0
+  const emptyCount = emptyMonths.length
+  
+  if (emptyCount === 0) return seasonal as SeasonalDistribution
+
+  // Distribute remaining percentage as integers
+  const baseValue = Math.floor(remaining / emptyCount)
+  const remainder = remaining - (baseValue * emptyCount)
 
   const filled: SeasonalDistribution = { ...seasonal } as SeasonalDistribution
-  months.forEach((month) => {
-    const value = seasonal[month]
-    if (value === undefined || value === null || value === 0) {
-      filled[month] = fillValue
-    }
+  
+  // Fill empty cells with base value
+  emptyMonths.forEach((month, index) => {
+    // Add 1 to first 'remainder' cells to reach exactly 100%
+    filled[month] = baseValue + (index < remainder ? 1 : 0)
   })
 
   return filled

@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { GeneralPerformanceData } from '@/types/reporting';
+import { adjustStartDateForFilter, adjustEndDateForFilter } from '@/lib/dateUtils';
 
 interface Filters {
   originCity?: string;
   destinationCity?: string;
   carrier?: string;
   product?: string;
+  dateFrom?: string;
+  dateTo?: string;
 }
 
 export function useReportingGeneral(accountId: string | undefined, filters?: Filters) {
@@ -41,6 +44,12 @@ export function useReportingGeneral(accountId: string | undefined, filters?: Fil
         }
         if (filters?.product) {
           query = query.eq('product_name', filters.product);
+        }
+        if (filters?.dateFrom && filters.dateFrom !== '') {
+          query = query.gte('sent_at', adjustStartDateForFilter(filters.dateFrom));
+        }
+        if (filters?.dateTo && filters.dateTo !== '') {
+          query = query.lte('sent_at', adjustEndDateForFilter(filters.dateTo));
         }
 
         const { data: shipments, error: err } = await query;
@@ -88,7 +97,7 @@ export function useReportingGeneral(accountId: string | undefined, filters?: Fil
     }
 
     fetchData();
-  }, [accountId, filters?.originCity, filters?.destinationCity, filters?.carrier, filters?.product]);
+  }, [accountId, filters?.originCity, filters?.destinationCity, filters?.carrier, filters?.product, filters?.dateFrom, filters?.dateTo]);
 
   return { data, loading, error };
 }

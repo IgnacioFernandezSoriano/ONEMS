@@ -61,7 +61,7 @@ export function WeeklySamplesChart({ data }: WeeklySamplesChartProps) {
               borderRadius: '8px',
               padding: '8px 12px',
             }}
-            formatter={(value: number) => [value.toLocaleString(), 'Samples']}
+            formatter={(value: number | undefined) => value !== undefined ? [value.toLocaleString(), 'Samples'] : ['', '']}
             labelFormatter={(label) => `Week of ${label}`}
           />
           <Bar dataKey="samples" radius={[4, 4, 0, 0]}>

@@ -1,5 +1,6 @@
 import React from 'react';
-import { CheckCircle, XCircle, Info } from 'lucide-react';
+import { CheckCircle, XCircle } from 'lucide-react';
+import { SmartTooltip } from '@/components/common/SmartTooltip';
 import type { CarrierData, ProductData, RouteData } from '@/hooks/reporting/useComplianceData';
 
 interface ComplianceTableProps {
@@ -68,87 +69,75 @@ export function ComplianceTable({ data }: ComplianceTableProps) {
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               <div className="flex items-center gap-1">
                 Standard (days)
-                <div className="group relative">
-                  <Info className="w-3 h-3 text-gray-400 cursor-help" />
-                  <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -right-2 top-6">
-                    <div className="absolute -top-1 right-4 w-2 h-2 bg-gray-900 transform rotate-45"></div>
+                <SmartTooltip content={
+                  <>
                     <p className="font-semibold mb-1">Carrier/Product Level:</p>
                     <p className="mb-2">Weighted average by shipment count</p>
                     <p className="font-semibold mb-1">Route Level:</p>
                     <p>Direct value from delivery_standards</p>
-                  </div>
-                </div>
+                  </>
+                } />
               </div>
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               <div className="flex items-center gap-1">
                 Actual (days)
-                <div className="group relative">
-                  <Info className="w-3 h-3 text-gray-400 cursor-help" />
-                  <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -right-2 top-6">
-                    <div className="absolute -top-1 right-4 w-2 h-2 bg-gray-900 transform rotate-45"></div>
+                <SmartTooltip content={
+                  <>
                     <p className="font-semibold mb-1">Carrier/Product Level:</p>
                     <p className="mb-2">Weighted average by shipment count</p>
                     <p className="font-semibold mb-1">Route Level:</p>
                     <p>Average business days for all shipments</p>
-                  </div>
-                </div>
+                  </>
+                } />
               </div>
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               <div className="flex items-center gap-1">
                 Standard %
-                <div className="group relative">
-                  <Info className="w-3 h-3 text-gray-400 cursor-help" />
-                  <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -right-2 top-6">
-                    <div className="absolute -top-1 right-4 w-2 h-2 bg-gray-900 transform rotate-45"></div>
+                <SmartTooltip content={
+                  <>
                     <p className="font-semibold mb-1">Carrier/Product Level:</p>
                     <p className="mb-2">Weighted average by shipment count</p>
                     <p className="font-semibold mb-1">Route Level:</p>
                     <p>Direct value from delivery_standards</p>
-                  </div>
-                </div>
+                  </>
+                } />
               </div>
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               <div className="flex items-center gap-1">
                 Actual %
-                <div className="group relative">
-                  <Info className="w-3 h-3 text-gray-400 cursor-help" />
-                  <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -right-2 top-6">
-                    <div className="absolute -top-1 right-4 w-2 h-2 bg-gray-900 transform rotate-45"></div>
+                <SmartTooltip content={
+                  <>
                     <p className="mb-2">Percentage of shipments delivered successfully</p>
                     <p className="font-semibold mb-1">Carrier/Product Level:</p>
                     <p className="mb-2">Weighted average by shipment count</p>
                     <p className="font-semibold mb-1">Route Level:</p>
                     <p>Compliant shipments / Total shipments × 100%</p>
-                  </div>
-                </div>
+                  </>
+                } />
               </div>
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               <div className="flex items-center gap-1">
                 Deviation
-                <div className="group relative">
-                  <Info className="w-3 h-3 text-gray-400 cursor-help" />
-                  <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -right-2 top-6">
-                    <div className="absolute -top-1 right-4 w-2 h-2 bg-gray-900 transform rotate-45"></div>
+                <SmartTooltip content={
+                  <>
                     <p className="mb-2">Difference between Actual % and Standard %</p>
                     <p className="font-semibold mb-1">Positive:</p>
                     <p className="mb-2">Above standard (good)</p>
                     <p className="font-semibold mb-1">Negative:</p>
                     <p>Below standard (deviation)</p>
-                  </div>
-                </div>
+                  </>
+                } />
               </div>
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               <div className="flex items-center gap-1">
                 Status
-                <div className="group relative">
-                  <Info className="w-3 h-3 text-gray-400 cursor-help" />
-                  <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -right-2 top-6">
-                    <div className="absolute -top-1 right-4 w-2 h-2 bg-gray-900 transform rotate-45"></div>
+                <SmartTooltip content={
+                  <>
                     <p className="mb-2">Compliance status based on dynamic thresholds:</p>
                     <p className="font-semibold mb-1">✅ Compliant:</p>
                     <p className="mb-2">Actual ≥ Standard %</p>
@@ -156,8 +145,8 @@ export function ComplianceTable({ data }: ComplianceTableProps) {
                     <p className="mb-2">Below standard but above critical (no penalty)</p>
                     <p className="font-semibold mb-1">🔴 Critical:</p>
                     <p>Below critical threshold (with penalty)</p>
-                  </div>
-                </div>
+                  </>
+                } />
               </div>
             </th>
           </tr>

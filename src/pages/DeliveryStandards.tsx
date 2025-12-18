@@ -28,6 +28,7 @@ export function DeliveryStandards() {
   const [editingStandard, setEditingStandard] = useState<DeliveryStandardWithDetails | null>(null)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [showBulkEdit, setShowBulkEdit] = useState(false)
+  const [showFilters, setShowFilters] = useState(false)
   const [bulkEditData, setBulkEditData] = useState({
     standard_time: '',
     success_percentage: '',
@@ -204,53 +205,96 @@ export function DeliveryStandards() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="p-8">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Delivery Standards</h1>
-        <p className="text-gray-600 mt-1">
+      <div className="mb-8">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold text-gray-900">Delivery Standards</h1>
+            <div className="group relative">
+              <svg className="w-5 h-5 text-gray-400 hover:text-blue-600 cursor-help transition-colors" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+              <div className="absolute left-0 top-6 w-80 bg-gray-900 text-white text-sm rounded-lg p-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 shadow-xl">
+                <div className="font-semibold mb-2">About Delivery Standards</div>
+                <div className="space-y-2 text-gray-200">
+                  <p><strong>Purpose:</strong> Define expected delivery times (J+K) and success rates between city pairs for each carrier-product combination.</p>
+                  <p><strong>Key Metrics:</strong></p>
+                  <ul className="list-disc list-inside ml-2 space-y-1">
+                    <li><strong>J+K:</strong> Standard delivery time (e.g., J+2 means 2 days from pickup)</li>
+                    <li><strong>Std %:</strong> Target percentage of deliveries meeting the J+K standard</li>
+                    <li><strong>Thresholds:</strong> Warning and critical deviation levels for performance monitoring</li>
+                  </ul>
+                  <p><strong>Usage:</strong> These standards are used for compliance reporting, carrier performance evaluation, and SLA management.</p>
+                </div>
+                <div className="absolute -top-1 left-4 w-2 h-2 bg-gray-900 transform rotate-45"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p className="text-gray-600 mt-2">
           Manage delivery time standards between cities for each carrier and product
         </p>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white p-6 rounded-lg border">
-          <div className="text-3xl font-bold text-blue-600">{standards.length}</div>
-          <div className="text-sm text-gray-600 mt-1">Total Standards</div>
-        </div>
-        <div className="bg-white p-6 rounded-lg border">
-          <div className="text-3xl font-bold text-green-600">
-            {standards.filter((s) => s.standard_time != null && s.success_percentage != null).length}
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="bg-gradient-to-br from-blue-50 to-white p-6 rounded-xl border border-blue-100 hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-3xl font-bold text-gray-900">{standards.length}</div>
+              <div className="text-xs text-gray-500 mt-1">Total Standards</div>
+            </div>
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+              <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+            </div>
           </div>
-          <div className="text-sm text-gray-600 mt-1">Configured</div>
         </div>
-        <div className="bg-white p-6 rounded-lg border">
-          <div className="text-3xl font-bold text-amber-600">
-            {standards.filter((s) => s.standard_time == null || s.success_percentage == null).length}
+        <div className="bg-gradient-to-br from-green-50 to-white p-6 rounded-xl border border-green-100 hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-3xl font-bold text-gray-900">
+                {standards.filter((s) => s.standard_time != null && s.success_percentage != null).length}
+              </div>
+              <div className="text-xs text-gray-500 mt-1">Configured</div>
+            </div>
+            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+              <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
           </div>
-          <div className="text-sm text-gray-600 mt-1">Pending</div>
         </div>
-        <div className="bg-white p-6 rounded-lg border">
-          <div className="text-3xl font-bold text-purple-600">{selectedIds.size}</div>
-          <div className="text-sm text-gray-600 mt-1">Selected</div>
+        <div className="bg-gradient-to-br from-amber-50 to-white p-6 rounded-xl border border-amber-100 hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-3xl font-bold text-gray-900">
+                {standards.filter((s) => s.standard_time == null || s.success_percentage == null).length}
+              </div>
+              <div className="text-xs text-gray-500 mt-1">Pending</div>
+            </div>
+            <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
+              <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+          </div>
         </div>
-      </div>
-
-      {/* Actions */}
-      <div className="flex gap-2 flex-wrap">
-        <Button onClick={() => setShowCreateModal(true)}>+ Create Standard</Button>
-        <Button onClick={() => setShowGenerateModal(true)}>⚡ Generate Combinations</Button>
-        {selectedIds.size > 0 && (
-          <>
-            <Button variant="secondary" onClick={() => setShowBulkEdit(!showBulkEdit)}>
-              ✏️ Bulk Edit ({selectedIds.size})
-            </Button>
-            <Button variant="secondary" onClick={handleBulkDelete}>
-              🗑️ Delete Selected
-            </Button>
-          </>
-        )}
+        <div className="bg-gradient-to-br from-purple-50 to-white p-6 rounded-xl border border-purple-100 hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-3xl font-bold text-gray-900">{selectedIds.size}</div>
+              <div className="text-xs text-gray-500 mt-1">Selected</div>
+            </div>
+            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+              <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+              </svg>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Bulk Edit Panel */}
@@ -391,11 +435,83 @@ export function DeliveryStandards() {
       )}
 
       {/* Filters */}
-      <div className="bg-white rounded-lg border p-4">
-        <h3 className="font-medium text-gray-900 mb-3">Filters</h3>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="bg-white rounded-lg shadow p-4 mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="p-1 hover:bg-gray-100 rounded transition-colors"
+              title={showFilters ? "Collapse filters" : "Expand filters"}
+            >
+              {showFilters ? (
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              )}
+            </button>
+            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+            </svg>
+            <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
+            {(filters.carrier_id || filters.product_id || filters.origin_city_id || filters.destination_city_id || filters.origin_classification || filters.destination_classification || filters.pending_only) && (
+              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">
+                Active
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <Button onClick={() => setShowCreateModal(true)}>+ Create Standard</Button>
+            <Button onClick={() => setShowGenerateModal(true)}>⚡ Generate Combinations</Button>
+            {selectedIds.size > 0 && (
+              <>
+                <Button variant="secondary" onClick={() => setShowBulkEdit(!showBulkEdit)}>
+                  ✏️ Bulk Edit ({selectedIds.size})
+                </Button>
+                <Button variant="secondary" onClick={handleBulkDelete}>
+                  🗑️ Delete Selected
+                </Button>
+              </>
+            )}
+            <button
+              onClick={() => setFilters({
+                carrier_id: '',
+                product_id: '',
+                origin_city_id: '',
+                destination_city_id: '',
+                origin_classification: '',
+                destination_classification: '',
+                pending_only: false,
+              })}
+              className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+              title="Reset all filters"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Reset
+            </button>
+          </div>
+        </div>
+        
+        {showFilters && (
+          <div className="border-t border-gray-200 pt-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Carrier</label>
+            <label className="flex items-center gap-1 text-sm font-medium text-gray-700 mb-1">
+              Carrier
+              <span className="group relative">
+                <svg className="w-3 h-3 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+                <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
+                  Filter standards by specific carrier. Shows only standards for the selected carrier.
+                </div>
+              </span>
+            </label>
             <select
               value={filters.carrier_id}
               onChange={(e) => setFilters({ ...filters, carrier_id: e.target.value })}
@@ -410,7 +526,17 @@ export function DeliveryStandards() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Product</label>
+            <label className="flex items-center gap-1 text-sm font-medium text-gray-700 mb-1">
+              Product
+              <span className="group relative">
+                <svg className="w-3 h-3 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+                <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
+                  Filter standards by carrier product/service type. Shows only standards for the selected product.
+                </div>
+              </span>
+            </label>
             <select
               value={filters.product_id}
               onChange={(e) => setFilters({ ...filters, product_id: e.target.value })}
@@ -425,7 +551,17 @@ export function DeliveryStandards() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Origin City</label>
+            <label className="flex items-center gap-1 text-sm font-medium text-gray-700 mb-1">
+              Origin City
+              <span className="group relative">
+                <svg className="w-3 h-3 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+                <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
+                  Filter standards by origin city (where packages are picked up). Shows only routes starting from the selected city.
+                </div>
+              </span>
+            </label>
             <select
               value={filters.origin_city_id}
               onChange={(e) => setFilters({ ...filters, origin_city_id: e.target.value })}
@@ -440,8 +576,16 @@ export function DeliveryStandards() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="flex items-center gap-1 text-sm font-medium text-gray-700 mb-1">
               Destination City
+              <span className="group relative">
+                <svg className="w-3 h-3 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+                <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
+                  Filter standards by destination city (where packages are delivered). Shows only routes ending in the selected city.
+                </div>
+              </span>
             </label>
             <select
               value={filters.destination_city_id}
@@ -457,8 +601,16 @@ export function DeliveryStandards() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="flex items-center gap-1 text-sm font-medium text-gray-700 mb-1">
               Origin Type
+              <span className="group relative">
+                <svg className="w-3 h-3 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+                <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
+                  Filter by origin city classification (A, B, or C). Shows only routes starting from cities of the selected type.
+                </div>
+              </span>
             </label>
             <select
               value={filters.origin_classification}
@@ -474,8 +626,16 @@ export function DeliveryStandards() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="flex items-center gap-1 text-sm font-medium text-gray-700 mb-1">
               Destination Type
+              <span className="group relative">
+                <svg className="w-3 h-3 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+                <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
+                  Filter by destination city classification (A, B, or C). Shows only routes ending in cities of the selected type.
+                </div>
+              </span>
             </label>
             <select
               value={filters.destination_classification}
@@ -498,29 +658,22 @@ export function DeliveryStandards() {
                 onChange={(e) => setFilters({ ...filters, pending_only: e.target.checked })}
                 className="rounded"
               />
-              <span className="text-sm font-medium text-gray-700">Pending Only</span>
+              <span className="flex items-center gap-1 text-sm font-medium text-gray-700">
+                Pending Only
+                <span className="group relative">
+                  <svg className="w-3 h-3 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                  </svg>
+                  <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
+                    Show only standards that are not yet configured (missing J+K or Std % values). Useful for identifying routes that need configuration.
+                  </div>
+                </span>
+              </span>
             </label>
           </div>
-          <div className="flex items-end">
-            <Button
-              variant="secondary"
-              onClick={() =>
-                setFilters({
-                  carrier_id: '',
-                  product_id: '',
-                  origin_city_id: '',
-                  destination_city_id: '',
-                  origin_classification: '',
-                  destination_classification: '',
-                  pending_only: false,
-                })
-              }
-              className="w-full"
-            >
-              Clear Filters
-            </Button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Table */}
@@ -541,25 +694,95 @@ export function DeliveryStandards() {
                   />
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Carrier
+                  <div className="flex items-center gap-1">
+                    Carrier
+                    <span className="group relative">
+                      <svg className="w-3 h-3 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                      </svg>
+                      <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
+                        Logistics carrier responsible for delivery (e.g., DHL, FedEx)
+                      </div>
+                    </span>
+                  </div>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Product
+                  <div className="flex items-center gap-1">
+                    Product
+                    <span className="group relative">
+                      <svg className="w-3 h-3 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                      </svg>
+                      <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
+                        Carrier's product/service type (e.g., Express, Standard, Economy)
+                      </div>
+                    </span>
+                  </div>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Origin
+                  <div className="flex items-center gap-1">
+                    Origin
+                    <span className="group relative">
+                      <svg className="w-3 h-3 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                      </svg>
+                      <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
+                        City where the package is picked up (origin city)
+                      </div>
+                    </span>
+                  </div>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Destination
+                  <div className="flex items-center gap-1">
+                    Destination
+                    <span className="group relative">
+                      <svg className="w-3 h-3 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                      </svg>
+                      <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
+                        City where the package is delivered (destination city)
+                      </div>
+                    </span>
+                  </div>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Time
+                  <div className="flex items-center gap-1">
+                    J+K
+                    <span className="group relative">
+                      <svg className="w-3 h-3 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                      </svg>
+                      <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
+                        Standard delivery time (J+K notation). J = pickup day, K = number of days. Example: J+2 means delivery within 2 days from pickup.
+                      </div>
+                    </span>
+                  </div>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Success %
+                  <div className="flex items-center gap-1">
+                    Unit
+                    <span className="group relative">
+                      <svg className="w-3 h-3 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                      </svg>
+                      <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
+                        Time unit for the J+K value (hours or days)
+                      </div>
+                    </span>
+                  </div>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Unit
+                  <div className="flex items-center gap-1">
+                    Std %
+                    <span className="group relative">
+                      <svg className="w-3 h-3 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                      </svg>
+                      <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
+                        Target percentage of deliveries that must meet the J+K standard. Example: 85% means at least 85 out of 100 deliveries should arrive within J+K time.
+                      </div>
+                    </span>
+                  </div>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   <div className="flex items-center gap-1">
@@ -569,7 +792,7 @@ export function DeliveryStandards() {
                         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                       </svg>
                       <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
-                        Desviación sin penalización
+                        Acceptable deviation from Std % without penalty. Example: If Std % is 85% and Warning is 10%, performance between 75-85% triggers a warning but no penalty.
                       </div>
                     </span>
                   </div>
@@ -582,16 +805,36 @@ export function DeliveryStandards() {
                         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                       </svg>
                       <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
-                        Desviación con penalización
+                        Critical deviation from Std % that triggers penalties. Example: If Std % is 85% and Critical is 20%, performance below 65% results in carrier penalties.
                       </div>
                     </span>
                   </div>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Type
+                  <div className="flex items-center gap-1">
+                    Type
+                    <span className="group relative">
+                      <svg className="w-3 h-3 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                      </svg>
+                      <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
+                        Threshold calculation type: Relative (percentage-based) or Absolute (fixed value)
+                      </div>
+                    </span>
+                  </div>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Actions
+                  <div className="flex items-center gap-1">
+                    Actions
+                    <span className="group relative">
+                      <svg className="w-3 h-3 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                      </svg>
+                      <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
+                        Edit or delete this delivery standard
+                      </div>
+                    </span>
+                  </div>
                 </th>
               </tr>
             </thead>
@@ -644,6 +887,18 @@ export function DeliveryStandards() {
                     />
                   </td>
                   <td className="px-6 py-4">
+                    <select
+                      value={std.time_unit}
+                      onChange={(e) =>
+                        handleInlineUpdate(std.id, 'time_unit', e.target.value)
+                      }
+                      className="px-2 py-1 border border-gray-300 rounded text-sm"
+                    >
+                      <option value="hours">Hours</option>
+                      <option value="days">Days</option>
+                    </select>
+                  </td>
+                  <td className="px-6 py-4">
                     <input
                       type="number"
                       step="0.01"
@@ -660,18 +915,6 @@ export function DeliveryStandards() {
                       className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
                       placeholder="--"
                     />
-                  </td>
-                  <td className="px-6 py-4">
-                    <select
-                      value={std.time_unit}
-                      onChange={(e) =>
-                        handleInlineUpdate(std.id, 'time_unit', e.target.value)
-                      }
-                      className="px-2 py-1 border border-gray-300 rounded text-sm"
-                    >
-                      <option value="hours">Hours</option>
-                      <option value="days">Days</option>
-                    </select>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500">
                     {std.warning_threshold != null ? `${std.warning_threshold}%` : '-'}

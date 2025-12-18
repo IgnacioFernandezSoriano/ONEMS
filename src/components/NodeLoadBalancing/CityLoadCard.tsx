@@ -5,14 +5,12 @@ interface CityLoadCardProps {
   cityName: string;
   cityData: NodeLoadData[];
   onBalance: () => void;
-  onViewDetails: () => void;
 }
 
 export const CityLoadCard: React.FC<CityLoadCardProps> = ({
   cityName,
   cityData,
   onBalance,
-  onViewDetails,
 }) => {
   // Get unique weeks and nodes
   const weeks = Array.from(new Set(cityData.map((d) => d.week_number))).sort();
@@ -105,7 +103,11 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
       <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="text-2xl">🏙️</span>
+            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+              <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clipRule="evenodd" />
+              </svg>
+            </div>
             <h3 className="text-lg font-semibold text-gray-900">{cityName}</h3>
           </div>
           <div className="flex items-center gap-6 text-sm">
@@ -116,12 +118,6 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
             <div className="flex items-center gap-2">
               <span className="text-gray-600">Avg/Node:</span>
               <strong className="text-gray-900">{avgPerNode.toFixed(1)}</strong>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-gray-600">Std Dev:</span>
-              <strong className={getStddevColor(monthlyStddev)}>
-                {monthlyStddev.toFixed(1)}
-              </strong>
             </div>
           </div>
         </div>
@@ -211,42 +207,47 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
               <td></td>
             </tr>
 
-            {/* Std Dev Row */}
-            <tr className="bg-gray-50 font-semibold">
-              <td className="px-4 py-3 text-gray-900">STD DEV</td>
-              {weeks.map((week) => (
-                <td
-                  key={week}
-                  className={`px-4 py-3 text-center ${getStddevColor(weekStddevs[week])}`}
-                >
-                  {weekStddevs[week].toFixed(1)}
-                </td>
-              ))}
-              <td className={`px-4 py-3 text-center ${getStddevColor(monthlyStddev)}`}>
-                {monthlyStddev.toFixed(1)}
-              </td>
-              <td></td>
-            </tr>
+
           </tbody>
         </table>
       </div>
 
       {/* Actions */}
-      <div className="bg-gray-50 px-6 py-4 border-t border-gray-200 flex gap-3">
-        <button
-          onClick={onBalance}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
-        >
-          <span>⚖️</span>
-          Auto-Balance {cityName}
-        </button>
-        <button
-          onClick={onViewDetails}
-          className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-50 transition-colors"
-        >
-          <span>📊</span>
-          View Details
-        </button>
+      <div className="bg-gray-50 px-6 py-4 border-t border-gray-200 flex items-center gap-3">
+        <div className="group relative">
+          <button
+            onClick={onBalance}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
+          >
+            <span>⚖️</span>
+            Auto-Balance {cityName}
+          </button>
+        </div>
+        <span className="group relative">
+          <svg
+            className="w-5 h-5 text-gray-400 cursor-help"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              fillRule="evenodd"
+              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+              clipRule="evenodd"
+            />
+          </svg>
+          <div className="invisible group-hover:visible absolute z-10 w-96 p-3 bg-gray-900 text-white text-sm rounded-lg shadow-lg bottom-full left-0 mb-2">
+            <p className="font-semibold mb-2">Auto-Balance Mechanism</p>
+            <p className="mb-2">
+              <strong>How it works:</strong> The system analyzes shipment distribution across nodes and weeks, identifying overloaded nodes (&gt;150% avg) and underutilized nodes (&lt;80% avg).
+            </p>
+            <p className="mb-2">
+              <strong>Algorithm:</strong> Moves shipments from saturated nodes to nodes with available capacity, prioritizing moves within the same week to maintain temporal distribution.
+            </p>
+            <p>
+              <strong>Result:</strong> Reduces load variance, prevents node saturation, and improves overall system efficiency. Preview shows proposed changes before applying.
+            </p>
+          </div>
+        </span>
       </div>
     </div>
   );

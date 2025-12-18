@@ -11,6 +11,7 @@ import { CumulativeDistributionTable } from '@/components/reporting/CumulativeDi
 import { CumulativeDistributionChart } from '@/components/reporting/CumulativeDistributionChart';
 import { exportRouteCSV, exportCityCSV, exportRegionCSV, exportCarrierProductCSV, exportCumulativeCSV } from '@/utils/jkExportCSV';
 import { ColumnTooltip } from '@/components/reporting/ColumnTooltip';
+import { SmartTooltip } from '@/components/common/SmartTooltip';
 
 export default function JKPerformance() {
   const { profile } = useAuth();
@@ -64,24 +65,7 @@ export default function JKPerformance() {
           <h1 className="text-2xl font-bold text-gray-900">J+K Performance Report</h1>
           <p className="text-gray-600 mt-1">Transit time analysis and delivery performance tracking</p>
         </div>
-        <div className="group relative">
-          <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg cursor-help">
-            <Info className="w-5 h-5 text-blue-600" />
-            <span className="text-sm font-medium text-blue-900">About this Report</span>
-          </div>
-          <div className="invisible group-hover:visible absolute z-10 w-96 p-4 bg-white border border-gray-200 rounded-lg shadow-xl text-sm text-gray-700 right-0 top-12">
-            <div className="absolute -top-1 right-8 w-2 h-2 bg-white border-l border-t border-gray-200 transform rotate-45"></div>
-            <h3 className="font-bold text-gray-900 mb-3">J+K Performance Report</h3>
-            <p className="mb-3"><strong>Purpose:</strong> Analyzes actual transit times (J+K Actual) against delivery standards (J+K Std) to identify routes, cities, carriers, or products with systematic delays.</p>
-            <p className="mb-3"><strong>What you'll see:</strong> Multi-level analysis showing Route, City, Region, Carrier, and Product performance. Color-coded metrics help identify problematic areas at a glance.</p>
-            <p className="mb-3"><strong>J+K Standard:</strong> Expected delivery time in days from delivery_standards table. Automatically converted from hours if needed.</p>
-            <p className="mb-3"><strong>J+K Actual:</strong> Average actual transit time in business days from shipment data.</p>
-            <p className="mb-3"><strong>Deviation:</strong> Difference between Actual and Standard. Positive values indicate delays.</p>
-            <p className="mb-3"><strong>On-Time %:</strong> Percentage of shipments delivered within or before the standard time.</p>
-            <p className="mb-3"><strong>Std %:</strong> Target success percentage defined in delivery_standards table (e.g., 85%, 95%). This is route-specific and dynamic.</p>
-            <p className="mb-3"><strong>Color Coding:</strong> Green (≥95% on-time), Yellow (90-95%), Red (&lt;90%) are visual guides. Actual compliance is measured against route-specific Std % from delivery_standards.</p>
-          </div>
-        </div>
+        <SmartTooltip content="J+K Performance Report: Analyzes actual transit times (J+K Actual) against delivery standards (J+K Std) to identify routes, cities, carriers, or products with systematic delays. Multi-level analysis showing Route, City, Region, Carrier, and Product performance. J+K Standard is the expected delivery time in days from delivery_standards table. J+K Actual is the average actual transit time in business days. Deviation is the difference between Actual and Standard (positive values indicate delays). On-Time % is the percentage of shipments delivered within or before the standard time. Color coding: Green (≥95%), Yellow (90-95%), Red (<90%)." />
       </div>
 
       {/* Filters */}
@@ -149,16 +133,7 @@ export default function JKPerformance() {
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center gap-2 mb-4">
             <h3 className="text-lg font-semibold text-gray-900">Weekly Sample Volume</h3>
-            <div className="group relative">
-              <Info className="w-4 h-4 text-gray-400 cursor-help" />
-              <div className="invisible group-hover:visible absolute z-10 w-80 p-3 bg-gray-900 text-white text-xs rounded shadow-lg left-0 top-6">
-                <div className="absolute -top-1 left-4 w-2 h-2 bg-gray-900 transform rotate-45"></div>
-                <p className="mb-2"><strong>Weekly Sample Volume</strong></p>
-                <p className="mb-2">Shows the number of shipments analyzed per week in the selected date range.</p>
-                <p className="mb-2"><strong>Color Coding:</strong> Green (20% above average), Blue (above average), Yellow (80-100% of average), Red (below 80% of average).</p>
-                <p><strong>Purpose:</strong> Identify weeks with low sample sizes that may affect statistical reliability. Minimum 30 samples/week recommended.</p>
-              </div>
-            </div>
+            <SmartTooltip content="Weekly Sample Volume: Shows the number of shipments analyzed per week in the selected date range. Color coding: Green (20% above average), Blue (above average), Yellow (80-100% of average), Red (below 80% of average). Use to identify weeks with low sample sizes that may affect statistical reliability. Minimum 30 samples/week recommended for statistical significance." />
           </div>
           <WeeklySamplesChart data={weeklySamples} />
         </div>
@@ -167,19 +142,7 @@ export default function JKPerformance() {
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center gap-2 mb-4">
             <h3 className="text-lg font-semibold text-gray-900">Performance Distribution</h3>
-            <div className="group relative">
-              <Info className="w-4 h-4 text-gray-400 cursor-help" />
-              <div className="invisible group-hover:visible absolute z-10 w-80 p-3 bg-gray-900 text-white text-xs rounded shadow-lg left-0 top-6">
-                <div className="absolute -top-1 left-4 w-2 h-2 bg-gray-900 transform rotate-45"></div>
-                <p className="mb-2"><strong>Performance Distribution</strong></p>
-                <p className="mb-2">Shows how shipments are distributed by actual transit time vs. delivery standard (J+K Std).</p>
-                <p className="mb-2"><strong>Categories:</strong></p>
-                <p className="mb-1">• <span className="text-red-400">After Standard</span>: Delivered AFTER J+K Std (late)</p>
-                <p className="mb-1">• <span className="text-green-400">Before/On-Time</span>: Delivered WITHIN J+K Std (on-time)</p>
-                <p className="mb-2">• <span className="text-blue-400">On Standard</span>: Delivered EXACTLY on J+K Std day</p>
-                <p><strong>Purpose:</strong> Visualize overall network performance. Large red bars indicate systematic delays.</p>
-              </div>
-            </div>
+            <SmartTooltip content="Performance Distribution: Shows how shipments are distributed by actual transit time vs. delivery standard (J+K Std). Categories: After Standard (red, delivered AFTER J+K Std = late), Before/On-Time (green, delivered WITHIN J+K Std = on-time), On Standard (blue, delivered EXACTLY on J+K Std day). Use to visualize overall network performance. Large red bars indicate systematic delays requiring investigation." />
           </div>
           <PerformanceDistributionChart routeData={routeData} maxDays={maxDays} />
         </div>

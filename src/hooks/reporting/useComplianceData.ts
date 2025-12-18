@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { adjustStartDateForFilter, adjustEndDateForFilter } from '@/lib/dateUtils';
 
 interface Filters {
+  startDate?: string;
+  endDate?: string;
   originCity?: string;
   destinationCity?: string;
   carrier?: string;
@@ -67,6 +70,7 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
     async function fetchData() {
       try {
         setLoading(true);
+        console.log("[useComplianceData] Filters received:", filters);
 
         // Build query with filters
         let query = supabase
@@ -74,6 +78,12 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
           .select('*')
           .eq('account_id', accountId);
 
+        if (filters?.startDate && filters.startDate !== '') {
+          query = query.gte('sent_at', adjustStartDateForFilter(filters.startDate));
+        }
+        if (filters?.endDate && filters.endDate !== '') {
+          query = query.lte('sent_at', adjustEndDateForFilter(filters.endDate));
+        }
         if (filters?.originCity) {
           query = query.eq('origin_city_name', filters.originCity);
         }
@@ -91,6 +101,7 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
 
         if (err) throw err;
 
+        console.log("[useComplianceData] Shipments after query:", shipments?.length);
         console.log('📦 Shipments loaded:', shipments?.length);
 
         // Load delivery standards WITHOUT JOINs to avoid 400 errors
@@ -108,18 +119,18 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
         console.log('📏 First standard example:', standards?.[0]);
 
         // Load lookup tables
-        const { data: carriers, error: carriersErr } = await supabase.from('carriers').select('id, name');
+        const { data: carriers, error: carriersErr } = await supabase.from('carriers').select('id, name').eq('account_id', accountId);
         if (carriersErr) {
           console.error('❌ Error loading carriers:', carriersErr);
         }
         
-        const { data: products, error: productsErr } = await supabase.from('products').select('id, description');
+        const { data: products, error: productsErr } = await supabase.from('products').select('id, description').eq('account_id', accountId);
         if (productsErr) {
           console.error('❌ Error loading products:', productsErr);
           console.error('❌ Products error details:', JSON.stringify(productsErr));
         }
         
-        const { data: cities, error: citiesErr } = await supabase.from('cities').select('id, name');
+        const { data: cities, error: citiesErr } = await supabase.from('cities').select('id, name').eq('account_id', accountId);
         if (citiesErr) {
           console.error('❌ Error loading cities:', citiesErr);
         }
@@ -389,7 +400,7 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
     }
 
     fetchData();
-  }, [accountId, filters?.originCity, filters?.destinationCity, filters?.carrier, filters?.product, filters?.complianceStatus]);
+  }, [accountId, filters?.startDate, filters?.endDate, filters?.originCity, filters?.destinationCity, filters?.carrier, filters?.product, filters?.complianceStatus]);
 
   return { data, loading, error };
 }

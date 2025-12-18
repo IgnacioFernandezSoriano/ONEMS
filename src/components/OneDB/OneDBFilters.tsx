@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
+import { Filter, RotateCcw } from 'lucide-react';
 import { OneDBFilters as Filters, OneDBRecord } from '../../hooks/useOneDB';
+import { SmartTooltip } from '../common/SmartTooltip';
 
 interface OneDBFiltersProps {
   records: OneDBRecord[];
@@ -32,51 +34,73 @@ export const OneDBFilters: React.FC<OneDBFiltersProps> = ({ records, onFilterCha
   ).length;
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
       {/* Header */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
         className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
       >
         <div className="flex items-center gap-3">
-          <span className="text-gray-400">🔍</span>
+          <Filter className="w-5 h-5 text-gray-400" />
           <span className="font-medium text-gray-900">Filters</span>
+          <SmartTooltip content="Filter ONE DB records by search term, carrier, product, route, delivery status, or date range to narrow down your analysis." />
           {activeFilterCount > 0 && (
             <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
-              {activeFilterCount} active
+              {activeFilterCount} Active
             </span>
           )}
         </div>
-        <span className="text-gray-400">{isExpanded ? '▲' : '▼'}</span>
+        <div className="flex items-center gap-3">
+          {activeFilterCount > 0 && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                clearFilters();
+              }}
+              className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 hover:text-gray-900 transition-colors"
+              title="Reset filters"
+            >
+              <RotateCcw className="w-4 h-4" />
+              Reset
+            </button>
+          )}
+          <span className="text-gray-400">{isExpanded ? '▲' : '▼'}</span>
+        </div>
       </button>
 
       {/* Filter Content */}
       {isExpanded && (
         <div className="px-6 pb-6 border-t border-gray-200">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
             {/* Search */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Search (Tag ID or Plan)
+              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                <span>🔍</span>
+                Search
+                <SmartTooltip content="Search by Tag ID or Plan name. Use partial matches to find related records." />
               </label>
               <input
                 type="text"
                 value={filters.search || ''}
                 onChange={(e) => handleFilterChange('search', e.target.value)}
-                placeholder="Search..."
+                placeholder="Tag ID or Plan..."
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
 
             {/* Carrier */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Carrier</label>
+              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                <span>🚚</span>
+                Carrier
+                <SmartTooltip content="Filter by specific carrier. Shows only shipments handled by the selected carrier." />
+              </label>
               <select
                 value={filters.carrier_name || ''}
                 onChange={(e) => handleFilterChange('carrier_name', e.target.value || undefined)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="">All</option>
+                <option value="">All Carriers</option>
                 {carriers.map((carrier) => (
                   <option key={carrier} value={carrier}>
                     {carrier}
@@ -87,13 +111,17 @@ export const OneDBFilters: React.FC<OneDBFiltersProps> = ({ records, onFilterCha
 
             {/* Product */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Product</label>
+              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                <span>📦</span>
+                Product
+                <SmartTooltip content="Filter by product/service type. Shows only shipments using the selected product." />
+              </label>
               <select
                 value={filters.product_name || ''}
                 onChange={(e) => handleFilterChange('product_name', e.target.value || undefined)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="">All</option>
+                <option value="">All Products</option>
                 {products.map((product) => (
                   <option key={product} value={product}>
                     {product}
@@ -104,7 +132,11 @@ export const OneDBFilters: React.FC<OneDBFiltersProps> = ({ records, onFilterCha
 
             {/* Origin City */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Origin City</label>
+              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                <span>📍</span>
+                Origin City
+                <SmartTooltip content="Filter by origin city. Shows only shipments that started from the selected city." />
+              </label>
               <select
                 value={filters.origin_city_name || ''}
                 onChange={(e) =>
@@ -112,7 +144,7 @@ export const OneDBFilters: React.FC<OneDBFiltersProps> = ({ records, onFilterCha
                 }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="">All</option>
+                <option value="">All Cities</option>
                 {originCities.map((city) => (
                   <option key={city} value={city}>
                     {city}
@@ -123,8 +155,10 @@ export const OneDBFilters: React.FC<OneDBFiltersProps> = ({ records, onFilterCha
 
             {/* Destination City */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                <span>🎯</span>
                 Destination City
+                <SmartTooltip content="Filter by destination city. Shows only shipments delivered to the selected city." />
               </label>
               <select
                 value={filters.destination_city_name || ''}
@@ -133,7 +167,7 @@ export const OneDBFilters: React.FC<OneDBFiltersProps> = ({ records, onFilterCha
                 }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="">All</option>
+                <option value="">All Cities</option>
                 {destinationCities.map((city) => (
                   <option key={city} value={city}>
                     {city}
@@ -144,8 +178,10 @@ export const OneDBFilters: React.FC<OneDBFiltersProps> = ({ records, onFilterCha
 
             {/* On Time Delivery */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                <span>⏱️</span>
                 On-Time Delivery
+                <SmartTooltip content="Filter by delivery performance. 'Yes' shows shipments delivered within standard, 'No' shows delayed shipments." />
               </label>
               <select
                 value={
@@ -162,15 +198,19 @@ export const OneDBFilters: React.FC<OneDBFiltersProps> = ({ records, onFilterCha
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="">All</option>
-                <option value="true">Yes</option>
-                <option value="false">No</option>
+                <option value="">All Records</option>
+                <option value="true">✓ On Time</option>
+                <option value="false">✕ Delayed</option>
               </select>
             </div>
 
             {/* Date From */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">From Date</label>
+              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                <span>📅</span>
+                From Date
+                <SmartTooltip content="Filter records sent on or after this date. Leave empty to include all records from the beginning." />
+              </label>
               <input
                 type="date"
                 value={filters.date_from || ''}
@@ -181,7 +221,11 @@ export const OneDBFilters: React.FC<OneDBFiltersProps> = ({ records, onFilterCha
 
             {/* Date To */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">To Date</label>
+              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                <span>📅</span>
+                To Date
+                <SmartTooltip content="Filter records sent on or before this date. Leave empty to include all records up to the present." />
+              </label>
               <input
                 type="date"
                 value={filters.date_to || ''}
@@ -190,19 +234,6 @@ export const OneDBFilters: React.FC<OneDBFiltersProps> = ({ records, onFilterCha
               />
             </div>
           </div>
-
-          {/* Clear Filters Button */}
-          {activeFilterCount > 0 && (
-            <div className="mt-4 flex justify-end">
-              <button
-                onClick={clearFilters}
-                className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
-              >
-                <span>✕</span>
-                Clear Filters
-              </button>
-            </div>
-          )}
         </div>
       )}
     </div>

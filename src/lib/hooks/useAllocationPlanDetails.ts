@@ -86,12 +86,34 @@ export function useAllocationPlanDetails() {
 
   const updateDetail = async (id: string, updates: Partial<AllocationPlanDetailWithRelations>) => {
     try {
-      const { error } = await supabase
-        .from('allocation_plan_details')
-        .update(updates)
-        .eq('id', id)
+      // If status is being set to 'received', delete the record instead of updating
+      // (the database trigger will have already transferred it to one_db)
+      if (updates.status === 'received') {
+        // First update to 'received' to trigger the one_db transfer
+        const { error: updateError } = await supabase
+          .from('allocation_plan_details')
+          .update(updates)
+          .eq('id', id)
 
-      if (error) throw error
+        if (updateError) throw updateError
+
+        // Then delete the record from allocation_plan_details
+        const { error: deleteError } = await supabase
+          .from('allocation_plan_details')
+          .delete()
+          .eq('id', id)
+
+        if (deleteError) throw deleteError
+      } else {
+        // Normal update for other status changes
+        const { error } = await supabase
+          .from('allocation_plan_details')
+          .update(updates)
+          .eq('id', id)
+
+        if (error) throw error
+      }
+
       await fetchAll()
     } catch (err: any) {
       throw new Error(`Failed to update detail: ${err.message}`)
@@ -173,6 +195,26 @@ export function useAllocationPlanDetails() {
     return nodes.filter((node) => node.city_id === cityId)
   }
 
+  const createDetail = async (newDetail: any) => {
+    try {
+      const { data, error } = await supabase
+        .from('allocation_plan_details')
+        .insert([newDetail])
+        .select()
+        .single()
+
+      if (error) throw error
+
+      // Refresh data after creation
+      await fetchAll()
+      
+      return data
+    } catch (err: any) {
+      console.error('Error creating allocation plan detail:', err)
+      throw err
+    }
+  }
+
   return {
     details,
     plans,
@@ -184,6 +226,7 @@ export function useAllocationPlanDetails() {
     loading,
     error,
     updateDetail,
+    createDetail,
     bulkUpdateDetails,
     bulkDeleteDetails,
     getNodesByCity,

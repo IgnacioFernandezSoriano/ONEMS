@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Calendar, Filter, RotateCcw, MapPin, Info } from 'lucide-react';
+import { Calendar, Filter, RotateCcw, MapPin } from 'lucide-react';
+import { SmartTooltip } from '@/components/common/SmartTooltip';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 
@@ -103,15 +104,7 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
     }
   };
 
-  const FilterTooltip = ({ text }: { text: string }) => (
-    <div className="group relative inline-block ml-1">
-      <Info className="w-4 h-4 text-gray-400 hover:text-blue-600 cursor-help inline" />
-      <div className="invisible group-hover:visible absolute z-10 w-64 p-3 bg-white border border-gray-200 rounded-lg shadow-lg text-xs text-gray-700 -right-2 top-6">
-        <div className="absolute -top-1 right-3 w-2 h-2 bg-white border-l border-t border-gray-200 transform rotate-45"></div>
-        {text}
-      </div>
-    </div>
-  );
+
 
   return (
     <div className="bg-white rounded-lg shadow p-4">
@@ -134,7 +127,7 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
           </button>
           <Filter className="w-5 h-5 text-gray-600" />
           <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
-          <FilterTooltip text="Filters apply to all reporting views. Use them to narrow your analysis to specific time periods, carriers, products, or routes. Empty filters show all available data." />
+          <SmartTooltip content="Filters apply to all reporting views. Use them to narrow your analysis to specific time periods, carriers, products, or routes. Empty filters show all available data." />
         </div>
         <button
           onClick={handleReset}
@@ -153,7 +146,7 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
           <label className="block text-sm font-medium text-gray-700 mb-1">
             <Calendar className="w-4 h-4 inline mr-1" />
             Start Date
-            <FilterTooltip text="Filter shipments sent on or after this date. Leave empty to include all historical data. Useful for analyzing specific time periods or recent performance." />
+            <SmartTooltip content="Filter shipments sent on or after this date. Leave empty to include all historical data. Useful for analyzing specific time periods or recent performance." />
           </label>
           <input
             type="date"
@@ -167,7 +160,7 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
           <label className="block text-sm font-medium text-gray-700 mb-1">
             <Calendar className="w-4 h-4 inline mr-1" />
             End Date
-            <FilterTooltip text="Filter shipments sent on or before this date. Leave empty to include data up to today. Combine with Start Date to analyze a specific date range." />
+            <SmartTooltip content="Filter shipments sent on or before this date. Leave empty to include data up to today. Combine with Start Date to analyze a specific date range." />
           </label>
           <input
             type="date"
@@ -180,7 +173,7 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Carrier
-            <FilterTooltip text="Filter by specific carrier (e.g., DHL, FedEx). Shows only shipments handled by the selected carrier. Use to compare carrier performance or investigate specific carrier issues." />
+            <SmartTooltip content="Filter by specific carrier (e.g., DHL, FedEx). Shows only shipments handled by the selected carrier. Use to compare carrier performance or investigate specific carrier issues." />
           </label>
           <select
             value={filters.carrier}
@@ -198,7 +191,7 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Product
-            <FilterTooltip text="Filter by service type (e.g., Express 24h, Standard). Shows only shipments using the selected product. Use to analyze performance by service level or compare product offerings." />
+            <SmartTooltip content="Filter by service type (e.g., Express 24h, Standard). Shows only shipments using the selected product. Use to analyze performance by service level or compare product offerings." />
           </label>
           <select
             value={filters.product}
@@ -217,7 +210,7 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
           <label className="block text-sm font-medium text-gray-700 mb-1">
             <MapPin className="w-4 h-4 inline mr-1" />
             Origin City
-            <FilterTooltip text="Filter by departure city. When selected, shows performance FROM this city TO all destinations (or to specific destination if also filtered). Use to analyze outbound performance from a specific location." />
+            <SmartTooltip content="Filter by departure city. When selected, shows performance FROM this city TO all destinations (or to specific destination if also filtered). Use to analyze outbound performance from a specific location." />
           </label>
           <select
             value={filters.originCity}
@@ -236,7 +229,7 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
           <label className="block text-sm font-medium text-gray-700 mb-1">
             <MapPin className="w-4 h-4 inline mr-1" />
             Destination City
-            <FilterTooltip text="Filter by arrival city. When selected, shows performance TO this city FROM all origins (or from specific origin if also filtered). Use to analyze inbound performance to a specific location." />
+            <SmartTooltip content="Filter by arrival city. When selected, shows performance TO this city FROM all origins (or from specific origin if also filtered). Use to analyze inbound performance to a specific location." />
           </label>
           <select
             value={filters.destinationCity}
@@ -254,7 +247,7 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Compliance Status
-            <FilterTooltip text="Select multiple compliance statuses to filter routes. Compliant (✅ meeting standard), Warning (⚠️ below standard but above critical), or Critical (🔴 below critical threshold with penalty)." />
+            <SmartTooltip content="Select multiple compliance statuses to filter routes. Compliant (✅ meeting standard), Warning (⚠️ below standard but above critical), or Critical (🔴 below critical threshold with penalty)." />
           </label>
           <div className="border border-gray-300 rounded-lg p-2 bg-white">
             <label className="flex items-center gap-2 py-1 cursor-pointer hover:bg-gray-50 px-2 rounded">

@@ -13,6 +13,7 @@ import { TerritoryEquityMap } from '@/components/reporting/TerritoryEquityMap';
 import { useEquityAuditExport } from '@/hooks/reporting/useEquityAuditExport';
 import { tooltips } from '@/components/reporting/TerritoryEquityTooltips';
 import { Info, Download, TrendingUp, Users, AlertTriangle, Award, FileText, Map } from 'lucide-react';
+import { SmartTooltip } from '@/components/common/SmartTooltip';
 import type { CityEquityData, RegionEquityData, TerritoryEquityFilters as Filters } from '@/types/reporting';
 
 export default function TerritoryEquity() {
@@ -390,14 +391,7 @@ export default function TerritoryEquity() {
     URL.revokeObjectURL(url);
   };
 
-  const Tooltip = ({ content }: { content: string | React.ReactNode }) => (
-    <div className="group relative inline-block">
-      <Info className="w-4 h-4 text-gray-400 cursor-help" />
-      <div className="invisible group-hover:visible absolute z-10 w-80 p-3 mt-1 text-sm text-white bg-gray-900 rounded-lg shadow-lg -left-28">
-        {content}
-      </div>
-    </div>
-  );
+  // Tooltip component replaced with SmartTooltip for consistency
 
   if (loading) {
     return (
@@ -455,7 +449,7 @@ export default function TerritoryEquity() {
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-gray-600">Service Equity Index</h3>
-            <Tooltip content={tooltips.serviceEquityIndex} />
+            <SmartTooltip content={tooltips.serviceEquityIndex} />
           </div>
           <div className="text-3xl font-bold text-gray-900">
             {metrics?.serviceEquityIndex.toFixed(1) || '0.0'}
@@ -470,7 +464,7 @@ export default function TerritoryEquity() {
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-gray-600">Population-Weighted Compliance</h3>
-            <Tooltip content={tooltips.populationWeightedCompliance} />
+            <SmartTooltip content={tooltips.populationWeightedCompliance} />
           </div>
           <div className="text-3xl font-bold text-gray-900">
             {metrics?.populationWeightedCompliance.toFixed(1) || '0.0'}%
@@ -487,7 +481,7 @@ export default function TerritoryEquity() {
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-gray-600">Underserved Cities</h3>
-            <Tooltip content={tooltips.underservedCities} />
+            <SmartTooltip content={tooltips.underservedCities} />
           </div>
           <div className="text-3xl font-bold text-red-600">
             {metrics?.underservedCitiesCount || 0}
@@ -504,7 +498,7 @@ export default function TerritoryEquity() {
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-gray-600">Citizens Affected</h3>
-            <Tooltip content={tooltips.citizensAffected} />
+            <SmartTooltip content={tooltips.citizensAffected} />
           </div>
           <div className="text-3xl font-bold text-red-600">
             {metrics?.citizensAffected.toLocaleString() || '0'}
@@ -522,7 +516,7 @@ export default function TerritoryEquity() {
               <Award className="w-4 h-4 text-green-600" />
               Top 3 Best Served Cities
             </h3>
-            <Tooltip content={tooltips.topBestServed} />
+            <SmartTooltip content={tooltips.topBestServed} />
           </div>
           <div className="space-y-2">
             <div className="grid grid-cols-7 gap-1 text-xs font-medium text-gray-500 border-b pb-1">
@@ -570,7 +564,7 @@ export default function TerritoryEquity() {
               <AlertTriangle className="w-4 h-4 text-red-600" />
               Top 3 Worst Served Cities
             </h3>
-            <Tooltip content={tooltips.topWorstServed} />
+            <SmartTooltip content={tooltips.topWorstServed} />
           </div>
           <div className="space-y-2">
             <div className="grid grid-cols-7 gap-1 text-xs font-medium text-gray-500 border-b pb-1">
@@ -659,7 +653,7 @@ export default function TerritoryEquity() {
                   <h3 className="text-lg font-semibold">
                     Inbound vs Outbound Comparison (Top 10 by Direction Gap)
                   </h3>
-                  <Tooltip content={tooltips.inboundOutboundChart} />
+                  <SmartTooltip content={tooltips.inboundOutboundChart} />
                 </div>
                 <InboundOutboundChart data={cityData} />
               </div>
@@ -668,7 +662,7 @@ export default function TerritoryEquity() {
               <div>
                 <div className="flex items-center gap-2 mb-4">
                   <h3 className="text-lg font-semibold">City Service Equity Treemap</h3>
-                  <Tooltip content={tooltips.treemap} />
+                  <SmartTooltip content={tooltips.treemap} />
                 </div>
                 <TerritoryEquityTreemap data={cityData} />
               </div>
@@ -678,7 +672,7 @@ export default function TerritoryEquity() {
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <h3 className="text-lg font-semibold">City Equity Details</h3>
-                    <Tooltip content={tooltips.cityTable} />
+                    <SmartTooltip content={tooltips.cityTable} />
                   </div>
                   <button
                     onClick={handleExportCSV}
@@ -699,7 +693,7 @@ export default function TerritoryEquity() {
               <div>
                 <div className="flex items-center gap-2 mb-4">
                   <h3 className="text-lg font-semibold">Regional Equity Comparison</h3>
-                  <Tooltip content={tooltips.regionalChart} />
+                  <SmartTooltip content={tooltips.regionalChart} />
                 </div>
                 <RegionalEquityChart data={regionData} />
               </div>
@@ -709,7 +703,7 @@ export default function TerritoryEquity() {
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <h3 className="text-lg font-semibold">Regional Equity Details</h3>
-                    <Tooltip content={tooltips.regionalTable} />
+                    <SmartTooltip content={tooltips.regionalTable} />
                   </div>
                   <button
                     onClick={handleExportRegionalCSV}

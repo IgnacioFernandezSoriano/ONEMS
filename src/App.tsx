@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import { ReportingFiltersProvider } from './contexts/ReportingFiltersContext'
+import { SidebarProvider } from './contexts/SidebarContext'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import { MainLayout } from './components/layout/MainLayout'
 import { Login } from './pages/Login'
@@ -12,6 +13,8 @@ import { Users } from './pages/Admin/Users'
 import { CountryTopology } from './pages/CountryTopology'
 import { Carriers } from './pages/Carriers'
 import { MaterialCatalogPage } from './pages/MaterialCatalog'
+import MaterialRequirements from './pages/MaterialRequirements'
+import StockManagement from './pages/StockManagement'
 import { DeliveryStandards } from './pages/DeliveryStandards'
 import { AllocationPlanGenerator } from './pages/AllocationPlanGenerator'
 import NodeLoadBalancing from './pages/NodeLoadBalancing'
@@ -36,7 +39,8 @@ function App() {
             element={
               <ProtectedRoute>
                 <ReportingFiltersProvider>
-                  <MainLayout>
+                  <SidebarProvider>
+                    <MainLayout>
                   <Routes>
                     <Route path="/dashboard" element={<Dashboard />} />
                     
@@ -106,6 +110,26 @@ function App() {
                       element={
                         <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
                           <AllocationPlans />
+                        </ProtectedRoute>
+                      }
+                    />
+                    
+                    {/* Material Requirements - for admin and superadmin */}
+                    <Route
+                      path="/material-requirements"
+                      element={
+                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                          <MaterialRequirements />
+                        </ProtectedRoute>
+                      }
+                    />
+                    
+                    {/* Stock Management - for admin and superadmin */}
+                    <Route
+                      path="/stock-management"
+                      element={
+                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                          <StockManagement />
                         </ProtectedRoute>
                       }
                     />
@@ -220,7 +244,8 @@ function App() {
                     
                     <Route path="/" element={<Navigate to="/dashboard" />} />
                   </Routes>
-                </MainLayout>
+                    </MainLayout>
+                  </SidebarProvider>
                 </ReportingFiltersProvider>
               </ProtectedRoute>
             }

@@ -9,6 +9,7 @@ export default function NodeLoadBalancing() {
   const currentDate = new Date();
   const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
+  const [showFilters, setShowFilters] = useState(true);
 
   const { loadData, citySummaries, loading, error, refetch, previewBalance, applyBalance } =
     useNodeLoadBalancing(profile?.account_id || undefined, selectedMonth, selectedYear);
@@ -89,10 +90,7 @@ export default function NodeLoadBalancing() {
     });
   };
 
-  const handleViewDetails = (cityId: string) => {
-    // TODO: Implement detailed view
-    alert('Detailed view coming soon!');
-  };
+
 
   // Calculate system-wide stats
   const totalSaturated = citySummaries.reduce((sum, city) => sum + city.saturated_nodes, 0);
@@ -133,93 +131,165 @@ export default function NodeLoadBalancing() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* Header with Tooltip */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <span className="text-4xl">🔄</span>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Node Load Balancing</h1>
-            <p className="text-sm text-gray-600">
-              Matrix-based workload distribution across nodes and weeks
-            </p>
+        <div>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold text-gray-900">Node Load Balancing</h1>
+            <span className="group relative">
+              <svg
+                className="w-5 h-5 text-gray-400 cursor-help"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <div className="invisible group-hover:visible absolute z-10 w-96 p-3 bg-gray-900 text-white text-sm rounded-lg shadow-lg top-0 left-8">
+                <p className="font-semibold mb-2">Node Load Balancing</p>
+                <p className="mb-2">
+                  <strong>Purpose:</strong> Visualize and optimize shipment distribution across nodes within each city to prevent overload and improve efficiency.
+                </p>
+                <p className="mb-2">
+                  <strong>How it works:</strong> View weekly shipment loads in a matrix format (nodes × weeks). The system identifies saturated nodes and suggests rebalancing to distribute workload more evenly.
+                </p>
+                <p>
+                  <strong>Usage:</strong> Select month/year, review load matrices by city, click "Balance" to preview and apply automatic rebalancing.
+                </p>
+              </div>
+            </span>
           </div>
+          <p className="text-gray-600 mt-1">Optimize shipment distribution across nodes and weeks</p>
         </div>
         <button
           onClick={refetch}
-          className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
         >
-          <span>🔄</span>
           Refresh
         </button>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <label className="text-sm font-medium text-gray-700">📅 Month:</label>
-            <select
-              value={selectedMonth}
-              onChange={(e) => setSelectedMonth(Number(e.target.value))}
-              className="border border-gray-300 rounded-md px-3 py-2 text-sm"
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+        {/* Filter Header */}
+        <div className="flex items-center justify-between p-4 border-b border-gray-200">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="p-1 hover:bg-gray-100 rounded transition-colors"
             >
-              {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
-                <option key={month} value={month}>
-                  {new Date(2000, month - 1).toLocaleString('en', { month: 'long' })}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="flex items-center gap-2">
-            <label className="text-sm font-medium text-gray-700">Year:</label>
-            <select
-              value={selectedYear}
-              onChange={(e) => setSelectedYear(Number(e.target.value))}
-              className="border border-gray-300 rounded-md px-3 py-2 text-sm"
-            >
-              {[2024, 2025, 2026].map((year) => (
-                <option key={year} value={year}>
-                  {year}
-                </option>
-              ))}
-            </select>
+              <svg
+                className={`w-5 h-5 text-gray-600 transition-transform ${showFilters ? '' : 'rotate-180'}`}
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path fillRule="evenodd" d="M5 15l7-7 7 7" clipRule="evenodd" />
+              </svg>
+            </button>
+            <svg className="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clipRule="evenodd" />
+            </svg>
+            <span className="text-lg font-semibold text-gray-900">Filters</span>
           </div>
         </div>
+
+        {/* Filter Content */}
+        {showFilters && (
+          <div className="p-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="flex items-center gap-1 text-sm font-medium text-gray-700 mb-1">
+                  <svg className="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                  </svg>
+                  Month
+                </label>
+                <select
+                  value={selectedMonth}
+                  onChange={(e) => setSelectedMonth(Number(e.target.value))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
+                    <option key={month} value={month}>
+                      {new Date(2000, month - 1).toLocaleString('en', { month: 'long' })}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="flex items-center gap-1 text-sm font-medium text-gray-700 mb-1">
+                  <svg className="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                  </svg>
+                  Year
+                </label>
+                <select
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(Number(e.target.value))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  {[2024, 2025, 2026].map((year) => (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* System Overview */}
+      {/* KPI Cards */}
       {citySummaries.length > 0 && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <h3 className="font-semibold text-yellow-900 mb-3">System Overview</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="flex items-center gap-3">
-              <span className="text-2xl">🔴</span>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Saturated Nodes */}
+          <div className="bg-gradient-to-br from-red-50 to-white rounded-lg shadow-sm border border-red-100 p-6 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between">
               <div>
-                <div className="text-sm text-yellow-700">Saturated Nodes</div>
-                <div className="text-2xl font-bold text-yellow-900">{totalSaturated}</div>
+                <p className="text-sm font-medium text-red-600 mb-1">Saturated Nodes</p>
+                <p className="text-3xl font-bold text-red-700">{totalSaturated}</p>
+                <p className="text-xs text-red-500 mt-1">Nodes over 150% avg load</p>
+              </div>
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                <svg className="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <span className="text-2xl">🟡</span>
+          </div>
+
+          {/* High Load Nodes */}
+          <div className="bg-gradient-to-br from-orange-50 to-white rounded-lg shadow-sm border border-orange-100 p-6 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between">
               <div>
-                <div className="text-sm text-yellow-700">High Load Nodes</div>
-                <div className="text-2xl font-bold text-yellow-900">{totalHigh}</div>
+                <p className="text-sm font-medium text-orange-600 mb-1">High Load Nodes</p>
+                <p className="text-3xl font-bold text-orange-700">{totalHigh}</p>
+                <p className="text-xs text-orange-500 mt-1">Nodes at 120-150% avg load</p>
+              </div>
+              <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+                <svg className="w-6 h-6 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <span className="text-2xl">📊</span>
+          </div>
+
+          {/* Total Shipments */}
+          <div className="bg-gradient-to-br from-blue-50 to-white rounded-lg shadow-sm border border-blue-100 p-6 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between">
               <div>
-                <div className="text-sm text-yellow-700">Avg Std Deviation</div>
-                <div className={`text-2xl font-bold ${stddevStatus.color}`}>
-                  {avgStddev.toFixed(1)} ({stddevStatus.text})
-                </div>
+                <p className="text-sm font-medium text-blue-600 mb-1">Total Shipments</p>
+                <p className="text-3xl font-bold text-blue-700">{totalShipments}</p>
+                <p className="text-xs text-blue-500 mt-1">All shipments in period</p>
               </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="text-2xl">📦</span>
-              <div>
-                <div className="text-sm text-yellow-700">Total Shipments</div>
-                <div className="text-2xl font-bold text-yellow-900">{totalShipments}</div>
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
+                </svg>
               </div>
             </div>
           </div>
@@ -241,30 +311,12 @@ export default function NodeLoadBalancing() {
               cityName={summary.city_name}
               cityData={citiesData[summary.city_id].data}
               onBalance={() => handleBalanceClick(summary.city_id, summary.city_name)}
-              onViewDetails={() => handleViewDetails(summary.city_id)}
             />
           ))}
         </div>
       )}
 
-      {/* Legend */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <div className="flex items-center gap-6 text-sm">
-          <span className="font-medium text-gray-700">Legend:</span>
-          <div className="flex items-center gap-2">
-            <span>🟢</span>
-            <span className="text-gray-600">Normal (&lt; 120% avg)</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span>🟡</span>
-            <span className="text-gray-600">High (120-150% avg)</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span>🔴</span>
-            <span className="text-gray-600">Saturated (&gt; 150% avg)</span>
-          </div>
-        </div>
-      </div>
+
 
       {/* Balance Preview Modal */}
       <BalancePreviewModal

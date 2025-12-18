@@ -146,7 +146,36 @@ export function AllocationPlanGenerator() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Allocation Plan Generator" />
+      {/* Header with Tooltip */}
+      <div className="flex items-center gap-3">
+        <h1 className="text-3xl font-bold text-gray-900">Allocation Plan Generator</h1>
+        <span className="group relative">
+          <svg
+            className="w-5 h-5 text-gray-400 cursor-help"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              fillRule="evenodd"
+              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+              clipRule="evenodd"
+            />
+          </svg>
+          <div className="invisible group-hover:visible absolute z-10 w-96 p-3 bg-gray-900 text-white text-sm rounded-lg shadow-lg top-0 left-8">
+            <p className="font-semibold mb-2">Allocation Plan Generator</p>
+            <p className="mb-2">
+              <strong>Purpose:</strong> Automatically generate sample allocation plans based on city distribution patterns and seasonal variations.
+            </p>
+            <p className="mb-2">
+              <strong>How it works:</strong> Define total samples, date range, carrier/product, and distribution matrices. The system will create a detailed plan with origin-destination pairs and scheduled dates.
+            </p>
+            <p>
+              <strong>Usage:</strong> Generate plans, review them in "Generated Plans" tab, then apply them to activate sample allocations.
+            </p>
+          </div>
+        </span>
+      </div>
+      <p className="text-gray-600">Generate sample allocation plans automatically based on distribution patterns</p>
 
       {/* Tabs */}
       <div className="border-b">

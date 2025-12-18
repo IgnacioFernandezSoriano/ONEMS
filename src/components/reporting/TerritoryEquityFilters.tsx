@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Calendar, Filter, RotateCcw, MapPin, Info, Navigation, AlertCircle } from 'lucide-react';
+import { Calendar, Filter, RotateCcw, MapPin, Navigation, AlertCircle } from 'lucide-react';
+import { SmartTooltip } from '@/components/common/SmartTooltip';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import type { TerritoryEquityFilters as Filters } from '@/types/reporting';
@@ -85,15 +86,7 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
     }
   };
 
-  const FilterTooltip = ({ text }: { text: string }) => (
-    <div className="group relative inline-block ml-1">
-      <Info className="w-4 h-4 text-gray-400 hover:text-blue-600 cursor-help inline" />
-      <div className="invisible group-hover:visible absolute z-10 w-64 p-3 bg-white border border-gray-200 rounded-lg shadow-lg text-xs text-gray-700 -right-2 top-6">
-        <div className="absolute -top-1 right-3 w-2 h-2 bg-white border-l border-t border-gray-200 transform rotate-45"></div>
-        {text}
-      </div>
-    </div>
-  );
+
 
   return (
     <div className="bg-white rounded-lg shadow p-4">
@@ -116,7 +109,7 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
           </button>
           <Filter className="w-5 h-5 text-gray-600" />
           <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
-          <FilterTooltip text="Filter the Territory Equity Report by date range, carrier, product, region, direction (inbound/outbound), or equity status. All filters are optional." />
+          <SmartTooltip content="Filter the Territory Equity Report by date range, carrier, product, region, direction (inbound/outbound), or equity status. All filters are optional." />
         </div>
         <button
           onClick={handleReset}
@@ -136,7 +129,7 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
           <label className="block text-sm font-medium text-gray-700 mb-1">
             <Calendar className="w-4 h-4 inline mr-1" />
             Start Date
-            <FilterTooltip text="Filter shipments sent on or after this date. Leave empty to include all historical data." />
+            <SmartTooltip content="Filter shipments sent on or after this date. Leave empty to include all historical data." />
           </label>
           <input
             type="date"
@@ -151,7 +144,7 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
           <label className="block text-sm font-medium text-gray-700 mb-1">
             <Calendar className="w-4 h-4 inline mr-1" />
             End Date
-            <FilterTooltip text="Filter shipments sent on or before this date. Leave empty to include data up to today." />
+            <SmartTooltip content="Filter shipments sent on or before this date. Leave empty to include data up to today." />
           </label>
           <input
             type="date"
@@ -165,7 +158,7 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Carrier
-            <FilterTooltip text="Filter by specific carrier (e.g., DHL). Shows only shipments handled by the selected carrier." />
+            <SmartTooltip content="Filter by specific carrier (e.g., DHL). Shows only shipments handled by the selected carrier." />
           </label>
           <select
             value={filters.carrier || ''}
@@ -184,7 +177,7 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Product
-            <FilterTooltip text="Filter by service type (e.g., Express 24h). Shows only shipments using the selected product." />
+            <SmartTooltip content="Filter by service type (e.g., Express 24h). Shows only shipments using the selected product." />
           </label>
           <select
             value={filters.product || ''}
@@ -204,7 +197,7 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
           <label className="block text-sm font-medium text-gray-700 mb-1">
             <MapPin className="w-4 h-4 inline mr-1" />
             Region
-            <FilterTooltip text="Filter by geographic region. Shows only cities within the selected region. Regions are defined by the regulator." />
+            <SmartTooltip content="Filter by geographic region. Shows only cities within the selected region. Regions are defined by the regulator." />
           </label>
           <select
             value={filters.region || ''}
@@ -224,7 +217,7 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
           <label className="block text-sm font-medium text-gray-700 mb-1">
             <Navigation className="w-4 h-4 inline mr-1" />
             Direction
-            <FilterTooltip text="Filter by shipment direction. Inbound: packages arriving TO cities. Outbound: packages leaving FROM cities. Both: combined analysis." />
+            <SmartTooltip content="Filter by shipment direction. Inbound: packages arriving TO cities. Outbound: packages leaving FROM cities. Both: combined analysis." />
           </label>
           <select
             value={filters.direction || ''}
@@ -242,7 +235,7 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
           <label className="block text-sm font-medium text-gray-700 mb-1">
             <AlertCircle className="w-4 h-4 inline mr-1" />
             Equity Status
-            <FilterTooltip text="Filter by equity compliance status. Compliant: meeting standards. Warning: below standard. Critical: significantly below standard requiring action." />
+            <SmartTooltip content="Filter by equity compliance status. Compliant: meeting standards. Warning: below standard. Critical: significantly below standard requiring action." />
           </label>
           <select
             value={(filters.equityStatus && filters.equityStatus.length > 0) ? filters.equityStatus[0] : ''}

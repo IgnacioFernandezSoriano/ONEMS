@@ -67,6 +67,7 @@ export interface MaterialCatalog {
   code: string
   name: string
   unit_measure?: string
+  min_stock?: number
   description?: string
   status: 'active' | 'inactive'
   created_at: string
@@ -245,6 +246,7 @@ export interface Panelist {
   name: string
   email: string
   mobile: string
+  telegram_id?: string
   address_line1?: string
   address_line2?: string
   postal_code?: string

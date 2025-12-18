@@ -1,5 +1,6 @@
 import React from 'react';
 import { OneDBRecord } from '../../hooks/useOneDB';
+import { SmartTooltip } from '../common/SmartTooltip';
 
 interface OneDBTableProps {
   records: OneDBRecord[];
@@ -72,34 +73,64 @@ export const OneDBTable: React.FC<OneDBTableProps> = ({
                 />
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Tag ID
+                <div className="flex items-center gap-1">
+                  Tag ID
+                  <SmartTooltip content="Unique identifier for the shipment. Used to track the package throughout its journey." />
+                </div>
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Plan
+                <div className="flex items-center gap-1">
+                  Plan
+                  <SmartTooltip content="Allocation plan name that generated this shipment. Links the record to its source plan." />
+                </div>
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Carrier
+                <div className="flex items-center gap-1">
+                  Carrier
+                  <SmartTooltip content="Postal carrier that handled the shipment (e.g., DHL, FedEx, UPS)." />
+                </div>
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Product
+                <div className="flex items-center gap-1">
+                  Product
+                  <SmartTooltip content="Service type or product used for the shipment (e.g., Express 24 horas, Standard)." />
+                </div>
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Route
+                <div className="flex items-center gap-1">
+                  Route
+                  <SmartTooltip content="Origin and destination cities for the shipment. Shows the complete route path." />
+                </div>
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Sent
+                <div className="flex items-center gap-1">
+                  Sent
+                  <SmartTooltip content="Date and time when the shipment was sent from the origin node." />
+                </div>
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Received
+                <div className="flex items-center gap-1">
+                  Received
+                  <SmartTooltip content="Date and time when the shipment was received at the destination node." />
+                </div>
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Transit Days
+                <div className="flex items-center gap-1">
+                  Transit Days
+                  <SmartTooltip content="Total calendar days from sent to received. Includes weekends and holidays." />
+                </div>
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Business Days
+                <div className="flex items-center gap-1">
+                  Business Days
+                  <SmartTooltip content="Business days only (excludes weekends and holidays). Used for compliance calculations." />
+                </div>
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                On Time
+                <div className="flex items-center gap-1">
+                  On Time
+                  <SmartTooltip content="Delivery performance status. Green (On Time) = met standard, Red (Delayed) = exceeded standard." />
+                </div>
               </th>
             </tr>
           </thead>

@@ -37,7 +37,7 @@ export function InboundOutboundChart({ data }: InboundOutboundChartProps) {
           <XAxis dataKey="city" angle={-45} textAnchor="end" height={80} />
           <YAxis domain={[0, 100]} label={{ value: 'Compliance %', angle: -90, position: 'insideLeft' }} />
           <Tooltip 
-            formatter={(value: number) => `${value.toFixed(1)}%`}
+            formatter={(value: number | undefined) => value !== undefined ? `${value.toFixed(1)}%` : ''}
             content={({ active, payload }) => {
               if (active && payload && payload.length) {
                 const data = payload[0].payload;

@@ -13,6 +13,7 @@ export function MaterialCatalogForm({ material, onSubmit, onCancel }: MaterialCa
     code: material?.code || '',
     name: material?.name || '',
     unit_measure: material?.unit_measure || '',
+    min_stock: material?.min_stock || 0,
     description: material?.description || '',
     status: material?.status || 'active',
   })
@@ -69,6 +70,24 @@ export function MaterialCatalogForm({ material, onSubmit, onCancel }: MaterialCa
           className="w-full px-3 py-2 border border-gray-300 rounded-md"
           placeholder="units, kg, etc."
         />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Minimum Stock (Safety Stock)
+        </label>
+        <input
+          type="number"
+          min="0"
+          step="1"
+          value={formData.min_stock}
+          onChange={(e) => setFormData({ ...formData, min_stock: parseInt(e.target.value) || 0 })}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md"
+          placeholder="0"
+        />
+        <p className="text-xs text-gray-500 mt-1">
+          Minimum quantity to maintain in regulator stock. Used for calculating material requirements.
+        </p>
       </div>
 
       <div>

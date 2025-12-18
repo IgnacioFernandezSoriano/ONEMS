@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import type { AllocationPlanDetailWithRelations } from '@/lib/types'
 import { RegisterShipmentModal } from './RegisterShipmentModal'
 import { RegisterReceptionModal } from './RegisterReceptionModal'
+import { getISOWeekFromDate } from '@/utils/weekUtils'
 
 interface Props {
   detail: AllocationPlanDetailWithRelations
@@ -10,6 +11,7 @@ interface Props {
   selected: boolean
   onToggleSelect: () => void
   onUpdate: (id: string, updates: any) => Promise<void>
+  onEdit: (detail: AllocationPlanDetailWithRelations) => void
   getNodesByCity: (cityId: string) => any[]
 }
 
@@ -20,6 +22,7 @@ export function AllocationPlanDetailRow({
   selected,
   onToggleSelect,
   onUpdate,
+  onEdit,
   getNodesByCity,
 }: Props) {
   const [editing, setEditing] = useState<string | null>(null)
@@ -27,13 +30,30 @@ export function AllocationPlanDetailRow({
   const [showShipmentModal, setShowShipmentModal] = useState(false)
   const [showReceptionModal, setShowReceptionModal] = useState(false)
 
+  // Determine if record is editable
+  const isCompleted = detail.status === 'received'
+  const isNonEditable = ['sent', 'received', 'cancelled', 'invalid'].includes(detail.status) || isCompleted
+  const canEdit = !isNonEditable
+
   const originNodes = detail.origin_city_id ? getNodesByCity(detail.origin_city_id) : []
   const destinationNodes = detail.destination_city_id ? getNodesByCity(detail.destination_city_id) : []
 
   const handleUpdate = async (field: string, value: any) => {
     try {
       setSaving(true)
-      await onUpdate(detail.id, { [field]: value })
+      
+      // If updating fecha_programada, calculate week_number and year automatically
+      if (field === 'fecha_programada') {
+        const { year, week_number } = getISOWeekFromDate(value)
+        await onUpdate(detail.id, { 
+          [field]: value,
+          year,
+          week_number
+        })
+      } else {
+        await onUpdate(detail.id, { [field]: value })
+      }
+      
       setEditing(null)
     } catch (error: any) {
       alert(`Error: ${error.message}`)
@@ -69,7 +89,7 @@ export function AllocationPlanDetailRow({
 
       {/* Origin Node - Editable */}
       <td className="px-4 py-3 text-sm">
-        {editing === 'origin_node' ? (
+        {editing === 'origin_node' && canEdit ? (
           <select
             value={detail.origin_node_id}
             onChange={(e) => handleUpdate('origin_node_id', e.target.value)}
@@ -86,8 +106,9 @@ export function AllocationPlanDetailRow({
           </select>
         ) : (
           <button
-            onClick={() => setEditing('origin_node')}
-            className="text-left hover:text-blue-600 w-full"
+            onClick={() => canEdit && setEditing('origin_node')}
+            className={`text-left w-full ${canEdit ? 'hover:text-blue-600 cursor-pointer' : 'cursor-not-allowed text-gray-500'}`}
+            disabled={!canEdit}
           >
             {detail.origin_node?.auto_id}
           </button>
@@ -99,7 +120,7 @@ export function AllocationPlanDetailRow({
 
       {/* Destination Node - Editable */}
       <td className="px-4 py-3 text-sm">
-        {editing === 'destination_node' ? (
+        {editing === 'destination_node' && canEdit ? (
           <select
             value={detail.destination_node_id}
             onChange={(e) => handleUpdate('destination_node_id', e.target.value)}
@@ -116,8 +137,9 @@ export function AllocationPlanDetailRow({
           </select>
         ) : (
           <button
-            onClick={() => setEditing('destination_node')}
-            className="text-left hover:text-blue-600 w-full"
+            onClick={() => canEdit && setEditing('destination_node')}
+            className={`text-left w-full ${canEdit ? 'hover:text-blue-600 cursor-pointer' : 'cursor-not-allowed text-gray-500'}`}
+            disabled={!canEdit}
           >
             {detail.destination_node?.auto_id}
           </button>
@@ -126,7 +148,7 @@ export function AllocationPlanDetailRow({
 
       {/* Scheduled Date - Editable */}
       <td className="px-4 py-3 text-sm">
-        {editing === 'fecha_programada' ? (
+        {editing === 'fecha_programada' && canEdit ? (
           <input
             type="date"
             value={detail.fecha_programada}
@@ -138,8 +160,9 @@ export function AllocationPlanDetailRow({
           />
         ) : (
           <button
-            onClick={() => setEditing('fecha_programada')}
-            className="text-left hover:text-blue-600 w-full"
+            onClick={() => canEdit && setEditing('fecha_programada')}
+            className={`text-left w-full ${canEdit ? 'hover:text-blue-600 cursor-pointer' : 'cursor-not-allowed text-gray-500'}`}
+            disabled={!canEdit}
           >
             {detail.fecha_programada}
           </button>
@@ -153,7 +176,7 @@ export function AllocationPlanDetailRow({
 
       {/* Tag ID - Editable */}
       <td className="px-4 py-3 text-sm">
-        {editing === 'tag_id' ? (
+        {editing === 'tag_id' && canEdit ? (
           <input
             type="text"
             value={detail.tag_id || ''}
@@ -166,8 +189,9 @@ export function AllocationPlanDetailRow({
           />
         ) : (
           <button
-            onClick={() => setEditing('tag_id')}
-            className="text-left hover:text-blue-600 w-full"
+            onClick={() => canEdit && setEditing('tag_id')}
+            className={`text-left w-full ${canEdit ? 'hover:text-blue-600 cursor-pointer' : 'cursor-not-allowed text-gray-500'}`}
+            disabled={!canEdit}
           >
             {detail.tag_id || <span className="text-gray-400">-</span>}
           </button>
@@ -291,7 +315,19 @@ export function AllocationPlanDetailRow({
 
       {/* Actions */}
       <td className="px-4 py-3">
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          {canEdit && (
+            <button
+              onClick={() => onEdit(detail)}
+              className="p-1 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+              title="Edit record"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+            </button>
+          )}
+          
           {detail.status === 'pending' || detail.status === 'notified' ? (
             <button
               onClick={() => setShowShipmentModal(true)}

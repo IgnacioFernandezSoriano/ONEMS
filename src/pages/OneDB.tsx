@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useOneDB, OneDBFilters as Filters } from '../hooks/useOneDB';
 import { OneDBFilters } from '../components/OneDB/OneDBFilters';
 import { OneDBTable } from '../components/OneDB/OneDBTable';
 import { OneDBBulkPanel } from '../components/OneDB/OneDBBulkPanel';
+import { Database, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { SmartTooltip } from '../components/common/SmartTooltip';
 
 export default function OneDB() {
   const { user, profile } = useAuth();
@@ -40,6 +42,18 @@ export default function OneDB() {
     setSelectedRecords([]); // Clear selection when filters change
   };
 
+  // Calculate KPIs (must be before early returns to follow hooks rules)
+  const kpis = useMemo(() => {
+    const total = filteredRecords.length;
+    const onTime = filteredRecords.filter(r => r.on_time_delivery === true).length;
+    const delayed = filteredRecords.filter(r => r.on_time_delivery === false).length;
+    const avgTransitDays = total > 0
+      ? (filteredRecords.reduce((sum, r) => sum + (r.total_transit_days || 0), 0) / total).toFixed(1)
+      : '0.0';
+    
+    return { total, onTime, delayed, avgTransitDays };
+  }, [filteredRecords]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -64,21 +78,78 @@ export default function OneDB() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <span className="text-4xl">🗄️</span>
+          <div className="p-3 bg-blue-50 rounded-lg">
+            <Database className="w-8 h-8 text-blue-600" />
+          </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">ONE DB</h1>
-            <p className="text-sm text-gray-600">
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-bold text-gray-900">ONE DB</h1>
+              <SmartTooltip content="ONE DB stores all validated shipment records with complete transit information, delivery performance metrics, and quality analytics for reporting and compliance tracking." />
+            </div>
+            <p className="text-sm text-gray-600 mt-1">
               Validated postal quality analytics repository
             </p>
           </div>
         </div>
-        <button
-          onClick={refetch}
-          className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-        >
-          <span>🔄</span>
-          Refresh
-        </button>
+      </div>
+
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Total Records */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600 mb-1">Total Records</p>
+              <p className="text-3xl font-bold text-gray-900">{kpis.total}</p>
+              <p className="text-xs text-gray-500 mt-1">All shipment records</p>
+            </div>
+            <div className="p-3 bg-blue-50 rounded-lg">
+              <Database className="w-6 h-6 text-blue-600" />
+            </div>
+          </div>
+        </div>
+
+        {/* On-Time Deliveries */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600 mb-1">On-Time</p>
+              <p className="text-3xl font-bold text-green-600">{kpis.onTime}</p>
+              <p className="text-xs text-gray-500 mt-1">Met delivery standard</p>
+            </div>
+            <div className="p-3 bg-green-50 rounded-lg">
+              <CheckCircle className="w-6 h-6 text-green-600" />
+            </div>
+          </div>
+        </div>
+
+        {/* Delayed Deliveries */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600 mb-1">Delayed</p>
+              <p className="text-3xl font-bold text-red-600">{kpis.delayed}</p>
+              <p className="text-xs text-gray-500 mt-1">Exceeded standard</p>
+            </div>
+            <div className="p-3 bg-red-50 rounded-lg">
+              <XCircle className="w-6 h-6 text-red-600" />
+            </div>
+          </div>
+        </div>
+
+        {/* Average Transit Days */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600 mb-1">Avg Transit Days</p>
+              <p className="text-3xl font-bold text-gray-900">{kpis.avgTransitDays}</p>
+              <p className="text-xs text-gray-500 mt-1">Business days average</p>
+            </div>
+            <div className="p-3 bg-gray-50 rounded-lg">
+              <Clock className="w-6 h-6 text-gray-600" />
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Filters */}

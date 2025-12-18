@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { adjustStartDateForFilter, adjustEndDateForFilter } from '@/lib/dateUtils';
 import type {
   CityEquityData,
   RegionEquityData,
@@ -81,8 +82,8 @@ export function useTerritoryEquityData(
         // 3. Load shipments with filters
         let query = supabase.from('one_db').select('*').eq('account_id', accountId);
 
-        if (filters?.startDate) query = query.gte('sent_at', filters.startDate);
-        if (filters?.endDate) query = query.lte('sent_at', filters.endDate);
+        if (filters?.startDate && filters.startDate !== '') query = query.gte('sent_at', adjustStartDateForFilter(filters.startDate));
+        if (filters?.endDate && filters.endDate !== '') query = query.lte('sent_at', adjustEndDateForFilter(filters.endDate));
         if (filters?.carrier) query = query.eq('carrier_name', filters.carrier);
         if (filters?.product) query = query.eq('product_name', filters.product);
         if (filters?.originCity) query = query.eq('origin_city_name', filters.originCity);

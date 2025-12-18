@@ -6,6 +6,7 @@ import { KPICard } from '@/components/reporting/KPICard';
 import { ReportFilters } from '@/components/reporting/ReportFilters';
 import { ComplianceTable } from '@/components/reporting/ComplianceTable';
 import { Shield, AlertTriangle, CheckCircle, XCircle, Info, FileDown } from 'lucide-react';
+import { SmartTooltip } from '@/components/common/SmartTooltip';
 import { generateComplianceAuditReport } from '@/hooks/reporting/useComplianceAuditExport';
 import { useState } from 'react';
 
@@ -135,7 +136,20 @@ export default function ComplianceReport() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
+  // DEBUG: Log filters before passing to hook
+  console.log("[ComplianceReport] Filters before hook:", {
+    startDate: filters.startDate,
+    endDate: filters.endDate,
+    originCity: filters.originCity,
+    destinationCity: filters.destinationCity,
+    carrier: filters.carrier,
+    product: filters.product,
+    complianceStatus: filters.complianceStatus
+  });
+
   const { data, loading, error } = useComplianceData(accountId, {
+    startDate: filters.startDate,
+    endDate: filters.endDate,
     originCity: filters.originCity,
     destinationCity: filters.destinationCity,
     carrier: filters.carrier,
@@ -197,21 +211,7 @@ export default function ComplianceReport() {
               {exporting ? 'Generating...' : 'Export Audit Report'}
             </span>
           </button>
-          <div className="group relative">
-          <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg cursor-help">
-            <Info className="w-5 h-5 text-blue-600" />
-            <span className="text-sm font-medium text-blue-900">About this Report</span>
-          </div>
-          <div className="invisible group-hover:visible absolute z-10 w-96 p-4 bg-white border border-gray-200 rounded-lg shadow-xl text-sm text-gray-700 right-0 top-12">
-            <div className="absolute -top-1 right-8 w-2 h-2 bg-white border-l border-t border-gray-200 transform rotate-45"></div>
-            <h3 className="font-bold text-gray-900 mb-3">Regulatory Compliance Report</h3>
-            <p className="mb-3"><strong>Purpose:</strong> Analyzes compliance rates hierarchically by Carrier, Product, and Route to identify which carriers, services, or routes are meeting or failing regulatory standards.</p>
-            <p className="mb-3"><strong>What you'll see:</strong> All rows displayed showing carriers, their products, and individual routes. Columns are organized to show Standard → Actual for both days and percentages, followed by Deviation and Status.</p>
-            <p className="mb-3"><strong>Weighted Averages:</strong> Carrier and Product level metrics (Standard days, Standard %, Actual days) are weighted averages based on shipment count. Routes with more shipments have proportionally more influence on the average.</p>
-            <p className="mb-3"><strong>Dynamic Thresholds:</strong> Each route has configurable warning and critical thresholds (relative or absolute) defined in Delivery Standards. Routes are automatically classified as Compliant (✅ meeting standard), Warning (⚠️ below standard but above critical), or Critical (🔴 below critical threshold with penalty).</p>
-            <p className="mb-3"><strong>Regulatory Objective:</strong> Identify systematic compliance failures at carrier, product, or route level. Determine if certain services need adjusted standards or if carriers need targeted interventions. Use as evidence in enforcement proceedings.</p>
-          </div>
-        </div>
+          <SmartTooltip content="Regulatory Compliance Report: Analyzes compliance rates hierarchically by Carrier, Product, and Route to identify which carriers, services, or routes are meeting or failing regulatory standards. Shows all carriers, their products, and individual routes. Columns organized to show Standard → Actual for both days and percentages, followed by Deviation and Status. Carrier and Product metrics are weighted averages based on shipment count. Routes classified as Compliant (✅ meeting standard), Warning (⚠️ below standard), or Critical (🔴 below critical threshold). Use to identify systematic compliance failures and as evidence in enforcement proceedings." />
         </div>
       </div>
 
@@ -296,19 +296,7 @@ export default function ComplianceReport() {
               <FileDown className="w-4 h-4" />
               Export CSV
             </button>
-            <div className="group relative">
-            <Info className="w-5 h-5 text-gray-400 hover:text-blue-600 cursor-help" />
-            <div className="invisible group-hover:visible absolute z-10 w-96 p-4 bg-white border border-gray-200 rounded-lg shadow-lg text-sm text-gray-700 right-0 top-8">
-              <div className="absolute -top-1 right-4 w-2 h-2 bg-white border-l border-t border-gray-200 transform rotate-45"></div>
-              <p className="font-semibold mb-2">Hierarchical Compliance Table</p>
-              <p className="mb-2"><strong>Structure:</strong> Three-level hierarchy showing Carrier (📦), Product (📋), and Route (🛣️). All rows are always visible.</p>
-              <p className="mb-2"><strong>Weighted Averages:</strong> Carrier and Product rows show weighted averages for Standard (days), Standard %, and Actual (days). The weighting is proportional to shipment count - routes with more shipments contribute more to the average.</p>
-              <p className="mb-2"><strong>Example:</strong> If a product has Route A (100 shipments, 1.0 day standard) and Route B (50 shipments, 2.0 day standard), the product-level Standard (days) = (100×1.0 + 50×2.0) / 150 = 1.33 days.</p>
-              <p className="mb-2"><strong>Column Order:</strong> Standard (days) → Actual (days) → Standard % → Actual % → Deviation → Status. This allows easy comparison of standard vs actual for both time and success metrics.</p>
-              <p className="mb-2"><strong>Interpretation:</strong> Status indicators show compliance level: ✅ Compliant (meeting standard), ⚠️ Warning (below standard, no penalty), 🔴 Critical (below critical threshold, with penalty). Compare actual transit days against standards to identify systematic delays.</p>
-              <p><strong>Regulatory Use:</strong> Evidence for enforcement proceedings. Identifies which carriers, products, or routes need standard adjustments or performance improvements.</p>
-            </div>
-          </div>
+            <SmartTooltip content="Hierarchical Compliance Table: Three-level hierarchy showing Carrier (📦), Product (📋), and Route (🛟️). All rows always visible. Carrier and Product rows show weighted averages for Standard (days), Standard %, and Actual (days), weighted by shipment count. Column order: Standard (days) → Actual (days) → Standard % → Actual % → Deviation → Status. Status indicators: ✅ Compliant (meeting standard), ⚠️ Warning (below standard, no penalty), 🔴 Critical (below critical threshold, with penalty). Use as evidence for enforcement proceedings to identify which carriers, products, or routes need adjustments." />
           </div>
         </div>
         <ComplianceTable data={data} />

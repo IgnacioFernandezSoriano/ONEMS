@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { adjustStartDateForFilter, adjustEndDateForFilter } from '@/lib/dateUtils';
 
 export interface JKRouteData {
   routeKey: string;
@@ -155,8 +156,8 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
           .select('*')
           .eq('account_id', accountId);
 
-        if (filters?.startDate) query = query.gte('sent_at', filters.startDate);
-        if (filters?.endDate) query = query.lte('sent_at', filters.endDate);
+        if (filters?.startDate && filters.startDate !== '') query = query.gte('sent_at', adjustStartDateForFilter(filters.startDate));
+        if (filters?.endDate && filters.endDate !== '') query = query.lte('sent_at', adjustEndDateForFilter(filters.endDate));
         if (filters?.originCity) query = query.eq('origin_city_name', filters.originCity);
         if (filters?.destinationCity) query = query.eq('destination_city_name', filters.destinationCity);
         if (filters?.carrier) query = query.eq('carrier_name', filters.carrier);

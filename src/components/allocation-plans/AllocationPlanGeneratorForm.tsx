@@ -43,11 +43,11 @@ export function AllocationPlanGeneratorForm({
   )
 
   const handleMatrixChange = (key: keyof CityDistributionMatrix, value: string) => {
-    setMatrix({ ...matrix, [key]: value === '' ? undefined : parseFloat(value) })
+    setMatrix({ ...matrix, [key]: value === '' ? undefined : parseInt(value, 10) })
   }
 
   const handleSeasonalChange = (month: keyof SeasonalDistribution, value: string) => {
-    setSeasonal({ ...seasonal, [month]: value === '' ? undefined : parseFloat(value) })
+    setSeasonal({ ...seasonal, [month]: value === '' ? undefined : parseInt(value, 10) })
   }
 
   const autoFillMatrixHandler = () => {
@@ -55,9 +55,17 @@ export function AllocationPlanGeneratorForm({
     setMatrix(filled)
   }
 
+  const clearMatrixHandler = () => {
+    setMatrix({})
+  }
+
   const autoFillSeasonalHandler = () => {
     const filled = autoFillSeasonal(seasonal)
     setSeasonal(filled)
+  }
+
+  const clearSeasonalHandler = () => {
+    setSeasonal({})
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -127,7 +135,17 @@ export function AllocationPlanGeneratorForm({
       {/* Basic Info */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Plan Name *</label>
+          <label className="flex items-center gap-1 text-sm font-medium mb-1">
+            Plan Name *
+            <span className="group relative">
+              <svg className="w-3 h-3 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+              <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
+                Unique identifier for this allocation plan. Use descriptive names like "Q1_2025_Madrid_Express".
+              </div>
+            </span>
+          </label>
           <input
             type="text"
             required
@@ -138,7 +156,17 @@ export function AllocationPlanGeneratorForm({
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Total Samples *</label>
+          <label className="flex items-center gap-1 text-sm font-medium mb-1">
+            Total Samples *
+            <span className="group relative">
+              <svg className="w-3 h-3 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+              <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
+                Total number of samples to allocate across the date range. Will be distributed according to city and seasonal patterns.
+              </div>
+            </span>
+          </label>
           <input
             type="number"
             required
@@ -152,7 +180,17 @@ export function AllocationPlanGeneratorForm({
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Carrier *</label>
+          <label className="flex items-center gap-1 text-sm font-medium mb-1">
+            Carrier *
+            <span className="group relative">
+              <svg className="w-3 h-3 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+              <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
+                Logistics carrier for this allocation plan (e.g., DHL, FedEx). Determines available products.
+              </div>
+            </span>
+          </label>
           <select
             required
             value={formData.carrier_id}
@@ -169,7 +207,17 @@ export function AllocationPlanGeneratorForm({
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Product *</label>
+          <label className="flex items-center gap-1 text-sm font-medium mb-1">
+            Product *
+            <span className="group relative">
+              <svg className="w-3 h-3 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+              <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
+                Carrier product/service type (e.g., Express, Standard). Filtered by selected carrier.
+              </div>
+            </span>
+          </label>
           <select
             required
             value={formData.product_id}
@@ -188,7 +236,17 @@ export function AllocationPlanGeneratorForm({
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Start Date *</label>
+          <label className="flex items-center gap-1 text-sm font-medium mb-1">
+            Start Date *
+            <span className="group relative">
+              <svg className="w-3 h-3 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+              <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
+                First day of the allocation period. Samples will be scheduled from this date.
+              </div>
+            </span>
+          </label>
           <input
             type="date"
             required
@@ -199,7 +257,17 @@ export function AllocationPlanGeneratorForm({
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">End Date *</label>
+          <label className="flex items-center gap-1 text-sm font-medium mb-1">
+            End Date *
+            <span className="group relative">
+              <svg className="w-3 h-3 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+              <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
+                Last day of the allocation period. Samples will be scheduled until this date.
+              </div>
+            </span>
+          </label>
           <input
             type="date"
             required
@@ -213,10 +281,38 @@ export function AllocationPlanGeneratorForm({
       {/* City Distribution Matrix */}
       <div className="border rounded-lg p-4">
         <div className="flex justify-between items-center mb-3">
-          <h3 className="font-medium">City Distribution Matrix (A-B-C)</h3>
-          <button type="button" onClick={autoFillMatrixHandler} className="text-sm text-blue-600">
-            Auto-fill to 100%
-          </button>
+          <div className="flex items-center gap-2">
+            <h3 className="font-medium">City Distribution Matrix (A-B-C)</h3>
+            <span className="group relative">
+              <svg className="w-4 h-4 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+              <div className="invisible group-hover:visible absolute z-10 w-80 p-3 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
+                <p className="font-semibold mb-1">City Distribution Matrix</p>
+                <p className="mb-2">Defines the percentage of samples allocated between city classification pairs (A, B, C).</p>
+                <p className="mb-1"><strong>Example:</strong></p>
+                <p className="mb-1">• AA = 20% (Class A origin → Class A destination)</p>
+                <p className="mb-1">• AB = 15% (Class A origin → Class B destination)</p>
+                <p>Fill some cells manually, then click "Auto-fill to 100%" to distribute the remaining percentage equally across empty cells.</p>
+              </div>
+            </span>
+          </div>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={clearMatrixHandler}
+              className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition-colors"
+            >
+              Clear
+            </button>
+            <button
+              type="button"
+              onClick={autoFillMatrixHandler}
+              className="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+            >
+              Auto-fill to 100%
+            </button>
+          </div>
         </div>
         <div className="grid grid-cols-3 gap-3">
           {(['AA', 'AB', 'AC', 'BA', 'BB', 'BC', 'CA', 'CB', 'CC'] as const).map((key) => (
@@ -226,7 +322,7 @@ export function AllocationPlanGeneratorForm({
               </label>
               <input
                 type="number"
-                step="0.01"
+                step="1"
                 min="0"
                 max="100"
                 value={matrix[key] ?? ''}
@@ -247,16 +343,40 @@ export function AllocationPlanGeneratorForm({
               checked={useSeasonalDist}
               onChange={(e) => setUseSeasonalDist(e.target.checked)}
             />
-            <span className="font-medium">Use Seasonal Distribution</span>
+            <div className="flex items-center gap-2">
+              <span className="font-medium">Seasonal Distribution</span>
+              <span className="group relative">
+                <svg className="w-4 h-4 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+                <div className="invisible group-hover:visible absolute z-10 w-80 p-3 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
+                  <p className="font-semibold mb-1">Seasonal Distribution</p>
+                  <p className="mb-2">Optional: Distribute samples unevenly across months to reflect seasonal patterns.</p>
+                  <p className="mb-1"><strong>Example:</strong></p>
+                  <p className="mb-1">• December = 15% (high season)</p>
+                  <p className="mb-1">• January = 5% (low season)</p>
+                  <p>When disabled, samples are distributed evenly across all months. Fill some months manually, then click "Auto-fill to 100%" to distribute the remaining percentage.</p>
+                </div>
+              </span>
+            </div>
           </label>
           {useSeasonalDist && (
-            <button
-              type="button"
-              onClick={autoFillSeasonalHandler}
-              className="text-sm text-blue-600"
-            >
-              Auto-fill to 100%
-            </button>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={clearSeasonalHandler}
+                className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition-colors"
+              >
+                Clear
+              </button>
+              <button
+                type="button"
+                onClick={autoFillSeasonalHandler}
+                className="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+              >
+                Auto-fill to 100%
+              </button>
+            </div>
           )}
         </div>
 
@@ -282,7 +402,7 @@ export function AllocationPlanGeneratorForm({
                 <label className="block text-xs mb-1 capitalize">{month} (%)</label>
                 <input
                   type="number"
-                  step="0.01"
+                  step="1"
                   min="0"
                   max="100"
                   value={seasonal[month] ?? ''}
