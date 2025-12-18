@@ -69,7 +69,15 @@ export default function NodeLoadBalancing() {
     const result = await applyBalance(modalState.cityId);
 
     if (result.success) {
+      // Wait for data to refresh (loading becomes false)
+      // Poll until loading is false or timeout after 5 seconds
+      const startTime = Date.now();
+      while (loading && Date.now() - startTime < 5000) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+      
       alert(`Balance applied successfully!\n${result.message}\nMoved: ${result.movements_count} shipments\nImprovement: ${result.improvement_percentage.toFixed(1)}%`);
+      
       setModalState({
         isOpen: false,
         cityId: null,
