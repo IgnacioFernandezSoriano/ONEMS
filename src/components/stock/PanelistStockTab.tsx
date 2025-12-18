@@ -1,12 +1,20 @@
-import React, { useState } from 'react'
-import { Search, User, Package } from 'lucide-react'
+import { useState } from 'react'
+import { Search, User, Package, Edit } from 'lucide-react'
 import { useStockManagement } from '../../hooks/useStockManagement'
 import { SmartTooltip } from '../common/SmartTooltip'
+import { supabase } from '../../lib/supabase'
+import { useAuth } from '../../contexts/AuthContext'
 
 export default function PanelistStockTab() {
   const { panelistStocks, loading } = useStockManagement()
+  const { user } = useAuth()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedPanelist, setSelectedPanelist] = useState<string>('')
+  const [showAdjustModal, setShowAdjustModal] = useState(false)
+  const [selectedStock, setSelectedStock] = useState<any>(null)
+  const [adjustQuantity, setAdjustQuantity] = useState<string>('')
+  const [adjustNote, setAdjustNote] = useState('')
+  const [adjusting, setAdjusting] = useState(false)
 
   // Get unique panelists
   const panelists = Array.from(
@@ -142,6 +150,9 @@ export default function PanelistStockTab() {
                           <SmartTooltip content="Date of last movement for this material" />
                         </div>
                       </th>
+                      <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Actions
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -173,6 +184,20 @@ export default function PanelistStockTab() {
                             }
                           </div>
                         </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <button
+                            onClick={() => {
+                              setSelectedStock(stock)
+                              setAdjustQuantity(stock.quantity.toString())
+                              setAdjustNote('')
+                              setShowAdjustModal(true)
+                            }}
+                            className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-900"
+                          >
+                            <Edit className="h-4 w-4" />
+                            Adjust Stock
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -190,6 +215,152 @@ export default function PanelistStockTab() {
           {(searchTerm || selectedPanelist) && ` (filtered from ${panelistStocks.length})`}
         </div>
       </div>
+
+      {/* Adjust Stock Modal */}
+      {showAdjustModal && selectedStock && (
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-medium text-gray-900">
+                Adjust Panelist Stock: {selectedStock.material?.code}
+              </h3>
+              <p className="text-sm text-gray-500 mt-1">
+                {selectedStock.material?.name}
+              </p>
+              <p className="text-sm text-gray-600 mt-1">
+                Panelist: {selectedStock.panelist?.name} ({selectedStock.panelist?.panelist_code})
+              </p>
+            </div>
+
+            <div className="px-6 py-4 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Current Quantity
+                </label>
+                <div className="text-lg font-semibold text-gray-900">
+                  {selectedStock.quantity.toLocaleString()} {selectedStock.material?.unit_measure || 'un'}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  New Quantity <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="number"
+                  value={adjustQuantity}
+                  onChange={(e) => setAdjustQuantity(e.target.value)}
+                  min="0"
+                  step="1"
+                  className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  placeholder="Enter new absolute quantity"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Adjustment Note <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  value={adjustNote}
+                  onChange={(e) => setAdjustNote(e.target.value)}
+                  rows={3}
+                  className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  placeholder="Explain the reason for this adjustment..."
+                />
+              </div>
+
+              {adjustQuantity && (
+                <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+                  <p className="text-sm text-blue-800">
+                    <strong>Change:</strong> {parseInt(adjustQuantity) - selectedStock.quantity > 0 ? '+' : ''}
+                    {(parseInt(adjustQuantity) - selectedStock.quantity).toLocaleString()} {selectedStock.material?.unit_measure || 'un'}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowAdjustModal(false)
+                  setSelectedStock(null)
+                  setAdjustQuantity('')
+                  setAdjustNote('')
+                }}
+                disabled={adjusting}
+                className="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  if (!adjustQuantity || !adjustNote.trim()) {
+                    alert('Please enter new quantity and adjustment note')
+                    return
+                  }
+
+                  const qty = parseInt(adjustQuantity)
+                  if (isNaN(qty) || qty < 0) {
+                    alert('Please enter a valid quantity')
+                    return
+                  }
+
+                  try {
+                    setAdjusting(true)
+                    
+                    // Update panelist stock
+                    const { error: updateError } = await supabase
+                      .from('panelist_stock')
+                      .update({ 
+                        quantity: qty,
+                        last_updated: new Date().toISOString()
+                      })
+                      .eq('id', selectedStock.id)
+
+                    if (updateError) throw updateError
+                    
+                    // Create adjustment movement record
+                    const { error: movementError } = await supabase
+                      .from('material_movements')
+                      .insert({
+                        account_id: selectedStock.account_id,
+                        material_id: selectedStock.material_id,
+                        panelist_id: selectedStock.panelist_id,
+                        movement_type: 'adjustment',
+                        quantity: qty - selectedStock.quantity,
+                        from_location: 'panelist',
+                        to_location: 'panelist',
+                        notes: adjustNote,
+                        created_by: user?.id
+                      })
+
+                    if (movementError) throw movementError
+
+                    // Reload data
+                    window.location.reload()
+                    
+                    setShowAdjustModal(false)
+                    setSelectedStock(null)
+                    setAdjustQuantity('')
+                    setAdjustNote('')
+                    alert('Panelist stock adjusted successfully')
+                  } catch (error: any) {
+                    console.error('Error adjusting panelist stock:', error)
+                    alert('Failed to adjust stock: ' + error.message)
+                  } finally {
+                    setAdjusting(false)
+                  }
+                }}
+                disabled={adjusting || !adjustQuantity || !adjustNote.trim()}
+                className="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+              >
+                {adjusting ? 'Adjusting...' : 'Confirm Adjustment'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
