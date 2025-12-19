@@ -407,7 +407,6 @@ export function useRegulatorRequirements() {
         .select('id, quantity')
         .eq('account_id', profile.account_id)
         .eq('material_id', requirement.material_id)
-        .eq('location_type', 'regulator')
         .maybeSingle()
 
       if (existingStock) {
@@ -426,11 +425,7 @@ export function useRegulatorRequirements() {
           .insert({
             account_id: profile.account_id,
             material_id: requirement.material_id,
-            location_type: 'regulator',
-            location_id: null,
-            quantity: quantityReceived,
-            min_stock: null,
-            max_stock: null
+            quantity: quantityReceived
           })
       }
 
@@ -442,13 +437,10 @@ export function useRegulatorRequirements() {
           material_id: requirement.material_id,
           movement_type: 'receipt',
           quantity: quantityReceived,
-          from_location_type: null,
-          from_location_id: null,
-          to_location_type: 'regulator',
-          to_location_id: null,
+          from_location: null,
+          to_location: 'regulator',
           notes: `Stock receipt from purchase order - Requirement ${requirementId}`,
-          reference_id: requirementId,
-          reference_type: 'requirement'
+          reference_id: requirementId
         })
 
       // 3. Update requirement status to received
