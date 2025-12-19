@@ -10,6 +10,7 @@ import { Settings } from './pages/Settings/Settings'
 import { Accounts } from './pages/Settings/Accounts'
 import { AllUsers } from './pages/Settings/AllUsers'
 import { Users } from './pages/Admin/Users'
+import { AccountManagement } from './pages/Admin/AccountManagement'
 import { CountryTopology } from './pages/CountryTopology'
 import { Carriers } from './pages/Carriers'
 import { MaterialCatalogPage } from './pages/MaterialCatalog'
@@ -238,6 +239,16 @@ function App() {
                       element={
                         <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
                           <Users />
+                        </ProtectedRoute>
+                      }
+                    />
+                    
+                    {/* Account Management - only for superadmin */}
+                    <Route
+                      path="/admin/account-management"
+                      element={
+                        <ProtectedRoute allowedRoles={['superadmin']}>
+                          <AccountManagement />
                         </ProtectedRoute>
                       }
                     />

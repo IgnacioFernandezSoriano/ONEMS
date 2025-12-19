@@ -23,6 +23,7 @@ import {
   ChevronLeft,
   Menu,
   Warehouse,
+  RefreshCw,
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -186,6 +187,12 @@ export function Sidebar() {
           label: 'Users',
           icon: Users,
           roles: ['admin', 'superadmin'],
+        },
+        {
+          path: '/admin/account-management',
+          label: 'Account Management',
+          icon: RefreshCw,
+          roles: ['superadmin'],
         },
         {
           path: '/settings',
