@@ -188,31 +188,28 @@ export function Sidebar() {
           icon: Users,
           roles: ['admin', 'superadmin'],
         },
+      ],
+    },
+    {
+      label: 'Superadmin',
+      items: [
         {
-          path: '/admin/account-management',
-          label: 'Account Management',
-          icon: RefreshCw,
+          path: '/settings/accounts',
+          label: 'Accounts',
+          icon: Building2,
           roles: ['superadmin'],
         },
         {
-          path: '/settings',
-          label: 'Settings',
-          icon: Settings,
+          path: '/settings/users',
+          label: 'All Users',
+          icon: Users,
           roles: ['superadmin'],
-          children: [
-            {
-              path: '/settings/accounts',
-              label: 'Accounts',
-              icon: Building2,
-              roles: ['superadmin'],
-            },
-            {
-              path: '/settings/users',
-              label: 'All Users',
-              icon: Users,
-              roles: ['superadmin'],
-            },
-          ],
+        },
+        {
+          path: '/admin/account-management',
+          label: 'Demo Reset',
+          icon: RefreshCw,
+          roles: ['superadmin'],
         },
       ],
     },

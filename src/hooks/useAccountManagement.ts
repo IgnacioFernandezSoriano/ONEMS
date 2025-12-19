@@ -4,7 +4,6 @@ import { supabase } from '@/lib/supabase'
 export interface Account {
   id: string
   name: string
-  email: string
   created_at: string
 }
 
@@ -26,13 +25,14 @@ export function useAccountManagement() {
     try {
       const { data, error } = await supabase
         .from('accounts')
-        .select('id, name, email, created_at')
-        .order('name')
+        .select('id, name, created_at')
+        .eq('name', 'DEMO2')
+        .single()
 
       if (error) throw error
-      setAccounts(data || [])
+      setAccounts(data ? [data] : [])
     } catch (error) {
-      console.error('Error fetching accounts:', error)
+      console.error('Error fetching DEMO2 account:', error)
     } finally {
       setLoading(false)
     }

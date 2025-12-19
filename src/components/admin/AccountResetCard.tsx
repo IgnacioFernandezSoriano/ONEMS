@@ -48,7 +48,6 @@ export function AccountResetCard({ account, onReset, disabled }: AccountResetCar
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <h3 className="text-lg font-semibold text-gray-900">{account.name}</h3>
-          <p className="text-sm text-gray-600 mt-1">{account.email}</p>
           <p className="text-xs text-gray-500 mt-2">
             Created: {new Date(account.created_at).toLocaleDateString()}
           </p>

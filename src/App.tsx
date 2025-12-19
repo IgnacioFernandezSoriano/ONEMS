@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
+import { AccountProvider } from './contexts/AccountContext'
 import { ReportingFiltersProvider } from './contexts/ReportingFiltersContext'
 import { SidebarProvider } from './contexts/SidebarContext'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
@@ -31,17 +32,18 @@ import AccountReportingConfig from './pages/Settings/AccountReportingConfig'
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          
-          <Route
-            path="/*"
-            element={
-              <ProtectedRoute>
-                <ReportingFiltersProvider>
-                  <SidebarProvider>
-                    <MainLayout>
+      <AccountProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            
+            <Route
+              path="/*"
+              element={
+                <ProtectedRoute>
+                  <ReportingFiltersProvider>
+                    <SidebarProvider>
+                      <MainLayout>
                   <Routes>
                     <Route path="/dashboard" element={<Dashboard />} />
                     
@@ -263,6 +265,7 @@ function App() {
           />
         </Routes>
       </BrowserRouter>
+      </AccountProvider>
     </AuthProvider>
   )
 }

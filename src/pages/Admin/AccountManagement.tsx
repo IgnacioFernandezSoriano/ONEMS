@@ -26,7 +26,7 @@ export function AccountManagement() {
   return (
     <div className="p-8">
       <PageHeader
-        title="Account Management"
+        title="Demo Reset"
       />
 
       <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -71,9 +71,9 @@ export function AccountManagement() {
                 d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
               />
             </svg>
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No accounts found</h3>
+            <h3 className="mt-2 text-sm font-medium text-gray-900">DEMO2 account not found</h3>
             <p className="mt-1 text-sm text-gray-500">
-              There are no accounts available to manage.
+              The DEMO2 account is not available. Please contact the administrator.
             </p>
           </div>
         ) : (
