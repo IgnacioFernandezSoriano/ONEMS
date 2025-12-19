@@ -68,16 +68,10 @@ export default function NodeLoadBalancing() {
 
     const result = await applyBalance(modalState.cityId);
 
+    setModalState((prev) => ({ ...prev, loading: false }));
+
     if (result.success) {
-      // Wait for data to refresh (loading becomes false)
-      // Poll until loading is false or timeout after 5 seconds
-      const startTime = Date.now();
-      while (loading && Date.now() - startTime < 5000) {
-        await new Promise(resolve => setTimeout(resolve, 100));
-      }
-      
-      alert(`Balance applied successfully!\n${result.message}\nMoved: ${result.movements_count} shipments\nImprovement: ${result.improvement_percentage.toFixed(1)}%`);
-      
+      // Close modal first
       setModalState({
         isOpen: false,
         cityId: null,
@@ -85,9 +79,14 @@ export default function NodeLoadBalancing() {
         previewResult: null,
         loading: false,
       });
+      
+      // Show success message
+      alert(`Balance applied successfully!\n${result.message}\nMoved: ${result.movements_count} shipments\nImprovement: ${result.improvement_percentage.toFixed(1)}%`);
+      
+      // Force refresh after modal closes
+      await refetch();
     } else {
       alert(`Error applying balance: ${result.error}`);
-      setModalState((prev) => ({ ...prev, loading: false }));
     }
   };
 

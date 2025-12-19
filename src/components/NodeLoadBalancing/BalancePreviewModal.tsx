@@ -260,6 +260,16 @@ const MatrixVisualization: React.FC<MatrixVisualizationProps> = ({
   const matrixBeforeLookup = buildMatrixLookup(matrixBefore);
   const matrixAfterLookup = buildMatrixLookup(matrixAfter);
 
+  // DEBUG: Log matrices for audit
+  console.log('=== MATRIX DEBUG ===');
+  console.log('Matrix Before:', JSON.stringify(matrixBefore, null, 2));
+  console.log('Matrix After:', JSON.stringify(matrixAfter, null, 2));
+  console.log('Nodes:', nodes);
+  console.log('Weeks:', weeks);
+  console.log('Before Lookup:', matrixBeforeLookup);
+  console.log('After Lookup:', matrixAfterLookup);
+  console.log('===================');
+
   const currentMatrix = matrixView === 'before' ? matrixBeforeLookup : matrixAfterLookup;
 
   // Calculate color intensity based on load
