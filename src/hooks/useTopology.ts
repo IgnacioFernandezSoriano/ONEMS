@@ -8,6 +8,7 @@ export function useTopology() {
   const [regions, setRegions] = useState<Region[]>([])
   const [cities, setCities] = useState<City[]>([])
   const [nodes, setNodes] = useState<Node[]>([])
+  const [panelists, setPanelists] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -27,19 +28,28 @@ export function useTopology() {
         nodesQuery = nodesQuery.eq('account_id', effectiveAccountId)
       }
 
-      const [regionsRes, citiesRes, nodesRes] = await Promise.all([
+      // Fetch panelists for node status
+      let panelistsQuery = supabase.from('panelists').select('id, node_id, name, status')
+      if (effectiveAccountId) {
+        panelistsQuery = panelistsQuery.eq('account_id', effectiveAccountId)
+      }
+
+      const [regionsRes, citiesRes, nodesRes, panelistsRes] = await Promise.all([
         regionsQuery,
         citiesQuery,
         nodesQuery,
+        panelistsQuery,
       ])
 
       if (regionsRes.error) throw regionsRes.error
       if (citiesRes.error) throw citiesRes.error
       if (nodesRes.error) throw nodesRes.error
+      if (panelistsRes.error) throw panelistsRes.error
 
       setRegions(regionsRes.data || [])
       setCities(citiesRes.data || [])
       setNodes(nodesRes.data || [])
+      setPanelists(panelistsRes.data || [])
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -143,6 +153,7 @@ export function useTopology() {
     regions,
     cities,
     nodes,
+    panelists,
     loading,
     error,
     createRegion,
