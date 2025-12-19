@@ -59,17 +59,24 @@ export function usePanelists() {
 
   const createPanelist = async (panelistData: Omit<Panelist, 'id' | 'created_at' | 'updated_at' | 'account_id'>) => {
     try {
-      // Get current user's account_id
+      // Get current user
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('User not authenticated')
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('account_id')
-        .eq('id', user.id)
-        .single()
+      // Get account_id: use effectiveAccountId if available (superadmin with selected account),
+      // otherwise use profile.account_id (normal user)
+      let accountId = effectiveAccountId
+      
+      if (!accountId) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('account_id')
+          .eq('id', user.id)
+          .single()
+        accountId = profile?.account_id
+      }
 
-      if (!profile?.account_id) throw new Error('User account not found')
+      if (!accountId) throw new Error('User account not found')
 
       // Generate panelist_code if empty or null
       let panelistCode = panelistData.panelist_code
@@ -78,7 +85,7 @@ export function usePanelists() {
         const { data: existingPanelists } = await supabase
           .from('panelists')
           .select('panelist_code')
-          .eq('account_id', profile.account_id)
+          .eq('account_id', accountId)
           .not('panelist_code', 'is', null)
           .order('panelist_code', { ascending: false })
           .limit(1)
@@ -102,7 +109,7 @@ export function usePanelists() {
         .insert({
           ...panelistData,
           panelist_code: panelistCode,
-          account_id: profile.account_id,
+          account_id: accountId,
           created_by: user.id,
         })
         .select()
