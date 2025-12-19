@@ -30,8 +30,8 @@ export function LoginForm() {
   }
 
   const fillDemoCredentials = () => {
-    setEmail('demo@onems.com')
-    setPassword('demo2024')
+    setEmail('demo@myone.int')
+    setPassword('myone2026')
   }
 
   return (
@@ -57,11 +57,11 @@ export function LoginForm() {
               <div className="text-xs text-blue-800 space-y-1 mb-3">
                 <div className="flex items-center gap-2">
                   <span className="font-medium">Email:</span>
-                  <code className="bg-blue-100 px-2 py-0.5 rounded">demo@onems.com</code>
+                  <code className="bg-blue-100 px-2 py-0.5 rounded">demo@myone.int</code>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="font-medium">Password:</span>
-                  <code className="bg-blue-100 px-2 py-0.5 rounded">demo2024</code>
+                  <code className="bg-blue-100 px-2 py-0.5 rounded">myone2026</code>
                 </div>
               </div>
               <button
