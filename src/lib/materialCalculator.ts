@@ -173,6 +173,7 @@ export async function calculateMaterialRequirements(
       .from('material_stocks')
       .select('material_id, quantity, min_stock')
       .eq('account_id', accountId)
+      .eq('location_type', 'regulator')
       .in('material_id', materialIds)
 
     const stockMap: Record<string, { quantity: number; min_stock: number | null }> = {}

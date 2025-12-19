@@ -58,6 +58,7 @@ export function useRegulatorRequirements() {
         .from('material_stocks')
         .select('material_id, quantity')
         .eq('account_id', profile.account_id)
+        .eq('location_type', 'regulator')
         .in('material_id', materialIds)
 
       const stockMap: Record<string, number> = {}
@@ -146,6 +147,7 @@ export function useRegulatorRequirements() {
         .from('material_stocks')
         .select('material_id, quantity')
         .eq('account_id', profile.account_id)
+        .eq('location_type', 'regulator')
         .in('material_id', materialIds)
 
       const stockMap: Record<string, number> = {}
@@ -276,6 +278,7 @@ export function useRegulatorRequirements() {
         .from('material_stocks')
         .select('material_id, quantity')
         .eq('account_id', profile.account_id)
+        .eq('location_type', 'regulator')
         .in('material_id', materialIds)
 
       const stockMap: Record<string, number> = {}
@@ -326,6 +329,7 @@ export function useRegulatorRequirements() {
           .select('quantity')
           .eq('account_id', profile.account_id)
           .eq('material_id', req.material_id)
+          .eq('location_type', 'regulator')
           .maybeSingle()
 
         const currentStock = stock?.quantity || 0
