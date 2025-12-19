@@ -7,11 +7,15 @@ import type {
   TerritoryEquityMetrics,
   TerritoryEquityFilters,
 } from '@/types/reporting';
+import { useEffectiveAccountId } from '../useEffectiveAccountId';
 
 export function useTerritoryEquityData(
   accountId: string | undefined,
   filters?: TerritoryEquityFilters
 ) {
+  const effectiveAccountId = useEffectiveAccountId();
+  const activeAccountId = effectiveAccountId || accountId;
+
   const [cityData, setCityData] = useState<CityEquityData[]>([]);
   const [regionData, setRegionData] = useState<RegionEquityData[]>([]);
   const [metrics, setMetrics] = useState<TerritoryEquityMetrics | null>(null);
@@ -19,7 +23,7 @@ export function useTerritoryEquityData(
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    if (!accountId) {
+    if (!activeAccountId) {
       setLoading(false);
       return;
     }
@@ -32,11 +36,11 @@ export function useTerritoryEquityData(
         // 1. Load lookup tables
         const [citiesRes, regionsRes, carriersRes, productsRes, standardsRes] =
           await Promise.all([
-            supabase.from('cities').select('*').eq('account_id', accountId),
-            supabase.from('regions').select('*').eq('account_id', accountId),
-            supabase.from('carriers').select('id, name').eq('account_id', accountId),
-            supabase.from('products').select('id, description').eq('account_id', accountId),
-            supabase.from('delivery_standards').select('*').eq('account_id', accountId),
+            supabase.from('cities').select('*').eq('account_id', activeAccountId),
+            supabase.from('regions').select('*').eq('account_id', activeAccountId),
+            supabase.from('carriers').select('id, name').eq('account_id', activeAccountId),
+            supabase.from('products').select('id, description').eq('account_id', activeAccountId),
+            supabase.from('delivery_standards').select('*').eq('account_id', activeAccountId),
           ]);
 
         if (citiesRes.error) throw citiesRes.error;
@@ -80,7 +84,7 @@ export function useTerritoryEquityData(
         );
 
         // 3. Load shipments with filters
-        let query = supabase.from('one_db').select('*').eq('account_id', accountId);
+        let query = supabase.from('one_db').select('*').eq('account_id', activeAccountId);
 
         if (filters?.startDate && filters.startDate !== '') query = query.gte('sent_at', adjustStartDateForFilter(filters.startDate));
         if (filters?.endDate && filters.endDate !== '') query = query.lte('sent_at', adjustEndDateForFilter(filters.endDate));
@@ -894,7 +898,7 @@ export function useTerritoryEquityData(
     }
 
     fetchData();
-  }, [accountId, JSON.stringify(filters)]);
+  }, [activeAccountId, JSON.stringify(filters)]);
 
   return { cityData, regionData, metrics, loading, error };
 }

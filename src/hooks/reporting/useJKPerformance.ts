@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { adjustStartDateForFilter, adjustEndDateForFilter } from '@/lib/dateUtils';
+import { useEffectiveAccountId } from '../useEffectiveAccountId';
 
 export interface JKRouteData {
   routeKey: string;
@@ -122,6 +123,9 @@ interface Filters {
 }
 
 export function useJKPerformance(accountId: string | undefined, filters?: Filters) {
+  const effectiveAccountId = useEffectiveAccountId();
+  const activeAccountId = effectiveAccountId || accountId;
+
   const [routeData, setRouteData] = useState<JKRouteData[]>([]);
   const [cityData, setCityData] = useState<JKCityData[]>([]);
   const [regionData, setRegionData] = useState<JKRegionData[]>([]);
@@ -141,7 +145,7 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    if (!accountId) {
+    if (!activeAccountId) {
       setLoading(false);
       return;
     }
@@ -154,7 +158,7 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
         let query = supabase
           .from('one_db')
           .select('*')
-          .eq('account_id', accountId);
+          .eq('account_id', activeAccountId);
 
         if (filters?.startDate && filters.startDate !== '') query = query.gte('sent_at', adjustStartDateForFilter(filters.startDate));
         if (filters?.endDate && filters.endDate !== '') query = query.lte('sent_at', adjustEndDateForFilter(filters.endDate));
@@ -170,15 +174,15 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
         const { data: standards, error: stdErr } = await supabase
           .from('delivery_standards')
           .select('*')
-          .eq('account_id', accountId);
+          .eq('account_id', activeAccountId);
         if (stdErr) throw stdErr;
 
         // 3. Load lookup tables
         const [carriersRes, productsRes, citiesRes, regionsRes] = await Promise.all([
-          supabase.from('carriers').select('id, name').eq('account_id', accountId),
-          supabase.from('products').select('id, description').eq('account_id', accountId),
-          supabase.from('cities').select('id, name, region_id').eq('account_id', accountId),
-          supabase.from('regions').select('id, name').eq('account_id', accountId),
+          supabase.from('carriers').select('id, name').eq('account_id', activeAccountId),
+          supabase.from('products').select('id, description').eq('account_id', activeAccountId),
+          supabase.from('cities').select('id, name, region_id').eq('account_id', activeAccountId),
+          supabase.from('regions').select('id, name').eq('account_id', activeAccountId),
         ]);
 
         if (carriersRes.error) throw carriersRes.error;
@@ -827,7 +831,7 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
 
     fetchData();
   }, [
-    accountId,
+    activeAccountId,
     filters?.startDate,
     filters?.endDate,
     filters?.originCity,

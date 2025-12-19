@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { adjustStartDateForFilter, adjustEndDateForFilter } from '@/lib/dateUtils';
+import { useEffectiveAccountId } from '../useEffectiveAccountId';
 
 interface CarrierProductData {
   carrier: string;
@@ -26,12 +27,15 @@ interface Filters {
 }
 
 export function useCarrierProductOverview(accountId: string | undefined, filters: Filters) {
+  const effectiveAccountId = useEffectiveAccountId();
+  const activeAccountId = effectiveAccountId || accountId;
+
   const [data, setData] = useState<CarrierProductData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    if (!accountId) {
+    if (!activeAccountId) {
       setLoading(false);
       return;
     }
@@ -44,7 +48,7 @@ export function useCarrierProductOverview(accountId: string | undefined, filters
         const { data: standards, error: stdError } = await supabase
           .from('delivery_standards')
           .select('*')
-          .eq('account_id', accountId);
+          .eq('account_id', activeAccountId);
 
         if (stdError) throw stdError;
 
@@ -73,7 +77,7 @@ export function useCarrierProductOverview(accountId: string | undefined, filters
             origin_city_name,
             destination_city_name
           `)
-          .eq('account_id', accountId);
+          .eq('account_id', activeAccountId);
 
         if (filters.dateFrom && filters.dateFrom !== '') {
           query = query.gte('sent_at', adjustStartDateForFilter(filters.dateFrom));
@@ -192,7 +196,7 @@ export function useCarrierProductOverview(accountId: string | undefined, filters
     }
 
     fetchData();
-  }, [accountId, filters.dateFrom, filters.dateTo, filters.routeType, filters.originCity, filters.destinationCity, filters.carrier, filters.product]);
+  }, [activeAccountId, filters.dateFrom, filters.dateTo, filters.routeType, filters.originCity, filters.destinationCity, filters.carrier, filters.product]);
 
   return { data, loading, error };
 }

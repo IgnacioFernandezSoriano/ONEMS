@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { adjustStartDateForFilter, adjustEndDateForFilter } from '@/lib/dateUtils';
+import { useEffectiveAccountId } from '../useEffectiveAccountId';
 
 interface Filters {
   startDate?: string;
@@ -57,12 +58,15 @@ export interface CarrierData {
 }
 
 export function useComplianceData(accountId: string | undefined, filters?: Filters) {
+  const effectiveAccountId = useEffectiveAccountId();
+  const activeAccountId = effectiveAccountId || accountId;
+
   const [data, setData] = useState<CarrierData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    if (!accountId) {
+    if (!activeAccountId) {
       setLoading(false);
       return;
     }
@@ -76,7 +80,7 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
         let query = supabase
           .from('one_db')
           .select('*')
-          .eq('account_id', accountId);
+          .eq('account_id', activeAccountId);
 
         if (filters?.startDate && filters.startDate !== '') {
           query = query.gte('sent_at', adjustStartDateForFilter(filters.startDate));
@@ -108,7 +112,7 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
         const { data: standards, error: stdErr } = await supabase
           .from('delivery_standards')
           .select('*')
-          .eq('account_id', accountId);
+          .eq('account_id', activeAccountId);
 
         if (stdErr) {
           console.error('❌ Error loading standards:', stdErr);
@@ -400,7 +404,7 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
     }
 
     fetchData();
-  }, [accountId, filters?.startDate, filters?.endDate, filters?.originCity, filters?.destinationCity, filters?.carrier, filters?.product, filters?.complianceStatus]);
+  }, [activeAccountId, filters?.startDate, filters?.endDate, filters?.originCity, filters?.destinationCity, filters?.carrier, filters?.product, filters?.complianceStatus]);
 
   return { data, loading, error };
 }
