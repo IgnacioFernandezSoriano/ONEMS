@@ -89,13 +89,17 @@ export const useNodeLoadBalancing = (
   referenceLoad: number = 6,
   deviationPercent: number = 20
 ) => {
+  const effectiveAccountId = useEffectiveAccountId()
+  // Use effectiveAccountId if available, otherwise fall back to passed accountId
+  const activeAccountId = effectiveAccountId || accountId
+
   const [loadData, setLoadData] = useState<NodeLoadData[]>([]);
   const [citySummaries, setCitySummaries] = useState<CityLoadSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchLoadData = async () => {
-    if (!accountId) {
+    if (!activeAccountId) {
       console.log('[useNodeLoadBalancing] No accountId provided');
       return;
     }
@@ -117,7 +121,7 @@ export const useNodeLoadBalancing = (
 
       const { data, error: fetchError } = await supabase
         .rpc('rpc_get_node_load_by_period', {
-          p_account_id: accountId,
+          p_account_id: activeAccountId,
           p_start_date: startDate,
           p_end_date: endDate,
           p_reference_load: referenceLoad,
@@ -254,7 +258,7 @@ export const useNodeLoadBalancing = (
 
   useEffect(() => {
     fetchLoadData();
-  }, [accountId, startDate, endDate, referenceLoad, deviationPercent]);
+  }, [activeAccountId, startDate, endDate, referenceLoad, deviationPercent]);
 
   return {
     loadData,

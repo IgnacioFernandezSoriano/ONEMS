@@ -17,20 +17,33 @@ export function useDeliveryStandards() {
       setLoading(true)
       setError(null)
 
+      // Build queries with account filter if needed
+      let standardsQuery = supabase
+        .from('delivery_standards')
+        .select(`
+          *,
+          carrier:carriers(*),
+          product:products(*),
+          origin_city:cities!delivery_standards_origin_city_id_fkey(*),
+          destination_city:cities!delivery_standards_destination_city_id_fkey(*)
+        `)
+
+      let carriersQuery = supabase.from('carriers').select('*').eq('status', 'active')
+      let productsQuery = supabase.from('products').select('*').eq('status', 'active')
+      let citiesQuery = supabase.from('cities').select('*').eq('status', 'active')
+
+      if (effectiveAccountId) {
+        standardsQuery = standardsQuery.eq('account_id', effectiveAccountId)
+        carriersQuery = carriersQuery.eq('account_id', effectiveAccountId)
+        productsQuery = productsQuery.eq('account_id', effectiveAccountId)
+        citiesQuery = citiesQuery.eq('account_id', effectiveAccountId)
+      }
+
       const [standardsRes, carriersRes, productsRes, citiesRes] = await Promise.all([
-        supabase
-          .from('delivery_standards')
-          .select(`
-            *,
-            carrier:carriers(*),
-            product:products(*),
-            origin_city:cities!delivery_standards_origin_city_id_fkey(*),
-            destination_city:cities!delivery_standards_destination_city_id_fkey(*)
-          `)
-          .order('created_at', { ascending: false }),
-        supabase.from('carriers').select('*').eq('status', 'active').order('name'),
-        supabase.from('products').select('*').eq('status', 'active').order('code'),
-        supabase.from('cities').select('*').eq('status', 'active').order('name'),
+        standardsQuery.order('created_at', { ascending: false }),
+        carriersQuery.order('name'),
+        productsQuery.order('code'),
+        citiesQuery.order('name'),
       ])
 
       if (standardsRes.error) throw standardsRes.error

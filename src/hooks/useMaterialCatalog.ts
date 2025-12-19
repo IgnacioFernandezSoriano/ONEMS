@@ -10,10 +10,13 @@ export function useMaterialCatalog() {
   const [loading, setLoading] = useState(true)
 
   const fetchCatalog = async () => {
-    const { data, error } = await supabase
-      .from('material_catalog')
-      .select('*')
-      .order('name')
+    let query = supabase.from('material_catalog').select('*')
+
+    if (effectiveAccountId) {
+      query = query.eq('account_id', effectiveAccountId)
+    }
+
+    const { data, error } = await query.order('name')
     
     if (error) throw error
     setCatalog(data || [])
@@ -23,11 +26,16 @@ export function useMaterialCatalog() {
     let query = supabase
       .from('product_materials')
       .select('*, material_catalog(*)')
-      .order('created_at')
     
+    if (effectiveAccountId) {
+      query = query.eq('account_id', effectiveAccountId)
+    }
+
     if (productId) {
       query = query.eq('product_id', productId)
     }
+
+    query = query.order('created_at')
 
     const { data, error } = await query
     

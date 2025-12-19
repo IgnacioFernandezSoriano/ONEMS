@@ -113,7 +113,8 @@ export interface StockSettings {
 export function useStockManagement() {
   const effectiveAccountId = useEffectiveAccountId()
   const { profile } = useAuth()
-  const accountId = profile?.account_id
+  // Use effectiveAccountId if available, otherwise fall back to profile.account_id
+  const accountId = effectiveAccountId || profile?.account_id
 
   const [regulatorStocks, setRegulatorStocks] = useState<MaterialStock[]>([])
   const [panelistStocks, setPanelistStocks] = useState<PanelistMaterialStock[]>([])
@@ -127,7 +128,7 @@ export function useStockManagement() {
     if (accountId) {
       loadData()
     }
-  }, [accountId])
+  }, [accountId, effectiveAccountId])
 
   const loadData = async () => {
     try {

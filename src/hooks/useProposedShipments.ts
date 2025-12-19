@@ -35,7 +35,10 @@ export function useProposedShipments() {
   const [proposedShipments, setProposedShipments] = useState<ProposedShipment[]>([])
 
   const calculate = useCallback(async (startDate: string, endDate: string) => {
-    if (!profile?.account_id) {
+    // Use effectiveAccountId if available, otherwise fall back to profile.account_id
+    const accountId = effectiveAccountId || profile?.account_id
+    
+    if (!accountId) {
       setError('No account ID found')
       return
     }
@@ -48,7 +51,7 @@ export function useProposedShipments() {
       const { data: planDetails, error: detailsError } = await supabase
         .from('allocation_plan_details')
         .select('id, plan_id, origin_node_id, origin_panelist_id, fecha_programada')
-        .eq('account_id', profile.account_id)
+        .eq('account_id', accountId)
         .gte('fecha_programada', startDate)
         .lte('fecha_programada', endDate)
         .in('status', ['pending', 'notified'])
@@ -94,7 +97,7 @@ export function useProposedShipments() {
       const { data: productMaterials, error: pmError } = await supabase
         .from('product_materials')
         .select('product_id, material_id, quantity')
-        .eq('account_id', profile.account_id)
+        .eq('account_id', accountId)
         .in('product_id', productIds)
 
       if (pmError) throw pmError
@@ -143,7 +146,7 @@ export function useProposedShipments() {
       const { data: panelists, error: panelistsError } = await supabase
         .from('panelists')
         .select('id, name, panelist_code, node_id')
-        .eq('account_id', profile.account_id)
+        .eq('account_id', accountId)
         .in('node_id', nodeIds)
 
       if (panelistsError) throw panelistsError
@@ -246,7 +249,7 @@ export function useProposedShipments() {
     } finally {
       setLoading(false)
     }
-  }, [profile?.account_id])
+  }, [profile?.account_id, effectiveAccountId])
 
   const reset = useCallback(() => {
     setProposedShipments([])

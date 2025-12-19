@@ -17,7 +17,10 @@ export function useMaterialRequirements() {
   const [panelistRequirements, setPanelistRequirements] = useState<PanelistMaterialRequirement[]>([])
 
   const calculate = useCallback(async (startDate: string, endDate: string) => {
-    if (!profile?.account_id) {
+    // Use effectiveAccountId if available, otherwise fall back to profile.account_id
+    const accountId = effectiveAccountId || profile?.account_id
+    
+    if (!accountId) {
       setError('No account ID found')
       return
     }
@@ -27,8 +30,8 @@ export function useMaterialRequirements() {
 
     try {
       const [materials, panelists] = await Promise.all([
-        calculateMaterialRequirements(profile.account_id, startDate, endDate),
-        calculatePanelistRequirements(profile.account_id, startDate, endDate)
+        calculateMaterialRequirements(accountId, startDate, endDate),
+        calculatePanelistRequirements(accountId, startDate, endDate)
       ])
 
       setMaterialRequirements(materials)
@@ -39,7 +42,7 @@ export function useMaterialRequirements() {
     } finally {
       setLoading(false)
     }
-  }, [profile?.account_id])
+  }, [profile?.account_id, effectiveAccountId])
 
   const reset = useCallback(() => {
     setMaterialRequirements([])

@@ -16,13 +16,21 @@ export function useCarriers() {
       setLoading(true)
       setError(null)
 
+      // Build queries with account filter if needed
+      let carriersQuery = supabase.from('carriers').select('*')
+      let productsQuery = supabase.from('products').select('*')
+      let productMaterialsQuery = supabase.from('product_materials').select('*, material_catalog(*)')
+
+      if (effectiveAccountId) {
+        carriersQuery = carriersQuery.eq('account_id', effectiveAccountId)
+        productsQuery = productsQuery.eq('account_id', effectiveAccountId)
+        productMaterialsQuery = productMaterialsQuery.eq('account_id', effectiveAccountId)
+      }
+
       const [carriersRes, productsRes, productMaterialsRes] = await Promise.all([
-        supabase.from('carriers').select('*').order('name'),
-        supabase.from('products').select('*').order('code'),
-        supabase
-          .from('product_materials')
-          .select('*, material_catalog(*)')
-          .order('created_at'),
+        carriersQuery.order('name'),
+        productsQuery.order('code'),
+        productMaterialsQuery.order('created_at'),
       ])
 
       if (carriersRes.error) throw carriersRes.error

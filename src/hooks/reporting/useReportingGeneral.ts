@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { GeneralPerformanceData } from '@/types/reporting';
 import { adjustStartDateForFilter, adjustEndDateForFilter } from '@/lib/dateUtils';
+import { useEffectiveAccountId } from '../useEffectiveAccountId';
 
 interface Filters {
   originCity?: string;
@@ -13,12 +14,16 @@ interface Filters {
 }
 
 export function useReportingGeneral(accountId: string | undefined, filters?: Filters) {
+  const effectiveAccountId = useEffectiveAccountId();
+  // Use effectiveAccountId if available, otherwise fall back to passed accountId
+  const activeAccountId = effectiveAccountId || accountId;
+
   const [data, setData] = useState<GeneralPerformanceData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    if (!accountId) {
+    if (!activeAccountId) {
       setLoading(false);
       return;
     }
@@ -31,7 +36,7 @@ export function useReportingGeneral(accountId: string | undefined, filters?: Fil
         let query = supabase
           .from('one_db')
           .select('*')
-          .eq('account_id', accountId);
+          .eq('account_id', activeAccountId);
 
         if (filters?.originCity) {
           query = query.eq('origin_city_name', filters.originCity);
@@ -97,7 +102,7 @@ export function useReportingGeneral(accountId: string | undefined, filters?: Fil
     }
 
     fetchData();
-  }, [accountId, filters?.originCity, filters?.destinationCity, filters?.carrier, filters?.product, filters?.dateFrom, filters?.dateTo]);
+  }, [activeAccountId, filters?.originCity, filters?.destinationCity, filters?.carrier, filters?.product, filters?.dateFrom, filters?.dateTo]);
 
   return { data, loading, error };
 }
