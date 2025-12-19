@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
+import { useEffectiveAccountId } from './useEffectiveAccountId'
 
 export interface ProposedShipment {
   node_id: string
@@ -27,6 +28,7 @@ export interface ShipmentMaterial {
  * Similar a useMaterialRequirements pero enfocado en crear shipments
  */
 export function useProposedShipments() {
+  const effectiveAccountId = useEffectiveAccountId()
   const { profile } = useAuth()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)

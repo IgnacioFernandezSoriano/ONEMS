@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { Carrier, Product, ProductMaterial } from '@/lib/types'
+import { useEffectiveAccountId } from './useEffectiveAccountId'
 
 export function useCarriers() {
+  const effectiveAccountId = useEffectiveAccountId()
   const [carriers, setCarriers] = useState<Carrier[]>([])
   const [products, setProducts] = useState<Product[]>([])
   const [productMaterials, setProductMaterials] = useState<ProductMaterial[]>([])
@@ -39,7 +41,7 @@ export function useCarriers() {
 
   useEffect(() => {
     fetchAll()
-  }, [])
+  }, [effectiveAccountId])
 
   // Carrier operations
   const createCarrier = async (data: { code: string; name: string; type?: string; status?: string }) => {

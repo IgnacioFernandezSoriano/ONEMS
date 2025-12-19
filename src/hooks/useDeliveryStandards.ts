@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { DeliveryStandardWithDetails, Carrier, Product, City } from '@/lib/types'
+import { useEffectiveAccountId } from './useEffectiveAccountId'
 
 export function useDeliveryStandards() {
+  const effectiveAccountId = useEffectiveAccountId()
   const [standards, setStandards] = useState<DeliveryStandardWithDetails[]>([])
   const [carriers, setCarriers] = useState<Carrier[]>([])
   const [products, setProducts] = useState<Product[]>([])
@@ -49,7 +51,7 @@ export function useDeliveryStandards() {
 
   useEffect(() => {
     fetchAll()
-  }, [])
+  }, [effectiveAccountId])
 
   const createStandard = async (data: {
     carrier_id: string

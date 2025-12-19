@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { Region, City, Node } from '@/lib/types'
+import { useEffectiveAccountId } from './useEffectiveAccountId'
 
 export function useTopology() {
+  const effectiveAccountId = useEffectiveAccountId()
   const [regions, setRegions] = useState<Region[]>([])
   const [cities, setCities] = useState<City[]>([])
   const [nodes, setNodes] = useState<Node[]>([])
@@ -14,10 +16,21 @@ export function useTopology() {
       setLoading(true)
       setError(null)
 
+      // Build queries with account filter if needed
+      let regionsQuery = supabase.from('regions').select('*').order('name')
+      let citiesQuery = supabase.from('cities').select('*').order('name')
+      let nodesQuery = supabase.from('nodes').select('*').order('auto_id')
+
+      if (effectiveAccountId) {
+        regionsQuery = regionsQuery.eq('account_id', effectiveAccountId)
+        citiesQuery = citiesQuery.eq('account_id', effectiveAccountId)
+        nodesQuery = nodesQuery.eq('account_id', effectiveAccountId)
+      }
+
       const [regionsRes, citiesRes, nodesRes] = await Promise.all([
-        supabase.from('regions').select('*').order('name'),
-        supabase.from('cities').select('*').order('name'),
-        supabase.from('nodes').select('*').order('auto_id'),
+        regionsQuery,
+        citiesQuery,
+        nodesQuery,
       ])
 
       if (regionsRes.error) throw regionsRes.error
@@ -36,7 +49,7 @@ export function useTopology() {
 
   useEffect(() => {
     fetchAll()
-  }, [])
+  }, [effectiveAccountId])
 
   // Region operations
   const createRegion = async (data: { name: string; code: string; description?: string }) => {

@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { MaterialCatalog, ProductMaterial } from '@/lib/types'
+import { useEffectiveAccountId } from './useEffectiveAccountId'
 
 export function useMaterialCatalog() {
+  const effectiveAccountId = useEffectiveAccountId()
   const [catalog, setCatalog] = useState<MaterialCatalog[]>([])
   const [productMaterials, setProductMaterials] = useState<ProductMaterial[]>([])
   const [loading, setLoading] = useState(true)
@@ -44,7 +46,7 @@ export function useMaterialCatalog() {
 
   useEffect(() => {
     fetchAll()
-  }, [])
+  }, [effectiveAccountId])
 
   const createCatalogItem = async (data: Partial<MaterialCatalog>) => {
     const { data: newItem, error } = await supabase

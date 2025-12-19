@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useEffectiveAccountId } from './useEffectiveAccountId'
 import type {
   GeneratedAllocationPlan,
   GeneratedAllocationPlanDetail,
@@ -11,6 +12,7 @@ import type {
 } from '@/lib/types'
 
 export function useAllocationPlans() {
+  const effectiveAccountId = useEffectiveAccountId()
   const [generatedPlans, setGeneratedPlans] = useState<GeneratedAllocationPlanWithDetails[]>([])
   const [carriers, setCarriers] = useState<Carrier[]>([])
   const [products, setProducts] = useState<Product[]>([])
@@ -99,7 +101,7 @@ export function useAllocationPlans() {
 
   useEffect(() => {
     fetchAll()
-  }, [])
+  }, [effectiveAccountId])
 
   const createPlan = async (data: {
     plan_name: string

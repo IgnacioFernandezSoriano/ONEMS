@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { AllocationPlanWithDetails } from '@/lib/types'
+import { useEffectiveAccountId } from './useEffectiveAccountId'
 
 export function useAppliedAllocationPlans() {
+  const effectiveAccountId = useEffectiveAccountId()
   const [appliedPlans, setAppliedPlans] = useState<AllocationPlanWithDetails[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -47,7 +49,7 @@ export function useAppliedAllocationPlans() {
 
   useEffect(() => {
     fetchAll()
-  }, [])
+  }, [effectiveAccountId])
 
   const getPlanDetails = async (planId: string) => {
     const { data, error } = await supabase

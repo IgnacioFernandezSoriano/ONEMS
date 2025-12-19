@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import { useAccount } from '../../contexts/AccountContext'
 import { useSidebar } from '../../contexts/SidebarContext'
 import {
   LayoutDashboard,
@@ -25,7 +26,8 @@ import {
   Warehouse,
   RefreshCw,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { supabase } from '../../lib/supabase'
 
 interface MenuItem {
   path: string
@@ -41,14 +43,29 @@ interface MenuGroup {
 }
 
 export function Sidebar() {
-  const { profile } = useAuth()
+  const { profile, signOut } = useAuth()
+  const { selectedAccountId, setSelectedAccountId } = useAccount()
   const location = useLocation()
   const { isCollapsed, setIsCollapsed } = useSidebar()
   const [expandedSections, setExpandedSections] = useState<string[]>(['/reporting'])
   const [isHovered, setIsHovered] = useState(false)
+  const [accounts, setAccounts] = useState<Array<{ id: string; name: string }>>([])
   
   // Auto-expand on hover when collapsed
   const isExpanded = isCollapsed ? isHovered : true
+
+  // Load accounts for superadmin
+  useEffect(() => {
+    if (profile?.role === 'superadmin') {
+      supabase
+        .from('accounts')
+        .select('id, name')
+        .order('name')
+        .then(({ data }) => {
+          if (data) setAccounts(data)
+        })
+    }
+  }, [profile?.role])
 
   const menuGroups: MenuGroup[] = [
     {
@@ -361,9 +378,10 @@ export function Sidebar() {
       </nav>
 
       {/* User Profile */}
-      <div className="p-4 border-t border-gray-200">
+      <div className="p-4 border-t border-gray-200 space-y-3">
+        {/* User Info */}
         <div className={`flex items-center gap-3 ${isCollapsed ? 'justify-center' : 'px-3'} py-2`}>
-          <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+          <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
             <span className="text-sm font-bold text-white">
               {profile?.full_name?.charAt(0) || profile?.email?.charAt(0) || 'U'}
             </span>
@@ -377,6 +395,40 @@ export function Sidebar() {
             </div>
           )}
         </div>
+
+        {/* Account Selector (only for superadmin) */}
+        {isExpanded && profile?.role === 'superadmin' && accounts.length > 0 && (
+          <div className="px-3">
+            <label htmlFor="account-selector-sidebar" className="block text-xs text-gray-600 mb-1">
+              View as account:
+            </label>
+            <select
+              id="account-selector-sidebar"
+              className="w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm"
+              value={selectedAccountId || ''}
+              onChange={(e) => setSelectedAccountId(e.target.value || null)}
+            >
+              <option value="">All Accounts</option>
+              {accounts.map((account) => (
+                <option key={account.id} value={account.id}>
+                  {account.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {/* Sign Out Button */}
+        {isExpanded && (
+          <div className="px-3">
+            <button
+              onClick={signOut}
+              className="w-full px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+            >
+              Sign Out
+            </button>
+          </div>
+        )}
       </div>
     </aside>
   )

@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 import { calculateMaterialRequirements } from '../lib/materialCalculator'
+import { useEffectiveAccountId } from './useEffectiveAccountId'
 
 export interface MaterialRequirementPeriod {
   id: string
@@ -28,6 +29,7 @@ export interface MaterialRequirementPeriod {
  * Los requirements se persisten en la tabla material_requirements_periods
  */
 export function useRegulatorRequirements() {
+  const effectiveAccountId = useEffectiveAccountId()
   const { profile } = useAuth()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)

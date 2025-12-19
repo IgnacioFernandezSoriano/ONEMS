@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import { useEffectiveAccountId } from './useEffectiveAccountId'
 import { 
   calculateMaterialRequirements, 
   calculatePanelistRequirements,
@@ -8,6 +9,7 @@ import {
 } from '../lib/materialCalculator'
 
 export function useMaterialRequirements() {
+  const effectiveAccountId = useEffectiveAccountId()
   const { profile } = useAuth()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)

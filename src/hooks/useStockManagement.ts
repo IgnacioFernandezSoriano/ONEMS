@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
+import { useEffectiveAccountId } from './useEffectiveAccountId'
 
 export interface MaterialStock {
   id: string
@@ -110,6 +111,7 @@ export interface StockSettings {
 }
 
 export function useStockManagement() {
+  const effectiveAccountId = useEffectiveAccountId()
   const { profile } = useAuth()
   const accountId = profile?.account_id
 
