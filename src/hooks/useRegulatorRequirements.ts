@@ -305,6 +305,8 @@ export function useRegulatorRequirements() {
   }, [profile?.account_id])
 
   const markAsOrdered = useCallback(async (requirementId: string, quantity: number | null) => {
+    if (!profile?.account_id) return
+    
     try {
       // If quantity is null, use net quantity (quantity_needed - current stock)
       let quantityToOrder = quantity
@@ -322,8 +324,8 @@ export function useRegulatorRequirements() {
         const { data: stock } = await supabase
           .from('material_stocks')
           .select('quantity')
+          .eq('account_id', profile.account_id)
           .eq('material_id', req.material_id)
-          .eq('location_type', 'regulator')
           .maybeSingle()
 
         const currentStock = stock?.quantity || 0
