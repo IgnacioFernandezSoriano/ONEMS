@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Button } from '@/components/common/Button'
 import type { Carrier, Product, City, Node } from '@/lib/types'
 import {
@@ -37,6 +37,7 @@ export function AllocationPlanGeneratorForm({
   const [useSeasonalDist, setUseSeasonalDist] = useState(false)
   const [seasonal, setSeasonal] = useState<Partial<SeasonalDistribution>>({})
   const [loading, setLoading] = useState(false)
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
 
   const availableProducts = products.filter(
     (p) => !formData.carrier_id || p.carrier_id === formData.carrier_id
@@ -66,6 +67,70 @@ export function AllocationPlanGeneratorForm({
 
   const clearSeasonalHandler = () => {
     setSeasonal({})
+  }
+
+  // Quick period selection helpers
+  const months = [
+    { name: 'Jan', num: 1 }, { name: 'Feb', num: 2 }, { name: 'Mar', num: 3 },
+    { name: 'Apr', num: 4 }, { name: 'May', num: 5 }, { name: 'Jun', num: 6 },
+    { name: 'Jul', num: 7 }, { name: 'Aug', num: 8 }, { name: 'Sep', num: 9 },
+    { name: 'Oct', num: 10 }, { name: 'Nov', num: 11 }, { name: 'Dec', num: 12 }
+  ]
+
+  const yearRange = useMemo(() => {
+    const currentYear = new Date().getFullYear()
+    const years = []
+    for (let i = currentYear; i <= currentYear + 10; i++) {
+      years.push(i)
+    }
+    return years
+  }, [])
+
+  const formatDateLocal = (date: Date) => {
+    const y = date.getFullYear()
+    const m = String(date.getMonth() + 1).padStart(2, '0')
+    const d = String(date.getDate()).padStart(2, '0')
+    return `${y}-${m}-${d}`
+  }
+
+  const handleMonthSelect = (year: number, month: number) => {
+    const firstDay = new Date(year, month - 1, 1)
+    const lastDay = new Date(year, month, 0)
+    setFormData({
+      ...formData,
+      start_date: formatDateLocal(firstDay),
+      end_date: formatDateLocal(lastDay)
+    })
+  }
+
+  const handleFirstSemesterSelect = () => {
+    const firstDay = new Date(selectedYear, 0, 1) // Jan 1
+    const lastDay = new Date(selectedYear, 5, 30) // Jun 30
+    setFormData({
+      ...formData,
+      start_date: formatDateLocal(firstDay),
+      end_date: formatDateLocal(lastDay)
+    })
+  }
+
+  const handleSecondSemesterSelect = () => {
+    const firstDay = new Date(selectedYear, 6, 1) // Jul 1
+    const lastDay = new Date(selectedYear, 11, 31) // Dec 31
+    setFormData({
+      ...formData,
+      start_date: formatDateLocal(firstDay),
+      end_date: formatDateLocal(lastDay)
+    })
+  }
+
+  const handleYearSelect = () => {
+    const firstDay = new Date(selectedYear, 0, 1) // Jan 1
+    const lastDay = new Date(selectedYear, 11, 31) // Dec 31
+    setFormData({
+      ...formData,
+      start_date: formatDateLocal(firstDay),
+      end_date: formatDateLocal(lastDay)
+    })
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -275,6 +340,65 @@ export function AllocationPlanGeneratorForm({
             onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
             className="w-full px-3 py-2 border rounded-md"
           />
+        </div>
+      </div>
+
+      {/* Quick Period Selection */}
+      <div className="border rounded-lg p-4 bg-gray-50">
+        <label className="flex items-center gap-2 text-sm font-medium mb-3">
+          Quick Period Selection
+          <span className="group relative">
+            <svg className="w-3 h-3 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+            </svg>
+            <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
+              Click any month button to automatically set the start and end dates for that entire month, or use semester/year buttons for longer periods.
+            </div>
+          </span>
+        </label>
+        <div className="flex items-center gap-2">
+          <select
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+            className="border border-gray-300 rounded-md shadow-sm py-1 px-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          >
+            {yearRange.map(year => (
+              <option key={year} value={year}>{year}</option>
+            ))}
+          </select>
+          <div className="flex flex-wrap gap-1">
+            {months.map(month => (
+              <button
+                key={month.num}
+                type="button"
+                onClick={() => handleMonthSelect(selectedYear, month.num)}
+                className="px-3 py-1 text-sm font-medium rounded-md border border-gray-300 hover:bg-blue-50 hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {month.name}
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={handleFirstSemesterSelect}
+              className="px-3 py-1 text-sm font-medium rounded-md border border-green-300 bg-green-50 hover:bg-green-100 hover:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+            >
+              1st Semester
+            </button>
+            <button
+              type="button"
+              onClick={handleSecondSemesterSelect}
+              className="px-3 py-1 text-sm font-medium rounded-md border border-teal-300 bg-teal-50 hover:bg-teal-100 hover:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
+            >
+              2nd Semester
+            </button>
+            <button
+              type="button"
+              onClick={handleYearSelect}
+              className="px-3 py-1 text-sm font-medium rounded-md border border-purple-300 bg-purple-50 hover:bg-purple-100 hover:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            >
+              Year
+            </button>
+          </div>
         </div>
       </div>
 

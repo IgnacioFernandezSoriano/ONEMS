@@ -69,6 +69,30 @@ export default function MaterialRequirements() {
     setEndDate(lastDay.toISOString().split('T')[0])
   }
 
+  const handleFirstSemesterSelect = () => {
+    const firstDay = new Date(selectedYear, 0, 1) // Jan 1
+    const lastDay = new Date(selectedYear, 5, 30) // Jun 30
+    
+    setStartDate(firstDay.toISOString().split('T')[0])
+    setEndDate(lastDay.toISOString().split('T')[0])
+  }
+
+  const handleSecondSemesterSelect = () => {
+    const firstDay = new Date(selectedYear, 6, 1) // Jul 1
+    const lastDay = new Date(selectedYear, 11, 31) // Dec 31
+    
+    setStartDate(firstDay.toISOString().split('T')[0])
+    setEndDate(lastDay.toISOString().split('T')[0])
+  }
+
+  const handleYearSelect = () => {
+    const firstDay = new Date(selectedYear, 0, 1) // Jan 1
+    const lastDay = new Date(selectedYear, 11, 31) // Dec 31
+    
+    setStartDate(firstDay.toISOString().split('T')[0])
+    setEndDate(lastDay.toISOString().split('T')[0])
+  }
+
   const handleResetFilters = () => {
     setStartDate('')
     setEndDate('')
@@ -295,10 +319,13 @@ export default function MaterialRequirements() {
               </div>
             </div>
 
-            {/* Quick Month Selector */}
+            {/* Quick Period Selector */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Quick Select Month</label>
-              <div className="flex items-center gap-4 mb-2">
+              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                Quick Period Selection
+                <SmartTooltip content="Click any month button to automatically set the start and end dates for that entire month, or use semester/year buttons for longer periods." />
+              </label>
+              <div className="flex items-center gap-2 mb-2">
                 <select
                   value={selectedYear}
                   onChange={(e) => setSelectedYear(Number(e.target.value))}
@@ -314,11 +341,29 @@ export default function MaterialRequirements() {
                   <button
                     key={month.num}
                     onClick={() => handleMonthSelect(selectedYear, month.num)}
-                    className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-blue-100 hover:text-blue-700 text-gray-700 rounded-lg transition-colors"
+                    className="px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-300 hover:bg-blue-50 hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
                   >
                     {month.name}
                   </button>
                 ))}
+                <button
+                  onClick={handleFirstSemesterSelect}
+                  className="px-3 py-1.5 text-sm font-medium rounded-lg border border-green-300 bg-green-50 hover:bg-green-100 hover:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors"
+                >
+                  1st Semester
+                </button>
+                <button
+                  onClick={handleSecondSemesterSelect}
+                  className="px-3 py-1.5 text-sm font-medium rounded-lg border border-teal-300 bg-teal-50 hover:bg-teal-100 hover:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-colors"
+                >
+                  2nd Semester
+                </button>
+                <button
+                  onClick={handleYearSelect}
+                  className="px-3 py-1.5 text-sm font-medium rounded-lg border border-purple-300 bg-purple-50 hover:bg-purple-100 hover:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors"
+                >
+                  Year
+                </button>
               </div>
             </div>
 
