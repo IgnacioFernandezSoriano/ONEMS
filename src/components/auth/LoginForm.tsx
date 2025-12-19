@@ -31,7 +31,7 @@ export function LoginForm() {
 
   const fillDemoCredentials = () => {
     setEmail('demo@myone.int')
-    setPassword('myone2026')
+    setPassword('WhereQualityStarts')
   }
 
   return (
@@ -61,7 +61,7 @@ export function LoginForm() {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="font-medium">Password:</span>
-                  <code className="bg-blue-100 px-2 py-0.5 rounded">myone2026</code>
+                  <code className="bg-blue-100 px-2 py-0.5 rounded">WhereQualityStarts</code>
                 </div>
               </div>
               <button
