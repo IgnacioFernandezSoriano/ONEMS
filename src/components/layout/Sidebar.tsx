@@ -89,7 +89,7 @@ export function Sidebar() {
         },
         {
           path: '/carriers',
-          label: 'Carriers',
+          label: 'Carriers & Products',
           icon: Truck,
           roles: ['admin', 'superadmin'],
         },
