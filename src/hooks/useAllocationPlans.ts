@@ -27,10 +27,16 @@ export function useAllocationPlans() {
       setError(null)
 
       // Fetch generated plans with relations
-      const { data: plansData, error: plansError } = await supabase
+      let plansQuery = supabase
         .from('generated_allocation_plans')
         .select('*, carriers(*), products(*)')
-        .order('created_at', { ascending: false })
+
+      // Filter by account if effectiveAccountId is set
+      if (effectiveAccountId) {
+        plansQuery = plansQuery.eq('account_id', effectiveAccountId)
+      }
+
+      const { data: plansData, error: plansError } = await plansQuery.order('created_at', { ascending: false })
 
       if (plansError) throw plansError
 

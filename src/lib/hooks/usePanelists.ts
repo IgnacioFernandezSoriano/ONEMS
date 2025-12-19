@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { Panelist, PanelistWithNode, Node, City, Region } from '@/lib/types'
+import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId'
 
 export function usePanelists() {
+  const effectiveAccountId = useEffectiveAccountId()
   const [panelists, setPanelists] = useState<PanelistWithNode[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -12,7 +14,7 @@ export function usePanelists() {
       setLoading(true)
       setError(null)
 
-      const { data, error: fetchError } = await supabase
+      let query = supabase
         .from('panelists')
         .select(`
           *,
@@ -24,7 +26,13 @@ export function usePanelists() {
             )
           )
         `)
-        .order('created_at', { ascending: false })
+
+      // Filter by account if effectiveAccountId is set
+      if (effectiveAccountId) {
+        query = query.eq('account_id', effectiveAccountId)
+      }
+
+      const { data, error: fetchError } = await query.order('created_at', { ascending: false })
 
       if (fetchError) throw fetchError
 
@@ -47,7 +55,7 @@ export function usePanelists() {
 
   useEffect(() => {
     fetchPanelists()
-  }, [])
+  }, [effectiveAccountId])
 
   const createPanelist = async (panelistData: Omit<Panelist, 'id' | 'created_at' | 'updated_at' | 'account_id'>) => {
     try {

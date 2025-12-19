@@ -33,15 +33,19 @@ export interface OneDBFilters {
 }
 
 export const useOneDB = (accountId: string | undefined) => {
+  const effectiveAccountId = useEffectiveAccountId()
+  // Use effectiveAccountId if available, otherwise fall back to passed accountId
+  const activeAccountId = effectiveAccountId || accountId
+  
   const [records, setRecords] = useState<OneDBRecord[]>([]);
   const [filteredRecords, setFilteredRecords] = useState<OneDBRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchRecords = async () => {
-    console.log('[useOneDB] fetchRecords called with accountId:', accountId);
+    console.log('[useOneDB] fetchRecords called with activeAccountId:', activeAccountId);
     
-    if (!accountId) {
+    if (!activeAccountId) {
       console.log('[useOneDB] No accountId provided, skipping fetch');
       setLoading(false);
       return;
@@ -51,12 +55,12 @@ export const useOneDB = (accountId: string | undefined) => {
       setLoading(true);
       setError(null);
 
-      console.log('[useOneDB] Fetching from one_db table with accountId:', accountId);
+      console.log('[useOneDB] Fetching from one_db table with accountId:', activeAccountId);
       
       const { data, error: fetchError } = await supabase
         .from('one_db')
         .select('*')
-        .eq('account_id', accountId)
+        .eq('account_id', activeAccountId)
         .order('created_at', { ascending: false });
 
       console.log('[useOneDB] Query result:', { 
@@ -177,7 +181,7 @@ export const useOneDB = (accountId: string | undefined) => {
 
   useEffect(() => {
     fetchRecords();
-  }, [accountId]);
+  }, [activeAccountId]);
 
   return {
     records,
