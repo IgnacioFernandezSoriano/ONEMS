@@ -667,8 +667,8 @@ Unification Logic:
             setShowReceiveModal(false)
             setSelectedRequirement(null)
           }}
-          onConfirm={async (quantity) => {
-            await receivePO(selectedRequirement.id, Number(quantity))
+          onConfirm={async (requirementId, quantity) => {
+            await receivePO(requirementId, quantity)
             setShowReceiveModal(false)
             setSelectedRequirement(null)
             reload()
