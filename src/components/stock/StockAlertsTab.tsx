@@ -1,192 +1,165 @@
 import { useState, useMemo } from 'react'
-import { AlertTriangle, Package, User, Calendar, FileText, TrendingDown } from 'lucide-react'
+import { AlertTriangle, Filter, X, ChevronUp, ChevronDown } from 'lucide-react'
 import { useStockAlerts } from '../../hooks/useStockAlerts'
-import { SmartTooltip } from '../common/SmartTooltip'
+// No need for date-fns, use native Date
 
 interface StockAlertsTabProps {
-  onNavigateToRegulatorStock?: (materialIds: string[]) => void
-  onNavigateToPanelistStock?: (materialIds: string[]) => void
+  onNavigateToRegulatorStock: (materialIds: string[]) => void
+  onNavigateToPanelistStock: (materialIds: string[]) => void
 }
 
-export default function StockAlertsTab({
-  onNavigateToRegulatorStock,
-  onNavigateToPanelistStock
-}: StockAlertsTabProps) {
-  const { alerts, loading, getAlertCounts, getAffectedMaterials } = useStockAlerts()
+type SortField = 'alert_type' | 'material_name' | 'panelist_name' | 'current_quantity' | 'created_at'
+type SortDirection = 'asc' | 'desc'
+
+export default function StockAlertsTab({ onNavigateToRegulatorStock, onNavigateToPanelistStock }: StockAlertsTabProps) {
+  const { alerts, loading } = useStockAlerts()
   
-  const [filterType, setFilterType] = useState<string>('')
-  const [filterMaterial, setFilterMaterial] = useState<string>('')
-  const [filterPanelist, setFilterPanelist] = useState<string>('')
-  const [startDate, setStartDate] = useState('')
-  const [endDate, setEndDate] = useState('')
+  // Filters
+  const [filterType, setFilterType] = useState<string>('all')
+  const [filterMaterial, setFilterMaterial] = useState<string>('all')
+  const [filterPanelist, setFilterPanelist] = useState<string>('all')
+  
+  // Sorting
+  const [sortField, setSortField] = useState<SortField>('alert_type')
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
 
-  const counts = getAlertCounts()
-
-  // Get unique materials and panelists for filters
+  // Get unique values for filters
   const materials = useMemo(() => {
-    const materialsMap = new Map()
+    const uniqueMaterials = new Map<string, { id: string; code: string; name: string }>()
     alerts.forEach(alert => {
-      if (alert.material_id && alert.material_code) {
-        materialsMap.set(alert.material_id, {
+      if (alert.material_id && alert.material_code && alert.material_name) {
+        uniqueMaterials.set(alert.material_id, {
           id: alert.material_id,
           code: alert.material_code,
           name: alert.material_name
         })
       }
     })
-    return Array.from(materialsMap.values()).sort((a, b) => a.code.localeCompare(b.code))
+    return Array.from(uniqueMaterials.values()).sort((a, b) => a.code.localeCompare(b.code))
   }, [alerts])
 
   const panelists = useMemo(() => {
-    const panelistsMap = new Map()
+    const uniquePanelists = new Set<string>()
     alerts.forEach(alert => {
-      if (alert.location_id && alert.panelist_name) {
-        panelistsMap.set(alert.location_id, {
-          id: alert.location_id,
-          name: alert.panelist_name,
-          code: alert.panelist_code
-        })
+      if (alert.panelist_name) {
+        uniquePanelists.add(alert.panelist_name)
       }
     })
-    return Array.from(panelistsMap.values()).sort((a, b) => a.name.localeCompare(b.name))
+    return Array.from(uniquePanelists).sort()
   }, [alerts])
 
-  // Filter alerts
-  const filteredAlerts = alerts.filter(alert => {
-    const matchesType = !filterType || alert.alert_type === filterType
-    const matchesMaterial = !filterMaterial || alert.material_id === filterMaterial
-    const matchesPanelist = !filterPanelist || alert.location_id === filterPanelist
+  // Apply filters and sorting
+  const filteredAndSortedAlerts = useMemo(() => {
+    let filtered = alerts.filter(alert => {
+      if (filterType !== 'all' && alert.alert_type !== filterType) return false
+      if (filterMaterial !== 'all' && alert.material_id !== filterMaterial) return false
+      if (filterPanelist !== 'all' && alert.panelist_name !== filterPanelist) return false
+      return true
+    })
 
-    let matchesDateRange = true
-    if (startDate || endDate) {
-      const alertDate = new Date(alert.created_at)
-      if (startDate) {
-        const start = new Date(startDate)
-        start.setHours(0, 0, 0, 0)
-        matchesDateRange = matchesDateRange && alertDate >= start
+    // Sort
+    filtered.sort((a, b) => {
+      let aValue: any = a[sortField]
+      let bValue: any = b[sortField]
+
+      // Handle null values
+      if (aValue === null || aValue === undefined) return 1
+      if (bValue === null || bValue === undefined) return -1
+
+      // Convert to comparable values
+      if (sortField === 'created_at') {
+        aValue = new Date(aValue).getTime()
+        bValue = new Date(bValue).getTime()
+      } else if (typeof aValue === 'string') {
+        aValue = aValue.toLowerCase()
+        bValue = bValue.toLowerCase()
       }
-      if (endDate) {
-        const end = new Date(endDate)
-        end.setHours(23, 59, 59, 999)
-        matchesDateRange = matchesDateRange && alertDate <= end
-      }
+
+      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1
+      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1
+      return 0
+    })
+
+    return filtered
+  }, [alerts, filterType, filterMaterial, filterPanelist, sortField, sortDirection])
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortField(field)
+      setSortDirection('asc')
     }
+  }
 
-    return matchesType && matchesMaterial && matchesPanelist && matchesDateRange
-  })
+  const SortIcon = ({ field }: { field: SortField }) => {
+    if (sortField !== field) return null
+    return sortDirection === 'asc' ? (
+      <ChevronUp className="h-4 w-4" />
+    ) : (
+      <ChevronDown className="h-4 w-4" />
+    )
+  }
+
+  const clearFilters = () => {
+    setFilterType('all')
+    setFilterMaterial('all')
+    setFilterPanelist('all')
+  }
+
+  const hasActiveFilters = filterType !== 'all' || filterMaterial !== 'all' || filterPanelist !== 'all'
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="flex items-center justify-center py-12">
         <div className="text-gray-500">Loading alerts...</div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Regulator Alerts Card */}
-        <button
-          onClick={() => {
-            if (onNavigateToRegulatorStock) {
-              const materialIds = getAffectedMaterials('regulator_insufficient')
-              onNavigateToRegulatorStock(materialIds)
-            }
-          }}
-          className="bg-white border-2 border-red-200 rounded-lg p-6 hover:border-red-400 hover:shadow-lg transition-all text-left group"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-red-100 rounded-lg group-hover:bg-red-200 transition-colors">
-                <Package className="h-6 w-6 text-red-600" />
-              </div>
-              <div>
-                <div className="text-sm font-medium text-gray-500">Regulator Stock Issues</div>
-                <div className="text-3xl font-bold text-red-600">{counts.regulator}</div>
-                <div className="text-xs text-gray-500 mt-1">
-                  {counts.regulatorMaterials} material{counts.regulatorMaterials !== 1 ? 's' : ''} affected
-                </div>
-              </div>
-            </div>
-            <div className="text-gray-400 group-hover:text-red-600 transition-colors">
-              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-          </div>
-          <div className="mt-4 text-xs text-gray-600">
-            Click to view affected materials in Regulator Stock
-          </div>
-        </button>
-
-        {/* Panelist Alerts Card */}
-        <button
-          onClick={() => {
-            if (onNavigateToPanelistStock) {
-              const materialIds = getAffectedMaterials('panelist_negative')
-              onNavigateToPanelistStock(materialIds)
-            }
-          }}
-          className="bg-white border-2 border-orange-200 rounded-lg p-6 hover:border-orange-400 hover:shadow-lg transition-all text-left group"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-orange-100 rounded-lg group-hover:bg-orange-200 transition-colors">
-                <User className="h-6 w-6 text-orange-600" />
-              </div>
-              <div>
-                <div className="text-sm font-medium text-gray-500">Panelist Stock Issues</div>
-                <div className="text-3xl font-bold text-orange-600">{counts.panelist}</div>
-                <div className="text-xs text-gray-500 mt-1">
-                  {counts.panelistMaterials} material{counts.panelistMaterials !== 1 ? 's' : ''} affected
-                </div>
-              </div>
-            </div>
-            <div className="text-gray-400 group-hover:text-orange-600 transition-colors">
-              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-          </div>
-          <div className="mt-4 text-xs text-gray-600">
-            Click to view affected materials in Panelist Stock
-          </div>
-        </button>
-      </div>
-
+    <div className="space-y-4">
       {/* Filters */}
-      <div className="bg-white border border-gray-200 rounded-lg p-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+        <div className="flex items-center gap-2 mb-3">
+          <Filter className="h-4 w-4 text-gray-500" />
+          <span className="text-sm font-medium text-gray-700">Filters</span>
+          {hasActiveFilters && (
+            <button
+              onClick={clearFilters}
+              className="ml-auto text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1"
+            >
+              <X className="h-3 w-3" />
+              Clear filters
+            </button>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {/* Type Filter */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
-              Alert Type
-              <SmartTooltip content="Filter by type of stock issue" />
-            </label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Alert Type</label>
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
-              className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="">All Types</option>
+              <option value="all">All Types</option>
               <option value="regulator_insufficient">Regulator Insufficient</option>
               <option value="panelist_negative">Panelist Negative</option>
             </select>
           </div>
 
+          {/* Material Filter */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
-              Material
-              <SmartTooltip content="Filter by material" />
-            </label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Material</label>
             <select
               value={filterMaterial}
               onChange={(e) => setFilterMaterial(e.target.value)}
-              className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="">All Materials</option>
-              {materials.map((material) => (
+              <option value="all">All Materials</option>
+              {materials.map(material => (
                 <option key={material.id} value={material.id}>
                   {material.code} - {material.name}
                 </option>
@@ -194,154 +167,171 @@ export default function StockAlertsTab({
             </select>
           </div>
 
+          {/* Panelist Filter */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
-              Panelist
-              <SmartTooltip content="Filter by panelist (for panelist alerts)" />
-            </label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Panelist</label>
             <select
               value={filterPanelist}
               onChange={(e) => setFilterPanelist(e.target.value)}
-              className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              disabled={filterType === 'regulator_insufficient'}
             >
-              <option value="">All Panelists</option>
-              {panelists.map((panelist) => (
-                <option key={panelist.id} value={panelist.id}>
-                  {panelist.name}
+              <option value="all">All Panelists</option>
+              {panelists.map(panelist => (
+                <option key={panelist} value={panelist}>
+                  {panelist}
                 </option>
               ))}
             </select>
           </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
-              Date Range
-              <SmartTooltip content="Filter by alert creation date" />
-            </label>
-            <div className="flex gap-2">
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              />
-            </div>
-          </div>
         </div>
-
-        {(filterType || filterMaterial || filterPanelist || startDate || endDate) && (
-          <div className="mt-4 flex items-center justify-between">
-            <div className="text-sm text-gray-600">
-              Showing {filteredAlerts.length} of {alerts.length} alerts
-            </div>
-            <button
-              onClick={() => {
-                setFilterType('')
-                setFilterMaterial('')
-                setFilterPanelist('')
-                setStartDate('')
-                setEndDate('')
-              }}
-              className="text-sm text-blue-600 hover:text-blue-800"
-            >
-              Clear filters
-            </button>
-          </div>
-        )}
       </div>
 
-      {/* Alerts Grid */}
-      {filteredAlerts.length === 0 ? (
+      {/* Results Summary */}
+      <div className="text-sm text-gray-600">
+        Showing <span className="font-semibold">{filteredAndSortedAlerts.length}</span> of{' '}
+        <span className="font-semibold">{alerts.length}</span> alerts
+      </div>
+
+      {/* Table */}
+      {filteredAndSortedAlerts.length === 0 ? (
         <div className="bg-white border border-gray-200 rounded-lg p-12 text-center">
-          <AlertTriangle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <div className="text-gray-500">
-            {alerts.length === 0 ? 'No stock alerts found' : 'No alerts match the selected filters'}
-          </div>
+          <AlertTriangle className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+          <p className="text-gray-500">No stock alerts found</p>
+          {hasActiveFilters && (
+            <button
+              onClick={clearFilters}
+              className="mt-2 text-sm text-blue-600 hover:text-blue-700"
+            >
+              Clear filters to see all alerts
+            </button>
+          )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredAlerts.map((alert) => (
-            <div
-              key={alert.id}
-              className={`bg-white border-2 rounded-lg p-4 ${
-                alert.alert_type === 'regulator_insufficient'
-                  ? 'border-red-200 hover:border-red-400'
-                  : 'border-orange-200 hover:border-orange-400'
-              } hover:shadow-lg transition-all`}
-            >
-              {/* Alert Header */}
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <div className={`p-2 rounded-lg ${
-                    alert.alert_type === 'regulator_insufficient'
-                      ? 'bg-red-100'
-                      : 'bg-orange-100'
-                  }`}>
-                    <AlertTriangle className={`h-5 w-5 ${
-                      alert.alert_type === 'regulator_insufficient'
-                        ? 'text-red-600'
-                        : 'text-orange-600'
-                    }`} />
-                  </div>
-                  <div>
-                    <div className={`text-xs font-medium ${
-                      alert.alert_type === 'regulator_insufficient'
-                        ? 'text-red-600'
-                        : 'text-orange-600'
-                    }`}>
-                      {alert.alert_type === 'regulator_insufficient'
-                        ? 'Regulator Insufficient'
-                        : 'Panelist Negative'}
+        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th
+                    scope="col"
+                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    onClick={() => handleSort('alert_type')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Type
+                      <SortIcon field="alert_type" />
                     </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1 text-xs text-gray-500">
-                  <Calendar className="h-3 w-3" />
-                  {new Date(alert.created_at).toLocaleDateString()}
-                </div>
-              </div>
-
-              {/* Material Info */}
-              <div className="mb-3">
-                <div className="text-sm font-medium text-gray-900">{alert.material_code}</div>
-                <div className="text-xs text-gray-500">{alert.material_name}</div>
-              </div>
-
-              {/* Stock Info */}
-              <div className="flex items-center gap-2 mb-3">
-                <TrendingDown className="h-4 w-4 text-gray-400" />
-                <div className="text-sm">
-                  <span className="font-medium text-gray-900">
-                    {alert.current_quantity.toLocaleString()}
-                  </span>
-                  <span className="text-gray-500 ml-1">{alert.unit_measure || 'units'}</span>
-                  {alert.expected_quantity && (
-                    <span className="text-xs text-gray-500 ml-2">
-                      (attempted: {alert.expected_quantity.toLocaleString()})
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Panelist Info (if applicable) */}
-              {alert.panelist_name && (
-                <div className="flex items-center gap-2 mb-3 text-xs text-gray-600">
-                  <User className="h-3 w-3" />
-                  {alert.panelist_name}
-                </div>
-              )}
-
-              {/* Notes */}
-              {alert.notes && (
-                <div className="mt-3 pt-3 border-t border-gray-200">
-                  <div className="flex items-start gap-2 text-xs text-gray-600">
-                    <FileText className="h-3 w-3 mt-0.5 flex-shrink-0" />
-                    <div className="line-clamp-2">{alert.notes}</div>
-                  </div>
-                </div>
-              )}
-            </div>
-          ))}
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    onClick={() => handleSort('material_name')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Material
+                      <SortIcon field="material_name" />
+                    </div>
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    onClick={() => handleSort('panelist_name')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Location
+                      <SortIcon field="panelist_name" />
+                    </div>
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    onClick={() => handleSort('current_quantity')}
+                  >
+                    <div className="flex items-center justify-end gap-1">
+                      Current Stock
+                      <SortIcon field="current_quantity" />
+                    </div>
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Expected
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    onClick={() => handleSort('created_at')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Date
+                      <SortIcon field="created_at" />
+                    </div>
+                  </th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Notes
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredAndSortedAlerts.map((alert) => (
+                  <tr
+                    key={alert.id}
+                    className={`hover:bg-gray-50 ${
+                      alert.alert_type === 'regulator_insufficient' ? 'bg-red-50' : 'bg-orange-50'
+                    }`}
+                  >
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle
+                          className={`h-4 w-4 ${
+                            alert.alert_type === 'regulator_insufficient' ? 'text-red-600' : 'text-orange-600'
+                          }`}
+                        />
+                        <span className="text-sm font-medium text-gray-900">
+                          {alert.alert_type === 'regulator_insufficient' ? 'Regulator' : 'Panelist'}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="text-sm font-medium text-gray-900">{alert.material_code}</div>
+                      <div className="text-xs text-gray-500">{alert.material_name}</div>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <span className="text-sm text-gray-900">
+                        {alert.panelist_name || 'Regulator'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-right">
+                      <span
+                        className={`text-sm font-semibold ${
+                          alert.current_quantity < 0 ? 'text-red-600' : 'text-orange-600'
+                        }`}
+                      >
+                        {alert.current_quantity}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-right">
+                      <span className="text-sm text-gray-500">
+                        {alert.expected_quantity || '-'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <span className="text-sm text-gray-500">
+                        {new Date(alert.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="text-xs text-gray-600 max-w-md truncate" title={alert.notes || ''}>
+                        {alert.notes}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>

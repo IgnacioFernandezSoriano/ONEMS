@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Package, Truck, Settings, TrendingUp, ClipboardList, AlertTriangle } from 'lucide-react'
 import { useStockManagement } from '../hooks/useStockManagement'
+import { useStockAlerts } from '../hooks/useStockAlerts'
 import { SmartTooltip } from '../components/common/SmartTooltip'
 import MaterialRequirementsTab from '../components/stock/MaterialRequirementsTab'
 import RegulatorStockTab from '../components/stock/RegulatorStockTab'
@@ -15,9 +16,11 @@ type TabType = 'requirements' | 'regulator' | 'shipments' | 'panelist' | 'moveme
 export default function StockManagement() {
   const [activeTab, setActiveTab] = useState<TabType>('requirements')
   const { shipments, loading } = useStockManagement()
+  const { getAlertCounts } = useStockAlerts()
 
   // Calculate KPIs
   const pendingShipments = shipments.filter(s => s.status === 'pending').length
+  const alertCounts = getAlertCounts()
 
   const tabs = [
     { 
@@ -74,7 +77,42 @@ export default function StockManagement() {
         </p>
       </div>
 
-      {/* KPIs */}
+      {/* Stock Alerts Summary Card */}
+      {alertCounts.total > 0 && (
+        <button
+          onClick={() => setActiveTab('alerts')}
+          className="w-full bg-gradient-to-r from-red-50 to-orange-50 border-2 border-red-200 rounded-lg p-4 hover:border-red-400 hover:shadow-lg transition-all text-left group"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-red-100 rounded-lg group-hover:bg-red-200 transition-colors">
+                <AlertTriangle className="h-6 w-6 text-red-600" />
+              </div>
+              <div>
+                <div className="text-lg font-bold text-red-900">Stock Alerts</div>
+                <div className="text-sm text-red-700 mt-1">
+                  {alertCounts.regulator > 0 && (
+                    <span className="mr-4">
+                      <span className="font-semibold">{alertCounts.regulator}</span> Regulator issue{alertCounts.regulator !== 1 ? 's' : ''}
+                    </span>
+                  )}
+                  {alertCounts.panelist > 0 && (
+                    <span>
+                      <span className="font-semibold">{alertCounts.panelist}</span> Panelist issue{alertCounts.panelist !== 1 ? 's' : ''}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="text-red-400 group-hover:text-red-600 transition-colors">
+              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+          </div>
+        </button>
+      )}
+
       {/* Tabs */}
       <div className="bg-white shadow rounded-lg">
         <div className="border-b border-gray-200">
@@ -82,6 +120,7 @@ export default function StockManagement() {
             {tabs.map((tab) => {
               const Icon = tab.icon
               const isActive = activeTab === tab.id
+              const hasAlerts = tab.id === 'alerts' && alertCounts.total > 0
               return (
                 <button
                   key={tab.id}
@@ -89,13 +128,18 @@ export default function StockManagement() {
                   className={`
                     group inline-flex items-center py-4 px-1 border-b-2 font-medium text-sm gap-2
                     ${isActive
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      ? hasAlerts ? 'border-red-500 text-red-600' : 'border-blue-500 text-blue-600'
+                      : hasAlerts ? 'border-transparent text-red-600 hover:text-red-700 hover:border-red-300' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                     }
                   `}
                 >
                   <Icon className="h-5 w-5" />
                   {tab.label}
+                  {hasAlerts && (
+                    <span className="ml-1 px-2 py-0.5 text-xs font-semibold bg-red-100 text-red-800 rounded-full">
+                      {alertCounts.total}
+                    </span>
+                  )}
                   <SmartTooltip content={tab.help} />
                 </button>
               )
