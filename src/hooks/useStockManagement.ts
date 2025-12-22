@@ -537,6 +537,25 @@ export function useStockManagement() {
     }
   }
 
+  const updateShipmentItem = async (itemId: string, quantitySent: number) => {
+    try {
+      const { error } = await supabase
+        .from('material_shipment_items')
+        .update({
+          quantity_sent: quantitySent,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', itemId)
+
+      if (error) throw error
+
+      await loadData()
+    } catch (err: any) {
+      console.error('Error updating shipment item:', err)
+      throw err
+    }
+  }
+
   const deleteShipment = async (shipmentId: string) => {
     try {
       // Delete shipment items first (foreign key constraint)
@@ -574,6 +593,7 @@ export function useStockManagement() {
     createMovement,
     createShipment,
     updateShipmentStatus,
+    updateShipmentItem,
     deleteShipment,
     updateSettings,
     reload: loadData

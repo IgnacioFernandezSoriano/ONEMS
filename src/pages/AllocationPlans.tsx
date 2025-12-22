@@ -21,6 +21,7 @@ export function AllocationPlans() {
     error,
     updateDetail,
     createDetail,
+    markAsSent,
     bulkUpdateDetails,
     bulkDeleteDetails,
     getNodesByCity,
@@ -779,6 +780,7 @@ export function AllocationPlans() {
                       selected={selectedIds.has(detail.id)}
                       onToggleSelect={() => handleToggleSelect(detail.id)}
                       onUpdate={updateDetail}
+                      onMarkAsSent={markAsSent}
                       onEdit={handleEditRecord}
                       getNodesByCity={getNodesByCity}
                     />

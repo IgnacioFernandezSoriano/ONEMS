@@ -1,13 +1,15 @@
 import React, { useState, useMemo } from 'react'
-import { Package, Search, Filter, RotateCcw, Send, Trash2, AlertCircle, CheckCircle, Clock, Download, FileText, ChevronDown, ChevronUp, Info, Calendar, CheckSquare, Square } from 'lucide-react'
+import { Package, Search, Filter, RotateCcw, Send, Trash2, AlertCircle, CheckCircle, Clock, Download, FileText, ChevronDown, ChevronUp, Info, Calendar, CheckSquare, Square, Edit } from 'lucide-react'
 import { useStockManagement } from '../../hooks/useStockManagement'
 import { useProposedShipments } from '../../hooks/useProposedShipments'
 import { useMaterialCatalog } from '../../hooks/useMaterialCatalog'
 import { SmartTooltip } from '../common/SmartTooltip'
 import { downloadCSV, generatePackingListPDF, printPDF } from '../../lib/exportUtils'
+import EditShipmentItemModal from './EditShipmentItemModal'
+import type { MaterialShipmentItem } from '../../hooks/useStockManagement'
 
 export default function ShipmentsTab() {
-  const { shipments, loading: loadingShipments, createShipment, updateShipmentStatus, deleteShipment, reload } = useStockManagement()
+  const { shipments, loading: loadingShipments, createShipment, updateShipmentStatus, updateShipmentItem, deleteShipment, reload } = useStockManagement()
   const { proposedShipments, loading: loadingProposed, calculate } = useProposedShipments()
   const { catalog: materials } = useMaterialCatalog()
 
@@ -34,6 +36,10 @@ export default function ShipmentsTab() {
 
   // Selection for bulk actions
   const [selectedShipmentIds, setSelectedShipmentIds] = useState<Set<string>>(new Set())
+
+  // Edit shipment item modal
+  const [editingItem, setEditingItem] = useState<MaterialShipmentItem | null>(null)
+  const [showEditModal, setShowEditModal] = useState(false)
 
   // Get unique nodes from proposed shipments
   const uniqueNodes = useMemo(() => {
@@ -774,17 +780,26 @@ Note: Only panelists with assigned allocation plans will have shipments generate
                     <td className="px-6 py-4">
                       <div className="text-sm text-gray-900">
                         {shipment.items && shipment.items.length > 0 ? (
-                          <div>
-                            {shipment.items.slice(0, 2).map(item => (
-                              <div key={item.id}>
-                                {item.material?.code}: {item.quantity_sent} {item.material?.unit_measure}
+                          <div className="space-y-1">
+                            {shipment.items.map(item => (
+                              <div key={item.id} className="flex items-center justify-between gap-2">
+                                <span>
+                                  {item.material?.code}: {item.quantity_sent} {item.material?.unit_measure}
+                                </span>
+                                {shipment.status === 'pending' && (
+                                  <button
+                                    onClick={() => {
+                                      setEditingItem(item)
+                                      setShowEditModal(true)
+                                    }}
+                                    className="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-700 bg-blue-100 hover:bg-blue-200 rounded"
+                                    title="Edit quantity"
+                                  >
+                                    <Edit className="h-3 w-3" />
+                                  </button>
+                                )}
                               </div>
                             ))}
-                            {shipment.items.length > 2 && (
-                              <div className="text-xs text-gray-500">
-                                +{shipment.items.length - 2} more
-                              </div>
-                            )}
                           </div>
                         ) : (
                           'No items'
@@ -829,6 +844,22 @@ Note: Only panelists with assigned allocation plans will have shipments generate
         <div className="text-center py-12 text-gray-500">
           Select date range and click "Calculate" to generate shipments from allocation plans
         </div>
+      )}
+
+      {/* Edit Shipment Item Modal */}
+      {showEditModal && editingItem && (
+        <EditShipmentItemModal
+          item={editingItem}
+          onClose={() => {
+            setShowEditModal(false)
+            setEditingItem(null)
+          }}
+          onSave={async (itemId, quantity) => {
+            await updateShipmentItem(itemId, quantity)
+            setShowEditModal(false)
+            setEditingItem(null)
+          }}
+        />
       )}
     </div>
   )

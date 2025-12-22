@@ -215,6 +215,106 @@ export function useAllocationPlanDetails() {
     }
   }
 
+  const markAsSent = async (
+    detailId: string,
+    data: {
+      tag_id: string
+      sent_at: string
+      origin_panelist_id: string
+      origin_panelist_name: string
+    }
+  ) => {
+    try {
+      // 1. Get allocation plan detail
+      const detail = details.find(d => d.id === detailId)
+      if (!detail) throw new Error('Allocation plan detail not found')
+
+      // 2. Get product_id from plan
+      const plan = plans.find(p => p.id === detail.plan_id)
+      if (!plan || !plan.product_id) throw new Error('Product not found for this allocation plan')
+
+      // 3. Get materials needed for this product
+      const { data: productMaterials, error: materialsError } = await supabase
+        .from('product_materials')
+        .select('material_id, quantity, material_catalog(*)')
+        .eq('product_id', plan.product_id)
+
+      if (materialsError) throw materialsError
+
+      if (!productMaterials || productMaterials.length === 0) {
+        console.warn('No materials defined for this product')
+      } else {
+        // 4. For each material, deduct from panelist stock
+        for (const pm of productMaterials) {
+          // 4a. Get current stock of panelist
+          const { data: currentStock } = await supabase
+            .from('panelist_material_stocks')
+            .select('id, quantity')
+            .eq('panelist_id', data.origin_panelist_id)
+            .eq('material_id', pm.material_id)
+            .maybeSingle()
+
+          const currentQuantity = currentStock?.quantity || 0
+          const newQuantity = currentQuantity - pm.quantity
+
+          // 4b. Update or create stock
+          if (currentStock) {
+            await supabase
+              .from('panelist_material_stocks')
+              .update({
+                quantity: newQuantity,
+                last_updated: new Date().toISOString()
+              })
+              .eq('id', currentStock.id)
+          } else {
+            await supabase
+              .from('panelist_material_stocks')
+              .insert({
+                account_id: detail.account_id,
+                panelist_id: data.origin_panelist_id,
+                material_id: pm.material_id,
+                quantity: newQuantity,
+                last_updated: new Date().toISOString()
+              })
+          }
+
+          // 4c. Create material movement
+          const isNegative = newQuantity < 0
+          const catalog = pm.material_catalog as any
+          const movementNotes = isNegative
+            ? `⚠️ STOCK ALERT: Negative stock after allocation shipment. Current: ${newQuantity} ${catalog?.unit_measure || 'units'}. Material: ${catalog?.name || pm.material_id}. Panelist: ${data.origin_panelist_name}. Tag: ${data.tag_id}`
+            : `Allocation shipment - Tag: ${data.tag_id}, Panelist: ${data.origin_panelist_name}`
+
+          await supabase
+            .from('material_movements')
+            .insert({
+              account_id: detail.account_id,
+              material_id: pm.material_id,
+              movement_type: 'allocation_shipment',
+              quantity: pm.quantity,
+              from_location_type: 'panelist',
+              from_location_id: data.origin_panelist_id,
+              to_location_type: 'in_transit',
+              to_location_id: null,
+              reference_id: detailId,
+              reference_type: 'allocation_plan_detail',
+              notes: movementNotes,
+              created_by: null
+            })
+        }
+      }
+
+      // 5. Update allocation_plan_details status
+      await updateDetail(detailId, {
+        ...data,
+        status: 'sent'
+      })
+
+    } catch (err: any) {
+      throw new Error(`Failed to mark as sent: ${err.message}`)
+    }
+  }
+
   return {
     details,
     plans,
@@ -227,6 +327,7 @@ export function useAllocationPlanDetails() {
     error,
     updateDetail,
     createDetail,
+    markAsSent,
     bulkUpdateDetails,
     bulkDeleteDetails,
     getNodesByCity,

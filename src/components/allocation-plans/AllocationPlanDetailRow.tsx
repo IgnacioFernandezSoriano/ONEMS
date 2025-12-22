@@ -11,6 +11,7 @@ interface Props {
   selected: boolean
   onToggleSelect: () => void
   onUpdate: (id: string, updates: any) => Promise<void>
+  onMarkAsSent: (id: string, data: any) => Promise<void>
   onEdit: (detail: AllocationPlanDetailWithRelations) => void
   getNodesByCity: (cityId: string) => any[]
 }
@@ -22,6 +23,7 @@ export function AllocationPlanDetailRow({
   selected,
   onToggleSelect,
   onUpdate,
+  onMarkAsSent,
   onEdit,
   getNodesByCity,
 }: Props) {
@@ -366,10 +368,7 @@ export function AllocationPlanDetailRow({
         panelists={panelists}
         onClose={() => setShowShipmentModal(false)}
         onRegister={async (data) => {
-          await onUpdate(detail.id, {
-            ...data,
-            status: 'sent',
-          })
+          await onMarkAsSent(detail.id, data)
           setShowShipmentModal(false)
         }}
       />
