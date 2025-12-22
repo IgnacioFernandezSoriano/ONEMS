@@ -617,6 +617,23 @@ export function useStockManagement() {
             created_by: profile?.id
           })
 
+        // Create stock alert if insufficient
+        if (hasStockIssue) {
+          await supabase
+            .from('stock_alerts')
+            .insert({
+              account_id: accountId,
+              material_id: confirmedItem.material_id,
+              alert_type: 'regulator_insufficient',
+              location_id: null,
+              current_quantity: currentRegulatorStock?.quantity || 0,
+              expected_quantity: confirmedItem.quantity_sent,
+              reference_id: shipmentId,
+              reference_type: 'shipment',
+              notes: stockAlertNote
+            })
+        }
+
         // Create receipt movement for panelist
         await supabase
           .from('material_movements')

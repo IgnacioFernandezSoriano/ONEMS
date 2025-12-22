@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Package, Truck, Settings, TrendingUp, ClipboardList } from 'lucide-react'
+import { Package, Truck, Settings, TrendingUp, ClipboardList, AlertTriangle } from 'lucide-react'
 import { useStockManagement } from '../hooks/useStockManagement'
 import { SmartTooltip } from '../components/common/SmartTooltip'
 import MaterialRequirementsTab from '../components/stock/MaterialRequirementsTab'
@@ -8,8 +8,9 @@ import PanelistStockTab from '../components/stock/PanelistStockTab'
 import MovementsTab from '../components/stock/MovementsTab'
 import ShipmentsTab from '../components/stock/ShipmentsTab'
 import SettingsTab from '../components/stock/SettingsTab'
+import StockAlertsTab from '../components/stock/StockAlertsTab'
 
-type TabType = 'requirements' | 'regulator' | 'shipments' | 'panelist' | 'movements' | 'settings'
+type TabType = 'requirements' | 'regulator' | 'shipments' | 'panelist' | 'movements' | 'alerts' | 'settings'
 
 export default function StockManagement() {
   const [activeTab, setActiveTab] = useState<TabType>('requirements')
@@ -48,6 +49,12 @@ export default function StockManagement() {
       label: 'Movements', 
       icon: TrendingUp,
       help: 'Complete audit trail of all material movements including receipts, dispatches, and transfers with full traceability.'
+    },
+    { 
+      id: 'alerts' as TabType, 
+      label: 'Stock Alerts', 
+      icon: AlertTriangle,
+      help: 'View and manage stock alerts for insufficient regulator stock and negative panelist stock. Alerts auto-resolve when stock returns to positive.'
     },
     { 
       id: 'settings' as TabType, 
@@ -102,6 +109,18 @@ export default function StockManagement() {
           {activeTab === 'shipments' && <ShipmentsTab />}
           {activeTab === 'panelist' && <PanelistStockTab />}
           {activeTab === 'movements' && <MovementsTab />}
+          {activeTab === 'alerts' && (
+            <StockAlertsTab
+              onNavigateToRegulatorStock={(materialIds) => {
+                setActiveTab('regulator')
+                // TODO: Pass materialIds to RegulatorStockTab for filtering
+              }}
+              onNavigateToPanelistStock={(materialIds) => {
+                setActiveTab('panelist')
+                // TODO: Pass materialIds to PanelistStockTab for filtering
+              }}
+            />
+          )}
           {activeTab === 'settings' && <SettingsTab />}
         </div>
       </div>

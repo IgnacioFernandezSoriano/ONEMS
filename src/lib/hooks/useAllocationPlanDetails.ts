@@ -301,6 +301,23 @@ export function useAllocationPlanDetails() {
               notes: movementNotes,
               created_by: null
             })
+
+          // Create stock alert if negative
+          if (isNegative) {
+            await supabase
+              .from('stock_alerts')
+              .insert({
+                account_id: detail.account_id,
+                material_id: pm.material_id,
+                alert_type: 'panelist_negative',
+                location_id: data.origin_panelist_id,
+                current_quantity: newQuantity,
+                expected_quantity: pm.quantity,
+                reference_id: detailId,
+                reference_type: 'allocation_plan_detail',
+                notes: movementNotes
+              })
+          }
         }
       }
 
