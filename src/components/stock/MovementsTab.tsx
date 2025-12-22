@@ -194,7 +194,54 @@ export default function MovementsTab() {
       </div>
 
       {/* Movements Table */}
-      <div className="overflow-x-auto">
+      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+        {/* Table Header with Export Button */}
+        <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+          <h3 className="text-lg font-medium text-gray-900">
+            Material Movements ({filteredMovements.length})
+          </h3>
+          <button
+            onClick={() => {
+              const csvData = filteredMovements.map(m => ({
+                'Date': new Date(m.created_at).toLocaleString(),
+                'Type': m.movement_type,
+                'Material Code': m.material?.code || '',
+                'Material Name': m.material?.name || '',
+                'Quantity': m.quantity,
+                'Unit': m.material?.unit_measure || '',
+                'From': m.from_location || '',
+                'To': m.to_location || '',
+                'Notes': m.notes || ''
+              }))
+              const headers = ['Date', 'Type', 'Material Code', 'Material Name', 'Quantity', 'Unit', 'From', 'To', 'Notes']
+              const csvContent = [
+                headers.join(','),
+                ...csvData.map(row => headers.map(h => {
+                  const value = row[h as keyof typeof row]?.toString() || ''
+                  return `"${value.replace(/"/g, '""')}"`
+                }).join(','))
+              ].join('\n')
+              
+              const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+              const link = document.createElement('a')
+              const url = URL.createObjectURL(blob)
+              link.setAttribute('href', url)
+              link.setAttribute('download', `material_movements_${new Date().toISOString().split('T')[0]}.csv`)
+              link.style.visibility = 'hidden'
+              document.body.appendChild(link)
+              link.click()
+              document.body.removeChild(link)
+            }}
+            className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Export CSV
+          </button>
+        </div>
+        
+        <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
@@ -295,13 +342,14 @@ export default function MovementsTab() {
             )}
           </tbody>
         </table>
-      </div>
-
-      {/* Summary */}
-      <div className="bg-gray-50 px-4 py-3 rounded-md">
+        </div>
+        
+        {/* Summary */}
+        <div className="bg-gray-50 px-4 py-3 border-t border-gray-200">
         <div className="text-sm text-gray-700">
           <span className="font-medium">Total movements:</span> {filteredMovements.length}
           {(searchTerm || filterType) && ` (filtered from ${movements.length})`}
+        </div>
         </div>
       </div>
     </div>

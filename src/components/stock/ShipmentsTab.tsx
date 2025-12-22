@@ -6,10 +6,11 @@ import { useMaterialCatalog } from '../../hooks/useMaterialCatalog'
 import { SmartTooltip } from '../common/SmartTooltip'
 import { downloadCSV, generatePackingListPDF, printPDF } from '../../lib/exportUtils'
 import EditShipmentItemModal from './EditShipmentItemModal'
-import type { MaterialShipmentItem } from '../../hooks/useStockManagement'
+import ConfirmShipmentModal from './ConfirmShipmentModal'
+import type { MaterialShipmentItem, MaterialShipment } from '../../hooks/useStockManagement'
 
 export default function ShipmentsTab() {
-  const { shipments, loading: loadingShipments, createShipment, updateShipmentStatus, updateShipmentItem, deleteShipment, reload } = useStockManagement()
+  const { shipments, regulatorStocks, loading: loadingShipments, createShipment, updateShipmentStatus, confirmShipment, updateShipmentItem, deleteShipment, reload } = useStockManagement()
   const { proposedShipments, loading: loadingProposed, calculate } = useProposedShipments()
   const { catalog: materials } = useMaterialCatalog()
 
@@ -40,6 +41,10 @@ export default function ShipmentsTab() {
   // Edit shipment item modal
   const [editingItem, setEditingItem] = useState<MaterialShipmentItem | null>(null)
   const [showEditModal, setShowEditModal] = useState(false)
+
+  // Confirm shipment modal
+  const [confirmingShipment, setConfirmingShipment] = useState<MaterialShipment | null>(null)
+  const [showConfirmModal, setShowConfirmModal] = useState(false)
 
   // Get unique nodes from proposed shipments
   const uniqueNodes = useMemo(() => {
@@ -241,14 +246,11 @@ export default function ShipmentsTab() {
     }
   }
 
-  const handleSendShipment = async (shipmentId: string) => {
-    try {
-      await updateShipmentStatus(shipmentId, 'sent')
-      alert('Shipment sent successfully')
-      reload()
-      setSelectedShipmentIds(new Set())
-    } catch (error: any) {
-      alert(`Error sending shipment: ${error.message}`)
+  const handleSendShipment = (shipmentId: string) => {
+    const shipment = pendingShipments.find(s => s.id === shipmentId)
+    if (shipment) {
+      setConfirmingShipment(shipment)
+      setShowConfirmModal(true)
     }
   }
 
@@ -858,6 +860,23 @@ Note: Only panelists with assigned allocation plans will have shipments generate
             await updateShipmentItem(itemId, quantity)
             setShowEditModal(false)
             setEditingItem(null)
+          }}
+        />
+      )}
+
+      {/* Confirm Shipment Modal */}
+      {showConfirmModal && confirmingShipment && (
+        <ConfirmShipmentModal
+          shipment={confirmingShipment}
+          regulatorStocks={regulatorStocks}
+          onClose={() => {
+            setShowConfirmModal(false)
+            setConfirmingShipment(null)
+          }}
+          onConfirm={async (shipmentId, confirmedItems, sentDate) => {
+            await confirmShipment(shipmentId, confirmedItems, sentDate)
+            setShowConfirmModal(false)
+            setConfirmingShipment(null)
           }}
         />
       )}
