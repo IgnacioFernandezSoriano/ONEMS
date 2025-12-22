@@ -31,9 +31,10 @@ export default function MovementsTab() {
   const filteredMovements = movements.filter(movement => {
     const materialName = movement.material?.name?.toLowerCase() || ''
     const materialCode = movement.material?.code?.toLowerCase() || ''
+    const notes = movement.notes?.toLowerCase() || ''
     const search = searchTerm.toLowerCase()
     
-    const matchesSearch = materialName.includes(search) || materialCode.includes(search)
+    const matchesSearch = materialName.includes(search) || materialCode.includes(search) || notes.includes(search)
     const matchesType = !filterType || movement.movement_type === filterType
     const matchesPanelist = !filterPanelist || movement.to_location === filterPanelist
     
