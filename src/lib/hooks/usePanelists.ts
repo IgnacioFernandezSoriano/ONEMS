@@ -81,27 +81,52 @@ export function usePanelists() {
       // Generate panelist_code if empty or null
       let panelistCode = panelistData.panelist_code
       if (!panelistCode || panelistCode.trim() === '') {
-        // Get the highest existing panelist code for this account
+        // Validate node_id is provided
+        if (!panelistData.node_id) {
+          throw new Error('Node must be selected to auto-generate panelist code')
+        }
+
+        // Get node information to extract city and node number
+        const { data: nodeData, error: nodeError } = await supabase
+          .from('nodes')
+          .select('node_code, city:cities(name)')
+          .eq('id', panelistData.node_id)
+          .single()
+
+        if (nodeError || !nodeData) {
+          throw new Error('Node not found')
+        }
+
+        // Extract node number from node_code (e.g., "CENTRO-MAD-002" -> "002")
+        const nodeMatch = nodeData.node_code?.match(/(\d+)$/)
+        const nodeNumber = nodeMatch ? nodeMatch[1] : '000'
+
+        // Get city name (first 3 letters, uppercase)
+        const cityName = (nodeData.city as any)?.name || 'XXX'
+        const cityCode = cityName.substring(0, 3).toUpperCase()
+
+        // Get the highest existing serial for this specific node
         const { data: existingPanelists } = await supabase
           .from('panelists')
           .select('panelist_code')
           .eq('account_id', accountId)
+          .eq('node_id', panelistData.node_id)
           .not('panelist_code', 'is', null)
           .order('panelist_code', { ascending: false })
           .limit(1)
 
-        let nextNumber = 1
+        let nextSerial = 1
         if (existingPanelists && existingPanelists.length > 0) {
           const lastCode = existingPanelists[0].panelist_code
-          // Extract number from code like "PAN-001" or "001"
-          const match = lastCode?.match(/(\d+)$/)
-          if (match) {
-            nextNumber = parseInt(match[1], 10) + 1
+          // Extract serial number from code like "PAN-MAD-002-001"
+          const serialMatch = lastCode?.match(/(\d+)$/)
+          if (serialMatch) {
+            nextSerial = parseInt(serialMatch[1], 10) + 1
           }
         }
         
-        // Generate new code with format PAN-XXX
-        panelistCode = `PAN-${String(nextNumber).padStart(3, '0')}`
+        // Generate new code with format PAN-CITY-NODE-SERIAL
+        panelistCode = `PAN-${cityCode}-${nodeNumber}-${String(nextSerial).padStart(3, '0')}`
       }
 
       const { data, error: insertError } = await supabase
