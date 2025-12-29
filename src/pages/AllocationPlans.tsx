@@ -203,7 +203,8 @@ export function AllocationPlans() {
         d.destination_availability_status === 'unavailable'
       ).length,
       unassigned: details.filter(d => 
-        !d.origin_panelist_id || !d.destination_panelist_id
+        d.origin_availability_status === 'unassigned' || 
+        d.destination_availability_status === 'unassigned'
       ).length,
       inactive: details.filter(d => 
         d.origin_availability_status === 'inactive' || 
@@ -543,7 +544,7 @@ export function AllocationPlans() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <p className="text-sm font-medium text-red-600">Availability Issues</p>
-              <SmartTooltip content="Shipments with panelist availability problems. Unavailable: Panelist not available on scheduled date. Unassigned: No panelist assigned to route. Inactive: Assigned panelist is inactive. Action required: Review and reassign panelists or adjust scheduled dates." />
+              <SmartTooltip content="Shipments with panelist availability problems. Unavailable: Panelist not available on scheduled date. No Panelist: No panelist assigned to route. Inactive: Assigned panelist is inactive. Action required: Review and reassign panelists or adjust scheduled dates." />
             </div>
             <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
               <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -566,7 +567,7 @@ export function AllocationPlans() {
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-600">📋 Unassigned</span>
+                <span className="text-xs text-gray-600">📋 No Panelist</span>
                 <SmartTooltip content="No panelist assigned to this route. Assign a panelist from the available pool for the origin and destination nodes." />
               </div>
               <button
@@ -761,9 +762,9 @@ export function AllocationPlans() {
                     <SortableHeader field="week" label="Week" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The ISO week number of the scheduled date (1-53)." />
                     <SortableHeader field="tagId" label="Tag ID" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The physical tag identifier assigned to track this shipment." />
                     <SortableHeader field="originPanelist" label="Origin Panelist" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The panelist assigned to send the package from the origin node." />
-                    <SortableHeader field="originStatus" label="Origin Status" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="Origin panelist availability: Available, Unavailable (not available on date), Unassigned (no panelist), or Inactive." />
+                    <SortableHeader field="originStatus" label="Origin Status" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="Origin panelist availability: Available, Unavailable (not available on date), No Panelist (no panelist), or Inactive." />
                     <SortableHeader field="destPanelist" label="Dest. Panelist" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The panelist assigned to receive the package at the destination node." />
-                    <SortableHeader field="destStatus" label="Dest. Status" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="Destination panelist availability: Available, Unavailable (not available on date), Unassigned (no panelist), or Inactive." />
+                    <SortableHeader field="destStatus" label="Dest. Status" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="Destination panelist availability: Available, Unavailable (not available on date), No Panelist (no panelist), or Inactive." />
                     <SortableHeader field="status" label="Status" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="Shipment status: Pending (not started), Notified, Sent (dispatched), Received (delivered), Cancelled, Invalid, or Transfer Error." />
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                       Actions
