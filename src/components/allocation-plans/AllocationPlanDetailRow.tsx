@@ -202,7 +202,7 @@ export function AllocationPlanDetailRow({
 
       {/* Origin Panelist */}
       <td className="px-4 py-3 text-sm text-gray-600">
-        {detail.origin_panelist_name || <span className="text-gray-400">Not assigned</span>}
+        {detail.origin_panelist_name || ''}
       </td>
 
       {/* Origin Availability Status */}
@@ -220,7 +220,7 @@ export function AllocationPlanDetailRow({
           </div>
         ) : detail.origin_availability_status === 'unassigned' ? (
           <span className="px-2 py-1 rounded text-xs bg-gray-100 text-gray-600">
-            Unassigned
+            No Panelist
           </span>
         ) : detail.origin_availability_status === 'inactive' ? (
           <span className="px-2 py-1 rounded text-xs bg-gray-300 text-gray-700">
@@ -235,7 +235,7 @@ export function AllocationPlanDetailRow({
 
       {/* Destination Panelist */}
       <td className="px-4 py-3 text-sm text-gray-600">
-        {detail.destination_panelist_name || <span className="text-gray-400">Not assigned</span>}
+        {detail.destination_panelist_name || ''}
       </td>
 
       {/* Destination Availability Status */}
@@ -253,7 +253,7 @@ export function AllocationPlanDetailRow({
           </div>
         ) : detail.destination_availability_status === 'unassigned' ? (
           <span className="px-2 py-1 rounded text-xs bg-gray-100 text-gray-600">
-            Unassigned
+            No Panelist
           </span>
         ) : detail.destination_availability_status === 'inactive' ? (
           <span className="px-2 py-1 rounded text-xs bg-gray-300 text-gray-700">
