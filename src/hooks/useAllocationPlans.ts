@@ -117,15 +117,44 @@ export function useAllocationPlans() {
     start_date: string
     end_date: string
   }) => {
-    const { data: plan, error } = await supabase
-      .from('generated_allocation_plans')
-      .insert(data)
-      .select()
-      .single()
+    try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('User not authenticated')
 
-    if (error) throw error
-    await fetchAll()
-    return plan
+      // Get account_id: use effectiveAccountId if available (superadmin with selected account),
+      // otherwise use profile.account_id (normal user)
+      let accountId = effectiveAccountId
+      
+      if (!accountId) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('account_id')
+          .eq('id', user.id)
+          .single()
+        accountId = profile?.account_id
+      }
+
+      if (!accountId) throw new Error('User account not found')
+
+      const { data: plan, error } = await supabase
+        .from('generated_allocation_plans')
+        .insert({
+          ...data,
+          account_id: accountId,
+          created_by: user.id,
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+      await fetchAll()
+      return plan
+    } catch (err: any) {
+      setError(err.message)
+      console.error('Error creating allocation plan:', err)
+      throw err
+    }
   }
 
   const createPlanDetails = async (planId: string, details: any[]) => {
