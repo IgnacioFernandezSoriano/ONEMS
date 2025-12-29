@@ -1,0 +1,35 @@
+name: Supabase Keep-Alive
+# This workflow prevents Supabase free tier from auto-pausing due to inactivity
+# It runs every 6 days and makes a simple query to keep the database active
+on:
+  # Schedule: Run every 6 days at midnight UTC
+  schedule:
+    - cron: '0 0 */6 * *'
+  
+  # Allow manual trigger from GitHub Actions UI
+  workflow_dispatch:
+jobs:
+  ping-supabase:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Ping Supabase Database
+        run: |
+          echo "🔄 Pinging Supabase to keep database active..."
+          
+          # Make a simple query to the accounts table
+          # This keeps the database active and prevents auto-pause
+          response=$(curl -s -w "\n%{http_code}" -X GET \
+            "https://sehbnpgzqljrsqimwyuz.supabase.co/rest/v1/accounts?select=id&limit=1" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Content-Type: application/json")
+          
+          # Extract HTTP status code
+          http_code=$(echo "$response" | tail -n1)
+          
+          if [ "$http_code" -eq 200 ]; then
+            echo "✅ Successfully pinged Supabase database"
+          else
+            echo "⚠️ Warning: Received HTTP $http_code from Supabase"
+            echo "Response: $response"
+          fi
