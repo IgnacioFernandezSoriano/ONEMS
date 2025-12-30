@@ -198,11 +198,23 @@ export default function ReceiveGenerator() {
       
       let totalRecordsGenerated = 0
 
+      // Create maps for quick lookup
+      const productMap = new Map(products.map(p => [p.id, p]))
+      const carrierMap = new Map(carriers.map(c => [c.id, c]))
+      const cityMap = new Map(cities.map(c => [c.id, c]))
+      const nodeMap = new Map(nodes.map(n => [n.id, n]))
+      const panelistMap = new Map(panelists.map(p => [p.id, p]))
+
       // Generate records for each product/carrier combination
       for (const productId of config.productIds) {
+        const product = productMap.get(productId)
+        if (!product) continue
+        
         const standardDays = standardDaysMap.get(productId) || 3
         
         for (const carrierId of config.carrierIds) {
+          const carrier = carrierMap.get(carrierId)
+          if (!carrier) continue
           for (let i = 0; i < recordsPerCombination; i++) {
             const isOutOfSla = i < outOfSlaCountPerCombination
 
@@ -252,17 +264,18 @@ export default function ReceiveGenerator() {
             const record = {
               account_id: accountId,
               tag_id: generateRandomTag(),
-              product_id: productId,
-              carrier_id: carrierId,
-              origin_city_id: originCity.id,
-              origin_node_id: originNode.id,
-              origin_panelist_id: originPanelist.id,
-              destination_city_id: destCity.id,
-              destination_node_id: destNode.id,
-              destination_panelist_id: destPanelist.id,
-              shipment_date: shipmentDate.toISOString().split('T')[0],
-              receive_date: receiveDate.toISOString().split('T')[0],
-              status: 'pending_validation'
+              carrier_name: carrier.name,
+              product_name: `${product.code} - ${product.description}`,
+              origin_city_name: originCity.name,
+              origin_node_auto_id: originNode.auto_id,
+              origin_panelist_code: originPanelist.panelist_code,
+              destination_city_name: destCity.name,
+              destination_node_auto_id: destNode.auto_id,
+              destination_panelist_code: destPanelist.panelist_code,
+              sent_at: shipmentDate.toISOString(),
+              received_at: receiveDate.toISOString(),
+              business_transit_days: Math.floor((receiveDate.getTime() - shipmentDate.getTime()) / (1000 * 60 * 60 * 24)),
+              on_time_delivery: !isOutOfSla
             }
 
             records.push(record)
