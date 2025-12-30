@@ -263,9 +263,9 @@ export default function ReceiveGenerator() {
 
             const transitDays = Math.floor((receiveDate.getTime() - shipmentDate.getTime()) / (1000 * 60 * 60 * 24))
             
-            const record = {
+            const record: any = {
               account_id: accountId,
-              allocation_detail_id: crypto.randomUUID(), // Generate a unique ID for the allocation detail
+              // allocation_detail_id omitted for synthetic data - no FK constraint
               tag_id: generateRandomTag(),
               plan_name: `Generated Plan - ${product.code} via ${carrier.name}`,
               carrier_name: carrier.name,
