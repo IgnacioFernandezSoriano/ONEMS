@@ -22,6 +22,7 @@ import { AllocationPlanGenerator } from './pages/AllocationPlanGenerator'
 import NodeLoadBalancing from './pages/NodeLoadBalancing'
 import { AllocationPlans } from './pages/AllocationPlans'
 import { Panelists } from './pages/Panelists'
+import ReceiveGenerator from './pages/ReceiveGenerator'
 import OneDB from './pages/OneDB'
 import ReportingDashboard from './pages/Reporting/Dashboard'
 import ComplianceReport from './pages/Reporting/ComplianceReport'
@@ -113,6 +114,16 @@ function App() {
                       element={
                         <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
                           <AllocationPlans />
+                        </ProtectedRoute>
+                      }
+                    />
+                    
+                    {/* Receive Generator - for admin and superadmin (DEMO only) */}
+                    <Route
+                      path="/receive-generator"
+                      element={
+                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                          <ReceiveGenerator />
                         </ProtectedRoute>
                       }
                     />

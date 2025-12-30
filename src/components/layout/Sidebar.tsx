@@ -130,6 +130,17 @@ export function Sidebar() {
         },
       ],
     },
+    ...(profile?.account_id === 'demo' ? [{
+      label: 'Demo Tools',
+      items: [
+        {
+          path: '/receive-generator',
+          label: 'Receive Generator',
+          icon: RefreshCw,
+          roles: ['admin', 'superadmin'],
+        },
+      ],
+    }] : []),
     {
       label: 'Materials Management',
       items: [
