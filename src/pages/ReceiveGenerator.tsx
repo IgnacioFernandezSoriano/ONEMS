@@ -261,21 +261,32 @@ export default function ReceiveGenerator() {
               receiveDate = new Date(shipmentDate.getTime() + (standardDays + variance) * 24 * 60 * 60 * 1000)
             }
 
+            const transitDays = Math.floor((receiveDate.getTime() - shipmentDate.getTime()) / (1000 * 60 * 60 * 24))
+            
             const record = {
               account_id: accountId,
+              allocation_detail_id: crypto.randomUUID(), // Generate a unique ID for the allocation detail
               tag_id: generateRandomTag(),
+              plan_name: `Generated Plan - ${product.code} via ${carrier.name}`,
               carrier_name: carrier.name,
               product_name: `${product.code} - ${product.description}`,
               origin_city_name: originCity.name,
-              origin_node_auto_id: originNode.auto_id,
-              origin_panelist_code: originPanelist.panelist_code,
               destination_city_name: destCity.name,
-              destination_node_auto_id: destNode.auto_id,
-              destination_panelist_code: destPanelist.panelist_code,
               sent_at: shipmentDate.toISOString(),
               received_at: receiveDate.toISOString(),
-              business_transit_days: Math.floor((receiveDate.getTime() - shipmentDate.getTime()) / (1000 * 60 * 60 * 24)),
-              on_time_delivery: !isOutOfSla
+              total_transit_days: transitDays,
+              business_transit_days: transitDays,
+              on_time_delivery: !isOutOfSla,
+              source_data_snapshot: {
+                generated: true,
+                generator_version: '1.0',
+                origin_node: originNode.auto_id,
+                destination_node: destNode.auto_id,
+                origin_panelist: originPanelist.panelist_code,
+                destination_panelist: destPanelist.panelist_code,
+                standard_days: standardDays,
+                is_out_of_sla: isOutOfSla
+              }
             }
 
             records.push(record)
