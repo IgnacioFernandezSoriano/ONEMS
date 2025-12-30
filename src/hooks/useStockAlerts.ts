@@ -46,6 +46,49 @@ export function useStockAlerts() {
 
       if (fetchError) throw fetchError
 
+      // Enrich alerts with panelist information
+      if (data && data.length > 0) {
+        // Get unique panelist IDs from alerts that don't have panelist_name
+        const panelistIds = Array.from(new Set(
+          data
+            .filter(alert => alert.alert_type === 'panelist_negative' && alert.location_id && !alert.panelist_name)
+            .map(alert => alert.location_id)
+        ))
+
+        if (panelistIds.length > 0) {
+          // Fetch panelist information
+          const { data: panelists, error: panelistError } = await supabase
+            .from('panelists')
+            .select('id, name, panelist_code')
+            .in('id', panelistIds)
+
+          if (panelistError) {
+            console.error('Error fetching panelists:', panelistError)
+          } else if (panelists) {
+            // Create a map for quick lookup
+            const panelistMap = new Map(panelists.map(p => [p.id, p]))
+
+            // Enrich alerts with panelist data
+            const enrichedData = data.map(alert => {
+              if (alert.alert_type === 'panelist_negative' && alert.location_id && !alert.panelist_name) {
+                const panelist = panelistMap.get(alert.location_id)
+                if (panelist) {
+                  return {
+                    ...alert,
+                    panelist_name: panelist.name,
+                    panelist_code: panelist.panelist_code
+                  }
+                }
+              }
+              return alert
+            })
+
+            setAlerts(enrichedData)
+            return
+          }
+        }
+      }
+
       setAlerts(data || [])
     } catch (err: any) {
       console.error('Error loading stock alerts:', err)
