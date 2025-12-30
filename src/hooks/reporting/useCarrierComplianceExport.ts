@@ -35,17 +35,35 @@ export async function generateCarrierComplianceReport(
 
   const { data: standards } = await standardsQuery;
 
-  // Fetch shipments
-  let shipmentsQuery = supabase
-    .from('one_db')
-    .select('*')
-    .eq('account_id', accountId);
+  // Fetch shipments with pagination
+  const allShipments: any[] = []
+  const pageSize = 1000
+  let start = 0
+  let hasMore = true
 
-  if (carrierFilter) {
-    shipmentsQuery = shipmentsQuery.eq('carrier_name', carrierFilter);
+  while (hasMore) {
+    let shipmentsQuery = supabase
+      .from('one_db')
+      .select('*')
+      .eq('account_id', accountId)
+      .range(start, start + pageSize - 1)
+
+    if (carrierFilter) {
+      shipmentsQuery = shipmentsQuery.eq('carrier_name', carrierFilter)
+    }
+
+    const { data } = await shipmentsQuery
+
+    if (data && data.length > 0) {
+      allShipments.push(...data)
+      hasMore = data.length === pageSize
+      start += pageSize
+    } else {
+      hasMore = false
+    }
   }
 
-  const { data: shipments } = await shipmentsQuery;
+  const shipments = allShipments
 
   // Group by carrier
   const carrierMap = new Map<string, CarrierData>();

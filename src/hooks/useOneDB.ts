@@ -57,22 +57,38 @@ export const useOneDB = (accountId: string | undefined) => {
 
       console.log('[useOneDB] Fetching from one_db table with accountId:', activeAccountId);
       
-      const { data, error: fetchError } = await supabase
-        .from('one_db')
-        .select('*')
-        .eq('account_id', activeAccountId)
-        .order('created_at', { ascending: false });
+      // Paginate to handle Supabase 1000-record limit
+      const allRecords: OneDBRecord[] = []
+      const pageSize = 1000
+      let start = 0
+      let hasMore = true
+
+      while (hasMore) {
+        const { data, error: fetchError } = await supabase
+          .from('one_db')
+          .select('*')
+          .eq('account_id', activeAccountId)
+          .order('created_at', { ascending: false })
+          .range(start, start + pageSize - 1)
+
+        if (fetchError) throw fetchError
+
+        if (data && data.length > 0) {
+          allRecords.push(...data)
+          hasMore = data.length === pageSize
+          start += pageSize
+        } else {
+          hasMore = false
+        }
+      }
 
       console.log('[useOneDB] Query result:', { 
-        dataCount: data?.length || 0, 
-        error: fetchError?.message || null,
-        sampleData: data?.[0] || null 
+        dataCount: allRecords.length, 
+        sampleData: allRecords[0] || null 
       });
 
-      if (fetchError) throw fetchError;
-
-      setRecords(data || []);
-      setFilteredRecords(data || []);
+      setRecords(allRecords);
+      setFilteredRecords(allRecords);
     } catch (err: any) {
       setError(err.message);
       console.error('Error fetching ONE DB records:', err);

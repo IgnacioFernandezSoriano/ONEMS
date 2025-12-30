@@ -83,18 +83,35 @@ export function useTerritoryEquityData(
           ])
         );
 
-        // 3. Load shipments with filters
-        let query = supabase.from('one_db').select('*').eq('account_id', activeAccountId);
+        // 3. Load shipments with filters and pagination
+        const allShipments: any[] = []
+        const pageSize = 1000
+        let start = 0
+        let hasMore = true
 
-        if (filters?.startDate && filters.startDate !== '') query = query.gte('sent_at', adjustStartDateForFilter(filters.startDate));
-        if (filters?.endDate && filters.endDate !== '') query = query.lte('sent_at', adjustEndDateForFilter(filters.endDate));
-        if (filters?.carrier) query = query.eq('carrier_name', filters.carrier);
-        if (filters?.product) query = query.eq('product_name', filters.product);
-        if (filters?.originCity) query = query.eq('origin_city_name', filters.originCity);
-        if (filters?.destinationCity) query = query.eq('destination_city_name', filters.destinationCity);
+        while (hasMore) {
+          let query = supabase.from('one_db').select('*').eq('account_id', activeAccountId).range(start, start + pageSize - 1)
 
-        const { data: shipments, error: shipmentsError } = await query;
-        if (shipmentsError) throw shipmentsError;
+          if (filters?.startDate && filters.startDate !== '') query = query.gte('sent_at', adjustStartDateForFilter(filters.startDate))
+          if (filters?.endDate && filters.endDate !== '') query = query.lte('sent_at', adjustEndDateForFilter(filters.endDate))
+          if (filters?.carrier) query = query.eq('carrier_name', filters.carrier)
+          if (filters?.product) query = query.eq('product_name', filters.product)
+          if (filters?.originCity) query = query.eq('origin_city_name', filters.originCity)
+          if (filters?.destinationCity) query = query.eq('destination_city_name', filters.destinationCity)
+
+          const { data, error: shipmentsError } = await query
+          if (shipmentsError) throw shipmentsError
+
+          if (data && data.length > 0) {
+            allShipments.push(...data)
+            hasMore = data.length === pageSize
+            start += pageSize
+          } else {
+            hasMore = false
+          }
+        }
+
+        const shipments = allShipments
 
         if (!shipments || shipments.length === 0) {
           setCityData([]);

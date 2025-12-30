@@ -37,26 +37,44 @@ export async function generateComplianceAuditReport(
 
   const { data: standards } = await standardsQuery;
 
-  // Fetch shipments
-  let shipmentsQuery = supabase
-    .from('one_db')
-    .select('*')
-    .eq('account_id', accountId);
+  // Fetch shipments with pagination
+  const allShipments: any[] = []
+  const pageSize = 1000
+  let start = 0
+  let hasMore = true
 
-  if (filters.carrier) {
-    shipmentsQuery = shipmentsQuery.eq('carrier_name', filters.carrier);
-  }
-  if (filters.product) {
-    shipmentsQuery = shipmentsQuery.eq('product_name', filters.product);
-  }
-  if (filters.originCity) {
-    shipmentsQuery = shipmentsQuery.eq('origin_city_name', filters.originCity);
-  }
-  if (filters.destinationCity) {
-    shipmentsQuery = shipmentsQuery.eq('destination_city_name', filters.destinationCity);
+  while (hasMore) {
+    let shipmentsQuery = supabase
+      .from('one_db')
+      .select('*')
+      .eq('account_id', accountId)
+      .range(start, start + pageSize - 1)
+
+    if (filters.carrier) {
+      shipmentsQuery = shipmentsQuery.eq('carrier_name', filters.carrier)
+    }
+    if (filters.product) {
+      shipmentsQuery = shipmentsQuery.eq('product_name', filters.product)
+    }
+    if (filters.originCity) {
+      shipmentsQuery = shipmentsQuery.eq('origin_city_name', filters.originCity)
+    }
+    if (filters.destinationCity) {
+      shipmentsQuery = shipmentsQuery.eq('destination_city_name', filters.destinationCity)
+    }
+
+    const { data } = await shipmentsQuery
+
+    if (data && data.length > 0) {
+      allShipments.push(...data)
+      hasMore = data.length === pageSize
+      start += pageSize
+    } else {
+      hasMore = false
+    }
   }
 
-  const { data: shipments } = await shipmentsQuery;
+  const shipments = allShipments
 
   // Fetch lookup tables
   const { data: carriers } = await supabase.from('carriers').select('id, name').eq('account_id', accountId);

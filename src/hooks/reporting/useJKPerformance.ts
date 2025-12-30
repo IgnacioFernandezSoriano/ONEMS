@@ -154,21 +154,39 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
       try {
         setLoading(true);
 
-        // 1. Load shipments with filters
-        let query = supabase
-          .from('one_db')
-          .select('*')
-          .eq('account_id', activeAccountId);
+        // 1. Load shipments with filters and pagination
+        const allShipments: any[] = []
+        const pageSize = 1000
+        let start = 0
+        let hasMore = true
 
-        if (filters?.startDate && filters.startDate !== '') query = query.gte('sent_at', adjustStartDateForFilter(filters.startDate));
-        if (filters?.endDate && filters.endDate !== '') query = query.lte('sent_at', adjustEndDateForFilter(filters.endDate));
-        if (filters?.originCity) query = query.eq('origin_city_name', filters.originCity);
-        if (filters?.destinationCity) query = query.eq('destination_city_name', filters.destinationCity);
-        if (filters?.carrier) query = query.eq('carrier_name', filters.carrier);
-        if (filters?.product) query = query.eq('product_name', filters.product);
+        while (hasMore) {
+          let query = supabase
+            .from('one_db')
+            .select('*')
+            .eq('account_id', activeAccountId)
+            .range(start, start + pageSize - 1)
 
-        const { data: shipments, error: shipmentsErr } = await query;
-        if (shipmentsErr) throw shipmentsErr;
+          if (filters?.startDate && filters.startDate !== '') query = query.gte('sent_at', adjustStartDateForFilter(filters.startDate))
+          if (filters?.endDate && filters.endDate !== '') query = query.lte('sent_at', adjustEndDateForFilter(filters.endDate))
+          if (filters?.originCity) query = query.eq('origin_city_name', filters.originCity)
+          if (filters?.destinationCity) query = query.eq('destination_city_name', filters.destinationCity)
+          if (filters?.carrier) query = query.eq('carrier_name', filters.carrier)
+          if (filters?.product) query = query.eq('product_name', filters.product)
+
+          const { data, error: shipmentsErr } = await query
+          if (shipmentsErr) throw shipmentsErr
+
+          if (data && data.length > 0) {
+            allShipments.push(...data)
+            hasMore = data.length === pageSize
+            start += pageSize
+          } else {
+            hasMore = false
+          }
+        }
+
+        const shipments = allShipments
 
         // 2. Load delivery standards
         const { data: standards, error: stdErr } = await supabase

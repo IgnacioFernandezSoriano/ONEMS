@@ -32,34 +32,52 @@ export function useReportingGeneral(accountId: string | undefined, filters?: Fil
       try {
         setLoading(true);
         
-        // Build query with filters
-        let query = supabase
-          .from('one_db')
-          .select('*')
-          .eq('account_id', activeAccountId);
+        // Build query with filters and pagination
+        const allShipments: any[] = []
+        const pageSize = 1000
+        let start = 0
+        let hasMore = true
 
-        if (filters?.originCity) {
-          query = query.eq('origin_city_name', filters.originCity);
-        }
-        if (filters?.destinationCity) {
-          query = query.eq('destination_city_name', filters.destinationCity);
-        }
-        if (filters?.carrier) {
-          query = query.eq('carrier_name', filters.carrier);
-        }
-        if (filters?.product) {
-          query = query.eq('product_name', filters.product);
-        }
-        if (filters?.dateFrom && filters.dateFrom !== '') {
-          query = query.gte('sent_at', adjustStartDateForFilter(filters.dateFrom));
-        }
-        if (filters?.dateTo && filters.dateTo !== '') {
-          query = query.lte('sent_at', adjustEndDateForFilter(filters.dateTo));
+        while (hasMore) {
+          let query = supabase
+            .from('one_db')
+            .select('*')
+            .eq('account_id', activeAccountId)
+            .range(start, start + pageSize - 1)
+
+          if (filters?.originCity) {
+            query = query.eq('origin_city_name', filters.originCity)
+          }
+          if (filters?.destinationCity) {
+            query = query.eq('destination_city_name', filters.destinationCity)
+          }
+          if (filters?.carrier) {
+            query = query.eq('carrier_name', filters.carrier)
+          }
+          if (filters?.product) {
+            query = query.eq('product_name', filters.product)
+          }
+          if (filters?.dateFrom && filters.dateFrom !== '') {
+            query = query.gte('sent_at', adjustStartDateForFilter(filters.dateFrom))
+          }
+          if (filters?.dateTo && filters.dateTo !== '') {
+            query = query.lte('sent_at', adjustEndDateForFilter(filters.dateTo))
+          }
+
+          const { data, error: err } = await query
+
+          if (err) throw err
+
+          if (data && data.length > 0) {
+            allShipments.push(...data)
+            hasMore = data.length === pageSize
+            start += pageSize
+          } else {
+            hasMore = false
+          }
         }
 
-        const { data: shipments, error: err } = await query;
-
-        if (err) throw err;
+        const shipments = allShipments
 
         // Group by week and calculate metrics
         const weeklyData = new Map<string, {
