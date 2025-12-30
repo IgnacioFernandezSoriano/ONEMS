@@ -8,8 +8,8 @@ interface GeneratorConfig {
   outOfSlaPercentage: number
   advanceVarianceDays: number
   delayVarianceDays: number
-  productId: string
-  carrierId: string
+  productIds: string[]
+  carrierIds: string[]
   startDate: string
   endDate: string
 }
@@ -23,8 +23,8 @@ export default function ReceiveGenerator() {
     outOfSlaPercentage: 20,
     advanceVarianceDays: 2,
     delayVarianceDays: 3,
-    productId: '',
-    carrierId: '',
+    productIds: [],
+    carrierIds: [],
     startDate: new Date().toISOString().split('T')[0],
     endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
   })
@@ -45,14 +45,14 @@ export default function ReceiveGenerator() {
     loadData()
   }, [accountId])
 
-  // Load delivery standard when product changes
+  // Load delivery standard when products change (use first product for example)
   useEffect(() => {
-    if (config.productId && accountId) {
+    if (config.productIds.length > 0 && accountId) {
       supabase
         .from('delivery_standards')
         .select('standard_days')
         .eq('account_id', accountId)
-        .eq('product_id', config.productId)
+        .eq('product_id', config.productIds[0])
         .maybeSingle()
         .then(({ data }) => {
           setDeliveryStandard(data?.standard_days || null)
@@ -60,7 +60,7 @@ export default function ReceiveGenerator() {
     } else {
       setDeliveryStandard(null)
     }
-  }, [config.productId, accountId])
+  }, [config.productIds, accountId])
 
   const loadData = async () => {
     if (!accountId) return
@@ -134,8 +134,12 @@ export default function ReceiveGenerator() {
   }
 
   const generateRecords = async () => {
-    if (!accountId || !config.productId) {
-      setError('Please select a product')
+    if (!accountId || config.productIds.length === 0) {
+      setError('Please select at least one product')
+      return
+    }
+    if (config.carrierIds.length === 0) {
+      setError('Please select at least one carrier')
       return
     }
 
@@ -145,83 +149,98 @@ export default function ReceiveGenerator() {
     setError(null)
 
     try {
-      // Get delivery standard for the product
-      const { data: deliveryStandard } = await supabase
+      // Get delivery standards for all products
+      const { data: deliveryStandards } = await supabase
         .from('delivery_standards')
-        .select('standard_days')
+        .select('product_id, standard_days')
         .eq('account_id', accountId)
-        .eq('product_id', config.productId)
-        .maybeSingle()
+        .in('product_id', config.productIds)
 
-      const standardDays = deliveryStandard?.standard_days || 3
+      const standardDaysMap = new Map(
+        deliveryStandards?.map(ds => [ds.product_id, ds.standard_days]) || []
+      )
 
       const records = []
       const startDate = new Date(config.startDate)
       const endDate = new Date(config.endDate)
 
-      // Determine how many records should be out of SLA
-      const outOfSlaCount = Math.floor(config.recordCount * (config.outOfSlaPercentage / 100))
+      // Calculate total records to generate (recordCount per product/carrier combination)
+      const totalCombinations = config.productIds.length * config.carrierIds.length
+      const recordsPerCombination = Math.floor(config.recordCount / totalCombinations)
+      
+      // Determine how many records should be out of SLA per combination
+      const outOfSlaCountPerCombination = Math.floor(recordsPerCombination * (config.outOfSlaPercentage / 100))
+      
+      let totalRecordsGenerated = 0
 
-      for (let i = 0; i < config.recordCount; i++) {
-        const isOutOfSla = i < outOfSlaCount
-
-        // Random origin and destination
-        const originCity = getRandomElement(cities)
-        const destCity = getRandomElement(cities.filter(c => c.id !== originCity.id))
+      // Generate records for each product/carrier combination
+      for (const productId of config.productIds) {
+        const standardDays = standardDaysMap.get(productId) || 3
         
-        const originNodesFiltered = nodes.filter(n => n.city_id === originCity.id)
-        const destNodesFiltered = nodes.filter(n => n.city_id === destCity.id)
-        
-        if (originNodesFiltered.length === 0 || destNodesFiltered.length === 0) continue
+        for (const carrierId of config.carrierIds) {
+          for (let i = 0; i < recordsPerCombination; i++) {
+            const isOutOfSla = i < outOfSlaCountPerCombination
 
-        const originNode = getRandomElement(originNodesFiltered)
-        const destNode = getRandomElement(destNodesFiltered)
+            // Random origin and destination
+            const originCity = getRandomElement(cities)
+            const destCity = getRandomElement(cities.filter(c => c.id !== originCity.id))
+            
+            const originNodesFiltered = nodes.filter(n => n.city_id === originCity.id)
+            const destNodesFiltered = nodes.filter(n => n.city_id === destCity.id)
+            
+            if (originNodesFiltered.length === 0 || destNodesFiltered.length === 0) continue
 
-        // Random panelists
-        const originPanelistsFiltered = panelists.filter(p => p.city_id === originCity.id)
-        const destPanelistsFiltered = panelists.filter(p => p.city_id === destCity.id)
+            const originNode = getRandomElement(originNodesFiltered)
+            const destNode = getRandomElement(destNodesFiltered)
 
-        if (originPanelistsFiltered.length === 0 || destPanelistsFiltered.length === 0) continue
+            // Random panelists
+            const originPanelistsFiltered = panelists.filter(p => p.city_id === originCity.id)
+            const destPanelistsFiltered = panelists.filter(p => p.city_id === destCity.id)
 
-        const originPanelist = getRandomElement(originPanelistsFiltered)
-        const destPanelist = getRandomElement(destPanelistsFiltered)
+            if (originPanelistsFiltered.length === 0 || destPanelistsFiltered.length === 0) continue
 
-        // Random dates
-        const shipmentDate = getRandomDate(startDate, endDate)
-        
-        let receiveDate: Date
-        if (isOutOfSla) {
-          // Out of SLA: add delay
-          const delayDays = standardDays + Math.floor(Math.random() * config.delayVarianceDays) + 1
-          receiveDate = new Date(shipmentDate.getTime() + delayDays * 24 * 60 * 60 * 1000)
-        } else {
-          // Within SLA: random between advance and standard
-          const variance = Math.random() < 0.5 
-            ? -Math.floor(Math.random() * config.advanceVarianceDays) // advance
-            : Math.floor(Math.random() * (standardDays - 1)) // within standard
-          receiveDate = new Date(shipmentDate.getTime() + (standardDays + variance) * 24 * 60 * 60 * 1000)
+            const originPanelist = getRandomElement(originPanelistsFiltered)
+            const destPanelist = getRandomElement(destPanelistsFiltered)
+
+            // Random dates within the specified range
+            const shipmentDate = getRandomDate(startDate, endDate)
+            
+            let receiveDate: Date
+            if (isOutOfSla) {
+              // Out of SLA: add delay
+              const delayDays = standardDays + Math.floor(Math.random() * config.delayVarianceDays) + 1
+              receiveDate = new Date(shipmentDate.getTime() + delayDays * 24 * 60 * 60 * 1000)
+            } else {
+              // Within SLA: random between advance and standard
+              const variance = Math.random() < 0.5 
+                ? -Math.floor(Math.random() * config.advanceVarianceDays) // advance
+                : Math.floor(Math.random() * (standardDays - 1)) // within standard
+              receiveDate = new Date(shipmentDate.getTime() + (standardDays + variance) * 24 * 60 * 60 * 1000)
+            }
+
+            const record = {
+              account_id: accountId,
+              tag_id: generateRandomTag(),
+              product_id: productId,
+              carrier_id: carrierId,
+              origin_city_id: originCity.id,
+              origin_node_id: originNode.id,
+              origin_panelist_id: originPanelist.id,
+              destination_city_id: destCity.id,
+              destination_node_id: destNode.id,
+              destination_panelist_id: destPanelist.id,
+              shipment_date: shipmentDate.toISOString().split('T')[0],
+              receive_date: receiveDate.toISOString().split('T')[0],
+              status: 'pending_validation'
+            }
+
+            records.push(record)
+            totalRecordsGenerated++
+
+            // Update progress
+            setProgress(Math.floor((totalRecordsGenerated / (recordsPerCombination * totalCombinations)) * 50))
+          }
         }
-
-        const record = {
-          account_id: accountId,
-          tag_id: generateRandomTag(),
-          product_id: config.productId,
-          carrier_id: config.carrierId || getRandomElement(carriers).id,
-          origin_city_id: originCity.id,
-          origin_node_id: originNode.id,
-          origin_panelist_id: originPanelist.id,
-          destination_city_id: destCity.id,
-          destination_node_id: destNode.id,
-          destination_panelist_id: destPanelist.id,
-          shipment_date: shipmentDate.toISOString().split('T')[0],
-          receive_date: receiveDate.toISOString().split('T')[0],
-          status: 'pending_validation'
-        }
-
-        records.push(record)
-
-        // Update progress
-        setProgress(Math.floor(((i + 1) / config.recordCount) * 50))
       }
 
       // Insert records in batches
@@ -351,42 +370,100 @@ export default function ReceiveGenerator() {
             )}
           </div>
 
-          {/* Product */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Product <span className="text-red-500">*</span>
+          {/* Products */}
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Products <span className="text-red-500">*</span>
             </label>
-            <select
-              value={config.productId}
-              onChange={(e) => setConfig({ ...config, productId: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="">Select Product</option>
-              {products.map((product) => (
-                <option key={product.id} value={product.id}>
-                  {product.code} - {product.description}
-                </option>
-              ))}
-            </select>
+            <div className="border border-gray-300 rounded-lg p-3 max-h-40 overflow-y-auto">
+              <div className="flex items-center gap-2 mb-2">
+                <input
+                  type="checkbox"
+                  checked={config.productIds.length === products.length}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setConfig({ ...config, productIds: products.map(p => p.id) })
+                    } else {
+                      setConfig({ ...config, productIds: [] })
+                    }
+                  }}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-sm font-medium text-gray-900">Select All</span>
+              </div>
+              <div className="border-t border-gray-200 pt-2 space-y-2">
+                {products.map((product) => (
+                  <div key={product.id} className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={config.productIds.includes(product.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setConfig({ ...config, productIds: [...config.productIds, product.id] })
+                        } else {
+                          setConfig({ ...config, productIds: config.productIds.filter(id => id !== product.id) })
+                        }
+                      }}
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-gray-700">
+                      {product.code} - {product.description}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              Selected: {config.productIds.length} product(s)
+            </p>
           </div>
 
-          {/* Carrier */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Carrier (optional)
+          {/* Carriers */}
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Carriers <span className="text-red-500">*</span>
             </label>
-            <select
-              value={config.carrierId}
-              onChange={(e) => setConfig({ ...config, carrierId: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="">Random Carrier</option>
-              {carriers.map((carrier) => (
-                <option key={carrier.id} value={carrier.id}>
-                  {carrier.name}
-                </option>
-              ))}
-            </select>
+            <div className="border border-gray-300 rounded-lg p-3 max-h-40 overflow-y-auto">
+              <div className="flex items-center gap-2 mb-2">
+                <input
+                  type="checkbox"
+                  checked={config.carrierIds.length === carriers.length}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setConfig({ ...config, carrierIds: carriers.map(c => c.id) })
+                    } else {
+                      setConfig({ ...config, carrierIds: [] })
+                    }
+                  }}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-sm font-medium text-gray-900">Select All</span>
+              </div>
+              <div className="border-t border-gray-200 pt-2 space-y-2">
+                {carriers.map((carrier) => (
+                  <div key={carrier.id} className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={config.carrierIds.includes(carrier.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setConfig({ ...config, carrierIds: [...config.carrierIds, carrier.id] })
+                        } else {
+                          setConfig({ ...config, carrierIds: config.carrierIds.filter(id => id !== carrier.id) })
+                        }
+                      }}
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-gray-700">
+                      {carrier.name}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              Selected: {config.carrierIds.length} carrier(s)
+            </p>
           </div>
 
           {/* Start Date */}
@@ -416,11 +493,24 @@ export default function ReceiveGenerator() {
           </div>
         </div>
 
+        {/* Summary */}
+        {config.productIds.length > 0 && config.carrierIds.length > 0 && (
+          <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <h3 className="text-sm font-semibold text-blue-900 mb-2">Generation Summary</h3>
+            <div className="text-sm text-blue-800 space-y-1">
+              <p>• <strong>{config.productIds.length}</strong> product(s) × <strong>{config.carrierIds.length}</strong> carrier(s) = <strong>{config.productIds.length * config.carrierIds.length}</strong> combinations</p>
+              <p>• <strong>{Math.floor(config.recordCount / (config.productIds.length * config.carrierIds.length))}</strong> records per combination</p>
+              <p>• <strong>~{Math.floor(config.recordCount / (config.productIds.length * config.carrierIds.length)) * config.productIds.length * config.carrierIds.length}</strong> total records will be generated</p>
+              <p>• Date range: <strong>{config.startDate}</strong> to <strong>{config.endDate}</strong></p>
+            </div>
+          </div>
+        )}
+
         {/* Generate Button */}
         <div className="mt-6">
           <button
             onClick={generateRecords}
-            disabled={generating || !config.productId}
+            disabled={generating || config.productIds.length === 0 || config.carrierIds.length === 0}
             className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
           >
             {generating ? (
