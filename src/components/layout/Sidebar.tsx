@@ -145,17 +145,7 @@ export function Sidebar() {
         },
       ],
     },
-    ...(accountName.toLowerCase().includes('demo') ? [{
-      label: 'Demo Tools',
-      items: [
-        {
-          path: '/receive-generator',
-          label: 'Receive Generator',
-          icon: RefreshCw,
-          roles: ['admin', 'superadmin'],
-        },
-      ],
-    }] : []),
+
     {
       label: 'Materials Management',
       items: [
@@ -231,6 +221,20 @@ export function Sidebar() {
           icon: Users,
           roles: ['admin', 'superadmin'],
         },
+        ...(accountName === 'DEMO2' ? [
+          {
+            path: '/receive-generator',
+            label: 'Receive Generator',
+            icon: RefreshCw,
+            roles: ['admin', 'superadmin'],
+          },
+          {
+            path: '/admin/account-management',
+            label: 'Demo Reset',
+            icon: RefreshCw,
+            roles: ['admin', 'superadmin'],
+          },
+        ] : []),
       ],
     },
     {
@@ -248,12 +252,7 @@ export function Sidebar() {
           icon: Users,
           roles: ['superadmin'],
         },
-        {
-          path: '/admin/account-management',
-          label: 'Demo Reset',
-          icon: RefreshCw,
-          roles: ['superadmin'],
-        },
+
       ],
     },
   ]
