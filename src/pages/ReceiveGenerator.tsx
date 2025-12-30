@@ -174,16 +174,21 @@ export default function ReceiveGenerator() {
     console.log('[Receive Generator] Products:', products.length)
 
     try {
-      // Get delivery standards for all products
+      // Get delivery standards for all routes (origin-destination-carrier-product)
       const { data: deliveryStandards } = await supabase
         .from('delivery_standards')
-        .select('product_id, standard_days')
+        .select('origin_city_name, destination_city_name, carrier_name, product_name, standard_days')
         .eq('account_id', accountId)
-        .in('product_id', config.productIds)
 
+      // Create a map with route key: "origin-destination-carrier-product" -> standard_days
       const standardDaysMap = new Map(
-        deliveryStandards?.map(ds => [ds.product_id, ds.standard_days]) || []
+        deliveryStandards?.map(ds => [
+          `${ds.origin_city_name}-${ds.destination_city_name}-${ds.carrier_name}-${ds.product_name}`,
+          ds.standard_days
+        ]) || []
       )
+
+      console.log('[Receive Generator] Loaded delivery standards:', standardDaysMap.size)
 
       const records = []
       const startDate = new Date(config.startDate)
@@ -209,8 +214,6 @@ export default function ReceiveGenerator() {
       for (const productId of config.productIds) {
         const product = productMap.get(productId)
         if (!product) continue
-        
-        const standardDays = standardDaysMap.get(productId) || 3
         
         for (const carrierId of config.carrierIds) {
           const carrier = carrierMap.get(carrierId)
@@ -244,6 +247,15 @@ export default function ReceiveGenerator() {
 
             const originPanelist = getRandomElement(originPanelistsFiltered)
             const destPanelist = getRandomElement(destPanelistsFiltered)
+
+            // Get SLA for this specific route
+            const routeKey = `${originCity.name}-${destCity.name}-${carrier.name}-${product.code} - ${product.description}`
+            const standardDays = standardDaysMap.get(routeKey)
+
+            if (!standardDays) {
+              console.warn('[Receive Generator] No SLA found for route:', routeKey)
+              continue // Skip if no SLA defined for this route
+            }
 
             // Random dates within the specified range
             const shipmentDate = getRandomDate(startDate, endDate)
