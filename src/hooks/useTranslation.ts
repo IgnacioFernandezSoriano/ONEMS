@@ -46,17 +46,20 @@ async function loadTranslations(locale: string): Promise<string> {
   console.log(`Loading translations for locale: ${locale}`)
   
   try {
-    // Try Supabase Storage first
-    const { data, error } = await supabase.storage
+    // Try Supabase Storage first using public URL
+    const { data } = supabase.storage
       .from('translations')
-      .download(`${locale}.csv`)
+      .getPublicUrl(`${locale}.csv`)
     
-    if (!error && data) {
-      const text = await data.text()
-      console.log(`✓ Loaded ${locale}.csv from Supabase Storage (${text.length} bytes)`)
-      return text
-    } else {
-      console.warn(`Supabase Storage error for ${locale}:`, error)
+    if (data?.publicUrl) {
+      const response = await fetch(data.publicUrl)
+      if (response.ok) {
+        const text = await response.text()
+        console.log(`✓ Loaded ${locale}.csv from Supabase Storage (${text.length} bytes)`)
+        return text
+      } else {
+        console.warn(`Supabase Storage error for ${locale}: ${response.status} ${response.statusText}`)
+      }
     }
   } catch (err) {
     console.warn(`Failed to load ${locale} from Supabase:`, err)
