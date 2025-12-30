@@ -178,12 +178,12 @@ export function ComplianceTable({ data }: ComplianceTableProps) {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                   <div className="flex items-center">
-                    {carrier.compliancePercentage >= 95 ? (
+                    {carrier.compliancePercentage >= carrier.standardPercentage ? (
                       <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
                     ) : (
                       <XCircle className="w-4 h-4 text-red-500 mr-2" />
                     )}
-                    <span className={carrier.compliancePercentage >= 95 ? 'text-green-600 font-medium' : 'text-red-600 font-medium'}>
+                    <span className={carrier.compliancePercentage >= carrier.standardPercentage ? 'text-green-600 font-medium' : 'text-red-600 font-medium'}>
                       {formatValue(carrier.compliancePercentage)}%
                     </span>
                   </div>
@@ -226,12 +226,12 @@ export function ComplianceTable({ data }: ComplianceTableProps) {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <div className="flex items-center">
-                        {product.compliancePercentage >= 95 ? (
+                        {product.compliancePercentage >= product.standardPercentage ? (
                           <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
                         ) : (
                           <XCircle className="w-4 h-4 text-red-500 mr-2" />
                         )}
-                        <span className={product.compliancePercentage >= 95 ? 'text-green-600' : 'text-red-600'}>
+                        <span className={product.compliancePercentage >= product.standardPercentage ? 'text-green-600' : 'text-red-600'}>
                           {formatValue(product.compliancePercentage)}%
                         </span>
                       </div>
