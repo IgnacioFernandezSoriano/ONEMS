@@ -3,6 +3,7 @@ import { AuthProvider } from './contexts/AuthContext'
 import { AccountProvider } from './contexts/AccountContext'
 import { ReportingFiltersProvider } from './contexts/ReportingFiltersContext'
 import { SidebarProvider } from './contexts/SidebarContext'
+import { LocaleProvider } from './contexts/LocaleContext'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import { MainLayout } from './components/layout/MainLayout'
 import { Login } from './pages/Login'
@@ -12,6 +13,7 @@ import { Accounts } from './pages/Settings/Accounts'
 import { AllUsers } from './pages/Settings/AllUsers'
 import { Users } from './pages/Admin/Users'
 import { AccountManagement } from './pages/Admin/AccountManagement'
+import TranslationManager from './pages/Admin/TranslationManager'
 import { CountryTopology } from './pages/CountryTopology'
 import { Carriers } from './pages/Carriers'
 import { MaterialCatalogPage } from './pages/MaterialCatalog'
@@ -32,9 +34,10 @@ import AccountReportingConfig from './pages/Settings/AccountReportingConfig'
 
 function App() {
   return (
-    <AuthProvider>
-      <AccountProvider>
-        <BrowserRouter>
+    <LocaleProvider>
+      <AuthProvider>
+        <AccountProvider>
+          <BrowserRouter>
           <Routes>
             <Route path="/login" element={<Login />} />
             
@@ -266,6 +269,16 @@ function App() {
                       }
                     />
                     
+                    {/* Translation Manager - only for superadmin */}
+                    <Route
+                      path="/admin/translations"
+                      element={
+                        <ProtectedRoute allowedRoles={['superadmin']}>
+                          <TranslationManager />
+                        </ProtectedRoute>
+                      }
+                    />
+                    
                     <Route path="/" element={<Navigate to="/dashboard" />} />
                   </Routes>
                     </MainLayout>
@@ -274,10 +287,11 @@ function App() {
               </ProtectedRoute>
             }
           />
-        </Routes>
-      </BrowserRouter>
-      </AccountProvider>
-    </AuthProvider>
+          </Routes>
+        </BrowserRouter>
+        </AccountProvider>
+      </AuthProvider>
+    </LocaleProvider>
   )
 }
 

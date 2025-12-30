@@ -1,0 +1,146 @@
+key,translation,context
+common.save,Save,Button text
+common.cancel,Cancel,Button text
+common.delete,Delete,Button text
+common.edit,Edit,Button text
+common.add,Add,Button text
+common.close,Close,Button text
+common.confirm,Confirm,Button text
+common.loading,Loading...,Loading state
+common.error,Error,Error state
+common.success,Success,Success state
+common.search,Search,Search placeholder
+common.filter,Filter,Filter label
+common.export,Export,Export button
+common.import,Import,Import button
+common.refresh,Refresh,Refresh button
+common.actions,Actions,Actions column header
+common.status,Status,Status label
+common.total,Total,Total label
+common.active,Active,Active status
+common.inactive,Inactive,Inactive status
+menu.overview,Overview,Menu group label
+menu.dashboard,Dashboard,Menu item
+menu.dashboard.tooltip,Dashboard: Overview of operational metrics resource status and critical alerts. Monitor allocation plans panelist availability material management and delivery standards.,Menu tooltip
+menu.setup,Setup,Menu group label
+menu.topology,Country Topology,Menu item
+menu.topology.tooltip,Country Topology: Define your geographical structure (regions cities nodes). Create and manage the network of locations where panelists operate. Required before creating allocation plans.,Menu tooltip
+menu.carriers,Carriers & Products,Menu item
+menu.carriers.tooltip,Carriers & Products: Manage shipping carriers and their product catalog. Define product materials and compositions. Essential for allocation planning and material requirements calculation.,Menu tooltip
+menu.panelists,Panelists,Menu item
+menu.panelists.tooltip,Panelists: Manage panelist registry assign to nodes track availability and vacation periods. View panelist stock levels and manage unavailability schedules.,Menu tooltip
+menu.delivery_standards,Delivery Standards,Menu item
+menu.delivery_standards.tooltip,Delivery Standards: Define expected delivery times and success rates for each carrier-product-route combination. Set warning and critical thresholds for performance monitoring.,Menu tooltip
+menu.allocation_management,Allocation Management,Menu group label
+menu.allocation_generator,Allocation Generator,Menu item
+menu.allocation_generator.tooltip,Allocation Generator: Create new allocation plans by defining carrier product date range and distribution rules. Generate shipment schedules automatically based on your configuration.,Menu tooltip
+menu.load_balancing,Load Balancing,Menu item
+menu.load_balancing.tooltip,Load Balancing: Visualize and rebalance shipment distribution across cities and nodes. Reassign shipments to optimize workload and ensure equitable distribution.,Menu tooltip
+menu.allocation_plans,Allocation Plans,Menu item
+menu.allocation_plans.tooltip,Allocation Plans: View and manage all shipment assignments. Track status (pending sent received) assign panelists mark shipments as sent and monitor availability issues.,Menu tooltip
+menu.materials_management,Materials Management,Menu group label
+menu.material_requirements,Material Requirements,Menu item
+menu.material_requirements.tooltip,Material Requirements: Calculate material needs based on allocation plans. Generate purchase orders and proposed shipments to panelists. Track requirement status and fulfillment.,Menu tooltip
+menu.stock_management,Stock Management,Menu item
+menu.stock_management.tooltip,Stock Management: Monitor inventory levels at regulator and panelist locations. Manage stock alerts track material movements and process shipments between locations.,Menu tooltip
+menu.material_catalog,Material DB,Menu item
+menu.material_catalog.tooltip,Material Catalog: Define and manage the master catalog of materials used in products. Set minimum stock levels units of measure and material specifications.,Menu tooltip
+menu.reporting,REPORTING,Menu group label
+menu.reporting_e2e,E2E,Menu item
+menu.reporting_e2e.tooltip,End-to-End Reporting: Comprehensive analytics and performance metrics for your delivery network. Access dashboards performance reports compliance tracking and territory equity analysis.,Menu tooltip
+menu.reporting_dashboard,Dashboard,Menu submenu item
+menu.reporting_dashboard.tooltip,Reporting Dashboard: High-level overview of key performance indicators trends and summary statistics across all reporting modules.,Menu tooltip
+menu.reporting_jk,J+K Performance,Menu submenu item
+menu.reporting_jk.tooltip,J+K Performance: Analyze delivery performance against standards. Track J (actual delivery time) vs K (standard time) metrics identify delays and monitor compliance rates by route and carrier.,Menu tooltip
+menu.reporting_compliance,Compliance,Menu submenu item
+menu.reporting_compliance.tooltip,Compliance Report: Monitor adherence to delivery standards. View compliance rates identify non-compliant routes and track performance trends over time with threshold-based alerts.,Menu tooltip
+menu.reporting_equity,Territory Equity,Menu submenu item
+menu.reporting_equity.tooltip,Territory Equity: Analyze distribution fairness across regions and cities. Compare shipment volumes delivery performance and resource allocation to ensure equitable service.,Menu tooltip
+menu.reporting_onedb,ONE DB,Menu submenu item
+menu.reporting_onedb.tooltip,ONE Database: Complete record of all received shipments. View detailed shipment history delivery times routes and panelist information for audit and analysis purposes.,Menu tooltip
+menu.administration,Administration,Menu group label
+menu.users,Users,Menu item
+menu.users.tooltip,User Management: Create and manage user accounts for your organization. Assign roles (admin viewer) and control access permissions to system features.,Menu tooltip
+menu.onedb_generator,ONEDB Generator,Menu item (demo only)
+menu.onedb_generator.tooltip,ONEDB Generator (Demo): Simulate received shipments for testing and demonstration purposes. Automatically transfers allocation plans to ONE DB.,Menu tooltip
+menu.demo_reset,Demo Reset,Menu item (demo only)
+menu.demo_reset.tooltip,Demo Reset: Reset demo account data to initial state. Clear all transactions while preserving base configuration (topology carriers panelists).,Menu tooltip
+menu.superadmin,Superadmin,Menu group label
+menu.accounts,Accounts,Menu item
+menu.accounts.tooltip,Account Management (Superadmin): Create and manage customer accounts. Configure account settings status and access. Only accessible to superadmin users.,Menu tooltip
+menu.all_users,All Users,Menu item
+menu.all_users.tooltip,All Users (Superadmin): View and manage users across all accounts. Assign accounts to users modify roles and control system-wide access. Only accessible to superadmin users.,Menu tooltip
+dashboard.title,Management Dashboard,Page title
+dashboard.tooltip,Management Dashboard: Overview of operational metrics resource status and critical alerts. Use the period selector to view current or upcoming month statistics.,Page tooltip
+dashboard.period_selector,Period Selector,Label
+dashboard.current_month,Current Month,Period option
+dashboard.next_month,Next Month,Period option
+dashboard.last_30_days,Last 30 days,Period option
+dashboard.last_60_days,Last 60 days,Period option
+dashboard.last_90_days,Last 90 days,Period option
+dashboard.selected_period,Selected period,Label
+dashboard.critical_alerts,Critical Alerts,Section title
+dashboard.alert.delayed_shipments,{count} delayed shipments in selected period,Alert message
+dashboard.alert.availability_issues,{count} plans with panelist availability issues,Alert message
+dashboard.alert.stock_alerts,{count} stock alerts ({regulator} regulator {panelist} panelist),Alert message
+dashboard.alert.panelists_vacation,{count} panelists currently on vacation,Alert message
+dashboard.alert.pending_requirements,{count} pending material requirements,Alert message
+dashboard.allocation_plans,Allocation Plans,Section title
+dashboard.allocation_plans.tooltip,Allocation Plans: Manage shipment assignments between panelists. Monitor pending plans shipment status availability issues and delayed shipments in the selected period.,Section tooltip
+dashboard.total_status,Total & Status,Card title
+dashboard.total_plans,Total Plans,Metric label
+dashboard.total_plans.tooltip,Total number of allocation plans in the selected period.,Metric tooltip
+dashboard.pending,Pending,Status label
+dashboard.pending.tooltip,Plans waiting to be assigned or executed.,Status tooltip
+dashboard.sent,Sent,Status label
+dashboard.sent.tooltip,Plans that have been dispatched.,Status tooltip
+dashboard.received,Received,Status label
+dashboard.received.tooltip,Plans that have been successfully received.,Status tooltip
+dashboard.issues_delays,Issues & Delays,Card title
+dashboard.availability_issues,Availability Issues,Metric label
+dashboard.availability_issues.tooltip,Plans affected by panelist availability problems (unavailable or inactive panelists).,Metric tooltip
+dashboard.unavailable,Unavailable,Status label
+dashboard.no_panelist,No Panelist,Status label
+dashboard.inactive,Inactive,Status label
+dashboard.delayed_shipments,Delayed Shipments,Metric label
+dashboard.delayed_shipments.tooltip,Shipments scheduled before today that have not been received yet.,Metric tooltip
+dashboard.panelists_availability,Panelists & Availability,Section title
+dashboard.panelists_availability.tooltip,Panelists: Manage panelist registry and track availability. Monitor vacation periods and ensure adequate coverage for operations.,Section tooltip
+dashboard.total_panelists,Total Panelists,Metric label
+dashboard.on_vacation,On Vacation,Metric label
+dashboard.upcoming_vacations,Upcoming Vacations,Metric label
+dashboard.upcoming_vacations.detail,Next 30 days,Metric detail
+dashboard.availability_rate,Availability Rate,Metric label
+dashboard.carriers_products,Carriers & Products,Section title
+dashboard.carriers_products.tooltip,Carriers & Products: Manage shipping carriers and product catalog. Essential for allocation planning and operations.,Section tooltip
+dashboard.active_carriers,Active Carriers,Metric label
+dashboard.total_carriers,Total Carriers,Metric label
+dashboard.active_products,Active Products,Metric label
+dashboard.material_management,Material Management,Section title
+dashboard.material_management.tooltip,Material Management: Track material requirements purchase orders and shipments to panelists. Monitor fulfillment status.,Section tooltip
+dashboard.pending_items,Pending Items,Card title
+dashboard.material_requirements,Material Requirements,Metric label
+dashboard.material_requirements.tooltip,Material needs calculated from allocation plans waiting to be fulfilled.,Metric tooltip
+dashboard.purchase_orders,Purchase Orders,Metric label
+dashboard.purchase_orders.tooltip,Purchase orders placed but not yet received.,Metric tooltip
+dashboard.shipments_panelists,Shipments to Panelists,Metric label
+dashboard.shipments_panelists.tooltip,Material shipments to panelists that are pending delivery.,Metric tooltip
+dashboard.stock_alerts,Stock Alerts,Section title
+dashboard.stock_alerts.tooltip,Stock Alerts: Monitor inventory alerts at regulator and panelist locations. Take action on low stock or negative inventory situations.,Section tooltip
+dashboard.alerts_by_location,Alerts by Location,Card title
+dashboard.regulator_alerts,Regulator Alerts,Metric label
+dashboard.panelist_alerts,Panelist Alerts,Metric label
+dashboard.pending_shipments,Pending Shipments,Metric label
+dashboard.delivery_standards,Delivery Standards,Section title
+dashboard.delivery_standards.tooltip,Delivery Standards: Monitor coverage and completeness of delivery standards. Ensure all routes have defined expectations.,Section tooltip
+dashboard.standards_overview,Standards Overview,Card title
+dashboard.total_standards,Total Standards,Metric label
+dashboard.coverage_rate,Coverage Rate,Metric label
+dashboard.coverage_rate.tooltip,Percentage of standards that have complete time and success percentage definitions.,Metric tooltip
+dashboard.needing_review,Needing Review,Metric label
+dashboard.needing_review.tooltip,Standards missing time or success percentage definitions.,Metric tooltip
+locale.selector.label,Language,Language selector label
+locale.en,English,Language name
+locale.es,Español,Language name
+locale.pt,Português,Language name
+locale.fr,Français,Language name

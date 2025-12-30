@@ -1,0 +1,1031 @@
+key,en,es,fr,ar,context,screen
+accounts.account_name,Account Name,,,,jsx_text,AccountForm
+accounts.created,Created,,,,jsx_text,AccountTable
+accounts.name,Name,,,,jsx_text,AccountTable
+accounts.no_accounts_found,No accounts found,,,,jsx_text,AccountTable
+accounts.promise,Promise,,,,jsx_text,AccountForm
+accounts.slug,Slug,,,,jsx_text,AccountForm
+accounts.unique_identifier_lowercase_no_spaces,"Unique identifier (lowercase, no spaces)",,,,jsx_text,AccountForm
+admin.about_account_reset,About Account Reset,,,,jsx_text,AccountManagement
+admin.all_allocation_plans_and_details,All allocation plans and details,,,,jsx_text,AccountResetCard
+admin.all_balancing_history,All balancing history,,,,jsx_text,AccountResetCard
+admin.all_material_shipments_and_movements,All material shipments and movements,,,,jsx_text,AccountResetCard
+admin.all_material_stocks,All material stocks,,,,jsx_text,AccountResetCard
+admin.all_purchase_orders,All purchase orders,,,,jsx_text,AccountResetCard
+admin.cannot_be_undone,Cannot be undone,,,,jsx_text,AccountManagement
+admin.configuration_data_nodes_panelists_materials_etc_w,"Configuration data (nodes, panelists, materials, etc.) will be preserved.",,,,jsx_text,AccountResetCard
+admin.create_user,Create User,,,,jsx_text,Users
+admin.deleted_records,Deleted records:,,,,jsx_text,AccountResetCard
+admin.demo2_account_not_found,DEMO2 account not found,,,,jsx_text,AccountManagement
+admin.demo_reset,Demo Reset,,,,title_attr,AccountManagement
+admin.loading,Loading...,,,,jsx_text,Users
+admin.loading_accounts,Loading accounts...,,,,jsx_text,AccountManagement
+admin.preserve,Preserve,,,,jsx_text,AccountManagement
+admin.promise,Promise,,,,jsx_text,AccountResetCard
+admin.reset_data,Reset Data,,,,jsx_text,AccountResetCard
+admin.the_demo2_account_is_not_available_please_contact_,The DEMO2 account is not available. Please contact the administrator.,,,,jsx_text,AccountManagement
+admin.this_will_permanently_delete,This will permanently delete:,,,,jsx_text,AccountResetCard
+admin.user_management,User Management,,,,title_attr,Users
+admin.warning_this_action_cannot_be_undone,Warning: This action cannot be undone,,,,jsx_text,AccountResetCard
+allocation_plans.all_carriers,All Carriers,,,,jsx_text,AllocationPlanFilters
+allocation_plans.all_cities,All Cities,,,,jsx_text,AllocationPlanFilters
+allocation_plans.all_nodes,All Nodes,,,,jsx_text,AllocationPlanFilters
+allocation_plans.all_plans,All Plans,,,,jsx_text,AllocationPlanFilters
+allocation_plans.all_products,All Products,,,,jsx_text,AllocationPlanFilters
+allocation_plans.all_records,All Records,,,,jsx_text,AllocationPlanFilters
+allocation_plans.all_status,All Status,,,,jsx_text,AllocationPlanFilters
+allocation_plans.auto_fill_to_100,Auto-fill to 100%,,,,jsx_text,AllocationPlanGeneratorForm
+allocation_plans.availability_issues,Availability Issues,,,,jsx_text,AllocationPlanFilters
+allocation_plans.cancel_selected,Cancel Selected,,,,jsx_text,BulkOperationsPanel
+allocation_plans.cancelled,Cancelled,,,,jsx_text,AllocationPlanDetailRow
+allocation_plans.carrier,Carrier,,,,jsx_text,AllocationPlanFilters
+allocation_plans.change_destination_node,Change Destination Node,,,,jsx_text,BulkOperationsPanel
+allocation_plans.change_origin_node,Change Origin Node,,,,jsx_text,BulkOperationsPanel
+allocation_plans.change_scheduled_date,Change Scheduled Date,,,,jsx_text,BulkOperationsPanel
+allocation_plans.city_distribution_matrix,City Distribution Matrix,,,,jsx_text,AllocationPlanGeneratorForm
+allocation_plans.city_distribution_matrix_a_b_c,City Distribution Matrix (A-B-C),,,,jsx_text,AllocationPlanGeneratorForm
+allocation_plans.clear_selection,Clear selection,,,,jsx_text,BulkOperationsPanel
+allocation_plans.completed,Completed,,,,jsx_text,AllocationPlanDetailRow
+allocation_plans.delete_selected,Delete Selected,,,,jsx_text,BulkOperationsPanel
+allocation_plans.destination,Destination:,,,,jsx_text,RegisterReceptionModal
+allocation_plans.destination_city,Destination City,,,,jsx_text,AllocationPlanFilters
+allocation_plans.destination_node,Destination Node,,,,jsx_text,AllocationPlanFilters
+allocation_plans.download_csv_template,Download CSV Template,,,,jsx_text,CSVHandler
+allocation_plans.edit_record,Edit record,,,,title_attr,AllocationPlanDetailRow
+allocation_plans.end_date,End Date,,,,jsx_text,AllocationPlanFilters
+allocation_plans.enter_tag_id,Enter tag ID,,,,placeholder,AllocationPlanDetailRow
+allocation_plans.error,Error:,,,,jsx_text,AllocationPlanDetailRow
+allocation_plans.event_id,Event ID,,,,jsx_text,AllocationPlanFilters
+allocation_plans.example,Example:,,,,jsx_text,AllocationPlanGeneratorForm
+allocation_plans.filters,Filters,,,,jsx_text,AllocationPlanFilters
+allocation_plans.first_day_of_the_allocation_period_samples_will_be,First day of the allocation period. Samples will be scheduled from this date.,,,,jsx_text,AllocationPlanGeneratorForm
+allocation_plans.import_csv,Import CSV,,,,jsx_text,CSVHandler
+allocation_plans.invalid,Invalid,,,,jsx_text,AllocationPlanFilters
+allocation_plans.last_day_of_the_allocation_period_samples_will_be_,Last day of the allocation period. Samples will be scheduled until this date.,,,,jsx_text,AllocationPlanGeneratorForm
+allocation_plans.no_panelist,No Panelist,,,,jsx_text,AllocationPlanDetailRow
+allocation_plans.no_panelist_assigned_to_destination_node,No panelist assigned to destination node,,,,jsx_text,RegisterReceptionModal
+allocation_plans.no_panelist_assigned_to_origin_node,No panelist assigned to origin node,,,,jsx_text,RegisterShipmentModal
+allocation_plans.notified,Notified,,,,jsx_text,AllocationPlanFilters
+allocation_plans.optional,Optional,,,,placeholder,RecordModal
+allocation_plans.optional_distribute_samples_unevenly_across_months,Optional: Distribute samples unevenly across months to reflect seasonal patterns.,,,,jsx_text,AllocationPlanGeneratorForm
+allocation_plans.origin,Origin:,,,,jsx_text,RegisterReceptionModal
+allocation_plans.origin_city,Origin City,,,,jsx_text,AllocationPlanFilters
+allocation_plans.origin_node,Origin Node,,,,jsx_text,AllocationPlanFilters
+allocation_plans.pending,Pending,,,,jsx_text,AllocationPlanFilters
+allocation_plans.plan,Plan,,,,jsx_text,AllocationPlanFilters
+allocation_plans.plan_name,Plan Name *,,,,jsx_text,AllocationPlanGeneratorForm
+allocation_plans.product,Product,,,,jsx_text,AllocationPlanFilters
+allocation_plans.promise,Promise,,,,jsx_text,AllocationPlanDetailRow
+allocation_plans.quick_period_selection,Quick Period Selection,,,,jsx_text,AllocationPlanGeneratorForm
+allocation_plans.receive,Receive,,,,jsx_text,AllocationPlanDetailRow
+allocation_plans.received,Received,,,,jsx_text,AllocationPlanFilters
+allocation_plans.received_date_time,Received Date & Time,,,,jsx_text,RegisterReceptionModal
+allocation_plans.register_reception,Register reception,,,,title_attr,AllocationPlanDetailRow
+allocation_plans.register_shipment,Register shipment,,,,title_attr,AllocationPlanDetailRow
+allocation_plans.registered_by,Registered By,,,,jsx_text,RegisterReceptionModal
+allocation_plans.reprocess_errors,Reprocess Errors,,,,jsx_text,BulkOperationsPanel
+allocation_plans.reset_filters,Reset filters,,,,title_attr,AllocationPlanFilters
+allocation_plans.scheduled_date,Scheduled Date,,,,jsx_text,RecordModal
+allocation_plans.search_by_event_id,Search by Event ID...,,,,placeholder,AllocationPlanFilters
+allocation_plans.search_by_tag_id,Search by Tag ID...,,,,placeholder,AllocationPlanFilters
+allocation_plans.seasonal_distribution,Seasonal Distribution,,,,jsx_text,AllocationPlanGeneratorForm
+allocation_plans.select_carrier,Select carrier,,,,jsx_text,AllocationPlanGeneratorForm
+allocation_plans.select_city,Select City,,,,jsx_text,RecordModal
+allocation_plans.select_node,Select node...,,,,jsx_text,BulkOperationsPanel
+allocation_plans.select_plan,Select Plan,,,,jsx_text,RecordModal
+allocation_plans.select_product,Select product,,,,jsx_text,AllocationPlanGeneratorForm
+allocation_plans.send,Send,,,,jsx_text,AllocationPlanDetailRow
+allocation_plans.sent,Sent,,,,jsx_text,AllocationPlanFilters
+allocation_plans.sent_at,Sent at:,,,,jsx_text,RegisterReceptionModal
+allocation_plans.sent_date_time,Sent Date & Time,,,,jsx_text,RegisterShipmentModal
+allocation_plans.start_date,Start Date,,,,jsx_text,AllocationPlanFilters
+allocation_plans.tag_id,Tag ID,,,,jsx_text,AllocationPlanFilters
+allocation_plans.total_samples,Total Samples *,,,,jsx_text,AllocationPlanGeneratorForm
+allocation_plans.transfer_error,Transfer Error,,,,jsx_text,AllocationPlanFilters
+allocation_plans.validation_errors,Validation Errors:,,,,jsx_text,AllocationPlanDetailRow
+allocation_plans.year,Year,,,,jsx_text,AllocationPlanGeneratorForm
+allocationplangenerator.allocation_plan_generator,Allocation Plan Generator,,,,jsx_text,AllocationPlanGenerator
+allocationplangenerator.applied_date,Applied Date,,,,jsx_text,AllocationPlanGenerator
+allocationplangenerator.applied_plans_historical,Applied Plans (Historical),,,,jsx_text,AllocationPlanGenerator
+allocationplangenerator.automatic_generator,Automatic Generator,,,,jsx_text,AllocationPlanGenerator
+allocationplangenerator.carrier,Carrier,,,,jsx_text,AllocationPlanGenerator
+allocationplangenerator.download_csv,Download CSV,,,,jsx_text,AllocationPlanGenerator
+allocationplangenerator.generate_sample_allocation_plans_automatically_bas,Generate sample allocation plans automatically based on distribution patterns,,,,jsx_text,AllocationPlanGenerator
+allocationplangenerator.generated_plans,Generated Plans,,,,jsx_text,AllocationPlanGenerator
+allocationplangenerator.generator,Generator,,,,jsx_text,AllocationPlanGenerator
+allocationplangenerator.how_it_works,How it works:,,,,jsx_text,AllocationPlanGenerator
+allocationplangenerator.loading,Loading...,,,,jsx_text,AllocationPlanGenerator
+allocationplangenerator.manual_import,Manual Import,,,,jsx_text,AllocationPlanGenerator
+allocationplangenerator.no_applied_plans_yet,No applied plans yet,,,,jsx_text,AllocationPlanGenerator
+allocationplangenerator.no_generated_plans_yet,No generated plans yet,,,,jsx_text,AllocationPlanGenerator
+allocationplangenerator.period,Period,,,,jsx_text,AllocationPlanGenerator
+allocationplangenerator.plan_name,Plan Name,,,,jsx_text,AllocationPlanGenerator
+allocationplangenerator.product,Product,,,,jsx_text,AllocationPlanGenerator
+allocationplangenerator.purpose,Purpose:,,,,jsx_text,AllocationPlanGenerator
+allocationplangenerator.samples,Samples,,,,jsx_text,AllocationPlanGenerator
+allocationplangenerator.usage,Usage:,,,,jsx_text,AllocationPlanGenerator
+allocationplans.add_record,Add Record,,,,jsx_text,AllocationPlans
+allocationplans.allocation_plans,Allocation Plans,,,,jsx_text,AllocationPlans
+allocationplans.availability_issues,Availability Issues,,,,jsx_text,AllocationPlans
+allocationplans.carrier,Carrier,,,,label,AllocationPlans
+allocationplans.delayed_shipments,Delayed Shipments,,,,jsx_text,AllocationPlans
+allocationplans.dest_city,Dest. City,,,,label,AllocationPlans
+allocationplans.dest_node,Dest. Node,,,,label,AllocationPlans
+allocationplans.dest_panelist,Dest. Panelist,,,,label,AllocationPlans
+allocationplans.dest_status,Dest. Status,,,,label,AllocationPlans
+allocationplans.event_id,Event ID,,,,label,AllocationPlans
+allocationplans.loading,Loading...,,,,jsx_text,AllocationPlans
+allocationplans.no_records_found,No records found,,,,jsx_text,AllocationPlans
+allocationplans.origin_city,Origin City,,,,label,AllocationPlans
+allocationplans.origin_node,Origin Node,,,,label,AllocationPlans
+allocationplans.origin_panelist,Origin Panelist,,,,label,AllocationPlans
+allocationplans.origin_status,Origin Status,,,,label,AllocationPlans
+allocationplans.pending,Pending,,,,jsx_text,AllocationPlans
+allocationplans.plan,Plan,,,,label,AllocationPlans
+allocationplans.product,Product,,,,label,AllocationPlans
+allocationplans.received,Received,,,,jsx_text,AllocationPlans
+allocationplans.scheduled_date,Scheduled Date,,,,label,AllocationPlans
+allocationplans.sent,Sent,,,,jsx_text,AllocationPlans
+allocationplans.shipment_status,Shipment Status,,,,jsx_text,AllocationPlans
+allocationplans.tag_id,Tag ID,,,,label,AllocationPlans
+allocationplans.total_delayed,Total Delayed,,,,jsx_text,AllocationPlans
+allocationplans.total_issues,Total Issues,,,,jsx_text,AllocationPlans
+allocationplans.total_pending,Total & Pending,,,,jsx_text,AllocationPlans
+allocationplans.view_and_manage_generated_allocation_plans,View and manage generated allocation plans,,,,jsx_text,AllocationPlans
+allocationplans.week,Week,,,,label,AllocationPlans
+auth.click_here_to_auto_fill_demo_credentials,Click here to auto-fill demo credentials,,,,jsx_text,LoginForm
+auth.email,Email:,,,,jsx_text,LoginForm
+auth.email_address,Email Address,,,,jsx_text,LoginForm
+auth.enter_your_password,Enter your password,,,,placeholder,LoginForm
+auth.loading,Loading...,,,,jsx_text,ProtectedRoute
+auth.password,Password:,,,,jsx_text,LoginForm
+auth.secure_authentication_powered_by_supabase,Secure authentication powered by Supabase,,,,jsx_text,LoginForm
+auth.sign_in,Sign In,,,,jsx_text,LoginForm
+auth.signing_in,Signing in...,,,,jsx_text,LoginForm
+auth.try_demo_account,Try Demo Account,,,,jsx_text,LoginForm
+auth.wherequalitystarts,WhereQualityStarts,,,,jsx_text,LoginForm
+auth.your_email_com,your@email.com,,,,placeholder,LoginForm
+carriers.add_a_new_material_to_catalog_and_assign_to_produc,Add a new material to catalog and assign to product,,,,jsx_text,MaterialSelector
+carriers.additional_details,Additional details...,,,,placeholder,MaterialSelector
+carriers.all_carriers,All Carriers,,,,jsx_text,Carriers
+carriers.all_products,All Products,,,,jsx_text,Carriers
+carriers.all_products_have_materials,All products have materials!,,,,jsx_text,Carriers
+carriers.all_status,All Status,,,,jsx_text,Carriers
+carriers.carrier,Carrier,,,,jsx_text,Carriers
+carriers.carriers,Carriers,,,,jsx_text,Carriers
+carriers.carriers_products,Carriers & Products,,,,jsx_text,Carriers
+carriers.choose_an_existing_material_from_your_catalog,Choose an existing material from your catalog,,,,jsx_text,MaterialSelector
+carriers.choose_how_to_add_material_to_this_product,Choose how to add material to this product:,,,,jsx_text,MaterialSelector
+carriers.clear_filters,Clear Filters,,,,jsx_text,Carriers
+carriers.code,Code *,,,,jsx_text,CarrierForm
+carriers.collapse_all,Collapse All,,,,jsx_text,Carriers
+carriers.create_carrier,Create Carrier,,,,jsx_text,Carriers
+carriers.create_new_material,Create New Material,,,,jsx_text,MaterialSelector
+carriers.days,Days,,,,jsx_text,ProductForm
+carriers.delete_carrier,Delete carrier,,,,title_attr,CarriersTree
+carriers.delete_product,Delete product,,,,title_attr,CarriersTree
+carriers.delivery_hours,Delivery Hours,,,,jsx_text,Carriers
+carriers.description,Description,,,,jsx_text,MaterialSelector
+carriers.download_csv,Download CSV,,,,jsx_text,Carriers
+carriers.e_g_24,"e.g., 24",,,,placeholder,ProductForm
+carriers.e_g_dhl_exp_24,"e.g., DHL-EXP-24",,,,placeholder,ProductForm
+carriers.e_g_dhl_express,"e.g., DHL Express",,,,placeholder,CarrierForm
+carriers.e_g_dhl_ups,"e.g., DHL, UPS",,,,placeholder,CarrierForm
+carriers.e_g_express_delivery_24_hours,"e.g., Express delivery 24 hours",,,,placeholder,ProductForm
+carriers.e_g_express_standard_economy,"e.g., express, standard, economy",,,,placeholder,CarrierForm
+carriers.edit_carrier,Edit carrier,,,,title_attr,CarriersTree
+carriers.edit_product,Edit product,,,,title_attr,CarriersTree
+carriers.every_product_has_materials_assigned_from_the_cata,Every product has materials assigned from the catalog,,,,jsx_text,Carriers
+carriers.expand_all,Expand All,,,,jsx_text,Carriers
+carriers.expand_all_products_in_this_carrier,Expand all products in this carrier,,,,title_attr,CarriersTree
+carriers.hours,Hours,,,,jsx_text,ProductForm
+carriers.loading_carriers,Loading carriers...,,,,jsx_text,Carriers
+carriers.manage_shipping_carriers_products_and_material_req,"Manage shipping carriers, products, and material requirements",,,,jsx_text,Carriers
+carriers.mat_001,MAT-001,,,,placeholder,MaterialSelector
+carriers.material,Material,,,,jsx_text,CarriersTree
+carriers.materials,Materials,,,,jsx_text,Carriers
+carriers.name,Name *,,,,jsx_text,CarrierForm
+carriers.no_active_materials_in_catalog_create_a_new_one_in,No active materials in catalog. Create a new one instead.,,,,jsx_text,MaterialSelector
+carriers.no_carriers_defined_yet,No carriers defined yet,,,,jsx_text,Carriers
+carriers.no_materials_assigned_yet,No materials assigned yet,,,,jsx_text,CarriersTree
+carriers.no_products_for_this_carrier_yet,No products for this carrier yet,,,,jsx_text,CarriersTree
+carriers.no_results_found,No results found,,,,jsx_text,Carriers
+carriers.pending_materials,Pending Materials,,,,jsx_text,CarriersTree
+carriers.product,Product,,,,jsx_text,CarriersTree
+carriers.product_code,Product Code,,,,jsx_text,Carriers
+carriers.products,Products,,,,jsx_text,Carriers
+carriers.products_without_materials,Products without Materials,,,,jsx_text,Carriers
+carriers.promise,Promise,,,,jsx_text,CarrierForm
+carriers.quantity,Quantity *,,,,jsx_text,MaterialSelector
+carriers.remove_material,Remove material,,,,title_attr,CarriersTree
+carriers.rfid_tag,RFID Tag,,,,placeholder,MaterialSelector
+carriers.search_carriers_or_products,Search carriers or products...,,,,placeholder,Carriers
+carriers.select_from_catalog,Select from Catalog,,,,jsx_text,MaterialSelector
+carriers.select_material,Select Material *,,,,jsx_text,MaterialSelector
+carriers.standard_delivery_time,Standard Delivery Time *,,,,jsx_text,ProductForm
+carriers.start_by_creating_your_first_carrier_to_manage_shi,Start by creating your first carrier to manage shipping products,,,,jsx_text,Carriers
+carriers.status,Status *,,,,jsx_text,CarrierForm
+carriers.these_products_need_material_assignments_to_be_ope,These products need material assignments to be operational,,,,jsx_text,Carriers
+carriers.time_unit,Time Unit *,,,,jsx_text,ProductForm
+carriers.try_adjusting_your_search_or_filters,Try adjusting your search or filters,,,,jsx_text,Carriers
+carriers.type,Type,,,,jsx_text,CarrierForm
+carriers.unit_measure,Unit Measure,,,,jsx_text,MaterialSelector
+carriers.units_kg_etc,"units, kg, etc.",,,,placeholder,MaterialSelector
+carriers.update_quantity,Update quantity,,,,title_attr,CarriersTree
+carriers.with_materials,With Materials,,,,jsx_text,Carriers
+carriers.without_materials,Without Materials,,,,jsx_text,Carriers
+common.actions,Actions,,,,jsx_text,PanelistUnavailability
+common.active,Active,,,,jsx_text,PanelistUnavailability
+common.apply,Apply,,,,jsx_text,BulkOperationsPanel
+common.cancel,Cancel,,,,jsx_text,PanelistUnavailability
+common.clear,Clear,,,,jsx_text,OneDBBulkPanel
+common.close,Close,,,,jsx_text,GenerateCombinationsModal
+common.delete,Delete,,,,jsx_text,PanelistUnavailability
+common.edit,Edit,,,,jsx_text,PanelistUnavailability
+common.error,Error,,,,jsx_text,ReceiveGenerator
+common.inactive,Inactive,,,,jsx_text,AccountForm
+common.information,Information,,,,jsx_text,SmartTooltip
+common.promise,Promise,,,,jsx_text,AuthContext
+common.refresh,Refresh,,,,jsx_text,NodeLoadBalancing
+common.remove,Remove,,,,jsx_text,ConfirmShipmentModal
+common.reset,Reset,,,,jsx_text,PanelistUnavailability
+common.save,Save,,,,title_attr,CityClassificationTable
+common.search,Search,,,,jsx_text,PanelistUnavailability
+common.status,Status,,,,jsx_text,PanelistUnavailability
+common.total,Total,,,,jsx_text,BalancePreviewModal
+countrytopology.all_cities,All Cities,,,,jsx_text,CountryTopology
+countrytopology.all_nodes,All Nodes,,,,jsx_text,CountryTopology
+countrytopology.all_nodes_have_panelists,All nodes have panelists!,,,,jsx_text,CountryTopology
+countrytopology.all_regions,All Regions,,,,jsx_text,CountryTopology
+countrytopology.cities,Cities,,,,jsx_text,CountryTopology
+countrytopology.city,City,,,,jsx_text,CountryTopology
+countrytopology.clear_filters,Clear Filters,,,,jsx_text,CountryTopology
+countrytopology.collapse_all,Collapse All,,,,jsx_text,CountryTopology
+countrytopology.country_topology,Country Topology,,,,jsx_text,CountryTopology
+countrytopology.create_region,Create Region,,,,jsx_text,CountryTopology
+countrytopology.define_and_manage_your_country_network_infrastruct,Define and manage your country network infrastructure hierarchy,,,,jsx_text,CountryTopology
+countrytopology.download_csv,Download CSV,,,,jsx_text,CountryTopology
+countrytopology.every_node_in_your_topology_has_a_panelist_assigne,Every node in your topology has a panelist assigned,,,,jsx_text,CountryTopology
+countrytopology.expand_all,Expand All,,,,jsx_text,CountryTopology
+countrytopology.loading_topology,Loading topology...,,,,jsx_text,CountryTopology
+countrytopology.no_results_found,No results found,,,,jsx_text,CountryTopology
+countrytopology.no_topology_defined_yet,No topology defined yet,,,,jsx_text,CountryTopology
+countrytopology.node_id,Node ID,,,,jsx_text,CountryTopology
+countrytopology.nodes_without_panelists,Nodes without Panelists,,,,jsx_text,CountryTopology
+countrytopology.pending_panelist,Pending Panelist,,,,jsx_text,CountryTopology
+countrytopology.region,Region,,,,jsx_text,CountryTopology
+countrytopology.regions,Regions,,,,jsx_text,CountryTopology
+countrytopology.search_regions_cities_or_nodes,"Search regions, cities, or nodes...",,,,placeholder,CountryTopology
+countrytopology.start_by_creating_your_first_region_to_build_your_,Start by creating your first region to build your country topology,,,,jsx_text,CountryTopology
+countrytopology.these_nodes_need_panelist_assignment_to_be_operati,These nodes need panelist assignment to be operational,,,,jsx_text,CountryTopology
+countrytopology.topology_tree,Topology Tree,,,,jsx_text,CountryTopology
+countrytopology.total_nodes,Total Nodes,,,,jsx_text,CountryTopology
+countrytopology.try_adjusting_your_search_or_filters,Try adjusting your search or filters,,,,jsx_text,CountryTopology
+countrytopology.with_panelist,With Panelist,,,,jsx_text,CountryTopology
+countrytopology.with_panelists,With Panelists,,,,jsx_text,CountryTopology
+countrytopology.without_panelist,Without Panelist,,,,jsx_text,CountryTopology
+countrytopology.without_panelists,Without Panelists,,,,jsx_text,CountryTopology
+dashboard.active_carriers,Active Carriers,,,,jsx_text,Dashboard
+dashboard.active_products,Active Products,,,,jsx_text,Dashboard
+dashboard.active_resources,Active Resources,,,,jsx_text,Dashboard
+dashboard.allocation_plans,Allocation Plans,,,,jsx_text,Dashboard
+dashboard.availability_issues,Availability Issues,,,,jsx_text,Dashboard
+dashboard.availability_rate,Availability Rate,,,,jsx_text,Dashboard
+dashboard.available_combinations,Available combinations,,,,jsx_text,Dashboard
+dashboard.carrier_product_pairs,Carrier-Product Pairs,,,,jsx_text,Dashboard
+dashboard.carriers_products,Carriers & Products,,,,jsx_text,Dashboard
+dashboard.configured_routes,Configured routes,,,,jsx_text,Dashboard
+dashboard.coverage_rate,Coverage Rate,,,,jsx_text,Dashboard
+dashboard.critical_alerts,Critical Alerts,,,,jsx_text,Dashboard
+dashboard.current_alerts,Current Alerts,,,,jsx_text,Dashboard
+dashboard.current_month,Current Month,,,,jsx_text,Dashboard
+dashboard.currently_unavailable,Currently unavailable,,,,jsx_text,Dashboard
+dashboard.delayed_shipments,Delayed Shipments,,,,jsx_text,Dashboard
+dashboard.delivery_standards,Delivery Standards,,,,jsx_text,Dashboard
+dashboard.incomplete_standards,Incomplete standards,,,,jsx_text,Dashboard
+dashboard.issues_delays,Issues & Delays,,,,jsx_text,Dashboard
+dashboard.last_30_days,Last 30 days,,,,jsx_text,Dashboard
+dashboard.last_60_days,Last 60 days,,,,jsx_text,Dashboard
+dashboard.last_90_days,Last 90 days,,,,jsx_text,Dashboard
+dashboard.loading_dashboard,Loading dashboard...,,,,jsx_text,Dashboard
+dashboard.management_dashboard,Management Dashboard,,,,jsx_text,Dashboard
+dashboard.management_tip,Management Tip,,,,jsx_text,Dashboard
+dashboard.material_management,Material Management,,,,jsx_text,Dashboard
+dashboard.material_requirements,Material Requirements,,,,jsx_text,Dashboard
+dashboard.needing_review,Needing Review,,,,jsx_text,Dashboard
+dashboard.next_30_days,Next 30 days,,,,jsx_text,Dashboard
+dashboard.next_month,Next Month,,,,jsx_text,Dashboard
+dashboard.on_vacation,On Vacation,,,,jsx_text,Dashboard
+dashboard.panelist_status,Panelist Status,,,,jsx_text,Dashboard
+dashboard.panelist_stock,Panelist Stock,,,,jsx_text,Dashboard
+dashboard.panelists_availability,Panelists & Availability,,,,jsx_text,Dashboard
+dashboard.pending_items,Pending Items,,,,jsx_text,Dashboard
+dashboard.pending_shipments,Pending Shipments,,,,jsx_text,Dashboard
+dashboard.purchase_orders,Purchase Orders,,,,jsx_text,Dashboard
+dashboard.regulator_stock,Regulator Stock,,,,jsx_text,Dashboard
+dashboard.selected_period,Selected period:,,,,jsx_text,Dashboard
+dashboard.shipments_to_panelists,Shipments to Panelists,,,,jsx_text,Dashboard
+dashboard.standards_configuration,Standards Configuration,,,,jsx_text,Dashboard
+dashboard.stock_alerts,Stock Alerts,,,,jsx_text,Dashboard
+dashboard.total_panelists,Total Panelists,,,,jsx_text,Dashboard
+dashboard.total_plans,Total Plans,,,,jsx_text,Dashboard
+dashboard.total_standards,Total Standards,,,,jsx_text,Dashboard
+dashboard.total_status,Total & Status,,,,jsx_text,Dashboard
+dashboard.upcoming_vacations,Upcoming Vacations,,,,jsx_text,Dashboard
+delivery_standards.carrier,Carrier *,,,,jsx_text,DeliveryStandardForm
+delivery_standards.clear_all_selections,Clear All Selections,,,,jsx_text,GenerateCombinationsModal
+delivery_standards.days,Days,,,,jsx_text,DeliveryStandardForm
+delivery_standards.destination_city,Destination City *,,,,jsx_text,DeliveryStandardForm
+delivery_standards.e_g_24,"e.g., 24",,,,placeholder,DeliveryStandardForm
+delivery_standards.e_g_85,"e.g., 85",,,,placeholder,DeliveryStandardForm
+delivery_standards.estimated_combinations,Estimated combinations:,,,,jsx_text,GenerateCombinationsModal
+delivery_standards.generate_delivery_standards,Generate Delivery Standards,,,,title_attr,GenerateCombinationsModal
+delivery_standards.generation_complete,Generation Complete,,,,title_attr,GenerateCombinationsModal
+delivery_standards.hours,Hours,,,,jsx_text,DeliveryStandardForm
+delivery_standards.no_products_for_this_carrier,No products for this carrier,,,,jsx_text,DeliveryStandardForm
+delivery_standards.origin_city,Origin City *,,,,jsx_text,DeliveryStandardForm
+delivery_standards.product,Product *,,,,jsx_text,DeliveryStandardForm
+delivery_standards.promise,Promise,,,,jsx_text,DeliveryStandardForm
+delivery_standards.select_carrier,Select carrier,,,,jsx_text,DeliveryStandardForm
+delivery_standards.select_destination,Select destination,,,,jsx_text,DeliveryStandardForm
+delivery_standards.select_origin,Select origin,,,,jsx_text,DeliveryStandardForm
+delivery_standards.select_product,Select product,,,,jsx_text,DeliveryStandardForm
+delivery_standards.smart_generation,Smart Generation:,,,,jsx_text,GenerateCombinationsModal
+delivery_standards.standard_time,Standard Time,,,,jsx_text,DeliveryStandardForm
+delivery_standards.success,Success %,,,,jsx_text,DeliveryStandardForm
+delivery_standards.time_unit,Time Unit *,,,,jsx_text,DeliveryStandardForm
+deliverystandards.about_delivery_standards,About Delivery Standards,,,,jsx_text,DeliveryStandards
+deliverystandards.absoluto,Absoluto:,,,,jsx_text,DeliveryStandards
+deliverystandards.absoluto_del_100,Absoluto (% del 100%),,,,jsx_text,DeliveryStandards
+deliverystandards.all_carriers,All Carriers,,,,jsx_text,DeliveryStandards
+deliverystandards.all_cities,All Cities,,,,jsx_text,DeliveryStandards
+deliverystandards.all_products,All Products,,,,jsx_text,DeliveryStandards
+deliverystandards.all_types,All Types,,,,jsx_text,DeliveryStandards
+deliverystandards.carrier,Carrier,,,,jsx_text,DeliveryStandards
+deliverystandards.carrier_s_product_service_type_e_g_express_standar,"Carrier's product/service type (e.g., Express, Standard, Economy)",,,,jsx_text,DeliveryStandards
+deliverystandards.city_where_the_package_is_delivered_destination_ci,City where the package is delivered (destination city),,,,jsx_text,DeliveryStandards
+deliverystandards.city_where_the_package_is_picked_up_origin_city,City where the package is picked up (origin city),,,,jsx_text,DeliveryStandards
+deliverystandards.configured,Configured,,,,jsx_text,DeliveryStandards
+deliverystandards.create_delivery_standard,Create Delivery Standard,,,,title_attr,DeliveryStandards
+deliverystandards.critical,Critical %,,,,jsx_text,DeliveryStandards
+deliverystandards.critical_threshold,Critical Threshold (%),,,,jsx_text,DeliveryStandards
+deliverystandards.days,Days,,,,jsx_text,DeliveryStandards
+deliverystandards.delivery_standards,Delivery Standards,,,,jsx_text,DeliveryStandards
+deliverystandards.destination,Destination,,,,jsx_text,DeliveryStandards
+deliverystandards.destination_city,Destination City,,,,jsx_text,DeliveryStandards
+deliverystandards.destination_type,Destination Type,,,,jsx_text,DeliveryStandards
+deliverystandards.e_g_10,"e.g., 10",,,,placeholder,DeliveryStandards
+deliverystandards.e_g_20,"e.g., 20",,,,placeholder,DeliveryStandards
+deliverystandards.e_g_24,"e.g., 24",,,,placeholder,DeliveryStandards
+deliverystandards.e_g_85,"e.g., 85",,,,placeholder,DeliveryStandards
+deliverystandards.edit_delivery_standard,Edit Delivery Standard,,,,title_attr,DeliveryStandards
+deliverystandards.edit_or_delete_this_delivery_standard,Edit or delete this delivery standard,,,,jsx_text,DeliveryStandards
+deliverystandards.ejemplo_success_95_warning_10_l_mite_90_100_10,"Ejemplo: Success=95%, Warning=10% → Límite=90% (100% - 10%)",,,,jsx_text,DeliveryStandards
+deliverystandards.ejemplo_success_95_warning_5_l_mite_90_25_95_95_5,"Ejemplo: Success=95%, Warning=5% → Límite=90.25% (95% - 95%×5%)",,,,jsx_text,DeliveryStandards
+deliverystandards.filters,Filters,,,,jsx_text,DeliveryStandards
+deliverystandards.hours,Hours,,,,jsx_text,DeliveryStandards
+deliverystandards.j_k,J+K:,,,,jsx_text,DeliveryStandards
+deliverystandards.key_metrics,Key Metrics:,,,,jsx_text,DeliveryStandards
+deliverystandards.loading_delivery_standards,Loading delivery standards...,,,,jsx_text,DeliveryStandards
+deliverystandards.logistics_carrier_responsible_for_delivery_e_g_dhl,"Logistics carrier responsible for delivery (e.g., DHL, FedEx)",,,,jsx_text,DeliveryStandards
+deliverystandards.los_thresholds_se_calculan_como_del_100,Los thresholds se calculan como % del 100%.,,,,jsx_text,DeliveryStandards
+deliverystandards.los_thresholds_se_calculan_como_del_success,Los thresholds se calculan como % del Success %.,,,,jsx_text,DeliveryStandards
+deliverystandards.manage_delivery_time_standards_between_cities_for_,Manage delivery time standards between cities for each carrier and product,,,,jsx_text,DeliveryStandards
+deliverystandards.no_delivery_standards_found_generate_combinations_,No delivery standards found. Generate combinations to get started.,,,,jsx_text,DeliveryStandards
+deliverystandards.origin,Origin,,,,jsx_text,DeliveryStandards
+deliverystandards.origin_city,Origin City,,,,jsx_text,DeliveryStandards
+deliverystandards.origin_type,Origin Type,,,,jsx_text,DeliveryStandards
+deliverystandards.pending,Pending,,,,jsx_text,DeliveryStandards
+deliverystandards.pending_only,Pending Only,,,,jsx_text,DeliveryStandards
+deliverystandards.product,Product,,,,jsx_text,DeliveryStandards
+deliverystandards.purpose,Purpose:,,,,jsx_text,DeliveryStandards
+deliverystandards.relativo,Relativo:,,,,jsx_text,DeliveryStandards
+deliverystandards.relativo_del_success,Relativo (% del Success %),,,,jsx_text,DeliveryStandards
+deliverystandards.reset_all_filters,Reset all filters,,,,title_attr,DeliveryStandards
+deliverystandards.selected,Selected,,,,jsx_text,DeliveryStandards
+deliverystandards.standard_delivery_time_e_g_j_2_means_2_days_from_p,"Standard delivery time (e.g., J+2 means 2 days from pickup)",,,,jsx_text,DeliveryStandards
+deliverystandards.standard_time,Standard Time,,,,jsx_text,DeliveryStandards
+deliverystandards.std,Std %:,,,,jsx_text,DeliveryStandards
+deliverystandards.success,Success %,,,,jsx_text,DeliveryStandards
+deliverystandards.target_percentage_of_deliveries_meeting_the_j_k_st,Target percentage of deliveries meeting the J+K standard,,,,jsx_text,DeliveryStandards
+deliverystandards.threshold_calculation_type_relative_percentage_bas,Threshold calculation type: Relative (percentage-based) or Absolute (fixed value),,,,jsx_text,DeliveryStandards
+deliverystandards.threshold_type,Threshold Type,,,,jsx_text,DeliveryStandards
+deliverystandards.thresholds,Thresholds:,,,,jsx_text,DeliveryStandards
+deliverystandards.time_unit,Time Unit,,,,jsx_text,DeliveryStandards
+deliverystandards.time_unit_for_the_j_k_value_hours_or_days,Time unit for the J+K value (hours or days),,,,jsx_text,DeliveryStandards
+deliverystandards.tipo_de_c_lculo_de_thresholds,Tipo de Cálculo de Thresholds:,,,,jsx_text,DeliveryStandards
+deliverystandards.total_standards,Total Standards,,,,jsx_text,DeliveryStandards
+deliverystandards.type,Type,,,,jsx_text,DeliveryStandards
+deliverystandards.type_a,Type A,,,,jsx_text,DeliveryStandards
+deliverystandards.type_b,Type B,,,,jsx_text,DeliveryStandards
+deliverystandards.type_c,Type C,,,,jsx_text,DeliveryStandards
+deliverystandards.unit,Unit,,,,jsx_text,DeliveryStandards
+deliverystandards.usage,Usage:,,,,jsx_text,DeliveryStandards
+deliverystandards.warning,Warning %,,,,jsx_text,DeliveryStandards
+deliverystandards.warning_and_critical_deviation_levels_for_performa,Warning and critical deviation levels for performance monitoring,,,,jsx_text,DeliveryStandards
+deliverystandards.warning_threshold,Warning Threshold (%),,,,jsx_text,DeliveryStandards
+layout.all_accounts,All Accounts,,,,jsx_text,Sidebar
+layout.sign_out,Sign Out,,,,jsx_text,Sidebar
+layout.view_as_account,View as account:,,,,jsx_text,Sidebar
+material_catalog.additional_details,Additional details...,,,,placeholder,MaterialCatalogForm
+material_catalog.code,Code *,,,,jsx_text,MaterialCatalogForm
+material_catalog.description,Description,,,,jsx_text,MaterialCatalogForm
+material_catalog.mat_001,MAT-001,,,,placeholder,MaterialCatalogForm
+material_catalog.minimum_stock_safety_stock,Minimum Stock (Safety Stock),,,,jsx_text,MaterialCatalogForm
+material_catalog.name,Name *,,,,jsx_text,MaterialCatalogForm
+material_catalog.promise,Promise,,,,jsx_text,MaterialCatalogForm
+material_catalog.rfid_tag,RFID Tag,,,,placeholder,MaterialCatalogForm
+material_catalog.unit_measure,Unit Measure,,,,jsx_text,MaterialCatalogForm
+material_catalog.units_kg_etc,"units, kg, etc.",,,,placeholder,MaterialCatalogForm
+materialcatalog.code,Code,,,,jsx_text,MaterialCatalog
+materialcatalog.description,Description,,,,jsx_text,MaterialCatalog
+materialcatalog.loading,Loading...,,,,jsx_text,MaterialCatalog
+materialcatalog.manage_reusable_materials_for_all_products,Manage reusable materials for all products,,,,jsx_text,MaterialCatalog
+materialcatalog.material_catalog,Material Catalog,,,,jsx_text,MaterialCatalog
+materialcatalog.min_stock,Min Stock,,,,jsx_text,MaterialCatalog
+materialcatalog.name,Name,,,,jsx_text,MaterialCatalog
+materialcatalog.no_materials_in_catalog_create_your_first_material,No materials in catalog. Create your first material to get started.,,,,jsx_text,MaterialCatalog
+materialcatalog.promise,Promise,,,,jsx_text,MaterialCatalog
+materialcatalog.unit,Unit,,,,jsx_text,MaterialCatalog
+materialrequirements.all_materials,All Materials,,,,jsx_text,MaterialRequirements
+materialrequirements.all_nodes,All Nodes,,,,jsx_text,MaterialRequirements
+materialrequirements.calculate_material_needs_based_on_allocation_plans,Calculate material needs based on allocation plans,,,,jsx_text,MaterialRequirements
+materialrequirements.end_date,End Date,,,,jsx_text,MaterialRequirements
+materialrequirements.error_calculating_requirements,Error calculating requirements,,,,jsx_text,MaterialRequirements
+materialrequirements.export_to_csv,Export to CSV,,,,jsx_text,MaterialRequirements
+materialrequirements.filters,Filters,,,,jsx_text,MaterialRequirements
+materialrequirements.material,Material,,,,jsx_text,MaterialRequirements
+materialrequirements.material_code,Material Code,,,,jsx_text,MaterialRequirements
+materialrequirements.material_name,Material Name,,,,jsx_text,MaterialRequirements
+materialrequirements.material_requirements,Material Requirements,,,,jsx_text,MaterialRequirements
+materialrequirements.node,Node,,,,jsx_text,MaterialRequirements
+materialrequirements.panelist_requirements,Panelist Requirements,,,,jsx_text,MaterialRequirements
+materialrequirements.panelists_needing,Panelists Needing,,,,jsx_text,MaterialRequirements
+materialrequirements.plans,Plans,,,,jsx_text,MaterialRequirements
+materialrequirements.purchase_requirements,Purchase Requirements,,,,jsx_text,MaterialRequirements
+materialrequirements.quantity,Quantity,,,,jsx_text,MaterialRequirements
+materialrequirements.quantity_needed,Quantity Needed,,,,jsx_text,MaterialRequirements
+materialrequirements.quick_period_selection,Quick Period Selection,,,,jsx_text,MaterialRequirements
+materialrequirements.reset_all_filters,Reset all filters,,,,title_attr,MaterialRequirements
+materialrequirements.shipments,Shipments,,,,jsx_text,MaterialRequirements
+materialrequirements.start_date,Start Date,,,,jsx_text,MaterialRequirements
+materialrequirements.total_materials,Total Materials,,,,jsx_text,MaterialRequirements
+materialrequirements.unit,Unit,,,,jsx_text,MaterialRequirements
+materialrequirements.year,Year,,,,jsx_text,MaterialRequirements
+nodeloadbalancing.acceptable_deviation_from_reference,Acceptable deviation from reference,,,,jsx_text,NodeLoadBalancing
+nodeloadbalancing.actualiza_fecha_programada_y_node_id_en_allocation,Actualiza fecha_programada y node_id en allocation_plan_details,,,,jsx_text,CityLoadCard
+nodeloadbalancing.additional_nodes_required,Additional Nodes Required,,,,jsx_text,BalancePreviewModal
+nodeloadbalancing.after,After,,,,jsx_text,BalancePreviewModal
+nodeloadbalancing.all_shipments_in_period,All shipments in period,,,,jsx_text,NodeLoadBalancing
+nodeloadbalancing.avg_node,Avg/Node:,,,,jsx_text,CityLoadCard
+nodeloadbalancing.balance_not_needed,Balance Not Needed,,,,jsx_text,CityLoadCard
+nodeloadbalancing.before,Before,,,,jsx_text,BalancePreviewModal
+nodeloadbalancing.c_lculo_del_objetivo,Cálculo del objetivo:,,,,jsx_text,CityLoadCard
+nodeloadbalancing.calculating_balance_preview,Calculating balance preview...,,,,jsx_text,BalancePreviewModal
+nodeloadbalancing.clasificaci_n,Clasificación:,,,,jsx_text,NodeLoadBalancing
+nodeloadbalancing.con_ref_63_y_20_normal_lt_75_6_high_75_6_saturated,"Con Ref=63 y %=20, Normal &lt; 75.6, High ≥ 75.6, Saturated ≥ 81.9",,,,jsx_text,NodeLoadBalancing
+nodeloadbalancing.concepto,Concepto:,,,,jsx_text,CityLoadCard
+nodeloadbalancing.critical,Critical:,,,,jsx_text,CityLoadCard
+nodeloadbalancing.deviation_tolerance,Deviation Tolerance (%),,,,jsx_text,NodeLoadBalancing
+nodeloadbalancing.ejemplo,Ejemplo:,,,,jsx_text,NodeLoadBalancing
+nodeloadbalancing.ejemplo_305_shipments_1_nodo_5_semanas_61_por_celd,Ejemplo: 305 shipments / (1 nodo × 5 semanas) = 61 por celda,,,,jsx_text,CityLoadCard
+nodeloadbalancing.end_date,End Date,,,,jsx_text,NodeLoadBalancing
+nodeloadbalancing.even_after_optimal_balancing_the_average_load_per_,"Even after optimal balancing, the average load per node (",,,,jsx_text,BalancePreviewModal
+nodeloadbalancing.expected_average_samples_per_node,Expected average samples per node,,,,jsx_text,NodeLoadBalancing
+nodeloadbalancing.filters,Filters,,,,jsx_text,NodeLoadBalancing
+nodeloadbalancing.high_load,High Load:,,,,jsx_text,NodeLoadBalancing
+nodeloadbalancing.high_load_nodes,High Load Nodes,,,,jsx_text,NodeLoadBalancing
+nodeloadbalancing.how_it_works,How it works:,,,,jsx_text,NodeLoadBalancing
+nodeloadbalancing.identifica_celdas_sobrecargadas_gt_objetivo_1_2,Identifica celdas sobrecargadas (&gt; objetivo × 1.2),,,,jsx_text,CityLoadCard
+nodeloadbalancing.identifica_celdas_subcargadas_lt_objetivo_0_9,Identifica celdas subcargadas (&lt; objetivo × 0.9),,,,jsx_text,CityLoadCard
+nodeloadbalancing.improvement,Improvement,,,,jsx_text,BalancePreviewModal
+nodeloadbalancing.load_distribution_matrix,Load Distribution Matrix,,,,jsx_text,BalancePreviewModal
+nodeloadbalancing.load_level,Load Level:,,,,jsx_text,BalancePreviewModal
+nodeloadbalancing.loading_node_load_data,Loading node load data...,,,,jsx_text,NodeLoadBalancing
+nodeloadbalancing.matrix_balancing_algorithm,Matrix Balancing Algorithm,,,,jsx_text,BalancePreviewModal
+nodeloadbalancing.matrix_data_not_available,Matrix data not available,,,,jsx_text,BalancePreviewModal
+nodeloadbalancing.minimiza_la_desviaci_n_est_ndar_de_toda_la_matriz,Minimiza la desviación estándar de toda la matriz,,,,jsx_text,CityLoadCard
+nodeloadbalancing.monthly_avg,Monthly Avg,,,,jsx_text,CityLoadCard
+nodeloadbalancing.movements,Movements,,,,jsx_text,BalancePreviewModal
+nodeloadbalancing.mueve_shipments_de_celdas_sobrecargadas_a_subcarga,Mueve shipments de celdas sobrecargadas a subcargadas,,,,jsx_text,CityLoadCard
+nodeloadbalancing.no_action_required_all_cells_are_within_acceptable,No action required. All cells are within acceptable range.,,,,jsx_text,CityLoadCard
+nodeloadbalancing.no_data_available_for_the_selected_period_try_sele,No data available for the selected period. Try selecting a different month.,,,,jsx_text,NodeLoadBalancing
+nodeloadbalancing.node,Node,,,,jsx_text,BalancePreviewModal
+nodeloadbalancing.node_load_balancing,Node Load Balancing,,,,jsx_text,NodeLoadBalancing
+nodeloadbalancing.nodes_at_120_150_avg_load,Nodes at 120-150% avg load,,,,jsx_text,NodeLoadBalancing
+nodeloadbalancing.nodes_over_150_avg_load,Nodes over 150% avg load,,,,jsx_text,NodeLoadBalancing
+nodeloadbalancing.normal,Normal:,,,,jsx_text,NodeLoadBalancing
+nodeloadbalancing.optimal,Optimal:,,,,jsx_text,CityLoadCard
+nodeloadbalancing.optimize_shipment_distribution_across_nodes_and_we,Optimize shipment distribution across nodes and weeks,,,,jsx_text,NodeLoadBalancing
+nodeloadbalancing.porcentaje_de_desviaci_n_aceptable_respecto_al_val,Porcentaje de desviación aceptable respecto al valor de referencia.,,,,jsx_text,NodeLoadBalancing
+nodeloadbalancing.preventive,Preventive:,,,,jsx_text,CityLoadCard
+nodeloadbalancing.proceso,Proceso:,,,,jsx_text,CityLoadCard
+nodeloadbalancing.promedio_objetivo_total_shipments_nodos_semanas,Promedio objetivo = Total shipments / (Nodos × Semanas),,,,jsx_text,CityLoadCard
+nodeloadbalancing.purpose,Purpose:,,,,jsx_text,NodeLoadBalancing
+nodeloadbalancing.quick_selection,Quick Selection,,,,jsx_text,NodeLoadBalancing
+nodeloadbalancing.reference_load,Reference Load,,,,jsx_text,NodeLoadBalancing
+nodeloadbalancing.reference_samples_node,Reference Samples/Node,,,,jsx_text,NodeLoadBalancing
+nodeloadbalancing.resultado,Resultado:,,,,jsx_text,CityLoadCard
+nodeloadbalancing.saturated,Saturated:,,,,jsx_text,NodeLoadBalancing
+nodeloadbalancing.saturated_nodes,Saturated Nodes,,,,jsx_text,NodeLoadBalancing
+nodeloadbalancing.si_esperas_63_samples_por_nodo_este_ser_tu_valor_d,"Si esperas 63 samples por nodo, este será tu valor de referencia.",,,,jsx_text,NodeLoadBalancing
+nodeloadbalancing.start_date,Start Date,,,,jsx_text,NodeLoadBalancing
+nodeloadbalancing.std_dev_after,Std Dev After,,,,jsx_text,BalancePreviewModal
+nodeloadbalancing.std_dev_before,Std Dev Before,,,,jsx_text,BalancePreviewModal
+nodeloadbalancing.summary,Summary,,,,jsx_text,BalancePreviewModal
+nodeloadbalancing.total,Total:,,,,jsx_text,CityLoadCard
+nodeloadbalancing.total_shipments,Total Shipments,,,,jsx_text,NodeLoadBalancing
+nodeloadbalancing.urgent,Urgent:,,,,jsx_text,CityLoadCard
+nodeloadbalancing.usage,Usage:,,,,jsx_text,NodeLoadBalancing
+nodeloadbalancing.use_the_auto_balance_button_below_to_redistribute_,"Use the ""Auto-Balance"" button below to redistribute load automatically.",,,,jsx_text,CityLoadCard
+nodeloadbalancing.warning,Warning:,,,,jsx_text,CityLoadCard
+nodeloadbalancing.year,Year,,,,jsx_text,NodeLoadBalancing
+onedb.all_carriers,All Carriers,,,,jsx_text,OneDBFilters
+onedb.all_cities,All Cities,,,,jsx_text,OneDBFilters
+onedb.all_products,All Products,,,,jsx_text,OneDBFilters
+onedb.all_records,All Records,,,,jsx_text,OneDBFilters
+onedb.all_shipment_records,All shipment records,,,,jsx_text,OneDB
+onedb.avg_transit_days,Avg Transit Days,,,,jsx_text,OneDB
+onedb.business_days,Business Days,,,,jsx_text,OneDBTable
+onedb.business_days_average,Business days average,,,,jsx_text,OneDB
+onedb.carrier,Carrier,,,,jsx_text,OneDBFilters
+onedb.delayed,Delayed,,,,jsx_text,OneDBTable
+onedb.destination,Destination:,,,,jsx_text,OneDBTable
+onedb.destination_city,Destination City,,,,jsx_text,OneDBFilters
+onedb.exceeded_standard,Exceeded standard,,,,jsx_text,OneDB
+onedb.export_csv,Export CSV,,,,jsx_text,OneDBBulkPanel
+onedb.filters,Filters,,,,jsx_text,OneDBFilters
+onedb.from_date,From Date,,,,jsx_text,OneDBFilters
+onedb.loading_records,Loading records...,,,,jsx_text,OneDB
+onedb.met_delivery_standard,Met delivery standard,,,,jsx_text,OneDB
+onedb.no_records_to_display,No records to display,,,,jsx_text,OneDBTable
+onedb.on_time,On Time,,,,jsx_text,OneDBTable
+onedb.on_time_delivery,On-Time Delivery,,,,jsx_text,OneDBFilters
+onedb.one_db,ONE DB,,,,jsx_text,OneDB
+onedb.origin,Origin:,,,,jsx_text,OneDBTable
+onedb.origin_city,Origin City,,,,jsx_text,OneDBFilters
+onedb.plan,Plan,,,,jsx_text,OneDBTable
+onedb.product,Product,,,,jsx_text,OneDBFilters
+onedb.received,Received,,,,jsx_text,OneDBTable
+onedb.reset_filters,Reset filters,,,,title_attr,OneDBFilters
+onedb.route,Route,,,,jsx_text,OneDBTable
+onedb.sent,Sent,,,,jsx_text,OneDBTable
+onedb.tag_id,Tag ID,,,,jsx_text,OneDBTable
+onedb.tag_id_or_plan,Tag ID or Plan...,,,,placeholder,OneDBFilters
+onedb.to_date,To Date,,,,jsx_text,OneDBFilters
+onedb.total_records,Total Records,,,,jsx_text,OneDB
+onedb.transit_days,Transit Days,,,,jsx_text,OneDBTable
+onedb.validated_postal_quality_analytics_repository,Validated postal quality analytics repository,,,,jsx_text,OneDB
+panelists.activate,Activate,,,,jsx_text,Panelists
+panelists.address_line_1,Address Line 1,,,,jsx_text,Panelists
+panelists.address_line_2,Address Line 2,,,,jsx_text,Panelists
+panelists.all_cities,All Cities,,,,jsx_text,Panelists
+panelists.all_nodes,All Nodes,,,,jsx_text,Panelists
+panelists.all_panelists_in_system,All panelists in system,,,,jsx_text,Panelists
+panelists.all_status,All Status,,,,jsx_text,Panelists
+panelists.apartment_suite_etc_optional,"Apartment, suite, etc. (optional)",,,,placeholder,Panelists
+panelists.available_for_deliveries,Available for deliveries,,,,jsx_text,Panelists
+panelists.choose_an_action_to_apply_to_all_selected_items,Choose an action to apply to all selected items,,,,jsx_text,Panelists
+panelists.city,City,,,,jsx_text,Panelists
+panelists.code,Code,,,,jsx_text,Panelists
+panelists.code_name_email,"Code, name, email...",,,,placeholder,Panelists
+panelists.country,Country,,,,jsx_text,Panelists
+panelists.deactivate,Deactivate,,,,jsx_text,Panelists
+panelists.delete_panelist,Delete panelist,,,,title_attr,Panelists
+panelists.edit_panelist,Edit panelist,,,,title_attr,Panelists
+panelists.email,Email,,,,jsx_text,Panelists
+panelists.filters,Filters,,,,jsx_text,Panelists
+panelists.leave_empty_to_auto_generate,Leave empty to auto-generate,,,,placeholder,Panelists
+panelists.loading,Loading...,,,,jsx_text,Panelists
+panelists.manage_panelist_profiles_and_assignments,Manage panelist profiles and assignments,,,,jsx_text,Panelists
+panelists.manage_panelists_and_their_availability_for_delive,Manage panelists and their availability for deliveries,,,,jsx_text,Panelists
+panelists.mobile,Mobile,,,,jsx_text,Panelists
+panelists.name,Name,,,,jsx_text,Panelists
+panelists.node,Node,,,,jsx_text,Panelists
+panelists.not_available,Not available,,,,jsx_text,Panelists
+panelists.panelist_code,Panelist Code,,,,jsx_text,Panelists
+panelists.panelists,Panelists,,,,jsx_text,Panelists
+panelists.panelists_management,Panelists Management,,,,jsx_text,Panelists
+panelists.postal_code,Postal Code,,,,jsx_text,Panelists
+panelists.reset_all_filters,Reset all filters,,,,title_attr,Panelists
+panelists.select_a_node,Select a node,,,,jsx_text,Panelists
+panelists.street_address,Street address,,,,placeholder,Panelists
+panelists.telegram_id,Telegram ID,,,,jsx_text,Panelists
+panelists.total_panelists,Total Panelists,,,,jsx_text,Panelists
+panelists.unavailability_periods,Unavailability Periods,,,,jsx_text,Panelists
+panelists.username_or_numeric_id,@username or numeric ID,,,,placeholder,Panelists
+panelistunavailability.tsx.additional_information_about_this_unavailability_p,Additional information about this unavailability period...,,,,placeholder,PanelistUnavailability
+panelistunavailability.tsx.all_panelists,All Panelists,,,,jsx_text,PanelistUnavailability
+panelistunavailability.tsx.all_periods,All Periods,,,,jsx_text,PanelistUnavailability
+panelistunavailability.tsx.all_reasons,All Reasons,,,,jsx_text,PanelistUnavailability
+panelistunavailability.tsx.all_status,All Status,,,,jsx_text,PanelistUnavailability
+panelistunavailability.tsx.cancel_periods,Cancel Periods,,,,jsx_text,PanelistUnavailability
+panelistunavailability.tsx.cancelled,Cancelled,,,,jsx_text,PanelistUnavailability
+panelistunavailability.tsx.clear_selection,Clear Selection,,,,jsx_text,PanelistUnavailability
+panelistunavailability.tsx.current_active_now,Current (Active Now),,,,jsx_text,PanelistUnavailability
+panelistunavailability.tsx.date_range,Date Range,,,,jsx_text,PanelistUnavailability
+panelistunavailability.tsx.duration,Duration,,,,jsx_text,PanelistUnavailability
+panelistunavailability.tsx.end_date,End Date,,,,jsx_text,PanelistUnavailability
+panelistunavailability.tsx.filters,Filters,,,,jsx_text,PanelistUnavailability
+panelistunavailability.tsx.loading,Loading...,,,,jsx_text,PanelistUnavailability
+panelistunavailability.tsx.manage_panelist_unavailability_periods_for_automat,Manage panelist unavailability periods for automatic sample reassignment,,,,jsx_text,PanelistUnavailability
+panelistunavailability.tsx.notes,Notes,,,,jsx_text,PanelistUnavailability
+panelistunavailability.tsx.other,Other,,,,jsx_text,PanelistUnavailability
+panelistunavailability.tsx.panelist,Panelist,,,,jsx_text,PanelistUnavailability
+panelistunavailability.tsx.panelist_name_notes,"Panelist name, notes...",,,,placeholder,PanelistUnavailability
+panelistunavailability.tsx.past,Past,,,,jsx_text,PanelistUnavailability
+panelistunavailability.tsx.personal,Personal,,,,jsx_text,PanelistUnavailability
+panelistunavailability.tsx.reason,Reason,,,,jsx_text,PanelistUnavailability
+panelistunavailability.tsx.reset_all_filters,Reset all filters,,,,title_attr,PanelistUnavailability
+panelistunavailability.tsx.select_a_panelist,Select a panelist,,,,jsx_text,PanelistUnavailability
+panelistunavailability.tsx.sick_leave,Sick Leave,,,,jsx_text,PanelistUnavailability
+panelistunavailability.tsx.start_date,Start Date,,,,jsx_text,PanelistUnavailability
+panelistunavailability.tsx.training,Training,,,,jsx_text,PanelistUnavailability
+panelistunavailability.tsx.unavailability_periods,Unavailability Periods,,,,jsx_text,PanelistUnavailability
+panelistunavailability.tsx.upcoming,Upcoming,,,,jsx_text,PanelistUnavailability
+panelistunavailability.tsx.vacation,Vacation,,,,jsx_text,PanelistUnavailability
+receivegenerator.advance_variance_days,Advance Variance (days),,,,jsx_text,ReceiveGenerator
+receivegenerator.carriers,Carriers,,,,jsx_text,ReceiveGenerator
+receivegenerator.delay_variance_days,Delay Variance (days),,,,jsx_text,ReceiveGenerator
+receivegenerator.demo_account_only_this_feature_is_only_available_f,Demo Account Only - This feature is only available for testing purposes,,,,jsx_text,ReceiveGenerator
+receivegenerator.end_date,End Date,,,,jsx_text,ReceiveGenerator
+receivegenerator.generate_records,Generate Records,,,,jsx_text,ReceiveGenerator
+receivegenerator.generate_synthetic_receive_records_for_testing_and,Generate synthetic receive records for testing and demo purposes,,,,jsx_text,ReceiveGenerator
+receivegenerator.generation_complete,Generation Complete,,,,jsx_text,ReceiveGenerator
+receivegenerator.generation_summary,Generation Summary,,,,jsx_text,ReceiveGenerator
+receivegenerator.generator_configuration,Generator Configuration,,,,jsx_text,ReceiveGenerator
+receivegenerator.maximum_days_records_can_arrive_early,Maximum days records can arrive early,,,,jsx_text,ReceiveGenerator
+receivegenerator.maximum_days_records_can_be_delayed_beyond_sla,Maximum days records can be delayed beyond SLA,,,,jsx_text,ReceiveGenerator
+receivegenerator.number_of_records,Number of Records,,,,jsx_text,ReceiveGenerator
+receivegenerator.out_of_sla_percentage,Out of SLA Percentage (%),,,,jsx_text,ReceiveGenerator
+receivegenerator.products,Products,,,,jsx_text,ReceiveGenerator
+receivegenerator.receive_generator,Receive Generator,,,,jsx_text,ReceiveGenerator
+receivegenerator.select_all,Select All,,,,jsx_text,ReceiveGenerator
+receivegenerator.start_date,Start Date,,,,jsx_text,ReceiveGenerator
+reporting.above_standard_good,Above standard (good),,,,jsx_text,ComplianceTable
+reporting.actual,Actual %:,,,,jsx_text,CityDetailModal
+reporting.actual_days,Actual (days),,,,jsx_text,ComplianceTable
+reporting.actual_standard,Actual ≥ Standard %,,,,jsx_text,ComplianceTable
+reporting.all_carriers,All Carriers,,,,jsx_text,ReportFilters
+reporting.all_destinations,All Destinations,,,,jsx_text,ReportFilters
+reporting.all_origins,All Origins,,,,jsx_text,ReportFilters
+reporting.all_products,All Products,,,,jsx_text,ReportFilters
+reporting.all_regions,All Regions,,,,jsx_text,TerritoryEquityFilters
+reporting.all_statuses,All Statuses,,,,jsx_text,TerritoryEquityFilters
+reporting.analyze_inbound_quality_to_one_city_from_all_origi,Analyze inbound quality to one city from all origins,,,,jsx_text,ReportFilters
+reporting.analyze_inbound_vs_outbound_service_quality_separa,Analyze inbound vs outbound service quality separately,,,,jsx_text,TerritoryEquityFilters
+reporting.analyze_outbound_quality_from_one_city_to_all_dest,Analyze outbound quality from one city to all destinations,,,,jsx_text,ReportFilters
+reporting.analyze_service_equity_across_cities_and_regions,Analyze service equity across cities and regions,,,,jsx_text,TerritoryEquity
+reporting.analyze_specific_route_performance_origin_destinat,Analyze specific route performance (origin → destination),,,,jsx_text,ReportFilters
+reporting.analyze_trends_over_specific_time_periods,Analyze trends over specific time periods,,,,jsx_text,TerritoryEquityFilters
+reporting.average_business_days_for_all_shipments,Average business days for all shipments,,,,jsx_text,ComplianceTable
+reporting.avg_j_k_actual,Avg J+K Actual,,,,title_attr,JKPerformance
+reporting.avg_transit_days,Avg Transit Days,,,,title_attr,Dashboard
+reporting.basic_information,Basic Information,,,,jsx_text,CityDetailModal
+reporting.below_critical_threshold_with_penalty,Below critical threshold (with penalty),,,,jsx_text,ComplianceTable
+reporting.below_standard_but_above_critical_no_penalty,Below standard but above critical (no penalty),,,,jsx_text,ComplianceTable
+reporting.below_standard_deviation,Below standard (deviation),,,,jsx_text,ComplianceTable
+reporting.both_cities,Both cities:,,,,jsx_text,ReportFilters
+reporting.both_directions,Both Directions,,,,jsx_text,TerritoryEquityFilters
+reporting.carrier,Carrier,,,,jsx_text,CityDetailModal
+reporting.carrier_product,Carrier / Product,,,,jsx_text,CarrierProductOverview
+reporting.carrier_product_breakdown,Carrier & Product Breakdown,,,,jsx_text,CityDetailModal
+reporting.carrier_product_level,Carrier/Product Level:,,,,jsx_text,ComplianceTable
+reporting.carrier_product_overview,Carrier & Product Overview,,,,jsx_text,Dashboard
+reporting.carrier_product_route,Carrier / Product / Route,,,,jsx_text,ComplianceTable
+reporting.chart_view,Chart View,,,,jsx_text,JKPerformance
+reporting.circle_size_population,Circle size = Population,,,,jsx_text,TerritoryEquityMap
+reporting.cities,Cities,,,,jsx_text,RegionalEquityTable
+reporting.citizens_affected,Citizens Affected,,,,jsx_text,TerritoryEquityTooltips
+reporting.city,City,,,,jsx_text,TerritoryEquityTable
+reporting.city_analysis,City Analysis,,,,jsx_text,TerritoryEquity
+reporting.city_equity_details,City Equity Details,,,,jsx_text,TerritoryEquity
+reporting.city_equity_details_table,City Equity Details Table,,,,jsx_text,TerritoryEquityTooltips
+reporting.city_service_equity_treemap,City Service Equity Treemap,,,,jsx_text,TerritoryEquityTooltips
+reporting.class,Class,,,,jsx_text,TerritoryEquityTable
+reporting.classification,Classification:,,,,jsx_text,CityDetailModal
+reporting.compl,Compl.,,,,jsx_text,TerritoryEquity
+reporting.compliance,Compliance:,,,,jsx_text,TerritoryEquityMap
+reporting.compliance_analysis_by_carrier_product_route,Compliance analysis by Carrier → Product → Route,,,,jsx_text,ComplianceReport
+reporting.compliance_by_carrier_product_route,Compliance by Carrier → Product → Route,,,,jsx_text,ComplianceReport
+reporting.compliance_status,Compliance Status,,,,jsx_text,ReportFilters
+reporting.compliance_status_based_on_dynamic_thresholds,Compliance status based on dynamic thresholds:,,,,jsx_text,ComplianceTable
+reporting.compliant,Compliant:,,,,jsx_text,CityDetailModal
+reporting.compliant_routes,Compliant Routes,,,,title_attr,ComplianceReport
+reporting.compliant_shipments_total_shipments_100,Compliant shipments / Total shipments × 100%,,,,jsx_text,ComplianceTable
+reporting.critical,Critical,,,,jsx_text,ComplianceTable
+reporting.critical_limit,Critical Limit:,,,,jsx_text,ComplianceTable
+reporting.critical_routes,Critical Routes,,,,title_attr,ComplianceReport
+reporting.cumulative,Cumulative:,,,,jsx_text,CumulativeDistributionChart
+reporting.cumulative_distribution_analysis,Cumulative Distribution Analysis,,,,jsx_text,JKPerformance
+reporting.cumulative_percentage_of_deliveries_by_transit_day,Cumulative percentage of deliveries by transit days.,,,,jsx_text,CumulativeDistributionChart
+reporting.current_week,Current Week,,,,title_attr,Dashboard
+reporting.date_range,Date Range:,,,,jsx_text,TerritoryEquityFilters
+reporting.delayed,Delayed,,,,jsx_text,ShipmentsTable
+reporting.description,Description:,,,,jsx_text,TerritoryEquityTooltips
+reporting.destination_city,Destination City,,,,jsx_text,ReportFilters
+reporting.destination_only,Destination only:,,,,jsx_text,ReportFilters
+reporting.deviation,Deviation,,,,jsx_text,CarrierProductOverview
+reporting.difference_between_actual_and_standard,Difference between Actual % and Standard %,,,,jsx_text,ComplianceTable
+reporting.direct_value_from_delivery_standards,Direct value from delivery_standards,,,,jsx_text,ComplianceTable
+reporting.direction,Direction,,,,jsx_text,RegionalEquityTable
+reporting.direction_gap,Direction Gap:,,,,jsx_text,CityDetailModal
+reporting.directional_analysis,Directional Analysis,,,,jsx_text,CityDetailModal
+reporting.distribution_of_shipments_by_actual_transit_time_v,Distribution of shipments by actual transit time vs delivery standard,,,,jsx_text,PerformanceDistributionChart
+reporting.end_date,End Date,,,,jsx_text,ReportFilters
+reporting.equity_status,Equity Status,,,,jsx_text,TerritoryEquityFilters
+reporting.export_audit_report,Export Audit Report,,,,jsx_text,TerritoryEquity
+reporting.export_csv,Export CSV,,,,jsx_text,ShipmentsTable
+reporting.export_filtered_data_to_csv,Export filtered data to CSV,,,,title_attr,ShipmentsTable
+reporting.filter_analysis_guide,Filter Analysis Guide,,,,jsx_text,ReportFilters
+reporting.filters,Filters,,,,jsx_text,ReportFilters
+reporting.focus_analysis_on_specific_geographic_areas,Focus analysis on specific geographic areas,,,,jsx_text,TerritoryEquityFilters
+reporting.further_narrow_analysis_to_specific_service_provid,Further narrow analysis to specific service providers or types,,,,jsx_text,ReportFilters
+reporting.general_performance_dashboard,General Performance Dashboard,,,,jsx_text,Dashboard
+reporting.geographic_distribution,Geographic Distribution,,,,jsx_text,TerritoryEquity
+reporting.geographic_view,Geographic View,,,,jsx_text,TerritoryEquity
+reporting.green,Green,,,,jsx_text,CumulativeDistributionChart
+reporting.identify_cities_with_specific_compliance_levels,Identify cities with specific compliance levels,,,,jsx_text,TerritoryEquityFilters
+reporting.inb,Inb.,,,,jsx_text,TerritoryEquity
+reporting.inbound,Inbound %,,,,jsx_text,CityDetailModal
+reporting.inbound_arrivals,Inbound (Arrivals),,,,jsx_text,CityDetailModal
+reporting.inbound_vs_outbound_comparison_top_10_by_direction,Inbound vs Outbound Comparison (Top 10 by Direction Gap),,,,jsx_text,TerritoryEquity
+reporting.inbound_vs_outbound_compliance_chart,Inbound vs Outbound Compliance Chart,,,,jsx_text,TerritoryEquityTooltips
+reporting.interpretation,Interpretation:,,,,jsx_text,TerritoryEquityTooltips
+reporting.j_k_actual,J+K Actual,,,,jsx_text,CarrierProductOverview
+reporting.j_k_performance_report,J+K Performance Report,,,,jsx_text,JKPerformance
+reporting.j_k_std,J+K Std,,,,jsx_text,CarrierProductOverview
+reporting.legend,Legend,,,,jsx_text,TerritoryEquityMap
+reporting.loading,Loading...,,,,jsx_text,CarrierProductOverview
+reporting.loading_compliance_data,Loading compliance data...,,,,jsx_text,ComplianceReport
+reporting.loading_j_k_performance_data,Loading J+K performance data...,,,,jsx_text,JKPerformance
+reporting.loading_performance_data,Loading performance data...,,,,jsx_text,Dashboard
+reporting.loading_territory_equity_data,Loading territory equity data...,,,,jsx_text,TerritoryEquity
+reporting.mapa_de_localidades_treemap,Mapa de Localidades (Treemap),,,,jsx_text,TreemapVisualization
+reporting.narrow_analysis_to_specific_service_providers_or_t,Narrow analysis to specific service providers or types,,,,jsx_text,TerritoryEquityFilters
+reporting.negative,Negative:,,,,jsx_text,ComplianceTable
+reporting.no_compliance_data_available,No compliance data available,,,,jsx_text,ComplianceTable
+reporting.no_data,No data,,,,jsx_text,TerritoryEquity
+reporting.no_data_available,No data available,,,,jsx_text,CarrierProductOverview
+reporting.no_data_available_for_treemap,No data available for treemap,,,,jsx_text,TerritoryEquityTreemap
+reporting.no_distribution_data_available,No distribution data available,,,,jsx_text,CumulativeDistributionChart
+reporting.no_filters,No filters:,,,,jsx_text,ReportFilters
+reporting.no_performance_data_available,No performance data available,,,,jsx_text,PerformanceDistributionChart
+reporting.no_shipment_data_available,No shipment data available,,,,jsx_text,ShipmentsTable
+reporting.no_shipment_data_available_for_timeline,No shipment data available for timeline,,,,jsx_text,TimelineChart
+reporting.no_underserved_cities,No underserved cities,,,,jsx_text,TerritoryEquity
+reporting.no_weekly_data_available,No weekly data available,,,,jsx_text,WeeklySamplesChart
+reporting.on_time,On-Time %,,,,jsx_text,CarrierProductOverview
+reporting.openstreetmap,OpenStreetMap,,,,jsx_text,TerritoryEquityMap
+reporting.origin_city,Origin City,,,,jsx_text,ReportFilters
+reporting.origin_only,Origin only:,,,,jsx_text,ReportFilters
+reporting.outb,Outb.,,,,jsx_text,TerritoryEquity
+reporting.outbound,Outbound %,,,,jsx_text,CityDetailModal
+reporting.outbound_departures,Outbound (Departures),,,,jsx_text,CityDetailModal
+reporting.overall_compliance,Overall Compliance,,,,title_attr,ComplianceReport
+reporting.overall_compliance_and_transit_time_metrics,Overall compliance and transit time metrics,,,,jsx_text,Dashboard
+reporting.percentage_of_shipments_delivered_successfully,Percentage of shipments delivered successfully,,,,jsx_text,ComplianceTable
+reporting.performance_distribution,Performance Distribution,,,,jsx_text,JKPerformance
+reporting.performance_metrics,Performance Metrics,,,,jsx_text,CityDetailModal
+reporting.performance_trend,Performance Trend,,,,jsx_text,DualLineChart
+reporting.population,Population:,,,,jsx_text,CityDetailModal
+reporting.population_weighted,Population-weighted,,,,jsx_text,TerritoryEquity
+reporting.population_weighted_compliance,Population-Weighted Compliance,,,,jsx_text,TerritoryEquityTooltips
+reporting.positive,Positive:,,,,jsx_text,ComplianceTable
+reporting.problem_routes,Problem Routes,,,,jsx_text,CarrierProductOverview
+reporting.product,Product,,,,jsx_text,CityDetailModal
+reporting.received_at,Received At,,,,jsx_text,ShipmentsTable
+reporting.region,Region:,,,,jsx_text,CityDetailModal
+reporting.regional_analysis,Regional Analysis,,,,jsx_text,TerritoryEquity
+reporting.regional_equity_analysis_table,Regional Equity Analysis Table,,,,jsx_text,TerritoryEquityTooltips
+reporting.regional_equity_comparison,Regional Equity Comparison,,,,jsx_text,TerritoryEquity
+reporting.regional_equity_comparison_chart,Regional Equity Comparison Chart,,,,jsx_text,TerritoryEquityTooltips
+reporting.regional_equity_details,Regional Equity Details,,,,jsx_text,TerritoryEquity
+reporting.regional_summary,Regional Summary,,,,jsx_text,RegionDetailModal
+reporting.regulatory_compliance_report,Regulatory Compliance Report,,,,jsx_text,ComplianceReport
+reporting.regulatory_use,Regulatory Use:,,,,jsx_text,TerritoryEquityTooltips
+reporting.reset_all_filters,Reset all filters,,,,title_attr,ReportFilters
+reporting.route,Route,,,,jsx_text,CumulativeDistributionTable
+reporting.route_level,Route Level:,,,,jsx_text,ComplianceTable
+reporting.routes,Routes,,,,jsx_text,CarrierProductOverview
+reporting.samples,Samples,,,,jsx_text,CarrierProductOverview
+reporting.search_by_tag_id_origin_or_destination,"Search by TAG ID, origin, or destination...",,,,placeholder,ShipmentsTable
+reporting.sent_at,Sent At,,,,jsx_text,ShipmentsTable
+reporting.service_equity_index,Service Equity Index,,,,jsx_text,TerritoryEquityTooltips
+reporting.shipments,Shipments:,,,,jsx_text,CityDetailModal
+reporting.standard,Standard:,,,,jsx_text,CityDetailModal
+reporting.standard_days,Standard (days),,,,jsx_text,ComplianceTable
+reporting.start_date,Start Date,,,,jsx_text,ReportFilters
+reporting.status,Status:,,,,jsx_text,CityDetailModal
+reporting.std,Std %,,,,jsx_text,CumulativeDistributionTable
+reporting.table_view,Table View,,,,jsx_text,JKPerformance
+reporting.tag_id,TAG ID,,,,jsx_text,ShipmentsTable
+reporting.target_1_day,Target: 1 day,,,,label,TimelineChart
+reporting.territory_equity_filter_guide,Territory Equity Filter Guide,,,,jsx_text,TerritoryEquityFilters
+reporting.territory_equity_report,Territory Equity Report,,,,jsx_text,TerritoryEquity
+reporting.top_3_best_served_cities,Top 3 Best Served Cities,,,,jsx_text,TerritoryEquityTooltips
+reporting.top_3_worst_served_cities,Top 3 Worst Served Cities,,,,jsx_text,TerritoryEquityTooltips
+reporting.total,Total:,,,,jsx_text,PerformanceDistributionChart
+reporting.total_cities,Total Cities:,,,,jsx_text,RegionDetailModal
+reporting.total_routes,Total Routes,,,,title_attr,ComplianceReport
+reporting.total_samples,Total Samples,,,,title_attr,JKPerformance
+reporting.total_shipments,Total Shipments:,,,,jsx_text,CityDetailModal
+reporting.transit_time_analysis_and_delivery_performance_tra,Transit time analysis and delivery performance tracking,,,,jsx_text,JKPerformance
+reporting.underserved,Underserved,,,,jsx_text,RegionalEquityTable
+reporting.underserved_cities,Underserved Cities:,,,,jsx_text,RegionDetailModal
+reporting.view_overall_ecosystem_performance_across_all_rout,View overall ecosystem performance across all routes and carriers,,,,jsx_text,ReportFilters
+reporting.view_overall_service_equity_across_all_cities_and_,View overall service equity across all cities and regions,,,,jsx_text,TerritoryEquityFilters
+reporting.warning,Warning,,,,jsx_text,ComplianceTable
+reporting.warning_limit,Warning Limit:,,,,jsx_text,ComplianceTable
+reporting.warning_routes,Warning Routes,,,,title_attr,ComplianceReport
+reporting.weekly_sample_volume,Weekly Sample Volume,,,,jsx_text,JKPerformance
+reporting.weighted_average_by_shipment_count,Weighted average by shipment count,,,,jsx_text,ComplianceTable
+settings.account_management,Account Management,,,,title_attr,Accounts
+settings.account_reporting_configuration,Account Reporting Configuration,,,,jsx_text,AccountReportingConfig
+settings.all_users,All Users,,,,title_attr,AllUsers
+settings.capital,Capital,,,,jsx_text,CityClassificationTable
+settings.changes_to_thresholds_will_affect_all_reporting_vi,Changes to thresholds will affect all reporting views,,,,jsx_text,AccountReportingConfig
+settings.city_classifications,City Classifications,,,,jsx_text,AccountReportingConfig
+settings.city_classifications_override_default_classificati,City classifications override default classifications from the topology,,,,jsx_text,AccountReportingConfig
+settings.city_name,City Name,,,,jsx_text,CityClassificationTable
+settings.classification,Classification,,,,jsx_text,CityClassificationTable
+settings.compliance_critical_threshold,Compliance Critical Threshold,,,,label,AccountReportingConfig
+settings.compliance_warning_threshold,Compliance Warning Threshold,,,,label,AccountReportingConfig
+settings.configuration_notes,Configuration Notes:,,,,jsx_text,AccountReportingConfig
+settings.configuration_saved_successfully,Configuration saved successfully,,,,jsx_text,AccountReportingConfig
+settings.configure_reporting_thresholds_and_city_classifica,Configure reporting thresholds and city classifications for this account,,,,jsx_text,AccountReportingConfig
+settings.create_account,Create Account,,,,jsx_text,Accounts
+settings.create_user,Create User,,,,jsx_text,AllUsers
+settings.default_report_period,Default Report Period,,,,jsx_text,AccountReportingConfig
+settings.default_time_period_for_generating_reports,Default time period for generating reports,,,,jsx_text,AccountReportingConfig
+settings.error_saving_configuration,Error saving configuration,,,,jsx_text,AccountReportingConfig
+settings.general_settings,General Settings,,,,jsx_text,AccountReportingConfig
+settings.loading,Loading...,,,,jsx_text,Accounts
+settings.loading_configuration,Loading configuration...,,,,jsx_text,AccountReportingConfig
+settings.major,Major,,,,jsx_text,CityClassificationTable
+settings.minor,Minor,,,,jsx_text,CityClassificationTable
+settings.monthly,Monthly,,,,jsx_text,AccountReportingConfig
+settings.no_city_classifications_found,No city classifications found,,,,jsx_text,CityClassificationTable
+settings.only_superadmin_users_can_modify_these_settings,Only superadmin users can modify these settings,,,,jsx_text,AccountReportingConfig
+settings.promise,Promise,,,,jsx_text,CityClassificationTable
+settings.quarterly,Quarterly,,,,jsx_text,AccountReportingConfig
+settings.search_cities,Search cities...,,,,placeholder,CityClassificationTable
+settings.warning_threshold_must_be_greater_than_critical_th,Warning threshold must be greater than critical threshold,,,,jsx_text,AccountReportingConfig
+settings.weekly,Weekly,,,,jsx_text,AccountReportingConfig
+stock.add_to_stock,Add to Stock,,,,jsx_text,AddStockModal
+stock.adjust_stock,Adjust Stock,,,,jsx_text,PanelistStockTab
+stock.adjustment_note,Adjustment Note,,,,jsx_text,PanelistStockTab
+stock.alert_type,Alert Type,,,,jsx_text,StockAlertsTab
+stock.all_materials,All Materials,,,,jsx_text,MaterialRequirementsTab
+stock.all_nodes,All Nodes,,,,jsx_text,ShipmentsTab
+stock.all_panelists,All panelists,,,,jsx_text,MovementsTab
+stock.all_status,All Status,,,,jsx_text,MaterialRequirementsTab
+stock.all_statuses,All Statuses,,,,jsx_text,ShipmentsTab
+stock.all_types,All types,,,,jsx_text,MovementsTab
+stock.auto_generate_purchase_orders,Auto-generate Purchase Orders,,,,jsx_text,SettingsTab
+stock.auto_generate_shipments,Auto-generate Shipments,,,,jsx_text,SettingsTab
+stock.automation,Automation,,,,jsx_text,SettingsTab
+stock.available_stock,Available Stock,,,,jsx_text,ConfirmShipmentModal
+stock.calculate_generate_shipments,Calculate & Generate Shipments,,,,jsx_text,ShipmentsTab
+stock.calculate_requirements,Calculate Requirements,,,,jsx_text,MaterialRequirementsTab
+stock.cancelled,Cancelled,,,,jsx_text,ShipmentsTab
+stock.change,Change:,,,,jsx_text,PanelistStockTab
+stock.clear_filters,Clear Filters,,,,jsx_text,MovementsTab
+stock.clear_filters_to_see_all_alerts,Clear filters to see all alerts,,,,jsx_text,StockAlertsTab
+stock.confirm_order,Confirm Order,,,,jsx_text,OrderMaterialModal
+stock.confirm_receipt,Confirm Receipt,,,,jsx_text,ReceivePOModal
+stock.confirm_shipment,Confirm Shipment,,,,jsx_text,ConfirmShipmentModal
+stock.confirmed_shipments,Confirmed Shipments,,,,jsx_text,ShipmentsTab
+stock.current_quantity,Current Quantity,,,,jsx_text,PanelistStockTab
+stock.current_stock,Current Stock,,,,jsx_text,MaterialRequirementsTab
+stock.date,Date,,,,jsx_text,MovementsTab
+stock.edit_quantity,Edit quantity,,,,title_attr,ShipmentsTab
+stock.edit_shipment_quantity,Edit Shipment Quantity,,,,jsx_text,EditShipmentItemModal
+stock.enable_stock_control,Enable Stock Control,,,,jsx_text,SettingsTab
+stock.end_date,End Date,,,,jsx_text,MaterialRequirementsTab
+stock.enter_new_absolute_quantity,Enter new absolute quantity,,,,placeholder,PanelistStockTab
+stock.expected,Expected,,,,jsx_text,StockAlertsTab
+stock.expected_date,Expected Date,,,,jsx_text,ShipmentsTab
+stock.explain_the_reason_for_this_adjustment,Explain the reason for this adjustment...,,,,placeholder,PanelistStockTab
+stock.export_csv,Export CSV,,,,jsx_text,MaterialRequirementsTab
+stock.filters,Filters,,,,jsx_text,RegulatorStockTab
+stock.from,From,,,,jsx_text,MovementsTab
+stock.last_updated,Last Updated,,,,jsx_text,PanelistStockTab
+stock.lead_times,Lead Times,,,,jsx_text,SettingsTab
+stock.loading_alerts,Loading alerts...,,,,jsx_text,StockAlertsTab
+stock.loading_movements,Loading movements...,,,,jsx_text,MovementsTab
+stock.loading_panelist_stock,Loading panelist stock...,,,,jsx_text,PanelistStockTab
+stock.loading_settings,Loading settings...,,,,jsx_text,SettingsTab
+stock.loading_stock,Loading stock...,,,,jsx_text,RegulatorStockTab
+stock.location,Location,,,,jsx_text,StockAlertsTab
+stock.low_stock,Low Stock,,,,jsx_text,RegulatorStockTab
+stock.low_stock_only,Low Stock Only,,,,jsx_text,RegulatorStockTab
+stock.material,Material,,,,jsx_text,MaterialRequirementsTab
+stock.materials,Materials,,,,jsx_text,ShipmentsTab
+stock.materials_to_send,Materials to Send,,,,jsx_text,ConfirmShipmentModal
+stock.metrics_overview,Metrics Overview,,,,jsx_text,MaterialRequirementsTab
+stock.minimum,Minimum,,,,jsx_text,RegulatorStockTab
+stock.movement_type,Movement Type,,,,jsx_text,MovementsTab
+stock.net_quantity,Net Quantity,,,,jsx_text,MaterialRequirementsTab
+stock.new_quantity,New Quantity,,,,jsx_text,PanelistStockTab
+stock.no_stock_alerts_found,No stock alerts found,,,,jsx_text,StockAlertsTab
+stock.no_stock_records_found,No stock records found,,,,jsx_text,RegulatorStockTab
+stock.node,Node,,,,jsx_text,ShipmentsTab
+stock.normal,Normal,,,,jsx_text,RegulatorStockTab
+stock.not_applicable_purchase_orders_are_not_used,Not applicable - Purchase orders are not used,,,,jsx_text,SettingsTab
+stock.notes,Notes,,,,jsx_text,MovementsTab
+stock.order,Order,,,,jsx_text,MaterialRequirementsTab
+stock.order_material,Order Material,,,,jsx_text,OrderMaterialModal
+stock.ordered,Ordered,,,,jsx_text,MaterialRequirementsTab
+stock.packing_list_pdf,Packing List PDF,,,,jsx_text,ShipmentsTab
+stock.panelist,Panelist,,,,jsx_text,MovementsTab
+stock.panelist_negative,Panelist Negative,,,,jsx_text,StockAlertsTab
+stock.pending,Pending,,,,jsx_text,MaterialRequirementsTab
+stock.pending_requirements,Pending Requirements,,,,jsx_text,MaterialRequirementsTab
+stock.pending_shipments,Pending Shipments,,,,jsx_text,ShipmentsTab
+stock.period,Period,,,,jsx_text,MaterialRequirementsTab
+stock.promise,Promise,,,,jsx_text,EditShipmentItemModal
+stock.purchase_lead_time_days,Purchase Lead Time (days),,,,jsx_text,SettingsTab
+stock.purchase_order_pdf,Purchase Order PDF,,,,jsx_text,MaterialRequirementsTab
+stock.quantity,Quantity,,,,jsx_text,MovementsTab
+stock.quantity_needed,Quantity Needed,,,,jsx_text,MaterialRequirementsTab
+stock.quantity_ordered,Quantity Ordered,,,,jsx_text,MaterialRequirementsTab
+stock.quantity_received,Quantity Received,,,,jsx_text,AddStockModal
+stock.quantity_to_order,Quantity to Order,,,,jsx_text,OrderMaterialModal
+stock.quantity_to_send,Quantity to Send,,,,jsx_text,ConfirmShipmentModal
+stock.quick_month_selection,Quick Month Selection,,,,jsx_text,MaterialRequirementsTab
+stock.receive,Receive,,,,jsx_text,MaterialRequirementsTab
+stock.receive_purchase_order,Receive Purchase Order,,,,jsx_text,ReceivePOModal
+stock.received,Received,,,,jsx_text,MaterialRequirementsTab
+stock.regulator_insufficient,Regulator Insufficient,,,,jsx_text,StockAlertsTab
+stock.removed_materials_will_create_new_pending_shipment,Removed Materials (Will Create New Pending Shipment),,,,jsx_text,ConfirmShipmentModal
+stock.reset_filters,Reset Filters,,,,jsx_text,RegulatorStockTab
+stock.restore,Restore,,,,jsx_text,ConfirmShipmentModal
+stock.search_by_material_or_code,Search by material or code...,,,,placeholder,RegulatorStockTab
+stock.search_by_material_or_panelist,Search by material or panelist...,,,,placeholder,PanelistStockTab
+stock.search_material,Search material...,,,,placeholder,MovementsTab
+stock.send,Send,,,,jsx_text,ShipmentsTab
+stock.sent,Sent,,,,jsx_text,ShipmentsTab
+stock.sent_date,Sent Date,,,,jsx_text,ConfirmShipmentModal
+stock.shipment,Shipment #,,,,jsx_text,ShipmentsTab
+stock.shipment_lead_time_days,Shipment Lead Time (days),,,,jsx_text,SettingsTab
+stock.shipments,Shipments,,,,jsx_text,ShipmentsTab
+stock.showing,Showing,,,,jsx_text,StockAlertsTab
+stock.start_date,Start Date,,,,jsx_text,MaterialRequirementsTab
+stock.stock_alert,Stock Alert,,,,jsx_text,ConfirmShipmentModal
+stock.stock_control,Stock Control,,,,jsx_text,SettingsTab
+stock.stock_status,Stock Status,,,,jsx_text,RegulatorStockTab
+stock.this_feature_is_not_available_in_the_current_versi,This feature is not available in the current version of the module.,,,,jsx_text,SettingsTab
+stock.total_items_pending,Total Items Pending,,,,jsx_text,ShipmentsTab
+stock.total_movements,Total movements:,,,,jsx_text,MovementsTab
+stock.total_records,Total records:,,,,jsx_text,PanelistStockTab
+stock.type,Type,,,,jsx_text,MovementsTab
+stock.unit,Unit,,,,jsx_text,PanelistStockTab
+stock.unknown_panelist,Unknown Panelist,,,,jsx_text,StockAlertsTab
+stock.used_to_calculate_expected_delivery_dates,Used to calculate expected delivery dates,,,,jsx_text,SettingsTab
+stock.year,Year,,,,jsx_text,MaterialRequirementsTab
+stockmanagement.stock_alerts,Stock Alerts,,,,jsx_text,StockManagement
+stockmanagement.stock_management_alerts,Stock Management & Alerts,,,,jsx_text,StockManagement
+stockmanagement.tabs,Tabs,,,,label,StockManagement
+topology.3_7038,-3.7038,,,,placeholder,CityForm
+topology.40_4168,40.4168,,,,placeholder,CityForm
+topology.city,City,,,,jsx_text,TopologyTree
+topology.city_code,City Code *,,,,jsx_text,CityForm
+topology.city_name,City Name *,,,,jsx_text,CityForm
+topology.country_code,Country Code *,,,,jsx_text,RegionForm
+topology.delete_city,Delete city,,,,title_attr,TopologyTree
+topology.delete_node,Delete node,,,,title_attr,TopologyTree
+topology.delete_region,Delete region,,,,title_attr,TopologyTree
+topology.description,Description,,,,jsx_text,RegionForm
+topology.e_g_3200000,"e.g., 3200000",,,,placeholder,CityForm
+topology.e_g_es_fr,"e.g., ES, FR",,,,placeholder,RegionForm
+topology.e_g_mad_bcn,"e.g., MAD, BCN",,,,placeholder,CityForm
+topology.e_g_madrid_barcelona,"e.g., Madrid, Barcelona",,,,placeholder,CityForm
+topology.e_g_spain_france,"e.g., Spain, France",,,,placeholder,RegionForm
+topology.edit_city,Edit city,,,,title_attr,TopologyTree
+topology.edit_node,Edit node,,,,title_attr,TopologyTree
+topology.edit_region,Edit region,,,,title_attr,TopologyTree
+topology.expand_all_cities_in_this_region,Expand all cities in this region,,,,title_attr,TopologyTree
+topology.latitude,Latitude,,,,jsx_text,CityForm
+topology.longitude,Longitude,,,,jsx_text,CityForm
+topology.no_cities_in_this_region_yet,No cities in this region yet,,,,jsx_text,TopologyTree
+topology.no_nodes_in_this_city_yet,No nodes in this city yet,,,,jsx_text,TopologyTree
+topology.node,Node,,,,jsx_text,TopologyTree
+topology.panelist_assigned,Panelist Assigned,,,,jsx_text,TopologyTree
+topology.pending_panelist,Pending Panelist,,,,jsx_text,TopologyTree
+topology.population,Population,,,,jsx_text,CityForm
+topology.promise,Promise,,,,jsx_text,CityForm
+topology.region_code,Region Code *,,,,jsx_text,RegionForm
+topology.region_name,Region Name *,,,,jsx_text,RegionForm
+topology.status,Status *,,,,jsx_text,CityForm
+topology.total_population_of_the_city_used_for_impact_analy,Total population of the city (used for impact analysis in reporting),,,,jsx_text,CityForm
+users.account,Account,,,,jsx_text,UserForm
+users.deactivate,Deactivate,,,,jsx_text,UserTable
+users.email,Email,,,,jsx_text,UserForm
+users.full_name,Full Name,,,,jsx_text,UserForm
+users.name,Name,,,,jsx_text,UserTable
+users.no_users_found,No users found,,,,jsx_text,UserTable
+users.password,Password,,,,jsx_text,UserForm
+users.promise,Promise,,,,jsx_text,UserForm
+users.role,Role,,,,jsx_text,UserForm
+users.select_account,Select account,,,,jsx_text,UserForm

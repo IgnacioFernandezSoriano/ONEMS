@@ -29,6 +29,7 @@ import {
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
+import { useLocale } from '../../contexts/LocaleContext'
 
 interface MenuItem {
   path: string
@@ -49,6 +50,7 @@ export function Sidebar() {
   const { selectedAccountId, setSelectedAccountId } = useAccount()
   const location = useLocation()
   const { isCollapsed, setIsCollapsed } = useSidebar()
+  const { t, locale, setLocale } = useLocale()
   const [expandedSections, setExpandedSections] = useState<string[]>(['/reporting'])
   const [isHovered, setIsHovered] = useState(false)
   const [accounts, setAccounts] = useState<Array<{ id: string; name: string }>>([])
@@ -86,195 +88,195 @@ export function Sidebar() {
 
   const menuGroups: MenuGroup[] = [
     {
-      label: 'Overview',
+      label: t('menu.overview'),
       items: [
         {
           path: '/dashboard',
-          label: 'Dashboard',
+          label: t('menu.dashboard'),
           icon: LayoutDashboard,
-          tooltip: 'Dashboard: Overview of operational metrics, resource status, and critical alerts. Monitor allocation plans, panelist availability, material management, and delivery standards.',
+          tooltip: t('menu.dashboard.tooltip'),
         },
       ],
     },
     {
-      label: 'Setup',
+      label: t('menu.setup'),
       items: [
         {
           path: '/topology',
-          label: 'Country Topology',
+          label: t('menu.topology'),
           icon: Map,
           roles: ['admin', 'superadmin'],
-          tooltip: 'Country Topology: Define your geographical structure (regions, cities, nodes). Create and manage the network of locations where panelists operate. Required before creating allocation plans.',
+          tooltip: t('menu.topology.tooltip'),
         },
         {
           path: '/carriers',
-          label: 'Carriers & Products',
+          label: t('menu.carriers'),
           icon: Truck,
           roles: ['admin', 'superadmin'],
-          tooltip: 'Carriers & Products: Manage shipping carriers and their product catalog. Define product materials and compositions. Essential for allocation planning and material requirements calculation.',
+          tooltip: t('menu.carriers.tooltip'),
         },
         {
           path: '/panelists',
-          label: 'Panelists',
+          label: t('menu.panelists'),
           icon: UserCircle,
           roles: ['admin', 'superadmin'],
-          tooltip: 'Panelists: Manage panelist registry, assign to nodes, track availability and vacation periods. View panelist stock levels and manage unavailability schedules.',
+          tooltip: t('menu.panelists.tooltip'),
         },
         {
           path: '/delivery-standards',
-          label: 'Delivery Standards',
+          label: t('menu.delivery_standards'),
           icon: Clock,
           roles: ['admin', 'superadmin'],
-          tooltip: 'Delivery Standards: Define expected delivery times and success rates for each carrier-product-route combination. Set warning and critical thresholds for performance monitoring.',
+          tooltip: t('menu.delivery_standards.tooltip'),
         },
       ],
     },
     {
-      label: 'Allocation Management',
+      label: t('menu.allocation_management'),
       items: [
         {
           path: '/allocation-plan-generator',
-          label: 'Allocation Generator',
+          label: t('menu.allocation_generator'),
           icon: Target,
           roles: ['admin', 'superadmin'],
-          tooltip: 'Allocation Generator: Create new allocation plans by defining carrier, product, date range, and distribution rules. Generate shipment schedules automatically based on your configuration.',
+          tooltip: t('menu.allocation_generator.tooltip'),
         },
         {
           path: '/node-load-balancing',
-          label: 'Load Balancing',
+          label: t('menu.load_balancing'),
           icon: Scale,
           roles: ['admin', 'superadmin'],
-          tooltip: 'Load Balancing: Visualize and rebalance shipment distribution across cities and nodes. Reassign shipments to optimize workload and ensure equitable distribution.',
+          tooltip: t('menu.load_balancing.tooltip'),
         },
         {
           path: '/allocation-plans',
-          label: 'Allocation Plans',
+          label: t('menu.allocation_plans'),
           icon: Calendar,
           roles: ['admin', 'superadmin'],
-          tooltip: 'Allocation Plans: View and manage all shipment assignments. Track status (pending, sent, received), assign panelists, mark shipments as sent, and monitor availability issues.',
+          tooltip: t('menu.allocation_plans.tooltip'),
         },
       ],
     },
 
     {
-      label: 'Materials Management',
+      label: t('menu.materials_management'),
       items: [
         {
           path: '/material-requirements',
-          label: 'Material Requirements',
+          label: t('menu.material_requirements'),
           icon: Package,
           roles: ['admin', 'superadmin'],
-          tooltip: 'Material Requirements: Calculate material needs based on allocation plans. Generate purchase orders and proposed shipments to panelists. Track requirement status and fulfillment.',
+          tooltip: t('menu.material_requirements.tooltip'),
         },
         {
           path: '/stock-management',
-          label: 'Stock Management',
+          label: t('menu.stock_management'),
           icon: Warehouse,
           roles: ['admin', 'superadmin'],
-          tooltip: 'Stock Management: Monitor inventory levels at regulator and panelist locations. Manage stock alerts, track material movements, and process shipments between locations.',
+          tooltip: t('menu.stock_management.tooltip'),
         },
         {
           path: '/material-catalog',
-          label: 'Material DB',
+          label: t('menu.material_catalog'),
           icon: Database,
           roles: ['admin', 'superadmin'],
-          tooltip: 'Material Catalog: Define and manage the master catalog of materials used in products. Set minimum stock levels, units of measure, and material specifications.',
+          tooltip: t('menu.material_catalog.tooltip'),
         },
       ],
     },
     {
-      label: 'REPORTING',
+      label: t('menu.reporting'),
       items: [
         {
           path: '/reporting',
-          label: 'E2E',
+          label: t('menu.reporting_e2e'),
           icon: BarChart3,
           roles: ['admin', 'superadmin'],
-          tooltip: 'End-to-End Reporting: Comprehensive analytics and performance metrics for your delivery network. Access dashboards, performance reports, compliance tracking, and territory equity analysis.',
+          tooltip: t('menu.reporting_e2e.tooltip'),
           children: [
             {
               path: '/reporting/dashboard',
-              label: 'Dashboard',
+              label: t('menu.reporting_dashboard'),
               icon: LayoutDashboard,
               roles: ['admin', 'superadmin'],
-              tooltip: 'Reporting Dashboard: High-level overview of key performance indicators, trends, and summary statistics across all reporting modules.',
+              tooltip: t('menu.reporting_dashboard.tooltip'),
             },
             {
               path: '/reporting/jk-performance',
-              label: 'J+K Performance',
+              label: t('menu.reporting_jk'),
               icon: Clock,
               roles: ['admin', 'superadmin'],
-              tooltip: 'J+K Performance: Analyze delivery performance against standards. Track J (actual delivery time) vs K (standard time) metrics, identify delays, and monitor compliance rates by route and carrier.',
+              tooltip: t('menu.reporting_jk.tooltip'),
             },
             {
               path: '/reporting/compliance',
-              label: 'Compliance',
+              label: t('menu.reporting_compliance'),
               icon: Shield,
               roles: ['admin', 'superadmin'],
-              tooltip: 'Compliance Report: Monitor adherence to delivery standards. View compliance rates, identify non-compliant routes, and track performance trends over time with threshold-based alerts.',
+              tooltip: t('menu.reporting_compliance.tooltip'),
             },
             {
               path: '/reporting/territory-equity',
-              label: 'Territory Equity',
+              label: t('menu.reporting_equity'),
               icon: MapPin,
               roles: ['admin', 'superadmin'],
-              tooltip: 'Territory Equity: Analyze distribution fairness across regions and cities. Compare shipment volumes, delivery performance, and resource allocation to ensure equitable service.',
+              tooltip: t('menu.reporting_equity.tooltip'),
             },
             {
               path: '/one-db',
-              label: 'ONE DB',
+              label: t('menu.reporting_onedb'),
               icon: Database,
               roles: ['admin', 'superadmin'],
-              tooltip: 'ONE Database: Complete record of all received shipments. View detailed shipment history, delivery times, routes, and panelist information for audit and analysis purposes.',
+              tooltip: t('menu.reporting_onedb.tooltip'),
             },
           ],
         },
       ],
     },
     {
-      label: 'Administration',
+      label: t('menu.administration'),
       items: [
         {
           path: '/users',
-          label: 'Users',
+          label: t('menu.users'),
           icon: Users,
           roles: ['admin', 'superadmin'],
-          tooltip: 'User Management: Create and manage user accounts for your organization. Assign roles (admin, viewer) and control access permissions to system features.',
+          tooltip: t('menu.users.tooltip'),
         },
         ...(accountName === 'DEMO2' ? [
           {
             path: '/receive-generator',
-            label: 'ONEDB Generator',
+            label: t('menu.onedb_generator'),
             icon: RefreshCw,
             roles: ['admin', 'superadmin'],
-            tooltip: 'ONEDB Generator (Demo): Simulate received shipments for testing and demonstration purposes. Automatically transfers allocation plans to ONE DB.',
+            tooltip: t('menu.onedb_generator.tooltip'),
           },
           {
             path: '/admin/account-management',
-            label: 'Demo Reset',
+            label: t('menu.demo_reset'),
             icon: RefreshCw,
             roles: ['admin', 'superadmin'],
-            tooltip: 'Demo Reset: Reset demo account data to initial state. Clear all transactions while preserving base configuration (topology, carriers, panelists).',
+            tooltip: t('menu.demo_reset.tooltip'),
           },
         ] : []),
       ],
     },
     {
-      label: 'Superadmin',
+      label: t('menu.superadmin'),
       items: [
         {
           path: '/settings/accounts',
-          label: 'Accounts',
+          label: t('menu.accounts'),
           icon: Building2,
           roles: ['superadmin'],
-          tooltip: 'Account Management (Superadmin): Create and manage customer accounts. Configure account settings, status, and access. Only accessible to superadmin users.',
+          tooltip: t('menu.accounts.tooltip'),
         },
         {
           path: '/settings/users',
-          label: 'All Users',
+          label: t('menu.all_users'),
           icon: Users,
           roles: ['superadmin'],
-          tooltip: 'All Users (Superadmin): View and manage users across all accounts. Assign accounts to users, modify roles, and control system-wide access. Only accessible to superadmin users.',
+          tooltip: t('menu.all_users.tooltip'),
         },
 
       ],
@@ -477,6 +479,26 @@ export function Sidebar() {
                   {account.name}
                 </option>
               ))}
+            </select>
+          </div>
+        )}
+
+        {/* Language Selector */}
+        {isExpanded && (
+          <div className="px-3">
+            <label htmlFor="language-selector" className="block text-xs text-gray-600 mb-1">
+              Language / Idioma / Langue / اللغة
+            </label>
+            <select
+              id="language-selector"
+              className="w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm"
+              value={locale}
+              onChange={(e) => setLocale(e.target.value)}
+            >
+              <option value="en">English</option>
+              <option value="es">Español</option>
+              <option value="fr">Français</option>
+              <option value="ar">العربية</option>
             </select>
           </div>
         )}
