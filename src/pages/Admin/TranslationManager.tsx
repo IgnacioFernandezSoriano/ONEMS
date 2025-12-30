@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Upload, Download, CheckCircle, AlertCircle, FileText } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
 
 export default function TranslationManager() {
   const [uploading, setUploading] = useState(false)
@@ -25,7 +26,7 @@ export default function TranslationManager() {
       const text = await file.text()
       
       // Validate CSV structure
-      const lines = text.split('\n')
+      const lines = text.split('\n').filter(line => line.trim())
       if (lines.length < 2) {
         throw new Error('CSV file is empty or invalid')
       }
@@ -41,45 +42,59 @@ export default function TranslationManager() {
       // Count translations
       const translationCount = lines.length - 1 // Exclude header
       
-      // Save to public/locales directory
-      // In production, this would be handled by a backend API
-      // For now, we'll create a download link for the user to manually place the file
-      
-      // Extract language-specific CSVs
+      // Extract language-specific CSVs and upload to Supabase Storage
       const languages = ['en', 'es', 'fr', 'ar']
       const headerParts = lines[0].split(',')
       const keyIdx = headerParts.findIndex(h => h.trim().toLowerCase() === 'key')
+      
+      let uploadedCount = 0
       
       for (const lang of languages) {
         const langIdx = headerParts.findIndex(h => h.trim().toLowerCase() === lang)
         if (langIdx === -1) continue
 
-        let langCSV = 'key,translation,context\n'
+        // Build CSV content for this language
+        let langCSV = 'key,translation\n'
         
         for (let i = 1; i < lines.length; i++) {
           const parts = lines[i].split(',')
           const key = parts[keyIdx]?.trim()
           const translation = parts[langIdx]?.trim()
-          const context = parts[headerParts.findIndex(h => h.trim().toLowerCase() === 'context')]?.trim() || ''
           
           if (key && translation) {
-            langCSV += `${key},${translation},${context}\n`
+            // Escape commas in translation if needed
+            const escapedTranslation = translation.includes(',') ? `"${translation}"` : translation
+            langCSV += `${key},${escapedTranslation}\n`
           }
         }
 
-        // Create download for this language
+        // Upload to Supabase Storage
         const blob = new Blob([langCSV], { type: 'text/csv;charset=utf-8;' })
-        const url = URL.createObjectURL(blob)
-        const link = document.createElement('a')
-        link.href = url
-        link.download = `${lang}.csv`
-        link.click()
-        URL.revokeObjectURL(url)
+        const fileName = `${lang}.csv`
+        
+        // Delete existing file if it exists
+        await supabase.storage
+          .from('translations')
+          .remove([fileName])
+        
+        // Upload new file
+        const { error: uploadError } = await supabase.storage
+          .from('translations')
+          .upload(fileName, blob, {
+            contentType: 'text/csv',
+            upsert: true
+          })
+
+        if (uploadError) {
+          throw new Error(`Failed to upload ${lang}.csv: ${uploadError.message}`)
+        }
+        
+        uploadedCount++
       }
 
       setUploadStatus({
         type: 'success',
-        message: `Successfully processed ${translationCount} translations. Download the generated language files and place them in the public/locales/ directory.`
+        message: `Successfully processed ${translationCount} translations and uploaded ${uploadedCount} language files. Changes will be applied immediately for all users.`
       })
     } catch (error) {
       setUploadStatus({
@@ -94,7 +109,6 @@ export default function TranslationManager() {
   }
 
   const downloadTemplate = () => {
-    // In production, this would fetch the latest template from the server
     const link = document.createElement('a')
     link.href = '/translations_template.csv'
     link.download = 'translations_template.csv'
@@ -121,8 +135,7 @@ export default function TranslationManager() {
           <li>Translate the empty columns (es, fr, ar) in Excel or Google Sheets</li>
           <li>Save the file as CSV (UTF-8 encoding)</li>
           <li>Upload the translated CSV file here</li>
-          <li>Download the generated language files</li>
-          <li>Place the files in the <code className="bg-blue-100 px-1 rounded">public/locales/</code> directory</li>
+          <li className="font-semibold">✨ Translations are applied automatically - no deployment needed!</li>
         </ol>
       </div>
 
@@ -145,7 +158,7 @@ export default function TranslationManager() {
       <div className="bg-white border border-gray-200 rounded-lg p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-3">Step 2: Upload Translated CSV</h2>
         <p className="text-gray-600 mb-4">
-          Upload your translated CSV file to generate language-specific files
+          Upload your translated CSV file - changes will be applied immediately
         </p>
         
         <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
@@ -193,7 +206,7 @@ export default function TranslationManager() {
         {uploading && (
           <div className="mt-4 text-center">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <p className="text-gray-600 mt-2">Processing CSV file...</p>
+            <p className="text-gray-600 mt-2">Processing and uploading CSV file...</p>
           </div>
         )}
       </div>

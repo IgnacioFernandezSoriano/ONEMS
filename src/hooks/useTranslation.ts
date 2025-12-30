@@ -7,8 +7,8 @@ interface TranslationMap {
 
 /**
  * Parse CSV content into a translation map
- * Expected CSV format: key,en,es,fr,ar,context,screen
- * We extract the column for the current locale
+ * Expected CSV format: key,translation (2 columns)
+ * OR: key,translation,context (3 columns)
  */
 function parseCSV(csvText: string, locale: string): TranslationMap {
   const lines = csvText.split('\n').filter(line => line.trim())
@@ -16,37 +16,68 @@ function parseCSV(csvText: string, locale: string): TranslationMap {
   
   if (lines.length === 0) return translations
   
-  // Parse header to find column indices
-  const header = lines[0].split(',')
-  const keyIdx = header.indexOf('key')
-  const localeIdx = header.indexOf(locale)
+  // Parse header
+  const header = lines[0].toLowerCase().split(',')
+  const keyIdx = header.findIndex(h => h.trim() === 'key')
+  const translationIdx = header.findIndex(h => h.trim() === 'translation')
   
-  if (keyIdx === -1 || localeIdx === -1) {
-    console.warn(`CSV missing required columns: key or ${locale}`)
-    return translations
-  }
-  
-  // Parse data rows
-  for (let i = 1; i < lines.length; i++) {
-    const line = lines[i].trim()
-    if (!line) continue
-    
-    const columns = line.split(',')
-    const key = columns[keyIdx]?.trim()
-    const translation = columns[localeIdx]?.trim()
-    
-    // Only add if both key and translation exist
-    if (key && translation) {
-      translations[key] = translation
+  // If we have a simple 2-column format (key,translation)
+  if (keyIdx !== -1 && translationIdx !== -1) {
+    // Parse data rows
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i].trim()
+      if (!line) continue
+      
+      // Handle quoted values (for commas in translations)
+      const columns = line.match(/(".*?"|[^,]+)(?=\s*,|\s*$)/g) || []
+      const key = columns[keyIdx]?.trim().replace(/^"|"$/g, '')
+      const translation = columns[translationIdx]?.trim().replace(/^"|"$/g, '')
+      
+      // Only add if both key and translation exist
+      if (key && translation) {
+        translations[key] = translation
+      }
     }
+  } else {
+    console.warn(`CSV missing required columns: key or translation`)
   }
   
   return translations
 }
 
 /**
+ * Load CSV from Supabase Storage with fallback to public folder
+ */
+async function loadTranslations(locale: string): Promise<string> {
+  try {
+    // Try loading from Supabase Storage first
+    const { data, error } = await supabase.storage
+      .from('translations')
+      .download(`${locale}.csv`)
+    
+    if (!error && data) {
+      const text = await data.text()
+      console.log(`Loaded translations for ${locale} from Supabase Storage`)
+      return text
+    }
+  } catch (err) {
+    console.warn(`Failed to load from Supabase Storage, trying fallback:`, err)
+  }
+  
+  // Fallback to public folder
+  const response = await fetch(`/locales/${locale}.csv`)
+  if (!response.ok) {
+    throw new Error(`Failed to load translations for ${locale}`)
+  }
+  const text = await response.text()
+  console.log(`Loaded translations for ${locale} from public folder (fallback)`)
+  return text
+}
+
+/**
  * Hook for loading and using translations from CSV files
  * Loads user's preferred language from their profile
+ * Tries Supabase Storage first, falls back to public folder
  */
 export function useTranslation() {
   const [locale, setLocaleState] = useState<string>('en')
@@ -100,13 +131,7 @@ export function useTranslation() {
     setLoading(true)
     setError(null)
     
-    fetch(`/locales/${locale}.csv`)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`Failed to load translations for ${locale}`)
-        }
-        return response.text()
-      })
+    loadTranslations(locale)
       .then(csvText => {
         const parsed = parseCSV(csvText, locale)
         setTranslations(parsed)
@@ -119,8 +144,7 @@ export function useTranslation() {
         
         // Fallback to English if available and not already English
         if (locale !== 'en') {
-          fetch('/locales/en.csv')
-            .then(response => response.text())
+          loadTranslations('en')
             .then(csvText => {
               const parsed = parseCSV(csvText, 'en')
               setTranslations(parsed)
