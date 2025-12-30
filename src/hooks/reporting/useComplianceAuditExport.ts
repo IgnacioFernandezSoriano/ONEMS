@@ -78,12 +78,12 @@ export async function generateComplianceAuditReport(
 
   // Fetch lookup tables
   const { data: carriers } = await supabase.from('carriers').select('id, name').eq('account_id', accountId);
-  const { data: products } = await supabase.from('products').select('id, description').eq('account_id', accountId);
+  const { data: products } = await supabase.from('products').select('id, code, description').eq('account_id', accountId);
   const { data: cities } = await supabase.from('cities').select('id, name').eq('account_id', accountId);
 
   // Create lookup maps
   const carrierMap = new Map(carriers?.map(c => [c.id, c.name]) || []);
-  const productMap = new Map(products?.map(p => [p.id, p.description]) || []);
+  const productMap = new Map(products?.map(p => [p.id, `${p.code} - ${p.description}`]) || []);
   const cityMap = new Map(cities?.map(c => [c.id, c.name]) || []);
 
   // Create standards map

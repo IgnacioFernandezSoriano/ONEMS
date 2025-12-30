@@ -39,7 +39,7 @@ export function useTerritoryEquityData(
             supabase.from('cities').select('*').eq('account_id', activeAccountId),
             supabase.from('regions').select('*').eq('account_id', activeAccountId),
             supabase.from('carriers').select('id, name').eq('account_id', activeAccountId),
-            supabase.from('products').select('id, description').eq('account_id', activeAccountId),
+            supabase.from('products').select('id, code, description').eq('account_id', activeAccountId),
             supabase.from('delivery_standards').select('*').eq('account_id', activeAccountId),
           ]);
 
@@ -73,7 +73,7 @@ export function useTerritoryEquityData(
         const cityNameToIdMap = new Map(cities.map((c) => [c.name, c.id]));
         const regionMap = new Map(regions.map((r) => [r.id, r]));
         const carrierNameToIdMap = new Map(carriers.map((c) => [c.name, c.id]));
-        const productDescToIdMap = new Map(products.map((p) => [p.description, p.id]));
+        const productDescToIdMap = new Map(products.map((p) => [`${p.code} - ${p.description}`, p.id]));
 
         // Standards map: "carrier_id|product_id|origin_id|dest_id" → standard
         const standardsMap = new Map(

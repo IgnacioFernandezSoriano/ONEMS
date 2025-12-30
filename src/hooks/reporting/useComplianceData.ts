@@ -146,7 +146,7 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
           console.error('❌ Error loading carriers:', carriersErr);
         }
         
-        const { data: products, error: productsErr } = await supabase.from('products').select('id, description').eq('account_id', accountId);
+        const { data: products, error: productsErr } = await supabase.from('products').select('id, code, description').eq('account_id', accountId);
         if (productsErr) {
           console.error('❌ Error loading products:', productsErr);
           console.error('❌ Products error details:', JSON.stringify(productsErr));
@@ -163,7 +163,7 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
 
         // Create lookup maps
         const carrierMap = new Map(carriers?.map(c => [c.id, c.name]) || []);
-        const productMap = new Map(products?.map(p => [p.id, p.description]) || []);
+        const productMap = new Map(products?.map(p => [p.id, `${p.code} - ${p.description}`]) || []);
         const cityMap = new Map(cities?.map(c => [c.id, c.name]) || []);
 
         // Create standards map using UUIDs as key

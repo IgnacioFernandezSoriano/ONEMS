@@ -15,6 +15,7 @@ interface JKRouteData {
   deviation: number;
   status: 'compliant' | 'warning' | 'critical';
   routeKey: string;
+  distribution: Map<number, number>; // day -> count
 }
 
 interface PerformanceDistributionChartProps {
@@ -31,24 +32,26 @@ export function PerformanceDistributionChart({ routeData, maxDays }: Performance
     );
   }
 
-  // Aggregate by J+K days (rounded)
+  // Aggregate by actual transit days from individual shipments
   const distributionMap = new Map<number, { before: number; onTime: number; after: number }>();
   
   routeData.forEach(route => {
-    const jkDay = Math.round(route.jkActual);
-    if (!distributionMap.has(jkDay)) {
-      distributionMap.set(jkDay, { before: 0, onTime: 0, after: 0 });
-    }
-    const dist = distributionMap.get(jkDay)!;
-    
-    // Classify samples based on standard
-    if (route.jkActual < route.jkStandard) {
-      dist.before += route.totalSamples;
-    } else if (route.jkActual === route.jkStandard) {
-      dist.onTime += route.totalSamples;
-    } else {
-      dist.after += route.totalSamples;
-    }
+    // Use the distribution map from the route data (day -> count)
+    route.distribution.forEach((count, days) => {
+      if (!distributionMap.has(days)) {
+        distributionMap.set(days, { before: 0, onTime: 0, after: 0 });
+      }
+      const dist = distributionMap.get(days)!;
+      
+      // Classify based on individual shipment days vs standard
+      if (days < route.jkStandard) {
+        dist.before += count;
+      } else if (days === route.jkStandard) {
+        dist.onTime += count;
+      } else {
+        dist.after += count;
+      }
+    });
   });
 
   // Convert to array and sort
