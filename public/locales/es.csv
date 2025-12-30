@@ -1,146 +1,74 @@
-key,translation,context
-common.save,Guardar,Texto de botón
-common.cancel,Cancelar,Texto de botón
-common.delete,Eliminar,Texto de botón
-common.edit,Editar,Texto de botón
-common.add,Añadir,Texto de botón
-common.close,Cerrar,Texto de botón
-common.confirm,Confirmar,Texto de botón
-common.loading,Cargando...,Estado de carga
-common.error,Error,Estado de error
-common.success,Éxito,Estado de éxito
-common.search,Buscar,Placeholder de búsqueda
-common.filter,Filtrar,Etiqueta de filtro
-common.export,Exportar,Botón de exportar
-common.import,Importar,Botón de importar
-common.refresh,Actualizar,Botón de actualizar
-common.actions,Acciones,Encabezado de columna de acciones
-common.status,Estado,Etiqueta de estado
-common.total,Total,Etiqueta de total
-common.active,Activo,Estado activo
-common.inactive,Inactivo,Estado inactivo
-menu.overview,Vista General,Etiqueta de grupo de menú
-menu.dashboard,Dashboard,Elemento de menú
-menu.dashboard.tooltip,Dashboard: Vista general de métricas operacionales estado de recursos y alertas críticas. Monitorea planes de asignación disponibilidad de panelistas gestión de materiales y estándares de entrega.,Tooltip de menú
-menu.setup,Configuración,Etiqueta de grupo de menú
-menu.topology,Topología del País,Elemento de menú
-menu.topology.tooltip,Topología del País: Define tu estructura geográfica (regiones ciudades nodos). Crea y gestiona la red de ubicaciones donde operan los panelistas. Requerido antes de crear planes de asignación.,Tooltip de menú
-menu.carriers,Transportistas y Productos,Elemento de menú
-menu.carriers.tooltip,Transportistas y Productos: Gestiona transportistas y su catálogo de productos. Define materiales y composiciones de productos. Esencial para planificación de asignaciones y cálculo de requerimientos de materiales.,Tooltip de menú
-menu.panelists,Panelistas,Elemento de menú
-menu.panelists.tooltip,Panelistas: Gestiona el registro de panelistas asigna a nodos rastrea disponibilidad y períodos de vacaciones. Visualiza niveles de stock de panelistas y gestiona horarios de no disponibilidad.,Tooltip de menú
-menu.delivery_standards,Estándares de Entrega,Elemento de menú
-menu.delivery_standards.tooltip,Estándares de Entrega: Define tiempos de entrega esperados y tasas de éxito para cada combinación transportista-producto-ruta. Establece umbrales de advertencia y críticos para monitoreo de rendimiento.,Tooltip de menú
-menu.allocation_management,Gestión de Asignaciones,Etiqueta de grupo de menú
-menu.allocation_generator,Generador de Asignaciones,Elemento de menú
-menu.allocation_generator.tooltip,Generador de Asignaciones: Crea nuevos planes de asignación definiendo transportista producto rango de fechas y reglas de distribución. Genera calendarios de envíos automáticamente basados en tu configuración.,Tooltip de menú
-menu.load_balancing,Balanceo de Carga,Elemento de menú
-menu.load_balancing.tooltip,Balanceo de Carga: Visualiza y rebalancea la distribución de envíos entre ciudades y nodos. Reasigna envíos para optimizar la carga de trabajo y asegurar distribución equitativa.,Tooltip de menú
-menu.allocation_plans,Planes de Asignación,Elemento de menú
-menu.allocation_plans.tooltip,Planes de Asignación: Visualiza y gestiona todas las asignaciones de envíos. Rastrea estado (pendiente enviado recibido) asigna panelistas marca envíos como enviados y monitorea problemas de disponibilidad.,Tooltip de menú
-menu.materials_management,Gestión de Materiales,Etiqueta de grupo de menú
-menu.material_requirements,Requerimientos de Materiales,Elemento de menú
-menu.material_requirements.tooltip,Requerimientos de Materiales: Calcula necesidades de materiales basadas en planes de asignación. Genera órdenes de compra y envíos propuestos a panelistas. Rastrea estado y cumplimiento de requerimientos.,Tooltip de menú
-menu.stock_management,Gestión de Stock,Elemento de menú
-menu.stock_management.tooltip,Gestión de Stock: Monitorea niveles de inventario en ubicaciones de regulador y panelistas. Gestiona alertas de stock rastrea movimientos de materiales y procesa envíos entre ubicaciones.,Tooltip de menú
-menu.material_catalog,Base de Datos de Materiales,Elemento de menú
-menu.material_catalog.tooltip,Catálogo de Materiales: Define y gestiona el catálogo maestro de materiales usados en productos. Establece niveles mínimos de stock unidades de medida y especificaciones de materiales.,Tooltip de menú
-menu.reporting,REPORTES,Etiqueta de grupo de menú
-menu.reporting_e2e,E2E,Elemento de menú
-menu.reporting_e2e.tooltip,Reportes End-to-End: Analítica completa y métricas de rendimiento para tu red de entregas. Accede a dashboards reportes de rendimiento seguimiento de cumplimiento y análisis de equidad territorial.,Tooltip de menú
-menu.reporting_dashboard,Dashboard,Elemento de submenú
-menu.reporting_dashboard.tooltip,Dashboard de Reportes: Vista general de alto nivel de indicadores clave de rendimiento tendencias y estadísticas resumidas de todos los módulos de reportes.,Tooltip de menú
-menu.reporting_jk,Rendimiento J+K,Elemento de submenú
-menu.reporting_jk.tooltip,Rendimiento J+K: Analiza el rendimiento de entregas contra estándares. Rastrea métricas J (tiempo real de entrega) vs K (tiempo estándar) identifica retrasos y monitorea tasas de cumplimiento por ruta y transportista.,Tooltip de menú
-menu.reporting_compliance,Cumplimiento,Elemento de submenú
-menu.reporting_compliance.tooltip,Reporte de Cumplimiento: Monitorea adherencia a estándares de entrega. Visualiza tasas de cumplimiento identifica rutas no conformes y rastrea tendencias de rendimiento en el tiempo con alertas basadas en umbrales.,Tooltip de menú
-menu.reporting_equity,Equidad Territorial,Elemento de submenú
-menu.reporting_equity.tooltip,Equidad Territorial: Analiza la equidad de distribución entre regiones y ciudades. Compara volúmenes de envíos rendimiento de entregas y asignación de recursos para asegurar servicio equitativo.,Tooltip de menú
-menu.reporting_onedb,Base de Datos ONE,Elemento de submenú
-menu.reporting_onedb.tooltip,Base de Datos ONE: Registro completo de todos los envíos recibidos. Visualiza historial detallado de envíos tiempos de entrega rutas e información de panelistas para auditoría y análisis.,Tooltip de menú
-menu.administration,Administración,Etiqueta de grupo de menú
-menu.users,Usuarios,Elemento de menú
-menu.users.tooltip,Gestión de Usuarios: Crea y gestiona cuentas de usuario para tu organización. Asigna roles (admin visor) y controla permisos de acceso a funcionalidades del sistema.,Tooltip de menú
-menu.onedb_generator,Generador ONEDB,Elemento de menú (solo demo)
-menu.onedb_generator.tooltip,Generador ONEDB (Demo): Simula envíos recibidos para propósitos de prueba y demostración. Transfiere automáticamente planes de asignación a la Base de Datos ONE.,Tooltip de menú
-menu.demo_reset,Reinicio de Demo,Elemento de menú (solo demo)
-menu.demo_reset.tooltip,Reinicio de Demo: Reinicia datos de cuenta demo al estado inicial. Limpia todas las transacciones mientras preserva la configuración base (topología transportistas panelistas).,Tooltip de menú
-menu.superadmin,Superadmin,Etiqueta de grupo de menú
-menu.accounts,Cuentas,Elemento de menú
-menu.accounts.tooltip,Gestión de Cuentas (Superadmin): Crea y gestiona cuentas de clientes. Configura ajustes de cuenta estado y acceso. Solo accesible para usuarios superadmin.,Tooltip de menú
-menu.all_users,Todos los Usuarios,Elemento de menú
-menu.all_users.tooltip,Todos los Usuarios (Superadmin): Visualiza y gestiona usuarios de todas las cuentas. Asigna cuentas a usuarios modifica roles y controla acceso a nivel de sistema. Solo accesible para usuarios superadmin.,Tooltip de menú
-dashboard.title,Dashboard de Gestión,Título de página
-dashboard.tooltip,Dashboard de Gestión: Vista general de métricas operacionales estado de recursos y alertas críticas. Usa el selector de período para ver estadísticas del mes actual o próximo.,Tooltip de página
-dashboard.period_selector,Selector de Período,Etiqueta
-dashboard.current_month,Mes Actual,Opción de período
-dashboard.next_month,Próximo Mes,Opción de período
-dashboard.last_30_days,Últimos 30 días,Opción de período
-dashboard.last_60_days,Últimos 60 días,Opción de período
-dashboard.last_90_days,Últimos 90 días,Opción de período
-dashboard.selected_period,Período seleccionado,Etiqueta
-dashboard.critical_alerts,Alertas Críticas,Título de sección
-dashboard.alert.delayed_shipments,{count} envíos retrasados en el período seleccionado,Mensaje de alerta
-dashboard.alert.availability_issues,{count} planes con problemas de disponibilidad de panelistas,Mensaje de alerta
-dashboard.alert.stock_alerts,{count} alertas de stock ({regulator} regulador {panelist} panelista),Mensaje de alerta
-dashboard.alert.panelists_vacation,{count} panelistas actualmente de vacaciones,Mensaje de alerta
-dashboard.alert.pending_requirements,{count} requerimientos de materiales pendientes,Mensaje de alerta
-dashboard.allocation_plans,Planes de Asignación,Título de sección
-dashboard.allocation_plans.tooltip,Planes de Asignación: Gestiona asignaciones de envíos entre panelistas. Monitorea planes pendientes estado de envíos problemas de disponibilidad y envíos retrasados en el período seleccionado.,Tooltip de sección
-dashboard.total_status,Total y Estado,Título de tarjeta
-dashboard.total_plans,Total de Planes,Etiqueta de métrica
-dashboard.total_plans.tooltip,Número total de planes de asignación en el período seleccionado.,Tooltip de métrica
-dashboard.pending,Pendiente,Etiqueta de estado
-dashboard.pending.tooltip,Planes esperando ser asignados o ejecutados.,Tooltip de estado
-dashboard.sent,Enviado,Etiqueta de estado
-dashboard.sent.tooltip,Planes que han sido despachados.,Tooltip de estado
-dashboard.received,Recibido,Etiqueta de estado
-dashboard.received.tooltip,Planes que han sido recibidos exitosamente.,Tooltip de estado
-dashboard.issues_delays,Problemas y Retrasos,Título de tarjeta
-dashboard.availability_issues,Problemas de Disponibilidad,Etiqueta de métrica
-dashboard.availability_issues.tooltip,Planes afectados por problemas de disponibilidad de panelistas (panelistas no disponibles o inactivos).,Tooltip de métrica
-dashboard.unavailable,No Disponible,Etiqueta de estado
-dashboard.no_panelist,Sin Panelista,Etiqueta de estado
-dashboard.inactive,Inactivo,Etiqueta de estado
-dashboard.delayed_shipments,Envíos Retrasados,Etiqueta de métrica
-dashboard.delayed_shipments.tooltip,Envíos programados antes de hoy que aún no han sido recibidos.,Tooltip de métrica
-dashboard.panelists_availability,Panelistas y Disponibilidad,Título de sección
-dashboard.panelists_availability.tooltip,Panelistas: Gestiona el registro de panelistas y rastrea disponibilidad. Monitorea períodos de vacaciones y asegura cobertura adecuada para operaciones.,Tooltip de sección
-dashboard.total_panelists,Total de Panelistas,Etiqueta de métrica
-dashboard.on_vacation,De Vacaciones,Etiqueta de métrica
-dashboard.upcoming_vacations,Vacaciones Próximas,Etiqueta de métrica
-dashboard.upcoming_vacations.detail,Próximos 30 días,Detalle de métrica
-dashboard.availability_rate,Tasa de Disponibilidad,Etiqueta de métrica
-dashboard.carriers_products,Transportistas y Productos,Título de sección
-dashboard.carriers_products.tooltip,Transportistas y Productos: Gestiona transportistas y catálogo de productos. Esencial para planificación de asignaciones y operaciones.,Tooltip de sección
-dashboard.active_carriers,Transportistas Activos,Etiqueta de métrica
-dashboard.total_carriers,Total de Transportistas,Etiqueta de métrica
-dashboard.active_products,Productos Activos,Etiqueta de métrica
-dashboard.material_management,Gestión de Materiales,Título de sección
-dashboard.material_management.tooltip,Gestión de Materiales: Rastrea requerimientos de materiales órdenes de compra y envíos a panelistas. Monitorea estado de cumplimiento.,Tooltip de sección
-dashboard.pending_items,Elementos Pendientes,Título de tarjeta
-dashboard.material_requirements,Requerimientos de Materiales,Etiqueta de métrica
-dashboard.material_requirements.tooltip,Necesidades de materiales calculadas desde planes de asignación esperando ser cumplidas.,Tooltip de métrica
-dashboard.purchase_orders,Órdenes de Compra,Etiqueta de métrica
-dashboard.purchase_orders.tooltip,Órdenes de compra colocadas pero aún no recibidas.,Tooltip de métrica
-dashboard.shipments_panelists,Envíos a Panelistas,Etiqueta de métrica
-dashboard.shipments_panelists.tooltip,Envíos de materiales a panelistas que están pendientes de entrega.,Tooltip de métrica
-dashboard.stock_alerts,Alertas de Stock,Título de sección
-dashboard.stock_alerts.tooltip,Alertas de Stock: Monitorea alertas de inventario en ubicaciones de regulador y panelistas. Toma acción en situaciones de stock bajo o inventario negativo.,Tooltip de sección
-dashboard.alerts_by_location,Alertas por Ubicación,Título de tarjeta
-dashboard.regulator_alerts,Alertas de Regulador,Etiqueta de métrica
-dashboard.panelist_alerts,Alertas de Panelista,Etiqueta de métrica
-dashboard.pending_shipments,Envíos Pendientes,Etiqueta de métrica
-dashboard.delivery_standards,Estándares de Entrega,Título de sección
-dashboard.delivery_standards.tooltip,Estándares de Entrega: Monitorea cobertura y completitud de estándares de entrega. Asegura que todas las rutas tengan expectativas definidas.,Tooltip de sección
-dashboard.standards_overview,Vista General de Estándares,Título de tarjeta
-dashboard.total_standards,Total de Estándares,Etiqueta de métrica
-dashboard.coverage_rate,Tasa de Cobertura,Etiqueta de métrica
-dashboard.coverage_rate.tooltip,Porcentaje de estándares que tienen definiciones completas de tiempo y porcentaje de éxito.,Tooltip de métrica
-dashboard.needing_review,Necesitan Revisión,Etiqueta de métrica
-dashboard.needing_review.tooltip,Estándares que faltan definiciones de tiempo o porcentaje de éxito.,Tooltip de métrica
-locale.selector.label,Idioma,Etiqueta de selector de idioma
-locale.en,English,Nombre de idioma
-locale.es,Español,Nombre de idioma
-locale.pt,Português,Nombre de idioma
-locale.fr,Français,Nombre de idioma
+key,translation
+common.save,Guardar
+common.cancel,Cancelar
+common.delete,Eliminar
+common.edit,Editar
+common.add,Añadir
+common.close,Cerrar
+common.confirm,Confirmar
+common.loading,Cargando...
+common.error,Error
+common.success,Éxito
+common.search,Buscar
+common.filter,Filtrar
+common.export,Exportar
+common.import,Importar
+common.refresh,Actualizar
+common.actions,Acciones
+common.status,Estado
+common.total,Total
+common.active,Activo
+common.inactive,Inactivo
+menu.overview,Resumen
+menu.dashboard,Panel de Control
+menu.dashboard.tooltip,Panel de Control: Visión general de métricas operacionales estado de recursos y alertas críticas. Monitorea planes de asignación disponibilidad de panelistas gestión de materiales y estándares de entrega.
+menu.setup,Configuración
+menu.topology,Topología del País
+menu.topology.tooltip,Topología del País: Define tu estructura geográfica (regiones ciudades nodos). Crea y gestiona la red de ubicaciones donde operan los panelistas. Requerido antes de crear planes de asignación.
+menu.carriers,Transportistas y Productos
+menu.carriers.tooltip,Transportistas y Productos: Gestiona transportistas y su catálogo de productos. Define materiales y composiciones de productos. Esencial para la planificación de asignaciones y cálculo de requisitos de materiales.
+menu.panelists,Panelistas
+menu.panelists.tooltip,Panelistas: Gestiona el registro de panelistas asigna a nodos rastrea disponibilidad y períodos de vacaciones. Visualiza niveles de stock de panelistas y gestiona horarios de no disponibilidad.
+menu.delivery_standards,Estándares de Entrega
+menu.delivery_standards.tooltip,Estándares de Entrega: Define tiempos de entrega esperados y tasas de éxito para cada combinación transportista-producto-ruta. Establece umbrales de advertencia y críticos para monitoreo de rendimiento.
+menu.allocation_management,Gestión de Asignaciones
+menu.allocation_generator,Generador de Asignaciones
+menu.allocation_generator.tooltip,Generador de Asignaciones: Crea nuevos planes de asignación definiendo transportista producto rango de fechas y reglas de distribución. Genera calendarios de envíos automáticamente basados en tu configuración.
+menu.load_balancing,Balanceo de Carga
+menu.load_balancing.tooltip,Balanceo de Carga: Visualiza y rebalancea la distribución de envíos entre ciudades y nodos. Reasigna envíos para optimizar la carga de trabajo y asegurar distribución equitativa.
+menu.allocation_plans,Planes de Asignación
+menu.allocation_plans.tooltip,Planes de Asignación: Visualiza y gestiona todas las asignaciones de envíos. Rastrea estado (pendiente enviado recibido) asigna panelistas marca envíos como enviados y monitorea problemas de disponibilidad.
+menu.materials_management,Gestión de Materiales
+menu.material_requirements,Requisitos de Materiales
+menu.material_requirements.tooltip,Requisitos de Materiales: Calcula necesidades de materiales basadas en planes de asignación. Genera órdenes de compra y envíos propuestos a panelistas. Rastrea estado y cumplimiento de requisitos.
+menu.stock_management,Gestión de Stock
+menu.stock_management.tooltip,Gestión de Stock: Monitorea niveles de inventario en ubicaciones de regulador y panelistas. Gestiona alertas de stock rastrea movimientos de materiales y procesa envíos entre ubicaciones.
+menu.material_catalog,Base de Datos de Materiales
+menu.material_catalog.tooltip,Catálogo de Materiales: Define y gestiona el catálogo maestro de materiales usados en productos. Establece niveles mínimos de stock unidades de medida y especificaciones de materiales.
+menu.reporting,REPORTES
+menu.reporting_e2e,E2E
+menu.reporting_e2e.tooltip,Reportes de Extremo a Extremo: Análisis completo y métricas de rendimiento para tu red de entregas. Accede a paneles reportes de rendimiento seguimiento de cumplimiento y análisis de equidad territorial.
+menu.reporting_dashboard,Panel de Control
+menu.reporting_dashboard.tooltip,Panel de Reportes: Visión general de alto nivel de indicadores clave de rendimiento tendencias y estadísticas resumidas de todos los módulos de reportes.
+menu.reporting_jk,Rendimiento J+K
+menu.reporting_jk.tooltip,Rendimiento J+K: Analiza el rendimiento de entregas contra estándares. Rastrea métricas J (tiempo real de entrega) vs K (tiempo estándar) identifica retrasos y monitorea tasas de cumplimiento por ruta y transportista.
+menu.reporting_compliance,Cumplimiento
+menu.reporting_compliance.tooltip,Reporte de Cumplimiento: Monitorea adherencia a estándares de entrega. Visualiza tasas de cumplimiento identifica rutas no conformes y rastrea tendencias de rendimiento a lo largo del tiempo con alertas basadas en umbrales.
+menu.reporting_equity,Equidad Territorial
+menu.reporting_equity.tooltip,Equidad Territorial: Analiza la equidad de distribución entre regiones y ciudades. Compara volúmenes de envíos rendimiento de entregas y asignación de recursos para asegurar servicio equitativo.
+menu.reporting_onedb,Base de Datos ONE
+menu.reporting_onedb.tooltip,Base de Datos ONE: Registro completo de todos los envíos recibidos. Visualiza historial detallado de envíos tiempos de entrega rutas e información de panelistas para auditoría y análisis.
+menu.administration,Administración
+menu.users,Usuarios
+menu.users.tooltip,Gestión de Usuarios: Crea y gestiona cuentas de usuario para tu organización. Asigna roles (admin visor) y controla permisos de acceso a funciones del sistema.
+menu.onedb_generator,Generador ONEDB
+menu.onedb_generator.tooltip,Generador ONEDB (Demo): Simula envíos recibidos para pruebas y demostración. Transfiere automáticamente planes de asignación a la Base de Datos ONE.
+menu.demo_reset,Reinicio de Demo
+menu.demo_reset.tooltip,Reinicio de Demo: Reinicia datos de cuenta demo al estado inicial. Limpia todas las transacciones mientras preserva la configuración base (topología transportistas panelistas).
+menu.superadmin,Superadmin
+menu.accounts,Cuentas
+menu.accounts.tooltip,Gestión de Cuentas (Superadmin): Crea y gestiona cuentas de clientes. Configura ajustes de cuenta estado y acceso. Solo accesible para usuarios superadmin.
+menu.all_users,Todos los Usuarios
+menu.all_users.tooltip,Todos los Usuarios (Superadmin): Visualiza y gestiona usuarios de todas las cuentas. Asigna cuentas a usuarios modifica roles y controla acceso a nivel de sistema. Solo accesible para usuarios superadmin.
+menu.translations,Traducciones
+menu.translations.tooltip,Gestor de Traducciones (Superadmin): Descarga plantilla CSV sube archivos traducidos y gestiona traducciones de la aplicación para múltiples idiomas. Solo accesible para usuarios superadmin.

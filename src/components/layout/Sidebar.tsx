@@ -26,6 +26,7 @@ import {
   Menu,
   Warehouse,
   RefreshCw,
+  Languages,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
@@ -278,6 +279,13 @@ export function Sidebar() {
           roles: ['superadmin'],
           tooltip: t('menu.all_users.tooltip'),
         },
+        {
+          path: '/admin/translations',
+          label: t('menu.translations'),
+          icon: Languages,
+          roles: ['superadmin'],
+          tooltip: t('menu.translations.tooltip'),
+        },
 
       ],
     },
@@ -479,26 +487,6 @@ export function Sidebar() {
                   {account.name}
                 </option>
               ))}
-            </select>
-          </div>
-        )}
-
-        {/* Language Selector */}
-        {isExpanded && (
-          <div className="px-3">
-            <label htmlFor="language-selector" className="block text-xs text-gray-600 mb-1">
-              Language / Idioma / Langue / اللغة
-            </label>
-            <select
-              id="language-selector"
-              className="w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm"
-              value={locale}
-              onChange={(e) => setLocale(e.target.value)}
-            >
-              <option value="en">English</option>
-              <option value="es">Español</option>
-              <option value="fr">Français</option>
-              <option value="ar">العربية</option>
             </select>
           </div>
         )}

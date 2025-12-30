@@ -20,6 +20,7 @@ export function UserForm({ user, onSubmit, onCancel }: UserFormProps) {
   const [role, setRole] = useState<'superadmin' | 'admin' | 'user'>(user?.role || 'user')
   const [accountId, setAccountId] = useState(user?.account_id || profile?.account_id || '')
   const [status, setStatus] = useState<'active' | 'inactive'>(user?.status || 'active')
+  const [preferredLanguage, setPreferredLanguage] = useState<string>((user as any)?.preferred_language || 'en')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -36,6 +37,7 @@ export function UserForm({ user, onSubmit, onCancel }: UserFormProps) {
         full_name: fullName,
         role,
         status,
+        preferred_language: preferredLanguage,
       }
 
       if (!user) {
@@ -161,6 +163,23 @@ export function UserForm({ user, onSubmit, onCancel }: UserFormProps) {
           </select>
         </div>
       )}
+
+      <div>
+        <label htmlFor="preferredLanguage" className="block text-sm font-medium mb-1">
+          Preferred Language
+        </label>
+        <select
+          id="preferredLanguage"
+          value={preferredLanguage}
+          onChange={(e) => setPreferredLanguage(e.target.value)}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md"
+        >
+          <option value="en">English</option>
+          <option value="es">Español</option>
+          <option value="fr">Français</option>
+          <option value="ar">العربية (Arabic)</option>
+        </select>
+      </div>
 
       <div className="flex gap-2 justify-end">
         <Button type="button" variant="secondary" onClick={onCancel}>

@@ -144,3 +144,5 @@ locale.en,English,Language name
 locale.es,Español,Language name
 locale.pt,Português,Language name
 locale.fr,Français,Language name
+menu.translations,Translations,Menu item
+menu.translations.tooltip,Translation Manager (Superadmin): Download CSV template upload translated files and manage application translations for multiple languages. Only accessible to superadmin users.,Menu tooltip
