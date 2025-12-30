@@ -44,27 +44,45 @@ export function useCarrierProductOverview(accountId: string | undefined, filters
       try {
         setLoading(true);
 
-        // First, get delivery standards
+        // First, get delivery standards with related data
         const { data: standards, error: stdError } = await supabase
           .from('delivery_standards')
-          .select('*')
+          .select(`
+            *,
+            origin_city:cities!delivery_standards_origin_city_id_fkey(id, name),
+            destination_city:cities!delivery_standards_destination_city_id_fkey(id, name),
+            carrier:carriers(id, name),
+            product:products(id, code, description)
+          `)
           .eq('account_id', activeAccountId);
 
         if (stdError) throw stdError;
 
-        // Create standards map
+        // Create standards map with correct field names
         const standardsMap = new Map<string, { jkStandard: number; successPercentage: number }>();
         (standards || []).forEach(std => {
-          const routeKey = `${std.origin_city_name}-${std.destination_city_name}-${std.carrier_name}-${std.product_name}`;
+          const originCityName = std.origin_city?.name;
+          const destCityName = std.destination_city?.name;
+          const carrierName = std.carrier?.name;
+          const productName = `${std.product?.code} - ${std.product?.description}`;
+          
+          if (!originCityName || !destCityName || !carrierName || !productName) {
+            console.warn('[useCarrierProductOverview] Skipping standard with missing data:', std);
+            return;
+          }
+          
+          const routeKey = `${originCityName}-${destCityName}-${carrierName}-${productName}`;
           const jkStandard = std.time_unit === 'days' 
-            ? std.delivery_time 
-            : std.delivery_time / 24;
+            ? std.standard_time 
+            : std.standard_time / 24;
           
           standardsMap.set(routeKey, {
             jkStandard: jkStandard || 0,
             successPercentage: std.success_percentage || 95
           });
         });
+
+        console.log('[useCarrierProductOverview] Loaded standards:', standardsMap.size);
 
         // Build query for shipments with pagination
         const allShipments: any[] = []
