@@ -122,7 +122,7 @@ export function useRegulatorRequirements() {
       const { data: allPendingRequirements } = await supabase
         .from('material_requirements_periods')
         .select('id, material_id, period_start, period_end, quantity_needed, plans_count')
-        .eq('account_id', profile.account_id)
+        .eq('account_id', accountId)
         .eq('status', 'pending')
         .in('material_id', calculatedRequirements.map(r => r.material_id))
 
@@ -149,7 +149,7 @@ export function useRegulatorRequirements() {
       const { data: stocks } = await supabase
         .from('material_stocks')
         .select('material_id, quantity')
-        .eq('account_id', profile.account_id)
+        .eq('account_id', accountId)
         .eq('location_type', 'regulator')
         .in('material_id', materialIds)
 
@@ -164,7 +164,7 @@ export function useRegulatorRequirements() {
       const { data: orderedRequirements } = await supabase
         .from('material_requirements_periods')
         .select('material_id, quantity_ordered')
-        .eq('account_id', profile.account_id)
+        .eq('account_id', accountId)
         .eq('status', 'ordered')
         .in('material_id', materialIds)
 
@@ -211,7 +211,7 @@ export function useRegulatorRequirements() {
           await supabase
             .from('material_requirements_periods')
             .delete()
-            .eq('account_id', profile.account_id)
+            .eq('account_id', accountId)
             .eq('material_id', req.material_id)
             .eq('status', 'pending')
           
@@ -219,7 +219,7 @@ export function useRegulatorRequirements() {
           await supabase
             .from('material_requirements_periods')
             .insert({
-              account_id: profile.account_id,
+              account_id: accountId,
               period_start: earliestStart,
               period_end: latestEnd,
               material_id: req.material_id,
@@ -235,7 +235,7 @@ export function useRegulatorRequirements() {
           await supabase
             .from('material_requirements_periods')
             .insert({
-              account_id: profile.account_id,
+              account_id: accountId,
               period_start: startDate,
               period_end: endDate,
               material_id: req.material_id,
