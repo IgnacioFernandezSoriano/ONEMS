@@ -97,7 +97,10 @@ export function useRegulatorRequirements() {
   }, [profile?.account_id, loadAllRequirements])
 
   const calculate = useCallback(async (startDate: string, endDate: string) => {
-    if (!profile?.account_id) {
+    // Use effectiveAccountId if available, otherwise fall back to profile.account_id
+    const accountId = effectiveAccountId || profile?.account_id
+    
+    if (!accountId) {
       setError('No account ID found')
       return
     }
@@ -109,7 +112,7 @@ export function useRegulatorRequirements() {
       
       // 1. Calculate requirements from allocation plans
       const calculatedRequirements = await calculateMaterialRequirements(
-        profile.account_id,
+        accountId,
         startDate,
         endDate
       )
@@ -251,7 +254,7 @@ export function useRegulatorRequirements() {
     } finally {
       setLoading(false)
     }
-  }, [profile?.account_id])
+  }, [profile?.account_id, effectiveAccountId, loadAllRequirements])
 
   const loadRequirements = useCallback(async (startDate: string, endDate: string) => {
     if (!profile?.account_id) return
