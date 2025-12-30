@@ -10,7 +10,6 @@ interface Props {
   onBulkCancel: () => Promise<void>
   onBulkReprocess: () => Promise<void>
   onBulkDelete: () => Promise<void>
-  onExportCSV: () => void
   onClearSelection: () => void
 }
 
@@ -24,7 +23,6 @@ export function BulkOperationsPanel({
   onBulkCancel,
   onBulkReprocess,
   onBulkDelete,
-  onExportCSV,
   onClearSelection,
 }: Props) {
   const [originNodeId, setOriginNodeId] = useState('')
@@ -254,20 +252,6 @@ export function BulkOperationsPanel({
             </button>
           </div>
         )}
-
-        {/* Export CSV */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Export to CSV
-          </label>
-          <button
-            onClick={onExportCSV}
-            disabled={processing}
-            className="w-full px-4 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700 disabled:bg-gray-300"
-          >
-            Export {selectedCount} records
-          </button>
-        </div>
 
         {/* Delete */}
         <div>

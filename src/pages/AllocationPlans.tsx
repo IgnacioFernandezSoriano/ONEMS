@@ -710,7 +710,6 @@ export function AllocationPlans() {
         onBulkCancel={handleBulkCancel}
         onBulkReprocess={handleBulkReprocess}
         onBulkDelete={handleBulkDelete}
-        onExportCSV={handleExportCSV}
         onClearSelection={handleClearSelection}
       />
 
@@ -720,15 +719,27 @@ export function AllocationPlans() {
             <h2 className="text-lg font-medium">
               Allocation Plan Details ({filteredDetails.length})
             </h2>
-            <button
-              onClick={handleAddRecord}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
-              </svg>
-              Add Record
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleExportCSV}
+                disabled={selectedIds.size === 0}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Export CSV {selectedIds.size > 0 ? `(${selectedIds.size})` : ''}
+              </button>
+              <button
+                onClick={handleAddRecord}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Add Record
+              </button>
+            </div>
           </div>
         </div>
 

@@ -18,13 +18,29 @@ export function useAllocationPlanDetails() {
       setLoading(true)
       setError(null)
 
-      // Fetch allocation plan details with availability status from view
-      const { data: detailsData, error: detailsError } = await supabase
-        .from('v_allocation_details_with_availability')
-        .select('*')
-        .order('fecha_programada', { ascending: true })
+      // Fetch allocation plan details with availability status from view with pagination
+      const allDetailsData: any[] = []
+      let hasMore = true
+      let page = 0
+      const pageSize = 1000
 
-      if (detailsError) throw detailsError
+      while (hasMore) {
+        const { data: detailsData, error: detailsError } = await supabase
+          .from('v_allocation_details_with_availability')
+          .select('*')
+          .order('fecha_programada', { ascending: true })
+          .range(page * pageSize, (page + 1) * pageSize - 1)
+
+        if (detailsError) throw detailsError
+        
+        if (detailsData && detailsData.length > 0) {
+          allDetailsData.push(...detailsData)
+          hasMore = detailsData.length === pageSize
+          page++
+        } else {
+          hasMore = false
+        }
+      }
 
       // Fetch additional data for filters and selectors
       const [plansRes, carriersRes, productsRes, citiesRes, nodesRes, panelistsRes] = await Promise.all([
@@ -44,7 +60,7 @@ export function useAllocationPlanDetails() {
       if (panelistsRes.error) throw panelistsRes.error
 
       // Enrich details with related data
-      const enrichedDetails = (detailsData || []).map((detail: any) => {
+      const enrichedDetails = allDetailsData.map((detail: any) => {
         const plan = plansRes.data?.find((p) => p.id === detail.plan_id)
         const originNode = nodesRes.data?.find((n) => n.id === detail.origin_node_id)
         const destinationNode = nodesRes.data?.find((n) => n.id === detail.destination_node_id)
