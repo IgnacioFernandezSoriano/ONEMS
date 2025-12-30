@@ -50,6 +50,7 @@ export function Sidebar() {
   const [expandedSections, setExpandedSections] = useState<string[]>(['/reporting'])
   const [isHovered, setIsHovered] = useState(false)
   const [accounts, setAccounts] = useState<Array<{ id: string; name: string }>>([])
+  const [accountName, setAccountName] = useState<string>('')
   
   // Auto-expand on hover when collapsed
   const isExpanded = isCollapsed ? isHovered : true
@@ -66,6 +67,20 @@ export function Sidebar() {
         })
     }
   }, [profile?.role])
+
+  // Load account name
+  useEffect(() => {
+    if (profile?.account_id) {
+      supabase
+        .from('accounts')
+        .select('name')
+        .eq('id', profile.account_id)
+        .single()
+        .then(({ data }) => {
+          if (data) setAccountName(data.name)
+        })
+    }
+  }, [profile?.account_id])
 
   const menuGroups: MenuGroup[] = [
     {
@@ -130,7 +145,7 @@ export function Sidebar() {
         },
       ],
     },
-    ...(profile?.account_id === 'demo' ? [{
+    ...(accountName.toLowerCase().includes('demo') ? [{
       label: 'Demo Tools',
       items: [
         {
