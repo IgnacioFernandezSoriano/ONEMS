@@ -38,19 +38,38 @@ export async function calculateMaterialRequirements(
   endDate: string
 ): Promise<MaterialRequirement[]> {
   try {
-    // 1. Obtener allocation plan details en el rango de fechas
-    const { data: planDetails, error: detailsError } = await supabase
-      .from('allocation_plan_details')
-      .select('id, plan_id, fecha_programada, origin_panelist_id')
-      .eq('account_id', accountId)
-      .gte('fecha_programada', startDate)
-      .lte('fecha_programada', endDate)
-      .in('status', ['pending', 'notified'])
+    // 1. Obtener allocation plan details en el rango de fechas (con paginación)
+    let allPlanDetails: any[] = []
+    let from = 0
+    const pageSize = 1000
+    let hasMore = true
 
-    if (detailsError) throw detailsError
-    if (!planDetails || planDetails.length === 0) {
+    while (hasMore) {
+      const { data: planDetails, error: detailsError } = await supabase
+        .from('allocation_plan_details')
+        .select('id, plan_id, fecha_programada, origin_panelist_id')
+        .eq('account_id', accountId)
+        .gte('fecha_programada', startDate)
+        .lte('fecha_programada', endDate)
+        .in('status', ['pending', 'notified'])
+        .range(from, from + pageSize - 1)
+
+      if (detailsError) throw detailsError
+      
+      if (planDetails && planDetails.length > 0) {
+        allPlanDetails = allPlanDetails.concat(planDetails)
+        hasMore = planDetails.length === pageSize
+        from += pageSize
+      } else {
+        hasMore = false
+      }
+    }
+
+    if (allPlanDetails.length === 0) {
       return []
     }
+
+    const planDetails = allPlanDetails
 
     // 2. Obtener los allocation plans para conseguir los product_id
     const planIds = [...new Set(planDetails.map(d => d.plan_id))]
@@ -223,18 +242,36 @@ export async function calculatePanelistRequirements(
   endDate: string
 ): Promise<PanelistMaterialRequirement[]> {
   try {
-    // 1. Obtener allocation plan details con nodos
-    const { data: planDetails, error: detailsError } = await supabase
-      .from('allocation_plan_details')
-      .select('id, plan_id, origin_node_id, origin_panelist_id, fecha_programada')
-      .eq('account_id', accountId)
-      .gte('fecha_programada', startDate)
-      .lte('fecha_programada', endDate)
-      .in('status', ['pending', 'notified'])
-      .not('origin_node_id', 'is', null)
+    // 1. Obtener allocation plan details con nodos (con paginación)
+    let allPlanDetails: any[] = []
+    let from = 0
+    const pageSize = 1000
+    let hasMore = true
 
-    if (detailsError) throw detailsError
-    if (!planDetails || planDetails.length === 0) return []
+    while (hasMore) {
+      const { data: planDetails, error: detailsError } = await supabase
+        .from('allocation_plan_details')
+        .select('id, plan_id, origin_node_id, origin_panelist_id, fecha_programada')
+        .eq('account_id', accountId)
+        .gte('fecha_programada', startDate)
+        .lte('fecha_programada', endDate)
+        .in('status', ['pending', 'notified'])
+        .not('origin_node_id', 'is', null)
+        .range(from, from + pageSize - 1)
+
+      if (detailsError) throw detailsError
+      
+      if (planDetails && planDetails.length > 0) {
+        allPlanDetails = allPlanDetails.concat(planDetails)
+        hasMore = planDetails.length === pageSize
+        from += pageSize
+      } else {
+        hasMore = false
+      }
+    }
+
+    if (allPlanDetails.length === 0) return []
+    const planDetails = allPlanDetails
 
     // 2. Obtener allocation plans
     const planIds = [...new Set(planDetails.map(d => d.plan_id))]
