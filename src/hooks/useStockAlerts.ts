@@ -55,16 +55,22 @@ export function useStockAlerts() {
             .map(alert => alert.location_id)
         ))
 
+        console.log('[Stock Alerts] Alerts loaded:', data.length)
+        console.log('[Stock Alerts] Panelist IDs to enrich:', panelistIds)
+
         if (panelistIds.length > 0) {
-          // Fetch panelist information
+          // Fetch panelist information with account_id filter
           const { data: panelists, error: panelistError } = await supabase
             .from('panelists')
             .select('id, name, panelist_code')
+            .eq('account_id', accountId)
             .in('id', panelistIds)
 
+          console.log('[Stock Alerts] Panelists fetched:', panelists?.length || 0)
+
           if (panelistError) {
-            console.error('Error fetching panelists:', panelistError)
-          } else if (panelists) {
+            console.error('[Stock Alerts] Error fetching panelists:', panelistError)
+          } else if (panelists && panelists.length > 0) {
             // Create a map for quick lookup
             const panelistMap = new Map(panelists.map(p => [p.id, p]))
 
@@ -73,11 +79,14 @@ export function useStockAlerts() {
               if (alert.alert_type === 'panelist_negative' && alert.location_id && !alert.panelist_name) {
                 const panelist = panelistMap.get(alert.location_id)
                 if (panelist) {
+                  console.log(`[Stock Alerts] Enriching alert ${alert.id} with panelist ${panelist.name}`)
                   return {
                     ...alert,
                     panelist_name: panelist.name,
                     panelist_code: panelist.panelist_code
                   }
+                } else {
+                  console.warn(`[Stock Alerts] Panelist not found for location_id: ${alert.location_id}`)
                 }
               }
               return alert
@@ -85,6 +94,8 @@ export function useStockAlerts() {
 
             setAlerts(enrichedData)
             return
+          } else {
+            console.warn('[Stock Alerts] No panelists found for IDs:', panelistIds)
           }
         }
       }
