@@ -177,15 +177,19 @@ export default function ReceiveGenerator() {
       // Get delivery standards for all routes (origin-destination-carrier-product)
       const { data: deliveryStandards } = await supabase
         .from('delivery_standards')
-        .select('origin_city_name, destination_city_name, carrier_name, product_name, standard_days')
+        .select('origin_city_id, destination_city_id, carrier_id, product_id, standard_time, time_unit')
         .eq('account_id', accountId)
 
-      // Create a map with route key: "origin-destination-carrier-product" -> standard_days
+      // Create a map with route key: "origin_city_id-destination_city_id-carrier_id-product_id" -> standard_days
       const standardDaysMap = new Map(
-        deliveryStandards?.map(ds => [
-          `${ds.origin_city_name}-${ds.destination_city_name}-${ds.carrier_name}-${ds.product_name}`,
-          ds.standard_days
-        ]) || []
+        deliveryStandards?.map(ds => {
+          // Convert standard_time to days if needed
+          const standardDays = ds.time_unit === 'hours' ? Math.ceil(ds.standard_time / 24) : ds.standard_time
+          return [
+            `${ds.origin_city_id}-${ds.destination_city_id}-${ds.carrier_id}-${ds.product_id}`,
+            standardDays
+          ]
+        }) || []
       )
 
       console.log('[Receive Generator] Loaded delivery standards:', standardDaysMap.size)
@@ -248,12 +252,18 @@ export default function ReceiveGenerator() {
             const originPanelist = getRandomElement(originPanelistsFiltered)
             const destPanelist = getRandomElement(destPanelistsFiltered)
 
-            // Get SLA for this specific route
-            const routeKey = `${originCity.name}-${destCity.name}-${carrier.name}-${product.code} - ${product.description}`
+            // Get SLA for this specific route using IDs
+            const routeKey = `${originCity.id}-${destCity.id}-${carrierId}-${productId}`
             const standardDays = standardDaysMap.get(routeKey)
 
             if (!standardDays) {
-              console.warn('[Receive Generator] No SLA found for route:', routeKey)
+              console.warn('[Receive Generator] No SLA found for route:', {
+                origin: originCity.name,
+                destination: destCity.name,
+                carrier: carrier.name,
+                product: product.code,
+                routeKey
+              })
               continue // Skip if no SLA defined for this route
             }
 
