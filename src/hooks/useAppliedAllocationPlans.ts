@@ -52,14 +52,32 @@ export function useAppliedAllocationPlans() {
   }, [effectiveAccountId])
 
   const getPlanDetails = async (planId: string) => {
-    const { data, error } = await supabase
-      .from('allocation_plan_details')
-      .select('*')
-      .eq('plan_id', planId)
-      .order('fecha_programada')
+    // Implement pagination to handle more than 1000 records
+    const allDetails: any[] = []
+    let hasMore = true
+    let page = 0
+    const pageSize = 1000
 
-    if (error) throw error
-    return data || []
+    while (hasMore) {
+      const { data, error } = await supabase
+        .from('allocation_plan_details')
+        .select('*')
+        .eq('plan_id', planId)
+        .order('fecha_programada')
+        .range(page * pageSize, (page + 1) * pageSize - 1)
+
+      if (error) throw error
+      
+      if (data && data.length > 0) {
+        allDetails.push(...data)
+        hasMore = data.length === pageSize
+        page++
+      } else {
+        hasMore = false
+      }
+    }
+
+    return allDetails
   }
 
   return {

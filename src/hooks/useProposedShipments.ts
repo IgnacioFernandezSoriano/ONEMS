@@ -47,24 +47,41 @@ export function useProposedShipments() {
     setError(null)
 
     try {
-      // 1. Get allocation plan details in date range
-      const { data: planDetails, error: detailsError } = await supabase
-        .from('allocation_plan_details')
-        .select('id, plan_id, origin_node_id, origin_panelist_id, fecha_programada')
-        .eq('account_id', accountId)
-        .gte('fecha_programada', startDate)
-        .lte('fecha_programada', endDate)
-        .in('status', ['pending', 'notified'])
-        .not('origin_node_id', 'is', null)
+      // 1. Get allocation plan details in date range with pagination
+      const allPlanDetails: any[] = []
+      let hasMore = true
+      let page = 0
+      const pageSize = 1000
 
-      if (detailsError) throw detailsError
-      if (!planDetails || planDetails.length === 0) {
+      while (hasMore) {
+        const { data: planDetails, error: detailsError } = await supabase
+          .from('allocation_plan_details')
+          .select('id, plan_id, origin_node_id, origin_panelist_id, fecha_programada')
+          .eq('account_id', accountId)
+          .gte('fecha_programada', startDate)
+          .lte('fecha_programada', endDate)
+          .in('status', ['pending', 'notified'])
+          .not('origin_node_id', 'is', null)
+          .range(page * pageSize, (page + 1) * pageSize - 1)
+
+        if (detailsError) throw detailsError
+        
+        if (planDetails && planDetails.length > 0) {
+          allPlanDetails.push(...planDetails)
+          hasMore = planDetails.length === pageSize
+          page++
+        } else {
+          hasMore = false
+        }
+      }
+
+      if (allPlanDetails.length === 0) {
         setProposedShipments([])
         return
       }
 
       // 2. Get allocation plans to get product_id
-      const planIds = [...new Set(planDetails.map(d => d.plan_id))]
+      const planIds = [...new Set(allPlanDetails.map(d => d.plan_id))]
       const { data: plans, error: plansError } = await supabase
         .from('allocation_plans')
         .select('id, product_id')
@@ -82,7 +99,7 @@ export function useProposedShipments() {
         planProductMap[p.id] = p.product_id
       })
 
-      const enrichedDetails = planDetails.map(d => ({
+      const enrichedDetails = allPlanDetails.map(d => ({
         ...d,
         product_id: planProductMap[d.plan_id]
       })).filter(d => d.product_id)
