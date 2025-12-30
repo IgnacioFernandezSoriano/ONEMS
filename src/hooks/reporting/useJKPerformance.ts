@@ -198,7 +198,7 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
         // 3. Load lookup tables
         const [carriersRes, productsRes, citiesRes, regionsRes] = await Promise.all([
           supabase.from('carriers').select('id, name').eq('account_id', activeAccountId),
-          supabase.from('products').select('id, description').eq('account_id', activeAccountId),
+          supabase.from('products').select('id, code, description').eq('account_id', activeAccountId),
           supabase.from('cities').select('id, name, region_id').eq('account_id', activeAccountId),
           supabase.from('regions').select('id, name').eq('account_id', activeAccountId),
         ]);
@@ -210,7 +210,7 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
 
         // 4. Create lookup maps
         const carrierMap = new Map(carriersRes.data?.map(c => [c.id, c.name]) || []);
-        const productMap = new Map(productsRes.data?.map(p => [p.id, p.description]) || []);
+        const productMap = new Map(productsRes.data?.map(p => [p.id, `${p.code} - ${p.description}`]) || []);
         const cityMap = new Map(citiesRes.data?.map(c => [c.id, c.name]) || []);
         const cityRegionMap = new Map(citiesRes.data?.map(c => [c.name, c.region_id]) || []);
         const regionMap = new Map(regionsRes.data?.map(r => [r.id, r.name]) || []);
@@ -234,6 +234,8 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
             });
           }
         });
+
+        console.log('[useJKPerformance] Loaded standards:', standardsMap.size, 'keys:', Array.from(standardsMap.keys()));
 
         // 6. Group shipments by route
         const routeMap = new Map<string, {
