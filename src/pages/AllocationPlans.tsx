@@ -40,6 +40,7 @@ export function AllocationPlans() {
     status: '',
     availabilityIssue: '',
     tagId: '',
+    eventId: '',
   })
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -47,6 +48,7 @@ export function AllocationPlans() {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
   const [showRecordModal, setShowRecordModal] = useState(false)
   const [editingRecord, setEditingRecord] = useState<any | null>(null)
+  const [showIdColumn, setShowIdColumn] = useState(false)
 
   // Modal handlers
   const handleAddRecord = () => {
@@ -97,6 +99,11 @@ export function AllocationPlans() {
         return false
       }
       
+      // Event ID filter (contains search)
+      if (filters.eventId) {
+        if (!detail.id.toLowerCase().includes(filters.eventId.toLowerCase())) return false
+      }
+      
       // Availability issue filter
       if (filters.availabilityIssue) {
         const originStatus = detail.origin_availability_status
@@ -125,6 +132,10 @@ export function AllocationPlans() {
         let bVal: any
 
         switch (sortField) {
+          case 'id':
+            aVal = a.id || ''
+            bVal = b.id || ''
+            break
           case 'plan':
             aVal = a.plan?.plan_name || ''
             bVal = b.plan?.plan_name || ''
@@ -258,6 +269,7 @@ export function AllocationPlans() {
       status: '',
       availabilityIssue: '',
       tagId: '',
+      eventId: '',
     })
   }
 
@@ -721,6 +733,21 @@ export function AllocationPlans() {
             </h2>
             <div className="flex items-center gap-3">
               <button
+                onClick={() => setShowIdColumn(!showIdColumn)}
+                className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors text-sm ${
+                  showIdColumn
+                    ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+                title={showIdColumn ? 'Hide Event ID column' : 'Show Event ID column'}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                {showIdColumn ? 'Hide' : 'Show'} ID
+              </button>
+              <button
                 onClick={handleExportCSV}
                 disabled={selectedIds.size === 0}
                 className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
@@ -762,6 +789,9 @@ export function AllocationPlans() {
                         className="rounded border-gray-300"
                       />
                     </th>
+                    {showIdColumn && (
+                      <SortableHeader field="id" label="Event ID" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="Unique identifier for this allocation plan detail event. Used to track material movements and shipments." />
+                    )}
                     <SortableHeader field="plan" label="Plan" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The allocation plan name that this shipment belongs to." />
                     <SortableHeader field="carrier" label="Carrier" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The logistics carrier responsible for this shipment." />
                     <SortableHeader field="product" label="Product" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The carrier product/service type used for this shipment." />
@@ -790,6 +820,7 @@ export function AllocationPlans() {
                       nodes={nodes}
                       panelists={panelists}
                       selected={selectedIds.has(detail.id)}
+                      showIdColumn={showIdColumn}
                       onToggleSelect={() => handleToggleSelect(detail.id)}
                       onUpdate={updateDetail}
                       onMarkAsSent={markAsSent}

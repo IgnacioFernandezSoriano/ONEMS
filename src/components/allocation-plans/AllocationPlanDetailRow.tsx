@@ -9,6 +9,7 @@ interface Props {
   nodes: any[]
   panelists: any[]
   selected: boolean
+  showIdColumn?: boolean
   onToggleSelect: () => void
   onUpdate: (id: string, updates: any) => Promise<void>
   onMarkAsSent: (id: string, data: any) => Promise<void>
@@ -21,6 +22,7 @@ export function AllocationPlanDetailRow({
   nodes,
   panelists,
   selected,
+  showIdColumn = false,
   onToggleSelect,
   onUpdate,
   onMarkAsSent,
@@ -76,6 +78,13 @@ export function AllocationPlanDetailRow({
           className="rounded border-gray-300"
         />
       </td>
+
+      {/* Event ID */}
+      {showIdColumn && (
+        <td className="px-4 py-3 text-xs text-gray-600 font-mono">
+          {detail.id.substring(0, 8)}...
+        </td>
+      )}
 
       {/* Plan */}
       <td className="px-4 py-3 text-sm">{detail.plan?.plan_name}</td>

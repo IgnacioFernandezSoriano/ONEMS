@@ -16,6 +16,7 @@ interface Props {
     status: string
     availabilityIssue: string
     tagId: string
+    eventId: string
   }
   plans: any[]
   carriers: any[]
@@ -313,13 +314,29 @@ export function AllocationPlanFilters({
               <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
                 <span>🏷️</span>
                 Tag ID
-                <SmartTooltip content="Search by physical tag identifier. Shows shipments with matching tag ID (partial match supported)." />
+                <SmartTooltip content="Search by physical tag identifier. Finds shipments with matching tag IDs (partial match supported)." />
               </label>
               <input
                 type="text"
                 value={filters.tagId}
                 onChange={(e) => onFilterChange('tagId', e.target.value)}
                 placeholder="Search by Tag ID..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
+            {/* Event ID */}
+            <div>
+              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                <span>🔑</span>
+                Event ID
+                <SmartTooltip content="Search by allocation plan detail event ID. Useful for tracking specific shipment records in material movements (partial match supported)." />
+              </label>
+              <input
+                type="text"
+                value={filters.eventId}
+                onChange={(e) => onFilterChange('eventId', e.target.value)}
+                placeholder="Search by Event ID..."
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
