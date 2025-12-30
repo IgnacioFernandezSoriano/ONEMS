@@ -290,7 +290,7 @@ export default function StockAlertsTab({ onNavigateToRegulatorStock, onNavigateT
                           }`}
                         />
                         <span className="text-sm font-medium text-gray-900">
-                          {alert.alert_type === 'regulator_insufficient' ? 'Regulator' : 'Panelist'}
+                          {alert.alert_type === 'regulator_insufficient' ? 'Regulator Insufficient' : 'Panelist Negative'}
                         </span>
                       </div>
                     </td>
@@ -300,7 +300,10 @@ export default function StockAlertsTab({ onNavigateToRegulatorStock, onNavigateT
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <span className="text-sm text-gray-900">
-                        {alert.panelist_name || 'Regulator'}
+                        {alert.alert_type === 'regulator_insufficient' 
+                          ? 'Regulator' 
+                          : (alert.panelist_name || <span className="text-red-600 italic">Unknown Panelist</span>)
+                        }
                       </span>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-right">
@@ -323,8 +326,15 @@ export default function StockAlertsTab({ onNavigateToRegulatorStock, onNavigateT
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <div className="text-xs text-gray-600 max-w-md truncate" title={alert.notes || ''}>
-                        {alert.notes}
+                      <div className="text-xs max-w-md">
+                        {alert.alert_type === 'panelist_negative' && !alert.panelist_name && (
+                          <div className="text-red-600 font-medium mb-1">
+                            ⚠️ ERROR: Panelist information missing (location_id: {alert.location_id || 'null'})
+                          </div>
+                        )}
+                        <div className="text-gray-600 truncate" title={alert.notes || ''}>
+                          {alert.notes}
+                        </div>
                       </div>
                     </td>
                   </tr>
