@@ -7,41 +7,35 @@ interface TranslationMap {
 
 /**
  * Parse CSV content into a translation map
- * Expected CSV format: key,translation (2 columns)
- * OR: key,translation,context (3 columns)
+ * Expected CSV format: key,translation
  */
-function parseCSV(csvText: string, locale: string): TranslationMap {
+function parseCSV(csvText: string): TranslationMap {
   const lines = csvText.split('\n').filter(line => line.trim())
   const translations: TranslationMap = {}
   
-  if (lines.length === 0) return translations
+  if (lines.length === 0) {
+    console.warn('CSV is empty')
+    return translations
+  }
   
-  // Parse header
-  const header = lines[0].toLowerCase().split(',')
-  const keyIdx = header.findIndex(h => h.trim() === 'key')
-  const translationIdx = header.findIndex(h => h.trim() === 'translation')
-  
-  // If we have a simple 2-column format (key,translation)
-  if (keyIdx !== -1 && translationIdx !== -1) {
-    // Parse data rows
-    for (let i = 1; i < lines.length; i++) {
-      const line = lines[i].trim()
-      if (!line) continue
+  // Skip header row
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i].trim()
+    if (!line) continue
+    
+    // Split by comma (handle quoted values)
+    const match = line.match(/^([^,]+),(.*)$/)
+    if (match) {
+      const key = match[1].trim().replace(/^"|"$/g, '')
+      const translation = match[2].trim().replace(/^"|"$/g, '')
       
-      // Handle quoted values (for commas in translations)
-      const columns = line.match(/(".*?"|[^,]+)(?=\s*,|\s*$)/g) || []
-      const key = columns[keyIdx]?.trim().replace(/^"|"$/g, '')
-      const translation = columns[translationIdx]?.trim().replace(/^"|"$/g, '')
-      
-      // Only add if both key and translation exist
       if (key && translation) {
         translations[key] = translation
       }
     }
-  } else {
-    console.warn(`CSV missing required columns: key or translation`)
   }
   
+  console.log(`Parsed ${Object.keys(translations).length} translations`)
   return translations
 }
 
@@ -49,35 +43,42 @@ function parseCSV(csvText: string, locale: string): TranslationMap {
  * Load CSV from Supabase Storage with fallback to public folder
  */
 async function loadTranslations(locale: string): Promise<string> {
+  console.log(`Loading translations for locale: ${locale}`)
+  
   try {
-    // Try loading from Supabase Storage first
+    // Try Supabase Storage first
     const { data, error } = await supabase.storage
       .from('translations')
       .download(`${locale}.csv`)
     
     if (!error && data) {
       const text = await data.text()
-      console.log(`Loaded translations for ${locale} from Supabase Storage`)
+      console.log(`✓ Loaded ${locale}.csv from Supabase Storage (${text.length} bytes)`)
       return text
+    } else {
+      console.warn(`Supabase Storage error for ${locale}:`, error)
     }
   } catch (err) {
-    console.warn(`Failed to load from Supabase Storage, trying fallback:`, err)
+    console.warn(`Failed to load ${locale} from Supabase:`, err)
   }
   
   // Fallback to public folder
-  const response = await fetch(`/locales/${locale}.csv`)
-  if (!response.ok) {
-    throw new Error(`Failed to load translations for ${locale}`)
+  try {
+    const response = await fetch(`/locales/${locale}.csv`)
+    if (response.ok) {
+      const text = await response.text()
+      console.log(`✓ Loaded ${locale}.csv from public folder (${text.length} bytes)`)
+      return text
+    }
+  } catch (err) {
+    console.error(`Failed to load ${locale} from public folder:`, err)
   }
-  const text = await response.text()
-  console.log(`Loaded translations for ${locale} from public folder (fallback)`)
-  return text
+  
+  throw new Error(`Failed to load translations for ${locale}`)
 }
 
 /**
- * Hook for loading and using translations from CSV files
- * Loads user's preferred language from their profile
- * Tries Supabase Storage first, falls back to public folder
+ * Hook for loading and using translations
  */
 export function useTranslation() {
   const [locale, setLocaleState] = useState<string>('en')
@@ -88,87 +89,134 @@ export function useTranslation() {
 
   // Load user's preferred language from profile
   useEffect(() => {
+    let mounted = true
+    
     const loadUserLanguage = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser()
         
+        if (!mounted) return
+        
         if (user) {
           setUserId(user.id)
+          console.log(`User authenticated: ${user.id}`)
           
           // Get user's profile with preferred language
-          const { data: profile } = await supabase
+          const { data: profile, error } = await supabase
             .from('profiles')
             .select('preferred_language')
             .eq('id', user.id)
             .single()
           
+          if (!mounted) return
+          
+          if (error) {
+            console.error('Error loading profile:', error)
+          }
+          
           if (profile?.preferred_language) {
+            console.log(`User preferred language: ${profile.preferred_language}`)
             setLocaleState(profile.preferred_language)
           } else {
-            // Fallback to browser language or default
-            const browserLang = navigator.language.split('-')[0]
-            const supportedLocales = ['en', 'es', 'fr', 'ar']
-            const defaultLang = supportedLocales.includes(browserLang) ? browserLang : 'en'
-            setLocaleState(defaultLang)
+            console.log('No preferred language set, using English')
+            setLocaleState('en')
           }
         } else {
-          // Not logged in, use browser language
-          const browserLang = navigator.language.split('-')[0]
-          const supportedLocales = ['en', 'es', 'fr', 'ar']
-          setLocaleState(supportedLocales.includes(browserLang) ? browserLang : 'en')
+          console.log('User not authenticated, using English')
+          setLocaleState('en')
         }
       } catch (err) {
         console.error('Error loading user language:', err)
-        setLocaleState('en')
+        if (mounted) {
+          setLocaleState('en')
+        }
       }
     }
     
     loadUserLanguage()
+    
+    return () => {
+      mounted = false
+    }
   }, [])
 
   // Load translations when locale changes
   useEffect(() => {
-    setLoading(true)
-    setError(null)
+    let mounted = true
     
-    loadTranslations(locale)
-      .then(csvText => {
-        const parsed = parseCSV(csvText, locale)
+    const loadAndParse = async () => {
+      console.log(`Loading translations for locale: ${locale}`)
+      setLoading(true)
+      
+      try {
+        const csvText = await loadTranslations(locale)
+        
+        if (!mounted) return
+        
+        const parsed = parseCSV(csvText)
+        console.log(`Loaded ${Object.keys(parsed).length} translations for ${locale}`)
+        
         setTranslations(parsed)
         setLoading(false)
-      })
-      .catch(err => {
-        console.error('Translation loading error:', err)
-        setError(err.message)
-        setLoading(false)
+      } catch (err) {
+        console.error(`Failed to load translations for ${locale}:`, err)
         
-        // Fallback to English if available and not already English
+        if (!mounted) return
+        
+        setError(err instanceof Error ? err.message : 'Failed to load translations')
+        
+        // Fallback to English if not already English
         if (locale !== 'en') {
-          loadTranslations('en')
-            .then(csvText => {
-              const parsed = parseCSV(csvText, 'en')
+          console.log('Falling back to English')
+          try {
+            const csvText = await loadTranslations('en')
+            if (mounted) {
+              const parsed = parseCSV(csvText)
               setTranslations(parsed)
-            })
-            .catch(fallbackErr => {
-              console.error('Fallback translation loading error:', fallbackErr)
-            })
+            }
+          } catch (fallbackErr) {
+            console.error('Fallback to English failed:', fallbackErr)
+          }
         }
-      })
+        
+        setLoading(false)
+      }
+    }
+    
+    loadAndParse()
+    
+    return () => {
+      mounted = false
+    }
+  }, [locale])
+
+  // Apply RTL direction to document when Arabic is selected
+  useEffect(() => {
+    const isRTL = locale === 'ar'
+    document.documentElement.dir = isRTL ? 'rtl' : 'ltr'
+    console.log(`Document direction set to: ${document.documentElement.dir}`)
   }, [locale])
 
   /**
-   * Set locale and persist to user profile in database
+   * Set locale and persist to user profile
    */
   const setLocale = async (newLocale: string) => {
+    console.log(`Changing locale to: ${newLocale}`)
     setLocaleState(newLocale)
     
     // Save to user profile if logged in
     if (userId) {
       try {
-        await supabase
+        const { error } = await supabase
           .from('profiles')
           .update({ preferred_language: newLocale })
           .eq('id', userId)
+        
+        if (error) {
+          console.error('Error saving language preference:', error)
+        } else {
+          console.log(`Saved language preference: ${newLocale}`)
+        }
       } catch (err) {
         console.error('Error saving language preference:', err)
       }
@@ -176,27 +224,23 @@ export function useTranslation() {
   }
 
   /**
-   * Translate a key with optional variable substitution
-   * @param key - Translation key (e.g., 'dashboard.title')
-   * @param vars - Optional variables for substitution (e.g., { count: 5 })
-   * @param fallback - Optional fallback text if key not found
+   * Translate a key
    */
   const t = (key: string, vars?: Record<string, any>, fallback?: string): string => {
-    let text = translations[key] || fallback || key
+    const text = translations[key] || fallback || key
     
     // Replace variables if provided
     if (vars) {
+      let result = text
       Object.keys(vars).forEach(varKey => {
-        text = text.replace(new RegExp(`\\{${varKey}\\}`, 'g'), String(vars[varKey]))
+        result = result.replace(new RegExp(`\\{${varKey}\\}`, 'g'), String(vars[varKey]))
       })
+      return result
     }
     
     return text
   }
 
-  /**
-   * Check if current locale is RTL (Right-to-Left)
-   */
   const isRTL = locale === 'ar'
 
   return {

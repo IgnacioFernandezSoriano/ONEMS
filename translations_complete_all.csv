@@ -1,0 +1,1031 @@
+key,en,es,fr,ar
+accounts.account_name,Account Name,Nombre de la cuenta,Nom du compte,اسم الحساب
+accounts.created,Created,Creado,Créé,تم الإنشاء
+accounts.name,Name,Nombre,Nom,الاسم
+accounts.no_accounts_found,No accounts found,No se encontraron cuentas,Aucun compte trouvé,لم يتم العثور على حسابات
+accounts.promise,Promise,Promesa,Promesse,الوعد
+accounts.slug,Slug,Identificador,Slug,المعرف المختصر
+accounts.unique_identifier_lowercase_no_spaces,"Unique identifier (lowercase, no spaces)","Identificador único (minúsculas, sin espacios)","Identifiant unique (minuscules, sans espaces)",معرف فريد (أحرف صغيرة، بدون فراغات)
+admin.about_account_reset,About Account Reset,Acerca del restablecimiento de cuenta,À propos de la réinitialisation du compte,حول إعادة تعيين الحساب
+admin.all_allocation_plans_and_details,All allocation plans and details,Todos los planes y detalles de asignación,Tous les plans d'allocation et détails,جميع خطط التخصيص والتفاصيل
+admin.all_balancing_history,All balancing history,Todo el historial de balanceo,Tout l'historique d'équilibrage,جميع سجلات الموازنة
+admin.all_material_shipments_and_movements,All material shipments and movements,Todos los envíos y movimientos de material,Tous les envois et mouvements de matériaux,جميع شحنات وتحركات المواد
+admin.all_material_stocks,All material stocks,Todos los inventarios de material,Tous les stocks de matériaux,جميع مخزونات المواد
+admin.all_purchase_orders,All purchase orders,Todas las órdenes de compra,Toutes les commandes d'achat,جميع أوامر الشراء
+admin.cannot_be_undone,Cannot be undone,No se puede deshacer,Ne peut pas être annulé,لا يمكن التراجع عنه
+admin.configuration_data_nodes_panelists_materials_etc_w,"Configuration data (nodes, panelists, materials, etc.) will be preserved.","Los datos de configuración (nodos, panelistas, materiales, etc.) se conservarán.","Les données de configuration (nœuds, panélistes, matériaux, etc.) seront conservées.",سيتم الاحتفاظ ببيانات التكوين (العقد، الأعضاء، المواد، إلخ).
+admin.create_user,Create User,Crear usuario,Créer un utilisateur,إنشاء مستخدم
+admin.deleted_records,Deleted records:,Registros eliminados:,Enregistrements supprimés :,السجلات المحذوفة:
+admin.demo2_account_not_found,DEMO2 account not found,Cuenta DEMO2 no encontrada,Compte DEMO2 introuvable,لم يتم العثور على حساب DEMO2
+admin.demo_reset,Demo Reset,Restablecer demo,Réinitialisation de la démo,إعادة تعيين العرض التوضيحي
+admin.loading,Loading...,Cargando...,Chargement...,جاري التحميل...
+admin.loading_accounts,Loading accounts...,Cargando cuentas...,Chargement des comptes...,جارٍ تحميل الحسابات...
+admin.preserve,Preserve,Preservar,Conserver,حفظ
+admin.promise,Promise,Promesa,Promesse,وعد
+admin.reset_data,Reset Data,Restablecer datos,Réinitialiser les données,إعادة تعيين البيانات
+admin.the_demo2_account_is_not_available_please_contact_,The DEMO2 account is not available. Please contact the administrator.,"La cuenta DEMO2 no está disponible. Por favor, contacte al administrador.",Le compte DEMO2 n'est pas disponible. Veuillez contacter l'administrateur.,حساب DEMO2 غير متوفر. يرجى الاتصال بالمسؤول.
+admin.this_will_permanently_delete,This will permanently delete:,Esto eliminará permanentemente:,Cela supprimera définitivement :,سيؤدي هذا إلى الحذف الدائم لـ:
+admin.user_management,User Management,Gestión de usuarios,Gestion des utilisateurs,إدارة المستخدمين
+admin.warning_this_action_cannot_be_undone,Warning: This action cannot be undone,Advertencia: Esta acción no se puede deshacer,Attention : Cette action est irréversible,تحذير: لا يمكن التراجع عن هذا الإجراء
+allocation_plans.all_carriers,All Carriers,Todos los operadores,Tous les opérateurs,جميع شركات الاتصالات
+allocation_plans.all_cities,All Cities,Todas las ciudades,Toutes les villes,جميع المدن
+allocation_plans.all_nodes,All Nodes,Todos los nodos,Tous les nœuds,جميع العقد
+allocation_plans.all_plans,All Plans,Todos los planes,Tous les plans,جميع الخطط
+allocation_plans.all_products,All Products,Todos los productos,Tous les produits,جميع المنتجات
+allocation_plans.all_records,All Records,Todos los registros,Tous les enregistrements,جميع السجلات
+allocation_plans.all_status,All Status,Todos los estados,Tous les statuts,جميع الحالات
+allocation_plans.auto_fill_to_100,Auto-fill to 100%,Autocompletar al 100%,Remplissage automatique à 100 %,الملء التلقائي إلى 100%
+allocation_plans.availability_issues,Availability Issues,Problemas de disponibilidad,Problèmes de disponibilité,مشاكل التوفر
+allocation_plans.cancel_selected,Cancel Selected,Cancelar seleccionados,Annuler la sélection,إلغاء المحدد
+allocation_plans.cancelled,Cancelled,Cancelado,Annulé,تم الإلغاء
+allocation_plans.carrier,Carrier,Operador,Opérateur,شركة الاتصالات
+allocation_plans.change_destination_node,Change Destination Node,Cambiar nodo de destino,Modifier le nœud de destination,تغيير عقدة الوجهة
+allocation_plans.change_origin_node,Change Origin Node,Cambiar nodo de origen,Modifier le nœud d'origine,تغيير عقدة الأصل
+allocation_plans.change_scheduled_date,Change Scheduled Date,Cambiar fecha programada,Modifier la date prévue,تغيير التاريخ المجدول
+allocation_plans.city_distribution_matrix,City Distribution Matrix,Matriz de distribución por ciudad,Matrice de distribution par ville,مصفوفة توزيع المدينة
+allocation_plans.city_distribution_matrix_a_b_c,City Distribution Matrix (A-B-C),Matriz de distribución por ciudad (A-B-C),Matrice de distribution par ville (A-B-C),مصفوفة توزيع المدينة (أ-ب-ج)
+allocation_plans.clear_selection,Clear selection,Borrar selección,Effacer la sélection,مسح التحديد
+allocation_plans.completed,Completed,Completado,Terminé,مكتمل
+allocation_plans.delete_selected,Delete Selected,Eliminar seleccionados,Supprimer la sélection,حذف المحدد
+allocation_plans.destination,Destination:,Destino:,Destination :,الوجهة:
+allocation_plans.destination_city,Destination City,Ciudad de destino,Ville de destination,مدينة الوجهة
+allocation_plans.destination_node,Destination Node,Nodo de destino,Nœud de destination,عقدة الوجهة
+allocation_plans.download_csv_template,Download CSV Template,Descargar plantilla CSV,Télécharger le modèle CSV,تنزيل قالب CSV
+allocation_plans.edit_record,Edit record,Editar registro,Modifier l'enregistrement,تعديل السجل
+allocation_plans.end_date,End Date,Fecha de finalización,Date de fin,تاريخ الانتهاء
+allocation_plans.enter_tag_id,Enter tag ID,Ingresar ID de etiqueta,Saisir l'ID du tag,أدخل معرف الوسم
+allocation_plans.error,Error:,Error:,Erreur :,خطأ:
+allocation_plans.event_id,Event ID,ID del evento,ID de l'événement,معرف الحدث
+allocation_plans.example,Example:,Ejemplo:,Exemple :,مثال:
+allocation_plans.filters,Filters,Filtros,Filtres,الفلاتر
+allocation_plans.first_day_of_the_allocation_period_samples_will_be,First day of the allocation period. Samples will be scheduled from this date.,Primer día del período de asignación. Las muestras se programarán a partir de esta fecha.,Premier jour de la période d'allocation. Les échantillons seront programmés à partir de cette date.,أول يوم في فترة التخصيص. سيتم جدولة العينات من هذا التاريخ.
+allocation_plans.import_csv,Import CSV,Importar CSV,Importer CSV,استيراد CSV
+allocation_plans.invalid,Invalid,Inválido,Invalide,غير صالح
+allocation_plans.last_day_of_the_allocation_period_samples_will_be_,Last day of the allocation period. Samples will be scheduled until this date.,Último día del período de asignación. Las muestras se programarán hasta esta fecha.,Dernier jour de la période d'allocation. Les échantillons seront programmés jusqu'à cette date.,آخر يوم في فترة التخصيص. سيتم جدولة العينات حتى هذا التاريخ.
+allocation_plans.no_panelist,No Panelist,Sin panelista,Aucun panéliste,لا يوجد مشارك
+allocation_plans.no_panelist_assigned_to_destination_node,No panelist assigned to destination node,No hay panelista asignado al nodo de destino,Aucun panéliste assigné au nœud de destination,لا يوجد مشارك معين لعقدة الوجهة
+allocation_plans.no_panelist_assigned_to_origin_node,No panelist assigned to origin node,No hay panelista asignado al nodo de origen,Aucun panéliste assigné au nœud d'origine,لا يوجد مشارك معين لعقدة الأصل
+allocation_plans.notified,Notified,Notificado,Notifié,تم الإخطار
+allocation_plans.optional,Optional,Opcional,Optionnel,اختياري
+allocation_plans.optional_distribute_samples_unevenly_across_months,Optional: Distribute samples unevenly across months to reflect seasonal patterns.,Opcional: Distribuir las muestras de manera desigual a lo largo de los meses para reflejar patrones estacionales.,Optionnel : Distribuer les échantillons de manière inégale selon les mois pour refléter les variations saisonnières.,اختياري: توزيع العينات بشكل غير متساوٍ عبر الأشهر لتعكس الأنماط الموسمية.
+allocation_plans.origin,Origin:,Origen:,Origine :,الأصل:
+allocation_plans.origin_city,Origin City,Ciudad de origen,Ville d'origine,مدينة الأصل
+allocation_plans.origin_node,Origin Node,Nodo de origen,Nœud d'origine,عقدة الأصل
+allocation_plans.pending,Pending,Pendiente,En attente,قيد الانتظار
+allocation_plans.plan,Plan,Plan,Plan,خطة
+allocation_plans.plan_name,Plan Name *,Nombre del plan *,Nom du plan *,اسم الخطة *
+allocation_plans.product,Product,Producto,Produit,المنتج
+allocation_plans.promise,Promise,Promesa,Promesse,الوعد
+allocation_plans.quick_period_selection,Quick Period Selection,Selección rápida de período,Sélection rapide de période,اختيار فترة سريع
+allocation_plans.receive,Receive,Recibir,Recevoir,استلام
+allocation_plans.received,Received,Recibido,Reçu,تم الاستلام
+allocation_plans.received_date_time,Received Date & Time,Fecha y hora de recepción,Date et heure de réception,تاريخ ووقت الاستلام
+allocation_plans.register_reception,Register reception,Registrar recepción,Enregistrer la réception,تسجيل الاستلام
+allocation_plans.register_shipment,Register shipment,Registrar envío,Enregistrer l'expédition,تسجيل الشحن
+allocation_plans.registered_by,Registered By,Registrado por,Enregistré par,مسجل بواسطة
+allocation_plans.reprocess_errors,Reprocess Errors,Reprocesar errores,Reprendre les erreurs,إعادة معالجة الأخطاء
+allocation_plans.reset_filters,Reset filters,Restablecer filtros,Réinitialiser les filtres,إعادة تعيين الفلاتر
+allocation_plans.scheduled_date,Scheduled Date,Fecha programada,Date prévue,التاريخ المجدول
+allocation_plans.search_by_event_id,Search by Event ID...,Buscar por ID de evento...,Rechercher par ID d'événement...,البحث بواسطة معرف الحدث...
+allocation_plans.search_by_tag_id,Search by Tag ID...,Buscar por ID de etiqueta...,Rechercher par ID de tag...,البحث بواسطة معرف الوسم...
+allocation_plans.seasonal_distribution,Seasonal Distribution,Distribución estacional,Distribution saisonnière,التوزيع الموسمي
+allocation_plans.select_carrier,Select carrier,Seleccionar transportista,Sélectionner le transporteur,اختر الناقل
+allocation_plans.select_city,Select City,Seleccionar ciudad,Sélectionner la ville,اختر المدينة
+allocation_plans.select_node,Select node...,Seleccionar nodo...,Sélectionner le nœud...,اختر العقدة...
+allocation_plans.select_plan,Select Plan,Seleccionar plan,Sélectionner le plan,اختر الخطة
+allocation_plans.select_product,Select product,Seleccionar producto,Sélectionner le produit,اختر المنتج
+allocation_plans.send,Send,Enviar,Envoyer,إرسال
+allocation_plans.sent,Sent,Enviado,Envoyé,تم الإرسال
+allocation_plans.sent_at,Sent at:,Enviado a las:,Envoyé à :,تم الإرسال في:
+allocation_plans.sent_date_time,Sent Date & Time,Fecha y hora de envío,Date et heure d'envoi,تاريخ ووقت الإرسال
+allocation_plans.start_date,Start Date,Fecha de inicio,Date de début,تاريخ البدء
+allocation_plans.tag_id,Tag ID,ID de etiqueta,ID de l'étiquette,معرّف العلامة
+allocation_plans.total_samples,Total Samples *,Total de muestras *,Échantillons totaux *,إجمالي العينات *
+allocation_plans.transfer_error,Transfer Error,Error de transferencia,Erreur de transfert,خطأ في النقل
+allocation_plans.validation_errors,Validation Errors:,Errores de validación:,Erreurs de validation :,أخطاء التحقق:
+allocation_plans.year,Year,Año,Année,السنة
+allocationplangenerator.allocation_plan_generator,Allocation Plan Generator,Generador de Planes de Asignación,Générateur de plan d'allocation,مولد خطة التخصيص
+allocationplangenerator.applied_date,Applied Date,Fecha aplicada,Date d'application,تاريخ التطبيق
+allocationplangenerator.applied_plans_historical,Applied Plans (Historical),Planes aplicados (Histórico),Plans appliqués (Historique),الخطط المطبقة (تاريخية)
+allocationplangenerator.automatic_generator,Automatic Generator,Generador automático,Générateur automatique,المولد التلقائي
+allocationplangenerator.carrier,Carrier,Transportista,Transporteur,الناقل
+allocationplangenerator.download_csv,Download CSV,Descargar CSV,Télécharger CSV,تحميل CSV
+allocationplangenerator.generate_sample_allocation_plans_automatically_bas,Generate sample allocation plans automatically based on distribution patterns,Generar planes de asignación de muestras automáticamente según patrones de distribución,Générer automatiquement des plans d'allocation d'échantillons basés sur les schémas de distribution,توليد خطط تخصيص العينات تلقائيًا بناءً على أنماط التوزيع
+allocationplangenerator.generated_plans,Generated Plans,Planes generados,Plans générés,الخطط المولدة
+allocationplangenerator.generator,Generator,Generador,Générateur,المولد
+allocationplangenerator.how_it_works,How it works:,Cómo funciona:,Comment ça fonctionne :,كيف يعمل:
+allocationplangenerator.loading,Loading...,Cargando...,Chargement...,جارٍ التحميل...
+allocationplangenerator.manual_import,Manual Import,Importación manual,Importation manuelle,استيراد يدوي
+allocationplangenerator.no_applied_plans_yet,No applied plans yet,Aún no hay planes aplicados,Aucun plan appliqué pour le moment,لا توجد خطط مطبقة بعد
+allocationplangenerator.no_generated_plans_yet,No generated plans yet,Aún no hay planes generados,Aucun plan généré pour le moment,لا توجد خطط مولدة بعد
+allocationplangenerator.period,Period,Período,Période,الفترة
+allocationplangenerator.plan_name,Plan Name,Nombre del plan,Nom du plan,اسم الخطة
+allocationplangenerator.product,Product,Producto,Produit,المنتج
+allocationplangenerator.purpose,Purpose:,Propósito:,Objectif :,الغرض:
+allocationplangenerator.samples,Samples,Muestras,Échantillons,عينات
+allocationplangenerator.usage,Usage:,Uso:,Utilisation :,الاستخدام:
+allocationplans.add_record,Add Record,Agregar registro,Ajouter un enregistrement,إضافة سجل
+allocationplans.allocation_plans,Allocation Plans,Planes de asignación,Plans d'allocation,خطط التخصيص
+allocationplans.availability_issues,Availability Issues,Problemas de disponibilidad,Problèmes de disponibilité,مشكلات التوفر
+allocationplans.carrier,Carrier,Transportista,Transporteur,الناقل
+allocationplans.delayed_shipments,Delayed Shipments,Envíos retrasados,Expéditions retardées,الشحنات المتأخرة
+allocationplans.dest_city,Dest. City,Ciudad de destino,Ville de destination,مدينة الوجهة
+allocationplans.dest_node,Dest. Node,Nodo de destino,Nœud de destination,العقدة الوجهة
+allocationplans.dest_panelist,Dest. Panelist,Panelista de destino,Panéliste de destination,المشارك الوجهة
+allocationplans.dest_status,Dest. Status,Estado de destino,Statut de destination,حالة الوجهة
+allocationplans.event_id,Event ID,ID del evento,ID de l'événement,معرّف الحدث
+allocationplans.loading,Loading...,Cargando...,Chargement...,جارٍ التحميل...
+allocationplans.no_records_found,No records found,No se encontraron registros,Aucun enregistrement trouvé,لم يتم العثور على سجلات
+allocationplans.origin_city,Origin City,Ciudad de origen,Ville d'origine,مدينة المنشأ
+allocationplans.origin_node,Origin Node,Nodo de origen,Nœud d'origine,عقدة المنشأ
+allocationplans.origin_panelist,Origin Panelist,Panelista de origen,Panéliste d'origine,مشارك المنشأ
+allocationplans.origin_status,Origin Status,Estado de Origen,Statut d'origine,حالة الأصل
+allocationplans.pending,Pending,Pendiente,En attente,قيد الانتظار
+allocationplans.plan,Plan,Plan,Plan,الخطة
+allocationplans.product,Product,Producto,Produit,المنتج
+allocationplans.received,Received,Recibido,Reçu,تم الاستلام
+allocationplans.scheduled_date,Scheduled Date,Fecha Programada,Date prévue,التاريخ المجدول
+allocationplans.sent,Sent,Enviado,Envoyé,تم الإرسال
+allocationplans.shipment_status,Shipment Status,Estado del Envío,Statut de l'expédition,حالة الشحنة
+allocationplans.tag_id,Tag ID,ID de Etiqueta,ID de l'étiquette,معرّف العلامة
+allocationplans.total_delayed,Total Delayed,Total Retrasado,Total retardé,إجمالي التأخير
+allocationplans.total_issues,Total Issues,Total de Problemas,Total des problèmes,إجمالي المشاكل
+allocationplans.total_pending,Total & Pending,Total y Pendiente,Total & en attente,الإجمالي والقيد الانتظار
+allocationplans.view_and_manage_generated_allocation_plans,View and manage generated allocation plans,Ver y gestionar planes de asignación generados,Voir et gérer les plans d'allocation générés,عرض وإدارة خطط التخصيص المُنشأة
+allocationplans.week,Week,Semana,Semaine,الأسبوع
+auth.click_here_to_auto_fill_demo_credentials,Click here to auto-fill demo credentials,Haga clic aquí para autocompletar credenciales de demostración,Cliquez ici pour remplir automatiquement les identifiants de démonstration,انقر هنا لملء بيانات الدخول التجريبية تلقائيًا
+auth.email,Email:,Correo electrónico:,E-mail :,البريد الإلكتروني:
+auth.email_address,Email Address,Dirección de correo electrónico,Adresse e-mail,عنوان البريد الإلكتروني
+auth.enter_your_password,Enter your password,Ingrese su contraseña,Entrez votre mot de passe,أدخل كلمة المرور الخاصة بك
+auth.loading,Loading...,Cargando...,Chargement...,جارٍ التحميل...
+auth.password,Password:,Contraseña:,Mot de passe :,كلمة المرور:
+auth.secure_authentication_powered_by_supabase,Secure authentication powered by Supabase,Autenticación segura impulsada por Supabase,Authentification sécurisée propulsée par Supabase,المصادقة الآمنة مدعومة بواسطة Supabase
+auth.sign_in,Sign In,Iniciar sesión,Se connecter,تسجيل الدخول
+auth.signing_in,Signing in...,Iniciando sesión...,Connexion en cours...,جارٍ تسجيل الدخول...
+auth.try_demo_account,Try Demo Account,Probar cuenta de demostración,Essayer le compte démo,جرب حساب العرض التجريبي
+auth.wherequalitystarts,WhereQualityStarts,DondeComienzaLaCalidad,Où commence la qualité,حيث تبدأ الجودة
+auth.your_email_com,your@email.com,tu@correo.com,votre@email.com,بريدك الإلكتروني@example.com
+carriers.add_a_new_material_to_catalog_and_assign_to_produc,Add a new material to catalog and assign to product,Agregar un nuevo material al catálogo y asignarlo al producto,Ajouter un nouveau matériau au catalogue et l’assigner au produit,إضافة مادة جديدة إلى الكتالوج وتعيينها للمنتج
+carriers.additional_details,Additional details...,Detalles adicionales...,Détails supplémentaires...,تفاصيل إضافية...
+carriers.all_carriers,All Carriers,Todos los transportistas,Tous les transporteurs,جميع الناقلين
+carriers.all_products,All Products,Todos los productos,Tous les produits,جميع المنتجات
+carriers.all_products_have_materials,All products have materials!,¡Todos los productos tienen materiales!,Tous les produits ont des matériaux !,جميع المنتجات تحتوي على مواد!
+carriers.all_status,All Status,Todos los estados,Tous les statuts,جميع الحالات
+carriers.carrier,Carrier,Transportista,Transporteur,الناقل
+carriers.carriers,Carriers,Transportistas,Transporteurs,الناقلون
+carriers.carriers_products,Carriers & Products,Transportistas y productos,Transporteurs & Produits,الناقلون والمنتجات
+carriers.choose_an_existing_material_from_your_catalog,Choose an existing material from your catalog,Elige un material existente de tu catálogo,Choisissez un matériau existant dans votre catalogue,اختر مادة موجودة من كتالوجك
+carriers.choose_how_to_add_material_to_this_product,Choose how to add material to this product:,Elige cómo agregar material a este producto:,Choisissez comment ajouter un matériau à ce produit :,اختر كيفية إضافة المادة إلى هذا المنتج:
+carriers.clear_filters,Clear Filters,Borrar filtros,Effacer les filtres,مسح الفلاتر
+carriers.code,Code *,Código *,Tout réduire,الرمز *
+carriers.collapse_all,Collapse All,Contraer todo,,طي الكل
+carriers.create_carrier,Create Carrier,Crear transportista,Créer un transporteur,إنشاء ناقل
+carriers.create_new_material,Create New Material,Crear nuevo material,Créer un nouveau matériau,إنشاء مادة جديدة
+carriers.days,Days,Días,Jours,أيام
+carriers.delete_carrier,Delete carrier,Eliminar transportista,Supprimer le transporteur,حذف الناقل
+carriers.delete_product,Delete product,Eliminar producto,Supprimer le produit,حذف المنتج
+carriers.delivery_hours,Delivery Hours,Horas de entrega,Heures de livraison,ساعات التسليم
+carriers.description,Description,Descripción,Description,الوصف
+carriers.download_csv,Download CSV,Descargar CSV,Télécharger CSV,تحميل CSV
+carriers.e_g_24,"e.g., 24","p. ej., 24",ex. : 24,مثال: 24
+carriers.e_g_dhl_exp_24,"e.g., DHL-EXP-24","p. ej., DHL-EXP-24",ex. : DHL-EXP-24,مثال: DHL-EXP-24
+carriers.e_g_dhl_express,"e.g., DHL Express","p. ej., DHL Express",ex. : DHL Express,مثال: DHL إكسبريس
+carriers.e_g_dhl_ups,"e.g., DHL, UPS","p. ej., DHL, UPS","ex. : DHL, UPS",مثال: DHL، UPS
+carriers.e_g_express_delivery_24_hours,"e.g., Express delivery 24 hours","p. ej., entrega exprés 24 horas",ex. : Livraison express 24 heures,مثال: توصيل سريع خلال 24 ساعة
+carriers.e_g_express_standard_economy,"e.g., express, standard, economy","p. ej., exprés, estándar, económico","ex. : express, standard, économique",مثال: سريع، عادي، اقتصادي
+carriers.edit_carrier,Edit carrier,Editar transportista,Modifier le transporteur,تعديل الناقل
+carriers.edit_product,Edit product,Editar producto,Modifier le produit,تعديل المنتج
+carriers.every_product_has_materials_assigned_from_the_cata,Every product has materials assigned from the catalog,Cada producto tiene materiales asignados del catálogo,Chaque produit a des matériaux assignés depuis le catalogue,كل منتج يحتوي على مواد مخصصة من الكتالوج
+carriers.expand_all,Expand All,Expandir todo,Tout développer,توسيع الكل
+carriers.expand_all_products_in_this_carrier,Expand all products in this carrier,Expandir todos los productos en este transportista,Développer tous les produits de ce transporteur,توسيع جميع المنتجات في هذا الناقل
+carriers.hours,Hours,Horas,Heures,ساعات
+carriers.loading_carriers,Loading carriers...,Cargando transportistas...,Chargement des transporteurs...,جارٍ تحميل شركات الشحن...
+carriers.manage_shipping_carriers_products_and_material_req,"Manage shipping carriers, products, and material requirements","Gestionar transportistas, productos y requisitos de materiales","Gérer les transporteurs d'expédition, les produits et les besoins en matériaux",إدارة شركات الشحن والمنتجات ومتطلبات المواد
+carriers.mat_001,MAT-001,MAT-001,MAT-001,MAT-001
+carriers.material,Material,Material,Matériau,مادة
+carriers.materials,Materials,Materiales,Matériaux,مواد
+carriers.name,Name *,Nombre *,Nom *,الاسم *
+carriers.no_active_materials_in_catalog_create_a_new_one_in,No active materials in catalog. Create a new one instead.,No hay materiales activos en el catálogo. Cree uno nuevo en su lugar.,Aucun matériau actif dans le catalogue. Créez-en un nouveau à la place.,لا توجد مواد نشطة في الكتالوج. قم بإنشاء مادة جديدة بدلاً من ذلك.
+carriers.no_carriers_defined_yet,No carriers defined yet,No se han definido transportistas aún,Aucun transporteur défini pour le moment,لم يتم تعريف أي شركات شحن بعد
+carriers.no_materials_assigned_yet,No materials assigned yet,No se han asignado materiales aún,Aucun matériau assigné pour le moment,لم يتم تعيين أي مواد بعد
+carriers.no_products_for_this_carrier_yet,No products for this carrier yet,No hay productos para este transportista aún,Aucun produit pour ce transporteur pour le moment,لا توجد منتجات لهذا الناقل بعد
+carriers.no_results_found,No results found,No se encontraron resultados,Aucun résultat trouvé,لم يتم العثور على نتائج
+carriers.pending_materials,Pending Materials,Materiales pendientes,Matériaux en attente,المواد المعلقة
+carriers.product,Product,Producto,Produit,منتج
+carriers.product_code,Product Code,Código de producto,Code produit,رمز المنتج
+carriers.products,Products,Productos,Produits,منتجات
+carriers.products_without_materials,Products without Materials,Productos sin materiales,Produits sans matériaux,منتجات بدون مواد
+carriers.promise,Promise,Compromiso,Engagement,الوعد
+carriers.quantity,Quantity *,Cantidad *,Quantité *,الكمية *
+carriers.remove_material,Remove material,Eliminar material,Supprimer le matériau,إزالة المادة
+carriers.rfid_tag,RFID Tag,Etiqueta RFID,Étiquette RFID,بطاقة التعريف بموجات الراديو (RFID)
+carriers.search_carriers_or_products,Search carriers or products...,Buscar transportistas o productos...,Rechercher des transporteurs ou des produits...,ابحث عن شركات النقل أو المنتجات...
+carriers.select_from_catalog,Select from Catalog,Seleccionar del Catálogo,Sélectionner dans le catalogue,اختر من الكتالوج
+carriers.select_material,Select Material *,Seleccionar Material *,Sélectionner le matériau *,اختر المادة *
+carriers.standard_delivery_time,Standard Delivery Time *,Tiempo de Entrega Estándar *,Délai de livraison standard *,وقت التسليم القياسي *
+carriers.start_by_creating_your_first_carrier_to_manage_shi,Start by creating your first carrier to manage shipping products,Comience creando su primer transportista para gestionar productos de envío,Commencez par créer votre premier transporteur pour gérer les produits d'expédition,ابدأ بإنشاء أول ناقل لديك لإدارة شحن المنتجات
+carriers.status,Status *,Estado *,Statut *,الحالة *
+carriers.these_products_need_material_assignments_to_be_ope,These products need material assignments to be operational,Estos productos necesitan asignaciones de material para estar operativos,Ces produits nécessitent des affectations de matériaux pour être opérationnels,هذه المنتجات تحتاج إلى تعيين مواد لتكون فعالة
+carriers.time_unit,Time Unit *,Unidad de Tiempo *,Unité de temps *,وحدة الزمن *
+carriers.try_adjusting_your_search_or_filters,Try adjusting your search or filters,Intente ajustar su búsqueda o filtros,Essayez d'ajuster votre recherche ou vos filtres,حاول تعديل بحثك أو الفلاتر
+carriers.type,Type,Tipo,Type,النوع
+carriers.unit_measure,Unit Measure,Unidad de Medida,Unité de mesure,وحدة القياس
+carriers.units_kg_etc,"units, kg, etc.","unidades, kg, etc.","unités, kg, etc.",وحدات، كجم، إلخ.
+carriers.update_quantity,Update quantity,Actualizar cantidad,Mettre à jour la quantité,تحديث الكمية
+carriers.with_materials,With Materials,Con Materiales,Avec matériaux,مع المواد
+carriers.without_materials,Without Materials,Sin Materiales,Sans matériaux,بدون مواد
+common.actions,Actions,Acciones,Actions,الإجراءات
+common.active,Active,Activo,Actif,نشط
+common.apply,Apply,Aplicar,Appliquer,تطبيق
+common.cancel,Cancel,Cancelar,Annuler,إلغاء
+common.clear,Clear,Limpiar,Effacer,مسح
+common.close,Close,Cerrar,Fermer,إغلاق
+common.delete,Delete,Eliminar,Supprimer,حذف
+common.edit,Edit,Editar,Modifier,تعديل
+common.error,Error,Error,Erreur,خطأ
+common.inactive,Inactive,Inactivo,Inactif,غير نشط
+common.information,Information,Información,Informations,معلومات
+common.promise,Promise,Promesa,Promesse,وعد
+common.refresh,Refresh,Actualizar,Actualiser,تحديث
+common.remove,Remove,Quitar,Retirer,إزالة
+common.reset,Reset,Restablecer,Réinitialiser,إعادة تعيين
+common.save,Save,Guardar,Enregistrer,حفظ
+common.search,Search,Buscar,Rechercher,بحث
+common.status,Status,Estado,Statut,الحالة
+common.total,Total,Total,Total,الإجمالي
+countrytopology.all_cities,All Cities,Todas las ciudades,Toutes les villes,جميع المدن
+countrytopology.all_nodes,All Nodes,Todos los nodos,Tous les nœuds,جميع العقد
+countrytopology.all_nodes_have_panelists,All nodes have panelists!,¡Todos los nodos tienen panelistas!,Tous les nœuds ont des panélistes !,جميع العقد تحتوي على مشاركين!
+countrytopology.all_regions,All Regions,Todas las regiones,Toutes les régions,جميع المناطق
+countrytopology.cities,Cities,Ciudades,Villes,المدن
+countrytopology.city,City,Ciudad,Ville,المدينة
+countrytopology.clear_filters,Clear Filters,Borrar filtros,Effacer les filtres,مسح الفلاتر
+countrytopology.collapse_all,Collapse All,Contraer todo,Réduire tout,طي الكل
+countrytopology.country_topology,Country Topology,Topología del país,Topologie du pays,طوبولوجيا الدولة
+countrytopology.create_region,Create Region,Crear región,Créer une région,إنشاء منطقة
+countrytopology.define_and_manage_your_country_network_infrastruct,Define and manage your country network infrastructure hierarchy,Defina y gestione la jerarquía de la infraestructura de red de su país,Définissez et gérez la hiérarchie de l'infrastructure réseau de votre pays,تعريف وإدارة هيكلية بنية شبكة الدولة الخاصة بك
+countrytopology.download_csv,Download CSV,Descargar CSV,Télécharger CSV,تحميل CSV
+countrytopology.every_node_in_your_topology_has_a_panelist_assigne,Every node in your topology has a panelist assigned,Cada nodo en su topología tiene un panelista asignado,Chaque nœud de votre topologie a un panéliste assigné,كل عقدة في الطوبولوجيا الخاصة بك لديها عضو لجنة معين
+countrytopology.expand_all,Expand All,Expandir todo,Développer tout,توسيع الكل
+countrytopology.loading_topology,Loading topology...,Cargando topología...,Chargement de la topologie...,جارٍ تحميل الطوبولوجيا...
+countrytopology.no_results_found,No results found,No se encontraron resultados,Aucun résultat trouvé,لم يتم العثور على نتائج
+countrytopology.no_topology_defined_yet,No topology defined yet,Aún no se ha definido ninguna topología,Aucune topologie définie pour le moment,لم يتم تعريف الطوبولوجيا بعد
+countrytopology.node_id,Node ID,ID del nodo,ID du nœud,معرّف العقدة
+countrytopology.nodes_without_panelists,Nodes without Panelists,Nodos sin panelistas,Nœuds sans panélistes,العقد بدون أعضاء لجنة
+countrytopology.pending_panelist,Pending Panelist,Panelista pendiente,Panéliste en attente,عضو لجنة معلق
+countrytopology.region,Region,Región,Région,المنطقة
+countrytopology.regions,Regions,Regiones,Régions,المناطق
+countrytopology.search_regions_cities_or_nodes,"Search regions, cities, or nodes...","Buscar regiones, ciudades o nodos...","Rechercher des régions, villes ou nœuds...",ابحث عن مناطق أو مدن أو عقد...
+countrytopology.start_by_creating_your_first_region_to_build_your_,Start by creating your first region to build your country topology,Comience creando su primera región para construir la topología de su país,Commencez par créer votre première région pour construire la topologie de votre pays,ابدأ بإنشاء أول منطقة لبناء طوبولوجيا الدولة الخاصة بك
+countrytopology.these_nodes_need_panelist_assignment_to_be_operati,These nodes need panelist assignment to be operational,Estos nodos necesitan asignación de panelista para estar operativos,Ces nœuds nécessitent une assignation de panéliste pour être opérationnels,تحتاج هذه العقد إلى تعيين عضو لجنة لتكون عملية
+countrytopology.topology_tree,Topology Tree,Árbol de topología,Arbre de topologie,شجرة الطوبولوجيا
+countrytopology.total_nodes,Total Nodes,Nodos Totales,Nombre total de nœuds,إجمالي العقد
+countrytopology.try_adjusting_your_search_or_filters,Try adjusting your search or filters,Intente ajustar su búsqueda o filtros,Essayez d'ajuster votre recherche ou vos filtres,حاول تعديل البحث أو الفلاتر
+countrytopology.with_panelist,With Panelist,Con Panelista,Avec panéliste,مع مشارك
+countrytopology.with_panelists,With Panelists,Con Panelistas,Avec panélistes,مع المشاركين
+countrytopology.without_panelist,Without Panelist,Sin Panelista,Sans panéliste,بدون مشارك
+countrytopology.without_panelists,Without Panelists,Sin Panelistas,Sans panélistes,بدون مشاركين
+dashboard.active_carriers,Active Carriers,Transportistas Activos,Transporteurs actifs,الناقلون النشطون
+dashboard.active_products,Active Products,Productos Activos,Produits actifs,المنتجات النشطة
+dashboard.active_resources,Active Resources,Recursos Activos,Ressources actives,الموارد النشطة
+dashboard.allocation_plans,Allocation Plans,Planes de Asignación,Plans d'allocation,خطط التخصيص
+dashboard.availability_issues,Availability Issues,Problemas de Disponibilidad,Problèmes de disponibilité,مشاكل التوفر
+dashboard.availability_rate,Availability Rate,Tasa de Disponibilidad,Taux de disponibilité,معدل التوفر
+dashboard.available_combinations,Available combinations,Combinaciones Disponibles,Combinaisons disponibles,التوليفات المتاحة
+dashboard.carrier_product_pairs,Carrier-Product Pairs,Pares Transportista-Producto,Paires transporteur-produit,أزواج الناقل-المنتج
+dashboard.carriers_products,Carriers & Products,Transportistas y Productos,Transporteurs et produits,الناقلون والمنتجات
+dashboard.configured_routes,Configured routes,Rutas Configuradas,Itinéraires configurés,المسارات المُعدة
+dashboard.coverage_rate,Coverage Rate,Tasa de Cobertura,Taux de couverture,معدل التغطية
+dashboard.critical_alerts,Critical Alerts,Alertas Críticas,Alertes critiques,التنبيهات الحرجة
+dashboard.current_alerts,Current Alerts,Alertas Actuales,Alertes en cours,التنبيهات الحالية
+dashboard.current_month,Current Month,Mes Actual,Mois en cours,الشهر الحالي
+dashboard.currently_unavailable,Currently unavailable,Actualmente no disponible,Actuellement indisponible,غير متوفر حالياً
+dashboard.delayed_shipments,Delayed Shipments,Envíos retrasados,Expéditions retardées,الشحنات المتأخرة
+dashboard.delivery_standards,Delivery Standards,Estándares de entrega,Normes de livraison,معايير التسليم
+dashboard.incomplete_standards,Incomplete standards,Estándares incompletos,Normes incomplètes,المعايير غير المكتملة
+dashboard.issues_delays,Issues & Delays,Problemas y retrasos,Problèmes et retards,المشاكل والتأخيرات
+dashboard.last_30_days,Last 30 days,Últimos 30 días,30 derniers jours,آخر 30 يومًا
+dashboard.last_60_days,Last 60 days,Últimos 60 días,60 derniers jours,آخر 60 يومًا
+dashboard.last_90_days,Last 90 days,Últimos 90 días,90 derniers jours,آخر 90 يومًا
+dashboard.loading_dashboard,Loading dashboard...,Cargando panel de control...,Chargement du tableau de bord...,جارٍ تحميل لوحة التحكم...
+dashboard.management_dashboard,Management Dashboard,Panel de gestión,Tableau de bord de gestion,لوحة إدارة
+dashboard.management_tip,Management Tip,Consejo de gestión,Conseil de gestion,نصيحة إدارية
+dashboard.material_management,Material Management,Gestión de materiales,Gestion des matériaux,إدارة المواد
+dashboard.material_requirements,Material Requirements,Requisitos de materiales,Besoins en matériaux,متطلبات المواد
+dashboard.needing_review,Needing Review,Necesita revisión,À réviser,بحاجة للمراجعة
+dashboard.next_30_days,Next 30 days,Próximos 30 días,30 prochains jours,الـ 30 يومًا القادمة
+dashboard.next_month,Next Month,Próximo mes,Mois prochain,الشهر القادم
+dashboard.on_vacation,On Vacation,De vacaciones,En congé,في إجازة
+dashboard.panelist_status,Panelist Status,Estado del panelista,Statut du panéliste,حالة الأعضاء
+dashboard.panelist_stock,Panelist Stock,Inventario del panelista,Stock du panéliste,مخزون الأعضاء
+dashboard.panelists_availability,Panelists & Availability,Panelistas y disponibilidad,Panélistes et disponibilité,الأعضاء والتوافر
+dashboard.pending_items,Pending Items,Elementos pendientes,Articles en attente,العناصر المعلقة
+dashboard.pending_shipments,Pending Shipments,Envíos pendientes,Expéditions en attente,الشحنات المعلقة
+dashboard.purchase_orders,Purchase Orders,Órdenes de compra,Commandes d'achat,أوامر الشراء
+dashboard.regulator_stock,Regulator Stock,Stock de reguladores,Stock de régulateurs,مخزون المنظم
+dashboard.selected_period,Selected period:,Período seleccionado:,Période sélectionnée :,الفترة المحددة:
+dashboard.shipments_to_panelists,Shipments to Panelists,Envíos a panelistas,Expéditions aux panélistes,الشحنات إلى المشاركين
+dashboard.standards_configuration,Standards Configuration,Configuración de estándares,Configuration des normes,تكوين المعايير
+dashboard.stock_alerts,Stock Alerts,Alertas de stock,Alertes de stock,تنبيهات المخزون
+dashboard.total_panelists,Total Panelists,Total de panelistas,Total des panélistes,إجمالي المشاركين
+dashboard.total_plans,Total Plans,Total de planes,Total des plans,إجمالي الخطط
+dashboard.total_standards,Total Standards,Total de estándares,Total des normes,إجمالي المعايير
+dashboard.total_status,Total & Status,Total y estado,Total et statut,الإجمالي والحالة
+dashboard.upcoming_vacations,Upcoming Vacations,Próximas vacaciones,Vacances à venir,الإجازات القادمة
+delivery_standards.carrier,Carrier *,Transportista *,Transporteur *,شركة النقل *
+delivery_standards.clear_all_selections,Clear All Selections,Borrar todas las selecciones,Effacer toutes les sélections,مسح جميع التحديدات
+delivery_standards.days,Days,Días,Jours,أيام
+delivery_standards.destination_city,Destination City *,Ciudad de destino *,Ville de destination *,مدينة الوجهة *
+delivery_standards.e_g_24,"e.g., 24","p. ej., 24",ex. : 24,مثال: 24
+delivery_standards.e_g_85,"e.g., 85","p. ej., 85",ex. : 85,مثال: 85
+delivery_standards.estimated_combinations,Estimated combinations:,Combinaciones estimadas:,Combinaisons estimées :,التوليفات المقدرة:
+delivery_standards.generate_delivery_standards,Generate Delivery Standards,Generar Estándares de Entrega,Générer les normes de livraison,إنشاء معايير التسليم
+delivery_standards.generation_complete,Generation Complete,Generación Completa,Génération terminée,اكتمل الإنشاء
+delivery_standards.hours,Hours,Horas,Heures,ساعات
+delivery_standards.no_products_for_this_carrier,No products for this carrier,No hay productos para este transportista,Aucun produit pour ce transporteur,لا توجد منتجات لهذا الناقل
+delivery_standards.origin_city,Origin City *,Ciudad de Origen *,Ville d'origine *,مدينة المنشأ *
+delivery_standards.product,Product *,Producto *,Produit *,المنتج *
+delivery_standards.promise,Promise,Compromiso,Engagement,الوعد
+delivery_standards.select_carrier,Select carrier,Seleccionar transportista,Sélectionner un transporteur,اختر الناقل
+delivery_standards.select_destination,Select destination,Seleccionar destino,Sélectionner la destination,اختر الوجهة
+delivery_standards.select_origin,Select origin,Seleccionar origen,Sélectionner l'origine,اختر المنشأ
+delivery_standards.select_product,Select product,Seleccionar producto,Sélectionner le produit,اختر المنتج
+delivery_standards.smart_generation,Smart Generation:,Generación Inteligente:,Génération intelligente :,الإنشاء الذكي:
+delivery_standards.standard_time,Standard Time,Tiempo Estándar,Temps standard,الوقت القياسي
+delivery_standards.success,Success %,% de Éxito,Taux de réussite %,نسبة النجاح %
+delivery_standards.time_unit,Time Unit *,Unidad de Tiempo *,Unité de temps *,وحدة الوقت *
+deliverystandards.about_delivery_standards,About Delivery Standards,Acerca de los Estándares de Entrega,À propos des normes de livraison,حول معايير التسليم
+deliverystandards.absoluto,Absoluto:,Absoluto:,Absolu :,مطلق:
+deliverystandards.absoluto_del_100,Absoluto (% del 100%),Absoluto (% del 100%),Absolu (% de 100 %),مطلق (% من 100%)
+deliverystandards.all_carriers,All Carriers,Todos los Transportistas,Tous les transporteurs,جميع الناقلين
+deliverystandards.all_cities,All Cities,Todas las Ciudades,Toutes les villes,جميع المدن
+deliverystandards.all_products,All Products,Todos los productos,Tous les produits,جميع المنتجات
+deliverystandards.all_types,All Types,Todos los tipos,Tous les types,جميع الأنواع
+deliverystandards.carrier,Carrier,Transportista,Transporteur,الناقل
+deliverystandards.carrier_s_product_service_type_e_g_express_standar,"Carrier's product/service type (e.g., Express, Standard, Economy)","Tipo de producto/servicio del transportista (p. ej., Exprés, Estándar, Económico)","Type de produit/service du transporteur (ex. : Express, Standard, Économique)",نوع منتج/خدمة الناقل (مثل: سريع، عادي، اقتصادي)
+deliverystandards.city_where_the_package_is_delivered_destination_ci,City where the package is delivered (destination city),Ciudad donde se entrega el paquete (ciudad de destino),Ville de livraison du colis (ville de destination),المدينة التي يتم فيها تسليم الطرد (مدينة الوجهة)
+deliverystandards.city_where_the_package_is_picked_up_origin_city,City where the package is picked up (origin city),Ciudad donde se recoge el paquete (ciudad de origen),Ville de prise en charge du colis (ville d'origine),المدينة التي يتم فيها استلام الطرد (مدينة المنشأ)
+deliverystandards.configured,Configured,Configurado,Configuré,مُكوَّن
+deliverystandards.create_delivery_standard,Create Delivery Standard,Crear estándar de entrega,Créer une norme de livraison,إنشاء معيار التسليم
+deliverystandards.critical,Critical %,% crítico,% critique,النسبة الحرجة %
+deliverystandards.critical_threshold,Critical Threshold (%),Umbral crítico (%),Seuil critique (%),العتبة الحرجة (%)
+deliverystandards.days,Days,Días,Jours,أيام
+deliverystandards.delivery_standards,Delivery Standards,Estándares de entrega,Normes de livraison,معايير التسليم
+deliverystandards.destination,Destination,Destino,Destination,الوجهة
+deliverystandards.destination_city,Destination City,Ciudad de destino,Ville de destination,مدينة الوجهة
+deliverystandards.destination_type,Destination Type,Tipo de destino,Type de destination,نوع الوجهة
+deliverystandards.e_g_10,"e.g., 10","p. ej., 10",ex. : 10,مثال: 10
+deliverystandards.e_g_20,"e.g., 20","p. ej., 20",ex. : 20,مثال: 20
+deliverystandards.e_g_24,"e.g., 24","p. ej., 24",ex. : 24,مثال: 24
+deliverystandards.e_g_85,"e.g., 85","p. ej., 85",ex. : 85,مثال: 85
+deliverystandards.edit_delivery_standard,Edit Delivery Standard,Editar estándar de entrega,Modifier la norme de livraison,تعديل معيار التسليم
+deliverystandards.edit_or_delete_this_delivery_standard,Edit or delete this delivery standard,Editar o eliminar este estándar de entrega,Modifier ou supprimer cette norme de livraison,تعديل أو حذف معيار التسليم هذا
+deliverystandards.ejemplo_success_95_warning_10_l_mite_90_100_10,"Ejemplo: Success=95%, Warning=10% → Límite=90% (100% - 10%)","Ejemplo: Éxito=95%, Advertencia=10% → Límite=90% (100% - 10%)","Exemple : Succès=95%, Avertissement=10% → Limite=90% (100% - 10%)",مثال: النجاح=95%، التحذير=10% → الحد=90% (100% - 10%)
+deliverystandards.ejemplo_success_95_warning_5_l_mite_90_25_95_95_5,"Ejemplo: Success=95%, Warning=5% → Límite=90.25% (95% - 95%×5%)","Ejemplo: Éxito=95%, Advertencia=5% → Límite=90,25% (95% - 95%×5%)","Exemple : Succès=95%, Avertissement=5% → Limite=90,25% (95% - 95%×5%)",مثال: النجاح=95%، التحذير=5% → الحد=90.25% (95% - 95%×5%)
+deliverystandards.filters,Filters,Filtros,Filtres,الفلاتر
+deliverystandards.hours,Hours,Horas,Heures,الساعات
+deliverystandards.j_k,J+K:,J+K:,J+K :,J+K:
+deliverystandards.key_metrics,Key Metrics:,Métricas clave:,Indicateurs clés :,المقاييس الرئيسية:
+deliverystandards.loading_delivery_standards,Loading delivery standards...,Cargando estándares de entrega...,Chargement des normes de livraison...,جاري تحميل معايير التسليم...
+deliverystandards.logistics_carrier_responsible_for_delivery_e_g_dhl,"Logistics carrier responsible for delivery (e.g., DHL, FedEx)","Transportista logístico responsable de la entrega (p. ej., DHL, FedEx)","Transporteur logistique responsable de la livraison (ex. : DHL, FedEx)",الناقل اللوجستي المسؤول عن التسليم (مثل DHL، FedEx)
+deliverystandards.los_thresholds_se_calculan_como_del_100,Los thresholds se calculan como % del 100%.,Los umbrales se calculan como % del 100%.,Les seuils sont calculés en % de 100%.,يتم حساب العتبات كنسبة مئوية من 100%.
+deliverystandards.los_thresholds_se_calculan_como_del_success,Los thresholds se calculan como % del Success %.,Los umbrales se calculan como % del % de Éxito.,Les seuils sont calculés en % du % de succès.,يتم حساب العتبات كنسبة مئوية من نسبة النجاح.
+deliverystandards.manage_delivery_time_standards_between_cities_for_,Manage delivery time standards between cities for each carrier and product,Gestionar estándares de tiempo de entrega entre ciudades para cada transportista y producto,Gérer les normes de temps de livraison entre villes pour chaque transporteur et produit,إدارة معايير وقت التسليم بين المدن لكل ناقل ومنتج
+deliverystandards.no_delivery_standards_found_generate_combinations_,No delivery standards found. Generate combinations to get started.,No se encontraron estándares de entrega. Genere combinaciones para comenzar.,Aucune norme de livraison trouvée. Générez des combinaisons pour commencer.,لم يتم العثور على معايير تسليم. أنشئ مجموعات للبدء.
+deliverystandards.origin,Origin,Origen,Origine,الأصل
+deliverystandards.origin_city,Origin City,Ciudad de origen,Ville d'origine,مدينة الأصل
+deliverystandards.origin_type,Origin Type,Tipo de origen,Type d'origine,نوع الأصل
+deliverystandards.pending,Pending,Pendiente,En attente,قيد الانتظار
+deliverystandards.pending_only,Pending Only,Solo pendientes,Uniquement en attente,الانتظار فقط
+deliverystandards.product,Product,Producto,Produit,المنتج
+deliverystandards.purpose,Purpose:,Propósito:,Objectif :,الغرض:
+deliverystandards.relativo,Relativo:,Relativo:,Relatif :,نسبي:
+deliverystandards.relativo_del_success,Relativo (% del Success %),Relativo (% del % de Éxito),Relatif (% du Succès %),نسبي (% من نسبة النجاح %)
+deliverystandards.reset_all_filters,Reset all filters,Restablecer todos los filtros,Réinitialiser tous les filtres,إعادة تعيين جميع الفلاتر
+deliverystandards.selected,Selected,Seleccionado,Sélectionné,المحدد
+deliverystandards.standard_delivery_time_e_g_j_2_means_2_days_from_p,"Standard delivery time (e.g., J+2 means 2 days from pickup)","Tiempo de entrega estándar (p. ej., J+2 significa 2 días desde la recogida)","Délai de livraison standard (par ex., J+2 signifie 2 jours à partir de la prise en charge)",وقت التسليم القياسي (مثلاً، J+2 تعني يومين من الاستلام)
+deliverystandards.standard_time,Standard Time,Tiempo estándar,Temps standard,الوقت القياسي
+deliverystandards.std,Std %:,% Estándar:,% Std :,نسبة قياسية:
+deliverystandards.success,Success %,% de Éxito,% de succès,نسبة النجاح %
+deliverystandards.target_percentage_of_deliveries_meeting_the_j_k_st,Target percentage of deliveries meeting the J+K standard,Porcentaje objetivo de entregas que cumplen con el estándar J+K,Pourcentage cible de livraisons respectant la norme J+K,النسبة المستهدفة للتسليمات التي تفي بمعيار J+K
+deliverystandards.threshold_calculation_type_relative_percentage_bas,Threshold calculation type: Relative (percentage-based) or Absolute (fixed value),Tipo de cálculo del umbral: Relativo (basado en porcentaje) o Absoluto (valor fijo),Type de calcul du seuil : Relatif (basé sur un pourcentage) ou Absolu (valeur fixe),نوع حساب العتبة: نسبي (معتمد على النسبة المئوية) أو مطلق (قيمة ثابتة)
+deliverystandards.threshold_type,Threshold Type,Tipo de umbral,Type de seuil,نوع العتبة
+deliverystandards.thresholds,Thresholds:,Umbrales:,Seuils :,العتبات:
+deliverystandards.time_unit,Time Unit,Unidad de tiempo,Unité de temps,وحدة الوقت
+deliverystandards.time_unit_for_the_j_k_value_hours_or_days,Time unit for the J+K value (hours or days),Unidad de tiempo para el valor J+K (horas o días),Unité de temps pour la valeur J+K (heures ou jours),وحدة الوقت لقيمة J+K (ساعات أو أيام)
+deliverystandards.tipo_de_c_lculo_de_thresholds,Tipo de Cálculo de Thresholds:,Tipo de cálculo de umbrales:,Type de calcul des seuils :,نوع حساب العتبات:
+deliverystandards.total_standards,Total Standards,Estándares totales,Normes totales,إجمالي المعايير
+deliverystandards.type,Type,Tipo,Type,النوع
+deliverystandards.type_a,Type A,Tipo A,Type A,النوع أ
+deliverystandards.type_b,Type B,Tipo B,Type B,النوع ب
+deliverystandards.type_c,Type C,Tipo C,Type C,النوع ج
+deliverystandards.unit,Unit,Unidad,Unité,الوحدة
+deliverystandards.usage,Usage:,Uso:,Utilisation :,الاستخدام:
+deliverystandards.warning,Warning %,Advertencia %,Avertissement %,نسبة التحذير
+deliverystandards.warning_and_critical_deviation_levels_for_performa,Warning and critical deviation levels for performance monitoring,Niveles de desviación de advertencia y crítica para el monitoreo del rendimiento,Niveaux d'alerte et de déviation critique pour la surveillance des performances,مستويات التحذير والانحراف الحرج لمراقبة الأداء
+deliverystandards.warning_threshold,Warning Threshold (%),Umbral de advertencia (%),Seuil d'alerte (%),عتبة التحذير (%)
+layout.all_accounts,All Accounts,Todas las cuentas,Tous les comptes,جميع الحسابات
+layout.sign_out,Sign Out,Cerrar sesión,Déconnexion,تسجيل الخروج
+layout.view_as_account,View as account:,Ver como cuenta:,Afficher en tant que compte :,عرض كحساب:
+material_catalog.additional_details,Additional details...,Detalles adicionales...,Détails supplémentaires...,تفاصيل إضافية...
+material_catalog.code,Code *,Código *,Code *,الرمز *
+material_catalog.description,Description,Descripción,Description,الوصف
+material_catalog.mat_001,MAT-001,MAT-001,MAT-001,MAT-001
+material_catalog.minimum_stock_safety_stock,Minimum Stock (Safety Stock),Stock mínimo (Stock de seguridad),Stock minimum (stock de sécurité),الحد الأدنى للمخزون (مخزون الأمان)
+material_catalog.name,Name *,Nombre *,Nom *,الاسم *
+material_catalog.promise,Promise,Promesa,Promesse,الوعد
+material_catalog.rfid_tag,RFID Tag,Etiqueta RFID,Étiquette RFID,علامة التعريف بالتردد اللاسلكي (RFID)
+material_catalog.unit_measure,Unit Measure,Unidad de medida,Unité de mesure,وحدة القياس
+material_catalog.units_kg_etc,"units, kg, etc.","unidades, kg, etc.","unités, kg, etc.",وحدات، كجم، إلخ.
+materialcatalog.code,Code,Código,Code,الرمز
+materialcatalog.description,Description,Descripción,Description,الوصف
+materialcatalog.loading,Loading...,Cargando...,Chargement...,جارٍ التحميل...
+materialcatalog.manage_reusable_materials_for_all_products,Manage reusable materials for all products,Gestionar materiales reutilizables para todos los productos,Gérer les matériaux réutilisables pour tous les produits,إدارة المواد القابلة لإعادة الاستخدام لجميع المنتجات
+materialcatalog.material_catalog,Material Catalog,Catálogo de Materiales,Catalogue des matériaux,كتالوج المواد
+materialcatalog.min_stock,Min Stock,Stock Mínimo,Stock min,الحد الأدنى للمخزون
+materialcatalog.name,Name,Nombre,Nom,الاسم
+materialcatalog.no_materials_in_catalog_create_your_first_material,No materials in catalog. Create your first material to get started.,No hay materiales en el catálogo. Crea tu primer material para comenzar.,Aucun matériau dans le catalogue. Créez votre premier matériau pour commencer.,لا توجد مواد في الكتالوج. أنشئ أول مادة للبدء.
+materialcatalog.promise,Promise,Compromiso,Engagement,الوعد
+materialcatalog.unit,Unit,Unidad,Unité,الوحدة
+materialrequirements.all_materials,All Materials,Todos los Materiales,Tous les matériaux,جميع المواد
+materialrequirements.all_nodes,All Nodes,Todos los Nodos,Tous les nœuds,جميع العقد
+materialrequirements.calculate_material_needs_based_on_allocation_plans,Calculate material needs based on allocation plans,Calcular necesidades de material basadas en planes de asignación,Calculer les besoins en matériaux selon les plans d'allocation,حساب احتياجات المواد بناءً على خطط التخصيص
+materialrequirements.end_date,End Date,Fecha de Fin,Date de fin,تاريخ الانتهاء
+materialrequirements.error_calculating_requirements,Error calculating requirements,Error al calcular los requerimientos,Erreur lors du calcul des besoins,خطأ في حساب المتطلبات
+materialrequirements.export_to_csv,Export to CSV,Exportar a CSV,Exporter en CSV,تصدير إلى CSV
+materialrequirements.filters,Filters,Filtros,Filtres,عوامل التصفية
+materialrequirements.material,Material,Material,Matériau,المادة
+materialrequirements.material_code,Material Code,Código de Material,Code matériau,رمز المادة
+materialrequirements.material_name,Material Name,Nombre del Material,Nom du matériau,اسم المادة
+materialrequirements.material_requirements,Material Requirements,Requerimientos de Material,Besoins en matériaux,متطلبات المادة
+materialrequirements.node,Node,Nodo,Nœud,العقدة
+materialrequirements.panelist_requirements,Panelist Requirements,Requisitos para panelistas,Exigences des panélistes,متطلبات الأعضاء
+materialrequirements.panelists_needing,Panelists Needing,Panelistas necesarios,Panélistes nécessaires,الأعضاء المطلوبون
+materialrequirements.plans,Plans,Planes,Plans,الخطط
+materialrequirements.purchase_requirements,Purchase Requirements,Requisitos de compra,Exigences d'achat,متطلبات الشراء
+materialrequirements.quantity,Quantity,Cantidad,Quantité,الكمية
+materialrequirements.quantity_needed,Quantity Needed,Cantidad necesaria,Quantité nécessaire,الكمية المطلوبة
+materialrequirements.quick_period_selection,Quick Period Selection,Selección rápida de período,Sélection rapide de période,اختيار فترة سريع
+materialrequirements.reset_all_filters,Reset all filters,Restablecer todos los filtros,Réinitialiser tous les filtres,إعادة تعيين جميع الفلاتر
+materialrequirements.shipments,Shipments,Envíos,Expéditions,الشحنات
+materialrequirements.start_date,Start Date,Fecha de inicio,Date de début,تاريخ البدء
+materialrequirements.total_materials,Total Materials,Materiales totales,Matériaux totaux,إجمالي المواد
+materialrequirements.unit,Unit,Unidad,Unité,الوحدة
+materialrequirements.year,Year,Año,Année,السنة
+nodeloadbalancing.acceptable_deviation_from_reference,Acceptable deviation from reference,Desviación aceptable respecto a la referencia,Écart acceptable par rapport à la référence,الانحراف المقبول عن المرجع
+nodeloadbalancing.actualiza_fecha_programada_y_node_id_en_allocation,Actualiza fecha_programada y node_id en allocation_plan_details,Actualiza fecha_programada y node_id en allocation_plan_details,Met à jour fecha_programada et node_id dans allocation_plan_details,تحديث تاريخ_مجدول و node_id في تفاصيل خطة التخصيص
+nodeloadbalancing.additional_nodes_required,Additional Nodes Required,Nodos adicionales requeridos,Nœuds supplémentaires requis,العقد الإضافية المطلوبة
+nodeloadbalancing.after,After,Después de,Après,بعد
+nodeloadbalancing.all_shipments_in_period,All shipments in period,Todos los envíos en el período,Toutes les expéditions dans la période,جميع الشحنات في الفترة
+nodeloadbalancing.avg_node,Avg/Node:,Promedio por nodo:,Moyenne/Nœud :,متوسط/عقدة:
+nodeloadbalancing.balance_not_needed,Balance Not Needed,Saldo no necesario,Solde non nécessaire,الرصيد غير مطلوب
+nodeloadbalancing.before,Before,Antes,Avant,قبل
+nodeloadbalancing.c_lculo_del_objetivo,Cálculo del objetivo:,Cálculo del objetivo:,Calcul de l'objectif :,حساب الهدف:
+nodeloadbalancing.calculating_balance_preview,Calculating balance preview...,Calculando vista previa del balance...,Calcul de l'aperçu du solde...,جارٍ حساب معاينة الرصيد...
+nodeloadbalancing.clasificaci_n,Clasificación:,Clasificación:,Classification :,التصنيف:
+nodeloadbalancing.con_ref_63_y_20_normal_lt_75_6_high_75_6_saturated,"Con Ref=63 y %=20, Normal &lt; 75.6, High ≥ 75.6, Saturated ≥ 81.9","Con Ref=63 y %=20, Normal < 75.6, Alto ≥ 75.6, Saturado ≥ 81.9","Avec Ref=63 et %=20, Normal < 75,6, Élevé ≥ 75,6, Saturé ≥ 81,9",مع Ref=63 و %=20، عادي < 75.6، مرتفع ≥ 75.6، مشبع ≥ 81.9
+nodeloadbalancing.concepto,Concepto:,Concepto:,Concept :,المفهوم:
+nodeloadbalancing.critical,Critical:,Crítico:,Critique :,حرج:
+nodeloadbalancing.deviation_tolerance,Deviation Tolerance (%),Tolerancia de desviación (%),Tolérance de déviation (%),تحمل الانحراف (%)
+nodeloadbalancing.ejemplo,Ejemplo:,Ejemplo:,Exemple :,مثال:
+nodeloadbalancing.ejemplo_305_shipments_1_nodo_5_semanas_61_por_celd,Ejemplo: 305 shipments / (1 nodo × 5 semanas) = 61 por celda,Ejemplo: 305 envíos / (1 nodo × 5 semanas) = 61 por celda,Exemple : 305 expéditions / (1 nœud × 5 semaines) = 61 par cellule,مثال: 305 شحنات / (1 عقدة × 5 أسابيع) = 61 لكل خلية
+nodeloadbalancing.end_date,End Date,Fecha de finalización,Date de fin,تاريخ الانتهاء
+nodeloadbalancing.even_after_optimal_balancing_the_average_load_per_,"Even after optimal balancing, the average load per node (","Incluso después del balance óptimo, la carga promedio por nodo (","Même après un équilibrage optimal, la charge moyenne par nœud (",حتى بعد التوازن الأمثل، متوسط الحمل لكل عقدة (
+nodeloadbalancing.expected_average_samples_per_node,Expected average samples per node,Muestras promedio esperadas por nodo,Échantillons moyens attendus par nœud,متوسط العينات المتوقع لكل عقدة
+nodeloadbalancing.filters,Filters,Filtros,Filtres,الفلاتر
+nodeloadbalancing.high_load,High Load:,Carga alta:,Charge élevée :,حمل مرتفع:
+nodeloadbalancing.high_load_nodes,High Load Nodes,Nodos con carga alta,Nœuds à charge élevée,عقد ذات حمل مرتفع
+nodeloadbalancing.how_it_works,How it works:,Cómo funciona:,Comment ça fonctionne :,كيف يعمل:
+nodeloadbalancing.identifica_celdas_sobrecargadas_gt_objetivo_1_2,Identifica celdas sobrecargadas (&gt; objetivo × 1.2),Identifica celdas sobrecargadas (> objetivo × 1.2),"Identifie les cellules surchargées (> objectif × 1,2)",يحدد الخلايا المحملة بشكل زائد (> الهدف × 1.2)
+nodeloadbalancing.identifica_celdas_subcargadas_lt_objetivo_0_9,Identifica celdas subcargadas (&lt; objetivo × 0.9),Identifica celdas subcargadas (< objetivo × 0.9),"Identifie les cellules sous-chargées (< objectif × 0,9)",يحدد الخلايا المحملة بشكل ناقص (< الهدف × 0.9)
+nodeloadbalancing.improvement,Improvement,Mejora,Amélioration,تحسين
+nodeloadbalancing.load_distribution_matrix,Load Distribution Matrix,Matriz de Distribución de Carga,Matrice de répartition de charge,مصفوفة توزيع الأحمال
+nodeloadbalancing.load_level,Load Level:,Nivel de Carga:,Niveau de charge :,مستوى الحمل:
+nodeloadbalancing.loading_node_load_data,Loading node load data...,Cargando datos de carga del nodo...,Chargement des données de charge du nœud...,جارٍ تحميل بيانات حمل العقدة...
+nodeloadbalancing.matrix_balancing_algorithm,Matrix Balancing Algorithm,Algoritmo de Balanceo de Matriz,Algorithme d'équilibrage de matrice,خوارزمية موازنة المصفوفة
+nodeloadbalancing.matrix_data_not_available,Matrix data not available,Datos de la matriz no disponibles,Données de matrice non disponibles,بيانات المصفوفة غير متوفرة
+nodeloadbalancing.minimiza_la_desviaci_n_est_ndar_de_toda_la_matriz,Minimiza la desviación estándar de toda la matriz,Minimiza la desviación estándar de toda la matriz,Minimiser l'écart-type de toute la matrice,تقليل الانحراف المعياري لكامل المصفوفة
+nodeloadbalancing.monthly_avg,Monthly Avg,Promedio Mensual,Moyenne mensuelle,المتوسط الشهري
+nodeloadbalancing.movements,Movements,Movimientos,Mouvements,الحركات
+nodeloadbalancing.mueve_shipments_de_celdas_sobrecargadas_a_subcarga,Mueve shipments de celdas sobrecargadas a subcargadas,Mueve envíos de celdas sobrecargadas a subcargadas,Déplace les expéditions des cellules surchargées vers les cellules sous-chargées,نقل الشحنات من الخلايا المحملة بشكل زائد إلى الخلايا المحملة بشكل ناقص
+nodeloadbalancing.no_action_required_all_cells_are_within_acceptable,No action required. All cells are within acceptable range.,No se requiere acción. Todas las celdas están dentro del rango aceptable.,Aucune action requise. Toutes les cellules sont dans la plage acceptable.,لا حاجة لاتخاذ إجراء. جميع الخلايا ضمن النطاق المقبول.
+nodeloadbalancing.no_data_available_for_the_selected_period_try_sele,No data available for the selected period. Try selecting a different month.,No hay datos disponibles para el período seleccionado. Intente seleccionar un mes diferente.,Aucune donnée disponible pour la période sélectionnée. Essayez de choisir un autre mois.,لا توجد بيانات للفترة المحددة. حاول اختيار شهر مختلف.
+nodeloadbalancing.node,Node,Nodo,Nœud,العقدة
+nodeloadbalancing.node_load_balancing,Node Load Balancing,Balanceo de Carga de Nodos,Équilibrage de charge des nœuds,موازنة حمل العقد
+nodeloadbalancing.nodes_at_120_150_avg_load,Nodes at 120-150% avg load,Nodos con carga promedio entre 120-150%,Nœuds à 120-150 % de la charge moyenne,العقد بنسبة تحميل 120-150% من المتوسط
+nodeloadbalancing.nodes_over_150_avg_load,Nodes over 150% avg load,Nodos con carga promedio superior al 150%,Nœuds à plus de 150 % de la charge moyenne,العقد بنسبة تحميل تزيد عن 150% من المتوسط
+nodeloadbalancing.normal,Normal:,Normal:,Normal :,عادي:
+nodeloadbalancing.optimal,Optimal:,Óptimo:,Optimal :,مثالي:
+nodeloadbalancing.optimize_shipment_distribution_across_nodes_and_we,Optimize shipment distribution across nodes and weeks,Optimizar la distribución de envíos entre nodos y semanas,Optimiser la répartition des expéditions entre les nœuds et les semaines,تحسين توزيع الشحنات عبر العقد والأسابيع
+nodeloadbalancing.porcentaje_de_desviaci_n_aceptable_respecto_al_val,Porcentaje de desviación aceptable respecto al valor de referencia.,Porcentaje de desviación aceptable respecto al valor de referencia.,Pourcentage de déviation acceptable par rapport à la valeur de référence.,نسبة الانحراف المقبولة بالنسبة للقيمة المرجعية.
+nodeloadbalancing.preventive,Preventive:,Preventivo:,Préventif :,وقائي:
+nodeloadbalancing.proceso,Proceso:,Proceso:,Processus :,العملية:
+nodeloadbalancing.promedio_objetivo_total_shipments_nodos_semanas,Promedio objetivo = Total shipments / (Nodos × Semanas),Promedio objetivo = Total de envíos / (Nodos × Semanas),Moyenne cible = Expéditions totales / (Nœuds × Semaines),المتوسط المستهدف = إجمالي الشحنات / (العقد × الأسابيع)
+nodeloadbalancing.purpose,Purpose:,Propósito:,Objectif :,الغرض:
+nodeloadbalancing.quick_selection,Quick Selection,Selección rápida,Sélection rapide,اختيار سريع
+nodeloadbalancing.reference_load,Reference Load,Carga de referencia,Charge de référence,الحمولة المرجعية
+nodeloadbalancing.reference_samples_node,Reference Samples/Node,Muestras de referencia por nodo,Échantillons de référence/nœud,العينات المرجعية/العقدة
+nodeloadbalancing.resultado,Resultado:,Resultado:,Résultat :,النتيجة:
+nodeloadbalancing.saturated,Saturated:,Saturado:,Saturé :,مشبع:
+nodeloadbalancing.saturated_nodes,Saturated Nodes,Nodos saturados,Nœuds saturés,العقد المشبعة
+nodeloadbalancing.si_esperas_63_samples_por_nodo_este_ser_tu_valor_d,"Si esperas 63 samples por nodo, este será tu valor de referencia.","Si esperas 63 muestras por nodo, este será tu valor de referencia.","Si vous attendez 63 échantillons par nœud, ceci sera votre valeur de référence.",إذا كنت تتوقع 63 عينة لكل عقدة، فسيكون هذا هو قيمة المرجع الخاصة بك.
+nodeloadbalancing.start_date,Start Date,Fecha de inicio,Date de début,تاريخ البدء
+nodeloadbalancing.std_dev_after,Std Dev After,Desviación estándar después,Écart type après,الانحراف المعياري بعد
+nodeloadbalancing.std_dev_before,Std Dev Before,Desviación estándar antes,Écart type avant,الانحراف المعياري قبل
+nodeloadbalancing.summary,Summary,Resumen,Résumé,الملخص
+nodeloadbalancing.total,Total:,Total:,Total :,الإجمالي:
+nodeloadbalancing.total_shipments,Total Shipments,Total de envíos,Expéditions totales,إجمالي الشحنات
+nodeloadbalancing.urgent,Urgent:,Urgente:,Urgent :,عاجل:
+nodeloadbalancing.usage,Usage:,Uso:,Utilisation :,الاستخدام:
+nodeloadbalancing.use_the_auto_balance_button_below_to_redistribute_,"Use the ""Auto-Balance"" button below to redistribute load automatically.","Usa el botón ""Autoequilibrar"" abajo para redistribuir la carga automáticamente.",Utilisez le bouton « Auto-équilibrage » ci-dessous pour redistribuer la charge automatiquement.,"استخدم زر ""التوازن التلقائي"" أدناه لإعادة توزيع الحمولة تلقائيًا."
+nodeloadbalancing.warning,Warning:,Advertencia:,Avertissement :,تحذير:
+nodeloadbalancing.year,Year,Año,Année,السنة
+onedb.all_carriers,All Carriers,Todos los transportistas,Tous les transporteurs,جميع الناقلين
+onedb.all_cities,All Cities,Todas las ciudades,Toutes les villes,جميع المدن
+onedb.all_products,All Products,Todos los productos,Tous les produits,جميع المنتجات
+onedb.all_records,All Records,Todos los registros,Tous les enregistrements,جميع السجلات
+onedb.all_shipment_records,All shipment records,Todos los registros de envíos,Tous les enregistrements d'expédition,جميع سجلات الشحن
+onedb.avg_transit_days,Avg Transit Days,Días promedio de tránsito,Jours de transit moyens,متوسط أيام العبور
+onedb.business_days,Business Days,Días hábiles,Jours ouvrables,أيام العمل
+onedb.business_days_average,Business days average,Promedio de días hábiles,Moyenne des jours ouvrables,متوسط أيام العمل
+onedb.carrier,Carrier,Transportista,Transporteur,الناقل
+onedb.delayed,Delayed,Retrasado,Retardé,متأخر
+onedb.destination,Destination:,Destino:,Destination :,الوجهة:
+onedb.destination_city,Destination City,Ciudad de destino,Ville de destination,مدينة الوجهة
+onedb.exceeded_standard,Exceeded standard,Excedió el estándar,Norme dépassée,تجاوز المعيار
+onedb.export_csv,Export CSV,Exportar CSV,Exporter CSV,تصدير CSV
+onedb.filters,Filters,Filtros,Filtres,الفلاتر
+onedb.from_date,From Date,Fecha desde,Date de début,من التاريخ
+onedb.loading_records,Loading records...,Cargando registros...,Chargement des enregistrements...,جارٍ تحميل السجلات...
+onedb.met_delivery_standard,Met delivery standard,Cumplió con el estándar de entrega,Norme de livraison respectée,تم تحقيق معيار التسليم
+onedb.no_records_to_display,No records to display,No hay registros para mostrar,Aucun enregistrement à afficher,لا توجد سجلات للعرض
+onedb.on_time,On Time,A tiempo,À l'heure,في الوقت المحدد
+onedb.on_time_delivery,On-Time Delivery,Entrega a tiempo,Livraison à l'heure,التسليم في الوقت المحدد
+onedb.one_db,ONE DB,UNA BD,UNE BD,قاعدة بيانات واحدة
+onedb.origin,Origin:,Origen:,Origine :,الأصل:
+onedb.origin_city,Origin City,Ciudad de origen,Ville d'origine,مدينة المنشأ
+onedb.plan,Plan,Plan,Plan,الخطة
+onedb.product,Product,Producto,Produit,المنتج
+onedb.received,Received,Recibido,Reçu,تم الاستلام
+onedb.reset_filters,Reset filters,Restablecer filtros,Réinitialiser les filtres,إعادة تعيين الفلاتر
+onedb.route,Route,Ruta,Itinéraire,المسار
+onedb.sent,Sent,Enviado,Envoyé,تم الإرسال
+onedb.tag_id,Tag ID,ID de etiqueta,ID de l'étiquette,معرّف العلامة
+onedb.tag_id_or_plan,Tag ID or Plan...,ID de etiqueta o plan...,ID de l'étiquette ou Plan...,معرّف العلامة أو الخطة...
+onedb.to_date,To Date,Hasta la fecha,À ce jour,حتى تاريخه
+onedb.total_records,Total Records,Total de registros,Total des enregistrements,إجمالي السجلات
+onedb.transit_days,Transit Days,Días en tránsito,Jours de transit,أيام العبور
+onedb.validated_postal_quality_analytics_repository,Validated postal quality analytics repository,Repositorio validado de análisis de calidad postal,Répertoire validé d'analyses de qualité postale,مستودع تحليلات جودة البريد المعتمد
+panelists.activate,Activate,Activar,Activer,تفعيل
+panelists.address_line_1,Address Line 1,Línea de dirección 1,Adresse ligne 1,السطر الأول من العنوان
+panelists.address_line_2,Address Line 2,Línea de dirección 2,Adresse ligne 2,السطر الثاني من العنوان
+panelists.all_cities,All Cities,Todas las ciudades,Toutes les villes,جميع المدن
+panelists.all_nodes,All Nodes,Todos los nodos,Tous les nœuds,جميع العقد
+panelists.all_panelists_in_system,All panelists in system,Todos los panelistas en el sistema,Tous les panélistes du système,جميع الأعضاء في النظام
+panelists.all_status,All Status,Todos los estados,Tous les statuts,جميع الحالات
+panelists.apartment_suite_etc_optional,"Apartment, suite, etc. (optional)","Apartamento, suite, etc. (opcional)","Appartement, suite, etc. (facultatif)",شقة، جناح، إلخ (اختياري)
+panelists.available_for_deliveries,Available for deliveries,Disponible para entregas,Disponible pour les livraisons,متاح للتوصيل
+panelists.choose_an_action_to_apply_to_all_selected_items,Choose an action to apply to all selected items,Elija una acción para aplicar a todos los elementos seleccionados,Choisissez une action à appliquer à tous les éléments sélectionnés,اختر إجراءً لتطبيقه على جميع العناصر المحددة
+panelists.city,City,Ciudad,Ville,المدينة
+panelists.code,Code,Código,Code,الرمز
+panelists.code_name_email,"Code, name, email...","Código, nombre, correo electrónico...","Code, nom, e-mail...",الرمز، الاسم، البريد الإلكتروني...
+panelists.country,Country,País,Pays,البلد
+panelists.deactivate,Deactivate,Desactivar,Désactiver,تعطيل
+panelists.delete_panelist,Delete panelist,Eliminar panelista,Supprimer le panéliste,حذف العضو
+panelists.edit_panelist,Edit panelist,Editar panelista,Modifier le panéliste,تعديل العضو
+panelists.email,Email,Correo electrónico,E-mail,البريد الإلكتروني
+panelists.filters,Filters,Filtros,Filtres,الفلاتر
+panelists.leave_empty_to_auto_generate,Leave empty to auto-generate,Dejar vacío para generar automáticamente,Laisser vide pour générer automatiquement,اتركه فارغًا للتوليد التلقائي
+panelists.loading,Loading...,Cargando...,Chargement...,جارٍ التحميل...
+panelists.manage_panelist_profiles_and_assignments,Manage panelist profiles and assignments,Gestionar perfiles y asignaciones de panelistas,Gérer les profils et les affectations des panélistes,إدارة ملفات الأعضاء وتعييناتهم
+panelists.manage_panelists_and_their_availability_for_delive,Manage panelists and their availability for deliveries,Gestionar panelistas y su disponibilidad para entregas,Gérer les panélistes et leur disponibilité pour les livraisons,إدارة الأعضاء وتوفرهم للتوصيل
+panelists.mobile,Mobile,Móvil,Mobile,الجوال
+panelists.name,Name,Nombre,Nom,الاسم
+panelists.node,Node,Nodo,Nœud,العقدة
+panelists.not_available,Not available,No disponible,Indisponible,غير متوفر
+panelists.panelist_code,Panelist Code,Código de panelista,Code panéliste,رمز المشارك
+panelists.panelists,Panelists,Panelistas,Panélistes,المشاركون
+panelists.panelists_management,Panelists Management,Gestión de panelistas,Gestion des panélistes,إدارة المشاركين
+panelists.postal_code,Postal Code,Código postal,Code postal,الرمز البريدي
+panelists.reset_all_filters,Reset all filters,Restablecer todos los filtros,Réinitialiser tous les filtres,إعادة تعيين جميع الفلاتر
+panelists.select_a_node,Select a node,Seleccionar un nodo,Sélectionnez un nœud,اختر عقدة
+panelists.street_address,Street address,Dirección,Adresse,عنوان الشارع
+panelists.telegram_id,Telegram ID,ID de Telegram,ID Telegram,معرف تيليجرام
+panelists.total_panelists,Total Panelists,Total de panelistas,Nombre total de panélistes,إجمالي المشاركين
+panelists.unavailability_periods,Unavailability Periods,Períodos de indisponibilidad,Périodes d'indisponibilité,فترات عدم التوفر
+panelists.username_or_numeric_id,@username or numeric ID,@usuario o ID numérico,@nomdutilisateur ou ID numérique,@اسم_المستخدم أو المعرف الرقمي
+panelistunavailability.tsx.additional_information_about_this_unavailability_p,Additional information about this unavailability period...,Información adicional sobre este período de indisponibilidad...,Informations supplémentaires sur cette période d'indisponibilité...,معلومات إضافية عن فترة عدم التوفر هذه...
+panelistunavailability.tsx.all_panelists,All Panelists,Todos los panelistas,Tous les panélistes,جميع المشاركين
+panelistunavailability.tsx.all_periods,All Periods,Todos los períodos,Toutes les périodes,جميع الفترات
+panelistunavailability.tsx.all_reasons,All Reasons,Todas las razones,Toutes les raisons,جميع الأسباب
+panelistunavailability.tsx.all_status,All Status,Todos los estados,Tous les statuts,جميع الحالات
+panelistunavailability.tsx.cancel_periods,Cancel Periods,Cancelar períodos,Annuler les périodes,إلغاء الفترات
+panelistunavailability.tsx.cancelled,Cancelled,Cancelado,Annulé,تم الإلغاء
+panelistunavailability.tsx.clear_selection,Clear Selection,Borrar selección,Effacer la sélection,مسح التحديد
+panelistunavailability.tsx.current_active_now,Current (Active Now),Actual (Activo ahora),Actuel (Actif maintenant),الحالي (نشط الآن)
+panelistunavailability.tsx.date_range,Date Range,Rango de fechas,Plage de dates,نطاق التاريخ
+panelistunavailability.tsx.duration,Duration,Duración,Durée,المدة
+panelistunavailability.tsx.end_date,End Date,Fecha de finalización,Date de fin,تاريخ الانتهاء
+panelistunavailability.tsx.filters,Filters,Filtros,Filtres,الفلاتر
+panelistunavailability.tsx.loading,Loading...,Cargando...,Chargement...,جارٍ التحميل...
+panelistunavailability.tsx.manage_panelist_unavailability_periods_for_automat,Manage panelist unavailability periods for automatic sample reassignment,Gestionar períodos de indisponibilidad del panelista para la reasignación automática de muestras,Gérer les périodes d'indisponibilité des panélistes pour la réaffectation automatique des échantillons,إدارة فترات عدم توفر الأعضاء لإعادة تعيين العينة تلقائيًا
+panelistunavailability.tsx.notes,Notes,Notas,Notes,ملاحظات
+panelistunavailability.tsx.other,Other,Otros,Autre,أخرى
+panelistunavailability.tsx.panelist,Panelist,Panelista,Panéliste,عضو اللجنة
+panelistunavailability.tsx.panelist_name_notes,"Panelist name, notes...","Nombre del panelista, notas...","Nom du panéliste, notes...",اسم العضو، ملاحظات...
+panelistunavailability.tsx.past,Past,Pasado,Passé,الماضي
+panelistunavailability.tsx.personal,Personal,Personal,Personnel,شخصي
+panelistunavailability.tsx.reason,Reason,Motivo,Raison,السبب
+panelistunavailability.tsx.reset_all_filters,Reset all filters,Restablecer todos los filtros,Réinitialiser tous les filtres,إعادة تعيين جميع الفلاتر
+panelistunavailability.tsx.select_a_panelist,Select a panelist,Seleccionar un panelista,Sélectionner un panéliste,اختر عضوًا
+panelistunavailability.tsx.sick_leave,Sick Leave,Baja por enfermedad,Congé maladie,إجازة مرضية
+panelistunavailability.tsx.start_date,Start Date,Fecha de inicio,Date de début,تاريخ البدء
+panelistunavailability.tsx.training,Training,Capacitación,Formation,التدريب
+panelistunavailability.tsx.unavailability_periods,Unavailability Periods,Períodos de indisponibilidad,Périodes d'indisponibilité,فترات عدم التوفر
+panelistunavailability.tsx.upcoming,Upcoming,Próximos,À venir,القادمة
+panelistunavailability.tsx.vacation,Vacation,Vacaciones,Vacances,إجازة
+receivegenerator.advance_variance_days,Advance Variance (days),Variación anticipada (días),Écart anticipé (jours),فرق التقدم (أيام)
+receivegenerator.carriers,Carriers,Transportistas,Transporteurs,الناقلون
+receivegenerator.delay_variance_days,Delay Variance (days),Variación de retraso (días),Écart de retard (jours),فرق التأخير (أيام)
+receivegenerator.demo_account_only_this_feature_is_only_available_f,Demo Account Only - This feature is only available for testing purposes,Solo cuenta de demostración - Esta función está disponible únicamente para fines de prueba,Compte de démonstration uniquement - Cette fonctionnalité est disponible uniquement à des fins de test,حساب تجريبي فقط - هذه الميزة متاحة لأغراض الاختبار فقط
+receivegenerator.end_date,End Date,Fecha de finalización,Date de fin,تاريخ الانتهاء
+receivegenerator.generate_records,Generate Records,Generar registros,Générer des enregistrements,إنشاء السجلات
+receivegenerator.generate_synthetic_receive_records_for_testing_and,Generate synthetic receive records for testing and demo purposes,Generar registros sintéticos de recepción para pruebas y demostraciones,Générer des enregistrements de réception synthétiques à des fins de test et de démonstration,إنشاء سجلات استلام اصطناعية لأغراض الاختبار والعرض التوضيحي
+receivegenerator.generation_complete,Generation Complete,Generación completada,Génération terminée,اكتمل الإنشاء
+receivegenerator.generation_summary,Generation Summary,Resumen de generación,Résumé de la génération,ملخص الإنشاء
+receivegenerator.generator_configuration,Generator Configuration,Configuración del generador,Configuration du générateur,تكوين المُنشئ
+receivegenerator.maximum_days_records_can_arrive_early,Maximum days records can arrive early,Máximo de días que los registros pueden llegar antes,Nombre maximum de jours d'avance pour l'arrivée des enregistrements,الحد الأقصى لأيام وصول السجلات مبكرًا
+receivegenerator.maximum_days_records_can_be_delayed_beyond_sla,Maximum days records can be delayed beyond SLA,Máximo de días que los registros pueden retrasarse más allá del SLA,Nombre maximum de jours de retard des enregistrements au-delà du SLA,الحد الأقصى لأيام تأخير السجلات بعد اتفاقية مستوى الخدمة
+receivegenerator.number_of_records,Number of Records,Número de registros,Nombre d'enregistrements,عدد السجلات
+receivegenerator.out_of_sla_percentage,Out of SLA Percentage (%),Porcentaje fuera de SLA (%),Pourcentage hors SLA (%),نسبة الخروج عن اتفاقية مستوى الخدمة (%)
+receivegenerator.products,Products,Productos,Produits,المنتجات
+receivegenerator.receive_generator,Receive Generator,Generador de Recepción,Récepteur de générateur,مولد الاستلام
+receivegenerator.select_all,Select All,Seleccionar Todo,Tout sélectionner,تحديد الكل
+receivegenerator.start_date,Start Date,Fecha de Inicio,Date de début,تاريخ البدء
+reporting.above_standard_good,Above standard (good),Por encima del estándar (bueno),Au-dessus de la norme (bon),فوق المعيار (جيد)
+reporting.actual,Actual %:,% Actual:,% réel :,النسبة الفعلية:
+reporting.actual_days,Actual (days),Días Actuales,Réel (jours),الفعلي (أيام)
+reporting.actual_standard,Actual ≥ Standard %,% Actual ≥ Estándar,Réel ≥ % standard,الفعلي ≥ النسبة المعيارية
+reporting.all_carriers,All Carriers,Todos los Transportistas,Tous les transporteurs,جميع الناقلين
+reporting.all_destinations,All Destinations,Todos los Destinos,Toutes les destinations,جميع الوجهات
+reporting.all_origins,All Origins,Todos los Orígenes,Toutes les origines,جميع المناشئ
+reporting.all_products,All Products,Todos los Productos,Tous les produits,جميع المنتجات
+reporting.all_regions,All Regions,Todas las Regiones,Toutes les régions,جميع المناطق
+reporting.all_statuses,All Statuses,Todos los Estados,Tous les statuts,جميع الحالات
+reporting.analyze_inbound_quality_to_one_city_from_all_origi,Analyze inbound quality to one city from all origins,Analizar calidad de entrada a una ciudad desde todos los orígenes,Analyser la qualité entrante vers une ville depuis toutes les origines,تحليل جودة الوارد إلى مدينة واحدة من جميع المناشئ
+reporting.analyze_inbound_vs_outbound_service_quality_separa,Analyze inbound vs outbound service quality separately,Analizar calidad de servicio de entrada vs salida por separado,Analyser séparément la qualité de service entrante et sortante,تحليل جودة الخدمة الواردة مقابل الصادرة بشكل منفصل
+reporting.analyze_outbound_quality_from_one_city_to_all_dest,Analyze outbound quality from one city to all destinations,Analizar calidad de salida desde una ciudad a todos los destinos,Analyser la qualité sortante d'une ville vers toutes les destinations,تحليل جودة الصادر من مدينة واحدة إلى جميع الوجهات
+reporting.analyze_service_equity_across_cities_and_regions,Analyze service equity across cities and regions,Analizar equidad del servicio entre ciudades y regiones,Analyser l'équité du service entre villes et régions,تحليل عدالة الخدمة عبر المدن والمناطق
+reporting.analyze_specific_route_performance_origin_destinat,Analyze specific route performance (origin → destination),Analizar desempeño de ruta específica (origen → destino),Analyser la performance d'une route spécifique (origine → destination),تحليل أداء مسار محدد (المصدر → الوجهة)
+reporting.analyze_trends_over_specific_time_periods,Analyze trends over specific time periods,Analizar tendencias en períodos de tiempo específicos,Analyser les tendances sur des périodes spécifiques,تحليل الاتجاهات خلال فترات زمنية محددة
+reporting.average_business_days_for_all_shipments,Average business days for all shipments,Promedio de días hábiles para todos los envíos,Jours ouvrables moyens pour tous les envois,متوسط أيام العمل لجميع الشحنات
+reporting.avg_j_k_actual,Avg J+K Actual,Promedio J+K Real,Moyenne J+K Réelle,متوسط J+K الفعلي
+reporting.avg_transit_days,Avg Transit Days,Promedio de Días de Tránsito,Moyenne des jours de transit,متوسط أيام العبور
+reporting.basic_information,Basic Information,Información Básica,Informations de base,المعلومات الأساسية
+reporting.below_critical_threshold_with_penalty,Below critical threshold (with penalty),Por debajo del umbral crítico (con penalización),En dessous du seuil critique (avec pénalité),أقل من الحد الحرج (مع عقوبة)
+reporting.below_standard_but_above_critical_no_penalty,Below standard but above critical (no penalty),Por debajo del estándar pero por encima del crítico (sin penalización),En dessous de la norme mais au-dessus du critique (sans pénalité),أقل من المعيار ولكن فوق الحد الحرج (بدون عقوبة)
+reporting.below_standard_deviation,Below standard (deviation),Por debajo del estándar (desviación),En dessous de la norme (écart),أقل من المعيار (انحراف)
+reporting.both_cities,Both cities:,Ambas ciudades:,Les deux villes :,كلا المدينتين:
+reporting.both_directions,Both Directions,Ambas direcciones,Les deux directions,كلا الاتجاهين
+reporting.carrier,Carrier,Transportista,Transporteur,الناقل
+reporting.carrier_product,Carrier / Product,Transportista / Producto,Transporteur / Produit,الناقل / المنتج
+reporting.carrier_product_breakdown,Carrier & Product Breakdown,Desglose por Transportista y Producto,Répartition Transporteur & Produit,تفصيل الناقل والمنتج
+reporting.carrier_product_level,Carrier/Product Level:,Nivel Transportista/Producto:,Niveau Transporteur/Produit :,مستوى الناقل / المنتج:
+reporting.carrier_product_overview,Carrier & Product Overview,Resumen de Transportista y Producto,Aperçu Transporteur & Produit,نظرة عامة على الناقل والمنتج
+reporting.carrier_product_route,Carrier / Product / Route,Transportista / Producto / Ruta,Transporteur / Produit / Itinéraire,الناقل / المنتج / المسار
+reporting.chart_view,Chart View,Vista de Gráfico,Vue graphique,عرض الرسم البياني
+reporting.circle_size_population,Circle size = Population,Tamaño del círculo = Población,Taille du cercle = Population,حجم الدائرة = السكان
+reporting.cities,Cities,Ciudades,Villes,المدن
+reporting.citizens_affected,Citizens Affected,Ciudadanos afectados,Citoyens affectés,المواطنين المتأثرين
+reporting.city,City,Ciudad,Ville,المدينة
+reporting.city_analysis,City Analysis,Análisis de la ciudad,Analyse de la ville,تحليل المدينة
+reporting.city_equity_details,City Equity Details,Detalles de Equidad de la Ciudad,Détails de l'équité de la ville,تفاصيل حقوق المدينة
+reporting.city_equity_details_table,City Equity Details Table,Tabla de Detalles de Equidad de la Ciudad,Tableau des détails de l'équité de la ville,جدول تفاصيل حقوق المدينة
+reporting.city_service_equity_treemap,City Service Equity Treemap,Mapa de Árbol de Equidad del Servicio de la Ciudad,Treemap de l'équité des services de la ville,خريطة شجرة حقوق خدمة المدينة
+reporting.class,Class,Clase,Classe,الفئة
+reporting.classification,Classification:,Clasificación:,Classification :,التصنيف:
+reporting.compl,Compl.,Compl.,Compl.,الشكوى
+reporting.compliance,Compliance:,Cumplimiento:,Conformité :,الامتثال:
+reporting.compliance_analysis_by_carrier_product_route,Compliance analysis by Carrier → Product → Route,Análisis de cumplimiento por Transportista → Producto → Ruta,Analyse de conformité par Transporteur → Produit → Itinéraire,تحليل الامتثال حسب الناقل → المنتج → المسار
+reporting.compliance_by_carrier_product_route,Compliance by Carrier → Product → Route,Cumplimiento por Transportista → Producto → Ruta,Conformité par Transporteur → Produit → Itinéraire,الامتثال حسب الناقل → المنتج → المسار
+reporting.compliance_status,Compliance Status,Estado de Cumplimiento,Statut de conformité,حالة الامتثال
+reporting.compliance_status_based_on_dynamic_thresholds,Compliance status based on dynamic thresholds:,Estado de cumplimiento basado en umbrales dinámicos:,Statut de conformité basé sur des seuils dynamiques :,حالة الامتثال بناءً على العتبات الديناميكية:
+reporting.compliant,Compliant:,Cumplido:,Conforme :,متوافق
+reporting.compliant_routes,Compliant Routes,Rutas Cumplidas,Itinéraires conformes,المسارات المتوافقة
+reporting.compliant_shipments_total_shipments_100,Compliant shipments / Total shipments × 100%,Envíos cumplidos / Total de envíos × 100%,Expéditions conformes / Total des expéditions × 100 %,الشحنات المتوافقة / إجمالي الشحنات × 100%
+reporting.critical,Critical,Crítico,Critique,حرج
+reporting.critical_limit,Critical Limit:,Límite Crítico:,Limite critique :,الحد الحرج:
+reporting.critical_routes,Critical Routes,Rutas Críticas,Itinéraires critiques,المسارات الحرجة
+reporting.cumulative,Cumulative:,Acumulativo:,Cumulatif :,تراكمي:
+reporting.cumulative_distribution_analysis,Cumulative Distribution Analysis,Análisis de Distribución Acumulativa,Analyse de distribution cumulative,تحليل التوزيع التراكمي
+reporting.cumulative_percentage_of_deliveries_by_transit_day,Cumulative percentage of deliveries by transit days.,Porcentaje acumulado de entregas por días de tránsito.,Pourcentage cumulatif des livraisons selon les jours de transit.,النسبة المئوية التراكمية للتسليمات حسب أيام العبور.
+reporting.current_week,Current Week,Semana Actual,Semaine en cours,الأسبوع الحالي
+reporting.date_range,Date Range:,Rango de Fechas:,Plage de dates :,نطاق التاريخ:
+reporting.delayed,Delayed,Retrasado,Retardé,متأخر
+reporting.description,Description:,Descripción:,Description :,الوصف:
+reporting.destination_city,Destination City,Ciudad de Destino,Ville de destination,مدينة الوجهة
+reporting.destination_only,Destination only:,Solo Destino:,Destination uniquement :,الوجهة فقط:
+reporting.deviation,Deviation,Desviación,Écart,انحراف
+reporting.difference_between_actual_and_standard,Difference between Actual % and Standard %,Diferencia entre % Real y % Estándar,Différence entre % réel et % standard,الفرق بين النسبة الفعلية والنسبة المعيارية
+reporting.direct_value_from_delivery_standards,Direct value from delivery_standards,Valor directo de delivery_standards,Valeur directe de delivery_standards,القيمة المباشرة من delivery_standards
+reporting.direction,Direction,Dirección,Direction,الاتجاه
+reporting.direction_gap,Direction Gap:,Brecha de Dirección:,Écart de direction :,فجوة الاتجاه:
+reporting.directional_analysis,Directional Analysis,Análisis Direccional,Analyse directionnelle,التحليل الاتجاهي
+reporting.distribution_of_shipments_by_actual_transit_time_v,Distribution of shipments by actual transit time vs delivery standard,Distribución de envíos por tiempo de tránsito real vs estándar de entrega,Répartition des envois selon le temps de transit réel vs norme de livraison,توزيع الشحنات حسب وقت العبور الفعلي مقابل معيار التسليم
+reporting.end_date,End Date,Fecha de Fin,Date de fin,تاريخ الانتهاء
+reporting.equity_status,Equity Status,Estado de Equidad,Statut des capitaux propres,حالة الأسهم
+reporting.export_audit_report,Export Audit Report,Informe de Auditoría de Exportación,Rapport d'audit d'exportation,تقرير تدقيق التصدير
+reporting.export_csv,Export CSV,Exportar CSV,Exporter CSV,تصدير CSV
+reporting.export_filtered_data_to_csv,Export filtered data to CSV,Exportar datos filtrados a CSV,Exporter les données filtrées en CSV,تصدير البيانات المفلترة إلى CSV
+reporting.filter_analysis_guide,Filter Analysis Guide,Guía de Análisis de Filtros,Guide d'analyse des filtres,دليل تحليل الفلاتر
+reporting.filters,Filters,Filtros,Filtres,الفلاتر
+reporting.focus_analysis_on_specific_geographic_areas,Focus analysis on specific geographic areas,Enfocar el análisis en áreas geográficas específicas,Concentrer l'analyse sur des zones géographiques spécifiques,تركيز التحليل على مناطق جغرافية محددة
+reporting.further_narrow_analysis_to_specific_service_provid,Further narrow analysis to specific service providers or types,Restringir aún más el análisis a proveedores de servicios o tipos específicos,Affiner davantage l'analyse par fournisseurs de services ou types spécifiques,تضييق التحليل أكثر لمزودي الخدمة أو الأنواع المحددة
+reporting.general_performance_dashboard,General Performance Dashboard,Panel de Rendimiento General,Tableau de bord de performance générale,لوحة الأداء العامة
+reporting.geographic_distribution,Geographic Distribution,Distribución Geográfica,Répartition géographique,التوزيع الجغرافي
+reporting.geographic_view,Geographic View,Vista Geográfica,Vue géographique,العرض الجغرافي
+reporting.green,Green,Verde,Vert,أخضر
+reporting.identify_cities_with_specific_compliance_levels,Identify cities with specific compliance levels,Identificar ciudades con niveles específicos de cumplimiento,Identifier les villes avec des niveaux de conformité spécifiques,تحديد المدن بمستويات امتثال محددة
+reporting.inb,Inb.,Entrante,Entrant,وارد
+reporting.inbound,Inbound %,% Entrante,% Entrant,نسبة الوارد
+reporting.inbound_arrivals,Inbound (Arrivals),Entrante (Llegadas),Entrant (Arrivées),وارد (الوصولات)
+reporting.inbound_vs_outbound_comparison_top_10_by_direction,Inbound vs Outbound Comparison (Top 10 by Direction Gap),Comparación Entrante vs Saliente (Top 10 por Diferencia de Dirección),Comparaison Entrant vs Sortant (Top 10 par écart de direction),مقارنة الوارد والصادر (أفضل 10 حسب فرق الاتجاه)
+reporting.inbound_vs_outbound_compliance_chart,Inbound vs Outbound Compliance Chart,Gráfico de Cumplimiento Entrante vs Saliente,Graphique de conformité Entrant vs Sortant,مخطط امتثال الوارد مقابل الصادر
+reporting.interpretation,Interpretation:,Interpretación:,Interprétation :,التفسير:
+reporting.j_k_actual,J+K Actual,J+K Real,J+K Réel,J+K الفعلي
+reporting.j_k_performance_report,J+K Performance Report,Informe de Rendimiento J+K,Rapport de performance J+K,تقرير أداء J+K
+reporting.j_k_std,J+K Std,J+K Estándar,J+K Std,J+K المعياري
+reporting.legend,Legend,Leyenda,Légende,الأسطورة
+reporting.loading,Loading...,Cargando...,Chargement...,جارٍ التحميل...
+reporting.loading_compliance_data,Loading compliance data...,Cargando datos de cumplimiento...,Chargement des données de conformité...,جارٍ تحميل بيانات الامتثال...
+reporting.loading_j_k_performance_data,Loading J+K performance data...,Cargando datos de rendimiento J+K...,Chargement des données de performance J+K...,جارٍ تحميل بيانات أداء J+K...
+reporting.loading_performance_data,Loading performance data...,Cargando datos de rendimiento...,Chargement des données de performance...,جارٍ تحميل بيانات الأداء...
+reporting.loading_territory_equity_data,Loading territory equity data...,Cargando datos de equidad territorial...,Chargement des données d'équité territoriale...,جارٍ تحميل بيانات حقوق الإقليم...
+reporting.mapa_de_localidades_treemap,Mapa de Localidades (Treemap),Mapa de Localidades (Treemap),Carte des localités (Treemap),خريطة المواقع (مخطط شجري)
+reporting.narrow_analysis_to_specific_service_providers_or_t,Narrow analysis to specific service providers or types,Restringir análisis a proveedores o tipos de servicio específicos,Restreindre l'analyse à des prestataires ou types de services spécifiques,تضييق التحليل لمزودي الخدمة أو الأنواع المحددة
+reporting.negative,Negative:,Negativo:,Négatif :,سلبي:
+reporting.no_compliance_data_available,No compliance data available,No hay datos de cumplimiento disponibles,Aucune donnée de conformité disponible,لا تتوفر بيانات الالتزام
+reporting.no_data,No data,Sin datos,Aucune donnée,لا توجد بيانات
+reporting.no_data_available,No data available,No hay datos disponibles,Aucune donnée disponible,لا تتوفر بيانات
+reporting.no_data_available_for_treemap,No data available for treemap,No hay datos disponibles para el treemap,Aucune donnée disponible pour le treemap,لا تتوفر بيانات للمخطط الشجري
+reporting.no_distribution_data_available,No distribution data available,No hay datos de distribución disponibles,Aucune donnée de distribution disponible,لا تتوفر بيانات التوزيع
+reporting.no_filters,No filters:,Sin filtros:,Aucun filtre :,لا توجد عوامل تصفية:
+reporting.no_performance_data_available,No performance data available,No hay datos de rendimiento disponibles,Aucune donnée de performance disponible,لا تتوفر بيانات الأداء
+reporting.no_shipment_data_available,No shipment data available,No hay datos de envíos disponibles,Aucune donnée d'expédition disponible,لا تتوفر بيانات الشحن
+reporting.no_shipment_data_available_for_timeline,No shipment data available for timeline,No hay datos de envíos disponibles para la línea de tiempo,Aucune donnée d'expédition disponible pour la chronologie,لا تتوفر بيانات الشحن للجدول الزمني
+reporting.no_underserved_cities,No underserved cities,No hay ciudades desatendidas,Aucune ville mal desservie,لا توجد مدن محرومة
+reporting.no_weekly_data_available,No weekly data available,No hay datos semanales disponibles,Aucune donnée hebdomadaire disponible,لا تتوفر بيانات أسبوعية
+reporting.on_time,On-Time %,% a tiempo,% à l'heure,النسبة في الوقت المحدد
+reporting.openstreetmap,OpenStreetMap,OpenStreetMap,OpenStreetMap,OpenStreetMap
+reporting.origin_city,Origin City,Ciudad de origen,Ville d'origine,مدينة المنشأ
+reporting.origin_only,Origin only:,Solo origen:,Origine uniquement :,المنشأ فقط:
+reporting.outb,Outb.,Sal.,Sortant,الصادر
+reporting.outbound,Outbound %,% Saliente,Pourcentage sortant,نسبة الصادر
+reporting.outbound_departures,Outbound (Departures),Salidas (Departures),Sortant (Départs),الصادر (المغادرات)
+reporting.overall_compliance,Overall Compliance,Cumplimiento General,Conformité globale,الامتثال الكلي
+reporting.overall_compliance_and_transit_time_metrics,Overall compliance and transit time metrics,Métricas generales de cumplimiento y tiempo de tránsito,Mesures de conformité globale et de temps de transit,مقاييس الامتثال الكلي ووقت العبور
+reporting.percentage_of_shipments_delivered_successfully,Percentage of shipments delivered successfully,Porcentaje de envíos entregados con éxito,Pourcentage d'expéditions livrées avec succès,نسبة الشحنات التي تم تسليمها بنجاح
+reporting.performance_distribution,Performance Distribution,Distribución del Rendimiento,Répartition des performances,توزيع الأداء
+reporting.performance_metrics,Performance Metrics,Métricas de Rendimiento,Indicateurs de performance,مقاييس الأداء
+reporting.performance_trend,Performance Trend,Tendencia de Rendimiento,Tendance des performances,اتجاه الأداء
+reporting.population,Population:,Población:,Population :,السكان:
+reporting.population_weighted,Population-weighted,Ponderado por población,Pondéré par la population,موزون حسب السكان
+reporting.population_weighted_compliance,Population-Weighted Compliance,Cumplimiento ponderado por población,Conformité pondérée par la population,الامتثال الموزون حسب السكان
+reporting.positive,Positive:,Positivo:,Positif :,إيجابي:
+reporting.problem_routes,Problem Routes,Rutas problemáticas,Itinéraires problématiques,المسارات المشكلة
+reporting.product,Product,Producto,Produit,المنتج
+reporting.received_at,Received At,Recibido en,Reçu à,تم الاستلام في
+reporting.region,Region:,Región:,Région :,المنطقة:
+reporting.regional_analysis,Regional Analysis,Análisis Regional,Analyse régionale,التحليل الإقليمي
+reporting.regional_equity_analysis_table,Regional Equity Analysis Table,Tabla de Análisis de Equidad Regional,Tableau d'analyse de l'équité régionale,جدول تحليل العدالة الإقليمية
+reporting.regional_equity_comparison,Regional Equity Comparison,Comparación de Equidad Regional,Comparaison de l'équité régionale,مقارنة العدالة الإقليمية
+reporting.regional_equity_comparison_chart,Regional Equity Comparison Chart,Gráfico de Comparación de Equidad Regional,Graphique de comparaison des capitaux propres régionaux,مخطط مقارنة الأسهم الإقليمية
+reporting.regional_equity_details,Regional Equity Details,Detalles de Equidad Regional,Détails des capitaux propres régionaux,تفاصيل الأسهم الإقليمية
+reporting.regional_summary,Regional Summary,Resumen Regional,Résumé régional,الملخص الإقليمي
+reporting.regulatory_compliance_report,Regulatory Compliance Report,Informe de Cumplimiento Normativo,Rapport de conformité réglementaire,تقرير الامتثال التنظيمي
+reporting.regulatory_use,Regulatory Use:,Uso Regulatorio:,Usage réglementaire :,الاستخدام التنظيمي:
+reporting.reset_all_filters,Reset all filters,Restablecer todos los filtros,Réinitialiser tous les filtres,إعادة تعيين جميع الفلاتر
+reporting.route,Route,Ruta,Itinéraire,المسار
+reporting.route_level,Route Level:,Nivel de Ruta:,Niveau d’itinéraire :,مستوى المسار:
+reporting.routes,Routes,Rutas,Itinéraires,المسارات
+reporting.samples,Samples,Muestras,Échantillons,عينات
+reporting.search_by_tag_id_origin_or_destination,"Search by TAG ID, origin, or destination...","Buscar por ID de ETIQUETA, origen o destino...","Rechercher par ID TAG, origine ou destination...",البحث بواسطة معرف العلامة، الأصل، أو الوجهة...
+reporting.sent_at,Sent At,Enviado el,Envoyé le,تم الإرسال في
+reporting.service_equity_index,Service Equity Index,Índice de Equidad de Servicio,Indice d’équité de service,مؤشر عدالة الخدمة
+reporting.shipments,Shipments:,Envíos:,Expéditions :,الشحنات:
+reporting.standard,Standard:,Estándar:,Norme :,المعيار:
+reporting.standard_days,Standard (days),Estándar (días),Norme (jours),المعيار (أيام)
+reporting.start_date,Start Date,Fecha de Inicio,Date de début,تاريخ البدء
+reporting.status,Status:,Estado:,Statut :,الحالة:
+reporting.std,Std %,% Estándar,% Std,النسبة المئوية للمعيار
+reporting.table_view,Table View,Vista de Tabla,Vue tableau,عرض الجدول
+reporting.tag_id,TAG ID,ID DE ETIQUETA,ID DE TAG,معرف العلامة
+reporting.target_1_day,Target: 1 day,Objetivo: 1 día,Cible : 1 jour,الهدف: يوم واحد
+reporting.territory_equity_filter_guide,Territory Equity Filter Guide,Guía del Filtro de Equidad Territorial,Guide du filtre d'équité territoriale,دليل تصفية حقوق الإقليم
+reporting.territory_equity_report,Territory Equity Report,Informe de Equidad Territorial,Rapport d'équité territoriale,تقرير حقوق الإقليم
+reporting.top_3_best_served_cities,Top 3 Best Served Cities,Las 3 Ciudades Mejor Atendidas,Top 3 des villes les mieux desservies,أفضل 3 مدن مخدومة
+reporting.top_3_worst_served_cities,Top 3 Worst Served Cities,Las 3 Ciudades Peor Atendidas,Top 3 des villes les moins bien desservies,أسوأ 3 مدن مخدومة
+reporting.total,Total:,Total:,Total :,الإجمالي:
+reporting.total_cities,Total Cities:,Total de Ciudades:,Total des villes :,إجمالي المدن:
+reporting.total_routes,Total Routes,Total de Rutas,Total des itinéraires,إجمالي المسارات
+reporting.total_samples,Total Samples,Total de Muestras,Total des échantillons,إجمالي العينات
+reporting.total_shipments,Total Shipments:,Total de Envíos:,Total des expéditions :,إجمالي الشحنات:
+reporting.transit_time_analysis_and_delivery_performance_tra,Transit time analysis and delivery performance tracking,Análisis de tiempo de tránsito y seguimiento del rendimiento de entrega,Analyse du temps de transit et suivi des performances de livraison,تحليل وقت العبور وتتبع أداء التسليم
+reporting.underserved,Underserved,Subatendido,Sous-desservi,غير مخدوم بشكل كافٍ
+reporting.underserved_cities,Underserved Cities:,Ciudades Subatendidas:,Villes sous-desservies :,المدن غير المخدومة بشكل كافٍ:
+reporting.view_overall_ecosystem_performance_across_all_rout,View overall ecosystem performance across all routes and carriers,Ver el rendimiento general del ecosistema en todas las rutas y transportistas,Voir la performance globale de l'écosystème sur tous les itinéraires et transporteurs,عرض أداء النظام البيئي العام عبر جميع المسارات والناقلين
+reporting.view_overall_service_equity_across_all_cities_and_,View overall service equity across all cities and regions,Ver la equidad general del servicio en todas las ciudades y regiones,Voir l'équité globale du service sur toutes les villes et régions,عرض عدالة الخدمة العامة عبر جميع المدن والمناطق
+reporting.warning,Warning,Advertencia,Avertissement,تحذير
+reporting.warning_limit,Warning Limit:,Límite de Advertencia:,Limite d'avertissement :,حد التحذير:
+reporting.warning_routes,Warning Routes,Rutas con Advertencia,Itinéraires en avertissement,مسارات التحذير
+reporting.weekly_sample_volume,Weekly Sample Volume,Volumen Semanal de Muestras,Volume hebdomadaire d'échantillons,حجم العينات الأسبوعي
+reporting.weighted_average_by_shipment_count,Weighted average by shipment count,Promedio ponderado por cantidad de envíos,Moyenne pondérée par nombre d'expéditions,المتوسط المرجح حسب عدد الشحنات
+settings.account_management,Account Management,Gestión de cuentas,Gestion du compte,إدارة الحساب
+settings.account_reporting_configuration,Account Reporting Configuration,Configuración de informes de cuenta,Configuration des rapports de compte,تكوين تقارير الحساب
+settings.all_users,All Users,Todos los usuarios,Tous les utilisateurs,جميع المستخدمين
+settings.capital,Capital,Capital,Capital,رأس المال
+settings.changes_to_thresholds_will_affect_all_reporting_vi,Changes to thresholds will affect all reporting views,Los cambios en los umbrales afectarán todas las vistas de informes,Les modifications des seuils affecteront toutes les vues de rapport,التغييرات في الحدود ستؤثر على جميع طرق العرض في التقارير
+settings.city_classifications,City Classifications,Clasificaciones de ciudades,Classifications des villes,تصنيفات المدينة
+settings.city_classifications_override_default_classificati,City classifications override default classifications from the topology,Las clasificaciones de ciudades anulan las clasificaciones predeterminadas de la topología,Les classifications des villes remplacent les classifications par défaut de la topologie,تصنيفات المدينة تتجاوز التصنيفات الافتراضية من الطوبولوجيا
+settings.city_name,City Name,Nombre de la ciudad,Nom de la ville,اسم المدينة
+settings.classification,Classification,Clasificación,Classification,التصنيف
+settings.compliance_critical_threshold,Compliance Critical Threshold,Umbral crítico de cumplimiento,Seuil critique de conformité,الحد الحرج للامتثال
+settings.compliance_warning_threshold,Compliance Warning Threshold,Umbral de advertencia de cumplimiento,Seuil d'alerte de conformité,حد تحذير الامتثال
+settings.configuration_notes,Configuration Notes:,Notas de configuración:,Notes de configuration :,ملاحظات التكوين:
+settings.configuration_saved_successfully,Configuration saved successfully,Configuración guardada con éxito,Configuration enregistrée avec succès,تم حفظ التكوين بنجاح
+settings.configure_reporting_thresholds_and_city_classifica,Configure reporting thresholds and city classifications for this account,Configurar umbrales de informes y clasificaciones de ciudades para esta cuenta,Configurer les seuils de rapport et les classifications des villes pour ce compte,تكوين حدود التقارير وتصنيفات المدينة لهذا الحساب
+settings.create_account,Create Account,Crear cuenta,Créer un compte,إنشاء حساب
+settings.create_user,Create User,Crear usuario,Créer un utilisateur,إنشاء مستخدم
+settings.default_report_period,Default Report Period,Período de informe predeterminado,Période de rapport par défaut,فترة التقرير الافتراضية
+settings.default_time_period_for_generating_reports,Default time period for generating reports,Período de tiempo predeterminado para generar informes,Période temporelle par défaut pour la génération des rapports,الفترة الزمنية الافتراضية لإنشاء التقارير
+settings.error_saving_configuration,Error saving configuration,Error al guardar la configuración,Erreur lors de l'enregistrement de la configuration,خطأ في حفظ التكوين
+settings.general_settings,General Settings,Configuración general,Paramètres généraux,الإعدادات العامة
+settings.loading,Loading...,Cargando...,Chargement...,جارٍ التحميل...
+settings.loading_configuration,Loading configuration...,Cargando configuración...,Chargement de la configuration...,جارٍ تحميل التكوين...
+settings.major,Major,Principal,Majeur,رئيسي
+settings.minor,Minor,Secundario,Mineur,ثانوي
+settings.monthly,Monthly,Mensual,Mensuel,شهري
+settings.no_city_classifications_found,No city classifications found,No se encontraron clasificaciones de ciudades,Aucune classification de ville trouvée,لم يتم العثور على تصنيفات مدن
+settings.only_superadmin_users_can_modify_these_settings,Only superadmin users can modify these settings,Solo los usuarios superadministradores pueden modificar estas configuraciones,Seuls les utilisateurs superadmin peuvent modifier ces paramètres,يمكن فقط للمستخدمين المشرفين الأعلى تعديل هذه الإعدادات
+settings.promise,Promise,Promesa,Promesse,الوعد
+settings.quarterly,Quarterly,Trimestral,Trimestriel,ربع سنوي
+settings.search_cities,Search cities...,Buscar ciudades...,Rechercher des villes...,ابحث عن المدن...
+settings.warning_threshold_must_be_greater_than_critical_th,Warning threshold must be greater than critical threshold,El umbral de advertencia debe ser mayor que el umbral crítico,Le seuil d'alerte doit être supérieur au seuil critique,يجب أن يكون حد التحذير أكبر من حد الخطر
+settings.weekly,Weekly,Semanal,Hebdomadaire,أسبوعي
+stock.add_to_stock,Add to Stock,Agregar al stock,Ajouter au stock,إضافة إلى المخزون
+stock.adjust_stock,Adjust Stock,Ajustar stock,Ajuster le stock,تعديل المخزون
+stock.adjustment_note,Adjustment Note,Nota de ajuste,Note d'ajustement,ملاحظة التعديل
+stock.alert_type,Alert Type,Tipo de alerta,Type d'alerte,نوع التنبيه
+stock.all_materials,All Materials,Todos los materiales,Tous les matériaux,جميع المواد
+stock.all_nodes,All Nodes,Todos los nodos,Tous les nœuds,جميع العقد
+stock.all_panelists,All panelists,Todos los panelistas,Tous les panélistes,جميع الأعضاء
+stock.all_status,All Status,Todos los estados,Tous les statuts,جميع الحالات
+stock.all_statuses,All Statuses,Todos los estados,Tous les statuts,جميع الحالات
+stock.all_types,All types,Todos los tipos,Tous les types,جميع الأنواع
+stock.auto_generate_purchase_orders,Auto-generate Purchase Orders,Generar órdenes de compra automáticamente,Générer automatiquement les bons de commande,توليد أوامر الشراء تلقائيًا
+stock.auto_generate_shipments,Auto-generate Shipments,Generar envíos automáticamente,Générer automatiquement les expéditions,توليد الشحنات تلقائيًا
+stock.automation,Automation,Automatización,Automatisation,الأتمتة
+stock.available_stock,Available Stock,Stock disponible,Stock disponible,المخزون المتاح
+stock.calculate_generate_shipments,Calculate & Generate Shipments,Calcular y generar envíos,Calculer et générer les expéditions,حساب وتوليد الشحنات
+stock.calculate_requirements,Calculate Requirements,Calcular requisitos,Calculer les besoins,حساب المتطلبات
+stock.cancelled,Cancelled,Cancelado,Annulé,ملغى
+stock.change,Change:,Cambiar:,Modifier :,تغيير:
+stock.clear_filters,Clear Filters,Borrar filtros,Effacer les filtres,مسح الفلاتر
+stock.clear_filters_to_see_all_alerts,Clear filters to see all alerts,Borre los filtros para ver todas las alertas,Effacez les filtres pour voir toutes les alertes,امسح الفلاتر لعرض جميع التنبيهات
+stock.confirm_order,Confirm Order,Confirmar pedido,Confirmer la commande,تأكيد الطلب
+stock.confirm_receipt,Confirm Receipt,Confirmar recepción,Confirmer la réception,تأكيد الاستلام
+stock.confirm_shipment,Confirm Shipment,Confirmar envío,Confirmer l'expédition,تأكيد الشحنة
+stock.confirmed_shipments,Confirmed Shipments,Envíos confirmados,Expéditions confirmées,الشحنات المؤكدة
+stock.current_quantity,Current Quantity,Cantidad actual,Quantité actuelle,الكمية الحالية
+stock.current_stock,Current Stock,Stock actual,Stock actuel,المخزون الحالي
+stock.date,Date,Fecha,Date,التاريخ
+stock.edit_quantity,Edit quantity,Editar cantidad,Modifier la quantité,تعديل الكمية
+stock.edit_shipment_quantity,Edit Shipment Quantity,Editar cantidad de envío,Modifier la quantité d'expédition,تعديل كمية الشحنة
+stock.enable_stock_control,Enable Stock Control,Habilitar control de stock,Activer le contrôle des stocks,تمكين التحكم في المخزون
+stock.end_date,End Date,Fecha de finalización,Date de fin,تاريخ الانتهاء
+stock.enter_new_absolute_quantity,Enter new absolute quantity,Ingrese nueva cantidad absoluta,Saisir une nouvelle quantité absolue,أدخل كمية مطلقة جديدة
+stock.expected,Expected,Esperado,Prévu,متوقع
+stock.expected_date,Expected Date,Fecha esperada,Date prévue,تاريخ المتوقع
+stock.explain_the_reason_for_this_adjustment,Explain the reason for this adjustment...,Explique la razón de este ajuste...,Expliquez la raison de cet ajustement...,اشرح سبب هذا التعديل...
+stock.export_csv,Export CSV,Exportar CSV,Exporter CSV,تصدير CSV
+stock.filters,Filters,Filtros,Filtres,مرشحات
+stock.from,From,Desde,De,من
+stock.last_updated,Last Updated,Última actualización,Dernière mise à jour,آخر تحديث
+stock.lead_times,Lead Times,Tiempos de entrega,Délais de livraison,أوقات التنفيذ
+stock.loading_alerts,Loading alerts...,Cargando alertas...,Chargement des alertes...,جارٍ تحميل التنبيهات...
+stock.loading_movements,Loading movements...,Cargando movimientos...,Chargement des mouvements...,جارٍ تحميل الحركات...
+stock.loading_panelist_stock,Loading panelist stock...,Cargando stock del panelista...,Chargement du stock des panélistes...,جارٍ تحميل مخزون المشاركين...
+stock.loading_settings,Loading settings...,Cargando configuraciones...,Chargement des paramètres...,جارٍ تحميل الإعدادات...
+stock.loading_stock,Loading stock...,Cargando stock...,Chargement du stock...,جارٍ تحميل المخزون...
+stock.location,Location,Ubicación,Emplacement,الموقع
+stock.low_stock,Low Stock,Stock bajo,Stock faible,مخزون منخفض
+stock.low_stock_only,Low Stock Only,Solo bajo stock,Stock faible uniquement,المخزون المنخفض فقط
+stock.material,Material,Material,Matériel,المادة
+stock.materials,Materials,Materiales,Matériels,المواد
+stock.materials_to_send,Materials to Send,Materiales para enviar,Matériels à envoyer,المواد للإرسال
+stock.metrics_overview,Metrics Overview,Resumen de métricas,Aperçu des métriques,نظرة عامة على المقاييس
+stock.minimum,Minimum,Mínimo,Minimum,الحد الأدنى
+stock.movement_type,Movement Type,Tipo de movimiento,Type de mouvement,نوع الحركة
+stock.net_quantity,Net Quantity,Cantidad neta,Quantité nette,الكمية الصافية
+stock.new_quantity,New Quantity,Cantidad nueva,Nouvelle quantité,الكمية الجديدة
+stock.no_stock_alerts_found,No stock alerts found,No se encontraron alertas de stock,Aucune alerte de stock trouvée,لم يتم العثور على تنبيهات مخزون
+stock.no_stock_records_found,No stock records found,No se encontraron registros de stock,Aucun enregistrement de stock trouvé,لم يتم العثور على سجلات مخزون
+stock.node,Node,Nodo,Nœud,العقدة
+stock.normal,Normal,Normal,Normal,عادي
+stock.not_applicable_purchase_orders_are_not_used,Not applicable - Purchase orders are not used,No aplicable - No se utilizan órdenes de compra,Non applicable - les commandes d'achat ne sont pas utilisées,غير قابل للتطبيق - لا يتم استخدام أوامر الشراء
+stock.notes,Notes,Notas,Notes,ملاحظات
+stock.order,Order,Orden,Commande,الطلب
+stock.order_material,Order Material,Material de orden,Matériel de commande,طلب المادة
+stock.ordered,Ordered,Ordenado,Commandé,تم الطلب
+stock.packing_list_pdf,Packing List PDF,Lista de empaque PDF,Liste de colisage PDF,قائمة التعبئة PDF
+stock.panelist,Panelist,Panelista,Panéliste,المشارك في اللجنة
+stock.panelist_negative,Panelist Negative,Panelista Negativo,Panéliste Négatif,المشارك سلبي
+stock.pending,Pending,Pendiente,En attente,قيد الانتظار
+stock.pending_requirements,Pending Requirements,Requisitos Pendientes,Exigences en attente,المتطلبات المعلقة
+stock.pending_shipments,Pending Shipments,Envíos Pendientes,Expéditions en attente,الشحنات المعلقة
+stock.period,Period,Período,Période,الفترة
+stock.promise,Promise,Compromiso,Engagement,الوعد
+stock.purchase_lead_time_days,Purchase Lead Time (days),Plazo de Compra (días),Délai d'achat (jours),مدة الشراء (أيام)
+stock.purchase_order_pdf,Purchase Order PDF,PDF de Orden de Compra,Bon de commande PDF,طلب الشراء بصيغة PDF
+stock.quantity,Quantity,Cantidad,Quantité,الكمية
+stock.quantity_needed,Quantity Needed,Cantidad Necesaria,Quantité nécessaire,الكمية المطلوبة
+stock.quantity_ordered,Quantity Ordered,Cantidad Ordenada,Quantité commandée,الكمية المطلوبة في الطلب
+stock.quantity_received,Quantity Received,Cantidad Recibida,Quantité reçue,الكمية المستلمة
+stock.quantity_to_order,Quantity to Order,Cantidad a Ordenar,Quantité à commander,الكمية للطلب
+stock.quantity_to_send,Quantity to Send,Cantidad a Enviar,Quantité à envoyer,الكمية للإرسال
+stock.quick_month_selection,Quick Month Selection,Selección Rápida de Mes,Sélection rapide du mois,اختيار سريع للشهر
+stock.receive,Receive,Recibir,Recevoir,استلام
+stock.receive_purchase_order,Receive Purchase Order,Recibir Orden de Compra,Recevoir le bon de commande,استلام طلب الشراء
+stock.received,Received,Recibido,Reçu,تم الاستلام
+stock.regulator_insufficient,Regulator Insufficient,Regulador Insuficiente,Régulateur insuffisant,المُنظِّم غير كافٍ
+stock.removed_materials_will_create_new_pending_shipment,Removed Materials (Will Create New Pending Shipment),Materiales Eliminados (Se Creará un Nuevo Envío Pendiente),Matériaux retirés (créera une nouvelle expédition en attente),المواد المُزالة (سيتم إنشاء شحنة معلقة جديدة)
+stock.reset_filters,Reset Filters,Restablecer filtros,Réinitialiser les filtres,إعادة تعيين الفلاتر
+stock.restore,Restore,Restaurar,Restaurer,استعادة
+stock.search_by_material_or_code,Search by material or code...,Buscar por material o código...,Rechercher par matériau ou code...,البحث حسب المادة أو الرمز...
+stock.search_by_material_or_panelist,Search by material or panelist...,Buscar por material o panelista...,Rechercher par matériau ou panéliste...,البحث حسب المادة أو المشارك...
+stock.search_material,Search material...,Buscar material...,Rechercher matériau...,البحث عن مادة...
+stock.send,Send,Enviar,Envoyer,إرسال
+stock.sent,Sent,Enviado,Envoyé,تم الإرسال
+stock.sent_date,Sent Date,Fecha de envío,Date d'envoi,تاريخ الإرسال
+stock.shipment,Shipment #,Número de envío,N° d'expédition,رقم الشحنة
+stock.shipment_lead_time_days,Shipment Lead Time (days),Plazo de envío (días),Délai d'expédition (jours),مدة تسليم الشحنة (أيام)
+stock.shipments,Shipments,Envíos,Expéditions,الشحنات
+stock.showing,Showing,Mostrando,Affichage,عرض
+stock.start_date,Start Date,Fecha de inicio,Date de début,تاريخ البدء
+stock.stock_alert,Stock Alert,Alerta de stock,Alerte de stock,تنبيه المخزون
+stock.stock_control,Stock Control,Control de stock,Contrôle des stocks,مراقبة المخزون
+stock.stock_status,Stock Status,Estado de stock,Statut du stock,حالة المخزون
+stock.this_feature_is_not_available_in_the_current_versi,This feature is not available in the current version of the module.,Esta función no está disponible en la versión actual del módulo.,Cette fonctionnalité n'est pas disponible dans la version actuelle du module.,هذه الميزة غير متوفرة في النسخة الحالية من الوحدة.
+stock.total_items_pending,Total Items Pending,Total de artículos pendientes,Total des articles en attente,إجمالي العناصر المعلقة
+stock.total_movements,Total movements:,Total de movimientos:,Total des mouvements :,إجمالي الحركات:
+stock.total_records,Total records:,Total de registros:,Total des enregistrements :,إجمالي السجلات:
+stock.type,Type,Tipo,Type,النوع
+stock.unit,Unit,Unidad,Unité,الوحدة
+stock.unknown_panelist,Unknown Panelist,Panelista desconocido,Panéliste inconnu,مشارك غير معروف
+stock.used_to_calculate_expected_delivery_dates,Used to calculate expected delivery dates,Utilizado para calcular fechas de entrega esperadas,Utilisé pour calculer les dates de livraison prévues,تُستخدم لحساب تواريخ التسليم المتوقعة
+stock.year,Year,Año,Année,السنة
+stockmanagement.stock_alerts,Stock Alerts,Alertas de stock,Alertes de stock,تنبيهات المخزون
+stockmanagement.stock_management_alerts,Stock Management & Alerts,Gestión y alertas de stock,Gestion des stocks et alertes,إدارة وتنبيهات المخزون
+stockmanagement.tabs,Tabs,Pestañas,Onglets,علامات التبويب
+topology.3_7038,-3.7038,-3.7038,"-3,7038",-3.7038
+topology.40_4168,40.4168,40.4168,"40,4168",40.4168
+topology.city,City,Ciudad,Ville,المدينة
+topology.city_code,City Code *,Código de ciudad *,Code postal *,رمز المدينة *
+topology.city_name,City Name *,Nombre de la ciudad *,Nom de la ville *,اسم المدينة *
+topology.country_code,Country Code *,Código de país *,Code pays *,رمز الدولة *
+topology.delete_city,Delete city,Eliminar ciudad,Supprimer la ville,حذف المدينة
+topology.delete_node,Delete node,Eliminar nodo,Supprimer le nœud,حذف العقدة
+topology.delete_region,Delete region,Eliminar región,Supprimer la région,حذف المنطقة
+topology.description,Description,Descripción,Description,الوصف
+topology.e_g_3200000,"e.g., 3200000","p. ej., 3200000","ex., 3200000",مثال: 3200000
+topology.e_g_es_fr,"e.g., ES, FR","p. ej., ES, FR","ex., ES, FR",مثال: ES، FR
+topology.e_g_mad_bcn,"e.g., MAD, BCN","p. ej., MAD, BCN","ex., MAD, BCN",على سبيل المثال، MAD، BCN
+topology.e_g_madrid_barcelona,"e.g., Madrid, Barcelona","p. ej., Madrid, Barcelona","ex., Madrid, Barcelone",على سبيل المثال، مدريد، برشلونة
+topology.e_g_spain_france,"e.g., Spain, France","p. ej., España, Francia","ex., Espagne, France",على سبيل المثال، إسبانيا، فرنسا
+topology.edit_city,Edit city,Editar ciudad,Modifier la ville,تعديل المدينة
+topology.edit_node,Edit node,Editar nodo,Modifier le nœud,تعديل العقدة
+topology.edit_region,Edit region,Editar región,Modifier la région,تعديل المنطقة
+topology.expand_all_cities_in_this_region,Expand all cities in this region,Expandir todas las ciudades en esta región,Développer toutes les villes de cette région,توسيع جميع المدن في هذه المنطقة
+topology.latitude,Latitude,Latitud,Latitude,خط العرض
+topology.longitude,Longitude,Longitud,Longitude,خط الطول
+topology.no_cities_in_this_region_yet,No cities in this region yet,Aún no hay ciudades en esta región,Aucune ville dans cette région pour le moment,لا توجد مدن في هذه المنطقة بعد
+topology.no_nodes_in_this_city_yet,No nodes in this city yet,Aún no hay nodos en esta ciudad,Aucun nœud dans cette ville pour le moment,لا توجد عقد في هذه المدينة بعد
+topology.node,Node,Nodo,Nœud,العقدة
+topology.panelist_assigned,Panelist Assigned,Panelista asignado,Panéliste assigné,المشارك المعين
+topology.pending_panelist,Pending Panelist,Panelista pendiente,Panéliste en attente,المشارك المعلق
+topology.population,Population,Población,Population,السكان
+topology.promise,Promise,Promesa,Promesse,الوعد
+topology.region_code,Region Code *,Código de región *,Code de région *,رمز المنطقة *
+topology.region_name,Region Name *,Nombre de la región *,Nom de la région *,اسم المنطقة *
+topology.status,Status *,Estado *,Statut *,الحالة *
+topology.total_population_of_the_city_used_for_impact_analy,Total population of the city (used for impact analysis in reporting),Población total de la ciudad (utilizada para análisis de impacto en informes),Population totale de la ville (utilisée pour l’analyse d’impact dans les rapports),إجمالي سكان المدينة (يُستخدم لتحليل التأثير في التقارير)
+users.account,Account,Cuenta,Compte,الحساب
+users.deactivate,Deactivate,Desactivar,Désactiver,تعطيل
+users.email,Email,Correo electrónico,Email,البريد الإلكتروني
+users.full_name,Full Name,Nombre completo,Nom complet,الاسم الكامل
+users.name,Name,Nombre,Nom,الاسم
+users.no_users_found,No users found,No se encontraron usuarios,Aucun utilisateur trouvé,لم يتم العثور على مستخدمين
+users.password,Password,Contraseña,Mot de passe,كلمة المرور
+users.promise,Promise,Promesa,Promesse,الوعد
+users.role,Role,Rol,Rôle,الدور
+users.select_account,Select account,Seleccionar cuenta,Sélectionner un compte,اختر حسابًا
