@@ -177,12 +177,12 @@ export function AllocationPlans() {
             bVal = b.tag_id || ''
             break
           case 'originPanelist':
-            aVal = a.origin_panelist?.name || ''
-            bVal = b.origin_panelist?.name || ''
+            aVal = a.origin_panelist_name || ''
+            bVal = b.origin_panelist_name || ''
             break
           case 'destPanelist':
-            aVal = a.destination_panelist?.name || ''
-            bVal = b.destination_panelist?.name || ''
+            aVal = a.destination_panelist_name || ''
+            bVal = b.destination_panelist_name || ''
             break
           case 'status':
             aVal = a.status || ''
@@ -406,8 +406,8 @@ export function AllocationPlans() {
       detail.tag_id || '',
       detail.sent_at ? new Date(detail.sent_at).toLocaleString() : '',
       detail.received_at ? new Date(detail.received_at).toLocaleString() : '',
-      detail.origin_panelist?.name || '',
-      detail.destination_panelist?.name || '',
+      detail.origin_panelist_name || '',
+      detail.destination_panelist_name || '',
       detail.origin_availability_status || '',
       detail.destination_availability_status || ''
     ])

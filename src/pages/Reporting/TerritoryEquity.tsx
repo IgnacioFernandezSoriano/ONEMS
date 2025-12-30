@@ -31,7 +31,7 @@ export default function TerritoryEquity() {
     equityStatus: [],
   });
 
-  const { cityData, regionData, metrics, loading, error } = useTerritoryEquityData(
+  const { cityData, regionData, metrics, loading, error, globalWarningThreshold, globalCriticalThreshold } = useTerritoryEquityData(
     profile?.account_id || undefined,
     filters
   );
@@ -101,7 +101,7 @@ export default function TerritoryEquity() {
               city.inboundDeviation.toFixed(1),
               city.inboundStandardDays.toFixed(1),
               city.inboundActualDays.toFixed(1),
-              city.inboundDeviation >= 0 ? 'compliant' : (city.inboundPercentage < 80 ? 'critical' : 'warning'),
+              city.inboundPercentage >= globalWarningThreshold ? 'compliant' : (city.inboundPercentage > globalCriticalThreshold ? 'warning' : 'critical'),
               cp.carrier,
               cp.product,
               cp.totalShipments.toString(),
@@ -128,7 +128,7 @@ export default function TerritoryEquity() {
             city.inboundDeviation.toFixed(1),
             city.inboundStandardDays.toFixed(1),
             city.inboundActualDays.toFixed(1),
-            city.inboundDeviation >= 0 ? 'compliant' : (city.inboundPercentage < 80 ? 'critical' : 'warning'),
+            city.inboundPercentage >= globalWarningThreshold ? 'compliant' : (city.inboundPercentage > globalCriticalThreshold ? 'warning' : 'critical'),
             '', '', '', '', '', '', '', '', '',
           ]);
         }
@@ -150,7 +150,7 @@ export default function TerritoryEquity() {
               city.outboundDeviation.toFixed(1),
               city.outboundStandardDays.toFixed(1),
               city.outboundActualDays.toFixed(1),
-              city.outboundDeviation >= 0 ? 'compliant' : (city.outboundPercentage < 80 ? 'critical' : 'warning'),
+              city.outboundPercentage >= globalWarningThreshold ? 'compliant' : (city.outboundPercentage > globalCriticalThreshold ? 'warning' : 'critical'),
               cp.carrier,
               cp.product,
               cp.totalShipments.toString(),
@@ -177,7 +177,7 @@ export default function TerritoryEquity() {
             city.outboundDeviation.toFixed(1),
             city.outboundStandardDays.toFixed(1),
             city.outboundActualDays.toFixed(1),
-            city.outboundDeviation >= 0 ? 'compliant' : (city.outboundPercentage < 80 ? 'critical' : 'warning'),
+            city.outboundPercentage >= globalWarningThreshold ? 'compliant' : (city.outboundPercentage > globalCriticalThreshold ? 'warning' : 'critical'),
             '', '', '', '', '', '', '', '', '',
           ]);
         }
@@ -196,7 +196,7 @@ export default function TerritoryEquity() {
           city.inboundDeviation.toFixed(1),
           city.inboundStandardDays.toFixed(1),
           city.inboundActualDays.toFixed(1),
-          city.inboundDeviation >= 0 ? 'compliant' : (city.inboundPercentage < 80 ? 'critical' : 'warning'),
+          city.inboundPercentage >= globalWarningThreshold ? 'compliant' : (city.inboundPercentage > globalCriticalThreshold ? 'warning' : 'critical'),
           '', '', '', '', '', '', '', '', '',
         ]);
         
@@ -213,7 +213,7 @@ export default function TerritoryEquity() {
           city.outboundDeviation.toFixed(1),
           city.outboundStandardDays.toFixed(1),
           city.outboundActualDays.toFixed(1),
-          city.outboundDeviation >= 0 ? 'compliant' : (city.outboundPercentage < 80 ? 'critical' : 'warning'),
+          city.outboundPercentage >= globalWarningThreshold ? 'compliant' : (city.outboundPercentage > globalCriticalThreshold ? 'warning' : 'critical'),
           '', '', '', '', '', '', '', '', '',
         ]);
       }
@@ -274,7 +274,7 @@ export default function TerritoryEquity() {
               region.inboundDeviation.toFixed(1),
               region.inboundStandardDays.toFixed(1),
               region.inboundActualDays.toFixed(1),
-              region.inboundDeviation >= 0 ? 'compliant' : (region.inboundPercentage < 80 ? 'critical' : 'warning'),
+              region.inboundPercentage >= globalWarningThreshold ? 'compliant' : (region.inboundPercentage > globalCriticalThreshold ? 'warning' : 'critical'),
               region.underservedCitiesCount.toString(),
               cp.carrier,
               cp.product,
@@ -298,7 +298,7 @@ export default function TerritoryEquity() {
             region.inboundDeviation.toFixed(1),
             region.inboundStandardDays.toFixed(1),
             region.inboundActualDays.toFixed(1),
-            region.inboundDeviation >= 0 ? 'compliant' : (region.inboundPercentage < 80 ? 'critical' : 'warning'),
+            region.inboundPercentage >= globalWarningThreshold ? 'compliant' : (region.inboundPercentage > globalCriticalThreshold ? 'warning' : 'critical'),
             region.underservedCitiesCount.toString(),
             '', '', '', '', '', '', '', '', '',
           ]);
@@ -318,7 +318,7 @@ export default function TerritoryEquity() {
               region.outboundDeviation.toFixed(1),
               region.outboundStandardDays.toFixed(1),
               region.outboundActualDays.toFixed(1),
-              region.outboundDeviation >= 0 ? 'compliant' : (region.outboundPercentage < 80 ? 'critical' : 'warning'),
+              region.outboundPercentage >= globalWarningThreshold ? 'compliant' : (region.outboundPercentage > globalCriticalThreshold ? 'warning' : 'critical'),
               region.underservedCitiesCount.toString(),
               cp.carrier,
               cp.product,
@@ -342,7 +342,7 @@ export default function TerritoryEquity() {
             region.outboundDeviation.toFixed(1),
             region.outboundStandardDays.toFixed(1),
             region.outboundActualDays.toFixed(1),
-            region.outboundDeviation >= 0 ? 'compliant' : (region.outboundPercentage < 80 ? 'critical' : 'warning'),
+            region.outboundPercentage >= globalWarningThreshold ? 'compliant' : (region.outboundPercentage > globalCriticalThreshold ? 'warning' : 'critical'),
             region.underservedCitiesCount.toString(),
             '', '', '', '', '', '', '', '', '',
           ]);
@@ -359,7 +359,7 @@ export default function TerritoryEquity() {
           region.inboundDeviation.toFixed(1),
           region.inboundStandardDays.toFixed(1),
           region.inboundActualDays.toFixed(1),
-          region.inboundDeviation >= 0 ? 'compliant' : (region.inboundPercentage < 80 ? 'critical' : 'warning'),
+          region.inboundPercentage >= globalWarningThreshold ? 'compliant' : (region.inboundPercentage > globalCriticalThreshold ? 'warning' : 'critical'),
           region.underservedCitiesCount.toString(),
           '', '', '', '', '', '', '', '', '',
         ]);
@@ -374,7 +374,7 @@ export default function TerritoryEquity() {
           region.outboundDeviation.toFixed(1),
           region.outboundStandardDays.toFixed(1),
           region.outboundActualDays.toFixed(1),
-          region.outboundDeviation >= 0 ? 'compliant' : (region.outboundPercentage < 80 ? 'critical' : 'warning'),
+          region.outboundPercentage >= globalWarningThreshold ? 'compliant' : (region.outboundPercentage > globalCriticalThreshold ? 'warning' : 'critical'),
           region.underservedCitiesCount.toString(),
           '', '', '', '', '', '', '', '', '',
         ]);
@@ -682,7 +682,12 @@ export default function TerritoryEquity() {
                     Export CSV
                   </button>
                 </div>
-                <TerritoryEquityTable data={cityData} onCityClick={setSelectedCity} />
+                <TerritoryEquityTable 
+                  data={cityData} 
+                  onCityClick={setSelectedCity} 
+                  globalWarningThreshold={globalWarningThreshold}
+                  globalCriticalThreshold={globalCriticalThreshold}
+                />
               </div>
             </div>
           )}

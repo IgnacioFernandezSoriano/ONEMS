@@ -21,6 +21,8 @@ export function useTerritoryEquityData(
   const [metrics, setMetrics] = useState<TerritoryEquityMetrics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [globalWarningThreshold, setGlobalWarningThreshold] = useState<number>(80);
+  const [globalCriticalThreshold, setGlobalCriticalThreshold] = useState<number>(75);
 
   useEffect(() => {
     if (!activeAccountId) {
@@ -82,6 +84,27 @@ export function useTerritoryEquityData(
             s,
           ])
         );
+
+        // Calculate global thresholds (average of all standards)
+        let warningThreshold = 80;
+        let criticalThreshold = 75;
+        if (standards.length > 0) {
+          const thresholds = standards.map((s: any) => {
+            const successPct = s.success_percentage || 95;
+            const warnThresh = s.threshold_type === 'relative'
+              ? successPct - (s.warning_threshold || 5)
+              : (s.warning_threshold || 5);
+            const critThresh = s.threshold_type === 'relative'
+              ? successPct - (s.critical_threshold || 10)
+              : (s.critical_threshold || 10);
+            return { warning: warnThresh, critical: critThresh };
+          });
+          warningThreshold = thresholds.reduce((sum, t) => sum + t.warning, 0) / thresholds.length;
+          criticalThreshold = thresholds.reduce((sum, t) => sum + t.critical, 0) / thresholds.length;
+        }
+        setGlobalWarningThreshold(warningThreshold);
+        setGlobalCriticalThreshold(criticalThreshold);
+        console.log('[useTerritoryEquityData] Global thresholds:', { warning: warningThreshold, critical: criticalThreshold });
 
         // 3. Load shipments with filters and pagination
         const allShipments: any[] = []
@@ -917,5 +940,5 @@ export function useTerritoryEquityData(
     fetchData();
   }, [activeAccountId, JSON.stringify(filters)]);
 
-  return { cityData, regionData, metrics, loading, error };
+  return { cityData, regionData, metrics, loading, error, globalWarningThreshold, globalCriticalThreshold };
 }

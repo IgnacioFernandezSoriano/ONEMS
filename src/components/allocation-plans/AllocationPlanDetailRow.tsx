@@ -41,6 +41,18 @@ export function AllocationPlanDetailRow({
 
   const originNodes = detail.origin_city_id ? getNodesByCity(detail.origin_city_id) : []
   const destinationNodes = detail.destination_city_id ? getNodesByCity(detail.destination_city_id) : []
+  
+  // Lookup panelists by node_id if names are not populated in the database
+  const originPanelist = panelists.find(p => p.node_id === detail.origin_node_id)
+  const destinationPanelist = panelists.find(p => p.node_id === detail.destination_node_id)
+  
+  const originPanelistName = detail.origin_panelist_name || originPanelist?.name || ''
+  
+  // Only show destination panelist name after the shipment has been sent
+  const showDestinationPanelist = ['sent', 'received'].includes(detail.status)
+  const destinationPanelistName = showDestinationPanelist 
+    ? (detail.destination_panelist_name || destinationPanelist?.name || '')
+    : ''
 
   const handleUpdate = async (field: string, value: any) => {
     try {
@@ -211,7 +223,7 @@ export function AllocationPlanDetailRow({
 
       {/* Origin Panelist */}
       <td className="px-4 py-3 text-sm text-gray-600">
-        {detail.origin_panelist_name || ''}
+        {originPanelistName}
       </td>
 
       {/* Origin Availability Status */}
@@ -244,7 +256,7 @@ export function AllocationPlanDetailRow({
 
       {/* Destination Panelist */}
       <td className="px-4 py-3 text-sm text-gray-600">
-        {detail.destination_panelist_name || ''}
+        {destinationPanelistName}
       </td>
 
       {/* Destination Availability Status */}

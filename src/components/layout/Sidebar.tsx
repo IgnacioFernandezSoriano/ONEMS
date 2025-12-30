@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { useAccount } from '../../contexts/AccountContext'
 import { useSidebar } from '../../contexts/SidebarContext'
+import { SmartTooltip } from '../common/SmartTooltip'
 import {
   LayoutDashboard,
   Map,
@@ -33,6 +34,7 @@ interface MenuItem {
   path: string
   label: string
   icon: any
+  tooltip?: string
   roles?: string[]
   children?: MenuItem[]
 }
@@ -90,6 +92,7 @@ export function Sidebar() {
           path: '/dashboard',
           label: 'Dashboard',
           icon: LayoutDashboard,
+          tooltip: 'Dashboard: Overview of operational metrics, resource status, and critical alerts. Monitor allocation plans, panelist availability, material management, and delivery standards.',
         },
       ],
     },
@@ -101,24 +104,28 @@ export function Sidebar() {
           label: 'Country Topology',
           icon: Map,
           roles: ['admin', 'superadmin'],
+          tooltip: 'Country Topology: Define your geographical structure (regions, cities, nodes). Create and manage the network of locations where panelists operate. Required before creating allocation plans.',
         },
         {
           path: '/carriers',
           label: 'Carriers & Products',
           icon: Truck,
           roles: ['admin', 'superadmin'],
+          tooltip: 'Carriers & Products: Manage shipping carriers and their product catalog. Define product materials and compositions. Essential for allocation planning and material requirements calculation.',
         },
         {
           path: '/panelists',
           label: 'Panelists',
           icon: UserCircle,
           roles: ['admin', 'superadmin'],
+          tooltip: 'Panelists: Manage panelist registry, assign to nodes, track availability and vacation periods. View panelist stock levels and manage unavailability schedules.',
         },
         {
           path: '/delivery-standards',
           label: 'Delivery Standards',
           icon: Clock,
           roles: ['admin', 'superadmin'],
+          tooltip: 'Delivery Standards: Define expected delivery times and success rates for each carrier-product-route combination. Set warning and critical thresholds for performance monitoring.',
         },
       ],
     },
@@ -130,18 +137,21 @@ export function Sidebar() {
           label: 'Allocation Generator',
           icon: Target,
           roles: ['admin', 'superadmin'],
+          tooltip: 'Allocation Generator: Create new allocation plans by defining carrier, product, date range, and distribution rules. Generate shipment schedules automatically based on your configuration.',
         },
         {
           path: '/node-load-balancing',
           label: 'Load Balancing',
           icon: Scale,
           roles: ['admin', 'superadmin'],
+          tooltip: 'Load Balancing: Visualize and rebalance shipment distribution across cities and nodes. Reassign shipments to optimize workload and ensure equitable distribution.',
         },
         {
           path: '/allocation-plans',
           label: 'Allocation Plans',
           icon: Calendar,
           roles: ['admin', 'superadmin'],
+          tooltip: 'Allocation Plans: View and manage all shipment assignments. Track status (pending, sent, received), assign panelists, mark shipments as sent, and monitor availability issues.',
         },
       ],
     },
@@ -154,18 +164,21 @@ export function Sidebar() {
           label: 'Material Requirements',
           icon: Package,
           roles: ['admin', 'superadmin'],
+          tooltip: 'Material Requirements: Calculate material needs based on allocation plans. Generate purchase orders and proposed shipments to panelists. Track requirement status and fulfillment.',
         },
         {
           path: '/stock-management',
           label: 'Stock Management',
           icon: Warehouse,
           roles: ['admin', 'superadmin'],
+          tooltip: 'Stock Management: Monitor inventory levels at regulator and panelist locations. Manage stock alerts, track material movements, and process shipments between locations.',
         },
         {
           path: '/material-catalog',
           label: 'Material DB',
           icon: Database,
           roles: ['admin', 'superadmin'],
+          tooltip: 'Material Catalog: Define and manage the master catalog of materials used in products. Set minimum stock levels, units of measure, and material specifications.',
         },
       ],
     },
@@ -177,36 +190,42 @@ export function Sidebar() {
           label: 'E2E',
           icon: BarChart3,
           roles: ['admin', 'superadmin'],
+          tooltip: 'End-to-End Reporting: Comprehensive analytics and performance metrics for your delivery network. Access dashboards, performance reports, compliance tracking, and territory equity analysis.',
           children: [
             {
               path: '/reporting/dashboard',
               label: 'Dashboard',
               icon: LayoutDashboard,
               roles: ['admin', 'superadmin'],
+              tooltip: 'Reporting Dashboard: High-level overview of key performance indicators, trends, and summary statistics across all reporting modules.',
             },
             {
               path: '/reporting/jk-performance',
               label: 'J+K Performance',
               icon: Clock,
               roles: ['admin', 'superadmin'],
+              tooltip: 'J+K Performance: Analyze delivery performance against standards. Track J (actual delivery time) vs K (standard time) metrics, identify delays, and monitor compliance rates by route and carrier.',
             },
             {
               path: '/reporting/compliance',
               label: 'Compliance',
               icon: Shield,
               roles: ['admin', 'superadmin'],
+              tooltip: 'Compliance Report: Monitor adherence to delivery standards. View compliance rates, identify non-compliant routes, and track performance trends over time with threshold-based alerts.',
             },
             {
               path: '/reporting/territory-equity',
               label: 'Territory Equity',
               icon: MapPin,
               roles: ['admin', 'superadmin'],
+              tooltip: 'Territory Equity: Analyze distribution fairness across regions and cities. Compare shipment volumes, delivery performance, and resource allocation to ensure equitable service.',
             },
             {
               path: '/one-db',
               label: 'ONE DB',
               icon: Database,
               roles: ['admin', 'superadmin'],
+              tooltip: 'ONE Database: Complete record of all received shipments. View detailed shipment history, delivery times, routes, and panelist information for audit and analysis purposes.',
             },
           ],
         },
@@ -220,6 +239,7 @@ export function Sidebar() {
           label: 'Users',
           icon: Users,
           roles: ['admin', 'superadmin'],
+          tooltip: 'User Management: Create and manage user accounts for your organization. Assign roles (admin, viewer) and control access permissions to system features.',
         },
         ...(accountName === 'DEMO2' ? [
           {
@@ -227,12 +247,14 @@ export function Sidebar() {
             label: 'ONEDB Generator',
             icon: RefreshCw,
             roles: ['admin', 'superadmin'],
+            tooltip: 'ONEDB Generator (Demo): Simulate received shipments for testing and demonstration purposes. Automatically transfers allocation plans to ONE DB.',
           },
           {
             path: '/admin/account-management',
             label: 'Demo Reset',
             icon: RefreshCw,
             roles: ['admin', 'superadmin'],
+            tooltip: 'Demo Reset: Reset demo account data to initial state. Clear all transactions while preserving base configuration (topology, carriers, panelists).',
           },
         ] : []),
       ],
@@ -245,12 +267,14 @@ export function Sidebar() {
           label: 'Accounts',
           icon: Building2,
           roles: ['superadmin'],
+          tooltip: 'Account Management (Superadmin): Create and manage customer accounts. Configure account settings, status, and access. Only accessible to superadmin users.',
         },
         {
           path: '/settings/users',
           label: 'All Users',
           icon: Users,
           roles: ['superadmin'],
+          tooltip: 'All Users (Superadmin): View and manage users across all accounts. Assign accounts to users, modify roles, and control system-wide access. Only accessible to superadmin users.',
         },
 
       ],
@@ -331,36 +355,46 @@ export function Sidebar() {
                     <div key={item.path}>
                       {/* Main Item */}
                       {hasChildren ? (
-                        <button
-                          onClick={() => toggleSection(item.path)}
-                          className={`w-full flex items-center justify-between gap-3 px-3 py-2 rounded-lg transition-colors ${
-                            active
-                              ? 'bg-blue-50 text-blue-700'
-                              : 'text-gray-700 hover:bg-gray-100'
-                          }`}
-                        >
-                          <div className="flex items-center gap-3 min-w-0">
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => toggleSection(item.path)}
+                            className={`flex-1 flex items-center justify-between gap-3 px-3 py-2 rounded-lg transition-colors ${
+                              active
+                                ? 'bg-blue-50 text-blue-700'
+                                : 'text-gray-700 hover:bg-gray-100'
+                            }`}
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              <Icon className="w-5 h-5 flex-shrink-0" />
+                              {isExpanded && <span className="font-medium text-sm whitespace-nowrap">{item.label}</span>}
+                            </div>
+                            {isExpanded && (isSectionExpanded ? (
+                              <ChevronDown className="w-4 h-4 flex-shrink-0" />
+                            ) : (
+                              <ChevronRight className="w-4 h-4 flex-shrink-0" />
+                            ))}
+                          </button>
+                          {isExpanded && item.tooltip && (
+                            <SmartTooltip content={item.tooltip} />
+                          )}
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1">
+                          <Link
+                            to={item.path}
+                            className={`flex-1 flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                              active
+                                ? 'bg-blue-50 text-blue-700'
+                                : 'text-gray-700 hover:bg-gray-100'
+                            }`}
+                          >
                             <Icon className="w-5 h-5 flex-shrink-0" />
                             {isExpanded && <span className="font-medium text-sm whitespace-nowrap">{item.label}</span>}
-                          </div>
-                          {isExpanded && (isSectionExpanded ? (
-                            <ChevronDown className="w-4 h-4 flex-shrink-0" />
-                          ) : (
-                            <ChevronRight className="w-4 h-4 flex-shrink-0" />
-                          ))}
-                        </button>
-                      ) : (
-                        <Link
-                          to={item.path}
-                          className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
-                            active
-                              ? 'bg-blue-50 text-blue-700'
-                              : 'text-gray-700 hover:bg-gray-100'
-                          }`}
-                        >
-                          <Icon className="w-5 h-5 flex-shrink-0" />
-                          {isExpanded && <span className="font-medium text-sm whitespace-nowrap">{item.label}</span>}
-                        </Link>
+                          </Link>
+                          {isExpanded && item.tooltip && (
+                            <SmartTooltip content={item.tooltip} />
+                          )}
+                        </div>
                       )}
 
                       {/* Children - Always occupy space to maintain positions */}
@@ -376,19 +410,23 @@ export function Sidebar() {
                             const shouldShow = (isSectionExpanded && isExpanded) || (isCollapsed && item.path === '/reporting')
 
                             return (
-                              <Link
-                                key={child.path}
-                                to={child.path}
-                                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
-                                  childActive
-                                    ? 'bg-blue-50 text-blue-700 font-medium'
-                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                                }`}
-                                style={shouldShow ? undefined : { pointerEvents: 'none' }}
-                              >
-                                <ChildIcon className="w-4 h-4 flex-shrink-0" />
-                                {isExpanded && <span className="whitespace-nowrap">{child.label}</span>}
-                              </Link>
+                              <div key={child.path} className="flex items-center gap-1">
+                                <Link
+                                  to={child.path}
+                                  className={`flex-1 flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
+                                    childActive
+                                      ? 'bg-blue-50 text-blue-700 font-medium'
+                                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                  }`}
+                                  style={shouldShow ? undefined : { pointerEvents: 'none' }}
+                                >
+                                  <ChildIcon className="w-4 h-4 flex-shrink-0" />
+                                  {isExpanded && <span className="whitespace-nowrap">{child.label}</span>}
+                                </Link>
+                                {isExpanded && child.tooltip && (
+                                  <SmartTooltip content={child.tooltip} />
+                                )}
+                              </div>
                             )
                           })}
                         </div>

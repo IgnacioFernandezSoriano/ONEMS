@@ -147,7 +147,7 @@ export default function ComplianceReport() {
     complianceStatus: filters.complianceStatus
   });
 
-  const { data, loading, error } = useComplianceData(accountId, {
+  const { data, loading, error, globalWarningThreshold, globalCriticalThreshold } = useComplianceData(accountId, {
     startDate: filters.startDate,
     endDate: filters.endDate,
     originCity: filters.originCity,

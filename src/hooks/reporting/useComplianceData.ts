@@ -64,6 +64,8 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
   const [data, setData] = useState<CarrierData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [globalWarningThreshold, setGlobalWarningThreshold] = useState<number>(80);
+  const [globalCriticalThreshold, setGlobalCriticalThreshold] = useState<number>(75);
 
   useEffect(() => {
     if (!activeAccountId) {
@@ -212,6 +214,27 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
         console.log('📊 Standards map size:', standardsMap.size);
         console.log('📊 Standards map keys:', Array.from(standardsMap.keys()));
 
+        // Calculate global thresholds (average of all standards)
+        let warningThreshold = 80;
+        let criticalThreshold = 75;
+        if (standardsMap.size > 0) {
+          const thresholds = Array.from(standardsMap.values()).map(s => {
+            const successPct = s.successPercentage;
+            const warnThresh = s.thresholdType === 'relative'
+              ? successPct - s.warningThreshold
+              : s.warningThreshold;
+            const critThresh = s.thresholdType === 'relative'
+              ? successPct - s.criticalThreshold
+              : s.criticalThreshold;
+            return { warning: warnThresh, critical: critThresh };
+          });
+          warningThreshold = thresholds.reduce((sum, t) => sum + t.warning, 0) / thresholds.length;
+          criticalThreshold = thresholds.reduce((sum, t) => sum + t.critical, 0) / thresholds.length;
+        }
+        setGlobalWarningThreshold(warningThreshold);
+        setGlobalCriticalThreshold(criticalThreshold);
+        console.log('[useComplianceData] Global thresholds:', { warning: warningThreshold, critical: criticalThreshold });
+
         // Group hierarchically: carrier -> product -> route
         const carrierGroupMap = new Map<string, {
           products: Map<string, {
@@ -290,23 +313,22 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
               let criticalLimit: number;
               
               if (route.thresholdType === 'relative') {
-                // Relative: threshold is % of success_percentage
-                warningLimit = route.standardPercentage - (route.standardPercentage * route.warningThreshold / 100);
-                criticalLimit = route.standardPercentage - (route.standardPercentage * route.criticalThreshold / 100);
+                // Relative: warning = success% - warning%, critical = success% - critical%
+                warningLimit = route.standardPercentage - route.warningThreshold;
+                criticalLimit = route.standardPercentage - route.criticalThreshold;
               } else {
-                // Absolute: threshold is % of 100
-                warningLimit = 100 - route.warningThreshold;
-                criticalLimit = 100 - route.criticalThreshold;
+                // Absolute: direct threshold values
+                warningLimit = route.warningThreshold;
+                criticalLimit = route.criticalThreshold;
               }
               
-              // Determine compliance status
+              // Determine compliance status based on thresholds
+              // Green: actual ≥ warning, Orange: critical < actual < warning, Red: actual ≤ critical
               let complianceStatus: 'compliant' | 'warning' | 'critical';
-              if (actualPercentage >= route.standardPercentage) {
+              if (actualPercentage >= warningLimit) {
                 complianceStatus = 'compliant';
-              } else if (actualPercentage >= warningLimit) {
+              } else if (actualPercentage > criticalLimit) {
                 complianceStatus = 'warning';
-              } else if (actualPercentage >= criticalLimit) {
-                complianceStatus = 'warning'; // Still warning zone
               } else {
                 complianceStatus = 'critical';
               }
@@ -423,5 +445,5 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
     fetchData();
   }, [activeAccountId, filters?.startDate, filters?.endDate, filters?.originCity, filters?.destinationCity, filters?.carrier, filters?.product, filters?.complianceStatus]);
 
-  return { data, loading, error };
+  return { data, loading, error, globalWarningThreshold, globalCriticalThreshold };
 }

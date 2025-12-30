@@ -33,6 +33,8 @@ export function useCarrierProductOverview(accountId: string | undefined, filters
   const [data, setData] = useState<CarrierProductData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [globalWarningThreshold, setGlobalWarningThreshold] = useState<number>(80);
+  const [globalCriticalThreshold, setGlobalCriticalThreshold] = useState<number>(75);
 
   useEffect(() => {
     if (!activeAccountId) {
@@ -59,7 +61,7 @@ export function useCarrierProductOverview(accountId: string | undefined, filters
         if (stdError) throw stdError;
 
         // Create standards map with correct field names
-        const standardsMap = new Map<string, { jkStandard: number; successPercentage: number }>();
+        const standardsMap = new Map<string, { jkStandard: number; successPercentage: number; warningThreshold: number; criticalThreshold: number }>();
         (standards || []).forEach(std => {
           const originCityName = std.origin_city?.name;
           const destCityName = std.destination_city?.name;
@@ -76,13 +78,35 @@ export function useCarrierProductOverview(accountId: string | undefined, filters
             ? std.standard_time 
             : std.standard_time / 24;
           
+          const successPct = std.success_percentage || 95;
+          const warningThreshold = std.threshold_type === 'relative'
+            ? successPct - (std.warning_threshold || 5)
+            : (std.warning_threshold || 5);
+          const criticalThreshold = std.threshold_type === 'relative'
+            ? successPct - (std.critical_threshold || 10)
+            : (std.critical_threshold || 10);
+          
           standardsMap.set(routeKey, {
             jkStandard: jkStandard || 0,
-            successPercentage: std.success_percentage || 95
+            successPercentage: successPct,
+            warningThreshold: warningThreshold,
+            criticalThreshold: criticalThreshold,
           });
         });
 
         console.log('[useCarrierProductOverview] Loaded standards:', standardsMap.size);
+
+        // Calculate global thresholds (average of all standards)
+        let warningThreshold = 80;
+        let criticalThreshold = 75;
+        if (standardsMap.size > 0) {
+          const thresholds = Array.from(standardsMap.values());
+          warningThreshold = thresholds.reduce((sum, s) => sum + s.warningThreshold, 0) / thresholds.length;
+          criticalThreshold = thresholds.reduce((sum, s) => sum + s.criticalThreshold, 0) / thresholds.length;
+        }
+        setGlobalWarningThreshold(warningThreshold);
+        setGlobalCriticalThreshold(criticalThreshold);
+        console.log('[useCarrierProductOverview] Global thresholds:', { warning: warningThreshold, critical: criticalThreshold });
 
         // Build query for shipments with pagination
         const allShipments: any[] = []
@@ -190,20 +214,20 @@ export function useCarrierProductOverview(accountId: string | undefined, filters
           const jkStandard = stats.totalStandardDays / stats.total;
           const deviation = jkActual - jkStandard;
           
-          // Count problematic routes (on-time < 90%)
+          // Count problematic routes (on-time < critical threshold)
           let problematicRoutes = 0;
           stats.routePerformance.forEach(routeStats => {
             const routeOnTime = (routeStats.onTime / routeStats.total) * 100;
-            if (routeOnTime < 90) {
+            if (routeOnTime <= criticalThreshold) {
               problematicRoutes++;
             }
           });
           
-          // Determine status
+          // Determine status based on thresholds
           let status: 'compliant' | 'warning' | 'critical';
-          if (onTimePercentage >= 95) {
+          if (onTimePercentage >= warningThreshold) {
             status = 'compliant';
-          } else if (onTimePercentage >= 90) {
+          } else if (onTimePercentage > criticalThreshold) {
             status = 'warning';
           } else {
             status = 'critical';
@@ -234,5 +258,5 @@ export function useCarrierProductOverview(accountId: string | undefined, filters
     fetchData();
   }, [activeAccountId, filters.dateFrom, filters.dateTo, filters.routeType, filters.originCity, filters.destinationCity, filters.carrier, filters.product]);
 
-  return { data, loading, error };
+  return { data, loading, error, globalWarningThreshold, globalCriticalThreshold };
 }

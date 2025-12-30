@@ -17,9 +17,11 @@ interface CarrierProductData {
 interface CarrierProductOverviewProps {
   data: CarrierProductData[];
   loading: boolean;
+  globalWarningThreshold: number;
+  globalCriticalThreshold: number;
 }
 
-export default function CarrierProductOverview({ data, loading }: CarrierProductOverviewProps) {
+export default function CarrierProductOverview({ data, loading, globalWarningThreshold, globalCriticalThreshold }: CarrierProductOverviewProps) {
   if (loading) {
     return (
       <div className="text-center text-gray-500 py-8">Loading...</div>
@@ -72,7 +74,7 @@ export default function CarrierProductOverview({ data, loading }: CarrierProduct
         <tbody className="bg-white divide-y divide-gray-200">
           {sortedData.map((item, index) => {
             const deviationColor = item.deviation <= 0 ? 'text-green-600' : item.deviation <= 1 ? 'text-yellow-600' : 'text-red-600';
-            const onTimeColor = item.onTimePercentage >= 95 ? 'text-green-600 font-semibold' : item.onTimePercentage >= 90 ? 'text-yellow-600' : 'text-red-600 font-semibold';
+            const onTimeColor = item.onTimePercentage >= globalWarningThreshold ? 'text-green-600 font-semibold' : item.onTimePercentage > globalCriticalThreshold ? 'text-yellow-600' : 'text-red-600 font-semibold';
             const statusColor = item.status === 'compliant' ? 'bg-green-500' : item.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500';
             
             return (

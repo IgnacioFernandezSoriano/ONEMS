@@ -5,6 +5,8 @@ import type { CityEquityData } from '@/types/reporting';
 interface TerritoryEquityTableProps {
   data: CityEquityData[];
   onCityClick?: (city: CityEquityData) => void;
+  globalWarningThreshold: number;
+  globalCriticalThreshold: number;
 }
 
 type DirectionRow = {
@@ -25,7 +27,7 @@ type DirectionRow = {
   originalCity: CityEquityData;
 };
 
-export function TerritoryEquityTable({ data, onCityClick }: TerritoryEquityTableProps) {
+export function TerritoryEquityTable({ data, onCityClick, globalWarningThreshold, globalCriticalThreshold }: TerritoryEquityTableProps) {
   const [sortField, setSortField] = useState<keyof DirectionRow>('cityName');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
@@ -56,7 +58,7 @@ export function TerritoryEquityTable({ data, onCityClick }: TerritoryEquityTable
       deviation: city.inboundDeviation,
       standardDays: city.inboundStandardDays,
       actualDays: city.inboundActualDays,
-      status: city.inboundDeviation >= 0 ? 'compliant' : (city.inboundPercentage < 80 ? 'critical' : 'warning'),
+      status: city.inboundPercentage >= globalWarningThreshold ? 'compliant' : (city.inboundPercentage > globalCriticalThreshold ? 'warning' : 'critical'),
       originalCity: city,
     },
     {
@@ -73,7 +75,7 @@ export function TerritoryEquityTable({ data, onCityClick }: TerritoryEquityTable
       deviation: city.outboundDeviation,
       standardDays: city.outboundStandardDays,
       actualDays: city.outboundActualDays,
-      status: city.outboundDeviation >= 0 ? 'compliant' : (city.outboundPercentage < 80 ? 'critical' : 'warning'),
+      status: city.outboundPercentage >= globalWarningThreshold ? 'compliant' : (city.outboundPercentage > globalCriticalThreshold ? 'warning' : 'critical'),
       originalCity: city,
     },
   ]);

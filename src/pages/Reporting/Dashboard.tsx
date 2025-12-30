@@ -3,6 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useReportingFilters } from '@/contexts/ReportingFiltersContext';
 import { useReportingGeneral } from '@/hooks/reporting/useReportingGeneral';
 import { useCarrierProductOverview } from '@/hooks/reporting/useCarrierProductOverview';
+import { useComplianceData } from '@/hooks/reporting/useComplianceData';
 import { KPICard } from '@/components/reporting/KPICard';
 import { ReportFilters } from '@/components/reporting/ReportFilters';
 import DualLineChart from '@/components/reporting/DualLineChart';
@@ -22,7 +23,7 @@ export default function Dashboard() {
     dateTo: filters.endDate
   });
 
-  const { data: carrierProductData, loading: carrierProductLoading } = useCarrierProductOverview(
+  const { data: carrierProductData, loading: carrierProductLoading, globalWarningThreshold: cpWarningThreshold, globalCriticalThreshold: cpCriticalThreshold } = useCarrierProductOverview(
     accountId,
     {
       dateFrom: filters.startDate,
@@ -33,6 +34,12 @@ export default function Dashboard() {
       product: filters.product
     }
   );
+
+  // Get global thresholds from compliance data
+  const { globalWarningThreshold, globalCriticalThreshold } = useComplianceData(accountId, {
+    startDate: filters.startDate,
+    endDate: filters.endDate,
+  });
 
   if (loading) {
     return (
@@ -86,9 +93,9 @@ export default function Dashboard() {
           title="Overall Compliance"
           value={`${avgCompliance.toFixed(1)}%`}
           icon={CheckCircle}
-          trend={avgCompliance >= 95 ? 'up' : 'down'}
-          trendValue={`${avgCompliance >= 95 ? 'Above' : 'Below'} target`}
-          color={avgCompliance >= 95 ? 'green' : 'red'}
+          trend={avgCompliance >= globalWarningThreshold ? 'up' : 'down'}
+          trendValue={`${avgCompliance >= globalWarningThreshold ? 'Above' : 'Below'} target`}
+          color={avgCompliance >= globalWarningThreshold ? 'green' : avgCompliance > globalCriticalThreshold ? 'amber' : 'red'}
           tooltip={{
             description: "Percentage of shipments delivered within the legally mandated transit time for their route classification.",
             interpretation: "Values ≥95% indicate good compliance. Values <95% suggest systematic delays requiring investigation.",
@@ -125,7 +132,7 @@ export default function Dashboard() {
           title="Current Week"
           value={latestData ? `${latestData.compliancePercentage.toFixed(1)}%` : 'N/A'}
           icon={TrendingUp}
-          trend={latestData && latestData.compliancePercentage >= 95 ? 'up' : 'down'}
+          trend={latestData && latestData.compliancePercentage >= globalWarningThreshold ? 'up' : 'down'}
           trendValue={latestData ? `${latestData.totalShipments} shipments` : 'No data'}
           color="indigo"
           tooltip={{
@@ -152,7 +159,9 @@ export default function Dashboard() {
           </div>
           <CarrierProductOverview 
             data={carrierProductData} 
-            loading={carrierProductLoading} 
+            loading={carrierProductLoading}
+            globalWarningThreshold={cpWarningThreshold}
+            globalCriticalThreshold={cpCriticalThreshold}
           />
         </div>
       )}

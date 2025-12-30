@@ -29,6 +29,8 @@ export default function JKPerformance() {
     weeklySamples,
     metrics,
     maxDays,
+    globalWarningThreshold,
+    globalCriticalThreshold,
     loading,
     error,
   } = useJKPerformance(accountId, {
@@ -240,7 +242,7 @@ export default function JKPerformance() {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {routeData.slice(0, 20).map((route, idx) => {
                       const deviationColor = route.deviation <= 0 ? 'text-green-600' : route.deviation < 1 ? 'text-yellow-600' : 'text-red-600';
-                      const onTimeColor = route.onTimePercentage >= 95 ? 'text-green-600 font-semibold' : route.onTimePercentage >= 90 ? 'text-yellow-600' : 'text-red-600 font-semibold';
+                      const onTimeColor = route.onTimePercentage >= route.warningThreshold ? 'text-green-600 font-semibold' : route.onTimePercentage > route.criticalThreshold ? 'text-yellow-600' : 'text-red-600 font-semibold';
                       const statusColor = route.status === 'compliant' ? 'bg-green-500' : route.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500';
                       
                       return (
@@ -320,7 +322,7 @@ export default function JKPerformance() {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {cityData.map((city, idx) => {
                       const deviationColor = city.deviation <= 0 ? 'text-green-600' : city.deviation < 1 ? 'text-yellow-600' : 'text-red-600';
-                      const onTimeColor = city.onTimePercentage >= 95 ? 'text-green-600 font-semibold' : city.onTimePercentage >= 90 ? 'text-yellow-600' : 'text-red-600 font-semibold';
+                      const onTimeColor = city.onTimePercentage >= globalWarningThreshold ? 'text-green-600 font-semibold' : city.onTimePercentage > globalCriticalThreshold ? 'text-yellow-600' : 'text-red-600 font-semibold';
                       const statusColor = city.status === 'compliant' ? 'bg-green-500' : city.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500';
                       const directionIcon = city.direction === 'inbound' ? '🔵 ↓' : '🟢 ↑';
                       
@@ -400,7 +402,7 @@ export default function JKPerformance() {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {regionData.map((region, idx) => {
                       const deviationColor = region.deviation <= 0 ? 'text-green-600' : region.deviation < 1 ? 'text-yellow-600' : 'text-red-600';
-                      const onTimeColor = region.onTimePercentage >= 95 ? 'text-green-600 font-semibold' : region.onTimePercentage >= 90 ? 'text-yellow-600' : 'text-red-600 font-semibold';
+                      const onTimeColor = region.onTimePercentage >= globalWarningThreshold ? 'text-green-600 font-semibold' : region.onTimePercentage > globalCriticalThreshold ? 'text-yellow-600' : 'text-red-600 font-semibold';
                       const statusColor = region.status === 'compliant' ? 'bg-green-500' : region.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500';
                       const directionIcon = region.direction === 'inbound' ? '🔵 ↓' : '🟢 ↑';
                       
@@ -480,7 +482,7 @@ export default function JKPerformance() {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {carrierData.map((carrier, carrierIdx) => {
                       const carrierDeviationColor = carrier.deviation <= 0 ? 'text-green-600' : carrier.deviation < 1 ? 'text-yellow-600' : 'text-red-600';
-                      const carrierOnTimeColor = carrier.onTimePercentage >= 95 ? 'text-green-600 font-semibold' : carrier.onTimePercentage >= 90 ? 'text-yellow-600' : 'text-red-600 font-semibold';
+                      const carrierOnTimeColor = carrier.onTimePercentage >= globalWarningThreshold ? 'text-green-600 font-semibold' : carrier.onTimePercentage > globalCriticalThreshold ? 'text-yellow-600' : 'text-red-600 font-semibold';
                       const carrierStatusColor = carrier.status === 'compliant' ? 'bg-green-500' : carrier.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500';
                       
                       return (
@@ -508,7 +510,7 @@ export default function JKPerformance() {
                           {/* Product Rows */}
                           {carrier.products.map((product, productIdx) => {
                             const productDeviationColor = product.deviation <= 0 ? 'text-green-600' : product.deviation < 1 ? 'text-yellow-600' : 'text-red-600';
-                            const productOnTimeColor = product.onTimePercentage >= 95 ? 'text-green-600 font-semibold' : product.onTimePercentage >= 90 ? 'text-yellow-600' : 'text-red-600 font-semibold';
+                            const productOnTimeColor = product.onTimePercentage >= globalWarningThreshold ? 'text-green-600 font-semibold' : product.onTimePercentage > globalCriticalThreshold ? 'text-yellow-600' : 'text-red-600 font-semibold';
                             const productStatusColor = product.status === 'compliant' ? 'bg-green-500' : product.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500';
                             
                             return (

@@ -19,6 +19,8 @@ export interface JKRouteData {
   afterStandardSamples: number; // samples delivered after standard
   distribution: Map<number, number>; // day -> count
   standardPercentage: number; // target percentage from delivery_standards (e.g., 85%)
+  warningThreshold: number; // warning threshold percentage (e.g., 80%)
+  criticalThreshold: number; // critical threshold percentage (e.g., 75%)
   status: 'compliant' | 'warning' | 'critical';
 }
 
@@ -141,6 +143,8 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
     problematicRoutes: 0,
   });
   const [maxDays, setMaxDays] = useState(0);
+  const [globalWarningThreshold, setGlobalWarningThreshold] = useState(80);
+  const [globalCriticalThreshold, setGlobalCriticalThreshold] = useState(75);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -216,7 +220,7 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
         const regionMap = new Map(regionsRes.data?.map(r => [r.id, r.name]) || []);
 
         // 5. Create standards map (key: carrier|product|origin|destination)
-        const standardsMap = new Map<string, { jkStandard: number; successPercentage: number }>();
+        const standardsMap = new Map<string, { jkStandard: number; successPercentage: number; warningThreshold: number; criticalThreshold: number }>();
         (standards || []).forEach(std => {
           const carrierName = carrierMap.get(std.carrier_id);
           const productName = productMap.get(std.product_id);
@@ -228,14 +232,36 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
             const jkStandard = std.time_unit === 'days' 
               ? std.standard_time 
               : Math.round(std.standard_time / 24);
+            // Calculate warning and critical thresholds
+            const successPct = std.success_percentage || 95;
+            const warningThreshold = std.threshold_type === 'relative' 
+              ? successPct - (std.warning_threshold || 5)
+              : (std.warning_threshold || 5);
+            const criticalThreshold = std.threshold_type === 'relative'
+              ? successPct - (std.critical_threshold || 10)
+              : (std.critical_threshold || 10);
+            
             standardsMap.set(key, {
               jkStandard: jkStandard || 0,
-              successPercentage: std.success_percentage || 95,
+              successPercentage: successPct,
+              warningThreshold: warningThreshold,
+              criticalThreshold: criticalThreshold,
             });
           }
         });
 
-        console.log('[useJKPerformance] Loaded standards:', standardsMap.size, 'keys:', Array.from(standardsMap.keys()));
+        // Calculate global thresholds (average of all standards)
+        let warningThreshold = 80;
+        let criticalThreshold = 75;
+        if (standardsMap.size > 0) {
+          const thresholds = Array.from(standardsMap.values());
+          warningThreshold = thresholds.reduce((sum, s) => sum + s.warningThreshold, 0) / thresholds.length;
+          criticalThreshold = thresholds.reduce((sum, s) => sum + s.criticalThreshold, 0) / thresholds.length;
+        }
+        setGlobalWarningThreshold(warningThreshold);
+        setGlobalCriticalThreshold(criticalThreshold);
+        
+        console.log('[useJKPerformance] Loaded standards:', standardsMap.size, 'Global thresholds:', { warning: warningThreshold, critical: criticalThreshold });
 
         // 6. Group shipments by route
         const routeMap = new Map<string, {
@@ -291,6 +317,8 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
         // 7. Build route data
         const routes: JKRouteData[] = Array.from(routeMap.entries()).map(([key, route]) => {
           const totalSamples = route.samples.length;
+          const standard = standardsMap.get(key);
+          
           const jkActual = totalSamples > 0 
             ? route.samples.reduce((sum, d) => sum + d, 0) / totalSamples 
             : 0;
@@ -299,17 +327,18 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
             ? (route.onTimeSamples / totalSamples) * 100 
             : 0;
 
+          const routeWarningThreshold = standard?.warningThreshold || warningThreshold;
+          const routeCriticalThreshold = standard?.criticalThreshold || criticalThreshold;
+          
           let status: 'compliant' | 'warning' | 'critical' = 'compliant';
-          if (onTimePercentage < 90) {
+          if (onTimePercentage <= routeCriticalThreshold) {
             status = 'critical';
-          } else if (onTimePercentage < 95) {
+          } else if (onTimePercentage < routeWarningThreshold) {
             status = 'warning';
           }
 
           const beforeStandardSamples = route.samples.filter(d => d < route.jkStandard).length;
           const afterStandardSamples = route.samples.filter(d => d > route.jkStandard).length;
-
-          const standard = standardsMap.get(key);
           
           return {
             routeKey: key,
@@ -327,6 +356,8 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
             afterStandardSamples,
             distribution: route.distribution,
             standardPercentage: standard?.successPercentage || 85,
+            warningThreshold: routeWarningThreshold,
+            criticalThreshold: routeCriticalThreshold,
             status,
           };
         });
@@ -870,6 +901,8 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
     weeklySamples,
     metrics,
     maxDays,
+    globalWarningThreshold,
+    globalCriticalThreshold,
     loading,
     error,
   };
