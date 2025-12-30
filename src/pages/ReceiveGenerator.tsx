@@ -102,14 +102,31 @@ export default function ReceiveGenerator() {
 
       setNodes(nodesData || [])
 
-      // Load panelists
+      // Load panelists with city_id from nodes
       const { data: panelistsData } = await supabase
         .from('panelists')
-        .select('id, name, panelist_code, city_id')
+        .select(`
+          id,
+          name,
+          panelist_code,
+          node_id,
+          nodes!inner (
+            city_id
+          )
+        `)
         .eq('account_id', accountId)
         .order('name')
 
-      setPanelists(panelistsData || [])
+      // Transform data to include city_id at root level
+      const panelistsWithCity = panelistsData?.map(p => ({
+        id: p.id,
+        name: p.name,
+        panelist_code: p.panelist_code,
+        node_id: p.node_id,
+        city_id: (p.nodes as any)?.city_id
+      })) || []
+
+      setPanelists(panelistsWithCity)
     } catch (err: any) {
       console.error('Error loading data:', err)
       setError(err.message)
