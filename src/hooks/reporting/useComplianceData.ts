@@ -332,8 +332,7 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
 
             // Calculate weighted averages for product level
             const productTotalShipments = routes.reduce((sum, r) => sum + r.totalShipments, 0);
-            const productCompliantShipments = routes.reduce((sum, r) => 
-              sum + (r.complianceStatus === 'compliant' ? r.totalShipments : 0), 0);
+            const productCompliantShipments = routes.reduce((sum, r) => sum + r.compliantShipments, 0);
             const productWarningShipments = routes.reduce((sum, r) => 
               sum + (r.complianceStatus === 'warning' ? r.totalShipments : 0), 0);
             const productCriticalShipments = routes.reduce((sum, r) => 
