@@ -148,6 +148,14 @@ export default function ReceiveGenerator() {
     setResult(null)
     setError(null)
 
+    console.log('[Receive Generator] Starting generation...')
+    console.log('[Receive Generator] Config:', config)
+    console.log('[Receive Generator] Cities:', cities.length)
+    console.log('[Receive Generator] Nodes:', nodes.length)
+    console.log('[Receive Generator] Panelists:', panelists.length)
+    console.log('[Receive Generator] Carriers:', carriers.length)
+    console.log('[Receive Generator] Products:', products.length)
+
     try {
       // Get delivery standards for all products
       const { data: deliveryStandards } = await supabase
@@ -188,7 +196,10 @@ export default function ReceiveGenerator() {
             const originNodesFiltered = nodes.filter(n => n.city_id === originCity.id)
             const destNodesFiltered = nodes.filter(n => n.city_id === destCity.id)
             
-            if (originNodesFiltered.length === 0 || destNodesFiltered.length === 0) continue
+            if (originNodesFiltered.length === 0 || destNodesFiltered.length === 0) {
+              console.warn('[Receive Generator] Skipping: No nodes found', { originCity: originCity.name, destCity: destCity.name })
+              continue
+            }
 
             const originNode = getRandomElement(originNodesFiltered)
             const destNode = getRandomElement(destNodesFiltered)
@@ -197,7 +208,10 @@ export default function ReceiveGenerator() {
             const originPanelistsFiltered = panelists.filter(p => p.city_id === originCity.id)
             const destPanelistsFiltered = panelists.filter(p => p.city_id === destCity.id)
 
-            if (originPanelistsFiltered.length === 0 || destPanelistsFiltered.length === 0) continue
+            if (originPanelistsFiltered.length === 0 || destPanelistsFiltered.length === 0) {
+              console.warn('[Receive Generator] Skipping: No panelists found', { originCity: originCity.name, destCity: destCity.name })
+              continue
+            }
 
             const originPanelist = getRandomElement(originPanelistsFiltered)
             const destPanelist = getRandomElement(destPanelistsFiltered)
@@ -242,6 +256,9 @@ export default function ReceiveGenerator() {
           }
         }
       }
+
+      console.log('[Receive Generator] Records generated:', records.length)
+      console.log('[Receive Generator] Starting batch insertion...')
 
       // Insert records in batches
       const batchSize = 100
@@ -335,8 +352,9 @@ export default function ReceiveGenerator() {
               type="number"
               min="0"
               max="10"
+              step="0.1"
               value={config.advanceVarianceDays}
-              onChange={(e) => setConfig({ ...config, advanceVarianceDays: parseInt(e.target.value) || 0 })}
+              onChange={(e) => setConfig({ ...config, advanceVarianceDays: parseFloat(e.target.value) || 0 })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
             {deliveryStandard !== null ? (
@@ -357,8 +375,9 @@ export default function ReceiveGenerator() {
               type="number"
               min="0"
               max="30"
+              step="0.1"
               value={config.delayVarianceDays}
-              onChange={(e) => setConfig({ ...config, delayVarianceDays: parseInt(e.target.value) || 0 })}
+              onChange={(e) => setConfig({ ...config, delayVarianceDays: parseFloat(e.target.value) || 0 })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
             {deliveryStandard !== null ? (

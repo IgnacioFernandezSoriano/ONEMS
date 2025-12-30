@@ -224,7 +224,7 @@ export function Sidebar() {
         ...(accountName === 'DEMO2' ? [
           {
             path: '/receive-generator',
-            label: 'Receive Generator',
+            label: 'ONEDB Generator',
             icon: RefreshCw,
             roles: ['admin', 'superadmin'],
           },
