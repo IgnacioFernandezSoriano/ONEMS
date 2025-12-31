@@ -1590,3 +1590,49 @@ unavailability.days,jours
 unavailability.select_panelist,Sélectionner un panéliste
 unavailability.required,Requis
 unavailability.date_range,Plage de dates
+allocation_plans.total_pending,Total et en attente
+allocation_plans.total,Total
+allocation_plans.pending,En attente
+allocation_plans.shipment_status,Statut d'envoi
+allocation_plans.waiting,En attente
+allocation_plans.sent,Envoyé
+allocation_plans.received,Reçu
+allocation_plans.availability_issues_title,Problèmes de disponibilité
+allocation_plans.unavailable,Indisponible
+allocation_plans.no_panelist,Aucun panéliste
+allocation_plans.inactive,Inactif
+allocation_plans.total_issues,Total des problèmes
+allocation_plans.delayed_shipments,Envois retardés
+allocation_plans.cancelled,Annulé
+allocation_plans.invalid,Invalide
+allocation_plans.transfer_error,Erreur de transfert
+allocation_plans.total_delayed,Total retardé
+allocation_plans.filters,Filtres
+allocation_plans.plan,Plan
+allocation_plans.carrier,Transporteur
+allocation_plans.product,Produit
+allocation_plans.all_plans,Tous les plans
+allocation_plans.all_carriers,Tous les transporteurs
+allocation_plans.all_products,Tous les produits
+allocation_plans.origin_city_filter,Ville d'origine
+allocation_plans.origin_node_filter,Nœud d'origine
+allocation_plans.destination_city,Ville de destination
+allocation_plans.destination_node,Nœud de destination
+allocation_plans.all_cities,Toutes les villes
+allocation_plans.all_nodes,Tous les nœuds
+allocation_plans.start_date,Date de début
+allocation_plans.end_date,Date de fin
+allocation_plans.tag_id,Tag ID
+allocation_plans.event_id,Event ID
+allocation_plans.search_tag_id,Rechercher par Tag ID...
+allocation_plans.search_event_id,Rechercher par Event ID...
+allocation_plans.availability_issues_filter,Problèmes de disponibilité
+allocation_plans.all_records,Tous les enregistrements
+allocation_plans.details,Détails du plan d'allocation
+allocation_plans.show_id,Afficher ID
+allocation_plans.week,Semaine
+allocation_plans.origin_panelist_header,Panéliste d'origine
+allocation_plans.origin_status_header,Statut d'origine
+allocation_plans.dest_panelist_header,Panéliste dest.
+allocation_plans.dest_status_header,Statut dest.
+allocation_plans.available,Disponible

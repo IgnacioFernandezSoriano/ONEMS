@@ -486,7 +486,7 @@ export function AllocationPlans() {
         <div className="bg-gradient-to-br from-blue-50 to-white p-6 rounded-lg shadow hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <p className="text-sm font-medium text-blue-600">Total & Pending</p>
+              <p className="text-sm font-medium text-blue-600">{t('allocation_plans.total_pending')}</p>
               <SmartTooltip content="Total allocation records and pending shipments awaiting execution." />
             </div>
             <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -497,11 +497,11 @@ export function AllocationPlans() {
           </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs text-gray-600">📊 Total</span>
+              <span className="text-xs text-gray-600">📊 {t('allocation_plans.total')}</span>
               <span className="text-lg font-bold text-blue-600">{details.length}</span>
             </div>
             <div className="flex items-center justify-between pt-2 border-t border-blue-100">
-              <span className="text-xs text-gray-600">⏳ Pending</span>
+              <span className="text-xs text-gray-600">⏳ {t('allocation_plans.pending')}</span>
               <button
                 onClick={() => handleCardClick('status', 'pending')}
                 className="text-lg font-bold text-amber-600 hover:text-amber-700 hover:underline cursor-pointer transition-colors"
@@ -515,7 +515,7 @@ export function AllocationPlans() {
         {/* Shipment Status Breakdown */}
         <div className="bg-gradient-to-br from-green-50 to-white p-6 rounded-lg shadow hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-sm font-medium text-green-600">Shipment Status</p>
+            <p className="text-sm font-medium text-green-600">{t('allocation_plans.shipment_status')}</p>
             <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
               <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
@@ -557,7 +557,7 @@ export function AllocationPlans() {
         <div className="bg-gradient-to-br from-red-50 to-white p-6 rounded-lg shadow hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <p className="text-sm font-medium text-red-600">Availability Issues</p>
+              <p className="text-sm font-medium text-red-600">{t('allocation_plans.availability_issues_title')}</p>
               <SmartTooltip content="Shipments with panelist availability problems. Unavailable: Panelist not available on scheduled date. No Panelist: No panelist assigned to route. Inactive: Assigned panelist is inactive. Action required: Review and reassign panelists or adjust scheduled dates." />
             </div>
             <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
@@ -569,7 +569,7 @@ export function AllocationPlans() {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-600">⚠️ Unavailable</span>
+                <span className="text-xs text-gray-600">⚠️ {t('allocation_plans.unavailable')}</span>
                 <SmartTooltip content="Panelist not available on the scheduled date. Review panelist calendar and either reassign to another panelist or change the scheduled date." />
               </div>
               <button
@@ -581,7 +581,7 @@ export function AllocationPlans() {
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-600">📋 No Panelist</span>
+                <span className="text-xs text-gray-600">📋 {t('allocation_plans.no_panelist')}</span>
                 <SmartTooltip content="No panelist assigned to this route. Assign a panelist from the available pool for the origin and destination nodes." />
               </div>
               <button
@@ -593,7 +593,7 @@ export function AllocationPlans() {
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-600">❌ Inactive</span>
+                <span className="text-xs text-gray-600">❌ {t('allocation_plans.inactive')}</span>
                 <SmartTooltip content="Assigned panelist is marked as inactive. Reassign to an active panelist to proceed with the shipment." />
               </div>
               <button
@@ -604,7 +604,7 @@ export function AllocationPlans() {
               </button>
             </div>
             <div className="flex items-center justify-between pt-2 border-t border-red-100">
-              <span className="text-xs font-medium text-gray-700">Total Issues</span>
+              <span className="text-xs font-medium text-gray-700">{t('allocation_plans.total_issues')}</span>
               <button
                 onClick={() => handleCardClick('availabilityIssue', 'any_issue')}
                 className="text-lg font-bold text-red-600 hover:text-red-700 hover:underline cursor-pointer transition-colors"
@@ -619,7 +619,7 @@ export function AllocationPlans() {
         <div className="bg-gradient-to-br from-orange-50 to-white p-6 rounded-lg shadow hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <p className="text-sm font-medium text-orange-600">Delayed Shipments</p>
+              <p className="text-sm font-medium text-orange-600">{t('allocation_plans.delayed_shipments')}</p>
               <SmartTooltip content="Shipments scheduled before today but not yet received. Breakdown by status: Pending (not sent), Sent (awaiting receipt), Cancelled, Invalid, Transfer Error. Action required: Review and expedite or update status." />
             </div>
             <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
@@ -631,7 +631,7 @@ export function AllocationPlans() {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-600">⏳ Pending</span>
+                <span className="text-xs text-gray-600">⏳ {t('allocation_plans.pending')}</span>
                 <SmartTooltip content="Delayed shipments not yet sent. Send immediately or reschedule." />
               </div>
               <button
@@ -655,7 +655,7 @@ export function AllocationPlans() {
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-600">❌ Cancelled</span>
+                <span className="text-xs text-gray-600">❌ {t('allocation_plans.cancelled')}</span>
                 <SmartTooltip content="Delayed shipments that were cancelled." />
               </div>
               <button
@@ -667,7 +667,7 @@ export function AllocationPlans() {
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-600">⚠️ Invalid</span>
+                <span className="text-xs text-gray-600">⚠️ {t('allocation_plans.invalid')}</span>
                 <SmartTooltip content="Delayed shipments marked as invalid." />
               </div>
               <button
@@ -679,7 +679,7 @@ export function AllocationPlans() {
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-600">🔄 Transfer Error</span>
+                <span className="text-xs text-gray-600">🔄 {t('allocation_plans.transfer_error')}</span>
                 <SmartTooltip content="Delayed shipments with transfer errors. Reprocess or fix manually." />
               </div>
               <button
@@ -690,7 +690,7 @@ export function AllocationPlans() {
               </button>
             </div>
             <div className="flex items-center justify-between pt-2 border-t border-orange-100">
-              <span className="text-xs font-medium text-gray-700">Total Delayed</span>
+              <span className="text-xs font-medium text-gray-700">{t('allocation_plans.total_delayed')}</span>
               <button
                 onClick={() => handleCardClick('delayed', '')}
                 className="text-lg font-bold text-orange-600 hover:text-orange-700 hover:underline cursor-pointer transition-colors"
@@ -792,7 +792,7 @@ export function AllocationPlans() {
                       />
                     </th>
                     {showIdColumn && (
-                      <SortableHeader field="id" label="Event ID" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="Unique identifier for this allocation plan detail event. Used to track material movements and shipments." />
+                      <SortableHeader field="id" label={t('allocation_plans.event_id')} sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="Unique identifier for this allocation plan detail event. Used to track material movements and shipments." />
                     )}
                     <SortableHeader field="plan" label={t('onedb.plan')} sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The allocation plan name that this shipment belongs to." />
                     <SortableHeader field="carrier" label={t('reporting.carrier')} sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The logistics carrier responsible for this shipment." />
@@ -803,7 +803,7 @@ export function AllocationPlans() {
                     <SortableHeader field="destNode" label={t('allocation_plans.dest_node')} sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The specific node within the destination city where delivery occurs." />
                     <SortableHeader field="date" label={t('allocation_plans.scheduled_date')} sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The date when this shipment is scheduled to be executed." />
                     <SortableHeader field="week" label={t('allocationplans.week')} sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The ISO week number of the scheduled date (1-53)." />
-                    <SortableHeader field="tagId" label="Tag ID" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The physical tag identifier assigned to track this shipment." />
+                    <SortableHeader field="tagId" label={t('allocation_plans.tag_id')} sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The physical tag identifier assigned to track this shipment." />
                     <SortableHeader field="originPanelist" label={t('allocation_plans.origin_panelist')} sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The panelist assigned to send the package from the origin node." />
                     <SortableHeader field="originStatus" label={t('allocation_plans.origin_status')} sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="Origin panelist availability: Available, Unavailable (not available on date), No Panelist (no panelist), or Inactive." />
                     <SortableHeader field="destPanelist" label={t('allocation_plans.dest_panelist')} sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The panelist assigned to receive the package at the destination node." />
