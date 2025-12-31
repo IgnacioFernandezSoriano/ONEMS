@@ -227,7 +227,7 @@ export function Panelists() {
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-bold text-gray-900">Panelists Management</h1>
+            <h1 className="text-3xl font-bold text-gray-900">{t('panelists.management')}</h1>
             <SmartTooltip content="About Panelists Management - Purpose: Manage the network of panelists who send and receive shipments across your topology. Key Features: Register panelists with contact details, assign them to specific nodes, track availability periods, manage Telegram integration for notifications, and monitor panelist activity. Usage: Add panelists, assign to nodes, set unavailability periods, configure Telegram for automated notifications, and use in allocation planning.">
               <svg className="w-5 h-5 text-gray-400 hover:text-gray-600 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -236,7 +236,7 @@ export function Panelists() {
           </div>
         </div>
         <p className="text-gray-600">
-          Manage panelists and their availability for deliveries
+          {t('panelists.manage_availability')}
         </p>
       </div>
 
@@ -253,7 +253,7 @@ export function Panelists() {
             </div>
           </div>
           <div className="text-3xl font-bold text-gray-900">{stats.total}</div>
-          <div className="text-xs text-gray-500 mt-1">All panelists in system</div>
+          <div className="text-xs text-gray-500 mt-1">{t('panelists.all_in_system')}</div>
         </div>
 
         {/* Active Panelists */}
@@ -267,7 +267,7 @@ export function Panelists() {
             </div>
           </div>
           <div className="text-3xl font-bold text-gray-900">{stats.active}</div>
-          <div className="text-xs text-gray-500 mt-1">Available for deliveries</div>
+          <div className="text-xs text-gray-500 mt-1">{t('panelists.available_for_deliveries')}</div>
         </div>
 
         {/* Inactive Panelists */}
@@ -281,7 +281,7 @@ export function Panelists() {
             </div>
           </div>
           <div className="text-3xl font-bold text-gray-900">{stats.inactive}</div>
-          <div className="text-xs text-gray-500 mt-1">Not available</div>
+          <div className="text-xs text-gray-500 mt-1">{t('panelists.not_available')}</div>
         </div>
       </div>
 
@@ -315,7 +315,7 @@ export function Panelists() {
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              Unavailability Periods
+              {t('panelists.unavailability_periods')}
             </button>
             <SmartTooltip content="Unavailability Periods - Define time periods when panelists are not available for deliveries (vacations, sick leave, etc.). This ensures accurate allocation planning and prevents assignments to unavailable panelists.">
               <svg className="w-4 h-4 text-gray-400 hover:text-gray-600 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -387,7 +387,7 @@ export function Panelists() {
                       type="text"
                       value={filters.search}
                       onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                      placeholder="Code, name, email..."
+                      placeholder={t('panelists.search_placeholder')}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     />
                   </div>
@@ -407,7 +407,7 @@ export function Panelists() {
                       onChange={(e) => setFilters({ ...filters, city_id: e.target.value, node_id: '' })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     >
-                      <option value="">All Cities</option>
+                      <option value="">{t('common.all_cities')}</option>
                       {cities.map(city => (
                         <option key={city.id} value={city.id}>{city.name}</option>
                       ))}
@@ -430,7 +430,7 @@ export function Panelists() {
                       onChange={(e) => setFilters({ ...filters, node_id: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     >
-                      <option value="">All Nodes</option>
+                      <option value="">{t('common.all_nodes')}</option>
                       {nodes
                         .filter((node: any) => !filters.city_id || node.city_id === filters.city_id)
                         .map((node: any) => (
@@ -456,7 +456,7 @@ export function Panelists() {
                       onChange={(e) => setFilters({ ...filters, status: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     >
-                      <option value="">All Status</option>
+                      <option value="">{t('common.all_status')}</option>
                       <option value="active">{t('common.active')}</option>
                       <option value="inactive">{t('common.inactive')}</option>
                     </select>
@@ -541,7 +541,7 @@ export function Panelists() {
             onClick={() => handleOpenModal()}
             className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
           >
-            + Add Panelist
+            {t('panelists.add_panelist')}
           </button>
         </div>
         <div className="overflow-x-auto">
