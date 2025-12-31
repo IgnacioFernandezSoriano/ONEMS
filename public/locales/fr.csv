@@ -1337,3 +1337,215 @@ users.password,Mot de passe
 users.promise,Promesse
 users.role,Rôle
 users.select_account,Sélectionner un compte
+auth.sign_in,Se connecter
+auth.try_demo_account,Essayer le compte démo
+auth.email_address,Adresse e-mail
+auth.password,Mot de passe
+auth.email_placeholder,votre@email.com
+auth.password_placeholder,Entrez votre mot de passe
+auth.click_autofill_demo,Cliquez ici pour remplir automatiquement les identifiants de démo
+auth.secure_auth_supabase,Authentification sécurisée par Supabase
+auth.for_regulators,pour les Régulateurs
+dashboard.selected_period,Période sélectionnée
+dashboard.current_month,Mois en cours
+dashboard.management_tip,Conseil de gestion
+dashboard.management_tip_text,"Utilisez le sélecteur de période pour afficher les statistiques du mois en cours ou planifier le mois prochain. Cliquez sur n'importe quelle carte pour accéder à la vue détaillée. Consultez les alertes critiques quotidiennement pour maintenir l'excellence opérationnelle. Surveillez les vacances des panélistes et les besoins en matériaux pour éviter les conflits d'allocation."
+dashboard.total_and_status,Total et Statut
+dashboard.pending,En attente
+dashboard.sent,Envoyé
+dashboard.received,Reçu
+dashboard.availability_issues,Problèmes de disponibilité
+dashboard.unavailable,Indisponible
+dashboard.no_panelist,Aucun panéliste
+dashboard.inactive,Inactif
+dashboard.delayed_shipments,Expéditions retardées
+dashboard.panelist_status,Statut du panéliste
+dashboard.total_panelists,Total des panélistes
+dashboard.active,actif
+dashboard.inactive_lowercase,inactif
+dashboard.on_leave,En congé
+dashboard.currently_unavailable,Actuellement indisponible
+dashboard.upcoming_vacations,Vacances à venir
+dashboard.availability_rate,Taux de disponibilité
+dashboard.available,disponible
+dashboard.active_resources,Ressources actives
+dashboard.active_carriers,Transporteurs actifs
+dashboard.of,sur
+dashboard.total,total
+dashboard.active_products,Produits actifs
+dashboard.carrier_product_pairs,Paires transporteur-produit
+dashboard.available_combinations,Combinaisons disponibles
+common.sign_out,Se déconnecter
+common.filters,Filtres
+common.reset,Réinitialiser
+common.search,Rechercher
+common.city,Ville
+common.all_cities,Toutes les villes
+common.node,Nœud
+common.all_nodes,Tous les nœuds
+common.status,Statut
+common.all_status,Tous les statuts
+common.actions,Actions
+common.edit,Modifier
+common.delete,Supprimer
+common.cancel,Annuler
+common.save,Enregistrer
+common.close,Fermer
+common.confirm,Confirmer
+common.yes,Oui
+common.no,Non
+common.loading,Chargement...
+common.error,Erreur
+common.success,Succès
+common.warning,Attention
+common.info,Information
+common.active,Actif
+common.inactive,Inactif
+common.available,Disponible
+common.unavailable,Indisponible
+common.total,Total
+common.of,sur
+common.show_id,Afficher ID
+common.export_csv,Exporter CSV
+common.add_record,Ajouter un enregistrement
+common.hide,Masquer
+common.expand_all,Tout développer
+common.collapse_all,Tout réduire
+allocation_plans.view_and_manage,Voir et gérer les plans d'allocation générés
+allocation_plans.total_and_pending,Total et En attente
+allocation_plans.shipment_status,Statut d'expédition
+allocation_plans.availability_issues,Problèmes de disponibilité
+allocation_plans.total_issues,Total des problèmes
+allocation_plans.delayed_shipments,Expéditions retardées
+allocation_plans.cancelled,Annulé
+allocation_plans.invalid,Invalide
+allocation_plans.transfer_error,Erreur de transfert
+allocation_plans.total_delayed,Total retardé
+allocation_plans.plan_details,Détails du plan d'allocation
+allocation_plans.origin_city,Ville d'origine
+allocation_plans.origin_node,Nœud d'origine
+allocation_plans.dest_city,Ville dest.
+allocation_plans.dest_node,Nœud dest.
+allocation_plans.scheduled_date,Date prévue
+allocation_plans.week,Semaine
+allocation_plans.tag_id,ID étiquette
+allocation_plans.origin_panelist,Panéliste d'origine
+allocation_plans.origin_status,Statut d'origine
+allocation_plans.dest_panelist,Panéliste dest.
+allocation_plans.dest_status,Statut dest.
+allocation_plans.status,Statut
+allocation_plans.sent_lowercase,envoyé
+allocation_plans.pending_lowercase,en attente
+allocation_plans.receive,Recevoir
+allocation_plans.send,Envoyer
+panelists.management,Gestion des panélistes
+panelists.manage_availability,Gérer les panélistes et leur disponibilité pour les livraisons
+panelists.total_panelists,Total des panélistes
+panelists.all_in_system,Tous les panélistes du système
+panelists.available_for_deliveries,Disponible pour les livraisons
+panelists.not_available,Non disponible
+panelists.tab_panelists,Panélistes
+panelists.tab_unavailability,Périodes d'indisponibilité
+panelists.search_placeholder,"Code, nom, e-mail..."
+panelists.add_panelist,Ajouter un panéliste
+panelists.manage_profiles,Gérer les profils et affectations des panélistes
+panelists.code,Code
+panelists.name,Nom
+panelists.email,E-mail
+panelists.mobile,Mobile
+panelists.node,Nœud
+panelists.city,Ville
+panelists.status,Statut
+panelists.active_lowercase,actif
+panelists.edit_tooltip,Modifier le panéliste
+panelists.deactivate_tooltip,Désactiver le panéliste
+panelists.delete_tooltip,Supprimer le panéliste
+panelists.unavailability_periods,Périodes d'indisponibilité
+panelists.manage_unavailability,Gérer les périodes d'indisponibilité des panélistes pour la réaffectation automatique des échantillons
+panelists.add_unavailability,Ajouter une période d'indisponibilité
+panelists.search_unavailability_placeholder,"Nom du panéliste, notes..."
+panelists.all_panelists,Tous les panélistes
+panelists.date_range,Plage de dates
+panelists.all_periods,Toutes les périodes
+panelists.current_active,Actuel (Actif maintenant)
+panelists.upcoming,À venir
+panelists.past,Passé
+panelists.reason,Raison
+panelists.all_reasons,Toutes les raisons
+panelists.vacation,vacances
+panelists.sick_leave,Congé maladie
+panelists.personal,Personnel
+panelists.training,Formation
+panelists.start_date,Date de début
+panelists.end_date,Date de fin
+panelists.duration,Durée
+panelists.notes,Notes
+panelists.one_day,1 jour
+carriers.title,Opérateurs et produits
+carriers.manage_description,Gérer les opérateurs d'expédition, les produits et les exigences en matériaux
+carriers.create_carrier,Créer un opérateur
+carriers.tab_carriers_products,Opérateurs et produits
+carriers.tab_products_without_materials,Produits sans matériaux
+carriers.search_placeholder,Rechercher des opérateurs ou des produits...
+carriers.all_carriers,Tous les opérateurs
+carriers.with_materials,Avec matériaux
+carriers.without_materials,Sans matériaux
+carriers.product,Produit
+carriers.expand_carrier,Développer l'opérateur
+carriers.expand_products,Développer tous les produits de cet opérateur
+carriers.edit_carrier,Modifier l'opérateur
+carriers.delete_carrier,Supprimer l'opérateur
+materials.requirements_title,Besoins en Matériaux
+materials.calculate_description,Calculer les besoins en matériaux basés sur les plans d'allocation
+materials.start_date,Date de début
+materials.end_date,Date de fin
+materials.date_placeholder,jj/mm/aaaa
+materials.material,Matériau
+materials.all_materials,Tous les matériaux
+materials.node,Nœud
+materials.all_nodes,Tous les nœuds
+materials.quick_period_selection,Sélection rapide de période
+materials.month_jan,Jan
+materials.month_feb,Fév
+materials.month_mar,Mar
+materials.month_apr,Avr
+materials.month_may,Mai
+materials.month_jun,Juin
+materials.month_jul,Juil
+materials.month_aug,Août
+materials.month_sep,Sep
+materials.month_oct,Oct
+materials.month_nov,Nov
+materials.month_dec,Déc
+materials.first_semester,1er Semestre
+materials.second_semester,2e Semestre
+materials.year,Année
+materials.calculate,Calculer
+stock.title,Gestion des Stocks et Alertes
+stock.manage_description,Gérer les exigences en matériaux, les demandes et l'inventaire des panélistes, suivre les mouvements et les expéditions
+stock.tab_requirements,Besoins en Matériaux
+stock.tab_regulator_stock,Stock du Régulateur
+stock.tab_shipments,Envois
+stock.tab_panelist_stock,Stock des Panélistes
+stock.tab_movements,Mouvements
+stock.tab_alerts,Alertes de Stock
+stock.tab_settings,Paramètres
+stock.calculate_requirements,Calculer les besoins
+stock.quick_month_selection,Sélection rapide du mois
+allocation_generator.plan_name,Nom du plan
+allocation_generator.total_samples,Total d'échantillons
+allocation_generator.carrier,Transporteur
+allocation_generator.select_carrier,Sélectionner le transporteur
+allocation_generator.product,Produit
+allocation_generator.select_product,Sélectionner le produit
+allocation_generator.start_date,Date de début
+allocation_generator.end_date,Date de fin
+allocation_generator.date_placeholder,jj/mm/aaaa
+allocation_generator.quick_period,Sélection rapide de période
+allocation_generator.distribution_matrix,Matrice de distribution par ville (A-B-C)
+allocation_generator.clear,Effacer
+allocation_generator.auto_fill,Remplir auto à 100%
+allocation_generator.seasonal_distribution,Distribution saisonnière
+allocation_generator.generate_plan,Générer le plan d'allocation
+allocation_generator.import_csv,Importer CSV
+allocation_generator.download_template,Télécharger le modèle CSV

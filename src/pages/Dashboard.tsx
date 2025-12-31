@@ -351,7 +351,7 @@ export function Dashboard() {
 
       {/* Selected Period Info */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 text-sm text-blue-800">
-        <strong>Selected period:</strong> {periodConfig.label} ({periodConfig.startDate} to {periodConfig.endDate})
+        <strong>{t('dashboard.selected_period')}:</strong> {periodConfig.label} ({periodConfig.startDate} to {periodConfig.endDate})
       </div>
 
       {/* Critical Alerts - Only show if there are real issues */}
@@ -542,8 +542,8 @@ export function Dashboard() {
               </div>
               <p className="text-3xl font-bold text-gray-900">{panelistMetrics.total}</p>
               <div className="flex gap-3 mt-2 text-xs">
-                <span className="text-green-600">✓ {panelistMetrics.active} active</span>
-                <span className="text-gray-500">✗ {panelistMetrics.inactive} inactive</span>
+                <span className="text-green-600">✓ {panelistMetrics.active} {t('dashboard.active_lowercase')}</span>
+                <span className="text-gray-500">✗ {panelistMetrics.inactive} {t('dashboard.inactive_lowercase')}</span>
               </div>
             </div>
 
@@ -571,7 +571,7 @@ export function Dashboard() {
                 <SmartTooltip content="Percentage of panelists currently available (not on vacation)" />
               </div>
               <p className="text-3xl font-bold text-blue-600">{panelistMetrics.availabilityRate.toFixed(1)}%</p>
-              <p className="text-xs text-gray-500 mt-2">{panelistMetrics.total - panelistMetrics.onVacation} of {panelistMetrics.total} available</p>
+              <p className="text-xs text-gray-500 mt-2">{panelistMetrics.total - panelistMetrics.onVacation} {t('dashboard.of')} {panelistMetrics.total} {t('dashboard.available')}</p>
             </div>
           </div>
         </Link>
@@ -595,7 +595,7 @@ export function Dashboard() {
                 <SmartTooltip content={t('dashboard.tooltip_active_carriers')} />
               </div>
               <p className="text-3xl font-bold text-gray-900">{carrierProductMetrics.activeCarriers}</p>
-              <p className="text-xs text-gray-500 mt-2">of {carrierProductMetrics.totalCarriers} total</p>
+              <p className="text-xs text-gray-500 mt-2">{t('dashboard.of')} {carrierProductMetrics.totalCarriers} {t('dashboard.total')}</p>
             </div>
 
             <div>
@@ -749,12 +749,9 @@ export function Dashboard() {
         <div className="flex items-start">
           <AlertCircle className="w-5 h-5 text-blue-500 mt-0.5 mr-3 flex-shrink-0" />
           <div>
-            <h3 className="text-sm font-semibold text-blue-900">Management Tip</h3>
+            <h3 className="text-sm font-semibold text-blue-900">{t('dashboard.management_tip')}</h3>
             <p className="text-sm text-blue-800 mt-1">
-              Use the period selector to view current month statistics or plan for the next month. 
-              Click on any card to navigate to the detailed view. 
-              Review critical alerts daily to maintain operational excellence.
-              Monitor panelist vacations and material requirements to avoid allocation conflicts.
+              {t('dashboard.management_tip_text')}
             </p>
           </div>
         </div>

@@ -42,8 +42,8 @@ export function LoginForm() {
         {/* Header */}
         <div className="text-center">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">ONE</h1>
-          <p className="text-sm text-gray-500 mb-6">for Regulators</p>
-          <h2 className="text-2xl font-semibold text-gray-800">Sign In</h2>
+          <p className="text-sm text-gray-500 mb-6">{t('auth.for_regulators')}</p>
+          <h2 className="text-2xl font-semibold text-gray-800">{t('auth.sign_in')}</h2>
         </div>
 
         {/* Demo Credentials Banner */}
@@ -55,7 +55,7 @@ export function LoginForm() {
               </svg>
             </div>
             <div className="flex-1">
-              <h3 className="text-sm font-semibold text-blue-900 mb-2">Try Demo Account</h3>
+              <h3 className="text-sm font-semibold text-blue-900 mb-2">{t('auth.try_demo_account')}</h3>
               <div className="text-xs text-blue-800 space-y-1 mb-3">
                 <div className="flex items-center gap-2">
                   <span className="font-medium">Email:</span>
@@ -71,7 +71,7 @@ export function LoginForm() {
                 onClick={fillDemoCredentials}
                 className="text-xs font-medium text-blue-700 hover:text-blue-800 underline"
               >
-                Click here to auto-fill demo credentials
+                {t('auth.click_autofill_demo')}
               </button>
             </div>
           </div>
@@ -88,7 +88,7 @@ export function LoginForm() {
           {/* Email Field */}
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              Email Address
+              {t('auth.email_address')}
             </label>
             <input
               id="email"
@@ -97,14 +97,14 @@ export function LoginForm() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-              placeholder="your@email.com"
+              placeholder={t('auth.email_placeholder')}
             />
           </div>
           
           {/* Password Field with Toggle */}
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-              Password
+              {t('auth.password')}
             </label>
             <div className="relative">
               <input
@@ -114,7 +114,7 @@ export function LoginForm() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="mt-1 block w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                placeholder="Enter your password"
+                placeholder={t('auth.password_placeholder')}
               />
               <button
                 type="button"
@@ -146,14 +146,14 @@ export function LoginForm() {
                 Signing in...
               </span>
             ) : (
-              'Sign In'
+              t('auth.sign_in')
             )}
           </button>
         </form>
 
         {/* Footer */}
         <div className="text-center text-xs text-gray-500 mt-6">
-          <p>Secure authentication powered by Supabase</p>
+          <p>{t('auth.secure_auth_supabase')}</p>
         </div>
       </div>
     </div>

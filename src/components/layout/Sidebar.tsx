@@ -498,7 +498,7 @@ export function Sidebar() {
               onClick={signOut}
               className="w-full px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
             >
-              Sign Out
+              {t('common.sign_out')}
             </button>
           </div>
         )}
