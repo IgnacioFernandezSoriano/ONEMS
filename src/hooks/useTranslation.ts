@@ -40,44 +40,24 @@ function parseCSV(csvText: string): TranslationMap {
 }
 
 /**
- * Load CSV from Supabase Storage with fallback to public folder
+ * Load CSV from public folder
  */
 async function loadTranslations(locale: string): Promise<string> {
   console.log(`Loading translations for locale: ${locale}`)
   
   try {
-    // Try Supabase Storage first using public URL
-    const { data } = supabase.storage
-      .from('translations')
-      .getPublicUrl(`${locale}.csv`)
-    
-    if (data?.publicUrl) {
-      const response = await fetch(data.publicUrl)
-      if (response.ok) {
-        const text = await response.text()
-        console.log(`✓ Loaded ${locale}.csv from Supabase Storage (${text.length} bytes)`)
-        return text
-      } else {
-        console.warn(`Supabase Storage error for ${locale}: ${response.status} ${response.statusText}`)
-      }
-    }
-  } catch (err) {
-    console.warn(`Failed to load ${locale} from Supabase:`, err)
-  }
-  
-  // Fallback to public folder
-  try {
     const response = await fetch(`/locales/${locale}.csv`)
     if (response.ok) {
       const text = await response.text()
-      console.log(`✓ Loaded ${locale}.csv from public folder (${text.length} bytes)`)
+      console.log(`✓ Loaded ${locale}.csv (${text.length} bytes)`)
       return text
+    } else {
+      throw new Error(`Failed to load ${locale}.csv: ${response.status} ${response.statusText}`)
     }
   } catch (err) {
-    console.error(`Failed to load ${locale} from public folder:`, err)
+    console.error(`Failed to load ${locale}:`, err)
+    throw err
   }
-  
-  throw new Error(`Failed to load translations for ${locale}`)
 }
 
 /**
