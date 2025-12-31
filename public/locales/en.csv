@@ -297,6 +297,10 @@ carriers.units_kg_etc,"units, kg, etc."
 carriers.update_quantity,Update quantity
 carriers.with_materials,With Materials
 carriers.without_materials,Without Materials
+catalog.add_material,Add Material
+catalog.material_code,Material Code
+catalog.material_name,Material Name
+catalog.title,Material Catalog
 common.1st_semester,1st Semester
 common.2nd_semester,2nd Semester
 common.actions,Actions
@@ -425,17 +429,22 @@ dashboard.total_status,Total & Status
 dashboard.unassigned,Unassigned
 dashboard.unavailable,Unavailable
 dashboard.upcoming_vacations,Upcoming Vacations
+delivery_standards.add_standard,Add Standard
 delivery_standards.carrier,Carrier *
 delivery_standards.clear_all_selections,Clear All Selections
 delivery_standards.days,Days
+delivery_standards.description,Configure expected delivery times and tolerances
+delivery_standards.destination,Destination
 delivery_standards.destination_city,Destination City *
 delivery_standards.e_g_24,"e.g., 24"
 delivery_standards.e_g_85,"e.g., 85"
 delivery_standards.estimated_combinations,Estimated combinations:
+delivery_standards.expected_days,Expected Days
 delivery_standards.generate_delivery_standards,Generate Delivery Standards
 delivery_standards.generation_complete,Generation Complete
 delivery_standards.hours,Hours
 delivery_standards.no_products_for_this_carrier,No products for this carrier
+delivery_standards.origin,Origin
 delivery_standards.origin_city,Origin City *
 delivery_standards.product,Product *
 delivery_standards.promise,Promise
@@ -447,6 +456,8 @@ delivery_standards.smart_generation,Smart Generation:
 delivery_standards.standard_time,Standard Time
 delivery_standards.success,Success %
 delivery_standards.time_unit,Time Unit *
+delivery_standards.title,Delivery Standards
+delivery_standards.tolerance_days,Tolerance Days
 deliverystandards.about_delivery_standards,About Delivery Standards
 deliverystandards.absoluto,Absoluto:
 deliverystandards.absoluto_del_100,Absoluto (% del 100%)
@@ -520,6 +531,11 @@ deliverystandards.warning_threshold,Warning Threshold (%)
 layout.all_accounts,All Accounts
 layout.sign_out,Sign Out
 layout.view_as_account,View as account:
+load_balancing.current_load,Current Load
+load_balancing.description,Balance workload across nodes
+load_balancing.rebalance,Rebalance
+load_balancing.target_load,Target Load
+load_balancing.title,Load Balancing
 material_catalog.additional_details,Additional details...
 material_catalog.code,Code *
 material_catalog.description,Description
@@ -753,9 +769,11 @@ onedb.product,Product
 onedb.received,Received
 onedb.reset_filters,Reset filters
 onedb.route,Route
+onedb.search,Search
 onedb.sent,Sent
 onedb.tag_id,Tag ID
 onedb.tag_id_or_plan,Tag ID or Plan...
+onedb.title,ONE DB
 onedb.to_date,To Date
 onedb.total_records,Total Records
 onedb.transit_days,Transit Days
@@ -836,6 +854,9 @@ panelistunavailability.tsx.training,Training
 panelistunavailability.tsx.unavailability_periods,Unavailability Periods
 panelistunavailability.tsx.upcoming,Upcoming
 panelistunavailability.tsx.vacation,Vacation
+receive.description,Generate receive transactions
+receive.generate,Generate
+receive.title,Receive Generator
 receivegenerator.advance_variance_days,Advance Variance (days)
 receivegenerator.carriers,Carriers
 receivegenerator.delay_variance_days,Delay Variance (days)
@@ -1200,6 +1221,7 @@ stockmanagement.stock_management_alerts,Stock Management & Alerts
 stockmanagement.tabs,Tabs
 topology.3_7038,-3.7038
 topology.40_4168,40.4168
+topology.cities,Cities
 topology.city,City
 topology.city_code,City Code *
 topology.city_name,City Name *
@@ -1222,14 +1244,20 @@ topology.longitude,Longitude
 topology.no_cities_in_this_region_yet,No cities in this region yet
 topology.no_nodes_in_this_city_yet,No nodes in this city yet
 topology.node,Node
+topology.nodes,Nodes
 topology.panelist_assigned,Panelist Assigned
+topology.panelists,Panelists
 topology.pending_panelist,Pending Panelist
 topology.population,Population
 topology.promise,Promise
 topology.region_code,Region Code *
 topology.region_name,Region Name *
+topology.regions,Regions
 topology.status,Status *
+topology.title,Country Topology
+topology.topology_tab,Topology
 topology.total_population_of_the_city_used_for_impact_analy,Total population of the city (used for impact analysis in reporting)
+topology.without_panelists_tab,Without Panelists
 users.account,Account
 users.deactivate,Deactivate
 users.email,Email

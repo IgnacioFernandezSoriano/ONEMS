@@ -297,6 +297,10 @@ carriers.units_kg_etc,"unités, kg, etc."
 carriers.update_quantity,Mettre à jour la quantité
 carriers.with_materials,Avec matériaux
 carriers.without_materials,Sans matériaux
+catalog.add_material,Ajouter un Matériau
+catalog.material_code,Code Matériau
+catalog.material_name,Nom du Matériau
+catalog.title,Catalogue de Matériaux
 common.1st_semester,1er Semestre
 common.2nd_semester,2ème Semestre
 common.actions,Actions
@@ -425,17 +429,22 @@ dashboard.total_status,Total & Statut
 dashboard.unassigned,Non Assigné
 dashboard.unavailable,Indisponible
 dashboard.upcoming_vacations,Vacances à venir
+delivery_standards.add_standard,Ajouter une Norme
 delivery_standards.carrier,Transporteur *
 delivery_standards.clear_all_selections,Effacer toutes les sélections
 delivery_standards.days,Jours
+delivery_standards.description,Configurer les délais de livraison attendus et les tolérances
+delivery_standards.destination,Destination
 delivery_standards.destination_city,Ville de destination *
 delivery_standards.e_g_24,ex. : 24
 delivery_standards.e_g_85,ex. : 85
 delivery_standards.estimated_combinations,Combinaisons estimées :
+delivery_standards.expected_days,Jours Attendus
 delivery_standards.generate_delivery_standards,Générer les normes de livraison
 delivery_standards.generation_complete,Génération terminée
 delivery_standards.hours,Heures
 delivery_standards.no_products_for_this_carrier,Aucun produit pour ce transporteur
+delivery_standards.origin,Origine
 delivery_standards.origin_city,Ville d'origine *
 delivery_standards.product,Produit *
 delivery_standards.promise,Engagement
@@ -447,6 +456,8 @@ delivery_standards.smart_generation,Génération intelligente :
 delivery_standards.standard_time,Temps standard
 delivery_standards.success,Taux de réussite %
 delivery_standards.time_unit,Unité de temps *
+delivery_standards.title,Normes de Livraison
+delivery_standards.tolerance_days,Jours de Tolérance
 deliverystandards.about_delivery_standards,À propos des normes de livraison
 deliverystandards.absoluto,Absolu :
 deliverystandards.absoluto_del_100,Absolu (% de 100 %)
@@ -520,6 +531,11 @@ deliverystandards.warning_threshold,Seuil d'avertissement (%)
 layout.all_accounts,Tous les comptes
 layout.sign_out,Déconnexion
 layout.view_as_account,Afficher en tant que compte :
+load_balancing.current_load,Charge Actuelle
+load_balancing.description,Équilibrer la charge de travail entre les nœuds
+load_balancing.rebalance,Rééquilibrer
+load_balancing.target_load,Charge Cible
+load_balancing.title,Équilibrage de Charge
 material_catalog.additional_details,Détails supplémentaires...
 material_catalog.code,Code *
 material_catalog.description,Description
@@ -753,9 +769,11 @@ onedb.product,Produit
 onedb.received,Reçu
 onedb.reset_filters,Réinitialiser les filtres
 onedb.route,Itinéraire
+onedb.search,Rechercher
 onedb.sent,Envoyé
 onedb.tag_id,ID de l'étiquette
 onedb.tag_id_or_plan,ID de l'étiquette ou Plan...
+onedb.title,ONE DB
 onedb.to_date,À ce jour
 onedb.total_records,Nombre total d'enregistrements
 onedb.transit_days,Jours de transit
@@ -836,6 +854,9 @@ panelistunavailability.tsx.training,Formation
 panelistunavailability.tsx.unavailability_periods,Périodes d'indisponibilité
 panelistunavailability.tsx.upcoming,À venir
 panelistunavailability.tsx.vacation,Vacances
+receive.description,Générer des transactions de réception
+receive.generate,Générer
+receive.title,Générateur de Réception
 receivegenerator.advance_variance_days,Écart anticipé (jours)
 receivegenerator.carriers,Transporteurs
 receivegenerator.delay_variance_days,Écart de retard (jours)
@@ -1200,6 +1221,7 @@ stockmanagement.stock_management_alerts,Gestion des stocks et alertes
 stockmanagement.tabs,Onglets
 topology.3_7038,"-3,7038"
 topology.40_4168,"40,4168"
+topology.cities,Villes
 topology.city,Ville
 topology.city_code,Code postal *
 topology.city_name,Nom de la ville *
@@ -1222,14 +1244,20 @@ topology.longitude,Longitude
 topology.no_cities_in_this_region_yet,Pas encore de villes dans cette région
 topology.no_nodes_in_this_city_yet,Pas encore de nœuds dans cette ville
 topology.node,Nœud
+topology.nodes,Nœuds
 topology.panelist_assigned,Panéliste assigné
+topology.panelists,Panélistes
 topology.pending_panelist,Panéliste en attente
 topology.population,Population
 topology.promise,Promesse
 topology.region_code,Code de région *
 topology.region_name,Nom de la région *
+topology.regions,Régions
 topology.status,Statut *
+topology.title,Topologie du Pays
+topology.topology_tab,Topologie
 topology.total_population_of_the_city_used_for_impact_analy,Population totale de la ville (utilisée pour l’analyse d’impact dans les rapports)
+topology.without_panelists_tab,Sans Panélistes
 users.account,Compte
 users.deactivate,Désactiver
 users.email,E-mail
