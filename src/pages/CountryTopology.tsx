@@ -536,6 +536,7 @@ export function CountryTopology() {
       {/* Create Region Modal */}
       {showRegionModal && (
         <Modal
+          isOpen={showRegionModal}
           title={t('topology.create_region')}
           onClose={() => setShowRegionModal(false)}
         >
