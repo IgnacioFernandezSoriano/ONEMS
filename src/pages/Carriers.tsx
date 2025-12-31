@@ -2,6 +2,8 @@ import { useState, useMemo } from 'react'
 import { useCarriers } from '@/hooks/useCarriers'
 import { CarriersTree } from '@/components/carriers/CarriersTree'
 import { SmartTooltip } from '@/components/common/SmartTooltip'
+import { Modal } from '@/components/common/Modal'
+import { CarrierForm } from '@/components/carriers/CarrierForm'
 
 import { useTranslation } from '@/hooks/useTranslation';
 export function Carriers() {
@@ -30,6 +32,7 @@ export function Carriers() {
   const [filterStatus, setFilterStatus] = useState<string>('all')
   const [filterMaterialStatus, setFilterMaterialStatus] = useState<string>('all')
   const [expandAll, setExpandAll] = useState(false)
+  const [showCarrierModal, setShowCarrierModal] = useState(false)
 
   // Calculate products with/without materials
   const productsWithMaterials = useMemo(() => {
@@ -179,7 +182,7 @@ export function Carriers() {
           
           {/* Create Carrier Button */}
           <button
-            onClick={() => createCarrier({ name: '', code: '', type: '', status: 'active' })}
+            onClick={() => setShowCarrierModal(true)}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -542,6 +545,23 @@ export function Carriers() {
             </div>
           )}
         </div>
+      )}
+
+      {/* Create Carrier Modal */}
+      {showCarrierModal && (
+        <Modal
+          isOpen={showCarrierModal}
+          title={t('carriers.create_carrier')}
+          onClose={() => setShowCarrierModal(false)}
+        >
+          <CarrierForm
+            onSubmit={async (data) => {
+              await createCarrier(data)
+              setShowCarrierModal(false)
+            }}
+            onCancel={() => setShowCarrierModal(false)}
+          />
+        </Modal>
       )}
     </div>
   )
