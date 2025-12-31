@@ -7,7 +7,9 @@ import { OneDBBulkPanel } from '../components/OneDB/OneDBBulkPanel';
 import { Database, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { SmartTooltip } from '../components/common/SmartTooltip';
 
+import { useTranslation } from '@/hooks/useTranslation';
 export default function OneDB() {
+  const { t } = useTranslation();
   const { user, profile } = useAuth();
   const { records, filteredRecords, loading, error, refetch, applyFilters, exportToCSV } =
     useOneDB(profile?.account_id || undefined);
@@ -127,7 +129,7 @@ export default function OneDB() {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 mb-1">Delayed</p>
+              <p className="text-sm text-gray-600 mb-1">{t('reporting.delayed')}</p>
               <p className="text-3xl font-bold text-red-600">{kpis.delayed}</p>
               <p className="text-xs text-gray-500 mt-1">Exceeded standard</p>
             </div>

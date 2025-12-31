@@ -16,7 +16,9 @@ import { Info, Download, TrendingUp, Users, AlertTriangle, Award, FileText, Map 
 import { SmartTooltip } from '@/components/common/SmartTooltip';
 import type { CityEquityData, RegionEquityData, TerritoryEquityFilters as Filters } from '@/types/reporting';
 
+import { useTranslation } from '@/hooks/useTranslation';
 export default function TerritoryEquity() {
+  const { t } = useTranslation();
   const { profile } = useAuth();
   const [activeTab, setActiveTab] = useState<'city' | 'regional' | 'map'>('city');
   const [selectedCity, setSelectedCity] = useState<CityEquityData | null>(null);
@@ -520,7 +522,7 @@ export default function TerritoryEquity() {
           </div>
           <div className="space-y-2">
             <div className="grid grid-cols-7 gap-1 text-xs font-medium text-gray-500 border-b pb-1">
-              <div>City</div>
+              <div>{t('topology.city')}</div>
               <div className="text-right">Compl.</div>
               <div className="text-right">Std.</div>
               <div className="text-right">J+K Std</div>
@@ -568,7 +570,7 @@ export default function TerritoryEquity() {
           </div>
           <div className="space-y-2">
             <div className="grid grid-cols-7 gap-1 text-xs font-medium text-gray-500 border-b pb-1">
-              <div>City</div>
+              <div>{t('topology.city')}</div>
               <div className="text-right">Compl.</div>
               <div className="text-right">Std.</div>
               <div className="text-right">J+K Std</div>

@@ -4,6 +4,7 @@ import { SmartTooltip } from '@/components/common/SmartTooltip';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 
+import { useTranslation } from '@/hooks/useTranslation';
 interface ReportFiltersProps {
   filters: {
     startDate: string;
@@ -19,6 +20,7 @@ interface ReportFiltersProps {
 }
 
 export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps) {
+  const { t } = useTranslation();
   const { profile } = useAuth();
   const [carriers, setCarriers] = useState<string[]>([]);
   const [products, setProducts] = useState<string[]>([]);
@@ -126,7 +128,7 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
             )}
           </button>
           <Filter className="w-5 h-5 text-gray-600" />
-          <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
+          <h3 className="text-lg font-semibold text-gray-900">{t('stock.filters')}</h3>
           <SmartTooltip content="Filters apply to all reporting views. Use them to narrow your analysis to specific time periods, carriers, products, or routes. Empty filters show all available data." />
         </div>
         <button

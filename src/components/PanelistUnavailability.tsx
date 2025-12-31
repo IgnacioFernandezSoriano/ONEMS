@@ -3,7 +3,9 @@ import { usePanelistUnavailability } from '@/lib/hooks/usePanelistUnavailability
 import { supabase } from '@/lib/supabase'
 import type { Panelist, PanelistUnavailability } from '@/lib/types'
 
+import { useTranslation } from '@/hooks/useTranslation';
 export function PanelistUnavailabilityComponent() {
+  const { t } = useTranslation();
   const { unavailabilityPeriods, loading, error, createUnavailabilityPeriod, updateUnavailabilityPeriod, deleteUnavailabilityPeriod } = usePanelistUnavailability()
   const [showModal, setShowModal] = useState(false)
   const [editingPeriod, setEditingPeriod] = useState<any>(null)
@@ -254,7 +256,7 @@ export function PanelistUnavailabilityComponent() {
             <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
             </svg>
-            <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
+            <h3 className="text-lg font-semibold text-gray-900">{t('stock.filters')}</h3>
             {(filters.search || filters.panelist_id || filters.date_range !== 'all' || filters.reason || filters.status) && (
               <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">
                 Active
@@ -333,8 +335,8 @@ export function PanelistUnavailabilityComponent() {
                 >
                   <option value="all">All Periods</option>
                   <option value="current">Current (Active Now)</option>
-                  <option value="upcoming">Upcoming</option>
-                  <option value="past">Past</option>
+                  <option value="upcoming">{t('panelistunavailability.tsx.upcoming')}</option>
+                  <option value="past">{t('panelistunavailability.tsx.past')}</option>
                 </select>
               </div>
 
@@ -353,11 +355,11 @@ export function PanelistUnavailabilityComponent() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 >
                   <option value="">All Reasons</option>
-                  <option value="vacation">Vacation</option>
+                  <option value="vacation">{t('panelistunavailability.tsx.vacation')}</option>
                   <option value="sick">Sick Leave</option>
-                  <option value="personal">Personal</option>
-                  <option value="training">Training</option>
-                  <option value="other">Other</option>
+                  <option value="personal">{t('panelistunavailability.tsx.personal')}</option>
+                  <option value="training">{t('panelistunavailability.tsx.training')}</option>
+                  <option value="other">{t('panelistunavailability.tsx.other')}</option>
                 </select>
               </div>
 
@@ -376,8 +378,8 @@ export function PanelistUnavailabilityComponent() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 >
                   <option value="">All Status</option>
-                  <option value="active">Active</option>
-                  <option value="cancelled">Cancelled</option>
+                  <option value="active">{t('common.active')}</option>
+                  <option value="cancelled">{t('stock.cancelled')}</option>
                 </select>
               </div>
             </div>
@@ -428,14 +430,14 @@ export function PanelistUnavailabilityComponent() {
                     className="rounded"
                   />
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Panelist</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('stock.panelist')}</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Start Date</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">End Date</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Duration</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Reason</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Notes</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('panelistunavailability.tsx.duration')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('panelistunavailability.tsx.reason')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('common.status')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('stock.notes')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('common.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -581,11 +583,11 @@ export function PanelistUnavailabilityComponent() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                     required
                   >
-                    <option value="vacation">Vacation</option>
+                    <option value="vacation">{t('panelistunavailability.tsx.vacation')}</option>
                     <option value="sick">Sick Leave</option>
-                    <option value="personal">Personal</option>
-                    <option value="training">Training</option>
-                    <option value="other">Other</option>
+                    <option value="personal">{t('panelistunavailability.tsx.personal')}</option>
+                    <option value="training">{t('panelistunavailability.tsx.training')}</option>
+                    <option value="other">{t('panelistunavailability.tsx.other')}</option>
                   </select>
                 </div>
 
@@ -611,8 +613,8 @@ export function PanelistUnavailabilityComponent() {
                     onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                   >
-                    <option value="active">Active</option>
-                    <option value="cancelled">Cancelled</option>
+                    <option value="active">{t('common.active')}</option>
+                    <option value="cancelled">{t('stock.cancelled')}</option>
                   </select>
                 </div>
               </div>

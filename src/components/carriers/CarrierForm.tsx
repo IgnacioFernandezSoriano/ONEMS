@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { Carrier } from '@/lib/types'
 
+import { useTranslation } from '@/hooks/useTranslation';
 interface CarrierFormProps {
   carrier?: Carrier
   onSubmit: (data: any) => Promise<void>
@@ -8,6 +9,7 @@ interface CarrierFormProps {
 }
 
 export function CarrierForm({ carrier, onSubmit, onCancel }: CarrierFormProps) {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     code: carrier?.code || '',
     name: carrier?.name || '',
@@ -54,7 +56,7 @@ export function CarrierForm({ carrier, onSubmit, onCancel }: CarrierFormProps) {
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">Type</label>
+        <label className="block text-sm font-medium mb-1">{t('stock.type')}</label>
         <input
           type="text"
           value={formData.type}
@@ -72,8 +74,8 @@ export function CarrierForm({ carrier, onSubmit, onCancel }: CarrierFormProps) {
           onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
           className="w-full px-3 py-2 border rounded-md"
         >
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
+          <option value="active">{t('common.active')}</option>
+          <option value="inactive">{t('common.inactive')}</option>
         </select>
       </div>
 

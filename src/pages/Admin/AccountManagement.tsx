@@ -3,7 +3,9 @@ import { PageHeader } from '@/components/common/PageHeader'
 import { AccountResetCard } from '@/components/admin/AccountResetCard'
 import { useAccountManagement } from '@/hooks/useAccountManagement'
 
+import { useTranslation } from '@/hooks/useTranslation';
 export function AccountManagement() {
+  const { t } = useTranslation();
   const { accounts, loading, resetting, fetchAccounts, resetAccountData } = useAccountManagement()
 
   useEffect(() => {
@@ -46,8 +48,8 @@ export function AccountManagement() {
                 The reset process will:
               </p>
               <ul className="list-disc list-inside mt-2 space-y-1">
-                <li><strong>Delete</strong> all operational data (plans, shipments, stocks, orders)</li>
-                <li><strong>Preserve</strong> all configuration data (topology, panelists, materials, settings)</li>
+                <li><strong>{t('common.delete')}</strong> all operational data (plans, shipments, stocks, orders)</li>
+                <li><strong>{t('admin.preserve')}</strong> all configuration data (topology, panelists, materials, settings)</li>
                 <li><strong>Cannot be undone</strong> - use with caution</li>
               </ul>
             </div>

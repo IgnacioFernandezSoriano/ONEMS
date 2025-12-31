@@ -7,7 +7,9 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
 import { downloadCSV } from '../../lib/exportUtils'
 
+import { useTranslation } from '@/hooks/useTranslation';
 export default function RegulatorStockTab() {
+  const { t } = useTranslation();
   const { regulatorStocks, loading, updateRegulatorStock, reload } = useStockManagement()
   const { catalog: materials } = useMaterialCatalog()
   const { user } = useAuth()
@@ -110,7 +112,7 @@ export default function RegulatorStockTab() {
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
         <div className="flex items-center gap-2 mb-4">
           <Filter className="h-5 w-5 text-gray-500" />
-          <span className="font-medium text-gray-900">Filters</span>
+          <span className="font-medium text-gray-900">{t('stock.filters')}</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

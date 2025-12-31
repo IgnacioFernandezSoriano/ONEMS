@@ -4,6 +4,7 @@ import type { CityEquityData } from '@/types/reporting';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
+import { useTranslation } from '@/hooks/useTranslation';
 // Fix for default marker icons in Leaflet with Webpack/Vite
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -40,6 +41,7 @@ function AutoFitBounds({ data }: { data: CityEquityData[] }) {
 }
 
 export function TerritoryEquityMap({ data }: TerritoryEquityMapProps) {
+  const { t } = useTranslation();
   const mapRef = useRef<L.Map>(null);
 
   // Filter cities with valid coordinates
@@ -91,7 +93,7 @@ export function TerritoryEquityMap({ data }: TerritoryEquityMapProps) {
         ref={mapRef}
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">{t('reporting.openstreetmap')}</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
@@ -218,7 +220,7 @@ export function TerritoryEquityMap({ data }: TerritoryEquityMapProps) {
 
       {/* Legend */}
       <div className="absolute bottom-4 right-4 bg-white p-3 rounded-lg shadow-lg border border-gray-200 z-[1000]">
-        <h4 className="font-semibold text-sm mb-2">Legend</h4>
+        <h4 className="font-semibold text-sm mb-2">{t('reporting.legend')}</h4>
         <div className="space-y-1 text-xs">
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded-full bg-green-500"></div>
@@ -226,11 +228,11 @@ export function TerritoryEquityMap({ data }: TerritoryEquityMapProps) {
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded-full bg-amber-500"></div>
-            <span>Warning</span>
+            <span>{t('reporting.warning')}</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded-full bg-red-500"></div>
-            <span>Critical</span>
+            <span>{t('reporting.critical')}</span>
           </div>
           <div className="border-t pt-1 mt-1">
             <p className="text-gray-600">Circle size = Population</p>

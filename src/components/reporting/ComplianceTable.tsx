@@ -3,11 +3,13 @@ import { CheckCircle, XCircle } from 'lucide-react';
 import { SmartTooltip } from '@/components/common/SmartTooltip';
 import type { CarrierData, ProductData, RouteData } from '@/hooks/reporting/useComplianceData';
 
+import { useTranslation } from '@/hooks/useTranslation';
 interface ComplianceTableProps {
   data: CarrierData[];
 }
 
 export function ComplianceTable({ data }: ComplianceTableProps) {
+  const { t } = useTranslation();
   if (data.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
@@ -310,13 +312,13 @@ export function ComplianceTable({ data }: ComplianceTableProps) {
                           {route.complianceStatus === 'warning' && (
                             <>
                               <span className="text-amber-500 text-lg">⚠️</span>
-                              <span className="text-amber-600 font-medium">Warning</span>
+                              <span className="text-amber-600 font-medium">{t('reporting.warning')}</span>
                             </>
                           )}
                           {route.complianceStatus === 'critical' && (
                             <>
                               <XCircle className="w-4 h-4 text-red-500" />
-                              <span className="text-red-600 font-medium">Critical</span>
+                              <span className="text-red-600 font-medium">{t('reporting.critical')}</span>
                             </>
                           )}
                         </div>

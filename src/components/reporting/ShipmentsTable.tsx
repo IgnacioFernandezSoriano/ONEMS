@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { CheckCircle, XCircle, Search, Download } from 'lucide-react';
 import type { ShipmentTracking } from '@/types/reporting';
 
+import { useTranslation } from '@/hooks/useTranslation';
 interface ShipmentsTableProps {
   data: ShipmentTracking[];
 }
 
 export function ShipmentsTable({ data }: ShipmentsTableProps) {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredData = data.filter(shipment =>
@@ -163,7 +165,7 @@ export function ShipmentsTable({ data }: ShipmentsTableProps) {
                     ) : (
                       <>
                         <XCircle className="w-4 h-4 text-red-500 mr-2" />
-                        <span className="text-red-600 font-medium">Delayed</span>
+                        <span className="text-red-600 font-medium">{t('reporting.delayed')}</span>
                       </>
                     )}
                   </div>

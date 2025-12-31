@@ -8,7 +8,9 @@ import OrderMaterialModal from './OrderMaterialModal'
 import ReceivePOModal from './ReceivePOModal'
 import { downloadCSV, generatePurchaseOrderPDF, printPDF } from '../../lib/exportUtils'
 
+import { useTranslation } from '@/hooks/useTranslation';
 export default function MaterialRequirementsTab() {
+  const { t } = useTranslation();
   const { regulatorStocks, reload } = useStockManagement()
   const { requirements, loading: loadingRequirements, calculate, markAsOrdered, receivePO, deleteRequirement } = useRegulatorRequirements()
   const { catalog: materials } = useMaterialCatalog()
@@ -301,7 +303,7 @@ export default function MaterialRequirementsTab() {
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-blue-800">Ordered</p>
+                      <p className="text-sm font-medium text-blue-800">{t('stock.ordered')}</p>
                       <p className="text-2xl font-bold text-blue-900 mt-1">{metrics.ordered}</p>
                     </div>
                     <Clock className="h-8 w-8 text-blue-600" />
@@ -386,9 +388,9 @@ export default function MaterialRequirementsTab() {
                   className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 >
                   <option value="">All Status</option>
-                  <option value="pending">Pending</option>
-                  <option value="ordered">Ordered</option>
-                  <option value="received">Received</option>
+                  <option value="pending">{t('stock.pending')}</option>
+                  <option value="ordered">{t('stock.ordered')}</option>
+                  <option value="received">{t('stock.received')}</option>
                 </select>
               </div>
             </div>

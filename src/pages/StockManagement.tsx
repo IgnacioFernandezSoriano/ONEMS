@@ -11,9 +11,11 @@ import ShipmentsTab from '../components/stock/ShipmentsTab'
 import SettingsTab from '../components/stock/SettingsTab'
 import StockAlertsTab from '../components/stock/StockAlertsTab'
 
+import { useTranslation } from '@/hooks/useTranslation';
 type TabType = 'requirements' | 'regulator' | 'shipments' | 'panelist' | 'movements' | 'alerts' | 'settings'
 
 export default function StockManagement() {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<TabType>('requirements')
   const { shipments, loading } = useStockManagement()
   const { getAlertCounts } = useStockAlerts()
@@ -116,7 +118,7 @@ export default function StockManagement() {
       {/* Tabs */}
       <div className="bg-white shadow rounded-lg">
         <div className="border-b border-gray-200">
-          <nav className="-mb-px flex space-x-8 px-6" aria-label="Tabs">
+          <nav className="-mb-px flex space-x-8 px-6" aria-label={t('stockmanagement.tabs')}>
             {tabs.map((tab) => {
               const Icon = tab.icon
               const isActive = activeTab === tab.id

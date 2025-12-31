@@ -5,6 +5,7 @@ import { useAccounts } from '@/hooks/useAccounts'
 import { ROLE_LABELS } from '@/utils/constants'
 import type { ProfileWithAccount } from '@/lib/types'
 
+import { useTranslation } from '@/hooks/useTranslation';
 interface UserFormProps {
   user?: ProfileWithAccount
   onSubmit: (data: any) => Promise<void>
@@ -12,6 +13,7 @@ interface UserFormProps {
 }
 
 export function UserForm({ user, onSubmit, onCancel }: UserFormProps) {
+  const { t } = useTranslation();
   const { profile } = useAuth()
   const { accounts } = useAccounts()
   const [email, setEmail] = useState(user?.email || '')
@@ -158,8 +160,8 @@ export function UserForm({ user, onSubmit, onCancel }: UserFormProps) {
             onChange={(e) => setStatus(e.target.value as 'active' | 'inactive')}
             className="w-full px-3 py-2 border border-gray-300 rounded-md"
           >
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
+            <option value="active">{t('common.active')}</option>
+            <option value="inactive">{t('common.inactive')}</option>
           </select>
         </div>
       )}

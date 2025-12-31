@@ -237,7 +237,6 @@ carriers.without_materials,بدون مواد
 common.actions,الإجراءات
 common.active,نشط
 common.apply,تطبيق
-common.available,متاح
 common.cancel,إلغاء
 common.clear,مسح
 common.close,إغلاق
@@ -246,8 +245,6 @@ common.edit,تعديل
 common.error,خطأ
 common.inactive,غير نشط
 common.information,معلومات
-common.no_panelist,لا يوجد عضو
-common.of,من
 common.promise,وعد
 common.refresh,تحديث
 common.remove,إزالة
@@ -256,7 +253,6 @@ common.save,حفظ
 common.search,بحث
 common.status,الحالة
 common.total,الإجمالي
-common.unavailable,غير متاح
 countrytopology.all_cities,جميع المدن
 countrytopology.all_nodes,جميع العقد
 countrytopology.all_nodes_have_panelists,جميع العقد تحتوي على أعضاء لجنة!
@@ -317,7 +313,6 @@ dashboard.management_tip,نصيحة إدارية
 dashboard.material_management,إدارة المواد
 dashboard.material_requirements,متطلبات المواد
 dashboard.needing_review,بحاجة إلى مراجعة
-dashboard.needs_review,يحتاج مراجعة
 dashboard.next_30_days,الثلاثون يوماً القادمة
 dashboard.next_month,الشهر القادم
 dashboard.on_vacation,في إجازة
@@ -332,27 +327,10 @@ dashboard.selected_period,الفترة المختارة:
 dashboard.shipments_to_panelists,الشحنات إلى المشاركين
 dashboard.standards_configuration,تكوين المعايير
 dashboard.stock_alerts,تنبيهات المخزون
-dashboard.tooltip_active_carriers,عدد شركات النقل النشطة المتاحة للشحنات
-dashboard.tooltip_active_products,عدد المنتجات النشطة المكونة عبر جميع شركات النقل
-dashboard.tooltip_coverage_rate,نسبة المعايير ذات التكوين الكامل
-dashboard.tooltip_delayed_shipments,الشحنات المجدولة قبل اليوم ولكن لم يتم استلامها بعد
-dashboard.tooltip_management_dashboard,لوحة التحكم الإدارية: نظرة عامة على المقاييس التشغيلية وحالة الموارد والتنبيهات الحرجة. استخدم محدد الفترة لعرض إحصائيات الشهر الحالي أو القادم.
-dashboard.tooltip_material_requirements,متطلبات المواد المعلقة من الجهات التنظيمية
-dashboard.tooltip_needs_review,المعايير التي تفتقد الوقت أو نسبة النجاح المكونة
-dashboard.tooltip_panelist_stock,تنبيهات المخزون في مواقع الأعضاء
-dashboard.tooltip_pending_shipments,شحنات المخزون المعلقة للإرسال
-dashboard.tooltip_received_plans,الخطط المستلمة بنجاح
-dashboard.tooltip_sent_plans,الخطط المرسلة وفي الطريق
-dashboard.tooltip_shipments_to_panelists,الشحنات المعلقة من المواد إلى الأعضاء
-dashboard.tooltip_total_panelists,العدد الإجمالي للأعضاء في النظام
-dashboard.tooltip_total_plans,إجمالي خطط التخصيص في الفترة المحددة
-dashboard.tooltip_total_standards,العدد الإجمالي لمعايير التسليم المكونة
 dashboard.total_panelists,إجمالي المشاركين
 dashboard.total_plans,إجمالي الخطط
 dashboard.total_standards,إجمالي المعايير
 dashboard.total_status,الإجمالي والحالة
-dashboard.unassigned,غير مخصص
-dashboard.unavailable,غير متاح
 dashboard.upcoming_vacations,الإجازات القادمة
 delivery_standards.carrier,شركة النقل *
 delivery_standards.clear_all_selections,مسح كل التحديدات

@@ -8,7 +8,9 @@ import { PageHeader } from '@/components/common/PageHeader'
 import { SortableHeader } from '@/components/common/SortableHeader'
 import { SmartTooltip } from '@/components/common/SmartTooltip'
 
+import { useTranslation } from '@/hooks/useTranslation';
 export function AllocationPlans() {
+  const { t } = useTranslation();
   const {
     details,
     plans,
@@ -522,7 +524,7 @@ export function AllocationPlans() {
           </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs text-gray-600">Pending</span>
+              <span className="text-xs text-gray-600">{t('stock.pending')}</span>
               <button
                 onClick={() => handleCardClick('status', 'pending')}
                 className="text-sm font-semibold text-amber-600 hover:text-amber-700 hover:underline cursor-pointer transition-colors"
@@ -531,7 +533,7 @@ export function AllocationPlans() {
               </button>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-xs text-gray-600">Sent</span>
+              <span className="text-xs text-gray-600">{t('stock.sent')}</span>
               <button
                 onClick={() => handleCardClick('status', 'sent')}
                 className="text-sm font-semibold text-blue-600 hover:text-blue-700 hover:underline cursor-pointer transition-colors"
@@ -540,7 +542,7 @@ export function AllocationPlans() {
               </button>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-xs text-gray-600">Received</span>
+              <span className="text-xs text-gray-600">{t('stock.received')}</span>
               <button
                 onClick={() => handleCardClick('status', 'received')}
                 className="text-sm font-semibold text-green-600 hover:text-green-700 hover:underline cursor-pointer transition-colors"
@@ -792,21 +794,21 @@ export function AllocationPlans() {
                     {showIdColumn && (
                       <SortableHeader field="id" label="Event ID" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="Unique identifier for this allocation plan detail event. Used to track material movements and shipments." />
                     )}
-                    <SortableHeader field="plan" label="Plan" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The allocation plan name that this shipment belongs to." />
-                    <SortableHeader field="carrier" label="Carrier" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The logistics carrier responsible for this shipment." />
-                    <SortableHeader field="product" label="Product" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The carrier product/service type used for this shipment." />
+                    <SortableHeader field="plan" label={t('onedb.plan')} sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The allocation plan name that this shipment belongs to." />
+                    <SortableHeader field="carrier" label={t('reporting.carrier')} sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The logistics carrier responsible for this shipment." />
+                    <SortableHeader field="product" label={t('reporting.product')} sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The carrier product/service type used for this shipment." />
                     <SortableHeader field="originCity" label="Origin City" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The city where the package is picked up." />
                     <SortableHeader field="originNode" label="Origin Node" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The specific node within the origin city where pickup occurs." />
                     <SortableHeader field="destCity" label="Dest. City" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The city where the package is delivered." />
                     <SortableHeader field="destNode" label="Dest. Node" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The specific node within the destination city where delivery occurs." />
                     <SortableHeader field="date" label="Scheduled Date" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The date when this shipment is scheduled to be executed." />
-                    <SortableHeader field="week" label="Week" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The ISO week number of the scheduled date (1-53)." />
+                    <SortableHeader field="week" label={t('allocationplans.week')} sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The ISO week number of the scheduled date (1-53)." />
                     <SortableHeader field="tagId" label="Tag ID" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The physical tag identifier assigned to track this shipment." />
                     <SortableHeader field="originPanelist" label="Origin Panelist" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The panelist assigned to send the package from the origin node." />
                     <SortableHeader field="originStatus" label="Origin Status" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="Origin panelist availability: Available, Unavailable (not available on date), No Panelist (no panelist), or Inactive." />
                     <SortableHeader field="destPanelist" label="Dest. Panelist" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="The panelist assigned to receive the package at the destination node." />
                     <SortableHeader field="destStatus" label="Dest. Status" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="Destination panelist availability: Available, Unavailable (not available on date), No Panelist (no panelist), or Inactive." />
-                    <SortableHeader field="status" label="Status" sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="Shipment status: Pending (not started), Notified, Sent (dispatched), Received (delivered), Cancelled, Invalid, or Transfer Error." />
+                    <SortableHeader field="status" label={t('common.status')} sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="Shipment status: Pending (not started), Notified, Sent (dispatched), Received (delivered), Cancelled, Invalid, or Transfer Error." />
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                       Actions
                     </th>

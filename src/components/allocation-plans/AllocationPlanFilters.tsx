@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Filter, RotateCcw } from 'lucide-react';
 import { SmartTooltip } from '../common/SmartTooltip';
 
+import { useTranslation } from '@/hooks/useTranslation';
 interface Props {
   filters: {
     planId: string
@@ -44,6 +45,7 @@ export function AllocationPlanFilters({
   onFilterChange,
   onClearFilters,
 }: Props) {
+  const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
 
   const originNodes = filters.originCityId
@@ -71,7 +73,7 @@ export function AllocationPlanFilters({
       >
         <div className="flex items-center gap-3">
           <Filter className="w-5 h-5 text-gray-400" />
-          <span className="font-medium text-gray-900">Filters</span>
+          <span className="font-medium text-gray-900">{t('stock.filters')}</span>
           <SmartTooltip content="Filter allocation plan details by plan, carrier, product, route, dates, status, or availability issues to focus on specific shipments." />
           {activeFilterCount > 0 && (
             <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
@@ -177,12 +179,12 @@ export function AllocationPlanFilters({
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="">All Status</option>
-                <option value="pending">Pending</option>
-                <option value="notified">Notified</option>
-                <option value="sent">Sent</option>
-                <option value="received">Received</option>
-                <option value="cancelled">Cancelled</option>
-                <option value="invalid">Invalid</option>
+                <option value="pending">{t('stock.pending')}</option>
+                <option value="notified">{t('allocation_plans.notified')}</option>
+                <option value="sent">{t('stock.sent')}</option>
+                <option value="received">{t('stock.received')}</option>
+                <option value="cancelled">{t('stock.cancelled')}</option>
+                <option value="invalid">{t('allocation_plans.invalid')}</option>
                 <option value="transfer_error">Transfer Error</option>
               </select>
             </div>

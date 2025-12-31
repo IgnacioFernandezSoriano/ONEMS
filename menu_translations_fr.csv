@@ -1,0 +1,54 @@
+key,translation
+menu.overview,Aperçu
+menu.dashboard,Tableau de bord
+menu.dashboard.tooltip,Vue d'ensemble des indicateurs opérationnels et des alertes critiques
+menu.setup,Configuration
+menu.topology,Topologie des pays
+menu.topology.tooltip,Définir la structure géographique par pays
+menu.carriers,Opérateurs & Produits
+menu.carriers.tooltip,Gérer les opérateurs et leur catalogue de produits
+menu.panelists,Panélistes
+menu.panelists.tooltip,Enregistrer et gérer la disponibilité des panélistes
+menu.delivery_standards,Normes de livraison
+menu.delivery_standards.tooltip,Définir les délais de livraison attendus et les taux de réussite par transporteur et produit
+menu.allocation_management,Gestion des allocations
+menu.allocation_generator,Générateur d’allocations
+menu.allocation_generator.tooltip,Créer automatiquement des plans d’allocation basés sur les besoins
+menu.load_balancing,Équilibrage de charge
+menu.load_balancing.tooltip,Visualiser et rééquilibrer la répartition des expéditions entre les nœuds
+menu.allocation_plans,Plans d’allocation
+menu.allocation_plans.tooltip,Gérer toutes les allocations d’expéditions
+menu.materials_management,Gestion des matériaux
+menu.material_requirements,Exigences en matériaux
+menu.material_requirements.tooltip,Calculer les besoins en matériaux selon les plans d'allocation
+menu.stock_management,Gestion des stocks
+menu.stock_management.tooltip,Surveiller les niveaux d'inventaire et les alertes
+menu.material_catalog,Catalogue des matériaux
+menu.material_catalog.tooltip,Catalogue principal de tous les matériaux
+menu.reporting,Rapports
+menu.reporting_e2e,E2E
+menu.reporting_e2e.tooltip,Analyse de bout en bout et indicateurs de performance
+menu.reporting_dashboard,Tableau de bord
+menu.reporting_dashboard.tooltip,Aperçu des indicateurs clés de performance
+menu.reporting_jk,Performance J+K
+menu.reporting_jk.tooltip,Analyser la performance par rapport aux normes de livraison
+menu.reporting_compliance,Conformité
+menu.reporting_compliance.tooltip,Surveiller la conformité aux normes de livraison
+menu.reporting_equity,Équité territoriale
+menu.reporting_equity.tooltip,Analyser l’équité dans la répartition des expéditions
+menu.reporting_onedb,ONE DB
+menu.reporting_onedb.tooltip,Enregistrement complet de toutes les expéditions reçues
+menu.administration,Administration
+menu.users,Utilisateurs
+menu.users.tooltip,Gérer les comptes utilisateurs et les permissions
+menu.onedb_generator,Générateur ONEDB
+menu.onedb_generator.tooltip,Générer des enregistrements de réception pour les plans d'allocation
+menu.demo_reset,Réinitialisation Démo
+menu.demo_reset.tooltip,Réinitialiser les données du compte démo
+menu.superadmin,Superadministrateur
+menu.accounts,Comptes
+menu.accounts.tooltip,Gérer tous les comptes du système
+menu.all_users,Tous les utilisateurs
+menu.all_users.tooltip,Voir et gérer tous les utilisateurs sur l’ensemble des comptes
+menu.translations,Traductions
+menu.translations.tooltip,Gérer les traductions de l’application

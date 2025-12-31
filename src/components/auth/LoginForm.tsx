@@ -3,7 +3,9 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
 
+import { useTranslation } from '@/hooks/useTranslation';
 export function LoginForm() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -61,7 +63,7 @@ export function LoginForm() {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="font-medium">Password:</span>
-                  <code className="bg-blue-100 px-2 py-0.5 rounded">WhereQualityStarts</code>
+                  <code className="bg-blue-100 px-2 py-0.5 rounded">{t('auth.wherequalitystarts')}</code>
                 </div>
               </div>
               <button

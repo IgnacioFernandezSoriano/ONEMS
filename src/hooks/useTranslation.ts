@@ -118,8 +118,17 @@ export function useTranslation() {
     
     loadUserLanguage()
     
+    // Listen for auth state changes (login/logout)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+        console.log(`Auth state changed: ${event}`)
+        loadUserLanguage()
+      }
+    })
+    
     return () => {
       mounted = false
+      subscription.unsubscribe()
     }
   }, [])
 

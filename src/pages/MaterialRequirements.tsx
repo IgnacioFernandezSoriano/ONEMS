@@ -5,7 +5,9 @@ import { SmartTooltip } from '../components/common/SmartTooltip'
 import { useMaterialCatalog } from '../hooks/useMaterialCatalog'
 import { useAuth } from '../contexts/AuthContext'
 
+import { useTranslation } from '@/hooks/useTranslation';
 export default function MaterialRequirements() {
+  const { t } = useTranslation();
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [selectedMaterialId, setSelectedMaterialId] = useState('')
@@ -233,7 +235,7 @@ export default function MaterialRequirements() {
               )}
             </button>
             <Filter className="w-5 h-5 text-gray-600" />
-            <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
+            <h3 className="text-lg font-semibold text-gray-900">{t('stock.filters')}</h3>
             <SmartTooltip content="Filter material requirements by date range, material type, or node. Use the quick month selector for easy date selection." />
           </div>
           <button
@@ -426,10 +428,10 @@ export default function MaterialRequirements() {
                     <tr className="border-b border-gray-200">
                       <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Material Code</th>
                       <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Material Name</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Unit</th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">{t('stock.unit')}</th>
                       <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Quantity Needed</th>
-                      <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Shipments</th>
-                      <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Plans</th>
+                      <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">{t('stock.shipments')}</th>
+                      <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">{t('materialrequirements.plans')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -483,8 +485,8 @@ export default function MaterialRequirements() {
                           <tr className="border-b border-gray-200">
                             <th className="text-left py-2 px-3 text-xs font-semibold text-gray-700">Material Code</th>
                             <th className="text-left py-2 px-3 text-xs font-semibold text-gray-700">Material Name</th>
-                            <th className="text-left py-2 px-3 text-xs font-semibold text-gray-700">Unit</th>
-                            <th className="text-right py-2 px-3 text-xs font-semibold text-gray-700">Quantity</th>
+                            <th className="text-left py-2 px-3 text-xs font-semibold text-gray-700">{t('stock.unit')}</th>
+                            <th className="text-right py-2 px-3 text-xs font-semibold text-gray-700">{t('stock.quantity')}</th>
                           </tr>
                         </thead>
                         <tbody>

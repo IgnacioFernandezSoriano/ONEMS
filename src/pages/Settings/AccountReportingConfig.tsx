@@ -5,7 +5,9 @@ import { ThresholdSlider } from '@/components/settings/ThresholdSlider';
 import { CityClassificationTable } from '@/components/settings/CityClassificationTable';
 import { Save, AlertCircle, CheckCircle } from 'lucide-react';
 
+import { useTranslation } from '@/hooks/useTranslation';
 export default function AccountReportingConfig() {
+  const { t } = useTranslation();
   const { profile } = useAuth();
   const accountId = profile?.account_id || undefined;
   
@@ -132,9 +134,9 @@ export default function AccountReportingConfig() {
               onChange={(e) => setReportPeriod(e.target.value as 'week' | 'month' | 'quarter')}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="week">Weekly</option>
-              <option value="month">Monthly</option>
-              <option value="quarter">Quarterly</option>
+              <option value="week">{t('settings.weekly')}</option>
+              <option value="month">{t('settings.monthly')}</option>
+              <option value="quarter">{t('settings.quarterly')}</option>
             </select>
             <p className="text-xs text-gray-600">
               Default time period for generating reports

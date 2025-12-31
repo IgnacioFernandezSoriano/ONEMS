@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Button } from '@/components/common/Button'
 import type { Region } from '@/lib/types'
 
+import { useTranslation } from '@/hooks/useTranslation';
 interface RegionFormProps {
   region?: Region
   onSubmit: (data: any) => Promise<void>
@@ -9,6 +10,7 @@ interface RegionFormProps {
 }
 
 export function RegionForm({ region, onSubmit, onCancel }: RegionFormProps) {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: region?.name || '',
     code: region?.code || '',
@@ -76,13 +78,13 @@ export function RegionForm({ region, onSubmit, onCancel }: RegionFormProps) {
           onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
           className="w-full px-3 py-2 border rounded-md"
         >
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
+          <option value="active">{t('common.active')}</option>
+          <option value="inactive">{t('common.inactive')}</option>
         </select>
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">Description</label>
+        <label className="block text-sm font-medium mb-1">{t('topology.description')}</label>
         <textarea
           value={formData.description}
           onChange={(e) => setFormData({ ...formData, description: e.target.value })}

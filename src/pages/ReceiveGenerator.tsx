@@ -3,6 +3,7 @@ import { Play, AlertCircle, CheckCircle, Loader } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 
+import { useTranslation } from '@/hooks/useTranslation';
 interface GeneratorConfig {
   recordCount: number
   outOfSlaPercentage: number
@@ -15,6 +16,7 @@ interface GeneratorConfig {
 }
 
 export default function ReceiveGenerator() {
+  const { t } = useTranslation();
   const { profile } = useAuth()
   const accountId = profile?.account_id
 
@@ -645,7 +647,7 @@ export default function ReceiveGenerator() {
             <div className="flex items-center gap-2">
               <AlertCircle className="h-5 w-5 text-red-600" />
               <div>
-                <p className="text-sm font-medium text-red-900">Error</p>
+                <p className="text-sm font-medium text-red-900">{t('common.error')}</p>
                 <p className="text-sm text-red-700 mt-1">{error}</p>
               </div>
             </div>

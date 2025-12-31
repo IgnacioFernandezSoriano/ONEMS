@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import type { DeliveryStandard, Carrier, Product, City } from '@/lib/types'
 
+import { useTranslation } from '@/hooks/useTranslation';
 interface DeliveryStandardFormProps {
   standard?: DeliveryStandard
   carriers: Carrier[]
@@ -18,6 +19,7 @@ export function DeliveryStandardForm({
   onSubmit,
   onCancel,
 }: DeliveryStandardFormProps) {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     carrier_id: standard?.carrier_id || '',
     product_id: standard?.product_id || '',
@@ -203,8 +205,8 @@ export function DeliveryStandardForm({
             }
             className="w-full px-3 py-2 border rounded-md"
           >
-            <option value="hours">Hours</option>
-            <option value="days">Days</option>
+            <option value="hours">{t('deliverystandards.hours')}</option>
+            <option value="days">{t('deliverystandards.days')}</option>
           </select>
         </div>
       </div>

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Button } from '@/components/common/Button'
 import type { City } from '@/lib/types'
 
+import { useTranslation } from '@/hooks/useTranslation';
 interface CityFormProps {
   city?: City
   regionId: string
@@ -10,6 +11,7 @@ interface CityFormProps {
 }
 
 export function CityForm({ city, regionId, onSubmit, onCancel }: CityFormProps) {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     region_id: regionId,
     name: city?.name || '',
@@ -95,14 +97,14 @@ export function CityForm({ city, regionId, onSubmit, onCancel }: CityFormProps) 
           onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
           className="w-full px-3 py-2 border rounded-md"
         >
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
+          <option value="active">{t('common.active')}</option>
+          <option value="inactive">{t('common.inactive')}</option>
         </select>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Latitude</label>
+          <label className="block text-sm font-medium mb-1">{t('topology.latitude')}</label>
           <input
             type="number"
             step="any"
@@ -113,7 +115,7 @@ export function CityForm({ city, regionId, onSubmit, onCancel }: CityFormProps) 
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Longitude</label>
+          <label className="block text-sm font-medium mb-1">{t('topology.longitude')}</label>
           <input
             type="number"
             step="any"

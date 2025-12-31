@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { getISOWeekFromDate } from '@/utils/weekUtils'
 
+import { useTranslation } from '@/hooks/useTranslation';
 interface RecordModalProps {
   isOpen: boolean
   onClose: () => void
@@ -28,6 +29,7 @@ export function RecordModal({
   nodes,
   getNodesByCity,
 }: RecordModalProps) {
+  const { t } = useTranslation();
   const isEditMode = !!editRecord
   
   const [formData, setFormData] = useState({
@@ -299,7 +301,7 @@ export function RecordModal({
                   type="text"
                   value={formData.tag_id}
                   onChange={(e) => handleChange('tag_id', e.target.value)}
-                  placeholder="Optional"
+                  placeholder={t('allocation_plans.optional')}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>

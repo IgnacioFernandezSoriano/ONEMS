@@ -3,6 +3,7 @@ import { Modal } from '@/components/common/Modal'
 import { Button } from '@/components/common/Button'
 import type { Carrier, Product, City } from '@/lib/types'
 
+import { useTranslation } from '@/hooks/useTranslation';
 interface GenerateCombinationsModalProps {
   isOpen: boolean
   onClose: () => void
@@ -25,6 +26,7 @@ export function GenerateCombinationsModal({
   cities,
   onGenerate,
 }: GenerateCombinationsModalProps) {
+  const { t } = useTranslation();
   const [selectedCarriers, setSelectedCarriers] = useState<string[]>([])
   const [selectedProducts, setSelectedProducts] = useState<string[]>([])
   const [selectedOriginCities, setSelectedOriginCities] = useState<string[]>([])
@@ -167,7 +169,7 @@ export function GenerateCombinationsModal({
           </div>
 
           <div className="flex justify-end">
-            <Button onClick={handleClose}>Close</Button>
+            <Button onClick={handleClose}>{t('common.close')}</Button>
           </div>
         </div>
       </Modal>

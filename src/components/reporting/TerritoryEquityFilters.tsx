@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import type { TerritoryEquityFilters as Filters } from '@/types/reporting';
 
+import { useTranslation } from '@/hooks/useTranslation';
 interface TerritoryEquityFiltersProps {
   filters: Filters;
   onChange: (filters: Filters) => void;
@@ -12,6 +13,7 @@ interface TerritoryEquityFiltersProps {
 }
 
 export function TerritoryEquityFilters({ filters, onChange, onReset }: TerritoryEquityFiltersProps) {
+  const { t } = useTranslation();
   const { profile } = useAuth();
   const [carriers, setCarriers] = useState<string[]>([]);
   const [products, setProducts] = useState<string[]>([]);
@@ -108,7 +110,7 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
             )}
           </button>
           <Filter className="w-5 h-5 text-gray-600" />
-          <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
+          <h3 className="text-lg font-semibold text-gray-900">{t('stock.filters')}</h3>
           <SmartTooltip content="Filter the Territory Equity Report by date range, carrier, product, region, direction (inbound/outbound), or equity status. All filters are optional." />
         </div>
         <button

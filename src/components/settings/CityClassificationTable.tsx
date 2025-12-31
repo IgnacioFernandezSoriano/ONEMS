@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Search, Edit2, Trash2, Save, X } from 'lucide-react';
 import type { CityClassification } from '@/hooks/useAccountReportingConfig';
 
+import { useTranslation } from '@/hooks/useTranslation';
 interface CityClassificationTableProps {
   classifications: CityClassification[];
   onUpdate: (cityId: string, classification: 'capital' | 'major' | 'minor') => Promise<{ success: boolean; error?: Error }>;
@@ -13,6 +14,7 @@ export function CityClassificationTable({
   onUpdate,
   onDelete
 }: CityClassificationTableProps) {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState<'capital' | 'major' | 'minor'>('minor');
@@ -105,9 +107,9 @@ export function CityClassificationTable({
                         onChange={(e) => setEditValue(e.target.value as 'capital' | 'major' | 'minor')}
                         className="border border-gray-300 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-blue-500"
                       >
-                        <option value="capital">Capital</option>
-                        <option value="major">Major</option>
-                        <option value="minor">Minor</option>
+                        <option value="capital">{t('settings.capital')}</option>
+                        <option value="major">{t('settings.major')}</option>
+                        <option value="minor">{t('settings.minor')}</option>
                       </select>
                     ) : (
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${getClassificationBadge(classification.classification)}`}>
@@ -121,14 +123,14 @@ export function CityClassificationTable({
                         <button
                           onClick={() => handleSave(classification.cityId)}
                           className="text-green-600 hover:text-green-900"
-                          title="Save"
+                          title={t('common.save')}
                         >
                           <Save className="w-4 h-4" />
                         </button>
                         <button
                           onClick={handleCancel}
                           className="text-gray-600 hover:text-gray-900"
-                          title="Cancel"
+                          title={t('common.cancel')}
                         >
                           <X className="w-4 h-4" />
                         </button>
@@ -138,14 +140,14 @@ export function CityClassificationTable({
                         <button
                           onClick={() => handleEdit(classification)}
                           className="text-blue-600 hover:text-blue-900"
-                          title="Edit"
+                          title={t('common.edit')}
                         >
                           <Edit2 className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(classification.cityId)}
                           className="text-red-600 hover:text-red-900"
-                          title="Delete"
+                          title={t('common.delete')}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>

@@ -3,7 +3,9 @@ import { Save, AlertCircle, Settings } from 'lucide-react'
 import { useStockManagement } from '../../hooks/useStockManagement'
 import { SmartTooltip } from '../common/SmartTooltip'
 
+import { useTranslation } from '@/hooks/useTranslation';
 export default function SettingsTab() {
+  const { t } = useTranslation();
   const { settings, loading, updateSettings } = useStockManagement()
   const [formData, setFormData] = useState({
     stock_control_enabled: true,
@@ -85,7 +87,7 @@ export default function SettingsTab() {
 
           {/* Automation */}
           <div className="bg-white border border-gray-200 rounded-lg p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Automation</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">{t('stock.automation')}</h3>
             
             <div className="space-y-4">
               <div className="flex items-start">

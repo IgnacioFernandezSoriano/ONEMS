@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ChevronDown, ChevronUp, ArrowDown, ArrowUp } from 'lucide-react';
 import type { RegionEquityData } from '@/types/reporting';
 
+import { useTranslation } from '@/hooks/useTranslation';
 interface RegionalEquityTableProps {
   data: RegionEquityData[];
   onRegionClick?: (region: RegionEquityData) => void;
@@ -26,6 +27,7 @@ type DirectionRow = {
 };
 
 export function RegionalEquityTable({ data, onRegionClick }: RegionalEquityTableProps) {
+  const { t } = useTranslation();
   const [sortField, setSortField] = useState<keyof DirectionRow>('regionName');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
@@ -300,13 +302,13 @@ export function RegionalEquityTable({ data, onRegionClick }: RegionalEquityTable
                         <table className="min-w-full text-sm">
                           <thead>
                             <tr className="text-xs text-gray-500 uppercase">
-                              <th className="px-3 py-2 text-left">Carrier</th>
-                              <th className="px-3 py-2 text-left">Product</th>
-                              <th className="px-3 py-2 text-right">Shipments</th>
+                              <th className="px-3 py-2 text-left">{t('reporting.carrier')}</th>
+                              <th className="px-3 py-2 text-left">{t('reporting.product')}</th>
+                              <th className="px-3 py-2 text-right">{t('stock.shipments')}</th>
                               <th className="px-3 py-2 text-right">Compliant</th>
                               <th className="px-3 py-2 text-right">Standard %</th>
                               <th className="px-3 py-2 text-right">Actual %</th>
-                              <th className="px-3 py-2 text-right">Deviation</th>
+                              <th className="px-3 py-2 text-right">{t('reporting.deviation')}</th>
                               <th className="px-3 py-2 text-right">J+K Std</th>
                               <th className="px-3 py-2 text-right">J+K Actual</th>
                             </tr>

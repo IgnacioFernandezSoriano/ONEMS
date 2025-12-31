@@ -4,6 +4,7 @@ import { RegisterShipmentModal } from './RegisterShipmentModal'
 import { RegisterReceptionModal } from './RegisterReceptionModal'
 import { getISOWeekFromDate } from '@/utils/weekUtils'
 
+import { useTranslation } from '@/hooks/useTranslation';
 interface Props {
   detail: AllocationPlanDetailWithRelations
   nodes: any[]
@@ -29,6 +30,7 @@ export function AllocationPlanDetailRow({
   onEdit,
   getNodesByCity,
 }: Props) {
+  const { t } = useTranslation();
   const [editing, setEditing] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [showShipmentModal, setShowShipmentModal] = useState(false)
@@ -372,11 +374,11 @@ export function AllocationPlanDetailRow({
           ) : null}
           
           {detail.status === 'received' ? (
-            <span className="text-xs text-gray-500">Completed</span>
+            <span className="text-xs text-gray-500">{t('allocation_plans.completed')}</span>
           ) : null}
           
           {detail.status === 'cancelled' ? (
-            <span className="text-xs text-gray-500">Cancelled</span>
+            <span className="text-xs text-gray-500">{t('stock.cancelled')}</span>
           ) : null}
         </div>
       </td>

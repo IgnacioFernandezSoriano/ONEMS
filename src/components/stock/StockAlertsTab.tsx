@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import { AlertTriangle, Filter, X, ChevronUp, ChevronDown } from 'lucide-react'
 import { useStockAlerts } from '../../hooks/useStockAlerts'
+import { useTranslation } from '@/hooks/useTranslation';
 // No need for date-fns, use native Date
 
 interface StockAlertsTabProps {
@@ -12,6 +13,7 @@ type SortField = 'alert_type' | 'material_name' | 'panelist_name' | 'current_qua
 type SortDirection = 'asc' | 'desc'
 
 export default function StockAlertsTab({ onNavigateToRegulatorStock, onNavigateToPanelistStock }: StockAlertsTabProps) {
+  const { t } = useTranslation();
   const { alerts, loading } = useStockAlerts()
   
   // Filters
@@ -123,7 +125,7 @@ export default function StockAlertsTab({ onNavigateToRegulatorStock, onNavigateT
       <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
         <div className="flex items-center gap-2 mb-3">
           <Filter className="h-4 w-4 text-gray-500" />
-          <span className="text-sm font-medium text-gray-700">Filters</span>
+          <span className="text-sm font-medium text-gray-700">{t('stock.filters')}</span>
           {hasActiveFilters && (
             <button
               onClick={clearFilters}
@@ -152,7 +154,7 @@ export default function StockAlertsTab({ onNavigateToRegulatorStock, onNavigateT
 
           {/* Material Filter */}
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">Material</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">{t('stock.material')}</label>
             <select
               value={filterMaterial}
               onChange={(e) => setFilterMaterial(e.target.value)}
@@ -169,7 +171,7 @@ export default function StockAlertsTab({ onNavigateToRegulatorStock, onNavigateT
 
           {/* Panelist Filter */}
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">Panelist</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">{t('stock.panelist')}</label>
             <select
               value={filterPanelist}
               onChange={(e) => setFilterPanelist(e.target.value)}

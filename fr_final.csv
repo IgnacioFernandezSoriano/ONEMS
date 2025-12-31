@@ -237,7 +237,6 @@ carriers.without_materials,Sans matériaux
 common.actions,Actions
 common.active,Actif
 common.apply,Appliquer
-common.available,disponible
 common.cancel,Annuler
 common.clear,Effacer
 common.close,Fermer
@@ -246,8 +245,6 @@ common.edit,Modifier
 common.error,Erreur
 common.inactive,Inactif
 common.information,Informations
-common.no_panelist,Pas de Panéliste
-common.of,de
 common.promise,Promesse
 common.refresh,Actualiser
 common.remove,Retirer
@@ -256,7 +253,6 @@ common.save,Enregistrer
 common.search,Rechercher
 common.status,Statut
 common.total,Total
-common.unavailable,Indisponible
 countrytopology.all_cities,Toutes les villes
 countrytopology.all_nodes,Tous les nœuds
 countrytopology.all_nodes_have_panelists,Tous les nœuds ont des panélistes !
@@ -317,7 +313,6 @@ dashboard.management_tip,Conseil de gestion
 dashboard.material_management,Gestion des matériaux
 dashboard.material_requirements,Besoins en matériaux
 dashboard.needing_review,À réviser
-dashboard.needs_review,Nécessite une Révision
 dashboard.next_30_days,30 prochains jours
 dashboard.next_month,Mois prochain
 dashboard.on_vacation,En congé
@@ -332,27 +327,10 @@ dashboard.selected_period,Période sélectionnée :
 dashboard.shipments_to_panelists,Expéditions aux panélistes
 dashboard.standards_configuration,Configuration des normes
 dashboard.stock_alerts,Alertes de stock
-dashboard.tooltip_active_carriers,Nombre de transporteurs actifs disponibles pour les expéditions
-dashboard.tooltip_active_products,Nombre de produits actifs configurés sur tous les transporteurs
-dashboard.tooltip_coverage_rate,Pourcentage de normes avec configuration complète
-dashboard.tooltip_delayed_shipments,Expéditions programmées avant aujourd'hui mais pas encore reçues
-dashboard.tooltip_management_dashboard,"Tableau de Bord de Gestion : Vue d'ensemble des métriques opérationnelles, de l'état des ressources et des alertes critiques. Utilisez le sélecteur de période pour afficher les statistiques du mois en cours ou à venir."
-dashboard.tooltip_material_requirements,Exigences en matériaux en attente des régulateurs
-dashboard.tooltip_needs_review,Normes sans temps ou pourcentage de réussite configuré
-dashboard.tooltip_panelist_stock,Alertes de stock dans les emplacements des panélistes
-dashboard.tooltip_pending_shipments,Expéditions de stock en attente d'expédition
-dashboard.tooltip_received_plans,Plans reçus avec succès
-dashboard.tooltip_sent_plans,Plans envoyés et en transit
-dashboard.tooltip_shipments_to_panelists,Expéditions en attente de matériaux aux panélistes
-dashboard.tooltip_total_panelists,Nombre total de panélistes dans le système
-dashboard.tooltip_total_plans,Total des plans d'allocation dans la période sélectionnée
-dashboard.tooltip_total_standards,Nombre total de normes de livraison configurées
 dashboard.total_panelists,Total des panélistes
 dashboard.total_plans,Total des plans
 dashboard.total_standards,Total des normes
 dashboard.total_status,Total & Statut
-dashboard.unassigned,Non Assigné
-dashboard.unavailable,Indisponible
 dashboard.upcoming_vacations,Vacances à venir
 delivery_standards.carrier,Transporteur *
 delivery_standards.clear_all_selections,Effacer toutes les sélections

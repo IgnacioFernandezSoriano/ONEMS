@@ -1,0 +1,54 @@
+key,translation
+menu.overview,Resumen
+menu.dashboard,Panel de control
+menu.dashboard.tooltip,Resumen de métricas operativas y alertas críticas
+menu.setup,Configuración
+menu.topology,Topología por país
+menu.topology.tooltip,Definir la estructura geográfica con países
+menu.carriers,Operadores y productos
+menu.carriers.tooltip,Gestionar operadores y su catálogo de productos
+menu.panelists,Panelistas
+menu.panelists.tooltip,Registrar y gestionar la disponibilidad de panelistas
+menu.delivery_standards,Estándares de Entrega
+menu.delivery_standards.tooltip,Definir tiempos de entrega esperados y tasas de éxito por transportista y producto
+menu.allocation_management,Gestión de Asignaciones
+menu.allocation_generator,Generador de Asignaciones
+menu.allocation_generator.tooltip,Crear planes de asignación automáticamente según los requisitos
+menu.load_balancing,Balanceo de Carga
+menu.load_balancing.tooltip,Visualizar y reequilibrar la distribución de envíos entre nodos
+menu.allocation_plans,Planes de Asignación
+menu.allocation_plans.tooltip,Gestionar todas las asignaciones de envíos
+menu.materials_management,Gestión de Materiales
+menu.material_requirements,Requisitos de Material
+menu.material_requirements.tooltip,Calcular necesidades de material según planes de asignación
+menu.stock_management,Gestión de Inventario
+menu.stock_management.tooltip,Monitorear niveles de inventario y alertas
+menu.material_catalog,Catálogo de Materiales
+menu.material_catalog.tooltip,Catálogo maestro de todos los materiales
+menu.reporting,Reportes
+menu.reporting_e2e,E2E
+menu.reporting_e2e.tooltip,Análisis de extremo a extremo y métricas de rendimiento
+menu.reporting_dashboard,Panel de Control
+menu.reporting_dashboard.tooltip,Resumen de indicadores clave de desempeño
+menu.reporting_jk,Desempeño J+K
+menu.reporting_jk.tooltip,Analizar el desempeño frente a los estándares de entrega
+menu.reporting_compliance,Cumplimiento
+menu.reporting_compliance.tooltip,Monitorear el cumplimiento de los estándares de entrega
+menu.reporting_equity,Equidad territorial
+menu.reporting_equity.tooltip,Analizar la equidad en la distribución de envíos
+menu.reporting_onedb,ONE DB
+menu.reporting_onedb.tooltip,Registro completo de todos los envíos recibidos
+menu.administration,Administración
+menu.users,Usuarios
+menu.users.tooltip,Gestionar cuentas de usuario y permisos
+menu.onedb_generator,Generador ONEDB
+menu.onedb_generator.tooltip,Generar registros de recepción para planes de asignación
+menu.demo_reset,Restablecer demostración
+menu.demo_reset.tooltip,Restablecer datos de la cuenta de demostración
+menu.superadmin,Superadministrador
+menu.accounts,Cuentas
+menu.accounts.tooltip,Gestionar todas las cuentas en el sistema
+menu.all_users,Todos los usuarios
+menu.all_users.tooltip,Ver y administrar todos los usuarios en las cuentas
+menu.translations,Traducciones
+menu.translations.tooltip,Administrar traducciones de la aplicación

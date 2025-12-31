@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { MaterialCatalog } from '@/lib/types'
 import { Button } from '@/components/common/Button'
 
+import { useTranslation } from '@/hooks/useTranslation';
 interface MaterialCatalogFormProps {
   material?: MaterialCatalog
   onSubmit: (data: any) => Promise<void>
@@ -9,6 +10,7 @@ interface MaterialCatalogFormProps {
 }
 
 export function MaterialCatalogForm({ material, onSubmit, onCancel }: MaterialCatalogFormProps) {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     code: material?.code || '',
     name: material?.name || '',
@@ -112,8 +114,8 @@ export function MaterialCatalogForm({ material, onSubmit, onCancel }: MaterialCa
           onChange={(e) => setFormData({ ...formData, status: e.target.value as 'active' | 'inactive' })}
           className="w-full px-3 py-2 border border-gray-300 rounded-md"
         >
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
+          <option value="active">{t('common.active')}</option>
+          <option value="inactive">{t('common.inactive')}</option>
         </select>
       </div>
 

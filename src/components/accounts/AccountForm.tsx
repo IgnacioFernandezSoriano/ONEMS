@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Button } from '@/components/common/Button'
 import type { Account } from '@/lib/types'
 
+import { useTranslation } from '@/hooks/useTranslation';
 interface AccountFormProps {
   account?: Account
   onSubmit: (data: { name: string; slug: string; status?: 'active' | 'inactive' }) => Promise<void>
@@ -9,6 +10,7 @@ interface AccountFormProps {
 }
 
 export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
+  const { t } = useTranslation();
   const [name, setName] = useState(account?.name || '')
   const [slug, setSlug] = useState(account?.slug || '')
   const [status, setStatus] = useState<'active' | 'inactive'>(account?.status || 'active')
@@ -80,8 +82,8 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
             onChange={(e) => setStatus(e.target.value as 'active' | 'inactive')}
             className="w-full px-3 py-2 border border-gray-300 rounded-md"
           >
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
+            <option value="active">{t('common.active')}</option>
+            <option value="inactive">{t('common.inactive')}</option>
           </select>
         </div>
       )}

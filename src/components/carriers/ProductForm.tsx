@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { Product } from '@/lib/types'
 
+import { useTranslation } from '@/hooks/useTranslation';
 interface ProductFormProps {
   product?: Product
   carrierId: string
@@ -9,6 +10,7 @@ interface ProductFormProps {
 }
 
 export function ProductForm({ product, carrierId, onSubmit, onCancel }: ProductFormProps) {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     carrier_id: carrierId,
     code: product?.code || '',
@@ -86,8 +88,8 @@ export function ProductForm({ product, carrierId, onSubmit, onCancel }: ProductF
             onChange={(e) => setFormData({ ...formData, time_unit: e.target.value as 'hours' | 'days' })}
             className="w-full px-3 py-2 border rounded-md"
           >
-            <option value="hours">Hours</option>
-            <option value="days">Days</option>
+            <option value="hours">{t('deliverystandards.hours')}</option>
+            <option value="days">{t('deliverystandards.days')}</option>
           </select>
         </div>
       </div>
@@ -100,8 +102,8 @@ export function ProductForm({ product, carrierId, onSubmit, onCancel }: ProductF
           onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
           className="w-full px-3 py-2 border rounded-md"
         >
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
+          <option value="active">{t('common.active')}</option>
+          <option value="inactive">{t('common.inactive')}</option>
         </select>
       </div>
 

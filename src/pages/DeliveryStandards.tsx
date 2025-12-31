@@ -6,7 +6,9 @@ import { Modal } from '@/components/common/Modal'
 import { Button } from '@/components/common/Button'
 import type { DeliveryStandardWithDetails } from '@/lib/types'
 
+import { useTranslation } from '@/hooks/useTranslation';
 export function DeliveryStandards() {
+  const { t } = useTranslation();
   const {
     standards,
     carriers,
@@ -258,7 +260,7 @@ export function DeliveryStandards() {
               <div className="text-3xl font-bold text-gray-900">
                 {standards.filter((s) => s.standard_time != null && s.success_percentage != null).length}
               </div>
-              <div className="text-xs text-gray-500 mt-1">Configured</div>
+              <div className="text-xs text-gray-500 mt-1">{t('deliverystandards.configured')}</div>
             </div>
             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
               <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -273,7 +275,7 @@ export function DeliveryStandards() {
               <div className="text-3xl font-bold text-gray-900">
                 {standards.filter((s) => s.standard_time == null || s.success_percentage == null).length}
               </div>
-              <div className="text-xs text-gray-500 mt-1">Pending</div>
+              <div className="text-xs text-gray-500 mt-1">{t('stock.pending')}</div>
             </div>
             <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
               <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -286,7 +288,7 @@ export function DeliveryStandards() {
           <div className="flex items-center justify-between">
             <div>
               <div className="text-3xl font-bold text-gray-900">{selectedIds.size}</div>
-              <div className="text-xs text-gray-500 mt-1">Selected</div>
+              <div className="text-xs text-gray-500 mt-1">{t('deliverystandards.selected')}</div>
             </div>
             <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
               <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -348,8 +350,8 @@ export function DeliveryStandards() {
                 }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
               >
-                <option value="hours">Hours</option>
-                <option value="days">Days</option>
+                <option value="hours">{t('deliverystandards.hours')}</option>
+                <option value="days">{t('deliverystandards.days')}</option>
               </select>
             </div>
             <div>
@@ -456,7 +458,7 @@ export function DeliveryStandards() {
             <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
             </svg>
-            <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
+            <h3 className="text-lg font-semibold text-gray-900">{t('stock.filters')}</h3>
             {(filters.carrier_id || filters.product_id || filters.origin_city_id || filters.destination_city_id || filters.origin_classification || filters.destination_classification || filters.pending_only) && (
               <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">
                 Active
@@ -894,8 +896,8 @@ export function DeliveryStandards() {
                       }
                       className="px-2 py-1 border border-gray-300 rounded text-sm"
                     >
-                      <option value="hours">Hours</option>
-                      <option value="days">Days</option>
+                      <option value="hours">{t('deliverystandards.hours')}</option>
+                      <option value="days">{t('deliverystandards.days')}</option>
                     </select>
                   </td>
                   <td className="px-6 py-4">
