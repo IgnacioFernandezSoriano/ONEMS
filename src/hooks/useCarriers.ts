@@ -53,7 +53,8 @@ export function useCarriers() {
 
   // Carrier operations
   const createCarrier = async (data: { code: string; name: string; type?: string; status?: string }) => {
-    const { data: newCarrier, error } = await supabase.from('carriers').insert(data).select().single()
+    const carrierData = { ...data, account_id: effectiveAccountId }
+    const { data: newCarrier, error } = await supabase.from('carriers').insert(carrierData).select().single()
     if (error) throw error
     setCarriers([...carriers, newCarrier])
   }
@@ -79,7 +80,8 @@ export function useCarriers() {
     standard_delivery_hours: number
     status?: string
   }) => {
-    const { data: newProduct, error } = await supabase.from('products').insert(data).select().single()
+    const productData = { ...data, account_id: effectiveAccountId }
+    const { data: newProduct, error } = await supabase.from('products').insert(productData).select().single()
     if (error) throw error
     setProducts([...products, newProduct])
   }
@@ -103,9 +105,10 @@ export function useCarriers() {
     material_id: string
     quantity: number
   }) => {
+    const pmData = { ...data, account_id: effectiveAccountId }
     const { data: newPM, error } = await supabase
       .from('product_materials')
-      .insert(data)
+      .insert(pmData)
       .select('*, material_catalog(*)')
       .single()
     
