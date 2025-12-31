@@ -1664,3 +1664,16 @@ topology.edit_node,Modifier le nœud
 topology.delete_region,Supprimer la région
 topology.delete_city,Supprimer la ville
 topology.delete_node,Supprimer le nœud
+topology.city,Ville
+topology.node,Nœud
+topology.create_city,Créer une ville
+topology.create_node,Créer un nœud
+topology.edit_city,Modifier la ville
+topology.edit_node,Modifier le nœud
+topology.delete_city,Supprimer la ville
+topology.delete_node,Supprimer le nœud
+topology.no_nodes_yet,Aucun nœud dans cette ville pour le moment
+topology.delete_city_confirm,Supprimer cette ville et tous ses nœuds ?
+topology.delete_node_confirm,Supprimer ce nœud ?
+topology.expand_city,Développer la ville
+topology.collapse_city,Réduire la ville

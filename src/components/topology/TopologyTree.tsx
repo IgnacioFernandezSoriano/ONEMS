@@ -4,6 +4,7 @@ import { RegionForm } from './RegionForm'
 import { CityForm } from './CityForm'
 
 import type { Region, City, Node } from '@/lib/types'
+import { useTranslation } from '@/hooks/useTranslation'
 
 interface TopologyTreeProps {
   regions: Region[]
@@ -38,6 +39,7 @@ export function TopologyTree({
   onDeleteCity,
   onDeleteNode,
 }: TopologyTreeProps) {
+  const { t } = useTranslation()
   const [expandedRegions, setExpandedRegions] = useState<Set<string>>(new Set())
   const [expandedCities, setExpandedCities] = useState<Set<string>>(new Set())
   const [modal, setModal] = useState<any>(null)
@@ -180,7 +182,7 @@ export function TopologyTree({
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                     </svg>
-                    City
+                    {t('topology.city')}
                   </button>
                   <button
                     onClick={() =>
@@ -231,7 +233,7 @@ export function TopologyTree({
                           <button
                             onClick={() => toggleCity(city.id)}
                             className="text-gray-400 hover:text-gray-600 transition-colors ml-2"
-                            title={isCityExpanded ? 'Collapse city' : 'Expand city'}
+                            title={isCityExpanded ? t('topology.collapse_city') : t('topology.expand_city')}
                           >
                             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                               {isCityExpanded ? (
@@ -280,7 +282,7 @@ export function TopologyTree({
                               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                               </svg>
-                              Node
+                              {t('topology.node')}
                             </button>
                             <button
                               onClick={() =>
@@ -300,7 +302,7 @@ export function TopologyTree({
                             </button>
                             <button
                               onClick={() => {
-                                if (confirm('Delete this city and all its nodes?')) {
+                                if (confirm(t('topology.delete_city_confirm'))) {
                                   onDeleteCity(city.id)
                                 }
                               }}
@@ -318,7 +320,7 @@ export function TopologyTree({
                           <div className="pl-6 pb-2 space-y-1">
                             {cityNodes.length === 0 && (
                               <div className="text-sm text-gray-500 italic p-3 ml-4">
-                                No nodes in this city yet
+                                {t('topology.no_nodes_yet')}
                               </div>
                             )}
                             {cityNodes.map((node) => (
@@ -388,7 +390,7 @@ export function TopologyTree({
                                   </button>
                                   <button
                                     onClick={() => {
-                                      if (confirm('Delete this node?')) {
+                                      if (confirm(t('topology.delete_node_confirm'))) {
                                         onDeleteNode(node.id)
                                       }
                                     }}
@@ -419,15 +421,15 @@ export function TopologyTree({
           isOpen={true}
           onClose={() => setModal(null)}
           title={
-            modal.type === 'region'
+              modal.type === 'region'
               ? modal.region
-                ? 'Edit Region'
-                : 'Create Region'
+                ? t('topology.edit_region')
+                : t('topology.create_region')
               : modal.type === 'city'
               ? modal.city
-                ? 'Edit City'
-                : 'Create City'
-              : 'Node Details'
+                ? t('topology.edit_city')
+                : t('topology.create_city')
+              : t('topology.edit_node')
           }
         >
           {modal.type === 'region' && (
