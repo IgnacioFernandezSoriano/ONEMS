@@ -313,6 +313,7 @@ dashboard.management_tip,Management Tip
 dashboard.material_management,Material Management
 dashboard.material_requirements,Material Requirements
 dashboard.needing_review,Needing Review
+dashboard.needs_review,Needs Review
 dashboard.next_30_days,Next 30 days
 dashboard.next_month,Next Month
 dashboard.on_vacation,On Vacation
@@ -327,10 +328,27 @@ dashboard.selected_period,Selected period:
 dashboard.shipments_to_panelists,Shipments to Panelists
 dashboard.standards_configuration,Standards Configuration
 dashboard.stock_alerts,Stock Alerts
+dashboard.tooltip_active_carriers,Number of active carriers available for shipments
+dashboard.tooltip_active_products,Number of active products configured across all carriers
+dashboard.tooltip_coverage_rate,Percentage of standards with complete configuration
+dashboard.tooltip_delayed_shipments,Shipments scheduled before today but not yet received
+dashboard.tooltip_management_dashboard,"Management Dashboard: Overview of operational metrics, resource status, and critical alerts. Use the period selector to view current or upcoming month statistics."
+dashboard.tooltip_material_requirements,Pending material requirements from regulators
+dashboard.tooltip_needs_review,Standards missing time or success percentage configuration
+dashboard.tooltip_panelist_stock,Stock alerts in panelist locations
+dashboard.tooltip_pending_shipments,Stock shipments pending dispatch
+dashboard.tooltip_received_plans,Plans successfully received
+dashboard.tooltip_sent_plans,Plans sent and in transit
+dashboard.tooltip_shipments_to_panelists,Pending shipments of materials to panelists
+dashboard.tooltip_total_panelists,Total number of panelists in the system
+dashboard.tooltip_total_plans,Total allocation plans in selected period
+dashboard.tooltip_total_standards,Total number of delivery standards configured
 dashboard.total_panelists,Total Panelists
 dashboard.total_plans,Total Plans
 dashboard.total_standards,Total Standards
 dashboard.total_status,Total & Status
+dashboard.unassigned,Unassigned
+dashboard.unavailable,Unavailable
 dashboard.upcoming_vacations,Upcoming Vacations
 delivery_standards.carrier,Carrier *
 delivery_standards.clear_all_selections,Clear All Selections

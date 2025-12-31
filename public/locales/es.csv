@@ -313,6 +313,7 @@ dashboard.management_tip,Consejo de gestión
 dashboard.material_management,Gestión de materiales
 dashboard.material_requirements,Requisitos de materiales
 dashboard.needing_review,Necesita revisión
+dashboard.needs_review,Requiere Revisión
 dashboard.next_30_days,Próximos 30 días
 dashboard.next_month,Próximo mes
 dashboard.on_vacation,De vacaciones
@@ -327,10 +328,27 @@ dashboard.selected_period,Período seleccionado:
 dashboard.shipments_to_panelists,Envíos a panelistas
 dashboard.standards_configuration,Configuración de estándares
 dashboard.stock_alerts,Alertas de stock
+dashboard.tooltip_active_carriers,Número de transportistas activos disponibles para envíos
+dashboard.tooltip_active_products,Número de productos activos configurados en todos los transportistas
+dashboard.tooltip_coverage_rate,Porcentaje de estándares con configuración completa
+dashboard.tooltip_delayed_shipments,Envíos programados antes de hoy pero aún no recibidos
+dashboard.tooltip_management_dashboard,"Panel de Gestión: Vista general de métricas operativas, estado de recursos y alertas críticas. Use el selector de período para ver estadísticas del mes actual o próximo."
+dashboard.tooltip_material_requirements,Requisitos de materiales pendientes de los reguladores
+dashboard.tooltip_needs_review,Estándares sin tiempo o porcentaje de éxito configurado
+dashboard.tooltip_panelist_stock,Alertas de stock en ubicaciones de panelistas
+dashboard.tooltip_pending_shipments,Envíos de stock pendientes de despacho
+dashboard.tooltip_received_plans,Planes recibidos exitosamente
+dashboard.tooltip_sent_plans,Planes enviados y en tránsito
+dashboard.tooltip_shipments_to_panelists,Envíos pendientes de materiales a panelistas
+dashboard.tooltip_total_panelists,Número total de panelistas en el sistema
+dashboard.tooltip_total_plans,Total de planes de asignación en el período seleccionado
+dashboard.tooltip_total_standards,Número total de estándares de entrega configurados
 dashboard.total_panelists,Total de panelistas
 dashboard.total_plans,Total de planes
 dashboard.total_standards,Total de estándares
 dashboard.total_status,Total y estado
+dashboard.unassigned,Sin Asignar
+dashboard.unavailable,No Disponible
 dashboard.upcoming_vacations,Próximas vacaciones
 delivery_standards.carrier,Transportista *
 delivery_standards.clear_all_selections,Borrar todas las selecciones
