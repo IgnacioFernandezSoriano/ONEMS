@@ -1731,3 +1731,13 @@ carriers.create_new_material,Créer un nouveau matériau
 carriers.create_new_material_desc,Ajouter un nouveau matériau au catalogue et l'assigner au produit
 carriers.products_without_materials_title,Produits sans matériaux
 carriers.products_need_materials,Ces produits nécessitent des assignations de matériaux pour être opérationnels
+productform.code,Code
+productform.description,Description
+productform.standard_delivery_time,Temps de livraison standard
+productform.time_unit,Unité de temps
+productform.cancel,Annuler
+productform.create,Créer
+productform.update,Mettre à jour
+productform.saving,Enregistrement...
+deliverystandards.hours,Heures
+deliverystandards.days,Jours

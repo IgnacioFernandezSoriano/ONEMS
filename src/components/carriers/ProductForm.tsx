@@ -43,7 +43,7 @@ export function ProductForm({ product, carrierId, onSubmit, onCancel }: ProductF
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium mb-1">Code *</label>
+        <label className="block text-sm font-medium mb-1">{t('productform.code')} *</label>
         <input
           type="text"
           required
@@ -56,7 +56,7 @@ export function ProductForm({ product, carrierId, onSubmit, onCancel }: ProductF
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">Description *</label>
+        <label className="block text-sm font-medium mb-1">{t('productform.description')} *</label>
         <textarea
           required
           value={formData.description}
@@ -69,7 +69,7 @@ export function ProductForm({ product, carrierId, onSubmit, onCancel }: ProductF
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Standard Delivery Time *</label>
+          <label className="block text-sm font-medium mb-1">{t('productform.standard_delivery_time')} *</label>
           <input
             type="number"
             required
@@ -81,7 +81,7 @@ export function ProductForm({ product, carrierId, onSubmit, onCancel }: ProductF
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Time Unit *</label>
+          <label className="block text-sm font-medium mb-1">{t('productform.time_unit')} *</label>
           <select
             required
             value={formData.time_unit}
@@ -113,14 +113,14 @@ export function ProductForm({ product, carrierId, onSubmit, onCancel }: ProductF
           onClick={onCancel}
           className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
         >
-          Cancel
+          {t('productform.cancel')}
         </button>
         <button
           type="submit"
           disabled={loading}
           className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
         >
-          {loading ? 'Saving...' : product ? 'Update' : 'Create'}
+          {loading ? t('productform.saving') : product ? t('productform.update') : t('productform.create')}
         </button>
       </div>
     </form>
