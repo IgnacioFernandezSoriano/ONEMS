@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react'
+import { useTranslation } from '@/hooks/useTranslation'
 import { Search, User, Package, Edit, Download } from 'lucide-react'
 import { useStockManagement } from '../../hooks/useStockManagement'
 import { SmartTooltip } from '../common/SmartTooltip'

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from '@/hooks/useTranslation'
 import { Modal } from '@/components/common/Modal'
 import { CarrierForm } from './CarrierForm'
 import { ProductForm } from './ProductForm'
@@ -36,6 +37,7 @@ export function CarriersTree({
   onUpdateProductMaterial,
   onRemoveProductMaterial,
 }: CarriersTreeProps) {
+  const { t } = useTranslation()
   const [expandedCarriers, setExpandedCarriers] = useState<Set<string>>(new Set())
   const [expandedProducts, setExpandedProducts] = useState<Set<string>>(new Set())
   const [modal, setModal] = useState<any>(null)

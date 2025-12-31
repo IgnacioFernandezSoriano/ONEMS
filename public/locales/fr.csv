@@ -226,6 +226,7 @@ bulk.retry_errors,Réessayer {count} erreurs
 bulk.selected,sélectionné(s)
 bulk.updated_records,{count} enregistrements mis à jour
 carriers.add_a_new_material_to_catalog_and_assign_to_produc,Ajouter un nouveau matériau au catalogue et l’assigner au produit
+carriers.add_product,Ajouter un Produit
 carriers.additional_details,Détails supplémentaires...
 carriers.all_carriers,Tous les transporteurs
 carriers.all_products,Tous les produits
@@ -268,12 +269,14 @@ carriers.name,Nom *
 carriers.no_active_materials_in_catalog_create_a_new_one_in,Aucun matériau actif dans le catalogue. Créez-en un nouveau.
 carriers.no_carriers_defined_yet,Aucun transporteur défini pour le moment
 carriers.no_materials_assigned_yet,Aucun matériau assigné pour le moment
+carriers.no_products,Aucun produit
 carriers.no_products_for_this_carrier_yet,Aucun produit pour ce transporteur pour le moment
 carriers.no_results_found,Aucun résultat trouvé
 carriers.pending_materials,Matériaux en attente
 carriers.product,Produit
 carriers.product_code,Code produit
 carriers.products,Produits
+carriers.products_count,{count} produits
 carriers.products_without_materials,Produits sans matériaux
 carriers.promise,Engagement
 carriers.quantity,Quantité *
@@ -562,6 +565,10 @@ materialrequirements.start_date,Date de début
 materialrequirements.total_materials,Total des matériaux
 materialrequirements.unit,Unité
 materialrequirements.year,Année
+materials.no_materials_selected,Aucun matériau sélectionné
+materials.search_materials,Rechercher des matériaux...
+materials.select_materials,Sélectionner les Matériaux
+materials.selected_materials,Matériaux Sélectionnés
 menu.accounts,Comptes
 menu.accounts.tooltip,Gérer tous les comptes du système
 menu.administration,Administration
@@ -732,6 +739,7 @@ onedb.total_records,Nombre total d'enregistrements
 onedb.transit_days,Jours de transit
 onedb.validated_postal_quality_analytics_repository,Répertoire validé d'analyses de qualité postale
 panelists.activate,Activer
+panelists.add_panelist,Ajouter un Panéliste
 panelists.address_line_1,Adresse ligne 1
 panelists.address_line_2,Adresse ligne 2
 panelists.all_cities,Toutes les villes
@@ -740,8 +748,10 @@ panelists.all_panelists_in_system,Tous les panélistes du système
 panelists.all_status,Tous les statuts
 panelists.apartment_suite_etc_optional,"Appartement, suite, etc. (facultatif)"
 panelists.available_for_deliveries,Disponible pour les livraisons
+panelists.bulk_actions,Actions en Masse
 panelists.choose_an_action_to_apply_to_all_selected_items,Choisissez une action à appliquer à tous les éléments sélectionnés
 panelists.city,Ville
+panelists.clear_selection_btn,Effacer
 panelists.code,Code
 panelists.code_name_email,"Code, nom, e-mail..."
 panelists.country,Pays
@@ -752,22 +762,27 @@ panelists.email,E-mail
 panelists.filters,Filtres
 panelists.leave_empty_to_auto_generate,Laisser vide pour générer automatiquement
 panelists.loading,Chargement...
+panelists.loading_panelists,Chargement des panélistes...
 panelists.manage_panelist_profiles_and_assignments,Gérer les profils et les affectations des panélistes
 panelists.manage_panelists_and_their_availability_for_delive,Gérer les panélistes et leur disponibilité pour les livraisons
 panelists.mobile,Mobile
 panelists.name,Nom
+panelists.no_panelists_found,Aucun panéliste trouvé
 panelists.node,Nœud
 panelists.not_available,Indisponible
 panelists.panelist_code,Code du panéliste
 panelists.panelists,Panélistes
 panelists.panelists_management,Gestion des panélistes
+panelists.panelists_tab,Panélistes
 panelists.postal_code,Code postal
 panelists.reset_all_filters,Réinitialiser tous les filtres
 panelists.select_a_node,Sélectionnez un nœud
+panelists.selected_count,{count} sélectionné(s)
 panelists.street_address,Adresse
 panelists.telegram_id,ID Telegram
 panelists.total_panelists,Total des panélistes
 panelists.unavailability_periods,Périodes d'indisponibilité
+panelists.unavailability_tab,Indisponibilité
 panelists.username_or_numeric_id,@nomdutilisateur ou ID numérique
 panelistunavailability.tsx.additional_information_about_this_unavailability_p,Informations supplémentaires sur cette période d'indisponibilité...
 panelistunavailability.tsx.all_panelists,Tous les panélistes
@@ -1078,12 +1093,15 @@ stock.low_stock_only,Stock faible uniquement
 stock.material,Matériel
 stock.materials,Matériels
 stock.materials_to_send,Matériels à envoyer
+stock.maximum_stock,Stock Maximum
 stock.metrics_overview,Aperçu des métriques
 stock.minimum,Minimum
+stock.minimum_stock,Stock Minimum
 stock.movement_type,Type de mouvement
 stock.net_quantity,Quantité nette
 stock.new_quantity,Nouvelle quantité
 stock.no_stock_alerts_found,Aucune alerte de stock trouvée
+stock.no_stock_data,Aucune donnée de stock disponible
 stock.no_stock_records_found,Aucun enregistrement de stock trouvé
 stock.node,Nœud
 stock.normal,Normal
@@ -1114,6 +1132,7 @@ stock.receive_purchase_order,Recevoir le bon de commande
 stock.received,Reçu
 stock.regulator_insufficient,Régulateur insuffisant
 stock.removed_materials_will_create_new_pending_shipment,Matériaux retirés (créera une nouvelle expédition en attente)
+stock.reorder_point,Point de Réapprovisionnement
 stock.reset_filters,Réinitialiser les filtres
 stock.restore,Restaurer
 stock.search_by_material_or_code,Rechercher par matériau ou code...

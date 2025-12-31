@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from '@/hooks/useTranslation'
 import { useMaterialCatalog } from '@/hooks/useMaterialCatalog'
 import { Button } from '@/components/common/Button'
 import type { MaterialCatalog } from '@/lib/types'
@@ -11,6 +12,7 @@ interface MaterialSelectorProps {
 }
 
 export function MaterialSelector({ productId, onSelect, onCreateNew, onCancel }: MaterialSelectorProps) {
+  const { t } = useTranslation()
   const { catalog, loading, createCatalogItem } = useMaterialCatalog()
   const [mode, setMode] = useState<'select' | 'create' | null>(null)
   const [selectedMaterialId, setSelectedMaterialId] = useState('')

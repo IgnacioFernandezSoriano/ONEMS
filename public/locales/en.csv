@@ -226,6 +226,7 @@ bulk.retry_errors,Retry {count} errors
 bulk.selected,selected
 bulk.updated_records,Updated {count} records
 carriers.add_a_new_material_to_catalog_and_assign_to_produc,Add a new material to catalog and assign to product
+carriers.add_product,Add Product
 carriers.additional_details,Additional details...
 carriers.all_carriers,All Carriers
 carriers.all_products,All Products
@@ -268,12 +269,14 @@ carriers.name,Name *
 carriers.no_active_materials_in_catalog_create_a_new_one_in,No active materials in catalog. Create a new one instead.
 carriers.no_carriers_defined_yet,No carriers defined yet
 carriers.no_materials_assigned_yet,No materials assigned yet
+carriers.no_products,No products
 carriers.no_products_for_this_carrier_yet,No products for this carrier yet
 carriers.no_results_found,No results found
 carriers.pending_materials,Pending Materials
 carriers.product,Product
 carriers.product_code,Product Code
 carriers.products,Products
+carriers.products_count,{count} products
 carriers.products_without_materials,Products without Materials
 carriers.promise,Promise
 carriers.quantity,Quantity *
@@ -562,6 +565,10 @@ materialrequirements.start_date,Start Date
 materialrequirements.total_materials,Total Materials
 materialrequirements.unit,Unit
 materialrequirements.year,Year
+materials.no_materials_selected,No materials selected
+materials.search_materials,Search materials...
+materials.select_materials,Select Materials
+materials.selected_materials,Selected Materials
 menu.accounts,Accounts
 menu.accounts.tooltip,Manage all accounts in the system
 menu.administration,Administration
@@ -732,6 +739,7 @@ onedb.total_records,Total Records
 onedb.transit_days,Transit Days
 onedb.validated_postal_quality_analytics_repository,Validated postal quality analytics repository
 panelists.activate,Activate
+panelists.add_panelist,Add Panelist
 panelists.address_line_1,Address Line 1
 panelists.address_line_2,Address Line 2
 panelists.all_cities,All Cities
@@ -740,8 +748,10 @@ panelists.all_panelists_in_system,All panelists in system
 panelists.all_status,All Status
 panelists.apartment_suite_etc_optional,"Apartment, suite, etc. (optional)"
 panelists.available_for_deliveries,Available for deliveries
+panelists.bulk_actions,Bulk Actions
 panelists.choose_an_action_to_apply_to_all_selected_items,Choose an action to apply to all selected items
 panelists.city,City
+panelists.clear_selection_btn,Clear
 panelists.code,Code
 panelists.code_name_email,"Code, name, email..."
 panelists.country,Country
@@ -752,22 +762,27 @@ panelists.email,Email
 panelists.filters,Filters
 panelists.leave_empty_to_auto_generate,Leave empty to auto-generate
 panelists.loading,Loading...
+panelists.loading_panelists,Loading panelists...
 panelists.manage_panelist_profiles_and_assignments,Manage panelist profiles and assignments
 panelists.manage_panelists_and_their_availability_for_delive,Manage panelists and their availability for deliveries
 panelists.mobile,Mobile
 panelists.name,Name
+panelists.no_panelists_found,No panelists found
 panelists.node,Node
 panelists.not_available,Not available
 panelists.panelist_code,Panelist Code
 panelists.panelists,Panelists
 panelists.panelists_management,Panelists Management
+panelists.panelists_tab,Panelists
 panelists.postal_code,Postal Code
 panelists.reset_all_filters,Reset all filters
 panelists.select_a_node,Select a node
+panelists.selected_count,{count} selected
 panelists.street_address,Street address
 panelists.telegram_id,Telegram ID
 panelists.total_panelists,Total Panelists
 panelists.unavailability_periods,Unavailability Periods
+panelists.unavailability_tab,Unavailability
 panelists.username_or_numeric_id,@username or numeric ID
 panelistunavailability.tsx.additional_information_about_this_unavailability_p,Additional information about this unavailability period...
 panelistunavailability.tsx.all_panelists,All Panelists
@@ -1078,12 +1093,15 @@ stock.low_stock_only,Low Stock Only
 stock.material,Material
 stock.materials,Materials
 stock.materials_to_send,Materials to Send
+stock.maximum_stock,Maximum Stock
 stock.metrics_overview,Metrics Overview
 stock.minimum,Minimum
+stock.minimum_stock,Minimum Stock
 stock.movement_type,Movement Type
 stock.net_quantity,Net Quantity
 stock.new_quantity,New Quantity
 stock.no_stock_alerts_found,No stock alerts found
+stock.no_stock_data,No stock data available
 stock.no_stock_records_found,No stock records found
 stock.node,Node
 stock.normal,Normal
@@ -1114,6 +1132,7 @@ stock.receive_purchase_order,Receive Purchase Order
 stock.received,Received
 stock.regulator_insufficient,Regulator Insufficient
 stock.removed_materials_will_create_new_pending_shipment,Removed Materials (Will Create New Pending Shipment)
+stock.reorder_point,Reorder Point
 stock.reset_filters,Reset Filters
 stock.restore,Restore
 stock.search_by_material_or_code,Search by material or code...
