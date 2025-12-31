@@ -27,6 +27,46 @@ admin.the_demo2_account_is_not_available_please_contact_,"La cuenta DEMO2 no est
 admin.this_will_permanently_delete,Esto eliminará permanentemente:
 admin.user_management,Gestión de usuarios
 admin.warning_this_action_cannot_be_undone,Advertencia: Esta acción no se puede deshacer
+allocation_generator.actions,Acciones
+allocation_generator.applied_date,Fecha de Aplicación
+allocation_generator.applied_plans_historical,Planes Aplicados (Histórico)
+allocation_generator.apply,Aplicar
+allocation_generator.automatic_generator,Generador Automático
+allocation_generator.carrier,Transportista
+allocation_generator.confirm_apply,¿Aplicar este plan? Se moverá a los planes aplicados.
+allocation_generator.confirm_delete,¿Eliminar este plan?
+allocation_generator.csv_import_coming_soon,¡Funcionalidad de importación CSV próximamente!
+allocation_generator.delete,Eliminar
+allocation_generator.description,Generar planes de asignación de muestras automáticamente basados en patrones de distribución
+allocation_generator.download_csv,Descargar CSV
+allocation_generator.error,Error
+allocation_generator.error_downloading,Error al descargar el plan
+allocation_generator.generated_plans_title,Planes Generados
+allocation_generator.loading,Cargando...
+allocation_generator.manual_import,Importación Manual
+allocation_generator.no_applied_plans,Aún no hay planes aplicados
+allocation_generator.no_details_found,No se encontraron detalles para este plan
+allocation_generator.no_generated_plans,Aún no hay planes generados
+allocation_generator.period,Período
+allocation_generator.plan_applied_success,¡Plan aplicado exitosamente!
+allocation_generator.plan_deleted_success,¡Plan eliminado exitosamente!
+allocation_generator.plan_name,Nombre del Plan
+allocation_generator.product,Producto
+allocation_generator.samples,Muestras
+allocation_generator.status,Estado
+allocation_generator.tab_applied_plans,Planes Aplicados
+allocation_generator.tab_generated_plans,Planes Generados
+allocation_generator.tab_generator,Generador
+allocation_generator.title,Generador de Planes de Asignación
+allocation_generator.to,a
+allocation_generator.tooltip_how_it_works,Cómo funciona:
+allocation_generator.tooltip_how_it_works_text,"Define el total de muestras, rango de fechas, transportista/producto y matrices de distribución. El sistema creará un plan detallado con pares origen-destino y fechas programadas."
+allocation_generator.tooltip_purpose,Propósito:
+allocation_generator.tooltip_purpose_text,Generar automáticamente planes de asignación de muestras basados en patrones de distribución por ciudad y variaciones estacionales.
+allocation_generator.tooltip_title,Generador de Planes de Asignación
+allocation_generator.tooltip_usage,Uso:
+allocation_generator.tooltip_usage_text,"Genera planes, revísalos en la pestaña ""Planes Generados"", luego aplícalos para activar las asignaciones de muestras."
+allocation_generator.user_not_authenticated,Usuario no autenticado
 allocation_plans.all_carriers,Todos los operadores
 allocation_plans.all_cities,Todas las ciudades
 allocation_plans.all_nodes,Todos los nodos

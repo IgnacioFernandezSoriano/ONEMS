@@ -27,6 +27,46 @@ admin.the_demo2_account_is_not_available_please_contact_,The DEMO2 account is no
 admin.this_will_permanently_delete,This will permanently delete:
 admin.user_management,User Management
 admin.warning_this_action_cannot_be_undone,Warning: This action cannot be undone
+allocation_generator.actions,Actions
+allocation_generator.applied_date,Applied Date
+allocation_generator.applied_plans_historical,Applied Plans (Historical)
+allocation_generator.apply,Apply
+allocation_generator.automatic_generator,Automatic Generator
+allocation_generator.carrier,Carrier
+allocation_generator.confirm_apply,Apply this plan? It will be moved to the applied plans.
+allocation_generator.confirm_delete,Delete this plan?
+allocation_generator.csv_import_coming_soon,CSV import functionality coming soon!
+allocation_generator.delete,Delete
+allocation_generator.description,Generate sample allocation plans automatically based on distribution patterns
+allocation_generator.download_csv,Download CSV
+allocation_generator.error,Error
+allocation_generator.error_downloading,Error downloading plan
+allocation_generator.generated_plans_title,Generated Plans
+allocation_generator.loading,Loading...
+allocation_generator.manual_import,Manual Import
+allocation_generator.no_applied_plans,No applied plans yet
+allocation_generator.no_details_found,No details found for this plan
+allocation_generator.no_generated_plans,No generated plans yet
+allocation_generator.period,Period
+allocation_generator.plan_applied_success,Plan applied successfully!
+allocation_generator.plan_deleted_success,Plan deleted successfully!
+allocation_generator.plan_name,Plan Name
+allocation_generator.product,Product
+allocation_generator.samples,Samples
+allocation_generator.status,Status
+allocation_generator.tab_applied_plans,Applied Plans
+allocation_generator.tab_generated_plans,Generated Plans
+allocation_generator.tab_generator,Generator
+allocation_generator.title,Allocation Plan Generator
+allocation_generator.to,to
+allocation_generator.tooltip_how_it_works,How it works:
+allocation_generator.tooltip_how_it_works_text,"Define total samples, date range, carrier/product, and distribution matrices. The system will create a detailed plan with origin-destination pairs and scheduled dates."
+allocation_generator.tooltip_purpose,Purpose:
+allocation_generator.tooltip_purpose_text,Automatically generate sample allocation plans based on city distribution patterns and seasonal variations.
+allocation_generator.tooltip_title,Allocation Plan Generator
+allocation_generator.tooltip_usage,Usage:
+allocation_generator.tooltip_usage_text,"Generate plans, review them in ""Generated Plans"" tab, then apply them to activate sample allocations."
+allocation_generator.user_not_authenticated,User not authenticated
 allocation_plans.all_carriers,All Carriers
 allocation_plans.all_cities,All Cities
 allocation_plans.all_nodes,All Nodes

@@ -8,8 +8,10 @@ import { Button } from '@/components/common/Button'
 import { downloadCSV, convertToCSV, type CSVExportData } from '@/lib/csvExport'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
+import { useTranslation } from '@/hooks/useTranslation'
 
 export function AllocationPlanGenerator() {
+  const { t } = useTranslation()
   const { profile } = useAuth()
   const [activeTab, setActiveTab] = useState<'generator' | 'generated' | 'applied'>('generator')
   const {
@@ -33,26 +35,26 @@ export function AllocationPlanGenerator() {
   }
 
   const handleApplyPlan = async (planId: string) => {
-    if (!confirm('Apply this plan? It will be moved to the applied plans.')) return
+    if (!confirm(t('allocation_generator.confirm_apply'))) return
     try {
       if (!profile?.id) {
-        alert('User not authenticated')
+        alert(t('allocation_generator.user_not_authenticated'))
         return
       }
       await applyPlan(planId, profile.id)
-      alert('Plan applied successfully!')
+      alert(t('allocation_generator.plan_applied_success'))
     } catch (error: any) {
-      alert(`Error: ${error.message}`)
+      alert(`${t('allocation_generator.error')}: ${error.message}`)
     }
   }
 
   const handleDeletePlan = async (planId: string) => {
-    if (!confirm('Delete this plan?')) return
+    if (!confirm(t('allocation_generator.confirm_delete'))) return
     try {
       await deletePlan(planId)
-      alert('Plan deleted successfully!')
+      alert(t('allocation_generator.plan_deleted_success'))
     } catch (error: any) {
-      alert(`Error: ${error.message}`)
+      alert(`${t('allocation_generator.error')}: ${error.message}`)
     }
   }
 
@@ -81,7 +83,7 @@ export function AllocationPlanGenerator() {
 
       if (error) throw error
       if (!details || details.length === 0) {
-        alert('No details found for this plan')
+        alert(t('allocation_generator.no_details_found'))
         return
       }
 
@@ -106,7 +108,7 @@ export function AllocationPlanGenerator() {
       const filename = `${planName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`
       downloadCSV(filename, csv)
     } catch (error: any) {
-      alert(`Error downloading plan: ${error.message}`)
+      alert(`${t('allocation_generator.error_downloading')}: ${error.message}`)
     }
   }
 
@@ -132,14 +134,14 @@ export function AllocationPlanGenerator() {
   }
 
   const handleImportCSV = async (file: File) => {
-    alert('CSV import functionality coming soon!')
+    alert(t('allocation_generator.csv_import_coming_soon'))
     // TODO: Implement CSV parsing and import
   }
 
   if (loading || appliedLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-600">Loading...</div>
+        <div className="text-gray-600">{t('allocation_generator.loading')}</div>
       </div>
     )
   }
@@ -148,7 +150,7 @@ export function AllocationPlanGenerator() {
     <div className="space-y-6">
       {/* Header with Tooltip */}
       <div className="flex items-center gap-3">
-        <h1 className="text-3xl font-bold text-gray-900">Allocation Plan Generator</h1>
+        <h1 className="text-3xl font-bold text-gray-900">{t('allocation_generator.title')}</h1>
         <span className="group relative">
           <svg
             className="w-5 h-5 text-gray-400 cursor-help"
@@ -162,20 +164,20 @@ export function AllocationPlanGenerator() {
             />
           </svg>
           <div className="invisible group-hover:visible absolute z-10 w-96 p-3 bg-gray-900 text-white text-sm rounded-lg shadow-lg top-0 left-8">
-            <p className="font-semibold mb-2">Allocation Plan Generator</p>
+            <p className="font-semibold mb-2">{t('allocation_generator.tooltip_title')}</p>
             <p className="mb-2">
-              <strong>Purpose:</strong> Automatically generate sample allocation plans based on city distribution patterns and seasonal variations.
+              <strong>{t('allocation_generator.tooltip_purpose')}</strong> {t('allocation_generator.tooltip_purpose_text')}
             </p>
             <p className="mb-2">
-              <strong>How it works:</strong> Define total samples, date range, carrier/product, and distribution matrices. The system will create a detailed plan with origin-destination pairs and scheduled dates.
+              <strong>{t('allocation_generator.tooltip_how_it_works')}</strong> {t('allocation_generator.tooltip_how_it_works_text')}
             </p>
             <p>
-              <strong>Usage:</strong> Generate plans, review them in "Generated Plans" tab, then apply them to activate sample allocations.
+              <strong>{t('allocation_generator.tooltip_usage')}</strong> {t('allocation_generator.tooltip_usage_text')}
             </p>
           </div>
         </span>
       </div>
-      <p className="text-gray-600">Generate sample allocation plans automatically based on distribution patterns</p>
+      <p className="text-gray-600">{t('allocation_generator.description')}</p>
 
       {/* Tabs */}
       <div className="border-b">
@@ -188,7 +190,7 @@ export function AllocationPlanGenerator() {
                 : 'border-transparent text-gray-600'
             }`}
           >
-            Generator
+            {t('allocation_generator.tab_generator')}
           </button>
           <button
             onClick={() => setActiveTab('generated')}
@@ -198,7 +200,7 @@ export function AllocationPlanGenerator() {
                 : 'border-transparent text-gray-600'
             }`}
           >
-            Generated Plans ({generatedPlans.length})
+            {t('allocation_generator.tab_generated_plans')} ({generatedPlans.length})
           </button>
           <button
             onClick={() => setActiveTab('applied')}
@@ -208,7 +210,7 @@ export function AllocationPlanGenerator() {
                 : 'border-transparent text-gray-600'
             }`}
           >
-            Applied Plans ({appliedPlans.length})
+            {t('allocation_generator.tab_applied_plans')} ({appliedPlans.length})
           </button>
         </div>
       </div>
@@ -217,7 +219,7 @@ export function AllocationPlanGenerator() {
       {activeTab === 'generator' && (
         <div className="space-y-6">
           <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-lg font-medium mb-4">Automatic Generator</h2>
+            <h2 className="text-lg font-medium mb-4">{t('allocation_generator.automatic_generator')}</h2>
             <AllocationPlanGeneratorForm
               carriers={carriers}
               products={products}
@@ -228,7 +230,7 @@ export function AllocationPlanGenerator() {
           </div>
 
           <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-lg font-medium mb-4">Manual Import</h2>
+            <h2 className="text-lg font-medium mb-4">{t('allocation_generator.manual_import')}</h2>
             <CSVHandler onImport={handleImportCSV} onDownloadTemplate={handleDownloadTemplate} />
           </div>
         </div>
@@ -237,34 +239,34 @@ export function AllocationPlanGenerator() {
       {activeTab === 'generated' && (
         <div className="bg-white rounded-lg shadow">
           <div className="p-6">
-            <h2 className="text-lg font-medium mb-4">Generated Plans</h2>
+            <h2 className="text-lg font-medium mb-4">{t('allocation_generator.generated_plans_title')}</h2>
             {generatedPlans.length === 0 ? (
-              <div className="text-gray-500 text-center py-8">No generated plans yet</div>
+              <div className="text-gray-500 text-center py-8">{t('allocation_generator.no_generated_plans')}</div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead>
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Plan Name
+                        {t('allocation_generator.plan_name')}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Carrier
+                        {t('allocation_generator.carrier')}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Product
+                        {t('allocation_generator.product')}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Samples
+                        {t('allocation_generator.samples')}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Period
+                        {t('allocation_generator.period')}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Status
+                        {t('allocation_generator.status')}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Actions
+                        {t('allocation_generator.actions')}
                       </th>
                     </tr>
                   </thead>
@@ -276,7 +278,7 @@ export function AllocationPlanGenerator() {
                         <td className="px-6 py-4">{plan.product?.description}</td>
                         <td className="px-6 py-4">{plan.details_count}</td>
                         <td className="px-6 py-4">
-                          {plan.start_date} to {plan.end_date}
+                          {plan.start_date} {t('allocation_generator.to')} {plan.end_date}
                         </td>
                         <td className="px-6 py-4">
                           <span
@@ -295,7 +297,7 @@ export function AllocationPlanGenerator() {
                               onClick={() => handleDownloadPlan(plan.id, plan.plan_name)}
                               className="text-blue-600 hover:text-blue-800 text-sm"
                             >
-                              Download CSV
+                              {t('allocation_generator.download_csv')}
                             </button>
                             {plan.status !== 'applied' && (
                               <>
@@ -303,13 +305,13 @@ export function AllocationPlanGenerator() {
                                   onClick={() => handleApplyPlan(plan.id)}
                                   className="text-green-600 hover:text-green-800 text-sm"
                                 >
-                                  Apply
+                                  {t('allocation_generator.apply')}
                                 </button>
                                 <button
                                   onClick={() => handleDeletePlan(plan.id)}
                                   className="text-red-600 hover:text-red-800 text-sm"
                                 >
-                                  Delete
+                                  {t('allocation_generator.delete')}
                                 </button>
                               </>
                             )}
@@ -328,31 +330,31 @@ export function AllocationPlanGenerator() {
       {activeTab === 'applied' && (
         <div className="bg-white rounded-lg shadow">
           <div className="p-6">
-            <h2 className="text-lg font-medium mb-4">Applied Plans (Historical)</h2>
+            <h2 className="text-lg font-medium mb-4">{t('allocation_generator.applied_plans_historical')}</h2>
             {appliedPlans.length === 0 ? (
-              <div className="text-gray-500 text-center py-8">No applied plans yet</div>
+              <div className="text-gray-500 text-center py-8">{t('allocation_generator.no_applied_plans')}</div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead>
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Plan Name
+                        {t('allocation_generator.plan_name')}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Carrier
+                        {t('allocation_generator.carrier')}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Product
+                        {t('allocation_generator.product')}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Samples
+                        {t('allocation_generator.samples')}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Applied Date
+                        {t('allocation_generator.applied_date')}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Status
+                        {t('allocation_generator.status')}
                       </th>
                     </tr>
                   </thead>
