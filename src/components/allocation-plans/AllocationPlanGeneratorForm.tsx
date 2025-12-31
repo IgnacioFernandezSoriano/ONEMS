@@ -203,7 +203,7 @@ export function AllocationPlanGeneratorForm({
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="flex items-center gap-1 text-sm font-medium mb-1">
-            Plan Name *
+            {t('allocation_generator.plan_name')} *
             <span className="group relative">
               <svg className="w-3 h-3 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
@@ -224,7 +224,7 @@ export function AllocationPlanGeneratorForm({
 
         <div>
           <label className="flex items-center gap-1 text-sm font-medium mb-1">
-            Total Samples *
+            {t('allocation_generator.total_samples')} *
             <span className="group relative">
               <svg className="w-3 h-3 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
@@ -304,7 +304,7 @@ export function AllocationPlanGeneratorForm({
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="flex items-center gap-1 text-sm font-medium mb-1">
-            Start Date *
+            {t('allocation_generator.start_date')} *
             <span className="group relative">
               <svg className="w-3 h-3 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
@@ -325,7 +325,7 @@ export function AllocationPlanGeneratorForm({
 
         <div>
           <label className="flex items-center gap-1 text-sm font-medium mb-1">
-            End Date *
+            {t('allocation_generator.end_date')} *
             <span className="group relative">
               <svg className="w-3 h-3 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
@@ -429,14 +429,14 @@ export function AllocationPlanGeneratorForm({
               onClick={clearMatrixHandler}
               className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition-colors"
             >
-              Clear
+              {t('allocation_generator.clear')}
             </button>
             <button
               type="button"
               onClick={autoFillMatrixHandler}
               className="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
             >
-              Auto-fill to 100%
+              {t('allocation_generator.auto_fill')}
             </button>
           </div>
         </div>
@@ -543,7 +543,7 @@ export function AllocationPlanGeneratorForm({
 
       <div className="flex justify-end">
         <Button type="submit" disabled={loading}>
-          {loading ? 'Generating...' : 'Generate Allocation Plan'}
+          {loading ? t('common.loading') : t('allocation_generator.generate_plan')}
         </Button>
       </div>
     </form>
