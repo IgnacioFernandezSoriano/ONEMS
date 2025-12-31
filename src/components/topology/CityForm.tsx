@@ -16,6 +16,7 @@ export function CityForm({ city, regionId, onSubmit, onCancel }: CityFormProps) 
     region_id: regionId,
     name: city?.name || '',
     code: city?.code || '',
+    classification: city?.classification || '',
     population: city?.population?.toString() || '',
     latitude: city?.latitude?.toString() || '',
     longitude: city?.longitude?.toString() || '',
@@ -33,6 +34,7 @@ export function CityForm({ city, regionId, onSubmit, onCancel }: CityFormProps) 
         code: formData.code,
         status: formData.status,
       }
+      if (formData.classification) data.classification = formData.classification
       if (formData.population) data.population = parseInt(formData.population)
       if (formData.latitude) data.latitude = parseFloat(formData.latitude)
       if (formData.longitude) data.longitude = parseFloat(formData.longitude)
@@ -46,7 +48,7 @@ export function CityForm({ city, regionId, onSubmit, onCancel }: CityFormProps) 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium mb-1">City Name *</label>
+        <label className="block text-sm font-medium mb-1">{t('cityform.city_name')} *</label>
         <input
           type="text"
           required
@@ -58,7 +60,7 @@ export function CityForm({ city, regionId, onSubmit, onCancel }: CityFormProps) 
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">City Code *</label>
+        <label className="block text-sm font-medium mb-1">{t('cityform.city_code')} *</label>
         <input
           type="text"
           required
@@ -71,9 +73,23 @@ export function CityForm({ city, regionId, onSubmit, onCancel }: CityFormProps) 
       </div>
 
       <div>
+        <label className="block text-sm font-medium mb-1">{t('cityform.city_class')}</label>
+        <select
+          value={formData.classification}
+          onChange={(e) => setFormData({ ...formData, classification: e.target.value as any })}
+          className="w-full px-3 py-2 border rounded-md"
+        >
+          <option value="">-- {t('cityform.optional')} --</option>
+          <option value="A">{t('cityform.class_a')}</option>
+          <option value="B">{t('cityform.class_b')}</option>
+          <option value="C">{t('cityform.class_c')}</option>
+        </select>
+      </div>
+
+      <div>
         <label className="block text-sm font-medium mb-1">
-          Population
-          <span className="text-xs text-gray-500 ml-2">(optional)</span>
+          {t('cityform.population')}
+          <span className="text-xs text-gray-500 ml-2">({t('cityform.optional')})</span>
         </label>
         <input
           type="number"
@@ -85,7 +101,7 @@ export function CityForm({ city, regionId, onSubmit, onCancel }: CityFormProps) 
           placeholder="e.g., 3200000"
         />
         <p className="text-xs text-gray-500 mt-1">
-          Total population of the city (used for impact analysis in reporting)
+          {t('cityform.population_description')}
         </p>
       </div>
 
@@ -129,10 +145,10 @@ export function CityForm({ city, regionId, onSubmit, onCancel }: CityFormProps) 
 
       <div className="flex gap-2 justify-end">
         <Button type="button" variant="secondary" onClick={onCancel}>
-          Cancel
+          {t('cityform.cancel')}
         </Button>
         <Button type="submit" disabled={loading}>
-          {loading ? 'Saving...' : city ? 'Update' : 'Create'}
+          {loading ? t('cityform.saving') : city ? t('cityform.update') : t('cityform.create')}
         </Button>
       </div>
     </form>

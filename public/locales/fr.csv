@@ -1677,3 +1677,20 @@ topology.delete_city_confirm,Supprimer cette ville et tous ses nœuds ?
 topology.delete_node_confirm,Supprimer ce nœud ?
 topology.expand_city,Développer la ville
 topology.collapse_city,Réduire la ville
+cityform.city_name,Nom de la ville
+cityform.city_code,Code de la ville
+cityform.city_class,Classe de ville
+cityform.class_a,Classe A
+cityform.class_b,Classe B
+cityform.class_c,Classe C
+cityform.population,Population
+cityform.optional,optionnel
+cityform.population_description,Population totale de la ville (utilisée pour l'analyse d'impact dans les rapports)
+cityform.latitude,Latitude
+cityform.longitude,Longitude
+cityform.cancel,Annuler
+cityform.create,Créer
+cityform.update,Mettre à jour
+cityform.saving,Enregistrement...
+topology.latitude,Latitude
+topology.longitude,Longitude
