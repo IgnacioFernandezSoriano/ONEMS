@@ -100,9 +100,7 @@ export function Carriers() {
       filteredProducts = filteredProducts.filter(p => !p.hasMaterials)
     }
 
-    // Filter carriers to only show those with products
-    const carrierIdsWithProducts = new Set(filteredProducts.map(p => p.carrier_id))
-    filteredCarriers = filteredCarriers.filter(c => carrierIdsWithProducts.has(c.id))
+    // Note: Show all carriers, even those without products
 
     return {
       carriers: filteredCarriers,
