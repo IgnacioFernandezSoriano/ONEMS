@@ -76,6 +76,7 @@ allocation_plans.all_records,Tous les enregistrements
 allocation_plans.all_status,Tous les statuts
 allocation_plans.auto_fill_to_100,Remplissage automatique à 100 %
 allocation_plans.availability_issues,Problèmes de disponibilité
+allocation_plans.bulk_operations,Opérations en Masse
 allocation_plans.cancel_selected,Annuler la sélection
 allocation_plans.cancelled,Annulé
 allocation_plans.carrier,Opérateur
@@ -102,9 +103,11 @@ allocation_plans.first_day_of_the_allocation_period_samples_will_be,Premier jour
 allocation_plans.import_csv,Importer CSV
 allocation_plans.invalid,Invalide
 allocation_plans.last_day_of_the_allocation_period_samples_will_be_,Dernier jour de la période d'allocation. Les échantillons seront programmés jusqu'à cette date.
+allocation_plans.loading,Chargement des plans d'allocation...
 allocation_plans.no_panelist,Aucun panéliste
 allocation_plans.no_panelist_assigned_to_destination_node,Aucun panéliste assigné au nœud de destination
 allocation_plans.no_panelist_assigned_to_origin_node,Aucun panéliste assigné au nœud d'origine
+allocation_plans.no_records,Aucun plan d'allocation trouvé
 allocation_plans.notified,Notifié
 allocation_plans.optional,Optionnel
 allocation_plans.optional_distribute_samples_unevenly_across_months,Optionnel : Distribuer les échantillons de manière inégale selon les mois pour refléter les variations saisonnières.
@@ -140,6 +143,7 @@ allocation_plans.select_city,Sélectionner la ville
 allocation_plans.select_node,Sélectionner le nœud...
 allocation_plans.select_plan,Sélectionner le plan
 allocation_plans.select_product,Sélectionner le produit
+allocation_plans.selected_count,{count} sélectionné(s)
 allocation_plans.send,Envoyer
 allocation_plans.sent,Envoyé
 allocation_plans.sent_at,Envoyé à :
@@ -226,6 +230,7 @@ bulk.retry_errors,Réessayer {count} erreurs
 bulk.selected,sélectionné(s)
 bulk.updated_records,{count} enregistrements mis à jour
 carriers.add_a_new_material_to_catalog_and_assign_to_produc,Ajouter un nouveau matériau au catalogue et l’assigner au produit
+carriers.add_carrier,Ajouter un Transporteur
 carriers.add_product,Ajouter un Produit
 carriers.additional_details,Détails supplémentaires...
 carriers.all_carriers,Tous les transporteurs
@@ -233,6 +238,7 @@ carriers.all_products,Tous les produits
 carriers.all_products_have_materials,Tous les produits ont des matériaux !
 carriers.all_status,Tous les statuts
 carriers.carrier,Transporteur
+carriers.carrier_details,Détails du Transporteur
 carriers.carriers,Transporteurs
 carriers.carriers_products,Transporteurs et produits
 carriers.choose_an_existing_material_from_your_catalog,Choisissez un matériau existant dans votre catalogue
@@ -260,6 +266,7 @@ carriers.every_product_has_materials_assigned_from_the_cata,Chaque produit a des
 carriers.expand_all,Tout développer
 carriers.expand_all_products_in_this_carrier,Développer tous les produits de ce transporteur
 carriers.hours,Heures
+carriers.loading,Chargement des transporteurs...
 carriers.loading_carriers,Chargement des transporteurs...
 carriers.manage_shipping_carriers_products_and_material_req,"Gérer les transporteurs, les produits et les besoins en matériaux"
 carriers.mat_001,MAT-001
@@ -267,6 +274,7 @@ carriers.material,Matériau
 carriers.materials,Matériaux
 carriers.name,Nom *
 carriers.no_active_materials_in_catalog_create_a_new_one_in,Aucun matériau actif dans le catalogue. Créez-en un nouveau.
+carriers.no_carriers,Aucun transporteur trouvé
 carriers.no_carriers_defined_yet,Aucun transporteur défini pour le moment
 carriers.no_materials_assigned_yet,Aucun matériau assigné pour le moment
 carriers.no_products,Aucun produit
@@ -303,23 +311,36 @@ catalog.material_name,Nom du Matériau
 catalog.title,Catalogue de Matériaux
 common.1st_semester,1er Semestre
 common.2nd_semester,2ème Semestre
+common.about,À propos
 common.actions,Actions
 common.active,Actif
+common.all,Tous
 common.apply,Appliquer
 common.available,disponible
+common.bulk_edit,Édition en Masse
 common.cancel,Annuler
 common.clear,Effacer
 common.close,Fermer
+common.confirm_delete,Supprimer cet enregistrement?
+common.create,Créer
+common.created_successfully,Créé avec succès
 common.delete,Supprimer
+common.deleted_successfully,Supprimé avec succès
 common.download,Télécharger
 common.edit,Modifier
 common.error,Erreur
+common.export,Exporter
+common.filters,Filtres
 common.generate_plan,Générer le Plan
+common.hide_filters,Masquer les Filtres
 common.import,Importer
 common.inactive,Inactif
 common.information,Informations
+common.loading,Chargement...
 common.no_panelist,Pas de Panéliste
 common.of,de
+common.pending,En Attente
+common.please_select_at_least_one,Veuillez sélectionner au moins un enregistrement
 common.promise,Promesse
 common.records,enregistrements
 common.refresh,Actualiser
@@ -328,9 +349,12 @@ common.remove,Retirer
 common.reset,Réinitialiser
 common.save,Enregistrer
 common.search,Rechercher
+common.select_all,Tout Sélectionner
+common.show_filters,Afficher les Filtres
 common.status,Statut
 common.total,Total
 common.unavailable,Indisponible
+common.updated_successfully,Mis à jour avec succès
 common.year,Année
 countrytopology.all_cities,Toutes les villes
 countrytopology.all_nodes,Tous les nœuds
@@ -429,25 +453,45 @@ dashboard.total_status,Total & Statut
 dashboard.unassigned,Non Assigné
 dashboard.unavailable,Indisponible
 dashboard.upcoming_vacations,Vacances à venir
+delivery_standards.about_text,Configurer les délais de livraison attendus entre les villes pour chaque combinaison transporteur-produit
+delivery_standards.absolute,Absolu
 delivery_standards.add_standard,Ajouter une Norme
+delivery_standards.all_carriers,Tous les Transporteurs
+delivery_standards.all_destinations,Toutes les Destinations
+delivery_standards.all_origins,Toutes les Origines
+delivery_standards.all_products,Tous les Produits
+delivery_standards.bulk_update,Mise à Jour en Masse
 delivery_standards.carrier,Transporteur *
 delivery_standards.clear_all_selections,Effacer toutes les sélections
+delivery_standards.confirm_delete,Supprimer cette norme de livraison?
+delivery_standards.create_standard,Créer une Norme
+delivery_standards.created,Norme de livraison créée avec succès
+delivery_standards.critical_threshold,Seuil Critique
 delivery_standards.days,Jours
+delivery_standards.delete_selected,Supprimer la Sélection
+delivery_standards.deleted,Norme de livraison supprimée avec succès
 delivery_standards.description,Configurer les délais de livraison attendus et les tolérances
 delivery_standards.destination,Destination
 delivery_standards.destination_city,Ville de destination *
+delivery_standards.destination_classification,Classification Destination
 delivery_standards.e_g_24,ex. : 24
 delivery_standards.e_g_85,ex. : 85
+delivery_standards.edit_standard,Modifier la Norme
 delivery_standards.estimated_combinations,Combinaisons estimées :
 delivery_standards.expected_days,Jours Attendus
+delivery_standards.generate_combinations,Générer des Combinaisons
 delivery_standards.generate_delivery_standards,Générer les normes de livraison
 delivery_standards.generation_complete,Génération terminée
 delivery_standards.hours,Heures
+delivery_standards.loading_standards,Chargement des normes de livraison...
 delivery_standards.no_products_for_this_carrier,Aucun produit pour ce transporteur
 delivery_standards.origin,Origine
 delivery_standards.origin_city,Ville d'origine *
+delivery_standards.origin_classification,Classification Origine
+delivery_standards.pending_only,En Attente Uniquement
 delivery_standards.product,Produit *
 delivery_standards.promise,Engagement
+delivery_standards.relative,Relatif
 delivery_standards.select_carrier,Sélectionner un transporteur
 delivery_standards.select_destination,Sélectionner la destination
 delivery_standards.select_origin,Sélectionner l'origine
@@ -455,9 +499,13 @@ delivery_standards.select_product,Sélectionner un produit
 delivery_standards.smart_generation,Génération intelligente :
 delivery_standards.standard_time,Temps standard
 delivery_standards.success,Taux de réussite %
+delivery_standards.success_percentage,% de Succès
+delivery_standards.threshold_type,Type de Seuil
 delivery_standards.time_unit,Unité de temps *
 delivery_standards.title,Normes de Livraison
 delivery_standards.tolerance_days,Jours de Tolérance
+delivery_standards.updated,Norme de livraison mise à jour avec succès
+delivery_standards.warning_threshold,Seuil d'Avertissement
 deliverystandards.about_delivery_standards,À propos des normes de livraison
 deliverystandards.absoluto,Absolu :
 deliverystandards.absoluto_del_100,Absolu (% de 100 %)
@@ -531,10 +579,24 @@ deliverystandards.warning_threshold,Seuil d'avertissement (%)
 layout.all_accounts,Tous les comptes
 layout.sign_out,Déconnexion
 layout.view_as_account,Afficher en tant que compte :
+load_balancing.about_text,Équilibrer l'allocation des panélistes entre les nœuds pour optimiser la distribution de la charge de travail
+load_balancing.apply_balance,Appliquer l'Équilibrage
+load_balancing.applying,Application de l'équilibrage...
+load_balancing.calculating,Calcul de l'équilibrage...
+load_balancing.confirm_apply,Appliquer ces modifications aux affectations des panélistes?
+load_balancing.current_distribution,Distribution Actuelle
 load_balancing.current_load,Charge Actuelle
+load_balancing.current_panelists,Panélistes Actuels
 load_balancing.description,Équilibrer la charge de travail entre les nœuds
+load_balancing.difference,Différence
+load_balancing.loading,Chargement des données d'équilibrage...
+load_balancing.node,Nœud
+load_balancing.preview_changes,Aperçu des Modifications
 load_balancing.rebalance,Rééquilibrer
+load_balancing.reset_preview,Réinitialiser l'Aperçu
+load_balancing.success,Équilibrage appliqué avec succès
 load_balancing.target_load,Charge Cible
+load_balancing.target_panelists,Panélistes Cibles
 load_balancing.title,Équilibrage de Charge
 material_catalog.additional_details,Détails supplémentaires...
 material_catalog.code,Code *
@@ -807,10 +869,12 @@ panelists.manage_panelist_profiles_and_assignments,Gérer les profils et les aff
 panelists.manage_panelists_and_their_availability_for_delive,Gérer les panélistes et leur disponibilité pour les livraisons
 panelists.mobile,Mobile
 panelists.name,Nom
+panelists.no_panelists,Aucun panéliste trouvé
 panelists.no_panelists_found,Aucun panéliste trouvé
 panelists.node,Nœud
 panelists.not_available,Indisponible
 panelists.panelist_code,Code du panéliste
+panelists.panelist_details,Détails du Panéliste
 panelists.panelists,Panélistes
 panelists.panelists_management,Gestion des panélistes
 panelists.panelists_tab,Panélistes
@@ -1221,6 +1285,9 @@ stockmanagement.stock_management_alerts,Gestion des stocks et alertes
 stockmanagement.tabs,Onglets
 topology.3_7038,"-3,7038"
 topology.40_4168,"40,4168"
+topology.add_city,Ajouter une Ville
+topology.add_node,Ajouter un Nœud
+topology.add_region,Ajouter une Région
 topology.cities,Villes
 topology.city,Ville
 topology.city_code,Code postal *
@@ -1240,9 +1307,11 @@ topology.edit_node,Modifier le nœud
 topology.edit_region,Modifier la région
 topology.expand_all_cities_in_this_region,Développer toutes les villes de cette région
 topology.latitude,Latitude
+topology.loading,Chargement de la topologie...
 topology.longitude,Longitude
 topology.no_cities_in_this_region_yet,Pas encore de villes dans cette région
 topology.no_nodes_in_this_city_yet,Pas encore de nœuds dans cette ville
+topology.no_regions,Aucune région trouvée
 topology.node,Nœud
 topology.nodes,Nœuds
 topology.panelist_assigned,Panéliste assigné

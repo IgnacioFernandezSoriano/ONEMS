@@ -96,7 +96,7 @@ export function DeliveryStandards() {
 
   const handleBulkUpdate = async () => {
     if (selectedIds.size === 0) {
-      alert('Please select at least one record')
+      alert(t('common.please_select_at_least_one'))
       return
     }
 
@@ -129,7 +129,7 @@ export function DeliveryStandards() {
 
   const handleBulkDelete = async () => {
     if (selectedIds.size === 0) {
-      alert('Please select at least one record')
+      alert(t('common.please_select_at_least_one'))
       return
     }
 
@@ -148,7 +148,7 @@ export function DeliveryStandards() {
     try {
       await createStandard(data)
       setShowCreateModal(false)
-      alert('Delivery standard created successfully')
+      alert(t('delivery_standards.created'))
     } catch (error: any) {
       alert(`Error: ${error.message}`)
       throw error
@@ -161,7 +161,7 @@ export function DeliveryStandards() {
       await updateStandard(editingStandard.id, data)
       setShowEditModal(false)
       setEditingStandard(null)
-      alert('Delivery standard updated successfully')
+      alert(t('delivery_standards.updated'))
     } catch (error: any) {
       alert(`Error: ${error.message}`)
       throw error
@@ -169,10 +169,10 @@ export function DeliveryStandards() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Delete this delivery standard?')) return
+    if (!confirm(t('delivery_standards.confirm_delete'))) return
     try {
       await deleteStandard(id)
-      alert('Delivery standard deleted successfully')
+      alert(t('delivery_standards.deleted'))
     } catch (error: any) {
       alert(`Error: ${error.message}`)
     }
@@ -193,7 +193,7 @@ export function DeliveryStandards() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Loading delivery standards...</div>
+        <div className="text-gray-500">{ t('delivery_standards.loading_standards')}</div>
       </div>
     )
   }
@@ -201,7 +201,7 @@ export function DeliveryStandards() {
   if (error) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-red-500">Error: {error}</div>
+        <div className="text-red-500">{ t('common.error')}: {error}</div>
       </div>
     )
   }
@@ -212,13 +212,13 @@ export function DeliveryStandards() {
       <div className="mb-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-bold text-gray-900">Delivery Standards</h1>
+            <h1 className="text-3xl font-bold text-gray-900">{ t('delivery_standards.title')}</h1>
             <div className="group relative">
               <svg className="w-5 h-5 text-gray-400 hover:text-blue-600 cursor-help transition-colors" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
               </svg>
               <div className="absolute left-0 top-6 w-80 bg-gray-900 text-white text-sm rounded-lg p-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 shadow-xl">
-                <div className="font-semibold mb-2">About Delivery Standards</div>
+                <div className="font-semibold mb-2">{ t('common.about')} { t('delivery_standards.title')}</div>
                 <div className="space-y-2 text-gray-200">
                   <p><strong>Purpose:</strong> Define expected delivery times (J+K) and success rates between city pairs for each carrier-product combination.</p>
                   <p><strong>Key Metrics:</strong></p>

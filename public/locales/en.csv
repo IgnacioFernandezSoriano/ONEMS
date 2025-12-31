@@ -76,6 +76,7 @@ allocation_plans.all_records,All Records
 allocation_plans.all_status,All Status
 allocation_plans.auto_fill_to_100,Auto-fill to 100%
 allocation_plans.availability_issues,Availability Issues
+allocation_plans.bulk_operations,Bulk Operations
 allocation_plans.cancel_selected,Cancel Selected
 allocation_plans.cancelled,Cancelled
 allocation_plans.carrier,Carrier
@@ -102,9 +103,11 @@ allocation_plans.first_day_of_the_allocation_period_samples_will_be,First day of
 allocation_plans.import_csv,Import CSV
 allocation_plans.invalid,Invalid
 allocation_plans.last_day_of_the_allocation_period_samples_will_be_,Last day of the allocation period. Samples will be scheduled until this date.
+allocation_plans.loading,Loading allocation plans...
 allocation_plans.no_panelist,No Panelist
 allocation_plans.no_panelist_assigned_to_destination_node,No panelist assigned to destination node
 allocation_plans.no_panelist_assigned_to_origin_node,No panelist assigned to origin node
+allocation_plans.no_records,No allocation plans found
 allocation_plans.notified,Notified
 allocation_plans.optional,Optional
 allocation_plans.optional_distribute_samples_unevenly_across_months,Optional: Distribute samples unevenly across months to reflect seasonal patterns.
@@ -140,6 +143,7 @@ allocation_plans.select_city,Select City
 allocation_plans.select_node,Select node...
 allocation_plans.select_plan,Select Plan
 allocation_plans.select_product,Select product
+allocation_plans.selected_count,{count} selected
 allocation_plans.send,Send
 allocation_plans.sent,Sent
 allocation_plans.sent_at,Sent at:
@@ -226,6 +230,7 @@ bulk.retry_errors,Retry {count} errors
 bulk.selected,selected
 bulk.updated_records,Updated {count} records
 carriers.add_a_new_material_to_catalog_and_assign_to_produc,Add a new material to catalog and assign to product
+carriers.add_carrier,Add Carrier
 carriers.add_product,Add Product
 carriers.additional_details,Additional details...
 carriers.all_carriers,All Carriers
@@ -233,6 +238,7 @@ carriers.all_products,All Products
 carriers.all_products_have_materials,All products have materials!
 carriers.all_status,All Status
 carriers.carrier,Carrier
+carriers.carrier_details,Carrier Details
 carriers.carriers,Carriers
 carriers.carriers_products,Carriers & Products
 carriers.choose_an_existing_material_from_your_catalog,Choose an existing material from your catalog
@@ -260,6 +266,7 @@ carriers.every_product_has_materials_assigned_from_the_cata,Every product has ma
 carriers.expand_all,Expand All
 carriers.expand_all_products_in_this_carrier,Expand all products in this carrier
 carriers.hours,Hours
+carriers.loading,Loading carriers...
 carriers.loading_carriers,Loading carriers...
 carriers.manage_shipping_carriers_products_and_material_req,"Manage shipping carriers, products, and material requirements"
 carriers.mat_001,MAT-001
@@ -267,6 +274,7 @@ carriers.material,Material
 carriers.materials,Materials
 carriers.name,Name *
 carriers.no_active_materials_in_catalog_create_a_new_one_in,No active materials in catalog. Create a new one instead.
+carriers.no_carriers,No carriers found
 carriers.no_carriers_defined_yet,No carriers defined yet
 carriers.no_materials_assigned_yet,No materials assigned yet
 carriers.no_products,No products
@@ -303,23 +311,36 @@ catalog.material_name,Material Name
 catalog.title,Material Catalog
 common.1st_semester,1st Semester
 common.2nd_semester,2nd Semester
+common.about,About
 common.actions,Actions
 common.active,Active
+common.all,All
 common.apply,Apply
 common.available,available
+common.bulk_edit,Bulk Edit
 common.cancel,Cancel
 common.clear,Clear
 common.close,Close
+common.confirm_delete,Delete this record?
+common.create,Create
+common.created_successfully,Created successfully
 common.delete,Delete
+common.deleted_successfully,Deleted successfully
 common.download,Download
 common.edit,Edit
 common.error,Error
+common.export,Export
+common.filters,Filters
 common.generate_plan,Generate Plan
+common.hide_filters,Hide Filters
 common.import,Import
 common.inactive,Inactive
 common.information,Information
+common.loading,Loading...
 common.no_panelist,No Panelist
 common.of,of
+common.pending,Pending
+common.please_select_at_least_one,Please select at least one record
 common.promise,Promise
 common.records,records
 common.refresh,Refresh
@@ -328,9 +349,12 @@ common.remove,Remove
 common.reset,Reset
 common.save,Save
 common.search,Search
+common.select_all,Select All
+common.show_filters,Show Filters
 common.status,Status
 common.total,Total
 common.unavailable,Unavailable
+common.updated_successfully,Updated successfully
 common.year,Year
 countrytopology.all_cities,All Cities
 countrytopology.all_nodes,All Nodes
@@ -429,25 +453,45 @@ dashboard.total_status,Total & Status
 dashboard.unassigned,Unassigned
 dashboard.unavailable,Unavailable
 dashboard.upcoming_vacations,Upcoming Vacations
+delivery_standards.about_text,Configure expected delivery times between cities for each carrier-product combination
+delivery_standards.absolute,Absolute
 delivery_standards.add_standard,Add Standard
+delivery_standards.all_carriers,All Carriers
+delivery_standards.all_destinations,All Destinations
+delivery_standards.all_origins,All Origins
+delivery_standards.all_products,All Products
+delivery_standards.bulk_update,Bulk Update
 delivery_standards.carrier,Carrier *
 delivery_standards.clear_all_selections,Clear All Selections
+delivery_standards.confirm_delete,Delete this delivery standard?
+delivery_standards.create_standard,Create Standard
+delivery_standards.created,Delivery standard created successfully
+delivery_standards.critical_threshold,Critical Threshold
 delivery_standards.days,Days
+delivery_standards.delete_selected,Delete Selected
+delivery_standards.deleted,Delivery standard deleted successfully
 delivery_standards.description,Configure expected delivery times and tolerances
 delivery_standards.destination,Destination
 delivery_standards.destination_city,Destination City *
+delivery_standards.destination_classification,Destination Classification
 delivery_standards.e_g_24,"e.g., 24"
 delivery_standards.e_g_85,"e.g., 85"
+delivery_standards.edit_standard,Edit Standard
 delivery_standards.estimated_combinations,Estimated combinations:
 delivery_standards.expected_days,Expected Days
+delivery_standards.generate_combinations,Generate Combinations
 delivery_standards.generate_delivery_standards,Generate Delivery Standards
 delivery_standards.generation_complete,Generation Complete
 delivery_standards.hours,Hours
+delivery_standards.loading_standards,Loading delivery standards...
 delivery_standards.no_products_for_this_carrier,No products for this carrier
 delivery_standards.origin,Origin
 delivery_standards.origin_city,Origin City *
+delivery_standards.origin_classification,Origin Classification
+delivery_standards.pending_only,Pending Only
 delivery_standards.product,Product *
 delivery_standards.promise,Promise
+delivery_standards.relative,Relative
 delivery_standards.select_carrier,Select carrier
 delivery_standards.select_destination,Select destination
 delivery_standards.select_origin,Select origin
@@ -455,9 +499,13 @@ delivery_standards.select_product,Select product
 delivery_standards.smart_generation,Smart Generation:
 delivery_standards.standard_time,Standard Time
 delivery_standards.success,Success %
+delivery_standards.success_percentage,Success %
+delivery_standards.threshold_type,Threshold Type
 delivery_standards.time_unit,Time Unit *
 delivery_standards.title,Delivery Standards
 delivery_standards.tolerance_days,Tolerance Days
+delivery_standards.updated,Delivery standard updated successfully
+delivery_standards.warning_threshold,Warning Threshold
 deliverystandards.about_delivery_standards,About Delivery Standards
 deliverystandards.absoluto,Absoluto:
 deliverystandards.absoluto_del_100,Absoluto (% del 100%)
@@ -531,10 +579,24 @@ deliverystandards.warning_threshold,Warning Threshold (%)
 layout.all_accounts,All Accounts
 layout.sign_out,Sign Out
 layout.view_as_account,View as account:
+load_balancing.about_text,Balance panelist allocation across nodes to optimize workload distribution
+load_balancing.apply_balance,Apply Balance
+load_balancing.applying,Applying balance...
+load_balancing.calculating,Calculating balance...
+load_balancing.confirm_apply,Apply these changes to panelist assignments?
+load_balancing.current_distribution,Current Distribution
 load_balancing.current_load,Current Load
+load_balancing.current_panelists,Current Panelists
 load_balancing.description,Balance workload across nodes
+load_balancing.difference,Difference
+load_balancing.loading,Loading load balancing data...
+load_balancing.node,Node
+load_balancing.preview_changes,Preview Changes
 load_balancing.rebalance,Rebalance
+load_balancing.reset_preview,Reset Preview
+load_balancing.success,Balance applied successfully
 load_balancing.target_load,Target Load
+load_balancing.target_panelists,Target Panelists
 load_balancing.title,Load Balancing
 material_catalog.additional_details,Additional details...
 material_catalog.code,Code *
@@ -807,10 +869,12 @@ panelists.manage_panelist_profiles_and_assignments,Manage panelist profiles and 
 panelists.manage_panelists_and_their_availability_for_delive,Manage panelists and their availability for deliveries
 panelists.mobile,Mobile
 panelists.name,Name
+panelists.no_panelists,No panelists found
 panelists.no_panelists_found,No panelists found
 panelists.node,Node
 panelists.not_available,Not available
 panelists.panelist_code,Panelist Code
+panelists.panelist_details,Panelist Details
 panelists.panelists,Panelists
 panelists.panelists_management,Panelists Management
 panelists.panelists_tab,Panelists
@@ -1221,6 +1285,9 @@ stockmanagement.stock_management_alerts,Stock Management & Alerts
 stockmanagement.tabs,Tabs
 topology.3_7038,-3.7038
 topology.40_4168,40.4168
+topology.add_city,Add City
+topology.add_node,Add Node
+topology.add_region,Add Region
 topology.cities,Cities
 topology.city,City
 topology.city_code,City Code *
@@ -1240,9 +1307,11 @@ topology.edit_node,Edit node
 topology.edit_region,Edit region
 topology.expand_all_cities_in_this_region,Expand all cities in this region
 topology.latitude,Latitude
+topology.loading,Loading topology...
 topology.longitude,Longitude
 topology.no_cities_in_this_region_yet,No cities in this region yet
 topology.no_nodes_in_this_city_yet,No nodes in this city yet
+topology.no_regions,No regions found
 topology.node,Node
 topology.nodes,Nodes
 topology.panelist_assigned,Panelist Assigned
