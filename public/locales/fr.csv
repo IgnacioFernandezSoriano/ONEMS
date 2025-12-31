@@ -114,11 +114,17 @@ allocation_plans.origin_node,Nœud d'origine
 allocation_plans.pending,En attente
 allocation_plans.plan,Plan
 allocation_plans.plan_name,Nom du plan *
+allocation_plans.please_ensure_destination_panelist,Veuillez vous assurer que le panéliste de destination est assigné
+allocation_plans.please_ensure_origin_panelist,Veuillez vous assurer que le panéliste d'origine est assigné
+allocation_plans.please_enter_tag_id,Veuillez saisir un ID d'étiquette
+allocation_plans.please_select_datetime,Veuillez sélectionner une date et une heure
 allocation_plans.product,Produit
 allocation_plans.promise,Engagement
 allocation_plans.quick_period_selection,Sélection rapide de période
 allocation_plans.receive,Recevoir
 allocation_plans.received,Reçu
+allocation_plans.received_at_time,Reçu à
+allocation_plans.received_by,Reçu par
 allocation_plans.received_date_time,Date et heure de réception
 allocation_plans.register_reception,Enregistrer la réception
 allocation_plans.register_shipment,Enregistrer l'expédition
@@ -137,6 +143,8 @@ allocation_plans.select_product,Sélectionner le produit
 allocation_plans.send,Envoyer
 allocation_plans.sent,Envoyé
 allocation_plans.sent_at,Envoyé à :
+allocation_plans.sent_at_time,Envoyé à
+allocation_plans.sent_by,Envoyé par
 allocation_plans.sent_date_time,Date et heure d'envoi
 allocation_plans.start_date,Date de début
 allocation_plans.tag_id,ID de l'étiquette
@@ -205,6 +213,18 @@ auth.signing_in,Connexion en cours...
 auth.try_demo_account,Essayer le compte de démonstration
 auth.wherequalitystarts,WhereQualityStarts
 auth.your_email_com,votre@email.com
+bulk.cancelled_records,{count} enregistrements annulés
+bulk.confirm_cancel,Annuler {count} enregistrements sélectionnés ?
+bulk.confirm_delete,Êtes-vous sûr de vouloir supprimer {count} enregistrements ? Cette action est irréversible.
+bulk.confirm_reprocess,Retraiter {count} enregistrements avec des erreurs de transfert ?
+bulk.deleted_records,{count} enregistrements supprimés
+bulk.please_select_date,Veuillez sélectionner une date
+bulk.please_select_destination_node,Veuillez sélectionner un nœud de destination
+bulk.please_select_origin_node,Veuillez sélectionner un nœud d'origine
+bulk.reprocessed_records,{count} enregistrements retraités
+bulk.retry_errors,Réessayer {count} erreurs
+bulk.selected,sélectionné(s)
+bulk.updated_records,{count} enregistrements mis à jour
 carriers.add_a_new_material_to_catalog_and_assign_to_produc,Ajouter un nouveau matériau au catalogue et l’assigner au produit
 carriers.additional_details,Détails supplémentaires...
 carriers.all_carriers,Tous les transporteurs
@@ -284,15 +304,19 @@ common.cancel,Annuler
 common.clear,Effacer
 common.close,Fermer
 common.delete,Supprimer
+common.download,Télécharger
 common.edit,Modifier
 common.error,Erreur
 common.generate_plan,Générer le Plan
+common.import,Importer
 common.inactive,Inactif
 common.information,Informations
 common.no_panelist,Pas de Panéliste
 common.of,de
 common.promise,Promesse
+common.records,enregistrements
 common.refresh,Actualiser
+common.register,Enregistrer
 common.remove,Retirer
 common.reset,Réinitialiser
 common.save,Enregistrer

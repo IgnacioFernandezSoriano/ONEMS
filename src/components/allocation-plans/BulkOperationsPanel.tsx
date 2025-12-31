@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from '@/hooks/useTranslation'
 
 interface Props {
   selectedCount: number
@@ -25,6 +26,7 @@ export function BulkOperationsPanel({
   onBulkDelete,
   onClearSelection,
 }: Props) {
+  const { t } = useTranslation()
   const [originNodeId, setOriginNodeId] = useState('')
   const [destinationNodeId, setDestinationNodeId] = useState('')
   const [date, setDate] = useState('')
@@ -34,14 +36,14 @@ export function BulkOperationsPanel({
 
   const handleBulkUpdateOriginNode = async () => {
     if (!originNodeId) {
-      alert('Please select an origin node')
+      alert(t('bulk.please_select_origin_node'))
       return
     }
     try {
       setProcessing(true)
       await onBulkUpdateOriginNode(originNodeId)
       setOriginNodeId('')
-      alert(`Updated ${selectedCount} records`)
+      alert(t('bulk.updated_records').replace('{count}', String(selectedCount)))
     } catch (error: any) {
       alert(`Error: ${error.message}`)
     } finally {
@@ -51,14 +53,14 @@ export function BulkOperationsPanel({
 
   const handleBulkUpdateDestinationNode = async () => {
     if (!destinationNodeId) {
-      alert('Please select a destination node')
+      alert(t('bulk.please_select_destination_node'))
       return
     }
     try {
       setProcessing(true)
       await onBulkUpdateDestinationNode(destinationNodeId)
       setDestinationNodeId('')
-      alert(`Updated ${selectedCount} records`)
+      alert(t('bulk.updated_records').replace('{count}', String(selectedCount)))
     } catch (error: any) {
       alert(`Error: ${error.message}`)
     } finally {
@@ -68,14 +70,14 @@ export function BulkOperationsPanel({
 
   const handleBulkUpdateDate = async () => {
     if (!date) {
-      alert('Please select a date')
+      alert(t('bulk.please_select_date'))
       return
     }
     try {
       setProcessing(true)
       await onBulkUpdateDate(date)
       setDate('')
-      alert(`Updated ${selectedCount} records`)
+      alert(t('bulk.updated_records').replace('{count}', String(selectedCount)))
     } catch (error: any) {
       alert(`Error: ${error.message}`)
     } finally {
@@ -84,11 +86,11 @@ export function BulkOperationsPanel({
   }
 
   const handleBulkCancel = async () => {
-    if (!confirm(`Cancel ${selectedCount} selected records?`)) return
+    if (!confirm(t('bulk.confirm_cancel').replace('{count}', String(selectedCount)))) return
     try {
       setProcessing(true)
       await onBulkCancel()
-      alert(`Cancelled ${selectedCount} records`)
+      alert(t('bulk.cancelled_records').replace('{count}', String(selectedCount)))
     } catch (error: any) {
       alert(`Error: ${error.message}`)
     } finally {
@@ -98,13 +100,13 @@ export function BulkOperationsPanel({
 
   const handleBulkReprocess = async () => {
     const errorCount = selectedDetails.filter(d => d.status === 'transfer_error').length
-    if (!confirm(`Reprocess ${errorCount} records with transfer errors?`)) {
+    if (!confirm(t('bulk.confirm_reprocess').replace('{count}', String(errorCount)))) {
       return
     }
     try {
       setProcessing(true)
       await onBulkReprocess()
-      alert(`Reprocessed ${errorCount} records`)
+      alert(t('bulk.reprocessed_records').replace('{count}', String(errorCount)))
     } catch (error: any) {
       alert(`Error: ${error.message}`)
     } finally {
@@ -113,13 +115,13 @@ export function BulkOperationsPanel({
   }
 
   const handleBulkDelete = async () => {
-    if (!confirm(`Are you sure you want to delete ${selectedCount} records? This cannot be undone.`)) {
+    if (!confirm(t('bulk.confirm_delete').replace('{count}', String(selectedCount)))) {
       return
     }
     try {
       setProcessing(true)
       await onBulkDelete()
-      alert(`Deleted ${selectedCount} records`)
+      alert(t('bulk.deleted_records').replace('{count}', String(selectedCount)))
     } catch (error: any) {
       alert(`Error: ${error.message}`)
     } finally {
@@ -131,7 +133,7 @@ export function BulkOperationsPanel({
     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <span className="font-medium text-blue-900">{selectedCount} selected</span>
+          <span className="font-medium text-blue-900">{selectedCount} {t('bulk.selected')}</span>
           <button
             onClick={onClearSelection}
             className="text-sm text-blue-600 hover:text-blue-800"

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from '@/hooks/useTranslation'
 import type { AllocationPlanDetailWithRelations } from '@/lib/types'
 
 interface Props {
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export function RegisterReceptionModal({ detail, panelists, onClose, onRegister }: Props) {
+  const { t } = useTranslation()
   const [receivedAt, setReceivedAt] = useState('')
   const [receivedByPanelistId, setReceivedByPanelistId] = useState('')
   const [saving, setSaving] = useState(false)
@@ -36,12 +38,12 @@ export function RegisterReceptionModal({ detail, panelists, onClose, onRegister 
     e.preventDefault()
 
     if (!receivedAt) {
-      alert('Please select a date and time')
+      alert(t('allocation_plans.please_select_datetime'))
       return
     }
 
     if (!receivedByPanelistId) {
-      alert('Please ensure destination panelist is assigned')
+      alert(t('allocation_plans.please_ensure_destination_panelist'))
       return
     }
 
@@ -69,7 +71,7 @@ export function RegisterReceptionModal({ detail, panelists, onClose, onRegister 
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
         <div className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-medium text-gray-900">Register Reception</h3>
+            <h3 className="text-lg font-medium text-gray-900">{t('allocation_plans.register_reception')}</h3>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600"
@@ -86,11 +88,11 @@ export function RegisterReceptionModal({ detail, panelists, onClose, onRegister 
             <div className="bg-gray-50 p-3 rounded text-sm">
               <div className="grid grid-cols-2 gap-2 mb-2">
                 <div>
-                  <span className="text-gray-600">Origin:</span>
+                  <span className="text-gray-600">{t('allocation_plans.origin')}</span>
                   <p className="font-medium">{detail.origin_node?.auto_id || 'N/A'}</p>
                 </div>
                 <div>
-                  <span className="text-gray-600">Destination:</span>
+                  <span className="text-gray-600">{t('allocation_plans.destination')}</span>
                   <p className="font-medium">{detail.destination_node?.auto_id || 'N/A'}</p>
                 </div>
               </div>

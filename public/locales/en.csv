@@ -114,11 +114,17 @@ allocation_plans.origin_node,Origin Node
 allocation_plans.pending,Pending
 allocation_plans.plan,Plan
 allocation_plans.plan_name,Plan Name *
+allocation_plans.please_ensure_destination_panelist,Please ensure destination panelist is assigned
+allocation_plans.please_ensure_origin_panelist,Please ensure origin panelist is assigned
+allocation_plans.please_enter_tag_id,Please enter a Tag ID
+allocation_plans.please_select_datetime,Please select a date and time
 allocation_plans.product,Product
 allocation_plans.promise,Promise
 allocation_plans.quick_period_selection,Quick Period Selection
 allocation_plans.receive,Receive
 allocation_plans.received,Received
+allocation_plans.received_at_time,Received at
+allocation_plans.received_by,Received by
 allocation_plans.received_date_time,Received Date & Time
 allocation_plans.register_reception,Register reception
 allocation_plans.register_shipment,Register shipment
@@ -137,6 +143,8 @@ allocation_plans.select_product,Select product
 allocation_plans.send,Send
 allocation_plans.sent,Sent
 allocation_plans.sent_at,Sent at:
+allocation_plans.sent_at_time,Sent at
+allocation_plans.sent_by,Sent by
 allocation_plans.sent_date_time,Sent Date & Time
 allocation_plans.start_date,Start Date
 allocation_plans.tag_id,Tag ID
@@ -205,6 +213,18 @@ auth.signing_in,Signing in...
 auth.try_demo_account,Try Demo Account
 auth.wherequalitystarts,WhereQualityStarts
 auth.your_email_com,your@email.com
+bulk.cancelled_records,Cancelled {count} records
+bulk.confirm_cancel,Cancel {count} selected records?
+bulk.confirm_delete,Are you sure you want to delete {count} records? This cannot be undone.
+bulk.confirm_reprocess,Reprocess {count} records with transfer errors?
+bulk.deleted_records,Deleted {count} records
+bulk.please_select_date,Please select a date
+bulk.please_select_destination_node,Please select a destination node
+bulk.please_select_origin_node,Please select an origin node
+bulk.reprocessed_records,Reprocessed {count} records
+bulk.retry_errors,Retry {count} errors
+bulk.selected,selected
+bulk.updated_records,Updated {count} records
 carriers.add_a_new_material_to_catalog_and_assign_to_produc,Add a new material to catalog and assign to product
 carriers.additional_details,Additional details...
 carriers.all_carriers,All Carriers
@@ -284,15 +304,19 @@ common.cancel,Cancel
 common.clear,Clear
 common.close,Close
 common.delete,Delete
+common.download,Download
 common.edit,Edit
 common.error,Error
 common.generate_plan,Generate Plan
+common.import,Import
 common.inactive,Inactive
 common.information,Information
 common.no_panelist,No Panelist
 common.of,of
 common.promise,Promise
+common.records,records
 common.refresh,Refresh
+common.register,Register
 common.remove,Remove
 common.reset,Reset
 common.save,Save

@@ -1,4 +1,5 @@
 import { Button } from '@/components/common/Button'
+import { useTranslation } from '@/hooks/useTranslation'
 
 interface CSVHandlerProps {
   onImport: (file: File) => Promise<void>
@@ -6,6 +7,7 @@ interface CSVHandlerProps {
 }
 
 export function CSVHandler({ onImport, onDownloadTemplate }: CSVHandlerProps) {
+  const { t } = useTranslation()
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
