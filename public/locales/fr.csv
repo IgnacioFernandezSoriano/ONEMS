@@ -1549,3 +1549,44 @@ allocation_generator.seasonal_distribution,Distribution saisonnière
 allocation_generator.generate_plan,Générer le plan d'allocation
 allocation_generator.import_csv,Importer CSV
 allocation_generator.download_template,Télécharger le modèle CSV
+unavailability.title,Périodes d'indisponibilité
+unavailability.description,Gérer les périodes d'indisponibilité des panélistes pour la réaffectation automatique des échantillons
+unavailability.add_period,+ Ajouter une période d'indisponibilité
+unavailability.search_placeholder,Nom du panéliste, notes...
+unavailability.all_panelists,Tous les panélistes
+unavailability.all_periods,Toutes les périodes
+unavailability.current_periods,Actuelles (actives maintenant)
+unavailability.upcoming_periods,À venir
+unavailability.past_periods,Passées
+unavailability.all_reasons,Toutes les raisons
+unavailability.reason_vacation,Vacances
+unavailability.reason_sick,Congé maladie
+unavailability.reason_personal,Personnel
+unavailability.reason_training,Formation
+unavailability.reason_other,Autre
+unavailability.cancel_periods,Annuler les périodes
+unavailability.edit,Modifier
+unavailability.cancel,Annuler
+unavailability.activate,Activer
+unavailability.delete,Supprimer
+unavailability.edit_period,Modifier la période d'indisponibilité
+unavailability.add_period_modal,Ajouter une période d'indisponibilité
+unavailability.confirm_cancel,Êtes-vous sûr de vouloir annuler {count} période(s) d'indisponibilité ?
+unavailability.confirm_delete,Êtes-vous sûr de vouloir supprimer {count} période(s) d'indisponibilité ? Cette action ne peut pas être annulée.
+unavailability.confirm_delete_single,Êtes-vous sûr de vouloir supprimer cette période d'indisponibilité ?
+unavailability.no_periods_found,Aucune période d'indisponibilité trouvée.
+unavailability.adjust_filters,Essayez d'ajuster vos filtres.
+unavailability.click_to_create,Cliquez sur "Ajouter une période d'indisponibilité" pour en créer une.
+unavailability.panelist,Panéliste
+unavailability.start_date,Date de début
+unavailability.end_date,Date de fin
+unavailability.duration,Durée
+unavailability.reason,Raison
+unavailability.status,Statut
+unavailability.notes,Notes
+unavailability.actions,Actions
+unavailability.day,jour
+unavailability.days,jours
+unavailability.select_panelist,Sélectionner un panéliste
+unavailability.required,Requis
+unavailability.date_range,Plage de dates

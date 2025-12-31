@@ -221,16 +221,16 @@ export function PanelistUnavailabilityComponent() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-xl font-bold">Unavailability Periods</h2>
+          <h2 className="text-xl font-bold">{t('unavailability.title')}</h2>
           <p className="text-sm text-gray-600 mt-1">
-            Manage panelist unavailability periods for automatic sample reassignment
+            {t('unavailability.description')}
           </p>
         </div>
         <button
           onClick={() => handleOpenModal()}
           className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
         >
-          + Add Unavailability Period
+          {t('unavailability.add_period')}
         </button>
       </div>
 
@@ -291,7 +291,7 @@ export function PanelistUnavailabilityComponent() {
                   type="text"
                   value={filters.search}
                   onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                  placeholder="Panelist name, notes..."
+                  placeholder={t('unavailability.search_placeholder')}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 />
               </div>
@@ -302,7 +302,7 @@ export function PanelistUnavailabilityComponent() {
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
-                    Panelist
+                    {t('unavailability.panelist')}
                   </div>
                 </label>
                 <select
@@ -310,7 +310,7 @@ export function PanelistUnavailabilityComponent() {
                   onChange={(e) => setFilters({ ...filters, panelist_id: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 >
-                  <option value="">All Panelists</option>
+                  <option value="">{t('unavailability.all_panelists')}</option>
                   {panelists.map(panelist => (
                     <option key={panelist.id} value={panelist.id}>
                       {panelist.panelist_code} - {panelist.name}
@@ -325,7 +325,7 @@ export function PanelistUnavailabilityComponent() {
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
-                    Date Range
+                    {t('unavailability.date_range')}
                   </div>
                 </label>
                 <select
@@ -333,10 +333,10 @@ export function PanelistUnavailabilityComponent() {
                   onChange={(e) => setFilters({ ...filters, date_range: e.target.value as any })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 >
-                  <option value="all">All Periods</option>
-                  <option value="current">Current (Active Now)</option>
-                  <option value="upcoming">{t('panelistunavailability.tsx.upcoming')}</option>
-                  <option value="past">{t('panelistunavailability.tsx.past')}</option>
+                  <option value="all">{t('unavailability.all_periods')}</option>
+                  <option value="current">{t('unavailability.current_periods')}</option>
+                  <option value="upcoming">{t('unavailability.upcoming_periods')}</option>
+                  <option value="past">{t('unavailability.past_periods')}</option>
                 </select>
               </div>
 
@@ -346,7 +346,7 @@ export function PanelistUnavailabilityComponent() {
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
                     </svg>
-                    Reason
+                    {t('unavailability.reason')}
                   </div>
                 </label>
                 <select
@@ -354,12 +354,12 @@ export function PanelistUnavailabilityComponent() {
                   onChange={(e) => setFilters({ ...filters, reason: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 >
-                  <option value="">All Reasons</option>
-                  <option value="vacation">{t('panelistunavailability.tsx.vacation')}</option>
-                  <option value="sick">Sick Leave</option>
-                  <option value="personal">{t('panelistunavailability.tsx.personal')}</option>
-                  <option value="training">{t('panelistunavailability.tsx.training')}</option>
-                  <option value="other">{t('panelistunavailability.tsx.other')}</option>
+                  <option value="">{t('unavailability.all_reasons')}</option>
+                  <option value="vacation">{t('unavailability.reason_vacation')}</option>
+                  <option value="sick">{t('unavailability.reason_sick')}</option>
+                  <option value="personal">{t('unavailability.reason_personal')}</option>
+                  <option value="training">{t('unavailability.reason_training')}</option>
+                  <option value="other">{t('unavailability.reason_other')}</option>
                 </select>
               </div>
 
@@ -369,7 +369,7 @@ export function PanelistUnavailabilityComponent() {
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    Status
+                    {t('unavailability.status')}
                   </div>
                 </label>
                 <select
@@ -377,7 +377,7 @@ export function PanelistUnavailabilityComponent() {
                   onChange={(e) => setFilters({ ...filters, status: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 >
-                  <option value="">All Status</option>
+                  <option value="">{t('common.all_status')}</option>
                   <option value="active">{t('common.active')}</option>
                   <option value="cancelled">{t('stock.cancelled')}</option>
                 </select>
@@ -398,13 +398,13 @@ export function PanelistUnavailabilityComponent() {
               onClick={handleBulkCancel}
               className="px-3 py-1 bg-yellow-600 text-white text-sm rounded hover:bg-yellow-700"
             >
-              Cancel Periods
+              {t('unavailability.cancel_periods')}
             </button>
             <button
               onClick={handleBulkDelete}
               className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
             >
-              Delete
+              {t('unavailability.delete')}
             </button>
             <button
               onClick={() => setSelectedIds(new Set())}
@@ -483,19 +483,19 @@ export function PanelistUnavailabilityComponent() {
                             onClick={() => handleOpenModal(period)}
                             className="text-blue-600 hover:text-blue-800"
                           >
-                            Edit
+                            {t('unavailability.edit')}
                           </button>
                           <button
                             onClick={() => handleToggleStatus(period)}
                             className="text-yellow-600 hover:text-yellow-800"
                           >
-                            {period.status === 'active' ? 'Cancel' : 'Activate'}
+                            {period.status === 'active' ? t('unavailability.cancel') : t('unavailability.activate')}
                           </button>
                           <button
                             onClick={() => handleDelete(period.id)}
                             className="text-red-600 hover:text-red-800"
                           >
-                            Delete
+                            {t('unavailability.delete')}
                           </button>
                         </div>
                       </td>
@@ -520,7 +520,7 @@ export function PanelistUnavailabilityComponent() {
           <div className="bg-white rounded-lg w-full max-w-md max-h-[90vh] flex flex-col">
             <div className="p-6 border-b">
               <h2 className="text-xl font-bold">
-                {editingPeriod ? 'Edit Unavailability Period' : 'Add Unavailability Period'}
+                {editingPeriod ? t('unavailability.edit_period') : t('unavailability.add_period_modal')}
               </h2>
             </div>
             <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
@@ -631,7 +631,7 @@ export function PanelistUnavailabilityComponent() {
                   onClick={handleCloseModal}
                   className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300"
                 >
-                  Cancel
+                  {t('unavailability.cancel')}
                 </button>
               </div>
             </form>
