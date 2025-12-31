@@ -1695,3 +1695,39 @@ cityform.saving,Enregistrement...
 topology.latitude,Latitude
 topology.longitude,Longitude
 topology.class,Classe
+carriers.title,Transporteurs & Produits
+carriers.description,Gérer les transporteurs, les produits et les exigences en matériaux
+carriers.transporteurs,Transporteurs
+carriers.produits,Produits
+carriers.with_materials,Avec matériaux
+carriers.without_materials,Sans matériaux
+carriers.materiels,Matériels
+carriers.carriers_products,Transporteurs & Produits
+carriers.products_without_materials,Produits sans matériaux
+carriers.search_placeholder,Rechercher des transporteurs ou des produits...
+carriers.all_carriers,Tous les transporteurs
+carriers.all_status,Tous les statuts
+carriers.all_products,Tous les produits
+carriers.expand_all,Tout développer
+carriers.create_carrier,Créer un transporteur
+carriers.product,Produit
+carriers.material,Matériau
+carriers.materials_assigned,Matériaux assignés
+carriers.add_product,Ajouter un produit
+carriers.add_material,Ajouter un matériau
+carriers.code,Code
+carriers.description_field,Description
+carriers.standard_delivery_time,Temps de livraison standard
+carriers.time_unit,Unité de temps
+carriers.heures,Heures
+carriers.jours,Jours
+carriers.status,Statut
+carriers.cancel,Annuler
+carriers.create,Créer
+carriers.choose_how_to_add,Choisissez comment ajouter un matériau à ce produit :
+carriers.select_from_catalog,Sélectionner dans le catalogue
+carriers.select_from_catalog_desc,Choisissez un matériau existant de votre catalogue
+carriers.create_new_material,Créer un nouveau matériau
+carriers.create_new_material_desc,Ajouter un nouveau matériau au catalogue et l'assigner au produit
+carriers.products_without_materials_title,Produits sans matériaux
+carriers.products_need_materials,Ces produits nécessitent des assignations de matériaux pour être opérationnels

@@ -172,7 +172,7 @@ export function Carriers() {
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-bold text-gray-900">Carriers & Products</h1>
+            <h1 className="text-3xl font-bold text-gray-900">{t('carriers.title')}</h1>
             <SmartTooltip content="About Carriers & Products - Purpose: Manage logistics carriers and their service products that will be used in allocation plans. Structure: Carriers (shipping companies) contain Products (delivery services), which require Materials (packaging, labels, etc.) from the material catalog. Key Features: Define carrier details, configure products with delivery standards, set cost structures, and manage material requirements. Usage: Add carriers, create products for each carrier, assign materials to products, specify delivery times and costs, and use these in allocation planning.">
               <svg className="w-5 h-5 text-gray-400 hover:text-gray-600 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -188,11 +188,11 @@ export function Carriers() {
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
-            Create Carrier
+            {t('carriers.create_carrier')}
           </button>
         </div>
         <p className="text-gray-600">
-          Manage shipping carriers, products, and material requirements
+          {t('carriers.description')}
         </p>
       </div>
 
@@ -253,7 +253,7 @@ export function Carriers() {
         {/* Products with Materials */}
         <div className="bg-gradient-to-br from-green-50 to-white border border-green-100 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-green-700">With Materials</span>
+            <span className="text-xs font-medium text-green-700">{t('carriers.with_materials')}</span>
             <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
               <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -266,7 +266,7 @@ export function Carriers() {
         {/* Products without Materials */}
         <div className="bg-gradient-to-br from-amber-50 to-white border border-amber-100 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-amber-700">Without Materials</span>
+            <span className="text-xs font-medium text-amber-700">{t('carriers.without_materials')}</span>
             <div className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center">
               <svg className="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -302,7 +302,7 @@ export function Carriers() {
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              Carriers & Products
+              {t('carriers.carriers_products')}
             </button>
             <button
               onClick={() => setActiveTab('without-materials')}
@@ -312,7 +312,7 @@ export function Carriers() {
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              Products without Materials
+              {t('carriers.products_without_materials')}
               {stats.productsWithoutMaterials > 0 && (
                 <span className="bg-amber-100 text-amber-800 text-xs font-semibold px-2 py-0.5 rounded-full">
                   {stats.productsWithoutMaterials}
@@ -332,7 +332,7 @@ export function Carriers() {
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="Search carriers or products..."
+                  placeholder={t('carriers.search_placeholder')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -350,7 +350,7 @@ export function Carriers() {
                 onChange={(e) => setFilterCarrier(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="all">All Carriers</option>
+                <option value="all">{t('carriers.all_carriers')}</option>
                 {carriers.map(carrier => (
                   <option key={carrier.id} value={carrier.id}>{carrier.name}</option>
                 ))}
@@ -364,7 +364,7 @@ export function Carriers() {
                 onChange={(e) => setFilterStatus(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="all">All Status</option>
+                <option value="all">{t('carriers.all_status')}</option>
                 <option value="active">{t('common.active')}</option>
                 <option value="inactive">{t('common.inactive')}</option>
               </select>
@@ -377,9 +377,9 @@ export function Carriers() {
                 onChange={(e) => setFilterMaterialStatus(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="all">All Products</option>
-                <option value="with">With Materials</option>
-                <option value="without">Without Materials</option>
+                <option value="all">{t('carriers.all_products')}</option>
+                <option value="with">{t('carriers.with_materials')}</option>
+                <option value="without">{t('carriers.without_materials')}</option>
               </select>
             </div>
 
@@ -400,7 +400,7 @@ export function Carriers() {
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
-                  Expand All
+                  {t('carriers.expand_all')}
                 </>
               )}
             </button>
@@ -468,9 +468,9 @@ export function Carriers() {
         <div className="bg-white border border-gray-200 rounded-lg p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Products without Materials</h3>
+              <h3 className="text-lg font-semibold text-gray-900">{t('carriers.products_without_materials_title')}</h3>
               <p className="text-sm text-gray-600 mt-1">
-                These products need material assignments to be operational
+                {t('carriers.products_need_materials')}
               </p>
             </div>
             <button
