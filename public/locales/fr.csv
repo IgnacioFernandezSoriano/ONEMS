@@ -1741,3 +1741,20 @@ productform.update,Mettre à jour
 productform.saving,Enregistrement...
 deliverystandards.hours,Heures
 deliverystandards.days,Jours
+carriers.product,Product,Produit
+carriers.material,Material,Matériau
+carriers.materials_assigned,Materials Assigned,Matériaux assignés
+carriers.pending_materials,Pending Materials,Matériaux en attente
+carriers.qty,Qty,Qté
+carriers.no_products,No products for this carrier yet,Aucun produit pour ce transporteur
+carriers.no_materials,No materials assigned yet,Aucun matériau assigné
+carriers.add_product,Add Product,Ajouter un produit
+carriers.add_material,Add Material,Ajouter un matériau
+carriers.edit_product,Edit Product,Modifier le produit
+carriers.remove_material_confirm,Remove material "{name}" from this product?,Retirer le matériau "{name}" de ce produit ?
+carriers.enter_new_quantity,Enter new quantity for "{name}":,Entrer la nouvelle quantité pour "{name}" :
+carriers.expand_all_products,Expand all products in this carrier,Développer tous les produits de ce transporteur
+carriers.collapse_product,Collapse product,Réduire le produit
+carriers.expand_product,Expand product,Développer le produit
+carriers.remove_material,Remove material,Retirer le matériau
+carriers.edit_quantity,Edit quantity,Modifier la quantité

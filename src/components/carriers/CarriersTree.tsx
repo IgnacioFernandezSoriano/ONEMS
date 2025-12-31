@@ -192,7 +192,7 @@ export function CarriersTree({
                         : 'bg-gray-100 text-gray-600'
                     }`}
                   >
-                    {carrier.status === 'active' ? 'Active' : 'Inactive'}
+                    {carrier.status === 'active' ? t('common.active') : t('common.inactive')}
                   </span>
                 </div>
 
@@ -218,11 +218,11 @@ export function CarriersTree({
                     }
                     className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                    Product
-                  </button>
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                              </svg>
+                              {t('carriers.material')}
+                            </button>
                   <button
                     onClick={() =>
                       setModal({
@@ -255,7 +255,7 @@ export function CarriersTree({
                 <div className="pl-8 pb-2 space-y-1">
                   {carrierProducts.length === 0 && (
                     <div className="text-sm text-gray-500 italic p-4">
-                      No products for this carrier yet
+                      {t('carriers.no_products')}
                     </div>
                   )}
                   {carrierProducts.map((product) => {
@@ -300,14 +300,14 @@ export function CarriersTree({
                                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                 </svg>
-                                Materials Assigned ({product.materialsCount})
+                                {t('carriers.materials_assigned')} ({product.materialsCount})
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1 text-xs font-medium bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
+                              <span className="inline-flex items-center gap-1 text-xs font-medium bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">
                                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                 </svg>
-                                Pending Materials
+                                {t('carriers.pending_materials')}
                               </span>
                             )}
 
@@ -324,7 +324,7 @@ export function CarriersTree({
                                   : 'bg-gray-100 text-gray-600'
                               }`}
                             >
-                              {product.status === 'active' ? 'Active' : 'Inactive'}
+                              {product.status === 'active' ? t('common.active') : t('common.inactive')}
                             </span>
                           </div>
 

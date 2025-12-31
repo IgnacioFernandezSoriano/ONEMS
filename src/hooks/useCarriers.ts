@@ -37,6 +37,11 @@ export function useCarriers() {
       if (productsRes.error) throw productsRes.error
       if (productMaterialsRes.error) throw productMaterialsRes.error
 
+      console.log('🚚 Carriers loaded:', carriersRes.data?.length, carriersRes.data)
+      console.log('📦 Products loaded:', productsRes.data?.length)
+      console.log('🔧 Product materials loaded:', productMaterialsRes.data?.length)
+      console.log('👤 Effective account ID:', effectiveAccountId)
+
       setCarriers(carriersRes.data || [])
       setProducts(productsRes.data || [])
       setProductMaterials(productMaterialsRes.data || [])
