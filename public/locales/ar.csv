@@ -27,32 +27,63 @@ admin.the_demo2_account_is_not_available_please_contact_,حساب DEMO2 غير �
 admin.this_will_permanently_delete,سيؤدي هذا إلى الحذف الدائم لـ:
 admin.user_management,إدارة المستخدمين
 admin.warning_this_action_cannot_be_undone,تحذير: لا يمكن التراجع عن هذا الإجراء
+allocation_generator.1st_semester,الفصل الأول
+allocation_generator.2nd_semester,الفصل الثاني
+allocation_generator.about,حول مولد التخصيص
+allocation_generator.about_description,إنشاء خطط تخصيص العينات تلقائيًا بناءً على أنماط التوزيع
 allocation_generator.actions,الإجراءات
+allocation_generator.applied,مطبق
 allocation_generator.applied_date,تاريخ التطبيق
+allocation_generator.applied_plans,الخطط المطبقة
 allocation_generator.applied_plans_historical,الخطط المطبقة (تاريخية)
 allocation_generator.apply,تطبيق
+allocation_generator.april,أبريل
+allocation_generator.august,أغسطس
+allocation_generator.auto_fill,ملء تلقائي إلى 100٪
 allocation_generator.automatic_generator,المولد التلقائي
 allocation_generator.carrier,شركة النقل
+allocation_generator.city_distribution_matrix,مصفوفة التوزيع حسب المدينة (A-B-C)
+allocation_generator.clear,مسح
 allocation_generator.confirm_apply,تطبيق هذه الخطة؟ سيتم نقلها إلى الخطط المطبقة.
 allocation_generator.confirm_delete,حذف هذه الخطة؟
 allocation_generator.csv_import_coming_soon,وظيفة استيراد CSV قريباً!
+allocation_generator.december,ديسمبر
 allocation_generator.delete,حذف
 allocation_generator.description,إنشاء خطط تخصيص العينات تلقائياً بناءً على أنماط التوزيع
 allocation_generator.download_csv,تنزيل CSV
+allocation_generator.end_date,تاريخ الانتهاء
 allocation_generator.error,خطأ
 allocation_generator.error_downloading,خطأ في تنزيل الخطة
+allocation_generator.february,فبراير
+allocation_generator.generate_plan,إنشاء خطة
+allocation_generator.generated,تم الإنشاء
+allocation_generator.generated_plans,الخطط المنشأة
 allocation_generator.generated_plans_title,الخطط المولدة
+allocation_generator.generator,المولد
+allocation_generator.january,يناير
+allocation_generator.july,يوليو
+allocation_generator.june,يونيو
 allocation_generator.loading,جاري التحميل...
 allocation_generator.manual_import,الاستيراد اليدوي
+allocation_generator.march,مارس
+allocation_generator.may,مايو
 allocation_generator.no_applied_plans,لا توجد خطط مطبقة بعد
 allocation_generator.no_details_found,لم يتم العثور على تفاصيل لهذه الخطة
 allocation_generator.no_generated_plans,لا توجد خطط مولدة بعد
+allocation_generator.november,نوفمبر
+allocation_generator.october,أكتوبر
 allocation_generator.period,الفترة
 allocation_generator.plan_applied_success,تم تطبيق الخطة بنجاح!
 allocation_generator.plan_deleted_success,تم حذف الخطة بنجاح!
 allocation_generator.plan_name,اسم الخطة
 allocation_generator.product,المنتج
+allocation_generator.quick_period_selection,تحديد سريع للفترة
 allocation_generator.samples,العينات
+allocation_generator.seasonal_distribution,التوزيع الموسمي
+allocation_generator.select_carrier,تحديد ناقل
+allocation_generator.select_product,تحديد منتج
+allocation_generator.september,سبتمبر
+allocation_generator.start_date,تاريخ البدء
 allocation_generator.status,الحالة
 allocation_generator.tab_applied_plans,الخطط المطبقة
 allocation_generator.tab_generated_plans,الخطط المولدة
@@ -66,7 +97,9 @@ allocation_generator.tooltip_purpose_text,إنشاء خطط تخصيص العي�
 allocation_generator.tooltip_title,مولد خطط التخصيص
 allocation_generator.tooltip_usage,الاستخدام:
 allocation_generator.tooltip_usage_text,"أنشئ الخطط، راجعها في علامة تبويب ""الخطط المولدة""، ثم قم بتطبيقها لتفعيل تخصيصات العينات."
+allocation_generator.total_samples,إجمالي العينات
 allocation_generator.user_not_authenticated,المستخدم غير مصادق عليه
+allocation_generator.year,السنة
 allocation_plans.all_carriers,جميع شركات النقل
 allocation_plans.all_cities,جميع المدن
 allocation_plans.all_nodes,جميع العقد
@@ -76,6 +109,7 @@ allocation_plans.all_records,جميع السجلات
 allocation_plans.all_status,جميع الحالات
 allocation_plans.auto_fill_to_100,الملء التلقائي إلى 100%
 allocation_plans.availability_issues,مشاكل التوفر
+allocation_plans.bulk_operations,العمليات الجماعية
 allocation_plans.cancel_selected,إلغاء المحدد
 allocation_plans.cancelled,تم الإلغاء
 allocation_plans.carrier,شركة النقل
@@ -102,9 +136,11 @@ allocation_plans.first_day_of_the_allocation_period_samples_will_be,أول يو�
 allocation_plans.import_csv,استيراد CSV
 allocation_plans.invalid,غير صالح
 allocation_plans.last_day_of_the_allocation_period_samples_will_be_,آخر يوم في فترة التخصيص. سيتم جدولة العينات حتى هذا التاريخ.
+allocation_plans.loading,جاري تحميل خطط التخصيص...
 allocation_plans.no_panelist,لا يوجد مشارك
 allocation_plans.no_panelist_assigned_to_destination_node,لا يوجد مشارك معين لعقدة الوجهة
 allocation_plans.no_panelist_assigned_to_origin_node,لا يوجد مشارك معين لعقدة الأصل
+allocation_plans.no_records,لم يتم العثور على خطط تخصيص
 allocation_plans.notified,تم الإخطار
 allocation_plans.optional,اختياري
 allocation_plans.optional_distribute_samples_unevenly_across_months,اختياري: توزيع العينات بشكل غير متساوٍ عبر الأشهر لتعكس الأنماط الموسمية.
@@ -114,11 +150,17 @@ allocation_plans.origin_node,عقدة الأصل
 allocation_plans.pending,قيد الانتظار
 allocation_plans.plan,خطة
 allocation_plans.plan_name,اسم الخطة *
+allocation_plans.please_ensure_destination_panelist,يرجى التأكد من أن العضو الوجهة
+allocation_plans.please_ensure_origin_panelist,يرجى التأكد من أن العضو المصدر
+allocation_plans.please_enter_tag_id,يرجى إدخال معرف العلامة
+allocation_plans.please_select_datetime,يرجى تحديد التاريخ والوقت
 allocation_plans.product,المنتج
 allocation_plans.promise,الوعد
 allocation_plans.quick_period_selection,اختيار فترة سريع
 allocation_plans.receive,استلام
 allocation_plans.received,تم الاستلام
+allocation_plans.received_at_time,تم الاستلام في
+allocation_plans.received_by,تم الاستلام بواسطة
 allocation_plans.received_date_time,تاريخ ووقت الاستلام
 allocation_plans.register_reception,تسجيل الاستلام
 allocation_plans.register_shipment,تسجيل الشحنة
@@ -134,9 +176,12 @@ allocation_plans.select_city,اختر المدينة
 allocation_plans.select_node,اختر العقدة...
 allocation_plans.select_plan,اختر الخطة
 allocation_plans.select_product,اختر المنتج
+allocation_plans.selected_count,{count} محدد
 allocation_plans.send,إرسال
 allocation_plans.sent,تم الإرسال
 allocation_plans.sent_at,تم الإرسال في:
+allocation_plans.sent_at_time,تم الإرسال في
+allocation_plans.sent_by,تم الإرسال بواسطة
 allocation_plans.sent_date_time,تاريخ ووقت الإرسال
 allocation_plans.start_date,تاريخ البدء
 allocation_plans.tag_id,معرّف الوسم
@@ -205,13 +250,28 @@ auth.signing_in,جارٍ تسجيل الدخول...
 auth.try_demo_account,جرب حساب العرض التجريبي
 auth.wherequalitystarts,حيث تبدأ الجودة
 auth.your_email_com,بريدك الإلكتروني@مثال.com
+bulk.cancelled_records,السجلات الملغاة
+bulk.confirm_cancel,إلغاء السجلات المحددة؟
+bulk.confirm_delete,حذف السجلات المحددة؟
+bulk.confirm_reprocess,إعادة معالجة السجلات المحددة؟
+bulk.deleted_records,السجلات المحذوفة
+bulk.please_select_date,يرجى تحديد تاريخ
+bulk.please_select_destination_node,يرجى تحديد عقدة الوجهة
+bulk.please_select_origin_node,يرجى تحديد عقدة المصدر
+bulk.reprocessed_records,السجلات المعاد معالجتها
+bulk.retry_errors,إعادة محاولة الأخطاء
+bulk.selected,محدد
+bulk.updated_records,السجلات المحدثة
 carriers.add_a_new_material_to_catalog_and_assign_to_produc,أضف مادة جديدة إلى الكتالوج وعيّنها للمنتج
+carriers.add_carrier,إضافة ناقل
+carriers.add_product,إضافة منتج
 carriers.additional_details,تفاصيل إضافية...
 carriers.all_carriers,جميع الناقلين
 carriers.all_products,جميع المنتجات
 carriers.all_products_have_materials,جميع المنتجات تحتوي على مواد!
 carriers.all_status,جميع الحالات
 carriers.carrier,الناقل
+carriers.carrier_details,تفاصيل الناقل
 carriers.carriers,الناقلون
 carriers.carriers_products,الناقلون والمنتجات
 carriers.choose_an_existing_material_from_your_catalog,اختر مادة موجودة من كتالوجك
@@ -239,6 +299,7 @@ carriers.every_product_has_materials_assigned_from_the_cata,كل منتج يحت
 carriers.expand_all,توسيع الكل
 carriers.expand_all_products_in_this_carrier,توسيع جميع المنتجات في هذا الناقل
 carriers.hours,ساعات
+carriers.loading,جاري تحميل الناقلين...
 carriers.loading_carriers,جارٍ تحميل شركات الشحن...
 carriers.manage_shipping_carriers_products_and_material_req,إدارة شركات الشحن، المنتجات، ومتطلبات المواد
 carriers.mat_001,MAT-001
@@ -246,14 +307,17 @@ carriers.material,مادة
 carriers.materials,مواد
 carriers.name,الاسم *
 carriers.no_active_materials_in_catalog_create_a_new_one_in,لا توجد مواد نشطة في الكتالوج. قم بإنشاء مادة جديدة بدلاً من ذلك.
+carriers.no_carriers,لم يتم العثور على ناقلين
 carriers.no_carriers_defined_yet,لم يتم تعريف أي شركات شحن بعد
 carriers.no_materials_assigned_yet,لم يتم تعيين أي مواد بعد
+carriers.no_products,لا توجد منتجات
 carriers.no_products_for_this_carrier_yet,لا توجد منتجات لهذا الناقل بعد
 carriers.no_results_found,لم يتم العثور على نتائج
 carriers.pending_materials,المواد المعلقة
 carriers.product,منتج
 carriers.product_code,رمز المنتج
 carriers.products,منتجات
+carriers.products_count,عدد المنتجات
 carriers.products_without_materials,منتجات بدون مواد
 carriers.promise,الوعد
 carriers.quantity,الكمية *
@@ -274,32 +338,56 @@ carriers.units_kg_etc,وحدات، كجم، إلخ.
 carriers.update_quantity,تحديث الكمية
 carriers.with_materials,مع المواد
 carriers.without_materials,بدون مواد
+catalog.add_material,إضافة مادة
+catalog.material_code,رمز المادة
+catalog.material_name,اسم المادة
+catalog.title,كتالوج المواد
 common.1st_semester,الفصل الأول
 common.2nd_semester,الفصل الثاني
+common.about,حول
 common.actions,الإجراءات
 common.active,نشط
+common.all,الكل
 common.apply,تطبيق
 common.available,متاح
+common.bulk_edit,تحرير جماعي
 common.cancel,إلغاء
 common.clear,مسح
 common.close,إغلاق
+common.confirm_delete,حذف هذا السجل؟
+common.create,إنشاء
+common.created_successfully,تم الإنشاء بنجاح
 common.delete,حذف
+common.deleted_successfully,تم الحذف بنجاح
+common.download,تحميل
 common.edit,تعديل
 common.error,خطأ
+common.export,تصدير
+common.filters,الفلاتر
 common.generate_plan,إنشاء الخطة
+common.hide_filters,إخفاء الفلاتر
+common.import,استيراد
 common.inactive,غير نشط
 common.information,معلومات
+common.loading,جاري التحميل...
 common.no_panelist,لا يوجد عضو
 common.of,من
+common.pending,قيد الانتظار
+common.please_select_at_least_one,يرجى تحديد سجل واحد على الأقل
 common.promise,وعد
+common.records,السجلات
 common.refresh,تحديث
+common.register,تسجيل
 common.remove,إزالة
 common.reset,إعادة تعيين
 common.save,حفظ
 common.search,بحث
+common.select_all,تحديد الكل
+common.show_filters,إظهار الفلاتر
 common.status,الحالة
 common.total,الإجمالي
 common.unavailable,غير متاح
+common.updated_successfully,تم التحديث بنجاح
 common.year,السنة
 countrytopology.all_cities,جميع المدن
 countrytopology.all_nodes,جميع العقد
@@ -398,20 +486,45 @@ dashboard.total_status,الإجمالي والحالة
 dashboard.unassigned,غير مخصص
 dashboard.unavailable,غير متاح
 dashboard.upcoming_vacations,الإجازات القادمة
+delivery_standards.about_text,تكوين أوقات التسليم المتوقعة بين المدن لكل مجموعة ناقل-منتج
+delivery_standards.absolute,مطلق
+delivery_standards.add_standard,إضافة معيار
+delivery_standards.all_carriers,جميع الناقلين
+delivery_standards.all_destinations,جميع الوجهات
+delivery_standards.all_origins,جميع المصادر
+delivery_standards.all_products,جميع المنتجات
+delivery_standards.bulk_update,تحديث جماعي
 delivery_standards.carrier,شركة النقل *
 delivery_standards.clear_all_selections,مسح كل التحديدات
+delivery_standards.confirm_delete,حذف معيار التسليم هذا؟
+delivery_standards.create_standard,إنشاء معيار
+delivery_standards.created,تم إنشاء معيار التسليم بنجاح
+delivery_standards.critical_threshold,العتبة الحرجة
 delivery_standards.days,أيام
+delivery_standards.delete_selected,حذف المحدد
+delivery_standards.deleted,تم حذف معيار التسليم بنجاح
+delivery_standards.description,الوصف
+delivery_standards.destination,الوجهة
 delivery_standards.destination_city,مدينة الوجهة *
+delivery_standards.destination_classification,تصنيف الوجهة
 delivery_standards.e_g_24,مثال: 24
 delivery_standards.e_g_85,مثال: 85
+delivery_standards.edit_standard,تحرير المعيار
 delivery_standards.estimated_combinations,التوليفات المقدرة:
+delivery_standards.expected_days,الأيام المتوقعة
+delivery_standards.generate_combinations,إنشاء التوليفات
 delivery_standards.generate_delivery_standards,إنشاء معايير التسليم
 delivery_standards.generation_complete,اكتمل الإنشاء
 delivery_standards.hours,ساعات
+delivery_standards.loading_standards,جاري تحميل معايير التسليم...
 delivery_standards.no_products_for_this_carrier,لا توجد منتجات لهذا الناقل
+delivery_standards.origin,المصدر
 delivery_standards.origin_city,مدينة المنشأ *
+delivery_standards.origin_classification,تصنيف المصدر
+delivery_standards.pending_only,قيد الانتظار فقط
 delivery_standards.product,المنتج *
 delivery_standards.promise,الوعد
+delivery_standards.relative,نسبي
 delivery_standards.select_carrier,اختر الناقل
 delivery_standards.select_destination,اختر الوجهة
 delivery_standards.select_origin,اختر المنشأ
@@ -419,7 +532,13 @@ delivery_standards.select_product,اختر المنتج
 delivery_standards.smart_generation,الإنشاء الذكي:
 delivery_standards.standard_time,الوقت القياسي
 delivery_standards.success,نسبة النجاح %
+delivery_standards.success_percentage,٪ النجاح
+delivery_standards.threshold_type,نوع العتبة
 delivery_standards.time_unit,وحدة الوقت *
+delivery_standards.title,معايير التسليم
+delivery_standards.tolerance_days,أيام التسامح
+delivery_standards.updated,تم تحديث معيار التسليم بنجاح
+delivery_standards.warning_threshold,عتبة التحذير
 deliverystandards.about_delivery_standards,حول معايير التسليم
 deliverystandards.absoluto,مطلق:
 deliverystandards.absoluto_del_100,مطلق (% من 100%)
@@ -493,6 +612,25 @@ deliverystandards.warning_threshold,عتبة التحذير (%)
 layout.all_accounts,جميع الحسابات
 layout.sign_out,تسجيل الخروج
 layout.view_as_account,عرض كحساب:
+load_balancing.about_text,موازنة تخصيص الأعضاء بين العقد لتحسين توزيع عبء العمل
+load_balancing.apply_balance,تطبيق التوازن
+load_balancing.applying,جاري تطبيق التوازن...
+load_balancing.calculating,جاري حساب التوازن...
+load_balancing.confirm_apply,تطبيق هذه التغييرات على تخصيصات الأعضاء؟
+load_balancing.current_distribution,التوزيع الحالي
+load_balancing.current_load,الحمل الحالي
+load_balancing.current_panelists,الأعضاء الحاليون
+load_balancing.description,الوصف
+load_balancing.difference,الفرق
+load_balancing.loading,جاري تحميل بيانات التوازن...
+load_balancing.node,العقدة
+load_balancing.preview_changes,معاينة التغييرات
+load_balancing.rebalance,إعادة التوازن
+load_balancing.reset_preview,إعادة تعيين المعاينة
+load_balancing.success,تم تطبيق التوازن بنجاح
+load_balancing.target_load,الحمل المستهدف
+load_balancing.target_panelists,الأعضاء المستهدفون
+load_balancing.title,موازنة حمل العقد
 material_catalog.additional_details,تفاصيل إضافية...
 material_catalog.code,الرمز *
 material_catalog.description,الوصف
@@ -503,6 +641,43 @@ material_catalog.promise,الوعد
 material_catalog.rfid_tag,علامة تحديد التردد اللاسلكي (RFID)
 material_catalog.unit_measure,وحدة القياس
 material_catalog.units_kg_etc,وحدات، كجم، إلخ.
+material_requirements.about,حول متطلبات المواد
+material_requirements.about_description,حساب احتياجات المواد بناءً على خطط التخصيص
+material_requirements.all_materials,جميع المواد
+material_requirements.all_nodes,جميع العقد
+material_requirements.assigned,مخصص
+material_requirements.calculate,حساب المتطلبات
+material_requirements.calculating,جاري الحساب...
+material_requirements.calculation_period,فترة الحساب
+material_requirements.carrier,الناقل
+material_requirements.city,المدينة
+material_requirements.clear_filters,مسح الفلاتر
+material_requirements.description,الوصف
+material_requirements.end_date,تاريخ الانتهاء
+material_requirements.export_csv,تصدير CSV
+material_requirements.filters,الفلاتر
+material_requirements.loading,جاري تحميل متطلبات المواد...
+material_requirements.material_code,رمز المادة
+material_requirements.material_name,اسم المادة
+material_requirements.node,العقدة
+material_requirements.panelist,العضو
+material_requirements.panelist_distribution,توزيع الأعضاء
+material_requirements.panelists_needing,الأعضاء المحتاجون
+material_requirements.pending,قيد الانتظار
+material_requirements.plans,الخطط
+material_requirements.please_select_dates,يرجى تحديد التواريخ
+material_requirements.product,المنتج
+material_requirements.purchase_orders,أوامر الشراء
+material_requirements.quantity,الكمية
+material_requirements.quantity_needed,الكمية المطلوبة
+material_requirements.region,المنطقة
+material_requirements.shipments,الشحنات
+material_requirements.start_date,تاريخ البدء
+material_requirements.status,الحالة
+material_requirements.title,متطلبات المواد
+material_requirements.total_materials,إجمالي المواد
+material_requirements.total_requirements,إجمالي المتطلبات
+material_requirements.unit,الوحدة
 materialcatalog.code,الرمز
 materialcatalog.description,الوصف
 materialcatalog.loading,جارٍ التحميل...
@@ -538,6 +713,10 @@ materialrequirements.start_date,تاريخ البدء
 materialrequirements.total_materials,إجمالي المواد
 materialrequirements.unit,الوحدة
 materialrequirements.year,السنة
+materials.no_materials_selected,لم يتم تحديد مواد
+materials.search_materials,بحث عن مواد
+materials.select_materials,تحديد مواد
+materials.selected_materials,المواد المحددة
 menu.accounts,الحسابات
 menu.accounts.tooltip,إدارة جميع الحسابات في النظام
 menu.administration,الإدارة
@@ -700,14 +879,17 @@ onedb.product,المنتج
 onedb.received,تم الاستلام
 onedb.reset_filters,إعادة تعيين الفلاتر
 onedb.route,المسار
+onedb.search,بحث
 onedb.sent,تم الإرسال
 onedb.tag_id,معرّف العلامة
 onedb.tag_id_or_plan,معرّف العلامة أو الخطة...
+onedb.title,قاعدة البيانات الموحدة
 onedb.to_date,حتى تاريخه
 onedb.total_records,إجمالي السجلات
 onedb.transit_days,أيام العبور
 onedb.validated_postal_quality_analytics_repository,مستودع تحليلات جودة البريد المعتمد
 panelists.activate,تفعيل
+panelists.add_panelist,إضافة عضو
 panelists.address_line_1,السطر الأول من العنوان
 panelists.address_line_2,السطر الثاني من العنوان
 panelists.all_cities,جميع المدن
@@ -716,8 +898,10 @@ panelists.all_panelists_in_system,جميع الأعضاء في النظام
 panelists.all_status,جميع الحالات
 panelists.apartment_suite_etc_optional,شقة، جناح، إلخ. (اختياري)
 panelists.available_for_deliveries,متاح للتوصيل
+panelists.bulk_actions,إجراءات جماعية
 panelists.choose_an_action_to_apply_to_all_selected_items,اختر إجراءً لتطبيقه على جميع العناصر المحددة
 panelists.city,المدينة
+panelists.clear_selection_btn,مسح التحديد
 panelists.code,الرمز
 panelists.code_name_email,الرمز، الاسم، البريد الإلكتروني...
 panelists.country,البلد
@@ -728,22 +912,29 @@ panelists.email,البريد الإلكتروني
 panelists.filters,الفلاتر
 panelists.leave_empty_to_auto_generate,اتركه فارغًا للتوليد التلقائي
 panelists.loading,جارٍ التحميل...
+panelists.loading_panelists,جاري تحميل الأعضاء...
 panelists.manage_panelist_profiles_and_assignments,إدارة ملفات الأعضاء وتعييناتهم
 panelists.manage_panelists_and_their_availability_for_delive,إدارة الأعضاء وتوفرهم للتوصيل
 panelists.mobile,الهاتف المحمول
 panelists.name,الاسم
+panelists.no_panelists,لم يتم العثور على أعضاء
+panelists.no_panelists_found,لم يتم العثور على أعضاء
 panelists.node,العقدة
 panelists.not_available,غير متوفر
 panelists.panelist_code,رمز المشارك
+panelists.panelist_details,تفاصيل العضو
 panelists.panelists,المشاركون
 panelists.panelists_management,إدارة المشاركين
+panelists.panelists_tab,الأعضاء
 panelists.postal_code,الرمز البريدي
 panelists.reset_all_filters,إعادة تعيين جميع الفلاتر
 panelists.select_a_node,اختر عقدة
+panelists.selected_count,{count} محدد
 panelists.street_address,عنوان الشارع
 panelists.telegram_id,معرف تيليجرام
 panelists.total_panelists,إجمالي المشاركين
 panelists.unavailability_periods,فترات عدم التوفر
+panelists.unavailability_tab,عدم التوفر
 panelists.username_or_numeric_id,@اسم_المستخدم أو المعرف الرقمي
 panelistunavailability.tsx.additional_information_about_this_unavailability_p,معلومات إضافية حول فترة عدم التوفر هذه...
 panelistunavailability.tsx.all_panelists,جميع المشاركين
@@ -775,6 +966,9 @@ panelistunavailability.tsx.training,التدريب
 panelistunavailability.tsx.unavailability_periods,فترات عدم التوفر
 panelistunavailability.tsx.upcoming,القادمة
 panelistunavailability.tsx.vacation,إجازة
+receive.description,إنشاء إيصالات العينات
+receive.generate,إنشاء
+receive.title,مولد الإيصالات
 receivegenerator.advance_variance_days,فرق التقدم (أيام)
 receivegenerator.carriers,الناقلون
 receivegenerator.delay_variance_days,فرق التأخير (أيام)
@@ -1003,10 +1197,13 @@ settings.quarterly,ربع سنوي
 settings.search_cities,ابحث عن مدن...
 settings.warning_threshold_must_be_greater_than_critical_th,يجب أن يكون حد التحذير أكبر من حد الخطر
 settings.weekly,أسبوعي
+stock.about,حول إدارة المخزون
+stock.about_description,إدارة مستويات المخزون وتنبيهات المخزون
 stock.add_to_stock,إضافة إلى المخزون
 stock.adjust_stock,تعديل المخزون
 stock.adjustment_note,مذكرة التعديل
 stock.alert_type,نوع التنبيه
+stock.alerts,التنبيهات
 stock.all_materials,جميع المواد
 stock.all_nodes,جميع العقد
 stock.all_panelists,جميع الأعضاء المشاركين
@@ -1027,6 +1224,7 @@ stock.confirm_order,تأكيد الطلب
 stock.confirm_receipt,تأكيد الاستلام
 stock.confirm_shipment,تأكيد الشحنة
 stock.confirmed_shipments,الشحنات المؤكدة
+stock.critical,حرج
 stock.current_quantity,الكمية الحالية
 stock.current_stock,المخزون الحالي
 stock.date,التاريخ
@@ -1043,6 +1241,7 @@ stock.filters,مرشحات
 stock.from,من
 stock.last_updated,آخر تحديث
 stock.lead_times,أوقات التنفيذ
+stock.loading,جاري تحميل بيانات المخزون...
 stock.loading_alerts,جارٍ تحميل التنبيهات...
 stock.loading_movements,جارٍ تحميل الحركات...
 stock.loading_panelist_stock,جارٍ تحميل مخزون المشاركين...
@@ -1052,14 +1251,21 @@ stock.location,الموقع
 stock.low_stock,مخزون منخفض
 stock.low_stock_only,المخزون المنخفض فقط
 stock.material,المادة
+stock.material_requirements_help,عرض متطلبات المواد المحسوبة
+stock.material_requirements_tab,متطلبات المواد
 stock.materials,المواد
 stock.materials_to_send,المواد للإرسال
+stock.maximum_stock,الحد الأقصى للمخزون
 stock.metrics_overview,نظرة عامة على المقاييس
 stock.minimum,الحد الأدنى
+stock.minimum_stock,الحد الأدنى للمخزون
 stock.movement_type,نوع الحركة
+stock.movements_help,تتبع حركات المخزون
+stock.movements_tab,الحركات
 stock.net_quantity,الكمية الصافية
 stock.new_quantity,الكمية الجديدة
 stock.no_stock_alerts_found,لم يتم العثور على تنبيهات مخزون
+stock.no_stock_data,لا توجد بيانات مخزون
 stock.no_stock_records_found,لم يتم العثور على سجلات مخزون
 stock.node,العقدة
 stock.normal,عادي
@@ -1068,9 +1274,12 @@ stock.notes,ملاحظات
 stock.order,طلب
 stock.order_material,طلب مادة
 stock.ordered,تم الطلب
+stock.out_of_stock,نفاد المخزون
 stock.packing_list_pdf,قائمة التعبئة بصيغة PDF
 stock.panelist,عضو اللجنة
 stock.panelist_negative,المشارك سلبي
+stock.panelist_stock_help,عرض مخزون الأعضاء
+stock.panelist_stock_tab,مخزون الأعضاء
 stock.pending,قيد الانتظار
 stock.pending_requirements,المتطلبات المعلقة
 stock.pending_shipments,الشحنات المعلقة
@@ -1089,7 +1298,10 @@ stock.receive,استلام
 stock.receive_purchase_order,استلام طلب الشراء
 stock.received,تم الاستلام
 stock.regulator_insufficient,المنظم غير كافٍ
+stock.regulator_stock_help,عرض مخزون المنظم
+stock.regulator_stock_tab,مخزون المنظم
 stock.removed_materials_will_create_new_pending_shipment,المواد المُزالة (سيتم إنشاء شحنة معلقة جديدة)
+stock.reorder_point,نقطة إعادة الطلب
 stock.reset_filters,إعادة تعيين الفلاتر
 stock.restore,استعادة
 stock.search_by_material_or_code,البحث حسب المادة أو الرمز...
@@ -1098,15 +1310,22 @@ stock.search_material,البحث عن مادة...
 stock.send,إرسال
 stock.sent,تم الإرسال
 stock.sent_date,تاريخ الإرسال
+stock.settings_help,تكوين معلمات المخزون
+stock.settings_tab,الإعدادات
 stock.shipment,رقم الشحنة
 stock.shipment_lead_time_days,مدة تسليم الشحنة (بالأيام)
 stock.shipments,الشحنات
+stock.shipments_help,عرض شحنات المخزون
+stock.shipments_tab,الشحنات
 stock.showing,عرض
 stock.start_date,تاريخ البدء
 stock.stock_alert,تنبيه المخزون
+stock.stock_alerts_help,عرض تنبيهات المخزون المنخفض
+stock.stock_alerts_tab,تنبيهات المخزون
 stock.stock_control,مراقبة المخزون
 stock.stock_status,حالة المخزون
 stock.this_feature_is_not_available_in_the_current_versi,هذه الميزة غير متوفرة في النسخة الحالية من الوحدة.
+stock.title,إدارة المخزون
 stock.total_items_pending,إجمالي العناصر المعلقة
 stock.total_movements,إجمالي الحركات:
 stock.total_records,إجمالي السجلات:
@@ -1114,12 +1333,17 @@ stock.type,النوع
 stock.unit,الوحدة
 stock.unknown_panelist,عضو لجنة غير معروف
 stock.used_to_calculate_expected_delivery_dates,يُستخدم لحساب تواريخ التسليم المتوقعة
+stock.warning,تحذير
 stock.year,السنة
 stockmanagement.stock_alerts,تنبيهات المخزون
 stockmanagement.stock_management_alerts,إدارة وتنبيهات المخزون
 stockmanagement.tabs,علامات التبويب
 topology.3_7038,-3.7038
 topology.40_4168,40.4168
+topology.add_city,إضافة مدينة
+topology.add_node,إضافة عقدة
+topology.add_region,إضافة منطقة
+topology.cities,المدن
 topology.city,المدينة
 topology.city_code,رمز المدينة *
 topology.city_name,اسم المدينة *
@@ -1138,18 +1362,26 @@ topology.edit_node,تعديل العقدة
 topology.edit_region,تعديل المنطقة
 topology.expand_all_cities_in_this_region,توسيع جميع المدن في هذه المنطقة
 topology.latitude,خط العرض
+topology.loading,جاري تحميل الطوبولوجيا...
 topology.longitude,خط الطول
 topology.no_cities_in_this_region_yet,لا توجد مدن في هذه المنطقة حتى الآن
 topology.no_nodes_in_this_city_yet,لا توجد عقد في هذه المدينة حتى الآن
+topology.no_regions,لم يتم العثور على مناطق
 topology.node,العقدة
+topology.nodes,العقد
 topology.panelist_assigned,المشارك المعين
+topology.panelists,الأعضاء
 topology.pending_panelist,المشارك المعلق
 topology.population,السكان
 topology.promise,الوعد
 topology.region_code,رمز المنطقة *
 topology.region_name,اسم المنطقة *
+topology.regions,المناطق
 topology.status,الحالة *
+topology.title,طوبولوجيا البلد
+topology.topology_tab,الطوبولوجيا
 topology.total_population_of_the_city_used_for_impact_analy,إجمالي سكان المدينة (يُستخدم لتحليل التأثير في التقارير)
+topology.without_panelists_tab,بدون أعضاء
 users.account,الحساب
 users.deactivate,تعطيل
 users.email,البريد الإلكتروني
