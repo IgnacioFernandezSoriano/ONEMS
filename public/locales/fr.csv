@@ -530,6 +530,28 @@ material_catalog.promise,Promesse
 material_catalog.rfid_tag,Étiquette RFID
 material_catalog.unit_measure,Unité de mesure
 material_catalog.units_kg_etc,"unités, kg, etc."
+material_requirements.all_materials,Tous les Matériaux
+material_requirements.all_nodes,Tous les Nœuds
+material_requirements.assigned,Assigné
+material_requirements.calculate,Calculer
+material_requirements.calculating,Calcul en cours...
+material_requirements.description,Calculer les besoins en matériaux basés sur les plans d'allocation
+material_requirements.material_code,Code Matériau
+material_requirements.material_name,Nom du Matériau
+material_requirements.node,Nœud
+material_requirements.panelist,Panéliste
+material_requirements.panelist_distribution,Distribution des Panélistes
+material_requirements.panelists_needing,Panélistes Nécessitant
+material_requirements.pending,En Attente
+material_requirements.plans,Plans
+material_requirements.please_select_dates,Veuillez sélectionner les dates de début et de fin
+material_requirements.purchase_orders,Commandes d'Achat
+material_requirements.quantity_needed,Quantité Nécessaire
+material_requirements.shipments,Envois
+material_requirements.status,Statut
+material_requirements.title,Besoins en Matériaux
+material_requirements.total_materials,Total des Matériaux
+material_requirements.unit,Unité
 materialcatalog.code,Code
 materialcatalog.description,Description
 materialcatalog.loading,Chargement...
@@ -1091,6 +1113,8 @@ stock.location,Emplacement
 stock.low_stock,Stock faible
 stock.low_stock_only,Stock faible uniquement
 stock.material,Matériel
+stock.material_requirements_help,Calculer les besoins en matériaux à partir des plans d'allocation. Commander des matériaux et recevoir des bons de commande pour mettre à jour le stock du régulateur.
+stock.material_requirements_tab,Besoins en Matériaux
 stock.materials,Matériels
 stock.materials_to_send,Matériels à envoyer
 stock.maximum_stock,Stock Maximum
@@ -1098,6 +1122,8 @@ stock.metrics_overview,Aperçu des métriques
 stock.minimum,Minimum
 stock.minimum_stock,Stock Minimum
 stock.movement_type,Type de mouvement
+stock.movements_help,"Piste d'audit complète de tous les mouvements de matériaux, y compris les réceptions, les expéditions et les transferts avec traçabilité complète."
+stock.movements_tab,Mouvements
 stock.net_quantity,Quantité nette
 stock.new_quantity,Nouvelle quantité
 stock.no_stock_alerts_found,Aucune alerte de stock trouvée
@@ -1113,6 +1139,8 @@ stock.ordered,Commandé
 stock.packing_list_pdf,Liste de colisage PDF
 stock.panelist,Panéliste
 stock.panelist_negative,Panéliste Négatif
+stock.panelist_stock_help,Afficher l'inventaire actuel distribué à chaque panéliste. Le stock est automatiquement mis à jour lors de l'envoi des expéditions.
+stock.panelist_stock_tab,Stock des Panélistes
 stock.pending,En attente
 stock.pending_requirements,Exigences en attente
 stock.pending_shipments,Expéditions en attente
@@ -1131,6 +1159,8 @@ stock.receive,Recevoir
 stock.receive_purchase_order,Recevoir le bon de commande
 stock.received,Reçu
 stock.regulator_insufficient,Régulateur insuffisant
+stock.regulator_stock_help,Afficher et gérer l'inventaire actuel dans l'entrepôt du régulateur (HAL). Le stock est mis à jour lors de la réception des bons de commande.
+stock.regulator_stock_tab,Stock du Régulateur
 stock.removed_materials_will_create_new_pending_shipment,Matériaux retirés (créera une nouvelle expédition en attente)
 stock.reorder_point,Point de Réapprovisionnement
 stock.reset_filters,Réinitialiser les filtres
@@ -1141,15 +1171,22 @@ stock.search_material,Rechercher un matériau...
 stock.send,Envoyer
 stock.sent,Envoyé
 stock.sent_date,Date d'envoi
+stock.settings_help,"Configurer les paramètres de contrôle des stocks, les règles d'automatisation et les délais pour les envois et les livraisons."
+stock.settings_tab,Paramètres
 stock.shipment,N° d'expédition
 stock.shipment_lead_time_days,Délai d'expédition (jours)
 stock.shipments,Expéditions
+stock.shipments_help,"Générer des envois aux panélistes basés sur les plans d'allocation. Créer des envois en attente, puis les envoyer pour mettre à jour automatiquement les stocks."
+stock.shipments_tab,Envois
 stock.showing,Affichage
 stock.start_date,Date de début
 stock.stock_alert,Alerte de stock
+stock.stock_alerts_help,Afficher et gérer les alertes de stock pour stock insuffisant du régulateur et stock négatif des panélistes. Les alertes se résolvent automatiquement lorsque le stock redevient positif.
+stock.stock_alerts_tab,Alertes de Stock
 stock.stock_control,Contrôle des stocks
 stock.stock_status,Statut du stock
 stock.this_feature_is_not_available_in_the_current_versi,Cette fonctionnalité n'est pas disponible dans la version actuelle du module.
+stock.title,Gestion des Stocks et Alertes
 stock.total_items_pending,Total des articles en attente
 stock.total_movements,Total des mouvements :
 stock.total_records,Total des enregistrements :

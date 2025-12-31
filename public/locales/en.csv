@@ -530,6 +530,28 @@ material_catalog.promise,Promise
 material_catalog.rfid_tag,RFID Tag
 material_catalog.unit_measure,Unit Measure
 material_catalog.units_kg_etc,"units, kg, etc."
+material_requirements.all_materials,All Materials
+material_requirements.all_nodes,All Nodes
+material_requirements.assigned,Assigned
+material_requirements.calculate,Calculate
+material_requirements.calculating,Calculating...
+material_requirements.description,Calculate material needs based on allocation plans
+material_requirements.material_code,Material Code
+material_requirements.material_name,Material Name
+material_requirements.node,Node
+material_requirements.panelist,Panelist
+material_requirements.panelist_distribution,Panelist Distribution
+material_requirements.panelists_needing,Panelists Needing
+material_requirements.pending,Pending
+material_requirements.plans,Plans
+material_requirements.please_select_dates,Please select both start and end dates
+material_requirements.purchase_orders,Purchase Orders
+material_requirements.quantity_needed,Quantity Needed
+material_requirements.shipments,Shipments
+material_requirements.status,Status
+material_requirements.title,Material Requirements
+material_requirements.total_materials,Total Materials
+material_requirements.unit,Unit
 materialcatalog.code,Code
 materialcatalog.description,Description
 materialcatalog.loading,Loading...
@@ -1091,6 +1113,8 @@ stock.location,Location
 stock.low_stock,Low Stock
 stock.low_stock_only,Low Stock Only
 stock.material,Material
+stock.material_requirements_help,Calculate material requirements from allocation plans. Order materials and receive purchase orders to update regulator stock.
+stock.material_requirements_tab,Material Requirements
 stock.materials,Materials
 stock.materials_to_send,Materials to Send
 stock.maximum_stock,Maximum Stock
@@ -1098,6 +1122,8 @@ stock.metrics_overview,Metrics Overview
 stock.minimum,Minimum
 stock.minimum_stock,Minimum Stock
 stock.movement_type,Movement Type
+stock.movements_help,"Complete audit trail of all material movements including receipts, dispatches, and transfers with full traceability."
+stock.movements_tab,Movements
 stock.net_quantity,Net Quantity
 stock.new_quantity,New Quantity
 stock.no_stock_alerts_found,No stock alerts found
@@ -1113,6 +1139,8 @@ stock.ordered,Ordered
 stock.packing_list_pdf,Packing List PDF
 stock.panelist,Panelist
 stock.panelist_negative,Panelist Negative
+stock.panelist_stock_help,View current inventory distributed to each panelist. Stock is automatically updated when shipments are sent.
+stock.panelist_stock_tab,Panelist Stock
 stock.pending,Pending
 stock.pending_requirements,Pending Requirements
 stock.pending_shipments,Pending Shipments
@@ -1131,6 +1159,8 @@ stock.receive,Receive
 stock.receive_purchase_order,Receive Purchase Order
 stock.received,Received
 stock.regulator_insufficient,Regulator Insufficient
+stock.regulator_stock_help,View and manage current inventory in regulator (HAL) warehouse. Stock is updated when receiving purchase orders.
+stock.regulator_stock_tab,Regulator Stock
 stock.removed_materials_will_create_new_pending_shipment,Removed Materials (Will Create New Pending Shipment)
 stock.reorder_point,Reorder Point
 stock.reset_filters,Reset Filters
@@ -1141,15 +1171,22 @@ stock.search_material,Search material...
 stock.send,Send
 stock.sent,Sent
 stock.sent_date,Sent Date
+stock.settings_help,"Configure stock control parameters, automation rules, and lead times for shipments and deliveries."
+stock.settings_tab,Settings
 stock.shipment,Shipment #
 stock.shipment_lead_time_days,Shipment Lead Time (days)
 stock.shipments,Shipments
+stock.shipments_help,"Generate shipments to panelists based on allocation plans. Create pending shipments, then send them to update stocks automatically."
+stock.shipments_tab,Shipments
 stock.showing,Showing
 stock.start_date,Start Date
 stock.stock_alert,Stock Alert
+stock.stock_alerts_help,View and manage stock alerts for insufficient regulator stock and negative panelist stock. Alerts auto-resolve when stock returns to positive.
+stock.stock_alerts_tab,Stock Alerts
 stock.stock_control,Stock Control
 stock.stock_status,Stock Status
 stock.this_feature_is_not_available_in_the_current_versi,This feature is not available in the current version of the module.
+stock.title,Stock Management & Alerts
 stock.total_items_pending,Total Items Pending
 stock.total_movements,Total movements:
 stock.total_records,Total records:

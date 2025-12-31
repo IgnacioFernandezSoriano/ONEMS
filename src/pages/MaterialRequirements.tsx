@@ -57,7 +57,7 @@ export default function MaterialRequirements() {
 
   const handleCalculate = () => {
     if (!startDate || !endDate) {
-      alert('Please select both start and end dates')
+      alert(t('material_requirements.please_select_dates'))
       return
     }
     calculate(startDate, endDate)
@@ -112,7 +112,7 @@ export default function MaterialRequirements() {
   }
 
   const exportPurchaseCSV = () => {
-    const headers = ['Material Code', 'Material Name', 'Unit', 'Quantity Needed', 'Shipments', 'Plans']
+    const headers = [t('material_requirements.material_code'), t('material_requirements.material_name'), t('material_requirements.unit'), t('material_requirements.quantity_needed'), t('material_requirements.shipments'), t('material_requirements.plans')]
     const rows = filteredMaterialRequirements.map(m => [
       m.material_code,
       m.material_name,
@@ -127,15 +127,15 @@ export default function MaterialRequirements() {
   }
 
   const exportPanelistCSV = () => {
-    const headers = ['Node', 'Panelist', 'Status', 'Material Code', 'Material Name', 'Unit', 'Quantity Needed']
+    const headers = [t('material_requirements.node'), t('material_requirements.panelist'), t('material_requirements.status'), t('material_requirements.material_code'), t('material_requirements.material_name'), t('material_requirements.unit'), t('material_requirements.quantity_needed')]
     const rows: string[][] = []
     
     filteredPanelistRequirements.forEach(pr => {
       pr.materials.forEach(m => {
         rows.push([
           pr.node_name,
-          pr.panelist_name || 'Pending',
-          pr.assignment_status === 'assigned' ? 'Assigned' : 'Pending',
+          pr.panelist_name || t('material_requirements.pending'),
+          pr.assignment_status === 'assigned' ? t('material_requirements.assigned') : t('material_requirements.pending'),
           m.material_code,
           m.material_name,
           m.unit_measure,
@@ -175,12 +175,12 @@ export default function MaterialRequirements() {
       <div className="flex items-center gap-3 mb-6">
         <Package className="w-8 h-8 text-blue-600" />
         <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-bold text-gray-900">Material Requirements</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t('material_requirements.title')}</h1>
           <SmartTooltip content="Calculate material needs based on allocation plans within a date range. This module shows what materials need to be purchased and which panelists need to receive materials for their scheduled shipments." />
         </div>
       </div>
 
-      <p className="text-gray-600 mb-6">Calculate material needs based on allocation plans</p>
+      <p className="text-gray-600 mb-6">{t('material_requirements.description')}</p>
 
       {error && (
         <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
@@ -194,7 +194,7 @@ export default function MaterialRequirements() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 mb-1">Total Materials</p>
+                <p className="text-sm text-gray-600 mb-1">{t('material_requirements.total_materials')}</p>
                 <p className="text-3xl font-bold text-gray-900">{totalMaterials}</p>
                 <p className="text-xs text-gray-500 mt-1">items needed</p>
               </div>
@@ -205,7 +205,7 @@ export default function MaterialRequirements() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 mb-1">Panelists Needing</p>
+                <p className="text-sm text-gray-600 mb-1">{t('material_requirements.panelists_needing')}</p>
                 <p className="text-3xl font-bold text-gray-900">{totalPanelists}</p>
                 <p className="text-xs text-gray-500 mt-1">to send</p>
               </div>
@@ -291,7 +291,7 @@ export default function MaterialRequirements() {
                   onChange={(e) => setSelectedMaterialId(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="">All Materials</option>
+                  <option value="">{t('material_requirements.all_materials')}</option>
                   {materials.filter((m: any) => m.status === 'active').map((material: any) => (
                     <option key={material.id} value={material.id}>
                       {material.code} - {material.name}
@@ -311,7 +311,7 @@ export default function MaterialRequirements() {
                   onChange={(e) => setSelectedNodeId(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="">All Nodes</option>
+                  <option value="">{t('material_requirements.all_nodes')}</option>
                   {uniqueNodes.map(node => (
                     <option key={node.id} value={node.id}>
                       {node.name}
@@ -374,7 +374,7 @@ export default function MaterialRequirements() {
               disabled={loading || !startDate || !endDate}
               className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium"
             >
-              {loading ? 'Calculating...' : 'Calculate'}
+              {loading ? t('material_requirements.calculating') : t('material_requirements.calculate')}
             </button>
           </>
         )}
@@ -426,10 +426,10 @@ export default function MaterialRequirements() {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-gray-200">
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Material Code</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Material Name</th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">{t('material_requirements.material_code')}</th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">{t('material_requirements.material_name')}</th>
                       <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">{t('stock.unit')}</th>
-                      <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Quantity Needed</th>
+                      <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">{t('material_requirements.quantity_needed')}</th>
                       <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">{t('stock.shipments')}</th>
                       <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">{t('materialrequirements.plans')}</th>
                     </tr>
@@ -475,7 +475,7 @@ export default function MaterialRequirements() {
                           ? 'bg-green-100 text-green-700'
                           : 'bg-orange-100 text-orange-700'
                       }`}>
-                        {panelist.assignment_status === 'assigned' ? 'Assigned' : 'Pending'}
+                        {panelist.assignment_status === 'assigned' ? t('material_requirements.assigned') : t('material_requirements.pending')}
                       </span>
                     </div>
 
@@ -483,8 +483,8 @@ export default function MaterialRequirements() {
                       <table className="w-full">
                         <thead>
                           <tr className="border-b border-gray-200">
-                            <th className="text-left py-2 px-3 text-xs font-semibold text-gray-700">Material Code</th>
-                            <th className="text-left py-2 px-3 text-xs font-semibold text-gray-700">Material Name</th>
+                            <th className="text-left py-2 px-3 text-xs font-semibold text-gray-700">{t('material_requirements.material_code')}</th>
+                            <th className="text-left py-2 px-3 text-xs font-semibold text-gray-700">{t('material_requirements.material_name')}</th>
                             <th className="text-left py-2 px-3 text-xs font-semibold text-gray-700">{t('stock.unit')}</th>
                             <th className="text-right py-2 px-3 text-xs font-semibold text-gray-700">{t('stock.quantity')}</th>
                           </tr>

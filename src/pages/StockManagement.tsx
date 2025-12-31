@@ -27,45 +27,45 @@ export default function StockManagement() {
   const tabs = [
     { 
       id: 'requirements' as TabType, 
-      label: 'Material Requirements', 
+      label: t('stock.material_requirements_tab'), 
       icon: ClipboardList,
-      help: 'Calculate material requirements from allocation plans. Order materials and receive purchase orders to update regulator stock.'
+      help: t('stock.material_requirements_help')
     },
     { 
       id: 'regulator' as TabType, 
-      label: 'Regulator Stock', 
+      label: t('stock.regulator_stock_tab'), 
       icon: Package,
-      help: 'View and manage current inventory in regulator (HAL) warehouse. Stock is updated when receiving purchase orders.'
+      help: t('stock.regulator_stock_help')
     },
     { 
       id: 'shipments' as TabType, 
-      label: 'Shipments', 
+      label: t('stock.shipments_tab'), 
       icon: Truck,
-      help: 'Generate shipments to panelists based on allocation plans. Create pending shipments, then send them to update stocks automatically.'
+      help: t('stock.shipments_help')
     },
     { 
       id: 'panelist' as TabType, 
-      label: 'Panelist Stock', 
+      label: t('stock.panelist_stock_tab'), 
       icon: Package,
-      help: 'View current inventory distributed to each panelist. Stock is automatically updated when shipments are sent.'
+      help: t('stock.panelist_stock_help')
     },
     { 
       id: 'movements' as TabType, 
-      label: 'Movements', 
+      label: t('stock.movements_tab'), 
       icon: TrendingUp,
-      help: 'Complete audit trail of all material movements including receipts, dispatches, and transfers with full traceability.'
+      help: t('stock.movements_help')
     },
     { 
       id: 'alerts' as TabType, 
-      label: 'Stock Alerts', 
+      label: t('stock.stock_alerts_tab'), 
       icon: AlertTriangle,
-      help: 'View and manage stock alerts for insufficient regulator stock and negative panelist stock. Alerts auto-resolve when stock returns to positive.'
+      help: t('stock.stock_alerts_help')
     },
     { 
       id: 'settings' as TabType, 
-      label: 'Settings', 
+      label: t('stock.settings_tab'), 
       icon: Settings,
-      help: 'Configure stock control parameters, automation rules, and lead times for shipments and deliveries.'
+      help: t('stock.settings_help')
     }
   ]
 
@@ -73,7 +73,7 @@ export default function StockManagement() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Stock Management & Alerts</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t('stock.title')}</h1>
         <p className="mt-1 text-sm text-gray-500">
           Manage material requirements, regulator and panelist inventory, track movements and shipments
         </p>
