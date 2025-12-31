@@ -259,7 +259,7 @@ export function TopologyTree({
                             <span className="text-sm text-gray-500">({city.code})</span>
                             {city.classification && (
                               <span className="text-xs font-medium bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">
-                                Class {city.classification}
+                                {t('topology.class')} {city.classification}
                               </span>
                             )}
                             <span
@@ -269,7 +269,7 @@ export function TopologyTree({
                                   : 'bg-gray-100 text-gray-600'
                               }`}
                             >
-                              {city.status === 'active' ? 'Active' : 'Inactive'}
+                              {city.status === 'active' ? t('common.active') : t('common.inactive')}
                             </span>
                           </div>
 

@@ -1694,3 +1694,4 @@ cityform.update,Mettre à jour
 cityform.saving,Enregistrement...
 topology.latitude,Latitude
 topology.longitude,Longitude
+topology.class,Classe
