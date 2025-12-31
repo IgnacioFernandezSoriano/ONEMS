@@ -274,6 +274,8 @@ carriers.units_kg_etc,وحدات، كجم، إلخ.
 carriers.update_quantity,تحديث الكمية
 carriers.with_materials,مع المواد
 carriers.without_materials,بدون مواد
+common.1st_semester,الفصل الأول
+common.2nd_semester,الفصل الثاني
 common.actions,الإجراءات
 common.active,نشط
 common.apply,تطبيق
@@ -284,6 +286,7 @@ common.close,إغلاق
 common.delete,حذف
 common.edit,تعديل
 common.error,خطأ
+common.generate_plan,إنشاء الخطة
 common.inactive,غير نشط
 common.information,معلومات
 common.no_panelist,لا يوجد عضو
@@ -297,6 +300,7 @@ common.search,بحث
 common.status,الحالة
 common.total,الإجمالي
 common.unavailable,غير متاح
+common.year,السنة
 countrytopology.all_cities,جميع المدن
 countrytopology.all_nodes,جميع العقد
 countrytopology.all_nodes_have_panelists,جميع العقد تحتوي على أعضاء لجنة!
@@ -587,6 +591,18 @@ menu.translations,الترجمات
 menu.translations.tooltip,إدارة ترجمات التطبيق
 menu.users,المستخدمون
 menu.users.tooltip,إدارة حسابات المستخدمين والصلاحيات
+months.apr,أبريل
+months.aug,أغسطس
+months.dec,ديسمبر
+months.feb,فبراير
+months.jan,يناير
+months.jul,يوليو
+months.jun,يونيو
+months.mar,مارس
+months.may,مايو
+months.nov,نوفمبر
+months.oct,أكتوبر
+months.sep,سبتمبر
 nodeloadbalancing.acceptable_deviation_from_reference,الانحراف المقبول عن المرجع
 nodeloadbalancing.actualiza_fecha_programada_y_node_id_en_allocation,تحديث تاريخ_المجدول و node_id في تفاصيل خطة التخصيص
 nodeloadbalancing.additional_nodes_required,العقد الإضافية المطلوبة

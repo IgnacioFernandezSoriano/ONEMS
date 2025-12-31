@@ -274,6 +274,8 @@ carriers.units_kg_etc,"unités, kg, etc."
 carriers.update_quantity,Mettre à jour la quantité
 carriers.with_materials,Avec matériaux
 carriers.without_materials,Sans matériaux
+common.1st_semester,1er Semestre
+common.2nd_semester,2ème Semestre
 common.actions,Actions
 common.active,Actif
 common.apply,Appliquer
@@ -284,6 +286,7 @@ common.close,Fermer
 common.delete,Supprimer
 common.edit,Modifier
 common.error,Erreur
+common.generate_plan,Générer le Plan
 common.inactive,Inactif
 common.information,Informations
 common.no_panelist,Pas de Panéliste
@@ -297,6 +300,7 @@ common.search,Rechercher
 common.status,Statut
 common.total,Total
 common.unavailable,Indisponible
+common.year,Année
 countrytopology.all_cities,Toutes les villes
 countrytopology.all_nodes,Tous les nœuds
 countrytopology.all_nodes_have_panelists,Tous les nœuds ont des panélistes !
@@ -587,6 +591,18 @@ menu.translations,Traductions
 menu.translations.tooltip,Gérer les traductions de l’application
 menu.users,Utilisateurs
 menu.users.tooltip,Gérer les comptes utilisateurs et les permissions
+months.apr,Avr
+months.aug,Août
+months.dec,Déc
+months.feb,Fév
+months.jan,Jan
+months.jul,Juil
+months.jun,Juin
+months.mar,Mar
+months.may,Mai
+months.nov,Nov
+months.oct,Oct
+months.sep,Sep
 nodeloadbalancing.acceptable_deviation_from_reference,Écart acceptable par rapport à la référence
 nodeloadbalancing.actualiza_fecha_programada_y_node_id_en_allocation,Met à jour fecha_programada et node_id dans allocation_plan_details
 nodeloadbalancing.additional_nodes_required,Nœuds supplémentaires requis

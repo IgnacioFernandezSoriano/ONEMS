@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { useTranslation } from '@/hooks/useTranslation'
 import { Button } from '@/components/common/Button'
 import type { Carrier, Product, City, Node } from '@/lib/types'
 import {
@@ -24,6 +25,7 @@ export function AllocationPlanGeneratorForm({
   nodes,
   onGenerate,
 }: AllocationPlanGeneratorFormProps) {
+  const { t } = useTranslation()
   const [formData, setFormData] = useState({
     plan_name: '',
     carrier_id: '',
@@ -262,7 +264,7 @@ export function AllocationPlanGeneratorForm({
             onChange={(e) => setFormData({ ...formData, carrier_id: e.target.value })}
             className="w-full px-3 py-2 border rounded-md"
           >
-            <option value="">Select carrier</option>
+            <option value="">{t('allocation_plans.select_carrier')}</option>
             {carriers.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
@@ -289,7 +291,7 @@ export function AllocationPlanGeneratorForm({
             onChange={(e) => setFormData({ ...formData, product_id: e.target.value })}
             className="w-full px-3 py-2 border rounded-md"
           >
-            <option value="">Select product</option>
+            <option value="">{t('allocation_plans.select_product')}</option>
             {availableProducts.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.description}
@@ -406,7 +408,7 @@ export function AllocationPlanGeneratorForm({
       <div className="border rounded-lg p-4">
         <div className="flex justify-between items-center mb-3">
           <div className="flex items-center gap-2">
-            <h3 className="font-medium">City Distribution Matrix (A-B-C)</h3>
+            <h3 className="font-medium">{t('allocation_plans.city_distribution_matrix_a_b_c')}</h3>
             <span className="group relative">
               <svg className="w-4 h-4 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
@@ -417,7 +419,7 @@ export function AllocationPlanGeneratorForm({
                 <p className="mb-1"><strong>Example:</strong></p>
                 <p className="mb-1">• AA = 20% (Class A origin → Class A destination)</p>
                 <p className="mb-1">• AB = 15% (Class A origin → Class B destination)</p>
-                <p>Fill some cells manually, then click "Auto-fill to 100%" to distribute the remaining percentage equally across empty cells.</p>
+                <p>Fill some cells manually, then click {t('allocation_plans.auto_fill_to_100')} to distribute the remaining percentage equally across empty cells.</p>
               </div>
             </span>
           </div>
@@ -468,18 +470,18 @@ export function AllocationPlanGeneratorForm({
               onChange={(e) => setUseSeasonalDist(e.target.checked)}
             />
             <div className="flex items-center gap-2">
-              <span className="font-medium">Seasonal Distribution</span>
+              <span className="font-medium">{t('allocation_plans.seasonal_distribution')}</span>
               <span className="group relative">
                 <svg className="w-4 h-4 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                 </svg>
                 <div className="invisible group-hover:visible absolute z-10 w-80 p-3 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
-                  <p className="font-semibold mb-1">Seasonal Distribution</p>
+                  <p className="font-semibold mb-1">{t('allocation_plans.seasonal_distribution')}</p>
                   <p className="mb-2">Optional: Distribute samples unevenly across months to reflect seasonal patterns.</p>
                   <p className="mb-1"><strong>Example:</strong></p>
                   <p className="mb-1">• December = 15% (high season)</p>
                   <p className="mb-1">• January = 5% (low season)</p>
-                  <p>When disabled, samples are distributed evenly across all months. Fill some months manually, then click "Auto-fill to 100%" to distribute the remaining percentage.</p>
+                  <p>When disabled, samples are distributed evenly across all months. Fill some months manually, then click {t('allocation_plans.auto_fill_to_100')} to distribute the remaining percentage.</p>
                 </div>
               </span>
             </div>

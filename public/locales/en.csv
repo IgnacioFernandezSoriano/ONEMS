@@ -274,6 +274,8 @@ carriers.units_kg_etc,"units, kg, etc."
 carriers.update_quantity,Update quantity
 carriers.with_materials,With Materials
 carriers.without_materials,Without Materials
+common.1st_semester,1st Semester
+common.2nd_semester,2nd Semester
 common.actions,Actions
 common.active,Active
 common.apply,Apply
@@ -284,6 +286,7 @@ common.close,Close
 common.delete,Delete
 common.edit,Edit
 common.error,Error
+common.generate_plan,Generate Plan
 common.inactive,Inactive
 common.information,Information
 common.no_panelist,No Panelist
@@ -297,6 +300,7 @@ common.search,Search
 common.status,Status
 common.total,Total
 common.unavailable,Unavailable
+common.year,Year
 countrytopology.all_cities,All Cities
 countrytopology.all_nodes,All Nodes
 countrytopology.all_nodes_have_panelists,All nodes have panelists!
@@ -587,6 +591,18 @@ menu.translations,Translations
 menu.translations.tooltip,Manage application translations
 menu.users,Users
 menu.users.tooltip,Manage user accounts and permissions
+months.apr,Apr
+months.aug,Aug
+months.dec,Dec
+months.feb,Feb
+months.jan,Jan
+months.jul,Jul
+months.jun,Jun
+months.mar,Mar
+months.may,May
+months.nov,Nov
+months.oct,Oct
+months.sep,Sep
 nodeloadbalancing.acceptable_deviation_from_reference,Acceptable deviation from reference
 nodeloadbalancing.actualiza_fecha_programada_y_node_id_en_allocation,Actualiza fecha_programada y node_id en allocation_plan_details
 nodeloadbalancing.additional_nodes_required,Additional Nodes Required
