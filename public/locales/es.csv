@@ -27,32 +27,63 @@ admin.the_demo2_account_is_not_available_please_contact_,"La cuenta DEMO2 no est
 admin.this_will_permanently_delete,Esto eliminará permanentemente:
 admin.user_management,Gestión de usuarios
 admin.warning_this_action_cannot_be_undone,Advertencia: Esta acción no se puede deshacer
+allocation_generator.1st_semester,1er Semestre
+allocation_generator.2nd_semester,2do Semestre
+allocation_generator.about,Acerca del Generador de Asignaciones
+allocation_generator.about_description,Generar planes de asignación de muestras automáticamente basados en patrones de distribución
 allocation_generator.actions,Acciones
+allocation_generator.applied,Aplicado
 allocation_generator.applied_date,Fecha de Aplicación
+allocation_generator.applied_plans,Planes Aplicados
 allocation_generator.applied_plans_historical,Planes Aplicados (Histórico)
 allocation_generator.apply,Aplicar
+allocation_generator.april,Abril
+allocation_generator.august,Agosto
+allocation_generator.auto_fill,Auto-llenar al 100%
 allocation_generator.automatic_generator,Generador Automático
 allocation_generator.carrier,Transportista
+allocation_generator.city_distribution_matrix,Matriz de Distribución por Ciudad (A-B-C)
+allocation_generator.clear,Limpiar
 allocation_generator.confirm_apply,¿Aplicar este plan? Se moverá a los planes aplicados.
 allocation_generator.confirm_delete,¿Eliminar este plan?
 allocation_generator.csv_import_coming_soon,¡Funcionalidad de importación CSV próximamente!
+allocation_generator.december,Diciembre
 allocation_generator.delete,Eliminar
 allocation_generator.description,Generar planes de asignación de muestras automáticamente basados en patrones de distribución
 allocation_generator.download_csv,Descargar CSV
+allocation_generator.end_date,Fecha Final
 allocation_generator.error,Error
 allocation_generator.error_downloading,Error al descargar el plan
+allocation_generator.february,Febrero
+allocation_generator.generate_plan,Generar Plan
+allocation_generator.generated,Generado
+allocation_generator.generated_plans,Planes Generados
 allocation_generator.generated_plans_title,Planes Generados
+allocation_generator.generator,Generador
+allocation_generator.january,Enero
+allocation_generator.july,Julio
+allocation_generator.june,Junio
 allocation_generator.loading,Cargando...
 allocation_generator.manual_import,Importación Manual
+allocation_generator.march,Marzo
+allocation_generator.may,Mayo
 allocation_generator.no_applied_plans,Aún no hay planes aplicados
 allocation_generator.no_details_found,No se encontraron detalles para este plan
 allocation_generator.no_generated_plans,Aún no hay planes generados
+allocation_generator.november,Noviembre
+allocation_generator.october,Octubre
 allocation_generator.period,Período
 allocation_generator.plan_applied_success,¡Plan aplicado exitosamente!
 allocation_generator.plan_deleted_success,¡Plan eliminado exitosamente!
 allocation_generator.plan_name,Nombre del Plan
 allocation_generator.product,Producto
+allocation_generator.quick_period_selection,Selección Rápida de Período
 allocation_generator.samples,Muestras
+allocation_generator.seasonal_distribution,Distribución Estacional
+allocation_generator.select_carrier,Seleccionar transportista
+allocation_generator.select_product,Seleccionar producto
+allocation_generator.september,Septiembre
+allocation_generator.start_date,Fecha Inicial
 allocation_generator.status,Estado
 allocation_generator.tab_applied_plans,Planes Aplicados
 allocation_generator.tab_generated_plans,Planes Generados
@@ -66,7 +97,9 @@ allocation_generator.tooltip_purpose_text,Generar automáticamente planes de asi
 allocation_generator.tooltip_title,Generador de Planes de Asignación
 allocation_generator.tooltip_usage,Uso:
 allocation_generator.tooltip_usage_text,"Genera planes, revísalos en la pestaña ""Planes Generados"", luego aplícalos para activar las asignaciones de muestras."
+allocation_generator.total_samples,Muestras Totales
 allocation_generator.user_not_authenticated,Usuario no autenticado
+allocation_generator.year,Año
 allocation_plans.all_carriers,Todos los operadores
 allocation_plans.all_cities,Todas las ciudades
 allocation_plans.all_nodes,Todos los nodos
@@ -76,6 +109,7 @@ allocation_plans.all_records,Todos los registros
 allocation_plans.all_status,Todos los estados
 allocation_plans.auto_fill_to_100,Autocompletar al 100%
 allocation_plans.availability_issues,Problemas de disponibilidad
+allocation_plans.bulk_operations,Operaciones Masivas
 allocation_plans.cancel_selected,Cancelar seleccionados
 allocation_plans.cancelled,Cancelado
 allocation_plans.carrier,Operador
@@ -102,9 +136,11 @@ allocation_plans.first_day_of_the_allocation_period_samples_will_be,Primer día 
 allocation_plans.import_csv,Importar CSV
 allocation_plans.invalid,Inválido
 allocation_plans.last_day_of_the_allocation_period_samples_will_be_,Último día del período de asignación. Las muestras se programarán hasta esta fecha.
+allocation_plans.loading,Cargando planes de asignación...
 allocation_plans.no_panelist,Sin panelista
 allocation_plans.no_panelist_assigned_to_destination_node,No hay panelista asignado al nodo de destino
 allocation_plans.no_panelist_assigned_to_origin_node,No hay panelista asignado al nodo de origen
+allocation_plans.no_records,No se encontraron planes de asignación
 allocation_plans.notified,Notificado
 allocation_plans.optional,Opcional
 allocation_plans.optional_distribute_samples_unevenly_across_months,Opcional: Distribuir las muestras de manera desigual a lo largo de los meses para reflejar patrones estacionales.
@@ -114,11 +150,17 @@ allocation_plans.origin_node,Nodo de origen
 allocation_plans.pending,Pendiente
 allocation_plans.plan,Plan
 allocation_plans.plan_name,Nombre del plan *
+allocation_plans.please_ensure_destination_panelist,Por favor asegúrese de que el panelista de destino
+allocation_plans.please_ensure_origin_panelist,Por favor asegúrese de que el panelista de origen
+allocation_plans.please_enter_tag_id,Por favor ingrese el ID de etiqueta
+allocation_plans.please_select_datetime,Por favor seleccione fecha y hora
 allocation_plans.product,Producto
 allocation_plans.promise,Promesa
 allocation_plans.quick_period_selection,Selección rápida de período
 allocation_plans.receive,Recibir
 allocation_plans.received,Recibido
+allocation_plans.received_at_time,Recibido a las
+allocation_plans.received_by,Recibido por
 allocation_plans.received_date_time,Fecha y hora de recepción
 allocation_plans.register_reception,Registrar recepción
 allocation_plans.register_shipment,Registrar envío
@@ -134,9 +176,12 @@ allocation_plans.select_city,Seleccionar ciudad
 allocation_plans.select_node,Seleccionar nodo...
 allocation_plans.select_plan,Seleccionar plan
 allocation_plans.select_product,Seleccionar producto
+allocation_plans.selected_count,{count} seleccionado(s)
 allocation_plans.send,Enviar
 allocation_plans.sent,Enviado
 allocation_plans.sent_at,Enviado a las:
+allocation_plans.sent_at_time,Enviado a las
+allocation_plans.sent_by,Enviado por
 allocation_plans.sent_date_time,Fecha y hora de envío
 allocation_plans.start_date,Fecha de inicio
 allocation_plans.tag_id,ID de etiqueta
@@ -205,13 +250,28 @@ auth.signing_in,Iniciando sesión...
 auth.try_demo_account,Probar cuenta de demostración
 auth.wherequalitystarts,DondeComienzaLaCalidad
 auth.your_email_com,tu@correo.com
+bulk.cancelled_records,Registros cancelados
+bulk.confirm_cancel,¿Cancelar los registros seleccionados?
+bulk.confirm_delete,¿Eliminar los registros seleccionados?
+bulk.confirm_reprocess,¿Reprocesar los registros seleccionados?
+bulk.deleted_records,Registros eliminados
+bulk.please_select_date,Por favor seleccione una fecha
+bulk.please_select_destination_node,Por favor seleccione un nodo de destino
+bulk.please_select_origin_node,Por favor seleccione un nodo de origen
+bulk.reprocessed_records,Registros reprocesados
+bulk.retry_errors,Reintentar Errores
+bulk.selected,Seleccionado(s)
+bulk.updated_records,Registros actualizados
 carriers.add_a_new_material_to_catalog_and_assign_to_produc,Agregar un nuevo material al catálogo y asignarlo al producto
+carriers.add_carrier,Agregar Transportista
+carriers.add_product,Agregar Producto
 carriers.additional_details,Detalles adicionales...
 carriers.all_carriers,Todos los transportistas
 carriers.all_products,Todos los productos
 carriers.all_products_have_materials,¡Todos los productos tienen materiales!
 carriers.all_status,Todos los estados
 carriers.carrier,Transportista
+carriers.carrier_details,Detalles del Transportista
 carriers.carriers,Transportistas
 carriers.carriers_products,Transportistas y productos
 carriers.choose_an_existing_material_from_your_catalog,Elige un material existente de tu catálogo
@@ -239,6 +299,7 @@ carriers.every_product_has_materials_assigned_from_the_cata,Cada producto tiene 
 carriers.expand_all,Expandir todo
 carriers.expand_all_products_in_this_carrier,Expandir todos los productos en este transportista
 carriers.hours,Horas
+carriers.loading,Cargando transportistas...
 carriers.loading_carriers,Cargando transportistas...
 carriers.manage_shipping_carriers_products_and_material_req,"Gestionar transportistas, productos y requisitos de materiales"
 carriers.mat_001,MAT-001
@@ -246,14 +307,17 @@ carriers.material,Material
 carriers.materials,Materiales
 carriers.name,Nombre *
 carriers.no_active_materials_in_catalog_create_a_new_one_in,No hay materiales activos en el catálogo. Cree uno nuevo en su lugar.
+carriers.no_carriers,No se encontraron transportistas
 carriers.no_carriers_defined_yet,No se han definido transportistas aún
 carriers.no_materials_assigned_yet,No se han asignado materiales aún
+carriers.no_products,No hay productos
 carriers.no_products_for_this_carrier_yet,No hay productos para este transportista aún
 carriers.no_results_found,No se encontraron resultados
 carriers.pending_materials,Materiales pendientes
 carriers.product,Producto
 carriers.product_code,Código de producto
 carriers.products,Productos
+carriers.products_count,Cantidad de Productos
 carriers.products_without_materials,Productos sin materiales
 carriers.promise,Compromiso
 carriers.quantity,Cantidad *
@@ -274,32 +338,56 @@ carriers.units_kg_etc,"unidades, kg, etc."
 carriers.update_quantity,Actualizar cantidad
 carriers.with_materials,Con Materiales
 carriers.without_materials,Sin Materiales
+catalog.add_material,Agregar Material
+catalog.material_code,Código de Material
+catalog.material_name,Nombre del Material
+catalog.title,Catálogo de Materiales
 common.1st_semester,1er Semestre
 common.2nd_semester,2do Semestre
+common.about,Acerca de
 common.actions,Acciones
 common.active,Activo
+common.all,Todos
 common.apply,Aplicar
 common.available,disponible
+common.bulk_edit,Edición Masiva
 common.cancel,Cancelar
 common.clear,Limpiar
 common.close,Cerrar
+common.confirm_delete,¿Eliminar este registro?
+common.create,Crear
+common.created_successfully,Creado exitosamente
 common.delete,Eliminar
+common.deleted_successfully,Eliminado exitosamente
+common.download,Descargar
 common.edit,Editar
 common.error,Error
+common.export,Exportar
+common.filters,Filtros
 common.generate_plan,Generar Plan
+common.hide_filters,Ocultar Filtros
+common.import,Importar
 common.inactive,Inactivo
 common.information,Información
+common.loading,Cargando...
 common.no_panelist,Sin Panelista
 common.of,de
+common.pending,Pendiente
+common.please_select_at_least_one,Por favor seleccione al menos un registro
 common.promise,Promesa
+common.records,Registros
 common.refresh,Actualizar
+common.register,Registrar
 common.remove,Quitar
 common.reset,Restablecer
 common.save,Guardar
 common.search,Buscar
+common.select_all,Seleccionar Todo
+common.show_filters,Mostrar Filtros
 common.status,Estado
 common.total,Total
 common.unavailable,No disponible
+common.updated_successfully,Actualizado exitosamente
 common.year,Año
 countrytopology.all_cities,Todas las ciudades
 countrytopology.all_nodes,Todos los nodos
@@ -398,20 +486,45 @@ dashboard.total_status,Total y estado
 dashboard.unassigned,Sin Asignar
 dashboard.unavailable,No Disponible
 dashboard.upcoming_vacations,Próximas vacaciones
+delivery_standards.about_text,Configurar tiempos de entrega esperados entre ciudades para cada combinación transportista-producto
+delivery_standards.absolute,Absoluto
+delivery_standards.add_standard,Agregar Norma
+delivery_standards.all_carriers,Todos los Transportistas
+delivery_standards.all_destinations,Todos los Destinos
+delivery_standards.all_origins,Todos los Orígenes
+delivery_standards.all_products,Todos los Productos
+delivery_standards.bulk_update,Actualización Masiva
 delivery_standards.carrier,Transportista *
 delivery_standards.clear_all_selections,Borrar todas las selecciones
+delivery_standards.confirm_delete,¿Eliminar esta norma de entrega?
+delivery_standards.create_standard,Crear Norma
+delivery_standards.created,Norma de entrega creada exitosamente
+delivery_standards.critical_threshold,Umbral Crítico
 delivery_standards.days,Días
+delivery_standards.delete_selected,Eliminar Seleccionados
+delivery_standards.deleted,Norma de entrega eliminada exitosamente
+delivery_standards.description,Descripción
+delivery_standards.destination,Destino
 delivery_standards.destination_city,Ciudad de destino *
+delivery_standards.destination_classification,Clasificación Destino
 delivery_standards.e_g_24,"p. ej., 24"
 delivery_standards.e_g_85,"p. ej., 85"
+delivery_standards.edit_standard,Editar Norma
 delivery_standards.estimated_combinations,Combinaciones estimadas:
+delivery_standards.expected_days,Días Esperados
+delivery_standards.generate_combinations,Generar Combinaciones
 delivery_standards.generate_delivery_standards,Generar Estándares de Entrega
 delivery_standards.generation_complete,Generación Completa
 delivery_standards.hours,Horas
+delivery_standards.loading_standards,Cargando normas de entrega...
 delivery_standards.no_products_for_this_carrier,No hay productos para este transportista
+delivery_standards.origin,Origen
 delivery_standards.origin_city,Ciudad de Origen *
+delivery_standards.origin_classification,Clasificación Origen
+delivery_standards.pending_only,Solo Pendientes
 delivery_standards.product,Producto *
 delivery_standards.promise,Compromiso
+delivery_standards.relative,Relativo
 delivery_standards.select_carrier,Seleccionar transportista
 delivery_standards.select_destination,Seleccionar destino
 delivery_standards.select_origin,Seleccionar origen
@@ -419,7 +532,13 @@ delivery_standards.select_product,Seleccionar producto
 delivery_standards.smart_generation,Generación Inteligente:
 delivery_standards.standard_time,Tiempo Estándar
 delivery_standards.success,% de Éxito
+delivery_standards.success_percentage,% de Éxito
+delivery_standards.threshold_type,Tipo de Umbral
 delivery_standards.time_unit,Unidad de Tiempo *
+delivery_standards.title,Normas de Entrega
+delivery_standards.tolerance_days,Días de Tolerancia
+delivery_standards.updated,Norma de entrega actualizada exitosamente
+delivery_standards.warning_threshold,Umbral de Advertencia
 deliverystandards.about_delivery_standards,Acerca de los Estándares de Entrega
 deliverystandards.absoluto,Absoluto:
 deliverystandards.absoluto_del_100,Absoluto (% del 100%)
@@ -493,6 +612,25 @@ deliverystandards.warning_threshold,Umbral de advertencia (%)
 layout.all_accounts,Todas las cuentas
 layout.sign_out,Cerrar sesión
 layout.view_as_account,Ver como cuenta:
+load_balancing.about_text,Equilibrar la asignación de panelistas entre nodos para optimizar la distribución de carga de trabajo
+load_balancing.apply_balance,Aplicar Equilibrio
+load_balancing.applying,Aplicando equilibrio...
+load_balancing.calculating,Calculando equilibrio...
+load_balancing.confirm_apply,¿Aplicar estos cambios a las asignaciones de panelistas?
+load_balancing.current_distribution,Distribución Actual
+load_balancing.current_load,Carga Actual
+load_balancing.current_panelists,Panelistas Actuales
+load_balancing.description,Descripción
+load_balancing.difference,Diferencia
+load_balancing.loading,Cargando datos de equilibrio...
+load_balancing.node,Nodo
+load_balancing.preview_changes,Vista Previa de Cambios
+load_balancing.rebalance,Reequilibrar
+load_balancing.reset_preview,Reiniciar Vista Previa
+load_balancing.success,Equilibrio aplicado exitosamente
+load_balancing.target_load,Carga Objetivo
+load_balancing.target_panelists,Panelistas Objetivo
+load_balancing.title,Equilibrio de Carga de Nodos
 material_catalog.additional_details,Detalles adicionales...
 material_catalog.code,Código *
 material_catalog.description,Descripción
@@ -503,6 +641,43 @@ material_catalog.promise,Promesa
 material_catalog.rfid_tag,Etiqueta RFID
 material_catalog.unit_measure,Unidad de medida
 material_catalog.units_kg_etc,"unidades, kg, etc."
+material_requirements.about,Acerca de los Requisitos de Material
+material_requirements.about_description,Calcular necesidades de material basadas en planes de asignación
+material_requirements.all_materials,Todos los Materiales
+material_requirements.all_nodes,Todos los Nodos
+material_requirements.assigned,Asignado
+material_requirements.calculate,Calcular Requisitos
+material_requirements.calculating,Calculando...
+material_requirements.calculation_period,Período de Cálculo
+material_requirements.carrier,Transportista
+material_requirements.city,Ciudad
+material_requirements.clear_filters,Limpiar Filtros
+material_requirements.description,Descripción
+material_requirements.end_date,Fecha Final
+material_requirements.export_csv,Exportar CSV
+material_requirements.filters,Filtros
+material_requirements.loading,Cargando requisitos de material...
+material_requirements.material_code,Código de Material
+material_requirements.material_name,Nombre del Material
+material_requirements.node,Nodo
+material_requirements.panelist,Panelista
+material_requirements.panelist_distribution,Distribución de Panelistas
+material_requirements.panelists_needing,Panelistas que Necesitan
+material_requirements.pending,Pendiente
+material_requirements.plans,Planes
+material_requirements.please_select_dates,Por favor seleccione fechas
+material_requirements.product,Producto
+material_requirements.purchase_orders,Órdenes de Compra
+material_requirements.quantity,Cantidad
+material_requirements.quantity_needed,Cantidad Necesaria
+material_requirements.region,Región
+material_requirements.shipments,Envíos
+material_requirements.start_date,Fecha Inicial
+material_requirements.status,Estado
+material_requirements.title,Requisitos de Material
+material_requirements.total_materials,Materiales Totales
+material_requirements.total_requirements,Requisitos Totales
+material_requirements.unit,Unidad
 materialcatalog.code,Código
 materialcatalog.description,Descripción
 materialcatalog.loading,Cargando...
@@ -538,6 +713,10 @@ materialrequirements.start_date,Fecha de inicio
 materialrequirements.total_materials,Materiales totales
 materialrequirements.unit,Unidad
 materialrequirements.year,Año
+materials.no_materials_selected,No hay materiales seleccionados
+materials.search_materials,Buscar materiales
+materials.select_materials,Seleccionar materiales
+materials.selected_materials,Materiales seleccionados
 menu.accounts,Cuentas
 menu.accounts.tooltip,Gestionar todas las cuentas en el sistema
 menu.administration,Administración
@@ -700,14 +879,17 @@ onedb.product,Producto
 onedb.received,Recibido
 onedb.reset_filters,Restablecer filtros
 onedb.route,Ruta
+onedb.search,Buscar
 onedb.sent,Enviado
 onedb.tag_id,ID de etiqueta
 onedb.tag_id_or_plan,ID de etiqueta o plan...
+onedb.title,ONE DB
 onedb.to_date,Hasta la fecha
 onedb.total_records,Total de registros
 onedb.transit_days,Días en tránsito
 onedb.validated_postal_quality_analytics_repository,Repositorio validado de análisis de calidad postal
 panelists.activate,Activar
+panelists.add_panelist,Agregar Panelista
 panelists.address_line_1,Línea de dirección 1
 panelists.address_line_2,Línea de dirección 2
 panelists.all_cities,Todas las ciudades
@@ -716,8 +898,10 @@ panelists.all_panelists_in_system,Todos los panelistas en el sistema
 panelists.all_status,Todos los estados
 panelists.apartment_suite_etc_optional,"Apartamento, suite, etc. (opcional)"
 panelists.available_for_deliveries,Disponible para entregas
+panelists.bulk_actions,Acciones Masivas
 panelists.choose_an_action_to_apply_to_all_selected_items,Elija una acción para aplicar a todos los elementos seleccionados
 panelists.city,Ciudad
+panelists.clear_selection_btn,Limpiar Selección
 panelists.code,Código
 panelists.code_name_email,"Código, nombre, correo electrónico..."
 panelists.country,País
@@ -728,22 +912,29 @@ panelists.email,Correo electrónico
 panelists.filters,Filtros
 panelists.leave_empty_to_auto_generate,Dejar vacío para generar automáticamente
 panelists.loading,Cargando...
+panelists.loading_panelists,Cargando panelistas...
 panelists.manage_panelist_profiles_and_assignments,Gestionar perfiles y asignaciones de panelistas
 panelists.manage_panelists_and_their_availability_for_delive,Gestionar panelistas y su disponibilidad para entregas
 panelists.mobile,Móvil
 panelists.name,Nombre
+panelists.no_panelists,No se encontraron panelistas
+panelists.no_panelists_found,No se encontraron panelistas
 panelists.node,Nodo
 panelists.not_available,No disponible
 panelists.panelist_code,Código de panelista
+panelists.panelist_details,Detalles del Panelista
 panelists.panelists,Panelistas
 panelists.panelists_management,Gestión de panelistas
+panelists.panelists_tab,Panelistas
 panelists.postal_code,Código postal
 panelists.reset_all_filters,Restablecer todos los filtros
 panelists.select_a_node,Seleccionar un nodo
+panelists.selected_count,{count} seleccionado(s)
 panelists.street_address,Dirección
 panelists.telegram_id,ID de Telegram
 panelists.total_panelists,Total de panelistas
 panelists.unavailability_periods,Períodos de indisponibilidad
+panelists.unavailability_tab,Indisponibilidad
 panelists.username_or_numeric_id,@usuario o ID numérico
 panelistunavailability.tsx.additional_information_about_this_unavailability_p,Información adicional sobre este período de indisponibilidad...
 panelistunavailability.tsx.all_panelists,Todos los panelistas
@@ -775,6 +966,9 @@ panelistunavailability.tsx.training,Capacitación
 panelistunavailability.tsx.unavailability_periods,Períodos de indisponibilidad
 panelistunavailability.tsx.upcoming,Próximos
 panelistunavailability.tsx.vacation,Vacaciones
+receive.description,Generar recibos de muestras
+receive.generate,Generar
+receive.title,Generador de Recibos
 receivegenerator.advance_variance_days,Variación anticipada (días)
 receivegenerator.carriers,Transportistas
 receivegenerator.delay_variance_days,Variación de retraso (días)
@@ -1003,10 +1197,13 @@ settings.quarterly,Trimestral
 settings.search_cities,Buscar ciudades...
 settings.warning_threshold_must_be_greater_than_critical_th,El umbral de advertencia debe ser mayor que el umbral crítico
 settings.weekly,Semanal
+stock.about,Acerca de la Gestión de Inventario
+stock.about_description,Gestionar niveles de inventario y alertas de stock
 stock.add_to_stock,Agregar al stock
 stock.adjust_stock,Ajustar stock
 stock.adjustment_note,Nota de ajuste
 stock.alert_type,Tipo de alerta
+stock.alerts,Alertas
 stock.all_materials,Todos los materiales
 stock.all_nodes,Todos los nodos
 stock.all_panelists,Todos los panelistas
@@ -1027,6 +1224,7 @@ stock.confirm_order,Confirmar pedido
 stock.confirm_receipt,Confirmar recepción
 stock.confirm_shipment,Confirmar envío
 stock.confirmed_shipments,Envíos confirmados
+stock.critical,Crítico
 stock.current_quantity,Cantidad actual
 stock.current_stock,Stock actual
 stock.date,Fecha
@@ -1043,6 +1241,7 @@ stock.filters,Filtros
 stock.from,Desde
 stock.last_updated,Última actualización
 stock.lead_times,Tiempos de entrega
+stock.loading,Cargando datos de inventario...
 stock.loading_alerts,Cargando alertas...
 stock.loading_movements,Cargando movimientos...
 stock.loading_panelist_stock,Cargando stock del panelista...
@@ -1052,14 +1251,21 @@ stock.location,Ubicación
 stock.low_stock,Stock bajo
 stock.low_stock_only,Solo bajo stock
 stock.material,Material
+stock.material_requirements_help,Ver requisitos de material calculados
+stock.material_requirements_tab,Requisitos de Material
 stock.materials,Materiales
 stock.materials_to_send,Materiales para enviar
+stock.maximum_stock,Stock Máximo
 stock.metrics_overview,Resumen de métricas
 stock.minimum,Mínimo
+stock.minimum_stock,Stock Mínimo
 stock.movement_type,Tipo de movimiento
+stock.movements_help,Rastrear movimientos de inventario
+stock.movements_tab,Movimientos
 stock.net_quantity,Cantidad neta
 stock.new_quantity,Cantidad nueva
 stock.no_stock_alerts_found,No se encontraron alertas de stock
+stock.no_stock_data,No hay datos de inventario
 stock.no_stock_records_found,No se encontraron registros de stock
 stock.node,Nodo
 stock.normal,Normal
@@ -1068,9 +1274,12 @@ stock.notes,Notas
 stock.order,Orden
 stock.order_material,Material de orden
 stock.ordered,Ordenado
+stock.out_of_stock,Sin Stock
 stock.packing_list_pdf,Lista de empaque PDF
 stock.panelist,Panelista
 stock.panelist_negative,Panelista Negativo
+stock.panelist_stock_help,Ver inventario de panelistas
+stock.panelist_stock_tab,Stock de Panelistas
 stock.pending,Pendiente
 stock.pending_requirements,Requisitos Pendientes
 stock.pending_shipments,Envíos Pendientes
@@ -1089,7 +1298,10 @@ stock.receive,Recibir
 stock.receive_purchase_order,Recibir Orden de Compra
 stock.received,Recibido
 stock.regulator_insufficient,Regulador Insuficiente
+stock.regulator_stock_help,Ver inventario del regulador
+stock.regulator_stock_tab,Stock del Regulador
 stock.removed_materials_will_create_new_pending_shipment,Materiales Eliminados (Se Creará un Nuevo Envío Pendiente)
+stock.reorder_point,Punto de Reorden
 stock.reset_filters,Restablecer filtros
 stock.restore,Restaurar
 stock.search_by_material_or_code,Buscar por material o código...
@@ -1098,15 +1310,22 @@ stock.search_material,Buscar material...
 stock.send,Enviar
 stock.sent,Enviado
 stock.sent_date,Fecha de envío
+stock.settings_help,Configurar parámetros de inventario
+stock.settings_tab,Configuración
 stock.shipment,Número de envío
 stock.shipment_lead_time_days,Plazo de envío (días)
 stock.shipments,Envíos
+stock.shipments_help,Ver envíos de inventario
+stock.shipments_tab,Envíos
 stock.showing,Mostrando
 stock.start_date,Fecha de inicio
 stock.stock_alert,Alerta de stock
+stock.stock_alerts_help,Ver alertas de stock bajo
+stock.stock_alerts_tab,Alertas de Stock
 stock.stock_control,Control de stock
 stock.stock_status,Estado de stock
 stock.this_feature_is_not_available_in_the_current_versi,Esta función no está disponible en la versión actual del módulo.
+stock.title,Gestión de Inventario
 stock.total_items_pending,Total de artículos pendientes
 stock.total_movements,Total de movimientos:
 stock.total_records,Total de registros:
@@ -1114,12 +1333,17 @@ stock.type,Tipo
 stock.unit,Unidad
 stock.unknown_panelist,Panelista desconocido
 stock.used_to_calculate_expected_delivery_dates,Utilizado para calcular fechas de entrega esperadas
+stock.warning,Advertencia
 stock.year,Año
 stockmanagement.stock_alerts,Alertas de stock
 stockmanagement.stock_management_alerts,Gestión y alertas de stock
 stockmanagement.tabs,Pestañas
 topology.3_7038,-3.7038
 topology.40_4168,40.4168
+topology.add_city,Agregar Ciudad
+topology.add_node,Agregar Nodo
+topology.add_region,Agregar Región
+topology.cities,Ciudades
 topology.city,Ciudad
 topology.city_code,Código de ciudad *
 topology.city_name,Nombre de la ciudad *
@@ -1138,18 +1362,26 @@ topology.edit_node,Editar nodo
 topology.edit_region,Editar región
 topology.expand_all_cities_in_this_region,Expandir todas las ciudades en esta región
 topology.latitude,Latitud
+topology.loading,Cargando topología...
 topology.longitude,Longitud
 topology.no_cities_in_this_region_yet,Aún no hay ciudades en esta región
 topology.no_nodes_in_this_city_yet,Aún no hay nodos en esta ciudad
+topology.no_regions,No se encontraron regiones
 topology.node,Nodo
+topology.nodes,Nodos
 topology.panelist_assigned,Panelista asignado
+topology.panelists,Panelistas
 topology.pending_panelist,Panelista pendiente
 topology.population,Población
 topology.promise,Promesa
 topology.region_code,Código de región *
 topology.region_name,Nombre de la región *
+topology.regions,Regiones
 topology.status,Estado *
+topology.title,Topología del País
+topology.topology_tab,Topología
 topology.total_population_of_the_city_used_for_impact_analy,Población total de la ciudad (utilizada para análisis de impacto en informes)
+topology.without_panelists_tab,Sin Panelistas
 users.account,Cuenta
 users.deactivate,Desactivar
 users.email,Correo electrónico
