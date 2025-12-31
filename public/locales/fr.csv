@@ -1636,3 +1636,31 @@ allocation_plans.origin_status_header,Statut d'origine
 allocation_plans.dest_panelist_header,Panéliste dest.
 allocation_plans.dest_status_header,Statut dest.
 allocation_plans.available,Disponible
+topology.title,Topologie du pays
+topology.description,Définir et gérer la hiérarchie de l'infrastructure réseau de votre pays
+topology.regions,Régions
+topology.cities,Villes
+topology.total_nodes,Total des nœuds
+topology.with_panelists,Avec panélistes
+topology.without_panelists,Sans panélistes
+topology.topology_tree,Arbre topologique
+topology.nodes_without_panelists,Nœuds sans panélistes
+topology.search_placeholder,Rechercher des régions, villes ou nœuds...
+topology.all_regions,Toutes les régions
+topology.all_cities,Toutes les villes
+topology.all_nodes,Tous les nœuds
+topology.expand_all,Tout développer
+topology.create_region,Créer une région
+topology.city,Ville
+topology.node,Nœud
+topology.panelist_assigned,Panéliste assigné
+topology.nodes_need_assignment,Ces nœuds nécessitent l'affectation d'un panéliste pour être opérationnels
+topology.download_csv,Télécharger CSV
+topology.all_nodes_have_panelists,Tous les nœuds ont des panélistes !
+topology.every_node_assigned,Chaque nœud de votre topologie a un panéliste assigné
+topology.edit_region,Modifier la région
+topology.edit_city,Modifier la ville
+topology.edit_node,Modifier le nœud
+topology.delete_region,Supprimer la région
+topology.delete_city,Supprimer la ville
+topology.delete_node,Supprimer le nœud

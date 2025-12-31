@@ -2,6 +2,8 @@ import { useState, useMemo } from 'react'
 import { useTopology } from '@/hooks/useTopology'
 import { TopologyTree } from '@/components/topology/TopologyTree'
 import { SmartTooltip } from '@/components/common/SmartTooltip'
+import { Modal } from '@/components/common/Modal'
+import { RegionForm } from '@/components/topology/RegionForm'
 
 import { useTranslation } from '@/hooks/useTranslation';
 export function CountryTopology() {
@@ -31,6 +33,7 @@ export function CountryTopology() {
   const [filterCity, setFilterCity] = useState<string>('all')
   const [filterPanelistStatus, setFilterPanelistStatus] = useState<string>('all')
   const [expandAll, setExpandAll] = useState(false)
+  const [showRegionModal, setShowRegionModal] = useState(false)
 
   // Calculate nodes with/without panelists
   const nodesWithPanelists = useMemo(() => {
@@ -179,7 +182,7 @@ export function CountryTopology() {
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-bold text-gray-900">Country Topology</h1>
+            <h1 className="text-3xl font-bold text-gray-900">{t('topology.title')}</h1>
             <SmartTooltip content="About Country Topology - Purpose: Define and manage your country's network infrastructure hierarchy in a three-level structure. Structure: Regions (top-level geographic divisions like Norte, Sur, Centro), Cities (urban centers within each region like Madrid, Barcelona), and Nodes (specific delivery points or addresses within cities). Usage: This topology is used throughout the system for allocation planning, reporting, and territory equity analysis.">
               <svg className="w-5 h-5 text-gray-400 hover:text-gray-600 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -189,17 +192,17 @@ export function CountryTopology() {
           
           {/* Create Region Button */}
           <button
-            onClick={() => createRegion({ name: '', code: '' })}
+            onClick={() => setShowRegionModal(true)}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
-            Create Region
+            {t('topology.create_region')}
           </button>
         </div>
         <p className="text-gray-600">
-          Define and manage your country network infrastructure hierarchy
+          {t('topology.description')}
         </p>
       </div>
 
@@ -234,7 +237,7 @@ export function CountryTopology() {
         {/* Total Nodes */}
         <div className="bg-gradient-to-br from-purple-50 to-white border border-purple-100 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-purple-700">Total Nodes</span>
+            <span className="text-xs font-medium text-purple-700">{t('topology.total_nodes')}</span>
             <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
               <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -248,7 +251,7 @@ export function CountryTopology() {
         {/* Nodes with Panelists */}
         <div className="bg-gradient-to-br from-emerald-50 to-white border border-emerald-100 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-emerald-700">With Panelists</span>
+            <span className="text-xs font-medium text-emerald-700">{t('topology.with_panelists')}</span>
             <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
               <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -261,7 +264,7 @@ export function CountryTopology() {
         {/* Nodes without Panelists */}
         <div className="bg-gradient-to-br from-amber-50 to-white border border-amber-100 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-amber-700">Without Panelists</span>
+            <span className="text-xs font-medium text-amber-700">{t('topology.without_panelists')}</span>
             <div className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center">
               <svg className="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -284,7 +287,7 @@ export function CountryTopology() {
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              Topology Tree
+              {t('topology.topology_tree')}
             </button>
             <button
               onClick={() => setActiveTab('without-panelists')}
@@ -294,7 +297,7 @@ export function CountryTopology() {
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              Nodes without Panelists
+              {t('topology.nodes_without_panelists')}
               {stats.nodesWithoutPanelists > 0 && (
                 <span className="bg-amber-100 text-amber-800 text-xs font-semibold px-2 py-0.5 rounded-full">
                   {stats.nodesWithoutPanelists}
@@ -314,7 +317,7 @@ export function CountryTopology() {
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="Search regions, cities, or nodes..."
+                  placeholder={t('topology.search_placeholder')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -335,7 +338,7 @@ export function CountryTopology() {
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="all">All Regions</option>
+                <option value="all">{t('topology.all_regions')}</option>
                 {regions.map(region => (
                   <option key={region.id} value={region.id}>{region.name}</option>
                 ))}
@@ -350,7 +353,7 @@ export function CountryTopology() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 disabled={filterRegion !== 'all'}
               >
-                <option value="all">All Cities</option>
+                <option value="all">{t('topology.all_cities')}</option>
                 {(filterRegion === 'all' ? cities : cities.filter(c => c.region_id === filterRegion)).map(city => (
                   <option key={city.id} value={city.id}>{city.name}</option>
                 ))}
@@ -364,7 +367,7 @@ export function CountryTopology() {
                 onChange={(e) => setFilterPanelistStatus(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="all">All Nodes</option>
+                <option value="all">{t('topology.all_nodes')}</option>
                 <option value="with">With Panelist</option>
                 <option value="without">Without Panelist</option>
               </select>
@@ -387,7 +390,7 @@ export function CountryTopology() {
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
-                  Expand All
+                  {t('topology.expand_all')}
                 </>
               )}
             </button>
@@ -528,6 +531,22 @@ export function CountryTopology() {
             </div>
           )}
         </div>
+      )}
+
+      {/* Create Region Modal */}
+      {showRegionModal && (
+        <Modal
+          title={t('topology.create_region')}
+          onClose={() => setShowRegionModal(false)}
+        >
+          <RegionForm
+            onSubmit={async (data) => {
+              await createRegion(data)
+              setShowRegionModal(false)
+            }}
+            onCancel={() => setShowRegionModal(false)}
+          />
+        </Modal>
       )}
     </div>
   )
