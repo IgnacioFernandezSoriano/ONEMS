@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { BalanceResult, MatrixCell } from '../../hooks/useNodeLoadBalancing';
 
-import { useTranslation } from '@/hooks/useTranslation';
 interface BalancePreviewModalProps {
   isOpen: boolean;
   cityName: string;
@@ -60,10 +59,10 @@ export const BalancePreviewModal: React.FC<BalancePreviewModalProps> = ({
             <>
               {/* Summary */}
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                <h3 className="font-semibold text-blue-900 mb-3">{t('nodeloadbalancing.summary')}</h3>
+                <h3 className="font-semibold text-blue-900 mb-3">Summary</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div>
-                    <div className="text-sm text-blue-700">{t('nodeloadbalancing.movements')}</div>
+                    <div className="text-sm text-blue-700">Movements</div>
                     <div className="text-2xl font-bold text-blue-900">
                       {previewResult.movements_count}
                     </div>
@@ -81,7 +80,7 @@ export const BalancePreviewModal: React.FC<BalancePreviewModalProps> = ({
                     </div>
                   </div>
                   <div>
-                    <div className="text-sm text-blue-700">{t('nodeloadbalancing.improvement')}</div>
+                    <div className="text-sm text-blue-700">Improvement</div>
                     <div className="text-2xl font-bold text-green-700">
                       {previewResult.improvement_percentage != null ? previewResult.improvement_percentage.toFixed(1) : 'N/A'}%
                     </div>
@@ -393,7 +392,7 @@ const MatrixVisualization: React.FC<MatrixVisualizationProps> = ({
                 })}
                 {/* Totals Row */}
                 <tr className="bg-gray-50 font-semibold">
-                  <td className="px-3 py-2 text-sm text-gray-900">{t('common.total')}</td>
+                  <td className="px-3 py-2 text-sm text-gray-900">Total</td>
                   {weeks.map((week) => {
                     const colTotal = nodes.reduce(
                       (sum, node) => sum + (currentMatrix[`${node}-${week}`] || 0),
