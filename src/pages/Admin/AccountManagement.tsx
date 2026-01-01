@@ -18,7 +18,7 @@ export function AccountManagement() {
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <p className="mt-2 text-gray-600">Loading accounts...</p>
+            <p className="mt-2 text-gray-600">{t('admin.loading_accounts')}</p>
           </div>
         </div>
       </div>
@@ -28,7 +28,7 @@ export function AccountManagement() {
   return (
     <div className="p-8">
       <PageHeader
-        title="Demo Reset"
+        title={t('admin.demo_reset')}
       />
 
       <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -40,17 +40,16 @@ export function AccountManagement() {
           </div>
           <div className="ml-3 flex-1">
             <h3 className="text-sm font-medium text-blue-800">
-              About Account Reset
+              {t('admin.about_account_reset')}
             </h3>
             <div className="mt-2 text-sm text-blue-700">
               <p>
-                Use this feature to prepare accounts for training sessions or demos. 
-                The reset process will:
+                {t('admin.use_this_feature_to_prepare_accounts')}
               </p>
               <ul className="list-disc list-inside mt-2 space-y-1">
-                <li><strong>{t('common.delete')}</strong> all operational data (plans, shipments, stocks, orders)</li>
-                <li><strong>{t('admin.preserve')}</strong> all configuration data (topology, panelists, materials, settings)</li>
-                <li><strong>Cannot be undone</strong> - use with caution</li>
+                <li><strong>{t('common.delete')}</strong> {t('admin.all_operational_data')}</li>
+                <li><strong>{t('admin.preserve')}</strong> {t('admin.all_configuration_data')}</li>
+                <li><strong>{t('admin.cannot_be_undone')}</strong> - {t('admin.use_with_caution')}</li>
               </ul>
             </div>
           </div>
@@ -73,9 +72,9 @@ export function AccountManagement() {
                 d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
               />
             </svg>
-            <h3 className="mt-2 text-sm font-medium text-gray-900">DEMO2 account not found</h3>
+            <h3 className="mt-2 text-sm font-medium text-gray-900">{t('admin.demo2_account_not_found')}</h3>
             <p className="mt-1 text-sm text-gray-500">
-              The DEMO2 account is not available. Please contact the administrator.
+              {t('admin.the_demo2_account_is_not_available_please_contact_')}
             </p>
           </div>
         ) : (

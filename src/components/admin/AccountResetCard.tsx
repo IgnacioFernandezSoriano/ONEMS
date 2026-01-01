@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/common/Button'
 import type { Account, ResetResult } from '@/hooks/useAccountManagement'
+import { useTranslation } from '@/hooks/useTranslation'
 
 interface AccountResetCardProps {
   account: Account
@@ -9,6 +10,7 @@ interface AccountResetCardProps {
 }
 
 export function AccountResetCard({ account, onReset, disabled }: AccountResetCardProps) {
+  const { t } = useTranslation()
   const [showConfirm, setShowConfirm] = useState(false)
   const [resetting, setResetting] = useState(false)
   const [result, setResult] = useState<ResetResult | null>(null)
@@ -31,7 +33,7 @@ export function AccountResetCard({ account, onReset, disabled }: AccountResetCar
     } catch (error) {
       setResult({
         success: false,
-        message: 'An unexpected error occurred'
+        message: t('admin.an_unexpected_error_occurred')
       })
     } finally {
       setResetting(false)
@@ -49,7 +51,7 @@ export function AccountResetCard({ account, onReset, disabled }: AccountResetCar
         <div className="flex-1">
           <h3 className="text-lg font-semibold text-gray-900">{account.name}</h3>
           <p className="text-xs text-gray-500 mt-2">
-            Created: {new Date(account.created_at).toLocaleDateString()}
+            {t('admin.created')} {new Date(account.created_at).toLocaleDateString()}
           </p>
         </div>
 
@@ -60,7 +62,7 @@ export function AccountResetCard({ account, onReset, disabled }: AccountResetCar
               onClick={() => setShowConfirm(true)}
               disabled={disabled || resetting}
             >
-              Reset Data
+              {t('admin.reset_data')}
             </Button>
           ) : (
             <div className="flex flex-col gap-2">
@@ -70,7 +72,7 @@ export function AccountResetCard({ account, onReset, disabled }: AccountResetCar
                 disabled={resetting}
                 className="whitespace-nowrap"
               >
-                {resetting ? 'Resetting...' : 'Confirm Reset'}
+                {resetting ? t('admin.resetting') : t('admin.confirm_reset')}
               </Button>
               <Button
                 variant="secondary"
@@ -78,7 +80,7 @@ export function AccountResetCard({ account, onReset, disabled }: AccountResetCar
                 disabled={resetting}
                 className="whitespace-nowrap"
               >
-                Cancel
+                {t('common.cancel')}
               </Button>
             </div>
           )}
@@ -112,7 +114,7 @@ export function AccountResetCard({ account, onReset, disabled }: AccountResetCar
               
               {result.success && result.deleted_records && (
                 <div className="mt-2 text-sm text-green-700">
-                  <p className="font-medium">Deleted records:</p>
+                  <p className="font-medium">{t('admin.deleted_records')}</p>
                   <ul className="mt-1 list-disc list-inside space-y-1">
                     {Object.entries(result.deleted_records).map(([table, count]) => (
                       count > 0 && (
@@ -139,19 +141,19 @@ export function AccountResetCard({ account, onReset, disabled }: AccountResetCar
             </div>
             <div className="ml-3">
               <h3 className="text-sm font-medium text-yellow-800">
-                Warning: This action cannot be undone
+                {t('admin.warning_this_action_cannot_be_undone')}
               </h3>
               <div className="mt-2 text-sm text-yellow-700">
-                <p>This will permanently delete:</p>
+                <p>{t('admin.this_will_permanently_delete')}</p>
                 <ul className="list-disc list-inside mt-1 space-y-1">
-                  <li>All allocation plans and details</li>
-                  <li>All material shipments and movements</li>
-                  <li>All material stocks</li>
-                  <li>All purchase orders</li>
-                  <li>All balancing history</li>
+                  <li>{t('admin.all_allocation_plans_and_details')}</li>
+                  <li>{t('admin.all_material_shipments_and_movements')}</li>
+                  <li>{t('admin.all_material_stocks')}</li>
+                  <li>{t('admin.all_purchase_orders')}</li>
+                  <li>{t('admin.all_balancing_history')}</li>
                 </ul>
                 <p className="mt-2 font-medium">
-                  Configuration data (nodes, panelists, materials, etc.) will be preserved.
+                  {t('admin.configuration_data_nodes_panelists_materials_etc_w')}
                 </p>
               </div>
             </div>
