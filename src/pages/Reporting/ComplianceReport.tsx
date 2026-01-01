@@ -296,7 +296,7 @@ export default function ComplianceReport() {
               className="flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
             >
               <FileDown className="w-4 h-4" />
-              Export CSV
+              {t('common.export_csv')}
             </button>
             <SmartTooltip content="Hierarchical Compliance Table: Three-level hierarchy showing Carrier (📦), Product (📋), and Route (🛟️). All rows always visible. Carrier and Product rows show weighted averages for Standard (days), Standard %, and Actual (days), weighted by shipment count. Column order: Standard (days) → Actual (days) → Standard % → Actual % → Deviation → Status. Status indicators: ✅ Compliant (meeting standard), ⚠️ Warning (below standard, no penalty), 🔴 Critical (below critical threshold, with penalty). Use as evidence for enforcement proceedings to identify which carriers, products, or routes need adjustments." />
           </div>

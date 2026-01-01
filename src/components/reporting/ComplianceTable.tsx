@@ -60,17 +60,17 @@ export function ComplianceTable({ data }: ComplianceTableProps) {
         <thead className="bg-gray-50">
           <tr>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Carrier / Product / Route
+              {t('reporting.carrier_product_route')}
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Total Shipments
+              {t('reporting.total_shipments')}
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Compliant
+              {t('reporting.compliant')}
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               <div className="flex items-center gap-1">
-                Standard (days)
+                {t('reporting.standard_days')}
                 <SmartTooltip content={
                   <>
                     <p className="font-semibold mb-1">Carrier/Product Level:</p>
@@ -83,7 +83,7 @@ export function ComplianceTable({ data }: ComplianceTableProps) {
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               <div className="flex items-center gap-1">
-                Actual (days)
+                {t('reporting.actual_days')}
                 <SmartTooltip content={
                   <>
                     <p className="font-semibold mb-1">Carrier/Product Level:</p>
@@ -96,7 +96,7 @@ export function ComplianceTable({ data }: ComplianceTableProps) {
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               <div className="flex items-center gap-1">
-                Standard %
+                {t('reporting.standard_percent')}
                 <SmartTooltip content={
                   <>
                     <p className="font-semibold mb-1">Carrier/Product Level:</p>
@@ -109,7 +109,7 @@ export function ComplianceTable({ data }: ComplianceTableProps) {
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               <div className="flex items-center gap-1">
-                Actual %
+                {t('reporting.actual_percent')}
                 <SmartTooltip content={
                   <>
                     <p className="mb-2">Percentage of shipments delivered successfully</p>
@@ -123,7 +123,7 @@ export function ComplianceTable({ data }: ComplianceTableProps) {
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               <div className="flex items-center gap-1">
-                Deviation
+                {t('reporting.deviation')}
                 <SmartTooltip content={
                   <>
                     <p className="mb-2">Difference between Actual % and Standard %</p>
@@ -137,7 +137,7 @@ export function ComplianceTable({ data }: ComplianceTableProps) {
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               <div className="flex items-center gap-1">
-                Status
+                {t('common.status')}
                 <SmartTooltip content={
                   <>
                     <p className="mb-2">Compliance status based on dynamic thresholds:</p>
