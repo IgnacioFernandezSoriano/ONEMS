@@ -1764,3 +1764,36 @@ reporting.total_routes,Total des itinéraires
 reporting.generating,Génération en cours...
 reporting.standard_percent,% norme
 reporting.actual_percent,% réel
+reporting.analyze_service_equity_across_cities_and_regions,Analyser l'équité des services entre les villes et régions
+reporting.both_directions,Les deux directions
+reporting.filter_no_filters,Aucun filtre :
+reporting.filter_region_label,Région :
+reporting.filter_direction_label,Direction :
+reporting.filter_direction_desc,Analyser séparément la qualité du service entrant vs sortant
+reporting.filter_equity_status_label,Statut d'équité :
+reporting.filter_equity_status_desc,Identifier les villes avec des niveaux de conformité spécifiques
+reporting.filter_carrier_product_label,Transporteur/Produit :
+reporting.filter_carrier_product_desc_narrow,Limiter l'analyse à des prestataires ou types de services spécifiques
+reporting.filter_date_range_label,Période :
+reporting.filter_date_range_desc,Analyser les tendances sur des périodes spécifiques
+reporting.citizens_count,{count} citoyens
+reporting.of_cities,sur {count} villes
+reporting.citizens_affected,Citoyens affectés
+reporting.in_critical_cities,dans les villes critiques
+reporting.top_3_best_served_cities,Top 3 des villes les mieux desservies
+reporting.top_3_worst_served_cities,Top 3 des villes les moins bien desservies
+reporting.compliance_percent,% de conformité
+reporting.inbound_percent,% entrant
+reporting.outbound_percent,% sortant
+reporting.treemap_size_population_color_compliance,La taille représente la population, la couleur indique le statut de conformité
+reporting.jk_std,Norme J+K
+reporting.jk_actual,Réel J+K
+reporting.inbound_direction,Entrant
+reporting.outbound_direction,Sortant
+reporting.avg_standard,Norme moyenne ({percent} %)
+reporting.underserved,MAL DESSERVIES
+reporting.map_interactive_description,Carte interactive montrant l'équité des services dans les villes. La taille du cercle représente la population, la couleur indique le statut de conformité. Cliquez sur un marqueur de ville pour voir les informations détaillées.
+reporting.compliant_abbr,Conf.
+reporting.std_abbr,Norme
+reporting.inbound_abbr,Ent.
+reporting.outbound_abbr,Sort.

@@ -1,11 +1,14 @@
+import React from 'react';
 import { Treemap, ResponsiveContainer, Tooltip } from 'recharts';
 import type { CityEquityData } from '@/types/reporting';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface TerritoryEquityTreemapProps {
   data: CityEquityData[];
 }
 
 export function TerritoryEquityTreemap({ data }: TerritoryEquityTreemapProps) {
+  const { t } = useTranslation();
   // Transform data for Recharts Treemap
   // Size by population (fallback to totalShipments if no population)
   const treemapData = data.map((city) => ({
@@ -117,9 +120,9 @@ export function TerritoryEquityTreemap({ data }: TerritoryEquityTreemapProps) {
               data.status === 'warning' ? 'text-amber-600' :
               'text-red-600'
             }`}>
-              {data.status === 'compliant' ? '✅ Compliant' :
-               data.status === 'warning' ? '⚠️ Warning' :
-               '🔴 Critical'}
+              {data.status === 'compliant' ? `✅ ${t('reporting.compliant')}` :
+               data.status === 'warning' ? `⚠️ ${t('reporting.warning')}` :
+               `🔴 ${t('reporting.critical')}`}
             </span>
           </p>
         </div>
@@ -141,8 +144,7 @@ export function TerritoryEquityTreemap({ data }: TerritoryEquityTreemapProps) {
       <div className="mb-4">
         <h3 className="text-lg font-semibold text-gray-900">City Service Equity Treemap</h3>
         <p className="text-sm text-gray-600 mt-1">
-          Size represents {data.some(d => d.population) ? 'population' : 'sample size'}, 
-          color indicates compliance status
+          {t('reporting.treemap_size_population_color_compliance')}
         </p>
       </div>
 
@@ -165,15 +167,15 @@ export function TerritoryEquityTreemap({ data }: TerritoryEquityTreemapProps) {
       <div className="mt-4 flex items-center justify-center gap-6 text-sm">
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 bg-green-500 rounded"></div>
-          <span className="text-gray-700">✅ Compliant</span>
+          <span className="text-gray-700">✅ {t('reporting.compliant')}</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 bg-amber-500 rounded"></div>
-          <span className="text-gray-700">⚠️ Warning</span>
+          <span className="text-gray-700">⚠️ {t('reporting.warning')}</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 bg-red-500 rounded"></div>
-          <span className="text-gray-700">🔴 Critical</span>
+          <span className="text-gray-700">🔴 {t('reporting.critical')}</span>
         </div>
       </div>
     </div>

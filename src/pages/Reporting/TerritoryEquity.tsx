@@ -416,9 +416,9 @@ export default function TerritoryEquity() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Territory Equity Report</h1>
+          <h1 className="text-3xl font-bold text-gray-900">{t('reporting.territory_equity_report')}</h1>
           <p className="text-gray-600 mt-1">
-            Analyze service equity across cities and regions
+            {t('reporting.analyze_service_equity_across_cities_and_regions')}
           </p>
         </div>
         <button
@@ -426,7 +426,7 @@ export default function TerritoryEquity() {
           className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
         >
           <FileText className="w-4 h-4" />
-          Export Audit Report
+          {t('reporting.export_audit_report')}
         </button>
       </div>
 
@@ -450,7 +450,7 @@ export default function TerritoryEquity() {
         {/* KPI 1: Service Equity Index */}
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium text-gray-600">Service Equity Index</h3>
+            <h3 className="text-sm font-medium text-gray-600">{t('reporting.service_equity_index')}</h3>
             <SmartTooltip content={tooltips.serviceEquityIndex} />
           </div>
           <div className="text-3xl font-bold text-gray-900">
@@ -458,14 +458,14 @@ export default function TerritoryEquity() {
           </div>
           <div className="flex items-center gap-1 mt-1">
             <TrendingUp className="w-4 h-4 text-gray-500" />
-            <span className="text-sm text-gray-500">Population-weighted</span>
+            <span className="text-sm text-gray-500">{t('reporting.population_weighted')}</span>
           </div>
         </div>
 
         {/* KPI 2: Population-Weighted Compliance */}
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium text-gray-600">Population-Weighted Compliance</h3>
+            <h3 className="text-sm font-medium text-gray-600">{t('reporting.population_weighted_compliance')}</h3>
             <SmartTooltip content={tooltips.populationWeightedCompliance} />
           </div>
           <div className="text-3xl font-bold text-gray-900">
@@ -474,7 +474,7 @@ export default function TerritoryEquity() {
           <div className="flex items-center gap-1 mt-1">
             <Users className="w-4 h-4 text-gray-500" />
             <span className="text-sm text-gray-500">
-              {metrics?.totalPopulation.toLocaleString() || '0'} citizens
+              {t('reporting.citizens_count', { count: metrics?.totalPopulation.toLocaleString() || '0' })}
             </span>
           </div>
         </div>
@@ -482,7 +482,7 @@ export default function TerritoryEquity() {
         {/* KPI 3: Underserved Cities */}
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium text-gray-600">Underserved Cities</h3>
+            <h3 className="text-sm font-medium text-gray-600">{t('reporting.underserved_cities')}</h3>
             <SmartTooltip content={tooltips.underservedCities} />
           </div>
           <div className="text-3xl font-bold text-red-600">
@@ -491,7 +491,7 @@ export default function TerritoryEquity() {
           <div className="flex items-center gap-1 mt-1">
             <AlertTriangle className="w-4 h-4 text-red-500" />
             <span className="text-sm text-gray-500">
-              of {metrics?.totalCities || 0} cities
+              {t('reporting.of_cities', { count: metrics?.totalCities || 0 })}
             </span>
           </div>
         </div>
@@ -499,7 +499,7 @@ export default function TerritoryEquity() {
         {/* KPI 5: Citizens Affected (moved here to be next to Underserved Cities) */}
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium text-gray-600">Citizens Affected</h3>
+            <h3 className="text-sm font-medium text-gray-600">{t('reporting.citizens_affected')}</h3>
             <SmartTooltip content={tooltips.citizensAffected} />
           </div>
           <div className="text-3xl font-bold text-red-600">
@@ -507,7 +507,7 @@ export default function TerritoryEquity() {
           </div>
           <div className="flex items-center gap-1 mt-1">
             <Users className="w-4 h-4 text-red-500" />
-            <span className="text-sm text-gray-500">in critical cities</span>
+            <span className="text-sm text-gray-500">{t('reporting.in_critical_cities')}</span>
           </div>
         </div>
 
@@ -516,20 +516,19 @@ export default function TerritoryEquity() {
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-medium text-gray-600 flex items-center gap-2">
               <Award className="w-4 h-4 text-green-600" />
-              Top 3 Best Served Cities
+              {t('reporting.top_3_best_served_cities')}
             </h3>
             <SmartTooltip content={tooltips.topBestServed} />
           </div>
           <div className="space-y-2">
             <div className="grid grid-cols-7 gap-1 text-xs font-medium text-gray-500 border-b pb-1">
               <div>{t('topology.city')}</div>
-              <div className="text-right">Compl.</div>
-              <div className="text-right">Std.</div>
-              <div className="text-right">J+K Std</div>
-              <div className="text-right">J+K Actual</div>
-              <div className="text-right">Inb.</div>
-              <div className="text-right">Outb.</div>
-            </div>
+              <div className="text-right">{t('reporting.compliant_abbr')}</div>
+              <div className="text-right">{t('reporting.std_abbr')}</div>
+              <div className="text-right">{t('reporting.jk_std')}</div>
+              <div className="text-right">{t('reporting.jk_actual')}</div>
+              <div className="text-right">{t('reporting.inbound_abbr')}</div>
+              <div className="text-right">{t('reporting.outbound_abbr')}</div>            </div>
             {metrics?.topBestCities.slice(0, 3).map((city, idx) => (
               <div key={idx} className="grid grid-cols-7 gap-1 text-xs">
                 <div className="font-medium truncate">{city.cityName}</div>
@@ -564,19 +563,19 @@ export default function TerritoryEquity() {
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-medium text-gray-600 flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-red-600" />
-              Top 3 Worst Served Cities
+              {t('reporting.top_3_worst_served_cities')}
             </h3>
             <SmartTooltip content={tooltips.topWorstServed} />
           </div>
           <div className="space-y-2">
             <div className="grid grid-cols-7 gap-1 text-xs font-medium text-gray-500 border-b pb-1">
               <div>{t('topology.city')}</div>
-              <div className="text-right">Compl.</div>
-              <div className="text-right">Std.</div>
-              <div className="text-right">J+K Std</div>
-              <div className="text-right">J+K Actual</div>
-              <div className="text-right">Inb.</div>
-              <div className="text-right">Outb.</div>
+              <div className="text-right">{t('reporting.compliant_abbr')}</div>
+              <div className="text-right">{t('reporting.std_abbr')}</div>
+              <div className="text-right">{t('reporting.jk_std')}</div>
+              <div className="text-right">{t('reporting.jk_actual')}</div>
+              <div className="text-right">{t('reporting.inbound_abbr')}</div>
+              <div className="text-right">{t('reporting.outbound_abbr')}</div>
             </div>
             {metrics?.topWorstCities.filter(c => c.status === 'critical' || c.status === 'warning').slice(0, 3).map((city, idx) => (
               <div key={idx} className="grid grid-cols-7 gap-1 text-xs">
@@ -602,7 +601,7 @@ export default function TerritoryEquity() {
               </div>
             ))}
             {(!metrics?.topWorstCities || metrics.topWorstCities.filter(c => c.status === 'critical' || c.status === 'warning').length === 0) && (
-              <div className="text-sm text-gray-500 text-center py-2">No underserved cities</div>
+              <div className="text-sm text-gray-500 text-center py-2">{t('reporting.no_underserved_cities')}</div>
             )}
           </div>
         </div>
@@ -620,7 +619,7 @@ export default function TerritoryEquity() {
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              City Analysis
+              {t('reporting.city_analysis')}
             </button>
             <button
               onClick={() => setActiveTab('regional')}
@@ -630,7 +629,7 @@ export default function TerritoryEquity() {
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              Regional Analysis
+              {t('reporting.regional_analysis')}
             </button>
             <button
               onClick={() => setActiveTab('map')}
@@ -641,7 +640,7 @@ export default function TerritoryEquity() {
               }`}
             >
               <Map className="w-4 h-4" />
-              Geographic View
+              {t('reporting.geographic_view')}
             </button>
           </div>
         </div>
@@ -653,7 +652,7 @@ export default function TerritoryEquity() {
               <div>
                 <div className="flex items-center gap-2 mb-4">
                   <h3 className="text-lg font-semibold">
-                    Inbound vs Outbound Comparison (Top 10 by Direction Gap)
+                    {t('reporting.inbound_vs_outbound_comparison_top_10_by_direction')}
                   </h3>
                   <SmartTooltip content={tooltips.inboundOutboundChart} />
                 </div>
@@ -663,7 +662,7 @@ export default function TerritoryEquity() {
               {/* Treemap Visualization */}
               <div>
                 <div className="flex items-center gap-2 mb-4">
-                  <h3 className="text-lg font-semibold">City Service Equity Treemap</h3>
+                  <h3 className="text-lg font-semibold">{t('reporting.city_service_equity_treemap')}</h3>
                   <SmartTooltip content={tooltips.treemap} />
                 </div>
                 <TerritoryEquityTreemap data={cityData} />
@@ -673,7 +672,7 @@ export default function TerritoryEquity() {
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-lg font-semibold">City Equity Details</h3>
+                    <h3 className="text-lg font-semibold">{t('reporting.city_equity_details')}</h3>
                     <SmartTooltip content={tooltips.cityTable} />
                   </div>
                   <button
@@ -681,7 +680,7 @@ export default function TerritoryEquity() {
                     className="flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
                   >
                     <Download className="w-4 h-4" />
-                    Export CSV
+                    {t('common.export_csv')}
                   </button>
                 </div>
                 <TerritoryEquityTable 
@@ -699,7 +698,7 @@ export default function TerritoryEquity() {
               {/* Regional Chart */}
               <div>
                 <div className="flex items-center gap-2 mb-4">
-                  <h3 className="text-lg font-semibold">Regional Equity Comparison</h3>
+                  <h3 className="text-lg font-semibold">{t('reporting.regional_equity_comparison')}</h3>
                   <SmartTooltip content={tooltips.regionalChart} />
                 </div>
                 <RegionalEquityChart data={regionData} />
@@ -709,7 +708,7 @@ export default function TerritoryEquity() {
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-lg font-semibold">Regional Equity Details</h3>
+                    <h3 className="text-lg font-semibold">{t('reporting.regional_equity_details')}</h3>
                     <SmartTooltip content={tooltips.regionalTable} />
                   </div>
                   <button
@@ -717,7 +716,7 @@ export default function TerritoryEquity() {
                     className="flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
                   >
                     <Download className="w-4 h-4" />
-                    Export CSV
+                    {t('common.export_csv')}
                   </button>
                 </div>
                 <RegionalEquityTable data={regionData} onRegionClick={setSelectedRegion} />
@@ -729,10 +728,9 @@ export default function TerritoryEquity() {
             <div className="space-y-6">
               <div>
                 <div className="mb-4">
-                  <h3 className="text-lg font-semibold mb-2">Geographic Distribution</h3>
+                  <h3 className="text-lg font-semibold mb-2">{t('reporting.geographic_distribution')}</h3>
                   <p className="text-sm text-gray-600">
-                    Interactive map showing service equity across cities. Circle size represents population, color indicates compliance status.
-                    Click on any city marker to view detailed information.
+                    {t('reporting.map_interactive_description')}
                   </p>
                 </div>
                 <TerritoryEquityMap data={cityData} />

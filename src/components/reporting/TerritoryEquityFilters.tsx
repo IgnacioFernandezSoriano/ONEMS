@@ -226,7 +226,7 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
             onChange={(e) => handleChange('direction', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
-            <option value="">Both Directions</option>
+            <option value="">{t('reporting.both_directions')}</option>
             <option value="inbound">📥 Inbound Only</option>
             <option value="outbound">📤 Outbound Only</option>
           </select>
@@ -236,7 +236,7 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             <AlertCircle className="w-4 h-4 inline mr-1" />
-            Equity Status
+            {t('reporting.equity_status')}
             <SmartTooltip content="Filter by equity compliance status. Compliant: meeting standards. Warning: below standard. Critical: significantly below standard requiring action." />
           </label>
           <select
@@ -244,7 +244,7 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
             onChange={(e) => handleChange('equityStatus', e.target.value ? [e.target.value] : [])}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
-            <option value="">All Statuses</option>
+            <option value="">{t('reporting.all_statuses')}</option>
             <option value="compliant">✅ Compliant</option>
             <option value="warning">⚠️ Warning</option>
             <option value="critical">🔴 Critical</option>
@@ -254,14 +254,14 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
 
       {/* Filter Guidance */}
       <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-        <h4 className="text-sm font-semibold text-blue-900 mb-1">Territory Equity Filter Guide</h4>
+        <h4 className="text-sm font-semibold text-blue-900 mb-1">{t('reporting.territory_equity_filter_guide')}</h4>
         <ul className="text-xs text-blue-800 space-y-1">
-          <li>• <strong>No filters:</strong> View overall service equity across all cities and regions</li>
-          <li>• <strong>Region:</strong> Focus analysis on specific geographic areas</li>
-          <li>• <strong>Direction:</strong> Analyze inbound vs outbound service quality separately</li>
-          <li>• <strong>Equity Status:</strong> Identify cities with specific compliance levels</li>
-          <li>• <strong>Carrier/Product:</strong> Narrow analysis to specific service providers or types</li>
-          <li>• <strong>Date Range:</strong> Analyze trends over specific time periods</li>
+          <li>• <strong>{t('reporting.filter_no_filters')}</strong> {t('reporting.view_overall_service_equity_across_all_cities_and_')}</li>
+          <li>• <strong>{t('reporting.filter_region_label')}</strong> {t('reporting.focus_analysis_on_specific_geographic_areas')}</li>
+          <li>• <strong>{t('reporting.filter_direction_label')}</strong> {t('reporting.filter_direction_desc')}</li>
+          <li>• <strong>{t('reporting.filter_equity_status_label')}</strong> {t('reporting.filter_equity_status_desc')}</li>
+          <li>• <strong>{t('reporting.filter_carrier_product_label')}</strong> {t('reporting.filter_carrier_product_desc_narrow')}</li>
+          <li>• <strong>{t('reporting.filter_date_range_label')}</strong> {t('reporting.filter_date_range_desc')}</li>
         </ul>
       </div>
       </>

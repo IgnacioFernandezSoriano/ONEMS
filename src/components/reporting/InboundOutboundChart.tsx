@@ -1,11 +1,14 @@
+import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceLine, ResponsiveContainer } from 'recharts';
 import type { CityEquityData } from '@/types/reporting';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface InboundOutboundChartProps {
   data: CityEquityData[];
 }
 
 export function InboundOutboundChart({ data }: InboundOutboundChartProps) {
+  const { t } = useTranslation();
   // Sort by direction gap (descending) and take top 10
   const topCities = [...data]
     .sort((a, b) => b.directionGap - a.directionGap)
@@ -35,7 +38,7 @@ export function InboundOutboundChart({ data }: InboundOutboundChartProps) {
         <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="city" angle={-45} textAnchor="end" height={80} />
-          <YAxis domain={[0, 100]} label={{ value: 'Compliance %', angle: -90, position: 'insideLeft' }} />
+          <YAxis domain={[0, 100]} label={{ value: t('reporting.compliance_percent'), angle: -90, position: 'insideLeft' }} />
           <Tooltip 
             formatter={(value: any) => typeof value === 'number' ? `${value.toFixed(1)}%` : ''}
             content={({ active, payload }) => {
@@ -65,10 +68,10 @@ export function InboundOutboundChart({ data }: InboundOutboundChartProps) {
             y={avgStandard}
             stroke="#ef4444"
             strokeDasharray="3 3"
-            label={{ value: `Avg Standard (${avgStandard.toFixed(1)}%)`, position: 'right' }}
+            label={{ value: t('reporting.avg_standard', { percent: avgStandard.toFixed(1) }), position: 'right' }}
           />
-          <Bar dataKey="inbound" fill="#3b82f6" name="Inbound %" />
-          <Bar dataKey="outbound" fill="#10b981" name="Outbound %" />
+          <Bar dataKey="inbound" fill="#3b82f6" name={t('reporting.inbound_percent')} />
+          <Bar dataKey="outbound" fill="#10b981" name={t('reporting.outbound_percent')} />
         </BarChart>
       </ResponsiveContainer>
     </div>

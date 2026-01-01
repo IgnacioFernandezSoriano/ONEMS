@@ -142,73 +142,73 @@ export function RegionalEquityTable({ data, onRegionClick }: RegionalEquityTable
               className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
               onClick={() => handleSort('regionName')}
             >
-              Region <SortIcon field="regionName" />
+              {t('reporting.region')} <SortIcon field="regionName" />
             </th>
             <th
               className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
               onClick={() => handleSort('direction')}
             >
-              Direction <SortIcon field="direction" />
+              {t('reporting.direction')} <SortIcon field="direction" />
             </th>
             <th
               className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
               onClick={() => handleSort('totalCities')}
             >
-              Cities <SortIcon field="totalCities" />
+              {t('reporting.cities')} <SortIcon field="totalCities" />
             </th>
             <th
               className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
               onClick={() => handleSort('totalPopulation')}
             >
-              Population <SortIcon field="totalPopulation" />
+              {t('reporting.population')} <SortIcon field="totalPopulation" />
             </th>
             <th
               className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
               onClick={() => handleSort('shipments')}
             >
-              Total <SortIcon field="shipments" />
+              {t('common.total')} <SortIcon field="shipments" />
             </th>
             <th
               className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
               onClick={() => handleSort('standardPercentage')}
             >
-              Standard % <SortIcon field="standardPercentage" />
+              {t('reporting.standard_percent')} <SortIcon field="standardPercentage" />
             </th>
             <th
               className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
               onClick={() => handleSort('actualPercentage')}
             >
-              Actual % <SortIcon field="actualPercentage" />
+              {t('reporting.actual_percent')} <SortIcon field="actualPercentage" />
             </th>
             <th
               className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
               onClick={() => handleSort('deviation')}
             >
-              Deviation <SortIcon field="deviation" />
+              {t('reporting.deviation')} <SortIcon field="deviation" />
             </th>
             <th
               className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
               onClick={() => handleSort('standardDays')}
             >
-              J+K Std <SortIcon field="standardDays" />
+              {t('reporting.jk_std')} <SortIcon field="standardDays" />
             </th>
             <th
               className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
               onClick={() => handleSort('actualDays')}
             >
-              J+K Actual <SortIcon field="actualDays" />
+              {t('reporting.jk_actual')} <SortIcon field="actualDays" />
             </th>
             <th
               className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
               onClick={() => handleSort('status')}
             >
-              Status <SortIcon field="status" />
+              {t('common.status')} <SortIcon field="status" />
             </th>
             <th
               className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
               onClick={() => handleSort('underservedCitiesCount')}
             >
-              Underserved <SortIcon field="underservedCitiesCount" />
+              {t('reporting.underserved')} <SortIcon field="underservedCitiesCount" />
             </th>
           </tr>
         </thead>
@@ -247,12 +247,12 @@ export function RegionalEquityTable({ data, onRegionClick }: RegionalEquityTable
                       {row.direction === 'inbound' ? (
                         <>
                           <ArrowDown className="w-4 h-4 text-blue-600" />
-                          <span className="text-blue-600 font-medium">Inbound</span>
+                          <span className="text-blue-600 font-medium">{t('reporting.inbound_direction')}</span>
                         </>
                       ) : (
                         <>
                           <ArrowUp className="w-4 h-4 text-green-600" />
-                          <span className="text-green-600 font-medium">Outbound</span>
+                          <span className="text-green-600 font-medium">{t('reporting.outbound_direction')}</span>
                         </>
                       )}
                     </div>
