@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, CircleMarker, Tooltip, useMap } from 'react-leaflet';
 import type { CityEquityData } from '@/types/reporting';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -112,18 +112,18 @@ export function TerritoryEquityMap({ data }: TerritoryEquityMapProps) {
               opacity: 0.9,
             }}
           >
-            <Popup>
+            <Tooltip direction="top" offset={[0, -10]} opacity={0.95}>
               <div className="min-w-[250px]">
                 <h3 className="font-bold text-lg mb-2">{city.cityName}</h3>
                 
                 <div className="space-y-1 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Region:</span>
+                    <span className="text-gray-600">{t('reporting.region')}</span>
                     <span className="font-medium">{city.regionName || 'N/A'}</span>
                   </div>
                   
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Population:</span>
+                    <span className="text-gray-600">{t('reporting.population')}:</span>
                     <span className="font-medium">
                       {city.population ? city.population.toLocaleString() : 'N/A'}
                     </span>
@@ -131,12 +131,12 @@ export function TerritoryEquityMap({ data }: TerritoryEquityMapProps) {
 
                   <div className="border-t pt-2 mt-2">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Total Shipments:</span>
+                      <span className="text-gray-600">{t('reporting.total_shipments')}</span>
                       <span className="font-medium">{city.totalShipments}</span>
                     </div>
 
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Compliance:</span>
+                      <span className="text-gray-600">{t('reporting.compliance')}</span>
                       <span
                         className={`font-bold ${
                           city.status === 'compliant'
@@ -151,12 +151,12 @@ export function TerritoryEquityMap({ data }: TerritoryEquityMapProps) {
                     </div>
 
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Standard:</span>
+                      <span className="text-gray-600">{t('reporting.standard')}</span>
                       <span className="font-medium">{city.standardPercentage.toFixed(1)}%</span>
                     </div>
 
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Deviation:</span>
+                      <span className="text-gray-600">{t('reporting.deviation')}:</span>
                       <span
                         className={`font-medium ${
                           city.deviation >= 0 ? 'text-green-600' : 'text-red-600'
@@ -170,17 +170,17 @@ export function TerritoryEquityMap({ data }: TerritoryEquityMapProps) {
 
                   <div className="border-t pt-2 mt-2">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Inbound:</span>
+                      <span className="text-gray-600">{t('reporting.inbound')}:</span>
                       <span className="font-medium">{city.inboundPercentage.toFixed(1)}%</span>
                     </div>
 
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Outbound:</span>
+                      <span className="text-gray-600">{t('reporting.outbound')}:</span>
                       <span className="font-medium">{city.outboundPercentage.toFixed(1)}%</span>
                     </div>
 
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Direction Gap:</span>
+                      <span className="text-gray-600">{t('reporting.direction_gap')}</span>
                       <span
                         className={`font-medium ${
                           city.directionGap > 5 ? 'text-amber-600' : 'text-gray-900'
@@ -193,7 +193,7 @@ export function TerritoryEquityMap({ data }: TerritoryEquityMapProps) {
 
                   <div className="border-t pt-2 mt-2">
                     <div className="flex justify-between items-center">
-                      <span className="text-gray-600">Status:</span>
+                      <span className="text-gray-600">{t('common.status')}:</span>
                       <span
                         className={`px-2 py-1 rounded text-xs font-semibold ${
                           city.status === 'compliant'
@@ -204,16 +204,16 @@ export function TerritoryEquityMap({ data }: TerritoryEquityMapProps) {
                         }`}
                       >
                         {city.status === 'compliant'
-                          ? '✅ Compliant'
+                          ? `✅ ${t('reporting.compliant')}`
                           : city.status === 'warning'
-                          ? '⚠️ Warning'
-                          : '❌ Critical'}
+                          ? `⚠️ ${t('reporting.warning')}`
+                          : `❌ ${t('reporting.critical')}`}
                       </span>
                     </div>
                   </div>
                 </div>
               </div>
-            </Popup>
+            </Tooltip>
           </CircleMarker>
         ))}
       </MapContainer>
@@ -224,7 +224,7 @@ export function TerritoryEquityMap({ data }: TerritoryEquityMapProps) {
         <div className="space-y-1 text-xs">
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded-full bg-green-500"></div>
-            <span>Compliant</span>
+            <span>{t('reporting.compliant')}</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded-full bg-amber-500"></div>
@@ -235,7 +235,7 @@ export function TerritoryEquityMap({ data }: TerritoryEquityMapProps) {
             <span>{t('reporting.critical')}</span>
           </div>
           <div className="border-t pt-1 mt-1">
-            <p className="text-gray-600">Circle size = Population</p>
+            <p className="text-gray-600">{t('reporting.circle_size_population')}</p>
           </div>
         </div>
       </div>
