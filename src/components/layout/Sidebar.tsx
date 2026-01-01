@@ -306,9 +306,11 @@ export function Sidebar() {
     )
   }
 
+  const isRTL = locale === 'ar'
+
   return (
     <aside 
-      className={`bg-white border-r border-gray-200 min-h-screen flex flex-col transition-all duration-300 ${isCollapsed ? 'w-16 fixed left-0 top-0 bottom-0 z-40' : 'w-64'} ${isCollapsed && isHovered ? 'shadow-2xl' : ''}`}
+      className={`bg-white ${isRTL ? 'border-l' : 'border-r'} border-gray-200 min-h-screen flex flex-col transition-all duration-300 ${isCollapsed ? `w-16 fixed ${isRTL ? 'right-0' : 'left-0'} top-0 bottom-0 z-40` : 'w-64'} ${isCollapsed && isHovered ? 'shadow-2xl' : ''}`}
       onMouseEnter={() => isCollapsed && setIsHovered(true)}
       onMouseLeave={() => isCollapsed && setIsHovered(false)}
       style={isCollapsed && isHovered ? { width: '256px' } : undefined}
