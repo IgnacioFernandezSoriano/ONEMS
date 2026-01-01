@@ -51,7 +51,7 @@ export function MaterialCatalogPage() {
 
       <div className="mb-6">
         <Button onClick={() => setModal({ title: 'Create Material', onSubmit: handleCreate })}>
-          + Add Material
+          + {t('material.add_material')}
         </Button>
       </div>
 

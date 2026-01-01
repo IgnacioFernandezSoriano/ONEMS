@@ -1680,3 +1680,4 @@ stock.when_enabled_system_will_monitor,Lorsqu'il est activé, le système survei
 stock.feature_not_available_in_current_version,Cette fonctionnalité n'est pas disponible dans la version actuelle du module.
 stock.system_will_automatically_create_shipments,Le système créera automatiquement des expéditions en attente lorsqu'il détecte qu'un panéliste a besoin de matériaux.
 stock.save_settings,Enregistrer les Paramètres
+material.add_material,Ajouter un matériau
