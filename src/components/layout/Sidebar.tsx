@@ -481,8 +481,8 @@ export function Sidebar() {
               value={locale}
               onChange={async (e) => {
                 await setLocale(e.target.value as 'en' | 'es' | 'fr' | 'ar')
-                // Reload page to ensure all components update with new language
-                window.location.reload()
+                // Redirect to dashboard for fast language update
+                window.location.href = '/dashboard'
               }}
             >
               <option value="en">English</option>
