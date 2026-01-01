@@ -1753,3 +1753,14 @@ reporting.transit_days_jk,Jours de transit (J+K)
 reporting.cumulative_percent,% Cumulatif
 reporting.cumulative_percentage_desc,Pourcentage cumulatif des livraisons selon les jours de transit. Les barres vertes indiquent les jours dans le standard, les barres rouges indiquent les jours dépassant le standard.
 reporting.std_percent,Std %
+reporting.regulatory_compliance_report,Rapport de conformité réglementaire
+reporting.overall_compliance,Conformité globale
+reporting.of_routes,de {{count}} itinéraires
+reporting.meeting_standard,Conforme à la norme
+reporting.no_penalty,Sans pénalité
+reporting.with_penalty,Avec pénalité
+reporting.across_all_carriers,Sur tous les transporteurs
+reporting.total_routes,Total des itinéraires
+reporting.generating,Génération en cours...
+reporting.standard_percent,% norme
+reporting.actual_percent,% réel

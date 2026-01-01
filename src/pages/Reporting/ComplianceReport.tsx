@@ -9,8 +9,10 @@ import { Shield, AlertTriangle, CheckCircle, XCircle, Info, FileDown } from 'luc
 import { SmartTooltip } from '@/components/common/SmartTooltip';
 import { generateComplianceAuditReport } from '@/hooks/reporting/useComplianceAuditExport';
 import { useState } from 'react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function ComplianceReport() {
+  const { t } = useTranslation();
   const { profile } = useAuth();
   const accountId = profile?.account_id || undefined;
   const { filters, setFilters, resetFilters } = useReportingFilters();
@@ -197,8 +199,8 @@ export default function ComplianceReport() {
     <div className="space-y-6">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Regulatory Compliance Report</h1>
-          <p className="text-gray-600 mt-1">Compliance analysis by Carrier → Product → Route</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('reporting.regulatory_compliance_report')}</h1>
+          <p className="text-gray-600 mt-1">{t('reporting.compliance_analysis_by_carrier_product_route')}</p>
         </div>
         <div className="flex gap-3">
           <button
@@ -208,7 +210,7 @@ export default function ComplianceReport() {
           >
             <FileDown className="w-5 h-5" />
             <span className="text-sm font-medium">
-              {exporting ? 'Generating...' : 'Export Audit Report'}
+              {exporting ? t('reporting.generating') : t('reporting.export_audit_report')}
             </span>
           </button>
           <SmartTooltip content="Regulatory Compliance Report: Analyzes compliance rates hierarchically by Carrier, Product, and Route to identify which carriers, services, or routes are meeting or failing regulatory standards. Shows all carriers, their products, and individual routes. Columns organized to show Standard → Actual for both days and percentages, followed by Deviation and Status. Carrier and Product metrics are weighted averages based on shipment count. Routes classified as Compliant (✅ meeting standard), Warning (⚠️ below standard), or Critical (🔴 below critical threshold). Use to identify systematic compliance failures and as evidence in enforcement proceedings." />
@@ -219,11 +221,11 @@ export default function ComplianceReport() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3">
         <KPICard
-          title="Overall Compliance"
+          title={t('reporting.overall_compliance')}
           value={`${overallCompliance.toFixed(1)}%`}
           icon={Shield}
           trend={compliantRoutes === totalRoutes ? 'up' : compliantRoutes > criticalRoutes ? 'neutral' : 'down'}
-          trendValue={`${compliantRoutes} of ${totalRoutes} routes`}
+          trendValue={t('reporting.of_routes', { count: totalRoutes, compliant: compliantRoutes })}
           color={compliantRoutes === totalRoutes ? 'green' : compliantRoutes > criticalRoutes ? 'amber' : 'red'}
           tooltip={{
             description: "Percentage of routes meeting their configured compliance standards (compliant status).",
@@ -232,11 +234,11 @@ export default function ComplianceReport() {
           }}
         />
         <KPICard
-          title="Compliant Routes"
+          title={t('reporting.compliant_routes')}
           value={compliantRoutes.toString()}
           icon={CheckCircle}
           trend="up"
-          trendValue="Meeting standard"
+          trendValue={t('reporting.meeting_standard')}
           color="green"
           tooltip={{
             description: "Number of routes meeting or exceeding their configured compliance standard.",
@@ -245,11 +247,11 @@ export default function ComplianceReport() {
           }}
         />
         <KPICard
-          title="Warning Routes"
+          title={t('reporting.warning_routes')}
           value={warningRoutes.toString()}
           icon={AlertTriangle}
-          trend={warningRoutes > 0 ? 'down' : 'neutral'}
-          trendValue="No penalty"
+          trend="neutral"
+          trendValue={t('reporting.no_penalty')}
           color="amber"
           tooltip={{
             description: "Routes with compliance below standard but above critical threshold. Performance is acceptable but needs monitoring.",
@@ -258,11 +260,11 @@ export default function ComplianceReport() {
           }}
         />
         <KPICard
-          title="Critical Routes"
+          title={t('reporting.critical_routes')}
           value={criticalRoutes.toString()}
           icon={XCircle}
-          trend={criticalRoutes > 0 ? 'down' : 'neutral'}
-          trendValue="With penalty"
+          trend="down"
+          trendValue={t('reporting.with_penalty')}
           color={criticalRoutes > 0 ? 'red' : 'gray'}
           tooltip={{
             description: "Routes with compliance below critical threshold. These routes incur penalties and require immediate corrective action.",
@@ -271,11 +273,11 @@ export default function ComplianceReport() {
           }}
         />
         <KPICard
-          title="Total Routes"
+          title={t('reporting.total_routes')}
           value={totalRoutes.toString()}
-          icon={AlertTriangle}
+          icon={Info}
           trend="neutral"
-          trendValue="Across all carriers"
+          trendValue={t('reporting.across_all_carriers')}
           color="blue"
           tooltip={{
             description: "Total number of unique routes (carrier + product + city pair) with shipment data.",
