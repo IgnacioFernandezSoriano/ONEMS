@@ -360,28 +360,28 @@ export default function ReceiveGenerator() {
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Receive Generator</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t('receive_generator.title')}</h1>
         <p className="text-sm text-gray-600 mt-1">
-          Generate synthetic receive records for testing and demo purposes
+          {t('receive_generator.subtitle')}
         </p>
         <div className="mt-2 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
           <div className="flex items-center gap-2">
             <AlertCircle className="h-4 w-4 text-yellow-600" />
             <span className="text-sm text-yellow-800 font-medium">
-              Demo Account Only - This feature is only available for testing purposes
+              {t('receive_generator.demo_account_only')}
             </span>
           </div>
         </div>
       </div>
 
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Generator Configuration</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('receive_generator.generator_configuration')}</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Number of Records */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Number of Records
+              {t('receive_generator.number_of_records')}
             </label>
             <input
               type="number"
@@ -396,7 +396,7 @@ export default function ReceiveGenerator() {
           {/* Out of SLA Percentage */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Out of SLA Percentage (%)
+              {t('receive_generator.out_of_sla_percentage')}
             </label>
             <input
               type="number"
@@ -411,7 +411,7 @@ export default function ReceiveGenerator() {
           {/* Advance Variance */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Advance Variance (days)
+              {t('receive_generator.advance_variance_days')}
             </label>
             <input
               type="number"
@@ -424,17 +424,17 @@ export default function ReceiveGenerator() {
             />
             {deliveryStandard !== null ? (
               <p className="text-xs text-blue-600 mt-1 font-medium">
-                📊 Example: Records can arrive between {Math.max(0, deliveryStandard - config.advanceVarianceDays)} and {deliveryStandard} days (SLA: {deliveryStandard} days)
+                {t('receive_generator.example_records_can_arrive_between', { min: Math.max(0, deliveryStandard - config.advanceVarianceDays), max: deliveryStandard, sla: deliveryStandard })}
               </p>
             ) : (
-              <p className="text-xs text-gray-500 mt-1">Maximum days records can arrive early</p>
+              <p className="text-xs text-gray-500 mt-1">{t('receive_generator.maximum_days_records_can_arrive_early')}</p>
             )}
           </div>
 
           {/* Delay Variance */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Delay Variance (days)
+              {t('receive_generator.delay_variance_days')}
             </label>
             <input
               type="number"
@@ -447,17 +447,17 @@ export default function ReceiveGenerator() {
             />
             {deliveryStandard !== null ? (
               <p className="text-xs text-red-600 mt-1 font-medium">
-                📊 Example: Out-of-SLA records can arrive up to {deliveryStandard + config.delayVarianceDays} days (SLA: {deliveryStandard} days, delay: +{config.delayVarianceDays} days)
+                {t('receive_generator.example_out_of_sla_records_can_arrive_up_to', { max: deliveryStandard + config.delayVarianceDays, sla: deliveryStandard, delay: config.delayVarianceDays })}
               </p>
             ) : (
-              <p className="text-xs text-gray-500 mt-1">Maximum days records can be delayed beyond SLA</p>
+              <p className="text-xs text-gray-500 mt-1">{t('receive_generator.maximum_days_records_can_be_delayed_beyond_sla')}</p>
             )}
           </div>
 
           {/* Products */}
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Products <span className="text-red-500">*</span>
+              {t('receive_generator.products')} <span className="text-red-500">*</span>
             </label>
             <div className="border border-gray-300 rounded-lg p-3 max-h-40 overflow-y-auto">
               <div className="flex items-center gap-2 mb-2">
@@ -473,7 +473,7 @@ export default function ReceiveGenerator() {
                   }}
                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
-                <span className="text-sm font-medium text-gray-900">Select All</span>
+                <span className="text-sm font-medium text-gray-900">{t('receive_generator.select_all')}</span>
               </div>
               <div className="border-t border-gray-200 pt-2 space-y-2">
                 {products.map((product) => (
@@ -498,14 +498,14 @@ export default function ReceiveGenerator() {
               </div>
             </div>
             <p className="text-xs text-gray-500 mt-1">
-              Selected: {config.productIds.length} product(s)
+              {t('receive_generator.selected_products', { count: config.productIds.length })}
             </p>
           </div>
 
           {/* Carriers */}
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Carriers <span className="text-red-500">*</span>
+              {t('receive_generator.carriers')} <span className="text-red-500">*</span>
             </label>
             <div className="border border-gray-300 rounded-lg p-3 max-h-40 overflow-y-auto">
               <div className="flex items-center gap-2 mb-2">
@@ -521,7 +521,7 @@ export default function ReceiveGenerator() {
                   }}
                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
-                <span className="text-sm font-medium text-gray-900">Select All</span>
+                <span className="text-sm font-medium text-gray-900">{t('receive_generator.select_all')}</span>
               </div>
               <div className="border-t border-gray-200 pt-2 space-y-2">
                 {carriers.map((carrier) => (
@@ -546,14 +546,14 @@ export default function ReceiveGenerator() {
               </div>
             </div>
             <p className="text-xs text-gray-500 mt-1">
-              Selected: {config.carrierIds.length} carrier(s)
+              {t('receive_generator.selected_carriers', { count: config.carrierIds.length })}
             </p>
           </div>
 
           {/* Start Date */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Start Date
+              {t('receive_generator.start_date')}
             </label>
             <input
               type="date"
@@ -566,7 +566,7 @@ export default function ReceiveGenerator() {
           {/* End Date */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              End Date
+              {t('receive_generator.end_date')}
             </label>
             <input
               type="date"
@@ -580,12 +580,12 @@ export default function ReceiveGenerator() {
         {/* Summary */}
         {config.productIds.length > 0 && config.carrierIds.length > 0 && (
           <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h3 className="text-sm font-semibold text-blue-900 mb-2">Generation Summary</h3>
+            <h3 className="text-sm font-semibold text-blue-900 mb-2">{t('receive_generator.generation_summary')}</h3>
             <div className="text-sm text-blue-800 space-y-1">
-              <p>• <strong>{config.productIds.length}</strong> product(s) × <strong>{config.carrierIds.length}</strong> carrier(s) = <strong>{config.productIds.length * config.carrierIds.length}</strong> combinations</p>
-              <p>• <strong>{Math.floor(config.recordCount / (config.productIds.length * config.carrierIds.length))}</strong> records per combination</p>
-              <p>• <strong>~{Math.floor(config.recordCount / (config.productIds.length * config.carrierIds.length)) * config.productIds.length * config.carrierIds.length}</strong> total records will be generated</p>
-              <p>• Date range: <strong>{config.startDate}</strong> to <strong>{config.endDate}</strong></p>
+              <p dangerouslySetInnerHTML={{ __html: t('receive_generator.summary_combinations', { products: config.productIds.length, carriers: config.carrierIds.length, total: config.productIds.length * config.carrierIds.length }) }} />
+              <p dangerouslySetInnerHTML={{ __html: t('receive_generator.summary_records_per_combination', { count: Math.floor(config.recordCount / (config.productIds.length * config.carrierIds.length)) }) }} />
+              <p dangerouslySetInnerHTML={{ __html: t('receive_generator.summary_total_records', { count: Math.floor(config.recordCount / (config.productIds.length * config.carrierIds.length)) * config.productIds.length * config.carrierIds.length }) }} />
+              <p dangerouslySetInnerHTML={{ __html: t('receive_generator.summary_date_range', { start: config.startDate, end: config.endDate }) }} />
             </div>
           </div>
         )}
@@ -600,12 +600,12 @@ export default function ReceiveGenerator() {
             {generating ? (
               <>
                 <Loader className="h-5 w-5 animate-spin" />
-                Generating... {progress}%
+                {t('receive_generator.generating', { progress })}
               </>
             ) : (
               <>
                 <Play className="h-5 w-5" />
-                Generate Records
+                {t('receive_generator.generate_records')}
               </>
             )}
           </button>
@@ -630,11 +630,10 @@ export default function ReceiveGenerator() {
               <CheckCircle className="h-5 w-5 text-green-600" />
               <div>
                 <p className="text-sm font-medium text-green-900">
-                  Generation Complete
+                  {t('receive_generator.generation_complete')}
                 </p>
                 <p className="text-sm text-green-700 mt-1">
-                  Successfully created {result.success} records
-                  {result.failed > 0 && ` (${result.failed} failed)`}
+                  {t('receive_generator.successfully_created_records', { success: result.success, failed: result.failed > 0 ? t('receive_generator.failed_records', { count: result.failed }) : '' })}
                 </p>
               </div>
             </div>

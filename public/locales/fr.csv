@@ -1798,3 +1798,32 @@ reporting.std_abbr,Norme
 reporting.inbound_abbr,Ent.
 reporting.outbound_abbr,Sort.
 onedb.showing_records,Affichage de {{filtered}} sur {{total}} enregistrements au total
+receive_generator.title,Générateur de registres ONE DB
+receive_generator.subtitle,Générer des enregistrements de réception synthétiques à des fins de test et de démonstration
+receive_generator.demo_account_only,Compte de démonstration uniquement - Cette fonctionnalité n'est disponible qu'à des fins de test
+receive_generator.generator_configuration,Configuration du générateur
+receive_generator.number_of_records,Nombre d'enregistrements
+receive_generator.out_of_sla_percentage,Pourcentage hors SLA (%)
+receive_generator.advance_variance_days,Variance d'avance (jours)
+receive_generator.delay_variance_days,Variance de retard (jours)
+receive_generator.maximum_days_records_can_arrive_early,Nombre maximum de jours pendant lesquels les enregistrements peuvent arriver en avance
+receive_generator.maximum_days_records_can_be_delayed_beyond_sla,Nombre maximum de jours pendant lesquels les enregistrements peuvent être retardés au-delà du SLA
+receive_generator.example_records_can_arrive_between,📊 Exemple : Les enregistrements peuvent arriver entre {{min}} et {{max}} jours (SLA : {{sla}} jours)
+receive_generator.example_out_of_sla_records_can_arrive_up_to,📊 Exemple : Les enregistrements hors SLA peuvent arriver jusqu'à {{max}} jours (SLA : {{sla}} jours\, retard : +{{delay}} jours)
+receive_generator.products,Produits
+receive_generator.carriers,Transporteurs
+receive_generator.select_all,Tout sélectionner
+receive_generator.selected_products,Sélectionné : {{count}} produit(s)
+receive_generator.selected_carriers,Sélectionné : {{count}} transporteur(s)
+receive_generator.start_date,Date de début
+receive_generator.end_date,Date de fin
+receive_generator.generation_summary,Résumé de la génération
+receive_generator.summary_combinations,• <strong>{{products}}</strong> produit(s) × <strong>{{carriers}}</strong> transporteur(s) = <strong>{{total}}</strong> combinaisons
+receive_generator.summary_records_per_combination,• <strong>{{count}}</strong> enregistrements par combinaison
+receive_generator.summary_total_records,• <strong>~{{count}}</strong> enregistrements totaux seront générés
+receive_generator.summary_date_range,• Plage de dates : <strong>{{start}}</strong> à <strong>{{end}}</strong>
+receive_generator.generate_records,Générer des enregistrements
+receive_generator.generating,Génération en cours... {{progress}}%
+receive_generator.generation_complete,Génération terminée
+receive_generator.successfully_created_records,Créé avec succès {{success}} enregistrements{{failed}}
+receive_generator.failed_records, ({{count}} échoué)
