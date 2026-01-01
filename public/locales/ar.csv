@@ -1835,3 +1835,68 @@ admin.resetting,جاري إعادة التعيين...
 admin.confirm_reset,تأكيد إعادة التعيين
 admin.an_unexpected_error_occurred,حدث خطأ غير متوقع
 common.language,اللغة
+onedb_api.title,ONE DB API
+onedb_api.description,أنشئ مفاتيح API وادمجها مع تطبيقاتك.
+onedb_api.tab_overview,نظرة عامة
+onedb_api.tab_documentation,التوثيق
+onedb_api.tab_testing,الاختبار
+onedb_api.tab_usage,الاستخدام
+onedb_api.credentials_section,بيانات اعتماد API
+onedb_api.no_api_key,أنشئ واحدًا لبدء استخدام API.
+onedb_api.generate_key,إنشاء مفتاح API
+onedb_api.generating,جارٍ الإنشاء...
+onedb_api.api_key_label,مفتاح API الخاص بك
+onedb_api.copy,نسخ
+onedb_api.copied,تم النسخ!
+onedb_api.created_at,تم الإنشاء
+onedb_api.regenerate_key,إعادة إنشاء مفتاح API
+onedb_api.confirm_regenerate,هل أنت متأكد من رغبتك في إعادة إنشاء مفتاح API الخاص بك؟ سيتم تعطيل المفتاح القديم فورًا.
+onedb_api.security_warning_title,تحذير أمني
+onedb_api.security_warning_text,لا تشاركه علنًا أو ترفعه إلى نظام التحكم في الإصدارات. أي شخص لديه هذا المفتاح يمكنه الوصول إلى بيانات ONE DB الخاصة بك.
+onedb_api.endpoint_section,نقطة نهاية API
+onedb_api.base_url,الرابط الأساسي
+onedb_api.authentication_title,المصادقة
+onedb_api.authentication_description,يجب أن تتضمن جميع طلبات API مفتاح API الخاص بك في رأس Authorization باستخدام مصادقة Bearer.
+onedb_api.endpoints_title,النقاط النهائية المتاحة
+onedb_api.endpoint_description,استرجاع سجلات ONE DB مصفاة حسب نطاق التاريخ
+onedb_api.query_parameters,معلمات الاستعلام
+onedb_api.parameter,المعلمة
+onedb_api.type,النوع
+onedb_api.required,مطلوب
+onedb_api.description,الوصف
+onedb_api.yes,نعم
+onedb_api.no,لا
+onedb_api.start_date,تاريخ البدء
+onedb_api.start_date_desc,تاريخ البدء لتصفية السجلات (التنسيق: YYYY-MM-DD)
+onedb_api.end_date,تاريخ الانتهاء
+onedb_api.end_date_desc,تاريخ الانتهاء لتصفية السجلات (التنسيق: YYYY-MM-DD)
+onedb_api.limit,الحد الأقصى
+onedb_api.limit_desc,الحد الأقصى لعدد السجلات التي سيتم إرجاعها (الافتراضي: 100)
+onedb_api.offset,الإزاحة
+onedb_api.offset_desc,عدد السجلات التي يجب تخطيها للترقيم (الافتراضي: 0)
+onedb_api.examples_title,أمثلة الطلبات
+onedb_api.response_format,تنسيق الاستجابة
+onedb_api.rate_limiting_title,تحديد المعدل
+onedb_api.rate_limiting_description,لضمان الاستخدام العادل واستقرار النظام
+onedb_api.rate_limit_info,حد المعدل: 10 طلبات في الدقيقة
+onedb_api.error_codes_title,رموز حالة HTTP
+onedb_api.status_code,رمز الحالة
+onedb_api.status_200,نجاح - تم إكمال الطلب بنجاح
+onedb_api.status_400,طلب خاطئ - معلمات أو تنسيق تاريخ غير صالح
+onedb_api.status_401,غير مصرح - مفتاح API غير صالح أو مفقود
+onedb_api.status_429,طلبات كثيرة جدًا - تم تجاوز حد المعدل
+onedb_api.status_500,خطأ داخلي في الخادم - حدث خطأ في جانبنا
+onedb_api.api_tester_title,مختبر API
+onedb_api.generate_key_first,يرجى إنشاء مفتاح API أولاً لاستخدام المختبر.
+onedb_api.test_api,اختبار طلب API
+onedb_api.testing,جارٍ الاختبار...
+onedb_api.response,الاستجابة
+onedb_api.usage_statistics,إحصائيات الاستخدام
+onedb_api.total_calls_month,إجمالي المكالمات هذا الشهر
+onedb_api.calls_last_hour,المكالمات في الساعة الأخيرة
+onedb_api.limit_10_per_minute,الحد: 10 في الدقيقة
+onedb_api.last_call,آخر مكالمة API
+onedb_api.never,أبدًا
+onedb_api.loading_stats,جارٍ تحميل الإحصائيات...
+menu.onedb_api,واجهة برمجة تطبيقات ONE DB
+menu.onedb_api.tooltip,الوصول إلى ONE DB عبر واجهة برمجة التطبيقات REST

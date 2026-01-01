@@ -1835,3 +1835,68 @@ admin.created,Creado:
 admin.resetting,Reiniciando...
 admin.confirm_reset,Confirmar reinicio
 admin.an_unexpected_error_occurred,Ocurrió un error inesperado
+onedb_api.title,ONE DB API
+onedb_api.description,Genera claves API e intégralas con tus aplicaciones.
+onedb_api.tab_overview,Resumen
+onedb_api.tab_documentation,Documentación
+onedb_api.tab_testing,Pruebas
+onedb_api.tab_usage,Uso
+onedb_api.credentials_section,Credenciales API
+onedb_api.no_api_key,Genera una para comenzar a usar la API.
+onedb_api.generate_key,Generar clave API
+onedb_api.generating,
+onedb_api.api_key_label,Tu clave API
+onedb_api.copy,Copiar
+onedb_api.copied,¡Copiado!
+onedb_api.created_at,Creado
+onedb_api.regenerate_key,Regenerar clave API
+onedb_api.confirm_regenerate,
+onedb_api.security_warning_title,Advertencia de seguridad
+onedb_api.security_warning_text,No la compartas públicamente ni la subas a control de versiones. Cualquiera con esta clave puede acceder a tus datos de ONE DB.
+onedb_api.endpoint_section,Endpoint de la API
+onedb_api.base_url,URL base
+onedb_api.authentication_title,Autenticación
+onedb_api.authentication_description,
+onedb_api.endpoints_title,Endpoints disponibles
+onedb_api.endpoint_description,Recuperar registros de ONE DB filtrados por rango de fechas
+onedb_api.query_parameters,Parámetros de consulta
+onedb_api.parameter,Parámetro
+onedb_api.type,Tipo
+onedb_api.required,Requerido
+onedb_api.description,Descripción
+onedb_api.yes,Sí
+onedb_api.no,No
+onedb_api.start_date,Fecha de inicio
+onedb_api.start_date_desc,Fecha de inicio para filtrar registros (formato: YYYY-MM-DD)
+onedb_api.end_date,Fecha de fin
+onedb_api.end_date_desc,Fecha de fin para filtrar registros (formato: YYYY-MM-DD)
+onedb_api.limit,Límite
+onedb_api.limit_desc,Número máximo de registros a devolver (por defecto: 100)
+onedb_api.offset,Desplazamiento
+onedb_api.offset_desc,Número de registros a omitir para paginación (por defecto: 0)
+onedb_api.examples_title,Ejemplos de solicitud
+onedb_api.response_format,Formato de respuesta
+onedb_api.rate_limiting_title,Limitación de tasa
+onedb_api.rate_limiting_description,Para garantizar un uso justo y la estabilidad del sistema
+onedb_api.rate_limit_info,Límite de tasa: 10 solicitudes por minuto
+onedb_api.error_codes_title,Códigos de estado HTTP
+onedb_api.status_code,Código de estado
+onedb_api.status_200,Éxito - Solicitud completada con éxito
+onedb_api.status_400,Solicitud incorrecta - Parámetros o formato de fecha inválidos
+onedb_api.status_401,No autorizado - Clave API inválida o ausente
+onedb_api.status_429,Demasiadas solicitudes - Límite de tasa excedido
+onedb_api.status_500,Error interno del servidor - Algo salió mal en nuestro lado
+onedb_api.api_tester_title,Probador de API
+onedb_api.generate_key_first,
+onedb_api.test_api,Probar solicitud API
+onedb_api.testing,
+onedb_api.response,Respuesta
+onedb_api.usage_statistics,Estadísticas de uso
+onedb_api.total_calls_month,Total de llamadas este mes
+onedb_api.calls_last_hour,Llamadas en la última hora
+onedb_api.limit_10_per_minute,Límite: 10 por minuto
+onedb_api.last_call,Última llamada API
+onedb_api.never,Nunca
+onedb_api.loading_stats,Cargando estadísticas...
+menu.onedb_api,API de ONE DB
+menu.onedb_api.tooltip,Accede a ONE DB a través de API REST

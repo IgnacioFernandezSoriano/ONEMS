@@ -27,6 +27,7 @@ import {
   Warehouse,
   RefreshCw,
   Languages,
+  Key,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
@@ -229,6 +230,13 @@ export function Sidebar() {
               icon: Database,
               roles: ['admin', 'superadmin'],
               tooltip: t('menu.reporting_onedb.tooltip'),
+            },
+            {
+              path: '/one-db-api',
+              label: t('menu.onedb_api'),
+              icon: Key,
+              roles: ['admin', 'superadmin'],
+              tooltip: t('menu.onedb_api.tooltip'),
             },
           ],
         },

@@ -1338,3 +1338,68 @@ users.promise,Promise
 users.role,Role
 users.select_account,Select account
 common.language,Language
+onedb_api.title,ONE DB API
+onedb_api.description,Access your ONE DB data programmatically through our REST API. Generate API keys and integrate with your applications.
+onedb_api.tab_overview,Overview
+onedb_api.tab_documentation,Documentation
+onedb_api.tab_testing,Testing
+onedb_api.tab_usage,Usage
+onedb_api.credentials_section,API Credentials
+onedb_api.no_api_key,You don't have an active API key yet. Generate one to start using the API.
+onedb_api.generate_key,Generate API Key
+onedb_api.generating,Generating...
+onedb_api.api_key_label,Your API Key
+onedb_api.copy,Copy
+onedb_api.copied,Copied!
+onedb_api.created_at,Created
+onedb_api.regenerate_key,Regenerate API Key
+onedb_api.confirm_regenerate,Are you sure you want to regenerate your API key? The old key will be deactivated immediately.
+onedb_api.security_warning_title,Security Warning
+onedb_api.security_warning_text,Keep your API key secure. Do not share it publicly or commit it to version control. Anyone with this key can access your ONE DB data.
+onedb_api.endpoint_section,API Endpoint
+onedb_api.base_url,Base URL
+onedb_api.authentication_title,Authentication
+onedb_api.authentication_description,All API requests must include your API key in the Authorization header using Bearer authentication.
+onedb_api.endpoints_title,Available Endpoints
+onedb_api.endpoint_description,Retrieve ONE DB records filtered by date range
+onedb_api.query_parameters,Query Parameters
+onedb_api.parameter,Parameter
+onedb_api.type,Type
+onedb_api.required,Required
+onedb_api.description,Description
+onedb_api.yes,Yes
+onedb_api.no,No
+onedb_api.start_date,Start Date
+onedb_api.start_date_desc,Start date for filtering records (format: YYYY-MM-DD)
+onedb_api.end_date,End Date
+onedb_api.end_date_desc,End date for filtering records (format: YYYY-MM-DD)
+onedb_api.limit,Limit
+onedb_api.limit_desc,Maximum number of records to return (default: 100, max: 1000)
+onedb_api.offset,Offset
+onedb_api.offset_desc,Number of records to skip for pagination (default: 0)
+onedb_api.examples_title,Request Examples
+onedb_api.response_format,Response Format
+onedb_api.rate_limiting_title,Rate Limiting
+onedb_api.rate_limiting_description,To ensure fair usage and system stability, API requests are rate limited per account.
+onedb_api.rate_limit_info,Rate Limit: 10 requests per minute
+onedb_api.error_codes_title,HTTP Status Codes
+onedb_api.status_code,Status Code
+onedb_api.status_200,Success - Request completed successfully
+onedb_api.status_400,Bad Request - Invalid parameters or date format
+onedb_api.status_401,Unauthorized - Invalid or missing API key
+onedb_api.status_429,Too Many Requests - Rate limit exceeded
+onedb_api.status_500,Internal Server Error - Something went wrong on our end
+onedb_api.api_tester_title,API Tester
+onedb_api.generate_key_first,Please generate an API key first to use the tester.
+onedb_api.test_api,Test API Request
+onedb_api.testing,Testing...
+onedb_api.response,Response
+onedb_api.usage_statistics,Usage Statistics
+onedb_api.total_calls_month,Total Calls This Month
+onedb_api.calls_last_hour,Calls in Last Hour
+onedb_api.limit_10_per_minute,Limit: 10 per minute
+onedb_api.last_call,Last API Call
+onedb_api.never,Never
+onedb_api.loading_stats,Loading statistics...
+menu.onedb_api,ONE DB API
+menu.onedb_api.tooltip,Access ONE DB through REST API

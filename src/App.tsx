@@ -26,6 +26,7 @@ import { AllocationPlans } from './pages/AllocationPlans'
 import { Panelists } from './pages/Panelists'
 import ReceiveGenerator from './pages/ReceiveGenerator'
 import OneDB from './pages/OneDB'
+import { OneDBAPI } from './pages/OneDBAPI'
 import ReportingDashboard from './pages/Reporting/Dashboard'
 import ComplianceReport from './pages/Reporting/ComplianceReport'
 import TerritoryEquity from './pages/Reporting/TerritoryEquity'
@@ -167,6 +168,16 @@ function App() {
                       element={
                         <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
                           <OneDB />
+                        </ProtectedRoute>
+                      }
+                    />
+                    
+                    {/* ONE DB API - for admin and superadmin */}
+                    <Route
+                      path="/one-db-api"
+                      element={
+                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                          <OneDBAPI />
                         </ProtectedRoute>
                       }
                     />

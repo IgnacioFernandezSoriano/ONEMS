@@ -1836,3 +1836,68 @@ admin.resetting,Réinitialisation en cours...
 admin.confirm_reset,Confirmer la réinitialisation
 admin.an_unexpected_error_occurred,Une erreur inattendue s'est produite
 common.language,Langue
+onedb_api.title,API ONE DB
+onedb_api.description,Accédez à vos données ONE DB de manière programmatique via notre API REST. Générez des clés API et intégrez-les à vos applications.
+onedb_api.tab_overview,Vue d'ensemble
+onedb_api.tab_documentation,Documentation
+onedb_api.tab_testing,Test
+onedb_api.tab_usage,Utilisation
+onedb_api.credentials_section,Identifiants API
+onedb_api.no_api_key,Vous n'avez pas encore de clé API active. Générez-en une pour commencer à utiliser l'API.
+onedb_api.generate_key,Générer une clé API
+onedb_api.generating,Génération en cours...
+onedb_api.api_key_label,Votre clé API
+onedb_api.copy,Copier
+onedb_api.copied,Copié !
+onedb_api.created_at,Créé
+onedb_api.regenerate_key,Régénérer la clé API
+onedb_api.confirm_regenerate,Êtes-vous sûr de vouloir régénérer votre clé API ? L'ancienne clé sera désactivée immédiatement.
+onedb_api.security_warning_title,Avertissement de sécurité
+onedb_api.security_warning_text,Gardez votre clé API sécurisée. Ne la partagez pas publiquement et ne la commettez pas dans un contrôle de version. Toute personne disposant de cette clé peut accéder à vos données ONE DB.
+onedb_api.endpoint_section,Point de terminaison API
+onedb_api.base_url,URL de base
+onedb_api.authentication_title,Authentification
+onedb_api.authentication_description,Toutes les requêtes API doivent inclure votre clé API dans l'en-tête Authorization en utilisant l'authentification Bearer.
+onedb_api.endpoints_title,Points de terminaison disponibles
+onedb_api.endpoint_description,Récupérer les enregistrements ONE DB filtrés par plage de dates
+onedb_api.query_parameters,Paramètres de requête
+onedb_api.parameter,Paramètre
+onedb_api.type,Type
+onedb_api.required,Obligatoire
+onedb_api.description,Description
+onedb_api.yes,Oui
+onedb_api.no,Non
+onedb_api.start_date,Date de début
+onedb_api.start_date_desc,Date de début pour filtrer les enregistrements (format : AAAA-MM-JJ)
+onedb_api.end_date,Date de fin
+onedb_api.end_date_desc,Date de fin pour filtrer les enregistrements (format : AAAA-MM-JJ)
+onedb_api.limit,Limite
+onedb_api.limit_desc,Nombre maximum d'enregistrements à retourner (par défaut : 100)
+onedb_api.offset,Offset
+onedb_api.offset_desc,Nombre d'enregistrements à ignorer pour la pagination (par défaut : 0)
+onedb_api.examples_title,Exemples de requêtes
+onedb_api.response_format,Format de réponse
+onedb_api.rate_limiting_title,Limitation du débit
+onedb_api.rate_limiting_description,Pour assurer une utilisation équitable et la stabilité du système
+onedb_api.rate_limit_info,Limite de débit : 10 requêtes par minute
+onedb_api.error_codes_title,Codes de statut HTTP
+onedb_api.status_code,Code de statut
+onedb_api.status_200,Succès - Requête terminée avec succès
+onedb_api.status_400,Mauvaise requête - Paramètres ou format de date invalides
+onedb_api.status_401,Non autorisé - Clé API invalide ou manquante
+onedb_api.status_429,Trop de requêtes - Limite de débit dépassée
+onedb_api.status_500,Erreur interne du serveur - Un problème est survenu de notre côté
+onedb_api.api_tester_title,Testeur API
+onedb_api.generate_key_first,Veuillez d'abord générer une clé API pour utiliser le testeur.
+onedb_api.test_api,Tester la requête API
+onedb_api.testing,Test en cours...
+onedb_api.response,Réponse
+onedb_api.usage_statistics,Statistiques d'utilisation
+onedb_api.total_calls_month,Total des appels ce mois-ci
+onedb_api.calls_last_hour,Appels dans la dernière heure
+onedb_api.limit_10_per_minute,Limite : 10 par minute
+onedb_api.last_call,Dernier appel API
+onedb_api.never,Jamais
+onedb_api.loading_stats,Chargement des statistiques...
+menu.onedb_api,API ONE DB
+menu.onedb_api.tooltip,Accédez à ONE DB via l'API REST
