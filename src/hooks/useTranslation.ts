@@ -26,8 +26,16 @@ function parseCSV(csvText: string): TranslationMap {
     // Split by comma (handle quoted values)
     const match = line.match(/^([^,]+),(.*)$/)
     if (match) {
-      const key = match[1].trim().replace(/^"|"$/g, '')
-      const translation = match[2].trim().replace(/^"|"$/g, '')
+      let key = match[1].trim()
+      let translation = match[2].trim()
+      
+      // Remove surrounding quotes
+      key = key.replace(/^"|"$/g, '')
+      translation = translation.replace(/^"|"$/g, '')
+      
+      // Convert escaped double quotes ("") to single quotes (")
+      key = key.replace(/""/g, '"')
+      translation = translation.replace(/""/g, '"')
       
       if (key && translation) {
         translations[key] = translation
