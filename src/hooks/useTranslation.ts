@@ -23,23 +23,27 @@ function parseCSV(csvText: string): TranslationMap {
     const line = lines[i].trim()
     if (!line) continue
     
-    // Split by comma (handle quoted values)
-    const match = line.match(/^([^,]+),(.*)$/)
-    if (match) {
-      let key = match[1].trim()
-      let translation = match[2].trim()
-      
-      // Remove surrounding quotes
-      key = key.replace(/^"|"$/g, '')
-      translation = translation.replace(/^"|"$/g, '')
-      
-      // Convert escaped double quotes ("") to single quotes (")
-      key = key.replace(/""/g, '"')
-      translation = translation.replace(/""/g, '"')
-      
-      if (key && translation) {
-        translations[key] = translation
-      }
+    // Find first comma to split key and value
+    const firstCommaIndex = line.indexOf(',')
+    if (firstCommaIndex === -1) continue
+    
+    let key = line.substring(0, firstCommaIndex).trim()
+    let translation = line.substring(firstCommaIndex + 1).trim()
+    
+    // Remove surrounding quotes if present
+    if (key.startsWith('"') && key.endsWith('"')) {
+      key = key.slice(1, -1)
+    }
+    if (translation.startsWith('"') && translation.endsWith('"')) {
+      translation = translation.slice(1, -1)
+    }
+    
+    // Convert escaped double quotes ("") to single quotes (")
+    key = key.replace(/""/g, '"')
+    translation = translation.replace(/""/g, '"')
+    
+    if (key && translation) {
+      translations[key] = translation
     }
   }
   
