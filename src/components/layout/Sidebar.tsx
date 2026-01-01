@@ -481,26 +481,6 @@ export function Sidebar() {
               value={locale}
               onChange={(e) => setLocale(e.target.value as 'en' | 'es' | 'fr' | 'ar')}
             >
-              <option value="es">Español</option>
-              <option value="fr">Français</option>
-              <option value="en">English</option>
-              <option value="ar">العربية</option>
-            </select>
-          </div>
-        )}
-
-        {/* Language Selector (only for demo user) */}
-        {isExpanded && profile?.email === 'demo@myone.int' && (
-          <div className="px-3">
-            <label htmlFor="language-selector-sidebar" className="block text-xs text-gray-600 mb-1">
-              {t('common.language')}
-            </label>
-            <select
-              id="language-selector-sidebar"
-              className="w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm"
-              value={locale}
-              onChange={(e) => setLocale(e.target.value as 'en' | 'es' | 'fr' | 'ar')}
-            >
               <option value="en">English</option>
               <option value="es">Español</option>
               <option value="fr">Français</option>
