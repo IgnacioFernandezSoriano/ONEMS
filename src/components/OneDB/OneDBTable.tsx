@@ -1,6 +1,7 @@
 import React from 'react';
 import { OneDBRecord } from '../../hooks/useOneDB';
 import { SmartTooltip } from '../common/SmartTooltip';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface OneDBTableProps {
   records: OneDBRecord[];
@@ -15,6 +16,7 @@ export const OneDBTable: React.FC<OneDBTableProps> = ({
   onSelectRecord,
   onSelectAll,
 }) => {
+  const { t } = useTranslation();
   const allSelected = records.length > 0 && selectedRecords.length === records.length;
   const someSelected = selectedRecords.length > 0 && selectedRecords.length < records.length;
 
@@ -42,7 +44,7 @@ export const OneDBTable: React.FC<OneDBTableProps> = ({
       return (
         <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
           <span>✓</span>
-          On Time
+          {t('onedb.on_time')}
         </span>
       );
     }
@@ -50,7 +52,7 @@ export const OneDBTable: React.FC<OneDBTableProps> = ({
     return (
       <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 text-xs font-medium rounded-full">
         <span>✕</span>
-        Delayed
+        {t('reporting.delayed')}
       </span>
     );
   };
@@ -74,61 +76,61 @@ export const OneDBTable: React.FC<OneDBTableProps> = ({
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 <div className="flex items-center gap-1">
-                  Tag ID
+                  {t('onedb.tag_id')}
                   <SmartTooltip content="Unique identifier for the shipment. Used to track the package throughout its journey." />
                 </div>
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 <div className="flex items-center gap-1">
-                  Plan
+                  {t('onedb.plan')}
                   <SmartTooltip content="Allocation plan name that generated this shipment. Links the record to its source plan." />
                 </div>
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 <div className="flex items-center gap-1">
-                  Carrier
+                  {t('onedb.carrier')}
                   <SmartTooltip content="Postal carrier that handled the shipment (e.g., DHL, FedEx, UPS)." />
                 </div>
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 <div className="flex items-center gap-1">
-                  Product
+                  {t('onedb.product')}
                   <SmartTooltip content="Service type or product used for the shipment (e.g., Express 24 horas, Standard)." />
                 </div>
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 <div className="flex items-center gap-1">
-                  Route
+                  {t('onedb.route')}
                   <SmartTooltip content="Origin and destination cities for the shipment. Shows the complete route path." />
                 </div>
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 <div className="flex items-center gap-1">
-                  Sent
+                  {t('onedb.sent')}
                   <SmartTooltip content="Date and time when the shipment was sent from the origin node." />
                 </div>
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 <div className="flex items-center gap-1">
-                  Received
+                  {t('onedb.received')}
                   <SmartTooltip content="Date and time when the shipment was received at the destination node." />
                 </div>
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 <div className="flex items-center gap-1">
-                  Transit Days
+                  {t('onedb.transit_days')}
                   <SmartTooltip content="Total calendar days from sent to received. Includes weekends and holidays." />
                 </div>
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 <div className="flex items-center gap-1">
-                  Business Days
+                  {t('onedb.business_days')}
                   <SmartTooltip content="Business days only (excludes weekends and holidays). Used for compliance calculations." />
                 </div>
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 <div className="flex items-center gap-1">
-                  On Time
+                  {t('onedb.on_time')}
                   <SmartTooltip content="Delivery performance status. Green (On Time) = met standard, Red (Delayed) = exceeded standard." />
                 </div>
               </th>
@@ -138,7 +140,7 @@ export const OneDBTable: React.FC<OneDBTableProps> = ({
             {records.length === 0 ? (
               <tr>
                 <td colSpan={11} className="px-4 py-8 text-center text-gray-500">
-                  No records to display
+                  {t('onedb.no_records_to_display')}
                 </td>
               </tr>
             ) : (
@@ -165,9 +167,9 @@ export const OneDBTable: React.FC<OneDBTableProps> = ({
                   <td className="px-4 py-3 text-sm text-gray-700">{record.product_name}</td>
                   <td className="px-4 py-3 text-sm text-gray-700">
                     <div className="flex flex-col">
-                      <span className="text-xs text-gray-500">Origin:</span>
+                      <span className="text-xs text-gray-500">{t('onedb.origin')}</span>
                       <span>{record.origin_city_name}</span>
-                      <span className="text-xs text-gray-500 mt-1">Destination:</span>
+                      <span className="text-xs text-gray-500 mt-1">{t('onedb.destination')}</span>
                       <span>{record.destination_city_name}</span>
                     </div>
                   </td>

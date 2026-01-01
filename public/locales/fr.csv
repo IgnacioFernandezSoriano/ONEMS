@@ -1797,3 +1797,4 @@ reporting.compliant_abbr,Conf.
 reporting.std_abbr,Norme
 reporting.inbound_abbr,Ent.
 reporting.outbound_abbr,Sort.
+onedb.showing_records,Affichage de {{filtered}} sur {{total}} enregistrements au total

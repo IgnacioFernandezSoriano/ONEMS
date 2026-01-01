@@ -61,7 +61,7 @@ export default function OneDB() {
       <div className="flex items-center justify-center h-64">
         <div className="flex items-center gap-3 text-gray-600">
           <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-600"></div>
-          <span>Loading records...</span>
+          <span>{t('onedb.loading_records')}</span>
         </div>
       </div>
     );
@@ -89,7 +89,7 @@ export default function OneDB() {
               <SmartTooltip content="ONE DB stores all validated shipment records with complete transit information, delivery performance metrics, and quality analytics for reporting and compliance tracking." />
             </div>
             <p className="text-sm text-gray-600 mt-1">
-              Validated postal quality analytics repository
+              {t('onedb.validated_postal_quality_analytics_repository')}
             </p>
           </div>
         </div>
@@ -101,9 +101,9 @@ export default function OneDB() {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 mb-1">Total Records</p>
+              <p className="text-sm text-gray-600 mb-1">{t('onedb.total_records')}</p>
               <p className="text-3xl font-bold text-gray-900">{kpis.total}</p>
-              <p className="text-xs text-gray-500 mt-1">All shipment records</p>
+              <p className="text-xs text-gray-500 mt-1">{t('onedb.all_shipment_records')}</p>
             </div>
             <div className="p-3 bg-blue-50 rounded-lg">
               <Database className="w-6 h-6 text-blue-600" />
@@ -115,9 +115,9 @@ export default function OneDB() {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 mb-1">On-Time</p>
+              <p className="text-sm text-gray-600 mb-1">{t('onedb.on_time')}</p>
               <p className="text-3xl font-bold text-green-600">{kpis.onTime}</p>
-              <p className="text-xs text-gray-500 mt-1">Met delivery standard</p>
+              <p className="text-xs text-gray-500 mt-1">{t('onedb.met_delivery_standard')}</p>
             </div>
             <div className="p-3 bg-green-50 rounded-lg">
               <CheckCircle className="w-6 h-6 text-green-600" />
@@ -131,7 +131,7 @@ export default function OneDB() {
             <div>
               <p className="text-sm text-gray-600 mb-1">{t('reporting.delayed')}</p>
               <p className="text-3xl font-bold text-red-600">{kpis.delayed}</p>
-              <p className="text-xs text-gray-500 mt-1">Exceeded standard</p>
+              <p className="text-xs text-gray-500 mt-1">{t('onedb.exceeded_standard')}</p>
             </div>
             <div className="p-3 bg-red-50 rounded-lg">
               <XCircle className="w-6 h-6 text-red-600" />
@@ -143,9 +143,9 @@ export default function OneDB() {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 mb-1">Avg Transit Days</p>
+              <p className="text-sm text-gray-600 mb-1">{t('onedb.avg_transit_days')}</p>
               <p className="text-3xl font-bold text-gray-900">{kpis.avgTransitDays}</p>
-              <p className="text-xs text-gray-500 mt-1">Business days average</p>
+              <p className="text-xs text-gray-500 mt-1">{t('onedb.business_days_average')}</p>
             </div>
             <div className="p-3 bg-gray-50 rounded-lg">
               <Clock className="w-6 h-6 text-gray-600" />
@@ -176,7 +176,7 @@ export default function OneDB() {
       {/* Footer Info */}
       {records.length > 0 && (
         <div className="text-center text-sm text-gray-500">
-          Showing {filteredRecords.length} of {records.length} total records
+          {t('onedb.showing_records', { filtered: filteredRecords.length, total: records.length })}
         </div>
       )}
     </div>
