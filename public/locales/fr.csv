@@ -1712,3 +1712,44 @@ reporting.both_cities,Les deux villes
 reporting.both_cities_desc,Analyser la performance d'un itinéraire spécifique (origine → destination)
 reporting.carrier_product,Transporteur/Produit
 reporting.carrier_product_desc,Affiner davantage l'analyse à des prestataires de services ou types spécifiques
+reporting.jk_performance_report,Rapport de performance J+K
+reporting.transit_time_analysis_and_delivery_performance_tracking,Analyse des temps de transit et suivi des performances de livraison
+reporting.total_samples,Total d'échantillons
+reporting.statistical_significance,Signification statistique
+reporting.avg_jk_actual,Moy. J+K Réel
+reporting.days,jours
+reporting.vs_std,vs Std
+reporting.on_time_percent,% À l'heure
+reporting.on_time_count,{{count}} à l'heure
+reporting.problem_routes,Itinéraires problématiques
+reporting.require_intervention,Nécessite une intervention
+reporting.weekly_sample_volume,Volume d'échantillons hebdomadaire
+reporting.average_samples_week,Moyenne {{count}} échantillons/semaine
+reporting.performance_distribution,Distribution des performances
+reporting.after_standard,Après standard
+reporting.in_standard_delayed,Dans le standard/Retardé
+reporting.on_standard,Sur standard
+reporting.distribution_of_shipments_by_actual_transit_time,Distribution des expéditions selon le temps de transit réel par rapport au standard de livraison
+reporting.route_analysis,Analyse des itinéraires
+reporting.region_analysis,Analyse des régions
+reporting.carrier_product_tab,Transporteur → Produit
+reporting.route_performance,Performance des itinéraires ({{count}} itinéraires)
+reporting.route,Itinéraire
+reporting.samples,Échantillons
+reporting.jk_std,J+K Std
+reporting.jk_actual,J+K Réel
+reporting.city_performance,Performance des villes ({{count}} entrées)
+reporting.direction,Direction
+reporting.inbound_arrow,↓ entrant
+reporting.outbound_arrow,↑ sortant
+reporting.region_performance,Performance des régions ({{count}} entrées)
+reporting.cities,Villes
+reporting.carrier_product_performance,Performance Transporteur → Produit ({{count}} transporteurs)
+reporting.routes,Itinéraires
+reporting.problem_routes_column,Itinéraires problématiques
+reporting.chart_view,Vue graphique
+reporting.table_view,Vue tableau
+reporting.transit_days_jk,Jours de transit (J+K)
+reporting.cumulative_percent,% Cumulatif
+reporting.cumulative_percentage_desc,Pourcentage cumulatif des livraisons selon les jours de transit. Les barres vertes indiquent les jours dans le standard, les barres rouges indiquent les jours dépassant le standard.
+reporting.std_percent,Std %

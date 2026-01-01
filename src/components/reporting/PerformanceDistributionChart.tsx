@@ -102,7 +102,7 @@ export function PerformanceDistributionChart({ routeData, maxDays }: Performance
   return (
     <div className="w-full h-64">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
+        <BarChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 40 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
           <XAxis 
             dataKey="dayLabel" 
@@ -115,8 +115,9 @@ export function PerformanceDistributionChart({ routeData, maxDays }: Performance
           />
           <Tooltip content={<CustomTooltip />} />
           <Legend 
-            wrapperStyle={{ fontSize: '12px' }}
+            wrapperStyle={{ fontSize: '12px', paddingTop: '20px' }}
             iconType="circle"
+            verticalAlign="bottom"
           />
           <Bar 
             dataKey="before" 

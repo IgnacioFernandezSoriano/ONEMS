@@ -12,8 +12,10 @@ import { CumulativeDistributionChart } from '@/components/reporting/CumulativeDi
 import { exportRouteCSV, exportCityCSV, exportRegionCSV, exportCarrierProductCSV, exportCumulativeCSV } from '@/utils/jkExportCSV';
 import { ColumnTooltip } from '@/components/reporting/ColumnTooltip';
 import { SmartTooltip } from '@/components/common/SmartTooltip';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function JKPerformance() {
+  const { t } = useTranslation();
   const { profile } = useAuth();
   const accountId = profile?.account_id || undefined;
   const { filters, setFilters, resetFilters } = useReportingFilters();
@@ -64,8 +66,8 @@ export default function JKPerformance() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">J+K Performance Report</h1>
-          <p className="text-gray-600 mt-1">Transit time analysis and delivery performance tracking</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('reporting.jk_performance_report')}</h1>
+          <p className="text-gray-600 mt-1">{t('reporting.transit_time_analysis_and_delivery_performance_tracking')}</p>
         </div>
         <SmartTooltip content="J+K Performance Report: Analyzes actual transit times (J+K Actual) against delivery standards (J+K Std) to identify routes, cities, carriers, or products with systematic delays. Multi-level analysis showing Route, City, Region, Carrier, and Product performance. J+K Standard is the expected delivery time in days from delivery_standards table. J+K Actual is the average actual transit time in business days. Deviation is the difference between Actual and Standard (positive values indicate delays). On-Time % is the percentage of shipments delivered within or before the standard time. Color coding: Green (≥95%), Yellow (90-95%), Red (<90%)." />
       </div>
@@ -76,11 +78,11 @@ export default function JKPerformance() {
       {/* KPIs - Minimalist Design */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
         <KPICard
-          title="Total Samples"
+          title={t('reporting.total_samples')}
           value={metrics.totalSamples.toLocaleString()}
           icon={Package}
           trend="neutral"
-          trendValue="Statistical significance"
+          trendValue={t('reporting.statistical_significance')}
           color="blue"
           tooltip={{
             description: "Total number of shipments analyzed in the current filter selection.",
@@ -89,11 +91,11 @@ export default function JKPerformance() {
           }}
         />
         <KPICard
-          title="Avg J+K Actual"
-          value={`${metrics.avgJKActual.toFixed(1)} days`}
+          title={t('reporting.avg_jk_actual')}
+          value={`${metrics.avgJKActual.toFixed(1)} ${t('reporting.days')}`}
           icon={Clock}
           trend={metrics.avgJKActual <= metrics.avgJKStandard ? 'up' : 'down'}
-          trendValue={`vs Std: ${metrics.avgJKStandard.toFixed(1)} days`}
+          trendValue={`${t('reporting.vs_std')}: ${metrics.avgJKStandard.toFixed(1)} ${t('reporting.days')}`}
           color={metrics.avgJKActual <= metrics.avgJKStandard ? 'green' : metrics.avgJKActual <= metrics.avgJKStandard + 1 ? 'amber' : 'red'}
           tooltip={{
             description: "Weighted average of actual transit times across all routes in the selection.",
@@ -102,11 +104,11 @@ export default function JKPerformance() {
           }}
         />
         <KPICard
-          title="On-Time %"
+          title={t('reporting.on_time_percent')}
           value={`${metrics.onTimePercentage.toFixed(1)}%`}
           icon={CheckCircle}
           trend={metrics.onTimePercentage >= 95 ? 'up' : metrics.onTimePercentage >= 90 ? 'neutral' : 'down'}
-          trendValue={`${metrics.onTimeSamples.toLocaleString()} on-time`}
+          trendValue={t('reporting.on_time_count', { count: metrics.onTimeSamples.toLocaleString() })}
           color={metrics.onTimePercentage >= 95 ? 'green' : metrics.onTimePercentage >= 90 ? 'amber' : 'red'}
           tooltip={{
             description: "Percentage of shipments delivered within or before the standard delivery time (J+K Std).",
@@ -115,11 +117,11 @@ export default function JKPerformance() {
           }}
         />
         <KPICard
-          title="Problem Routes"
+          title={t('reporting.problem_routes')}
           value={metrics.problematicRoutes.toString()}
           icon={AlertTriangle}
           trend={metrics.problematicRoutes === 0 ? 'up' : 'down'}
-          trendValue="Require intervention"
+          trendValue={t('reporting.require_intervention')}
           color={metrics.problematicRoutes === 0 ? 'green' : metrics.problematicRoutes <= 3 ? 'amber' : 'red'}
           tooltip={{
             description: "Number of routes with on-time performance below 90%.",
@@ -134,7 +136,7 @@ export default function JKPerformance() {
         {/* Weekly Samples Chart */}
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center gap-2 mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Weekly Sample Volume</h3>
+            <h3 className="text-lg font-semibold text-gray-900">{t('reporting.weekly_sample_volume')}</h3>
             <SmartTooltip content="Weekly Sample Volume: Shows the number of shipments analyzed per week in the selected date range. Color coding: Green (20% above average), Blue (above average), Yellow (80-100% of average), Red (below 80% of average). Use to identify weeks with low sample sizes that may affect statistical reliability. Minimum 30 samples/week recommended for statistical significance." />
           </div>
           <WeeklySamplesChart data={weeklySamples} />
@@ -143,7 +145,7 @@ export default function JKPerformance() {
         {/* Performance Distribution */}
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center gap-2 mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Performance Distribution</h3>
+            <h3 className="text-lg font-semibold text-gray-900">{t('reporting.performance_distribution')}</h3>
             <SmartTooltip content="Performance Distribution: Shows how shipments are distributed by actual transit time vs. delivery standard (J+K Std). Categories: After Standard (red, delivered AFTER J+K Std = late), Before/On-Time (green, delivered WITHIN J+K Std = on-time), On Standard (blue, delivered EXACTLY on J+K Std day). Use to visualize overall network performance. Large red bars indicate systematic delays requiring investigation." />
           </div>
           <PerformanceDistributionChart routeData={routeData} maxDays={maxDays} />
@@ -155,11 +157,11 @@ export default function JKPerformance() {
         <div className="border-b border-gray-200">
           <nav className="flex -mb-px">
             {[
-              { id: 'route', label: 'Route Analysis' },
-              { id: 'city', label: 'City Analysis' },
-              { id: 'region', label: 'Region Analysis' },
-              { id: 'carrier', label: 'Carrier → Product' },
-              { id: 'cumulative', label: 'Cumulative Distribution' },
+              { id: 'route', label: t('reporting.route_analysis') },
+              { id: 'city', label: t('reporting.city_analysis') },
+              { id: 'region', label: t('reporting.region_analysis') },
+              { id: 'carrier', label: t('reporting.carrier_product_tab') },
+              { id: 'cumulative', label: t('reporting.cumulative_distribution_analysis') },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -181,14 +183,14 @@ export default function JKPerformance() {
             <div>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">
-                  Route Performance ({routeData.length} routes)
+                  {t('reporting.route_performance', { count: routeData.length })}
                 </h3>
                 <button
                   onClick={() => exportRouteCSV(routeData)}
                   className="flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
                 >
                   <FileDown className="w-4 h-4" />
-                  Export CSV
+                  {t('common.export_csv')}
                 </button>
               </div>
               <div className="overflow-x-auto">
@@ -276,14 +278,14 @@ export default function JKPerformance() {
             <div>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">
-                  City Performance ({cityData.length} entries)
+                  {t('reporting.city_performance', { count: cityData.length })}
                 </h3>
                 <button
                   onClick={() => exportCityCSV(cityData)}
                   className="flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
                 >
                   <FileDown className="w-4 h-4" />
-                  Export CSV
+                  {t('common.export_csv')}
                 </button>
               </div>
               <div className="overflow-x-auto">
@@ -356,14 +358,14 @@ export default function JKPerformance() {
             <div>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">
-                  Region Performance ({regionData.length} entries)
+                  {t('reporting.region_performance', { count: regionData.length })}
                 </h3>
                 <button
                   onClick={() => exportRegionCSV(regionData)}
                   className="flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
                 >
                   <FileDown className="w-4 h-4" />
-                  Export CSV
+                  {t('common.export_csv')}
                 </button>
               </div>
               <div className="overflow-x-auto">
@@ -436,14 +438,14 @@ export default function JKPerformance() {
             <div>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">
-                  Carrier → Product Performance ({carrierData.length} carriers)
+                  {t('reporting.carrier_product_performance', { count: carrierData.length })}
                 </h3>
                 <button
                   onClick={() => exportCarrierProductCSV(carrierData)}
                   className="flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
                 >
                   <FileDown className="w-4 h-4" />
-                  Export CSV
+                  {t('common.export_csv')}
                 </button>
               </div>
               <div className="overflow-x-auto">
@@ -545,9 +547,7 @@ export default function JKPerformance() {
           {activeTab === 'cumulative' && (
             <div>
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  Cumulative Distribution Analysis
-                </h3>
+                <h3 className="text-lg font-semibold text-gray-900">{t('reporting.cumulative_distribution_analysis')}</h3>
                 <div className="flex gap-2">
                   {cumulativeView === 'table' && (
                     <button
@@ -565,7 +565,7 @@ export default function JKPerformance() {
                       className="flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
                     >
                       <FileDown className="w-4 h-4" />
-                      Export CSV
+                      {t('common.export_csv')}
                     </button>
                   )}
                   <button
@@ -576,7 +576,7 @@ export default function JKPerformance() {
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
-                    Chart View
+                    {t('reporting.chart_view')}
                   </button>
                   <button
                     onClick={() => setCumulativeView('table')}
@@ -586,7 +586,7 @@ export default function JKPerformance() {
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
-                    Table View
+                    {t('reporting.table_view')}
                   </button>
                 </div>
               </div>
