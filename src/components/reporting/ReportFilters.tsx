@@ -147,7 +147,7 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             <Calendar className="w-4 h-4 inline mr-1" />
-            Start Date
+            {t('reporting.start_date')}
             <SmartTooltip content="Filter shipments sent on or after this date. Leave empty to include all historical data. Useful for analyzing specific time periods or recent performance." />
           </label>
           <input
@@ -161,7 +161,7 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             <Calendar className="w-4 h-4 inline mr-1" />
-            End Date
+            {t('reporting.end_date')}
             <SmartTooltip content="Filter shipments sent on or before this date. Leave empty to include data up to today. Combine with Start Date to analyze a specific date range." />
           </label>
           <input
@@ -174,7 +174,7 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Carrier
+            {t('reporting.carrier')}
             <SmartTooltip content="Filter by specific carrier (e.g., DHL, FedEx). Shows only shipments handled by the selected carrier. Use to compare carrier performance or investigate specific carrier issues." />
           </label>
           <select
@@ -183,7 +183,7 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             disabled={loading}
           >
-            <option value="">All Carriers</option>
+            <option value="">{t('reporting.all_carriers')}</option>
             {carriers.map(carrier => (
               <option key={carrier} value={carrier}>{carrier}</option>
             ))}
@@ -192,7 +192,7 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Product
+            {t('reporting.product')}
             <SmartTooltip content="Filter by service type (e.g., Express 24h, Standard). Shows only shipments using the selected product. Use to analyze performance by service level or compare product offerings." />
           </label>
           <select
@@ -201,7 +201,7 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             disabled={loading}
           >
-            <option value="">All Products</option>
+            <option value="">{t('reporting.all_products')}</option>
             {products.map(product => (
               <option key={product} value={product}>{product}</option>
             ))}
@@ -211,7 +211,7 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             <MapPin className="w-4 h-4 inline mr-1" />
-            Origin City
+            {t('reporting.origin_city')}
             <SmartTooltip content="Filter by departure city. When selected, shows performance FROM this city TO all destinations (or to specific destination if also filtered). Use to analyze outbound performance from a specific location." />
           </label>
           <select
@@ -220,7 +220,7 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             disabled={loading}
           >
-            <option value="">All Origins</option>
+            <option value="">{t('reporting.all_origins')}</option>
             {originCities.map(city => (
               <option key={city} value={city}>{city}</option>
             ))}
@@ -230,7 +230,7 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             <MapPin className="w-4 h-4 inline mr-1" />
-            Destination City
+            {t('reporting.destination_city')}
             <SmartTooltip content="Filter by arrival city. When selected, shows performance TO this city FROM all origins (or from specific origin if also filtered). Use to analyze inbound performance to a specific location." />
           </label>
           <select
@@ -239,7 +239,7 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             disabled={loading}
           >
-            <option value="">All Destinations</option>
+            <option value="">{t('reporting.all_destinations')}</option>
             {destinationCities.map(city => (
               <option key={city} value={city}>{city}</option>
             ))}
@@ -248,7 +248,7 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Compliance Status
+            {t('reporting.compliance_status')}
             <SmartTooltip content="Select multiple compliance statuses to filter routes. Compliant (✅ meeting standard), Warning (⚠️ below standard but above critical), or Critical (🔴 below critical threshold with penalty)." />
           </label>
           <div className="border border-gray-300 rounded-lg p-2 bg-white">
@@ -265,7 +265,7 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
                 }}
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
-              <span className="text-sm">✅ Compliant</span>
+              <span className="text-sm">✅ {t('reporting.compliant')}</span>
             </label>
             <label className="flex items-center gap-2 py-1 cursor-pointer hover:bg-gray-50 px-2 rounded">
               <input
@@ -280,7 +280,7 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
                 }}
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
-              <span className="text-sm">⚠️ Warning</span>
+              <span className="text-sm">⚠️ {t('reporting.warning')}</span>
             </label>
             <label className="flex items-center gap-2 py-1 cursor-pointer hover:bg-gray-50 px-2 rounded">
               <input
@@ -295,7 +295,7 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
                 }}
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
-              <span className="text-sm">🔴 Critical</span>
+              <span className="text-sm">🔴 {t('reporting.critical')}</span>
             </label>
           </div>
         </div>
@@ -303,13 +303,13 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
 
       {/* Filter Guidance */}
       <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-        <h4 className="text-sm font-semibold text-blue-900 mb-1">Filter Analysis Guide</h4>
+        <h4 className="text-sm font-semibold text-blue-900 mb-1">{t('reporting.filter_analysis_guide')}</h4>
         <ul className="text-xs text-blue-800 space-y-1">
-          <li>• <strong>No filters:</strong> View overall ecosystem performance across all routes and carriers</li>
-          <li>• <strong>Origin only:</strong> Analyze outbound quality from one city to all destinations</li>
-          <li>• <strong>Destination only:</strong> Analyze inbound quality to one city from all origins</li>
-          <li>• <strong>Both cities:</strong> Analyze specific route performance (origin → destination)</li>
-          <li>• <strong>Carrier/Product:</strong> Further narrow analysis to specific service providers or types</li>
+          <li>• <strong>{t('reporting.no_filters')}:</strong> {t('reporting.no_filters_desc')}</li>
+          <li>• <strong>{t('reporting.origin_only')}:</strong> {t('reporting.origin_only_desc')}</li>
+          <li>• <strong>{t('reporting.destination_only')}:</strong> {t('reporting.destination_only_desc')}</li>
+          <li>• <strong>{t('reporting.both_cities')}:</strong> {t('reporting.both_cities_desc')}</li>
+          <li>• <strong>{t('reporting.carrier_product')}:</strong> {t('reporting.carrier_product_desc')}</li>
         </ul>
       </div>
       </>

@@ -1681,3 +1681,34 @@ stock.feature_not_available_in_current_version,Cette fonctionnalité n'est pas d
 stock.system_will_automatically_create_shipments,Le système créera automatiquement des expéditions en attente lorsqu'il détecte qu'un panéliste a besoin de matériaux.
 stock.save_settings,Enregistrer les Paramètres
 material.add_material,Ajouter un matériau
+reporting.general_performance_dashboard,Tableau de bord des performances générales
+reporting.above_target,Au-dessus de la cible
+reporting.below_target,En dessous de la cible
+reporting.avg_transit_days,Jours de transit moyens
+reporting.business_days,Jours ouvrables
+reporting.last_12_weeks,12 dernières semaines
+reporting.current_week,Semaine en cours
+reporting.shipments_count,{{count}} expédition(s)
+reporting.carrier_product_overview,Aperçu Transporteur & Produit
+reporting.end_date,Date de fin
+reporting.carrier,Transporteur
+reporting.all_carriers,Tous les transporteurs
+reporting.all_products,Tous les produits
+reporting.origin_city,Ville d'origine
+reporting.all_origins,Toutes les origines
+reporting.destination_city,Ville de destination
+reporting.all_destinations,Toutes les destinations
+reporting.compliance_status,Statut de conformité
+reporting.compliant,Conforme
+reporting.critical,Critique
+reporting.filter_analysis_guide,Guide d'analyse des filtres
+reporting.no_filters,Aucun filtre
+reporting.no_filters_desc,Voir la performance globale de l'écosystème sur tous les itinéraires et transporteurs
+reporting.origin_only,Origine uniquement
+reporting.origin_only_desc,Analyser la qualité sortante d'une ville vers toutes les destinations
+reporting.destination_only,Destination uniquement
+reporting.destination_only_desc,Analyser la qualité entrante vers une ville depuis toutes les origines
+reporting.both_cities,Les deux villes
+reporting.both_cities_desc,Analyser la performance d'un itinéraire spécifique (origine → destination)
+reporting.carrier_product,Transporteur/Produit
+reporting.carrier_product_desc,Affiner davantage l'analyse à des prestataires de services ou types spécifiques

@@ -10,7 +10,10 @@ import DualLineChart from '@/components/reporting/DualLineChart';
 import CarrierProductOverview from '@/components/reporting/CarrierProductOverview';
 import { TrendingUp, Package, Clock, CheckCircle, Info } from 'lucide-react';
 import { SmartTooltip } from '@/components/common/SmartTooltip';
+import { useTranslation } from '@/hooks/useTranslation';
+
 export default function Dashboard() {
+  const { t } = useTranslation();
   const { profile } = useAuth();
   const accountId = profile?.account_id || undefined;
   const { filters, setFilters, resetFilters } = useReportingFilters();
@@ -80,8 +83,8 @@ export default function Dashboard() {
     <div className="space-y-6">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">General Performance Dashboard</h1>
-          <p className="text-gray-600 mt-1">Overall compliance and transit time metrics</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('reporting.general_performance_dashboard')}</h1>
+          <p className="text-gray-600 mt-1">{t('reporting.overall_compliance_and_transit_time_metrics')}</p>
         </div>
         <SmartTooltip content="General Performance Dashboard: Provides a high-level overview of delivery performance across your entire ecosystem. This is the starting point for regulatory analysis. You'll see overall compliance rates, average transit times, shipment volumes, and temporal trends. When no filters are applied, you'll also see a breakdown by carrier and product. Use this dashboard to quickly assess the overall health of the delivery network, identify underperforming carriers, and detect emerging compliance issues before they become systemic problems. Use filters to drill down into specific carriers, products, or routes, and navigate to other reports for detailed analysis." />
       </div>
@@ -90,11 +93,11 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <KPICard
-          title="Overall Compliance"
+          title={t('reporting.overall_compliance')}
           value={`${avgCompliance.toFixed(1)}%`}
           icon={CheckCircle}
           trend={avgCompliance >= globalWarningThreshold ? 'up' : 'down'}
-          trendValue={`${avgCompliance >= globalWarningThreshold ? 'Above' : 'Below'} target`}
+          trendValue={avgCompliance >= globalWarningThreshold ? t('reporting.above_target') : t('reporting.below_target')}
           color={avgCompliance >= globalWarningThreshold ? 'green' : avgCompliance > globalCriticalThreshold ? 'amber' : 'red'}
           tooltip={{
             description: "Percentage of shipments delivered within the legally mandated transit time for their route classification.",
@@ -103,11 +106,11 @@ export default function Dashboard() {
           }}
         />
         <KPICard
-          title="Avg Transit Days"
+          title={t('reporting.avg_transit_days')}
           value={avgTransitDays.toFixed(1)}
           icon={Clock}
           trend="neutral"
-          trendValue="Business days"
+          trendValue={t('reporting.business_days')}
           color="blue"
           tooltip={{
             description: "Average number of business days from shipment origin to final delivery across all routes.",
@@ -116,11 +119,11 @@ export default function Dashboard() {
           }}
         />
         <KPICard
-          title="Total Shipments"
+          title={t('reporting.total_shipments')}
           value={totalShipments.toString()}
           icon={Package}
           trend="up"
-          trendValue="Last 12 weeks"
+          trendValue={t('reporting.last_12_weeks')}
           color="purple"
           tooltip={{
             description: "Total number of shipments processed in the selected time period across all carriers and routes.",
@@ -129,11 +132,11 @@ export default function Dashboard() {
           }}
         />
         <KPICard
-          title="Current Week"
+          title={t('reporting.current_week')}
           value={latestData ? `${latestData.compliancePercentage.toFixed(1)}%` : 'N/A'}
           icon={TrendingUp}
           trend={latestData && latestData.compliancePercentage >= globalWarningThreshold ? 'up' : 'down'}
-          trendValue={latestData ? `${latestData.totalShipments} shipments` : 'No data'}
+          trendValue={latestData ? t('reporting.shipments_count', { count: latestData.totalShipments }) : 'No data'}
           color="indigo"
           tooltip={{
             description: "Compliance rate for the most recent week of data, showing current performance trends.",
@@ -145,7 +148,7 @@ export default function Dashboard() {
 
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Performance Trend</h2>
+          <h2 className="text-lg font-semibold text-gray-900">{t('reporting.performance_trend')}</h2>
           <SmartTooltip content="Performance Trend Over Time: Dual-axis chart showing compliance percentage (green line) and average transit days (blue line) over the selected time period. Upward compliance trend indicates improving service quality. Downward transit days show faster deliveries. Look for correlations between both metrics. Use to identify seasonal patterns, detect performance degradation, and verify if improvement plans are working." />
         </div>
         <DualLineChart data={data} />
@@ -154,7 +157,7 @@ export default function Dashboard() {
       {!filters.carrier && !filters.product && (
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">Carrier & Product Overview</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{t('reporting.carrier_product_overview')}</h2>
             <SmartTooltip content="Ecosystem Overview Table: Summary showing performance for each carrier-product combination in your ecosystem. Sorted by worst on-time percentage first. Shows Routes (unique city pairs), Samples (total shipments), J+K Std (expected transit days), J+K Actual (real transit days), Deviation (difference), On-Time % (percentage delivered on time), Problem Routes (routes with <90% on-time), and Status (visual indicator). Use for quick identification of non-compliant carriers for investigation and to prioritize enforcement actions." />
           </div>
           <CarrierProductOverview 
