@@ -479,7 +479,11 @@ export function Sidebar() {
               id="language-selector-sidebar"
               className="w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm"
               value={locale}
-              onChange={(e) => setLocale(e.target.value as 'en' | 'es' | 'fr' | 'ar')}
+              onChange={async (e) => {
+                await setLocale(e.target.value as 'en' | 'es' | 'fr' | 'ar')
+                // Reload page to ensure all components update with new language
+                window.location.reload()
+              }}
             >
               <option value="en">English</option>
               <option value="es">Español</option>
