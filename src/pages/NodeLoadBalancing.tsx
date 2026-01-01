@@ -424,9 +424,9 @@ export default function NodeLoadBalancing() {
           <div className="bg-gradient-to-br from-red-50 to-white rounded-lg shadow-sm border border-red-100 p-6 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-red-600 mb-1">Saturated Nodes</p>
+                <p className="text-sm font-medium text-red-600 mb-1">{t('nodeLoadBalancing.saturatedNodes')}</p>
                 <p className="text-3xl font-bold text-red-700">{totalSaturated}</p>
-                <p className="text-xs text-red-500 mt-1">Nodes over 150% avg load</p>
+                <p className="text-xs text-red-500 mt-1">{t('nodeLoadBalancing.saturatedNodesDesc')}</p>
               </div>
               <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
                 <svg className="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 20 20">
@@ -440,9 +440,9 @@ export default function NodeLoadBalancing() {
           <div className="bg-gradient-to-br from-orange-50 to-white rounded-lg shadow-sm border border-orange-100 p-6 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-orange-600 mb-1">High Load Nodes</p>
+                <p className="text-sm font-medium text-orange-600 mb-1">{t('nodeLoadBalancing.highLoadNodes')}</p>
                 <p className="text-3xl font-bold text-orange-700">{totalHigh}</p>
-                <p className="text-xs text-orange-500 mt-1">Nodes at 120-150% avg load</p>
+                <p className="text-xs text-orange-500 mt-1">{t('nodeLoadBalancing.highLoadNodesDesc')}</p>
               </div>
               <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
                 <svg className="w-6 h-6 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
@@ -456,9 +456,9 @@ export default function NodeLoadBalancing() {
           <div className="bg-gradient-to-br from-blue-50 to-white rounded-lg shadow-sm border border-blue-100 p-6 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-blue-600 mb-1">Total Shipments</p>
+                <p className="text-sm font-medium text-blue-600 mb-1">{t('nodeLoadBalancing.totalShipments')}</p>
                 <p className="text-3xl font-bold text-blue-700">{totalShipments}</p>
-                <p className="text-xs text-blue-500 mt-1">All shipments in period</p>
+                <p className="text-xs text-blue-500 mt-1">{t('nodeLoadBalancing.totalShipmentsDesc')}</p>
               </div>
               <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                 <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { BalanceResult, MatrixCell } from '../../hooks/useNodeLoadBalancing';
+import { useTranslation } from '../../hooks/useTranslation';
 
 interface BalancePreviewModalProps {
   isOpen: boolean;
@@ -18,6 +19,7 @@ export const BalancePreviewModal: React.FC<BalancePreviewModalProps> = ({
   onClose,
   onConfirm,
 }) => {
+  const { t } = useTranslation();
   if (!isOpen) return null;
 
   return (
@@ -233,6 +235,7 @@ const MatrixVisualization: React.FC<MatrixVisualizationProps> = ({
   matrixAfter,
   movements,
 }) => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'matrix' | 'movements'>('matrix');
   const [matrixView, setMatrixView] = useState<'before' | 'after'>('before');
 
@@ -352,7 +355,7 @@ const MatrixVisualization: React.FC<MatrixVisualizationProps> = ({
                       key={week}
                       className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
                     >
-                      W{week}
+                      S{week}
                     </th>
                   ))}
                   <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -392,7 +395,7 @@ const MatrixVisualization: React.FC<MatrixVisualizationProps> = ({
                 })}
                 {/* Totals Row */}
                 <tr className="bg-gray-50 font-semibold">
-                  <td className="px-3 py-2 text-sm text-gray-900">Total</td>
+                  <td className="px-3 py-2 text-sm text-gray-900">{t('nodeLoadBalancing.table.total')}</td>
                   {weeks.map((week) => {
                     const colTotal = nodes.reduce(
                       (sum, node) => sum + (currentMatrix[`${node}-${week}`] || 0),

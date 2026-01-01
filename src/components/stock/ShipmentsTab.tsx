@@ -198,7 +198,7 @@ export default function ShipmentsTab() {
 
     const shipmentsWithoutPanelist = filteredProposedShipments.filter(ps => !ps.panelist_id)
     if (shipmentsWithoutPanelist.length > 0) {
-      alert(`Warning: ${shipmentsWithoutPanelist.length} node(s) don't have assigned panelists and will be skipped`)
+      alert(t('stock.warning_nodes_without_panelists', { count: shipmentsWithoutPanelist.length }))
     }
 
     const validShipments = filteredProposedShipments.filter(ps => ps.panelist_id)
@@ -372,7 +372,7 @@ export default function ShipmentsTab() {
                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-yellow-800">Pending Shipments</p>
+                      <p className="text-sm font-medium text-yellow-800">{t('stock.pending_shipments')}</p>
                       <p className="text-2xl font-bold text-yellow-900 mt-1">{metrics.pending}</p>
                     </div>
                     <AlertCircle className="h-8 w-8 text-yellow-600" />
@@ -382,7 +382,7 @@ export default function ShipmentsTab() {
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-green-800">Confirmed Shipments</p>
+                      <p className="text-sm font-medium text-green-800">{t('stock.confirmed_shipments')}</p>
                       <p className="text-2xl font-bold text-green-900 mt-1">{metrics.confirmed}</p>
                     </div>
                     <CheckCircle className="h-8 w-8 text-green-600" />
@@ -392,7 +392,7 @@ export default function ShipmentsTab() {
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-blue-800">Total Items Pending</p>
+                      <p className="text-sm font-medium text-blue-800">{t('stock.total_items_pending')}</p>
                       <p className="text-2xl font-bold text-blue-900 mt-1">{metrics.totalItems}</p>
                     </div>
                     <Package className="h-8 w-8 text-blue-600" />
@@ -412,11 +412,11 @@ export default function ShipmentsTab() {
         >
           <div className="flex items-center gap-2">
             <Filter className="h-4 w-4 text-gray-500" />
-            <span className="font-medium text-gray-900">Calculate & Generate Shipments</span>
+            <span className="font-medium text-gray-900">{t('stock.calculate_generate_shipments')}</span>
             <SmartTooltip content="Use this section to calculate material requirements for panelists based on allocation plans, then generate shipments to send materials to them" />
           </div>
           <span className="text-sm text-gray-500">
-            {isFiltersCollapsed ? 'Show' : 'Hide'}
+            {isFiltersCollapsed ? t('common.show') : t('common.hide')}
           </span>
         </button>
 
@@ -452,7 +452,7 @@ export default function ShipmentsTab() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
-                  Material
+                  {t('common.material')}
                   <SmartTooltip content="Filter by specific material" />
                 </label>
                 <select
@@ -460,7 +460,7 @@ export default function ShipmentsTab() {
                   onChange={(e) => setSelectedMaterialId(e.target.value)}
                   className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 >
-                  <option value="">All Materials</option>
+                  <option value="">{t('stock.all_materials')}</option>
                   {materials.map(m => (
                     <option key={m.id} value={m.id}>{m.code} - {m.name}</option>
                   ))}
@@ -469,7 +469,7 @@ export default function ShipmentsTab() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
-                  Node
+                  {t('stock.node')}
                   <SmartTooltip content="Filter by specific node" />
                 </label>
                 <select
@@ -477,7 +477,7 @@ export default function ShipmentsTab() {
                   onChange={(e) => setSelectedNodeId(e.target.value)}
                   className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 >
-                  <option value="">All Nodes</option>
+                  <option value="">{t('stock.all_nodes')}</option>
                   {uniqueNodes.map(n => (
                     <option key={n.id} value={n.id}>{n.name}</option>
                   ))}
@@ -489,7 +489,7 @@ export default function ShipmentsTab() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
                 <Calendar className="h-4 w-4" />
-                Quick Month Selection
+                {t('stock.quick_month_selection')}
                 <SmartTooltip content="Click a month to set start/end dates for that entire month" />
               </label>
               <div className="flex items-center gap-2">
@@ -516,19 +516,19 @@ export default function ShipmentsTab() {
                     onClick={handleFirstSemesterSelect}
                     className="px-2 py-1 text-xs font-medium rounded border border-green-300 bg-green-50 hover:bg-green-100 hover:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
                   >
-                    1st Semester
+                    {t('common.first_semester')}
                   </button>
                   <button
                     onClick={handleSecondSemesterSelect}
                     className="px-2 py-1 text-xs font-medium rounded border border-teal-300 bg-teal-50 hover:bg-teal-100 hover:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
                   >
-                    2nd Semester
+                    {t('common.second_semester')}
                   </button>
                   <button
                     onClick={handleYearSelect}
                     className="px-2 py-1 text-xs font-medium rounded border border-purple-300 bg-purple-50 hover:bg-purple-100 hover:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
                   >
-                    Year
+                    {t('common.year')}
                   </button>
                 </div>
               </div>
@@ -542,7 +542,7 @@ export default function ShipmentsTab() {
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
               >
                 <Search className="h-4 w-4 mr-2" />
-                {loadingProposed ? 'Calculating...' : 'Calculate'}
+                {loadingProposed ? t('stock.calculating') : t('common.calculate')}
               </button>
 
               {filteredProposedShipments.length > 0 && (
@@ -552,7 +552,7 @@ export default function ShipmentsTab() {
                     className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                   >
                     <Package className="h-4 w-4 mr-2" />
-                    Generate Shipments ({filteredProposedShipments.filter(ps => ps.panelist_id).length})
+                    {t('stock.generate_shipments', { count: filteredProposedShipments.filter(ps => ps.panelist_id).length })}
                   </button>
                   <SmartTooltip content="Generate shipments for panelists based on allocation plans. The system will:
 
@@ -579,7 +579,7 @@ Note: Only panelists with assigned allocation plans will have shipments generate
                 className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 <RotateCcw className="h-4 w-4 mr-2" />
-                Reset
+                {t('common.reset')}
               </button>
             </div>
           </div>
@@ -590,11 +590,11 @@ Note: Only panelists with assigned allocation plans will have shipments generate
       {filteredProposedShipments.length > 0 && (
         <div className="bg-white border border-gray-200 rounded-lg p-4">
           <h3 className="text-sm font-medium text-gray-900 mb-2">
-            Preview: {filteredProposedShipments.length} shipment(s) will be generated
+            {t('stock.preview_shipments_will_be_generated', { count: filteredProposedShipments.length })}
           </h3>
           <div className="text-sm text-gray-600">
-            {filteredProposedShipments.filter(ps => ps.panelist_id).length} with assigned panelists, 
-            {' '}{filteredProposedShipments.filter(ps => !ps.panelist_id).length} without panelist (will be skipped)
+            {filteredProposedShipments.filter(ps => ps.panelist_id).length} {t('stock.with_assigned_panelists')}, 
+            {' '}{filteredProposedShipments.filter(ps => !ps.panelist_id).length} {t('stock.without_panelist_will_be_skipped')}
           </div>
         </div>
       )}
@@ -609,7 +609,7 @@ Note: Only panelists with assigned allocation plans will have shipments generate
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
-                Status
+                {t('common.status')}
                 <SmartTooltip content="Filter shipments by status" />
               </label>
               <select
@@ -617,7 +617,7 @@ Note: Only panelists with assigned allocation plans will have shipments generate
                 onChange={(e) => setHistoryStatusFilter(e.target.value)}
                 className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               >
-                <option value="">All Statuses</option>
+                <option value="">{t('stock.all_statuses')}</option>
                 <option value="pending">{t('stock.pending')}</option>
                 <option value="sent">{t('stock.sent')}</option>
                 <option value="received">{t('stock.received')}</option>
@@ -627,7 +627,7 @@ Note: Only panelists with assigned allocation plans will have shipments generate
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
-                Panelist
+                {t('stock.panelist')}
                 <SmartTooltip content="Filter shipments by panelist" />
               </label>
               <select
@@ -635,7 +635,7 @@ Note: Only panelists with assigned allocation plans will have shipments generate
                 onChange={(e) => setHistoryPanelistFilter(e.target.value)}
                 className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               >
-                <option value="">All Panelists</option>
+                <option value="">{t('stock.all_panelists')}</option>
                 {uniquePanelists.map(p => (
                   <option key={p.id} value={p.id}>{p.name}</option>
                 ))}
@@ -644,7 +644,7 @@ Note: Only panelists with assigned allocation plans will have shipments generate
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
-                Material
+                {t('common.material')}
                 <SmartTooltip content="Filter shipments containing specific material" />
               </label>
               <select
@@ -652,7 +652,7 @@ Note: Only panelists with assigned allocation plans will have shipments generate
                 onChange={(e) => setHistoryMaterialFilter(e.target.value)}
                 className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               >
-                <option value="">All Materials</option>
+                <option value="">{t('stock.all_materials')}</option>
                 {materials.map(m => (
                   <option key={m.id} value={m.id}>{m.code} - {m.name}</option>
                 ))}
@@ -671,7 +671,7 @@ Note: Only panelists with assigned allocation plans will have shipments generate
                 className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 <RotateCcw className="h-4 w-4 mr-1" />
-                Clear Filters
+                {t('stock.clear_filters')}
               </button>
             </div>
           )}
@@ -683,7 +683,7 @@ Note: Only panelists with assigned allocation plans will have shipments generate
         <div className="bg-white border border-gray-200 rounded-lg">
           <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
             <h3 className="text-lg font-medium text-gray-900">
-              Pending Shipments ({pendingShipments.length})
+              {t('stock.pending_shipments')} ({pendingShipments.length})
             </h3>
             {selectedShipmentIds.size > 0 && (
               <div className="flex items-center gap-2">
@@ -692,7 +692,7 @@ Note: Only panelists with assigned allocation plans will have shipments generate
                   className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
                   <Send className="h-4 w-4 mr-1" />
-                  Send {selectedShipmentIds.size} Selected
+                  {t('stock.send_selected', { count: selectedShipmentIds.size })}
                 </button>
                 <button
                   onClick={handleExportCSV}
@@ -737,19 +737,19 @@ Note: Only panelists with assigned allocation plans will have shipments generate
                     </button>
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Shipment #
+                    {t('stock.shipment')}
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Panelist
+                    {t('stock.panelist')}
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Materials
+                    {t('common.material')}s
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Expected Date
+                    {t('stock.expected_date')}
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
+                    {t('common.actions')}
                   </th>
                 </tr>
               </thead>
@@ -825,7 +825,7 @@ Note: Only panelists with assigned allocation plans will have shipments generate
                           className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                         >
                           <Send className="h-4 w-4 mr-1" />
-                          Send
+                          {t('stock.send')}
                         </button>
                         <button
                           onClick={() => handleDelete(shipment.id)}

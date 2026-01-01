@@ -63,7 +63,7 @@ export default function RegulatorStockTab() {
 
   const handleExportCSV = () => {
     if (filteredStocks.length === 0) {
-      alert('No stock data to export')
+      alert(t('stock.no_stock_data_to_export'))
       return
     }
 
@@ -73,7 +73,7 @@ export default function RegulatorStockTab() {
       'Quantity': stock.quantity,
       'Unit': stock.material?.unit_measure || 'un',
       'Minimum': stock.min_stock || 0,
-      'Status': stock.min_stock && stock.quantity < stock.min_stock ? 'Low Stock' : 'Normal'
+      'Status': stock.min_stock && stock.quantity < stock.min_stock ? t('stock.low_stock') : t('stock.normal')
     }))
 
     downloadCSV(csvData, `regulator-stock-${new Date().toISOString().split('T')[0]}.csv`)
@@ -84,13 +84,13 @@ export default function RegulatorStockTab() {
     if (minStock > 0 && stock.quantity < minStock) {
       return (
         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-          Low Stock
+          {t('stock.low_stock')}
         </span>
       )
     }
     return (
       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-        Normal
+        {t('stock.normal')}
       </span>
     )
   }
@@ -100,7 +100,7 @@ export default function RegulatorStockTab() {
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <p className="mt-2 text-sm text-gray-500">Loading stock...</p>
+          <p className="mt-2 text-sm text-gray-500">{t('stock.loading_stock')}</p>
         </div>
       </div>
     )
@@ -119,7 +119,7 @@ export default function RegulatorStockTab() {
           {/* Search */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Search
+              {t('common.search')}
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -129,7 +129,7 @@ export default function RegulatorStockTab() {
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search by material or code..."
+                placeholder={t('stock.search_by_material_or_code')}
                 className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               />
             </div>
@@ -138,7 +138,7 @@ export default function RegulatorStockTab() {
           {/* Material Filter */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
-              Material
+              {t('common.material')}
               <SmartTooltip content="Filter by specific material" />
             </label>
             <select
@@ -146,7 +146,7 @@ export default function RegulatorStockTab() {
               onChange={(e) => setSelectedMaterialId(e.target.value)}
               className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             >
-              <option value="">All Materials</option>
+              <option value="">{t('stock.all_materials')}</option>
               {materials.map(m => (
                 <option key={m.id} value={m.id}>{m.code} - {m.name}</option>
               ))}
@@ -156,7 +156,7 @@ export default function RegulatorStockTab() {
           {/* Low Stock Toggle */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
-              Stock Status
+              {t('stock.stock_status')}
               <SmartTooltip content="Show only materials with low stock" />
             </label>
             <label className="flex items-center h-10 px-3 border border-gray-300 rounded-md bg-white cursor-pointer hover:bg-gray-50">
@@ -166,7 +166,7 @@ export default function RegulatorStockTab() {
                 onChange={(e) => setShowLowStockOnly(e.target.checked)}
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
-              <span className="ml-2 text-sm text-gray-700">Low Stock Only</span>
+              <span className="ml-2 text-sm text-gray-700">{t('stock.low_stock_only')}</span>
             </label>
           </div>
         </div>
@@ -178,14 +178,14 @@ export default function RegulatorStockTab() {
             className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
             <RotateCcw className="h-4 w-4 mr-2" />
-            Reset Filters
+            {t('stock.reset_filters')}
           </button>
           <button
             onClick={handleExportCSV}
             className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
             <Download className="h-4 w-4 mr-2" />
-            Export CSV
+            {t('common.export_csv')}
           </button>
         </div>
       </div>
@@ -194,13 +194,13 @@ export default function RegulatorStockTab() {
       <div className="bg-white border border-gray-200 rounded-lg">
         <div className="px-4 py-3 border-b border-gray-200">
           <h3 className="text-lg font-medium text-gray-900">
-            Current Regulator Stock ({filteredStocks.length})
+            {t('stock.current_regulator_stock')} ({filteredStocks.length})
           </h3>
         </div>
 
         {filteredStocks.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-sm text-gray-500">No stock records found</p>
+            <p className="text-sm text-gray-500">{t('stock.no_stock_records_found')}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -208,19 +208,19 @@ export default function RegulatorStockTab() {
               <thead className="bg-gray-50">
                 <tr>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Material
+                    {t('common.material')}
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Quantity
+                    {t('stock.quantity')}
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Minimum
+                    {t('stock.minimum')}
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
+                    {t('common.status')}
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
+                    {t('common.actions')}
                   </th>
                 </tr>
               </thead>
@@ -260,7 +260,7 @@ export default function RegulatorStockTab() {
                           }}
                           className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                         >
-                          Adjust Stock
+                          {t('stock.adjust_stock')}
                         </button>
                       </td>
                     </tr>
@@ -278,7 +278,7 @@ export default function RegulatorStockTab() {
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
             <div className="px-6 py-4 border-b border-gray-200">
               <h3 className="text-lg font-medium text-gray-900">
-                Adjust Stock: {selectedStock.material?.code}
+                {t('stock.adjust_stock')}: {selectedStock.material?.code}
               </h3>
               <p className="text-sm text-gray-500 mt-1">
                 {selectedStock.material?.name}
@@ -288,7 +288,7 @@ export default function RegulatorStockTab() {
             <div className="px-6 py-4 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Current Quantity
+                  {t('stock.current_quantity')}
                 </label>
                 <div className="text-lg font-semibold text-gray-900">
                   {selectedStock.quantity.toLocaleString()} {selectedStock.material?.unit_measure || 'un'}
@@ -297,7 +297,7 @@ export default function RegulatorStockTab() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  New Quantity <span className="text-red-500">*</span>
+                  {t('stock.new_quantity')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
@@ -306,27 +306,27 @@ export default function RegulatorStockTab() {
                   min="0"
                   step="1"
                   className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  placeholder="Enter new absolute quantity"
+                  placeholder={t('stock.enter_new_absolute_quantity')}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Adjustment Note <span className="text-red-500">*</span>
+                  {t('stock.adjustment_note')} <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   value={adjustmentNote}
                   onChange={(e) => setAdjustmentNote(e.target.value)}
                   rows={3}
                   className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  placeholder="Explain the reason for this adjustment..."
+                  placeholder={t('stock.explain_the_reason_for_this_adjustment')}
                 />
               </div>
 
               {newQuantity && (
                 <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
                   <p className="text-sm text-blue-800">
-                    <strong>Change:</strong> {parseInt(newQuantity) - selectedStock.quantity > 0 ? '+' : ''}
+                    <strong>{t('stock.change')}:</strong> {parseInt(newQuantity) - selectedStock.quantity > 0 ? '+' : ''}
                     {(parseInt(newQuantity) - selectedStock.quantity).toLocaleString()} {selectedStock.material?.unit_measure || 'un'}
                   </p>
                 </div>
@@ -344,18 +344,18 @@ export default function RegulatorStockTab() {
                 disabled={isAdjusting}
                 className="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 onClick={async () => {
                   if (!newQuantity || !adjustmentNote.trim()) {
-                    alert('Please enter new quantity and adjustment note')
+                    alert(t('stock.please_enter_quantity_and_note'))
                     return
                   }
 
                   const qty = parseInt(newQuantity)
                   if (isNaN(qty) || qty < 0) {
-                    alert('Please enter a valid quantity')
+                    alert(t('stock.please_enter_valid_quantity'))
                     return
                   }
 
@@ -385,10 +385,10 @@ export default function RegulatorStockTab() {
                     setSelectedStock(null)
                     setNewQuantity('')
                     setAdjustmentNote('')
-                    alert('Stock adjusted successfully')
+                    alert(t('stock.stock_adjusted_successfully'))
                   } catch (error: any) {
                     console.error('Error adjusting stock:', error)
-                    alert('Failed to adjust stock: ' + error.message)
+                    alert(t('stock.failed_to_adjust_stock') + ': ' + error.message)
                   } finally {
                     setIsAdjusting(false)
                   }
@@ -396,7 +396,7 @@ export default function RegulatorStockTab() {
                 disabled={isAdjusting || !newQuantity || !adjustmentNote.trim()}
                 className="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
               >
-                {isAdjusting ? 'Adjusting...' : 'Confirm Adjustment'}
+                {isAdjusting ? t('stock.adjusting') : t('stock.confirm_adjustment')}
               </button>
             </div>
           </div>

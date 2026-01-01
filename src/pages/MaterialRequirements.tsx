@@ -196,7 +196,7 @@ export default function MaterialRequirements() {
               <div>
                 <p className="text-sm text-gray-600 mb-1">{t('material_requirements.total_materials')}</p>
                 <p className="text-3xl font-bold text-gray-900">{totalMaterials}</p>
-                <p className="text-xs text-gray-500 mt-1">items needed</p>
+                <p className="text-xs text-gray-500 mt-1">{t('material_requirements.items_needed')}</p>
               </div>
               <Package className="w-12 h-12 text-blue-500" />
             </div>
@@ -207,7 +207,7 @@ export default function MaterialRequirements() {
               <div>
                 <p className="text-sm text-gray-600 mb-1">{t('material_requirements.panelists_needing')}</p>
                 <p className="text-3xl font-bold text-gray-900">{totalPanelists}</p>
-                <p className="text-xs text-gray-500 mt-1">to send</p>
+                <p className="text-xs text-gray-500 mt-1">{t('material_requirements.to_send')}</p>
               </div>
               <Users className="w-12 h-12 text-orange-500" />
             </div>
@@ -244,7 +244,7 @@ export default function MaterialRequirements() {
             title="Reset all filters"
           >
             <RotateCcw className="w-4 h-4" />
-            Reset
+            {t('common.reset')}
           </button>
         </div>
 
@@ -255,7 +255,7 @@ export default function MaterialRequirements() {
               <div>
                 <label className="flex items-center gap-2 block text-sm font-medium text-gray-700 mb-2">
                   <Calendar className="w-4 h-4" />
-                  Start Date
+                  {t('common.start_date')}
                   <SmartTooltip content="The beginning date of the period for which to calculate material requirements." />
                 </label>
                 <input
@@ -269,7 +269,7 @@ export default function MaterialRequirements() {
               <div>
                 <label className="flex items-center gap-2 block text-sm font-medium text-gray-700 mb-2">
                   <Calendar className="w-4 h-4" />
-                  End Date
+                  {t('common.end_date')}
                   <SmartTooltip content="The ending date of the period for which to calculate material requirements." />
                 </label>
                 <input
@@ -283,7 +283,7 @@ export default function MaterialRequirements() {
               <div>
                 <label className="flex items-center gap-2 block text-sm font-medium text-gray-700 mb-2">
                   <Package className="w-4 h-4" />
-                  Material
+                  {t('common.material')}
                   <SmartTooltip content="Filter results to show only a specific material. Leave empty to show all materials." />
                 </label>
                 <select
@@ -303,7 +303,7 @@ export default function MaterialRequirements() {
               <div>
                 <label className="flex items-center gap-2 block text-sm font-medium text-gray-700 mb-2">
                   <Users className="w-4 h-4" />
-                  Node
+                  {t('common.node')}
                   <SmartTooltip content="Filter panelist requirements to show only a specific node. This filter only applies to the Panelist Requirements tab." />
                 </label>
                 <select
@@ -324,7 +324,7 @@ export default function MaterialRequirements() {
             {/* Quick Period Selector */}
             <div className="mb-4">
               <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                Quick Period Selection
+                {t('material_requirements.quick_period_selection')}
                 <SmartTooltip content="Click any month button to automatically set the start and end dates for that entire month, or use semester/year buttons for longer periods." />
               </label>
               <div className="flex items-center gap-2 mb-2">
@@ -345,26 +345,26 @@ export default function MaterialRequirements() {
                     onClick={() => handleMonthSelect(selectedYear, month.num)}
                     className="px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-300 hover:bg-blue-50 hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
                   >
-                    {month.name}
+                    {t(`months.${month.name.toLowerCase()}`)}
                   </button>
                 ))}
                 <button
                   onClick={handleFirstSemesterSelect}
                   className="px-3 py-1.5 text-sm font-medium rounded-lg border border-green-300 bg-green-50 hover:bg-green-100 hover:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors"
                 >
-                  1st Semester
+                  {t('common.first_semester')}
                 </button>
                 <button
                   onClick={handleSecondSemesterSelect}
                   className="px-3 py-1.5 text-sm font-medium rounded-lg border border-teal-300 bg-teal-50 hover:bg-teal-100 hover:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-colors"
                 >
-                  2nd Semester
+                  {t('common.second_semester')}
                 </button>
                 <button
                   onClick={handleYearSelect}
                   className="px-3 py-1.5 text-sm font-medium rounded-lg border border-purple-300 bg-purple-50 hover:bg-purple-100 hover:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors"
                 >
-                  Year
+                  {t('common.year')}
                 </button>
               </div>
             </div>
@@ -394,7 +394,7 @@ export default function MaterialRequirements() {
                 }`}
               >
                 <ShoppingCart className="w-4 h-4" />
-                Purchase Requirements
+                {t('material_requirements.purchase_requirements')}
                 <SmartTooltip content="Shows the total quantity of each material needed to be purchased to fulfill all allocation plans in the selected date range." />
               </button>
               <button
@@ -406,7 +406,7 @@ export default function MaterialRequirements() {
                 }`}
               >
                 <Users className="w-4 h-4" />
-                Panelist Requirements
+                {t('material_requirements.panelist_requirements')}
                 <SmartTooltip content="Shows which materials need to be sent to each panelist/node for their scheduled shipments." />
               </button>
             </div>
@@ -416,7 +416,7 @@ export default function MaterialRequirements() {
               className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
             >
               <Download className="w-4 h-4" />
-              Export to CSV
+              {t('common.export_to_csv')}
             </button>
           </div>
 

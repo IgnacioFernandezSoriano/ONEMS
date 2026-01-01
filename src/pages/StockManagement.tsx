@@ -75,7 +75,7 @@ export default function StockManagement() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900">{t('stock.title')}</h1>
         <p className="mt-1 text-sm text-gray-500">
-          Manage material requirements, regulator and panelist inventory, track movements and shipments
+          {t('stock.manage_description')}
         </p>
       </div>
 
@@ -91,16 +91,16 @@ export default function StockManagement() {
                 <AlertTriangle className="h-6 w-6 text-red-600" />
               </div>
               <div>
-                <div className="text-lg font-bold text-red-900">Stock Alerts</div>
+                <div className="text-lg font-bold text-red-900">{t('stock.stock_alerts_tab')}</div>
                 <div className="text-sm text-red-700 mt-1">
                   {alertCounts.regulator > 0 && (
                     <span className="mr-4">
-                      <span className="font-semibold">{alertCounts.regulator}</span> Regulator issue{alertCounts.regulator !== 1 ? 's' : ''}
+                      <span className="font-semibold">{alertCounts.regulator}</span> {alertCounts.regulator !== 1 ? t('stock.regulator_issues') : t('stock.regulator_issue')}
                     </span>
                   )}
                   {alertCounts.panelist > 0 && (
                     <span>
-                      <span className="font-semibold">{alertCounts.panelist}</span> Panelist issue{alertCounts.panelist !== 1 ? 's' : ''}
+                      <span className="font-semibold">{alertCounts.panelist}</span> {alertCounts.panelist !== 1 ? t('stock.panelist_issues') : t('stock.panelist_issue')}
                     </span>
                   )}
                 </div>

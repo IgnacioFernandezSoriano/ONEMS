@@ -46,7 +46,9 @@ async function loadTranslations(locale: string): Promise<string> {
   console.log(`Loading translations for locale: ${locale}`)
   
   try {
-    const response = await fetch(`/locales/${locale}.csv`)
+    // Add cache-busting parameter to force fresh downloads
+    const cacheBuster = Date.now()
+    const response = await fetch(`/locales/${locale}.csv?v=${cacheBuster}`)
     if (response.ok) {
       const text = await response.text()
       console.log(`✓ Loaded ${locale}.csv (${text.length} bytes)`)

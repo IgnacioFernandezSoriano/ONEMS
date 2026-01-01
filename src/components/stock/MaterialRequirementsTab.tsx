@@ -93,7 +93,7 @@ export default function MaterialRequirementsTab() {
 
   const handleCalculate = () => {
     if (!startDate || !endDate) {
-      alert('Please select both start and end dates')
+      alert(t('stock.please_select_dates'))
       return
     }
     calculate(startDate, endDate)
@@ -222,7 +222,7 @@ export default function MaterialRequirementsTab() {
 
   const handleExportCSV = () => {
     if (selectedRequirements.size === 0) {
-      alert('Please select requirements to export')
+      alert(t('stock.please_select_requirements_export'))
       return
     }
 
@@ -244,7 +244,7 @@ export default function MaterialRequirementsTab() {
 
   const handleGeneratePDF = () => {
     if (selectedRequirements.size === 0) {
-      alert('Please select requirements to generate purchase order')
+      alert(t('stock.please_select_requirements_po'))
       return
     }
 
@@ -278,7 +278,7 @@ export default function MaterialRequirementsTab() {
           >
             <div className="flex items-center gap-2">
               <Package className="h-4 w-4 text-gray-500" />
-              <span className="font-medium text-gray-900">Metrics Overview</span>
+              <span className="font-medium text-gray-900">{t('stock.metrics_overview')}</span>
             </div>
             {isMetricsCollapsed ? (
               <ChevronDown className="h-4 w-4 text-gray-500" />
@@ -293,7 +293,7 @@ export default function MaterialRequirementsTab() {
                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-yellow-800">Pending Requirements</p>
+                      <p className="text-sm font-medium text-yellow-800">{t('stock.pending_requirements')}</p>
                       <p className="text-2xl font-bold text-yellow-900 mt-1">{metrics.pending}</p>
                     </div>
                     <AlertCircle className="h-8 w-8 text-yellow-600" />
@@ -323,10 +323,10 @@ export default function MaterialRequirementsTab() {
         >
           <div className="flex items-center gap-2">
             <Filter className="h-5 w-5 text-gray-500" />
-            <span className="font-medium text-gray-900">Calculate Requirements</span>
+            <span className="font-medium text-gray-900">{t('stock.calculate_requirements')}</span>
           </div>
           <span className="text-sm text-gray-500">
-            {isFiltersCollapsed ? 'Show' : 'Hide'}
+            {isFiltersCollapsed ? t('common.show') : t('common.hide')}
           </span>
         </button>
 
@@ -336,7 +336,7 @@ export default function MaterialRequirementsTab() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
-                  Start Date
+                  {t('common.start_date')}
                   <SmartTooltip content="Select the start date of the period for which you want to calculate material requirements based on allocation plans" />
                 </label>
                 <input
@@ -349,7 +349,7 @@ export default function MaterialRequirementsTab() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
-                  End Date
+                  {t('common.end_date')}
                   <SmartTooltip content="Select the end date of the period. The system will analyze all allocation plans within this date range to determine material needs" />
                 </label>
                 <input
@@ -362,7 +362,7 @@ export default function MaterialRequirementsTab() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
-                  Material
+                  {t('common.material')}
                   <SmartTooltip content="Filter calculated requirements by a specific material to focus on individual items" />
                 </label>
                 <select
@@ -370,7 +370,7 @@ export default function MaterialRequirementsTab() {
                   onChange={(e) => setSelectedMaterialId(e.target.value)}
                   className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 >
-                  <option value="">All Materials</option>
+                  <option value="">{t('stock.all_materials')}</option>
                   {materials.map(m => (
                     <option key={m.id} value={m.id}>{m.code} - {m.name}</option>
                   ))}
@@ -379,7 +379,7 @@ export default function MaterialRequirementsTab() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
-                  Status
+                  {t('common.status')}
                   <SmartTooltip content="Filter requirements by their current status: Pending (not yet ordered), Ordered (purchase order placed), or Received (materials in stock)" />
                 </label>
                 <select
@@ -387,7 +387,7 @@ export default function MaterialRequirementsTab() {
                   onChange={(e) => setSelectedStatus(e.target.value)}
                   className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 >
-                  <option value="">All Status</option>
+                  <option value="">{t('common.all_status')}</option>
                   <option value="pending">{t('stock.pending')}</option>
                   <option value="ordered">{t('stock.ordered')}</option>
                   <option value="received">{t('stock.received')}</option>
@@ -399,7 +399,7 @@ export default function MaterialRequirementsTab() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
                 <Calendar className="h-4 w-4" />
-                Quick Month Selection
+                {t('stock.quick_month_selection')}
                 <SmartTooltip content="Click any month button to automatically set the start and end dates for that entire month. This is the fastest way to calculate requirements for a specific month." />
               </label>
               <div className="flex items-center gap-2">
@@ -452,7 +452,7 @@ export default function MaterialRequirementsTab() {
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Package className="h-4 w-4 mr-2" />
-                {loadingRequirements ? 'Calculating...' : 'Calculate Requirements'}
+                {loadingRequirements ? t('stock.calculating') : t('stock.calculate_requirements')}
               </button>
               <SmartTooltip content="Calculate material requirements for the selected period. The system will:
 
@@ -489,7 +489,7 @@ Unification Logic:
         <div className="bg-white border border-gray-200 rounded-lg">
           <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
             <h3 className="text-lg font-medium text-gray-900">
-              Material Requirements ({enrichedRequirements.length})
+              {t('stock.material_requirements_tab')} ({enrichedRequirements.length})
             </h3>
             <div className="flex items-center gap-2">
               {selectedRequirements.size > 0 && (
@@ -499,28 +499,28 @@ Unification Logic:
                     className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   >
                     <ShoppingCart className="h-4 w-4 mr-1" />
-                    Mark {selectedRequirements.size} as Ordered
+                    {t('stock.mark_as_ordered', { count: selectedRequirements.size })}
                   </button>
                   <button
                     onClick={handleExportCSV}
                     className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   >
                     <Download className="h-4 w-4 mr-1" />
-                    Export CSV
+                    {t('common.export_csv')}
                   </button>
                   <button
                     onClick={handleGeneratePDF}
                     className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   >
                     <FileText className="h-4 w-4 mr-1" />
-                    Purchase Order PDF
+                    {t('stock.purchase_order_pdf')}
                   </button>
                   <button
                     onClick={handleDeleteSelected}
                     className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                   >
                     <Trash2 className="h-4 w-4 mr-1" />
-                    Delete {selectedRequirements.size} Selected
+                    {t('stock.delete_selected', { count: selectedRequirements.size })}
                   </button>
                 </>
               )}
@@ -541,32 +541,32 @@ Unification Logic:
                       ) : (
                         <Square className="h-4 w-4" />
                       )}
-                      Select
+                      {t('common.select')}
                     </button>
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Material
+                    {t('common.material')}
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Period
+                    {t('stock.period')}
                   </th>
                   <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Quantity Needed
+                    {t('stock.quantity_needed')}
                   </th>
                   <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Current Stock
+                    {t('stock.current_stock')}
                   </th>
                   <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Quantity Ordered
+                    {t('stock.quantity_ordered')}
                   </th>
                   <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Net Quantity
+                    {t('stock.net_quantity')}
                   </th>
                   <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
+                    {t('common.status')}
                   </th>
                   <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
+                    {t('common.actions')}
                   </th>
                 </tr>
               </thead>
@@ -618,7 +618,7 @@ Unification Logic:
                             className="inline-flex items-center px-2 py-1 border border-transparent text-xs font-medium rounded text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                           >
                             <ShoppingCart className="h-3 w-3 mr-1" />
-                            Order
+                            {t('stock.order')}
                           </button>
                         )}
                         {req.status === 'ordered' && (

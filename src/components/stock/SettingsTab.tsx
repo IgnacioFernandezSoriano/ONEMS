@@ -58,7 +58,7 @@ export default function SettingsTab() {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Stock Control */}
           <div className="bg-white border border-gray-200 rounded-lg p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Stock Control</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">{t('stock.stock_control')}</h3>
             
             <div className="space-y-4">
               <div className="flex items-start">
@@ -74,11 +74,11 @@ export default function SettingsTab() {
                 </div>
                 <div className="ml-3 text-sm">
                   <label htmlFor="stock_control_enabled" className="font-medium text-gray-700 flex items-center gap-1">
-                    Enable Stock Control
+                    {t('stock.enable_stock_control')}
                     <SmartTooltip content="Activates inventory monitoring and alert system" />
                   </label>
                   <p className="text-gray-500">
-                    When enabled, the system will monitor stock levels and generate alerts when materials fall below minimum thresholds.
+                    {t('stock.stock_control_description')}
                   </p>
                 </div>
               </div>
@@ -104,11 +104,11 @@ export default function SettingsTab() {
                 </div>
                 <div className="ml-3 text-sm">
                   <label htmlFor="auto_generate_purchase_orders" className="font-medium text-gray-700 flex items-center gap-1">
-                    Auto-generate Purchase Orders
+                    {t('stock.auto_generate_purchase_orders')}
                     <SmartTooltip content="Feature disabled - Purchase orders are not used in this module" />
                   </label>
                   <p className="text-gray-500">
-                    This feature is not available in the current version of the module.
+                    {t('stock.feature_not_available')}
                   </p>
                 </div>
               </div>
@@ -126,11 +126,11 @@ export default function SettingsTab() {
                 </div>
                 <div className="ml-3 text-sm">
                   <label htmlFor="auto_generate_shipments" className="font-medium text-gray-700 flex items-center gap-1">
-                    Auto-generate Shipments
+                    {t('stock.auto_generate_shipments')}
                     <SmartTooltip content="Automatically creates shipments when panelist stock is low" />
                   </label>
                   <p className="text-gray-500">
-                    The system will automatically create pending shipments when it detects that a panelist needs materials.
+                    {t('stock.auto_generate_shipments_description')}
                   </p>
                 </div>
               </div>
@@ -139,12 +139,12 @@ export default function SettingsTab() {
 
           {/* Lead Times */}
           <div className="bg-white border border-gray-200 rounded-lg p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Lead Times</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">{t('stock.lead_times')}</h3>
             
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <div>
                 <label htmlFor="purchase_lead_time_days" className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
-                  Purchase Lead Time (days)
+                  {t('stock.purchase_lead_time_days')}
                   <SmartTooltip content="Estimated days from purchase order to receipt" />
                 </label>
                 <input
@@ -158,13 +158,13 @@ export default function SettingsTab() {
                   disabled
                 />
                 <p className="mt-1 text-xs text-gray-500">
-                  Not applicable - Purchase orders are not used
+                  {t('stock.not_applicable_purchase_orders')}
                 </p>
               </div>
 
               <div>
                 <label htmlFor="shipment_lead_time_days" className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
-                  Shipment Lead Time (days)
+                  {t('stock.shipment_lead_time_days')}
                   <SmartTooltip content="Estimated days from shipment to panelist delivery" />
                 </label>
                 <input
@@ -177,7 +177,7 @@ export default function SettingsTab() {
                   className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
                 <p className="mt-1 text-xs text-gray-500">
-                  Used to calculate expected delivery dates
+                  {t('stock.used_to_calculate_delivery_dates')}
                 </p>
               </div>
             </div>
@@ -213,7 +213,7 @@ export default function SettingsTab() {
               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Save className="h-4 w-4 mr-2" />
-              {saving ? 'Saving...' : 'Save Settings'}
+              {saving ? t('common.saving') : t('stock.save_settings')}
             </button>
           </div>
         </form>

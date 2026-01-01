@@ -107,7 +107,7 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
     }
     return (
       <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
-        NORMAL
+        Normal
       </span>
     );
   };
@@ -144,21 +144,21 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Node
+                Nœud
               </th>
               {weeks.map((week) => (
                 <th
                   key={week}
                   className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase"
                 >
-                  Week {week}
+                  Semaine {week}
                 </th>
               ))}
               <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
-                Monthly Avg
+                Moyenne mensuelle
               </th>
               <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
-                Status
+                Statut
               </th>
             </tr>
           </thead>
@@ -210,7 +210,7 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
 
             {/* Totals Row */}
             <tr className="bg-gray-50 font-semibold border-t-2 border-gray-300">
-              <td className="px-4 py-3 text-gray-900">TOTAL</td>
+              <td className="px-4 py-3 text-gray-900">Total</td>
               {weeks.map((week) => (
                 <td key={week} className="px-4 py-3 text-center text-gray-900">
                   {weekTotals[week]}
@@ -224,7 +224,7 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
 
             {/* Average Row */}
             <tr className="bg-gray-50 font-semibold">
-              <td className="px-4 py-3 text-gray-900">AVG/NODE</td>
+              <td className="px-4 py-3 text-gray-900">Moy/Nœud</td>
               {weeks.map((week) => (
                 <td key={week} className="px-4 py-3 text-center text-gray-900">
                   {weekAverages[week].toFixed(1)}
@@ -268,7 +268,7 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
             
               {/* Optimization Recommendations */}
               <div className="mb-3">
-                <p className="text-xs font-medium text-gray-700 mb-1">📊 Optimization:</p>
+                <p className="text-xs font-medium text-gray-700 mb-1">📊 Optimisation :</p>
                 <ul className="text-xs text-gray-600 space-y-1 ml-4">
                   {(() => {
                     // Analyze individual cells
@@ -312,7 +312,7 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
                         {saturatedCells.length === 0 && highCells.length === 0 && (
                           <li className="flex items-start gap-1">
                             <span className="text-green-600">•</span>
-                            <span><strong>Optimal:</strong> All {totalCells} cells are within normal range (&lt;{highThreshold.toFixed(1)} shipments). No balancing required.</span>
+                            <span><strong>Optimal :</strong> Toutes les {totalCells} cellules sont dans la plage normale (&lt;{highThreshold.toFixed(1)} expéditions). Aucun équilibrage requis.</span>
                           </li>
                         )}
                         {normalCells.length > 0 && (saturatedCells.length > 0 || highCells.length > 0) && (
@@ -329,7 +329,7 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
 
               {/* Action Recommendations */}
               <div className="mb-3">
-                <p className="text-xs font-medium text-gray-700 mb-1">🎯 Suggested Actions:</p>
+                <p className="text-xs font-medium text-gray-700 mb-1">🎯 Actions suggérées :</p>
                 <ul className="text-xs text-gray-600 space-y-1 ml-4">
                   {(() => {
                     // Find specific problematic cells
@@ -356,25 +356,25 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
                         {saturatedCells.length > 0 && (
                           <li className="flex items-start gap-1">
                             <span className="text-red-600">•</span>
-                            <span><strong>Urgent:</strong> Balance immediately. Saturated cells in nodes: {saturatedNodes.join(', ')}.</span>
+                            <span><strong>Urgent :</strong> Équilibrer immédiatement. Cellules saturées dans les nœuds : {saturatedNodes.join(', ')}.</span>
                           </li>
                         )}
                         {highCells.length > 0 && saturatedCells.length === 0 && (
                           <li className="flex items-start gap-1">
                             <span className="text-orange-600">•</span>
-                            <span><strong>Preventive:</strong> Balance recommended. High load cells in nodes: {highNodes.join(', ')}.</span>
+                            <span><strong>Préventif :</strong> Équilibrage recommandé. Cellules à charge élevée dans les nœuds : {highNodes.join(', ')}.</span>
                           </li>
                         )}
                         {saturatedCells.length === 0 && highCells.length === 0 && (
                           <li className="flex items-start gap-1">
                             <span className="text-green-600">•</span>
-                            <span>No action required. All cells are within acceptable range.</span>
+                            <span>Aucune action requise. Toutes les cellules sont dans la plage acceptable.</span>
                           </li>
                         )}
                         {(saturatedCells.length > 0 || highCells.length > 0) && (
                           <li className="flex items-start gap-1">
                             <span className="text-blue-600">•</span>
-                            <span>Use the "Auto-Balance" button below to redistribute load automatically.</span>
+                            <span>Utilisez le bouton "Équilibrage auto" ci-dessous pour redistribuer la charge automatiquement.</span>
                           </li>
                         )}
                       </>
@@ -385,7 +385,7 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
 
               {/* Additional Statistics */}
               <div>
-                <p className="text-xs font-medium text-gray-700 mb-1">📈 Additional Statistics:</p>
+                <p className="text-xs font-medium text-gray-700 mb-1">📈 Statistiques supplémentaires :</p>
                 <ul className="text-xs text-gray-600 space-y-1 ml-4">
                   {(() => {
                     // Find cell with max load
@@ -415,20 +415,20 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
                         {maxCell.count > 0 && (
                           <li className="flex items-start gap-1">
                             <span className="text-blue-600">•</span>
-                            <span>Highest load cell: {maxCell.node} / W{maxCell.week} ({maxCell.count} shipments)</span>
+                            <span>Cellule avec la charge la plus élevée : {maxCell.node} / S{maxCell.week} ({maxCell.count} expéditions)</span>
                           </li>
                         )}
                         <li className="flex items-start gap-1">
                           <span className="text-blue-600">•</span>
-                          <span>Cells requiring attention: {problematicCells.length > 0 ? problematicCells.slice(0, 5).join(', ') + (problematicCells.length > 5 ? ` +${problematicCells.length - 5} more` : '') : 'None'}</span>
+                            <span>Cellules nécessitant une attention : {problematicCells.length > 0 ? problematicCells.slice(0, 5).join(', ') + (problematicCells.length > 5 ? ` +${problematicCells.length - 5} de plus` : '') : 'Aucune'}</span>
                         </li>
                         <li className="flex items-start gap-1">
                           <span className="text-blue-600">•</span>
-                          <span>Thresholds: High ≥{highThreshold.toFixed(1)}, Saturated ≥{saturatedThreshold.toFixed(1)} shipments/cell</span>
+                            <span>Seuils : Élevé ≥{highThreshold.toFixed(1)}, Saturé ≥{saturatedThreshold.toFixed(1)} expéditions/cellule</span>
                         </li>
                         <li className="flex items-start gap-1">
                           <span className="text-blue-600">•</span>
-                          <span>Reference: {referenceLoad} samples/node, {deviationPercent.toFixed(0)}% tolerance</span>
+                            <span>Référence : {referenceLoad} échantillons/nœud, {deviationPercent.toFixed(0)}% tolérance</span>
                         </li>
                       </>
                     );

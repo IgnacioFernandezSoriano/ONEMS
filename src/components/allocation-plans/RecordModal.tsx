@@ -135,7 +135,7 @@ export function RecordModal({
       <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold">{isEditMode ? 'Edit Record' : 'Add New Record'}</h2>
+            <h2 className="text-xl font-semibold">{isEditMode ? t('allocation_plans.edit_record') : t('allocation_plans.add_record')}</h2>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600"
@@ -150,7 +150,7 @@ export function RecordModal({
             {/* Plan */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Plan <span className="text-red-500">*</span>
+                {t('allocation_plans.plan')} <span className="text-red-500">*</span>
               </label>
               <select
                 value={formData.plan_id}
@@ -158,7 +158,7 @@ export function RecordModal({
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="">Select Plan</option>
+                <option value="">{t('allocation_plans.select_plan')}</option>
                 {plans.map(plan => (
                   <option key={plan.id} value={plan.id}>{plan.plan_name}</option>
                 ))}
@@ -169,7 +169,7 @@ export function RecordModal({
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Carrier <span className="text-red-500">*</span>
+                  {t('allocation_plans.carrier')} <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={formData.carrier_id}
@@ -177,7 +177,7 @@ export function RecordModal({
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="">Select Carrier</option>
+                  <option value="">{t('allocation_plans.select_carrier')}</option>
                   {carriers.map(carrier => (
                     <option key={carrier.id} value={carrier.id}>{carrier.name}</option>
                   ))}
@@ -186,7 +186,7 @@ export function RecordModal({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Product <span className="text-red-500">*</span>
+                  {t('allocation_plans.product')} <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={formData.product_id}
@@ -194,7 +194,7 @@ export function RecordModal({
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="">Select Product</option>
+                  <option value="">{t('allocation_plans.select_product')}</option>
                   {products.map(product => (
                     <option key={product.id} value={product.id}>{product.description}</option>
                   ))}
@@ -206,7 +206,7 @@ export function RecordModal({
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Origin City <span className="text-red-500">*</span>
+                  {t('allocation_plans.origin_city')} <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={formData.origin_city_id}
@@ -214,7 +214,7 @@ export function RecordModal({
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="">Select City</option>
+                  <option value="">{t('allocation_plans.select_city')}</option>
                   {cities.map(city => (
                     <option key={city.id} value={city.id}>{city.name}</option>
                   ))}
@@ -223,7 +223,7 @@ export function RecordModal({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Origin Node <span className="text-red-500">*</span>
+                  {t('allocation_plans.origin_node')} <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={formData.origin_node_id}
@@ -232,7 +232,7 @@ export function RecordModal({
                   disabled={!formData.origin_city_id}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
                 >
-                  <option value="">Select Node</option>
+                  <option value="">{t('allocation_plans.select_node')}</option>
                   {originNodes.map(node => (
                     <option key={node.id} value={node.id}>{node.auto_id}</option>
                   ))}
@@ -244,7 +244,7 @@ export function RecordModal({
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Destination City <span className="text-red-500">*</span>
+                  {t('allocation_plans.destination_city')} <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={formData.destination_city_id}
@@ -252,7 +252,7 @@ export function RecordModal({
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="">Select City</option>
+                  <option value="">{t('allocation_plans.select_city')}</option>
                   {cities.map(city => (
                     <option key={city.id} value={city.id}>{city.name}</option>
                   ))}
@@ -261,7 +261,7 @@ export function RecordModal({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Destination Node <span className="text-red-500">*</span>
+                  {t('allocation_plans.destination_node')} <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={formData.destination_node_id}
@@ -270,7 +270,7 @@ export function RecordModal({
                   disabled={!formData.destination_city_id}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
                 >
-                  <option value="">Select Node</option>
+                  <option value="">{t('allocation_plans.select_node')}</option>
                   {destinationNodes.map(node => (
                     <option key={node.id} value={node.id}>{node.auto_id}</option>
                   ))}
@@ -282,7 +282,7 @@ export function RecordModal({
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Scheduled Date <span className="text-red-500">*</span>
+                  {t('allocation_plans.scheduled_date')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="date"
@@ -295,7 +295,7 @@ export function RecordModal({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Tag ID
+                  {t('allocation_plans.tag_id')}
                 </label>
                 <input
                   type="text"
@@ -314,14 +314,14 @@ export function RecordModal({
                 onClick={onClose}
                 className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 type="submit"
                 disabled={loading}
                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400"
               >
-                {loading ? (isEditMode ? 'Updating...' : 'Creating...') : (isEditMode ? 'Update Record' : 'Create Record')}
+                {loading ? (isEditMode ? t('common.updating') : t('common.creating')) : (isEditMode ? t('allocation_plans.update_record') : t('allocation_plans.create_record'))}
               </button>
             </div>
           </form>

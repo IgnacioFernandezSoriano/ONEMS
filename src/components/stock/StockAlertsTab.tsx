@@ -140,13 +140,13 @@ export default function StockAlertsTab({ onNavigateToRegulatorStock, onNavigateT
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {/* Type Filter */}
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">Alert Type</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">{t('stock.alert_type')}</label>
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="all">All Types</option>
+              <option value="all">{t('stock.all_types')}</option>
               <option value="regulator_insufficient">Regulator Insufficient</option>
               <option value="panelist_negative">Panelist Negative</option>
             </select>
@@ -160,7 +160,7 @@ export default function StockAlertsTab({ onNavigateToRegulatorStock, onNavigateT
               onChange={(e) => setFilterMaterial(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="all">All Materials</option>
+              <option value="all">{t('stock.all_materials')}</option>
               {materials.map(material => (
                 <option key={material.id} value={material.id}>
                   {material.code} - {material.name}
@@ -178,7 +178,7 @@ export default function StockAlertsTab({ onNavigateToRegulatorStock, onNavigateT
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               disabled={filterType === 'regulator_insufficient'}
             >
-              <option value="all">All Panelists</option>
+              <option value="all">{t('stock.all_panelists')}</option>
               {panelists.map(panelist => (
                 <option key={panelist} value={panelist}>
                   {panelist}
@@ -191,21 +191,20 @@ export default function StockAlertsTab({ onNavigateToRegulatorStock, onNavigateT
 
       {/* Results Summary */}
       <div className="text-sm text-gray-600">
-        Showing <span className="font-semibold">{filteredAndSortedAlerts.length}</span> of{' '}
-        <span className="font-semibold">{alerts.length}</span> alerts
+        {t('stock.showing_alerts_count', { showing: filteredAndSortedAlerts.length, total: alerts.length })}
       </div>
 
       {/* Table */}
       {filteredAndSortedAlerts.length === 0 ? (
         <div className="bg-white border border-gray-200 rounded-lg p-12 text-center">
           <AlertTriangle className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500">No stock alerts found</p>
+          <p className="text-gray-500">{t('stock.no_stock_alerts_found')}</p>
           {hasActiveFilters && (
             <button
               onClick={clearFilters}
               className="mt-2 text-sm text-blue-600 hover:text-blue-700"
             >
-              Clear filters to see all alerts
+              {t('stock.clear_filters_to_see_all_alerts')}
             </button>
           )}
         </div>

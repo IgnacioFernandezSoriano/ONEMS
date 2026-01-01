@@ -2,8 +2,10 @@ import React, { useState, useMemo } from 'react'
 import { Search, TrendingUp, TrendingDown, ArrowRight } from 'lucide-react'
 import { useStockManagement } from '../../hooks/useStockManagement'
 import { SmartTooltip } from '../common/SmartTooltip'
+import { useTranslation } from '../../hooks/useTranslation'
 
 export default function MovementsTab() {
+  const { t } = useTranslation()
   const { movements, loading } = useStockManagement()
   const [searchTerm, setSearchTerm] = useState('')
   const [filterType, setFilterType] = useState<string>('')
@@ -104,14 +106,14 @@ export default function MovementsTab() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                placeholder="Search material..."
+                placeholder={t('stock.search_material')}
               />
             </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
-              Movement Type
+              {t('stock.movement_type')}
               <SmartTooltip content="Filter by movement type" />
             </label>
             <select
@@ -119,7 +121,7 @@ export default function MovementsTab() {
               onChange={(e) => setFilterType(e.target.value)}
               className="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
             >
-              <option value="">All types</option>
+              <option value="">{t('stock.all_types')}</option>
               {movementTypes.map((type) => (
                 <option key={type} value={type}>
                   {type}
@@ -130,7 +132,7 @@ export default function MovementsTab() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
-              Panelist
+              {t('stock.panelist')}
               <SmartTooltip content="Filter by destination panelist" />
             </label>
             <select
@@ -138,7 +140,7 @@ export default function MovementsTab() {
               onChange={(e) => setFilterPanelist(e.target.value)}
               className="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
             >
-              <option value="">All panelists</option>
+              <option value="">{t('stock.all_panelists')}</option>
               {panelists.map((panelist) => (
                 <option key={panelist} value={panelist}>
                   {panelist.replace('panelist_', 'Panelist ')}
@@ -149,7 +151,7 @@ export default function MovementsTab() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
-              Start Date
+              {t('common.start_date')}
               <SmartTooltip content="Filter movements from this date" />
             </label>
             <input
@@ -164,7 +166,7 @@ export default function MovementsTab() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
-              End Date
+              {t('common.end_date')}
               <SmartTooltip content="Filter movements until this date" />
             </label>
             <input
@@ -187,7 +189,7 @@ export default function MovementsTab() {
                 }}
                 className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
-                Clear Filters
+                {t('stock.clear_filters')}
               </button>
             </div>
           )}
@@ -199,7 +201,7 @@ export default function MovementsTab() {
         {/* Table Header with Export Button */}
         <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
           <h3 className="text-lg font-medium text-gray-900">
-            Material Movements ({filteredMovements.length})
+            {t('stock.material_movements')} ({filteredMovements.length})
           </h3>
           <button
             onClick={() => {
@@ -238,7 +240,7 @@ export default function MovementsTab() {
             <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            Export CSV
+            {t('common.export_csv')}
           </button>
         </div>
         
@@ -248,36 +250,36 @@ export default function MovementsTab() {
             <tr>
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 <div className="flex items-center gap-1">
-                  Date
+                  {t('stock.date')}
                   <SmartTooltip content="Date and time of the movement" />
                 </div>
               </th>
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 <div className="flex items-center gap-1">
-                  Type
+                  {t('common.type')}
                   <SmartTooltip content="Type of movement (in, out, transfer)" />
                 </div>
               </th>
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Material
+                {t('common.material')}
               </th>
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Quantity
+                {t('stock.quantity')}
               </th>
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 <div className="flex items-center gap-1">
-                  From
+                  {t('stock.from')}
                   <SmartTooltip content="Origin location of the material" />
                 </div>
               </th>
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 <div className="flex items-center gap-1">
-                  To
+                  {t('common.to')}
                   <SmartTooltip content="Destination location of the material" />
                 </div>
               </th>
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Notes
+                {t('stock.notes')}
               </th>
             </tr>
           </thead>

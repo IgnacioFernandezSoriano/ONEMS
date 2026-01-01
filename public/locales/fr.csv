@@ -1337,74 +1337,36 @@ users.password,Mot de passe
 users.promise,Promesse
 users.role,Rôle
 users.select_account,Sélectionner un compte
-auth.sign_in,Se connecter
-auth.try_demo_account,Essayer le compte démo
-auth.email_address,Adresse e-mail
-auth.password,Mot de passe
 auth.email_placeholder,votre@email.com
 auth.password_placeholder,Entrez votre mot de passe
 auth.click_autofill_demo,Cliquez ici pour remplir automatiquement les identifiants de démo
 auth.secure_auth_supabase,Authentification sécurisée par Supabase
 auth.for_regulators,pour les Régulateurs
-dashboard.selected_period,Période sélectionnée
-dashboard.current_month,Mois en cours
-dashboard.management_tip,Conseil de gestion
 dashboard.management_tip_text,"Utilisez le sélecteur de période pour afficher les statistiques du mois en cours ou planifier le mois prochain. Cliquez sur n'importe quelle carte pour accéder à la vue détaillée. Consultez les alertes critiques quotidiennement pour maintenir l'excellence opérationnelle. Surveillez les vacances des panélistes et les besoins en matériaux pour éviter les conflits d'allocation."
 dashboard.total_and_status,Total et Statut
 dashboard.pending,En attente
 dashboard.sent,Envoyé
 dashboard.received,Reçu
-dashboard.availability_issues,Problèmes de disponibilité
-dashboard.unavailable,Indisponible
 dashboard.no_panelist,Aucun panéliste
 dashboard.inactive,Inactif
-dashboard.delayed_shipments,Expéditions retardées
-dashboard.panelist_status,Statut du panéliste
-dashboard.total_panelists,Total des panélistes
 dashboard.active,actif
 dashboard.inactive_lowercase,inactif
 dashboard.on_leave,En congé
-dashboard.currently_unavailable,Actuellement indisponible
-dashboard.upcoming_vacations,Vacances à venir
-dashboard.availability_rate,Taux de disponibilité
 dashboard.available,disponible
-dashboard.active_resources,Ressources actives
-dashboard.active_carriers,Transporteurs actifs
 dashboard.of,sur
 dashboard.total,total
-dashboard.active_products,Produits actifs
-dashboard.carrier_product_pairs,Paires transporteur-produit
-dashboard.available_combinations,Combinaisons disponibles
 common.sign_out,Se déconnecter
-common.filters,Filtres
-common.reset,Réinitialiser
-common.search,Rechercher
 common.city,Ville
 common.all_cities,Toutes les villes
 common.node,Nœud
 common.all_nodes,Tous les nœuds
-common.status,Statut
 common.all_status,Tous les statuts
-common.actions,Actions
-common.edit,Modifier
-common.delete,Supprimer
-common.cancel,Annuler
-common.save,Enregistrer
-common.close,Fermer
 common.confirm,Confirmer
 common.yes,Oui
 common.no,Non
-common.loading,Chargement...
-common.error,Erreur
 common.success,Succès
 common.warning,Attention
 common.info,Information
-common.active,Actif
-common.inactive,Inactif
-common.available,Disponible
-common.unavailable,Indisponible
-common.total,Total
-common.of,sur
 common.show_id,Afficher ID
 common.export_csv,Exporter CSV
 common.add_record,Ajouter un enregistrement
@@ -1414,21 +1376,13 @@ common.collapse_all,Tout réduire
 allocation_plans.view_and_manage,Voir et gérer les plans d'allocation générés
 allocation_plans.total_and_pending,Total et En attente
 allocation_plans.shipment_status,Statut d'expédition
-allocation_plans.availability_issues,Problèmes de disponibilité
 allocation_plans.total_issues,Total des problèmes
 allocation_plans.delayed_shipments,Expéditions retardées
-allocation_plans.cancelled,Annulé
-allocation_plans.invalid,Invalide
-allocation_plans.transfer_error,Erreur de transfert
 allocation_plans.total_delayed,Total retardé
 allocation_plans.plan_details,Détails du plan d'allocation
-allocation_plans.origin_city,Ville d'origine
-allocation_plans.origin_node,Nœud d'origine
 allocation_plans.dest_city,Ville dest.
 allocation_plans.dest_node,Nœud dest.
-allocation_plans.scheduled_date,Date prévue
 allocation_plans.week,Semaine
-allocation_plans.tag_id,ID étiquette
 allocation_plans.origin_panelist,Panéliste d'origine
 allocation_plans.origin_status,Statut d'origine
 allocation_plans.dest_panelist,Panéliste dest.
@@ -1436,31 +1390,18 @@ allocation_plans.dest_status,Statut dest.
 allocation_plans.status,Statut
 allocation_plans.sent_lowercase,envoyé
 allocation_plans.pending_lowercase,en attente
-allocation_plans.receive,Recevoir
-allocation_plans.send,Envoyer
 panelists.management,Gestion des panélistes
 panelists.manage_availability,Gérer les panélistes et leur disponibilité pour les livraisons
-panelists.total_panelists,Total des panélistes
 panelists.all_in_system,Tous les panélistes du système
-panelists.available_for_deliveries,Disponible pour les livraisons
-panelists.not_available,Non disponible
 panelists.tab_panelists,Panélistes
 panelists.tab_unavailability,Périodes d'indisponibilité
 panelists.search_placeholder,"Code, nom, e-mail..."
-panelists.add_panelist,Ajouter un panéliste
 panelists.manage_profiles,Gérer les profils et affectations des panélistes
-panelists.code,Code
-panelists.name,Nom
-panelists.email,E-mail
-panelists.mobile,Mobile
-panelists.node,Nœud
-panelists.city,Ville
 panelists.status,Statut
 panelists.active_lowercase,actif
 panelists.edit_tooltip,Modifier le panéliste
 panelists.deactivate_tooltip,Désactiver le panéliste
 panelists.delete_tooltip,Supprimer le panéliste
-panelists.unavailability_periods,Périodes d'indisponibilité
 panelists.manage_unavailability,Gérer les périodes d'indisponibilité des panélistes pour la réaffectation automatique des échantillons
 panelists.add_unavailability,Ajouter une période d'indisponibilité
 panelists.search_unavailability_placeholder,"Nom du panéliste, notes..."
@@ -1483,18 +1424,11 @@ panelists.notes,Notes
 panelists.one_day,1 jour
 carriers.title,Opérateurs et produits
 carriers.manage_description,Gérer les opérateurs d'expédition, les produits et les exigences en matériaux
-carriers.create_carrier,Créer un opérateur
 carriers.tab_carriers_products,Opérateurs et produits
 carriers.tab_products_without_materials,Produits sans matériaux
 carriers.search_placeholder,Rechercher des opérateurs ou des produits...
-carriers.all_carriers,Tous les opérateurs
-carriers.with_materials,Avec matériaux
-carriers.without_materials,Sans matériaux
-carriers.product,Produit
 carriers.expand_carrier,Développer l'opérateur
 carriers.expand_products,Développer tous les produits de cet opérateur
-carriers.edit_carrier,Modifier l'opérateur
-carriers.delete_carrier,Supprimer l'opérateur
 materials.requirements_title,Besoins en Matériaux
 materials.calculate_description,Calculer les besoins en matériaux basés sur les plans d'allocation
 materials.start_date,Date de début
@@ -1521,7 +1455,6 @@ materials.first_semester,1er Semestre
 materials.second_semester,2e Semestre
 materials.year,Année
 materials.calculate,Calculer
-stock.title,Gestion des Stocks et Alertes
 stock.manage_description,Gérer les exigences en matériaux, les demandes et l'inventaire des panélistes, suivre les mouvements et les expéditions
 stock.tab_requirements,Besoins en Matériaux
 stock.tab_regulator_stock,Stock du Régulateur
@@ -1530,13 +1463,8 @@ stock.tab_panelist_stock,Stock des Panélistes
 stock.tab_movements,Mouvements
 stock.tab_alerts,Alertes de Stock
 stock.tab_settings,Paramètres
-stock.calculate_requirements,Calculer les besoins
-stock.quick_month_selection,Sélection rapide du mois
-allocation_generator.plan_name,Nom du plan
 allocation_generator.total_samples,Total d'échantillons
-allocation_generator.carrier,Transporteur
 allocation_generator.select_carrier,Sélectionner le transporteur
-allocation_generator.product,Produit
 allocation_generator.select_product,Sélectionner le produit
 allocation_generator.start_date,Date de début
 allocation_generator.end_date,Date de fin
@@ -1592,54 +1520,22 @@ unavailability.required,Requis
 unavailability.date_range,Plage de dates
 allocation_plans.total_pending,Total et en attente
 allocation_plans.total,Total
-allocation_plans.pending,En attente
-allocation_plans.shipment_status,Statut d'envoi
 allocation_plans.waiting,En attente
-allocation_plans.sent,Envoyé
-allocation_plans.received,Reçu
 allocation_plans.availability_issues_title,Problèmes de disponibilité
 allocation_plans.unavailable,Indisponible
-allocation_plans.no_panelist,Aucun panéliste
 allocation_plans.inactive,Inactif
-allocation_plans.total_issues,Total des problèmes
-allocation_plans.delayed_shipments,Envois retardés
-allocation_plans.cancelled,Annulé
-allocation_plans.invalid,Invalide
-allocation_plans.transfer_error,Erreur de transfert
-allocation_plans.total_delayed,Total retardé
-allocation_plans.filters,Filtres
-allocation_plans.plan,Plan
-allocation_plans.carrier,Transporteur
-allocation_plans.product,Produit
-allocation_plans.all_plans,Tous les plans
-allocation_plans.all_carriers,Tous les transporteurs
-allocation_plans.all_products,Tous les produits
 allocation_plans.origin_city_filter,Ville d'origine
 allocation_plans.origin_node_filter,Nœud d'origine
-allocation_plans.destination_city,Ville de destination
-allocation_plans.destination_node,Nœud de destination
-allocation_plans.all_cities,Toutes les villes
-allocation_plans.all_nodes,Tous les nœuds
-allocation_plans.start_date,Date de début
-allocation_plans.end_date,Date de fin
-allocation_plans.tag_id,Tag ID
-allocation_plans.event_id,Event ID
 allocation_plans.search_tag_id,Rechercher par Tag ID...
 allocation_plans.search_event_id,Rechercher par Event ID...
 allocation_plans.availability_issues_filter,Problèmes de disponibilité
-allocation_plans.all_records,Tous les enregistrements
 allocation_plans.details,Détails du plan d'allocation
 allocation_plans.show_id,Afficher ID
-allocation_plans.week,Semaine
 allocation_plans.origin_panelist_header,Panéliste d'origine
 allocation_plans.origin_status_header,Statut d'origine
 allocation_plans.dest_panelist_header,Panéliste dest.
 allocation_plans.dest_status_header,Statut dest.
 allocation_plans.available,Disponible
-topology.title,Topologie du pays
-topology.description,Définir et gérer la hiérarchie de l'infrastructure réseau de votre pays
-topology.regions,Régions
-topology.cities,Villes
 topology.total_nodes,Total des nœuds
 topology.with_panelists,Avec panélistes
 topology.without_panelists,Sans panélistes
@@ -1651,27 +1547,12 @@ topology.all_cities,Toutes les villes
 topology.all_nodes,Tous les nœuds
 topology.expand_all,Tout développer
 topology.create_region,Créer une région
-topology.city,Ville
-topology.node,Nœud
-topology.panelist_assigned,Panéliste assigné
 topology.nodes_need_assignment,Ces nœuds nécessitent l'affectation d'un panéliste pour être opérationnels
 topology.download_csv,Télécharger CSV
 topology.all_nodes_have_panelists,Tous les nœuds ont des panélistes !
 topology.every_node_assigned,Chaque nœud de votre topologie a un panéliste assigné
-topology.edit_region,Modifier la région
-topology.edit_city,Modifier la ville
-topology.edit_node,Modifier le nœud
-topology.delete_region,Supprimer la région
-topology.delete_city,Supprimer la ville
-topology.delete_node,Supprimer le nœud
-topology.city,Ville
-topology.node,Nœud
 topology.create_city,Créer une ville
 topology.create_node,Créer un nœud
-topology.edit_city,Modifier la ville
-topology.edit_node,Modifier le nœud
-topology.delete_city,Supprimer la ville
-topology.delete_node,Supprimer le nœud
 topology.no_nodes_yet,Aucun nœud dans cette ville pour le moment
 topology.delete_city_confirm,Supprimer cette ville et tous ses nœuds ?
 topology.delete_node_confirm,Supprimer ce nœud ?
@@ -1692,42 +1573,19 @@ cityform.cancel,Annuler
 cityform.create,Créer
 cityform.update,Mettre à jour
 cityform.saving,Enregistrement...
-topology.latitude,Latitude
-topology.longitude,Longitude
 topology.class,Classe
-carriers.title,Transporteurs & Produits
-carriers.description,Gérer les transporteurs, les produits et les exigences en matériaux
 carriers.transporteurs,Transporteurs
 carriers.produits,Produits
-carriers.with_materials,Avec matériaux
-carriers.without_materials,Sans matériaux
 carriers.materiels,Matériels
-carriers.carriers_products,Transporteurs & Produits
-carriers.products_without_materials,Produits sans matériaux
-carriers.search_placeholder,Rechercher des transporteurs ou des produits...
-carriers.all_carriers,Tous les transporteurs
-carriers.all_status,Tous les statuts
-carriers.all_products,Tous les produits
-carriers.expand_all,Tout développer
-carriers.create_carrier,Créer un transporteur
-carriers.product,Produit
-carriers.material,Matériau
 carriers.materials_assigned,Matériaux assignés
-carriers.add_product,Ajouter un produit
 carriers.add_material,Ajouter un matériau
-carriers.code,Code
 carriers.description_field,Description
-carriers.standard_delivery_time,Temps de livraison standard
-carriers.time_unit,Unité de temps
 carriers.heures,Heures
 carriers.jours,Jours
-carriers.status,Statut
 carriers.cancel,Annuler
 carriers.create,Créer
 carriers.choose_how_to_add,Choisissez comment ajouter un matériau à ce produit :
-carriers.select_from_catalog,Sélectionner dans le catalogue
 carriers.select_from_catalog_desc,Choisissez un matériau existant de votre catalogue
-carriers.create_new_material,Créer un nouveau matériau
 carriers.create_new_material_desc,Ajouter un nouveau matériau au catalogue et l'assigner au produit
 carriers.products_without_materials_title,Produits sans matériaux
 carriers.products_need_materials,Ces produits nécessitent des assignations de matériaux pour être opérationnels
@@ -1739,22 +1597,86 @@ productform.cancel,Annuler
 productform.create,Créer
 productform.update,Mettre à jour
 productform.saving,Enregistrement...
-deliverystandards.hours,Heures
-deliverystandards.days,Jours
-carriers.product,Product,Produit
-carriers.material,Material,Matériau
-carriers.materials_assigned,Materials Assigned,Matériaux assignés
-carriers.pending_materials,Pending Materials,Matériaux en attente
 carriers.qty,Qty,Qté
-carriers.no_products,No products for this carrier yet,Aucun produit pour ce transporteur
 carriers.no_materials,No materials assigned yet,Aucun matériau assigné
-carriers.add_product,Add Product,Ajouter un produit
-carriers.add_material,Add Material,Ajouter un matériau
-carriers.edit_product,Edit Product,Modifier le produit
 carriers.remove_material_confirm,Remove material "{name}" from this product?,Retirer le matériau "{name}" de ce produit ?
 carriers.enter_new_quantity,Enter new quantity for "{name}":,Entrer la nouvelle quantité pour "{name}" :
 carriers.expand_all_products,Expand all products in this carrier,Développer tous les produits de ce transporteur
 carriers.collapse_product,Collapse product,Réduire le produit
 carriers.expand_product,Expand product,Développer le produit
-carriers.remove_material,Remove material,Retirer le matériau
 carriers.edit_quantity,Edit quantity,Modifier la quantité
+nodeLoadBalancing.saturatedNodes,Nœuds saturés
+nodeLoadBalancing.saturatedNodesDesc,Nœuds au-dessus de 150% de charge moyenne
+nodeLoadBalancing.highLoadNodes,Nœuds à charge élevée
+nodeLoadBalancing.highLoadNodesDesc,Nœuds à 120-150% de charge moyenne
+nodeLoadBalancing.totalShipments,Total des expéditions
+nodeLoadBalancing.totalShipmentsDesc,Toutes les expéditions de la période
+nodeLoadBalancing.balancePreview,Aperçu de l'équilibrage
+nodeLoadBalancing.stdDevBefore,Écart type avant
+nodeLoadBalancing.stdDevAfter,Écart type après
+nodeLoadBalancing.matrixView,Vue matricielle
+nodeLoadBalancing.loadDistributionMatrix,Matrice de distribution de charge
+nodeLoadBalancing.before,Avant
+nodeLoadBalancing.after,Après
+nodeLoadBalancing.loadLevel,Niveau de charge
+nodeLoadBalancing.applyBalance,Appliquer l'équilibrage
+nodeLoadBalancing.cancel,Annuler
+nodeLoadBalancing.loading,Chargement...
+allocation_plans.create_record,Créer l'enregistrement
+allocation_plans.update_record,Mettre à jour l'enregistrement
+common.updating,Mise à jour...
+common.creating,Création...
+allocation_plans.add_record,Ajouter un enregistrement
+material_requirements.items_needed,articles nécessaires
+material_requirements.to_send,à envoyer
+common.start_date,Date de début
+common.end_date,Date de fin
+common.material,Matériau
+material_requirements.quick_period_selection,Sélection rapide de période
+common.first_semester,1er Semestre
+common.second_semester,2ème Semestre
+material_requirements.purchase_requirements,Exigences d'achat
+material_requirements.panelist_requirements,Exigences des panélistes
+common.export_to_csv,Exporter en CSV
+stock.regulator_issue,Problème du régulateur
+stock.regulator_issues,Problèmes du régulateur
+stock.panelist_issue,Problème du panéliste
+stock.panelist_issues,Problèmes du panéliste
+stock.please_select_dates,Veuillez sélectionner les dates de début et de fin
+stock.please_select_requirements_export,Veuillez sélectionner des exigences à exporter
+stock.please_select_requirements_po,Veuillez sélectionner des exigences pour générer le bon de commande
+common.show,Afficher
+stock.calculating,Calcul en cours...
+stock.mark_as_ordered,Marquer {count} comme commandé(s)
+stock.delete_selected,Supprimer {count} sélectionné(s)
+common.select,Sélectionner
+stock.no_stock_data_to_export,Aucune donnée de stock à exporter
+stock.loading_stock,Chargement du stock...
+stock.current_regulator_stock,Stock Actuel du Régulateur
+stock.change,Changement
+stock.please_enter_quantity_and_note,Veuillez saisir la nouvelle quantité et la note d'ajustement
+stock.please_enter_valid_quantity,Veuillez saisir une quantité valide
+stock.stock_adjusted_successfully,Stock ajusté avec succès
+stock.failed_to_adjust_stock,Échec de l'ajustement du stock
+stock.adjusting,Ajustement en cours...
+stock.confirm_adjustment,Confirmer l'ajustement
+stock.total_items_pending,Total d'articles en attente
+stock.preview_shipments_will_be_generated,Aperçu : {count} expédition(s) sera(ont) générée(s)
+stock.with_assigned_panelists,avec panélistes assignés
+stock.without_panelist_will_be_skipped,sans panéliste (sera ignoré)
+stock.send_selected,Envoyer {count} sélectionné(s)
+stock.warning_nodes_without_panelists,Attention : {count} nœud(s) n'ont pas de panélistes assignés et seront ignorés
+stock.only_panelists_with_allocation_plans,Remarque : Seuls les panélistes avec des plans d'allocation assignés auront des expéditions générées
+common.calculate,Calculer
+common.unit,Unité
+stock.panelist_code_materials_count,Code: {code} • {count} matériau(x)
+stock.material_movements,Mouvements de Matériaux
+common.type,Type
+common.to,À
+stock.allocation_shipment,Expédition d'allocation
+stock.showing_alerts_count,Affichage de {showing} sur {total} alertes
+stock.stock_control,Contrôle des Stocks
+stock.when_enabled_system_will_monitor,Lorsqu'il est activé, le système surveillera les niveaux de stock et générera des alertes lorsque les matériaux tombent en dessous des seuils minimums.
+stock.feature_not_available_in_current_version,Cette fonctionnalité n'est pas disponible dans la version actuelle du module.
+stock.system_will_automatically_create_shipments,Le système créera automatiquement des expéditions en attente lorsqu'il détecte qu'un panéliste a besoin de matériaux.
+stock.save_settings,Enregistrer les Paramètres

@@ -8,6 +8,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { downloadCSV } from '../../lib/exportUtils'
 
 export default function PanelistStockTab() {
+  const { t } = useTranslation()
   const { panelistStocks, loading } = useStockManagement()
   const { user } = useAuth()
   const [searchTerm, setSearchTerm] = useState('')
@@ -99,7 +100,7 @@ export default function PanelistStockTab() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              placeholder="Search by material or panelist..."
+              placeholder={t('stock.search_by_material_or_panelist')}
             />
           </div>
         </div>
@@ -110,7 +111,7 @@ export default function PanelistStockTab() {
             onChange={(e) => setSelectedPanelist(e.target.value)}
             className="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
           >
-            <option value="">All panelists</option>
+            <option value="">{t('stock.all_panelists')}</option>
             {panelists.map((panelist) => (
               <option key={panelist.id} value={panelist.id}>
                 {panelist.name} ({panelist.code})
@@ -124,7 +125,7 @@ export default function PanelistStockTab() {
           className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
         >
           <Download className="h-4 w-4 mr-2" />
-          Export CSV
+          {t('common.export_csv')}
         </button>
       </div>
 
@@ -146,7 +147,7 @@ export default function PanelistStockTab() {
                       {panelist?.name || 'No name'}
                     </h3>
                     <p className="text-sm text-gray-500">
-                      Code: {panelist?.panelist_code || 'N/A'} • {stocks.length} material(s)
+                      {t('stock.panelist_code_materials_count', { code: panelist?.panelist_code || 'N/A', count: stocks.length })}
                     </p>
                   </div>
                 </div>
@@ -159,27 +160,27 @@ export default function PanelistStockTab() {
                     <tr>
                       <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         <div className="flex items-center gap-1">
-                          Material
+                          {t('common.material')}
                           <SmartTooltip content="Material code and name" />
                         </div>
                       </th>
                       <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         <div className="flex items-center gap-1">
-                          Quantity
+                          {t('stock.quantity')}
                           <SmartTooltip content="Current quantity in panelist stock" />
                         </div>
                       </th>
                       <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Unit
+                        {t('common.unit')}
                       </th>
                       <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         <div className="flex items-center gap-1">
-                          Last Updated
+                          {t('stock.last_updated')}
                           <SmartTooltip content="Date of last movement for this material" />
                         </div>
                       </th>
                       <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Actions
+                        {t('common.actions')}
                       </th>
                     </tr>
                   </thead>
@@ -223,7 +224,7 @@ export default function PanelistStockTab() {
                             className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-900"
                           >
                             <Edit className="h-4 w-4" />
-                            Adjust Stock
+                            {t('stock.adjust_stock')}
                           </button>
                         </td>
                       </tr>
