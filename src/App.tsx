@@ -259,11 +259,11 @@ function App() {
                       }
                     />
                     
-                    {/* Account Management - only for superadmin */}
+                    {/* Account Management - for admin and superadmin */}
                     <Route
                       path="/admin/account-management"
                       element={
-                        <ProtectedRoute allowedRoles={['superadmin']}>
+                        <ProtectedRoute allowedRoles={['admin', 'superadmin']}>
                           <AccountManagement />
                         </ProtectedRoute>
                       }
