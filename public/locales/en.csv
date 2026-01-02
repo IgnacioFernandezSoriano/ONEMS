@@ -9,12 +9,17 @@ accounts.unique_identifier_lowercase_no_spaces,"Unique identifier (lowercase, no
 admin.about_account_reset,About Account Reset
 admin.all_allocation_plans_and_details,All allocation plans and details
 admin.all_balancing_history,All balancing history
+admin.all_configuration_data,all configuration data (topology
 admin.all_material_shipments_and_movements,All material shipments and movements
 admin.all_material_stocks,All material stocks
+admin.all_operational_data,all operational data (plans
 admin.all_purchase_orders,All purchase orders
+admin.an_unexpected_error_occurred,An unexpected error occurred
 admin.cannot_be_undone,Cannot be undone
 admin.configuration_data_nodes_panelists_materials_etc_w,"Configuration data (nodes, panelists, materials, etc.) will be preserved."
+admin.confirm_reset,Confirm reset
 admin.create_user,Create User
+admin.created,Created:
 admin.deleted_records,Deleted records:
 admin.demo2_account_not_found,DEMO2 account not found
 admin.demo_reset,Demo Reset
@@ -23,36 +28,75 @@ admin.loading_accounts,Loading accounts...
 admin.preserve,Preserve
 admin.promise,Promise
 admin.reset_data,Reset Data
+admin.resetting,Resetting...
 admin.the_demo2_account_is_not_available_please_contact_,The DEMO2 account is not available. Please contact the administrator.
 admin.this_will_permanently_delete,This will permanently delete:
+admin.use_this_feature_to_prepare_accounts,Use this feature to prepare accounts for training sessions or demonstrations. The reset process will:
+admin.use_with_caution,use with caution
 admin.user_management,User Management
 admin.warning_this_action_cannot_be_undone,Warning: This action cannot be undone
+allocation_generator.1st_semester,1st Semester
+allocation_generator.2nd_semester,2nd Semester
+allocation_generator.about,About the Allocation Generator
+allocation_generator.about_description,Automatically generate sample allocation plans based on distribution patterns
 allocation_generator.actions,Actions
+allocation_generator.applied,Applied
 allocation_generator.applied_date,Applied Date
+allocation_generator.applied_plans,Applied Plans
 allocation_generator.applied_plans_historical,Applied Plans (Historical)
 allocation_generator.apply,Apply
+allocation_generator.april,April
+allocation_generator.august,August
+allocation_generator.auto_fill,Auto-fill 100%
 allocation_generator.automatic_generator,Automatic Generator
 allocation_generator.carrier,Carrier
+allocation_generator.city_distribution_matrix,City Distribution Matrix (A-B-C)
+allocation_generator.clear,Clear
 allocation_generator.confirm_apply,Apply this plan? It will be moved to the applied plans.
 allocation_generator.confirm_delete,Delete this plan?
 allocation_generator.csv_import_coming_soon,CSV import functionality coming soon!
+allocation_generator.date_placeholder,dd/mm/yyyy
+allocation_generator.december,December
 allocation_generator.delete,Delete
 allocation_generator.description,Generate sample allocation plans automatically based on distribution patterns
+allocation_generator.distribution_matrix,City distribution matrix (A-B-C)
 allocation_generator.download_csv,Download CSV
+allocation_generator.download_template,Download CSV template
+allocation_generator.end_date,End Date
 allocation_generator.error,Error
 allocation_generator.error_downloading,Error downloading plan
+allocation_generator.february,February
+allocation_generator.generate_plan,Generate Plan
+allocation_generator.generated,Generated
+allocation_generator.generated_plans,Generated Plans
 allocation_generator.generated_plans_title,Generated Plans
+allocation_generator.generator,Generator
+allocation_generator.import_csv,Import CSV
+allocation_generator.january,January
+allocation_generator.july,July
+allocation_generator.june,June
 allocation_generator.loading,Loading...
 allocation_generator.manual_import,Manual Import
+allocation_generator.march,March
+allocation_generator.may,May
 allocation_generator.no_applied_plans,No applied plans yet
 allocation_generator.no_details_found,No details found for this plan
 allocation_generator.no_generated_plans,No generated plans yet
+allocation_generator.november,November
+allocation_generator.october,October
 allocation_generator.period,Period
 allocation_generator.plan_applied_success,Plan applied successfully!
 allocation_generator.plan_deleted_success,Plan deleted successfully!
 allocation_generator.plan_name,Plan Name
 allocation_generator.product,Product
+allocation_generator.quick_period,Quick period selection
+allocation_generator.quick_period_selection,Quick Period Selection
 allocation_generator.samples,Samples
+allocation_generator.seasonal_distribution,Seasonal Distribution
+allocation_generator.select_carrier,Select carrier
+allocation_generator.select_product,Select product
+allocation_generator.september,September
+allocation_generator.start_date,Start Date
 allocation_generator.status,Status
 allocation_generator.tab_applied_plans,Applied Plans
 allocation_generator.tab_generated_plans,Generated Plans
@@ -66,7 +110,10 @@ allocation_generator.tooltip_purpose_text,Automatically generate sample allocati
 allocation_generator.tooltip_title,Allocation Plan Generator
 allocation_generator.tooltip_usage,Usage:
 allocation_generator.tooltip_usage_text,"Generate plans, review them in ""Generated Plans"" tab, then apply them to activate sample allocations."
+allocation_generator.total_samples,Total Samples
 allocation_generator.user_not_authenticated,User not authenticated
+allocation_generator.year,Year
+allocation_plans.add_record,Add record
 allocation_plans.all_carriers,All Carriers
 allocation_plans.all_cities,All Cities
 allocation_plans.all_nodes,All Nodes
@@ -76,6 +123,9 @@ allocation_plans.all_records,All Records
 allocation_plans.all_status,All Status
 allocation_plans.auto_fill_to_100,Auto-fill to 100%
 allocation_plans.availability_issues,Availability Issues
+allocation_plans.availability_issues_filter,Availability issues
+allocation_plans.availability_issues_title,Availability issues
+allocation_plans.available,Available
 allocation_plans.bulk_operations,Bulk Operations
 allocation_plans.cancel_selected,Cancel Selected
 allocation_plans.cancelled,Cancelled
@@ -87,10 +137,19 @@ allocation_plans.city_distribution_matrix,City Distribution Matrix
 allocation_plans.city_distribution_matrix_a_b_c,City Distribution Matrix (A-B-C)
 allocation_plans.clear_selection,Clear selection
 allocation_plans.completed,Completed
+allocation_plans.create_record,Create record
+allocation_plans.delayed_shipments,Delayed shipments
 allocation_plans.delete_selected,Delete Selected
+allocation_plans.dest_city,Dest. city
+allocation_plans.dest_node,Dest. node
+allocation_plans.dest_panelist,Dest. panelist
+allocation_plans.dest_panelist_header,Destination panelist
+allocation_plans.dest_status,Dest. status
+allocation_plans.dest_status_header,Destination status
 allocation_plans.destination,Destination:
 allocation_plans.destination_city,Destination City
 allocation_plans.destination_node,Destination Node
+allocation_plans.details,Allocation plan details
 allocation_plans.download_csv_template,Download CSV Template
 allocation_plans.edit_record,Edit record
 allocation_plans.end_date,End Date
@@ -101,6 +160,7 @@ allocation_plans.example,Example:
 allocation_plans.filters,Filters
 allocation_plans.first_day_of_the_allocation_period_samples_will_be,First day of the allocation period. Samples will be scheduled from this date.
 allocation_plans.import_csv,Import CSV
+allocation_plans.inactive,Inactive
 allocation_plans.invalid,Invalid
 allocation_plans.last_day_of_the_allocation_period_samples_will_be_,Last day of the allocation period. Samples will be scheduled until this date.
 allocation_plans.loading,Loading allocation plans...
@@ -113,9 +173,17 @@ allocation_plans.optional,Optional
 allocation_plans.optional_distribute_samples_unevenly_across_months,Optional: Distribute samples unevenly across months to reflect seasonal patterns.
 allocation_plans.origin,Origin:
 allocation_plans.origin_city,Origin City
+allocation_plans.origin_city_filter,Origin city
 allocation_plans.origin_node,Origin Node
+allocation_plans.origin_node_filter,Origin node
+allocation_plans.origin_panelist,Origin panelist
+allocation_plans.origin_panelist_header,Origin panelist
+allocation_plans.origin_status,Origin status
+allocation_plans.origin_status_header,Origin status
 allocation_plans.pending,Pending
+allocation_plans.pending_lowercase,pending
 allocation_plans.plan,Plan
+allocation_plans.plan_details,Allocation plan details
 allocation_plans.plan_name,Plan Name *
 allocation_plans.please_ensure_destination_panelist,Please ensure destination panelist is assigned
 allocation_plans.please_ensure_origin_panelist,Please ensure origin panelist is assigned
@@ -137,6 +205,8 @@ allocation_plans.reset_filters,Reset filters
 allocation_plans.scheduled_date,Scheduled Date
 allocation_plans.search_by_event_id,Search by Event ID...
 allocation_plans.search_by_tag_id,Search by Tag ID...
+allocation_plans.search_event_id,Search by event ID...
+allocation_plans.search_tag_id,Search by tag ID...
 allocation_plans.seasonal_distribution,Seasonal Distribution
 allocation_plans.select_carrier,Select carrier
 allocation_plans.select_city,Select City
@@ -150,11 +220,25 @@ allocation_plans.sent_at,Sent at:
 allocation_plans.sent_at_time,Sent at
 allocation_plans.sent_by,Sent by
 allocation_plans.sent_date_time,Sent Date & Time
+allocation_plans.sent_lowercase,sent
+allocation_plans.shipment_status,Shipment status
+allocation_plans.show_id,Show ID
 allocation_plans.start_date,Start Date
+allocation_plans.status,Status
 allocation_plans.tag_id,Tag ID
+allocation_plans.total,Total
+allocation_plans.total_and_pending,Total and Pending
+allocation_plans.total_delayed,Total delayed
+allocation_plans.total_issues,Total issues
+allocation_plans.total_pending,Total and pending
 allocation_plans.total_samples,Total Samples *
 allocation_plans.transfer_error,Transfer Error
+allocation_plans.unavailable,Unavailable
+allocation_plans.update_record,Update record
 allocation_plans.validation_errors,Validation Errors:
+allocation_plans.view_and_manage,View and manage generated allocation plans
+allocation_plans.waiting,Waiting
+allocation_plans.week,Week
 allocation_plans.year,Year
 allocationplangenerator.allocation_plan_generator,Allocation Plan Generator
 allocationplangenerator.applied_date,Applied Date
@@ -205,12 +289,17 @@ allocationplans.total_issues,Total Issues
 allocationplans.total_pending,Total & Pending
 allocationplans.view_and_manage_generated_allocation_plans,View and manage generated allocation plans
 allocationplans.week,Week
+auth.click_autofill_demo,Click here to autofill demo credentials
 auth.click_here_to_auto_fill_demo_credentials,Click here to auto-fill demo credentials
 auth.email,Email:
 auth.email_address,Email Address
+auth.email_placeholder,your@email.com
 auth.enter_your_password,Enter your password
+auth.for_regulators,for Regulators
 auth.loading,Loading...
 auth.password,Password:
+auth.password_placeholder,Enter your password
+auth.secure_auth_supabase,Secure authentication by Supabase
 auth.secure_authentication_powered_by_supabase,Secure authentication powered by Supabase
 auth.sign_in,Sign In
 auth.signing_in,Signing in...
@@ -231,28 +320,35 @@ bulk.selected,selected
 bulk.updated_records,Updated {count} records
 carriers.add_a_new_material_to_catalog_and_assign_to_produc,Add a new material to catalog and assign to product
 carriers.add_carrier,Add Carrier
+carriers.add_material,Add a material
 carriers.add_product,Add Product
 carriers.additional_details,Additional details...
 carriers.all_carriers,All Carriers
 carriers.all_products,All Products
 carriers.all_products_have_materials,All products have materials!
 carriers.all_status,All Status
+carriers.cancel,Cancel
 carriers.carrier,Carrier
 carriers.carrier_details,Carrier Details
 carriers.carriers,Carriers
 carriers.carriers_products,Carriers & Products
 carriers.choose_an_existing_material_from_your_catalog,Choose an existing material from your catalog
+carriers.choose_how_to_add,Choose how to add a material to this product:
 carriers.choose_how_to_add_material_to_this_product,Choose how to add material to this product:
 carriers.clear_filters,Clear Filters
 carriers.code,Code *
 carriers.collapse_all,Collapse All
+carriers.collapse_product,Collapse product
+carriers.create,Create
 carriers.create_carrier,Create Carrier
 carriers.create_new_material,Create New Material
+carriers.create_new_material_desc,Add a new material to the catalog and assign it to the product
 carriers.days,Days
 carriers.delete_carrier,Delete carrier
 carriers.delete_product,Delete product
 carriers.delivery_hours,Delivery Hours
 carriers.description,Description
+carriers.description_field,Description
 carriers.download_csv,Download CSV
 carriers.e_g_24,"e.g., 24"
 carriers.e_g_dhl_exp_24,"e.g., DHL-EXP-24"
@@ -262,20 +358,32 @@ carriers.e_g_express_delivery_24_hours,"e.g., Express delivery 24 hours"
 carriers.e_g_express_standard_economy,"e.g., express, standard, economy"
 carriers.edit_carrier,Edit carrier
 carriers.edit_product,Edit product
+carriers.edit_quantity,Edit quantity
+carriers.enter_new_quantity,"Enter the new quantity for ""{name}"":"
 carriers.every_product_has_materials_assigned_from_the_cata,Every product has materials assigned from the catalog
 carriers.expand_all,Expand All
+carriers.expand_all_products,Expand all products in this carrier
 carriers.expand_all_products_in_this_carrier,Expand all products in this carrier
+carriers.expand_carrier,Expand the carrier
+carriers.expand_product,Expand product
+carriers.expand_products,Expand all products of this carrier
+carriers.heures,Hours
 carriers.hours,Hours
+carriers.jours,Days
 carriers.loading,Loading carriers...
 carriers.loading_carriers,Loading carriers...
+carriers.manage_description,Manage shipping carriers
 carriers.manage_shipping_carriers_products_and_material_req,"Manage shipping carriers, products, and material requirements"
 carriers.mat_001,MAT-001
 carriers.material,Material
 carriers.materials,Materials
+carriers.materials_assigned,Assigned materials
+carriers.materiels,Materials
 carriers.name,Name *
 carriers.no_active_materials_in_catalog_create_a_new_one_in,No active materials in catalog. Create a new one instead.
 carriers.no_carriers,No carriers found
 carriers.no_carriers_defined_yet,No carriers defined yet
+carriers.no_materials,No materials assigned yet
 carriers.no_materials_assigned_yet,No materials assigned yet
 carriers.no_products,No products
 carriers.no_products_for_this_carrier_yet,No products for this carrier yet
@@ -285,19 +393,30 @@ carriers.product,Product
 carriers.product_code,Product Code
 carriers.products,Products
 carriers.products_count,{count} products
+carriers.products_need_materials,These products require material assignments to be operational
 carriers.products_without_materials,Products without Materials
+carriers.products_without_materials_title,Products without materials
+carriers.produits,Products
 carriers.promise,Promise
+carriers.qty,Qty.
 carriers.quantity,Quantity *
 carriers.remove_material,Remove material
+carriers.remove_material_confirm,"Remove the material ""{name}"" from this product?"
 carriers.rfid_tag,RFID Tag
 carriers.search_carriers_or_products,Search carriers or products...
+carriers.search_placeholder,Search carriers or products...
 carriers.select_from_catalog,Select from Catalog
+carriers.select_from_catalog_desc,Choose an existing material from your catalog
 carriers.select_material,Select Material *
 carriers.standard_delivery_time,Standard Delivery Time *
 carriers.start_by_creating_your_first_carrier_to_manage_shi,Start by creating your first carrier to manage shipping products
 carriers.status,Status *
+carriers.tab_carriers_products,Carriers and products
+carriers.tab_products_without_materials,Products without materials
 carriers.these_products_need_material_assignments_to_be_ope,These products need material assignments to be operational
 carriers.time_unit,Time Unit *
+carriers.title,Carriers and products
+carriers.transporteurs,Carriers
 carriers.try_adjusting_your_search_or_filters,Try adjusting your search or filters
 carriers.type,Type
 carriers.unit_measure,Unit Measure
@@ -309,35 +428,73 @@ catalog.add_material,Add Material
 catalog.material_code,Material Code
 catalog.material_name,Material Name
 catalog.title,Material Catalog
+cityform.cancel,Cancel
+cityform.city_class,City Class
+cityform.city_code,City Code
+cityform.city_name,City Name
+cityform.class_a,Class A
+cityform.class_b,Class B
+cityform.class_c,Class C
+cityform.create,Create
+cityform.latitude,Latitude
+cityform.longitude,Longitude
+cityform.optional,optional
+cityform.population,Population
+cityform.population_description,Total city population (used for impact analysis in reports)
+cityform.saving,Saving...
+cityform.update,Update
 common.1st_semester,1st Semester
 common.2nd_semester,2nd Semester
 common.about,About
 common.actions,Actions
 common.active,Active
+common.add_record,Add a record
 common.all,All
+common.all_cities,All Cities
+common.all_cities,All Cities
+common.all_nodes,All Nodes
+common.all_nodes,All Nodes
+common.all_status,All Status
+common.all_status,All Statuses
 common.apply,Apply
 common.available,available
 common.bulk_edit,Bulk Edit
+common.calculate,Calculate
 common.cancel,Cancel
+common.city,City
 common.clear,Clear
 common.close,Close
+common.collapse_all,Collapse all
+common.confirm,Confirm
 common.confirm_delete,Delete this record?
 common.create,Create
 common.created_successfully,Created successfully
+common.creating,Creating...
 common.delete,Delete
 common.deleted_successfully,Deleted successfully
 common.download,Download
 common.edit,Edit
+common.end_date,End date
 common.error,Error
+common.expand_all,Expand all
 common.export,Export
+common.export_csv,Export CSV
+common.export_to_csv,Export to CSV
 common.filters,Filters
+common.first_semester,1st Semester
 common.generate_plan,Generate Plan
+common.hide,Hide
 common.hide_filters,Hide Filters
 common.import,Import
 common.inactive,Inactive
+common.info,Information
 common.information,Information
+common.language,Language
 common.loading,Loading...
+common.material,Material
+common.no,No
 common.no_panelist,No Panelist
+common.node,Node
 common.of,of
 common.pending,Pending
 common.please_select_at_least_one,Please select at least one record
@@ -349,13 +506,26 @@ common.remove,Remove
 common.reset,Reset
 common.save,Save
 common.search,Search
+common.second_semester,2nd Semester
+common.select,Select
 common.select_all,Select All
+common.show,Show
 common.show_filters,Show Filters
+common.show_id,Show ID
+common.sign_out,Sign out
+common.start_date,Start date
 common.status,Status
+common.success,Success
+common.to,To
 common.total,Total
+common.type,Type
 common.unavailable,Unavailable
+common.unit,Unit
 common.updated_successfully,Updated successfully
+common.updating,Updating...
+common.warning,Warning
 common.year,Year
+common.yes,Yes
 countrytopology.all_cities,All Cities
 countrytopology.all_nodes,All Nodes
 countrytopology.all_nodes_have_panelists,All nodes have panelists!
@@ -388,12 +558,14 @@ countrytopology.with_panelist,With Panelist
 countrytopology.with_panelists,With Panelists
 countrytopology.without_panelist,Without Panelist
 countrytopology.without_panelists,Without Panelists
+dashboard.active,active
 dashboard.active_carriers,Active Carriers
 dashboard.active_products,Active Products
 dashboard.active_resources,Active Resources
 dashboard.allocation_plans,Allocation Plans
 dashboard.availability_issues,Availability Issues
 dashboard.availability_rate,Availability Rate
+dashboard.available,available
 dashboard.available_combinations,Available combinations
 dashboard.carrier_product_pairs,Carrier-Product Pairs
 dashboard.carriers_products,Carriers & Products
@@ -405,6 +577,8 @@ dashboard.current_month,Current Month
 dashboard.currently_unavailable,Currently unavailable
 dashboard.delayed_shipments,Delayed Shipments
 dashboard.delivery_standards,Delivery Standards
+dashboard.inactive,Inactive
+dashboard.inactive_lowercase,inactive
 dashboard.incomplete_standards,Incomplete standards
 dashboard.issues_delays,Issues & Delays
 dashboard.last_30_days,Last 30 days
@@ -413,21 +587,28 @@ dashboard.last_90_days,Last 90 days
 dashboard.loading_dashboard,Loading dashboard...
 dashboard.management_dashboard,Management Dashboard
 dashboard.management_tip,Management Tip
+dashboard.management_tip_text,Use the period selector to display statistics for the current month or plan for the next month. Click any card to access the detailed view. Check critical alerts daily to maintain operational excellence. Monitor panelists' vacations and material needs to avoid allocation conflicts.
 dashboard.material_management,Material Management
 dashboard.material_requirements,Material Requirements
 dashboard.needing_review,Needing Review
 dashboard.needs_review,Needs Review
 dashboard.next_30_days,Next 30 days
 dashboard.next_month,Next Month
+dashboard.no_panelist,No panelist
+dashboard.of,of
+dashboard.on_leave,On leave
 dashboard.on_vacation,On Vacation
 dashboard.panelist_status,Panelist Status
 dashboard.panelist_stock,Panelist Stock
 dashboard.panelists_availability,Panelists & Availability
+dashboard.pending,Pending
 dashboard.pending_items,Pending Items
 dashboard.pending_shipments,Pending Shipments
 dashboard.purchase_orders,Purchase Orders
+dashboard.received,Received
 dashboard.regulator_stock,Regulator Stock
 dashboard.selected_period,Selected period:
+dashboard.sent,Sent
 dashboard.shipments_to_panelists,Shipments to Panelists
 dashboard.standards_configuration,Standards Configuration
 dashboard.stock_alerts,Stock Alerts
@@ -446,6 +627,8 @@ dashboard.tooltip_shipments_to_panelists,Pending shipments of materials to panel
 dashboard.tooltip_total_panelists,Total number of panelists in the system
 dashboard.tooltip_total_plans,Total allocation plans in selected period
 dashboard.tooltip_total_standards,Total number of delivery standards configured
+dashboard.total,total
+dashboard.total_and_status,Total and Status
 dashboard.total_panelists,Total Panelists
 dashboard.total_plans,Total Plans
 dashboard.total_standards,Total Standards
@@ -598,6 +781,7 @@ load_balancing.success,Balance applied successfully
 load_balancing.target_load,Target Load
 load_balancing.target_panelists,Target Panelists
 load_balancing.title,Load Balancing
+material.add_material,Add a material
 material_catalog.additional_details,Additional details...
 material_catalog.code,Code *
 material_catalog.description,Description
@@ -608,27 +792,47 @@ material_catalog.promise,Promise
 material_catalog.rfid_tag,RFID Tag
 material_catalog.unit_measure,Unit Measure
 material_catalog.units_kg_etc,"units, kg, etc."
+material_requirements.about,About Material Requirements
+material_requirements.about_description,Calculate material needs based on assignment plans
 material_requirements.all_materials,All Materials
 material_requirements.all_nodes,All Nodes
 material_requirements.assigned,Assigned
 material_requirements.calculate,Calculate
 material_requirements.calculating,Calculating...
+material_requirements.calculation_period,Calculation Period
+material_requirements.carrier,Carrier
+material_requirements.city,City
+material_requirements.clear_filters,Clear Filters
 material_requirements.description,Calculate material needs based on allocation plans
+material_requirements.end_date,End Date
+material_requirements.export_csv,Export CSV
+material_requirements.filters,Filters
+material_requirements.items_needed,items needed
+material_requirements.loading,Loading material requirements...
 material_requirements.material_code,Material Code
 material_requirements.material_name,Material Name
 material_requirements.node,Node
 material_requirements.panelist,Panelist
 material_requirements.panelist_distribution,Panelist Distribution
+material_requirements.panelist_requirements,Panelist Requirements
 material_requirements.panelists_needing,Panelists Needing
 material_requirements.pending,Pending
 material_requirements.plans,Plans
 material_requirements.please_select_dates,Please select both start and end dates
+material_requirements.product,Product
 material_requirements.purchase_orders,Purchase Orders
+material_requirements.purchase_requirements,Purchase Requirements
+material_requirements.quantity,Quantity
 material_requirements.quantity_needed,Quantity Needed
+material_requirements.quick_period_selection,Quick Period Selection
+material_requirements.region,Region
 material_requirements.shipments,Shipments
+material_requirements.start_date,Start Date
 material_requirements.status,Status
 material_requirements.title,Material Requirements
+material_requirements.to_send,to send
 material_requirements.total_materials,Total Materials
+material_requirements.total_requirements,Total Requirements
 material_requirements.unit,Unit
 materialcatalog.code,Code
 materialcatalog.description,Description
@@ -665,10 +869,36 @@ materialrequirements.start_date,Start Date
 materialrequirements.total_materials,Total Materials
 materialrequirements.unit,Unit
 materialrequirements.year,Year
+materials.all_materials,All materials
+materials.all_nodes,All nodes
+materials.calculate,Calculate
+materials.calculate_description,Calculate material requirements based on assignment plans
+materials.date_placeholder,dd/mm/yyyy
+materials.end_date,End date
+materials.first_semester,1st Semester
+materials.material,Material
+materials.month_apr,Apr
+materials.month_aug,Aug
+materials.month_dec,Dec
+materials.month_feb,Feb
+materials.month_jan,Jan
+materials.month_jul,Jul
+materials.month_jun,Jun
+materials.month_mar,Mar
+materials.month_may,May
+materials.month_nov,Nov
+materials.month_oct,Oct
+materials.month_sep,Sep
 materials.no_materials_selected,No materials selected
+materials.node,Node
+materials.quick_period_selection,Quick period selection
+materials.requirements_title,Material requirements
 materials.search_materials,Search materials...
+materials.second_semester,2nd Semester
 materials.select_materials,Select Materials
 materials.selected_materials,Selected Materials
+materials.start_date,Start date
+materials.year,Year
 menu.accounts,Accounts
 menu.accounts.tooltip,Manage all accounts in the system
 menu.administration,Administration
@@ -687,6 +917,8 @@ menu.delivery_standards,Delivery Standards
 menu.delivery_standards.tooltip,Define expected delivery times and success rates by carrier and product
 menu.demo_reset,Demo Reset
 menu.demo_reset.tooltip,Reset demo account data
+menu.get_api,GET API
+menu.get_api.tooltip,Extract data via REST API
 menu.load_balancing,Load Balancing
 menu.load_balancing.tooltip,Visualize and rebalance shipment distribution across nodes
 menu.material_catalog,Material Catalog
@@ -694,8 +926,12 @@ menu.material_catalog.tooltip,Master catalog of all materials
 menu.material_requirements,Material Requirements
 menu.material_requirements.tooltip,Calculate material needs based on allocation plans
 menu.materials_management,Materials Management
+menu.onedb_api,ONE DB API
+menu.onedb_api.tooltip,Access ONE DB through REST API
 menu.onedb_generator,ONEDB Generator
 menu.onedb_generator.tooltip,Generate receive records for allocation plans
+menu.onedb_section,ONE DB
+menu.onedb_section.tooltip,Data management and API access
 menu.overview,Overview
 menu.panelists,Panelists
 menu.panelists.tooltip,Register and manage panelist availability
@@ -734,6 +970,23 @@ months.may,May
 months.nov,Nov
 months.oct,Oct
 months.sep,Sep
+nodeLoadBalancing.after,After
+nodeLoadBalancing.applyBalance,Apply balance
+nodeLoadBalancing.balancePreview,Balance preview
+nodeLoadBalancing.before,Before
+nodeLoadBalancing.cancel,Cancel
+nodeLoadBalancing.highLoadNodes,High load nodes
+nodeLoadBalancing.highLoadNodesDesc,Nodes with 120-150% average load
+nodeLoadBalancing.loadDistributionMatrix,Load distribution matrix
+nodeLoadBalancing.loadLevel,Load level
+nodeLoadBalancing.loading,Loading...
+nodeLoadBalancing.matrixView,Matrix view
+nodeLoadBalancing.saturatedNodes,Saturated nodes
+nodeLoadBalancing.saturatedNodesDesc,Nodes above 150% average load
+nodeLoadBalancing.stdDevAfter,Standard deviation after
+nodeLoadBalancing.stdDevBefore,Standard deviation before
+nodeLoadBalancing.totalShipments,Total shipments
+nodeLoadBalancing.totalShipmentsDesc,All shipments in the period
 nodeloadbalancing.acceptable_deviation_from_reference,Acceptable deviation from reference
 nodeloadbalancing.actualiza_fecha_programada_y_node_id_en_allocation,Actualiza fecha_programada y node_id en allocation_plan_details
 nodeloadbalancing.additional_nodes_required,Additional Nodes Required
@@ -833,6 +1086,7 @@ onedb.reset_filters,Reset filters
 onedb.route,Route
 onedb.search,Search
 onedb.sent,Sent
+onedb.showing_records,Showing {{filtered}} of {{total}} total records
 onedb.tag_id,Tag ID
 onedb.tag_id_or_plan,Tag ID or Plan...
 onedb.title,ONE DB
@@ -840,13 +1094,85 @@ onedb.to_date,To Date
 onedb.total_records,Total Records
 onedb.transit_days,Transit Days
 onedb.validated_postal_quality_analytics_repository,Validated postal quality analytics repository
+onedb_api.api_key_label,Your API Key
+onedb_api.api_tester_title,API Tester
+onedb_api.auth_note,"Note: The Authorization header uses the Supabase anon key (provided by the system), while X-API-Key contains your personal API key."
+onedb_api.authentication_description,All API requests must include your API key in the Authorization header using Bearer authentication.
+onedb_api.authentication_title,Authentication
+onedb_api.base_url,Base URL
+onedb_api.calls_last_hour,Calls in Last Hour
+onedb_api.confirm_regenerate,Are you sure you want to regenerate your API key? The old key will be deactivated immediately.
+onedb_api.copied,Copied!
+onedb_api.copy,Copy
+onedb_api.created_at,Created
+onedb_api.credentials_section,API Credentials
+onedb_api.description,"REST API for querying and extracting ONE DB data. Read-only access with date filtering and pagination. Limited to 10,000 records per request and 10 requests per minute."
+onedb_api.description,"REST API for querying and extracting ONE DB data. Read-only access with date filtering and pagination. Limited to 10,000 records per request and 10 requests per minute."
+onedb_api.end_date,End Date
+onedb_api.end_date_desc,End date for filtering records (format: YYYY-MM-DD)
+onedb_api.endpoint_description,Retrieve ONE DB records filtered by date range
+onedb_api.endpoint_section,API Endpoint
+onedb_api.endpoints_title,Available Endpoints
+onedb_api.error_codes_title,HTTP Status Codes
+onedb_api.examples_title,Request Examples
+onedb_api.generate_key,Generate API Key
+onedb_api.generate_key_first,Please generate an API key first to use the tester.
+onedb_api.generating,Generating...
+onedb_api.last_call,Last API Call
+onedb_api.limit,Limit
+onedb_api.limit_10_per_minute,Limit: 10 per minute
+onedb_api.limit_desc,Maximum number of records to return (default: 100, max: 1000)
+onedb_api.loading_stats,Loading statistics...
+onedb_api.max_records_note,"Note: The API returns a maximum of 10,000 records total. Use more specific date ranges if you need to access more data."
+onedb_api.never,Never
+onedb_api.no,No
+onedb_api.no_api_key,You don't have an active API key yet. Generate one to start using the API.
+onedb_api.offset,Offset
+onedb_api.offset_desc,Number of records to skip for pagination (default: 0)
+onedb_api.parameter,Parameter
+onedb_api.query_parameters,Query Parameters
+onedb_api.rate_limit_info,Rate Limit: 10 requests per minute
+onedb_api.rate_limiting_description,To ensure fair usage and system stability, API requests are rate limited per account.
+onedb_api.rate_limiting_title,Rate Limiting
+onedb_api.regenerate_key,Regenerate API Key
+onedb_api.required,Required
+onedb_api.response,Response
+onedb_api.response_format,Response Format
+onedb_api.security_warning_text,Keep your API key secure. Do not share it publicly or commit it to version control. Anyone with this key can access your ONE DB data.
+onedb_api.security_warning_title,Security Warning
+onedb_api.start_date,Start Date
+onedb_api.start_date_desc,Start date for filtering records (format: YYYY-MM-DD)
+onedb_api.status_200,Success - Request completed successfully
+onedb_api.status_400,Bad Request - Invalid parameters or date format
+onedb_api.status_401,Unauthorized - Invalid or missing API key
+onedb_api.status_429,Too Many Requests - Rate limit exceeded
+onedb_api.status_500,Internal Server Error - Something went wrong on our end
+onedb_api.status_code,Status Code
+onedb_api.tab_documentation,Documentation
+onedb_api.tab_overview,Overview
+onedb_api.tab_testing,Testing
+onedb_api.tab_usage,Usage
+onedb_api.test_api,Test API Request
+onedb_api.testing,Testing...
+onedb_api.title,GET API - ONE DB
+onedb_api.total_calls_month,Total Calls This Month
+onedb_api.type,Type
+onedb_api.usage_statistics,Usage Statistics
+onedb_api.yes,Yes
 panelists.activate,Activate
+panelists.active_lowercase,active
 panelists.add_panelist,Add Panelist
+panelists.add_unavailability,Add an unavailability period
 panelists.address_line_1,Address Line 1
 panelists.address_line_2,Address Line 2
 panelists.all_cities,All Cities
+panelists.all_in_system,All in system
+panelists.all_in_system,Total in system
 panelists.all_nodes,All Nodes
+panelists.all_panelists,All panelists
 panelists.all_panelists_in_system,All panelists in system
+panelists.all_periods,All periods
+panelists.all_reasons,All reasons
 panelists.all_status,All Status
 panelists.apartment_suite_etc_optional,"Apartment, suite, etc. (optional)"
 panelists.available_for_deliveries,Available for deliveries
@@ -857,37 +1183,66 @@ panelists.clear_selection_btn,Clear
 panelists.code,Code
 panelists.code_name_email,"Code, name, email..."
 panelists.country,Country
+panelists.current_active,Current (Active now)
+panelists.date_range,Date range
 panelists.deactivate,Deactivate
+panelists.deactivate_tooltip,Deactivate panelist
 panelists.delete_panelist,Delete panelist
+panelists.delete_tooltip,Delete panelist
+panelists.duration,Duration
 panelists.edit_panelist,Edit panelist
+panelists.edit_tooltip,Edit panelist
 panelists.email,Email
+panelists.end_date,End date
 panelists.filters,Filters
 panelists.leave_empty_to_auto_generate,Leave empty to auto-generate
 panelists.loading,Loading...
 panelists.loading_panelists,Loading panelists...
+panelists.manage_availability,Manage panelist availability
+panelists.manage_availability,Manage panelist availability
 panelists.manage_panelist_profiles_and_assignments,Manage panelist profiles and assignments
 panelists.manage_panelists_and_their_availability_for_delive,Manage panelists and their availability for deliveries
+panelists.manage_profiles,Manage panelist profiles and assignments
+panelists.manage_unavailability,Manage panelist unavailability periods for automatic sample reassignment
+panelists.management,Panelists Management
+panelists.management,Panelist Management
 panelists.mobile,Mobile
 panelists.name,Name
 panelists.no_panelists,No panelists found
 panelists.no_panelists_found,No panelists found
 panelists.node,Node
 panelists.not_available,Not available
+panelists.notes,Notes
+panelists.one_day,1 day
 panelists.panelist_code,Panelist Code
 panelists.panelist_details,Panelist Details
 panelists.panelists,Panelists
 panelists.panelists_management,Panelists Management
 panelists.panelists_tab,Panelists
+panelists.past,Past
+panelists.personal,Personal
 panelists.postal_code,Postal Code
+panelists.reason,Reason
 panelists.reset_all_filters,Reset all filters
+panelists.search_placeholder,"Search by code, name, email..."
+panelists.search_placeholder,"Search by code, name, email..."
+panelists.search_unavailability_placeholder,Panelist name
 panelists.select_a_node,Select a node
 panelists.selected_count,{count} selected
+panelists.sick_leave,Sick leave
+panelists.start_date,Start date
+panelists.status,Status
 panelists.street_address,Street address
+panelists.tab_panelists,Panelists
+panelists.tab_unavailability,Unavailability periods
 panelists.telegram_id,Telegram ID
 panelists.total_panelists,Total Panelists
+panelists.training,Training
 panelists.unavailability_periods,Unavailability Periods
 panelists.unavailability_tab,Unavailability
+panelists.upcoming,Upcoming
 panelists.username_or_numeric_id,@username or numeric ID
+panelists.vacation,vacation
 panelistunavailability.tsx.additional_information_about_this_unavailability_p,Additional information about this unavailability period...
 panelistunavailability.tsx.all_panelists,All Panelists
 panelistunavailability.tsx.all_periods,All Periods
@@ -918,9 +1273,46 @@ panelistunavailability.tsx.training,Training
 panelistunavailability.tsx.unavailability_periods,Unavailability Periods
 panelistunavailability.tsx.upcoming,Upcoming
 panelistunavailability.tsx.vacation,Vacation
+productform.cancel,Cancel
+productform.code,Code
+productform.create,Create
+productform.description,Description
+productform.saving,Saving...
+productform.standard_delivery_time,Standard delivery time
+productform.time_unit,Time unit
+productform.update,Update
 receive.description,Generate receive transactions
 receive.generate,Generate
 receive.title,Receive Generator
+receive_generator.advance_variance_days,Advance variance (days)
+receive_generator.carriers,Carriers
+receive_generator.delay_variance_days,Delay variance (days)
+receive_generator.demo_account_only,Demo account only - This feature is only available for testing
+receive_generator.end_date,End date
+receive_generator.example_out_of_sla_records_can_arrive_up_to,📊 Example: Out of SLA records can arrive up to {{max}} days (SLA: {{sla}} days
+receive_generator.example_records_can_arrive_between,📊 Example: Records can arrive between {{min}} and {{max}} days (SLA: {{sla}} days)
+receive_generator.failed_records,({{count}} failed)
+receive_generator.generate_records,Generate records
+receive_generator.generating,Generating... {{progress}}%
+receive_generator.generation_complete,Generation complete
+receive_generator.generation_summary,Generation summary
+receive_generator.generator_configuration,Generator configuration
+receive_generator.maximum_days_records_can_arrive_early,Maximum number of days records can arrive early
+receive_generator.maximum_days_records_can_be_delayed_beyond_sla,Maximum number of days records can be delayed beyond SLA
+receive_generator.number_of_records,Number of records
+receive_generator.out_of_sla_percentage,Out of SLA percentage (%)
+receive_generator.products,Products
+receive_generator.select_all,Select all
+receive_generator.selected_carriers,Selected: {{count}} carrier(s)
+receive_generator.selected_products,Selected: {{count}} product(s)
+receive_generator.start_date,Start date
+receive_generator.subtitle,Generate synthetic receipt records for testing and demonstrations
+receive_generator.successfully_created_records,Successfully created {{success}} records{{failed}}
+receive_generator.summary_combinations,• <strong>{{products}}</strong> product(s) × <strong>{{carriers}}</strong> carrier(s) = <strong>{{total}}</strong> combinations
+receive_generator.summary_date_range,• Date range: <strong>{{start}}</strong> to <strong>{{end}}</strong>
+receive_generator.summary_records_per_combination,• <strong>{{count}}</strong> records per combination
+receive_generator.summary_total_records,• <strong>~{{count}}</strong> total records will be generated
+receive_generator.title,ONE DB Record Generator
 receivegenerator.advance_variance_days,Advance Variance (days)
 receivegenerator.carriers,Carriers
 receivegenerator.delay_variance_days,Delay Variance (days)
@@ -940,9 +1332,13 @@ receivegenerator.receive_generator,Receive Generator
 receivegenerator.select_all,Select All
 receivegenerator.start_date,Start Date
 reporting.above_standard_good,Above standard (good)
+reporting.above_target,Above target
+reporting.across_all_carriers,Across all carriers
 reporting.actual,Actual %:
 reporting.actual_days,Actual (days)
+reporting.actual_percent,Actual %
 reporting.actual_standard,Actual ≥ Standard %
+reporting.after_standard,After standard
 reporting.all_carriers,All Carriers
 reporting.all_destinations,All Destinations
 reporting.all_origins,All Origins
@@ -956,28 +1352,39 @@ reporting.analyze_service_equity_across_cities_and_regions,Analyze service equit
 reporting.analyze_specific_route_performance_origin_destinat,Analyze specific route performance (origin → destination)
 reporting.analyze_trends_over_specific_time_periods,Analyze trends over specific time periods
 reporting.average_business_days_for_all_shipments,Average business days for all shipments
+reporting.average_samples_week,Average {{count}} samples/week
 reporting.avg_j_k_actual,Avg J+K Actual
+reporting.avg_jk_actual,Avg. J+K Actual
+reporting.avg_standard,Average standard ({percent} %)
 reporting.avg_transit_days,Avg Transit Days
 reporting.basic_information,Basic Information
 reporting.below_critical_threshold_with_penalty,Below critical threshold (with penalty)
 reporting.below_standard_but_above_critical_no_penalty,Below standard but above critical (no penalty)
 reporting.below_standard_deviation,Below standard (deviation)
+reporting.below_target,Below target
 reporting.both_cities,Both cities:
+reporting.both_cities_desc,Analyze the performance of a specific route (origin → destination)
 reporting.both_directions,Both Directions
+reporting.business_days,Business days
 reporting.carrier,Carrier
 reporting.carrier_product,Carrier / Product
 reporting.carrier_product_breakdown,Carrier & Product Breakdown
+reporting.carrier_product_desc,Further refine the analysis to specific service providers or types
 reporting.carrier_product_level,Carrier/Product Level:
 reporting.carrier_product_overview,Carrier & Product Overview
+reporting.carrier_product_performance,Carrier → Product Performance ({{count}} carriers)
 reporting.carrier_product_route,Carrier / Product / Route
+reporting.carrier_product_tab,Carrier → Product
 reporting.chart_view,Chart View
 reporting.circle_size_population,Circle size = Population
 reporting.cities,Cities
 reporting.citizens_affected,Citizens Affected
+reporting.citizens_count,{count} citizens
 reporting.city,City
 reporting.city_analysis,City Analysis
 reporting.city_equity_details,City Equity Details
 reporting.city_equity_details_table,City Equity Details Table
+reporting.city_performance,City performance ({{count}} entries)
 reporting.city_service_equity_treemap,City Service Equity Treemap
 reporting.class,Class
 reporting.classification,Classification:
@@ -985,9 +1392,11 @@ reporting.compl,Compl.
 reporting.compliance,Compliance:
 reporting.compliance_analysis_by_carrier_product_route,Compliance analysis by Carrier → Product → Route
 reporting.compliance_by_carrier_product_route,Compliance by Carrier → Product → Route
+reporting.compliance_percent,% compliance
 reporting.compliance_status,Compliance Status
 reporting.compliance_status_based_on_dynamic_thresholds,Compliance status based on dynamic thresholds:
 reporting.compliant,Compliant:
+reporting.compliant_abbr,Compl.
 reporting.compliant_routes,Compliant Routes
 reporting.compliant_shipments_total_shipments_100,Compliant shipments / Total shipments × 100%
 reporting.critical,Critical
@@ -995,19 +1404,24 @@ reporting.critical_limit,Critical Limit:
 reporting.critical_routes,Critical Routes
 reporting.cumulative,Cumulative:
 reporting.cumulative_distribution_analysis,Cumulative Distribution Analysis
+reporting.cumulative_percent,Cumulative %
+reporting.cumulative_percentage_desc,Cumulative percentage of deliveries by transit days. Green bars indicate days within the standard
 reporting.cumulative_percentage_of_deliveries_by_transit_day,Cumulative percentage of deliveries by transit days.
 reporting.current_week,Current Week
 reporting.date_range,Date Range:
+reporting.days,days
 reporting.delayed,Delayed
 reporting.description,Description:
 reporting.destination_city,Destination City
 reporting.destination_only,Destination only:
+reporting.destination_only_desc,Analyze inbound quality to a city from all origins
 reporting.deviation,Deviation
 reporting.difference_between_actual_and_standard,Difference between Actual % and Standard %
 reporting.direct_value_from_delivery_standards,Direct value from delivery_standards
 reporting.direction,Direction
 reporting.direction_gap,Direction Gap:
 reporting.directional_analysis,Directional Analysis
+reporting.distribution_of_shipments_by_actual_transit_time,Distribution of shipments by actual transit time compared to delivery standard
 reporting.distribution_of_shipments_by_actual_transit_time_v,Distribution of shipments by actual transit time vs delivery standard
 reporting.end_date,End Date
 reporting.equity_status,Equity Status
@@ -1015,30 +1429,53 @@ reporting.export_audit_report,Export Audit Report
 reporting.export_csv,Export CSV
 reporting.export_filtered_data_to_csv,Export filtered data to CSV
 reporting.filter_analysis_guide,Filter Analysis Guide
+reporting.filter_carrier_product_desc_narrow,Limit analysis to specific providers or service types
+reporting.filter_carrier_product_label,Carrier/Product:
+reporting.filter_date_range_desc,Analyze trends over specific periods
+reporting.filter_date_range_label,Period:
+reporting.filter_direction_desc,Analyze inbound vs outbound service quality separately
+reporting.filter_direction_label,Direction:
+reporting.filter_equity_status_desc,Identify cities with specific compliance levels
+reporting.filter_equity_status_label,Equity status:
+reporting.filter_no_filters,No filters:
+reporting.filter_region_label,Region:
 reporting.filters,Filters
 reporting.focus_analysis_on_specific_geographic_areas,Focus analysis on specific geographic areas
 reporting.further_narrow_analysis_to_specific_service_provid,Further narrow analysis to specific service providers or types
 reporting.general_performance_dashboard,General Performance Dashboard
+reporting.generating,Generating...
 reporting.geographic_distribution,Geographic Distribution
 reporting.geographic_view,Geographic View
 reporting.green,Green
 reporting.identify_cities_with_specific_compliance_levels,Identify cities with specific compliance levels
+reporting.in_critical_cities,in critical cities
+reporting.in_standard_delayed,On standard/Delayed
 reporting.inb,Inb.
 reporting.inbound,Inbound %
+reporting.inbound_abbr,Inb.
 reporting.inbound_arrivals,Inbound (Arrivals)
+reporting.inbound_arrow,↓ inbound
+reporting.inbound_direction,Inbound
+reporting.inbound_percent,% inbound
 reporting.inbound_vs_outbound_comparison_top_10_by_direction,Inbound vs Outbound Comparison (Top 10 by Direction Gap)
 reporting.inbound_vs_outbound_compliance_chart,Inbound vs Outbound Compliance Chart
 reporting.interpretation,Interpretation:
 reporting.j_k_actual,J+K Actual
 reporting.j_k_performance_report,J+K Performance Report
 reporting.j_k_std,J+K Std
+reporting.jk_actual,J+K Actual
+reporting.jk_performance_report,J+K Performance Report
+reporting.jk_std,J+K Std
+reporting.last_12_weeks,Last 12 weeks
 reporting.legend,Legend
 reporting.loading,Loading...
 reporting.loading_compliance_data,Loading compliance data...
 reporting.loading_j_k_performance_data,Loading J+K performance data...
 reporting.loading_performance_data,Loading performance data...
 reporting.loading_territory_equity_data,Loading territory equity data...
+reporting.map_interactive_description,Interactive map showing service equity in cities. Circle size represents population
 reporting.mapa_de_localidades_treemap,Mapa de Localidades (Treemap)
+reporting.meeting_standard,Meeting standard
 reporting.narrow_analysis_to_specific_service_providers_or_t,Narrow analysis to specific service providers or types
 reporting.negative,Negative:
 reporting.no_compliance_data_available,No compliance data available
@@ -1047,18 +1484,30 @@ reporting.no_data_available,No data available
 reporting.no_data_available_for_treemap,No data available for treemap
 reporting.no_distribution_data_available,No distribution data available
 reporting.no_filters,No filters:
+reporting.no_filters_desc,View overall ecosystem performance across all routes and carriers
+reporting.no_penalty,No penalty
 reporting.no_performance_data_available,No performance data available
 reporting.no_shipment_data_available,No shipment data available
 reporting.no_shipment_data_available_for_timeline,No shipment data available for timeline
 reporting.no_underserved_cities,No underserved cities
 reporting.no_weekly_data_available,No weekly data available
+reporting.of_cities,about {count} cities
+reporting.of_routes,of {{count}} routes
+reporting.on_standard,On standard
 reporting.on_time,On-Time %
+reporting.on_time_count,{{count}} on time
+reporting.on_time_percent,% On time
 reporting.openstreetmap,OpenStreetMap
 reporting.origin_city,Origin City
 reporting.origin_only,Origin only:
+reporting.origin_only_desc,Analyze the outgoing quality of a city to all destinations
 reporting.outb,Outb.
 reporting.outbound,Outbound %
+reporting.outbound_abbr,Outb.
+reporting.outbound_arrow,↑ outbound
 reporting.outbound_departures,Outbound (Departures)
+reporting.outbound_direction,Outbound
+reporting.outbound_percent,% outbound
 reporting.overall_compliance,Overall Compliance
 reporting.overall_compliance_and_transit_time_metrics,Overall compliance and transit time metrics
 reporting.percentage_of_shipments_delivered_successfully,Percentage of shipments delivered successfully
@@ -1070,9 +1519,12 @@ reporting.population_weighted,Population-weighted
 reporting.population_weighted_compliance,Population-Weighted Compliance
 reporting.positive,Positive:
 reporting.problem_routes,Problem Routes
+reporting.problem_routes_column,Problematic routes
 reporting.product,Product
 reporting.received_at,Received At
 reporting.region,Region:
+reporting.region_analysis,Region analysis
+reporting.region_performance,Region performance ({{count}} entries)
 reporting.regional_analysis,Regional Analysis
 reporting.regional_equity_analysis_table,Regional Equity Analysis Table
 reporting.regional_equity_comparison,Regional Equity Comparison
@@ -1081,20 +1533,28 @@ reporting.regional_equity_details,Regional Equity Details
 reporting.regional_summary,Regional Summary
 reporting.regulatory_compliance_report,Regulatory Compliance Report
 reporting.regulatory_use,Regulatory Use:
+reporting.require_intervention,Requires intervention
 reporting.reset_all_filters,Reset all filters
 reporting.route,Route
+reporting.route_analysis,Route analysis
 reporting.route_level,Route Level:
+reporting.route_performance,Route performance ({{count}} routes)
 reporting.routes,Routes
 reporting.samples,Samples
 reporting.search_by_tag_id_origin_or_destination,"Search by TAG ID, origin, or destination..."
 reporting.sent_at,Sent At
 reporting.service_equity_index,Service Equity Index
 reporting.shipments,Shipments:
+reporting.shipments_count,{{count}} shipment(s)
 reporting.standard,Standard:
 reporting.standard_days,Standard (days)
+reporting.standard_percent,% standard
 reporting.start_date,Start Date
+reporting.statistical_significance,Statistical significance
 reporting.status,Status:
 reporting.std,Std %
+reporting.std_abbr,Std.
+reporting.std_percent,% Standard
 reporting.table_view,Table View
 reporting.tag_id,TAG ID
 reporting.target_1_day,Target: 1 day
@@ -1107,16 +1567,21 @@ reporting.total_cities,Total Cities:
 reporting.total_routes,Total Routes
 reporting.total_samples,Total Samples
 reporting.total_shipments,Total Shipments:
+reporting.transit_days_jk,Transit days (J+K)
 reporting.transit_time_analysis_and_delivery_performance_tra,Transit time analysis and delivery performance tracking
+reporting.transit_time_analysis_and_delivery_performance_tracking,Transit time analysis and delivery performance tracking
+reporting.treemap_size_population_color_compliance,Size represents population
 reporting.underserved,Underserved
 reporting.underserved_cities,Underserved Cities:
 reporting.view_overall_ecosystem_performance_across_all_rout,View overall ecosystem performance across all routes and carriers
 reporting.view_overall_service_equity_across_all_cities_and_,View overall service equity across all cities and regions
+reporting.vs_std,vs Std
 reporting.warning,Warning
 reporting.warning_limit,Warning Limit:
 reporting.warning_routes,Warning Routes
 reporting.weekly_sample_volume,Weekly Sample Volume
 reporting.weighted_average_by_shipment_count,Weighted average by shipment count
+reporting.with_penalty,With penalty
 settings.account_management,Account Management
 settings.account_reporting_configuration,Account Reporting Configuration
 settings.all_users,All Users
@@ -1149,33 +1614,43 @@ settings.quarterly,Quarterly
 settings.search_cities,Search cities...
 settings.warning_threshold_must_be_greater_than_critical_th,Warning threshold must be greater than critical threshold
 settings.weekly,Weekly
+stock.about,About Inventory Management
+stock.about_description,Manage inventory levels and stock alerts
 stock.add_to_stock,Add to Stock
 stock.adjust_stock,Adjust Stock
+stock.adjusting,Adjusting...
 stock.adjustment_note,Adjustment Note
 stock.alert_type,Alert Type
+stock.alerts,Alerts
 stock.all_materials,All Materials
 stock.all_nodes,All Nodes
 stock.all_panelists,All panelists
 stock.all_status,All Status
 stock.all_statuses,All Statuses
 stock.all_types,All types
+stock.allocation_shipment,Allocation shipment
 stock.auto_generate_purchase_orders,Auto-generate Purchase Orders
 stock.auto_generate_shipments,Auto-generate Shipments
 stock.automation,Automation
 stock.available_stock,Available Stock
 stock.calculate_generate_shipments,Calculate & Generate Shipments
 stock.calculate_requirements,Calculate Requirements
+stock.calculating,Calculating...
 stock.cancelled,Cancelled
 stock.change,Change:
 stock.clear_filters,Clear Filters
 stock.clear_filters_to_see_all_alerts,Clear filters to see all alerts
+stock.confirm_adjustment,Confirm adjustment
 stock.confirm_order,Confirm Order
 stock.confirm_receipt,Confirm Receipt
 stock.confirm_shipment,Confirm Shipment
 stock.confirmed_shipments,Confirmed Shipments
+stock.critical,Critical
 stock.current_quantity,Current Quantity
+stock.current_regulator_stock,Current Regulator Stock
 stock.current_stock,Current Stock
 stock.date,Date
+stock.delete_selected,Delete {count} selected
 stock.edit_quantity,Edit quantity
 stock.edit_shipment_quantity,Edit Shipment Quantity
 stock.enable_stock_control,Enable Stock Control
@@ -1185,10 +1660,13 @@ stock.expected,Expected
 stock.expected_date,Expected Date
 stock.explain_the_reason_for_this_adjustment,Explain the reason for this adjustment...
 stock.export_csv,Export CSV
+stock.failed_to_adjust_stock,Failed to adjust stock
+stock.feature_not_available_in_current_version,This feature is not available in the current module version.
 stock.filters,Filters
 stock.from,From
 stock.last_updated,Last Updated
 stock.lead_times,Lead Times
+stock.loading,Loading inventory data...
 stock.loading_alerts,Loading alerts...
 stock.loading_movements,Loading movements...
 stock.loading_panelist_stock,Loading panelist stock...
@@ -1197,7 +1675,10 @@ stock.loading_stock,Loading stock...
 stock.location,Location
 stock.low_stock,Low Stock
 stock.low_stock_only,Low Stock Only
+stock.manage_description,Manage material requirements
+stock.mark_as_ordered,Mark {count} as ordered
 stock.material,Material
+stock.material_movements,Material Movements
 stock.material_requirements_help,Calculate material requirements from allocation plans. Order materials and receive purchase orders to update regulator stock.
 stock.material_requirements_tab,Material Requirements
 stock.materials,Materials
@@ -1213,16 +1694,22 @@ stock.net_quantity,Net Quantity
 stock.new_quantity,New Quantity
 stock.no_stock_alerts_found,No stock alerts found
 stock.no_stock_data,No stock data available
+stock.no_stock_data_to_export,No stock data to export
 stock.no_stock_records_found,No stock records found
 stock.node,Node
 stock.normal,Normal
 stock.not_applicable_purchase_orders_are_not_used,Not applicable - Purchase orders are not used
 stock.notes,Notes
+stock.only_panelists_with_allocation_plans,Note: Only panelists with assigned allocation plans will have shipments generated
 stock.order,Order
 stock.order_material,Order Material
 stock.ordered,Ordered
+stock.out_of_stock,Out of Stock
 stock.packing_list_pdf,Packing List PDF
 stock.panelist,Panelist
+stock.panelist_code_materials_count,Code: {code} • {count} material(s)
+stock.panelist_issue,Panelist Issue
+stock.panelist_issues,Panelist Issues
 stock.panelist_negative,Panelist Negative
 stock.panelist_stock_help,View current inventory distributed to each panelist. Stock is automatically updated when shipments are sent.
 stock.panelist_stock_tab,Panelist Stock
@@ -1230,6 +1717,12 @@ stock.pending,Pending
 stock.pending_requirements,Pending Requirements
 stock.pending_shipments,Pending Shipments
 stock.period,Period
+stock.please_enter_quantity_and_note,Please enter the new quantity and adjustment note
+stock.please_enter_valid_quantity,Please enter a valid quantity
+stock.please_select_dates,Please select start and end dates
+stock.please_select_requirements_export,Please select requirements to export
+stock.please_select_requirements_po,Please select requirements to generate the purchase order
+stock.preview_shipments_will_be_generated,Preview: {count} shipment(s) will be generated
 stock.promise,Promise
 stock.purchase_lead_time_days,Purchase Lead Time (days)
 stock.purchase_order_pdf,Purchase Order PDF
@@ -1244,16 +1737,20 @@ stock.receive,Receive
 stock.receive_purchase_order,Receive Purchase Order
 stock.received,Received
 stock.regulator_insufficient,Regulator Insufficient
+stock.regulator_issue,Regulator Issue
+stock.regulator_issues,Regulator Issues
 stock.regulator_stock_help,View and manage current inventory in regulator (HAL) warehouse. Stock is updated when receiving purchase orders.
 stock.regulator_stock_tab,Regulator Stock
 stock.removed_materials_will_create_new_pending_shipment,Removed Materials (Will Create New Pending Shipment)
 stock.reorder_point,Reorder Point
 stock.reset_filters,Reset Filters
 stock.restore,Restore
+stock.save_settings,Save Settings
 stock.search_by_material_or_code,Search by material or code...
 stock.search_by_material_or_panelist,Search by material or panelist...
 stock.search_material,Search material...
 stock.send,Send
+stock.send_selected,Send {count} selected
 stock.sent,Sent
 stock.sent_date,Sent Date
 stock.settings_help,"Configure stock control parameters, automation rules, and lead times for shipments and deliveries."
@@ -1264,12 +1761,22 @@ stock.shipments,Shipments
 stock.shipments_help,"Generate shipments to panelists based on allocation plans. Create pending shipments, then send them to update stocks automatically."
 stock.shipments_tab,Shipments
 stock.showing,Showing
+stock.showing_alerts_count,Showing {showing} of {total} alerts
 stock.start_date,Start Date
+stock.stock_adjusted_successfully,Stock adjusted successfully
 stock.stock_alert,Stock Alert
 stock.stock_alerts_help,View and manage stock alerts for insufficient regulator stock and negative panelist stock. Alerts auto-resolve when stock returns to positive.
 stock.stock_alerts_tab,Stock Alerts
 stock.stock_control,Stock Control
 stock.stock_status,Stock Status
+stock.system_will_automatically_create_shipments,The system will automatically create pending shipments when it detects a panelist needs materials.
+stock.tab_alerts,Stock Alerts
+stock.tab_movements,Movements
+stock.tab_panelist_stock,Panelist Stock
+stock.tab_regulator_stock,Regulator Stock
+stock.tab_requirements,Material Requirements
+stock.tab_settings,Settings
+stock.tab_shipments,Shipments
 stock.this_feature_is_not_available_in_the_current_versi,This feature is not available in the current version of the module.
 stock.title,Stock Management & Alerts
 stock.total_items_pending,Total Items Pending
@@ -1279,6 +1786,11 @@ stock.type,Type
 stock.unit,Unit
 stock.unknown_panelist,Unknown Panelist
 stock.used_to_calculate_expected_delivery_dates,Used to calculate expected delivery dates
+stock.warning,Warning
+stock.warning_nodes_without_panelists,Attention: {count} node(s) have no assigned panelists and will be ignored
+stock.when_enabled_system_will_monitor,When enabled
+stock.with_assigned_panelists,with assigned panelists
+stock.without_panelist_will_be_skipped,without panelist (will be ignored)
 stock.year,Year
 stockmanagement.stock_alerts,Stock Alerts
 stockmanagement.stock_management_alerts,Stock Management & Alerts
@@ -1288,15 +1800,27 @@ topology.40_4168,40.4168
 topology.add_city,Add City
 topology.add_node,Add Node
 topology.add_region,Add Region
+topology.all_cities,All cities
+topology.all_nodes,All nodes
+topology.all_nodes_have_panelists,All nodes have panelists!
+topology.all_regions,All regions
 topology.cities,Cities
 topology.city,City
 topology.city_code,City Code *
 topology.city_name,City Name *
+topology.class,Class
+topology.collapse_city,Collapse city
 topology.country_code,Country Code *
+topology.create_city,Create a city
+topology.create_node,Create a node
+topology.create_region,Create a region
 topology.delete_city,Delete city
+topology.delete_city_confirm,Delete this city and all its nodes?
 topology.delete_node,Delete node
+topology.delete_node_confirm,Delete this node?
 topology.delete_region,Delete region
 topology.description,Description
+topology.download_csv,Download CSV
 topology.e_g_3200000,"e.g., 3200000"
 topology.e_g_es_fr,"e.g., ES, FR"
 topology.e_g_mad_bcn,"e.g., MAD, BCN"
@@ -1305,15 +1829,21 @@ topology.e_g_spain_france,"e.g., Spain, France"
 topology.edit_city,Edit city
 topology.edit_node,Edit node
 topology.edit_region,Edit region
+topology.every_node_assigned,Every node in your topology has an assigned panelist
+topology.expand_all,Expand all
 topology.expand_all_cities_in_this_region,Expand all cities in this region
+topology.expand_city,Expand the city
 topology.latitude,Latitude
 topology.loading,Loading topology...
 topology.longitude,Longitude
 topology.no_cities_in_this_region_yet,No cities in this region yet
 topology.no_nodes_in_this_city_yet,No nodes in this city yet
+topology.no_nodes_yet,There are no nodes in this city yet
 topology.no_regions,No regions found
 topology.node,Node
 topology.nodes,Nodes
+topology.nodes_need_assignment,These nodes need a panelist assignment to be operational
+topology.nodes_without_panelists,Nodes without panelists
 topology.panelist_assigned,Panelist Assigned
 topology.panelists,Panelists
 topology.pending_panelist,Pending Panelist
@@ -1322,11 +1852,57 @@ topology.promise,Promise
 topology.region_code,Region Code *
 topology.region_name,Region Name *
 topology.regions,Regions
+topology.search_placeholder,Search regions
 topology.status,Status *
 topology.title,Country Topology
 topology.topology_tab,Topology
+topology.topology_tree,Topology tree
+topology.total_nodes,Total nodes
 topology.total_population_of_the_city_used_for_impact_analy,Total population of the city (used for impact analysis in reporting)
+topology.with_panelists,With panelists
+topology.without_panelists,Without panelists
 topology.without_panelists_tab,Without Panelists
+unavailability.actions,Actions
+unavailability.activate,Activate
+unavailability.add_period,+ Add an unavailability period
+unavailability.add_period_modal,Add an unavailability period
+unavailability.adjust_filters,Try adjusting your filters.
+unavailability.all_panelists,All panelists
+unavailability.all_periods,All periods
+unavailability.all_reasons,All reasons
+unavailability.cancel,Cancel
+unavailability.cancel_periods,Cancel periods
+unavailability.click_to_create,"Click ""Add an unavailability period"" to create one."
+unavailability.confirm_cancel,Are you sure you want to cancel {count} unavailability period(s)?
+unavailability.confirm_delete,Are you sure you want to delete {count} unavailability period(s)? This action cannot be undone.
+unavailability.confirm_delete_single,Are you sure you want to delete this unavailability period?
+unavailability.current_periods,Current (active now)
+unavailability.date_range,Date range
+unavailability.day,day
+unavailability.days,days
+unavailability.delete,Delete
+unavailability.description,Manage panelists' unavailability periods for automatic sample reassignment
+unavailability.duration,Duration
+unavailability.edit,Edit
+unavailability.edit_period,Edit unavailability period
+unavailability.end_date,End date
+unavailability.no_periods_found,No unavailability periods found.
+unavailability.notes,Notes
+unavailability.panelist,Panelist
+unavailability.past_periods,Past
+unavailability.reason,Reason
+unavailability.reason_other,Other
+unavailability.reason_personal,Personal
+unavailability.reason_sick,Sick leave
+unavailability.reason_training,Training
+unavailability.reason_vacation,Vacation
+unavailability.required,Required
+unavailability.search_placeholder,Panelist name
+unavailability.select_panelist,Select a panelist
+unavailability.start_date,Start date
+unavailability.status,Status
+unavailability.title,Unavailability periods
+unavailability.upcoming_periods,Upcoming
 users.account,Account
 users.deactivate,Deactivate
 users.email,Email
@@ -1337,82 +1913,3 @@ users.password,Password
 users.promise,Promise
 users.role,Role
 users.select_account,Select account
-common.language,Language
-onedb_api.title,GET API - ONE DB
-onedb_api.description,"REST API for querying and extracting ONE DB data. Read-only access with date filtering and pagination. Limited to 10,000 records per request and 10 requests per minute."
-onedb_api.tab_overview,Overview
-onedb_api.tab_documentation,Documentation
-onedb_api.tab_testing,Testing
-onedb_api.tab_usage,Usage
-onedb_api.credentials_section,API Credentials
-onedb_api.no_api_key,You don't have an active API key yet. Generate one to start using the API.
-onedb_api.generate_key,Generate API Key
-onedb_api.generating,Generating...
-onedb_api.api_key_label,Your API Key
-onedb_api.copy,Copy
-onedb_api.copied,Copied!
-onedb_api.created_at,Created
-onedb_api.regenerate_key,Regenerate API Key
-onedb_api.confirm_regenerate,Are you sure you want to regenerate your API key? The old key will be deactivated immediately.
-onedb_api.security_warning_title,Security Warning
-onedb_api.security_warning_text,Keep your API key secure. Do not share it publicly or commit it to version control. Anyone with this key can access your ONE DB data.
-onedb_api.endpoint_section,API Endpoint
-onedb_api.base_url,Base URL
-onedb_api.authentication_title,Authentication
-onedb_api.authentication_description,All API requests must include your API key in the Authorization header using Bearer authentication.
-onedb_api.endpoints_title,Available Endpoints
-onedb_api.endpoint_description,Retrieve ONE DB records filtered by date range
-onedb_api.query_parameters,Query Parameters
-onedb_api.parameter,Parameter
-onedb_api.type,Type
-onedb_api.required,Required
-onedb_api.description,"REST API for querying and extracting ONE DB data. Read-only access with date filtering and pagination. Limited to 10,000 records per request and 10 requests per minute."
-onedb_api.yes,Yes
-onedb_api.no,No
-onedb_api.start_date,Start Date
-onedb_api.start_date_desc,Start date for filtering records (format: YYYY-MM-DD)
-onedb_api.end_date,End Date
-onedb_api.end_date_desc,End date for filtering records (format: YYYY-MM-DD)
-onedb_api.limit,Limit
-onedb_api.limit_desc,Maximum number of records to return (default: 100, max: 1000)
-onedb_api.offset,Offset
-onedb_api.offset_desc,Number of records to skip for pagination (default: 0)
-onedb_api.examples_title,Request Examples
-onedb_api.response_format,Response Format
-onedb_api.rate_limiting_title,Rate Limiting
-onedb_api.rate_limiting_description,To ensure fair usage and system stability, API requests are rate limited per account.
-onedb_api.rate_limit_info,Rate Limit: 10 requests per minute
-onedb_api.error_codes_title,HTTP Status Codes
-onedb_api.status_code,Status Code
-onedb_api.status_200,Success - Request completed successfully
-onedb_api.status_400,Bad Request - Invalid parameters or date format
-onedb_api.status_401,Unauthorized - Invalid or missing API key
-onedb_api.status_429,Too Many Requests - Rate limit exceeded
-onedb_api.status_500,Internal Server Error - Something went wrong on our end
-onedb_api.api_tester_title,API Tester
-onedb_api.generate_key_first,Please generate an API key first to use the tester.
-onedb_api.test_api,Test API Request
-onedb_api.testing,Testing...
-onedb_api.response,Response
-onedb_api.usage_statistics,Usage Statistics
-onedb_api.total_calls_month,Total Calls This Month
-onedb_api.calls_last_hour,Calls in Last Hour
-onedb_api.limit_10_per_minute,Limit: 10 per minute
-onedb_api.last_call,Last API Call
-onedb_api.never,Never
-onedb_api.loading_stats,Loading statistics...
-menu.onedb_api,ONE DB API
-menu.onedb_api.tooltip,Access ONE DB through REST API
-onedb_api.auth_note,"Note: The Authorization header uses the Supabase anon key (provided by the system), while X-API-Key contains your personal API key."
-onedb_api.max_records_note,"Note: The API returns a maximum of 10,000 records total. Use more specific date ranges if you need to access more data."
-menu.onedb_section,"ONE DB"
-menu.onedb_section.tooltip,"Data management and API access"
-menu.get_api,"GET API"
-menu.get_api.tooltip,"Extract data via REST API"
-panelists.management,"Panelists Management"
-panelists.manage_availability,"Manage panelist availability"
-panelists.all_in_system,"All in system"
-panelists.search_placeholder,"Search by code, name, email..."
-common.all_cities,"All Cities"
-common.all_nodes,"All Nodes"
-common.all_status,"All Status"
