@@ -28,6 +28,7 @@ import {
   RefreshCw,
   Languages,
   Key,
+  DatabaseZap,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
@@ -224,6 +225,15 @@ export function Sidebar() {
               roles: ['admin', 'superadmin'],
               tooltip: t('menu.reporting_equity.tooltip'),
             },
+          ],
+        },
+        {
+          path: '/one-db',
+          label: t('menu.onedb_section'),
+          icon: Database,
+          roles: ['admin', 'superadmin'],
+          tooltip: t('menu.onedb_section.tooltip'),
+          children: [
             {
               path: '/one-db',
               label: t('menu.reporting_onedb'),
@@ -233,10 +243,10 @@ export function Sidebar() {
             },
             {
               path: '/one-db-api',
-              label: t('menu.onedb_api'),
-              icon: Key,
+              label: t('menu.get_api'),
+              icon: DatabaseZap,
               roles: ['admin', 'superadmin'],
-              tooltip: t('menu.onedb_api.tooltip'),
+              tooltip: t('menu.get_api.tooltip'),
             },
           ],
         },

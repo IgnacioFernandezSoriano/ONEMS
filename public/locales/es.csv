@@ -1902,3 +1902,7 @@ menu.onedb_api,API de ONE DB
 menu.onedb_api.tooltip,Accede a ONE DB a través de API REST
 onedb_api.auth_note,"Nota: El header Authorization usa la clave anon de Supabase (proporcionada por el sistema), mientras que X-API-Key contiene tu clave API personal."
 onedb_api.max_records_note,"Nota: La API retorna un máximo de 10,000 registros en total. Usa rangos de fechas más específicos si necesitas acceder a más datos."
+menu.onedb_section,"ONE DB"
+menu.onedb_section.tooltip,"Gestión de datos y acceso API"
+menu.get_api,"GET API"
+menu.get_api.tooltip,"Extraer datos vía REST API"

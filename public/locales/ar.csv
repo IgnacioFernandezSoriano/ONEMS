@@ -1902,3 +1902,7 @@ menu.onedb_api,واجهة برمجة تطبيقات ONE DB
 menu.onedb_api.tooltip,الوصول إلى ONE DB عبر واجهة برمجة التطبيقات REST
 onedb_api.auth_note,"ملاحظة: يستخدم رأس Authorization مفتاح Supabase anon (المقدم من النظام)، بينما يحتوي X-API-Key على مفتاح API الشخصي الخاص بك."
 onedb_api.max_records_note,"ملاحظة: تُرجع واجهة برمجة التطبيقات حدًا أقصى قدره 10000 سجل إجمالاً. استخدم نطاقات تاريخ أكثر تحديدًا إذا كنت بحاجة إلى الوصول إلى المزيد من البيانات."
+menu.onedb_section,"ONE DB"
+menu.onedb_section.tooltip,"إدارة البيانات والوصول إلى واجهة برمجة التطبيقات"
+menu.get_api,"GET API"
+menu.get_api.tooltip,"استخراج البيانات عبر REST API"
