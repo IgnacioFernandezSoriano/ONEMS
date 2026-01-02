@@ -1836,8 +1836,8 @@ admin.resetting,Réinitialisation en cours...
 admin.confirm_reset,Confirmer la réinitialisation
 admin.an_unexpected_error_occurred,Une erreur inattendue s'est produite
 common.language,Langue
-onedb_api.title,API ONE DB
-onedb_api.description,Accédez à vos données ONE DB de manière programmatique via notre API REST. Générez des clés API et intégrez-les à vos applications.
+onedb_api.title,GET API - ONE DB
+onedb_api.description,"API REST pour interroger et extraire les données ONE DB. Accès en lecture seule avec filtrage par date et pagination. Limité à 10,000 enregistrements par requête et 10 requêtes par minute."
 onedb_api.tab_overview,Vue d'ensemble
 onedb_api.tab_documentation,Documentation
 onedb_api.tab_testing,Test
@@ -1864,7 +1864,7 @@ onedb_api.query_parameters,Paramètres de requête
 onedb_api.parameter,Paramètre
 onedb_api.type,Type
 onedb_api.required,Obligatoire
-onedb_api.description,Description
+onedb_api.description,"API REST pour interroger et extraire les données ONE DB. Accès en lecture seule avec filtrage par date et pagination. Limité à 10,000 enregistrements par requête et 10 requêtes par minute."
 onedb_api.yes,Oui
 onedb_api.no,Non
 onedb_api.start_date,Date de début

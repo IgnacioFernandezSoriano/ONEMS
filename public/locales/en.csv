@@ -1338,8 +1338,8 @@ users.promise,Promise
 users.role,Role
 users.select_account,Select account
 common.language,Language
-onedb_api.title,ONE DB API
-onedb_api.description,Access your ONE DB data programmatically through our REST API. Generate API keys and integrate with your applications.
+onedb_api.title,GET API - ONE DB
+onedb_api.description,"REST API for querying and extracting ONE DB data. Read-only access with date filtering and pagination. Limited to 10,000 records per request and 10 requests per minute."
 onedb_api.tab_overview,Overview
 onedb_api.tab_documentation,Documentation
 onedb_api.tab_testing,Testing
@@ -1366,7 +1366,7 @@ onedb_api.query_parameters,Query Parameters
 onedb_api.parameter,Parameter
 onedb_api.type,Type
 onedb_api.required,Required
-onedb_api.description,Description
+onedb_api.description,"REST API for querying and extracting ONE DB data. Read-only access with date filtering and pagination. Limited to 10,000 records per request and 10 requests per minute."
 onedb_api.yes,Yes
 onedb_api.no,No
 onedb_api.start_date,Start Date

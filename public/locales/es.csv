@@ -1835,8 +1835,8 @@ admin.created,Creado:
 admin.resetting,Reiniciando...
 admin.confirm_reset,Confirmar reinicio
 admin.an_unexpected_error_occurred,Ocurrió un error inesperado
-onedb_api.title,ONE DB API
-onedb_api.description,Genera claves API e intégralas con tus aplicaciones.
+onedb_api.title,GET API - ONE DB
+onedb_api.description,"API REST para consultar y extraer datos de ONE DB. Acceso de solo lectura con filtrado por fechas y paginación. Limitado a 10,000 registros por solicitud y 10 solicitudes por minuto."
 onedb_api.tab_overview,Resumen
 onedb_api.tab_documentation,Documentación
 onedb_api.tab_testing,Pruebas
@@ -1863,7 +1863,7 @@ onedb_api.query_parameters,Parámetros de consulta
 onedb_api.parameter,Parámetro
 onedb_api.type,Tipo
 onedb_api.required,Requerido
-onedb_api.description,Descripción
+onedb_api.description,"API REST para consultar y extraer datos de ONE DB. Acceso de solo lectura con filtrado por fechas y paginación. Limitado a 10,000 registros por solicitud y 10 solicitudes por minuto."
 onedb_api.yes,Sí
 onedb_api.no,No
 onedb_api.start_date,Fecha de inicio
