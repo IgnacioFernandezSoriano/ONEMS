@@ -609,7 +609,7 @@ export function AllocationPlans() {
                 onClick={() => handleCardClick('availabilityIssue', 'any_issue')}
                 className="text-lg font-bold text-red-600 hover:text-red-700 hover:underline cursor-pointer transition-colors"
               >
-                {availabilityCounts.any_issue}
+                {availabilityCounts.unavailable + availabilityCounts.unassigned + availabilityCounts.inactive}
               </button>
             </div>
           </div>
