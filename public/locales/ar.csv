@@ -1900,3 +1900,4 @@ onedb_api.never,أبدًا
 onedb_api.loading_stats,جارٍ تحميل الإحصائيات...
 menu.onedb_api,واجهة برمجة تطبيقات ONE DB
 menu.onedb_api.tooltip,الوصول إلى ONE DB عبر واجهة برمجة التطبيقات REST
+onedb_api.auth_note,"ملاحظة: يستخدم رأس Authorization مفتاح Supabase anon (المقدم من النظام)، بينما يحتوي X-API-Key على مفتاح API الشخصي الخاص بك."

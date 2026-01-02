@@ -15,7 +15,7 @@ export function OneDBAPI() {
   const [testResponse, setTestResponse] = useState<any>(null)
   const [testing, setTesting] = useState(false)
 
-  const apiEndpoint = `${window.location.origin}/api/onedb/records`
+  const apiEndpoint = 'https://sehbnpgzqljrsqimwyuz.supabase.co/functions/v1/onedb-api'
 
   const handleCopyApiKey = () => {
     if (apiKey) {
@@ -64,7 +64,8 @@ export function OneDBAPI() {
       
       const response = await fetch(url, {
         headers: {
-          'Authorization': `Bearer ${apiKey.api_key}`,
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNlaGJucGd6cWxqcnNxaW13eXV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ4OTQzMTEsImV4cCI6MjA4MDQ3MDMxMX0.C-LsSmfOo38Tqc_PwP1c-nFyK1PeVj_mCBqanYsgoeg',
+          'X-API-Key': apiKey.api_key,
           'Content-Type': 'application/json'
         }
       })
@@ -225,9 +226,13 @@ export function OneDBAPI() {
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">{t('onedb_api.authentication_title')}</h2>
             <p className="text-gray-600 mb-4">{t('onedb_api.authentication_description')}</p>
             
-            <div className="bg-gray-50 rounded-lg p-4 font-mono text-sm">
-              <div className="text-gray-500 mb-1">Authorization: Bearer YOUR_API_KEY</div>
+            <div className="bg-gray-50 rounded-lg p-4 font-mono text-sm space-y-2">
+              <div className="text-gray-700">Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</div>
+              <div className="text-gray-700">X-API-Key: YOUR_API_KEY</div>
             </div>
+            <p className="text-sm text-gray-500 mt-2">
+              {t('onedb_api.auth_note')}
+            </p>
           </section>
 
           {/* Endpoints */}
@@ -290,7 +295,8 @@ export function OneDBAPI() {
               <h3 className="font-semibold text-gray-900 mb-2">cURL</h3>
               <div className="bg-gray-900 text-gray-100 rounded-lg p-4 font-mono text-sm overflow-x-auto">
                 <pre>{`curl -X GET "${apiEndpoint}?start_date=2024-01-01&end_date=2024-12-31&limit=100" \\
-  -H "Authorization: Bearer YOUR_API_KEY" \\
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \\
+  -H "X-API-Key: YOUR_API_KEY" \\
   -H "Content-Type: application/json"`}</pre>
               </div>
             </div>
@@ -303,7 +309,8 @@ export function OneDBAPI() {
 
 url = "${apiEndpoint}"
 headers = {
-    "Authorization": "Bearer YOUR_API_KEY",
+    "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "X-API-Key": "YOUR_API_KEY",
     "Content-Type": "application/json"
 }
 params = {
@@ -335,7 +342,8 @@ url.searchParams.append("limit", "100");
 
 const response = await fetch(url, {
   headers: {
-    "Authorization": "Bearer YOUR_API_KEY",
+    "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "X-API-Key": "YOUR_API_KEY",
     "Content-Type": "application/json"
   }
 });

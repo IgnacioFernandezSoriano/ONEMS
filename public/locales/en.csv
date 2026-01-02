@@ -1403,3 +1403,4 @@ onedb_api.never,Never
 onedb_api.loading_stats,Loading statistics...
 menu.onedb_api,ONE DB API
 menu.onedb_api.tooltip,Access ONE DB through REST API
+onedb_api.auth_note,"Note: The Authorization header uses the Supabase anon key (provided by the system), while X-API-Key contains your personal API key."

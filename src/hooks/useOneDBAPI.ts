@@ -111,12 +111,24 @@ export function useOneDBAPI() {
   const generateApiKey = async () => {
     try {
       setLoading(true)
+      setError(null)
       
-      // Generate random API key
-      const randomString = Array.from(crypto.getRandomValues(new Uint8Array(24)))
-        .map(b => b.toString(16).padStart(2, '0'))
-        .join('')
+      // Generate random API key using a more compatible method
+      const generateRandomString = () => {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+        let result = ''
+        const randomValues = new Uint8Array(32)
+        crypto.getRandomValues(randomValues)
+        for (let i = 0; i < 32; i++) {
+          result += chars[randomValues[i] % chars.length]
+        }
+        return result
+      }
+      
+      const randomString = generateRandomString()
       const newApiKey = `onedb_live_${randomString}`
+
+      console.log('Attempting to create API key for account:', profile?.account_id)
 
       const { data, error } = await supabase
         .from('api_keys')
@@ -129,14 +141,20 @@ export function useOneDBAPI() {
         .select()
         .single()
 
-      if (error) throw error
+      if (error) {
+        console.error('Supabase error:', error)
+        throw new Error(`Failed to create API key: ${error.message}`)
+      }
 
+      console.log('API key created successfully:', data)
       setApiKey(data)
       setError(null)
       return data
     } catch (err: any) {
       console.error('Error generating API key:', err)
-      setError(err.message)
+      const errorMessage = err.message || 'Failed to generate API key. Please ensure the database migration has been run.'
+      setError(errorMessage)
+      alert(errorMessage) // Show error to user
       throw err
     } finally {
       setLoading(false)

@@ -1901,3 +1901,4 @@ onedb_api.never,Jamais
 onedb_api.loading_stats,Chargement des statistiques...
 menu.onedb_api,API ONE DB
 menu.onedb_api.tooltip,Accédez à ONE DB via l'API REST
+onedb_api.auth_note,"Remarque : L'en-tête Authorization utilise la clé anon Supabase (fournie par le système), tandis que X-API-Key contient votre clé API personnelle."
