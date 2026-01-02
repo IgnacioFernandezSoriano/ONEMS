@@ -1404,3 +1404,4 @@ onedb_api.loading_stats,Loading statistics...
 menu.onedb_api,ONE DB API
 menu.onedb_api.tooltip,Access ONE DB through REST API
 onedb_api.auth_note,"Note: The Authorization header uses the Supabase anon key (provided by the system), while X-API-Key contains your personal API key."
+onedb_api.max_records_note,"Note: The API returns a maximum of 10,000 records total. Use more specific date ranges if you need to access more data."

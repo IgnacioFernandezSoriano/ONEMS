@@ -1902,3 +1902,4 @@ onedb_api.loading_stats,Chargement des statistiques...
 menu.onedb_api,API ONE DB
 menu.onedb_api.tooltip,Accédez à ONE DB via l'API REST
 onedb_api.auth_note,"Remarque : L'en-tête Authorization utilise la clé anon Supabase (fournie par le système), tandis que X-API-Key contient votre clé API personnelle."
+onedb_api.max_records_note,"Remarque : L'API renvoie un maximum de 10 000 enregistrements au total. Utilisez des plages de dates plus spécifiques si vous avez besoin d'accéder à plus de données."
