@@ -227,28 +227,24 @@ export function Sidebar() {
             },
           ],
         },
+      ],
+    },
+    {
+      label: t('menu.onedb_section'),
+      items: [
         {
           path: '/one-db',
-          label: t('menu.onedb_section'),
+          label: t('menu.reporting_onedb'),
           icon: Database,
           roles: ['admin', 'superadmin'],
-          tooltip: t('menu.onedb_section.tooltip'),
-          children: [
-            {
-              path: '/one-db',
-              label: t('menu.reporting_onedb'),
-              icon: Database,
-              roles: ['admin', 'superadmin'],
-              tooltip: t('menu.reporting_onedb.tooltip'),
-            },
-            {
-              path: '/one-db-api',
-              label: t('menu.get_api'),
-              icon: DatabaseZap,
-              roles: ['admin', 'superadmin'],
-              tooltip: t('menu.get_api.tooltip'),
-            },
-          ],
+          tooltip: t('menu.reporting_onedb.tooltip'),
+        },
+        {
+          path: '/one-db-api',
+          label: t('menu.get_api'),
+          icon: DatabaseZap,
+          roles: ['admin', 'superadmin'],
+          tooltip: t('menu.get_api.tooltip'),
         },
       ],
     },
