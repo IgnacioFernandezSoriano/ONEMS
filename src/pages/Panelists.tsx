@@ -51,12 +51,30 @@ export function Panelists() {
   }, [])
 
   const fetchNodes = async () => {
-    const { data } = await supabase
+    // Obtener nodos activos con información de ciudad
+    const { data: nodesData } = await supabase
       .from('nodes')
       .select('*, city:cities(*)')
       .eq('status', 'active')
       .order('auto_id')
-    if (data) setNodes(data as any)
+    
+    if (!nodesData) {
+      setNodes([])
+      return
+    }
+
+    // Obtener IDs de nodos que ya tienen panelistas asignados
+    const { data: assignedNodes } = await supabase
+      .from('panelists')
+      .select('node_id')
+      .not('node_id', 'is', null)
+    
+    const assignedNodeIds = new Set(assignedNodes?.map(p => p.node_id) || [])
+    
+    // Filtrar solo nodos disponibles (sin panelistas asignados)
+    const availableNodes = nodesData.filter(node => !assignedNodeIds.has(node.id))
+    
+    setNodes(availableNodes as any)
   }
 
   const fetchCities = async () => {
@@ -186,6 +204,8 @@ export function Panelists() {
         await createPanelist(formData)
       }
       handleCloseModal()
+      // Refrescar la lista de nodos disponibles
+      await fetchNodes()
     } catch (err) {
       console.error('Error saving panelist:', err)
       alert('Error saving panelist')
@@ -200,6 +220,8 @@ export function Panelists() {
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this panelist?')) return
     await deletePanelist(id)
+    // Refrescar la lista de nodos disponibles
+    await fetchNodes()
   }
 
   const clearFilters = () => {
