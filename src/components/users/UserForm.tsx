@@ -46,7 +46,8 @@ export function UserForm({ user, onSubmit, onCancel }: UserFormProps) {
         data.password = password
       }
 
-      if (role !== 'superadmin') {
+      // Only set account_id when creating a new user
+      if (!user && role !== 'superadmin') {
         data.account_id = accountId
       }
 
@@ -136,7 +137,7 @@ export function UserForm({ user, onSubmit, onCancel }: UserFormProps) {
             value={accountId}
             onChange={(e) => setAccountId(e.target.value)}
             required
-            disabled={!isSuperadmin}
+            disabled={!!user || !isSuperadmin}
             className="w-full px-3 py-2 border border-gray-300 rounded-md disabled:bg-gray-100"
           >
             <option value="">Select account</option>
