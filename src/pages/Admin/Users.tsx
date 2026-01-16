@@ -8,7 +8,7 @@ import { useUsers } from '@/hooks/useUsers'
 import type { ProfileWithAccount } from '@/lib/types'
 
 export function Users() {
-  const { users, loading, createUser, updateUser, deleteUser } = useUsers()
+  const { users, loading, createUser, updateUser, deleteUser, resetPassword } = useUsers()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<ProfileWithAccount | undefined>()
 
@@ -54,6 +54,7 @@ export function Users() {
         users={users}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        onResetPassword={resetPassword}
       />
 
       <Modal

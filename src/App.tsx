@@ -11,6 +11,7 @@ import { Dashboard } from './pages/Dashboard'
 import { Settings } from './pages/Settings/Settings'
 import { Accounts } from './pages/Settings/Accounts'
 import { AllUsers } from './pages/Settings/AllUsers'
+import { ChangePassword } from './pages/Settings/ChangePassword'
 import { Users } from './pages/Admin/Users'
 import { AccountManagement } from './pages/Admin/AccountManagement'
 import TranslationManager from './pages/Admin/TranslationManager'
@@ -259,6 +260,9 @@ function App() {
                         </ProtectedRoute>
                       }
                     />
+                    
+                    {/* Change Password - for all authenticated users */}
+                    <Route path="/settings/change-password" element={<ChangePassword />} />
                     
                     {/* Users route - for admin and superadmin */}
                     <Route
