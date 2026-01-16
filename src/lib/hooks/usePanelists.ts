@@ -89,7 +89,7 @@ export function usePanelists() {
         // Get node information to extract city and node number
         const { data: nodeData, error: nodeError } = await supabase
           .from('nodes')
-          .select('node_code, city:cities(name)')
+          .select('auto_id, city:cities(name)')
           .eq('id', panelistData.node_id)
           .single()
 
@@ -97,8 +97,8 @@ export function usePanelists() {
           throw new Error('Node not found')
         }
 
-        // Extract node number from node_code (e.g., "CENTRO-MAD-002" -> "002")
-        const nodeMatch = nodeData.node_code?.match(/(\d+)$/)
+        // Extract node number from auto_id (e.g., "CENTRO-MAD-002" -> "002")
+        const nodeMatch = nodeData.auto_id?.match(/(\d+)$/)
         const nodeNumber = nodeMatch ? nodeMatch[1] : '000'
 
         // Get city name (first 3 letters, uppercase)
