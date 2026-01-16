@@ -59,7 +59,7 @@ export function useMaterialCatalog() {
   const createCatalogItem = async (data: Partial<MaterialCatalog>) => {
     const { data: newItem, error } = await supabase
       .from('material_catalog')
-      .insert(data)
+      .insert({ ...data, account_id: effectiveAccountId })
       .select()
       .single()
     
