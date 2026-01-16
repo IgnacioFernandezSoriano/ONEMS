@@ -6,8 +6,11 @@ import { PanelistUnavailabilityComponent } from '@/components/PanelistUnavailabi
 import { SmartTooltip } from '@/components/common/SmartTooltip'
 
 import { useTranslation } from '@/hooks/useTranslation';
+import { useAccount } from '@/contexts/AccountContext';
+
 export function Panelists() {
   const { t } = useTranslation();
+  const { effectiveAccountId } = useAccount();
   const { panelists, loading, error, createPanelist, updatePanelist, deletePanelist } = usePanelists()
   const [showModal, setShowModal] = useState(false)
   const [editingPanelist, setEditingPanelist] = useState<any>(null)
@@ -48,15 +51,21 @@ export function Panelists() {
   useEffect(() => {
     fetchNodes()
     fetchCities()
-  }, [])
+  }, [effectiveAccountId]) // Refrescar cuando cambie la cuenta seleccionada
 
   const fetchNodes = async () => {
-    // Obtener nodos activos con información de ciudad
-    const { data: nodesData } = await supabase
+    // Construir query base
+    let query = supabase
       .from('nodes')
       .select('*, city:cities(*)')
       .eq('status', 'active')
-      .order('auto_id')
+    
+    // Si hay una cuenta seleccionada (superadmin con cuenta específica), filtrar por ella
+    if (effectiveAccountId) {
+      query = query.eq('account_id', effectiveAccountId)
+    }
+    
+    const { data: nodesData } = await query.order('auto_id')
     
     if (!nodesData) {
       setNodes([])
@@ -64,10 +73,17 @@ export function Panelists() {
     }
 
     // Obtener IDs de nodos que ya tienen panelistas asignados
-    const { data: assignedNodes } = await supabase
+    let panelistsQuery = supabase
       .from('panelists')
       .select('node_id')
       .not('node_id', 'is', null)
+    
+    // También filtrar panelistas por cuenta si aplica
+    if (effectiveAccountId) {
+      panelistsQuery = panelistsQuery.eq('account_id', effectiveAccountId)
+    }
+    
+    const { data: assignedNodes } = await panelistsQuery
     
     const assignedNodeIds = new Set(assignedNodes?.map(p => p.node_id) || [])
     
