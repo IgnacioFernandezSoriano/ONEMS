@@ -7,9 +7,11 @@ import { SmartTooltip } from '@/components/common/SmartTooltip'
 
 import { useTranslation } from '@/hooks/useTranslation';
 import { useAccount } from '@/contexts/AccountContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function Panelists() {
   const { t } = useTranslation();
+  const { profile } = useAuth();
   const { effectiveAccountId } = useAccount();
   const { panelists, loading, error, createPanelist, updatePanelist, deletePanelist } = usePanelists()
   const [showModal, setShowModal] = useState(false)
@@ -49,11 +51,21 @@ export function Panelists() {
   })
 
   useEffect(() => {
+    // Solo cargar nodos cuando el perfil del usuario esté disponible
+    // Esto evita el race condition donde fetchNodes se ejecuta antes de que effectiveAccountId esté listo
+    if (!profile) {
+      console.log('[Panelists] Esperando a que el perfil del usuario se cargue...')
+      return
+    }
+    
+    console.log('[Panelists] Perfil cargado, ejecutando fetchNodes con effectiveAccountId:', effectiveAccountId)
     fetchNodes()
     fetchCities()
-  }, [effectiveAccountId]) // Refrescar cuando cambie la cuenta seleccionada
+  }, [profile, effectiveAccountId]) // Refrescar cuando cambie el perfil o la cuenta seleccionada
 
   const fetchNodes = async () => {
+    console.log('[Panelists] fetchNodes - effectiveAccountId:', effectiveAccountId)
+    
     // Construir query base
     let query = supabase
       .from('nodes')
@@ -62,7 +74,10 @@ export function Panelists() {
     
     // Si hay una cuenta seleccionada (superadmin con cuenta específica), filtrar por ella
     if (effectiveAccountId) {
+      console.log('[Panelists] Filtrando nodos por account_id:', effectiveAccountId)
       query = query.eq('account_id', effectiveAccountId)
+    } else {
+      console.log('[Panelists] NO se está filtrando por cuenta (effectiveAccountId es null)')
     }
     
     const { data: nodesData } = await query.order('auto_id')
