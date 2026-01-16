@@ -63,7 +63,11 @@ export function useTopology() {
 
   // Region operations
   const createRegion = async (data: { name: string; code: string; description?: string }) => {
-    const { data: newRegion, error } = await supabase.from('regions').insert(data).select().single()
+    const { data: newRegion, error } = await supabase
+      .from('regions')
+      .insert({ ...data, account_id: effectiveAccountId })
+      .select()
+      .single()
     if (error) throw error
     setRegions([...regions, newRegion])
   }
@@ -90,7 +94,11 @@ export function useTopology() {
     latitude?: number
     longitude?: number
   }) => {
-    const { data: newCity, error } = await supabase.from('cities').insert(data).select().single()
+    const { data: newCity, error } = await supabase
+      .from('cities')
+      .insert({ ...data, account_id: effectiveAccountId })
+      .select()
+      .single()
     if (error) throw error
     setCities([...cities, newCity])
   }
@@ -122,6 +130,7 @@ export function useTopology() {
       city_id: data.city_id,
       auto_id: autoIdData,
       status: 'active',
+      account_id: effectiveAccountId,
     })
 
     if (error) throw error

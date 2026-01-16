@@ -542,8 +542,13 @@ export function CountryTopology() {
         >
           <RegionForm
             onSubmit={async (data) => {
-              await createRegion(data)
-              setShowRegionModal(false)
+              try {
+                await createRegion(data)
+                setShowRegionModal(false)
+              } catch (err: any) {
+                alert(`Error creating region: ${err.message}`)
+                throw err
+              }
             }}
             onCancel={() => setShowRegionModal(false)}
           />

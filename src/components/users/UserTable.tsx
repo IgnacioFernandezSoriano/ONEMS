@@ -201,12 +201,12 @@ export function UserTable({ users, onEdit, onDelete, onResetPassword }: UserTabl
                     size="sm"
                     variant="danger"
                     onClick={() => {
-                      if (confirm('Are you sure you want to deactivate this user?')) {
+                      if (confirm('Are you sure you want to permanently delete this user? This action cannot be undone.')) {
                         onDelete(user.id)
                       }
                     }}
                   >
-                    Deactivate
+                    Delete
                   </Button>
                 </td>
               </tr>

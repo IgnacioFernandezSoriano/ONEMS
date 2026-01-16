@@ -112,13 +112,13 @@ export function useUsers() {
   }
 
   const deleteUser = async (id: string) => {
-    // Nota: Esto solo desactiva el perfil, no elimina el usuario de Auth
-    const { error } = await supabase
-      .from('profiles')
-      .update({ status: 'inactive' } as any)
-      .eq('id', id)
+    // Eliminar usuario de Supabase Auth (libera el email para reutilización)
+    const { error: authError } = await supabase.auth.admin.deleteUser(id)
+    if (authError) throw authError
 
-    if (error) throw error
+    // El perfil se elimina automáticamente por CASCADE (ON DELETE CASCADE)
+    // No es necesario eliminar manualmente de profiles
+    
     await fetchUsers()
   }
 
@@ -141,6 +141,21 @@ export function useUsers() {
     }
   }
 
+  const transferUser = async (userId: string, newAccountId: string) => {
+    // Solo superadmin puede transferir usuarios
+    if (profile?.role !== 'superadmin') {
+      throw new Error('Only superadmin can transfer users between accounts')
+    }
+
+    const { error } = await supabase
+      .from('profiles')
+      .update({ account_id: newAccountId } as any)
+      .eq('id', userId)
+
+    if (error) throw error
+    await fetchUsers()
+  }
+
   return {
     users,
     loading,
@@ -148,6 +163,7 @@ export function useUsers() {
     createUser,
     updateUser,
     deleteUser,
+    transferUser,
     resetPassword,
     refresh: fetchUsers,
   }
