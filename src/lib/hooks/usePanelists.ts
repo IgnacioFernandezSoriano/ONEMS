@@ -39,6 +39,8 @@ export function usePanelists() {
       // Transform data to flatten relationships
       const transformedData = data?.map((panelist: any) => ({
         ...panelist,
+        node_id: panelist.node_id, // Explicitly preserve node_id
+        city_id: panelist.city_id, // Explicitly preserve city_id  
         node: panelist.node,
         city: panelist.node?.city,
         region: panelist.node?.city?.region,
