@@ -13,6 +13,7 @@ export interface ResetResult {
   account_name?: string
   message: string
   deleted_records?: Record<string, number>
+  inserted_records?: Record<string, number>
 }
 
 export function useAccountManagement() {
@@ -41,9 +42,7 @@ export function useAccountManagement() {
   const resetAccountData = async (accountIdentifier: string): Promise<ResetResult> => {
     setResetting(true)
     try {
-      const { data, error } = await supabase.rpc('admin_reset_account_data', {
-        p_account_identifier: accountIdentifier
-      })
+      const { data, error } = await supabase.rpc('admin_reset_and_seed_demo2')
 
       if (error) throw error
 
