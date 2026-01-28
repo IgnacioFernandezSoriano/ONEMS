@@ -41,9 +41,8 @@ export function useAccountManagement() {
   const resetAccountData = async (accountIdentifier: string): Promise<ResetResult> => {
     setResetting(true)
     try {
-      const { data, error } = await supabase.rpc('admin_reset_account_data', {
-        p_account_identifier: accountIdentifier
-      })
+      // Call new extended function that deletes and reloads configuration data
+      const { data, error } = await supabase.rpc('admin_reset_and_seed_demo2', {})
 
       if (error) throw error
 

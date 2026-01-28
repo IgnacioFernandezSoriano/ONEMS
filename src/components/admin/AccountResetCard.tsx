@@ -126,6 +126,21 @@ export function AccountResetCard({ account, onReset, disabled }: AccountResetCar
                   </ul>
                 </div>
               )}
+              
+              {result.success && (result as any).inserted_records && (
+                <div className="mt-2 text-sm text-green-700">
+                  <p className="font-medium">Reloaded Records:</p>
+                  <ul className="mt-1 list-disc list-inside space-y-1">
+                    {Object.entries((result as any).inserted_records).map(([table, count]) => (
+                      count > 0 && (
+                        <li key={table}>
+                          {table.replace(/_/g, ' ')}: <span className="font-semibold">{count}</span>
+                        </li>
+                      )
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -151,9 +166,10 @@ export function AccountResetCard({ account, onReset, disabled }: AccountResetCar
                   <li>{t('admin.all_material_stocks')}</li>
                   <li>{t('admin.all_purchase_orders')}</li>
                   <li>{t('admin.all_balancing_history')}</li>
+                  <li className="font-semibold text-red-700">All configuration data (regions, cities, nodes, carriers, products, panelists, delivery standards)</li>
                 </ul>
-                <p className="mt-2 font-medium">
-                  {t('admin.configuration_data_nodes_panelists_materials_etc_w')}
+                <p className="mt-2 font-medium text-green-700">
+                  ✓ Predefined DEMO2 data will be automatically reloaded
                 </p>
               </div>
             </div>
