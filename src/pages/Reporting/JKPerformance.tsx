@@ -54,25 +54,69 @@ export default function JKPerformance() {
 
   // Recalculate all derived data based on filtered routes
   const { routeData, cityData, regionData, carrierData, productData, weeklySamples, metrics } = useMemo(() => {
+    // Apply compliance status filter first
+    let baseRouteData = rawRouteData;
+    let baseCityData = rawCityData;
+    let baseRegionData = rawRegionData;
+    let baseCarrierData = rawCarrierData;
+    let baseProductData = rawProductData;
+
+    // Filter by compliance status if selected
+    if (filters.complianceStatus) {
+      const selectedStatuses = filters.complianceStatus.split(',').filter(s => s);
+      if (selectedStatuses.length > 0 && selectedStatuses.length < 3) {
+        baseRouteData = baseRouteData.filter(r => selectedStatuses.includes(r.status));
+        baseCityData = baseCityData.filter(c => selectedStatuses.includes(c.status));
+        baseRegionData = baseRegionData.filter(r => selectedStatuses.includes(r.status));
+        baseCarrierData = baseCarrierData.filter(c => selectedStatuses.includes(c.status));
+        baseProductData = baseProductData.filter(p => selectedStatuses.includes(p.status));
+      }
+    }
+
     if (!showProblematicOnly) {
       // Sort weekly samples chronologically even when no filter is active
       const sortedWeeklySamples = [...rawWeeklySamples].sort((a, b) => 
         new Date(a.weekStart).getTime() - new Date(b.weekStart).getTime()
       );
       
+      // Recalculate metrics from filtered data
+      const totalSamples = baseRouteData.reduce((sum, r) => sum + r.totalSamples, 0);
+      const totalWeightedJKActual = baseRouteData.reduce((sum, r) => sum + r.jkActual * r.totalSamples, 0);
+      const totalWeightedJKStandard = baseRouteData.reduce((sum, r) => sum + r.jkStandard * r.totalSamples, 0);
+      const onTimeSamples = baseRouteData.reduce((sum, r) => sum + r.onTimeSamples, 0);
+      const avgJKActual = totalSamples > 0 ? totalWeightedJKActual / totalSamples : 0;
+      const avgJKStandard = totalSamples > 0 ? totalWeightedJKStandard / totalSamples : 0;
+      const onTimePercentage = totalSamples > 0 ? (onTimeSamples / totalSamples) * 100 : 0;
+      const problematicRoutes = baseRouteData.filter(r => r.onTimePercentage <= r.criticalThreshold).length;
+
+      const filteredMetrics = {
+        totalSamples,
+        avgJKActual,
+        avgJKStandard,
+        onTimePercentage,
+        onTimeSamples,
+        problematicRoutes,
+      };
+      
       return {
-        routeData: rawRouteData,
-        cityData: rawCityData,
-        regionData: rawRegionData,
-        carrierData: rawCarrierData,
-        productData: rawProductData,
+        routeData: baseRouteData,
+        cityData: baseCityData,
+        regionData: baseRegionData,
+        carrierData: baseCarrierData,
+        productData: baseProductData,
         weeklySamples: sortedWeeklySamples,
-        metrics: rawMetrics,
+        metrics: filteredMetrics,
       };
     }
 
-    // Use filtered route data
-    const routeData = filteredRouteData;
+    // Use filtered route data and apply compliance status filter
+    let routeData = filteredRouteData;
+    if (filters.complianceStatus) {
+      const selectedStatuses = filters.complianceStatus.split(',').filter(s => s);
+      if (selectedStatuses.length > 0 && selectedStatuses.length < 3) {
+        routeData = routeData.filter(r => selectedStatuses.includes(r.status));
+      }
+    }
 
     // Recalculate metrics from filtered routes
     const totalSamples = routeData.reduce((sum, r) => sum + r.totalSamples, 0);
@@ -413,7 +457,7 @@ export default function JKPerformance() {
       weeklySamples,
       metrics,
     };
-  }, [rawRouteData, rawCityData, rawRegionData, rawCarrierData, rawProductData, rawWeeklySamples, rawMetrics, filteredRouteData, showProblematicOnly, globalWarningThreshold, globalCriticalThreshold]);
+  }, [rawRouteData, rawCityData, rawRegionData, rawCarrierData, rawProductData, rawWeeklySamples, rawMetrics, filteredRouteData, showProblematicOnly, globalWarningThreshold, globalCriticalThreshold, filters.complianceStatus]);
 
   if (loading) {
     return (
@@ -558,7 +602,7 @@ export default function JKPerformance() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <h3 className="text-lg font-semibold text-gray-900">
-                    {t('reporting.route_performance', { count: routeData.length })}
+                    Route performance ({routeData.length} routes)
                   </h3>
                   {showProblematicOnly && (
                     <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded">
@@ -671,7 +715,7 @@ export default function JKPerformance() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <h3 className="text-lg font-semibold text-gray-900">
-                    {t('reporting.city_performance', { count: cityData.length })}
+                    City performance ({cityData.length} cities)
                   </h3>
                   {showProblematicOnly && (
                     <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded">
@@ -769,7 +813,7 @@ export default function JKPerformance() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <h3 className="text-lg font-semibold text-gray-900">
-                    {t('reporting.region_performance', { count: regionData.length })}
+                    Region performance ({regionData.length} regions)
                   </h3>
                   {showProblematicOnly && (
                     <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded">
@@ -867,7 +911,7 @@ export default function JKPerformance() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <h3 className="text-lg font-semibold text-gray-900">
-                    {t('reporting.carrier_product_performance', { count: carrierData.length })}
+                    Carrier / Product performance ({carrierData.length} carriers)
                   </h3>
                   {showProblematicOnly && (
                     <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded">
