@@ -188,6 +188,10 @@ export default function JKPerformance() {
       inbound.totalWeightedJKStandard += route.jkStandard * route.totalSamples;
       inbound.totalWeightedJKActual += route.jkActual * route.totalSamples;
       inbound.onTimeSamples += route.onTimeSamples;
+      inbound.standardPercentageSum += route.standardPercentage;
+      inbound.warningThresholdSum += route.warningThreshold;
+      inbound.criticalThresholdSum += route.criticalThreshold;
+      inbound.thresholdCount++;
     });
 
     const cityData = Array.from(cityMap.values()).map(city => {
@@ -195,7 +199,10 @@ export default function JKPerformance() {
       const jkActual = city.totalSamples > 0 ? city.totalWeightedJKActual / city.totalSamples : 0;
       const deviation = jkActual - jkStandard;
       const onTimePercentage = city.totalSamples > 0 ? (city.onTimeSamples / city.totalSamples) * 100 : 0;
-      const status: 'compliant' | 'warning' | 'critical' = onTimePercentage >= globalWarningThreshold ? 'compliant' : onTimePercentage > globalCriticalThreshold ? 'warning' : 'critical';
+      const standardPercentage = city.thresholdCount > 0 ? city.standardPercentageSum / city.thresholdCount : 85;
+      const warningThreshold = city.thresholdCount > 0 ? city.warningThresholdSum / city.thresholdCount : 80;
+      const criticalThreshold = city.thresholdCount > 0 ? city.criticalThresholdSum / city.thresholdCount : 75;
+      const status: 'compliant' | 'warning' | 'critical' = onTimePercentage >= warningThreshold ? 'compliant' : onTimePercentage > criticalThreshold ? 'warning' : 'critical';
       
       // Find region name from original data
       const originalCity = rawCityData.find(c => c.cityName === city.cityName && c.direction === city.direction);
@@ -207,6 +214,9 @@ export default function JKPerformance() {
         jkActual,
         deviation,
         onTimePercentage,
+        standardPercentage,
+        warningThreshold,
+        criticalThreshold,
         status,
       };
     });
@@ -225,6 +235,10 @@ export default function JKPerformance() {
           totalWeightedJKStandard: 0,
           totalWeightedJKActual: 0,
           onTimeSamples: 0,
+          standardPercentageSum: 0,
+          warningThresholdSum: 0,
+          criticalThresholdSum: 0,
+          thresholdCount: 0,
         });
       }
       const region = regionMap.get(key);
@@ -234,6 +248,10 @@ export default function JKPerformance() {
       region.totalWeightedJKStandard += city.jkStandard * city.totalSamples;
       region.totalWeightedJKActual += city.jkActual * city.totalSamples;
       region.onTimeSamples += city.onTimeSamples;
+      region.standardPercentageSum += city.standardPercentage;
+      region.warningThresholdSum += city.warningThreshold;
+      region.criticalThresholdSum += city.criticalThreshold;
+      region.thresholdCount++;
     });
 
     const regionData = Array.from(regionMap.values()).map(region => {
@@ -241,7 +259,10 @@ export default function JKPerformance() {
       const jkActual = region.totalSamples > 0 ? region.totalWeightedJKActual / region.totalSamples : 0;
       const deviation = jkActual - jkStandard;
       const onTimePercentage = region.totalSamples > 0 ? (region.onTimeSamples / region.totalSamples) * 100 : 0;
-      const status: 'compliant' | 'warning' | 'critical' = onTimePercentage >= globalWarningThreshold ? 'compliant' : onTimePercentage > globalCriticalThreshold ? 'warning' : 'critical';
+      const standardPercentage = region.thresholdCount > 0 ? region.standardPercentageSum / region.thresholdCount : 85;
+      const warningThreshold = region.thresholdCount > 0 ? region.warningThresholdSum / region.thresholdCount : 80;
+      const criticalThreshold = region.thresholdCount > 0 ? region.criticalThresholdSum / region.thresholdCount : 75;
+      const status: 'compliant' | 'warning' | 'critical' = onTimePercentage >= warningThreshold ? 'compliant' : onTimePercentage > criticalThreshold ? 'warning' : 'critical';
       
       return {
         regionName: region.regionName,
@@ -253,6 +274,9 @@ export default function JKPerformance() {
         jkActual,
         deviation,
         onTimePercentage,
+        standardPercentage,
+        warningThreshold,
+        criticalThreshold,
         status,
       };
     });
@@ -270,6 +294,10 @@ export default function JKPerformance() {
           onTimeSamples: 0,
           problematicRoutes: 0,
           products: new Map(),
+          standardPercentageSum: 0,
+          warningThresholdSum: 0,
+          criticalThresholdSum: 0,
+          thresholdCount: 0,
         });
       }
       const carrier = carrierMap.get(route.carrier);
@@ -278,6 +306,10 @@ export default function JKPerformance() {
       carrier.totalWeightedJKStandard += route.jkStandard * route.totalSamples;
       carrier.totalWeightedJKActual += route.jkActual * route.totalSamples;
       carrier.onTimeSamples += route.onTimeSamples;
+      carrier.standardPercentageSum += route.standardPercentage;
+      carrier.warningThresholdSum += route.warningThreshold;
+      carrier.criticalThresholdSum += route.criticalThreshold;
+      carrier.thresholdCount++;
       if (route.onTimePercentage <= route.criticalThreshold) {
         carrier.problematicRoutes++;
       }
@@ -291,6 +323,10 @@ export default function JKPerformance() {
           totalWeightedJKStandard: 0,
           totalWeightedJKActual: 0,
           onTimeSamples: 0,
+          standardPercentageSum: 0,
+          warningThresholdSum: 0,
+          criticalThresholdSum: 0,
+          thresholdCount: 0,
         });
       }
       const product = carrier.products.get(route.product);
@@ -299,6 +335,10 @@ export default function JKPerformance() {
       product.totalWeightedJKStandard += route.jkStandard * route.totalSamples;
       product.totalWeightedJKActual += route.jkActual * route.totalSamples;
       product.onTimeSamples += route.onTimeSamples;
+      product.standardPercentageSum += route.standardPercentage;
+      product.warningThresholdSum += route.warningThreshold;
+      product.criticalThresholdSum += route.criticalThreshold;
+      product.thresholdCount++;
     });
 
     const carrierData = Array.from(carrierMap.values()).map(carrier => {
@@ -306,14 +346,20 @@ export default function JKPerformance() {
       const jkActual = carrier.totalSamples > 0 ? carrier.totalWeightedJKActual / carrier.totalSamples : 0;
       const deviation = jkActual - jkStandard;
       const onTimePercentage = carrier.totalSamples > 0 ? (carrier.onTimeSamples / carrier.totalSamples) * 100 : 0;
-      const status: 'compliant' | 'warning' | 'critical' = onTimePercentage >= globalWarningThreshold ? 'compliant' : onTimePercentage > globalCriticalThreshold ? 'warning' : 'critical';
+      const standardPercentage = carrier.thresholdCount > 0 ? carrier.standardPercentageSum / carrier.thresholdCount : 85;
+      const warningThreshold = carrier.thresholdCount > 0 ? carrier.warningThresholdSum / carrier.thresholdCount : 80;
+      const criticalThreshold = carrier.thresholdCount > 0 ? carrier.criticalThresholdSum / carrier.thresholdCount : 75;
+      const status: 'compliant' | 'warning' | 'critical' = onTimePercentage >= warningThreshold ? 'compliant' : onTimePercentage > criticalThreshold ? 'warning' : 'critical';
       
       const products = Array.from(carrier.products.values()).map((p: any) => {
         const pJkStandard = p.totalSamples > 0 ? p.totalWeightedJKStandard / p.totalSamples : 0;
         const pJkActual = p.totalSamples > 0 ? p.totalWeightedJKActual / p.totalSamples : 0;
         const pDeviation = pJkActual - pJkStandard;
         const pOnTimePercentage = p.totalSamples > 0 ? (p.onTimeSamples / p.totalSamples) * 100 : 0;
-        const pStatus: 'compliant' | 'warning' | 'critical' = pOnTimePercentage >= globalWarningThreshold ? 'compliant' : pOnTimePercentage > globalCriticalThreshold ? 'warning' : 'critical';
+        const pStandardPercentage = p.thresholdCount > 0 ? p.standardPercentageSum / p.thresholdCount : 85;
+        const pWarningThreshold = p.thresholdCount > 0 ? p.warningThresholdSum / p.thresholdCount : 80;
+        const pCriticalThreshold = p.thresholdCount > 0 ? p.criticalThresholdSum / p.thresholdCount : 75;
+        const pStatus: 'compliant' | 'warning' | 'critical' = pOnTimePercentage >= pWarningThreshold ? 'compliant' : pOnTimePercentage > pCriticalThreshold ? 'warning' : 'critical';
         
         return {
           product: p.product,
@@ -323,6 +369,9 @@ export default function JKPerformance() {
           jkActual: pJkActual,
           deviation: pDeviation,
           onTimePercentage: pOnTimePercentage,
+          standardPercentage: pStandardPercentage,
+          warningThreshold: pWarningThreshold,
+          criticalThreshold: pCriticalThreshold,
           status: pStatus,
         };
       });
@@ -335,6 +384,9 @@ export default function JKPerformance() {
         jkActual,
         deviation,
         onTimePercentage,
+        standardPercentage,
+        warningThreshold,
+        criticalThreshold,
         problematicRoutes: carrier.problematicRoutes,
         status,
         products,
@@ -881,6 +933,9 @@ export default function JKPerformance() {
                         <div className="flex items-center gap-1">Deviation <ColumnTooltip content="Weighted average deviation (Actual - Standard) across all routes in this region." /></div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <div className="flex items-center gap-1">STD % <ColumnTooltip content="Weighted average target on-time percentage across all routes in this region. This is the required performance threshold that must be achieved." /></div>
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                         <div className="flex items-center gap-1">On-Time % <ColumnTooltip content="Percentage of all shipments (across all routes) delivered on-time in this region." /></div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
@@ -901,7 +956,7 @@ export default function JKPerformance() {
                       })
                       .map((region, idx) => {
                       const deviationColor = region.deviation <= 0 ? 'text-green-600' : region.deviation < 1 ? 'text-yellow-600' : 'text-red-600';
-                      const onTimeColor = region.onTimePercentage >= globalWarningThreshold ? 'text-green-600 font-semibold' : region.onTimePercentage > globalCriticalThreshold ? 'text-yellow-600' : 'text-red-600 font-semibold';
+                      const onTimeColor = region.onTimePercentage >= region.warningThreshold ? 'text-green-600 font-semibold' : region.onTimePercentage > region.criticalThreshold ? 'text-yellow-600' : 'text-red-600 font-semibold';
                       const statusColor = region.status === 'compliant' ? 'bg-green-500' : region.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500';
                       const directionIcon = region.direction === 'inbound' ? '🔵 ↓' : '🟢 ↑';
                       
@@ -915,6 +970,9 @@ export default function JKPerformance() {
                           <td className="px-3 py-2 text-sm text-gray-900">{region.jkActual.toFixed(1)}</td>
                           <td className={`px-3 py-2 text-sm ${deviationColor}`}>
                             {region.deviation > 0 ? '+' : ''}{region.deviation.toFixed(1)}
+                          </td>
+                          <td className="px-3 py-2 text-sm text-gray-900">
+                            {region.standardPercentage.toFixed(0)}%
                           </td>
                           <td className={`px-3 py-2 text-sm ${onTimeColor}`}>
                             {region.onTimePercentage.toFixed(1)}%
@@ -976,6 +1034,9 @@ export default function JKPerformance() {
                         <div className="flex items-center gap-1">Deviation <ColumnTooltip content="Weighted average deviation (Actual - Standard) across all routes for this carrier or product." /></div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <div className="flex items-center gap-1">STD % <ColumnTooltip content="Weighted average target on-time percentage across all routes for this carrier or product. This is the required performance threshold that must be achieved." /></div>
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                         <div className="flex items-center gap-1">On-Time % <ColumnTooltip content="Percentage of all shipments delivered on-time for this carrier or product." /></div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
@@ -999,7 +1060,7 @@ export default function JKPerformance() {
                       })
                       .map((carrier, carrierIdx) => {
                       const carrierDeviationColor = carrier.deviation <= 0 ? 'text-green-600' : carrier.deviation < 1 ? 'text-yellow-600' : 'text-red-600';
-                      const carrierOnTimeColor = carrier.onTimePercentage >= globalWarningThreshold ? 'text-green-600 font-semibold' : carrier.onTimePercentage > globalCriticalThreshold ? 'text-yellow-600' : 'text-red-600 font-semibold';
+                      const carrierOnTimeColor = carrier.onTimePercentage >= carrier.warningThreshold ? 'text-green-600 font-semibold' : carrier.onTimePercentage > carrier.criticalThreshold ? 'text-yellow-600' : 'text-red-600 font-semibold';
                       const carrierStatusColor = carrier.status === 'compliant' ? 'bg-green-500' : carrier.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500';
                       
                       return (
@@ -1014,6 +1075,9 @@ export default function JKPerformance() {
                             <td className={`px-3 py-2 text-sm font-semibold ${carrierDeviationColor}`}>
                               {carrier.deviation > 0 ? '+' : ''}{carrier.deviation.toFixed(1)}
                             </td>
+                            <td className="px-3 py-2 text-sm font-semibold text-gray-900">
+                              {carrier.standardPercentage.toFixed(0)}%
+                            </td>
                             <td className={`px-3 py-2 text-sm ${carrierOnTimeColor}`}>
                               {carrier.onTimePercentage.toFixed(1)}%
                             </td>
@@ -1027,7 +1091,7 @@ export default function JKPerformance() {
                           {/* Product Rows */}
                           {carrier.products.map((product, productIdx) => {
                             const productDeviationColor = product.deviation <= 0 ? 'text-green-600' : product.deviation < 1 ? 'text-yellow-600' : 'text-red-600';
-                            const productOnTimeColor = product.onTimePercentage >= globalWarningThreshold ? 'text-green-600 font-semibold' : product.onTimePercentage > globalCriticalThreshold ? 'text-yellow-600' : 'text-red-600 font-semibold';
+                            const productOnTimeColor = product.onTimePercentage >= product.warningThreshold ? 'text-green-600 font-semibold' : product.onTimePercentage > product.criticalThreshold ? 'text-yellow-600' : 'text-red-600 font-semibold';
                             const productStatusColor = product.status === 'compliant' ? 'bg-green-500' : product.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500';
                             
                             return (
@@ -1039,6 +1103,9 @@ export default function JKPerformance() {
                                 <td className="px-3 py-2 text-sm text-gray-900">{product.jkActual.toFixed(1)}</td>
                                 <td className={`px-3 py-2 text-sm ${productDeviationColor}`}>
                                   {product.deviation > 0 ? '+' : ''}{product.deviation.toFixed(1)}
+                                </td>
+                                <td className="px-3 py-2 text-sm text-gray-900">
+                                  {product.standardPercentage.toFixed(0)}%
                                 </td>
                                 <td className={`px-3 py-2 text-sm ${productOnTimeColor}`}>
                                   {product.onTimePercentage.toFixed(1)}%
