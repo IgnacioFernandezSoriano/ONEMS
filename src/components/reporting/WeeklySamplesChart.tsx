@@ -1,4 +1,4 @@
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface WeeklySample {
   weekStart: string;
@@ -18,25 +18,18 @@ export function WeeklySamplesChart({ data }: WeeklySamplesChartProps) {
     );
   }
 
-  // Format date for display
+  // Format date for display with year
   const formattedData = data.map(item => ({
     ...item,
     weekLabel: new Date(item.weekStart).toLocaleDateString('es-ES', { 
-      month: 'short', 
-      day: 'numeric' 
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
     }),
   }));
 
-  // Calculate average for reference line
+  // Calculate average for reference
   const avgSamples = data.reduce((sum, item) => sum + item.samples, 0) / data.length;
-
-  // Color bars based on sample count (green if above average, blue otherwise)
-  const getBarColor = (samples: number) => {
-    if (samples >= avgSamples * 1.2) return '#10b981'; // green-500
-    if (samples >= avgSamples) return '#3b82f6'; // blue-500
-    if (samples >= avgSamples * 0.8) return '#f59e0b'; // amber-500
-    return '#ef4444'; // red-500
-  };
 
   return (
     <div className="w-full h-64">
@@ -64,35 +57,11 @@ export function WeeklySamplesChart({ data }: WeeklySamplesChartProps) {
             formatter={(value: any) => typeof value === 'number' ? [value.toLocaleString(), 'Samples'] : ['', '']}
             labelFormatter={(label) => `Week of ${label}`}
           />
-          <Bar dataKey="samples" radius={[4, 4, 0, 0]}>
-            {formattedData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={getBarColor(entry.samples)} />
-            ))}
-          </Bar>
+          <Bar dataKey="samples" fill="#3b82f6" radius={[4, 4, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
-      <div className="mt-2 space-y-2">
-        <div className="text-xs text-gray-500 text-center">
-          Average: {avgSamples.toFixed(0)} samples/week
-        </div>
-        <div className="flex items-center justify-center gap-4 text-xs">
-          <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded bg-green-500"></div>
-            <span className="text-gray-600">≥120% avg</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded bg-blue-500"></div>
-            <span className="text-gray-600">≥100% avg</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded bg-amber-500"></div>
-            <span className="text-gray-600">80-100% avg</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded bg-red-500"></div>
-            <span className="text-gray-600">&lt;80% avg</span>
-          </div>
-        </div>
+      <div className="mt-2 text-xs text-gray-500 text-center">
+        Average: {avgSamples.toFixed(0)} samples/week
       </div>
     </div>
   );

@@ -55,13 +55,18 @@ export default function JKPerformance() {
   // Recalculate all derived data based on filtered routes
   const { routeData, cityData, regionData, carrierData, productData, weeklySamples, metrics } = useMemo(() => {
     if (!showProblematicOnly) {
+      // Sort weekly samples chronologically even when no filter is active
+      const sortedWeeklySamples = [...rawWeeklySamples].sort((a, b) => 
+        new Date(a.weekStart).getTime() - new Date(b.weekStart).getTime()
+      );
+      
       return {
         routeData: rawRouteData,
         cityData: rawCityData,
         regionData: rawRegionData,
         carrierData: rawCarrierData,
         productData: rawProductData,
-        weeklySamples: rawWeeklySamples,
+        weeklySamples: sortedWeeklySamples,
         metrics: rawMetrics,
       };
     }
@@ -370,12 +375,34 @@ export default function JKPerformance() {
     });
 
     // Recalculate weekly samples from filtered routes
-    // Note: This is a simplified version - ideally we'd need shipment-level data
-    const weeklySamples = rawWeeklySamples.map(week => {
-      // For now, we'll keep the original weekly samples as we don't have shipment-level data
-      // In a real implementation, you'd filter shipments by problematic routes
-      return week;
+    // Aggregate total samples per week from filtered routes
+    const weeklyMap = new Map<string, { weekStart: string; samples: number }>();
+    
+    // Since we don't have shipment-level weekly data, we'll distribute route samples proportionally
+    // This is an approximation - in production you'd query shipments grouped by week
+    rawWeeklySamples.forEach(week => {
+      weeklyMap.set(week.weekStart, {
+        weekStart: week.weekStart,
+        samples: 0,
+      });
     });
+
+    // Distribute filtered route samples proportionally across weeks
+    const totalFilteredSamples = routeData.reduce((sum, r) => sum + r.totalSamples, 0);
+    const totalOriginalSamples = rawRouteData.reduce((sum, r) => sum + r.totalSamples, 0);
+    const filterRatio = totalOriginalSamples > 0 ? totalFilteredSamples / totalOriginalSamples : 0;
+
+    rawWeeklySamples.forEach(week => {
+      const adjustedSamples = Math.round(week.samples * filterRatio);
+      weeklyMap.set(week.weekStart, {
+        weekStart: week.weekStart,
+        samples: adjustedSamples,
+      });
+    });
+
+    // Convert to array and sort chronologically (oldest to newest)
+    const weeklySamples = Array.from(weeklyMap.values())
+      .sort((a, b) => new Date(a.weekStart).getTime() - new Date(b.weekStart).getTime());
 
     return {
       routeData,
