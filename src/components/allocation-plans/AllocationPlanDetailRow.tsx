@@ -49,12 +49,7 @@ export function AllocationPlanDetailRow({
   const destinationPanelist = panelists.find(p => p.node_id === detail.destination_node_id)
   
   const originPanelistName = detail.origin_panelist_name || originPanelist?.name || ''
-  
-  // Only show destination panelist name after the shipment has been sent
-  const showDestinationPanelist = ['sent', 'received'].includes(detail.status)
-  const destinationPanelistName = showDestinationPanelist 
-    ? (detail.destination_panelist_name || destinationPanelist?.name || '')
-    : ''
+  const destinationPanelistName = detail.destination_panelist_name || destinationPanelist?.name || ''
 
   const handleUpdate = async (field: string, value: any) => {
     try {
