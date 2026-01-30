@@ -527,9 +527,9 @@ export default function JKPerformance() {
           trendValue={`${t('reporting.vs_std')}: ${metrics.avgJKStandard.toFixed(1)} ${t('reporting.days')}`}
           color={metrics.avgJKActual <= metrics.avgJKStandard ? 'green' : metrics.avgJKActual <= metrics.avgJKStandard + 1 ? 'amber' : 'red'}
           tooltip={{
-            description: "Weighted average of actual transit times across all routes in the selection.",
-            interpretation: "Compare against J+K Standard. Values below standard indicate early delivery, above standard indicate delays.",
-            utility: "Primary metric for overall network performance. Use to track improvement over time."
+            description: "Weighted average of days required to reach the STD % target across all routes in the selection.",
+            interpretation: "Represents the actual day when cumulative deliveries reach the target percentage. Compare against J+K Standard to assess performance gap.",
+            utility: "Primary metric for evaluating how quickly routes achieve their delivery targets. Higher values indicate slower achievement of performance thresholds."
           }}
         />
         <KPICard
@@ -664,7 +664,7 @@ export default function JKPerformance() {
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                         <div className="flex items-center gap-1">
                           J+K Actual
-                          <ColumnTooltip content="Average actual transit time in business days for all shipments on this route. Calculated from shipments.business_transit_days field." />
+                          <ColumnTooltip content="Number of days required to reach the STD % target for this route. Represents the day when the cumulative percentage of deliveries reaches the standard threshold (e.g., 85%). Compare with J+K Std to assess performance." />
                         </div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
@@ -781,7 +781,7 @@ export default function JKPerformance() {
                         <div className="flex items-center gap-1">J+K Std <ColumnTooltip content="Weighted average of J+K standards across all routes involving this city. Routes with more shipments have higher weight." /></div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                        <div className="flex items-center gap-1">J+K Actual <ColumnTooltip content="Weighted average of actual transit times across all routes involving this city." /></div>
+                        <div className="flex items-center gap-1">J+K Actual <ColumnTooltip content="Weighted average of days required to reach the STD % target across all routes involving this city. Represents the actual performance vs the standard delivery time." /></div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                         <div className="flex items-center gap-1">Deviation <ColumnTooltip content="Weighted average deviation (Actual - Standard) across all routes involving this city." /></div>
@@ -875,7 +875,7 @@ export default function JKPerformance() {
                         <div className="flex items-center gap-1">J+K Std <ColumnTooltip content="Weighted average of J+K standards across all routes in this region. Routes with more shipments have higher weight." /></div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                        <div className="flex items-center gap-1">J+K Actual <ColumnTooltip content="Weighted average of actual transit times across all routes in this region." /></div>
+                        <div className="flex items-center gap-1">J+K Actual <ColumnTooltip content="Weighted average of days required to reach the STD % target across all routes in this region. Represents the actual performance vs the standard delivery time." /></div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                         <div className="flex items-center gap-1">Deviation <ColumnTooltip content="Weighted average deviation (Actual - Standard) across all routes in this region." /></div>
@@ -970,7 +970,7 @@ export default function JKPerformance() {
                         <div className="flex items-center gap-1">J+K Std <ColumnTooltip content="Weighted average of J+K standards across all routes for this carrier or product." /></div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                        <div className="flex items-center gap-1">J+K Actual <ColumnTooltip content="Weighted average of actual transit times across all routes for this carrier or product." /></div>
+                        <div className="flex items-center gap-1">J+K Actual <ColumnTooltip content="Weighted average of days required to reach the STD % target across all routes for this carrier or product. Represents the actual performance vs the standard delivery time." /></div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                         <div className="flex items-center gap-1">Deviation <ColumnTooltip content="Weighted average deviation (Actual - Standard) across all routes for this carrier or product." /></div>
