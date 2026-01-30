@@ -167,8 +167,10 @@ export function useCarrierProductOverview(accountId: string | undefined, filters
           routes: Set<string>;
           onTimeCount: number;
           total: number;
-          totalActualDays: number;
+          dayDistribution: Map<number, number>; // day -> count
           totalStandardDays: number;
+          standardPercentageSum: number;
+          standardPercentageCount: number;
           routePerformance: Map<string, { onTime: number; total: number }>;
         }>();
 
@@ -183,8 +185,10 @@ export function useCarrierProductOverview(accountId: string | undefined, filters
               routes: new Set(),
               onTimeCount: 0,
               total: 0,
-              totalActualDays: 0,
+              dayDistribution: new Map(),
               totalStandardDays: 0,
+              standardPercentageSum: 0,
+              standardPercentageCount: 0,
               routePerformance: new Map()
             });
           }
@@ -193,8 +197,16 @@ export function useCarrierProductOverview(accountId: string | undefined, filters
           stats.routes.add(routeKey);
           stats.onTimeCount += shipment.on_time_delivery ? 1 : 0;
           stats.total += 1;
-          stats.totalActualDays += shipment.business_transit_days || 0;
+          
+          // Accumulate day distribution
+          const transitDays = shipment.business_transit_days || 0;
+          stats.dayDistribution.set(transitDays, (stats.dayDistribution.get(transitDays) || 0) + 1);
+          
           stats.totalStandardDays += standard?.jkStandard || 0;
+          if (standard?.successPercentage) {
+            stats.standardPercentageSum += standard.successPercentage;
+            stats.standardPercentageCount++;
+          }
           
           // Track route performance
           if (!stats.routePerformance.has(routeKey)) {
@@ -210,8 +222,26 @@ export function useCarrierProductOverview(accountId: string | undefined, filters
         grouped.forEach((stats, key) => {
           const [carrier, product] = key.split('|');
           const onTimePercentage = (stats.onTimeCount / stats.total) * 100;
-          const jkActual = stats.totalActualDays / stats.total;
           const jkStandard = stats.totalStandardDays / stats.total;
+          
+          // Calculate J+K Actual (days to reach STD %)
+          const targetStdPercentage = stats.standardPercentageCount > 0 
+            ? stats.standardPercentageSum / stats.standardPercentageCount 
+            : 85;
+          
+          let jkActual = 0;
+          const sortedDays = Array.from(stats.dayDistribution.keys()).sort((a, b) => a - b);
+          let cumulativeSamples = 0;
+          const targetSamples = (targetStdPercentage / 100) * stats.total;
+          
+          for (const day of sortedDays) {
+            cumulativeSamples += stats.dayDistribution.get(day) || 0;
+            if (cumulativeSamples >= targetSamples) {
+              jkActual = day;
+              break;
+            }
+          }
+          
           const deviation = jkActual - jkStandard;
           
           // Count problematic routes (on-time < critical threshold)
