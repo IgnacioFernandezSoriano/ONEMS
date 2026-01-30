@@ -302,25 +302,12 @@ export function ComplianceTable({ data }: ComplianceTableProps) {
                         ) : '-'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <div className="flex items-center gap-2">
-                          {route.complianceStatus === 'compliant' && (
-                            <>
-                              <CheckCircle className="w-4 h-4 text-green-500" />
-                              <span className="text-green-600 font-medium">Compliant</span>
-                            </>
-                          )}
-                          {route.complianceStatus === 'warning' && (
-                            <>
-                              <span className="text-amber-500 text-lg">⚠️</span>
-                              <span className="text-amber-600 font-medium">{t('reporting.warning')}</span>
-                            </>
-                          )}
-                          {route.complianceStatus === 'critical' && (
-                            <>
-                              <XCircle className="w-4 h-4 text-red-500" />
-                              <span className="text-red-600 font-medium">{t('reporting.critical')}</span>
-                            </>
-                          )}
+                        <div className="flex items-center justify-center">
+                          <div className={`w-3 h-3 rounded-full ${
+                            route.complianceStatus === 'compliant' ? 'bg-green-500' :
+                            route.complianceStatus === 'warning' ? 'bg-yellow-500' :
+                            'bg-red-500'
+                          }`} />
                         </div>
                       </td>
                     </tr>
