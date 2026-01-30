@@ -9,6 +9,41 @@ import type {
 } from '@/types/reporting';
 import { useEffectiveAccountId } from '../useEffectiveAccountId';
 
+// Helper function to calculate J+K Actual as day where STD % is reached
+function calculateJKActualFromDays(
+  daysArray: number[],
+  standardPercentage: number,
+  standardDays: number
+): number {
+  if (daysArray.length === 0 || standardPercentage <= 0) {
+    return standardDays;
+  }
+
+  // Create distribution
+  const distribution: Record<number, number> = {};
+  daysArray.forEach(day => {
+    const roundedDay = Math.round(day);
+    distribution[roundedDay] = (distribution[roundedDay] || 0) + 1;
+  });
+
+  // Sort days and find cumulative point
+  const sortedDays = Object.keys(distribution)
+    .map(Number)
+    .sort((a, b) => a - b);
+
+  let cumulativeSamples = 0;
+  const targetSamples = (standardPercentage / 100) * daysArray.length;
+
+  for (const day of sortedDays) {
+    cumulativeSamples += distribution[day];
+    if (cumulativeSamples >= targetSamples) {
+      return day;
+    }
+  }
+
+  return standardDays;
+}
+
 export function useTerritoryEquityData(
   accountId: string | undefined,
   filters?: TerritoryEquityFilters
@@ -164,8 +199,7 @@ export function useTerritoryEquityData(
               standardsCount: number;
               standardDaysSum: number;
               standardDaysCount: number;
-              actualDaysSum: number;
-              actualDaysCount: number;
+              actualDaysArray: number[];
             };
             outbound: { 
               total: number; 
@@ -174,15 +208,13 @@ export function useTerritoryEquityData(
               standardsCount: number;
               standardDaysSum: number;
               standardDaysCount: number;
-              actualDaysSum: number;
-              actualDaysCount: number;
+              actualDaysArray: number[];
             };
             standardsSum: number;
             standardsCount: number;
             standardDaysSum: number;
             standardDaysCount: number;
-            actualDaysSum: number;
-            actualDaysCount: number;
+            actualDaysArray: number[];
             carrierProduct: Map<string, { 
               carrier: string; 
               product: string; 
@@ -194,8 +226,7 @@ export function useTerritoryEquityData(
               standardsCount: number;
               standardDaysSum: number;
               standardDaysCount: number;
-              actualDaysSum: number;
-              actualDaysCount: number;
+              actualDaysArray: number[];
             }>;
           }
         >();
@@ -212,8 +243,7 @@ export function useTerritoryEquityData(
                 standardsCount: 0,
                 standardDaysSum: 0,
                 standardDaysCount: 0,
-                actualDaysSum: 0,
-                actualDaysCount: 0,
+                actualDaysArray: [] as number[],
               },
               outbound: { 
                 total: 0, 
@@ -222,15 +252,13 @@ export function useTerritoryEquityData(
                 standardsCount: 0,
                 standardDaysSum: 0,
                 standardDaysCount: 0,
-                actualDaysSum: 0,
-                actualDaysCount: 0,
+                actualDaysArray: [] as number[],
               },
               standardsSum: 0,
               standardsCount: 0,
               standardDaysSum: 0,
               standardDaysCount: 0,
-              actualDaysSum: 0,
-              actualDaysCount: 0,
+              actualDaysArray: [] as number[],
               carrierProduct: new Map(),
             });
           }
@@ -253,8 +281,7 @@ export function useTerritoryEquityData(
               standardsCount: 0,
               standardDaysSum: 0,
               standardDaysCount: 0,
-              actualDaysSum: 0,
-              actualDaysCount: 0,
+              actualDaysArray: [] as number[],
             });
           }
           const cpStats = destStats.carrierProduct.get(cpKey)!;
@@ -293,8 +320,7 @@ export function useTerritoryEquityData(
           
           // Track actual business days for this shipment
           if (shipment.business_transit_days != null) {
-            cpStats.actualDaysSum += shipment.business_transit_days;
-            cpStats.actualDaysCount++;
+            cpStats.actualDaysArray.push(shipment.business_transit_days);
           }
 
           // Also add to city-level standard (overall + inbound-specific)
@@ -323,10 +349,8 @@ export function useTerritoryEquityData(
           
           // Track actual business days at city level (overall + inbound-specific)
           if (shipment.business_transit_days != null) {
-            destStats.actualDaysSum += shipment.business_transit_days;
-            destStats.actualDaysCount++;
-            destStats.inbound.actualDaysSum += shipment.business_transit_days;
-            destStats.inbound.actualDaysCount++;
+            destStats.actualDaysArray.push(shipment.business_transit_days);
+            destStats.inbound.actualDaysArray.push(shipment.business_transit_days);
           }
 
           // Process as OUTBOUND (origin)
@@ -340,8 +364,7 @@ export function useTerritoryEquityData(
                 standardsCount: 0,
                 standardDaysSum: 0,
                 standardDaysCount: 0,
-                actualDaysSum: 0,
-                actualDaysCount: 0,
+                actualDaysArray: [] as number[],
               },
               outbound: { 
                 total: 0, 
@@ -350,15 +373,13 @@ export function useTerritoryEquityData(
                 standardsCount: 0,
                 standardDaysSum: 0,
                 standardDaysCount: 0,
-                actualDaysSum: 0,
-                actualDaysCount: 0,
+                actualDaysArray: [] as number[],
               },
               standardsSum: 0,
               standardsCount: 0,
               standardDaysSum: 0,
               standardDaysCount: 0,
-              actualDaysSum: 0,
-              actualDaysCount: 0,
+              actualDaysArray: [] as number[],
               carrierProduct: new Map(),
             });
           }
@@ -381,8 +402,7 @@ export function useTerritoryEquityData(
               standardsCount: 0,
               standardDaysSum: 0,
               standardDaysCount: 0,
-              actualDaysSum: 0,
-              actualDaysCount: 0,
+              actualDaysArray: [] as number[],
             });
           }
           const cpStatsOrigin = originStats.carrierProduct.get(cpKeyOrigin)!;
@@ -439,12 +459,9 @@ export function useTerritoryEquityData(
           
           // Track actual business days for outbound shipment (overall + outbound-specific)
           if (shipment.business_transit_days != null) {
-            cpStatsOrigin.actualDaysSum += shipment.business_transit_days;
-            cpStatsOrigin.actualDaysCount++;
-            originStats.actualDaysSum += shipment.business_transit_days;
-            originStats.actualDaysCount++;
-            originStats.outbound.actualDaysSum += shipment.business_transit_days;
-            originStats.outbound.actualDaysCount++;
+            cpStatsOrigin.actualDaysArray.push(shipment.business_transit_days);
+            originStats.actualDaysArray.push(shipment.business_transit_days);
+            originStats.outbound.actualDaysArray.push(shipment.business_transit_days);
           }
         });
 
@@ -471,8 +488,11 @@ export function useTerritoryEquityData(
               stats.standardsCount > 0 ? stats.standardsSum / stats.standardsCount : 95;
             const standardDays =
               stats.standardDaysCount > 0 ? stats.standardDaysSum / stats.standardDaysCount : 0;
-            const actualDays =
-              stats.actualDaysCount > 0 ? stats.actualDaysSum / stats.actualDaysCount : 0;
+            const actualDays = calculateJKActualFromDays(
+              stats.actualDaysArray,
+              standardPercentage,
+              standardDays
+            );
             const deviation = actualPercentage - standardPercentage;
 
             // Determine status
@@ -492,8 +512,11 @@ export function useTerritoryEquityData(
               stats.inbound.standardsCount > 0 ? stats.inbound.standardsSum / stats.inbound.standardsCount : 95;
             const inboundStandardDays =
               stats.inbound.standardDaysCount > 0 ? stats.inbound.standardDaysSum / stats.inbound.standardDaysCount : 0;
-            const inboundActualDays =
-              stats.inbound.actualDaysCount > 0 ? stats.inbound.actualDaysSum / stats.inbound.actualDaysCount : 0;
+            const inboundActualDays = calculateJKActualFromDays(
+              stats.inbound.actualDaysArray,
+              inboundStandardPercentage,
+              inboundStandardDays
+            );
             const inboundDeviation = inboundPercentage - inboundStandardPercentage;
             
             // Outbound metrics
@@ -503,8 +526,11 @@ export function useTerritoryEquityData(
               stats.outbound.standardsCount > 0 ? stats.outbound.standardsSum / stats.outbound.standardsCount : 95;
             const outboundStandardDays =
               stats.outbound.standardDaysCount > 0 ? stats.outbound.standardDaysSum / stats.outbound.standardDaysCount : 0;
-            const outboundActualDays =
-              stats.outbound.actualDaysCount > 0 ? stats.outbound.actualDaysSum / stats.outbound.actualDaysCount : 0;
+            const outboundActualDays = calculateJKActualFromDays(
+              stats.outbound.actualDaysArray,
+              outboundStandardPercentage,
+              outboundStandardDays
+            );
             const outboundDeviation = outboundPercentage - outboundStandardPercentage;
             
             const directionGap = Math.abs(inboundPercentage - outboundPercentage);
@@ -514,7 +540,11 @@ export function useTerritoryEquityData(
               const cpActualPercentage = cp.total > 0 ? (cp.compliant / cp.total) * 100 : 0;
               const cpStandardPercentage = cp.standardsCount > 0 ? cp.standardsSum / cp.standardsCount : 95;
               const cpStandardDays = cp.standardDaysCount > 0 ? cp.standardDaysSum / cp.standardDaysCount : 0;
-              const cpActualDays = cp.actualDaysCount > 0 ? cp.actualDaysSum / cp.actualDaysCount : 0;
+              const cpActualDays = calculateJKActualFromDays(
+                cp.actualDaysArray,
+                cpStandardPercentage,
+                cpStandardDays
+              );
               const cpInboundPercentage = cp.inbound.total > 0 ? (cp.inbound.compliant / cp.inbound.total) * 100 : 0;
               const cpOutboundPercentage = cp.outbound.total > 0 ? (cp.outbound.compliant / cp.outbound.total) * 100 : 0;
               
@@ -666,8 +696,7 @@ export function useTerritoryEquityData(
             standardsCount: number;
             standardDaysSum: number;
             standardDaysCount: number;
-            actualDaysSum: number;
-            actualDaysCount: number;
+            actualDaysArray: number[];
             underservedCities: number;
             inboundShipments: number;
             inboundCompliant: number;
@@ -675,16 +704,14 @@ export function useTerritoryEquityData(
             inboundStandardsCount: number;
             inboundStandardDaysSum: number;
             inboundStandardDaysCount: number;
-            inboundActualDaysSum: number;
-            inboundActualDaysCount: number;
+            inboundActualDaysArray: number[];
             outboundShipments: number;
             outboundCompliant: number;
             outboundStandardsSum: number;
             outboundStandardsCount: number;
             outboundStandardDaysSum: number;
             outboundStandardDaysCount: number;
-            outboundActualDaysSum: number;
-            outboundActualDaysCount: number;
+            outboundActualDaysArray: number[];
             carrierProduct: Map<string, { 
               carrier: string; 
               product: string; 
@@ -696,8 +723,7 @@ export function useTerritoryEquityData(
               standardsCount: number;
               standardDaysSum: number;
               standardDaysCount: number;
-              actualDaysSum: number;
-              actualDaysCount: number;
+              actualDaysArray: number[];
             }>;
           }
         >();
@@ -714,8 +740,7 @@ export function useTerritoryEquityData(
               standardsCount: 0,
               standardDaysSum: 0,
               standardDaysCount: 0,
-              actualDaysSum: 0,
-              actualDaysCount: 0,
+              actualDaysArray: [],
               underservedCities: 0,
               inboundShipments: 0,
               inboundCompliant: 0,
@@ -723,16 +748,14 @@ export function useTerritoryEquityData(
               inboundStandardsCount: 0,
               inboundStandardDaysSum: 0,
               inboundStandardDaysCount: 0,
-              inboundActualDaysSum: 0,
-              inboundActualDaysCount: 0,
+              inboundActualDaysArray: [],
               outboundShipments: 0,
               outboundCompliant: 0,
               outboundStandardsSum: 0,
               outboundStandardsCount: 0,
               outboundStandardDaysSum: 0,
               outboundStandardDaysCount: 0,
-              outboundActualDaysSum: 0,
-              outboundActualDaysCount: 0,
+              outboundActualDaysArray: [],
               carrierProduct: new Map(),
             });
           }
@@ -746,24 +769,28 @@ export function useTerritoryEquityData(
           regionStats.standardsCount += city.totalShipments;
           regionStats.standardDaysSum += city.standardDays * city.totalShipments;
           regionStats.standardDaysCount += city.totalShipments;
-          regionStats.actualDaysSum += city.actualDays * city.totalShipments;
-          regionStats.actualDaysCount += city.totalShipments;
+          // Weighted contribution: add actualDays * shipments to array
+          for (let i = 0; i < city.totalShipments; i++) {
+            regionStats.actualDaysArray.push(city.actualDays);
+          }
           regionStats.inboundShipments += city.inboundShipments;
           regionStats.inboundCompliant += city.inboundCompliant;
           regionStats.inboundStandardsSum += city.inboundStandardPercentage * city.inboundShipments;
           regionStats.inboundStandardsCount += city.inboundShipments;
           regionStats.inboundStandardDaysSum += city.inboundStandardDays * city.inboundShipments;
           regionStats.inboundStandardDaysCount += city.inboundShipments;
-          regionStats.inboundActualDaysSum += city.inboundActualDays * city.inboundShipments;
-          regionStats.inboundActualDaysCount += city.inboundShipments;
+          for (let i = 0; i < city.inboundShipments; i++) {
+            regionStats.inboundActualDaysArray.push(city.inboundActualDays);
+          }
           regionStats.outboundShipments += city.outboundShipments;
           regionStats.outboundCompliant += city.outboundCompliant;
           regionStats.outboundStandardsSum += city.outboundStandardPercentage * city.outboundShipments;
           regionStats.outboundStandardsCount += city.outboundShipments;
           regionStats.outboundStandardDaysSum += city.outboundStandardDays * city.outboundShipments;
           regionStats.outboundStandardDaysCount += city.outboundShipments;
-          regionStats.outboundActualDaysSum += city.outboundActualDays * city.outboundShipments;
-          regionStats.outboundActualDaysCount += city.outboundShipments;
+          for (let i = 0; i < city.outboundShipments; i++) {
+            regionStats.outboundActualDaysArray.push(city.outboundActualDays);
+          }
           if (city.status === 'critical') regionStats.underservedCities++;
           
           // Aggregate carrier/product breakdown
@@ -782,8 +809,7 @@ export function useTerritoryEquityData(
                   standardsCount: 0,
                   standardDaysSum: 0,
                   standardDaysCount: 0,
-                  actualDaysSum: 0,
-                  actualDaysCount: 0,
+                  actualDaysArray: [],
                 });
               }
               const cpStats = regionStats.carrierProduct.get(cpKey)!;
@@ -797,8 +823,10 @@ export function useTerritoryEquityData(
               cpStats.standardsCount++;
               cpStats.standardDaysSum += cp.standardDays;
               cpStats.standardDaysCount++;
-              cpStats.actualDaysSum += cp.actualDays;
-              cpStats.actualDaysCount++;
+              // Weighted contribution: add actualDays for each shipment
+              for (let i = 0; i < cp.totalShipments; i++) {
+                cpStats.actualDaysArray.push(cp.actualDays);
+              }
             });
           }
         });
@@ -811,8 +839,11 @@ export function useTerritoryEquityData(
               stats.standardsCount > 0 ? stats.standardsSum / stats.standardsCount : 95;
             const standardDays =
               stats.standardDaysCount > 0 ? stats.standardDaysSum / stats.standardDaysCount : 0;
-            const actualDays =
-              stats.actualDaysCount > 0 ? stats.actualDaysSum / stats.actualDaysCount : 0;
+            const actualDays = calculateJKActualFromDays(
+              stats.actualDaysArray,
+              standardPercentage,
+              standardDays
+            );
             const deviation = actualPercentage - standardPercentage;
 
             let status: 'compliant' | 'warning' | 'critical' = 'compliant';
@@ -834,9 +865,11 @@ export function useTerritoryEquityData(
             const inboundStandardDays = stats.inboundStandardDaysCount > 0
               ? stats.inboundStandardDaysSum / stats.inboundStandardDaysCount
               : 0;
-            const inboundActualDays = stats.inboundActualDaysCount > 0
-              ? stats.inboundActualDaysSum / stats.inboundActualDaysCount
-              : 0;
+            const inboundActualDays = calculateJKActualFromDays(
+              stats.inboundActualDaysArray,
+              inboundStandardPercentage,
+              inboundStandardDays
+            );
             const inboundDeviation = inboundPercentage - inboundStandardPercentage;
             
             // Outbound metrics
@@ -849,9 +882,11 @@ export function useTerritoryEquityData(
             const outboundStandardDays = stats.outboundStandardDaysCount > 0
               ? stats.outboundStandardDaysSum / stats.outboundStandardDaysCount
               : 0;
-            const outboundActualDays = stats.outboundActualDaysCount > 0
-              ? stats.outboundActualDaysSum / stats.outboundActualDaysCount
-              : 0;
+            const outboundActualDays = calculateJKActualFromDays(
+              stats.outboundActualDaysArray,
+              outboundStandardPercentage,
+              outboundStandardDays
+            );
             const outboundDeviation = outboundPercentage - outboundStandardPercentage;
             
             const directionGap = Math.abs(inboundPercentage - outboundPercentage);
@@ -861,7 +896,11 @@ export function useTerritoryEquityData(
               const cpActualPercentage = cp.total > 0 ? (cp.compliant / cp.total) * 100 : 0;
               const cpStandardPercentage = cp.standardsCount > 0 ? cp.standardsSum / cp.standardsCount : 95;
               const cpStandardDays = cp.standardDaysCount > 0 ? cp.standardDaysSum / cp.standardDaysCount : 0;
-              const cpActualDays = cp.actualDaysCount > 0 ? cp.actualDaysSum / cp.actualDaysCount : 0;
+              const cpActualDays = calculateJKActualFromDays(
+                cp.actualDaysArray,
+                cpStandardPercentage,
+                cpStandardDays
+              );
               const cpInboundPercentage = cp.inbound.total > 0 ? (cp.inbound.compliant / cp.inbound.total) * 100 : 0;
               const cpOutboundPercentage = cp.outbound.total > 0 ? (cp.outbound.compliant / cp.outbound.total) * 100 : 0;
               
