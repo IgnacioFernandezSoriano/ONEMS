@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { adjustStartDateForFilter, adjustEndDateForFilter } from '@/lib/dateUtils';
+import { calculateJKActualFromDays } from '@/lib/jkCalculations';
 import { useEffectiveAccountId } from '../useEffectiveAccountId';
 
 interface Filters {
@@ -241,7 +242,7 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
             routes: Map<string, {
               totalShipments: number;
               compliantShipments: number;
-              totalDays: number;
+              daysArray: number[];
               standardDays: number;
               standardPercentage: number;
               warningThreshold: number;
@@ -285,7 +286,7 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
             product.routes.set(routeKey, {
               totalShipments: 0,
               compliantShipments: 0,
-              totalDays: 0,
+              daysArray: [],
               standardDays: standard?.allowedDays || 0,
               standardPercentage: standard?.successPercentage || 0,
               warningThreshold: standard?.warningThreshold || 5,
@@ -299,7 +300,9 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
           const route = product.routes.get(routeKey)!;
           route.totalShipments++;
           route.compliantShipments += shipment.on_time_delivery ? 1 : 0;
-          route.totalDays += shipment.business_transit_days || 0;
+          if (shipment.business_transit_days != null) {
+            route.daysArray.push(shipment.business_transit_days);
+          }
         });
 
         // Convert to array structure with weighted averages
@@ -340,7 +343,11 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
                 totalShipments: route.totalShipments,
                 compliantShipments: route.compliantShipments,
                 compliancePercentage: actualPercentage,
-                avgBusinessDays: route.totalDays / route.totalShipments,
+                avgBusinessDays: calculateJKActualFromDays(
+                  route.daysArray,
+                  route.standardPercentage,
+                  route.standardDays
+                ),
                 standardDays: route.standardDays,
                 standardPercentage: route.standardPercentage,
                 warningThreshold: route.warningThreshold,
