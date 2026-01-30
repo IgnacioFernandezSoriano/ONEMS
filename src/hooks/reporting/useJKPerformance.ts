@@ -617,7 +617,7 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
           carrierStats.onTimeSamples += route.onTimeSamples;
           carrierStats.standardSum += route.jkStandard * route.totalSamples;
           carrierStats.standardCount += route.totalSamples;
-          if (route.onTimePercentage < 90) {
+          if (route.onTimePercentage <= route.criticalThreshold) {
             carrierStats.problematicRoutes++;
           }
 
@@ -737,7 +737,7 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
           productStats.onTimeSamples += route.onTimeSamples;
           productStats.standardSum += route.jkStandard * route.totalSamples;
           productStats.standardCount += route.totalSamples;
-          if (route.onTimePercentage < 90) {
+          if (route.onTimePercentage <= route.criticalThreshold) {
             productStats.problematicRoutes++;
           }
 
@@ -854,7 +854,7 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
         const totalOnTimeSamples = routes.reduce((sum, r) => sum + r.onTimeSamples, 0);
         const weightedStandardSum = routes.reduce((sum, r) => sum + r.jkStandard * r.totalSamples, 0);
         const weightedActualSum = routes.reduce((sum, r) => sum + r.jkActual * r.totalSamples, 0);
-        const problematicRoutes = routes.filter(r => r.onTimePercentage < 90).length;
+        const problematicRoutes = routes.filter(r => r.onTimePercentage <= r.criticalThreshold).length;
 
         const globalMetrics: JKMetrics = {
           totalSamples,

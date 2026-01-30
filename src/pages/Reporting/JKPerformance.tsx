@@ -21,6 +21,7 @@ export default function JKPerformance() {
   const { filters, setFilters, resetFilters } = useReportingFilters();
   const [activeTab, setActiveTab] = useState<'route' | 'city' | 'region' | 'carrier' | 'cumulative'>('route');
   const [cumulativeView, setCumulativeView] = useState<'table' | 'chart'>('chart');
+  const [showProblematicOnly, setShowProblematicOnly] = useState(false);
 
   const {
     routeData,
@@ -124,9 +125,13 @@ export default function JKPerformance() {
           trendValue={t('reporting.require_intervention')}
           color={metrics.problematicRoutes === 0 ? 'green' : metrics.problematicRoutes <= 3 ? 'amber' : 'red'}
           tooltip={{
-            description: "Number of routes with on-time performance below 90%.",
-            interpretation: "Routes failing to meet their delivery standards. Critical threshold (90%) is a general guide; actual standards vary per route in delivery_standards table.",
-            utility: "Prioritization tool for operational improvements. Focus resources on these routes first."
+            description: "Number of routes with on-time performance at or below their critical SLA threshold.",
+            interpretation: "Routes failing to meet their critical delivery standards. Each route has its own critical threshold defined in delivery_standards table.",
+            utility: "Click to filter and show only problematic routes. Prioritization tool for operational improvements."
+          }}
+          onClick={() => {
+            setShowProblematicOnly(!showProblematicOnly);
+            setActiveTab('route');
           }}
         />
       </div>
@@ -182,9 +187,21 @@ export default function JKPerformance() {
           {activeTab === 'route' && (
             <div>
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  {t('reporting.route_performance', { count: routeData.length })}
-                </h3>
+                <div className="flex items-center gap-3">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {t('reporting.route_performance', { 
+                      count: showProblematicOnly 
+                        ? routeData.filter(r => r.onTimePercentage <= r.criticalThreshold).length 
+                        : routeData.length 
+                    })}
+                  </h3>
+                  {showProblematicOnly && (
+                    <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded">
+                      <AlertTriangle className="w-3 h-3" />
+                      Problematic only
+                    </span>
+                  )}
+                </div>
                 <button
                   onClick={() => exportRouteCSV(routeData)}
                   className="flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
@@ -242,7 +259,10 @@ export default function JKPerformance() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {routeData.slice(0, 20).map((route, idx) => {
+                    {routeData
+                      .filter(route => !showProblematicOnly || route.onTimePercentage <= route.criticalThreshold)
+                      .slice(0, 20)
+                      .map((route, idx) => {
                       const deviationColor = route.deviation <= 0 ? 'text-green-600' : route.deviation < 1 ? 'text-yellow-600' : 'text-red-600';
                       const onTimeColor = route.onTimePercentage >= route.warningThreshold ? 'text-green-600 font-semibold' : route.onTimePercentage > route.criticalThreshold ? 'text-yellow-600' : 'text-red-600 font-semibold';
                       const statusColor = route.status === 'compliant' ? 'bg-green-500' : route.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500';

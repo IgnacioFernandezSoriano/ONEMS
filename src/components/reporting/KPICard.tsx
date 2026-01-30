@@ -14,9 +14,10 @@ interface KPICardProps {
     interpretation: string;
     utility: string;
   };
+  onClick?: () => void;
 }
 
-export function KPICard({ title, value, icon: Icon, trend, trendValue, color, tooltip }: KPICardProps) {
+export function KPICard({ title, value, icon: Icon, trend, trendValue, color, tooltip, onClick }: KPICardProps) {
   const colorClasses = {
     green: 'bg-green-50 border-green-500',
     red: 'bg-red-50 border-red-500',
@@ -38,7 +39,10 @@ export function KPICard({ title, value, icon: Icon, trend, trendValue, color, to
   };
 
   return (
-    <div className={`rounded-lg border-l-4 p-3 ${colorClasses[color]}`}>
+    <div 
+      className={`rounded-lg border-l-4 p-3 ${colorClasses[color]} ${onClick ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
+      onClick={onClick}
+    >
       <div className="flex items-center justify-between mb-1">
         <div className="flex items-center gap-1">
           <h3 className="text-xs font-medium text-gray-600">{title}</h3>
