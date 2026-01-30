@@ -28,6 +28,9 @@ export function DeliveryStandardForm({
     standard_time: standard?.standard_time?.toString() || '',
     success_percentage: standard?.success_percentage?.toString() || '',
     time_unit: standard?.time_unit || 'hours',
+    warning_threshold: standard?.warning_threshold?.toString() || '',
+    critical_threshold: standard?.critical_threshold?.toString() || '',
+    threshold_type: standard?.threshold_type || 'absolute',
   })
   const [loading, setLoading] = useState(false)
 
@@ -67,6 +70,9 @@ export function DeliveryStandardForm({
           ? parseFloat(formData.success_percentage)
           : null,
         time_unit: formData.time_unit,
+        warning_threshold: formData.warning_threshold ? parseFloat(formData.warning_threshold) : null,
+        critical_threshold: formData.critical_threshold ? parseFloat(formData.critical_threshold) : null,
+        threshold_type: formData.threshold_type,
       }
 
       await onSubmit(data)
@@ -207,6 +213,48 @@ export function DeliveryStandardForm({
           >
             <option value="hours">{t('deliverystandards.hours')}</option>
             <option value="days">{t('deliverystandards.days')}</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">Warning %</label>
+          <input
+            type="number"
+            step="0.01"
+            min="0"
+            max="100"
+            value={formData.warning_threshold}
+            onChange={(e) => setFormData({ ...formData, warning_threshold: e.target.value })}
+            className="w-full px-3 py-2 border rounded-md"
+            placeholder="e.g., 5"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Critical %</label>
+          <input
+            type="number"
+            step="0.01"
+            min="0"
+            max="100"
+            value={formData.critical_threshold}
+            onChange={(e) => setFormData({ ...formData, critical_threshold: e.target.value })}
+            className="w-full px-3 py-2 border rounded-md"
+            placeholder="e.g., 20"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Type</label>
+          <select
+            value={formData.threshold_type}
+            onChange={(e) => setFormData({ ...formData, threshold_type: e.target.value as 'absolute' | 'relative' })}
+            className="w-full px-3 py-2 border rounded-md"
+          >
+            <option value="absolute">Abs</option>
+            <option value="relative">Rel</option>
           </select>
         </div>
       </div>

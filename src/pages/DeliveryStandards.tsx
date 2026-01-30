@@ -113,8 +113,8 @@ export function DeliveryStandards() {
     if (bulkEditData.critical_threshold) {
       updateData.critical_threshold = parseFloat(bulkEditData.critical_threshold)
     }
-    updateData.time_unit = bulkEditData.time_unit
-    updateData.threshold_type = bulkEditData.threshold_type
+    // Only update time_unit and threshold_type if explicitly changed
+    // (not applying defaults)
 
     try {
       await updateMultiple(Array.from(selectedIds), updateData)
