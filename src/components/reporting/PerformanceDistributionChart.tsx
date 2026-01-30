@@ -119,6 +119,22 @@ export function PerformanceDistributionChart({ routeData, maxDays, carrierFilter
       return (
         <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3">
           <p className="font-semibold text-gray-900 mb-2">{label}</p>
+          
+          {/* Cumulative info first */}
+          {cumulativePayload && cumulativePercentage !== undefined && (
+            <div className="mb-2 pb-2 border-b border-gray-200">
+              <div className="flex items-center justify-between text-sm font-semibold text-gray-900">
+                <span>Cumulative:</span>
+                <span>{cumulativePayload.value.toLocaleString()}</span>
+              </div>
+              <div className="flex items-center justify-between text-xs text-gray-600 mt-1">
+                <span>% of Total:</span>
+                <span>{cumulativePercentage.toFixed(1)}% (Target: {targetStandardPercentage.toFixed(0)}%)</span>
+              </div>
+            </div>
+          )}
+          
+          {/* Bar data */}
           {barPayload.map((entry: any, index: number) => (
             <div key={index} className="flex items-center justify-between gap-4 text-sm">
               <div className="flex items-center gap-2">
@@ -133,24 +149,13 @@ export function PerformanceDistributionChart({ routeData, maxDays, carrierFilter
               </span>
             </div>
           ))}
+          
           <div className="mt-2 pt-2 border-t border-gray-200">
             <div className="flex items-center justify-between text-sm font-semibold">
               <span className="text-gray-600">Total:</span>
               <span className="text-gray-900">{total.toLocaleString()}</span>
             </div>
           </div>
-          {cumulativePayload && cumulativePercentage !== undefined && (
-            <div className="mt-2 pt-2 border-t border-gray-200">
-              <div className="flex items-center justify-between text-sm font-semibold text-purple-600">
-                <span>Cumulative:</span>
-                <span>{cumulativePayload.value.toLocaleString()}</span>
-              </div>
-              <div className="flex items-center justify-between text-xs text-purple-500 mt-1">
-                <span>% of Total:</span>
-                <span>{cumulativePercentage.toFixed(1)}% (Target: {targetStandardPercentage.toFixed(0)}%)</span>
-              </div>
-            </div>
-          )}
         </div>
       );
     }
@@ -176,8 +181,8 @@ export function PerformanceDistributionChart({ routeData, maxDays, carrierFilter
             <YAxis 
               yAxisId="right"
               orientation="right"
-              tick={{ fontSize: 12, fill: '#9333ea' }}
-              label={{ value: 'Cumulative Samples', angle: 90, position: 'insideRight', style: { fontSize: 12, fill: '#9333ea' } }}
+              tick={{ fontSize: 12, fill: '#000000' }}
+              label={{ value: 'Cumulative Samples', angle: 90, position: 'insideRight', style: { fontSize: 12, fill: '#000000' } }}
             />
           )}
           <Tooltip content={<CustomTooltip />} />
@@ -191,13 +196,13 @@ export function PerformanceDistributionChart({ routeData, maxDays, carrierFilter
           {isSingleCarrierProduct && dayReachingStdPercentage !== null && (
             <ReferenceLine 
               x={`${dayReachingStdPercentage}d`} 
-              stroke="#9333ea" 
+              stroke="#000000" 
               strokeWidth={2}
               strokeDasharray="5 5"
               label={{ 
                 value: `${targetStandardPercentage.toFixed(0)}% at ${dayReachingStdPercentage}d`, 
                 position: 'top',
-                fill: '#9333ea',
+                fill: '#000000',
                 fontSize: 11,
                 fontWeight: 'bold'
               }}
@@ -229,14 +234,14 @@ export function PerformanceDistributionChart({ routeData, maxDays, carrierFilter
             yAxisId="left"
           />
           
-          {/* Cumulative line */}
+          {/* Cumulative line in black */}
           {isSingleCarrierProduct && (
             <Line 
               type="monotone"
               dataKey="cumulative"
-              stroke="#9333ea"
+              stroke="#000000"
               strokeWidth={2}
-              dot={{ fill: '#9333ea', r: 4 }}
+              dot={{ fill: '#000000', r: 4 }}
               name="Cumulative Samples"
               yAxisId="right"
             />
@@ -246,7 +251,7 @@ export function PerformanceDistributionChart({ routeData, maxDays, carrierFilter
       <div className="mt-2 text-xs text-gray-500 text-center">
         Distribution of shipments by actual transit time vs delivery standard
         {isSingleCarrierProduct && targetStandardPercentage > 0 && dayReachingStdPercentage !== null && (
-          <span className="ml-2 text-purple-600 font-medium">
+          <span className="ml-2 text-gray-900 font-medium">
             • {carrierFilter} - {productFilter}: {targetStandardPercentage.toFixed(0)}% reached at {dayReachingStdPercentage}d (J+K Std: {targetJKDays}d)
           </span>
         )}
