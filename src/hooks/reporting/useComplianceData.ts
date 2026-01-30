@@ -241,7 +241,7 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
             routes: Map<string, {
               totalShipments: number;
               compliantShipments: number;
-              dayDistribution: Record<number, number>;
+              totalDays: number;
               standardDays: number;
               standardPercentage: number;
               warningThreshold: number;
@@ -285,7 +285,7 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
             product.routes.set(routeKey, {
               totalShipments: 0,
               compliantShipments: 0,
-              dayDistribution: {} as Record<number, number>,
+              totalDays: 0,
               standardDays: standard?.allowedDays || 0,
               standardPercentage: standard?.successPercentage || 0,
               warningThreshold: standard?.warningThreshold || 5,
@@ -299,10 +299,7 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
           const route = product.routes.get(routeKey)!;
           route.totalShipments++;
           route.compliantShipments += shipment.on_time_delivery ? 1 : 0;
-          
-          // Accumulate day distribution
-          const days = Math.round(shipment.business_transit_days || 0);
-          route.dayDistribution[days] = (route.dayDistribution[days] || 0) + 1;
+          route.totalDays += shipment.business_transit_days || 0;
         });
 
         // Convert to array structure with weighted averages
@@ -336,27 +333,6 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
                 complianceStatus = 'critical';
               }
               
-              // Calculate J+K Actual as day where STD % is reached
-              let jkActual = route.standardDays;
-              const targetStdPercentage = route.standardPercentage;
-              
-              if (targetStdPercentage > 0 && route.totalShipments > 0) {
-                const sortedDays = Object.keys(route.dayDistribution)
-                  .map(Number)
-                  .sort((a, b) => a - b);
-                
-                let cumulativeSamples = 0;
-                const targetSamples = (targetStdPercentage / 100) * route.totalShipments;
-                
-                for (const day of sortedDays) {
-                  cumulativeSamples += route.dayDistribution[day];
-                  if (cumulativeSamples >= targetSamples) {
-                    jkActual = day;
-                    break;
-                  }
-                }
-              }
-              
               return {
                 route: routeKey,
                 originCity: route.originCity,
@@ -364,7 +340,7 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
                 totalShipments: route.totalShipments,
                 compliantShipments: route.compliantShipments,
                 compliancePercentage: actualPercentage,
-                avgBusinessDays: jkActual,
+                avgBusinessDays: route.totalDays / route.totalShipments,
                 standardDays: route.standardDays,
                 standardPercentage: route.standardPercentage,
                 warningThreshold: route.warningThreshold,
