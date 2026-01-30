@@ -316,13 +316,13 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
               let criticalLimit: number;
               
               if (route.thresholdType === 'relative') {
-                // Relative: warning = success% - warning%, critical = success% - critical%
+                // Relative: warning = success% - (success% * warning%), critical = success% - (success% * critical%)
+                warningLimit = route.standardPercentage - (route.standardPercentage * route.warningThreshold / 100);
+                criticalLimit = route.standardPercentage - (route.standardPercentage * route.criticalThreshold / 100);
+              } else {
+                // Absolute: warning = success% - warning%, critical = success% - critical%
                 warningLimit = route.standardPercentage - route.warningThreshold;
                 criticalLimit = route.standardPercentage - route.criticalThreshold;
-              } else {
-                // Absolute: direct threshold values
-                warningLimit = route.warningThreshold;
-                criticalLimit = route.criticalThreshold;
               }
               
               // Determine compliance status based on thresholds
