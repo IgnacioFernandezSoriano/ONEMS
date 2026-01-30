@@ -93,11 +93,11 @@ export function useTerritoryEquityData(
           const thresholds = standards.map((s: any) => {
             const successPct = s.success_percentage || 95;
             const warnThresh = s.threshold_type === 'relative'
-              ? successPct - (s.warning_threshold || 5)
-              : (s.warning_threshold || 5);
+              ? successPct - (successPct * (s.warning_threshold || 5) / 100)
+              : successPct - (s.warning_threshold || 5);
             const critThresh = s.threshold_type === 'relative'
-              ? successPct - (s.critical_threshold || 10)
-              : (s.critical_threshold || 10);
+              ? successPct - (successPct * (s.critical_threshold || 10) / 100)
+              : successPct - (s.critical_threshold || 10);
             return { warning: warnThresh, critical: critThresh };
           });
           warningThreshold = thresholds.reduce((sum, t) => sum + t.warning, 0) / thresholds.length;

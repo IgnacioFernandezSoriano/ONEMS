@@ -253,11 +253,11 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
             // Calculate warning and critical thresholds
             const successPct = std.success_percentage || 95;
             const warningThreshold = std.threshold_type === 'relative' 
-              ? successPct - (std.warning_threshold || 5)
-              : (std.warning_threshold || 5);
+              ? successPct - (successPct * (std.warning_threshold || 5) / 100)
+              : successPct - (std.warning_threshold || 5);
             const criticalThreshold = std.threshold_type === 'relative'
-              ? successPct - (std.critical_threshold || 10)
-              : (std.critical_threshold || 10);
+              ? successPct - (successPct * (std.critical_threshold || 10) / 100)
+              : successPct - (std.critical_threshold || 10);
             
             standardsMap.set(key, {
               jkStandard: jkStandard || 0,
