@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { AllocationPlanDetailWithRelations } from '@/lib/types'
+import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId'
 
 export function useAllocationPlanDetails() {
+  const effectiveAccountId = useEffectiveAccountId()
   const [details, setDetails] = useState<AllocationPlanDetailWithRelations[]>([])
   const [plans, setPlans] = useState<any[]>([])
   const [carriers, setCarriers] = useState<any[]>([])
@@ -25,9 +27,16 @@ export function useAllocationPlanDetails() {
       const pageSize = 1000
 
       while (hasMore) {
-        const { data: detailsData, error: detailsError } = await supabase
+        let query = supabase
           .from('v_allocation_details_with_availability')
           .select('*')
+        
+        // CRITICAL SECURITY FIX: Filter by account_id to prevent cross-account data access
+        if (effectiveAccountId) {
+          query = query.eq('account_id', effectiveAccountId)
+        }
+        
+        const { data: detailsData, error: detailsError } = await query
           .order('fecha_programada', { ascending: true })
           .range(page * pageSize, (page + 1) * pageSize - 1)
 

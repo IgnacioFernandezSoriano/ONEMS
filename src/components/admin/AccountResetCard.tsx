@@ -132,9 +132,9 @@ export function AccountResetCard({ account, onReset, disabled }: AccountResetCar
                   <p className="font-medium">Reloaded Records:</p>
                   <ul className="mt-1 list-disc list-inside space-y-1">
                     {Object.entries((result as any).inserted_records).map(([table, count]) => (
-                      count > 0 && (
+                      (count as number) > 0 && (
                         <li key={table}>
-                          {table.replace(/_/g, ' ')}: <span className="font-semibold">{count}</span>
+                          {table.replace(/_/g, ' ')}: <span className="font-semibold">{count as number}</span>
                         </li>
                       )
                     ))}
