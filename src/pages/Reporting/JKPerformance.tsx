@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, useMemo, Fragment } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useReportingFilters } from '@/contexts/ReportingFiltersContext';
 import { useJKPerformance } from '@/hooks/reporting/useJKPerformance';
@@ -24,13 +24,13 @@ export default function JKPerformance() {
   const [showProblematicOnly, setShowProblematicOnly] = useState(false);
 
   const {
-    routeData,
-    cityData,
-    regionData,
-    carrierData,
-    productData,
-    weeklySamples,
-    metrics,
+    routeData: rawRouteData,
+    cityData: rawCityData,
+    regionData: rawRegionData,
+    carrierData: rawCarrierData,
+    productData: rawProductData,
+    weeklySamples: rawWeeklySamples,
+    metrics: rawMetrics,
     maxDays,
     globalWarningThreshold,
     globalCriticalThreshold,
@@ -45,6 +45,348 @@ export default function JKPerformance() {
     product: filters.product,
 
   });
+
+  // Apply problematic routes filter globally
+  const filteredRouteData = useMemo(() => {
+    if (!showProblematicOnly) return rawRouteData;
+    return rawRouteData.filter(route => route.onTimePercentage <= route.criticalThreshold);
+  }, [rawRouteData, showProblematicOnly]);
+
+  // Recalculate all derived data based on filtered routes
+  const { routeData, cityData, regionData, carrierData, productData, weeklySamples, metrics } = useMemo(() => {
+    if (!showProblematicOnly) {
+      return {
+        routeData: rawRouteData,
+        cityData: rawCityData,
+        regionData: rawRegionData,
+        carrierData: rawCarrierData,
+        productData: rawProductData,
+        weeklySamples: rawWeeklySamples,
+        metrics: rawMetrics,
+      };
+    }
+
+    // Use filtered route data
+    const routeData = filteredRouteData;
+
+    // Recalculate metrics from filtered routes
+    const totalSamples = routeData.reduce((sum, r) => sum + r.totalSamples, 0);
+    const totalWeightedJKActual = routeData.reduce((sum, r) => sum + r.jkActual * r.totalSamples, 0);
+    const totalWeightedJKStandard = routeData.reduce((sum, r) => sum + r.jkStandard * r.totalSamples, 0);
+    const onTimeSamples = routeData.reduce((sum, r) => sum + r.onTimeSamples, 0);
+    const avgJKActual = totalSamples > 0 ? totalWeightedJKActual / totalSamples : 0;
+    const avgJKStandard = totalSamples > 0 ? totalWeightedJKStandard / totalSamples : 0;
+    const onTimePercentage = totalSamples > 0 ? (onTimeSamples / totalSamples) * 100 : 0;
+    const problematicRoutes = routeData.filter(r => r.onTimePercentage <= r.criticalThreshold).length;
+
+    const metrics = {
+      totalSamples,
+      avgJKActual,
+      avgJKStandard,
+      onTimePercentage,
+      onTimeSamples,
+      problematicRoutes,
+    };
+
+    // Recalculate city data from filtered routes
+    const cityMap = new Map<string, any>();
+    routeData.forEach(route => {
+      // Outbound (origin city)
+      const outboundKey = `${route.originCity}-outbound`;
+      if (!cityMap.has(outboundKey)) {
+        cityMap.set(outboundKey, {
+          cityName: route.originCity,
+          direction: 'outbound',
+          regionName: '', // Would need to be fetched from original data
+          routes: 0,
+          totalSamples: 0,
+          totalWeightedJKStandard: 0,
+          totalWeightedJKActual: 0,
+          onTimeSamples: 0,
+        });
+      }
+      const outbound = cityMap.get(outboundKey);
+      outbound.routes++;
+      outbound.totalSamples += route.totalSamples;
+      outbound.totalWeightedJKStandard += route.jkStandard * route.totalSamples;
+      outbound.totalWeightedJKActual += route.jkActual * route.totalSamples;
+      outbound.onTimeSamples += route.onTimeSamples;
+
+      // Inbound (destination city)
+      const inboundKey = `${route.destinationCity}-inbound`;
+      if (!cityMap.has(inboundKey)) {
+        cityMap.set(inboundKey, {
+          cityName: route.destinationCity,
+          direction: 'inbound',
+          regionName: '', // Would need to be fetched from original data
+          routes: 0,
+          totalSamples: 0,
+          totalWeightedJKStandard: 0,
+          totalWeightedJKActual: 0,
+          onTimeSamples: 0,
+        });
+      }
+      const inbound = cityMap.get(inboundKey);
+      inbound.routes++;
+      inbound.totalSamples += route.totalSamples;
+      inbound.totalWeightedJKStandard += route.jkStandard * route.totalSamples;
+      inbound.totalWeightedJKActual += route.jkActual * route.totalSamples;
+      inbound.onTimeSamples += route.onTimeSamples;
+    });
+
+    const cityData = Array.from(cityMap.values()).map(city => {
+      const jkStandard = city.totalSamples > 0 ? city.totalWeightedJKStandard / city.totalSamples : 0;
+      const jkActual = city.totalSamples > 0 ? city.totalWeightedJKActual / city.totalSamples : 0;
+      const deviation = jkActual - jkStandard;
+      const onTimePercentage = city.totalSamples > 0 ? (city.onTimeSamples / city.totalSamples) * 100 : 0;
+      const status: 'compliant' | 'warning' | 'critical' = onTimePercentage >= globalWarningThreshold ? 'compliant' : onTimePercentage > globalCriticalThreshold ? 'warning' : 'critical';
+      
+      // Find region name from original data
+      const originalCity = rawCityData.find(c => c.cityName === city.cityName && c.direction === city.direction);
+      
+      return {
+        ...city,
+        regionName: originalCity?.regionName || '',
+        jkStandard,
+        jkActual,
+        deviation,
+        onTimePercentage,
+        status,
+      };
+    });
+
+    // Recalculate region data from city data
+    const regionMap = new Map<string, any>();
+    cityData.forEach(city => {
+      const key = `${city.regionName}-${city.direction}`;
+      if (!regionMap.has(key)) {
+        regionMap.set(key, {
+          regionName: city.regionName,
+          direction: city.direction,
+          cities: new Set(),
+          routes: 0,
+          totalSamples: 0,
+          totalWeightedJKStandard: 0,
+          totalWeightedJKActual: 0,
+          onTimeSamples: 0,
+        });
+      }
+      const region = regionMap.get(key);
+      region.cities.add(city.cityName);
+      region.routes += city.routes;
+      region.totalSamples += city.totalSamples;
+      region.totalWeightedJKStandard += city.jkStandard * city.totalSamples;
+      region.totalWeightedJKActual += city.jkActual * city.totalSamples;
+      region.onTimeSamples += city.onTimeSamples;
+    });
+
+    const regionData = Array.from(regionMap.values()).map(region => {
+      const jkStandard = region.totalSamples > 0 ? region.totalWeightedJKStandard / region.totalSamples : 0;
+      const jkActual = region.totalSamples > 0 ? region.totalWeightedJKActual / region.totalSamples : 0;
+      const deviation = jkActual - jkStandard;
+      const onTimePercentage = region.totalSamples > 0 ? (region.onTimeSamples / region.totalSamples) * 100 : 0;
+      const status: 'compliant' | 'warning' | 'critical' = onTimePercentage >= globalWarningThreshold ? 'compliant' : onTimePercentage > globalCriticalThreshold ? 'warning' : 'critical';
+      
+      return {
+        regionName: region.regionName,
+        direction: region.direction,
+        cities: region.cities.size,
+        routes: region.routes,
+        totalSamples: region.totalSamples,
+        jkStandard,
+        jkActual,
+        deviation,
+        onTimePercentage,
+        status,
+      };
+    });
+
+    // Recalculate carrier/product data from filtered routes
+    const carrierMap = new Map<string, any>();
+    routeData.forEach(route => {
+      if (!carrierMap.has(route.carrier)) {
+        carrierMap.set(route.carrier, {
+          carrier: route.carrier,
+          routes: 0,
+          totalSamples: 0,
+          totalWeightedJKStandard: 0,
+          totalWeightedJKActual: 0,
+          onTimeSamples: 0,
+          problematicRoutes: 0,
+          products: new Map(),
+        });
+      }
+      const carrier = carrierMap.get(route.carrier);
+      carrier.routes++;
+      carrier.totalSamples += route.totalSamples;
+      carrier.totalWeightedJKStandard += route.jkStandard * route.totalSamples;
+      carrier.totalWeightedJKActual += route.jkActual * route.totalSamples;
+      carrier.onTimeSamples += route.onTimeSamples;
+      if (route.onTimePercentage <= route.criticalThreshold) {
+        carrier.problematicRoutes++;
+      }
+
+      // Track products within carrier
+      if (!carrier.products.has(route.product)) {
+        carrier.products.set(route.product, {
+          product: route.product,
+          routes: 0,
+          totalSamples: 0,
+          totalWeightedJKStandard: 0,
+          totalWeightedJKActual: 0,
+          onTimeSamples: 0,
+        });
+      }
+      const product = carrier.products.get(route.product);
+      product.routes++;
+      product.totalSamples += route.totalSamples;
+      product.totalWeightedJKStandard += route.jkStandard * route.totalSamples;
+      product.totalWeightedJKActual += route.jkActual * route.totalSamples;
+      product.onTimeSamples += route.onTimeSamples;
+    });
+
+    const carrierData = Array.from(carrierMap.values()).map(carrier => {
+      const jkStandard = carrier.totalSamples > 0 ? carrier.totalWeightedJKStandard / carrier.totalSamples : 0;
+      const jkActual = carrier.totalSamples > 0 ? carrier.totalWeightedJKActual / carrier.totalSamples : 0;
+      const deviation = jkActual - jkStandard;
+      const onTimePercentage = carrier.totalSamples > 0 ? (carrier.onTimeSamples / carrier.totalSamples) * 100 : 0;
+      const status: 'compliant' | 'warning' | 'critical' = onTimePercentage >= globalWarningThreshold ? 'compliant' : onTimePercentage > globalCriticalThreshold ? 'warning' : 'critical';
+      
+      const products = Array.from(carrier.products.values()).map((p: any) => {
+        const pJkStandard = p.totalSamples > 0 ? p.totalWeightedJKStandard / p.totalSamples : 0;
+        const pJkActual = p.totalSamples > 0 ? p.totalWeightedJKActual / p.totalSamples : 0;
+        const pDeviation = pJkActual - pJkStandard;
+        const pOnTimePercentage = p.totalSamples > 0 ? (p.onTimeSamples / p.totalSamples) * 100 : 0;
+        const pStatus: 'compliant' | 'warning' | 'critical' = pOnTimePercentage >= globalWarningThreshold ? 'compliant' : pOnTimePercentage > globalCriticalThreshold ? 'warning' : 'critical';
+        
+        return {
+          product: p.product,
+          routes: p.routes,
+          totalSamples: p.totalSamples,
+          jkStandard: pJkStandard,
+          jkActual: pJkActual,
+          deviation: pDeviation,
+          onTimePercentage: pOnTimePercentage,
+          status: pStatus,
+        };
+      });
+
+      return {
+        carrier: carrier.carrier,
+        routes: carrier.routes,
+        totalSamples: carrier.totalSamples,
+        jkStandard,
+        jkActual,
+        deviation,
+        onTimePercentage,
+        problematicRoutes: carrier.problematicRoutes,
+        status,
+        products,
+      };
+    });
+
+    // Recalculate product data
+    const productMap = new Map<string, any>();
+    routeData.forEach(route => {
+      if (!productMap.has(route.product)) {
+        productMap.set(route.product, {
+          product: route.product,
+          routes: 0,
+          totalSamples: 0,
+          totalWeightedJKStandard: 0,
+          totalWeightedJKActual: 0,
+          onTimeSamples: 0,
+          problematicRoutes: 0,
+          carriers: new Map(),
+        });
+      }
+      const product = productMap.get(route.product);
+      product.routes++;
+      product.totalSamples += route.totalSamples;
+      product.totalWeightedJKStandard += route.jkStandard * route.totalSamples;
+      product.totalWeightedJKActual += route.jkActual * route.totalSamples;
+      product.onTimeSamples += route.onTimeSamples;
+      if (route.onTimePercentage <= route.criticalThreshold) {
+        product.problematicRoutes++;
+      }
+
+      // Track carriers within product
+      if (!product.carriers.has(route.carrier)) {
+        product.carriers.set(route.carrier, {
+          carrier: route.carrier,
+          routes: 0,
+          totalSamples: 0,
+          totalWeightedJKStandard: 0,
+          totalWeightedJKActual: 0,
+          onTimeSamples: 0,
+        });
+      }
+      const carrierInProduct = product.carriers.get(route.carrier);
+      carrierInProduct.routes++;
+      carrierInProduct.totalSamples += route.totalSamples;
+      carrierInProduct.totalWeightedJKStandard += route.jkStandard * route.totalSamples;
+      carrierInProduct.totalWeightedJKActual += route.jkActual * route.totalSamples;
+      carrierInProduct.onTimeSamples += route.onTimeSamples;
+    });
+
+    const productData = Array.from(productMap.values()).map(product => {
+      const jkStandard = product.totalSamples > 0 ? product.totalWeightedJKStandard / product.totalSamples : 0;
+      const jkActual = product.totalSamples > 0 ? product.totalWeightedJKActual / product.totalSamples : 0;
+      const deviation = jkActual - jkStandard;
+      const onTimePercentage = product.totalSamples > 0 ? (product.onTimeSamples / product.totalSamples) * 100 : 0;
+      const status: 'compliant' | 'warning' | 'critical' = onTimePercentage >= globalWarningThreshold ? 'compliant' : onTimePercentage > globalCriticalThreshold ? 'warning' : 'critical';
+      
+      const carriers = Array.from(product.carriers.values()).map((c: any) => {
+        const cJkStandard = c.totalSamples > 0 ? c.totalWeightedJKStandard / c.totalSamples : 0;
+        const cJkActual = c.totalSamples > 0 ? c.totalWeightedJKActual / c.totalSamples : 0;
+        const cDeviation = cJkActual - cJkStandard;
+        const cOnTimePercentage = c.totalSamples > 0 ? (c.onTimeSamples / c.totalSamples) * 100 : 0;
+        const cStatus: 'compliant' | 'warning' | 'critical' = cOnTimePercentage >= globalWarningThreshold ? 'compliant' : cOnTimePercentage > globalCriticalThreshold ? 'warning' : 'critical';
+        
+        return {
+          carrier: c.carrier,
+          routes: c.routes,
+          totalSamples: c.totalSamples,
+          jkStandard: cJkStandard,
+          jkActual: cJkActual,
+          deviation: cDeviation,
+          onTimePercentage: cOnTimePercentage,
+          status: cStatus,
+        };
+      });
+
+      return {
+        product: product.product,
+        routes: product.routes,
+        totalSamples: product.totalSamples,
+        jkStandard,
+        jkActual,
+        deviation,
+        onTimePercentage,
+        problematicRoutes: product.problematicRoutes,
+        status,
+        carriers,
+      };
+    });
+
+    // Recalculate weekly samples from filtered routes
+    // Note: This is a simplified version - ideally we'd need shipment-level data
+    const weeklySamples = rawWeeklySamples.map(week => {
+      // For now, we'll keep the original weekly samples as we don't have shipment-level data
+      // In a real implementation, you'd filter shipments by problematic routes
+      return week;
+    });
+
+    return {
+      routeData,
+      cityData,
+      regionData,
+      carrierData,
+      productData,
+      weeklySamples,
+      metrics,
+    };
+  }, [rawRouteData, rawCityData, rawRegionData, rawCarrierData, rawProductData, rawWeeklySamples, rawMetrics, filteredRouteData, showProblematicOnly, globalWarningThreshold, globalCriticalThreshold]);
 
   if (loading) {
     return (
@@ -189,11 +531,7 @@ export default function JKPerformance() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <h3 className="text-lg font-semibold text-gray-900">
-                    {t('reporting.route_performance', { 
-                      count: showProblematicOnly 
-                        ? routeData.filter(r => r.onTimePercentage <= r.criticalThreshold).length 
-                        : routeData.length 
-                    })}
+                    {t('reporting.route_performance', { count: routeData.length })}
                   </h3>
                   {showProblematicOnly && (
                     <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded">
@@ -260,7 +598,6 @@ export default function JKPerformance() {
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {routeData
-                      .filter(route => !showProblematicOnly || route.onTimePercentage <= route.criticalThreshold)
                       .slice(0, 20)
                       .map((route, idx) => {
                       const deviationColor = route.deviation <= 0 ? 'text-green-600' : route.deviation < 1 ? 'text-yellow-600' : 'text-red-600';
@@ -297,9 +634,17 @@ export default function JKPerformance() {
           {activeTab === 'city' && (
             <div>
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  {t('reporting.city_performance', { count: cityData.length })}
-                </h3>
+                <div className="flex items-center gap-3">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {t('reporting.city_performance', { count: cityData.length })}
+                  </h3>
+                  {showProblematicOnly && (
+                    <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded">
+                      <AlertTriangle className="w-3 h-3" />
+                      Problematic only
+                    </span>
+                  )}
+                </div>
                 <button
                   onClick={() => exportCityCSV(cityData)}
                   className="flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
@@ -377,9 +722,17 @@ export default function JKPerformance() {
           {activeTab === 'region' && (
             <div>
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  {t('reporting.region_performance', { count: regionData.length })}
-                </h3>
+                <div className="flex items-center gap-3">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {t('reporting.region_performance', { count: regionData.length })}
+                  </h3>
+                  {showProblematicOnly && (
+                    <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded">
+                      <AlertTriangle className="w-3 h-3" />
+                      Problematic only
+                    </span>
+                  )}
+                </div>
                 <button
                   onClick={() => exportRegionCSV(regionData)}
                   className="flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
@@ -457,9 +810,17 @@ export default function JKPerformance() {
           {activeTab === 'carrier' && (
             <div>
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  {t('reporting.carrier_product_performance', { count: carrierData.length })}
-                </h3>
+                <div className="flex items-center gap-3">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {t('reporting.carrier_product_performance', { count: carrierData.length })}
+                  </h3>
+                  {showProblematicOnly && (
+                    <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded">
+                      <AlertTriangle className="w-3 h-3" />
+                      Problematic only
+                    </span>
+                  )}
+                </div>
                 <button
                   onClick={() => exportCarrierProductCSV(carrierData)}
                   className="flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
@@ -508,7 +869,7 @@ export default function JKPerformance() {
                       const carrierStatusColor = carrier.status === 'compliant' ? 'bg-green-500' : carrier.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500';
                       
                       return (
-                        <React.Fragment key={carrierIdx}>
+                        <Fragment key={carrierIdx}>
                           {/* Carrier Row */}
                           <tr className="bg-blue-50 hover:bg-blue-100">
                             <td className="px-3 py-2 text-sm font-bold text-gray-900">{carrier.carrier}</td>
@@ -555,7 +916,7 @@ export default function JKPerformance() {
                               </tr>
                             );
                           })}
-                        </React.Fragment>
+                        </Fragment>
                       );
                     })}
                   </tbody>
