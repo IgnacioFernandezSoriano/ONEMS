@@ -660,6 +660,12 @@ export default function JKPerformance() {
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                         <div className="flex items-center gap-1">
+                          J+K Actual (to STD %)
+                          <ColumnTooltip content="Number of days required to reach the target STD % defined in delivery_standards. This is the actual performance metric showing how many days it takes to achieve the required on-time percentage. Lower values indicate better performance." />
+                        </div>
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <div className="flex items-center gap-1">
                           On-Time %
                           <ColumnTooltip content="Percentage of shipments delivered within or before J+K Std. Compare against route-specific Std % from delivery_standards (not shown in this table)." />
                         </div>
@@ -699,6 +705,9 @@ export default function JKPerformance() {
                           <td className="px-3 py-2 text-sm text-gray-900">{route.jkActual.toFixed(1)}</td>
                           <td className={`px-3 py-2 text-sm ${deviationColor}`}>
                             {route.deviation > 0 ? '+' : ''}{route.deviation.toFixed(1)}
+                          </td>
+                          <td className="px-3 py-2 text-sm text-gray-900 font-medium">
+                            {route.jkActualToStd > 0 ? `${route.jkActualToStd}d` : 'N/A'}
                           </td>
                           <td className={`px-3 py-2 text-sm ${onTimeColor}`}>
                             {route.onTimePercentage.toFixed(1)}%

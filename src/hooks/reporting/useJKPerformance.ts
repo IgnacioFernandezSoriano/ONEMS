@@ -12,6 +12,7 @@ export interface JKRouteData {
   totalSamples: number;
   jkStandard: number; // days
   jkActual: number; // average days
+  jkActualToStd: number; // days to reach STD % target
   deviation: number; // actual - standard
   onTimePercentage: number;
   onTimeSamples: number;
@@ -340,6 +341,25 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
           const beforeStandardSamples = route.samples.filter(d => d < route.jkStandard).length;
           const afterStandardSamples = route.samples.filter(d => d > route.jkStandard).length;
           
+          // Calculate J+K Actual (days to reach STD %)
+          const targetStdPercentage = standard?.successPercentage || 85;
+          let jkActualToStd = 0;
+          if (totalSamples > 0 && route.distribution.size > 0) {
+            const sortedDays = Array.from(route.distribution.entries())
+              .sort((a, b) => a[0] - b[0]); // Sort by day ascending
+            
+            let cumulativeSamples = 0;
+            const targetSamples = (totalSamples * targetStdPercentage) / 100;
+            
+            for (const [day, count] of sortedDays) {
+              cumulativeSamples += count;
+              if (cumulativeSamples >= targetSamples) {
+                jkActualToStd = day;
+                break;
+              }
+            }
+          }
+          
           return {
             routeKey: key,
             originCity: route.originCity,
@@ -349,6 +369,7 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
             totalSamples,
             jkStandard: route.jkStandard,
             jkActual,
+            jkActualToStd,
             deviation,
             onTimePercentage,
             onTimeSamples: route.onTimeSamples,

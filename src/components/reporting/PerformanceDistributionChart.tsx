@@ -13,6 +13,7 @@ interface JKRouteData {
   afterStandardSamples: number;
   onTimePercentage: number;
   deviation: number;
+  standardPercentage: number;
   status: 'compliant' | 'warning' | 'critical';
   routeKey: string;
   distribution: Map<number, number>; // day -> count
@@ -37,12 +38,16 @@ export function PerformanceDistributionChart({ routeData, maxDays, carrierFilter
   // Check if we have a single carrier-product combination
   const isSingleCarrierProduct = !!(carrierFilter && productFilter);
   
-  // Get the standard for this carrier-product (weighted average if multiple routes)
-  let targetStandard = 0;
+  // Get the standard percentage and J+K standard for this carrier-product (weighted average if multiple routes)
+  let targetStandardPercentage = 0;
+  let targetJKDays = 0;
+  
   if (isSingleCarrierProduct && routeData.length > 0) {
     const totalSamples = routeData.reduce((sum, r) => sum + r.totalSamples, 0);
-    const weightedStandard = routeData.reduce((sum, r) => sum + r.jkStandard * r.totalSamples, 0);
-    targetStandard = totalSamples > 0 ? Math.round(weightedStandard / totalSamples) : 0;
+    const weightedStdPercentage = routeData.reduce((sum, r) => sum + r.standardPercentage * r.totalSamples, 0);
+    const weightedJKStandard = routeData.reduce((sum, r) => sum + r.jkStandard * r.totalSamples, 0);
+    targetStandardPercentage = totalSamples > 0 ? weightedStdPercentage / totalSamples : 0;
+    targetJKDays = totalSamples > 0 ? Math.round(weightedJKStandard / totalSamples) : 0;
   }
 
   // Aggregate by actual transit days from individual shipments
@@ -80,31 +85,23 @@ export function PerformanceDistributionChart({ routeData, maxDays, carrierFilter
     .sort((a, b) => a.day - b.day)
     .slice(0, 15); // Limit to first 15 days for readability
 
-  // Calculate cumulative samples if single carrier-product
-  let cumulativeData: { day: number; cumulative: number }[] = [];
-  let standardReachedAtDay: number | null = null;
+  // Calculate cumulative samples and find day where STD % is reached
+  let dayReachingStdPercentage: number | null = null;
   
-  if (isSingleCarrierProduct && targetStandard > 0) {
+  if (isSingleCarrierProduct && targetStandardPercentage > 0) {
     let cumulative = 0;
     const totalSamples = chartData.reduce((sum, d) => sum + d.total, 0);
-    const targetSamples = totalSamples * (targetStandard / 100); // Assuming targetStandard is a percentage
+    const targetSamplesCount = (totalSamples * targetStandardPercentage) / 100;
     
-    // Actually, targetStandard is days, not percentage. Let me recalculate based on reaching the standard day
-    // We need to accumulate samples up to the standard day
     chartData.forEach(item => {
       cumulative += item.total;
-      cumulativeData.push({ day: item.day, cumulative });
+      const cumulativePercentage = (cumulative / totalSamples) * 100;
+      (item as any).cumulative = cumulative;
+      (item as any).cumulativePercentage = cumulativePercentage;
       
-      // Mark the day where we reach or exceed the standard
-      if (standardReachedAtDay === null && item.day >= targetStandard) {
-        standardReachedAtDay = item.day;
-      }
-    });
-
-    // Add cumulative to chartData
-    chartData.forEach((item, index) => {
-      if (cumulativeData[index]) {
-        (item as any).cumulative = cumulativeData[index].cumulative;
+      // Mark the day where we reach or exceed the target percentage
+      if (dayReachingStdPercentage === null && cumulative >= targetSamplesCount) {
+        dayReachingStdPercentage = item.day;
       }
     });
   }
@@ -114,6 +111,10 @@ export function PerformanceDistributionChart({ routeData, maxDays, carrierFilter
       const barPayload = payload.filter((p: any) => p.dataKey !== 'cumulative');
       const cumulativePayload = payload.find((p: any) => p.dataKey === 'cumulative');
       const total = barPayload.reduce((sum: number, entry: any) => sum + entry.value, 0);
+      
+      // Get cumulative percentage from the data point
+      const dataPoint = payload[0]?.payload;
+      const cumulativePercentage = dataPoint?.cumulativePercentage;
       
       return (
         <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3">
@@ -138,11 +139,15 @@ export function PerformanceDistributionChart({ routeData, maxDays, carrierFilter
               <span className="text-gray-900">{total.toLocaleString()}</span>
             </div>
           </div>
-          {cumulativePayload && (
+          {cumulativePayload && cumulativePercentage !== undefined && (
             <div className="mt-2 pt-2 border-t border-gray-200">
               <div className="flex items-center justify-between text-sm font-semibold text-purple-600">
                 <span>Cumulative:</span>
                 <span>{cumulativePayload.value.toLocaleString()}</span>
+              </div>
+              <div className="flex items-center justify-between text-xs text-purple-500 mt-1">
+                <span>% of Total:</span>
+                <span>{cumulativePercentage.toFixed(1)}% (Target: {targetStandardPercentage.toFixed(0)}%)</span>
               </div>
             </div>
           )}
@@ -151,12 +156,6 @@ export function PerformanceDistributionChart({ routeData, maxDays, carrierFilter
     }
     return null;
   };
-
-  // Calculate max Y for bars and cumulative
-  const maxBarValue = Math.max(...chartData.map(d => d.total));
-  const maxCumulative = isSingleCarrierProduct && chartData.length > 0 
-    ? (chartData[chartData.length - 1] as any).cumulative || 0 
-    : 0;
 
   return (
     <div className="w-full h-64">
@@ -188,15 +187,15 @@ export function PerformanceDistributionChart({ routeData, maxDays, carrierFilter
             verticalAlign="bottom"
           />
           
-          {/* Vertical line at standard day */}
-          {isSingleCarrierProduct && standardReachedAtDay !== null && (
+          {/* Vertical line at day reaching STD % */}
+          {isSingleCarrierProduct && dayReachingStdPercentage !== null && (
             <ReferenceLine 
-              x={`${standardReachedAtDay}d`} 
+              x={`${dayReachingStdPercentage}d`} 
               stroke="#9333ea" 
               strokeWidth={2}
               strokeDasharray="5 5"
               label={{ 
-                value: `Standard: ${targetStandard}d`, 
+                value: `${targetStandardPercentage.toFixed(0)}% at ${dayReachingStdPercentage}d`, 
                 position: 'top',
                 fill: '#9333ea',
                 fontSize: 11,
@@ -246,9 +245,9 @@ export function PerformanceDistributionChart({ routeData, maxDays, carrierFilter
       </ResponsiveContainer>
       <div className="mt-2 text-xs text-gray-500 text-center">
         Distribution of shipments by actual transit time vs delivery standard
-        {isSingleCarrierProduct && targetStandard > 0 && (
+        {isSingleCarrierProduct && targetStandardPercentage > 0 && dayReachingStdPercentage !== null && (
           <span className="ml-2 text-purple-600 font-medium">
-            • Cumulative view for {carrierFilter} - {productFilter} (Standard: {targetStandard}d)
+            • {carrierFilter} - {productFilter}: {targetStandardPercentage.toFixed(0)}% reached at {dayReachingStdPercentage}d (J+K Std: {targetJKDays}d)
           </span>
         )}
       </div>
