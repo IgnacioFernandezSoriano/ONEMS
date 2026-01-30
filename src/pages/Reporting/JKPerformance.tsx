@@ -624,8 +624,16 @@ export default function JKPerformance() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {routeData
-                      .slice(0, 20)
+                    {[...routeData]
+                      .sort((a, b) => {
+                        // Sort problematic routes first (On-Time % <= Critical SLA)
+                        const aProblematic = a.onTimePercentage <= a.criticalThreshold;
+                        const bProblematic = b.onTimePercentage <= b.criticalThreshold;
+                        if (aProblematic && !bProblematic) return -1;
+                        if (!aProblematic && bProblematic) return 1;
+                        // Then sort by On-Time % ascending (worst first)
+                        return a.onTimePercentage - b.onTimePercentage;
+                      })
                       .map((route, idx) => {
                       const deviationColor = route.deviation <= 0 ? 'text-green-600' : route.deviation < 1 ? 'text-yellow-600' : 'text-red-600';
                       const onTimeColor = route.onTimePercentage >= route.warningThreshold ? 'text-green-600 font-semibold' : route.onTimePercentage > route.criticalThreshold ? 'text-yellow-600' : 'text-red-600 font-semibold';
@@ -714,7 +722,17 @@ export default function JKPerformance() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {cityData.map((city, idx) => {
+                    {[...cityData]
+                      .sort((a, b) => {
+                        // Sort by status: critical first, then warning, then compliant
+                        const statusOrder: Record<string, number> = { critical: 0, warning: 1, compliant: 2 };
+                        if (a.status !== b.status) {
+                          return statusOrder[a.status] - statusOrder[b.status];
+                        }
+                        // Then sort by On-Time % ascending (worst first)
+                        return a.onTimePercentage - b.onTimePercentage;
+                      })
+                      .map((city, idx) => {
                       const deviationColor = city.deviation <= 0 ? 'text-green-600' : city.deviation < 1 ? 'text-yellow-600' : 'text-red-600';
                       const onTimeColor = city.onTimePercentage >= globalWarningThreshold ? 'text-green-600 font-semibold' : city.onTimePercentage > globalCriticalThreshold ? 'text-yellow-600' : 'text-red-600 font-semibold';
                       const statusColor = city.status === 'compliant' ? 'bg-green-500' : city.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500';
@@ -802,7 +820,17 @@ export default function JKPerformance() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {regionData.map((region, idx) => {
+                    {[...regionData]
+                      .sort((a, b) => {
+                        // Sort by status: critical first, then warning, then compliant
+                        const statusOrder: Record<string, number> = { critical: 0, warning: 1, compliant: 2 };
+                        if (a.status !== b.status) {
+                          return statusOrder[a.status] - statusOrder[b.status];
+                        }
+                        // Then sort by On-Time % ascending (worst first)
+                        return a.onTimePercentage - b.onTimePercentage;
+                      })
+                      .map((region, idx) => {
                       const deviationColor = region.deviation <= 0 ? 'text-green-600' : region.deviation < 1 ? 'text-yellow-600' : 'text-red-600';
                       const onTimeColor = region.onTimePercentage >= globalWarningThreshold ? 'text-green-600 font-semibold' : region.onTimePercentage > globalCriticalThreshold ? 'text-yellow-600' : 'text-red-600 font-semibold';
                       const statusColor = region.status === 'compliant' ? 'bg-green-500' : region.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500';
@@ -890,7 +918,17 @@ export default function JKPerformance() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {carrierData.map((carrier, carrierIdx) => {
+                    {[...carrierData]
+                      .sort((a, b) => {
+                        // Sort by status: critical first, then warning, then compliant
+                        const statusOrder: Record<string, number> = { critical: 0, warning: 1, compliant: 2 };
+                        if (a.status !== b.status) {
+                          return statusOrder[a.status] - statusOrder[b.status];
+                        }
+                        // Then sort by On-Time % ascending (worst first)
+                        return a.onTimePercentage - b.onTimePercentage;
+                      })
+                      .map((carrier, carrierIdx) => {
                       const carrierDeviationColor = carrier.deviation <= 0 ? 'text-green-600' : carrier.deviation < 1 ? 'text-yellow-600' : 'text-red-600';
                       const carrierOnTimeColor = carrier.onTimePercentage >= globalWarningThreshold ? 'text-green-600 font-semibold' : carrier.onTimePercentage > globalCriticalThreshold ? 'text-yellow-600' : 'text-red-600 font-semibold';
                       const carrierStatusColor = carrier.status === 'compliant' ? 'bg-green-500' : carrier.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500';
