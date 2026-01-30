@@ -1,4 +1,4 @@
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
+import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
 
 interface JKRouteData {
   originCity: string;
@@ -21,15 +21,28 @@ interface JKRouteData {
 interface PerformanceDistributionChartProps {
   routeData: JKRouteData[];
   maxDays: number;
+  carrierFilter?: string;
+  productFilter?: string;
 }
 
-export function PerformanceDistributionChart({ routeData, maxDays }: PerformanceDistributionChartProps) {
+export function PerformanceDistributionChart({ routeData, maxDays, carrierFilter, productFilter }: PerformanceDistributionChartProps) {
   if (!routeData || routeData.length === 0) {
     return (
       <div className="h-64 flex items-center justify-center text-gray-400">
         No performance data available
       </div>
     );
+  }
+
+  // Check if we have a single carrier-product combination
+  const isSingleCarrierProduct = !!(carrierFilter && productFilter);
+  
+  // Get the standard for this carrier-product (weighted average if multiple routes)
+  let targetStandard = 0;
+  if (isSingleCarrierProduct && routeData.length > 0) {
+    const totalSamples = routeData.reduce((sum, r) => sum + r.totalSamples, 0);
+    const weightedStandard = routeData.reduce((sum, r) => sum + r.jkStandard * r.totalSamples, 0);
+    targetStandard = totalSamples > 0 ? Math.round(weightedStandard / totalSamples) : 0;
   }
 
   // Aggregate by actual transit days from individual shipments
@@ -67,13 +80,45 @@ export function PerformanceDistributionChart({ routeData, maxDays }: Performance
     .sort((a, b) => a.day - b.day)
     .slice(0, 15); // Limit to first 15 days for readability
 
+  // Calculate cumulative samples if single carrier-product
+  let cumulativeData: { day: number; cumulative: number }[] = [];
+  let standardReachedAtDay: number | null = null;
+  
+  if (isSingleCarrierProduct && targetStandard > 0) {
+    let cumulative = 0;
+    const totalSamples = chartData.reduce((sum, d) => sum + d.total, 0);
+    const targetSamples = totalSamples * (targetStandard / 100); // Assuming targetStandard is a percentage
+    
+    // Actually, targetStandard is days, not percentage. Let me recalculate based on reaching the standard day
+    // We need to accumulate samples up to the standard day
+    chartData.forEach(item => {
+      cumulative += item.total;
+      cumulativeData.push({ day: item.day, cumulative });
+      
+      // Mark the day where we reach or exceed the standard
+      if (standardReachedAtDay === null && item.day >= targetStandard) {
+        standardReachedAtDay = item.day;
+      }
+    });
+
+    // Add cumulative to chartData
+    chartData.forEach((item, index) => {
+      if (cumulativeData[index]) {
+        (item as any).cumulative = cumulativeData[index].cumulative;
+      }
+    });
+  }
+
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
-      const total = payload.reduce((sum: number, entry: any) => sum + entry.value, 0);
+      const barPayload = payload.filter((p: any) => p.dataKey !== 'cumulative');
+      const cumulativePayload = payload.find((p: any) => p.dataKey === 'cumulative');
+      const total = barPayload.reduce((sum: number, entry: any) => sum + entry.value, 0);
+      
       return (
         <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3">
           <p className="font-semibold text-gray-900 mb-2">{label}</p>
-          {payload.map((entry: any, index: number) => (
+          {barPayload.map((entry: any, index: number) => (
             <div key={index} className="flex items-center justify-between gap-4 text-sm">
               <div className="flex items-center gap-2">
                 <div 
@@ -93,16 +138,30 @@ export function PerformanceDistributionChart({ routeData, maxDays }: Performance
               <span className="text-gray-900">{total.toLocaleString()}</span>
             </div>
           </div>
+          {cumulativePayload && (
+            <div className="mt-2 pt-2 border-t border-gray-200">
+              <div className="flex items-center justify-between text-sm font-semibold text-purple-600">
+                <span>Cumulative:</span>
+                <span>{cumulativePayload.value.toLocaleString()}</span>
+              </div>
+            </div>
+          )}
         </div>
       );
     }
     return null;
   };
 
+  // Calculate max Y for bars and cumulative
+  const maxBarValue = Math.max(...chartData.map(d => d.total));
+  const maxCumulative = isSingleCarrierProduct && chartData.length > 0 
+    ? (chartData[chartData.length - 1] as any).cumulative || 0 
+    : 0;
+
   return (
     <div className="w-full h-64">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 40 }}>
+        <ComposedChart data={chartData} margin={{ top: 10, right: isSingleCarrierProduct ? 40 : 10, left: 0, bottom: 40 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
           <XAxis 
             dataKey="dayLabel" 
@@ -110,21 +169,49 @@ export function PerformanceDistributionChart({ routeData, maxDays }: Performance
             label={{ value: 'Transit Days (J+K)', position: 'insideBottom', offset: -10, style: { fontSize: 12, fill: '#6b7280' } }}
           />
           <YAxis 
+            yAxisId="left"
             tick={{ fontSize: 12, fill: '#6b7280' }}
             label={{ value: 'Shipments', angle: -90, position: 'insideLeft', style: { fontSize: 12, fill: '#6b7280' } }}
           />
+          {isSingleCarrierProduct && (
+            <YAxis 
+              yAxisId="right"
+              orientation="right"
+              tick={{ fontSize: 12, fill: '#9333ea' }}
+              label={{ value: 'Cumulative Samples', angle: 90, position: 'insideRight', style: { fontSize: 12, fill: '#9333ea' } }}
+            />
+          )}
           <Tooltip content={<CustomTooltip />} />
           <Legend 
             wrapperStyle={{ fontSize: '12px', paddingTop: '20px' }}
             iconType="circle"
             verticalAlign="bottom"
           />
+          
+          {/* Vertical line at standard day */}
+          {isSingleCarrierProduct && standardReachedAtDay !== null && (
+            <ReferenceLine 
+              x={`${standardReachedAtDay}d`} 
+              stroke="#9333ea" 
+              strokeWidth={2}
+              strokeDasharray="5 5"
+              label={{ 
+                value: `Standard: ${targetStandard}d`, 
+                position: 'top',
+                fill: '#9333ea',
+                fontSize: 11,
+                fontWeight: 'bold'
+              }}
+            />
+          )}
+          
           <Bar 
             dataKey="before" 
             stackId="a" 
             fill="#10b981" 
             name="Before Standard"
             radius={[0, 0, 0, 0]}
+            yAxisId="left"
           />
           <Bar 
             dataKey="onTime" 
@@ -132,6 +219,7 @@ export function PerformanceDistributionChart({ routeData, maxDays }: Performance
             fill="#3b82f6" 
             name="On Standard"
             radius={[0, 0, 0, 0]}
+            yAxisId="left"
           />
           <Bar 
             dataKey="after" 
@@ -139,11 +227,30 @@ export function PerformanceDistributionChart({ routeData, maxDays }: Performance
             fill="#ef4444" 
             name="After Standard"
             radius={[4, 4, 0, 0]}
+            yAxisId="left"
           />
-        </BarChart>
+          
+          {/* Cumulative line */}
+          {isSingleCarrierProduct && (
+            <Line 
+              type="monotone"
+              dataKey="cumulative"
+              stroke="#9333ea"
+              strokeWidth={2}
+              dot={{ fill: '#9333ea', r: 4 }}
+              name="Cumulative Samples"
+              yAxisId="right"
+            />
+          )}
+        </ComposedChart>
       </ResponsiveContainer>
       <div className="mt-2 text-xs text-gray-500 text-center">
         Distribution of shipments by actual transit time vs delivery standard
+        {isSingleCarrierProduct && targetStandard > 0 && (
+          <span className="ml-2 text-purple-600 font-medium">
+            • Cumulative view for {carrierFilter} - {productFilter} (Standard: {targetStandard}d)
+          </span>
+        )}
       </div>
     </div>
   );

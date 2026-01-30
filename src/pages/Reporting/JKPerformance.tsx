@@ -566,7 +566,12 @@ export default function JKPerformance() {
             <h3 className="text-lg font-semibold text-gray-900">{t('reporting.performance_distribution')}</h3>
             <SmartTooltip content="Performance Distribution: Shows how shipments are distributed by actual transit time vs. delivery standard (J+K Std). Categories: After Standard (red, delivered AFTER J+K Std = late), Before/On-Time (green, delivered WITHIN J+K Std = on-time), On Standard (blue, delivered EXACTLY on J+K Std day). Use to visualize overall network performance. Large red bars indicate systematic delays requiring investigation." />
           </div>
-          <PerformanceDistributionChart routeData={routeData} maxDays={maxDays} />
+          <PerformanceDistributionChart 
+            routeData={routeData} 
+            maxDays={maxDays} 
+            carrierFilter={filters.carrier}
+            productFilter={filters.product}
+          />
         </div>
       </div>
 
