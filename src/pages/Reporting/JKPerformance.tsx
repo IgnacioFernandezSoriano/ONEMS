@@ -98,9 +98,16 @@ export default function JKPerformance() {
         problematicRoutes,
       };
       
+      // Sort cityData by city name, then by direction (inbound first, outbound second)
+      const sortedBaseCityData = [...baseCityData].sort((a, b) => {
+        const cityCompare = a.cityName.localeCompare(b.cityName);
+        if (cityCompare !== 0) return cityCompare;
+        return a.direction === 'inbound' ? -1 : 1;
+      });
+      
       return {
         routeData: baseRouteData,
-        cityData: baseCityData,
+        cityData: sortedBaseCityData,
         regionData: baseRegionData,
         carrierData: baseCarrierData,
         productData: baseProductData,
@@ -448,9 +455,17 @@ export default function JKPerformance() {
     const weeklySamples = Array.from(weeklyMap.values())
       .sort((a, b) => new Date(a.weekStart).getTime() - new Date(b.weekStart).getTime());
 
+    // Sort cityData by city name, then by direction (inbound first, outbound second)
+    const sortedCityData = [...cityData].sort((a, b) => {
+      const cityCompare = a.cityName.localeCompare(b.cityName);
+      if (cityCompare !== 0) return cityCompare;
+      // inbound (0) before outbound (1)
+      return a.direction === 'inbound' ? -1 : 1;
+    });
+
     return {
       routeData,
-      cityData,
+      cityData: sortedCityData,
       regionData,
       carrierData,
       productData,
@@ -772,6 +787,9 @@ export default function JKPerformance() {
                         <div className="flex items-center gap-1">Deviation <ColumnTooltip content="Weighted average deviation (Actual - Standard) across all routes involving this city." /></div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <div className="flex items-center gap-1">STD % <ColumnTooltip content="Weighted average target on-time percentage from delivery_standards for all routes involving this city." /></div>
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                         <div className="flex items-center gap-1">On-Time % <ColumnTooltip content="Percentage of all shipments (across all routes) delivered on-time for this city." /></div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
@@ -780,19 +798,9 @@ export default function JKPerformance() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {[...cityData]
-                      .sort((a, b) => {
-                        // Sort by status: critical first, then warning, then compliant
-                        const statusOrder: Record<string, number> = { critical: 0, warning: 1, compliant: 2 };
-                        if (a.status !== b.status) {
-                          return statusOrder[a.status] - statusOrder[b.status];
-                        }
-                        // Then sort by On-Time % ascending (worst first)
-                        return a.onTimePercentage - b.onTimePercentage;
-                      })
-                      .map((city, idx) => {
+                    {cityData.map((city, idx) => {
                       const deviationColor = city.deviation <= 0 ? 'text-green-600' : city.deviation < 1 ? 'text-yellow-600' : 'text-red-600';
-                      const onTimeColor = city.onTimePercentage >= globalWarningThreshold ? 'text-green-600 font-semibold' : city.onTimePercentage > globalCriticalThreshold ? 'text-yellow-600' : 'text-red-600 font-semibold';
+                      const onTimeColor = city.onTimePercentage >= city.warningThreshold ? 'text-green-600 font-semibold' : city.onTimePercentage > city.criticalThreshold ? 'text-yellow-600' : 'text-red-600 font-semibold';
                       const statusColor = city.status === 'compliant' ? 'bg-green-500' : city.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500';
                       const directionIcon = city.direction === 'inbound' ? '🔵 ↓' : '🟢 ↑';
                       
@@ -806,6 +814,9 @@ export default function JKPerformance() {
                           <td className="px-3 py-2 text-sm text-gray-900">{city.jkActual.toFixed(1)}</td>
                           <td className={`px-3 py-2 text-sm ${deviationColor}`}>
                             {city.deviation > 0 ? '+' : ''}{city.deviation.toFixed(1)}
+                          </td>
+                          <td className="px-3 py-2 text-sm text-gray-900">
+                            {city.standardPercentage.toFixed(0)}%
                           </td>
                           <td className={`px-3 py-2 text-sm ${onTimeColor}`}>
                             {city.onTimePercentage.toFixed(1)}%

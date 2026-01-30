@@ -35,6 +35,9 @@ export interface JKCityData {
   jkActual: number;
   deviation: number;
   onTimePercentage: number;
+  standardPercentage: number;
+  warningThreshold: number;
+  criticalThreshold: number;
   status: 'compliant' | 'warning' | 'critical';
 }
 
@@ -390,6 +393,10 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
             onTimeSamples: number;
             standardSum: number;
             standardCount: number;
+            standardPercentageSum: number;
+            warningThresholdSum: number;
+            criticalThresholdSum: number;
+            thresholdCount: number;
             routes: Set<string>;
           };
           outbound: {
@@ -397,6 +404,10 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
             onTimeSamples: number;
             standardSum: number;
             standardCount: number;
+            standardPercentageSum: number;
+            warningThresholdSum: number;
+            criticalThresholdSum: number;
+            thresholdCount: number;
             routes: Set<string>;
           };
         }>();
@@ -405,8 +416,8 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
           // Inbound (destination city)
           if (!cityStatsMap.has(route.destinationCity)) {
             cityStatsMap.set(route.destinationCity, {
-              inbound: { samples: [], onTimeSamples: 0, standardSum: 0, standardCount: 0, routes: new Set() },
-              outbound: { samples: [], onTimeSamples: 0, standardSum: 0, standardCount: 0, routes: new Set() },
+              inbound: { samples: [], onTimeSamples: 0, standardSum: 0, standardCount: 0, standardPercentageSum: 0, warningThresholdSum: 0, criticalThresholdSum: 0, thresholdCount: 0, routes: new Set() },
+              outbound: { samples: [], onTimeSamples: 0, standardSum: 0, standardCount: 0, standardPercentageSum: 0, warningThresholdSum: 0, criticalThresholdSum: 0, thresholdCount: 0, routes: new Set() },
             });
           }
           const destStats = cityStatsMap.get(route.destinationCity)!;
@@ -416,13 +427,17 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
           destStats.inbound.onTimeSamples += route.onTimeSamples;
           destStats.inbound.standardSum += route.jkStandard * route.totalSamples;
           destStats.inbound.standardCount += route.totalSamples;
+          destStats.inbound.standardPercentageSum += route.standardPercentage * route.totalSamples;
+          destStats.inbound.warningThresholdSum += route.warningThreshold * route.totalSamples;
+          destStats.inbound.criticalThresholdSum += route.criticalThreshold * route.totalSamples;
+          destStats.inbound.thresholdCount += route.totalSamples;
           destStats.inbound.routes.add(route.routeKey);
 
           // Outbound (origin city)
           if (!cityStatsMap.has(route.originCity)) {
             cityStatsMap.set(route.originCity, {
-              inbound: { samples: [], onTimeSamples: 0, standardSum: 0, standardCount: 0, routes: new Set() },
-              outbound: { samples: [], onTimeSamples: 0, standardSum: 0, standardCount: 0, routes: new Set() },
+              inbound: { samples: [], onTimeSamples: 0, standardSum: 0, standardCount: 0, standardPercentageSum: 0, warningThresholdSum: 0, criticalThresholdSum: 0, thresholdCount: 0, routes: new Set() },
+              outbound: { samples: [], onTimeSamples: 0, standardSum: 0, standardCount: 0, standardPercentageSum: 0, warningThresholdSum: 0, criticalThresholdSum: 0, thresholdCount: 0, routes: new Set() },
             });
           }
           const originStats = cityStatsMap.get(route.originCity)!;
@@ -432,6 +447,10 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
           originStats.outbound.onTimeSamples += route.onTimeSamples;
           originStats.outbound.standardSum += route.jkStandard * route.totalSamples;
           originStats.outbound.standardCount += route.totalSamples;
+          originStats.outbound.standardPercentageSum += route.standardPercentage * route.totalSamples;
+          originStats.outbound.warningThresholdSum += route.warningThreshold * route.totalSamples;
+          originStats.outbound.criticalThresholdSum += route.criticalThreshold * route.totalSamples;
+          originStats.outbound.thresholdCount += route.totalSamples;
           originStats.outbound.routes.add(route.routeKey);
         });
 
@@ -451,9 +470,19 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
               ? (stats.inbound.onTimeSamples / stats.inbound.samples.length) * 100 
               : 0;
             
+            const standardPercentage = stats.inbound.thresholdCount > 0
+              ? stats.inbound.standardPercentageSum / stats.inbound.thresholdCount
+              : 85;
+            const cityWarningThreshold = stats.inbound.thresholdCount > 0
+              ? stats.inbound.warningThresholdSum / stats.inbound.thresholdCount
+              : 80;
+            const cityCriticalThreshold = stats.inbound.thresholdCount > 0
+              ? stats.inbound.criticalThresholdSum / stats.inbound.thresholdCount
+              : 75;
+            
             let status: 'compliant' | 'warning' | 'critical' = 'compliant';
-            if (onTimePercentage < 90) status = 'critical';
-            else if (onTimePercentage < 95) status = 'warning';
+            if (onTimePercentage <= cityCriticalThreshold) status = 'critical';
+            else if (onTimePercentage < cityWarningThreshold) status = 'warning';
 
             cities.push({
               cityName,
@@ -465,6 +494,9 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
               jkActual,
               deviation,
               onTimePercentage,
+              standardPercentage,
+              warningThreshold: cityWarningThreshold,
+              criticalThreshold: cityCriticalThreshold,
               status,
             });
           }
@@ -480,9 +512,19 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
               ? (stats.outbound.onTimeSamples / stats.outbound.samples.length) * 100 
               : 0;
             
+            const standardPercentage = stats.outbound.thresholdCount > 0
+              ? stats.outbound.standardPercentageSum / stats.outbound.thresholdCount
+              : 85;
+            const cityWarningThreshold = stats.outbound.thresholdCount > 0
+              ? stats.outbound.warningThresholdSum / stats.outbound.thresholdCount
+              : 80;
+            const cityCriticalThreshold = stats.outbound.thresholdCount > 0
+              ? stats.outbound.criticalThresholdSum / stats.outbound.thresholdCount
+              : 75;
+            
             let status: 'compliant' | 'warning' | 'critical' = 'compliant';
-            if (onTimePercentage < 90) status = 'critical';
-            else if (onTimePercentage < 95) status = 'warning';
+            if (onTimePercentage <= cityCriticalThreshold) status = 'critical';
+            else if (onTimePercentage < cityWarningThreshold) status = 'warning';
 
             cities.push({
               cityName,
@@ -494,6 +536,9 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
               jkActual,
               deviation,
               onTimePercentage,
+              standardPercentage,
+              warningThreshold: cityWarningThreshold,
+              criticalThreshold: cityCriticalThreshold,
               status,
             });
           }
