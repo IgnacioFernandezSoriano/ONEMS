@@ -18,6 +18,8 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
   const [carriers, setCarriers] = useState<string[]>([]);
   const [products, setProducts] = useState<string[]>([]);
   const [regions, setRegions] = useState<string[]>([]);
+  const [originCities, setOriginCities] = useState<string[]>([]);
+  const [destinationCities, setDestinationCities] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -48,13 +50,31 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
           .select('name')
           .eq('account_id', profile.account_id);
 
+        // Get unique origin cities
+        const { data: originCityData } = await supabase
+          .from('one_db')
+          .select('origin_city_name')
+          .eq('account_id', profile.account_id)
+          .not('origin_city_name', 'is', null);
+
+        // Get unique destination cities
+        const { data: destCityData } = await supabase
+          .from('one_db')
+          .select('destination_city_name')
+          .eq('account_id', profile.account_id)
+          .not('destination_city_name', 'is', null);
+
         const uniqueCarriers = [...new Set(carrierData?.map(d => d.carrier_name) || [])];
         const uniqueProducts = [...new Set(productData?.map(d => d.product_name) || [])];
         const uniqueRegions = regionData?.map(r => r.name) || [];
+        const uniqueOriginCities = [...new Set(originCityData?.map(d => d.origin_city_name) || [])];
+        const uniqueDestCities = [...new Set(destCityData?.map(d => d.destination_city_name) || [])];
 
         setCarriers(uniqueCarriers.sort());
         setProducts(uniqueProducts.sort());
         setRegions(uniqueRegions.sort());
+        setOriginCities(uniqueOriginCities.sort());
+        setDestinationCities(uniqueDestCities.sort());
       } catch (error) {
         console.error('Error loading filter options:', error);
       } finally {
@@ -81,6 +101,8 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
         endDate: '',
         carrier: '',
         product: '',
+        originCity: '',
+        destinationCity: '',
         region: '',
         direction: undefined,
         equityStatus: [],
@@ -125,7 +147,7 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
       
       {!isCollapsed && (
       <>
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-9 gap-4">
         {/* Start Date */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -190,6 +212,46 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
             <option value="">All Products</option>
             {products.map(product => (
               <option key={product} value={product}>{product}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Origin City */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            <MapPin className="w-4 h-4 inline mr-1" />
+            Origin City
+            <SmartTooltip content="Filter by origin city (where shipments depart from). Shows only shipments originating from the selected city." />
+          </label>
+          <select
+            value={filters.originCity || ''}
+            onChange={(e) => handleChange('originCity', e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            disabled={loading}
+          >
+            <option value="">All Origins</option>
+            {originCities.map(city => (
+              <option key={city} value={city}>{city}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Destination City */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            <MapPin className="w-4 h-4 inline mr-1" />
+            Destination City
+            <SmartTooltip content="Filter by destination city (where shipments arrive). Shows only shipments delivered to the selected city." />
+          </label>
+          <select
+            value={filters.destinationCity || ''}
+            onChange={(e) => handleChange('destinationCity', e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            disabled={loading}
+          >
+            <option value="">All Destinations</option>
+            {destinationCities.map(city => (
+              <option key={city} value={city}>{city}</option>
             ))}
           </select>
         </div>
