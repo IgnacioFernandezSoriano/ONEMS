@@ -155,7 +155,7 @@ export function useTerritoryEquityData(
 
         // 3. Build shipments query with filters
         let shipmentsQuery = supabase
-          .from('shipments')
+          .from('one_db')
           .select(`
             id,
             tag_id,
