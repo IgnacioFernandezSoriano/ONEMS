@@ -651,9 +651,8 @@ export default function TerritoryEquity() {
             >
               {t('reporting.city_analysis')}
             </button>
-            {!scenarioInfo.isRouteView && (
-              <button
-                onClick={() => setActiveTab('regional')}
+            <button
+              onClick={() => setActiveTab('regional')}
                 className={`px-6 py-3 font-medium transition-colors ${
                   activeTab === 'regional'
                     ? 'border-b-2 border-blue-600 text-blue-600'
@@ -661,11 +660,9 @@ export default function TerritoryEquity() {
                 }`}
               >
                 {t('reporting.regional_analysis')}
-              </button>
-            )}
-            {!scenarioInfo.isRouteView && (
-              <button
-                onClick={() => setActiveTab('map')}
+            </button>
+            <button
+              onClick={() => setActiveTab('map')}
                 className={`px-6 py-3 font-medium transition-colors flex items-center gap-2 ${
                   activeTab === 'map'
                     ? 'border-b-2 border-blue-600 text-blue-600'
@@ -674,8 +671,7 @@ export default function TerritoryEquity() {
               >
                 <Map className="w-4 h-4" />
                 {t('reporting.geographic_view')}
-              </button>
-            )}
+            </button>
           </div>
         </div>
 

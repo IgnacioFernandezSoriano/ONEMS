@@ -42,6 +42,11 @@ interface RouteStats {
   standardDaysCount: number;
   actualDaysArray: number[];
   
+  // Thresholds (weighted by shipments)
+  warningThresholdsSum: number;
+  criticalThresholdsSum: number;
+  thresholdsCount: number;
+  
   carrierProduct: Map<string, {
     carrier: string;
     product: string;
@@ -247,6 +252,11 @@ export function useTerritoryEquityData(
               standardDaysSum: 0,
               standardDaysCount: 0,
               actualDaysArray: [],
+              
+              warningThresholdsSum: 0,
+              criticalThresholdsSum: 0,
+              thresholdsCount: 0,
+              
               carrierProduct: new Map(),
               accountId: activeAccountId || '',
             });
@@ -302,6 +312,19 @@ export function useTerritoryEquityData(
                 routeStats.standardsSum += standard.success_percentage;
                 routeStats.standardsCount++;
               }
+              
+              // Calculate and add thresholds
+              const successPct = standard.success_percentage || 95;
+              const warnThresh = standard.threshold_type === 'relative'
+                ? successPct - (successPct * (standard.warning_threshold || 5) / 100)
+                : (standard.warning_threshold || 85);
+              const critThresh = standard.threshold_type === 'relative'
+                ? successPct - (successPct * (standard.critical_threshold || 10) / 100)
+                : (standard.critical_threshold || 75);
+              
+              routeStats.warningThresholdsSum += warnThresh;
+              routeStats.criticalThresholdsSum += critThresh;
+              routeStats.thresholdsCount++;
               
               // Convert standard_time to days
               if (standard.standard_time != null) {
@@ -444,9 +467,17 @@ function groupRoutesForDisplay(
       
       const deviation = actualPercentage - standardPercentage;
       
+      // Calculate weighted thresholds for this route
+      const routeWarningThreshold = route.thresholdsCount > 0
+        ? route.warningThresholdsSum / route.thresholdsCount
+        : warningThreshold;
+      const routeCriticalThreshold = route.thresholdsCount > 0
+        ? route.criticalThresholdsSum / route.thresholdsCount
+        : criticalThreshold;
+      
       const status: 'compliant' | 'warning' | 'critical' =
-        actualPercentage >= warningThreshold ? 'compliant' :
-        actualPercentage >= criticalThreshold ? 'warning' : 'critical';
+        actualPercentage >= routeWarningThreshold ? 'compliant' :
+        actualPercentage >= routeCriticalThreshold ? 'warning' : 'critical';
       
       // Carrier/product breakdown
       const carrierProductBreakdown = Array.from(route.carrierProduct.values()).map(cp => {
@@ -589,9 +620,17 @@ function groupRoutesForDisplay(
       
       const deviation = actualPercentage - standardPercentage;
       
+      // Calculate weighted thresholds from aggregated routes
+      const cityWarningThreshold = aggregated.thresholdsCount > 0
+        ? aggregated.warningThresholdsSum / aggregated.thresholdsCount
+        : warningThreshold;
+      const cityCriticalThreshold = aggregated.thresholdsCount > 0
+        ? aggregated.criticalThresholdsSum / aggregated.thresholdsCount
+        : criticalThreshold;
+      
       const status: 'compliant' | 'warning' | 'critical' =
-        actualPercentage >= warningThreshold ? 'compliant' :
-        actualPercentage >= criticalThreshold ? 'warning' : 'critical';
+        actualPercentage >= cityWarningThreshold ? 'compliant' :
+        actualPercentage >= cityCriticalThreshold ? 'warning' : 'critical';
       
       const carrierProductBreakdown = buildCarrierProductBreakdown(aggregated.carrierProduct);
       
@@ -714,9 +753,17 @@ function groupRoutesForDisplay(
       
       const deviation = actualPercentage - standardPercentage;
       
+      // Calculate weighted thresholds from aggregated routes
+      const cityWarningThreshold = aggregated.thresholdsCount > 0
+        ? aggregated.warningThresholdsSum / aggregated.thresholdsCount
+        : warningThreshold;
+      const cityCriticalThreshold = aggregated.thresholdsCount > 0
+        ? aggregated.criticalThresholdsSum / aggregated.thresholdsCount
+        : criticalThreshold;
+      
       const status: 'compliant' | 'warning' | 'critical' =
-        actualPercentage >= warningThreshold ? 'compliant' :
-        actualPercentage >= criticalThreshold ? 'warning' : 'critical';
+        actualPercentage >= cityWarningThreshold ? 'compliant' :
+        actualPercentage >= cityCriticalThreshold ? 'warning' : 'critical';
       
       const carrierProductBreakdown = buildCarrierProductBreakdown(aggregated.carrierProduct);
       
@@ -880,9 +927,18 @@ function groupRoutesForDisplay(
       const actualDays = (inboundActualDays + outboundActualDays) / 2;
       const deviation = actualPercentage - standardPercentage;
       
+      // Calculate weighted thresholds from combined inbound + outbound
+      const totalThresholdsCount = inboundAgg.thresholdsCount + outboundAgg.thresholdsCount;
+      const cityWarningThreshold = totalThresholdsCount > 0
+        ? (inboundAgg.warningThresholdsSum + outboundAgg.warningThresholdsSum) / totalThresholdsCount
+        : warningThreshold;
+      const cityCriticalThreshold = totalThresholdsCount > 0
+        ? (inboundAgg.criticalThresholdsSum + outboundAgg.criticalThresholdsSum) / totalThresholdsCount
+        : criticalThreshold;
+      
       const status: 'compliant' | 'warning' | 'critical' =
-        actualPercentage >= warningThreshold ? 'compliant' :
-        actualPercentage >= criticalThreshold ? 'warning' : 'critical';
+        actualPercentage >= cityWarningThreshold ? 'compliant' :
+        actualPercentage >= cityCriticalThreshold ? 'warning' : 'critical';
       
       const directionGap = inboundPercentage - outboundPercentage;
       
@@ -979,6 +1035,9 @@ function aggregateRoutes(routes: RouteStats[]) {
     standardDaysSum: 0,
     standardDaysCount: 0,
     actualDaysArray: [] as number[],
+    warningThresholdsSum: 0,
+    criticalThresholdsSum: 0,
+    thresholdsCount: 0,
     carrierProduct: new Map<string, {
       carrier: string;
       product: string;
@@ -1000,6 +1059,9 @@ function aggregateRoutes(routes: RouteStats[]) {
     result.standardDaysSum += route.standardDaysSum;
     result.standardDaysCount += route.standardDaysCount;
     result.actualDaysArray.push(...route.actualDaysArray);
+    result.warningThresholdsSum += route.warningThresholdsSum;
+    result.criticalThresholdsSum += route.criticalThresholdsSum;
+    result.thresholdsCount += route.thresholdsCount;
     
     // Merge carrier/product data
     route.carrierProduct.forEach((cpData, key) => {
