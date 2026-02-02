@@ -249,7 +249,7 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
             const key = `${carrierName}|${productName}|${originName}|${destName}`;
             const jkStandard = std.time_unit === 'days' 
               ? std.standard_time 
-              : Math.round(std.standard_time / 24);
+              : std.standard_time / 24;
             // Calculate warning and critical thresholds
             const successPct = std.success_percentage || 95;
             const warningThreshold = std.threshold_type === 'relative' 

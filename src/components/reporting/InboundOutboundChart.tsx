@@ -1,5 +1,6 @@
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceLine, ResponsiveContainer } from 'recharts';
+import { formatNumber } from '@/lib/formatNumber';
 import type { CityEquityData } from '@/types/reporting';
 import { useTranslation } from '@/hooks/useTranslation';
 
@@ -9,8 +10,13 @@ interface InboundOutboundChartProps {
 
 export function InboundOutboundChart({ data }: InboundOutboundChartProps) {
   const { t } = useTranslation();
-  // Sort by direction gap (descending) and take top 10
+  // Filter cities that have at least one valid direction (shipments > 0 or standardDays > 0)
+  // Then sort by direction gap (descending) and take top 10
   const topCities = [...data]
+    .filter(city => 
+      (city.inboundShipments > 0 || city.inboundStandardDays > 0) &&
+      (city.outboundShipments > 0 || city.outboundStandardDays > 0)
+    )
     .sort((a, b) => b.directionGap - a.directionGap)
     .slice(0, 10);
 
@@ -40,7 +46,7 @@ export function InboundOutboundChart({ data }: InboundOutboundChartProps) {
           <XAxis dataKey="city" angle={-45} textAnchor="end" height={80} />
           <YAxis domain={[0, 100]} label={{ value: t('reporting.compliance_percent'), angle: -90, position: 'insideLeft' }} />
           <Tooltip 
-            formatter={(value: any) => typeof value === 'number' ? `${value.toFixed(1)}%` : ''}
+            formatter={(value: any) => typeof value === 'number' ? `${formatNumber(value)}%` : ''}
             content={({ active, payload }) => {
               if (active && payload && payload.length) {
                 const data = payload[0].payload;
@@ -49,13 +55,13 @@ export function InboundOutboundChart({ data }: InboundOutboundChartProps) {
                     <p className="font-semibold mb-2">{data.city}</p>
                     <div className="mb-2">
                       <p className="text-blue-600 font-medium">Inbound:</p>
-                      <p className="text-sm ml-2">Std %: {data.inboundStandardPercentage.toFixed(1)}% | Actual %: {data.inbound.toFixed(1)}%</p>
-                      <p className="text-sm ml-2">J+K Std: {data.inboundStandardDays.toFixed(1)} days | J+K Actual: {data.inboundActualDays.toFixed(1)} days</p>
+                      <p className="text-sm ml-2">Std %: {formatNumber(data.inboundStandardPercentage)}% | Actual %: {formatNumber(data.inbound)}%</p>
+                      <p className="text-sm ml-2">J+K Std: {formatNumber(data.inboundStandardDays)} days | J+K Actual: {formatNumber(data.inboundActualDays)} days</p>
                     </div>
                     <div>
                       <p className="text-green-600 font-medium">Outbound:</p>
-                      <p className="text-sm ml-2">Std %: {data.outboundStandardPercentage.toFixed(1)}% | Actual %: {data.outbound.toFixed(1)}%</p>
-                      <p className="text-sm ml-2">J+K Std: {data.outboundStandardDays.toFixed(1)} days | J+K Actual: {data.outboundActualDays.toFixed(1)} days</p>
+                      <p className="text-sm ml-2">Std %: {formatNumber(data.outboundStandardPercentage)}% | Actual %: {formatNumber(data.outbound)}%</p>
+                      <p className="text-sm ml-2">J+K Std: {formatNumber(data.outboundStandardDays)} days | J+K Actual: {formatNumber(data.outboundActualDays)} days</p>
                     </div>
                   </div>
                 );
@@ -68,7 +74,7 @@ export function InboundOutboundChart({ data }: InboundOutboundChartProps) {
             y={avgStandard}
             stroke="#ef4444"
             strokeDasharray="3 3"
-            label={{ value: t('reporting.avg_standard', { percent: avgStandard.toFixed(1) }), position: 'right' }}
+            label={{ value: t('reporting.avg_standard', { percent: formatNumber(avgStandard) }), position: 'right' }}
           />
           <Bar dataKey="inbound" fill="#3b82f6" name={t('reporting.inbound_percent')} />
           <Bar dataKey="outbound" fill="#10b981" name={t('reporting.outbound_percent')} />

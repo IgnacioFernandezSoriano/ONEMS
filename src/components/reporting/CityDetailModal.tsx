@@ -1,5 +1,6 @@
 import { X } from 'lucide-react';
 import type { CityEquityData } from '@/types/reporting';
+import { formatNumber } from '@/lib/formatNumber';
 
 interface CityDetailModalProps {
   city: CityEquityData;
@@ -64,12 +65,12 @@ export function CityDetailModal({ city, onClose }: CityDetailModalProps) {
               <div>
                 <p className="text-sm text-gray-500">Compliant:</p>
                 <p className="font-medium text-gray-900">
-                  {city.compliantShipments} ({city.actualPercentage.toFixed(1)}%)
+                  {city.compliantShipments} ({formatNumber(city.actualPercentage)}%)
                 </p>
               </div>
               <div>
                 <p className="text-sm text-gray-500">Standard:</p>
-                <p className="font-medium text-gray-900">{city.standardPercentage.toFixed(1)}%</p>
+                <p className="font-medium text-gray-900">{formatNumber(city.standardPercentage)}%</p>
               </div>
               <div>
                 <p className="text-sm text-gray-500">Deviation:</p>
@@ -79,7 +80,7 @@ export function CityDetailModal({ city, onClose }: CityDetailModalProps) {
                   }`}
                 >
                   {city.deviation >= 0 ? '+' : ''}
-                  {city.deviation.toFixed(1)}%
+                  {formatNumber(city.deviation)}%
                 </p>
               </div>
               <div>
@@ -101,6 +102,7 @@ export function CityDetailModal({ city, onClose }: CityDetailModalProps) {
           <div>
             <h3 className="text-lg font-semibold text-gray-900 mb-3">Directional Analysis</h3>
             <div className="space-y-3">
+              {(city.inboundShipments > 0 || city.inboundStandardDays > 0) && (
               <div className="bg-blue-50 p-4 rounded-lg">
                 <p className="text-sm font-medium text-gray-700 mb-2">Inbound (Arrivals)</p>
                 <div className="grid grid-cols-2 gap-4">
@@ -110,29 +112,31 @@ export function CityDetailModal({ city, onClose }: CityDetailModalProps) {
                   </div>
                   <div>
                     <p className="text-xs text-gray-600">Actual %:</p>
-                    <p className="text-lg font-bold text-blue-600">{city.inboundPercentage.toFixed(1)}%</p>
+                    <p className="text-lg font-bold text-blue-600">{formatNumber(city.inboundPercentage)}%</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-600">Standard %:</p>
-                    <p className="text-sm font-medium">{city.inboundStandardPercentage.toFixed(1)}%</p>
+                    <p className="text-sm font-medium">{formatNumber(city.inboundStandardPercentage)}%</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-600">Deviation:</p>
                     <p className={`text-sm font-medium ${city.inboundDeviation >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {city.inboundDeviation >= 0 ? '+' : ''}{city.inboundDeviation.toFixed(1)}%
+                      {city.inboundDeviation >= 0 ? '+' : ''}{formatNumber(city.inboundDeviation)}%
                     </p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-600">J+K Std:</p>
-                    <p className="text-sm font-medium">{city.inboundStandardDays.toFixed(1)} days</p>
+                    <p className="text-sm font-medium">{formatNumber(city.inboundStandardDays)} days</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-600">J+K Actual:</p>
-                    <p className="text-sm font-medium">{city.inboundActualDays.toFixed(1)} days</p>
+                    <p className="text-sm font-medium">{formatNumber(city.inboundActualDays)} days</p>
                   </div>
                 </div>
               </div>
+              )}
 
+              {(city.outboundShipments > 0 || city.outboundStandardDays > 0) && (
               <div className="bg-green-50 p-4 rounded-lg">
                 <p className="text-sm font-medium text-gray-700 mb-2">Outbound (Departures)</p>
                 <div className="grid grid-cols-2 gap-4">
@@ -142,29 +146,32 @@ export function CityDetailModal({ city, onClose }: CityDetailModalProps) {
                   </div>
                   <div>
                     <p className="text-xs text-gray-600">Actual %:</p>
-                    <p className="text-lg font-bold text-green-600">{city.outboundPercentage.toFixed(1)}%</p>
+                    <p className="text-lg font-bold text-green-600">{formatNumber(city.outboundPercentage)}%</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-600">Standard %:</p>
-                    <p className="text-sm font-medium">{city.outboundStandardPercentage.toFixed(1)}%</p>
+                    <p className="text-sm font-medium">{formatNumber(city.outboundStandardPercentage)}%</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-600">Deviation:</p>
                     <p className={`text-sm font-medium ${city.outboundDeviation >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {city.outboundDeviation >= 0 ? '+' : ''}{city.outboundDeviation.toFixed(1)}%
+                      {city.outboundDeviation >= 0 ? '+' : ''}{formatNumber(city.outboundDeviation)}%
                     </p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-600">J+K Std:</p>
-                    <p className="text-sm font-medium">{city.outboundStandardDays.toFixed(1)} days</p>
+                    <p className="text-sm font-medium">{formatNumber(city.outboundStandardDays)} days</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-600">J+K Actual:</p>
-                    <p className="text-sm font-medium">{city.outboundActualDays.toFixed(1)} days</p>
+                    <p className="text-sm font-medium">{formatNumber(city.outboundActualDays)} days</p>
                   </div>
                 </div>
               </div>
+              )}
 
+              {(city.inboundShipments > 0 || city.inboundStandardDays > 0) && 
+               (city.outboundShipments > 0 || city.outboundStandardDays > 0) && (
               <div className="bg-gray-50 p-4 rounded-lg">
                 <div className="flex items-center justify-between">
                   <div>
@@ -174,10 +181,11 @@ export function CityDetailModal({ city, onClose }: CityDetailModalProps) {
                     </p>
                   </div>
                   <p className="text-2xl font-bold text-gray-700">
-                    {city.directionGap.toFixed(1)}%
+                    {formatNumber(city.directionGap)}%
                   </p>
                 </div>
               </div>
+              )}
             </div>
           </div>
 
@@ -236,16 +244,16 @@ export function CityDetailModal({ city, onClose }: CityDetailModalProps) {
                           {cp.compliantShipments}
                         </td>
                         <td className="px-4 py-3 text-sm text-right text-gray-900">
-                          {cp.actualPercentage.toFixed(1)}%
+                          {formatNumber(cp.actualPercentage)}%
                         </td>
                         <td className="px-4 py-3 text-sm text-right text-gray-900">
-                          {cp.standardPercentage.toFixed(1)}%
+                          {formatNumber(cp.standardPercentage)}%
                         </td>
                         <td className="px-4 py-3 text-sm text-right text-gray-900">
-                          {cp.standardDays.toFixed(1)}
+                          {formatNumber(cp.standardDays)}
                         </td>
                         <td className="px-4 py-3 text-sm text-right text-gray-900">
-                          {cp.actualDays.toFixed(1)}
+                          {formatNumber(cp.actualDays)}
                         </td>
                         <td
                           className={`px-4 py-3 text-sm text-right font-medium ${
@@ -253,13 +261,13 @@ export function CityDetailModal({ city, onClose }: CityDetailModalProps) {
                           }`}
                         >
                           {cp.deviation >= 0 ? '+' : ''}
-                          {cp.deviation.toFixed(1)}%
+                          {formatNumber(cp.deviation)}%
                         </td>
                         <td className="px-4 py-3 text-sm text-right text-blue-600">
-                          {cp.inboundPercentage.toFixed(1)}%
+                          {formatNumber(cp.inboundPercentage)}%
                         </td>
                         <td className="px-4 py-3 text-sm text-right text-green-600">
-                          {cp.outboundPercentage.toFixed(1)}%
+                          {formatNumber(cp.outboundPercentage)}%
                         </td>
                       </tr>
                     ))}

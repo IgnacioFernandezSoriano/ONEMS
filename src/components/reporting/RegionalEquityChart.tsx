@@ -1,5 +1,6 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine, ResponsiveContainer, Cell } from 'recharts';
 import type { RegionEquityData } from '@/types/reporting';
+import { formatNumber } from '@/lib/formatNumber';
 
 interface RegionalEquityChartProps {
   data: RegionEquityData[];
@@ -60,13 +61,13 @@ export function RegionalEquityChart({ data }: RegionalEquityChartProps) {
                     <p className="font-semibold mb-2">{data.region}</p>
                     <div className="mb-2">
                       <p className="text-blue-600 font-medium">Inbound:</p>
-                      <p className="text-sm ml-2">Std %: {data.inboundStandardPercentage.toFixed(1)}% | Actual %: {data.inboundPercentage.toFixed(1)}%</p>
-                      <p className="text-sm ml-2">J+K Std: {data.inboundStandardDays.toFixed(1)} days | J+K Actual: {data.inboundActualDays.toFixed(1)} days</p>
+                      <p className="text-sm ml-2">Std %: {formatNumber(data.inboundStandardPercentage)}% | Actual %: {formatNumber(data.inboundPercentage)}%</p>
+                      <p className="text-sm ml-2">J+K Std: {formatNumber(data.inboundStandardDays)} days | J+K Actual: {formatNumber(data.inboundActualDays)} days</p>
                     </div>
                     <div>
                       <p className="text-green-600 font-medium">Outbound:</p>
-                      <p className="text-sm ml-2">Std %: {data.outboundStandardPercentage.toFixed(1)}% | Actual %: {data.outboundPercentage.toFixed(1)}%</p>
-                      <p className="text-sm ml-2">J+K Std: {data.outboundStandardDays.toFixed(1)} days | J+K Actual: {data.outboundActualDays.toFixed(1)} days</p>
+                      <p className="text-sm ml-2">Std %: {formatNumber(data.outboundStandardPercentage)}% | Actual %: {formatNumber(data.outboundPercentage)}%</p>
+                      <p className="text-sm ml-2">J+K Std: {formatNumber(data.outboundStandardDays)} days | J+K Actual: {formatNumber(data.outboundActualDays)} days</p>
                     </div>
                   </div>
                 );
@@ -78,7 +79,7 @@ export function RegionalEquityChart({ data }: RegionalEquityChartProps) {
             x={avgStandard}
             stroke="#ef4444"
             strokeDasharray="3 3"
-            label={{ value: `Avg Standard (${avgStandard.toFixed(1)}%)`, position: 'top' }}
+            label={{ value: `Avg Standard (${formatNumber(avgStandard)}%)`, position: 'top' }}
           />
           <Bar dataKey="actual" name="Actual Compliance %">
             {chartData.map((entry, index) => (

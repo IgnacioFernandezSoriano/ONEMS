@@ -1,5 +1,6 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Cell, Legend } from 'recharts';
 import { useMemo } from 'react';
+import { formatNumber } from '@/lib/formatNumber';
 
 interface RouteDistribution {
   routeKey: string;
@@ -95,7 +96,7 @@ export function CumulativeDistributionChart({ routes, maxDays, selectedRoute }: 
         <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3">
           <p className="font-semibold text-gray-900 mb-1">{data.dayLabel}</p>
           <div className="text-sm text-gray-600">
-            Cumulative: <span className="font-medium text-gray-900">{data.cumulativePercentage.toFixed(1)}%</span>
+            Cumulative: <span className="font-medium text-gray-900">{formatNumber(data.cumulativePercentage)}%</span>
           </div>
           {data.day === standardDay && (
             <div className="mt-1 text-xs text-green-600 font-medium">

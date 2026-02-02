@@ -9,6 +9,7 @@ import type {
   TerritoryEquityFilters,
 } from '@/types/reporting';
 import { useEffectiveAccountId } from '../useEffectiveAccountId';
+import { useFilterScenario } from './useFilterScenario';
 
 export function useTerritoryEquityData(
   accountId: string | undefined,
@@ -24,6 +25,9 @@ export function useTerritoryEquityData(
   const [error, setError] = useState<Error | null>(null);
   const [globalWarningThreshold, setGlobalWarningThreshold] = useState<number>(80);
   const [globalCriticalThreshold, setGlobalCriticalThreshold] = useState<number>(75);
+
+  // Detect filter scenario
+  const scenarioInfo = useFilterScenario(filters || {});
 
   useEffect(() => {
     if (!activeAccountId) {
@@ -581,6 +585,20 @@ export function useTerritoryEquityData(
 
         if (filters?.region) {
           filteredCityData = filteredCityData.filter((c) => c.regionId === filters.region);
+        }
+
+        // Filter cities based on scenario to exclude origin/destination city from metrics
+        if (scenarioInfo.isRouteView && filters?.originCity && filters?.destinationCity) {
+          // For route view, only show the two cities involved in the route
+          filteredCityData = filteredCityData.filter((c) => 
+            c.cityName === filters.originCity || c.cityName === filters.destinationCity
+          );
+        } else if (scenarioInfo.isOriginView && filters?.originCity) {
+          // Exclude origin city, show only destinations
+          filteredCityData = filteredCityData.filter((c) => c.cityName !== filters.originCity);
+        } else if (scenarioInfo.isDestinationView && filters?.destinationCity) {
+          // Exclude destination city, show only origins
+          filteredCityData = filteredCityData.filter((c) => c.cityName !== filters.destinationCity);
         }
 
         // 7. Calculate metrics

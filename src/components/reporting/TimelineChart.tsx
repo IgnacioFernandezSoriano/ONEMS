@@ -1,5 +1,6 @@
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { formatNumber } from '@/lib/formatNumber';
 import type { ShipmentTracking } from '@/types/reporting';
 
 interface TimelineChartProps {
@@ -38,7 +39,7 @@ export function TimelineChart({ data }: TimelineChartProps) {
             label={{ value: 'Business Days', angle: -90, position: 'insideLeft' }}
           />
           <Tooltip 
-            formatter={(value: any) => typeof value === 'number' ? value.toFixed(1) : ''}
+            formatter={(value: any) => typeof value === 'number' ? formatNumber(value) : ''}
             labelFormatter={(label) => `Shipment: ${label}`}
           />
           <Legend 

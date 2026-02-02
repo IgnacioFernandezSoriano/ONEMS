@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { ColumnTooltip } from './ColumnTooltip';
+import { formatNumber } from '@/lib/formatNumber';
 
 interface RouteDistribution {
   routeKey: string;
@@ -160,7 +161,7 @@ export function CumulativeDistributionTable({ routes, maxDays }: CumulativeDistr
                         : 'bg-red-50 text-red-600'
                     }`}
                   >
-                    {percentage.toFixed(1)}%
+                    {formatNumber(percentage)}%
                   </td>
                 );
               })}

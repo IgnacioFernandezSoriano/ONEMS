@@ -2,6 +2,7 @@ import React from 'react';
 import { CheckCircle, XCircle } from 'lucide-react';
 import { SmartTooltip } from '@/components/common/SmartTooltip';
 import type { CarrierData, ProductData, RouteData } from '@/hooks/reporting/useComplianceData';
+import { formatNumber } from '@/lib/formatNumber';
 
 import { useTranslation } from '@/hooks/useTranslation';
 interface ComplianceTableProps {
@@ -18,14 +19,14 @@ export function ComplianceTable({ data }: ComplianceTableProps) {
     );
   }
 
-  const formatValue = (value: number | undefined, decimals: number = 1): string => {
+  const formatValue = (value: number | undefined): string => {
     if (value === undefined || value === null || isNaN(value)) return '-';
-    return value.toFixed(decimals);
+    return formatNumber(value);
   };
 
   const formatPercentage = (value: number | undefined): string => {
     if (value === undefined || value === null || isNaN(value) || value === 0) return 'N/A';
-    return `${value.toFixed(1)}%`;
+    return `${formatNumber(value)}%`;
   };
 
   const getComplianceIcon = (status: 'compliant' | 'warning' | 'critical') => {

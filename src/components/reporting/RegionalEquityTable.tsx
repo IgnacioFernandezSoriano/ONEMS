@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { formatNumber } from '@/lib/formatNumber';
 import { ChevronDown, ChevronUp, ArrowDown, ArrowUp } from 'lucide-react';
 import type { RegionEquityData } from '@/types/reporting';
 
@@ -6,6 +7,8 @@ import { useTranslation } from '@/hooks/useTranslation';
 interface RegionalEquityTableProps {
   data: RegionEquityData[];
   onRegionClick?: (region: RegionEquityData) => void;
+  scenarioInfo?: { scenario: string; isOriginView: boolean; isDestinationView: boolean; isRouteView: boolean; isGeneralView: boolean };
+  filters?: any;
 }
 
 type DirectionRow = {
@@ -26,7 +29,7 @@ type DirectionRow = {
   originalRegion: RegionEquityData;
 };
 
-export function RegionalEquityTable({ data, onRegionClick }: RegionalEquityTableProps) {
+export function RegionalEquityTable({ data, onRegionClick, scenarioInfo, filters }: RegionalEquityTableProps) {
   const { t } = useTranslation();
   const [sortField, setSortField] = useState<keyof DirectionRow>('regionName');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
@@ -57,7 +60,7 @@ export function RegionalEquityTable({ data, onRegionClick }: RegionalEquityTable
       deviation: region.inboundDeviation,
       standardDays: region.inboundStandardDays,
       actualDays: region.inboundActualDays,
-      status: region.inboundDeviation >= 0 ? 'compliant' : (region.inboundPercentage < 80 ? 'critical' : 'warning'),
+      status: (region.inboundDeviation >= 0 ? 'compliant' : (region.inboundPercentage < 80 ? 'critical' : 'warning')) as 'compliant' | 'warning' | 'critical',
       underservedCitiesCount: region.underservedCitiesCount,
       originalRegion: region,
     },
@@ -74,11 +77,30 @@ export function RegionalEquityTable({ data, onRegionClick }: RegionalEquityTable
       deviation: region.outboundDeviation,
       standardDays: region.outboundStandardDays,
       actualDays: region.outboundActualDays,
-      status: region.outboundDeviation >= 0 ? 'compliant' : (region.outboundPercentage < 80 ? 'critical' : 'warning'),
+      status: (region.outboundDeviation >= 0 ? 'compliant' : (region.outboundPercentage < 80 ? 'critical' : 'warning')) as 'compliant' | 'warning' | 'critical',
       underservedCitiesCount: region.underservedCitiesCount,
       originalRegion: region,
     },
-  ]);
+  ]).filter((row) => {
+    // Filter out rows with no shipments and no standard (empty direction data)
+    if (row.shipments === 0 && row.standardDays === 0) {
+      return false;
+    }
+    
+    // Filter by direction based on scenario
+    if (scenarioInfo?.isOriginView) {
+      // Origin filter: show only Inbound (arrivals to regions)
+      return row.direction === 'inbound';
+    }
+    
+    if (scenarioInfo?.isDestinationView) {
+      // Destination filter: show only Outbound (departures from regions)
+      return row.direction === 'outbound';
+    }
+    
+    // General or Route view: show both directions (but empty ones already filtered above)
+    return true;
+  });
 
   const handleSort = (field: keyof DirectionRow) => {
     if (sortField === field) {
@@ -267,10 +289,10 @@ export function RegionalEquityTable({ data, onRegionClick }: RegionalEquityTable
                     {row.shipments}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
-                    {row.standardPercentage.toFixed(1)}%
+                    {formatNumber(row.standardPercentage)}%
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
-                    {row.actualPercentage.toFixed(1)}%
+                    {formatNumber(row.actualPercentage)}%
                   </td>
                   <td
                     className={`px-4 py-3 whitespace-nowrap text-sm text-right font-medium ${
@@ -278,13 +300,13 @@ export function RegionalEquityTable({ data, onRegionClick }: RegionalEquityTable
                     }`}
                   >
                     {row.deviation >= 0 ? '+' : ''}
-                    {row.deviation.toFixed(1)}%
+                    {formatNumber(row.deviation)}%
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
-                    {row.standardDays.toFixed(1)}
+                    {formatNumber(row.standardDays)}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
-                    {row.actualDays.toFixed(1)}
+                    {formatNumber(row.actualDays)}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-center text-lg">
                     {getStatusIcon(row.status)}
@@ -329,13 +351,13 @@ export function RegionalEquityTable({ data, onRegionClick }: RegionalEquityTable
                                   <td className="px-3 py-2 text-gray-700">{cp.product}</td>
                                   <td className="px-3 py-2 text-right text-gray-700">{cp.totalShipments}</td>
                                   <td className="px-3 py-2 text-right text-gray-700">{cp.compliantShipments}</td>
-                                  <td className="px-3 py-2 text-right text-gray-700">{cp.standardPercentage.toFixed(1)}%</td>
-                                  <td className="px-3 py-2 text-right text-gray-700">{cp.actualPercentage.toFixed(1)}%</td>
+                                  <td className="px-3 py-2 text-right text-gray-700">{formatNumber(cp.standardPercentage)}%</td>
+                                  <td className="px-3 py-2 text-right text-gray-700">{formatNumber(cp.actualPercentage)}%</td>
                                   <td className={`px-3 py-2 text-right font-medium ${cp.deviation >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                    {cp.deviation >= 0 ? '+' : ''}{cp.deviation.toFixed(1)}%
+                                    {cp.deviation >= 0 ? '+' : ''}{formatNumber(cp.deviation)}%
                                   </td>
-                                  <td className="px-3 py-2 text-right text-gray-700">{cp.standardDays.toFixed(1)}</td>
-                                  <td className="px-3 py-2 text-right text-gray-700">{cp.actualDays.toFixed(1)}</td>
+                                  <td className="px-3 py-2 text-right text-gray-700">{formatNumber(cp.standardDays)}</td>
+                                  <td className="px-3 py-2 text-right text-gray-700">{formatNumber(cp.actualDays)}</td>
                                 </tr>
                               ))}
                           </tbody>

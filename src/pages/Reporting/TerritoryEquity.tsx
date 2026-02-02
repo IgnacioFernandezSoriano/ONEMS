@@ -17,6 +17,7 @@ import { SmartTooltip } from '@/components/common/SmartTooltip';
 import type { CityEquityData, RegionEquityData, TerritoryEquityFilters as Filters } from '@/types/reporting';
 
 import { useTranslation } from '@/hooks/useTranslation';
+import { useFilterScenario } from '@/hooks/reporting/useFilterScenario';
 export default function TerritoryEquity() {
   const { t } = useTranslation();
   const { profile } = useAuth();
@@ -39,6 +40,9 @@ export default function TerritoryEquity() {
   );
 
   const { generateMarkdownReport, downloadMarkdown } = useEquityAuditExport();
+
+  // Detect current filter scenario
+  const scenarioInfo = useFilterScenario(filters);
 
   const handleExportAuditReport = () => {
     if (!metrics || cityData.length === 0) return;
@@ -416,9 +420,23 @@ export default function TerritoryEquity() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">{t('reporting.territory_equity_report')}</h1>
+          <h1 className="text-3xl font-bold text-gray-900">
+            {scenarioInfo.isRouteView
+              ? `Route Analysis: ${scenarioInfo.originCityName} → ${scenarioInfo.destinationCityName}`
+              : scenarioInfo.isOriginView
+              ? `Territory Equity Report: Outbound from ${scenarioInfo.originCityName}`
+              : scenarioInfo.isDestinationView
+              ? `Territory Equity Report: Inbound to ${scenarioInfo.destinationCityName}`
+              : t('reporting.territory_equity_report')}
+          </h1>
           <p className="text-gray-600 mt-1">
-            {t('reporting.analyze_service_equity_across_cities_and_regions')}
+            {scenarioInfo.isRouteView
+              ? `Detailed performance analysis for the route from ${scenarioInfo.originCityName} to ${scenarioInfo.destinationCityName}`
+              : scenarioInfo.isOriginView
+              ? `Analyze outbound service equity from ${scenarioInfo.originCityName} to all destinations`
+              : scenarioInfo.isDestinationView
+              ? `Analyze inbound service equity to ${scenarioInfo.destinationCityName} from all origins`
+              : t('reporting.analyze_service_equity_across_cities_and_regions')}
           </p>
         </div>
         <button
@@ -448,6 +466,7 @@ export default function TerritoryEquity() {
       {/* KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {/* KPI 1: Service Equity Index */}
+        {!scenarioInfo.isRouteView && (
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-gray-600">{t('reporting.service_equity_index')}</h3>
@@ -461,11 +480,14 @@ export default function TerritoryEquity() {
             <span className="text-sm text-gray-500">{t('reporting.population_weighted')}</span>
           </div>
         </div>
+        )}
 
         {/* KPI 2: Population-Weighted Compliance */}
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium text-gray-600">{t('reporting.population_weighted_compliance')}</h3>
+            <h3 className="text-sm font-medium text-gray-600">
+              {scenarioInfo.isRouteView ? 'Route Compliance' : t('reporting.population_weighted_compliance')}
+            </h3>
             <SmartTooltip content={tooltips.populationWeightedCompliance} />
           </div>
           <div className="text-3xl font-bold text-gray-900">
@@ -480,6 +502,7 @@ export default function TerritoryEquity() {
         </div>
 
         {/* KPI 3: Underserved Cities */}
+        {!scenarioInfo.isRouteView && (
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-gray-600">{t('reporting.underserved_cities')}</h3>
@@ -495,8 +518,10 @@ export default function TerritoryEquity() {
             </span>
           </div>
         </div>
+        )}
 
         {/* KPI 5: Citizens Affected (moved here to be next to Underserved Cities) */}
+        {!scenarioInfo.isRouteView && (
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-gray-600">{t('reporting.citizens_affected')}</h3>
@@ -510,8 +535,10 @@ export default function TerritoryEquity() {
             <span className="text-sm text-gray-500">{t('reporting.in_critical_cities')}</span>
           </div>
         </div>
+        )}
 
         {/* KPI 4: Top 3 Best Served Cities */}
+        {!scenarioInfo.isRouteView && (
         <div className="bg-white rounded-lg shadow p-6 col-span-1 md:col-span-2 lg:col-span-1">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-medium text-gray-600 flex items-center gap-2">
@@ -557,8 +584,10 @@ export default function TerritoryEquity() {
             )}
           </div>
         </div>
+        )}
 
         {/* KPI 6: Top 3 Worst Served Cities */}
+        {!scenarioInfo.isRouteView && (
         <div className="bg-white rounded-lg shadow p-6 col-span-1 md:col-span-2 lg:col-span-1">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-medium text-gray-600 flex items-center gap-2">
@@ -605,6 +634,7 @@ export default function TerritoryEquity() {
             )}
           </div>
         </div>
+        )}
       </div>
 
       {/* Tabs */}
@@ -621,27 +651,31 @@ export default function TerritoryEquity() {
             >
               {t('reporting.city_analysis')}
             </button>
-            <button
-              onClick={() => setActiveTab('regional')}
-              className={`px-6 py-3 font-medium transition-colors ${
-                activeTab === 'regional'
-                  ? 'border-b-2 border-blue-600 text-blue-600'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              {t('reporting.regional_analysis')}
-            </button>
-            <button
-              onClick={() => setActiveTab('map')}
-              className={`px-6 py-3 font-medium transition-colors flex items-center gap-2 ${
-                activeTab === 'map'
-                  ? 'border-b-2 border-blue-600 text-blue-600'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              <Map className="w-4 h-4" />
-              {t('reporting.geographic_view')}
-            </button>
+            {!scenarioInfo.isRouteView && (
+              <button
+                onClick={() => setActiveTab('regional')}
+                className={`px-6 py-3 font-medium transition-colors ${
+                  activeTab === 'regional'
+                    ? 'border-b-2 border-blue-600 text-blue-600'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                {t('reporting.regional_analysis')}
+              </button>
+            )}
+            {!scenarioInfo.isRouteView && (
+              <button
+                onClick={() => setActiveTab('map')}
+                className={`px-6 py-3 font-medium transition-colors flex items-center gap-2 ${
+                  activeTab === 'map'
+                    ? 'border-b-2 border-blue-600 text-blue-600'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <Map className="w-4 h-4" />
+                {t('reporting.geographic_view')}
+              </button>
+            )}
           </div>
         </div>
 
@@ -719,7 +753,7 @@ export default function TerritoryEquity() {
                     {t('common.export_csv')}
                   </button>
                 </div>
-                <RegionalEquityTable data={regionData} onRegionClick={setSelectedRegion} />
+                <RegionalEquityTable data={regionData} onRegionClick={setSelectedRegion} scenarioInfo={scenarioInfo} filters={filters} />
               </div>
             </div>
           )}

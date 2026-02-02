@@ -1,5 +1,6 @@
 import { X } from 'lucide-react';
 import type { RegionEquityData } from '@/types/reporting';
+import { formatNumber } from '@/lib/formatNumber';
 
 interface RegionDetailModalProps {
   region: RegionEquityData;
@@ -60,12 +61,12 @@ export function RegionDetailModal({ region, onClose }: RegionDetailModalProps) {
               <div>
                 <p className="text-sm text-gray-500">Compliant:</p>
                 <p className="font-medium text-gray-900">
-                  {region.compliantShipments} ({region.actualPercentage.toFixed(1)}%)
+                  {region.compliantShipments} ({formatNumber(region.actualPercentage)}%)
                 </p>
               </div>
               <div>
                 <p className="text-sm text-gray-500">Standard:</p>
-                <p className="font-medium text-gray-900">{region.standardPercentage.toFixed(1)}%</p>
+                <p className="font-medium text-gray-900">{formatNumber(region.standardPercentage)}%</p>
               </div>
               <div>
                 <p className="text-sm text-gray-500">Deviation:</p>
@@ -75,7 +76,7 @@ export function RegionDetailModal({ region, onClose }: RegionDetailModalProps) {
                   }`}
                 >
                   {region.deviation >= 0 ? '+' : ''}
-                  {region.deviation.toFixed(1)}%
+                  {formatNumber(region.deviation)}%
                 </p>
               </div>
               <div>
@@ -106,25 +107,25 @@ export function RegionDetailModal({ region, onClose }: RegionDetailModalProps) {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-xs text-gray-600">Actual %:</p>
-                    <p className="text-lg font-bold text-blue-600">{region.inboundPercentage.toFixed(1)}%</p>
+                    <p className="text-lg font-bold text-blue-600">{formatNumber(region.inboundPercentage)}%</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-600">Standard %:</p>
-                    <p className="text-sm font-medium">{region.inboundStandardPercentage.toFixed(1)}%</p>
+                    <p className="text-sm font-medium">{formatNumber(region.inboundStandardPercentage)}%</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-600">Deviation:</p>
                     <p className={`text-sm font-medium ${region.inboundDeviation >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {region.inboundDeviation >= 0 ? '+' : ''}{region.inboundDeviation.toFixed(1)}%
+                      {region.inboundDeviation >= 0 ? '+' : ''}{formatNumber(region.inboundDeviation)}%
                     </p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-600">J+K Std:</p>
-                    <p className="text-sm font-medium">{region.inboundStandardDays.toFixed(1)} days</p>
+                    <p className="text-sm font-medium">{formatNumber(region.inboundStandardDays)} days</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-600">J+K Actual:</p>
-                    <p className="text-sm font-medium">{region.inboundActualDays.toFixed(1)} days</p>
+                    <p className="text-sm font-medium">{formatNumber(region.inboundActualDays)} days</p>
                   </div>
                 </div>
               </div>
@@ -134,25 +135,25 @@ export function RegionDetailModal({ region, onClose }: RegionDetailModalProps) {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-xs text-gray-600">Actual %:</p>
-                    <p className="text-lg font-bold text-green-600">{region.outboundPercentage.toFixed(1)}%</p>
+                    <p className="text-lg font-bold text-green-600">{formatNumber(region.outboundPercentage)}%</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-600">Standard %:</p>
-                    <p className="text-sm font-medium">{region.outboundStandardPercentage.toFixed(1)}%</p>
+                    <p className="text-sm font-medium">{formatNumber(region.outboundStandardPercentage)}%</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-600">Deviation:</p>
                     <p className={`text-sm font-medium ${region.outboundDeviation >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {region.outboundDeviation >= 0 ? '+' : ''}{region.outboundDeviation.toFixed(1)}%
+                      {region.outboundDeviation >= 0 ? '+' : ''}{formatNumber(region.outboundDeviation)}%
                     </p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-600">J+K Std:</p>
-                    <p className="text-sm font-medium">{region.outboundStandardDays.toFixed(1)} days</p>
+                    <p className="text-sm font-medium">{formatNumber(region.outboundStandardDays)} days</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-600">J+K Actual:</p>
-                    <p className="text-sm font-medium">{region.outboundActualDays.toFixed(1)} days</p>
+                    <p className="text-sm font-medium">{formatNumber(region.outboundActualDays)} days</p>
                   </div>
                 </div>
               </div>
@@ -166,7 +167,7 @@ export function RegionDetailModal({ region, onClose }: RegionDetailModalProps) {
                     </p>
                   </div>
                   <p className="text-2xl font-bold text-gray-700">
-                    {region.directionGap.toFixed(1)}%
+                    {formatNumber(region.directionGap)}%
                   </p>
                 </div>
               </div>
@@ -228,16 +229,16 @@ export function RegionDetailModal({ region, onClose }: RegionDetailModalProps) {
                           {cp.compliantShipments}
                         </td>
                         <td className="px-4 py-3 text-sm text-right text-gray-900">
-                          {cp.actualPercentage.toFixed(1)}%
+                          {formatNumber(cp.actualPercentage)}%
                         </td>
                         <td className="px-4 py-3 text-sm text-right text-gray-900">
-                          {cp.standardPercentage.toFixed(1)}%
+                          {formatNumber(cp.standardPercentage)}%
                         </td>
                         <td className="px-4 py-3 text-sm text-right text-gray-900">
-                          {cp.standardDays.toFixed(1)}
+                          {formatNumber(cp.standardDays)}
                         </td>
                         <td className="px-4 py-3 text-sm text-right text-gray-900">
-                          {cp.actualDays.toFixed(1)}
+                          {formatNumber(cp.actualDays)}
                         </td>
                         <td
                           className={`px-4 py-3 text-sm text-right font-medium ${
@@ -245,13 +246,13 @@ export function RegionDetailModal({ region, onClose }: RegionDetailModalProps) {
                           }`}
                         >
                           {cp.deviation >= 0 ? '+' : ''}
-                          {cp.deviation.toFixed(1)}%
+                          {formatNumber(cp.deviation)}%
                         </td>
                         <td className="px-4 py-3 text-sm text-right text-blue-600">
-                          {cp.inboundPercentage.toFixed(1)}%
+                          {formatNumber(cp.inboundPercentage)}%
                         </td>
                         <td className="px-4 py-3 text-sm text-right text-green-600">
-                          {cp.outboundPercentage.toFixed(1)}%
+                          {formatNumber(cp.outboundPercentage)}%
                         </td>
                       </tr>
                     ))}

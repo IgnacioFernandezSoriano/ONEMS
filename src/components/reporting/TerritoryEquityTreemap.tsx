@@ -1,5 +1,6 @@
 import React from 'react';
 import { Treemap, ResponsiveContainer, Tooltip } from 'recharts';
+import { formatNumber } from '@/lib/formatNumber';
 import type { CityEquityData } from '@/types/reporting';
 import { useTranslation } from '@/hooks/useTranslation';
 
@@ -10,15 +11,20 @@ interface TerritoryEquityTreemapProps {
 export function TerritoryEquityTreemap({ data }: TerritoryEquityTreemapProps) {
   const { t } = useTranslation();
   // Transform data for Recharts Treemap
-  // Size by population (fallback to totalShipments if no population)
-  const treemapData = data.map((city) => ({
-    name: city.cityName,
-    size: city.population || city.totalShipments || 1,
-    actualPercentage: city.actualPercentage,
-    status: city.status,
-    population: city.population,
-    totalShipments: city.totalShipments,
-  }));
+  // Filter cities with at least one valid direction, then size by population (fallback to totalShipments)
+  const treemapData = data
+    .filter(city => 
+      (city.inboundShipments > 0 || city.inboundStandardDays > 0) ||
+      (city.outboundShipments > 0 || city.outboundStandardDays > 0)
+    )
+    .map((city) => ({
+      name: city.cityName,
+      size: city.population || city.totalShipments || 1,
+      actualPercentage: city.actualPercentage,
+      status: city.status,
+      population: city.population,
+      totalShipments: city.totalShipments,
+    }));
 
   // Color based on status
   const getColor = (status: string) => {

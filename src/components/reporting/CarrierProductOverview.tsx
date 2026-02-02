@@ -1,5 +1,6 @@
 import React from 'react';
 import { ColumnTooltip } from './ColumnTooltip';
+import { formatNumber } from '@/lib/formatNumber';
 
 interface CarrierProductData {
   carrier: string;
@@ -85,13 +86,13 @@ export default function CarrierProductOverview({ data, loading, globalWarningThr
                 </td>
                 <td className="px-3 py-2 text-sm text-gray-700">{item.routes}</td>
                 <td className="px-3 py-2 text-sm text-gray-900">{item.totalSamples}</td>
-                <td className="px-3 py-2 text-sm text-gray-900">{item.jkStandard.toFixed(1)}</td>
-                <td className="px-3 py-2 text-sm text-gray-900">{item.jkActual.toFixed(1)}</td>
+                <td className="px-3 py-2 text-sm text-gray-900">{formatNumber(item.jkStandard)}</td>
+                <td className="px-3 py-2 text-sm text-gray-900">{formatNumber(item.jkActual)}</td>
                 <td className={`px-3 py-2 text-sm ${deviationColor}`}>
-                  {item.deviation > 0 ? '+' : ''}{item.deviation.toFixed(1)}
+                  {item.deviation > 0 ? '+' : ''}{formatNumber(item.deviation)}
                 </td>
                 <td className={`px-3 py-2 text-sm ${onTimeColor}`}>
-                  {item.onTimePercentage.toFixed(1)}%
+                  {formatNumber(item.onTimePercentage)}%
                 </td>
                 <td className="px-3 py-2 text-sm text-red-600 font-semibold">
                   {item.problematicRoutes}

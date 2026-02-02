@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { formatNumber } from '@/lib/formatNumber';
 import { ChevronDown, ChevronUp, ArrowDown, ArrowUp } from 'lucide-react';
 import type { CityEquityData } from '@/types/reporting';
 
@@ -45,42 +46,54 @@ export function TerritoryEquityTable({ data, onCityClick, globalWarningThreshold
   };
 
   // Convert each city into two rows (inbound + outbound)
-  const directionRows: DirectionRow[] = data.flatMap((city) => [
-    {
-      cityId: `${city.cityId}-inbound`,
-      cityName: city.cityName,
-      direction: 'inbound' as const,
-      regionName: city.regionName,
-      classification: city.classification,
-      population: city.population,
-      shipments: city.inboundShipments,
-      compliant: city.inboundCompliant,
-      standardPercentage: city.inboundStandardPercentage,
-      actualPercentage: city.inboundPercentage,
-      deviation: city.inboundDeviation,
-      standardDays: city.inboundStandardDays,
-      actualDays: city.inboundActualDays,
-      status: city.inboundPercentage >= globalWarningThreshold ? 'compliant' : (city.inboundPercentage > globalCriticalThreshold ? 'warning' : 'critical'),
-      originalCity: city,
-    },
-    {
-      cityId: `${city.cityId}-outbound`,
-      cityName: city.cityName,
-      direction: 'outbound' as const,
-      regionName: city.regionName,
-      classification: city.classification,
-      population: city.population,
-      shipments: city.outboundShipments,
-      compliant: city.outboundCompliant,
-      standardPercentage: city.outboundStandardPercentage,
-      actualPercentage: city.outboundPercentage,
-      deviation: city.outboundDeviation,
-      standardDays: city.outboundStandardDays,
-      actualDays: city.outboundActualDays,
-      status: city.outboundPercentage >= globalWarningThreshold ? 'compliant' : (city.outboundPercentage > globalCriticalThreshold ? 'warning' : 'critical'),
-      originalCity: city,
-    },
-  ]);
+  // Filter out rows with shipments=0 and standardDays=0
+  const directionRows: DirectionRow[] = data.flatMap((city) => {
+    const rows: DirectionRow[] = [];
+    
+    // Add inbound row only if it has shipments or standardDays > 0
+    if (city.inboundShipments > 0 || city.inboundStandardDays > 0) {
+      rows.push({
+        cityId: `${city.cityId}-inbound`,
+        cityName: city.cityName,
+        direction: 'inbound' as const,
+        regionName: city.regionName,
+        classification: city.classification,
+        population: city.population,
+        shipments: city.inboundShipments,
+        compliant: city.inboundCompliant,
+        standardPercentage: city.inboundStandardPercentage,
+        actualPercentage: city.inboundPercentage,
+        deviation: city.inboundDeviation,
+        standardDays: city.inboundStandardDays,
+        actualDays: city.inboundActualDays,
+        status: city.inboundPercentage >= globalWarningThreshold ? 'compliant' : (city.inboundPercentage > globalCriticalThreshold ? 'warning' : 'critical'),
+        originalCity: city,
+      });
+    }
+    
+    // Add outbound row only if it has shipments or standardDays > 0
+    if (city.outboundShipments > 0 || city.outboundStandardDays > 0) {
+      rows.push({
+        cityId: `${city.cityId}-outbound`,
+        cityName: city.cityName,
+        direction: 'outbound' as const,
+        regionName: city.regionName,
+        classification: city.classification,
+        population: city.population,
+        shipments: city.outboundShipments,
+        compliant: city.outboundCompliant,
+        standardPercentage: city.outboundStandardPercentage,
+        actualPercentage: city.outboundPercentage,
+        deviation: city.outboundDeviation,
+        standardDays: city.outboundStandardDays,
+        actualDays: city.outboundActualDays,
+        status: city.outboundPercentage >= globalWarningThreshold ? 'compliant' : (city.outboundPercentage > globalCriticalThreshold ? 'warning' : 'critical'),
+        originalCity: city,
+      });
+    }
+    
+    return rows;
+  });
 
   const handleSort = (field: keyof DirectionRow) => {
     if (sortField === field) {
@@ -272,10 +285,10 @@ export function TerritoryEquityTable({ data, onCityClick, globalWarningThreshold
                     {row.shipments}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
-                    {row.standardPercentage.toFixed(1)}%
+                    {formatNumber(row.standardPercentage)}%
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
-                    {row.actualPercentage.toFixed(1)}%
+                    {formatNumber(row.actualPercentage)}%
                   </td>
                   <td
                     className={`px-4 py-3 whitespace-nowrap text-sm text-right font-medium ${
@@ -283,13 +296,13 @@ export function TerritoryEquityTable({ data, onCityClick, globalWarningThreshold
                     }`}
                   >
                     {row.deviation >= 0 ? '+' : ''}
-                    {row.deviation.toFixed(1)}%
+                    {formatNumber(row.deviation)}%
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
-                    {row.standardDays.toFixed(1)}
+                    {formatNumber(row.standardDays)}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
-                    {row.actualDays.toFixed(1)}
+                    {formatNumber(row.actualDays)}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-center text-lg">
                     {getStatusIcon(row.status)}
@@ -337,13 +350,13 @@ export function TerritoryEquityTable({ data, onCityClick, globalWarningThreshold
                                     <td className="px-3 py-2 text-gray-700">{cp.product}</td>
                                     <td className="px-3 py-2 text-right text-gray-700">{cp.totalShipments}</td>
                                     <td className="px-3 py-2 text-right text-gray-700">{cp.compliantShipments}</td>
-                                    <td className="px-3 py-2 text-right text-gray-700">{cp.standardPercentage.toFixed(1)}%</td>
-                                    <td className="px-3 py-2 text-right text-gray-700">{cp.actualPercentage.toFixed(1)}%</td>
+                                    <td className="px-3 py-2 text-right text-gray-700">{formatNumber(cp.standardPercentage)}%</td>
+                                    <td className="px-3 py-2 text-right text-gray-700">{formatNumber(cp.actualPercentage)}%</td>
                                     <td className={`px-3 py-2 text-right font-medium ${cp.deviation >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                      {cp.deviation >= 0 ? '+' : ''}{cp.deviation.toFixed(1)}%
+                                      {cp.deviation >= 0 ? '+' : ''}{formatNumber(cp.deviation)}%
                                     </td>
-                                    <td className="px-3 py-2 text-right text-gray-700">{cp.standardDays.toFixed(1)}</td>
-                                    <td className="px-3 py-2 text-right text-gray-700">{cp.actualDays.toFixed(1)}</td>
+                                    <td className="px-3 py-2 text-right text-gray-700">{formatNumber(cp.standardDays)}</td>
+                                    <td className="px-3 py-2 text-right text-gray-700">{formatNumber(cp.actualDays)}</td>
                                   </tr>
                                 );
                               })}

@@ -1,4 +1,5 @@
 import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { formatNumber } from '@/lib/formatNumber';
 
 interface JKRouteData {
   originCity: string;
@@ -129,7 +130,7 @@ export function PerformanceDistributionChart({ routeData, maxDays, carrierFilter
               </div>
               <div className="flex items-center justify-between text-xs text-gray-600 mt-1">
                 <span>% of Total:</span>
-                <span>{cumulativePercentage.toFixed(1)}% (Target: {targetStandardPercentage.toFixed(0)}%)</span>
+                <span>{formatNumber(cumulativePercentage)}% (Target: {targetStandardPercentage.toFixed(0)}%)</span>
               </div>
             </div>
           )}
@@ -145,7 +146,7 @@ export function PerformanceDistributionChart({ routeData, maxDays, carrierFilter
                 <span className="text-gray-600">{entry.name}:</span>
               </div>
               <span className="font-medium text-gray-900">
-                {entry.value.toLocaleString()} ({((entry.value / total) * 100).toFixed(1)}%)
+                {entry.value.toLocaleString()} ({formatNumber((entry.value / total) * 100)}%)
               </span>
             </div>
           ))}

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Tooltip, useMap } from 'react-leaflet';
+import { formatNumber } from '@/lib/formatNumber';
 import type { CityEquityData } from '@/types/reporting';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -44,9 +45,13 @@ export function TerritoryEquityMap({ data }: TerritoryEquityMapProps) {
   const { t } = useTranslation();
   const mapRef = useRef<L.Map>(null);
 
-  // Filter cities with valid coordinates
+  // Filter cities with valid coordinates and at least one valid direction
   const citiesWithCoords = data.filter(
-    (city) => city.latitude != null && city.longitude != null
+    (city) => 
+      city.latitude != null && 
+      city.longitude != null &&
+      ((city.inboundShipments > 0 || city.inboundStandardDays > 0) ||
+       (city.outboundShipments > 0 || city.outboundStandardDays > 0))
   );
 
   if (citiesWithCoords.length === 0) {
@@ -146,13 +151,13 @@ export function TerritoryEquityMap({ data }: TerritoryEquityMapProps) {
                             : 'text-red-600'
                         }`}
                       >
-                        {city.actualPercentage.toFixed(1)}%
+                        {formatNumber(city.actualPercentage)}%
                       </span>
                     </div>
 
                     <div className="flex justify-between">
                       <span className="text-gray-600">{t('reporting.standard')}</span>
-                      <span className="font-medium">{city.standardPercentage.toFixed(1)}%</span>
+                      <span className="font-medium">{formatNumber(city.standardPercentage)}%</span>
                     </div>
 
                     <div className="flex justify-between">
@@ -163,7 +168,7 @@ export function TerritoryEquityMap({ data }: TerritoryEquityMapProps) {
                         }`}
                       >
                         {city.deviation >= 0 ? '+' : ''}
-                        {city.deviation.toFixed(1)}%
+                        {formatNumber(city.deviation)}%
                       </span>
                     </div>
                   </div>
@@ -171,12 +176,12 @@ export function TerritoryEquityMap({ data }: TerritoryEquityMapProps) {
                   <div className="border-t pt-2 mt-2">
                     <div className="flex justify-between">
                       <span className="text-gray-600">{t('reporting.inbound')}:</span>
-                      <span className="font-medium">{city.inboundPercentage.toFixed(1)}%</span>
+                      <span className="font-medium">{formatNumber(city.inboundPercentage)}%</span>
                     </div>
 
                     <div className="flex justify-between">
                       <span className="text-gray-600">{t('reporting.outbound')}:</span>
-                      <span className="font-medium">{city.outboundPercentage.toFixed(1)}%</span>
+                      <span className="font-medium">{formatNumber(city.outboundPercentage)}%</span>
                     </div>
 
                     <div className="flex justify-between">
@@ -186,7 +191,7 @@ export function TerritoryEquityMap({ data }: TerritoryEquityMapProps) {
                           city.directionGap > 5 ? 'text-amber-600' : 'text-gray-900'
                         }`}
                       >
-                        {city.directionGap.toFixed(1)}%
+                        {formatNumber(city.directionGap)}%
                       </span>
                     </div>
                   </div>
