@@ -14,10 +14,10 @@ export function InboundOutboundChart({ data }: InboundOutboundChartProps) {
   // Then sort by direction gap (descending) and take top 10
   const topCities = [...data]
     .filter(city => 
-      (city.inboundShipments > 0 || city.inboundStandardDays > 0) &&
+      (city.inboundShipments > 0 || city.inboundStandardDays > 0) ||
       (city.outboundShipments > 0 || city.outboundStandardDays > 0)
     )
-    .sort((a, b) => b.directionGap - a.directionGap)
+    .sort((a, b) => Math.abs(b.directionGap) - Math.abs(a.directionGap))
     .slice(0, 10);
 
   const chartData = topCities.map((city) => ({
