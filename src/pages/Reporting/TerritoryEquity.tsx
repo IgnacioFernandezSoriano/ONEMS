@@ -466,7 +466,7 @@ export default function TerritoryEquity() {
       {/* KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {/* KPI 1: Service Equity Index */}
-        {!scenarioInfo.isRouteView && (
+        {scenarioInfo.isGeneralView && (
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-gray-600">{t('reporting.service_equity_index')}</h3>
@@ -502,7 +502,7 @@ export default function TerritoryEquity() {
         </div>
 
         {/* KPI 3: Underserved Cities */}
-        {!scenarioInfo.isRouteView && (
+        {scenarioInfo.isGeneralView && (
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-gray-600">{t('reporting.underserved_cities')}</h3>
@@ -521,7 +521,7 @@ export default function TerritoryEquity() {
         )}
 
         {/* KPI 5: Citizens Affected (moved here to be next to Underserved Cities) */}
-        {!scenarioInfo.isRouteView && (
+        {scenarioInfo.isGeneralView && (
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-gray-600">{t('reporting.citizens_affected')}</h3>

@@ -66,7 +66,7 @@ export function TerritoryEquityTable({ data, onCityClick, globalWarningThreshold
         deviation: city.inboundDeviation,
         standardDays: city.inboundStandardDays,
         actualDays: city.inboundActualDays,
-        status: city.inboundPercentage >= globalWarningThreshold ? 'compliant' : (city.inboundPercentage > globalCriticalThreshold ? 'warning' : 'critical'),
+        status: city.status, // Use status from hook (already calculated with route-specific thresholds)
         originalCity: city,
       });
     }
@@ -87,7 +87,7 @@ export function TerritoryEquityTable({ data, onCityClick, globalWarningThreshold
         deviation: city.outboundDeviation,
         standardDays: city.outboundStandardDays,
         actualDays: city.outboundActualDays,
-        status: city.outboundPercentage >= globalWarningThreshold ? 'compliant' : (city.outboundPercentage > globalCriticalThreshold ? 'warning' : 'critical'),
+        status: city.status, // Use status from hook (already calculated with route-specific thresholds)
         originalCity: city,
       });
     }
