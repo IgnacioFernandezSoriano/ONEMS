@@ -510,45 +510,57 @@ export default function TerritoryEquity() {
         })}
       />
 
-      {/* KPIs */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {/* KPI 1: Service Equity Index */}
-        {scenarioInfo.isGeneralView && (
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium text-gray-600">{t('reporting.service_equity_index')}</h3>
-            <SmartTooltip content={tooltips.serviceEquityIndex} />
-          </div>
-          <div className="text-3xl font-bold text-gray-900">
-            {metrics?.serviceEquityIndex.toFixed(1) || '0.0'}
-          </div>
-          <div className="flex items-center gap-1 mt-1">
-            <TrendingUp className="w-4 h-4 text-gray-500" />
-            <span className="text-sm text-gray-500">{t('reporting.population_weighted')}</span>
-          </div>
-        </div>
-        )}
-
-        {/* KPI 2: Population-Weighted Compliance */}
+      {/* KPIs - Reorganized */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* KPI 1: Service Equity Index + Population-Weighted Compliance (Unified) */}
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-gray-600">
-              {scenarioInfo.isRouteView ? 'Route Compliance' : t('reporting.population_weighted_compliance')}
+              {scenarioInfo.isGeneralView ? t('reporting.service_equity_index') : 
+               scenarioInfo.isRouteView ? 'Route Compliance' : 
+               t('reporting.population_weighted_compliance')}
             </h3>
-            <SmartTooltip content={tooltips.populationWeightedCompliance} />
+            <SmartTooltip content={scenarioInfo.isGeneralView ? tooltips.serviceEquityIndex : tooltips.populationWeightedCompliance} />
           </div>
-          <div className="text-3xl font-bold text-gray-900">
-            {metrics?.populationWeightedCompliance.toFixed(1) || '0.0'}%
-          </div>
-          <div className="flex items-center gap-1 mt-1">
-            <Users className="w-4 h-4 text-gray-500" />
-            <span className="text-sm text-gray-500">
-              {t('reporting.citizens_count', { count: metrics?.totalPopulation.toLocaleString() || '0' })}
-            </span>
-          </div>
+          {scenarioInfo.isGeneralView && (
+            <>
+              <div className="text-3xl font-bold text-gray-900">
+                {metrics?.serviceEquityIndex.toFixed(1) || '0.0'}
+              </div>
+              <div className="flex items-center gap-1 mt-1">
+                <TrendingUp className="w-4 h-4 text-gray-500" />
+                <span className="text-sm text-gray-500">{t('reporting.population_weighted')}</span>
+              </div>
+              <div className="border-t mt-3 pt-3">
+                <div className="text-sm text-gray-600 mb-1">{t('reporting.population_weighted_compliance')}</div>
+                <div className="text-2xl font-bold text-blue-600">
+                  {metrics?.populationWeightedCompliance.toFixed(1) || '0.0'}%
+                </div>
+                <div className="flex items-center gap-1 mt-1">
+                  <Users className="w-4 h-4 text-gray-500" />
+                  <span className="text-xs text-gray-500">
+                    {metrics?.totalPopulation.toLocaleString() || '0'} citizens
+                  </span>
+                </div>
+              </div>
+            </>
+          )}
+          {!scenarioInfo.isGeneralView && (
+            <>
+              <div className="text-3xl font-bold text-gray-900">
+                {metrics?.populationWeightedCompliance.toFixed(1) || '0.0'}%
+              </div>
+              <div className="flex items-center gap-1 mt-1">
+                <Users className="w-4 h-4 text-gray-500" />
+                <span className="text-sm text-gray-500">
+                  {metrics?.totalPopulation.toLocaleString() || '0'} citizens
+                </span>
+              </div>
+            </>
+          )}
         </div>
 
-        {/* KPI 3: Underserved Cities */}
+        {/* KPI 2: Underserved Cities + Citizens Affected (Unified) */}
         {scenarioInfo.isGeneralView && (
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-2">
@@ -561,138 +573,222 @@ export default function TerritoryEquity() {
           <div className="flex items-center gap-1 mt-1">
             <AlertTriangle className="w-4 h-4 text-red-500" />
             <span className="text-sm text-gray-500">
-              {t('reporting.of_cities', { count: metrics?.totalCities || 0 })}
+              about {metrics?.totalCities || 0} cities
             </span>
           </div>
-        </div>
-        )}
-
-        {/* KPI 5: Citizens Affected (moved here to be next to Underserved Cities) */}
-        {scenarioInfo.isGeneralView && (
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium text-gray-600">{t('reporting.citizens_affected')}</h3>
-            <SmartTooltip content={tooltips.citizensAffected} />
-          </div>
-          <div className="text-3xl font-bold text-red-600">
-            {metrics?.citizensAffected.toLocaleString() || '0'}
-          </div>
-          <div className="flex items-center gap-1 mt-1">
-            <Users className="w-4 h-4 text-red-500" />
-            <span className="text-sm text-gray-500">{t('reporting.in_critical_cities')}</span>
+          <div className="border-t mt-3 pt-3">
+            <div className="text-sm text-gray-600 mb-1">{t('reporting.citizens_affected')}</div>
+            <div className="text-2xl font-bold text-red-600">
+              {metrics?.citizensAffected.toLocaleString() || '0'}
+            </div>
+            <div className="flex items-center gap-1 mt-1">
+              <Users className="w-4 h-4 text-red-500" />
+              <span className="text-xs text-gray-500">{t('reporting.in_critical_cities')}</span>
+            </div>
           </div>
         </div>
         )}
 
-        {/* KPI 4: Top 3 Best Served Cities */}
+        {/* KPI 3: Top 3 Best & Worst Cities (Combined) */}
         {!scenarioInfo.isRouteView && (
         <div className="bg-white rounded-lg shadow p-6 col-span-1 md:col-span-2 lg:col-span-1">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-medium text-gray-600 flex items-center gap-2">
-              <Award className="w-4 h-4 text-green-600" />
-              {t('reporting.top_3_best_served_cities')}
+            <h3 className="text-sm font-medium text-gray-600">
+              Top Cities Performance
             </h3>
             <SmartTooltip content={tooltips.topBestServed} />
           </div>
-          <div className="space-y-2">
-            <div className="grid grid-cols-7 gap-1 text-xs font-medium text-gray-500 border-b pb-1">
-              <div>{t('topology.city')}</div>
-              <div className="text-right">{t('reporting.compliant_abbr')}</div>
-              <div className="text-right">{t('reporting.std_abbr')}</div>
-              <div className="text-right">{t('reporting.jk_std')}</div>
-              <div className="text-right">{t('reporting.jk_actual')}</div>
-              <div className="text-right">{t('reporting.inbound_abbr')}</div>
-              <div className="text-right">{t('reporting.outbound_abbr')}</div>            </div>
-            {metrics?.topBestCities.slice(0, 3).map((city, idx) => {
-              // Use same logic as table: show relevant percentage based on scenario
-              const relevantPercentage = hookScenarioInfo.isOriginView 
-                ? city.inboundPercentage 
-                : city.outboundPercentage;
-              
-              return (
-                <div key={idx} className="grid grid-cols-7 gap-1 text-xs">
-                  <div className="font-medium truncate">{city.cityName}</div>
-                  <div className="text-right font-semibold text-green-600">
-                    {relevantPercentage.toFixed(1)}%
+          
+          {/* Best Cities */}
+          <div className="mb-3">
+            <div className="flex items-center gap-1 mb-2">
+              <Award className="w-3 h-3 text-green-600" />
+              <span className="text-xs font-medium text-green-600">Best Served</span>
+            </div>
+            <div className="space-y-1">
+              <div className="grid grid-cols-7 gap-1 text-[10px] font-medium text-gray-500 border-b pb-1">
+                <div>City</div>
+                <div className="text-right">Compl.</div>
+                <div className="text-right">Std.</div>
+                <div className="text-right">J+K Std</div>
+                <div className="text-right">J+K Act</div>
+                <div className="text-right">Inb.</div>
+                <div className="text-right">Outb.</div>
+              </div>
+              {metrics?.topBestCities.slice(0, 3).map((city, idx) => {
+                const relevantPercentage = hookScenarioInfo.isOriginView 
+                  ? city.inboundPercentage 
+                  : city.outboundPercentage;
+                
+                return (
+                  <div key={idx} className="grid grid-cols-7 gap-1 text-[10px]">
+                    <div className="font-medium truncate">{city.cityName}</div>
+                    <div className="text-right font-semibold text-green-600">
+                      {relevantPercentage.toFixed(1)}%
+                    </div>
+                    <div className="text-right text-gray-600">
+                      {city.standardPercentage.toFixed(1)}%
+                    </div>
+                    <div className="text-right text-gray-600">
+                      {city.standardDays.toFixed(1)}
+                    </div>
+                    <div className="text-right text-gray-600">
+                      {city.actualDays.toFixed(1)}
+                    </div>
+                    <div className="text-right text-gray-600">
+                      {city.inboundPercentage.toFixed(1)}%
+                    </div>
+                    <div className="text-right text-gray-600">
+                      {city.outboundPercentage.toFixed(1)}%
+                    </div>
                   </div>
-                  <div className="text-right text-gray-600">
-                    {city.standardPercentage.toFixed(1)}%
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Worst Cities */}
+          <div>
+            <div className="flex items-center gap-1 mb-2">
+              <AlertTriangle className="w-3 h-3 text-red-600" />
+              <span className="text-xs font-medium text-red-600">Worst Served</span>
+            </div>
+            <div className="space-y-1">
+              {metrics?.topWorstCities.filter(c => c.status === 'critical' || c.status === 'warning').slice(0, 3).map((city, idx) => {
+                const relevantPercentage = hookScenarioInfo.isOriginView 
+                  ? city.inboundPercentage 
+                  : city.outboundPercentage;
+                
+                return (
+                  <div key={idx} className="grid grid-cols-7 gap-1 text-[10px]">
+                    <div className="font-medium truncate">{city.cityName}</div>
+                    <div className="text-right font-semibold text-red-600">
+                      {relevantPercentage.toFixed(1)}%
+                    </div>
+                    <div className="text-right text-gray-600">
+                      {city.standardPercentage.toFixed(1)}%
+                    </div>
+                    <div className="text-right text-gray-600">
+                      {city.standardDays.toFixed(1)}
+                    </div>
+                    <div className="text-right text-gray-600">
+                      {city.actualDays.toFixed(1)}
+                    </div>
+                    <div className="text-right text-gray-600">
+                      {city.inboundPercentage.toFixed(1)}%
+                    </div>
+                    <div className="text-right text-gray-600">
+                      {city.outboundPercentage.toFixed(1)}%
+                    </div>
                   </div>
-                  <div className="text-right text-gray-600">
-                    {city.standardDays.toFixed(1)}
-                  </div>
-                  <div className="text-right text-gray-600">
-                    {city.actualDays.toFixed(1)}
-                  </div>
-                  <div className="text-right text-gray-600">
-                    {city.inboundPercentage.toFixed(1)}%
-                  </div>
-                  <div className="text-right text-gray-600">
-                    {city.outboundPercentage.toFixed(1)}%
-                  </div>
-                </div>
-              );
-            })}
-            {(!metrics?.topBestCities || metrics.topBestCities.length === 0) && (
-              <div className="text-sm text-gray-500 text-center py-2">No data</div>
-            )}
+                );
+              })}
+              {(!metrics?.topWorstCities || metrics.topWorstCities.filter(c => c.status === 'critical' || c.status === 'warning').length === 0) && (
+                <div className="text-[10px] text-gray-500 text-center py-1">{t('reporting.no_underserved_cities')}</div>
+              )}
+            </div>
           </div>
         </div>
         )}
 
-        {/* KPI 6: Top 3 Worst Served Cities */}
+        {/* KPI 4: Top 3 Best & Worst Regions (Combined - NEW) */}
         {!scenarioInfo.isRouteView && (
         <div className="bg-white rounded-lg shadow p-6 col-span-1 md:col-span-2 lg:col-span-1">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-medium text-gray-600 flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-red-600" />
-              {t('reporting.top_3_worst_served_cities')}
+            <h3 className="text-sm font-medium text-gray-600">
+              Top Regions Performance
             </h3>
-            <SmartTooltip content={tooltips.topWorstServed} />
+            <SmartTooltip content="Performance ranking of regions based on service equity compliance" />
           </div>
-          <div className="space-y-2">
-            <div className="grid grid-cols-7 gap-1 text-xs font-medium text-gray-500 border-b pb-1">
-              <div>{t('topology.city')}</div>
-              <div className="text-right">{t('reporting.compliant_abbr')}</div>
-              <div className="text-right">{t('reporting.std_abbr')}</div>
-              <div className="text-right">{t('reporting.jk_std')}</div>
-              <div className="text-right">{t('reporting.jk_actual')}</div>
-              <div className="text-right">{t('reporting.inbound_abbr')}</div>
-              <div className="text-right">{t('reporting.outbound_abbr')}</div>
+          
+          {/* Best Regions */}
+          <div className="mb-3">
+            <div className="flex items-center gap-1 mb-2">
+              <Award className="w-3 h-3 text-green-600" />
+              <span className="text-xs font-medium text-green-600">Best Served</span>
             </div>
-            {metrics?.topWorstCities.filter(c => c.status === 'critical' || c.status === 'warning').slice(0, 3).map((city, idx) => {
-              // Use same logic as table: show relevant percentage based on scenario
-              const relevantPercentage = hookScenarioInfo.isOriginView 
-                ? city.inboundPercentage 
-                : city.outboundPercentage;
-              
-              return (
-                <div key={idx} className="grid grid-cols-7 gap-1 text-xs">
-                  <div className="font-medium truncate">{city.cityName}</div>
-                  <div className="text-right font-semibold text-red-600">
-                    {relevantPercentage.toFixed(1)}%
+            <div className="space-y-1">
+              <div className="grid grid-cols-7 gap-1 text-[10px] font-medium text-gray-500 border-b pb-1">
+                <div>Region</div>
+                <div className="text-right">Compl.</div>
+                <div className="text-right">Std.</div>
+                <div className="text-right">J+K Std</div>
+                <div className="text-right">J+K Act</div>
+                <div className="text-right">Inb.</div>
+                <div className="text-right">Outb.</div>
+              </div>
+              {metrics?.topBestRegions.slice(0, 3).map((region, idx) => {
+                const relevantPercentage = hookScenarioInfo.isOriginView 
+                  ? region.inboundPercentage 
+                  : region.outboundPercentage;
+                
+                return (
+                  <div key={idx} className="grid grid-cols-7 gap-1 text-[10px]">
+                    <div className="font-medium truncate">{region.regionName}</div>
+                    <div className="text-right font-semibold text-green-600">
+                      {relevantPercentage.toFixed(1)}%
+                    </div>
+                    <div className="text-right text-gray-600">
+                      {region.standardPercentage.toFixed(1)}%
+                    </div>
+                    <div className="text-right text-gray-600">
+                      {region.standardDays.toFixed(1)}
+                    </div>
+                    <div className="text-right text-gray-600">
+                      {region.actualDays.toFixed(1)}
+                    </div>
+                    <div className="text-right text-gray-600">
+                      {region.inboundPercentage.toFixed(1)}%
+                    </div>
+                    <div className="text-right text-gray-600">
+                      {region.outboundPercentage.toFixed(1)}%
+                    </div>
                   </div>
-                  <div className="text-right text-gray-600">
-                    {city.standardPercentage.toFixed(1)}%
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Worst Regions */}
+          <div>
+            <div className="flex items-center gap-1 mb-2">
+              <AlertTriangle className="w-3 h-3 text-red-600" />
+              <span className="text-xs font-medium text-red-600">Worst Served</span>
+            </div>
+            <div className="space-y-1">
+              {metrics?.topWorstRegions.filter(r => r.status === 'critical' || r.status === 'warning').slice(0, 3).map((region, idx) => {
+                const relevantPercentage = hookScenarioInfo.isOriginView 
+                  ? region.inboundPercentage 
+                  : region.outboundPercentage;
+                
+                return (
+                  <div key={idx} className="grid grid-cols-7 gap-1 text-[10px]">
+                    <div className="font-medium truncate">{region.regionName}</div>
+                    <div className="text-right font-semibold text-red-600">
+                      {relevantPercentage.toFixed(1)}%
+                    </div>
+                    <div className="text-right text-gray-600">
+                      {region.standardPercentage.toFixed(1)}%
+                    </div>
+                    <div className="text-right text-gray-600">
+                      {region.standardDays.toFixed(1)}
+                    </div>
+                    <div className="text-right text-gray-600">
+                      {region.actualDays.toFixed(1)}
+                    </div>
+                    <div className="text-right text-gray-600">
+                      {region.inboundPercentage.toFixed(1)}%
+                    </div>
+                    <div className="text-right text-gray-600">
+                      {region.outboundPercentage.toFixed(1)}%
+                    </div>
                   </div>
-                  <div className="text-right text-gray-600">
-                    {city.standardDays.toFixed(1)}
-                  </div>
-                  <div className="text-right text-gray-600">
-                    {city.actualDays.toFixed(1)}
-                  </div>
-                  <div className="text-right text-gray-600">
-                    {city.inboundPercentage.toFixed(1)}%
-                  </div>
-                  <div className="text-right text-gray-600">
-                    {city.outboundPercentage.toFixed(1)}%
-                  </div>
-                </div>
-              );
-            })}
-            {(!metrics?.topWorstCities || metrics.topWorstCities.filter(c => c.status === 'critical' || c.status === 'warning').length === 0) && (
-              <div className="text-sm text-gray-500 text-center py-2">{t('reporting.no_underserved_cities')}</div>
-            )}
+                );
+              })}
+              {(!metrics?.topWorstRegions || metrics.topWorstRegions.filter(r => r.status === 'critical' || r.status === 'warning').length === 0) && (
+                <div className="text-[10px] text-gray-500 text-center py-1">No underserved regions</div>
+              )}
+            </div>
           </div>
         </div>
         )}

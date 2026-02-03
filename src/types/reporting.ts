@@ -255,6 +255,29 @@ export interface TerritoryEquityMetrics {
     status: 'compliant' | 'warning' | 'critical';
   }>;
   
+  // Top 3 Best/Worst Regions
+  topBestRegions: Array<{
+    regionName: string;
+    actualPercentage: number;
+    deviation: number;
+    standardPercentage: number;
+    standardDays: number;
+    actualDays: number;
+    inboundPercentage: number;
+    outboundPercentage: number;
+  }>;
+  topWorstRegions: Array<{
+    regionName: string;
+    actualPercentage: number;
+    deviation: number;
+    standardPercentage: number;
+    standardDays: number;
+    actualDays: number;
+    inboundPercentage: number;
+    outboundPercentage: number;
+    status: 'compliant' | 'warning' | 'critical';
+  }>;
+  
   // Totals
   totalCities: number;
   totalPopulation: number;

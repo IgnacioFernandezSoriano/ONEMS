@@ -153,6 +153,8 @@ export function useTerritoryEquityDataV2(
             citizensAffected: 0,
             topBestCities: [],
             topWorstCities: [],
+            topBestRegions: [],
+            topWorstRegions: [],
             totalCities: 0,
             totalPopulation: 0,
             totalRegions: 0,
@@ -1077,6 +1079,33 @@ export function useTerritoryEquityDataV2(
           }
         );
 
+        // Top 3 Best/Worst Regions
+        const sortedRegionsByDeviation = [...regionEquityData].sort((a, b) => b.deviation - a.deviation);
+        const topBestRegions = sortedRegionsByDeviation.slice(0, 3).map((r) => ({
+          regionName: r.regionName,
+          actualPercentage: r.actualPercentage,
+          deviation: r.deviation,
+          standardPercentage: r.standardPercentage,
+          standardDays: r.standardDays,
+          actualDays: r.actualDays,
+          inboundPercentage: r.inboundPercentage,
+          outboundPercentage: r.outboundPercentage,
+        }));
+        const topWorstRegions = sortedRegionsByDeviation
+          .slice(-3)
+          .reverse()
+          .map((r) => ({
+            regionName: r.regionName,
+            actualPercentage: r.actualPercentage,
+            deviation: r.deviation,
+            standardPercentage: r.standardPercentage,
+            standardDays: r.standardDays,
+            actualDays: r.actualDays,
+            inboundPercentage: r.inboundPercentage,
+            outboundPercentage: r.outboundPercentage,
+            status: r.status,
+          }));
+
         // 9. Set state
         setCityData(filteredCityData);
         
@@ -1089,6 +1118,8 @@ export function useTerritoryEquityDataV2(
           citizensAffected,
           topBestCities,
           topWorstCities,
+          topBestRegions,
+          topWorstRegions,
           totalCities,
           totalPopulation,
           totalRegions,

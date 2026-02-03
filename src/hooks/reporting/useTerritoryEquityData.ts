@@ -1419,6 +1419,8 @@ function calculateGlobalMetrics(
     citizensAffected: 0, // Will be calculated from city data
     topBestCities: [],
     topWorstCities: [],
+    topBestRegions: [],
+    topWorstRegions: [],
     totalCities: 0, // Will be calculated from city data
     totalPopulation: 0, // Will be calculated from city data
     totalRegions: 0, // Will be calculated from region data
