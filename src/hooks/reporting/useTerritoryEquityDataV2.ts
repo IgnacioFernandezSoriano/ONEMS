@@ -143,28 +143,7 @@ export function useTerritoryEquityDataV2(
 
         let shipments = allShipments;
 
-        // Filter by equity status at route level (before aggregation)
-        if (filters?.equityStatus && filters.equityStatus.length > 0) {
-          shipments = shipments.filter(s => {
-            // Calculate route-level status
-            const standard = s.delivery_standard_percentage || 95;
-            const actual = s.is_compliant ? 100 : 0; // Simplified: 100% if compliant, 0% if not
-            const deviation = actual - standard;
-            const warningThreshold = s.warning_threshold || globalWarningThreshold;
-            const criticalThreshold = s.critical_threshold || globalCriticalThreshold;
-            
-            let routeStatus: 'compliant' | 'warning' | 'critical';
-            if (deviation >= -warningThreshold) {
-              routeStatus = 'compliant';
-            } else if (deviation >= -criticalThreshold) {
-              routeStatus = 'warning';
-            } else {
-              routeStatus = 'critical';
-            }
-            
-            return filters.equityStatus!.includes(routeStatus);
-          });
-        }
+        // equityStatus filter is now handled in Product Analysis tab
 
         if (!shipments || shipments.length === 0) {
           setCityData([]);

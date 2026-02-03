@@ -11,6 +11,7 @@ import { RegionDetailModal } from '@/components/reporting/RegionDetailModal';
 import { TerritoryEquityFilters } from '@/components/reporting/TerritoryEquityFilters';
 import { TerritoryEquityTreemap } from '@/components/reporting/TerritoryEquityTreemap';
 import { TerritoryEquityMap } from '@/components/reporting/TerritoryEquityMap';
+import { ProductAnalysisTable } from '@/components/reporting/ProductAnalysisTable';
 import { useEquityAuditExport } from '@/hooks/reporting/useEquityAuditExport';
 import { tooltips } from '@/components/reporting/TerritoryEquityTooltips';
 import { Info, Download, TrendingUp, Users, AlertTriangle, Award, FileText, Map, Package } from 'lucide-react';
@@ -22,7 +23,7 @@ import { useFilterScenario } from '@/hooks/reporting/useFilterScenario';
 export default function TerritoryEquity() {
   const { t } = useTranslation();
   const { profile } = useAuth();
-  const [activeTab, setActiveTab] = useState<'city' | 'regional' | 'map'>('city');
+  const [activeTab, setActiveTab] = useState<'city' | 'regional' | 'map' | 'product'>('city');
   const [selectedCity, setSelectedCity] = useState<CityEquityData | null>(null);
   const [selectedRegion, setSelectedRegion] = useState<RegionEquityData | null>(null);
   const [availableRegions, setAvailableRegions] = useState<string[]>([]);
@@ -861,6 +862,16 @@ export default function TerritoryEquity() {
                 <Map className="w-4 h-4" />
                 {t('reporting.geographic_view')}
             </button>
+            <button
+              onClick={() => setActiveTab('product')}
+              className={`px-6 py-3 font-medium transition-colors ${
+                activeTab === 'product'
+                  ? 'border-b-2 border-blue-600 text-blue-600'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Product Analysis
+            </button>
           </div>
         </div>
 
@@ -1010,6 +1021,25 @@ export default function TerritoryEquity() {
                   </p>
                 </div>
                 <TerritoryEquityMap data={cityData} />
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'product' && (
+            <div className="space-y-6">
+              <div>
+                <div className="mb-4">
+                  <h3 className="text-lg font-semibold mb-2">Product-Level Route Analysis</h3>
+                  <p className="text-sm text-gray-600">
+                    Detailed breakdown of all routes by carrier and product. Filter by equity status to identify specific compliance issues.
+                  </p>
+                </div>
+                <ProductAnalysisTable 
+                  data={cityData}
+                  globalWarningThreshold={globalWarningThreshold}
+                  globalCriticalThreshold={globalCriticalThreshold}
+                  isOriginView={hookScenarioInfo.isOriginView}
+                />
               </div>
             </div>
           )}
