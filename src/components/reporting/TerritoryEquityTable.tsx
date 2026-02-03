@@ -13,6 +13,7 @@ interface TerritoryEquityTableProps {
   scenarioInfo: ScenarioInfo;
   scenarioDescription: string;
   showProductBreakdown?: boolean; // Auto-expand to product level when true
+  equityStatusFilter?: string[]; // Filter products by status
 }
 
 type CityRow = {
@@ -65,7 +66,8 @@ export function TerritoryEquityTable({
   globalCriticalThreshold,
   scenarioInfo,
   scenarioDescription,
-  showProductBreakdown = false
+  showProductBreakdown = false,
+  equityStatusFilter = []
 }: TerritoryEquityTableProps) {
   const { t } = useTranslation();
   const [sortField, setSortField] = useState<keyof CityRow>('cityName');
@@ -173,10 +175,6 @@ export function TerritoryEquityTable({
 
   // Build city rows with carrier/product hierarchy
   const cityRows: CityRow[] = data
-    .filter(city => {
-      const metrics = getMetricsForCity(city);
-      return metrics.shipments > 0 || metrics.standardDays > 0;
-    })
     .map((city) => {
       const metrics = getMetricsForCity(city);
       
@@ -247,6 +245,11 @@ export function TerritoryEquityTable({
           relevantPercentage >= globalWarningThreshold ? 'compliant' :
           relevantPercentage >= globalCriticalThreshold ? 'warning' : 'critical';
 
+        // Filter by equity status if specified
+        if (equityStatusFilter.length > 0 && !equityStatusFilter.includes(productStatus)) {
+          return; // Skip this product if it doesn't match the filter
+        }
+
         carrierData.products.set(cp.product, {
           product: cp.product,
           shipments: cp.totalShipments,
@@ -260,8 +263,10 @@ export function TerritoryEquityTable({
         });
       });
 
-      // Build carrier rows
-      const carrierBreakdown: CarrierRow[] = Array.from(carrierMap.values()).map(carrierData => {
+      // Build carrier rows (filter out carriers with no products after status filter)
+      const carrierBreakdown: CarrierRow[] = Array.from(carrierMap.values())
+        .filter(carrierData => carrierData.products.size > 0) // Only include carriers with products
+        .map(carrierData => {
         const carrierActualPercentage = carrierData.totalShipments > 0 
           ? (carrierData.totalCompliant / carrierData.totalShipments) * 100 
           : 0;
@@ -312,6 +317,11 @@ export function TerritoryEquityTable({
         originalCity: city,
         carrierBreakdown,
       };
+    })
+    .filter(cityRow => {
+      // Only include cities that have carriers (and thus products matching the filter)
+      const metrics = getMetricsForCity(cityRow.originalCity);
+      return (metrics.shipments > 0 || metrics.standardDays > 0) && cityRow.carrierBreakdown.length > 0;
     });
 
   // Auto-expand all when showProductBreakdown is true

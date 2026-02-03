@@ -916,6 +916,7 @@ export default function TerritoryEquity() {
                   scenarioInfo={hookScenarioInfo}
                   scenarioDescription={scenarioDescription}
                   showProductBreakdown={filters.equityStatus && filters.equityStatus.length > 0}
+                  equityStatusFilter={filters.equityStatus || []}
                 />
               </div>
             </div>
