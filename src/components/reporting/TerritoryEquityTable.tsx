@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { formatNumber } from '@/lib/formatNumber';
 import { ChevronDown, ChevronRight, ChevronsDown, ChevronsUp } from 'lucide-react';
 import type { CityEquityData } from '@/types/reporting';
@@ -12,6 +12,7 @@ interface TerritoryEquityTableProps {
   globalCriticalThreshold: number;
   scenarioInfo: ScenarioInfo;
   scenarioDescription: string;
+  showProductBreakdown?: boolean; // Auto-expand to product level when true
 }
 
 type CityRow = {
@@ -63,7 +64,8 @@ export function TerritoryEquityTable({
   globalWarningThreshold, 
   globalCriticalThreshold,
   scenarioInfo,
-  scenarioDescription 
+  scenarioDescription,
+  showProductBreakdown = false
 }: TerritoryEquityTableProps) {
   const { t } = useTranslation();
   const [sortField, setSortField] = useState<keyof CityRow>('cityName');
@@ -311,6 +313,22 @@ export function TerritoryEquityTable({
         carrierBreakdown,
       };
     });
+
+  // Auto-expand all when showProductBreakdown is true
+  useEffect(() => {
+    if (showProductBreakdown && cityRows.length > 0) {
+      const allCities = new Set(cityRows.map(c => c.cityId));
+      const allCarriers = new Set<string>();
+      cityRows.forEach(city => {
+        city.carrierBreakdown.forEach(carrier => {
+          allCarriers.add(`${city.cityId}-${carrier.carrier}`);
+        });
+      });
+      setExpandedCities(allCities);
+      setExpandedCarriers(allCarriers);
+      setExpandAll(true);
+    }
+  }, [showProductBreakdown, cityRows.length]);
 
   // Sorting logic
   const handleSort = (field: keyof CityRow) => {

@@ -258,23 +258,60 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
 
         {/* Region and Direction filters removed - now in Regional Analysis tab */}
 
-        {/* Equity Status */}
+        {/* Equity Status - Multiple Selection */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             <AlertCircle className="w-4 h-4 inline mr-1" />
             {t('reporting.equity_status')}
-            <SmartTooltip content="Filter by equity compliance status. Compliant: meeting standards. Warning: below standard. Critical: significantly below standard requiring action." />
+            <SmartTooltip content="Filter by equity compliance status at route level (origin-destination-carrier-product). Select multiple statuses to include." />
           </label>
-          <select
-            value={(filters.equityStatus && filters.equityStatus.length > 0) ? filters.equityStatus[0] : ''}
-            onChange={(e) => handleChange('equityStatus', e.target.value ? [e.target.value] : [])}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="">{t('reporting.all_statuses')}</option>
-            <option value="compliant">✅ Compliant</option>
-            <option value="warning">⚠️ Warning</option>
-            <option value="critical">🔴 Critical</option>
-          </select>
+          <div className="border border-gray-300 rounded-lg p-3 space-y-2 bg-white">
+            <label className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+              <input
+                type="checkbox"
+                checked={filters.equityStatus?.includes('compliant') || false}
+                onChange={(e) => {
+                  const current = filters.equityStatus || [];
+                  const updated = e.target.checked
+                    ? [...current, 'compliant']
+                    : current.filter(s => s !== 'compliant');
+                  handleChange('equityStatus', updated);
+                }}
+                className="w-4 h-4 text-green-600 rounded focus:ring-2 focus:ring-green-500"
+              />
+              <span className="text-sm">✅ Compliant</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+              <input
+                type="checkbox"
+                checked={filters.equityStatus?.includes('warning') || false}
+                onChange={(e) => {
+                  const current = filters.equityStatus || [];
+                  const updated = e.target.checked
+                    ? [...current, 'warning']
+                    : current.filter(s => s !== 'warning');
+                  handleChange('equityStatus', updated);
+                }}
+                className="w-4 h-4 text-yellow-600 rounded focus:ring-2 focus:ring-yellow-500"
+              />
+              <span className="text-sm">⚠️ Warning</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+              <input
+                type="checkbox"
+                checked={filters.equityStatus?.includes('critical') || false}
+                onChange={(e) => {
+                  const current = filters.equityStatus || [];
+                  const updated = e.target.checked
+                    ? [...current, 'critical']
+                    : current.filter(s => s !== 'critical');
+                  handleChange('equityStatus', updated);
+                }}
+                className="w-4 h-4 text-red-600 rounded focus:ring-2 focus:ring-red-500"
+              />
+              <span className="text-sm">🔴 Critical</span>
+            </label>
+          </div>
         </div>
       </div>
 

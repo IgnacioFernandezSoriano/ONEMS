@@ -141,7 +141,30 @@ export function useTerritoryEquityDataV2(
           }
         }
 
-        const shipments = allShipments
+        let shipments = allShipments;
+
+        // Filter by equity status at route level (before aggregation)
+        if (filters?.equityStatus && filters.equityStatus.length > 0) {
+          shipments = shipments.filter(s => {
+            // Calculate route-level status
+            const standard = s.delivery_standard_percentage || 95;
+            const actual = s.is_compliant ? 100 : 0; // Simplified: 100% if compliant, 0% if not
+            const deviation = actual - standard;
+            const warningThreshold = s.warning_threshold || globalWarningThreshold;
+            const criticalThreshold = s.critical_threshold || globalCriticalThreshold;
+            
+            let routeStatus: 'compliant' | 'warning' | 'critical';
+            if (deviation >= -warningThreshold) {
+              routeStatus = 'compliant';
+            } else if (deviation >= -criticalThreshold) {
+              routeStatus = 'warning';
+            } else {
+              routeStatus = 'critical';
+            }
+            
+            return filters.equityStatus!.includes(routeStatus);
+          });
+        }
 
         if (!shipments || shipments.length === 0) {
           setCityData([]);
@@ -688,10 +711,8 @@ export function useTerritoryEquityDataV2(
           // For simplicity, we'll keep all cities but note this in UI
         }
 
-        if (filters?.equityStatus && filters.equityStatus.length > 0) {
-          filteredCityData = filteredCityData.filter((c) => filters.equityStatus!.includes(c.status));
-        }
-
+        // equityStatus filter is now applied at route level before aggregation
+        
         if (filters?.region) {
           filteredCityData = filteredCityData.filter((c) => c.regionName === filters.region);
         }

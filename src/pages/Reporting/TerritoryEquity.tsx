@@ -915,6 +915,7 @@ export default function TerritoryEquity() {
                   globalCriticalThreshold={globalCriticalThreshold}
                   scenarioInfo={hookScenarioInfo}
                   scenarioDescription={scenarioDescription}
+                  showProductBreakdown={filters.equityStatus && filters.equityStatus.length > 0}
                 />
               </div>
             </div>
