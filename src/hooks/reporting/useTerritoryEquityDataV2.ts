@@ -715,10 +715,19 @@ export function useTerritoryEquityDataV2(
         const totalPopulation = filteredCityData.reduce((sum, c) => sum + (c.population || 0), 0);
         const totalRegions = new Set(filteredCityData.map((c) => c.regionId)).size;
 
-        const underservedCitiesCount = filteredCityData.filter((c) => c.status === 'critical').length;
-        const citizensAffected = filteredCityData
-          .filter((c) => c.status === 'critical')
-          .reduce((sum, c) => sum + (c.population || 0), 0);
+        // Underserved Cities: cities with at least one critical carrier-product (inbound)
+        const underservedCities = filteredCityData.filter((c) => {
+          // Check if any carrier-product has critical inbound performance
+          if (!c.carrierProductBreakdown || c.carrierProductBreakdown.length === 0) return false;
+          return c.carrierProductBreakdown.some(cp => {
+            const cpInboundPercentage = cp.inboundPercentage;
+            const cpStandardPercentage = cp.standardPercentage;
+            const criticalThreshold = cpStandardPercentage - globalCriticalThreshold;
+            return cpInboundPercentage < criticalThreshold;
+          });
+        });
+        const underservedCitiesCount = underservedCities.length;
+        const citizensAffected = underservedCities.reduce((sum, c) => sum + (c.population || 0), 0);
 
         // Service Equity Index (population-weighted std dev)
         const weightedMean =
