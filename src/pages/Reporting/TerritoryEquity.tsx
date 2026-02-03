@@ -511,9 +511,9 @@ export default function TerritoryEquity() {
       />
 
       {/* KPIs - Reorganized */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
         {/* KPI 1: Service Equity Index + Population-Weighted Compliance (Unified) */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-lg shadow p-6 col-span-1 md:col-span-1 lg:col-span-1">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-gray-600">
               {scenarioInfo.isGeneralView ? t('reporting.service_equity_index') : 
@@ -562,7 +562,7 @@ export default function TerritoryEquity() {
 
         {/* KPI 2: Underserved Cities + Citizens Affected (Unified) */}
         {scenarioInfo.isGeneralView && (
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-lg shadow p-6 col-span-1 md:col-span-1 lg:col-span-1">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-gray-600">{t('reporting.underserved_cities')}</h3>
             <SmartTooltip content={tooltips.underservedCities} />
@@ -591,7 +591,7 @@ export default function TerritoryEquity() {
 
         {/* KPI 3: Top 3 Best & Worst Cities (Combined) */}
         {!scenarioInfo.isRouteView && (
-        <div className="bg-white rounded-lg shadow p-6 col-span-1 md:col-span-2 lg:col-span-1">
+        <div className="bg-white rounded-lg shadow p-6 col-span-1 md:col-span-2 lg:col-span-2">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-medium text-gray-600">
               Top Cities Performance
@@ -693,7 +693,7 @@ export default function TerritoryEquity() {
 
         {/* KPI 4: Top 3 Best & Worst Regions (Combined - NEW) */}
         {!scenarioInfo.isRouteView && (
-        <div className="bg-white rounded-lg shadow p-6 col-span-1 md:col-span-2 lg:col-span-1">
+        <div className="bg-white rounded-lg shadow p-6 col-span-1 md:col-span-2 lg:col-span-2">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-medium text-gray-600">
               Top Regions Performance
