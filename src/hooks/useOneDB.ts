@@ -157,10 +157,10 @@ export const useOneDB = (accountId: string | undefined) => {
       'Plan Name',
       'Carrier',
       'Product',
-      'Origin',
-      'Destination',
-      'Sent At',
-      'Received At',
+      'Origin City',
+      'Destination City',
+      'Sent Date',
+      'Received Date',
       'Total Transit Days',
       'Business Transit Days',
       'On Time Delivery',
@@ -182,7 +182,7 @@ export const useOneDB = (accountId: string | undefined) => {
       new Date(record.created_at).toLocaleString(),
     ]);
 
-    const csvContent = [headers, ...rows].map((row) => row.join(',')).join('\n');
+    const csvContent = [headers, ...rows].map((row) => row.join(';')).join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
