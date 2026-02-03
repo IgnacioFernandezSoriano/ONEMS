@@ -240,10 +240,11 @@ export function TerritoryEquityTable({
           ? cp.outboundPercentage  // Destination filtered: show outbound percentages
           : cp.outboundPercentage;  // General/route: show outbound percentages
         
-        // Add product
+        // Add product - Calculate status based on deviation
+        const productDeviation = relevantPercentage - cp.standardPercentage;
         const productStatus: 'compliant' | 'warning' | 'critical' = 
-          relevantPercentage >= globalWarningThreshold ? 'compliant' :
-          relevantPercentage >= globalCriticalThreshold ? 'warning' : 'critical';
+          productDeviation >= -globalWarningThreshold ? 'compliant' :
+          productDeviation >= -globalCriticalThreshold ? 'warning' : 'critical';
 
         // Filter by equity status if specified
         if (equityStatusFilter.length > 0 && !equityStatusFilter.includes(productStatus)) {
@@ -282,9 +283,10 @@ export function TerritoryEquityTable({
           ? carrierData.actualDaysSum / carrierData.actualDaysCount
           : 0;
         
+        const carrierDeviation = carrierActualPercentage - carrierStandardPercentage;
         const carrierStatus: 'compliant' | 'warning' | 'critical' = 
-          carrierActualPercentage >= globalWarningThreshold ? 'compliant' :
-          carrierActualPercentage >= globalCriticalThreshold ? 'warning' : 'critical';
+          carrierDeviation >= -globalWarningThreshold ? 'compliant' :
+          carrierDeviation >= -globalCriticalThreshold ? 'warning' : 'critical';
 
         return {
           carrier: carrierData.carrier,
