@@ -358,3 +358,223 @@ export function groupSamplesByRoute(samples: Sample[]): Map<string, Sample[]> {
 
   return routeMap;
 }
+
+// ============================================================================
+// AGGREGATION FUNCTIONS
+// ============================================================================
+
+/**
+ * Aggregate inbound routes for a city
+ */
+export function aggregateInbound(
+  routes: RouteMetrics[],
+  cityId: string,
+  globalWarningThreshold: number = 80,
+  globalCriticalThreshold: number = 75
+): AggregatedMetrics {
+  const inboundRoutes = routes.filter(r => r.destinationCityId === cityId);
+  const aggregated = aggregateRoutes(inboundRoutes, globalWarningThreshold, globalCriticalThreshold);
+  
+  if (!aggregated) {
+    return {
+      totalSamples: 0,
+      compliantSamples: 0,
+      actualPercentage: 0,
+      actualDays: 0,
+      jkActual: 0,
+      standardPercentage: 0,
+      standardDays: 0,
+      deviation: 0,
+      status: 'critical',
+    };
+  }
+  
+  return aggregated;
+}
+
+/**
+ * Aggregate outbound routes for a city
+ */
+export function aggregateOutbound(
+  routes: RouteMetrics[],
+  cityId: string,
+  globalWarningThreshold: number = 80,
+  globalCriticalThreshold: number = 75
+): AggregatedMetrics {
+  const outboundRoutes = routes.filter(r => r.originCityId === cityId);
+  const aggregated = aggregateRoutes(outboundRoutes, globalWarningThreshold, globalCriticalThreshold);
+  
+  if (!aggregated) {
+    return {
+      totalSamples: 0,
+      compliantSamples: 0,
+      actualPercentage: 0,
+      actualDays: 0,
+      jkActual: 0,
+      standardPercentage: 0,
+      standardDays: 0,
+      deviation: 0,
+      status: 'critical',
+    };
+  }
+  
+  return aggregated;
+}
+
+/**
+ * Aggregate city metrics from inbound and outbound
+ */
+export function aggregateCity(
+  inbound: AggregatedMetrics,
+  outbound: AggregatedMetrics,
+  globalWarningThreshold: number = 80,
+  globalCriticalThreshold: number = 75
+): AggregatedMetrics {
+  const totalSamples = inbound.totalSamples + outbound.totalSamples;
+  const compliantSamples = inbound.compliantSamples + outbound.compliantSamples;
+  
+  if (totalSamples === 0) {
+    return {
+      totalSamples: 0,
+      compliantSamples: 0,
+      actualPercentage: 0,
+      actualDays: 0,
+      jkActual: 0,
+      standardPercentage: 0,
+      standardDays: 0,
+      deviation: 0,
+      status: 'critical',
+    };
+  }
+  
+  // Weighted averages
+  const actualPercentage = (compliantSamples / totalSamples) * 100;
+  
+  const actualDays = (
+    (inbound.actualDays * inbound.totalSamples) +
+    (outbound.actualDays * outbound.totalSamples)
+  ) / totalSamples;
+  
+  const standardPercentage = (
+    (inbound.standardPercentage * inbound.totalSamples) +
+    (outbound.standardPercentage * outbound.totalSamples)
+  ) / totalSamples;
+  
+  const standardDays = (
+    (inbound.standardDays * inbound.totalSamples) +
+    (outbound.standardDays * outbound.totalSamples)
+  ) / totalSamples;
+  
+  const jkActual = (
+    (inbound.jkActual * inbound.totalSamples) +
+    (outbound.jkActual * outbound.totalSamples)
+  ) / totalSamples;
+  
+  const deviation = actualPercentage - standardPercentage;
+  
+  const status: 'compliant' | 'warning' | 'critical' =
+    actualPercentage >= globalWarningThreshold ? 'compliant' :
+    actualPercentage >= globalCriticalThreshold ? 'warning' : 'critical';
+  
+  return {
+    totalSamples,
+    compliantSamples,
+    actualPercentage,
+    actualDays,
+    jkActual,
+    standardPercentage,
+    standardDays,
+    deviation,
+    status,
+  };
+}
+
+/**
+ * Aggregate region metrics from cities
+ */
+export function aggregateRegion(
+  cityMetrics: AggregatedMetrics[],
+  globalWarningThreshold: number = 80,
+  globalCriticalThreshold: number = 75
+): AggregatedMetrics {
+  const totalSamples = cityMetrics.reduce((sum, c) => sum + c.totalSamples, 0);
+  const compliantSamples = cityMetrics.reduce((sum, c) => sum + c.compliantSamples, 0);
+  
+  if (totalSamples === 0) {
+    return {
+      totalSamples: 0,
+      compliantSamples: 0,
+      actualPercentage: 0,
+      actualDays: 0,
+      jkActual: 0,
+      standardPercentage: 0,
+      standardDays: 0,
+      deviation: 0,
+      status: 'critical',
+    };
+  }
+  
+  // Weighted averages
+  const actualPercentage = (compliantSamples / totalSamples) * 100;
+  
+  const actualDays = cityMetrics.reduce((sum, c) => 
+    sum + (c.actualDays * c.totalSamples), 0) / totalSamples;
+  
+  const standardPercentage = cityMetrics.reduce((sum, c) => 
+    sum + (c.standardPercentage * c.totalSamples), 0) / totalSamples;
+  
+  const standardDays = cityMetrics.reduce((sum, c) => 
+    sum + (c.standardDays * c.totalSamples), 0) / totalSamples;
+  
+  const jkActual = cityMetrics.reduce((sum, c) => 
+    sum + (c.jkActual * c.totalSamples), 0) / totalSamples;
+  
+  const deviation = actualPercentage - standardPercentage;
+  
+  const status: 'compliant' | 'warning' | 'critical' =
+    actualPercentage >= globalWarningThreshold ? 'compliant' :
+    actualPercentage >= globalCriticalThreshold ? 'warning' : 'critical';
+  
+  return {
+    totalSamples,
+    compliantSamples,
+    actualPercentage,
+    actualDays,
+    jkActual,
+    standardPercentage,
+    standardDays,
+    deviation,
+    status,
+  };
+}
+
+// ============================================================================
+// HIGH-LEVEL FUNCTION
+// ============================================================================
+
+export interface BaseSample extends Sample {
+  slaStandard: SLAStandard | null;
+}
+
+/**
+ * Load base data from ONE DB + SLA standards
+ */
+export async function loadBaseData(
+  accountId: string,
+  filters: E2EFilters = {}
+): Promise<BaseSample[]> {
+  const [samples, slaStandardsMap] = await Promise.all([
+    loadSamples(accountId, filters),
+    loadSLAStandards(accountId),
+  ]);
+  
+  return samples.map(sample => {
+    const key = `${sample.originCityId}-${sample.destinationCityId}-${sample.carrierId}-${sample.productId}`;
+    const slaStandard = slaStandardsMap.get(key) || null;
+    
+    return {
+      ...sample,
+      slaStandard,
+    };
+  });
+}

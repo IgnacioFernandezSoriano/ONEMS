@@ -99,24 +99,25 @@ export function useTerritoryEquityDataV2(
             longitude: city.longitude,
             actualPercentage: combinedMetrics.actualPercentage,
             standardPercentage: combinedMetrics.standardPercentage,
-            jkActual: combinedMetrics.jkActual,
-            jkStandard: combinedMetrics.jkStandard,
+            actualDays: combinedMetrics.jkActual,
+            standardDays: combinedMetrics.standardDays,
             totalShipments: combinedMetrics.totalSamples,
-            status: 'normal',
-            inbound: {
-              actualPercentage: inboundMetrics.actualPercentage,
-              standardPercentage: inboundMetrics.standardPercentage,
-              jkActual: inboundMetrics.jkActual,
-              jkStandard: inboundMetrics.jkStandard,
-              totalShipments: inboundMetrics.totalSamples,
-            },
-            outbound: {
-              actualPercentage: outboundMetrics.actualPercentage,
-              standardPercentage: outboundMetrics.standardPercentage,
-              jkActual: outboundMetrics.jkActual,
-              jkStandard: outboundMetrics.jkStandard,
-              totalShipments: outboundMetrics.totalSamples,
-            },
+            status: combinedMetrics.status,
+            compliantShipments: combinedMetrics.compliantSamples,
+            inboundShipments: inboundMetrics.totalSamples,
+            inboundCompliant: inboundMetrics.compliantSamples,
+            inboundPercentage: inboundMetrics.actualPercentage,
+            inboundStandardPercentage: inboundMetrics.standardPercentage,
+            inboundStandardDays: inboundMetrics.standardDays,
+            inboundActualDays: inboundMetrics.jkActual,
+            inboundDeviation: inboundMetrics.deviation,
+            outboundShipments: outboundMetrics.totalSamples,
+            outboundCompliant: outboundMetrics.compliantSamples,
+            outboundPercentage: outboundMetrics.actualPercentage,
+            outboundStandardPercentage: outboundMetrics.standardPercentage,
+            outboundStandardDays: outboundMetrics.standardDays,
+            outboundActualDays: outboundMetrics.jkActual,
+            outboundDeviation: outboundMetrics.deviation,
           });
         }
 
@@ -130,11 +131,15 @@ export function useTerritoryEquityDataV2(
           
           const regionMetrics = aggregateRegion(
             regionCities.map(c => ({
-              actualPercentage: c.actualPercentage,
-              standardPercentage: c.standardPercentage,
-              jkActual: c.jkActual,
-              jkStandard: c.jkStandard,
               totalSamples: c.totalShipments,
+              compliantSamples: c.compliantShipments,
+              actualPercentage: c.actualPercentage,
+              actualDays: c.actualDays,
+              jkActual: c.actualDays,
+              standardPercentage: c.standardPercentage,
+              standardDays: c.standardDays,
+              deviation: c.deviation,
+              status: c.status,
             }))
           );
 
@@ -143,10 +148,12 @@ export function useTerritoryEquityDataV2(
             regionName: region.name,
             actualPercentage: regionMetrics.actualPercentage,
             standardPercentage: regionMetrics.standardPercentage,
-            jkActual: regionMetrics.jkActual,
-            jkStandard: regionMetrics.jkStandard,
+            actualDays: regionMetrics.jkActual,
+            standardDays: regionMetrics.standardDays,
+            deviation: regionMetrics.deviation,
+            compliantShipments: regionMetrics.compliantSamples,
             totalShipments: regionMetrics.totalSamples,
-            status: 'normal',
+            status: combinedMetrics.status,
             cities: regionCities,
           });
         }
@@ -155,20 +162,25 @@ export function useTerritoryEquityDataV2(
         const allCities = Array.from(cityDataMap.values());
         const globalMetrics = aggregateRegion(
           allCities.map(c => ({
-            actualPercentage: c.actualPercentage,
-            standardPercentage: c.standardPercentage,
-            jkActual: c.jkActual,
-            jkStandard: c.jkStandard,
             totalSamples: c.totalShipments,
+            compliantSamples: c.compliantShipments,
+            actualPercentage: c.actualPercentage,
+            actualDays: c.actualDays,
+            jkActual: c.actualDays,
+            standardPercentage: c.standardPercentage,
+            standardDays: c.standardDays,
+            deviation: c.deviation,
+            status: c.status,
           }))
         );
 
         setMetrics({
-          totalShipments: globalMetrics.totalSamples,
+          compliantShipments: globalMetrics.compliantSamples,
           actualPercentage: globalMetrics.actualPercentage,
           standardPercentage: globalMetrics.standardPercentage,
-          jkActual: globalMetrics.jkActual,
-          jkStandard: globalMetrics.jkStandard,
+          actualDays: globalMetrics.jkActual,
+          standardDays: globalMetrics.standardDays,
+          deviation: globalMetrics.deviation,
         });
 
         setCityData(allCities);
