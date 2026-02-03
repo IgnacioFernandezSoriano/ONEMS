@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/lib/supabase';
 import { useTerritoryEquityData } from '@/hooks/reporting/useTerritoryEquityData';
 import { TerritoryEquityTable } from '@/components/reporting/TerritoryEquityTable';
 import { RegionalEquityTable } from '@/components/reporting/RegionalEquityTable';
@@ -55,6 +56,93 @@ export default function TerritoryEquity() {
     });
 
     downloadMarkdown(markdown, `equity-audit-report-${new Date().toISOString().split('T')[0]}.md`);
+  };
+
+  const handleExportRawSamples = async () => {
+    if (!profile?.account_id) return;
+
+    try {
+      // Build query
+      let query = supabase
+        .from('one_db')
+        .select(`
+          id,
+          shipment_date,
+          origin_city_id,
+          destination_city_id,
+          carrier_id,
+          product_id,
+          business_transit_days,
+          is_compliant,
+          created_at
+        `)
+        .eq('account_id', profile.account_id);
+
+      // Apply filters
+      if (filters.startDate) {
+        query = query.gte('shipment_date', filters.startDate);
+      }
+      if (filters.endDate) {
+        query = query.lte('shipment_date', filters.endDate);
+      }
+      if (filters.carrier) {
+        query = query.eq('carrier_id', filters.carrier);
+      }
+      if (filters.product) {
+        query = query.eq('product_id', filters.product);
+      }
+      if (filters.originCity) {
+        query = query.eq('origin_city_id', filters.originCity);
+      }
+      if (filters.destinationCity) {
+        query = query.eq('destination_city_id', filters.destinationCity);
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+      if (!data || data.length === 0) {
+        alert('No samples found for the selected filters');
+        return;
+      }
+
+      // Convert to CSV
+      const headers = [
+        'ID',
+        'Shipment Date',
+        'Origin City ID',
+        'Destination City ID',
+        'Carrier ID',
+        'Product ID',
+        'Business Transit Days',
+        'Is Compliant',
+        'Created At',
+      ];
+
+      const rows = data.map(row => [
+        row.id,
+        row.shipment_date,
+        row.origin_city_id,
+        row.destination_city_id,
+        row.carrier_id,
+        row.product_id,
+        row.business_transit_days,
+        row.is_compliant ? 'Yes' : 'No',
+        row.created_at,
+      ]);
+
+      const csv = [headers, ...rows].map(row => row.join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `one-db-samples-${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Error exporting raw samples:', err);
+      alert('Failed to export raw samples');
+    }
   };
 
   const handleExportCSV = () => {
@@ -439,13 +527,23 @@ export default function TerritoryEquity() {
               : t('reporting.analyze_service_equity_across_cities_and_regions')}
           </p>
         </div>
-        <button
-          onClick={handleExportAuditReport}
-          className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-        >
-          <FileText className="w-4 h-4" />
-          {t('reporting.export_audit_report')}
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={handleExportRawSamples}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            title="Export raw samples from ONE DB (for validation)"
+          >
+            <Download className="w-4 h-4" />
+            Export Raw Data
+          </button>
+          <button
+            onClick={handleExportAuditReport}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+          >
+            <FileText className="w-4 h-4" />
+            {t('reporting.export_audit_report')}
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
