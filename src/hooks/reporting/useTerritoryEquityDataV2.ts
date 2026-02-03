@@ -515,21 +515,55 @@ export function useTerritoryEquityDataV2(
             const latitude = city.latitude || null;
             const longitude = city.longitude || null;
 
-            const totalShipments = stats.inbound.total + stats.outbound.total;
-            const compliantShipments = stats.inbound.compliant + stats.outbound.compliant;
-            const actualPercentage = totalShipments > 0 ? (compliantShipments / totalShipments) * 100 : 0;
+            // Determine which direction to use based on scenario
+            let totalShipments: number;
+            let compliantShipments: number;
+            let actualPercentage: number;
+            let standardPercentage: number;
+            let standardDays: number;
+            let actualDays: number;
+            let deviation: number;
 
-             // Calculate weighted average standard
-            const standardPercentage =
-              stats.standardsCount > 0 ? stats.standardsSum / stats.standardsCount : 95;
-            const standardDays =
-              stats.standardDaysCount > 0 ? stats.standardDaysSum / stats.standardDaysCount : 0;
-            const actualDays = calculateJKActualFromDays(
-              stats.actualDaysArray,
-              standardPercentage,
-              standardDays
-            );
-            const deviation = actualPercentage - standardPercentage;
+            if (scenarioInfo.isOriginView) {
+              // Origin view: show INBOUND data (city as destination)
+              totalShipments = stats.inbound.total;
+              compliantShipments = stats.inbound.compliant;
+              actualPercentage = totalShipments > 0 ? (compliantShipments / totalShipments) * 100 : 0;
+              standardPercentage = stats.inbound.standardsCount > 0 ? stats.inbound.standardsSum / stats.inbound.standardsCount : 95;
+              standardDays = stats.inbound.standardDaysCount > 0 ? stats.inbound.standardDaysSum / stats.inbound.standardDaysCount : 0;
+              actualDays = calculateJKActualFromDays(
+                stats.inbound.actualDaysArray,
+                standardPercentage,
+                standardDays
+              );
+              deviation = actualPercentage - standardPercentage;
+            } else if (scenarioInfo.isDestinationView) {
+              // Destination view: show OUTBOUND data (city as origin)
+              totalShipments = stats.outbound.total;
+              compliantShipments = stats.outbound.compliant;
+              actualPercentage = totalShipments > 0 ? (compliantShipments / totalShipments) * 100 : 0;
+              standardPercentage = stats.outbound.standardsCount > 0 ? stats.outbound.standardsSum / stats.outbound.standardsCount : 95;
+              standardDays = stats.outbound.standardDaysCount > 0 ? stats.outbound.standardDaysSum / stats.outbound.standardDaysCount : 0;
+              actualDays = calculateJKActualFromDays(
+                stats.outbound.actualDaysArray,
+                standardPercentage,
+                standardDays
+              );
+              deviation = actualPercentage - standardPercentage;
+            } else {
+              // General view or route view: show OUTBOUND data (default)
+              totalShipments = stats.outbound.total;
+              compliantShipments = stats.outbound.compliant;
+              actualPercentage = totalShipments > 0 ? (compliantShipments / totalShipments) * 100 : 0;
+              standardPercentage = stats.outbound.standardsCount > 0 ? stats.outbound.standardsSum / stats.outbound.standardsCount : 95;
+              standardDays = stats.outbound.standardDaysCount > 0 ? stats.outbound.standardDaysSum / stats.outbound.standardDaysCount : 0;
+              actualDays = calculateJKActualFromDays(
+                stats.outbound.actualDaysArray,
+                standardPercentage,
+                standardDays
+              );
+              deviation = actualPercentage - standardPercentage;
+            }
 
             // Calculate aggregated thresholds (weighted average)
             const aggregatedWarningThreshold = stats.warningThresholdCount > 0
