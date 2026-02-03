@@ -160,27 +160,39 @@ export const useOneDB = (accountId: string | undefined) => {
       'Origin City',
       'Destination City',
       'Sent Date',
+      'Sent Time',
       'Received Date',
+      'Received Time',
       'Total Transit Days',
       'Business Transit Days',
       'On Time Delivery',
-      'Created At',
+      'Created Date',
+      'Created Time',
     ];
 
-    const rows = dataToExport.map((record) => [
-      record.tag_id,
-      record.plan_name,
-      record.carrier_name,
-      record.product_name,
-      record.origin_city_name,
-      record.destination_city_name,
-      new Date(record.sent_at).toLocaleString(),
-      new Date(record.received_at).toLocaleString(),
-      record.total_transit_days,
-      record.business_transit_days ?? 'N/A',
-      record.on_time_delivery === null ? 'N/A' : record.on_time_delivery ? 'Yes' : 'No',
-      new Date(record.created_at).toLocaleString(),
-    ]);
+    const rows = dataToExport.map((record) => {
+      const sentDate = new Date(record.sent_at);
+      const receivedDate = new Date(record.received_at);
+      const createdDate = new Date(record.created_at);
+
+      return [
+        record.tag_id,
+        record.plan_name,
+        record.carrier_name,
+        record.product_name,
+        record.origin_city_name,
+        record.destination_city_name,
+        sentDate.toLocaleDateString(),
+        sentDate.toLocaleTimeString(),
+        receivedDate.toLocaleDateString(),
+        receivedDate.toLocaleTimeString(),
+        record.total_transit_days,
+        record.business_transit_days ?? 'N/A',
+        record.on_time_delivery === null ? 'N/A' : record.on_time_delivery ? 'Yes' : 'No',
+        createdDate.toLocaleDateString(),
+        createdDate.toLocaleTimeString(),
+      ];
+    });
 
     const csvContent = [headers, ...rows].map((row) => row.join(';')).join('\n');
 
