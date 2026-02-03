@@ -229,6 +229,7 @@ export interface TerritoryEquityMetrics {
   // Main KPIs
   serviceEquityIndex: number;
   populationWeightedCompliance: number;
+  sampleWeightedCompliance: number;
   underservedCitiesCount: number;
   citizensAffected: number;
   
@@ -281,6 +282,7 @@ export interface TerritoryEquityMetrics {
   // Totals
   totalCities: number;
   totalPopulation: number;
+  totalSamples: number;
   totalRegions: number;
 }
 

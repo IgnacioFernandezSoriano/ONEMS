@@ -1415,6 +1415,7 @@ function calculateGlobalMetrics(
   return {
     serviceEquityIndex: 0, // Will be calculated from city data
     populationWeightedCompliance: 0, // Will be calculated from city data
+    sampleWeightedCompliance: 0, // Will be calculated from city data
     underservedCitiesCount: 0, // Will be calculated from city data
     citizensAffected: 0, // Will be calculated from city data
     topBestCities: [],
@@ -1423,6 +1424,7 @@ function calculateGlobalMetrics(
     topWorstRegions: [],
     totalCities: 0, // Will be calculated from city data
     totalPopulation: 0, // Will be calculated from city data
+    totalSamples: 0, // Will be calculated from city data
     totalRegions: 0, // Will be calculated from region data
   };
 }

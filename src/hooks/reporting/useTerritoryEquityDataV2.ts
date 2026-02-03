@@ -149,6 +149,7 @@ export function useTerritoryEquityDataV2(
           setMetrics({
             serviceEquityIndex: 0,
             populationWeightedCompliance: 0,
+            sampleWeightedCompliance: 0,
             underservedCitiesCount: 0,
             citizensAffected: 0,
             topBestCities: [],
@@ -157,6 +158,7 @@ export function useTerritoryEquityDataV2(
             topWorstRegions: [],
             totalCities: 0,
             totalPopulation: 0,
+            totalSamples: 0,
             totalRegions: 0,
           });
           return;
@@ -747,6 +749,16 @@ export function useTerritoryEquityDataV2(
               }, 0)
             : 0;
 
+        // Sample-Weighted Compliance (weighted by number of shipments)
+        const totalSamples = filteredCityData.reduce((sum, c) => sum + c.totalShipments, 0);
+        const sampleWeightedCompliance =
+          totalSamples > 0
+            ? filteredCityData.reduce((sum, c) => {
+                const weight = c.totalShipments / totalSamples;
+                return sum + c.actualPercentage * weight;
+              }, 0)
+            : 0;
+
         // Top 3 Best/Worst Cities
         const sortedByDeviation = [...filteredCityData].sort((a, b) => b.deviation - a.deviation);
         const topBestCities = sortedByDeviation.slice(0, 3).map((c) => ({
@@ -1114,6 +1126,7 @@ export function useTerritoryEquityDataV2(
         setMetrics({
           serviceEquityIndex,
           populationWeightedCompliance,
+          sampleWeightedCompliance,
           underservedCitiesCount,
           citizensAffected,
           topBestCities,
@@ -1122,6 +1135,7 @@ export function useTerritoryEquityDataV2(
           topWorstRegions,
           totalCities,
           totalPopulation,
+          totalSamples,
           totalRegions,
         });
       } catch (err) {

@@ -13,7 +13,7 @@ import { TerritoryEquityTreemap } from '@/components/reporting/TerritoryEquityTr
 import { TerritoryEquityMap } from '@/components/reporting/TerritoryEquityMap';
 import { useEquityAuditExport } from '@/hooks/reporting/useEquityAuditExport';
 import { tooltips } from '@/components/reporting/TerritoryEquityTooltips';
-import { Info, Download, TrendingUp, Users, AlertTriangle, Award, FileText, Map } from 'lucide-react';
+import { Info, Download, TrendingUp, Users, AlertTriangle, Award, FileText, Map, Package } from 'lucide-react';
 import { SmartTooltip } from '@/components/common/SmartTooltip';
 import type { CityEquityData, RegionEquityData, TerritoryEquityFilters as Filters } from '@/types/reporting';
 
@@ -523,7 +523,7 @@ export default function TerritoryEquity() {
             <h3 className="text-sm font-medium text-gray-600">
               {scenarioInfo.isGeneralView ? t('reporting.service_equity_index') : 
                scenarioInfo.isRouteView ? 'Route Compliance' : 
-               t('reporting.population_weighted_compliance')}
+               'Compliance Metrics'}
             </h3>
             <SmartTooltip content={scenarioInfo.isGeneralView ? tooltips.serviceEquityIndex : tooltips.populationWeightedCompliance} />
           </div>
@@ -537,7 +537,7 @@ export default function TerritoryEquity() {
                 <span className="text-sm text-gray-500">{t('reporting.population_weighted')}</span>
               </div>
               <div className="border-t mt-3 pt-3">
-                <div className="text-sm text-gray-600 mb-1">{t('reporting.population_weighted_compliance')}</div>
+                <div className="text-sm text-gray-600 mb-1">Population-Weighted Compliance</div>
                 <div className="text-2xl font-bold text-blue-600">
                   {metrics?.populationWeightedCompliance.toFixed(1) || '0.0'}%
                 </div>
@@ -548,18 +548,45 @@ export default function TerritoryEquity() {
                   </span>
                 </div>
               </div>
+              <div className="border-t mt-3 pt-3">
+                <div className="text-sm text-gray-600 mb-1">Sample-Weighted Compliance</div>
+                <div className="text-2xl font-bold text-green-600">
+                  {metrics?.sampleWeightedCompliance.toFixed(1) || '0.0'}%
+                </div>
+                <div className="flex items-center gap-1 mt-1">
+                  <Package className="w-4 h-4 text-gray-500" />
+                  <span className="text-xs text-gray-500">
+                    {metrics?.totalSamples.toLocaleString() || '0'} samples
+                  </span>
+                </div>
+              </div>
             </>
           )}
           {!scenarioInfo.isGeneralView && (
             <>
-              <div className="text-3xl font-bold text-gray-900">
-                {metrics?.populationWeightedCompliance.toFixed(1) || '0.0'}%
+              <div className="mb-3">
+                <div className="text-sm text-gray-600 mb-1">Population-Weighted</div>
+                <div className="text-2xl font-bold text-blue-600">
+                  {metrics?.populationWeightedCompliance.toFixed(1) || '0.0'}%
+                </div>
+                <div className="flex items-center gap-1 mt-1">
+                  <Users className="w-4 h-4 text-gray-500" />
+                  <span className="text-xs text-gray-500">
+                    {metrics?.totalPopulation.toLocaleString() || '0'} citizens
+                  </span>
+                </div>
               </div>
-              <div className="flex items-center gap-1 mt-1">
-                <Users className="w-4 h-4 text-gray-500" />
-                <span className="text-sm text-gray-500">
-                  {metrics?.totalPopulation.toLocaleString() || '0'} citizens
-                </span>
+              <div className="border-t pt-3">
+                <div className="text-sm text-gray-600 mb-1">Sample-Weighted</div>
+                <div className="text-2xl font-bold text-green-600">
+                  {metrics?.sampleWeightedCompliance.toFixed(1) || '0.0'}%
+                </div>
+                <div className="flex items-center gap-1 mt-1">
+                  <Package className="w-4 h-4 text-gray-500" />
+                  <span className="text-xs text-gray-500">
+                    {metrics?.totalSamples.toLocaleString() || '0'} samples
+                  </span>
+                </div>
               </div>
             </>
           )}
