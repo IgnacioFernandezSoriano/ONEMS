@@ -145,6 +145,73 @@ export function DeliveryStandards() {
     }
   }
 
+  const handleExportCSV = () => {
+    if (selectedIds.size === 0) {
+      alert(t('common.please_select_at_least_one'))
+      return
+    }
+
+    // Get selected records
+    const selectedRecords = filteredStandards.filter(s => selectedIds.has(s.id))
+
+    // Define headers
+    const headers = [
+      'ID',
+      'Carrier',
+      'Product',
+      'Origin City',
+      'Origin Classification',
+      'Destination City',
+      'Destination Classification',
+      'Standard Time',
+      'Time Unit',
+      'Success %',
+      'Warning Threshold',
+      'Critical Threshold',
+      'Threshold Type',
+      'Created Date',
+      'Created Time',
+      'Updated Date',
+      'Updated Time'
+    ]
+
+    // Map records to CSV rows
+    const rows = selectedRecords.map(record => {
+      const createdAt = record.created_at ? new Date(record.created_at) : null
+      const updatedAt = record.updated_at ? new Date(record.updated_at) : null
+
+      return [
+        record.id,
+        record.carrier?.name || '',
+        record.product?.description || '',
+        record.origin_city?.name || '',
+        record.origin_city?.classification || '',
+        record.destination_city?.name || '',
+        record.destination_city?.classification || '',
+        record.standard_time != null ? record.standard_time : '',
+        record.time_unit || '',
+        record.success_percentage != null ? record.success_percentage : '',
+        record.warning_threshold != null ? record.warning_threshold : '',
+        record.critical_threshold != null ? record.critical_threshold : '',
+        record.threshold_type || '',
+        createdAt ? createdAt.toISOString().split('T')[0] : '',
+        createdAt ? createdAt.toISOString().split('T')[1].split('.')[0] : '',
+        updatedAt ? updatedAt.toISOString().split('T')[0] : '',
+        updatedAt ? updatedAt.toISOString().split('T')[1].split('.')[0] : ''
+      ]
+    })
+
+    // Create CSV with semicolon delimiter
+    const csv = [headers, ...rows].map(row => row.join(';')).join('\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `delivery-standards-${new Date().toISOString().split('T')[0]}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   const handleCreate = async (data: any) => {
     try {
       await createStandard(data)
@@ -476,6 +543,9 @@ export function DeliveryStandards() {
                 </Button>
                 <Button variant="secondary" onClick={handleBulkDelete}>
                   🗑️ Delete Selected
+                </Button>
+                <Button variant="secondary" onClick={handleExportCSV}>
+                  📥 Export CSV ({selectedIds.size})
                 </Button>
               </>
             )}

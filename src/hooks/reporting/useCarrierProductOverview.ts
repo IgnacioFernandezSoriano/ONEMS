@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { adjustStartDateForFilter, adjustEndDateForFilter } from '@/lib/dateUtils';
+// Removed dateUtils import - using same filtering as ONE DB
 import { useEffectiveAccountId } from '../useEffectiveAccountId';
 
 interface CarrierProductData {
@@ -128,11 +128,12 @@ export function useCarrierProductOverview(accountId: string | undefined, filters
             .eq('account_id', activeAccountId)
             .range(start, start + pageSize - 1)
 
+          // Use same date filtering as ONE DB (no time adjustment)
           if (filters.dateFrom && filters.dateFrom !== '') {
-            query = query.gte('sent_at', adjustStartDateForFilter(filters.dateFrom))
+            query = query.gte('sent_at', filters.dateFrom)
           }
           if (filters.dateTo && filters.dateTo !== '') {
-            query = query.lte('sent_at', adjustEndDateForFilter(filters.dateTo))
+            query = query.lte('sent_at', filters.dateTo)
           }
           if (filters.originCity) {
             query = query.eq('origin_city_name', filters.originCity)

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { GeneralPerformanceData } from '@/types/reporting';
-import { adjustStartDateForFilter, adjustEndDateForFilter } from '@/lib/dateUtils';
+// Removed dateUtils import - using same filtering as ONE DB
 import { useEffectiveAccountId } from '../useEffectiveAccountId';
 
 interface Filters {
@@ -57,11 +57,12 @@ export function useReportingGeneral(accountId: string | undefined, filters?: Fil
           if (filters?.product) {
             query = query.eq('product_name', filters.product)
           }
+          // Use same date filtering as ONE DB (no time adjustment)
           if (filters?.dateFrom && filters.dateFrom !== '') {
-            query = query.gte('sent_at', adjustStartDateForFilter(filters.dateFrom))
+            query = query.gte('sent_at', filters.dateFrom)
           }
           if (filters?.dateTo && filters.dateTo !== '') {
-            query = query.lte('sent_at', adjustEndDateForFilter(filters.dateTo))
+            query = query.lte('sent_at', filters.dateTo)
           }
 
           const { data, error: err } = await query

@@ -127,6 +127,8 @@ export interface CityEquityData {
   actualPercentage: number;
   deviation: number;
   status: 'compliant' | 'warning' | 'critical';
+  aggregatedWarningThreshold: number;
+  aggregatedCriticalThreshold: number;
   
   // Inbound (City as Destination)
   inboundShipments: number;
@@ -181,6 +183,8 @@ export interface RegionEquityData {
   actualPercentage: number;
   deviation: number;
   status: 'compliant' | 'warning' | 'critical';
+  aggregatedWarningThreshold: number;
+  aggregatedCriticalThreshold: number;
   underservedCitiesCount: number;
   
   // Inbound metrics

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { adjustStartDateForFilter, adjustEndDateForFilter } from '@/lib/dateUtils';
+// Removed dateUtils import - using same filtering as ONE DB
 import { useEffectiveAccountId } from '../useEffectiveAccountId';
 
 export interface JKRouteData {
@@ -189,8 +189,9 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
             .eq('account_id', activeAccountId)
             .range(start, start + pageSize - 1)
 
-          if (filters?.startDate && filters.startDate !== '') query = query.gte('sent_at', adjustStartDateForFilter(filters.startDate))
-          if (filters?.endDate && filters.endDate !== '') query = query.lte('sent_at', adjustEndDateForFilter(filters.endDate))
+          // Use same date filtering as ONE DB (no time adjustment)
+          if (filters?.startDate && filters.startDate !== '') query = query.gte('sent_at', filters.startDate)
+          if (filters?.endDate && filters.endDate !== '') query = query.lte('sent_at', filters.endDate)
           if (filters?.originCity) query = query.eq('origin_city_name', filters.originCity)
           if (filters?.destinationCity) query = query.eq('destination_city_name', filters.destinationCity)
           if (filters?.carrier) query = query.eq('carrier_name', filters.carrier)
@@ -364,12 +365,9 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
           const routeWarningThreshold = standard?.warningThreshold || warningThreshold;
           const routeCriticalThreshold = standard?.criticalThreshold || criticalThreshold;
           
-          let status: 'compliant' | 'warning' | 'critical' = 'compliant';
-          if (onTimePercentage <= routeCriticalThreshold) {
-            status = 'critical';
-          } else if (onTimePercentage < routeWarningThreshold) {
-            status = 'warning';
-          }
+          const status: 'compliant' | 'warning' | 'critical' =
+            onTimePercentage >= routeWarningThreshold ? 'compliant' :
+            onTimePercentage >= routeCriticalThreshold ? 'warning' : 'critical';
 
           const beforeStandardSamples = route.samples.filter(d => d < route.jkStandard).length;
           const afterStandardSamples = route.samples.filter(d => d > route.jkStandard).length;
@@ -490,9 +488,9 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
               ? stats.inbound.criticalThresholdSum / stats.inbound.thresholdCount
               : 75;
             
-            let status: 'compliant' | 'warning' | 'critical' = 'compliant';
-            if (onTimePercentage <= cityCriticalThreshold) status = 'critical';
-            else if (onTimePercentage < cityWarningThreshold) status = 'warning';
+            const status: 'compliant' | 'warning' | 'critical' =
+              onTimePercentage >= cityWarningThreshold ? 'compliant' :
+              onTimePercentage >= cityCriticalThreshold ? 'warning' : 'critical';
 
             cities.push({
               cityName,
@@ -532,9 +530,9 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
               ? stats.outbound.criticalThresholdSum / stats.outbound.thresholdCount
               : 75;
             
-            let status: 'compliant' | 'warning' | 'critical' = 'compliant';
-            if (onTimePercentage <= cityCriticalThreshold) status = 'critical';
-            else if (onTimePercentage < cityWarningThreshold) status = 'warning';
+            const status: 'compliant' | 'warning' | 'critical' =
+              onTimePercentage >= cityWarningThreshold ? 'compliant' :
+              onTimePercentage >= cityCriticalThreshold ? 'warning' : 'critical';
 
             cities.push({
               cityName,
@@ -629,9 +627,9 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
               ? stats.inbound.criticalThresholdSum / stats.inbound.thresholdCount
               : 75;
             
-            let status: 'compliant' | 'warning' | 'critical' = 'compliant';
-            if (onTimePercentage <= regionCriticalThreshold) status = 'critical';
-            else if (onTimePercentage < regionWarningThreshold) status = 'warning';
+            const status: 'compliant' | 'warning' | 'critical' =
+              onTimePercentage >= regionWarningThreshold ? 'compliant' :
+              onTimePercentage >= regionCriticalThreshold ? 'warning' : 'critical';
 
             regions.push({
               regionName,
@@ -671,9 +669,9 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
               ? stats.outbound.criticalThresholdSum / stats.outbound.thresholdCount
               : 75;
             
-            let status: 'compliant' | 'warning' | 'critical' = 'compliant';
-            if (onTimePercentage <= regionCriticalThreshold) status = 'critical';
-            else if (onTimePercentage < regionWarningThreshold) status = 'warning';
+            const status: 'compliant' | 'warning' | 'critical' =
+              onTimePercentage >= regionWarningThreshold ? 'compliant' :
+              onTimePercentage >= regionCriticalThreshold ? 'warning' : 'critical';
 
             regions.push({
               regionName,
@@ -801,9 +799,9 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
             ? stats.criticalThresholdSum / stats.thresholdCount
             : 75;
           
-          let status: 'compliant' | 'warning' | 'critical' = 'compliant';
-          if (onTimePercentage <= carrierCriticalThreshold) status = 'critical';
-          else if (onTimePercentage < carrierWarningThreshold) status = 'warning';
+          const status: 'compliant' | 'warning' | 'critical' =
+            onTimePercentage >= carrierWarningThreshold ? 'compliant' :
+            onTimePercentage >= carrierCriticalThreshold ? 'warning' : 'critical';
 
           const products: JKProductBreakdown[] = Array.from(stats.products.entries()).map(([product, pStats]) => {
             const pJkActual = pStats.samples.length > 0 
@@ -967,9 +965,9 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
             ? stats.criticalThresholdSum / stats.thresholdCount
             : 75;
           
-          let status: 'compliant' | 'warning' | 'critical' = 'compliant';
-          if (onTimePercentage <= productCriticalThreshold) status = 'critical';
-          else if (onTimePercentage < productWarningThreshold) status = 'warning';
+          const status: 'compliant' | 'warning' | 'critical' =
+            onTimePercentage >= productWarningThreshold ? 'compliant' :
+            onTimePercentage >= productCriticalThreshold ? 'warning' : 'critical';
 
           const carriers: JKCarrierBreakdown[] = Array.from(stats.carriers.entries()).map(([carrier, cStats]) => {
             const cJkActual = cStats.samples.length > 0 

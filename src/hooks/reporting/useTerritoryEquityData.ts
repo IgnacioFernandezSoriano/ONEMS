@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { adjustStartDateForFilter, adjustEndDateForFilter } from '@/lib/dateUtils';
+// Removed dateUtils import - using same filtering as ONE DB
 import { calculateJKActualFromDays } from '@/lib/jkCalculations';
 import type {
   CityEquityData,
@@ -175,14 +175,12 @@ export function useTerritoryEquityData(
           `)
           .eq('account_id', activeAccountId);
 
-        // Apply date filters
+        // Use same date filtering as ONE DB (no time adjustment)
         if (filters?.startDate) {
-          const adjustedStart = adjustStartDateForFilter(filters.startDate);
-          shipmentsQuery = shipmentsQuery.gte('sent_at', adjustedStart);
+          shipmentsQuery = shipmentsQuery.gte('sent_at', filters.startDate);
         }
         if (filters?.endDate) {
-          const adjustedEnd = adjustEndDateForFilter(filters.endDate);
-          shipmentsQuery = shipmentsQuery.lte('sent_at', adjustedEnd);
+          shipmentsQuery = shipmentsQuery.lte('sent_at', filters.endDate);
         }
 
         // Apply origin/destination filters
@@ -522,6 +520,8 @@ function groupRoutesForDisplay(
         actualPercentage,
         deviation,
         status,
+      aggregatedWarningThreshold: 80,
+      aggregatedCriticalThreshold: 75,
         
         inboundShipments: route.totalShipments,
         inboundCompliant: route.compliantShipments,
@@ -563,6 +563,8 @@ function groupRoutesForDisplay(
         actualPercentage,
         deviation,
         status,
+      aggregatedWarningThreshold: 80,
+      aggregatedCriticalThreshold: 75,
         
         inboundShipments: 0,
         inboundCompliant: 0,
@@ -655,6 +657,8 @@ function groupRoutesForDisplay(
         actualPercentage,
         deviation,
         status,
+      aggregatedWarningThreshold: 80,
+      aggregatedCriticalThreshold: 75,
         
         inboundShipments: aggregated.totalShipments,
         inboundCompliant: aggregated.compliantShipments,
@@ -696,6 +700,8 @@ function groupRoutesForDisplay(
         actualPercentage,
         deviation,
         status,
+      aggregatedWarningThreshold: 80,
+      aggregatedCriticalThreshold: 75,
         
         inboundShipments: 0,
         inboundCompliant: 0,
@@ -788,6 +794,8 @@ function groupRoutesForDisplay(
         actualPercentage,
         deviation,
         status,
+      aggregatedWarningThreshold: 80,
+      aggregatedCriticalThreshold: 75,
         
         inboundShipments: aggregated.totalShipments,
         inboundCompliant: aggregated.compliantShipments,
@@ -829,6 +837,8 @@ function groupRoutesForDisplay(
         actualPercentage,
         deviation,
         status,
+      aggregatedWarningThreshold: 80,
+      aggregatedCriticalThreshold: 75,
         
         inboundShipments: 0,
         inboundCompliant: 0,
@@ -993,6 +1003,8 @@ function groupRoutesForDisplay(
         actualPercentage,
         deviation,
         status,
+      aggregatedWarningThreshold: 80,
+      aggregatedCriticalThreshold: 75,
         
         inboundShipments: inboundAgg.totalShipments,
         inboundCompliant: inboundAgg.compliantShipments,
@@ -1334,6 +1346,8 @@ function aggregateRoutesByRegion(
       actualPercentage,
       deviation,
       status,
+      aggregatedWarningThreshold: 80,
+      aggregatedCriticalThreshold: 75,
       underservedCitiesCount: stats.underservedCities,
       
       inboundShipments: stats.inboundShipments,

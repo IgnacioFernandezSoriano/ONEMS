@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { adjustStartDateForFilter, adjustEndDateForFilter } from '@/lib/dateUtils';
+// Removed dateUtils import - using same filtering as ONE DB
 import { calculateJKActualFromDays } from '@/lib/jkCalculations';
 import type {
   CityEquityData,
@@ -62,9 +62,9 @@ export function useTerritoryEquityDataV2(
         const products = productsRes.data || [];
         const standards = standardsRes.data || [];
 
-        // Default thresholds (can be overridden by delivery_standards per route)
-        const defaultWarningThreshold = 85;
-        const defaultCriticalThreshold = 75;
+        // Global thresholds (fallback when SLA doesn't specify)
+        const defaultWarningThreshold = globalWarningThreshold;
+        const defaultCriticalThreshold = globalCriticalThreshold;
 
         // 2. Create lookup maps
         const cityMap = new Map(
@@ -96,12 +96,13 @@ export function useTerritoryEquityDataV2(
         if (standards.length > 0) {
           const thresholds = standards.map((s: any) => {
             const successPct = s.success_percentage || 95;
-            const warnThresh = s.threshold_type === 'relative'
-              ? successPct - (successPct * (s.warning_threshold || 5) / 100)
-              : successPct - (s.warning_threshold || 5);
-            const critThresh = s.threshold_type === 'relative'
-              ? successPct - (successPct * (s.critical_threshold || 10) / 100)
-              : successPct - (s.critical_threshold || 10);
+            // Distinguish between absolute and relative thresholds
+            const warnThresh = s.threshold_type === 'absolute'
+              ? (s.warning_threshold || 80)  // Absolute: use value directly
+              : successPct - (s.warning_threshold || 5);  // Relative: subtract offset from STD%
+            const critThresh = s.threshold_type === 'absolute'
+              ? (s.critical_threshold || 75)  // Absolute: use value directly
+              : successPct - (s.critical_threshold || 10);  // Relative: subtract offset from STD%
             return { warning: warnThresh, critical: critThresh };
           });
           warningThreshold = thresholds.reduce((sum, t) => sum + t.warning, 0) / thresholds.length;
@@ -120,8 +121,9 @@ export function useTerritoryEquityDataV2(
         while (hasMore) {
           let query = supabase.from('one_db').select('*').eq('account_id', activeAccountId).range(start, start + pageSize - 1)
 
-          if (filters?.startDate && filters.startDate !== '') query = query.gte('sent_at', adjustStartDateForFilter(filters.startDate))
-          if (filters?.endDate && filters.endDate !== '') query = query.lte('sent_at', adjustEndDateForFilter(filters.endDate))
+          // Use same date filtering as ONE DB (no time adjustment)
+          if (filters?.startDate && filters.startDate !== '') query = query.gte('sent_at', filters.startDate)
+          if (filters?.endDate && filters.endDate !== '') query = query.lte('sent_at', filters.endDate)
           if (filters?.carrier) query = query.eq('carrier_name', filters.carrier)
           if (filters?.product) query = query.eq('product_name', filters.product)
           if (filters?.originCity) query = query.eq('origin_city_name', filters.originCity)
@@ -162,29 +164,41 @@ export function useTerritoryEquityDataV2(
         const cityStatsMap = new Map<
           string,
           {
-            inbound: { 
-              total: number; 
+            inbound: {
+              total: number;
               compliant: number;
               standardsSum: number;
               standardsCount: number;
               standardDaysSum: number;
               standardDaysCount: number;
               actualDaysArray: number[];
+              warningThresholdSum: number;
+              warningThresholdCount: number;
+              criticalThresholdSum: number;
+              criticalThresholdCount: number;
             };
-            outbound: { 
-              total: number; 
+            outbound: {
+              total: number;
               compliant: number;
               standardsSum: number;
               standardsCount: number;
               standardDaysSum: number;
               standardDaysCount: number;
               actualDaysArray: number[];
+              warningThresholdSum: number;
+              warningThresholdCount: number;
+              criticalThresholdSum: number;
+              criticalThresholdCount: number;
             };
             standardsSum: number;
             standardsCount: number;
             standardDaysSum: number;
             standardDaysCount: number;
             actualDaysArray: number[];
+            warningThresholdSum: number;
+            warningThresholdCount: number;
+            criticalThresholdSum: number;
+            criticalThresholdCount: number;
             carrierProduct: Map<string, { 
               carrier: string; 
               product: string; 
@@ -214,6 +228,10 @@ export function useTerritoryEquityDataV2(
                 standardDaysSum: 0,
                 standardDaysCount: 0,
                 actualDaysArray: [],
+                warningThresholdSum: 0,
+                warningThresholdCount: 0,
+                criticalThresholdSum: 0,
+                criticalThresholdCount: 0,
               },
               outbound: { 
                 total: 0, 
@@ -223,12 +241,20 @@ export function useTerritoryEquityDataV2(
                 standardDaysSum: 0,
                 standardDaysCount: 0,
                 actualDaysArray: [],
+                warningThresholdSum: 0,
+                warningThresholdCount: 0,
+                criticalThresholdSum: 0,
+                criticalThresholdCount: 0,
               },
               standardsSum: 0,
               standardsCount: 0,
               standardDaysSum: 0,
               standardDaysCount: 0,
               actualDaysArray: [],
+              warningThresholdSum: 0,
+              warningThresholdCount: 0,
+              criticalThresholdSum: 0,
+              criticalThresholdCount: 0,
               carrierProduct: new Map(),
             });
           }
@@ -314,6 +340,22 @@ export function useTerritoryEquityDataV2(
                 destStats.inbound.standardDaysSum += allowedDays;
                 destStats.inbound.standardDaysCount++;
               }
+              // Distinguish between absolute and relative thresholds
+              const successPct = standard.success_percentage || 95;
+              const warnThresh = standard.threshold_type === 'absolute'
+                ? (standard.warning_threshold || 80)  // Absolute: use value directly
+                : successPct - (standard.warning_threshold || 5);  // Relative: subtract offset from STD%
+              const critThresh = standard.threshold_type === 'absolute'
+                ? (standard.critical_threshold || 75)  // Absolute: use value directly
+                : successPct - (standard.critical_threshold || 10);  // Relative: subtract offset from STD%
+              destStats.warningThresholdSum += warnThresh;
+              destStats.warningThresholdCount++;
+              destStats.criticalThresholdSum += critThresh;
+              destStats.criticalThresholdCount++;
+              destStats.inbound.warningThresholdSum += warnThresh;
+              destStats.inbound.warningThresholdCount++;
+              destStats.inbound.criticalThresholdSum += critThresh;
+              destStats.inbound.criticalThresholdCount++;
             }
           }
           
@@ -335,6 +377,10 @@ export function useTerritoryEquityDataV2(
                 standardDaysSum: 0,
                 standardDaysCount: 0,
                 actualDaysArray: [],
+                warningThresholdSum: 0,
+                warningThresholdCount: 0,
+                criticalThresholdSum: 0,
+                criticalThresholdCount: 0,
               },
               outbound: { 
                 total: 0, 
@@ -344,12 +390,20 @@ export function useTerritoryEquityDataV2(
                 standardDaysSum: 0,
                 standardDaysCount: 0,
                 actualDaysArray: [],
+                warningThresholdSum: 0,
+                warningThresholdCount: 0,
+                criticalThresholdSum: 0,
+                criticalThresholdCount: 0,
               },
               standardsSum: 0,
               standardsCount: 0,
               standardDaysSum: 0,
               standardDaysCount: 0,
               actualDaysArray: [],
+              warningThresholdSum: 0,
+              warningThresholdCount: 0,
+              criticalThresholdSum: 0,
+              criticalThresholdCount: 0,
               carrierProduct: new Map(),
             });
           }
@@ -424,6 +478,18 @@ export function useTerritoryEquityDataV2(
                 originStats.outbound.standardDaysSum += allowedDays;
                 originStats.outbound.standardDaysCount++;
               }
+              // Distinguish between absolute and relative thresholds
+              const successPctOut = standardOut.success_percentage || 95;
+              const warnThreshOut = standardOut.threshold_type === 'absolute'
+                ? (standardOut.warning_threshold || 80)  // Absolute: use value directly
+                : successPctOut - (standardOut.warning_threshold || 5);  // Relative: subtract offset from STD%
+              const critThreshOut = standardOut.threshold_type === 'absolute'
+                ? (standardOut.critical_threshold || 75)  // Absolute: use value directly
+                : successPctOut - (standardOut.critical_threshold || 10);  // Relative: subtract offset from STD%
+              originStats.outbound.warningThresholdSum += warnThreshOut;
+              originStats.outbound.warningThresholdCount++;
+              originStats.outbound.criticalThresholdSum += critThreshOut;
+              originStats.outbound.criticalThresholdCount++;
             }
           }
           
@@ -465,15 +531,18 @@ export function useTerritoryEquityDataV2(
             );
             const deviation = actualPercentage - standardPercentage;
 
-            // Determine status
-            let status: 'compliant' | 'warning' | 'critical' = 'compliant';
-            if (actualPercentage < standardPercentage) {
-              if (actualPercentage < defaultCriticalThreshold) {
-                status = 'critical';
-              } else if (actualPercentage < defaultWarningThreshold) {
-                status = 'warning';
-              }
-            }
+            // Calculate aggregated thresholds (weighted average)
+            const aggregatedWarningThreshold = stats.warningThresholdCount > 0
+              ? stats.warningThresholdSum / stats.warningThresholdCount
+              : defaultWarningThreshold;
+            const aggregatedCriticalThreshold = stats.criticalThresholdCount > 0
+              ? stats.criticalThresholdSum / stats.criticalThresholdCount
+              : defaultCriticalThreshold;
+
+            // Determine status using same logic as E2E module
+            const status: 'compliant' | 'warning' | 'critical' =
+              actualPercentage >= aggregatedWarningThreshold ? 'compliant' :
+              actualPercentage >= aggregatedCriticalThreshold ? 'warning' : 'critical';
 
             // Inbound metrics
             const inboundPercentage =
@@ -550,6 +619,8 @@ export function useTerritoryEquityDataV2(
               actualPercentage,
               deviation,
               status,
+              aggregatedWarningThreshold,
+              aggregatedCriticalThreshold,
               inboundShipments: stats.inbound.total,
               inboundCompliant: stats.inbound.compliant,
               inboundPercentage,
@@ -681,6 +752,10 @@ export function useTerritoryEquityDataV2(
             standardDaysSum: number;
             standardDaysCount: number;
             actualDaysArray: number[];
+            warningThresholdSum: number;
+            warningThresholdCount: number;
+            criticalThresholdSum: number;
+            criticalThresholdCount: number;
             underservedCities: number;
             inboundShipments: number;
             inboundCompliant: number;
@@ -689,6 +764,10 @@ export function useTerritoryEquityDataV2(
             inboundStandardDaysSum: number;
             inboundStandardDaysCount: number;
             inboundActualDaysArray: number[];
+            inboundWarningThresholdSum: number;
+            inboundWarningThresholdCount: number;
+            inboundCriticalThresholdSum: number;
+            inboundCriticalThresholdCount: number;
             outboundShipments: number;
             outboundCompliant: number;
             outboundStandardsSum: number;
@@ -696,6 +775,10 @@ export function useTerritoryEquityDataV2(
             outboundStandardDaysSum: number;
             outboundStandardDaysCount: number;
             outboundActualDaysArray: number[];
+            outboundWarningThresholdSum: number;
+            outboundWarningThresholdCount: number;
+            outboundCriticalThresholdSum: number;
+            outboundCriticalThresholdCount: number;
             carrierProduct: Map<string, { 
               carrier: string; 
               product: string; 
@@ -725,6 +808,10 @@ export function useTerritoryEquityDataV2(
               standardDaysSum: 0,
               standardDaysCount: 0,
               actualDaysArray: [],
+              warningThresholdSum: 0,
+              warningThresholdCount: 0,
+              criticalThresholdSum: 0,
+              criticalThresholdCount: 0,
               underservedCities: 0,
               inboundShipments: 0,
               inboundCompliant: 0,
@@ -733,6 +820,10 @@ export function useTerritoryEquityDataV2(
               inboundStandardDaysSum: 0,
               inboundStandardDaysCount: 0,
               inboundActualDaysArray: [],
+              inboundWarningThresholdSum: 0,
+              inboundWarningThresholdCount: 0,
+              inboundCriticalThresholdSum: 0,
+              inboundCriticalThresholdCount: 0,
               outboundShipments: 0,
               outboundCompliant: 0,
               outboundStandardsSum: 0,
@@ -740,6 +831,10 @@ export function useTerritoryEquityDataV2(
               outboundStandardDaysSum: 0,
               outboundStandardDaysCount: 0,
               outboundActualDaysArray: [],
+              outboundWarningThresholdSum: 0,
+              outboundWarningThresholdCount: 0,
+              outboundCriticalThresholdSum: 0,
+              outboundCriticalThresholdCount: 0,
               carrierProduct: new Map(),
             });
           }
@@ -753,6 +848,11 @@ export function useTerritoryEquityDataV2(
           regionStats.standardsCount += city.totalShipments;
           regionStats.standardDaysSum += city.standardDays * city.totalShipments;
           regionStats.standardDaysCount += city.totalShipments;
+          // Accumulate thresholds (weighted by total shipments)
+          regionStats.warningThresholdSum += city.aggregatedWarningThreshold * city.totalShipments;
+          regionStats.warningThresholdCount += city.totalShipments;
+          regionStats.criticalThresholdSum += city.aggregatedCriticalThreshold * city.totalShipments;
+          regionStats.criticalThresholdCount += city.totalShipments;
           // Replicate actualDays for weighted aggregation
           for (let i = 0; i < city.totalShipments; i++) {
             regionStats.actualDaysArray.push(city.actualDays);
@@ -829,14 +929,18 @@ export function useTerritoryEquityDataV2(
             );
             const deviation = actualPercentage - standardPercentage;
 
-            let status: 'compliant' | 'warning' | 'critical' = 'compliant';
-            if (actualPercentage < standardPercentage) {
-              if (actualPercentage < defaultCriticalThreshold) {
-                status = 'critical';
-              } else if (actualPercentage < defaultWarningThreshold) {
-                status = 'warning';
-              }
-            }
+            // Calculate aggregated thresholds (weighted average)
+            const aggregatedWarningThreshold = stats.warningThresholdCount > 0
+              ? stats.warningThresholdSum / stats.warningThresholdCount
+              : defaultWarningThreshold;
+            const aggregatedCriticalThreshold = stats.criticalThresholdCount > 0
+              ? stats.criticalThresholdSum / stats.criticalThresholdCount
+              : defaultCriticalThreshold;
+
+            // Determine status using same logic as E2E module
+            const status: 'compliant' | 'warning' | 'critical' =
+              actualPercentage >= aggregatedWarningThreshold ? 'compliant' :
+              actualPercentage >= aggregatedCriticalThreshold ? 'warning' : 'critical';
 
             // Inbound metrics
             const inboundPercentage = stats.inboundShipments > 0 
@@ -915,6 +1019,8 @@ export function useTerritoryEquityDataV2(
               actualPercentage,
               deviation,
               status,
+              aggregatedWarningThreshold,
+              aggregatedCriticalThreshold,
               underservedCitiesCount: stats.underservedCities,
               inboundShipments: stats.inboundShipments,
               inboundCompliant: stats.inboundCompliant,
