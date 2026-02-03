@@ -31,6 +31,7 @@ import { OneDBAPI } from './pages/OneDBAPI'
 import ReportingDashboard from './pages/Reporting/Dashboard'
 import ComplianceReport from './pages/Reporting/ComplianceReport'
 import TerritoryEquity from './pages/Reporting/TerritoryEquity'
+import TerritoryEquityV2 from './pages/Reporting/TerritoryEquityV2'
 import JKPerformance from './pages/Reporting/JKPerformance'
 import AccountReportingConfig from './pages/Settings/AccountReportingConfig'
 
@@ -215,6 +216,16 @@ function App() {
                       element={
                         <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
                           <TerritoryEquity />
+                        </ProtectedRoute>
+                      }
+                    />
+                    
+                    {/* Territory Equity V2 (Testing) - for admin and superadmin */}
+                    <Route
+                      path="/reporting/territory-equity-v2"
+                      element={
+                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                          <TerritoryEquityV2 />
                         </ProtectedRoute>
                       }
                     />
