@@ -1,22 +1,24 @@
 import { useState } from 'react';
 import { formatNumber } from '@/lib/formatNumber';
-import { ChevronDown, ChevronUp, ArrowDown, ArrowUp } from 'lucide-react';
+import { ChevronDown, ChevronRight, ChevronsDown, ChevronsUp } from 'lucide-react';
 import type { RegionEquityData } from '@/types/reporting';
-
+import type { ScenarioInfo } from '@/hooks/reporting/useFilterScenario';
 import { useTranslation } from '@/hooks/useTranslation';
+
 interface RegionalEquityTableProps {
   data: RegionEquityData[];
   onRegionClick?: (region: RegionEquityData) => void;
-  scenarioInfo?: { scenario: string; isOriginView: boolean; isDestinationView: boolean; isRouteView: boolean; isGeneralView: boolean };
-  filters?: any;
+  globalWarningThreshold: number;
+  globalCriticalThreshold: number;
+  scenarioInfo: ScenarioInfo;
+  scenarioDescription: string;
 }
 
-type DirectionRow = {
+type RegionRow = {
   regionId: string;
   regionName: string;
-  direction: 'inbound' | 'outbound';
-  totalCities: number;
-  totalPopulation: number | null;
+  classification: string | null;
+  population: number | null;
   shipments: number;
   compliant: number;
   standardPercentage: number;
@@ -25,84 +27,293 @@ type DirectionRow = {
   standardDays: number;
   actualDays: number;
   status: 'compliant' | 'warning' | 'critical';
-  underservedCitiesCount: number;
   originalRegion: RegionEquityData;
+  carrierBreakdown: CarrierRow[];
 };
 
-export function RegionalEquityTable({ data, onRegionClick, scenarioInfo, filters }: RegionalEquityTableProps) {
-  const { t } = useTranslation();
-  const [sortField, setSortField] = useState<keyof DirectionRow>('regionName');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+type CarrierRow = {
+  carrier: string;
+  shipments: number;
+  compliant: number;
+  standardPercentage: number;
+  actualPercentage: number;
+  deviation: number;
+  standardDays: number;
+  actualDays: number;
+  status: 'compliant' | 'warning' | 'critical';
+  productBreakdown: ProductRow[];
+};
 
-  const toggleRow = (rowId: string) => {
-    const newExpanded = new Set(expandedRows);
-    if (newExpanded.has(rowId)) {
-      newExpanded.delete(rowId);
+type ProductRow = {
+  product: string;
+  shipments: number;
+  compliant: number;
+  standardPercentage: number;
+  actualPercentage: number;
+  deviation: number;
+  standardDays: number;
+  actualDays: number;
+  status: 'compliant' | 'warning' | 'critical';
+};
+
+export function RegionalEquityTable({ 
+  data, 
+  onRegionClick, 
+  globalWarningThreshold, 
+  globalCriticalThreshold,
+  scenarioInfo,
+  scenarioDescription 
+}: RegionalEquityTableProps) {
+  const { t } = useTranslation();
+  const [sortField, setSortField] = useState<keyof RegionRow>('regionName');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [expandedRegions, setExpandedRegions] = useState<Set<string>>(new Set());
+  const [expandedCarriers, setExpandedCarriers] = useState<Set<string>>(new Set());
+  const [expandAll, setExpandAll] = useState(false);
+
+  // Toggle region expansion (expands/collapses all levels below)
+  const toggleRegion = (regionId: string) => {
+    const newExpanded = new Set(expandedRegions);
+    const newExpandedCarriers = new Set(expandedCarriers);
+    
+    if (newExpanded.has(regionId)) {
+      // Collapse region and all its carriers
+      newExpanded.delete(regionId);
+      const carriersToRemove = Array.from(newExpandedCarriers).filter(id => id.startsWith(`${regionId}-`));
+      carriersToRemove.forEach(id => newExpandedCarriers.delete(id));
     } else {
-      newExpanded.add(rowId);
+      // Expand region and all its carriers
+      newExpanded.add(regionId);
+      // Find all carriers for this region and expand them
+      const regionRow = regionRows.find(r => r.regionId === regionId);
+      if (regionRow) {
+        regionRow.carrierBreakdown.forEach(carrier => {
+          newExpandedCarriers.add(`${regionId}-${carrier.carrier}`);
+        });
+      }
     }
-    setExpandedRows(newExpanded);
+    
+    setExpandedRegions(newExpanded);
+    setExpandedCarriers(newExpandedCarriers);
   };
 
-  // Convert each region into two rows (inbound + outbound)
-  const directionRows: DirectionRow[] = data.flatMap((region) => [
-    {
-      regionId: `${region.regionName}-inbound`,
-      regionName: region.regionName,
-      direction: 'inbound' as const,
-      totalCities: region.totalCities,
-      totalPopulation: region.totalPopulation,
-      shipments: region.inboundShipments,
-      compliant: region.inboundCompliant,
-      standardPercentage: region.inboundStandardPercentage,
-      actualPercentage: region.inboundPercentage,
-      deviation: region.inboundDeviation,
-      standardDays: region.inboundStandardDays,
-      actualDays: region.inboundActualDays,
-      status: (region.inboundDeviation >= 0 ? 'compliant' : (region.inboundPercentage < 80 ? 'critical' : 'warning')) as 'compliant' | 'warning' | 'critical',
-      underservedCitiesCount: region.underservedCitiesCount,
-      originalRegion: region,
-    },
-    {
-      regionId: `${region.regionName}-outbound`,
-      regionName: region.regionName,
-      direction: 'outbound' as const,
-      totalCities: region.totalCities,
-      totalPopulation: region.totalPopulation,
-      shipments: region.outboundShipments,
-      compliant: region.outboundCompliant,
-      standardPercentage: region.outboundStandardPercentage,
-      actualPercentage: region.outboundPercentage,
-      deviation: region.outboundDeviation,
-      standardDays: region.outboundStandardDays,
-      actualDays: region.outboundActualDays,
-      status: (region.outboundDeviation >= 0 ? 'compliant' : (region.outboundPercentage < 80 ? 'critical' : 'warning')) as 'compliant' | 'warning' | 'critical',
-      underservedCitiesCount: region.underservedCitiesCount,
-      originalRegion: region,
-    },
-  ]).filter((row) => {
-    // Filter out rows with no shipments and no standard (empty direction data)
-    if (row.shipments === 0 && row.standardDays === 0) {
-      return false;
+  // Toggle carrier expansion
+  const toggleCarrier = (carrierId: string) => {
+    const newExpanded = new Set(expandedCarriers);
+    if (newExpanded.has(carrierId)) {
+      newExpanded.delete(carrierId);
+    } else {
+      newExpanded.add(carrierId);
     }
-    
-    // Filter by direction based on scenario
-    if (scenarioInfo?.isOriginView) {
-      // Origin filter: show only Inbound (arrivals to regions)
-      return row.direction === 'inbound';
+    setExpandedCarriers(newExpanded);
+  };
+
+  // Toggle all regions
+  const toggleAll = () => {
+    if (expandAll) {
+      setExpandedRegions(new Set());
+      setExpandedCarriers(new Set());
+    } else {
+      const allRegions = new Set(regionRows.map(r => r.regionId));
+      const allCarriers = new Set<string>();
+      regionRows.forEach(region => {
+        region.carrierBreakdown.forEach(carrier => {
+          allCarriers.add(`${region.regionId}-${carrier.carrier}`);
+        });
+      });
+      setExpandedRegions(allRegions);
+      setExpandedCarriers(allCarriers);
     }
-    
-    if (scenarioInfo?.isDestinationView) {
-      // Destination filter: show only Outbound (departures from regions)
-      return row.direction === 'outbound';
+    setExpandAll(!expandAll);
+  };
+
+  // Determine which metrics to show based on scenario
+  const getMetricsForRegion = (region: RegionEquityData) => {
+    if (scenarioInfo.isOriginView) {
+      return {
+        shipments: region.inboundShipments,
+        compliant: region.inboundCompliant,
+        standardPercentage: region.inboundStandardPercentage,
+        actualPercentage: region.inboundPercentage,
+        deviation: region.inboundDeviation,
+        standardDays: region.inboundStandardDays,
+        actualDays: region.inboundActualDays,
+      };
+    } else if (scenarioInfo.isDestinationView) {
+      return {
+        shipments: region.outboundShipments,
+        compliant: region.outboundCompliant,
+        standardPercentage: region.outboundStandardPercentage,
+        actualPercentage: region.outboundPercentage,
+        deviation: region.outboundDeviation,
+        standardDays: region.outboundStandardDays,
+        actualDays: region.outboundActualDays,
+      };
+    } else {
+      return {
+        shipments: region.outboundShipments,
+        compliant: region.outboundCompliant,
+        standardPercentage: region.outboundStandardPercentage,
+        actualPercentage: region.outboundPercentage,
+        deviation: region.outboundDeviation,
+        standardDays: region.outboundStandardDays,
+        actualDays: region.outboundActualDays,
+      };
     }
-    
-    // General or Route view: show both directions (but empty ones already filtered above)
-    return true;
+  };
+
+  // Build region rows with carrier/product hierarchy
+  const regionRows: RegionRow[] = data
+    .filter(region => {
+      const metrics = getMetricsForRegion(region);
+      return metrics.shipments > 0 || metrics.standardDays > 0;
+    })
+    .map((region) => {
+      const metrics = getMetricsForRegion(region);
+      
+      // Build carrier breakdown
+      const carrierMap = new Map<string, { 
+        carrier: string; 
+        products: Map<string, ProductRow>; 
+        totalShipments: number; 
+        totalCompliant: number; 
+        standardSum: number; 
+        standardCount: number;
+        standardDaysSum: number;
+        standardDaysCount: number;
+        actualDaysSum: number;
+        actualDaysCount: number;
+      }>();
+
+      // Group carrier/product breakdown by carrier
+      region.carrierProductBreakdown?.forEach(cp => {
+        const hasRelevantData = scenarioInfo.isOriginView
+          ? cp.inboundPercentage > 0 || cp.totalShipments > 0
+          : scenarioInfo.isDestinationView
+          ? cp.outboundPercentage > 0 || cp.totalShipments > 0
+          : cp.outboundPercentage > 0 || cp.totalShipments > 0;
+
+        if (!hasRelevantData) return;
+
+        if (!carrierMap.has(cp.carrier)) {
+          carrierMap.set(cp.carrier, {
+            carrier: cp.carrier,
+            products: new Map(),
+            totalShipments: 0,
+            totalCompliant: 0,
+            standardSum: 0,
+            standardCount: 0,
+            standardDaysSum: 0,
+            standardDaysCount: 0,
+            actualDaysSum: 0,
+            actualDaysCount: 0,
+          });
+        }
+
+        const carrierData = carrierMap.get(cp.carrier)!;
+        carrierData.totalShipments += cp.totalShipments;
+        carrierData.totalCompliant += cp.compliantShipments;
+        carrierData.standardSum += cp.standardPercentage * cp.totalShipments;
+        carrierData.standardCount += cp.totalShipments;
+        carrierData.standardDaysSum += cp.standardDays * cp.totalShipments;
+        carrierData.standardDaysCount += cp.totalShipments;
+        if (cp.actualDays > 0) {
+          carrierData.actualDaysSum += cp.actualDays * cp.totalShipments;
+          carrierData.actualDaysCount += cp.totalShipments;
+        }
+        
+        const relevantPercentage = scenarioInfo.isOriginView
+          ? cp.inboundPercentage
+          : scenarioInfo.isDestinationView
+          ? cp.outboundPercentage
+          : cp.outboundPercentage;
+        
+        const productStatus: 'compliant' | 'warning' | 'critical' = 
+          relevantPercentage >= globalWarningThreshold ? 'compliant' :
+          relevantPercentage >= globalCriticalThreshold ? 'warning' : 'critical';
+
+        carrierData.products.set(cp.product, {
+          product: cp.product,
+          shipments: cp.totalShipments,
+          compliant: cp.compliantShipments,
+          standardPercentage: cp.standardPercentage,
+          actualPercentage: relevantPercentage,
+          deviation: relevantPercentage - cp.standardPercentage,
+          standardDays: cp.standardDays,
+          actualDays: cp.actualDays,
+          status: productStatus,
+        });
+      });
+
+      // Build carrier rows
+      const carrierBreakdown: CarrierRow[] = Array.from(carrierMap.values()).map(carrierData => {
+        const carrierActualPercentage = carrierData.totalShipments > 0 
+          ? (carrierData.totalCompliant / carrierData.totalShipments) * 100 
+          : 0;
+        const carrierStandardPercentage = carrierData.standardCount > 0
+          ? carrierData.standardSum / carrierData.standardCount
+          : 95;
+        const carrierStandardDays = carrierData.standardDaysCount > 0
+          ? carrierData.standardDaysSum / carrierData.standardDaysCount
+          : 0;
+        
+        const carrierActualDays = carrierData.actualDaysCount > 0
+          ? carrierData.actualDaysSum / carrierData.actualDaysCount
+          : 0;
+
+        const carrierStatus: 'compliant' | 'warning' | 'critical' = 
+          carrierActualPercentage >= globalWarningThreshold ? 'compliant' :
+          carrierActualPercentage >= globalCriticalThreshold ? 'warning' : 'critical';
+
+        return {
+          carrier: carrierData.carrier,
+          shipments: carrierData.totalShipments,
+          compliant: carrierData.totalCompliant,
+          standardPercentage: carrierStandardPercentage,
+          actualPercentage: carrierActualPercentage,
+          deviation: carrierActualPercentage - carrierStandardPercentage,
+          standardDays: carrierStandardDays,
+          actualDays: carrierActualDays,
+          status: carrierStatus,
+          productBreakdown: Array.from(carrierData.products.values()),
+        };
+      });
+
+      const regionStatus: 'compliant' | 'warning' | 'critical' = 
+        metrics.actualPercentage >= globalWarningThreshold ? 'compliant' :
+        metrics.actualPercentage >= globalCriticalThreshold ? 'warning' : 'critical';
+
+      return {
+        regionId: region.regionId,
+        regionName: region.regionName,
+        classification: null,
+        population: region.totalPopulation,
+        shipments: metrics.shipments,
+        compliant: metrics.compliant,
+        standardPercentage: metrics.standardPercentage,
+        actualPercentage: metrics.actualPercentage,
+        deviation: metrics.deviation,
+        standardDays: metrics.standardDays,
+        actualDays: metrics.actualDays,
+        status: regionStatus,
+        originalRegion: region,
+        carrierBreakdown,
+      };
+    });
+
+  // Sort regions
+  const sortedRegions = [...regionRows].sort((a, b) => {
+    const aVal = a[sortField];
+    const bVal = b[sortField];
+    if (aVal === null || aVal === undefined) return 1;
+    if (bVal === null || bVal === undefined) return -1;
+    if (typeof aVal === 'string' && typeof bVal === 'string') {
+      return sortDirection === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+    }
+    return sortDirection === 'asc' ? (aVal > bVal ? 1 : -1) : (aVal < bVal ? 1 : -1);
   });
 
-  const handleSort = (field: keyof DirectionRow) => {
+  const handleSort = (field: keyof RegionRow) => {
     if (sortField === field) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
@@ -111,269 +322,218 @@ export function RegionalEquityTable({ data, onRegionClick, scenarioInfo, filters
     }
   };
 
-  const sortedData = [...directionRows].sort((a, b) => {
-    // First, sort by the selected field
-    const aVal = a[sortField];
-    const bVal = b[sortField];
-    const multiplier = sortDirection === 'asc' ? 1 : -1;
-
-    let comparison = 0;
-    if (typeof aVal === 'number' && typeof bVal === 'number') {
-      comparison = (aVal - bVal) * multiplier;
-    } else {
-      comparison = String(aVal || '').localeCompare(String(bVal || '')) * multiplier;
-    }
-
-    // If values are equal (especially for regionName), sort by direction (inbound first)
-    if (comparison === 0) {
-      return a.direction === 'inbound' ? -1 : 1;
-    }
-
-    return comparison;
-  });
-
-  const SortIcon = ({ field }: { field: keyof DirectionRow }) => {
-    if (sortField !== field) return null;
-    return sortDirection === 'asc' ? (
-      <ChevronUp className="w-4 h-4 inline ml-1" />
-    ) : (
-      <ChevronDown className="w-4 h-4 inline ml-1" />
-    );
-  };
-
-  const getStatusIcon = (status: 'compliant' | 'warning' | 'critical') => {
+  const getStatusColor = (status: string) => {
     switch (status) {
-      case 'compliant':
-        return <span className="text-green-500">●</span>;
-      case 'warning':
-        return <span className="text-amber-500">●</span>;
-      case 'critical':
-        return <span className="text-red-500">●</span>;
+      case 'compliant': return 'text-green-600';
+      case 'warning': return 'text-amber-600';
+      case 'critical': return 'text-red-600';
+      default: return 'text-gray-600';
     }
   };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'compliant': return <div className="w-4 h-4 rounded-full bg-green-500"></div>;
+      case 'warning': return <div className="w-4 h-4 rounded-full bg-amber-500"></div>;
+      case 'critical': return <div className="w-4 h-4 rounded-full bg-red-500"></div>;
+      default: return <div className="w-4 h-4 rounded-full bg-gray-400"></div>;
+    }
+  };
+
+  if (!data || data.length === 0) {
+    return (
+      <div className="bg-white rounded-lg shadow p-6">
+        <p className="text-gray-500 text-center">No data available</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-              {/* Expand button column */}
-            </th>
-            <th
-              className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-              onClick={() => handleSort('regionName')}
-            >
-              {t('reporting.region')} <SortIcon field="regionName" />
-            </th>
-            <th
-              className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-              onClick={() => handleSort('direction')}
-            >
-              {t('reporting.direction')} <SortIcon field="direction" />
-            </th>
-            <th
-              className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-              onClick={() => handleSort('totalCities')}
-            >
-              {t('reporting.cities')} <SortIcon field="totalCities" />
-            </th>
-            <th
-              className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-              onClick={() => handleSort('totalPopulation')}
-            >
-              {t('reporting.population')} <SortIcon field="totalPopulation" />
-            </th>
-            <th
-              className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-              onClick={() => handleSort('shipments')}
-            >
-              {t('common.total')} <SortIcon field="shipments" />
-            </th>
-            <th
-              className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-              onClick={() => handleSort('standardPercentage')}
-            >
-              {t('reporting.standard_percent')} <SortIcon field="standardPercentage" />
-            </th>
-            <th
-              className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-              onClick={() => handleSort('actualPercentage')}
-            >
-              {t('reporting.actual_percent')} <SortIcon field="actualPercentage" />
-            </th>
-            <th
-              className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-              onClick={() => handleSort('deviation')}
-            >
-              {t('reporting.deviation')} <SortIcon field="deviation" />
-            </th>
-            <th
-              className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-              onClick={() => handleSort('standardDays')}
-            >
-              {t('reporting.jk_std')} <SortIcon field="standardDays" />
-            </th>
-            <th
-              className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-              onClick={() => handleSort('actualDays')}
-            >
-              {t('reporting.jk_actual')} <SortIcon field="actualDays" />
-            </th>
-            <th
-              className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-              onClick={() => handleSort('status')}
-            >
-              {t('common.status')} <SortIcon field="status" />
-            </th>
-            <th
-              className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-              onClick={() => handleSort('underservedCitiesCount')}
-            >
-              {t('reporting.underserved')} <SortIcon field="underservedCitiesCount" />
-            </th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {sortedData.map((row) => {
-            const hasBreakdown = row.originalRegion.carrierProductBreakdown && row.originalRegion.carrierProductBreakdown.length > 0;
-            const isExpanded = expandedRows.has(row.regionId);
-            
-            return (
+    <div className="bg-white rounded-lg shadow overflow-hidden">
+      {/* Scenario Description */}
+      <div className="px-4 py-3 bg-blue-50 border-b border-blue-100">
+        <p className="text-sm text-blue-800">{scenarioDescription}</p>
+      </div>
+
+      {/* Expand All Button */}
+      <div className="px-4 py-2 bg-gray-50 border-b border-gray-200 flex justify-end">
+        <button
+          onClick={toggleAll}
+          className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 transition-colors"
+        >
+          {expandAll ? <ChevronsUp className="w-4 h-4" /> : <ChevronsDown className="w-4 h-4" />}
+          {expandAll ? t('common.collapse_all') : t('common.expand_all')}
+        </button>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead className="bg-gray-50 border-b border-gray-200">
+            <tr>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => handleSort('regionName')}>
+                {t('reporting.region')}
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                {t('reporting.class')}
+              </th>
+              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => handleSort('population')}>
+                {t('reporting.population')}
+              </th>
+              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => handleSort('shipments')}>
+                {t('reporting.total')}
+              </th>
+              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => handleSort('standardDays')}>
+                {t('reporting.jk_std')}
+              </th>
+              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => handleSort('actualDays')}>
+                {t('reporting.jk_actual')}
+              </th>
+              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => handleSort('standardPercentage')}>
+                {t('reporting.standard_percent')}
+              </th>
+              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => handleSort('actualPercentage')}>
+                {t('reporting.actual_percent')}
+              </th>
+              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => handleSort('deviation')}>
+                {t('reporting.deviation')}
+              </th>
+              <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                {t('reporting.status')}
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {sortedRegions.map((region) => (
               <>
-                <tr key={row.regionId} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 whitespace-nowrap text-center">
-                    {hasBreakdown && (
-                      <button
-                        onClick={() => toggleRow(row.regionId)}
-                        className="text-gray-500 hover:text-gray-700"
-                      >
-                        {isExpanded ? (
-                          <ChevronUp className="w-4 h-4" />
-                        ) : (
-                          <ChevronDown className="w-4 h-4" />
-                        )}
-                      </button>
-                    )}
-                  </td>
+                {/* Region Row */}
+                <tr 
+                  key={region.regionId}
+                  className="hover:bg-gray-50 cursor-pointer"
+                  onClick={() => toggleRegion(region.regionId)}
+                >
                   <td className="px-4 py-3 whitespace-nowrap">
-                    <button
-                      onClick={() => onRegionClick?.(row.originalRegion)}
-                      className="text-blue-600 hover:text-blue-800 hover:underline font-medium text-left"
-                    >
-                      {row.regionName}
-                    </button>
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm">
-                    <div className="flex items-center gap-1">
-                      {row.direction === 'inbound' ? (
-                        <>
-                          <ArrowDown className="w-4 h-4 text-blue-600" />
-                          <span className="text-blue-600 font-medium">{t('reporting.inbound_direction')}</span>
-                        </>
+                    <div className="flex items-center gap-2">
+                      {expandedRegions.has(region.regionId) ? (
+                        <ChevronDown className="w-4 h-4 text-gray-400" />
                       ) : (
-                        <>
-                          <ArrowUp className="w-4 h-4 text-green-600" />
-                          <span className="text-green-600 font-medium">{t('reporting.outbound_direction')}</span>
-                        </>
+                        <ChevronRight className="w-4 h-4 text-gray-400" />
                       )}
+                      <span className="text-sm font-medium text-gray-900">{region.regionName}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
-                    {row.totalCities}
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                    {region.classification || '-'}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
-                    {row.totalPopulation ? row.totalPopulation.toLocaleString() : '-'}
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 text-right">
+                    {region.population ? formatNumber(region.population) : '-'}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
-                    {row.shipments}
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 text-right">
+                    {formatNumber(region.shipments)}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
-                    {formatNumber(row.standardPercentage)}%
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 text-right">
+                    {formatNumber(region.standardDays)}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
-                    {formatNumber(row.actualPercentage)}%
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 text-right">
+                    {formatNumber(region.actualDays)}
                   </td>
-                  <td
-                    className={`px-4 py-3 whitespace-nowrap text-sm text-right font-medium ${
-                      row.deviation >= 0 ? 'text-green-600' : 'text-red-600'
-                    }`}
-                  >
-                    {row.deviation >= 0 ? '+' : ''}
-                    {formatNumber(row.deviation)}%
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 text-right">
+                    {formatNumber(region.standardPercentage)}%
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
-                    {formatNumber(row.standardDays)}
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 text-right">
+                    {formatNumber(region.actualPercentage)}%
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
-                    {formatNumber(row.actualDays)}
+                  <td className={`px-4 py-3 whitespace-nowrap text-sm text-right font-medium ${getStatusColor(region.status)}`}>
+                    {region.deviation > 0 ? '+' : ''}{formatNumber(region.deviation)}%
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-center text-lg">
-                    {getStatusIcon(row.status)}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
-                    {row.underservedCitiesCount}
+                  <td className="px-4 py-3 whitespace-nowrap text-center">
+                    {getStatusIcon(region.status)}
                   </td>
                 </tr>
-                
-                {/* Carrier/Product Breakdown Subrows */}
-                {isExpanded && hasBreakdown && (
-                  <tr key={`${row.regionId}-breakdown`} className="bg-gray-50">
-                    <td colSpan={13} className="px-4 py-2">
-                      <div className="ml-8">
-                        <table className="min-w-full text-sm">
-                          <thead>
-                            <tr className="text-xs text-gray-500 uppercase">
-                              <th className="px-3 py-2 text-left">{t('reporting.carrier')}</th>
-                              <th className="px-3 py-2 text-left">{t('reporting.product')}</th>
-                              <th className="px-3 py-2 text-right">{t('stock.shipments')}</th>
-                              <th className="px-3 py-2 text-right">Compliant</th>
-                              <th className="px-3 py-2 text-right">Standard %</th>
-                              <th className="px-3 py-2 text-right">Actual %</th>
-                              <th className="px-3 py-2 text-right">{t('reporting.deviation')}</th>
-                              <th className="px-3 py-2 text-right">J+K Std</th>
-                              <th className="px-3 py-2 text-right">J+K Actual</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {row.originalRegion.carrierProductBreakdown
-                              ?.filter(cp => {
-                                // Filter by direction
-                                if (row.direction === 'inbound') {
-                                  return cp.inboundPercentage > 0;
-                                } else {
-                                  return cp.outboundPercentage > 0;
-                                }
-                              })
-                              .map((cp, idx) => (
-                                <tr key={idx} className="border-t border-gray-200">
-                                  <td className="px-3 py-2 text-gray-700">{cp.carrier}</td>
-                                  <td className="px-3 py-2 text-gray-700">{cp.product}</td>
-                                  <td className="px-3 py-2 text-right text-gray-700">{cp.totalShipments}</td>
-                                  <td className="px-3 py-2 text-right text-gray-700">{cp.compliantShipments}</td>
-                                  <td className="px-3 py-2 text-right text-gray-700">{formatNumber(cp.standardPercentage)}%</td>
-                                  <td className="px-3 py-2 text-right text-gray-700">{formatNumber(cp.actualPercentage)}%</td>
-                                  <td className={`px-3 py-2 text-right font-medium ${cp.deviation >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                    {cp.deviation >= 0 ? '+' : ''}{formatNumber(cp.deviation)}%
-                                  </td>
-                                  <td className="px-3 py-2 text-right text-gray-700">{formatNumber(cp.standardDays)}</td>
-                                  <td className="px-3 py-2 text-right text-gray-700">{formatNumber(cp.actualDays)}</td>
-                                </tr>
-                              ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </td>
-                  </tr>
-                )}
+
+                {/* Carrier Rows */}
+                {expandedRegions.has(region.regionId) && region.carrierBreakdown.map((carrier) => {
+                  const carrierId = `${region.regionId}-${carrier.carrier}`;
+                  return (
+                    <>
+                      <tr 
+                        key={carrierId}
+                        className="bg-gray-50 hover:bg-gray-100 cursor-pointer"
+                        onClick={(e) => { e.stopPropagation(); toggleCarrier(carrierId); }}
+                      >
+                        <td className="px-4 py-2 whitespace-nowrap">
+                          <div className="flex items-center gap-2 pl-8">
+                            {expandedCarriers.has(carrierId) ? (
+                              <ChevronDown className="w-3 h-3 text-gray-400" />
+                            ) : (
+                              <ChevronRight className="w-3 h-3 text-gray-400" />
+                            )}
+                            <span className="text-sm text-gray-700">{carrier.carrier}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">-</td>
+                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500 text-right">-</td>
+                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700 text-right">
+                          {formatNumber(carrier.shipments)}
+                        </td>
+                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700 text-right">
+                          {formatNumber(carrier.standardDays)}
+                        </td>
+                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700 text-right">
+                          {formatNumber(carrier.actualDays)}
+                        </td>
+                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700 text-right">
+                          {formatNumber(carrier.standardPercentage)}%
+                        </td>
+                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700 text-right">
+                          {formatNumber(carrier.actualPercentage)}%
+                        </td>
+                        <td className={`px-4 py-2 whitespace-nowrap text-sm text-right font-medium ${getStatusColor(carrier.status)}`}>
+                          {carrier.deviation > 0 ? '+' : ''}{formatNumber(carrier.deviation)}%
+                        </td>
+                        <td className="px-4 py-2 whitespace-nowrap text-center">
+                          {getStatusIcon(carrier.status)}
+                        </td>
+                      </tr>
+
+                      {/* Product Rows */}
+                      {expandedCarriers.has(carrierId) && carrier.productBreakdown.map((product) => (
+                        <tr key={`${carrierId}-${product.product}`} className="bg-blue-50">
+                          <td className="px-4 py-2 whitespace-nowrap">
+                            <div className="pl-16 text-sm text-gray-600">{product.product}</div>
+                          </td>
+                          <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">-</td>
+                          <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500 text-right">-</td>
+                          <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-600 text-right">
+                            {formatNumber(product.shipments)}
+                          </td>
+                          <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-600 text-right">
+                            {formatNumber(product.standardDays)}
+                          </td>
+                          <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-600 text-right">
+                            {formatNumber(product.actualDays)}
+                          </td>
+                          <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-600 text-right">
+                            {formatNumber(product.standardPercentage)}%
+                          </td>
+                          <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-600 text-right">
+                            {formatNumber(product.actualPercentage)}%
+                          </td>
+                          <td className={`px-4 py-2 whitespace-nowrap text-sm text-right font-medium ${getStatusColor(product.status)}`}>
+                            {product.deviation > 0 ? '+' : ''}{formatNumber(product.deviation)}%
+                          </td>
+                          <td className="px-4 py-2 whitespace-nowrap text-center">
+                            {getStatusIcon(product.status)}
+                          </td>
+                        </tr>
+                      ))}
+                    </>
+                  );
+                })}
               </>
-            );
-          })}
-        </tbody>
-      </table>
-      {sortedData.length === 0 && (
-        <div className="text-center py-8 text-gray-500">No data available</div>
-      )}
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

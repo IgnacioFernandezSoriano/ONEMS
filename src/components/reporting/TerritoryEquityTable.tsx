@@ -1,20 +1,22 @@
 import { useState } from 'react';
 import { formatNumber } from '@/lib/formatNumber';
-import { ChevronDown, ChevronUp, ArrowDown, ArrowUp } from 'lucide-react';
+import { ChevronDown, ChevronRight, ChevronsDown, ChevronsUp } from 'lucide-react';
 import type { CityEquityData } from '@/types/reporting';
-
+import type { ScenarioInfo } from '@/hooks/reporting/useFilterScenario';
 import { useTranslation } from '@/hooks/useTranslation';
+
 interface TerritoryEquityTableProps {
   data: CityEquityData[];
   onCityClick?: (city: CityEquityData) => void;
   globalWarningThreshold: number;
   globalCriticalThreshold: number;
+  scenarioInfo: ScenarioInfo;
+  scenarioDescription: string;
 }
 
-type DirectionRow = {
+type CityRow = {
   cityId: string;
   cityName: string;
-  direction: 'inbound' | 'outbound';
   regionName: string | null;
   classification: string | null;
   population: number | null;
@@ -27,38 +29,113 @@ type DirectionRow = {
   actualDays: number;
   status: 'compliant' | 'warning' | 'critical';
   originalCity: CityEquityData;
+  carrierBreakdown: CarrierRow[];
 };
 
-export function TerritoryEquityTable({ data, onCityClick, globalWarningThreshold, globalCriticalThreshold }: TerritoryEquityTableProps) {
-  const { t } = useTranslation();
-  const [sortField, setSortField] = useState<keyof DirectionRow>('cityName');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+type CarrierRow = {
+  carrier: string;
+  shipments: number;
+  compliant: number;
+  standardPercentage: number;
+  actualPercentage: number;
+  deviation: number;
+  standardDays: number;
+  actualDays: number;
+  status: 'compliant' | 'warning' | 'critical';
+  productBreakdown: ProductRow[];
+};
 
-  const toggleRow = (rowId: string) => {
-    const newExpanded = new Set(expandedRows);
-    if (newExpanded.has(rowId)) {
-      newExpanded.delete(rowId);
+type ProductRow = {
+  product: string;
+  shipments: number;
+  compliant: number;
+  standardPercentage: number;
+  actualPercentage: number;
+  deviation: number;
+  standardDays: number;
+  actualDays: number;
+  status: 'compliant' | 'warning' | 'critical';
+};
+
+export function TerritoryEquityTable({ 
+  data, 
+  onCityClick, 
+  globalWarningThreshold, 
+  globalCriticalThreshold,
+  scenarioInfo,
+  scenarioDescription 
+}: TerritoryEquityTableProps) {
+  const { t } = useTranslation();
+  const [sortField, setSortField] = useState<keyof CityRow>('cityName');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [expandedCities, setExpandedCities] = useState<Set<string>>(new Set());
+  const [expandedCarriers, setExpandedCarriers] = useState<Set<string>>(new Set());
+  const [expandAll, setExpandAll] = useState(false);
+
+  // Toggle city expansion (expands/collapses all levels below)
+  const toggleCity = (cityId: string) => {
+    const newExpanded = new Set(expandedCities);
+    const newExpandedCarriers = new Set(expandedCarriers);
+    
+    if (newExpanded.has(cityId)) {
+      // Collapse city and all its carriers
+      newExpanded.delete(cityId);
+      const carriersToRemove = Array.from(newExpandedCarriers).filter(id => id.startsWith(`${cityId}-`));
+      carriersToRemove.forEach(id => newExpandedCarriers.delete(id));
     } else {
-      newExpanded.add(rowId);
+      // Expand city and all its carriers
+      newExpanded.add(cityId);
+      // Find all carriers for this city and expand them
+      const cityRow = cityRows.find(c => c.cityId === cityId);
+      if (cityRow) {
+        cityRow.carrierBreakdown.forEach(carrier => {
+          newExpandedCarriers.add(`${cityId}-${carrier.carrier}`);
+        });
+      }
     }
-    setExpandedRows(newExpanded);
+    
+    setExpandedCities(newExpanded);
+    setExpandedCarriers(newExpandedCarriers);
   };
 
-  // Convert each city into two rows (inbound + outbound)
-  // Filter out rows with shipments=0 and standardDays=0
-  const directionRows: DirectionRow[] = data.flatMap((city) => {
-    const rows: DirectionRow[] = [];
-    
-    // Add inbound row only if it has shipments or standardDays > 0
-    if (city.inboundShipments > 0 || city.inboundStandardDays > 0) {
-      rows.push({
-        cityId: `${city.cityId}-inbound`,
-        cityName: city.cityName,
-        direction: 'inbound' as const,
-        regionName: city.regionName,
-        classification: city.classification,
-        population: city.population,
+  // Toggle carrier expansion
+  const toggleCarrier = (carrierId: string) => {
+    const newExpanded = new Set(expandedCarriers);
+    if (newExpanded.has(carrierId)) {
+      newExpanded.delete(carrierId);
+    } else {
+      newExpanded.add(carrierId);
+    }
+    setExpandedCarriers(newExpanded);
+  };
+
+  // Toggle all cities
+  const toggleAll = () => {
+    if (expandAll) {
+      setExpandedCities(new Set());
+      setExpandedCarriers(new Set());
+    } else {
+      const allCities = new Set(cityRows.map(c => c.cityId));
+      const allCarriers = new Set<string>();
+      cityRows.forEach(city => {
+        city.carrierBreakdown.forEach(carrier => {
+          allCarriers.add(`${city.cityId}-${carrier.carrier}`);
+        });
+      });
+      setExpandedCities(allCities);
+      setExpandedCarriers(allCarriers);
+    }
+    setExpandAll(!expandAll);
+  };
+
+  // Determine which metrics to show based on scenario
+  const getMetricsForCity = (city: CityEquityData) => {
+    // Origin view (origin filtered): show destination cities with INBOUND data
+    // Destination view (destination filtered): show origin cities with OUTBOUND data
+    // General/Route view: show outbound data
+    if (scenarioInfo.isOriginView) {
+      // When filtering by origin, we see destination cities receiving shipments (INBOUND)
+      return {
         shipments: city.inboundShipments,
         compliant: city.inboundCompliant,
         standardPercentage: city.inboundStandardPercentage,
@@ -66,20 +143,10 @@ export function TerritoryEquityTable({ data, onCityClick, globalWarningThreshold
         deviation: city.inboundDeviation,
         standardDays: city.inboundStandardDays,
         actualDays: city.inboundActualDays,
-        status: city.status, // Use status from hook (already calculated with route-specific thresholds)
-        originalCity: city,
-      });
-    }
-    
-    // Add outbound row only if it has shipments or standardDays > 0
-    if (city.outboundShipments > 0 || city.outboundStandardDays > 0) {
-      rows.push({
-        cityId: `${city.cityId}-outbound`,
-        cityName: city.cityName,
-        direction: 'outbound' as const,
-        regionName: city.regionName,
-        classification: city.classification,
-        population: city.population,
+      };
+    } else if (scenarioInfo.isDestinationView) {
+      // When filtering by destination, we see origin cities sending shipments (OUTBOUND)
+      return {
         shipments: city.outboundShipments,
         compliant: city.outboundCompliant,
         standardPercentage: city.outboundStandardPercentage,
@@ -87,15 +154,166 @@ export function TerritoryEquityTable({ data, onCityClick, globalWarningThreshold
         deviation: city.outboundDeviation,
         standardDays: city.outboundStandardDays,
         actualDays: city.outboundActualDays,
-        status: city.status, // Use status from hook (already calculated with route-specific thresholds)
-        originalCity: city,
-      });
+      };
+    } else {
+      // General or route view: show outbound
+      return {
+        shipments: city.outboundShipments,
+        compliant: city.outboundCompliant,
+        standardPercentage: city.outboundStandardPercentage,
+        actualPercentage: city.outboundPercentage,
+        deviation: city.outboundDeviation,
+        standardDays: city.outboundStandardDays,
+        actualDays: city.outboundActualDays,
+      };
     }
-    
-    return rows;
-  });
+  };
 
-  const handleSort = (field: keyof DirectionRow) => {
+  // Build city rows with carrier/product hierarchy
+  const cityRows: CityRow[] = data
+    .filter(city => {
+      const metrics = getMetricsForCity(city);
+      return metrics.shipments > 0 || metrics.standardDays > 0;
+    })
+    .map((city) => {
+      const metrics = getMetricsForCity(city);
+      
+      // Build carrier breakdown
+      const carrierMap = new Map<string, { 
+        carrier: string; 
+        products: Map<string, ProductRow>; 
+        totalShipments: number; 
+        totalCompliant: number; 
+        standardSum: number; 
+        standardCount: number;
+        standardDaysSum: number;
+        standardDaysCount: number;
+        actualDaysSum: number;
+        actualDaysCount: number;
+      }>();
+
+      // Group carrier/product breakdown by carrier
+      city.carrierProductBreakdown?.forEach(cp => {
+        // Filter by direction - check if this carrier/product has data in the relevant direction
+        // Origin view: show INBOUND data (destination cities receiving)
+        // Destination view: show OUTBOUND data (origin cities sending)
+        const hasRelevantData = scenarioInfo.isOriginView
+          ? cp.inboundPercentage > 0 || cp.totalShipments > 0  // Origin filtered: show inbound to destinations
+          : scenarioInfo.isDestinationView
+          ? cp.outboundPercentage > 0 || cp.totalShipments > 0  // Destination filtered: show outbound from origins
+          : cp.outboundPercentage > 0 || cp.totalShipments > 0;  // General/route: show outbound
+
+        if (!hasRelevantData) return;
+
+        if (!carrierMap.has(cp.carrier)) {
+          carrierMap.set(cp.carrier, {
+            carrier: cp.carrier,
+            products: new Map(),
+            totalShipments: 0,
+            totalCompliant: 0,
+            standardSum: 0,
+            standardCount: 0,
+            standardDaysSum: 0,
+            standardDaysCount: 0,
+            actualDaysSum: 0,
+            actualDaysCount: 0,
+          });
+        }
+
+        const carrierData = carrierMap.get(cp.carrier)!;
+        carrierData.totalShipments += cp.totalShipments;
+        carrierData.totalCompliant += cp.compliantShipments;
+        carrierData.standardSum += cp.standardPercentage * cp.totalShipments;
+        carrierData.standardCount += cp.totalShipments;
+        carrierData.standardDaysSum += cp.standardDays * cp.totalShipments;
+        carrierData.standardDaysCount += cp.totalShipments;
+        // Accumulate actual days weighted by shipments
+        if (cp.actualDays > 0) {
+          carrierData.actualDaysSum += cp.actualDays * cp.totalShipments;
+          carrierData.actualDaysCount += cp.totalShipments;
+        }
+        
+        // Determine which percentage to use based on direction
+        const relevantPercentage = scenarioInfo.isOriginView
+          ? cp.inboundPercentage  // Origin filtered: show inbound percentages
+          : scenarioInfo.isDestinationView
+          ? cp.outboundPercentage  // Destination filtered: show outbound percentages
+          : cp.outboundPercentage;  // General/route: show outbound percentages
+        
+        // Add product
+        const productStatus: 'compliant' | 'warning' | 'critical' = 
+          relevantPercentage >= globalWarningThreshold ? 'compliant' :
+          relevantPercentage >= globalCriticalThreshold ? 'warning' : 'critical';
+
+        carrierData.products.set(cp.product, {
+          product: cp.product,
+          shipments: cp.totalShipments,
+          compliant: cp.compliantShipments,
+          standardPercentage: cp.standardPercentage,
+          actualPercentage: relevantPercentage,  // Use direction-specific percentage
+          deviation: relevantPercentage - cp.standardPercentage,  // Recalculate deviation
+          standardDays: cp.standardDays,
+          actualDays: cp.actualDays,
+          status: productStatus,
+        });
+      });
+
+      // Build carrier rows
+      const carrierBreakdown: CarrierRow[] = Array.from(carrierMap.values()).map(carrierData => {
+        const carrierActualPercentage = carrierData.totalShipments > 0 
+          ? (carrierData.totalCompliant / carrierData.totalShipments) * 100 
+          : 0;
+        const carrierStandardPercentage = carrierData.standardCount > 0
+          ? carrierData.standardSum / carrierData.standardCount
+          : 95;
+        const carrierStandardDays = carrierData.standardDaysCount > 0
+          ? carrierData.standardDaysSum / carrierData.standardDaysCount
+          : 0;
+        
+        // Calculate weighted average of actual days
+        const carrierActualDays = carrierData.actualDaysCount > 0
+          ? carrierData.actualDaysSum / carrierData.actualDaysCount
+          : 0;
+        
+        const carrierStatus: 'compliant' | 'warning' | 'critical' = 
+          carrierActualPercentage >= globalWarningThreshold ? 'compliant' :
+          carrierActualPercentage >= globalCriticalThreshold ? 'warning' : 'critical';
+
+        return {
+          carrier: carrierData.carrier,
+          shipments: carrierData.totalShipments,
+          compliant: carrierData.totalCompliant,
+          standardPercentage: carrierStandardPercentage,
+          actualPercentage: carrierActualPercentage,
+          deviation: carrierActualPercentage - carrierStandardPercentage,
+          standardDays: carrierStandardDays,
+          actualDays: carrierActualDays,
+          status: carrierStatus,
+          productBreakdown: Array.from(carrierData.products.values()),
+        };
+      });
+
+      return {
+        cityId: city.cityId,
+        cityName: city.cityName,
+        regionName: city.regionName,
+        classification: city.classification,
+        population: city.population,
+        shipments: metrics.shipments,
+        compliant: metrics.compliant,
+        standardPercentage: metrics.standardPercentage,
+        actualPercentage: metrics.actualPercentage,
+        deviation: metrics.deviation,
+        standardDays: metrics.standardDays,
+        actualDays: metrics.actualDays,
+        status: city.status,
+        originalCity: city,
+        carrierBreakdown,
+      };
+    });
+
+  // Sorting logic
+  const handleSort = (field: keyof CityRow) => {
     if (sortField === field) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
@@ -104,34 +322,29 @@ export function TerritoryEquityTable({ data, onCityClick, globalWarningThreshold
     }
   };
 
-  const sortedData = [...directionRows].sort((a, b) => {
-    // First, sort by the selected field
-    const aVal = a[sortField];
-    const bVal = b[sortField];
-    const multiplier = sortDirection === 'asc' ? 1 : -1;
+  const sortedData = [...cityRows].sort((a, b) => {
+    let aVal = a[sortField];
+    let bVal = b[sortField];
 
-    let comparison = 0;
+    if (aVal === null || aVal === undefined) aVal = '';
+    if (bVal === null || bVal === undefined) bVal = '';
+
+    if (typeof aVal === 'string' && typeof bVal === 'string') {
+      return sortDirection === 'asc'
+        ? aVal.localeCompare(bVal)
+        : bVal.localeCompare(aVal);
+    }
+
     if (typeof aVal === 'number' && typeof bVal === 'number') {
-      comparison = (aVal - bVal) * multiplier;
-    } else {
-      comparison = String(aVal || '').localeCompare(String(bVal || '')) * multiplier;
+      return sortDirection === 'asc' ? aVal - bVal : bVal - aVal;
     }
 
-    // If values are equal (especially for cityName), sort by direction (inbound first)
-    if (comparison === 0) {
-      return a.direction === 'inbound' ? -1 : 1;
-    }
-
-    return comparison;
+    return 0;
   });
 
-  const SortIcon = ({ field }: { field: keyof DirectionRow }) => {
+  const SortIcon = ({ field }: { field: keyof CityRow }) => {
     if (sortField !== field) return null;
-    return sortDirection === 'asc' ? (
-      <ChevronUp className="w-4 h-4 inline ml-1" />
-    ) : (
-      <ChevronDown className="w-4 h-4 inline ml-1" />
-    );
+    return sortDirection === 'asc' ? ' ▲' : ' ▼';
   };
 
   const getStatusIcon = (status: 'compliant' | 'warning' | 'critical') => {
@@ -146,234 +359,284 @@ export function TerritoryEquityTable({ data, onCityClick, globalWarningThreshold
   };
 
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-              {/* Expand button column */}
-            </th>
-            <th
-              className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-              onClick={() => handleSort('cityName')}
-            >
-              {t('reporting.city')} <SortIcon field="cityName" />
-            </th>
-            <th
-              className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-              onClick={() => handleSort('direction')}
-            >
-              {t('reporting.direction')} <SortIcon field="direction" />
-            </th>
-            <th
-              className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-              onClick={() => handleSort('regionName')}
-            >
-              {t('reporting.region')} <SortIcon field="regionName" />
-            </th>
-            <th
-              className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-              onClick={() => handleSort('classification')}
-            >
-              {t('reporting.class')} <SortIcon field="classification" />
-            </th>
-            <th
-              className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-              onClick={() => handleSort('population')}
-            >
-              {t('reporting.population')} <SortIcon field="population" />
-            </th>
-            <th
-              className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-              onClick={() => handleSort('shipments')}
-            >
-              {t('common.total')} <SortIcon field="shipments" />
-            </th>
-            <th
-              className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-              onClick={() => handleSort('standardPercentage')}
-            >
-              {t('reporting.standard_percent')} <SortIcon field="standardPercentage" />
-            </th>
-            <th
-              className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-              onClick={() => handleSort('actualPercentage')}
-            >
-              {t('reporting.actual_percent')} <SortIcon field="actualPercentage" />
-            </th>
-            <th
-              className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-              onClick={() => handleSort('deviation')}
-            >
-              {t('reporting.deviation')} <SortIcon field="deviation" />
-            </th>
-            <th
-              className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-              onClick={() => handleSort('standardDays')}
-            >
-              {t('reporting.jk_std')} <SortIcon field="standardDays" />
-            </th>
-            <th
-              className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-              onClick={() => handleSort('actualDays')}
-            >
-              {t('reporting.jk_actual')} <SortIcon field="actualDays" />
-            </th>
-            <th
-              className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-              onClick={() => handleSort('status')}
-            >
-              {t('common.status')} <SortIcon field="status" />
-            </th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {sortedData.map((row) => {
-            const hasBreakdown = row.originalCity.carrierProductBreakdown && row.originalCity.carrierProductBreakdown.length > 0;
-            const isExpanded = expandedRows.has(row.cityId);
-            
-            return (
-              <>
-                <tr key={row.cityId} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 whitespace-nowrap text-center">
-                    {hasBreakdown && (
-                      <button
-                        onClick={() => toggleRow(row.cityId)}
-                        className="text-gray-500 hover:text-gray-700"
-                      >
-                        {isExpanded ? (
-                          <ChevronUp className="w-4 h-4" />
-                        ) : (
-                          <ChevronDown className="w-4 h-4" />
-                        )}
-                      </button>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <button
-                      onClick={() => onCityClick?.(row.originalCity)}
-                      className="text-blue-600 hover:text-blue-800 hover:underline font-medium text-left"
-                    >
-                      {row.cityName}
-                    </button>
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm">
-                    <div className="flex items-center gap-1">
-                      {row.direction === 'inbound' ? (
-                        <>
-                          <ArrowDown className="w-4 h-4 text-blue-600" />
-                          <span className="text-blue-600 font-medium">{t('reporting.inbound_direction')}</span>
-                        </>
-                      ) : (
-                        <>
-                          <ArrowUp className="w-4 h-4 text-green-600" />
-                          <span className="text-green-600 font-medium">{t('reporting.outbound_direction')}</span>
-                        </>
+    <div className="space-y-4">
+      {/* Scenario Description */}
+      <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg px-4 py-3">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-blue-900">{scenarioDescription}</span>
+        </div>
+        <button
+          onClick={toggleAll}
+          className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-blue-700 hover:text-blue-900 hover:bg-blue-100 rounded-md transition-colors"
+        >
+          {expandAll ? (
+            <>
+              <ChevronsUp className="w-4 h-4" />
+              Collapse All
+            </>
+          ) : (
+            <>
+              <ChevronsDown className="w-4 h-4" />
+              Expand All
+            </>
+          )}
+        </button>
+      </div>
+
+      {/* Table */}
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-10">
+                {/* Expand button column */}
+              </th>
+              <th
+                className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                onClick={() => handleSort('cityName')}
+              >
+                {t('reporting.city')} <SortIcon field="cityName" />
+              </th>
+              <th
+                className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                onClick={() => handleSort('regionName')}
+              >
+                {t('reporting.region')} <SortIcon field="regionName" />
+              </th>
+              <th
+                className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                onClick={() => handleSort('classification')}
+              >
+                {t('reporting.class')} <SortIcon field="classification" />
+              </th>
+              <th
+                className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                onClick={() => handleSort('population')}
+              >
+                {t('reporting.population')} <SortIcon field="population" />
+              </th>
+              <th
+                className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                onClick={() => handleSort('shipments')}
+              >
+                {t('common.total')} <SortIcon field="shipments" />
+              </th>
+              <th
+                className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                onClick={() => handleSort('standardDays')}
+              >
+                {t('reporting.jk_std')} <SortIcon field="standardDays" />
+              </th>
+              <th
+                className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                onClick={() => handleSort('actualDays')}
+              >
+                {t('reporting.jk_actual')} <SortIcon field="actualDays" />
+              </th>
+              <th
+                className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                onClick={() => handleSort('standardPercentage')}
+              >
+                {t('reporting.standard_percent')} <SortIcon field="standardPercentage" />
+              </th>
+              <th
+                className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                onClick={() => handleSort('actualPercentage')}
+              >
+                {t('reporting.actual_percent')} <SortIcon field="actualPercentage" />
+              </th>
+              <th
+                className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                onClick={() => handleSort('deviation')}
+              >
+                {t('reporting.deviation')} <SortIcon field="deviation" />
+              </th>
+              <th
+                className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                onClick={() => handleSort('status')}
+              >
+                {t('common.status')} <SortIcon field="status" />
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {sortedData.map((city) => {
+              const isCityExpanded = expandedCities.has(city.cityId);
+              const hasCarriers = city.carrierBreakdown.length > 0;
+              
+              return (
+                <>
+                  {/* City Row */}
+                  <tr key={city.cityId} className="hover:bg-gray-50">
+                    <td className="px-4 py-3 whitespace-nowrap text-center">
+                      {hasCarriers && (
+                        <button
+                          onClick={() => toggleCity(city.cityId)}
+                          className="text-gray-500 hover:text-gray-700"
+                        >
+                          {isCityExpanded ? (
+                            <ChevronDown className="w-4 h-4" />
+                          ) : (
+                            <ChevronRight className="w-4 h-4" />
+                          )}
+                        </button>
                       )}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                    {row.regionName || '-'}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
-                    {row.classification || '-'}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
-                    {row.population ? row.population.toLocaleString() : '-'}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
-                    {row.shipments}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
-                    {formatNumber(row.standardPercentage)}%
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
-                    {formatNumber(row.actualPercentage)}%
-                  </td>
-                  <td
-                    className={`px-4 py-3 whitespace-nowrap text-sm text-right font-medium ${
-                      row.deviation >= 0 ? 'text-green-600' : 'text-red-600'
-                    }`}
-                  >
-                    {row.deviation >= 0 ? '+' : ''}
-                    {formatNumber(row.deviation)}%
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
-                    {formatNumber(row.standardDays)}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
-                    {formatNumber(row.actualDays)}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-center text-lg">
-                    {getStatusIcon(row.status)}
-                  </td>
-                </tr>
-                
-                {/* Carrier/Product Breakdown Subrows */}
-                {isExpanded && hasBreakdown && (
-                  <tr key={`${row.cityId}-breakdown`} className="bg-gray-50">
-                    <td colSpan={13} className="px-4 py-2">
-                      <div className="ml-8">
-                        <table className="min-w-full text-sm">
-                          <thead>
-                            <tr className="text-xs text-gray-500 uppercase">
-                              <th className="px-3 py-2 text-left">{t('reporting.carrier')}</th>
-                              <th className="px-3 py-2 text-left">{t('reporting.product')}</th>
-                              <th className="px-3 py-2 text-right">{t('stock.shipments')}</th>
-                              <th className="px-3 py-2 text-right">Compliant</th>
-                              <th className="px-3 py-2 text-right">Standard %</th>
-                              <th className="px-3 py-2 text-right">Actual %</th>
-                              <th className="px-3 py-2 text-right">{t('reporting.deviation')}</th>
-                              <th className="px-3 py-2 text-right">J+K Std</th>
-                              <th className="px-3 py-2 text-right">J+K Actual</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {row.originalCity.carrierProductBreakdown
-                              ?.filter(cp => {
-                                // Filter by direction: show only inbound or outbound data
-                                if (row.direction === 'inbound') {
-                                  return cp.inboundPercentage > 0; // Has inbound data
-                                } else {
-                                  return cp.outboundPercentage > 0; // Has outbound data
-                                }
-                              })
-                              .map((cp, idx) => {
-                                // Use direction-specific percentages
-                                const directionPercentage = row.direction === 'inbound' 
-                                  ? cp.inboundPercentage 
-                                  : cp.outboundPercentage;
-                                
-                                return (
-                                  <tr key={idx} className="border-t border-gray-200">
-                                    <td className="px-3 py-2 text-gray-700">{cp.carrier}</td>
-                                    <td className="px-3 py-2 text-gray-700">{cp.product}</td>
-                                    <td className="px-3 py-2 text-right text-gray-700">{cp.totalShipments}</td>
-                                    <td className="px-3 py-2 text-right text-gray-700">{cp.compliantShipments}</td>
-                                    <td className="px-3 py-2 text-right text-gray-700">{formatNumber(cp.standardPercentage)}%</td>
-                                    <td className="px-3 py-2 text-right text-gray-700">{formatNumber(cp.actualPercentage)}%</td>
-                                    <td className={`px-3 py-2 text-right font-medium ${cp.deviation >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                      {cp.deviation >= 0 ? '+' : ''}{formatNumber(cp.deviation)}%
-                                    </td>
-                                    <td className="px-3 py-2 text-right text-gray-700">{formatNumber(cp.standardDays)}</td>
-                                    <td className="px-3 py-2 text-right text-gray-700">{formatNumber(cp.actualDays)}</td>
-                                  </tr>
-                                );
-                              })}
-                          </tbody>
-                        </table>
-                      </div>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <button
+                        onClick={() => onCityClick?.(city.originalCity)}
+                        className="text-blue-600 hover:text-blue-800 hover:underline font-medium text-left"
+                      >
+                        {city.cityName}
+                      </button>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                      {city.regionName || '-'}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
+                      {city.classification || '-'}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
+                      {city.population ? city.population.toLocaleString() : '-'}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
+                      {city.shipments}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
+                      {formatNumber(city.standardDays)}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
+                      {formatNumber(city.actualDays)}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
+                      {formatNumber(city.standardPercentage)}%
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
+                      {formatNumber(city.actualPercentage)}%
+                    </td>
+                    <td
+                      className={`px-4 py-3 whitespace-nowrap text-sm text-right font-medium ${
+                        city.status === 'compliant' ? 'text-green-600' :
+                        city.status === 'warning' ? 'text-amber-600' : 'text-red-600'
+                      }`}
+                    >
+                      {city.deviation >= 0 ? '+' : ''}
+                      {formatNumber(city.deviation)}%
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-center text-2xl">
+                      {getStatusIcon(city.status)}
                     </td>
                   </tr>
-                )}
-              </>
-            );
-          })}
-        </tbody>
-      </table>
-      {sortedData.length === 0 && (
-        <div className="text-center py-8 text-gray-500">No data available</div>
-      )}
+                  
+                  {/* Carrier Rows */}
+                  {isCityExpanded && city.carrierBreakdown.map((carrier) => {
+                    const carrierId = `${city.cityId}-${carrier.carrier}`;
+                    const isCarrierExpanded = expandedCarriers.has(carrierId);
+                    const hasProducts = carrier.productBreakdown.length > 0;
+                    
+                    return (
+                      <>
+                        <tr key={carrierId} className="bg-gray-50">
+                          <td className="px-4 py-2 whitespace-nowrap text-center">
+                            {hasProducts && (
+                              <button
+                                onClick={() => toggleCarrier(carrierId)}
+                                className="text-gray-500 hover:text-gray-700 ml-4"
+                              >
+                                {isCarrierExpanded ? (
+                                  <ChevronDown className="w-3.5 h-3.5" />
+                                ) : (
+                                  <ChevronRight className="w-3.5 h-3.5" />
+                                )}
+                              </button>
+                            )}
+                          </td>
+                          <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700 font-medium pl-12">
+                            {carrier.carrier}
+                          </td>
+                          <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">-</td>
+                          <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">-</td>
+                          <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">-</td>
+                          <td className="px-4 py-2 whitespace-nowrap text-sm text-right text-gray-700">
+                            {carrier.shipments}
+                          </td>
+                          <td className="px-4 py-2 whitespace-nowrap text-sm text-right text-gray-700">
+                            {formatNumber(carrier.standardDays)}
+                          </td>
+                          <td className="px-4 py-2 whitespace-nowrap text-sm text-right text-gray-700">
+                            {formatNumber(carrier.actualDays)}
+                          </td>
+                          <td className="px-4 py-2 whitespace-nowrap text-sm text-right text-gray-700">
+                            {formatNumber(carrier.standardPercentage)}%
+                          </td>
+                          <td className="px-4 py-2 whitespace-nowrap text-sm text-right text-gray-700">
+                            {formatNumber(carrier.actualPercentage)}%
+                          </td>
+                          <td
+                            className={`px-4 py-2 whitespace-nowrap text-sm text-right font-medium ${
+                              carrier.status === 'compliant' ? 'text-green-600' :
+                              carrier.status === 'warning' ? 'text-amber-600' : 'text-red-600'
+                            }`}
+                          >
+                            {carrier.deviation >= 0 ? '+' : ''}
+                            {formatNumber(carrier.deviation)}%
+                          </td>
+                          <td className="px-4 py-2 whitespace-nowrap text-center text-xl">
+                            {getStatusIcon(carrier.status)}
+                          </td>
+                        </tr>
+                        
+                        {/* Product Rows */}
+                        {isCarrierExpanded && carrier.productBreakdown.map((product) => (
+                          <tr key={`${carrierId}-${product.product}`} className="bg-gray-100">
+                            <td className="px-4 py-2 whitespace-nowrap"></td>
+                            <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-600 pl-20">
+                              {product.product}
+                            </td>
+                            <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">-</td>
+                            <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">-</td>
+                            <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">-</td>
+                            <td className="px-4 py-2 whitespace-nowrap text-sm text-right text-gray-700">
+                              {product.shipments}
+                            </td>
+                            <td className="px-4 py-2 whitespace-nowrap text-sm text-right text-gray-700">
+                              {formatNumber(product.standardDays)}
+                            </td>
+                            <td className="px-4 py-2 whitespace-nowrap text-sm text-right text-gray-700">
+                              {formatNumber(product.actualDays)}
+                            </td>
+                            <td className="px-4 py-2 whitespace-nowrap text-sm text-right text-gray-700">
+                              {formatNumber(product.standardPercentage)}%
+                            </td>
+                            <td className="px-4 py-2 whitespace-nowrap text-sm text-right text-gray-700">
+                              {formatNumber(product.actualPercentage)}%
+                            </td>
+                            <td
+                              className={`px-4 py-2 whitespace-nowrap text-sm text-right font-medium ${
+                                product.status === 'compliant' ? 'text-green-600' :
+                                product.status === 'warning' ? 'text-amber-600' : 'text-red-600'
+                              }`}
+                            >
+                              {product.deviation >= 0 ? '+' : ''}
+                              {formatNumber(product.deviation)}%
+                            </td>
+                            <td className="px-4 py-2 whitespace-nowrap text-center text-lg">
+                              {getStatusIcon(product.status)}
+                            </td>
+                          </tr>
+                        ))}
+                      </>
+                    );
+                  })}
+                </>
+              );
+            })}
+          </tbody>
+        </table>
+        {sortedData.length === 0 && (
+          <div className="text-center py-8 text-gray-500">No data available</div>
+        )}
+      </div>
     </div>
   );
 }

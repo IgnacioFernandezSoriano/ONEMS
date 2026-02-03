@@ -256,43 +256,7 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
           </select>
         </div>
 
-        {/* Region */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            <MapPin className="w-4 h-4 inline mr-1" />
-            Region
-            <SmartTooltip content="Filter by geographic region. Shows only cities within the selected region. Regions are defined by the regulator." />
-          </label>
-          <select
-            value={filters.region || ''}
-            onChange={(e) => handleChange('region', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            disabled={loading}
-          >
-            <option value="">All Regions</option>
-            {regions.map(region => (
-              <option key={region} value={region}>{region}</option>
-            ))}
-          </select>
-        </div>
-
-        {/* Direction */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            <Navigation className="w-4 h-4 inline mr-1" />
-            Direction
-            <SmartTooltip content="Filter by shipment direction. Inbound: packages arriving TO cities. Outbound: packages leaving FROM cities. Both: combined analysis." />
-          </label>
-          <select
-            value={filters.direction || ''}
-            onChange={(e) => handleChange('direction', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="">{t('reporting.both_directions')}</option>
-            <option value="inbound">📥 Inbound Only</option>
-            <option value="outbound">📤 Outbound Only</option>
-          </select>
-        </div>
+        {/* Region and Direction filters removed - now in Regional Analysis tab */}
 
         {/* Equity Status */}
         <div>
@@ -319,8 +283,7 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
         <h4 className="text-sm font-semibold text-blue-900 mb-1">{t('reporting.territory_equity_filter_guide')}</h4>
         <ul className="text-xs text-blue-800 space-y-1">
           <li>• <strong>{t('reporting.filter_no_filters')}</strong> {t('reporting.view_overall_service_equity_across_all_cities_and_')}</li>
-          <li>• <strong>{t('reporting.filter_region_label')}</strong> {t('reporting.focus_analysis_on_specific_geographic_areas')}</li>
-          <li>• <strong>{t('reporting.filter_direction_label')}</strong> {t('reporting.filter_direction_desc')}</li>
+
           <li>• <strong>{t('reporting.filter_equity_status_label')}</strong> {t('reporting.filter_equity_status_desc')}</li>
           <li>• <strong>{t('reporting.filter_carrier_product_label')}</strong> {t('reporting.filter_carrier_product_desc_narrow')}</li>
           <li>• <strong>{t('reporting.filter_date_range_label')}</strong> {t('reporting.filter_date_range_desc')}</li>

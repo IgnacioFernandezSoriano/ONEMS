@@ -1,40 +1,40 @@
 import React from 'react';
 import { Treemap, ResponsiveContainer, Tooltip } from 'recharts';
 import { formatNumber } from '@/lib/formatNumber';
-import type { CityEquityData } from '@/types/reporting';
+import type { RegionEquityData } from '@/types/reporting';
 import type { ScenarioInfo } from '@/hooks/reporting/useFilterScenario';
 import { useTranslation } from '@/hooks/useTranslation';
 
-interface TerritoryEquityTreemapProps {
-  data: CityEquityData[];
+interface RegionalEquityTreemapProps {
+  data: RegionEquityData[];
   scenarioInfo: ScenarioInfo;
   globalWarningThreshold: number;
   globalCriticalThreshold: number;
   scenarioDescription: string;
 }
 
-export function TerritoryEquityTreemap({ data, scenarioInfo, globalWarningThreshold, globalCriticalThreshold, scenarioDescription }: TerritoryEquityTreemapProps) {
+export function RegionalEquityTreemap({ data, scenarioInfo, globalWarningThreshold, globalCriticalThreshold, scenarioDescription }: RegionalEquityTreemapProps) {
   const { t } = useTranslation();
   
   // Determine which metrics to show based on scenario (same logic as table)
-  const getMetricsForCity = (city: CityEquityData) => {
+  const getMetricsForRegion = (region: RegionEquityData) => {
     if (scenarioInfo.isOriginView) {
-      // Origin filtered: show destination cities with INBOUND data
+      // Origin filtered: show destination regions with INBOUND data
       return {
-        actualPercentage: city.inboundPercentage,
-        shipments: city.inboundShipments,
+        actualPercentage: region.inboundPercentage,
+        shipments: region.inboundShipments,
       };
     } else if (scenarioInfo.isDestinationView) {
-      // Destination filtered: show origin cities with OUTBOUND data
+      // Destination filtered: show origin regions with OUTBOUND data
       return {
-        actualPercentage: city.outboundPercentage,
-        shipments: city.outboundShipments,
+        actualPercentage: region.outboundPercentage,
+        shipments: region.outboundShipments,
       };
     } else {
       // General or route view: show outbound
       return {
-        actualPercentage: city.outboundPercentage,
-        shipments: city.outboundShipments,
+        actualPercentage: region.outboundPercentage,
+        shipments: region.outboundShipments,
       };
     }
   };
@@ -48,21 +48,21 @@ export function TerritoryEquityTreemap({ data, scenarioInfo, globalWarningThresh
   
   // Transform data for Recharts Treemap
   const treemapData = data
-    .filter(city => {
-      const metrics = getMetricsForCity(city);
+    .filter(region => {
+      const metrics = getMetricsForRegion(region);
       return metrics.shipments > 0;
     })
-    .map((city) => {
-      const metrics = getMetricsForCity(city);
+    .map((region) => {
+      const metrics = getMetricsForRegion(region);
       const status = getStatusForPercentage(metrics.actualPercentage);
       
       return {
-        name: city.cityName,
-        size: city.population || city.totalShipments || 1,
+        name: region.regionName,
+        size: region.totalPopulation || region.totalShipments || 1,
         actualPercentage: metrics.actualPercentage,
         status: status,
-        population: city.population,
-        totalShipments: city.totalShipments,
+        totalPopulation: region.totalPopulation,
+        totalShipments: region.totalShipments,
       };
     });
 
@@ -81,7 +81,7 @@ export function TerritoryEquityTreemap({ data, scenarioInfo, globalWarningThresh
   };
 
   const CustomizedContent = (props: any) => {
-    const { x, y, width, height, name, actualPercentage, status, population, totalShipments } = props;
+    const { x, y, width, height, name, actualPercentage, status, totalPopulation, totalShipments } = props;
 
     // Don't render if too small
     if (width < 40 || height < 30) return null;
@@ -133,7 +133,7 @@ export function TerritoryEquityTreemap({ data, scenarioInfo, globalWarningThresh
                 fontSize={16}
                 opacity={0.9}
               >
-                {population ? `${(population / 1000).toFixed(0)}K pop` : `${totalShipments} shipments`}
+                {totalPopulation ? `${(totalPopulation / 1000).toFixed(0)}K pop` : `${totalShipments} shipments`}
               </text>
             )}
           </>
@@ -151,9 +151,9 @@ export function TerritoryEquityTreemap({ data, scenarioInfo, globalWarningThresh
           <p className="text-sm text-gray-600">
             Compliance: <span className="font-medium">{(data.actualPercentage || 0).toFixed(1)}%</span>
           </p>
-          {data.population && (
+          {data.totalPopulation && (
             <p className="text-sm text-gray-600">
-              Population: <span className="font-medium">{data.population.toLocaleString()}</span>
+              Population: <span className="font-medium">{data.totalPopulation.toLocaleString()}</span>
             </p>
           )}
           <p className="text-sm text-gray-600">
@@ -166,9 +166,9 @@ export function TerritoryEquityTreemap({ data, scenarioInfo, globalWarningThresh
               data.status === 'warning' ? 'text-amber-600' :
               'text-red-600'
             }`}>
-              {data.status === 'compliant' ? `✅ ${t('reporting.compliant')}` :
-               data.status === 'warning' ? `⚠️ ${t('reporting.warning')}` :
-               `🔴 ${t('reporting.critical')}`}
+              {data.status === 'compliant' ? t('reporting.compliant') :
+               data.status === 'warning' ? t('reporting.warning') :
+               t('reporting.critical')}
             </span>
           </p>
         </div>

@@ -1045,6 +1045,8 @@ export function useTerritoryEquityDataV2(
 
         // 9. Set state
         setCityData(filteredCityData);
+        
+        // RegionData is NOT filtered - treemap always shows all regions
         setRegionData(regionEquityData);
         setMetrics({
           serviceEquityIndex,
@@ -1068,5 +1070,35 @@ export function useTerritoryEquityDataV2(
     fetchData();
   }, [activeAccountId, JSON.stringify(filters)]);
 
-  return { cityData, regionData, metrics, loading, error, globalWarningThreshold, globalCriticalThreshold };
+  // Generate scenario description
+  const getScenarioDescription = () => {
+    // Check for region filter first
+    if (filters?.region && filters.region.trim() !== '') {
+      // When region is filtered, show origin regions sending to that region
+      return `Showing origin regions with shipments to ${filters.region} region`;
+    }
+    
+    // Then check city filters
+    if (scenarioInfo.isRouteView) {
+      return `Showing route from ${scenarioInfo.originCityName} to ${scenarioInfo.destinationCityName}`;
+    } else if (scenarioInfo.isOriginView) {
+      return `Showing destination cities receiving shipments from ${scenarioInfo.originCityName}`;
+    } else if (scenarioInfo.isDestinationView) {
+      return `Showing origin cities with shipments to ${scenarioInfo.destinationCityName}`;
+    } else {
+      return 'Showing origin cities with outbound shipments to all destinations';
+    }
+  };
+
+  return { 
+    cityData, 
+    regionData, 
+    metrics, 
+    loading, 
+    error, 
+    globalWarningThreshold, 
+    globalCriticalThreshold,
+    scenarioDescription: getScenarioDescription(),
+    scenarioInfo
+  };
 }

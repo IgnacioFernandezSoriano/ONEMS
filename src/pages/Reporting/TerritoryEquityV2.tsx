@@ -35,7 +35,17 @@ export default function TerritoryEquity() {
     equityStatus: [],
   });
 
-  const { cityData, regionData, metrics, loading, error, globalWarningThreshold, globalCriticalThreshold } = useTerritoryEquityData(
+  const { 
+    cityData, 
+    regionData, 
+    metrics, 
+    loading, 
+    error, 
+    globalWarningThreshold, 
+    globalCriticalThreshold,
+    scenarioDescription,
+    scenarioInfo: hookScenarioInfo
+  } = useTerritoryEquityData(
     profile?.account_id || undefined,
     filters
   );
@@ -784,7 +794,7 @@ export default function TerritoryEquity() {
                   </h3>
                   <SmartTooltip content={tooltips.inboundOutboundChart} />
                 </div>
-                <InboundOutboundChart data={cityData} />
+                <InboundOutboundChart data={cityData} scenarioDescription={scenarioDescription} />
               </div>
 
               {/* Treemap Visualization */}
@@ -793,7 +803,13 @@ export default function TerritoryEquity() {
                   <h3 className="text-lg font-semibold">{t('reporting.city_service_equity_treemap')}</h3>
                   <SmartTooltip content={tooltips.treemap} />
                 </div>
-                <TerritoryEquityTreemap data={cityData} />
+                <TerritoryEquityTreemap 
+                  data={cityData} 
+                  scenarioInfo={hookScenarioInfo}
+                  globalWarningThreshold={globalWarningThreshold}
+                  globalCriticalThreshold={globalCriticalThreshold}
+                  scenarioDescription={scenarioDescription}
+                />
               </div>
 
               {/* City Table */}
@@ -816,6 +832,8 @@ export default function TerritoryEquity() {
                   onCityClick={setSelectedCity} 
                   globalWarningThreshold={globalWarningThreshold}
                   globalCriticalThreshold={globalCriticalThreshold}
+                  scenarioInfo={hookScenarioInfo}
+                  scenarioDescription={scenarioDescription}
                 />
               </div>
             </div>
@@ -847,7 +865,14 @@ export default function TerritoryEquity() {
                     {t('common.export_csv')}
                   </button>
                 </div>
-                <RegionalEquityTable data={regionData} onRegionClick={setSelectedRegion} scenarioInfo={scenarioInfo} filters={filters} />
+                <RegionalEquityTable 
+                  data={regionData} 
+                  onRegionClick={setSelectedRegion} 
+                  globalWarningThreshold={globalWarningThreshold}
+                  globalCriticalThreshold={globalCriticalThreshold}
+                  scenarioInfo={hookScenarioInfo}
+                  scenarioDescription={scenarioDescription}
+                />
               </div>
             </div>
           )}
@@ -857,6 +882,10 @@ export default function TerritoryEquity() {
               <div>
                 <div className="mb-4">
                   <h3 className="text-lg font-semibold mb-2">{t('reporting.geographic_distribution')}</h3>
+                  {/* Scenario Description */}
+                  <div className="mb-3 px-4 py-3 bg-blue-50 border border-blue-100 rounded-lg">
+                    <p className="text-sm text-blue-800">{scenarioDescription}</p>
+                  </div>
                   <p className="text-sm text-gray-600">
                     {t('reporting.map_interactive_description')}
                   </p>

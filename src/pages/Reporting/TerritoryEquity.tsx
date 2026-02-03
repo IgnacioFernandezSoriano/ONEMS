@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { useTerritoryEquityDataV2 as useTerritoryEquityData } from '@/hooks/reporting/useTerritoryEquityDataV2';
 import { TerritoryEquityTable } from '@/components/reporting/TerritoryEquityTable';
 import { RegionalEquityTable } from '@/components/reporting/RegionalEquityTable';
 import { InboundOutboundChart } from '@/components/reporting/InboundOutboundChart';
-import { RegionalEquityChart } from '@/components/reporting/RegionalEquityChart';
+import { RegionalEquityTreemap } from '@/components/reporting/RegionalEquityTreemap';
 import { CityDetailModal } from '@/components/reporting/CityDetailModal';
 import { RegionDetailModal } from '@/components/reporting/RegionDetailModal';
 import { TerritoryEquityFilters } from '@/components/reporting/TerritoryEquityFilters';
@@ -25,6 +25,7 @@ export default function TerritoryEquity() {
   const [activeTab, setActiveTab] = useState<'city' | 'regional' | 'map'>('city');
   const [selectedCity, setSelectedCity] = useState<CityEquityData | null>(null);
   const [selectedRegion, setSelectedRegion] = useState<RegionEquityData | null>(null);
+  const [availableRegions, setAvailableRegions] = useState<string[]>([]);
   const [filters, setFilters] = useState<Filters>({
     startDate: '',
     endDate: '',
@@ -35,7 +36,38 @@ export default function TerritoryEquity() {
     equityStatus: [],
   });
 
-  const { cityData, regionData, metrics, loading, error, globalWarningThreshold, globalCriticalThreshold } = useTerritoryEquityData(
+  // Load available regions
+  useEffect(() => {
+    async function loadRegions() {
+      if (!profile?.account_id) return;
+      
+      try {
+        const { data } = await supabase
+          .from('regions')
+          .select('name')
+          .eq('account_id', profile.account_id)
+          .order('name');
+        
+        setAvailableRegions(data?.map(r => r.name) || []);
+      } catch (error) {
+        console.error('Error loading regions:', error);
+      }
+    }
+    
+    loadRegions();
+  }, [profile?.account_id]);
+
+  const { 
+    cityData, 
+    regionData, 
+    metrics, 
+    loading, 
+    error, 
+    globalWarningThreshold, 
+    globalCriticalThreshold,
+    scenarioDescription,
+    scenarioInfo: hookScenarioInfo
+  } = useTerritoryEquityData(
     profile?.account_id || undefined,
     filters
   );
@@ -561,29 +593,36 @@ export default function TerritoryEquity() {
               <div className="text-right">{t('reporting.jk_actual')}</div>
               <div className="text-right">{t('reporting.inbound_abbr')}</div>
               <div className="text-right">{t('reporting.outbound_abbr')}</div>            </div>
-            {metrics?.topBestCities.slice(0, 3).map((city, idx) => (
-              <div key={idx} className="grid grid-cols-7 gap-1 text-xs">
-                <div className="font-medium truncate">{city.cityName}</div>
-                <div className="text-right font-semibold text-green-600">
-                  {city.actualPercentage.toFixed(1)}%
+            {metrics?.topBestCities.slice(0, 3).map((city, idx) => {
+              // Use same logic as table: show relevant percentage based on scenario
+              const relevantPercentage = hookScenarioInfo.isOriginView 
+                ? city.inboundPercentage 
+                : city.outboundPercentage;
+              
+              return (
+                <div key={idx} className="grid grid-cols-7 gap-1 text-xs">
+                  <div className="font-medium truncate">{city.cityName}</div>
+                  <div className="text-right font-semibold text-green-600">
+                    {relevantPercentage.toFixed(1)}%
+                  </div>
+                  <div className="text-right text-gray-600">
+                    {city.standardPercentage.toFixed(1)}%
+                  </div>
+                  <div className="text-right text-gray-600">
+                    {city.standardDays.toFixed(1)}
+                  </div>
+                  <div className="text-right text-gray-600">
+                    {city.actualDays.toFixed(1)}
+                  </div>
+                  <div className="text-right text-gray-600">
+                    {city.inboundPercentage.toFixed(1)}%
+                  </div>
+                  <div className="text-right text-gray-600">
+                    {city.outboundPercentage.toFixed(1)}%
+                  </div>
                 </div>
-                <div className="text-right text-gray-600">
-                  {city.standardPercentage.toFixed(1)}%
-                </div>
-                <div className="text-right text-gray-600">
-                  {city.standardDays.toFixed(1)}
-                </div>
-                <div className="text-right text-gray-600">
-                  {city.actualDays.toFixed(1)}
-                </div>
-                <div className="text-right text-gray-600">
-                  {city.inboundPercentage.toFixed(1)}%
-                </div>
-                <div className="text-right text-gray-600">
-                  {city.outboundPercentage.toFixed(1)}%
-                </div>
-              </div>
-            ))}
+              );
+            })}
             {(!metrics?.topBestCities || metrics.topBestCities.length === 0) && (
               <div className="text-sm text-gray-500 text-center py-2">No data</div>
             )}
@@ -611,29 +650,36 @@ export default function TerritoryEquity() {
               <div className="text-right">{t('reporting.inbound_abbr')}</div>
               <div className="text-right">{t('reporting.outbound_abbr')}</div>
             </div>
-            {metrics?.topWorstCities.filter(c => c.status === 'critical' || c.status === 'warning').slice(0, 3).map((city, idx) => (
-              <div key={idx} className="grid grid-cols-7 gap-1 text-xs">
-                <div className="font-medium truncate">{city.cityName}</div>
-                <div className="text-right font-semibold text-red-600">
-                  {city.actualPercentage.toFixed(1)}%
+            {metrics?.topWorstCities.filter(c => c.status === 'critical' || c.status === 'warning').slice(0, 3).map((city, idx) => {
+              // Use same logic as table: show relevant percentage based on scenario
+              const relevantPercentage = hookScenarioInfo.isOriginView 
+                ? city.inboundPercentage 
+                : city.outboundPercentage;
+              
+              return (
+                <div key={idx} className="grid grid-cols-7 gap-1 text-xs">
+                  <div className="font-medium truncate">{city.cityName}</div>
+                  <div className="text-right font-semibold text-red-600">
+                    {relevantPercentage.toFixed(1)}%
+                  </div>
+                  <div className="text-right text-gray-600">
+                    {city.standardPercentage.toFixed(1)}%
+                  </div>
+                  <div className="text-right text-gray-600">
+                    {city.standardDays.toFixed(1)}
+                  </div>
+                  <div className="text-right text-gray-600">
+                    {city.actualDays.toFixed(1)}
+                  </div>
+                  <div className="text-right text-gray-600">
+                    {city.inboundPercentage.toFixed(1)}%
+                  </div>
+                  <div className="text-right text-gray-600">
+                    {city.outboundPercentage.toFixed(1)}%
+                  </div>
                 </div>
-                <div className="text-right text-gray-600">
-                  {city.standardPercentage.toFixed(1)}%
-                </div>
-                <div className="text-right text-gray-600">
-                  {city.standardDays.toFixed(1)}
-                </div>
-                <div className="text-right text-gray-600">
-                  {city.actualDays.toFixed(1)}
-                </div>
-                <div className="text-right text-gray-600">
-                  {city.inboundPercentage.toFixed(1)}%
-                </div>
-                <div className="text-right text-gray-600">
-                  {city.outboundPercentage.toFixed(1)}%
-                </div>
-              </div>
-            ))}
+              );
+            })}
             {(!metrics?.topWorstCities || metrics.topWorstCities.filter(c => c.status === 'critical' || c.status === 'warning').length === 0) && (
               <div className="text-sm text-gray-500 text-center py-2">{t('reporting.no_underserved_cities')}</div>
             )}
@@ -683,6 +729,21 @@ export default function TerritoryEquity() {
         <div className="p-6">
           {activeTab === 'city' && (
             <div className="space-y-6">
+              {/* Treemap Visualization */}
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <h3 className="text-lg font-semibold">{t('reporting.city_service_equity_treemap')}</h3>
+                  <SmartTooltip content={tooltips.treemap} />
+                </div>
+                <TerritoryEquityTreemap 
+                  data={cityData} 
+                  scenarioInfo={hookScenarioInfo}
+                  globalWarningThreshold={globalWarningThreshold}
+                  globalCriticalThreshold={globalCriticalThreshold}
+                  scenarioDescription={scenarioDescription}
+                />
+              </div>
+
               {/* Inbound vs Outbound Chart */}
               <div>
                 <div className="flex items-center gap-2 mb-4">
@@ -691,16 +752,7 @@ export default function TerritoryEquity() {
                   </h3>
                   <SmartTooltip content={tooltips.inboundOutboundChart} />
                 </div>
-                <InboundOutboundChart data={cityData} />
-              </div>
-
-              {/* Treemap Visualization */}
-              <div>
-                <div className="flex items-center gap-2 mb-4">
-                  <h3 className="text-lg font-semibold">{t('reporting.city_service_equity_treemap')}</h3>
-                  <SmartTooltip content={tooltips.treemap} />
-                </div>
-                <TerritoryEquityTreemap data={cityData} />
+                <InboundOutboundChart data={cityData} scenarioDescription={scenarioDescription} />
               </div>
 
               {/* City Table */}
@@ -723,6 +775,8 @@ export default function TerritoryEquity() {
                   onCityClick={setSelectedCity} 
                   globalWarningThreshold={globalWarningThreshold}
                   globalCriticalThreshold={globalCriticalThreshold}
+                  scenarioInfo={hookScenarioInfo}
+                  scenarioDescription={scenarioDescription}
                 />
               </div>
             </div>
@@ -730,32 +784,75 @@ export default function TerritoryEquity() {
 
           {activeTab === 'regional' && (
             <div className="space-y-6">
-              {/* Regional Chart */}
+              {/* Regional Treemap - Always visible */}
               <div>
                 <div className="flex items-center gap-2 mb-4">
-                  <h3 className="text-lg font-semibold">{t('reporting.regional_equity_comparison')}</h3>
-                  <SmartTooltip content={tooltips.regionalChart} />
+                  <h3 className="text-lg font-semibold">{t('reporting.regional_service_equity_treemap')}</h3>
+                  <SmartTooltip content={tooltips.treemap} />
                 </div>
-                <RegionalEquityChart data={regionData} />
+                <RegionalEquityTreemap 
+                  data={regionData} 
+                  scenarioInfo={hookScenarioInfo}
+                  globalWarningThreshold={globalWarningThreshold}
+                  globalCriticalThreshold={globalCriticalThreshold}
+                  scenarioDescription={scenarioDescription}
+                />
               </div>
 
-              {/* Regional Table */}
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-lg font-semibold">{t('reporting.regional_equity_details')}</h3>
-                    <SmartTooltip content={tooltips.regionalTable} />
-                  </div>
-                  <button
-                    onClick={handleExportRegionalCSV}
-                    className="flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-                  >
-                    <Download className="w-4 h-4" />
-                    {t('common.export_csv')}
-                  </button>
-                </div>
-                <RegionalEquityTable data={regionData} onRegionClick={setSelectedRegion} scenarioInfo={scenarioInfo} filters={filters} />
+              {/* Region Filter */}
+              <div className="bg-white p-4 rounded-lg border border-gray-200">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Region - Analyze inbound shipments to cities within a specific region
+                </label>
+                <select
+                  value={filters.region || ''}
+                  onChange={(e) => setFilters({ ...filters, region: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">All Regions (Treemap view only)</option>
+                  {availableRegions.map(region => (
+                    <option key={region} value={region}>{region}</option>
+                  ))}
+                </select>
               </div>
+
+              {/* City Table - Only when region is selected */}
+              {filters.region && (() => {
+                const filteredCities = cityData.filter(c => c.regionName === filters.region);
+                return (
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-lg font-semibold">
+                        Cities in {filters.region} Region - Inbound Analysis
+                      </h3>
+                      <SmartTooltip content="Detailed breakdown of cities within the selected region, showing inbound shipments and service equity metrics." />
+                    </div>
+                    <button
+                      onClick={handleExportCSV}
+                      className="flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                    >
+                      <Download className="w-4 h-4" />
+                      {t('common.export_csv')}
+                    </button>
+                  </div>
+                  <TerritoryEquityTable 
+                    data={filteredCities}
+                    onCityClick={setSelectedCity}
+                    globalWarningThreshold={globalWarningThreshold}
+                    globalCriticalThreshold={globalCriticalThreshold}
+                    scenarioInfo={{
+                      scenario: 'origin',
+                      isOriginView: true,
+                      isDestinationView: false,
+                      isRouteView: false,
+                      isGeneralView: false
+                    }}
+                    scenarioDescription={`Showing cities in ${filters.region} region with inbound shipment analysis`}
+                  />
+                </div>
+                );
+              })()}
             </div>
           )}
 
@@ -764,6 +861,10 @@ export default function TerritoryEquity() {
               <div>
                 <div className="mb-4">
                   <h3 className="text-lg font-semibold mb-2">{t('reporting.geographic_distribution')}</h3>
+                  {/* Scenario Description */}
+                  <div className="mb-3 px-4 py-3 bg-blue-50 border border-blue-100 rounded-lg">
+                    <p className="text-sm text-blue-800">{scenarioDescription}</p>
+                  </div>
                   <p className="text-sm text-gray-600">
                     {t('reporting.map_interactive_description')}
                   </p>

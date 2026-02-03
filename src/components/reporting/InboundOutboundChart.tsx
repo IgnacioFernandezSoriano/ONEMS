@@ -6,9 +6,10 @@ import { useTranslation } from '@/hooks/useTranslation';
 
 interface InboundOutboundChartProps {
   data: CityEquityData[];
+  scenarioDescription: string;
 }
 
-export function InboundOutboundChart({ data }: InboundOutboundChartProps) {
+export function InboundOutboundChart({ data, scenarioDescription }: InboundOutboundChartProps) {
   const { t } = useTranslation();
   // Filter cities that have at least one valid direction (shipments > 0 or standardDays > 0)
   // Then sort by direction gap (descending) and take top 10
@@ -39,7 +40,13 @@ export function InboundOutboundChart({ data }: InboundOutboundChartProps) {
       : 90;
 
   return (
-    <div className="w-full h-96">
+    <>
+      {/* Scenario Description */}
+      <div className="mb-4 px-4 py-3 bg-blue-50 border border-blue-100 rounded-lg">
+        <p className="text-sm text-blue-800">{scenarioDescription}</p>
+      </div>
+      
+      <div className="w-full h-96">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
           <CartesianGrid strokeDasharray="3 3" />
@@ -80,6 +87,7 @@ export function InboundOutboundChart({ data }: InboundOutboundChartProps) {
           <Bar dataKey="outbound" fill="#10b981" name={t('reporting.outbound_percent')} />
         </BarChart>
       </ResponsiveContainer>
-    </div>
+      </div>
+    </>
   );
 }
