@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { useTerritoryEquityDataV2 as useTerritoryEquityData } from '@/hooks/reporting/useTerritoryEquityDataV2';
@@ -57,6 +57,16 @@ export default function TerritoryEquity() {
     loadRegions();
   }, [profile?.account_id]);
 
+  // Prepare filters based on active tab - region filter only applies in Regional Analysis
+  const effectiveFilters = useMemo(() => {
+    if (activeTab === 'regional') {
+      return filters;
+    }
+    // For City Analysis and Map, exclude region filter
+    const { region, ...filtersWithoutRegion } = filters;
+    return filtersWithoutRegion;
+  }, [filters, activeTab]);
+
   const { 
     cityData, 
     regionData, 
@@ -69,7 +79,7 @@ export default function TerritoryEquity() {
     scenarioInfo: hookScenarioInfo
   } = useTerritoryEquityData(
     profile?.account_id || undefined,
-    filters
+    effectiveFilters
   );
 
   const { generateMarkdownReport, downloadMarkdown } = useEquityAuditExport();

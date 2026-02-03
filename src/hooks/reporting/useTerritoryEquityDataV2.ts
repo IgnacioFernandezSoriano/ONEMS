@@ -655,7 +655,7 @@ export function useTerritoryEquityDataV2(
         }
 
         if (filters?.region) {
-          filteredCityData = filteredCityData.filter((c) => c.regionId === filters.region);
+          filteredCityData = filteredCityData.filter((c) => c.regionName === filters.region);
         }
 
         // Filter cities based on scenario to exclude origin/destination city from metrics
