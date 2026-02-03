@@ -72,6 +72,7 @@ export default function TerritoryEquity() {
     cityData, 
     regionData, 
     metrics, 
+    routeData,
     loading, 
     error, 
     globalWarningThreshold, 
@@ -1035,10 +1036,9 @@ export default function TerritoryEquity() {
                   </p>
                 </div>
                 <ProductAnalysisTable 
-                  data={cityData}
+                  routeData={routeData}
                   globalWarningThreshold={globalWarningThreshold}
                   globalCriticalThreshold={globalCriticalThreshold}
-                  isOriginView={hookScenarioInfo.isOriginView}
                 />
               </div>
             </div>

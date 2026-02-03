@@ -21,6 +21,7 @@ export function useTerritoryEquityDataV2(
   const [cityData, setCityData] = useState<CityEquityData[]>([]);
   const [regionData, setRegionData] = useState<RegionEquityData[]>([]);
   const [metrics, setMetrics] = useState<TerritoryEquityMetrics | null>(null);
+  const [routeData, setRouteData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [globalWarningThreshold, setGlobalWarningThreshold] = useState<number>(80);
@@ -148,6 +149,7 @@ export function useTerritoryEquityDataV2(
         if (!shipments || shipments.length === 0) {
           setCityData([]);
           setRegionData([]);
+          setRouteData([]);
           setMetrics({
             serviceEquityIndex: 0,
             populationWeightedCompliance: 0,
@@ -1127,8 +1129,96 @@ export function useTerritoryEquityDataV2(
             status: r.status,
           }));
 
-        // 9. Set state
+        // 9. Build route-level data for Product Analysis
+        const routeMap = new Map<string, {
+          origin: string;
+          destination: string;
+          carrier: string;
+          product: string;
+          total: number;
+          compliant: number;
+          standardSum: number;
+          standardCount: number;
+          actualDaysArray: number[];
+          standardDaysArray: number[];
+        }>();
+
+        shipments.forEach(s => {
+          const routeKey = `${s.origin_city_name}|${s.destination_city_name}|${s.carrier_name}|${s.product_name}`;
+          if (!routeMap.has(routeKey)) {
+            routeMap.set(routeKey, {
+              origin: s.origin_city_name,
+              destination: s.destination_city_name,
+              carrier: s.carrier_name,
+              product: s.product_name,
+              total: 0,
+              compliant: 0,
+              standardSum: 0,
+              standardCount: 0,
+              actualDaysArray: [],
+              standardDaysArray: [],
+            });
+          }
+          const route = routeMap.get(routeKey)!;
+          route.total++;
+          if (s.is_compliant) route.compliant++;
+          
+          // Find standard for this route
+          const standard = standardsMap.get(
+            `${s.origin_city_name}|${s.destination_city_name}|${s.carrier_name}|${s.product_name}`
+          );
+          if (standard) {
+            const successPct = standard.success_percentage || 85;
+            route.standardSum += successPct;
+            route.standardCount++;
+            if (standard.standard_days != null) {
+              route.standardDaysArray.push(standard.standard_days);
+            }
+          }
+          if (s.business_transit_days != null) {
+            route.actualDaysArray.push(s.business_transit_days);
+          }
+        });
+
+        const routeData = Array.from(routeMap.values()).map(r => {
+          const standardPercentage = r.standardCount > 0 ? r.standardSum / r.standardCount : 85;
+          const actualPercentage = r.total > 0 ? (r.compliant / r.total) * 100 : 0;
+          const deviation = actualPercentage - standardPercentage;
+          const standardDays = r.standardDaysArray.length > 0
+            ? r.standardDaysArray.reduce((sum, d) => sum + d, 0) / r.standardDaysArray.length
+            : 0;
+          const actualDays = r.actualDaysArray.length > 0
+            ? r.actualDaysArray.reduce((sum, d) => sum + d, 0) / r.actualDaysArray.length
+            : 0;
+          
+          // Calculate status based on actual% vs absolute thresholds
+          let status: 'compliant' | 'warning' | 'critical';
+          if (actualPercentage >= globalWarningThreshold) {
+            status = 'compliant';
+          } else if (actualPercentage >= globalCriticalThreshold) {
+            status = 'warning';
+          } else {
+            status = 'critical';
+          }
+
+          return {
+            origin: r.origin,
+            destination: r.destination,
+            carrier: r.carrier,
+            product: r.product,
+            totalShipments: r.total,
+            standardPercentage,
+            actualPercentage,
+            deviation,
+            standardDays,
+            actualDays,
+            status,
+          };
+        });
+
+        // 10. Set state
         setCityData(filteredCityData);
+        setRouteData(routeData);
         
         // RegionData is NOT filtered - treemap always shows all regions
         setRegionData(regionEquityData);
@@ -1182,6 +1272,7 @@ export function useTerritoryEquityDataV2(
     cityData, 
     regionData, 
     metrics, 
+    routeData,
     loading, 
     error, 
     globalWarningThreshold, 

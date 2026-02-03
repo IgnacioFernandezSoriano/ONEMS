@@ -242,6 +242,23 @@ export function TerritoryEquityTable({
         
         // Add product - Calculate status based on deviation
         const productDeviation = relevantPercentage - cp.standardPercentage;
+        
+        // Debug: Log first product to check thresholds
+        if (city.cityName === 'Baltimore' && cp.carrier === 'Carrier B' && cp.product === 'EXPRESS') {
+          console.log('DEBUG Product Status:', {
+            city: city.cityName,
+            carrier: cp.carrier,
+            product: cp.product,
+            relevantPercentage,
+            standardPercentage: cp.standardPercentage,
+            productDeviation,
+            globalWarningThreshold,
+            globalCriticalThreshold,
+            check1: productDeviation >= -globalWarningThreshold,
+            check2: productDeviation >= -globalCriticalThreshold
+          });
+        }
+        
         const productStatus: 'compliant' | 'warning' | 'critical' = 
           productDeviation >= -globalWarningThreshold ? 'compliant' :
           productDeviation >= -globalCriticalThreshold ? 'warning' : 'critical';

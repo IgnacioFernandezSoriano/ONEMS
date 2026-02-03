@@ -4,10 +4,9 @@ import type { CityEquityData } from '@/types/reporting';
 import { useTranslation } from '@/hooks/useTranslation';
 
 interface ProductAnalysisTableProps {
-  data: CityEquityData[];
+  routeData: any[];
   globalWarningThreshold: number;
   globalCriticalThreshold: number;
-  isOriginView: boolean;
 }
 
 type ProductRow = {
@@ -23,51 +22,29 @@ type ProductRow = {
 };
 
 export function ProductAnalysisTable({
-  data,
+  routeData,
   globalWarningThreshold,
   globalCriticalThreshold,
-  isOriginView,
 }: ProductAnalysisTableProps) {
   const { t } = useTranslation();
   const [equityStatusFilter, setEquityStatusFilter] = useState<string[]>([]);
   const [sortField, setSortField] = useState<keyof ProductRow>('origin');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
-  // Build flat product rows from cityData
+  // Use route data directly
   const productRows: ProductRow[] = useMemo(() => {
-    const rows: ProductRow[] = [];
-
-    data.forEach(city => {
-      city.carrierProductBreakdown?.forEach(cp => {
-        // Use relevant percentage based on view
-        const relevantPercentage = isOriginView ? cp.inboundPercentage : cp.outboundPercentage;
-        const deviation = relevantPercentage - cp.standardPercentage;
-        
-        let status: 'compliant' | 'warning' | 'critical';
-        if (deviation >= -globalWarningThreshold) {
-          status = 'compliant';
-        } else if (deviation >= -globalCriticalThreshold) {
-          status = 'warning';
-        } else {
-          status = 'critical';
-        }
-
-        rows.push({
-          origin: city.cityName,
-          destination: 'All Destinations',
-          carrier: cp.carrier,
-          product: cp.product,
-          totalShipments: cp.totalShipments,
-          standardPercentage: cp.standardPercentage,
-          actualPercentage: relevantPercentage,
-          deviation,
-          status,
-        });
-      });
-    });
-
-    return rows;
-  }, [data, globalWarningThreshold, globalCriticalThreshold, isOriginView]);
+    return routeData.map(route => ({
+      origin: route.origin,
+      destination: route.destination,
+      carrier: route.carrier,
+      product: route.product,
+      totalShipments: route.totalShipments,
+      standardPercentage: route.standardPercentage,
+      actualPercentage: route.actualPercentage,
+      deviation: route.deviation,
+      status: route.status,
+    }));
+  }, [routeData]);
 
   // Filter by equity status
   const filteredRows = useMemo(() => {
