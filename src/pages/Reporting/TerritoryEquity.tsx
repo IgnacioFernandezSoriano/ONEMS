@@ -510,6 +510,11 @@ export default function TerritoryEquity() {
         })}
       />
 
+      {/* Scenario Description */}
+      <div className="mb-4 px-4 py-3 bg-blue-50 border border-blue-100 rounded-lg">
+        <p className="text-sm text-blue-800">{scenarioDescription}</p>
+      </div>
+
       {/* KPIs - Reorganized */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
         {/* KPI 1: Service Equity Index + Population-Weighted Compliance (Unified) */}
