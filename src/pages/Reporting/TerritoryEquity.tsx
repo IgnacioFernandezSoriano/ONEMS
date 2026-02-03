@@ -605,7 +605,7 @@ export default function TerritoryEquity() {
           <div className="flex items-center gap-1 mt-1">
             <AlertTriangle className="w-4 h-4 text-red-500" />
             <span className="text-sm text-gray-500">
-              about {metrics?.totalCities || 0} cities
+              of {metrics?.totalCities || 0} cities
             </span>
           </div>
           <div className="border-t mt-3 pt-3">
@@ -615,7 +615,7 @@ export default function TerritoryEquity() {
             </div>
             <div className="flex items-center gap-1 mt-1">
               <Users className="w-4 h-4 text-red-500" />
-              <span className="text-xs text-gray-500">{t('reporting.in_critical_cities')}</span>
+              <span className="text-xs text-gray-500">citizens in underserved cities</span>
             </div>
           </div>
         </div>
