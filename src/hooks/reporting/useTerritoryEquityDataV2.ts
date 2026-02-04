@@ -741,11 +741,15 @@ export function useTerritoryEquityDataV2(
         // Group shipments by destination city, carrier, product
         const destinationRouteMap = new Map<string, { total: number; compliant: number; standardPercentage: number }>();
         
+        console.log('[UNDERSERVED DEBUG] Total shipments:', shipments.length);
+        console.log('[UNDERSERVED DEBUG] Global critical threshold:', globalCriticalThreshold);
+        
         shipments.forEach((shipment: any) => {
+          const originCity = shipment.origin_city_name;
           const destCity = shipment.destination_city_name;
           const carrier = shipment.carrier_name;
           const product = shipment.product_name;
-          const key = `${destCity}|${carrier}|${product}`;
+          const key = `${originCity}|${destCity}|${carrier}|${product}`;
           
           if (!destinationRouteMap.has(key)) {
             // Get standard for this route
@@ -778,15 +782,26 @@ export function useTerritoryEquityDataV2(
         });
         
         // Check each route for critical status
+        console.log('[UNDERSERVED DEBUG] Total routes in map:', destinationRouteMap.size);
         destinationRouteMap.forEach((stats, key) => {
-          const [destCity] = key.split('|');
+          const [originCity, destCity, carrier, product] = key.split('|');
           const inboundPercentage = (stats.compliant / stats.total) * 100;
           const criticalThreshold = stats.standardPercentage - globalCriticalThreshold;
           
+          console.log(`[UNDERSERVED DEBUG] Route: ${key}`);
+          console.log(`  - Total: ${stats.total}, Compliant: ${stats.compliant}`);
+          console.log(`  - Inbound %: ${inboundPercentage.toFixed(2)}%`);
+          console.log(`  - Standard %: ${stats.standardPercentage}%`);
+          console.log(`  - Critical threshold: ${criticalThreshold}%`);
+          console.log(`  - Is critical: ${inboundPercentage < criticalThreshold}`);
+          
           if (inboundPercentage < criticalThreshold) {
             criticalDestinationCities.add(destCity);
+            console.log(`  - ✓ Added ${destCity} to critical cities`);
           }
         });
+        
+        console.log('[UNDERSERVED DEBUG] Critical destination cities:', Array.from(criticalDestinationCities));
         
         // Get city data for critical cities
         const underservedCities = cityEquityData.filter(c => 
