@@ -84,6 +84,13 @@ export function useTerritoryEquityDataV2(
         const carrierNameToIdMap = new Map(carriers.map((c) => [c.name, c.id]));
         const productDescToIdMap = new Map(products.map((p) => [`${p.code} - ${p.description}`, p.id]));
 
+        // Debug: Log sample data from lookup maps
+        console.log('[DEBUG] Lookup maps:', {
+          cities: Array.from(cityNameToIdMap.entries()).slice(0, 3),
+          carriers: Array.from(carrierNameToIdMap.entries()).slice(0, 3),
+          products: Array.from(productDescToIdMap.entries()).slice(0, 3),
+        });
+
         // Standards map: "carrier_id|product_id|origin_id|dest_id" → standard
         const standardsMap = new Map(
           standards.map((s) => [
@@ -91,6 +98,12 @@ export function useTerritoryEquityDataV2(
             s,
           ])
         );
+        
+        console.log('[DEBUG] Standards map:', {
+          size: standardsMap.size,
+          sampleKeys: Array.from(standardsMap.keys()).slice(0, 3),
+          sampleValues: Array.from(standardsMap.values()).slice(0, 1),
+        });
 
         // Calculate global thresholds (average of all standards)
         let warningThreshold = 80;
@@ -1171,9 +1184,33 @@ export function useTerritoryEquityDataV2(
           const carrierId = carrierNameToIdMap.get(s.carrier_name);
           const productId = productDescToIdMap.get(s.product_name);
           
+          // Debug: Log first shipment details
+          if (route.total === 0) {
+            console.log('[routeData DEBUG] First shipment for route:', {
+              origin: s.origin_city_name,
+              destination: s.destination_city_name,
+              carrier: s.carrier_name,
+              product: s.product_name,
+              originCityId,
+              destCityId,
+              carrierId,
+              productId,
+              standardKey: `${carrierId}|${productId}|${originCityId}|${destCityId}`,
+              standardsMapSize: standardsMap.size,
+              standardsMapKeys: Array.from(standardsMap.keys()).slice(0, 5),
+            });
+          }
+          
           const standard = (originCityId && destCityId && carrierId && productId)
             ? standardsMap.get(`${carrierId}|${productId}|${originCityId}|${destCityId}`)
             : undefined;
+          
+          if (route.total === 0 && standard) {
+            console.log('[routeData DEBUG] Standard found:', standard);
+          } else if (route.total === 0 && !standard) {
+            console.log('[routeData DEBUG] Standard NOT found');
+          }
+          
           if (standard) {
             const successPct = standard.success_percentage || 85;
             route.standardSum += successPct;
