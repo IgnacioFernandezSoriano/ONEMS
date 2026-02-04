@@ -198,13 +198,6 @@ export function Sidebar() {
           tooltip: t('menu.reporting_e2e.tooltip'),
           children: [
             {
-              path: '/reporting/dashboard',
-              label: t('menu.reporting_dashboard'),
-              icon: LayoutDashboard,
-              roles: ['admin', 'superadmin'],
-              tooltip: t('menu.reporting_dashboard.tooltip'),
-            },
-            {
               path: '/reporting/jk-performance',
               label: t('menu.reporting_jk'),
               icon: Clock,

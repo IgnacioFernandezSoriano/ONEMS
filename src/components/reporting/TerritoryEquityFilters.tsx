@@ -260,18 +260,6 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
 
         {/* Equity Status moved to Product Analysis tab */}
       </div>
-
-      {/* Filter Guidance */}
-      <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-        <h4 className="text-sm font-semibold text-blue-900 mb-1">{t('reporting.territory_equity_filter_guide')}</h4>
-        <ul className="text-xs text-blue-800 space-y-1">
-          <li>• <strong>{t('reporting.filter_no_filters')}</strong> {t('reporting.view_overall_service_equity_across_all_cities_and_')}</li>
-
-          <li>• <strong>{t('reporting.filter_equity_status_label')}</strong> {t('reporting.filter_equity_status_desc')}</li>
-          <li>• <strong>{t('reporting.filter_carrier_product_label')}</strong> {t('reporting.filter_carrier_product_desc_narrow')}</li>
-          <li>• <strong>{t('reporting.filter_date_range_label')}</strong> {t('reporting.filter_date_range_desc')}</li>
-        </ul>
-      </div>
       </>
       )}
     </div>
