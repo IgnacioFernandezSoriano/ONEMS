@@ -18,7 +18,6 @@ import { SmartTooltip } from '@/components/common/SmartTooltip';
 import type { CityEquityData, RegionEquityData, TerritoryEquityFilters as Filters } from '@/types/reporting';
 
 import { useTranslation } from '@/hooks/useTranslation';
-import { useFilterScenario } from '@/hooks/reporting/useFilterScenario';
 export default function TerritoryEquity() {
   const { t } = useTranslation();
   const { profile } = useAuth();
@@ -53,8 +52,8 @@ export default function TerritoryEquity() {
 
   const { generateMarkdownReport, downloadMarkdown } = useEquityAuditExport();
 
-  // Detect current filter scenario
-  const scenarioInfo = useFilterScenario(filters);
+  // Use scenarioInfo from the hook (hookScenarioInfo)
+  const scenarioInfo = hookScenarioInfo;
 
   // Switch to city tab when city filters are applied (regional tab should be hidden)
   React.useEffect(() => {

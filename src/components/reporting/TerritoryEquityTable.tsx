@@ -338,22 +338,20 @@ export function TerritoryEquityTable({
       };
     })
     .filter(cityRow => {
-      // Only include cities that have carriers (and thus products matching the filter)
-      const metrics = getMetricsForCity(cityRow.originalCity);
-      const hasData = (metrics.shipments > 0 || metrics.standardDays > 0) && cityRow.carrierBreakdown.length > 0;
-      
-      if (!hasData) return false;
-      
       // In route view (origin AND destination filtered), exclude destination city if it has no outbound data
       if (scenarioInfo.isRouteView && scenarioInfo.destinationCityName) {
         if (cityRow.cityName === scenarioInfo.destinationCityName) {
           // Only include destination city if it has outbound data
           const hasOutboundData = cityRow.originalCity.outboundShipments > 0;
-          return hasOutboundData;
+          if (!hasOutboundData) return false;
         }
       }
       
-      return true;
+      // Only include cities that have carriers (and thus products matching the filter)
+      const metrics = getMetricsForCity(cityRow.originalCity);
+      const hasData = (metrics.shipments > 0 || metrics.standardDays > 0) && cityRow.carrierBreakdown.length > 0;
+      
+      return hasData;
     });
 
   // Auto-expand all when showProductBreakdown is true
