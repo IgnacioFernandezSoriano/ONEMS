@@ -849,52 +849,10 @@ export function useTerritoryEquityDataV2(
           // Use their outboundPercentage (shipments departing TO the destination)
           // Citizens affected = population of DESTINATION city
           useOutboundMetric = true;
-          // Get destination city from cityMap since it won't be in cityEquityData
-          console.log('[CITIZENS DEBUG] filters?.destinationCity:', filters?.destinationCity);
-          console.log('[CITIZENS DEBUG] cityMap keys sample:', Array.from(cityMap.keys()).slice(0, 5));
-          const destCity = cityMap.get(filters?.destinationCity || '');
-          console.log('[CITIZENS DEBUG] destCity found:', destCity ? { name: destCity.name, pop: destCity.population } : 'NOT FOUND');
-          if (destCity) {
-            citizensAffectedCities = [{
-              cityId: destCity.id,
-              cityName: destCity.name,
-              regionId: destCity.region_id,
-              regionName: destCity.region_name,
-              classification: destCity.classification || null,
-              population: destCity.population || null,
-              latitude: destCity.latitude || null,
-              longitude: destCity.longitude || null,
-              totalShipments: 0,
-              compliantShipments: 0,
-              standardPercentage: 0,
-              standardDays: 0,
-              actualDays: 0,
-              actualPercentage: 0,
-              deviation: 0,
-              status: 'compliant' as const,
-              aggregatedWarningThreshold: 80,
-              aggregatedCriticalThreshold: 75,
-              inboundShipments: 0,
-              inboundCompliant: 0,
-              inboundPercentage: 0,
-              inboundStandardPercentage: 0,
-              inboundStandardDays: 0,
-              inboundActualDays: 0,
-              inboundDeviation: 0,
-              outboundShipments: 0,
-              outboundCompliant: 0,
-              outboundPercentage: 0,
-              outboundStandardPercentage: 0,
-              outboundStandardDays: 0,
-              outboundActualDays: 0,
-              outboundDeviation: 0,
-              directionGap: 0,
-              carrierProductBreakdown: [],
-              accountId: destCity.account_id,
-            }];
-          } else {
-            citizensAffectedCities = [];
-          }
+          // Get destination city from cityEquityData (same logic as Underserved Cities)
+          citizensAffectedCities = cityEquityData.filter(c => 
+            c.cityName === filters?.destinationCity
+          );
           console.log('[CITIZENS DEBUG] Destination View - citizensAffectedCities:', citizensAffectedCities.map(c => ({ name: c.cityName, pop: c.population })));
         } else if (scenarioInfo.isRouteView) {
           // Route: weight by destination city only
