@@ -770,17 +770,24 @@ export function useTerritoryEquityDataV2(
         let relevantCitiesForPopWeight = filteredCityData;
         let useInboundMetric = false;
         let useOutboundMetric = false;
+        let citizensAffectedCities = filteredCityData;
         
         if (scenarioInfo.isOriginView) {
-          // Outbound: weight by destination cities only (already filtered)
+          // Outbound: weight by destination cities (already filtered - origin excluded)
+          // Citizens affected = population of ORIGIN city
           useOutboundMetric = true;
+          citizensAffectedCities = cityEquityData.filter(c => c.cityName === filters?.originCity);
         } else if (scenarioInfo.isDestinationView) {
-          // Inbound: weight by origin cities only (already filtered)
+          // Inbound: weight by origin cities (already filtered - destination excluded)
+          // Citizens affected = population of DESTINATION city
           useInboundMetric = true;
+          citizensAffectedCities = cityEquityData.filter(c => c.cityName === filters?.destinationCity);
         } else if (scenarioInfo.isRouteView) {
           // Route: weight by destination city only
+          // Citizens affected = population of DESTINATION city
           relevantCitiesForPopWeight = filteredCityData.filter(c => c.cityName === filters?.destinationCity);
           useInboundMetric = true;
+          citizensAffectedCities = cityEquityData.filter(c => c.cityName === filters?.destinationCity);
         }
         
         const popWeightTotalPopulation = relevantCitiesForPopWeight.reduce((sum, c) => sum + (c.population || 0), 0);
@@ -811,8 +818,8 @@ export function useTerritoryEquityDataV2(
               }, 0)
             : 0;
         
-        // Update citizensAffected to use correct population
-        const citizensAffected = popWeightTotalPopulation;
+        // Citizens Affected: Use the relevant city population based on scenario
+        const citizensAffected = citizensAffectedCities.reduce((sum, c) => sum + (c.population || 0), 0);
 
         // Sample-Weighted Compliance (weighted by number of shipments)
         const totalSamples = filteredCityData.reduce((sum, c) => sum + c.totalShipments, 0);
