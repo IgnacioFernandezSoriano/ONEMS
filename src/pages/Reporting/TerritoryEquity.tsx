@@ -12,6 +12,7 @@ import { TerritoryEquityFilters } from '@/components/reporting/TerritoryEquityFi
 import { TerritoryEquityTreemap } from '@/components/reporting/TerritoryEquityTreemap';
 import { TerritoryEquityMap } from '@/components/reporting/TerritoryEquityMap';
 import { ProductAnalysisTable } from '@/components/reporting/ProductAnalysisTable';
+import { PerformanceTrendChart } from '@/components/reports/PerformanceTrendChart';
 import { useEquityAuditExport } from '@/hooks/reporting/useEquityAuditExport';
 import { tooltips } from '@/components/reporting/TerritoryEquityTooltips';
 import { Info, Download, TrendingUp, Users, AlertTriangle, Award, FileText, Map, Package } from 'lucide-react';
@@ -73,6 +74,7 @@ export default function TerritoryEquity() {
     regionData, 
     metrics, 
     routeData,
+    trendData,
     loading, 
     error, 
     globalWarningThreshold, 
@@ -892,6 +894,11 @@ export default function TerritoryEquity() {
                   globalCriticalThreshold={globalCriticalThreshold}
                   scenarioDescription={scenarioDescription}
                 />
+              </div>
+
+              {/* Performance Trend Chart */}
+              <div>
+                <PerformanceTrendChart data={trendData} />
               </div>
 
               {/* Inbound vs Outbound Chart */}

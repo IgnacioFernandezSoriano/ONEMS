@@ -22,6 +22,7 @@ export function useTerritoryEquityDataV2(
   const [regionData, setRegionData] = useState<RegionEquityData[]>([]);
   const [metrics, setMetrics] = useState<TerritoryEquityMetrics | null>(null);
   const [routeData, setRouteData] = useState<any[]>([]);
+  const [trendData, setTrendData] = useState<Array<{ date: string; avgDays: number; compliancePercent: number }>>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [globalWarningThreshold, setGlobalWarningThreshold] = useState<number>(80);
@@ -150,6 +151,7 @@ export function useTerritoryEquityDataV2(
           setCityData([]);
           setRegionData([]);
           setRouteData([]);
+          setTrendData([]);
           setMetrics({
             serviceEquityIndex: 0,
             populationWeightedCompliance: 0,
@@ -1217,9 +1219,37 @@ export function useTerritoryEquityDataV2(
           };
         });
 
-        // 10. Set state
+        // 10. Calculate trend data (daily aggregation)
+        const trendMap = new Map<string, { totalDays: number; count: number; compliant: number }>();
+        shipments.forEach(s => {
+          if (!s.sent_at) return;
+          const date = new Date(s.sent_at);
+          const dateKey = date.toISOString().split('T')[0]; // YYYY-MM-DD
+          if (!trendMap.has(dateKey)) {
+            trendMap.set(dateKey, { totalDays: 0, count: 0, compliant: 0 });
+          }
+          const trend = trendMap.get(dateKey)!;
+          trend.count++;
+          if (s.business_transit_days != null) {
+            trend.totalDays += s.business_transit_days;
+          }
+          if (s.on_time_delivery) {
+            trend.compliant++;
+          }
+        });
+
+        const trendDataArray = Array.from(trendMap.entries())
+          .map(([dateKey, data]) => ({
+            date: dateKey,
+            avgDays: data.count > 0 ? data.totalDays / data.count : 0,
+            compliancePercent: data.count > 0 ? (data.compliant / data.count) * 100 : 0,
+          }))
+          .sort((a, b) => a.date.localeCompare(b.date));
+
+        // 11. Set state
         setCityData(filteredCityData);
         setRouteData(routeData);
+        setTrendData(trendDataArray);
         
         // RegionData is NOT filtered - treemap always shows all regions
         setRegionData(regionEquityData);
@@ -1274,6 +1304,7 @@ export function useTerritoryEquityDataV2(
     regionData, 
     metrics, 
     routeData,
+    trendData,
     loading, 
     error, 
     globalWarningThreshold, 

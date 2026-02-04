@@ -109,9 +109,11 @@ export function TerritoryEquityTreemap({ data, scenarioInfo, globalWarningThresh
               x={x + width / 2}
               y={y + height / 2 - 15}
               textAnchor="middle"
-              fill={textColor}
+              fill="#000000"
               fontSize={16}
               fontWeight="bold"
+              stroke="#000000"
+              strokeWidth={0.5}
             >
               {name}
             </text>
@@ -119,8 +121,11 @@ export function TerritoryEquityTreemap({ data, scenarioInfo, globalWarningThresh
               x={x + width / 2}
               y={y + height / 2 + 5}
               textAnchor="middle"
-              fill={textColor}
+              fill="#000000"
               fontSize={16}
+              fontWeight="bold"
+              stroke="#000000"
+              strokeWidth={0.5}
             >
               {(actualPercentage || 0).toFixed(1)}%
             </text>
@@ -129,8 +134,11 @@ export function TerritoryEquityTreemap({ data, scenarioInfo, globalWarningThresh
                 x={x + width / 2}
                 y={y + height / 2 + 25}
                 textAnchor="middle"
-                fill={textColor}
+                fill="#000000"
                 fontSize={16}
+                fontWeight="bold"
+                stroke="#000000"
+                strokeWidth={0.5}
                 opacity={0.9}
               >
                 {population ? `${(population / 1000).toFixed(0)}K pop` : `${totalShipments} shipments`}
