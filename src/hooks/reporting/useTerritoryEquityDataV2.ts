@@ -27,6 +27,7 @@ export function useTerritoryEquityDataV2(
   const [error, setError] = useState<Error | null>(null);
   const [globalWarningThreshold, setGlobalWarningThreshold] = useState<number>(80);
   const [globalCriticalThreshold, setGlobalCriticalThreshold] = useState<number>(75);
+  const [populationWeightedCitizensAffected, setPopulationWeightedCitizensAffected] = useState<number>(0);
 
   // Detect filter scenario
   const scenarioInfo = useFilterScenario(filters || {});
@@ -165,6 +166,7 @@ export function useTerritoryEquityDataV2(
           setRegionData([]);
           setRouteData([]);
           setTrendData([]);
+          setPopulationWeightedCitizensAffected(0);
           setMetrics({
             serviceEquityIndex: 0,
             populationWeightedCompliance: 0,
@@ -818,8 +820,11 @@ export function useTerritoryEquityDataV2(
               }, 0)
             : 0;
         
-        // Citizens Affected: Use the relevant city population based on scenario
-        const citizensAffected = citizensAffectedCities.reduce((sum, c) => sum + (c.population || 0), 0);
+        // Citizens Affected for Population-Weighted Compliance card
+        const populationWeightedCitizensAffected = citizensAffectedCities.reduce((sum, c) => sum + (c.population || 0), 0);
+        
+        // Citizens Affected for Underserved Cities card (separate calculation)
+        const underservedCitizensAffected = underservedCities.reduce((sum, c) => sum + (c.population || 0), 0);
 
         // Sample-Weighted Compliance (weighted by number of shipments)
         const totalSamples = filteredCityData.reduce((sum, c) => sum + c.totalShipments, 0);
@@ -1385,6 +1390,7 @@ export function useTerritoryEquityDataV2(
         setCityData(filteredCityData);
         setRouteData(routeData);
         setTrendData(trendDataArray);
+        setPopulationWeightedCitizensAffected(populationWeightedCitizensAffected);
         
         // RegionData is NOT filtered - treemap always shows all regions
         setRegionData(regionEquityData);
@@ -1393,7 +1399,7 @@ export function useTerritoryEquityDataV2(
           populationWeightedCompliance,
           sampleWeightedCompliance,
           underservedCitiesCount,
-          citizensAffected,
+          citizensAffected: underservedCitizensAffected,
           topBestCities,
           topWorstCities,
           topBestRegions,
@@ -1445,6 +1451,7 @@ export function useTerritoryEquityDataV2(
     globalWarningThreshold, 
     globalCriticalThreshold,
     scenarioDescription: getScenarioDescription(),
-    scenarioInfo
+    scenarioInfo,
+    populationWeightedCitizensAffected
   };
 }
