@@ -845,68 +845,17 @@ export function useTerritoryEquityDataV2(
           useInboundMetric = true;
           citizensAffectedCities = filteredCityData;
         } else if (scenarioInfo.isDestinationView) {
-          // Destination view: filteredCityData contains ORIGIN cities
-          // But we analyze the DESTINATION city (Los Angeles) which has inbound metrics
-          // Use inboundPercentage of destination city (shipments arriving TO it)
-          // Citizens affected = population of DESTINATION city
-          // Population weighting = based on DESTINATION city population
+          // Destination view: analyze DESTINATION city (has inbound metrics)
           useInboundMetric = true;
           
-          // Build destination city array from cityEquityData (which contains the destination city with inbound metrics)
+          // Get destination city from cityEquityData for metrics
           const destinationCityName = filters?.destinationCity;
           const destinationCityFromEquity = cityEquityData.find(c => c.cityName === destinationCityName);
           
           if (destinationCityFromEquity) {
-            // Use the destination city from cityEquityData (has inbound metrics)
-            citizensAffectedCities = [destinationCityFromEquity];
             relevantCitiesForPopWeight = [destinationCityFromEquity];
           } else {
-            // Fallback: create from cityMap if not in cityEquityData
-            const cityFromMap = cityMap.get(destinationCityName || '');
-            if (cityFromMap) {
-              const cityEntry = {
-                cityId: cityFromMap.id,
-                cityName: cityFromMap.name,
-                regionId: cityFromMap.region_id,
-                regionName: cityFromMap.region_name,
-                classification: cityFromMap.classification || null,
-                population: cityFromMap.population || 0,
-                latitude: cityFromMap.latitude || null,
-                longitude: cityFromMap.longitude || null,
-                totalShipments: 0,
-                compliantShipments: 0,
-                standardPercentage: 0,
-                standardDays: 0,
-                actualDays: 0,
-                actualPercentage: 0,
-                deviation: 0,
-                status: 'compliant' as const,
-                aggregatedWarningThreshold: 80,
-                aggregatedCriticalThreshold: 75,
-                inboundShipments: 0,
-                inboundCompliant: 0,
-                inboundPercentage: 0,
-                inboundStandardPercentage: 0,
-                inboundStandardDays: 0,
-                inboundActualDays: 0,
-                inboundDeviation: 0,
-                outboundShipments: 0,
-                outboundCompliant: 0,
-                outboundPercentage: 0,
-                outboundStandardPercentage: 0,
-                outboundStandardDays: 0,
-                outboundActualDays: 0,
-                outboundDeviation: 0,
-                directionGap: 0,
-                carrierProductBreakdown: [],
-                accountId: cityFromMap.account_id,
-              };
-              citizensAffectedCities = [cityEntry];
-              relevantCitiesForPopWeight = [cityEntry];
-            } else {
-              citizensAffectedCities = [];
-              relevantCitiesForPopWeight = [];
-            }
+            relevantCitiesForPopWeight = [];
           }
         } else if (scenarioInfo.isRouteView) {
           // Route: weight by destination city only
@@ -915,6 +864,65 @@ export function useTerritoryEquityDataV2(
           useInboundMetric = true;
           citizensAffectedCities = cityEquityData.filter(c => c.cityName === filters?.destinationCity);
         }
+        
+        // Calculate Citizens Affected: Get unique destination cities from shipments and sum their populations from cityMap
+        const destinationCityNames = new Set<string>();
+        shipments.forEach((s: any) => {
+          if (s.destination_city_name) {
+            destinationCityNames.add(s.destination_city_name);
+          }
+        });
+        
+        const destinationCitiesPopulation = Array.from(destinationCityNames)
+          .map(cityName => cityMap.get(cityName)?.population || 0)
+          .reduce((sum, pop) => sum + pop, 0);
+        
+        citizensAffectedCities = Array.from(destinationCityNames)
+          .map(cityName => {
+            const city = cityMap.get(cityName);
+            if (!city) return null;
+            return {
+              cityId: city.id,
+              cityName: city.name,
+              population: city.population || 0,
+            };
+          })
+          .filter((c): c is { cityId: string; cityName: string; population: number } => c !== null)
+          .map(c => ({
+            ...c,
+            regionId: '',
+            regionName: '',
+            classification: null,
+            latitude: null,
+            longitude: null,
+            totalShipments: 0,
+            compliantShipments: 0,
+            standardPercentage: 0,
+            standardDays: 0,
+            actualDays: 0,
+            actualPercentage: 0,
+            deviation: 0,
+            status: 'compliant' as const,
+            aggregatedWarningThreshold: 80,
+            aggregatedCriticalThreshold: 75,
+            inboundShipments: 0,
+            inboundCompliant: 0,
+            inboundPercentage: 0,
+            inboundStandardPercentage: 0,
+            inboundStandardDays: 0,
+            inboundActualDays: 0,
+            inboundDeviation: 0,
+            outboundShipments: 0,
+            outboundCompliant: 0,
+            outboundPercentage: 0,
+            outboundStandardPercentage: 0,
+            outboundStandardDays: 0,
+            outboundActualDays: 0,
+            outboundDeviation: 0,
+            directionGap: 0,
+            carrierProductBreakdown: [],
+            accountId: '',
+          }));
         
         const popWeightTotalPopulation = relevantCitiesForPopWeight.reduce((sum, c) => sum + (c.population || 0), 0);
         
