@@ -1215,8 +1215,12 @@ export function useTerritoryEquityDataV2(
             const successPct = standard.success_percentage || 85;
             route.standardSum += successPct;
             route.standardCount++;
-            if (standard.standard_days != null) {
-              route.standardDaysArray.push(standard.standard_days);
+            // Convert standard_time to days based on time_unit
+            if (standard.standard_time != null) {
+              const allowedDays = standard.time_unit === 'days' 
+                ? standard.standard_time 
+                : (standard.standard_time / 24);
+              route.standardDaysArray.push(allowedDays);
             }
           }
           if (s.business_transit_days != null) {
@@ -1307,8 +1311,12 @@ export function useTerritoryEquityDataV2(
             : undefined;
           
           if (standard) {
-            if (standard.standard_days != null) {
-              trend.standardDaysSum += standard.standard_days;
+            // Convert standard_time to days based on time_unit
+            if (standard.standard_time != null) {
+              const allowedDays = standard.time_unit === 'days' 
+                ? standard.standard_time 
+                : (standard.standard_time / 24);
+              trend.standardDaysSum += allowedDays;
               trend.standardDaysCount++;
             }
             const successPct = standard.success_percentage || 85;
