@@ -59,10 +59,10 @@ export default function TerritoryEquity() {
 
   // Switch to city tab when city filters are applied (regional tab should be hidden)
   React.useEffect(() => {
-    if (!scenarioInfo.isGeneralView && activeTab === 'regional') {
+    if ((filters.originCity || filters.destinationCity) && activeTab === 'regional') {
       setActiveTab('city');
     }
-  }, [scenarioInfo.isGeneralView, activeTab]);
+  }, [filters.originCity, filters.destinationCity, activeTab]);
 
   const handleExportAuditReport = () => {
     if (!metrics || cityData.length === 0) return;
@@ -770,7 +770,7 @@ export default function TerritoryEquity() {
             >
               {t('reporting.city_analysis')}
             </button>
-            {scenarioInfo.isGeneralView && (
+            {!filters.originCity && !filters.destinationCity && (
             <button
               onClick={() => setActiveTab('regional')}
                 className={`px-6 py-3 font-medium transition-colors ${

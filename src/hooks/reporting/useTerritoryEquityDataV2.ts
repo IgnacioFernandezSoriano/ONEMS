@@ -717,9 +717,9 @@ export function useTerritoryEquityDataV2(
 
         // Filter cities based on scenario to exclude origin/destination city from metrics
         if (scenarioInfo.isRouteView && filters?.originCity && filters?.destinationCity) {
-          // For route view, only show the two cities involved in the route
+          // For route view, only show the origin city (not destination)
           filteredCityData = filteredCityData.filter((c) => 
-            c.cityName === filters.originCity || c.cityName === filters.destinationCity
+            c.cityName === filters.originCity
           );
         } else if (scenarioInfo.isOriginView && filters?.originCity) {
           // Exclude origin city, show only destinations
