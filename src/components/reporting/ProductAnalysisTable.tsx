@@ -15,6 +15,8 @@ type ProductRow = {
   carrier: string;
   product: string;
   totalShipments: number;
+  standardDays?: number;
+  actualDays?: number;
   standardPercentage: number;
   actualPercentage: number;
   deviation: number;
@@ -39,6 +41,8 @@ export function ProductAnalysisTable({
       carrier: route.carrier,
       product: route.product,
       totalShipments: route.totalShipments,
+      standardDays: route.standardDays,
+      actualDays: route.actualDays,
       standardPercentage: route.standardPercentage,
       actualPercentage: route.actualPercentage,
       deviation: route.deviation,
@@ -174,6 +178,8 @@ export function ProductAnalysisTable({
                 { key: 'carrier', label: 'Carrier' },
                 { key: 'product', label: 'Product' },
                 { key: 'totalShipments', label: 'Total' },
+                { key: 'standardDays', label: 'J+K STD' },
+                { key: 'actualDays', label: 'J+K ACTUAL' },
                 { key: 'standardPercentage', label: 'Standard %' },
                 { key: 'actualPercentage', label: 'Actual %' },
                 { key: 'deviation', label: 'Deviation' },
@@ -200,6 +206,8 @@ export function ProductAnalysisTable({
                 <td className="px-6 py-4 whitespace-nowrap text-sm">{row.carrier}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">{row.product}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-right">{row.totalShipments}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-right">{row.standardDays?.toFixed(1) || '-'}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-right">{row.actualDays?.toFixed(1) || '-'}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-right">{row.standardPercentage.toFixed(1)}%</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-right">{row.actualPercentage.toFixed(1)}%</td>
                 <td className={`px-6 py-4 whitespace-nowrap text-sm text-right font-medium ${

@@ -1161,7 +1161,7 @@ export function useTerritoryEquityDataV2(
           }
           const route = routeMap.get(routeKey)!;
           route.total++;
-          if (s.is_compliant) route.compliant++;
+          if (s.on_time_delivery) route.compliant++;
           
           // Find standard for this route
           const standard = standardsMap.get(
@@ -1180,6 +1180,7 @@ export function useTerritoryEquityDataV2(
           }
         });
 
+        console.log('[routeData] Sample route:', Array.from(routeMap.values())[0]);
         const routeData = Array.from(routeMap.values()).map(r => {
           const standardPercentage = r.standardCount > 0 ? r.standardSum / r.standardCount : 85;
           const actualPercentage = r.total > 0 ? (r.compliant / r.total) * 100 : 0;

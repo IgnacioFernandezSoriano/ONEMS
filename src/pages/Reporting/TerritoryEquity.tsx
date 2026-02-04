@@ -871,7 +871,7 @@ export default function TerritoryEquity() {
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              Product Analysis
+              Low Profile Routes
             </button>
           </div>
         </div>
@@ -1030,7 +1030,7 @@ export default function TerritoryEquity() {
             <div className="space-y-6">
               <div>
                 <div className="mb-4">
-                  <h3 className="text-lg font-semibold mb-2">Product-Level Route Analysis</h3>
+                  <h3 className="text-lg font-semibold mb-2">Low Profile Routes</h3>
                   <p className="text-sm text-gray-600">
                     Detailed breakdown of all routes by carrier and product. Filter by equity status to identify specific compliance issues.
                   </p>
