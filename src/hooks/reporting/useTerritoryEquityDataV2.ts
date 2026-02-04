@@ -847,9 +847,9 @@ export function useTerritoryEquityDataV2(
         } else if (scenarioInfo.isDestinationView) {
           // Destination view: filteredCityData contains ORIGIN cities
           // Use their outboundPercentage (shipments departing TO the destination)
-          // Citizens affected = population of ORIGIN cities
+          // Citizens affected = population of DESTINATION city
           useOutboundMetric = true;
-          citizensAffectedCities = filteredCityData;
+          citizensAffectedCities = cityEquityData.filter(c => c.cityName === filters?.destinationCity);
         } else if (scenarioInfo.isRouteView) {
           // Route: weight by destination city only
           // Citizens affected = population of DESTINATION city
