@@ -846,10 +846,11 @@ export function useTerritoryEquityDataV2(
           citizensAffectedCities = filteredCityData;
         } else if (scenarioInfo.isDestinationView) {
           // Destination view: filteredCityData contains ORIGIN cities
-          // Use their outboundPercentage (shipments departing TO the destination)
-          // Citizens affected = population of DESTINATION city (from cityMap)
+          // But we analyze the DESTINATION city (Los Angeles) which has inbound metrics
+          // Use inboundPercentage of destination city (shipments arriving TO it)
+          // Citizens affected = population of DESTINATION city
           // Population weighting = based on DESTINATION city population
-          useOutboundMetric = true;
+          useInboundMetric = true;
           
           // Build destination city array from cityEquityData (which contains the destination city with inbound metrics)
           const destinationCityName = filters?.destinationCity;
