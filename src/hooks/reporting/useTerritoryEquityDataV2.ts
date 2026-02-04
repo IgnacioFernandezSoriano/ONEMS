@@ -734,8 +734,24 @@ export function useTerritoryEquityDataV2(
         const totalPopulation = filteredCityData.reduce((sum, c) => sum + (c.population || 0), 0);
         const totalRegions = new Set(filteredCityData.map((c) => c.regionId)).size;
 
-        // Underserved Cities: cities with at least one critical carrier-product (inbound)
-        const underservedCities = filteredCityData.filter((c) => {
+        // Underserved Cities: DESTINATION cities with at least one critical carrier-product (inbound)
+        // Always consider destination cities, regardless of scenario
+        let citiesToCheckForUnderserved = cityEquityData;
+        
+        // Filter to only destination cities based on scenario
+        if (scenarioInfo.isRouteView && filters?.destinationCity) {
+          // Route view: only check the destination city
+          citiesToCheckForUnderserved = cityEquityData.filter(c => c.cityName === filters.destinationCity);
+        } else if (scenarioInfo.isDestinationView && filters?.destinationCity) {
+          // Destination view: only check the destination city
+          citiesToCheckForUnderserved = cityEquityData.filter(c => c.cityName === filters.destinationCity);
+        } else if (scenarioInfo.isOriginView && filters?.originCity) {
+          // Origin view: check all destination cities (exclude origin)
+          citiesToCheckForUnderserved = cityEquityData.filter(c => c.cityName !== filters.originCity);
+        }
+        // General view: check all cities
+        
+        const underservedCities = citiesToCheckForUnderserved.filter((c) => {
           // Check if any carrier-product has critical inbound performance
           if (!c.carrierProductBreakdown || c.carrierProductBreakdown.length === 0) return false;
           return c.carrierProductBreakdown.some(cp => {
@@ -1430,13 +1446,13 @@ export function useTerritoryEquityDataV2(
     
     // Then check city filters
     if (scenarioInfo.isRouteView) {
-      return `Showing route from ${scenarioInfo.originCityName} to ${scenarioInfo.destinationCityName} (Inbound to ${scenarioInfo.destinationCityName})`;
+      return `Showing route from ${scenarioInfo.originCityName} to ${scenarioInfo.destinationCityName} (Outbound from ${scenarioInfo.originCityName} to ${scenarioInfo.destinationCityName})`;
     } else if (scenarioInfo.isOriginView) {
-      return `Showing destination cities receiving shipments from ${scenarioInfo.originCityName} (Outbound from ${scenarioInfo.originCityName})`;
+      return `Showing destination cities receiving shipments from ${scenarioInfo.originCityName} (Inbound to destination cities from ${scenarioInfo.originCityName})`;
     } else if (scenarioInfo.isDestinationView) {
-      return `Showing origin cities with shipments to ${scenarioInfo.destinationCityName} (Inbound to ${scenarioInfo.destinationCityName})`;
+      return `Showing origin cities with shipments to ${scenarioInfo.destinationCityName} (Outbound from origin cities to ${scenarioInfo.destinationCityName})`;
     } else {
-      return 'Showing origin cities with outbound shipments to all destinations';
+      return 'Showing all cities with shipments';
     }
   };
 
