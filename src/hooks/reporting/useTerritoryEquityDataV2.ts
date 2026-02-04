@@ -1267,8 +1267,7 @@ export function useTerritoryEquityDataV2(
           product: string;
           total: number;
           compliant: number;
-          standardSum: number;
-          standardCount: number;
+          standardPercentage: number;  // Single value, not averaged
           actualDaysArray: number[];
           standardDaysArray: number[];
         }>();
@@ -1276,6 +1275,21 @@ export function useTerritoryEquityDataV2(
         shipments.forEach(s => {
           const routeKey = `${s.origin_city_name}|${s.destination_city_name}|${s.carrier_name}|${s.product_name}`;
           if (!routeMap.has(routeKey)) {
+            // Get standard for this route (same logic as Underserved Cities)
+            const originCityId = cityNameToIdMap.get(s.origin_city_name);
+            const destCityId = cityNameToIdMap.get(s.destination_city_name);
+            const carrierId = carrierNameToIdMap.get(s.carrier_name);
+            const productId = productDescToIdMap.get(s.product_name);
+            
+            let standardPercentage = 95; // default (same as Underserved Cities)
+            if (carrierId && productId && originCityId && destCityId) {
+              const standardKey = `${carrierId}|${productId}|${originCityId}|${destCityId}`;
+              const standard = standardsMap.get(standardKey);
+              if (standard?.success_percentage) {
+                standardPercentage = standard.success_percentage;
+              }
+            }
+            
             routeMap.set(routeKey, {
               origin: s.origin_city_name,
               destination: s.destination_city_name,
@@ -1283,8 +1297,7 @@ export function useTerritoryEquityDataV2(
               product: s.product_name,
               total: 0,
               compliant: 0,
-              standardSum: 0,
-              standardCount: 0,
+              standardPercentage,
               actualDaysArray: [],
               standardDaysArray: [],
             });
@@ -1293,50 +1306,21 @@ export function useTerritoryEquityDataV2(
           route.total++;
           if (s.on_time_delivery) route.compliant++;
           
-          // Find standard for this route (using IDs)
+          // Collect standard_time for J+K calculation
           const originCityId = cityNameToIdMap.get(s.origin_city_name);
           const destCityId = cityNameToIdMap.get(s.destination_city_name);
           const carrierId = carrierNameToIdMap.get(s.carrier_name);
           const productId = productDescToIdMap.get(s.product_name);
           
-          // Debug: Log first shipment details
-          if (route.total === 0) {
-            console.log('[routeData DEBUG] First shipment for route:', {
-              origin: s.origin_city_name,
-              destination: s.destination_city_name,
-              carrier: s.carrier_name,
-              product: s.product_name,
-              originCityId,
-              destCityId,
-              carrierId,
-              productId,
-              standardKey: `${carrierId}|${productId}|${originCityId}|${destCityId}`,
-              standardsMapSize: standardsMap.size,
-              standardsMapKeys: Array.from(standardsMap.keys()).slice(0, 5),
-            });
-          }
-          
           const standard = (originCityId && destCityId && carrierId && productId)
             ? standardsMap.get(`${carrierId}|${productId}|${originCityId}|${destCityId}`)
             : undefined;
           
-          if (route.total === 0 && standard) {
-            console.log('[routeData DEBUG] Standard found:', standard);
-          } else if (route.total === 0 && !standard) {
-            console.log('[routeData DEBUG] Standard NOT found');
-          }
-          
-          if (standard) {
-            const successPct = standard.success_percentage || 85;
-            route.standardSum += successPct;
-            route.standardCount++;
-            // Convert standard_time to days based on time_unit
-            if (standard.standard_time != null) {
-              const allowedDays = standard.time_unit === 'days' 
-                ? standard.standard_time 
-                : (standard.standard_time / 24);
-              route.standardDaysArray.push(allowedDays);
-            }
+          if (standard?.standard_time != null) {
+            const allowedDays = standard.time_unit === 'days' 
+              ? standard.standard_time 
+              : (standard.standard_time / 24);
+            route.standardDaysArray.push(allowedDays);
           }
           if (s.business_transit_days != null) {
             route.actualDaysArray.push(s.business_transit_days);
@@ -1345,7 +1329,7 @@ export function useTerritoryEquityDataV2(
 
         console.log('[routeData] Sample route:', Array.from(routeMap.values())[0]);
         const routeData = Array.from(routeMap.values()).map(r => {
-          const standardPercentage = r.standardCount > 0 ? r.standardSum / r.standardCount : 85;
+          const standardPercentage = r.standardPercentage;  // Use the single value calculated at route creation
           const actualPercentage = r.total > 0 ? (r.compliant / r.total) * 100 : 0;
           const deviation = actualPercentage - standardPercentage;
           const standardDays = r.standardDaysArray.length > 0
@@ -1355,11 +1339,19 @@ export function useTerritoryEquityDataV2(
             ? r.actualDaysArray.reduce((sum, d) => sum + d, 0) / r.actualDaysArray.length
             : 0;
           
-          // Calculate status based on actual% vs absolute thresholds
+          // Calculate status based on relative threshold (same as Underserved Cities logic)
+          // Critical: actual% is 10+ percentage points below standard%
+          // Warning: actual% is 5-10 percentage points below standard%
+          // Compliant: actual% is within 5 percentage points of standard%
+          const relativeThreshold = 10;
+          const warningThreshold = 5;
+          const criticalThreshold = standardPercentage - relativeThreshold;
+          const warningThresholdValue = standardPercentage - warningThreshold;
+          
           let status: 'compliant' | 'warning' | 'critical';
-          if (actualPercentage >= globalWarningThreshold) {
+          if (actualPercentage >= warningThresholdValue) {
             status = 'compliant';
-          } else if (actualPercentage >= globalCriticalThreshold) {
+          } else if (actualPercentage >= criticalThreshold) {
             status = 'warning';
           } else {
             status = 'critical';

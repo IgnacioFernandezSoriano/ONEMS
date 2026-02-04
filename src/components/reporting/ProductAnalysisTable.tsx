@@ -84,7 +84,7 @@ export function ProductAnalysisTable({
   };
 
   const handleExportCSV = () => {
-    const headers = ['Origin', 'Destination', 'Carrier', 'Product', 'Total Shipments', 'Standard %', 'Actual %', 'Deviation', 'Status'];
+    const headers = ['Origin', 'Destination', 'Carrier', 'Product', 'Total Shipments', 'J+K STD', 'J+K ACTUAL', 'Standard %', 'Actual %', 'Deviation', 'Status'];
     const csvContent = [
       headers.join(','),
       ...sortedRows.map(row =>
@@ -94,6 +94,8 @@ export function ProductAnalysisTable({
           row.carrier,
           row.product,
           row.totalShipments,
+          row.standardDays?.toFixed(1) || '-',
+          row.actualDays?.toFixed(1) || '-',
           row.standardPercentage.toFixed(1),
           row.actualPercentage.toFixed(1),
           row.deviation.toFixed(1),
