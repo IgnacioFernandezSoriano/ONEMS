@@ -22,7 +22,7 @@ export function useTerritoryEquityDataV2(
   const [regionData, setRegionData] = useState<RegionEquityData[]>([]);
   const [metrics, setMetrics] = useState<TerritoryEquityMetrics | null>(null);
   const [routeData, setRouteData] = useState<any[]>([]);
-  const [trendData, setTrendData] = useState<Array<{ date: string; avgDays: number; compliancePercent: number }>>([]);
+  const [trendData, setTrendData] = useState<Array<{ date: string; avgDays: number; compliancePercent: number; standardDays: number; standardPercent: number }>>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [globalWarningThreshold, setGlobalWarningThreshold] = useState<number>(80);
@@ -1225,13 +1225,30 @@ export function useTerritoryEquityDataV2(
         });
 
         // 10. Calculate trend data (daily aggregation)
-        const trendMap = new Map<string, { totalDays: number; count: number; compliant: number }>();
+        const trendMap = new Map<string, { 
+          totalDays: number; 
+          count: number; 
+          compliant: number;
+          standardDaysSum: number;
+          standardDaysCount: number;
+          standardPercentSum: number;
+          standardPercentCount: number;
+        }>();
+        
         shipments.forEach(s => {
           if (!s.sent_at) return;
           const date = new Date(s.sent_at);
           const dateKey = date.toISOString().split('T')[0]; // YYYY-MM-DD
           if (!trendMap.has(dateKey)) {
-            trendMap.set(dateKey, { totalDays: 0, count: 0, compliant: 0 });
+            trendMap.set(dateKey, { 
+              totalDays: 0, 
+              count: 0, 
+              compliant: 0,
+              standardDaysSum: 0,
+              standardDaysCount: 0,
+              standardPercentSum: 0,
+              standardPercentCount: 0,
+            });
           }
           const trend = trendMap.get(dateKey)!;
           trend.count++;
@@ -1241,6 +1258,26 @@ export function useTerritoryEquityDataV2(
           if (s.on_time_delivery) {
             trend.compliant++;
           }
+          
+          // Find standard for this shipment
+          const originCityId = cityNameToIdMap.get(s.origin_city_name);
+          const destCityId = cityNameToIdMap.get(s.destination_city_name);
+          const carrierId = carrierNameToIdMap.get(s.carrier_name);
+          const productId = productDescToIdMap.get(s.product_name);
+          
+          const standard = (originCityId && destCityId && carrierId && productId)
+            ? standardsMap.get(`${carrierId}|${productId}|${originCityId}|${destCityId}`)
+            : undefined;
+          
+          if (standard) {
+            if (standard.standard_days != null) {
+              trend.standardDaysSum += standard.standard_days;
+              trend.standardDaysCount++;
+            }
+            const successPct = standard.success_percentage || 85;
+            trend.standardPercentSum += successPct;
+            trend.standardPercentCount++;
+          }
         });
 
         const trendDataArray = Array.from(trendMap.entries())
@@ -1248,6 +1285,8 @@ export function useTerritoryEquityDataV2(
             date: dateKey,
             avgDays: data.count > 0 ? data.totalDays / data.count : 0,
             compliancePercent: data.count > 0 ? (data.compliant / data.count) * 100 : 0,
+            standardDays: data.standardDaysCount > 0 ? data.standardDaysSum / data.standardDaysCount : 0,
+            standardPercent: data.standardPercentCount > 0 ? data.standardPercentSum / data.standardPercentCount : 85,
           }))
           .sort((a, b) => a.date.localeCompare(b.date));
 
