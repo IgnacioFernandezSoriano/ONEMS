@@ -839,15 +839,17 @@ export function useTerritoryEquityDataV2(
         let citizensAffectedCities = filteredCityData;
         
         if (scenarioInfo.isOriginView) {
-          // Outbound: weight by destination cities (already filtered - origin excluded)
-          // Citizens affected = population of ORIGIN city
-          useOutboundMetric = true;
-          citizensAffectedCities = cityEquityData.filter(c => c.cityName === filters?.originCity);
-        } else if (scenarioInfo.isDestinationView) {
-          // Inbound: weight by origin cities (already filtered - destination excluded)
-          // Citizens affected = population of DESTINATION city
+          // Origin view: filteredCityData contains DESTINATION cities
+          // Use their inboundPercentage (shipments arriving FROM the origin)
+          // Citizens affected = population of DESTINATION cities
           useInboundMetric = true;
-          citizensAffectedCities = cityEquityData.filter(c => c.cityName === filters?.destinationCity);
+          citizensAffectedCities = filteredCityData;
+        } else if (scenarioInfo.isDestinationView) {
+          // Destination view: filteredCityData contains ORIGIN cities
+          // Use their outboundPercentage (shipments departing TO the destination)
+          // Citizens affected = population of ORIGIN cities
+          useOutboundMetric = true;
+          citizensAffectedCities = filteredCityData;
         } else if (scenarioInfo.isRouteView) {
           // Route: weight by destination city only
           // Citizens affected = population of DESTINATION city
