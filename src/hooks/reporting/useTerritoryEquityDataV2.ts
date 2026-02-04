@@ -1531,7 +1531,7 @@ export function useTerritoryEquityDataV2(
           topBestRegions,
           topWorstRegions,
           totalCities,
-          totalPopulation,
+          totalPopulation: populationWeightedCitizensAffected, // Use destination cities population for display
           totalSamples,
           totalRegions,
         });
