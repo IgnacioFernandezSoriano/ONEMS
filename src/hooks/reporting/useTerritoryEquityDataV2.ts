@@ -892,6 +892,7 @@ export function useTerritoryEquityDataV2(
           } else {
             citizensAffectedCities = [];
           }
+          console.log('[CITIZENS DEBUG] Destination View - citizensAffectedCities:', citizensAffectedCities.map(c => ({ name: c.cityName, pop: c.population })));
         } else if (scenarioInfo.isRouteView) {
           // Route: weight by destination city only
           // Citizens affected = population of DESTINATION city
@@ -929,7 +930,9 @@ export function useTerritoryEquityDataV2(
             : 0;
         
         // Citizens Affected for Population-Weighted Compliance card
+        console.log('[CITIZENS DEBUG] Final citizensAffectedCities before reduce:', citizensAffectedCities.map(c => ({ name: c.cityName, pop: c.population })));
         const populationWeightedCitizensAffected = citizensAffectedCities.reduce((sum, c) => sum + (c.population || 0), 0);
+        console.log('[CITIZENS DEBUG] populationWeightedCitizensAffected:', populationWeightedCitizensAffected);
         
         // Citizens Affected for Underserved Cities card (separate calculation)
         const underservedCitizensAffected = underservedCities.reduce((sum, c) => sum + (c.population || 0), 0);
