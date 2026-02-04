@@ -597,7 +597,6 @@ export default function TerritoryEquity() {
         </div>
 
         {/* KPI 2: Underserved Cities + Citizens Affected (Unified) */}
-        {scenarioInfo.isGeneralView && (
         <div className="bg-white rounded-lg shadow p-6 col-span-1 md:col-span-1 lg:col-span-1">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-gray-600">{t('reporting.underserved_cities')}</h3>
@@ -623,10 +622,8 @@ export default function TerritoryEquity() {
             </div>
           </div>
         </div>
-        )}
 
         {/* KPI 3: Top 3 Best & Worst Cities (Combined) */}
-        {!scenarioInfo.isRouteView && (
         <div className="bg-white rounded-lg shadow p-6 col-span-1 md:col-span-2 lg:col-span-2">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-medium text-gray-600">
@@ -725,10 +722,8 @@ export default function TerritoryEquity() {
             </div>
           </div>
         </div>
-        )}
 
         {/* KPI 4: Top 3 Best & Worst Regions (Combined - NEW) */}
-        {!scenarioInfo.isRouteView && (
         <div className="bg-white rounded-lg shadow p-6 col-span-1 md:col-span-2 lg:col-span-2">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-medium text-gray-600">
@@ -827,7 +822,6 @@ export default function TerritoryEquity() {
             </div>
           </div>
         </div>
-        )}
       </div>
 
       {/* Tabs */}

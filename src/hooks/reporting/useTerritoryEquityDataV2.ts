@@ -744,7 +744,6 @@ export function useTerritoryEquityDataV2(
           });
         });
         const underservedCitiesCount = underservedCities.length;
-        const citizensAffected = underservedCities.reduce((sum, c) => sum + (c.population || 0), 0);
 
         // Service Equity Index (population-weighted std dev)
         const weightedMean =
@@ -766,14 +765,54 @@ export function useTerritoryEquityDataV2(
         const weightedStdDev = Math.sqrt(weightedVariance);
         const serviceEquityIndex = Math.max(0, Math.min(100, 100 - weightedStdDev * 10));
 
-        // Population-Weighted Compliance
+        // Population-Weighted Compliance (with directional logic)
+        // Determine which cities and metrics to use based on scenario
+        let relevantCitiesForPopWeight = filteredCityData;
+        let useInboundMetric = false;
+        let useOutboundMetric = false;
+        
+        if (scenarioInfo.isOriginView) {
+          // Outbound: weight by destination cities only (already filtered)
+          useOutboundMetric = true;
+        } else if (scenarioInfo.isDestinationView) {
+          // Inbound: weight by origin cities only (already filtered)
+          useInboundMetric = true;
+        } else if (scenarioInfo.isRouteView) {
+          // Route: weight by destination city only
+          relevantCitiesForPopWeight = filteredCityData.filter(c => c.cityName === filters?.destinationCity);
+          useInboundMetric = true;
+        }
+        
+        const popWeightTotalPopulation = relevantCitiesForPopWeight.reduce((sum, c) => sum + (c.population || 0), 0);
+        
+        // First: Calculate sample-weighted compliance per city
+        const citiesWithSampleWeightedCompliance = relevantCitiesForPopWeight.map(c => {
+          // Use appropriate metric based on scenario
+          let complianceValue = c.actualPercentage;
+          if (useInboundMetric) {
+            complianceValue = c.inboundPercentage;
+          } else if (useOutboundMetric) {
+            complianceValue = c.outboundPercentage;
+          }
+          return {
+            ...c,
+            complianceValue,
+            population: c.population || 0,
+            totalShipments: c.totalShipments || 0,
+          };
+        });
+        
+        // Second: Apply population weighting
         const populationWeightedCompliance =
-          totalPopulation > 0
-            ? filteredCityData.reduce((sum, c) => {
-                const weight = (c.population || 0) / totalPopulation;
-                return sum + c.actualPercentage * weight;
+          popWeightTotalPopulation > 0
+            ? citiesWithSampleWeightedCompliance.reduce((sum, c) => {
+                const popWeight = c.population / popWeightTotalPopulation;
+                return sum + c.complianceValue * popWeight;
               }, 0)
             : 0;
+        
+        // Update citizensAffected to use correct population
+        const citizensAffected = popWeightTotalPopulation;
 
         // Sample-Weighted Compliance (weighted by number of shipments)
         const totalSamples = filteredCityData.reduce((sum, c) => sum + c.totalShipments, 0);
