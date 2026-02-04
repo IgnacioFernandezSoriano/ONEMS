@@ -848,60 +848,63 @@ export function useTerritoryEquityDataV2(
           // Destination view: filteredCityData contains ORIGIN cities
           // Use their outboundPercentage (shipments departing TO the destination)
           // Citizens affected = population of DESTINATION city (from cityMap)
+          // Population weighting = based on DESTINATION city population
           useOutboundMetric = true;
-          // Get destination city names from filteredCityData to determine which cities are relevant
-          const destinationCityNames = new Set([filters?.destinationCity]);
-          // Build citizensAffectedCities from cityMap
-          citizensAffectedCities = [];
-          for (const cityName of destinationCityNames) {
-            if (cityName) {
-              const cityFromMap = cityMap.get(cityName);
-              if (cityFromMap) {
-                // Find this city in cityEquityData to get its compliance metrics
-                const cityEquity = cityEquityData.find(c => c.cityName === cityName);
-                if (cityEquity) {
-                  citizensAffectedCities.push(cityEquity);
-                } else {
-                  // If not in cityEquityData, create minimal entry with population from cityMap
-                  citizensAffectedCities.push({
-                    cityId: cityFromMap.id,
-                    cityName: cityFromMap.name,
-                    regionId: cityFromMap.region_id,
-                    regionName: cityFromMap.region_name,
-                    classification: cityFromMap.classification || null,
-                    population: cityFromMap.population || 0,
-                    latitude: cityFromMap.latitude || null,
-                    longitude: cityFromMap.longitude || null,
-                    totalShipments: 0,
-                    compliantShipments: 0,
-                    standardPercentage: 0,
-                    standardDays: 0,
-                    actualDays: 0,
-                    actualPercentage: 0,
-                    deviation: 0,
-                    status: 'compliant' as const,
-                    aggregatedWarningThreshold: 80,
-                    aggregatedCriticalThreshold: 75,
-                    inboundShipments: 0,
-                    inboundCompliant: 0,
-                    inboundPercentage: 0,
-                    inboundStandardPercentage: 0,
-                    inboundStandardDays: 0,
-                    inboundActualDays: 0,
-                    inboundDeviation: 0,
-                    outboundShipments: 0,
-                    outboundCompliant: 0,
-                    outboundPercentage: 0,
-                    outboundStandardPercentage: 0,
-                    outboundStandardDays: 0,
-                    outboundActualDays: 0,
-                    outboundDeviation: 0,
-                    directionGap: 0,
-                    carrierProductBreakdown: [],
-                    accountId: cityFromMap.account_id,
-                  });
-                }
-              }
+          
+          // Build destination city array from cityEquityData (which contains the destination city with inbound metrics)
+          const destinationCityName = filters?.destinationCity;
+          const destinationCityFromEquity = cityEquityData.find(c => c.cityName === destinationCityName);
+          
+          if (destinationCityFromEquity) {
+            // Use the destination city from cityEquityData (has inbound metrics)
+            citizensAffectedCities = [destinationCityFromEquity];
+            relevantCitiesForPopWeight = [destinationCityFromEquity];
+          } else {
+            // Fallback: create from cityMap if not in cityEquityData
+            const cityFromMap = cityMap.get(destinationCityName || '');
+            if (cityFromMap) {
+              const cityEntry = {
+                cityId: cityFromMap.id,
+                cityName: cityFromMap.name,
+                regionId: cityFromMap.region_id,
+                regionName: cityFromMap.region_name,
+                classification: cityFromMap.classification || null,
+                population: cityFromMap.population || 0,
+                latitude: cityFromMap.latitude || null,
+                longitude: cityFromMap.longitude || null,
+                totalShipments: 0,
+                compliantShipments: 0,
+                standardPercentage: 0,
+                standardDays: 0,
+                actualDays: 0,
+                actualPercentage: 0,
+                deviation: 0,
+                status: 'compliant' as const,
+                aggregatedWarningThreshold: 80,
+                aggregatedCriticalThreshold: 75,
+                inboundShipments: 0,
+                inboundCompliant: 0,
+                inboundPercentage: 0,
+                inboundStandardPercentage: 0,
+                inboundStandardDays: 0,
+                inboundActualDays: 0,
+                inboundDeviation: 0,
+                outboundShipments: 0,
+                outboundCompliant: 0,
+                outboundPercentage: 0,
+                outboundStandardPercentage: 0,
+                outboundStandardDays: 0,
+                outboundActualDays: 0,
+                outboundDeviation: 0,
+                directionGap: 0,
+                carrierProductBreakdown: [],
+                accountId: cityFromMap.account_id,
+              };
+              citizensAffectedCities = [cityEntry];
+              relevantCitiesForPopWeight = [cityEntry];
+            } else {
+              citizensAffectedCities = [];
+              relevantCitiesForPopWeight = [];
             }
           }
         } else if (scenarioInfo.isRouteView) {
