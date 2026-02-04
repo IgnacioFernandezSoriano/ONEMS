@@ -958,6 +958,11 @@ export default function TerritoryEquity() {
                 />
               </div>
 
+              {/* Performance Trend Chart */}
+              <div>
+                <PerformanceTrendChart data={trendData} title="Regional Performance Trend" />
+              </div>
+
               {/* Region Filter */}
               <div className="bg-white p-4 rounded-lg border border-gray-200">
                 <label className="block text-sm font-medium text-gray-700 mb-2">

@@ -1165,10 +1165,15 @@ export function useTerritoryEquityDataV2(
           route.total++;
           if (s.on_time_delivery) route.compliant++;
           
-          // Find standard for this route
-          const standard = standardsMap.get(
-            `${s.origin_city_name}|${s.destination_city_name}|${s.carrier_name}|${s.product_name}`
-          );
+          // Find standard for this route (using IDs)
+          const originCityId = cityNameToIdMap.get(s.origin_city_name);
+          const destCityId = cityNameToIdMap.get(s.destination_city_name);
+          const carrierId = carrierNameToIdMap.get(s.carrier_name);
+          const productId = productDescToIdMap.get(s.product_name);
+          
+          const standard = (originCityId && destCityId && carrierId && productId)
+            ? standardsMap.get(`${carrierId}|${productId}|${originCityId}|${destCityId}`)
+            : undefined;
           if (standard) {
             const successPct = standard.success_percentage || 85;
             route.standardSum += successPct;
