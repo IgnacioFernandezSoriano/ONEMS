@@ -1424,11 +1424,11 @@ export function useTerritoryEquityDataV2(
     
     // Then check city filters
     if (scenarioInfo.isRouteView) {
-      return `Showing route from ${scenarioInfo.originCityName} to ${scenarioInfo.destinationCityName}`;
+      return `Showing route from ${scenarioInfo.originCityName} to ${scenarioInfo.destinationCityName} (Inbound to ${scenarioInfo.destinationCityName})`;
     } else if (scenarioInfo.isOriginView) {
-      return `Showing destination cities receiving shipments from ${scenarioInfo.originCityName}`;
+      return `Showing destination cities receiving shipments from ${scenarioInfo.originCityName} (Outbound from ${scenarioInfo.originCityName})`;
     } else if (scenarioInfo.isDestinationView) {
-      return `Showing origin cities with shipments to ${scenarioInfo.destinationCityName}`;
+      return `Showing origin cities with shipments to ${scenarioInfo.destinationCityName} (Inbound to ${scenarioInfo.destinationCityName})`;
     } else {
       return 'Showing origin cities with outbound shipments to all destinations';
     }
