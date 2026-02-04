@@ -338,12 +338,11 @@ export function TerritoryEquityTable({
       };
     })
     .filter(cityRow => {
-      // In route view (origin AND destination filtered), exclude destination city if it has no outbound data
+      // In route view (origin AND destination filtered), only show origin city
       if (scenarioInfo.isRouteView && scenarioInfo.destinationCityName) {
+        // Exclude destination city completely
         if (cityRow.cityName === scenarioInfo.destinationCityName) {
-          // Only include destination city if it has outbound data
-          const hasOutboundData = cityRow.originalCity.outboundShipments > 0;
-          if (!hasOutboundData) return false;
+          return false;
         }
       }
       
