@@ -850,7 +850,10 @@ export function useTerritoryEquityDataV2(
           // Citizens affected = population of DESTINATION city
           useOutboundMetric = true;
           // Get destination city from cityMap since it won't be in cityEquityData
+          console.log('[CITIZENS DEBUG] filters?.destinationCity:', filters?.destinationCity);
+          console.log('[CITIZENS DEBUG] cityMap keys sample:', Array.from(cityMap.keys()).slice(0, 5));
           const destCity = cityMap.get(filters?.destinationCity || '');
+          console.log('[CITIZENS DEBUG] destCity found:', destCity ? { name: destCity.name, pop: destCity.population } : 'NOT FOUND');
           if (destCity) {
             citizensAffectedCities = [{
               cityId: destCity.id,
