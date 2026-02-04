@@ -27,7 +27,11 @@ interface PerformanceTrendChartProps {
 type TimeScale = 'day' | 'week' | 'month';
 
 export function PerformanceTrendChart({ data, title = 'Performance Trend' }: PerformanceTrendChartProps) {
-  const [timeScale, setTimeScale] = useState<TimeScale>('day');
+  const [timeScale, setTimeScale] = useState<TimeScale>('week');
+  const [visibleLines, setVisibleLines] = useState({
+    avgDays: true,
+    compliancePercent: true,
+  });
 
   // Aggregate data based on time scale
   const aggregatedData = useMemo(() => {
@@ -166,6 +170,34 @@ export function PerformanceTrendChart({ data, title = 'Performance Trend' }: Per
         </div>
       </div>
 
+      {/* Line visibility checkboxes */}
+      <div className="flex gap-4 mb-4">
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={visibleLines.avgDays}
+            onChange={(e) => setVisibleLines({ ...visibleLines, avgDays: e.target.checked })}
+            className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+          />
+          <span className="text-sm text-gray-700 flex items-center gap-1">
+            <span className="w-3 h-0.5 bg-blue-600 inline-block"></span>
+            J+K Actual
+          </span>
+        </label>
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={visibleLines.compliancePercent}
+            onChange={(e) => setVisibleLines({ ...visibleLines, compliancePercent: e.target.checked })}
+            className="w-4 h-4 text-green-600 rounded focus:ring-green-500"
+          />
+          <span className="text-sm text-gray-700 flex items-center gap-1">
+            <span className="w-3 h-0.5 bg-green-600 inline-block"></span>
+            % Actual
+          </span>
+        </label>
+      </div>
+
       <ResponsiveContainer width="100%" height={350}>
         <LineChart data={aggregatedData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -195,28 +227,32 @@ export function PerformanceTrendChart({ data, title = 'Performance Trend' }: Per
           />
           
           {/* J+K Actual (avgDays) */}
-          <Line
-            yAxisId="left"
-            type="monotone"
-            dataKey="avgDays"
-            stroke="#3b82f6"
-            strokeWidth={2}
-            dot={{ fill: '#3b82f6', r: 4 }}
-            activeDot={{ r: 6 }}
-            name="J+K Actual"
-          />
+          {visibleLines.avgDays && (
+            <Line
+              yAxisId="left"
+              type="monotone"
+              dataKey="avgDays"
+              stroke="#3b82f6"
+              strokeWidth={2}
+              dot={{ fill: '#3b82f6', r: 4 }}
+              activeDot={{ r: 6 }}
+              name="J+K Actual"
+            />
+          )}
           
           {/* % Actual (compliancePercent) */}
-          <Line
-            yAxisId="right"
-            type="monotone"
-            dataKey="compliancePercent"
-            stroke="#10b981"
-            strokeWidth={2}
-            dot={{ fill: '#10b981', r: 4 }}
+          {visibleLines.compliancePercent && (
+            <Line
+              yAxisId="right"
+              type="monotone"
+              dataKey="compliancePercent"
+              stroke="#10b981"
+              strokeWidth={2}
+              dot={{ fill: '#10b981', r: 4 }}
             activeDot={{ r: 6 }}
             name="% Actual"
           />
+          )}
         </LineChart>
       </ResponsiveContainer>
     </div>

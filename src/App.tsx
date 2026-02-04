@@ -187,17 +187,7 @@ function App() {
                     {/* Reporting redirect */}
                     <Route
                       path="/reporting"
-                      element={<Navigate to="/reporting/dashboard" replace />}
-                    />
-                    
-                    {/* Reporting Dashboard - for admin and superadmin */}
-                    <Route
-                      path="/reporting/dashboard"
-                      element={
-                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
-                          <ReportingDashboard />
-                        </ProtectedRoute>
-                      }
+                      element={<Navigate to="/reporting/territory-equity" replace />}
                     />
                     
                     {/* Reporting Compliance - for admin and superadmin */}

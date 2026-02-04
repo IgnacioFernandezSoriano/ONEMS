@@ -25,6 +25,7 @@ export default function TerritoryEquity() {
   const { t } = useTranslation();
   const { profile } = useAuth();
   const [activeTab, setActiveTab] = useState<'city' | 'regional' | 'map' | 'product'>('city');
+  const [filtersExpanded, setFiltersExpanded] = useState(true);
   const [selectedCity, setSelectedCity] = useState<CityEquityData | null>(null);
   const [selectedRegion, setSelectedRegion] = useState<RegionEquityData | null>(null);
   const [availableRegions, setAvailableRegions] = useState<string[]>([]);
@@ -499,28 +500,44 @@ export default function TerritoryEquity() {
         </div>
       </div>
 
-      {/* Filters */}
-      <TerritoryEquityFilters
-        filters={filters}
-        onChange={setFilters}
-        onReset={() => setFilters({
-          startDate: '',
-          endDate: '',
-          carrier: '',
-          product: '',
-          region: '',
-          direction: undefined,
-          equityStatus: [],
-        })}
-      />
+      {/* Collapsible Filters and KPIs */}
+      <div className="mb-4">
+        <button
+          onClick={() => setFiltersExpanded(!filtersExpanded)}
+          className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors rounded-lg mb-2"
+        >
+          <span className="text-sm font-medium text-gray-700">
+            {filtersExpanded ? 'Hide Filters & Metrics' : 'Show Filters & Metrics'}
+          </span>
+          <svg
+            className={`w-5 h-5 text-gray-500 transition-transform ${filtersExpanded ? 'rotate-180' : ''}`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
 
-      {/* Scenario Description */}
-      <div className="mb-4 px-4 py-3 bg-blue-50 border border-blue-100 rounded-lg">
-        <p className="text-sm text-blue-800">{scenarioDescription}</p>
-      </div>
+        {filtersExpanded && (
+          <div className="space-y-4">
+            {/* Filters */}
+            <TerritoryEquityFilters
+              filters={filters}
+              onChange={setFilters}
+              onReset={() => setFilters({
+                startDate: '',
+                endDate: '',
+                carrier: '',
+                product: '',
+                region: '',
+                direction: undefined,
+                equityStatus: [],
+              })}
+            />
 
-      {/* KPIs - Reorganized */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+            {/* KPIs - Reorganized */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
         {/* KPI 1: Service Equity Index + Population-Weighted Compliance (Unified) */}
         <div className="bg-white rounded-lg shadow p-6 col-span-1 md:col-span-1 lg:col-span-1">
           <div className="flex items-center justify-between mb-2">
@@ -822,6 +839,9 @@ export default function TerritoryEquity() {
             </div>
           </div>
         </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Tabs */}
