@@ -786,7 +786,9 @@ export function useTerritoryEquityDataV2(
         destinationRouteMap.forEach((stats, key) => {
           const [originCity, destCity, carrier, product] = key.split('|');
           const inboundPercentage = (stats.compliant / stats.total) * 100;
-          const criticalThreshold = stats.standardPercentage - globalCriticalThreshold;
+          // Use relative threshold: 10 percentage points below standard
+          const relativeThreshold = 10;
+          const criticalThreshold = stats.standardPercentage - relativeThreshold;
           
           console.log(`[UNDERSERVED DEBUG] Route: ${key}`);
           console.log(`  - Total: ${stats.total}, Compliant: ${stats.compliant}`);
