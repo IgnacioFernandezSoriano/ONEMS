@@ -44,7 +44,8 @@ export default function TerritoryEquity() {
     globalWarningThreshold, 
     globalCriticalThreshold,
     scenarioDescription,
-    scenarioInfo: hookScenarioInfo
+    scenarioInfo: hookScenarioInfo,
+    populationWeightedCitizensAffected
   } = useTerritoryEquityData(
     profile?.account_id || undefined,
     filters
@@ -604,7 +605,7 @@ export default function TerritoryEquity() {
           <div className="flex items-center gap-1 mt-1">
             <Users className="w-4 h-4 text-gray-500" />
             <span className="text-sm text-gray-500">
-              {t('reporting.citizens_count', { count: metrics?.totalPopulation.toLocaleString() || '0' })}
+              {t('reporting.citizens_count', { count: populationWeightedCitizensAffected?.toLocaleString() || '0' })}
             </span>
           </div>
         </div>
