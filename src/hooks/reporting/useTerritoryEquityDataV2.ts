@@ -1452,7 +1452,7 @@ export function useTerritoryEquityDataV2(
     } else if (scenarioInfo.isDestinationView) {
       return `Showing origin cities with shipments to ${scenarioInfo.destinationCityName} (Outbound from origin cities to ${scenarioInfo.destinationCityName})`;
     } else {
-      return 'Showing all cities with shipments';
+      return 'Showing all cities with shipments (Outbound from all cities)';
     }
   };
 
