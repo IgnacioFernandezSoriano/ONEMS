@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { useTerritoryEquityDataV2 as useTerritoryEquityData } from '@/hooks/reporting/useTerritoryEquityDataV2';
@@ -55,6 +55,13 @@ export default function TerritoryEquity() {
 
   // Detect current filter scenario
   const scenarioInfo = useFilterScenario(filters);
+
+  // Switch to city tab when city filters are applied (regional tab should be hidden)
+  React.useEffect(() => {
+    if (!scenarioInfo.isGeneralView && activeTab === 'regional') {
+      setActiveTab('city');
+    }
+  }, [scenarioInfo.isGeneralView, activeTab]);
 
   const handleExportAuditReport = () => {
     if (!metrics || cityData.length === 0) return;
@@ -760,6 +767,7 @@ export default function TerritoryEquity() {
             >
               {t('reporting.city_analysis')}
             </button>
+            {scenarioInfo.isGeneralView && (
             <button
               onClick={() => setActiveTab('regional')}
                 className={`px-6 py-3 font-medium transition-colors ${
@@ -770,6 +778,7 @@ export default function TerritoryEquity() {
               >
                 {t('reporting.regional_analysis')}
             </button>
+            )}
             <button
               onClick={() => setActiveTab('map')}
                 className={`px-6 py-3 font-medium transition-colors flex items-center gap-2 ${
