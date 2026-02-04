@@ -734,33 +734,64 @@ export function useTerritoryEquityDataV2(
         const totalPopulation = filteredCityData.reduce((sum, c) => sum + (c.population || 0), 0);
         const totalRegions = new Set(filteredCityData.map((c) => c.regionId)).size;
 
-        // Underserved Cities: DESTINATION cities with at least one critical carrier-product (inbound)
-        // Always consider destination cities, regardless of scenario
-        let citiesToCheckForUnderserved = cityEquityData;
+        // Underserved Cities: DESTINATION cities with critical routes
+        // Process shipments to detect critical routes
+        const criticalDestinationCities = new Set<string>();
         
-        // Filter to only destination cities based on scenario
-        if (scenarioInfo.isRouteView && filters?.destinationCity) {
-          // Route view: only check the destination city
-          citiesToCheckForUnderserved = cityEquityData.filter(c => c.cityName === filters.destinationCity);
-        } else if (scenarioInfo.isDestinationView && filters?.destinationCity) {
-          // Destination view: only check the destination city
-          citiesToCheckForUnderserved = cityEquityData.filter(c => c.cityName === filters.destinationCity);
-        } else if (scenarioInfo.isOriginView && filters?.originCity) {
-          // Origin view: check all destination cities (exclude origin)
-          citiesToCheckForUnderserved = cityEquityData.filter(c => c.cityName !== filters.originCity);
-        }
-        // General view: check all cities
+        // Group shipments by destination city, carrier, product
+        const destinationRouteMap = new Map<string, { total: number; compliant: number; standardPercentage: number }>();
         
-        const underservedCities = citiesToCheckForUnderserved.filter((c) => {
-          // Check if any carrier-product has critical inbound performance
-          if (!c.carrierProductBreakdown || c.carrierProductBreakdown.length === 0) return false;
-          return c.carrierProductBreakdown.some(cp => {
-            const cpInboundPercentage = cp.inboundPercentage;
-            const cpStandardPercentage = cp.standardPercentage;
-            const criticalThreshold = cpStandardPercentage - globalCriticalThreshold;
-            return cpInboundPercentage < criticalThreshold;
-          });
+        shipments.forEach((shipment: any) => {
+          const destCity = shipment.destination_city_name;
+          const carrier = shipment.carrier_name;
+          const product = shipment.product_name;
+          const key = `${destCity}|${carrier}|${product}`;
+          
+          if (!destinationRouteMap.has(key)) {
+            // Get standard for this route
+            const carrierId = carrierNameToIdMap.get(carrier);
+            const productId = productDescToIdMap.get(product);
+            const originCityId = cityNameToIdMap.get(shipment.origin_city_name);
+            const destCityId = cityNameToIdMap.get(destCity);
+            
+            let standardPercentage = 95; // default
+            if (carrierId && productId && originCityId && destCityId) {
+              const standardKey = `${carrierId}|${productId}|${originCityId}|${destCityId}`;
+              const standard = standardsMap.get(standardKey);
+              if (standard?.success_percentage) {
+                standardPercentage = standard.success_percentage;
+              }
+            }
+            
+            destinationRouteMap.set(key, {
+              total: 0,
+              compliant: 0,
+              standardPercentage
+            });
+          }
+          
+          const routeStats = destinationRouteMap.get(key)!;
+          routeStats.total++;
+          if (shipment.on_time_delivery) {
+            routeStats.compliant++;
+          }
         });
+        
+        // Check each route for critical status
+        destinationRouteMap.forEach((stats, key) => {
+          const [destCity] = key.split('|');
+          const inboundPercentage = (stats.compliant / stats.total) * 100;
+          const criticalThreshold = stats.standardPercentage - globalCriticalThreshold;
+          
+          if (inboundPercentage < criticalThreshold) {
+            criticalDestinationCities.add(destCity);
+          }
+        });
+        
+        // Get city data for critical cities
+        const underservedCities = cityEquityData.filter(c => 
+          criticalDestinationCities.has(c.cityName)
+        );
         const underservedCitiesCount = underservedCities.length;
 
         // Service Equity Index (population-weighted std dev)
