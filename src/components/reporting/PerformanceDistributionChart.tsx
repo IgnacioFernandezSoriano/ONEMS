@@ -187,11 +187,7 @@ export function PerformanceDistributionChart({ routeData, maxDays, carrierFilter
             />
           )}
           <Tooltip content={<CustomTooltip />} />
-          <Legend 
-            wrapperStyle={{ fontSize: '12px', paddingTop: '20px' }}
-            iconType="circle"
-            verticalAlign="bottom"
-          />
+
           
           {/* Vertical line at day reaching STD % */}
           {isSingleCarrierProduct && dayReachingStdPercentage !== null && (

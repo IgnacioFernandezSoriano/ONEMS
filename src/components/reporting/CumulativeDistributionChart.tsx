@@ -145,9 +145,7 @@ export function CumulativeDistributionChart({ routes, maxDays, selectedRoute }: 
             }}
           />
           <Tooltip content={<CustomTooltip />} />
-          <Legend 
-            wrapperStyle={{ paddingTop: '20px', fontSize: '12px' }}
-          />
+
           
           {/* Reference line for standard percentage */}
           <ReferenceLine 

@@ -75,11 +75,11 @@ export function CumulativeDistributionTable({ routes, maxDays }: CumulativeDistr
   }
 
   return (
-    <div className="overflow-x-auto">
+    <div className="max-h-96 overflow-y-auto">
       <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
+        <thead className="bg-gray-50 sticky top-0 z-20">
           <tr>
-            <th className="sticky left-0 z-10 bg-gray-50 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
+            <th className="sticky left-0 z-30 bg-gray-50 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
               <div className="flex items-center gap-1">
                 Route
                 <ColumnTooltip content="Origin → Destination city pair. Each route shows cumulative delivery percentages by day." />
