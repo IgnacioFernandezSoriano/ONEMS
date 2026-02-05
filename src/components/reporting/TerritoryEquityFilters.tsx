@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Calendar, Filter, RotateCcw, MapPin, Navigation, AlertCircle } from 'lucide-react';
 import { SmartTooltip } from '@/components/common/SmartTooltip';
+import { QuickMonthSelector } from '@/components/common/QuickMonthSelector';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import type { TerritoryEquityFilters as Filters } from '@/types/reporting';
@@ -24,6 +25,7 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [filteredProducts, setFilteredProducts] = useState<string[]>([]);
   const prevCarrierRef = useRef<string>();
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
   useEffect(() => {
     async function loadFilterOptions() {
@@ -300,6 +302,50 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
         {/* Region and Direction filters removed - now in Regional Analysis tab */}
 
         {/* Equity Status moved to Product Analysis tab */}
+      </div>
+
+      {/* Quick Month Selector */}
+      <div className="mt-4 pt-4 border-t border-gray-200">
+        <QuickMonthSelector
+          selectedYear={selectedYear}
+          onYearChange={setSelectedYear}
+          onMonthSelect={(year, month) => {
+            const firstDay = new Date(year, month - 1, 1);
+            const lastDay = new Date(year, month, 0);
+            onChange({
+              ...filters,
+              startDate: firstDay.toISOString().split('T')[0],
+              endDate: lastDay.toISOString().split('T')[0],
+            });
+          }}
+          onFirstSemesterSelect={() => {
+            const firstDay = new Date(selectedYear, 0, 1);
+            const lastDay = new Date(selectedYear, 5, 30);
+            onChange({
+              ...filters,
+              startDate: firstDay.toISOString().split('T')[0],
+              endDate: lastDay.toISOString().split('T')[0],
+            });
+          }}
+          onSecondSemesterSelect={() => {
+            const firstDay = new Date(selectedYear, 6, 1);
+            const lastDay = new Date(selectedYear, 11, 31);
+            onChange({
+              ...filters,
+              startDate: firstDay.toISOString().split('T')[0],
+              endDate: lastDay.toISOString().split('T')[0],
+            });
+          }}
+          onYearSelect={() => {
+            const firstDay = new Date(selectedYear, 0, 1);
+            const lastDay = new Date(selectedYear, 11, 31);
+            onChange({
+              ...filters,
+              startDate: firstDay.toISOString().split('T')[0],
+              endDate: lastDay.toISOString().split('T')[0],
+            });
+          }}
+        />
       </div>
       </>
       )}
