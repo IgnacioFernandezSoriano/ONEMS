@@ -1405,9 +1405,11 @@ export function useTerritoryEquityDataV2(
           const standardDays = r.standardDaysArray.length > 0
             ? r.standardDaysArray.reduce((sum, d) => sum + d, 0) / r.standardDaysArray.length
             : 0;
-          const actualDays = r.actualDaysArray.length > 0
-            ? r.actualDaysArray.reduce((sum, d) => sum + d, 0) / r.actualDaysArray.length
-            : 0;
+          const actualDays = calculateJKActualFromDays(
+            r.actualDaysArray,
+            standardPercentage,
+            standardDays
+          );
           
           // Calculate status based on relative threshold (same as Underserved Cities logic)
           // Critical: actual% is 10+ percentage points below standard%

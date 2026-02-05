@@ -1,11 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTerritoryEquityDataV2 as useTerritoryEquityData } from '@/hooks/reporting/useTerritoryEquityDataV2';
 import { TerritoryEquityFilters } from '@/components/reporting/TerritoryEquityFilters';
-import { ComplianceCarrierTable } from '@/components/reporting/ComplianceCarrierTable';
-import { ComplianceProductTable } from '@/components/reporting/ComplianceProductTable';
-import { ComplianceRouteTable } from '@/components/reporting/ComplianceRouteTable';
-import { Shield, AlertTriangle, CheckCircle, XCircle, Info, FileDown, TrendingUp, Package, MapPin } from 'lucide-react';
+import { ComplianceHierarchicalTable } from '@/components/reporting/ComplianceHierarchicalTable';
+import { Shield, AlertTriangle, CheckCircle, XCircle, Info, FileDown } from 'lucide-react';
 import { SmartTooltip } from '@/components/common/SmartTooltip';
 import { useTranslation } from '@/hooks/useTranslation';
 import type { TerritoryEquityFilters as Filters } from '@/types/reporting';
@@ -13,7 +11,6 @@ import type { TerritoryEquityFilters as Filters } from '@/types/reporting';
 export default function ComplianceReport() {
   const { t } = useTranslation();
   const { profile } = useAuth();
-  const [activeTab, setActiveTab] = useState<'carrier' | 'product' | 'route'>('carrier');
   const [filters, setFilters] = useState<Filters>({
     startDate: '',
     endDate: '',
@@ -27,10 +24,8 @@ export default function ComplianceReport() {
   });
 
   const { 
-    cityData, 
-    regionData, 
-    metrics, 
     routeData,
+    metrics, 
     loading, 
     error, 
     globalWarningThreshold, 
@@ -40,105 +35,22 @@ export default function ComplianceReport() {
     filters
   );
 
-  // Calculate KPIs from route data
+  // Calculate KPIs from routeData
   const totalRoutes = routeData.length;
   const compliantRoutes = routeData.filter(r => r.status === 'compliant').length;
   const warningRoutes = routeData.filter(r => r.status === 'warning').length;
   const criticalRoutes = routeData.filter(r => r.status === 'critical').length;
-  
-  const totalSamples = routeData.reduce((sum, r) => sum + (r.samples || 0), 0);
+  const totalSamples = routeData.reduce((sum, r) => sum + (r.totalShipments || 0), 0);
   const overallCompliance = totalRoutes > 0 ? (compliantRoutes / totalRoutes) * 100 : 0;
 
-  // Aggregate by carrier
-  const carrierData = useMemo(() => {
-    const carrierMap = new Map();
-    routeData.forEach(route => {
-      const carrier = route.carrier || 'Unknown';
-      if (!carrierMap.has(carrier)) {
-        carrierMap.set(carrier, {
-          carrier,
-          routes: [],
-          totalSamples: 0,
-          compliantRoutes: 0,
-          warningRoutes: 0,
-          criticalRoutes: 0,
-        });
-      }
-      const c = carrierMap.get(carrier);
-      c.routes.push(route);
-      c.totalSamples += route.samples || 0;
-      if (route.status === 'compliant') c.compliantRoutes++;
-      if (route.status === 'warning') c.warningRoutes++;
-      if (route.status === 'critical') c.criticalRoutes++;
-    });
-    return Array.from(carrierMap.values());
-  }, [routeData]);
-
-  // Aggregate by product
-  const productData = useMemo(() => {
-    const productMap = new Map();
-    routeData.forEach(route => {
-      const product = route.product || 'Unknown';
-      if (!productMap.has(product)) {
-        productMap.set(product, {
-          product,
-          routes: [],
-          totalSamples: 0,
-          compliantRoutes: 0,
-          warningRoutes: 0,
-          criticalRoutes: 0,
-        });
-      }
-      const p = productMap.get(product);
-      p.routes.push(route);
-      p.totalSamples += route.samples || 0;
-      if (route.status === 'compliant') p.compliantRoutes++;
-      if (route.status === 'warning') p.warningRoutes++;
-      if (route.status === 'critical') p.criticalRoutes++;
-    });
-    return Array.from(productMap.values());
-  }, [routeData]);
-
-  const handleExportCSV = () => {
-    const headers = ['Carrier', 'Product', 'Origin', 'Destination', 'Samples', 'J+K STD', 'J+K Actual', 'STD %', 'Actual %', 'Deviation', 'Status'];
-    const rows: string[][] = [headers];
-    
-    routeData.forEach(route => {
-      const deviation = route.standardPercentage > 0 
-        ? ((route.actualPercentage - route.standardPercentage) / route.standardPercentage * 100).toFixed(1)
-        : '0.0';
-      
-      rows.push([
-        route.carrier || '',
-        route.product || '',
-        route.origin || '',
-        route.destination || '',
-        route.samples?.toString() || '0',
-        route.standardDays?.toFixed(1) || '',
-        route.actualDays?.toFixed(1) || '',
-        route.standardPercentage?.toFixed(1) || '',
-        route.actualPercentage?.toFixed(1) || '',
-        deviation,
-        route.status || ''
-      ]);
-    });
-    
-    const csvContent = rows.map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `compliance_report_${new Date().toISOString().split('T')[0]}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+  const handleExportAuditReport = () => {
+    alert('Export Audit Report - Coming soon');
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Loading compliance data...</div>
+        <div className="text-lg text-gray-600">Loading compliance data...</div>
       </div>
     );
   }
@@ -146,178 +58,129 @@ export default function ComplianceReport() {
   if (error) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-red-500">Error loading data: {error.message}</div>
+        <div className="text-lg text-red-600">Error loading data</div>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between">
+      {/* Header */}
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Regulatory Compliance Report</h1>
-          <p className="text-gray-600 mt-1">Compliance analysis by carrier, product, and route</p>
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <Shield className="w-6 h-6 text-blue-600" />
+            {t('reporting.regulatory_compliance_report')}
+          </h1>
+          <p className="text-gray-600 mt-1">
+            {t('reporting.compliance_analysis_description')}
+          </p>
         </div>
-        <div className="flex gap-3">
-          <button
-            disabled
-            className="flex items-center gap-2 px-4 py-2 bg-gray-400 text-white rounded-lg cursor-not-allowed opacity-60"
-          >
-            <FileDown className="w-5 h-5" />
-            <span className="text-sm font-medium">Export Audit Report</span>
-          </button>
-          <SmartTooltip content="Regulatory Compliance Report: Analyzes compliance rates by Carrier, Product, and Route to identify which carriers, services, or routes are meeting or failing regulatory standards." />
-        </div>
+        <button
+          onClick={handleExportAuditReport}
+          disabled
+          className="flex items-center gap-2 px-4 py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed"
+          title="Coming soon"
+        >
+          <FileDown className="w-4 h-4" />
+          {t('reporting.export_audit_report')}
+        </button>
       </div>
 
-      <TerritoryEquityFilters
-        filters={filters}
-        onChange={setFilters}
-      />
-
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3">
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <Shield className={`w-5 h-5 ${
-                compliantRoutes === totalRoutes ? 'text-green-600' : 
-                compliantRoutes > criticalRoutes ? 'text-amber-600' : 'text-red-600'
-              }`} />
-              <span className="text-sm text-gray-600">Overall Compliance</span>
-            </div>
-            <SmartTooltip content="Percentage of routes meeting their configured compliance standards." />
-          </div>
-          <div className="text-2xl font-bold">{overallCompliance.toFixed(1)}%</div>
-          <div className="text-xs text-gray-500 mt-1">{compliantRoutes}/{totalRoutes} routes</div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <CheckCircle className="w-5 h-5 text-green-600" />
-              <span className="text-sm text-gray-600">Compliant Routes</span>
-            </div>
-            <SmartTooltip content="Number of routes meeting or exceeding their configured compliance standard." />
-          </div>
-          <div className="text-2xl font-bold text-green-600">{compliantRoutes}</div>
-          <div className="text-xs text-gray-500 mt-1">Meeting standard</div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5 text-amber-600" />
-              <span className="text-sm text-gray-600">Warning Routes</span>
-            </div>
-            <SmartTooltip content="Routes with compliance below standard but above critical threshold." />
-          </div>
-          <div className="text-2xl font-bold text-amber-600">{warningRoutes}</div>
-          <div className="text-xs text-gray-500 mt-1">Below standard</div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <XCircle className="w-5 h-5 text-red-600" />
-              <span className="text-sm text-gray-600">Critical Routes</span>
-            </div>
-            <SmartTooltip content="Routes with compliance below critical threshold requiring immediate action." />
-          </div>
-          <div className="text-2xl font-bold text-red-600">{criticalRoutes}</div>
-          <div className="text-xs text-gray-500 mt-1">Needs action</div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <Info className="w-5 h-5 text-blue-600" />
-              <span className="text-sm text-gray-600">Total Samples</span>
-            </div>
-            <SmartTooltip content="Total number of shipment samples analyzed across all routes." />
-          </div>
-          <div className="text-2xl font-bold text-blue-600">{totalSamples}</div>
-          <div className="text-xs text-gray-500 mt-1">{totalRoutes} routes</div>
-        </div>
-      </div>
-
+      {/* Filters */}
       <div className="bg-white rounded-lg shadow">
-        <div className="border-b border-gray-200">
-          <nav className="flex -mb-px">
-            <button
-              onClick={() => setActiveTab('carrier')}
-              className={`flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === 'carrier'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              <TrendingUp className="w-4 h-4" />
-              Carrier Analysis
-            </button>
-            <button
-              onClick={() => setActiveTab('product')}
-              className={`flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === 'product'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              <Package className="w-4 h-4" />
-              Product Analysis
-            </button>
-            <button
-              onClick={() => setActiveTab('route')}
-              className={`flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === 'route'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              <MapPin className="w-4 h-4" />
-              Route Analysis
-            </button>
-          </nav>
+        <TerritoryEquityFilters 
+          filters={filters}
+          onChange={setFilters}
+        />
+      </div>
+
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        {/* Overall Compliance */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-medium text-gray-600 flex items-center gap-1">
+              Overall Compliance
+              <SmartTooltip content="Percentage of routes meeting compliance standards" />
+            </h3>
+          </div>
+          <div className="flex items-center gap-2">
+            <Shield className="w-5 h-5 text-blue-600" />
+            <span className="text-3xl font-bold text-gray-900">
+              {overallCompliance.toFixed(1)}%
+            </span>
+          </div>
+          <p className="text-sm text-gray-500 mt-1">{compliantRoutes}/{totalRoutes} routes</p>
         </div>
 
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">
-              {activeTab === 'carrier' && 'Carrier Compliance Analysis'}
-              {activeTab === 'product' && 'Product Compliance Analysis'}
-              {activeTab === 'route' && 'Route Compliance Analysis'}
-            </h2>
-            <button
-              onClick={handleExportCSV}
-              className="flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-            >
-              <FileDown className="w-4 h-4" />
-              Export CSV
-            </button>
+        {/* Compliant Routes */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-medium text-gray-600 flex items-center gap-1">
+              <CheckCircle className="w-4 h-4 text-green-600" />
+              Compliant Routes
+              <SmartTooltip content="Routes meeting standard" />
+            </h3>
           </div>
+          <div className="text-3xl font-bold text-green-600">{compliantRoutes}</div>
+          <p className="text-sm text-gray-500 mt-1">Meeting standard</p>
+        </div>
 
-          {activeTab === 'carrier' && (
-            <ComplianceCarrierTable 
-              data={carrierData}
-              warningThreshold={globalWarningThreshold}
-              criticalThreshold={globalCriticalThreshold}
-            />
-          )}
+        {/* Warning Routes */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-medium text-gray-600 flex items-center gap-1">
+              <AlertTriangle className="w-4 h-4 text-amber-600" />
+              Warning Routes
+              <SmartTooltip content="Routes with minor issues" />
+            </h3>
+          </div>
+          <div className="text-3xl font-bold text-amber-600">{warningRoutes}</div>
+          <p className="text-sm text-gray-500 mt-1">No penalty</p>
+        </div>
 
-          {activeTab === 'product' && (
-            <ComplianceProductTable 
-              data={productData}
-              warningThreshold={globalWarningThreshold}
-              criticalThreshold={globalCriticalThreshold}
-            />
-          )}
+        {/* Critical Routes */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-medium text-gray-600 flex items-center gap-1">
+              <XCircle className="w-4 h-4 text-red-600" />
+              Critical Routes
+              <SmartTooltip content="Routes with penalties" />
+            </h3>
+          </div>
+          <div className="text-3xl font-bold text-red-600">{criticalRoutes}</div>
+          <p className="text-sm text-gray-500 mt-1">With penalty</p>
+        </div>
 
-          {activeTab === 'route' && (
-            <ComplianceRouteTable 
-              data={routeData}
-              warningThreshold={globalWarningThreshold}
-              criticalThreshold={globalCriticalThreshold}
-            />
-          )}
+        {/* Total Routes */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-medium text-gray-600 flex items-center gap-1">
+              <Info className="w-4 h-4 text-blue-600" />
+              Total Routes
+              <SmartTooltip content="All routes analyzed" />
+            </h3>
+          </div>
+          <div className="text-3xl font-bold text-blue-600">{totalRoutes}</div>
+          <p className="text-sm text-gray-500 mt-1">Across all carriers</p>
+        </div>
+      </div>
+
+      {/* Compliance Analysis Table */}
+      <div className="bg-white rounded-lg shadow">
+        <div className="p-6 border-b border-gray-200">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold">Compliance Analysis</h2>
+            <SmartTooltip content="Hierarchical view: Carrier → Product → Route" />
+          </div>
+        </div>
+        <div className="p-6">
+          <ComplianceHierarchicalTable 
+            data={routeData}
+            warningThreshold={globalWarningThreshold}
+            criticalThreshold={globalCriticalThreshold}
+          />
         </div>
       </div>
     </div>
