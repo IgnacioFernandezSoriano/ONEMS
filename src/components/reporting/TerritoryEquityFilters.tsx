@@ -320,7 +320,7 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
           }}
           onFirstSemesterSelect={() => {
             const firstDay = new Date(selectedYear, 0, 1);
-            const lastDay = new Date(selectedYear, 5, 30);
+            const lastDay = new Date(selectedYear, 6, 0); // Last day of June
             onChange({
               ...filters,
               startDate: firstDay.toISOString().split('T')[0],
