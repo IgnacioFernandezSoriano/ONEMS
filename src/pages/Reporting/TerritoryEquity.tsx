@@ -12,6 +12,8 @@ import { TerritoryEquityFilters } from '@/components/reporting/TerritoryEquityFi
 import { TerritoryEquityTreemap } from '@/components/reporting/TerritoryEquityTreemap';
 import { TerritoryEquityMap } from '@/components/reporting/TerritoryEquityMap';
 import { ProductAnalysisTable } from '@/components/reporting/ProductAnalysisTable';
+import { JKPerformanceDistribution } from '@/components/reporting/JKPerformanceDistribution';
+import { JKCumulativeDistribution } from '@/components/reporting/JKCumulativeDistribution';
 import { PerformanceTrendChart } from '@/components/reports/PerformanceTrendChart';
 import { useEquityAuditExport } from '@/hooks/reporting/useEquityAuditExport';
 import { tooltips } from '@/components/reporting/TerritoryEquityTooltips';
@@ -1095,23 +1097,13 @@ export default function TerritoryEquity() {
                   {/* Bar Chart: Distribution */}
                   <div className="bg-white p-6 rounded-lg border border-gray-200">
                     <h4 className="text-md font-semibold mb-4">Performance Distribution</h4>
-                    <div className="h-64">
-                      {/* Placeholder for bar chart */}
-                      <div className="flex items-center justify-center h-full text-gray-400">
-                        Distribution chart (Before/On/After Standard)
-                      </div>
-                    </div>
+                    <JKPerformanceDistribution routeData={routeData} />
                   </div>
 
-                  {/* Line Chart: Cumulative Distribution */}
+                  {/* Cumulative Distribution */}
                   <div className="bg-white p-6 rounded-lg border border-gray-200">
                     <h4 className="text-md font-semibold mb-4">Cumulative Distribution</h4>
-                    <div className="h-64">
-                      {/* Placeholder for line chart */}
-                      <div className="flex items-center justify-center h-full text-gray-400">
-                        Cumulative distribution chart
-                      </div>
-                    </div>
+                    <JKCumulativeDistribution routeData={routeData} />
                   </div>
                 </div>
 
