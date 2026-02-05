@@ -202,7 +202,14 @@ export function ProductAnalysisTable({
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {sortedRows.map((row, idx) => (
-              <tr key={idx} className="hover:bg-gray-50">
+              <tr 
+                key={idx} 
+                className="hover:bg-gray-50 cursor-pointer"
+                onClick={() => {
+                  const url = `/reporting/territory-equity?tab=jk&origin=${encodeURIComponent(row.origin)}&destination=${encodeURIComponent(row.destination)}&carrier=${encodeURIComponent(row.carrier)}&product=${encodeURIComponent(row.product)}`;
+                  window.open(url, '_blank');
+                }}
+              >
                 <td className="px-6 py-4 whitespace-nowrap text-sm">{row.origin}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{row.destination}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">{row.carrier}</td>

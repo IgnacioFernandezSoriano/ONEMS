@@ -26,10 +26,20 @@ import type { CityEquityData, RegionEquityData, TerritoryEquityFilters as Filter
 
 import { useTranslation } from '@/hooks/useTranslation';
 import { useFilterScenario } from '@/hooks/reporting/useFilterScenario';
+import { useSearchParams } from 'react-router-dom';
+
 export default function TerritoryEquity() {
+  const [searchParams] = useSearchParams();
   const { t } = useTranslation();
   const { profile } = useAuth();
-  const [activeTab, setActiveTab] = useState<'city' | 'regional' | 'map' | 'product' | 'jk'>('city');
+  // Read URL params
+  const urlTab = searchParams.get('tab') as 'city' | 'regional' | 'map' | 'product' | 'jk' | null;
+  const urlOrigin = searchParams.get('origin');
+  const urlDestination = searchParams.get('destination');
+  const urlCarrier = searchParams.get('carrier');
+  const urlProduct = searchParams.get('product');
+
+  const [activeTab, setActiveTab] = useState<'city' | 'regional' | 'map' | 'product' | 'jk'>(urlTab || 'city');
   const [cumulativeView, setCumulativeView] = useState<'chart' | 'table'>('chart');
   const [filtersExpanded, setFiltersExpanded] = useState(true);
   const [selectedCity, setSelectedCity] = useState<CityEquityData | null>(null);
@@ -38,11 +48,13 @@ export default function TerritoryEquity() {
   const [filters, setFilters] = useState<Filters>({
     startDate: '',
     endDate: '',
-    carrier: '',
-    product: '',
+    carrier: urlCarrier || '',
+    product: urlProduct || '',
     region: '',
-    direction: undefined,
+    direction: (urlOrigin && urlDestination) ? 'outbound' : undefined,
     equityStatus: [],
+    originCity: urlOrigin || undefined,
+    destinationCity: urlDestination || undefined,
   });
 
   // Load available regions
