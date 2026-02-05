@@ -490,9 +490,9 @@ export default function TerritoryEquity() {
             {scenarioInfo.isRouteView
               ? `Route Analysis: ${scenarioInfo.originCityName} → ${scenarioInfo.destinationCityName}`
               : scenarioInfo.isOriginView
-              ? `Territory Equity Report: Outbound from ${scenarioInfo.originCityName}`
+              ? `Territory Performance Report: Outbound from ${scenarioInfo.originCityName}`
               : scenarioInfo.isDestinationView
-              ? `Territory Equity Report: Inbound to ${scenarioInfo.destinationCityName}`
+              ? `Territory Performance Report: Inbound to ${scenarioInfo.destinationCityName}`
               : t('reporting.territory_equity_report')}
           </h1>
           <p className="text-gray-600 mt-1">
@@ -507,8 +507,9 @@ export default function TerritoryEquity() {
         </div>
         <div className="flex gap-2">
           <button
-            onClick={handleExportAuditReport}
-            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            disabled
+            className="flex items-center gap-2 px-4 py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed"
+            title="Coming soon"
           >
             <FileText className="w-4 h-4" />
             {t('reporting.export_audit_report')}

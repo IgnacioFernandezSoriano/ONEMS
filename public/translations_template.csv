@@ -821,8 +821,8 @@ reporting.std,Std %,,,,jsx_text,CumulativeDistributionTable
 reporting.table_view,Table View,,,,jsx_text,JKPerformance
 reporting.tag_id,TAG ID,,,,jsx_text,ShipmentsTable
 reporting.target_1_day,Target: 1 day,,,,label,TimelineChart
-reporting.territory_equity_filter_guide,Territory Equity Filter Guide,,,,jsx_text,TerritoryEquityFilters
-reporting.territory_equity_report,Territory Equity Report,,,,jsx_text,TerritoryEquity
+reporting.territory_equity_filter_guide,Territory Performance Filter Guide,,,,jsx_text,TerritoryEquityFilters
+reporting.territory_equity_report,Territory Performance Report,,,,jsx_text,TerritoryEquity
 reporting.top_3_best_served_cities,Top 3 Best Served Cities,,,,jsx_text,TerritoryEquityTooltips
 reporting.top_3_worst_served_cities,Top 3 Worst Served Cities,,,,jsx_text,TerritoryEquityTooltips
 reporting.total,Total:,,,,jsx_text,PerformanceDistributionChart
