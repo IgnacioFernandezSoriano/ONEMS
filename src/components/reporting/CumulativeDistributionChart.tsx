@@ -55,10 +55,21 @@ export function CumulativeDistributionChart({ routes, maxDays, selectedRoute }: 
 
     // Build cumulative chart data
     const maxDisplayDays = Math.min(maxDays, 20);
+    
+    // Find first day with data
+    let minDayWithData = maxDisplayDays;
+    for (let day = 0; day <= maxDisplayDays; day++) {
+      const count = aggregatedDistribution.get(day) || 0;
+      if (count > 0) {
+        minDayWithData = day;
+        break;
+      }
+    }
+    
     const data: any[] = [];
     let cumulativeCount = 0;
 
-    for (let day = 0; day <= maxDisplayDays; day++) {
+    for (let day = minDayWithData; day <= maxDisplayDays; day++) {
       const count = aggregatedDistribution.get(day) || 0;
       cumulativeCount += count;
       const cumulativePercentage = totalSamples > 0 ? (cumulativeCount / totalSamples) * 100 : 0;
