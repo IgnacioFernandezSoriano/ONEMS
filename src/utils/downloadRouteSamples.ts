@@ -20,7 +20,7 @@ export async function downloadRouteSamples(route: RouteInfo) {
       .eq('destination_city_name', route.destinationCity)
       .eq('carrier_name', route.carrier)
       .eq('product_name', route.product)
-      .order('ship_date', { ascending: false });
+      .order('sent_at', { ascending: false });
 
     if (error) {
       console.error('Error fetching samples:', error);
