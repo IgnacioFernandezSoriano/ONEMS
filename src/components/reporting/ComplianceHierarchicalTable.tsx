@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { ChevronDown, ChevronRight, Download } from 'lucide-react';
 import { downloadRouteSamples } from '@/utils/downloadRouteSamples';
 
@@ -37,6 +37,17 @@ interface ComplianceHierarchicalTableProps {
 export function ComplianceHierarchicalTable({ data, warningThreshold, criticalThreshold }: ComplianceHierarchicalTableProps) {
   const [expandedCarriers, setExpandedCarriers] = useState<Set<string>>(new Set());
   const [expandedProducts, setExpandedProducts] = useState<Set<string>>(new Set());
+
+  // Auto-expand carriers and products on mount
+  useEffect(() => {
+    if (data.length > 0) {
+      const carriers = new Set<string>();
+      data.forEach(route => {
+        carriers.add(route.carrier || 'Unknown');
+      });
+      setExpandedCarriers(carriers);
+    }
+  }, [data]);
 
   // Aggregate data by carrier → product → route
   const hierarchicalData = useMemo(() => {
@@ -160,14 +171,11 @@ export function ComplianceHierarchicalTable({ data, warningThreshold, criticalTh
                 <td className="px-4 py-3 whitespace-nowrap text-sm text-right font-bold">
                   {carrierItem.standardPercentage > 0 ? `${carrierItem.standardPercentage.toFixed(1)}%` : '-'}
                 </td>
-                <td className={`px-4 py-3 whitespace-nowrap text-sm text-right font-bold ${
-                  carrierItem.status === 'compliant' ? 'text-green-600' :
-                  carrierItem.status === 'warning' ? 'text-amber-600' : 'text-red-600'
-                }`}>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-right font-bold text-gray-900">
                   {carrierItem.actualPercentage > 0 ? `${carrierItem.actualPercentage.toFixed(1)}%` : '-'}
                 </td>
                 <td className={`px-4 py-3 whitespace-nowrap text-sm text-right font-bold ${
-                  carrierItem.deviation < 0 ? 'text-red-600' : 'text-gray-600'
+                  carrierItem.deviation < 0 ? 'text-red-600' : 'text-gray-900'
                 }`}>
                   {carrierItem.deviation !== 0 ? `${carrierItem.deviation.toFixed(1)}%` : '-'}
                 </td>
@@ -211,14 +219,11 @@ export function ComplianceHierarchicalTable({ data, warningThreshold, criticalTh
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-right font-semibold">
                       {productItem.standardPercentage > 0 ? `${productItem.standardPercentage.toFixed(1)}%` : '-'}
                     </td>
-                    <td className={`px-4 py-3 whitespace-nowrap text-sm text-right font-semibold ${
-                      productItem.status === 'compliant' ? 'text-green-600' :
-                      productItem.status === 'warning' ? 'text-amber-600' : 'text-red-600'
-                    }`}>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-right font-semibold text-gray-900">
                       {productItem.actualPercentage > 0 ? `${productItem.actualPercentage.toFixed(1)}%` : '-'}
                     </td>
                     <td className={`px-4 py-3 whitespace-nowrap text-sm text-right font-semibold ${
-                      productItem.deviation < 0 ? 'text-red-600' : 'text-gray-600'
+                      productItem.deviation < 0 ? 'text-red-600' : 'text-gray-900'
                     }`}>
                       {productItem.deviation !== 0 ? `${productItem.deviation.toFixed(1)}%` : '-'}
                     </td>
@@ -247,14 +252,11 @@ export function ComplianceHierarchicalTable({ data, warningThreshold, criticalTh
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-right">{route.standardDays?.toFixed(1)}</td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-right">{route.actualDays?.toFixed(1)}</td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-right">{route.standardPercentage?.toFixed(1)}%</td>
-                        <td className={`px-4 py-3 whitespace-nowrap text-sm text-right font-medium ${
-                          route.status === 'compliant' ? 'text-green-600' :
-                          route.status === 'warning' ? 'text-amber-600' : 'text-red-600'
-                        }`}>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-900">
                           {route.actualPercentage?.toFixed(1)}%
                         </td>
                         <td className={`px-4 py-3 whitespace-nowrap text-sm text-right ${
-                          parseFloat(deviation) < 0 ? 'text-red-600' : 'text-gray-600'
+                          parseFloat(deviation) < 0 ? 'text-red-600' : 'text-gray-900'
                         }`}>
                           {deviation}%
                         </td>
