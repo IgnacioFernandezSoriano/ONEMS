@@ -13,8 +13,9 @@ import { TerritoryEquityFilters } from '@/components/reporting/TerritoryEquityFi
 import { TerritoryEquityTreemap } from '@/components/reporting/TerritoryEquityTreemap';
 import { TerritoryEquityMap } from '@/components/reporting/TerritoryEquityMap';
 import { ProductAnalysisTable } from '@/components/reporting/ProductAnalysisTable';
-import { JKPerformanceDistribution } from '@/components/reporting/JKPerformanceDistribution';
-import { JKCumulativeDistribution } from '@/components/reporting/JKCumulativeDistribution';
+import { PerformanceDistributionChart } from '@/components/reporting/PerformanceDistributionChart';
+import { CumulativeDistributionChart } from '@/components/reporting/CumulativeDistributionChart';
+import { CumulativeDistributionTable } from '@/components/reporting/CumulativeDistributionTable';
 import { PerformanceTrendChart } from '@/components/reports/PerformanceTrendChart';
 import { useEquityAuditExport } from '@/hooks/reporting/useEquityAuditExport';
 import { tooltips } from '@/components/reporting/TerritoryEquityTooltips';
@@ -28,6 +29,7 @@ export default function TerritoryEquity() {
   const { t } = useTranslation();
   const { profile } = useAuth();
   const [activeTab, setActiveTab] = useState<'city' | 'regional' | 'map' | 'product' | 'jk'>('city');
+  const [cumulativeView, setCumulativeView] = useState<'chart' | 'table'>('chart');
   const [filtersExpanded, setFiltersExpanded] = useState(true);
   const [selectedCity, setSelectedCity] = useState<CityEquityData | null>(null);
   const [selectedRegion, setSelectedRegion] = useState<RegionEquityData | null>(null);
@@ -1104,25 +1106,77 @@ export default function TerritoryEquity() {
 
                 {/* Distribution Charts */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                  {/* Bar Chart: Distribution */}
+                  {/* Left: Performance Distribution */}
                   <div className="bg-white p-6 rounded-lg border border-gray-200">
                     <h4 className="text-md font-semibold mb-4">Performance Distribution</h4>
-                    <JKPerformanceDistribution routeData={jkRouteData} />
+                    <PerformanceDistributionChart 
+                      routeData={jkRouteData} 
+                      maxDays={jkMetrics?.maxDays || 20}
+                      carrierFilter={effectiveFilters.carrier}
+                      productFilter={effectiveFilters.product}
+                    />
                   </div>
 
-                  {/* Cumulative Distribution */}
+                  {/* Right: Cumulative Distribution with toggle */}
                   <div className="bg-white p-6 rounded-lg border border-gray-200">
-                    <h4 className="text-md font-semibold mb-4">Cumulative Distribution</h4>
-                    <JKCumulativeDistribution routeData={jkRouteData} />
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="text-md font-semibold">Cumulative Distribution</h4>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setCumulativeView('chart')}
+                          className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
+                            cumulativeView === 'chart'
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          Chart
+                        </button>
+                        <button
+                          onClick={() => setCumulativeView('table')}
+                          className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
+                            cumulativeView === 'table'
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          Table
+                        </button>
+                      </div>
+                    </div>
+                    {cumulativeView === 'chart' ? (
+                      <CumulativeDistributionChart
+                        routes={jkRouteData.map(route => ({
+                          routeKey: route.routeKey,
+                          originCity: route.originCity,
+                          destinationCity: route.destinationCity,
+                          carrier: route.carrier,
+                          product: route.product,
+                          jkStandard: route.jkStandard,
+                          standardPercentage: route.standardPercentage,
+                          distribution: route.distribution,
+                          totalSamples: route.totalSamples,
+                        }))}
+                        maxDays={jkMetrics?.maxDays || 20}
+                      />
+                    ) : (
+                      <CumulativeDistributionTable
+                        routes={jkRouteData.map(route => ({
+                          routeKey: route.routeKey,
+                          originCity: route.originCity,
+                          destinationCity: route.destinationCity,
+                          carrier: route.carrier,
+                          product: route.product,
+                          jkStandard: route.jkStandard,
+                          standardPercentage: route.standardPercentage,
+                          distribution: route.distribution,
+                          totalSamples: route.totalSamples,
+                        }))}
+                        maxDays={jkMetrics?.maxDays || 20}
+                      />
+                    )}
                   </div>
                 </div>
-
-                {/* Routes Table */}
-                <ProductAnalysisTable 
-                  routeData={routeData}
-                  globalWarningThreshold={globalWarningThreshold}
-                  globalCriticalThreshold={globalCriticalThreshold}
-                />
               </div>
             </div>
           )}
