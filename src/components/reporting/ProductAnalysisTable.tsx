@@ -206,7 +206,7 @@ export function ProductAnalysisTable({
                 key={idx} 
                 className="hover:bg-gray-50 cursor-pointer"
                 onClick={() => {
-                  const url = `/reporting/territory-equity?tab=jk&origin=${encodeURIComponent(row.origin)}&destination=${encodeURIComponent(row.destination)}&carrier=${encodeURIComponent(row.carrier)}&product=${encodeURIComponent(row.product)}`;
+                  const url = `/reporting/territory-equity?tab=jk&hideSidebar=true&origin=${encodeURIComponent(row.origin)}&destination=${encodeURIComponent(row.destination)}&carrier=${encodeURIComponent(row.carrier)}&product=${encodeURIComponent(row.product)}`;
                   window.open(url, '_blank');
                 }}
               >
