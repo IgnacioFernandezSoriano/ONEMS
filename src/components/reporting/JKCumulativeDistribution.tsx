@@ -26,9 +26,11 @@ export function JKCumulativeDistribution({ routeData }: JKCumulativeDistribution
       totalTarget += route.standardPercentage * route.totalSamples;
       totalSamples += route.totalSamples;
 
-      route.distribution.forEach((count, day) => {
+      if (route.distribution && route.distribution instanceof Map) {
+        route.distribution.forEach((count, day) => {
         dayCountMap.set(day, (dayCountMap.get(day) || 0) + count);
-      });
+        });
+      }
     });
 
     const avgStd = totalSamples > 0 ? totalStandard / totalSamples : 0;

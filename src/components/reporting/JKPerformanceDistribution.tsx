@@ -14,7 +14,8 @@ export function JKPerformanceDistribution({ routeData }: JKPerformanceDistributi
     routeData.forEach(route => {
       const jkStd = Math.round(route.jkStandard);
       
-      route.distribution.forEach((count, day) => {
+      if (route.distribution && route.distribution instanceof Map) {
+        route.distribution.forEach((count, day) => {
         if (!dayCountMap.has(day)) {
           dayCountMap.set(day, { before: 0, on: 0, after: 0 });
         }
@@ -27,7 +28,8 @@ export function JKPerformanceDistribution({ routeData }: JKPerformanceDistributi
         } else {
           entry.after += count;
         }
-      });
+        });
+      }
     });
     
     // Convert to array and sort by day

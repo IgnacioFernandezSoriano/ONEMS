@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { useTerritoryEquityDataV2 as useTerritoryEquityData } from '@/hooks/reporting/useTerritoryEquityDataV2';
+import { useJKPerformance } from '@/hooks/reporting/useJKPerformance';
 import { TerritoryEquityTable } from '@/components/reporting/TerritoryEquityTable';
 import { RegionalEquityTable } from '@/components/reporting/RegionalEquityTable';
 import { InboundOutboundChart } from '@/components/reporting/InboundOutboundChart';
@@ -88,6 +89,15 @@ export default function TerritoryEquity() {
     profile?.account_id || undefined,
     effectiveFilters
   );
+
+  // Load J+K Performance data with distribution
+  const {
+    routeData: jkRouteData,
+    metrics: jkMetrics,
+    loading: jkLoading,
+    globalWarningThreshold: jkWarningThreshold,
+    globalCriticalThreshold: jkCriticalThreshold,
+  } = useJKPerformance(profile?.account_id || undefined, effectiveFilters);
 
   const { generateMarkdownReport, downloadMarkdown } = useEquityAuditExport();
 
@@ -1097,13 +1107,13 @@ export default function TerritoryEquity() {
                   {/* Bar Chart: Distribution */}
                   <div className="bg-white p-6 rounded-lg border border-gray-200">
                     <h4 className="text-md font-semibold mb-4">Performance Distribution</h4>
-                    <JKPerformanceDistribution routeData={routeData} />
+                    <JKPerformanceDistribution routeData={jkRouteData} />
                   </div>
 
                   {/* Cumulative Distribution */}
                   <div className="bg-white p-6 rounded-lg border border-gray-200">
                     <h4 className="text-md font-semibold mb-4">Cumulative Distribution</h4>
-                    <JKCumulativeDistribution routeData={routeData} />
+                    <JKCumulativeDistribution routeData={jkRouteData} />
                   </div>
                 </div>
 
