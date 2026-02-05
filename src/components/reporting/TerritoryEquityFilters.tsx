@@ -312,37 +312,61 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
           onMonthSelect={(year, month) => {
             const firstDay = new Date(year, month - 1, 1);
             const lastDay = new Date(year, month, 0);
+            const formatDate = (d: Date) => {
+              const y = d.getFullYear();
+              const m = String(d.getMonth() + 1).padStart(2, '0');
+              const day = String(d.getDate()).padStart(2, '0');
+              return `${y}-${m}-${day}`;
+            };
             onChange({
               ...filters,
-              startDate: firstDay.toISOString().split('T')[0],
-              endDate: lastDay.toISOString().split('T')[0],
+              startDate: formatDate(firstDay),
+              endDate: formatDate(lastDay),
             });
           }}
           onFirstSemesterSelect={() => {
             const firstDay = new Date(selectedYear, 0, 1);
             const lastDay = new Date(selectedYear, 6, 0); // Last day of June
+            const formatDate = (d: Date) => {
+              const y = d.getFullYear();
+              const m = String(d.getMonth() + 1).padStart(2, '0');
+              const day = String(d.getDate()).padStart(2, '0');
+              return `${y}-${m}-${day}`;
+            };
             onChange({
               ...filters,
-              startDate: firstDay.toISOString().split('T')[0],
-              endDate: lastDay.toISOString().split('T')[0],
+              startDate: formatDate(firstDay),
+              endDate: formatDate(lastDay),
             });
           }}
           onSecondSemesterSelect={() => {
             const firstDay = new Date(selectedYear, 6, 1);
             const lastDay = new Date(selectedYear, 11, 31);
+            const formatDate = (d: Date) => {
+              const y = d.getFullYear();
+              const m = String(d.getMonth() + 1).padStart(2, '0');
+              const day = String(d.getDate()).padStart(2, '0');
+              return `${y}-${m}-${day}`;
+            };
             onChange({
               ...filters,
-              startDate: firstDay.toISOString().split('T')[0],
-              endDate: lastDay.toISOString().split('T')[0],
+              startDate: formatDate(firstDay),
+              endDate: formatDate(lastDay),
             });
           }}
           onYearSelect={() => {
             const firstDay = new Date(selectedYear, 0, 1);
             const lastDay = new Date(selectedYear, 11, 31);
+            const formatDate = (d: Date) => {
+              const y = d.getFullYear();
+              const m = String(d.getMonth() + 1).padStart(2, '0');
+              const day = String(d.getDate()).padStart(2, '0');
+              return `${y}-${m}-${day}`;
+            };
             onChange({
               ...filters,
-              startDate: firstDay.toISOString().split('T')[0],
-              endDate: lastDay.toISOString().split('T')[0],
+              startDate: formatDate(firstDay),
+              endDate: formatDate(lastDay),
             });
           }}
         />
