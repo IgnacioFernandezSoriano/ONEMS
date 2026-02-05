@@ -16,6 +16,7 @@ import { ProductAnalysisTable } from '@/components/reporting/ProductAnalysisTabl
 import { PerformanceDistributionChart } from '@/components/reporting/PerformanceDistributionChart';
 import { CumulativeDistributionChart } from '@/components/reporting/CumulativeDistributionChart';
 import { CumulativeDistributionTable } from '@/components/reporting/CumulativeDistributionTable';
+import { RoutePerformanceTable } from '@/components/reporting/RoutePerformanceTable';
 import { PerformanceTrendChart } from '@/components/reports/PerformanceTrendChart';
 import { useEquityAuditExport } from '@/hooks/reporting/useEquityAuditExport';
 import { tooltips } from '@/components/reporting/TerritoryEquityTooltips';
@@ -1177,6 +1178,11 @@ export default function TerritoryEquity() {
                       />
                     )}
                   </div>
+                </div>
+
+                {/* Route Performance Table */}
+                <div className="bg-white p-6 rounded-lg border border-gray-200">
+                  <RoutePerformanceTable routeData={jkRouteData} />
                 </div>
               </div>
             </div>
