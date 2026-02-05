@@ -1450,6 +1450,8 @@ export function useTerritoryEquityDataV2(
           standardDaysArray: number[];
           standardPercentageSum: number;
           standardPercentageCount: number;
+          totalShipments: number;
+          compliantShipments: number;
         }>();
 
         const productAggregateMap = new Map<string, {
@@ -1457,6 +1459,8 @@ export function useTerritoryEquityDataV2(
           standardDaysArray: number[];
           standardPercentageSum: number;
           standardPercentageCount: number;
+          totalShipments: number;
+          compliantShipments: number;
         }>();
 
         // Collect all transit days for each carrier and product
@@ -1471,6 +1475,8 @@ export function useTerritoryEquityDataV2(
               standardDaysArray: [],
               standardPercentageSum: 0,
               standardPercentageCount: 0,
+              totalShipments: 0,
+              compliantShipments: 0,
             });
           }
           const carrierAgg = carrierAggregateMap.get(carrier)!;
@@ -1478,6 +1484,8 @@ export function useTerritoryEquityDataV2(
           carrierAgg.standardDaysArray.push(...r.standardDaysArray);
           carrierAgg.standardPercentageSum += r.standardPercentage;
           carrierAgg.standardPercentageCount++;
+          carrierAgg.totalShipments += r.total;
+          carrierAgg.compliantShipments += r.compliant;
           
           // Product aggregation
           if (!productAggregateMap.has(productKey)) {
@@ -1486,6 +1494,8 @@ export function useTerritoryEquityDataV2(
               standardDaysArray: [],
               standardPercentageSum: 0,
               standardPercentageCount: 0,
+              totalShipments: 0,
+              compliantShipments: 0,
             });
           }
           const productAgg = productAggregateMap.get(productKey)!;
@@ -1493,10 +1503,19 @@ export function useTerritoryEquityDataV2(
           productAgg.standardDaysArray.push(...r.standardDaysArray);
           productAgg.standardPercentageSum += r.standardPercentage;
           productAgg.standardPercentageCount++;
+          productAgg.totalShipments += r.total;
+          productAgg.compliantShipments += r.compliant;
         });
 
         // Calculate aggregated J+K for carriers and products
-        const carrierJK = new Map<string, { standardDays: number; actualDays: number }>();
+        const carrierJK = new Map<string, { 
+          standardDays: number; 
+          actualDays: number;
+          standardPercentage: number;
+          actualPercentage: number;
+          deviation: number;
+          status: 'compliant' | 'warning' | 'critical';
+        }>();
         carrierAggregateMap.forEach((agg, carrier) => {
           const avgStandardPercentage = agg.standardPercentageCount > 0 
             ? agg.standardPercentageSum / agg.standardPercentageCount 
@@ -1509,10 +1528,41 @@ export function useTerritoryEquityDataV2(
             avgStandardPercentage,
             standardDays
           );
-          carrierJK.set(carrier, { standardDays, actualDays });
+          const actualPercentage = agg.totalShipments > 0 
+            ? (agg.compliantShipments / agg.totalShipments) * 100 
+            : 0;
+          const deviation = actualPercentage - avgStandardPercentage;
+          
+          // Calculate status
+          const warningThreshold = avgStandardPercentage - 5;
+          const criticalThreshold = avgStandardPercentage - 10;
+          let status: 'compliant' | 'warning' | 'critical';
+          if (actualPercentage >= warningThreshold) {
+            status = 'compliant';
+          } else if (actualPercentage >= criticalThreshold) {
+            status = 'warning';
+          } else {
+            status = 'critical';
+          }
+          
+          carrierJK.set(carrier, { 
+            standardDays, 
+            actualDays, 
+            standardPercentage: avgStandardPercentage,
+            actualPercentage,
+            deviation,
+            status
+          });
         });
 
-        const productJK = new Map<string, { standardDays: number; actualDays: number }>();
+        const productJK = new Map<string, { 
+          standardDays: number; 
+          actualDays: number;
+          standardPercentage: number;
+          actualPercentage: number;
+          deviation: number;
+          status: 'compliant' | 'warning' | 'critical';
+        }>();
         productAggregateMap.forEach((agg, productKey) => {
           const avgStandardPercentage = agg.standardPercentageCount > 0 
             ? agg.standardPercentageSum / agg.standardPercentageCount 
@@ -1525,17 +1575,53 @@ export function useTerritoryEquityDataV2(
             avgStandardPercentage,
             standardDays
           );
-          productJK.set(productKey, { standardDays, actualDays });
+          const actualPercentage = agg.totalShipments > 0 
+            ? (agg.compliantShipments / agg.totalShipments) * 100 
+            : 0;
+          const deviation = actualPercentage - avgStandardPercentage;
+          
+          // Calculate status
+          const warningThreshold = avgStandardPercentage - 5;
+          const criticalThreshold = avgStandardPercentage - 10;
+          let status: 'compliant' | 'warning' | 'critical';
+          if (actualPercentage >= warningThreshold) {
+            status = 'compliant';
+          } else if (actualPercentage >= criticalThreshold) {
+            status = 'warning';
+          } else {
+            status = 'critical';
+          }
+          
+          productJK.set(productKey, { 
+            standardDays, 
+            actualDays,
+            standardPercentage: avgStandardPercentage,
+            actualPercentage,
+            deviation,
+            status
+          });
         });
 
         // Extend routeData to include aggregated metrics
-        const routeDataWithAggregates = routeData.map(r => ({
-          ...r,
-          carrierStandardDays: carrierJK.get(r.carrier)?.standardDays || 0,
-          carrierActualDays: carrierJK.get(r.carrier)?.actualDays || 0,
-          productStandardDays: productJK.get(`${r.carrier}|${r.product}`)?.standardDays || 0,
-          productActualDays: productJK.get(`${r.carrier}|${r.product}`)?.actualDays || 0,
-        }));
+        const routeDataWithAggregates = routeData.map(r => {
+          const carrierMetrics = carrierJK.get(r.carrier);
+          const productMetrics = productJK.get(`${r.carrier}|${r.product}`);
+          return {
+            ...r,
+            carrierStandardDays: carrierMetrics?.standardDays || 0,
+            carrierActualDays: carrierMetrics?.actualDays || 0,
+            carrierStandardPercentage: carrierMetrics?.standardPercentage || 0,
+            carrierActualPercentage: carrierMetrics?.actualPercentage || 0,
+            carrierDeviation: carrierMetrics?.deviation || 0,
+            carrierStatus: carrierMetrics?.status || 'compliant',
+            productStandardDays: productMetrics?.standardDays || 0,
+            productActualDays: productMetrics?.actualDays || 0,
+            productStandardPercentage: productMetrics?.standardPercentage || 0,
+            productActualPercentage: productMetrics?.actualPercentage || 0,
+            productDeviation: productMetrics?.deviation || 0,
+            productStatus: productMetrics?.status || 'compliant',
+          };
+        });
 
         // 10. Calculate trend data (daily aggregation)
         const trendMap = new Map<string, { 

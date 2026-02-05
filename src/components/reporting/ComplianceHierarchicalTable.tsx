@@ -16,8 +16,16 @@ interface RouteData {
   status: 'compliant' | 'warning' | 'critical';
   carrierStandardDays?: number;
   carrierActualDays?: number;
+  carrierStandardPercentage?: number;
+  carrierActualPercentage?: number;
+  carrierDeviation?: number;
+  carrierStatus?: 'compliant' | 'warning' | 'critical';
   productStandardDays?: number;
   productActualDays?: number;
+  productStandardPercentage?: number;
+  productActualPercentage?: number;
+  productDeviation?: number;
+  productStatus?: 'compliant' | 'warning' | 'critical';
 }
 
 interface ComplianceHierarchicalTableProps {
@@ -44,6 +52,10 @@ export function ComplianceHierarchicalTable({ data, warningThreshold, criticalTh
           totalSamples: 0,
           standardDays: route.carrierStandardDays || 0,
           actualDays: route.carrierActualDays || 0,
+          standardPercentage: route.carrierStandardPercentage || 0,
+          actualPercentage: route.carrierActualPercentage || 0,
+          deviation: route.carrierDeviation || 0,
+          status: route.carrierStatus || 'compliant',
           products: new Map(),
         });
       }
@@ -57,6 +69,10 @@ export function ComplianceHierarchicalTable({ data, warningThreshold, criticalTh
           totalSamples: 0,
           standardDays: route.productStandardDays || 0,
           actualDays: route.productActualDays || 0,
+          standardPercentage: route.productStandardPercentage || 0,
+          actualPercentage: route.productActualPercentage || 0,
+          deviation: route.productDeviation || 0,
+          status: route.productStatus || 'compliant',
           routes: [],
         });
       }
@@ -141,7 +157,30 @@ export function ComplianceHierarchicalTable({ data, warningThreshold, criticalTh
                 <td className="px-4 py-3 whitespace-nowrap text-sm text-right font-bold">
                   {carrierItem.actualDays > 0 ? carrierItem.actualDays.toFixed(1) : '-'}
                 </td>
-                <td colSpan={5}></td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-right font-bold">
+                  {carrierItem.standardPercentage > 0 ? `${carrierItem.standardPercentage.toFixed(1)}%` : '-'}
+                </td>
+                <td className={`px-4 py-3 whitespace-nowrap text-sm text-right font-bold ${
+                  carrierItem.status === 'compliant' ? 'text-green-600' :
+                  carrierItem.status === 'warning' ? 'text-amber-600' : 'text-red-600'
+                }`}>
+                  {carrierItem.actualPercentage > 0 ? `${carrierItem.actualPercentage.toFixed(1)}%` : '-'}
+                </td>
+                <td className={`px-4 py-3 whitespace-nowrap text-sm text-right font-bold ${
+                  carrierItem.deviation < 0 ? 'text-red-600' : 'text-gray-600'
+                }`}>
+                  {carrierItem.deviation !== 0 ? `${carrierItem.deviation.toFixed(1)}%` : '-'}
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap text-center">
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                    carrierItem.status === 'compliant' ? 'bg-green-100 text-green-800' :
+                    carrierItem.status === 'warning' ? 'bg-yellow-100 text-yellow-800' :
+                    'bg-red-100 text-red-800'
+                  }`}>
+                    {carrierItem.status}
+                  </span>
+                </td>
+                <td></td>
               </tr>
               
               {/* Products under this carrier */}
@@ -169,7 +208,30 @@ export function ComplianceHierarchicalTable({ data, warningThreshold, criticalTh
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-right font-semibold">
                       {productItem.actualDays > 0 ? productItem.actualDays.toFixed(1) : '-'}
                     </td>
-                    <td colSpan={5}></td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-right font-semibold">
+                      {productItem.standardPercentage > 0 ? `${productItem.standardPercentage.toFixed(1)}%` : '-'}
+                    </td>
+                    <td className={`px-4 py-3 whitespace-nowrap text-sm text-right font-semibold ${
+                      productItem.status === 'compliant' ? 'text-green-600' :
+                      productItem.status === 'warning' ? 'text-amber-600' : 'text-red-600'
+                    }`}>
+                      {productItem.actualPercentage > 0 ? `${productItem.actualPercentage.toFixed(1)}%` : '-'}
+                    </td>
+                    <td className={`px-4 py-3 whitespace-nowrap text-sm text-right font-semibold ${
+                      productItem.deviation < 0 ? 'text-red-600' : 'text-gray-600'
+                    }`}>
+                      {productItem.deviation !== 0 ? `${productItem.deviation.toFixed(1)}%` : '-'}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-center">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                        productItem.status === 'compliant' ? 'bg-green-100 text-green-800' :
+                        productItem.status === 'warning' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {productItem.status}
+                      </span>
+                    </td>
+                    <td></td>
                   </tr>
                   
                   {/* Routes under this product */}
