@@ -96,6 +96,7 @@ export default function TerritoryEquity() {
   const {
     routeData: jkRouteData,
     metrics: jkMetrics,
+    maxDays: jkMaxDays,
     loading: jkLoading,
     globalWarningThreshold: jkWarningThreshold,
     globalCriticalThreshold: jkCriticalThreshold,
@@ -1111,7 +1112,7 @@ export default function TerritoryEquity() {
                     <h4 className="text-md font-semibold mb-4">Performance Distribution</h4>
                     <PerformanceDistributionChart 
                       routeData={jkRouteData} 
-                      maxDays={jkMetrics?.maxDays || 20}
+                      maxDays={jkMaxDays}
                       carrierFilter={effectiveFilters.carrier}
                       productFilter={effectiveFilters.product}
                     />
@@ -1157,7 +1158,7 @@ export default function TerritoryEquity() {
                           distribution: route.distribution,
                           totalSamples: route.totalSamples,
                         }))}
-                        maxDays={jkMetrics?.maxDays || 20}
+                        maxDays={jkMaxDays}
                       />
                     ) : (
                       <CumulativeDistributionTable
@@ -1172,7 +1173,7 @@ export default function TerritoryEquity() {
                           distribution: route.distribution,
                           totalSamples: route.totalSamples,
                         }))}
-                        maxDays={jkMetrics?.maxDays || 20}
+                        maxDays={jkMaxDays}
                       />
                     )}
                   </div>
