@@ -14,6 +14,10 @@ interface RouteData {
   standardDays: number;
   actualDays: number;
   status: 'compliant' | 'warning' | 'critical';
+  carrierStandardDays?: number;
+  carrierActualDays?: number;
+  productStandardDays?: number;
+  productActualDays?: number;
 }
 
 interface ComplianceHierarchicalTableProps {
@@ -38,6 +42,8 @@ export function ComplianceHierarchicalTable({ data, warningThreshold, criticalTh
         carrierMap.set(carrier, {
           carrier,
           totalSamples: 0,
+          standardDays: route.carrierStandardDays || 0,
+          actualDays: route.carrierActualDays || 0,
           products: new Map(),
         });
       }
@@ -49,6 +55,8 @@ export function ComplianceHierarchicalTable({ data, warningThreshold, criticalTh
         carrierData.products.set(product, {
           product,
           totalSamples: 0,
+          standardDays: route.productStandardDays || 0,
+          actualDays: route.productActualDays || 0,
           routes: [],
         });
       }
@@ -127,7 +135,13 @@ export function ComplianceHierarchicalTable({ data, warningThreshold, criticalTh
                   </div>
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm text-right font-bold">{carrierItem.totalSamples}</td>
-                <td colSpan={7}></td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-right font-bold">
+                  {carrierItem.standardDays > 0 ? carrierItem.standardDays.toFixed(1) : '-'}
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-right font-bold">
+                  {carrierItem.actualDays > 0 ? carrierItem.actualDays.toFixed(1) : '-'}
+                </td>
+                <td colSpan={5}></td>
               </tr>
               
               {/* Products under this carrier */}
@@ -149,7 +163,13 @@ export function ComplianceHierarchicalTable({ data, warningThreshold, criticalTh
                       </div>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-right font-semibold">{productItem.totalSamples}</td>
-                    <td colSpan={7}></td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-right font-semibold">
+                      {productItem.standardDays > 0 ? productItem.standardDays.toFixed(1) : '-'}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-right font-semibold">
+                      {productItem.actualDays > 0 ? productItem.actualDays.toFixed(1) : '-'}
+                    </td>
+                    <td colSpan={5}></td>
                   </tr>
                   
                   {/* Routes under this product */}

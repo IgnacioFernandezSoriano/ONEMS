@@ -1444,99 +1444,6 @@ export function useTerritoryEquityDataV2(
           };
         });
 
-        // 9.5. Build aggregated J+K metrics for carriers and products
-        const carrierAggregateMap = new Map<string, {
-          actualDaysArray: number[];
-          standardDaysArray: number[];
-          standardPercentageSum: number;
-          standardPercentageCount: number;
-        }>();
-
-        const productAggregateMap = new Map<string, {
-          actualDaysArray: number[];
-          standardDaysArray: number[];
-          standardPercentageSum: number;
-          standardPercentageCount: number;
-        }>();
-
-        // Collect all transit days for each carrier and product
-        Array.from(routeMap.values()).forEach(r => {
-          const carrier = r.carrier;
-          const productKey = `${r.carrier}|${r.product}`;
-          
-          // Carrier aggregation
-          if (!carrierAggregateMap.has(carrier)) {
-            carrierAggregateMap.set(carrier, {
-              actualDaysArray: [],
-              standardDaysArray: [],
-              standardPercentageSum: 0,
-              standardPercentageCount: 0,
-            });
-          }
-          const carrierAgg = carrierAggregateMap.get(carrier)!;
-          carrierAgg.actualDaysArray.push(...r.actualDaysArray);
-          carrierAgg.standardDaysArray.push(...r.standardDaysArray);
-          carrierAgg.standardPercentageSum += r.standardPercentage;
-          carrierAgg.standardPercentageCount++;
-          
-          // Product aggregation
-          if (!productAggregateMap.has(productKey)) {
-            productAggregateMap.set(productKey, {
-              actualDaysArray: [],
-              standardDaysArray: [],
-              standardPercentageSum: 0,
-              standardPercentageCount: 0,
-            });
-          }
-          const productAgg = productAggregateMap.get(productKey)!;
-          productAgg.actualDaysArray.push(...r.actualDaysArray);
-          productAgg.standardDaysArray.push(...r.standardDaysArray);
-          productAgg.standardPercentageSum += r.standardPercentage;
-          productAgg.standardPercentageCount++;
-        });
-
-        // Calculate aggregated J+K for carriers and products
-        const carrierJK = new Map<string, { standardDays: number; actualDays: number }>();
-        carrierAggregateMap.forEach((agg, carrier) => {
-          const avgStandardPercentage = agg.standardPercentageCount > 0 
-            ? agg.standardPercentageSum / agg.standardPercentageCount 
-            : 95;
-          const standardDays = agg.standardDaysArray.length > 0
-            ? agg.standardDaysArray.reduce((sum, d) => sum + d, 0) / agg.standardDaysArray.length
-            : 0;
-          const actualDays = calculateJKActualFromDays(
-            agg.actualDaysArray,
-            avgStandardPercentage,
-            standardDays
-          );
-          carrierJK.set(carrier, { standardDays, actualDays });
-        });
-
-        const productJK = new Map<string, { standardDays: number; actualDays: number }>();
-        productAggregateMap.forEach((agg, productKey) => {
-          const avgStandardPercentage = agg.standardPercentageCount > 0 
-            ? agg.standardPercentageSum / agg.standardPercentageCount 
-            : 95;
-          const standardDays = agg.standardDaysArray.length > 0
-            ? agg.standardDaysArray.reduce((sum, d) => sum + d, 0) / agg.standardDaysArray.length
-            : 0;
-          const actualDays = calculateJKActualFromDays(
-            agg.actualDaysArray,
-            avgStandardPercentage,
-            standardDays
-          );
-          productJK.set(productKey, { standardDays, actualDays });
-        });
-
-        // Extend routeData to include aggregated metrics
-        const routeDataWithAggregates = routeData.map(r => ({
-          ...r,
-          carrierStandardDays: carrierJK.get(r.carrier)?.standardDays || 0,
-          carrierActualDays: carrierJK.get(r.carrier)?.actualDays || 0,
-          productStandardDays: productJK.get(`${r.carrier}|${r.product}`)?.standardDays || 0,
-          productActualDays: productJK.get(`${r.carrier}|${r.product}`)?.actualDays || 0,
-        }));
-
         // 10. Calculate trend data (daily aggregation)
         const trendMap = new Map<string, { 
           totalDays: number; 
@@ -1609,7 +1516,7 @@ export function useTerritoryEquityDataV2(
 
         // 11. Set state
         setCityData(filteredCityData);
-        setRouteData(routeDataWithAggregates);
+        setRouteData(routeData);
         setTrendData(trendDataArray);
         setPopulationWeightedCitizensAffected(populationWeightedCitizensAffected);
         
