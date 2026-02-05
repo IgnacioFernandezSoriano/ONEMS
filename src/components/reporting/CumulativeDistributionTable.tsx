@@ -25,7 +25,7 @@ export function CumulativeDistributionTable({ routes, maxDays }: CumulativeDistr
       return { tableData: [], dayColumns: [] };
     }
 
-    // Generate day columns (1 to maxDays, limited to 20 for display)
+    // Generate day columns (0 to maxDays, limited to 20 for display)
     const maxDisplayDays = Math.min(maxDays, 20);
     
     // Find the maximum day needed to reach 100% across all routes
@@ -75,35 +75,35 @@ export function CumulativeDistributionTable({ routes, maxDays }: CumulativeDistr
   }
 
   return (
-    <div className="max-h-96 overflow-y-auto overflow-x-hidden">
-      <table className="w-full divide-y divide-gray-200">
+    <div className="max-h-96 overflow-y-auto overflow-x-auto">
+      <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50 sticky top-0 z-20">
           <tr>
-            <th className="sticky left-0 z-30 bg-gray-50 px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase border-r border-gray-200">
+            <th className="sticky left-0 z-30 bg-gray-50 px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase border-r border-gray-200 min-w-[140px]">
               <div className="flex items-center gap-1">
                 Route
                 <ColumnTooltip content="Origin → Destination city pair. Each route shows cumulative delivery percentages by day." />
               </div>
             </th>
-            <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+            <th className="sticky z-20 bg-gray-50 px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase min-w-[100px]" style={{ left: '140px' }}>
               <div className="flex items-center gap-1">
                 Carrier
                 <ColumnTooltip content="Shipping carrier for this route." />
               </div>
             </th>
-            <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+            <th className="sticky z-20 bg-gray-50 px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase min-w-[120px]" style={{ left: '240px' }}>
               <div className="flex items-center gap-1">
                 Product
                 <ColumnTooltip content="Service product (e.g., Express 24 horas) for this route." />
               </div>
             </th>
-            <th className="px-1 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+            <th className="sticky z-20 bg-gray-50 px-1 py-2 text-center text-xs font-medium text-gray-500 uppercase min-w-[70px]" style={{ left: '360px' }}>
               <div className="flex items-center gap-1 justify-center">
                 J+K Std
                 <ColumnTooltip content="Expected delivery time in days from delivery_standards. Column header turns green when it matches this value." />
               </div>
             </th>
-            <th className="px-1 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+            <th className="sticky z-20 bg-gray-50 px-1 py-2 text-center text-xs font-medium text-gray-500 uppercase min-w-[70px] border-r border-gray-300" style={{ left: '430px' }}>
               <div className="flex items-center gap-1 justify-center">
                 Std %
                 <ColumnTooltip content="Target success percentage from delivery_standards (e.g., 85%, 95%). This is the threshold the route must meet." />
@@ -115,7 +115,7 @@ export function CumulativeDistributionTable({ routes, maxDays }: CumulativeDistr
               return (
                 <th
                   key={day}
-                  className={`px-1 py-2 text-center text-xs font-medium uppercase ${
+                  className={`px-1 py-2 text-center text-xs font-medium uppercase min-w-[50px] ${
                     isStandardDay ? 'text-green-600' : 'text-gray-500'
                   }`}
                 >
@@ -128,19 +128,19 @@ export function CumulativeDistributionTable({ routes, maxDays }: CumulativeDistr
         <tbody className="bg-white divide-y divide-gray-200">
           {tableData.map((route, idx) => (
             <tr key={idx} className="hover:bg-gray-50">
-              <td className="sticky left-0 z-10 bg-white px-2 py-2 text-xs font-medium text-gray-900 border-r border-gray-200">
+              <td className="sticky left-0 z-10 bg-white px-2 py-2 text-xs font-medium text-gray-900 border-r border-gray-200 min-w-[140px]">
                 {route.originCity} → {route.destinationCity}
               </td>
-              <td className="px-2 py-2 text-xs text-gray-600">
+              <td className="sticky z-5 bg-white px-2 py-2 text-xs text-gray-600 min-w-[100px]" style={{ left: '140px' }}>
                 {route.carrier}
               </td>
-              <td className="px-2 py-2 text-xs text-gray-600">
+              <td className="sticky z-5 bg-white px-2 py-2 text-xs text-gray-600 min-w-[120px]" style={{ left: '240px' }}>
                 {route.product}
               </td>
-              <td className="px-1 py-2 text-xs text-center text-gray-900">
+              <td className="sticky z-5 bg-white px-1 py-2 text-xs text-center text-gray-900 min-w-[70px]" style={{ left: '360px' }}>
                 {route.jkStandard}
               </td>
-              <td className="px-1 py-2 text-xs text-center text-gray-900">
+              <td className="sticky z-5 bg-white px-1 py-2 text-xs text-center text-gray-900 min-w-[70px] border-r border-gray-300" style={{ left: '430px' }}>
                 {route.standardPercentage.toFixed(0)}%
               </td>
               {dayColumns.map(day => {
@@ -151,7 +151,7 @@ export function CumulativeDistributionTable({ routes, maxDays }: CumulativeDistr
                 return (
                   <td
                     key={day}
-                    className={`px-1 py-2 text-xs text-center font-medium ${
+                    className={`px-1 py-2 text-xs text-center font-medium min-w-[50px] ${
                       isBeforeOrAtStandard
                         ? meetsStandard
                           ? 'bg-green-50 text-green-700'
