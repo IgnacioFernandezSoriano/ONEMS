@@ -1,6 +1,7 @@
-import { FileDown } from 'lucide-react';
+import { FileDown, Download } from 'lucide-react';
 import { ColumnTooltip } from './ColumnTooltip';
 import { exportRouteCSV } from '@/utils/jkExportCSV';
+import { downloadRouteSamples } from '@/utils/downloadRouteSamples';
 
 interface JKRouteData {
   originCity: string;
@@ -102,6 +103,12 @@ export function RoutePerformanceTable({ routeData }: RoutePerformanceTableProps)
                   <ColumnTooltip content="Visual indicator: Green (compliant), Yellow (warning), Red (critical)." />
                 </div>
               </th>
+              <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+                <div className="flex items-center gap-1 justify-center">
+                  Samples
+                  <ColumnTooltip content="Download raw samples data for this specific route from ONE DB." />
+                </div>
+              </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -140,6 +147,16 @@ export function RoutePerformanceTable({ routeData }: RoutePerformanceTableProps)
                     </td>
                     <td className="px-3 py-2 text-sm">
                       <div className={`w-3 h-3 rounded-full ${statusColor}`} />
+                    </td>
+                    <td className="px-3 py-2 text-sm text-center">
+                      <button
+                        onClick={() => downloadRouteSamples(route)}
+                        className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded transition-colors"
+                        title="Download samples for this route"
+                      >
+                        <Download className="w-3 h-3" />
+                        CSV
+                      </button>
                     </td>
                   </tr>
                 );
