@@ -22,6 +22,8 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
   const [destinationCities, setDestinationCities] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [filteredProducts, setFilteredProducts] = useState<string[]>([]);
+  const prevCarrierRef = useRef<string>();
 
   useEffect(() => {
     async function loadFilterOptions() {
@@ -85,12 +87,51 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
     loadFilterOptions();
   }, [profile?.account_id]);
 
-  const handleChange = (field: keyof Filters, value: string | string[] | undefined) => {
+  // Filter products by selected carrier
+  useEffect(() => {
+    async function filterProductsByCarrier() {
+      if (!profile?.account_id) return;
+      
+      if (!filters.carrier) {
+        setFilteredProducts(products);
+        return;
+      }
+
+      try {
+        const { data } = await supabase
+          .from('one_db')
+          .select('product_name')
+          .eq('account_id', profile.account_id)
+          .eq('carrier_name', filters.carrier)
+          .not('product_name', 'is', null);
+
+        const uniqueProducts = [...new Set(data?.map(d => d.product_name) || [])];
+        setFilteredProducts(uniqueProducts.sort());
+
+        // Reset product if it's not in the filtered list and carrier changed
+        if (prevCarrierRef.current !== undefined && 
+            prevCarrierRef.current !== filters.carrier && 
+            filters.product && 
+            !uniqueProducts.includes(filters.product)) {
+          handleChange('product', '');
+        }
+      } catch (error) {
+        console.error('Error filtering products:', error);
+        setFilteredProducts(products);
+      }
+
+      prevCarrierRef.current = filters.carrier;
+    }
+
+    filterProductsByCarrier();
+  }, [filters.carrier, products, profile?.account_id]);
+
+  const handleChange = useCallback((field: keyof Filters, value: string | string[] | undefined) => {
     onChange({
       ...filters,
       [field]: value
     } as Filters);
-  };
+  }, [filters, onChange]);
 
   const handleReset = () => {
     if (onReset) {
@@ -210,7 +251,7 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
             disabled={loading}
           >
             <option value="">All Products</option>
-            {products.map(product => (
+            {filteredProducts.map(product => (
               <option key={product} value={product}>{product}</option>
             ))}
           </select>

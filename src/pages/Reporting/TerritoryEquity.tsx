@@ -24,7 +24,7 @@ import { useFilterScenario } from '@/hooks/reporting/useFilterScenario';
 export default function TerritoryEquity() {
   const { t } = useTranslation();
   const { profile } = useAuth();
-  const [activeTab, setActiveTab] = useState<'city' | 'regional' | 'map' | 'product'>('city');
+  const [activeTab, setActiveTab] = useState<'city' | 'regional' | 'map' | 'product' | 'jk'>('city');
   const [filtersExpanded, setFiltersExpanded] = useState(true);
   const [selectedCity, setSelectedCity] = useState<CityEquityData | null>(null);
   const [selectedRegion, setSelectedRegion] = useState<RegionEquityData | null>(null);
@@ -889,6 +889,16 @@ export default function TerritoryEquity() {
             >
               Low Profile Routes
             </button>
+            <button
+              onClick={() => setActiveTab('jk')}
+              className={`px-6 py-3 font-medium transition-colors ${
+                activeTab === 'jk'
+                  ? 'border-b-2 border-blue-600 text-blue-600'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              J+K Performance
+            </button>
           </div>
         </div>
 
@@ -1061,6 +1071,51 @@ export default function TerritoryEquity() {
                     Detailed breakdown of all routes by carrier and product. Filter by equity status to identify specific compliance issues.
                   </p>
                 </div>
+                <ProductAnalysisTable 
+                  routeData={routeData}
+                  globalWarningThreshold={globalWarningThreshold}
+                  globalCriticalThreshold={globalCriticalThreshold}
+                />
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'jk' && (
+            <div className="space-y-6">
+              <div>
+                <div className="mb-4">
+                  <h3 className="text-lg font-semibold mb-2">J+K Performance Analysis</h3>
+                  <p className="text-sm text-gray-600">
+                    Analysis of Journey + Knowledge (J+K) performance metrics including distribution and route-level compliance.
+                  </p>
+                </div>
+
+                {/* Distribution Charts */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                  {/* Bar Chart: Distribution */}
+                  <div className="bg-white p-6 rounded-lg border border-gray-200">
+                    <h4 className="text-md font-semibold mb-4">Performance Distribution</h4>
+                    <div className="h-64">
+                      {/* Placeholder for bar chart */}
+                      <div className="flex items-center justify-center h-full text-gray-400">
+                        Distribution chart (Before/On/After Standard)
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Line Chart: Cumulative Distribution */}
+                  <div className="bg-white p-6 rounded-lg border border-gray-200">
+                    <h4 className="text-md font-semibold mb-4">Cumulative Distribution</h4>
+                    <div className="h-64">
+                      {/* Placeholder for line chart */}
+                      <div className="flex items-center justify-center h-full text-gray-400">
+                        Cumulative distribution chart
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Routes Table */}
                 <ProductAnalysisTable 
                   routeData={routeData}
                   globalWarningThreshold={globalWarningThreshold}
