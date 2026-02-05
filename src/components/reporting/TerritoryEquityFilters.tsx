@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Calendar, Filter, RotateCcw, MapPin, Navigation, AlertCircle } from 'lucide-react';
 import { SmartTooltip } from '@/components/common/SmartTooltip';
 import { useAuth } from '@/contexts/AuthContext';
