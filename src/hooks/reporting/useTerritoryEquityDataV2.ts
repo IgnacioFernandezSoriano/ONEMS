@@ -858,11 +858,11 @@ export function useTerritoryEquityDataV2(
             relevantCitiesForPopWeight = [];
           }
         } else if (scenarioInfo.isRouteView) {
-          // Route: weight by destination city only
-          // Citizens affected = population of DESTINATION city
-          relevantCitiesForPopWeight = filteredCityData.filter(c => c.cityName === filters?.destinationCity);
-          useInboundMetric = true;
-          citizensAffectedCities = cityEquityData.filter(c => c.cityName === filters?.destinationCity);
+          // Route: weight by ORIGIN city (outbound metric)
+          // Citizens affected = population of ORIGIN city
+          relevantCitiesForPopWeight = cityEquityData.filter(c => c.cityName === filters?.originCity);
+          useOutboundMetric = true;
+          citizensAffectedCities = cityEquityData.filter(c => c.cityName === filters?.originCity);
         }
         
         // Calculate Citizens Affected: Get unique destination cities from shipments and sum their populations from cityMap
