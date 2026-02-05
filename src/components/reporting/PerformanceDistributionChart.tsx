@@ -30,7 +30,7 @@ interface PerformanceDistributionChartProps {
 export function PerformanceDistributionChart({ routeData, maxDays, carrierFilter, productFilter }: PerformanceDistributionChartProps) {
   if (!routeData || routeData.length === 0) {
     return (
-      <div className="h-64 flex items-center justify-center text-gray-400">
+      <div className="h-80 flex items-center justify-center text-gray-400">
         No performance data available
       </div>
     );
@@ -164,7 +164,7 @@ export function PerformanceDistributionChart({ routeData, maxDays, carrierFilter
   };
 
   return (
-    <div className="w-full h-64">
+    <div className="w-full h-80">
       <ResponsiveContainer width="100%" height="100%">
         <ComposedChart data={chartData} margin={{ top: 10, right: isSingleCarrierProduct ? 40 : 10, left: 0, bottom: 40 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />

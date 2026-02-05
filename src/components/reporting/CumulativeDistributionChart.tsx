@@ -83,7 +83,7 @@ export function CumulativeDistributionChart({ routes, maxDays, selectedRoute }: 
 
   if (chartData.length === 0) {
     return (
-      <div className="h-96 flex items-center justify-center text-gray-400">
+      <div className="h-80 flex items-center justify-center text-gray-400">
         No distribution data available
       </div>
     );
@@ -113,11 +113,11 @@ export function CumulativeDistributionChart({ routes, maxDays, selectedRoute }: 
   const chartWidth = Math.max(400, Math.min(800, chartData.length * 80 + 150));
 
   return (
-    <div className="w-full h-96 flex justify-center">
+    <div className="w-full h-80 flex justify-center">
       <div style={{ width: chartWidth, height: '100%' }}>
         <BarChart
           width={chartWidth}
-          height={384}
+          height={320}
           data={chartData}
           margin={{ top: 20, right: 30, left: 60, bottom: 20 }}
           barSize={40}
@@ -185,11 +185,6 @@ export function CumulativeDistributionChart({ routes, maxDays, selectedRoute }: 
             ))}
           </Bar>
         </BarChart>
-      </div>
-      <div className="mt-4 text-xs text-gray-500 text-center">
-        Cumulative percentage of deliveries by transit days. 
-        <span className="text-green-600 font-medium"> Green</span> bars indicate days within standard,
-        <span className="text-red-600 font-medium"> red</span> bars indicate days exceeding standard.
       </div>
     </div>
   );
