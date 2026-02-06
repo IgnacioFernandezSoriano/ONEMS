@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
+import { useAuth } from '../contexts/AuthContext'
 
 interface TranslationMap {
   [key: string]: string
@@ -78,73 +79,20 @@ async function loadTranslations(locale: string): Promise<string> {
  * Hook for loading and using translations
  */
 export function useTranslation() {
+  const { profile } = useAuth()
   const [locale, setLocaleState] = useState<string>('en')
   const [translations, setTranslations] = useState<TranslationMap>({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [userId, setUserId] = useState<string | null>(null)
 
-  // Load user's preferred language from profile
+  // Load user's preferred language from profile (from AuthContext)
   useEffect(() => {
-    let mounted = true
-    
-    const loadUserLanguage = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser()
-        
-        if (!mounted) return
-        
-        if (user) {
-          setUserId(user.id)
-          console.log(`User authenticated: ${user.id}`)
-          
-          // Get user's profile with preferred language
-          const { data: profile, error } = await supabase
-            .from('profiles')
-            .select('preferred_language')
-            .eq('id', user.id)
-            .single()
-          
-          if (!mounted) return
-          
-          if (error) {
-            console.error('Error loading profile:', error)
-          }
-          
-          if (profile?.preferred_language) {
-            console.log(`User preferred language: ${profile.preferred_language}`)
-            setLocaleState(profile.preferred_language)
-          } else {
-            console.log('No preferred language set, using English')
-            setLocaleState('en')
-          }
-        } else {
-          console.log('User not authenticated, using English')
-          setLocaleState('en')
-        }
-      } catch (err) {
-        console.error('Error loading user language:', err)
-        if (mounted) {
-          setLocaleState('en')
-        }
-      }
+    if (profile?.preferred_language) {
+      setLocaleState(profile.preferred_language)
+    } else {
+      setLocaleState('en')
     }
-    
-    loadUserLanguage()
-    
-    // Listen for auth state changes (login/logout)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
-        console.log(`Auth state changed: ${event}`)
-        loadUserLanguage()
-      }
-    })
-    
-    return () => {
-      mounted = false
-      subscription.unsubscribe()
-    }
-  }, [])
+  }, [profile])
 
   // Load translations when locale changes
   useEffect(() => {
@@ -211,12 +159,12 @@ export function useTranslation() {
     setLocaleState(newLocale)
     
     // Save to user profile if logged in
-    if (userId) {
+    if (profile?.id) {
       try {
         const { error } = await supabase
           .from('profiles')
           .update({ preferred_language: newLocale })
-          .eq('id', userId)
+          .eq('id', profile.id)
         
         if (error) {
           console.error('Error saving language preference:', error)

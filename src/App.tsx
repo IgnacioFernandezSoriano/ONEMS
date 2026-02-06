@@ -37,8 +37,8 @@ import AccountReportingConfig from './pages/Settings/AccountReportingConfig'
 
 function App() {
   return (
-    <LocaleProvider>
-      <AuthProvider>
+    <AuthProvider>
+      <LocaleProvider>
         <AccountProvider>
           <BrowserRouter>
           <Routes>
@@ -306,8 +306,8 @@ function App() {
           </Routes>
         </BrowserRouter>
         </AccountProvider>
-      </AuthProvider>
-    </LocaleProvider>
+      </LocaleProvider>
+    </AuthProvider>
   )
 }
 
