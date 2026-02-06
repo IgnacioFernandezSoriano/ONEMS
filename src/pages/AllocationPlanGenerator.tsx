@@ -60,29 +60,46 @@ export function AllocationPlanGenerator() {
 
   const handleDownloadPlan = async (planId: string, planName: string) => {
     try {
-      // Fetch plan details with joins
-      const { data: details, error } = await supabase
-        .from('generated_allocation_plan_details')
-        .select(`
-          *,
-          plan:generated_allocation_plans(
-            plan_name,
-            carrier:carriers(code),
-            product:products(code)
-          ),
-          origin_node:nodes!generated_allocation_plan_details_origin_node_id_fkey(
-            auto_id,
-            city:cities(code)
-          ),
-          destination_node:nodes!generated_allocation_plan_details_destination_node_id_fkey(
-            auto_id,
-            city:cities(code)
-          )
-        `)
-        .eq('plan_id', planId)
+      // Fetch plan details with joins using pagination (Supabase SELECT limit: 1000)
+      const allDetails: any[] = []
+      let hasMore = true
+      let page = 0
+      const pageSize = 1000
 
-      if (error) throw error
-      if (!details || details.length === 0) {
+      while (hasMore) {
+        const { data: details, error } = await supabase
+          .from('generated_allocation_plan_details')
+          .select(`
+            *,
+            plan:generated_allocation_plans(
+              plan_name,
+              carrier:carriers(code),
+              product:products(code)
+            ),
+            origin_node:nodes!generated_allocation_plan_details_origin_node_id_fkey(
+              auto_id,
+              city:cities(code)
+            ),
+            destination_node:nodes!generated_allocation_plan_details_destination_node_id_fkey(
+              auto_id,
+              city:cities(code)
+            )
+          `)
+          .eq('plan_id', planId)
+          .range(page * pageSize, (page + 1) * pageSize - 1)
+
+        if (error) throw error
+        
+        if (details && details.length > 0) {
+          allDetails.push(...details)
+          hasMore = details.length === pageSize
+          page++
+        } else {
+          hasMore = false
+        }
+      }
+
+      if (allDetails.length === 0) {
         alert(t('allocation_generator.no_details_found'))
         return
       }

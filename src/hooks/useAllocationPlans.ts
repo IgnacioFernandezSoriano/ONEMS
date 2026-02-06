@@ -158,14 +158,19 @@ export function useAllocationPlans() {
   }
 
   const createPlanDetails = async (planId: string, details: any[]) => {
-    const { error } = await supabase.from('generated_allocation_plan_details').insert(
-      details.map((d) => ({
-        plan_id: planId,
-        ...d,
-      }))
-    )
+    // Insert in batches to handle Supabase 1000 records limit
+    const batchSize = 1000
+    const detailsToInsert = details.map((d) => ({
+      plan_id: planId,
+      ...d,
+    }))
 
-    if (error) throw error
+    for (let i = 0; i < detailsToInsert.length; i += batchSize) {
+      const batch = detailsToInsert.slice(i, i + batchSize)
+      const { error } = await supabase.from('generated_allocation_plan_details').insert(batch)
+      if (error) throw error
+    }
+
     await fetchAll()
   }
 
