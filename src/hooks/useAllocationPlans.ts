@@ -254,21 +254,24 @@ export function useAllocationPlans() {
 
     if (appliedPlanError) throw appliedPlanError
 
-    // Create applied plan details
-    const { error: appliedDetailsError } = await supabase.from('allocation_plan_details').insert(
-      details.map((d) => ({
-        plan_id: appliedPlan.id,
-        origin_node_id: d.origin_node_id,
-        destination_node_id: d.destination_node_id,
-        fecha_programada: d.fecha_programada,
-        week_number: d.week_number,
-        month: d.month,
-        year: d.year,
-        status: d.status,
-      }))
-    )
+    // Create applied plan details in batches (Supabase limit: 1000 per request)
+    const batchSize = 1000
+    const detailsToInsert = details.map((d) => ({
+      plan_id: appliedPlan.id,
+      origin_node_id: d.origin_node_id,
+      destination_node_id: d.destination_node_id,
+      fecha_programada: d.fecha_programada,
+      week_number: d.week_number,
+      month: d.month,
+      year: d.year,
+      status: d.status,
+    }))
 
-    if (appliedDetailsError) throw appliedDetailsError
+    for (let i = 0; i < detailsToInsert.length; i += batchSize) {
+      const batch = detailsToInsert.slice(i, i + batchSize)
+      const { error: batchError } = await supabase.from('allocation_plan_details').insert(batch)
+      if (batchError) throw batchError
+    }
 
     // Update generated plan status
     await updatePlan(planId, { status: 'applied' })
