@@ -105,7 +105,7 @@ export function AllocationPlanGenerator() {
       }
 
       // Convert to CSV format
-      const csvData: CSVExportData[] = details.map((detail: any) => ({
+      const csvData: CSVExportData[] = allDetails.map((detail: any) => ({
         plan_name: detail.plan?.plan_name || '',
         account_code: 'ACCOUNT', // TODO: Get from account
         carrier_code: detail.plan?.carrier?.code || '',
