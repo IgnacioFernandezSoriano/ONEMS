@@ -299,6 +299,7 @@ export interface Profile {
   role: Role
   account_id: string | null
   status: Status
+  preferred_language?: string
   created_at: string
   updated_at: string
 }
