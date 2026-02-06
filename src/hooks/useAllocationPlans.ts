@@ -233,12 +233,29 @@ export function useAllocationPlans() {
 
     if (planError) throw planError
 
-    const { data: details, error: detailsError } = await supabase
-      .from('generated_allocation_plan_details')
-      .select('*')
-      .eq('plan_id', planId)
+    // Fetch all details with pagination (Supabase SELECT limit: 1000)
+    const allDetails: any[] = []
+    let hasMore = true
+    let page = 0
+    const pageSize = 1000
 
-    if (detailsError) throw detailsError
+    while (hasMore) {
+      const { data: details, error: detailsError } = await supabase
+        .from('generated_allocation_plan_details')
+        .select('*')
+        .eq('plan_id', planId)
+        .range(page * pageSize, (page + 1) * pageSize - 1)
+
+      if (detailsError) throw detailsError
+      
+      if (details && details.length > 0) {
+        allDetails.push(...details)
+        hasMore = details.length === pageSize
+        page++
+      } else {
+        hasMore = false
+      }
+    }
 
     // Create applied plan
     const { data: appliedPlan, error: appliedPlanError } = await supabase
@@ -261,7 +278,7 @@ export function useAllocationPlans() {
 
     // Create applied plan details in batches (Supabase limit: 1000 per request)
     const batchSize = 1000
-    const detailsToInsert = details.map((d) => ({
+    const detailsToInsert = allDetails.map((d) => ({
       plan_id: appliedPlan.id,
       origin_node_id: d.origin_node_id,
       destination_node_id: d.destination_node_id,
