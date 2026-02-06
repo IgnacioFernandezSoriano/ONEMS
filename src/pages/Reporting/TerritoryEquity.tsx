@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { useTerritoryEquityDataV2 as useTerritoryEquityData } from '@/hooks/reporting/useTerritoryEquityDataV2';
+import { useJKPerformance } from '@/hooks/reporting/useJKPerformance';
 import { TerritoryEquityTable } from '@/components/reporting/TerritoryEquityTable';
 import { RegionalEquityTable } from '@/components/reporting/RegionalEquityTable';
 import { InboundOutboundChart } from '@/components/reporting/InboundOutboundChart';
@@ -12,6 +13,10 @@ import { TerritoryEquityFilters } from '@/components/reporting/TerritoryEquityFi
 import { TerritoryEquityTreemap } from '@/components/reporting/TerritoryEquityTreemap';
 import { TerritoryEquityMap } from '@/components/reporting/TerritoryEquityMap';
 import { ProductAnalysisTable } from '@/components/reporting/ProductAnalysisTable';
+import { PerformanceDistributionChart } from '@/components/reporting/PerformanceDistributionChart';
+import { CumulativeDistributionChart } from '@/components/reporting/CumulativeDistributionChart';
+import { CumulativeDistributionTable } from '@/components/reporting/CumulativeDistributionTable';
+import { RoutePerformanceTable } from '@/components/reporting/RoutePerformanceTable';
 import { PerformanceTrendChart } from '@/components/reports/PerformanceTrendChart';
 import { useEquityAuditExport } from '@/hooks/reporting/useEquityAuditExport';
 import { tooltips } from '@/components/reporting/TerritoryEquityTooltips';
@@ -21,10 +26,21 @@ import type { CityEquityData, RegionEquityData, TerritoryEquityFilters as Filter
 
 import { useTranslation } from '@/hooks/useTranslation';
 import { useFilterScenario } from '@/hooks/reporting/useFilterScenario';
+import { useSearchParams } from 'react-router-dom';
+
 export default function TerritoryEquity() {
+  const [searchParams] = useSearchParams();
   const { t } = useTranslation();
   const { profile } = useAuth();
-  const [activeTab, setActiveTab] = useState<'city' | 'regional' | 'map' | 'product'>('city');
+  // Read URL params
+  const urlTab = searchParams.get('tab') as 'city' | 'regional' | 'map' | 'product' | 'jk' | null;
+  const urlOrigin = searchParams.get('origin');
+  const urlDestination = searchParams.get('destination');
+  const urlCarrier = searchParams.get('carrier');
+  const urlProduct = searchParams.get('product');
+
+  const [activeTab, setActiveTab] = useState<'city' | 'regional' | 'map' | 'product' | 'jk'>(urlTab || 'city');
+  const [cumulativeView, setCumulativeView] = useState<'chart' | 'table'>('chart');
   const [filtersExpanded, setFiltersExpanded] = useState(true);
   const [selectedCity, setSelectedCity] = useState<CityEquityData | null>(null);
   const [selectedRegion, setSelectedRegion] = useState<RegionEquityData | null>(null);
@@ -32,11 +48,13 @@ export default function TerritoryEquity() {
   const [filters, setFilters] = useState<Filters>({
     startDate: '',
     endDate: '',
-    carrier: '',
-    product: '',
+    carrier: urlCarrier || '',
+    product: urlProduct || '',
     region: '',
-    direction: undefined,
+    direction: (urlOrigin && urlDestination) ? 'outbound' : undefined,
     equityStatus: [],
+    originCity: urlOrigin || undefined,
+    destinationCity: urlDestination || undefined,
   });
 
   // Load available regions
@@ -86,6 +104,16 @@ export default function TerritoryEquity() {
     profile?.account_id || undefined,
     effectiveFilters
   );
+
+  // Load J+K Performance data with distribution
+  const {
+    routeData: jkRouteData,
+    metrics: jkMetrics,
+    maxDays: jkMaxDays,
+    loading: jkLoading,
+    globalWarningThreshold: jkWarningThreshold,
+    globalCriticalThreshold: jkCriticalThreshold,
+  } = useJKPerformance(profile?.account_id || undefined, effectiveFilters);
 
   const { generateMarkdownReport, downloadMarkdown } = useEquityAuditExport();
 
@@ -474,9 +502,9 @@ export default function TerritoryEquity() {
             {scenarioInfo.isRouteView
               ? `Route Analysis: ${scenarioInfo.originCityName} → ${scenarioInfo.destinationCityName}`
               : scenarioInfo.isOriginView
-              ? `Territory Equity Report: Outbound from ${scenarioInfo.originCityName}`
+              ? `Territory Performance Report: Outbound from ${scenarioInfo.originCityName}`
               : scenarioInfo.isDestinationView
-              ? `Territory Equity Report: Inbound to ${scenarioInfo.destinationCityName}`
+              ? `Territory Performance Report: Inbound to ${scenarioInfo.destinationCityName}`
               : t('reporting.territory_equity_report')}
           </h1>
           <p className="text-gray-600 mt-1">
@@ -491,8 +519,9 @@ export default function TerritoryEquity() {
         </div>
         <div className="flex gap-2">
           <button
-            onClick={handleExportAuditReport}
-            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            disabled
+            className="flex items-center gap-2 px-4 py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed"
+            title="Coming soon"
           >
             <FileText className="w-4 h-4" />
             {t('reporting.export_audit_report')}
@@ -889,6 +918,16 @@ export default function TerritoryEquity() {
             >
               Low Profile Routes
             </button>
+            <button
+              onClick={() => setActiveTab('jk')}
+              className={`px-6 py-3 font-medium transition-colors ${
+                activeTab === 'jk'
+                  ? 'border-b-2 border-blue-600 text-blue-600'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              J+K Performance
+            </button>
           </div>
         </div>
 
@@ -1066,6 +1105,98 @@ export default function TerritoryEquity() {
                   globalWarningThreshold={globalWarningThreshold}
                   globalCriticalThreshold={globalCriticalThreshold}
                 />
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'jk' && (
+            <div className="space-y-6">
+              <div>
+                <div className="mb-4">
+                  <h3 className="text-lg font-semibold mb-2">J+K Performance Analysis</h3>
+                  <p className="text-sm text-gray-600">
+                    Analysis of Journey + Knowledge (J+K) performance metrics including distribution and route-level compliance.
+                  </p>
+                </div>
+
+                {/* Distribution Charts */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                  {/* Left: Performance Distribution */}
+                  <div className="bg-white p-6 rounded-lg border border-gray-200">
+                    <h4 className="text-md font-semibold mb-4">Performance Distribution</h4>
+                    <PerformanceDistributionChart 
+                      routeData={jkRouteData} 
+                      maxDays={jkMaxDays}
+                      carrierFilter={effectiveFilters.carrier}
+                      productFilter={effectiveFilters.product}
+                    />
+                  </div>
+
+                  {/* Right: Cumulative Distribution with toggle */}
+                  <div className="bg-white p-6 rounded-lg border border-gray-200">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="text-md font-semibold">Cumulative Distribution</h4>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setCumulativeView('chart')}
+                          className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
+                            cumulativeView === 'chart'
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          Chart
+                        </button>
+                        <button
+                          onClick={() => setCumulativeView('table')}
+                          className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
+                            cumulativeView === 'table'
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          Table
+                        </button>
+                      </div>
+                    </div>
+                    {cumulativeView === 'chart' ? (
+                      <CumulativeDistributionChart
+                        routes={jkRouteData.map(route => ({
+                          routeKey: route.routeKey,
+                          originCity: route.originCity,
+                          destinationCity: route.destinationCity,
+                          carrier: route.carrier,
+                          product: route.product,
+                          jkStandard: route.jkStandard,
+                          standardPercentage: route.standardPercentage,
+                          distribution: route.distribution,
+                          totalSamples: route.totalSamples,
+                        }))}
+                        maxDays={jkMaxDays}
+                      />
+                    ) : (
+                      <CumulativeDistributionTable
+                        routes={jkRouteData.map(route => ({
+                          routeKey: route.routeKey,
+                          originCity: route.originCity,
+                          destinationCity: route.destinationCity,
+                          carrier: route.carrier,
+                          product: route.product,
+                          jkStandard: route.jkStandard,
+                          standardPercentage: route.standardPercentage,
+                          distribution: route.distribution,
+                          totalSamples: route.totalSamples,
+                        }))}
+                        maxDays={jkMaxDays}
+                      />
+                    )}
+                  </div>
+                </div>
+
+                {/* Route Performance Table */}
+                <div className="bg-white p-6 rounded-lg border border-gray-200">
+                  <RoutePerformanceTable routeData={jkRouteData} />
+                </div>
               </div>
             </div>
           )}

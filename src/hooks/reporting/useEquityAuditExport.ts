@@ -269,11 +269,11 @@ ${cityData.length > 20 ? `\n*... and ${cityData.length - 20} more cities*` : ''}
 
 **Report Generated:** ${reportDate}  
 **System:** ONEMS (Oficina Nacional de Evaluación y Monitoreo de Servicios)  
-**Report Type:** Territory Equity Audit Report
+**Report Type:** Territory Performance Audit Report
 `;
 
     // Combine all sections
-    const markdown = `# Territory Equity Audit Report
+    const markdown = `# Territory Performance Audit Report
 
 **Generated:** ${reportDate}  
 **System:** ONEMS - Oficina Nacional de Evaluación y Monitoreo de Servicios

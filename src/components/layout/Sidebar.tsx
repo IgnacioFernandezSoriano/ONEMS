@@ -198,11 +198,11 @@ export function Sidebar() {
           tooltip: t('menu.reporting_e2e.tooltip'),
           children: [
             {
-              path: '/reporting/jk-performance',
-              label: t('menu.reporting_jk'),
-              icon: Clock,
+              path: '/reporting/territory-equity',
+              label: t('menu.reporting_equity'),
+              icon: MapPin,
               roles: ['admin', 'superadmin'],
-              tooltip: t('menu.reporting_jk.tooltip'),
+              tooltip: t('menu.reporting_equity.tooltip'),
             },
             {
               path: '/reporting/compliance',
@@ -210,13 +210,6 @@ export function Sidebar() {
               icon: Shield,
               roles: ['admin', 'superadmin'],
               tooltip: t('menu.reporting_compliance.tooltip'),
-            },
-            {
-              path: '/reporting/territory-equity',
-              label: t('menu.reporting_equity'),
-              icon: MapPin,
-              roles: ['admin', 'superadmin'],
-              tooltip: t('menu.reporting_equity.tooltip'),
             },
           ],
         },

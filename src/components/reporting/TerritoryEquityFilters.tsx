@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Calendar, Filter, RotateCcw, MapPin, Navigation, AlertCircle } from 'lucide-react';
 import { SmartTooltip } from '@/components/common/SmartTooltip';
+import { QuickMonthSelector } from '@/components/common/QuickMonthSelector';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import type { TerritoryEquityFilters as Filters } from '@/types/reporting';
@@ -22,6 +23,9 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
   const [destinationCities, setDestinationCities] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [filteredProducts, setFilteredProducts] = useState<string[]>([]);
+  const prevCarrierRef = useRef<string>();
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
   useEffect(() => {
     async function loadFilterOptions() {
@@ -85,12 +89,51 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
     loadFilterOptions();
   }, [profile?.account_id]);
 
-  const handleChange = (field: keyof Filters, value: string | string[] | undefined) => {
+  // Filter products by selected carrier
+  useEffect(() => {
+    async function filterProductsByCarrier() {
+      if (!profile?.account_id) return;
+      
+      if (!filters.carrier) {
+        setFilteredProducts(products);
+        return;
+      }
+
+      try {
+        const { data } = await supabase
+          .from('one_db')
+          .select('product_name')
+          .eq('account_id', profile.account_id)
+          .eq('carrier_name', filters.carrier)
+          .not('product_name', 'is', null);
+
+        const uniqueProducts = [...new Set(data?.map(d => d.product_name) || [])];
+        setFilteredProducts(uniqueProducts.sort());
+
+        // Reset product if it's not in the filtered list and carrier changed
+        if (prevCarrierRef.current !== undefined && 
+            prevCarrierRef.current !== filters.carrier && 
+            filters.product && 
+            !uniqueProducts.includes(filters.product)) {
+          handleChange('product', '');
+        }
+      } catch (error) {
+        console.error('Error filtering products:', error);
+        setFilteredProducts(products);
+      }
+
+      prevCarrierRef.current = filters.carrier;
+    }
+
+    filterProductsByCarrier();
+  }, [filters.carrier, products, profile?.account_id]);
+
+  const handleChange = useCallback((field: keyof Filters, value: string | string[] | undefined) => {
     onChange({
       ...filters,
       [field]: value
     } as Filters);
-  };
+  }, [filters, onChange]);
 
   const handleReset = () => {
     if (onReset) {
@@ -133,7 +176,7 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
           </button>
           <Filter className="w-5 h-5 text-gray-600" />
           <h3 className="text-lg font-semibold text-gray-900">{t('stock.filters')}</h3>
-          <SmartTooltip content="Filter the Territory Equity Report by date range, carrier, product, region, direction (inbound/outbound), or equity status. All filters are optional." />
+          <SmartTooltip content="Filter the Territory Performance Report by date range, carrier, product, region, direction (inbound/outbound), or equity status. All filters are optional." />
         </div>
         <button
           onClick={handleReset}
@@ -210,7 +253,7 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
             disabled={loading}
           >
             <option value="">All Products</option>
-            {products.map(product => (
+            {filteredProducts.map(product => (
               <option key={product} value={product}>{product}</option>
             ))}
           </select>
@@ -259,6 +302,74 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
         {/* Region and Direction filters removed - now in Regional Analysis tab */}
 
         {/* Equity Status moved to Product Analysis tab */}
+      </div>
+
+      {/* Quick Month Selector */}
+      <div className="mt-4 pt-4 border-t border-gray-200">
+        <QuickMonthSelector
+          selectedYear={selectedYear}
+          onYearChange={setSelectedYear}
+          onMonthSelect={(year, month) => {
+            const firstDay = new Date(year, month - 1, 1);
+            const lastDay = new Date(year, month, 0);
+            const formatDate = (d: Date) => {
+              const y = d.getFullYear();
+              const m = String(d.getMonth() + 1).padStart(2, '0');
+              const day = String(d.getDate()).padStart(2, '0');
+              return `${y}-${m}-${day}`;
+            };
+            onChange({
+              ...filters,
+              startDate: formatDate(firstDay),
+              endDate: formatDate(lastDay),
+            });
+          }}
+          onFirstSemesterSelect={() => {
+            const firstDay = new Date(selectedYear, 0, 1);
+            const lastDay = new Date(selectedYear, 6, 0); // Last day of June
+            const formatDate = (d: Date) => {
+              const y = d.getFullYear();
+              const m = String(d.getMonth() + 1).padStart(2, '0');
+              const day = String(d.getDate()).padStart(2, '0');
+              return `${y}-${m}-${day}`;
+            };
+            onChange({
+              ...filters,
+              startDate: formatDate(firstDay),
+              endDate: formatDate(lastDay),
+            });
+          }}
+          onSecondSemesterSelect={() => {
+            const firstDay = new Date(selectedYear, 6, 1);
+            const lastDay = new Date(selectedYear, 11, 31);
+            const formatDate = (d: Date) => {
+              const y = d.getFullYear();
+              const m = String(d.getMonth() + 1).padStart(2, '0');
+              const day = String(d.getDate()).padStart(2, '0');
+              return `${y}-${m}-${day}`;
+            };
+            onChange({
+              ...filters,
+              startDate: formatDate(firstDay),
+              endDate: formatDate(lastDay),
+            });
+          }}
+          onYearSelect={() => {
+            const firstDay = new Date(selectedYear, 0, 1);
+            const lastDay = new Date(selectedYear, 11, 31);
+            const formatDate = (d: Date) => {
+              const y = d.getFullYear();
+              const m = String(d.getMonth() + 1).padStart(2, '0');
+              const day = String(d.getDate()).padStart(2, '0');
+              return `${y}-${m}-${day}`;
+            };
+            onChange({
+              ...filters,
+              startDate: formatDate(firstDay),
+              endDate: formatDate(lastDay),
+            });
+          }}
+        />
       </div>
       </>
       )}

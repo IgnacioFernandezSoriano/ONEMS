@@ -158,14 +158,19 @@ export function useAllocationPlans() {
   }
 
   const createPlanDetails = async (planId: string, details: any[]) => {
-    const { error } = await supabase.from('generated_allocation_plan_details').insert(
-      details.map((d) => ({
-        plan_id: planId,
-        ...d,
-      }))
-    )
+    // Insert in batches to handle Supabase 1000 records limit
+    const batchSize = 1000
+    const detailsToInsert = details.map((d) => ({
+      plan_id: planId,
+      ...d,
+    }))
 
-    if (error) throw error
+    for (let i = 0; i < detailsToInsert.length; i += batchSize) {
+      const batch = detailsToInsert.slice(i, i + batchSize)
+      const { error } = await supabase.from('generated_allocation_plan_details').insert(batch)
+      if (error) throw error
+    }
+
     await fetchAll()
   }
 
@@ -228,12 +233,29 @@ export function useAllocationPlans() {
 
     if (planError) throw planError
 
-    const { data: details, error: detailsError } = await supabase
-      .from('generated_allocation_plan_details')
-      .select('*')
-      .eq('plan_id', planId)
+    // Fetch all details with pagination (Supabase SELECT limit: 1000)
+    const allDetails: any[] = []
+    let hasMore = true
+    let page = 0
+    const pageSize = 1000
 
-    if (detailsError) throw detailsError
+    while (hasMore) {
+      const { data: details, error: detailsError } = await supabase
+        .from('generated_allocation_plan_details')
+        .select('*')
+        .eq('plan_id', planId)
+        .range(page * pageSize, (page + 1) * pageSize - 1)
+
+      if (detailsError) throw detailsError
+      
+      if (details && details.length > 0) {
+        allDetails.push(...details)
+        hasMore = details.length === pageSize
+        page++
+      } else {
+        hasMore = false
+      }
+    }
 
     // Create applied plan
     const { data: appliedPlan, error: appliedPlanError } = await supabase
@@ -254,25 +276,30 @@ export function useAllocationPlans() {
 
     if (appliedPlanError) throw appliedPlanError
 
-    // Create applied plan details
-    const { error: appliedDetailsError } = await supabase.from('allocation_plan_details').insert(
-      details.map((d) => ({
-        plan_id: appliedPlan.id,
-        origin_node_id: d.origin_node_id,
-        destination_node_id: d.destination_node_id,
-        fecha_programada: d.fecha_programada,
-        week_number: d.week_number,
-        month: d.month,
-        year: d.year,
-        status: d.status,
-      }))
-    )
+    // Create applied plan details in batches (Supabase limit: 1000 per request)
+    const batchSize = 1000
+    const detailsToInsert = allDetails.map((d) => ({
+      plan_id: appliedPlan.id,
+      origin_node_id: d.origin_node_id,
+      destination_node_id: d.destination_node_id,
+      fecha_programada: d.fecha_programada,
+      week_number: d.week_number,
+      month: d.month,
+      year: d.year,
+      status: d.status,
+    }))
 
-    if (appliedDetailsError) throw appliedDetailsError
+    for (let i = 0; i < detailsToInsert.length; i += batchSize) {
+      const batch = detailsToInsert.slice(i, i + batchSize)
+      const { error: batchError } = await supabase
+        .from('allocation_plan_details')
+        .insert(batch)
+      
+      if (batchError) throw batchError
+    }
 
     // Update generated plan status
     await updatePlan(planId, { status: 'applied' })
-
     await fetchAll()
     return appliedPlan
   }
