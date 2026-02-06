@@ -1913,3 +1913,20 @@ users.password,Password
 users.promise,Promise
 users.role,Role
 users.select_account,Select account
+admin.epcis_generator,EPCIS Data Generator
+admin.epcis_generator_description,Generate simulated RFID event data for testing and development
+admin.epcis_generator_tooltip,Generate simulated EPCIS data
+admin.about_epcis_generator,About EPCIS Data Generator
+admin.epcis_generator_info,This tool generates simulated RFID event data based on your configuration. The generated data will be stored in the intermediate database and can be processed by the diagnostics module.
+admin.epcis_start_date,Start Date
+admin.epcis_end_date,End Date
+admin.epcis_item_count,Number of Items to Simulate
+admin.epcis_item_count_help,Number of unique TagIDs to generate (1-10000)
+admin.epcis_max_events,Maximum Readings per Item
+admin.epcis_max_events_help,Maximum number of RFID readings per TagID (2-50)
+admin.epcis_generate_button,Generate Data
+admin.generating,Generating...
+admin.epcis_generation_success,Data Generated Successfully
+admin.epcis_items_generated,Items Generated
+admin.epcis_total_events,Total Events
+admin.epcis_avg_events,Avg Events per Item

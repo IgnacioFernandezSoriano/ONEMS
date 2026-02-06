@@ -15,6 +15,7 @@ import { ChangePassword } from './pages/Settings/ChangePassword'
 import { Users } from './pages/Admin/Users'
 import { AccountManagement } from './pages/Admin/AccountManagement'
 import TranslationManager from './pages/Admin/TranslationManager'
+import { EpcisGenerator } from './pages/Admin/EpcisGenerator'
 import { CountryTopology } from './pages/CountryTopology'
 import { Carriers } from './pages/Carriers'
 import { MaterialCatalogPage } from './pages/MaterialCatalog'
@@ -291,6 +292,16 @@ function App() {
                       element={
                         <ProtectedRoute allowedRoles={['superadmin']}>
                           <TranslationManager />
+                        </ProtectedRoute>
+                      }
+                    />
+                    
+                    {/* EPCIS Generator - for admin and superadmin */}
+                    <Route
+                      path="/admin/epcis-generator"
+                      element={
+                        <ProtectedRoute allowedRoles={['admin', 'superadmin']}>
+                          <EpcisGenerator />
                         </ProtectedRoute>
                       }
                     />

@@ -253,6 +253,13 @@ export function Sidebar() {
             tooltip: t('menu.onedb_generator.tooltip'),
           },
           {
+            path: '/admin/epcis-generator',
+            label: t('admin.epcis_generator'),
+            icon: Database,
+            roles: ['admin', 'superadmin'],
+            tooltip: t('admin.epcis_generator_tooltip'),
+          },
+          {
             path: '/admin/account-management',
             label: t('menu.demo_reset'),
             icon: RefreshCw,
