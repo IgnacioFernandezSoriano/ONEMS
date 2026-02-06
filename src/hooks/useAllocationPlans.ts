@@ -291,13 +291,15 @@ export function useAllocationPlans() {
 
     for (let i = 0; i < detailsToInsert.length; i += batchSize) {
       const batch = detailsToInsert.slice(i, i + batchSize)
-      const { error: batchError } = await supabase.from('allocation_plan_details').insert(batch)
+      const { error: batchError } = await supabase
+        .from('allocation_plan_details')
+        .insert(batch)
+      
       if (batchError) throw batchError
     }
 
     // Update generated plan status
     await updatePlan(planId, { status: 'applied' })
-
     await fetchAll()
     return appliedPlan
   }
