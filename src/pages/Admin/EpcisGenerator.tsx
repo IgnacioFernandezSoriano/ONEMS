@@ -3,11 +3,13 @@ import { PageHeader } from '@/components/common/PageHeader'
 import { Button } from '@/components/common/Button'
 import { useTranslation } from '@/hooks/useTranslation'
 import { useGenerateEpcisData } from '@/hooks/useGenerateEpcisData'
-import { Database, CheckCircle, AlertCircle } from 'lucide-react'
+import { useProcessRfidEvents } from '@/hooks/useProcessRfidEvents'
+import { Database, CheckCircle, AlertCircle, Play } from 'lucide-react'
 
 export function EpcisGenerator() {
   const { t } = useTranslation()
   const { generateData, loading, error } = useGenerateEpcisData()
+  const { processEvents, loading: processing, result: processResult, error: processError } = useProcessRfidEvents()
   const [formData, setFormData] = useState({
     startDate: '',
     endDate: '',
@@ -167,6 +169,84 @@ export function EpcisGenerator() {
             <div className="ml-3">
               <h3 className="text-sm font-medium text-red-800">Error</h3>
               <p className="mt-1 text-sm text-red-700">{error}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Process Events Section */}
+      <div className="mt-8 bg-white border border-gray-200 rounded-lg p-6">
+        <h3 className="text-lg font-medium text-gray-900 mb-4">
+          {t('admin.epcis_process_title')}
+        </h3>
+        <p className="text-sm text-gray-600 mb-4">
+          {t('admin.epcis_process_description')}
+        </p>
+        <Button
+          onClick={() => processEvents()}
+          disabled={processing}
+          className="inline-flex items-center"
+        >
+          {processing ? (
+            <>
+              <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              {t('admin.processing')}
+            </>
+          ) : (
+            <>
+              <Play className="h-4 w-4 mr-2" />
+              {t('admin.epcis_process_button')}
+            </>
+          )}
+        </Button>
+      </div>
+
+      {/* Process Error */}
+      {processError && (
+        <div className="mt-6 bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <AlertCircle className="h-5 w-5 text-red-400" />
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-red-800">Error</h3>
+              <p className="mt-1 text-sm text-red-700">{processError}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Process Success */}
+      {processResult && processResult.success && (
+        <div className="mt-6 bg-green-50 border border-green-200 rounded-lg p-6">
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              <CheckCircle className="h-6 w-6 text-green-400" />
+            </div>
+            <div className="ml-3 flex-1">
+              <h3 className="text-lg font-medium text-green-800">
+                {t('admin.epcis_process_success')}
+              </h3>
+              <p className="mt-2 text-sm text-green-700">{processResult.message}</p>
+              
+              <div className="mt-4 grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="bg-white rounded-lg p-4 border border-green-200">
+                  <p className="text-sm font-medium text-gray-600">{t('admin.epcis_processed')}</p>
+                  <p className="mt-1 text-2xl font-bold text-green-600">{processResult.stats.processed}</p>
+                </div>
+                <div className="bg-white rounded-lg p-4 border border-green-200">
+                  <p className="text-sm font-medium text-gray-600">{t('admin.epcis_routes')}</p>
+                  <p className="mt-1 text-2xl font-bold text-green-600">{processResult.stats.routes}</p>
+                </div>
+                <div className="bg-white rounded-lg p-4 border border-green-200">
+                  <p className="text-sm font-medium text-gray-600">{t('admin.epcis_anomalies')}</p>
+                  <p className="mt-1 text-2xl font-bold text-green-600">{processResult.stats.anomalies}</p>
+                </div>
+                <div className="bg-white rounded-lg p-4 border border-green-200">
+                  <p className="text-sm font-medium text-gray-600">{t('admin.epcis_errors')}</p>
+                  <p className="mt-1 text-2xl font-bold text-red-600">{processResult.stats.errors}</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>

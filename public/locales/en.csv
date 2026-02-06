@@ -1930,3 +1930,12 @@ admin.epcis_generation_success,Data Generated Successfully
 admin.epcis_items_generated,Items Generated
 admin.epcis_total_events,Total Events
 admin.epcis_avg_events,Avg Events per Item
+admin.epcis_process_title,Process RFID Events
+admin.epcis_process_description,Process the generated RFID events to create routes and detect anomalies. This will analyze all unprocessed events in the intermediate database.
+admin.epcis_process_button,Process Events
+admin.processing,Processing...
+admin.epcis_process_success,Events Processed Successfully
+admin.epcis_processed,Events Processed
+admin.epcis_routes,Routes Created
+admin.epcis_anomalies,Anomalies Detected
+admin.epcis_errors,Errors
