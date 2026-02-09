@@ -117,30 +117,24 @@ export function usePostalCenters() {
     if (centerError) throw centerError
     
     // Update weekly schedule if provided
-    if (weeklySchedule !== undefined) {
-      // Delete existing center-specific schedule
-      await supabase
-        .from('weekly_schedule')
-        .delete()
-        .eq('postal_center_id', id)
+    if (weeklySchedule !== undefined && weeklySchedule.length > 0) {
+      // Use upsert to insert or update each day
+      const scheduleToUpsert = weeklySchedule.map(s => ({
+        account_id: effectiveAccountId,
+        postal_center_id: id,
+        day_of_week: s.day_of_week,
+        is_working_day: s.is_working_day,
+        opening_hour: s.opening_hour,
+        cutoff_time: s.cutoff_time
+      }))
       
-      // Insert new schedule
-      if (weeklySchedule.length > 0) {
-        const scheduleToInsert = weeklySchedule.map(s => ({
-          account_id: effectiveAccountId,
-          postal_center_id: id,
-          day_of_week: s.day_of_week,
-          is_working_day: s.is_working_day,
-          opening_hour: s.opening_hour,
-          cutoff_time: s.cutoff_time
-        }))
-        
-        const { error: scheduleError } = await supabase
-          .from('weekly_schedule')
-          .insert(scheduleToInsert)
-        
-        if (scheduleError) throw scheduleError
-      }
+      const { error: scheduleError } = await supabase
+        .from('weekly_schedule')
+        .upsert(scheduleToUpsert, {
+          onConflict: 'account_id,postal_center_id,day_of_week'
+        })
+      
+      if (scheduleError) throw scheduleError
     }
     
     await fetchAll()

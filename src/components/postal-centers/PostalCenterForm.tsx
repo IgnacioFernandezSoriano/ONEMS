@@ -52,9 +52,28 @@ export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCen
         calculation_mode: postalCenter.calculation_mode || null,
         is_active: postalCenter.is_active
       })
-      // TODO: Load center-specific weekly schedule from database
+      // Load center-specific weekly schedule from database
+      loadWeeklySchedule(postalCenter.id)
     }
   }, [postalCenter])
+
+  const loadWeeklySchedule = async (postalCenterId: string) => {
+    try {
+      const { supabase } = await import('@/lib/supabase')
+      const { data, error } = await supabase
+        .from('weekly_schedule')
+        .select('*')
+        .eq('postal_center_id', postalCenterId)
+        .order('day_of_week')
+      
+      if (error) throw error
+      if (data) {
+        setWeeklySchedule(data)
+      }
+    } catch (err) {
+      console.error('Error loading weekly schedule:', err)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -241,7 +260,7 @@ export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCen
                 {schedule.is_working_day && (
                   <div className="flex items-center gap-4 pl-4">
                     <div className="flex items-center gap-2">
-                      <label className="text-xs text-gray-500 min-w-[60px]">{t('account_config.opening')}:</label>
+                      <label className="text-xs text-gray-500 min-w-[60px]">{t('common.opening')}:</label>
                       <input
                         type="time"
                         value={schedule.opening_hour || '08:00'}
@@ -252,7 +271,7 @@ export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCen
                       />
                     </div>
                     <div className="flex items-center gap-2">
-                      <label className="text-xs text-gray-500 min-w-[60px]">{t('account_config.cutoff')}:</label>
+                      <label className="text-xs text-gray-500 min-w-[60px]">{t('common.cutoff')}:</label>
                       <input
                         type="time"
                         value={schedule.cutoff_time || '18:00'}
