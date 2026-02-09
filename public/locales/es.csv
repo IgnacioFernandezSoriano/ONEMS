@@ -2034,3 +2034,6 @@ postal_centers.center_holidays,Festivos Específicos del Centro
 postal_centers.specific,Específico
 postal_centers.holiday_reason,Motivo
 postal_centers.no_center_holidays,No hay festivos específicos del centro definidos
+readers.from_account,De la Cuenta
+readers.inheriting_from_account,Heredando de la cuenta
+readers.minutes,minutos

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/common/Button'
 import type { Reader, ReaderFormData } from '@/lib/types_postal_centers'
 import { useTranslation } from '@/hooks/useTranslation'
+import { useAccountConfig } from '@/hooks/useAccountConfig'
 
 interface ReaderFormProps {
   reader?: Reader | null
@@ -11,6 +12,7 @@ interface ReaderFormProps {
 
 export function ReaderForm({ reader, onSubmit, onCancel }: ReaderFormProps) {
   const { t } = useTranslation()
+  const { config } = useAccountConfig()
   const [formData, setFormData] = useState<ReaderFormData>({
     reader_id: '',
     name: '',
@@ -132,11 +134,16 @@ export function ReaderForm({ reader, onSubmit, onCancel }: ReaderFormProps) {
             type="number"
             value={formData.mixed_reader_gap_minutes || ''}
             onChange={(e) => setFormData({ ...formData, mixed_reader_gap_minutes: e.target.value ? parseInt(e.target.value) : null })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
             min="1"
-            placeholder="10"
+            placeholder={`${config?.mixed_reader_gap_minutes || 10} (${t('readers.from_account')})`}
           />
-          <p className="text-xs text-gray-500 mt-1">
+          {formData.mixed_reader_gap_minutes === null && (
+            <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+              ✓ {t('readers.inheriting_from_account')}: {config?.mixed_reader_gap_minutes || 10} {t('readers.minutes')}
+            </p>
+          )}
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
             {t('readers.mixed_reader_gap_help')}
           </p>
         </div>

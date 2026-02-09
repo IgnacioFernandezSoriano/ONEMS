@@ -2035,3 +2035,6 @@ postal_centers.center_holidays,Jours Fériés Spécifiques au Centre
 postal_centers.specific,Spécifique
 postal_centers.holiday_reason,Raison
 postal_centers.no_center_holidays,Aucun jour férié spécifique au centre défini
+readers.from_account,Du Compte
+readers.inheriting_from_account,Hérité du compte
+readers.minutes,minutes
