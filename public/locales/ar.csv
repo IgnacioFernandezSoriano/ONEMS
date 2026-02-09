@@ -1999,3 +1999,8 @@ account_config.no_valid_holidays,لم يتم العثور على عطلات صا
 account_config.imported_successfully,تم استيراد {count} عطلة بنجاح
 account_config.opening,افتتاح
 account_config.cutoff,قطع
+postal_centers.inherited,موروث
+postal_centers.override,مخصص
+postal_centers.inheriting_from_account,موروث من الحساب
+postal_centers.from_account,من الحساب
+postal_centers.minutes,دقائق

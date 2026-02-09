@@ -3,6 +3,7 @@ import { ChevronRight, ChevronDown, MapPin, Radio, Edit, Trash2, Plus } from 'lu
 import { Button } from '@/components/common/Button'
 import type { PostalCenterWithReaders, Reader } from '@/lib/types_postal_centers'
 import { useTranslation } from '@/hooks/useTranslation'
+import { useAccountConfig } from '@/hooks/useAccountConfig'
 
 interface PostalCentersListProps {
   postalCenters: PostalCenterWithReaders[]
@@ -22,6 +23,7 @@ export function PostalCentersList({
   onDeleteReader
 }: PostalCentersListProps) {
   const { t } = useTranslation()
+  const { config } = useAccountConfig()
   const [expandedCenters, setExpandedCenters] = useState<Set<string>>(new Set())
 
   const toggleCenter = (centerId: string) => {
@@ -112,11 +114,23 @@ export function PostalCentersList({
                           {t('postal_centers.hours')}: {center.opening_hour.substring(0, 5)} - {center.cutoff_time.substring(0, 5)}
                         </span>
                       )}
-                      {center.calculation_mode && (
-                        <span>
-                          {t('postal_centers.mode')}: {t(`postal_centers.${center.calculation_mode}`)}
-                        </span>
-                      )}
+                      <span>
+                        {t('postal_centers.mode')}: {center.calculation_mode ? (
+                          <>
+                            {t(`postal_centers.${center.calculation_mode}`)}
+                            <span className="ml-1 px-1.5 py-0.5 text-xs bg-orange-100 text-orange-800 rounded">
+                              {t('postal_centers.override')}
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            {t(`postal_centers.${config?.calculation_mode || 'natural_days'}`)}
+                            <span className="ml-1 px-1.5 py-0.5 text-xs bg-blue-100 text-blue-800 rounded">
+                              {t('postal_centers.inherited')}
+                            </span>
+                          </>
+                        )}
+                      </span>
                       <span>
                         {readersCount} {readersCount === 1 ? t('readers.reader') : t('readers.readers')}
                       </span>

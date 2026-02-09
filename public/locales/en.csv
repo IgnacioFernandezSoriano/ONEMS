@@ -1999,3 +1999,8 @@ account_config.no_valid_holidays,No valid holidays found in CSV
 account_config.imported_successfully,Successfully imported {count} holidays
 account_config.opening,Opening
 account_config.cutoff,Cut-off
+postal_centers.inherited,Inherited
+postal_centers.override,Override
+postal_centers.inheriting_from_account,Inheriting from account
+postal_centers.from_account,from account
+postal_centers.minutes,minutes

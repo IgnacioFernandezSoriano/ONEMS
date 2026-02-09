@@ -2000,3 +2000,8 @@ account_config.no_valid_holidays,Aucun jour férié valide trouvé dans le CSV
 account_config.imported_successfully,{count} jours fériés importés avec succès
 account_config.opening,Ouverture
 account_config.cutoff,Coupure
+postal_centers.inherited,Hérité
+postal_centers.override,Personnalisé
+postal_centers.inheriting_from_account,Héritant du compte
+postal_centers.from_account,du compte
+postal_centers.minutes,minutes

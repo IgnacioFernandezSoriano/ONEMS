@@ -1999,3 +1999,8 @@ account_config.no_valid_holidays,No se encontraron festivos válidos en el CSV
 account_config.imported_successfully,Se importaron exitosamente {count} festivos
 account_config.opening,Apertura
 account_config.cutoff,Corte
+postal_centers.inherited,Heredado
+postal_centers.override,Personalizado
+postal_centers.inheriting_from_account,Heredando de la cuenta
+postal_centers.from_account,de la cuenta
+postal_centers.minutes,minutos
