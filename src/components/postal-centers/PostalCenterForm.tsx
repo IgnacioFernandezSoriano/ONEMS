@@ -26,7 +26,6 @@ export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCen
     name: '',
     description: '',
     calculation_mode: null,
-    mixed_reader_gap_minutes: null,
     is_active: true
   })
   
@@ -51,7 +50,6 @@ export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCen
         name: postalCenter.name,
         description: postalCenter.description || '',
         calculation_mode: postalCenter.calculation_mode || null,
-        mixed_reader_gap_minutes: postalCenter.mixed_reader_gap_minutes || null,
         is_active: postalCenter.is_active
       })
       // TODO: Load center-specific weekly schedule from database
@@ -94,7 +92,6 @@ export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCen
 
   // Get inherited values
   const inheritedCalculationMode = config?.calculation_mode || 'natural_days'
-  const inheritedMixedReaderGap = config?.mixed_reader_gap_minutes || 10
   const effectiveCalculationMode = formData.calculation_mode || inheritedCalculationMode
 
   return (
@@ -193,28 +190,6 @@ export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCen
               ✓ {t('postal_centers.inheriting_from_account')}: {t(`postal_centers.${inheritedCalculationMode}`)}
             </p>
           )}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            {t('postal_centers.mixed_reader_gap_minutes')}
-          </label>
-          <input
-            type="number"
-            value={formData.mixed_reader_gap_minutes ?? ''}
-            onChange={(e) => setFormData({ ...formData, mixed_reader_gap_minutes: e.target.value ? parseInt(e.target.value) : null })}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
-            min="1"
-            placeholder={`${inheritedMixedReaderGap} (${t('postal_centers.from_account')})`}
-          />
-          {formData.mixed_reader_gap_minutes === null && (
-            <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-              ✓ {t('postal_centers.inheriting_from_account')}: {inheritedMixedReaderGap} {t('postal_centers.minutes')}
-            </p>
-          )}
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-            {t('postal_centers.mixed_reader_gap_help')}
-          </p>
         </div>
       </div>
 
