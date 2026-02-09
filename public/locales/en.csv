@@ -2020,3 +2020,10 @@ postal_centers.weekly_schedule_help,Customize opening hours for this center or i
 postal_centers.inherited,Inherited
 postal_centers.holidays_inherited_help,Non-working days are managed at account level and automatically inherited by all postal centers
 postal_centers.inherited_from_account,Inherited from Account
+common.sunday,Sunday
+common.monday,Monday
+common.tuesday,Tuesday
+common.wednesday,Wednesday
+common.thursday,Thursday
+common.friday,Friday
+common.saturday,Saturday

@@ -2020,3 +2020,10 @@ postal_centers.weekly_schedule_help,Personaliza los horarios de apertura para es
 postal_centers.inherited,Heredado
 postal_centers.holidays_inherited_help,Los días no laborables se gestionan a nivel de cuenta y se heredan automáticamente por todos los centros postales
 postal_centers.inherited_from_account,Heredado de la Cuenta
+common.sunday,Domingo
+common.monday,Lunes
+common.tuesday,Martes
+common.wednesday,Miércoles
+common.thursday,Jueves
+common.friday,Viernes
+common.saturday,Sábado

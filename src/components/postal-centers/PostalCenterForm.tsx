@@ -238,33 +238,35 @@ export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCen
             return (
               <div
                 key={dayOfWeek}
-                className="flex items-center gap-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
+                className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg space-y-2"
               >
-                <div className="w-28">
-                  <p className="font-medium text-gray-900 dark:text-white">{dayName}</p>
-                  {isInherited && (
-                    <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded">
-                      {t('postal_centers.inherited')}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium text-gray-900 dark:text-white min-w-[100px]">{dayName}</p>
+                    {isInherited && (
+                      <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded">
+                        {t('postal_centers.inherited')}
+                      </span>
+                    )}
+                  </div>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={schedule.is_working_day}
+                      onChange={(e) =>
+                        handleUpdateSchedule(dayOfWeek, 'is_working_day', e.target.checked)
+                      }
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      {t('account_config.working_day')}
                     </span>
-                  )}
+                  </label>
                 </div>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={schedule.is_working_day}
-                    onChange={(e) =>
-                      handleUpdateSchedule(dayOfWeek, 'is_working_day', e.target.checked)
-                    }
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
-                    {t('account_config.working_day')}
-                  </span>
-                </label>
                 {schedule.is_working_day && (
-                  <>
+                  <div className="flex items-center gap-4 pl-4">
                     <div className="flex items-center gap-2">
-                      <label className="text-xs text-gray-500">{t('account_config.opening')}:</label>
+                      <label className="text-xs text-gray-500 min-w-[60px]">{t('account_config.opening')}:</label>
                       <input
                         type="time"
                         value={schedule.opening_hour || '08:00'}
@@ -275,7 +277,7 @@ export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCen
                       />
                     </div>
                     <div className="flex items-center gap-2">
-                      <label className="text-xs text-gray-500">{t('account_config.cutoff')}:</label>
+                      <label className="text-xs text-gray-500 min-w-[60px]">{t('account_config.cutoff')}:</label>
                       <input
                         type="time"
                         value={schedule.cutoff_time || '18:00'}
@@ -285,7 +287,7 @@ export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCen
                         className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white"
                       />
                     </div>
-                  </>
+                  </div>
                 )}
               </div>
             )

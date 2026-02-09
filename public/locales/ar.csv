@@ -2020,3 +2020,10 @@ postal_centers.weekly_schedule_help,تخصيص ساعات العمل لهذا ا
 postal_centers.inherited,موروث
 postal_centers.holidays_inherited_help,تتم إدارة أيام عدم العمل على مستوى الحساب ويتم توريثها تلقائيًا بواسطة جميع المراكز البريدية
 postal_centers.inherited_from_account,موروث من الحساب
+common.sunday,الأحد
+common.monday,الاثنين
+common.tuesday,الثلاثاء
+common.wednesday,الأربعاء
+common.thursday,الخميس
+common.friday,الجمعة
+common.saturday,السبت

@@ -2021,3 +2021,10 @@ postal_centers.weekly_schedule_help,Personnalisez les heures d'ouverture pour ce
 postal_centers.inherited,Hérité
 postal_centers.holidays_inherited_help,Les jours non ouvrables sont gérés au niveau du compte et automatiquement hérités par tous les centres postaux
 postal_centers.inherited_from_account,Hérité du Compte
+common.sunday,Dimanche
+common.monday,Lundi
+common.tuesday,Mardi
+common.wednesday,Mercredi
+common.thursday,Jeudi
+common.friday,Vendredi
+common.saturday,Samedi
