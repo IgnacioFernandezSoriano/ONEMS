@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useAccountConfig } from '../../hooks/useAccountConfig'
 import { useLocale } from '../../contexts/LocaleContext'
-import { Save, Calendar, Clock, Settings as SettingsIcon, Plus, Trash2, Upload, Download } from 'lucide-react'e-react'
+import { Save, Calendar, Clock, Settings as SettingsIcon, Plus, Trash2, Upload, Download } from 'lucide-react'
 
 export function AccountConfiguration() {
   const { t } = useLocale()
