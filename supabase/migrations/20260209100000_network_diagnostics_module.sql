@@ -89,69 +89,105 @@ ALTER TABLE weekly_schedule ENABLE ROW LEVEL SECURITY;
 ALTER TABLE non_working_days ENABLE ROW LEVEL SECURITY;
 
 -- Postal Centers Policies
-CREATE POLICY "Users can view postal centers in their account"
+CREATE POLICY "postal_centers_select_own_account"
   ON postal_centers FOR SELECT
-  USING (account_id IN (SELECT get_user_accounts()));
+  TO authenticated
+  USING (account_id = public.current_user_account_id());
 
-CREATE POLICY "Users can insert postal centers in their account"
+CREATE POLICY "postal_centers_select_superadmin"
+  ON postal_centers FOR SELECT
+  TO authenticated
+  USING (public.current_user_role() = 'superadmin');
+
+CREATE POLICY "postal_centers_insert_own_account"
   ON postal_centers FOR INSERT
-  WITH CHECK (account_id IN (SELECT get_user_accounts()));
+  TO authenticated
+  WITH CHECK (account_id = public.current_user_account_id());
 
-CREATE POLICY "Users can update postal centers in their account"
+CREATE POLICY "postal_centers_update_own_account"
   ON postal_centers FOR UPDATE
-  USING (account_id IN (SELECT get_user_accounts()));
+  TO authenticated
+  USING (account_id = public.current_user_account_id());
 
-CREATE POLICY "Users can delete postal centers in their account"
+CREATE POLICY "postal_centers_delete_own_account"
   ON postal_centers FOR DELETE
-  USING (account_id IN (SELECT get_user_accounts()));
+  TO authenticated
+  USING (account_id = public.current_user_account_id());
 
 -- Readers Policies
-CREATE POLICY "Users can view readers in their account"
+CREATE POLICY "readers_select_own_account"
   ON readers FOR SELECT
-  USING (account_id IN (SELECT get_user_accounts()));
+  TO authenticated
+  USING (account_id = public.current_user_account_id());
 
-CREATE POLICY "Users can insert readers in their account"
+CREATE POLICY "readers_select_superadmin"
+  ON readers FOR SELECT
+  TO authenticated
+  USING (public.current_user_role() = 'superadmin');
+
+CREATE POLICY "readers_insert_own_account"
   ON readers FOR INSERT
-  WITH CHECK (account_id IN (SELECT get_user_accounts()));
+  TO authenticated
+  WITH CHECK (account_id = public.current_user_account_id());
 
-CREATE POLICY "Users can update readers in their account"
+CREATE POLICY "readers_update_own_account"
   ON readers FOR UPDATE
-  USING (account_id IN (SELECT get_user_accounts()));
+  TO authenticated
+  USING (account_id = public.current_user_account_id());
 
-CREATE POLICY "Users can delete readers in their account"
+CREATE POLICY "readers_delete_own_account"
   ON readers FOR DELETE
-  USING (account_id IN (SELECT get_user_accounts()));
+  TO authenticated
+  USING (account_id = public.current_user_account_id());
 
 -- Weekly Schedule Policies
-CREATE POLICY "Users can view weekly schedules in their account"
+CREATE POLICY "weekly_schedule_select_own_account"
   ON weekly_schedule FOR SELECT
-  USING (account_id IN (SELECT get_user_accounts()));
+  TO authenticated
+  USING (account_id = public.current_user_account_id());
 
-CREATE POLICY "Users can insert weekly schedules in their account"
+CREATE POLICY "weekly_schedule_select_superadmin"
+  ON weekly_schedule FOR SELECT
+  TO authenticated
+  USING (public.current_user_role() = 'superadmin');
+
+CREATE POLICY "weekly_schedule_insert_own_account"
   ON weekly_schedule FOR INSERT
-  WITH CHECK (account_id IN (SELECT get_user_accounts()));
+  TO authenticated
+  WITH CHECK (account_id = public.current_user_account_id());
 
-CREATE POLICY "Users can update weekly schedules in their account"
+CREATE POLICY "weekly_schedule_update_own_account"
   ON weekly_schedule FOR UPDATE
-  USING (account_id IN (SELECT get_user_accounts()));
+  TO authenticated
+  USING (account_id = public.current_user_account_id());
 
-CREATE POLICY "Users can delete weekly schedules in their account"
+CREATE POLICY "weekly_schedule_delete_own_account"
   ON weekly_schedule FOR DELETE
-  USING (account_id IN (SELECT get_user_accounts()));
+  TO authenticated
+  USING (account_id = public.current_user_account_id());
 
 -- Non-Working Days Policies
-CREATE POLICY "Users can view non-working days in their account"
+CREATE POLICY "non_working_days_select_own_account"
   ON non_working_days FOR SELECT
-  USING (account_id IN (SELECT get_user_accounts()));
+  TO authenticated
+  USING (account_id = public.current_user_account_id());
 
-CREATE POLICY "Users can insert non-working days in their account"
+CREATE POLICY "non_working_days_select_superadmin"
+  ON non_working_days FOR SELECT
+  TO authenticated
+  USING (public.current_user_role() = 'superadmin');
+
+CREATE POLICY "non_working_days_insert_own_account"
   ON non_working_days FOR INSERT
-  WITH CHECK (account_id IN (SELECT get_user_accounts()));
+  TO authenticated
+  WITH CHECK (account_id = public.current_user_account_id());
 
-CREATE POLICY "Users can update non-working days in their account"
+CREATE POLICY "non_working_days_update_own_account"
   ON non_working_days FOR UPDATE
-  USING (account_id IN (SELECT get_user_accounts()));
+  TO authenticated
+  USING (account_id = public.current_user_account_id());
 
-CREATE POLICY "Users can delete non-working days in their account"
+CREATE POLICY "non_working_days_delete_own_account"
   ON non_working_days FOR DELETE
-  USING (account_id IN (SELECT get_user_accounts()));
+  TO authenticated
+  USING (account_id = public.current_user_account_id());
