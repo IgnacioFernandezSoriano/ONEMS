@@ -34,6 +34,7 @@ import TerritoryEquity from './pages/Reporting/TerritoryEquity'
 import TerritoryEquityV2 from './pages/Reporting/TerritoryEquityV2'
 import JKPerformance from './pages/Reporting/JKPerformance'
 import AccountReportingConfig from './pages/Settings/AccountReportingConfig'
+import { AccountConfiguration } from './pages/Settings/AccountConfiguration'
 import { PostalCenters } from './pages/PostalCenters'
 
 function App() {
@@ -269,6 +270,16 @@ function App() {
                       element={
                         <ProtectedRoute allowedRoles={['superadmin']}>
                           <AccountReportingConfig />
+                        </ProtectedRoute>
+                      }
+                    />
+                    
+                    {/* Account Configuration - for admin and superadmin */}
+                    <Route
+                      path="/settings/account-configuration"
+                      element={
+                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                          <AccountConfiguration />
                         </ProtectedRoute>
                       }
                     />

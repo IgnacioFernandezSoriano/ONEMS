@@ -1974,3 +1974,23 @@ common.expand_all,Tout Développer
 common.collapse_all,Tout Réduire
 menu.postal_centers,Centres Postaux
 menu.postal_centers.tooltip,Configurer les centres postaux et les lecteurs RFID
+menu.account_configuration,Configuration du Compte
+menu.account_configuration.tooltip,Configurer les paramètres au niveau du compte pour les diagnostics
+account_config.title,Configuration du Compte
+account_config.description,Configurer les paramètres globaux de votre compte
+account_config.global_settings,Paramètres Globaux
+account_config.calculation_mode,Mode de Calcul
+account_config.natural_days,Jours Naturels
+account_config.working_days,Jours Ouvrables
+account_config.calculation_mode_help,Choisissez comment calculer les temps de transit: jours naturels (24/7) ou jours ouvrables (hors heures non ouvrables)
+account_config.mixed_reader_gap,Intervalle Lecteur Mixte (minutes)
+account_config.mixed_reader_gap_help,Intervalle de temps pour séparer les événements d'entrée et de sortie pour les lecteurs mixtes
+account_config.non_working_days,Jours Non Ouvrables (Jours Fériés)
+account_config.add_holiday,Ajouter un Jour Férié
+account_config.holiday_reason,Raison (ex: Noël, Nouvel An)
+account_config.no_holidays,Aucun jour férié configuré
+account_config.confirm_delete_holiday,Êtes-vous sûr de vouloir supprimer ce jour férié?
+account_config.weekly_schedule,Horaire Hebdomadaire
+account_config.working_day,Jour Ouvrable
+account_config.saved_successfully,Configuration enregistrée avec succès
+account_config.fill_all_fields,Veuillez remplir tous les champs

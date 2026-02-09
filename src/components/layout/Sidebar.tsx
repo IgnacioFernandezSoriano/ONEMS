@@ -251,6 +251,13 @@ export function Sidebar() {
           roles: ['admin', 'superadmin'],
           tooltip: t('menu.users.tooltip'),
         },
+        {
+          path: '/settings/account-configuration',
+          label: t('menu.account_configuration'),
+          icon: SettingsIcon,
+          roles: ['admin', 'superadmin'],
+          tooltip: t('menu.account_configuration.tooltip'),
+        },
         ...(accountName === 'DEMO2' ? [
           {
             path: '/receive-generator',
