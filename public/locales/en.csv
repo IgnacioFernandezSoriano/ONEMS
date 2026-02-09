@@ -1993,3 +1993,9 @@ account_config.weekly_schedule,Weekly Schedule
 account_config.working_day,Working Day
 account_config.saved_successfully,Configuration saved successfully
 account_config.fill_all_fields,Please fill all fields
+account_config.download_template,Download Template
+account_config.import_csv,Import CSV
+account_config.no_valid_holidays,No valid holidays found in CSV
+account_config.imported_successfully,Successfully imported {count} holidays
+account_config.opening,Opening
+account_config.cutoff,Cut-off

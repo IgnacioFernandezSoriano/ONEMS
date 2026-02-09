@@ -1993,3 +1993,9 @@ account_config.weekly_schedule,الجدول الأسبوعي
 account_config.working_day,يوم عمل
 account_config.saved_successfully,تم حفظ التكوين بنجاح
 account_config.fill_all_fields,يرجى ملء جميع الحقول
+account_config.download_template,تحميل النموذج
+account_config.import_csv,استيراد CSV
+account_config.no_valid_holidays,لم يتم العثور على عطلات صالحة في CSV
+account_config.imported_successfully,تم استيراد {count} عطلة بنجاح
+account_config.opening,افتتاح
+account_config.cutoff,قطع

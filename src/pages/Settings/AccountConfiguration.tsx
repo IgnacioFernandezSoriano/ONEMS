@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useAccountConfig } from '../../hooks/useAccountConfig'
 import { useLocale } from '../../contexts/LocaleContext'
-import { Save, Calendar, Clock, Settings as SettingsIcon, Plus, Trash2 } from 'lucide-react'
+import { Save, Calendar, Clock, Settings as SettingsIcon, Plus, Trash2, Upload, Download } from 'lucide-react'
 
 export function AccountConfiguration() {
   const { t } = useLocale()
@@ -14,6 +14,7 @@ export function AccountConfiguration() {
     addNonWorkingDay,
     deleteNonWorkingDay,
     updateWeeklySchedule,
+    bulkImportNonWorkingDays,
   } = useAccountConfig()
 
   const [calculationMode, setCalculationMode] = useState<'natural_days' | 'working_days'>(
@@ -26,6 +27,7 @@ export function AccountConfiguration() {
   const [showAddHoliday, setShowAddHoliday] = useState(false)
   const [newHolidayDate, setNewHolidayDate] = useState('')
   const [newHolidayReason, setNewHolidayReason] = useState('')
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
@@ -67,10 +69,54 @@ export function AccountConfiguration() {
 
   const handleUpdateSchedule = async (
     dayOfWeek: number,
-    field: 'opening_time' | 'closing_time' | 'is_working_day',
+    field: 'opening_hour' | 'cutoff_time' | 'is_working_day',
     value: string | boolean
   ) => {
     await updateWeeklySchedule(dayOfWeek, { [field]: value })
+  }
+
+  const handleDownloadTemplate = () => {
+    const csv = 'date,reason\n2026-01-01,New Year\n2026-12-25,Christmas'
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'holidays_template.csv'
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const handleImportCSV = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    const text = await file.text()
+    const lines = text.split('\n').slice(1) // Skip header
+    const holidays: Array<{ date: string; reason: string }> = []
+
+    for (const line of lines) {
+      const [date, reason] = line.split(',')
+      if (date && reason) {
+        holidays.push({ date: date.trim(), reason: reason.trim() })
+      }
+    }
+
+    if (holidays.length === 0) {
+      alert(t('account_config.no_valid_holidays'))
+      return
+    }
+
+    const result = await bulkImportNonWorkingDays(holidays)
+    if (result.success) {
+      alert(t('account_config.imported_successfully', { count: holidays.length }))
+    } else {
+      alert(`Error: ${result.error}`)
+    }
+
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
   }
 
   if (loading) {
@@ -162,13 +208,36 @@ export function AccountConfiguration() {
               {t('account_config.non_working_days')}
             </h2>
           </div>
-          <button
-            onClick={() => setShowAddHoliday(!showAddHoliday)}
-            className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700"
-          >
-            <Plus className="w-4 h-4" />
-            {t('account_config.add_holiday')}
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={handleDownloadTemplate}
+              className="flex items-center gap-2 px-3 py-1.5 bg-gray-600 text-white text-sm rounded-lg hover:bg-gray-700"
+            >
+              <Download className="w-4 h-4" />
+              {t('account_config.download_template')}
+            </button>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="flex items-center gap-2 px-3 py-1.5 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700"
+            >
+              <Upload className="w-4 h-4" />
+              {t('account_config.import_csv')}
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".csv"
+              onChange={handleImportCSV}
+              className="hidden"
+            />
+            <button
+              onClick={() => setShowAddHoliday(!showAddHoliday)}
+              className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700"
+            >
+              <Plus className="w-4 h-4" />
+              {t('account_config.add_holiday')}
+            </button>
+          </div>
         </div>
 
         {showAddHoliday && (
@@ -267,23 +336,28 @@ export function AccountConfiguration() {
                 </label>
                 {schedule?.is_working_day && (
                   <>
-                    <input
-                      type="time"
-                      value={schedule?.opening_time || '08:00'}
-                      onChange={(e) =>
-                        handleUpdateSchedule(dayOfWeek, 'opening_time', e.target.value)
-                      }
-                      className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white"
-                    />
-                    <span className="text-gray-500">-</span>
-                    <input
-                      type="time"
-                      value={schedule?.closing_time || '18:00'}
-                      onChange={(e) =>
-                        handleUpdateSchedule(dayOfWeek, 'closing_time', e.target.value)
-                      }
-                      className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white"
-                    />
+                    <div className="flex items-center gap-2">
+                      <label className="text-xs text-gray-500">{t('account_config.opening')}:</label>
+                      <input
+                        type="time"
+                        value={schedule?.opening_hour || '08:00'}
+                        onChange={(e) =>
+                          handleUpdateSchedule(dayOfWeek, 'opening_hour', e.target.value)
+                        }
+                        className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <label className="text-xs text-gray-500">{t('account_config.cutoff')}:</label>
+                      <input
+                        type="time"
+                        value={schedule?.cutoff_time || '18:00'}
+                        onChange={(e) =>
+                          handleUpdateSchedule(dayOfWeek, 'cutoff_time', e.target.value)
+                        }
+                        className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white"
+                      />
+                    </div>
                   </>
                 )}
               </div>

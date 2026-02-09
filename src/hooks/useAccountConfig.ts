@@ -22,9 +22,10 @@ export interface NonWorkingDay {
 export interface WeeklySchedule {
   id: string
   account_id: string
+  postal_center_id?: string
   day_of_week: number // 0 = Sunday, 6 = Saturday
-  opening_time: string // HH:MM format
-  closing_time: string // HH:MM format
+  opening_hour: string // HH:MM format
+  cutoff_time: string // HH:MM format
   is_working_day: boolean
   created_at: string
 }
@@ -174,6 +175,26 @@ export function useAccountConfig() {
     }
   }
 
+  const bulkImportNonWorkingDays = async (holidays: Array<{ date: string; reason: string }>) => {
+    try {
+      const records = holidays.map((h) => ({
+        account_id: effectiveAccountId,
+        date: h.date,
+        reason: h.reason,
+      }))
+
+      const { error: insertError } = await supabase
+        .from('non_working_days')
+        .insert(records)
+
+      if (insertError) throw insertError
+      await fetchNonWorkingDays()
+      return { success: true }
+    } catch (err: any) {
+      return { success: false, error: err.message }
+    }
+  }
+
   return {
     config,
     nonWorkingDays,
@@ -184,6 +205,7 @@ export function useAccountConfig() {
     addNonWorkingDay,
     deleteNonWorkingDay,
     updateWeeklySchedule,
+    bulkImportNonWorkingDays,
     refetch: () => {
       fetchAccountConfig()
       fetchNonWorkingDays()

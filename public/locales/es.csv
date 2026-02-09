@@ -1993,3 +1993,9 @@ account_config.weekly_schedule,Horario Semanal
 account_config.working_day,Día Laborable
 account_config.saved_successfully,Configuración guardada exitosamente
 account_config.fill_all_fields,Por favor complete todos los campos
+account_config.download_template,Descargar Plantilla
+account_config.import_csv,Importar CSV
+account_config.no_valid_holidays,No se encontraron festivos válidos en el CSV
+account_config.imported_successfully,Se importaron exitosamente {count} festivos
+account_config.opening,Apertura
+account_config.cutoff,Corte

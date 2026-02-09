@@ -1994,3 +1994,9 @@ account_config.weekly_schedule,Horaire Hebdomadaire
 account_config.working_day,Jour Ouvrable
 account_config.saved_successfully,Configuration enregistrée avec succès
 account_config.fill_all_fields,Veuillez remplir tous les champs
+account_config.download_template,Télécharger le Modèle
+account_config.import_csv,Importer CSV
+account_config.no_valid_holidays,Aucun jour férié valide trouvé dans le CSV
+account_config.imported_successfully,{count} jours fériés importés avec succès
+account_config.opening,Ouverture
+account_config.cutoff,Coupure
