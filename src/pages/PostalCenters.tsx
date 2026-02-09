@@ -10,10 +10,12 @@ import { Button } from '@/components/common/Button'
 import type { PostalCenterWithReaders, Reader, PostalCenterFormData, ReaderFormData } from '@/lib/types_postal_centers'
 import { useTranslation } from '@/hooks/useTranslation'
 import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId'
+import { useAccountConfig } from '@/hooks/useAccountConfig'
 
 export function PostalCenters() {
   const { t } = useTranslation()
   const effectiveAccountId = useEffectiveAccountId()
+  const { config } = useAccountConfig()
   const {
     postalCenters,
     loading,

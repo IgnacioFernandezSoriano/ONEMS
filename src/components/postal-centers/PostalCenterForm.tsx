@@ -22,11 +22,10 @@ export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCen
   const { t } = useTranslation()
   const { config, nonWorkingDays: accountHolidays, weeklySchedule: accountWeeklySchedule } = useAccountConfig()
   
-  const [formData, setFormData] = useState<PostalCenterFormData>({
-    code: '',
+  const [formData, setFormData] = useState<PostalCenterFormData>({code: '',
     name: '',
     description: '',
-    calculation_mode: null,
+    calculation_mode: config?.calculation_mode || 'natural_days',
     is_active: true
   })
   
