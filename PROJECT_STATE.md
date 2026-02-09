@@ -16,15 +16,20 @@ Durante esta sesión se completó exitosamente el **Sprint 5: SLAs Configuration
 **Estado:** ✅ **COMPLETADO** - Todas las funcionalidades implementadas, build exitoso
 
 **Funcionalidades Implementadas:**
-- ✅ Migración de base de datos (tabla slas con constraints y RLS)
-- ✅ Tipos TypeScript completos (types_slas.ts)
-- ✅ Hook useSLAs con CRUD completo + Generate Combinations
-- ✅ Componente SLAForm (formulario dinámico según tipo)
-- ✅ Componente GenerateCombinationsModal (generación masiva)
-- ✅ Página SLAsConfiguration (tabla, inline editing, filtros, bulk ops)
-- ✅ Routing y navegación integrados
-- ✅ Traducciones en 4 idiomas (en, es, fr, ar)
-- ✅ Build exitoso (618 KB deployment package)
+- ✅ Migración de base de datos simplificada (tabla slas sin referencias a readers)
+- ✅ SLAs a nivel de centro postal (no de lectores individuales)
+- ✅ SLA Operacional: Entry → Exit dentro de cada centro
+- ✅ SLA Distribución: Shipments entre centros
+- ✅ Generación selectiva de SLAs pendientes únicamente
+- ✅ Modal de edición individual (sin validación intermedia)
+- ✅ Bulk edit para múltiples registros
+- ✅ Visualización de tiempo en días con formato inteligente (< 1 día: 3 decimales, ≥ 1 día: 1 decimal)
+- ✅ Conversión de unidades: minutos/horas/días → almacenamiento en minutos
+- ✅ CRUD completo con filtros avanzados
+- ✅ CSV export
+- ✅ Traducciones completas en 4 idiomas (en, es, fr, ar)
+- ✅ Nombre del menú: "Sites SLA"
+- ✅ Build exitoso (620 KB deployment package)
 - ✅ Documentación completa (SPRINT5_SUMMARY.md)
 
 ---
@@ -83,9 +88,9 @@ Durante esta sesión se completó exitosamente el **Sprint 5: SLAs Configuration
 
 ### GitHub
 - **Repositorio:** `https://github.com/IgnacioFernandezSoriano/ONEMS`
-- **Personal Access Token (PAT):** `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`
+- **Personal Access Token (PAT):** `[Stored securely - not in repository]`
 - **Rama Actual:** `main`
-- **Último Commit:** Pendiente - Sprint 5 SLAs Configuration Module complete (pending push)
+- **Último Commit:** `055d1eb` - feat(slas): Complete Sprint 5 - Sites SLA Configuration Module
 - **Comandos de configuración:**
   ```bash
   cd /tmp
