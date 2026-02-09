@@ -2062,3 +2062,29 @@ readers.inherited,Inherited
 postal_centers.tab_centers,Centers
 postal_centers.tab_readers,Readers
 common.reset_filters,Reset Filters
+slas.title,SLAs Configuration
+slas.description,Configure Service Level Agreements for operational and distribution routes
+slas.create_sla,Create SLA
+slas.generate_combinations,Generate Combinations
+slas.sla_type,SLA Type
+slas.operational,Operational
+slas.distribution,Distribution
+slas.route,Route
+slas.expected_time,Expected Time
+slas.on_time_percentage,On-Time %
+slas.warning_threshold,Warning Threshold
+slas.critical_threshold,Critical Threshold
+slas.postal_center,Postal Center
+slas.from_reader,From Reader
+slas.to_reader,To Reader
+slas.from_postal_center,From Postal Center
+slas.to_postal_center,To Postal Center
+slas.time_unit,Time Unit
+slas.select_postal_centers,Select Postal Centers
+slas.operational_combinations_hint,Will generate SLAs for all reader pairs within each selected center
+slas.from_postal_centers,From Postal Centers
+slas.to_postal_centers,To Postal Centers
+slas.default_values,Default Values
+slas.combinations_generated,Generated {inserted} new SLAs ({skipped} skipped as duplicates)
+menu.slas_configuration,SLAs Configuration
+menu.slas_configuration.tooltip,Configure Service Level Agreements

@@ -1,31 +1,30 @@
 # PROJECT STATE - ONEMS V3 Network Diagnostics Module
 
-**Última Actualización:** 9 de febrero de 2026 - Sesión Sprint 5 (SLAs Configuration Module)
-**Versión:** 3.3 - Sprint 5 Completado
+**Última Actualización:** 10 de febrero de 2026 - Sesión Sprint 4 (Readers Module + Roadmap Completo)
+**Versión:** 3.2 - Sprint 4 Completado + Roadmap Detallado
 
 ---
 
-## 📋 ESTADO ACTUAL: SPRINT 5 COMPLETADO
+## 📋 ESTADO ACTUAL: SPRINT 4 COMPLETADO
 
-Durante esta sesión se completó exitosamente el **Sprint 5: SLAs Configuration Module**, implementando un sistema completo de gestión de SLAs con soporte para tipos operacionales y de distribución.
+Durante esta sesión se completó exitosamente el **Sprint 4: Readers Module Enhancement** y se estableció el **roadmap detallado** hasta el módulo de cálculo.
 
-### Resumen Ejecutivo Sprint 5
+### Resumen Ejecutivo Sprint 4
 
-**Objetivo:** Implementar módulo completo de SLAs Configuration con soporte para SLAs operacionales y de distribución
+**Objetivo:** Completar módulo de Lectores con lista, asignación a centros, filtros y bulk operations
 
-**Estado:** ✅ **COMPLETADO** - Todas las funcionalidades implementadas, build exitoso
+**Estado:** ✅ **COMPLETADO** - Todas las funcionalidades implementadas y testeadas
 
 **Funcionalidades Implementadas:**
-- ✅ Migración de base de datos (tabla slas con constraints y RLS)
-- ✅ Tipos TypeScript completos (types_slas.ts)
-- ✅ Hook useSLAs con CRUD completo + Generate Combinations
-- ✅ Componente SLAForm (formulario dinámico según tipo)
-- ✅ Componente GenerateCombinationsModal (generación masiva)
-- ✅ Página SLAsConfiguration (tabla, inline editing, filtros, bulk ops)
-- ✅ Routing y navegación integrados
-- ✅ Traducciones en 4 idiomas (en, es, fr, ar)
-- ✅ Build exitoso (618 KB deployment package)
-- ✅ Documentación completa (SPRINT5_SUMMARY.md)
+- ✅ Tabs en Postal Centers page (Centers / Readers)
+- ✅ ReadersList con tabla completa de lectores
+- ✅ Filtros: Centro postal, Tipo (Entry/Exit/Mixed), Estado (Active/Inactive)
+- ✅ Búsqueda por reader_id o nombre
+- ✅ Bulk operations (activar/desactivar/eliminar múltiples)
+- ✅ Reset filters button
+- ✅ Calculation mode: herencia correcta desde Account Config
+- ✅ Filtros corregidos (buscan en BD directamente)
+- ✅ Traducciones en 4 idiomas
 
 ---
 
@@ -38,8 +37,7 @@ Durante esta sesión se completó exitosamente el **Sprint 5: SLAs Configuration
 2. `04_requerimientos_tecnicos.md` (Requerimientos Técnicos Detallados)
 3. `ModuloDiagnosticoUserrequirementsV1.md` (Requerimientos de Usuario)
 4. `SPRINT3_SUMMARY.md` (Resumen de Sprint 3)
-5. `SPRINT4_SUMMARY.md` (Resumen de Sprint 4)
-6. `SPRINT5_SUMMARY.md` (Resumen de Sprint 5) - NUEVO
+5. `SPRINT4_SUMMARY.md` (Resumen de Sprint 4) - NUEVO
 
 **YO leo estos archivos para:**
 - Recordar el estado del proyecto
@@ -85,7 +83,7 @@ Durante esta sesión se completó exitosamente el **Sprint 5: SLAs Configuration
 - **Repositorio:** `https://github.com/IgnacioFernandezSoriano/ONEMS`
 - **Personal Access Token (PAT):** `ghp_****` (solicitar al usuario si es necesario)
 - **Rama Actual:** `main`
-- **Último Commit:** Pendiente - Sprint 5 SLAs Configuration Module complete (pending push)
+- **Último Commit:** `6fd67fd` - fix(postal-centers): Calculation mode inheritance and filter correction - Sprint 4 complete
 - **Comandos de configuración:**
   ```bash
   cd /tmp
@@ -322,7 +320,7 @@ Tener todo listo para modificar y ejecutar el **Módulo de Cálculo** antes de p
 | 1-2 | Infraestructura Base | - | ✅ Completado |
 | 3 | Postal Centers | - | ✅ Completado |
 | 4 | Readers | - | ✅ Completado |
-| **5** | **SLAs Configuration** | **2-3h** | **✅ Completado** |
+| **5** | **SLAs Configuration** | **2-3h** | **⏳ Próximo** |
 | 6 | Diagnosis DB Schema | 2h | ⏳ Pendiente |
 | 7 | Event Consolidation | 4-5h | ⏳ Pendiente |
 | 8 | Journey Reconstruction | 3-4h | ⏳ Pendiente |
@@ -330,8 +328,8 @@ Tener todo listo para modificar y ejecutar el **Módulo de Cálculo** antes de p
 | 10 | Integration & Orchestration | 2-3h | ⏳ Pendiente |
 | 11 | Testing & Simulation | 2h | ⏳ Pendiente |
 
-**Progreso:** 5/11 sprints completados (45%)  
-**Total estimado:** ~16-20 horas de desarrollo restantes
+**Progreso:** 4/11 sprints completados (36%)  
+**Total estimado:** ~18-23 horas de desarrollo restantes
 
 ---
 

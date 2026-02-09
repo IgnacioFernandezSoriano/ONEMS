@@ -2063,3 +2063,29 @@ readers.inherited,Hérité
 postal_centers.tab_centers,Centres
 postal_centers.tab_readers,Lecteurs
 common.reset_filters,Réinitialiser les filtres
+slas.title,Configuration des SLA
+slas.description,Configurer les accords de niveau de service pour les itinéraires opérationnels et de distribution
+slas.create_sla,Créer SLA
+slas.generate_combinations,Générer des Combinaisons
+slas.sla_type,Type de SLA
+slas.operational,Opérationnel
+slas.distribution,Distribution
+slas.route,Itinéraire
+slas.expected_time,Temps Prévu
+slas.on_time_percentage,% Ponctuel
+slas.warning_threshold,Seuil d'Avertissement
+slas.critical_threshold,Seuil Critique
+slas.postal_center,Centre Postal
+slas.from_reader,Lecteur Origine
+slas.to_reader,Lecteur Destination
+slas.from_postal_center,Centre Postal Origine
+slas.to_postal_center,Centre Postal Destination
+slas.time_unit,Unité de Temps
+slas.select_postal_centers,Sélectionner les Centres Postaux
+slas.operational_combinations_hint,Générera des SLA pour toutes les paires de lecteurs dans chaque centre sélectionné
+slas.from_postal_centers,Centres Postaux Origine
+slas.to_postal_centers,Centres Postaux Destination
+slas.default_values,Valeurs par Défaut
+slas.combinations_generated,Généré {inserted} nouveaux SLA ({skipped} ignorés comme doublons)
+menu.slas_configuration,Configuration des SLA
+menu.slas_configuration.tooltip,Configurer les accords de niveau de service

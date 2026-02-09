@@ -2062,3 +2062,29 @@ readers.inherited,Heredado
 postal_centers.tab_centers,Centros
 postal_centers.tab_readers,Lectores
 common.reset_filters,Limpiar Filtros
+slas.title,Configuración de SLAs
+slas.description,Configurar Acuerdos de Nivel de Servicio para rutas operacionales y de distribución
+slas.create_sla,Crear SLA
+slas.generate_combinations,Generar Combinaciones
+slas.sla_type,Tipo de SLA
+slas.operational,Operacional
+slas.distribution,Distribución
+slas.route,Ruta
+slas.expected_time,Tiempo Esperado
+slas.on_time_percentage,% Puntual
+slas.warning_threshold,Umbral de Advertencia
+slas.critical_threshold,Umbral Crítico
+slas.postal_center,Centro Postal
+slas.from_reader,Lector Origen
+slas.to_reader,Lector Destino
+slas.from_postal_center,Centro Postal Origen
+slas.to_postal_center,Centro Postal Destino
+slas.time_unit,Unidad de Tiempo
+slas.select_postal_centers,Seleccionar Centros Postales
+slas.operational_combinations_hint,Generará SLAs para todos los pares de lectores dentro de cada centro seleccionado
+slas.from_postal_centers,Centros Postales Origen
+slas.to_postal_centers,Centros Postales Destino
+slas.default_values,Valores Predeterminados
+slas.combinations_generated,Generados {inserted} nuevos SLAs ({skipped} omitidos como duplicados)
+menu.slas_configuration,Configuración de SLAs
+menu.slas_configuration.tooltip,Configurar Acuerdos de Nivel de Servicio

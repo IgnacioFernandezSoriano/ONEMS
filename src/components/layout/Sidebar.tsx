@@ -139,6 +139,13 @@ export function Sidebar() {
           roles: ['admin', 'superadmin'],
           tooltip: t('menu.postal_centers.tooltip'),
         },
+        {
+          path: '/slas-configuration',
+          label: t('menu.slas_configuration'),
+          icon: Target,
+          roles: ['admin', 'superadmin'],
+          tooltip: t('menu.slas_configuration.tooltip'),
+        },
       ],
     },
     {

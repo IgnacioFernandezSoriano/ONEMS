@@ -36,6 +36,7 @@ import JKPerformance from './pages/Reporting/JKPerformance'
 import AccountReportingConfig from './pages/Settings/AccountReportingConfig'
 import { AccountConfiguration } from './pages/Settings/AccountConfiguration'
 import { PostalCenters } from './pages/PostalCenters'
+import { SLAsConfiguration } from './pages/SLAsConfiguration'
 
 function App() {
   return (
@@ -92,6 +93,16 @@ function App() {
                       element={
                         <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
                           <DeliveryStandards />
+                        </ProtectedRoute>
+                      }
+                    />
+                    
+                    {/* SLAs Configuration - for admin and superadmin */}
+                    <Route
+                      path="/slas-configuration"
+                      element={
+                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                          <SLAsConfiguration />
                         </ProtectedRoute>
                       }
                     />

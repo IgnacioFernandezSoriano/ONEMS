@@ -2062,3 +2062,29 @@ readers.inherited,موروث
 postal_centers.tab_centers,المراكز
 postal_centers.tab_readers,القراء
 common.reset_filters,إعادة تعيين الفلاتر
+slas.title,تكوين اتفاقيات مستوى الخدمة
+slas.description,تكوين اتفاقيات مستوى الخدمة للمسارات التشغيلية والتوزيع
+slas.create_sla,إنشاء SLA
+slas.generate_combinations,توليد التركيبات
+slas.sla_type,نوع SLA
+slas.operational,تشغيلي
+slas.distribution,توزيع
+slas.route,مسار
+slas.expected_time,الوقت المتوقع
+slas.on_time_percentage,% في الوقت المحدد
+slas.warning_threshold,عتبة التحذير
+slas.critical_threshold,عتبة حرجة
+slas.postal_center,مركز بريدي
+slas.from_reader,قارئ المصدر
+slas.to_reader,قارئ الوجهة
+slas.from_postal_center,مركز بريدي المصدر
+slas.to_postal_center,مركز بريدي الوجهة
+slas.time_unit,وحدة الوقت
+slas.select_postal_centers,حدد المراكز البريدية
+slas.operational_combinations_hint,سيتم إنشاء SLA لجميع أزواج القراء داخل كل مركز محدد
+slas.from_postal_centers,مراكز بريدية المصدر
+slas.to_postal_centers,مراكز بريدية الوجهة
+slas.default_values,القيم الافتراضية
+slas.combinations_generated,تم إنشاء {inserted} SLA جديدة ({skipped} تم تخطيها كتكرارات)
+menu.slas_configuration,تكوين SLA
+menu.slas_configuration.tooltip,تكوين اتفاقيات مستوى الخدمة
