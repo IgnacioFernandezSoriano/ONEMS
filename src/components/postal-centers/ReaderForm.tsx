@@ -15,7 +15,7 @@ interface ReaderFormProps {
 export function ReaderForm({ accountId, reader, onSubmit, onCancel }: ReaderFormProps) {
   const { t } = useTranslation()
   const { config } = useAccountConfig()
-  const { postalCenters } = usePostalCenters(accountId)
+  const { postalCenters } = usePostalCenters()
   const [formData, setFormData] = useState<ReaderFormData>({
     reader_id: '',
     name: '',
@@ -136,7 +136,7 @@ export function ReaderForm({ accountId, reader, onSubmit, onCancel }: ReaderForm
         </label>
         <select
           value={formData.postal_center_id || ''}
-          onChange={(e) => setFormData({ ...formData, postal_center_id: e.target.value ? parseInt(e.target.value) : null })}
+          onChange={(e) => setFormData({ ...formData, postal_center_id: e.target.value || null })}
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">{t('readers.unassigned')}</option>

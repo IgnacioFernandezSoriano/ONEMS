@@ -220,6 +220,7 @@ export function usePostalCenters() {
 
   return {
     postalCenters,
+    readers: postalCenters.flatMap(pc => pc.readers || []),
     loading,
     error,
     createPostalCenter,

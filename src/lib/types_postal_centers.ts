@@ -49,6 +49,7 @@ export interface ReaderFormData {
   name: string
   description?: string
   type: 'Entry' | 'Exit' | 'Mixed'
+  postal_center_id?: string | null
   mixed_reader_gap_minutes?: number | null
   is_active: boolean
 }

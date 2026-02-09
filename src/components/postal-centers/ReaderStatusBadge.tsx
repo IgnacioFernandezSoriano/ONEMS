@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '@/hooks/useTranslation';
 import { Reader } from '../../lib/types_postal_centers';
 import { supabase } from '../../lib/supabase';
 
@@ -10,7 +10,7 @@ interface ReaderStatusBadgeProps {
 
 type ReaderStatus = 'active' | 'inactive' | 'offline' | 'unknown';
 
-export default function ReaderStatusBadge({ reader, accountId }: ReaderStatusBadgeProps) {
+export function ReaderStatusBadge({ reader, accountId }: ReaderStatusBadgeProps) {
   const { t } = useTranslation();
   const [status, setStatus] = useState<ReaderStatus>('unknown');
   const [loading, setLoading] = useState(true);

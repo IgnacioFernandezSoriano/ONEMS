@@ -1,10 +1,10 @@
 import React, { useState, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '@/hooks/useTranslation';
 import { Pencil, Trash2, Eye, Power, PowerOff } from 'lucide-react';
 import { Reader } from '../../lib/types_postal_centers';
 import { usePostalCenters } from '../../hooks/usePostalCenters';
-import ReaderForm from './ReaderForm';
-import ReaderStatusBadge from './ReaderStatusBadge';
+import { ReaderForm } from './ReaderForm';
+import { ReaderStatusBadge } from './ReaderStatusBadge';
 
 interface ReadersListProps {
   accountId: string;
@@ -18,7 +18,7 @@ export default function ReadersList({ accountId }: ReadersListProps) {
     loading,
     deleteReader,
     updateReader,
-  } = usePostalCenters(accountId);
+  } = usePostalCenters();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCenter, setSelectedCenter] = useState<string>('all');
@@ -26,7 +26,7 @@ export default function ReadersList({ accountId }: ReadersListProps) {
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingReader, setEditingReader] = useState<Reader | undefined>();
-  const [selectedReaders, setSelectedReaders] = useState<Set<number>>(new Set());
+  const [selectedReaders, setSelectedReaders] = useState<Set<string>>(new Set());
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 25;
 
@@ -68,7 +68,7 @@ export default function ReadersList({ accountId }: ReadersListProps) {
 
   const handleDelete = async (readerId: number) => {
     if (window.confirm(t('readers.confirm_delete'))) {
-      await deleteReader(readerId);
+      await deleteReader(readerId.toString());
     }
   };
 
@@ -76,7 +76,7 @@ export default function ReadersList({ accountId }: ReadersListProps) {
     await updateReader(reader.id, { is_active: !reader.is_active });
   };
 
-  const handleSelectReader = (readerId: number) => {
+  const handleSelectReader = (readerId: string) => {
     const newSelected = new Set(selectedReaders);
     if (newSelected.has(readerId)) {
       newSelected.delete(readerId);
@@ -111,13 +111,13 @@ export default function ReadersList({ accountId }: ReadersListProps) {
   const handleBulkDelete = async () => {
     if (window.confirm(t('readers.confirm_bulk_delete', { count: selectedReaders.size }))) {
       for (const readerId of selectedReaders) {
-        await deleteReader(readerId);
+        await deleteReader(readerId.toString());
       }
       setSelectedReaders(new Set());
     }
   };
 
-  const getCenterName = (centerId: number | null) => {
+  const getCenterName = (centerId: string | null) => {
     if (!centerId) return t('readers.unassigned');
     const center = postalCenters.find((c) => c.id === centerId);
     return center?.name || '-';
@@ -343,7 +343,7 @@ export default function ReadersList({ accountId }: ReadersListProps) {
                         {reader.is_active ? <PowerOff className="w-4 h-4" /> : <Power className="w-4 h-4" />}
                       </button>
                       <button
-                        onClick={() => handleDelete(reader.id)}
+                        onClick={() => handleDelete(parseInt(reader.id))}
                         className="text-red-600 hover:text-red-900"
                         title={t('common.delete')}
                       >
@@ -400,7 +400,16 @@ export default function ReadersList({ accountId }: ReadersListProps) {
             <ReaderForm
               accountId={accountId}
               reader={editingReader}
-              onClose={() => {
+              onSubmit={async (data) => {
+                if (editingReader) {
+                  await updateReader(editingReader.id, data);
+                } else {
+                  // Create logic would go here
+                }
+                setIsFormOpen(false);
+                setEditingReader(undefined);
+              }}
+              onCancel={() => {
                 setIsFormOpen(false);
                 setEditingReader(undefined);
               }}

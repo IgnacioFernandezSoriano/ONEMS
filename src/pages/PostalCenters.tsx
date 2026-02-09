@@ -8,9 +8,11 @@ import { Modal } from '@/components/common/Modal'
 import { Button } from '@/components/common/Button'
 import type { PostalCenterWithReaders, Reader, PostalCenterFormData, ReaderFormData } from '@/lib/types_postal_centers'
 import { useTranslation } from '@/hooks/useTranslation'
+import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId'
 
 export function PostalCenters() {
   const { t } = useTranslation()
+  const effectiveAccountId = useEffectiveAccountId()
   const {
     postalCenters,
     loading,
@@ -336,6 +338,7 @@ export function PostalCenters() {
         title={t('readers.create_reader')}
       >
         <ReaderForm
+          accountId={effectiveAccountId || ''}
           onSubmit={handleCreateReader}
           onCancel={() => {
             setShowCreateReaderModal(false)
@@ -353,6 +356,7 @@ export function PostalCenters() {
         title={t('readers.edit_reader')}
       >
         <ReaderForm
+          accountId={effectiveAccountId || ''}
           reader={editingReader}
           onSubmit={handleUpdateReader}
           onCancel={() => {
