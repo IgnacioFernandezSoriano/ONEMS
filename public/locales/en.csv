@@ -2015,3 +2015,8 @@ postal_centers.no_account_holidays,No holidays defined at account level
 postal_centers.no_center_holidays,No center-specific holidays defined
 postal_centers.from_account,From Account
 postal_centers.minutes,minutes
+postal_centers.weekly_schedule,Weekly Schedule
+postal_centers.weekly_schedule_help,Customize opening hours for this center or inherit from account configuration
+postal_centers.inherited,Inherited
+postal_centers.holidays_inherited_help,Non-working days are managed at account level and automatically inherited by all postal centers
+postal_centers.inherited_from_account,Inherited from Account

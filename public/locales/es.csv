@@ -2015,3 +2015,8 @@ postal_centers.no_account_holidays,No hay festivos definidos a nivel de cuenta
 postal_centers.no_center_holidays,No hay festivos específicos del centro definidos
 postal_centers.from_account,De la Cuenta
 postal_centers.minutes,minutos
+postal_centers.weekly_schedule,Horario Semanal
+postal_centers.weekly_schedule_help,Personaliza los horarios de apertura para este centro o hereda de la configuración de cuenta
+postal_centers.inherited,Heredado
+postal_centers.holidays_inherited_help,Los días no laborables se gestionan a nivel de cuenta y se heredan automáticamente por todos los centros postales
+postal_centers.inherited_from_account,Heredado de la Cuenta

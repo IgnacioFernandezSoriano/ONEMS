@@ -2016,3 +2016,8 @@ postal_centers.no_account_holidays,Aucun jour férié défini au niveau du compt
 postal_centers.no_center_holidays,Aucun jour férié spécifique au centre défini
 postal_centers.from_account,Du Compte
 postal_centers.minutes,minutes
+postal_centers.weekly_schedule,Horaire Hebdomadaire
+postal_centers.weekly_schedule_help,Personnalisez les heures d'ouverture pour ce centre ou héritez de la configuration du compte
+postal_centers.inherited,Hérité
+postal_centers.holidays_inherited_help,Les jours non ouvrables sont gérés au niveau du compte et automatiquement hérités par tous les centres postaux
+postal_centers.inherited_from_account,Hérité du Compte

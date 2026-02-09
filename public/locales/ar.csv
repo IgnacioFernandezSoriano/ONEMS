@@ -2015,3 +2015,8 @@ postal_centers.no_account_holidays,لا توجد عطلات محددة على م
 postal_centers.no_center_holidays,لا توجد عطلات خاصة بالمركز محددة
 postal_centers.from_account,من الحساب
 postal_centers.minutes,دقائق
+postal_centers.weekly_schedule,الجدول الأسبوعي
+postal_centers.weekly_schedule_help,تخصيص ساعات العمل لهذا المركز أو الوراثة من تكوين الحساب
+postal_centers.inherited,موروث
+postal_centers.holidays_inherited_help,تتم إدارة أيام عدم العمل على مستوى الحساب ويتم توريثها تلقائيًا بواسطة جميع المراكز البريدية
+postal_centers.inherited_from_account,موروث من الحساب
