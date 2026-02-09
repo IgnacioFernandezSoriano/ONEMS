@@ -2004,3 +2004,14 @@ postal_centers.override,Override
 postal_centers.inheriting_from_account,Inheriting from account
 postal_centers.from_account,from account
 postal_centers.minutes,minutes
+postal_centers.basic_info,Basic Information
+postal_centers.configuration,Configuration
+postal_centers.holidays,Holidays (Non-Working Days)
+postal_centers.inherited_holidays,Inherited from Account
+postal_centers.center_holidays,Center-Specific Holidays
+postal_centers.specific,Specific
+postal_centers.holiday_reason,Reason
+postal_centers.no_account_holidays,No holidays defined at account level
+postal_centers.no_center_holidays,No center-specific holidays defined
+postal_centers.from_account,From Account
+postal_centers.minutes,minutes

@@ -2004,3 +2004,14 @@ postal_centers.override,Personalizado
 postal_centers.inheriting_from_account,Heredando de la cuenta
 postal_centers.from_account,de la cuenta
 postal_centers.minutes,minutos
+postal_centers.basic_info,Información Básica
+postal_centers.configuration,Configuración
+postal_centers.holidays,Festivos (Días No Laborables)
+postal_centers.inherited_holidays,Heredados de la Cuenta
+postal_centers.center_holidays,Festivos Específicos del Centro
+postal_centers.specific,Específico
+postal_centers.holiday_reason,Motivo
+postal_centers.no_account_holidays,No hay festivos definidos a nivel de cuenta
+postal_centers.no_center_holidays,No hay festivos específicos del centro definidos
+postal_centers.from_account,De la Cuenta
+postal_centers.minutes,minutos

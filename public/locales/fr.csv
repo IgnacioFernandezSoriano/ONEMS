@@ -2005,3 +2005,14 @@ postal_centers.override,Personnalisé
 postal_centers.inheriting_from_account,Héritant du compte
 postal_centers.from_account,du compte
 postal_centers.minutes,minutes
+postal_centers.basic_info,Informations de Base
+postal_centers.configuration,Configuration
+postal_centers.holidays,Jours Fériés (Jours Non Ouvrables)
+postal_centers.inherited_holidays,Hérités du Compte
+postal_centers.center_holidays,Jours Fériés Spécifiques au Centre
+postal_centers.specific,Spécifique
+postal_centers.holiday_reason,Raison
+postal_centers.no_account_holidays,Aucun jour férié défini au niveau du compte
+postal_centers.no_center_holidays,Aucun jour férié spécifique au centre défini
+postal_centers.from_account,Du Compte
+postal_centers.minutes,minutes

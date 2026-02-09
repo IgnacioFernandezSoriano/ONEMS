@@ -2004,3 +2004,14 @@ postal_centers.override,مخصص
 postal_centers.inheriting_from_account,موروث من الحساب
 postal_centers.from_account,من الحساب
 postal_centers.minutes,دقائق
+postal_centers.basic_info,المعلومات الأساسية
+postal_centers.configuration,التكوين
+postal_centers.holidays,العطلات (أيام غير العمل)
+postal_centers.inherited_holidays,موروثة من الحساب
+postal_centers.center_holidays,عطلات خاصة بالمركز
+postal_centers.specific,خاص
+postal_centers.holiday_reason,السبب
+postal_centers.no_account_holidays,لا توجد عطلات محددة على مستوى الحساب
+postal_centers.no_center_holidays,لا توجد عطلات خاصة بالمركز محددة
+postal_centers.from_account,من الحساب
+postal_centers.minutes,دقائق

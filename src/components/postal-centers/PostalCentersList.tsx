@@ -109,11 +109,6 @@ export function PostalCentersList({
                     </div>
                     
                     <div className="flex items-center gap-4 mt-1 text-sm text-gray-600">
-                      {center.opening_hour && center.cutoff_time && (
-                        <span>
-                          {t('postal_centers.hours')}: {center.opening_hour.substring(0, 5)} - {center.cutoff_time.substring(0, 5)}
-                        </span>
-                      )}
                       <span>
                         {t('postal_centers.mode')}: {center.calculation_mode ? (
                           <>
