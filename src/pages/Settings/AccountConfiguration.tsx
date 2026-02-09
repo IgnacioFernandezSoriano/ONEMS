@@ -334,7 +334,7 @@ export function AccountConfiguration() {
                     {t('account_config.working_day')}
                   </span>
                 </label>
-                {schedule?.is_working_day && (
+                {(schedule?.is_working_day ?? true) && (
                   <>
                     <div className="flex items-center gap-2">
                       <label className="text-xs text-gray-500">{t('account_config.opening')}:</label>
