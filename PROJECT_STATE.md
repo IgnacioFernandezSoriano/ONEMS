@@ -1,28 +1,30 @@
 # PROJECT STATE - ONEMS V3 Network Diagnostics Module
 
-**Última Actualización:** 9 de febrero de 2026 - Sesión Sprint 3 (Postal Centers Module)
-**Versión:** 3.1 - Sprint 3 Completado
+**Última Actualización:** 10 de febrero de 2026 - Sesión Sprint 4 (Readers Module + Roadmap Completo)
+**Versión:** 3.2 - Sprint 4 Completado + Roadmap Detallado
 
 ---
 
-## 📋 ESTADO ACTUAL: SPRINT 3 COMPLETADO
+## 📋 ESTADO ACTUAL: SPRINT 4 COMPLETADO
 
-Durante esta sesión se completó exitosamente el **Sprint 3: Postal Centers Module** del Network Diagnostics Dashboard.
+Durante esta sesión se completó exitosamente el **Sprint 4: Readers Module Enhancement** y se estableció el **roadmap detallado** hasta el módulo de cálculo.
 
-### Resumen Ejecutivo Sprint 3
+### Resumen Ejecutivo Sprint 4
 
-**Objetivo:** Implementar módulo de Centros Postales con herencia de configuración desde Account Config, gestión de horarios semanales y festivos.
+**Objetivo:** Completar módulo de Lectores con lista, asignación a centros, filtros y bulk operations
 
 **Estado:** ✅ **COMPLETADO** - Todas las funcionalidades implementadas y testeadas
 
 **Funcionalidades Implementadas:**
-- ✅ CRUD completo de Centros Postales
-- ✅ Sistema de herencia desde Account Configuration
-- ✅ Weekly Schedule (calendario lunes-domingo) con herencia
-- ✅ Gestión de festivos (dos niveles: cuenta + centro específico)
-- ✅ Readers: herencia de Mixed Reader Gap desde Account Config
-- ✅ Base de datos: 4 tablas creadas con RLS policies
-- ✅ Traducciones en 4 idiomas (en, es, fr, ar)
+- ✅ Tabs en Postal Centers page (Centers / Readers)
+- ✅ ReadersList con tabla completa de lectores
+- ✅ Filtros: Centro postal, Tipo (Entry/Exit/Mixed), Estado (Active/Inactive)
+- ✅ Búsqueda por reader_id o nombre
+- ✅ Bulk operations (activar/desactivar/eliminar múltiples)
+- ✅ Reset filters button
+- ✅ Calculation mode: herencia correcta desde Account Config
+- ✅ Filtros corregidos (buscan en BD directamente)
+- ✅ Traducciones en 4 idiomas
 
 ---
 
@@ -34,14 +36,15 @@ Durante esta sesión se completó exitosamente el **Sprint 3: Postal Centers Mod
 1. `PROJECT_STATE.md` (este archivo)
 2. `04_requerimientos_tecnicos.md` (Requerimientos Técnicos Detallados)
 3. `ModuloDiagnosticoUserrequirementsV1.md` (Requerimientos de Usuario)
-4. `SPRINT3_SUMMARY.md` (Resumen de Sprint 3 completado)
+4. `SPRINT3_SUMMARY.md` (Resumen de Sprint 3)
+5. `SPRINT4_SUMMARY.md` (Resumen de Sprint 4) - NUEVO
 
 **YO leo estos archivos para:**
 - Recordar el estado del proyecto
 - Conocer los accesos y credenciales
 - Entender las decisiones técnicas previas
-- Conocer las funcionalidades implementadas en Sprint 3
-- Saber exactamente qué hacer en esta sesión
+- Conocer las funcionalidades implementadas
+- **Seguir el roadmap detallado** sin perderme
 
 ### Durante la sesión:
 
@@ -66,6 +69,7 @@ Durante esta sesión se completó exitosamente el **Sprint 3: Postal Centers Mod
    - Cambios en arquitectura o diseño
    - Commits realizados
    - Build artifacts generados
+   - **Progreso en el roadmap**
 
 3. **Build artifact** listo para deploy en Netlify
 
@@ -79,7 +83,7 @@ Durante esta sesión se completó exitosamente el **Sprint 3: Postal Centers Mod
 - **Repositorio:** `https://github.com/IgnacioFernandezSoriano/ONEMS`
 - **Personal Access Token (PAT):** `ghp_****` (solicitar al usuario si es necesario)
 - **Rama Actual:** `main`
-- **Último Commit:** `c557c67` - docs: Add Sprint 3 summary documentation
+- **Último Commit:** `6fd67fd` - fix(postal-centers): Calculation mode inheritance and filter correction - Sprint 4 complete
 - **Comandos de configuración:**
   ```bash
   cd /tmp
@@ -108,16 +112,237 @@ Durante esta sesión se completó exitosamente el **Sprint 3: Postal Centers Mod
 
 ---
 
-## 📊 Estado Actual del Desarrollo
+## 🗺️ ROADMAP DETALLADO - HASTA MÓDULO DE CÁLCULO
 
-### Última Sesión
-**Fecha:** 9 de febrero de 2026 - Sprint 3
-**Objetivo:** Implementar módulo de Centros Postales con herencia y gestión de horarios/festivos
-**Estado:** ✅ Completado
+### 🎯 OBJETIVO PRINCIPAL
+Tener todo listo para modificar y ejecutar el **Módulo de Cálculo** antes de pasar a la representación de tablas y gráficos del dashboard.
 
-### Fase Actual
-**Sprint 4: Readers Module Enhancement** (Próxima sesión)
-**Objetivo:** Completar módulo de Lectores con lista, asignación a centros y monitoreo
+---
+
+## ✅ COMPLETADO (Sprints 1-4)
+
+### Sprint 1-2: Infraestructura Base
+- ✅ RFID Intermediate DB (tabla rfid_intermediate_db)
+- ✅ Configuración de Account (calculation_mode, mixed_reader_gap_minutes, weekly_schedule, non_working_days)
+
+### Sprint 3: Postal Centers Module (9 feb 2026)
+- ✅ CRUD de Centros Postales
+- ✅ Weekly Schedule (calendario lunes-domingo con herencia)
+- ✅ Holidays Management (dos niveles: cuenta + centro)
+- ✅ Calculation Mode (Natural Days vs Working Days)
+- ✅ Base de datos: postal_centers, weekly_schedule, non_working_days
+- ✅ 12 commits realizados
+- ✅ Build: `onems-build-sprint3-final.zip`
+
+### Sprint 4: Readers Module (10 feb 2026)
+- ✅ CRUD de Lectores
+- ✅ Asignación a centros postales
+- ✅ Mixed Reader Gap herencia
+- ✅ Tabs (Centers/Readers)
+- ✅ Filtros y búsqueda
+- ✅ Bulk operations
+- ✅ Reset filters
+- ✅ Calculation mode inheritance fix
+- ✅ Base de datos: readers
+- ✅ 4 commits realizados
+- ✅ Build: `onems-build-sprint4-final.zip`
+
+---
+
+## ⏳ PENDIENTE - ROADMAP ORDENADO
+
+### **SPRINT 5: SLAs Configuration Module** ⏳ PRÓXIMO
+**Duración estimada:** 2-3 horas  
+**Objetivo:** Configurar tiempos esperados (SLAs) para operaciones y distribución
+
+#### Funcionalidades
+1. **SLA Types**
+   - Operational SLA: tiempo esperado dentro de un centro (Entry → Exit)
+   - Distribution SLA: tiempo esperado entre centros (Exit Centro A → Entry Centro B)
+
+2. **SLA Configuration UI**
+   - Tabla de SLAs con filtros (tipo, centro, ruta)
+   - Formulario de creación/edición
+   - Campos:
+     - Type: Operational | Distribution
+     - From Reader (Entry/Mixed)
+     - To Reader (Exit/Mixed) 
+     - Expected Time (minutos)
+     - Tolerance (%)
+     - Is Active
+
+3. **Base de Datos**
+   ```sql
+   CREATE TABLE slas (
+     id UUID PRIMARY KEY,
+     account_id UUID NOT NULL,
+     type TEXT CHECK (type IN ('operational', 'distribution')),
+     from_reader_id UUID REFERENCES readers(id),
+     to_reader_id UUID REFERENCES readers(id),
+     postal_center_id UUID REFERENCES postal_centers(id), -- solo para operational
+     expected_time_minutes INTEGER NOT NULL,
+     tolerance_percentage DECIMAL(5,2),
+     is_active BOOLEAN DEFAULT true
+   );
+   ```
+
+4. **Validaciones**
+   - Operational SLA: ambos readers del mismo centro
+   - Distribution SLA: readers de centros diferentes
+   - From reader debe ser Entry o Mixed
+   - To reader debe ser Exit o Mixed
+
+**Dependencias:** ✅ Postal Centers, ✅ Readers  
+**Entregables:** 
+- Componente `SLAsList.tsx`
+- Componente `SLAForm.tsx`
+- Hook `useSLAs.ts`
+- Migración SQL
+- Traducciones
+
+---
+
+### **SPRINT 6: Diagnosis DB Schema Complete**
+**Duración estimada:** 2 horas  
+**Objetivo:** Crear esquema completo de Diagnosis DB para almacenar datos procesados
+
+#### Tablas a Crear
+
+1. **`processed_events`** (eventos consolidados)
+2. **`journey_segments`** (segmentos de ruta calculados)
+3. **`incidents`** (anomalías detectadas)
+4. **`journeys`** (rutas completas reconstruidas)
+
+**Dependencias:** ✅ SLAs, ✅ Postal Centers, ✅ Readers  
+**Entregables:**
+- Migración SQL completa
+- Documentación de esquema
+- RLS policies
+
+---
+
+### **SPRINT 7: Calculation Module - Event Consolidation**
+**Duración estimada:** 4-5 horas  
+**Objetivo:** Implementar consolidación de eventos raw → processed_events
+
+#### Funcionalidades
+
+1. Leer eventos raw de RFID Intermediate DB
+2. Consolidar según tipo de lector (MIN/MAX)
+3. Calcular Analysis DateTime (cut-off, non-working days)
+4. Insertar en processed_events
+
+**Dependencias:** ✅ Diagnosis DB Schema, ✅ RFID Intermediate DB, ✅ Weekly Schedule, ✅ Non-Working Days  
+**Entregables:**
+- Función/Worker de consolidación
+- Tests unitarios
+- Documentación de lógica
+
+---
+
+### **SPRINT 8: Calculation Module - Journey Reconstruction**
+**Duración estimada:** 3-4 horas  
+**Objetivo:** Reconstruir journeys completos desde processed_events
+
+#### Funcionalidades
+
+1. Agrupar eventos por tag_id
+2. Crear journey_segments (operational + distribution)
+3. Calcular tiempos (Actual, Adjusted, Pre-Operational Wait)
+4. Comparar con SLAs
+
+**Dependencias:** ✅ Event Consolidation, ✅ SLAs  
+**Entregables:**
+- Función de reconstrucción
+- Tests con datos de ejemplo
+
+---
+
+### **SPRINT 9: Calculation Module - Incident Detection**
+**Duración estimada:** 2-3 horas  
+**Objetivo:** Detectar anomalías automáticamente
+
+#### Tipos de Incidentes
+
+1. Exit Before Entry
+2. Missing Entry
+3. Missing Exit
+4. SLA Violation
+5. Stuck Sample
+
+**Dependencias:** ✅ Journey Reconstruction  
+**Entregables:**
+- Función de detección
+- Inserción en tabla incidents
+
+---
+
+### **SPRINT 10: Calculation Module - Integration & Orchestration**
+**Duración estimada:** 2-3 horas  
+**Objetivo:** Orquestar todo el proceso de cálculo
+
+#### Funcionalidades
+
+1. Scheduler/Cron Job
+2. Orchestrator Function (consolidación → reconstrucción → detección)
+3. Error Handling
+4. Monitoring
+
+**Dependencias:** ✅ Todos los sprints anteriores  
+**Entregables:**
+- Orchestrator completo
+- Configuración de cron
+
+---
+
+### **SPRINT 11: Testing & Data Simulation**
+**Duración estimada:** 2 horas  
+**Objetivo:** Crear datos de prueba y validar módulo de cálculo
+
+#### Tareas
+
+1. Generar datos sintéticos
+2. Testing end-to-end
+3. Validación de lógica
+
+**Dependencias:** ✅ Calculation Module completo  
+**Entregables:**
+- Script de generación de datos
+- Suite de tests
+- Reporte de validación
+
+---
+
+## 📊 RESUMEN DEL ROADMAP
+
+| Sprint | Módulo | Duración | Estado |
+|--------|--------|----------|--------|
+| 1-2 | Infraestructura Base | - | ✅ Completado |
+| 3 | Postal Centers | - | ✅ Completado |
+| 4 | Readers | - | ✅ Completado |
+| **5** | **SLAs Configuration** | **2-3h** | **⏳ Próximo** |
+| 6 | Diagnosis DB Schema | 2h | ⏳ Pendiente |
+| 7 | Event Consolidation | 4-5h | ⏳ Pendiente |
+| 8 | Journey Reconstruction | 3-4h | ⏳ Pendiente |
+| 9 | Incident Detection | 2-3h | ⏳ Pendiente |
+| 10 | Integration & Orchestration | 2-3h | ⏳ Pendiente |
+| 11 | Testing & Simulation | 2h | ⏳ Pendiente |
+
+**Progreso:** 4/11 sprints completados (36%)  
+**Total estimado:** ~18-23 horas de desarrollo restantes
+
+---
+
+## 🚀 DESPUÉS DEL MÓDULO DE CÁLCULO
+
+Una vez completado el módulo de cálculo y validado con datos de prueba, se procederá a:
+
+### Sprint 12+: Dashboard & Reporting
+- Filtros globales
+- KPIs principales
+- Tabs: Overview, Anomalies, Performance, Routes
+- Gráficos y visualizaciones
+- Export to CSV
 
 ---
 
@@ -125,180 +350,116 @@ Durante esta sesión se completó exitosamente el **Sprint 3: Postal Centers Mod
 
 ### ✅ Sprint 3: Postal Centers Module
 **Fecha:** 9 de febrero de 2026
-**Objetivo:** Implementar CRUD de Centros Postales con herencia de configuración
+**Duración:** 1 sesión completa
 **Resultado:** ✅ Completado
 
 **Funcionalidades Implementadas:**
+- CRUD de Centros Postales
+- Weekly Schedule con herencia
+- Holidays Management (dos niveles)
+- Calculation Mode (Natural Days vs Working Days)
+- Base de datos: 4 tablas con RLS
 
-1. **Postal Centers CRUD**
-   - Creación, edición, eliminación de centros postales
-   - Campos: code, name, description, is_active
-   - Calculation Mode: Natural Days vs Working Days
-   - Herencia de calculation_mode desde Account Config
-   - UI condicional: oculta horarios/festivos en modo Natural Days
-
-2. **Weekly Schedule Management**
-   - Calendario lunes-domingo con horarios por día
-   - Herencia desde Account Config (weekly_schedule con postal_center_id = NULL)
-   - Override por día: working_day, opening_hour, cutoff_time
-   - Badges "Inherited" para días que usan configuración de cuenta
-   - Persistencia con UPSERT (no borra días no modificados)
-   - Carga de horarios existentes al editar centro
-
-3. **Holidays Management (Non-Working Days)**
-   - **Dos niveles de festivos:**
-     - Account-level: Festivos anuales heredados (read-only en formulario de centro)
-     - Center-specific: Festivos locales del centro (editables)
-   - Visual distinction: badges "Inherited from Account" (azul) vs "Specific" (naranja)
-   - CRUD de festivos específicos: agregar/eliminar con fecha + motivo
-   - Base de datos: postal_center_id = NULL para cuenta, ID específico para centro
-
-4. **Readers Module Enhancement**
-   - Mixed Reader Gap hereda de Account Config
-   - Placeholder muestra valor heredado: "60 (From Account)"
-   - Hint azul cuando NULL: "✓ Inheriting from account: 60 minutes"
-   - Campo solo visible para lectores tipo "Mixed"
-
-**Base de Datos:**
-
-Tablas creadas (migración `20260209100000_network_diagnostics_module.sql`):
-
-1. **postal_centers**
-   - Campos: id, account_id, code, name, description, calculation_mode, is_active
-   - UNIQUE(account_id, code)
-   - RLS policies con current_user_account_id()
-
-2. **readers**
-   - Campos: id, account_id, postal_center_id, reader_id, name, description, type, mixed_reader_gap_minutes, is_active
-   - type: 'Entry' | 'Exit' | 'Mixed'
-   - UNIQUE(account_id, reader_id)
-   - RLS policies
-
-3. **weekly_schedule**
-   - Campos: id, account_id, postal_center_id, day_of_week, is_working_day, opening_hour, cutoff_time
-   - UNIQUE(account_id, postal_center_id, day_of_week)
-   - postal_center_id = NULL para horarios de cuenta
-   - RLS policies
-
-4. **non_working_days**
-   - Campos: id, account_id, postal_center_id, date, reason
-   - UNIQUE(account_id, postal_center_id, date)
-   - postal_center_id = NULL para festivos de cuenta
-   - RLS policies
-
-**Componentes Frontend:**
-- `src/components/postal-centers/PostalCentersList.tsx` - Lista con búsqueda y filtros
-- `src/components/postal-centers/PostalCenterForm.tsx` - Formulario con herencia
-- `src/components/postal-centers/ReaderForm.tsx` - Formulario de lectores con gap heredado
-
-**Hooks:**
-- `src/hooks/usePostalCenters.ts` - CRUD, weekly schedule, holidays
-- `src/hooks/useAccountConfig.ts` - Configuración de cuenta para herencia
-
-**Traducciones:**
-- Agregadas en 4 idiomas: en, es, fr, ar
-- Keys: postal_centers.*, readers.*, common.*
-
-**Commits Realizados (11 commits):**
-1. `1d84e87` - feat: Hide calendars when calculation mode is natural_days
-2. `e8e3354` - feat(sprint3): Add inheritance from Account Config
-3. `520a7cc` - feat(sprint3): Improve Postal Centers - remove historic hours
-4. `5bb62ad` - feat(sprint3): Add Weekly Schedule with inheritance
-5. `c855af4` - fix(sprint3): Add day translations and improve layout
-6. `2dce260` - fix(sprint3): Remove mixed_reader_gap from Postal Centers
-7. `5cb68d5` - fix(sprint3): Fix weekly schedule persistence, add translations
-8. `0197e66` - fix(migration): Update RLS policies to use current_user_account_id
-9. `f999fed` - feat(sprint3): Add center-specific holidays management
-10. `3c51b12` - feat(readers): Add mixed_reader_gap_minutes inheritance
-11. `c557c67` - docs: Add Sprint 3 summary documentation
-
-**Build Artifact:**
-- Archivo: `onems-build-sprint3-final.zip`
-- Tamaño: ~1.9MB
-- Listo para deploy en Netlify
-
-**Decisiones Técnicas:**
-
-1. **Patrón de Herencia:**
-   - NULL = Heredar de cuenta
-   - Valor específico = Override
-   - Visual feedback con placeholders y hints
-
-2. **Calculation Mode:**
-   - Natural Days: 24/7, sin horarios ni festivos (UI oculta)
-   - Working Days: requiere horarios y festivos (UI visible)
-
-3. **Arquitectura de Festivos:**
-   - Account-level: gestión centralizada, herencia automática
-   - Center-level: festivos locales específicos
-   - Sin duplicación de datos
-
-4. **Persistencia de Weekly Schedule:**
-   - UPSERT con conflict resolution
-   - Solo guarda días modificados
-   - Carga eficiente de overrides
-
-**Testing Completado:**
-- ✅ CRUD de centros postales
-- ✅ Cambio de calculation mode
-- ✅ Herencia de weekly schedule
-- ✅ Override de días específicos
-- ✅ Persistencia de cambios
-- ✅ Gestión de festivos (cuenta + centro)
-- ✅ Herencia de mixed_reader_gap en lectores
+**Commits:** 12 commits  
+**Build:** `onems-build-sprint3-final.zip` (1.9MB)
 
 ---
 
-## 🎯 Próxima Sesión: Sprint 4
+### ✅ Sprint 4: Readers Module Enhancement
+**Fecha:** 10 de febrero de 2026
+**Duración:** 1 sesión completa
+**Resultado:** ✅ Completado
 
-### Objetivo: Readers Module Enhancement
+**Funcionalidades Implementadas:**
+- Tabs en Postal Centers page (Centers / Readers)
+- ReadersList con filtros avanzados
+- Bulk operations (activar/desactivar/eliminar)
+- Reset filters button
+- Calculation mode inheritance fix
+- Filtros corregidos (buscan en BD)
+
+**Commits:** 4 commits
+- `feat(sprint4): Add Readers tab with list, filters and bulk operations`
+- `feat(sprint4): Add reset filters button`
+- `fix(postal-centers): Fix calculation mode filter with inheritance`
+- `fix(postal-centers): Calculation mode inheritance and filter correction - Sprint 4 complete`
+
+**Build:** `onems-build-sprint4-final.zip` (1.9MB)
+
+**Decisiones Técnicas:**
+
+1. **Arquitectura de Tabs:**
+   - Tab Centers: Vista jerárquica (centros → lectores anidados)
+   - Tab Readers: Vista plana (tabla completa con filtros)
+   - Dos perspectivas complementarias
+
+2. **Calculation Mode Inheritance:**
+   - Se hereda de Account Config **solo al crear** el centro
+   - Se guarda en BD del centro
+   - NO se actualiza automáticamente si cambias Account Config
+   - Excepción: Holidays sí se heredan dinámicamente
+
+3. **Filtros:**
+   - Buscan directamente en BD (sin herencia dinámica)
+   - Reset filters limpia todos los filtros a valores por defecto
+
+**Testing Completado:**
+- ✅ Tabs funcionando correctamente
+- ✅ Filtros de ReadersList
+- ✅ Bulk operations
+- ✅ Reset filters
+- ✅ Calculation mode filter corregido
+
+---
+
+## 🎯 Próxima Sesión: Sprint 5
+
+### Objetivo: SLAs Configuration Module
 
 **Funcionalidades a Implementar:**
 
-1. **Readers List View**
-   - Tabla con todos los lectores
-   - Filtros: por centro postal, por tipo (Entry/Exit/Mixed), por estado (active/inactive)
-   - Búsqueda por reader_id o nombre
-   - Columnas: Reader ID, Name, Type, Postal Center, Gap (Mixed only), Status
+1. **SLA Types**
+   - Operational SLA (dentro de un centro)
+   - Distribution SLA (entre centros)
 
-2. **Reader Assignment to Postal Centers**
-   - Dropdown en ReaderForm para seleccionar centro postal
-   - Validación: un reader solo puede estar en un centro
-   - Actualización de postal_center_id en tabla readers
+2. **SLA Configuration UI**
+   - Lista de SLAs con filtros
+   - Formulario de creación/edición
+   - Validaciones de negocio
 
-3. **Reader Status Monitoring** (opcional, según tiempo)
-   - Indicador de último evento recibido
-   - Estado: Active (eventos recientes), Inactive (sin eventos), Offline (no responde)
+3. **Base de Datos**
+   - Tabla `slas` con constraints
+   - RLS policies
+   - Migración SQL
 
-4. **Bulk Operations** (opcional)
-   - Activar/desactivar múltiples lectores
-   - Cambiar centro postal de múltiples lectores
+**Estimación:** 2-3 horas
 
-**Estimación:** 3-4 horas
-
-**Archivos a Modificar:**
-- Crear: `src/components/postal-centers/ReadersList.tsx`
-- Modificar: `src/components/postal-centers/ReaderForm.tsx`
-- Modificar: `src/hooks/usePostalCenters.ts`
-- Agregar traducciones
+**Archivos a Crear:**
+- `src/components/postal-centers/SLAsList.tsx`
+- `src/components/postal-centers/SLAForm.tsx`
+- `src/hooks/useSLAs.ts`
+- `src/lib/types_slas.ts`
+- Migración SQL
+- Traducciones
 
 ---
 
 ## 📚 Documentación Técnica Clave
 
 ### Archivos de Documentación (Actualizados)
-1. **PROJECT_STATE.md** (este archivo) - Estado general del proyecto v3.1
+1. **PROJECT_STATE.md** (este archivo) - Estado general del proyecto v3.2
 2. **04_requerimientos_tecnicos.md** - Especificaciones técnicas detalladas
 3. **ModuloDiagnosticoUserrequirementsV1.md** - Requerimientos de usuario
-4. **SPRINT3_SUMMARY.md** - Resumen completo de Sprint 3 (nuevo)
+4. **SPRINT3_SUMMARY.md** - Resumen completo de Sprint 3
+5. **SPRINT4_SUMMARY.md** - Resumen completo de Sprint 4 (nuevo)
+6. **ROADMAP_DETALLADO.md** - Roadmap hasta módulo de cálculo (nuevo)
 
 ### Migraciones de Base de Datos (Aplicadas)
-- `20260209094630_remove_mixed_reader_gap_from_postal_centers.sql` - Cleanup
 - `20260209100000_network_diagnostics_module.sql` - Schema completo (4 tablas)
 
 ### Páginas Frontend Existentes
-- `src/pages/Settings/AccountConfiguration.tsx` - Configuración de cuenta (herencia)
-- Postal Centers module (lista + formulario) - Sprint 3
+- `src/pages/Settings/AccountConfiguration.tsx` - Configuración de cuenta
+- `src/pages/PostalCenters.tsx` - Postal Centers con tabs (Centers/Readers)
 
 ---
 
@@ -309,49 +470,13 @@ Tablas creadas (migración `20260209100000_network_diagnostics_module.sql`):
 - **Fase 2 (Backend/Edge Functions):** ⚠️ 100% Deployed (pendiente refactorización)
 - **Fase 3 (Network Diagnostics UI):**
   - Sprint 3 (Postal Centers): ✅ 100% Completado
-  - Sprint 4 (Readers): ⏳ 0% - Próxima sesión
-  - Sprint 5 (Dashboard): ⏳ 0% - Pendiente
+  - Sprint 4 (Readers): ✅ 100% Completado
+  - Sprint 5 (SLAs): ⏳ 0% - Próxima sesión
+  - Sprint 6-11 (Calculation Module): ⏳ 0% - Pendiente
+  - Sprint 12+ (Dashboard): ⏳ 0% - Pendiente
 - **Fase 4 (Integración EPCIS Real):** ⏳ 0% - Pendiente
 
-**Progreso total:** ~50% (Sprint 3 completado)
-
-### Progreso Sprint 3 (Postal Centers)
-- [x] CRUD de Centros Postales (100%)
-- [x] Sistema de herencia desde Account Config (100%)
-- [x] Weekly Schedule management (100%)
-- [x] Holidays management (dos niveles) (100%)
-- [x] Readers: Mixed gap inheritance (100%)
-- [x] Base de datos (4 tablas + RLS) (100%)
-- [x] Traducciones (4 idiomas) (100%)
-- [x] Testing completo (100%)
-- [x] Build y deploy (100%)
-
-**Progreso Sprint 3:** 100% ✅
-
----
-
-## 🔄 Mejoras Pendientes (Post-MVP)
-
-### Sprint 4 (Readers Module)
-- [ ] Lista de lectores con filtros
-- [ ] Asignación a centros postales
-- [ ] Monitoreo de estado
-- [ ] Bulk operations
-
-### Sprint 5 (Dashboard Principal)
-- [ ] KPIs globales
-- [ ] Filtros globales
-- [ ] Tab Overview con gráficos
-- [ ] Tab Anomalies con tabla
-- [ ] Tab Performance
-- [ ] Tab Routes & Tracking
-
-### Funcionalidades Adicionales (Post-MVP)
-- [ ] Exportación a CSV/PDF
-- [ ] Auto-refresh cada 30s
-- [ ] Mapa geográfico de centros
-- [ ] Notificaciones push para anomalías
-- [ ] Dashboard móvil responsive
+**Progreso total hasta módulo de cálculo:** 36% (4/11 sprints completados)
 
 ---
 
@@ -363,4 +488,4 @@ Tablas creadas (migración `20260209100000_network_diagnostics_module.sql`):
 
 ---
 
-**Fin del documento. Actualizado al final de Sprint 3 - 9 de febrero de 2026**
+**Fin del documento. Actualizado al final de Sprint 4 - 10 de febrero de 2026**
