@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { useSLAs } from '@/hooks/useSLAs'
 import { GenerateCombinationsModal } from '@/components/slas/GenerateCombinationsModal'
 import { SLAForm } from '@/components/slas/SLAForm'
+import { BulkEditForm } from '@/components/slas/BulkEditForm'
 import { Modal } from '@/components/common/Modal'
 import { Button } from '@/components/common/Button'
 import type { SLAWithDetails } from '@/lib/types_slas'
@@ -24,10 +25,13 @@ export function SLAsConfiguration() {
 
   const [showGenerateModal, setShowGenerateModal] = useState(false)
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const [showBulkEditModal, setShowBulkEditModal] = useState(false)
+  const [editingSLA, setEditingSLA] = useState<SLAWithDetails | null>(null)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [showFilters, setShowFilters] = useState(false)
   const [editingCell, setEditingCell] = useState<{ id: string; field: string } | null>(null)
   const [editValue, setEditValue] = useState('')
+  const [editUnit, setEditUnit] = useState<'minutes' | 'hours' | 'days'>('minutes')
 
   // Filters
   const [filters, setFilters] = useState({
@@ -88,8 +92,18 @@ export function SLAsConfiguration() {
 
   const handleCellEdit = async (id: string, field: string, value: string) => {
     try {
-      const numValue = parseFloat(value)
+      let numValue = parseFloat(value)
       if (isNaN(numValue)) return
+
+      // Convert to minutes if editing expected_time_minutes
+      if (field === 'expected_time_minutes') {
+        if (editUnit === 'hours') {
+          numValue = numValue * 60
+        } else if (editUnit === 'days') {
+          numValue = numValue * 24 * 60
+        }
+        // editUnit === 'minutes' stays as is
+      }
 
       await updateSLA(id, { [field]: numValue } as any)
       setEditingCell(null)
@@ -176,6 +190,12 @@ export function SLAsConfiguration() {
         </Button>
         <Button onClick={() => setShowGenerateModal(true)}>
           {t('slas.generate_combinations')}
+        </Button>
+        <Button
+          onClick={() => setShowBulkEditModal(true)}
+          disabled={selectedIds.size === 0}
+        >
+          {t('common.bulk_edit')} ({selectedIds.size})
         </Button>
         <Button
           onClick={handleBulkDelete}
@@ -321,27 +341,47 @@ export function SLAsConfiguration() {
                 </td>
                 <td className="px-4 py-3 text-sm">
                   {editingCell?.id === sla.id && editingCell?.field === 'expected_time_minutes' ? (
-                    <input
-                      type="number"
-                      value={editValue}
-                      onChange={(e) => setEditValue(e.target.value)}
-                      onBlur={() => handleCellEdit(sla.id, 'expected_time_minutes', editValue)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') handleCellEdit(sla.id, 'expected_time_minutes', editValue)
-                        if (e.key === 'Escape') setEditingCell(null)
-                      }}
-                      className="w-20 px-2 py-1 border rounded"
-                      autoFocus
-                    />
+                    <div className="flex gap-1">
+                      <input
+                        type="number"
+                        step="0.001"
+                        value={editValue}
+                        onChange={(e) => setEditValue(e.target.value)}
+                        onBlur={() => handleCellEdit(sla.id, 'expected_time_minutes', editValue)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleCellEdit(sla.id, 'expected_time_minutes', editValue)
+                          if (e.key === 'Escape') setEditingCell(null)
+                        }}
+                        className="w-20 px-2 py-1 border rounded text-sm"
+                        autoFocus
+                      />
+                      <select
+                        value={editUnit}
+                        onChange={(e) => setEditUnit(e.target.value as 'minutes' | 'hours' | 'days')}
+                        className="px-2 py-1 border rounded text-xs"
+                      >
+                        <option value="minutes">{t('common.minutes')}</option>
+                        <option value="hours">{t('common.hours')}</option>
+                        <option value="days">{t('common.days')}</option>
+                      </select>
+                    </div>
                   ) : (
                     <span
                       onClick={() => {
                         setEditingCell({ id: sla.id, field: 'expected_time_minutes' })
-                        setEditValue(sla.expected_time_minutes.toString())
+                        // Convert minutes to days for editing
+                        const days = sla.expected_time_minutes / (24 * 60)
+                        setEditValue(days.toString())
+                        setEditUnit('days')
                       }}
                       className="cursor-pointer hover:bg-blue-50 px-2 py-1 rounded"
                     >
-                      {sla.expected_time_minutes} {t(`common.${sla.time_unit}`)}
+                      {(() => {
+                        const days = sla.expected_time_minutes / (24 * 60)
+                        return days < 1 
+                          ? `${days.toFixed(3)} ${t('common.days')}`
+                          : `${days.toFixed(1)} ${t('common.days')}`
+                      })()}
                     </span>
                   )}
                 </td>
@@ -383,16 +423,24 @@ export function SLAsConfiguration() {
                   </span>
                 </td>
                 <td className="px-4 py-3">
-                  <button
-                    onClick={async () => {
-                      if (confirm(t('common.confirm_delete'))) {
-                        await deleteSLA(sla.id)
-                      }
-                    }}
-                    className="text-red-600 hover:text-red-800 text-sm"
-                  >
-                    {t('common.delete')}
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setEditingSLA(sla)}
+                      className="text-blue-600 hover:text-blue-800 text-sm"
+                    >
+                      {t('common.edit')}
+                    </button>
+                    <button
+                      onClick={async () => {
+                        if (confirm(t('common.confirm_delete'))) {
+                          await deleteSLA(sla.id)
+                        }
+                      }}
+                      className="text-red-600 hover:text-red-800 text-sm"
+                    >
+                      {t('common.delete')}
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -423,9 +471,51 @@ export function SLAsConfiguration() {
       {showGenerateModal && (
         <GenerateCombinationsModal
           postalCenters={postalCenters}
+          existingSLAs={slas}
           onGenerate={generateCombinations}
           onClose={() => setShowGenerateModal(false)}
         />
+      )}
+
+      {/* Edit SLA Modal */}
+      {editingSLA && (
+        <Modal isOpen={!!editingSLA} onClose={() => setEditingSLA(null)} title={t('slas.edit_sla')}>
+          <SLAForm
+            postalCenters={postalCenters}
+            initialData={{
+              sla_type: editingSLA.sla_type,
+              postal_center_id: editingSLA.postal_center_id || undefined,
+              from_postal_center_id: editingSLA.from_postal_center_id || undefined,
+              to_postal_center_id: editingSLA.to_postal_center_id || undefined,
+              expected_time_minutes: editingSLA.expected_time_minutes,
+              time_unit: 'minutes',
+              on_time_percentage: editingSLA.on_time_percentage,
+              warning_threshold: editingSLA.warning_threshold,
+              critical_threshold: editingSLA.critical_threshold,
+              is_active: editingSLA.is_active,
+            }}
+            onSubmit={async (data) => {
+              await updateSLA(editingSLA.id, data)
+              setEditingSLA(null)
+            }}
+            onCancel={() => setEditingSLA(null)}
+          />
+        </Modal>
+      )}
+
+      {/* Bulk Edit Modal */}
+      {showBulkEditModal && (
+        <Modal isOpen={showBulkEditModal} onClose={() => setShowBulkEditModal(false)} title={t('common.bulk_edit')}>
+          <BulkEditForm
+            selectedCount={selectedIds.size}
+            onSubmit={async (data) => {
+              await updateMultiple(Array.from(selectedIds), data)
+              setSelectedIds(new Set())
+              setShowBulkEditModal(false)
+            }}
+            onCancel={() => setShowBulkEditModal(false)}
+          />
+        </Modal>
       )}
     </div>
   )

@@ -2100,3 +2100,27 @@ slas.slas_skipped,SLA تم تخطيها
 slas.already_exist,موجودة بالفعل
 slas.operational_sla_description,دخول ← خروج داخل هذا المركز البريدي
 common.generating,جاري التوليد...
+common.bulk_edit,التحرير الجماعي
+common.bulk_edit_description,تحرير {count} سجلات محددة. اترك الحقول فارغة للتخطي.
+common.leave_empty_to_skip,اترك فارغًا للتخطي
+common.days,أيام
+slas.edit_sla,تعديل SLA
+common.edit,تعديل
+common.saving,جاري الحفظ...
+common.hours,ساعات
+postal_centers.postal_center,المركز البريدي
+slas.generate_pending_slas,توليد SLA المعلقة
+slas.pending_slas_summary,ملخص SLA المعلقة
+slas.pending_operational,التشغيلية المعلقة
+slas.pending_distribution,التوزيع المعلق
+slas.selected_to_generate,المحدد للتوليد
+slas.select_sla_types,حدد أنواع SLA للتوليد
+slas.select_centers_for_operational,حدد المراكز لـ SLA التشغيلية
+slas.select_routes_for_distribution,حدد المسارات لـ SLA التوزيع
+slas.generate_selected_slas,توليد SLA المحددة
+common.select_all,تحديد الكل
+common.deselect_all,إلغاء تحديد الكل
+common.show_filters,إظهار الفلاتر
+common.hide_filters,إخفاء الفلاتر
+common.delete_selected,حذف المحدد
+common.export_csv,تصدير CSV

@@ -2101,3 +2101,27 @@ slas.slas_skipped,SLA ignorés
 slas.already_exist,existent déjà
 slas.operational_sla_description,Entrée → Sortie dans ce centre postal
 common.generating,Génération...
+common.bulk_edit,Édition en Masse
+common.bulk_edit_description,Édition de {count} enregistrements sélectionnés. Laissez les champs vides pour ignorer.
+common.leave_empty_to_skip,Laisser vide pour ignorer
+common.days,jours
+slas.edit_sla,Modifier SLA
+common.edit,Modifier
+common.saving,Enregistrement...
+common.hours,heures
+postal_centers.postal_center,Centre Postal
+slas.generate_pending_slas,Générer les SLA en Attente
+slas.pending_slas_summary,Résumé des SLA en Attente
+slas.pending_operational,Opérationnels en Attente
+slas.pending_distribution,Distribution en Attente
+slas.selected_to_generate,Sélectionnés pour Générer
+slas.select_sla_types,Sélectionner les Types de SLA à Générer
+slas.select_centers_for_operational,Sélectionner les Centres pour SLA Opérationnels
+slas.select_routes_for_distribution,Sélectionner les Routes pour SLA de Distribution
+slas.generate_selected_slas,Générer les SLA Sélectionnés
+common.select_all,Tout Sélectionner
+common.deselect_all,Tout Désélectionner
+common.show_filters,Afficher les Filtres
+common.hide_filters,Masquer les Filtres
+common.delete_selected,Supprimer la Sélection
+common.export_csv,Exporter CSV

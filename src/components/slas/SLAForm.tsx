@@ -13,22 +13,42 @@ interface SLAFormProps {
 export function SLAForm({ postalCenters, initialData, onSubmit, onCancel }: SLAFormProps) {
   const { t } = useTranslation()
   const [loading, setLoading] = useState(false)
+  // Initialize time value and unit from initialData
+  const initTimeValue = initialData?.expected_time_minutes 
+    ? initialData.expected_time_minutes / (24 * 60) // Convert to days
+    : 1
+  const [timeValue, setTimeValue] = useState<number>(initTimeValue)
+  const [timeUnit, setTimeUnit] = useState<'minutes' | 'hours' | 'days'>('days')
   const [formData, setFormData] = useState<SLAFormData>({
     sla_type: initialData?.sla_type || 'operational',
-    expected_time_minutes: initialData?.expected_time_minutes || 60,
-    time_unit: initialData?.time_unit || 'minutes',
+    postal_center_id: initialData?.postal_center_id,
+    from_postal_center_id: initialData?.from_postal_center_id,
+    to_postal_center_id: initialData?.to_postal_center_id,
+    expected_time_minutes: initialData?.expected_time_minutes || 1440,
+    time_unit: 'minutes',
     on_time_percentage: initialData?.on_time_percentage || 95,
     warning_threshold: initialData?.warning_threshold || 90,
     critical_threshold: initialData?.critical_threshold || 80,
     is_active: initialData?.is_active ?? true,
-    ...initialData,
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     try {
-      await onSubmit(formData)
+      // Convert time to minutes
+      let minutes = timeValue
+      if (timeUnit === 'hours') {
+        minutes = timeValue * 60
+      } else if (timeUnit === 'days') {
+        minutes = timeValue * 24 * 60
+      }
+      
+      await onSubmit({
+        ...formData,
+        expected_time_minutes: minutes,
+        time_unit: 'minutes'
+      })
     } finally {
       setLoading(false)
     }
@@ -127,19 +147,21 @@ export function SLAForm({ postalCenters, initialData, onSubmit, onCancel }: SLAF
         <div className="flex gap-2">
           <input
             type="number"
-            min="1"
-            value={formData.expected_time_minutes}
-            onChange={(e) => setFormData({ ...formData, expected_time_minutes: parseInt(e.target.value) })}
+            min="0.001"
+            step="0.001"
+            value={timeValue}
+            onChange={(e) => setTimeValue(parseFloat(e.target.value))}
             className="flex-1 px-3 py-2 border border-gray-300 rounded-md"
             required
           />
           <select
-            value={formData.time_unit}
-            onChange={(e) => setFormData({ ...formData, time_unit: e.target.value as 'minutes' | 'hours' })}
+            value={timeUnit}
+            onChange={(e) => setTimeUnit(e.target.value as 'minutes' | 'hours' | 'days')}
             className="px-3 py-2 border border-gray-300 rounded-md"
           >
             <option value="minutes">{t('common.minutes')}</option>
             <option value="hours">{t('common.hours')}</option>
+            <option value="days">{t('common.days')}</option>
           </select>
         </div>
       </div>

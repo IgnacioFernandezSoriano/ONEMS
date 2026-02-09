@@ -69,46 +69,51 @@ export function useSLAs() {
     await fetchAll()
   }
 
-  const generateCombinations = async (request: GenerateCombinationsRequest) => {
+  const generateCombinations = async (request: GenerateCombinationsRequest & {
+    selectedCenters?: string[]
+    selectedRoutes?: Array<{ from: string; to: string }>
+    generateOperational?: boolean
+    generateDistribution?: boolean
+  }) => {
     if (!effectiveAccountId) throw new Error('Account ID is required')
 
     const combinations: any[] = []
 
-    // 1. Generate OPERATIONAL SLAs (one per active postal center: Entry → Exit)
-    for (const center of postalCenters) {
-      combinations.push({
-        account_id: effectiveAccountId,
-        sla_type: 'operational',
-        postal_center_id: center.id,
-        from_postal_center_id: null,
-        to_postal_center_id: null,
-        expected_time_minutes: request.expected_time_minutes,
-        time_unit: request.time_unit,
-        on_time_percentage: request.on_time_percentage,
-        warning_threshold: request.warning_threshold,
-        critical_threshold: request.critical_threshold,
-        is_active: true,
-      })
+    // 1. Generate OPERATIONAL SLAs for selected centers
+    if (request.generateOperational && request.selectedCenters) {
+      for (const centerId of request.selectedCenters) {
+        combinations.push({
+          account_id: effectiveAccountId,
+          sla_type: 'operational',
+          postal_center_id: centerId,
+          from_postal_center_id: null,
+          to_postal_center_id: null,
+          expected_time_minutes: request.expected_time_minutes,
+          time_unit: request.time_unit,
+          on_time_percentage: request.on_time_percentage,
+          warning_threshold: request.warning_threshold,
+          critical_threshold: request.critical_threshold,
+          is_active: true,
+        })
+      }
     }
 
-    // 2. Generate DISTRIBUTION SLAs (all center pairs: A→B, B→A, etc.)
-    for (const fromCenter of postalCenters) {
-      for (const toCenter of postalCenters) {
-        if (fromCenter.id !== toCenter.id) {
-          combinations.push({
-            account_id: effectiveAccountId,
-            sla_type: 'distribution',
-            postal_center_id: null,
-            from_postal_center_id: fromCenter.id,
-            to_postal_center_id: toCenter.id,
-            expected_time_minutes: request.expected_time_minutes,
-            time_unit: request.time_unit,
-            on_time_percentage: request.on_time_percentage,
-            warning_threshold: request.warning_threshold,
-            critical_threshold: request.critical_threshold,
-            is_active: true,
-          })
-        }
+    // 2. Generate DISTRIBUTION SLAs for selected routes
+    if (request.generateDistribution && request.selectedRoutes) {
+      for (const route of request.selectedRoutes) {
+        combinations.push({
+          account_id: effectiveAccountId,
+          sla_type: 'distribution',
+          postal_center_id: null,
+          from_postal_center_id: route.from,
+          to_postal_center_id: route.to,
+          expected_time_minutes: request.expected_time_minutes,
+          time_unit: request.time_unit,
+          on_time_percentage: request.on_time_percentage,
+          warning_threshold: request.warning_threshold,
+          critical_threshold: request.critical_threshold,
+          is_active: true,
+        })
       }
     }
 

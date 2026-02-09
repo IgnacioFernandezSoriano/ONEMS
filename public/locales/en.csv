@@ -2100,3 +2100,27 @@ slas.slas_skipped,SLAs skipped
 slas.already_exist,already exist
 slas.operational_sla_description,Entry → Exit within this postal center
 common.generating,Generating...
+common.bulk_edit,Bulk Edit
+common.bulk_edit_description,Editing {count} selected records. Leave fields empty to skip.
+common.leave_empty_to_skip,Leave empty to skip
+common.days,days
+slas.edit_sla,Edit SLA
+common.edit,Edit
+common.saving,Saving...
+common.hours,hours
+postal_centers.postal_center,Postal Center
+slas.generate_pending_slas,Generate Pending SLAs
+slas.pending_slas_summary,Pending SLAs Summary
+slas.pending_operational,Pending Operational
+slas.pending_distribution,Pending Distribution
+slas.selected_to_generate,Selected to Generate
+slas.select_sla_types,Select SLA Types to Generate
+slas.select_centers_for_operational,Select Centers for Operational SLAs
+slas.select_routes_for_distribution,Select Routes for Distribution SLAs
+slas.generate_selected_slas,Generate Selected SLAs
+common.select_all,Select All
+common.deselect_all,Deselect All
+common.show_filters,Show Filters
+common.hide_filters,Hide Filters
+common.delete_selected,Delete Selected
+common.export_csv,Export CSV
