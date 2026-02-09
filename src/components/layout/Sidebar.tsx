@@ -255,7 +255,6 @@ export function Sidebar() {
           path: '/settings/account-configuration',
           label: t('menu.account_configuration'),
           icon: Settings,
-          roles: ['admin', 'superadmin'],
           tooltip: t('menu.account_configuration.tooltip'),
         },
         ...(accountName === 'DEMO2' ? [

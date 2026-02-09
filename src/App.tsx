@@ -274,15 +274,8 @@ function App() {
                       }
                     />
                     
-                    {/* Account Configuration - for admin and superadmin */}
-                    <Route
-                      path="/settings/account-configuration"
-                      element={
-                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
-                          <AccountConfiguration />
-                        </ProtectedRoute>
-                      }
-                    />
+                    {/* Account Configuration - for admin and superadmin (all users in DEMO2) */}
+                    <Route path="/settings/account-configuration" element={<AccountConfiguration />} />
                     
                     {/* Change Password - for all authenticated users */}
                     <Route path="/settings/change-password" element={<ChangePassword />} />
