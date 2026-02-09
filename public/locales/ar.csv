@@ -2059,3 +2059,5 @@ readers.confirm_delete,هل أنت متأكد من حذف هذا القارئ؟
 readers.confirm_bulk_delete,هل أنت متأكد من حذف {{count}} قارئ؟
 readers.no_readers_found,لم يتم العثور على قراء
 readers.inherited,موروث
+postal_centers.tab_centers,المراكز
+postal_centers.tab_readers,القراء

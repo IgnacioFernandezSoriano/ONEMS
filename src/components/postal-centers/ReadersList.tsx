@@ -10,7 +10,7 @@ interface ReadersListProps {
   accountId: string;
 }
 
-export default function ReadersList({ accountId }: ReadersListProps) {
+export function ReadersList({ accountId }: ReadersListProps) {
   const { t } = useTranslation();
   const {
     readers,

@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { Plus, Search, Filter } from 'lucide-react'
 import { usePostalCenters } from '@/hooks/usePostalCenters'
 import { PostalCentersList } from '@/components/postal-centers/PostalCentersList'
+import { ReadersList } from '@/components/postal-centers/ReadersList'
 import { PostalCenterForm } from '@/components/postal-centers/PostalCenterForm'
 import { ReaderForm } from '@/components/postal-centers/ReaderForm'
 import { Modal } from '@/components/common/Modal'
@@ -34,6 +35,9 @@ export function PostalCenters() {
   const [showEditReaderModal, setShowEditReaderModal] = useState(false)
   const [editingReader, setEditingReader] = useState<Reader | null>(null)
   const [selectedCenterId, setSelectedCenterId] = useState<string | null>(null)
+
+  // Tab state
+  const [activeTab, setActiveTab] = useState<'centers' | 'readers'>('centers')
 
   // Filters state
   const [showFilters, setShowFilters] = useState(false)
@@ -185,6 +189,34 @@ export function PostalCenters() {
         </Button>
       </div>
 
+      {/* Tabs */}
+      <div className="border-b border-gray-200">
+        <nav className="-mb-px flex space-x-8">
+          <button
+            onClick={() => setActiveTab('centers')}
+            className={`${
+              activeTab === 'centers'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+          >
+            {t('postal_centers.tab_centers')}
+          </button>
+          <button
+            onClick={() => setActiveTab('readers')}
+            className={`${
+              activeTab === 'readers'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+          >
+            {t('postal_centers.tab_readers')}
+          </button>
+        </nav>
+      </div>
+
+      {activeTab === 'centers' && (
+        <>
       {/* KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
         <div className="bg-white p-4 rounded-lg border border-gray-200">
@@ -298,6 +330,12 @@ export function PostalCenters() {
         onEditReader={handleEditReader}
         onDeleteReader={handleDeleteReader}
       />
+        </>
+      )}
+
+      {activeTab === 'readers' && (
+        <ReadersList accountId={effectiveAccountId || ''} />
+      )}
 
       {/* Modals */}
       <Modal
