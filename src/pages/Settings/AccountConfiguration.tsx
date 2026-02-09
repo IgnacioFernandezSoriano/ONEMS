@@ -233,7 +233,8 @@ export function AccountConfiguration() {
         </div>
       </div>
 
-      {/* Non-Working Days */}
+      {/* Non-Working Days - Only show for working_days mode */}
+      {calculationMode === 'working_days' && (
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
@@ -334,8 +335,10 @@ export function AccountConfiguration() {
           )}
         </div>
       </div>
+      )}
 
-      {/* Weekly Schedule */}
+      {/* Weekly Schedule - Only show for working_days mode */}
+      {calculationMode === 'working_days' && (
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
         <div className="flex items-center gap-2 mb-4">
           <Clock className="w-5 h-5 text-gray-500" />
@@ -399,6 +402,7 @@ export function AccountConfiguration() {
           })}
         </div>
       </div>
+      )}
     </div>
   )
 }
