@@ -2037,3 +2037,25 @@ postal_centers.no_center_holidays,لا توجد عطلات خاصة بالمرك
 readers.from_account,من الحساب
 readers.inheriting_from_account,موروث من الحساب
 readers.minutes,دقائق
+readers.title,القراء
+readers.add_new,إضافة قارئ جديد
+readers.total_count,الإجمالي: {{count}} قارئ
+readers.search_placeholder,البحث بواسطة معرف القارئ أو الاسم
+readers.filter_by_center,تصفية حسب المركز البريدي
+readers.filter_by_type,تصفية حسب النوع
+readers.filter_by_status,تصفية حسب الحالة
+readers.postal_center,المركز البريدي
+readers.postal_center_help,تعيين هذا القارئ إلى مركز بريدي
+readers.gap_threshold,عتبة الفجوة
+readers.status,الحالة
+readers.status_active,نشط
+readers.status_inactive,غير نشط
+readers.status_offline,غير متصل
+readers.status_unknown,غير معروف
+readers.selected_count,{{count}} محدد
+readers.activate,تفعيل
+readers.deactivate,إلغاء التفعيل
+readers.confirm_delete,هل أنت متأكد من حذف هذا القارئ؟
+readers.confirm_bulk_delete,هل أنت متأكد من حذف {{count}} قارئ؟
+readers.no_readers_found,لم يتم العثور على قراء
+readers.inherited,موروث

@@ -2037,3 +2037,25 @@ postal_centers.no_center_holidays,No hay festivos específicos del centro defini
 readers.from_account,De la Cuenta
 readers.inheriting_from_account,Heredando de la cuenta
 readers.minutes,minutos
+readers.title,Lectores
+readers.add_new,Agregar Nuevo Lector
+readers.total_count,Total: {{count}} lectores
+readers.search_placeholder,Buscar por ID de Lector o Nombre
+readers.filter_by_center,Filtrar por Centro Postal
+readers.filter_by_type,Filtrar por Tipo
+readers.filter_by_status,Filtrar por Estado
+readers.postal_center,Centro Postal
+readers.postal_center_help,Asignar este lector a un centro postal
+readers.gap_threshold,Umbral de Gap
+readers.status,Estado
+readers.status_active,Activo
+readers.status_inactive,Inactivo
+readers.status_offline,Desconectado
+readers.status_unknown,Desconocido
+readers.selected_count,{{count}} seleccionados
+readers.activate,Activar
+readers.deactivate,Desactivar
+readers.confirm_delete,¿Estás seguro de que quieres eliminar este lector?
+readers.confirm_bulk_delete,¿Estás seguro de que quieres eliminar {{count}} lectores?
+readers.no_readers_found,No se encontraron lectores
+readers.inherited,Heredado

@@ -2038,3 +2038,25 @@ postal_centers.no_center_holidays,Aucun jour férié spécifique au centre défi
 readers.from_account,Du Compte
 readers.inheriting_from_account,Hérité du compte
 readers.minutes,minutes
+readers.title,Lecteurs
+readers.add_new,Ajouter un Nouveau Lecteur
+readers.total_count,Total: {{count}} lecteurs
+readers.search_placeholder,Rechercher par ID de Lecteur ou Nom
+readers.filter_by_center,Filtrer par Centre Postal
+readers.filter_by_type,Filtrer par Type
+readers.filter_by_status,Filtrer par Statut
+readers.postal_center,Centre Postal
+readers.postal_center_help,Assigner ce lecteur à un centre postal
+readers.gap_threshold,Seuil de Gap
+readers.status,Statut
+readers.status_active,Actif
+readers.status_inactive,Inactif
+readers.status_offline,Hors ligne
+readers.status_unknown,Inconnu
+readers.selected_count,{{count}} sélectionnés
+readers.activate,Activer
+readers.deactivate,Désactiver
+readers.confirm_delete,Êtes-vous sûr de vouloir supprimer ce lecteur?
+readers.confirm_bulk_delete,Êtes-vous sûr de vouloir supprimer {{count}} lecteurs?
+readers.no_readers_found,Aucun lecteur trouvé
+readers.inherited,Hérité

@@ -2037,3 +2037,25 @@ postal_centers.no_center_holidays,No center-specific holidays defined
 readers.from_account,From Account
 readers.inheriting_from_account,Inheriting from account
 readers.minutes,minutes
+readers.title,Readers
+readers.add_new,Add New Reader
+readers.total_count,Total: {{count}} readers
+readers.search_placeholder,Search by Reader ID or Name
+readers.filter_by_center,Filter by Postal Center
+readers.filter_by_type,Filter by Type
+readers.filter_by_status,Filter by Status
+readers.postal_center,Postal Center
+readers.postal_center_help,Assign this reader to a postal center
+readers.gap_threshold,Gap Threshold
+readers.status,Status
+readers.status_active,Active
+readers.status_inactive,Inactive
+readers.status_offline,Offline
+readers.status_unknown,Unknown
+readers.selected_count,{{count}} selected
+readers.activate,Activate
+readers.deactivate,Deactivate
+readers.confirm_delete,Are you sure you want to delete this reader?
+readers.confirm_bulk_delete,Are you sure you want to delete {{count}} readers?
+readers.no_readers_found,No readers found
+readers.inherited,Inherited

@@ -3,21 +3,25 @@ import { Button } from '@/components/common/Button'
 import type { Reader, ReaderFormData } from '@/lib/types_postal_centers'
 import { useTranslation } from '@/hooks/useTranslation'
 import { useAccountConfig } from '@/hooks/useAccountConfig'
+import { usePostalCenters } from '@/hooks/usePostalCenters'
 
 interface ReaderFormProps {
+  accountId: string
   reader?: Reader | null
   onSubmit: (data: ReaderFormData) => Promise<void>
   onCancel: () => void
 }
 
-export function ReaderForm({ reader, onSubmit, onCancel }: ReaderFormProps) {
+export function ReaderForm({ accountId, reader, onSubmit, onCancel }: ReaderFormProps) {
   const { t } = useTranslation()
   const { config } = useAccountConfig()
+  const { postalCenters } = usePostalCenters(accountId)
   const [formData, setFormData] = useState<ReaderFormData>({
     reader_id: '',
     name: '',
     description: '',
     type: 'Entry',
+    postal_center_id: null,
     mixed_reader_gap_minutes: null,
     is_active: true
   })
@@ -31,6 +35,7 @@ export function ReaderForm({ reader, onSubmit, onCancel }: ReaderFormProps) {
         name: reader.name,
         description: reader.description || '',
         type: reader.type,
+        postal_center_id: reader.postal_center_id,
         mixed_reader_gap_minutes: reader.mixed_reader_gap_minutes,
         is_active: reader.is_active
       })
@@ -122,6 +127,27 @@ export function ReaderForm({ reader, onSubmit, onCancel }: ReaderFormProps) {
           {formData.type === 'Entry' && t('readers.type_entry_help')}
           {formData.type === 'Exit' && t('readers.type_exit_help')}
           {formData.type === 'Mixed' && t('readers.type_mixed_help')}
+        </p>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          {t('readers.postal_center')}
+        </label>
+        <select
+          value={formData.postal_center_id || ''}
+          onChange={(e) => setFormData({ ...formData, postal_center_id: e.target.value ? parseInt(e.target.value) : null })}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="">{t('readers.unassigned')}</option>
+          {postalCenters.map((center) => (
+            <option key={center.id} value={center.id}>
+              {center.name}
+            </option>
+          ))}
+        </select>
+        <p className="text-xs text-gray-500 mt-1">
+          {t('readers.postal_center_help')}
         </p>
       </div>
 
