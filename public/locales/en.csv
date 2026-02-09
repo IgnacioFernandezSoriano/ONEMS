@@ -2030,3 +2030,7 @@ common.saturday,Saturday
 common.update,Update
 common.opening,Opening
 common.cutoff,Cut-off
+postal_centers.center_holidays,Center-Specific Holidays
+postal_centers.specific,Specific
+postal_centers.holiday_reason,Reason
+postal_centers.no_center_holidays,No center-specific holidays defined

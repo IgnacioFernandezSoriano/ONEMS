@@ -2031,3 +2031,7 @@ common.saturday,Samedi
 common.update,Mettre à jour
 common.opening,Ouverture
 common.cutoff,Fermeture
+postal_centers.center_holidays,Jours Fériés Spécifiques au Centre
+postal_centers.specific,Spécifique
+postal_centers.holiday_reason,Raison
+postal_centers.no_center_holidays,Aucun jour férié spécifique au centre défini

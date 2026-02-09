@@ -2030,3 +2030,7 @@ common.saturday,السبت
 common.update,تحديث
 common.opening,افتتاح
 common.cutoff,إغلاق
+postal_centers.center_holidays,العطلات الخاصة بالمركز
+postal_centers.specific,خاص
+postal_centers.holiday_reason,السبب
+postal_centers.no_center_holidays,لا توجد عطلات خاصة بالمركز محددة

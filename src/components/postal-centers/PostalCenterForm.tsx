@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/common/Button'
+import { Plus, Trash2 } from 'lucide-react'
 import type { PostalCenter, PostalCenterFormData } from '@/lib/types_postal_centers'
 import { useTranslation } from '@/hooks/useTranslation'
 import { useAccountConfig } from '@/hooks/useAccountConfig'
 
 interface PostalCenterFormProps {
   postalCenter?: PostalCenter | null
-  onSubmit: (data: PostalCenterFormData & { weeklySchedule?: WeeklyScheduleDay[] }) => Promise<void>
+  onSubmit: (data: PostalCenterFormData & { weeklySchedule?: WeeklyScheduleDay[]; centerHolidays?: { date: string; reason: string }[] }) => Promise<void>
   onCancel: () => void
 }
 
@@ -30,6 +31,8 @@ export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCen
   })
   
   const [weeklySchedule, setWeeklySchedule] = useState<WeeklyScheduleDay[]>([])
+  const [centerHolidays, setCenterHolidays] = useState<{ date: string; reason: string }[]>([])
+  const [newHoliday, setNewHoliday] = useState({ date: '', reason: '' })
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -52,8 +55,9 @@ export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCen
         calculation_mode: postalCenter.calculation_mode || null,
         is_active: postalCenter.is_active
       })
-      // Load center-specific weekly schedule from database
+      // Load center-specific weekly schedule and holidays from database
       loadWeeklySchedule(postalCenter.id)
+      loadCenterHolidays(postalCenter.id)
     }
   }, [postalCenter])
 
@@ -75,18 +79,47 @@ export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCen
     }
   }
 
+  const loadCenterHolidays = async (postalCenterId: string) => {
+    try {
+      const { supabase } = await import('@/lib/supabase')
+      const { data, error } = await supabase
+        .from('non_working_days')
+        .select('date, reason')
+        .eq('postal_center_id', postalCenterId)
+        .order('date')
+      
+      if (error) throw error
+      if (data) {
+        setCenterHolidays(data)
+      }
+    } catch (err) {
+      console.error('Error loading center holidays:', err)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
     setSubmitting(true)
 
     try {
-      await onSubmit({ ...formData, weeklySchedule })
+      await onSubmit({ ...formData, weeklySchedule, centerHolidays })
     } catch (err: any) {
       setError(err.message)
     } finally {
       setSubmitting(false)
     }
+  }
+
+  const handleAddHoliday = () => {
+    if (newHoliday.date && newHoliday.reason) {
+      setCenterHolidays([...centerHolidays, { ...newHoliday }])
+      setNewHoliday({ date: '', reason: '' })
+    }
+  }
+
+  const handleRemoveHoliday = (index: number) => {
+    setCenterHolidays(centerHolidays.filter((_, i) => i !== index))
   }
 
   const handleUpdateSchedule = (dayOfWeek: number, field: string, value: any) => {
@@ -310,6 +343,67 @@ export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCen
               <span>{holiday.reason}</span>
             </div>
           ))}
+        </div>
+
+        {/* Center-Specific Holidays */}
+        <div className="mt-4">
+          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            {t('postal_centers.center_holidays')}
+            <span className="ml-2 px-2 py-0.5 text-xs bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200 rounded">
+              {t('postal_centers.specific')}
+            </span>
+          </h4>
+          
+          {/* Add Holiday Form */}
+          <div className="flex gap-2 mb-3">
+            <input
+              type="date"
+              value={newHoliday.date}
+              onChange={(e) => setNewHoliday({ ...newHoliday, date: e.target.value })}
+              className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+              placeholder="YYYY-MM-DD"
+            />
+            <input
+              type="text"
+              value={newHoliday.reason}
+              onChange={(e) => setNewHoliday({ ...newHoliday, reason: e.target.value })}
+              placeholder={t('postal_centers.holiday_reason')}
+              className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+            />
+            <Button
+              type="button"
+              onClick={handleAddHoliday}
+              disabled={!newHoliday.date || !newHoliday.reason}
+              size="sm"
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {/* Center Holidays List */}
+          {centerHolidays.length > 0 ? (
+            <div className="space-y-2">
+              {centerHolidays.map((holiday, index) => (
+                <div key={index} className="flex justify-between items-center bg-white dark:bg-gray-700 p-2 rounded border border-gray-200 dark:border-gray-600">
+                  <div className="flex-1">
+                    <span className="text-sm text-gray-900 dark:text-white font-medium">{holiday.date}</span>
+                    <span className="ml-3 text-sm text-gray-600 dark:text-gray-400">{holiday.reason}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveHoliday(index)}
+                    className="text-red-600 hover:text-red-800 dark:hover:text-red-400"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {t('postal_centers.no_center_holidays')}
+            </p>
+          )}
         </div>
       </div>
       )}

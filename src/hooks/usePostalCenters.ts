@@ -69,8 +69,8 @@ export function usePostalCenters() {
     fetchAll()
   }, [effectiveAccountId])
 
-  const createPostalCenter = async (data: PostalCenterFormData & { weeklySchedule?: any[] }) => {
-    const { weeklySchedule, ...centerData } = data
+  const createPostalCenter = async (data: PostalCenterFormData & { weeklySchedule?: any[]; centerHolidays?: any[] }) => {
+    const { weeklySchedule, centerHolidays, ...centerData } = data
     
     // Insert postal center
     const { data: newCenter, error: centerError } = await supabase
@@ -102,11 +102,27 @@ export function usePostalCenters() {
       if (scheduleError) throw scheduleError
     }
     
+    // Insert center-specific holidays if any
+    if (centerHolidays && centerHolidays.length > 0 && newCenter) {
+      const holidaysToInsert = centerHolidays.map(h => ({
+        account_id: effectiveAccountId,
+        postal_center_id: newCenter.id,
+        date: h.date,
+        reason: h.reason
+      }))
+      
+      const { error: holidaysError } = await supabase
+        .from('non_working_days')
+        .insert(holidaysToInsert)
+      
+      if (holidaysError) throw holidaysError
+    }
+    
     await fetchAll()
   }
 
-  const updatePostalCenter = async (id: string, data: Partial<PostalCenterFormData> & { weeklySchedule?: any[] }) => {
-    const { weeklySchedule, ...centerData } = data
+  const updatePostalCenter = async (id: string, data: Partial<PostalCenterFormData> & { weeklySchedule?: any[]; centerHolidays?: any[] }) => {
+    const { weeklySchedule, centerHolidays, ...centerData } = data
     
     // Update postal center
     const { error: centerError } = await supabase
@@ -135,6 +151,31 @@ export function usePostalCenters() {
         })
       
       if (scheduleError) throw scheduleError
+    }
+    
+    // Update center-specific holidays if provided
+    if (centerHolidays !== undefined) {
+      // Delete existing center-specific holidays
+      await supabase
+        .from('non_working_days')
+        .delete()
+        .eq('postal_center_id', id)
+      
+      // Insert new holidays
+      if (centerHolidays.length > 0) {
+        const holidaysToInsert = centerHolidays.map(h => ({
+          account_id: effectiveAccountId,
+          postal_center_id: id,
+          date: h.date,
+          reason: h.reason
+        }))
+        
+        const { error: holidaysError } = await supabase
+          .from('non_working_days')
+          .insert(holidaysToInsert)
+        
+        if (holidaysError) throw holidaysError
+      }
     }
     
     await fetchAll()
