@@ -37,6 +37,196 @@ Se te proporcionan los siguientes documentos:
 
 ---
 
+## ACCESO A CÓDIGO Y BASE DE DATOS
+
+### GitHub Repository
+
+**Repositorio:** https://github.com/IgnacioFernandezSoriano/ONEMS
+
+**Acceso:**
+- El repositorio es privado
+- Puedes clonar y analizar el código con:
+  ```bash
+  git clone https://github.com/IgnacioFernandezSoriano/ONEMS.git
+  cd ONEMS
+  ```
+
+**Estructura Relevante:**
+```
+ONEMS/
+├── src/
+│   ├── pages/
+│   │   ├── DeliveryStandards.tsx        # Módulo E2E de referencia
+│   │   ├── PostalCenters.tsx            # Sprint 3 completado
+│   │   └── AccountConfiguration.tsx     # Config de cuenta
+│   ├── components/
+│   │   ├── delivery-standards/          # Componentes E2E
+│   │   └── postal-centers/              # Componentes Sprint 3 y 4
+│   │       ├── PostalCentersList.tsx
+│   │       ├── PostalCenterForm.tsx
+│   │       ├── ReadersList.tsx
+│   │       └── ReaderForm.tsx
+│   ├── hooks/
+│   │   ├── useDeliveryStandards.ts      # Hook E2E de referencia
+│   │   ├── usePostalCenters.ts          # Sprint 3 y 4
+│   │   └── useAccountConfig.ts
+│   └── lib/
+│       ├── types_delivery_standards.ts  # Tipos E2E
+│       └── types_postal_centers.ts      # Tipos Sprint 3 y 4
+├── supabase/
+│   └── migrations/
+│       └── 20260209100000_network_diagnostics_module.sql
+└── public/
+    └── locales/
+        ├── en.csv
+        ├── es.csv
+        ├── fr.csv
+        └── ar.csv
+```
+
+**Archivos Clave a Analizar:**
+
+1. **Módulo E2E (Referencia):**
+   - `src/pages/DeliveryStandards.tsx`
+   - `src/components/delivery-standards/*`
+   - `src/hooks/useDeliveryStandards.ts`
+   - `src/lib/types_delivery_standards.ts`
+
+2. **Módulos Completados (Sprint 3 y 4):**
+   - `src/pages/PostalCenters.tsx`
+   - `src/components/postal-centers/*`
+   - `src/hooks/usePostalCenters.ts`
+   - `src/lib/types_postal_centers.ts`
+
+3. **Migraciones BD:**
+   - `supabase/migrations/20260209100000_network_diagnostics_module.sql`
+
+### Supabase Database
+
+**Project ID:** `sehbnpgzqljrsqimwyuz`
+
+**Conexión:**
+- **URL:** `https://sehbnpgzqljrsqimwyuz.supabase.co`
+- **Anon Key:** `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNlaGJucGd6cWxqcnNxaW13eXV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ4OTQzMTEsImV4cCI6MjA4MDQ3MDMxMX0.C-LsSmfOo38Tqc_PwP1c-nFyK1PeVj_mCBqanYsgoeg`
+- **Service Role Key:** `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNlaGJucGd6cWxqcnNxaW13eXV6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NDg5NDMxMSwiZXhwIjoyMDgwNDcwMzExfQ.8aPEi2qUYMiKBi__jAu-8gnkc3Z5b1jrPpbjBYQPf4k`
+
+**Dashboard:**
+- SQL Editor: https://supabase.com/dashboard/project/sehbnpgzqljrsqimwyuz/sql/new
+- Table Editor: https://supabase.com/dashboard/project/sehbnpgzqljrsqimwyuz/editor
+
+**Tablas Relevantes:**
+
+1. **delivery_standards** (Referencia E2E)
+   - Estructura similar a SLAs pero para E2E delivery
+   - Analizar schema, constraints, índices
+
+2. **postal_centers** (Sprint 3)
+   - Centros postales configurados
+   - Campos: id, account_id, code, name, calculation_mode, is_active
+
+3. **readers** (Sprint 4)
+   - Lectores RFID
+   - Campos: id, account_id, postal_center_id, reader_id, name, type (Entry/Exit/Mixed)
+
+4. **weekly_schedule** (Sprint 3)
+   - Horarios semanales con herencia
+   - Campos: id, account_id, postal_center_id, day_of_week, opening_hour, cutoff_time
+
+5. **non_working_days** (Sprint 3)
+   - Festivos con herencia
+   - Campos: id, account_id, postal_center_id, date, reason
+
+**Queries de Análisis Recomendadas:**
+
+```sql
+-- Ver estructura de delivery_standards (E2E)
+SELECT column_name, data_type, is_nullable
+FROM information_schema.columns
+WHERE table_name = 'delivery_standards'
+ORDER BY ordinal_position;
+
+-- Ver constraints de delivery_standards
+SELECT conname, contype, pg_get_constraintdef(oid)
+FROM pg_constraint
+WHERE conrelid = 'delivery_standards'::regclass;
+
+-- Ver índices de delivery_standards
+SELECT indexname, indexdef
+FROM pg_indexes
+WHERE tablename = 'delivery_standards';
+
+-- Ver RLS policies de delivery_standards
+SELECT schemaname, tablename, policyname, permissive, roles, cmd, qual, with_check
+FROM pg_policies
+WHERE tablename = 'delivery_standards';
+
+-- Ver datos de ejemplo de postal_centers
+SELECT id, code, name, calculation_mode, is_active
+FROM postal_centers
+LIMIT 5;
+
+-- Ver datos de ejemplo de readers
+SELECT id, reader_id, name, type, postal_center_id, is_active
+FROM readers
+LIMIT 10;
+```
+
+### Aplicación en Vivo
+
+**URL:** https://onem-dev.netlify.app
+
+**Acceso:**
+- Puedes explorar la aplicación para entender la UX completa
+- Módulos relevantes:
+  - Delivery Standards: `/delivery-standards`
+  - Postal Centers: `/postal-centers`
+  - Account Configuration: `/account-configuration`
+
+---
+
+## INSTRUCCIONES DE ANÁLISIS
+
+**IMPORTANTE:** Debes basar tu propuesta en el **código real** y la **base de datos real**, no en suposiciones.
+
+### Paso 1: Analizar Código E2E
+
+1. Clona el repositorio y lee los archivos del módulo E2E:
+   - `src/pages/DeliveryStandards.tsx`
+   - `src/components/delivery-standards/*`
+   - `src/hooks/useDeliveryStandards.ts`
+
+2. Identifica:
+   - Estructura de componentes
+   - Patrón de estado (useState, useMemo, useEffect)
+   - Manejo de formularios (React Hook Form, Zod)
+   - Edición inline (cómo se implementa)
+   - Filtros (estructura y lógica)
+   - Generate Combinations (algoritmo)
+
+### Paso 2: Analizar Base de Datos
+
+1. Conecta a Supabase y ejecuta las queries de análisis
+2. Examina:
+   - Schema de `delivery_standards`
+   - Constraints y validaciones
+   - Índices para performance
+   - RLS policies para multi-tenancy
+
+### Paso 3: Analizar Módulos Completados (Sprint 3 y 4)
+
+1. Lee el código de Postal Centers y Readers
+2. Identifica patrones reutilizables:
+   - Cómo se implementó herencia de Account Config
+   - Cómo se manejan tabs (Centers | Readers)
+   - Cómo se implementaron filtros colapsables
+   - Cómo se manejan bulk operations
+
+### Paso 4: Generar Propuesta
+
+Con base en el análisis del código real, genera tu propuesta siguiendo el formato especificado más adelante.
+
+---
+
 ## TU TAREA
 
 Genera una **propuesta de diseño e implementación** detallada que incluya:
