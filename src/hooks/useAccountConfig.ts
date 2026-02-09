@@ -157,13 +157,19 @@ export function useAccountConfig() {
 
         if (updateError) throw updateError
       } else {
+        // When inserting new record, include all required fields with defaults
+        const newRecord = {
+          account_id: effectiveAccountId,
+          day_of_week: dayOfWeek,
+          is_working_day: true,
+          opening_hour: '08:00',
+          cutoff_time: '18:00',
+          ...updates, // Override with provided updates
+        }
+        
         const { error: insertError } = await supabase
           .from('weekly_schedule')
-          .insert({
-            account_id: effectiveAccountId,
-            day_of_week: dayOfWeek,
-            ...updates,
-          })
+          .insert(newRecord)
 
         if (insertError) throw insertError
       }

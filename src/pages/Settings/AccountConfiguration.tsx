@@ -72,7 +72,10 @@ export function AccountConfiguration() {
     field: 'opening_hour' | 'cutoff_time' | 'is_working_day',
     value: string | boolean
   ) => {
-    await updateWeeklySchedule(dayOfWeek, { [field]: value })
+    const result = await updateWeeklySchedule(dayOfWeek, { [field]: value })
+    if (!result.success) {
+      alert(`Error updating schedule: ${result.error}`)
+    }
   }
 
   const handleDownloadTemplate = () => {
