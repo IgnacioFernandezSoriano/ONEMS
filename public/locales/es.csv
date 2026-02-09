@@ -1913,3 +1913,63 @@ panelists.search_placeholder,"Buscar por código, nombre, email..."
 common.all_cities,"Todas las Ciudades"
 common.all_nodes,"Todos los Nodos"
 common.all_status,"Todos los Estados"
+postal_centers.title,Centros Postales
+postal_centers.description,Configurar centros postales y lectores RFID para diagnóstico de red
+postal_centers.create_center,Crear Centro Postal
+postal_centers.edit_center,Editar Centro Postal
+postal_centers.confirm_delete_center,¿Está seguro de que desea eliminar este centro postal? Todos los lectores asociados también serán eliminados.
+postal_centers.no_centers_found,No se encontraron centros postales
+postal_centers.total_centers,Centros Totales
+postal_centers.active_centers,Centros Activos
+postal_centers.code,Código
+postal_centers.name,Nombre
+postal_centers.description,Descripción
+postal_centers.opening_hour,Hora de Apertura
+postal_centers.cutoff_time,Hora de Corte
+postal_centers.calculation_mode,Modo de Cálculo
+postal_centers.mixed_reader_gap_minutes,Intervalo de Lector Mixto (minutos)
+postal_centers.mixed_reader_gap_help,Intervalo de tiempo para separar eventos de entrada/salida en lectores Mixtos (dejar vacío para heredar de la cuenta)
+postal_centers.is_active,Activo
+postal_centers.inherit_from_account,Heredar de la Cuenta
+postal_centers.natural_days,Días Naturales
+postal_centers.working_days,Días Laborables
+postal_centers.hours,Horas
+postal_centers.mode,Modo
+postal_centers.status,Estado
+postal_centers.search_placeholder,Buscar centros postales o lectores...
+readers.reader,Lector
+readers.readers,Lectores
+readers.total_readers,Lectores Totales
+readers.active_readers,Lectores Activos
+readers.entry_readers,Lectores de Entrada
+readers.exit_readers,Lectores de Salida
+readers.mixed_readers,Lectores Mixtos
+readers.add_reader,Agregar Lector
+readers.add_first_reader,Agregar Primer Lector
+readers.create_reader,Crear Lector
+readers.edit_reader,Editar Lector
+readers.confirm_delete_reader,¿Está seguro de que desea eliminar este lector?
+readers.no_readers_found,No se encontraron lectores para este centro postal
+readers.reader_id,ID del Lector
+readers.reader_id_help,Debe coincidir con el ReaderId en eventos EPCIS
+readers.name,Nombre
+readers.description,Descripción
+readers.type,Tipo
+readers.reader_type,Tipo de Lector
+readers.type_entry,Entrada
+readers.type_exit,Salida
+readers.type_mixed,Mixto
+readers.type_entry_help,Usa MIN(timestamp) - lectura más temprana
+readers.type_exit_help,Usa MAX(timestamp) - lectura más reciente
+readers.type_mixed_help,Separa entrada/salida según intervalo de tiempo
+readers.mixed_reader_gap_minutes,Umbral de Intervalo (minutos)
+readers.mixed_reader_gap_help,Sobrescribir umbral de intervalo para este lector (dejar vacío para heredar)
+readers.is_active,Activo
+readers.gap,Intervalo
+common.minutes,minutos
+common.all,Todos
+common.active_only,Solo Activos
+common.expand_all,Expandir Todo
+common.collapse_all,Contraer Todo
+menu.postal_centers,Centros Postales
+menu.postal_centers.tooltip,Configurar centros postales y lectores RFID

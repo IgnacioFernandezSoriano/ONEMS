@@ -132,6 +132,13 @@ export function Sidebar() {
           roles: ['admin', 'superadmin'],
           tooltip: t('menu.delivery_standards.tooltip'),
         },
+        {
+          path: '/postal-centers',
+          label: t('menu.postal_centers'),
+          icon: Building2,
+          roles: ['admin', 'superadmin'],
+          tooltip: t('menu.postal_centers.tooltip'),
+        },
       ],
     },
     {

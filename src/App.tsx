@@ -34,6 +34,7 @@ import TerritoryEquity from './pages/Reporting/TerritoryEquity'
 import TerritoryEquityV2 from './pages/Reporting/TerritoryEquityV2'
 import JKPerformance from './pages/Reporting/JKPerformance'
 import AccountReportingConfig from './pages/Settings/AccountReportingConfig'
+import { PostalCenters } from './pages/PostalCenters'
 
 function App() {
   return (
@@ -90,6 +91,16 @@ function App() {
                       element={
                         <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
                           <DeliveryStandards />
+                        </ProtectedRoute>
+                      }
+                    />
+                    
+                    {/* Postal Centers - for admin and superadmin */}
+                    <Route
+                      path="/postal-centers"
+                      element={
+                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                          <PostalCenters />
                         </ProtectedRoute>
                       }
                     />

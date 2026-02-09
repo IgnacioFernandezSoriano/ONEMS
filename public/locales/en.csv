@@ -1913,3 +1913,63 @@ users.password,Password
 users.promise,Promise
 users.role,Role
 users.select_account,Select account
+postal_centers.title,Postal Centers
+postal_centers.description,Configure postal centers and RFID readers for network diagnostics
+postal_centers.create_center,Create Postal Center
+postal_centers.edit_center,Edit Postal Center
+postal_centers.confirm_delete_center,Are you sure you want to delete this postal center? All associated readers will also be deleted.
+postal_centers.no_centers_found,No postal centers found
+postal_centers.total_centers,Total Centers
+postal_centers.active_centers,Active Centers
+postal_centers.code,Code
+postal_centers.name,Name
+postal_centers.description,Description
+postal_centers.opening_hour,Opening Hour
+postal_centers.cutoff_time,Cutoff Time
+postal_centers.calculation_mode,Calculation Mode
+postal_centers.mixed_reader_gap_minutes,Mixed Reader Gap (minutes)
+postal_centers.mixed_reader_gap_help,Time gap to separate entry/exit events in Mixed readers (leave empty to inherit from account)
+postal_centers.is_active,Active
+postal_centers.inherit_from_account,Inherit from Account
+postal_centers.natural_days,Natural Days
+postal_centers.working_days,Working Days
+postal_centers.hours,Hours
+postal_centers.mode,Mode
+postal_centers.status,Status
+postal_centers.search_placeholder,Search postal centers or readers...
+readers.reader,Reader
+readers.readers,Readers
+readers.total_readers,Total Readers
+readers.active_readers,Active Readers
+readers.entry_readers,Entry Readers
+readers.exit_readers,Exit Readers
+readers.mixed_readers,Mixed Readers
+readers.add_reader,Add Reader
+readers.add_first_reader,Add First Reader
+readers.create_reader,Create Reader
+readers.edit_reader,Edit Reader
+readers.confirm_delete_reader,Are you sure you want to delete this reader?
+readers.no_readers_found,No readers found for this postal center
+readers.reader_id,Reader ID
+readers.reader_id_help,Must match the ReaderId in EPCIS events
+readers.name,Name
+readers.description,Description
+readers.type,Type
+readers.reader_type,Reader Type
+readers.type_entry,Entry
+readers.type_exit,Exit
+readers.type_mixed,Mixed
+readers.type_entry_help,Uses MIN(timestamp) - earliest reading
+readers.type_exit_help,Uses MAX(timestamp) - latest reading
+readers.type_mixed_help,Separates entry/exit based on time gap
+readers.mixed_reader_gap_minutes,Gap Threshold (minutes)
+readers.mixed_reader_gap_help,Override gap threshold for this reader (leave empty to inherit)
+readers.is_active,Active
+readers.gap,Gap
+common.minutes,minutes
+common.all,All
+common.active_only,Active Only
+common.expand_all,Expand All
+common.collapse_all,Collapse All
+menu.postal_centers,Postal Centers
+menu.postal_centers.tooltip,Configure postal centers and RFID readers

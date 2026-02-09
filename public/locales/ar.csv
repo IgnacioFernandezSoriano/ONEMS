@@ -1913,3 +1913,63 @@ panelists.search_placeholder,"البحث بالرمز أو الاسم أو ال�
 common.all_cities,"جميع المدن"
 common.all_nodes,"جميع العقد"
 common.all_status,"جميع الحالات"
+postal_centers.title,المراكز البريدية
+postal_centers.description,تكوين المراكز البريدية وقارئات RFID لتشخيص الشبكة
+postal_centers.create_center,إنشاء مركز بريدي
+postal_centers.edit_center,تعديل المركز البريدي
+postal_centers.confirm_delete_center,هل أنت متأكد من حذف هذا المركز البريدي؟ سيتم حذف جميع القارئات المرتبطة أيضًا.
+postal_centers.no_centers_found,لم يتم العثور على مراكز بريدية
+postal_centers.total_centers,إجمالي المراكز
+postal_centers.active_centers,المراكز النشطة
+postal_centers.code,الرمز
+postal_centers.name,الاسم
+postal_centers.description,الوصف
+postal_centers.opening_hour,ساعة الافتتاح
+postal_centers.cutoff_time,وقت القطع
+postal_centers.calculation_mode,وضع الحساب
+postal_centers.mixed_reader_gap_minutes,فجوة القارئ المختلط (دقائق)
+postal_centers.mixed_reader_gap_help,فجوة زمنية لفصل أحداث الدخول/الخروج في القارئات المختلطة (اتركه فارغًا للوراثة من الحساب)
+postal_centers.is_active,نشط
+postal_centers.inherit_from_account,الوراثة من الحساب
+postal_centers.natural_days,أيام طبيعية
+postal_centers.working_days,أيام العمل
+postal_centers.hours,ساعات
+postal_centers.mode,الوضع
+postal_centers.status,الحالة
+postal_centers.search_placeholder,البحث عن مراكز بريدية أو قارئات...
+readers.reader,قارئ
+readers.readers,القارئات
+readers.total_readers,إجمالي القارئات
+readers.active_readers,القارئات النشطة
+readers.entry_readers,قارئات الدخول
+readers.exit_readers,قارئات الخروج
+readers.mixed_readers,القارئات المختلطة
+readers.add_reader,إضافة قارئ
+readers.add_first_reader,إضافة القارئ الأول
+readers.create_reader,إنشاء قارئ
+readers.edit_reader,تعديل القارئ
+readers.confirm_delete_reader,هل أنت متأكد من حذف هذا القارئ؟
+readers.no_readers_found,لم يتم العثور على قارئات لهذا المركز البريدي
+readers.reader_id,معرف القارئ
+readers.reader_id_help,يجب أن يتطابق مع ReaderId في أحداث EPCIS
+readers.name,الاسم
+readers.description,الوصف
+readers.type,النوع
+readers.reader_type,نوع القارئ
+readers.type_entry,دخول
+readers.type_exit,خروج
+readers.type_mixed,مختلط
+readers.type_entry_help,يستخدم MIN(timestamp) - أقدم قراءة
+readers.type_exit_help,يستخدم MAX(timestamp) - أحدث قراءة
+readers.type_mixed_help,يفصل الدخول/الخروج بناءً على الفجوة الزمنية
+readers.mixed_reader_gap_minutes,عتبة الفجوة (دقائق)
+readers.mixed_reader_gap_help,تجاوز عتبة الفجوة لهذا القارئ (اتركه فارغًا للوراثة)
+readers.is_active,نشط
+readers.gap,الفجوة
+common.minutes,دقائق
+common.all,الكل
+common.active_only,النشطة فقط
+common.expand_all,توسيع الكل
+common.collapse_all,طي الكل
+menu.postal_centers,المراكز البريدية
+menu.postal_centers.tooltip,تكوين المراكز البريدية وقارئات RFID
