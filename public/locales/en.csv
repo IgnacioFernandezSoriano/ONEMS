@@ -2086,5 +2086,17 @@ slas.from_postal_centers,From Postal Centers
 slas.to_postal_centers,To Postal Centers
 slas.default_values,Default Values
 slas.combinations_generated,Generated {inserted} new SLAs ({skipped} skipped as duplicates)
-menu.slas_configuration,SLAs Configuration
-menu.slas_configuration.tooltip,Configure Service Level Agreements
+menu.slas_configuration,Sites SLA
+menu.slas_configuration.tooltip,Configure Sites SLA
+slas.generate_network_slas,Generate Network SLAs
+slas.network_summary,Network Summary
+slas.active_postal_centers,Active Postal Centers
+slas.operational_slas_to_generate,Operational SLAs to generate
+slas.distribution_slas_to_generate,Distribution SLAs to generate
+slas.one_per_center,one per center: Entry → Exit
+slas.all_center_pairs,all center pairs: A→B
+slas.slas_created,SLAs created
+slas.slas_skipped,SLAs skipped
+slas.already_exist,already exist
+slas.operational_sla_description,Entry → Exit within this postal center
+common.generating,Generating...

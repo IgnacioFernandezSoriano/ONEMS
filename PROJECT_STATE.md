@@ -83,7 +83,7 @@ Durante esta sesión se completó exitosamente el **Sprint 5: SLAs Configuration
 
 ### GitHub
 - **Repositorio:** `https://github.com/IgnacioFernandezSoriano/ONEMS`
-- **Personal Access Token (PAT):** `ghp_****` (solicitar al usuario si es necesario)
+- **Personal Access Token (PAT):** `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`
 - **Rama Actual:** `main`
 - **Último Commit:** Pendiente - Sprint 5 SLAs Configuration Module complete (pending push)
 - **Comandos de configuración:**

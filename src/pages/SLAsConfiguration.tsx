@@ -12,7 +12,6 @@ export function SLAsConfiguration() {
   const {
     slas,
     postalCenters,
-    readers,
     loading,
     error,
     createSLA,
@@ -111,8 +110,6 @@ export function SLAsConfiguration() {
       'ID',
       'SLA Type',
       'Postal Center',
-      'From Reader',
-      'To Reader',
       'From Postal Center',
       'To Postal Center',
       'Expected Time (min)',
@@ -128,8 +125,6 @@ export function SLAsConfiguration() {
       record.id,
       record.sla_type,
       record.postal_center?.name || '',
-      record.from_reader?.reader_id || '',
-      record.to_reader?.reader_id || '',
       record.from_postal_center?.name || '',
       record.to_postal_center?.name || '',
       record.expected_time_minutes,
@@ -315,7 +310,7 @@ export function SLAsConfiguration() {
                     <div>
                       <div className="font-medium">{sla.postal_center?.name}</div>
                       <div className="text-gray-500 text-xs">
-                        {sla.from_reader?.reader_id} → {sla.to_reader?.reader_id}
+                        Entry → Exit
                       </div>
                     </div>
                   ) : (
@@ -416,7 +411,6 @@ export function SLAsConfiguration() {
         <Modal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)} title={t('slas.create_sla')}>
           <SLAForm
             postalCenters={postalCenters}
-            readers={readers}
             onSubmit={async (data) => {
               await createSLA(data)
               setShowCreateModal(false)

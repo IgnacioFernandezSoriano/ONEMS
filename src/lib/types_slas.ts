@@ -1,8 +1,7 @@
 // Types for SLAs (Service Level Agreements) - Network Diagnostics Module
-// Sprint 5: SLAs Configuration
+// Sprint 5 (Revised): SLAs Configuration - Simplified
 
 import type { PostalCenter } from './types_postal_centers'
-import type { Reader } from './types_postal_centers'
 
 export type SLAType = 'operational' | 'distribution'
 export type TimeUnit = 'minutes' | 'hours'
@@ -13,10 +12,8 @@ export interface SLA {
   account_id: string
   sla_type: SLAType
   
-  // Operational SLA fields (within a postal center)
+  // Operational SLA fields (Entry → Exit within a postal center)
   postal_center_id: string | null
-  from_reader_id: string | null
-  to_reader_id: string | null
   
   // Distribution SLA fields (between postal centers)
   from_postal_center_id: string | null
@@ -40,8 +37,6 @@ export interface SLA {
 export interface SLAWithDetails extends SLA {
   // For operational SLAs
   postal_center?: PostalCenter
-  from_reader?: Reader
-  to_reader?: Reader
   
   // For distribution SLAs
   from_postal_center?: PostalCenter
@@ -54,8 +49,6 @@ export interface SLAFormData {
   
   // Operational SLA fields
   postal_center_id?: string
-  from_reader_id?: string
-  to_reader_id?: string
   
   // Distribution SLA fields
   from_postal_center_id?: string
@@ -79,18 +72,9 @@ export interface SLAFilters {
   status: 'active' | 'inactive' | ''
 }
 
-// Generate combinations request
+// Generate combinations request (generates BOTH operational and distribution SLAs)
 export interface GenerateCombinationsRequest {
-  sla_type: SLAType
-  
-  // For operational SLAs
-  postal_center_ids?: string[]
-  
-  // For distribution SLAs
-  from_postal_center_ids?: string[]
-  to_postal_center_ids?: string[]
-  
-  // Default values for generated SLAs
+  // Default values for all generated SLAs
   expected_time_minutes: number
   time_unit: TimeUnit
   on_time_percentage: number

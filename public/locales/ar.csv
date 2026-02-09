@@ -2086,5 +2086,17 @@ slas.from_postal_centers,مراكز بريدية المصدر
 slas.to_postal_centers,مراكز بريدية الوجهة
 slas.default_values,القيم الافتراضية
 slas.combinations_generated,تم إنشاء {inserted} SLA جديدة ({skipped} تم تخطيها كتكرارات)
-menu.slas_configuration,تكوين SLA
-menu.slas_configuration.tooltip,تكوين اتفاقيات مستوى الخدمة
+menu.slas_configuration,Sites SLA
+menu.slas_configuration.tooltip,تكوين Sites SLA
+slas.generate_network_slas,توليد SLA للشبكة
+slas.network_summary,ملخص الشبكة
+slas.active_postal_centers,المراكز البريدية النشطة
+slas.operational_slas_to_generate,SLA التشغيلية المراد توليدها
+slas.distribution_slas_to_generate,SLA التوزيع المراد توليدها
+slas.one_per_center,واحد لكل مركز: دخول ← خروج
+slas.all_center_pairs,جميع أزواج المراكز: A→B
+slas.slas_created,SLA تم إنشاؤها
+slas.slas_skipped,SLA تم تخطيها
+slas.already_exist,موجودة بالفعل
+slas.operational_sla_description,دخول ← خروج داخل هذا المركز البريدي
+common.generating,جاري التوليد...

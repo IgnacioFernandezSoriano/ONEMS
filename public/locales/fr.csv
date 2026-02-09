@@ -2087,5 +2087,17 @@ slas.from_postal_centers,Centres Postaux Origine
 slas.to_postal_centers,Centres Postaux Destination
 slas.default_values,Valeurs par Défaut
 slas.combinations_generated,Généré {inserted} nouveaux SLA ({skipped} ignorés comme doublons)
-menu.slas_configuration,Configuration des SLA
-menu.slas_configuration.tooltip,Configurer les accords de niveau de service
+menu.slas_configuration,Sites SLA
+menu.slas_configuration.tooltip,Configurer Sites SLA
+slas.generate_network_slas,Générer les SLA de Réseau
+slas.network_summary,Résumé du Réseau
+slas.active_postal_centers,Centres Postaux Actifs
+slas.operational_slas_to_generate,SLA opérationnels à générer
+slas.distribution_slas_to_generate,SLA de distribution à générer
+slas.one_per_center,un par centre: Entrée → Sortie
+slas.all_center_pairs,toutes les paires de centres: A→B
+slas.slas_created,SLA créés
+slas.slas_skipped,SLA ignorés
+slas.already_exist,existent déjà
+slas.operational_sla_description,Entrée → Sortie dans ce centre postal
+common.generating,Génération...
