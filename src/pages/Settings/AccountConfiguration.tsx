@@ -72,7 +72,30 @@ export function AccountConfiguration() {
     field: 'opening_hour' | 'cutoff_time' | 'is_working_day',
     value: string | boolean
   ) => {
-    const result = await updateWeeklySchedule(dayOfWeek, { [field]: value })
+    const schedule = weeklySchedule.find((s) => s.day_of_week === dayOfWeek)
+    
+    // When toggling is_working_day, ensure all required fields are set
+    let updates: any = { [field]: value }
+    
+    if (field === 'is_working_day') {
+      if (value === true) {
+        // Marking as working day: ensure opening_hour and cutoff_time are set
+        updates = {
+          is_working_day: true,
+          opening_hour: schedule?.opening_hour || '08:00',
+          cutoff_time: schedule?.cutoff_time || '18:00',
+        }
+      } else {
+        // Unmarking as working day: set times to null
+        updates = {
+          is_working_day: false,
+          opening_hour: null,
+          cutoff_time: null,
+        }
+      }
+    }
+    
+    const result = await updateWeeklySchedule(dayOfWeek, updates)
     if (!result.success) {
       alert(`Error updating schedule: ${result.error}`)
     }
