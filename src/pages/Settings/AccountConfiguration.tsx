@@ -1,7 +1,7 @@
-import { useState, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useAccountConfig } from '../../hooks/useAccountConfig'
 import { useLocale } from '../../contexts/LocaleContext'
-import { Save, Calendar, Clock, Settings as SettingsIcon, Plus, Trash2, Upload, Download } from 'lucide-react'
+import { Save, Calendar, Clock, Settings as SettingsIcon, Plus, Trash2, Upload, Download } from 'lucide-react'e-react'
 
 export function AccountConfiguration() {
   const { t } = useLocale()
@@ -30,6 +30,14 @@ export function AccountConfiguration() {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+
+  // Sync local state with config when it changes
+  useEffect(() => {
+    if (config) {
+      setCalculationMode(config.calculation_mode)
+      setMixedReaderGap(config.mixed_reader_gap_minutes)
+    }
+  }, [config])
 
   const handleSaveConfig = async () => {
     setSaving(true)
