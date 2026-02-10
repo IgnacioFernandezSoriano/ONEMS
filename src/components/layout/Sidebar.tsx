@@ -29,6 +29,7 @@ import {
   Languages,
   Key,
   DatabaseZap,
+  CheckCircle,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
@@ -283,6 +284,13 @@ export function Sidebar() {
           icon: RefreshCw,
           roles: ['admin', 'superadmin'],
           tooltip: t('menu.event_consolidation.tooltip'),
+        },
+        {
+          path: '/diagnosis/processed-events',
+          label: t('menu.processed_events'),
+          icon: CheckCircle,
+          roles: ['admin', 'superadmin'],
+          tooltip: t('menu.processed_events.tooltip'),
         },
         {
           path: '/settings/account-configuration',

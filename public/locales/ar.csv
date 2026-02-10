@@ -2176,3 +2176,50 @@ diagnosis.consolidation.actions.reprocess,إعادة المعالجة
 diagnosis.consolidation.actions.view_history,عرض السجل
 diagnosis.consolidation.incident_resolved,تم وضع علامة على الحادث كمحلول بنجاح
 diagnosis.consolidation.details.incident_summary,ملخص الحادث
+processed_events.title,أحداث RFID الموحدة
+processed_events.description,عرض وتحليل جميع أحداث RFID التي تمت معالجتها بنجاح
+processed_events.tooltip,تعرض هذه الشاشة جميع أحداث RFID التي تم دمجها بنجاح. تتضمن معلومات العبور والأوقات المعدلة لساعات العمل.
+processed_events.loading,جاري تحميل الأحداث...
+processed_events.error,خطأ في تحميل الأحداث
+processed_events.filters,الفلاتر
+processed_events.active,نشط
+processed_events.reset,إعادة تعيين
+processed_events.search,بحث
+processed_events.search_placeholder,البحث بواسطة معرف العلامة أو القارئ أو المركز البريدي...
+processed_events.postal_center,المركز البريدي
+processed_events.all_centers,جميع المراكز
+processed_events.reader_type,نوع القارئ
+processed_events.all_types,جميع الأنواع
+processed_events.type_entry,دخول
+processed_events.type_exit,خروج
+processed_events.type_mixed,مختلط
+processed_events.date_from,من تاريخ
+processed_events.date_to,إلى تاريخ
+processed_events.tag_id,معرف العلامة
+processed_events.entry_reader,قارئ الدخول
+processed_events.exit_reader,قارئ الخروج
+processed_events.entry_time,وقت الدخول
+processed_events.exit_time,وقت الخروج
+processed_events.transit_time,وقت العبور
+processed_events.adjusted_time,الوقت المعدل
+processed_events.no_records,لم يتم العثور على أحداث موحدة
+processed_events.select_all,تحديد الكل
+processed_events.deselect_all,إلغاء تحديد الكل
+processed_events.selected_of,محدد من
+processed_events.export_csv,تصدير CSV
+processed_events.export_selected,تصدير السجلات المحددة
+processed_events.clear_selection,مسح التحديد
+processed_events.total_events,إجمالي الأحداث
+processed_events.consolidated_events,الأحداث الموحدة
+processed_events.by_type,حسب النوع
+processed_events.entry_short,دخول
+processed_events.exit_short,خروج
+processed_events.mixed_short,مختلط
+processed_events.reader_types,أنواع القارئ
+processed_events.avg_transit,متوسط الوقت
+processed_events.minutes_avg,دقائق في المتوسط
+processed_events.avg_adjusted,متوسط الوقت المعدل
+processed_events.business_hours_avg,متوسط ساعات العمل
+processed_events.showing_records,عرض {filtered} من {total} حدث
+menu.processed_events,أحداث RFID الموحدة
+menu.processed_events.tooltip,عرض وتحليل أحداث RFID المعالجة

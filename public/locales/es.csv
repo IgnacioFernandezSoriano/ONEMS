@@ -2176,3 +2176,50 @@ diagnosis.consolidation.actions.reprocess,Reprocesar
 diagnosis.consolidation.actions.view_history,Ver Historial
 diagnosis.consolidation.incident_resolved,Incidencia marcada como resuelta exitosamente
 diagnosis.consolidation.details.incident_summary,Resumen de la Incidencia
+processed_events.title,Eventos RFID Consolidados
+processed_events.description,Visualiza y analiza todos los eventos RFID procesados exitosamente
+processed_events.tooltip,Esta pantalla muestra todos los eventos RFID que han sido consolidados exitosamente. Incluye información de tránsito y tiempos ajustados por horarios laborales.
+processed_events.loading,Cargando eventos...
+processed_events.error,Error al cargar eventos
+processed_events.filters,Filtros
+processed_events.active,activos
+processed_events.reset,Restablecer
+processed_events.search,Buscar
+processed_events.search_placeholder,Buscar por Tag ID, lector, centro postal...
+processed_events.postal_center,Centro Postal
+processed_events.all_centers,Todos los Centros
+processed_events.reader_type,Tipo de Lector
+processed_events.all_types,Todos los Tipos
+processed_events.type_entry,Entrada
+processed_events.type_exit,Salida
+processed_events.type_mixed,Mixto
+processed_events.date_from,Fecha Desde
+processed_events.date_to,Fecha Hasta
+processed_events.tag_id,Tag ID
+processed_events.entry_reader,Lector Entrada
+processed_events.exit_reader,Lector Salida
+processed_events.entry_time,Hora Entrada
+processed_events.exit_time,Hora Salida
+processed_events.transit_time,Tiempo Tránsito
+processed_events.adjusted_time,Tiempo Ajustado
+processed_events.no_records,No se encontraron eventos consolidados
+processed_events.select_all,Seleccionar todos
+processed_events.deselect_all,Deseleccionar todos
+processed_events.selected_of,seleccionados de
+processed_events.export_csv,Exportar CSV
+processed_events.export_selected,Exportar registros seleccionados
+processed_events.clear_selection,Limpiar selección
+processed_events.total_events,Total de Eventos
+processed_events.consolidated_events,Eventos consolidados
+processed_events.by_type,Por Tipo
+processed_events.entry_short,Entrada
+processed_events.exit_short,Salida
+processed_events.mixed_short,Mixto
+processed_events.reader_types,Tipos de lector
+processed_events.avg_transit,Tiempo Promedio
+processed_events.minutes_avg,minutos promedio
+processed_events.avg_adjusted,Tiempo Ajustado Prom.
+processed_events.business_hours_avg,promedio en horario laboral
+processed_events.showing_records,Mostrando {filtered} de {total} eventos
+menu.processed_events,Eventos RFID Consolidados
+menu.processed_events.tooltip,Visualizar y analizar eventos RFID procesados

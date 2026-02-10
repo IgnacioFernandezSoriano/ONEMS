@@ -38,6 +38,7 @@ import { AccountConfiguration } from './pages/Settings/AccountConfiguration'
 import { PostalCenters } from './pages/PostalCenters'
 import { SLAsConfiguration } from './pages/SLAsConfiguration'
 import { EventConsolidation } from './pages/diagnosis/EventConsolidation'
+import ProcessedEvents from './pages/ProcessedEvents'
 
 function App() {
   return (
@@ -114,6 +115,16 @@ function App() {
                       element={
                         <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
                           <EventConsolidation />
+                        </ProtectedRoute>
+                      }
+                    />
+                    
+                    {/* Processed Events - for admin and superadmin */}
+                    <Route
+                      path="/diagnosis/processed-events"
+                      element={
+                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                          <ProcessedEvents />
                         </ProtectedRoute>
                       }
                     />
