@@ -4,7 +4,7 @@ import { useProcessedEvents, ProcessedEventsFilters as Filters } from '../hooks/
 import { ProcessedEventsFilters } from '../components/ProcessedEvents/ProcessedEventsFilters';
 import { ProcessedEventsTable } from '../components/ProcessedEvents/ProcessedEventsTable';
 import { ProcessedEventsBulkPanel } from '../components/ProcessedEvents/ProcessedEventsBulkPanel';
-import { Database, CheckCircle, Activity, Package, Download } from 'lucide-react';
+import { Database, CheckCircle, Activity, Link2, Download } from 'lucide-react';
 import { SmartTooltip } from '../components/common/SmartTooltip';
 import { useTranslation } from '@/hooks/useTranslation';
 
@@ -51,22 +51,21 @@ export default function ProcessedEvents() {
     const total = filteredRecords.length;
     const entryEvents = filteredRecords.filter((r) => r.event_type === 'entry').length;
     const exitEvents = filteredRecords.filter((r) => r.event_type === 'exit').length;
-    const consolidated = filteredRecords.filter((r) => r.is_consolidated).length;
-    const pending = total - consolidated;
-    const avgRawCount =
-      total > 0
-        ? (
-            filteredRecords.reduce((sum, r) => sum + r.raw_event_count, 0) / total
-          ).toFixed(1)
-        : '0';
+    const paired = filteredRecords.filter((r) => r.has_pair === true).length;
+    const unpaired = total - paired;
+    const pairingRate = total > 0 ? ((paired / total) * 100).toFixed(1) : '0';
+    const segmented = filteredRecords.filter((r) => r.is_consolidated === true).length;
+    const pending = total - segmented;
 
     return {
       total,
       entryEvents,
       exitEvents,
-      consolidated,
+      paired,
+      unpaired,
+      pairingRate,
+      segmented,
       pending,
-      avgRawCount,
     };
   }, [filteredRecords]);
 
@@ -160,42 +159,42 @@ export default function ProcessedEvents() {
           </div>
         </div>
 
-        {/* Consolidated Status */}
+        {/* Segmentation Status */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 mb-1">{t('processed_events.consolidated_status')}</p>
+              <p className="text-sm text-gray-600 mb-1">{t('processed_events.segmentation_status')}</p>
               <div className="flex items-center gap-2 mt-2">
                 <span className="text-sm font-medium text-green-600">
-                  {kpis.consolidated} {t('processed_events.done')}
+                  {kpis.segmented} {t('processed_events.done')}
                 </span>
                 <span className="text-gray-400">|</span>
-                <span className="text-sm font-medium text-yellow-600">
+                <span className="text-sm font-medium text-orange-600">
                   {kpis.pending} {t('processed_events.pending')}
                 </span>
               </div>
               <p className="text-xs text-gray-500 mt-1">
-                {t('processed_events.consolidation_progress')}
+                {t('processed_events.segmentation_description')}
               </p>
             </div>
-            <div className="p-3 bg-green-50 rounded-lg">
-              <CheckCircle className="w-6 h-6 text-green-600" />
+            <div className="p-3 bg-purple-50 rounded-lg">
+              <CheckCircle className="w-6 h-6 text-purple-600" />
             </div>
           </div>
         </div>
 
-        {/* Average Raw Count */}
+        {/* Pairing Rate */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 mb-1">{t('processed_events.avg_raw_count')}</p>
-              <p className="text-3xl font-bold text-blue-900">{kpis.avgRawCount}</p>
+              <p className="text-sm text-gray-600 mb-1">{t('processed_events.pairing_rate')}</p>
+              <p className="text-3xl font-bold text-purple-900">{kpis.pairingRate}%</p>
               <p className="text-xs text-gray-500 mt-1">
-                {t('processed_events.raw_events_per_processed')}
+                {t('processed_events.pairing_rate_description')}
               </p>
             </div>
-            <div className="p-3 bg-orange-50 rounded-lg">
-              <Package className="w-6 h-6 text-orange-600" />
+            <div className="p-3 bg-green-50 rounded-lg">
+              <CheckCircle className="w-6 h-6 text-green-600" />
             </div>
           </div>
         </div>

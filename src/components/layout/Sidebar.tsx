@@ -268,10 +268,10 @@ export function Sidebar() {
         },
         {
           path: '/diagnosis/processed-events',
-          label: t('menu.diagnosis_db'),
+          label: t('menu.rfid_events_db'),
           icon: CheckCircle,
           roles: ['admin', 'superadmin'],
-          tooltip: t('menu.diagnosis_db.tooltip'),
+          tooltip: t('menu.rfid_events_db.tooltip'),
         },
       ],
     },

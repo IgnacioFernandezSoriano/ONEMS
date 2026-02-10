@@ -2237,5 +2237,26 @@ processed_events.business_hours_avg,متوسط ساعات العمل
 processed_events.showing_records,عرض {filtered} من {total} حدث
 menu.processed_events,أحداث RFID الموحدة
 menu.processed_events.tooltip,عرض وتحليل أحداث RFID المعالجة
-menu.diagnosis_db,Diagnosis DB
-menu.diagnosis_db.tooltip,قاعدة بيانات تشخيص RFID مع الأحداث الموحدة
+menu.rfid_events_db,RFID Events DB
+menu.rfid_events_db.tooltip,قاعدة بيانات أحداث RFID المعالجة مع الأحداث الموحدة
+processed_events.pairing,الاقتران
+processed_events.pairing_tooltip,يشير إلى ما إذا كان الحدث له زوج مقابل (دخول مع خروج أو العكس) في نفس المركز البريدي
+processed_events.tag_id_tooltip,المعرف الفريد لعلامة RFID التي اكتشفها القارئ
+processed_events.postal_center_tooltip,المركز البريدي حيث تم تسجيل حدث RFID
+processed_events.event_type_tooltip,نوع الحدث: ENTRY (الدخول إلى المركز) أو EXIT (الخروج من المركز)
+processed_events.reader_id_tooltip,رمز قارئ RFID الذي اكتشف العلامة
+processed_events.reader_type_tooltip,نوع القارئ: Entry (المداخل فقط)، Exit (المخارج فقط)، أو Mixed (كلاهما)
+processed_events.timestamp_tooltip,التاريخ والوقت الدقيق لتسجيل حدث RFID
+processed_events.raw_count_tooltip,عدد القراءات الخام الموحدة في هذا الحدث المعالج
+processed_events.has_pair,له زوج
+processed_events.no_pair,بدون زوج
+processed_events.pairing_status,حالة الاقتران
+processed_events.pairing_description,دخول + خروج
+processed_events.segmentation_status,حالة التجزئة
+processed_events.segmentation_description,Journey Segments المنشأة
+processed_events.done,مكتمل
+processed_events.pending,قيد الانتظار
+processed_events.pairing_rate,معدل الاقتران
+processed_events.pairing_rate_description,% من الأحداث مع زوج
+processed_events.pairing_filter,الاقتران
+processed_events.all_pairing,جميع الحالات

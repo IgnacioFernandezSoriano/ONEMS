@@ -2237,5 +2237,26 @@ processed_events.business_hours_avg,promedio en horario laboral
 processed_events.showing_records,Mostrando {filtered} de {total} eventos
 menu.processed_events,Eventos RFID Consolidados
 menu.processed_events.tooltip,Visualizar y analizar eventos RFID procesados
-menu.diagnosis_db,Diagnosis DB
-menu.diagnosis_db.tooltip,Base de datos de diagnóstico RFID con eventos consolidados
+menu.rfid_events_db,RFID Events DB
+menu.rfid_events_db.tooltip,Base de datos de eventos RFID procesados con eventos consolidados
+processed_events.pairing,Emparejamiento
+processed_events.pairing_tooltip,Indica si el evento tiene su par correspondiente (entrada con salida o viceversa) en el mismo centro postal
+processed_events.tag_id_tooltip,Identificador único del tag RFID que fue detectado por el lector
+processed_events.postal_center_tooltip,Centro postal donde se registró el evento RFID
+processed_events.event_type_tooltip,Tipo de evento: ENTRY (entrada al centro) o EXIT (salida del centro)
+processed_events.reader_id_tooltip,Código del lector RFID que detectó el tag
+processed_events.reader_type_tooltip,Tipo de lector: Entry (solo entradas), Exit (solo salidas), o Mixed (ambos)
+processed_events.timestamp_tooltip,Fecha y hora exacta en que se registró el evento RFID
+processed_events.raw_count_tooltip,Número de lecturas raw que se consolidaron en este evento procesado
+processed_events.has_pair,Tiene par
+processed_events.no_pair,Sin par
+processed_events.pairing_status,Estado de Emparejamiento
+processed_events.pairing_description,Entrada + Salida
+processed_events.segmentation_status,Estado de Segmentación
+processed_events.segmentation_description,Journey Segments creados
+processed_events.done,Completado
+processed_events.pending,Pendiente
+processed_events.pairing_rate,Tasa de Emparejamiento
+processed_events.pairing_rate_description,% de eventos con par
+processed_events.pairing_filter,Emparejamiento
+processed_events.all_pairing,Todos los estados

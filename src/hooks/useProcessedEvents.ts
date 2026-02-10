@@ -22,12 +22,16 @@ export interface ProcessedEvent {
   // Joined data
   postal_center_name?: string;
   postal_center_code?: string;
+  // Pairing status
+  has_pair?: boolean;
+  pair_event_id?: number | null;
 }
 
 export interface ProcessedEventsFilters {
   search?: string;
   postal_center_id?: string;
   event_type?: 'entry' | 'exit' | null;
+  pairing_status?: 'paired' | 'unpaired' | null;
   date_from?: string;
   date_to?: string;
 }
@@ -99,14 +103,81 @@ export const useProcessedEvents = (accountId: string | undefined) => {
         sampleData: allRecords[0] || null,
       });
 
-      setRecords(allRecords);
-      setFilteredRecords(allRecords);
+      // Calculate pairing status for each event
+      const recordsWithPairing = calculatePairingStatus(allRecords);
+
+      // Sort by tag_id, postal_center_id, and timestamp
+      recordsWithPairing.sort((a, b) => {
+        // First by tag_id
+        if (a.tag_id !== b.tag_id) {
+          return a.tag_id.localeCompare(b.tag_id);
+        }
+        // Then by postal_center_id
+        if (a.postal_center_id !== b.postal_center_id) {
+          return a.postal_center_id.localeCompare(b.postal_center_id);
+        }
+        // Finally by timestamp (ascending - entry first, exit later)
+        return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
+      });
+
+      setRecords(recordsWithPairing);
+      setFilteredRecords(recordsWithPairing);
     } catch (err: any) {
       setError(err.message);
       console.error('Error fetching processed events:', err);
     } finally {
       setLoading(false);
     }
+  };
+
+  const calculatePairingStatus = (events: ProcessedEvent[]): ProcessedEvent[] => {
+    // Group events by tag_id and postal_center_id
+    const eventsByTagAndCenter = events.reduce((acc, event) => {
+      const key = `${event.tag_id}_${event.postal_center_id}`;
+      if (!acc[key]) {
+        acc[key] = { entry: [], exit: [] };
+      }
+      if (event.event_type === 'entry') {
+        acc[key].entry.push(event);
+      } else {
+        acc[key].exit.push(event);
+      }
+      return acc;
+    }, {} as Record<string, { entry: ProcessedEvent[]; exit: ProcessedEvent[] }>);
+
+    // Mark events with pairs
+    const updatedEvents = events.map((event) => {
+      const key = `${event.tag_id}_${event.postal_center_id}`;
+      const group = eventsByTagAndCenter[key];
+
+      if (!group) {
+        return { ...event, has_pair: false, pair_event_id: null };
+      }
+
+      if (event.event_type === 'entry') {
+        // Find matching exit after this entry
+        const matchingExit = group.exit.find(
+          (exit) => exit.timestamp > event.timestamp
+        );
+        return {
+          ...event,
+          has_pair: !!matchingExit,
+          pair_event_id: matchingExit?.id || null,
+        };
+      } else {
+        // Find matching entry before this exit
+        const matchingEntry = group.entry.find(
+          (entry) => entry.timestamp < event.timestamp
+        );
+        return {
+          ...event,
+          has_pair: !!matchingEntry,
+          pair_event_id: matchingEntry?.id || null,
+        };
+      }
+    });
+
+    return updatedEvents;
   };
 
   const applyFilters = (filters: ProcessedEventsFilters) => {
@@ -132,6 +203,15 @@ export const useProcessedEvents = (accountId: string | undefined) => {
     // Event type filter
     if (filters.event_type) {
       filtered = filtered.filter((r) => r.event_type === filters.event_type);
+    }
+
+    // Pairing status filter
+    if (filters.pairing_status) {
+      if (filters.pairing_status === 'paired') {
+        filtered = filtered.filter((r) => r.has_pair === true);
+      } else if (filters.pairing_status === 'unpaired') {
+        filtered = filtered.filter((r) => r.has_pair === false);
+      }
     }
 
     // Date range filter (timestamp)
@@ -166,7 +246,8 @@ export const useProcessedEvents = (accountId: string | undefined) => {
       'Timestamp',
       'Analysis DateTime',
       'Reader Type',
-      'Is Consolidated',
+      'Has Pair',
+      'Pair Event ID',
       'Raw Event Count',
       'Created At',
     ];
@@ -181,7 +262,8 @@ export const useProcessedEvents = (accountId: string | undefined) => {
       record.timestamp,
       record.analysis_datetime,
       record.reader_type_snapshot,
-      record.is_consolidated ? 'Yes' : 'No',
+      record.has_pair ? 'Yes' : 'No',
+      record.pair_event_id?.toString() || 'N/A',
       record.raw_event_count.toString(),
       record.created_at,
     ]);

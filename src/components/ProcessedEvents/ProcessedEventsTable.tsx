@@ -1,6 +1,7 @@
 import { ProcessedEvent } from '../../hooks/useProcessedEvents';
-import { CheckSquare, Square, Clock, Database } from 'lucide-react';
+import { CheckSquare, Square, Link2, Link2Off } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
+import { SmartTooltip } from '../common/SmartTooltip';
 
 interface ProcessedEventsTableProps {
   records: ProcessedEvent[];
@@ -51,7 +52,9 @@ export function ProcessedEventsTable({
     return (
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
         <div className="text-gray-400 mb-2">
-          <Database className="w-12 h-12 mx-auto" />
+          <svg className="w-12 h-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+          </svg>
         </div>
         <p className="text-gray-600">{t('processed_events.no_records')}</p>
       </div>
@@ -78,31 +81,46 @@ export function ProcessedEventsTable({
                 </button>
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {t('processed_events.tag_id')}
+                <div className="flex items-center gap-1">
+                  {t('processed_events.pairing')}
+                  <SmartTooltip content={t('processed_events.pairing_tooltip')} />
+                </div>
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {t('processed_events.postal_center')}
+                <div className="flex items-center gap-1">
+                  {t('processed_events.tag_id')}
+                  <SmartTooltip content={t('processed_events.tag_id_tooltip')} />
+                </div>
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {t('processed_events.event_type')}
+                <div className="flex items-center gap-1">
+                  {t('processed_events.postal_center')}
+                  <SmartTooltip content={t('processed_events.postal_center_tooltip')} />
+                </div>
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {t('processed_events.reader_id')}
+                <div className="flex items-center gap-1">
+                  {t('processed_events.event_type')}
+                  <SmartTooltip content={t('processed_events.event_type_tooltip')} />
+                </div>
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {t('processed_events.reader_type')}
+                <div className="flex items-center gap-1">
+                  {t('processed_events.reader_id')}
+                  <SmartTooltip content={t('processed_events.reader_id_tooltip')} />
+                </div>
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {t('processed_events.timestamp')}
+                <div className="flex items-center gap-1">
+                  {t('processed_events.reader_type')}
+                  <SmartTooltip content={t('processed_events.reader_type_tooltip')} />
+                </div>
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {t('processed_events.analysis_time')}
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {t('processed_events.consolidated')}
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {t('processed_events.raw_count')}
+                <div className="flex items-center gap-1">
+                  {t('processed_events.timestamp')}
+                  <SmartTooltip content={t('processed_events.timestamp_tooltip')} />
+                </div>
               </th>
             </tr>
           </thead>
@@ -127,6 +145,17 @@ export function ProcessedEventsTable({
                         <Square className="w-5 h-5" />
                       )}
                     </button>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {record.has_pair ? (
+                      <div className="flex items-center gap-1 text-green-600" title={t('processed_events.has_pair')}>
+                        <Link2 className="w-4 h-4" />
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1 text-orange-600" title={t('processed_events.no_pair')}>
+                        <Link2Off className="w-4 h-4" />
+                      </div>
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className="text-sm font-mono text-gray-900">{record.tag_id}</span>
@@ -158,26 +187,6 @@ export function ProcessedEventsTable({
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className="text-sm text-gray-900">{formatDateTime(record.timestamp)}</span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm text-gray-900">{formatDateTime(record.analysis_datetime)}</span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`px-2 py-1 text-xs font-medium rounded-full ${
-                        record.is_consolidated
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-yellow-100 text-yellow-700'
-                      }`}
-                    >
-                      {record.is_consolidated ? 'Yes' : 'No'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center gap-1 text-sm text-gray-900">
-                      <Database className="w-4 h-4 text-gray-400" />
-                      {record.raw_event_count}
-                    </div>
                   </td>
                 </tr>
               );

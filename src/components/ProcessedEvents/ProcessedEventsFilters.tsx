@@ -26,6 +26,7 @@ export function ProcessedEventsFilters({ records, onFilterChange }: ProcessedEve
     search: '',
     postal_center_id: '',
     event_type: null,
+    pairing_status: null,
     date_from: '',
     date_to: '',
   });
@@ -60,6 +61,7 @@ export function ProcessedEventsFilters({ records, onFilterChange }: ProcessedEve
       search: '',
       postal_center_id: '',
       event_type: null,
+      pairing_status: null,
       date_from: '',
       date_to: '',
     };
@@ -71,6 +73,7 @@ export function ProcessedEventsFilters({ records, onFilterChange }: ProcessedEve
     filters.search,
     filters.postal_center_id,
     filters.event_type,
+    filters.pairing_status,
     filters.date_from,
     filters.date_to,
   ].filter(Boolean).length;
@@ -135,7 +138,7 @@ export function ProcessedEventsFilters({ records, onFilterChange }: ProcessedEve
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             {/* Postal Center */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -170,6 +173,24 @@ export function ProcessedEventsFilters({ records, onFilterChange }: ProcessedEve
                 <option value="">{t('processed_events.all_types')}</option>
                 <option value="entry">{t('processed_events.type_entry')}</option>
                 <option value="exit">{t('processed_events.type_exit')}</option>
+              </select>
+            </div>
+
+            {/* Pairing Status */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('processed_events.pairing_filter')}
+              </label>
+              <select
+                value={filters.pairing_status || ''}
+                onChange={(e) =>
+                  handleFilterChange('pairing_status', e.target.value || null)
+                }
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="">{t('processed_events.all_pairing')}</option>
+                <option value="paired">{t('processed_events.paired')}</option>
+                <option value="unpaired">{t('processed_events.unpaired')}</option>
               </select>
             </div>
 
