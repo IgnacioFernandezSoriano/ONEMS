@@ -25,7 +25,7 @@ export function ProcessedEventsFilters({ records, onFilterChange }: ProcessedEve
   const [filters, setFilters] = useState<Filters>({
     search: '',
     postal_center_id: '',
-    reader_type: null,
+    event_type: null,
     date_from: '',
     date_to: '',
   });
@@ -59,7 +59,7 @@ export function ProcessedEventsFilters({ records, onFilterChange }: ProcessedEve
     const resetFilters: Filters = {
       search: '',
       postal_center_id: '',
-      reader_type: null,
+      event_type: null,
       date_from: '',
       date_to: '',
     };
@@ -70,7 +70,7 @@ export function ProcessedEventsFilters({ records, onFilterChange }: ProcessedEve
   const activeFiltersCount = [
     filters.search,
     filters.postal_center_id,
-    filters.reader_type,
+    filters.event_type,
     filters.date_from,
     filters.date_to,
   ].filter(Boolean).length;
@@ -155,22 +155,21 @@ export function ProcessedEventsFilters({ records, onFilterChange }: ProcessedEve
               </select>
             </div>
 
-            {/* Reader Type */}
+            {/* Event Type */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('processed_events.reader_type')}
+                {t('processed_events.event_type')}
               </label>
               <select
-                value={filters.reader_type || ''}
+                value={filters.event_type || ''}
                 onChange={(e) =>
-                  handleFilterChange('reader_type', e.target.value || null)
+                  handleFilterChange('event_type', e.target.value || null)
                 }
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="">{t('processed_events.all_types')}</option>
                 <option value="entry">{t('processed_events.type_entry')}</option>
                 <option value="exit">{t('processed_events.type_exit')}</option>
-                <option value="mixed">{t('processed_events.type_mixed')}</option>
               </select>
             </div>
 

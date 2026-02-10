@@ -4,7 +4,7 @@ import { useProcessedEvents, ProcessedEventsFilters as Filters } from '../hooks/
 import { ProcessedEventsFilters } from '../components/ProcessedEvents/ProcessedEventsFilters';
 import { ProcessedEventsTable } from '../components/ProcessedEvents/ProcessedEventsTable';
 import { ProcessedEventsBulkPanel } from '../components/ProcessedEvents/ProcessedEventsBulkPanel';
-import { Database, CheckCircle, Clock, Activity, Download } from 'lucide-react';
+import { Database, CheckCircle, Activity, Package, Download } from 'lucide-react';
 import { SmartTooltip } from '../components/common/SmartTooltip';
 import { useTranslation } from '@/hooks/useTranslation';
 
@@ -26,12 +26,14 @@ export default function ProcessedEvents() {
     if (selectedRecords.length === filteredRecords.length) {
       setSelectedRecords([]);
     } else {
-      setSelectedRecords(filteredRecords.map((r) => r.id));
+      setSelectedRecords(filteredRecords.map((r) => r.id.toString()));
     }
   };
 
   const handleExport = () => {
-    const recordsToExport = filteredRecords.filter((r) => selectedRecords.includes(r.id));
+    const recordsToExport = filteredRecords.filter((r) =>
+      selectedRecords.includes(r.id.toString())
+    );
     exportToCSV(recordsToExport);
   };
 
@@ -47,31 +49,24 @@ export default function ProcessedEvents() {
   // Calculate KPIs
   const kpis = useMemo(() => {
     const total = filteredRecords.length;
-    const entryOnly = filteredRecords.filter((r) => r.reader_type === 'entry').length;
-    const exitOnly = filteredRecords.filter((r) => r.reader_type === 'exit').length;
-    const mixed = filteredRecords.filter((r) => r.reader_type === 'mixed').length;
-    const avgTransitMinutes =
+    const entryEvents = filteredRecords.filter((r) => r.event_type === 'entry').length;
+    const exitEvents = filteredRecords.filter((r) => r.event_type === 'exit').length;
+    const consolidated = filteredRecords.filter((r) => r.is_consolidated).length;
+    const pending = total - consolidated;
+    const avgRawCount =
       total > 0
-        ? filteredRecords
-            .filter((r) => r.transit_minutes !== null)
-            .reduce((sum, r) => sum + (r.transit_minutes || 0), 0) /
-          filteredRecords.filter((r) => r.transit_minutes !== null).length
-        : 0;
-    const avgAdjustedMinutes =
-      total > 0
-        ? filteredRecords
-            .filter((r) => r.adjusted_minutes !== null)
-            .reduce((sum, r) => sum + (r.adjusted_minutes || 0), 0) /
-          filteredRecords.filter((r) => r.adjusted_minutes !== null).length
-        : 0;
+        ? (
+            filteredRecords.reduce((sum, r) => sum + r.raw_event_count, 0) / total
+          ).toFixed(1)
+        : '0';
 
     return {
       total,
-      entryOnly,
-      exitOnly,
-      mixed,
-      avgTransitMinutes: avgTransitMinutes.toFixed(0),
-      avgAdjustedMinutes: avgAdjustedMinutes.toFixed(0),
+      entryEvents,
+      exitEvents,
+      consolidated,
+      pending,
+      avgRawCount,
     };
   }, [filteredRecords]);
 
@@ -134,7 +129,7 @@ export default function ProcessedEvents() {
               <p className="text-sm text-gray-600 mb-1">{t('processed_events.total_events')}</p>
               <p className="text-3xl font-bold text-gray-900">{kpis.total}</p>
               <p className="text-xs text-gray-500 mt-1">
-                {t('processed_events.consolidated_events')}
+                {t('processed_events.processed_events')}
               </p>
             </div>
             <div className="p-3 bg-green-50 rounded-lg">
@@ -143,25 +138,21 @@ export default function ProcessedEvents() {
           </div>
         </div>
 
-        {/* Entry/Exit/Mixed Distribution */}
+        {/* Entry/Exit Distribution */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 mb-1">{t('processed_events.by_type')}</p>
               <div className="flex items-center gap-2 mt-2">
                 <span className="text-sm font-medium text-blue-600">
-                  {kpis.entryOnly} {t('processed_events.entry_short')}
+                  {kpis.entryEvents} {t('processed_events.entry_short')}
                 </span>
                 <span className="text-gray-400">|</span>
                 <span className="text-sm font-medium text-green-600">
-                  {kpis.exitOnly} {t('processed_events.exit_short')}
-                </span>
-                <span className="text-gray-400">|</span>
-                <span className="text-sm font-medium text-purple-600">
-                  {kpis.mixed} {t('processed_events.mixed_short')}
+                  {kpis.exitEvents} {t('processed_events.exit_short')}
                 </span>
               </div>
-              <p className="text-xs text-gray-500 mt-1">{t('processed_events.reader_types')}</p>
+              <p className="text-xs text-gray-500 mt-1">{t('processed_events.event_types')}</p>
             </div>
             <div className="p-3 bg-blue-50 rounded-lg">
               <Activity className="w-6 h-6 text-blue-600" />
@@ -169,32 +160,42 @@ export default function ProcessedEvents() {
           </div>
         </div>
 
-        {/* Average Transit Time */}
+        {/* Consolidated Status */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 mb-1">{t('processed_events.avg_transit')}</p>
-              <p className="text-3xl font-bold text-gray-900">{kpis.avgTransitMinutes}</p>
-              <p className="text-xs text-gray-500 mt-1">{t('processed_events.minutes_avg')}</p>
+              <p className="text-sm text-gray-600 mb-1">{t('processed_events.consolidated_status')}</p>
+              <div className="flex items-center gap-2 mt-2">
+                <span className="text-sm font-medium text-green-600">
+                  {kpis.consolidated} {t('processed_events.done')}
+                </span>
+                <span className="text-gray-400">|</span>
+                <span className="text-sm font-medium text-yellow-600">
+                  {kpis.pending} {t('processed_events.pending')}
+                </span>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                {t('processed_events.consolidation_progress')}
+              </p>
             </div>
-            <div className="p-3 bg-orange-50 rounded-lg">
-              <Clock className="w-6 h-6 text-orange-600" />
+            <div className="p-3 bg-green-50 rounded-lg">
+              <CheckCircle className="w-6 h-6 text-green-600" />
             </div>
           </div>
         </div>
 
-        {/* Average Adjusted Time */}
+        {/* Average Raw Count */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 mb-1">{t('processed_events.avg_adjusted')}</p>
-              <p className="text-3xl font-bold text-blue-900">{kpis.avgAdjustedMinutes}</p>
+              <p className="text-sm text-gray-600 mb-1">{t('processed_events.avg_raw_count')}</p>
+              <p className="text-3xl font-bold text-blue-900">{kpis.avgRawCount}</p>
               <p className="text-xs text-gray-500 mt-1">
-                {t('processed_events.business_hours_avg')}
+                {t('processed_events.raw_events_per_processed')}
               </p>
             </div>
-            <div className="p-3 bg-blue-50 rounded-lg">
-              <CheckCircle className="w-6 h-6 text-blue-600" />
+            <div className="p-3 bg-orange-50 rounded-lg">
+              <Package className="w-6 h-6 text-orange-600" />
             </div>
           </div>
         </div>

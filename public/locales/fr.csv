@@ -2212,6 +2212,20 @@ processed_events.export_selected,Exporter les enregistrements sélectionnés
 processed_events.clear_selection,Effacer la sélection
 processed_events.total_events,Total des Événements
 processed_events.consolidated_events,Événements consolidés
+processed_events.processed_events,Événements traités
+processed_events.event_type,Type d'Événement
+processed_events.reader_id,ID du Lecteur
+processed_events.timestamp,Timestamp
+processed_events.analysis_time,Heure d'Analyse
+processed_events.consolidated,Consolidé
+processed_events.raw_count,Événements Bruts
+processed_events.event_types,Types d'événement
+processed_events.consolidated_status,Statut de Consolidation
+processed_events.done,Terminés
+processed_events.pending,En attente
+processed_events.consolidation_progress,Progrès de consolidation
+processed_events.avg_raw_count,Moyenne Raw Count
+processed_events.raw_events_per_processed,événements bruts par traité
 processed_events.by_type,Par Type
 processed_events.entry_short,Entrée
 processed_events.exit_short,Sortie
@@ -2224,3 +2238,5 @@ processed_events.business_hours_avg,moyenne en heures ouvrables
 processed_events.showing_records,Affichage de {filtered} sur {total} événements
 menu.processed_events,Événements RFID Consolidés
 menu.processed_events.tooltip,Visualiser et analyser les événements RFID traités
+menu.diagnosis_db,Diagnosis DB
+menu.diagnosis_db.tooltip,Base de données de diagnostic RFID avec événements consolidés

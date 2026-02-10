@@ -3,29 +3,31 @@ import { supabase } from '../lib/supabase';
 import { useEffectiveAccountId } from './useEffectiveAccountId';
 
 export interface ProcessedEvent {
-  id: string;
+  id: number;
   account_id: string;
   tag_id: string;
-  entry_reader_id: string;
-  exit_reader_id: string | null;
-  entry_time: string;
-  exit_time: string | null;
-  transit_minutes: number | null;
-  adjusted_minutes: number | null;
+  reader_id: string;
   postal_center_id: string;
-  reader_type: 'entry' | 'exit' | 'mixed';
+  event_type: 'entry' | 'exit';
+  timestamp: string;
+  analysis_datetime: string;
+  postal_center_code_snapshot: string;
+  postal_center_name_snapshot: string;
+  reader_id_snapshot: string;
+  reader_type_snapshot: string;
+  is_consolidated: boolean;
+  raw_event_count: number;
   created_at: string;
+  processed_at: string | null;
   // Joined data
   postal_center_name?: string;
   postal_center_code?: string;
-  entry_reader_name?: string;
-  exit_reader_name?: string;
 }
 
 export interface ProcessedEventsFilters {
   search?: string;
   postal_center_id?: string;
-  reader_type?: 'entry' | 'exit' | 'mixed' | null;
+  event_type?: 'entry' | 'exit' | null;
   date_from?: string;
   date_to?: string;
 }
@@ -71,7 +73,7 @@ export const useProcessedEvents = (accountId: string | undefined) => {
             )
           `)
           .eq('account_id', activeAccountId)
-          .order('entry_time', { ascending: false })
+          .order('timestamp', { ascending: false })
           .range(start, start + pageSize - 1);
 
         if (fetchError) throw fetchError;
@@ -80,8 +82,8 @@ export const useProcessedEvents = (accountId: string | undefined) => {
           // Transform data to include joined fields
           const transformedData = data.map((record: any) => ({
             ...record,
-            postal_center_name: record.postal_centers?.name || 'Unknown',
-            postal_center_code: record.postal_centers?.code || 'N/A',
+            postal_center_name: record.postal_centers?.name || record.postal_center_name_snapshot || 'Unknown',
+            postal_center_code: record.postal_centers?.code || record.postal_center_code_snapshot || 'N/A',
           }));
 
           allRecords.push(...transformedData);
@@ -116,10 +118,9 @@ export const useProcessedEvents = (accountId: string | undefined) => {
       filtered = filtered.filter(
         (r) =>
           r.tag_id.toLowerCase().includes(searchLower) ||
-          r.entry_reader_id.toLowerCase().includes(searchLower) ||
-          (r.exit_reader_id && r.exit_reader_id.toLowerCase().includes(searchLower)) ||
-          (r.postal_center_name && r.postal_center_name.toLowerCase().includes(searchLower)) ||
-          (r.postal_center_code && r.postal_center_code.toLowerCase().includes(searchLower))
+          r.reader_id_snapshot.toLowerCase().includes(searchLower) ||
+          (r.postal_center_name_snapshot && r.postal_center_name_snapshot.toLowerCase().includes(searchLower)) ||
+          (r.postal_center_code_snapshot && r.postal_center_code_snapshot.toLowerCase().includes(searchLower))
       );
     }
 
@@ -128,14 +129,14 @@ export const useProcessedEvents = (accountId: string | undefined) => {
       filtered = filtered.filter((r) => r.postal_center_id === filters.postal_center_id);
     }
 
-    // Reader type filter
-    if (filters.reader_type) {
-      filtered = filtered.filter((r) => r.reader_type === filters.reader_type);
+    // Event type filter
+    if (filters.event_type) {
+      filtered = filtered.filter((r) => r.event_type === filters.event_type);
     }
 
-    // Date range filter (entry_time)
+    // Date range filter (timestamp)
     if (filters.date_from) {
-      filtered = filtered.filter((r) => r.entry_time >= filters.date_from!);
+      filtered = filtered.filter((r) => r.timestamp >= filters.date_from!);
     }
 
     if (filters.date_to) {
@@ -143,7 +144,7 @@ export const useProcessedEvents = (accountId: string | undefined) => {
       const endDate = new Date(filters.date_to);
       endDate.setDate(endDate.getDate() + 1);
       const endDateStr = endDate.toISOString().split('T')[0];
-      filtered = filtered.filter((r) => r.entry_time < endDateStr);
+      filtered = filtered.filter((r) => r.timestamp < endDateStr);
     }
 
     setFilteredRecords(filtered);
@@ -160,28 +161,28 @@ export const useProcessedEvents = (accountId: string | undefined) => {
       'ID',
       'Tag ID',
       'Postal Center',
-      'Entry Reader',
-      'Exit Reader',
-      'Entry Time',
-      'Exit Time',
-      'Transit Minutes',
-      'Adjusted Minutes',
+      'Reader ID',
+      'Event Type',
+      'Timestamp',
+      'Analysis DateTime',
       'Reader Type',
+      'Is Consolidated',
+      'Raw Event Count',
       'Created At',
     ];
 
     // Convert records to CSV rows
     const rows = recordsToExport.map((record) => [
-      record.id,
+      record.id.toString(),
       record.tag_id,
-      record.postal_center_name || 'N/A',
-      record.entry_reader_id,
-      record.exit_reader_id || 'N/A',
-      record.entry_time,
-      record.exit_time || 'N/A',
-      record.transit_minutes?.toString() || 'N/A',
-      record.adjusted_minutes?.toString() || 'N/A',
-      record.reader_type,
+      record.postal_center_name_snapshot || 'N/A',
+      record.reader_id_snapshot,
+      record.event_type,
+      record.timestamp,
+      record.analysis_datetime,
+      record.reader_type_snapshot,
+      record.is_consolidated ? 'Yes' : 'No',
+      record.raw_event_count.toString(),
       record.created_at,
     ]);
 
@@ -193,7 +194,7 @@ export const useProcessedEvents = (accountId: string | undefined) => {
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', `processed_events_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `diagnosis_db_${new Date().toISOString().split('T')[0]}.csv`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();

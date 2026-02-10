@@ -266,6 +266,13 @@ export function Sidebar() {
           roles: ['admin', 'superadmin'],
           tooltip: t('menu.get_api.tooltip'),
         },
+        {
+          path: '/diagnosis/processed-events',
+          label: t('menu.diagnosis_db'),
+          icon: CheckCircle,
+          roles: ['admin', 'superadmin'],
+          tooltip: t('menu.diagnosis_db.tooltip'),
+        },
       ],
     },
     {
@@ -285,13 +292,7 @@ export function Sidebar() {
           roles: ['admin', 'superadmin'],
           tooltip: t('menu.event_consolidation.tooltip'),
         },
-        {
-          path: '/diagnosis/processed-events',
-          label: t('menu.processed_events'),
-          icon: CheckCircle,
-          roles: ['admin', 'superadmin'],
-          tooltip: t('menu.processed_events.tooltip'),
-        },
+
         {
           path: '/settings/account-configuration',
           label: t('menu.account_configuration'),

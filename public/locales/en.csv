@@ -2211,6 +2211,20 @@ processed_events.export_selected,Export selected records
 processed_events.clear_selection,Clear selection
 processed_events.total_events,Total Events
 processed_events.consolidated_events,Consolidated events
+processed_events.processed_events,Processed events
+processed_events.event_type,Event Type
+processed_events.reader_id,Reader ID
+processed_events.timestamp,Timestamp
+processed_events.analysis_time,Analysis Time
+processed_events.consolidated,Consolidated
+processed_events.raw_count,Raw Events
+processed_events.event_types,Event types
+processed_events.consolidated_status,Consolidation Status
+processed_events.done,Done
+processed_events.pending,Pending
+processed_events.consolidation_progress,Consolidation progress
+processed_events.avg_raw_count,Avg. Raw Count
+processed_events.raw_events_per_processed,raw events per processed
 processed_events.by_type,By Type
 processed_events.entry_short,Entry
 processed_events.exit_short,Exit
@@ -2223,3 +2237,5 @@ processed_events.business_hours_avg,business hours average
 processed_events.showing_records,Showing {filtered} of {total} events
 menu.processed_events,Consolidated RFID Events
 menu.processed_events.tooltip,View and analyze processed RFID events
+menu.diagnosis_db,Diagnosis DB
+menu.diagnosis_db.tooltip,RFID diagnosis database with consolidated events

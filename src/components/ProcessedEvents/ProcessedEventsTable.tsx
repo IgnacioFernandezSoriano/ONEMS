@@ -1,5 +1,5 @@
 import { ProcessedEvent } from '../../hooks/useProcessedEvents';
-import { CheckSquare, Square, Clock, ArrowRight } from 'lucide-react';
+import { CheckSquare, Square, Clock, Database } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 
 interface ProcessedEventsTableProps {
@@ -28,21 +28,19 @@ export function ProcessedEventsTable({
     });
   };
 
-  const formatMinutes = (minutes: number | null) => {
-    if (minutes === null) return 'N/A';
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    if (hours > 0) {
-      return `${hours}h ${mins}m`;
-    }
-    return `${mins}m`;
+  const getEventTypeBadge = (type: string) => {
+    const badges = {
+      entry: 'bg-blue-100 text-blue-700',
+      exit: 'bg-green-100 text-green-700',
+    };
+    return badges[type as keyof typeof badges] || 'bg-gray-100 text-gray-700';
   };
 
   const getReaderTypeBadge = (type: string) => {
     const badges = {
-      entry: 'bg-blue-100 text-blue-700',
-      exit: 'bg-green-100 text-green-700',
-      mixed: 'bg-purple-100 text-purple-700',
+      Entry: 'bg-blue-100 text-blue-700',
+      Exit: 'bg-green-100 text-green-700',
+      Mixed: 'bg-purple-100 text-purple-700',
     };
     return badges[type as keyof typeof badges] || 'bg-gray-100 text-gray-700';
   };
@@ -53,7 +51,7 @@ export function ProcessedEventsTable({
     return (
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
         <div className="text-gray-400 mb-2">
-          <Clock className="w-12 h-12 mx-auto" />
+          <Database className="w-12 h-12 mx-auto" />
         </div>
         <p className="text-gray-600">{t('processed_events.no_records')}</p>
       </div>
@@ -86,31 +84,31 @@ export function ProcessedEventsTable({
                 {t('processed_events.postal_center')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                {t('processed_events.event_type')}
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                {t('processed_events.reader_id')}
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {t('processed_events.reader_type')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {t('processed_events.entry_reader')}
+                {t('processed_events.timestamp')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {t('processed_events.exit_reader')}
+                {t('processed_events.analysis_time')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {t('processed_events.entry_time')}
+                {t('processed_events.consolidated')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {t('processed_events.exit_time')}
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {t('processed_events.transit_time')}
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {t('processed_events.adjusted_time')}
+                {t('processed_events.raw_count')}
               </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
             {records.map((record) => {
-              const isSelected = selectedRecords.includes(record.id);
+              const isSelected = selectedRecords.includes(record.id.toString());
               return (
                 <tr
                   key={record.id}
@@ -120,7 +118,7 @@ export function ProcessedEventsTable({
                 >
                   <td className="px-6 py-4">
                     <button
-                      onClick={() => onSelectRecord(record.id)}
+                      onClick={() => onSelectRecord(record.id.toString())}
                       className="text-gray-600 hover:text-gray-900"
                     >
                       {isSelected ? (
@@ -134,50 +132,51 @@ export function ProcessedEventsTable({
                     <span className="text-sm font-mono text-gray-900">{record.tag_id}</span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{record.postal_center_name}</div>
-                    <div className="text-xs text-gray-500">{record.postal_center_code}</div>
+                    <div className="text-sm text-gray-900">{record.postal_center_name_snapshot}</div>
+                    <div className="text-xs text-gray-500">{record.postal_center_code_snapshot}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span
+                      className={`px-2 py-1 text-xs font-medium rounded-full ${getEventTypeBadge(
+                        record.event_type
+                      )}`}
+                    >
+                      {record.event_type.toUpperCase()}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className="text-sm font-mono text-gray-700">{record.reader_id_snapshot}</span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
                       className={`px-2 py-1 text-xs font-medium rounded-full ${getReaderTypeBadge(
-                        record.reader_type
+                        record.reader_type_snapshot
                       )}`}
                     >
-                      {record.reader_type.toUpperCase()}
+                      {record.reader_type_snapshot}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm font-mono text-gray-700">{record.entry_reader_id}</span>
+                    <span className="text-sm text-gray-900">{formatDateTime(record.timestamp)}</span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm font-mono text-gray-700">
-                      {record.exit_reader_id || (
-                        <span className="text-gray-400 italic">N/A</span>
-                      )}
-                    </span>
+                    <span className="text-sm text-gray-900">{formatDateTime(record.analysis_datetime)}</span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm text-gray-900">{formatDateTime(record.entry_time)}</span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm text-gray-900">
-                      {record.exit_time ? (
-                        formatDateTime(record.exit_time)
-                      ) : (
-                        <span className="text-gray-400 italic">N/A</span>
-                      )}
+                    <span
+                      className={`px-2 py-1 text-xs font-medium rounded-full ${
+                        record.is_consolidated
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-yellow-100 text-yellow-700'
+                      }`}
+                    >
+                      {record.is_consolidated ? 'Yes' : 'No'}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center gap-1 text-sm text-gray-900">
-                      <Clock className="w-4 h-4 text-gray-400" />
-                      {formatMinutes(record.transit_minutes)}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center gap-1 text-sm text-gray-900">
-                      <Clock className="w-4 h-4 text-blue-400" />
-                      {formatMinutes(record.adjusted_minutes)}
+                      <Database className="w-4 h-4 text-gray-400" />
+                      {record.raw_event_count}
                     </div>
                   </td>
                 </tr>
