@@ -49,19 +49,18 @@ export function EventConsolidation() {
         .from('incidents')
         .select('*', { count: 'exact', head: true });
 
-      // Get last consolidation timestamp
-      const { data: lastLog } = await supabase
-        .from('processing_logs')
-        .select('created_at')
-        .eq('process_type', 'consolidation')
-        .order('created_at', { ascending: false })
+      // Get last consolidation timestamp from audit_raw_reads
+      const { data: lastAudit } = await supabase
+        .from('audit_raw_reads')
+        .select('archived_at')
+        .order('archived_at', { ascending: false })
         .limit(1)
         .single();
 
       setMetrics({
         pending_events: pendingCount || 0,
         total_incidents: incidentsCount || 0,
-        last_consolidation: lastLog?.created_at || null,
+        last_consolidation: lastAudit?.archived_at || null,
       });
     } catch (error) {
       console.error('Error loading metrics:', error);
