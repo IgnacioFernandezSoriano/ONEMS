@@ -2128,3 +2128,28 @@ menu.setup_e2e,E2E Network
 menu.setup_e2e.tooltip,Configure E2E monitoring network settings
 menu.setup_diagnosis,Diagnosis Network
 menu.setup_diagnosis.tooltip,Configure postal network diagnosis settings
+diagnosis.consolidation.title,Event Consolidation
+diagnosis.consolidation.description,Process raw RFID events and detect system anomalies
+diagnosis.consolidation.run_button,Run Consolidation
+diagnosis.consolidation.pending_events,Pending Events
+diagnosis.consolidation.total_incidents,Total Incidents
+diagnosis.consolidation.last_consolidation,Last Consolidation
+diagnosis.consolidation.never,Never
+diagnosis.consolidation.incidents_table_title,Detected Incidents
+diagnosis.consolidation.no_incidents,No incidents detected
+diagnosis.consolidation.success,Consolidation completed: {processed} events processed - {incidents} incidents detected
+diagnosis.consolidation.error,Consolidation error: {message}
+diagnosis.consolidation.error_no_session,No active session
+diagnosis.consolidation.columns.tag_id,Tag ID
+diagnosis.consolidation.columns.incident_type,Type
+diagnosis.consolidation.columns.postal_center,Postal Center
+diagnosis.consolidation.columns.description,Description
+diagnosis.consolidation.columns.detected_at,Detected At
+diagnosis.consolidation.columns.status,Status
+diagnosis.consolidation.incident_types.missing_exit,Missing Exit
+diagnosis.consolidation.incident_types.unknown_reader,Unknown Reader
+diagnosis.consolidation.incident_types.data_quality,Data Quality
+diagnosis.consolidation.status.resolved,Resolved
+diagnosis.consolidation.status.pending,Pending
+menu.event_consolidation,Event Consolidation
+menu.event_consolidation.tooltip,Process RFID events and detect anomalies

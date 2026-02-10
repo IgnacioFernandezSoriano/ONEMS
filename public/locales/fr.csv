@@ -2129,3 +2129,28 @@ menu.setup_e2e,Réseau E2E
 menu.setup_e2e.tooltip,Configurer les paramètres du réseau de surveillance E2E
 menu.setup_diagnosis,Réseau de Diagnostic
 menu.setup_diagnosis.tooltip,Configurer les paramètres de diagnostic du réseau postal
+diagnosis.consolidation.title,Consolidation des Événements
+diagnosis.consolidation.description,Traiter les événements RFID bruts et détecter les anomalies du système
+diagnosis.consolidation.run_button,Exécuter la Consolidation
+diagnosis.consolidation.pending_events,Événements en Attente
+diagnosis.consolidation.total_incidents,Incidents Totaux
+diagnosis.consolidation.last_consolidation,Dernière Consolidation
+diagnosis.consolidation.never,Jamais
+diagnosis.consolidation.incidents_table_title,Incidents Détectés
+diagnosis.consolidation.no_incidents,Aucun incident détecté
+diagnosis.consolidation.success,Consolidation terminée: {processed} événements traités - {incidents} incidents détectés
+diagnosis.consolidation.error,Erreur de consolidation: {message}
+diagnosis.consolidation.error_no_session,Aucune session active
+diagnosis.consolidation.columns.tag_id,ID d'Étiquette
+diagnosis.consolidation.columns.incident_type,Type
+diagnosis.consolidation.columns.postal_center,Centre Postal
+diagnosis.consolidation.columns.description,Description
+diagnosis.consolidation.columns.detected_at,Détecté le
+diagnosis.consolidation.columns.status,Statut
+diagnosis.consolidation.incident_types.missing_exit,Sortie Manquante
+diagnosis.consolidation.incident_types.unknown_reader,Lecteur Inconnu
+diagnosis.consolidation.incident_types.data_quality,Qualité des Données
+diagnosis.consolidation.status.resolved,Résolu
+diagnosis.consolidation.status.pending,En Attente
+menu.event_consolidation,Consolidation des Événements
+menu.event_consolidation.tooltip,Traiter les événements RFID et détecter les anomalies

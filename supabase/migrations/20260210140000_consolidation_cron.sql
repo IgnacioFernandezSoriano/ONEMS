@@ -118,7 +118,7 @@ BEGIN
         PERFORM cron.schedule(
             'consolidate-rfid-events-hourly',  -- job name
             '0 * * * *',                        -- cron schedule (every hour at minute 0)
-            $$SELECT consolidate_all_accounts()$$  -- SQL command
+            'SELECT consolidate_all_accounts()'  -- SQL command
         );
         
         RAISE NOTICE '✅ Cron job scheduled: consolidate-rfid-events-hourly';
@@ -155,7 +155,7 @@ Query to reschedule with different timing:
 SELECT cron.schedule(
     ''consolidate-rfid-events-hourly'',
     ''0 * * * *'',  -- Change this cron expression
-    $$SELECT consolidate_all_accounts()$$
+    ''SELECT consolidate_all_accounts()''
 );
 ';
 

@@ -2128,3 +2128,28 @@ menu.setup_e2e,شبكة E2E
 menu.setup_e2e.tooltip,تكوين إعدادات شبكة المراقبة E2E
 menu.setup_diagnosis,شبكة التشخيص
 menu.setup_diagnosis.tooltip,تكوين إعدادات تشخيص الشبكة البريدية
+diagnosis.consolidation.title,دمج الأحداث
+diagnosis.consolidation.description,معالجة أحداث RFID الأولية واكتشاف الشذوذات في النظام
+diagnosis.consolidation.run_button,تشغيل الدمج
+diagnosis.consolidation.pending_events,الأحداث المعلقة
+diagnosis.consolidation.total_incidents,إجمالي الحوادث
+diagnosis.consolidation.last_consolidation,آخر دمج
+diagnosis.consolidation.never,أبدًا
+diagnosis.consolidation.incidents_table_title,الحوادث المكتشفة
+diagnosis.consolidation.no_incidents,لم يتم اكتشاف حوادث
+diagnosis.consolidation.success,اكتمل الدمج: {processed} حدث تمت معالجته - {incidents} حادث تم اكتشافه
+diagnosis.consolidation.error,خطأ في الدمج: {message}
+diagnosis.consolidation.error_no_session,لا توجد جلسة نشطة
+diagnosis.consolidation.columns.tag_id,معرف العلامة
+diagnosis.consolidation.columns.incident_type,النوع
+diagnosis.consolidation.columns.postal_center,المركز البريدي
+diagnosis.consolidation.columns.description,الوصف
+diagnosis.consolidation.columns.detected_at,تاريخ الاكتشاف
+diagnosis.consolidation.columns.status,الحالة
+diagnosis.consolidation.incident_types.missing_exit,خروج مفقود
+diagnosis.consolidation.incident_types.unknown_reader,قارئ غير معروف
+diagnosis.consolidation.incident_types.data_quality,جودة البيانات
+diagnosis.consolidation.status.resolved,تم الحل
+diagnosis.consolidation.status.pending,معلق
+menu.event_consolidation,دمج الأحداث
+menu.event_consolidation.tooltip,معالجة أحداث RFID واكتشاف الشذوذات
