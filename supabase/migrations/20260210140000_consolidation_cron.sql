@@ -125,7 +125,6 @@ BEGIN
         
         RAISE NOTICE '✅ Cron job scheduled: consolidate-rfid-events-hourly';
         RAISE NOTICE '   Schedule: Every hour at minute 0';
-        RAISE NOTICE '   Next run: %', (SELECT next_run FROM cron.job WHERE jobname = 'consolidate-rfid-events-hourly');
     ELSE
         RAISE WARNING '⚠️  pg_cron extension is not enabled';
         RAISE WARNING '   Please enable it in Supabase Dashboard: Database > Extensions > pg_cron';
