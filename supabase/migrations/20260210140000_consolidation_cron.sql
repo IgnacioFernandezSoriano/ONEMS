@@ -112,7 +112,9 @@ BEGIN
         SELECT 1 FROM pg_extension WHERE extname = 'pg_cron'
     ) THEN
         -- Remove existing job if it exists
-        PERFORM cron.unschedule('consolidate-rfid-events-hourly');
+        IF EXISTS (SELECT 1 FROM cron.job WHERE jobname = 'consolidate-rfid-events-hourly') THEN
+            PERFORM cron.unschedule('consolidate-rfid-events-hourly');
+        END IF;
         
         -- Schedule new job to run every hour
         PERFORM cron.schedule(
