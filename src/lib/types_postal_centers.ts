@@ -14,6 +14,7 @@ export interface PostalCenter {
   updated_at: string
   created_by?: string
   updated_by?: string
+  deleted_at?: string | null // Soft delete timestamp
 }
 
 export interface Reader {
@@ -30,6 +31,7 @@ export interface Reader {
   updated_at: string
   created_by?: string
   updated_by?: string
+  deleted_at?: string | null // Soft delete timestamp
 }
 
 export interface PostalCenterWithReaders extends PostalCenter {

@@ -30,6 +30,7 @@ export function useSLAs() {
         .from('postal_centers')
         .select('*')
         .eq('is_active', true)
+        .is('deleted_at', null)
 
       if (effectiveAccountId) {
         slasQuery = slasQuery.eq('account_id', effectiveAccountId)
@@ -181,13 +182,21 @@ export function useSLAs() {
   }
 
   const deleteSLA = async (id: string) => {
-    const { error } = await supabase.from('slas').delete().eq('id', id)
+    // Soft delete: set deleted_at timestamp
+    const { error } = await supabase
+      .from('slas')
+      .update({ deleted_at: new Date().toISOString() })
+      .eq('id', id)
     if (error) throw error
     await fetchAll()
   }
 
   const deleteMultiple = async (ids: string[]) => {
-    const { error } = await supabase.from('slas').delete().in('id', ids)
+    // Soft delete: set deleted_at timestamp
+    const { error } = await supabase
+      .from('slas')
+      .update({ deleted_at: new Date().toISOString() })
+      .in('id', ids)
     if (error) throw error
     await fetchAll()
   }

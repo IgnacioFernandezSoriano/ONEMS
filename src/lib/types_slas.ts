@@ -31,6 +31,7 @@ export interface SLA {
   updated_at: string
   created_by: string | null
   updated_by: string | null
+  deleted_at: string | null // Soft delete timestamp
 }
 
 // SLA with joined details for display

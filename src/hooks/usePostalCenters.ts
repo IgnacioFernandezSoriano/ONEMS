@@ -14,10 +14,11 @@ export function usePostalCenters() {
       setLoading(true)
       setError(null)
 
-      // Fetch postal centers
+      // Fetch postal centers (exclude soft-deleted)
       let centersQuery = supabase
         .from('postal_centers')
         .select('*')
+        .is('deleted_at', null)
         .order('name')
 
       if (effectiveAccountId) {
@@ -28,10 +29,11 @@ export function usePostalCenters() {
 
       if (centersError) throw centersError
 
-      // Fetch readers for all centers
+      // Fetch readers for all centers (exclude soft-deleted)
       let readersQuery = supabase
         .from('readers')
         .select('*')
+        .is('deleted_at', null)
         .order('name')
 
       if (effectiveAccountId) {
@@ -182,9 +184,10 @@ export function usePostalCenters() {
   }
 
   const deletePostalCenter = async (id: string) => {
+    // Soft delete: set deleted_at timestamp
     const { error } = await supabase
       .from('postal_centers')
-      .delete()
+      .update({ deleted_at: new Date().toISOString() })
       .eq('id', id)
     if (error) throw error
     await fetchAll()
@@ -210,9 +213,10 @@ export function usePostalCenters() {
   }
 
   const deleteReader = async (id: string) => {
+    // Soft delete: set deleted_at timestamp
     const { error } = await supabase
       .from('readers')
-      .delete()
+      .update({ deleted_at: new Date().toISOString() })
       .eq('id', id)
     if (error) throw error
     await fetchAll()
