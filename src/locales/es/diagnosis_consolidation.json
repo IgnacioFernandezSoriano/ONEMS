@@ -10,9 +10,10 @@
       "never": "Nunca",
       "incidents_table_title": "Incidencias Detectadas",
       "no_incidents": "No se han detectado incidencias",
-      "success": "Consolidación completada: {{processed}} eventos procesados, {{incidents}} incidencias detectadas",
+      "success": "Consolidación completada: {{processed}} eventos procesados, {{created}} eventos creados, {{incidents}} incidencias detectadas",
       "error": "Error en consolidación: {{message}}",
       "error_no_session": "Sesión no válida. Por favor, inicie sesión nuevamente.",
+      "incident_resolved": "Incidencia marcada como resuelta correctamente",
       "columns": {
         "tag_id": "ID Etiqueta",
         "incident_type": "Tipo",
@@ -24,11 +25,34 @@
       "incident_types": {
         "missing_exit": "Salida Faltante",
         "unknown_reader": "Lector Desconocido",
-        "data_quality": "Calidad de Datos"
+        "data_quality": "Calidad de Datos",
+        "missing_entry": "Entrada Faltante",
+        "exit_before_entry": "Salida Antes de Entrada",
+        "sla_violation": "Violación de SLA",
+        "stuck_sample": "Muestra Atascada",
+        "missroute": "Ruta Incorrecta",
+        "duplicate_event": "Evento Duplicado",
+        "invalid_sequence": "Secuencia Inválida"
       },
       "status": {
         "resolved": "Resuelto",
         "pending": "Pendiente"
+      },
+      "details": {
+        "incident_summary": "Resumen de Incidencia",
+        "affected_events": "Eventos Afectados",
+        "reader_code": "Código de Lector",
+        "severity": "Severidad",
+        "detected_at": "Detectado el",
+        "raw_events": "Eventos EPCIS Sin Procesar",
+        "no_raw_events": "No hay eventos sin procesar disponibles",
+        "quick_actions": "Acciones Rápidas"
+      },
+      "actions": {
+        "create_reader": "Crear Lector",
+        "mark_resolved": "Marcar como Resuelto",
+        "reprocess": "Reprocesar",
+        "view_history": "Ver Historial"
       }
     }
   }

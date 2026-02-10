@@ -3,6 +3,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/common/Button';
 import { RefreshCw, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
+import { IncidentDetailsRow } from '@/components/diagnosis/IncidentDetailsRow';
 
 interface ConsolidationMetrics {
   pending_events: number;
@@ -18,6 +19,7 @@ interface Incident {
   detected_at: string;
   resolved: boolean;
   postal_center_name: string;
+  metadata?: any;
 }
 
 export function EventConsolidation() {
@@ -44,10 +46,11 @@ export function EventConsolidation() {
         .select('*', { count: 'exact', head: true })
         .eq('is_processed', false);
 
-      // Get total incidents count
+      // Get total incidents count (only unresolved)
       const { count: incidentsCount } = await supabase
         .from('incidents')
-        .select('*', { count: 'exact', head: true });
+        .select('*', { count: 'exact', head: true })
+        .eq('is_resolved', false);
 
       // Get last consolidation timestamp from most recent incident
       const { data: lastIncident } = await supabase
@@ -80,6 +83,7 @@ export function EventConsolidation() {
           description,
           detected_at,
           is_resolved,
+          metadata,
           postal_centers!incidents_postal_center_id_fkey(name)
         `)
         .order('detected_at', { ascending: false })
@@ -95,6 +99,7 @@ export function EventConsolidation() {
         detected_at: incident.detected_at,
         resolved: incident.is_resolved,
         postal_center_name: incident.postal_centers?.name || 'N/A',
+        metadata: incident.metadata,
       }));
 
       setIncidents(formattedIncidents);
@@ -134,10 +139,15 @@ export function EventConsolidation() {
         throw error;
       }
 
-      alert(t('diagnosis.consolidation.success', {
-        processed: result?.events_processed || 0,
-        incidents: result?.incidents_detected || 0,
-      }));
+      const successMsg = result?.success 
+        ? t('diagnosis.consolidation.success', {
+            processed: result?.events_processed || 0,
+            created: result?.events_created || 0,
+            incidents: result?.incidents_created || 0,
+          })
+        : t('diagnosis.consolidation.error', { message: result?.error || 'Unknown error' });
+
+      alert(successMsg);
 
       // Reload metrics and incidents
       await loadMetrics();
@@ -152,11 +162,41 @@ export function EventConsolidation() {
     }
   };
 
+  const handleResolveIncident = async (incidentId: string) => {
+    try {
+      const { error } = await supabase
+        .from('incidents')
+        .update({ 
+          is_resolved: true,
+          resolved_at: new Date().toISOString(),
+        })
+        .eq('id', incidentId);
+
+      if (error) throw error;
+
+      alert(t('diagnosis.consolidation.incident_resolved'));
+      
+      // Reload data
+      await loadMetrics();
+      await loadIncidents();
+    } catch (error: any) {
+      console.error('Error resolving incident:', error);
+      alert(t('diagnosis.consolidation.error', { message: error.message }));
+    }
+  };
+
   const getIncidentTypeBadge = (type: string) => {
     const colors: Record<string, string> = {
       'missing_exit': 'bg-red-100 text-red-800',
       'unknown_reader': 'bg-yellow-100 text-yellow-800',
       'data_quality': 'bg-orange-100 text-orange-800',
+      'missing_entry': 'bg-red-100 text-red-800',
+      'exit_before_entry': 'bg-red-100 text-red-800',
+      'sla_violation': 'bg-purple-100 text-purple-800',
+      'stuck_sample': 'bg-orange-100 text-orange-800',
+      'missroute': 'bg-yellow-100 text-yellow-800',
+      'duplicate_event': 'bg-gray-100 text-gray-800',
+      'invalid_sequence': 'bg-orange-100 text-orange-800',
     };
     return colors[type] || 'bg-gray-100 text-gray-800';
   };
@@ -193,7 +233,7 @@ export function EventConsolidation() {
         </div>
         <Button
           onClick={runConsolidation}
-          disabled={isConsolidating || metrics.pending_events === 0}
+          disabled={isConsolidating}
           className="flex items-center gap-2"
         >
           <RefreshCw className={`w-4 h-4 ${isConsolidating ? 'animate-spin' : ''}`} />
@@ -265,6 +305,9 @@ export function EventConsolidation() {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12">
+                  {/* Expand icon column */}
+                </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   {t('diagnosis.consolidation.columns.tag_id')}
                 </th>
@@ -288,42 +331,20 @@ export function EventConsolidation() {
             <tbody className="bg-white divide-y divide-gray-200">
               {incidents.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-4 text-center text-sm text-gray-500">
+                  <td colSpan={7} className="px-6 py-4 text-center text-sm text-gray-500">
                     {t('diagnosis.consolidation.no_incidents')}
                   </td>
                 </tr>
               ) : (
                 incidents.map((incident) => (
-                  <tr key={incident.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {incident.tag_id}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getIncidentTypeBadge(incident.incident_type)}`}>
-                        {t(`diagnosis.consolidation.incident_types.${incident.incident_type}`)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {incident.postal_center_name}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">
-                      {incident.description}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {formatDateTime(incident.detected_at)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        incident.resolved
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {incident.resolved
-                          ? t('diagnosis.consolidation.status.resolved')
-                          : t('diagnosis.consolidation.status.pending')}
-                      </span>
-                    </td>
-                  </tr>
+                  <IncidentDetailsRow
+                    key={incident.id}
+                    incident={incident}
+                    getIncidentTypeBadge={getIncidentTypeBadge}
+                    formatDateTime={formatDateTime}
+                    onReprocess={runConsolidation}
+                    onResolve={handleResolveIncident}
+                  />
                 ))
               )}
             </tbody>
