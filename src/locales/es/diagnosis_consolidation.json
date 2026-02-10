@@ -1,0 +1,35 @@
+{
+  "diagnosis": {
+    "consolidation": {
+      "title": "Consolidación de Eventos",
+      "description": "Procesa eventos RFID sin procesar y detecta anomalías en el sistema",
+      "run_button": "Ejecutar Consolidación",
+      "pending_events": "Eventos Pendientes",
+      "total_incidents": "Incidencias Totales",
+      "last_consolidation": "Última Consolidación",
+      "never": "Nunca",
+      "incidents_table_title": "Incidencias Detectadas",
+      "no_incidents": "No se han detectado incidencias",
+      "success": "Consolidación completada: {{processed}} eventos procesados, {{incidents}} incidencias detectadas",
+      "error": "Error en consolidación: {{message}}",
+      "error_no_session": "Sesión no válida. Por favor, inicie sesión nuevamente.",
+      "columns": {
+        "tag_id": "ID Etiqueta",
+        "incident_type": "Tipo",
+        "postal_center": "Centro Postal",
+        "description": "Descripción",
+        "detected_at": "Detectado",
+        "status": "Estado"
+      },
+      "incident_types": {
+        "missing_exit": "Salida Faltante",
+        "unknown_reader": "Lector Desconocido",
+        "data_quality": "Calidad de Datos"
+      },
+      "status": {
+        "resolved": "Resuelto",
+        "pending": "Pendiente"
+      }
+    }
+  }
+}

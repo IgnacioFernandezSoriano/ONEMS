@@ -37,6 +37,7 @@ import AccountReportingConfig from './pages/Settings/AccountReportingConfig'
 import { AccountConfiguration } from './pages/Settings/AccountConfiguration'
 import { PostalCenters } from './pages/PostalCenters'
 import { SLAsConfiguration } from './pages/SLAsConfiguration'
+import { EventConsolidation } from './pages/diagnosis/EventConsolidation'
 
 function App() {
   return (
@@ -103,6 +104,16 @@ function App() {
                       element={
                         <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
                           <SLAsConfiguration />
+                        </ProtectedRoute>
+                      }
+                    />
+                    
+                    {/* Event Consolidation - for admin and superadmin */}
+                    <Route
+                      path="/diagnosis/event-consolidation"
+                      element={
+                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                          <EventConsolidation />
                         </ProtectedRoute>
                       }
                     />

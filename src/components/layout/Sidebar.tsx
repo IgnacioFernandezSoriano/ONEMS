@@ -162,6 +162,13 @@ export function Sidebar() {
               roles: ['admin', 'superadmin'],
               tooltip: t('menu.slas_configuration.tooltip'),
             },
+            {
+              path: '/diagnosis/event-consolidation',
+              label: t('menu.event_consolidation'),
+              icon: RefreshCw,
+              roles: ['admin', 'superadmin'],
+              tooltip: t('menu.event_consolidation.tooltip'),
+            },
           ],
         },
       ],
