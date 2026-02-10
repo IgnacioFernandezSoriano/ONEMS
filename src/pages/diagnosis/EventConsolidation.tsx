@@ -80,8 +80,8 @@ export function EventConsolidation() {
           incident_type,
           description,
           detected_at,
-          resolved,
-          postal_centers!inner(name)
+          is_resolved,
+          postal_centers!incidents_postal_center_id_fkey(name)
         `)
         .order('detected_at', { ascending: false })
         .limit(50);
@@ -94,8 +94,8 @@ export function EventConsolidation() {
         incident_type: incident.incident_type,
         description: incident.description,
         detected_at: incident.detected_at,
-        resolved: incident.resolved,
-        postal_center_name: incident.postal_centers.name,
+        resolved: incident.is_resolved,
+        postal_center_name: incident.postal_centers?.name || 'N/A',
       }));
 
       setIncidents(formattedIncidents);
@@ -107,33 +107,37 @@ export function EventConsolidation() {
   const runConsolidation = async () => {
     setIsConsolidating(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      // Get user's account_id
+      const { data: { user } } = await supabase.auth.getUser();
       
-      if (!session) {
+      if (!user) {
         alert(t('diagnosis.consolidation.error_no_session'));
         return;
       }
 
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/consolidate-rfid-events`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${session.access_token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('account_id')
+        .eq('id', user.id)
+        .single();
 
-      const result = await response.json();
+      if (!profile) {
+        alert('Profile not found');
+        return;
+      }
 
-      if (!response.ok) {
-        throw new Error(result.error || 'Consolidation failed');
+      // Call SQL function directly
+      const { data: result, error } = await supabase.rpc('consolidate_rfid_events', {
+        p_account_id: profile.account_id,
+      });
+
+      if (error) {
+        throw error;
       }
 
       alert(t('diagnosis.consolidation.success', {
-        processed: result.events_processed || 0,
-        incidents: result.incidents_detected || 0,
+        processed: result?.events_processed || 0,
+        incidents: result?.incidents_detected || 0,
       }));
 
       // Reload metrics and incidents
