@@ -1,32 +1,41 @@
 # PROJECT STATE - ONEMS V3 Network Diagnostics Module
 
-**Última Actualización:** 9 de febrero de 2026 - Sesión Sprint 5 (Sites SLA Configuration)
-**Versión:** 3.3 - Sprint 5 Completado
+**Última Actualización:** 10 de febrero de 2026 - Sesión Sprint 6 (Diagnosis DB Schema Complete)
+**Versión:** 3.4 - Sprint 6 Completado
 
 ---
 
-## 📋 ESTADO ACTUAL: SPRINT 5 COMPLETADO
+## 📋 ESTADO ACTUAL: SPRINT 6 COMPLETADO
 
-Durante esta sesión se completó exitosamente el **Sprint 5: Sites SLA Configuration Module** del Network Diagnostics Dashboard.
+Durante esta sesión se completó exitosamente el **Sprint 6: Diagnosis DB Schema Complete** del Network Diagnostics Dashboard.
 
-### Resumen Ejecutivo Sprint 5
+### Resumen Ejecutivo Sprint 6
 
-**Objetivo:** Implementar módulo completo de SLAs Configuration con soporte para SLAs operacionales y de distribución a nivel de centro postal
+**Objetivo:** Crear esquema completo de Diagnosis DB con 4 tablas nuevas e implementar soft delete en tablas de configuración
 
-**Estado:** ✅ **COMPLETADO** - Todas las funcionalidades implementadas y testeadas
+**Estado:** ✅ **COMPLETADO** - Esquema de BD completo y soft delete implementado
 
 **Funcionalidades Implementadas:**
-- ✅ SLAs a nivel de centro postal (no de lectores individuales)
-- ✅ SLA Operacional: Entry → Exit dentro de cada centro
-- ✅ SLA Distribución: Shipments entre centros
-- ✅ Generación selectiva de SLAs pendientes únicamente
-- ✅ Modal de edición individual (sin validación intermedia)
-- ✅ Bulk edit para múltiples registros
-- ✅ Visualización de tiempo en días con formato inteligente
-- ✅ Conversión de unidades: minutos/horas/días → almacenamiento en minutos
-- ✅ CRUD completo con filtros avanzados y CSV export
-- ✅ Traducciones completas en 4 idiomas (en, es, fr, ar)
-- ✅ Nombre del menú: "Sites SLA"
+
+**Parte 1: Soft Delete Implementation**
+- ✅ Agregada columna `deleted_at` a `postal_centers`, `readers`, `slas`
+- ✅ Índices parciales para optimizar filtrado
+- ✅ Políticas RLS actualizadas para filtrar registros eliminados
+- ✅ Hooks actualizados (usePostalCenters, useSLAs) para usar soft delete
+- ✅ Tipos TypeScript actualizados con campo `deleted_at`
+- ✅ Preservación de datos históricos garantizada
+
+**Parte 2: Diagnosis DB Tables (4 tablas nuevas)**
+- ✅ `processed_events` - Eventos RFID consolidados (8 índices, RLS completo)
+- ✅ `journey_segments` - Segmentos calculados operational/distribution (8 índices, RLS completo)
+- ✅ `incidents` - Anomalías detectadas (7 índices, 8 tipos de incidentes, RLS completo)
+- ✅ `journeys` - Journeys completos reconstruidos (7 índices, RLS completo)
+- ✅ 485 líneas de SQL migration
+- ✅ 30+ índices para performance
+- ✅ 16 políticas RLS para seguridad
+- ✅ 400+ líneas de tipos TypeScript
+- ✅ Campos snapshot para reportes históricos
+- ✅ ON DELETE RESTRICT para preservar integridad referencial
 
 ---
 
@@ -40,7 +49,8 @@ Durante esta sesión se completó exitosamente el **Sprint 5: Sites SLA Configur
 3. `ModuloDiagnosticoUserrequirementsV1.md` (Requerimientos de Usuario)
 4. `SPRINT3_SUMMARY.md` (Resumen de Sprint 3)
 5. `SPRINT4_SUMMARY.md` (Resumen de Sprint 4)
-6. `SPRINT5_SUMMARY.md` (Resumen de Sprint 5) - NUEVO
+6. `SPRINT5_SUMMARY.md` (Resumen de Sprint 5)
+7. `SPRINT6_SUMMARY.md` (Resumen de Sprint 6) - NUEVO
 
 **YO leo estos archivos para:**
 - Recordar el estado del proyecto
@@ -85,7 +95,7 @@ Durante esta sesión se completó exitosamente el **Sprint 5: Sites SLA Configur
 - **Repositorio:** `https://github.com/IgnacioFernandezSoriano/ONEMS` (PRIVADO)
 - **Personal Access Token (PAT):** `[Stored securely - not in repository]`
 - **Rama Actual:** `main`
-- **Último Commit:** `a3afde5` - docs: Update SPRINT5_SUMMARY with final implementation details
+- **Último Commit:** `f73a422` - feat(diagnosis): Sprint 6 - Diagnosis DB Schema Complete + Soft Delete
 - **Comandos de configuración:**
   ```bash
   cd /tmp
@@ -289,22 +299,37 @@ Tabla creada (migración `20260209130000_slas_simplified.sql`):
 
 ## 🎯 ROADMAP DETALLADO
 
-### **SPRINT 6: Diagnosis DB Schema Complete**
-**Duración estimada:** 2 horas  
-**Objetivo:** Crear esquema completo de Diagnosis DB para almacenar datos procesados
+### ✅ **SPRINT 6: Diagnosis DB Schema Complete**
+**Duración real:** 3-4 horas  
+**Fecha:** 10 de febrero de 2026  
+**Estado:** ✅ COMPLETADO
 
-#### Tablas a Crear
+#### Tablas Creadas
 
-1. **`processed_events`** (eventos consolidados)
-2. **`journey_segments`** (segmentos de ruta calculados)
-3. **`incidents`** (anomalías detectadas)
-4. **`journeys`** (rutas completas reconstruidas)
+1. **`processed_events`** - Eventos RFID consolidados (8 índices, RLS completo)
+2. **`journey_segments`** - Segmentos calculados operational/distribution (8 índices, RLS completo)
+3. **`incidents`** - Anomalías detectadas (7 índices, 8 tipos, RLS completo)
+4. **`journeys`** - Journeys completos reconstruidos (7 índices, RLS completo)
+
+#### Soft Delete Implementado
+
+- Agregada columna `deleted_at` a `postal_centers`, `readers`, `slas`
+- Índices parciales para optimizar filtrado
+- Políticas RLS actualizadas
+- Hooks actualizados (usePostalCenters, useSLAs)
+- Tipos TypeScript actualizados
 
 **Dependencias:** ✅ SLAs, ✅ Postal Centers, ✅ Readers  
 **Entregables:**
-- Migración SQL completa
-- Documentación de esquema
-- RLS policies
+- ✅ Migración SQL completa (485 líneas)
+- ✅ Tipos TypeScript (400+ líneas)
+- ✅ Documentación completa (SPRINT6_SUMMARY.md)
+- ✅ 30+ índices para performance
+- ✅ 16 políticas RLS para seguridad
+- ✅ Campos snapshot para reportes históricos
+
+**Commits:** 1 commit (`f73a422`)  
+**Archivos:** 7 archivos modificados, 1225 inserciones
 
 ---
 
