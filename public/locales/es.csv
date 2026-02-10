@@ -2153,3 +2153,26 @@ diagnosis.consolidation.status.resolved,Resuelto
 diagnosis.consolidation.status.pending,Pendiente
 menu.event_consolidation,Consolidación de Eventos
 menu.event_consolidation.tooltip,Procesar eventos RFID sin procesar y detectar anomalías
+diagnosis.consolidation.details.affected_events,Eventos Afectados
+diagnosis.consolidation.details.reader_code,Código del Lector
+diagnosis.consolidation.details.severity,Gravedad
+diagnosis.consolidation.details.detected_at,Detectado el
+diagnosis.consolidation.details.raw_events,Eventos EPCIS Sin Procesar
+diagnosis.consolidation.details.no_raw_events,No hay eventos sin procesar disponibles
+diagnosis.consolidation.details.quick_actions,Acciones Rápidas
+diagnosis.consolidation.details.event_of,Evento {current} de {total}
+diagnosis.consolidation.details.event_id,ID de Evento
+diagnosis.consolidation.details.tag_id_epc,ID de Etiqueta (EPC)
+diagnosis.consolidation.details.reader_id,ID del Lector
+diagnosis.consolidation.details.read_datetime,Fecha/Hora de Lectura
+diagnosis.consolidation.details.created_at,Creado el
+diagnosis.consolidation.details.is_processed,Procesado
+diagnosis.consolidation.details.internal_id,ID Interno
+diagnosis.consolidation.details.yes,Sí
+diagnosis.consolidation.details.no,No
+diagnosis.consolidation.actions.create_reader,Crear Lector
+diagnosis.consolidation.actions.mark_resolved,Marcar como Resuelto
+diagnosis.consolidation.actions.reprocess,Reprocesar
+diagnosis.consolidation.actions.view_history,Ver Historial
+diagnosis.consolidation.incident_resolved,Incidencia marcada como resuelta exitosamente
+diagnosis.consolidation.details.incident_summary,Resumen de la Incidencia

@@ -2153,3 +2153,26 @@ diagnosis.consolidation.status.resolved,تم الحل
 diagnosis.consolidation.status.pending,معلق
 menu.event_consolidation,دمج الأحداث
 menu.event_consolidation.tooltip,معالجة أحداث RFID واكتشاف الشذوذات
+diagnosis.consolidation.details.affected_events,الأحداث المتأثرة
+diagnosis.consolidation.details.reader_code,رمز القارئ
+diagnosis.consolidation.details.severity,الخطورة
+diagnosis.consolidation.details.detected_at,تم الاكتشاف في
+diagnosis.consolidation.details.raw_events,أحداث EPCIS الأولية
+diagnosis.consolidation.details.no_raw_events,لا توجد أحداث أولية متاحة
+diagnosis.consolidation.details.quick_actions,إجراءات سريعة
+diagnosis.consolidation.details.event_of,حدث {current} من {total}
+diagnosis.consolidation.details.event_id,معرف الحدث
+diagnosis.consolidation.details.tag_id_epc,معرف العلامة (EPC)
+diagnosis.consolidation.details.reader_id,معرف القارئ
+diagnosis.consolidation.details.read_datetime,تاريخ/وقت القراءة
+diagnosis.consolidation.details.created_at,تم الإنشاء في
+diagnosis.consolidation.details.is_processed,تمت المعالجة
+diagnosis.consolidation.details.internal_id,المعرف الداخلي
+diagnosis.consolidation.details.yes,نعم
+diagnosis.consolidation.details.no,لا
+diagnosis.consolidation.actions.create_reader,إنشاء قارئ
+diagnosis.consolidation.actions.mark_resolved,وضع علامة كمحلول
+diagnosis.consolidation.actions.reprocess,إعادة المعالجة
+diagnosis.consolidation.actions.view_history,عرض السجل
+diagnosis.consolidation.incident_resolved,تم وضع علامة على الحادث كمحلول بنجاح
+diagnosis.consolidation.details.incident_summary,ملخص الحادث

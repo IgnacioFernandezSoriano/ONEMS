@@ -2154,3 +2154,26 @@ diagnosis.consolidation.status.resolved,Résolu
 diagnosis.consolidation.status.pending,En Attente
 menu.event_consolidation,Consolidation des Événements
 menu.event_consolidation.tooltip,Traiter les événements RFID et détecter les anomalies
+diagnosis.consolidation.details.affected_events,Événements Affectés
+diagnosis.consolidation.details.reader_code,Code du Lecteur
+diagnosis.consolidation.details.severity,Gravité
+diagnosis.consolidation.details.detected_at,Détecté le
+diagnosis.consolidation.details.raw_events,Événements EPCIS Bruts
+diagnosis.consolidation.details.no_raw_events,Aucun événement brut disponible
+diagnosis.consolidation.details.quick_actions,Actions Rapides
+diagnosis.consolidation.details.event_of,Événement {current} sur {total}
+diagnosis.consolidation.details.event_id,ID d'Événement
+diagnosis.consolidation.details.tag_id_epc,ID d'Étiquette (EPC)
+diagnosis.consolidation.details.reader_id,ID du Lecteur
+diagnosis.consolidation.details.read_datetime,Date/Heure de Lecture
+diagnosis.consolidation.details.created_at,Créé le
+diagnosis.consolidation.details.is_processed,Traité
+diagnosis.consolidation.details.internal_id,ID Interne
+diagnosis.consolidation.details.yes,Oui
+diagnosis.consolidation.details.no,Non
+diagnosis.consolidation.actions.create_reader,Créer un Lecteur
+diagnosis.consolidation.actions.mark_resolved,Marquer comme Résolu
+diagnosis.consolidation.actions.reprocess,Retraiter
+diagnosis.consolidation.actions.view_history,Voir l'Historique
+diagnosis.consolidation.incident_resolved,Incident marqué comme résolu avec succès
+diagnosis.consolidation.details.incident_summary,Résumé de l'Incident

@@ -2153,3 +2153,26 @@ diagnosis.consolidation.status.resolved,Resolved
 diagnosis.consolidation.status.pending,Pending
 menu.event_consolidation,Event Consolidation
 menu.event_consolidation.tooltip,Process RFID events and detect anomalies
+diagnosis.consolidation.details.affected_events,Affected Events
+diagnosis.consolidation.details.reader_code,Reader Code
+diagnosis.consolidation.details.severity,Severity
+diagnosis.consolidation.details.detected_at,Detected At
+diagnosis.consolidation.details.raw_events,Raw EPCIS Events
+diagnosis.consolidation.details.no_raw_events,No raw events available
+diagnosis.consolidation.details.quick_actions,Quick Actions
+diagnosis.consolidation.details.event_of,Event {current} of {total}
+diagnosis.consolidation.details.event_id,Event ID
+diagnosis.consolidation.details.tag_id_epc,Tag ID (EPC)
+diagnosis.consolidation.details.reader_id,Reader ID
+diagnosis.consolidation.details.read_datetime,Read DateTime
+diagnosis.consolidation.details.created_at,Created At
+diagnosis.consolidation.details.is_processed,Is Processed
+diagnosis.consolidation.details.internal_id,Internal ID
+diagnosis.consolidation.details.yes,Yes
+diagnosis.consolidation.details.no,No
+diagnosis.consolidation.actions.create_reader,Create Reader
+diagnosis.consolidation.actions.mark_resolved,Mark as Resolved
+diagnosis.consolidation.actions.reprocess,Reprocess
+diagnosis.consolidation.actions.view_history,View History
+diagnosis.consolidation.incident_resolved,Incident marked as resolved successfully
+diagnosis.consolidation.details.incident_summary,Incident Summary
