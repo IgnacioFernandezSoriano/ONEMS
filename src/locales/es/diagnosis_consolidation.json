@@ -46,7 +46,17 @@
         "detected_at": "Detectado el",
         "raw_events": "Eventos EPCIS Sin Procesar",
         "no_raw_events": "No hay eventos sin procesar disponibles",
-        "quick_actions": "Acciones Rápidas"
+        "quick_actions": "Acciones Rápidas",
+        "event_of": "Evento {{current}} de {{total}}",
+        "event_id": "ID de Evento",
+        "tag_id_epc": "ID Etiqueta (EPC)",
+        "reader_id": "ID de Lector",
+        "read_datetime": "Fecha/Hora de Lectura",
+        "created_at": "Creado el",
+        "is_processed": "Procesado",
+        "internal_id": "ID Interno",
+        "yes": "Sí",
+        "no": "No"
       },
       "actions": {
         "create_reader": "Crear Lector",

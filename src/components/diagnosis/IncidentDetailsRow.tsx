@@ -214,43 +214,43 @@ export function IncidentDetailsRow({
                         className="border border-gray-200 rounded-lg p-3 bg-gray-50"
                       >
                         <div className="text-xs font-semibold text-gray-700 mb-2">
-                          Event {index + 1} of {rawEvents.length}
+                          {t('diagnosis.consolidation.details.event_of', { current: index + 1, total: rawEvents.length })}
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
                           <div>
-                            <span className="text-gray-500">Event ID:</span>
+                            <span className="text-gray-500">{t('diagnosis.consolidation.details.event_id')}:</span>
                             <span className="ml-2 font-mono text-gray-900">{event.event_id}</span>
                           </div>
                           <div>
-                            <span className="text-gray-500">Tag ID (EPC):</span>
+                            <span className="text-gray-500">{t('diagnosis.consolidation.details.tag_id_epc')}:</span>
                             <span className="ml-2 font-mono text-gray-900">{event.tag_id}</span>
                           </div>
                           <div>
-                            <span className="text-gray-500">Reader ID:</span>
+                            <span className="text-gray-500">{t('diagnosis.consolidation.details.reader_id')}:</span>
                             <span className="ml-2 font-mono text-gray-900">{event.reader_id}</span>
                           </div>
                           <div>
-                            <span className="text-gray-500">Read DateTime:</span>
+                            <span className="text-gray-500">{t('diagnosis.consolidation.details.read_datetime')}:</span>
                             <span className="ml-2 font-mono text-gray-900">
                               {formatDateTime(event.read_local_datetime)}
                             </span>
                           </div>
                           <div>
-                            <span className="text-gray-500">Created At:</span>
+                            <span className="text-gray-500">{t('diagnosis.consolidation.details.created_at')}:</span>
                             <span className="ml-2 font-mono text-gray-900">
                               {formatDateTime(event.created_at)}
                             </span>
                           </div>
                           <div>
-                            <span className="text-gray-500">Is Processed:</span>
+                            <span className="text-gray-500">{t('diagnosis.consolidation.details.is_processed')}:</span>
                             <span className={`ml-2 font-medium ${
                               event.is_processed ? 'text-green-600' : 'text-red-600'
                             }`}>
-                              {event.is_processed ? '✅ Yes' : '❌ No'}
+                              {event.is_processed ? `✅ ${t('diagnosis.consolidation.details.yes')}` : `❌ ${t('diagnosis.consolidation.details.no')}`}
                             </span>
                           </div>
                           <div className="md:col-span-2">
-                            <span className="text-gray-500">Internal ID:</span>
+                            <span className="text-gray-500">{t('diagnosis.consolidation.details.internal_id')}:</span>
                             <span className="ml-2 font-mono text-gray-900 text-xs">{event.id}</span>
                           </div>
                         </div>

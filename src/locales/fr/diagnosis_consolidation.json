@@ -1,0 +1,69 @@
+{
+  "diagnosis": {
+    "consolidation": {
+      "title": "Consolidation des Événements",
+      "description": "Traiter les événements RFID bruts et détecter les anomalies du système",
+      "run_button": "Exécuter la Consolidation",
+      "pending_events": "Événements en Attente",
+      "total_incidents": "Incidents Totaux",
+      "last_consolidation": "Dernière Consolidation",
+      "never": "Jamais",
+      "incidents_table_title": "Incidents Détectés",
+      "no_incidents": "Aucun incident détecté",
+      "success": "Consolidation terminée: {{processed}} événements traités, {{created}} événements créés, {{incidents}} incidents détectés",
+      "error": "Erreur de consolidation: {{message}}",
+      "error_no_session": "Session invalide. Veuillez vous reconnecter.",
+      "incident_resolved": "Incident marqué comme résolu avec succès",
+      "columns": {
+        "tag_id": "ID d'Étiquette",
+        "incident_type": "Type",
+        "postal_center": "Centre Postal",
+        "description": "Description",
+        "detected_at": "Détecté le",
+        "status": "Statut"
+      },
+      "incident_types": {
+        "missing_exit": "Sortie Manquante",
+        "unknown_reader": "Lecteur Inconnu",
+        "data_quality": "Qualité des Données",
+        "missing_entry": "Entrée Manquante",
+        "exit_before_entry": "Sortie Avant Entrée",
+        "sla_violation": "Violation de SLA",
+        "stuck_sample": "Échantillon Bloqué",
+        "missroute": "Mauvaise Route",
+        "duplicate_event": "Événement Dupliqué",
+        "invalid_sequence": "Séquence Invalide"
+      },
+      "status": {
+        "resolved": "Résolu",
+        "pending": "En Attente"
+      },
+      "details": {
+        "incident_summary": "Résumé de l'Incident",
+        "affected_events": "Événements Affectés",
+        "reader_code": "Code du Lecteur",
+        "severity": "Gravité",
+        "detected_at": "Détecté le",
+        "raw_events": "Événements EPCIS Bruts",
+        "no_raw_events": "Aucun événement brut disponible",
+        "quick_actions": "Actions Rapides",
+        "event_of": "Événement {{current}} sur {{total}}",
+        "event_id": "ID d'Événement",
+        "tag_id_epc": "ID d'Étiquette (EPC)",
+        "reader_id": "ID du Lecteur",
+        "read_datetime": "Date/Heure de Lecture",
+        "created_at": "Créé le",
+        "is_processed": "Traité",
+        "internal_id": "ID Interne",
+        "yes": "Oui",
+        "no": "Non"
+      },
+      "actions": {
+        "create_reader": "Créer un Lecteur",
+        "mark_resolved": "Marquer comme Résolu",
+        "reprocess": "Retraiter",
+        "view_history": "Voir l'Historique"
+      }
+    }
+  }
+}

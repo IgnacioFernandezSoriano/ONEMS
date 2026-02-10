@@ -1,0 +1,69 @@
+{
+  "diagnosis": {
+    "consolidation": {
+      "title": "Event Consolidation",
+      "description": "Process raw RFID events and detect system anomalies",
+      "run_button": "Run Consolidation",
+      "pending_events": "Pending Events",
+      "total_incidents": "Total Incidents",
+      "last_consolidation": "Last Consolidation",
+      "never": "Never",
+      "incidents_table_title": "Detected Incidents",
+      "no_incidents": "No incidents detected",
+      "success": "Consolidation completed: {{processed}} events processed, {{created}} events created, {{incidents}} incidents detected",
+      "error": "Consolidation error: {{message}}",
+      "error_no_session": "Invalid session. Please log in again.",
+      "incident_resolved": "Incident marked as resolved successfully",
+      "columns": {
+        "tag_id": "Tag ID",
+        "incident_type": "Type",
+        "postal_center": "Postal Center",
+        "description": "Description",
+        "detected_at": "Detected At",
+        "status": "Status"
+      },
+      "incident_types": {
+        "missing_exit": "Missing Exit",
+        "unknown_reader": "Unknown Reader",
+        "data_quality": "Data Quality",
+        "missing_entry": "Missing Entry",
+        "exit_before_entry": "Exit Before Entry",
+        "sla_violation": "SLA Violation",
+        "stuck_sample": "Stuck Sample",
+        "missroute": "Missroute",
+        "duplicate_event": "Duplicate Event",
+        "invalid_sequence": "Invalid Sequence"
+      },
+      "status": {
+        "resolved": "Resolved",
+        "pending": "Pending"
+      },
+      "details": {
+        "incident_summary": "Incident Summary",
+        "affected_events": "Affected Events",
+        "reader_code": "Reader Code",
+        "severity": "Severity",
+        "detected_at": "Detected At",
+        "raw_events": "Raw EPCIS Events",
+        "no_raw_events": "No raw events available",
+        "quick_actions": "Quick Actions",
+        "event_of": "Event {{current}} of {{total}}",
+        "event_id": "Event ID",
+        "tag_id_epc": "Tag ID (EPC)",
+        "reader_id": "Reader ID",
+        "read_datetime": "Read DateTime",
+        "created_at": "Created At",
+        "is_processed": "Is Processed",
+        "internal_id": "Internal ID",
+        "yes": "Yes",
+        "no": "No"
+      },
+      "actions": {
+        "create_reader": "Create Reader",
+        "mark_resolved": "Mark as Resolved",
+        "reprocess": "Reprocess",
+        "view_history": "View History"
+      }
+    }
+  }
+}

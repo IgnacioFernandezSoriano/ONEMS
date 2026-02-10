@@ -1,0 +1,69 @@
+{
+  "diagnosis": {
+    "consolidation": {
+      "title": "دمج الأحداث",
+      "description": "معالجة أحداث RFID الأولية واكتشاف الشذوذ في النظام",
+      "run_button": "تشغيل الدمج",
+      "pending_events": "الأحداث المعلقة",
+      "total_incidents": "إجمالي الحوادث",
+      "last_consolidation": "آخر دمج",
+      "never": "أبداً",
+      "incidents_table_title": "الحوادث المكتشفة",
+      "no_incidents": "لم يتم اكتشاف حوادث",
+      "success": "اكتمل الدمج: {{processed}} حدث تمت معالجته، {{created}} حدث تم إنشاؤه، {{incidents}} حادث تم اكتشافه",
+      "error": "خطأ في الدمج: {{message}}",
+      "error_no_session": "جلسة غير صالحة. يرجى تسجيل الدخول مرة أخرى.",
+      "incident_resolved": "تم وضع علامة على الحادث كمحلول بنجاح",
+      "columns": {
+        "tag_id": "معرف العلامة",
+        "incident_type": "النوع",
+        "postal_center": "المركز البريدي",
+        "description": "الوصف",
+        "detected_at": "تم الاكتشاف في",
+        "status": "الحالة"
+      },
+      "incident_types": {
+        "missing_exit": "خروج مفقود",
+        "unknown_reader": "قارئ غير معروف",
+        "data_quality": "جودة البيانات",
+        "missing_entry": "دخول مفقود",
+        "exit_before_entry": "خروج قبل الدخول",
+        "sla_violation": "انتهاك SLA",
+        "stuck_sample": "عينة عالقة",
+        "missroute": "مسار خاطئ",
+        "duplicate_event": "حدث مكرر",
+        "invalid_sequence": "تسلسل غير صالح"
+      },
+      "status": {
+        "resolved": "محلول",
+        "pending": "معلق"
+      },
+      "details": {
+        "incident_summary": "ملخص الحادث",
+        "affected_events": "الأحداث المتأثرة",
+        "reader_code": "رمز القارئ",
+        "severity": "الخطورة",
+        "detected_at": "تم الاكتشاف في",
+        "raw_events": "أحداث EPCIS الأولية",
+        "no_raw_events": "لا توجد أحداث أولية متاحة",
+        "quick_actions": "إجراءات سريعة",
+        "event_of": "حدث {{current}} من {{total}}",
+        "event_id": "معرف الحدث",
+        "tag_id_epc": "معرف العلامة (EPC)",
+        "reader_id": "معرف القارئ",
+        "read_datetime": "تاريخ/وقت القراءة",
+        "created_at": "تم الإنشاء في",
+        "is_processed": "تمت المعالجة",
+        "internal_id": "المعرف الداخلي",
+        "yes": "نعم",
+        "no": "لا"
+      },
+      "actions": {
+        "create_reader": "إنشاء قارئ",
+        "mark_resolved": "وضع علامة كمحلول",
+        "reprocess": "إعادة المعالجة",
+        "view_history": "عرض السجل"
+      }
+    }
+  }
+}
