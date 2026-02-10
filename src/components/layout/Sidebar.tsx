@@ -54,7 +54,7 @@ export function Sidebar() {
   const location = useLocation()
   const { isCollapsed, setIsCollapsed } = useSidebar()
   const { t, locale, setLocale } = useLocale()
-  const [expandedSections, setExpandedSections] = useState<string[]>(['/reporting'])
+  const [expandedSections, setExpandedSections] = useState<string[]>(['/reporting', '/setup/e2e', '/setup/diagnosis'])
   const [isHovered, setIsHovered] = useState(false)
   const [accounts, setAccounts] = useState<Array<{ id: string; name: string }>>([])
   const [accountName, setAccountName] = useState<string>('')
@@ -105,46 +105,64 @@ export function Sidebar() {
       label: t('menu.setup'),
       items: [
         {
-          path: '/topology',
-          label: t('menu.topology'),
-          icon: Map,
+          path: '/setup/e2e',
+          label: t('menu.setup_e2e'),
+          icon: Package,
           roles: ['admin', 'superadmin'],
-          tooltip: t('menu.topology.tooltip'),
+          tooltip: t('menu.setup_e2e.tooltip'),
+          children: [
+            {
+              path: '/topology',
+              label: t('menu.topology'),
+              icon: Map,
+              roles: ['admin', 'superadmin'],
+              tooltip: t('menu.topology.tooltip'),
+            },
+            {
+              path: '/carriers',
+              label: t('menu.carriers'),
+              icon: Truck,
+              roles: ['admin', 'superadmin'],
+              tooltip: t('menu.carriers.tooltip'),
+            },
+            {
+              path: '/panelists',
+              label: t('menu.panelists'),
+              icon: UserCircle,
+              roles: ['admin', 'superadmin'],
+              tooltip: t('menu.panelists.tooltip'),
+            },
+            {
+              path: '/delivery-standards',
+              label: t('menu.delivery_standards'),
+              icon: Clock,
+              roles: ['admin', 'superadmin'],
+              tooltip: t('menu.delivery_standards.tooltip'),
+            },
+          ],
         },
         {
-          path: '/carriers',
-          label: t('menu.carriers'),
-          icon: Truck,
+          path: '/setup/diagnosis',
+          label: t('menu.setup_diagnosis'),
+          icon: DatabaseZap,
           roles: ['admin', 'superadmin'],
-          tooltip: t('menu.carriers.tooltip'),
-        },
-        {
-          path: '/panelists',
-          label: t('menu.panelists'),
-          icon: UserCircle,
-          roles: ['admin', 'superadmin'],
-          tooltip: t('menu.panelists.tooltip'),
-        },
-        {
-          path: '/delivery-standards',
-          label: t('menu.delivery_standards'),
-          icon: Clock,
-          roles: ['admin', 'superadmin'],
-          tooltip: t('menu.delivery_standards.tooltip'),
-        },
-        {
-          path: '/postal-centers',
-          label: t('menu.postal_centers'),
-          icon: Building2,
-          roles: ['admin', 'superadmin'],
-          tooltip: t('menu.postal_centers.tooltip'),
-        },
-        {
-          path: '/slas-configuration',
-          label: t('menu.slas_configuration'),
-          icon: Target,
-          roles: ['admin', 'superadmin'],
-          tooltip: t('menu.slas_configuration.tooltip'),
+          tooltip: t('menu.setup_diagnosis.tooltip'),
+          children: [
+            {
+              path: '/postal-centers',
+              label: t('menu.postal_centers'),
+              icon: Building2,
+              roles: ['admin', 'superadmin'],
+              tooltip: t('menu.postal_centers.tooltip'),
+            },
+            {
+              path: '/slas-configuration',
+              label: t('menu.slas_configuration'),
+              icon: Target,
+              roles: ['admin', 'superadmin'],
+              tooltip: t('menu.slas_configuration.tooltip'),
+            },
+          ],
         },
       ],
     },

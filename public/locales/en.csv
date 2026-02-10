@@ -2124,3 +2124,7 @@ common.show_filters,Show Filters
 common.hide_filters,Hide Filters
 common.delete_selected,Delete Selected
 common.export_csv,Export CSV
+menu.setup_e2e,E2E Network
+menu.setup_e2e.tooltip,Configure E2E monitoring network settings
+menu.setup_diagnosis,Diagnosis Network
+menu.setup_diagnosis.tooltip,Configure postal network diagnosis settings

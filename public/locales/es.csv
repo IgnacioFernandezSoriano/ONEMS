@@ -2124,3 +2124,7 @@ common.show_filters,Mostrar Filtros
 common.hide_filters,Ocultar Filtros
 common.delete_selected,Eliminar Seleccionados
 common.export_csv,Exportar CSV
+menu.setup_e2e,Red E2E
+menu.setup_e2e.tooltip,Configurar ajustes de red de monitoreo E2E
+menu.setup_diagnosis,Red de Diagnóstico
+menu.setup_diagnosis.tooltip,Configurar ajustes de diagnóstico de red postal

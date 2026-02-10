@@ -2124,3 +2124,7 @@ common.show_filters,إظهار الفلاتر
 common.hide_filters,إخفاء الفلاتر
 common.delete_selected,حذف المحدد
 common.export_csv,تصدير CSV
+menu.setup_e2e,شبكة E2E
+menu.setup_e2e.tooltip,تكوين إعدادات شبكة المراقبة E2E
+menu.setup_diagnosis,شبكة التشخيص
+menu.setup_diagnosis.tooltip,تكوين إعدادات تشخيص الشبكة البريدية
