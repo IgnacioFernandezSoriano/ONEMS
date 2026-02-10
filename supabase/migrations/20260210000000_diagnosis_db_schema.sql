@@ -19,7 +19,9 @@ CREATE INDEX IF NOT EXISTS idx_slas_deleted_at ON slas(deleted_at) WHERE deleted
 -- Update RLS policies to filter out soft-deleted records
 -- Drop existing SELECT policies
 DROP POLICY IF EXISTS "postal_centers_select_own_account" ON postal_centers;
+DROP POLICY IF EXISTS "postal_centers_select_superadmin" ON postal_centers;
 DROP POLICY IF EXISTS "readers_select_own_account" ON readers;
+DROP POLICY IF EXISTS "readers_select_superadmin" ON readers;
 DROP POLICY IF EXISTS "slas_select_policy" ON slas;
 
 -- Recreate SELECT policies with soft delete filter
