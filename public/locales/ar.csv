@@ -758,7 +758,7 @@ menu.reporting_equity,تكافؤ الإقليم
 menu.reporting_equity.tooltip,تحليل التكافؤ في توزيع الشحنات
 menu.reporting_jk,أداء J+K
 menu.reporting_jk.tooltip,تحليل الأداء مقابل معايير التسليم
-menu.reporting_onedb,قاعدة بيانات ONE
+menu.e2e_db,E2E DBبيانات ONE
 menu.reporting_onedb.tooltip,السجل الكامل لجميع الشحنات المستلمة
 menu.setup,الإعداد
 menu.stock_management,إدارة المخزون
@@ -1902,10 +1902,10 @@ menu.onedb_api,واجهة برمجة تطبيقات ONE DB
 menu.onedb_api.tooltip,الوصول إلى ONE DB عبر واجهة برمجة التطبيقات REST
 onedb_api.auth_note,"ملاحظة: يستخدم رأس Authorization مفتاح Supabase anon (المقدم من النظام)، بينما يحتوي X-API-Key على مفتاح API الشخصي الخاص بك."
 onedb_api.max_records_note,"ملاحظة: تُرجع واجهة برمجة التطبيقات حدًا أقصى قدره 10000 سجل إجمالاً. استخدم نطاقات تاريخ أكثر تحديدًا إذا كنت بحاجة إلى الوصول إلى المزيد من البيانات."
-menu.onedb_section,"ONE DB"
-menu.onedb_section.tooltip,"إدارة البيانات والوصول إلى واجهة برمجة التطبيقات"
-menu.get_api,"GET API"
-menu.get_api.tooltip,"استخراج البيانات عبر REST API"
+menu.databases_section,"قواعد البيانات"
+menu.databases_section.tooltip,"إدارة قواعد البيانات والوصول إلى واجهة برمجة التطبيقات"
+menu.extract_e2e_db_api,"Extract E2E DB API"
+menu.extract_e2e_db_api.tooltip,"استخراج بيانات E2E عبر REST API"
 panelists.management,"إدارة الأعضاء"
 panelists.manage_availability,"إدارة توفر الأعضاء"
 panelists.all_in_system,"الإجمالي في النظام"
@@ -2151,7 +2151,7 @@ diagnosis.consolidation.incident_types.unknown_reader,قارئ غير معروف
 diagnosis.consolidation.incident_types.data_quality,جودة البيانات
 diagnosis.consolidation.status.resolved,تم الحل
 diagnosis.consolidation.status.pending,معلق
-menu.event_consolidation,دمج الأحداث
+menu.rfid_events_consolidation,دمج أحداث RFID
 menu.event_consolidation.tooltip,معالجة أحداث RFID واكتشاف الشذوذات
 diagnosis.consolidation.details.affected_events,الأحداث المتأثرة
 diagnosis.consolidation.details.reader_code,رمز القارئ

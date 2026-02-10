@@ -1337,74 +1337,36 @@ users.password,Mot de passe
 users.promise,Promesse
 users.role,Rôle
 users.select_account,Sélectionner un compte
-auth.sign_in,Se connecter
-auth.try_demo_account,Essayer le compte démo
-auth.email_address,Adresse e-mail
-auth.password,Mot de passe
 auth.email_placeholder,votre@email.com
 auth.password_placeholder,Entrez votre mot de passe
 auth.click_autofill_demo,Cliquez ici pour remplir automatiquement les identifiants de démo
 auth.secure_auth_supabase,Authentification sécurisée par Supabase
 auth.for_regulators,pour les Régulateurs
-dashboard.selected_period,Période sélectionnée
-dashboard.current_month,Mois en cours
-dashboard.management_tip,Conseil de gestion
 dashboard.management_tip_text,"Utilisez le sélecteur de période pour afficher les statistiques du mois en cours ou planifier le mois prochain. Cliquez sur n'importe quelle carte pour accéder à la vue détaillée. Consultez les alertes critiques quotidiennement pour maintenir l'excellence opérationnelle. Surveillez les vacances des panélistes et les besoins en matériaux pour éviter les conflits d'allocation."
 dashboard.total_and_status,Total et Statut
 dashboard.pending,En attente
 dashboard.sent,Envoyé
 dashboard.received,Reçu
-dashboard.availability_issues,Problèmes de disponibilité
-dashboard.unavailable,Indisponible
 dashboard.no_panelist,Aucun panéliste
 dashboard.inactive,Inactif
-dashboard.delayed_shipments,Expéditions retardées
-dashboard.panelist_status,Statut du panéliste
-dashboard.total_panelists,Total des panélistes
 dashboard.active,actif
 dashboard.inactive_lowercase,inactif
 dashboard.on_leave,En congé
-dashboard.currently_unavailable,Actuellement indisponible
-dashboard.upcoming_vacations,Vacances à venir
-dashboard.availability_rate,Taux de disponibilité
 dashboard.available,disponible
-dashboard.active_resources,Ressources actives
-dashboard.active_carriers,Transporteurs actifs
 dashboard.of,sur
 dashboard.total,total
-dashboard.active_products,Produits actifs
-dashboard.carrier_product_pairs,Paires transporteur-produit
-dashboard.available_combinations,Combinaisons disponibles
 common.sign_out,Se déconnecter
-common.filters,Filtres
-common.reset,Réinitialiser
-common.search,Rechercher
 common.city,Ville
 common.all_cities,Toutes les villes
 common.node,Nœud
 common.all_nodes,Tous les nœuds
-common.status,Statut
 common.all_status,Tous les statuts
-common.actions,Actions
-common.edit,Modifier
-common.delete,Supprimer
-common.cancel,Annuler
-common.save,Enregistrer
-common.close,Fermer
 common.confirm,Confirmer
 common.yes,Oui
 common.no,Non
-common.loading,Chargement...
-common.error,Erreur
 common.success,Succès
 common.warning,Attention
 common.info,Information
-common.active,Actif
-common.inactive,Inactif
-common.available,Disponible
-common.unavailable,Indisponible
-common.total,Total
-common.of,sur
 common.show_id,Afficher ID
 common.export_csv,Exporter CSV
 common.add_record,Ajouter un enregistrement
@@ -1414,21 +1376,13 @@ common.collapse_all,Tout réduire
 allocation_plans.view_and_manage,Voir et gérer les plans d'allocation générés
 allocation_plans.total_and_pending,Total et En attente
 allocation_plans.shipment_status,Statut d'expédition
-allocation_plans.availability_issues,Problèmes de disponibilité
 allocation_plans.total_issues,Total des problèmes
 allocation_plans.delayed_shipments,Expéditions retardées
-allocation_plans.cancelled,Annulé
-allocation_plans.invalid,Invalide
-allocation_plans.transfer_error,Erreur de transfert
 allocation_plans.total_delayed,Total retardé
 allocation_plans.plan_details,Détails du plan d'allocation
-allocation_plans.origin_city,Ville d'origine
-allocation_plans.origin_node,Nœud d'origine
 allocation_plans.dest_city,Ville dest.
 allocation_plans.dest_node,Nœud dest.
-allocation_plans.scheduled_date,Date prévue
 allocation_plans.week,Semaine
-allocation_plans.tag_id,ID étiquette
 allocation_plans.origin_panelist,Panéliste d'origine
 allocation_plans.origin_status,Statut d'origine
 allocation_plans.dest_panelist,Panéliste dest.
@@ -1436,31 +1390,18 @@ allocation_plans.dest_status,Statut dest.
 allocation_plans.status,Statut
 allocation_plans.sent_lowercase,envoyé
 allocation_plans.pending_lowercase,en attente
-allocation_plans.receive,Recevoir
-allocation_plans.send,Envoyer
 panelists.management,Gestion des panélistes
 panelists.manage_availability,Gérer les panélistes et leur disponibilité pour les livraisons
-panelists.total_panelists,Total des panélistes
 panelists.all_in_system,Tous les panélistes du système
-panelists.available_for_deliveries,Disponible pour les livraisons
-panelists.not_available,Non disponible
 panelists.tab_panelists,Panélistes
 panelists.tab_unavailability,Périodes d'indisponibilité
 panelists.search_placeholder,"Code, nom, e-mail..."
-panelists.add_panelist,Ajouter un panéliste
 panelists.manage_profiles,Gérer les profils et affectations des panélistes
-panelists.code,Code
-panelists.name,Nom
-panelists.email,E-mail
-panelists.mobile,Mobile
-panelists.node,Nœud
-panelists.city,Ville
 panelists.status,Statut
 panelists.active_lowercase,actif
 panelists.edit_tooltip,Modifier le panéliste
 panelists.deactivate_tooltip,Désactiver le panéliste
 panelists.delete_tooltip,Supprimer le panéliste
-panelists.unavailability_periods,Périodes d'indisponibilité
 panelists.manage_unavailability,Gérer les périodes d'indisponibilité des panélistes pour la réaffectation automatique des échantillons
 panelists.add_unavailability,Ajouter une période d'indisponibilité
 panelists.search_unavailability_placeholder,"Nom du panéliste, notes..."
@@ -1483,18 +1424,11 @@ panelists.notes,Notes
 panelists.one_day,1 jour
 carriers.title,Opérateurs et produits
 carriers.manage_description,Gérer les opérateurs d'expédition, les produits et les exigences en matériaux
-carriers.create_carrier,Créer un opérateur
 carriers.tab_carriers_products,Opérateurs et produits
 carriers.tab_products_without_materials,Produits sans matériaux
 carriers.search_placeholder,Rechercher des opérateurs ou des produits...
-carriers.all_carriers,Tous les opérateurs
-carriers.with_materials,Avec matériaux
-carriers.without_materials,Sans matériaux
-carriers.product,Produit
 carriers.expand_carrier,Développer l'opérateur
 carriers.expand_products,Développer tous les produits de cet opérateur
-carriers.edit_carrier,Modifier l'opérateur
-carriers.delete_carrier,Supprimer l'opérateur
 materials.requirements_title,Besoins en Matériaux
 materials.calculate_description,Calculer les besoins en matériaux basés sur les plans d'allocation
 materials.start_date,Date de début
@@ -1521,7 +1455,6 @@ materials.first_semester,1er Semestre
 materials.second_semester,2e Semestre
 materials.year,Année
 materials.calculate,Calculer
-stock.title,Gestion des Stocks et Alertes
 stock.manage_description,Gérer les exigences en matériaux, les demandes et l'inventaire des panélistes, suivre les mouvements et les expéditions
 stock.tab_requirements,Besoins en Matériaux
 stock.tab_regulator_stock,Stock du Régulateur
@@ -1530,13 +1463,8 @@ stock.tab_panelist_stock,Stock des Panélistes
 stock.tab_movements,Mouvements
 stock.tab_alerts,Alertes de Stock
 stock.tab_settings,Paramètres
-stock.calculate_requirements,Calculer les besoins
-stock.quick_month_selection,Sélection rapide du mois
-allocation_generator.plan_name,Nom du plan
 allocation_generator.total_samples,Total d'échantillons
-allocation_generator.carrier,Transporteur
 allocation_generator.select_carrier,Sélectionner le transporteur
-allocation_generator.product,Produit
 allocation_generator.select_product,Sélectionner le produit
 allocation_generator.start_date,Date de début
 allocation_generator.end_date,Date de fin
@@ -1592,54 +1520,22 @@ unavailability.required,Requis
 unavailability.date_range,Plage de dates
 allocation_plans.total_pending,Total et en attente
 allocation_plans.total,Total
-allocation_plans.pending,En attente
-allocation_plans.shipment_status,Statut d'envoi
 allocation_plans.waiting,En attente
-allocation_plans.sent,Envoyé
-allocation_plans.received,Reçu
 allocation_plans.availability_issues_title,Problèmes de disponibilité
 allocation_plans.unavailable,Indisponible
-allocation_plans.no_panelist,Aucun panéliste
 allocation_plans.inactive,Inactif
-allocation_plans.total_issues,Total des problèmes
-allocation_plans.delayed_shipments,Envois retardés
-allocation_plans.cancelled,Annulé
-allocation_plans.invalid,Invalide
-allocation_plans.transfer_error,Erreur de transfert
-allocation_plans.total_delayed,Total retardé
-allocation_plans.filters,Filtres
-allocation_plans.plan,Plan
-allocation_plans.carrier,Transporteur
-allocation_plans.product,Produit
-allocation_plans.all_plans,Tous les plans
-allocation_plans.all_carriers,Tous les transporteurs
-allocation_plans.all_products,Tous les produits
 allocation_plans.origin_city_filter,Ville d'origine
 allocation_plans.origin_node_filter,Nœud d'origine
-allocation_plans.destination_city,Ville de destination
-allocation_plans.destination_node,Nœud de destination
-allocation_plans.all_cities,Toutes les villes
-allocation_plans.all_nodes,Tous les nœuds
-allocation_plans.start_date,Date de début
-allocation_plans.end_date,Date de fin
-allocation_plans.tag_id,Tag ID
-allocation_plans.event_id,Event ID
 allocation_plans.search_tag_id,Rechercher par Tag ID...
 allocation_plans.search_event_id,Rechercher par Event ID...
 allocation_plans.availability_issues_filter,Problèmes de disponibilité
-allocation_plans.all_records,Tous les enregistrements
 allocation_plans.details,Détails du plan d'allocation
 allocation_plans.show_id,Afficher ID
-allocation_plans.week,Semaine
 allocation_plans.origin_panelist_header,Panéliste d'origine
 allocation_plans.origin_status_header,Statut d'origine
 allocation_plans.dest_panelist_header,Panéliste dest.
 allocation_plans.dest_status_header,Statut dest.
 allocation_plans.available,Disponible
-topology.title,Topologie du pays
-topology.description,Définir et gérer la hiérarchie de l'infrastructure réseau de votre pays
-topology.regions,Régions
-topology.cities,Villes
 topology.total_nodes,Total des nœuds
 topology.with_panelists,Avec panélistes
 topology.without_panelists,Sans panélistes
@@ -1651,27 +1547,12 @@ topology.all_cities,Toutes les villes
 topology.all_nodes,Tous les nœuds
 topology.expand_all,Tout développer
 topology.create_region,Créer une région
-topology.city,Ville
-topology.node,Nœud
-topology.panelist_assigned,Panéliste assigné
 topology.nodes_need_assignment,Ces nœuds nécessitent l'affectation d'un panéliste pour être opérationnels
 topology.download_csv,Télécharger CSV
 topology.all_nodes_have_panelists,Tous les nœuds ont des panélistes !
 topology.every_node_assigned,Chaque nœud de votre topologie a un panéliste assigné
-topology.edit_region,Modifier la région
-topology.edit_city,Modifier la ville
-topology.edit_node,Modifier le nœud
-topology.delete_region,Supprimer la région
-topology.delete_city,Supprimer la ville
-topology.delete_node,Supprimer le nœud
-topology.city,Ville
-topology.node,Nœud
 topology.create_city,Créer une ville
 topology.create_node,Créer un nœud
-topology.edit_city,Modifier la ville
-topology.edit_node,Modifier le nœud
-topology.delete_city,Supprimer la ville
-topology.delete_node,Supprimer le nœud
 topology.no_nodes_yet,Aucun nœud dans cette ville pour le moment
 topology.delete_city_confirm,Supprimer cette ville et tous ses nœuds ?
 topology.delete_node_confirm,Supprimer ce nœud ?
@@ -1692,42 +1573,19 @@ cityform.cancel,Annuler
 cityform.create,Créer
 cityform.update,Mettre à jour
 cityform.saving,Enregistrement...
-topology.latitude,Latitude
-topology.longitude,Longitude
 topology.class,Classe
-carriers.title,Transporteurs & Produits
-carriers.description,Gérer les transporteurs, les produits et les exigences en matériaux
 carriers.transporteurs,Transporteurs
 carriers.produits,Produits
-carriers.with_materials,Avec matériaux
-carriers.without_materials,Sans matériaux
 carriers.materiels,Matériels
-carriers.carriers_products,Transporteurs & Produits
-carriers.products_without_materials,Produits sans matériaux
-carriers.search_placeholder,Rechercher des transporteurs ou des produits...
-carriers.all_carriers,Tous les transporteurs
-carriers.all_status,Tous les statuts
-carriers.all_products,Tous les produits
-carriers.expand_all,Tout développer
-carriers.create_carrier,Créer un transporteur
-carriers.product,Produit
-carriers.material,Matériau
 carriers.materials_assigned,Matériaux assignés
-carriers.add_product,Ajouter un produit
 carriers.add_material,Ajouter un matériau
-carriers.code,Code
 carriers.description_field,Description
-carriers.standard_delivery_time,Temps de livraison standard
-carriers.time_unit,Unité de temps
 carriers.heures,Heures
 carriers.jours,Jours
-carriers.status,Statut
 carriers.cancel,Annuler
 carriers.create,Créer
 carriers.choose_how_to_add,Choisissez comment ajouter un matériau à ce produit :
-carriers.select_from_catalog,Sélectionner dans le catalogue
 carriers.select_from_catalog_desc,Choisissez un matériau existant de votre catalogue
-carriers.create_new_material,Créer un nouveau matériau
 carriers.create_new_material_desc,Ajouter un nouveau matériau au catalogue et l'assigner au produit
 carriers.products_without_materials_title,Produits sans matériaux
 carriers.products_need_materials,Ces produits nécessitent des assignations de matériaux pour être opérationnels
@@ -1739,24 +1597,13 @@ productform.cancel,Annuler
 productform.create,Créer
 productform.update,Mettre à jour
 productform.saving,Enregistrement...
-deliverystandards.hours,Heures
-deliverystandards.days,Jours
-carriers.product,Product,Produit
-carriers.material,Material,Matériau
-carriers.materials_assigned,Materials Assigned,Matériaux assignés
-carriers.pending_materials,Pending Materials,Matériaux en attente
 carriers.qty,Qty,Qté
-carriers.no_products,No products for this carrier yet,Aucun produit pour ce transporteur
 carriers.no_materials,No materials assigned yet,Aucun matériau assigné
-carriers.add_product,Add Product,Ajouter un produit
-carriers.add_material,Add Material,Ajouter un matériau
-carriers.edit_product,Edit Product,Modifier le produit
 carriers.remove_material_confirm,Remove material "{name}" from this product?,Retirer le matériau "{name}" de ce produit ?
 carriers.enter_new_quantity,Enter new quantity for "{name}":,Entrer la nouvelle quantité pour "{name}" :
 carriers.expand_all_products,Expand all products in this carrier,Développer tous les produits de ce transporteur
 carriers.collapse_product,Collapse product,Réduire le produit
 carriers.expand_product,Expand product,Développer le produit
-carriers.remove_material,Remove material,Retirer le matériau
 carriers.edit_quantity,Edit quantity,Modifier la quantité
 nodeLoadBalancing.saturatedNodes,Nœuds saturés
 nodeLoadBalancing.saturatedNodesDesc,Nœuds au-dessus de 150% de charge moyenne
@@ -1780,3 +1627,530 @@ allocation_plans.update_record,Mettre à jour l'enregistrement
 common.updating,Mise à jour...
 common.creating,Création...
 allocation_plans.add_record,Ajouter un enregistrement
+material_requirements.items_needed,articles nécessaires
+material_requirements.to_send,à envoyer
+common.start_date,Date de début
+common.end_date,Date de fin
+common.material,Matériau
+material_requirements.quick_period_selection,Sélection rapide de période
+common.first_semester,1er Semestre
+common.second_semester,2ème Semestre
+material_requirements.purchase_requirements,Exigences d'achat
+material_requirements.panelist_requirements,Exigences des panélistes
+common.export_to_csv,Exporter en CSV
+stock.regulator_issue,Problème du régulateur
+stock.regulator_issues,Problèmes du régulateur
+stock.panelist_issue,Problème du panéliste
+stock.panelist_issues,Problèmes du panéliste
+stock.please_select_dates,Veuillez sélectionner les dates de début et de fin
+stock.please_select_requirements_export,Veuillez sélectionner des exigences à exporter
+stock.please_select_requirements_po,Veuillez sélectionner des exigences pour générer le bon de commande
+common.show,Afficher
+stock.calculating,Calcul en cours...
+stock.mark_as_ordered,Marquer {count} comme commandé(s)
+stock.delete_selected,Supprimer {count} sélectionné(s)
+common.select,Sélectionner
+stock.no_stock_data_to_export,Aucune donnée de stock à exporter
+stock.loading_stock,Chargement du stock...
+stock.current_regulator_stock,Stock Actuel du Régulateur
+stock.change,Changement
+stock.please_enter_quantity_and_note,Veuillez saisir la nouvelle quantité et la note d'ajustement
+stock.please_enter_valid_quantity,Veuillez saisir une quantité valide
+stock.stock_adjusted_successfully,Stock ajusté avec succès
+stock.failed_to_adjust_stock,Échec de l'ajustement du stock
+stock.adjusting,Ajustement en cours...
+stock.confirm_adjustment,Confirmer l'ajustement
+stock.total_items_pending,Total d'articles en attente
+stock.preview_shipments_will_be_generated,Aperçu : {count} expédition(s) sera(ont) générée(s)
+stock.with_assigned_panelists,avec panélistes assignés
+stock.without_panelist_will_be_skipped,sans panéliste (sera ignoré)
+stock.send_selected,Envoyer {count} sélectionné(s)
+stock.warning_nodes_without_panelists,Attention : {count} nœud(s) n'ont pas de panélistes assignés et seront ignorés
+stock.only_panelists_with_allocation_plans,Remarque : Seuls les panélistes avec des plans d'allocation assignés auront des expéditions générées
+common.calculate,Calculer
+common.unit,Unité
+stock.panelist_code_materials_count,Code: {code} • {count} matériau(x)
+stock.material_movements,Mouvements de Matériaux
+common.type,Type
+common.to,À
+stock.allocation_shipment,Expédition d'allocation
+stock.showing_alerts_count,Affichage de {showing} sur {total} alertes
+stock.stock_control,Contrôle des Stocks
+stock.when_enabled_system_will_monitor,Lorsqu'il est activé, le système surveillera les niveaux de stock et générera des alertes lorsque les matériaux tombent en dessous des seuils minimums.
+stock.feature_not_available_in_current_version,Cette fonctionnalité n'est pas disponible dans la version actuelle du module.
+stock.system_will_automatically_create_shipments,Le système créera automatiquement des expéditions en attente lorsqu'il détecte qu'un panéliste a besoin de matériaux.
+stock.save_settings,Enregistrer les Paramètres
+material.add_material,Ajouter un matériau
+reporting.general_performance_dashboard,Tableau de bord des performances générales
+reporting.above_target,Au-dessus de la cible
+reporting.below_target,En dessous de la cible
+reporting.avg_transit_days,Jours de transit moyens
+reporting.business_days,Jours ouvrables
+reporting.last_12_weeks,12 dernières semaines
+reporting.current_week,Semaine en cours
+reporting.shipments_count,{{count}} expédition(s)
+reporting.carrier_product_overview,Aperçu Transporteur & Produit
+reporting.end_date,Date de fin
+reporting.carrier,Transporteur
+reporting.all_carriers,Tous les transporteurs
+reporting.all_products,Tous les produits
+reporting.origin_city,Ville d'origine
+reporting.all_origins,Toutes les origines
+reporting.destination_city,Ville de destination
+reporting.all_destinations,Toutes les destinations
+reporting.compliance_status,Statut de conformité
+reporting.compliant,Conforme
+reporting.critical,Critique
+reporting.filter_analysis_guide,Guide d'analyse des filtres
+reporting.no_filters,Aucun filtre
+reporting.no_filters_desc,Voir la performance globale de l'écosystème sur tous les itinéraires et transporteurs
+reporting.origin_only,Origine uniquement
+reporting.origin_only_desc,Analyser la qualité sortante d'une ville vers toutes les destinations
+reporting.destination_only,Destination uniquement
+reporting.destination_only_desc,Analyser la qualité entrante vers une ville depuis toutes les origines
+reporting.both_cities,Les deux villes
+reporting.both_cities_desc,Analyser la performance d'un itinéraire spécifique (origine → destination)
+reporting.carrier_product,Transporteur/Produit
+reporting.carrier_product_desc,Affiner davantage l'analyse à des prestataires de services ou types spécifiques
+reporting.jk_performance_report,Rapport de performance J+K
+reporting.transit_time_analysis_and_delivery_performance_tracking,Analyse des temps de transit et suivi des performances de livraison
+reporting.total_samples,Total d'échantillons
+reporting.statistical_significance,Signification statistique
+reporting.avg_jk_actual,Moy. J+K Réel
+reporting.days,jours
+reporting.vs_std,vs Std
+reporting.on_time_percent,% À l'heure
+reporting.on_time_count,{{count}} à l'heure
+reporting.problem_routes,Itinéraires problématiques
+reporting.require_intervention,Nécessite une intervention
+reporting.weekly_sample_volume,Volume d'échantillons hebdomadaire
+reporting.average_samples_week,Moyenne {{count}} échantillons/semaine
+reporting.performance_distribution,Distribution des performances
+reporting.after_standard,Après standard
+reporting.in_standard_delayed,Dans le standard/Retardé
+reporting.on_standard,Sur standard
+reporting.distribution_of_shipments_by_actual_transit_time,Distribution des expéditions selon le temps de transit réel par rapport au standard de livraison
+reporting.route_analysis,Analyse des itinéraires
+reporting.region_analysis,Analyse des régions
+reporting.carrier_product_tab,Transporteur → Produit
+reporting.route_performance,Performance des itinéraires ({{count}} itinéraires)
+reporting.route,Itinéraire
+reporting.samples,Échantillons
+reporting.jk_std,J+K Std
+reporting.jk_actual,J+K Réel
+reporting.city_performance,Performance des villes ({{count}} entrées)
+reporting.direction,Direction
+reporting.inbound_arrow,↓ entrant
+reporting.outbound_arrow,↑ sortant
+reporting.region_performance,Performance des régions ({{count}} entrées)
+reporting.cities,Villes
+reporting.carrier_product_performance,Performance Transporteur → Produit ({{count}} transporteurs)
+reporting.routes,Itinéraires
+reporting.problem_routes_column,Itinéraires problématiques
+reporting.chart_view,Vue graphique
+reporting.table_view,Vue tableau
+reporting.transit_days_jk,Jours de transit (J+K)
+reporting.cumulative_percent,% Cumulatif
+reporting.cumulative_percentage_desc,Pourcentage cumulatif des livraisons selon les jours de transit. Les barres vertes indiquent les jours dans le standard, les barres rouges indiquent les jours dépassant le standard.
+reporting.std_percent,Std %
+reporting.regulatory_compliance_report,Rapport de conformité réglementaire
+reporting.overall_compliance,Conformité globale
+reporting.of_routes,de {{count}} itinéraires
+reporting.meeting_standard,Conforme à la norme
+reporting.no_penalty,Sans pénalité
+reporting.with_penalty,Avec pénalité
+reporting.across_all_carriers,Sur tous les transporteurs
+reporting.total_routes,Total des itinéraires
+reporting.generating,Génération en cours...
+reporting.standard_percent,% norme
+reporting.actual_percent,% réel
+reporting.analyze_service_equity_across_cities_and_regions,Analyser l'équité des services entre les villes et régions
+reporting.both_directions,Les deux directions
+reporting.filter_no_filters,Aucun filtre :
+reporting.filter_region_label,Région :
+reporting.filter_direction_label,Direction :
+reporting.filter_direction_desc,Analyser séparément la qualité du service entrant vs sortant
+reporting.filter_equity_status_label,Statut d'équité :
+reporting.filter_equity_status_desc,Identifier les villes avec des niveaux de conformité spécifiques
+reporting.filter_carrier_product_label,Transporteur/Produit :
+reporting.filter_carrier_product_desc_narrow,Limiter l'analyse à des prestataires ou types de services spécifiques
+reporting.filter_date_range_label,Période :
+reporting.filter_date_range_desc,Analyser les tendances sur des périodes spécifiques
+reporting.citizens_count,{count} citoyens
+reporting.of_cities,sur {count} villes
+reporting.citizens_affected,Citoyens affectés
+reporting.in_critical_cities,dans les villes critiques
+reporting.top_3_best_served_cities,Top 3 des villes les mieux desservies
+reporting.top_3_worst_served_cities,Top 3 des villes les moins bien desservies
+reporting.compliance_percent,% de conformité
+reporting.inbound_percent,% entrant
+reporting.outbound_percent,% sortant
+reporting.treemap_size_population_color_compliance,La taille représente la population, la couleur indique le statut de conformité
+reporting.jk_std,Norme J+K
+reporting.jk_actual,Réel J+K
+reporting.inbound_direction,Entrant
+reporting.outbound_direction,Sortant
+reporting.avg_standard,Norme moyenne ({percent} %)
+reporting.underserved,MAL DESSERVIES
+reporting.map_interactive_description,Carte interactive montrant l'équité des services dans les villes. La taille du cercle représente la population, la couleur indique le statut de conformité. Cliquez sur un marqueur de ville pour voir les informations détaillées.
+reporting.compliant_abbr,Conf.
+reporting.std_abbr,Norme
+reporting.inbound_abbr,Ent.
+reporting.outbound_abbr,Sort.
+onedb.showing_records,Affichage de {{filtered}} sur {{total}} enregistrements au total
+receive_generator.title,Générateur de registres ONE DB
+receive_generator.subtitle,Générer des enregistrements de réception synthétiques à des fins de test et de démonstration
+receive_generator.demo_account_only,Compte de démonstration uniquement - Cette fonctionnalité n'est disponible qu'à des fins de test
+receive_generator.generator_configuration,Configuration du générateur
+receive_generator.number_of_records,Nombre d'enregistrements
+receive_generator.out_of_sla_percentage,Pourcentage hors SLA (%)
+receive_generator.advance_variance_days,Variance d'avance (jours)
+receive_generator.delay_variance_days,Variance de retard (jours)
+receive_generator.maximum_days_records_can_arrive_early,Nombre maximum de jours pendant lesquels les enregistrements peuvent arriver en avance
+receive_generator.maximum_days_records_can_be_delayed_beyond_sla,Nombre maximum de jours pendant lesquels les enregistrements peuvent être retardés au-delà du SLA
+receive_generator.example_records_can_arrive_between,📊 Exemple : Les enregistrements peuvent arriver entre {{min}} et {{max}} jours (SLA : {{sla}} jours)
+receive_generator.example_out_of_sla_records_can_arrive_up_to,📊 Exemple : Les enregistrements hors SLA peuvent arriver jusqu'à {{max}} jours (SLA : {{sla}} jours\, retard : +{{delay}} jours)
+receive_generator.products,Produits
+receive_generator.carriers,Transporteurs
+receive_generator.select_all,Tout sélectionner
+receive_generator.selected_products,Sélectionné : {{count}} produit(s)
+receive_generator.selected_carriers,Sélectionné : {{count}} transporteur(s)
+receive_generator.start_date,Date de début
+receive_generator.end_date,Date de fin
+receive_generator.generation_summary,Résumé de la génération
+receive_generator.summary_combinations,• <strong>{{products}}</strong> produit(s) × <strong>{{carriers}}</strong> transporteur(s) = <strong>{{total}}</strong> combinaisons
+receive_generator.summary_records_per_combination,• <strong>{{count}}</strong> enregistrements par combinaison
+receive_generator.summary_total_records,• <strong>~{{count}}</strong> enregistrements totaux seront générés
+receive_generator.summary_date_range,• Plage de dates : <strong>{{start}}</strong> à <strong>{{end}}</strong>
+receive_generator.generate_records,Générer des enregistrements
+receive_generator.generating,Génération en cours... {{progress}}%
+receive_generator.generation_complete,Génération terminée
+receive_generator.successfully_created_records,Créé avec succès {{success}} enregistrements{{failed}}
+receive_generator.failed_records, ({{count}} échoué)
+admin.use_this_feature_to_prepare_accounts,"Utilisez cette fonctionnalité pour préparer les comptes pour les sessions de formation ou les démonstrations. Le processus de réinitialisation va :"
+admin.all_operational_data,"toutes les données opérationnelles (plans, envois, stocks, commandes)"
+admin.all_configuration_data,"toutes les données de configuration (topologie, panélistes, matériaux, paramètres)"
+admin.use_with_caution,utiliser avec prudence
+admin.created,Créé :
+admin.resetting,Réinitialisation en cours...
+admin.confirm_reset,Confirmer la réinitialisation
+admin.an_unexpected_error_occurred,Une erreur inattendue s'est produite
+common.language,Langue
+onedb_api.title,GET API - ONE DB
+onedb_api.description,"API REST pour interroger et extraire les données ONE DB. Accès en lecture seule avec filtrage par date et pagination. Limité à 10,000 enregistrements par requête et 10 requêtes par minute."
+onedb_api.tab_overview,Vue d'ensemble
+onedb_api.tab_documentation,Documentation
+onedb_api.tab_testing,Test
+onedb_api.tab_usage,Utilisation
+onedb_api.credentials_section,Identifiants API
+onedb_api.no_api_key,Vous n'avez pas encore de clé API active. Générez-en une pour commencer à utiliser l'API.
+onedb_api.generate_key,Générer une clé API
+onedb_api.generating,Génération en cours...
+onedb_api.api_key_label,Votre clé API
+onedb_api.copy,Copier
+onedb_api.copied,Copié !
+onedb_api.created_at,Créé
+onedb_api.regenerate_key,Régénérer la clé API
+onedb_api.confirm_regenerate,Êtes-vous sûr de vouloir régénérer votre clé API ? L'ancienne clé sera désactivée immédiatement.
+onedb_api.security_warning_title,Avertissement de sécurité
+onedb_api.security_warning_text,Gardez votre clé API sécurisée. Ne la partagez pas publiquement et ne la commettez pas dans un contrôle de version. Toute personne disposant de cette clé peut accéder à vos données ONE DB.
+onedb_api.endpoint_section,Point de terminaison API
+onedb_api.base_url,URL de base
+onedb_api.authentication_title,Authentification
+onedb_api.authentication_description,Toutes les requêtes API doivent inclure votre clé API dans l'en-tête Authorization en utilisant l'authentification Bearer.
+onedb_api.endpoints_title,Points de terminaison disponibles
+onedb_api.endpoint_description,Récupérer les enregistrements ONE DB filtrés par plage de dates
+onedb_api.query_parameters,Paramètres de requête
+onedb_api.parameter,Paramètre
+onedb_api.type,Type
+onedb_api.required,Obligatoire
+onedb_api.description,"API REST pour interroger et extraire les données ONE DB. Accès en lecture seule avec filtrage par date et pagination. Limité à 10,000 enregistrements par requête et 10 requêtes par minute."
+onedb_api.yes,Oui
+onedb_api.no,Non
+onedb_api.start_date,Date de début
+onedb_api.start_date_desc,Date de début pour filtrer les enregistrements (format : AAAA-MM-JJ)
+onedb_api.end_date,Date de fin
+onedb_api.end_date_desc,Date de fin pour filtrer les enregistrements (format : AAAA-MM-JJ)
+onedb_api.limit,Limite
+onedb_api.limit_desc,Nombre maximum d'enregistrements à retourner (par défaut : 100)
+onedb_api.offset,Offset
+onedb_api.offset_desc,Nombre d'enregistrements à ignorer pour la pagination (par défaut : 0)
+onedb_api.examples_title,Exemples de requêtes
+onedb_api.response_format,Format de réponse
+onedb_api.rate_limiting_title,Limitation du débit
+onedb_api.rate_limiting_description,Pour assurer une utilisation équitable et la stabilité du système
+onedb_api.rate_limit_info,Limite de débit : 10 requêtes par minute
+onedb_api.error_codes_title,Codes de statut HTTP
+onedb_api.status_code,Code de statut
+onedb_api.status_200,Succès - Requête terminée avec succès
+onedb_api.status_400,Mauvaise requête - Paramètres ou format de date invalides
+onedb_api.status_401,Non autorisé - Clé API invalide ou manquante
+onedb_api.status_429,Trop de requêtes - Limite de débit dépassée
+onedb_api.status_500,Erreur interne du serveur - Un problème est survenu de notre côté
+onedb_api.api_tester_title,Testeur API
+onedb_api.generate_key_first,Veuillez d'abord générer une clé API pour utiliser le testeur.
+onedb_api.test_api,Tester la requête API
+onedb_api.testing,Test en cours...
+onedb_api.response,Réponse
+onedb_api.usage_statistics,Statistiques d'utilisation
+onedb_api.total_calls_month,Total des appels ce mois-ci
+onedb_api.calls_last_hour,Appels dans la dernière heure
+onedb_api.limit_10_per_minute,Limite : 10 par minute
+onedb_api.last_call,Dernier appel API
+onedb_api.never,Jamais
+onedb_api.loading_stats,Chargement des statistiques...
+menu.onedb_api,API ONE DB
+menu.onedb_api.tooltip,Accédez à ONE DB via l'API REST
+onedb_api.auth_note,"Remarque : L'en-tête Authorization utilise la clé anon Supabase (fournie par le système), tandis que X-API-Key contient votre clé API personnelle."
+onedb_api.max_records_note,"Remarque : L'API renvoie un maximum de 10 000 enregistrements au total. Utilisez des plages de dates plus spécifiques si vous avez besoin d'accéder à plus de données."
+menu.onedb_section,"ONE DB"
+menu.onedb_section.tooltip,"Gestion des données et accès API"
+menu.get_api,"GET API"
+menu.get_api.tooltip,"Extraire des données via l'API REST"
+panelists.management,"Gestion des Panélistes"
+panelists.manage_availability,"Gérer la disponibilité des panélistes"
+panelists.all_in_system,"Total dans le système"
+panelists.search_placeholder,"Rechercher par code, nom, email..."
+common.all_cities,"Toutes les Villes"
+common.all_nodes,"Tous les Nœuds"
+common.all_status,"Tous les Statuts"
+postal_centers.title,Centres Postaux
+postal_centers.description,Configurer les centres postaux et les lecteurs RFID pour le diagnostic réseau
+postal_centers.create_center,Créer un Centre Postal
+postal_centers.edit_center,Modifier le Centre Postal
+postal_centers.confirm_delete_center,Êtes-vous sûr de vouloir supprimer ce centre postal ? Tous les lecteurs associés seront également supprimés.
+postal_centers.no_centers_found,Aucun centre postal trouvé
+postal_centers.total_centers,Centres Totaux
+postal_centers.active_centers,Centres Actifs
+postal_centers.code,Code
+postal_centers.name,Nom
+postal_centers.description,Description
+postal_centers.opening_hour,Heure d'Ouverture
+postal_centers.cutoff_time,Heure de Coupure
+postal_centers.calculation_mode,Mode de Calcul
+postal_centers.mixed_reader_gap_minutes,Intervalle Lecteur Mixte (minutes)
+postal_centers.mixed_reader_gap_help,Intervalle de temps pour séparer les événements d'entrée/sortie dans les lecteurs mixtes (laisser vide pour hériter du compte)
+postal_centers.is_active,Actif
+postal_centers.inherit_from_account,Hériter du Compte
+postal_centers.natural_days,Jours Naturels
+postal_centers.working_days,Jours Ouvrables
+postal_centers.hours,Heures
+postal_centers.mode,Mode
+postal_centers.status,Statut
+postal_centers.search_placeholder,Rechercher des centres postaux ou des lecteurs...
+readers.reader,Lecteur
+readers.readers,Lecteurs
+readers.total_readers,Lecteurs Totaux
+readers.active_readers,Lecteurs Actifs
+readers.entry_readers,Lecteurs d'Entrée
+readers.exit_readers,Lecteurs de Sortie
+readers.mixed_readers,Lecteurs Mixtes
+readers.add_reader,Ajouter un Lecteur
+readers.add_first_reader,Ajouter le Premier Lecteur
+readers.create_reader,Créer un Lecteur
+readers.edit_reader,Modifier le Lecteur
+readers.confirm_delete_reader,Êtes-vous sûr de vouloir supprimer ce lecteur ?
+readers.no_readers_found,Aucun lecteur trouvé pour ce centre postal
+readers.reader_id,ID du Lecteur
+readers.reader_id_help,Doit correspondre au ReaderId dans les événements EPCIS
+readers.name,Nom
+readers.description,Description
+readers.type,Type
+readers.reader_type,Type de Lecteur
+readers.type_entry,Entrée
+readers.type_exit,Sortie
+readers.type_mixed,Mixte
+readers.type_entry_help,Utilise MIN(timestamp) - lecture la plus ancienne
+readers.type_exit_help,Utilise MAX(timestamp) - lecture la plus récente
+readers.type_mixed_help,Sépare entrée/sortie selon l'intervalle de temps
+readers.mixed_reader_gap_minutes,Seuil d'Intervalle (minutes)
+readers.mixed_reader_gap_help,Remplacer le seuil d'intervalle pour ce lecteur (laisser vide pour hériter)
+readers.is_active,Actif
+readers.gap,Intervalle
+common.minutes,minutes
+common.all,Tous
+common.active_only,Actifs Seulement
+common.expand_all,Tout Développer
+common.collapse_all,Tout Réduire
+menu.postal_centers,Centres Postaux
+menu.postal_centers.tooltip,Configurer les centres postaux et les lecteurs RFID
+menu.account_configuration,Configuration du Compte
+menu.account_configuration.tooltip,Configurer les paramètres au niveau du compte pour les diagnostics
+account_config.title,Configuration du Compte
+account_config.description,Configurer les paramètres globaux de votre compte
+account_config.global_settings,Paramètres Globaux
+account_config.calculation_mode,Mode de Calcul
+account_config.natural_days,Jours Naturels
+account_config.working_days,Jours Ouvrables
+account_config.calculation_mode_help,Choisissez comment calculer les temps de transit: jours naturels (24/7) ou jours ouvrables (hors heures non ouvrables)
+account_config.mixed_reader_gap,Intervalle Lecteur Mixte (minutes)
+account_config.mixed_reader_gap_help,Intervalle de temps pour séparer les événements d'entrée et de sortie pour les lecteurs mixtes
+account_config.non_working_days,Jours Non Ouvrables (Jours Fériés)
+account_config.add_holiday,Ajouter un Jour Férié
+account_config.holiday_reason,Raison (ex: Noël, Nouvel An)
+account_config.no_holidays,Aucun jour férié configuré
+account_config.confirm_delete_holiday,Êtes-vous sûr de vouloir supprimer ce jour férié?
+account_config.weekly_schedule,Horaire Hebdomadaire
+account_config.working_day,Jour Ouvrable
+account_config.saved_successfully,Configuration enregistrée avec succès
+account_config.fill_all_fields,Veuillez remplir tous les champs
+account_config.download_template,Télécharger le Modèle
+account_config.import_csv,Importer CSV
+account_config.no_valid_holidays,Aucun jour férié valide trouvé dans le CSV
+account_config.imported_successfully,{count} jours fériés importés avec succès
+account_config.opening,Ouverture
+account_config.cutoff,Coupure
+postal_centers.inherited,Hérité
+postal_centers.override,Personnalisé
+postal_centers.inheriting_from_account,Héritant du compte
+postal_centers.from_account,du compte
+postal_centers.minutes,minutes
+postal_centers.basic_info,Informations de Base
+postal_centers.configuration,Configuration
+postal_centers.holidays,Jours Fériés (Jours Non Ouvrables)
+postal_centers.inherited_holidays,Hérités du Compte
+postal_centers.center_holidays,Jours Fériés Spécifiques au Centre
+postal_centers.specific,Spécifique
+postal_centers.holiday_reason,Raison
+postal_centers.no_account_holidays,Aucun jour férié défini au niveau du compte
+postal_centers.no_center_holidays,Aucun jour férié spécifique au centre défini
+postal_centers.from_account,Du Compte
+postal_centers.minutes,minutes
+postal_centers.weekly_schedule,Horaire Hebdomadaire
+postal_centers.weekly_schedule_help,Personnalisez les heures d'ouverture pour ce centre ou héritez de la configuration du compte
+postal_centers.inherited,Hérité
+postal_centers.holidays_inherited_help,Les jours non ouvrables sont gérés au niveau du compte et automatiquement hérités par tous les centres postaux
+postal_centers.inherited_from_account,Hérité du Compte
+common.sunday,Dimanche
+common.monday,Lundi
+common.tuesday,Mardi
+common.wednesday,Mercredi
+common.thursday,Jeudi
+common.friday,Vendredi
+common.saturday,Samedi
+common.update,Mettre à jour
+common.opening,Ouverture
+common.cutoff,Fermeture
+postal_centers.center_holidays,Jours Fériés Spécifiques au Centre
+postal_centers.specific,Spécifique
+postal_centers.holiday_reason,Raison
+postal_centers.no_center_holidays,Aucun jour férié spécifique au centre défini
+readers.from_account,Du Compte
+readers.inheriting_from_account,Hérité du compte
+readers.minutes,minutes
+readers.title,Lecteurs
+readers.add_new,Ajouter un Nouveau Lecteur
+readers.total_count,Total: {{count}} lecteurs
+readers.search_placeholder,Rechercher par ID de Lecteur ou Nom
+readers.filter_by_center,Filtrer par Centre Postal
+readers.filter_by_type,Filtrer par Type
+readers.filter_by_status,Filtrer par Statut
+readers.postal_center,Centre Postal
+readers.postal_center_help,Assigner ce lecteur à un centre postal
+readers.gap_threshold,Seuil de Gap
+readers.status,Statut
+readers.status_active,Actif
+readers.status_inactive,Inactif
+readers.status_offline,Hors ligne
+readers.status_unknown,Inconnu
+readers.selected_count,{{count}} sélectionnés
+readers.activate,Activer
+readers.deactivate,Désactiver
+readers.confirm_delete,Êtes-vous sûr de vouloir supprimer ce lecteur?
+readers.confirm_bulk_delete,Êtes-vous sûr de vouloir supprimer {{count}} lecteurs?
+readers.no_readers_found,Aucun lecteur trouvé
+readers.inherited,Hérité
+postal_centers.tab_centers,Centres
+postal_centers.tab_readers,Lecteurs
+common.reset_filters,Réinitialiser les filtres
+slas.title,Configuration des SLA
+slas.description,Configurer les accords de niveau de service pour les itinéraires opérationnels et de distribution
+slas.create_sla,Créer SLA
+slas.generate_combinations,Générer des Combinaisons
+slas.sla_type,Type de SLA
+slas.operational,Opérationnel
+slas.distribution,Distribution
+slas.route,Itinéraire
+slas.expected_time,Temps Prévu
+slas.on_time_percentage,% Ponctuel
+slas.warning_threshold,Seuil d'Avertissement
+slas.critical_threshold,Seuil Critique
+slas.postal_center,Centre Postal
+slas.from_reader,Lecteur Origine
+slas.to_reader,Lecteur Destination
+slas.from_postal_center,Centre Postal Origine
+slas.to_postal_center,Centre Postal Destination
+slas.time_unit,Unité de Temps
+slas.select_postal_centers,Sélectionner les Centres Postaux
+slas.operational_combinations_hint,Générera des SLA pour toutes les paires de lecteurs dans chaque centre sélectionné
+slas.from_postal_centers,Centres Postaux Origine
+slas.to_postal_centers,Centres Postaux Destination
+slas.default_values,Valeurs par Défaut
+slas.combinations_generated,Généré {inserted} nouveaux SLA ({skipped} ignorés comme doublons)
+menu.slas_configuration,Sites SLA
+menu.slas_configuration.tooltip,Configurer Sites SLA
+slas.generate_network_slas,Générer les SLA de Réseau
+slas.network_summary,Résumé du Réseau
+slas.active_postal_centers,Centres Postaux Actifs
+slas.operational_slas_to_generate,SLA opérationnels à générer
+slas.distribution_slas_to_generate,SLA de distribution à générer
+slas.one_per_center,un par centre: Entrée → Sortie
+slas.all_center_pairs,toutes les paires de centres: A→B
+slas.slas_created,SLA créés
+slas.slas_skipped,SLA ignorés
+slas.already_exist,existent déjà
+slas.operational_sla_description,Entrée → Sortie dans ce centre postal
+common.generating,Génération...
+common.bulk_edit,Édition en Masse
+common.bulk_edit_description,Édition de {count} enregistrements sélectionnés. Laissez les champs vides pour ignorer.
+common.leave_empty_to_skip,Laisser vide pour ignorer
+common.days,jours
+slas.edit_sla,Modifier SLA
+common.edit,Modifier
+common.saving,Enregistrement...
+common.hours,heures
+postal_centers.postal_center,Centre Postal
+slas.generate_pending_slas,Générer les SLA en Attente
+slas.pending_slas_summary,Résumé des SLA en Attente
+slas.pending_operational,Opérationnels en Attente
+slas.pending_distribution,Distribution en Attente
+slas.selected_to_generate,Sélectionnés pour Générer
+slas.select_sla_types,Sélectionner les Types de SLA à Générer
+slas.select_centers_for_operational,Sélectionner les Centres pour SLA Opérationnels
+slas.select_routes_for_distribution,Sélectionner les Routes pour SLA de Distribution
+slas.generate_selected_slas,Générer les SLA Sélectionnés
+common.select_all,Tout Sélectionner
+common.deselect_all,Tout Désélectionner
+common.show_filters,Afficher les Filtres
+common.hide_filters,Masquer les Filtres
+common.delete_selected,Supprimer la Sélection
+common.export_csv,Exporter CSV
+menu.setup_e2e,Réseau E2E
+menu.setup_e2e.tooltip,Configurer les paramètres du réseau de surveillance E2E
+menu.setup_diagnosis,Réseau de Diagnostic
+menu.setup_diagnosis.tooltip,Configurer les paramètres de diagnostic du réseau postal
+diagnosis.consolidation.title,Consolidation des Événements
+diagnosis.consolidation.description,Traiter les événements RFID bruts et détecter les anomalies du système
+diagnosis.consolidation.run_button,Exécuter la Consolidation
+diagnosis.consolidation.pending_events,Événements en Attente
+diagnosis.consolidation.total_incidents,Incidents Totaux
+diagnosis.consolidation.last_consolidation,Dernière Consolidation
+diagnosis.consolidation.never,Jamais
+diagnosis.consolidation.incidents_table_title,Incidents Détectés
+diagnosis.consolidation.no_incidents,Aucun incident détecté
+diagnosis.consolidation.success,Consolidation terminée: {processed} événements traités - {incidents} incidents détectés
+diagnosis.consolidation.error,Erreur de consolidation: {message}
+diagnosis.consolidation.error_no_session,Aucune session active
+diagnosis.consolidation.columns.tag_id,ID d'Étiquette
+diagnosis.consolidation.columns.incident_type,Type
+diagnosis.consolidation.columns.postal_center,Centre Postal
+diagnosis.consolidation.columns.description,Description
+diagnosis.consolidation.columns.detected_at,Détecté le
+diagnosis.consolidation.columns.status,Statut
+diagnosis.consolidation.incident_types.missing_exit,Sortie Manquante
+diagnosis.consolidation.incident_types.unknown_reader,Lecteur Inconnu
+diagnosis.consolidation.incident_types.data_quality,Qualité des Données
+diagnosis.consolidation.status.resolved,Résolu
+diagnosis.consolidation.status.pending,En Attente
+menu.event_consolidation,Consolidation des Événements
+menu.event_consolidation.tooltip,Traiter les événements RFID et détecter les anomalies

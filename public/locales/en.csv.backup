@@ -917,8 +917,8 @@ menu.delivery_standards,Delivery Standards
 menu.delivery_standards.tooltip,Define expected delivery times and success rates by carrier and product
 menu.demo_reset,Demo Reset
 menu.demo_reset.tooltip,Reset demo account data
-menu.extract_e2e_db_api,Extract E2E DB API
-menu.extract_e2e_db_api.tooltip,Extract E2E data via REST API
+menu.get_api,GET API
+menu.get_api.tooltip,Extract data via REST API
 menu.load_balancing,Load Balancing
 menu.load_balancing.tooltip,Visualize and rebalance shipment distribution across nodes
 menu.material_catalog,Material Catalog
@@ -930,8 +930,8 @@ menu.onedb_api,ONE DB API
 menu.onedb_api.tooltip,Access ONE DB through REST API
 menu.onedb_generator,ONEDB Generator
 menu.onedb_generator.tooltip,Generate receive records for allocation plans
-menu.databases_section,DATA BASES
-menu.databases_section.tooltip,Database management and API access
+menu.onedb_section,ONE DB
+menu.onedb_section.tooltip,Data management and API access
 menu.overview,Overview
 menu.panelists,Panelists
 menu.panelists.tooltip,Register and manage panelist availability
@@ -946,7 +946,7 @@ menu.reporting_equity,Territory Equity
 menu.reporting_equity.tooltip,Analyze equity in shipment distribution
 menu.reporting_jk,J+K Performance
 menu.reporting_jk.tooltip,Analyze performance against delivery standards
-menu.e2e_db,E2E DB
+menu.reporting_onedb,ONE DB
 menu.reporting_onedb.tooltip,Complete record of all received shipments
 menu.setup,Setup
 menu.stock_management,Stock Management
@@ -2151,28 +2151,5 @@ diagnosis.consolidation.incident_types.unknown_reader,Unknown Reader
 diagnosis.consolidation.incident_types.data_quality,Data Quality
 diagnosis.consolidation.status.resolved,Resolved
 diagnosis.consolidation.status.pending,Pending
-menu.rfid_events_consolidation,RFID Events Consolidation
+menu.event_consolidation,Event Consolidation
 menu.event_consolidation.tooltip,Process RFID events and detect anomalies
-diagnosis.consolidation.details.affected_events,Affected Events
-diagnosis.consolidation.details.reader_code,Reader Code
-diagnosis.consolidation.details.severity,Severity
-diagnosis.consolidation.details.detected_at,Detected At
-diagnosis.consolidation.details.raw_events,Raw EPCIS Events
-diagnosis.consolidation.details.no_raw_events,No raw events available
-diagnosis.consolidation.details.quick_actions,Quick Actions
-diagnosis.consolidation.details.event_of,Event {current} of {total}
-diagnosis.consolidation.details.event_id,Event ID
-diagnosis.consolidation.details.tag_id_epc,Tag ID (EPC)
-diagnosis.consolidation.details.reader_id,Reader ID
-diagnosis.consolidation.details.read_datetime,Read DateTime
-diagnosis.consolidation.details.created_at,Created At
-diagnosis.consolidation.details.is_processed,Is Processed
-diagnosis.consolidation.details.internal_id,Internal ID
-diagnosis.consolidation.details.yes,Yes
-diagnosis.consolidation.details.no,No
-diagnosis.consolidation.actions.create_reader,Create Reader
-diagnosis.consolidation.actions.mark_resolved,Mark as Resolved
-diagnosis.consolidation.actions.reprocess,Reprocess
-diagnosis.consolidation.actions.view_history,View History
-diagnosis.consolidation.incident_resolved,Incident marked as resolved successfully
-diagnosis.consolidation.details.incident_summary,Incident Summary

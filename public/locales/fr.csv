@@ -710,7 +710,7 @@ menu.reporting_equity,Équité territoriale
 menu.reporting_equity.tooltip,Analyser l’équité dans la répartition des expéditions
 menu.reporting_jk,Performance J+K
 menu.reporting_jk.tooltip,Analyser la performance par rapport aux normes de livraison
-menu.reporting_onedb,ONE DB
+menu.e2e_db,E2E DB
 menu.reporting_onedb.tooltip,Enregistrement complet de toutes les expéditions reçues
 menu.setup,Configuration
 menu.stock_management,Gestion des stocks
@@ -1903,10 +1903,10 @@ menu.onedb_api,API ONE DB
 menu.onedb_api.tooltip,Accédez à ONE DB via l'API REST
 onedb_api.auth_note,"Remarque : L'en-tête Authorization utilise la clé anon Supabase (fournie par le système), tandis que X-API-Key contient votre clé API personnelle."
 onedb_api.max_records_note,"Remarque : L'API renvoie un maximum de 10 000 enregistrements au total. Utilisez des plages de dates plus spécifiques si vous avez besoin d'accéder à plus de données."
-menu.onedb_section,"ONE DB"
-menu.onedb_section.tooltip,"Gestion des données et accès API"
-menu.get_api,"GET API"
-menu.get_api.tooltip,"Extraire des données via l'API REST"
+menu.databases_section,"BASES DE DONNÉES"
+menu.databases_section.tooltip,"Gestion des bases de données et accès API"
+menu.extract_e2e_db_api,"Extract E2E DB API"
+menu.extract_e2e_db_api.tooltip,"Extraire des données E2E via l'API REST"
 panelists.management,"Gestion des Panélistes"
 panelists.manage_availability,"Gérer la disponibilité des panélistes"
 panelists.all_in_system,"Total dans le système"
@@ -2152,7 +2152,7 @@ diagnosis.consolidation.incident_types.unknown_reader,Lecteur Inconnu
 diagnosis.consolidation.incident_types.data_quality,Qualité des Données
 diagnosis.consolidation.status.resolved,Résolu
 diagnosis.consolidation.status.pending,En Attente
-menu.event_consolidation,Consolidation des Événements
+menu.rfid_events_consolidation,Consolidation des Événements RFID
 menu.event_consolidation.tooltip,Traiter les événements RFID et détecter les anomalies
 diagnosis.consolidation.details.affected_events,Événements Affectés
 diagnosis.consolidation.details.reader_code,Code du Lecteur

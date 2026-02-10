@@ -249,18 +249,18 @@ export function Sidebar() {
       ],
     },
     {
-      label: t('menu.onedb_section'),
+      label: t('menu.databases_section'),
       items: [
         {
           path: '/one-db',
-          label: t('menu.reporting_onedb'),
+          label: t('menu.e2e_db'),
           icon: Database,
           roles: ['admin', 'superadmin'],
           tooltip: t('menu.reporting_onedb.tooltip'),
         },
         {
           path: '/one-db-api',
-          label: t('menu.get_api'),
+          label: t('menu.extract_e2e_db_api'),
           icon: DatabaseZap,
           roles: ['admin', 'superadmin'],
           tooltip: t('menu.get_api.tooltip'),
@@ -279,7 +279,7 @@ export function Sidebar() {
         },
         {
           path: '/diagnosis/event-consolidation',
-          label: t('menu.event_consolidation'),
+          label: t('menu.rfid_events_consolidation'),
           icon: RefreshCw,
           roles: ['admin', 'superadmin'],
           tooltip: t('menu.event_consolidation.tooltip'),

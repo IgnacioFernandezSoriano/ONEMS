@@ -758,7 +758,7 @@ menu.reporting_equity,Equidad territorial
 menu.reporting_equity.tooltip,Analizar la equidad en la distribución de envíos
 menu.reporting_jk,Desempeño J+K
 menu.reporting_jk.tooltip,Analizar el desempeño frente a los estándares de entrega
-menu.reporting_onedb,ONE DB
+menu.e2e_db,E2E DB
 menu.reporting_onedb.tooltip,Registro completo de todos los envíos recibidos
 menu.setup,Configuración
 menu.stock_management,Gestión de Inventario
@@ -1902,10 +1902,10 @@ menu.onedb_api,API de ONE DB
 menu.onedb_api.tooltip,Accede a ONE DB a través de API REST
 onedb_api.auth_note,"Nota: El header Authorization usa la clave anon de Supabase (proporcionada por el sistema), mientras que X-API-Key contiene tu clave API personal."
 onedb_api.max_records_note,"Nota: La API retorna un máximo de 10,000 registros en total. Usa rangos de fechas más específicos si necesitas acceder a más datos."
-menu.onedb_section,"ONE DB"
-menu.onedb_section.tooltip,"Gestión de datos y acceso API"
-menu.get_api,"GET API"
-menu.get_api.tooltip,"Extraer datos vía REST API"
+menu.databases_section,"BASES DE DATOS"
+menu.databases_section.tooltip,"Gestión de bases de datos y acceso API"
+menu.extract_e2e_db_api,"Extract E2E DB API"
+menu.extract_e2e_db_api.tooltip,"Extraer datos E2E vía REST API"
 panelists.management,"Gestión de Panelistas"
 panelists.manage_availability,"Gestionar disponibilidad de panelistas"
 panelists.all_in_system,"Total en el sistema"
@@ -2151,7 +2151,7 @@ diagnosis.consolidation.incident_types.unknown_reader,Lector Desconocido
 diagnosis.consolidation.incident_types.data_quality,Calidad de Datos
 diagnosis.consolidation.status.resolved,Resuelto
 diagnosis.consolidation.status.pending,Pendiente
-menu.event_consolidation,Consolidación de Eventos
+menu.rfid_events_consolidation,Consolidación de Eventos RFID
 menu.event_consolidation.tooltip,Procesar eventos RFID sin procesar y detectar anomalías
 diagnosis.consolidation.details.affected_events,Eventos Afectados
 diagnosis.consolidation.details.reader_code,Código del Lector

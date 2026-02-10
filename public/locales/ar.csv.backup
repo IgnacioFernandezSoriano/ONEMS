@@ -1,0 +1,2155 @@
+key,translation
+accounts.account_name,اسم الحساب
+accounts.created,تم الإنشاء
+accounts.name,الاسم
+accounts.no_accounts_found,لم يتم العثور على حسابات
+accounts.promise,الوعد
+accounts.slug,المعرف المختصر
+accounts.unique_identifier_lowercase_no_spaces,معرف فريد (حروف صغيرة، بدون فراغات)
+admin.about_account_reset,حول إعادة تعيين الحساب
+admin.all_allocation_plans_and_details,جميع خطط التخصيص والتفاصيل
+admin.all_balancing_history,جميع سجلات الموازنة
+admin.all_material_shipments_and_movements,جميع شحنات وتحركات المواد
+admin.all_material_stocks,جميع مخزونات المواد
+admin.all_purchase_orders,جميع أوامر الشراء
+admin.cannot_be_undone,لا يمكن التراجع عنه
+admin.configuration_data_nodes_panelists_materials_etc_w,سيتم الاحتفاظ ببيانات التكوين (العقد، الأعضاء، المواد، إلخ).
+admin.create_user,إنشاء مستخدم
+admin.deleted_records,السجلات المحذوفة:
+admin.demo2_account_not_found,لم يتم العثور على حساب DEMO2
+admin.demo_reset,إعادة تعيين العرض التوضيحي
+admin.loading,جارٍ التحميل...
+admin.loading_accounts,جارٍ تحميل الحسابات...
+admin.preserve,حفظ
+admin.promise,وعد
+admin.reset_data,إعادة تعيين البيانات
+admin.the_demo2_account_is_not_available_please_contact_,حساب DEMO2 غير متوفر. يرجى الاتصال بالمسؤول.
+admin.this_will_permanently_delete,سيؤدي هذا إلى الحذف الدائم لـ:
+admin.user_management,إدارة المستخدمين
+admin.warning_this_action_cannot_be_undone,تحذير: لا يمكن التراجع عن هذا الإجراء
+allocation_generator.1st_semester,الفصل الأول
+allocation_generator.2nd_semester,الفصل الثاني
+allocation_generator.about,حول مولد التخصيص
+allocation_generator.about_description,إنشاء خطط تخصيص العينات تلقائيًا بناءً على أنماط التوزيع
+allocation_generator.actions,الإجراءات
+allocation_generator.applied,مطبق
+allocation_generator.applied_date,تاريخ التطبيق
+allocation_generator.applied_plans,الخطط المطبقة
+allocation_generator.applied_plans_historical,الخطط المطبقة (تاريخية)
+allocation_generator.apply,تطبيق
+allocation_generator.april,أبريل
+allocation_generator.august,أغسطس
+allocation_generator.auto_fill,ملء تلقائي إلى 100٪
+allocation_generator.automatic_generator,المولد التلقائي
+allocation_generator.carrier,شركة النقل
+allocation_generator.city_distribution_matrix,مصفوفة التوزيع حسب المدينة (A-B-C)
+allocation_generator.clear,مسح
+allocation_generator.confirm_apply,تطبيق هذه الخطة؟ سيتم نقلها إلى الخطط المطبقة.
+allocation_generator.confirm_delete,حذف هذه الخطة؟
+allocation_generator.csv_import_coming_soon,وظيفة استيراد CSV قريباً!
+allocation_generator.december,ديسمبر
+allocation_generator.delete,حذف
+allocation_generator.description,إنشاء خطط تخصيص العينات تلقائياً بناءً على أنماط التوزيع
+allocation_generator.download_csv,تنزيل CSV
+allocation_generator.end_date,تاريخ الانتهاء
+allocation_generator.error,خطأ
+allocation_generator.error_downloading,خطأ في تنزيل الخطة
+allocation_generator.february,فبراير
+allocation_generator.generate_plan,إنشاء خطة
+allocation_generator.generated,تم الإنشاء
+allocation_generator.generated_plans,الخطط المنشأة
+allocation_generator.generated_plans_title,الخطط المولدة
+allocation_generator.generator,المولد
+allocation_generator.january,يناير
+allocation_generator.july,يوليو
+allocation_generator.june,يونيو
+allocation_generator.loading,جاري التحميل...
+allocation_generator.manual_import,الاستيراد اليدوي
+allocation_generator.march,مارس
+allocation_generator.may,مايو
+allocation_generator.no_applied_plans,لا توجد خطط مطبقة بعد
+allocation_generator.no_details_found,لم يتم العثور على تفاصيل لهذه الخطة
+allocation_generator.no_generated_plans,لا توجد خطط مولدة بعد
+allocation_generator.november,نوفمبر
+allocation_generator.october,أكتوبر
+allocation_generator.period,الفترة
+allocation_generator.plan_applied_success,تم تطبيق الخطة بنجاح!
+allocation_generator.plan_deleted_success,تم حذف الخطة بنجاح!
+allocation_generator.plan_name,اسم الخطة
+allocation_generator.product,المنتج
+allocation_generator.quick_period_selection,تحديد سريع للفترة
+allocation_generator.samples,العينات
+allocation_generator.seasonal_distribution,التوزيع الموسمي
+allocation_generator.select_carrier,تحديد ناقل
+allocation_generator.select_product,تحديد منتج
+allocation_generator.september,سبتمبر
+allocation_generator.start_date,تاريخ البدء
+allocation_generator.status,الحالة
+allocation_generator.tab_applied_plans,الخطط المطبقة
+allocation_generator.tab_generated_plans,الخطط المولدة
+allocation_generator.tab_generator,المولد
+allocation_generator.title,مولد خطط التخصيص
+allocation_generator.to,إلى
+allocation_generator.tooltip_how_it_works,كيف يعمل:
+allocation_generator.tooltip_how_it_works_text,حدد إجمالي العينات ونطاق التاريخ وشركة النقل/المنتج ومصفوفات التوزيع. سينشئ النظام خطة مفصلة مع أزواج المنشأ-الوجهة والتواريخ المجدولة.
+allocation_generator.tooltip_purpose,الغرض:
+allocation_generator.tooltip_purpose_text,إنشاء خطط تخصيص العينات تلقائياً بناءً على أنماط التوزيع حسب المدينة والتغيرات الموسمية.
+allocation_generator.tooltip_title,مولد خطط التخصيص
+allocation_generator.tooltip_usage,الاستخدام:
+allocation_generator.tooltip_usage_text,"أنشئ الخطط، راجعها في علامة تبويب ""الخطط المولدة""، ثم قم بتطبيقها لتفعيل تخصيصات العينات."
+allocation_generator.total_samples,إجمالي العينات
+allocation_generator.user_not_authenticated,المستخدم غير مصادق عليه
+allocation_generator.year,السنة
+allocation_plans.all_carriers,جميع شركات النقل
+allocation_plans.all_cities,جميع المدن
+allocation_plans.all_nodes,جميع العقد
+allocation_plans.all_plans,جميع الخطط
+allocation_plans.all_products,جميع المنتجات
+allocation_plans.all_records,جميع السجلات
+allocation_plans.all_status,جميع الحالات
+allocation_plans.auto_fill_to_100,الملء التلقائي إلى 100%
+allocation_plans.availability_issues,مشاكل التوفر
+allocation_plans.bulk_operations,العمليات الجماعية
+allocation_plans.cancel_selected,إلغاء المحدد
+allocation_plans.cancelled,تم الإلغاء
+allocation_plans.carrier,شركة النقل
+allocation_plans.change_destination_node,تغيير عقدة الوجهة
+allocation_plans.change_origin_node,تغيير عقدة الأصل
+allocation_plans.change_scheduled_date,تغيير التاريخ المجدول
+allocation_plans.city_distribution_matrix,مصفوفة توزيع المدينة
+allocation_plans.city_distribution_matrix_a_b_c,مصفوفة توزيع المدينة (أ-ب-ج)
+allocation_plans.clear_selection,مسح التحديد
+allocation_plans.completed,مكتمل
+allocation_plans.delete_selected,حذف المحدد
+allocation_plans.destination,الوجهة:
+allocation_plans.destination_city,مدينة الوجهة
+allocation_plans.destination_node,عقدة الوجهة
+allocation_plans.download_csv_template,تحميل قالب CSV
+allocation_plans.edit_record,تعديل السجل
+allocation_plans.end_date,تاريخ الانتهاء
+allocation_plans.enter_tag_id,أدخل معرف الوسم
+allocation_plans.error,خطأ:
+allocation_plans.event_id,معرف الحدث
+allocation_plans.example,مثال:
+allocation_plans.filters,مرشحات
+allocation_plans.first_day_of_the_allocation_period_samples_will_be,أول يوم في فترة التخصيص. سيتم جدولة العينات من هذا التاريخ.
+allocation_plans.import_csv,استيراد CSV
+allocation_plans.invalid,غير صالح
+allocation_plans.last_day_of_the_allocation_period_samples_will_be_,آخر يوم في فترة التخصيص. سيتم جدولة العينات حتى هذا التاريخ.
+allocation_plans.loading,جاري تحميل خطط التخصيص...
+allocation_plans.no_panelist,لا يوجد مشارك
+allocation_plans.no_panelist_assigned_to_destination_node,لا يوجد مشارك معين لعقدة الوجهة
+allocation_plans.no_panelist_assigned_to_origin_node,لا يوجد مشارك معين لعقدة الأصل
+allocation_plans.no_records,لم يتم العثور على خطط تخصيص
+allocation_plans.notified,تم الإخطار
+allocation_plans.optional,اختياري
+allocation_plans.optional_distribute_samples_unevenly_across_months,اختياري: توزيع العينات بشكل غير متساوٍ عبر الأشهر لتعكس الأنماط الموسمية.
+allocation_plans.origin,الأصل:
+allocation_plans.origin_city,مدينة الأصل
+allocation_plans.origin_node,عقدة الأصل
+allocation_plans.pending,قيد الانتظار
+allocation_plans.plan,خطة
+allocation_plans.plan_name,اسم الخطة *
+allocation_plans.please_ensure_destination_panelist,يرجى التأكد من أن العضو الوجهة
+allocation_plans.please_ensure_origin_panelist,يرجى التأكد من أن العضو المصدر
+allocation_plans.please_enter_tag_id,يرجى إدخال معرف العلامة
+allocation_plans.please_select_datetime,يرجى تحديد التاريخ والوقت
+allocation_plans.product,المنتج
+allocation_plans.promise,الوعد
+allocation_plans.quick_period_selection,اختيار فترة سريع
+allocation_plans.receive,استلام
+allocation_plans.received,تم الاستلام
+allocation_plans.received_at_time,تم الاستلام في
+allocation_plans.received_by,تم الاستلام بواسطة
+allocation_plans.received_date_time,تاريخ ووقت الاستلام
+allocation_plans.register_reception,تسجيل الاستلام
+allocation_plans.register_shipment,تسجيل الشحنة
+allocation_plans.registered_by,مسجل بواسطة
+allocation_plans.reprocess_errors,إعادة معالجة الأخطاء
+allocation_plans.reset_filters,إعادة تعيين الفلاتر
+allocation_plans.scheduled_date,التاريخ المجدول
+allocation_plans.search_by_event_id,البحث بواسطة معرف الحدث...
+allocation_plans.search_by_tag_id,البحث بواسطة معرف العلامة...
+allocation_plans.seasonal_distribution,التوزيع الموسمي
+allocation_plans.select_carrier,اختر الناقل
+allocation_plans.select_city,اختر المدينة
+allocation_plans.select_node,اختر العقدة...
+allocation_plans.select_plan,اختر الخطة
+allocation_plans.select_product,اختر المنتج
+allocation_plans.selected_count,{count} محدد
+allocation_plans.send,إرسال
+allocation_plans.sent,تم الإرسال
+allocation_plans.sent_at,تم الإرسال في:
+allocation_plans.sent_at_time,تم الإرسال في
+allocation_plans.sent_by,تم الإرسال بواسطة
+allocation_plans.sent_date_time,تاريخ ووقت الإرسال
+allocation_plans.start_date,تاريخ البدء
+allocation_plans.tag_id,معرّف الوسم
+allocation_plans.total_samples,إجمالي العينات *
+allocation_plans.transfer_error,خطأ في النقل
+allocation_plans.validation_errors,أخطاء التحقق:
+allocation_plans.year,السنة
+allocationplangenerator.allocation_plan_generator,مولد خطة التخصيص
+allocationplangenerator.applied_date,تاريخ التطبيق
+allocationplangenerator.applied_plans_historical,الخطط المطبقة (تاريخية)
+allocationplangenerator.automatic_generator,المولد التلقائي
+allocationplangenerator.carrier,الناقل
+allocationplangenerator.download_csv,تحميل ملف CSV
+allocationplangenerator.generate_sample_allocation_plans_automatically_bas,توليد خطط تخصيص العينات تلقائيًا بناءً على أنماط التوزيع
+allocationplangenerator.generated_plans,الخطط المُولدة
+allocationplangenerator.generator,المولد
+allocationplangenerator.how_it_works,كيفية العمل:
+allocationplangenerator.loading,جارٍ التحميل...
+allocationplangenerator.manual_import,استيراد يدوي
+allocationplangenerator.no_applied_plans_yet,لا توجد خطط مطبقة حتى الآن
+allocationplangenerator.no_generated_plans_yet,لا توجد خطط مُولدة حتى الآن
+allocationplangenerator.period,الفترة
+allocationplangenerator.plan_name,اسم الخطة
+allocationplangenerator.product,المنتج
+allocationplangenerator.purpose,الغرض:
+allocationplangenerator.samples,عينات
+allocationplangenerator.usage,الاستخدام:
+allocationplans.add_record,إضافة سجل
+allocationplans.allocation_plans,خطط التخصيص
+allocationplans.availability_issues,مشاكل التوفر
+allocationplans.carrier,الناقل
+allocationplans.delayed_shipments,الشحنات المتأخرة
+allocationplans.dest_city,مدينة الوجهة
+allocationplans.dest_node,عقدة الوجهة
+allocationplans.dest_panelist,مشارك الوجهة
+allocationplans.dest_status,حالة الوجهة
+allocationplans.event_id,معرّف الحدث
+allocationplans.loading,جارٍ التحميل...
+allocationplans.no_records_found,لم يتم العثور على سجلات
+allocationplans.origin_city,مدينة المنشأ
+allocationplans.origin_node,عقدة المنشأ
+allocationplans.origin_panelist,مشارك المنشأ
+allocationplans.origin_status,حالة الأصل
+allocationplans.pending,قيد الانتظار
+allocationplans.plan,الخطة
+allocationplans.product,المنتج
+allocationplans.received,تم الاستلام
+allocationplans.scheduled_date,التاريخ المحدد
+allocationplans.sent,تم الإرسال
+allocationplans.shipment_status,حالة الشحنة
+allocationplans.tag_id,معرّف الوسم
+allocationplans.total_delayed,إجمالي التأخير
+allocationplans.total_issues,إجمالي المشكلات
+allocationplans.total_pending,الإجمالي والقيد الانتظار
+allocationplans.view_and_manage_generated_allocation_plans,عرض وإدارة خطط التخصيص المُنشأة
+allocationplans.week,الأسبوع
+auth.click_here_to_auto_fill_demo_credentials,انقر هنا لملء بيانات الدخول التجريبية تلقائيًا
+auth.email,البريد الإلكتروني:
+auth.email_address,عنوان البريد الإلكتروني
+auth.enter_your_password,أدخل كلمة المرور الخاصة بك
+auth.loading,جارٍ التحميل...
+auth.password,كلمة المرور:
+auth.secure_authentication_powered_by_supabase,مصادقة آمنة مدعومة بواسطة Supabase
+auth.sign_in,تسجيل الدخول
+auth.signing_in,جارٍ تسجيل الدخول...
+auth.try_demo_account,جرب حساب العرض التجريبي
+auth.wherequalitystarts,حيث تبدأ الجودة
+auth.your_email_com,بريدك الإلكتروني@مثال.com
+bulk.cancelled_records,السجلات الملغاة
+bulk.confirm_cancel,إلغاء السجلات المحددة؟
+bulk.confirm_delete,حذف السجلات المحددة؟
+bulk.confirm_reprocess,إعادة معالجة السجلات المحددة؟
+bulk.deleted_records,السجلات المحذوفة
+bulk.please_select_date,يرجى تحديد تاريخ
+bulk.please_select_destination_node,يرجى تحديد عقدة الوجهة
+bulk.please_select_origin_node,يرجى تحديد عقدة المصدر
+bulk.reprocessed_records,السجلات المعاد معالجتها
+bulk.retry_errors,إعادة محاولة الأخطاء
+bulk.selected,محدد
+bulk.updated_records,السجلات المحدثة
+carriers.add_a_new_material_to_catalog_and_assign_to_produc,أضف مادة جديدة إلى الكتالوج وعيّنها للمنتج
+carriers.add_carrier,إضافة ناقل
+carriers.add_product,إضافة منتج
+carriers.additional_details,تفاصيل إضافية...
+carriers.all_carriers,جميع الناقلين
+carriers.all_products,جميع المنتجات
+carriers.all_products_have_materials,جميع المنتجات تحتوي على مواد!
+carriers.all_status,جميع الحالات
+carriers.carrier,الناقل
+carriers.carrier_details,تفاصيل الناقل
+carriers.carriers,الناقلون
+carriers.carriers_products,الناقلون والمنتجات
+carriers.choose_an_existing_material_from_your_catalog,اختر مادة موجودة من كتالوجك
+carriers.choose_how_to_add_material_to_this_product,اختر كيفية إضافة المادة إلى هذا المنتج:
+carriers.clear_filters,مسح الفلاتر
+carriers.code,الرمز *
+carriers.collapse_all,طي الكل
+carriers.create_carrier,إنشاء ناقل
+carriers.create_new_material,إنشاء مادة جديدة
+carriers.days,أيام
+carriers.delete_carrier,حذف الناقل
+carriers.delete_product,حذف المنتج
+carriers.delivery_hours,ساعات التسليم
+carriers.description,الوصف
+carriers.download_csv,تحميل ملف CSV
+carriers.e_g_24,مثلاً، 24
+carriers.e_g_dhl_exp_24,مثلاً، DHL-EXP-24
+carriers.e_g_dhl_express,مثلاً، دي إتش إل إكسبرس
+carriers.e_g_dhl_ups,مثلاً، دي إتش إل، يو بي إس
+carriers.e_g_express_delivery_24_hours,مثلاً، توصيل سريع خلال 24 ساعة
+carriers.e_g_express_standard_economy,مثلاً، سريع، عادي، اقتصادي
+carriers.edit_carrier,تعديل الناقل
+carriers.edit_product,تعديل المنتج
+carriers.every_product_has_materials_assigned_from_the_cata,كل منتج يحتوي على مواد مخصصة من الكتالوج
+carriers.expand_all,توسيع الكل
+carriers.expand_all_products_in_this_carrier,توسيع جميع المنتجات في هذا الناقل
+carriers.hours,ساعات
+carriers.loading,جاري تحميل الناقلين...
+carriers.loading_carriers,جارٍ تحميل شركات الشحن...
+carriers.manage_shipping_carriers_products_and_material_req,إدارة شركات الشحن، المنتجات، ومتطلبات المواد
+carriers.mat_001,MAT-001
+carriers.material,مادة
+carriers.materials,مواد
+carriers.name,الاسم *
+carriers.no_active_materials_in_catalog_create_a_new_one_in,لا توجد مواد نشطة في الكتالوج. قم بإنشاء مادة جديدة بدلاً من ذلك.
+carriers.no_carriers,لم يتم العثور على ناقلين
+carriers.no_carriers_defined_yet,لم يتم تعريف أي شركات شحن بعد
+carriers.no_materials_assigned_yet,لم يتم تعيين أي مواد بعد
+carriers.no_products,لا توجد منتجات
+carriers.no_products_for_this_carrier_yet,لا توجد منتجات لهذا الناقل بعد
+carriers.no_results_found,لم يتم العثور على نتائج
+carriers.pending_materials,المواد المعلقة
+carriers.product,منتج
+carriers.product_code,رمز المنتج
+carriers.products,منتجات
+carriers.products_count,عدد المنتجات
+carriers.products_without_materials,منتجات بدون مواد
+carriers.promise,الوعد
+carriers.quantity,الكمية *
+carriers.remove_material,إزالة المادة
+carriers.rfid_tag,علامة RFID
+carriers.search_carriers_or_products,ابحث عن شركات النقل أو المنتجات...
+carriers.select_from_catalog,اختر من الكتالوج
+carriers.select_material,اختر المادة *
+carriers.standard_delivery_time,وقت التسليم القياسي *
+carriers.start_by_creating_your_first_carrier_to_manage_shi,ابدأ بإنشاء أول ناقل لديك لإدارة شحن المنتجات
+carriers.status,الحالة *
+carriers.these_products_need_material_assignments_to_be_ope,هذه المنتجات تحتاج إلى تعيين مواد لتكون قابلة للتشغيل
+carriers.time_unit,وحدة الوقت *
+carriers.try_adjusting_your_search_or_filters,حاول تعديل بحثك أو الفلاتر
+carriers.type,النوع
+carriers.unit_measure,وحدة القياس
+carriers.units_kg_etc,وحدات، كجم، إلخ.
+carriers.update_quantity,تحديث الكمية
+carriers.with_materials,مع المواد
+carriers.without_materials,بدون مواد
+catalog.add_material,إضافة مادة
+catalog.material_code,رمز المادة
+catalog.material_name,اسم المادة
+catalog.title,كتالوج المواد
+common.1st_semester,الفصل الأول
+common.2nd_semester,الفصل الثاني
+common.about,حول
+common.actions,الإجراءات
+common.active,نشط
+common.all,الكل
+common.apply,تطبيق
+common.available,متاح
+common.bulk_edit,تحرير جماعي
+common.cancel,إلغاء
+common.clear,مسح
+common.close,إغلاق
+common.confirm_delete,حذف هذا السجل؟
+common.create,إنشاء
+common.created_successfully,تم الإنشاء بنجاح
+common.delete,حذف
+common.deleted_successfully,تم الحذف بنجاح
+common.download,تحميل
+common.edit,تعديل
+common.error,خطأ
+common.export,تصدير
+common.filters,الفلاتر
+common.generate_plan,إنشاء الخطة
+common.hide_filters,إخفاء الفلاتر
+common.import,استيراد
+common.inactive,غير نشط
+common.information,معلومات
+common.loading,جاري التحميل...
+common.no_panelist,لا يوجد عضو
+common.of,من
+common.pending,قيد الانتظار
+common.please_select_at_least_one,يرجى تحديد سجل واحد على الأقل
+common.promise,وعد
+common.records,السجلات
+common.refresh,تحديث
+common.register,تسجيل
+common.remove,إزالة
+common.reset,إعادة تعيين
+common.save,حفظ
+common.search,بحث
+common.select_all,تحديد الكل
+common.show_filters,إظهار الفلاتر
+common.status,الحالة
+common.total,الإجمالي
+common.unavailable,غير متاح
+common.updated_successfully,تم التحديث بنجاح
+common.year,السنة
+countrytopology.all_cities,جميع المدن
+countrytopology.all_nodes,جميع العقد
+countrytopology.all_nodes_have_panelists,جميع العقد تحتوي على أعضاء لجنة!
+countrytopology.all_regions,جميع المناطق
+countrytopology.cities,المدن
+countrytopology.city,المدينة
+countrytopology.clear_filters,مسح الفلاتر
+countrytopology.collapse_all,طي الكل
+countrytopology.country_topology,طوبولوجيا الدولة
+countrytopology.create_region,إنشاء منطقة
+countrytopology.define_and_manage_your_country_network_infrastruct,تعريف وإدارة هيكلية بنية شبكة الدولة الخاصة بك
+countrytopology.download_csv,تحميل CSV
+countrytopology.every_node_in_your_topology_has_a_panelist_assigne,كل عقدة في الطوبولوجيا الخاصة بك لديها مشارك معين
+countrytopology.expand_all,توسيع الكل
+countrytopology.loading_topology,جارٍ تحميل الطوبولوجيا...
+countrytopology.no_results_found,لم يتم العثور على نتائج
+countrytopology.no_topology_defined_yet,لم يتم تعريف الطوبولوجيا بعد
+countrytopology.node_id,معرّف العقدة
+countrytopology.nodes_without_panelists,العقد بدون مشاركين
+countrytopology.pending_panelist,مشارك معلق
+countrytopology.region,منطقة
+countrytopology.regions,مناطق
+countrytopology.search_regions_cities_or_nodes,ابحث عن مناطق أو مدن أو عقد...
+countrytopology.start_by_creating_your_first_region_to_build_your_,ابدأ بإنشاء أول منطقة لبناء طوبولوجيا الدولة الخاصة بك
+countrytopology.these_nodes_need_panelist_assignment_to_be_operati,تحتاج هذه العقد إلى تعيين مشارك لتكون عملية
+countrytopology.topology_tree,شجرة الطوبولوجيا
+countrytopology.total_nodes,إجمالي العقد
+countrytopology.try_adjusting_your_search_or_filters,حاول تعديل بحثك أو الفلاتر
+countrytopology.with_panelist,مع المشارك
+countrytopology.with_panelists,مع المشاركين
+countrytopology.without_panelist,بدون المشارك
+countrytopology.without_panelists,بدون المشاركين
+dashboard.active_carriers,الناقلون النشطون
+dashboard.active_products,المنتجات النشطة
+dashboard.active_resources,الموارد النشطة
+dashboard.allocation_plans,خطط التخصيص
+dashboard.availability_issues,مشكلات التوفر
+dashboard.availability_rate,معدل التوفر
+dashboard.available_combinations,التوليفات المتاحة
+dashboard.carrier_product_pairs,أزواج الناقل والمنتج
+dashboard.carriers_products,الناقلون والمنتجات
+dashboard.configured_routes,المسارات المُعدة
+dashboard.coverage_rate,معدل التغطية
+dashboard.critical_alerts,التنبيهات الحرجة
+dashboard.current_alerts,التنبيهات الحالية
+dashboard.current_month,الشهر الحالي
+dashboard.currently_unavailable,غير متوفر حالياً
+dashboard.delayed_shipments,الشحنات المتأخرة
+dashboard.delivery_standards,معايير التسليم
+dashboard.incomplete_standards,المعايير غير المكتملة
+dashboard.issues_delays,المشكلات والتأخيرات
+dashboard.last_30_days,آخر 30 يوماً
+dashboard.last_60_days,آخر 60 يوماً
+dashboard.last_90_days,آخر 90 يوماً
+dashboard.loading_dashboard,جارٍ تحميل لوحة التحكم...
+dashboard.management_dashboard,لوحة تحكم الإدارة
+dashboard.management_tip,نصيحة إدارية
+dashboard.material_management,إدارة المواد
+dashboard.material_requirements,متطلبات المواد
+dashboard.needing_review,بحاجة إلى مراجعة
+dashboard.needs_review,يحتاج مراجعة
+dashboard.next_30_days,الثلاثون يوماً القادمة
+dashboard.next_month,الشهر القادم
+dashboard.on_vacation,في إجازة
+dashboard.panelist_status,حالة المشارك
+dashboard.panelist_stock,مخزون المشارك
+dashboard.panelists_availability,المشاركون والتوافر
+dashboard.pending_items,العناصر المعلقة
+dashboard.pending_shipments,الشحنات المعلقة
+dashboard.purchase_orders,أوامر الشراء
+dashboard.regulator_stock,مخزون المنظم
+dashboard.selected_period,الفترة المختارة:
+dashboard.shipments_to_panelists,الشحنات إلى المشاركين
+dashboard.standards_configuration,تكوين المعايير
+dashboard.stock_alerts,تنبيهات المخزون
+dashboard.tooltip_active_carriers,عدد شركات النقل النشطة المتاحة للشحنات
+dashboard.tooltip_active_products,عدد المنتجات النشطة المكونة عبر جميع شركات النقل
+dashboard.tooltip_coverage_rate,نسبة المعايير ذات التكوين الكامل
+dashboard.tooltip_delayed_shipments,الشحنات المجدولة قبل اليوم ولكن لم يتم استلامها بعد
+dashboard.tooltip_management_dashboard,لوحة التحكم الإدارية: نظرة عامة على المقاييس التشغيلية وحالة الموارد والتنبيهات الحرجة. استخدم محدد الفترة لعرض إحصائيات الشهر الحالي أو القادم.
+dashboard.tooltip_material_requirements,متطلبات المواد المعلقة من الجهات التنظيمية
+dashboard.tooltip_needs_review,المعايير التي تفتقد الوقت أو نسبة النجاح المكونة
+dashboard.tooltip_panelist_stock,تنبيهات المخزون في مواقع الأعضاء
+dashboard.tooltip_pending_shipments,شحنات المخزون المعلقة للإرسال
+dashboard.tooltip_received_plans,الخطط المستلمة بنجاح
+dashboard.tooltip_sent_plans,الخطط المرسلة وفي الطريق
+dashboard.tooltip_shipments_to_panelists,الشحنات المعلقة من المواد إلى الأعضاء
+dashboard.tooltip_total_panelists,العدد الإجمالي للأعضاء في النظام
+dashboard.tooltip_total_plans,إجمالي خطط التخصيص في الفترة المحددة
+dashboard.tooltip_total_standards,العدد الإجمالي لمعايير التسليم المكونة
+dashboard.total_panelists,إجمالي المشاركين
+dashboard.total_plans,إجمالي الخطط
+dashboard.total_standards,إجمالي المعايير
+dashboard.total_status,الإجمالي والحالة
+dashboard.unassigned,غير مخصص
+dashboard.unavailable,غير متاح
+dashboard.upcoming_vacations,الإجازات القادمة
+delivery_standards.about_text,تكوين أوقات التسليم المتوقعة بين المدن لكل مجموعة ناقل-منتج
+delivery_standards.absolute,مطلق
+delivery_standards.add_standard,إضافة معيار
+delivery_standards.all_carriers,جميع الناقلين
+delivery_standards.all_destinations,جميع الوجهات
+delivery_standards.all_origins,جميع المصادر
+delivery_standards.all_products,جميع المنتجات
+delivery_standards.bulk_update,تحديث جماعي
+delivery_standards.carrier,شركة النقل *
+delivery_standards.clear_all_selections,مسح كل التحديدات
+delivery_standards.confirm_delete,حذف معيار التسليم هذا؟
+delivery_standards.create_standard,إنشاء معيار
+delivery_standards.created,تم إنشاء معيار التسليم بنجاح
+delivery_standards.critical_threshold,العتبة الحرجة
+delivery_standards.days,أيام
+delivery_standards.delete_selected,حذف المحدد
+delivery_standards.deleted,تم حذف معيار التسليم بنجاح
+delivery_standards.description,الوصف
+delivery_standards.destination,الوجهة
+delivery_standards.destination_city,مدينة الوجهة *
+delivery_standards.destination_classification,تصنيف الوجهة
+delivery_standards.e_g_24,مثال: 24
+delivery_standards.e_g_85,مثال: 85
+delivery_standards.edit_standard,تحرير المعيار
+delivery_standards.estimated_combinations,التوليفات المقدرة:
+delivery_standards.expected_days,الأيام المتوقعة
+delivery_standards.generate_combinations,إنشاء التوليفات
+delivery_standards.generate_delivery_standards,إنشاء معايير التسليم
+delivery_standards.generation_complete,اكتمل الإنشاء
+delivery_standards.hours,ساعات
+delivery_standards.loading_standards,جاري تحميل معايير التسليم...
+delivery_standards.no_products_for_this_carrier,لا توجد منتجات لهذا الناقل
+delivery_standards.origin,المصدر
+delivery_standards.origin_city,مدينة المنشأ *
+delivery_standards.origin_classification,تصنيف المصدر
+delivery_standards.pending_only,قيد الانتظار فقط
+delivery_standards.product,المنتج *
+delivery_standards.promise,الوعد
+delivery_standards.relative,نسبي
+delivery_standards.select_carrier,اختر الناقل
+delivery_standards.select_destination,اختر الوجهة
+delivery_standards.select_origin,اختر المنشأ
+delivery_standards.select_product,اختر المنتج
+delivery_standards.smart_generation,الإنشاء الذكي:
+delivery_standards.standard_time,الوقت القياسي
+delivery_standards.success,نسبة النجاح %
+delivery_standards.success_percentage,٪ النجاح
+delivery_standards.threshold_type,نوع العتبة
+delivery_standards.time_unit,وحدة الوقت *
+delivery_standards.title,معايير التسليم
+delivery_standards.tolerance_days,أيام التسامح
+delivery_standards.updated,تم تحديث معيار التسليم بنجاح
+delivery_standards.warning_threshold,عتبة التحذير
+deliverystandards.about_delivery_standards,حول معايير التسليم
+deliverystandards.absoluto,مطلق:
+deliverystandards.absoluto_del_100,مطلق (% من 100%)
+deliverystandards.all_carriers,جميع الناقلين
+deliverystandards.all_cities,جميع المدن
+deliverystandards.all_products,جميع المنتجات
+deliverystandards.all_types,جميع الأنواع
+deliverystandards.carrier,الناقل
+deliverystandards.carrier_s_product_service_type_e_g_express_standar,نوع منتج/خدمة الناقل (مثل: سريع، عادي، اقتصادي)
+deliverystandards.city_where_the_package_is_delivered_destination_ci,المدينة التي يتم فيها تسليم الطرد (مدينة الوجهة)
+deliverystandards.city_where_the_package_is_picked_up_origin_city,المدينة التي يتم فيها استلام الطرد (مدينة المنشأ)
+deliverystandards.configured,مُكوَّن
+deliverystandards.create_delivery_standard,إنشاء معيار التسليم
+deliverystandards.critical,النسبة الحرجة
+deliverystandards.critical_threshold,الحد الحرج (%)
+deliverystandards.days,أيام
+deliverystandards.delivery_standards,معايير التسليم
+deliverystandards.destination,الوجهة
+deliverystandards.destination_city,مدينة الوجهة
+deliverystandards.destination_type,نوع الوجهة
+deliverystandards.e_g_10,مثال: 10
+deliverystandards.e_g_20,مثال: 20
+deliverystandards.e_g_24,مثال: 24
+deliverystandards.e_g_85,مثال: 85
+deliverystandards.edit_delivery_standard,تعديل معيار التسليم
+deliverystandards.edit_or_delete_this_delivery_standard,تحرير أو حذف معيار التسليم هذا
+deliverystandards.ejemplo_success_95_warning_10_l_mite_90_100_10,مثال: النجاح=95٪، التحذير=10٪ → الحد=90٪ (100٪ - 10٪)
+deliverystandards.ejemplo_success_95_warning_5_l_mite_90_25_95_95_5,مثال: النجاح=95٪، التحذير=5٪ → الحد=90.25٪ (95٪ - 95٪×5٪)
+deliverystandards.filters,الفلاتر
+deliverystandards.hours,الساعات
+deliverystandards.j_k,J+K:
+deliverystandards.key_metrics,المقاييس الرئيسية:
+deliverystandards.loading_delivery_standards,جاري تحميل معايير التسليم...
+deliverystandards.logistics_carrier_responsible_for_delivery_e_g_dhl,الناقل اللوجستي المسؤول عن التسليم (مثل DHL، FedEx)
+deliverystandards.los_thresholds_se_calculan_como_del_100,يتم حساب العتبات كنسبة مئوية من 100٪.
+deliverystandards.los_thresholds_se_calculan_como_del_success,يتم حساب العتبات كنسبة مئوية من نسبة النجاح.
+deliverystandards.manage_delivery_time_standards_between_cities_for_,إدارة معايير وقت التسليم بين المدن لكل ناقل ومنتج
+deliverystandards.no_delivery_standards_found_generate_combinations_,لم يتم العثور على معايير تسليم. قم بإنشاء التركيبات للبدء.
+deliverystandards.origin,الأصل
+deliverystandards.origin_city,مدينة الأصل
+deliverystandards.origin_type,نوع الأصل
+deliverystandards.pending,قيد الانتظار
+deliverystandards.pending_only,الانتظار فقط
+deliverystandards.product,المنتج
+deliverystandards.purpose,الغرض:
+deliverystandards.relativo,نسبي
+deliverystandards.relativo_del_success,نسبي (% من نسبة النجاح %)
+deliverystandards.reset_all_filters,إعادة تعيين جميع الفلاتر
+deliverystandards.selected,المحدد
+deliverystandards.standard_delivery_time_e_g_j_2_means_2_days_from_p,وقت التسليم القياسي (مثلاً، J+2 تعني يومين من الاستلام)
+deliverystandards.standard_time,الوقت القياسي
+deliverystandards.std,نسبة قياسية:
+deliverystandards.success,نسبة النجاح %
+deliverystandards.target_percentage_of_deliveries_meeting_the_j_k_st,النسبة المستهدفة للتسليمات التي تفي بالمعيار J+K
+deliverystandards.threshold_calculation_type_relative_percentage_bas,نوع حساب العتبة: نسبي (معتمد على النسبة المئوية) أو مطلق (قيمة ثابتة)
+deliverystandards.threshold_type,نوع العتبة
+deliverystandards.thresholds,العتبات:
+deliverystandards.time_unit,وحدة الزمن
+deliverystandards.time_unit_for_the_j_k_value_hours_or_days,وحدة الزمن لقيمة J+K (ساعات أو أيام)
+deliverystandards.tipo_de_c_lculo_de_thresholds,نوع حساب العتبات:
+deliverystandards.total_standards,إجمالي المعايير
+deliverystandards.type,النوع
+deliverystandards.type_a,النوع أ
+deliverystandards.type_b,النوع ب
+deliverystandards.type_c,النوع ج
+deliverystandards.unit,الوحدة
+deliverystandards.usage,الاستخدام:
+deliverystandards.warning,نسبة التحذير
+deliverystandards.warning_and_critical_deviation_levels_for_performa,مستويات الانحراف التحذيري والحرج لمراقبة الأداء
+deliverystandards.warning_threshold,عتبة التحذير (%)
+layout.all_accounts,جميع الحسابات
+layout.sign_out,تسجيل الخروج
+layout.view_as_account,عرض كحساب:
+load_balancing.about_text,موازنة تخصيص الأعضاء بين العقد لتحسين توزيع عبء العمل
+load_balancing.apply_balance,تطبيق التوازن
+load_balancing.applying,جاري تطبيق التوازن...
+load_balancing.calculating,جاري حساب التوازن...
+load_balancing.confirm_apply,تطبيق هذه التغييرات على تخصيصات الأعضاء؟
+load_balancing.current_distribution,التوزيع الحالي
+load_balancing.current_load,الحمل الحالي
+load_balancing.current_panelists,الأعضاء الحاليون
+load_balancing.description,الوصف
+load_balancing.difference,الفرق
+load_balancing.loading,جاري تحميل بيانات التوازن...
+load_balancing.node,العقدة
+load_balancing.preview_changes,معاينة التغييرات
+load_balancing.rebalance,إعادة التوازن
+load_balancing.reset_preview,إعادة تعيين المعاينة
+load_balancing.success,تم تطبيق التوازن بنجاح
+load_balancing.target_load,الحمل المستهدف
+load_balancing.target_panelists,الأعضاء المستهدفون
+load_balancing.title,موازنة حمل العقد
+material_catalog.additional_details,تفاصيل إضافية...
+material_catalog.code,الرمز *
+material_catalog.description,الوصف
+material_catalog.mat_001,MAT-001
+material_catalog.minimum_stock_safety_stock,الحد الأدنى للمخزون (مخزون الأمان)
+material_catalog.name,الاسم *
+material_catalog.promise,الوعد
+material_catalog.rfid_tag,علامة تحديد التردد اللاسلكي (RFID)
+material_catalog.unit_measure,وحدة القياس
+material_catalog.units_kg_etc,وحدات، كجم، إلخ.
+material_requirements.about,حول متطلبات المواد
+material_requirements.about_description,حساب احتياجات المواد بناءً على خطط التخصيص
+material_requirements.all_materials,جميع المواد
+material_requirements.all_nodes,جميع العقد
+material_requirements.assigned,مخصص
+material_requirements.calculate,حساب المتطلبات
+material_requirements.calculating,جاري الحساب...
+material_requirements.calculation_period,فترة الحساب
+material_requirements.carrier,الناقل
+material_requirements.city,المدينة
+material_requirements.clear_filters,مسح الفلاتر
+material_requirements.description,الوصف
+material_requirements.end_date,تاريخ الانتهاء
+material_requirements.export_csv,تصدير CSV
+material_requirements.filters,الفلاتر
+material_requirements.loading,جاري تحميل متطلبات المواد...
+material_requirements.material_code,رمز المادة
+material_requirements.material_name,اسم المادة
+material_requirements.node,العقدة
+material_requirements.panelist,العضو
+material_requirements.panelist_distribution,توزيع الأعضاء
+material_requirements.panelists_needing,الأعضاء المحتاجون
+material_requirements.pending,قيد الانتظار
+material_requirements.plans,الخطط
+material_requirements.please_select_dates,يرجى تحديد التواريخ
+material_requirements.product,المنتج
+material_requirements.purchase_orders,أوامر الشراء
+material_requirements.quantity,الكمية
+material_requirements.quantity_needed,الكمية المطلوبة
+material_requirements.region,المنطقة
+material_requirements.shipments,الشحنات
+material_requirements.start_date,تاريخ البدء
+material_requirements.status,الحالة
+material_requirements.title,متطلبات المواد
+material_requirements.total_materials,إجمالي المواد
+material_requirements.total_requirements,إجمالي المتطلبات
+material_requirements.unit,الوحدة
+materialcatalog.code,الرمز
+materialcatalog.description,الوصف
+materialcatalog.loading,جارٍ التحميل...
+materialcatalog.manage_reusable_materials_for_all_products,إدارة المواد القابلة لإعادة الاستخدام لجميع المنتجات
+materialcatalog.material_catalog,كتالوج المواد
+materialcatalog.min_stock,الحد الأدنى للمخزون
+materialcatalog.name,الاسم
+materialcatalog.no_materials_in_catalog_create_your_first_material,لا توجد مواد في الكتالوج. أنشئ أول مادة للبدء.
+materialcatalog.promise,الوعد
+materialcatalog.unit,الوحدة
+materialrequirements.all_materials,جميع المواد
+materialrequirements.all_nodes,جميع العقد
+materialrequirements.calculate_material_needs_based_on_allocation_plans,حساب احتياجات المواد بناءً على خطط التخصيص
+materialrequirements.end_date,تاريخ الانتهاء
+materialrequirements.error_calculating_requirements,خطأ في حساب المتطلبات
+materialrequirements.export_to_csv,تصدير إلى CSV
+materialrequirements.filters,الفلاتر
+materialrequirements.material,المادة
+materialrequirements.material_code,رمز المادة
+materialrequirements.material_name,اسم المادة
+materialrequirements.material_requirements,متطلبات المادة
+materialrequirements.node,العقدة
+materialrequirements.panelist_requirements,متطلبات الأعضاء
+materialrequirements.panelists_needing,الأعضاء الذين يحتاجون
+materialrequirements.plans,الخطط
+materialrequirements.purchase_requirements,متطلبات الشراء
+materialrequirements.quantity,الكمية
+materialrequirements.quantity_needed,الكمية المطلوبة
+materialrequirements.quick_period_selection,اختيار فترة سريع
+materialrequirements.reset_all_filters,إعادة تعيين جميع الفلاتر
+materialrequirements.shipments,الشحنات
+materialrequirements.start_date,تاريخ البدء
+materialrequirements.total_materials,إجمالي المواد
+materialrequirements.unit,الوحدة
+materialrequirements.year,السنة
+materials.no_materials_selected,لم يتم تحديد مواد
+materials.search_materials,بحث عن مواد
+materials.select_materials,تحديد مواد
+materials.selected_materials,المواد المحددة
+menu.accounts,الحسابات
+menu.accounts.tooltip,إدارة جميع الحسابات في النظام
+menu.administration,الإدارة
+menu.all_users,جميع المستخدمين
+menu.all_users.tooltip,عرض وإدارة جميع المستخدمين عبر الحسابات
+menu.allocation_generator,مولد التخصيص
+menu.allocation_generator.tooltip,إنشاء خطط التخصيص تلقائيًا بناءً على المتطلبات
+menu.allocation_management,إدارة التخصيص
+menu.allocation_plans,خطط التخصيص
+menu.allocation_plans.tooltip,إدارة جميع تخصيصات الشحنات
+menu.carriers,المشغلون والمنتجات
+menu.carriers.tooltip,إدارة المشغلين وكاتالوج منتجاتهم
+menu.dashboard,لوحة التحكم
+menu.dashboard.tooltip,نظرة عامة على المقاييس التشغيلية والتنبيهات الحرجة
+menu.delivery_standards,معايير التسليم
+menu.delivery_standards.tooltip,تحديد أوقات التسليم المتوقعة ونسب النجاح حسب الناقل والمنتج
+menu.demo_reset,إعادة تعيين العرض التوضيحي
+menu.demo_reset.tooltip,إعادة تعيين بيانات حساب العرض التوضيحي
+menu.load_balancing,موازنة الحمل
+menu.load_balancing.tooltip,تصور وإعادة موازنة توزيع الشحنات عبر العقد
+menu.material_catalog,كتالوج المواد
+menu.material_catalog.tooltip,الكتالوج الرئيسي لجميع المواد
+menu.material_requirements,متطلبات المواد
+menu.material_requirements.tooltip,حساب احتياجات المواد بناءً على خطط التخصيص
+menu.materials_management,إدارة المواد
+menu.onedb_generator,مولد ONEDB
+menu.onedb_generator.tooltip,توليد سجلات الاستلام لخطط التخصيص
+menu.overview,نظرة عامة
+menu.panelists,المشاركون في اللجنة
+menu.panelists.tooltip,تسجيل وإدارة توافر المشاركين في اللجنة
+menu.reporting,التقارير
+menu.reporting_compliance,الامتثال
+menu.reporting_compliance.tooltip,مراقبة الامتثال لمعايير التسليم
+menu.reporting_dashboard,لوحة التحكم
+menu.reporting_dashboard.tooltip,نظرة عامة على مؤشرات الأداء الرئيسية
+menu.reporting_e2e,نهاية إلى نهاية
+menu.reporting_e2e.tooltip,تحليلات شاملة ومقاييس الأداء
+menu.reporting_equity,تكافؤ الإقليم
+menu.reporting_equity.tooltip,تحليل التكافؤ في توزيع الشحنات
+menu.reporting_jk,أداء J+K
+menu.reporting_jk.tooltip,تحليل الأداء مقابل معايير التسليم
+menu.reporting_onedb,قاعدة بيانات ONE
+menu.reporting_onedb.tooltip,السجل الكامل لجميع الشحنات المستلمة
+menu.setup,الإعداد
+menu.stock_management,إدارة المخزون
+menu.stock_management.tooltip,مراقبة مستويات المخزون والتنبيهات
+menu.superadmin,المشرف الأعلى
+menu.topology,هيكلية الدول
+menu.topology.tooltip,تحديد الهيكل الجغرافي بالدول
+menu.translations,الترجمات
+menu.translations.tooltip,إدارة ترجمات التطبيق
+menu.users,المستخدمون
+menu.users.tooltip,إدارة حسابات المستخدمين والصلاحيات
+months.apr,أبريل
+months.aug,أغسطس
+months.dec,ديسمبر
+months.feb,فبراير
+months.jan,يناير
+months.jul,يوليو
+months.jun,يونيو
+months.mar,مارس
+months.may,مايو
+months.nov,نوفمبر
+months.oct,أكتوبر
+months.sep,سبتمبر
+nodeloadbalancing.acceptable_deviation_from_reference,الانحراف المقبول عن المرجع
+nodeloadbalancing.actualiza_fecha_programada_y_node_id_en_allocation,تحديث تاريخ_المجدول و node_id في تفاصيل خطة التخصيص
+nodeloadbalancing.additional_nodes_required,العقد الإضافية المطلوبة
+nodeloadbalancing.after,بعد
+nodeloadbalancing.all_shipments_in_period,جميع الشحنات في الفترة
+nodeloadbalancing.avg_node,متوسط/العقدة:
+nodeloadbalancing.balance_not_needed,الرصيد غير مطلوب
+nodeloadbalancing.before,قبل
+nodeloadbalancing.c_lculo_del_objetivo,حساب الهدف:
+nodeloadbalancing.calculating_balance_preview,جارٍ حساب معاينة الرصيد...
+nodeloadbalancing.clasificaci_n,التصنيف:
+nodeloadbalancing.con_ref_63_y_20_normal_lt_75_6_high_75_6_saturated,مع Ref=63 و %=20، عادي < 75.6، مرتفع ≥ 75.6، مشبع ≥ 81.9
+nodeloadbalancing.concepto,المفهوم:
+nodeloadbalancing.critical,حرج:
+nodeloadbalancing.deviation_tolerance,تحمل الانحراف (%)
+nodeloadbalancing.ejemplo,مثال:
+nodeloadbalancing.ejemplo_305_shipments_1_nodo_5_semanas_61_por_celd,مثال: 305 شحنات / (1 عقدة × 5 أسابيع) = 61 لكل خلية
+nodeloadbalancing.end_date,تاريخ الانتهاء
+nodeloadbalancing.even_after_optimal_balancing_the_average_load_per_,حتى بعد الموازنة المثلى، متوسط الحمل لكل عقدة (
+nodeloadbalancing.expected_average_samples_per_node,متوسط العينات المتوقع لكل عقدة
+nodeloadbalancing.filters,الفلاتر
+nodeloadbalancing.high_load,حمل مرتفع:
+nodeloadbalancing.high_load_nodes,عقد ذات حمل مرتفع
+nodeloadbalancing.how_it_works,كيف يعمل:
+nodeloadbalancing.identifica_celdas_sobrecargadas_gt_objetivo_1_2,يحدد الخلايا المحملة بشكل زائد (> الهدف × 1.2)
+nodeloadbalancing.identifica_celdas_subcargadas_lt_objetivo_0_9,يحدد الخلايا المحملة بشكل ناقص (< الهدف × 0.9)
+nodeloadbalancing.improvement,تحسين
+nodeloadbalancing.load_distribution_matrix,مصفوفة توزيع الأحمال
+nodeloadbalancing.load_level,مستوى الحمل:
+nodeloadbalancing.loading_node_load_data,جاري تحميل بيانات حمل العقدة...
+nodeloadbalancing.matrix_balancing_algorithm,خوارزمية موازنة المصفوفة
+nodeloadbalancing.matrix_data_not_available,بيانات المصفوفة غير متوفرة
+nodeloadbalancing.minimiza_la_desviaci_n_est_ndar_de_toda_la_matriz,تقليل الانحراف المعياري لكامل المصفوفة
+nodeloadbalancing.monthly_avg,المتوسط الشهري
+nodeloadbalancing.movements,الحركات
+nodeloadbalancing.mueve_shipments_de_celdas_sobrecargadas_a_subcarga,نقل الشحنات من الخلايا المحملة بشكل زائد إلى الخلايا المحملة بشكل ناقص
+nodeloadbalancing.no_action_required_all_cells_are_within_acceptable,لا حاجة لاتخاذ إجراء. جميع الخلايا ضمن النطاق المقبول.
+nodeloadbalancing.no_data_available_for_the_selected_period_try_sele,لا تتوفر بيانات للفترة المحددة. حاول اختيار شهر مختلف.
+nodeloadbalancing.node,العقدة
+nodeloadbalancing.node_load_balancing,موازنة حمل العقد
+nodeloadbalancing.nodes_at_120_150_avg_load,العقد بحمل متوسط بين 120-150%
+nodeloadbalancing.nodes_over_150_avg_load,العقد بحمل متوسط فوق 150%
+nodeloadbalancing.normal,عادي:
+nodeloadbalancing.optimal,مثالي:
+nodeloadbalancing.optimize_shipment_distribution_across_nodes_and_we,تحسين توزيع الشحنات عبر العقد والأسابيع
+nodeloadbalancing.porcentaje_de_desviaci_n_aceptable_respecto_al_val,نسبة الانحراف المقبولة بالنسبة للقيمة المرجعية.
+nodeloadbalancing.preventive,وقائي:
+nodeloadbalancing.proceso,العملية:
+nodeloadbalancing.promedio_objetivo_total_shipments_nodos_semanas,المتوسط المستهدف = إجمالي الشحنات / (العقد × الأسابيع)
+nodeloadbalancing.purpose,الغرض:
+nodeloadbalancing.quick_selection,اختيار سريع
+nodeloadbalancing.reference_load,حمل مرجعي
+nodeloadbalancing.reference_samples_node,عينات مرجعية/العقدة
+nodeloadbalancing.resultado,النتيجة:
+nodeloadbalancing.saturated,مشبع:
+nodeloadbalancing.saturated_nodes,العقد المشبعة
+nodeloadbalancing.si_esperas_63_samples_por_nodo_este_ser_tu_valor_d,إذا كنت تتوقع 63 عينة لكل عقدة، فسيكون هذا هو قيمة المرجع الخاصة بك.
+nodeloadbalancing.start_date,تاريخ البدء
+nodeloadbalancing.std_dev_after,الانحراف المعياري بعد
+nodeloadbalancing.std_dev_before,الانحراف المعياري قبل
+nodeloadbalancing.summary,الملخص
+nodeloadbalancing.total,الإجمالي:
+nodeloadbalancing.total_shipments,إجمالي الشحنات
+nodeloadbalancing.urgent,عاجل:
+nodeloadbalancing.usage,الاستخدام:
+nodeloadbalancing.use_the_auto_balance_button_below_to_redistribute_,"استخدم زر ""التوازن التلقائي"" أدناه لإعادة توزيع الحمل تلقائيًا."
+nodeloadbalancing.warning,تحذير:
+nodeloadbalancing.year,السنة
+onedb.all_carriers,جميع الناقلين
+onedb.all_cities,جميع المدن
+onedb.all_products,جميع المنتجات
+onedb.all_records,جميع السجلات
+onedb.all_shipment_records,جميع سجلات الشحن
+onedb.avg_transit_days,متوسط أيام العبور
+onedb.business_days,أيام العمل
+onedb.business_days_average,متوسط أيام العمل
+onedb.carrier,الناقل
+onedb.delayed,متأخر
+onedb.destination,الوجهة:
+onedb.destination_city,مدينة الوجهة
+onedb.exceeded_standard,تجاوز المعيار
+onedb.export_csv,تصدير CSV
+onedb.filters,مرشحات
+onedb.from_date,من التاريخ
+onedb.loading_records,جارٍ تحميل السجلات...
+onedb.met_delivery_standard,تم تحقيق معيار التسليم
+onedb.no_records_to_display,لا توجد سجلات للعرض
+onedb.on_time,في الوقت المحدد
+onedb.on_time_delivery,التسليم في الوقت المحدد
+onedb.one_db,قاعدة بيانات واحدة
+onedb.origin,الأصل:
+onedb.origin_city,مدينة المنشأ
+onedb.plan,الخطة
+onedb.product,المنتج
+onedb.received,تم الاستلام
+onedb.reset_filters,إعادة تعيين الفلاتر
+onedb.route,المسار
+onedb.search,بحث
+onedb.sent,تم الإرسال
+onedb.tag_id,معرّف العلامة
+onedb.tag_id_or_plan,معرّف العلامة أو الخطة...
+onedb.title,قاعدة البيانات الموحدة
+onedb.to_date,حتى تاريخه
+onedb.total_records,إجمالي السجلات
+onedb.transit_days,أيام العبور
+onedb.validated_postal_quality_analytics_repository,مستودع تحليلات جودة البريد المعتمد
+panelists.activate,تفعيل
+panelists.add_panelist,إضافة عضو
+panelists.address_line_1,السطر الأول من العنوان
+panelists.address_line_2,السطر الثاني من العنوان
+panelists.all_cities,جميع المدن
+panelists.all_nodes,جميع العقد
+panelists.all_panelists_in_system,جميع الأعضاء في النظام
+panelists.all_status,جميع الحالات
+panelists.apartment_suite_etc_optional,شقة، جناح، إلخ. (اختياري)
+panelists.available_for_deliveries,متاح للتوصيل
+panelists.bulk_actions,إجراءات جماعية
+panelists.choose_an_action_to_apply_to_all_selected_items,اختر إجراءً لتطبيقه على جميع العناصر المحددة
+panelists.city,المدينة
+panelists.clear_selection_btn,مسح التحديد
+panelists.code,الرمز
+panelists.code_name_email,الرمز، الاسم، البريد الإلكتروني...
+panelists.country,البلد
+panelists.deactivate,تعطيل
+panelists.delete_panelist,حذف العضو
+panelists.edit_panelist,تعديل العضو
+panelists.email,البريد الإلكتروني
+panelists.filters,الفلاتر
+panelists.leave_empty_to_auto_generate,اتركه فارغًا للتوليد التلقائي
+panelists.loading,جارٍ التحميل...
+panelists.loading_panelists,جاري تحميل الأعضاء...
+panelists.manage_panelist_profiles_and_assignments,إدارة ملفات الأعضاء وتعييناتهم
+panelists.manage_panelists_and_their_availability_for_delive,إدارة الأعضاء وتوفرهم للتوصيل
+panelists.mobile,الهاتف المحمول
+panelists.name,الاسم
+panelists.no_panelists,لم يتم العثور على أعضاء
+panelists.no_panelists_found,لم يتم العثور على أعضاء
+panelists.node,العقدة
+panelists.not_available,غير متوفر
+panelists.panelist_code,رمز المشارك
+panelists.panelist_details,تفاصيل العضو
+panelists.panelists,المشاركون
+panelists.panelists_management,إدارة المشاركين
+panelists.panelists_tab,الأعضاء
+panelists.postal_code,الرمز البريدي
+panelists.reset_all_filters,إعادة تعيين جميع الفلاتر
+panelists.select_a_node,اختر عقدة
+panelists.selected_count,{count} محدد
+panelists.street_address,عنوان الشارع
+panelists.telegram_id,معرف تيليجرام
+panelists.total_panelists,إجمالي المشاركين
+panelists.unavailability_periods,فترات عدم التوفر
+panelists.unavailability_tab,عدم التوفر
+panelists.username_or_numeric_id,@اسم_المستخدم أو المعرف الرقمي
+panelistunavailability.tsx.additional_information_about_this_unavailability_p,معلومات إضافية حول فترة عدم التوفر هذه...
+panelistunavailability.tsx.all_panelists,جميع المشاركين
+panelistunavailability.tsx.all_periods,جميع الفترات
+panelistunavailability.tsx.all_reasons,جميع الأسباب
+panelistunavailability.tsx.all_status,جميع الحالات
+panelistunavailability.tsx.cancel_periods,إلغاء الفترات
+panelistunavailability.tsx.cancelled,تم الإلغاء
+panelistunavailability.tsx.clear_selection,مسح التحديد
+panelistunavailability.tsx.current_active_now,الحالي (نشط الآن)
+panelistunavailability.tsx.date_range,نطاق التاريخ
+panelistunavailability.tsx.duration,المدة
+panelistunavailability.tsx.end_date,تاريخ الانتهاء
+panelistunavailability.tsx.filters,الفلاتر
+panelistunavailability.tsx.loading,جارٍ التحميل...
+panelistunavailability.tsx.manage_panelist_unavailability_periods_for_automat,إدارة فترات عدم توفر أعضاء اللجنة لإعادة تعيين العينة تلقائيًا
+panelistunavailability.tsx.notes,ملاحظات
+panelistunavailability.tsx.other,أخرى
+panelistunavailability.tsx.panelist,عضو اللجنة
+panelistunavailability.tsx.panelist_name_notes,اسم عضو اللجنة، ملاحظات...
+panelistunavailability.tsx.past,الماضي
+panelistunavailability.tsx.personal,شخصي
+panelistunavailability.tsx.reason,السبب
+panelistunavailability.tsx.reset_all_filters,إعادة تعيين جميع الفلاتر
+panelistunavailability.tsx.select_a_panelist,اختر عضو لجنة
+panelistunavailability.tsx.sick_leave,إجازة مرضية
+panelistunavailability.tsx.start_date,تاريخ البدء
+panelistunavailability.tsx.training,التدريب
+panelistunavailability.tsx.unavailability_periods,فترات عدم التوفر
+panelistunavailability.tsx.upcoming,القادمة
+panelistunavailability.tsx.vacation,إجازة
+receive.description,إنشاء إيصالات العينات
+receive.generate,إنشاء
+receive.title,مولد الإيصالات
+receivegenerator.advance_variance_days,فرق التقدم (أيام)
+receivegenerator.carriers,الناقلون
+receivegenerator.delay_variance_days,فرق التأخير (أيام)
+receivegenerator.demo_account_only_this_feature_is_only_available_f,حساب تجريبي فقط - هذه الميزة متاحة لأغراض الاختبار فقط
+receivegenerator.end_date,تاريخ الانتهاء
+receivegenerator.generate_records,إنشاء السجلات
+receivegenerator.generate_synthetic_receive_records_for_testing_and,إنشاء سجلات استلام تركيبية لأغراض الاختبار والعرض التوضيحي
+receivegenerator.generation_complete,اكتملت العملية
+receivegenerator.generation_summary,ملخص الإنشاء
+receivegenerator.generator_configuration,إعدادات المُنشئ
+receivegenerator.maximum_days_records_can_arrive_early,الحد الأقصى لأيام وصول السجلات مبكرًا
+receivegenerator.maximum_days_records_can_be_delayed_beyond_sla,الحد الأقصى لأيام تأخير السجلات بعد تجاوز اتفاقية مستوى الخدمة
+receivegenerator.number_of_records,عدد السجلات
+receivegenerator.out_of_sla_percentage,نسبة الخروج عن اتفاقية مستوى الخدمة (%)
+receivegenerator.products,المنتجات
+receivegenerator.receive_generator,مستلم المولد
+receivegenerator.select_all,تحديد الكل
+receivegenerator.start_date,تاريخ البدء
+reporting.above_standard_good,فوق المعيار (جيد)
+reporting.actual,النسبة الفعلية:
+reporting.actual_days,الفعلية (أيام)
+reporting.actual_standard,النسبة الفعلية ≥ المعيار
+reporting.all_carriers,جميع الناقلين
+reporting.all_destinations,جميع الوجهات
+reporting.all_origins,جميع المنشأ
+reporting.all_products,جميع المنتجات
+reporting.all_regions,جميع المناطق
+reporting.all_statuses,جميع الحالات
+reporting.analyze_inbound_quality_to_one_city_from_all_origi,تحليل جودة الوارد إلى مدينة واحدة من جميع المنشأ
+reporting.analyze_inbound_vs_outbound_service_quality_separa,تحليل جودة الخدمة الواردة مقابل الصادرة بشكل منفصل
+reporting.analyze_outbound_quality_from_one_city_to_all_dest,تحليل جودة الصادر من مدينة واحدة إلى جميع الوجهات
+reporting.analyze_service_equity_across_cities_and_regions,تحليل تكافؤ الخدمة عبر المدن والمناطق
+reporting.analyze_specific_route_performance_origin_destinat,تحليل أداء مسار محدد (المنشأ → الوجهة)
+reporting.analyze_trends_over_specific_time_periods,تحليل الاتجاهات خلال فترات زمنية محددة
+reporting.average_business_days_for_all_shipments,متوسط أيام العمل لجميع الشحنات
+reporting.avg_j_k_actual,متوسط J+K الفعلي
+reporting.avg_transit_days,متوسط أيام العبور
+reporting.basic_information,معلومات أساسية
+reporting.below_critical_threshold_with_penalty,أدنى من العتبة الحرجة (مع عقوبة)
+reporting.below_standard_but_above_critical_no_penalty,أدنى من المعيار ولكن أعلى من العتبة الحرجة (بدون عقوبة)
+reporting.below_standard_deviation,أدنى من المعيار (انحراف)
+reporting.both_cities,كلا المدينتين:
+reporting.both_directions,كلا الاتجاهين
+reporting.carrier,الناقل
+reporting.carrier_product,الناقل / المنتج
+reporting.carrier_product_breakdown,تفصيل الناقل والمنتج
+reporting.carrier_product_level,مستوى الناقل / المنتج:
+reporting.carrier_product_overview,نظرة عامة على الناقل والمنتج
+reporting.carrier_product_route,الناقل / المنتج / المسار
+reporting.chart_view,عرض الرسم البياني
+reporting.circle_size_population,حجم الدائرة = عدد السكان
+reporting.cities,المدن
+reporting.citizens_affected,المواطنون المتأثرون
+reporting.city,المدينة
+reporting.city_analysis,تحليل المدينة
+reporting.city_equity_details,تفاصيل حقوق المدينة
+reporting.city_equity_details_table,جدول تفاصيل حقوق المدينة
+reporting.city_service_equity_treemap,خريطة شجرة حقوق خدمة المدينة
+reporting.class,الفئة
+reporting.classification,التصنيف:
+reporting.compl,الشكوى
+reporting.compliance,الامتثال:
+reporting.compliance_analysis_by_carrier_product_route,تحليل الامتثال حسب الناقل → المنتج → المسار
+reporting.compliance_by_carrier_product_route,الامتثال حسب الناقل → المنتج → المسار
+reporting.compliance_status,حالة الامتثال
+reporting.compliance_status_based_on_dynamic_thresholds,حالة الامتثال بناءً على الحدود الديناميكية:
+reporting.compliant,مطابق:
+reporting.compliant_routes,المسارات المطابقة
+reporting.compliant_shipments_total_shipments_100,الشحنات المطابقة / إجمالي الشحنات × 100%
+reporting.critical,حرج
+reporting.critical_limit,الحد الحرج:
+reporting.critical_routes,المسارات الحرجة
+reporting.cumulative,تراكمي:
+reporting.cumulative_distribution_analysis,تحليل التوزيع التراكمي
+reporting.cumulative_percentage_of_deliveries_by_transit_day,النسبة التراكمية للتسليمات حسب أيام العبور.
+reporting.current_week,الأسبوع الحالي
+reporting.date_range,نطاق التاريخ:
+reporting.delayed,متأخر
+reporting.description,الوصف:
+reporting.destination_city,مدينة الوجهة
+reporting.destination_only,الوجهة فقط:
+reporting.deviation,انحراف
+reporting.difference_between_actual_and_standard,الفرق بين النسبة الفعلية والنسبة المعيارية
+reporting.direct_value_from_delivery_standards,القيمة المباشرة من delivery_standards
+reporting.direction,الاتجاه
+reporting.direction_gap,فجوة الاتجاه:
+reporting.directional_analysis,التحليل الاتجاهي
+reporting.distribution_of_shipments_by_actual_transit_time_v,توزيع الشحنات حسب وقت العبور الفعلي مقابل معيار التسليم
+reporting.end_date,تاريخ الانتهاء
+reporting.equity_status,حالة الأسهم
+reporting.export_audit_report,تقرير تدقيق التصدير
+reporting.export_csv,تصدير CSV
+reporting.export_filtered_data_to_csv,تصدير البيانات المفلترة إلى CSV
+reporting.filter_analysis_guide,دليل تحليل الفلاتر
+reporting.filters,الفلاتر
+reporting.focus_analysis_on_specific_geographic_areas,تركيز التحليل على مناطق جغرافية محددة
+reporting.further_narrow_analysis_to_specific_service_provid,تضييق التحليل أكثر لمزودي الخدمة أو الأنواع المحددة
+reporting.general_performance_dashboard,لوحة الأداء العامة
+reporting.geographic_distribution,التوزيع الجغرافي
+reporting.geographic_view,العرض الجغرافي
+reporting.green,أخضر
+reporting.identify_cities_with_specific_compliance_levels,تحديد المدن بمستويات امتثال محددة
+reporting.inb,وارد
+reporting.inbound,نسبة الوارد
+reporting.inbound_arrivals,الوارد (الوصولات)
+reporting.inbound_vs_outbound_comparison_top_10_by_direction,مقارنة الوارد والصادر (أفضل 10 حسب فرق الاتجاه)
+reporting.inbound_vs_outbound_compliance_chart,مخطط امتثال الوارد مقابل الصادر
+reporting.interpretation,التفسير:
+reporting.j_k_actual,J+K الفعلي
+reporting.j_k_performance_report,تقرير أداء J+K
+reporting.j_k_std,J+K المعياري
+reporting.legend,الأسطورة
+reporting.loading,جاري التحميل...
+reporting.loading_compliance_data,جاري تحميل بيانات الامتثال...
+reporting.loading_j_k_performance_data,جاري تحميل بيانات أداء J+K...
+reporting.loading_performance_data,جاري تحميل بيانات الأداء...
+reporting.loading_territory_equity_data,جاري تحميل بيانات حقوق الإقليم...
+reporting.mapa_de_localidades_treemap,خريطة المناطق (خريطة شجرية)
+reporting.narrow_analysis_to_specific_service_providers_or_t,تضييق التحليل لمزودي الخدمة أو الأنواع المحددة
+reporting.negative,سلبي:
+reporting.no_compliance_data_available,لا تتوفر بيانات الامتثال
+reporting.no_data,لا توجد بيانات
+reporting.no_data_available,لا تتوفر بيانات
+reporting.no_data_available_for_treemap,لا تتوفر بيانات للخريطة الشجرية
+reporting.no_distribution_data_available,لا تتوفر بيانات التوزيع
+reporting.no_filters,لا توجد فلاتر:
+reporting.no_performance_data_available,لا تتوفر بيانات الأداء
+reporting.no_shipment_data_available,لا تتوفر بيانات الشحن
+reporting.no_shipment_data_available_for_timeline,لا تتوفر بيانات الشحن للجدول الزمني
+reporting.no_underserved_cities,لا توجد مدن غير مخدومة بشكل كافٍ
+reporting.no_weekly_data_available,لا تتوفر بيانات أسبوعية
+reporting.on_time,نسبة الالتزام بالمواعيد
+reporting.openstreetmap,OpenStreetMap
+reporting.origin_city,مدينة المنشأ
+reporting.origin_only,المنشأ فقط:
+reporting.outb,الصادر
+reporting.outbound,نسبة الصادر
+reporting.outbound_departures,الصادر (المغادرات)
+reporting.overall_compliance,الامتثال العام
+reporting.overall_compliance_and_transit_time_metrics,مقاييس الامتثال العام ووقت العبور
+reporting.percentage_of_shipments_delivered_successfully,نسبة الشحنات التي تم تسليمها بنجاح
+reporting.performance_distribution,توزيع الأداء
+reporting.performance_metrics,مقاييس الأداء
+reporting.performance_trend,اتجاه الأداء
+reporting.population,السكان:
+reporting.population_weighted,موزون حسب السكان
+reporting.population_weighted_compliance,الامتثال الموزون حسب السكان
+reporting.positive,إيجابي:
+reporting.problem_routes,المسارات المشكلة
+reporting.product,المنتج
+reporting.received_at,تم الاستلام في
+reporting.region,المنطقة:
+reporting.regional_analysis,التحليل الإقليمي
+reporting.regional_equity_analysis_table,جدول تحليل العدالة الإقليمية
+reporting.regional_equity_comparison,مقارنة العدالة الإقليمية
+reporting.regional_equity_comparison_chart,مخطط مقارنة الأسهم الإقليمية
+reporting.regional_equity_details,تفاصيل الأسهم الإقليمية
+reporting.regional_summary,الملخص الإقليمي
+reporting.regulatory_compliance_report,تقرير الامتثال التنظيمي
+reporting.regulatory_use,الاستخدام التنظيمي:
+reporting.reset_all_filters,إعادة تعيين جميع الفلاتر
+reporting.route,المسار
+reporting.route_level,مستوى المسار:
+reporting.routes,المسارات
+reporting.samples,عينات
+reporting.search_by_tag_id_origin_or_destination,ابحث بواسطة معرف العلامة، الأصل، أو الوجهة...
+reporting.sent_at,تاريخ الإرسال
+reporting.service_equity_index,مؤشر عدالة الخدمة
+reporting.shipments,الشحنات:
+reporting.standard,المعيار:
+reporting.standard_days,المعيار (أيام)
+reporting.start_date,تاريخ البدء
+reporting.status,الحالة:
+reporting.std,النسبة المئوية للمعيار
+reporting.table_view,عرض الجدول
+reporting.tag_id,معرّف العلامة
+reporting.target_1_day,الهدف: يوم واحد
+reporting.territory_equity_filter_guide,دليل تصفية عدالة الإقليم
+reporting.territory_equity_report,تقرير عدالة الإقليم
+reporting.top_3_best_served_cities,أفضل 3 مدن مخدومة
+reporting.top_3_worst_served_cities,أسوأ 3 مدن مخدومة
+reporting.total,الإجمالي:
+reporting.total_cities,إجمالي المدن:
+reporting.total_routes,إجمالي المسارات
+reporting.total_samples,إجمالي العينات
+reporting.total_shipments,إجمالي الشحنات:
+reporting.transit_time_analysis_and_delivery_performance_tra,تحليل زمن العبور وتتبع أداء التسليم
+reporting.underserved,مدن مخدومة بشكل ناقص
+reporting.underserved_cities,المدن المخدومة بشكل ناقص:
+reporting.view_overall_ecosystem_performance_across_all_rout,عرض أداء النظام البيئي العام عبر جميع المسارات والناقلين
+reporting.view_overall_service_equity_across_all_cities_and_,عرض عدالة الخدمة العامة عبر جميع المدن والمناطق
+reporting.warning,تحذير
+reporting.warning_limit,حد التحذير:
+reporting.warning_routes,مسارات التحذير
+reporting.weekly_sample_volume,حجم العينات الأسبوعي
+reporting.weighted_average_by_shipment_count,المتوسط المرجح حسب عدد الشحنات
+settings.account_management,إدارة الحساب
+settings.account_reporting_configuration,تكوين تقارير الحساب
+settings.all_users,جميع المستخدمين
+settings.capital,رأس المال
+settings.changes_to_thresholds_will_affect_all_reporting_vi,التغييرات في الحدود ستؤثر على جميع طرق العرض الخاصة بالتقارير
+settings.city_classifications,تصنيفات المدن
+settings.city_classifications_override_default_classificati,تصنيفات المدن تتجاوز التصنيفات الافتراضية من الطوبولوجيا
+settings.city_name,اسم المدينة
+settings.classification,التصنيف
+settings.compliance_critical_threshold,الحد الحرج للامتثال
+settings.compliance_warning_threshold,حد التحذير للامتثال
+settings.configuration_notes,ملاحظات التكوين:
+settings.configuration_saved_successfully,تم حفظ التكوين بنجاح
+settings.configure_reporting_thresholds_and_city_classifica,تكوين حدود التقارير وتصنيفات المدن لهذا الحساب
+settings.create_account,إنشاء حساب
+settings.create_user,إنشاء مستخدم
+settings.default_report_period,فترة التقرير الافتراضية
+settings.default_time_period_for_generating_reports,الفترة الزمنية الافتراضية لإنشاء التقارير
+settings.error_saving_configuration,خطأ في حفظ التكوين
+settings.general_settings,الإعدادات العامة
+settings.loading,جارٍ التحميل...
+settings.loading_configuration,جارٍ تحميل التكوين...
+settings.major,رئيسي
+settings.minor,ثانوي
+settings.monthly,شهري
+settings.no_city_classifications_found,لم يتم العثور على تصنيفات للمدن
+settings.only_superadmin_users_can_modify_these_settings,يمكن فقط للمستخدمين ذوي صلاحيات المشرف الأعلى تعديل هذه الإعدادات
+settings.promise,الوعد
+settings.quarterly,ربع سنوي
+settings.search_cities,ابحث عن مدن...
+settings.warning_threshold_must_be_greater_than_critical_th,يجب أن يكون حد التحذير أكبر من حد الخطر
+settings.weekly,أسبوعي
+stock.about,حول إدارة المخزون
+stock.about_description,إدارة مستويات المخزون وتنبيهات المخزون
+stock.add_to_stock,إضافة إلى المخزون
+stock.adjust_stock,تعديل المخزون
+stock.adjustment_note,مذكرة التعديل
+stock.alert_type,نوع التنبيه
+stock.alerts,التنبيهات
+stock.all_materials,جميع المواد
+stock.all_nodes,جميع العقد
+stock.all_panelists,جميع الأعضاء المشاركين
+stock.all_status,جميع الحالات
+stock.all_statuses,جميع الحالات
+stock.all_types,جميع الأنواع
+stock.auto_generate_purchase_orders,توليد أوامر الشراء تلقائيًا
+stock.auto_generate_shipments,توليد الشحنات تلقائيًا
+stock.automation,الأتمتة
+stock.available_stock,المخزون المتاح
+stock.calculate_generate_shipments,حساب وتوليد الشحنات
+stock.calculate_requirements,حساب المتطلبات
+stock.cancelled,ملغى
+stock.change,تغيير:
+stock.clear_filters,مسح الفلاتر
+stock.clear_filters_to_see_all_alerts,امسح الفلاتر لعرض جميع التنبيهات
+stock.confirm_order,تأكيد الطلب
+stock.confirm_receipt,تأكيد الاستلام
+stock.confirm_shipment,تأكيد الشحنة
+stock.confirmed_shipments,الشحنات المؤكدة
+stock.critical,حرج
+stock.current_quantity,الكمية الحالية
+stock.current_stock,المخزون الحالي
+stock.date,التاريخ
+stock.edit_quantity,تعديل الكمية
+stock.edit_shipment_quantity,تعديل كمية الشحنة
+stock.enable_stock_control,تمكين مراقبة المخزون
+stock.end_date,تاريخ الانتهاء
+stock.enter_new_absolute_quantity,أدخل الكمية المطلقة الجديدة
+stock.expected,متوقع
+stock.expected_date,تاريخ المتوقع
+stock.explain_the_reason_for_this_adjustment,اشرح سبب هذا التعديل...
+stock.export_csv,تصدير CSV
+stock.filters,مرشحات
+stock.from,من
+stock.last_updated,آخر تحديث
+stock.lead_times,أوقات التنفيذ
+stock.loading,جاري تحميل بيانات المخزون...
+stock.loading_alerts,جارٍ تحميل التنبيهات...
+stock.loading_movements,جارٍ تحميل الحركات...
+stock.loading_panelist_stock,جارٍ تحميل مخزون المشاركين...
+stock.loading_settings,جارٍ تحميل الإعدادات...
+stock.loading_stock,جارٍ تحميل المخزون...
+stock.location,الموقع
+stock.low_stock,مخزون منخفض
+stock.low_stock_only,المخزون المنخفض فقط
+stock.material,المادة
+stock.material_requirements_help,عرض متطلبات المواد المحسوبة
+stock.material_requirements_tab,متطلبات المواد
+stock.materials,المواد
+stock.materials_to_send,المواد للإرسال
+stock.maximum_stock,الحد الأقصى للمخزون
+stock.metrics_overview,نظرة عامة على المقاييس
+stock.minimum,الحد الأدنى
+stock.minimum_stock,الحد الأدنى للمخزون
+stock.movement_type,نوع الحركة
+stock.movements_help,تتبع حركات المخزون
+stock.movements_tab,الحركات
+stock.net_quantity,الكمية الصافية
+stock.new_quantity,الكمية الجديدة
+stock.no_stock_alerts_found,لم يتم العثور على تنبيهات مخزون
+stock.no_stock_data,لا توجد بيانات مخزون
+stock.no_stock_records_found,لم يتم العثور على سجلات مخزون
+stock.node,العقدة
+stock.normal,عادي
+stock.not_applicable_purchase_orders_are_not_used,غير قابل للتطبيق - لا يتم استخدام أوامر الشراء
+stock.notes,ملاحظات
+stock.order,طلب
+stock.order_material,طلب مادة
+stock.ordered,تم الطلب
+stock.out_of_stock,نفاد المخزون
+stock.packing_list_pdf,قائمة التعبئة بصيغة PDF
+stock.panelist,عضو اللجنة
+stock.panelist_negative,المشارك سلبي
+stock.panelist_stock_help,عرض مخزون الأعضاء
+stock.panelist_stock_tab,مخزون الأعضاء
+stock.pending,قيد الانتظار
+stock.pending_requirements,المتطلبات المعلقة
+stock.pending_shipments,الشحنات المعلقة
+stock.period,الفترة
+stock.promise,الوعد
+stock.purchase_lead_time_days,مدة الشراء (أيام)
+stock.purchase_order_pdf,طلب شراء بصيغة PDF
+stock.quantity,الكمية
+stock.quantity_needed,الكمية المطلوبة
+stock.quantity_ordered,الكمية المطلوبة في الطلب
+stock.quantity_received,الكمية المستلمة
+stock.quantity_to_order,الكمية المطلوب طلبها
+stock.quantity_to_send,الكمية المطلوب إرسالها
+stock.quick_month_selection,اختيار سريع للشهر
+stock.receive,استلام
+stock.receive_purchase_order,استلام طلب الشراء
+stock.received,تم الاستلام
+stock.regulator_insufficient,المنظم غير كافٍ
+stock.regulator_stock_help,عرض مخزون المنظم
+stock.regulator_stock_tab,مخزون المنظم
+stock.removed_materials_will_create_new_pending_shipment,المواد المُزالة (سيتم إنشاء شحنة معلقة جديدة)
+stock.reorder_point,نقطة إعادة الطلب
+stock.reset_filters,إعادة تعيين الفلاتر
+stock.restore,استعادة
+stock.search_by_material_or_code,البحث حسب المادة أو الرمز...
+stock.search_by_material_or_panelist,البحث حسب المادة أو المشارك...
+stock.search_material,البحث عن مادة...
+stock.send,إرسال
+stock.sent,تم الإرسال
+stock.sent_date,تاريخ الإرسال
+stock.settings_help,تكوين معلمات المخزون
+stock.settings_tab,الإعدادات
+stock.shipment,رقم الشحنة
+stock.shipment_lead_time_days,مدة تسليم الشحنة (بالأيام)
+stock.shipments,الشحنات
+stock.shipments_help,عرض شحنات المخزون
+stock.shipments_tab,الشحنات
+stock.showing,عرض
+stock.start_date,تاريخ البدء
+stock.stock_alert,تنبيه المخزون
+stock.stock_alerts_help,عرض تنبيهات المخزون المنخفض
+stock.stock_alerts_tab,تنبيهات المخزون
+stock.stock_control,مراقبة المخزون
+stock.stock_status,حالة المخزون
+stock.this_feature_is_not_available_in_the_current_versi,هذه الميزة غير متوفرة في النسخة الحالية من الوحدة.
+stock.title,إدارة المخزون
+stock.total_items_pending,إجمالي العناصر المعلقة
+stock.total_movements,إجمالي الحركات:
+stock.total_records,إجمالي السجلات:
+stock.type,النوع
+stock.unit,الوحدة
+stock.unknown_panelist,عضو لجنة غير معروف
+stock.used_to_calculate_expected_delivery_dates,يُستخدم لحساب تواريخ التسليم المتوقعة
+stock.warning,تحذير
+stock.year,السنة
+stockmanagement.stock_alerts,تنبيهات المخزون
+stockmanagement.stock_management_alerts,إدارة وتنبيهات المخزون
+stockmanagement.tabs,علامات التبويب
+topology.3_7038,-3.7038
+topology.40_4168,40.4168
+topology.add_city,إضافة مدينة
+topology.add_node,إضافة عقدة
+topology.add_region,إضافة منطقة
+topology.cities,المدن
+topology.city,المدينة
+topology.city_code,رمز المدينة *
+topology.city_name,اسم المدينة *
+topology.country_code,رمز الدولة *
+topology.delete_city,حذف المدينة
+topology.delete_node,حذف العقدة
+topology.delete_region,حذف المنطقة
+topology.description,الوصف
+topology.e_g_3200000,مثال: 3200000
+topology.e_g_es_fr,مثال: ES، FR
+topology.e_g_mad_bcn,على سبيل المثال، MAD، BCN
+topology.e_g_madrid_barcelona,على سبيل المثال، مدريد، برشلونة
+topology.e_g_spain_france,على سبيل المثال، إسبانيا، فرنسا
+topology.edit_city,تعديل المدينة
+topology.edit_node,تعديل العقدة
+topology.edit_region,تعديل المنطقة
+topology.expand_all_cities_in_this_region,توسيع جميع المدن في هذه المنطقة
+topology.latitude,خط العرض
+topology.loading,جاري تحميل الطوبولوجيا...
+topology.longitude,خط الطول
+topology.no_cities_in_this_region_yet,لا توجد مدن في هذه المنطقة حتى الآن
+topology.no_nodes_in_this_city_yet,لا توجد عقد في هذه المدينة حتى الآن
+topology.no_regions,لم يتم العثور على مناطق
+topology.node,العقدة
+topology.nodes,العقد
+topology.panelist_assigned,المشارك المعين
+topology.panelists,الأعضاء
+topology.pending_panelist,المشارك المعلق
+topology.population,السكان
+topology.promise,الوعد
+topology.region_code,رمز المنطقة *
+topology.region_name,اسم المنطقة *
+topology.regions,المناطق
+topology.status,الحالة *
+topology.title,طوبولوجيا البلد
+topology.topology_tab,الطوبولوجيا
+topology.total_population_of_the_city_used_for_impact_analy,إجمالي سكان المدينة (يُستخدم لتحليل التأثير في التقارير)
+topology.without_panelists_tab,بدون أعضاء
+users.account,الحساب
+users.deactivate,تعطيل
+users.email,البريد الإلكتروني
+users.full_name,الاسم الكامل
+users.name,الاسم
+users.no_users_found,لم يتم العثور على مستخدمين
+users.password,كلمة المرور
+users.promise,الوعد
+users.role,الدور
+users.select_account,اختر الحساب
+auth.email_placeholder,بريدك الإلكتروني@مثال.com
+auth.password_placeholder,أدخل كلمة المرور الخاصة بك
+auth.click_autofill_demo,انقر هنا لملء بيانات الدخول التجريبية تلقائيًا
+auth.secure_auth_supabase,مصادقة آمنة بواسطة Supabase
+auth.for_regulators,للمنظمين
+dashboard.management_tip_text,استخدم محدد الفترة لعرض إحصائيات الشهر الحالي أو تخطيط الشهر القادم. انقر على أي بطاقة للوصول إلى العرض التفصيلي. تحقق من التنبيهات الحرجة يوميًا للحفاظ على التميز التشغيلي. راقب إجازات المشاركين واحتياجات المواد لتجنب تعارضات التخصيص.
+dashboard.total_and_status,الإجمالي والحالة
+dashboard.pending,قيد الانتظار
+dashboard.sent,مرسل
+dashboard.received,مستلم
+dashboard.no_panelist,لا يوجد مشارك
+dashboard.inactive,غير نشط
+dashboard.active,نشط
+dashboard.inactive_lowercase,غير نشط
+dashboard.on_leave,في إجازة
+dashboard.available,متاح
+dashboard.of,من
+dashboard.total,الإجمالي
+common.sign_out,تسجيل الخروج
+common.city,المدينة
+common.all_cities,جميع المدن
+common.node,العقدة
+common.all_nodes,جميع العقد
+common.all_status,جميع الحالات
+common.confirm,تأكيد
+common.yes,نعم
+common.no,لا
+common.success,نجاح
+common.warning,تحذير
+common.info,معلومات
+common.show_id,عرض المعرف
+common.export_csv,تصدير CSV
+common.add_record,إضافة سجل
+common.hide,إخفاء
+common.expand_all,توسيع الكل
+common.collapse_all,طي الكل
+allocation_plans.view_and_manage,عرض وإدارة خطط التخصيص المولدة
+allocation_plans.total_and_pending,الإجمالي والقيد الانتظار
+allocation_plans.shipment_status,حالة الشحنة
+allocation_plans.total_issues,إجمالي المشاكل
+allocation_plans.delayed_shipments,الشحنات المتأخرة
+allocation_plans.total_delayed,الإجمالي المتأخر
+allocation_plans.plan_details,تفاصيل خطة التخصيص
+allocation_plans.dest_city,المدينة الوجهة
+allocation_plans.dest_node,العقدة الوجهة
+allocation_plans.week,الأسبوع
+allocation_plans.origin_panelist,المشارك الأصلي
+allocation_plans.origin_status,الحالة الأصلية
+allocation_plans.dest_panelist,المشارك الوجهة
+allocation_plans.dest_status,الحالة الوجهة
+allocation_plans.status,الحالة
+allocation_plans.sent_lowercase,مرسل
+allocation_plans.pending_lowercase,قيد الانتظار
+panelists.management,إدارة المشاركين في اللوحة
+panelists.manage_availability,إدارة المشاركين وتوفرهم للتسليمات
+panelists.all_in_system,جميع المشاركين في النظام
+panelists.tab_panelists,المشاركون في اللوحة
+panelists.tab_unavailability,فترات عدم التوفر
+panelists.search_placeholder,رمز، اسم، بريد إلكتروني...
+panelists.manage_profiles,إدارة ملفات المشاركين وتعييناتهم
+panelists.status,الحالة
+panelists.active_lowercase,نشط
+panelists.edit_tooltip,تعديل المشارك في اللوحة
+panelists.deactivate_tooltip,تعطيل المشارك في اللوحة
+panelists.delete_tooltip,حذف المشارك في اللوحة
+panelists.manage_unavailability,إدارة فترات عدم توفر المشاركين لإعادة التعيين التلقائي للعينات
+panelists.add_unavailability,إضافة فترة عدم توفر
+panelists.search_unavailability_placeholder,اسم المشارك، ملاحظات...
+panelists.all_panelists,جميع المشاركين في اللوحة
+panelists.date_range,نطاق التواريخ
+panelists.all_periods,جميع الفترات
+panelists.current_active,الحالي (نشط الآن)
+panelists.upcoming,القادم
+panelists.past,الماضي
+panelists.reason,السبب
+panelists.all_reasons,جميع الأسباب
+panelists.vacation,إجازة
+panelists.sick_leave,إجازة مرضية
+panelists.personal,شخصي
+panelists.training,تدريب
+panelists.start_date,تاريخ البدء
+panelists.end_date,تاريخ الانتهاء
+panelists.duration,المدة
+panelists.notes,ملاحظات
+panelists.one_day,1 يوم
+carriers.title,المشغلون والمنتجات
+carriers.manage_description,إدارة مشغلي الشحن
+carriers.tab_carriers_products,المشغلون والمنتجات
+carriers.tab_products_without_materials,منتجات بدون مواد
+carriers.search_placeholder,البحث عن مشغلين أو منتجات...
+carriers.expand_carrier,توسيع المشغل
+carriers.expand_products,توسيع جميع منتجات هذا المشغل
+materials.requirements_title,احتياجات المواد
+materials.calculate_description,حساب احتياجات المواد بناءً على خطط التخصيص
+materials.start_date,تاريخ البدء
+materials.end_date,تاريخ الانتهاء
+materials.date_placeholder,يوم/شهر/سنة
+materials.material,المادة
+materials.all_materials,جميع المواد
+materials.node,العقدة
+materials.all_nodes,جميع العقد
+materials.quick_period_selection,اختيار فترة سريع
+materials.month_jan,يناير
+materials.month_feb,فبراير
+materials.month_mar,مارس
+materials.month_apr,أبريل
+materials.month_may,مايو
+materials.month_jun,يونيو
+materials.month_jul,يوليو
+materials.month_aug,أغسطس
+materials.month_sep,سبتمبر
+materials.month_oct,أكتوبر
+materials.month_nov,نوفمبر
+materials.month_dec,ديسمبر
+materials.first_semester,الفصل الدراسي الأول
+materials.second_semester,الفصل الدراسي الثاني
+materials.year,السنة
+materials.calculate,احسب
+stock.manage_description,إدارة متطلبات المواد
+stock.tab_requirements,احتياجات المواد
+stock.tab_regulator_stock,مخزون المنظم
+stock.tab_shipments,الشحنات
+stock.tab_panelist_stock,مخزون المشاركين
+stock.tab_movements,الحركات
+stock.tab_alerts,تنبيهات المخزون
+stock.tab_settings,الإعدادات
+allocation_generator.date_placeholder,يوم/شهر/سنة
+allocation_generator.quick_period,اختيار سريع للفترة
+allocation_generator.distribution_matrix,مصفوفة التوزيع حسب المدينة (A-B-C)
+allocation_generator.import_csv,استيراد CSV
+allocation_generator.download_template,تحميل نموذج CSV
+unavailability.title,فترات عدم التوفر
+unavailability.description,إدارة فترات عدم توفر المشاركين لإعادة تخصيص العينات تلقائيًا
+unavailability.add_period,+ إضافة فترة عدم توفر
+unavailability.search_placeholder,اسم المشارك
+unavailability.all_panelists,جميع المشاركين
+unavailability.all_periods,جميع الفترات
+unavailability.current_periods,الحالية (نشطة الآن)
+unavailability.upcoming_periods,القادمة
+unavailability.past_periods,الماضية
+unavailability.all_reasons,جميع الأسباب
+unavailability.reason_vacation,إجازة
+unavailability.reason_sick,إجازة مرضية
+unavailability.reason_personal,شخصي
+unavailability.reason_training,تدريب
+unavailability.reason_other,أخرى
+unavailability.cancel_periods,إلغاء الفترات
+unavailability.edit,تعديل
+unavailability.cancel,إلغاء
+unavailability.activate,تفعيل
+unavailability.delete,حذف
+unavailability.edit_period,تعديل فترة عدم التوفر
+unavailability.add_period_modal,إضافة فترة عدم توفر
+unavailability.confirm_cancel,هل أنت متأكد من رغبتك في إلغاء {count} فترة/فترات عدم توفر؟
+unavailability.confirm_delete,هل أنت متأكد من رغبتك في حذف {count} فترة/فترات عدم توفر؟ لا يمكن التراجع عن هذا الإجراء.
+unavailability.confirm_delete_single,هل أنت متأكد من رغبتك في حذف هذه الفترة من عدم التوفر؟
+unavailability.no_periods_found,لم يتم العثور على أي فترة عدم توفر.
+unavailability.adjust_filters,حاول تعديل الفلاتر الخاصة بك.
+unavailability.click_to_create,انقر على "إضافة فترة عدم توفر" لإنشاء واحدة.
+unavailability.panelist,عضو اللجنة
+unavailability.start_date,تاريخ البدء
+unavailability.end_date,تاريخ الانتهاء
+unavailability.duration,المدة
+unavailability.reason,السبب
+unavailability.status,الحالة
+unavailability.notes,ملاحظات
+unavailability.actions,إجراءات
+unavailability.day,يوم
+unavailability.days,أيام
+unavailability.select_panelist,اختر عضو لجنة
+unavailability.required,مطلوب
+unavailability.date_range,نطاق التواريخ
+allocation_plans.total_pending,الإجمالي والمعلق
+allocation_plans.total,الإجمالي
+allocation_plans.waiting,في الانتظار
+allocation_plans.availability_issues_title,مشاكل التوفر
+allocation_plans.unavailable,غير متوفر
+allocation_plans.inactive,غير نشط
+allocation_plans.origin_city_filter,مدينة الأصل
+allocation_plans.origin_node_filter,العقدة الأصلية
+allocation_plans.search_tag_id,البحث بواسطة معرف الوسم...
+allocation_plans.search_event_id,البحث بواسطة معرف الحدث...
+allocation_plans.availability_issues_filter,مشاكل التوفر
+allocation_plans.details,تفاصيل خطة التخصيص
+allocation_plans.show_id,عرض المعرف
+allocation_plans.origin_panelist_header,عضو اللجنة الأصلي
+allocation_plans.origin_status_header,الحالة الأصلية
+allocation_plans.dest_panelist_header,عضو اللجنة المستهدف
+allocation_plans.dest_status_header,الحالة المستهدفة
+allocation_plans.available,متوفر
+topology.total_nodes,إجمالي العقد
+topology.with_panelists,مع أعضاء اللجنة
+topology.without_panelists,بدون أعضاء اللجنة
+topology.topology_tree,شجرة الطوبولوجيا
+topology.nodes_without_panelists,عقد بدون أعضاء لجنة
+topology.search_placeholder,ابحث عن المناطق
+topology.all_regions,جميع المناطق
+topology.all_cities,جميع المدن
+topology.all_nodes,جميع العقد
+topology.expand_all,توسيع الكل
+topology.create_region,إنشاء منطقة
+topology.nodes_need_assignment,هذه العقد تحتاج إلى تعيين عضو لجنة لتكون عملية
+topology.download_csv,تحميل CSV
+topology.all_nodes_have_panelists,جميع العقد تحتوي على أعضاء لجنة!
+topology.every_node_assigned,تم تعيين عضو لجنة لكل عقدة في الطوبولوجيا الخاصة بك
+topology.create_city,إنشاء مدينة
+topology.create_node,إنشاء عقدة
+topology.no_nodes_yet,لا توجد عقد في هذه المدينة حتى الآن
+topology.delete_city_confirm,هل تريد حذف هذه المدينة وجميع عقدها؟
+topology.delete_node_confirm,هل تريد حذف هذه العقدة؟
+topology.expand_city,توسيع المدينة
+topology.collapse_city,طي المدينة
+cityform.city_name,اسم المدينة
+cityform.city_code,رمز المدينة
+cityform.city_class,فئة المدينة
+cityform.class_a,الفئة أ
+cityform.class_b,الفئة ب
+cityform.class_c,الفئة ج
+cityform.population,السكان
+cityform.optional,اختياري
+cityform.population_description,إجمالي سكان المدينة (يستخدم لتحليل التأثير في التقارير)
+cityform.latitude,خط العرض
+cityform.longitude,خط الطول
+cityform.cancel,إلغاء
+cityform.create,إنشاء
+cityform.update,تحديث
+cityform.saving,جارٍ الحفظ...
+topology.class,الفئة
+carriers.transporteurs,الناقلون
+carriers.produits,المنتجات
+carriers.materiels,المواد
+carriers.materials_assigned,المواد المعينة
+carriers.add_material,إضافة مادة
+carriers.description_field,الوصف
+carriers.heures,الساعات
+carriers.jours,الأيام
+carriers.cancel,إلغاء
+carriers.create,إنشاء
+carriers.choose_how_to_add,اختر كيفية إضافة مادة إلى هذا المنتج:
+carriers.select_from_catalog_desc,اختر مادة موجودة من الكتالوج الخاص بك
+carriers.create_new_material_desc,أضف مادة جديدة إلى الكتالوج وقم بتعيينها للمنتج
+carriers.products_without_materials_title,منتجات بدون مواد
+carriers.products_need_materials,هذه المنتجات تحتاج إلى تعيين مواد لتكون عملية
+productform.code,الرمز
+productform.description,الوصف
+productform.standard_delivery_time,وقت التسليم القياسي
+productform.time_unit,وحدة الوقت
+productform.cancel,إلغاء
+productform.create,إنشاء
+productform.update,تحديث
+productform.saving,جارٍ الحفظ...
+carriers.qty,الكمية
+carriers.no_materials,لا توجد مواد مخصصة بعد
+carriers.remove_material_confirm,هل تود إزالة المادة "{name}" من هذا المنتج؟
+carriers.enter_new_quantity,أدخل الكمية الجديدة لـ "{name}":
+carriers.expand_all_products,توسيع جميع المنتجات في هذه الناقلة
+carriers.collapse_product,طي المنتج
+carriers.expand_product,توسيع المنتج
+carriers.edit_quantity,تعديل الكمية
+nodeLoadBalancing.saturatedNodes,العقد المشبعة
+nodeLoadBalancing.saturatedNodesDesc,العقد التي تتجاوز 150% من متوسط الحمل
+nodeLoadBalancing.highLoadNodes,العقد ذات الحمل العالي
+nodeLoadBalancing.highLoadNodesDesc,العقد بنسبة 120-150% من متوسط الحمل
+nodeLoadBalancing.totalShipments,إجمالي الشحنات
+nodeLoadBalancing.totalShipmentsDesc,جميع الشحنات خلال الفترة
+nodeLoadBalancing.balancePreview,معاينة التوازن
+nodeLoadBalancing.stdDevBefore,الانحراف المعياري قبل
+nodeLoadBalancing.stdDevAfter,الانحراف المعياري بعد
+nodeLoadBalancing.matrixView,عرض مصفوفي
+nodeLoadBalancing.loadDistributionMatrix,مصفوفة توزيع الحمل
+nodeLoadBalancing.before,قبل
+nodeLoadBalancing.after,بعد
+nodeLoadBalancing.loadLevel,مستوى الحمل
+nodeLoadBalancing.applyBalance,تطبيق التوازن
+nodeLoadBalancing.cancel,إلغاء
+nodeLoadBalancing.loading,جارٍ التحميل...
+allocation_plans.create_record,إنشاء السجل
+allocation_plans.update_record,تحديث السجل
+common.updating,جارٍ التحديث...
+common.creating,جارٍ الإنشاء...
+allocation_plans.add_record,إضافة سجل
+material_requirements.items_needed,العناصر المطلوبة
+material_requirements.to_send,لإرسال
+common.start_date,تاريخ البدء
+common.end_date,تاريخ الانتهاء
+common.material,المادة
+material_requirements.quick_period_selection,اختيار سريع للفترة
+common.first_semester,الفصل الدراسي الأول
+common.second_semester,الفصل الدراسي الثاني
+material_requirements.purchase_requirements,متطلبات الشراء
+material_requirements.panelist_requirements,متطلبات المشاركين في اللجنة
+common.export_to_csv,تصدير إلى CSV
+stock.regulator_issue,مشكلة في المنظم
+stock.regulator_issues,مشاكل في المنظم
+stock.panelist_issue,مشكلة في المشارك في اللجنة
+stock.panelist_issues,مشاكل في المشاركين في اللجنة
+stock.please_select_dates,يرجى اختيار تواريخ البدء والانتهاء
+stock.please_select_requirements_export,يرجى اختيار المتطلبات للتصدير
+stock.please_select_requirements_po,يرجى اختيار المتطلبات لإنشاء أمر الشراء
+common.show,عرض
+stock.calculating,جارٍ الحساب...
+stock.mark_as_ordered,وضع علامة {count} كمطلوب(ة) الطلب
+stock.delete_selected,حذف {count} المحدد(ة)
+common.select,تحديد
+stock.no_stock_data_to_export,لا توجد بيانات مخزون للتصدير
+stock.current_regulator_stock,المخزون الحالي للمنظم
+stock.please_enter_quantity_and_note,يرجى إدخال الكمية الجديدة وملاحظة التعديل
+stock.please_enter_valid_quantity,يرجى إدخال كمية صالحة
+stock.stock_adjusted_successfully,تم تعديل المخزون بنجاح
+stock.failed_to_adjust_stock,فشل في تعديل المخزون
+stock.adjusting,جارٍ التعديل...
+stock.confirm_adjustment,تأكيد التعديل
+stock.preview_shipments_will_be_generated,معاينة: سيتم إنشاء {count} شحنة(شحنات)
+stock.with_assigned_panelists,مع المشاركين المعينين
+stock.without_panelist_will_be_skipped,بدون مشارك (سيتم تجاهله)
+stock.send_selected,إرسال {count} المحدد(ة)
+stock.warning_nodes_without_panelists,تحذير: {count} عقدة(عقد) بدون مشاركين معينين وسيتم تجاهلها
+stock.only_panelists_with_allocation_plans,ملاحظة: فقط المشاركون الذين لديهم خطط تخصيص معينة سيتم إنشاء شحنات لهم
+common.calculate,حساب
+common.unit,الوحدة
+stock.panelist_code_materials_count,الرمز: {code} • {count} مادة(مواد)
+stock.material_movements,حركات المواد
+common.type,النوع
+common.to,إلى
+stock.allocation_shipment,شحنة التخصيص
+stock.showing_alerts_count,عرض {showing} من أصل {total} تنبيه
+stock.when_enabled_system_will_monitor,عند التفعيل
+stock.feature_not_available_in_current_version,هذه الميزة غير متوفرة في النسخة الحالية من الوحدة.
+stock.system_will_automatically_create_shipments,سيقوم النظام تلقائيًا بإنشاء شحنات معلقة عند اكتشاف أن مشاركًا يحتاج إلى مواد.
+stock.save_settings,حفظ الإعدادات
+material.add_material,إضافة مادة
+reporting.above_target,فوق الهدف
+reporting.below_target,تحت الهدف
+reporting.business_days,أيام العمل
+reporting.last_12_weeks,آخر 12 أسبوعًا
+reporting.shipments_count,{{count}} شحنة(شحنات)
+reporting.no_filters_desc,عرض الأداء العام للنظام البيئي على جميع المسارات والناقلين
+reporting.origin_only_desc,تحليل جودة الصادر من مدينة إلى جميع الوجهات
+reporting.destination_only_desc,تحليل جودة الوارد إلى مدينة من جميع المصادر
+reporting.both_cities_desc,تحليل أداء مسار محدد (المصدر → الوجهة)
+reporting.carrier_product_desc,تضييق التحليل أكثر إلى مزودي خدمات أو أنواع محددة
+reporting.jk_performance_report,تقرير أداء J+K
+reporting.transit_time_analysis_and_delivery_performance_tracking,تحليل أوقات العبور وتتبع أداء التسليم
+reporting.statistical_significance,الدلالة الإحصائية
+reporting.avg_jk_actual,متوسط J+K الفعلي
+reporting.days,أيام
+reporting.vs_std,مقابل المعيار
+reporting.on_time_percent,٪ في الوقت المحدد
+reporting.on_time_count,{{count}} في الوقت المحدد
+reporting.require_intervention,تتطلب تدخلاً
+reporting.average_samples_week,متوسط {{count}} عينات/أسبوع
+reporting.after_standard,بعد المعيار
+reporting.in_standard_delayed,ضمن المعيار/متأخر
+reporting.on_standard,على المعيار
+reporting.distribution_of_shipments_by_actual_transit_time,توزيع الشحنات حسب وقت العبور الفعلي مقارنة بمعيار التسليم
+reporting.route_analysis,تحليل المسارات
+reporting.region_analysis,تحليل المناطق
+reporting.carrier_product_tab,الناقل → المنتج
+reporting.route_performance,أداء المسارات ({{count}} مسار)
+reporting.jk_std,معيار J+K
+reporting.jk_actual,J+K الفعلي
+reporting.city_performance,أداء المدن ({{count}} مدخلات)
+reporting.inbound_arrow,↓ وارد
+reporting.outbound_arrow,↑ صادر
+reporting.region_performance,أداء المناطق ({{count}} مدخلات)
+reporting.carrier_product_performance,أداء الناقل → المنتج ({{count}} ناقل)
+reporting.problem_routes_column,المسارات الإشكالية
+reporting.transit_days_jk,أيام العبور (J+K)
+reporting.cumulative_percent,النسبة التراكمية %
+reporting.cumulative_percentage_desc,النسبة التراكمية للتسليمات حسب أيام العبور. تشير الأشرطة الخضراء إلى الأيام ضمن المعيار
+reporting.std_percent,النسبة المعيارية %
+reporting.of_routes,من بين {{count}} مساراً
+reporting.meeting_standard,مطابق للمعيار
+reporting.no_penalty,بدون عقوبة
+reporting.with_penalty,مع عقوبة
+reporting.across_all_carriers,عبر جميع الناقلين
+reporting.generating,جارٍ الإنشاء...
+reporting.standard_percent,النسبة المعيارية %
+reporting.actual_percent,النسبة الفعلية %
+reporting.filter_no_filters,لا توجد فلاتر:
+reporting.filter_region_label,المنطقة:
+reporting.filter_direction_label,الاتجاه:
+reporting.filter_direction_desc,تحليل جودة الخدمة الواردة مقابل الصادرة بشكل منفصل
+reporting.filter_equity_status_label,حالة العدالة:
+reporting.filter_equity_status_desc,تحديد المدن ذات مستويات الامتثال المحددة
+reporting.filter_carrier_product_label,الناقل/المنتج:
+reporting.filter_carrier_product_desc_narrow,تقييد التحليل لمزودي الخدمة أو أنواع الخدمات المحددة
+reporting.filter_date_range_label,الفترة:
+reporting.filter_date_range_desc,تحليل الاتجاهات خلال فترات محددة
+reporting.citizens_count,{count} مواطنين
+reporting.of_cities,من بين {count} مدينة
+reporting.in_critical_cities,في المدن الحرجة
+reporting.compliance_percent,نسبة الامتثال %
+reporting.inbound_percent,النسبة الواردة %
+reporting.outbound_percent,النسبة الصادرة %
+reporting.treemap_size_population_color_compliance,الحجم يمثل السكان
+reporting.inbound_direction,وارد
+reporting.outbound_direction,صادر
+reporting.avg_standard,المتوسط المعياري ({percent} %)
+reporting.map_interactive_description,خريطة تفاعلية تظهر عدالة الخدمات في المدن. حجم الدائرة يمثل السكان
+reporting.compliant_abbr,مطابق
+reporting.std_abbr,معيار
+reporting.inbound_abbr,وارد
+reporting.outbound_abbr,صادر
+onedb.showing_records,عرض {{filtered}} من أصل {{total}} سجلاً إجمالياً
+receive_generator.title,مولد سجلات ONE DB
+receive_generator.subtitle,توليد سجلات استقبال تركيبية لأغراض الاختبار والعرض
+receive_generator.demo_account_only,حساب تجريبي فقط - هذه الميزة متاحة لأغراض الاختبار فقط
+receive_generator.generator_configuration,تكوين المولد
+receive_generator.number_of_records,عدد السجلات
+receive_generator.out_of_sla_percentage,النسبة المئوية خارج اتفاقية مستوى الخدمة (%)
+receive_generator.advance_variance_days,تفاوت التقدم (أيام)
+receive_generator.delay_variance_days,تفاوت التأخير (أيام)
+receive_generator.maximum_days_records_can_arrive_early,الحد الأقصى لعدد الأيام التي يمكن أن تصل فيها السجلات مبكرًا
+receive_generator.maximum_days_records_can_be_delayed_beyond_sla,الحد الأقصى لعدد الأيام التي يمكن أن تتأخر فيها السجلات بعد اتفاقية مستوى الخدمة
+receive_generator.example_records_can_arrive_between,📊 مثال: يمكن أن تصل السجلات بين {{min}} و {{max}} يومًا (اتفاقية مستوى الخدمة: {{sla}} يومًا)
+receive_generator.example_out_of_sla_records_can_arrive_up_to,📊 مثال: يمكن أن تصل السجلات خارج اتفاقية مستوى الخدمة حتى {{max}} يومًا (اتفاقية مستوى الخدمة: {{sla}} يومًا\
+receive_generator.products,المنتجات
+receive_generator.carriers,الناقلون
+receive_generator.select_all,تحديد الكل
+receive_generator.selected_products,المحدد: {{count}} منتج(منتجات)
+receive_generator.selected_carriers,المحدد: {{count}} ناقل(ناقلون)
+receive_generator.start_date,تاريخ البدء
+receive_generator.end_date,تاريخ الانتهاء
+receive_generator.generation_summary,ملخص التوليد
+receive_generator.summary_combinations,• <strong>{{products}}</strong> منتج(منتجات) × <strong>{{carriers}}</strong> ناقل(ناقلون) = <strong>{{total}}</strong> تركيبة(تركيبات)
+receive_generator.summary_records_per_combination,• <strong>{{count}}</strong> سجل لكل تركيبة
+receive_generator.summary_total_records,• <strong>~{{count}}</strong> سجل إجمالي سيتم توليده
+receive_generator.summary_date_range,• نطاق التواريخ: <strong>{{start}}</strong> إلى <strong>{{end}}</strong>
+receive_generator.generate_records,توليد السجلات
+receive_generator.generating,جاري التوليد... {{progress}}%
+receive_generator.generation_complete,اكتمل التوليد
+receive_generator.successfully_created_records,تم إنشاء {{success}} سجل بنجاح{{failed}}
+receive_generator.failed_records, (فشل {{count}})
+admin.use_this_feature_to_prepare_accounts,استخدم هذه الميزة لتحضير الحسابات لجلسات التدريب أو العروض التوضيحية. ستقوم عملية إعادة التعيين بـ:
+admin.all_operational_data,جميع البيانات التشغيلية (الخطط، الشحنات، المخزونات، الطلبات)
+admin.all_configuration_data,جميع بيانات التكوين (الطوبولوجيا، لوحات التحكم، المواد، الإعدادات)
+admin.use_with_caution,استخدم بحذر
+admin.created,تم الإنشاء:
+admin.resetting,جاري إعادة التعيين...
+admin.confirm_reset,تأكيد إعادة التعيين
+admin.an_unexpected_error_occurred,حدث خطأ غير متوقع
+common.language,اللغة
+onedb_api.title,GET API - ONE DB
+onedb_api.description,"واجهة برمجة تطبيقات REST للاستعلام واستخراج بيانات ONE DB. وصول للقراءة فقط مع التصفية حسب التاريخ والترقيم. محدود بـ 10,000 سجل لكل طلب و 10 طلبات في الدقيقة."
+onedb_api.tab_overview,نظرة عامة
+onedb_api.tab_documentation,التوثيق
+onedb_api.tab_testing,الاختبار
+onedb_api.tab_usage,الاستخدام
+onedb_api.credentials_section,بيانات اعتماد API
+onedb_api.no_api_key,أنشئ واحدًا لبدء استخدام API.
+onedb_api.generate_key,إنشاء مفتاح API
+onedb_api.generating,جارٍ الإنشاء...
+onedb_api.api_key_label,مفتاح API الخاص بك
+onedb_api.copy,نسخ
+onedb_api.copied,تم النسخ!
+onedb_api.created_at,تم الإنشاء
+onedb_api.regenerate_key,إعادة إنشاء مفتاح API
+onedb_api.confirm_regenerate,هل أنت متأكد من رغبتك في إعادة إنشاء مفتاح API الخاص بك؟ سيتم تعطيل المفتاح القديم فورًا.
+onedb_api.security_warning_title,تحذير أمني
+onedb_api.security_warning_text,لا تشاركه علنًا أو ترفعه إلى نظام التحكم في الإصدارات. أي شخص لديه هذا المفتاح يمكنه الوصول إلى بيانات ONE DB الخاصة بك.
+onedb_api.endpoint_section,نقطة نهاية API
+onedb_api.base_url,الرابط الأساسي
+onedb_api.authentication_title,المصادقة
+onedb_api.authentication_description,يجب أن تتضمن جميع طلبات API مفتاح API الخاص بك في رأس Authorization باستخدام مصادقة Bearer.
+onedb_api.endpoints_title,النقاط النهائية المتاحة
+onedb_api.endpoint_description,استرجاع سجلات ONE DB مصفاة حسب نطاق التاريخ
+onedb_api.query_parameters,معلمات الاستعلام
+onedb_api.parameter,المعلمة
+onedb_api.type,النوع
+onedb_api.required,مطلوب
+onedb_api.description,"واجهة برمجة تطبيقات REST للاستعلام واستخراج بيانات ONE DB. وصول للقراءة فقط مع التصفية حسب التاريخ والترقيم. محدود بـ 10,000 سجل لكل طلب و 10 طلبات في الدقيقة."
+onedb_api.yes,نعم
+onedb_api.no,لا
+onedb_api.start_date,تاريخ البدء
+onedb_api.start_date_desc,تاريخ البدء لتصفية السجلات (التنسيق: YYYY-MM-DD)
+onedb_api.end_date,تاريخ الانتهاء
+onedb_api.end_date_desc,تاريخ الانتهاء لتصفية السجلات (التنسيق: YYYY-MM-DD)
+onedb_api.limit,الحد الأقصى
+onedb_api.limit_desc,الحد الأقصى لعدد السجلات التي سيتم إرجاعها (الافتراضي: 100)
+onedb_api.offset,الإزاحة
+onedb_api.offset_desc,عدد السجلات التي يجب تخطيها للترقيم (الافتراضي: 0)
+onedb_api.examples_title,أمثلة الطلبات
+onedb_api.response_format,تنسيق الاستجابة
+onedb_api.rate_limiting_title,تحديد المعدل
+onedb_api.rate_limiting_description,لضمان الاستخدام العادل واستقرار النظام
+onedb_api.rate_limit_info,حد المعدل: 10 طلبات في الدقيقة
+onedb_api.error_codes_title,رموز حالة HTTP
+onedb_api.status_code,رمز الحالة
+onedb_api.status_200,نجاح - تم إكمال الطلب بنجاح
+onedb_api.status_400,طلب خاطئ - معلمات أو تنسيق تاريخ غير صالح
+onedb_api.status_401,غير مصرح - مفتاح API غير صالح أو مفقود
+onedb_api.status_429,طلبات كثيرة جدًا - تم تجاوز حد المعدل
+onedb_api.status_500,خطأ داخلي في الخادم - حدث خطأ في جانبنا
+onedb_api.api_tester_title,مختبر API
+onedb_api.generate_key_first,يرجى إنشاء مفتاح API أولاً لاستخدام المختبر.
+onedb_api.test_api,اختبار طلب API
+onedb_api.testing,جارٍ الاختبار...
+onedb_api.response,الاستجابة
+onedb_api.usage_statistics,إحصائيات الاستخدام
+onedb_api.total_calls_month,إجمالي المكالمات هذا الشهر
+onedb_api.calls_last_hour,المكالمات في الساعة الأخيرة
+onedb_api.limit_10_per_minute,الحد: 10 في الدقيقة
+onedb_api.last_call,آخر مكالمة API
+onedb_api.never,أبدًا
+onedb_api.loading_stats,جارٍ تحميل الإحصائيات...
+menu.onedb_api,واجهة برمجة تطبيقات ONE DB
+menu.onedb_api.tooltip,الوصول إلى ONE DB عبر واجهة برمجة التطبيقات REST
+onedb_api.auth_note,"ملاحظة: يستخدم رأس Authorization مفتاح Supabase anon (المقدم من النظام)، بينما يحتوي X-API-Key على مفتاح API الشخصي الخاص بك."
+onedb_api.max_records_note,"ملاحظة: تُرجع واجهة برمجة التطبيقات حدًا أقصى قدره 10000 سجل إجمالاً. استخدم نطاقات تاريخ أكثر تحديدًا إذا كنت بحاجة إلى الوصول إلى المزيد من البيانات."
+menu.onedb_section,"ONE DB"
+menu.onedb_section.tooltip,"إدارة البيانات والوصول إلى واجهة برمجة التطبيقات"
+menu.get_api,"GET API"
+menu.get_api.tooltip,"استخراج البيانات عبر REST API"
+panelists.management,"إدارة الأعضاء"
+panelists.manage_availability,"إدارة توفر الأعضاء"
+panelists.all_in_system,"الإجمالي في النظام"
+panelists.search_placeholder,"البحث بالرمز أو الاسم أو البريد الإلكتروني..."
+common.all_cities,"جميع المدن"
+common.all_nodes,"جميع العقد"
+common.all_status,"جميع الحالات"
+postal_centers.title,المراكز البريدية
+postal_centers.description,تكوين المراكز البريدية وقارئات RFID لتشخيص الشبكة
+postal_centers.create_center,إنشاء مركز بريدي
+postal_centers.edit_center,تعديل المركز البريدي
+postal_centers.confirm_delete_center,هل أنت متأكد من حذف هذا المركز البريدي؟ سيتم حذف جميع القارئات المرتبطة أيضًا.
+postal_centers.no_centers_found,لم يتم العثور على مراكز بريدية
+postal_centers.total_centers,إجمالي المراكز
+postal_centers.active_centers,المراكز النشطة
+postal_centers.code,الرمز
+postal_centers.name,الاسم
+postal_centers.description,الوصف
+postal_centers.opening_hour,ساعة الافتتاح
+postal_centers.cutoff_time,وقت القطع
+postal_centers.calculation_mode,وضع الحساب
+postal_centers.mixed_reader_gap_minutes,فجوة القارئ المختلط (دقائق)
+postal_centers.mixed_reader_gap_help,فجوة زمنية لفصل أحداث الدخول/الخروج في القارئات المختلطة (اتركه فارغًا للوراثة من الحساب)
+postal_centers.is_active,نشط
+postal_centers.inherit_from_account,الوراثة من الحساب
+postal_centers.natural_days,أيام طبيعية
+postal_centers.working_days,أيام العمل
+postal_centers.hours,ساعات
+postal_centers.mode,الوضع
+postal_centers.status,الحالة
+postal_centers.search_placeholder,البحث عن مراكز بريدية أو قارئات...
+readers.reader,قارئ
+readers.readers,القارئات
+readers.total_readers,إجمالي القارئات
+readers.active_readers,القارئات النشطة
+readers.entry_readers,قارئات الدخول
+readers.exit_readers,قارئات الخروج
+readers.mixed_readers,القارئات المختلطة
+readers.add_reader,إضافة قارئ
+readers.add_first_reader,إضافة القارئ الأول
+readers.create_reader,إنشاء قارئ
+readers.edit_reader,تعديل القارئ
+readers.confirm_delete_reader,هل أنت متأكد من حذف هذا القارئ؟
+readers.no_readers_found,لم يتم العثور على قارئات لهذا المركز البريدي
+readers.reader_id,معرف القارئ
+readers.reader_id_help,يجب أن يتطابق مع ReaderId في أحداث EPCIS
+readers.name,الاسم
+readers.description,الوصف
+readers.type,النوع
+readers.reader_type,نوع القارئ
+readers.type_entry,دخول
+readers.type_exit,خروج
+readers.type_mixed,مختلط
+readers.type_entry_help,يستخدم MIN(timestamp) - أقدم قراءة
+readers.type_exit_help,يستخدم MAX(timestamp) - أحدث قراءة
+readers.type_mixed_help,يفصل الدخول/الخروج بناءً على الفجوة الزمنية
+readers.mixed_reader_gap_minutes,عتبة الفجوة (دقائق)
+readers.mixed_reader_gap_help,تجاوز عتبة الفجوة لهذا القارئ (اتركه فارغًا للوراثة)
+readers.is_active,نشط
+readers.gap,الفجوة
+common.minutes,دقائق
+common.all,الكل
+common.active_only,النشطة فقط
+common.expand_all,توسيع الكل
+common.collapse_all,طي الكل
+menu.postal_centers,المراكز البريدية
+menu.postal_centers.tooltip,تكوين المراكز البريدية وقارئات RFID
+menu.account_configuration,تكوين الحساب
+menu.account_configuration.tooltip,تكوين إعدادات مستوى الحساب للتشخيص
+account_config.title,تكوين الحساب
+account_config.description,تكوين الإعدادات العامة لحسابك
+account_config.global_settings,الإعدادات العامة
+account_config.calculation_mode,وضع الحساب
+account_config.natural_days,أيام طبيعية
+account_config.working_days,أيام العمل
+account_config.calculation_mode_help,اختر كيفية حساب أوقات العبور: أيام طبيعية (24/7) أو أيام عمل (باستثناء ساعات غير العمل)
+account_config.mixed_reader_gap,فجوة القارئ المختلط (دقائق)
+account_config.mixed_reader_gap_help,فجوة زمنية لفصل أحداث الدخول والخروج للقراء المختلطين
+account_config.non_working_days,أيام غير العمل (العطلات)
+account_config.add_holiday,إضافة عطلة
+account_config.holiday_reason,السبب (مثل: عيد الميلاد، رأس السنة)
+account_config.no_holidays,لا توجد عطلات مكونة
+account_config.confirm_delete_holiday,هل أنت متأكد من أنك تريد حذف هذه العطلة؟
+account_config.weekly_schedule,الجدول الأسبوعي
+account_config.working_day,يوم عمل
+account_config.saved_successfully,تم حفظ التكوين بنجاح
+account_config.fill_all_fields,يرجى ملء جميع الحقول
+account_config.download_template,تحميل النموذج
+account_config.import_csv,استيراد CSV
+account_config.no_valid_holidays,لم يتم العثور على عطلات صالحة في CSV
+account_config.imported_successfully,تم استيراد {count} عطلة بنجاح
+account_config.opening,افتتاح
+account_config.cutoff,قطع
+postal_centers.inherited,موروث
+postal_centers.override,مخصص
+postal_centers.inheriting_from_account,موروث من الحساب
+postal_centers.from_account,من الحساب
+postal_centers.minutes,دقائق
+postal_centers.basic_info,المعلومات الأساسية
+postal_centers.configuration,التكوين
+postal_centers.holidays,العطلات (أيام غير العمل)
+postal_centers.inherited_holidays,موروثة من الحساب
+postal_centers.center_holidays,عطلات خاصة بالمركز
+postal_centers.specific,خاص
+postal_centers.holiday_reason,السبب
+postal_centers.no_account_holidays,لا توجد عطلات محددة على مستوى الحساب
+postal_centers.no_center_holidays,لا توجد عطلات خاصة بالمركز محددة
+postal_centers.from_account,من الحساب
+postal_centers.minutes,دقائق
+postal_centers.weekly_schedule,الجدول الأسبوعي
+postal_centers.weekly_schedule_help,تخصيص ساعات العمل لهذا المركز أو الوراثة من تكوين الحساب
+postal_centers.inherited,موروث
+postal_centers.holidays_inherited_help,تتم إدارة أيام عدم العمل على مستوى الحساب ويتم توريثها تلقائيًا بواسطة جميع المراكز البريدية
+postal_centers.inherited_from_account,موروث من الحساب
+common.sunday,الأحد
+common.monday,الاثنين
+common.tuesday,الثلاثاء
+common.wednesday,الأربعاء
+common.thursday,الخميس
+common.friday,الجمعة
+common.saturday,السبت
+common.update,تحديث
+common.opening,افتتاح
+common.cutoff,إغلاق
+postal_centers.center_holidays,العطلات الخاصة بالمركز
+postal_centers.specific,خاص
+postal_centers.holiday_reason,السبب
+postal_centers.no_center_holidays,لا توجد عطلات خاصة بالمركز محددة
+readers.from_account,من الحساب
+readers.inheriting_from_account,موروث من الحساب
+readers.minutes,دقائق
+readers.title,القراء
+readers.add_new,إضافة قارئ جديد
+readers.total_count,الإجمالي: {{count}} قارئ
+readers.search_placeholder,البحث بواسطة معرف القارئ أو الاسم
+readers.filter_by_center,تصفية حسب المركز البريدي
+readers.filter_by_type,تصفية حسب النوع
+readers.filter_by_status,تصفية حسب الحالة
+readers.postal_center,المركز البريدي
+readers.postal_center_help,تعيين هذا القارئ إلى مركز بريدي
+readers.gap_threshold,عتبة الفجوة
+readers.status,الحالة
+readers.status_active,نشط
+readers.status_inactive,غير نشط
+readers.status_offline,غير متصل
+readers.status_unknown,غير معروف
+readers.selected_count,{{count}} محدد
+readers.activate,تفعيل
+readers.deactivate,إلغاء التفعيل
+readers.confirm_delete,هل أنت متأكد من حذف هذا القارئ؟
+readers.confirm_bulk_delete,هل أنت متأكد من حذف {{count}} قارئ؟
+readers.no_readers_found,لم يتم العثور على قراء
+readers.inherited,موروث
+postal_centers.tab_centers,المراكز
+postal_centers.tab_readers,القراء
+common.reset_filters,إعادة تعيين الفلاتر
+slas.title,تكوين اتفاقيات مستوى الخدمة
+slas.description,تكوين اتفاقيات مستوى الخدمة للمسارات التشغيلية والتوزيع
+slas.create_sla,إنشاء SLA
+slas.generate_combinations,توليد التركيبات
+slas.sla_type,نوع SLA
+slas.operational,تشغيلي
+slas.distribution,توزيع
+slas.route,مسار
+slas.expected_time,الوقت المتوقع
+slas.on_time_percentage,% في الوقت المحدد
+slas.warning_threshold,عتبة التحذير
+slas.critical_threshold,عتبة حرجة
+slas.postal_center,مركز بريدي
+slas.from_reader,قارئ المصدر
+slas.to_reader,قارئ الوجهة
+slas.from_postal_center,مركز بريدي المصدر
+slas.to_postal_center,مركز بريدي الوجهة
+slas.time_unit,وحدة الوقت
+slas.select_postal_centers,حدد المراكز البريدية
+slas.operational_combinations_hint,سيتم إنشاء SLA لجميع أزواج القراء داخل كل مركز محدد
+slas.from_postal_centers,مراكز بريدية المصدر
+slas.to_postal_centers,مراكز بريدية الوجهة
+slas.default_values,القيم الافتراضية
+slas.combinations_generated,تم إنشاء {inserted} SLA جديدة ({skipped} تم تخطيها كتكرارات)
+menu.slas_configuration,Sites SLA
+menu.slas_configuration.tooltip,تكوين Sites SLA
+slas.generate_network_slas,توليد SLA للشبكة
+slas.network_summary,ملخص الشبكة
+slas.active_postal_centers,المراكز البريدية النشطة
+slas.operational_slas_to_generate,SLA التشغيلية المراد توليدها
+slas.distribution_slas_to_generate,SLA التوزيع المراد توليدها
+slas.one_per_center,واحد لكل مركز: دخول ← خروج
+slas.all_center_pairs,جميع أزواج المراكز: A→B
+slas.slas_created,SLA تم إنشاؤها
+slas.slas_skipped,SLA تم تخطيها
+slas.already_exist,موجودة بالفعل
+slas.operational_sla_description,دخول ← خروج داخل هذا المركز البريدي
+common.generating,جاري التوليد...
+common.bulk_edit,التحرير الجماعي
+common.bulk_edit_description,تحرير {count} سجلات محددة. اترك الحقول فارغة للتخطي.
+common.leave_empty_to_skip,اترك فارغًا للتخطي
+common.days,أيام
+slas.edit_sla,تعديل SLA
+common.edit,تعديل
+common.saving,جاري الحفظ...
+common.hours,ساعات
+postal_centers.postal_center,المركز البريدي
+slas.generate_pending_slas,توليد SLA المعلقة
+slas.pending_slas_summary,ملخص SLA المعلقة
+slas.pending_operational,التشغيلية المعلقة
+slas.pending_distribution,التوزيع المعلق
+slas.selected_to_generate,المحدد للتوليد
+slas.select_sla_types,حدد أنواع SLA للتوليد
+slas.select_centers_for_operational,حدد المراكز لـ SLA التشغيلية
+slas.select_routes_for_distribution,حدد المسارات لـ SLA التوزيع
+slas.generate_selected_slas,توليد SLA المحددة
+common.select_all,تحديد الكل
+common.deselect_all,إلغاء تحديد الكل
+common.show_filters,إظهار الفلاتر
+common.hide_filters,إخفاء الفلاتر
+common.delete_selected,حذف المحدد
+common.export_csv,تصدير CSV
+menu.setup_e2e,شبكة E2E
+menu.setup_e2e.tooltip,تكوين إعدادات شبكة المراقبة E2E
+menu.setup_diagnosis,شبكة التشخيص
+menu.setup_diagnosis.tooltip,تكوين إعدادات تشخيص الشبكة البريدية
+diagnosis.consolidation.title,دمج الأحداث
+diagnosis.consolidation.description,معالجة أحداث RFID الأولية واكتشاف الشذوذات في النظام
+diagnosis.consolidation.run_button,تشغيل الدمج
+diagnosis.consolidation.pending_events,الأحداث المعلقة
+diagnosis.consolidation.total_incidents,إجمالي الحوادث
+diagnosis.consolidation.last_consolidation,آخر دمج
+diagnosis.consolidation.never,أبدًا
+diagnosis.consolidation.incidents_table_title,الحوادث المكتشفة
+diagnosis.consolidation.no_incidents,لم يتم اكتشاف حوادث
+diagnosis.consolidation.success,اكتمل الدمج: {processed} حدث تمت معالجته - {incidents} حادث تم اكتشافه
+diagnosis.consolidation.error,خطأ في الدمج: {message}
+diagnosis.consolidation.error_no_session,لا توجد جلسة نشطة
+diagnosis.consolidation.columns.tag_id,معرف العلامة
+diagnosis.consolidation.columns.incident_type,النوع
+diagnosis.consolidation.columns.postal_center,المركز البريدي
+diagnosis.consolidation.columns.description,الوصف
+diagnosis.consolidation.columns.detected_at,تاريخ الاكتشاف
+diagnosis.consolidation.columns.status,الحالة
+diagnosis.consolidation.incident_types.missing_exit,خروج مفقود
+diagnosis.consolidation.incident_types.unknown_reader,قارئ غير معروف
+diagnosis.consolidation.incident_types.data_quality,جودة البيانات
+diagnosis.consolidation.status.resolved,تم الحل
+diagnosis.consolidation.status.pending,معلق
+menu.event_consolidation,دمج الأحداث
+menu.event_consolidation.tooltip,معالجة أحداث RFID واكتشاف الشذوذات
