@@ -331,19 +331,19 @@ export default function NodeLoadBalancing() {
                   onClick={handleFirstSemesterSelect}
                   className="px-2 py-1 text-xs font-medium rounded border border-green-300 bg-green-50 hover:bg-green-100 hover:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
                 >
-                  1st Semester
+                  {t("common.first_semester")}
                 </button>
                 <button
                   onClick={handleSecondSemesterSelect}
                   className="px-2 py-1 text-xs font-medium rounded border border-teal-300 bg-teal-50 hover:bg-teal-100 hover:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
                 >
-                  2nd Semester
+                  {t("common.second_semester")}
                 </button>
                 <button
                   onClick={handleYearSelect}
                   className="px-2 py-1 text-xs font-medium rounded border border-purple-300 bg-purple-50 hover:bg-purple-100 hover:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
                 >
-                  Year
+                  {t("common.year")}
                 </button>
               </div>
             </div>
