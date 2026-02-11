@@ -2259,3 +2259,5 @@ users.password,Password
 users.promise,Promise
 users.role,Role
 users.select_account,Select account
+menu.journey_segments,"Journey Segments"
+menu.journey_segments.tooltip,"Complete journey reconstruction with transit times and SLA compliance"

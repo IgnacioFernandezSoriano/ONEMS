@@ -2259,3 +2259,5 @@ users.password,Mot de passe
 users.promise,Promesse
 users.role,Rôle
 users.select_account,Sélectionner un compte
+menu.journey_segments,"Segments de Parcours"
+menu.journey_segments.tooltip,"Reconstruction complète du parcours avec temps de transit et conformité SLA"

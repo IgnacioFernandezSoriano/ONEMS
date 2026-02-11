@@ -2259,3 +2259,5 @@ users.password,كلمة المرور
 users.promise,الوعد
 users.role,الدور
 users.select_account,اختر الحساب
+menu.journey_segments,"أقسام الرحلة"
+menu.journey_segments.tooltip,"إعادة بناء كاملة للرحلة مع أوقات العبور والامتثال لاتفاقية مستوى الخدمة"

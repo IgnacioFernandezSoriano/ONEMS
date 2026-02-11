@@ -1,0 +1,76 @@
+{
+  "journey_segments": {
+    "title": "أقسام الرحلة",
+    "description": "إعادة بناء كاملة للرحلة مع أوقات العبور والامتثال لاتفاقية مستوى الخدمة",
+    "loading": "جاري تحميل الأقسام...",
+    "error": "خطأ في تحميل الأقسام",
+    "run_reconstruction": "تشغيل إعادة البناء",
+    "run_reconstruction_tooltip": "إعادة بناء أقسام الرحلة من الأحداث المعالجة",
+    "export_csv": "تصدير CSV",
+    "export_tooltip": "تصدير الأقسام المحددة إلى CSV",
+    "export_selected": "تصدير المحدد",
+    "clear_selection": "مسح التحديد",
+    "selected_count": "{{count}} أقسام محددة",
+    "error_no_account": "لم يتم العثور على حساب نشط",
+    "reconstruction_success": "اكتملت إعادة البناء: تم إنشاء {{segments}} قسم من {{events}} حدث في {{time}} مللي ثانية",
+    "reconstruction_no_data": "لم يتم إنشاء أقسام جديدة",
+    "reconstruction_error": "خطأ في إعادة البناء: {{message}}",
+    "kpi": {
+      "total": "الإجمالي",
+      "segments": "الأقسام",
+      "on_time": "في الوقت المحدد",
+      "warning": "تحذير",
+      "critical": "حرج",
+      "avg_time": "متوسط الوقت",
+      "minutes": "دقائق"
+    },
+    "filters": {
+      "title": "المرشحات",
+      "search": "بحث",
+      "search_placeholder": "معرف العلامة أو المركز البريدي...",
+      "segment_type": "نوع القسم",
+      "all_types": "جميع الأنواع",
+      "operational": "تشغيلي",
+      "distribution": "توزيع",
+      "postal_center": "المركز البريدي",
+      "all_centers": "جميع المراكز",
+      "from_center": "من المركز",
+      "to_center": "إلى المركز",
+      "sla_compliance": "الامتثال لاتفاقية مستوى الخدمة",
+      "all_compliance": "جميع الحالات",
+      "on_time": "في الوقت المحدد",
+      "warning": "تحذير",
+      "critical": "حرج",
+      "violated": "منتهك",
+      "no_sla": "بدون اتفاقية مستوى خدمة",
+      "date_from": "من تاريخ",
+      "date_to": "إلى تاريخ",
+      "apply": "تطبيق المرشحات",
+      "clear": "مسح المرشحات"
+    },
+    "table": {
+      "tag_id": "معرف العلامة",
+      "type": "النوع",
+      "centers": "المراكز",
+      "entry_time": "وقت الدخول",
+      "exit_time": "وقت الخروج",
+      "duration": "المدة",
+      "actual": "الفعلي",
+      "sla": "اتفاقية مستوى الخدمة",
+      "compliance": "الامتثال",
+      "no_segments": "لم يتم العثور على أقسام",
+      "no_sla": "بدون اتفاقية مستوى خدمة"
+    },
+    "type": {
+      "operational": "تشغيلي",
+      "distribution": "توزيع"
+    },
+    "compliance": {
+      "on_time": "في الوقت المحدد",
+      "warning": "تحذير",
+      "critical": "حرج",
+      "violated": "منتهك",
+      "no_sla": "بدون اتفاقية مستوى خدمة"
+    }
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "journey_segments": {
+    "title": "Journey Segments",
+    "description": "Complete journey reconstruction with transit times and SLA compliance",
+    "loading": "Loading segments...",
+    "error": "Error loading segments",
+    "run_reconstruction": "Run Reconstruction",
+    "run_reconstruction_tooltip": "Reconstruct journey segments from processed events",
+    "export_csv": "Export CSV",
+    "export_tooltip": "Export selected segments to CSV",
+    "export_selected": "Export Selected",
+    "clear_selection": "Clear Selection",
+    "selected_count": "{{count}} segments selected",
+    "error_no_account": "No active account found",
+    "reconstruction_success": "Reconstruction completed: {{segments}} segments created from {{events}} events in {{time}}ms",
+    "reconstruction_no_data": "No new segments created",
+    "reconstruction_error": "Reconstruction error: {{message}}",
+    "kpi": {
+      "total": "Total",
+      "segments": "Segments",
+      "on_time": "On Time",
+      "warning": "Warning",
+      "critical": "Critical",
+      "avg_time": "Average Time",
+      "minutes": "minutes"
+    },
+    "filters": {
+      "title": "Filters",
+      "search": "Search",
+      "search_placeholder": "Tag ID or Postal Center...",
+      "segment_type": "Segment Type",
+      "all_types": "All Types",
+      "operational": "Operational",
+      "distribution": "Distribution",
+      "postal_center": "Postal Center",
+      "all_centers": "All Centers",
+      "from_center": "From Center",
+      "to_center": "To Center",
+      "sla_compliance": "SLA Compliance",
+      "all_compliance": "All Status",
+      "on_time": "On Time",
+      "warning": "Warning",
+      "critical": "Critical",
+      "violated": "Violated",
+      "no_sla": "No SLA",
+      "date_from": "Date From",
+      "date_to": "Date To",
+      "apply": "Apply Filters",
+      "clear": "Clear Filters"
+    },
+    "table": {
+      "tag_id": "Tag ID",
+      "type": "Type",
+      "centers": "Centers",
+      "entry_time": "Entry Time",
+      "exit_time": "Exit Time",
+      "duration": "Duration",
+      "actual": "Actual",
+      "sla": "SLA",
+      "compliance": "Compliance",
+      "no_segments": "No segments found",
+      "no_sla": "No SLA"
+    },
+    "type": {
+      "operational": "Operational",
+      "distribution": "Distribution"
+    },
+    "compliance": {
+      "on_time": "On Time",
+      "warning": "Warning",
+      "critical": "Critical",
+      "violated": "Violated",
+      "no_sla": "No SLA"
+    }
+  }
+}

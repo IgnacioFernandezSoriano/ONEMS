@@ -2259,3 +2259,5 @@ users.password,Contraseña
 users.promise,Promesa
 users.role,Rol
 users.select_account,Seleccionar cuenta
+menu.journey_segments,"Segmentos de Trayecto"
+menu.journey_segments.tooltip,"Reconstrucción de trayectos completos con tiempos de tránsito y cumplimiento de SLA"

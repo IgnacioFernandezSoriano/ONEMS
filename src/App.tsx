@@ -38,6 +38,7 @@ import { AccountConfiguration } from './pages/Settings/AccountConfiguration'
 import { PostalCenters } from './pages/PostalCenters'
 import { SLAsConfiguration } from './pages/SLAsConfiguration'
 import { EventConsolidation } from './pages/diagnosis/EventConsolidation'
+import JourneySegments from './pages/diagnosis/JourneySegments'
 import ProcessedEvents from './pages/ProcessedEvents'
 
 function App() {
@@ -125,6 +126,16 @@ function App() {
                       element={
                         <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
                           <ProcessedEvents />
+                        </ProtectedRoute>
+                      }
+                    />
+                    
+                    {/* Journey Segments - for admin and superadmin */}
+                    <Route
+                      path="/diagnosis/journey-segments"
+                      element={
+                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                          <JourneySegments />
                         </ProtectedRoute>
                       }
                     />

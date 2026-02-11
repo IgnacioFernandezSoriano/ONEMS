@@ -1,0 +1,76 @@
+{
+  "journey_segments": {
+    "title": "Segmentos de Trayecto",
+    "description": "Reconstrucción de trayectos completos con tiempos de tránsito y cumplimiento de SLA",
+    "loading": "Cargando segmentos...",
+    "error": "Error al cargar segmentos",
+    "run_reconstruction": "Ejecutar Reconstrucción",
+    "run_reconstruction_tooltip": "Reconstruir segmentos de trayecto desde eventos procesados",
+    "export_csv": "Exportar CSV",
+    "export_tooltip": "Exportar segmentos seleccionados a CSV",
+    "export_selected": "Exportar Seleccionados",
+    "clear_selection": "Limpiar Selección",
+    "selected_count": "{{count}} segmentos seleccionados",
+    "error_no_account": "No se encontró cuenta activa",
+    "reconstruction_success": "Reconstrucción completada: {{segments}} segmentos creados desde {{events}} eventos en {{time}}ms",
+    "reconstruction_no_data": "No se crearon segmentos nuevos",
+    "reconstruction_error": "Error en reconstrucción: {{message}}",
+    "kpi": {
+      "total": "Total",
+      "segments": "Segmentos",
+      "on_time": "A Tiempo",
+      "warning": "Advertencia",
+      "critical": "Crítico",
+      "avg_time": "Tiempo Promedio",
+      "minutes": "minutos"
+    },
+    "filters": {
+      "title": "Filtros",
+      "search": "Buscar",
+      "search_placeholder": "ID Etiqueta o Centro Postal...",
+      "segment_type": "Tipo de Segmento",
+      "all_types": "Todos los Tipos",
+      "operational": "Operacional",
+      "distribution": "Distribución",
+      "postal_center": "Centro Postal",
+      "all_centers": "Todos los Centros",
+      "from_center": "Centro Origen",
+      "to_center": "Centro Destino",
+      "sla_compliance": "Cumplimiento SLA",
+      "all_compliance": "Todos los Estados",
+      "on_time": "A Tiempo",
+      "warning": "Advertencia",
+      "critical": "Crítico",
+      "violated": "Violado",
+      "no_sla": "Sin SLA",
+      "date_from": "Fecha Desde",
+      "date_to": "Fecha Hasta",
+      "apply": "Aplicar Filtros",
+      "clear": "Limpiar Filtros"
+    },
+    "table": {
+      "tag_id": "ID Etiqueta",
+      "type": "Tipo",
+      "centers": "Centros",
+      "entry_time": "Hora Entrada",
+      "exit_time": "Hora Salida",
+      "duration": "Duración",
+      "actual": "Real",
+      "sla": "SLA",
+      "compliance": "Cumplimiento",
+      "no_segments": "No se encontraron segmentos",
+      "no_sla": "Sin SLA"
+    },
+    "type": {
+      "operational": "Operacional",
+      "distribution": "Distribución"
+    },
+    "compliance": {
+      "on_time": "A Tiempo",
+      "warning": "Advertencia",
+      "critical": "Crítico",
+      "violated": "Violado",
+      "no_sla": "Sin SLA"
+    }
+  }
+}

@@ -292,6 +292,13 @@ export function Sidebar() {
           roles: ['admin', 'superadmin'],
           tooltip: t('menu.event_consolidation.tooltip'),
         },
+        {
+          path: '/diagnosis/journey-segments',
+          label: t('menu.journey_segments'),
+          icon: Map,
+          roles: ['admin', 'superadmin'],
+          tooltip: t('menu.journey_segments.tooltip'),
+        },
 
         {
           path: '/settings/account-configuration',
