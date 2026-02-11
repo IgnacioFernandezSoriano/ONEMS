@@ -2366,3 +2366,40 @@ complete_journeys.error_no_account,No account selected
 complete_journeys.assembly_success,Assembly completed: {created} created, {updated} updated in {time}ms
 complete_journeys.assembly_no_data,No data returned from assembly
 complete_journeys.assembly_error,Assembly error: {message}
+menu.cutoff_times,Cut-off Times
+menu.non_working_days,Non-Working Days
+cutoff_times.title,Cut-off Times
+cutoff_times.description,Cut-off times and working hours configuration per postal center
+cutoff_times.add_cutoff,Add Cut-off
+cutoff_times.edit_cutoff,Edit Cut-off
+cutoff_times.confirm_delete,Are you sure you want to delete this cut-off time?
+cutoff_times.table.center,Center
+cutoff_times.table.cutoff_time,Cut-off Time
+cutoff_times.table.working_hours,Working Hours
+cutoff_times.table.working_days,Working Days
+cutoff_times.table.timezone,Timezone
+cutoff_times.form.postal_center,Postal Center
+cutoff_times.form.cutoff_time,Cut-off Time
+cutoff_times.form.working_hours_start,Working Hours Start
+cutoff_times.form.working_hours_end,Working Hours End
+cutoff_times.form.working_days,Working Days
+cutoff_times.form.timezone,Timezone
+non_working_days.title,Non-Working Days
+non_working_days.description,Holidays and closure days calendar
+non_working_days.add_day,Add Day
+non_working_days.edit_day,Edit Day
+non_working_days.confirm_delete,Are you sure you want to delete this non-working day?
+non_working_days.all_centers,All Centers
+non_working_days.specific_centers,Specific Centers
+non_working_days.table.date,Date
+non_working_days.table.name,Name
+non_working_days.table.type,Type
+non_working_days.table.scope,Scope
+non_working_days.table.recurring,Recurring
+non_working_days.form.date,Date
+non_working_days.form.name,Name
+non_working_days.form.name_placeholder,e.g. Christmas
+non_working_days.form.description,Description
+non_working_days.form.type,Type
+non_working_days.form.applies_to_all,Applies to all centers
+non_working_days.form.recurring,Recurring annually

@@ -2366,3 +2366,40 @@ complete_journeys.error_no_account,No account selected
 complete_journeys.assembly_success,Assembly completed: {created} created, {updated} updated in {time}ms
 complete_journeys.assembly_no_data,No data returned from assembly
 complete_journeys.assembly_error,Assembly error: {message}
+menu.cutoff_times,Heures de Coupure
+menu.non_working_days,Jours Non Ouvrables
+cutoff_times.title,Heures de Coupure
+cutoff_times.description,Configuration des heures de coupure et des heures de travail par centre postal
+cutoff_times.add_cutoff,Ajouter Heure
+cutoff_times.edit_cutoff,Modifier Heure
+cutoff_times.confirm_delete,Êtes-vous sûr de vouloir supprimer cette heure de coupure?
+cutoff_times.table.center,Centre
+cutoff_times.table.cutoff_time,Heure de Coupure
+cutoff_times.table.working_hours,Heures de Travail
+cutoff_times.table.working_days,Jours Ouvrables
+cutoff_times.table.timezone,Fuseau Horaire
+cutoff_times.form.postal_center,Centre Postal
+cutoff_times.form.cutoff_time,Heure de Coupure
+cutoff_times.form.working_hours_start,Début Journée
+cutoff_times.form.working_hours_end,Fin Journée
+cutoff_times.form.working_days,Jours Ouvrables
+cutoff_times.form.timezone,Fuseau Horaire
+non_working_days.title,Jours Non Ouvrables
+non_working_days.description,Calendrier des jours fériés et de fermeture
+non_working_days.add_day,Ajouter Jour
+non_working_days.edit_day,Modifier Jour
+non_working_days.confirm_delete,Êtes-vous sûr de vouloir supprimer ce jour non ouvrable?
+non_working_days.all_centers,Tous les Centres
+non_working_days.specific_centers,Centres Spécifiques
+non_working_days.table.date,Date
+non_working_days.table.name,Nom
+non_working_days.table.type,Type
+non_working_days.table.scope,Portée
+non_working_days.table.recurring,Récurrent
+non_working_days.form.date,Date
+non_working_days.form.name,Nom
+non_working_days.form.name_placeholder,ex. Noël
+non_working_days.form.description,Description
+non_working_days.form.type,Type
+non_working_days.form.applies_to_all,S'applique à tous les centres
+non_working_days.form.recurring,Récurrent annuellement

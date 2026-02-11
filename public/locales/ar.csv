@@ -2366,3 +2366,40 @@ complete_journeys.error_no_account,No account selected
 complete_journeys.assembly_success,Assembly completed: {created} created, {updated} updated in {time}ms
 complete_journeys.assembly_no_data,No data returned from assembly
 complete_journeys.assembly_error,Assembly error: {message}
+menu.cutoff_times,أوقات القطع
+menu.non_working_days,أيام العطل
+cutoff_times.title,أوقات القطع
+cutoff_times.description,تكوين أوقات القطع وساعات العمل لكل مركز بريدي
+cutoff_times.add_cutoff,إضافة وقت
+cutoff_times.edit_cutoff,تعديل وقت
+cutoff_times.confirm_delete,هل أنت متأكد من حذف وقت القطع هذا؟
+cutoff_times.table.center,المركز
+cutoff_times.table.cutoff_time,وقت القطع
+cutoff_times.table.working_hours,ساعات العمل
+cutoff_times.table.working_days,أيام العمل
+cutoff_times.table.timezone,المنطقة الزمنية
+cutoff_times.form.postal_center,المركز البريدي
+cutoff_times.form.cutoff_time,وقت القطع
+cutoff_times.form.working_hours_start,بداية الدوام
+cutoff_times.form.working_hours_end,نهاية الدوام
+cutoff_times.form.working_days,أيام العمل
+cutoff_times.form.timezone,المنطقة الزمنية
+non_working_days.title,أيام العطل
+non_working_days.description,تقويم العطلات وأيام الإغلاق
+non_working_days.add_day,إضافة يوم
+non_working_days.edit_day,تعديل يوم
+non_working_days.confirm_delete,هل أنت متأكد من حذف يوم العطلة هذا؟
+non_working_days.all_centers,جميع المراكز
+non_working_days.specific_centers,مراكز محددة
+non_working_days.table.date,التاريخ
+non_working_days.table.name,الاسم
+non_working_days.table.type,النوع
+non_working_days.table.scope,النطاق
+non_working_days.table.recurring,متكرر
+non_working_days.form.date,التاريخ
+non_working_days.form.name,الاسم
+non_working_days.form.name_placeholder,مثال: عيد الميلاد
+non_working_days.form.description,الوصف
+non_working_days.form.type,النوع
+non_working_days.form.applies_to_all,ينطبق على جميع المراكز
+non_working_days.form.recurring,متكرر سنوياً

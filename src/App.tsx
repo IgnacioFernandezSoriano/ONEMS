@@ -41,6 +41,8 @@ import { EventConsolidation } from './pages/diagnosis/EventConsolidation'
 import JourneySegments from './pages/diagnosis/JourneySegments'
 import CompleteJourneys from './pages/diagnosis/CompleteJourneys'
 import ProcessedEvents from './pages/ProcessedEvents'
+import CutoffTimes from './pages/setup/CutoffTimes'
+import NonWorkingDays from './pages/setup/NonWorkingDays'
 
 function App() {
   return (
@@ -332,6 +334,12 @@ function App() {
                     
                     {/* Change Password - for all authenticated users */}
                     <Route path="/settings/change-password" element={<ChangePassword />} />
+                    
+                    {/* Cut-off Times - for admin and superadmin */}
+                    <Route path="/setup/cutoff-times" element={<CutoffTimes />} />
+                    
+                    {/* Non-Working Days - for admin and superadmin */}
+                    <Route path="/setup/non-working-days" element={<NonWorkingDays />} />
                     
                     {/* Users route - for admin and superadmin */}
                     <Route

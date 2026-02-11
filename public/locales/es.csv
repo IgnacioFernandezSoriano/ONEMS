@@ -2366,3 +2366,40 @@ complete_journeys.error_no_account,No account selected
 complete_journeys.assembly_success,Assembly completed: {created} created, {updated} updated in {time}ms
 complete_journeys.assembly_no_data,No data returned from assembly
 complete_journeys.assembly_error,Assembly error: {message}
+menu.cutoff_times,Horarios de Corte
+menu.non_working_days,Días No Laborables
+cutoff_times.title,Horarios de Corte
+cutoff_times.description,Configuración de horarios de corte y horas laborables por centro postal
+cutoff_times.add_cutoff,Agregar Horario
+cutoff_times.edit_cutoff,Editar Horario
+cutoff_times.confirm_delete,¿Está seguro de eliminar este horario de corte?
+cutoff_times.table.center,Centro
+cutoff_times.table.cutoff_time,Hora de Corte
+cutoff_times.table.working_hours,Horas Laborables
+cutoff_times.table.working_days,Días Laborables
+cutoff_times.table.timezone,Zona Horaria
+cutoff_times.form.postal_center,Centro Postal
+cutoff_times.form.cutoff_time,Hora de Corte
+cutoff_times.form.working_hours_start,Inicio Jornada
+cutoff_times.form.working_hours_end,Fin Jornada
+cutoff_times.form.working_days,Días Laborables
+cutoff_times.form.timezone,Zona Horaria
+non_working_days.title,Días No Laborables
+non_working_days.description,Calendario de festivos y días de cierre
+non_working_days.add_day,Agregar Día
+non_working_days.edit_day,Editar Día
+non_working_days.confirm_delete,¿Está seguro de eliminar este día no laborable?
+non_working_days.all_centers,Todos los Centros
+non_working_days.specific_centers,Centros Específicos
+non_working_days.table.date,Fecha
+non_working_days.table.name,Nombre
+non_working_days.table.type,Tipo
+non_working_days.table.scope,Alcance
+non_working_days.table.recurring,Recurrente
+non_working_days.form.date,Fecha
+non_working_days.form.name,Nombre
+non_working_days.form.name_placeholder,ej. Navidad
+non_working_days.form.description,Descripción
+non_working_days.form.type,Tipo
+non_working_days.form.applies_to_all,Aplica a todos los centros
+non_working_days.form.recurring,Recurrente anualmente
