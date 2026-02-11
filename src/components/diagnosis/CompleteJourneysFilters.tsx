@@ -10,7 +10,7 @@ export function CompleteJourneysFilters({ onFilterChange }: CompleteJourneysFilt
   const { t } = useTranslation();
 
   const [search, setSearch] = useState('');
-  const [slaCompliance, setSlaCompliance] = useState('');
+  const [journeyStatus, setJourneyStatus] = useState('');
   const [minSegments, setMinSegments] = useState('');
   const [maxSegments, setMaxSegments] = useState('');
   const [dateFrom, setDateFrom] = useState('');
@@ -19,7 +19,7 @@ export function CompleteJourneysFilters({ onFilterChange }: CompleteJourneysFilt
   const handleApplyFilters = () => {
     onFilterChange({
       search: search || undefined,
-      sla_compliance: slaCompliance || undefined,
+      journey_status: journeyStatus || undefined,
       min_segments: minSegments ? parseInt(minSegments) : undefined,
       max_segments: maxSegments ? parseInt(maxSegments) : undefined,
       date_from: dateFrom || undefined,
@@ -29,7 +29,7 @@ export function CompleteJourneysFilters({ onFilterChange }: CompleteJourneysFilt
 
   const handleClearFilters = () => {
     setSearch('');
-    setSlaCompliance('');
+    setJourneyStatus('');
     setMinSegments('');
     setMaxSegments('');
     setDateFrom('');
@@ -59,23 +59,21 @@ export function CompleteJourneysFilters({ onFilterChange }: CompleteJourneysFilt
           />
         </div>
 
-        {/* SLA Compliance */}
+        {/* Journey Status */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             {t('complete_journeys.filters.sla_compliance')}
           </label>
           <select
-            value={slaCompliance}
-            onChange={(e) => setSlaCompliance(e.target.value)}
+            value={journeyStatus}
+            onChange={(e) => setJourneyStatus(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
           >
             <option value="">{t('complete_journeys.filters.all_status')}</option>
-            <option value="on_time">{t('complete_journeys.compliance.on_time')}</option>
-            <option value="warning">{t('complete_journeys.compliance.warning')}</option>
-            <option value="critical">{t('complete_journeys.compliance.critical')}</option>
-            <option value="violated">{t('complete_journeys.compliance.violated')}</option>
-            <option value="no_sla">{t('complete_journeys.compliance.no_sla')}</option>
-            <option value="mixed">{t('complete_journeys.compliance.mixed')}</option>
+            <option value="in_progress">In Progress</option>
+            <option value="completed">Completed</option>
+            <option value="anomalous">Anomalous</option>
+            <option value="stuck">Stuck</option>
           </select>
         </div>
 

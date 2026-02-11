@@ -1,6 +1,7 @@
 import { useTranslation } from '@/hooks/useTranslation';
 import { CompleteJourney } from '@/hooks/useCompleteJourneys';
-import { CheckCircle, AlertTriangle, XCircle, Circle, Layers } from 'lucide-react';
+import { CheckCircle, AlertTriangle, XCircle, Circle, MapPin } from 'lucide-react';
+import { format } from 'date-fns';
 
 interface CompleteJourneysTableProps {
   journeys: CompleteJourney[];
@@ -19,57 +20,58 @@ export function CompleteJourneysTable({
 }: CompleteJourneysTableProps) {
   const { t } = useTranslation();
 
-  const getComplianceIcon = (compliance: string) => {
-    switch (compliance) {
-      case 'on_time':
-        return <CheckCircle className="w-5 h-5 text-green-500" />;
-      case 'warning':
-        return <AlertTriangle className="w-5 h-5 text-yellow-500" />;
-      case 'critical':
-      case 'violated':
-        return <XCircle className="w-5 h-5 text-red-500" />;
-      case 'mixed':
-        return <Layers className="w-5 h-5 text-blue-500" />;
-      default:
-        return <Circle className="w-5 h-5 text-gray-400" />;
+  const getStatusIcon = (status: string, violations: number) => {
+    if (violations === 0) {
+      return <CheckCircle className="w-5 h-5 text-green-500" />;
+    } else if (violations <= 2) {
+      return <AlertTriangle className="w-5 h-5 text-yellow-500" />;
+    } else {
+      return <XCircle className="w-5 h-5 text-red-500" />;
     }
   };
 
-  const getComplianceClass = (compliance: string) => {
-    switch (compliance) {
-      case 'on_time':
-        return 'bg-green-100 text-green-800';
-      case 'warning':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'critical':
-      case 'violated':
-        return 'bg-red-100 text-red-800';
-      case 'mixed':
-        return 'bg-blue-100 text-blue-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
+  const getStatusClass = (status: string, violations: number) => {
+    if (violations === 0) {
+      return 'bg-green-100 text-green-800';
+    } else if (violations <= 2) {
+      return 'bg-yellow-100 text-yellow-800';
+    } else {
+      return 'bg-red-100 text-red-800';
     }
+  };
+
+  const getStatusLabel = (status: string, violations: number) => {
+    if (violations === 0) return t('complete_journeys.compliance.on_time');
+    if (violations <= 2) return t('complete_journeys.compliance.warning');
+    return t('complete_journeys.compliance.critical');
+  };
+
+  const formatDuration = (minutes: number | null) => {
+    if (!minutes) return '-';
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
   };
 
   if (journeys.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
+      <div className="text-center py-12 bg-white rounded-lg shadow">
+        <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-4" />
         <p className="text-gray-500">{t('complete_journeys.table.no_journeys')}</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-      {/* Selection header */}
+    <div className="bg-white rounded-lg shadow overflow-hidden">
       {selectedJourneys.length > 0 && (
-        <div className="bg-purple-50 border-b border-purple-200 px-4 py-2 flex items-center justify-between">
-          <span className="text-sm text-purple-700">
+        <div className="bg-blue-50 px-4 py-3 border-b border-blue-200 flex items-center justify-between">
+          <span className="text-sm text-blue-700">
             {t('complete_journeys.table.selected', { count: selectedJourneys.length })}
           </span>
           <button
             onClick={onClearSelection}
-            className="text-sm text-purple-600 hover:text-purple-800"
+            className="text-sm text-blue-600 hover:text-blue-800 font-medium"
           >
             {t('complete_journeys.table.clear_selection')}
           </button>
@@ -77,95 +79,96 @@ export function CompleteJourneysTable({
       )}
 
       <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-gray-50 border-b border-gray-200">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
             <tr>
-              <th className="px-4 py-3 text-left">
+              <th className="px-6 py-3 text-left">
                 <input
                   type="checkbox"
-                  checked={selectedJourneys.length === journeys.length && journeys.length > 0}
+                  checked={selectedJourneys.length === journeys.length}
                   onChange={onSelectAll}
-                  className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                  className="rounded border-gray-300"
                 />
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {t('complete_journeys.table.tag_id')}
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {t('complete_journeys.table.segments')}
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {t('complete_journeys.table.centers')}
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {t('complete_journeys.table.start_time')}
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {t('complete_journeys.table.total_time')}
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {t('complete_journeys.table.compliance')}
               </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {journeys.map((journey) => (
-              <tr
-                key={journey.id}
-                className={`hover:bg-gray-50 ${
-                  selectedJourneys.includes(journey.id) ? 'bg-purple-50' : ''
-                }`}
-              >
-                <td className="px-4 py-3">
+              <tr key={journey.id} className="hover:bg-gray-50">
+                <td className="px-6 py-4">
                   <input
                     type="checkbox"
-                    checked={selectedJourneys.includes(journey.id)}
-                    onChange={() => onSelectJourney(journey.id)}
-                    className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                    checked={selectedJourneys.includes(journey.tag_id)}
+                    onChange={() => onSelectJourney(journey.tag_id)}
+                    className="rounded border-gray-300"
                   />
                 </td>
-                <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                  {journey.tag_id}
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm font-medium text-gray-900">{journey.tag_id}</div>
+                  {journey.is_missroute && (
+                    <div className="text-xs text-red-600">Missroute</div>
+                  )}
                 </td>
-                <td className="px-4 py-3 text-sm text-gray-600">
-                  <div className="flex flex-col">
-                    <span className="font-medium">{journey.total_segments} total</span>
-                    <span className="text-xs text-gray-500">
-                      {journey.operational_segments} op / {journey.distribution_segments} dist
-                    </span>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-900">{journey.total_segments}</div>
+                  <div className="text-xs text-gray-500">
+                    {journey.on_time_segments} on time
                   </div>
                 </td>
-                <td className="px-4 py-3 text-sm text-gray-600">
-                  <div className="max-w-xs truncate" title={journey.centers_visited.join(' → ')}>
-                    {journey.centers_visited.slice(0, 3).join(' → ')}
-                    {journey.centers_visited.length > 3 && ' ...'}
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-900">{journey.total_centers_visited}</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-900">
+                    {journey.first_event_timestamp
+                      ? format(new Date(journey.first_event_timestamp), 'dd/MM/yyyy HH:mm')
+                      : '-'}
                   </div>
                 </td>
-                <td className="px-4 py-3 text-sm text-gray-600">
-                  {new Date(journey.journey_start_timestamp).toLocaleString()}
-                </td>
-                <td className="px-4 py-3 text-sm text-gray-600">
-                  <div className="flex flex-col">
-                    <span className="font-medium">{journey.total_adjusted_time_minutes} min</span>
-                    <span className="text-xs text-gray-500">
-                      Op: {journey.total_operational_time_minutes} / Dist: {journey.total_distribution_time_minutes}
-                    </span>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-900">
+                    {formatDuration(journey.total_adjusted_time_minutes)}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    Op: {formatDuration(journey.total_operational_time_minutes)} | 
+                    Dist: {formatDuration(journey.total_distribution_time_minutes)}
                   </div>
                 </td>
-                <td className="px-4 py-3">
+                <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center gap-2">
-                    {getComplianceIcon(journey.overall_sla_compliance)}
+                    {getStatusIcon(journey.journey_status, journey.total_sla_violations)}
                     <span
-                      className={`px-2 py-1 text-xs font-medium rounded-full ${getComplianceClass(
-                        journey.overall_sla_compliance
+                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusClass(
+                        journey.journey_status,
+                        journey.total_sla_violations
                       )}`}
                     >
-                      {t(`complete_journeys.compliance.${journey.overall_sla_compliance}`)}
+                      {getStatusLabel(journey.journey_status, journey.total_sla_violations)}
                     </span>
                   </div>
-                  <div className="text-xs text-gray-500 mt-1">
-                    {journey.segments_on_time} OK / {journey.segments_warning} ⚠ / {journey.segments_critical + journey.segments_violated} ✗
-                  </div>
+                  {journey.total_sla_violations > 0 && (
+                    <div className="text-xs text-red-600 mt-1">
+                      {journey.total_sla_violations} violations
+                    </div>
+                  )}
                 </td>
               </tr>
             ))}
