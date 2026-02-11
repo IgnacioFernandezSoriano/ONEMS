@@ -39,6 +39,7 @@ import { PostalCenters } from './pages/PostalCenters'
 import { SLAsConfiguration } from './pages/SLAsConfiguration'
 import { EventConsolidation } from './pages/diagnosis/EventConsolidation'
 import JourneySegments from './pages/diagnosis/JourneySegments'
+import CompleteJourneys from './pages/diagnosis/CompleteJourneys'
 import ProcessedEvents from './pages/ProcessedEvents'
 
 function App() {
@@ -136,6 +137,14 @@ function App() {
                       element={
                         <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
                           <JourneySegments />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/diagnosis/complete-journeys"
+                      element={
+                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                          <CompleteJourneys />
                         </ProtectedRoute>
                       }
                     />

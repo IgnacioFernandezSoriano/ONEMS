@@ -2323,3 +2323,46 @@ journey_segments.compliance.warning,"Warning"
 journey_segments.compliance.critical,"Critical"
 journey_segments.compliance.violated,"Violated"
 journey_segments.compliance.no_sla,"No SLA"
+menu.complete_journeys,Complete Journeys
+complete_journeys.title,Complete Journeys
+complete_journeys.description,Complete journey reconstruction with transit times and SLA compliance
+complete_journeys.run_assembly,Run Assembly
+complete_journeys.assembling,Assembling...
+complete_journeys.export_csv,Export CSV ({count})
+complete_journeys.kpi.total,Total
+complete_journeys.kpi.journeys,Journeys
+complete_journeys.kpi.on_time,On Time
+complete_journeys.kpi.warning,Warning
+complete_journeys.kpi.critical,Critical
+complete_journeys.kpi.avg_time,Average Time
+complete_journeys.kpi.minutes,minutes
+complete_journeys.filters.title,Filters
+complete_journeys.filters.search,Search
+complete_journeys.filters.search_placeholder,Tag ID or Postal Center...
+complete_journeys.filters.sla_compliance,SLA Compliance
+complete_journeys.filters.all_status,All Status
+complete_journeys.filters.min_segments,Min Segments
+complete_journeys.filters.max_segments,Max Segments
+complete_journeys.filters.date_from,Date From
+complete_journeys.filters.date_to,Date To
+complete_journeys.filters.apply,Apply Filters
+complete_journeys.filters.clear,Clear Filters
+complete_journeys.compliance.on_time,On Time
+complete_journeys.compliance.warning,Warning
+complete_journeys.compliance.critical,Critical
+complete_journeys.compliance.violated,Violated
+complete_journeys.compliance.no_sla,No SLA
+complete_journeys.compliance.mixed,Mixed
+complete_journeys.table.no_journeys,No journeys found
+complete_journeys.table.selected,{count} selected
+complete_journeys.table.clear_selection,Clear selection
+complete_journeys.table.tag_id,Tag ID
+complete_journeys.table.segments,Segments
+complete_journeys.table.centers,Centers Visited
+complete_journeys.table.start_time,Start Time
+complete_journeys.table.total_time,Total Time
+complete_journeys.table.compliance,Compliance
+complete_journeys.error_no_account,No account selected
+complete_journeys.assembly_success,Assembly completed: {created} created, {updated} updated in {time}ms
+complete_journeys.assembly_no_data,No data returned from assembly
+complete_journeys.assembly_error,Assembly error: {message}

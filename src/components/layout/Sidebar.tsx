@@ -6,6 +6,7 @@ import { SmartTooltip } from '../common/SmartTooltip'
 import {
   LayoutDashboard,
   Map,
+  Route,
   Truck,
   Package,
   Database,
@@ -298,6 +299,13 @@ export function Sidebar() {
           icon: Map,
           roles: ['admin', 'superadmin'],
           tooltip: t('menu.journey_segments.tooltip'),
+        },
+        {
+          path: '/diagnosis/complete-journeys',
+          label: t('menu.complete_journeys'),
+          icon: Route,
+          roles: ['admin', 'superadmin'],
+          tooltip: t('menu.complete_journeys.tooltip'),
         },
 
         {
