@@ -358,7 +358,7 @@ export default function NodeLoadBalancing() {
                       <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                     </svg>
                     <div className="invisible group-hover:visible absolute z-10 w-72 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg bottom-full left-0 mb-2">
-                      <p className="font-semibold mb-1">Reference Load</p>
+                      <p className="font-semibold mb-1">{t('node_load_balancing.reference_load')}</p>
                       <p className="mb-2">Define el número esperado de samples que cada nodo debería manejar en promedio durante el periodo seleccionado.</p>
                       <p className="mb-2"><strong>Ejemplo:</strong> Si esperas 63 samples por nodo, este será tu valor de referencia.</p>
                       <p>Este valor se usa junto con el % de desviación para clasificar nodos como Normal, High Load o Saturated.</p>
@@ -382,7 +382,7 @@ export default function NodeLoadBalancing() {
                       <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                     </svg>
                     <div className="invisible group-hover:visible absolute z-10 w-72 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg bottom-full left-0 mb-2">
-                      <p className="font-semibold mb-1">Deviation Tolerance</p>
+                      <p className="font-semibold mb-1">{t('node_load_balancing.deviation_tolerance_label')}</p>
                       <p className="mb-2">Porcentaje de desviación aceptable respecto al valor de referencia.</p>
                       <p className="mb-2"><strong>Clasificación:</strong></p>
                       <p className="mb-1">• <strong>Normal:</strong> &lt; Ref × (1 + %)</p>

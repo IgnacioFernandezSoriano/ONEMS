@@ -1,4 +1,27 @@
-key,translation
+account_config.add_holiday,Add Holiday
+account_config.calculation_mode,Calculation Mode
+account_config.calculation_mode_help,Choose how to calculate transit times: natural days (24/7) or working days (excluding non-working hours)
+account_config.confirm_delete_holiday,Are you sure you want to delete this holiday?
+account_config.cutoff,Cut-off
+account_config.description,Configure global settings for your account
+account_config.download_template,Download Template
+account_config.fill_all_fields,Please fill all fields
+account_config.global_settings,Global Settings
+account_config.holiday_reason,Reason (e.g.
+account_config.import_csv,Import CSV
+account_config.imported_successfully,Successfully imported {count} holidays
+account_config.mixed_reader_gap,Mixed Reader Gap (minutes)
+account_config.mixed_reader_gap_help,Time gap to separate entry and exit events for mixed readers
+account_config.natural_days,Natural Days
+account_config.no_holidays,No holidays configured
+account_config.no_valid_holidays,No valid holidays found in CSV
+account_config.non_working_days,Non-Working Days (Holidays)
+account_config.opening,Opening
+account_config.saved_successfully,Configuration saved successfully
+account_config.title,Account Configuration
+account_config.weekly_schedule,Weekly Schedule
+account_config.working_day,Working Day
+account_config.working_days,Working Days
 accounts.account_name,Account Name
 accounts.created,Created
 accounts.name,Name
@@ -448,54 +471,64 @@ common.2nd_semester,2nd Semester
 common.about,About
 common.actions,Actions
 common.active,Active
+common.active_only,Active Only
 common.add_record,Add a record
 common.all,All
 common.all_cities,All Cities
-common.all_cities,All Cities
 common.all_nodes,All Nodes
-common.all_nodes,All Nodes
-common.all_status,All Status
 common.all_status,All Statuses
 common.apply,Apply
 common.available,available
 common.bulk_edit,Bulk Edit
+common.bulk_edit_description,Editing {count} selected records. Leave fields empty to skip.
 common.calculate,Calculate
 common.cancel,Cancel
 common.city,City
 common.clear,Clear
 common.close,Close
-common.collapse_all,Collapse all
+common.collapse_all,Collapse All
 common.confirm,Confirm
 common.confirm_delete,Delete this record?
 common.create,Create
 common.created_successfully,Created successfully
 common.creating,Creating...
+common.cutoff,Cut-off
+common.days,days
 common.delete,Delete
+common.delete_selected,Delete Selected
 common.deleted_successfully,Deleted successfully
+common.deselect_all,Deselect All
 common.download,Download
 common.edit,Edit
 common.end_date,End date
 common.error,Error
-common.expand_all,Expand all
+common.expand_all,Expand All
 common.export,Export
 common.export_csv,Export CSV
 common.export_to_csv,Export to CSV
 common.filters,Filters
 common.first_semester,1st Semester
+common.friday,Friday
 common.generate_plan,Generate Plan
+common.generating,Generating...
 common.hide,Hide
 common.hide_filters,Hide Filters
+common.hours,hours
 common.import,Import
 common.inactive,Inactive
 common.info,Information
 common.information,Information
 common.language,Language
+common.leave_empty_to_skip,Leave empty to skip
 common.loading,Loading...
 common.material,Material
+common.minutes,minutes
+common.monday,Monday
 common.no,No
 common.no_panelist,No Panelist
 common.node,Node
 common.of,of
+common.opening,Opening
 common.pending,Pending
 common.please_select_at_least_one,Please select at least one record
 common.promise,Promise
@@ -504,7 +537,10 @@ common.refresh,Refresh
 common.register,Register
 common.remove,Remove
 common.reset,Reset
+common.reset_filters,Reset Filters
+common.saturday,Saturday
 common.save,Save
+common.saving,Saving...
 common.search,Search
 common.second_semester,2nd Semester
 common.select,Select
@@ -516,14 +552,19 @@ common.sign_out,Sign out
 common.start_date,Start date
 common.status,Status
 common.success,Success
+common.sunday,Sunday
+common.thursday,Thursday
 common.to,To
 common.total,Total
+common.tuesday,Tuesday
 common.type,Type
 common.unavailable,Unavailable
 common.unit,Unit
+common.update,Update
 common.updated_successfully,Updated successfully
 common.updating,Updating...
 common.warning,Warning
+common.wednesday,Wednesday
 common.year,Year
 common.yes,Yes
 countrytopology.all_cities,All Cities
@@ -649,6 +690,7 @@ delivery_standards.clear_all_selections,Clear All Selections
 delivery_standards.confirm_delete,Delete this delivery standard?
 delivery_standards.create_standard,Create Standard
 delivery_standards.created,Delivery standard created successfully
+delivery_standards.critical_percent,Critical %
 delivery_standards.critical_threshold,Critical Threshold
 delivery_standards.days,Days
 delivery_standards.delete_selected,Delete Selected
@@ -666,6 +708,7 @@ delivery_standards.generate_combinations,Generate Combinations
 delivery_standards.generate_delivery_standards,Generate Delivery Standards
 delivery_standards.generation_complete,Generation Complete
 delivery_standards.hours,Hours
+delivery_standards.jk,J+K
 delivery_standards.loading_standards,Loading delivery standards...
 delivery_standards.no_products_for_this_carrier,No products for this carrier
 delivery_standards.origin,Origin
@@ -681,13 +724,16 @@ delivery_standards.select_origin,Select origin
 delivery_standards.select_product,Select product
 delivery_standards.smart_generation,Smart Generation:
 delivery_standards.standard_time,Standard Time
+delivery_standards.std_percent,Std %
 delivery_standards.success,Success %
 delivery_standards.success_percentage,Success %
 delivery_standards.threshold_type,Threshold Type
 delivery_standards.time_unit,Time Unit *
 delivery_standards.title,Delivery Standards
 delivery_standards.tolerance_days,Tolerance Days
+delivery_standards.unit,Unit
 delivery_standards.updated,Delivery standard updated successfully
+delivery_standards.warning_percent,Warning %
 delivery_standards.warning_threshold,Warning Threshold
 deliverystandards.about_delivery_standards,About Delivery Standards
 deliverystandards.absoluto,Absoluto:
@@ -759,6 +805,53 @@ deliverystandards.usage,Usage:
 deliverystandards.warning,Warning %
 deliverystandards.warning_and_critical_deviation_levels_for_performa,Warning and critical deviation levels for performance monitoring
 deliverystandards.warning_threshold,Warning Threshold (%)
+diagnosis.consolidation.actions.create_reader,Create Reader
+diagnosis.consolidation.actions.mark_resolved,Mark as Resolved
+diagnosis.consolidation.actions.reprocess,Reprocess
+diagnosis.consolidation.actions.view_history,View History
+diagnosis.consolidation.columns.description,Description
+diagnosis.consolidation.columns.detected_at,Detected At
+diagnosis.consolidation.columns.incident_type,Type
+diagnosis.consolidation.columns.postal_center,Postal Center
+diagnosis.consolidation.columns.status,Status
+diagnosis.consolidation.columns.tag_id,Tag ID
+diagnosis.consolidation.description,Process raw RFID events and detect system anomalies
+diagnosis.consolidation.details.affected_events,Affected Events
+diagnosis.consolidation.details.created_at,Created At
+diagnosis.consolidation.details.detected_at,Detected At
+diagnosis.consolidation.details.event_id,Event ID
+diagnosis.consolidation.details.event_of,Event {current} of {total}
+diagnosis.consolidation.details.incident_summary,Incident Summary
+diagnosis.consolidation.details.internal_id,Internal ID
+diagnosis.consolidation.details.is_processed,Is Processed
+diagnosis.consolidation.details.no,No
+diagnosis.consolidation.details.no_raw_events,No raw events available
+diagnosis.consolidation.details.quick_actions,Quick Actions
+diagnosis.consolidation.details.raw_events,Raw EPCIS Events
+diagnosis.consolidation.details.read_datetime,Read DateTime
+diagnosis.consolidation.details.reader_code,Reader Code
+diagnosis.consolidation.details.reader_id,Reader ID
+diagnosis.consolidation.details.severity,Severity
+diagnosis.consolidation.details.tag_id_epc,Tag ID (EPC)
+diagnosis.consolidation.details.yes,Yes
+diagnosis.consolidation.error,Consolidation error: {message}
+diagnosis.consolidation.error_no_session,No active session
+diagnosis.consolidation.incident_resolved,Incident marked as resolved successfully
+diagnosis.consolidation.incident_types.data_quality,Data Quality
+diagnosis.consolidation.incident_types.missing_exit,Missing Exit
+diagnosis.consolidation.incident_types.unknown_reader,Unknown Reader
+diagnosis.consolidation.incidents_table_title,Detected Incidents
+diagnosis.consolidation.last_consolidation,Last Consolidation
+diagnosis.consolidation.never,Never
+diagnosis.consolidation.no_incidents,No incidents detected
+diagnosis.consolidation.pending_events,Pending Events
+diagnosis.consolidation.run_button,Run Consolidation
+diagnosis.consolidation.status.pending,Pending
+diagnosis.consolidation.status.resolved,Resolved
+diagnosis.consolidation.success,Consolidation completed: {processed} events processed - {incidents} incidents detected
+diagnosis.consolidation.title,Event Consolidation
+diagnosis.consolidation.total_incidents,Total Incidents
+key,translation
 layout.all_accounts,All Accounts
 layout.sign_out,Sign Out
 layout.view_as_account,View as account:
@@ -899,6 +992,8 @@ materials.select_materials,Select Materials
 materials.selected_materials,Selected Materials
 materials.start_date,Start date
 materials.year,Year
+menu.account_configuration,Account Configuration
+menu.account_configuration.tooltip,Configure account-level settings for diagnostics
 menu.accounts,Accounts
 menu.accounts.tooltip,Manage all accounts in the system
 menu.administration,Administration
@@ -913,10 +1008,14 @@ menu.carriers,Carriers & Products
 menu.carriers.tooltip,Manage carriers and their product catalog
 menu.dashboard,Dashboard
 menu.dashboard.tooltip,Overview of operational metrics and critical alerts
+menu.databases_section,DATA BASES
+menu.databases_section.tooltip,Database management and API access
 menu.delivery_standards,Delivery Standards
 menu.delivery_standards.tooltip,Define expected delivery times and success rates by carrier and product
 menu.demo_reset,Demo Reset
 menu.demo_reset.tooltip,Reset demo account data
+menu.e2e_db,E2E DB
+menu.event_consolidation.tooltip,Process RFID events and detect anomalies
 menu.extract_e2e_db_api,Extract E2E DB API
 menu.extract_e2e_db_api.tooltip,Extract E2E data via REST API
 menu.load_balancing,Load Balancing
@@ -930,11 +1029,13 @@ menu.onedb_api,ONE DB API
 menu.onedb_api.tooltip,Access ONE DB through REST API
 menu.onedb_generator,ONEDB Generator
 menu.onedb_generator.tooltip,Generate receive records for allocation plans
-menu.databases_section,DATA BASES
-menu.databases_section.tooltip,Database management and API access
 menu.overview,Overview
 menu.panelists,Panelists
 menu.panelists.tooltip,Register and manage panelist availability
+menu.postal_centers,Postal Centers
+menu.postal_centers.tooltip,Configure postal centers and RFID readers
+menu.processed_events,Consolidated RFID Events
+menu.processed_events.tooltip,View and analyze processed RFID events
 menu.reporting,Reporting
 menu.reporting_compliance,Compliance
 menu.reporting_compliance.tooltip,Monitor compliance with delivery standards
@@ -946,9 +1047,17 @@ menu.reporting_equity,Territory Equity
 menu.reporting_equity.tooltip,Analyze equity in shipment distribution
 menu.reporting_jk,J+K Performance
 menu.reporting_jk.tooltip,Analyze performance against delivery standards
-menu.e2e_db,E2E DB
 menu.reporting_onedb.tooltip,Complete record of all received shipments
+menu.rfid_events_consolidation,RFID Events Consolidation
+menu.rfid_events_db,RFID Events DB
+menu.rfid_events_db.tooltip,Processed RFID events database with consolidated events
 menu.setup,Setup
+menu.setup_diagnosis,Diagnosis Network
+menu.setup_diagnosis.tooltip,Configure postal network diagnosis settings
+menu.setup_e2e,E2E Network
+menu.setup_e2e.tooltip,Configure E2E monitoring network settings
+menu.slas_configuration,Sites SLA
+menu.slas_configuration.tooltip,Configure Sites SLA
 menu.stock_management,Stock Management
 menu.stock_management.tooltip,Monitor inventory levels and alerts
 menu.superadmin,Superadmin
@@ -987,6 +1096,11 @@ nodeLoadBalancing.stdDevAfter,Standard deviation after
 nodeLoadBalancing.stdDevBefore,Standard deviation before
 nodeLoadBalancing.totalShipments,Total shipments
 nodeLoadBalancing.totalShipmentsDesc,All shipments in the period
+node_load_balancing.deviation_tolerance,Deviation Tolerance (%)
+node_load_balancing.deviation_tolerance_label,Deviation Tolerance
+node_load_balancing.quick_selection,Quick Selection
+node_load_balancing.reference_load,Reference Load
+node_load_balancing.reference_samples_node,Reference Samples/Node
 nodeloadbalancing.acceptable_deviation_from_reference,Acceptable deviation from reference
 nodeloadbalancing.actualiza_fecha_programada_y_node_id_en_allocation,Actualiza fecha_programada y node_id en allocation_plan_details
 nodeloadbalancing.additional_nodes_required,Additional Nodes Required
@@ -1107,7 +1221,6 @@ onedb_api.copy,Copy
 onedb_api.created_at,Created
 onedb_api.credentials_section,API Credentials
 onedb_api.description,"REST API for querying and extracting ONE DB data. Read-only access with date filtering and pagination. Limited to 10,000 records per request and 10 requests per minute."
-onedb_api.description,"REST API for querying and extracting ONE DB data. Read-only access with date filtering and pagination. Limited to 10,000 records per request and 10 requests per minute."
 onedb_api.end_date,End Date
 onedb_api.end_date_desc,End date for filtering records (format: YYYY-MM-DD)
 onedb_api.endpoint_description,Retrieve ONE DB records filtered by date range
@@ -1121,7 +1234,7 @@ onedb_api.generating,Generating...
 onedb_api.last_call,Last API Call
 onedb_api.limit,Limit
 onedb_api.limit_10_per_minute,Limit: 10 per minute
-onedb_api.limit_desc,Maximum number of records to return (default: 100, max: 1000)
+onedb_api.limit_desc,Maximum number of records to return (default: 100
 onedb_api.loading_stats,Loading statistics...
 onedb_api.max_records_note,"Note: The API returns a maximum of 10,000 records total. Use more specific date ranges if you need to access more data."
 onedb_api.never,Never
@@ -1132,7 +1245,7 @@ onedb_api.offset_desc,Number of records to skip for pagination (default: 0)
 onedb_api.parameter,Parameter
 onedb_api.query_parameters,Query Parameters
 onedb_api.rate_limit_info,Rate Limit: 10 requests per minute
-onedb_api.rate_limiting_description,To ensure fair usage and system stability, API requests are rate limited per account.
+onedb_api.rate_limiting_description,To ensure fair usage and system stability
 onedb_api.rate_limiting_title,Rate Limiting
 onedb_api.regenerate_key,Regenerate API Key
 onedb_api.required,Required
@@ -1166,7 +1279,6 @@ panelists.add_unavailability,Add an unavailability period
 panelists.address_line_1,Address Line 1
 panelists.address_line_2,Address Line 2
 panelists.all_cities,All Cities
-panelists.all_in_system,All in system
 panelists.all_in_system,Total in system
 panelists.all_nodes,All Nodes
 panelists.all_panelists,All panelists
@@ -1199,12 +1311,10 @@ panelists.leave_empty_to_auto_generate,Leave empty to auto-generate
 panelists.loading,Loading...
 panelists.loading_panelists,Loading panelists...
 panelists.manage_availability,Manage panelist availability
-panelists.manage_availability,Manage panelist availability
 panelists.manage_panelist_profiles_and_assignments,Manage panelist profiles and assignments
 panelists.manage_panelists_and_their_availability_for_delive,Manage panelists and their availability for deliveries
 panelists.manage_profiles,Manage panelist profiles and assignments
 panelists.manage_unavailability,Manage panelist unavailability periods for automatic sample reassignment
-panelists.management,Panelists Management
 panelists.management,Panelist Management
 panelists.mobile,Mobile
 panelists.name,Name
@@ -1224,7 +1334,6 @@ panelists.personal,Personal
 panelists.postal_code,Postal Code
 panelists.reason,Reason
 panelists.reset_all_filters,Reset all filters
-panelists.search_placeholder,"Search by code, name, email..."
 panelists.search_placeholder,"Search by code, name, email..."
 panelists.search_unavailability_placeholder,Panelist name
 panelists.select_a_node,Select a node
@@ -1273,6 +1382,128 @@ panelistunavailability.tsx.training,Training
 panelistunavailability.tsx.unavailability_periods,Unavailability Periods
 panelistunavailability.tsx.upcoming,Upcoming
 panelistunavailability.tsx.vacation,Vacation
+postal_centers.active_centers,Active Centers
+postal_centers.basic_info,Basic Information
+postal_centers.calculation_mode,Calculation Mode
+postal_centers.center_holidays,Center-Specific Holidays
+postal_centers.code,Code
+postal_centers.configuration,Configuration
+postal_centers.confirm_delete_center,Are you sure you want to delete this postal center? All associated readers will also be deleted.
+postal_centers.create_center,Create Postal Center
+postal_centers.cutoff_time,Cutoff Time
+postal_centers.description,Description
+postal_centers.edit_center,Edit Postal Center
+postal_centers.from_account,From Account
+postal_centers.holiday_reason,Reason
+postal_centers.holidays,Holidays (Non-Working Days)
+postal_centers.holidays_inherited_help,Non-working days are managed at account level and automatically inherited by all postal centers
+postal_centers.hours,Hours
+postal_centers.inherit_from_account,Inherit from Account
+postal_centers.inherited,Inherited
+postal_centers.inherited_from_account,Inherited from Account
+postal_centers.inherited_holidays,Inherited from Account
+postal_centers.inheriting_from_account,Inheriting from account
+postal_centers.is_active,Active
+postal_centers.minutes,minutes
+postal_centers.mixed_reader_gap_help,Time gap to separate entry/exit events in Mixed readers (leave empty to inherit from account)
+postal_centers.mixed_reader_gap_minutes,Mixed Reader Gap (minutes)
+postal_centers.mode,Mode
+postal_centers.name,Name
+postal_centers.natural_days,Natural Days
+postal_centers.no_account_holidays,No holidays defined at account level
+postal_centers.no_center_holidays,No center-specific holidays defined
+postal_centers.no_centers_found,No postal centers found
+postal_centers.opening_hour,Opening Hour
+postal_centers.override,Override
+postal_centers.postal_center,Postal Center
+postal_centers.search_placeholder,Search postal centers or readers...
+postal_centers.specific,Specific
+postal_centers.status,Status
+postal_centers.tab_centers,Centers
+postal_centers.tab_readers,Readers
+postal_centers.title,Postal Centers
+postal_centers.total_centers,Total Centers
+postal_centers.weekly_schedule,Weekly Schedule
+postal_centers.weekly_schedule_help,Customize opening hours for this center or inherit from account configuration
+postal_centers.working_days,Working Days
+processed_events.active,active
+processed_events.adjusted_time,Adjusted Time
+processed_events.all_centers,All Centers
+processed_events.all_pairing,All statuses
+processed_events.all_types,All Types
+processed_events.analysis_time,Analysis Time
+processed_events.avg_adjusted,Avg. Adjusted Time
+processed_events.avg_raw_count,Avg. Raw Count
+processed_events.avg_transit,Average Time
+processed_events.business_hours_avg,business hours average
+processed_events.by_type,By Type
+processed_events.clear_selection,Clear selection
+processed_events.consolidated,Consolidated
+processed_events.consolidated_events,Consolidated events
+processed_events.consolidated_status,Consolidation Status
+processed_events.consolidation_progress,Consolidation progress
+processed_events.date_from,Date From
+processed_events.date_to,Date To
+processed_events.description,View and analyze all successfully processed RFID events
+processed_events.deselect_all,Deselect all
+processed_events.done,Done
+processed_events.entry_reader,Entry Reader
+processed_events.entry_short,Entry
+processed_events.entry_time,Entry Time
+processed_events.error,Error loading events
+processed_events.event_type,Event Type
+processed_events.event_type_tooltip,Event type: ENTRY (entering the center) or EXIT (leaving the center)
+processed_events.event_types,Event types
+processed_events.exit_reader,Exit Reader
+processed_events.exit_short,Exit
+processed_events.exit_time,Exit Time
+processed_events.export_csv,Export CSV
+processed_events.export_selected,Export selected records
+processed_events.filters,Filters
+processed_events.has_pair,Has pair
+processed_events.loading,Loading events...
+processed_events.minutes_avg,minutes average
+processed_events.mixed_short,Mixed
+processed_events.no_pair,No pair
+processed_events.no_records,No consolidated events found
+processed_events.pairing,Pairing
+processed_events.pairing_description,Entry + Exit
+processed_events.pairing_filter,Pairing
+processed_events.pairing_rate,Pairing Rate
+processed_events.pairing_rate_description,% of events with pair
+processed_events.pairing_status,Pairing Status
+processed_events.pairing_tooltip,Indicates if the event has its corresponding pair (entry with exit or vice versa) in the same postal center
+processed_events.pending,Pending
+processed_events.postal_center,Postal Center
+processed_events.postal_center_tooltip,Postal center where the RFID event was registered
+processed_events.processed_events,Processed events
+processed_events.raw_count,Raw Events
+processed_events.raw_count_tooltip,Number of raw reads consolidated into this processed event
+processed_events.raw_events_per_processed,raw events per processed
+processed_events.reader_id,Reader ID
+processed_events.reader_id_tooltip,Code of the RFID reader that detected the tag
+processed_events.reader_type,Reader Type
+processed_events.reader_type_tooltip,Reader type: Entry (only entries)
+processed_events.reader_types,Reader types
+processed_events.reset,Reset
+processed_events.search,Search
+processed_events.search_placeholder,Search by Tag ID
+processed_events.segmentation_description,Journey Segments created
+processed_events.segmentation_status,Segmentation Status
+processed_events.select_all,Select all
+processed_events.selected_of,selected of
+processed_events.showing_records,Showing {filtered} of {total} events
+processed_events.tag_id,Tag ID
+processed_events.tag_id_tooltip,Unique identifier of the RFID tag detected by the reader
+processed_events.timestamp,Timestamp
+processed_events.timestamp_tooltip,Exact date and time when the RFID event was registered
+processed_events.title,Consolidated RFID Events
+processed_events.tooltip,This screen shows all RFID events that have been successfully consolidated. Includes transit information and times adjusted for business hours.
+processed_events.total_events,Total Events
+processed_events.transit_time,Transit Time
+processed_events.type_entry,Entry
+processed_events.type_exit,Exit
+processed_events.type_mixed,Mixed
 productform.cancel,Cancel
 productform.code,Code
 productform.create,Create
@@ -1281,6 +1512,59 @@ productform.saving,Saving...
 productform.standard_delivery_time,Standard delivery time
 productform.time_unit,Time unit
 productform.update,Update
+readers.activate,Activate
+readers.active_readers,Active Readers
+readers.add_first_reader,Add First Reader
+readers.add_new,Add New Reader
+readers.add_reader,Add Reader
+readers.confirm_bulk_delete,Are you sure you want to delete {{count}} readers?
+readers.confirm_delete,Are you sure you want to delete this reader?
+readers.confirm_delete_reader,Are you sure you want to delete this reader?
+readers.create_reader,Create Reader
+readers.deactivate,Deactivate
+readers.description,Description
+readers.edit_reader,Edit Reader
+readers.entry_readers,Entry Readers
+readers.exit_readers,Exit Readers
+readers.filter_by_center,Filter by Postal Center
+readers.filter_by_status,Filter by Status
+readers.filter_by_type,Filter by Type
+readers.from_account,From Account
+readers.gap,Gap
+readers.gap_threshold,Gap Threshold
+readers.inherited,Inherited
+readers.inheriting_from_account,Inheriting from account
+readers.is_active,Active
+readers.minutes,minutes
+readers.mixed_reader_gap_help,Override gap threshold for this reader (leave empty to inherit)
+readers.mixed_reader_gap_minutes,Gap Threshold (minutes)
+readers.mixed_readers,Mixed Readers
+readers.name,Name
+readers.no_readers_found,No readers found
+readers.postal_center,Postal Center
+readers.postal_center_help,Assign this reader to a postal center
+readers.reader,Reader
+readers.reader_id,Reader ID
+readers.reader_id_help,Must match the ReaderId in EPCIS events
+readers.reader_type,Reader Type
+readers.readers,Readers
+readers.search_placeholder,Search by Reader ID or Name
+readers.selected_count,{{count}} selected
+readers.status,Status
+readers.status_active,Active
+readers.status_inactive,Inactive
+readers.status_offline,Offline
+readers.status_unknown,Unknown
+readers.title,Readers
+readers.total_count,Total: {{count}} readers
+readers.total_readers,Total Readers
+readers.type,Type
+readers.type_entry,Entry
+readers.type_entry_help,Uses MIN(timestamp) - earliest reading
+readers.type_exit,Exit
+readers.type_exit_help,Uses MAX(timestamp) - latest reading
+readers.type_mixed,Mixed
+readers.type_mixed_help,Separates entry/exit based on time gap
 receive.description,Generate receive transactions
 receive.generate,Generate
 receive.title,Receive Generator
@@ -1614,6 +1898,51 @@ settings.quarterly,Quarterly
 settings.search_cities,Search cities...
 settings.warning_threshold_must_be_greater_than_critical_th,Warning threshold must be greater than critical threshold
 settings.weekly,Weekly
+slas.active_postal_centers,Active Postal Centers
+slas.all_center_pairs,all center pairs: A→B
+slas.already_exist,already exist
+slas.combinations_generated,Generated {inserted} new SLAs ({skipped} skipped as duplicates)
+slas.create_sla,Create SLA
+slas.critical_threshold,Critical Threshold
+slas.default_values,Default Values
+slas.description,Configure Service Level Agreements for operational and distribution routes
+slas.distribution,Distribution
+slas.distribution_slas_to_generate,Distribution SLAs to generate
+slas.edit_sla,Edit SLA
+slas.expected_time,Expected Time
+slas.from_postal_center,From Postal Center
+slas.from_postal_centers,From Postal Centers
+slas.from_reader,From Reader
+slas.generate_combinations,Generate Combinations
+slas.generate_network_slas,Generate Network SLAs
+slas.generate_pending_slas,Generate Pending SLAs
+slas.generate_selected_slas,Generate Selected SLAs
+slas.network_summary,Network Summary
+slas.on_time_percentage,On-Time %
+slas.one_per_center,one per center: Entry → Exit
+slas.operational,Operational
+slas.operational_combinations_hint,Will generate SLAs for all reader pairs within each selected center
+slas.operational_sla_description,Entry → Exit within this postal center
+slas.operational_slas_to_generate,Operational SLAs to generate
+slas.pending_distribution,Pending Distribution
+slas.pending_operational,Pending Operational
+slas.pending_slas_summary,Pending SLAs Summary
+slas.postal_center,Postal Center
+slas.route,Route
+slas.select_centers_for_operational,Select Centers for Operational SLAs
+slas.select_postal_centers,Select Postal Centers
+slas.select_routes_for_distribution,Select Routes for Distribution SLAs
+slas.select_sla_types,Select SLA Types to Generate
+slas.selected_to_generate,Selected to Generate
+slas.sla_type,SLA Type
+slas.slas_created,SLAs created
+slas.slas_skipped,SLAs skipped
+slas.time_unit,Time Unit
+slas.title,SLAs Configuration
+slas.to_postal_center,To Postal Center
+slas.to_postal_centers,To Postal Centers
+slas.to_reader,To Reader
+slas.warning_threshold,Warning Threshold
 stock.about,About Inventory Management
 stock.about_description,Manage inventory levels and stock alerts
 stock.add_to_stock,Add to Stock
@@ -1913,350 +2242,3 @@ users.password,Password
 users.promise,Promise
 users.role,Role
 users.select_account,Select account
-postal_centers.title,Postal Centers
-postal_centers.description,Configure postal centers and RFID readers for network diagnostics
-postal_centers.create_center,Create Postal Center
-postal_centers.edit_center,Edit Postal Center
-postal_centers.confirm_delete_center,Are you sure you want to delete this postal center? All associated readers will also be deleted.
-postal_centers.no_centers_found,No postal centers found
-postal_centers.total_centers,Total Centers
-postal_centers.active_centers,Active Centers
-postal_centers.code,Code
-postal_centers.name,Name
-postal_centers.description,Description
-postal_centers.opening_hour,Opening Hour
-postal_centers.cutoff_time,Cutoff Time
-postal_centers.calculation_mode,Calculation Mode
-postal_centers.mixed_reader_gap_minutes,Mixed Reader Gap (minutes)
-postal_centers.mixed_reader_gap_help,Time gap to separate entry/exit events in Mixed readers (leave empty to inherit from account)
-postal_centers.is_active,Active
-postal_centers.inherit_from_account,Inherit from Account
-postal_centers.natural_days,Natural Days
-postal_centers.working_days,Working Days
-postal_centers.hours,Hours
-postal_centers.mode,Mode
-postal_centers.status,Status
-postal_centers.search_placeholder,Search postal centers or readers...
-readers.reader,Reader
-readers.readers,Readers
-readers.total_readers,Total Readers
-readers.active_readers,Active Readers
-readers.entry_readers,Entry Readers
-readers.exit_readers,Exit Readers
-readers.mixed_readers,Mixed Readers
-readers.add_reader,Add Reader
-readers.add_first_reader,Add First Reader
-readers.create_reader,Create Reader
-readers.edit_reader,Edit Reader
-readers.confirm_delete_reader,Are you sure you want to delete this reader?
-readers.no_readers_found,No readers found for this postal center
-readers.reader_id,Reader ID
-readers.reader_id_help,Must match the ReaderId in EPCIS events
-readers.name,Name
-readers.description,Description
-readers.type,Type
-readers.reader_type,Reader Type
-readers.type_entry,Entry
-readers.type_exit,Exit
-readers.type_mixed,Mixed
-readers.type_entry_help,Uses MIN(timestamp) - earliest reading
-readers.type_exit_help,Uses MAX(timestamp) - latest reading
-readers.type_mixed_help,Separates entry/exit based on time gap
-readers.mixed_reader_gap_minutes,Gap Threshold (minutes)
-readers.mixed_reader_gap_help,Override gap threshold for this reader (leave empty to inherit)
-readers.is_active,Active
-readers.gap,Gap
-common.minutes,minutes
-common.all,All
-common.active_only,Active Only
-common.expand_all,Expand All
-common.collapse_all,Collapse All
-menu.postal_centers,Postal Centers
-menu.postal_centers.tooltip,Configure postal centers and RFID readers
-menu.account_configuration,Account Configuration
-menu.account_configuration.tooltip,Configure account-level settings for diagnostics
-account_config.title,Account Configuration
-account_config.description,Configure global settings for your account
-account_config.global_settings,Global Settings
-account_config.calculation_mode,Calculation Mode
-account_config.natural_days,Natural Days
-account_config.working_days,Working Days
-account_config.calculation_mode_help,Choose how to calculate transit times: natural days (24/7) or working days (excluding non-working hours)
-account_config.mixed_reader_gap,Mixed Reader Gap (minutes)
-account_config.mixed_reader_gap_help,Time gap to separate entry and exit events for mixed readers
-account_config.non_working_days,Non-Working Days (Holidays)
-account_config.add_holiday,Add Holiday
-account_config.holiday_reason,Reason (e.g., Christmas, New Year)
-account_config.no_holidays,No holidays configured
-account_config.confirm_delete_holiday,Are you sure you want to delete this holiday?
-account_config.weekly_schedule,Weekly Schedule
-account_config.working_day,Working Day
-account_config.saved_successfully,Configuration saved successfully
-account_config.fill_all_fields,Please fill all fields
-account_config.download_template,Download Template
-account_config.import_csv,Import CSV
-account_config.no_valid_holidays,No valid holidays found in CSV
-account_config.imported_successfully,Successfully imported {count} holidays
-account_config.opening,Opening
-account_config.cutoff,Cut-off
-postal_centers.inherited,Inherited
-postal_centers.override,Override
-postal_centers.inheriting_from_account,Inheriting from account
-postal_centers.from_account,from account
-postal_centers.minutes,minutes
-postal_centers.basic_info,Basic Information
-postal_centers.configuration,Configuration
-postal_centers.holidays,Holidays (Non-Working Days)
-postal_centers.inherited_holidays,Inherited from Account
-postal_centers.center_holidays,Center-Specific Holidays
-postal_centers.specific,Specific
-postal_centers.holiday_reason,Reason
-postal_centers.no_account_holidays,No holidays defined at account level
-postal_centers.no_center_holidays,No center-specific holidays defined
-postal_centers.from_account,From Account
-postal_centers.minutes,minutes
-postal_centers.weekly_schedule,Weekly Schedule
-postal_centers.weekly_schedule_help,Customize opening hours for this center or inherit from account configuration
-postal_centers.inherited,Inherited
-postal_centers.holidays_inherited_help,Non-working days are managed at account level and automatically inherited by all postal centers
-postal_centers.inherited_from_account,Inherited from Account
-common.sunday,Sunday
-common.monday,Monday
-common.tuesday,Tuesday
-common.wednesday,Wednesday
-common.thursday,Thursday
-common.friday,Friday
-common.saturday,Saturday
-common.update,Update
-common.opening,Opening
-common.cutoff,Cut-off
-postal_centers.center_holidays,Center-Specific Holidays
-postal_centers.specific,Specific
-postal_centers.holiday_reason,Reason
-postal_centers.no_center_holidays,No center-specific holidays defined
-readers.from_account,From Account
-readers.inheriting_from_account,Inheriting from account
-readers.minutes,minutes
-readers.title,Readers
-readers.add_new,Add New Reader
-readers.total_count,Total: {{count}} readers
-readers.search_placeholder,Search by Reader ID or Name
-readers.filter_by_center,Filter by Postal Center
-readers.filter_by_type,Filter by Type
-readers.filter_by_status,Filter by Status
-readers.postal_center,Postal Center
-readers.postal_center_help,Assign this reader to a postal center
-readers.gap_threshold,Gap Threshold
-readers.status,Status
-readers.status_active,Active
-readers.status_inactive,Inactive
-readers.status_offline,Offline
-readers.status_unknown,Unknown
-readers.selected_count,{{count}} selected
-readers.activate,Activate
-readers.deactivate,Deactivate
-readers.confirm_delete,Are you sure you want to delete this reader?
-readers.confirm_bulk_delete,Are you sure you want to delete {{count}} readers?
-readers.no_readers_found,No readers found
-readers.inherited,Inherited
-postal_centers.tab_centers,Centers
-postal_centers.tab_readers,Readers
-common.reset_filters,Reset Filters
-slas.title,SLAs Configuration
-slas.description,Configure Service Level Agreements for operational and distribution routes
-slas.create_sla,Create SLA
-slas.generate_combinations,Generate Combinations
-slas.sla_type,SLA Type
-slas.operational,Operational
-slas.distribution,Distribution
-slas.route,Route
-slas.expected_time,Expected Time
-slas.on_time_percentage,On-Time %
-slas.warning_threshold,Warning Threshold
-slas.critical_threshold,Critical Threshold
-slas.postal_center,Postal Center
-slas.from_reader,From Reader
-slas.to_reader,To Reader
-slas.from_postal_center,From Postal Center
-slas.to_postal_center,To Postal Center
-slas.time_unit,Time Unit
-slas.select_postal_centers,Select Postal Centers
-slas.operational_combinations_hint,Will generate SLAs for all reader pairs within each selected center
-slas.from_postal_centers,From Postal Centers
-slas.to_postal_centers,To Postal Centers
-slas.default_values,Default Values
-slas.combinations_generated,Generated {inserted} new SLAs ({skipped} skipped as duplicates)
-menu.slas_configuration,Sites SLA
-menu.slas_configuration.tooltip,Configure Sites SLA
-slas.generate_network_slas,Generate Network SLAs
-slas.network_summary,Network Summary
-slas.active_postal_centers,Active Postal Centers
-slas.operational_slas_to_generate,Operational SLAs to generate
-slas.distribution_slas_to_generate,Distribution SLAs to generate
-slas.one_per_center,one per center: Entry → Exit
-slas.all_center_pairs,all center pairs: A→B
-slas.slas_created,SLAs created
-slas.slas_skipped,SLAs skipped
-slas.already_exist,already exist
-slas.operational_sla_description,Entry → Exit within this postal center
-common.generating,Generating...
-common.bulk_edit,Bulk Edit
-common.bulk_edit_description,Editing {count} selected records. Leave fields empty to skip.
-common.leave_empty_to_skip,Leave empty to skip
-common.days,days
-slas.edit_sla,Edit SLA
-common.edit,Edit
-common.saving,Saving...
-common.hours,hours
-postal_centers.postal_center,Postal Center
-slas.generate_pending_slas,Generate Pending SLAs
-slas.pending_slas_summary,Pending SLAs Summary
-slas.pending_operational,Pending Operational
-slas.pending_distribution,Pending Distribution
-slas.selected_to_generate,Selected to Generate
-slas.select_sla_types,Select SLA Types to Generate
-slas.select_centers_for_operational,Select Centers for Operational SLAs
-slas.select_routes_for_distribution,Select Routes for Distribution SLAs
-slas.generate_selected_slas,Generate Selected SLAs
-common.select_all,Select All
-common.deselect_all,Deselect All
-common.show_filters,Show Filters
-common.hide_filters,Hide Filters
-common.delete_selected,Delete Selected
-common.export_csv,Export CSV
-menu.setup_e2e,E2E Network
-menu.setup_e2e.tooltip,Configure E2E monitoring network settings
-menu.setup_diagnosis,Diagnosis Network
-menu.setup_diagnosis.tooltip,Configure postal network diagnosis settings
-diagnosis.consolidation.title,Event Consolidation
-diagnosis.consolidation.description,Process raw RFID events and detect system anomalies
-diagnosis.consolidation.run_button,Run Consolidation
-diagnosis.consolidation.pending_events,Pending Events
-diagnosis.consolidation.total_incidents,Total Incidents
-diagnosis.consolidation.last_consolidation,Last Consolidation
-diagnosis.consolidation.never,Never
-diagnosis.consolidation.incidents_table_title,Detected Incidents
-diagnosis.consolidation.no_incidents,No incidents detected
-diagnosis.consolidation.success,Consolidation completed: {processed} events processed - {incidents} incidents detected
-diagnosis.consolidation.error,Consolidation error: {message}
-diagnosis.consolidation.error_no_session,No active session
-diagnosis.consolidation.columns.tag_id,Tag ID
-diagnosis.consolidation.columns.incident_type,Type
-diagnosis.consolidation.columns.postal_center,Postal Center
-diagnosis.consolidation.columns.description,Description
-diagnosis.consolidation.columns.detected_at,Detected At
-diagnosis.consolidation.columns.status,Status
-diagnosis.consolidation.incident_types.missing_exit,Missing Exit
-diagnosis.consolidation.incident_types.unknown_reader,Unknown Reader
-diagnosis.consolidation.incident_types.data_quality,Data Quality
-diagnosis.consolidation.status.resolved,Resolved
-diagnosis.consolidation.status.pending,Pending
-menu.rfid_events_consolidation,RFID Events Consolidation
-menu.event_consolidation.tooltip,Process RFID events and detect anomalies
-diagnosis.consolidation.details.affected_events,Affected Events
-diagnosis.consolidation.details.reader_code,Reader Code
-diagnosis.consolidation.details.severity,Severity
-diagnosis.consolidation.details.detected_at,Detected At
-diagnosis.consolidation.details.raw_events,Raw EPCIS Events
-diagnosis.consolidation.details.no_raw_events,No raw events available
-diagnosis.consolidation.details.quick_actions,Quick Actions
-diagnosis.consolidation.details.event_of,Event {current} of {total}
-diagnosis.consolidation.details.event_id,Event ID
-diagnosis.consolidation.details.tag_id_epc,Tag ID (EPC)
-diagnosis.consolidation.details.reader_id,Reader ID
-diagnosis.consolidation.details.read_datetime,Read DateTime
-diagnosis.consolidation.details.created_at,Created At
-diagnosis.consolidation.details.is_processed,Is Processed
-diagnosis.consolidation.details.internal_id,Internal ID
-diagnosis.consolidation.details.yes,Yes
-diagnosis.consolidation.details.no,No
-diagnosis.consolidation.actions.create_reader,Create Reader
-diagnosis.consolidation.actions.mark_resolved,Mark as Resolved
-diagnosis.consolidation.actions.reprocess,Reprocess
-diagnosis.consolidation.actions.view_history,View History
-diagnosis.consolidation.incident_resolved,Incident marked as resolved successfully
-diagnosis.consolidation.details.incident_summary,Incident Summary
-processed_events.title,Consolidated RFID Events
-processed_events.description,View and analyze all successfully processed RFID events
-processed_events.tooltip,This screen shows all RFID events that have been successfully consolidated. Includes transit information and times adjusted for business hours.
-processed_events.loading,Loading events...
-processed_events.error,Error loading events
-processed_events.filters,Filters
-processed_events.active,active
-processed_events.reset,Reset
-processed_events.search,Search
-processed_events.search_placeholder,Search by Tag ID, reader, postal center...
-processed_events.postal_center,Postal Center
-processed_events.all_centers,All Centers
-processed_events.reader_type,Reader Type
-processed_events.all_types,All Types
-processed_events.type_entry,Entry
-processed_events.type_exit,Exit
-processed_events.type_mixed,Mixed
-processed_events.date_from,Date From
-processed_events.date_to,Date To
-processed_events.tag_id,Tag ID
-processed_events.entry_reader,Entry Reader
-processed_events.exit_reader,Exit Reader
-processed_events.entry_time,Entry Time
-processed_events.exit_time,Exit Time
-processed_events.transit_time,Transit Time
-processed_events.adjusted_time,Adjusted Time
-processed_events.no_records,No consolidated events found
-processed_events.select_all,Select all
-processed_events.deselect_all,Deselect all
-processed_events.selected_of,selected of
-processed_events.export_csv,Export CSV
-processed_events.export_selected,Export selected records
-processed_events.clear_selection,Clear selection
-processed_events.total_events,Total Events
-processed_events.consolidated_events,Consolidated events
-processed_events.processed_events,Processed events
-processed_events.event_type,Event Type
-processed_events.reader_id,Reader ID
-processed_events.timestamp,Timestamp
-processed_events.analysis_time,Analysis Time
-processed_events.consolidated,Consolidated
-processed_events.raw_count,Raw Events
-processed_events.event_types,Event types
-processed_events.consolidated_status,Consolidation Status
-processed_events.done,Done
-processed_events.pending,Pending
-processed_events.consolidation_progress,Consolidation progress
-processed_events.avg_raw_count,Avg. Raw Count
-processed_events.raw_events_per_processed,raw events per processed
-processed_events.by_type,By Type
-processed_events.entry_short,Entry
-processed_events.exit_short,Exit
-processed_events.mixed_short,Mixed
-processed_events.reader_types,Reader types
-processed_events.avg_transit,Average Time
-processed_events.minutes_avg,minutes average
-processed_events.avg_adjusted,Avg. Adjusted Time
-processed_events.business_hours_avg,business hours average
-processed_events.showing_records,Showing {filtered} of {total} events
-menu.processed_events,Consolidated RFID Events
-menu.processed_events.tooltip,View and analyze processed RFID events
-menu.rfid_events_db,RFID Events DB
-menu.rfid_events_db.tooltip,Processed RFID events database with consolidated events
-processed_events.pairing,Pairing
-processed_events.pairing_tooltip,Indicates if the event has its corresponding pair (entry with exit or vice versa) in the same postal center
-processed_events.tag_id_tooltip,Unique identifier of the RFID tag detected by the reader
-processed_events.postal_center_tooltip,Postal center where the RFID event was registered
-processed_events.event_type_tooltip,Event type: ENTRY (entering the center) or EXIT (leaving the center)
-processed_events.reader_id_tooltip,Code of the RFID reader that detected the tag
-processed_events.reader_type_tooltip,Reader type: Entry (only entries), Exit (only exits), or Mixed (both)
-processed_events.timestamp_tooltip,Exact date and time when the RFID event was registered
-processed_events.raw_count_tooltip,Number of raw reads consolidated into this processed event
-processed_events.has_pair,Has pair
-processed_events.no_pair,No pair
-processed_events.pairing_status,Pairing Status
-processed_events.pairing_description,Entry + Exit
-processed_events.segmentation_status,Segmentation Status
-processed_events.segmentation_description,Journey Segments created
-processed_events.done,Done
-processed_events.pending,Pending
-processed_events.pairing_rate,Pairing Rate
-processed_events.pairing_rate_description,% of events with pair
-processed_events.pairing_filter,Pairing
-processed_events.all_pairing,All statuses
