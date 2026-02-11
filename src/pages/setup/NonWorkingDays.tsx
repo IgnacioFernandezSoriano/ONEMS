@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useNonWorkingDays } from '@/hooks/useNonWorkingDays';
+import { usePostalCenters } from '@/hooks/usePostalCenters';
 import { Calendar, Plus, Edit, Trash2, Save, X } from 'lucide-react';
 
 export default function NonWorkingDays() {
@@ -14,37 +15,48 @@ export default function NonWorkingDays() {
     deleteNonWorkingDay,
   } = useNonWorkingDays();
 
+  const { postalCenters } = usePostalCenters();
+
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     date: '',
-    name: '',
-    description: '',
-    applies_to_all_centers: true,
-    day_type: 'holiday',
-    is_recurring: false,
+    reason: '',
+    type: 'holiday',
+    postal_center_id: null as string | null,
   });
 
+  const resetForm = () => {
+    setFormData({
+      date: '',
+      reason: '',
+      type: 'holiday',
+      postal_center_id: null,
+    });
+  };
+
   const handleSave = async () => {
-    if (editingId) {
-      await updateNonWorkingDay(editingId, formData);
-    } else {
-      await createNonWorkingDay(formData);
+    try {
+      if (editingId) {
+        await updateNonWorkingDay(editingId, formData);
+      } else {
+        await createNonWorkingDay(formData);
+      }
+      setIsEditing(false);
+      setEditingId(null);
+      resetForm();
+    } catch (err) {
+      console.error('Error saving non-working day:', err);
     }
-    setIsEditing(false);
-    setEditingId(null);
-    resetForm();
   };
 
   const handleEdit = (day: any) => {
     setEditingId(day.id);
     setFormData({
       date: day.date,
-      name: day.name,
-      description: day.description || '',
-      applies_to_all_centers: day.applies_to_all_centers,
-      day_type: day.day_type,
-      is_recurring: day.is_recurring,
+      reason: day.reason,
+      type: day.type,
+      postal_center_id: day.postal_center_id,
     });
     setIsEditing(true);
   };
@@ -55,231 +67,212 @@ export default function NonWorkingDays() {
     }
   };
 
-  const resetForm = () => {
-    setFormData({
-      date: '',
-      name: '',
-      description: '',
-      applies_to_all_centers: true,
-      day_type: 'holiday',
-      is_recurring: false,
-    });
+  const handleCancel = () => {
+    setIsEditing(false);
+    setEditingId(null);
+    resetForm();
   };
 
   if (loading) {
-    return <div className="flex items-center justify-center h-64">{t('common.loading')}</div>;
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-gray-500">{t('common.loading')}</div>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="p-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="p-3 bg-green-100 rounded-lg">
-            <Calendar className="w-6 h-6 text-green-600" />
-          </div>
+          <Calendar className="w-8 h-8 text-purple-600" />
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">{t('non_working_days.title')}</h1>
-            <p className="text-sm text-gray-600">{t('non_working_days.description')}</p>
+            <h1 className="text-2xl font-bold text-gray-900">
+              {t('non_working_days.title')}
+            </h1>
+            <p className="text-sm text-gray-500">
+              {t('non_working_days.description')}
+            </p>
           </div>
         </div>
         <button
           onClick={() => setIsEditing(true)}
-          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
+          className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
         >
-          <Plus className="w-4 h-4" />
-          {t('non_working_days.add_day')}
+          <Plus className="w-5 h-5" />
+          {t('non_working_days.add')}
         </button>
       </div>
 
+      {/* Error */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">{error}</div>
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+          {error}
+        </div>
       )}
 
-      {/* Non-Working Days Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
+      {/* Form */}
+      {isEditing && (
+        <div className="mb-6 p-6 bg-white border border-gray-200 rounded-lg">
+          <h3 className="text-lg font-semibold mb-4">
+            {editingId ? t('non_working_days.edit') : t('non_working_days.add')}
+          </h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t('non_working_days.date')}
+              </label>
+              <input
+                type="date"
+                value={formData.date}
+                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t('non_working_days.type')}
+              </label>
+              <select
+                value={formData.type}
+                onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              >
+                <option value="holiday">{t('non_working_days.type_holiday')}</option>
+                <option value="closure">{t('non_working_days.type_closure')}</option>
+                <option value="maintenance">{t('non_working_days.type_maintenance')}</option>
+              </select>
+            </div>
+            <div className="col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t('non_working_days.reason')}
+              </label>
+              <input
+                type="text"
+                value={formData.reason}
+                onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                placeholder={t('non_working_days.reason_placeholder')}
+              />
+            </div>
+            <div className="col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t('non_working_days.postal_center')}
+              </label>
+              <select
+                value={formData.postal_center_id || ''}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    postal_center_id: e.target.value || null,
+                  })
+                }
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              >
+                <option value="">{t('non_working_days.all_centers')}</option>
+                {postalCenters.map((center) => (
+                  <option key={center.id} value={center.id}>
+                    {center.code} - {center.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="flex gap-2 mt-4">
+            <button
+              onClick={handleSave}
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+            >
+              <Save className="w-4 h-4" />
+              {t('common.save')}
+            </button>
+            <button
+              onClick={handleCancel}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+            >
+              <X className="w-4 h-4" />
+              {t('common.cancel')}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Table */}
+      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+        <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                {t('non_working_days.table.date')}
+                {t('non_working_days.date')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                {t('non_working_days.table.name')}
+                {t('non_working_days.reason')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                {t('non_working_days.table.type')}
+                {t('non_working_days.type')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                {t('non_working_days.table.scope')}
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                {t('non_working_days.table.recurring')}
+                {t('non_working_days.postal_center')}
               </th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
                 {t('common.actions')}
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {nonWorkingDays.map((day) => (
-              <tr key={day.id}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{day.date}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{day.name}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  <span
-                    className={`px-2 py-1 rounded-full text-xs ${
-                      day.day_type === 'holiday'
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
-                    }`}
-                  >
-                    {day.day_type}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {day.applies_to_all_centers ? t('non_working_days.all_centers') : t('non_working_days.specific_centers')}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {day.is_recurring ? t('common.yes') : t('common.no')}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <button
-                    onClick={() => handleEdit(day)}
-                    className="text-blue-600 hover:text-blue-900 mr-4"
-                  >
-                    <Edit className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(day.id)}
-                    className="text-red-600 hover:text-red-900"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+          <tbody className="divide-y divide-gray-200">
+            {nonWorkingDays.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                  {t('non_working_days.no_data')}
                 </td>
               </tr>
-            ))}
+            ) : (
+              nonWorkingDays.map((day) => (
+                <tr key={day.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {new Date(day.date).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-900">{day.reason}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs ${
+                        day.type === 'holiday'
+                          ? 'bg-blue-100 text-blue-800'
+                          : day.type === 'closure'
+                          ? 'bg-red-100 text-red-800'
+                          : 'bg-yellow-100 text-yellow-800'
+                      }`}
+                    >
+                      {t(`non_working_days.type_${day.type}`)}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-500">
+                    {day.postal_center_id
+                      ? postalCenters.find((c) => c.id === day.postal_center_id)?.name ||
+                        day.postal_center_id
+                      : t('non_working_days.all_centers')}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <button
+                      onClick={() => handleEdit(day)}
+                      className="text-purple-600 hover:text-purple-900 mr-3"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(day.id)}
+                      className="text-red-600 hover:text-red-900"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
-
-      {/* Edit Modal */}
-      {isEditing && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
-            <h2 className="text-xl font-bold mb-4">
-              {editingId ? t('non_working_days.edit_day') : t('non_working_days.add_day')}
-            </h2>
-
-            <div className="space-y-4">
-              {/* Date */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('non_working_days.form.date')}
-                </label>
-                <input
-                  type="date"
-                  value={formData.date}
-                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                />
-              </div>
-
-              {/* Name */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('non_working_days.form.name')}
-                </label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder={t('non_working_days.form.name_placeholder')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                />
-              </div>
-
-              {/* Description */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('non_working_days.form.description')}
-                </label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                  rows={3}
-                />
-              </div>
-
-              {/* Type */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('non_working_days.form.type')}
-                </label>
-                <select
-                  value={formData.day_type}
-                  onChange={(e) => setFormData({ ...formData, day_type: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                >
-                  <option value="holiday">Holiday</option>
-                  <option value="closure">Closure</option>
-                  <option value="maintenance">Maintenance</option>
-                </select>
-              </div>
-
-              {/* Applies to all centers */}
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={formData.applies_to_all_centers}
-                  onChange={(e) =>
-                    setFormData({ ...formData, applies_to_all_centers: e.target.checked })
-                  }
-                  className="mr-2"
-                />
-                <label className="text-sm font-medium text-gray-700">
-                  {t('non_working_days.form.applies_to_all')}
-                </label>
-              </div>
-
-              {/* Recurring */}
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={formData.is_recurring}
-                  onChange={(e) => setFormData({ ...formData, is_recurring: e.target.checked })}
-                  className="mr-2"
-                />
-                <label className="text-sm font-medium text-gray-700">
-                  {t('non_working_days.form.recurring')}
-                </label>
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-2 mt-6">
-              <button
-                onClick={() => {
-                  setIsEditing(false);
-                  setEditingId(null);
-                  resetForm();
-                }}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 flex items-center gap-2"
-              >
-                <X className="w-4 h-4" />
-                {t('common.cancel')}
-              </button>
-              <button
-                onClick={handleSave}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
-              >
-                <Save className="w-4 h-4" />
-                {t('common.save')}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

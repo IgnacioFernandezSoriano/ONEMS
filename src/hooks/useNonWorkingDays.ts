@@ -2,19 +2,16 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId';
 
+// Existing table structure: id, account_id, postal_center_id, date, reason, type, created_at, created_by
 export interface NonWorkingDay {
   id: number;
   account_id: string;
+  postal_center_id: string | null;
   date: string;
-  name: string;
-  description?: string;
-  applies_to_all_centers: boolean;
-  postal_center_ids?: string[];
-  day_type: string;
-  is_recurring: boolean;
-  recurrence_pattern?: string;
+  reason: string;
+  type: string;
   created_at: string;
-  updated_at: string;
+  created_by: string | null;
 }
 
 export function useNonWorkingDays() {
@@ -32,7 +29,7 @@ export function useNonWorkingDays() {
         .from('non_working_days')
         .select('*')
         .eq('account_id', accountId)
-        .order('date', { ascending: true });
+        .order('date', { ascending: false });
 
       if (fetchError) throw fetchError;
 
@@ -70,10 +67,7 @@ export function useNonWorkingDays() {
     try {
       const { error: updateError } = await supabase
         .from('non_working_days')
-        .update({
-          ...data,
-          updated_at: new Date().toISOString(),
-        })
+        .update(data)
         .eq('id', id);
 
       if (updateError) throw updateError;
