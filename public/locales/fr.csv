@@ -497,6 +497,7 @@ common.days,jours
 common.delete,Supprimer
 common.delete_selected,Supprimer la Sélection
 common.deleted_successfully,Supprimé avec succès
+common.description,Description
 common.deselect_all,Tout Désélectionner
 common.download,Télécharger
 common.edit,Modifier
@@ -534,6 +535,7 @@ common.please_select_at_least_one,Veuillez sélectionner au moins un enregistrem
 common.promise,Promesse
 common.records,enregistrements
 common.refresh,Actualiser
+common.region,Région
 common.register,Enregistrer
 common.remove,Retirer
 common.reset,Réinitialiser

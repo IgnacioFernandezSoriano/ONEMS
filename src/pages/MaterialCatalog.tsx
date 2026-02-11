@@ -108,13 +108,13 @@ export function MaterialCatalogPage() {
                     }
                     className="text-blue-600 hover:text-blue-900 mr-4"
                   >
-                    Edit
+                    {t("common.edit")}
                   </button>
                   <button
                     onClick={() => handleDelete(material.id, material.name)}
                     className="text-red-600 hover:text-red-900"
                   >
-                    Delete
+                    {t("common.delete")}
                   </button>
                 </td>
               </tr>

@@ -810,7 +810,7 @@ export function AllocationPlans() {
                     <SortableHeader field="destStatus" label={t('allocation_plans.dest_status')} sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="Destination panelist availability: Available, Unavailable (not available on date), No Panelist (no panelist), or Inactive." />
                     <SortableHeader field="status" label={t('common.status')} sortField={sortField} sortDirection={sortDirection} onSort={handleSort} tooltip="Shipment status: Pending (not started), Notified, Sent (dispatched), Received (delivered), Cancelled, Invalid, or Transfer Error." />
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Actions
+                      {t("common.actions")}
                     </th>
                   </tr>
                 </thead>

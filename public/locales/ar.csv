@@ -497,6 +497,7 @@ common.days,أيام
 common.delete,حذف
 common.delete_selected,حذف المحدد
 common.deleted_successfully,تم الحذف بنجاح
+common.description,الوصف
 common.deselect_all,إلغاء تحديد الكل
 common.download,تحميل
 common.edit,تعديل
@@ -534,6 +535,7 @@ common.please_select_at_least_one,يرجى تحديد سجل واحد على ا�
 common.promise,وعد
 common.records,السجلات
 common.refresh,تحديث
+common.region,المنطقة
 common.register,تسجيل
 common.remove,إزالة
 common.reset,إعادة تعيين
