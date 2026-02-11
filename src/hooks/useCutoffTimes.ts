@@ -3,18 +3,15 @@ import { supabase } from '@/lib/supabase';
 import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId';
 
 export interface CutoffTime {
-  id: number;
-  account_id: string;
+  id: string;
   postal_center_id: string;
-  postal_center_code?: string;
+  postal_center_code: string;
+  postal_center_name: string;
   cutoff_time: string;
-  timezone: string;
-  working_hours_start: string;
+  opening_hour: string;
   working_hours_end: string;
-  working_days: number[];
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
+  working_days: string[];
+  timezone: string;
 }
 
 export function useCutoffTimes() {
@@ -29,22 +26,25 @@ export function useCutoffTimes() {
     try {
       setLoading(true);
       const { data, error: fetchError } = await supabase
-        .from('postal_center_cutoffs')
-        .select(`
-          *,
-          postal_centers!postal_center_cutoffs_postal_center_id_fkey (
-            code
-          )
-        `)
+        .from('postal_centers')
+        .select('id, code, name, cutoff_time, opening_hour, working_hours_end, working_days, timezone')
         .eq('account_id', accountId)
-        .order('created_at', { ascending: false });
+        .is('deleted_at', null)
+        .order('code');
 
       if (fetchError) throw fetchError;
 
-      const formatted = data?.map((item: any) => ({
-        ...item,
-        postal_center_code: item.postal_centers?.code,
-      })) || [];
+      const formatted: CutoffTime[] = (data || []).map(pc => ({
+        id: pc.id,
+        postal_center_id: pc.id,
+        postal_center_code: pc.code,
+        postal_center_name: pc.name,
+        cutoff_time: pc.cutoff_time || '18:00:00',
+        opening_hour: pc.opening_hour || '09:00:00',
+        working_hours_end: pc.working_hours_end || '18:00:00',
+        working_days: pc.working_days || ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+        timezone: pc.timezone || 'UTC',
+      }));
 
       setCutoffs(formatted);
       setError(null);
@@ -56,53 +56,22 @@ export function useCutoffTimes() {
     }
   };
 
-  const createCutoff = async (data: Partial<CutoffTime>) => {
-    if (!accountId) return;
-
-    try {
-      const { error: insertError } = await supabase
-        .from('postal_center_cutoffs')
-        .insert({
-          ...data,
-          account_id: accountId,
-        });
-
-      if (insertError) throw insertError;
-
-      await fetchCutoffs();
-    } catch (err: any) {
-      setError(err.message);
-      throw err;
-    }
-  };
-
-  const updateCutoff = async (id: number, data: Partial<CutoffTime>) => {
+  const updateCutoff = async (postalCenterId: string, updates: Partial<CutoffTime>) => {
     try {
       const { error: updateError } = await supabase
-        .from('postal_center_cutoffs')
+        .from('postal_centers')
         .update({
-          ...data,
+          cutoff_time: updates.cutoff_time,
+          opening_hour: updates.opening_hour,
+          working_hours_end: updates.working_hours_end,
+          working_days: updates.working_days,
+          timezone: updates.timezone,
           updated_at: new Date().toISOString(),
         })
-        .eq('id', id);
+        .eq('id', postalCenterId)
+        .eq('account_id', accountId);
 
       if (updateError) throw updateError;
-
-      await fetchCutoffs();
-    } catch (err: any) {
-      setError(err.message);
-      throw err;
-    }
-  };
-
-  const deleteCutoff = async (id: number) => {
-    try {
-      const { error: deleteError } = await supabase
-        .from('postal_center_cutoffs')
-        .delete()
-        .eq('id', id);
-
-      if (deleteError) throw deleteError;
 
       await fetchCutoffs();
     } catch (err: any) {
@@ -119,9 +88,7 @@ export function useCutoffTimes() {
     cutoffs,
     loading,
     error,
-    createCutoff,
     updateCutoff,
-    deleteCutoff,
     refetch: fetchCutoffs,
   };
 }

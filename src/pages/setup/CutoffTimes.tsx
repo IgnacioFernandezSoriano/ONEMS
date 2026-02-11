@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
-import { useCutoffTimes } from '@/hooks/useCutoffTimes';
-import { Clock, Plus, Edit, Trash2, Save, X } from 'lucide-react';
-import { SmartTooltip } from '@/components/common/SmartTooltip';
+import { useCutoffTimes, CutoffTime } from '@/hooks/useCutoffTimes';
+import { Clock, Edit, Save, X } from 'lucide-react';
 
 export default function CutoffTimes() {
   const { t } = useTranslation();
@@ -10,71 +9,50 @@ export default function CutoffTimes() {
     cutoffs,
     loading,
     error,
-    createCutoff,
     updateCutoff,
-    deleteCutoff,
   } = useCutoffTimes();
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [formData, setFormData] = useState({
-    postal_center_id: '',
-    cutoff_time: '18:00',
-    timezone: 'UTC',
-    working_hours_start: '09:00',
-    working_hours_end: '18:00',
-    working_days: [1, 2, 3, 4, 5],
-  });
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [formData, setFormData] = useState<Partial<CutoffTime>>({});
+
+  const handleEdit = (cutoff: CutoffTime) => {
+    setEditingId(cutoff.id);
+    setFormData({
+      cutoff_time: cutoff.cutoff_time,
+      opening_hour: cutoff.opening_hour,
+      working_hours_end: cutoff.working_hours_end,
+      working_days: cutoff.working_days,
+      timezone: cutoff.timezone,
+    });
+  };
 
   const handleSave = async () => {
     if (editingId) {
       await updateCutoff(editingId, formData);
-    } else {
-      await createCutoff(formData);
+      setEditingId(null);
+      setFormData({});
     }
-    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
     setEditingId(null);
-    resetForm();
+    setFormData({});
   };
 
-  const handleEdit = (cutoff: any) => {
-    setEditingId(cutoff.id);
-    setFormData({
-      postal_center_id: cutoff.postal_center_id,
-      cutoff_time: cutoff.cutoff_time,
-      timezone: cutoff.timezone,
-      working_hours_start: cutoff.working_hours_start,
-      working_hours_end: cutoff.working_hours_end,
-      working_days: cutoff.working_days,
-    });
-    setIsEditing(true);
-  };
-
-  const handleDelete = async (id: number) => {
-    if (confirm(t('cutoff_times.confirm_delete'))) {
-      await deleteCutoff(id);
-    }
-  };
-
-  const resetForm = () => {
-    setFormData({
-      postal_center_id: '',
-      cutoff_time: '18:00',
-      timezone: 'UTC',
-      working_hours_start: '09:00',
-      working_hours_end: '18:00',
-      working_days: [1, 2, 3, 4, 5],
+  const toggleWorkingDay = (day: string) => {
+    setFormData((prev) => {
+      const days = prev.working_days || [];
+      return {
+        ...prev,
+        working_days: days.includes(day)
+          ? days.filter((d) => d !== day)
+          : [...days, day],
+      };
     });
   };
 
-  const toggleWorkingDay = (day: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      working_days: prev.working_days.includes(day)
-        ? prev.working_days.filter((d) => d !== day)
-        : [...prev.working_days, day].sort(),
-    }));
-  };
+  const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const dayAbbr = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
   if (loading) {
     return <div className="flex items-center justify-center h-64">{t('common.loading')}</div>;
@@ -83,23 +61,14 @@ export default function CutoffTimes() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-3 bg-blue-100 rounded-lg">
-            <Clock className="w-6 h-6 text-blue-600" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">{t('cutoff_times.title')}</h1>
-            <p className="text-sm text-gray-600">{t('cutoff_times.description')}</p>
-          </div>
+      <div className="flex items-center gap-3">
+        <div className="p-3 bg-blue-100 rounded-lg">
+          <Clock className="w-6 h-6 text-blue-600" />
         </div>
-        <button
-          onClick={() => setIsEditing(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
-        >
-          <Plus className="w-4 h-4" />
-          {t('cutoff_times.add_cutoff')}
-        </button>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">{t('cutoff_times.title')}</h1>
+          <p className="text-sm text-gray-600">{t('cutoff_times.description')}</p>
+        </div>
       </div>
 
       {error && (
@@ -134,17 +103,18 @@ export default function CutoffTimes() {
           <tbody className="bg-white divide-y divide-gray-200">
             {cutoffs.map((cutoff) => (
               <tr key={cutoff.id}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {cutoff.postal_center_code}
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm font-medium text-gray-900">{cutoff.postal_center_code}</div>
+                  <div className="text-sm text-gray-500">{cutoff.postal_center_name}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {cutoff.cutoff_time}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {cutoff.working_hours_start} - {cutoff.working_hours_end}
+                  {cutoff.opening_hour} - {cutoff.working_hours_end}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {cutoff.working_days.join(', ')}
+                  {cutoff.working_days.map(d => d.substring(0, 3)).join(', ')}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {cutoff.timezone}
@@ -152,15 +122,9 @@ export default function CutoffTimes() {
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <button
                     onClick={() => handleEdit(cutoff)}
-                    className="text-blue-600 hover:text-blue-900 mr-4"
+                    className="text-blue-600 hover:text-blue-900"
                   >
                     <Edit className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(cutoff.id)}
-                    className="text-red-600 hover:text-red-900"
-                  >
-                    <Trash2 className="w-4 h-4" />
                   </button>
                 </td>
               </tr>
@@ -170,27 +134,12 @@ export default function CutoffTimes() {
       </div>
 
       {/* Edit Modal */}
-      {isEditing && (
+      {editingId && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
-            <h2 className="text-xl font-bold mb-4">
-              {editingId ? t('cutoff_times.edit_cutoff') : t('cutoff_times.add_cutoff')}
-            </h2>
+            <h2 className="text-xl font-bold mb-4">{t('cutoff_times.edit_cutoff')}</h2>
 
             <div className="space-y-4">
-              {/* Postal Center */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('cutoff_times.form.postal_center')}
-                </label>
-                <input
-                  type="text"
-                  value={formData.postal_center_id}
-                  onChange={(e) => setFormData({ ...formData, postal_center_id: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                />
-              </div>
-
               {/* Cut-off Time */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -198,7 +147,7 @@ export default function CutoffTimes() {
                 </label>
                 <input
                   type="time"
-                  value={formData.cutoff_time}
+                  value={formData.cutoff_time || ''}
                   onChange={(e) => setFormData({ ...formData, cutoff_time: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 />
@@ -212,10 +161,8 @@ export default function CutoffTimes() {
                   </label>
                   <input
                     type="time"
-                    value={formData.working_hours_start}
-                    onChange={(e) =>
-                      setFormData({ ...formData, working_hours_start: e.target.value })
-                    }
+                    value={formData.opening_hour || ''}
+                    onChange={(e) => setFormData({ ...formData, opening_hour: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                   />
                 </div>
@@ -225,10 +172,8 @@ export default function CutoffTimes() {
                   </label>
                   <input
                     type="time"
-                    value={formData.working_hours_end}
-                    onChange={(e) =>
-                      setFormData({ ...formData, working_hours_end: e.target.value })
-                    }
+                    value={formData.working_hours_end || ''}
+                    onChange={(e) => setFormData({ ...formData, working_hours_end: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                   />
                 </div>
@@ -240,17 +185,17 @@ export default function CutoffTimes() {
                   {t('cutoff_times.form.working_days')}
                 </label>
                 <div className="flex gap-2">
-                  {[1, 2, 3, 4, 5, 6, 7].map((day) => (
+                  {dayNames.map((day, idx) => (
                     <button
                       key={day}
                       onClick={() => toggleWorkingDay(day)}
                       className={`px-3 py-2 rounded-lg border ${
-                        formData.working_days.includes(day)
+                        (formData.working_days || []).includes(day)
                           ? 'bg-blue-600 text-white border-blue-600'
                           : 'bg-white text-gray-700 border-gray-300'
                       }`}
                     >
-                      {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][day - 1]}
+                      {dayAbbr[idx]}
                     </button>
                   ))}
                 </div>
@@ -263,20 +208,17 @@ export default function CutoffTimes() {
                 </label>
                 <input
                   type="text"
-                  value={formData.timezone}
+                  value={formData.timezone || ''}
                   onChange={(e) => setFormData({ ...formData, timezone: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  placeholder="UTC, Europe/Madrid, etc."
                 />
               </div>
             </div>
 
             <div className="flex justify-end gap-2 mt-6">
               <button
-                onClick={() => {
-                  setIsEditing(false);
-                  setEditingId(null);
-                  resetForm();
-                }}
+                onClick={handleCancel}
                 className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 flex items-center gap-2"
               >
                 <X className="w-4 h-4" />
