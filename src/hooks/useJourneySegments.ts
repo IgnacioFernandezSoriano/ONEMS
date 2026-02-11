@@ -246,10 +246,12 @@ export const useJourneySegments = (accountId: string | undefined) => {
     setIsReconstructing(true);
 
     try {
-      // Call the reconstruction function
-      const { data, error: rpcError } = await supabase.rpc('reconstruct_journeys', {
-        p_account_id: activeAccountId,
-      });
+      // Call the reconstruction function - it returns a table, so we need to handle it correctly
+      const { data, error: rpcError } = await supabase
+        .rpc('reconstruct_journeys', {
+          p_account_id: activeAccountId,
+        })
+        .select();
 
       if (rpcError) throw rpcError;
 
