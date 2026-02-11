@@ -245,7 +245,7 @@ carriers.choose_an_existing_material_from_your_catalog,Choisissez un matériau e
 carriers.choose_how_to_add_material_to_this_product,Choisissez comment ajouter un matériau à ce produit :
 carriers.clear_filters,Effacer les filtres
 carriers.code,Tout réduire
-carriers.collapse_all,
+carriers.collapse_all,Réduire tout
 carriers.create_carrier,Créer un transporteur
 carriers.create_new_material,Créer un nouveau matériau
 carriers.days,Jours
@@ -1342,7 +1342,7 @@ auth.password_placeholder,Entrez votre mot de passe
 auth.click_autofill_demo,Cliquez ici pour remplir automatiquement les identifiants de démo
 auth.secure_auth_supabase,Authentification sécurisée par Supabase
 auth.for_regulators,pour les Régulateurs
-dashboard.management_tip_text,"Utilisez le sélecteur de période pour afficher les statistiques du mois en cours ou planifier le mois prochain. Cliquez sur n'importe quelle carte pour accéder à la vue détaillée. Consultez les alertes critiques quotidiennement pour maintenir l'excellence opérationnelle. Surveillez les vacances des panélistes et les besoins en matériaux pour éviter les conflits d'allocation."
+dashboard.management_tip_text,Utilisez le sélecteur de période pour afficher les statistiques du mois en cours ou planifier le mois prochain. Cliquez sur n'importe quelle carte pour accéder à la vue détaillée. Consultez les alertes critiques quotidiennement pour maintenir l'excellence opérationnelle. Surveillez les vacances des panélistes et les besoins en matériaux pour éviter les conflits d'allocation.
 dashboard.total_and_status,Total et Statut
 dashboard.pending,En attente
 dashboard.sent,Envoyé
@@ -1504,7 +1504,7 @@ unavailability.confirm_delete,Êtes-vous sûr de vouloir supprimer {count} péri
 unavailability.confirm_delete_single,Êtes-vous sûr de vouloir supprimer cette période d'indisponibilité ?
 unavailability.no_periods_found,Aucune période d'indisponibilité trouvée.
 unavailability.adjust_filters,Essayez d'ajuster vos filtres.
-unavailability.click_to_create,Cliquez sur "Ajouter une période d'indisponibilité" pour en créer une.
+unavailability.click_to_create,"Cliquez sur ""Ajouter une période d'indisponibilité"" pour en créer une."
 unavailability.panelist,Panéliste
 unavailability.start_date,Date de début
 unavailability.end_date,Date de fin
@@ -1599,8 +1599,8 @@ productform.update,Mettre à jour
 productform.saving,Enregistrement...
 carriers.qty,Qty,Qté
 carriers.no_materials,No materials assigned yet,Aucun matériau assigné
-carriers.remove_material_confirm,Remove material "{name}" from this product?,Retirer le matériau "{name}" de ce produit ?
-carriers.enter_new_quantity,Enter new quantity for "{name}":,Entrer la nouvelle quantité pour "{name}" :
+carriers.remove_material_confirm,"Remove material ""{name}"" from this product?","Retirer le matériau ""{name}"" de ce produit ?"
+carriers.enter_new_quantity,"Enter new quantity for ""{name}"":","Entrer la nouvelle quantité pour ""{name}"" :"
 carriers.expand_all_products,Expand all products in this carrier,Développer tous les produits de ce transporteur
 carriers.collapse_product,Collapse product,Réduire le produit
 carriers.expand_product,Expand product,Développer le produit
@@ -1827,7 +1827,7 @@ receive_generator.generating,Génération en cours... {{progress}}%
 receive_generator.generation_complete,Génération terminée
 receive_generator.successfully_created_records,Créé avec succès {{success}} enregistrements{{failed}}
 receive_generator.failed_records, ({{count}} échoué)
-admin.use_this_feature_to_prepare_accounts,"Utilisez cette fonctionnalité pour préparer les comptes pour les sessions de formation ou les démonstrations. Le processus de réinitialisation va :"
+admin.use_this_feature_to_prepare_accounts,Utilisez cette fonctionnalité pour préparer les comptes pour les sessions de formation ou les démonstrations. Le processus de réinitialisation va :
 admin.all_operational_data,"toutes les données opérationnelles (plans, envois, stocks, commandes)"
 admin.all_configuration_data,"toutes les données de configuration (topologie, panélistes, matériaux, paramètres)"
 admin.use_with_caution,utiliser avec prudence
@@ -1902,18 +1902,18 @@ onedb_api.loading_stats,Chargement des statistiques...
 menu.onedb_api,API ONE DB
 menu.onedb_api.tooltip,Accédez à ONE DB via l'API REST
 onedb_api.auth_note,"Remarque : L'en-tête Authorization utilise la clé anon Supabase (fournie par le système), tandis que X-API-Key contient votre clé API personnelle."
-onedb_api.max_records_note,"Remarque : L'API renvoie un maximum de 10 000 enregistrements au total. Utilisez des plages de dates plus spécifiques si vous avez besoin d'accéder à plus de données."
-menu.databases_section,"BASES DE DONNÉES"
-menu.databases_section.tooltip,"Gestion des bases de données et accès API"
-menu.extract_e2e_db_api,"Extract E2E DB API"
-menu.extract_e2e_db_api.tooltip,"Extraire des données E2E via l'API REST"
-panelists.management,"Gestion des Panélistes"
-panelists.manage_availability,"Gérer la disponibilité des panélistes"
-panelists.all_in_system,"Total dans le système"
+onedb_api.max_records_note,Remarque : L'API renvoie un maximum de 10 000 enregistrements au total. Utilisez des plages de dates plus spécifiques si vous avez besoin d'accéder à plus de données.
+menu.databases_section,BASES DE DONNÉES
+menu.databases_section.tooltip,Gestion des bases de données et accès API
+menu.extract_e2e_db_api,Extract E2E DB API
+menu.extract_e2e_db_api.tooltip,Extraire des données E2E via l'API REST
+panelists.management,Gestion des Panélistes
+panelists.manage_availability,Gérer la disponibilité des panélistes
+panelists.all_in_system,Total dans le système
 panelists.search_placeholder,"Rechercher par code, nom, email..."
-common.all_cities,"Toutes les Villes"
-common.all_nodes,"Tous les Nœuds"
-common.all_status,"Tous les Statuts"
+common.all_cities,Toutes les Villes
+common.all_nodes,Tous les Nœuds
+common.all_status,Tous les Statuts
 postal_centers.title,Centres Postaux
 postal_centers.description,Configurer les centres postaux et les lecteurs RFID pour le diagnostic réseau
 postal_centers.create_center,Créer un Centre Postal
@@ -2261,3 +2261,49 @@ processed_events.pairing_rate,Taux d'Appariement
 processed_events.pairing_rate_description,% d'événements avec paire
 processed_events.pairing_filter,Appariement
 processed_events.all_pairing,Tous les statuts
+allocation_generator.1st_semester,1er Semestre
+allocation_generator.2nd_semester,2ème Semestre
+allocation_generator.about,À propos du Générateur d'Allocation
+allocation_generator.about_description,Générer automatiquement des plans d'allocation d'échantillons basés sur des modèles de distribution
+allocation_generator.applied,Appliqué
+allocation_generator.applied_plans,Plans Appliqués
+allocation_generator.april,Avril
+allocation_generator.august,Août
+allocation_generator.city_distribution_matrix,Matrice de Distribution par Ville (A-B-C)
+allocation_generator.december,Décembre
+allocation_generator.february,Février
+allocation_generator.generated,Généré
+allocation_generator.generated_plans,Plans Générés
+allocation_generator.generator,Générateur
+allocation_generator.january,Janvier
+allocation_generator.july,Juillet
+allocation_generator.june,Juin
+allocation_generator.march,Mars
+allocation_generator.may,Mai
+allocation_generator.november,Novembre
+allocation_generator.october,Octobre
+allocation_generator.quick_period_selection,Sélection Rapide de Période
+allocation_generator.september,Septembre
+allocation_generator.year,Année
+material_requirements.about,À propos des Exigences Matérielles
+material_requirements.about_description,Calculer les besoins en matériaux basés sur les plans d'allocation
+material_requirements.calculation_period,Période de Calcul
+material_requirements.carrier,Transporteur
+material_requirements.city,Ville
+material_requirements.clear_filters,Effacer les Filtres
+material_requirements.end_date,Date de Fin
+material_requirements.export_csv,Exporter CSV
+material_requirements.filters,Filtres
+material_requirements.loading,Chargement des exigences matérielles...
+material_requirements.product,Produit
+material_requirements.quantity,Quantité
+material_requirements.region,Région
+material_requirements.start_date,Date de Début
+material_requirements.total_requirements,Exigences Totales
+stock.about,À propos de la Gestion des Stocks
+stock.about_description,Gérer les niveaux de stock et les alertes d'inventaire
+stock.alerts,Alertes
+stock.critical,Critique
+stock.loading,Chargement des données d'inventaire...
+stock.out_of_stock,Rupture de Stock
+stock.warning,Avertissement

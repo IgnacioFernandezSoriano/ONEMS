@@ -1551,7 +1551,7 @@ unavailability.confirm_delete,¿Está seguro de que desea eliminar {count} perí
 unavailability.confirm_delete_single,¿Está seguro de que desea eliminar este período de indisponibilidad?
 unavailability.no_periods_found,No se encontraron períodos de indisponibilidad.
 unavailability.adjust_filters,Intente ajustar sus filtros.
-unavailability.click_to_create,Haga clic en "Añadir un período de indisponibilidad" para crear uno.
+unavailability.click_to_create,"Haga clic en ""Añadir un período de indisponibilidad"" para crear uno."
 unavailability.panelist,Panelista
 unavailability.start_date,Fecha de inicio
 unavailability.end_date,Fecha de fin
@@ -1646,8 +1646,8 @@ productform.update,Actualizar
 productform.saving,Guardando...
 carriers.qty,Cant.
 carriers.no_materials,Aún no se han asignado materiales  
-carriers.remove_material_confirm,¿Eliminar el material "{name}" de este producto?  
-carriers.enter_new_quantity,Introduzca la nueva cantidad para "{name}":  
+carriers.remove_material_confirm,"¿Eliminar el material ""{name}"" de este producto?  "
+carriers.enter_new_quantity,"Introduzca la nueva cantidad para ""{name}"":  "
 carriers.expand_all_products,Expandir todos los productos en este transportista  
 carriers.collapse_product,Colapsar producto  
 carriers.expand_product,Expandir producto  
@@ -1844,19 +1844,19 @@ onedb_api.tab_usage,Uso
 onedb_api.credentials_section,Credenciales API
 onedb_api.no_api_key,Genera una para comenzar a usar la API.
 onedb_api.generate_key,Generar clave API
-onedb_api.generating,
+onedb_api.generating,Generando...
 onedb_api.api_key_label,Tu clave API
 onedb_api.copy,Copiar
 onedb_api.copied,¡Copiado!
 onedb_api.created_at,Creado
 onedb_api.regenerate_key,Regenerar clave API
-onedb_api.confirm_regenerate,
+onedb_api.confirm_regenerate,¿Está seguro de que desea regenerar su clave API? La clave antigua se desactivará inmediatamente.
 onedb_api.security_warning_title,Advertencia de seguridad
 onedb_api.security_warning_text,No la compartas públicamente ni la subas a control de versiones. Cualquiera con esta clave puede acceder a tus datos de ONE DB.
 onedb_api.endpoint_section,Endpoint de la API
 onedb_api.base_url,URL base
 onedb_api.authentication_title,Autenticación
-onedb_api.authentication_description,
+onedb_api.authentication_description,Todas las solicitudes de API deben incluir su clave API en el encabezado Authorization usando autenticación Bearer.
 onedb_api.endpoints_title,Endpoints disponibles
 onedb_api.endpoint_description,Recuperar registros de ONE DB filtrados por rango de fechas
 onedb_api.query_parameters,Parámetros de consulta
@@ -1887,9 +1887,9 @@ onedb_api.status_401,No autorizado - Clave API inválida o ausente
 onedb_api.status_429,Demasiadas solicitudes - Límite de tasa excedido
 onedb_api.status_500,Error interno del servidor - Algo salió mal en nuestro lado
 onedb_api.api_tester_title,Probador de API
-onedb_api.generate_key_first,
+onedb_api.generate_key_first,"Por favor, genere una clave API primero para usar el probador."
 onedb_api.test_api,Probar solicitud API
-onedb_api.testing,
+onedb_api.testing,Probando...
 onedb_api.response,Respuesta
 onedb_api.usage_statistics,Estadísticas de uso
 onedb_api.total_calls_month,Total de llamadas este mes
@@ -1902,17 +1902,17 @@ menu.onedb_api,API de ONE DB
 menu.onedb_api.tooltip,Accede a ONE DB a través de API REST
 onedb_api.auth_note,"Nota: El header Authorization usa la clave anon de Supabase (proporcionada por el sistema), mientras que X-API-Key contiene tu clave API personal."
 onedb_api.max_records_note,"Nota: La API retorna un máximo de 10,000 registros en total. Usa rangos de fechas más específicos si necesitas acceder a más datos."
-menu.databases_section,"BASES DE DATOS"
-menu.databases_section.tooltip,"Gestión de bases de datos y acceso API"
-menu.extract_e2e_db_api,"Extract E2E DB API"
-menu.extract_e2e_db_api.tooltip,"Extraer datos E2E vía REST API"
-panelists.management,"Gestión de Panelistas"
-panelists.manage_availability,"Gestionar disponibilidad de panelistas"
-panelists.all_in_system,"Total en el sistema"
+menu.databases_section,BASES DE DATOS
+menu.databases_section.tooltip,Gestión de bases de datos y acceso API
+menu.extract_e2e_db_api,Extract E2E DB API
+menu.extract_e2e_db_api.tooltip,Extraer datos E2E vía REST API
+panelists.management,Gestión de Panelistas
+panelists.manage_availability,Gestionar disponibilidad de panelistas
+panelists.all_in_system,Total en el sistema
 panelists.search_placeholder,"Buscar por código, nombre, email..."
-common.all_cities,"Todas las Ciudades"
-common.all_nodes,"Todos los Nodos"
-common.all_status,"Todos los Estados"
+common.all_cities,Todas las Ciudades
+common.all_nodes,Todos los Nodos
+common.all_status,Todos los Estados
 postal_centers.title,Centros Postales
 postal_centers.description,Configurar centros postales y lectores RFID para diagnóstico de red
 postal_centers.create_center,Crear Centro Postal
