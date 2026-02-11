@@ -39,7 +39,7 @@ export function MaterialCatalogPage() {
   }
 
   if (loading) {
-    return <div className="p-8">Loading...</div>
+    return <div className="p-8">{t("common.loading")}</div>
   }
 
   return (

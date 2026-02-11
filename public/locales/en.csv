@@ -407,6 +407,7 @@ carriers.name,Name *
 carriers.no_active_materials_in_catalog_create_a_new_one_in,No active materials in catalog. Create a new one instead.
 carriers.no_carriers,No carriers found
 carriers.no_carriers_defined_yet,No carriers defined yet
+carriers.no_carriers_yet,No carriers defined yet
 carriers.no_materials,No materials assigned yet
 carriers.no_materials_assigned_yet,No materials assigned yet
 carriers.no_products,No products
@@ -523,11 +524,15 @@ common.information,Information
 common.language,Language
 common.leave_empty_to_skip,Leave empty to skip
 common.loading,Loading...
+common.loading_carriers,Loading carriers...
+common.loading_data,Loading data...
+common.loading_topology,Loading topology...
 common.material,Material
 common.minutes,minutes
 common.monday,Monday
 common.no,No
 common.no_panelist,No Panelist
+common.no_results_found,No results found
 common.node,Node
 common.of,of
 common.opening,Opening
@@ -2180,6 +2185,7 @@ topology.no_cities_in_this_region_yet,No cities in this region yet
 topology.no_nodes_in_this_city_yet,No nodes in this city yet
 topology.no_nodes_yet,There are no nodes in this city yet
 topology.no_regions,No regions found
+topology.no_topology_yet,No topology defined yet
 topology.node,Node
 topology.nodes,Nodes
 topology.nodes_need_assignment,These nodes need a panelist assignment to be operational

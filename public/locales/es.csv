@@ -407,6 +407,7 @@ carriers.name,Nombre *
 carriers.no_active_materials_in_catalog_create_a_new_one_in,No hay materiales activos en el catálogo. Cree uno nuevo en su lugar.
 carriers.no_carriers,No se encontraron transportistas
 carriers.no_carriers_defined_yet,No se han definido transportistas aún
+carriers.no_carriers_yet,Aún no hay transportistas definidos
 carriers.no_materials,Aún no se han asignado materiales  
 carriers.no_materials_assigned_yet,No se han asignado materiales aún
 carriers.no_products,No hay productos
@@ -523,11 +524,15 @@ common.information,Información
 common.language,Idioma
 common.leave_empty_to_skip,Dejar vacío para omitir
 common.loading,Cargando...
+common.loading_carriers,Cargando transportistas...
+common.loading_data,Cargando datos...
+common.loading_topology,Cargando topología...
 common.material,Material  
 common.minutes,minutos
 common.monday,Lunes
 common.no,No
 common.no_panelist,Sin Panelista
+common.no_results_found,No se encontraron resultados
 common.node,Nodo
 common.of,de
 common.opening,Apertura
@@ -2180,6 +2185,7 @@ topology.no_cities_in_this_region_yet,Aún no hay ciudades en esta región
 topology.no_nodes_in_this_city_yet,Aún no hay nodos en esta ciudad
 topology.no_nodes_yet,Aún no hay nodos en esta ciudad
 topology.no_regions,No se encontraron regiones
+topology.no_topology_yet,Aún no hay topología definida
 topology.node,Nodo
 topology.nodes,Nodos
 topology.nodes_need_assignment,Estos nodos necesitan la asignación de un panelista para estar operativos

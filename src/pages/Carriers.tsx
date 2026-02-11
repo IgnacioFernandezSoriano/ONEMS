@@ -139,7 +139,7 @@ export function Carriers() {
   if (loading) {
     return (
       <div className="p-8">
-        <div className="text-center text-gray-600">Loading carriers...</div>
+        <div className="text-center text-gray-600">{t("common.loading_carriers")}</div>
       </div>
     )
   }
@@ -427,7 +427,7 @@ export function Carriers() {
           {filteredData.carriers.length === 0 && !searchTerm && carriers.length === 0 && (
             <div className="text-center py-8 mb-6">
               <div className="text-4xl mb-4">🚚</div>
-              <h3 className="text-lg font-semibold mb-2">No carriers defined yet</h3>
+              <h3 className="text-lg font-semibold mb-2">{t("carriers.no_carriers_yet")}</h3>
               <p className="text-gray-600 mb-4">
                 Start by creating your first carrier to manage shipping products
               </p>
@@ -437,7 +437,7 @@ export function Carriers() {
           {filteredData.carriers.length === 0 && (searchTerm || filterCarrier !== 'all' || filterStatus !== 'all' || filterMaterialStatus !== 'all') && (
             <div className="text-center py-8">
               <div className="text-4xl mb-4">🔍</div>
-              <h3 className="text-lg font-semibold mb-2">No results found</h3>
+              <h3 className="text-lg font-semibold mb-2">{t("common.no_results_found")}</h3>
               <p className="text-gray-600">
                 Try adjusting your search or filters
               </p>

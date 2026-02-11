@@ -407,6 +407,7 @@ carriers.name,الاسم *
 carriers.no_active_materials_in_catalog_create_a_new_one_in,لا توجد مواد نشطة في الكتالوج. قم بإنشاء مادة جديدة بدلاً من ذلك.
 carriers.no_carriers,لم يتم العثور على ناقلين
 carriers.no_carriers_defined_yet,لم يتم تعريف أي شركات شحن بعد
+carriers.no_carriers_yet,لم يتم تعريف شركات نقل بعد
 carriers.no_materials,لا توجد مواد مخصصة بعد
 carriers.no_materials_assigned_yet,لم يتم تعيين أي مواد بعد
 carriers.no_products,لا توجد منتجات
@@ -523,11 +524,15 @@ common.information,معلومات
 common.language,اللغة
 common.leave_empty_to_skip,اترك فارغًا للتخطي
 common.loading,جاري التحميل...
+common.loading_carriers,جاري تحميل شركات النقل...
+common.loading_data,جاري تحميل البيانات...
+common.loading_topology,جاري تحميل الطوبولوجيا...
 common.material,المادة
 common.minutes,دقائق
 common.monday,الاثنين
 common.no,لا
 common.no_panelist,لا يوجد عضو
+common.no_results_found,لم يتم العثور على نتائج
 common.node,العقدة
 common.of,من
 common.opening,افتتاح
@@ -2180,6 +2185,7 @@ topology.no_cities_in_this_region_yet,لا توجد مدن في هذه المن�
 topology.no_nodes_in_this_city_yet,لا توجد عقد في هذه المدينة حتى الآن
 topology.no_nodes_yet,لا توجد عقد في هذه المدينة حتى الآن
 topology.no_regions,لم يتم العثور على مناطق
+topology.no_topology_yet,لم يتم تعريف طوبولوجيا بعد
 topology.node,العقدة
 topology.nodes,العقد
 topology.nodes_need_assignment,هذه العقد تحتاج إلى تعيين عضو لجنة لتكون عملية

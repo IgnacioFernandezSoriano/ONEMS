@@ -191,7 +191,7 @@ export default function NodeLoadBalancing() {
       <div className="flex items-center justify-center h-64">
         <div className="flex items-center gap-3 text-gray-600">
           <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-600"></div>
-          <span>Loading node load data...</span>
+          <span>{t("common.loading_data")}</span>
         </div>
       </div>
     );

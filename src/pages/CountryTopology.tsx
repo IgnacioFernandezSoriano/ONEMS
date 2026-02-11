@@ -153,7 +153,7 @@ export function CountryTopology() {
   if (loading) {
     return (
       <div className="p-8">
-        <div className="text-center text-gray-600">Loading topology...</div>
+        <div className="text-center text-gray-600">{t("common.loading_topology")}</div>
       </div>
     )
   }
@@ -419,7 +419,7 @@ export function CountryTopology() {
           {filteredData.regions.length === 0 && !searchTerm && (
             <div className="text-center py-8 mb-6">
               <div className="text-4xl mb-4">🗺️</div>
-              <h3 className="text-lg font-semibold mb-2">No topology defined yet</h3>
+              <h3 className="text-lg font-semibold mb-2">{t("topology.no_topology_yet")}</h3>
               <p className="text-gray-600 mb-4">
                 Start by creating your first region to build your country topology
               </p>
@@ -429,7 +429,7 @@ export function CountryTopology() {
           {filteredData.regions.length === 0 && searchTerm && (
             <div className="text-center py-8">
               <div className="text-4xl mb-4">🔍</div>
-              <h3 className="text-lg font-semibold mb-2">No results found</h3>
+              <h3 className="text-lg font-semibold mb-2">{t("common.no_results_found")}</h3>
               <p className="text-gray-600">
                 Try adjusting your search or filters
               </p>

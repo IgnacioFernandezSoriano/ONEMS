@@ -407,6 +407,7 @@ carriers.name,Nom *
 carriers.no_active_materials_in_catalog_create_a_new_one_in,Aucun matériau actif dans le catalogue. Créez-en un nouveau.
 carriers.no_carriers,Aucun transporteur trouvé
 carriers.no_carriers_defined_yet,Aucun transporteur défini pour le moment
+carriers.no_carriers_yet,Aucun transporteur défini pour le moment
 carriers.no_materials,No materials assigned yet
 carriers.no_materials_assigned_yet,Aucun matériau assigné pour le moment
 carriers.no_products,Aucun produit
@@ -523,11 +524,15 @@ common.information,Informations
 common.language,Langue
 common.leave_empty_to_skip,Laisser vide pour ignorer
 common.loading,Chargement...
+common.loading_carriers,Chargement des transporteurs...
+common.loading_data,Chargement des données...
+common.loading_topology,Chargement de la topologie...
 common.material,Matériau
 common.minutes,minutes
 common.monday,Lundi
 common.no,Non
 common.no_panelist,Pas de Panéliste
+common.no_results_found,Aucun résultat trouvé
 common.node,Nœud
 common.of,de
 common.opening,Ouverture
@@ -2180,6 +2185,7 @@ topology.no_cities_in_this_region_yet,Pas encore de villes dans cette région
 topology.no_nodes_in_this_city_yet,Pas encore de nœuds dans cette ville
 topology.no_nodes_yet,Aucun nœud dans cette ville pour le moment
 topology.no_regions,Aucune région trouvée
+topology.no_topology_yet,Aucune topologie définie pour le moment
 topology.node,Nœud
 topology.nodes,Nœuds
 topology.nodes_need_assignment,Ces nœuds nécessitent l'affectation d'un panéliste pour être opérationnels
