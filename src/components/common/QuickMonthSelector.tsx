@@ -29,18 +29,18 @@ export function QuickMonthSelector({
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 10 }, (_, i) => currentYear + i);
   const months = [
-    { num: 1, name: 'Jan' },
-    { num: 2, name: 'Feb' },
-    { num: 3, name: 'Mar' },
-    { num: 4, name: 'Apr' },
-    { num: 5, name: 'May' },
-    { num: 6, name: 'Jun' },
-    { num: 7, name: 'Jul' },
-    { num: 8, name: 'Aug' },
-    { num: 9, name: 'Sep' },
-    { num: 10, name: 'Oct' },
-    { num: 11, name: 'Nov' },
-    { num: 12, name: 'Dec' },
+    { num: 1, name: t('months.jan') },
+    { num: 2, name: t('months.feb') },
+    { num: 3, name: t('months.mar') },
+    { num: 4, name: t('months.apr') },
+    { num: 5, name: t('months.may') },
+    { num: 6, name: t('months.jun') },
+    { num: 7, name: t('months.jul') },
+    { num: 8, name: t('months.aug') },
+    { num: 9, name: t('months.sep') },
+    { num: 10, name: t('months.oct') },
+    { num: 11, name: t('months.nov') },
+    { num: 12, name: t('months.dec') },
   ];
 
   return (
@@ -48,7 +48,7 @@ export function QuickMonthSelector({
       {showLabel && (
         <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
           <Calendar className="w-4 h-4" />
-          Quick Month Selection
+          {t('common.quick_month_selection')}
           {showTooltip && (
             <SmartTooltip content="Click any month button to automatically set the start and end dates for that entire month, or use semester/year buttons for longer periods." />
           )}
@@ -81,19 +81,19 @@ export function QuickMonthSelector({
           onClick={onFirstSemesterSelect}
           className="px-3 py-1.5 text-sm font-medium rounded-lg border border-green-300 bg-green-50 hover:bg-green-100 hover:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors"
         >
-          1st Semester
+          {t('common.first_semester')}
         </button>
         <button
           onClick={onSecondSemesterSelect}
           className="px-3 py-1.5 text-sm font-medium rounded-lg border border-teal-300 bg-teal-50 hover:bg-teal-100 hover:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-colors"
         >
-          2nd Semester
+          {t('common.second_semester')}
         </button>
         <button
           onClick={onYearSelect}
           className="px-3 py-1.5 text-sm font-medium rounded-lg border border-purple-300 bg-purple-50 hover:bg-purple-100 hover:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors"
         >
-          Year
+          {t('common.year')}
         </button>
       </div>
     </div>

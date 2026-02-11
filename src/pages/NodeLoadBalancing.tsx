@@ -211,7 +211,7 @@ export default function NodeLoadBalancing() {
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-bold text-gray-900">Node Load Balancing</h1>
+            <h1 className="text-3xl font-bold text-gray-900">{t("node_load_balancing.title")}</h1>
             <span className="group relative">
               <svg
                 className="w-5 h-5 text-gray-400 cursor-help"
@@ -225,7 +225,7 @@ export default function NodeLoadBalancing() {
                 />
               </svg>
               <div className="invisible group-hover:visible absolute z-10 w-96 p-3 bg-gray-900 text-white text-sm rounded-lg shadow-lg top-0 left-8">
-                <p className="font-semibold mb-2">Node Load Balancing</p>
+                <p className="font-semibold mb-2">{t("node_load_balancing.title")}</p>
                 <p className="mb-2">
                   <strong>Purpose:</strong> Visualize and optimize shipment distribution across nodes within each city to prevent overload and improve efficiency.
                 </p>
@@ -238,7 +238,7 @@ export default function NodeLoadBalancing() {
               </div>
             </span>
           </div>
-          <p className="text-gray-600 mt-1">Optimize shipment distribution across nodes and weeks</p>
+          <p className="text-gray-600 mt-1">{t("node_load_balancing.subtitle")}</p>
         </div>
         <button
           onClick={refetch}
@@ -372,7 +372,7 @@ export default function NodeLoadBalancing() {
                   min="1"
                   className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
-                <p className="mt-1 text-xs text-gray-500">Expected average samples per node</p>
+                <p className="mt-1 text-xs text-gray-500">{t("node_load_balancing.expected_average_tooltip")}</p>
               </div>
               <div>
                 <label className="flex items-center gap-1 text-sm font-medium text-gray-700 mb-1">
@@ -400,7 +400,7 @@ export default function NodeLoadBalancing() {
                   max="100"
                   className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
-                <p className="mt-1 text-xs text-gray-500">Acceptable deviation from reference</p>
+                <p className="mt-1 text-xs text-gray-500">{t("node_load_balancing.acceptable_deviation_tooltip")}</p>
               </div>
             </div>
 
@@ -474,7 +474,7 @@ export default function NodeLoadBalancing() {
       {citySummaries.length === 0 ? (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
           <p className="text-gray-500">
-            No data available for the selected period. Try selecting a different month.
+            {t("node_load_balancing.no_data_message")}
           </p>
         </div>
       ) : (

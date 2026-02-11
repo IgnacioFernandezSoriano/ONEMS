@@ -249,6 +249,7 @@ allocation_plans.show_id,Show ID
 allocation_plans.start_date,Start Date
 allocation_plans.status,Status
 allocation_plans.tag_id,Tag ID
+allocation_plans.title,Allocation Plans
 allocation_plans.total,Total
 allocation_plans.total_and_pending,Total and Pending
 allocation_plans.total_delayed,Total delayed
@@ -533,6 +534,7 @@ common.opening,Opening
 common.pending,Pending
 common.please_select_at_least_one,Please select at least one record
 common.promise,Promise
+common.quick_month_selection,Quick Month Selection
 common.records,records
 common.refresh,Refresh
 common.region,Region
@@ -885,6 +887,7 @@ material_catalog.minimum_stock_safety_stock,Minimum Stock (Safety Stock)
 material_catalog.name,Name *
 material_catalog.promise,Promise
 material_catalog.rfid_tag,RFID Tag
+material_catalog.title,Material Catalog
 material_catalog.unit_measure,Unit Measure
 material_catalog.units_kg_etc,"units, kg, etc."
 material_requirements.about,About Material Requirements
@@ -1098,11 +1101,16 @@ nodeLoadBalancing.stdDevAfter,Standard deviation after
 nodeLoadBalancing.stdDevBefore,Standard deviation before
 nodeLoadBalancing.totalShipments,Total shipments
 nodeLoadBalancing.totalShipmentsDesc,All shipments in the period
+node_load_balancing.acceptable_deviation_tooltip,Acceptable deviation from reference
 node_load_balancing.deviation_tolerance,Deviation Tolerance (%)
 node_load_balancing.deviation_tolerance_label,Deviation Tolerance
+node_load_balancing.expected_average_tooltip,Expected average samples per node
+node_load_balancing.no_data_message,No data available for the selected period. Try selecting a different month.
 node_load_balancing.quick_selection,Quick Selection
 node_load_balancing.reference_load,Reference Load
 node_load_balancing.reference_samples_node,Reference Samples/Node
+node_load_balancing.subtitle,Optimize shipment distribution across nodes and weeks
+node_load_balancing.title,Node Load Balancing
 nodeloadbalancing.acceptable_deviation_from_reference,Acceptable deviation from reference
 nodeloadbalancing.actualiza_fecha_programada_y_node_id_en_allocation,Actualiza fecha_programada y node_id en allocation_plan_details
 nodeloadbalancing.additional_nodes_required,Additional Nodes Required
@@ -1171,6 +1179,7 @@ nodeloadbalancing.usage,Usage:
 nodeloadbalancing.use_the_auto_balance_button_below_to_redistribute_,"Use the ""Auto-Balance"" button below to redistribute load automatically."
 nodeloadbalancing.warning,Warning:
 nodeloadbalancing.year,Year
+one_db.title,ONE DB
 onedb.all_carriers,All Carriers
 onedb.all_cities,All Cities
 onedb.all_products,All Products

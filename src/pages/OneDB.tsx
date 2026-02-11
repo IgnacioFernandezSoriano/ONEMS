@@ -85,7 +85,7 @@ export default function OneDB() {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold text-gray-900">ONE DB</h1>
+              <h1 className="text-2xl font-bold text-gray-900">{t("one_db.title")}</h1>
               <SmartTooltip content="ONE DB stores all validated shipment records with complete transit information, delivery performance metrics, and quality analytics for reporting and compliance tracking." />
             </div>
             <p className="text-sm text-gray-600 mt-1">

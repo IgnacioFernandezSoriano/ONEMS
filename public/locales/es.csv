@@ -249,6 +249,7 @@ allocation_plans.show_id,Mostrar ID
 allocation_plans.start_date,Fecha de inicio
 allocation_plans.status,Estado
 allocation_plans.tag_id,ID de etiqueta
+allocation_plans.title,Planes de Asignación
 allocation_plans.total,Total
 allocation_plans.total_and_pending,Total y Pendiente
 allocation_plans.total_delayed,Total retrasado
@@ -533,6 +534,7 @@ common.opening,Apertura
 common.pending,Pendiente
 common.please_select_at_least_one,Por favor seleccione al menos un registro
 common.promise,Promesa
+common.quick_month_selection,Selección rápida del mes
 common.records,Registros
 common.refresh,Actualizar
 common.region,Región
@@ -885,6 +887,7 @@ material_catalog.minimum_stock_safety_stock,Stock mínimo (Stock de seguridad)
 material_catalog.name,Nombre *
 material_catalog.promise,Promesa
 material_catalog.rfid_tag,Etiqueta RFID
+material_catalog.title,Catálogo de Materiales
 material_catalog.unit_measure,Unidad de medida
 material_catalog.units_kg_etc,"unidades, kg, etc."
 material_requirements.about,Acerca de los Requisitos de Material
@@ -1098,11 +1101,16 @@ nodeLoadBalancing.stdDevAfter,Desviación estándar después
 nodeLoadBalancing.stdDevBefore,Desviación estándar antes  
 nodeLoadBalancing.totalShipments,Total de envíos  
 nodeLoadBalancing.totalShipmentsDesc,Todas las expediciones del período  
+node_load_balancing.acceptable_deviation_tooltip,Desviación aceptable de la referencia
 node_load_balancing.deviation_tolerance,Tolerancia de Desviación (%)
 node_load_balancing.deviation_tolerance_label,Tolerancia de Desviación
+node_load_balancing.expected_average_tooltip,Promedio esperado de muestras por nodo
+node_load_balancing.no_data_message,No hay datos disponibles para el período seleccionado. Intente seleccionar un mes diferente.
 node_load_balancing.quick_selection,Selección Rápida
 node_load_balancing.reference_load,Carga de Referencia
 node_load_balancing.reference_samples_node,Muestras de Referencia/Nodo
+node_load_balancing.subtitle,Optimizar la distribución de envíos entre nodos y semanas
+node_load_balancing.title,Balanceo de Carga de Nodos
 nodeloadbalancing.acceptable_deviation_from_reference,Desviación aceptable respecto a la referencia
 nodeloadbalancing.actualiza_fecha_programada_y_node_id_en_allocation,Actualiza fecha_programada y node_id en allocation_plan_details
 nodeloadbalancing.additional_nodes_required,Nodos adicionales requeridos
@@ -1171,6 +1179,7 @@ nodeloadbalancing.usage,Uso:
 nodeloadbalancing.use_the_auto_balance_button_below_to_redistribute_,"Usa el botón ""Autoequilibrar"" abajo para redistribuir la carga automáticamente."
 nodeloadbalancing.warning,Advertencia:
 nodeloadbalancing.year,Año
+one_db.title,ONE DB
 onedb.all_carriers,Todos los transportistas
 onedb.all_cities,Todas las ciudades
 onedb.all_products,Todos los productos

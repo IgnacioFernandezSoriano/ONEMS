@@ -249,6 +249,7 @@ allocation_plans.show_id,Afficher ID
 allocation_plans.start_date,Date de début
 allocation_plans.status,Statut
 allocation_plans.tag_id,ID de l'étiquette
+allocation_plans.title,Plans d'Allocation
 allocation_plans.total,Total
 allocation_plans.total_and_pending,Total et En attente
 allocation_plans.total_delayed,Total retardé
@@ -533,6 +534,7 @@ common.opening,Ouverture
 common.pending,En Attente
 common.please_select_at_least_one,Veuillez sélectionner au moins un enregistrement
 common.promise,Promesse
+common.quick_month_selection,Sélection rapide du mois
 common.records,enregistrements
 common.refresh,Actualiser
 common.region,Région
@@ -885,6 +887,7 @@ material_catalog.minimum_stock_safety_stock,Stock minimum (stock de sécurité)
 material_catalog.name,Nom *
 material_catalog.promise,Promesse
 material_catalog.rfid_tag,Étiquette RFID
+material_catalog.title,Catalogue de Matériaux
 material_catalog.unit_measure,Unité de mesure
 material_catalog.units_kg_etc,"unités, kg, etc."
 material_requirements.about,À propos des Exigences Matérielles
@@ -1098,11 +1101,16 @@ nodeLoadBalancing.stdDevAfter,Écart type après
 nodeLoadBalancing.stdDevBefore,Écart type avant
 nodeLoadBalancing.totalShipments,Total des expéditions
 nodeLoadBalancing.totalShipmentsDesc,Toutes les expéditions de la période
+node_load_balancing.acceptable_deviation_tooltip,Écart acceptable par rapport à la référence
 node_load_balancing.deviation_tolerance,Tolérance de Déviation (%)
 node_load_balancing.deviation_tolerance_label,Tolérance de Déviation
+node_load_balancing.expected_average_tooltip,Moyenne attendue d'échantillons par nœud
+node_load_balancing.no_data_message,Aucune donnée disponible pour la période sélectionnée. Essayez de sélectionner un mois différent.
 node_load_balancing.quick_selection,Sélection Rapide
 node_load_balancing.reference_load,Charge de Référence
 node_load_balancing.reference_samples_node,Échantillons de Référence/Nœud
+node_load_balancing.subtitle,Optimiser la distribution des envois entre les nœuds et les semaines
+node_load_balancing.title,Équilibrage de Charge des Nœuds
 nodeloadbalancing.acceptable_deviation_from_reference,Écart acceptable par rapport à la référence
 nodeloadbalancing.actualiza_fecha_programada_y_node_id_en_allocation,Met à jour fecha_programada et node_id dans allocation_plan_details
 nodeloadbalancing.additional_nodes_required,Nœuds supplémentaires requis
@@ -1171,6 +1179,7 @@ nodeloadbalancing.usage,Utilisation :
 nodeloadbalancing.use_the_auto_balance_button_below_to_redistribute_,Utilisez le bouton « Auto-équilibrage » ci-dessous pour redistribuer la charge automatiquement.
 nodeloadbalancing.warning,Avertissement :
 nodeloadbalancing.year,Année
+one_db.title,ONE DB
 onedb.all_carriers,Tous les transporteurs
 onedb.all_cities,Toutes les villes
 onedb.all_products,Tous les produits

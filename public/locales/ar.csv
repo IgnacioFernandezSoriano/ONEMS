@@ -249,6 +249,7 @@ allocation_plans.show_id,عرض المعرف
 allocation_plans.start_date,تاريخ البدء
 allocation_plans.status,الحالة
 allocation_plans.tag_id,معرّف الوسم
+allocation_plans.title,خطط التخصيص
 allocation_plans.total,الإجمالي
 allocation_plans.total_and_pending,الإجمالي والقيد الانتظار
 allocation_plans.total_delayed,الإجمالي المتأخر
@@ -533,6 +534,7 @@ common.opening,افتتاح
 common.pending,قيد الانتظار
 common.please_select_at_least_one,يرجى تحديد سجل واحد على الأقل
 common.promise,وعد
+common.quick_month_selection,تحديد سريع للشهر
 common.records,السجلات
 common.refresh,تحديث
 common.region,المنطقة
@@ -885,6 +887,7 @@ material_catalog.minimum_stock_safety_stock,الحد الأدنى للمخزون
 material_catalog.name,الاسم *
 material_catalog.promise,الوعد
 material_catalog.rfid_tag,علامة تحديد التردد اللاسلكي (RFID)
+material_catalog.title,كتالوج المواد
 material_catalog.unit_measure,وحدة القياس
 material_catalog.units_kg_etc,وحدات، كجم، إلخ.
 material_requirements.about,حول متطلبات المواد
@@ -1098,11 +1101,16 @@ nodeLoadBalancing.stdDevAfter,الانحراف المعياري بعد
 nodeLoadBalancing.stdDevBefore,الانحراف المعياري قبل
 nodeLoadBalancing.totalShipments,إجمالي الشحنات
 nodeLoadBalancing.totalShipmentsDesc,جميع الشحنات خلال الفترة
+node_load_balancing.acceptable_deviation_tooltip,الانحراف المقبول عن المرجع
 node_load_balancing.deviation_tolerance,تحمل الانحراف (%)
 node_load_balancing.deviation_tolerance_label,تحمل الانحراف
+node_load_balancing.expected_average_tooltip,متوسط العينات المتوقع لكل عقدة
+node_load_balancing.no_data_message,لا توجد بيانات متاحة للفترة المحددة. حاول تحديد شهر مختلف.
 node_load_balancing.quick_selection,تحديد سريع
 node_load_balancing.reference_load,حمل مرجعي
 node_load_balancing.reference_samples_node,عينات مرجعية/عقدة
+node_load_balancing.subtitle,تحسين توزيع الشحنات عبر العقد والأسابيع
+node_load_balancing.title,موازنة حمل العقد
 nodeloadbalancing.acceptable_deviation_from_reference,الانحراف المقبول عن المرجع
 nodeloadbalancing.actualiza_fecha_programada_y_node_id_en_allocation,تحديث تاريخ_المجدول و node_id في تفاصيل خطة التخصيص
 nodeloadbalancing.additional_nodes_required,العقد الإضافية المطلوبة
@@ -1171,6 +1179,7 @@ nodeloadbalancing.usage,الاستخدام:
 nodeloadbalancing.use_the_auto_balance_button_below_to_redistribute_,"استخدم زر ""التوازن التلقائي"" أدناه لإعادة توزيع الحمل تلقائيًا."
 nodeloadbalancing.warning,تحذير:
 nodeloadbalancing.year,السنة
+one_db.title,ONE DB
 onedb.all_carriers,جميع الناقلين
 onedb.all_cities,جميع المدن
 onedb.all_products,جميع المنتجات
