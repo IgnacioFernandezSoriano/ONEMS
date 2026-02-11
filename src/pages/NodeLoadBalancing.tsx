@@ -279,7 +279,7 @@ export default function NodeLoadBalancing() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Start Date
+                  {t("common.start_date")}
                 </label>
                 <input
                   type="date"
@@ -290,7 +290,7 @@ export default function NodeLoadBalancing() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  End Date
+                  {t("common.end_date")}
                 </label>
                 <input
                   type="date"
@@ -304,7 +304,7 @@ export default function NodeLoadBalancing() {
             {/* Quick Date Selection */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Quick Selection
+                {t("node_load_balancing.quick_selection")}
               </label>
               <div className="flex items-center gap-2 mb-2">
                 <select
@@ -352,7 +352,7 @@ export default function NodeLoadBalancing() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
               <div>
                 <label className="flex items-center gap-1 text-sm font-medium text-gray-700 mb-1">
-                  Reference Samples/Node
+                  {t("node_load_balancing.reference_samples_node")}
                   <span className="group relative">
                     <svg className="w-4 h-4 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
@@ -376,7 +376,7 @@ export default function NodeLoadBalancing() {
               </div>
               <div>
                 <label className="flex items-center gap-1 text-sm font-medium text-gray-700 mb-1">
-                  Deviation Tolerance (%)
+                  {t("node_load_balancing.deviation_tolerance")}
                   <span className="group relative">
                     <svg className="w-4 h-4 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
@@ -410,7 +410,7 @@ export default function NodeLoadBalancing() {
                 onClick={handleResetFilters}
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                Reset
+                {t("common.reset")}
               </button>
             </div>
           </div>
