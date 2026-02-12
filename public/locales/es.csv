@@ -2507,3 +2507,7 @@ readers_management.movement_date,Fecha de Movimiento
 readers_management.movement_date_help,Fecha en que esta asignación/desasignación toma efecto
 readers_management.assign_help,Seleccione un centro para asignar o deje vacío para desasignar
 readers_management.edit_reader,Editar Lector
+menu.diagnosis,Diagnóstico
+menu.diagnosis.tooltip,Herramientas de diagnóstico y análisis de rendimiento de red
+menu.network_overview,Resumen de Red
+menu.network_overview.tooltip,Evaluación integral de salud y resumen de rendimiento de la red postal

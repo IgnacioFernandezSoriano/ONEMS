@@ -2507,3 +2507,7 @@ readers_management.movement_date,Movement Date
 readers_management.movement_date_help,Date when this assignment/unassignment takes effect
 readers_management.assign_help,Select a center to assign or leave empty to unassign
 readers_management.edit_reader,Edit Reader
+menu.diagnosis,Diagnosis
+menu.diagnosis.tooltip,Network diagnosis and performance analysis tools
+menu.network_overview,Network Overview
+menu.network_overview.tooltip,Comprehensive health assessment and performance summary of the postal network

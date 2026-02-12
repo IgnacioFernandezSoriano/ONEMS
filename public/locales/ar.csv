@@ -2403,3 +2403,7 @@ non_working_days.form.description,الوصف
 non_working_days.form.type,النوع
 non_working_days.form.applies_to_all,ينطبق على جميع المراكز
 non_working_days.form.recurring,متكرر سنوياً
+menu.diagnosis,التشخيص
+menu.diagnosis.tooltip,أدوات تشخيص وتحليل أداء الشبكة
+menu.network_overview,نظرة عامة على الشبكة
+menu.network_overview.tooltip,تقييم شامل للصحة وملخص أداء الشبكة البريدية

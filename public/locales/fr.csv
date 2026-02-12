@@ -2403,3 +2403,7 @@ non_working_days.form.description,Description
 non_working_days.form.type,Type
 non_working_days.form.applies_to_all,S'applique à tous les centres
 non_working_days.form.recurring,Récurrent annuellement
+menu.diagnosis,Diagnostic
+menu.diagnosis.tooltip,Outils de diagnostic et d'analyse des performances du réseau
+menu.network_overview,Aperçu du Réseau
+menu.network_overview.tooltip,Évaluation complète de la santé et résumé des performances du réseau postal
