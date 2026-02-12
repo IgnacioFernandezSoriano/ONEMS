@@ -70,6 +70,7 @@ export function useAccountConfig() {
         .from('non_working_days')
         .select('*')
         .eq('account_id', effectiveAccountId)
+        .is('postal_center_id', null)
         .order('date', { ascending: true })
 
       if (fetchError) throw fetchError
