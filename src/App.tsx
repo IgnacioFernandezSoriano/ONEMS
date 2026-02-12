@@ -41,6 +41,7 @@ import { EventConsolidation } from './pages/diagnosis/EventConsolidation'
 import JourneySegments from './pages/diagnosis/JourneySegments'
 import CompleteJourneys from './pages/diagnosis/CompleteJourneys'
 import ProcessedEvents from './pages/ProcessedEvents'
+import MobileReaders from './pages/MobileReaders'
 
 
 function App() {
@@ -156,6 +157,16 @@ function App() {
                       element={
                         <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
                           <PostalCenters />
+                        </ProtectedRoute>
+                      }
+                    />
+                    
+                    {/* Mobile Readers - for admin and superadmin */}
+                    <Route
+                      path="/mobile-readers"
+                      element={
+                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                          <MobileReaders />
                         </ProtectedRoute>
                       }
                     />

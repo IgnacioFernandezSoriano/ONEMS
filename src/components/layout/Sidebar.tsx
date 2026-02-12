@@ -158,6 +158,13 @@ export function Sidebar() {
               tooltip: t('menu.postal_centers.tooltip'),
             },
             {
+              path: '/mobile-readers',
+              label: t('menu.mobile_readers'),
+              icon: MapPin,
+              roles: ['admin', 'superadmin'],
+              tooltip: t('menu.mobile_readers.tooltip'),
+            },
+            {
               path: '/slas-configuration',
               label: t('menu.slas_configuration'),
               icon: Target,

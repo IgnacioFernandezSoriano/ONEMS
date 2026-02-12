@@ -2403,3 +2403,42 @@ non_working_days.form.description,Descripción
 non_working_days.form.type,Tipo
 non_working_days.form.applies_to_all,Aplica a todos los centros
 non_working_days.form.recurring,Recurrente anualmente
+menu.mobile_readers,Lectores Móviles
+menu.mobile_readers.tooltip,Gestionar lectores móviles y temporales
+mobile_readers.description,Gestiona lectores que pueden ser asignados a diferentes centros postales a lo largo del tiempo
+mobile_readers.create_reader,Crear Lector Móvil
+mobile_readers.total_readers,lectores totales
+mobile_readers.mobile,Móvil
+mobile_readers.current_location,Ubicación Actual
+mobile_readers.since,Desde
+mobile_readers.unassigned,Sin asignar
+mobile_readers.assignments,asignaciones
+mobile_readers.reassign,Reasignar
+mobile_readers.assign,Asignar a Centro
+mobile_readers.view_history,Ver Historial
+mobile_readers.no_readers,Aún no hay lectores móviles
+mobile_readers.no_readers_description,Crea tu primer lector móvil para comenzar a rastrear asignaciones
+mobile_readers.create_first_reader,Crear Primer Lector
+mobile_readers.no_location_history,No hay historial de ubicaciones disponible
+mobile_readers.location_history,Historial de Ubicaciones
+mobile_readers.less_than_day,< 1 día
+mobile_readers.one_day,1 día
+mobile_readers.days,días
+mobile_readers.current,Actual
+mobile_readers.assigned,Asignado
+mobile_readers.unassigned,Desasignado
+mobile_readers.currently_active,Actualmente activo
+mobile_readers.duration,Duración
+mobile_readers.notes,Notas
+mobile_readers.assign_reader,Asignar Lector a Centro
+mobile_readers.postal_center,Centro Postal
+mobile_readers.select_center,Selecciona un centro...
+mobile_readers.select_center_help,Elige el centro postal donde se ubicará este lector
+mobile_readers.select_center_error,Por favor selecciona un centro postal
+mobile_readers.assigned_at,Fecha de Asignación
+mobile_readers.assigned_at_help,Cuándo se asignará el lector a este centro
+mobile_readers.unassigned_at,Fecha de Desasignación
+mobile_readers.unassigned_at_help,Opcional: Cuándo se desasignará el lector (dejar vacío para indefinido)
+mobile_readers.notes_placeholder,ej., Despliegue temporal para temporada alta
+mobile_readers.notes_help,Notas opcionales sobre esta asignación
+mobile_readers.confirm_delete,¿Estás seguro de que quieres eliminar este lector?

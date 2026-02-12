@@ -2403,3 +2403,42 @@ non_working_days.form.description,Description
 non_working_days.form.type,Type
 non_working_days.form.applies_to_all,Applies to all centers
 non_working_days.form.recurring,Recurring annually
+menu.mobile_readers,Mobile Readers
+menu.mobile_readers.tooltip,Manage mobile and temporary readers
+mobile_readers.description,Manage readers that can be assigned to different postal centers over time
+mobile_readers.create_reader,Create Mobile Reader
+mobile_readers.total_readers,total readers
+mobile_readers.mobile,Mobile
+mobile_readers.current_location,Current Location
+mobile_readers.since,Since
+mobile_readers.unassigned,Unassigned
+mobile_readers.assignments,assignments
+mobile_readers.reassign,Reassign
+mobile_readers.assign,Assign to Center
+mobile_readers.view_history,View History
+mobile_readers.no_readers,No mobile readers yet
+mobile_readers.no_readers_description,Create your first mobile reader to start tracking assignments
+mobile_readers.create_first_reader,Create First Reader
+mobile_readers.no_location_history,No location history available
+mobile_readers.location_history,Location History
+mobile_readers.less_than_day,< 1 day
+mobile_readers.one_day,1 day
+mobile_readers.days,days
+mobile_readers.current,Current
+mobile_readers.assigned,Assigned
+mobile_readers.unassigned,Unassigned
+mobile_readers.currently_active,Currently active
+mobile_readers.duration,Duration
+mobile_readers.notes,Notes
+mobile_readers.assign_reader,Assign Reader to Center
+mobile_readers.postal_center,Postal Center
+mobile_readers.select_center,Select a center...
+mobile_readers.select_center_help,Choose the postal center where this reader will be located
+mobile_readers.select_center_error,Please select a postal center
+mobile_readers.assigned_at,Assignment Date
+mobile_readers.assigned_at_help,When the reader will be assigned to this center
+mobile_readers.unassigned_at,Unassignment Date
+mobile_readers.unassigned_at_help,Optional: When the reader will be unassigned (leave empty for indefinite)
+mobile_readers.notes_placeholder,e.g., Temporary deployment for peak season
+mobile_readers.notes_help,Optional notes about this assignment
+mobile_readers.confirm_delete,Are you sure you want to delete this reader?
