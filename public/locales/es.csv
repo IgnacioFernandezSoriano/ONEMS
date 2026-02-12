@@ -2496,3 +2496,8 @@ readers_management.less_than_day,Menos de 1 día
 readers_management.one_day,1 día
 readers_management.days,días
 readers_management.no_location_history,No hay historial de ubicaciones disponible
+readers_management.reader_name,Nombre del Lector
+readers_management.code,Código
+readers_management.type,Tipo
+readers_management.status,Estado
+readers_management.current_location,Ubicación Actual

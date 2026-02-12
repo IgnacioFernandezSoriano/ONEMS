@@ -22,7 +22,7 @@ export default function ReadersManagement() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [selectedReaderId, setSelectedReaderId] = useState<string | null>(null);
   const [showAssignModal, setShowAssignModal] = useState(false);
-  const [showHistory, setShowHistory] = useState(false);
+  const [showHistory, setShowHistory] = useState<string | null>(null);
   const [filters, setFilters] = useState<ReadersFiltersState>({
     search: '',
     postal_center_id: '',
@@ -183,129 +183,155 @@ export default function ReadersManagement() {
         />
       )}
 
-      {/* Readers Grid */}
-      {filteredReaders.length === 0 ? (
-        <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-          <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-600 dark:text-gray-400">
-            {t('readers_management.no_readers_found')}
-          </p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {filteredReaders.map((reader) => (
-          <div
-            key={reader.reader_id}
-            className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow"
-          >
-            {/* Header */}
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                    {reader.reader_name}
-                  </h3>
-                  <span
-                    className={`px-2 py-1 text-xs font-medium rounded ${getReaderTypeColor(
-                      reader.reader_type
-                    )}`}
-                  >
-                    {reader.reader_type}
-                  </span>
-                  {reader.is_mobile && (
-                    <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs font-medium rounded">
-                      {t('readers_management.mobile')}
-                    </span>
-                  )}
-                </div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">{reader.reader_code}</p>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => handleDeleteReader(reader.reader_id)}
-                  className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
-                  title={t('common.delete')}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-
-            {/* Current Location */}
-            <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <MapPin className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {t('readers_management.current_location')}
-                </span>
-              </div>
-              {reader.current_center_name ? (
-                <div>
-                  <p className="text-gray-900 dark:text-white font-medium">
-                    {reader.current_center_name}
-                  </p>
-                  {reader.assigned_since && (
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      {t('readers_management.since')}{' '}
-                      {new Date(reader.assigned_since).toLocaleDateString('es-ES')}
-                    </p>
-                  )}
-                </div>
-              ) : (
-                <p className="text-gray-500 dark:text-gray-400 italic">
-                  {t('readers_management.unassigned')}
-                </p>
-              )}
-            </div>
-
-            {/* Stats */}
-            <div className="flex items-center gap-4 mb-4 text-sm text-gray-600 dark:text-gray-400">
-              <div className="flex items-center gap-1">
-                <History className="w-4 h-4" />
-                <span>
-                  {reader.total_assignments} {t('readers_management.assignments')}
-                </span>
-              </div>
-            </div>
-
-            {/* Actions */}
-            <div className="flex gap-2">
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => {
-                  setSelectedReaderId(reader.reader_id);
-                  setShowAssignModal(true);
-                }}
-              >
-                <Navigation className="w-4 h-4 mr-2" />
-                {reader.current_center_name
-                  ? t('readers_management.reassign')
-                  : t('readers_management.assign')}
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => {
-                  setSelectedReaderId(reader.reader_id);
-                  setShowHistory(!showHistory);
-                }}
-              >
-                <History className="w-4 h-4 mr-2" />
-                {t('readers_management.view_history')}
-              </Button>
-            </div>
-
-            {/* History Timeline */}
-            {showHistory && selectedReaderId === reader.reader_id && (
-              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                <ReaderLocationTimeline readerId={reader.reader_id} />
-              </div>
-            )}
+      {/* Readers Table */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+        {filteredReaders.length === 0 ? (
+          <div className="text-center py-12">
+            <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-600 dark:text-gray-400">
+              {t('readers_management.no_readers_found')}
+            </p>
           </div>
-        ))}
-        </div>
-      )}
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    {t('readers_management.reader_name')}
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    {t('readers_management.code')}
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    {t('readers_management.type')}
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    {t('readers_management.postal_center')}
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    {t('readers_management.status')}
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    {t('readers_management.assignments')}
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    {t('common.actions')}
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                {filteredReaders.map((reader) => (
+                  <tr key={reader.reader_id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                    {/* Reader Name */}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900 dark:text-white">
+                        {reader.reader_name}
+                      </div>
+                    </td>
+
+                    {/* Code */}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-500 dark:text-gray-400">
+                        {reader.reader_code}
+                      </div>
+                    </td>
+
+                    {/* Type */}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span
+                        className={`px-2 py-1 text-xs font-medium rounded ${getReaderTypeColor(
+                          reader.reader_type
+                        )}`}
+                      >
+                        {reader.reader_type}
+                      </span>
+                    </td>
+
+                    {/* Postal Center */}
+                    <td className="px-6 py-4">
+                      {reader.current_center_name ? (
+                        <div>
+                          <div className="text-sm text-gray-900 dark:text-white">
+                            {reader.current_center_name}
+                          </div>
+                          {reader.assigned_since && (
+                            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                              {t('readers_management.since')}{' '}
+                              {new Date(reader.assigned_since).toLocaleDateString('es-ES')}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-sm text-gray-500 dark:text-gray-400 italic">
+                          {t('readers_management.unassigned')}
+                        </span>
+                      )}
+                    </td>
+
+                    {/* Status */}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {reader.is_mobile ? (
+                        <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs font-medium rounded">
+                          {t('readers_management.has_history')}
+                        </span>
+                      ) : (
+                        <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-400 text-xs font-medium rounded">
+                          {t('readers_management.no_history')}
+                        </span>
+                      )}
+                    </td>
+
+                    {/* Assignments */}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900 dark:text-white">
+                        {reader.total_assignments}
+                      </div>
+                    </td>
+
+                    {/* Actions */}
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <div className="flex items-center justify-end gap-2">
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedReaderId(reader.reader_id);
+                            setShowAssignModal(true);
+                          }}
+                        >
+                          <Navigation className="w-4 h-4 mr-2" />
+                          {reader.current_center_name
+                            ? t('readers_management.reassign')
+                            : t('readers_management.assign')}
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedReaderId(reader.reader_id);
+                            setShowHistory(showHistory === reader.reader_id ? null : reader.reader_id);
+                          }}
+                        >
+                          <History className="w-4 h-4 mr-2" />
+                          {t('readers_management.view_history')}
+                        </Button>
+                        <button
+                          onClick={() => handleDeleteReader(reader.reader_id)}
+                          className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
+                          title={t('common.delete')}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
