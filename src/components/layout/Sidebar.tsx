@@ -31,6 +31,7 @@ import {
   Key,
   DatabaseZap,
   CheckCircle,
+  Activity,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
@@ -254,6 +255,18 @@ export function Sidebar() {
               tooltip: t('menu.reporting_compliance.tooltip'),
             },
           ],
+        },
+      ],
+    },
+    {
+      label: t('menu.diagnosis'),
+      items: [
+        {
+          path: '/diagnosis/network-overview',
+          label: t('menu.network_overview'),
+          icon: Activity,
+          roles: ['admin', 'superadmin'],
+          tooltip: t('menu.network_overview.tooltip'),
         },
       ],
     },
