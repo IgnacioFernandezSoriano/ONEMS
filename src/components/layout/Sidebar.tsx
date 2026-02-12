@@ -277,6 +277,13 @@ export function Sidebar() {
               roles: ['admin', 'superadmin'],
               tooltip: t('menu.route_analysis.tooltip'),
             },
+            {
+              path: '/diagnosis/center-analysis',
+              label: t('menu.center_analysis'),
+              icon: Activity,
+              roles: ['admin', 'superadmin'],
+              tooltip: t('menu.center_analysis.tooltip'),
+            },
           ],
         },
       ],

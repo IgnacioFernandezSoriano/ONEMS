@@ -2409,3 +2409,5 @@ menu.network_overview,Aperçu du Réseau
 menu.network_overview.tooltip,Évaluation complète de la santé et résumé des performances du réseau postal
 menu.route_analysis,Analyse des Routes
 menu.route_analysis.tooltip,Analyse détaillée des performances par route et transporteur
+menu.center_analysis,Analyse des Centres
+menu.center_analysis.tooltip,Analyse des performances opérationnelles par centre

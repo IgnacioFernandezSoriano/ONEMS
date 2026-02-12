@@ -2409,3 +2409,5 @@ menu.network_overview,نظرة عامة على الشبكة
 menu.network_overview.tooltip,تقييم شامل للصحة وملخص أداء الشبكة البريدية
 menu.route_analysis,تحليل المسارات
 menu.route_analysis.tooltip,تحليل مفصل للأداء حسب المسار والناقل
+menu.center_analysis,تحليل المراكز
+menu.center_analysis.tooltip,تحليل الأداء التشغيلي حسب المركز

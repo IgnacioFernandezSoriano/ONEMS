@@ -2513,3 +2513,5 @@ menu.network_overview,Resumen de Red
 menu.network_overview.tooltip,Evaluación integral de salud y resumen de rendimiento de la red postal
 menu.route_analysis,Análisis de Rutas
 menu.route_analysis.tooltip,Análisis detallado de rendimiento por ruta y transportista
+menu.center_analysis,Análisis de Centros
+menu.center_analysis.tooltip,Análisis de rendimiento operacional por centro

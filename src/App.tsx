@@ -44,6 +44,7 @@ import ProcessedEvents from './pages/ProcessedEvents'
 import ReadersManagement from './pages/ReadersManagement'
 import NetworkOverview from './pages/diagnosis/NetworkOverview'
 import RouteAnalysis from './pages/diagnosis/RouteAnalysis'
+import CenterAnalysis from './pages/diagnosis/CenterAnalysis'
 
 
 function App() {
@@ -169,6 +170,16 @@ function App() {
                       element={
                         <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
                           <RouteAnalysis />
+                        </ProtectedRoute>
+                      }
+                    />
+                    
+                    {/* Center Analysis - for admin and superadmin */}
+                    <Route
+                      path="/diagnosis/center-analysis"
+                      element={
+                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                          <CenterAnalysis />
                         </ProtectedRoute>
                       }
                     />

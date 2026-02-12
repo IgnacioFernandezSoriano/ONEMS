@@ -2513,3 +2513,5 @@ menu.network_overview,Network Overview
 menu.network_overview.tooltip,Comprehensive health assessment and performance summary of the postal network
 menu.route_analysis,Route Analysis
 menu.route_analysis.tooltip,Detailed performance analysis by route and carrier
+menu.center_analysis,Center Analysis
+menu.center_analysis.tooltip,Operational performance analysis by center
