@@ -164,18 +164,7 @@ export function Sidebar() {
               roles: ['admin', 'superadmin'],
               tooltip: t('menu.slas_configuration.tooltip'),
             },
-            {
-              path: '/setup/cutoff-times',
-              label: t('menu.cutoff_times'),
-              icon: Clock,
-              roles: ['admin', 'superadmin'],
-            },
-            {
-              path: '/setup/non-working-days',
-              label: t('menu.non_working_days'),
-              icon: Calendar,
-              roles: ['admin', 'superadmin'],
-            },
+
           ],
         },
       ],
