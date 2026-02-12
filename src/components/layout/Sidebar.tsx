@@ -57,7 +57,7 @@ export function Sidebar() {
   const location = useLocation()
   const { isCollapsed, setIsCollapsed } = useSidebar()
   const { t, locale, setLocale } = useLocale()
-  const [expandedSections, setExpandedSections] = useState<string[]>(['/reporting', '/setup/e2e', '/setup/diagnosis'])
+  const [expandedSections, setExpandedSections] = useState<string[]>(['/reporting', '/diagnosis', '/setup/e2e', '/setup/diagnosis'])
   const [isHovered, setIsHovered] = useState(false)
   const [accounts, setAccounts] = useState<Array<{ id: string; name: string }>>([])
   const [accountName, setAccountName] = useState<string>('')
@@ -256,17 +256,21 @@ export function Sidebar() {
             },
           ],
         },
-      ],
-    },
-    {
-      label: t('menu.diagnosis'),
-      items: [
         {
-          path: '/diagnosis/network-overview',
-          label: t('menu.network_overview'),
+          path: '/diagnosis',
+          label: t('menu.diagnosis'),
           icon: Activity,
           roles: ['admin', 'superadmin'],
-          tooltip: t('menu.network_overview.tooltip'),
+          tooltip: t('menu.diagnosis.tooltip'),
+          children: [
+            {
+              path: '/diagnosis/network-overview',
+              label: t('menu.network_overview'),
+              icon: Activity,
+              roles: ['admin', 'superadmin'],
+              tooltip: t('menu.network_overview.tooltip'),
+            },
+          ],
         },
       ],
     },
