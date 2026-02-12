@@ -45,6 +45,7 @@ import ReadersManagement from './pages/ReadersManagement'
 import NetworkOverview from './pages/diagnosis/NetworkOverview'
 import RouteAnalysis from './pages/diagnosis/RouteAnalysis'
 import CenterAnalysis from './pages/diagnosis/CenterAnalysis'
+import SegmentDeepDive from './pages/diagnosis/SegmentDeepDive'
 
 
 function App() {
@@ -180,6 +181,16 @@ function App() {
                       element={
                         <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
                           <CenterAnalysis />
+                        </ProtectedRoute>
+                      }
+                    />
+                    
+                    {/* Segment Deep Dive - for admin and superadmin */}
+                    <Route
+                      path="/diagnosis/segment-deep-dive"
+                      element={
+                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                          <SegmentDeepDive />
                         </ProtectedRoute>
                       }
                     />

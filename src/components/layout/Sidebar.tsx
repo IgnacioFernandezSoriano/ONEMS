@@ -284,6 +284,13 @@ export function Sidebar() {
               roles: ['admin', 'superadmin'],
               tooltip: t('menu.center_analysis.tooltip'),
             },
+            {
+              path: '/diagnosis/segment-deep-dive',
+              label: t('menu.segment_deep_dive'),
+              icon: Activity,
+              roles: ['admin', 'superadmin'],
+              tooltip: t('menu.segment_deep_dive.tooltip'),
+            },
           ],
         },
       ],

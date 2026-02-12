@@ -2411,3 +2411,5 @@ menu.route_analysis,Analyse des Routes
 menu.route_analysis.tooltip,Analyse détaillée des performances par route et transporteur
 menu.center_analysis,Analyse des Centres
 menu.center_analysis.tooltip,Analyse des performances opérationnelles par centre
+menu.segment_deep_dive,Analyse Approfondie des Segments
+menu.segment_deep_dive.tooltip,Analyse détaillée des segments de voyage par type et performance
