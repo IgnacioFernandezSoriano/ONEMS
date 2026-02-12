@@ -25,6 +25,7 @@ export default function ReadersManagement() {
   const [showHistory, setShowHistory] = useState<string | null>(null);
   const [filters, setFilters] = useState<ReadersFiltersState>({
     search: '',
+    carrier_id: '',
     postal_center_id: '',
     reader_type: '',
     assignment_status: '',
@@ -43,6 +44,11 @@ export default function ReadersManagement() {
           reader.reader_name.toLowerCase().includes(searchLower) ||
           reader.reader_code.toLowerCase().includes(searchLower);
         if (!matchesSearch) return false;
+      }
+
+      // Carrier filter (filter by centers belonging to carrier)
+      if (filters.carrier_id && reader.carrier_id !== filters.carrier_id) {
+        return false;
       }
 
       // Postal Center filter

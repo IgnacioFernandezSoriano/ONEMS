@@ -6,6 +6,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 
 export interface ReadersFiltersState {
   search: string;
+  carrier_id: string;
   postal_center_id: string;
   reader_type: string;
   assignment_status: string;
@@ -22,14 +23,21 @@ interface PostalCenter {
   code: string;
 }
 
+interface Carrier {
+  id: string;
+  name: string;
+}
+
 export function ReadersFilters({ onFilterChange }: ReadersFiltersProps) {
   const { t } = useTranslation();
   const { profile } = useAuth();
   const [isExpanded, setIsExpanded] = useState(false);
   const [postalCenters, setPostalCenters] = useState<PostalCenter[]>([]);
+  const [carriers, setCarriers] = useState<Carrier[]>([]);
 
   const [filters, setFilters] = useState<ReadersFiltersState>({
     search: '',
+    carrier_id: '',
     postal_center_id: '',
     reader_type: '',
     assignment_status: '',
@@ -55,6 +63,25 @@ export function ReadersFilters({ onFilterChange }: ReadersFiltersProps) {
     fetchPostalCenters();
   }, [profile?.account_id]);
 
+  // Fetch carriers
+  useEffect(() => {
+    const fetchCarriers = async () => {
+      if (!profile?.account_id) return;
+
+      const { data, error } = await supabase
+        .from('carriers')
+        .select('id, name')
+        .eq('account_id', profile.account_id)
+        .order('name');
+
+      if (data && !error) {
+        setCarriers(data);
+      }
+    };
+
+    fetchCarriers();
+  }, [profile?.account_id]);
+
   const handleFilterChange = (key: keyof ReadersFiltersState, value: string) => {
     const newFilters = { ...filters, [key]: value };
     setFilters(newFilters);
@@ -64,6 +91,7 @@ export function ReadersFilters({ onFilterChange }: ReadersFiltersProps) {
   const handleReset = () => {
     const resetFilters: ReadersFiltersState = {
       search: '',
+      carrier_id: '',
       postal_center_id: '',
       reader_type: '',
       assignment_status: '',
@@ -75,6 +103,7 @@ export function ReadersFilters({ onFilterChange }: ReadersFiltersProps) {
 
   const activeFiltersCount = [
     filters.search,
+    filters.carrier_id,
     filters.postal_center_id,
     filters.reader_type,
     filters.assignment_status,
@@ -142,6 +171,25 @@ export function ReadersFilters({ onFilterChange }: ReadersFiltersProps) {
                   </button>
                 )}
               </div>
+            </div>
+
+            {/* Carrier */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('readers_management.carrier')}
+              </label>
+              <select
+                value={filters.carrier_id}
+                onChange={(e) => handleFilterChange('carrier_id', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="">{t('readers_management.all_carriers')}</option>
+                {carriers.map((carrier) => (
+                  <option key={carrier.id} value={carrier.id}>
+                    {carrier.name}
+                  </option>
+                ))}
+              </select>
             </div>
 
             {/* Postal Center */}

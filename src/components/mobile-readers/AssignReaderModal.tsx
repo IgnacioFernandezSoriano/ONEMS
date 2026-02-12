@@ -39,10 +39,7 @@ export function AssignReaderModal({
     e.preventDefault();
     setError(null);
 
-    if (!formData.postal_center_id) {
-      setError(t('mobile_readers.select_center_error'));
-      return;
-    }
+    // Allow unassigned (postal_center_id can be empty for unassignment)
 
     setSubmitting(true);
 
@@ -97,7 +94,7 @@ export function AssignReaderModal({
           <div>
             <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               <MapPin className="w-4 h-4" />
-              {t('mobile_readers.postal_center')} *
+              {t('readers_management.postal_center')}
             </label>
             <select
               value={formData.postal_center_id}
@@ -105,9 +102,8 @@ export function AssignReaderModal({
                 setFormData({ ...formData, postal_center_id: e.target.value })
               }
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-              required
             >
-              <option value="">{t('mobile_readers.select_center')}</option>
+              <option value="">{t('readers_management.unassigned')}</option>
               {postalCenters.map((center) => (
                 <option key={center.id} value={center.id}>
                   {center.name} ({center.code})
@@ -115,7 +111,7 @@ export function AssignReaderModal({
               ))}
             </select>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              {t('mobile_readers.select_center_help')}
+              {t('readers_management.assign_help')}
             </p>
           </div>
 
@@ -123,7 +119,7 @@ export function AssignReaderModal({
           <div>
             <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               <Calendar className="w-4 h-4" />
-              {t('mobile_readers.assigned_at')} *
+              {t('readers_management.movement_date')} *
             </label>
             <input
               type="datetime-local"
@@ -133,7 +129,7 @@ export function AssignReaderModal({
               required
             />
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              {t('mobile_readers.assigned_at_help')}
+              {t('readers_management.movement_date_help')}
             </p>
           </div>
 

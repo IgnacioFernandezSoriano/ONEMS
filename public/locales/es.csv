@@ -2501,3 +2501,8 @@ readers_management.code,Código
 readers_management.type,Tipo
 readers_management.status,Estado
 readers_management.current_location,Ubicación Actual
+readers_management.carrier,Transportista
+readers_management.all_carriers,Todos los Transportistas
+readers_management.movement_date,Fecha de Movimiento
+readers_management.movement_date_help,Fecha en que esta asignación/desasignación toma efecto
+readers_management.assign_help,Seleccione un centro para asignar o deje vacío para desasignar
