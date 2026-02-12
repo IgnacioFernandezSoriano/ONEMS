@@ -34,7 +34,9 @@ export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCen
     longitude: undefined,
     timezone: 'America/New_York',
     is_active: true
-  }) const [weeklySchedule, setWeeklySchedule] = useState<WeeklyScheduleDay[]>([])
+  })
+  
+  const [weeklySchedule, setWeeklySchedule] = useState<WeeklyScheduleDay[]>([])
   const [centerHolidays, setCenterHolidays] = useState<{ date: string; reason: string }[]>([])
   const [newHoliday, setNewHoliday] = useState({ date: '', reason: '' })
   const [submitting, setSubmitting] = useState(false)
