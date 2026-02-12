@@ -222,7 +222,8 @@ export default function ReadersManagement() {
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 {filteredReaders.map((reader) => (
-                  <tr key={reader.reader_id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                  <React.Fragment key={reader.reader_id}>
+                  <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                     {/* Reader Name */}
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900 dark:text-white">
@@ -326,6 +327,15 @@ export default function ReadersManagement() {
                       </div>
                     </td>
                   </tr>
+                  {/* Expandable History Row */}
+                  {showHistory === reader.reader_id && (
+                    <tr>
+                      <td colSpan={7} className="px-6 py-4 bg-gray-50 dark:bg-gray-700/30">
+                        <ReaderLocationTimeline readerId={reader.reader_id} />
+                      </td>
+                    </tr>
+                  )}
+                  </React.Fragment>
                 ))}
               </tbody>
             </table>
