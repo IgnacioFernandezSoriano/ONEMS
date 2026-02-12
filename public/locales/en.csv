@@ -2447,3 +2447,34 @@ menu.readers_management.tooltip,Manage all readers and their location history
 readers_management.description,Manage all RFID readers. Track location history for readers that move between postal centers.
 readers_management.total_readers,total readers
 readers_management.with_history,with location history
+menu.rfid_data_consolidation,RFID Data Consolidation
+menu.rfid_data_consolidation.tooltip,Consolidate and process RFID events into journey segments and complete journeys
+menu.rfid_events_consolidation_numbered,1. RFID Events Consolidation
+menu.journey_segments_numbered,2. Journey Segments
+menu.complete_journeys_numbered,3. Complete Journeys
+menu.center_working_days,Center Working Days
+menu.center_working_days.tooltip,Configure working days and holidays for postal centers
+readers_management.description,Manage all readers and track their location history
+readers_management.filters,Filters
+readers_management.active,active
+readers_management.reset,Reset
+readers_management.search,Search
+readers_management.search_placeholder,Search by name or code...
+readers_management.postal_center,Postal Center
+readers_management.all_centers,All Centers
+readers_management.unassigned,Unassigned
+readers_management.reader_type,Reader Type
+readers_management.all_types,All Types
+readers_management.entry,Entry
+readers_management.exit,Exit
+readers_management.mixed,Mixed
+readers_management.assignment_status,Assignment Status
+readers_management.all_statuses,All Statuses
+readers_management.assigned,Assigned
+readers_management.mobility_status,Mobility Status
+readers_management.all_mobility,All
+readers_management.has_history,Has History
+readers_management.no_history,No History
+readers_management.showing,showing
+readers_management.total,total
+readers_management.no_readers_found,No readers found matching your filters

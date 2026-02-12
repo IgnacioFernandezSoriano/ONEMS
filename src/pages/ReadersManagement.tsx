@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Plus, MapPin, History, Edit, Trash2, Navigation } from 'lucide-react';
 import { Button } from '@/components/common/Button';
 import { ReaderForm } from '@/components/postal-centers/ReaderForm';
 import { ReaderLocationTimeline } from '@/components/mobile-readers/ReaderLocationTimeline';
 import { AssignReaderModal } from '@/components/mobile-readers/AssignReaderModal';
+import { ReadersFilters, ReadersFiltersState } from '@/components/mobile-readers/ReadersFilters';
 import { useMobileReaders } from '@/hooks/useMobileReaders';
 import { useReaderLocationHistory } from '@/hooks/useReaderLocationHistory';
 import { useAuth } from '@/contexts/AuthContext';
@@ -22,8 +23,57 @@ export default function ReadersManagement() {
   const [selectedReaderId, setSelectedReaderId] = useState<string | null>(null);
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [filters, setFilters] = useState<ReadersFiltersState>({
+    search: '',
+    postal_center_id: '',
+    reader_type: '',
+    assignment_status: '',
+    mobility_status: '',
+  });
 
   const { assignToCenter } = useReaderLocationHistory(selectedReaderId);
+
+  // Apply filters
+  const filteredReaders = useMemo(() => {
+    return readers.filter((reader) => {
+      // Search filter
+      if (filters.search) {
+        const searchLower = filters.search.toLowerCase();
+        const matchesSearch =
+          reader.reader_name.toLowerCase().includes(searchLower) ||
+          reader.reader_code.toLowerCase().includes(searchLower);
+        if (!matchesSearch) return false;
+      }
+
+      // Postal Center filter
+      if (filters.postal_center_id) {
+        if (filters.postal_center_id === 'unassigned') {
+          if (reader.current_center_id !== null) return false;
+        } else {
+          if (reader.current_center_id !== filters.postal_center_id) return false;
+        }
+      }
+
+      // Reader Type filter
+      if (filters.reader_type && reader.reader_type !== filters.reader_type) {
+        return false;
+      }
+
+      // Assignment Status filter
+      if (filters.assignment_status) {
+        if (filters.assignment_status === 'assigned' && !reader.current_center_id) return false;
+        if (filters.assignment_status === 'unassigned' && reader.current_center_id) return false;
+      }
+
+      // Mobility Status filter
+      if (filters.mobility_status) {
+        if (filters.mobility_status === 'mobile' && !reader.is_mobile) return false;
+        if (filters.mobility_status === 'fixed' && reader.is_mobile) return false;
+      }
+
+      return true;
+    });
+  }, [readers, filters]);
 
   const selectedReader = readers.find((r) => r.reader_id === selectedReaderId);
 
@@ -94,11 +144,16 @@ export default function ReadersManagement() {
           </Button>
         </div>
         <div className="text-sm text-gray-600 dark:text-gray-400">
-          {readers.length} {t('readers_management.total_readers')}
-          {readers.filter((r) => r.is_mobile).length > 0 && (
-            <> • {readers.filter((r) => r.is_mobile).length} {t('readers_management.with_history')}</>
+          {filteredReaders.length} {t('readers_management.showing')}
+          {filteredReaders.length !== readers.length && (
+            <> / {readers.length} {t('readers_management.total')}</>
           )}
         </div>
+      </div>
+
+      {/* Filters */}
+      <div className="mb-6">
+        <ReadersFilters onFilterChange={setFilters} />
       </div>
 
       {/* Create Form Modal */}
@@ -129,8 +184,16 @@ export default function ReadersManagement() {
       )}
 
       {/* Readers Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {readers.map((reader) => (
+      {filteredReaders.length === 0 ? (
+        <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+          <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+          <p className="text-gray-600 dark:text-gray-400">
+            {t('readers_management.no_readers_found')}
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {filteredReaders.map((reader) => (
           <div
             key={reader.reader_id}
             className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow"
@@ -241,22 +304,6 @@ export default function ReadersManagement() {
             )}
           </div>
         ))}
-      </div>
-
-      {/* Empty State */}
-      {readers.length === 0 && (
-        <div className="text-center py-12">
-          <MapPin className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-            {t('mobile_readers.no_readers')}
-          </h3>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
-            {t('mobile_readers.no_readers_description')}
-          </p>
-          <Button onClick={() => setShowCreateForm(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            {t('mobile_readers.create_first_reader')}
-          </Button>
         </div>
       )}
     </div>

@@ -294,32 +294,41 @@ export function Sidebar() {
           tooltip: t('menu.users.tooltip'),
         },
         {
-          path: '/diagnosis/event-consolidation',
-          label: t('menu.rfid_events_consolidation'),
-          icon: RefreshCw,
+          path: '/rfid-data-consolidation',
+          label: t('menu.rfid_data_consolidation'),
+          icon: DatabaseZap,
           roles: ['admin', 'superadmin'],
-          tooltip: t('menu.event_consolidation.tooltip'),
-        },
-        {
-          path: '/diagnosis/journey-segments',
-          label: t('menu.journey_segments'),
-          icon: Map,
-          roles: ['admin', 'superadmin'],
-          tooltip: t('menu.journey_segments.tooltip'),
-        },
-        {
-          path: '/diagnosis/complete-journeys',
-          label: t('menu.complete_journeys'),
-          icon: Route,
-          roles: ['admin', 'superadmin'],
-          tooltip: t('menu.complete_journeys.tooltip'),
+          tooltip: t('menu.rfid_data_consolidation.tooltip'),
+          children: [
+            {
+              path: '/diagnosis/event-consolidation',
+              label: t('menu.rfid_events_consolidation_numbered'),
+              icon: RefreshCw,
+              roles: ['admin', 'superadmin'],
+              tooltip: t('menu.event_consolidation.tooltip'),
+            },
+            {
+              path: '/diagnosis/journey-segments',
+              label: t('menu.journey_segments_numbered'),
+              icon: Map,
+              roles: ['admin', 'superadmin'],
+              tooltip: t('menu.journey_segments.tooltip'),
+            },
+            {
+              path: '/diagnosis/complete-journeys',
+              label: t('menu.complete_journeys_numbered'),
+              icon: Route,
+              roles: ['admin', 'superadmin'],
+              tooltip: t('menu.complete_journeys.tooltip'),
+            },
+          ],
         },
 
         {
           path: '/settings/account-configuration',
-          label: t('menu.account_configuration'),
+          label: t('menu.center_working_days'),
           icon: Settings,
-          tooltip: t('menu.account_configuration.tooltip'),
+          tooltip: t('menu.center_working_days.tooltip'),
         },
         ...(accountName === 'DEMO2' ? [
           {

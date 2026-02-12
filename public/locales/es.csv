@@ -2447,3 +2447,34 @@ menu.readers_management.tooltip,Gestionar todos los lectores y su historial de u
 readers_management.description,Gestiona todos los lectores RFID. Rastrea el historial de ubicaciones para lectores que se mueven entre centros postales.
 readers_management.total_readers,lectores totales
 readers_management.with_history,con historial de ubicaciones
+menu.rfid_data_consolidation,Consolidación de Datos RFID
+menu.rfid_data_consolidation.tooltip,Consolida y procesa eventos RFID en segmentos de viaje y viajes completos
+menu.rfid_events_consolidation_numbered,1. Consolidación de Eventos RFID
+menu.journey_segments_numbered,2. Segmentos de Viaje
+menu.complete_journeys_numbered,3. Viajes Completos
+menu.center_working_days,Días Laborables de Centros
+menu.center_working_days.tooltip,Configura días laborables y festivos para centros postales
+readers_management.description,Gestiona todos los lectores y rastrea su historial de ubicaciones
+readers_management.filters,Filtros
+readers_management.active,activos
+readers_management.reset,Resetear
+readers_management.search,Buscar
+readers_management.search_placeholder,Buscar por nombre o código...
+readers_management.postal_center,Centro Postal
+readers_management.all_centers,Todos los Centros
+readers_management.unassigned,Sin Asignar
+readers_management.reader_type,Tipo de Lector
+readers_management.all_types,Todos los Tipos
+readers_management.entry,Entrada
+readers_management.exit,Salida
+readers_management.mixed,Mixto
+readers_management.assignment_status,Estado de Asignación
+readers_management.all_statuses,Todos los Estados
+readers_management.assigned,Asignado
+readers_management.mobility_status,Estado de Movilidad
+readers_management.all_mobility,Todos
+readers_management.has_history,Con Historial
+readers_management.no_history,Sin Historial
+readers_management.showing,mostrando
+readers_management.total,total
+readers_management.no_readers_found,No se encontraron lectores que coincidan con tus filtros
