@@ -2407,3 +2407,5 @@ menu.diagnosis,Diagnostic
 menu.diagnosis.tooltip,Outils de diagnostic et d'analyse des performances du réseau
 menu.network_overview,Aperçu du Réseau
 menu.network_overview.tooltip,Évaluation complète de la santé et résumé des performances du réseau postal
+menu.route_analysis,Analyse des Routes
+menu.route_analysis.tooltip,Analyse détaillée des performances par route et transporteur

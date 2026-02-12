@@ -2511,3 +2511,5 @@ menu.diagnosis,Diagnóstico
 menu.diagnosis.tooltip,Herramientas de diagnóstico y análisis de rendimiento de red
 menu.network_overview,Resumen de Red
 menu.network_overview.tooltip,Evaluación integral de salud y resumen de rendimiento de la red postal
+menu.route_analysis,Análisis de Rutas
+menu.route_analysis.tooltip,Análisis detallado de rendimiento por ruta y transportista

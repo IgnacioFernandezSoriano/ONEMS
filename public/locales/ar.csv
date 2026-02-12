@@ -2407,3 +2407,5 @@ menu.diagnosis,التشخيص
 menu.diagnosis.tooltip,أدوات تشخيص وتحليل أداء الشبكة
 menu.network_overview,نظرة عامة على الشبكة
 menu.network_overview.tooltip,تقييم شامل للصحة وملخص أداء الشبكة البريدية
+menu.route_analysis,تحليل المسارات
+menu.route_analysis.tooltip,تحليل مفصل للأداء حسب المسار والناقل
