@@ -2442,3 +2442,8 @@ mobile_readers.unassigned_at_help,Optional: When the reader will be unassigned (
 mobile_readers.notes_placeholder,e.g., Temporary deployment for peak season
 mobile_readers.notes_help,Optional notes about this assignment
 mobile_readers.confirm_delete,Are you sure you want to delete this reader?
+menu.readers_management,Readers Management
+menu.readers_management.tooltip,Manage all readers and their location history
+readers_management.description,Manage all RFID readers. Track location history for readers that move between postal centers.
+readers_management.total_readers,total readers
+readers_management.with_history,with location history

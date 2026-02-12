@@ -2442,3 +2442,8 @@ mobile_readers.unassigned_at_help,Opcional: Cuándo se desasignará el lector (d
 mobile_readers.notes_placeholder,ej., Despliegue temporal para temporada alta
 mobile_readers.notes_help,Notas opcionales sobre esta asignación
 mobile_readers.confirm_delete,¿Estás seguro de que quieres eliminar este lector?
+menu.readers_management,Gestión de Lectores
+menu.readers_management.tooltip,Gestionar todos los lectores y su historial de ubicaciones
+readers_management.description,Gestiona todos los lectores RFID. Rastrea el historial de ubicaciones para lectores que se mueven entre centros postales.
+readers_management.total_readers,lectores totales
+readers_management.with_history,con historial de ubicaciones

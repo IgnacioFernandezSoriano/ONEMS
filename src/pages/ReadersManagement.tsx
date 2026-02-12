@@ -10,7 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from '@/hooks/useTranslation';
 import type { ReaderFormData } from '@/lib/types_postal_centers';
 
-export default function MobileReaders() {
+export default function ReadersManagement() {
   const { t } = useTranslation();
   const { profile } = useAuth();
   const accountId = profile?.account_id || undefined;
@@ -78,10 +78,10 @@ export default function MobileReaders() {
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-          Mobile Readers Management
+          Readers Management
         </h1>
         <p className="text-gray-600 dark:text-gray-400">
-          {t('mobile_readers.description')}
+          {t('readers_management.description')}
         </p>
       </div>
 
@@ -94,8 +94,10 @@ export default function MobileReaders() {
           </Button>
         </div>
         <div className="text-sm text-gray-600 dark:text-gray-400">
-          {readers.length} {t('mobile_readers.total_readers')} •{' '}
-          {readers.filter((r) => r.is_mobile).length} {t('mobile_readers.mobile')}
+          {readers.length} {t('readers_management.total_readers')}
+          {readers.filter((r) => r.is_mobile).length > 0 && (
+            <> • {readers.filter((r) => r.is_mobile).length} {t('readers_management.with_history')}</>
+          )}
         </div>
       </div>
 
