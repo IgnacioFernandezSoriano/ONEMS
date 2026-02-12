@@ -295,13 +295,66 @@ export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCen
             onChange={(e) => setFormData({ ...formData, timezone: e.target.value })}
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
           >
-            <option value="America/New_York">Eastern Time (America/New_York)</option>
-            <option value="America/Chicago">Central Time (America/Chicago)</option>
-            <option value="America/Denver">Mountain Time (America/Denver)</option>
-            <option value="America/Los_Angeles">Pacific Time (America/Los_Angeles)</option>
-            <option value="America/Phoenix">Arizona Time (America/Phoenix)</option>
-            <option value="America/Anchorage">Alaska Time (America/Anchorage)</option>
-            <option value="Pacific/Honolulu">Hawaii Time (Pacific/Honolulu)</option>
+            <optgroup label="🌎 North America">
+              <option value="America/New_York">New York (UTC-5/-4)</option>
+              <option value="America/Chicago">Chicago (UTC-6/-5)</option>
+              <option value="America/Denver">Denver (UTC-7/-6)</option>
+              <option value="America/Los_Angeles">Los Angeles (UTC-8/-7)</option>
+              <option value="America/Phoenix">Phoenix (UTC-7)</option>
+              <option value="America/Anchorage">Anchorage (UTC-9/-8)</option>
+              <option value="America/Toronto">Toronto (UTC-5/-4)</option>
+              <option value="America/Vancouver">Vancouver (UTC-8/-7)</option>
+              <option value="America/Mexico_City">Mexico City (UTC-6/-5)</option>
+            </optgroup>
+            <optgroup label="🌎 South America">
+              <option value="America/Sao_Paulo">São Paulo (UTC-3)</option>
+              <option value="America/Buenos_Aires">Buenos Aires (UTC-3)</option>
+              <option value="America/Santiago">Santiago (UTC-4/-3)</option>
+              <option value="America/Lima">Lima (UTC-5)</option>
+              <option value="America/Bogota">Bogotá (UTC-5)</option>
+            </optgroup>
+            <optgroup label="🌍 Europe">
+              <option value="Europe/London">London (UTC+0/+1)</option>
+              <option value="Europe/Paris">Paris (UTC+1/+2)</option>
+              <option value="Europe/Berlin">Berlin (UTC+1/+2)</option>
+              <option value="Europe/Madrid">Madrid (UTC+1/+2)</option>
+              <option value="Europe/Rome">Rome (UTC+1/+2)</option>
+              <option value="Europe/Amsterdam">Amsterdam (UTC+1/+2)</option>
+              <option value="Europe/Brussels">Brussels (UTC+1/+2)</option>
+              <option value="Europe/Zurich">Zurich (UTC+1/+2)</option>
+              <option value="Europe/Moscow">Moscow (UTC+3)</option>
+            </optgroup>
+            <optgroup label="🌍 Africa">
+              <option value="Africa/Cairo">Cairo (UTC+2)</option>
+              <option value="Africa/Johannesburg">Johannesburg (UTC+2)</option>
+              <option value="Africa/Lagos">Lagos (UTC+1)</option>
+              <option value="Africa/Nairobi">Nairobi (UTC+3)</option>
+              <option value="Africa/Casablanca">Casablanca (UTC+0/+1)</option>
+            </optgroup>
+            <optgroup label="🌏 Asia">
+              <option value="Asia/Dubai">Dubai (UTC+4)</option>
+              <option value="Asia/Kolkata">Mumbai/Delhi (UTC+5:30)</option>
+              <option value="Asia/Bangkok">Bangkok (UTC+7)</option>
+              <option value="Asia/Singapore">Singapore (UTC+8)</option>
+              <option value="Asia/Hong_Kong">Hong Kong (UTC+8)</option>
+              <option value="Asia/Shanghai">Shanghai (UTC+8)</option>
+              <option value="Asia/Tokyo">Tokyo (UTC+9)</option>
+              <option value="Asia/Seoul">Seoul (UTC+9)</option>
+              <option value="Asia/Jakarta">Jakarta (UTC+7)</option>
+            </optgroup>
+            <optgroup label="🌏 Oceania">
+              <option value="Australia/Sydney">Sydney (UTC+10/+11)</option>
+              <option value="Australia/Melbourne">Melbourne (UTC+10/+11)</option>
+              <option value="Australia/Brisbane">Brisbane (UTC+10)</option>
+              <option value="Australia/Perth">Perth (UTC+8)</option>
+              <option value="Pacific/Auckland">Auckland (UTC+12/+13)</option>
+              <option value="Pacific/Fiji">Fiji (UTC+12/+13)</option>
+            </optgroup>
+            <optgroup label="🌊 Pacific">
+              <option value="Pacific/Honolulu">Honolulu (UTC-10)</option>
+              <option value="Pacific/Tahiti">Tahiti (UTC-10)</option>
+              <option value="Pacific/Guam">Guam (UTC+10)</option>
+            </optgroup>
           </select>
         </div>
 
