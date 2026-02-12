@@ -352,30 +352,28 @@ export default function ReadersManagement() {
                         >
                           <Edit className="w-4 h-4" />
                         </button>
-                        <Button
-                          variant="secondary"
-                          size="sm"
+                        <button
                           onClick={() => {
                             setSelectedReaderId(reader.reader_id);
                             setShowAssignModal(true);
                           }}
-                        >
-                          <Navigation className="w-4 h-4 mr-2" />
-                          {reader.current_center_name
+                          className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg"
+                          title={reader.current_center_name
                             ? t('readers_management.reassign')
                             : t('readers_management.assign')}
-                        </Button>
-                        <Button
-                          variant="secondary"
-                          size="sm"
+                        >
+                          <Navigation className="w-4 h-4" />
+                        </button>
+                        <button
                           onClick={() => {
                             setSelectedReaderId(reader.reader_id);
                             setShowHistory(showHistory === reader.reader_id ? null : reader.reader_id);
                           }}
+                          className="p-2 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg"
+                          title={t('readers_management.view_history')}
                         >
-                          <History className="w-4 h-4 mr-2" />
-                          {t('readers_management.view_history')}
-                        </Button>
+                          <History className="w-4 h-4" />
+                        </button>
                         <button
                           onClick={() => handleDeleteReader(reader.reader_id)}
                           className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
