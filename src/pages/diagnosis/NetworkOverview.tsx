@@ -14,39 +14,11 @@ interface HealthScore {
   total_sla_violations: number
 }
 
-interface RoutePerformance {
-  ranking_type: string
-  origin_postal_center_id: string
-  origin_name: string
-  origin_code: string
-  destination_postal_center_id: string
-  destination_name: string
-  destination_code: string
-  on_time_rate: number
-  avg_transit_time_hours: number
-  total_items: number
-  total_sla_violations: number
-}
-
-interface CenterPerformance {
-  ranking_type: string
-  postal_center_id: string
-  center_name: string
-  center_code: string
-  avg_processing_time_hours: number
-  on_time_rate: number
-  total_items_processed: number
-  avg_outbound_on_time_rate: number
-}
-
 export default function NetworkOverview() {
   const { selectedAccountId } = useAccount()
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [healthScore, setHealthScore] = useState<HealthScore | null>(null)
-  const [topRoutes, setTopRoutes] = useState<RoutePerformance[]>([])
-  const [bottomRoutes, setBottomRoutes] = useState<RoutePerformance[]>([])
-  const [topCenters, setTopCenters] = useState<CenterPerformance[]>([])
-  const [bottomCenters, setBottomCenters] = useState<CenterPerformance[]>([])
   const [autoFindings, setAutoFindings] = useState<string[]>([])
 
   useEffect(() => {
@@ -57,46 +29,32 @@ export default function NetworkOverview() {
 
   const loadData = async () => {
     setLoading(true)
+    setError(null)
+    
     try {
-      // Load health score
+      console.log('Loading health score for account:', selectedAccountId)
+      
       const { data: healthData, error: healthError } = await supabase
         .rpc('calculate_network_health_score', {
           p_account_id: selectedAccountId,
         })
 
-      if (healthError) throw healthError
+      if (healthError) {
+        console.error('Health score error:', healthError)
+        throw healthError
+      }
+      
+      console.log('Health data received:', healthData)
+      
       if (healthData && healthData.length > 0) {
         setHealthScore(healthData[0])
         generateAutoFindings(healthData[0])
+      } else {
+        setError('No data available')
       }
-
-      // Load top/bottom routes
-      const { data: routesData, error: routesError } = await supabase
-        .rpc('get_top_bottom_routes', {
-          p_account_id: selectedAccountId,
-          p_limit: 5,
-        })
-
-      if (routesError) throw routesError
-      if (routesData) {
-        setTopRoutes(routesData.filter((r: RoutePerformance) => r.ranking_type === 'top'))
-        setBottomRoutes(routesData.filter((r: RoutePerformance) => r.ranking_type === 'bottom'))
-      }
-
-      // Load top/bottom centers
-      const { data: centersData, error: centersError } = await supabase
-        .rpc('get_top_bottom_centers', {
-          p_account_id: selectedAccountId,
-          p_limit: 5,
-        })
-
-      if (centersError) throw centersError
-      if (centersData) {
-        setTopCenters(centersData.filter((c: CenterPerformance) => c.ranking_type === 'top'))
-        setBottomCenters(centersData.filter((c: CenterPerformance) => c.ranking_type === 'bottom'))
-      }
-    } catch (error) {
-      console.error('Error loading network overview data:', error)
+    } catch (err: any) {
+      console.error('Error loading network overview data:', err)
+      setError(err.message || 'Failed to load data')
     } finally {
       setLoading(false)
     }
@@ -105,7 +63,6 @@ export default function NetworkOverview() {
   const generateAutoFindings = (health: HealthScore) => {
     const findings: string[] = []
 
-    // Health score assessment
     if (health.health_score >= 80) {
       findings.push(`Network health is excellent (${health.health_score.toFixed(1)}/100). Overall performance is strong.`)
     } else if (health.health_score >= 60) {
@@ -114,22 +71,18 @@ export default function NetworkOverview() {
       findings.push(`Network health is concerning (${health.health_score.toFixed(1)}/100). Immediate action recommended.`)
     }
 
-    // On-time delivery assessment
     if (health.on_time_delivery_rate < 80) {
       findings.push(`On-time delivery rate is ${health.on_time_delivery_rate.toFixed(1)}%, below the 80% target.`)
     }
 
-    // Transit time assessment
     if (health.avg_transit_time_hours > 48) {
       findings.push(`Average transit time is ${health.avg_transit_time_hours.toFixed(1)} hours, which may indicate delays.`)
     }
 
-    // Processing time assessment
     if (health.avg_processing_time_hours > 4) {
       findings.push(`Average processing time at centers is ${health.avg_processing_time_hours.toFixed(1)} hours, above optimal levels.`)
     }
 
-    // SLA violations assessment
     if (health.total_sla_violations > 0) {
       const violationRate = (health.total_sla_violations / health.total_items) * 100
       findings.push(`${health.total_sla_violations} SLA violations detected (${violationRate.toFixed(1)}% of total items).`)
@@ -153,7 +106,28 @@ export default function NetworkOverview() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading network overview...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <p className="text-gray-900 font-semibold mb-2">Error loading data</p>
+          <p className="text-gray-600">{error}</p>
+          <button
+            onClick={loadData}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Retry
+          </button>
+        </div>
       </div>
     )
   }
@@ -308,145 +282,6 @@ export default function NetworkOverview() {
             </li>
           ))}
         </ul>
-      </div>
-
-      {/* Top & Bottom Performers */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Top Routes */}
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
-            <TrendingUp className="h-5 w-5 mr-2 text-green-600" />
-            Top 5 Routes
-          </h3>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead>
-                <tr>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Route</th>
-                  <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">On-Time %</th>
-                  <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Items</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {topRoutes.map((route, index) => (
-                  <tr key={index}>
-                    <td className="px-3 py-2 text-sm text-gray-900">
-                      {route.origin_code} → {route.destination_code}
-                    </td>
-                    <td className="px-3 py-2 text-sm text-right text-green-600 font-medium">
-                      {route.on_time_rate.toFixed(1)}%
-                    </td>
-                    <td className="px-3 py-2 text-sm text-right text-gray-600">
-                      {route.total_items.toLocaleString()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Bottom Routes */}
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
-            <AlertTriangle className="h-5 w-5 mr-2 text-red-600" />
-            Bottom 5 Routes
-          </h3>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead>
-                <tr>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Route</th>
-                  <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">On-Time %</th>
-                  <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Items</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {bottomRoutes.map((route, index) => (
-                  <tr key={index}>
-                    <td className="px-3 py-2 text-sm text-gray-900">
-                      {route.origin_code} → {route.destination_code}
-                    </td>
-                    <td className="px-3 py-2 text-sm text-right text-red-600 font-medium">
-                      {route.on_time_rate.toFixed(1)}%
-                    </td>
-                    <td className="px-3 py-2 text-sm text-right text-gray-600">
-                      {route.total_items.toLocaleString()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Top Centers */}
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
-            <TrendingUp className="h-5 w-5 mr-2 text-green-600" />
-            Top 5 Centers
-          </h3>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead>
-                <tr>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Center</th>
-                  <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">On-Time %</th>
-                  <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Proc. Time</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {topCenters.map((center, index) => (
-                  <tr key={index}>
-                    <td className="px-3 py-2 text-sm text-gray-900">
-                      {center.center_code}
-                    </td>
-                    <td className="px-3 py-2 text-sm text-right text-green-600 font-medium">
-                      {center.on_time_rate.toFixed(1)}%
-                    </td>
-                    <td className="px-3 py-2 text-sm text-right text-gray-600">
-                      {center.avg_processing_time_hours.toFixed(1)}h
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Bottom Centers */}
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
-            <AlertTriangle className="h-5 w-5 mr-2 text-red-600" />
-            Bottom 5 Centers
-          </h3>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead>
-                <tr>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Center</th>
-                  <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">On-Time %</th>
-                  <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Proc. Time</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {bottomCenters.map((center, index) => (
-                  <tr key={index}>
-                    <td className="px-3 py-2 text-sm text-gray-900">
-                      {center.center_code}
-                    </td>
-                    <td className="px-3 py-2 text-sm text-right text-red-600 font-medium">
-                      {center.on_time_rate.toFixed(1)}%
-                    </td>
-                    <td className="px-3 py-2 text-sm text-right text-gray-600">
-                      {center.avg_processing_time_hours.toFixed(1)}h
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
       </div>
     </div>
   )
