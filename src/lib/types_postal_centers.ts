@@ -9,6 +9,12 @@ export interface PostalCenter {
   opening_hour?: string // TIME format "HH:MM:SS" (deprecated, use weekly_schedule)
   cutoff_time?: string // TIME format "HH:MM:SS" (deprecated, use weekly_schedule)
   calculation_mode?: 'natural_days' | 'working_days' | null
+  city?: string
+  state?: string
+  country?: string
+  latitude?: number
+  longitude?: number
+  timezone?: string
   is_active: boolean
   created_at: string
   updated_at: string
@@ -43,6 +49,12 @@ export interface PostalCenterFormData {
   name: string
   description?: string
   calculation_mode?: 'natural_days' | 'working_days' | null
+  city?: string
+  state?: string
+  country?: string
+  latitude?: number
+  longitude?: number
+  timezone?: string
   is_active: boolean
 }
 

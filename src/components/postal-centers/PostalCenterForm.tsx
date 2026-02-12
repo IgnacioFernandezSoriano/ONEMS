@@ -22,14 +22,19 @@ export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCen
   const { t } = useTranslation()
   const { config, nonWorkingDays: accountHolidays, weeklySchedule: accountWeeklySchedule } = useAccountConfig()
   
-  const [formData, setFormData] = useState<PostalCenterFormData>({code: '',
+  const [formData, setFormData] = useState<PostalCenterFormData>({
+    code: '',
     name: '',
     description: '',
     calculation_mode: config?.calculation_mode || 'natural_days',
+    city: '',
+    state: '',
+    country: 'USA',
+    latitude: undefined,
+    longitude: undefined,
+    timezone: 'America/New_York',
     is_active: true
-  })
-  
-  const [weeklySchedule, setWeeklySchedule] = useState<WeeklyScheduleDay[]>([])
+  }) const [weeklySchedule, setWeeklySchedule] = useState<WeeklyScheduleDay[]>([])
   const [centerHolidays, setCenterHolidays] = useState<{ date: string; reason: string }[]>([])
   const [newHoliday, setNewHoliday] = useState({ date: '', reason: '' })
   const [submitting, setSubmitting] = useState(false)
@@ -52,6 +57,12 @@ export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCen
         name: postalCenter.name,
         description: postalCenter.description || '',
         calculation_mode: postalCenter.calculation_mode || null,
+        city: postalCenter.city || '',
+        state: postalCenter.state || '',
+        country: postalCenter.country || 'USA',
+        latitude: postalCenter.latitude,
+        longitude: postalCenter.longitude,
+        timezone: postalCenter.timezone || 'America/New_York',
         is_active: postalCenter.is_active
       })
       // Load center-specific weekly schedule and holidays from database
@@ -199,6 +210,97 @@ export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCen
             rows={3}
             placeholder="Main distribution hub for Madrid region"
           />
+        </div>
+
+        {/* Location Information */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              City
+            </label>
+            <input
+              type="text"
+              value={formData.city || ''}
+              onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+              placeholder="New York"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              State
+            </label>
+            <input
+              type="text"
+              value={formData.state || ''}
+              onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+              placeholder="NY"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Country
+            </label>
+            <input
+              type="text"
+              value={formData.country || 'USA'}
+              onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+              placeholder="USA"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Latitude
+            </label>
+            <input
+              type="number"
+              step="0.000001"
+              value={formData.latitude || ''}
+              onChange={(e) => setFormData({ ...formData, latitude: e.target.value ? parseFloat(e.target.value) : undefined })}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+              placeholder="40.712776"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Longitude
+            </label>
+            <input
+              type="number"
+              step="0.000001"
+              value={formData.longitude || ''}
+              onChange={(e) => setFormData({ ...formData, longitude: e.target.value ? parseFloat(e.target.value) : undefined })}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+              placeholder="-74.005974"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Timezone
+          </label>
+          <select
+            value={formData.timezone || 'America/New_York'}
+            onChange={(e) => setFormData({ ...formData, timezone: e.target.value })}
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+          >
+            <option value="America/New_York">Eastern Time (America/New_York)</option>
+            <option value="America/Chicago">Central Time (America/Chicago)</option>
+            <option value="America/Denver">Mountain Time (America/Denver)</option>
+            <option value="America/Los_Angeles">Pacific Time (America/Los_Angeles)</option>
+            <option value="America/Phoenix">Arizona Time (America/Phoenix)</option>
+            <option value="America/Anchorage">Alaska Time (America/Anchorage)</option>
+            <option value="Pacific/Honolulu">Hawaii Time (Pacific/Honolulu)</option>
+          </select>
         </div>
 
         <div className="flex items-center">
