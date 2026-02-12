@@ -291,6 +291,13 @@ export function Sidebar() {
               roles: ['admin', 'superadmin'],
               tooltip: t('menu.segment_deep_dive.tooltip'),
             },
+            {
+              path: '/diagnosis/jk-performance-segments',
+              label: t('menu.jk_performance_segments'),
+              icon: Activity,
+              roles: ['admin', 'superadmin'],
+              tooltip: t('menu.jk_performance_segments.tooltip'),
+            },
           ],
         },
       ],

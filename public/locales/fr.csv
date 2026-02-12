@@ -2413,3 +2413,5 @@ menu.center_analysis,Analyse des Centres
 menu.center_analysis.tooltip,Analyse des performances opérationnelles par centre
 menu.segment_deep_dive,Analyse Approfondie des Segments
 menu.segment_deep_dive.tooltip,Analyse détaillée des segments de voyage par type et performance
+menu.jk_performance_segments,Performance J+K (Segments)
+menu.jk_performance_segments.tooltip,Analyse de performance J+K au niveau des segments avec métriques en jours

@@ -46,6 +46,7 @@ import NetworkOverview from './pages/diagnosis/NetworkOverview'
 import RouteAnalysis from './pages/diagnosis/RouteAnalysis'
 import CenterAnalysis from './pages/diagnosis/CenterAnalysis'
 import SegmentDeepDive from './pages/diagnosis/SegmentDeepDive'
+import JKPerformanceSegments from './pages/diagnosis/JKPerformanceSegments'
 
 
 function App() {
@@ -191,6 +192,16 @@ function App() {
                       element={
                         <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
                           <SegmentDeepDive />
+                        </ProtectedRoute>
+                      }
+                    />
+                    
+                    {/* J+K Performance Segments - for admin and superadmin */}
+                    <Route
+                      path="/diagnosis/jk-performance-segments"
+                      element={
+                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                          <JKPerformanceSegments />
                         </ProtectedRoute>
                       }
                     />
