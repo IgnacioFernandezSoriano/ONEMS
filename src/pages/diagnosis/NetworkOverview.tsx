@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useAccount } from '../../contexts/AccountContext'
+import { useAuth } from '../../contexts/AuthContext'
 import { supabase } from '../../lib/supabase'
 import { Activity, TrendingUp, Clock, Database, AlertCircle, Info } from 'lucide-react'
 
@@ -16,7 +16,8 @@ interface HealthScore {
 }
 
 export default function NetworkOverview() {
-  const { selectedAccountId } = useAccount()
+  const { profile } = useAuth()
+  const accountId = profile?.account_id
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [healthScore, setHealthScore] = useState<HealthScore | null>(null)
@@ -25,7 +26,10 @@ export default function NetworkOverview() {
     let mounted = true
 
     const loadData = async () => {
-      if (!selectedAccountId) {
+      console.log('[NetworkOverview] accountId:', accountId)
+      
+      if (!accountId) {
+        console.log('[NetworkOverview] No account ID, skipping load')
         setLoading(false)
         return
       }
@@ -34,9 +38,13 @@ export default function NetworkOverview() {
       setError(null)
 
       try {
+        console.log('[NetworkOverview] Calling RPC with account:', accountId)
+        
         const { data, error: rpcError } = await supabase.rpc('calculate_network_health_score', {
-          p_account_id: selectedAccountId,
+          p_account_id: accountId,
         })
+        
+        console.log('[NetworkOverview] RPC response:', { data, error: rpcError })
 
         if (!mounted) return
 
@@ -48,8 +56,10 @@ export default function NetworkOverview() {
         }
 
         if (data && data.length > 0) {
+          console.log('[NetworkOverview] Setting health score:', data[0])
           setHealthScore(data[0])
         } else {
+          console.log('[NetworkOverview] No data returned')
           setHealthScore(null)
         }
       } catch (err) {
@@ -68,7 +78,7 @@ export default function NetworkOverview() {
     return () => {
       mounted = false
     }
-  }, [selectedAccountId])
+  }, [accountId])
 
   if (loading) {
     return (
