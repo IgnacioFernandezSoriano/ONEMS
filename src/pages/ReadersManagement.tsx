@@ -102,7 +102,7 @@ export default function ReadersManagement() {
   };
 
   const handleDeleteReader = async (readerId: string) => {
-    if (!confirm(t('mobile_readers.confirm_delete'))) return;
+    if (!confirm(t('readers_management.confirm_delete'))) return;
 
     const result = await deleteReader(readerId);
     if (result.success) {
@@ -140,7 +140,7 @@ export default function ReadersManagement() {
         <div className="flex gap-2">
           <Button onClick={() => setShowCreateForm(true)}>
             <Plus className="w-4 h-4 mr-2" />
-            {t('mobile_readers.create_reader')}
+            {t('readers_management.create_reader')}
           </Button>
         </div>
         <div className="text-sm text-gray-600 dark:text-gray-400">
@@ -161,7 +161,7 @@ export default function ReadersManagement() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-              {t('mobile_readers.create_reader')}
+              {t('readers_management.create_reader')}
             </h2>
             <ReaderForm
               accountId={accountId!}
@@ -214,7 +214,7 @@ export default function ReadersManagement() {
                   </span>
                   {reader.is_mobile && (
                     <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs font-medium rounded">
-                      {t('mobile_readers.mobile')}
+                      {t('readers_management.mobile')}
                     </span>
                   )}
                 </div>
@@ -236,7 +236,7 @@ export default function ReadersManagement() {
               <div className="flex items-center gap-2 mb-2">
                 <MapPin className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {t('mobile_readers.current_location')}
+                  {t('readers_management.current_location')}
                 </span>
               </div>
               {reader.current_center_name ? (
@@ -246,14 +246,14 @@ export default function ReadersManagement() {
                   </p>
                   {reader.assigned_since && (
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      {t('mobile_readers.since')}{' '}
+                      {t('readers_management.since')}{' '}
                       {new Date(reader.assigned_since).toLocaleDateString('es-ES')}
                     </p>
                   )}
                 </div>
               ) : (
                 <p className="text-gray-500 dark:text-gray-400 italic">
-                  {t('mobile_readers.unassigned')}
+                  {t('readers_management.unassigned')}
                 </p>
               )}
             </div>
@@ -263,7 +263,7 @@ export default function ReadersManagement() {
               <div className="flex items-center gap-1">
                 <History className="w-4 h-4" />
                 <span>
-                  {reader.total_assignments} {t('mobile_readers.assignments')}
+                  {reader.total_assignments} {t('readers_management.assignments')}
                 </span>
               </div>
             </div>
@@ -280,8 +280,8 @@ export default function ReadersManagement() {
               >
                 <Navigation className="w-4 h-4 mr-2" />
                 {reader.current_center_name
-                  ? t('mobile_readers.reassign')
-                  : t('mobile_readers.assign')}
+                  ? t('readers_management.reassign')
+                  : t('readers_management.assign')}
               </Button>
               <Button
                 variant="secondary"
@@ -292,7 +292,7 @@ export default function ReadersManagement() {
                 }}
               >
                 <History className="w-4 h-4 mr-2" />
-                {t('mobile_readers.view_history')}
+                {t('readers_management.view_history')}
               </Button>
             </div>
 

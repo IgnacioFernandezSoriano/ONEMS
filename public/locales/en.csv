@@ -2478,3 +2478,21 @@ readers_management.no_history,No History
 readers_management.showing,showing
 readers_management.total,total
 readers_management.no_readers_found,No readers found matching your filters
+readers_management.create_reader,Create Reader
+readers_management.confirm_delete,Are you sure you want to delete this reader?
+readers_management.since,Since
+readers_management.assignments,assignments
+readers_management.reassign,Reassign
+readers_management.assign,Assign
+readers_management.view_history,View History
+readers_management.location_history,Location History
+readers_management.current,Current
+readers_management.assigned_at,Assigned
+readers_management.unassigned_at,Unassigned
+readers_management.duration,Duration
+readers_management.notes,Notes
+readers_management.currently_active,Currently active
+readers_management.less_than_day,Less than 1 day
+readers_management.one_day,1 day
+readers_management.days,days
+readers_management.no_location_history,No location history available

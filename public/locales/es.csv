@@ -2478,3 +2478,21 @@ readers_management.no_history,Sin Historial
 readers_management.showing,mostrando
 readers_management.total,total
 readers_management.no_readers_found,No se encontraron lectores que coincidan con tus filtros
+readers_management.create_reader,Crear Lector
+readers_management.confirm_delete,¿Estás seguro de que quieres eliminar este lector?
+readers_management.since,Desde
+readers_management.assignments,asignaciones
+readers_management.reassign,Reasignar
+readers_management.assign,Asignar
+readers_management.view_history,Ver Historial
+readers_management.location_history,Historial de Ubicaciones
+readers_management.current,Actual
+readers_management.assigned_at,Asignado
+readers_management.unassigned_at,Desasignado
+readers_management.duration,Duración
+readers_management.notes,Notas
+readers_management.currently_active,Actualmente activo
+readers_management.less_than_day,Menos de 1 día
+readers_management.one_day,1 día
+readers_management.days,días
+readers_management.no_location_history,No hay historial de ubicaciones disponible
