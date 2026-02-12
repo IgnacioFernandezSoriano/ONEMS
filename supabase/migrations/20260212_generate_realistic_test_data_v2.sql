@@ -49,10 +49,10 @@ BEGIN
     v_processing_minutes := 85;
     v_distribution_minutes := v_transit_minutes - v_processing_minutes;
 
-    INSERT INTO journeys (id, account_id, tag_id, origin_city_name, destination_city_name,
+    INSERT INTO journeys (id, account_id, tag_id, origin_city_name, destination_city_name, route_path,
       first_event_timestamp, last_event_timestamp, journey_status, total_actual_time_minutes,
       total_distribution_time_minutes, total_sla_violations, is_missroute, total_segments, on_time_segments)
-    VALUES (v_journey_id, v_account_id, 'NY-LA-' || i, 'New York', 'Los Angeles',
+    VALUES (v_journey_id, v_account_id, 'NY-LA-' || i, 'New York', 'Los Angeles', '[]'::jsonb,
       v_entry_time, v_exit_time, 'completed', v_transit_minutes, v_distribution_minutes,
       CASE WHEN v_is_on_time THEN 0 ELSE 1 END, FALSE, 3, CASE WHEN v_is_on_time THEN 3 ELSE 2 END);
 
@@ -89,10 +89,10 @@ BEGIN
     v_processing_minutes := 65;
     v_distribution_minutes := v_transit_minutes - v_processing_minutes;
 
-    INSERT INTO journeys (id, account_id, tag_id, origin_city_name, destination_city_name,
+    INSERT INTO journeys (id, account_id, tag_id, origin_city_name, destination_city_name, route_path,
       first_event_timestamp, last_event_timestamp, journey_status, total_actual_time_minutes,
       total_distribution_time_minutes, total_sla_violations, is_missroute, total_segments, on_time_segments)
-    VALUES (v_journey_id, v_account_id, 'LA-CHI-' || i, 'Los Angeles', 'Chicago',
+    VALUES (v_journey_id, v_account_id, 'LA-CHI-' || i, 'Los Angeles', 'Chicago', '[]'::jsonb,
       v_entry_time, v_exit_time, 'completed', v_transit_minutes, v_distribution_minutes,
       CASE WHEN v_is_on_time THEN 0 ELSE 1 END, FALSE, 3, CASE WHEN v_is_on_time THEN 3 ELSE 2 END);
 
@@ -126,10 +126,10 @@ BEGIN
     v_processing_minutes := 85;
     v_distribution_minutes := v_transit_minutes - v_processing_minutes;
 
-    INSERT INTO journeys (id, account_id, tag_id, origin_city_name, destination_city_name,
+    INSERT INTO journeys (id, account_id, tag_id, origin_city_name, destination_city_name, route_path,
       first_event_timestamp, last_event_timestamp, journey_status, total_actual_time_minutes,
       total_distribution_time_minutes, total_sla_violations, is_missroute, total_segments, on_time_segments)
-    VALUES (v_journey_id, v_account_id, 'CHI-NY-' || i, 'Chicago', 'Queens',
+    VALUES (v_journey_id, v_account_id, 'CHI-NY-' || i, 'Chicago', 'Queens', '[]'::jsonb,
       v_entry_time, v_exit_time, 'completed', v_transit_minutes, v_distribution_minutes,
       CASE WHEN v_is_on_time THEN 0 ELSE 1 END, FALSE, 3, CASE WHEN v_is_on_time THEN 3 ELSE 2 END);
 
@@ -163,10 +163,10 @@ BEGIN
     v_processing_minutes := 35;
     v_distribution_minutes := v_transit_minutes - v_processing_minutes;
 
-    INSERT INTO journeys (id, account_id, tag_id, origin_city_name, destination_city_name,
+    INSERT INTO journeys (id, account_id, tag_id, origin_city_name, destination_city_name, route_path,
       first_event_timestamp, last_event_timestamp, journey_status, total_actual_time_minutes,
       total_distribution_time_minutes, total_sla_violations, is_missroute, total_segments, on_time_segments)
-    VALUES (v_journey_id, v_account_id, 'SFO-SAC-' || i, 'San Francisco', 'Sacramento',
+    VALUES (v_journey_id, v_account_id, 'SFO-SAC-' || i, 'San Francisco', 'Sacramento', '[]'::jsonb,
       v_entry_time, v_exit_time, 'completed', v_transit_minutes, v_distribution_minutes,
       CASE WHEN v_is_on_time THEN 0 ELSE 1 END, FALSE, 3, CASE WHEN v_is_on_time THEN 3 ELSE 2 END);
 
@@ -200,10 +200,10 @@ BEGIN
     v_processing_minutes := 45;
     v_distribution_minutes := v_transit_minutes - v_processing_minutes;
 
-    INSERT INTO journeys (id, account_id, tag_id, origin_city_name, destination_city_name,
+    INSERT INTO journeys (id, account_id, tag_id, origin_city_name, destination_city_name, route_path,
       first_event_timestamp, last_event_timestamp, journey_status, total_actual_time_minutes,
       total_distribution_time_minutes, total_sla_violations, is_missroute, total_segments, on_time_segments)
-    VALUES (v_journey_id, v_account_id, 'BAL-PHL-' || i, 'Baltimore', 'Philadelphia',
+    VALUES (v_journey_id, v_account_id, 'BAL-PHL-' || i, 'Baltimore', 'Philadelphia', '[]'::jsonb,
       v_entry_time, v_exit_time, 'completed', v_transit_minutes, v_distribution_minutes,
       CASE WHEN v_is_on_time THEN 0 ELSE 1 END, FALSE, 3, CASE WHEN v_is_on_time THEN 3 ELSE 2 END);
 
@@ -237,10 +237,10 @@ BEGIN
     v_processing_minutes := 55;
     v_distribution_minutes := v_transit_minutes - v_processing_minutes;
 
-    INSERT INTO journeys (id, account_id, tag_id, origin_city_name, destination_city_name,
+    INSERT INTO journeys (id, account_id, tag_id, origin_city_name, destination_city_name, route_path,
       first_event_timestamp, last_event_timestamp, journey_status, total_actual_time_minutes,
       total_distribution_time_minutes, total_sla_violations, is_missroute, total_segments, on_time_segments)
-    VALUES (v_journey_id, v_account_id, 'DEN-SFO-' || i, 'Denver', 'San Francisco',
+    VALUES (v_journey_id, v_account_id, 'DEN-SFO-' || i, 'Denver', 'San Francisco', '[]'::jsonb,
       v_entry_time, v_exit_time, 'completed', v_transit_minutes, v_distribution_minutes,
       CASE WHEN v_is_on_time THEN 0 ELSE 1 END, FALSE, 3, CASE WHEN v_is_on_time THEN 3 ELSE 2 END);
 
