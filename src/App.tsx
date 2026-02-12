@@ -43,6 +43,7 @@ import CompleteJourneys from './pages/diagnosis/CompleteJourneys'
 import ProcessedEvents from './pages/ProcessedEvents'
 import ReadersManagement from './pages/ReadersManagement'
 import NetworkOverview from './pages/diagnosis/NetworkOverview'
+import RouteAnalysis from './pages/diagnosis/RouteAnalysis'
 
 
 function App() {
@@ -158,6 +159,16 @@ function App() {
                       element={
                         <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
                           <NetworkOverview />
+                        </ProtectedRoute>
+                      }
+                    />
+                    
+                    {/* Route Analysis - for admin and superadmin */}
+                    <Route
+                      path="/diagnosis/route-analysis"
+                      element={
+                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                          <RouteAnalysis />
                         </ProtectedRoute>
                       }
                     />
