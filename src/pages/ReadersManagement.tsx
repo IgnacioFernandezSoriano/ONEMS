@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Plus, MapPin, History, Edit, Trash2, Navigation } from 'lucide-react';
 import { Button } from '@/components/common/Button';
 import { ReaderForm } from '@/components/postal-centers/ReaderForm';
@@ -16,10 +16,11 @@ export default function ReadersManagement() {
   const { profile } = useAuth();
   const accountId = profile?.account_id || undefined;
 
-  const { readers, createMobileReader, updateReader, deleteReader, refetch } =
+  const { readers, allReaders, createMobileReader, updateReader, deleteReader, refetch } =
     useMobileReaders(accountId);
 
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
   const [selectedReaderId, setSelectedReaderId] = useState<string | null>(null);
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [showHistory, setShowHistory] = useState<string | null>(null);
@@ -82,11 +83,23 @@ export default function ReadersManagement() {
   }, [readers, filters]);
 
   const selectedReader = readers.find((r) => r.reader_id === selectedReaderId);
+  const selectedFullReader = allReaders.find((r) => r.id === selectedReaderId);
 
   const handleCreateReader = async (data: ReaderFormData) => {
     const result = await createMobileReader(data);
     if (result.success) {
       setShowCreateForm(false);
+      refetch();
+    } else {
+      throw new Error(result.error);
+    }
+  };
+
+  const handleUpdateReader = async (readerId: string, data: ReaderFormData) => {
+    const result = await updateReader(readerId, data);
+    if (result.success) {
+      setShowEditForm(false);
+      setSelectedReaderId(null);
       refetch();
     } else {
       throw new Error(result.error);
@@ -178,6 +191,26 @@ export default function ReadersManagement() {
         </div>
       )}
 
+      {/* Edit Form Modal */}
+      {showEditForm && selectedFullReader && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+              {t('readers_management.edit_reader')}
+            </h2>
+            <ReaderForm
+              accountId={accountId!}
+              reader={selectedFullReader}
+              onSubmit={(data) => handleUpdateReader(selectedFullReader.id, data)}
+              onCancel={() => {
+                setShowEditForm(false);
+                setSelectedReaderId(null);
+              }}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Assign Modal */}
       {showAssignModal && selectedReader && (
         <AssignReaderModal
@@ -207,6 +240,9 @@ export default function ReadersManagement() {
                     {t('readers_management.reader_name')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    {t('readers_management.carrier')}
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     {t('readers_management.code')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -234,6 +270,13 @@ export default function ReadersManagement() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900 dark:text-white">
                         {reader.reader_name}
+                      </div>
+                    </td>
+
+                    {/* Carrier */}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-500 dark:text-gray-400">
+                        {reader.carrier_name || '-'}
                       </div>
                     </td>
 
@@ -299,6 +342,16 @@ export default function ReadersManagement() {
                     {/* Actions */}
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => {
+                            setSelectedReaderId(reader.reader_id);
+                            setShowEditForm(true);
+                          }}
+                          className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg"
+                          title={t('common.edit')}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
                         <Button
                           variant="secondary"
                           size="sm"
@@ -336,7 +389,7 @@ export default function ReadersManagement() {
                   {/* Expandable History Row */}
                   {showHistory === reader.reader_id && (
                     <tr>
-                      <td colSpan={7} className="px-6 py-4 bg-gray-50 dark:bg-gray-700/30">
+                      <td colSpan={8} className="px-6 py-4 bg-gray-50 dark:bg-gray-700/30">
                         <ReaderLocationTimeline readerId={reader.reader_id} />
                       </td>
                     </tr>

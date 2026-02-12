@@ -9,6 +9,8 @@ export interface MobileReaderSummary {
   reader_type: 'Entry' | 'Exit' | 'Mixed';
   current_center_id: string | null;
   current_center_name: string | null;
+  carrier_id: string | null;
+  carrier_name: string | null;
   assigned_since: string | null;
   total_assignments: number;
   is_mobile: boolean;

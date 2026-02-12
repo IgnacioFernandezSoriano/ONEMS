@@ -2506,3 +2506,4 @@ readers_management.all_carriers,All Carriers
 readers_management.movement_date,Movement Date
 readers_management.movement_date_help,Date when this assignment/unassignment takes effect
 readers_management.assign_help,Select a center to assign or leave empty to unassign
+readers_management.edit_reader,Edit Reader
