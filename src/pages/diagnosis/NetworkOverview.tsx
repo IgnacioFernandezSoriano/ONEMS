@@ -57,7 +57,16 @@ export default function NetworkOverview() {
 
         if (data && data.length > 0) {
           console.log('[NetworkOverview] Setting health score:', data[0])
-          setHealthScore(data[0])
+          // Parse numeric values from SQL (returned as strings)
+          const parsed = {
+            ...data[0],
+            health_score: parseFloat(data[0].health_score),
+            on_time_delivery_rate: parseFloat(data[0].on_time_delivery_rate),
+            avg_transit_time_hours: parseFloat(data[0].avg_transit_time_hours),
+            avg_processing_time_hours: parseFloat(data[0].avg_processing_time_hours),
+            data_quality_score: parseFloat(data[0].data_quality_score || '100'),
+          }
+          setHealthScore(parsed)
         } else {
           console.log('[NetworkOverview] No data returned')
           setHealthScore(null)
