@@ -99,22 +99,57 @@ export function useSLAs() {
 
     const combinations: any[] = []
 
-    // 1. Generate OPERATIONAL SLAs for selected centers
+    // 1. Generate OPERATIONAL SLAs for selected centers × carriers × products
     if (request.generateOperational && request.selectedCenters) {
+      // Get all carriers and products
+      const carriersRes = await supabase
+        .from('carriers')
+        .select('id')
+        .eq('account_id', effectiveAccountId)
+      
+      const productsRes = await supabase
+        .from('products')
+        .select('id, carrier_id, standard_delivery_hours, time_unit')
+        .eq('account_id', effectiveAccountId)
+      
+      const carrierIds = carriersRes.data?.map(c => c.id) || []
+      const allProducts = productsRes.data || []
+      
       for (const centerId of request.selectedCenters) {
-        combinations.push({
-          account_id: effectiveAccountId,
-          sla_type: 'operational',
-          postal_center_id: centerId,
-          from_postal_center_id: null,
-          to_postal_center_id: null,
-          expected_time_minutes: request.expected_time_minutes,
-          time_unit: request.time_unit,
-          on_time_percentage: request.on_time_percentage,
-          warning_threshold: request.warning_threshold,
-          critical_threshold: request.critical_threshold,
-          is_active: true,
-        })
+        for (const carrierId of carrierIds) {
+          // Get products for this carrier
+          const carrierProducts = allProducts.filter(p => p.carrier_id === carrierId)
+          
+          for (const product of carrierProducts) {
+            // Calculate expected time based on product standard delivery
+            let expectedMinutes = request.expected_time_minutes
+            if (product.standard_delivery_hours && product.time_unit) {
+              if (product.time_unit === 'days') {
+                expectedMinutes = product.standard_delivery_hours * 24 * 60
+              } else if (product.time_unit === 'hours') {
+                expectedMinutes = product.standard_delivery_hours * 60
+              } else {
+                expectedMinutes = product.standard_delivery_hours
+              }
+            }
+            
+            combinations.push({
+              account_id: effectiveAccountId,
+              sla_type: 'operational',
+              postal_center_id: centerId,
+              from_postal_center_id: null,
+              to_postal_center_id: null,
+              carrier_id: carrierId,
+              product_id: product.id,
+              expected_time_minutes: expectedMinutes,
+              time_unit: request.time_unit,
+              on_time_percentage: request.on_time_percentage,
+              warning_threshold: request.warning_threshold,
+              critical_threshold: request.critical_threshold,
+              is_active: true,
+            })
+          }
+        }
       }
     }
 
