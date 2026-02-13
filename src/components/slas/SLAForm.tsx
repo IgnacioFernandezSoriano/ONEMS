@@ -2,8 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from '@/hooks/useTranslation'
 import type { SLAFormData, SLAType } from '@/lib/types_slas'
 import type { PostalCenter } from '@/lib/types_postal_centers'
-import type { Carrier } from '@/lib/types_carriers'
-import type { Product } from '@/lib/types_products'
+import type { Carrier, Product } from '@/lib/types'
 
 interface SLAFormProps {
   postalCenters: PostalCenter[]

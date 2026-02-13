@@ -175,6 +175,8 @@ export function SLAsConfiguration() {
       postal_center_id: '',
       from_postal_center_id: '',
       to_postal_center_id: '',
+      carrier_id: '',
+      product_id: '',
       status: '',
     })
   }

@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { SLAWithDetails, SLAFormData, GenerateCombinationsRequest } from '@/lib/types_slas'
 import type { PostalCenter } from './types_postal_centers'
-import type { Carrier } from './types_carriers'
-import type { Product } from './types_products'
+import type { Carrier, Product } from './types'
 import { useEffectiveAccountId } from './useEffectiveAccountId'
 
 export function useSLAs() {
