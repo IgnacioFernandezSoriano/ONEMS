@@ -13,6 +13,8 @@ export function SLAsConfiguration() {
   const {
     slas,
     postalCenters,
+    carriers,
+    products,
     loading,
     error,
     createSLA,
@@ -39,6 +41,8 @@ export function SLAsConfiguration() {
     postal_center_id: '',
     from_postal_center_id: '',
     to_postal_center_id: '',
+    carrier_id: '',
+    product_id: '',
     status: '',
   })
 
@@ -49,6 +53,8 @@ export function SLAsConfiguration() {
       if (filters.postal_center_id && sla.postal_center_id !== filters.postal_center_id) return false
       if (filters.from_postal_center_id && sla.from_postal_center_id !== filters.from_postal_center_id) return false
       if (filters.to_postal_center_id && sla.to_postal_center_id !== filters.to_postal_center_id) return false
+      if (filters.carrier_id && sla.carrier_id !== filters.carrier_id) return false
+      if (filters.product_id && sla.product_id !== filters.product_id) return false
       if (filters.status === 'active' && !sla.is_active) return false
       if (filters.status === 'inactive' && sla.is_active) return false
       return true
@@ -252,6 +258,38 @@ export function SLAsConfiguration() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
+                Carrier
+              </label>
+              <select
+                value={filters.carrier_id}
+                onChange={(e) => setFilters({ ...filters, carrier_id: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              >
+                <option value="">{t('common.all')}</option>
+                {carriers.map(c => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Product
+              </label>
+              <select
+                value={filters.product_id}
+                onChange={(e) => setFilters({ ...filters, product_id: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              >
+                <option value="">{t('common.all')}</option>
+                {products.map(p => (
+                  <option key={p.id} value={p.id}>{p.code}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 {t('common.status')}
               </label>
               <select
@@ -291,6 +329,12 @@ export function SLAsConfiguration() {
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                 {t('slas.route')}
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                Carrier
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                Product
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                 {t('slas.expected_time')}
@@ -338,6 +382,12 @@ export function SLAsConfiguration() {
                       {sla.from_postal_center?.name} → {sla.to_postal_center?.name}
                     </div>
                   )}
+                </td>
+                <td className="px-4 py-3 text-sm">
+                  {carriers.find(c => c.id === sla.carrier_id)?.name || '-'}
+                </td>
+                <td className="px-4 py-3 text-sm">
+                  {products.find(p => p.id === sla.product_id)?.code || '-'}
                 </td>
                 <td className="px-4 py-3 text-sm">
                   {editingCell?.id === sla.id && editingCell?.field === 'expected_time_minutes' ? (
@@ -459,6 +509,8 @@ export function SLAsConfiguration() {
         <Modal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)} title={t('slas.create_sla')}>
           <SLAForm
             postalCenters={postalCenters}
+            carriers={carriers}
+            products={products}
             onSubmit={async (data) => {
               await createSLA(data)
               setShowCreateModal(false)
@@ -482,6 +534,8 @@ export function SLAsConfiguration() {
         <Modal isOpen={!!editingSLA} onClose={() => setEditingSLA(null)} title={t('slas.edit_sla')}>
           <SLAForm
             postalCenters={postalCenters}
+            carriers={carriers}
+            products={products}
             initialData={{
               sla_type: editingSLA.sla_type,
               postal_center_id: editingSLA.postal_center_id || undefined,

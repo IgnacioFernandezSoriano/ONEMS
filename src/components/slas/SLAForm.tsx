@@ -2,15 +2,19 @@ import { useState } from 'react'
 import { useTranslation } from '@/hooks/useTranslation'
 import type { SLAFormData, SLAType } from '@/lib/types_slas'
 import type { PostalCenter } from '@/lib/types_postal_centers'
+import type { Carrier } from '@/lib/types_carriers'
+import type { Product } from '@/lib/types_products'
 
 interface SLAFormProps {
   postalCenters: PostalCenter[]
+  carriers: Carrier[]
+  products: Product[]
   initialData?: Partial<SLAFormData>
   onSubmit: (data: SLAFormData) => Promise<void>
   onCancel: () => void
 }
 
-export function SLAForm({ postalCenters, initialData, onSubmit, onCancel }: SLAFormProps) {
+export function SLAForm({ postalCenters, carriers, products, initialData, onSubmit, onCancel }: SLAFormProps) {
   const { t } = useTranslation()
   const [loading, setLoading] = useState(false)
   // Initialize time value and unit from initialData
@@ -24,6 +28,8 @@ export function SLAForm({ postalCenters, initialData, onSubmit, onCancel }: SLAF
     postal_center_id: initialData?.postal_center_id,
     from_postal_center_id: initialData?.from_postal_center_id,
     to_postal_center_id: initialData?.to_postal_center_id,
+    carrier_id: initialData?.carrier_id,
+    product_id: initialData?.product_id,
     expected_time_minutes: initialData?.expected_time_minutes || 1440,
     time_unit: 'minutes',
     on_time_percentage: initialData?.on_time_percentage || 95,
@@ -138,6 +144,42 @@ export function SLAForm({ postalCenters, initialData, onSubmit, onCancel }: SLAF
           </div>
         </>
       )}
+
+      {/* Carrier */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Carrier
+        </label>
+        <select
+          value={formData.carrier_id || ''}
+          onChange={(e) => setFormData({ ...formData, carrier_id: e.target.value })}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md"
+        >
+          <option value="">{t('common.select')}</option>
+          {carriers.map(c => (
+            <option key={c.id} value={c.id}>{c.name}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* Product */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Product
+        </label>
+        <select
+          value={formData.product_id || ''}
+          onChange={(e) => setFormData({ ...formData, product_id: e.target.value })}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md"
+        >
+          <option value="">{t('common.select')}</option>
+          {products
+            .filter(p => !formData.carrier_id || p.carrier_id === formData.carrier_id)
+            .map(p => (
+              <option key={p.id} value={p.id}>{p.code} - {p.description}</option>
+            ))}
+        </select>
+      </div>
 
       {/* Expected Time */}
       <div>

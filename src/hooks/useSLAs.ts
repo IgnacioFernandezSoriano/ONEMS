@@ -1,13 +1,17 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { SLAWithDetails, SLAFormData, GenerateCombinationsRequest } from '@/lib/types_slas'
-import type { PostalCenter } from '@/lib/types_postal_centers'
+import type { PostalCenter } from './types_postal_centers'
+import type { Carrier } from './types_carriers'
+import type { Product } from './types_products'
 import { useEffectiveAccountId } from './useEffectiveAccountId'
 
 export function useSLAs() {
   const effectiveAccountId = useEffectiveAccountId()
   const [slas, setSLAs] = useState<SLAWithDetails[]>([])
   const [postalCenters, setPostalCenters] = useState<PostalCenter[]>([])
+  const [carriers, setCarriers] = useState<Carrier[]>([])
+  const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -32,21 +36,41 @@ export function useSLAs() {
         .eq('is_active', true)
         .is('deleted_at', null)
 
+      let carriersQuery = supabase
+        .from('carriers')
+        .select('*')
+        .eq('is_active', true)
+        .is('deleted_at', null)
+
+      let productsQuery = supabase
+        .from('products')
+        .select('*')
+        .eq('is_active', true)
+        .is('deleted_at', null)
+
       if (effectiveAccountId) {
         slasQuery = slasQuery.eq('account_id', effectiveAccountId)
         postalCentersQuery = postalCentersQuery.eq('account_id', effectiveAccountId)
+        carriersQuery = carriersQuery.eq('account_id', effectiveAccountId)
+        productsQuery = productsQuery.eq('account_id', effectiveAccountId)
       }
 
-      const [slasRes, postalCentersRes] = await Promise.all([
+      const [slasRes, postalCentersRes, carriersRes, productsRes] = await Promise.all([
         slasQuery.order('created_at', { ascending: false }),
         postalCentersQuery.order('name'),
+        carriersQuery.order('name'),
+        productsQuery.order('code'),
       ])
 
       if (slasRes.error) throw slasRes.error
       if (postalCentersRes.error) throw postalCentersRes.error
+      if (carriersRes.error) throw carriersRes.error
+      if (productsRes.error) throw productsRes.error
 
       setSLAs(slasRes.data || [])
       setPostalCenters(postalCentersRes.data || [])
+      setCarriers(carriersRes.data || [])
+      setProducts(productsRes.data || [])
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -99,22 +123,62 @@ export function useSLAs() {
       }
     }
 
-    // 2. Generate DISTRIBUTION SLAs for selected routes
+    // 2. Generate DISTRIBUTION SLAs for selected routes × carriers × products
     if (request.generateDistribution && request.selectedRoutes) {
+      // Get all active carriers and products
+      const carriersRes = await supabase
+        .from('carriers')
+        .select('id')
+        .eq('account_id', effectiveAccountId)
+        .eq('is_active', true)
+        .is('deleted_at', null)
+      
+      const productsRes = await supabase
+        .from('products')
+        .select('id, carrier_id, standard_delivery_hours, time_unit')
+        .eq('account_id', effectiveAccountId)
+        .eq('is_active', true)
+        .is('deleted_at', null)
+      
+      const carrierIds = carriersRes.data?.map(c => c.id) || []
+      const allProducts = productsRes.data || []
+      
+      // Generate SLA for each route × carrier × product combination
       for (const route of request.selectedRoutes) {
-        combinations.push({
-          account_id: effectiveAccountId,
-          sla_type: 'distribution',
-          postal_center_id: null,
-          from_postal_center_id: route.from,
-          to_postal_center_id: route.to,
-          expected_time_minutes: request.expected_time_minutes,
-          time_unit: request.time_unit,
-          on_time_percentage: request.on_time_percentage,
-          warning_threshold: request.warning_threshold,
-          critical_threshold: request.critical_threshold,
-          is_active: true,
-        })
+        for (const carrierId of carrierIds) {
+          // Get products for this carrier
+          const carrierProducts = allProducts.filter(p => p.carrier_id === carrierId)
+          
+          for (const product of carrierProducts) {
+            // Calculate expected time based on product standard delivery
+            let expectedMinutes = request.expected_time_minutes
+            if (product.standard_delivery_hours && product.time_unit) {
+              if (product.time_unit === 'days') {
+                expectedMinutes = product.standard_delivery_hours * 24 * 60
+              } else if (product.time_unit === 'hours') {
+                expectedMinutes = product.standard_delivery_hours * 60
+              } else {
+                expectedMinutes = product.standard_delivery_hours
+              }
+            }
+            
+            combinations.push({
+              account_id: effectiveAccountId,
+              sla_type: 'distribution',
+              postal_center_id: null,
+              from_postal_center_id: route.from,
+              to_postal_center_id: route.to,
+              carrier_id: carrierId,
+              product_id: product.id,
+              expected_time_minutes: expectedMinutes,
+              time_unit: request.time_unit,
+              on_time_percentage: request.on_time_percentage,
+              warning_threshold: request.warning_threshold,
+              critical_threshold: request.critical_threshold,
+              is_active: true,
+            })
+          }
+        }
       }
     }
 
@@ -204,6 +268,8 @@ export function useSLAs() {
   return {
     slas,
     postalCenters,
+    carriers,
+    products,
     loading,
     error,
     createSLA,

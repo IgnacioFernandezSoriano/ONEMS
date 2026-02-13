@@ -19,6 +19,10 @@ export interface SLA {
   from_postal_center_id: string | null
   to_postal_center_id: string | null
   
+  // Carrier and Product fields
+  carrier_id: string | null
+  product_id: string | null
+  
   // Common fields
   expected_time_minutes: number
   time_unit: TimeUnit
@@ -55,6 +59,10 @@ export interface SLAFormData {
   from_postal_center_id?: string
   to_postal_center_id?: string
   
+  // Carrier and Product fields
+  carrier_id?: string
+  product_id?: string
+  
   // Common fields
   expected_time_minutes: number
   time_unit: TimeUnit
@@ -70,6 +78,8 @@ export interface SLAFilters {
   postal_center_id: string
   from_postal_center_id: string
   to_postal_center_id: string
+  carrier_id: string
+  product_id: string
   status: 'active' | 'inactive' | ''
 }
 
