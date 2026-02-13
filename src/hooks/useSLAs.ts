@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { SLAWithDetails, SLAFormData, GenerateCombinationsRequest } from '@/lib/types_slas'
-import type { PostalCenter } from './types_postal_centers'
-import type { Carrier, Product } from './types'
+import type { PostalCenter } from '@/lib/types_postal_centers'
+import type { Carrier, Product } from '@/lib/types'
 import { useEffectiveAccountId } from './useEffectiveAccountId'
 
 export function useSLAs() {
