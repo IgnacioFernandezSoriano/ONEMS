@@ -38,14 +38,10 @@ export function useSLAs() {
       let carriersQuery = supabase
         .from('carriers')
         .select('*')
-        .eq('is_active', true)
-        .is('deleted_at', null)
 
       let productsQuery = supabase
         .from('products')
         .select('*')
-        .eq('is_active', true)
-        .is('deleted_at', null)
 
       if (effectiveAccountId) {
         slasQuery = slasQuery.eq('account_id', effectiveAccountId)
@@ -129,15 +125,11 @@ export function useSLAs() {
         .from('carriers')
         .select('id')
         .eq('account_id', effectiveAccountId)
-        .eq('is_active', true)
-        .is('deleted_at', null)
       
       const productsRes = await supabase
         .from('products')
         .select('id, carrier_id, standard_delivery_hours, time_unit')
         .eq('account_id', effectiveAccountId)
-        .eq('is_active', true)
-        .is('deleted_at', null)
       
       const carrierIds = carriersRes.data?.map(c => c.id) || []
       const allProducts = productsRes.data || []
