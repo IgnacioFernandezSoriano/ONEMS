@@ -320,6 +320,13 @@ export function Sidebar() {
           tooltip: t('menu.get_api.tooltip'),
         },
         {
+          path: '/epcis-api',
+          label: 'EPCIS Pipeline API',
+          icon: DatabaseZap,
+          roles: ['admin', 'superadmin'],
+          tooltip: 'EPCIS event ingestion and pipeline management API',
+        },
+        {
           path: '/diagnosis/processed-events',
           label: t('menu.rfid_events_db'),
           icon: CheckCircle,
