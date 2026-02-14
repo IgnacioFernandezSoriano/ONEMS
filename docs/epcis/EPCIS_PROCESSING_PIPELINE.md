@@ -210,35 +210,54 @@ Para cada centro postal visitado por un tag, se determina el `entry_time` y `exi
 
 #### 5.3.2. **Cálculo de Tiempo de Permanencia en Centro (`Time in Center`)**
 
-Una vez obtenidos `entry_time` y `exit_time`, se calcula el tiempo que el paquete permaneció en el centro, respetando la política de cálculo del centro.
+Una vez obtenidos `entry_time` y `exit_time`, se calculan **siempre dos métricas de tiempo** para la permanencia del paquete en el centro:
 
-**Lógica de Cálculo:**
-```sql
-raw_time_minutes = exit_time - entry_time;
+**1. Tiempo Natural (`natural_time_in_center_minutes`):**
+- **Propósito:** Medir el tiempo real y absoluto que el paquete estuvo en el centro.
+- **Lógica de Cálculo:**
+  ```sql
+  natural_time_in_center_minutes = exit_time - entry_time;
+  ```
 
-IF postal_center_calculation_mode = 'working_days' THEN
-  time_in_center_minutes = calculate_working_time(entry_time, exit_time, postal_center_id);
-ELSE -- 'natural_days'
-  time_in_center_minutes = raw_time_minutes;
-END IF;
-```
-
-La función `calculate_working_time()` descuenta los fines de semana y las horas no laborables basándose en el `weekly_schedule` del centro postal.
+**2. Tiempo Laborable (`working_time_in_center_minutes`):**
+- **Propósito:** Medir el tiempo de permanencia según la política de cálculo del centro.
+- **Lógica de Cálculo:**
+  ```sql
+  IF postal_center_calculation_mode = \'working_days\' THEN
+    working_time_in_center_minutes = calculate_working_time(entry_time, exit_time, postal_center_id);
+  ELSE -- \'natural_days\'
+    working_time_in_center_minutes = natural_time_in_center_minutes;
+  END IF;
+  ```
+- La función `calculate_working_time()` descuenta los fines de semana y las horas no laborables basándose en el `weekly_schedule` del centro postal.
 
 #### 5.3.3. **Creación de Segmentos de Tránsito**
 
-Un segmento se define como el viaje entre la **salida de un centro** y la **entrada en el siguiente**.
+Un segmento se define como el viaje entre la **salida de un centro** y la **entrada en el siguiente**. Para el tiempo de tránsito, también se calculan siempre dos métricas:
 
-**Lógica de Cálculo:**
-```sql
--- Para el segmento Centro A -> Centro B
+**1. Tiempo de Tránsito Natural (`natural_transit_time_minutes`):**
+- **Propósito:** Medir el tiempo real y absoluto que el paquete estuvo en tránsito entre dos centros.
+- **Lógica de Cálculo:**
+  ```sql
+  natural_transit_time_minutes = entry_time_centro_B - exit_time_centro_A;
+  ```
 
--- Tiempo de tránsito (siempre días naturales)
-transit_time_minutes = entry_time_centro_B - exit_time_centro_A;
+**2. Tiempo de Tránsito Laborable (`working_transit_time_minutes`):**
+- **Propósito:** Medir el tiempo de tránsito según la política de cálculo del centro **origen** del segmento.
+- **Lógica de Cálculo:**
+  ```sql
+  IF from_postal_center_calculation_mode = \'working_days\' THEN
+    working_transit_time_minutes = calculate_working_time(exit_time_centro_A, entry_time_centro_B, from_postal_center_id);
+  ELSE -- \'natural_days\'
+    working_transit_time_minutes = natural_transit_time_minutes;
+  END IF;
+  ```
 
--- Tiempo total del segmento
-total_segment_time_minutes = time_in_center_A + transit_time_minutes;
-```
+**Tiempo Total del Segmento:**
+El tiempo total del segmento se calcula sumando los tiempos correspondientes:
+
+- **Total Natural:** `natural_time_in_center_minutes` + `natural_transit_time_minutes`
+- **Total Laborable:** `working_time_in_center_minutes` + `working_transit_time_minutes`
 
 #### 5.3.4. **Lookup de SLA (Service Level Agreement)**
 
@@ -268,9 +287,10 @@ sla_compliance = (total_segment_time_minutes <= expected_time_minutes);
 | `from_postal_center_city`, `to_postal_center_city` | `TEXT` | Ciudades de los centros del segmento. |
 | `entry_timestamp`, `exit_timestamp` | `TIMESTAMPTZ` | Timestamps detectados en el centro origen. |
 | `next_entry_timestamp` | `TIMESTAMPTZ` | Timestamp de entrada en el centro destino. |
-| `time_in_origin_center_minutes` | `INTEGER` | `exit - entry` (respetando `calculation_mode`). |
-| `transit_time_minutes` | `INTEGER` | `next_entry - exit` (días naturales). |
-| `total_segment_time_minutes` | `INTEGER` | `time_in_center + transit_time`. |
+| `natural_time_in_center_minutes` | `INTEGER` | Tiempo natural en el centro origen. |
+| `working_time_in_center_minutes` | `INTEGER` | Tiempo laborable en el centro origen. |
+| `natural_transit_time_minutes` | `INTEGER` | Tiempo natural de tránsito. |
+| `working_transit_time_minutes` | `INTEGER` | Tiempo laborable de tránsito. |
 | `expected_time_minutes` | `INTEGER` | Lookup en `delivery_standards`. |
 | `sla_compliance` | `BOOLEAN` | `total_segment_time <= expected_time`. |
 
