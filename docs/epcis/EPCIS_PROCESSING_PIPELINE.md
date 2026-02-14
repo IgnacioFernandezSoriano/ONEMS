@@ -50,7 +50,18 @@ graph TD
 
 Capturar y almacenar los eventos de lectura RFID tal como llegan de los sistemas externos, sin ninguna modificación. Esta fase asegura que no se pierda ningún dato y proporciona una fuente de verdad auditable.
 
-### 3.2. Input: Evento EPCIS Raw
+### 3.2. Origen de los Datos
+
+Los eventos EPCIS provienen de una **base de datos externa** gestionada por el sistema de lectores RFID. Nuestra solución expondrá una **API REST** que permitirá al sistema externo enviar los eventos en tiempo real o por lotes.
+
+**Endpoint de Ingesta (a definir):**
+```
+POST /api/epcis/events
+```
+
+Este endpoint recibirá un array de eventos EPCIS y los insertará en `rfid_events_raw`.
+
+### 3.3. Input: Evento EPCIS Raw
 
 El sistema recibe un objeto JSON por cada lectura RFID.
 
@@ -64,7 +75,7 @@ El sistema recibe un objeto JSON por cada lectura RFID.
 }
 ```
 
-### 3.3. Lógica de Procesamiento
+### 3.4. Lógica de Procesamiento
 
 La lógica en esta fase es mínima. El sistema simplemente parsea el JSON y lo inserta en la tabla `rfid_events_raw`.
 
@@ -72,7 +83,7 @@ La lógica en esta fase es mínima. El sistema simplemente parsea el JSON y lo i
 - **`TagId`**: Se almacena como el EPC (Electronic Product Code) del paquete.
 - **`ReadLocalDateTime`**: Se convierte y almacena como un `TIMESTAMPTZ`.
 
-### 3.4. Output: Tabla `rfid_events_raw`
+### 3.5. Output: Tabla `rfid_events_raw`
 
 | Columna | Tipo | Descripción |
 | :--- | :--- | :--- |
