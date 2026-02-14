@@ -410,3 +410,52 @@ El desarrollo se centrará en cerrar estos gaps en el siguiente orden:
 2.  **Backend - Lógica:** Modificar las funciones de consolidación y construcción de segmentos, y crear la nueva función de agregación.
 3.  **Backend - APIs:** Implementar los endpoints de ingesta y consulta.
 4.  **Frontend:** Desarrollar las visualizaciones una vez que el backend esté validado.
+
+
+---
+
+## 9. Pantalla de Monitorización y Ejecución Manual
+
+Para proporcionar visibilidad y control sobre el pipeline, se creará una pantalla unificada de monitorización que reemplazará a la actual pantalla de consolidación.
+
+### 9.1. Análisis de la Pantalla Actual
+
+La pantalla existente en `/diagnosis/consolidation` se centra únicamente en la fase de consolidación, mostrando métricas de eventos pendientes e incidentes, y permitiendo la ejecución manual de esa única fase. Carece de visibilidad sobre el resto del pipeline.
+
+### 9.2. Diseño de la Nueva Pantalla Unificada
+
+**Título:** EPCIS Pipeline Monitor
+**Ubicación:** `/diagnosis/pipeline-monitor`
+
+La nueva pantalla proporcionará una vista completa del estado del pipeline, dividida en cuatro secciones principales:
+
+1.  **Vista General del Estado del Pipeline:** Un conjunto de tarjetas que muestran métricas clave de cada etapa del proceso:
+    -   Eventos en crudo pendientes de procesar.
+    -   Total de eventos procesados.
+    -   Total de segmentos de viaje construidos.
+    -   Total de rutas únicas agregadas.
+
+2.  **Estado Detallado por Fase:** Una tarjeta para cada una de las cuatro fases del pipeline (Ingesta, Consolidación, Construcción de Segmentos, Agregación de Rutas). Cada tarjeta mostrará:
+    -   **Estado actual:** (Ej: `Idle`, `Running`, `Ready`, `Error`).
+    -   **Última ejecución:** Timestamp y duración.
+    -   **Métricas específicas de la fase:** (Ej: eventos procesados, incidentes detectados).
+    -   **Acciones:** Botones para `Ver Logs` y `Ejecutar Ahora` manualmente esa fase específica.
+
+3.  **Panel de Incidentes Recientes:** Un listado de los últimos incidentes detectados por el sistema, con la capacidad de expandir para ver detalles y un enlace a la página completa de gestión de incidentes.
+
+4.  **Log de Ejecución en Tiempo Real:** Una consola que mostrará los logs de la ejecución del pipeline en tiempo real, con mensajes de estado, éxito o error, permitiendo un seguimiento detallado del proceso.
+
+### 9.3. Funcionalidad
+
+-   **Ejecución Manual:** El usuario podrá ejecutar cada fase del pipeline de forma individual o el pipeline completo con un solo clic.
+-   **Auto-Refresco:** La pantalla se refrescará automáticamente para mantener las métricas y estados actualizados.
+-   **Feedback Inmediato:** El log de ejecución proporcionará feedback instantáneo sobre el progreso y los resultados de cada fase.
+
+### 9.4. Beneficios
+
+-   **Visibilidad Completa:** Permite entender el estado de todo el pipeline de un solo vistazo.
+-   **Control Total:** Ofrece la capacidad de intervenir y ejecutar los procesos manualmente cuando sea necesario.
+-   **Diagnóstico Rápido:** Facilita la identificación de en qué fase del pipeline se ha producido un error.
+-   **UX Consistente:** Mantiene una experiencia de usuario unificada con el resto de los módulos de la aplicación.
+
+
