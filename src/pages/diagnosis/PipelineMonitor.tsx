@@ -25,7 +25,7 @@ interface LogEntry {
 }
 
 export default function PipelineMonitor() {
-  const { currentAccount } = useAccount()
+  const { effectiveAccountId } = useAccount()
   const [autoRefresh, setAutoRefresh] = useState(false)
   const [metrics, setMetrics] = useState<PipelineMetrics>({
     rawEventsPending: 0,
@@ -63,7 +63,7 @@ export default function PipelineMonitor() {
 
   // Load metrics
   const loadMetrics = async () => {
-    if (!currentAccount) return
+    if (!effectiveAccountId) return
 
     try {
       const { data: status } = await supabase.rpc('rpc_get_pipeline_status')
@@ -83,7 +83,7 @@ export default function PipelineMonitor() {
 
   // Load recent incidents
   const loadIncidents = async () => {
-    if (!currentAccount) return
+    if (!effectiveAccountId) return
 
     try {
       const { data } = await supabase.rpc('rpc_get_recent_incidents', {
@@ -108,7 +108,7 @@ export default function PipelineMonitor() {
 
   // Run phase
   const runPhase = async (phaseKey: string) => {
-    if (!currentAccount) return
+    if (!effectiveAccountId) return
 
     setPhases(prev => ({
       ...prev,
@@ -194,7 +194,7 @@ export default function PipelineMonitor() {
   useEffect(() => {
     loadMetrics()
     loadIncidents()
-  }, [currentAccount])
+  }, [effectiveAccountId])
 
   const getStatusColor = (status: PhaseStatus['status']) => {
     switch (status) {

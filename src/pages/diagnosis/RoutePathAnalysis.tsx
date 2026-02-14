@@ -20,6 +20,8 @@ interface RoutePathData {
   avg_working_time_minutes: number
   compliance_rate: number
   segment_details: any[]
+  expected_time_minutes: number
+  on_time_percentage_std: number
 }
 
 interface FilterState {
@@ -30,7 +32,7 @@ interface FilterState {
 }
 
 export default function RoutePathAnalysis() {
-  const { currentAccount } = useAccount()
+  const { effectiveAccountId } = useAccount()
   const [viewMode, setViewMode] = useState<'map' | 'table'>('map')
   const [loading, setLoading] = useState(false)
   const [routePaths, setRoutePaths] = useState<RoutePathData[]>([])
@@ -49,7 +51,7 @@ export default function RoutePathAnalysis() {
   // Load filter options
   useEffect(() => {
     loadFilterOptions()
-  }, [currentAccount])
+  }, [effectiveAccountId])
 
   // Load route paths when filters change
   useEffect(() => {
@@ -59,14 +61,14 @@ export default function RoutePathAnalysis() {
   }, [filters])
 
   const loadFilterOptions = async () => {
-    if (!currentAccount) return
+    if (!effectiveAccountId) return
 
     try {
       // Load carriers
       const { data: carriersData } = await supabase
         .from('carriers')
         .select('id, name')
-        .eq('account_id', currentAccount.id)
+        .eq('account_id', effectiveAccountId)
         .order('name')
 
       if (carriersData) setCarriers(carriersData)
@@ -75,7 +77,7 @@ export default function RoutePathAnalysis() {
       const { data: productsData } = await supabase
         .from('products')
         .select('id, code, description')
-        .eq('account_id', currentAccount.id)
+        .eq('account_id', effectiveAccountId)
         .order('code')
 
       if (productsData) setProducts(productsData)
@@ -84,7 +86,7 @@ export default function RoutePathAnalysis() {
       const { data: citiesData } = await supabase
         .from('journey_paths')
         .select('origin_city_name, destination_city_name')
-        .eq('account_id', currentAccount.id)
+        .eq('account_id', effectiveAccountId)
 
       if (citiesData) {
         const uniqueCities = new Set<string>()
@@ -100,7 +102,7 @@ export default function RoutePathAnalysis() {
   }
 
   const loadRoutePaths = async () => {
-    if (!currentAccount) return
+    if (!effectiveAccountId) return
 
     setLoading(true)
     try {
@@ -122,7 +124,7 @@ export default function RoutePathAnalysis() {
           carriers!inner(name),
           products!inner(code, description)
         `)
-        .eq('account_id', currentAccount.id)
+        .eq('account_id', effectiveAccountId)
         .eq('carrier_id', filters.carrier_id)
         .eq('product_id', filters.product_id)
         .eq('origin_city_name', filters.origin_city)
@@ -145,7 +147,9 @@ export default function RoutePathAnalysis() {
         avg_natural_time_minutes: row.avg_natural_time_minutes,
         avg_working_time_minutes: row.avg_working_time_minutes,
         compliance_rate: row.compliance_rate,
-        segment_details: row.segment_details || []
+        segment_details: row.segment_details || [],
+        expected_time_minutes: 0, // TODO: Calculate from SLA
+        on_time_percentage_std: 95 // TODO: Get from SLA configuration
       }))
 
       setRoutePaths(formattedData)
