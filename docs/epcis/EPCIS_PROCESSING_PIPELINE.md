@@ -370,3 +370,43 @@ El frontend recibe el JSON de la API y lo renderiza en:
 
 1.  **Un mapa de flujos:** Usando librerías como D3.js o Mapbox, dibujando arcos entre ciudades con un grosor proporcional a `total_tags`.
 2.  **Una tabla colapsable:** Mostrando cada ruta y permitiendo al usuario expandirla para ver los detalles de cada segmento, con interactividad (hover y click) para análisis más profundos.
+
+
+---
+
+## 8. Gap Analysis: Estado Actual vs. Requerido
+
+Esta sección detalla qué partes del pipeline ya están implementadas en el código base actual y qué componentes faltan por desarrollar para alcanzar la funcionalidad completa descrita en este documento.
+
+### 8.1. ✅ Componentes Ya Implementados
+
+El código base actual ya incluye una base sólida para el procesamiento de eventos:
+
+- **Tablas Principales:** `processed_events`, `journey_segments`, `incidents`, y `journeys` ya existen.
+- **Funciones de Consolidación Básica:** Existen funciones para consolidar eventos de lectores `Entry`, `Exit` y `Mixed`, así como para detectar `missing_exits`.
+- **Cálculo de Tiempo Básico:** Se incluye la lógica para calcular tiempos en `working_days` vs `natural_days`.
+- **Detección de Incidentes Básica:** El sistema puede detectar `unknown_reader`, `missing_exit`, y `exit_before_entry`.
+
+### 8.2. ❌ Componentes Faltantes o a Modificar
+
+A continuación se detallan los gaps principales que deben ser abordados:
+
+| Área | Gap Específico | Acción Requerida |
+| :--- | :--- | :--- |
+| **1. Esquema de BD** | **Campos faltantes** en `processed_events` y `journey_segments` para `carrier`, `product`, y `origin/destination`. | **Añadir** los campos `carrier_id`, `product_id`, `origin_city_name`, `destination_city_name`, etc. |
+| | **Tabla `journey_paths` no existe.** | **Crear** la nueva tabla para almacenar las rutas agregadas. |
+| **2. Consolidación** | **No hay integración con `one_db`**. | **Modificar** `consolidate_rfid_events()` para hacer un lookup en `one_db` por `tag_id` y obtener los detalles del envío. |
+| | **Uso inconsistente de LPI**. | **Unificar** y usar la versión de `consolidate_rfid_events()` que trabaja con LPI de forma nativa. |
+| **3. Construcción de Segmentos** | **Cálculo de tiempo de tránsito no separado.** | **Modificar** `build_journey_segments()` para calcular `transit_time` (entre centros) de forma separada a `time_in_center`. |
+| | **Falta de propagación de datos.** | **Asegurar** que `carrier_id`, `product_id`, y `origin/destination` se propaguen correctamente a `journey_segments`. |
+| **4. Agregación de Rutas** | **Función `aggregate_journey_paths()` no existe.** | **Crear** la nueva función que agrupe los segmentos por `path_signature` y calcule las métricas de rendimiento. |
+| **5. APIs** | **No existen los endpoints de ingesta y consulta.** | **Implementar** `POST /api/epcis/events` para la ingesta y `GET /api/journey-paths` para la consulta desde el frontend. |
+
+### 8.3. Plan de Implementación Resumido
+
+El desarrollo se centrará en cerrar estos gaps en el siguiente orden:
+
+1.  **Backend - Base de Datos:** Actualizar el esquema de la base de datos.
+2.  **Backend - Lógica:** Modificar las funciones de consolidación y construcción de segmentos, y crear la nueva función de agregación.
+3.  **Backend - APIs:** Implementar los endpoints de ingesta y consulta.
+4.  **Frontend:** Desarrollar las visualizaciones una vez que el backend esté validado.
