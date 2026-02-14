@@ -271,6 +271,13 @@ export function Sidebar() {
               tooltip: 'Monitor and control EPCIS pipeline execution',
             },
             {
+              path: '/diagnosis/route-path-analysis',
+              label: 'Route Path Analysis',
+              icon: Activity,
+              roles: ['admin', 'superadmin'],
+              tooltip: 'Analyze journey paths and route performance',
+            },
+            {
               path: '/diagnosis/network-overview',
               label: t('menu.network_overview'),
               icon: Activity,

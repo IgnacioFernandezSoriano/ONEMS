@@ -49,6 +49,7 @@ import CenterAnalysis from './pages/diagnosis/CenterAnalysis'
 import SegmentDeepDive from './pages/diagnosis/SegmentDeepDive'
 import JKPerformanceSegments from './pages/diagnosis/JKPerformanceSegments'
 import PipelineMonitor from './pages/diagnosis/PipelineMonitor'
+import RoutePathAnalysis from './pages/diagnosis/RoutePathAnalysis'
 
 
 function App() {
@@ -126,6 +127,16 @@ function App() {
                       element={
                         <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
                           <PipelineMonitor />
+                        </ProtectedRoute>
+                      }
+                    />
+                    
+                    {/* Route Path Analysis - for admin and superadmin */}
+                    <Route
+                      path="/diagnosis/route-path-analysis"
+                      element={
+                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                          <RoutePathAnalysis />
                         </ProtectedRoute>
                       }
                     />
