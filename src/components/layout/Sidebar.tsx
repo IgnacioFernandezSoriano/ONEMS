@@ -264,6 +264,13 @@ export function Sidebar() {
           tooltip: t('menu.diagnosis.tooltip'),
           children: [
             {
+              path: '/diagnosis/pipeline-monitor',
+              label: 'Pipeline Monitor',
+              icon: Activity,
+              roles: ['admin', 'superadmin'],
+              tooltip: 'Monitor and control EPCIS pipeline execution',
+            },
+            {
               path: '/diagnosis/network-overview',
               label: t('menu.network_overview'),
               icon: Activity,

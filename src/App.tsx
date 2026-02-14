@@ -48,6 +48,7 @@ import RouteAnalysis from './pages/diagnosis/RouteAnalysis'
 import CenterAnalysis from './pages/diagnosis/CenterAnalysis'
 import SegmentDeepDive from './pages/diagnosis/SegmentDeepDive'
 import JKPerformanceSegments from './pages/diagnosis/JKPerformanceSegments'
+import PipelineMonitor from './pages/diagnosis/PipelineMonitor'
 
 
 function App() {
@@ -115,6 +116,16 @@ function App() {
                       element={
                         <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
                           <SLAsConfiguration />
+                        </ProtectedRoute>
+                      }
+                    />
+                    
+                    {/* Pipeline Monitor - for admin and superadmin */}
+                    <Route
+                      path="/diagnosis/pipeline-monitor"
+                      element={
+                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                          <PipelineMonitor />
                         </ProtectedRoute>
                       }
                     />
