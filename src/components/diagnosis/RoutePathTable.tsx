@@ -57,6 +57,7 @@ interface Props {
 export default function RoutePathTable({ routePaths, postalCenters }: Props) {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
   const [hoveredSegment, setHoveredSegment] = useState<string | null>(null)
+  const [segmentCounts, setSegmentCounts] = useState<Record<string, number>>({})
   const navigate = useNavigate()
 
   // Calculate weighted average on_time_percentage_std from segment_details
@@ -215,7 +216,7 @@ export default function RoutePathTable({ routePaths, postalCenters }: Props) {
                     <td className="px-3 py-2 text-gray-700">{path.origin_city_name}</td>
                     <td className="px-3 py-2 text-gray-700">{path.destination_city_name}</td>
                     <td className="px-3 py-2 text-right font-semibold text-gray-700">
-                      {path.path_signature.split(' | ').length}
+                      {segmentCounts[path.id] || (path.path_signature.split(' | ').length * 2 + 1)}
                     </td>
                     <td className="px-3 py-2 text-right font-mono text-gray-900">
                       {formatJK(path.expected_time_minutes)}
@@ -269,6 +270,9 @@ export default function RoutePathTable({ routePaths, postalCenters }: Props) {
                             pathId={path.id}
                             pathSignature={path.path_signature}
                             accountId="f4d823d2-93e6-4755-9a89-9da87e7fa86e"
+                            onSegmentCountChange={(count) => {
+                              setSegmentCounts(prev => ({ ...prev, [path.id]: count }))
+                            }}
                           />
                         </div>
                       </td>

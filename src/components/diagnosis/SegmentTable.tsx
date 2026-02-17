@@ -20,9 +20,10 @@ interface SegmentTableProps {
   pathId: string
   pathSignature: string
   accountId: string
+  onSegmentCountChange?: (count: number) => void
 }
 
-export default function SegmentTable({ pathId, pathSignature, accountId }: SegmentTableProps) {
+export default function SegmentTable({ pathId, pathSignature, accountId, onSegmentCountChange }: SegmentTableProps) {
   const [segments, setSegments] = React.useState<SegmentData[]>([])
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
@@ -206,6 +207,7 @@ export default function SegmentTable({ pathId, pathSignature, accountId }: Segme
       })
       
       setSegments(segmentDataArray)
+      onSegmentCountChange?.(segmentDataArray.length)
     } catch (err: any) {
       console.error('Error loading segments:', err)
       setError(err.message)
