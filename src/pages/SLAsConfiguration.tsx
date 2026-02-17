@@ -242,21 +242,63 @@ export function SLAsConfiguration() {
               </select>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t('postal_centers.postal_center')}
-              </label>
-              <select
-                value={filters.postal_center_id}
-                onChange={(e) => setFilters({ ...filters, postal_center_id: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-              >
-                <option value="">{t('common.all')}</option>
-                {postalCenters.map(pc => (
-                  <option key={pc.id} value={pc.id}>{pc.name}</option>
-                ))}
-              </select>
-            </div>
+            {/* Show different filters based on SLA type */}
+            {(!filters.sla_type || filters.sla_type === 'operational') && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {t('postal_centers.postal_center')}
+                </label>
+                <select
+                  value={filters.postal_center_id}
+                  onChange={(e) => setFilters({ ...filters, postal_center_id: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  disabled={filters.sla_type === 'distribution'}
+                >
+                  <option value="">{t('common.all')}</option>
+                  {postalCenters.map(pc => (
+                    <option key={pc.id} value={pc.id}>{pc.name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {(!filters.sla_type || filters.sla_type === 'distribution') && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    {t('slas.from_postal_center')}
+                  </label>
+                  <select
+                    value={filters.from_postal_center_id}
+                    onChange={(e) => setFilters({ ...filters, from_postal_center_id: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    disabled={filters.sla_type === 'operational'}
+                  >
+                    <option value="">{t('common.all')}</option>
+                    {postalCenters.map(pc => (
+                      <option key={pc.id} value={pc.id}>{pc.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    {t('slas.to_postal_center')}
+                  </label>
+                  <select
+                    value={filters.to_postal_center_id}
+                    onChange={(e) => setFilters({ ...filters, to_postal_center_id: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    disabled={filters.sla_type === 'operational'}
+                  >
+                    <option value="">{t('common.all')}</option>
+                    {postalCenters.map(pc => (
+                      <option key={pc.id} value={pc.id}>{pc.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </>
+            )}
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
