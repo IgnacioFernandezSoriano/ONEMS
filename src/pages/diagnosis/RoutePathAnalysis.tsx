@@ -183,7 +183,7 @@ export default function RoutePathAnalysis() {
 
   const totalTags = routePaths.reduce((sum, path) => sum + path.total_tags, 0)
   const avgCompliance = routePaths.length > 0
-    ? routePaths.reduce((sum, path) => sum + path.compliance_rate * path.total_tags, 0) / totalTags
+    ? routePaths.reduce((sum, path) => sum + (path.percent_real || 0) * path.total_tags, 0) / totalTags
     : 0
 
   return (
@@ -284,7 +284,7 @@ export default function RoutePathAnalysis() {
 
       {/* Summary Stats */}
       {routePaths.length > 0 && (
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           <div className="bg-white rounded-lg shadow p-4">
             <div className="text-sm text-gray-600 mb-1">Total Routes</div>
             <div className="text-2xl font-bold text-gray-900">{routePaths.length}</div>
@@ -297,12 +297,7 @@ export default function RoutePathAnalysis() {
             <div className="text-sm text-gray-600 mb-1">Avg Compliance</div>
             <div className="text-2xl font-bold text-gray-900">{avgCompliance.toFixed(1)}%</div>
           </div>
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-sm text-gray-600 mb-1">Most Common Route</div>
-            <div className="text-sm font-semibold text-gray-900 truncate">
-              {routePaths[0]?.path_signature || '-'}
-            </div>
-          </div>
+
         </div>
       )}
 
