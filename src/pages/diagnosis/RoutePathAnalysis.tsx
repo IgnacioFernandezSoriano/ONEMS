@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useAccount } from '../../contexts/AccountContext'
 import { supabase } from '../../lib/supabase'
 import { Filter, Map as MapIcon, List, Download } from 'lucide-react'
-import RouteFlowMap from '../../components/diagnosis/RouteFlowMap'
+import RoutePathMapLeaflet from '../../components/diagnosis/RoutePathMapLeaflet'
 import RoutePathTable from '../../components/diagnosis/RoutePathTable'
 
 interface RoutePathData {
@@ -21,7 +21,6 @@ interface RoutePathData {
   compliance_rate: number
   segment_details: any[]
   expected_time_minutes: number
-  on_time_percentage_std: number
 }
 
 interface FilterState {
@@ -33,7 +32,6 @@ interface FilterState {
 
 export default function RoutePathAnalysis() {
   const { effectiveAccountId } = useAccount()
-  const [viewMode, setViewMode] = useState<'map' | 'table'>('map')
   const [loading, setLoading] = useState(false)
   const [routePaths, setRoutePaths] = useState<RoutePathData[]>([])
   
@@ -47,18 +45,17 @@ export default function RoutePathAnalysis() {
   const [carriers, setCarriers] = useState<any[]>([])
   const [products, setProducts] = useState<any[]>([])
   const [cities, setCities] = useState<string[]>([])
+  const [postalCenters, setPostalCenters] = useState<any[]>([])
 
   // Load filter options
   useEffect(() => {
     loadFilterOptions()
   }, [effectiveAccountId])
 
-  // Load route paths when filters change
+  // Load route paths when filters change or on mount
   useEffect(() => {
-    if (filters.carrier_id && filters.product_id && filters.origin_city && filters.destination_city) {
-      loadRoutePaths()
-    }
-  }, [filters])
+    loadRoutePaths()
+  }, [filters, effectiveAccountId])
 
   const loadFilterOptions = async () => {
     if (!effectiveAccountId) return
@@ -96,6 +93,14 @@ export default function RoutePathAnalysis() {
         })
         setCities(Array.from(uniqueCities).sort())
       }
+
+      // Load postal centers
+      const { data: centersData } = await supabase
+        .from('postal_centers')
+        .select('id, code, name, city')
+        .eq('account_id', effectiveAccountId)
+
+      if (centersData) setPostalCenters(centersData)
     } catch (error) {
       console.error('Error loading filter options:', error)
     }
@@ -106,7 +111,7 @@ export default function RoutePathAnalysis() {
 
     setLoading(true)
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('journey_paths')
         .select(`
           id,
@@ -121,36 +126,44 @@ export default function RoutePathAnalysis() {
           avg_working_time_minutes,
           compliance_rate,
           segment_details,
-          carriers!inner(name),
-          products!inner(code, description)
+          expected_time_minutes,
+          carriers(name),
+          products(code, description)
         `)
         .eq('account_id', effectiveAccountId)
-        .eq('carrier_id', filters.carrier_id)
-        .eq('product_id', filters.product_id)
-        .eq('origin_city_name', filters.origin_city)
-        .eq('destination_city_name', filters.destination_city)
-        .order('total_tags', { ascending: false })
+
+      // Apply filters only if they are set
+      if (filters.carrier_id) query = query.eq('carrier_id', filters.carrier_id)
+      if (filters.product_id) query = query.eq('product_id', filters.product_id)
+      if (filters.origin_city) query = query.eq('origin_city_name', filters.origin_city)
+      if (filters.destination_city) query = query.eq('destination_city_name', filters.destination_city)
+
+      const { data, error } = await query.order('total_tags', { ascending: false })
 
       if (error) throw error
 
-      const formattedData: RoutePathData[] = (data || []).map((row: any) => ({
-        id: row.id,
-        carrier_id: row.carrier_id,
-        carrier_name: row.carriers?.name || '',
-        product_id: row.product_id,
-        product_name: `${row.products?.code} - ${row.products?.description}`,
-        origin_city_name: row.origin_city_name,
-        destination_city_name: row.destination_city_name,
-        path_signature: row.path_signature,
-        path_segments: row.path_segments || [],
-        total_tags: row.total_tags,
-        avg_natural_time_minutes: row.avg_natural_time_minutes,
-        avg_working_time_minutes: row.avg_working_time_minutes,
-        compliance_rate: row.compliance_rate,
-        segment_details: row.segment_details || [],
-        expected_time_minutes: 0, // TODO: Calculate from SLA
-        on_time_percentage_std: 95 // TODO: Get from SLA configuration
-      }))
+      const formattedData: RoutePathData[] = (data || []).map((row: any) => {
+        // Extract thresholds from first distribution segment
+        const distributionSegment = (row.segment_details || []).find((seg: any) => seg.segment_type === 'distribution')
+        
+        return {
+          id: row.id,
+          carrier_id: row.carrier_id,
+          carrier_name: row.carriers?.name || '',
+          product_id: row.product_id,
+          product_name: `${row.products?.code} - ${row.products?.description}`,
+          origin_city_name: row.origin_city_name,
+          destination_city_name: row.destination_city_name,
+          path_signature: row.path_signature,
+          path_segments: row.path_segments || [],
+          total_tags: row.total_tags,
+          avg_natural_time_minutes: row.avg_natural_time_minutes,
+          avg_working_time_minutes: row.avg_working_time_minutes,
+          compliance_rate: row.compliance_rate,
+          segment_details: row.segment_details || [],
+          expected_time_minutes: row.expected_time_minutes || 0
+        }
+      })
 
       setRoutePaths(formattedData)
     } catch (error) {
@@ -173,39 +186,15 @@ export default function RoutePathAnalysis() {
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-gray-900">Route Path Analysis</h1>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setViewMode('map')}
-            className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
-              viewMode === 'map'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            <MapIcon className="w-4 h-4" />
-            Map View
-          </button>
-          <button
-            onClick={() => setViewMode('table')}
-            className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
-              viewMode === 'table'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            <List className="w-4 h-4" />
-            Table View
-          </button>
-          <button
-            onClick={handleExport}
-            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 flex items-center gap-2"
-          >
-            <Download className="w-4 h-4" />
-            Export
-          </button>
-        </div>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">Route Path Analysis</h1>
+        <button
+          onClick={handleExport}
+          className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 flex items-center gap-2"
+        >
+          <Download className="w-4 h-4" />
+          Export
+        </button>
       </div>
 
       {/* Filters */}
@@ -323,16 +312,20 @@ export default function RoutePathAnalysis() {
       ) : routePaths.length === 0 ? (
         <div className="bg-white rounded-lg shadow p-12 text-center text-gray-500">
           <MapIcon className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-          <p>Select all filters to view route paths</p>
+          <p>No route paths found. Try adjusting your filters.</p>
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow">
-          {viewMode === 'map' ? (
-            <RouteFlowMap routePaths={routePaths} />
-          ) : (
-            <RoutePathTable routePaths={routePaths} />
-          )}
-        </div>
+        <>
+          {/* Map View */}
+          <div className="bg-white rounded-lg shadow mb-6">
+            <RoutePathMapLeaflet routePaths={routePaths} />
+          </div>
+          
+          {/* Table View */}
+          <div className="bg-white rounded-lg shadow">
+            <RoutePathTable routePaths={routePaths} postalCenters={postalCenters} />
+          </div>
+        </>
       )}
     </div>
   )

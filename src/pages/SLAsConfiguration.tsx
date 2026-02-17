@@ -514,8 +514,14 @@ export function SLAsConfiguration() {
             carriers={carriers}
             products={products}
             onSubmit={async (data) => {
-              await createSLA(data)
-              setShowCreateModal(false)
+              try {
+                await createSLA(data)
+                setShowCreateModal(false)
+                alert(t('slas.sla_created_successfully'))
+              } catch (error: any) {
+                alert(error.message || 'Error al crear SLA')
+                throw error // Re-throw to keep form in loading state if needed
+              }
             }}
             onCancel={() => setShowCreateModal(false)}
           />

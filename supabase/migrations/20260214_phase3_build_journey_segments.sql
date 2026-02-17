@@ -48,18 +48,18 @@ BEGIN
                     postal_center_id,
                     postal_center_city_snapshot,
                     event_type,
-                    event_timestamp,
-                    ROW_NUMBER() OVER (PARTITION BY postal_center_id ORDER BY event_timestamp) as visit_order
+                    timestamp,
+                    ROW_NUMBER() OVER (PARTITION BY postal_center_id ORDER BY timestamp) as visit_order
                 FROM processed_events
                 WHERE account_id = p_account_id
                   AND tag_id = v_tag.tag_id
-                ORDER BY event_timestamp
+                ORDER BY timestamp
             )
             SELECT DISTINCT
                 postal_center_id,
                 postal_center_city_snapshot,
-                MIN(CASE WHEN event_type = 'entry' THEN event_timestamp END) as entry_time,
-                MAX(CASE WHEN event_type = 'exit' THEN event_timestamp END) as exit_time
+                MIN(CASE WHEN event_type = 'entry' THEN timestamp END) as entry_time,
+                MAX(CASE WHEN event_type = 'exit' THEN timestamp END) as exit_time
             FROM center_events
             GROUP BY postal_center_id, postal_center_city_snapshot
             ORDER BY COALESCE(entry_time, exit_time)
@@ -68,12 +68,12 @@ BEGIN
             v_exit_time := v_center_visit.exit_time;
             
             -- Get next entry time (for transit calculation)
-            SELECT MIN(event_timestamp) INTO v_next_entry_time
+            SELECT MIN(timestamp) INTO v_next_entry_time
             FROM processed_events
             WHERE account_id = p_account_id
               AND tag_id = v_tag.tag_id
               AND event_type = 'entry'
-              AND event_timestamp > COALESCE(v_exit_time, v_entry_time);
+              AND timestamp > COALESCE(v_exit_time, v_entry_time);
             
             -- ========================================
             -- Calculate Time in Center (Dual Tracking)
@@ -179,14 +179,14 @@ BEGIN
                  FROM processed_events 
                  WHERE account_id = p_account_id 
                    AND tag_id = v_tag.tag_id 
-                   AND event_timestamp = v_next_entry_time 
+                   AND timestamp = v_next_entry_time 
                  LIMIT 1),
                 -- Get next center city
                 (SELECT postal_center_city_snapshot 
                  FROM processed_events 
                  WHERE account_id = p_account_id 
                    AND tag_id = v_tag.tag_id 
-                   AND event_timestamp = v_next_entry_time 
+                   AND timestamp = v_next_entry_time 
                  LIMIT 1),
                 v_entry_time,
                 v_exit_time,

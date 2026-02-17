@@ -80,6 +80,39 @@ export function useSLAs() {
   const createSLA = async (data: SLAFormData) => {
     if (!effectiveAccountId) throw new Error('Account ID is required')
 
+    // Check for duplicate based on unique constraint
+    let duplicateQuery = supabase
+      .from('slas')
+      .select('id')
+      .eq('account_id', effectiveAccountId)
+      .eq('sla_type', data.sla_type)
+      .is('deleted_at', null)
+
+    if (data.sla_type === 'operational') {
+      duplicateQuery = duplicateQuery
+        .eq('postal_center_id', data.postal_center_id!)
+        .eq('carrier_id', data.carrier_id || null)
+        .eq('product_id', data.product_id || null)
+    } else {
+      duplicateQuery = duplicateQuery
+        .eq('from_postal_center_id', data.from_postal_center_id!)
+        .eq('to_postal_center_id', data.to_postal_center_id!)
+        .eq('carrier_id', data.carrier_id || null)
+        .eq('product_id', data.product_id || null)
+    }
+
+    const { data: existing } = await duplicateQuery
+
+    if (existing && existing.length > 0) {
+      throw new Error(
+        'Ya existe un SLA para esta combinación de ' +
+        (data.sla_type === 'operational' 
+          ? 'Centro Postal, Carrier y Producto' 
+          : 'Origen, Destino, Carrier y Producto') +
+        '. Por favor, modifica alguno de estos valores o edita el SLA existente.'
+      )
+    }
+
     const { error } = await supabase.from('slas').insert({
       ...data,
       account_id: effectiveAccountId,

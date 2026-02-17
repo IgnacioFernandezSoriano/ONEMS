@@ -1,0 +1,22 @@
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  'https://sehbnpgzqljrsqimwyuz.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNlaGJucGd6cWxqcnNxaW13eXV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ0NTEyNjksImV4cCI6MjA1MDAyNzI2OX0.LZxsQGI5eoSU9-Xwu7M9oFWk8vZWLBBHfqPWPBCGnYI'
+)
+
+async function check() {
+  const { data, error } = await supabase
+    .from('journey_paths')
+    .select('id, carrier_id, product_id, origin_city_name')
+    .eq('account_id', 'f4d823d2-93e6-4755-9a89-9da87e7fa86e')
+    .limit(3)
+  
+  if (error) {
+    console.error('Error:', error)
+  } else {
+    console.log('Journey paths:', JSON.stringify(data, null, 2))
+  }
+}
+
+check()
