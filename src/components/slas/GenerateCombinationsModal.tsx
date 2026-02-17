@@ -3,13 +3,18 @@ import { useTranslation } from '@/hooks/useTranslation'
 import type { GenerateCombinationsRequest } from '@/lib/types_slas'
 import type { PostalCenter } from '@/lib/types_postal_centers'
 import type { SLAWithDetails } from '@/lib/types_slas'
+import type { Carrier, Product } from '@/lib/types'pes_slas'
 
 interface GenerateCombinationsModalProps {
   postalCenters: PostalCenter[]
+  carriers: Carrier[]
+  products: Product[]
   existingSLAs: SLAWithDetails[]
   onGenerate: (request: GenerateCombinationsRequest & { 
     selectedCenters: string[]
     selectedRoutes: Array<{ from: string; to: string }>
+    selectedCarriers: string[]
+    selectedProducts: string[]
     generateOperational: boolean
     generateDistribution: boolean
   }) => Promise<{ inserted_count: number; skipped_count: number }>
@@ -17,7 +22,9 @@ interface GenerateCombinationsModalProps {
 }
 
 export function GenerateCombinationsModal({ 
-  postalCenters, 
+  postalCenters,
+  carriers,
+  products,
   existingSLAs,
   onGenerate, 
   onClose 
@@ -37,6 +44,8 @@ export function GenerateCombinationsModal({
   const [generateDistribution, setGenerateDistribution] = useState(true)
   const [selectedCenters, setSelectedCenters] = useState<Set<string>>(new Set())
   const [selectedRoutes, setSelectedRoutes] = useState<Set<string>>(new Set())
+  const [selectedCarriers, setSelectedCarriers] = useState<Set<string>>(new Set(carriers.map(c => c.id)))
+  const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set(products.map(p => p.id)))
 
   // Calculate pending operational SLAs
   const pendingOperational = useMemo(() => {
@@ -128,6 +137,8 @@ export function GenerateCombinationsModal({
         time_unit: 'minutes',
         selectedCenters: Array.from(selectedCenters),
         selectedRoutes: routes,
+        selectedCarriers: Array.from(selectedCarriers),
+        selectedProducts: Array.from(selectedProducts),
         generateOperational,
         generateDistribution,
       })
@@ -186,6 +197,86 @@ export function GenerateCombinationsModal({
                   />
                   <span>{t('slas.distribution')}</span>
                 </label>
+              </div>
+            </div>
+
+            {/* Carrier Selection */}
+            <div className="mb-6">
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="font-medium text-gray-900">Select Carriers</h3>
+                <button
+                  onClick={() => {
+                    if (selectedCarriers.size === carriers.length) {
+                      setSelectedCarriers(new Set())
+                    } else {
+                      setSelectedCarriers(new Set(carriers.map(c => c.id)))
+                    }
+                  }}
+                  className="text-sm text-blue-600 hover:text-blue-800"
+                >
+                  {selectedCarriers.size === carriers.length ? t('common.deselect_all') : t('common.select_all')}
+                </button>
+              </div>
+              <div className="max-h-32 overflow-y-auto border rounded p-2 space-y-1">
+                {carriers.map(carrier => (
+                  <label key={carrier.id} className="flex items-center hover:bg-gray-50 p-1 rounded">
+                    <input
+                      type="checkbox"
+                      checked={selectedCarriers.has(carrier.id)}
+                      onChange={() => {
+                        const newSelected = new Set(selectedCarriers)
+                        if (newSelected.has(carrier.id)) {
+                          newSelected.delete(carrier.id)
+                        } else {
+                          newSelected.add(carrier.id)
+                        }
+                        setSelectedCarriers(newSelected)
+                      }}
+                      className="mr-2"
+                    />
+                    <span className="text-sm">{carrier.name}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Product Selection */}
+            <div className="mb-6">
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="font-medium text-gray-900">Select Products</h3>
+                <button
+                  onClick={() => {
+                    if (selectedProducts.size === products.length) {
+                      setSelectedProducts(new Set())
+                    } else {
+                      setSelectedProducts(new Set(products.map(p => p.id)))
+                    }
+                  }}
+                  className="text-sm text-blue-600 hover:text-blue-800"
+                >
+                  {selectedProducts.size === products.length ? t('common.deselect_all') : t('common.select_all')}
+                </button>
+              </div>
+              <div className="max-h-32 overflow-y-auto border rounded p-2 space-y-1">
+                {products.map(product => (
+                  <label key={product.id} className="flex items-center hover:bg-gray-50 p-1 rounded">
+                    <input
+                      type="checkbox"
+                      checked={selectedProducts.has(product.id)}
+                      onChange={() => {
+                        const newSelected = new Set(selectedProducts)
+                        if (newSelected.has(product.id)) {
+                          newSelected.delete(product.id)
+                        } else {
+                          newSelected.add(product.id)
+                        }
+                        setSelectedProducts(newSelected)
+                      }}
+                      className="mr-2"
+                    />
+                    <span className="text-sm">{product.code} - {product.description}</span>
+                  </label>
+                ))}
               </div>
             </div>
 

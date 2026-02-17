@@ -573,6 +573,8 @@ export function SLAsConfiguration() {
       {showGenerateModal && (
         <GenerateCombinationsModal
           postalCenters={postalCenters}
+          carriers={carriers}
+          products={products}
           existingSLAs={slas}
           onGenerate={generateCombinations}
           onClose={() => setShowGenerateModal(false)}

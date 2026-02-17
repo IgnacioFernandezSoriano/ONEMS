@@ -125,6 +125,8 @@ export function useSLAs() {
   const generateCombinations = async (request: GenerateCombinationsRequest & {
     selectedCenters?: string[]
     selectedRoutes?: Array<{ from: string; to: string }>
+    selectedCarriers?: string[]
+    selectedProducts?: string[]
     generateOperational?: boolean
     generateDistribution?: boolean
   }) => {
@@ -134,18 +136,16 @@ export function useSLAs() {
 
     // 1. Generate OPERATIONAL SLAs for selected centers × carriers × products
     if (request.generateOperational && request.selectedCenters) {
-      // Get all carriers and products
-      const carriersRes = await supabase
-        .from('carriers')
-        .select('id')
-        .eq('account_id', effectiveAccountId)
+      // Use selected carriers and products
+      const carrierIds = request.selectedCarriers || []
       
+      // Get product details for selected products
       const productsRes = await supabase
         .from('products')
         .select('id, carrier_id, standard_delivery_hours, time_unit')
         .eq('account_id', effectiveAccountId)
+        .in('id', request.selectedProducts || [])
       
-      const carrierIds = carriersRes.data?.map(c => c.id) || []
       const allProducts = productsRes.data || []
       
       for (const centerId of request.selectedCenters) {
@@ -188,18 +188,16 @@ export function useSLAs() {
 
     // 2. Generate DISTRIBUTION SLAs for selected routes × carriers × products
     if (request.generateDistribution && request.selectedRoutes) {
-      // Get all active carriers and products
-      const carriersRes = await supabase
-        .from('carriers')
-        .select('id')
-        .eq('account_id', effectiveAccountId)
+      // Use selected carriers and products
+      const carrierIds = request.selectedCarriers || []
       
+      // Get product details for selected products
       const productsRes = await supabase
         .from('products')
         .select('id, carrier_id, standard_delivery_hours, time_unit')
         .eq('account_id', effectiveAccountId)
+        .in('id', request.selectedProducts || [])
       
-      const carrierIds = carriersRes.data?.map(c => c.id) || []
       const allProducts = productsRes.data || []
       
       // Generate SLA for each route × carrier × product combination
