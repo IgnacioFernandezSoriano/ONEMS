@@ -1,0 +1,335 @@
+import React from 'react'
+import { supabase } from '../../lib/supabase'
+
+interface SegmentData {
+  segment_name: string
+  segment_type: 'center' | 'transit'
+  jk_std_minutes: number
+  natural_time_minutes: number
+  working_time_minutes: number
+  std_percentage: number
+  real_percentage: number
+  diff_percentage: number
+  threshold: 'Compliant' | 'Warning' | 'Critical'
+  warning_threshold: number
+  critical_threshold: number
+  order: number
+}
+
+interface SegmentTableProps {
+  pathId: string
+  pathSignature: string
+  accountId: string
+}
+
+export default function SegmentTable({ pathId, pathSignature, accountId }: SegmentTableProps) {
+  const [segments, setSegments] = React.useState<SegmentData[]>([])
+  const [loading, setLoading] = React.useState(true)
+  const [error, setError] = React.useState<string | null>(null)
+
+  React.useEffect(() => {
+    loadSegments()
+  }, [pathId, pathSignature])
+
+  const loadSegments = async () => {
+    setLoading(true)
+    setError(null)
+    
+    try {
+      // 1. Get all journey_segments for this path
+      const { data: journeySegments, error: segmentsError } = await supabase
+        .from('journey_segments')
+        .select(`
+          tag_id,
+          from_postal_center_id,
+          to_postal_center_id,
+          from_postal_center_city,
+          to_postal_center_city,
+          natural_time_in_center_minutes,
+          natural_transit_time_minutes,
+          working_time_in_center_minutes,
+          working_transit_time_minutes,
+          expected_time_minutes,
+          entry_timestamp,
+          from_center:postal_centers!journey_segments_from_postal_center_id_fkey(name),
+          to_center:postal_centers!journey_segments_to_postal_center_id_fkey(name)
+        `)
+        .eq('account_id', accountId)
+        .order('entry_timestamp')
+
+      if (segmentsError) throw segmentsError
+
+      // 2. Get SLAs
+      const { data: slas, error: slasError } = await supabase
+        .from('slas')
+        .select('*')
+        .eq('account_id', accountId)
+        .eq('is_active', true)
+
+      if (slasError) throw slasError
+
+      // 3. Filter segments by path_signature and order them
+      const pathCities = pathSignature.split(' | ')
+      
+      // Build ordered list of segments based on path
+      const orderedSegments: any[][] = []
+      pathCities.forEach(pathSegment => {
+        const matchingSegs = journeySegments?.filter(seg => {
+          const segPath = `${seg.from_postal_center_city}→${seg.to_postal_center_city}`
+          return segPath === pathSegment
+        }) || []
+        if (matchingSegs.length > 0) {
+          orderedSegments.push(matchingSegs)
+        }
+      })
+
+      // 4. Build segment data array
+      const segmentDataArray: SegmentData[] = []
+      let order = 0
+
+      orderedSegments.forEach((segs, segIndex) => {
+        const firstSeg = segs[0]
+        const totalTags = segs.length
+
+        // Calculate averages
+        const avgNaturalCenter = segs.reduce((sum, s) => sum + (s.natural_time_in_center_minutes || 0), 0) / totalTags
+        const avgNaturalTransit = segs.reduce((sum, s) => sum + (s.natural_transit_time_minutes || 0), 0) / totalTags
+        const avgWorkingCenter = segs.reduce((sum, s) => sum + (s.working_time_in_center_minutes || 0), 0) / totalTags
+        const avgWorkingTransit = segs.reduce((sum, s) => sum + (s.working_transit_time_minutes || 0), 0) / totalTags
+
+        // Find SLAs
+        const centerSLA = slas?.find(sla => 
+          sla.sla_type === 'operational' && 
+          sla.postal_center_id === firstSeg.from_postal_center_id
+        )
+        
+        const transitSLA = slas?.find(sla => 
+          sla.sla_type === 'distribution' && 
+          sla.from_postal_center_id === firstSeg.from_postal_center_id &&
+          sla.to_postal_center_id === firstSeg.to_postal_center_id
+        )
+
+        const fromCenterName = firstSeg.from_center?.name || firstSeg.from_postal_center_city
+        const toCenterName = firstSeg.to_center?.name || firstSeg.to_postal_center_city
+
+        // Center segment (from)
+        if (avgNaturalCenter > 0 || centerSLA) {
+          const jkStd = centerSLA?.expected_time_minutes || 0
+          const stdPercentage = centerSLA?.on_time_percentage || 95
+          const warningThreshold = centerSLA?.warning_threshold || 90
+          const criticalThreshold = centerSLA?.critical_threshold || 80
+          
+          // Calculate % Real: tags that met the SLA
+          const tagsOnTime = segs.filter(s => (s.natural_time_in_center_minutes || 0) <= jkStd).length
+          const realPercentage = totalTags > 0 ? (tagsOnTime / totalTags) * 100 : 0
+          const diffPercentage = realPercentage - stdPercentage
+
+          const threshold = realPercentage >= warningThreshold ? 'Compliant' :
+                           realPercentage >= criticalThreshold ? 'Warning' : 'Critical'
+
+          segmentDataArray.push({
+            segment_name: `${fromCenterName} (Center)`,
+            segment_type: 'center',
+            jk_std_minutes: jkStd,
+            natural_time_minutes: Math.round(avgNaturalCenter),
+            working_time_minutes: Math.round(avgWorkingCenter),
+            std_percentage: stdPercentage,
+            real_percentage: Math.round(realPercentage),
+            diff_percentage: diffPercentage,
+            threshold,
+            warning_threshold: warningThreshold,
+            critical_threshold: criticalThreshold,
+            order: order++
+          })
+        }
+
+        // Transit segment
+        if (avgNaturalTransit > 0 || transitSLA) {
+          const jkStd = transitSLA?.expected_time_minutes || 0
+          const stdPercentage = transitSLA?.on_time_percentage || 95
+          const warningThreshold = transitSLA?.warning_threshold || 90
+          const criticalThreshold = transitSLA?.critical_threshold || 80
+          
+          const tagsOnTime = segs.filter(s => (s.natural_transit_time_minutes || 0) <= jkStd).length
+          const realPercentage = totalTags > 0 ? (tagsOnTime / totalTags) * 100 : 0
+          const diffPercentage = realPercentage - stdPercentage
+
+          const threshold = realPercentage >= warningThreshold ? 'Compliant' :
+                           realPercentage >= criticalThreshold ? 'Warning' : 'Critical'
+
+          segmentDataArray.push({
+            segment_name: `${fromCenterName} → ${toCenterName}`,
+            segment_type: 'transit',
+            jk_std_minutes: jkStd,
+            natural_time_minutes: Math.round(avgNaturalTransit),
+            working_time_minutes: Math.round(avgWorkingTransit),
+            std_percentage: stdPercentage,
+            real_percentage: Math.round(realPercentage),
+            diff_percentage: diffPercentage,
+            threshold,
+            warning_threshold: warningThreshold,
+            critical_threshold: criticalThreshold,
+            order: order++
+          })
+        }
+
+        // Add destination center for the LAST segment only
+        if (segIndex === orderedSegments.length - 1) {
+          // Find SLA for destination center
+          const destCenterSLA = slas?.find(sla => 
+            sla.sla_type === 'operational' && 
+            sla.postal_center_id === firstSeg.to_postal_center_id
+          )
+
+          if (destCenterSLA) {
+            const jkStd = destCenterSLA.expected_time_minutes || 0
+            const stdPercentage = destCenterSLA.on_time_percentage || 95
+            const warningThreshold = destCenterSLA.warning_threshold || 90
+            const criticalThreshold = destCenterSLA.critical_threshold || 80
+
+            segmentDataArray.push({
+              segment_name: `${toCenterName} (Center)`,
+              segment_type: 'center',
+              jk_std_minutes: jkStd,
+              natural_time_minutes: 0,
+              working_time_minutes: 0,
+              std_percentage: stdPercentage,
+              real_percentage: 0,
+              diff_percentage: -stdPercentage,
+              threshold: 'Critical',
+              warning_threshold: warningThreshold,
+              critical_threshold: criticalThreshold,
+              order: order++
+            })
+          }
+        }
+      })
+      
+      setSegments(segmentDataArray)
+    } catch (err: any) {
+      console.error('Error loading segments:', err)
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const formatTime = (minutes: number) => {
+    if (minutes === 0) return '-'
+    
+    const days = Math.floor(minutes / 1440)
+    const hours = Math.floor((minutes % 1440) / 60)
+    const mins = Math.round(minutes % 60)
+    
+    if (days > 0) {
+      return `${days.toFixed(2)} days`
+    } else if (hours > 0) {
+      return `${hours}h ${mins}m`
+    } else {
+      return `${mins}m`
+    }
+  }
+
+  const getThresholdColor = (threshold: string) => {
+    switch (threshold) {
+      case 'Compliant':
+        return 'bg-green-100 text-green-800'
+      case 'Warning':
+        return 'bg-yellow-100 text-yellow-800'
+      case 'Critical':
+        return 'bg-red-100 text-red-800'
+      default:
+        return 'bg-gray-100 text-gray-800'
+    }
+  }
+
+  if (loading) {
+    return <div className="text-center py-4 text-gray-500">Loading segments...</div>
+  }
+
+  if (error) {
+    return <div className="text-center py-4 text-red-500">Error: {error}</div>
+  }
+
+  if (segments.length === 0) {
+    return <div className="text-center py-4 text-gray-500">No segments found</div>
+  }
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="min-w-full divide-y divide-gray-200">
+        <thead className="bg-gray-100">
+          <tr>
+            <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Segment</th>
+            <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">J+K STD</th>
+            <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">Natural Time</th>
+            <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">Working Time</th>
+            <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">% STD</th>
+            <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">% Real</th>
+            <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">Diff %</th>
+            <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">Threshold</th>
+          </tr>
+        </thead>
+        <tbody className="bg-white divide-y divide-gray-200">
+          {segments.map((segment, index) => (
+            <tr key={index} className="hover:bg-gray-50">
+              <td className="px-3 py-2 text-sm font-medium text-gray-900">
+                {segment.segment_name}
+                <span className="ml-2 text-xs text-gray-500">
+                  ({segment.segment_type === 'center' ? 'Center' : 'Transit'})
+                </span>
+              </td>
+              <td className="px-3 py-2 text-right text-sm font-mono text-gray-900">
+                {formatTime(segment.jk_std_minutes)}
+              </td>
+              <td className="px-3 py-2 text-right text-sm font-mono text-gray-900">
+                {formatTime(segment.natural_time_minutes)}
+              </td>
+              <td className="px-3 py-2 text-right text-sm font-mono text-gray-900">
+                {formatTime(segment.working_time_minutes)}
+              </td>
+              <td className="px-3 py-2 text-right text-sm font-semibold text-gray-700">
+                {segment.std_percentage}%
+              </td>
+              <td className="px-3 py-2 text-right">
+                {segment.real_percentage > 0 ? (
+                  <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                    segment.real_percentage >= segment.warning_threshold 
+                      ? 'bg-green-100 text-green-800' 
+                      : segment.real_percentage >= segment.critical_threshold
+                      ? 'bg-yellow-100 text-yellow-800'
+                      : 'bg-red-100 text-red-800'
+                  }`}>
+                    {segment.real_percentage}%
+                  </span>
+                ) : (
+                  <span className="text-gray-400">-</span>
+                )}
+              </td>
+              <td className="px-3 py-2 text-right">
+                {segment.real_percentage > 0 ? (
+                  <span className={`font-semibold ${
+                    segment.diff_percentage >= 0 ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    {segment.diff_percentage > 0 ? '+' : ''}{segment.diff_percentage.toFixed(1)}%
+                  </span>
+                ) : (
+                  <span className="text-gray-400">-</span>
+                )}
+              </td>
+              <td className="px-3 py-2 text-right">
+                {segment.real_percentage > 0 ? (
+                  <span className={`px-2 py-0.5 rounded text-xs font-semibold ${getThresholdColor(segment.threshold)}`}>
+                    {segment.threshold}
+                  </span>
+                ) : (
+                  <span className="text-gray-400">-</span>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}

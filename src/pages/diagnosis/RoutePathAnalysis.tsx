@@ -19,6 +19,7 @@ interface RoutePathData {
   avg_natural_time_minutes: number
   avg_working_time_minutes: number
   compliance_rate: number
+  percent_real: number
   segment_details: any[]
   expected_time_minutes: number
 }
@@ -125,6 +126,7 @@ export default function RoutePathAnalysis() {
           avg_natural_time_minutes,
           avg_working_time_minutes,
           compliance_rate,
+          percent_real,
           segment_details,
           expected_time_minutes,
           carriers(name),
@@ -160,6 +162,7 @@ export default function RoutePathAnalysis() {
           avg_natural_time_minutes: row.avg_natural_time_minutes,
           avg_working_time_minutes: row.avg_working_time_minutes,
           compliance_rate: row.compliance_rate,
+          percent_real: row.percent_real || 0,
           segment_details: row.segment_details || [],
           expected_time_minutes: row.expected_time_minutes || 0
         }

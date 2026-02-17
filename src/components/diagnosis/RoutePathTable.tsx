@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { ChevronDown, ChevronRight, AlertCircle, Info } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import SegmentFlowDiagram from './SegmentFlowDiagram'
+import SegmentTable from './SegmentTable'
 
 interface SegmentDetail {
   from_city: string
@@ -42,6 +42,7 @@ interface RoutePathData {
   avg_natural_time_minutes: number
   avg_working_time_minutes: number
   compliance_rate: number
+  percent_real: number
   segment_details: SegmentDetail[]
   
   // Aggregated SLA
@@ -160,6 +161,7 @@ export default function RoutePathTable({ routePaths, postalCenters }: Props) {
               <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Product</th>
               <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Origin</th>
               <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Destination</th>
+              <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">Seg</th>
               <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">
                 <div className="flex items-center justify-end gap-1">
                   J+K Std
@@ -212,6 +214,9 @@ export default function RoutePathTable({ routePaths, postalCenters }: Props) {
                     <td className="px-3 py-2 text-gray-700">{path.product_name}</td>
                     <td className="px-3 py-2 text-gray-700">{path.origin_city_name}</td>
                     <td className="px-3 py-2 text-gray-700">{path.destination_city_name}</td>
+                    <td className="px-3 py-2 text-right font-semibold text-gray-700">
+                      {path.path_signature.split(' | ').length}
+                    </td>
                     <td className="px-3 py-2 text-right font-mono text-gray-900">
                       {formatJK(path.expected_time_minutes)}
                     </td>
@@ -231,22 +236,22 @@ export default function RoutePathTable({ routePaths, postalCenters }: Props) {
                       {stdPercentage.toFixed(0)}%
                     </td>
                     <td className="px-3 py-2 text-right">
-                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getComplianceColor(path.compliance_rate, 90, 80)}`}>
-                        {path.compliance_rate.toFixed(1)}%
+                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getComplianceColor(path.percent_real, 90, 80)}`}>
+                        {path.percent_real.toFixed(1)}%
                       </span>
                     </td>
                     <td className="px-3 py-2 text-right">
-                      <span className={`font-semibold ${percentDiff >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {formatPercentDiff(path.compliance_rate, stdPercentage)}
+                      <span className={`font-semibold ${(path.percent_real - stdPercentage) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {formatPercentDiff(path.percent_real, stdPercentage)}
                       </span>
                     </td>
                     <td className="px-3 py-2 text-right">
                       <span className={`px-2 py-0.5 rounded text-xs font-semibold ${
-                        path.compliance_rate >= 90 ? 'bg-green-100 text-green-800' :
-                        path.compliance_rate >= 80 ? 'bg-yellow-100 text-yellow-800' :
+                        path.percent_real >= 90 ? 'bg-green-100 text-green-800' :
+                        path.percent_real >= 80 ? 'bg-yellow-100 text-yellow-800' :
                         'bg-red-100 text-red-800'
                       }`}>
-                        {path.compliance_rate >= 90 ? 'Compliant' : path.compliance_rate >= 80 ? 'Warning' : 'Critical'}
+                        {path.percent_real >= 90 ? 'Compliant' : path.percent_real >= 80 ? 'Warning' : 'Critical'}
                       </span>
                     </td>
                     <td className="px-3 py-2 text-right font-semibold text-gray-900">
@@ -254,16 +259,16 @@ export default function RoutePathTable({ routePaths, postalCenters }: Props) {
                     </td>
                   </tr>
 
-                  {/* Expanded Segments - Flow Diagram */}
+                  {/* Expanded Segments - Table */}
                   {isExpanded && (
                     <tr>
                       <td colSpan={13} className="px-3 py-3 bg-gray-50">
                         <div className="space-y-2">
-                          <div className="text-xs font-semibold text-gray-600 uppercase mb-2">Segment Flow</div>
-                          <SegmentFlowDiagram 
-                            segments={path.segment_details}
-                            postalCenters={postalCenters}
-                            onSegmentClick={handleSegmentClick}
+                          <div className="text-xs font-semibold text-gray-600 uppercase mb-2">Segment Details</div>
+                          <SegmentTable 
+                            pathId={path.id}
+                            pathSignature={path.path_signature}
+                            accountId="f4d823d2-93e6-4755-9a89-9da87e7fa86e"
                           />
                         </div>
                       </td>
