@@ -3,7 +3,7 @@ import { useTranslation } from '@/hooks/useTranslation'
 import type { GenerateCombinationsRequest } from '@/lib/types_slas'
 import type { PostalCenter } from '@/lib/types_postal_centers'
 import type { SLAWithDetails } from '@/lib/types_slas'
-import type { Carrier, Product } from '@/lib/types'pes_slas'
+import type { Carrier, Product } from '@/lib/types'
 
 interface GenerateCombinationsModalProps {
   postalCenters: PostalCenter[]
