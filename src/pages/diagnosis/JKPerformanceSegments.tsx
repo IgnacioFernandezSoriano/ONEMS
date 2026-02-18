@@ -193,7 +193,7 @@ const JKPerformanceSegments: React.FC = () => {
     } else if (activeTab === 'carriers') {
       loadCarrierPerformance();
     }
-  }, [activeTab, profile?.account_id, originCity, destinationCity, carrier, segmentType, carrierId, productId, fromCenterId, toCenterId]);
+  }, [activeTab, profile?.account_id, originCity, destinationCity, carrier, product, segmentType, threshold]);
 
   const loadSegmentRoutes = async () => {
     if (!profile?.account_id) return;
