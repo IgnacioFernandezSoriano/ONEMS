@@ -4,7 +4,6 @@ import { useAccount } from '../../contexts/AccountContext'
 import { useSidebar } from '../../contexts/SidebarContext'
 import { SmartTooltip } from '../common/SmartTooltip'
 import {
-  LayoutDashboard,
   Map,
   Route,
   Truck,
@@ -32,6 +31,8 @@ import {
   DatabaseZap,
   CheckCircle,
   Activity,
+  LayoutList,
+  Network,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
@@ -51,19 +52,37 @@ interface MenuGroup {
   items: MenuItem[]
 }
 
+type SidebarView = 'setup' | 'functional'
+
 export function Sidebar() {
   const { profile, signOut } = useAuth()
   const { selectedAccountId, setSelectedAccountId } = useAccount()
   const location = useLocation()
   const { isCollapsed, setIsCollapsed } = useSidebar()
   const { t, locale, setLocale } = useLocale()
-  const [expandedSections, setExpandedSections] = useState<string[]>(['/reporting', '/diagnosis', '/setup/e2e', '/setup/diagnosis'])
+  const [expandedSections, setExpandedSections] = useState<string[]>(['/reporting', '/diagnosis', '/setup/e2e', '/setup/diagnosis', '/e2e', '/rfid'])
   const [isHovered, setIsHovered] = useState(false)
   const [accounts, setAccounts] = useState<Array<{ id: string; name: string }>>([])
   const [accountName, setAccountName] = useState<string>('')
+  const [sidebarView, setSidebarView] = useState<SidebarView>('functional')
   
   // Auto-expand on hover when collapsed
   const isExpanded = isCollapsed ? isHovered : true
+
+  // Load sidebar view preference from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('sidebarView')
+    if (saved === 'setup' || saved === 'functional') {
+      setSidebarView(saved)
+    }
+  }, [])
+
+  // Save sidebar view preference
+  const toggleSidebarView = () => {
+    const newView = sidebarView === 'setup' ? 'functional' : 'setup'
+    setSidebarView(newView)
+    localStorage.setItem('sidebarView', newView)
+  }
 
   // Load accounts for superadmin
   useEffect(() => {
@@ -92,247 +111,130 @@ export function Sidebar() {
     }
   }, [profile?.account_id])
 
-  const menuGroups: MenuGroup[] = [
+  // SETUP VIEW MENU
+  const setupMenuGroups: MenuGroup[] = [
     {
-      label: t('menu.overview'),
+      label: 'SYSTEM SETUP',
       items: [
         {
-          path: '/dashboard',
-          label: t('menu.dashboard'),
-          icon: LayoutDashboard,
-          tooltip: t('menu.dashboard.tooltip'),
+          path: '/topology',
+          label: 'Country Topology',
+          icon: Map,
+          roles: ['admin', 'superadmin'],
+          tooltip: 'Configure country topology and postal network',
+        },
+        {
+          path: '/carriers',
+          label: 'Carriers & Products',
+          icon: Truck,
+          roles: ['admin', 'superadmin'],
+          tooltip: 'Manage carriers and their products',
+        },
+        {
+          path: '/panelists',
+          label: 'Panelists',
+          icon: UserCircle,
+          roles: ['admin', 'superadmin'],
+          tooltip: 'Manage test panelists',
+        },
+        {
+          path: '/delivery-standards',
+          label: 'Delivery Standards',
+          icon: Clock,
+          roles: ['admin', 'superadmin'],
+          tooltip: 'Configure delivery time standards',
+        },
+        {
+          path: '/postal-centers',
+          label: 'Postal Centers',
+          icon: Building2,
+          roles: ['admin', 'superadmin'],
+          tooltip: 'Manage postal centers',
+        },
+        {
+          path: '/readers-management',
+          label: 'Readers Management',
+          icon: MapPin,
+          roles: ['admin', 'superadmin'],
+          tooltip: 'Configure RFID readers',
+        },
+        {
+          path: '/slas-configuration',
+          label: 'SLAs Configuration',
+          icon: Target,
+          roles: ['admin', 'superadmin'],
+          tooltip: 'Configure service level agreements',
         },
       ],
     },
     {
-      label: t('menu.setup'),
-      items: [
-        {
-          path: '/setup/e2e',
-          label: t('menu.setup_e2e'),
-          icon: Package,
-          roles: ['admin', 'superadmin'],
-          tooltip: t('menu.setup_e2e.tooltip'),
-          children: [
-            {
-              path: '/topology',
-              label: t('menu.topology'),
-              icon: Map,
-              roles: ['admin', 'superadmin'],
-              tooltip: t('menu.topology.tooltip'),
-            },
-            {
-              path: '/carriers',
-              label: t('menu.carriers'),
-              icon: Truck,
-              roles: ['admin', 'superadmin'],
-              tooltip: t('menu.carriers.tooltip'),
-            },
-            {
-              path: '/panelists',
-              label: t('menu.panelists'),
-              icon: UserCircle,
-              roles: ['admin', 'superadmin'],
-              tooltip: t('menu.panelists.tooltip'),
-            },
-            {
-              path: '/delivery-standards',
-              label: t('menu.delivery_standards'),
-              icon: Clock,
-              roles: ['admin', 'superadmin'],
-              tooltip: t('menu.delivery_standards.tooltip'),
-            },
-          ],
-        },
-        {
-          path: '/setup/diagnosis',
-          label: t('menu.setup_diagnosis'),
-          icon: DatabaseZap,
-          roles: ['admin', 'superadmin'],
-          tooltip: t('menu.setup_diagnosis.tooltip'),
-          children: [
-            {
-              path: '/postal-centers',
-              label: t('menu.postal_centers'),
-              icon: Building2,
-              roles: ['admin', 'superadmin'],
-              tooltip: t('menu.postal_centers.tooltip'),
-            },
-            {
-              path: '/readers-management',
-              label: t('menu.readers_management'),
-              icon: MapPin,
-              roles: ['admin', 'superadmin'],
-              tooltip: t('menu.readers_management.tooltip'),
-            },
-            {
-              path: '/slas-configuration',
-              label: t('menu.slas_configuration'),
-              icon: Target,
-              roles: ['admin', 'superadmin'],
-              tooltip: t('menu.slas_configuration.tooltip'),
-            },
-
-          ],
-        },
-      ],
-    },
-    {
-      label: t('menu.allocation_management'),
+      label: 'ALLOCATION MANAGEMENT',
       items: [
         {
           path: '/allocation-plan-generator',
-          label: t('menu.allocation_generator'),
+          label: 'Allocation Generator',
           icon: Target,
           roles: ['admin', 'superadmin'],
-          tooltip: t('menu.allocation_generator.tooltip'),
+          tooltip: 'Generate allocation plans',
         },
         {
           path: '/node-load-balancing',
-          label: t('menu.load_balancing'),
+          label: 'Load Balancing',
           icon: Scale,
           roles: ['admin', 'superadmin'],
-          tooltip: t('menu.load_balancing.tooltip'),
+          tooltip: 'Balance load across nodes',
         },
         {
           path: '/allocation-plans',
-          label: t('menu.allocation_plans'),
+          label: 'Allocation Plans',
           icon: Calendar,
           roles: ['admin', 'superadmin'],
-          tooltip: t('menu.allocation_plans.tooltip'),
+          tooltip: 'View and manage allocation plans',
         },
       ],
     },
-
     {
-      label: t('menu.materials_management'),
+      label: 'MATERIALS MANAGEMENT',
       items: [
         {
           path: '/material-requirements',
-          label: t('menu.material_requirements'),
+          label: 'Material Requirements',
           icon: Package,
           roles: ['admin', 'superadmin'],
-          tooltip: t('menu.material_requirements.tooltip'),
+          tooltip: 'Manage material requirements',
         },
         {
           path: '/stock-management',
-          label: t('menu.stock_management'),
+          label: 'Stock Management',
           icon: Warehouse,
           roles: ['admin', 'superadmin'],
-          tooltip: t('menu.stock_management.tooltip'),
+          tooltip: 'Manage stock levels',
         },
         {
           path: '/material-catalog',
-          label: t('menu.material_catalog'),
+          label: 'Material Catalog',
           icon: Database,
           roles: ['admin', 'superadmin'],
-          tooltip: t('menu.material_catalog.tooltip'),
+          tooltip: 'Browse material catalog',
         },
       ],
     },
     {
-      label: t('menu.reporting'),
-      items: [
-        {
-          path: '/reporting',
-          label: t('menu.reporting_e2e'),
-          icon: BarChart3,
-          roles: ['admin', 'superadmin'],
-          tooltip: t('menu.reporting_e2e.tooltip'),
-          children: [
-            {
-              path: '/reporting/territory-equity',
-              label: t('menu.reporting_equity'),
-              icon: MapPin,
-              roles: ['admin', 'superadmin'],
-              tooltip: t('menu.reporting_equity.tooltip'),
-            },
-            {
-              path: '/reporting/compliance',
-              label: t('menu.reporting_compliance'),
-              icon: Shield,
-              roles: ['admin', 'superadmin'],
-              tooltip: t('menu.reporting_compliance.tooltip'),
-            },
-          ],
-        },
-        {
-          path: '/diagnosis',
-          label: t('menu.diagnosis'),
-          icon: Activity,
-          roles: ['admin', 'superadmin'],
-          tooltip: t('menu.diagnosis.tooltip'),
-          children: [
-            {
-              path: '/diagnosis/pipeline-monitor',
-              label: 'Pipeline Monitor',
-              icon: Activity,
-              roles: ['admin', 'superadmin'],
-              tooltip: 'Monitor and control EPCIS pipeline execution',
-            },
-            {
-              path: '/diagnosis/route-path-analysis',
-              label: 'Route Path Analysis',
-              icon: Activity,
-              roles: ['admin', 'superadmin'],
-              tooltip: 'Analyze journey paths and route performance',
-            },
-            // Temporarily hidden - not part of EPCIS pipeline
-            // {
-            //   path: '/diagnosis/network-overview',
-            //   label: t('menu.network_overview'),
-            //   icon: Activity,
-            //   roles: ['admin', 'superadmin'],
-            //   tooltip: t('menu.network_overview.tooltip'),
-            // },
-            // {
-            //   path: '/diagnosis/route-analysis',
-            //   label: t('menu.route_analysis'),
-            //   icon: Activity,
-            //   roles: ['admin', 'superadmin'],
-            //   tooltip: t('menu.route_analysis.tooltip'),
-            // },
-            // {
-            //   path: '/diagnosis/center-analysis',
-            //   label: t('menu.center_analysis'),
-            //   icon: Activity,
-            //   roles: ['admin', 'superadmin'],
-            //   tooltip: t('menu.center_analysis.tooltip'),
-            // },
-            // {
-            //   path: '/diagnosis/segment-deep-dive',
-            //   label: t('menu.segment_deep_dive'),
-            //   icon: Activity,
-            //   roles: ['admin', 'superadmin'],
-            //   tooltip: t('menu.segment_deep_dive.tooltip'),
-            // },
-            {
-              path: '/diagnosis/jk-performance-segments',
-              label: t('menu.jk_performance_segments'),
-              icon: Activity,
-              roles: ['admin', 'superadmin'],
-              tooltip: t('menu.jk_performance_segments.tooltip'),
-            },
-          ],
-        },
-      ],
-    },
-    {
-      label: t('menu.databases_section'),
+      label: 'DATA SOURCES',
       items: [
         {
           path: '/one-db',
-          label: t('menu.e2e_db'),
+          label: 'E2E Database',
           icon: Database,
           roles: ['admin', 'superadmin'],
-          tooltip: t('menu.reporting_onedb.tooltip'),
+          tooltip: 'End-to-end database access',
         },
         {
           path: '/one-db-api',
-          label: t('menu.extract_e2e_db_api'),
+          label: 'E2E Database API',
           icon: DatabaseZap,
           roles: ['admin', 'superadmin'],
-          tooltip: t('menu.get_api.tooltip'),
+          tooltip: 'E2E database API access',
         },
         {
           path: '/epcis-api',
@@ -343,106 +245,300 @@ export function Sidebar() {
         },
         {
           path: '/diagnosis/processed-events',
-          label: t('menu.rfid_events_db'),
+          label: 'RFID Events Database',
           icon: CheckCircle,
           roles: ['admin', 'superadmin'],
-          tooltip: t('menu.rfid_events_db.tooltip'),
+          tooltip: 'View processed RFID events',
         },
       ],
     },
     {
-      label: t('menu.administration'),
+      label: 'ADMINISTRATION',
       items: [
         {
           path: '/users',
-          label: t('menu.users'),
+          label: 'Users',
           icon: Users,
           roles: ['admin', 'superadmin'],
-          tooltip: t('menu.users.tooltip'),
+          tooltip: 'Manage users',
         },
-        {
-          path: '/rfid-data-consolidation',
-          label: t('menu.rfid_data_consolidation'),
-          icon: DatabaseZap,
-          roles: ['admin', 'superadmin'],
-          tooltip: t('menu.rfid_data_consolidation.tooltip'),
-          children: [
-            {
-              path: '/diagnosis/event-consolidation',
-              label: t('menu.rfid_events_consolidation_numbered'),
-              icon: RefreshCw,
-              roles: ['admin', 'superadmin'],
-              tooltip: t('menu.event_consolidation.tooltip'),
-            },
-            {
-              path: '/diagnosis/journey-segments',
-              label: t('menu.journey_segments_numbered'),
-              icon: Map,
-              roles: ['admin', 'superadmin'],
-              tooltip: t('menu.journey_segments.tooltip'),
-            },
-            {
-              path: '/diagnosis/complete-journeys',
-              label: t('menu.complete_journeys_numbered'),
-              icon: Route,
-              roles: ['admin', 'superadmin'],
-              tooltip: t('menu.complete_journeys.tooltip'),
-            },
-          ],
-        },
-
         {
           path: '/settings/account-configuration',
-          label: t('menu.center_working_days'),
+          label: 'Center Working Days',
           icon: Settings,
-          tooltip: t('menu.center_working_days.tooltip'),
+          tooltip: 'Configure center working days',
         },
         ...(accountName === 'DEMO2' ? [
           {
-            path: '/receive-generator',
-            label: t('menu.onedb_generator'),
-            icon: RefreshCw,
-            roles: ['admin', 'superadmin'],
-            tooltip: t('menu.onedb_generator.tooltip'),
-          },
-          {
-            path: '/admin/account-management',
-            label: t('menu.demo_reset'),
-            icon: RefreshCw,
-            roles: ['admin', 'superadmin'],
-            tooltip: t('menu.demo_reset.tooltip'),
+            path: '/api-keys',
+            label: 'API Keys',
+            icon: Key,
+            roles: ['admin', 'superadmin'] as string[],
+            tooltip: 'Manage API keys',
           },
         ] : []),
       ],
     },
+  ]
+
+  // FUNCTIONAL VIEW MENU
+  const functionalMenuGroups: MenuGroup[] = [
     {
-      label: t('menu.superadmin'),
+      label: 'E2E NETWORK',
       items: [
         {
-          path: '/settings/accounts',
-          label: t('menu.accounts'),
-          icon: Building2,
-          roles: ['superadmin'],
-          tooltip: t('menu.accounts.tooltip'),
+          path: '/e2e',
+          label: 'E2E Network',
+          icon: Network,
+          roles: ['admin', 'superadmin'],
+          tooltip: 'End-to-end network management',
+          children: [
+            {
+              path: '/topology',
+              label: 'Country Topology',
+              icon: Map,
+              roles: ['admin', 'superadmin'],
+              tooltip: 'Configure country topology',
+            },
+            {
+              path: '/carriers',
+              label: 'Carriers & Products',
+              icon: Truck,
+              roles: ['admin', 'superadmin'],
+              tooltip: 'Manage carriers and products',
+            },
+            {
+              path: '/panelists',
+              label: 'Panelists',
+              icon: UserCircle,
+              roles: ['admin', 'superadmin'],
+              tooltip: 'Manage test panelists',
+            },
+            {
+              path: '/delivery-standards',
+              label: 'Delivery Standards',
+              icon: Clock,
+              roles: ['admin', 'superadmin'],
+              tooltip: 'Configure delivery standards',
+            },
+            {
+              path: '/allocation-plan-generator',
+              label: 'Allocation Generator',
+              icon: Target,
+              roles: ['admin', 'superadmin'],
+              tooltip: 'Generate allocation plans',
+            },
+            {
+              path: '/node-load-balancing',
+              label: 'Load Balancing',
+              icon: Scale,
+              roles: ['admin', 'superadmin'],
+              tooltip: 'Balance load across nodes',
+            },
+            {
+              path: '/allocation-plans',
+              label: 'Allocation Plans',
+              icon: Calendar,
+              roles: ['admin', 'superadmin'],
+              tooltip: 'View allocation plans',
+            },
+            {
+              path: '/material-requirements',
+              label: 'Material Requirements',
+              icon: Package,
+              roles: ['admin', 'superadmin'],
+              tooltip: 'Material requirements',
+            },
+            {
+              path: '/stock-management',
+              label: 'Stock Management',
+              icon: Warehouse,
+              roles: ['admin', 'superadmin'],
+              tooltip: 'Manage stock',
+            },
+            {
+              path: '/material-catalog',
+              label: 'Material Catalog',
+              icon: Database,
+              roles: ['admin', 'superadmin'],
+              tooltip: 'Material catalog',
+            },
+            {
+              path: '/reporting/territory-equity',
+              label: 'Territory Equity',
+              icon: MapPin,
+              roles: ['admin', 'superadmin'],
+              tooltip: 'Territory equity reporting',
+            },
+            {
+              path: '/reporting/compliance',
+              label: 'Compliance',
+              icon: Shield,
+              roles: ['admin', 'superadmin'],
+              tooltip: 'Compliance reporting',
+            },
+            {
+              path: '/one-db',
+              label: 'E2E Database',
+              icon: Database,
+              roles: ['admin', 'superadmin'],
+              tooltip: 'E2E database access',
+            },
+            {
+              path: '/one-db-api',
+              label: 'E2E Database API',
+              icon: DatabaseZap,
+              roles: ['admin', 'superadmin'],
+              tooltip: 'E2E database API',
+            },
+          ],
         },
+      ],
+    },
+    {
+      label: 'DIAGNOSIS (RFID)',
+      items: [
         {
-          path: '/settings/users',
-          label: t('menu.all_users'),
+          path: '/rfid',
+          label: 'RFID Diagnosis',
+          icon: Activity,
+          roles: ['admin', 'superadmin'],
+          tooltip: 'RFID diagnosis and analysis',
+          children: [
+            {
+              path: '/postal-centers',
+              label: 'Postal Centers',
+              icon: Building2,
+              roles: ['admin', 'superadmin'],
+              tooltip: 'Manage postal centers',
+            },
+            {
+              path: '/readers-management',
+              label: 'Readers Management',
+              icon: MapPin,
+              roles: ['admin', 'superadmin'],
+              tooltip: 'Configure RFID readers',
+            },
+            {
+              path: '/slas-configuration',
+              label: 'SLAs Configuration',
+              icon: Target,
+              roles: ['admin', 'superadmin'],
+              tooltip: 'Configure SLAs',
+            },
+            {
+              path: '/diagnosis/event-consolidation',
+              label: '1. RFID Events Consolidation',
+              icon: RefreshCw,
+              roles: ['admin', 'superadmin'],
+              tooltip: 'Consolidate RFID events',
+            },
+            {
+              path: '/diagnosis/journey-segments',
+              label: '2. Journey Segments',
+              icon: Map,
+              roles: ['admin', 'superadmin'],
+              tooltip: 'View journey segments',
+            },
+            {
+              path: '/diagnosis/complete-journeys',
+              label: '3. Complete Journeys',
+              icon: Route,
+              roles: ['admin', 'superadmin'],
+              tooltip: 'View complete journeys',
+            },
+            {
+              path: '/diagnosis/route-path-analysis',
+              label: 'Route Analysis',
+              icon: Activity,
+              roles: ['admin', 'superadmin'],
+              tooltip: 'Analyze route performance',
+            },
+            {
+              path: '/diagnosis/jk-performance-segments',
+              label: 'Segment Performance',
+              icon: Activity,
+              roles: ['admin', 'superadmin'],
+              tooltip: 'Segment performance analysis',
+            },
+            {
+              path: '/epcis-api',
+              label: 'EPCIS Pipeline API',
+              icon: DatabaseZap,
+              roles: ['admin', 'superadmin'],
+              tooltip: 'EPCIS pipeline API',
+            },
+            {
+              path: '/diagnosis/processed-events',
+              label: 'RFID Events Database',
+              icon: CheckCircle,
+              roles: ['admin', 'superadmin'],
+              tooltip: 'RFID events database',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      label: 'ADMINISTRATION',
+      items: [
+        {
+          path: '/users',
+          label: 'Users',
           icon: Users,
-          roles: ['superadmin'],
-          tooltip: t('menu.all_users.tooltip'),
+          roles: ['admin', 'superadmin'],
+          tooltip: 'Manage users',
         },
         {
-          path: '/admin/translations',
-          label: t('menu.translations'),
-          icon: Languages,
-          roles: ['superadmin'],
-          tooltip: t('menu.translations.tooltip'),
+          path: '/settings/account-configuration',
+          label: 'Center Working Days',
+          icon: Settings,
+          tooltip: 'Configure center working days',
         },
-
+        ...(accountName === 'DEMO2' ? [
+          {
+            path: '/api-keys',
+            label: 'API Keys',
+            icon: Key,
+            roles: ['admin', 'superadmin'] as string[],
+            tooltip: 'Manage API keys',
+          },
+        ] : []),
       ],
     },
   ]
+
+  // Add superadmin items if applicable
+  if (profile?.role === 'superadmin') {
+    const adminGroup = (sidebarView === 'setup' ? setupMenuGroups : functionalMenuGroups).find(g => g.label === 'ADMINISTRATION')
+    if (adminGroup) {
+      adminGroup.items.push(
+        {
+          path: '/settings/accounts',
+          label: 'Accounts',
+          icon: Building2,
+          roles: ['superadmin'],
+          tooltip: 'Manage accounts',
+        },
+        {
+          path: '/settings/users',
+          label: 'All Users',
+          icon: Users,
+          roles: ['superadmin'],
+          tooltip: 'Manage all users',
+        },
+        {
+          path: '/admin/translations',
+          label: 'Translations',
+          icon: Languages,
+          roles: ['superadmin'],
+          tooltip: 'Manage translations',
+        }
+      )
+    }
+  }
+
+  const menuGroups = sidebarView === 'setup' ? setupMenuGroups : functionalMenuGroups
 
   const hasAccess = (item: MenuItem) => {
     if (!item.roles) return true
@@ -489,6 +585,40 @@ export function Sidebar() {
         </button>
       </div>
 
+      {/* View Toggle */}
+      {isExpanded && (
+        <div className="px-3 py-3 border-b border-gray-200">
+          <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+            <button
+              onClick={() => {
+                setSidebarView('setup')
+                localStorage.setItem('sidebarView', 'setup')
+              }}
+              className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                sidebarView === 'setup'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              📋 Setup
+            </button>
+            <button
+              onClick={() => {
+                setSidebarView('functional')
+                localStorage.setItem('sidebarView', 'functional')
+              }}
+              className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                sidebarView === 'functional'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              📊 Functional
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 overflow-y-auto">
         {menuGroups.map((group, groupIdx) => {
@@ -497,7 +627,7 @@ export function Sidebar() {
 
           return (
             <div key={groupIdx} className="mb-6">
-              {/* Group Label - Always takes space to maintain positions */}
+              {/* Group Label */}
               <div className="px-3 mb-2">
                 <h3 className={`text-xs font-semibold text-gray-400 uppercase tracking-wider transition-opacity ${
                   isExpanded ? 'opacity-100' : 'opacity-0'
@@ -518,80 +648,69 @@ export function Sidebar() {
 
                   return (
                     <div key={item.path}>
-                      {/* Main Item */}
+                      {/* Parent Item */}
                       {hasChildren ? (
-                        <div className="flex items-center gap-1">
-                          <button
-                            onClick={() => toggleSection(item.path)}
-                            className={`flex-1 flex items-center justify-between gap-3 px-3 py-2 rounded-lg transition-colors ${
-                              active
-                                ? 'bg-blue-50 text-blue-700'
-                                : 'text-gray-700 hover:bg-gray-100'
-                            }`}
-                          >
-                            <div className="flex items-center gap-3 min-w-0">
-                              <Icon className="w-5 h-5 flex-shrink-0" />
-                              {isExpanded && <span className="font-medium text-sm whitespace-nowrap">{item.label}</span>}
-                            </div>
-                            {isExpanded && (isSectionExpanded ? (
-                              <ChevronDown className="w-4 h-4 flex-shrink-0" />
-                            ) : (
-                              <ChevronRight className="w-4 h-4 flex-shrink-0" />
-                            ))}
-                          </button>
-                          {isExpanded && item.tooltip && (
-                            <SmartTooltip content={item.tooltip} />
+                        <button
+                          onClick={() => toggleSection(item.path)}
+                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${
+                            active
+                              ? 'bg-blue-50 text-blue-600'
+                              : 'text-gray-700 hover:bg-gray-50'
+                          }`}
+                        >
+                          <Icon className="w-5 h-5 flex-shrink-0" />
+                          {isExpanded && (
+                            <>
+                              <span className="flex-1 text-sm font-medium text-left">
+                                {item.label}
+                              </span>
+                              {isSectionExpanded ? (
+                                <ChevronDown className="w-4 h-4" />
+                              ) : (
+                                <ChevronRight className="w-4 h-4" />
+                              )}
+                            </>
                           )}
-                        </div>
+                        </button>
                       ) : (
-                        <div className="flex items-center gap-1">
+                        <SmartTooltip content={item.tooltip || item.label}>
                           <Link
                             to={item.path}
-                            className={`flex-1 flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                            className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${
                               active
-                                ? 'bg-blue-50 text-blue-700'
-                                : 'text-gray-700 hover:bg-gray-100'
+                                ? 'bg-blue-50 text-blue-600'
+                                : 'text-gray-700 hover:bg-gray-50'
                             }`}
                           >
                             <Icon className="w-5 h-5 flex-shrink-0" />
-                            {isExpanded && <span className="font-medium text-sm whitespace-nowrap">{item.label}</span>}
+                            {isExpanded && (
+                              <span className="text-sm font-medium">{item.label}</span>
+                            )}
                           </Link>
-                          {isExpanded && item.tooltip && (
-                            <SmartTooltip content={item.tooltip} />
-                          )}
-                        </div>
+                        </SmartTooltip>
                       )}
 
-                      {/* Children - Always occupy space to maintain positions */}
-                      {hasChildren && (
-                        <div className={`${isExpanded ? 'ml-8' : 'ml-0'} mt-1 space-y-1 transition-opacity ${
-                          (isSectionExpanded && isExpanded) || (isCollapsed && item.path === '/reporting') ? 'opacity-100' : 'opacity-0'
-                        }`}>
+                      {/* Children Items */}
+                      {hasChildren && isSectionExpanded && isExpanded && (
+                        <div className="ml-8 mt-1 space-y-1">
                           {item.children!.map((child) => {
                             if (!hasAccess(child)) return null
-
                             const ChildIcon = child.icon
                             const childActive = isActive(child.path)
-                            const shouldShow = (isSectionExpanded && isExpanded) || (isCollapsed && item.path === '/reporting')
 
                             return (
-                              <div key={child.path} className="flex items-center gap-1">
-                                <Link
-                                  to={child.path}
-                                  className={`flex-1 flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
-                                    childActive
-                                      ? 'bg-blue-50 text-blue-700 font-medium'
-                                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                                  }`}
-                                  style={shouldShow ? undefined : { pointerEvents: 'none' }}
-                                >
-                                  <ChildIcon className="w-4 h-4 flex-shrink-0" />
-                                  {isExpanded && <span className="whitespace-nowrap">{child.label}</span>}
-                                </Link>
-                                {isExpanded && child.tooltip && (
-                                  <SmartTooltip content={child.tooltip} />
-                                )}
-                              </div>
+                              <Link
+                                key={child.path}
+                                to={child.path}
+                                className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all text-sm ${
+                                  childActive
+                                    ? 'bg-blue-50 text-blue-600'
+                                    : 'text-gray-600 hover:bg-gray-50'
+                                }`}
+                              >
+                                <ChildIcon className="w-4 h-4 flex-shrink-0" />
+                                <span>{child.label}</span>
+                              </Link>
                             )
                           })}
                         </div>
@@ -605,60 +724,18 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* User Profile */}
-      <div className="p-4 border-t border-gray-200 space-y-3">
-        {/* User Info */}
-        <div className={`flex items-center gap-3 ${isCollapsed ? 'justify-center' : 'px-3'} py-2`}>
-          <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
-            <span className="text-sm font-bold text-white">
-              {profile?.full_name?.charAt(0) || profile?.email?.charAt(0) || 'U'}
-            </span>
-          </div>
-          {isExpanded && (
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">
-                {profile?.full_name || 'User'}
-              </p>
-              <p className="text-xs text-gray-500 truncate">{profile?.email}</p>
-            </div>
-          )}
-        </div>
-
-        {/* Language Selector (only for demo user) */}
-        {isExpanded && profile?.email === 'demo@myone.int' && (
-          <div className="px-3">
-            <label htmlFor="language-selector-sidebar" className="block text-xs text-gray-600 mb-1">
-              {t('common.language')}
+      {/* Footer */}
+      <div className="border-t border-gray-200 p-4">
+        {/* Account Selector for Superadmin */}
+        {profile?.role === 'superadmin' && isExpanded && accounts.length > 0 && (
+          <div className="mb-3">
+            <label className="block text-xs font-medium text-gray-700 mb-1">
+              Account
             </label>
             <select
-              id="language-selector-sidebar"
-              className="w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm"
-              value={locale}
-              onChange={async (e) => {
-                await setLocale(e.target.value as 'en' | 'es' | 'fr' | 'ar')
-                // Redirect to dashboard for fast language update
-                window.location.href = '/dashboard'
-              }}
-            >
-              <option value="en">English</option>
-              <option value="es">Español</option>
-              <option value="fr">Français</option>
-              <option value="ar">العربية (Arabic)</option>
-            </select>
-          </div>
-        )}
-
-        {/* Account Selector (only for superadmin) */}
-        {isExpanded && profile?.role === 'superadmin' && accounts.length > 0 && (
-          <div className="px-3">
-            <label htmlFor="account-selector-sidebar" className="block text-xs text-gray-600 mb-1">
-              View as account:
-            </label>
-            <select
-              id="account-selector-sidebar"
-              className="w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm"
               value={selectedAccountId || ''}
               onChange={(e) => setSelectedAccountId(e.target.value || null)}
+              className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md"
             >
               <option value="">All Accounts</option>
               {accounts.map((account) => (
@@ -670,17 +747,47 @@ export function Sidebar() {
           </div>
         )}
 
-        {/* Sign Out Button */}
+        {/* Language Selector */}
         {isExpanded && (
-          <div className="px-3">
-            <button
-              onClick={signOut}
-              className="w-full px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+          <div className="mb-3">
+            <select
+              value={locale}
+              onChange={(e) => setLocale(e.target.value as any)}
+              className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md"
             >
-              {t('common.sign_out')}
-            </button>
+              <option value="en">English</option>
+              <option value="es">Español</option>
+              <option value="fr">Français</option>
+              <option value="ar">العربية</option>
+            </select>
           </div>
         )}
+
+        {/* User Info */}
+        {isExpanded && (
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+              <span className="text-sm font-medium text-blue-600">
+                {profile?.email?.[0].toUpperCase()}
+              </span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-gray-900 truncate">
+                {profile?.email}
+              </p>
+              <p className="text-xs text-gray-500 capitalize">{profile?.role}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Sign Out Button */}
+        <button
+          onClick={signOut}
+          className={`w-full flex items-center ${isExpanded ? 'justify-start gap-2' : 'justify-center'} px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors`}
+        >
+          <ChevronRight className="w-4 h-4" />
+          {isExpanded && <span>Sign Out</span>}
+        </button>
       </div>
     </aside>
   )
