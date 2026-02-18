@@ -1,6 +1,5 @@
 [
   {
-    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "carrier_id": "856b4a5c-1716-4110-ac5e-0d7c909b9237",
     "product_id": "8325a692-7e1c-40a6-9a54-59527d19634f",
     "origin_city_id": "9ebc9d84-e121-42bf-a163-e8726448b796",
@@ -13,7 +12,6 @@
     "threshold_type": "absolute"
   },
   {
-    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "carrier_id": "5ea9f7ed-a96c-4f3c-b849-05dc80e3ca67",
     "product_id": "288a5c97-7a99-42a7-810c-84e793cb3f13",
     "origin_city_id": "9ebc9d84-e121-42bf-a163-e8726448b796",
@@ -26,12 +24,11 @@
     "threshold_type": "absolute"
   },
   {
-    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "carrier_id": "5ea9f7ed-a96c-4f3c-b849-05dc80e3ca67",
     "product_id": "288a5c97-7a99-42a7-810c-84e793cb3f13",
     "origin_city_id": "4e6b443c-a1c4-4533-9bf9-d2d67a0f405d",
     "destination_city_id": "b6d002e9-2c03-482b-9efb-0abaedd637f0",
-    "standard_time": 2.0,
+    "standard_time": 1.0,
     "success_percentage": 90.0,
     "time_unit": "days",
     "warning_threshold": 85.0,
@@ -39,12 +36,11 @@
     "threshold_type": "absolute"
   },
   {
-    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "carrier_id": "856b4a5c-1716-4110-ac5e-0d7c909b9237",
     "product_id": "8325a692-7e1c-40a6-9a54-59527d19634f",
     "origin_city_id": "4e6b443c-a1c4-4533-9bf9-d2d67a0f405d",
     "destination_city_id": "b6d002e9-2c03-482b-9efb-0abaedd637f0",
-    "standard_time": 2.0,
+    "standard_time": 1.0,
     "success_percentage": 90.0,
     "time_unit": "days",
     "warning_threshold": 85.0,
@@ -52,12 +48,11 @@
     "threshold_type": "absolute"
   },
   {
-    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "carrier_id": "856b4a5c-1716-4110-ac5e-0d7c909b9237",
     "product_id": "8325a692-7e1c-40a6-9a54-59527d19634f",
     "origin_city_id": "b6d002e9-2c03-482b-9efb-0abaedd637f0",
     "destination_city_id": "4e6b443c-a1c4-4533-9bf9-d2d67a0f405d",
-    "standard_time": 2.0,
+    "standard_time": 1.0,
     "success_percentage": 90.0,
     "time_unit": "days",
     "warning_threshold": 85.0,
@@ -65,12 +60,11 @@
     "threshold_type": "absolute"
   },
   {
-    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "carrier_id": "5ea9f7ed-a96c-4f3c-b849-05dc80e3ca67",
     "product_id": "288a5c97-7a99-42a7-810c-84e793cb3f13",
     "origin_city_id": "b6d002e9-2c03-482b-9efb-0abaedd637f0",
     "destination_city_id": "4e6b443c-a1c4-4533-9bf9-d2d67a0f405d",
-    "standard_time": 2.0,
+    "standard_time": 1.0,
     "success_percentage": 90.0,
     "time_unit": "days",
     "warning_threshold": 85.0,
@@ -78,7 +72,6 @@
     "threshold_type": "absolute"
   },
   {
-    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "carrier_id": "856b4a5c-1716-4110-ac5e-0d7c909b9237",
     "product_id": "8325a692-7e1c-40a6-9a54-59527d19634f",
     "origin_city_id": "4e6b443c-a1c4-4533-9bf9-d2d67a0f405d",
@@ -91,7 +84,6 @@
     "threshold_type": "absolute"
   },
   {
-    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "carrier_id": "5ea9f7ed-a96c-4f3c-b849-05dc80e3ca67",
     "product_id": "288a5c97-7a99-42a7-810c-84e793cb3f13",
     "origin_city_id": "4e6b443c-a1c4-4533-9bf9-d2d67a0f405d",
@@ -104,7 +96,6 @@
     "threshold_type": "absolute"
   },
   {
-    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "carrier_id": "856b4a5c-1716-4110-ac5e-0d7c909b9237",
     "product_id": "8325a692-7e1c-40a6-9a54-59527d19634f",
     "origin_city_id": "f86f46c1-98dd-4ec1-9cab-d435856c3125",
@@ -117,7 +108,6 @@
     "threshold_type": "relative"
   },
   {
-    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "carrier_id": "5ea9f7ed-a96c-4f3c-b849-05dc80e3ca67",
     "product_id": "288a5c97-7a99-42a7-810c-84e793cb3f13",
     "origin_city_id": "f86f46c1-98dd-4ec1-9cab-d435856c3125",
@@ -130,7 +120,6 @@
     "threshold_type": "relative"
   },
   {
-    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "carrier_id": "856b4a5c-1716-4110-ac5e-0d7c909b9237",
     "product_id": "8325a692-7e1c-40a6-9a54-59527d19634f",
     "origin_city_id": "f86f46c1-98dd-4ec1-9cab-d435856c3125",
@@ -143,7 +132,6 @@
     "threshold_type": "absolute"
   },
   {
-    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "carrier_id": "5ea9f7ed-a96c-4f3c-b849-05dc80e3ca67",
     "product_id": "288a5c97-7a99-42a7-810c-84e793cb3f13",
     "origin_city_id": "f86f46c1-98dd-4ec1-9cab-d435856c3125",
@@ -156,12 +144,11 @@
     "threshold_type": "absolute"
   },
   {
-    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "carrier_id": "856b4a5c-1716-4110-ac5e-0d7c909b9237",
     "product_id": "8325a692-7e1c-40a6-9a54-59527d19634f",
     "origin_city_id": "9ebc9d84-e121-42bf-a163-e8726448b796",
     "destination_city_id": "4e6b443c-a1c4-4533-9bf9-d2d67a0f405d",
-    "standard_time": 4.0,
+    "standard_time": 3.0,
     "success_percentage": 85.0,
     "time_unit": "days",
     "warning_threshold": 80.0,
@@ -169,12 +156,11 @@
     "threshold_type": "absolute"
   },
   {
-    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "carrier_id": "856b4a5c-1716-4110-ac5e-0d7c909b9237",
     "product_id": "8325a692-7e1c-40a6-9a54-59527d19634f",
     "origin_city_id": "9ebc9d84-e121-42bf-a163-e8726448b796",
     "destination_city_id": "b6d002e9-2c03-482b-9efb-0abaedd637f0",
-    "standard_time": 4.0,
+    "standard_time": 3.0,
     "success_percentage": 85.0,
     "time_unit": "days",
     "warning_threshold": 80.0,
@@ -182,12 +168,11 @@
     "threshold_type": "absolute"
   },
   {
-    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "carrier_id": "856b4a5c-1716-4110-ac5e-0d7c909b9237",
     "product_id": "8325a692-7e1c-40a6-9a54-59527d19634f",
     "origin_city_id": "4e6b443c-a1c4-4533-9bf9-d2d67a0f405d",
     "destination_city_id": "9ebc9d84-e121-42bf-a163-e8726448b796",
-    "standard_time": 4.0,
+    "standard_time": 3.0,
     "success_percentage": 85.0,
     "time_unit": "days",
     "warning_threshold": 80.0,
@@ -195,12 +180,11 @@
     "threshold_type": "absolute"
   },
   {
-    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "carrier_id": "856b4a5c-1716-4110-ac5e-0d7c909b9237",
     "product_id": "8325a692-7e1c-40a6-9a54-59527d19634f",
     "origin_city_id": "f86f46c1-98dd-4ec1-9cab-d435856c3125",
     "destination_city_id": "b6d002e9-2c03-482b-9efb-0abaedd637f0",
-    "standard_time": 4.0,
+    "standard_time": 3.0,
     "success_percentage": 85.0,
     "time_unit": "days",
     "warning_threshold": 80.0,
@@ -208,12 +192,11 @@
     "threshold_type": "absolute"
   },
   {
-    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "carrier_id": "856b4a5c-1716-4110-ac5e-0d7c909b9237",
     "product_id": "8325a692-7e1c-40a6-9a54-59527d19634f",
     "origin_city_id": "b6d002e9-2c03-482b-9efb-0abaedd637f0",
     "destination_city_id": "9ebc9d84-e121-42bf-a163-e8726448b796",
-    "standard_time": 4.0,
+    "standard_time": 3.0,
     "success_percentage": 85.0,
     "time_unit": "days",
     "warning_threshold": 80.0,
@@ -221,12 +204,11 @@
     "threshold_type": "absolute"
   },
   {
-    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "carrier_id": "856b4a5c-1716-4110-ac5e-0d7c909b9237",
     "product_id": "8325a692-7e1c-40a6-9a54-59527d19634f",
     "origin_city_id": "b6d002e9-2c03-482b-9efb-0abaedd637f0",
     "destination_city_id": "f86f46c1-98dd-4ec1-9cab-d435856c3125",
-    "standard_time": 4.0,
+    "standard_time": 3.0,
     "success_percentage": 85.0,
     "time_unit": "days",
     "warning_threshold": 80.0,
@@ -234,12 +216,11 @@
     "threshold_type": "absolute"
   },
   {
-    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "carrier_id": "5ea9f7ed-a96c-4f3c-b849-05dc80e3ca67",
     "product_id": "288a5c97-7a99-42a7-810c-84e793cb3f13",
     "origin_city_id": "9ebc9d84-e121-42bf-a163-e8726448b796",
     "destination_city_id": "4e6b443c-a1c4-4533-9bf9-d2d67a0f405d",
-    "standard_time": 4.0,
+    "standard_time": 3.0,
     "success_percentage": 85.0,
     "time_unit": "days",
     "warning_threshold": 80.0,
@@ -247,12 +228,11 @@
     "threshold_type": "absolute"
   },
   {
-    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "carrier_id": "5ea9f7ed-a96c-4f3c-b849-05dc80e3ca67",
     "product_id": "288a5c97-7a99-42a7-810c-84e793cb3f13",
     "origin_city_id": "9ebc9d84-e121-42bf-a163-e8726448b796",
     "destination_city_id": "b6d002e9-2c03-482b-9efb-0abaedd637f0",
-    "standard_time": 4.0,
+    "standard_time": 3.0,
     "success_percentage": 85.0,
     "time_unit": "days",
     "warning_threshold": 80.0,
@@ -260,12 +240,11 @@
     "threshold_type": "absolute"
   },
   {
-    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "carrier_id": "5ea9f7ed-a96c-4f3c-b849-05dc80e3ca67",
     "product_id": "288a5c97-7a99-42a7-810c-84e793cb3f13",
     "origin_city_id": "4e6b443c-a1c4-4533-9bf9-d2d67a0f405d",
     "destination_city_id": "9ebc9d84-e121-42bf-a163-e8726448b796",
-    "standard_time": 4.0,
+    "standard_time": 3.0,
     "success_percentage": 85.0,
     "time_unit": "days",
     "warning_threshold": 80.0,
@@ -273,12 +252,11 @@
     "threshold_type": "absolute"
   },
   {
-    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "carrier_id": "5ea9f7ed-a96c-4f3c-b849-05dc80e3ca67",
     "product_id": "288a5c97-7a99-42a7-810c-84e793cb3f13",
     "origin_city_id": "f86f46c1-98dd-4ec1-9cab-d435856c3125",
     "destination_city_id": "b6d002e9-2c03-482b-9efb-0abaedd637f0",
-    "standard_time": 4.0,
+    "standard_time": 3.0,
     "success_percentage": 85.0,
     "time_unit": "days",
     "warning_threshold": 80.0,
@@ -286,12 +264,11 @@
     "threshold_type": "absolute"
   },
   {
-    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "carrier_id": "5ea9f7ed-a96c-4f3c-b849-05dc80e3ca67",
     "product_id": "288a5c97-7a99-42a7-810c-84e793cb3f13",
     "origin_city_id": "b6d002e9-2c03-482b-9efb-0abaedd637f0",
     "destination_city_id": "9ebc9d84-e121-42bf-a163-e8726448b796",
-    "standard_time": 4.0,
+    "standard_time": 3.0,
     "success_percentage": 85.0,
     "time_unit": "days",
     "warning_threshold": 80.0,
@@ -299,12 +276,11 @@
     "threshold_type": "absolute"
   },
   {
-    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "carrier_id": "5ea9f7ed-a96c-4f3c-b849-05dc80e3ca67",
     "product_id": "288a5c97-7a99-42a7-810c-84e793cb3f13",
     "origin_city_id": "b6d002e9-2c03-482b-9efb-0abaedd637f0",
     "destination_city_id": "f86f46c1-98dd-4ec1-9cab-d435856c3125",
-    "standard_time": 4.0,
+    "standard_time": 3.0,
     "success_percentage": 85.0,
     "time_unit": "days",
     "warning_threshold": 80.0,
