@@ -13,6 +13,7 @@ export interface ResetResult {
   account_name?: string
   message: string
   deleted_records?: Record<string, number>
+  restored_records?: Record<string, number>
 }
 
 export function useAccountManagement() {
@@ -152,6 +153,8 @@ export function useAccountManagement() {
       deletedCounts.reader_location_history = readerLocationCount || 0
 
       // RESTORE: Re-insert products and delivery_standards
+      const restoredCounts: Record<string, number> = {}
+      
       if (productsBackup && productsBackup.length > 0) {
         // Remove id, created_at, updated_at to let DB generate new ones
         const productsToRestore = productsBackup.map(({ id, created_at, updated_at, ...rest }) => rest)
@@ -161,6 +164,8 @@ export function useAccountManagement() {
         
         if (productsError) {
           console.error('Error restoring products:', productsError)
+        } else {
+          restoredCounts.products = productsBackup.length
         }
       }
 
@@ -173,6 +178,8 @@ export function useAccountManagement() {
         
         if (deliveryStandardsError) {
           console.error('Error restoring delivery_standards:', deliveryStandardsError)
+        } else {
+          restoredCounts.delivery_standards = deliveryStandardsBackup.length
         }
       }
 
@@ -181,7 +188,8 @@ export function useAccountManagement() {
         account_id: demo2AccountId,
         account_name: 'DEMO2',
         message: 'Account data reset successfully',
-        deleted_records: deletedCounts
+        deleted_records: deletedCounts,
+        restored_records: restoredCounts
       }
     } catch (error: any) {
       console.error('Error resetting account:', error)
