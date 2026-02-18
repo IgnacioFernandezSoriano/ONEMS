@@ -45,6 +45,8 @@ export default function JKPerformanceSegments() {
   const [product, setProduct] = useState('');
   const [originCity, setOriginCity] = useState('');
   const [destinationCity, setDestinationCity] = useState('');
+  const [fromCenter, setFromCenter] = useState('');
+  const [toCenter, setToCenter] = useState('');
   const [segmentType, setSegmentType] = useState<'all' | 'operational' | 'distribution'>('all');
   const [threshold, setThreshold] = useState<'all' | 'compliant' | 'warning' | 'critical'>('all');
   
@@ -111,34 +113,26 @@ export default function JKPerformanceSegments() {
       if (productObj) setProduct(`${productObj.code} - ${productObj.description}`);
     }
 
-    if (fromCenterIdParam && effectiveAccountId) {
-      supabase
-        .from('postal_centers')
-        .select('city')
-        .eq('id', fromCenterIdParam)
-        .eq('account_id', effectiveAccountId)
-        .single()
-        .then(({ data }) => {
-          if (data) setOriginCity(data.city);
-        });
+    if (fromCenterIdParam && postalCenters.length > 0) {
+      const centerObj = postalCenters.find(c => c.id === fromCenterIdParam);
+      if (centerObj) {
+        setFromCenter(centerObj.name);
+        setOriginCity(centerObj.city);
+      }
     }
 
-    if (toCenterIdParam && effectiveAccountId) {
-      supabase
-        .from('postal_centers')
-        .select('city')
-        .eq('id', toCenterIdParam)
-        .eq('account_id', effectiveAccountId)
-        .single()
-        .then(({ data }) => {
-          if (data) setDestinationCity(data.city);
-        });
+    if (toCenterIdParam && postalCenters.length > 0) {
+      const centerObj = postalCenters.find(c => c.id === toCenterIdParam);
+      if (centerObj) {
+        setToCenter(centerObj.name);
+        setDestinationCity(centerObj.city);
+      }
     }
 
     if (segmentTypeParam === 'operational' || segmentTypeParam === 'distribution') {
       setSegmentType(segmentTypeParam);
     }
-  }, [searchParams, carriers, products, effectiveAccountId]);
+  }, [searchParams, carriers, products, postalCenters, effectiveAccountId]);
 
   // Load segment data
   useEffect(() => {
@@ -171,6 +165,16 @@ export default function JKPerformanceSegments() {
 
         if (destinationCity) {
           query = query.eq('to_postal_center_city', destinationCity);
+        }
+
+        if (fromCenter) {
+          const centerObj = postalCenters.find(c => c.name === fromCenter);
+          if (centerObj) query = query.eq('from_postal_center_id', centerObj.id);
+        }
+
+        if (toCenter) {
+          const centerObj = postalCenters.find(c => c.name === toCenter);
+          if (centerObj) query = query.eq('to_postal_center_id', centerObj.id);
         }
 
         const { data: segments, error } = await query;
@@ -394,7 +398,7 @@ export default function JKPerformanceSegments() {
     };
 
     loadSegments();
-  }, [effectiveAccountId, carrier, product, originCity, destinationCity, segmentType, threshold, carriers, products, postalCenters]);
+  }, [effectiveAccountId, carrier, product, originCity, destinationCity, fromCenter, toCenter, segmentType, threshold, carriers, products, postalCenters]);
 
   // Convert SegmentData to JKRouteData format for charts
   const routeDataForCharts = segmentData.map(seg => ({
@@ -463,7 +467,7 @@ export default function JKPerformanceSegments() {
 
         {/* Filters */}
         <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">{t('common.carrier', undefined, 'Carrier')}</label>
               <select
@@ -519,6 +523,34 @@ export default function JKPerformanceSegments() {
                 <option value="">{t('common.all', undefined, 'All')}</option>
                 {cities.map(city => (
                   <option key={city} value={city}>{city}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">From Center</label>
+              <select
+                value={fromCenter}
+                onChange={(e) => setFromCenter(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              >
+                <option value="">All</option>
+                {postalCenters.map(center => (
+                  <option key={center.id} value={center.name}>{center.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">To Center</label>
+              <select
+                value={toCenter}
+                onChange={(e) => setToCenter(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              >
+                <option value="">All</option>
+                {postalCenters.map(center => (
+                  <option key={center.id} value={center.name}>{center.name}</option>
                 ))}
               </select>
             </div>
