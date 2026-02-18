@@ -33,7 +33,9 @@ interface SegmentDetail {
 
 interface RoutePathData {
   id: string
+  carrier_id: string
   carrier_name: string
+  product_id: string
   product_name: string
   origin_city_name: string
   destination_city_name: string
@@ -270,6 +272,10 @@ export default function RoutePathTable({ routePaths, postalCenters }: Props) {
                             pathId={path.id}
                             pathSignature={path.path_signature}
                             accountId="f4d823d2-93e6-4755-9a89-9da87e7fa86e"
+                            carrierId={path.carrier_id}
+                            carrierName={path.carrier_name}
+                            productId={path.product_id}
+                            productName={path.product_name}
                             onSegmentCountChange={(count) => {
                               setSegmentCounts(prev => ({ ...prev, [path.id]: count }))
                             }}

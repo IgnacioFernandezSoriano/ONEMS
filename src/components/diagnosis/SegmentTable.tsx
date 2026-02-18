@@ -1,9 +1,12 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 
 interface SegmentData {
   segment_name: string
   segment_type: 'center' | 'transit'
+  from_center_id: string | null
+  to_center_id: string | null
   jk_std_minutes: number
   natural_time_minutes: number
   working_time_minutes: number
@@ -20,10 +23,15 @@ interface SegmentTableProps {
   pathId: string
   pathSignature: string
   accountId: string
+  carrierId: string
+  carrierName: string
+  productId: string
+  productName: string
   onSegmentCountChange?: (count: number) => void
 }
 
-export default function SegmentTable({ pathId, pathSignature, accountId, onSegmentCountChange }: SegmentTableProps) {
+export default function SegmentTable({ pathId, pathSignature, accountId, carrierId, carrierName, productId, productName, onSegmentCountChange }: SegmentTableProps) {
+  const navigate = useNavigate()
   const [segments, setSegments] = React.useState<SegmentData[]>([])
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
@@ -131,6 +139,8 @@ export default function SegmentTable({ pathId, pathSignature, accountId, onSegme
           segmentDataArray.push({
             segment_name: `${fromCenterName} (Center)`,
             segment_type: 'center',
+            from_center_id: firstSeg.from_postal_center_id,
+            to_center_id: null,
             jk_std_minutes: jkStd,
             natural_time_minutes: Math.round(avgNaturalCenter),
             working_time_minutes: Math.round(avgWorkingCenter),
@@ -161,6 +171,8 @@ export default function SegmentTable({ pathId, pathSignature, accountId, onSegme
           segmentDataArray.push({
             segment_name: `${fromCenterName} → ${toCenterName}`,
             segment_type: 'transit',
+            from_center_id: firstSeg.from_postal_center_id,
+            to_center_id: firstSeg.to_postal_center_id,
             jk_std_minutes: jkStd,
             natural_time_minutes: Math.round(avgNaturalTransit),
             working_time_minutes: Math.round(avgWorkingTransit),
@@ -191,6 +203,8 @@ export default function SegmentTable({ pathId, pathSignature, accountId, onSegme
             segmentDataArray.push({
               segment_name: `${toCenterName} (Center)`,
               segment_type: 'center',
+              from_center_id: firstSeg.to_postal_center_id,
+              to_center_id: null,
               jk_std_minutes: jkStd,
               natural_time_minutes: 0,
               working_time_minutes: 0,
@@ -245,6 +259,25 @@ export default function SegmentTable({ pathId, pathSignature, accountId, onSegme
     }
   }
 
+  const handleSegmentClick = (segment: SegmentData) => {
+    // Build URL params for J+K Performance
+    const params = new URLSearchParams()
+    params.set('carrier_id', carrierId)
+    params.set('product_id', productId)
+    
+    if (segment.segment_type === 'center' && segment.from_center_id) {
+      params.set('from_center_id', segment.from_center_id)
+      params.set('segment_type', 'operational')
+    } else if (segment.segment_type === 'transit' && segment.from_center_id && segment.to_center_id) {
+      params.set('from_center_id', segment.from_center_id)
+      params.set('to_center_id', segment.to_center_id)
+      params.set('segment_type', 'distribution')
+    }
+    
+    // Open in new tab
+    window.open(`/diagnosis/jk-performance-segments?${params.toString()}`, '_blank')
+  }
+
   if (loading) {
     return <div className="text-center py-4 text-gray-500">Loading segments...</div>
   }
@@ -274,7 +307,11 @@ export default function SegmentTable({ pathId, pathSignature, accountId, onSegme
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
           {segments.map((segment, index) => (
-            <tr key={index} className="hover:bg-gray-50">
+            <tr 
+              key={index} 
+              onClick={() => handleSegmentClick(segment)}
+              className="hover:bg-blue-50 cursor-pointer transition-colors"
+            >
               <td className="px-3 py-2 text-sm font-medium text-gray-900">
                 {segment.segment_name}
                 <span className="ml-2 text-xs text-gray-500">

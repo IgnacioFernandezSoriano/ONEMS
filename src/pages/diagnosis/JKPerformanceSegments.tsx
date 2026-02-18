@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { Package, Clock, CheckCircle, AlertTriangle } from 'lucide-react';
@@ -44,6 +45,7 @@ interface CarrierPerformance {
 
 const JKPerformanceSegments: React.FC = () => {
   const { profile } = useAuth();
+  const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<'segments' | 'centers' | 'carriers'>('segments');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -53,6 +55,10 @@ const JKPerformanceSegments: React.FC = () => {
   const [destinationCity, setDestinationCity] = useState<string>('');
   const [carrier, setCarrier] = useState<string>('');
   const [segmentType, setSegmentType] = useState<string>('');
+  const [carrierId, setCarrierId] = useState<string>('');
+  const [productId, setProductId] = useState<string>('');
+  const [fromCenterId, setFromCenterId] = useState<string>('');
+  const [toCenterId, setToCenterId] = useState<string>('');
 
   // Data
   const [segmentRoutes, setSegmentRoutes] = useState<SegmentRoute[]>([]);
@@ -68,6 +74,62 @@ const JKPerformanceSegments: React.FC = () => {
     problematicRoutes: 0
   });
 
+  // Read URL params on mount and resolve IDs to names
+  useEffect(() => {
+    const urlCarrierId = searchParams.get('carrier_id');
+    const urlProductId = searchParams.get('product_id');
+    const urlFromCenterId = searchParams.get('from_center_id');
+    const urlToCenterId = searchParams.get('to_center_id');
+    const urlSegmentType = searchParams.get('segment_type');
+
+    if (urlCarrierId) setCarrierId(urlCarrierId);
+    if (urlProductId) setProductId(urlProductId);
+    if (urlFromCenterId) setFromCenterId(urlFromCenterId);
+    if (urlToCenterId) setToCenterId(urlToCenterId);
+    if (urlSegmentType) setSegmentType(urlSegmentType);
+
+    // Resolve IDs to names
+    const resolveIds = async () => {
+      if (!profile?.account_id) return;
+
+      try {
+        // Resolve carrier
+        if (urlCarrierId) {
+          const { data: carrierData } = await supabase
+            .from('carriers')
+            .select('name')
+            .eq('id', urlCarrierId)
+            .single();
+          if (carrierData) setCarrier(carrierData.name);
+        }
+
+        // Resolve from center to city
+        if (urlFromCenterId) {
+          const { data: centerData } = await supabase
+            .from('postal_centers')
+            .select('city')
+            .eq('id', urlFromCenterId)
+            .single();
+          if (centerData) setOriginCity(centerData.city);
+        }
+
+        // Resolve to center to city
+        if (urlToCenterId) {
+          const { data: centerData } = await supabase
+            .from('postal_centers')
+            .select('city')
+            .eq('id', urlToCenterId)
+            .single();
+          if (centerData) setDestinationCity(centerData.city);
+        }
+      } catch (err) {
+        console.error('Error resolving IDs:', err);
+      }
+    };
+
+    resolveIds();
+  }, [searchParams, profile?.account_id]);
+
   useEffect(() => {
     if (activeTab === 'segments') {
       loadSegmentRoutes();
@@ -76,7 +138,7 @@ const JKPerformanceSegments: React.FC = () => {
     } else if (activeTab === 'carriers') {
       loadCarrierPerformance();
     }
-  }, [activeTab, profile?.account_id, originCity, destinationCity, carrier, segmentType]);
+  }, [activeTab, profile?.account_id, originCity, destinationCity, carrier, segmentType, carrierId, productId, fromCenterId, toCenterId]);
 
   const loadSegmentRoutes = async () => {
     if (!profile?.account_id) return;
