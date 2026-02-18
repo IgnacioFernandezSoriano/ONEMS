@@ -251,7 +251,7 @@ export function Sidebar() {
   // FUNCTIONAL VIEW MENU
   const functionalMenuGroups: MenuGroup[] = [
     {
-      label: 'E2E NETWORK',
+      label: 'E2E',
       items: [
         {
           path: '/e2e/setup',
@@ -283,7 +283,7 @@ export function Sidebar() {
             },
             {
               path: '/delivery-standards',
-              label: 'Delivery Standards',
+              label: 'E2E SLA',
               icon: Clock,
               roles: ['admin', 'superadmin'],
               tooltip: 'Configure delivery standards',
@@ -399,7 +399,7 @@ export function Sidebar() {
       ],
     },
     {
-      label: 'DIAGNOSIS (RFID)',
+      label: 'DIAGNOSIS',
       items: [
         {
           path: '/rfid/setup',
@@ -447,7 +447,7 @@ export function Sidebar() {
             },
             {
               path: '/diagnosis/jk-performance-segments',
-              label: 'Segment Performance',
+              label: 'Segment Analysis',
               icon: FileText,
               roles: ['admin', 'superadmin'],
               tooltip: 'Segment performance analysis',
@@ -672,8 +672,8 @@ export function Sidebar() {
           if (moduleFilter !== 'all') {
             // In functional or all view - filter by group labels
             if (sidebarView === 'functional' || sidebarView === 'all') {
-              if (moduleFilter === 'e2e' && group.label === 'DIAGNOSIS (RFID)') return null
-              if (moduleFilter === 'diagnosis' && group.label === 'E2E NETWORK') return null
+              if (moduleFilter === 'e2e' && group.label === 'DIAGNOSIS') return null
+              if (moduleFilter === 'diagnosis' && group.label === 'E2E') return null
             }
             // In setup view - filter by item prefixes
             if (sidebarView === 'setup') {
