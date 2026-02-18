@@ -70,7 +70,7 @@ export function Sidebar() {
   const [accounts, setAccounts] = useState<Array<{ id: string; name: string }>>([])
   const [accountName, setAccountName] = useState<string>('')
   const [sidebarView, setSidebarView] = useState<SidebarView>('functional')
-  const [moduleFilter, setModuleFilter] = useState<'all' | 'e2e' | 'rfid'>('all')
+  const [moduleFilter, setModuleFilter] = useState<'all' | 'e2e' | 'diagnosis'>('all')
   
   // Auto-expand on hover when collapsed
   const isExpanded = isCollapsed ? isHovered : true
@@ -183,21 +183,21 @@ export function Sidebar() {
         },
         {
           path: '/postal-centers',
-          label: 'RFID: Postal Centers',
+          label: 'Diag: Postal Centers',
           icon: Building2,
           roles: ['admin', 'superadmin'],
           tooltip: 'Manage postal centers',
         },
         {
           path: '/readers-management',
-          label: 'RFID: Readers Management',
+          label: 'Diag: Readers Management',
           icon: MapPin,
           roles: ['admin', 'superadmin'],
           tooltip: 'Configure RFID readers',
         },
         {
           path: '/slas-configuration',
-          label: 'RFID: Segment SLA',
+          label: 'Diag: Segment SLA',
           icon: Target,
           roles: ['admin', 'superadmin'],
           tooltip: 'Configure segment service level agreements',
@@ -651,14 +651,14 @@ export function Sidebar() {
                 E2E
               </button>
               <button
-                onClick={() => setModuleFilter('rfid')}
+                onClick={() => setModuleFilter('diagnosis'))
                 className={`flex-1 px-2 py-1 text-xs font-medium rounded-md transition-colors ${
-                  moduleFilter === 'rfid'
+                  moduleFilter === 'diagnosis'
                     ? 'bg-blue-100 text-blue-700'
                     : 'text-gray-600 hover:bg-gray-200'
                 }`}
               >
-                RFID
+                Diagnosis
               </button>
             </div>
           )}
@@ -676,13 +676,13 @@ export function Sidebar() {
             // In functional view
             if (sidebarView === 'functional') {
               if (moduleFilter === 'e2e' && group.label === 'DIAGNOSIS (RFID)') return null
-              if (moduleFilter === 'rfid' && group.label === 'E2E NETWORK') return null
+              if (moduleFilter === 'diagnosis' && group.label === 'E2E NETWORK') return null
             }
             // In setup view - filter by item prefixes
             if (sidebarView === 'setup') {
               const hasMatchingItems = group.items.some(item => {
                 if (moduleFilter === 'e2e') return item.label?.startsWith('E2E:')
-                if (moduleFilter === 'rfid') return item.label?.startsWith('RFID:')
+                if (moduleFilter === 'diagnosis') return item.label?.startsWith('Diag:')
                 return true
               })
               if (!hasMatchingItems) return null
@@ -708,7 +708,7 @@ export function Sidebar() {
                   // Apply module filter to individual items in setup view
                   if (sidebarView === 'setup' && moduleFilter !== 'all') {
                     if (moduleFilter === 'e2e' && !item.label?.startsWith('E2E:')) return null
-                    if (moduleFilter === 'rfid' && !item.label?.startsWith('RFID:')) return null
+                    if (moduleFilter === 'diagnosis' && !item.label?.startsWith('Diag:')) return null
                   }
 
                   const Icon = item.icon
