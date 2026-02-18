@@ -53,7 +53,7 @@ interface MenuGroup {
   items: MenuItem[]
 }
 
-type SidebarView = 'setup' | 'functional'
+type SidebarView = 'all' | 'setup' | 'functional'
 
 export function Sidebar() {
   const { profile, signOut } = useAuth()
@@ -78,8 +78,8 @@ export function Sidebar() {
   // Load sidebar view preference from localStorage
   useEffect(() => {
     const saved = localStorage.getItem('sidebarView')
-    if (saved === 'setup' || saved === 'functional') {
-      setSidebarView(saved)
+    if (saved === 'setup' || saved === 'functional' || saved === 'all') {
+      setSidebarView(saved as SidebarView)
     } else {
       // Default to functional if no preference saved
       setSidebarView('functional')
@@ -87,11 +87,10 @@ export function Sidebar() {
     }
   }, [])
 
-  // Save sidebar view preference
-  const toggleSidebarView = () => {
-    const newView = sidebarView === 'setup' ? 'functional' : 'setup'
-    setSidebarView(newView)
-    localStorage.setItem('sidebarView', newView)
+  // Handle sidebar view change
+  const handleViewChange = (view: SidebarView) => {
+    setSidebarView(view)
+    localStorage.setItem('sidebarView', view)
   }
 
   // Load accounts for superadmin
@@ -502,35 +501,68 @@ export function Sidebar() {
 
   // Add superadmin items if applicable
   if (profile?.role === 'superadmin') {
-    const adminGroup = (sidebarView === 'setup' ? setupMenuGroups : functionalMenuGroups).find(g => g.label === 'ADMINISTRATION')
-    if (adminGroup) {
-      adminGroup.items.push(
-        {
-          path: '/settings/accounts',
-          label: 'Accounts',
-          icon: Building2,
-          roles: ['superadmin'],
-          tooltip: 'Manage accounts',
-        },
-        {
-          path: '/settings/users',
-          label: 'All Users',
-          icon: Users,
-          roles: ['superadmin'],
-          tooltip: 'Manage all users',
-        },
-        {
-          path: '/admin/translations',
-          label: 'Translations',
-          icon: Languages,
-          roles: ['superadmin'],
-          tooltip: 'Manage translations',
-        }
-      )
+    // Add to both setup and functional views
+    const setupAdminGroup = setupMenuGroups.find(g => g.label === 'ADMINISTRATION')
+    const functionalAdminGroup = functionalMenuGroups.find(g => g.label === 'ADMINISTRATION')
+    
+    const superadminItems = [
+      {
+        path: '/settings/accounts',
+        label: 'Accounts',
+        icon: Building2,
+        roles: ['superadmin'],
+        tooltip: 'Manage accounts',
+      },
+      {
+        path: '/settings/users',
+        label: 'All Users',
+        icon: Users,
+        roles: ['superadmin'],
+        tooltip: 'Manage all users',
+      },
+      {
+        path: '/admin/translations',
+        label: 'Translations',
+        icon: Languages,
+        roles: ['superadmin'],
+        tooltip: 'Manage translations',
+      }
+    ]
+    
+    if (setupAdminGroup) {
+      setupAdminGroup.items.push(...superadminItems)
+    }
+    if (functionalAdminGroup) {
+      functionalAdminGroup.items.push(...superadminItems)
     }
   }
 
-  const menuGroups = sidebarView === 'setup' ? setupMenuGroups : functionalMenuGroups
+  // Select menu groups based on view
+  let menuGroups: MenuGroup[]
+  if (sidebarView === 'all') {
+    // Combine both views - merge all unique groups
+    const allGroups = [...setupMenuGroups, ...functionalMenuGroups]
+    const groupMap: { [key: string]: MenuGroup } = {}
+    
+    allGroups.forEach((group) => {
+      if (groupMap[group.label]) {
+        // Merge items if group already exists
+        const existing = groupMap[group.label]
+        const existingPaths = new Set(existing.items.map((i: MenuItem) => i.path))
+        group.items.forEach((item) => {
+          if (!existingPaths.has(item.path)) {
+            existing.items.push(item)
+          }
+        })
+      } else {
+        groupMap[group.label] = { ...group, items: [...group.items] }
+      }
+    })
+    
+    menuGroups = Object.values(groupMap)
+  } else {
+    menuGroups = sidebarView === 'setup' ? setupMenuGroups : functionalMenuGroups
+  }
 
   const hasAccess = (item: MenuItem) => {
     if (!item.roles) return true
@@ -580,33 +612,16 @@ export function Sidebar() {
       {/* View Toggle */}
       {isExpanded && (
         <div className="px-3 py-3 border-b border-gray-200">
-          <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
-            <button
-              onClick={() => {
-                setSidebarView('setup')
-                localStorage.setItem('sidebarView', 'setup')
-              }}
-              className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                sidebarView === 'setup'
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
+          <div className="relative">
+            <select
+              value={sidebarView}
+              onChange={(e) => handleViewChange(e.target.value as SidebarView)}
+              className="w-full px-3 py-2 text-sm font-medium bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
             >
-              📋 Setup
-            </button>
-            <button
-              onClick={() => {
-                setSidebarView('functional')
-                localStorage.setItem('sidebarView', 'functional')
-              }}
-              className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                sidebarView === 'functional'
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              📊 Functional
-            </button>
+              <option value="all">🌐 All Modules</option>
+              <option value="setup">📋 Setup View</option>
+              <option value="functional">📊 Functional View</option>
+            </select>
           </div>
           
           {/* Module Filter - Show in both views */}
@@ -653,10 +668,10 @@ export function Sidebar() {
           const hasAccessibleItems = group.items.some(hasAccess)
           if (!hasAccessibleItems) return null
 
-          // Apply module filter to both views
+          // Apply module filter to all views
           if (moduleFilter !== 'all') {
-            // In functional view
-            if (sidebarView === 'functional') {
+            // In functional or all view - filter by group labels
+            if (sidebarView === 'functional' || sidebarView === 'all') {
               if (moduleFilter === 'e2e' && group.label === 'DIAGNOSIS (RFID)') return null
               if (moduleFilter === 'diagnosis' && group.label === 'E2E NETWORK') return null
             }
