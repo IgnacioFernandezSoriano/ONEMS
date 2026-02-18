@@ -13,7 +13,7 @@ interface RouteInfo {
 }
 
 /**
- * Download raw samples data for a specific segment from journey_segments table
+ * Download optimized segment samples for external analysis (Power BI, Excel, etc.)
  */
 export async function downloadRouteSamples(route: RouteInfo) {
   try {
@@ -73,35 +73,41 @@ export async function downloadRouteSamples(route: RouteInfo) {
     const productMap = new Map((productsRes.data || []).map(p => [p.id, `${p.code} - ${p.description}`]));
     const centerMap = new Map((centersRes.data || []).map(c => [c.id, c.name]));
 
-    // Transform samples to replace IDs with names
+    // Transform samples to optimized format for analysis
     const transformedSamples = samples.map((row: any) => {
-      const transformed: any = { ...row };
-      
-      // Replace carrier_id with carrier_name
-      if (row.carrier_id && carrierMap.has(row.carrier_id)) {
-        transformed.carrier_name = carrierMap.get(row.carrier_id);
-        delete transformed.carrier_id;
-      }
-      
-      // Replace product_id with product_name
-      if (row.product_id && productMap.has(row.product_id)) {
-        transformed.product_name = productMap.get(row.product_id);
-        delete transformed.product_id;
-      }
-      
-      // Replace from_postal_center_id with from_postal_center_name
-      if (row.from_postal_center_id && centerMap.has(row.from_postal_center_id)) {
-        transformed.from_postal_center_name = centerMap.get(row.from_postal_center_id);
-        delete transformed.from_postal_center_id;
-      }
-      
-      // Replace to_postal_center_id with to_postal_center_name
-      if (row.to_postal_center_id && centerMap.has(row.to_postal_center_id)) {
-        transformed.to_postal_center_name = centerMap.get(row.to_postal_center_id);
-        delete transformed.to_postal_center_id;
-      }
-      
-      return transformed;
+      return {
+        // Identification
+        'Tag ID': row.tag_id || '',
+        'Segment Type': row.segment_type || '',
+        
+        // Carrier & Product
+        'Carrier': carrierMap.get(row.carrier_id) || row.carrier_name_snapshot || '',
+        'Product': productMap.get(row.product_id) || row.product_name || '',
+        
+        // Route Information
+        'Origin City': row.origin_city_name || '',
+        'Destination City': row.destination_city_name || '',
+        'From Center': centerMap.get(row.from_postal_center_id) || row.from_postal_center_name || row.from_postal_center_city || '',
+        'To Center': centerMap.get(row.to_postal_center_id) || row.to_postal_center_name || row.to_postal_center_city || '',
+        
+        // Timestamps
+        'Entry Timestamp': row.entry_timestamp || '',
+        'Exit Timestamp': row.exit_timestamp || '',
+        'Next Entry Timestamp': row.next_entry_timestamp || '',
+        
+        // Time Metrics (minutes)
+        'Natural Time in Center (min)': row.natural_time_in_center_minutes || 0,
+        'Working Time in Center (min)': row.working_time_in_center_minutes || 0,
+        'Natural Transit Time (min)': row.natural_transit_time_minutes || 0,
+        'Working Transit Time (min)': row.working_transit_time_minutes || 0,
+        'Actual Time (min)': row.actual_time_minutes || 0,
+        'Adjusted Time (min)': row.adjusted_time_minutes || 0,
+        'Pre-operational Wait (min)': row.pre_operational_wait_minutes || 0,
+        
+        // SLA Metrics
+        'Expected Time (min)': row.expected_time_minutes || '',
+        'SLA Compliance': row.sla_compliance || ''
+      };
     });
 
     // Convert to CSV
@@ -110,7 +116,7 @@ export async function downloadRouteSamples(route: RouteInfo) {
       headers.join(','),
       ...transformedSamples.map(row =>
         headers.map(header => {
-          const value = row[header];
+          const value = (row as any)[header];
           // Escape values containing commas or quotes
           if (value === null || value === undefined) return '';
           const stringValue = String(value);
