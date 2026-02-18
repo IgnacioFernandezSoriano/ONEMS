@@ -144,20 +144,13 @@ export default function JKPerformanceSegments() {
       setLoading(true);
 
       try {
-        // Load journey_paths with segment_details (same as Route Path Analysis)
+        // Query journey_segments with simpler select
         let query = supabase
-          .from('journey_paths')
-          .select(`
-            id,
-            carrier_id,
-            product_id,
-            segment_details,
-            carriers(name),
-            products(code, description)
-          `)
-          .eq('account_id', effectiveAccountId);
+          .from('journey_segments')
+          .select('*')
+          .eq('account_id', effectiveAccountId)
+          .limit(1000);
 
-        // Apply filters
         if (carrier) {
           const carrierObj = carriers.find(c => c.name === carrier);
           if (carrierObj) query = query.eq('carrier_id', carrierObj.id);
@@ -168,136 +161,186 @@ export default function JKPerformanceSegments() {
           if (productObj) query = query.eq('product_id', productObj.id);
         }
 
-        const { data: journeyPaths, error } = await query;
+        if (originCity) {
+          query = query.eq('from_postal_center_city', originCity);
+        }
+
+        if (destinationCity) {
+          query = query.eq('to_postal_center_city', destinationCity);
+        }
+
+        const { data: segments, error } = await query;
 
         if (error) throw error;
-        if (!journeyPaths || journeyPaths.length === 0) {
+        if (!segments || segments.length === 0) {
           setSegmentData([]);
           setLoading(false);
           return;
         }
 
-        console.log('📊 Data Source: journey_paths.segment_details');
-        console.log('📦 Journey paths loaded:', journeyPaths.length);
+        console.log('📊 JKPerformanceSegments - Data Source: journey_segments table');
+        console.log('📦 Total segments loaded:', segments.length);
 
-        // Extract all segments from all journey paths
-        const allSegments: any[] = [];
-        journeyPaths.forEach((path: any) => {
-          const carrierName = path.carriers?.name || 'Unknown';
-          const productName = path.products ? `${path.products.code} - ${path.products.description}` : 'Unknown';
-          
-          if (path.segment_details && Array.isArray(path.segment_details)) {
-            path.segment_details.forEach((seg: any) => {
-              allSegments.push({
-                ...seg,
-                carrier_name: carrierName,
-                product_name: productName,
-                carrier_id: path.carrier_id,
-                product_id: path.product_id
-              });
-            });
-          }
-        });
+        // Get SLAs
+        const { data: slas } = await supabase
+          .from('slas')
+          .select('*')
+          .eq('account_id', effectiveAccountId)
+          .eq('is_active', true);
 
-        console.log('📦 Total segments extracted:', allSegments.length);
-
-        // Filter by city if needed
-        let filteredSegments = allSegments;
-        
-        if (originCity) {
-          filteredSegments = filteredSegments.filter(seg => 
-            seg.from_center_name?.includes(originCity) || seg.from_center_city === originCity
-          );
+        if (!slas) {
+          setSegmentData([]);
+          setLoading(false);
+          return;
         }
 
-        if (destinationCity) {
-          filteredSegments = filteredSegments.filter(seg => 
-            seg.to_center_name?.includes(destinationCity) || seg.to_center_city === destinationCity
-          );
-        }
-
-        if (segmentType !== 'all') {
-          filteredSegments = filteredSegments.filter(seg => seg.segment_type === segmentType);
-        }
-
-        console.log('📦 Filtered segments:', filteredSegments.length);
-        console.log('📋 Sample segment:', filteredSegments[0]);
-
-        // Group and aggregate segments
+        // Group segments and calculate metrics
         const segmentMap = new Map<string, any>();
+        console.log('🔍 Grouping segments by type (operational/distribution)...');
 
-        filteredSegments.forEach((seg: any) => {
-          const segmentKey = seg.segment_type === 'operational'
-            ? `${seg.from_center_name}_center_${seg.carrier_name}_${seg.product_name}`
-            : `${seg.from_center_name}_${seg.to_center_name}_transit_${seg.carrier_name}_${seg.product_name}`;
+        // Create lookup maps
+        const carrierMap = new Map(carriers.map(c => [c.id, c.name]));
+        const productMap = new Map(products.map(p => [p.id, p.name]));
+        const centerMap = new Map(postalCenters.map(c => [c.id, c.name]));
 
-          if (!segmentMap.has(segmentKey)) {
-            segmentMap.set(segmentKey, {
-              segmentKey,
-              fromCenter: seg.from_center_name || seg.from_center_city || 'Unknown',
-              toCenter: seg.segment_type === 'operational' 
-                ? (seg.from_center_name || seg.from_center_city || 'Unknown')
-                : (seg.to_center_name || seg.to_center_city || 'Unknown'),
-              carrier: seg.carrier_name,
-              product: seg.product_name,
-              segmentType: seg.segment_type,
-              jkStandard: seg.sla_minutes ? seg.sla_minutes / 1440 : 1, // Convert to days
-              onTimeThreshold: seg.on_time_threshold || 95,
-              warningThreshold: seg.warning_threshold || 90,
-              criticalThreshold: seg.critical_threshold || 80,
-              samples: []
-            });
+        console.log('📋 Sample segment:', segments[0]);
+        console.log('📋 Carrier map size:', carrierMap.size);
+        console.log('📋 Product map size:', productMap.size);
+        console.log('📋 Products loaded:', products.map(p => ({ id: p.id, name: p.name, carrier_id: p.carrier_id })));
+
+        segments.forEach((seg: any) => {
+          const carrierName = carrierMap.get(seg.carrier_id) || 'Unknown';
+          const productName = productMap.get(seg.product_id) || 'Unknown';
+          
+          if (productName === 'Unknown') {
+            console.warn('⚠️ Unknown product for segment:', { product_id: seg.product_id, carrier_id: seg.carrier_id, available_products: Array.from(productMap.keys()) });
+          }
+          const fromCenterName = centerMap.get(seg.from_postal_center_id) || seg.from_postal_center_city || 'Unknown';
+          const toCenterName = centerMap.get(seg.to_postal_center_id) || seg.to_postal_center_city || 'Unknown';
+          
+          // Center segment - only if there's actual time in center
+          const timeInCenter = seg.working_time_in_center_minutes || seg.natural_time_in_center_minutes || 0;
+          if (timeInCenter > 0) {
+            const centerKey = `${fromCenterName}_center_${carrierName}_${productName}`;
+            if (!segmentMap.has(centerKey)) {
+              segmentMap.set(centerKey, {
+                segmentKey: centerKey,
+                fromCenter: fromCenterName,
+                toCenter: fromCenterName,
+                carrier: carrierName,
+                product: productName,
+                segmentType: 'operational',
+                samples: [],
+                carrier_id: seg.carrier_id,
+                from_postal_center_id: seg.from_postal_center_id,
+              });
+            }
+            segmentMap.get(centerKey).samples.push({ time: timeInCenter });
           }
 
-          // Add sample
-          const timeMinutes = seg.segment_type === 'operational'
-            ? (seg.working_time_in_center_minutes || seg.natural_time_in_center_minutes || 0)
-            : (seg.working_transit_time_minutes || seg.natural_transit_time_minutes || 0);
-
-          segmentMap.get(segmentKey).samples.push({
-            time: timeMinutes,
-            isOnTime: seg.is_on_time || false
-          });
+          // Transit segment - only if there's actual transit time
+          const transitTime = seg.working_transit_time_minutes || seg.natural_transit_time_minutes || 0;
+          if (transitTime > 0 && seg.to_postal_center_id) {
+            const transitKey = `${fromCenterName}_${toCenterName}_transit_${carrierName}_${productName}`;
+            if (!segmentMap.has(transitKey)) {
+              segmentMap.set(transitKey, {
+                segmentKey: transitKey,
+                fromCenter: fromCenterName,
+                toCenter: toCenterName,
+                carrier: carrierName,
+                product: productName,
+                segmentType: 'distribution',
+                samples: [],
+                carrier_id: seg.carrier_id,
+                from_postal_center_id: seg.from_postal_center_id,
+                to_postal_center_id: seg.to_postal_center_id,
+              });
+            }
+            segmentMap.get(transitKey).samples.push({ time: transitTime });
+          }
         });
 
-        console.log('✅ Grouped segments:', segmentMap.size);
-        console.log('  - Operational:', Array.from(segmentMap.values()).filter(s => s.segmentType === 'operational').length);
-        console.log('  - Distribution:', Array.from(segmentMap.values()).filter(s => s.segmentType === 'distribution').length);
+        console.log('✅ Processed segments:');
+        console.log('  - Operational (center):', Array.from(segmentMap.values()).filter(s => s.segmentType === 'operational').length);
+        console.log('  - Distribution (transit):', Array.from(segmentMap.values()).filter(s => s.segmentType === 'distribution').length);
+        console.log('  - Total:', segmentMap.size);
 
-        // Calculate metrics for each segment group
+        // Calculate metrics for each segment
         const processedSegments: SegmentData[] = [];
 
         segmentMap.forEach((segGroup) => {
-          const samples = segGroup.samples;
-          const totalSamples = samples.length;
-          
-          if (totalSamples === 0) return;
+          // Find SLA
+          let sla = null;
+          if (segGroup.segmentType === 'operational') {
+            sla = slas.find(s => 
+              s.sla_type === 'operational' &&
+              s.postal_center_id === segGroup.from_postal_center_id &&
+              (s.carrier_id === null || s.carrier_id === segGroup.carrier_id)
+            );
+          } else {
+            sla = slas.find(s => 
+              s.sla_type === 'distribution' &&
+              s.from_postal_center_id === segGroup.from_postal_center_id &&
+              s.to_postal_center_id === segGroup.to_postal_center_id &&
+              (s.carrier_id === null || s.carrier_id === segGroup.carrier_id)
+            );
+          }
 
-          // Calculate average actual time
-          const avgTimeMinutes = samples.reduce((sum: number, s: any) => sum + s.time, 0) / totalSamples;
-          const jkActual = avgTimeMinutes / 1440; // Convert to days
+          // Use SLA values or defaults if no SLA exists
+          const jkStandardMinutes = sla?.expected_time_minutes || 1440; // Default 1 day
+          const jkStandardDays = jkStandardMinutes / 1440;
+          const standardPercentage = sla?.on_time_percentage || 95;
+          const warningThreshold = sla?.warning_threshold || 90;
+          const criticalThreshold = sla?.critical_threshold || 80;
 
-          // Count on-time samples
-          const onTimeSamples = samples.filter((s: any) => s.isOnTime).length;
-          const onTimePercentage = (onTimeSamples / totalSamples) * 100;
-
-          // Build distribution
+          // Calculate distribution
           const distribution = new Map<number, number>();
-          samples.forEach((s: any) => {
-            const days = Math.floor(s.time / 1440);
+          let onTimeSamples = 0;
+          let beforeStandardSamples = 0;
+          let afterStandardSamples = 0;
+
+          segGroup.samples.forEach((sample: any) => {
+            const days = Math.round(sample.time / 1440);
             distribution.set(days, (distribution.get(days) || 0) + 1);
+
+            if (sample.time <= jkStandardMinutes) {
+              onTimeSamples++;
+              if (sample.time < jkStandardMinutes) beforeStandardSamples++;
+            } else {
+              afterStandardSamples++;
+            }
           });
 
-          // Determine status
+          const totalSamples = segGroup.samples.length;
+          const onTimePercentage = totalSamples > 0 ? (onTimeSamples / totalSamples) * 100 : 0;
+
+          // Calculate J+K Actual (day where standardPercentage is reached)
+          let cumulativeCount = 0;
+          let jkActualDays = jkStandardDays;
+          const sortedDays = Array.from(distribution.keys()).sort((a, b) => a - b);
+          for (const day of sortedDays) {
+            cumulativeCount += distribution.get(day) || 0;
+            const cumulativePercentage = (cumulativeCount / totalSamples) * 100;
+            if (cumulativePercentage >= standardPercentage) {
+              jkActualDays = day;
+              break;
+            }
+          }
+
+          const deviation = jkActualDays - jkStandardDays;
+
           let status: 'compliant' | 'warning' | 'critical' = 'compliant';
-          if (onTimePercentage < segGroup.criticalThreshold) {
+          if (onTimePercentage < criticalThreshold) {
             status = 'critical';
-          } else if (onTimePercentage < segGroup.warningThreshold) {
+          } else if (onTimePercentage < warningThreshold) {
             status = 'warning';
           }
 
-          // Apply threshold filter
+          // Filter by threshold
           if (threshold !== 'all' && status !== threshold) return;
+
+          // Filter by segment type
+          if (segmentType !== 'all' && segGroup.segmentType !== segmentType) return;
 
           processedSegments.push({
             segmentKey: segGroup.segmentKey,
@@ -307,20 +350,27 @@ export default function JKPerformanceSegments() {
             product: segGroup.product,
             segmentType: segGroup.segmentType,
             totalSamples,
-            jkStandard: segGroup.jkStandard,
-            jkActual,
+            jkStandard: jkStandardDays,
+            jkActual: jkActualDays,
             onTimeSamples,
-            beforeStandardSamples: samples.filter((s: any) => s.time < segGroup.jkStandard * 1440).length,
-            afterStandardSamples: samples.filter((s: any) => s.time > segGroup.jkStandard * 1440).length,
+            beforeStandardSamples,
+            afterStandardSamples,
             onTimePercentage,
-            deviation: jkActual - segGroup.jkStandard,
-            standardPercentage: segGroup.onTimeThreshold,
+            deviation,
+            standardPercentage,
             status,
             distribution,
-            warningThreshold: segGroup.warningThreshold,
-            criticalThreshold: segGroup.criticalThreshold
+            warningThreshold,
+            criticalThreshold,
           });
         });
+
+        const operationalCount = processedSegments.filter(s => s.segmentType === 'operational').length;
+        const distributionCount = processedSegments.filter(s => s.segmentType === 'distribution').length;
+        console.log('✅ Processed segments:');
+        console.log('  - Operational (center):', operationalCount);
+        console.log('  - Distribution (transit):', distributionCount);
+        console.log('  - Total:', processedSegments.length);
 
         setSegmentData(processedSegments);
       } catch (error) {
@@ -330,7 +380,6 @@ export default function JKPerformanceSegments() {
         setLoading(false);
       }
     };
-
 
     loadSegments();
   }, [effectiveAccountId, carrier, product, originCity, destinationCity, segmentType, threshold, carriers, products]);
