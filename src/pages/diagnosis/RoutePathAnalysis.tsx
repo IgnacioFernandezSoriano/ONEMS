@@ -5,6 +5,26 @@ import { Filter, Map as MapIcon, List, Download } from 'lucide-react'
 import RoutePathMapLeaflet from '../../components/diagnosis/RoutePathMapLeaflet'
 import RoutePathTable from '../../components/diagnosis/RoutePathTable'
 
+interface JourneySegment {
+  id: string
+  tag_id: string
+  carrier_id: string
+  product_id: string
+  from_postal_center_id: string
+  to_postal_center_id: string
+  from_city: string
+  to_city: string
+  segment_type: 'operational' | 'distribution'
+  natural_time_in_center_minutes: number
+  working_time_in_center_minutes: number
+  natural_transit_time_minutes: number
+  working_transit_time_minutes: number
+  expected_time_minutes: number
+  sla_compliance: number
+  from_center_name: string
+  to_center_name: string
+}
+
 interface RoutePathData {
   id: string
   carrier_id: string
@@ -80,17 +100,17 @@ export default function RoutePathAnalysis() {
 
       if (productsData) setProducts(productsData)
 
-      // Load unique cities from journey_paths
-      const { data: citiesData } = await supabase
-        .from('journey_paths')
-        .select('origin_city_name, destination_city_name')
+      // Load unique cities from journey_segments
+      const { data: segmentsData } = await supabase
+        .from('journey_segments')
+        .select('from_city, to_city')
         .eq('account_id', effectiveAccountId)
 
-      if (citiesData) {
+      if (segmentsData) {
         const uniqueCities = new Set<string>()
-        citiesData.forEach(row => {
-          if (row.origin_city_name) uniqueCities.add(row.origin_city_name)
-          if (row.destination_city_name) uniqueCities.add(row.destination_city_name)
+        segmentsData.forEach(row => {
+          if (row.from_city) uniqueCities.add(row.from_city)
+          if (row.to_city) uniqueCities.add(row.to_city)
         })
         setCities(Array.from(uniqueCities).sort())
       }
@@ -112,62 +132,213 @@ export default function RoutePathAnalysis() {
 
     setLoading(true)
     try {
+      // Load journey_segments with related data
       let query = supabase
-        .from('journey_paths')
+        .from('journey_segments')
         .select(`
           id,
+          tag_id,
           carrier_id,
           product_id,
-          origin_city_name,
-          destination_city_name,
+          from_postal_center_id,
+          to_postal_center_id,
+          from_city,
+          to_city,
+          segment_type,
+          natural_time_in_center_minutes,
+          working_time_in_center_minutes,
+          natural_transit_time_minutes,
+          working_transit_time_minutes,
+          expected_time_minutes,
+          sla_compliance,
+          carriers(name),
+          products(code, description),
+          from_center:postal_centers!journey_segments_from_postal_center_id_fkey(name),
+          to_center:postal_centers!journey_segments_to_postal_center_id_fkey(name)
+        `)
+        .eq('account_id', effectiveAccountId)
+
+      // Apply filters
+      if (filters.carrier_id) query = query.eq('carrier_id', filters.carrier_id)
+      if (filters.product_id) query = query.eq('product_id', filters.product_id)
+      if (filters.origin_city) query = query.eq('from_city', filters.origin_city)
+      if (filters.destination_city) query = query.eq('to_city', filters.destination_city)
+
+      const { data: segments, error } = await query
+
+      if (error) throw error
+
+      // Group segments by route (carrier + product + origin + destination)
+      const routeMap = new Map<string, JourneySegment[]>()
+      
+      segments?.forEach((seg: any) => {
+        // Find first and last cities for this tag
+        const tagSegments = segments.filter((s: any) => s.tag_id === seg.tag_id)
+        tagSegments.sort((a: any, b: any) => a.id.localeCompare(b.id))
+        
+        const originCity = tagSegments[0]?.from_city || seg.from_city
+        const destinationCity = tagSegments[tagSegments.length - 1]?.to_city || seg.to_city
+        
+        const routeKey = `${seg.carrier_id}|${seg.product_id}|${originCity}|${destinationCity}`
+        
+        if (!routeMap.has(routeKey)) {
+          routeMap.set(routeKey, [])
+        }
+        
+        routeMap.get(routeKey)!.push({
+          id: seg.id,
+          tag_id: seg.tag_id,
+          carrier_id: seg.carrier_id,
+          product_id: seg.product_id,
+          from_postal_center_id: seg.from_postal_center_id,
+          to_postal_center_id: seg.to_postal_center_id,
+          from_city: seg.from_city,
+          to_city: seg.to_city,
+          segment_type: seg.segment_type,
+          natural_time_in_center_minutes: seg.natural_time_in_center_minutes || 0,
+          working_time_in_center_minutes: seg.working_time_in_center_minutes || 0,
+          natural_transit_time_minutes: seg.natural_transit_time_minutes || 0,
+          working_transit_time_minutes: seg.working_transit_time_minutes || 0,
+          expected_time_minutes: seg.expected_time_minutes || 0,
+          sla_compliance: seg.sla_compliance || 0,
+          from_center_name: seg.from_center?.name || '',
+          to_center_name: seg.to_center?.name || ''
+        })
+      })
+
+      // Calculate aggregated metrics for each route
+      const formattedData: RoutePathData[] = Array.from(routeMap.entries()).map(([routeKey, routeSegments]) => {
+        const [carrier_id, product_id, origin_city, destination_city] = routeKey.split('|')
+        
+        // Get unique tags
+        const uniqueTags = new Set(routeSegments.map(s => s.tag_id))
+        const totalTags = uniqueTags.size
+        
+        // Get carrier and product info from first segment
+        const firstSegment = routeSegments[0]
+        const carrierInfo = segments?.find((s: any) => s.carrier_id === carrier_id) as any
+        const productInfo = segments?.find((s: any) => s.product_id === product_id) as any
+        
+        // Calculate metrics per tag, then average
+        const tagMetrics = Array.from(uniqueTags).map(tagId => {
+          const tagSegments = routeSegments.filter(s => s.tag_id === tagId)
+          
+          return {
+            expected_time: tagSegments.reduce((sum, s) => sum + s.expected_time_minutes, 0),
+            natural_time: tagSegments.reduce((sum, s) => 
+              sum + s.natural_time_in_center_minutes + s.natural_transit_time_minutes, 0),
+            working_time: tagSegments.reduce((sum, s) => 
+              sum + s.working_time_in_center_minutes + s.working_transit_time_minutes, 0),
+            avg_compliance: tagSegments.reduce((sum, s) => sum + s.sla_compliance, 0) / tagSegments.length,
+            compliance_excluding_zeros: tagSegments.filter(s => s.sla_compliance > 0).length > 0
+              ? tagSegments.filter(s => s.sla_compliance > 0).reduce((sum, s) => sum + s.sla_compliance, 0) / 
+                tagSegments.filter(s => s.sla_compliance > 0).length
+              : 0
+          }
+        })
+        
+        // Average across all tags
+        const expected_time_minutes = tagMetrics.reduce((sum, m) => sum + m.expected_time, 0) / totalTags
+        const avg_natural_time_minutes = tagMetrics.reduce((sum, m) => sum + m.natural_time, 0) / totalTags
+        const avg_working_time_minutes = tagMetrics.reduce((sum, m) => sum + m.working_time, 0) / totalTags
+        const compliance_rate = tagMetrics.reduce((sum, m) => sum + m.avg_compliance, 0) / totalTags
+        const percent_real = tagMetrics.reduce((sum, m) => sum + m.compliance_excluding_zeros, 0) / totalTags
+        
+        // Build segment details for display
+        const segmentDetailsMap = new Map<string, any>()
+        
+        routeSegments.forEach(seg => {
+          const segKey = `${seg.from_postal_center_id}|${seg.to_postal_center_id}`
+          
+          if (!segmentDetailsMap.has(segKey)) {
+            segmentDetailsMap.set(segKey, {
+              from_city: seg.from_city,
+              to_city: seg.to_city,
+              from_center_name: seg.from_center_name,
+              to_center_name: seg.to_center_name,
+              from_center_id: seg.from_postal_center_id,
+              to_center_id: seg.to_postal_center_id,
+              segment_type: seg.segment_type,
+              expected_time_minutes: 0,
+              natural_time: 0,
+              working_time: 0,
+              compliance_sum: 0,
+              compliance_count: 0,
+              compliance_non_zero_sum: 0,
+              compliance_non_zero_count: 0,
+              tags: new Set()
+            })
+          }
+          
+          const detail = segmentDetailsMap.get(segKey)!
+          detail.expected_time_minutes += seg.expected_time_minutes
+          detail.natural_time += seg.natural_time_in_center_minutes + seg.natural_transit_time_minutes
+          detail.working_time += seg.working_time_in_center_minutes + seg.working_transit_time_minutes
+          detail.compliance_sum += seg.sla_compliance
+          detail.compliance_count += 1
+          if (seg.sla_compliance > 0) {
+            detail.compliance_non_zero_sum += seg.sla_compliance
+            detail.compliance_non_zero_count += 1
+          }
+          detail.tags.add(seg.tag_id)
+        })
+        
+        const segment_details = Array.from(segmentDetailsMap.values()).map(detail => ({
+          from_city: detail.from_city,
+          to_city: detail.to_city,
+          from_center_name: detail.from_center_name,
+          to_center_name: detail.to_center_name,
+          from_center_id: detail.from_center_id,
+          to_center_id: detail.to_center_id,
+          segment_type: detail.segment_type,
+          expected_time_minutes: detail.expected_time_minutes / detail.tags.size,
+          avg_time_in_center_natural: 0, // Not needed for header calculation
+          avg_time_in_center_working: 0,
+          avg_transit_time_natural: 0,
+          avg_transit_time_working: 0,
+          avg_total_time_natural: detail.natural_time / detail.tags.size,
+          avg_total_time_working: detail.working_time / detail.tags.size,
+          on_time_percentage_std: detail.compliance_sum / detail.compliance_count,
+          compliance_rate: detail.compliance_non_zero_count > 0 
+            ? detail.compliance_non_zero_sum / detail.compliance_non_zero_count 
+            : 0,
+          warning_threshold: 90,
+          critical_threshold: 80,
+          tags_count: detail.tags.size,
+          calculation_mode: 'frontend'
+        }))
+        
+        // Build path signature
+        const uniqueSegmentKeys = Array.from(new Set(
+          routeSegments.map(s => `${s.from_city} → ${s.to_city}`)
+        ))
+        const path_signature = uniqueSegmentKeys.join(' | ')
+        
+        return {
+          id: routeKey,
+          carrier_id,
+          carrier_name: carrierInfo?.carriers?.name || '',
+          product_id,
+          product_name: productInfo?.products 
+            ? `${productInfo.products.code} - ${productInfo.products.description}`
+            : '',
+          origin_city_name: origin_city,
+          destination_city_name: destination_city,
           path_signature,
-          path_segments,
-          total_tags,
+          path_segments: [],
+          total_tags: totalTags,
           avg_natural_time_minutes,
           avg_working_time_minutes,
           compliance_rate,
           percent_real,
           segment_details,
-          expected_time_minutes,
-          carriers(name),
-          products(code, description)
-        `)
-        .eq('account_id', effectiveAccountId)
-
-      // Apply filters only if they are set
-      if (filters.carrier_id) query = query.eq('carrier_id', filters.carrier_id)
-      if (filters.product_id) query = query.eq('product_id', filters.product_id)
-      if (filters.origin_city) query = query.eq('origin_city_name', filters.origin_city)
-      if (filters.destination_city) query = query.eq('destination_city_name', filters.destination_city)
-
-      const { data, error } = await query.order('total_tags', { ascending: false })
-
-      if (error) throw error
-
-      const formattedData: RoutePathData[] = (data || []).map((row: any) => {
-        // Extract thresholds from first distribution segment
-        const distributionSegment = (row.segment_details || []).find((seg: any) => seg.segment_type === 'distribution')
-        
-        return {
-          id: row.id,
-          carrier_id: row.carrier_id,
-          carrier_name: row.carriers?.name || '',
-          product_id: row.product_id,
-          product_name: `${row.products?.code} - ${row.products?.description}`,
-          origin_city_name: row.origin_city_name,
-          destination_city_name: row.destination_city_name,
-          path_signature: row.path_signature,
-          path_segments: row.path_segments || [],
-          total_tags: row.total_tags,
-          avg_natural_time_minutes: row.avg_natural_time_minutes,
-          avg_working_time_minutes: row.avg_working_time_minutes,
-          compliance_rate: row.compliance_rate,
-          percent_real: row.percent_real || 0,
-          segment_details: row.segment_details || [],
-          expected_time_minutes: row.expected_time_minutes || 0
+          expected_time_minutes
         }
       })
 
+      // Sort by total tags descending
+      formattedData.sort((a, b) => b.total_tags - a.total_tags)
+      
       setRoutePaths(formattedData)
     } catch (error) {
       console.error('Error loading route paths:', error)
