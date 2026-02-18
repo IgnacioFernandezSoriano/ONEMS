@@ -1,0 +1,16 @@
+[
+  {
+    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
+    "code": "CARRIER A ",
+    "name": "Carrier A",
+    "type": "Express, Economy",
+    "status": "active"
+  },
+  {
+    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
+    "code": "CARRIER B ",
+    "name": "Carrier B",
+    "type": "Express, Standard",
+    "status": "active"
+  }
+]

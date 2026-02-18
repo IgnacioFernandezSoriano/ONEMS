@@ -1,0 +1,18 @@
+[
+  {
+    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
+    "name": "East",
+    "code": "EAST",
+    "description": "East Region",
+    "status": "active",
+    "country_code": "US"
+  },
+  {
+    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
+    "name": "West",
+    "code": "WEST",
+    "description": "West Region",
+    "status": "active",
+    "country_code": "US"
+  }
+]

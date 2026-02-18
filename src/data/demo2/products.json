@@ -1,0 +1,38 @@
+[
+  {
+    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
+    "carrier_id": "856b4a5c-1716-4110-ac5e-0d7c909b9237",
+    "code": "A EXPRESS",
+    "description": "A EXPRESS",
+    "standard_delivery_hours": 24,
+    "status": "active",
+    "time_unit": "hours"
+  },
+  {
+    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
+    "carrier_id": "856b4a5c-1716-4110-ac5e-0d7c909b9237",
+    "code": "A STANDARD",
+    "description": "A STANDARD",
+    "standard_delivery_hours": 3,
+    "status": "active",
+    "time_unit": "days"
+  },
+  {
+    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
+    "carrier_id": "5ea9f7ed-a96c-4f3c-b849-05dc80e3ca67",
+    "code": "B EXPRESS",
+    "description": "B EXPRESS",
+    "standard_delivery_hours": 24,
+    "status": "active",
+    "time_unit": "hours"
+  },
+  {
+    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
+    "carrier_id": "5ea9f7ed-a96c-4f3c-b849-05dc80e3ca67",
+    "code": "B STANDARD",
+    "description": "B STANDARD",
+    "standard_delivery_hours": 4,
+    "status": "active",
+    "time_unit": "days"
+  }
+]

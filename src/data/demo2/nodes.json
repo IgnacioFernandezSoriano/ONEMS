@@ -1,0 +1,62 @@
+[
+  {
+    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
+    "city_id": "9ebc9d84-e121-42bf-a163-e8726448b796",
+    "auto_id": "BAL-01",
+    "status": "active"
+  },
+  {
+    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
+    "city_id": "9ebc9d84-e121-42bf-a163-e8726448b796",
+    "auto_id": "BAL-02",
+    "status": "active"
+  },
+  {
+    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
+    "city_id": "4e6b443c-a1c4-4533-9bf9-d2d67a0f405d",
+    "auto_id": "LA-01",
+    "status": "active"
+  },
+  {
+    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
+    "city_id": "4e6b443c-a1c4-4533-9bf9-d2d67a0f405d",
+    "auto_id": "LA-02",
+    "status": "active"
+  },
+  {
+    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
+    "city_id": "4e6b443c-a1c4-4533-9bf9-d2d67a0f405d",
+    "auto_id": "LA-03",
+    "status": "active"
+  },
+  {
+    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
+    "city_id": "f86f46c1-98dd-4ec1-9cab-d435856c3125",
+    "auto_id": "NY-01",
+    "status": "active"
+  },
+  {
+    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
+    "city_id": "f86f46c1-98dd-4ec1-9cab-d435856c3125",
+    "auto_id": "NY-02",
+    "status": "active"
+  },
+  {
+    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
+    "city_id": "f86f46c1-98dd-4ec1-9cab-d435856c3125",
+    "auto_id": "NY-03",
+    "status": "active"
+  },
+  {
+    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
+    "city_id": "b6d002e9-2c03-482b-9efb-0abaedd637f0",
+    "auto_id": "SAC-01",
+    "status": "active"
+  },
+  {
+    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
+    "city_id": "b6d002e9-2c03-482b-9efb-0abaedd637f0",
+    "auto_id": "SAC-02",
+    "status": "active"
+  }
+]
