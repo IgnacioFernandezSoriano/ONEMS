@@ -1,5 +1,6 @@
 [
   {
+    "id": "efc3cad3-8aa3-4739-a221-436673e9bec0",
     "panelist_code": "PAN-BAL-01",
     "name": "Panelist BAL-01",
     "email": "ifernandez@holahal.com",
@@ -7,6 +8,8 @@
     "node_id": "1c6d99fa-5404-44e9-87e5-973bc3f2e112",
     "status": "active",
     "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
+    "created_at": "2026-02-18T15:55:23.019943+00:00",
+    "updated_at": "2026-02-18T15:55:23.019943+00:00",
     "created_by": null,
     "updated_by": null,
     "address_line1": null,
@@ -18,6 +21,7 @@
     "city_id": null
   },
   {
+    "id": "dc65b13b-72c0-492d-a4dc-acfb3c6059f1",
     "panelist_code": "PAN-BAL-02",
     "name": "Panelist BAL-02",
     "email": "ifernandez@holahal.com",
@@ -25,6 +29,8 @@
     "node_id": "bbbb9556-d0b5-4047-8fdb-43e8d56b42e1",
     "status": "active",
     "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
+    "created_at": "2026-02-18T15:55:23.268935+00:00",
+    "updated_at": "2026-02-18T15:55:23.268935+00:00",
     "created_by": null,
     "updated_by": null,
     "address_line1": null,
@@ -36,6 +42,7 @@
     "city_id": null
   },
   {
+    "id": "1a573716-6699-40d4-b706-cb42370f03ca",
     "panelist_code": "PAN-LA-01",
     "name": "Panelist LA-01",
     "email": "ifernandez@holahal.com",
@@ -43,6 +50,8 @@
     "node_id": "2940e6ff-f666-4cb2-8780-ffb464bce544",
     "status": "active",
     "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
+    "created_at": "2026-02-18T15:55:23.50548+00:00",
+    "updated_at": "2026-02-18T15:55:23.50548+00:00",
     "created_by": null,
     "updated_by": null,
     "address_line1": null,
@@ -54,6 +63,7 @@
     "city_id": null
   },
   {
+    "id": "cdfed383-6460-4794-bfa5-6ba273a389ef",
     "panelist_code": "PAN-LA-02",
     "name": "Panelist LA-02",
     "email": "ifernandez@holahal.com",
@@ -61,6 +71,8 @@
     "node_id": "68a5c9f9-8954-43d7-8a1b-e6d2180e32ed",
     "status": "active",
     "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
+    "created_at": "2026-02-18T15:55:23.764285+00:00",
+    "updated_at": "2026-02-18T15:55:23.764285+00:00",
     "created_by": null,
     "updated_by": null,
     "address_line1": null,
@@ -72,6 +84,7 @@
     "city_id": null
   },
   {
+    "id": "d8441403-7234-49f2-b127-dbca44313895",
     "panelist_code": "PAN-LA-03",
     "name": "Panelist LA-03",
     "email": "ifernandez@holahal.com",
@@ -79,6 +92,8 @@
     "node_id": "60700624-72eb-403b-878a-1a332d2ae39f",
     "status": "active",
     "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
+    "created_at": "2026-02-18T15:55:24.005164+00:00",
+    "updated_at": "2026-02-18T15:55:24.005164+00:00",
     "created_by": null,
     "updated_by": null,
     "address_line1": null,
@@ -90,6 +105,7 @@
     "city_id": null
   },
   {
+    "id": "85dbaaa3-733e-4919-8a0f-144826990b98",
     "panelist_code": "PAN-NY-01",
     "name": "Panelist NY-01",
     "email": "ifernandez@holahal.com",
@@ -97,6 +113,8 @@
     "node_id": "ddaaa410-7967-4e40-8b3e-aa096004a2b7",
     "status": "active",
     "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
+    "created_at": "2026-02-18T15:55:24.238911+00:00",
+    "updated_at": "2026-02-18T15:55:24.238911+00:00",
     "created_by": null,
     "updated_by": null,
     "address_line1": null,
@@ -108,6 +126,7 @@
     "city_id": null
   },
   {
+    "id": "72fb33c3-e51b-4b35-a1a5-8bfb112e0d9b",
     "panelist_code": "PAN-NY-02",
     "name": "Panelist NY-02",
     "email": "ifernandez@holahal.com",
@@ -115,6 +134,8 @@
     "node_id": "de47b186-2420-4ce5-88d5-df02b2d5f987",
     "status": "active",
     "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
+    "created_at": "2026-02-18T15:55:24.514183+00:00",
+    "updated_at": "2026-02-18T15:55:24.514183+00:00",
     "created_by": null,
     "updated_by": null,
     "address_line1": null,
@@ -126,6 +147,7 @@
     "city_id": null
   },
   {
+    "id": "037896f9-c200-43db-8f84-0aab1da1a1c4",
     "panelist_code": "PAN-NY-03",
     "name": "Panelist NY-03",
     "email": "ifernandez@holahal.com",
@@ -133,6 +155,8 @@
     "node_id": "62b2f1d5-4b87-49b7-a075-35ab817ec3fc",
     "status": "active",
     "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
+    "created_at": "2026-02-18T15:55:24.75187+00:00",
+    "updated_at": "2026-02-18T15:55:24.75187+00:00",
     "created_by": null,
     "updated_by": null,
     "address_line1": null,
@@ -144,6 +168,7 @@
     "city_id": null
   },
   {
+    "id": "b12476fd-59b0-4c06-a50c-4ef7c9e4e706",
     "panelist_code": "PAN-SAC-01",
     "name": "Panelist SAC-01",
     "email": "ifernandez@holahal.com",
@@ -151,6 +176,8 @@
     "node_id": "1af34665-9ce5-4c99-a21e-3f2bd2e2d521",
     "status": "active",
     "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
+    "created_at": "2026-02-18T15:55:25.086468+00:00",
+    "updated_at": "2026-02-18T15:55:25.086468+00:00",
     "created_by": null,
     "updated_by": null,
     "address_line1": null,
@@ -162,6 +189,7 @@
     "city_id": null
   },
   {
+    "id": "a8f073c3-ad92-424c-83d8-85fa49d14994",
     "panelist_code": "PAN-SAC-02",
     "name": "Panelist SAC-02",
     "email": "ifernandez@holahal.com",
@@ -169,6 +197,8 @@
     "node_id": "e68c5e03-0ebb-4f8d-a2c8-9098feb3931f",
     "status": "active",
     "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
+    "created_at": "2026-02-18T15:55:25.330021+00:00",
+    "updated_at": "2026-02-18T15:55:25.330021+00:00",
     "created_by": null,
     "updated_by": null,
     "address_line1": null,
@@ -178,5 +208,47 @@
     "address_country": null,
     "telegram_id": null,
     "city_id": null
+  },
+  {
+    "id": "3ad80257-0e83-4267-aa63-7d288fdd45f5",
+    "panelist_code": "PAN-MAD-001-001",
+    "name": "Baptiste Jacquemet",
+    "email": "baptiste@agentstudio.io",
+    "mobile": "+34656409614",
+    "node_id": "bf8f3083-144f-4fdc-afde-ba0c39dd91c8",
+    "status": "active",
+    "account_id": "7edd1c36-4654-484d-a3a3-975667decded",
+    "created_at": "2026-01-16T12:38:07.719471+00:00",
+    "updated_at": "2026-02-11T08:40:10.532978+00:00",
+    "created_by": "63c2d6ea-b5f1-4614-8334-7bd6ffac2a4f",
+    "updated_by": null,
+    "address_line1": "Prats de Mollo 9, 4.1, 4.1",
+    "address_line2": "",
+    "postal_code": "08021",
+    "address_city": "Barcelona",
+    "address_country": "Spain",
+    "telegram_id": "8536134834",
+    "city_id": "aac3a2f6-ed2f-421c-8006-7e64b0786da4"
+  },
+  {
+    "id": "459cfffb-ba5e-4ac3-aa90-f68728b9d1f0",
+    "panelist_code": "PAN-BAR-001-001",
+    "name": "Cesc Vilanova ",
+    "email": "cesc@agentstudio.io",
+    "mobile": "+34679374001",
+    "node_id": "b6c51b04-7fa6-40b2-91c5-833b023ad37a",
+    "status": "active",
+    "account_id": "7edd1c36-4654-484d-a3a3-975667decded",
+    "created_at": "2026-01-16T12:38:45.998395+00:00",
+    "updated_at": "2026-02-12T09:14:35.321991+00:00",
+    "created_by": "63c2d6ea-b5f1-4614-8334-7bd6ffac2a4f",
+    "updated_by": null,
+    "address_line1": "Prats de Mollo 9, 4.1, 4.1",
+    "address_line2": "",
+    "postal_code": "08021",
+    "address_city": "Barcelona",
+    "address_country": "Spain",
+    "telegram_id": "",
+    "city_id": "a4e96c1a-d7d6-4588-9b63-40eda8bacdca"
   }
 ]

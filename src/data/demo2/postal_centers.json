@@ -1,5 +1,7 @@
 [
   {
+    "id": "c374fe70-78a8-4fe5-9eca-dd715e90f09d",
+    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "code": "LA-LC",
     "name": "LA Local Processing Center",
     "description": null,
@@ -8,6 +10,8 @@
     "calculation_mode": null,
     "mixed_reader_gap_minutes": null,
     "is_active": true,
+    "created_at": "2026-02-18T16:15:22.753948+00:00",
+    "updated_at": "2026-02-18T16:15:22.753948+00:00",
     "created_by": null,
     "updated_by": null,
     "deleted_at": null,
@@ -22,6 +26,8 @@
     "timezone": "America/New_York"
   },
   {
+    "id": "7e4058c4-2f3a-43bc-b902-bc841e624183",
+    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "code": "LA-RC",
     "name": "LA Regional Distribution Hub",
     "description": null,
@@ -30,6 +36,8 @@
     "calculation_mode": null,
     "mixed_reader_gap_minutes": null,
     "is_active": true,
+    "created_at": "2026-02-18T16:15:23.094942+00:00",
+    "updated_at": "2026-02-18T16:15:23.094942+00:00",
     "created_by": null,
     "updated_by": null,
     "deleted_at": null,
@@ -44,6 +52,8 @@
     "timezone": "America/New_York"
   },
   {
+    "id": "3cb1d5b8-2785-4d66-9a7a-6ce24909b1fc",
+    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "code": "NY-LC",
     "name": "NY Local Processing Center",
     "description": null,
@@ -52,6 +62,8 @@
     "calculation_mode": null,
     "mixed_reader_gap_minutes": null,
     "is_active": true,
+    "created_at": "2026-02-18T16:15:23.36418+00:00",
+    "updated_at": "2026-02-18T16:15:23.36418+00:00",
     "created_by": null,
     "updated_by": null,
     "deleted_at": null,
@@ -66,6 +78,8 @@
     "timezone": "America/New_York"
   },
   {
+    "id": "5c1ef79d-c57d-41fa-aa2d-f38d9611ea2a",
+    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "code": "NY-RC",
     "name": "NY Regional Distribution Hub",
     "description": null,
@@ -74,6 +88,8 @@
     "calculation_mode": null,
     "mixed_reader_gap_minutes": null,
     "is_active": true,
+    "created_at": "2026-02-18T16:15:23.648786+00:00",
+    "updated_at": "2026-02-18T16:15:23.648786+00:00",
     "created_by": null,
     "updated_by": null,
     "deleted_at": null,
@@ -88,6 +104,8 @@
     "timezone": "America/New_York"
   },
   {
+    "id": "c395d565-e731-4d93-baf9-383a15d59568",
+    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "code": "BAL-LC",
     "name": "Baltimore Processing Center",
     "description": null,
@@ -96,6 +114,8 @@
     "calculation_mode": null,
     "mixed_reader_gap_minutes": null,
     "is_active": true,
+    "created_at": "2026-02-18T16:15:23.895549+00:00",
+    "updated_at": "2026-02-18T16:15:23.895549+00:00",
     "created_by": null,
     "updated_by": null,
     "deleted_at": null,
@@ -110,6 +130,8 @@
     "timezone": "America/New_York"
   },
   {
+    "id": "e67a58f6-cfcd-4605-91c9-af61373b3340",
+    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "code": "SAC-LC",
     "name": "Sacramento Processing Center",
     "description": null,
@@ -118,6 +140,8 @@
     "calculation_mode": null,
     "mixed_reader_gap_minutes": null,
     "is_active": true,
+    "created_at": "2026-02-18T16:15:24.156598+00:00",
+    "updated_at": "2026-02-18T16:15:24.156598+00:00",
     "created_by": null,
     "updated_by": null,
     "deleted_at": null,
@@ -132,6 +156,8 @@
     "timezone": "America/New_York"
   },
   {
+    "id": "117f06f9-5ed5-4e40-b104-5e8f0baa8884",
+    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "code": "PHL-HUB",
     "name": "Philadelphia Regional Hub",
     "description": null,
@@ -140,6 +166,8 @@
     "calculation_mode": null,
     "mixed_reader_gap_minutes": null,
     "is_active": true,
+    "created_at": "2026-02-18T16:20:06.858568+00:00",
+    "updated_at": "2026-02-18T16:20:06.858568+00:00",
     "created_by": null,
     "updated_by": null,
     "deleted_at": null,

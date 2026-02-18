@@ -66,6 +66,7 @@ export function useAccountManagement() {
       const oneDbData = await import('@/data/demo2/one_db.json')
       const postalCentersData = await import('@/data/demo2/postal_centers.json')
       const readersData = await import('@/data/demo2/readers.json')
+      const slasData = await import('@/data/demo2/slas.json')
 
       // Delete in correct order to respect foreign key constraints
 
@@ -304,6 +305,19 @@ export function useAccountManagement() {
           console.error('Error restoring one_db:', oneDbError)
         } else {
           restoredCounts.one_db = oneDbData.default.length
+        }
+      }
+
+      // Restore SLAs (depends on postal_centers and products)
+      if (slasData.default && slasData.default.length > 0) {
+        const { error: slasError } = await supabase
+          .from('slas')
+          .insert(slasData.default)
+        
+        if (slasError) {
+          console.error('Error restoring slas:', slasError)
+        } else {
+          restoredCounts.slas = slasData.default.length
         }
       }
 

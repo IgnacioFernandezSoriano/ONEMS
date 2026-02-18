@@ -1,38 +1,62 @@
 [
   {
+    "id": "10a95566-936b-4612-8649-ad3ce590c89b",
+    "account_id": "7edd1c36-4654-484d-a3a3-975667decded",
+    "carrier_id": "54ee898b-54ee-4477-a4e2-c714f3704b88",
+    "code": "DHL EXPRESS",
+    "description": "DHL express",
+    "standard_delivery_hours": 24,
+    "status": "active",
+    "created_at": "2026-01-16T11:38:38.119002+00:00",
+    "updated_at": "2026-01-16T11:38:38.119002+00:00",
+    "time_unit": "hours"
+  },
+  {
+    "id": "a42e2120-8909-4a7a-abad-b14822ddc3ce",
     "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "carrier_id": "856b4a5c-1716-4110-ac5e-0d7c909b9237",
     "code": "A EXPRESS",
     "description": "A EXPRESS",
     "standard_delivery_hours": 24,
     "status": "active",
+    "created_at": "2026-02-03T10:06:42.190228+00:00",
+    "updated_at": "2026-02-18T15:03:41.246718+00:00",
     "time_unit": "hours"
   },
   {
+    "id": "8325a692-7e1c-40a6-9a54-59527d19634f",
     "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "carrier_id": "856b4a5c-1716-4110-ac5e-0d7c909b9237",
     "code": "A STANDARD",
     "description": "A STANDARD",
     "standard_delivery_hours": 3,
     "status": "active",
+    "created_at": "2026-02-03T10:06:42.190228+00:00",
+    "updated_at": "2026-02-18T15:03:54.406148+00:00",
     "time_unit": "days"
   },
   {
+    "id": "98dd1587-f60b-443a-a35d-3c41876594e3",
     "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "carrier_id": "5ea9f7ed-a96c-4f3c-b849-05dc80e3ca67",
     "code": "B EXPRESS",
     "description": "B EXPRESS",
     "standard_delivery_hours": 24,
     "status": "active",
+    "created_at": "2026-02-03T10:06:42.190228+00:00",
+    "updated_at": "2026-02-18T15:04:12.887027+00:00",
     "time_unit": "hours"
   },
   {
+    "id": "288a5c97-7a99-42a7-810c-84e793cb3f13",
     "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "carrier_id": "5ea9f7ed-a96c-4f3c-b849-05dc80e3ca67",
     "code": "B STANDARD",
     "description": "B STANDARD",
     "standard_delivery_hours": 4,
     "status": "active",
+    "created_at": "2026-02-03T10:06:42.190228+00:00",
+    "updated_at": "2026-02-18T15:04:26.778902+00:00",
     "time_unit": "days"
   }
 ]

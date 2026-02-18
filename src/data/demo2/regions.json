@@ -1,18 +1,46 @@
 [
   {
+    "id": "9649a4da-cb22-4d70-802b-0ce28bea9187",
     "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "name": "East",
     "code": "EAST",
     "description": "East Region",
     "status": "active",
+    "created_at": "2026-02-18T15:40:11.200659+00:00",
+    "updated_at": "2026-02-18T15:40:11.200659+00:00",
     "country_code": "US"
   },
   {
+    "id": "6bca6b48-843e-45cb-bcc5-3127c53aca00",
     "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "name": "West",
     "code": "WEST",
     "description": "West Region",
     "status": "active",
+    "created_at": "2026-02-18T15:40:11.467739+00:00",
+    "updated_at": "2026-02-18T15:40:11.467739+00:00",
     "country_code": "US"
+  },
+  {
+    "id": "cce0445a-8637-4630-b7fb-1d1fe2544cd4",
+    "account_id": "7edd1c36-4654-484d-a3a3-975667decded",
+    "name": "Centro",
+    "code": "CENTRO",
+    "description": "",
+    "status": "active",
+    "created_at": "2026-01-16T11:30:31.078623+00:00",
+    "updated_at": "2026-01-16T11:30:31.078623+00:00",
+    "country_code": "ES"
+  },
+  {
+    "id": "1d3144dd-babc-47bc-81b8-e377a0499962",
+    "account_id": "7edd1c36-4654-484d-a3a3-975667decded",
+    "name": "ESTE",
+    "code": "ESTE",
+    "description": "",
+    "status": "active",
+    "created_at": "2026-01-16T11:35:22.254285+00:00",
+    "updated_at": "2026-01-16T11:35:22.254285+00:00",
+    "country_code": "ES"
   }
 ]

@@ -1,62 +1,119 @@
 [
   {
+    "id": "1c6d99fa-5404-44e9-87e5-973bc3f2e112",
     "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "city_id": "9ebc9d84-e121-42bf-a163-e8726448b796",
     "auto_id": "BAL-01",
-    "status": "active"
+    "status": "active",
+    "created_at": "2026-02-18T15:47:44.919796+00:00",
+    "updated_at": "2026-02-18T15:47:44.919796+00:00"
   },
   {
+    "id": "bbbb9556-d0b5-4047-8fdb-43e8d56b42e1",
     "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "city_id": "9ebc9d84-e121-42bf-a163-e8726448b796",
     "auto_id": "BAL-02",
-    "status": "active"
+    "status": "active",
+    "created_at": "2026-02-18T15:47:45.216835+00:00",
+    "updated_at": "2026-02-18T15:47:45.216835+00:00"
   },
   {
+    "id": "2940e6ff-f666-4cb2-8780-ffb464bce544",
     "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "city_id": "4e6b443c-a1c4-4533-9bf9-d2d67a0f405d",
     "auto_id": "LA-01",
-    "status": "active"
+    "status": "active",
+    "created_at": "2026-02-18T15:47:45.459825+00:00",
+    "updated_at": "2026-02-18T15:47:45.459825+00:00"
   },
   {
+    "id": "68a5c9f9-8954-43d7-8a1b-e6d2180e32ed",
     "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "city_id": "4e6b443c-a1c4-4533-9bf9-d2d67a0f405d",
     "auto_id": "LA-02",
-    "status": "active"
+    "status": "active",
+    "created_at": "2026-02-18T15:47:45.704243+00:00",
+    "updated_at": "2026-02-18T15:47:45.704243+00:00"
   },
   {
+    "id": "60700624-72eb-403b-878a-1a332d2ae39f",
     "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "city_id": "4e6b443c-a1c4-4533-9bf9-d2d67a0f405d",
     "auto_id": "LA-03",
-    "status": "active"
+    "status": "active",
+    "created_at": "2026-02-18T15:47:45.949643+00:00",
+    "updated_at": "2026-02-18T15:47:45.949643+00:00"
   },
   {
+    "id": "ddaaa410-7967-4e40-8b3e-aa096004a2b7",
     "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "city_id": "f86f46c1-98dd-4ec1-9cab-d435856c3125",
     "auto_id": "NY-01",
-    "status": "active"
+    "status": "active",
+    "created_at": "2026-02-18T15:47:46.184761+00:00",
+    "updated_at": "2026-02-18T15:47:46.184761+00:00"
   },
   {
+    "id": "de47b186-2420-4ce5-88d5-df02b2d5f987",
     "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "city_id": "f86f46c1-98dd-4ec1-9cab-d435856c3125",
     "auto_id": "NY-02",
-    "status": "active"
+    "status": "active",
+    "created_at": "2026-02-18T15:47:46.412006+00:00",
+    "updated_at": "2026-02-18T15:47:46.412006+00:00"
   },
   {
+    "id": "62b2f1d5-4b87-49b7-a075-35ab817ec3fc",
     "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "city_id": "f86f46c1-98dd-4ec1-9cab-d435856c3125",
     "auto_id": "NY-03",
-    "status": "active"
+    "status": "active",
+    "created_at": "2026-02-18T15:47:46.634657+00:00",
+    "updated_at": "2026-02-18T15:47:46.634657+00:00"
   },
   {
+    "id": "1af34665-9ce5-4c99-a21e-3f2bd2e2d521",
     "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "city_id": "b6d002e9-2c03-482b-9efb-0abaedd637f0",
     "auto_id": "SAC-01",
-    "status": "active"
+    "status": "active",
+    "created_at": "2026-02-18T15:47:46.864187+00:00",
+    "updated_at": "2026-02-18T15:47:46.864187+00:00"
   },
   {
+    "id": "e68c5e03-0ebb-4f8d-a2c8-9098feb3931f",
     "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
     "city_id": "b6d002e9-2c03-482b-9efb-0abaedd637f0",
     "auto_id": "SAC-02",
-    "status": "active"
+    "status": "active",
+    "created_at": "2026-02-18T15:47:47.096317+00:00",
+    "updated_at": "2026-02-18T15:47:47.096317+00:00"
+  },
+  {
+    "id": "a827d7a8-78db-4d25-8326-c38b8ff3c00a",
+    "account_id": "f4d823d2-93e6-4755-9a89-9da87e7fa86e",
+    "city_id": "a47bbac3-0edb-46a5-8bd0-cb51dd70200d",
+    "auto_id": "PHL-01",
+    "status": "active",
+    "created_at": "2026-02-18T16:20:06.522598+00:00",
+    "updated_at": "2026-02-18T16:20:06.522598+00:00"
+  },
+  {
+    "id": "bf8f3083-144f-4fdc-afde-ba0c39dd91c8",
+    "account_id": "7edd1c36-4654-484d-a3a3-975667decded",
+    "city_id": "aac3a2f6-ed2f-421c-8006-7e64b0786da4",
+    "auto_id": "CENTRO-MAD-001",
+    "status": "active",
+    "created_at": "2026-01-16T11:32:29.951393+00:00",
+    "updated_at": "2026-01-16T11:32:29.951393+00:00"
+  },
+  {
+    "id": "b6c51b04-7fa6-40b2-91c5-833b023ad37a",
+    "account_id": "7edd1c36-4654-484d-a3a3-975667decded",
+    "city_id": "a4e96c1a-d7d6-4588-9b63-40eda8bacdca",
+    "auto_id": "ESTE-BCN-001",
+    "status": "active",
+    "created_at": "2026-01-16T11:36:24.766026+00:00",
+    "updated_at": "2026-01-16T11:36:24.766026+00:00"
   }
 ]
