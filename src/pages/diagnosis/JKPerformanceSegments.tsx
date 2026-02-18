@@ -16,6 +16,10 @@ interface SegmentData {
   carrier: string;
   product: string;
   segmentType: 'operational' | 'distribution';
+  carrier_id?: string;
+  product_id?: string;
+  from_postal_center_id?: string;
+  to_postal_center_id?: string;
   totalSamples: number;
   jkStandard: number;
   jkActual: number;
@@ -45,7 +49,7 @@ export default function JKPerformanceSegments() {
   const [threshold, setThreshold] = useState<'all' | 'compliant' | 'warning' | 'critical'>('all');
   
   const [carriers, setCarriers] = useState<Array<{id: string, name: string}>>([]);
-  const [products, setProducts] = useState<Array<{id: string, name: string, carrier_id: string}>>([]);
+  const [products, setProducts] = useState<Array<{id: string, code: string, description: string, carrier_id: string}>>([]);
   const [cities, setCities] = useState<string[]>([]);
   const [postalCenters, setPostalCenters] = useState<Array<{id: string, name: string, city: string}>>([]);
   
@@ -69,18 +73,18 @@ export default function JKPerformanceSegments() {
       // Load products
       const { data: productsData } = await supabase
         .from('products')
-        .select('id, name, carrier_id')
+        .select('id, code, description, carrier_id')
         .eq('account_id', effectiveAccountId)
-        .order('name');
+        .order('code');
       if (productsData) setProducts(productsData);
 
-      // Load postal centers
+      // Load postal centers (load all centers, not filtered by account)
       const { data: centersData } = await supabase
         .from('postal_centers')
-        .select('id, name, city')
-        .eq('account_id', effectiveAccountId);
+        .select('id, name, city');
       if (centersData) {
         setPostalCenters(centersData);
+        console.log(`📍 Loaded ${centersData.length} postal centers (all accounts)`);
         const uniqueCities = [...new Set(centersData.map(c => c.city))].sort();
         setCities(uniqueCities);
       }
@@ -104,7 +108,7 @@ export default function JKPerformanceSegments() {
 
     if (productIdParam && products.length > 0) {
       const productObj = products.find(p => p.id === productIdParam);
-      if (productObj) setProduct(productObj.name);
+      if (productObj) setProduct(`${productObj.code} - ${productObj.description}`);
     }
 
     if (fromCenterIdParam && effectiveAccountId) {
@@ -157,7 +161,7 @@ export default function JKPerformanceSegments() {
         }
 
         if (product) {
-          const productObj = products.find(p => p.name === product);
+          const productObj = products.find(p => `${p.code} - ${p.description}` === product);
           if (productObj) query = query.eq('product_id', productObj.id);
         }
 
@@ -200,14 +204,25 @@ export default function JKPerformanceSegments() {
 
         // Create lookup maps
         const carrierMap = new Map(carriers.map(c => [c.id, c.name]));
-        const productMap = new Map(products.map(p => [p.id, p.name]));
+        const productMap = new Map(products.map(p => [p.id, `${p.code} - ${p.description}`]));
         const centerMap = new Map(postalCenters.map(c => [c.id, c.name]));
+
+        console.log(`📍 Loaded ${postalCenters.length} postal centers for mapping`);
+        console.log('Sample center IDs in map:', Array.from(centerMap.keys()).slice(0, 3));
 
         segments.forEach((seg: any) => {
           const carrierName = carrierMap.get(seg.carrier_id) || 'Unknown';
           const productName = productMap.get(seg.product_id) || 'Unknown';
           const fromCenterName = centerMap.get(seg.from_postal_center_id) || seg.from_postal_center_city || 'Unknown';
           const toCenterName = centerMap.get(seg.to_postal_center_id) || seg.to_postal_center_city || 'Unknown';
+          
+          // Debug: Log if we're falling back to city names
+          if (!centerMap.has(seg.from_postal_center_id)) {
+            console.warn(`⚠️  Center ID not found: ${seg.from_postal_center_id}, falling back to city: ${seg.from_postal_center_city}`);
+          }
+          if (seg.to_postal_center_id && !centerMap.has(seg.to_postal_center_id)) {
+            console.warn(`⚠️  Center ID not found: ${seg.to_postal_center_id}, falling back to city: ${seg.to_postal_center_city}`);
+          }
           
           // Center segment - only if there's actual time in center
           const timeInCenter = seg.working_time_in_center_minutes || seg.natural_time_in_center_minutes || 0;
@@ -223,10 +238,11 @@ export default function JKPerformanceSegments() {
                 segmentType: 'operational',
                 samples: [],
                 carrier_id: seg.carrier_id,
+                product_id: seg.product_id,
                 from_postal_center_id: seg.from_postal_center_id,
               });
             }
-            segmentMap.get(centerKey).samples.push({ time: timeInCenter });
+            segmentMap.get(centerKey).samples.push({ time: timeInCenter, journey_id: seg.id });
           }
 
           // Transit segment - only if there's actual transit time
@@ -243,11 +259,12 @@ export default function JKPerformanceSegments() {
                 segmentType: 'distribution',
                 samples: [],
                 carrier_id: seg.carrier_id,
+                product_id: seg.product_id,
                 from_postal_center_id: seg.from_postal_center_id,
                 to_postal_center_id: seg.to_postal_center_id,
               });
             }
-            segmentMap.get(transitKey).samples.push({ time: transitTime });
+            segmentMap.get(transitKey).samples.push({ time: transitTime, journey_id: seg.id });
           }
         });
 
@@ -284,15 +301,20 @@ export default function JKPerformanceSegments() {
           const warningThreshold = sla?.warning_threshold || 90;
           const criticalThreshold = sla?.critical_threshold || 80;
 
-          // Calculate distribution
+          // Calculate distribution and J+K Actual
           const distribution = new Map<number, number>();
           let onTimeSamples = 0;
           let beforeStandardSamples = 0;
           let afterStandardSamples = 0;
 
+          // Store all sample times in days for J+K Actual calculation
+          const sampleDays: number[] = [];
+
           segGroup.samples.forEach((sample: any) => {
             const days = Math.round(sample.time / 1440);
+            const exactDays = sample.time / 1440;
             distribution.set(days, (distribution.get(days) || 0) + 1);
+            sampleDays.push(exactDays);
 
             if (sample.time <= jkStandardMinutes) {
               onTimeSamples++;
@@ -305,17 +327,12 @@ export default function JKPerformanceSegments() {
           const totalSamples = segGroup.samples.length;
           const onTimePercentage = totalSamples > 0 ? (onTimeSamples / totalSamples) * 100 : 0;
 
-          // Calculate J+K Actual (day where standardPercentage is reached)
-          let cumulativeCount = 0;
+          // Calculate J+K Actual: sort samples by time and find the day where standardPercentage is reached
           let jkActualDays = jkStandardDays;
-          const sortedDays = Array.from(distribution.keys()).sort((a, b) => a - b);
-          for (const day of sortedDays) {
-            cumulativeCount += distribution.get(day) || 0;
-            const cumulativePercentage = (cumulativeCount / totalSamples) * 100;
-            if (cumulativePercentage >= standardPercentage) {
-              jkActualDays = day;
-              break;
-            }
+          if (sampleDays.length > 0) {
+            const sortedSampleDays = [...sampleDays].sort((a, b) => a - b);
+            const targetIndex = Math.ceil((standardPercentage / 100) * totalSamples) - 1;
+            jkActualDays = sortedSampleDays[Math.min(targetIndex, sortedSampleDays.length - 1)];
           }
 
           const deviation = jkActualDays - jkStandardDays;
@@ -340,6 +357,10 @@ export default function JKPerformanceSegments() {
             carrier: segGroup.carrier,
             product: segGroup.product,
             segmentType: segGroup.segmentType,
+            carrier_id: segGroup.carrier_id,
+            product_id: segGroup.product_id,
+            from_postal_center_id: segGroup.from_postal_center_id,
+            to_postal_center_id: segGroup.to_postal_center_id,
             totalSamples,
             jkStandard: jkStandardDays,
             jkActual: jkActualDays,
@@ -373,7 +394,7 @@ export default function JKPerformanceSegments() {
     };
 
     loadSegments();
-  }, [effectiveAccountId, carrier, product, originCity, destinationCity, segmentType, threshold, carriers, products]);
+  }, [effectiveAccountId, carrier, product, originCity, destinationCity, segmentType, threshold, carriers, products, postalCenters]);
 
   // Convert SegmentData to JKRouteData format for charts
   const routeDataForCharts = segmentData.map(seg => ({
@@ -381,6 +402,11 @@ export default function JKPerformanceSegments() {
     destinationCity: seg.toCenter,
     carrier: seg.carrier,
     product: seg.product,
+    segmentType: seg.segmentType,
+    carrier_id: seg.carrier_id,
+    product_id: seg.product_id,
+    from_postal_center_id: seg.from_postal_center_id,
+    to_postal_center_id: seg.to_postal_center_id,
     totalSamples: seg.totalSamples,
     jkStandard: seg.jkStandard,
     jkActual: seg.jkActual,
@@ -461,11 +487,10 @@ export default function JKPerformanceSegments() {
                 value={product}
                 onChange={(e) => setProduct(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                disabled={!carrier}
               >
                 <option value="">{t('common.all', undefined, 'All')}</option>
                 {filteredProducts.map(p => (
-                  <option key={p.id} value={p.name}>{p.name}</option>
+                  <option key={p.id} value={`${p.code} - ${p.description}`}>{p.code} - {p.description}</option>
                 ))}
               </select>
             </div>

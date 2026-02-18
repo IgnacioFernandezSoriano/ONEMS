@@ -8,6 +8,11 @@ interface JKRouteData {
   destinationCity: string;
   carrier: string;
   product: string;
+  segmentType?: 'operational' | 'distribution';
+  carrier_id?: string;
+  product_id?: string;
+  from_postal_center_id?: string;
+  to_postal_center_id?: string;
   totalSamples: number;
   jkStandard: number;
   jkActual: number;
@@ -130,8 +135,21 @@ export function RoutePerformanceTable({ routeData }: RoutePerformanceTableProps)
                 return (
                   <tr key={idx} className="hover:bg-gray-50">
                     <td className="sticky left-0 z-10 bg-white px-3 py-2 text-sm text-gray-900 border-r border-gray-200">
-                      {route.originCity} → {route.destinationCity}
-                      <div className="text-xs text-gray-500">{route.carrier} · {route.product}</div>
+                      <div className="flex items-start gap-2">
+                        {route.segmentType === 'operational' ? (
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 whitespace-nowrap">
+                            Centro
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 whitespace-nowrap">
+                            Tránsito
+                          </span>
+                        )}
+                        <div className="flex-1">
+                          <div>{route.originCity} → {route.destinationCity}</div>
+                          <div className="text-xs text-gray-500">{route.carrier} · {route.product}</div>
+                        </div>
+                      </div>
                     </td>
                     <td className="px-3 py-2 text-sm text-gray-900">{route.totalSamples}</td>
                     <td className="px-3 py-2 text-sm text-gray-900">{route.jkStandard.toFixed(1)}</td>
