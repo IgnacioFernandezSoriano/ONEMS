@@ -61,6 +61,7 @@ export function Sidebar() {
   const location = useLocation()
   const { isCollapsed, setIsCollapsed } = useSidebar()
   const { t, locale, setLocale } = useLocale()
+  const [sidebarView, setSidebarView] = useState<SidebarView>('all')
   const [expandedSections, setExpandedSections] = useState<string[]>(() => {
     // In 'all' view, start with all collapsed. In other views, expand all.
     if (sidebarView === 'all') {
@@ -75,7 +76,6 @@ export function Sidebar() {
   const [isHovered, setIsHovered] = useState(false)
   const [accounts, setAccounts] = useState<Array<{ id: string; name: string }>>([])
   const [accountName, setAccountName] = useState<string>('')
-  const [sidebarView, setSidebarView] = useState<SidebarView>('all')
   const [moduleFilter, setModuleFilter] = useState<'all' | 'e2e' | 'diagnosis'>('all')
   
   // Auto-expand on hover when collapsed
