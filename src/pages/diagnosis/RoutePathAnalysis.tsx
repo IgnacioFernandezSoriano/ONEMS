@@ -20,7 +20,7 @@ interface JourneySegment {
   natural_transit_time_minutes: number
   working_transit_time_minutes: number
   expected_time_minutes: number
-  sla_compliance: number
+  sla_compliance: 'on_time' | 'warning' | 'critical' | 'violated' | 'no_sla'
   from_center_name: string
   to_center_name: string
 }
@@ -103,14 +103,14 @@ export default function RoutePathAnalysis() {
       // Load unique cities from journey_segments
       const { data: segmentsData } = await supabase
         .from('journey_segments')
-        .select('from_city, to_city')
+        .select('origin_city_name, destination_city_name')
         .eq('account_id', effectiveAccountId)
 
       if (segmentsData) {
         const uniqueCities = new Set<string>()
         segmentsData.forEach(row => {
-          if (row.from_city) uniqueCities.add(row.from_city)
-          if (row.to_city) uniqueCities.add(row.to_city)
+          if (row.origin_city_name) uniqueCities.add(row.origin_city_name)
+          if (row.destination_city_name) uniqueCities.add(row.destination_city_name)
         })
         setCities(Array.from(uniqueCities).sort())
       }
@@ -141,8 +141,8 @@ export default function RoutePathAnalysis() {
       // Apply filters
       if (filters.carrier_id) query = query.eq('carrier_id', filters.carrier_id)
       if (filters.product_id) query = query.eq('product_id', filters.product_id)
-      if (filters.origin_city) query = query.eq('from_city', filters.origin_city)
-      if (filters.destination_city) query = query.eq('to_city', filters.destination_city)
+      if (filters.origin_city) query = query.eq('origin_city_name', filters.origin_city)
+      if (filters.destination_city) query = query.eq('destination_city_name', filters.destination_city)
 
       const { data: segments, error } = await query
 
@@ -175,12 +175,14 @@ export default function RoutePathAnalysis() {
       const routeMap = new Map<string, JourneySegment[]>()
       
       segments?.forEach((seg: any) => {
-        // Find first and last cities for this tag
-        const tagSegments = segments.filter((s: any) => s.tag_id === seg.tag_id)
-        tagSegments.sort((a: any, b: any) => new Date(a.entry_timestamp).getTime() - new Date(b.entry_timestamp).getTime())
+        // Use origin and destination city names from the segment (already populated by backend)
+        const originCity = seg.origin_city_name
+        const destinationCity = seg.destination_city_name
         
-        const originCity = tagSegments[0]?.from_city || seg.from_city
-        const destinationCity = tagSegments[tagSegments.length - 1]?.to_city || seg.to_city
+        if (!originCity || !destinationCity) {
+          console.warn('Segment missing city names:', seg)
+          return
+        }
         
         const routeKey = `${seg.carrier_id}|${seg.product_id}|${originCity}|${destinationCity}`
         
@@ -195,15 +197,15 @@ export default function RoutePathAnalysis() {
           product_id: seg.product_id,
           from_postal_center_id: seg.from_postal_center_id,
           to_postal_center_id: seg.to_postal_center_id,
-          from_city: seg.from_city,
-          to_city: seg.to_city,
+          from_city: seg.from_postal_center_city,
+          to_city: seg.to_postal_center_city,
           segment_type: seg.segment_type,
           natural_time_in_center_minutes: seg.natural_time_in_center_minutes || 0,
           working_time_in_center_minutes: seg.working_time_in_center_minutes || 0,
           natural_transit_time_minutes: seg.natural_transit_time_minutes || 0,
           working_transit_time_minutes: seg.working_transit_time_minutes || 0,
           expected_time_minutes: seg.expected_time_minutes || 0,
-          sla_compliance: seg.sla_compliance || 0,
+          sla_compliance: seg.sla_compliance || 'no_sla',
           from_center_name: centerMap.get(seg.from_postal_center_id) || '',
           to_center_name: centerMap.get(seg.to_postal_center_id) || ''
         })
@@ -225,17 +227,18 @@ export default function RoutePathAnalysis() {
         const tagMetrics = Array.from(uniqueTags).map(tagId => {
           const tagSegments = routeSegments.filter(s => s.tag_id === tagId)
           
+          // Count compliance categories
+          const onTimeCount = tagSegments.filter(s => s.sla_compliance === 'on_time').length
+          const totalWithSla = tagSegments.filter(s => s.sla_compliance !== 'no_sla').length
+          
           return {
             expected_time: tagSegments.reduce((sum, s) => sum + s.expected_time_minutes, 0),
             natural_time: tagSegments.reduce((sum, s) => 
               sum + s.natural_time_in_center_minutes + s.natural_transit_time_minutes, 0),
             working_time: tagSegments.reduce((sum, s) => 
               sum + s.working_time_in_center_minutes + s.working_transit_time_minutes, 0),
-            avg_compliance: tagSegments.reduce((sum, s) => sum + s.sla_compliance, 0) / tagSegments.length,
-            compliance_excluding_zeros: tagSegments.filter(s => s.sla_compliance > 0).length > 0
-              ? tagSegments.filter(s => s.sla_compliance > 0).reduce((sum, s) => sum + s.sla_compliance, 0) / 
-                tagSegments.filter(s => s.sla_compliance > 0).length
-              : 0
+            compliance_percentage: totalWithSla > 0 ? (onTimeCount / totalWithSla) * 100 : 0,
+            compliance_percentage_real: totalWithSla > 0 ? (onTimeCount / totalWithSla) * 100 : 0
           }
         })
         
@@ -243,8 +246,8 @@ export default function RoutePathAnalysis() {
         const expected_time_minutes = tagMetrics.reduce((sum, m) => sum + m.expected_time, 0) / totalTags
         const avg_natural_time_minutes = tagMetrics.reduce((sum, m) => sum + m.natural_time, 0) / totalTags
         const avg_working_time_minutes = tagMetrics.reduce((sum, m) => sum + m.working_time, 0) / totalTags
-        const compliance_rate = tagMetrics.reduce((sum, m) => sum + m.avg_compliance, 0) / totalTags
-        const percent_real = tagMetrics.reduce((sum, m) => sum + m.compliance_excluding_zeros, 0) / totalTags
+        const compliance_rate = tagMetrics.reduce((sum, m) => sum + m.compliance_percentage, 0) / totalTags
+        const percent_real = tagMetrics.reduce((sum, m) => sum + m.compliance_percentage_real, 0) / totalTags
         
         // Build segment details for display
         const segmentDetailsMap = new Map<string, any>()
@@ -264,10 +267,8 @@ export default function RoutePathAnalysis() {
               expected_time_minutes: 0,
               natural_time: 0,
               working_time: 0,
-              compliance_sum: 0,
-              compliance_count: 0,
-              compliance_non_zero_sum: 0,
-              compliance_non_zero_count: 0,
+              on_time_count: 0,
+              with_sla_count: 0,
               tags: new Set()
             })
           }
@@ -276,12 +277,11 @@ export default function RoutePathAnalysis() {
           detail.expected_time_minutes += seg.expected_time_minutes
           detail.natural_time += seg.natural_time_in_center_minutes + seg.natural_transit_time_minutes
           detail.working_time += seg.working_time_in_center_minutes + seg.working_transit_time_minutes
-          detail.compliance_sum += seg.sla_compliance
-          detail.compliance_count += 1
-          if (seg.sla_compliance > 0) {
-            detail.compliance_non_zero_sum += seg.sla_compliance
-            detail.compliance_non_zero_count += 1
-          }
+          
+          // Count compliance categories
+          if (seg.sla_compliance === 'on_time') detail.on_time_count += 1
+          if (seg.sla_compliance !== 'no_sla') detail.with_sla_count += 1
+          
           detail.tags.add(seg.tag_id)
         })
         
@@ -300,10 +300,8 @@ export default function RoutePathAnalysis() {
           avg_transit_time_working: 0,
           avg_total_time_natural: detail.natural_time / detail.tags.size,
           avg_total_time_working: detail.working_time / detail.tags.size,
-          on_time_percentage_std: detail.compliance_sum / detail.compliance_count,
-          compliance_rate: detail.compliance_non_zero_count > 0 
-            ? detail.compliance_non_zero_sum / detail.compliance_non_zero_count 
-            : 0,
+          on_time_percentage_std: detail.with_sla_count > 0 ? (detail.on_time_count / detail.with_sla_count) * 100 : 0,
+          compliance_rate: detail.with_sla_count > 0 ? (detail.on_time_count / detail.with_sla_count) * 100 : 0,
           warning_threshold: 90,
           critical_threshold: 80,
           tags_count: detail.tags.size,
