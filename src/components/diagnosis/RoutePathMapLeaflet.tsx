@@ -88,25 +88,22 @@ export default function RoutePathMapLeaflet({ routePaths }: Props) {
         // Get all journey_segments
         const { data: journeySegments, error: segmentsError } = await supabase
           .from('journey_segments')
-          .select(`
-            tag_id,
-            from_postal_center_id,
-            to_postal_center_id,
-            from_postal_center_city,
-            to_postal_center_city,
-            natural_time_in_center_minutes,
-            natural_transit_time_minutes,
-            working_time_in_center_minutes,
-            working_transit_time_minutes,
-            expected_time_minutes,
-            entry_timestamp,
-            from_center:postal_centers!journey_segments_from_postal_center_id_fkey(id, code, name, city, latitude, longitude),
-            to_center:postal_centers!journey_segments_to_postal_center_id_fkey(id, code, name, city, latitude, longitude)
-          `)
+          .select('*')
           .eq('account_id', effectiveAccountId)
           .order('entry_timestamp')
 
         if (segmentsError) throw segmentsError
+
+        // Get postal centers with coordinates
+        const { data: centers, error: centersError } = await supabase
+          .from('postal_centers')
+          .select('id, code, name, city, latitude, longitude')
+          .eq('account_id', effectiveAccountId)
+
+        if (centersError) throw centersError
+
+        // Create lookup map for centers
+        const centerMap = new Map(centers?.map(c => [c.id, c]) || [])
 
         // Get SLAs
         const { data: slas, error: slasError } = await supabase
@@ -134,9 +131,11 @@ export default function RoutePathMapLeaflet({ routePaths }: Props) {
             const firstSeg = matchingSegs[0]
             const totalTags = matchingSegs.length
 
-            // Skip if centers don't have coordinates
-            const fromCenter = Array.isArray(firstSeg.from_center) ? firstSeg.from_center[0] : firstSeg.from_center
-            const toCenter = Array.isArray(firstSeg.to_center) ? firstSeg.to_center[0] : firstSeg.to_center
+            // Get centers from map
+            const fromCenter = centerMap.get(firstSeg.from_postal_center_id)
+            const toCenter = centerMap.get(firstSeg.to_postal_center_id)
+            
+            // Skip if centers don't exist or don't have coordinates
             
             if (!fromCenter || !toCenter ||
                 fromCenter.latitude == null || fromCenter.longitude == null ||

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { ChevronDown, ChevronRight, AlertCircle, Info } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import SegmentTable from './SegmentTable'
@@ -63,6 +63,12 @@ export default function RoutePathTable({ routePaths, postalCenters, onRouteMetri
   const [segmentCounts, setSegmentCounts] = useState<Record<string, number>>({})
   const [segmentTotals, setSegmentTotals] = useState<Record<string, any>>({})
   const navigate = useNavigate()
+
+  // Expand all rows by default when routePaths changes
+  useEffect(() => {
+    const allIds = new Set(routePaths.map(path => path.id))
+    setExpandedRows(allIds)
+  }, [routePaths])
 
   // Calculate weighted average on_time_percentage_std from segment_details
   const calculateWeightedStd = (segmentDetails: SegmentDetail[]) => {
@@ -149,12 +155,36 @@ export default function RoutePathTable({ routePaths, postalCenters, onRouteMetri
   }
 
   return (
-    <div className="p-6">
-      <div className="mb-4">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">Route Performance Details</h3>
-        <p className="text-sm text-gray-600">
-          Click rows to expand segments. Click segments to view J+K report.
-        </p>
+    <>
+      <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900">Route Performance Details</h2>
+          <p className="text-sm text-gray-600">
+            Click rows to expand segments. Click segments to view J+K report.
+          </p>
+        </div>
+        <button
+          onClick={() => {
+            if (expandedRows.size === routePaths.length) {
+              setExpandedRows(new Set())
+            } else {
+              setExpandedRows(new Set(routePaths.map(p => p.id)))
+            }
+          }}
+          className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 flex items-center gap-2"
+        >
+          {expandedRows.size === routePaths.length ? (
+            <>
+              <ChevronRight className="w-4 h-4" />
+              Collapse All
+            </>
+          ) : (
+            <>
+              <ChevronDown className="w-4 h-4" />
+              Expand All
+            </>
+          )}
+        </button>
       </div>
 
       <div className="overflow-x-auto">
@@ -321,6 +351,6 @@ export default function RoutePathTable({ routePaths, postalCenters, onRouteMetri
           </div>
         )}
       </div>
-    </div>
+    </>
   )
 }
