@@ -55,21 +55,17 @@ export function useAccountManagement() {
       const demo2AccountId = accountData.id
       const deletedCounts: Record<string, number> = {}
 
-      // BACKUP: Save products, delivery_standards, and one_db before deletion
-      const { data: productsBackup } = await supabase
-        .from('products')
-        .select('*')
-        .eq('account_id', demo2AccountId)
-      
-      const { data: deliveryStandardsBackup } = await supabase
-        .from('delivery_standards')
-        .select('*')
-        .eq('account_id', demo2AccountId)
-      
-      const { data: oneDbBackup } = await supabase
-        .from('one_db')
-        .select('*')
-        .eq('account_id', demo2AccountId)
+      // BACKUP: Save all configuration and data tables before deletion
+      const { data: carriersBackup } = await supabase.from('carriers').select('*').eq('account_id', demo2AccountId)
+      const { data: regionsBackup } = await supabase.from('regions').select('*').eq('account_id', demo2AccountId)
+      const { data: citiesBackup } = await supabase.from('cities').select('*').eq('account_id', demo2AccountId)
+      const { data: postalCentersBackup } = await supabase.from('postal_centers').select('*').eq('account_id', demo2AccountId)
+      const { data: nodesBackup } = await supabase.from('nodes').select('*').eq('account_id', demo2AccountId)
+      const { data: panelistsBackup } = await supabase.from('panelists').select('*').eq('account_id', demo2AccountId)
+      const { data: topologyBackup } = await supabase.from('topology').select('*').eq('account_id', demo2AccountId)
+      const { data: productsBackup } = await supabase.from('products').select('*').eq('account_id', demo2AccountId)
+      const { data: deliveryStandardsBackup } = await supabase.from('delivery_standards').select('*').eq('account_id', demo2AccountId)
+      const { data: oneDbBackup } = await supabase.from('one_db').select('*').eq('account_id', demo2AccountId)
 
       // Delete in correct order to respect foreign key constraints
 
@@ -164,9 +160,115 @@ export function useAccountManagement() {
         .eq('account_id', demo2AccountId)
       deletedCounts.reader_location_history = readerLocationCount || 0
 
-      // RESTORE: Re-insert products and delivery_standards
+      // 14. Delete panelists (depends on nodes)
+      const { count: panelistsCount } = await supabase
+        .from('panelists')
+        .delete({ count: 'exact' })
+        .eq('account_id', demo2AccountId)
+      deletedCounts.panelists = panelistsCount || 0
+
+      // 15. Delete nodes (depends on postal_centers)
+      const { count: nodesCount } = await supabase
+        .from('nodes')
+        .delete({ count: 'exact' })
+        .eq('account_id', demo2AccountId)
+      deletedCounts.nodes = nodesCount || 0
+
+      // 16. Delete postal_centers (depends on cities)
+      const { count: postalCentersCount } = await supabase
+        .from('postal_centers')
+        .delete({ count: 'exact' })
+        .eq('account_id', demo2AccountId)
+      deletedCounts.postal_centers = postalCentersCount || 0
+
+      // 17. Delete topology
+      const { count: topologyCount } = await supabase
+        .from('topology')
+        .delete({ count: 'exact' })
+        .eq('account_id', demo2AccountId)
+      deletedCounts.topology = topologyCount || 0
+
+      // 18. Delete cities (depends on regions)
+      const { count: citiesCount } = await supabase
+        .from('cities')
+        .delete({ count: 'exact' })
+        .eq('account_id', demo2AccountId)
+      deletedCounts.cities = citiesCount || 0
+
+      // 19. Delete regions
+      const { count: regionsCount } = await supabase
+        .from('regions')
+        .delete({ count: 'exact' })
+        .eq('account_id', demo2AccountId)
+      deletedCounts.regions = regionsCount || 0
+
+      // 20. Delete carriers
+      const { count: carriersCount } = await supabase
+        .from('carriers')
+        .delete({ count: 'exact' })
+        .eq('account_id', demo2AccountId)
+      deletedCounts.carriers = carriersCount || 0
+
+      // RESTORE: Re-insert all configuration and data tables in correct order
       const restoredCounts: Record<string, number> = {}
       
+      // Restore carriers first (no dependencies)
+      if (carriersBackup && carriersBackup.length > 0) {
+        const carriersToRestore = carriersBackup.map(({ id, created_at, updated_at, ...rest }) => rest)
+        const { error } = await supabase.from('carriers').insert(carriersToRestore)
+        if (!error) restoredCounts.carriers = carriersBackup.length
+        else console.error('Error restoring carriers:', error)
+      }
+
+      // Restore regions
+      if (regionsBackup && regionsBackup.length > 0) {
+        const regionsToRestore = regionsBackup.map(({ id, created_at, updated_at, ...rest }) => rest)
+        const { error } = await supabase.from('regions').insert(regionsToRestore)
+        if (!error) restoredCounts.regions = regionsBackup.length
+        else console.error('Error restoring regions:', error)
+      }
+
+      // Restore cities (depends on regions)
+      if (citiesBackup && citiesBackup.length > 0) {
+        const citiesToRestore = citiesBackup.map(({ id, created_at, updated_at, ...rest }) => rest)
+        const { error } = await supabase.from('cities').insert(citiesToRestore)
+        if (!error) restoredCounts.cities = citiesBackup.length
+        else console.error('Error restoring cities:', error)
+      }
+
+      // Restore topology
+      if (topologyBackup && topologyBackup.length > 0) {
+        const topologyToRestore = topologyBackup.map(({ id, created_at, updated_at, ...rest }) => rest)
+        const { error } = await supabase.from('topology').insert(topologyToRestore)
+        if (!error) restoredCounts.topology = topologyBackup.length
+        else console.error('Error restoring topology:', error)
+      }
+
+      // Restore postal_centers (depends on cities)
+      if (postalCentersBackup && postalCentersBackup.length > 0) {
+        const postalCentersToRestore = postalCentersBackup.map(({ id, created_at, updated_at, ...rest }) => rest)
+        const { error } = await supabase.from('postal_centers').insert(postalCentersToRestore)
+        if (!error) restoredCounts.postal_centers = postalCentersBackup.length
+        else console.error('Error restoring postal_centers:', error)
+      }
+
+      // Restore nodes (depends on postal_centers)
+      if (nodesBackup && nodesBackup.length > 0) {
+        const nodesToRestore = nodesBackup.map(({ id, created_at, updated_at, ...rest }) => rest)
+        const { error } = await supabase.from('nodes').insert(nodesToRestore)
+        if (!error) restoredCounts.nodes = nodesBackup.length
+        else console.error('Error restoring nodes:', error)
+      }
+
+      // Restore panelists (depends on nodes)
+      if (panelistsBackup && panelistsBackup.length > 0) {
+        const panelistsToRestore = panelistsBackup.map(({ id, created_at, updated_at, ...rest }) => rest)
+        const { error } = await supabase.from('panelists').insert(panelistsToRestore)
+        if (!error) restoredCounts.panelists = panelistsBackup.length
+        else console.error('Error restoring panelists:', error)
+      }
+
+      // Restore products
       if (productsBackup && productsBackup.length > 0) {
         // Remove id, created_at, updated_at to let DB generate new ones
         const productsToRestore = productsBackup.map(({ id, created_at, updated_at, ...rest }) => rest)
