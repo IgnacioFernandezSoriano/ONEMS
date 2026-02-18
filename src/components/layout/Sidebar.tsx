@@ -139,15 +139,6 @@ export function Sidebar() {
           icon: Settings,
           tooltip: 'Configure account working days',
         },
-        ...(accountName === 'DEMO2' ? [
-          {
-            path: '/api-keys',
-            label: 'API Keys',
-            icon: Key,
-            roles: ['admin', 'superadmin'] as string[],
-            tooltip: 'Manage API keys',
-          },
-        ] : []),
       ],
     },
     {
@@ -505,15 +496,6 @@ export function Sidebar() {
           icon: Settings,
           tooltip: 'Configure account working days',
         },
-        ...(accountName === 'DEMO2' ? [
-          {
-            path: '/api-keys',
-            label: 'API Keys',
-            icon: Key,
-            roles: ['admin', 'superadmin'] as string[],
-            tooltip: 'Manage API keys',
-          },
-        ] : []),
       ],
     },
   ]
