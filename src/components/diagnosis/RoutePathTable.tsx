@@ -276,6 +276,8 @@ export default function RoutePathTable({ routePaths, postalCenters }: Props) {
                             carrierName={path.carrier_name}
                             productId={path.product_id}
                             productName={path.product_name}
+                            originCity={path.origin_city_name}
+                            destinationCity={path.destination_city_name}
                             onSegmentCountChange={(count) => {
                               setSegmentCounts(prev => ({ ...prev, [path.id]: count }))
                             }}

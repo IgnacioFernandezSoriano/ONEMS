@@ -27,10 +27,12 @@ interface SegmentTableProps {
   carrierName: string
   productId: string
   productName: string
+  originCity: string
+  destinationCity: string
   onSegmentCountChange?: (count: number) => void
 }
 
-export default function SegmentTable({ pathId, pathSignature, accountId, carrierId, carrierName, productId, productName, onSegmentCountChange }: SegmentTableProps) {
+export default function SegmentTable({ pathId, pathSignature, accountId, carrierId, carrierName, productId, productName, originCity, destinationCity, onSegmentCountChange }: SegmentTableProps) {
   const navigate = useNavigate()
   const [segments, setSegments] = React.useState<SegmentData[]>([])
   const [loading, setLoading] = React.useState(true)
@@ -52,6 +54,8 @@ export default function SegmentTable({ pathId, pathSignature, accountId, carrier
         .eq('account_id', accountId)
         .eq('carrier_id', carrierId)
         .eq('product_id', productId)
+        .eq('origin_city_name', originCity)
+        .eq('destination_city_name', destinationCity)
         .order('entry_timestamp')
 
       if (segmentsError) throw segmentsError
@@ -73,20 +77,18 @@ export default function SegmentTable({ pathId, pathSignature, accountId, carrier
 
       if (slasError) throw slasError
 
-      // 3. Filter segments by path_signature and order them
-      const pathCities = pathSignature.split(' | ')
+      // 3. Group segments by from_postal_center_id -> to_postal_center_id
+      const segmentGroups = new Map<string, any[]>()
       
-      // Build ordered list of segments based on path
-      const orderedSegments: any[][] = []
-      pathCities.forEach(pathSegment => {
-        const matchingSegs = journeySegments?.filter(seg => {
-          const segPath = `${seg.from_postal_center_city}→${seg.to_postal_center_city}`
-          return segPath === pathSegment
-        }) || []
-        if (matchingSegs.length > 0) {
-          orderedSegments.push(matchingSegs)
+      journeySegments?.forEach(seg => {
+        const key = `${seg.from_postal_center_id}|${seg.to_postal_center_id}`
+        if (!segmentGroups.has(key)) {
+          segmentGroups.set(key, [])
         }
+        segmentGroups.get(key)!.push(seg)
       })
+      
+      const orderedSegments = Array.from(segmentGroups.values())
 
       // 4. Build segment data array
       const segmentDataArray: SegmentData[] = []
