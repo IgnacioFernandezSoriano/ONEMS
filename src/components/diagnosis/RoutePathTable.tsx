@@ -60,6 +60,7 @@ export default function RoutePathTable({ routePaths, postalCenters }: Props) {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
   const [hoveredSegment, setHoveredSegment] = useState<string | null>(null)
   const [segmentCounts, setSegmentCounts] = useState<Record<string, number>>({})
+  const [segmentTotals, setSegmentTotals] = useState<Record<string, any>>({})
   const navigate = useNavigate()
 
   // Calculate weighted average on_time_percentage_std from segment_details
@@ -193,10 +194,18 @@ export default function RoutePathTable({ routePaths, postalCenters }: Props) {
           <tbody className="bg-white divide-y divide-gray-200">
             {routePaths.map((path) => {
               const isExpanded = expandedRows.has(path.id)
-              const timeDiffNatural = path.avg_natural_time_minutes - path.expected_time_minutes
-              const timeDiffWorking = path.avg_working_time_minutes - path.expected_time_minutes
-              const stdPercentage = calculateWeightedStd(path.segment_details)
-              const percentDiff = path.compliance_rate - stdPercentage
+              const totals = segmentTotals[path.id]
+              
+              // Use calculated totals from segments if available, otherwise use path data
+              const jkStd = totals?.jk_std_minutes ?? path.expected_time_minutes
+              const naturalTime = totals?.natural_time_minutes ?? path.avg_natural_time_minutes
+              const workingTime = totals?.working_time_minutes ?? path.avg_working_time_minutes
+              const stdPercentage = totals?.std_percentage ?? calculateWeightedStd(path.segment_details)
+              const realPercentage = totals?.real_percentage ?? path.percent_real
+              
+              const timeDiffNatural = naturalTime - jkStd
+              const timeDiffWorking = workingTime - jkStd
+              const percentDiff = realPercentage - stdPercentage
               
               return (
                 <>
@@ -221,40 +230,40 @@ export default function RoutePathTable({ routePaths, postalCenters }: Props) {
                       {segmentCounts[path.id] || (path.path_signature.split(' | ').length * 2 + 1)}
                     </td>
                     <td className="px-3 py-2 text-right font-mono text-gray-900">
-                      {formatJK(path.expected_time_minutes)}
+                      {formatJK(jkStd)}
                     </td>
                     <td className="px-3 py-2 text-right">
-                      <div className="font-mono text-gray-900">{formatJK(path.avg_natural_time_minutes)}</div>
-                      <div className={`text-xs font-semibold ${getTimeDiffColor(path.avg_natural_time_minutes, path.expected_time_minutes)}`}>
-                        {formatTimeDiff(path.avg_natural_time_minutes, path.expected_time_minutes)}
+                      <div className="font-mono text-gray-900">{formatJK(naturalTime)}</div>
+                      <div className={`text-xs font-semibold ${getTimeDiffColor(naturalTime, jkStd)}`}>
+                        {formatTimeDiff(naturalTime, jkStd)}
                       </div>
                     </td>
                     <td className="px-3 py-2 text-right">
-                      <div className="font-mono text-gray-900">{formatJK(path.avg_working_time_minutes)}</div>
-                      <div className={`text-xs font-semibold ${getTimeDiffColor(path.avg_working_time_minutes, path.expected_time_minutes)}`}>
-                        {formatTimeDiff(path.avg_working_time_minutes, path.expected_time_minutes)}
+                      <div className="font-mono text-gray-900">{formatJK(workingTime)}</div>
+                      <div className={`text-xs font-semibold ${getTimeDiffColor(workingTime, jkStd)}`}>
+                        {formatTimeDiff(workingTime, jkStd)}
                       </div>
                     </td>
                     <td className="px-3 py-2 text-right font-semibold text-gray-700">
                       {stdPercentage.toFixed(0)}%
                     </td>
                     <td className="px-3 py-2 text-right">
-                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getComplianceColor(path.percent_real, 90, 80)}`}>
-                        {path.percent_real.toFixed(1)}%
+                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getComplianceColor(realPercentage, 90, 80)}`}>
+                        {realPercentage.toFixed(1)}%
                       </span>
                     </td>
                     <td className="px-3 py-2 text-right">
-                      <span className={`font-semibold ${(path.percent_real - stdPercentage) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {formatPercentDiff(path.percent_real, stdPercentage)}
+                      <span className={`font-semibold ${percentDiff >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {formatPercentDiff(realPercentage, stdPercentage)}
                       </span>
                     </td>
                     <td className="px-3 py-2 text-right">
                       <span className={`px-2 py-0.5 rounded text-xs font-semibold ${
-                        path.percent_real >= 90 ? 'bg-green-100 text-green-800' :
-                        path.percent_real >= 80 ? 'bg-yellow-100 text-yellow-800' :
+                        realPercentage >= 90 ? 'bg-green-100 text-green-800' :
+                        realPercentage >= 80 ? 'bg-yellow-100 text-yellow-800' :
                         'bg-red-100 text-red-800'
                       }`}>
-                        {path.percent_real >= 90 ? 'Compliant' : path.percent_real >= 80 ? 'Warning' : 'Critical'}
+                        {realPercentage >= 90 ? 'Compliant' : realPercentage >= 80 ? 'Warning' : 'Critical'}
                       </span>
                     </td>
                     <td className="px-3 py-2 text-right font-semibold text-gray-900">
@@ -280,6 +289,9 @@ export default function RoutePathTable({ routePaths, postalCenters }: Props) {
                             destinationCity={path.destination_city_name}
                             onSegmentCountChange={(count) => {
                               setSegmentCounts(prev => ({ ...prev, [path.id]: count }))
+                            }}
+                            onSegmentsCalculated={(totals) => {
+                              setSegmentTotals(prev => ({ ...prev, [path.id]: totals }))
                             }}
                           />
                         </div>

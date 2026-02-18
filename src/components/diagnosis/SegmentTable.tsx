@@ -19,6 +19,14 @@ interface SegmentData {
   order: number
 }
 
+interface SegmentTotals {
+  jk_std_minutes: number
+  natural_time_minutes: number
+  working_time_minutes: number
+  std_percentage: number
+  real_percentage: number
+}
+
 interface SegmentTableProps {
   pathId: string
   pathSignature: string
@@ -30,9 +38,10 @@ interface SegmentTableProps {
   originCity: string
   destinationCity: string
   onSegmentCountChange?: (count: number) => void
+  onSegmentsCalculated?: (totals: SegmentTotals) => void
 }
 
-export default function SegmentTable({ pathId, pathSignature, accountId, carrierId, carrierName, productId, productName, originCity, destinationCity, onSegmentCountChange }: SegmentTableProps) {
+export default function SegmentTable({ pathId, pathSignature, accountId, carrierId, carrierName, productId, productName, originCity, destinationCity, onSegmentCountChange, onSegmentsCalculated }: SegmentTableProps) {
   const navigate = useNavigate()
   const [segments, setSegments] = React.useState<SegmentData[]>([])
   const [loading, setLoading] = React.useState(true)
@@ -220,6 +229,33 @@ export default function SegmentTable({ pathId, pathSignature, accountId, carrier
       
       setSegments(segmentDataArray)
       onSegmentCountChange?.(segmentDataArray.length)
+      
+      // Calculate totals for header
+      if (segmentDataArray.length > 0) {
+        const totalJkStd = segmentDataArray.reduce((sum, seg) => sum + seg.jk_std_minutes, 0)
+        const totalNaturalTime = segmentDataArray.reduce((sum, seg) => sum + seg.natural_time_minutes, 0)
+        const totalWorkingTime = segmentDataArray.reduce((sum, seg) => sum + seg.working_time_minutes, 0)
+        
+        // Average % STD (weighted by segment count)
+        const avgStdPercentage = segmentDataArray.reduce((sum, seg) => sum + seg.std_percentage, 0) / segmentDataArray.length
+        
+        // Average % REAL (excluding segments with 0 or no data)
+        const segmentsWithReal = segmentDataArray.filter(seg => seg.real_percentage > 0)
+        const avgRealPercentage = segmentsWithReal.length > 0
+          ? segmentsWithReal.reduce((sum, seg) => sum + seg.real_percentage, 0) / segmentsWithReal.length
+          : 0
+        
+        // Notify parent with calculated totals
+        if (onSegmentsCalculated) {
+          onSegmentsCalculated({
+            jk_std_minutes: totalJkStd,
+            natural_time_minutes: totalNaturalTime,
+            working_time_minutes: totalWorkingTime,
+            std_percentage: avgStdPercentage,
+            real_percentage: avgRealPercentage
+          })
+        }
+      }
     } catch (err: any) {
       console.error('Error loading segments:', err)
       setError(err.message)
