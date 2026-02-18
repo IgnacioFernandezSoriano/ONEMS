@@ -48,25 +48,21 @@ export default function SegmentTable({ pathId, pathSignature, accountId, carrier
       // 1. Get all journey_segments for this path
       const { data: journeySegments, error: segmentsError } = await supabase
         .from('journey_segments')
-        .select(`
-          tag_id,
-          from_postal_center_id,
-          to_postal_center_id,
-          from_postal_center_city,
-          to_postal_center_city,
-          natural_time_in_center_minutes,
-          natural_transit_time_minutes,
-          working_time_in_center_minutes,
-          working_transit_time_minutes,
-          expected_time_minutes,
-          entry_timestamp,
-          from_center:postal_centers!journey_segments_from_postal_center_id_fkey(name),
-          to_center:postal_centers!journey_segments_to_postal_center_id_fkey(name)
-        `)
+        .select('*')
         .eq('account_id', accountId)
+        .eq('carrier_id', carrierId)
+        .eq('product_id', productId)
         .order('entry_timestamp')
 
       if (segmentsError) throw segmentsError
+
+      // Load postal centers for names
+      const { data: centers } = await supabase
+        .from('postal_centers')
+        .select('id, name')
+        .eq('account_id', accountId)
+
+      const centerMap = new Map(centers?.map(c => [c.id, c.name]) || [])
 
       // 2. Get SLAs
       const { data: slas, error: slasError } = await supabase
@@ -118,8 +114,8 @@ export default function SegmentTable({ pathId, pathSignature, accountId, carrier
           sla.to_postal_center_id === firstSeg.to_postal_center_id
         )
 
-        const fromCenterName = firstSeg.from_center?.name || firstSeg.from_postal_center_city
-        const toCenterName = firstSeg.to_center?.name || firstSeg.to_postal_center_city
+        const fromCenterName = centerMap.get(firstSeg.from_postal_center_id) || firstSeg.from_postal_center_city
+        const toCenterName = centerMap.get(firstSeg.to_postal_center_id) || firstSeg.to_postal_center_city
 
         // Center segment (from)
         if (avgNaturalCenter > 0 || centerSLA) {
