@@ -54,11 +54,18 @@ const JKPerformanceSegments: React.FC = () => {
   const [originCity, setOriginCity] = useState<string>('');
   const [destinationCity, setDestinationCity] = useState<string>('');
   const [carrier, setCarrier] = useState<string>('');
+  const [product, setProduct] = useState<string>('');
   const [segmentType, setSegmentType] = useState<string>('');
+  const [threshold, setThreshold] = useState<string>('');
   const [carrierId, setCarrierId] = useState<string>('');
   const [productId, setProductId] = useState<string>('');
   const [fromCenterId, setFromCenterId] = useState<string>('');
   const [toCenterId, setToCenterId] = useState<string>('');
+
+  // Dropdown options
+  const [carriers, setCarriers] = useState<{id: string, name: string}[]>([]);
+  const [products, setProducts] = useState<{id: string, name: string, carrier_id: string}[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<{id: string, name: string}[]>([]);
 
   // Data
   const [segmentRoutes, setSegmentRoutes] = useState<SegmentRoute[]>([]);
@@ -73,6 +80,44 @@ const JKPerformanceSegments: React.FC = () => {
     onTimePercentage: 0,
     problematicRoutes: 0
   });
+
+  // Load carriers and products
+  useEffect(() => {
+    const loadOptions = async () => {
+      if (!profile?.account_id) return;
+
+      try {
+        // Load carriers
+        const { data: carriersData } = await supabase
+          .from('carriers')
+          .select('id, name')
+          .eq('account_id', profile.account_id)
+          .order('name');
+        if (carriersData) setCarriers(carriersData);
+
+        // Load products
+        const { data: productsData } = await supabase
+          .from('products')
+          .select('id, name, carrier_id')
+          .eq('account_id', profile.account_id)
+          .order('name');
+        if (productsData) setProducts(productsData);
+      } catch (err) {
+        console.error('Error loading options:', err);
+      }
+    };
+
+    loadOptions();
+  }, [profile?.account_id]);
+
+  // Filter products by selected carrier
+  useEffect(() => {
+    if (carrierId) {
+      setFilteredProducts(products.filter(p => p.carrier_id === carrierId));
+    } else {
+      setFilteredProducts(products);
+    }
+  }, [carrierId, products]);
 
   // Read URL params on mount and resolve IDs to names
   useEffect(() => {
@@ -101,6 +146,16 @@ const JKPerformanceSegments: React.FC = () => {
             .eq('id', urlCarrierId)
             .single();
           if (carrierData) setCarrier(carrierData.name);
+        }
+
+        // Resolve product
+        if (urlProductId) {
+          const { data: productData } = await supabase
+            .from('products')
+            .select('name')
+            .eq('id', urlProductId)
+            .single();
+          if (productData) setProduct(productData.name);
         }
 
         // Resolve from center to city
@@ -152,7 +207,9 @@ const JKPerformanceSegments: React.FC = () => {
         p_origin_city: originCity || null,
         p_destination_city: destinationCity || null,
         p_carrier: carrier || null,
-        p_segment_type: segmentType || null
+        p_product: product || null,
+        p_segment_type: segmentType || null,
+        p_threshold: threshold || null
       });
 
       if (rpcError) throw rpcError;
@@ -231,7 +288,62 @@ const JKPerformanceSegments: React.FC = () => {
 
   const renderFilters = () => (
     <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Carrier</label>
+          <select
+            value={carrierId}
+            onChange={(e) => {
+              const selectedId = e.target.value;
+              setCarrierId(selectedId);
+              const selectedCarrier = carriers.find(c => c.id === selectedId);
+              setCarrier(selectedCarrier?.name || '');
+              // Reset product when carrier changes
+              setProductId('');
+              setProduct('');
+            }}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+          >
+            <option value="">All Carriers</option>
+            {carriers.map(c => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Product</label>
+          <select
+            value={productId}
+            onChange={(e) => {
+              const selectedId = e.target.value;
+              setProductId(selectedId);
+              const selectedProduct = filteredProducts.find(p => p.id === selectedId);
+              setProduct(selectedProduct?.name || '');
+            }}
+            disabled={!carrierId}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm disabled:bg-gray-100"
+          >
+            <option value="">All Products</option>
+            {filteredProducts.map(p => (
+              <option key={p.id} value={p.id}>{p.name}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Threshold</label>
+          <select
+            value={threshold}
+            onChange={(e) => setThreshold(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+          >
+            <option value="">All</option>
+            <option value="compliant">Compliant</option>
+            <option value="warning">Warning</option>
+            <option value="critical">Critical</option>
+          </select>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Origin City</label>
           <input
@@ -248,16 +360,6 @@ const JKPerformanceSegments: React.FC = () => {
             type="text"
             value={destinationCity}
             onChange={(e) => setDestinationCity(e.target.value)}
-            placeholder="All"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Carrier</label>
-          <input
-            type="text"
-            value={carrier}
-            onChange={(e) => setCarrier(e.target.value)}
             placeholder="All"
             className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
           />
