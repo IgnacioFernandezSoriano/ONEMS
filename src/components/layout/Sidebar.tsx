@@ -60,7 +60,11 @@ export function Sidebar() {
   const location = useLocation()
   const { isCollapsed, setIsCollapsed } = useSidebar()
   const { t, locale, setLocale } = useLocale()
-  const [expandedSections, setExpandedSections] = useState<string[]>(['/reporting', '/diagnosis', '/setup/e2e', '/setup/diagnosis', '/e2e', '/rfid'])
+  const [expandedSections, setExpandedSections] = useState<string[]>([
+    '/reporting', '/diagnosis', '/setup/e2e', '/setup/diagnosis', '/e2e', '/rfid',
+    '/e2e/setup', '/e2e/allocation', '/e2e/materials', '/e2e/reporting', '/e2e/database',
+    '/rfid/setup', '/rfid/consolidation', '/rfid/analysis', '/rfid/database'
+  ])
   const [isHovered, setIsHovered] = useState(false)
   const [accounts, setAccounts] = useState<Array<{ id: string; name: string }>>([])
   const [accountName, setAccountName] = useState<string>('')
@@ -118,6 +122,33 @@ export function Sidebar() {
 
   // SETUP VIEW MENU
   const setupMenuGroups: MenuGroup[] = [
+    {
+      label: 'ADMINISTRATION',
+      items: [
+        {
+          path: '/users',
+          label: 'Users',
+          icon: Users,
+          roles: ['admin', 'superadmin'],
+          tooltip: 'Manage users',
+        },
+        {
+          path: '/settings/account-configuration',
+          label: 'Account Working Days',
+          icon: Settings,
+          tooltip: 'Configure account working days',
+        },
+        ...(accountName === 'DEMO2' ? [
+          {
+            path: '/api-keys',
+            label: 'API Keys',
+            icon: Key,
+            roles: ['admin', 'superadmin'] as string[],
+            tooltip: 'Manage API keys',
+          },
+        ] : []),
+      ],
+    },
     {
       label: 'SYSTEM SETUP',
       items: [
@@ -222,33 +253,6 @@ export function Sidebar() {
           roles: ['admin', 'superadmin'],
           tooltip: 'Browse material catalog',
         },
-      ],
-    },
-    {
-      label: 'ADMINISTRATION',
-      items: [
-        {
-          path: '/users',
-          label: 'Users',
-          icon: Users,
-          roles: ['admin', 'superadmin'],
-          tooltip: 'Manage users',
-        },
-        {
-          path: '/settings/account-configuration',
-          label: 'Center Working Days',
-          icon: Settings,
-          tooltip: 'Configure center working days',
-        },
-        ...(accountName === 'DEMO2' ? [
-          {
-            path: '/api-keys',
-            label: 'API Keys',
-            icon: Key,
-            roles: ['admin', 'superadmin'] as string[],
-            tooltip: 'Manage API keys',
-          },
-        ] : []),
       ],
     },
   ]
@@ -526,9 +530,9 @@ export function Sidebar() {
         },
         {
           path: '/settings/account-configuration',
-          label: 'Center Working Days',
+          label: 'Account Working Days',
           icon: Settings,
-          tooltip: 'Configure center working days',
+          tooltip: 'Configure account working days',
         },
         ...(accountName === 'DEMO2' ? [
           {
@@ -652,8 +656,8 @@ export function Sidebar() {
             </button>
           </div>
           
-          {/* Module Filter - Only show in functional view */}
-          {sidebarView === 'functional' && (
+          {/* Module Filter - Show in both views */}
+          {(
             <div className="mt-2 flex items-center gap-1">
               <button
                 onClick={() => setModuleFilter('all')}
@@ -696,10 +700,22 @@ export function Sidebar() {
           const hasAccessibleItems = group.items.some(hasAccess)
           if (!hasAccessibleItems) return null
 
-          // Apply module filter in functional view
-          if (sidebarView === 'functional' && moduleFilter !== 'all') {
-            if (moduleFilter === 'e2e' && group.label === 'DIAGNOSIS (RFID)') return null
-            if (moduleFilter === 'rfid' && group.label === 'E2E NETWORK') return null
+          // Apply module filter to both views
+          if (moduleFilter !== 'all') {
+            // In functional view
+            if (sidebarView === 'functional') {
+              if (moduleFilter === 'e2e' && group.label === 'DIAGNOSIS (RFID)') return null
+              if (moduleFilter === 'rfid' && group.label === 'E2E NETWORK') return null
+            }
+            // In setup view - filter by item prefixes
+            if (sidebarView === 'setup') {
+              const hasMatchingItems = group.items.some(item => {
+                if (moduleFilter === 'e2e') return item.label?.startsWith('E2E:')
+                if (moduleFilter === 'rfid') return item.label?.startsWith('RFID:')
+                return true
+              })
+              if (!hasMatchingItems) return null
+            }
           }
 
           return (
@@ -717,6 +733,12 @@ export function Sidebar() {
               <div className="space-y-1">
                 {group.items.map((item) => {
                   if (!hasAccess(item)) return null
+
+                  // Apply module filter to individual items in setup view
+                  if (sidebarView === 'setup' && moduleFilter !== 'all') {
+                    if (moduleFilter === 'e2e' && !item.label?.startsWith('E2E:')) return null
+                    if (moduleFilter === 'rfid' && !item.label?.startsWith('RFID:')) return null
+                  }
 
                   const Icon = item.icon
                   const active = isActive(item.path)
