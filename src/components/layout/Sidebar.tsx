@@ -651,7 +651,7 @@ export function Sidebar() {
                 E2E
               </button>
               <button
-                onClick={() => setModuleFilter('diagnosis'))
+                onClick={() => setModuleFilter('diagnosis')}
                 className={`flex-1 px-2 py-1 text-xs font-medium rounded-md transition-colors ${
                   moduleFilter === 'diagnosis'
                     ? 'bg-blue-100 text-blue-700'
