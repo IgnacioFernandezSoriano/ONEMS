@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAccount } from '@/contexts/AccountContext';
 import { supabase } from '@/lib/supabase';
+import { useTranslation } from '@/hooks/useTranslation';
 import { PerformanceDistributionChart } from '@/components/reporting/PerformanceDistributionChart';
 import { CumulativeDistributionChart } from '@/components/reporting/CumulativeDistributionChart';
 import { RoutePerformanceTable } from '@/components/reporting/RoutePerformanceTable';
@@ -34,6 +35,7 @@ export default function JKPerformanceSegments() {
   const { profile } = useAuth();
   const { effectiveAccountId } = useAccount();
   const [searchParams] = useSearchParams();
+  const { t } = useTranslation();
   
   const [carrier, setCarrier] = useState('');
   const [product, setProduct] = useState('');
@@ -45,6 +47,7 @@ export default function JKPerformanceSegments() {
   const [carriers, setCarriers] = useState<Array<{id: string, name: string}>>([]);
   const [products, setProducts] = useState<Array<{id: string, name: string, carrier_id: string}>>([]);
   const [cities, setCities] = useState<string[]>([]);
+  const [postalCenters, setPostalCenters] = useState<Array<{id: string, name: string, city: string}>>([]);
   
   const [segmentData, setSegmentData] = useState<SegmentData[]>([]);
   const [loading, setLoading] = useState(false);
@@ -71,12 +74,14 @@ export default function JKPerformanceSegments() {
         .order('name');
       if (productsData) setProducts(productsData);
 
-      // Load cities from postal_centers
+      // Load postal centers
       const { data: centersData } = await supabase
         .from('postal_centers')
-        .select('city')
-        .eq('account_id', effectiveAccountId);
+        .select('id, name, city')
+        .eq('account_id', effectiveAccountId)
+        .order('name');
       if (centersData) {
+        setPostalCenters(centersData);
         const uniqueCities = [...new Set(centersData.map(c => c.city))].sort();
         setCities(uniqueCities);
       }
@@ -140,12 +145,20 @@ export default function JKPerformanceSegments() {
       setLoading(true);
 
       try {
-        // Query journey_segments with simpler select
+        // Query journey_paths to get segment_details
         let query = supabase
-          .from('journey_segments')
-          .select('*')
-          .eq('account_id', effectiveAccountId)
-          .limit(1000);
+          .from('journey_paths')
+          .select(`
+            id,
+            carrier_id,
+            product_id,
+            origin_city_name,
+            destination_city_name,
+            segment_details,
+            carriers(name),
+            products(code, description)
+          `)
+          .eq('account_id', effectiveAccountId);
 
         if (carrier) {
           const carrierObj = carriers.find(c => c.name === carrier);
@@ -158,24 +171,42 @@ export default function JKPerformanceSegments() {
         }
 
         if (originCity) {
-          query = query.eq('from_postal_center_city', originCity);
+          query = query.eq('origin_city_name', originCity);
         }
 
         if (destinationCity) {
-          query = query.eq('to_postal_center_city', destinationCity);
+          query = query.eq('destination_city_name', destinationCity);
         }
 
-        const { data: segments, error } = await query;
+        const { data: journeyPaths, error } = await query;
 
         if (error) throw error;
-        if (!segments || segments.length === 0) {
+        if (!journeyPaths || journeyPaths.length === 0) {
           setSegmentData([]);
           setLoading(false);
           return;
         }
 
-        console.log('📊 JKPerformanceSegments - Data Source: journey_segments table');
-        console.log('📦 Total segments loaded:', segments.length);
+        console.log('📊 JKPerformanceSegments - Data Source: journey_paths.segment_details');
+        console.log('📦 Total journey paths loaded:', journeyPaths.length);
+
+        // Extract all segments from all journey paths
+        const allSegments: any[] = [];
+        journeyPaths.forEach((path: any) => {
+          if (path.segment_details && Array.isArray(path.segment_details)) {
+            path.segment_details.forEach((seg: any) => {
+              allSegments.push({
+                ...seg,
+                carrier_name: path.carriers?.name || 'Unknown',
+                product_name: path.products ? `${path.products.code} - ${path.products.description}` : 'Unknown',
+                carrier_id: path.carrier_id,
+                product_id: path.product_id
+              });
+            });
+          }
+        });
+
+        console.log('📦 Total segments extracted:', allSegments.length);
 
         // Get SLAs
         const { data: slas } = await supabase
@@ -190,85 +221,50 @@ export default function JKPerformanceSegments() {
           return;
         }
 
-        // Group segments and calculate metrics
+        // Group segments by unique key
         const segmentMap = new Map<string, any>();
-        console.log('🔍 Grouping segments by type (operational/distribution)...');
+        console.log('🔍 Processing segment_details...');
 
-        // Get carrier and product names
-        const carrierMap = new Map(carriers.map(c => [c.id, c.name]));
-        const productMap = new Map(products.map(p => [p.id, p.name]));
+        allSegments.forEach((seg: any) => {
+          // Create unique key based on segment type and centers
+          const segmentKey = seg.segment_type === 'operational'
+            ? `${seg.from_center_name}_center_${seg.carrier_name}_${seg.product_name}`
+            : `${seg.from_center_name}_${seg.to_center_name}_transit_${seg.carrier_name}_${seg.product_name}`;
 
-        segments.forEach((seg: any) => {
-          const carrierName = carrierMap.get(seg.carrier_id) || 'Unknown';
-          const productName = productMap.get(seg.product_id) || 'Unknown';
-          
-          // Center segment
-          const centerKey = `${seg.from_postal_center_city}_center_${carrierName}_${productName}`;
-          if (!segmentMap.has(centerKey)) {
-            segmentMap.set(centerKey, {
-              segmentKey: centerKey,
-              fromCenter: seg.from_postal_center_city,
-              toCenter: seg.from_postal_center_city,
-              carrier: carrierName,
-              product: productName,
-              segmentType: 'operational',
+          if (!segmentMap.has(segmentKey)) {
+            segmentMap.set(segmentKey, {
+              segmentKey,
+              fromCenter: seg.from_center_name,
+              toCenter: seg.to_center_name || seg.from_center_name,
+              carrier: seg.carrier_name,
+              product: seg.product_name,
+              segmentType: seg.segment_type,
               samples: [],
-              carrier_id: seg.carrier_id,
-              from_postal_center_id: seg.from_postal_center_id,
+              sla_minutes: seg.sla_minutes,
+              on_time_threshold: seg.on_time_threshold,
+              warning_threshold: seg.warning_threshold,
+              critical_threshold: seg.critical_threshold,
             });
           }
-          segmentMap.get(centerKey).samples.push({
-            time: seg.working_time_in_center_minutes || seg.natural_time_in_center_minutes || 0,
-          });
 
-          // Transit segment
-          const transitKey = `${seg.from_postal_center_city}_${seg.to_postal_center_city}_transit_${carrierName}_${productName}`;
-          if (!segmentMap.has(transitKey)) {
-            segmentMap.set(transitKey, {
-              segmentKey: transitKey,
-              fromCenter: seg.from_postal_center_city,
-              toCenter: seg.to_postal_center_city,
-              carrier: carrierName,
-              product: productName,
-              segmentType: 'distribution',
-              samples: [],
-              carrier_id: seg.carrier_id,
-              from_postal_center_id: seg.from_postal_center_id,
-              to_postal_center_id: seg.to_postal_center_id,
+          // Add sample times from the segment
+          if (seg.sample_times && Array.isArray(seg.sample_times)) {
+            seg.sample_times.forEach((time: number) => {
+              segmentMap.get(segmentKey).samples.push({ time });
             });
           }
-          segmentMap.get(transitKey).samples.push({
-            time: seg.working_transit_time_minutes || seg.natural_transit_time_minutes || 0,
-          });
         });
 
         // Calculate metrics for each segment
         const processedSegments: SegmentData[] = [];
 
         segmentMap.forEach((segGroup) => {
-          // Find SLA
-          let sla = null;
-          if (segGroup.segmentType === 'operational') {
-            sla = slas.find(s => 
-              s.sla_type === 'operational' &&
-              s.postal_center_id === segGroup.from_postal_center_id &&
-              (s.carrier_id === null || s.carrier_id === segGroup.carrier_id)
-            );
-          } else {
-            sla = slas.find(s => 
-              s.sla_type === 'distribution' &&
-              s.from_postal_center_id === segGroup.from_postal_center_id &&
-              s.to_postal_center_id === segGroup.to_postal_center_id &&
-              (s.carrier_id === null || s.carrier_id === segGroup.carrier_id)
-            );
-          }
-
-          // Use SLA values or defaults if no SLA exists
-          const jkStandardMinutes = sla?.expected_time_minutes || 1440; // Default 1 day
+          // Use SLA values from segment_details (already pre-calculated)
+          const jkStandardMinutes = segGroup.sla_minutes || 1440; // Default 1 day
           const jkStandardDays = jkStandardMinutes / 1440;
-          const standardPercentage = sla?.on_time_percentage || 95;
-          const warningThreshold = sla?.warning_threshold || 90;
-          const criticalThreshold = sla?.critical_threshold || 80;
+          const standardPercentage = segGroup.on_time_threshold || 95;
+          const warningThreshold = segGroup.warning_threshold || 90;
+          const criticalThreshold = segGroup.critical_threshold || 80;
 
           // Calculate distribution
           const distribution = new Map<number, number>();
@@ -414,100 +410,130 @@ export default function JKPerformanceSegments() {
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-2">
             <Info className="w-5 h-5 text-blue-600" />
-            <h1 className="text-2xl font-bold text-gray-900">J+K Performance (Segmentos)</h1>
+            <h1 className="text-2xl font-bold text-gray-900">{t('diagnosis.jk_performance_segments.title', undefined, 'J+K Performance (Segments)')}</h1>
           </div>
           <p className="text-sm text-gray-600">
-            Análisis de rendimiento a nivel de segmento con métricas J+K (días)
+            {t('diagnosis.jk_performance_segments.description', undefined, 'Segment-level performance analysis with J+K metrics (days)')}
           </p>
         </div>
 
         {/* Filters */}
         <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {/* Carrier */}
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Transportista</label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">{t('common.carrier', undefined, 'Carrier')}</label>
               <select
                 value={carrier}
                 onChange={(e) => {
                   setCarrier(e.target.value);
-                  setProduct(''); // Reset product when carrier changes
+                  setProduct('');
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
               >
-                <option value="">Todos</option>
+                <option value="">{t('common.all', undefined, 'All')}</option>
                 {carriers.map(c => (
                   <option key={c.id} value={c.name}>{c.name}</option>
                 ))}
               </select>
             </div>
 
+            {/* Product */}
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Producto</label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">{t('common.product', undefined, 'Product')}</label>
               <select
                 value={product}
                 onChange={(e) => setProduct(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
                 disabled={!carrier}
               >
-                <option value="">Todos</option>
+                <option value="">{t('common.all', undefined, 'All')}</option>
                 {filteredProducts.map(p => (
                   <option key={p.id} value={p.name}>{p.name}</option>
                 ))}
               </select>
             </div>
 
+            {/* Segment Type */}
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Ciudad Origen</label>
-              <select
-                value={originCity}
-                onChange={(e) => setOriginCity(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-              >
-                <option value="">Todas</option>
-                {cities.map(city => (
-                  <option key={city} value={city}>{city}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Ciudad Destino</label>
-              <select
-                value={destinationCity}
-                onChange={(e) => setDestinationCity(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-              >
-                <option value="">Todas</option>
-                {cities.map(city => (
-                  <option key={city} value={city}>{city}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Tipo de Segmento</label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">{t('diagnosis.segment_type', undefined, 'Segment Type')}</label>
               <select
                 value={segmentType}
-                onChange={(e) => setSegmentType(e.target.value as any)}
+                onChange={(e) => {
+                  setSegmentType(e.target.value as any);
+                  // Reset location filters when changing segment type
+                  setOriginCity('');
+                  setDestinationCity('');
+                }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
               >
-                <option value="all">Todos</option>
-                <option value="operational">Operacional</option>
-                <option value="distribution">Distribución</option>
+                <option value="all">{t('common.all', undefined, 'All')}</option>
+                <option value="operational">{t('diagnosis.operational', undefined, 'Operational')}</option>
+                <option value="distribution">{t('diagnosis.distribution', undefined, 'Distribution')}</option>
               </select>
             </div>
 
+            {/* Dynamic location filters based on segment type */}
+            {segmentType === 'operational' && (
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">{t('common.center', undefined, 'Center')}</label>
+                <select
+                  value={originCity}
+                  onChange={(e) => setOriginCity(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                >
+                  <option value="">{t('common.all', undefined, 'All')}</option>
+                  {cities.map(city => (
+                    <option key={city} value={city}>{city}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {(segmentType === 'distribution' || segmentType === 'all') && (
+              <>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">{t('common.origin_city', undefined, 'Origin City')}</label>
+                  <select
+                    value={originCity}
+                    onChange={(e) => setOriginCity(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  >
+                    <option value="">{t('common.all', undefined, 'All')}</option>
+                    {cities.map(city => (
+                      <option key={city} value={city}>{city}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">{t('common.destination_city', undefined, 'Destination City')}</label>
+                  <select
+                    value={destinationCity}
+                    onChange={(e) => setDestinationCity(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  >
+                    <option value="">{t('common.all', undefined, 'All')}</option>
+                    {cities.map(city => (
+                      <option key={city} value={city}>{city}</option>
+                    ))}
+                  </select>
+                </div>
+              </>
+            )}
+
+            {/* Threshold */}
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Umbral</label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">{t('common.threshold', undefined, 'Threshold')}</label>
               <select
                 value={threshold}
                 onChange={(e) => setThreshold(e.target.value as any)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
               >
-                <option value="all">Todos</option>
-                <option value="compliant">Cumple</option>
-                <option value="warning">Advertencia</option>
-                <option value="critical">Crítico</option>
+                <option value="all">{t('common.all', undefined, 'All')}</option>
+                <option value="compliant">{t('common.compliant', undefined, 'Compliant')}</option>
+                <option value="warning">{t('common.warning', undefined, 'Warning')}</option>
+                <option value="critical">{t('common.critical', undefined, 'Critical')}</option>
               </select>
             </div>
           </div>
@@ -517,7 +543,7 @@ export default function JKPerformanceSegments() {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
           <div className="bg-white rounded-lg shadow-sm p-4">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-xs text-gray-500">Total Segmentos</span>
+              <span className="text-xs text-gray-500">{t('diagnosis.total_segments', undefined, 'Total Segments')}</span>
               <Info className="w-3 h-3 text-gray-400" />
             </div>
             <div className="text-2xl font-bold text-gray-900">{totalSegments}</div>
@@ -525,7 +551,7 @@ export default function JKPerformanceSegments() {
 
           <div className="bg-white rounded-lg shadow-sm p-4">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-xs text-gray-500">Prom J+K Actual</span>
+              <span className="text-xs text-gray-500">{t('diagnosis.avg_jk_actual', undefined, 'Avg J+K Actual')}</span>
               <Info className="w-3 h-3 text-gray-400" />
             </div>
             <div className="text-2xl font-bold text-gray-900">{avgJKActual.toFixed(2)}d</div>
@@ -533,7 +559,7 @@ export default function JKPerformanceSegments() {
 
           <div className="bg-white rounded-lg shadow-sm p-4">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-xs text-gray-500">Prom J+K Estándar</span>
+              <span className="text-xs text-gray-500">{t('diagnosis.avg_jk_standard', undefined, 'Avg J+K Standard')}</span>
               <Info className="w-3 h-3 text-gray-400" />
             </div>
             <div className="text-2xl font-bold text-gray-900">{avgJKStandard.toFixed(2)}d</div>
@@ -541,7 +567,7 @@ export default function JKPerformanceSegments() {
 
           <div className="bg-white rounded-lg shadow-sm p-4">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-xs text-gray-500">% A Tiempo</span>
+              <span className="text-xs text-gray-500">{t('diagnosis.on_time_percentage', undefined, '% On Time')}</span>
               <Info className="w-3 h-3 text-gray-400" />
             </div>
             <div className={`text-2xl font-bold ${
@@ -555,7 +581,7 @@ export default function JKPerformanceSegments() {
 
           <div className="bg-white rounded-lg shadow-sm p-4">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-xs text-gray-500">Rutas Problemáticas</span>
+              <span className="text-xs text-gray-500">{t('diagnosis.problematic_routes', undefined, 'Problematic Routes')}</span>
               <Info className="w-3 h-3 text-gray-400" />
             </div>
             <div className="text-2xl font-bold text-red-600">{problematicSegments}</div>
@@ -565,14 +591,14 @@ export default function JKPerformanceSegments() {
         {loading ? (
           <div className="text-center py-12">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <p className="mt-2 text-sm text-gray-600">Cargando datos de segmentos...</p>
+            <p className="mt-2 text-sm text-gray-600">{t('common.loading', undefined, 'Loading')}...</p>
           </div>
         ) : (
           <>
             {/* Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
               <div className="bg-white rounded-lg shadow-sm p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Distribución de Rendimiento</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('diagnosis.performance_distribution', undefined, 'Performance Distribution')}</h3>
                 <PerformanceDistributionChart
                   routeData={routeDataForCharts}
                   maxDays={maxDays}
