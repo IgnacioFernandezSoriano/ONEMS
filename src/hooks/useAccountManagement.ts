@@ -55,7 +55,7 @@ export function useAccountManagement() {
       const demo2AccountId = accountData.id
       const deletedCounts: Record<string, number> = {}
 
-      // BACKUP: Save products and delivery_standards before deletion
+      // BACKUP: Save products, delivery_standards, and one_db before deletion
       const { data: productsBackup } = await supabase
         .from('products')
         .select('*')
@@ -63,6 +63,11 @@ export function useAccountManagement() {
       
       const { data: deliveryStandardsBackup } = await supabase
         .from('delivery_standards')
+        .select('*')
+        .eq('account_id', demo2AccountId)
+      
+      const { data: oneDbBackup } = await supabase
+        .from('one_db')
         .select('*')
         .eq('account_id', demo2AccountId)
 
@@ -145,7 +150,14 @@ export function useAccountManagement() {
         .eq('account_id', demo2AccountId)
       deletedCounts.processed_events = processedEventsCount || 0
 
-      // 12. Delete reader location history
+      // 12. Delete one_db
+      const { count: oneDbCount } = await supabase
+        .from('one_db')
+        .delete({ count: 'exact' })
+        .eq('account_id', demo2AccountId)
+      deletedCounts.one_db = oneDbCount || 0
+
+      // 13. Delete reader location history
       const { count: readerLocationCount } = await supabase
         .from('reader_location_history')
         .delete({ count: 'exact' })
@@ -180,6 +192,20 @@ export function useAccountManagement() {
           console.error('Error restoring delivery_standards:', deliveryStandardsError)
         } else {
           restoredCounts.delivery_standards = deliveryStandardsBackup.length
+        }
+      }
+
+      if (oneDbBackup && oneDbBackup.length > 0) {
+        // Remove id, created_at to let DB generate new ones
+        const oneDbToRestore = oneDbBackup.map(({ id, created_at, ...rest }) => rest)
+        const { error: oneDbError } = await supabase
+          .from('one_db')
+          .insert(oneDbToRestore)
+        
+        if (oneDbError) {
+          console.error('Error restoring one_db:', oneDbError)
+        } else {
+          restoredCounts.one_db = oneDbBackup.length
         }
       }
 
