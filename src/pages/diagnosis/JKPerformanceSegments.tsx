@@ -1,651 +1,650 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '../../lib/supabase';
-import { Package, Clock, CheckCircle, AlertTriangle } from 'lucide-react';
+import { useAccount } from '@/contexts/AccountContext';
+import { supabase } from '@/lib/supabase';
+import { PerformanceDistributionChart } from '@/components/reporting/PerformanceDistributionChart';
+import { CumulativeDistributionChart } from '@/components/reporting/CumulativeDistributionChart';
+import { RoutePerformanceTable } from '@/components/reporting/RoutePerformanceTable';
+import { Info } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
+import { useTranslation } from '@/hooks/useTranslation';
 
-interface SegmentRoute {
-  route_key: string;
-  origin_city: string;
-  destination_city: string;
+interface SegmentData {
+  segmentKey: string;
+  fromCenter: string;
+  toCenter: string;
   carrier: string;
-  segment_type: string;
-  total_segments: number;
-  jk_standard_days: number;
-  jk_actual_days: number;
-  deviation_days: number;
-  on_time_percentage: number;
-  on_time_segments: number;
-  status: string;
+  product: string;
+  segmentType: 'operational' | 'distribution';
+  totalSamples: number;
+  jkStandard: number;
+  jkActual: number;
+  onTimeSamples: number;
+  beforeStandardSamples: number;
+  afterStandardSamples: number;
+  onTimePercentage: number;
+  deviation: number;
+  standardPercentage: number;
+  status: 'compliant' | 'warning' | 'critical';
+  distribution: Map<number, number>;
+  warningThreshold: number;
+  criticalThreshold: number;
 }
 
-interface CityPerformance {
-  city_name: string;
-  direction: string;
-  routes: number;
-  total_segments: number;
-  jk_standard_days: number;
-  jk_actual_days: number;
-  deviation_days: number;
-  on_time_percentage: number;
-  status: string;
-}
-
-interface CarrierPerformance {
-  carrier: string;
-  routes: number;
-  total_segments: number;
-  jk_standard_days: number;
-  jk_actual_days: number;
-  deviation_days: number;
-  on_time_percentage: number;
-  problematic_routes: number;
-  status: string;
-}
-
-const JKPerformanceSegments: React.FC = () => {
+export default function JKPerformanceSegments() {
   const { profile } = useAuth();
+  const { effectiveAccountId } = useAccount();
   const [searchParams] = useSearchParams();
-  const [activeTab, setActiveTab] = useState<'segments' | 'centers' | 'carriers'>('segments');
+  const { t } = useTranslation();
+  
+  const [carrier, setCarrier] = useState('');
+  const [product, setProduct] = useState('');
+  const [originCity, setOriginCity] = useState('');
+  const [destinationCity, setDestinationCity] = useState('');
+  const [segmentType, setSegmentType] = useState<'all' | 'operational' | 'distribution'>('all');
+  const [threshold, setThreshold] = useState<'all' | 'compliant' | 'warning' | 'critical'>('all');
+  
+  const [carriers, setCarriers] = useState<Array<{id: string, name: string}>>([]);
+  const [products, setProducts] = useState<Array<{id: string, name: string, carrier_id: string}>>([]);
+  const [cities, setCities] = useState<string[]>([]);
+  const [postalCenters, setPostalCenters] = useState<Array<{id: string, name: string, city: string}>>([]);
+  
+  const [segmentData, setSegmentData] = useState<SegmentData[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'chart' | 'table'>('chart');
 
-  // Filters
-  const [originCity, setOriginCity] = useState<string>('');
-  const [destinationCity, setDestinationCity] = useState<string>('');
-  const [carrier, setCarrier] = useState<string>('');
-  const [product, setProduct] = useState<string>('');
-  const [segmentType, setSegmentType] = useState<string>('');
-  const [threshold, setThreshold] = useState<string>('');
-  const [carrierId, setCarrierId] = useState<string>('');
-  const [productId, setProductId] = useState<string>('');
-  const [fromCenterId, setFromCenterId] = useState<string>('');
-  const [toCenterId, setToCenterId] = useState<string>('');
-
-  // Dropdown options
-  const [carriers, setCarriers] = useState<{id: string, name: string}[]>([]);
-  const [products, setProducts] = useState<{id: string, name: string, carrier_id: string}[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<{id: string, name: string}[]>([]);
-
-  // Data
-  const [segmentRoutes, setSegmentRoutes] = useState<SegmentRoute[]>([]);
-  const [cityPerformance, setCityPerformance] = useState<CityPerformance[]>([]);
-  const [carrierPerformance, setCarrierPerformance] = useState<CarrierPerformance[]>([]);
-
-  // Metrics
-  const [metrics, setMetrics] = useState({
-    totalSegments: 0,
-    avgJKActual: 0,
-    avgJKStandard: 0,
-    onTimePercentage: 0,
-    problematicRoutes: 0
-  });
-
-  // Load carriers and products
+  // Load carriers, products, cities
   useEffect(() => {
-    const loadOptions = async () => {
-      if (!profile?.account_id) return;
+    if (!effectiveAccountId) return;
 
-      try {
-        // Load carriers
-        const { data: carriersData } = await supabase
-          .from('carriers')
-          .select('id, name')
-          .eq('account_id', profile.account_id)
-          .order('name');
-        if (carriersData) setCarriers(carriersData);
+    const loadFilters = async () => {
+      // Load carriers
+      const { data: carriersData } = await supabase
+        .from('carriers')
+        .select('id, name')
+        .eq('account_id', effectiveAccountId)
+        .order('name');
+      if (carriersData) setCarriers(carriersData);
 
-        // Load products
-        const { data: productsData } = await supabase
-          .from('products')
-          .select('id, name, carrier_id')
-          .eq('account_id', profile.account_id)
-          .order('name');
-        if (productsData) setProducts(productsData);
-      } catch (err) {
-        console.error('Error loading options:', err);
+      // Load products
+      const { data: productsData } = await supabase
+        .from('products')
+        .select('id, name, carrier_id')
+        .eq('account_id', effectiveAccountId)
+        .order('name');
+      if (productsData) setProducts(productsData);
+
+      // Load postal centers
+      const { data: centersData } = await supabase
+        .from('postal_centers')
+        .select('id, name, city')
+        .eq('account_id', effectiveAccountId);
+      if (centersData) {
+        setPostalCenters(centersData);
+        const uniqueCities = [...new Set(centersData.map(c => c.city))].sort();
+        setCities(uniqueCities);
       }
     };
 
-    loadOptions();
-  }, [profile?.account_id]);
+    loadFilters();
+  }, [effectiveAccountId]);
+
+  // Read URL params and set filters
+  useEffect(() => {
+    const carrierIdParam = searchParams.get('carrier_id');
+    const productIdParam = searchParams.get('product_id');
+    const fromCenterIdParam = searchParams.get('from_center_id');
+    const toCenterIdParam = searchParams.get('to_center_id');
+    const segmentTypeParam = searchParams.get('segment_type');
+
+    if (carrierIdParam && carriers.length > 0) {
+      const carrierObj = carriers.find(c => c.id === carrierIdParam);
+      if (carrierObj) setCarrier(carrierObj.name);
+    }
+
+    if (productIdParam && products.length > 0) {
+      const productObj = products.find(p => p.id === productIdParam);
+      if (productObj) setProduct(productObj.name);
+    }
+
+    if (fromCenterIdParam && effectiveAccountId) {
+      supabase
+        .from('postal_centers')
+        .select('city')
+        .eq('id', fromCenterIdParam)
+        .eq('account_id', effectiveAccountId)
+        .single()
+        .then(({ data }) => {
+          if (data) setOriginCity(data.city);
+        });
+    }
+
+    if (toCenterIdParam && effectiveAccountId) {
+      supabase
+        .from('postal_centers')
+        .select('city')
+        .eq('id', toCenterIdParam)
+        .eq('account_id', effectiveAccountId)
+        .single()
+        .then(({ data }) => {
+          if (data) setDestinationCity(data.city);
+        });
+    }
+
+    if (segmentTypeParam === 'operational' || segmentTypeParam === 'distribution') {
+      setSegmentType(segmentTypeParam);
+    }
+  }, [searchParams, carriers, products, effectiveAccountId]);
+
+  // Load segment data
+  useEffect(() => {
+    if (!effectiveAccountId) return;
+
+    const loadSegments = async () => {
+      setLoading(true);
+
+      try {
+        // Query journey_segments with simpler select
+        let query = supabase
+          .from('journey_segments')
+          .select('*')
+          .eq('account_id', effectiveAccountId)
+          .limit(1000);
+
+        if (carrier) {
+          const carrierObj = carriers.find(c => c.name === carrier);
+          if (carrierObj) query = query.eq('carrier_id', carrierObj.id);
+        }
+
+        if (product) {
+          const productObj = products.find(p => p.name === product);
+          if (productObj) query = query.eq('product_id', productObj.id);
+        }
+
+        if (originCity) {
+          query = query.eq('from_postal_center_city', originCity);
+        }
+
+        if (destinationCity) {
+          query = query.eq('to_postal_center_city', destinationCity);
+        }
+
+        const { data: segments, error } = await query;
+
+        if (error) throw error;
+        if (!segments || segments.length === 0) {
+          setSegmentData([]);
+          setLoading(false);
+          return;
+        }
+
+        console.log('📊 JKPerformanceSegments - Data Source: journey_segments table');
+        console.log('📦 Total segments loaded:', segments.length);
+
+        // Get SLAs
+        const { data: slas } = await supabase
+          .from('slas')
+          .select('*')
+          .eq('account_id', effectiveAccountId)
+          .eq('is_active', true);
+
+        if (!slas) {
+          setSegmentData([]);
+          setLoading(false);
+          return;
+        }
+
+        // Group segments and calculate metrics
+        const segmentMap = new Map<string, any>();
+        console.log('🔍 Grouping segments by type (operational/distribution)...');
+
+        // Create lookup maps
+        const carrierMap = new Map(carriers.map(c => [c.id, c.name]));
+        const productMap = new Map(products.map(p => [p.id, p.name]));
+        const centerMap = new Map(postalCenters.map(c => [c.id, c.name]));
+
+        segments.forEach((seg: any) => {
+          const carrierName = carrierMap.get(seg.carrier_id) || 'Unknown';
+          const productName = productMap.get(seg.product_id) || 'Unknown';
+          const fromCenterName = centerMap.get(seg.from_postal_center_id) || seg.from_postal_center_city || 'Unknown';
+          const toCenterName = centerMap.get(seg.to_postal_center_id) || seg.to_postal_center_city || 'Unknown';
+          
+          // Center segment - only if there's actual time in center
+          const timeInCenter = seg.working_time_in_center_minutes || seg.natural_time_in_center_minutes || 0;
+          if (timeInCenter > 0) {
+            const centerKey = `${fromCenterName}_center_${carrierName}_${productName}`;
+            if (!segmentMap.has(centerKey)) {
+              segmentMap.set(centerKey, {
+                segmentKey: centerKey,
+                fromCenter: fromCenterName,
+                toCenter: fromCenterName,
+                carrier: carrierName,
+                product: productName,
+                segmentType: 'operational',
+                samples: [],
+                carrier_id: seg.carrier_id,
+                from_postal_center_id: seg.from_postal_center_id,
+              });
+            }
+            segmentMap.get(centerKey).samples.push({ time: timeInCenter });
+          }
+
+          // Transit segment - only if there's actual transit time
+          const transitTime = seg.working_transit_time_minutes || seg.natural_transit_time_minutes || 0;
+          if (transitTime > 0 && seg.to_postal_center_id) {
+            const transitKey = `${fromCenterName}_${toCenterName}_transit_${carrierName}_${productName}`;
+            if (!segmentMap.has(transitKey)) {
+              segmentMap.set(transitKey, {
+                segmentKey: transitKey,
+                fromCenter: fromCenterName,
+                toCenter: toCenterName,
+                carrier: carrierName,
+                product: productName,
+                segmentType: 'distribution',
+                samples: [],
+                carrier_id: seg.carrier_id,
+                from_postal_center_id: seg.from_postal_center_id,
+                to_postal_center_id: seg.to_postal_center_id,
+              });
+            }
+            segmentMap.get(transitKey).samples.push({ time: transitTime });
+          }
+        });
+
+        console.log('✅ Processed segments:');
+        console.log('  - Operational (center):', Array.from(segmentMap.values()).filter(s => s.segmentType === 'operational').length);
+        console.log('  - Distribution (transit):', Array.from(segmentMap.values()).filter(s => s.segmentType === 'distribution').length);
+        console.log('  - Total:', segmentMap.size);
+
+        // Calculate metrics for each segment
+        const processedSegments: SegmentData[] = [];
+
+        segmentMap.forEach((segGroup) => {
+          // Find SLA
+          let sla = null;
+          if (segGroup.segmentType === 'operational') {
+            sla = slas.find(s => 
+              s.sla_type === 'operational' &&
+              s.postal_center_id === segGroup.from_postal_center_id &&
+              (s.carrier_id === null || s.carrier_id === segGroup.carrier_id)
+            );
+          } else {
+            sla = slas.find(s => 
+              s.sla_type === 'distribution' &&
+              s.from_postal_center_id === segGroup.from_postal_center_id &&
+              s.to_postal_center_id === segGroup.to_postal_center_id &&
+              (s.carrier_id === null || s.carrier_id === segGroup.carrier_id)
+            );
+          }
+
+          // Use SLA values or defaults if no SLA exists
+          const jkStandardMinutes = sla?.expected_time_minutes || 1440; // Default 1 day
+          const jkStandardDays = jkStandardMinutes / 1440;
+          const standardPercentage = sla?.on_time_percentage || 95;
+          const warningThreshold = sla?.warning_threshold || 90;
+          const criticalThreshold = sla?.critical_threshold || 80;
+
+          // Calculate distribution
+          const distribution = new Map<number, number>();
+          let onTimeSamples = 0;
+          let beforeStandardSamples = 0;
+          let afterStandardSamples = 0;
+
+          segGroup.samples.forEach((sample: any) => {
+            const days = Math.round(sample.time / 1440);
+            distribution.set(days, (distribution.get(days) || 0) + 1);
+
+            if (sample.time <= jkStandardMinutes) {
+              onTimeSamples++;
+              if (sample.time < jkStandardMinutes) beforeStandardSamples++;
+            } else {
+              afterStandardSamples++;
+            }
+          });
+
+          const totalSamples = segGroup.samples.length;
+          const onTimePercentage = totalSamples > 0 ? (onTimeSamples / totalSamples) * 100 : 0;
+
+          // Calculate J+K Actual (day where standardPercentage is reached)
+          let cumulativeCount = 0;
+          let jkActualDays = jkStandardDays;
+          const sortedDays = Array.from(distribution.keys()).sort((a, b) => a - b);
+          for (const day of sortedDays) {
+            cumulativeCount += distribution.get(day) || 0;
+            const cumulativePercentage = (cumulativeCount / totalSamples) * 100;
+            if (cumulativePercentage >= standardPercentage) {
+              jkActualDays = day;
+              break;
+            }
+          }
+
+          const deviation = jkActualDays - jkStandardDays;
+
+          let status: 'compliant' | 'warning' | 'critical' = 'compliant';
+          if (onTimePercentage < criticalThreshold) {
+            status = 'critical';
+          } else if (onTimePercentage < warningThreshold) {
+            status = 'warning';
+          }
+
+          // Filter by threshold
+          if (threshold !== 'all' && status !== threshold) return;
+
+          // Filter by segment type
+          if (segmentType !== 'all' && segGroup.segmentType !== segmentType) return;
+
+          processedSegments.push({
+            segmentKey: segGroup.segmentKey,
+            fromCenter: segGroup.fromCenter,
+            toCenter: segGroup.toCenter,
+            carrier: segGroup.carrier,
+            product: segGroup.product,
+            segmentType: segGroup.segmentType,
+            totalSamples,
+            jkStandard: jkStandardDays,
+            jkActual: jkActualDays,
+            onTimeSamples,
+            beforeStandardSamples,
+            afterStandardSamples,
+            onTimePercentage,
+            deviation,
+            standardPercentage,
+            status,
+            distribution,
+            warningThreshold,
+            criticalThreshold,
+          });
+        });
+
+        const operationalCount = processedSegments.filter(s => s.segmentType === 'operational').length;
+        const distributionCount = processedSegments.filter(s => s.segmentType === 'distribution').length;
+        console.log('✅ Processed segments:');
+        console.log('  - Operational (center):', operationalCount);
+        console.log('  - Distribution (transit):', distributionCount);
+        console.log('  - Total:', processedSegments.length);
+
+        setSegmentData(processedSegments);
+      } catch (error) {
+        console.error('Error loading segments:', error);
+        setSegmentData([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadSegments();
+  }, [effectiveAccountId, carrier, product, originCity, destinationCity, segmentType, threshold, carriers, products]);
+
+  // Convert SegmentData to JKRouteData format for charts
+  const routeDataForCharts = segmentData.map(seg => ({
+    originCity: seg.fromCenter,
+    destinationCity: seg.toCenter,
+    carrier: seg.carrier,
+    product: seg.product,
+    totalSamples: seg.totalSamples,
+    jkStandard: seg.jkStandard,
+    jkActual: seg.jkActual,
+    onTimeSamples: seg.onTimeSamples,
+    beforeStandardSamples: seg.beforeStandardSamples,
+    afterStandardSamples: seg.afterStandardSamples,
+    onTimePercentage: seg.onTimePercentage,
+    deviation: seg.deviation,
+    standardPercentage: seg.standardPercentage,
+    status: seg.status,
+    routeKey: seg.segmentKey,
+    distribution: seg.distribution,
+    warningThreshold: seg.warningThreshold,
+    criticalThreshold: seg.criticalThreshold,
+  }));
+
+  const maxDays = Math.max(...Array.from(segmentData.flatMap(s => Array.from(s.distribution.keys()))), 0);
+
+  // Calculate metrics
+  const totalSegments = segmentData.length;
+  const totalSamples = segmentData.reduce((sum, s) => sum + s.totalSamples, 0);
+  const avgJKActual = totalSamples > 0 
+    ? segmentData.reduce((sum, s) => sum + s.jkActual * s.totalSamples, 0) / totalSamples 
+    : 0;
+  const avgJKStandard = totalSamples > 0
+    ? segmentData.reduce((sum, s) => sum + s.jkStandard * s.totalSamples, 0) / totalSamples
+    : 0;
+  const onTimePercentage = totalSamples > 0
+    ? (segmentData.reduce((sum, s) => sum + s.onTimeSamples, 0) / totalSamples) * 100
+    : 0;
+  const problematicSegments = segmentData.filter(s => s.status === 'warning' || s.status === 'critical').length;
 
   // Filter products by selected carrier
-  useEffect(() => {
-    if (carrierId) {
-      setFilteredProducts(products.filter(p => p.carrier_id === carrierId));
-    } else {
-      setFilteredProducts(products);
-    }
-  }, [carrierId, products]);
-
-  // Read URL params on mount and resolve IDs to names
-  useEffect(() => {
-    const urlCarrierId = searchParams.get('carrier_id');
-    const urlProductId = searchParams.get('product_id');
-    const urlFromCenterId = searchParams.get('from_center_id');
-    const urlToCenterId = searchParams.get('to_center_id');
-    const urlSegmentType = searchParams.get('segment_type');
-
-    if (urlCarrierId) setCarrierId(urlCarrierId);
-    if (urlProductId) setProductId(urlProductId);
-    if (urlFromCenterId) setFromCenterId(urlFromCenterId);
-    if (urlToCenterId) setToCenterId(urlToCenterId);
-    if (urlSegmentType) setSegmentType(urlSegmentType);
-
-    // Resolve IDs to names
-    const resolveIds = async () => {
-      if (!profile?.account_id) return;
-
-      try {
-        // Resolve carrier
-        if (urlCarrierId) {
-          const { data: carrierData } = await supabase
-            .from('carriers')
-            .select('name')
-            .eq('id', urlCarrierId)
-            .single();
-          if (carrierData) setCarrier(carrierData.name);
-        }
-
-        // Resolve product
-        if (urlProductId) {
-          const { data: productData } = await supabase
-            .from('products')
-            .select('name')
-            .eq('id', urlProductId)
-            .single();
-          if (productData) setProduct(productData.name);
-        }
-
-        // Resolve from center to city
-        if (urlFromCenterId) {
-          const { data: centerData } = await supabase
-            .from('postal_centers')
-            .select('city')
-            .eq('id', urlFromCenterId)
-            .single();
-          if (centerData) setOriginCity(centerData.city);
-        }
-
-        // Resolve to center to city
-        if (urlToCenterId) {
-          const { data: centerData } = await supabase
-            .from('postal_centers')
-            .select('city')
-            .eq('id', urlToCenterId)
-            .single();
-          if (centerData) setDestinationCity(centerData.city);
-        }
-      } catch (err) {
-        console.error('Error resolving IDs:', err);
-      }
-    };
-
-    resolveIds();
-  }, [searchParams, profile?.account_id]);
-
-  useEffect(() => {
-    if (activeTab === 'segments') {
-      loadSegmentRoutes();
-    } else if (activeTab === 'centers') {
-      loadCityPerformance();
-    } else if (activeTab === 'carriers') {
-      loadCarrierPerformance();
-    }
-  }, [activeTab, profile?.account_id, originCity, destinationCity, carrier, product, segmentType, threshold]);
-
-  const loadSegmentRoutes = async () => {
-    if (!profile?.account_id) return;
-
-    try {
-      setLoading(true);
-      setError(null);
-
-      const { data, error: rpcError } = await supabase.rpc('get_jk_performance_segments', {
-        p_account_id: profile.account_id,
-        p_origin_city: originCity || null,
-        p_destination_city: destinationCity || null,
-        p_carrier: carrier || null,
-        p_product: product || null,
-        p_segment_type: segmentType || null,
-        p_threshold: threshold || null
-      });
-
-      if (rpcError) throw rpcError;
-
-      setSegmentRoutes(data || []);
-
-      // Calculate metrics
-      const totalSegments = data?.reduce((sum: number, r: SegmentRoute) => sum + r.total_segments, 0) || 0;
-      const totalWeightedJKActual = data?.reduce((sum: number, r: SegmentRoute) => sum + r.jk_actual_days * r.total_segments, 0) || 0;
-      const totalWeightedJKStandard = data?.reduce((sum: number, r: SegmentRoute) => sum + r.jk_standard_days * r.total_segments, 0) || 0;
-      const onTimeSegments = data?.reduce((sum: number, r: SegmentRoute) => sum + r.on_time_segments, 0) || 0;
-      const problematicRoutes = data?.filter((r: SegmentRoute) => r.status === 'critical').length || 0;
-
-      setMetrics({
-        totalSegments,
-        avgJKActual: totalSegments > 0 ? totalWeightedJKActual / totalSegments : 0,
-        avgJKStandard: totalSegments > 0 ? totalWeightedJKStandard / totalSegments : 0,
-        onTimePercentage: totalSegments > 0 ? (onTimeSegments / totalSegments) * 100 : 0,
-        problematicRoutes
-      });
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadCityPerformance = async () => {
-    if (!profile?.account_id) return;
-
-    try {
-      setLoading(true);
-      setError(null);
-
-      const { data, error: rpcError } = await supabase.rpc('get_jk_city_performance_segments', {
-        p_account_id: profile.account_id
-      });
-
-      if (rpcError) throw rpcError;
-      setCityPerformance(data || []);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadCarrierPerformance = async () => {
-    if (!profile?.account_id) return;
-
-    try {
-      setLoading(true);
-      setError(null);
-
-      const { data, error: rpcError } = await supabase.rpc('get_jk_carrier_performance_segments', {
-        p_account_id: profile.account_id
-      });
-
-      if (rpcError) throw rpcError;
-      setCarrierPerformance(data || []);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getStatusBadge = (status: string) => {
-    const colors = {
-      compliant: 'bg-green-100 text-green-800',
-      warning: 'bg-yellow-100 text-yellow-800',
-      critical: 'bg-red-100 text-red-800'
-    };
-    return colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-800';
-  };
-
-  const renderFilters = () => (
-    <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Carrier</label>
-          <select
-            value={carrierId}
-            onChange={(e) => {
-              const selectedId = e.target.value;
-              setCarrierId(selectedId);
-              const selectedCarrier = carriers.find(c => c.id === selectedId);
-              setCarrier(selectedCarrier?.name || '');
-              // Reset product when carrier changes
-              setProductId('');
-              setProduct('');
-            }}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-          >
-            <option value="">All Carriers</option>
-            {carriers.map(c => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Product</label>
-          <select
-            value={productId}
-            onChange={(e) => {
-              const selectedId = e.target.value;
-              setProductId(selectedId);
-              const selectedProduct = filteredProducts.find(p => p.id === selectedId);
-              setProduct(selectedProduct?.name || '');
-            }}
-            disabled={!carrierId}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm disabled:bg-gray-100"
-          >
-            <option value="">All Products</option>
-            {filteredProducts.map(p => (
-              <option key={p.id} value={p.id}>{p.name}</option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Threshold</label>
-          <select
-            value={threshold}
-            onChange={(e) => setThreshold(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-          >
-            <option value="">All</option>
-            <option value="compliant">Compliant</option>
-            <option value="warning">Warning</option>
-            <option value="critical">Critical</option>
-          </select>
-        </div>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Origin City</label>
-          <input
-            type="text"
-            value={originCity}
-            onChange={(e) => setOriginCity(e.target.value)}
-            placeholder="All"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Destination City</label>
-          <input
-            type="text"
-            value={destinationCity}
-            onChange={(e) => setDestinationCity(e.target.value)}
-            placeholder="All"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Segment Type</label>
-          <select
-            value={segmentType}
-            onChange={(e) => setSegmentType(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-          >
-            <option value="">All</option>
-            <option value="operational">Operational</option>
-            <option value="distribution">Distribution</option>
-          </select>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderKPIs = () => (
-    <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-      <div className="bg-white border border-gray-200 rounded-lg p-4">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm text-gray-600">Total Segments</span>
-          <Package className="h-5 w-5 text-blue-600" />
-        </div>
-        <div className="text-2xl font-bold text-gray-900">{metrics.totalSegments}</div>
-      </div>
-      <div className="bg-white border border-gray-200 rounded-lg p-4">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm text-gray-600">Avg J+K Actual</span>
-          <Clock className="h-5 w-5 text-orange-600" />
-        </div>
-        <div className="text-2xl font-bold text-gray-900">{metrics.avgJKActual.toFixed(2)}d</div>
-      </div>
-      <div className="bg-white border border-gray-200 rounded-lg p-4">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm text-gray-600">Avg J+K Standard</span>
-          <Clock className="h-5 w-5 text-blue-600" />
-        </div>
-        <div className="text-2xl font-bold text-gray-900">{metrics.avgJKStandard.toFixed(2)}d</div>
-      </div>
-      <div className="bg-white border border-gray-200 rounded-lg p-4">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm text-gray-600">On-Time %</span>
-          <CheckCircle className="h-5 w-5 text-green-600" />
-        </div>
-        <div className={`text-2xl font-bold ${
-          metrics.onTimePercentage >= 80 ? 'text-green-600' :
-          metrics.onTimePercentage >= 75 ? 'text-yellow-600' :
-          'text-red-600'
-        }`}>
-          {metrics.onTimePercentage.toFixed(1)}%
-        </div>
-      </div>
-      <div className="bg-white border border-gray-200 rounded-lg p-4">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm text-gray-600">Problematic Routes</span>
-          <AlertTriangle className="h-5 w-5 text-red-600" />
-        </div>
-        <div className="text-2xl font-bold text-red-600">{metrics.problematicRoutes}</div>
-      </div>
-    </div>
-  );
-
-  const renderSegmentsTab = () => (
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ROUTE</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CARRIER</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TYPE</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SEGMENTS</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">J+K STD</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">J+K ACT</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DEVIATION</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ON-TIME %</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STATUS</th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {segmentRoutes.map((route, idx) => (
-            <tr key={idx}>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                <div>{route.origin_city} → {route.destination_city}</div>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{route.carrier}</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 capitalize">{route.segment_type}</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{route.total_segments}</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{route.jk_standard_days}d</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{route.jk_actual_days}d</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm">
-                <span className={route.deviation_days > 0 ? 'text-red-600 font-semibold' : 'text-green-600 font-semibold'}>
-                  {route.deviation_days > 0 ? '+' : ''}{route.deviation_days}d
-                </span>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm">
-                <span className={`font-semibold ${
-                  route.on_time_percentage >= 80 ? 'text-green-600' :
-                  route.on_time_percentage >= 75 ? 'text-yellow-600' :
-                  'text-red-600'
-                }`}>
-                  {route.on_time_percentage}%
-                </span>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadge(route.status)}`}>
-                  {route.status}
-                </span>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-
-  const renderCentersTab = () => (
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CENTER</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DIRECTION</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ROUTES</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SEGMENTS</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">J+K STD</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">J+K ACT</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DEVIATION</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ON-TIME %</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STATUS</th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {cityPerformance.map((city, idx) => (
-            <tr key={idx}>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{city.city_name}</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 capitalize">{city.direction}</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{city.routes}</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{city.total_segments}</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{city.jk_standard_days}d</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{city.jk_actual_days}d</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm">
-                <span className={city.deviation_days > 0 ? 'text-red-600 font-semibold' : 'text-green-600 font-semibold'}>
-                  {city.deviation_days > 0 ? '+' : ''}{city.deviation_days}d
-                </span>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm">
-                <span className={`font-semibold ${
-                  city.on_time_percentage >= 80 ? 'text-green-600' :
-                  city.on_time_percentage >= 75 ? 'text-yellow-600' :
-                  'text-red-600'
-                }`}>
-                  {city.on_time_percentage}%
-                </span>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadge(city.status)}`}>
-                  {city.status}
-                </span>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-
-  const renderCarriersTab = () => (
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CARRIER</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ROUTES</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SEGMENTS</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">J+K STD</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">J+K ACT</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DEVIATION</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ON-TIME %</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PROBLEMATIC</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STATUS</th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {carrierPerformance.map((carr, idx) => (
-            <tr key={idx}>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{carr.carrier}</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{carr.routes}</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{carr.total_segments}</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{carr.jk_standard_days}d</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{carr.jk_actual_days}d</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm">
-                <span className={carr.deviation_days > 0 ? 'text-red-600 font-semibold' : 'text-green-600 font-semibold'}>
-                  {carr.deviation_days > 0 ? '+' : ''}{carr.deviation_days}d
-                </span>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm">
-                <span className={`font-semibold ${
-                  carr.on_time_percentage >= 80 ? 'text-green-600' :
-                  carr.on_time_percentage >= 75 ? 'text-yellow-600' :
-                  'text-red-600'
-                }`}>
-                  {carr.on_time_percentage}%
-                </span>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600 font-semibold">{carr.problematic_routes}</td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadge(carr.status)}`}>
-                  {carr.status}
-                </span>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
+  const filteredProducts = carrier 
+    ? products.filter(p => {
+        const carrierObj = carriers.find(c => c.name === carrier);
+        return carrierObj && p.carrier_id === carrierObj.id;
+      })
+    : products;
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-6">
-        <div className="flex items-center gap-2 mb-2">
-          <Package className="h-6 w-6 text-blue-600" />
-          <h1 className="text-2xl font-bold text-gray-900">J+K Performance (Segments)</h1>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        {/* Header */}
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-2">
+            <Info className="w-5 h-5 text-blue-600" />
+            <h1 className="text-2xl font-bold text-gray-900">{t('diagnosis.jk_performance_segments.title', undefined, 'J+K Performance (Segments)')}</h1>
+          </div>
+          <p className="text-sm text-gray-600">
+            {t('diagnosis.jk_performance_segments.description', undefined, 'Segment-level performance analysis with J+K metrics (days)')}
+          </p>
         </div>
-        <p className="text-gray-600">Segment-level performance analysis with J+K metrics (days)</p>
-      </div>
 
-      {renderFilters()}
-      {activeTab === 'segments' && renderKPIs()}
+        {/* Filters */}
+        <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">{t('common.carrier', undefined, 'Carrier')}</label>
+              <select
+                value={carrier}
+                onChange={(e) => {
+                  setCarrier(e.target.value);
+                  setProduct(''); // Reset product when carrier changes
+                }}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              >
+                <option value="">{t('common.all', undefined, 'All')}</option>
+                {carriers.map(c => (
+                  <option key={c.id} value={c.name}>{c.name}</option>
+                ))}
+              </select>
+            </div>
 
-      {/* Tabs */}
-      <div className="border-b border-gray-200 mb-6">
-        <nav className="-mb-px flex space-x-8">
-          <button
-            onClick={() => setActiveTab('segments')}
-            className={`py-4 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'segments'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-          >
-            Segments
-          </button>
-          <button
-            onClick={() => setActiveTab('centers')}
-            className={`py-4 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'centers'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-          >
-            Centers
-          </button>
-          <button
-            onClick={() => setActiveTab('carriers')}
-            className={`py-4 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'carriers'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-          >
-            Carriers
-          </button>
-        </nav>
-      </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">{t('common.product', undefined, 'Product')}</label>
+              <select
+                value={product}
+                onChange={(e) => setProduct(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                disabled={!carrier}
+              >
+                <option value="">{t('common.all', undefined, 'All')}</option>
+                {filteredProducts.map(p => (
+                  <option key={p.id} value={p.name}>{p.name}</option>
+                ))}
+              </select>
+            </div>
 
-      {/* Content */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">{t('common.origin_city', undefined, 'Origin City')}</label>
+              <select
+                value={originCity}
+                onChange={(e) => setOriginCity(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              >
+                <option value="">{t('common.all', undefined, 'All')}</option>
+                {cities.map(city => (
+                  <option key={city} value={city}>{city}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">{t('common.destination_city', undefined, 'Destination City')}</label>
+              <select
+                value={destinationCity}
+                onChange={(e) => setDestinationCity(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              >
+                <option value="">{t('common.all', undefined, 'All')}</option>
+                {cities.map(city => (
+                  <option key={city} value={city}>{city}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">{t('diagnosis.segment_type', undefined, 'Segment Type')}</label>
+              <select
+                value={segmentType}
+                onChange={(e) => setSegmentType(e.target.value as any)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              >
+                <option value="all">{t('common.all', undefined, 'All')}</option>
+                <option value="operational">{t('diagnosis.operational', undefined, 'Operational')}</option>
+                <option value="distribution">{t('diagnosis.distribution', undefined, 'Distribution')}</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">{t('common.threshold', undefined, 'Threshold')}</label>
+              <select
+                value={threshold}
+                onChange={(e) => setThreshold(e.target.value as any)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              >
+                <option value="all">{t('common.all', undefined, 'All')}</option>
+                <option value="compliant">{t('common.compliant', undefined, 'Compliant')}</option>
+                <option value="warning">{t('common.warning', undefined, 'Warning')}</option>
+                <option value="critical">{t('common.critical', undefined, 'Critical')}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Metrics Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+          <div className="bg-white rounded-lg shadow-sm p-4">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-xs text-gray-500">{t('diagnosis.total_segments', undefined, 'Total Segments')}</span>
+              <Info className="w-3 h-3 text-gray-400" />
+            </div>
+            <div className="text-2xl font-bold text-gray-900">{totalSegments}</div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-sm p-4">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-xs text-gray-500">Prom J+K Actual</span>
+              <Info className="w-3 h-3 text-gray-400" />
+            </div>
+            <div className="text-2xl font-bold text-gray-900">{avgJKActual.toFixed(2)}d</div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-sm p-4">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-xs text-gray-500">Prom J+K Estándar</span>
+              <Info className="w-3 h-3 text-gray-400" />
+            </div>
+            <div className="text-2xl font-bold text-gray-900">{avgJKStandard.toFixed(2)}d</div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-sm p-4">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-xs text-gray-500">% A Tiempo</span>
+              <Info className="w-3 h-3 text-gray-400" />
+            </div>
+            <div className={`text-2xl font-bold ${
+              onTimePercentage >= 90 ? 'text-green-600' : 
+              onTimePercentage >= 80 ? 'text-yellow-600' : 
+              'text-red-600'
+            }`}>
+              {onTimePercentage.toFixed(1)}%
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-sm p-4">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-xs text-gray-500">Rutas Problemáticas</span>
+              <Info className="w-3 h-3 text-gray-400" />
+            </div>
+            <div className="text-2xl font-bold text-red-600">{problematicSegments}</div>
+          </div>
+        </div>
+
         {loading ? (
-          <div className="text-center py-8 text-gray-500">Loading...</div>
-        ) : error ? (
-          <div className="text-center py-8 text-red-500">Error: {error}</div>
+          <div className="text-center py-12">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <p className="mt-2 text-sm text-gray-600">Cargando datos de segmentos...</p>
+          </div>
         ) : (
           <>
-            {activeTab === 'segments' && renderSegmentsTab()}
-            {activeTab === 'centers' && renderCentersTab()}
-            {activeTab === 'carriers' && renderCarriersTab()}
+            {/* Charts */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Distribución de Rendimiento</h3>
+                <PerformanceDistributionChart
+                  routeData={routeDataForCharts}
+                  maxDays={maxDays}
+                  carrierFilter={carrier}
+                  productFilter={product}
+                />
+              </div>
+
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Distribución Acumulada</h3>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setViewMode('chart')}
+                      className={`px-3 py-1 text-sm rounded ${
+                        viewMode === 'chart'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      Gráfico
+                    </button>
+                    <button
+                      onClick={() => setViewMode('table')}
+                      className={`px-3 py-1 text-sm rounded ${
+                        viewMode === 'table'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      Tabla
+                    </button>
+                  </div>
+                </div>
+                <CumulativeDistributionChart
+                  routes={routeDataForCharts.map(r => ({
+                    routeKey: r.routeKey,
+                    originCity: r.originCity,
+                    destinationCity: r.destinationCity,
+                    carrier: r.carrier,
+                    product: r.product,
+                    jkStandard: r.jkStandard,
+                    standardPercentage: r.standardPercentage,
+                    distribution: r.distribution,
+                    totalSamples: r.totalSamples,
+                  }))}
+                  maxDays={maxDays}
+                />
+              </div>
+            </div>
+
+            {/* Table */}
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <RoutePerformanceTable routeData={routeDataForCharts} />
+            </div>
           </>
         )}
       </div>
     </div>
   );
-};
-
-export default JKPerformanceSegments;
+}
