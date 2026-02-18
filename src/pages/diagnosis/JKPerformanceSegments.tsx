@@ -203,9 +203,18 @@ export default function JKPerformanceSegments() {
         const productMap = new Map(products.map(p => [p.id, p.name]));
         const centerMap = new Map(postalCenters.map(c => [c.id, c.name]));
 
+        console.log('📋 Sample segment:', segments[0]);
+        console.log('📋 Carrier map size:', carrierMap.size);
+        console.log('📋 Product map size:', productMap.size);
+        console.log('📋 Products loaded:', products.map(p => ({ id: p.id, name: p.name, carrier_id: p.carrier_id })));
+
         segments.forEach((seg: any) => {
           const carrierName = carrierMap.get(seg.carrier_id) || 'Unknown';
           const productName = productMap.get(seg.product_id) || 'Unknown';
+          
+          if (productName === 'Unknown') {
+            console.warn('⚠️ Unknown product for segment:', { product_id: seg.product_id, carrier_id: seg.carrier_id, available_products: Array.from(productMap.keys()) });
+          }
           const fromCenterName = centerMap.get(seg.from_postal_center_id) || seg.from_postal_center_city || 'Unknown';
           const toCenterName = centerMap.get(seg.to_postal_center_id) || seg.to_postal_center_city || 'Unknown';
           
