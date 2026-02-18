@@ -33,6 +33,7 @@ import {
   Activity,
   LayoutList,
   Network,
+  FileText,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
@@ -63,7 +64,7 @@ export function Sidebar() {
   const [expandedSections, setExpandedSections] = useState<string[]>([
     '/reporting', '/diagnosis', '/setup/e2e', '/setup/diagnosis', '/e2e', '/rfid',
     '/e2e/setup', '/e2e/allocation', '/e2e/materials', '/e2e/reporting', '/e2e/database',
-    '/rfid/setup', '/rfid/consolidation', '/rfid/analysis', '/rfid/database'
+    '/rfid/setup', '/rfid/reporting', '/rfid/database'
   ])
   const [isHovered, setIsHovered] = useState(false)
   const [accounts, setAccounts] = useState<Array<{ id: string; name: string }>>([])
@@ -362,21 +363,21 @@ export function Sidebar() {
         {
           path: '/e2e/reporting',
           label: 'Reporting',
-          icon: BarChart3,
+          icon: FileText,
           roles: ['admin', 'superadmin'],
           tooltip: 'E2E reporting and analytics',
           children: [
             {
               path: '/reporting/territory-equity',
               label: 'Territory Equity',
-              icon: MapPin,
+              icon: FileText,
               roles: ['admin', 'superadmin'],
               tooltip: 'Territory equity reporting',
             },
             {
               path: '/reporting/compliance',
               label: 'Compliance',
-              icon: Shield,
+              icon: FileText,
               roles: ['admin', 'superadmin'],
               tooltip: 'Compliance reporting',
             },
@@ -441,53 +442,23 @@ export function Sidebar() {
           ],
         },
         {
-          path: '/rfid/consolidation',
-          label: 'RFID Consolidation',
-          icon: RefreshCw,
-          roles: ['admin', 'superadmin'],
-          tooltip: 'RFID data consolidation pipeline',
-          children: [
-            {
-              path: '/diagnosis/event-consolidation',
-              label: '1. RFID Events Consolidation',
-              icon: RefreshCw,
-              roles: ['admin', 'superadmin'],
-              tooltip: 'Consolidate RFID events',
-            },
-            {
-              path: '/diagnosis/journey-segments',
-              label: '2. Journey Segments',
-              icon: Map,
-              roles: ['admin', 'superadmin'],
-              tooltip: 'View journey segments',
-            },
-            {
-              path: '/diagnosis/complete-journeys',
-              label: '3. Complete Journeys',
-              icon: Route,
-              roles: ['admin', 'superadmin'],
-              tooltip: 'View complete journeys',
-            },
-          ],
-        },
-        {
-          path: '/rfid/analysis',
-          label: 'Analysis',
-          icon: BarChart3,
+          path: '/rfid/reporting',
+          label: 'Reporting',
+          icon: FileText,
           roles: ['admin', 'superadmin'],
           tooltip: 'RFID performance analysis',
           children: [
             {
               path: '/diagnosis/route-path-analysis',
               label: 'Route Analysis',
-              icon: Activity,
+              icon: FileText,
               roles: ['admin', 'superadmin'],
               tooltip: 'Analyze route performance',
             },
             {
               path: '/diagnosis/jk-performance-segments',
               label: 'Segment Performance',
-              icon: Activity,
+              icon: FileText,
               roles: ['admin', 'superadmin'],
               tooltip: 'Segment performance analysis',
             },
