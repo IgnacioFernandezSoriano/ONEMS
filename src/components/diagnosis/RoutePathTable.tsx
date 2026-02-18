@@ -54,9 +54,10 @@ interface RoutePathData {
 interface Props {
   routePaths: RoutePathData[]
   postalCenters: any[]
+  onRouteMetricsUpdate?: (pathId: string, metrics: Partial<RoutePathData>) => void
 }
 
-export default function RoutePathTable({ routePaths, postalCenters }: Props) {
+export default function RoutePathTable({ routePaths, postalCenters, onRouteMetricsUpdate }: Props) {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
   const [hoveredSegment, setHoveredSegment] = useState<string | null>(null)
   const [segmentCounts, setSegmentCounts] = useState<Record<string, number>>({})
@@ -292,6 +293,15 @@ export default function RoutePathTable({ routePaths, postalCenters }: Props) {
                             }}
                             onSegmentsCalculated={(totals) => {
                               setSegmentTotals(prev => ({ ...prev, [path.id]: totals }))
+                              
+                              // Notify parent to update route metrics
+                              onRouteMetricsUpdate?.(path.id, {
+                                expected_time_minutes: totals.jk_std_minutes,
+                                avg_natural_time_minutes: totals.natural_time_minutes,
+                                avg_working_time_minutes: totals.working_time_minutes,
+                                compliance_rate: totals.std_percentage,
+                                percent_real: totals.real_percentage
+                              })
                             }}
                           />
                         </div>

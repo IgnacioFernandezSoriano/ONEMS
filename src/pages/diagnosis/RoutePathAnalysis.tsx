@@ -55,6 +55,7 @@ export default function RoutePathAnalysis() {
   const { effectiveAccountId } = useAccount()
   const [loading, setLoading] = useState(false)
   const [routePaths, setRoutePaths] = useState<RoutePathData[]>([])
+  const [routeMetrics, setRouteMetrics] = useState<Record<string, any>>({})
   
   const [filters, setFilters] = useState<FilterState>({
     carrier_id: '',
@@ -354,7 +355,11 @@ export default function RoutePathAnalysis() {
 
   const totalTags = routePaths.reduce((sum, path) => sum + path.total_tags, 0)
   const avgCompliance = routePaths.length > 0
-    ? routePaths.reduce((sum, path) => sum + (path.percent_real || 0) * path.total_tags, 0) / totalTags
+    ? routePaths.reduce((sum, path) => {
+        const metrics = routeMetrics[path.id]
+        const percentReal = metrics?.percent_real ?? path.percent_real ?? 0
+        return sum + percentReal * path.total_tags
+      }, 0) / totalTags
     : 0
 
   return (
@@ -492,7 +497,13 @@ export default function RoutePathAnalysis() {
           
           {/* Table View */}
           <div className="bg-white rounded-lg shadow">
-            <RoutePathTable routePaths={routePaths} postalCenters={postalCenters} />
+            <RoutePathTable 
+              routePaths={routePaths} 
+              postalCenters={postalCenters}
+              onRouteMetricsUpdate={(pathId, metrics) => {
+                setRouteMetrics(prev => ({ ...prev, [pathId]: metrics }))
+              }}
+            />
           </div>
         </>
       )}
