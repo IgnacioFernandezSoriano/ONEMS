@@ -54,6 +54,17 @@ export function useAccountManagement() {
       const demo2AccountId = accountData.id
       const deletedCounts: Record<string, number> = {}
 
+      // BACKUP: Save products and delivery_standards before deletion
+      const { data: productsBackup } = await supabase
+        .from('products')
+        .select('*')
+        .eq('account_id', demo2AccountId)
+      
+      const { data: deliveryStandardsBackup } = await supabase
+        .from('delivery_standards')
+        .select('*')
+        .eq('account_id', demo2AccountId)
+
       // Delete in correct order to respect foreign key constraints
 
       // 1. Delete SLAs first (depends on products)
@@ -139,6 +150,31 @@ export function useAccountManagement() {
         .delete({ count: 'exact' })
         .eq('account_id', demo2AccountId)
       deletedCounts.reader_location_history = readerLocationCount || 0
+
+      // RESTORE: Re-insert products and delivery_standards
+      if (productsBackup && productsBackup.length > 0) {
+        // Remove id, created_at, updated_at to let DB generate new ones
+        const productsToRestore = productsBackup.map(({ id, created_at, updated_at, ...rest }) => rest)
+        const { error: productsError } = await supabase
+          .from('products')
+          .insert(productsToRestore)
+        
+        if (productsError) {
+          console.error('Error restoring products:', productsError)
+        }
+      }
+
+      if (deliveryStandardsBackup && deliveryStandardsBackup.length > 0) {
+        // Remove id, created_at, updated_at to let DB generate new ones
+        const deliveryStandardsToRestore = deliveryStandardsBackup.map(({ id, created_at, updated_at, ...rest }) => rest)
+        const { error: deliveryStandardsError } = await supabase
+          .from('delivery_standards')
+          .insert(deliveryStandardsToRestore)
+        
+        if (deliveryStandardsError) {
+          console.error('Error restoring delivery_standards:', deliveryStandardsError)
+        }
+      }
 
       return {
         success: true,
