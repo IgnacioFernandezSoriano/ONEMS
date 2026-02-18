@@ -132,30 +132,10 @@ export default function RoutePathAnalysis() {
 
     setLoading(true)
     try {
-      // Load journey_segments with related data
+      // Load journey_segments
       let query = supabase
         .from('journey_segments')
-        .select(`
-          id,
-          tag_id,
-          carrier_id,
-          product_id,
-          from_postal_center_id,
-          to_postal_center_id,
-          from_city,
-          to_city,
-          segment_type,
-          natural_time_in_center_minutes,
-          working_time_in_center_minutes,
-          natural_transit_time_minutes,
-          working_transit_time_minutes,
-          expected_time_minutes,
-          sla_compliance,
-          carriers(name),
-          products(code, description),
-          from_center:postal_centers!journey_segments_from_postal_center_id_fkey(name),
-          to_center:postal_centers!journey_segments_to_postal_center_id_fkey(name)
-        `)
+        .select('*')
         .eq('account_id', effectiveAccountId)
 
       // Apply filters
@@ -167,6 +147,29 @@ export default function RoutePathAnalysis() {
       const { data: segments, error } = await query
 
       if (error) throw error
+
+      // Load carriers
+      const { data: carriersData } = await supabase
+        .from('carriers')
+        .select('id, name')
+        .eq('account_id', effectiveAccountId)
+
+      // Load products
+      const { data: productsData } = await supabase
+        .from('products')
+        .select('id, code, description')
+        .eq('account_id', effectiveAccountId)
+
+      // Load postal centers
+      const { data: centersData } = await supabase
+        .from('postal_centers')
+        .select('id, name')
+        .eq('account_id', effectiveAccountId)
+
+      // Create lookup maps
+      const carrierMap = new Map(carriersData?.map(c => [c.id, c.name]) || [])
+      const productMap = new Map(productsData?.map(p => [p.id, { code: p.code, description: p.description }]) || [])
+      const centerMap = new Map(centersData?.map(c => [c.id, c.name]) || [])
 
       // Group segments by route (carrier + product + origin + destination)
       const routeMap = new Map<string, JourneySegment[]>()
@@ -201,8 +204,8 @@ export default function RoutePathAnalysis() {
           working_transit_time_minutes: seg.working_transit_time_minutes || 0,
           expected_time_minutes: seg.expected_time_minutes || 0,
           sla_compliance: seg.sla_compliance || 0,
-          from_center_name: seg.from_center?.name || '',
-          to_center_name: seg.to_center?.name || ''
+          from_center_name: centerMap.get(seg.from_postal_center_id) || '',
+          to_center_name: centerMap.get(seg.to_postal_center_id) || ''
         })
       })
 
@@ -214,10 +217,9 @@ export default function RoutePathAnalysis() {
         const uniqueTags = new Set(routeSegments.map(s => s.tag_id))
         const totalTags = uniqueTags.size
         
-        // Get carrier and product info from first segment
-        const firstSegment = routeSegments[0]
-        const carrierInfo = segments?.find((s: any) => s.carrier_id === carrier_id) as any
-        const productInfo = segments?.find((s: any) => s.product_id === product_id) as any
+        // Get carrier and product info from maps
+        const carrierName = carrierMap.get(carrier_id) || ''
+        const productInfo = productMap.get(product_id)
         
         // Calculate metrics per tag, then average
         const tagMetrics = Array.from(uniqueTags).map(tagId => {
@@ -317,10 +319,10 @@ export default function RoutePathAnalysis() {
         return {
           id: routeKey,
           carrier_id,
-          carrier_name: carrierInfo?.carriers?.name || '',
+          carrier_name: carrierName,
           product_id,
-          product_name: productInfo?.products 
-            ? `${productInfo.products.code} - ${productInfo.products.description}`
+          product_name: productInfo 
+            ? `${productInfo.code} - ${productInfo.description}`
             : '',
           origin_city_name: origin_city,
           destination_city_name: destination_city,
