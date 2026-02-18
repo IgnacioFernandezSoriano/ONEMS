@@ -138,11 +138,11 @@ export function RoutePerformanceTable({ routeData }: RoutePerformanceTableProps)
                       <div className="flex items-start gap-2">
                         {route.segmentType === 'operational' ? (
                           <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 whitespace-nowrap">
-                            Centro
+                            Operational
                           </span>
                         ) : (
                           <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 whitespace-nowrap">
-                            Tránsito
+                            Distribution
                           </span>
                         )}
                         <div className="flex-1">
