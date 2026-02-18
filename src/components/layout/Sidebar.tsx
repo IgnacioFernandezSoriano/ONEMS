@@ -156,6 +156,22 @@ export function Sidebar() {
           icon: Settings,
           tooltip: 'Configure account working days',
         },
+        ...(accountName === 'DEMO2' ? [
+          {
+            path: '/receive-generator',
+            label: 'E2E: OneDB Generator',
+            icon: RefreshCw,
+            roles: ['admin', 'superadmin'] as string[],
+            tooltip: 'Generate OneDB data',
+          },
+          {
+            path: '/admin/account-management',
+            label: 'Demo Reset',
+            icon: RefreshCw,
+            roles: ['admin', 'superadmin'] as string[],
+            tooltip: 'Reset demo account data',
+          },
+        ] : []),
       ],
     },
     {
@@ -492,6 +508,22 @@ export function Sidebar() {
           icon: Settings,
           tooltip: 'Configure account working days',
         },
+        ...(accountName === 'DEMO2' ? [
+          {
+            path: '/receive-generator',
+            label: 'OneDB Generator',
+            icon: RefreshCw,
+            roles: ['admin', 'superadmin'] as string[],
+            tooltip: 'Generate OneDB data',
+          },
+          {
+            path: '/admin/account-management',
+            label: 'Demo Reset',
+            icon: RefreshCw,
+            roles: ['admin', 'superadmin'] as string[],
+            tooltip: 'Reset demo account data',
+          },
+        ] : []),
       ],
     },
   ]
@@ -743,6 +775,22 @@ export function Sidebar() {
           icon: Settings,
           tooltip: 'Configure account working days',
         },
+        ...(accountName === 'DEMO2' ? [
+          {
+            path: '/receive-generator',
+            label: 'OneDB Generator',
+            icon: RefreshCw,
+            roles: ['admin', 'superadmin'] as string[],
+            tooltip: 'Generate OneDB data',
+          },
+          {
+            path: '/admin/account-management',
+            label: 'Demo Reset',
+            icon: RefreshCw,
+            roles: ['admin', 'superadmin'] as string[],
+            tooltip: 'Reset demo account data',
+          },
+        ] : []),
       ],
     },
   ]
@@ -853,7 +901,6 @@ export function Sidebar() {
             >
               <option value="all">🌐 All Modules</option>
               <option value="setup">📋 Setup View</option>
-              <option value="functional">📊 Functional View</option>
             </select>
           </div>
           
