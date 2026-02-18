@@ -177,7 +177,7 @@ export default function RoutePathAnalysis() {
       segments?.forEach((seg: any) => {
         // Find first and last cities for this tag
         const tagSegments = segments.filter((s: any) => s.tag_id === seg.tag_id)
-        tagSegments.sort((a: any, b: any) => a.id.localeCompare(b.id))
+        tagSegments.sort((a: any, b: any) => new Date(a.entry_timestamp).getTime() - new Date(b.entry_timestamp).getTime())
         
         const originCity = tagSegments[0]?.from_city || seg.from_city
         const destinationCity = tagSegments[tagSegments.length - 1]?.to_city || seg.to_city
