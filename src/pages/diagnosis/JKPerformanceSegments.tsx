@@ -174,6 +174,9 @@ export default function JKPerformanceSegments() {
           return;
         }
 
+        console.log('📊 JKPerformanceSegments - Data Source: journey_segments table');
+        console.log('📦 Total segments loaded:', segments.length);
+
         // Get SLAs
         const { data: slas } = await supabase
           .from('slas')
@@ -189,6 +192,7 @@ export default function JKPerformanceSegments() {
 
         // Group segments and calculate metrics
         const segmentMap = new Map<string, any>();
+        console.log('🔍 Grouping segments by type (operational/distribution)...');
 
         // Get carrier and product names
         const carrierMap = new Map(carriers.map(c => [c.id, c.name]));
@@ -259,13 +263,12 @@ export default function JKPerformanceSegments() {
             );
           }
 
-          if (!sla) return;
-
-          const jkStandardMinutes = sla.expected_time_minutes;
+          // Use SLA values or defaults if no SLA exists
+          const jkStandardMinutes = sla?.expected_time_minutes || 1440; // Default 1 day
           const jkStandardDays = jkStandardMinutes / 1440;
-          const standardPercentage = sla.on_time_percentage || 95;
-          const warningThreshold = sla.warning_threshold || 90;
-          const criticalThreshold = sla.critical_threshold || 80;
+          const standardPercentage = sla?.on_time_percentage || 95;
+          const warningThreshold = sla?.warning_threshold || 90;
+          const criticalThreshold = sla?.critical_threshold || 80;
 
           // Calculate distribution
           const distribution = new Map<number, number>();
@@ -338,6 +341,13 @@ export default function JKPerformanceSegments() {
             criticalThreshold,
           });
         });
+
+        const operationalCount = processedSegments.filter(s => s.segmentType === 'operational').length;
+        const distributionCount = processedSegments.filter(s => s.segmentType === 'distribution').length;
+        console.log('✅ Processed segments:');
+        console.log('  - Operational (center):', operationalCount);
+        console.log('  - Distribution (transit):', distributionCount);
+        console.log('  - Total:', processedSegments.length);
 
         setSegmentData(processedSegments);
       } catch (error) {
