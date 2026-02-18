@@ -65,6 +65,7 @@ export function Sidebar() {
   const [accounts, setAccounts] = useState<Array<{ id: string; name: string }>>([])
   const [accountName, setAccountName] = useState<string>('')
   const [sidebarView, setSidebarView] = useState<SidebarView>('functional')
+  const [moduleFilter, setModuleFilter] = useState<'all' | 'e2e' | 'rfid'>('all')
   
   // Auto-expand on hover when collapsed
   const isExpanded = isCollapsed ? isHovered : true
@@ -74,6 +75,10 @@ export function Sidebar() {
     const saved = localStorage.getItem('sidebarView')
     if (saved === 'setup' || saved === 'functional') {
       setSidebarView(saved)
+    } else {
+      // Default to functional if no preference saved
+      setSidebarView('functional')
+      localStorage.setItem('sidebarView', 'functional')
     }
   }, [])
 
@@ -118,52 +123,52 @@ export function Sidebar() {
       items: [
         {
           path: '/topology',
-          label: 'Country Topology',
+          label: 'E2E: Country Topology',
           icon: Map,
           roles: ['admin', 'superadmin'],
           tooltip: 'Configure country topology and postal network',
         },
         {
           path: '/carriers',
-          label: 'Carriers & Products',
+          label: 'E2E: Carriers & Products',
           icon: Truck,
           roles: ['admin', 'superadmin'],
           tooltip: 'Manage carriers and their products',
         },
         {
           path: '/panelists',
-          label: 'Panelists',
+          label: 'E2E: Panelists',
           icon: UserCircle,
           roles: ['admin', 'superadmin'],
           tooltip: 'Manage test panelists',
         },
         {
           path: '/delivery-standards',
-          label: 'Delivery Standards',
+          label: 'E2E: E2E SLA',
           icon: Clock,
           roles: ['admin', 'superadmin'],
-          tooltip: 'Configure delivery time standards',
+          tooltip: 'Configure E2E service level agreements',
         },
         {
           path: '/postal-centers',
-          label: 'Postal Centers',
+          label: 'RFID: Postal Centers',
           icon: Building2,
           roles: ['admin', 'superadmin'],
           tooltip: 'Manage postal centers',
         },
         {
           path: '/readers-management',
-          label: 'Readers Management',
+          label: 'RFID: Readers Management',
           icon: MapPin,
           roles: ['admin', 'superadmin'],
           tooltip: 'Configure RFID readers',
         },
         {
           path: '/slas-configuration',
-          label: 'SLAs Configuration',
+          label: 'RFID: Segment SLA',
           icon: Target,
           roles: ['admin', 'superadmin'],
-          tooltip: 'Configure service level agreements',
+          tooltip: 'Configure segment service level agreements',
         },
       ],
     },
@@ -172,21 +177,21 @@ export function Sidebar() {
       items: [
         {
           path: '/allocation-plan-generator',
-          label: 'Allocation Generator',
+          label: 'E2E: Allocation Generator',
           icon: Target,
           roles: ['admin', 'superadmin'],
           tooltip: 'Generate allocation plans',
         },
         {
           path: '/node-load-balancing',
-          label: 'Load Balancing',
+          label: 'E2E: Load Balancing',
           icon: Scale,
           roles: ['admin', 'superadmin'],
           tooltip: 'Balance load across nodes',
         },
         {
           path: '/allocation-plans',
-          label: 'Allocation Plans',
+          label: 'E2E: Allocation Plans',
           icon: Calendar,
           roles: ['admin', 'superadmin'],
           tooltip: 'View and manage allocation plans',
@@ -198,57 +203,24 @@ export function Sidebar() {
       items: [
         {
           path: '/material-requirements',
-          label: 'Material Requirements',
+          label: 'E2E: Material Requirements',
           icon: Package,
           roles: ['admin', 'superadmin'],
           tooltip: 'Manage material requirements',
         },
         {
           path: '/stock-management',
-          label: 'Stock Management',
+          label: 'E2E: Stock Management',
           icon: Warehouse,
           roles: ['admin', 'superadmin'],
           tooltip: 'Manage stock levels',
         },
         {
           path: '/material-catalog',
-          label: 'Material Catalog',
+          label: 'E2E: Material Catalog',
           icon: Database,
           roles: ['admin', 'superadmin'],
           tooltip: 'Browse material catalog',
-        },
-      ],
-    },
-    {
-      label: 'DATA SOURCES',
-      items: [
-        {
-          path: '/one-db',
-          label: 'E2E Database',
-          icon: Database,
-          roles: ['admin', 'superadmin'],
-          tooltip: 'End-to-end database access',
-        },
-        {
-          path: '/one-db-api',
-          label: 'E2E Database API',
-          icon: DatabaseZap,
-          roles: ['admin', 'superadmin'],
-          tooltip: 'E2E database API access',
-        },
-        {
-          path: '/epcis-api',
-          label: 'EPCIS Pipeline API',
-          icon: DatabaseZap,
-          roles: ['admin', 'superadmin'],
-          tooltip: 'EPCIS event ingestion and pipeline management API',
-        },
-        {
-          path: '/diagnosis/processed-events',
-          label: 'RFID Events Database',
-          icon: CheckCircle,
-          roles: ['admin', 'superadmin'],
-          tooltip: 'View processed RFID events',
         },
       ],
     },
@@ -287,11 +259,11 @@ export function Sidebar() {
       label: 'E2E NETWORK',
       items: [
         {
-          path: '/e2e',
-          label: 'E2E Network',
-          icon: Network,
+          path: '/e2e/setup',
+          label: 'Setup',
+          icon: Settings,
           roles: ['admin', 'superadmin'],
-          tooltip: 'End-to-end network management',
+          tooltip: 'E2E network setup and configuration',
           children: [
             {
               path: '/topology',
@@ -321,6 +293,15 @@ export function Sidebar() {
               roles: ['admin', 'superadmin'],
               tooltip: 'Configure delivery standards',
             },
+          ],
+        },
+        {
+          path: '/e2e/allocation',
+          label: 'Allocation',
+          icon: Target,
+          roles: ['admin', 'superadmin'],
+          tooltip: 'Allocation management',
+          children: [
             {
               path: '/allocation-plan-generator',
               label: 'Allocation Generator',
@@ -342,6 +323,15 @@ export function Sidebar() {
               roles: ['admin', 'superadmin'],
               tooltip: 'View allocation plans',
             },
+          ],
+        },
+        {
+          path: '/e2e/materials',
+          label: 'Materials',
+          icon: Package,
+          roles: ['admin', 'superadmin'],
+          tooltip: 'Materials management',
+          children: [
             {
               path: '/material-requirements',
               label: 'Material Requirements',
@@ -363,6 +353,15 @@ export function Sidebar() {
               roles: ['admin', 'superadmin'],
               tooltip: 'Material catalog',
             },
+          ],
+        },
+        {
+          path: '/e2e/reporting',
+          label: 'Reporting',
+          icon: BarChart3,
+          roles: ['admin', 'superadmin'],
+          tooltip: 'E2E reporting and analytics',
+          children: [
             {
               path: '/reporting/territory-equity',
               label: 'Territory Equity',
@@ -377,6 +376,15 @@ export function Sidebar() {
               roles: ['admin', 'superadmin'],
               tooltip: 'Compliance reporting',
             },
+          ],
+        },
+        {
+          path: '/e2e/database',
+          label: 'Database',
+          icon: Database,
+          roles: ['admin', 'superadmin'],
+          tooltip: 'E2E database access',
+          children: [
             {
               path: '/one-db',
               label: 'E2E Database',
@@ -399,11 +407,11 @@ export function Sidebar() {
       label: 'DIAGNOSIS (RFID)',
       items: [
         {
-          path: '/rfid',
-          label: 'RFID Diagnosis',
-          icon: Activity,
+          path: '/rfid/setup',
+          label: 'Setup',
+          icon: Settings,
           roles: ['admin', 'superadmin'],
-          tooltip: 'RFID diagnosis and analysis',
+          tooltip: 'RFID setup and configuration',
           children: [
             {
               path: '/postal-centers',
@@ -426,6 +434,15 @@ export function Sidebar() {
               roles: ['admin', 'superadmin'],
               tooltip: 'Configure SLAs',
             },
+          ],
+        },
+        {
+          path: '/rfid/consolidation',
+          label: 'RFID Consolidation',
+          icon: RefreshCw,
+          roles: ['admin', 'superadmin'],
+          tooltip: 'RFID data consolidation pipeline',
+          children: [
             {
               path: '/diagnosis/event-consolidation',
               label: '1. RFID Events Consolidation',
@@ -447,6 +464,15 @@ export function Sidebar() {
               roles: ['admin', 'superadmin'],
               tooltip: 'View complete journeys',
             },
+          ],
+        },
+        {
+          path: '/rfid/analysis',
+          label: 'Analysis',
+          icon: BarChart3,
+          roles: ['admin', 'superadmin'],
+          tooltip: 'RFID performance analysis',
+          children: [
             {
               path: '/diagnosis/route-path-analysis',
               label: 'Route Analysis',
@@ -461,6 +487,15 @@ export function Sidebar() {
               roles: ['admin', 'superadmin'],
               tooltip: 'Segment performance analysis',
             },
+          ],
+        },
+        {
+          path: '/rfid/database',
+          label: 'Database',
+          icon: Database,
+          roles: ['admin', 'superadmin'],
+          tooltip: 'RFID database access',
+          children: [
             {
               path: '/epcis-api',
               label: 'EPCIS Pipeline API',
@@ -616,6 +651,42 @@ export function Sidebar() {
               📊 Functional
             </button>
           </div>
+          
+          {/* Module Filter - Only show in functional view */}
+          {sidebarView === 'functional' && (
+            <div className="mt-2 flex items-center gap-1">
+              <button
+                onClick={() => setModuleFilter('all')}
+                className={`flex-1 px-2 py-1 text-xs font-medium rounded-md transition-colors ${
+                  moduleFilter === 'all'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                All
+              </button>
+              <button
+                onClick={() => setModuleFilter('e2e')}
+                className={`flex-1 px-2 py-1 text-xs font-medium rounded-md transition-colors ${
+                  moduleFilter === 'e2e'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                E2E
+              </button>
+              <button
+                onClick={() => setModuleFilter('rfid')}
+                className={`flex-1 px-2 py-1 text-xs font-medium rounded-md transition-colors ${
+                  moduleFilter === 'rfid'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                RFID
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -624,6 +695,12 @@ export function Sidebar() {
         {menuGroups.map((group, groupIdx) => {
           const hasAccessibleItems = group.items.some(hasAccess)
           if (!hasAccessibleItems) return null
+
+          // Apply module filter in functional view
+          if (sidebarView === 'functional' && moduleFilter !== 'all') {
+            if (moduleFilter === 'e2e' && group.label === 'DIAGNOSIS (RFID)') return null
+            if (moduleFilter === 'rfid' && group.label === 'E2E NETWORK') return null
+          }
 
           return (
             <div key={groupIdx} className="mb-6">
