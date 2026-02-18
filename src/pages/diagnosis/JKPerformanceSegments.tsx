@@ -140,29 +140,12 @@ export default function JKPerformanceSegments() {
       setLoading(true);
 
       try {
-        // Query journey_segments
+        // Query journey_segments with simpler select
         let query = supabase
           .from('journey_segments')
-          .select(`
-            id,
-            from_postal_center_id,
-            to_postal_center_id,
-            from_postal_center_city,
-            to_postal_center_city,
-            carrier_id,
-            product_id,
-            natural_time_in_center_minutes,
-            working_time_in_center_minutes,
-            natural_transit_time_minutes,
-            working_transit_time_minutes,
-            entry_timestamp,
-            exit_timestamp,
-            from_center:postal_centers!journey_segments_from_postal_center_id_fkey(name),
-            to_center:postal_centers!journey_segments_to_postal_center_id_fkey(name),
-            carrier:carriers(name),
-            product:products(name)
-          `)
-          .eq('account_id', effectiveAccountId);
+          .select('*')
+          .eq('account_id', effectiveAccountId)
+          .limit(1000);
 
         if (carrier) {
           const carrierObj = carriers.find(c => c.name === carrier);
@@ -207,16 +190,23 @@ export default function JKPerformanceSegments() {
         // Group segments and calculate metrics
         const segmentMap = new Map<string, any>();
 
+        // Get carrier and product names
+        const carrierMap = new Map(carriers.map(c => [c.id, c.name]));
+        const productMap = new Map(products.map(p => [p.id, p.name]));
+
         segments.forEach((seg: any) => {
+          const carrierName = carrierMap.get(seg.carrier_id) || 'Unknown';
+          const productName = productMap.get(seg.product_id) || 'Unknown';
+          
           // Center segment
-          const centerKey = `${seg.from_center?.name || seg.from_postal_center_city}_center_${seg.carrier?.name}_${seg.product?.name}`;
+          const centerKey = `${seg.from_postal_center_city}_center_${carrierName}_${productName}`;
           if (!segmentMap.has(centerKey)) {
             segmentMap.set(centerKey, {
               segmentKey: centerKey,
-              fromCenter: seg.from_center?.name || seg.from_postal_center_city,
-              toCenter: seg.from_center?.name || seg.from_postal_center_city,
-              carrier: seg.carrier?.name || '',
-              product: seg.product?.name || '',
+              fromCenter: seg.from_postal_center_city,
+              toCenter: seg.from_postal_center_city,
+              carrier: carrierName,
+              product: productName,
               segmentType: 'operational',
               samples: [],
               carrier_id: seg.carrier_id,
@@ -228,14 +218,14 @@ export default function JKPerformanceSegments() {
           });
 
           // Transit segment
-          const transitKey = `${seg.from_center?.name || seg.from_postal_center_city}_${seg.to_center?.name || seg.to_postal_center_city}_transit_${seg.carrier?.name}_${seg.product?.name}`;
+          const transitKey = `${seg.from_postal_center_city}_${seg.to_postal_center_city}_transit_${carrierName}_${productName}`;
           if (!segmentMap.has(transitKey)) {
             segmentMap.set(transitKey, {
               segmentKey: transitKey,
-              fromCenter: seg.from_center?.name || seg.from_postal_center_city,
-              toCenter: seg.to_center?.name || seg.to_postal_center_city,
-              carrier: seg.carrier?.name || '',
-              product: seg.product?.name || '',
+              fromCenter: seg.from_postal_center_city,
+              toCenter: seg.to_postal_center_city,
+              carrier: carrierName,
+              product: productName,
               segmentType: 'distribution',
               samples: [],
               carrier_id: seg.carrier_id,
