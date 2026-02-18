@@ -118,18 +118,31 @@ export default function RoutePathMapLeaflet({ routePaths }: Props) {
         const allSegments: SegmentData[] = []
 
         routePaths.forEach(route => {
-          const pathCities = route.path_signature.split(' | ')
-          
-          pathCities.forEach(pathSegment => {
-            const matchingSegs = journeySegments?.filter(seg => {
-              const segPath = `${seg.from_postal_center_city}→${seg.to_postal_center_city}`
-              return segPath === pathSegment
-            }) || []
+          // Filter segments for this specific route
+          const matchingSegs = journeySegments?.filter(seg => 
+            seg.carrier_id === route.carrier_id &&
+            seg.product_id === route.product_id &&
+            seg.origin_city_name === route.origin_city_name &&
+            seg.destination_city_name === route.destination_city_name
+          ) || []
 
-            if (matchingSegs.length === 0) return
+          if (matchingSegs.length === 0) return
 
-            const firstSeg = matchingSegs[0]
-            const totalTags = matchingSegs.length
+          // Group by from/to center pair
+          const centerPairs = new Map<string, any[]>()
+          matchingSegs.forEach(seg => {
+            const key = `${seg.from_postal_center_id}|${seg.to_postal_center_id}`
+            if (!centerPairs.has(key)) {
+              centerPairs.set(key, [])
+            }
+            centerPairs.get(key)!.push(seg)
+          })
+
+          centerPairs.forEach((segs, key) => {
+            if (segs.length === 0) return
+
+            const firstSeg = segs[0]
+            const totalTags = segs.length
 
             // Get centers from map
             const fromCenter = centerMap.get(firstSeg.from_postal_center_id)
@@ -144,10 +157,10 @@ export default function RoutePathMapLeaflet({ routePaths }: Props) {
             }
 
             // Calculate averages
-            const avgNaturalCenter = matchingSegs.reduce((sum, s) => sum + (s.natural_time_in_center_minutes || 0), 0) / totalTags
-            const avgNaturalTransit = matchingSegs.reduce((sum, s) => sum + (s.natural_transit_time_minutes || 0), 0) / totalTags
-            const avgWorkingCenter = matchingSegs.reduce((sum, s) => sum + (s.working_time_in_center_minutes || 0), 0) / totalTags
-            const avgWorkingTransit = matchingSegs.reduce((sum, s) => sum + (s.working_transit_time_minutes || 0), 0) / totalTags
+            const avgNaturalCenter = segs.reduce((sum, s) => sum + (s.natural_time_in_center_minutes || 0), 0) / totalTags
+            const avgNaturalTransit = segs.reduce((sum, s) => sum + (s.natural_transit_time_minutes || 0), 0) / totalTags
+            const avgWorkingCenter = segs.reduce((sum, s) => sum + (s.working_time_in_center_minutes || 0), 0) / totalTags
+            const avgWorkingTransit = segs.reduce((sum, s) => sum + (s.working_transit_time_minutes || 0), 0) / totalTags
 
             // Find SLAs
             const centerSLA = slas?.find(sla => 
@@ -168,7 +181,7 @@ export default function RoutePathMapLeaflet({ routePaths }: Props) {
               const warningThreshold = centerSLA?.warning_threshold || 90
               const criticalThreshold = centerSLA?.critical_threshold || 80
               
-              const tagsOnTime = matchingSegs.filter(s => (s.natural_time_in_center_minutes || 0) <= jkStd).length
+              const tagsOnTime = segs.filter(s => (s.natural_time_in_center_minutes || 0) <= jkStd).length
               const realPercentage = totalTags > 0 ? (tagsOnTime / totalTags) * 100 : 0
 
               const threshold = realPercentage >= warningThreshold ? 'Compliant' :
@@ -195,7 +208,7 @@ export default function RoutePathMapLeaflet({ routePaths }: Props) {
               const warningThreshold = transitSLA?.warning_threshold || 90
               const criticalThreshold = transitSLA?.critical_threshold || 80
               
-              const tagsOnTime = matchingSegs.filter(s => (s.natural_transit_time_minutes || 0) <= jkStd).length
+              const tagsOnTime = segs.filter(s => (s.natural_transit_time_minutes || 0) <= jkStd).length
               const realPercentage = totalTags > 0 ? (tagsOnTime / totalTags) * 100 : 0
 
               const threshold = realPercentage >= warningThreshold ? 'Compliant' :
