@@ -2,6 +2,7 @@ import { FileDown, Download } from 'lucide-react';
 import { ColumnTooltip } from './ColumnTooltip';
 import { exportRouteCSV } from '@/utils/jkExportCSV';
 import { downloadRouteSamples } from '@/utils/downloadRouteSamples';
+import { useNavigate } from 'react-router-dom';
 
 interface JKRouteData {
   originCity: string;
@@ -34,6 +35,19 @@ interface RoutePerformanceTableProps {
 }
 
 export function RoutePerformanceTable({ routeData }: RoutePerformanceTableProps) {
+  const navigate = useNavigate();
+
+  const handleRowClick = (route: JKRouteData) => {
+    const params = new URLSearchParams();
+    if (route.carrier_id) params.set('carrier_id', route.carrier_id);
+    if (route.product_id) params.set('product_id', route.product_id);
+    if (route.from_postal_center_id) params.set('from_center_id', route.from_postal_center_id);
+    if (route.to_postal_center_id) params.set('to_center_id', route.to_postal_center_id);
+    if (route.segmentType) params.set('segment_type', route.segmentType);
+    
+    navigate(`/diagnosis/jk-performance-segments?${params.toString()}`);
+  };
+
   if (!routeData || routeData.length === 0) {
     return (
       <div className="text-center py-8 text-gray-400">
@@ -133,7 +147,11 @@ export function RoutePerformanceTable({ routeData }: RoutePerformanceTableProps)
                 const statusColor = route.status === 'compliant' ? 'bg-green-500' : route.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500';
                 
                 return (
-                  <tr key={idx} className="hover:bg-gray-50">
+                  <tr 
+                    key={idx} 
+                    onClick={() => handleRowClick(route)}
+                    className="hover:bg-gray-50 cursor-pointer transition-colors"
+                  >
                     <td className="sticky left-0 z-10 bg-white px-3 py-2 text-sm text-gray-900 border-r border-gray-200">
                       <div className="flex items-start gap-2">
                         {route.segmentType === 'operational' ? (
@@ -168,7 +186,10 @@ export function RoutePerformanceTable({ routeData }: RoutePerformanceTableProps)
                     </td>
                     <td className="px-3 py-2 text-sm text-center">
                       <button
-                        onClick={() => downloadRouteSamples(route)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          downloadRouteSamples(route);
+                        }}
                         className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded transition-colors"
                         title="Download samples for this route"
                       >
