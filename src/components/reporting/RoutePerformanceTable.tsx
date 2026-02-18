@@ -39,8 +39,18 @@ export function RoutePerformanceTable({ routeData }: RoutePerformanceTableProps)
     const params = new URLSearchParams();
     if (route.carrier_id) params.set('carrier_id', route.carrier_id);
     if (route.product_id) params.set('product_id', route.product_id);
-    if (route.from_postal_center_id) params.set('from_center_id', route.from_postal_center_id);
-    if (route.to_postal_center_id) params.set('to_center_id', route.to_postal_center_id);
+    
+    // For operational segments, from and to are the same center
+    if (route.segmentType === 'operational') {
+      if (route.from_postal_center_id) {
+        params.set('from_center_id', route.from_postal_center_id);
+        params.set('to_center_id', route.from_postal_center_id);
+      }
+    } else {
+      if (route.from_postal_center_id) params.set('from_center_id', route.from_postal_center_id);
+      if (route.to_postal_center_id) params.set('to_center_id', route.to_postal_center_id);
+    }
+    
     if (route.segmentType) params.set('segment_type', route.segmentType);
     
     window.open(`/diagnosis/jk-performance-segments?${params.toString()}`, '_blank');

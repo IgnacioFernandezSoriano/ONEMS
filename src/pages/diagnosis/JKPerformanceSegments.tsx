@@ -596,7 +596,7 @@ export default function JKPerformanceSegments() {
 
           <div className="bg-white rounded-lg shadow-sm p-4">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-xs text-gray-500">Prom J+K Actual</span>
+              <span className="text-xs text-gray-500">Avg J+K Actual</span>
               <Info className="w-3 h-3 text-gray-400" />
             </div>
             <div className="text-2xl font-bold text-gray-900">{avgJKActual.toFixed(2)}d</div>
@@ -604,7 +604,7 @@ export default function JKPerformanceSegments() {
 
           <div className="bg-white rounded-lg shadow-sm p-4">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-xs text-gray-500">Prom J+K Estándar</span>
+              <span className="text-xs text-gray-500">Avg J+K Standard</span>
               <Info className="w-3 h-3 text-gray-400" />
             </div>
             <div className="text-2xl font-bold text-gray-900">{avgJKStandard.toFixed(2)}d</div>
@@ -612,7 +612,7 @@ export default function JKPerformanceSegments() {
 
           <div className="bg-white rounded-lg shadow-sm p-4">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-xs text-gray-500">% A Tiempo</span>
+              <span className="text-xs text-gray-500">% On Time</span>
               <Info className="w-3 h-3 text-gray-400" />
             </div>
             <div className={`text-2xl font-bold ${
@@ -626,7 +626,7 @@ export default function JKPerformanceSegments() {
 
           <div className="bg-white rounded-lg shadow-sm p-4">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-xs text-gray-500">Rutas Problemáticas</span>
+              <span className="text-xs text-gray-500">Problematic Segments</span>
               <Info className="w-3 h-3 text-gray-400" />
             </div>
             <div className="text-2xl font-bold text-red-600">{problematicSegments}</div>
