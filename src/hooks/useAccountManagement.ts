@@ -64,6 +64,8 @@ export function useAccountManagement() {
       const productsData = await import('@/data/demo2/products.json')
       const deliveryStandardsData = await import('@/data/demo2/delivery_standards.json')
       const oneDbData = await import('@/data/demo2/one_db.json')
+      const postalCentersData = await import('@/data/demo2/postal_centers.json')
+      const readersData = await import('@/data/demo2/readers.json')
 
       // Delete in correct order to respect foreign key constraints
 
@@ -151,14 +153,21 @@ export function useAccountManagement() {
         .eq('account_id', demo2AccountId)
       deletedCounts.one_db = oneDbCount || 0
 
-      // 13. Delete reader location history
+      // 13. Delete readers (depends on postal_centers)
+      const { count: readersCount } = await supabase
+        .from('readers')
+        .delete({ count: 'exact' })
+        .eq('account_id', demo2AccountId)
+      deletedCounts.readers = readersCount || 0
+
+      // 14. Delete reader location history
       const { count: readerLocationCount } = await supabase
         .from('reader_location_history')
         .delete({ count: 'exact' })
         .eq('account_id', demo2AccountId)
       deletedCounts.reader_location_history = readerLocationCount || 0
 
-      // 14. Delete panelists (depends on nodes)
+      // 15. Delete panelists (depends on nodes)
       const { count: panelistsCount } = await supabase
         .from('panelists')
         .delete({ count: 'exact' })
@@ -245,6 +254,20 @@ export function useAccountManagement() {
         const { error } = await supabase.from('panelists').insert(panelistsData.default)
         if (!error) restoredCounts.panelists = panelistsData.default.length
         else console.error('Error restoring panelists:', error)
+      }
+
+      // Restore postal_centers (depends on cities)
+      if (postalCentersData.default && postalCentersData.default.length > 0) {
+        const { error } = await supabase.from('postal_centers').insert(postalCentersData.default)
+        if (!error) restoredCounts.postal_centers = postalCentersData.default.length
+        else console.error('Error restoring postal_centers:', error)
+      }
+
+      // Restore readers (depends on postal_centers)
+      if (readersData.default && readersData.default.length > 0) {
+        const { error } = await supabase.from('readers').insert(readersData.default)
+        if (!error) restoredCounts.readers = readersData.default.length
+        else console.error('Error restoring readers:', error)
       }
 
       // Restore products
