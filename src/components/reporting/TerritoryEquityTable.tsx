@@ -220,9 +220,17 @@ export function TerritoryEquityTable({
           });
         }
 
+        // Determine which percentage to use based on direction FIRST
+        const relevantPercentage = scenarioInfo.isOriginView
+          ? cp.inboundPercentage  // Origin filtered: show inbound percentages
+          : scenarioInfo.isDestinationView
+          ? cp.outboundPercentage  // Destination filtered: show outbound percentages
+          : cp.outboundPercentage;  // General/route: show outbound percentages
+        
         const carrierData = carrierMap.get(cp.carrier)!;
         carrierData.totalShipments += cp.totalShipments;
-        carrierData.totalCompliant += cp.compliantShipments;
+        // Use relevantPercentage to calculate compliant shipments for aggregation
+        carrierData.totalCompliant += (cp.totalShipments * relevantPercentage / 100);
         carrierData.standardSum += cp.standardPercentage * cp.totalShipments;
         carrierData.standardCount += cp.totalShipments;
         carrierData.standardDaysSum += cp.standardDays * cp.totalShipments;
@@ -232,13 +240,6 @@ export function TerritoryEquityTable({
           carrierData.actualDaysSum += cp.actualDays * cp.totalShipments;
           carrierData.actualDaysCount += cp.totalShipments;
         }
-        
-        // Determine which percentage to use based on direction
-        const relevantPercentage = scenarioInfo.isOriginView
-          ? cp.inboundPercentage  // Origin filtered: show inbound percentages
-          : scenarioInfo.isDestinationView
-          ? cp.outboundPercentage  // Destination filtered: show outbound percentages
-          : cp.outboundPercentage;  // General/route: show outbound percentages
         
         // Add product - Calculate status using relative thresholds
         const productDeviation = relevantPercentage - cp.standardPercentage;
