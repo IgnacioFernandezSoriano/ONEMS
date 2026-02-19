@@ -1,33 +1,28 @@
 import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { formatNumber } from '@/lib/formatNumber';
 
-interface JKRouteData {
-  originCity: string;
-  destinationCity: string;
+interface RouteData {
+  origin: string;
+  destination: string;
   carrier: string;
   product: string;
-  totalSamples: number;
-  jkStandard: number;
-  jkActual: number;
-  onTimeSamples: number;
-  beforeStandardSamples: number;
-  afterStandardSamples: number;
-  onTimePercentage: number;
-  deviation: number;
+  totalShipments: number;
+  standardDays: number;
+  actualDays: number;
   standardPercentage: number;
+  actualPercentage: number;
+  deviation: number;
   status: 'compliant' | 'warning' | 'critical';
-  routeKey: string;
   distribution: Map<number, number>; // day -> count
 }
 
 interface PerformanceDistributionChartProps {
-  routeData: JKRouteData[];
-  maxDays: number;
+  routeData: RouteData[];
   carrierFilter?: string;
   productFilter?: string;
 }
 
-export function PerformanceDistributionChart({ routeData, maxDays, carrierFilter, productFilter }: PerformanceDistributionChartProps) {
+export function PerformanceDistributionChart({ routeData, carrierFilter, productFilter }: PerformanceDistributionChartProps) {
   if (!routeData || routeData.length === 0) {
     return (
       <div className="h-80 flex items-center justify-center text-gray-400">
@@ -44,9 +39,9 @@ export function PerformanceDistributionChart({ routeData, maxDays, carrierFilter
   let targetJKDays = 0;
   
   if (isSingleCarrierProduct && routeData.length > 0) {
-    const totalSamples = routeData.reduce((sum, r) => sum + r.totalSamples, 0);
-    const weightedStdPercentage = routeData.reduce((sum, r) => sum + r.standardPercentage * r.totalSamples, 0);
-    const weightedJKStandard = routeData.reduce((sum, r) => sum + r.jkStandard * r.totalSamples, 0);
+    const totalSamples = routeData.reduce((sum, r) => sum + r.totalShipments, 0);
+    const weightedStdPercentage = routeData.reduce((sum, r) => sum + r.standardPercentage * r.totalShipments, 0);
+    const weightedJKStandard = routeData.reduce((sum, r) => sum + r.standardDays * r.totalShipments, 0);
     targetStandardPercentage = totalSamples > 0 ? weightedStdPercentage / totalSamples : 0;
     targetJKDays = totalSamples > 0 ? Math.round(weightedJKStandard / totalSamples) : 0;
   }
@@ -63,9 +58,10 @@ export function PerformanceDistributionChart({ routeData, maxDays, carrierFilter
       const dist = distributionMap.get(days)!;
       
       // Classify based on individual shipment days vs standard
-      if (days < route.jkStandard) {
+      const routeStdDays = Math.round(route.standardDays);
+      if (days < routeStdDays) {
         dist.before += count;
-      } else if (days === route.jkStandard) {
+      } else if (days === routeStdDays) {
         dist.onTime += count;
       } else {
         dist.after += count;

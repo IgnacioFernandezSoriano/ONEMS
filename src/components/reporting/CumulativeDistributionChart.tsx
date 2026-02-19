@@ -3,35 +3,23 @@ import { useMemo } from 'react';
 import { formatNumber } from '@/lib/formatNumber';
 
 interface RouteDistribution {
-  routeKey: string;
-  originCity: string;
-  destinationCity: string;
+  origin: string;
+  destination: string;
   carrier: string;
   product: string;
-  jkStandard: number;
+  standardDays: number;
   standardPercentage: number; // target percentage (e.g., 85%)
   distribution: Map<number, number>; // day -> count
-  totalSamples: number;
+  totalShipments: number;
 }
 
 interface CumulativeDistributionChartProps {
   routes: RouteDistribution[];
-  maxDays: number;
-  selectedRoute?: string; // routeKey to display, if undefined show aggregated
 }
 
-export function CumulativeDistributionChart({ routes, maxDays, selectedRoute }: CumulativeDistributionChartProps) {
+export function CumulativeDistributionChart({ routes }: CumulativeDistributionChartProps) {
   const { chartData, standardDay, standardPercentage } = useMemo(() => {
     if (!routes || routes.length === 0) {
-      return { chartData: [], standardDay: 0, standardPercentage: 85 };
-    }
-
-    // Filter to selected route or aggregate all
-    const targetRoutes = selectedRoute 
-      ? routes.filter(r => r.routeKey === selectedRoute)
-      : routes;
-
-    if (targetRoutes.length === 0) {
       return { chartData: [], standardDay: 0, standardPercentage: 85 };
     }
 
@@ -41,24 +29,25 @@ export function CumulativeDistributionChart({ routes, maxDays, selectedRoute }: 
     let avgStandard = 0;
     let avgStandardPercentage = 0;
 
-    targetRoutes.forEach(route => {
+    routes.forEach(route => {
       route.distribution.forEach((count, day) => {
         aggregatedDistribution.set(day, (aggregatedDistribution.get(day) || 0) + count);
       });
-      totalSamples += route.totalSamples;
-      avgStandard += route.jkStandard * route.totalSamples;
-      avgStandardPercentage += route.standardPercentage * route.totalSamples;
+      totalSamples += route.totalShipments;
+      avgStandard += route.standardDays * route.totalShipments;
+      avgStandardPercentage += route.standardPercentage * route.totalShipments;
     });
 
     avgStandard = totalSamples > 0 ? avgStandard / totalSamples : 0;
     avgStandardPercentage = totalSamples > 0 ? avgStandardPercentage / totalSamples : 85;
 
     // Build cumulative chart data
-    const maxDisplayDays = Math.min(maxDays, 20);
+    const maxDisplayDays = Math.max(...Array.from(aggregatedDistribution.keys()), 10);
+    const maxDisplayDaysLimit = Math.min(maxDisplayDays, 20);
     
     // Find first day with data
-    let minDayWithData = maxDisplayDays;
-    for (let day = 0; day <= maxDisplayDays; day++) {
+    let minDayWithData = maxDisplayDaysLimit;
+    for (let day = 0; day <= maxDisplayDaysLimit; day++) {
       const count = aggregatedDistribution.get(day) || 0;
       if (count > 0) {
         minDayWithData = day;
@@ -69,7 +58,7 @@ export function CumulativeDistributionChart({ routes, maxDays, selectedRoute }: 
     const data: any[] = [];
     let cumulativeCount = 0;
 
-    for (let day = minDayWithData; day <= maxDisplayDays; day++) {
+    for (let day = minDayWithData; day <= maxDisplayDaysLimit; day++) {
       const count = aggregatedDistribution.get(day) || 0;
       cumulativeCount += count;
       const cumulativePercentage = totalSamples > 0 ? (cumulativeCount / totalSamples) * 100 : 0;
@@ -90,7 +79,7 @@ export function CumulativeDistributionChart({ routes, maxDays, selectedRoute }: 
       standardDay: Math.round(avgStandard),
       standardPercentage: avgStandardPercentage,
     };
-  }, [routes, maxDays, selectedRoute]);
+  }, [routes]);
 
   if (chartData.length === 0) {
     return (

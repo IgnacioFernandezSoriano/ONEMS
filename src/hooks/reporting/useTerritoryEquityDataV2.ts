@@ -1379,6 +1379,7 @@ export function useTerritoryEquityDataV2(
           standardPercentage: number;  // Single value, not averaged
           actualDaysArray: number[];
           standardDaysArray: number[];
+          distribution: Map<number, number>;  // day -> count for distribution charts
         }>();
 
         shipments.forEach(s => {
@@ -1409,6 +1410,7 @@ export function useTerritoryEquityDataV2(
               standardPercentage,
               actualDaysArray: [],
               standardDaysArray: [],
+              distribution: new Map<number, number>(),
             });
           }
           const route = routeMap.get(routeKey)!;
@@ -1433,6 +1435,10 @@ export function useTerritoryEquityDataV2(
           }
           if (s.business_transit_days != null) {
             route.actualDaysArray.push(s.business_transit_days);
+            // Update distribution map
+            const days = Math.round(s.business_transit_days);
+            const currentCount = route.distribution.get(days) || 0;
+            route.distribution.set(days, currentCount + 1);
           }
         });
 
@@ -1480,6 +1486,7 @@ export function useTerritoryEquityDataV2(
             standardDays,
             actualDays,
             status,
+            distribution: r.distribution,
           };
         });
 

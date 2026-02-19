@@ -1028,19 +1028,75 @@ export default function TerritoryEquity() {
 
           {activeTab === 'jk' && (
             <div className="space-y-6">
-              {/* Route Performance Table */}
-              <div className="bg-white p-6 rounded-lg border border-gray-200">
+              {/* Distribution Analysis */}
+              <div>
                 <div className="mb-4">
-                  <h3 className="text-lg font-semibold mb-2">J+K Performance</h3>
+                  <h3 className="text-lg font-semibold mb-2">Distribution Analysis</h3>
                   <p className="text-sm text-gray-600">
-                    Detailed breakdown of all routes by carrier and product with J+K metrics.
+                    Detailed analysis of transit time distribution and cumulative performance metrics.
                   </p>
                 </div>
-                <ProductAnalysisTable 
-                  routeData={routeData}
-                  globalWarningThreshold={globalWarningThreshold}
-                  globalCriticalThreshold={globalCriticalThreshold}
-                />
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                  {/* Left: Performance Distribution */}
+                  <div className="bg-white p-6 rounded-lg border border-gray-200">
+                    <h4 className="text-md font-semibold mb-4">Performance Distribution</h4>
+                    <PerformanceDistributionChart 
+                      routeData={routeData}
+                      carrierFilter={effectiveFilters.carrier}
+                      productFilter={effectiveFilters.product}
+                    />
+                  </div>
+
+                  {/* Right: Cumulative Distribution with toggle */}
+                  <div className="bg-white p-6 rounded-lg border border-gray-200">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="text-md font-semibold">Cumulative Distribution</h4>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setCumulativeView('chart')}
+                          className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
+                            cumulativeView === 'chart'
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          Chart
+                        </button>
+                        <button
+                          onClick={() => setCumulativeView('table')}
+                          className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
+                            cumulativeView === 'table'
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          Table
+                        </button>
+                      </div>
+                    </div>
+                    {cumulativeView === 'chart' ? (
+                      <CumulativeDistributionChart routes={routeData} />
+                    ) : (
+                      <CumulativeDistributionTable routes={routeData} />
+                    )}
+                  </div>
+                </div>
+
+                {/* Route Performance Table */}
+                <div className="bg-white p-6 rounded-lg border border-gray-200">
+                  <div className="mb-4">
+                    <h4 className="text-md font-semibold mb-2">Route Performance</h4>
+                    <p className="text-sm text-gray-600">
+                      Detailed breakdown of all routes by carrier and product.
+                    </p>
+                  </div>
+                  <ProductAnalysisTable 
+                    routeData={routeData}
+                    globalWarningThreshold={globalWarningThreshold}
+                    globalCriticalThreshold={globalCriticalThreshold}
+                  />
+                </div>
               </div>
             </div>
           )}

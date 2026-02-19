@@ -3,29 +3,28 @@ import { ColumnTooltip } from './ColumnTooltip';
 import { formatNumber } from '@/lib/formatNumber';
 
 interface RouteDistribution {
-  routeKey: string;
-  originCity: string;
-  destinationCity: string;
+  origin: string;
+  destination: string;
   carrier: string;
   product: string;
-  jkStandard: number;
+  standardDays: number;
   standardPercentage: number; // target percentage (e.g., 85%)
   distribution: Map<number, number>; // day -> count
-  totalSamples: number;
+  totalShipments: number;
 }
 
 interface CumulativeDistributionTableProps {
   routes: RouteDistribution[];
-  maxDays: number;
 }
 
-export function CumulativeDistributionTable({ routes, maxDays }: CumulativeDistributionTableProps) {
+export function CumulativeDistributionTable({ routes }: CumulativeDistributionTableProps) {
   const { tableData, dayColumns } = useMemo(() => {
     if (!routes || routes.length === 0) {
       return { tableData: [], dayColumns: [] };
     }
 
-    // Generate day columns (0 to maxDays, limited to 20 for display)
+    // Calculate maxDays from distribution data
+    const maxDays = Math.max(...routes.flatMap(r => Array.from(r.distribution.keys())), 10);
     const maxDisplayDays = Math.min(maxDays, 20);
     
     // Find the minimum day with data and maximum day needed to reach 100%
@@ -46,7 +45,7 @@ export function CumulativeDistributionTable({ routes, maxDays }: CumulativeDistr
           foundFirstData = true;
         }
         
-        const percentage = route.totalSamples > 0 ? (cumulative / route.totalSamples) * 100 : 0;
+        const percentage = route.totalShipments > 0 ? (cumulative / route.totalShipments) * 100 : 0;
         if (percentage >= 99.9) {
           maxNeededDay = Math.max(maxNeededDay, day);
           break;
@@ -69,8 +68,8 @@ export function CumulativeDistributionTable({ routes, maxDays }: CumulativeDistr
       days.forEach(day => {
         const count = route.distribution.get(day) || 0;
         cumulativeCount += count;
-        const percentage = route.totalSamples > 0 
-          ? (cumulativeCount / route.totalSamples) * 100 
+        const percentage = route.totalShipments > 0 
+          ? (cumulativeCount / route.totalShipments) * 100 
           : 0;
         cumulativePercentages[day] = percentage;
         
@@ -88,7 +87,7 @@ export function CumulativeDistributionTable({ routes, maxDays }: CumulativeDistr
     });
 
     return { tableData: data, dayColumns: days };
-  }, [routes, maxDays]);
+  }, [routes]);
 
   if (tableData.length === 0) {
     return (
@@ -135,7 +134,7 @@ export function CumulativeDistributionTable({ routes, maxDays }: CumulativeDistr
             </th>
             {dayColumns.map(day => {
               // Check if this day matches any route's standard
-              const isStandardDay = tableData.some(route => route.jkStandard === day);
+              const isStandardDay = tableData.some(route => Math.round(route.standardDays) === day);
               return (
                 <th
                   key={day}
@@ -153,7 +152,7 @@ export function CumulativeDistributionTable({ routes, maxDays }: CumulativeDistr
           {tableData.map((route, idx) => (
             <tr key={idx} className="hover:bg-gray-50">
               <td className="sticky left-0 z-10 bg-white px-1 py-2 text-xs font-medium text-gray-900 border-r border-gray-200 min-w-[120px]">
-                {route.originCity} → {route.destinationCity}
+                {route.origin} → {route.destination}
               </td>
               <td className="sticky z-5 bg-white px-1 py-2 text-xs text-gray-600 min-w-[80px]" style={{ left: '120px' }}>
                 {route.carrier}
@@ -162,14 +161,14 @@ export function CumulativeDistributionTable({ routes, maxDays }: CumulativeDistr
                 {route.product}
               </td>
               <td className="sticky z-5 bg-white px-1 py-2 text-xs text-center text-gray-900 min-w-[60px]" style={{ left: '300px' }}>
-                {route.jkStandard}
+                {Math.round(route.standardDays)}
               </td>
               <td className="sticky z-5 bg-white px-1 py-2 text-xs text-center text-gray-900 min-w-[60px] border-r border-gray-300" style={{ left: '360px' }}>
                 {route.standardPercentage.toFixed(0)}%
               </td>
               {dayColumns.map(day => {
                 const percentage = route.cumulativePercentages[day] || 0;
-                const isBeforeOrAtStandard = day <= route.jkStandard;
+                const isBeforeOrAtStandard = day <= Math.round(route.standardDays);
                 const meetsStandard = percentage >= route.standardPercentage;
                 const isTargetDay = day === route.targetDay; // Day where STD % is reached
 
