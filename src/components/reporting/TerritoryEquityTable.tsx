@@ -220,25 +220,31 @@ export function TerritoryEquityTable({
           });
         }
 
-        // Determine which percentage to use based on direction FIRST
+        // Determine which percentage and shipments to use based on direction
         const relevantPercentage = scenarioInfo.isOriginView
           ? cp.inboundPercentage  // Origin filtered: show inbound percentages
           : scenarioInfo.isDestinationView
           ? cp.outboundPercentage  // Destination filtered: show outbound percentages
           : cp.outboundPercentage;  // General/route: show outbound percentages
         
+        const relevantShipments = scenarioInfo.isOriginView
+          ? cp.inboundShipments  // Origin filtered: use inbound shipments
+          : scenarioInfo.isDestinationView
+          ? cp.outboundShipments  // Destination filtered: use outbound shipments
+          : cp.outboundShipments;  // General/route: use outbound shipments
+        
         const carrierData = carrierMap.get(cp.carrier)!;
-        carrierData.totalShipments += cp.totalShipments;
+        carrierData.totalShipments += relevantShipments;
         // Use relevantPercentage to calculate compliant shipments for aggregation
-        carrierData.totalCompliant += (cp.totalShipments * relevantPercentage / 100);
-        carrierData.standardSum += cp.standardPercentage * cp.totalShipments;
-        carrierData.standardCount += cp.totalShipments;
-        carrierData.standardDaysSum += cp.standardDays * cp.totalShipments;
-        carrierData.standardDaysCount += cp.totalShipments;
+        carrierData.totalCompliant += (relevantShipments * relevantPercentage / 100);
+        carrierData.standardSum += cp.standardPercentage * relevantShipments;
+        carrierData.standardCount += relevantShipments;
+        carrierData.standardDaysSum += cp.standardDays * relevantShipments;
+        carrierData.standardDaysCount += relevantShipments;
         // Accumulate actual days weighted by shipments
         if (cp.actualDays > 0) {
-          carrierData.actualDaysSum += cp.actualDays * cp.totalShipments;
-          carrierData.actualDaysCount += cp.totalShipments;
+          carrierData.actualDaysSum += cp.actualDays * relevantShipments;
+          carrierData.actualDaysCount += relevantShipments;
         }
         
         // Add product - Calculate status using relative thresholds

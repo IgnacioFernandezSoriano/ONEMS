@@ -1,102 +1,51 @@
 import React from 'react';
 import { Treemap, ResponsiveContainer, Tooltip } from 'recharts';
 import { formatNumber } from '@/lib/formatNumber';
-import type { CityEquityData } from '@/types/reporting';
+import type { JKCityData } from '@/hooks/reporting/useJKPerformance';
 import type { ScenarioInfo } from '@/hooks/reporting/useFilterScenario';
 import { useTranslation } from '@/hooks/useTranslation';
 
-interface TerritoryEquityTreemapProps {
-  data: CityEquityData[];
+interface JKTreemapProps {
+  data: JKCityData[];
   scenarioInfo: ScenarioInfo;
   globalWarningThreshold: number;
   globalCriticalThreshold: number;
   scenarioDescription: string;
 }
 
-export function TerritoryEquityTreemap({ data, scenarioInfo, globalWarningThreshold, globalCriticalThreshold, scenarioDescription }: TerritoryEquityTreemapProps) {
+export function JKTreemap({ 
+  data, 
+  scenarioInfo, 
+  globalWarningThreshold, 
+  globalCriticalThreshold, 
+  scenarioDescription 
+}: JKTreemapProps) {
   const { t } = useTranslation();
   
-  // Determine which metrics to show based on scenario (same logic as table)
-  const getMetricsForCity = (city: CityEquityData) => {
-    // Recalculate from visible carrier/product breakdown
-    const breakdown = city.carrierProductBreakdown || [];
-    
-    if (breakdown.length === 0) {
-      // No breakdown available, use city-level metrics
-      if (scenarioInfo.isOriginView) {
-        return {
-          actualPercentage: city.inboundPercentage,
-          shipments: city.inboundShipments,
-        };
-      } else {
-        return {
-          actualPercentage: city.outboundPercentage,
-          shipments: city.outboundShipments,
-        };
-      }
-    }
-    
-    // Calculate from visible breakdown
+  // Filter cities based on direction from scenario
+  const filteredData = React.useMemo(() => {
     if (scenarioInfo.isOriginView) {
-      // Origin filtered: show destination cities with INBOUND data
-      const totalInbound = breakdown.reduce((sum, cp) => sum + cp.inboundShipments, 0);
-      const compliantInbound = breakdown.reduce((sum, cp) => 
-        sum + (cp.inboundShipments * cp.inboundPercentage / 100), 0);
-      const actualPercentage = totalInbound > 0 ? (compliantInbound / totalInbound) * 100 : 0;
-      
-      return {
-        actualPercentage,
-        shipments: totalInbound,
-      };
-    } else if (scenarioInfo.isDestinationView) {
-      // Destination filtered: show origin cities with OUTBOUND data
-      const totalOutbound = breakdown.reduce((sum, cp) => sum + cp.outboundShipments, 0);
-      const compliantOutbound = breakdown.reduce((sum, cp) => 
-        sum + (cp.outboundShipments * cp.outboundPercentage / 100), 0);
-      const actualPercentage = totalOutbound > 0 ? (compliantOutbound / totalOutbound) * 100 : 0;
-      
-      return {
-        actualPercentage,
-        shipments: totalOutbound,
-      };
-    } else {
-      // General or route view: show outbound
-      const totalOutbound = breakdown.reduce((sum, cp) => sum + cp.outboundShipments, 0);
-      const compliantOutbound = breakdown.reduce((sum, cp) => 
-        sum + (cp.outboundShipments * cp.outboundPercentage / 100), 0);
-      const actualPercentage = totalOutbound > 0 ? (compliantOutbound / totalOutbound) * 100 : 0;
-      
-      return {
-        actualPercentage,
-        shipments: totalOutbound,
-      };
+      return data.filter(c => c.direction === 'inbound');
+    } else if (scenarioInfo.isDestinationView || scenarioInfo.isGeneralView) {
+      return data.filter(c => c.direction === 'outbound');
     }
-  };
-  
-  // Calculate status based on relevant percentage
-  const getStatusForPercentage = (percentage: number): 'compliant' | 'warning' | 'critical' => {
-    if (percentage >= globalWarningThreshold) return 'compliant';
-    if (percentage >= globalCriticalThreshold) return 'warning';
-    return 'critical';
-  };
+    return data;
+  }, [data, scenarioInfo]);
   
   // Transform data for Recharts Treemap
-  const treemapData = data
-    .filter(city => {
-      const metrics = getMetricsForCity(city);
-      return metrics.shipments > 0;
-    })
+  const treemapData = filteredData
+    .filter(city => city.totalSamples > 0)
     .map((city) => {
-      const metrics = getMetricsForCity(city);
-      const status = getStatusForPercentage(metrics.actualPercentage);
-      
       return {
         name: city.cityName,
-        size: city.population || city.totalShipments || 1,
-        actualPercentage: metrics.actualPercentage,
-        status: status,
-        population: city.population,
-        totalShipments: city.totalShipments,
+        size: city.totalSamples,
+        onTimePercentage: city.onTimePercentage,
+        jkStandard: city.jkStandard,
+        jkActual: city.jkActual,
+        deviation: city.deviation,
+        status: city.status,
+        totalSamples: city.totalSamples,
+        routes: city.routes,
       };
     });
 
@@ -115,13 +64,12 @@ export function TerritoryEquityTreemap({ data, scenarioInfo, globalWarningThresh
   };
 
   const CustomizedContent = (props: any) => {
-    const { x, y, width, height, name, actualPercentage, status, population, totalShipments } = props;
+    const { x, y, width, height, name, onTimePercentage, status, totalSamples } = props;
 
     // Don't render if too small
     if (width < 40 || height < 30) return null;
 
     const color = getColor(status);
-    const textColor = '#000000';
 
     return (
       <g>
@@ -161,7 +109,7 @@ export function TerritoryEquityTreemap({ data, scenarioInfo, globalWarningThresh
               stroke="#000000"
               strokeWidth={0.5}
             >
-              {(actualPercentage || 0).toFixed(1)}%
+              {(onTimePercentage || 0).toFixed(1)}%
             </text>
             {width > 100 && height > 60 && (
               <text
@@ -169,13 +117,13 @@ export function TerritoryEquityTreemap({ data, scenarioInfo, globalWarningThresh
                 y={y + height / 2 + 25}
                 textAnchor="middle"
                 fill="#000000"
-                fontSize={16}
+                fontSize={14}
                 fontWeight="bold"
                 stroke="#000000"
                 strokeWidth={0.5}
                 opacity={0.9}
               >
-                {population ? `${(population / 1000).toFixed(0)}K pop` : `${totalShipments} shipments`}
+                {(totalSamples || 0).toLocaleString()} samples
               </text>
             )}
           </>
@@ -191,15 +139,24 @@ export function TerritoryEquityTreemap({ data, scenarioInfo, globalWarningThresh
         <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3">
           <p className="font-semibold text-gray-900">{data.name}</p>
           <p className="text-sm text-gray-600">
-            Compliance: <span className="font-medium">{(data.actualPercentage || 0).toFixed(1)}%</span>
+            On-Time: <span className="font-medium">{(data.onTimePercentage || 0).toFixed(1)}%</span>
           </p>
-          {data.population && (
-            <p className="text-sm text-gray-600">
-              Population: <span className="font-medium">{data.population.toLocaleString()}</span>
-            </p>
-          )}
           <p className="text-sm text-gray-600">
-            Shipments: <span className="font-medium">{data.totalShipments}</span>
+            J+K Std: <span className="font-medium">{(data.jkStandard || 0).toFixed(1)} days</span>
+          </p>
+          <p className="text-sm text-gray-600">
+            J+K Actual: <span className="font-medium">{(data.jkActual || 0).toFixed(1)} days</span>
+          </p>
+          <p className="text-sm text-gray-600">
+            Deviation: <span className={`font-medium ${(data.deviation || 0) > 0 ? 'text-red-600' : 'text-green-600'}`}>
+              {(data.deviation || 0) > 0 ? '+' : ''}{(data.deviation || 0).toFixed(1)} days
+            </span>
+          </p>
+          <p className="text-sm text-gray-600">
+            Samples: <span className="font-medium">{(data.totalSamples || 0).toLocaleString()}</span>
+          </p>
+          <p className="text-sm text-gray-600">
+            Routes: <span className="font-medium">{data.routes || 0}</span>
           </p>
           <p className="text-sm">
             Status:{' '}
@@ -208,9 +165,9 @@ export function TerritoryEquityTreemap({ data, scenarioInfo, globalWarningThresh
               data.status === 'warning' ? 'text-amber-600' :
               'text-red-600'
             }`}>
-              {data.status === 'compliant' ? `✅ ${t('reporting.compliant')}` :
-               data.status === 'warning' ? `⚠️ ${t('reporting.warning')}` :
-               `🔴 ${t('reporting.critical')}`}
+              {data.status === 'compliant' ? '✅ Compliant' :
+               data.status === 'warning' ? '⚠️ Warning' :
+               '🔴 Critical'}
             </span>
           </p>
         </div>
@@ -219,10 +176,10 @@ export function TerritoryEquityTreemap({ data, scenarioInfo, globalWarningThresh
     return null;
   };
 
-  if (!data || data.length === 0) {
+  if (!filteredData || filteredData.length === 0) {
     return (
       <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
-        <p className="text-gray-500">No data available for treemap</p>
+        <p className="text-gray-500">No J+K data available for treemap</p>
       </div>
     );
   }
@@ -236,7 +193,7 @@ export function TerritoryEquityTreemap({ data, scenarioInfo, globalWarningThresh
       
       <div className="mb-4">
         <p className="text-sm text-gray-600">
-          {t('reporting.treemap_size_population_color_compliance')}
+          City size represents number of samples. Color indicates J+K performance status.
         </p>
       </div>
 
@@ -259,15 +216,15 @@ export function TerritoryEquityTreemap({ data, scenarioInfo, globalWarningThresh
       <div className="mt-4 flex items-center justify-center gap-6 text-sm">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-          <span className="text-gray-700">{t('reporting.compliant')}</span>
+          <span className="text-gray-700">Compliant</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
-          <span className="text-gray-700">{t('reporting.warning')}</span>
+          <span className="text-gray-700">Warning</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-          <span className="text-gray-700">{t('reporting.critical')}</span>
+          <span className="text-gray-700">Critical</span>
         </div>
       </div>
     </div>

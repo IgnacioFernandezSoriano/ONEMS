@@ -496,7 +496,9 @@ function groupRoutesForDisplay(
           standardDays: cpStandardDays,
           actualDays: cpActualDays,
           deviation: cpActualPct - cpStandardPct,
+          inboundShipments: cp.total,
           inboundPercentage: cpActualPct, // Same as overall in route scenario
+          outboundShipments: cp.total,
           outboundPercentage: cpActualPct,
         };
       });
@@ -1139,7 +1141,9 @@ function buildCarrierProductBreakdown(
       standardDays: cpStandardDays,
       actualDays: cpActualDays,
       deviation: cpActualPct - cpStandardPct,
+      inboundShipments: cp.total,
       inboundPercentage: cpActualPct,
+      outboundShipments: cp.total,
       outboundPercentage: cpActualPct,
     };
   });

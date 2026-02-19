@@ -18,23 +18,57 @@ export function RegionalEquityTreemap({ data, scenarioInfo, globalWarningThresho
   
   // Determine which metrics to show based on scenario (same logic as table)
   const getMetricsForRegion = (region: RegionEquityData) => {
+    // Recalculate from visible carrier/product breakdown
+    const breakdown = region.carrierProductBreakdown || [];
+    
+    if (breakdown.length === 0) {
+      // No breakdown available, use region-level metrics
+      if (scenarioInfo.isOriginView) {
+        return {
+          actualPercentage: region.inboundPercentage,
+          shipments: region.inboundShipments,
+        };
+      } else {
+        return {
+          actualPercentage: region.outboundPercentage,
+          shipments: region.outboundShipments,
+        };
+      }
+    }
+    
+    // Calculate from visible breakdown
     if (scenarioInfo.isOriginView) {
       // Origin filtered: show destination regions with INBOUND data
+      const totalInbound = breakdown.reduce((sum, cp) => sum + cp.inboundShipments, 0);
+      const compliantInbound = breakdown.reduce((sum, cp) => 
+        sum + (cp.inboundShipments * cp.inboundPercentage / 100), 0);
+      const actualPercentage = totalInbound > 0 ? (compliantInbound / totalInbound) * 100 : 0;
+      
       return {
-        actualPercentage: region.inboundPercentage,
-        shipments: region.inboundShipments,
+        actualPercentage,
+        shipments: totalInbound,
       };
     } else if (scenarioInfo.isDestinationView) {
       // Destination filtered: show origin regions with OUTBOUND data
+      const totalOutbound = breakdown.reduce((sum, cp) => sum + cp.outboundShipments, 0);
+      const compliantOutbound = breakdown.reduce((sum, cp) => 
+        sum + (cp.outboundShipments * cp.outboundPercentage / 100), 0);
+      const actualPercentage = totalOutbound > 0 ? (compliantOutbound / totalOutbound) * 100 : 0;
+      
       return {
-        actualPercentage: region.outboundPercentage,
-        shipments: region.outboundShipments,
+        actualPercentage,
+        shipments: totalOutbound,
       };
     } else {
       // General or route view: show outbound
+      const totalOutbound = breakdown.reduce((sum, cp) => sum + cp.outboundShipments, 0);
+      const compliantOutbound = breakdown.reduce((sum, cp) => 
+        sum + (cp.outboundShipments * cp.outboundPercentage / 100), 0);
+      const actualPercentage = totalOutbound > 0 ? (compliantOutbound / totalOutbound) * 100 : 0;
+      
       return {
-        actualPercentage: region.outboundPercentage,
-        shipments: region.outboundShipments,
+        actualPercentage,
+        shipments: totalOutbound,
       };
     }
   };
@@ -174,9 +208,9 @@ export function RegionalEquityTreemap({ data, scenarioInfo, globalWarningThresho
               data.status === 'warning' ? 'text-amber-600' :
               'text-red-600'
             }`}>
-              {data.status === 'compliant' ? t('reporting.compliant') :
-               data.status === 'warning' ? t('reporting.warning') :
-               t('reporting.critical')}
+              {data.status === 'compliant' ? `✅ ${t('reporting.compliant')}` :
+               data.status === 'warning' ? `⚠️ ${t('reporting.warning')}` :
+               `🔴 ${t('reporting.critical')}`}
             </span>
           </p>
         </div>

@@ -11,6 +11,77 @@ interface InboundOutboundChartProps {
 
 export function InboundOutboundChart({ data, scenarioDescription }: InboundOutboundChartProps) {
   const { t } = useTranslation();
+  
+  // Helper function to calculate metrics from visible carrier/product breakdown
+  const calculateMetricsFromBreakdown = (city: CityEquityData) => {
+    const breakdown = city.carrierProductBreakdown || [];
+    
+    if (breakdown.length === 0) {
+      // No breakdown, use city-level metrics
+      return {
+        inbound: city.inboundPercentage,
+        outbound: city.outboundPercentage,
+        inboundStandardPercentage: city.inboundStandardPercentage,
+        outboundStandardPercentage: city.outboundStandardPercentage,
+        inboundStandardDays: city.inboundStandardDays,
+        inboundActualDays: city.inboundActualDays,
+        outboundStandardDays: city.outboundStandardDays,
+        outboundActualDays: city.outboundActualDays,
+      };
+    }
+    
+    // Calculate inbound metrics from visible breakdown
+    const totalInbound = breakdown.reduce((sum, cp) => sum + cp.inboundShipments, 0);
+    const compliantInbound = breakdown.reduce((sum, cp) => 
+      sum + (cp.inboundShipments * cp.inboundPercentage / 100), 0);
+    const inboundPercentage = totalInbound > 0 ? (compliantInbound / totalInbound) * 100 : 0;
+    
+    // Calculate weighted average for inbound standard percentage
+    const inboundStandardPercentage = totalInbound > 0
+      ? breakdown.reduce((sum, cp) => sum + (cp.inboundShipments * cp.standardPercentage), 0) / totalInbound
+      : 0;
+    
+    // Calculate weighted average for inbound days
+    const inboundStandardDays = totalInbound > 0
+      ? breakdown.reduce((sum, cp) => sum + (cp.inboundShipments * cp.standardDays), 0) / totalInbound
+      : 0;
+    
+    const inboundActualDays = totalInbound > 0
+      ? breakdown.reduce((sum, cp) => sum + (cp.inboundShipments * cp.actualDays), 0) / totalInbound
+      : 0;
+    
+    // Calculate outbound metrics from visible breakdown
+    const totalOutbound = breakdown.reduce((sum, cp) => sum + cp.outboundShipments, 0);
+    const compliantOutbound = breakdown.reduce((sum, cp) => 
+      sum + (cp.outboundShipments * cp.outboundPercentage / 100), 0);
+    const outboundPercentage = totalOutbound > 0 ? (compliantOutbound / totalOutbound) * 100 : 0;
+    
+    // Calculate weighted average for outbound standard percentage
+    const outboundStandardPercentage = totalOutbound > 0
+      ? breakdown.reduce((sum, cp) => sum + (cp.outboundShipments * cp.standardPercentage), 0) / totalOutbound
+      : 0;
+    
+    // Calculate weighted average for outbound days
+    const outboundStandardDays = totalOutbound > 0
+      ? breakdown.reduce((sum, cp) => sum + (cp.outboundShipments * cp.standardDays), 0) / totalOutbound
+      : 0;
+    
+    const outboundActualDays = totalOutbound > 0
+      ? breakdown.reduce((sum, cp) => sum + (cp.outboundShipments * cp.actualDays), 0) / totalOutbound
+      : 0;
+    
+    return {
+      inbound: inboundPercentage,
+      outbound: outboundPercentage,
+      inboundStandardPercentage,
+      outboundStandardPercentage,
+      inboundStandardDays,
+      inboundActualDays,
+      outboundStandardDays,
+      outboundActualDays,
+    };
+  };
+  
   // Filter cities that have at least one valid direction (shipments > 0 or standardDays > 0)
   // Then sort by direction gap (descending) and take top 10
   const topCities = [...data]
@@ -18,19 +89,27 @@ export function InboundOutboundChart({ data, scenarioDescription }: InboundOutbo
       (city.inboundShipments > 0 || city.inboundStandardDays > 0) ||
       (city.outboundShipments > 0 || city.outboundStandardDays > 0)
     )
-    .sort((a, b) => Math.abs(b.directionGap) - Math.abs(a.directionGap))
+    .map(city => {
+      const metrics = calculateMetricsFromBreakdown(city);
+      return {
+        city,
+        metrics,
+        directionGap: Math.abs(metrics.inbound - metrics.outbound),
+      };
+    })
+    .sort((a, b) => b.directionGap - a.directionGap)
     .slice(0, 10);
 
-  const chartData = topCities.map((city) => ({
+  const chartData = topCities.map(({ city, metrics }) => ({
     city: city.cityName,
-    inbound: city.inboundPercentage,
-    outbound: city.outboundPercentage,
-    inboundStandardPercentage: city.inboundStandardPercentage,
-    outboundStandardPercentage: city.outboundStandardPercentage,
-    inboundStandardDays: city.inboundStandardDays,
-    inboundActualDays: city.inboundActualDays,
-    outboundStandardDays: city.outboundStandardDays,
-    outboundActualDays: city.outboundActualDays,
+    inbound: metrics.inbound,
+    outbound: metrics.outbound,
+    inboundStandardPercentage: metrics.inboundStandardPercentage,
+    outboundStandardPercentage: metrics.outboundStandardPercentage,
+    inboundStandardDays: metrics.inboundStandardDays,
+    inboundActualDays: metrics.inboundActualDays,
+    outboundStandardDays: metrics.outboundStandardDays,
+    outboundActualDays: metrics.outboundActualDays,
   }));
 
   // Calculate average standard for reference line (using inbound as reference)

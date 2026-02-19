@@ -211,22 +211,28 @@ export function RegionalEquityTable({
         }
 
         const carrierData = carrierMap.get(cp.carrier)!;
-        carrierData.totalShipments += cp.totalShipments;
-        carrierData.totalCompliant += cp.compliantShipments;
-        carrierData.standardSum += cp.standardPercentage * cp.totalShipments;
-        carrierData.standardCount += cp.totalShipments;
-        carrierData.standardDaysSum += cp.standardDays * cp.totalShipments;
-        carrierData.standardDaysCount += cp.totalShipments;
-        if (cp.actualDays > 0) {
-          carrierData.actualDaysSum += cp.actualDays * cp.totalShipments;
-          carrierData.actualDaysCount += cp.totalShipments;
-        }
-        
         const relevantPercentage = scenarioInfo.isOriginView
           ? cp.inboundPercentage
           : scenarioInfo.isDestinationView
           ? cp.outboundPercentage
           : cp.outboundPercentage;
+        
+        const relevantShipments = scenarioInfo.isOriginView
+          ? cp.inboundShipments
+          : scenarioInfo.isDestinationView
+          ? cp.outboundShipments
+          : cp.outboundShipments;
+        
+        carrierData.totalShipments += relevantShipments;
+        carrierData.totalCompliant += (relevantShipments * relevantPercentage / 100);
+        carrierData.standardSum += cp.standardPercentage * relevantShipments;
+        carrierData.standardCount += relevantShipments;
+        carrierData.standardDaysSum += cp.standardDays * relevantShipments;
+        carrierData.standardDaysCount += relevantShipments;
+        if (cp.actualDays > 0) {
+          carrierData.actualDaysSum += cp.actualDays * relevantShipments;
+          carrierData.actualDaysCount += relevantShipments;
+        }
         
         const productStatus: 'compliant' | 'warning' | 'critical' = 
           relevantPercentage >= globalWarningThreshold ? 'compliant' :
@@ -234,7 +240,7 @@ export function RegionalEquityTable({
 
         carrierData.products.set(cp.product, {
           product: cp.product,
-          shipments: cp.totalShipments,
+          shipments: relevantShipments,
           compliant: cp.compliantShipments,
           standardPercentage: cp.standardPercentage,
           actualPercentage: relevantPercentage,

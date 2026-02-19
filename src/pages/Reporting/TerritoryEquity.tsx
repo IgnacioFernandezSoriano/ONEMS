@@ -17,6 +17,9 @@ import { PerformanceDistributionChart } from '@/components/reporting/Performance
 import { CumulativeDistributionChart } from '@/components/reporting/CumulativeDistributionChart';
 import { CumulativeDistributionTable } from '@/components/reporting/CumulativeDistributionTable';
 import { RoutePerformanceTable } from '@/components/reporting/RoutePerformanceTable';
+import { JKHierarchicalTable } from '@/components/reporting/JKHierarchicalTable';
+import { JKTreemap } from '@/components/reporting/JKTreemap';
+import { TopCitiesJKPerformance } from '@/components/reporting/TopCitiesJKPerformance';
 import { PerformanceTrendChart } from '@/components/reports/PerformanceTrendChart';
 import { useEquityAuditExport } from '@/hooks/reporting/useEquityAuditExport';
 import { tooltips } from '@/components/reporting/TerritoryEquityTooltips';
@@ -108,6 +111,9 @@ export default function TerritoryEquity() {
   // Load J+K Performance data with distribution
   const {
     routeData: jkRouteData,
+    cityData: jkCityData,
+    carrierData: jkCarrierData,
+    productData: jkProductData,
     metrics: jkMetrics,
     maxDays: jkMaxDays,
     loading: jkLoading,
@@ -1036,15 +1042,53 @@ export default function TerritoryEquity() {
 
           {activeTab === 'jk' && (
             <div className="space-y-6">
+              {/* J+K Treemap Visualization */}
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <h3 className="text-lg font-semibold">J+K Performance Treemap</h3>
+                  <SmartTooltip content="Visual representation of cities sized by sample count and colored by J+K performance status." />
+                </div>
+                <JKTreemap
+                  data={jkCityData}
+                  scenarioInfo={hookScenarioInfo}
+                  globalWarningThreshold={jkWarningThreshold}
+                  globalCriticalThreshold={jkCriticalThreshold}
+                  scenarioDescription={scenarioDescription}
+                />
+              </div>
+
+              {/* Top Cities J+K Performance */}
+              <TopCitiesJKPerformance
+                data={jkCityData}
+                scenarioInfo={hookScenarioInfo}
+              />
+
+              {/* J+K Hierarchical Table */}
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <h3 className="text-lg font-semibold">J+K Performance Details</h3>
+                  <SmartTooltip content="Hierarchical breakdown of J+K performance by city, carrier, and product. Expand rows to see detailed breakdowns." />
+                </div>
+                <JKHierarchicalTable
+                  cityData={jkCityData}
+                  carrierData={jkCarrierData}
+                  productData={jkProductData}
+                  scenarioInfo={hookScenarioInfo}
+                  scenarioDescription={scenarioDescription}
+                  globalWarningThreshold={jkWarningThreshold}
+                  globalCriticalThreshold={jkCriticalThreshold}
+                />
+              </div>
+
+              {/* Distribution Analysis */}
               <div>
                 <div className="mb-4">
-                  <h3 className="text-lg font-semibold mb-2">J+K Performance Analysis</h3>
+                  <h3 className="text-lg font-semibold mb-2">Distribution Analysis</h3>
                   <p className="text-sm text-gray-600">
-                    Analysis of Journey + Knowledge (J+K) performance metrics including distribution and route-level compliance.
+                    Detailed analysis of transit time distribution and cumulative performance metrics.
                   </p>
                 </div>
 
-                {/* Distribution Charts */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                   {/* Left: Performance Distribution */}
                   <div className="bg-white p-6 rounded-lg border border-gray-200">

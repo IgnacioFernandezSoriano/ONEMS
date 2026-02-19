@@ -658,7 +658,9 @@ export function useTerritoryEquityDataV2(
                 standardDays: cpStandardDays,
                 actualDays: cpActualDays,
                 deviation: cpActualPercentage - cpStandardPercentage,
+                inboundShipments: cp.inbound.total,
                 inboundPercentage: cpInboundPercentage,
+                outboundShipments: cp.outbound.total,
                 outboundPercentage: cpOutboundPercentage,
               };
             }).sort((a, b) => b.totalShipments - a.totalShipments);
@@ -1295,7 +1297,9 @@ export function useTerritoryEquityDataV2(
                 standardDays: cpStandardDays,
                 actualDays: cpActualDays,
                 deviation: cpActualPercentage - cpStandardPercentage,
+                inboundShipments: cp.inbound.total,
                 inboundPercentage: cpInboundPercentage,
+                outboundShipments: cp.outbound.total,
                 outboundPercentage: cpOutboundPercentage,
               };
             }).sort((a, b) => b.totalShipments - a.totalShipments);

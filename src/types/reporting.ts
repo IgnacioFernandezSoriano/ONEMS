@@ -162,7 +162,9 @@ export interface CityEquityData {
     standardDays: number;  // J+K Standard
     actualDays: number;  // J+K Actual
     deviation: number;
+    inboundShipments: number;
     inboundPercentage: number;
+    outboundShipments: number;
     outboundPercentage: number;
   }>;
   
@@ -218,7 +220,9 @@ export interface RegionEquityData {
     standardDays: number;  // J+K Standard
     actualDays: number;  // J+K Actual
     deviation: number;
+    inboundShipments: number;
     inboundPercentage: number;
+    outboundShipments: number;
     outboundPercentage: number;
   }>;
   
