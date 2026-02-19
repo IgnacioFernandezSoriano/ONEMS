@@ -4,7 +4,8 @@ import { useOneDB, OneDBFilters as Filters } from '../hooks/useOneDB';
 import { OneDBFilters } from '../components/OneDB/OneDBFilters';
 import { OneDBTable } from '../components/OneDB/OneDBTable';
 import { OneDBBulkPanel } from '../components/OneDB/OneDBBulkPanel';
-import { Database, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { Database, CheckCircle, XCircle, Clock, Trash2 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 import { SmartTooltip } from '../components/common/SmartTooltip';
 
 import { useTranslation } from '@/hooks/useTranslation';
@@ -37,6 +38,39 @@ export default function OneDB() {
 
   const handleClearSelection = () => {
     setSelectedRecords([]);
+  };
+
+  const handleDelete = async () => {
+    if (selectedRecords.length === 0) return;
+
+    const confirmMessage = `Are you sure you want to delete ${selectedRecords.length} record(s)? This action cannot be undone.`;
+    if (!window.confirm(confirmMessage)) return;
+
+    try {
+      console.log('Deleting records:', selectedRecords);
+      
+      const { data, error } = await supabase
+        .from('one_db')
+        .delete()
+        .in('id', selectedRecords)
+        .select();
+
+      if (error) {
+        console.error('Supabase delete error:', error);
+        throw error;
+      }
+
+      console.log('Delete response:', data);
+      
+      // Refresh data and clear selection
+      await refetch();
+      setSelectedRecords([]);
+      
+      alert(`Successfully deleted ${selectedRecords.length} record(s)`);
+    } catch (err: any) {
+      console.error('Error deleting records:', err);
+      alert(`Failed to delete records: ${err.message || 'Unknown error'}. Please check console for details.`);
+    }
   };
 
   const handleFilterChange = (filters: Filters) => {
@@ -180,6 +214,7 @@ export default function OneDB() {
         totalCount={filteredRecords.length}
         onExport={handleExport}
         onClearSelection={handleClearSelection}
+        onDelete={handleDelete}
       />
 
       {/* Footer Info */}

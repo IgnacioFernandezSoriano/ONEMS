@@ -240,28 +240,17 @@ export function TerritoryEquityTable({
           ? cp.outboundPercentage  // Destination filtered: show outbound percentages
           : cp.outboundPercentage;  // General/route: show outbound percentages
         
-        // Add product - Calculate status based on deviation
+        // Add product - Calculate status using relative thresholds
         const productDeviation = relevantPercentage - cp.standardPercentage;
         
-        // Debug: Log first product to check thresholds
-        if (city.cityName === 'Baltimore' && cp.carrier === 'Carrier B' && cp.product === 'EXPRESS') {
-          console.log('DEBUG Product Status:', {
-            city: city.cityName,
-            carrier: cp.carrier,
-            product: cp.product,
-            relevantPercentage,
-            standardPercentage: cp.standardPercentage,
-            productDeviation,
-            globalWarningThreshold,
-            globalCriticalThreshold,
-            check1: productDeviation >= -globalWarningThreshold,
-            check2: productDeviation >= -globalCriticalThreshold
-          });
-        }
+        // Calculate thresholds relative to standardPercentage
+        // If standardPercentage is 85% and we want warning at -5%, threshold is 80%
+        const productWarningThreshold = cp.standardPercentage - 5;  // 5% below standard
+        const productCriticalThreshold = cp.standardPercentage - 10; // 10% below standard
         
         const productStatus: 'compliant' | 'warning' | 'critical' = 
-          productDeviation >= -globalWarningThreshold ? 'compliant' :
-          productDeviation >= -globalCriticalThreshold ? 'warning' : 'critical';
+          relevantPercentage >= productWarningThreshold ? 'compliant' :
+          relevantPercentage >= productCriticalThreshold ? 'warning' : 'critical';
 
         // Filter by equity status if specified
         if (equityStatusFilter.length > 0 && !equityStatusFilter.includes(productStatus)) {
@@ -301,9 +290,14 @@ export function TerritoryEquityTable({
           : 0;
         
         const carrierDeviation = carrierActualPercentage - carrierStandardPercentage;
+        
+        // Calculate carrier status using relative thresholds
+        const carrierWarningThreshold = carrierStandardPercentage - 5;
+        const carrierCriticalThreshold = carrierStandardPercentage - 10;
+        
         const carrierStatus: 'compliant' | 'warning' | 'critical' = 
-          carrierDeviation >= -globalWarningThreshold ? 'compliant' :
-          carrierDeviation >= -globalCriticalThreshold ? 'warning' : 'critical';
+          carrierActualPercentage >= carrierWarningThreshold ? 'compliant' :
+          carrierActualPercentage >= carrierCriticalThreshold ? 'warning' : 'critical';
 
         return {
           carrier: carrierData.carrier,
@@ -319,6 +313,14 @@ export function TerritoryEquityTable({
         };
       });
 
+      // Recalculate city status using relative thresholds (same as products/carriers)
+      const cityWarningThreshold = metrics.standardPercentage - 5;
+      const cityCriticalThreshold = metrics.standardPercentage - 10;
+      
+      const cityStatus: 'compliant' | 'warning' | 'critical' = 
+        metrics.actualPercentage >= cityWarningThreshold ? 'compliant' :
+        metrics.actualPercentage >= cityCriticalThreshold ? 'warning' : 'critical';
+
       return {
         cityId: city.cityId,
         cityName: city.cityName,
@@ -332,7 +334,7 @@ export function TerritoryEquityTable({
         deviation: metrics.deviation,
         standardDays: metrics.standardDays,
         actualDays: metrics.actualDays,
-        status: city.status,
+        status: cityStatus,  // Use recalculated status
         originalCity: city,
         carrierBreakdown,
       };

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { useTerritoryEquityDataV2 as useTerritoryEquityData } from '@/hooks/reporting/useTerritoryEquityDataV2';
@@ -13,15 +13,21 @@ import { TerritoryEquityTreemap } from '@/components/reporting/TerritoryEquityTr
 import { TerritoryEquityMap } from '@/components/reporting/TerritoryEquityMap';
 import { useEquityAuditExport } from '@/hooks/reporting/useEquityAuditExport';
 import { tooltips } from '@/components/reporting/TerritoryEquityTooltips';
-import { Info, Download, TrendingUp, Users, AlertTriangle, Award, FileText, Map } from 'lucide-react';
+import { Info, Download, Users, Award, FileText, Map as MapIcon } from 'lucide-react';
 import { SmartTooltip } from '@/components/common/SmartTooltip';
 import type { CityEquityData, RegionEquityData, TerritoryEquityFilters as Filters } from '@/types/reporting';
 
 import { useTranslation } from '@/hooks/useTranslation';
+
+import { PerformanceDistributionChartV2 } from '@/components/reporting/PerformanceDistributionChartV2';
+import { CumulativeDistributionChartV2 } from '@/components/reporting/CumulativeDistributionChartV2';
+import { RoutePerformanceTableV2 } from '@/components/reporting/RoutePerformanceTableV2';
+import { KPICard } from '@/components/reporting/KPICard';
+import { Package, Clock, CheckCircle, AlertTriangle as AlertTriangleIcon, TrendingUp } from 'lucide-react';
 export default function TerritoryEquity() {
   const { t } = useTranslation();
   const { profile } = useAuth();
-  const [activeTab, setActiveTab] = useState<'city' | 'regional' | 'map'>('city');
+  const [activeTab, setActiveTab] = useState<'city' | 'regional' | 'map' | 'jk-performance'>('city');
   const [selectedCity, setSelectedCity] = useState<CityEquityData | null>(null);
   const [selectedRegion, setSelectedRegion] = useState<RegionEquityData | null>(null);
   const [filters, setFilters] = useState<Filters>({
@@ -40,6 +46,7 @@ export default function TerritoryEquity() {
     cityData, 
     regionData, 
     metrics, 
+    routeData,
     loading, 
     error, 
     globalWarningThreshold, 
@@ -53,6 +60,55 @@ export default function TerritoryEquity() {
   );
 
   const { generateMarkdownReport, downloadMarkdown } = useEquityAuditExport();
+
+  // Calculate J+K Performance metrics from routeData
+  const jkMetrics = useMemo(() => {
+    if (!routeData || routeData.length === 0) return null;
+    
+    const totalSamples = routeData.reduce((sum, r) => sum + r.totalShipments, 0);
+    const totalCompliant = routeData.reduce((sum, r) => sum + (r.totalShipments * r.actualPercentage / 100), 0);
+    const avgJKStandard = routeData.reduce((sum, r) => sum + (r.standardDays * r.totalShipments), 0) / totalSamples;
+    const avgJKActual = routeData.reduce((sum, r) => sum + (r.actualDays * r.totalShipments), 0) / totalSamples;
+    const onTimePercentage = totalSamples > 0 ? (totalCompliant / totalSamples) * 100 : 0;
+    
+    return {
+      totalSamples,
+      avgJKStandard,
+      avgJKActual,
+      onTimePercentage,
+    };
+  }, [routeData]);
+
+  const jkMaxDays = useMemo(() => {
+    if (!routeData || routeData.length === 0) return 10;
+    return Math.max(...routeData.map(r => Math.max(r.standardDays, r.actualDays))) + 2;
+  }, [routeData]);
+
+  // Adapt routeData for V2 components
+  const adaptedRouteData = useMemo(() => {
+    if (!routeData) return [];
+    const adapted = routeData.map(r => ({
+      routeKey: `${r.origin}|${r.destination}|${r.carrier}|${r.product}`,
+      originCity: r.origin,
+      destinationCity: r.destination,
+      carrier: r.carrier,
+      product: r.product,
+      totalSamples: r.totalShipments,
+      jkStandard: r.standardDays,
+      jkActual: r.actualDays,
+      onTimeSamples: Math.round(r.totalShipments * r.actualPercentage / 100),
+      beforeStandardSamples: 0,
+      afterStandardSamples: Math.round(r.totalShipments * (100 - r.actualPercentage) / 100),
+      onTimePercentage: r.actualPercentage,
+      deviation: r.deviation,
+      standardPercentage: r.standardPercentage,
+      status: r.status,
+      distribution: new Map() as any,
+      warningThreshold: globalWarningThreshold,
+      criticalThreshold: globalCriticalThreshold,
+    }));
+    return adapted;
+  }, [routeData, globalWarningThreshold, globalCriticalThreshold]);
 
   // Use scenarioInfo from the hook (hookScenarioInfo)
   const scenarioInfo = hookScenarioInfo;
@@ -631,7 +687,7 @@ export default function TerritoryEquity() {
             {metrics?.underservedCitiesCount || 0}
           </div>
           <div className="flex items-center gap-1 mt-1">
-            <AlertTriangle className="w-4 h-4 text-red-500" />
+            <AlertTriangleIcon className="w-4 h-4 text-red-500" />
             <span className="text-sm text-gray-500">
               {t('reporting.of_cities', { count: metrics?.totalCities || 0 })}
             </span>
@@ -710,7 +766,7 @@ export default function TerritoryEquity() {
         <div className="bg-white rounded-lg shadow p-6 col-span-1 md:col-span-2 lg:col-span-1">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-medium text-gray-600 flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-red-600" />
+              <AlertTriangleIcon className="w-4 h-4 text-red-600" />
               {t('reporting.top_3_worst_served_cities')}
             </h3>
             <SmartTooltip content={tooltips.topWorstServed} />
@@ -790,8 +846,19 @@ export default function TerritoryEquity() {
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
-                <Map className="w-4 h-4" />
+                <MapIcon className="w-4 h-4" />
                 {t('reporting.geographic_view')}
+            </button>
+            <button
+              onClick={() => setActiveTab('jk-performance')}
+                className={`px-6 py-3 font-medium transition-colors flex items-center gap-2 ${
+                  activeTab === 'jk-performance'
+                    ? 'border-b-2 border-blue-600 text-blue-600'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <TrendingUp className="w-4 h-4" />
+                J+K Performance
             </button>
           </div>
         </div>
@@ -905,6 +972,86 @@ export default function TerritoryEquity() {
                 </div>
                 <TerritoryEquityMap data={cityData} />
               </div>
+            </div>
+          )}
+
+          {activeTab === 'jk-performance' && (
+            <div className="space-y-6">
+              {loading ? (
+                <div className="flex items-center justify-center h-64">
+                  <div className="text-gray-500">Loading J+K Performance data...</div>
+                </div>
+              ) : error ? (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <p className="text-red-800">Error loading J+K Performance data</p>
+                </div>
+              ) : (
+                <>
+                  {/* KPI Cards */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <KPICard
+                      title="Total Samples"
+                      value={jkMetrics?.totalSamples?.toLocaleString() || '0'}
+                      icon={Package}
+                      trend="neutral"
+                      trendValue=""
+                      color="blue"
+                    />
+                    <KPICard
+                      title="Avg J+K Actual"
+                      value={`${jkMetrics?.avgJKActual?.toFixed(1) || '0'}d`}
+                      icon={Clock}
+                      trend="neutral"
+                      trendValue=""
+                      color="indigo"
+                    />
+                    <KPICard
+                      title="Avg J+K Standard"
+                      value={`${jkMetrics?.avgJKStandard?.toFixed(1) || '0'}d`}
+                      icon={Clock}
+                      trend="neutral"
+                      trendValue=""
+                      color="purple"
+                    />
+                    <KPICard
+                      title="On-Time Performance"
+                      value={`${jkMetrics?.onTimePercentage?.toFixed(1) || '0'}%`}
+                      icon={CheckCircle}
+                      trend={(jkMetrics?.onTimePercentage ?? 0) >= 85 ? 'up' : (jkMetrics?.onTimePercentage ?? 0) >= 75 ? 'neutral' : 'down'}
+                      trendValue=""
+                      color={(jkMetrics?.onTimePercentage ?? 0) >= 85 ? 'green' : (jkMetrics?.onTimePercentage ?? 0) >= 75 ? 'amber' : 'red'}
+                    />
+                  </div>
+
+                  {/* Performance Distribution Chart */}
+                  <div className="bg-white rounded-lg border p-6">
+                    <h3 className="text-lg font-semibold mb-4">Performance Distribution</h3>
+                    <PerformanceDistributionChartV2
+                      routeData={adaptedRouteData}
+                      maxDays={jkMaxDays}
+                      carrierFilter={filters.carrier}
+                      productFilter={filters.product}
+                    />
+                  </div>
+
+                  {/* Cumulative Distribution Chart */}
+                  <div className="bg-white rounded-lg border p-6">
+                    <h3 className="text-lg font-semibold mb-4">Cumulative Distribution</h3>
+                    <CumulativeDistributionChartV2
+                      routes={adaptedRouteData}
+                      maxDays={jkMaxDays}
+                    />
+                  </div>
+
+                  {/* Route Performance Table */}
+                  <div className="bg-white rounded-lg border p-6">
+                    <h3 className="text-lg font-semibold mb-4">Route Performance</h3>
+                    <RoutePerformanceTableV2
+                      data={adaptedRouteData}
+                    />
+                  </div>
+                </>
+              )}
             </div>
           )}
         </div>

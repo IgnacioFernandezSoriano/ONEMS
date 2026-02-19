@@ -5,6 +5,7 @@ interface OneDBBulkPanelProps {
   totalCount: number;
   onExport: () => void;
   onClearSelection: () => void;
+  onDelete: () => void;
 }
 
 export const OneDBBulkPanel: React.FC<OneDBBulkPanelProps> = ({
@@ -12,6 +13,7 @@ export const OneDBBulkPanel: React.FC<OneDBBulkPanelProps> = ({
   totalCount,
   onExport,
   onClearSelection,
+  onDelete,
 }) => {
   if (selectedCount === 0) return null;
 
@@ -35,6 +37,15 @@ export const OneDBBulkPanel: React.FC<OneDBBulkPanelProps> = ({
         >
           <span>⬇</span>
           Export CSV
+        </button>
+
+        {/* Delete Button */}
+        <button
+          onClick={onDelete}
+          className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-md transition-colors"
+        >
+          <span>🗑</span>
+          Delete ({selectedCount})
         </button>
 
         {/* Clear Selection */}

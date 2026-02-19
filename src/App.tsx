@@ -34,6 +34,7 @@ import ComplianceReport from './pages/Reporting/ComplianceReport'
 import TerritoryEquity from './pages/Reporting/TerritoryEquity'
 import TerritoryEquityV2 from './pages/Reporting/TerritoryEquityV2'
 import JKPerformance from './pages/Reporting/JKPerformance'
+import JKPerformanceV2 from './pages/Reporting/JKPerformanceV2'
 import AccountReportingConfig from './pages/Settings/AccountReportingConfig'
 import { AccountConfiguration } from './pages/Settings/AccountConfiguration'
 import { PostalCenters } from './pages/PostalCenters'
@@ -390,6 +391,15 @@ function App() {
                       element={
                         <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
                           <JKPerformance />
+                        </ProtectedRoute>
+                      }
+                    />
+                    {/* Reporting J+K Performance V2 - for admin and superadmin */}
+                    <Route
+                      path="/reporting/jk-performance-v2"
+                      element={
+                        <ProtectedRoute allowedRoles={['superadmin', 'admin', 'user']}>
+                          <JKPerformanceV2 />
                         </ProtectedRoute>
                       }
                     />                 
