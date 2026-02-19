@@ -62,6 +62,18 @@ function App() {
           <Routes>
             <Route path="/login" element={<Login />} />
             
+            {/* Reporting J+K Performance V2 - without sidebar */}
+            <Route
+              path="/reporting/jk-performance-v2"
+              element={
+                <ProtectedRoute allowedRoles={['superadmin', 'admin', 'user']}>
+                  <ReportingFiltersProvider>
+                    <JKPerformanceV2 />
+                  </ReportingFiltersProvider>
+                </ProtectedRoute>
+              }
+            />
+            
             <Route
               path="/*"
               element={
@@ -394,15 +406,7 @@ function App() {
                         </ProtectedRoute>
                       }
                     />
-                    {/* Reporting J+K Performance V2 - for admin and superadmin */}
-                    <Route
-                      path="/reporting/jk-performance-v2"
-                      element={
-                        <ProtectedRoute allowedRoles={['superadmin', 'admin', 'user']}>
-                          <JKPerformanceV2 />
-                        </ProtectedRoute>
-                      }
-                    />                 
+                 
                     {/* Settings routes - only for superadmin */}
                     <Route
                       path="/settings"
