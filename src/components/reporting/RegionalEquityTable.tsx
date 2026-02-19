@@ -261,9 +261,14 @@ export function RegionalEquityTable({
           ? carrierData.actualDaysSum / carrierData.actualDaysCount
           : 0;
 
+        // Determine carrier status based on worst (most critical) product status
+        const productStatuses = Array.from(carrierData.products.values()).map(p => p.status);
+        const hasCritical = productStatuses.some(s => s === 'critical');
+        const hasWarning = productStatuses.some(s => s === 'warning');
+        
         const carrierStatus: 'compliant' | 'warning' | 'critical' = 
-          carrierActualPercentage >= globalWarningThreshold ? 'compliant' :
-          carrierActualPercentage >= globalCriticalThreshold ? 'warning' : 'critical';
+          hasCritical ? 'critical' :
+          hasWarning ? 'warning' : 'compliant';
 
         return {
           carrier: carrierData.carrier,
@@ -279,22 +284,43 @@ export function RegionalEquityTable({
         };
       });
 
+      // Recalculate region metrics from visible carriers (aggregated)
+      const regionTotalShipments = carrierBreakdown.reduce((sum, c) => sum + c.shipments, 0);
+      const regionTotalCompliant = carrierBreakdown.reduce((sum, c) => sum + c.compliant, 0);
+      const regionActualPercentage = regionTotalShipments > 0 ? (regionTotalCompliant / regionTotalShipments) * 100 : 0;
+      
+      const regionStandardPercentageSum = carrierBreakdown.reduce((sum, c) => sum + (c.standardPercentage * c.shipments), 0);
+      const regionStandardPercentage = regionTotalShipments > 0 ? regionStandardPercentageSum / regionTotalShipments : 95;
+      
+      const regionStandardDaysSum = carrierBreakdown.reduce((sum, c) => sum + (c.standardDays * c.shipments), 0);
+      const regionStandardDays = regionTotalShipments > 0 ? regionStandardDaysSum / regionTotalShipments : 0;
+      
+      const regionActualDaysSum = carrierBreakdown.reduce((sum, c) => sum + (c.actualDays * c.shipments), 0);
+      const regionActualDays = regionTotalShipments > 0 ? regionActualDaysSum / regionTotalShipments : 0;
+      
+      const regionDeviation = regionActualPercentage - regionStandardPercentage;
+      
+      // Determine region status based on worst (most critical) carrier status
+      const carrierStatuses = carrierBreakdown.map(c => c.status);
+      const hasCritical = carrierStatuses.some(s => s === 'critical');
+      const hasWarning = carrierStatuses.some(s => s === 'warning');
+      
       const regionStatus: 'compliant' | 'warning' | 'critical' = 
-        metrics.actualPercentage >= globalWarningThreshold ? 'compliant' :
-        metrics.actualPercentage >= globalCriticalThreshold ? 'warning' : 'critical';
+        hasCritical ? 'critical' :
+        hasWarning ? 'warning' : 'compliant';
 
       return {
         regionId: region.regionId,
         regionName: region.regionName,
         classification: null,
         population: region.totalPopulation,
-        shipments: metrics.shipments,
-        compliant: metrics.compliant,
-        standardPercentage: metrics.standardPercentage,
-        actualPercentage: metrics.actualPercentage,
-        deviation: metrics.deviation,
-        standardDays: metrics.standardDays,
-        actualDays: metrics.actualDays,
+        shipments: regionTotalShipments,
+        compliant: regionTotalCompliant,
+        standardPercentage: regionStandardPercentage,
+        actualPercentage: regionActualPercentage,
+        deviation: regionDeviation,
+        standardDays: regionStandardDays,
+        actualDays: regionActualDays,
         status: regionStatus,
         originalRegion: region,
         carrierBreakdown,
