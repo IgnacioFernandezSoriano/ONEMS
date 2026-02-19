@@ -180,7 +180,7 @@ export function CumulativeDistributionChart({ routes }: CumulativeDistributionCh
             {chartData.map((entry, index) => (
               <Cell 
                 key={`cell-${index}`} 
-                fill={entry.isBeforeOrAtStandard ? '#10b981' : '#ef4444'} 
+                fill={entry.day === standardDay ? '#3b82f6' : (entry.isBeforeOrAtStandard ? '#10b981' : '#ef4444')} 
               />
             ))}
           </Bar>

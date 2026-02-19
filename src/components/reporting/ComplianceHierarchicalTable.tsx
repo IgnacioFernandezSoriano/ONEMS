@@ -293,7 +293,14 @@ export function ComplianceHierarchicalTable({ data, warningThreshold, criticalTh
                     const deviation = route.deviation.toFixed(1);
                     
                     return (
-                      <tr key={idx} className="hover:bg-gray-50">
+                      <tr 
+                        key={idx} 
+                        className="hover:bg-gray-50 cursor-pointer"
+                        onClick={() => {
+                          const url = `/reporting/territory-equity?tab=jk&hideSidebar=true&origin=${encodeURIComponent(route.origin)}&destination=${encodeURIComponent(route.destination)}&carrier=${encodeURIComponent(route.carrier)}&product=${encodeURIComponent(route.product)}`;
+                          window.open(url, '_blank');
+                        }}
+                      >
                         <td className="px-4 py-3 whitespace-nowrap text-sm pl-20">
                           {route.origin} → {route.destination}
                         </td>
