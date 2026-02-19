@@ -333,7 +333,7 @@ export function CarriersTree({
                             <button
                               onClick={() =>
                                 setModal({
-                                  title: 'Add Product',
+                                  title: 'Add Material',
                                   type: 'material',
                                   productId: product.id,
                                   onSubmit: onAddMaterialToProduct,
@@ -344,7 +344,7 @@ export function CarriersTree({
                               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                               </svg>
-                              Add a product
+                              Add a material
                             </button>
                             <button
                               onClick={() =>
