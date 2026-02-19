@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
-import { Filter, X } from 'lucide-react';
+import { Filter, X, RotateCcw } from 'lucide-react';
 
 interface CompleteJourneysFiltersProps {
   onFilterChange: (filters: any) => void;
@@ -39,9 +39,19 @@ export function CompleteJourneysFilters({ onFilterChange }: CompleteJourneysFilt
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <div className="flex items-center gap-2 mb-4">
-        <Filter className="w-5 h-5 text-gray-600" />
-        <h3 className="text-lg font-semibold text-gray-900">{t('complete_journeys.filters.title')}</h3>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Filter className="w-5 h-5 text-gray-600" />
+          <h3 className="text-lg font-semibold text-gray-900">{t('complete_journeys.filters.title')}</h3>
+        </div>
+        <button
+          onClick={handleClearFilters}
+          className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+          title="Reset all filters"
+        >
+          <RotateCcw className="w-4 h-4" />
+          Reset
+        </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
