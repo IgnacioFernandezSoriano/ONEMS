@@ -234,6 +234,7 @@ export default function MaterialRequirementsTab() {
         'Quantity Needed': r.quantity_needed,
         'Current Stock': r.current_stock,
         'Net Quantity': r.net_quantity,
+        'Quantity Ordered': r.quantity_ordered || 0,
         'Unit': r.unit_measure,
         'Status': r.status,
         'Period': `${r.period_start} to ${r.period_end}`
@@ -557,10 +558,10 @@ Unification Logic:
                     {t('stock.current_stock')}
                   </th>
                   <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('stock.quantity_ordered')}
+                    {t('stock.net_quantity')}
                   </th>
                   <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('stock.net_quantity')}
+                    {t('stock.quantity_ordered')}
                   </th>
                   <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     {t('common.status')}
@@ -602,10 +603,10 @@ Unification Logic:
                       <div className="text-sm text-gray-900">{req.current_stock.toLocaleString()}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <div className="text-sm text-orange-900">{(req.quantity_ordered || 0).toLocaleString()}</div>
+                      <div className="text-sm font-bold text-blue-900">{req.net_quantity.toLocaleString()}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <div className="text-sm font-bold text-blue-900">{req.net_quantity.toLocaleString()}</div>
+                      <div className="text-sm text-orange-900">{(req.quantity_ordered || 0).toLocaleString()}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
                       {getStatusBadge(req.status)}
