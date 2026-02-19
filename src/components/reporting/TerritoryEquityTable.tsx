@@ -315,6 +315,22 @@ export function TerritoryEquityTable({
         };
       });
 
+      // Recalculate city metrics from visible carriers (aggregated)
+      const cityTotalShipments = carrierBreakdown.reduce((sum, c) => sum + c.shipments, 0);
+      const cityTotalCompliant = carrierBreakdown.reduce((sum, c) => sum + c.compliant, 0);
+      const cityActualPercentage = cityTotalShipments > 0 ? (cityTotalCompliant / cityTotalShipments) * 100 : 0;
+      
+      const cityStandardPercentageSum = carrierBreakdown.reduce((sum, c) => sum + (c.standardPercentage * c.shipments), 0);
+      const cityStandardPercentage = cityTotalShipments > 0 ? cityStandardPercentageSum / cityTotalShipments : 95;
+      
+      const cityStandardDaysSum = carrierBreakdown.reduce((sum, c) => sum + (c.standardDays * c.shipments), 0);
+      const cityStandardDays = cityTotalShipments > 0 ? cityStandardDaysSum / cityTotalShipments : 0;
+      
+      const cityActualDaysSum = carrierBreakdown.reduce((sum, c) => sum + (c.actualDays * c.shipments), 0);
+      const cityActualDays = cityTotalShipments > 0 ? cityActualDaysSum / cityTotalShipments : 0;
+      
+      const cityDeviation = cityActualPercentage - cityStandardPercentage;
+      
       // Determine city status based on worst (most critical) carrier status
       const carrierStatuses = carrierBreakdown.map(c => c.status);
       const hasCritical = carrierStatuses.some(s => s === 'critical');
@@ -330,14 +346,14 @@ export function TerritoryEquityTable({
         regionName: city.regionName,
         classification: city.classification,
         population: city.population,
-        shipments: metrics.shipments,
-        compliant: metrics.compliant,
-        standardPercentage: metrics.standardPercentage,
-        actualPercentage: metrics.actualPercentage,
-        deviation: metrics.deviation,
-        standardDays: metrics.standardDays,
-        actualDays: metrics.actualDays,
-        status: cityStatus,  // Use recalculated status
+        shipments: cityTotalShipments,
+        compliant: cityTotalCompliant,
+        standardPercentage: cityStandardPercentage,
+        actualPercentage: cityActualPercentage,
+        deviation: cityDeviation,
+        standardDays: cityStandardDays,
+        actualDays: cityActualDays,
+        status: cityStatus,
         originalCity: city,
         carrierBreakdown,
       };
