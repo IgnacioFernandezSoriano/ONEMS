@@ -973,14 +973,47 @@ export function useTerritoryEquityDataV2(
             : 0;
 
         // Top 3 Best/Worst Cities
-        const sortedByDeviation = [...filteredCityData].sort((a, b) => b.deviation - a.deviation);
+        // Use appropriate metrics based on scenario
+        const sortedByDeviation = [...filteredCityData].map(c => {
+          const relevantPercentage = scenarioInfo.isOriginView
+            ? c.inboundPercentage
+            : scenarioInfo.isDestinationView
+            ? c.outboundPercentage
+            : c.outboundPercentage;
+          const relevantStandardPercentage = scenarioInfo.isOriginView
+            ? c.inboundStandardPercentage
+            : scenarioInfo.isDestinationView
+            ? c.outboundStandardPercentage
+            : c.outboundStandardPercentage;
+          const relevantStandardDays = scenarioInfo.isOriginView
+            ? c.inboundStandardDays
+            : scenarioInfo.isDestinationView
+            ? c.outboundStandardDays
+            : c.outboundStandardDays;
+          const relevantActualDays = scenarioInfo.isOriginView
+            ? c.inboundActualDays
+            : scenarioInfo.isDestinationView
+            ? c.outboundActualDays
+            : c.outboundActualDays;
+          const relevantDeviation = relevantPercentage - relevantStandardPercentage;
+          
+          return {
+            ...c,
+            relevantPercentage,
+            relevantStandardPercentage,
+            relevantStandardDays,
+            relevantActualDays,
+            relevantDeviation,
+          };
+        }).sort((a, b) => b.relevantDeviation - a.relevantDeviation);
+        
         const topBestCities = sortedByDeviation.slice(0, 3).map((c) => ({
           cityName: c.cityName,
-          actualPercentage: c.actualPercentage,
-          deviation: c.deviation,
-          standardPercentage: c.standardPercentage,
-          standardDays: c.standardDays,
-          actualDays: c.actualDays,
+          actualPercentage: c.relevantPercentage,
+          deviation: c.relevantDeviation,
+          standardPercentage: c.relevantStandardPercentage,
+          standardDays: c.relevantStandardDays,
+          actualDays: c.relevantActualDays,
           inboundPercentage: c.inboundPercentage,
           outboundPercentage: c.outboundPercentage,
         }));
@@ -989,11 +1022,11 @@ export function useTerritoryEquityDataV2(
           .reverse()
           .map((c) => ({
             cityName: c.cityName,
-            actualPercentage: c.actualPercentage,
-            deviation: c.deviation,
-            standardPercentage: c.standardPercentage,
-            standardDays: c.standardDays,
-            actualDays: c.actualDays,
+            actualPercentage: c.relevantPercentage,
+            deviation: c.relevantDeviation,
+            standardPercentage: c.relevantStandardPercentage,
+            standardDays: c.relevantStandardDays,
+            actualDays: c.relevantActualDays,
             inboundPercentage: c.inboundPercentage,
             outboundPercentage: c.outboundPercentage,
             status: c.status,
