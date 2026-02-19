@@ -28,6 +28,7 @@ export function useTerritoryEquityDataV2(
   const [globalWarningThreshold, setGlobalWarningThreshold] = useState<number>(80);
   const [globalCriticalThreshold, setGlobalCriticalThreshold] = useState<number>(75);
   const [populationWeightedCitizensAffected, setPopulationWeightedCitizensAffected] = useState<number>(0);
+  const [allShipments, setAllShipments] = useState<any[]>([]);
 
   // Detect filter scenario
   const scenarioInfo = useFilterScenario(filters || {});
@@ -131,7 +132,7 @@ export function useTerritoryEquityDataV2(
         console.log('[useTerritoryEquityData] Global thresholds:', { warning: warningThreshold, critical: criticalThreshold });
 
         // 3. Load shipments with filters and pagination
-        const allShipments: any[] = []
+        const shipmentsData: any[] = []
         const pageSize = 1000
         let start = 0
         let hasMore = true
@@ -151,7 +152,7 @@ export function useTerritoryEquityDataV2(
           if (shipmentsError) throw shipmentsError
 
           if (data && data.length > 0) {
-            allShipments.push(...data)
+            shipmentsData.push(...data)
             hasMore = data.length === pageSize
             start += pageSize
           } else {
@@ -159,7 +160,8 @@ export function useTerritoryEquityDataV2(
           }
         }
 
-        let shipments = allShipments;
+        setAllShipments(shipmentsData);
+        let shipments = shipmentsData;
 
         // equityStatus filter is now handled in Product Analysis tab
 
@@ -1799,6 +1801,7 @@ export function useTerritoryEquityDataV2(
     metrics, 
     routeData,
     trendData,
+    shipments: allShipments,
     loading, 
     error, 
     globalWarningThreshold, 

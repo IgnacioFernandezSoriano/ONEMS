@@ -93,6 +93,7 @@ export default function TerritoryEquity() {
     metrics, 
     routeData,
     trendData,
+    shipments,
     loading, 
     error, 
     globalWarningThreshold, 
@@ -1019,6 +1020,7 @@ export default function TerritoryEquity() {
                 </div>
                 <ProductAnalysisTable 
                   routeData={routeData}
+                  shipments={shipments}
                   globalWarningThreshold={globalWarningThreshold}
                   globalCriticalThreshold={globalCriticalThreshold}
                 />
@@ -1093,6 +1095,7 @@ export default function TerritoryEquity() {
                   </div>
                   <ProductAnalysisTable 
                     routeData={routeData}
+                    shipments={shipments}
                     globalWarningThreshold={globalWarningThreshold}
                     globalCriticalThreshold={globalCriticalThreshold}
                   />

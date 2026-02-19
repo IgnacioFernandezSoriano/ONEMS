@@ -5,6 +5,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 
 interface ProductAnalysisTableProps {
   routeData: any[];
+  shipments?: any[];
   globalWarningThreshold: number;
   globalCriticalThreshold: number;
 }
@@ -25,6 +26,7 @@ type ProductRow = {
 
 export function ProductAnalysisTable({
   routeData,
+  shipments = [],
   globalWarningThreshold,
   globalCriticalThreshold,
 }: ProductAnalysisTableProps) {
@@ -84,31 +86,62 @@ export function ProductAnalysisTable({
   };
 
   const handleExportCSV = () => {
-    const headers = ['Origin', 'Destination', 'Carrier', 'Product', 'Total Shipments', 'J+K STD', 'J+K ACTUAL', 'Standard %', 'Actual %', 'Deviation', 'Status'];
+    // Filter shipments to match visible routes
+    const visibleRoutes = new Set(
+      sortedRows.map(row => `${row.origin}|${row.destination}|${row.carrier}|${row.product}`)
+    );
+    
+    const filteredShipments = shipments.filter(s => {
+      const routeKey = `${s.origin_city_name}|${s.destination_city_name}|${s.carrier_name}|${s.product_name}`;
+      return visibleRoutes.has(routeKey);
+    });
+
+    // Export individual samples
+    const headers = [
+      'Tracking Number',
+      'Origin',
+      'Destination',
+      'Carrier',
+      'Product',
+      'Sent At',
+      'Delivered At',
+      'Transit Days',
+      'Standard Time',
+      'J+K Actual',
+      'On Time',
+      'Status'
+    ];
+    
     const csvContent = [
       headers.join(','),
-      ...sortedRows.map(row =>
-        [
-          row.origin,
-          row.destination,
-          row.carrier,
-          row.product,
-          row.totalShipments,
-          row.standardDays?.toFixed(1) || '-',
-          row.actualDays?.toFixed(1) || '-',
-          row.standardPercentage.toFixed(1),
-          row.actualPercentage.toFixed(1),
-          row.deviation.toFixed(1),
-          row.status,
-        ].join(',')
-      ),
+      ...filteredShipments.map(s => {
+        const transitDays = s.transit_days || 0;
+        const standardTime = s.standard_time || 0;
+        const jkActual = transitDays > 0 ? transitDays : 0;
+        const onTime = standardTime > 0 && jkActual <= standardTime;
+        
+        return [
+          s.tracking_number || '',
+          s.origin_city_name || '',
+          s.destination_city_name || '',
+          s.carrier_name || '',
+          s.product_name || '',
+          s.sent_at || '',
+          s.delivered_at || '',
+          transitDays.toFixed(1),
+          standardTime.toFixed(1),
+          jkActual.toFixed(1),
+          onTime ? 'Yes' : 'No',
+          s.status || ''
+        ].join(',');
+      }),
     ].join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `product-analysis-${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `jk-samples-${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -165,7 +198,7 @@ export function ProductAnalysisTable({
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
         >
           <Download className="w-4 h-4" />
-          Export CSV
+          Export Samples CSV
         </button>
       </div>
 
