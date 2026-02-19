@@ -29,7 +29,7 @@ export function ProductAnalysisTable({
   globalCriticalThreshold,
 }: ProductAnalysisTableProps) {
   const { t } = useTranslation();
-  const [equityStatusFilter, setEquityStatusFilter] = useState<string[]>(['warning', 'critical']);
+  const [equityStatusFilter, setEquityStatusFilter] = useState<string[]>([]);
   const [sortField, setSortField] = useState<keyof ProductRow>('origin');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
