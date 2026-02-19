@@ -290,7 +290,7 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
           product: string;
           samples: number[];
           onTimeSamples: number;
-          jkStandard: number;
+          standardDaysArray: number[];
           distribution: Map<number, number>;
         }>();
 
@@ -313,7 +313,7 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
               product: shipment.product_name,
               samples: [],
               onTimeSamples: 0,
-              jkStandard: standard?.jkStandard || 0,
+              standardDaysArray: [],
               distribution: new Map(),
             });
           }
@@ -321,14 +321,14 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
           const route = routeMap.get(key)!;
           route.samples.push(days);
           
+          // Collect standard_time for J+K calculation (same logic as useTerritoryEquityDataV2)
+          if (standard?.jkStandard != null) {
+            route.standardDaysArray.push(standard.jkStandard);
+          }
+          
           // Update distribution
           const currentCount = route.distribution.get(days) || 0;
           route.distribution.set(days, currentCount + 1);
-
-          // Check if on-time
-          if (standard && days <= standard.jkStandard) {
-            route.onTimeSamples++;
-          }
         });
 
         setMaxDays(calculatedMaxDays);
@@ -337,6 +337,11 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
         const routes: JKRouteData[] = Array.from(routeMap.entries()).map(([key, route]) => {
           const totalSamples = route.samples.length;
           const standard = standardsMap.get(key);
+          
+          // Calculate jkStandard as average of standardDaysArray (same as useTerritoryEquityDataV2)
+          const jkStandard = route.standardDaysArray.length > 0
+            ? route.standardDaysArray.reduce((sum, d) => sum + d, 0) / route.standardDaysArray.length
+            : 0;
           
           // Calculate J+K Actual (days to reach STD %)
           const targetStdPercentage = standard?.successPercentage || 85;
@@ -357,9 +362,14 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
             }
           }
           
-          const deviation = jkActual - route.jkStandard;
+          // Recalculate onTimeSamples based on calculated jkStandard
+          const onTimeSamples = jkStandard > 0 
+            ? route.samples.filter(d => d <= jkStandard).length 
+            : 0;
+          
+          const deviation = jkActual - jkStandard;
           const onTimePercentage = totalSamples > 0 
-            ? (route.onTimeSamples / totalSamples) * 100 
+            ? (onTimeSamples / totalSamples) * 100 
             : 0;
 
           const routeWarningThreshold = standard?.warningThreshold || warningThreshold;
@@ -369,8 +379,8 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
             onTimePercentage >= routeWarningThreshold ? 'compliant' :
             onTimePercentage >= routeCriticalThreshold ? 'warning' : 'critical';
 
-          const beforeStandardSamples = route.samples.filter(d => d < route.jkStandard).length;
-          const afterStandardSamples = route.samples.filter(d => d > route.jkStandard).length;
+          const beforeStandardSamples = route.samples.filter(d => d < jkStandard).length;
+          const afterStandardSamples = route.samples.filter(d => d > jkStandard).length;
           
           return {
             routeKey: key,
@@ -379,11 +389,11 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
             carrier: route.carrier,
             product: route.product,
             totalSamples,
-            jkStandard: route.jkStandard,
+            jkStandard,
             jkActual,
             deviation,
             onTimePercentage,
-            onTimeSamples: route.onTimeSamples,
+            onTimeSamples,
             beforeStandardSamples,
             afterStandardSamples,
             distribution: route.distribution,
