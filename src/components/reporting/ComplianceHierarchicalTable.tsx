@@ -61,42 +61,91 @@ export function ComplianceHierarchicalTable({ data, warningThreshold, criticalTh
         carrierMap.set(carrier, {
           carrier,
           totalSamples: 0,
-          standardDays: route.carrierStandardDays || 0,
-          actualDays: route.carrierActualDays || 0,
-          standardPercentage: route.carrierStandardPercentage || 0,
-          actualPercentage: route.carrierActualPercentage || 0,
-          deviation: route.carrierDeviation || 0,
-          status: route.carrierStatus || 'compliant',
           products: new Map(),
         });
       }
       
       const carrierData = carrierMap.get(carrier);
-      carrierData.totalSamples += route.totalShipments || 0;
       
       if (!carrierData.products.has(product)) {
         carrierData.products.set(product, {
           product,
-          totalSamples: 0,
-          standardDays: route.productStandardDays || 0,
-          actualDays: route.productActualDays || 0,
-          standardPercentage: route.productStandardPercentage || 0,
-          actualPercentage: route.productActualPercentage || 0,
-          deviation: route.productDeviation || 0,
-          status: route.productStatus || 'compliant',
           routes: [],
         });
       }
       
       const productData = carrierData.products.get(product);
-      productData.totalSamples += route.totalShipments || 0;
       productData.routes.push(route);
     });
     
-    return Array.from(carrierMap.values()).map(c => ({
-      ...c,
-      products: Array.from(c.products.values()),
-    }));
+    // Calculate product metrics from visible routes
+    return Array.from(carrierMap.values()).map((carrierData: any) => {
+      const products = Array.from(carrierData.products.values()).map((productData: any) => {
+        const routes = productData.routes;
+        const totalSamples = routes.reduce((sum: number, r: RouteData) => sum + (r.totalShipments || 0), 0);
+        
+        // Weighted averages for product
+        const standardDaysSum = routes.reduce((sum: number, r: RouteData) => sum + (r.standardDays * r.totalShipments), 0);
+        const actualDaysSum = routes.reduce((sum: number, r: RouteData) => sum + (r.actualDays * r.totalShipments), 0);
+        const standardPercentageSum = routes.reduce((sum: number, r: RouteData) => sum + (r.standardPercentage * r.totalShipments), 0);
+        const actualPercentageSum = routes.reduce((sum: number, r: RouteData) => sum + (r.actualPercentage * r.totalShipments), 0);
+        
+        const standardDays = totalSamples > 0 ? standardDaysSum / totalSamples : 0;
+        const actualDays = totalSamples > 0 ? actualDaysSum / totalSamples : 0;
+        const standardPercentage = totalSamples > 0 ? standardPercentageSum / totalSamples : 0;
+        const actualPercentage = totalSamples > 0 ? actualPercentageSum / totalSamples : 0;
+        const deviation = actualPercentage - standardPercentage;
+        
+        // Product status: worst status from routes
+        const routeStatuses = routes.map((r: RouteData) => r.status);
+        const hasCritical = routeStatuses.some((s: string) => s === 'critical');
+        const hasWarning = routeStatuses.some((s: string) => s === 'warning');
+        const status = hasCritical ? 'critical' : hasWarning ? 'warning' : 'compliant';
+        
+        return {
+          product: productData.product,
+          totalSamples,
+          standardDays,
+          actualDays,
+          standardPercentage,
+          actualPercentage,
+          deviation,
+          status,
+          routes,
+        };
+      });
+      
+      // Calculate carrier metrics from visible products
+      const totalSamples = products.reduce((sum: number, p: any) => sum + p.totalSamples, 0);
+      const standardDaysSum = products.reduce((sum: number, p: any) => sum + (p.standardDays * p.totalSamples), 0);
+      const actualDaysSum = products.reduce((sum: number, p: any) => sum + (p.actualDays * p.totalSamples), 0);
+      const standardPercentageSum = products.reduce((sum: number, p: any) => sum + (p.standardPercentage * p.totalSamples), 0);
+      const actualPercentageSum = products.reduce((sum: number, p: any) => sum + (p.actualPercentage * p.totalSamples), 0);
+      
+      const standardDays = totalSamples > 0 ? standardDaysSum / totalSamples : 0;
+      const actualDays = totalSamples > 0 ? actualDaysSum / totalSamples : 0;
+      const standardPercentage = totalSamples > 0 ? standardPercentageSum / totalSamples : 0;
+      const actualPercentage = totalSamples > 0 ? actualPercentageSum / totalSamples : 0;
+      const deviation = actualPercentage - standardPercentage;
+      
+      // Carrier status: worst status from products
+      const productStatuses = products.map((p: any) => p.status);
+      const hasCritical = productStatuses.some((s: string) => s === 'critical');
+      const hasWarning = productStatuses.some((s: string) => s === 'warning');
+      const status = hasCritical ? 'critical' : hasWarning ? 'warning' : 'compliant';
+      
+      return {
+        carrier: carrierData.carrier,
+        totalSamples,
+        standardDays,
+        actualDays,
+        standardPercentage,
+        actualPercentage,
+        deviation,
+        status,
+        products,
+      };
+    });
   }, [data]);
 
   const toggleCarrier = (carrier: string) => {
