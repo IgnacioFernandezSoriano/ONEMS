@@ -83,14 +83,16 @@ export function useTerritoryEquityDataV2(
         const cityNameToIdMap = new Map(cities.map((c) => [c.name, c.id]));
         const regionMap = new Map(regions.map((r) => [r.id, r]));
         const carrierNameToIdMap = new Map(carriers.map((c) => [c.name, c.id]));
-        const productDescToIdMap = new Map(products.map((p) => [`${p.code} - ${p.description}`, p.id]));
-
-        // Debug: Log sample data from lookup maps
-        console.log('[DEBUG] Lookup maps:', {
-          cities: Array.from(cityNameToIdMap.entries()).slice(0, 3),
-          carriers: Array.from(carrierNameToIdMap.entries()).slice(0, 3),
-          products: Array.from(productDescToIdMap.entries()).slice(0, 3),
+        
+        // Product map: support multiple formats
+        const productDescToIdMap = new Map<string, string>();
+        products.forEach(p => {
+          productDescToIdMap.set(`${p.code} - ${p.description}`, p.id); // Full format
+          productDescToIdMap.set(p.code, p.id); // Code only
+          productDescToIdMap.set(p.description, p.id); // Description only
         });
+
+
 
         // Standards map: "carrier_id|product_id|origin_id|dest_id" → standard
         const standardsMap = new Map(
