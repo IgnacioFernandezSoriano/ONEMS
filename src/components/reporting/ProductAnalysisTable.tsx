@@ -115,10 +115,14 @@ export function ProductAnalysisTable({
     const csvContent = [
       headers.join(','),
       ...filteredShipments.map(s => {
-        const transitDays = s.transit_days || 0;
-        const standardTime = s.standard_time || 0;
-        const jkActual = transitDays > 0 ? transitDays : 0;
-        const onTime = standardTime > 0 && jkActual <= standardTime;
+        const transitDays = s.business_transit_days || 0;
+        // Find standard for this shipment from routeData
+        const routeKey = `${s.origin_city_name}|${s.destination_city_name}|${s.carrier_name}|${s.product_name}`;
+        const route = sortedRows.find(r => `${r.origin}|${r.destination}|${r.carrier}|${r.product}` === routeKey);
+        const standardTime = route?.standardDays || 0;
+        const jkActual = transitDays;
+        const onTime = s.on_time_delivery || false;
+        const status = route?.status || '';
         
         return [
           s.tracking_number || '',
@@ -132,7 +136,7 @@ export function ProductAnalysisTable({
           standardTime.toFixed(1),
           jkActual.toFixed(1),
           onTime ? 'Yes' : 'No',
-          s.status || ''
+          status
         ].join(',');
       }),
     ].join('\n');
