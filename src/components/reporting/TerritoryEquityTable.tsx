@@ -315,13 +315,14 @@ export function TerritoryEquityTable({
         };
       });
 
-      // Recalculate city status using relative thresholds (same as products/carriers)
-      const cityWarningThreshold = metrics.standardPercentage - 5;
-      const cityCriticalThreshold = metrics.standardPercentage - 10;
+      // Determine city status based on worst (most critical) carrier status
+      const carrierStatuses = carrierBreakdown.map(c => c.status);
+      const hasCritical = carrierStatuses.some(s => s === 'critical');
+      const hasWarning = carrierStatuses.some(s => s === 'warning');
       
       const cityStatus: 'compliant' | 'warning' | 'critical' = 
-        metrics.actualPercentage >= cityWarningThreshold ? 'compliant' :
-        metrics.actualPercentage >= cityCriticalThreshold ? 'warning' : 'critical';
+        hasCritical ? 'critical' :
+        hasWarning ? 'warning' : 'compliant';
 
       return {
         cityId: city.cityId,
