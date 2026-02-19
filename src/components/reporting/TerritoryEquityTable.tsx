@@ -292,13 +292,14 @@ export function TerritoryEquityTable({
         
         const carrierDeviation = carrierActualPercentage - carrierStandardPercentage;
         
-        // Calculate carrier status using relative thresholds
-        const carrierWarningThreshold = carrierStandardPercentage - 5;
-        const carrierCriticalThreshold = carrierStandardPercentage - 10;
+        // Determine carrier status based on worst (most critical) product status
+        const productStatuses = Array.from(carrierData.products.values()).map(p => p.status);
+        const hasCritical = productStatuses.some(s => s === 'critical');
+        const hasWarning = productStatuses.some(s => s === 'warning');
         
         const carrierStatus: 'compliant' | 'warning' | 'critical' = 
-          carrierActualPercentage >= carrierWarningThreshold ? 'compliant' :
-          carrierActualPercentage >= carrierCriticalThreshold ? 'warning' : 'critical';
+          hasCritical ? 'critical' :
+          hasWarning ? 'warning' : 'compliant';
 
         return {
           carrier: carrierData.carrier,
