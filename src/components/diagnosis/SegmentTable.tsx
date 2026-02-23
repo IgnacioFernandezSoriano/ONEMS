@@ -277,7 +277,8 @@ export default function SegmentTable({ pathId, pathSignature, accountId, carrier
     params.set('product_id', productId)
     
     if (segment.segment_type === 'center' && segment.from_center_id) {
-      params.set('from_center_id', segment.from_center_id)
+      // For operational segments, use postal_center_id instead of from_center_id
+      params.set('postal_center_id', segment.from_center_id)
       params.set('segment_type', 'operational')
     } else if (segment.segment_type === 'transit' && segment.from_center_id && segment.to_center_id) {
       params.set('from_center_id', segment.from_center_id)

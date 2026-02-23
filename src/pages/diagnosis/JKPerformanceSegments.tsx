@@ -101,6 +101,7 @@ export default function JKPerformanceSegments() {
     const productIdParam = searchParams.get('product_id');
     const fromCenterIdParam = searchParams.get('from_center_id');
     const toCenterIdParam = searchParams.get('to_center_id');
+    const postalCenterIdParam = searchParams.get('postal_center_id');
     const segmentTypeParam = searchParams.get('segment_type');
 
     if (carrierIdParam && carriers.length > 0) {
@@ -113,7 +114,14 @@ export default function JKPerformanceSegments() {
       if (productObj) setProduct(`${productObj.code} - ${productObj.description}`);
     }
 
-    if (fromCenterIdParam && postalCenters.length > 0) {
+    // For operational segments, use postal_center_id
+    if (postalCenterIdParam && postalCenters.length > 0) {
+      const centerObj = postalCenters.find(c => c.id === postalCenterIdParam);
+      if (centerObj) {
+        setFromCenter(centerObj.name);
+        setOriginCity(centerObj.city);
+      }
+    } else if (fromCenterIdParam && postalCenters.length > 0) {
       const centerObj = postalCenters.find(c => c.id === fromCenterIdParam);
       if (centerObj) {
         setFromCenter(centerObj.name);
@@ -169,7 +177,14 @@ export default function JKPerformanceSegments() {
 
         if (fromCenter) {
           const centerObj = postalCenters.find(c => c.name === fromCenter);
-          if (centerObj) query = query.eq('from_postal_center_id', centerObj.id);
+          if (centerObj) {
+            // For operational segments, filter by postal_center_id
+            if (segmentType === 'operational') {
+              query = query.eq('postal_center_id', centerObj.id);
+            } else {
+              query = query.eq('from_postal_center_id', centerObj.id);
+            }
+          }
         }
 
         if (toCenter) {
