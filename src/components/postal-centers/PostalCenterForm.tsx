@@ -62,11 +62,17 @@ export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCen
   const loadCarriers = async () => {
     try {
       setLoadingCarriers(true)
-      const { supabase } = await import('@/lib/supabase')
+      const { supabase, getAccountId } = await import('@/lib/supabase')
+      const accountId = getAccountId()
+      if (!accountId) {
+        console.error('No account ID available')
+        return
+      }
       const { data, error } = await supabase
         .from('carriers')
         .select('id, name')
-        .eq('is_active', true)
+        .eq('account_id', accountId)
+        .eq('status', 'active')
         .order('name')
       
       if (error) throw error
