@@ -384,13 +384,7 @@ export function Sidebar() {
               roles: ['admin', 'superadmin'],
               tooltip: 'Compliance reporting',
             },
-            {
-              path: '/reporting/jk-performance-v2',
-              label: 'J+K Performance',
-              icon: FileText,
-              roles: ['admin', 'superadmin', 'user'],
-              tooltip: 'E2E J+K performance analysis',
-            },
+
           ],
         },
         {
@@ -658,13 +652,7 @@ export function Sidebar() {
               roles: ['admin', 'superadmin'],
               tooltip: 'Compliance reporting',
             },
-            {
-              path: '/reporting/jk-performance-v2',
-              label: 'J+K Performance',
-              icon: FileText,
-              roles: ['admin', 'superadmin', 'user'],
-              tooltip: 'E2E J+K performance analysis',
-            },
+
           ],
         },
         {
