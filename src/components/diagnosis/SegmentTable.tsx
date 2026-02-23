@@ -342,7 +342,7 @@ export default function SegmentTable({ pathId, pathSignature, accountId, carrier
                 {segment.std_percentage}%
               </td>
               <td className="px-3 py-2 text-right">
-                {segment.real_percentage > 0 ? (
+                {segment.real_percentage !== null && segment.real_percentage !== undefined ? (
                   <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
                     segment.real_percentage >= segment.warning_threshold 
                       ? 'bg-green-100 text-green-800' 
@@ -357,7 +357,7 @@ export default function SegmentTable({ pathId, pathSignature, accountId, carrier
                 )}
               </td>
               <td className="px-3 py-2 text-right">
-                {segment.real_percentage > 0 ? (
+                {segment.real_percentage !== null && segment.real_percentage !== undefined ? (
                   <span className={`font-semibold ${
                     segment.diff_percentage >= 0 ? 'text-green-600' : 'text-red-600'
                   }`}>
@@ -368,7 +368,7 @@ export default function SegmentTable({ pathId, pathSignature, accountId, carrier
                 )}
               </td>
               <td className="px-3 py-2 text-right">
-                {segment.real_percentage > 0 ? (
+                {segment.real_percentage !== null && segment.real_percentage !== undefined ? (
                   <span className={`px-2 py-0.5 rounded text-xs font-semibold ${getThresholdColor(segment.threshold)}`}>
                     {segment.threshold}
                   </span>
