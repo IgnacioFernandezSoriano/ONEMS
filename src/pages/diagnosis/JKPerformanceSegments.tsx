@@ -299,18 +299,41 @@ export default function JKPerformanceSegments() {
           // Find SLA
           let sla = null;
           if (segGroup.segmentType === 'operational') {
+            // Try to find carrier-specific SLA first, then fallback to generic
             sla = slas.find(s => 
               s.sla_type === 'operational' &&
               s.postal_center_id === segGroup.from_postal_center_id &&
-              (s.carrier_id === null || s.carrier_id === segGroup.carrier_id)
+              s.carrier_id === segGroup.carrier_id
             );
+            if (!sla) {
+              sla = slas.find(s => 
+                s.sla_type === 'operational' &&
+                s.postal_center_id === segGroup.from_postal_center_id &&
+                s.carrier_id === null
+              );
+            }
+            console.log(`🔍 SLA lookup for ${segGroup.fromCenter}:`, {
+              found: !!sla,
+              expected_minutes: sla?.expected_time_minutes || 'using default 1440',
+              carrier_id: segGroup.carrier_id,
+              postal_center_id: segGroup.from_postal_center_id
+            });
           } else {
+            // Try to find carrier-specific SLA first, then fallback to generic
             sla = slas.find(s => 
               s.sla_type === 'distribution' &&
               s.from_postal_center_id === segGroup.from_postal_center_id &&
               s.to_postal_center_id === segGroup.to_postal_center_id &&
-              (s.carrier_id === null || s.carrier_id === segGroup.carrier_id)
+              s.carrier_id === segGroup.carrier_id
             );
+            if (!sla) {
+              sla = slas.find(s => 
+                s.sla_type === 'distribution' &&
+                s.from_postal_center_id === segGroup.from_postal_center_id &&
+                s.to_postal_center_id === segGroup.to_postal_center_id &&
+                s.carrier_id === null
+              );
+            }
           }
 
           // Use SLA values or defaults if no SLA exists
