@@ -33,6 +33,7 @@ export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCen
     latitude: undefined,
     longitude: undefined,
     timezone: 'America/New_York',
+    carrier_id: null,
     is_active: true
   })
   
@@ -41,6 +42,8 @@ export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCen
   const [newHoliday, setNewHoliday] = useState({ date: '', reason: '' })
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [carriers, setCarriers] = useState<Array<{ id: string; name: string }>>([])
+  const [loadingCarriers, setLoadingCarriers] = useState(false)
 
   const dayNames = [
     t('common.sunday'), 
@@ -51,6 +54,31 @@ export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCen
     t('common.friday'), 
     t('common.saturday')
   ]
+
+  useEffect(() => {
+    loadCarriers()
+  }, [])
+
+  const loadCarriers = async () => {
+    try {
+      setLoadingCarriers(true)
+      const { supabase } = await import('@/lib/supabase')
+      const { data, error } = await supabase
+        .from('carriers')
+        .select('id, name')
+        .eq('is_active', true)
+        .order('name')
+      
+      if (error) throw error
+      if (data) {
+        setCarriers(data)
+      }
+    } catch (err) {
+      console.error('Error loading carriers:', err)
+    } finally {
+      setLoadingCarriers(false)
+    }
+  }
 
   useEffect(() => {
     if (postalCenter) {
@@ -65,6 +93,7 @@ export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCen
         latitude: postalCenter.latitude,
         longitude: postalCenter.longitude,
         timezone: postalCenter.timezone || 'America/New_York',
+        carrier_id: postalCenter.carrier_id || null,
         is_active: postalCenter.is_active
       })
       // Load center-specific weekly schedule and holidays from database
@@ -212,6 +241,25 @@ export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCen
             rows={3}
             placeholder="Main distribution hub for Madrid region"
           />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Carrier
+          </label>
+          <select
+            value={formData.carrier_id || ''}
+            onChange={(e) => setFormData({ ...formData, carrier_id: e.target.value || null })}
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+            disabled={loadingCarriers}
+          >
+            <option value="">-- No carrier assigned --</option>
+            {carriers.map((carrier) => (
+              <option key={carrier.id} value={carrier.id}>
+                {carrier.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Location Information */}
