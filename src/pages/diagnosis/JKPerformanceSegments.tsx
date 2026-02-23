@@ -258,7 +258,7 @@ export default function JKPerformanceSegments() {
                 samples: [],
                 carrier_id: seg.carrier_id,
                 product_id: seg.product_id,
-                from_postal_center_id: seg.from_postal_center_id,
+                postal_center_id: seg.postal_center_id,
               });
             }
             segmentMap.get(centerKey).samples.push({ time: timeInCenter, journey_id: seg.id });
@@ -302,13 +302,13 @@ export default function JKPerformanceSegments() {
             // Try to find carrier-specific SLA first, then fallback to generic
             sla = slas.find(s => 
               s.sla_type === 'operational' &&
-              s.postal_center_id === segGroup.from_postal_center_id &&
+              s.postal_center_id === segGroup.postal_center_id &&
               s.carrier_id === segGroup.carrier_id
             );
             if (!sla) {
               sla = slas.find(s => 
                 s.sla_type === 'operational' &&
-                s.postal_center_id === segGroup.from_postal_center_id &&
+                s.postal_center_id === segGroup.postal_center_id &&
                 s.carrier_id === null
               );
             }
@@ -316,7 +316,7 @@ export default function JKPerformanceSegments() {
               found: !!sla,
               expected_minutes: sla?.expected_time_minutes || 'using default 1440',
               carrier_id: segGroup.carrier_id,
-              postal_center_id: segGroup.from_postal_center_id
+              postal_center_id: segGroup.postal_center_id
             });
           } else {
             // Try to find carrier-specific SLA first, then fallback to generic
