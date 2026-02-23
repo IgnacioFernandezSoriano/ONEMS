@@ -136,8 +136,8 @@ export default function SegmentTable({ pathId, pathSignature, accountId, carrier
           : (centerMap.get(firstSeg.from_postal_center_id) || firstSeg.from_postal_center_city)
         const toCenterName = centerMap.get(firstSeg.to_postal_center_id) || firstSeg.to_postal_center_city
 
-        // Center segment (from)
-        if (avgNaturalCenter > 0 || centerSLA) {
+        // Center segment - only for operational segments
+        if (firstSeg.segment_type === 'operational' && (avgNaturalCenter > 0 || centerSLA)) {
           const jkStd = centerSLA?.expected_time_minutes || 0
           const stdPercentage = centerSLA?.on_time_percentage || 95
           const warningThreshold = centerSLA?.warning_threshold || 90
@@ -169,8 +169,8 @@ export default function SegmentTable({ pathId, pathSignature, accountId, carrier
           })
         }
 
-        // Transit segment
-        if (avgNaturalTransit > 0 || transitSLA) {
+        // Transit segment - only for distribution segments
+        if (firstSeg.segment_type === 'distribution' && (avgNaturalTransit > 0 || transitSLA)) {
           const jkStd = transitSLA?.expected_time_minutes || 0
           const stdPercentage = transitSLA?.on_time_percentage || 95
           const warningThreshold = transitSLA?.warning_threshold || 90
@@ -201,38 +201,7 @@ export default function SegmentTable({ pathId, pathSignature, accountId, carrier
           })
         }
 
-        // Add destination center for the LAST segment only
-        if (segIndex === orderedSegments.length - 1) {
-          // Find SLA for destination center
-          const destCenterSLA = slas?.find(sla => 
-            sla.sla_type === 'operational' && 
-            sla.postal_center_id === firstSeg.to_postal_center_id
-          )
-
-          if (destCenterSLA) {
-            const jkStd = destCenterSLA.expected_time_minutes || 0
-            const stdPercentage = destCenterSLA.on_time_percentage || 95
-            const warningThreshold = destCenterSLA.warning_threshold || 90
-            const criticalThreshold = destCenterSLA.critical_threshold || 80
-
-            segmentDataArray.push({
-              segment_name: `${toCenterName} (Center)`,
-              segment_type: 'center',
-              from_center_id: firstSeg.to_postal_center_id,
-              to_center_id: null,
-              jk_std_minutes: jkStd,
-              natural_time_minutes: 0,
-              working_time_minutes: 0,
-              std_percentage: stdPercentage,
-              real_percentage: 0,
-              diff_percentage: -stdPercentage,
-              threshold: 'Critical',
-              warning_threshold: warningThreshold,
-              critical_threshold: criticalThreshold,
-              order: order++
-            })
-          }
-        }
+        // No need to add destination center - all operational centers are already in journey_segments
       })
       
       setSegments(segmentDataArray)
