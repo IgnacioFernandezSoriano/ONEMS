@@ -4,6 +4,8 @@ import { Plus, Trash2 } from 'lucide-react'
 import type { PostalCenter, PostalCenterFormData } from '@/lib/types_postal_centers'
 import { useTranslation } from '@/hooks/useTranslation'
 import { useAccountConfig } from '@/hooks/useAccountConfig'
+import { useAuth } from '@/contexts/AuthContext'
+import { supabase } from '@/lib/supabase'
 
 interface PostalCenterFormProps {
   postalCenter?: PostalCenter | null
@@ -21,6 +23,8 @@ interface WeeklyScheduleDay {
 export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCenterFormProps) {
   const { t } = useTranslation()
   const { config, nonWorkingDays: accountHolidays, weeklySchedule: accountWeeklySchedule } = useAccountConfig()
+  const { profile } = useAuth()
+  const [carriers, setCarriers] = useState<{ id: string; name: string }[]>([])
   
   const [formData, setFormData] = useState<PostalCenterFormData>({
     code: '',
@@ -33,6 +37,7 @@ export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCen
     latitude: undefined,
     longitude: undefined,
     timezone: 'America/New_York',
+    carrier_id: null,
     is_active: true
   })
   
@@ -65,6 +70,7 @@ export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCen
         latitude: postalCenter.latitude,
         longitude: postalCenter.longitude,
         timezone: postalCenter.timezone || 'America/New_York',
+        carrier_id: postalCenter.carrier_id || null,
         is_active: postalCenter.is_active
       })
       // Load center-specific weekly schedule and holidays from database
@@ -72,6 +78,31 @@ export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCen
       loadCenterHolidays(postalCenter.id)
     }
   }, [postalCenter])
+
+  // Load active carriers
+  useEffect(() => {
+    const loadCarriers = async () => {
+      if (!profile?.account_id) return
+
+      try {
+        const { data, error } = await supabase
+          .from('carriers')
+          .select('id, name')
+          .eq('account_id', profile.account_id)
+          .eq('status', 'active')
+          .order('name')
+
+        if (error) throw error
+        if (data) {
+          setCarriers(data)
+        }
+      } catch (err) {
+        console.error('Error loading carriers:', err)
+      }
+    }
+
+    loadCarriers()
+  }, [profile?.account_id])
 
   const loadWeeklySchedule = async (postalCenterId: string) => {
     try {
@@ -212,6 +243,24 @@ export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCen
             rows={3}
             placeholder="Main distribution hub for Madrid region"
           />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Carrier
+          </label>
+          <select
+            value={formData.carrier_id || ''}
+            onChange={(e) => setFormData({ ...formData, carrier_id: e.target.value || null })}
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+          >
+            <option value="">-- No carrier assigned --</option>
+            {carriers.map((carrier) => (
+              <option key={carrier.id} value={carrier.id}>
+                {carrier.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Location Information */}
