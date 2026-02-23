@@ -12,6 +12,7 @@ interface JKRouteData {
   segmentType?: 'operational' | 'distribution';
   carrier_id?: string;
   product_id?: string;
+  postal_center_id?: string;
   from_postal_center_id?: string;
   to_postal_center_id?: string;
   totalSamples: number;

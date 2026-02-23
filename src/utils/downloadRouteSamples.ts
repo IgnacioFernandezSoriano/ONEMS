@@ -8,6 +8,7 @@ interface RouteInfo {
   segmentType?: 'operational' | 'distribution';
   carrier_id?: string;
   product_id?: string;
+  postal_center_id?: string;
   from_postal_center_id?: string;
   to_postal_center_id?: string;
 }
@@ -35,9 +36,9 @@ export async function downloadRouteSamples(route: RouteInfo) {
 
     // Filter by postal centers based on segment type
     if (route.segmentType === 'operational') {
-      // For operational segments, from and to are the same center
-      if (route.from_postal_center_id) {
-        query = query.eq('from_postal_center_id', route.from_postal_center_id);
+      // For operational segments, use postal_center_id (from/to are NULL)
+      if (route.postal_center_id) {
+        query = query.eq('postal_center_id', route.postal_center_id);
       }
     } else {
       // For distribution segments, filter by both from and to centers
