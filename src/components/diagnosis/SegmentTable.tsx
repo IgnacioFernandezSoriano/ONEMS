@@ -90,7 +90,11 @@ export default function SegmentTable({ pathId, pathSignature, accountId, carrier
       const segmentGroups = new Map<string, any[]>()
       
       journeySegments?.forEach(seg => {
-        const key = `${seg.from_postal_center_id}|${seg.to_postal_center_id}`
+        // Operational segments: group by postal_center_id
+        // Distribution segments: group by from_postal_center_id|to_postal_center_id
+        const key = seg.segment_type === 'operational'
+          ? `operational|${seg.postal_center_id}`
+          : `distribution|${seg.from_postal_center_id}|${seg.to_postal_center_id}`
         if (!segmentGroups.has(key)) {
           segmentGroups.set(key, [])
         }
@@ -116,7 +120,9 @@ export default function SegmentTable({ pathId, pathSignature, accountId, carrier
         // Find SLAs
         const centerSLA = slas?.find(sla => 
           sla.sla_type === 'operational' && 
-          sla.postal_center_id === firstSeg.from_postal_center_id
+          sla.postal_center_id === (firstSeg.segment_type === 'operational' 
+            ? firstSeg.postal_center_id 
+            : firstSeg.from_postal_center_id)
         )
         
         const transitSLA = slas?.find(sla => 
@@ -125,7 +131,9 @@ export default function SegmentTable({ pathId, pathSignature, accountId, carrier
           sla.to_postal_center_id === firstSeg.to_postal_center_id
         )
 
-        const fromCenterName = centerMap.get(firstSeg.from_postal_center_id) || firstSeg.from_postal_center_city
+        const fromCenterName = firstSeg.segment_type === 'operational'
+          ? (centerMap.get(firstSeg.postal_center_id) || firstSeg.postal_center_name_snapshot)
+          : (centerMap.get(firstSeg.from_postal_center_id) || firstSeg.from_postal_center_city)
         const toCenterName = centerMap.get(firstSeg.to_postal_center_id) || firstSeg.to_postal_center_city
 
         // Center segment (from)
@@ -146,7 +154,7 @@ export default function SegmentTable({ pathId, pathSignature, accountId, carrier
           segmentDataArray.push({
             segment_name: `${fromCenterName} (Center)`,
             segment_type: 'center',
-            from_center_id: firstSeg.from_postal_center_id,
+            from_center_id: firstSeg.segment_type === 'operational' ? firstSeg.postal_center_id : firstSeg.from_postal_center_id,
             to_center_id: null,
             jk_std_minutes: jkStd,
             natural_time_minutes: Math.round(avgNaturalCenter),
