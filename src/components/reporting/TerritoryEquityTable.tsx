@@ -247,17 +247,13 @@ export function TerritoryEquityTable({
           carrierData.actualDaysCount += relevantShipments;
         }
         
-        // Add product - Calculate status using relative thresholds
+        // Add product - Calculate status using global thresholds from SLA
         const productDeviation = relevantPercentage - cp.standardPercentage;
         
-        // Calculate thresholds relative to standardPercentage
-        // If standardPercentage is 85% and we want warning at -5%, threshold is 80%
-        const productWarningThreshold = cp.standardPercentage - 5;  // 5% below standard
-        const productCriticalThreshold = cp.standardPercentage - 10; // 10% below standard
-        
+        // Use global thresholds from SLA configuration
         const productStatus: 'compliant' | 'warning' | 'critical' = 
-          relevantPercentage >= productWarningThreshold ? 'compliant' :
-          relevantPercentage >= productCriticalThreshold ? 'warning' : 'critical';
+          relevantPercentage >= globalWarningThreshold ? 'compliant' :
+          relevantPercentage >= globalCriticalThreshold ? 'warning' : 'critical';
 
         // Filter by equity status if specified
         if (equityStatusFilter.length > 0 && !equityStatusFilter.includes(productStatus)) {
