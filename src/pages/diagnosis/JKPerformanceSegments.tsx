@@ -453,12 +453,16 @@ export default function JKPerformanceSegments() {
     from_postal_center_id: seg.from_postal_center_id,
     to_postal_center_id: seg.to_postal_center_id,
     totalSamples: seg.totalSamples,
+    totalShipments: seg.totalSamples, // For PerformanceDistributionChart
     jkStandard: seg.jkStandard,
+    standardDays: seg.jkStandard, // For PerformanceDistributionChart
     jkActual: seg.jkActual,
+    actualDays: seg.jkActual, // For PerformanceDistributionChart
     onTimeSamples: seg.onTimeSamples,
     beforeStandardSamples: seg.beforeStandardSamples,
     afterStandardSamples: seg.afterStandardSamples,
     onTimePercentage: seg.onTimePercentage,
+    actualPercentage: seg.onTimePercentage, // For PerformanceDistributionChart
     deviation: seg.deviation,
     standardPercentage: seg.standardPercentage,
     status: seg.status,
