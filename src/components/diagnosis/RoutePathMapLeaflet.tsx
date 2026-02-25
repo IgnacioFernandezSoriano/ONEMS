@@ -325,8 +325,8 @@ export default function RoutePathMapLeaflet({ routePaths }: Props) {
               positions={positions}
               pathOptions={{
                 color: getColor(segment.threshold),
-                weight: Math.max(2, Math.min(8, Math.sqrt(segment.tags) / 2)),
-                opacity: 0.6
+                weight: Math.max(4, Math.min(12, Math.sqrt(segment.tags))),
+                opacity: 0.8
               }}
             >
               <Tooltip sticky>
