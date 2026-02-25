@@ -18,6 +18,7 @@ interface SegmentData {
   segmentType: 'operational' | 'distribution';
   carrier_id?: string;
   product_id?: string;
+  postal_center_id?: string;
   from_postal_center_id?: string;
   to_postal_center_id?: string;
   totalSamples: number;
@@ -729,7 +730,6 @@ export default function JKPerformanceSegments() {
                     distribution: r.distribution,
                     totalShipments: r.totalSamples,
                   }))}
-                  maxDays={maxDays}
                 />
               </div>
             </div>
