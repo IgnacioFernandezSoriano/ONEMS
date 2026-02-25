@@ -1176,17 +1176,15 @@ export default function JKPerformance() {
               {cumulativeView === 'chart' ? (
                 <CumulativeDistributionChart
                   routes={routeData.map(route => ({
-                    routeKey: route.routeKey,
-                    originCity: route.originCity,
-                    destinationCity: route.destinationCity,
+                    origin: route.originCity,
+                    destination: route.destinationCity,
                     carrier: route.carrier,
                     product: route.product,
-                    jkStandard: route.jkStandard,
+                    standardDays: route.jkStandard,
                     standardPercentage: route.standardPercentage,
                     distribution: route.distribution,
-                    totalSamples: route.totalSamples,
+                    totalShipments: route.totalSamples,
                   }))}
-                  maxDays={maxDays}
                 />
               ) : (
                 <CumulativeDistributionTable
