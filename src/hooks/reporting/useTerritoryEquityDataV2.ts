@@ -1581,13 +1581,11 @@ export function useTerritoryEquityDataV2(
             : 0;
           const deviation = actualPercentage - avgStandardPercentage;
           
-          // Calculate status
-          const warningThreshold = avgStandardPercentage - 5;
-          const criticalThreshold = avgStandardPercentage - 10;
+          // Calculate status using global SLA thresholds
           let status: 'compliant' | 'warning' | 'critical';
-          if (actualPercentage >= warningThreshold) {
+          if (actualPercentage >= defaultWarningThreshold) {
             status = 'compliant';
-          } else if (actualPercentage >= criticalThreshold) {
+          } else if (actualPercentage >= defaultCriticalThreshold) {
             status = 'warning';
           } else {
             status = 'critical';
@@ -1628,13 +1626,11 @@ export function useTerritoryEquityDataV2(
             : 0;
           const deviation = actualPercentage - avgStandardPercentage;
           
-          // Calculate status
-          const warningThreshold = avgStandardPercentage - 5;
-          const criticalThreshold = avgStandardPercentage - 10;
+          // Calculate status using global SLA thresholds
           let status: 'compliant' | 'warning' | 'critical';
-          if (actualPercentage >= warningThreshold) {
+          if (actualPercentage >= defaultWarningThreshold) {
             status = 'compliant';
-          } else if (actualPercentage >= criticalThreshold) {
+          } else if (actualPercentage >= defaultCriticalThreshold) {
             status = 'warning';
           } else {
             status = 'critical';
