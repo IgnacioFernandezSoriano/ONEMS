@@ -1458,19 +1458,11 @@ export function useTerritoryEquityDataV2(
             standardDays
           );
           
-          // Calculate status based on relative threshold (same as Underserved Cities logic)
-          // Critical: actual% is 10+ percentage points below standard%
-          // Warning: actual% is 5-10 percentage points below standard%
-          // Compliant: actual% is within 5 percentage points of standard%
-          const relativeThreshold = 10;
-          const warningThreshold = 5;
-          const criticalThreshold = standardPercentage - relativeThreshold;
-          const warningThresholdValue = standardPercentage - warningThreshold;
-          
+          // Calculate status using global SLA thresholds
           let status: 'compliant' | 'warning' | 'critical';
-          if (actualPercentage >= warningThresholdValue) {
+          if (actualPercentage >= defaultWarningThreshold) {
             status = 'compliant';
-          } else if (actualPercentage >= criticalThreshold) {
+          } else if (actualPercentage >= defaultCriticalThreshold) {
             status = 'warning';
           } else {
             status = 'critical';
