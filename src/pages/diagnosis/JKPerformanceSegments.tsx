@@ -720,15 +720,14 @@ export default function JKPerformanceSegments() {
                 </div>
                 <CumulativeDistributionChart
                   routes={routeDataForCharts.map(r => ({
-                    routeKey: r.routeKey,
-                    originCity: r.originCity,
-                    destinationCity: r.destinationCity,
+                    origin: r.originCity,
+                    destination: r.destinationCity,
                     carrier: r.carrier,
                     product: r.product,
-                    jkStandard: r.jkStandard,
+                    standardDays: r.jkStandard,
                     standardPercentage: r.standardPercentage,
                     distribution: r.distribution,
-                    totalSamples: r.totalSamples,
+                    totalShipments: r.totalSamples,
                   }))}
                   maxDays={maxDays}
                 />
