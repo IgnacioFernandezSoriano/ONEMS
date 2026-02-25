@@ -442,6 +442,8 @@ export default function JKPerformanceSegments() {
 
   // Convert SegmentData to JKRouteData format for charts
   const routeDataForCharts = segmentData.map(seg => ({
+    origin: seg.fromCenter,
+    destination: seg.toCenter,
     originCity: seg.fromCenter,
     destinationCity: seg.toCenter,
     carrier: seg.carrier,

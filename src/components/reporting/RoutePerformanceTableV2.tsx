@@ -5,6 +5,8 @@ import { downloadRouteSamples } from '@/utils/downloadRouteSamples';
 
 
 interface JKRouteData {
+  origin: string;
+  destination: string;
   originCity: string;
   destinationCity: string;
   carrier: string;
@@ -15,8 +17,12 @@ interface JKRouteData {
   from_postal_center_id?: string;
   to_postal_center_id?: string;
   totalSamples: number;
+  totalShipments: number;
   jkStandard: number;
+  standardDays: number;
   jkActual: number;
+  actualDays: number;
+  actualPercentage: number;
   onTimeSamples: number;
   beforeStandardSamples: number;
   afterStandardSamples: number;

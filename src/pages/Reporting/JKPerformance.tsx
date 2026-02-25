@@ -1190,13 +1190,17 @@ export default function JKPerformance() {
                 <CumulativeDistributionTable
                   routes={routeData.map(route => ({
                     routeKey: route.routeKey,
+                    origin: route.originCity,
+                    destination: route.destinationCity,
                     originCity: route.originCity,
                     destinationCity: route.destinationCity,
                     carrier: route.carrier,
                     product: route.product,
+                    standardDays: route.jkStandard,
                     jkStandard: route.jkStandard,
                     standardPercentage: route.standardPercentage,
                     distribution: route.distribution,
+                    totalShipments: route.totalSamples,
                     totalSamples: route.totalSamples,
                   }))}
                   maxDays={maxDays}

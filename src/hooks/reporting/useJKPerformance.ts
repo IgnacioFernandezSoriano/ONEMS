@@ -5,13 +5,19 @@ import { useEffectiveAccountId } from '../useEffectiveAccountId';
 
 export interface JKRouteData {
   routeKey: string;
+  origin: string;
+  destination: string;
   originCity: string;
   destinationCity: string;
   carrier: string;
   product: string;
   totalSamples: number;
+  totalShipments: number;
   jkStandard: number; //  jkStandard: number;
+  standardDays: number;
   jkActual: number; // days to reach STD % target
+  actualDays: number;
+  actualPercentage: number;
   deviation: number; // actual - standard
   onTimePercentage: number;
   onTimeSamples: number;
@@ -384,13 +390,19 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
           
           return {
             routeKey: key,
+            origin: route.originCity,
+            destination: route.destinationCity,
             originCity: route.originCity,
             destinationCity: route.destinationCity,
             carrier: route.carrier,
             product: route.product,
             totalSamples,
+            totalShipments: totalSamples,
             jkStandard,
+            standardDays: jkStandard,
             jkActual,
+            actualDays: jkActual,
+            actualPercentage: onTimePercentage,
             deviation,
             onTimePercentage,
             onTimeSamples,

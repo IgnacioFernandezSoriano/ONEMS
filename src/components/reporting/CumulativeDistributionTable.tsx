@@ -15,6 +15,7 @@ interface RouteDistribution {
 
 interface CumulativeDistributionTableProps {
   routes: RouteDistribution[];
+  maxDays?: number;
 }
 
 export function CumulativeDistributionTable({ routes }: CumulativeDistributionTableProps) {

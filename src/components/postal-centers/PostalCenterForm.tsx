@@ -4,6 +4,7 @@ import { Plus, Trash2 } from 'lucide-react'
 import type { PostalCenter, PostalCenterFormData } from '@/lib/types_postal_centers'
 import { useTranslation } from '@/hooks/useTranslation'
 import { useAccountConfig } from '@/hooks/useAccountConfig'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface PostalCenterFormProps {
   postalCenter?: PostalCenter | null
@@ -20,6 +21,7 @@ interface WeeklyScheduleDay {
 
 export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCenterFormProps) {
   const { t } = useTranslation()
+  const { profile } = useAuth()
   const { config, nonWorkingDays: accountHolidays, weeklySchedule: accountWeeklySchedule } = useAccountConfig()
   
   const [formData, setFormData] = useState<PostalCenterFormData>({
@@ -62,8 +64,8 @@ export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCen
   const loadCarriers = async () => {
     try {
       setLoadingCarriers(true)
-      const { supabase, getAccountId } = await import('@/lib/supabase')
-      const accountId = getAccountId()
+      const { supabase } = await import('@/lib/supabase')
+      const accountId = profile?.account_id
       if (!accountId) {
         console.error('No account ID available')
         return

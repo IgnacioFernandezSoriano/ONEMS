@@ -18,6 +18,7 @@ interface RouteData {
 
 interface PerformanceDistributionChartProps {
   routeData: RouteData[];
+  maxDays?: number;
   carrierFilter?: string;
   productFilter?: string;
 }
