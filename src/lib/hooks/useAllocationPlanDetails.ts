@@ -222,9 +222,40 @@ export function useAllocationPlanDetails() {
 
   const createDetail = async (newDetail: any) => {
     try {
+      // Get account_id from current user
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('User not authenticated')
+
+      let accountId = effectiveAccountId
+      if (!accountId) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('account_id')
+          .eq('id', user.id)
+          .single()
+        accountId = profile?.account_id
+      }
+      if (!accountId) throw new Error('User account not found')
+
+      // Only include fields that exist in allocation_plan_details table
+      const validFields = {
+        plan_id: newDetail.plan_id,
+        account_id: accountId,
+        origin_node_id: newDetail.origin_node_id,
+        destination_node_id: newDetail.destination_node_id,
+        fecha_programada: newDetail.fecha_programada,
+        week_number: newDetail.week_number,
+        month: newDetail.month,
+        year: newDetail.year,
+        status: newDetail.status || 'pending',
+        tag_id: newDetail.tag_id || null,
+        origin_availability_status: newDetail.origin_availability_status || 'available',
+        destination_availability_status: newDetail.destination_availability_status || 'available',
+      }
+
       const { data, error } = await supabase
         .from('allocation_plan_details')
-        .insert([newDetail])
+        .insert([validFields])
         .select()
         .single()
 

@@ -95,11 +95,13 @@ export function RecordModal({
     try {
       // Calculate week and year from fecha_programada
       const { week_number, year } = getISOWeekFromDate(formData.fecha_programada)
+      const month = formData.fecha_programada ? new Date(formData.fecha_programada + 'T00:00:00').getMonth() + 1 : 1
 
       const recordData = {
         ...formData,
         year,
         week_number,
+        month,
       }
 
       if (isEditMode && editRecord && onUpdate) {
