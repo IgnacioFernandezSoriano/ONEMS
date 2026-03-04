@@ -249,8 +249,6 @@ export function useAllocationPlanDetails() {
         year: newDetail.year,
         status: newDetail.status || 'pending',
         tag_id: newDetail.tag_id || null,
-        origin_availability_status: newDetail.origin_availability_status || 'available',
-        destination_availability_status: newDetail.destination_availability_status || 'available',
       }
 
       const { data, error } = await supabase
