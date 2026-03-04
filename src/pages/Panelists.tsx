@@ -65,7 +65,7 @@ export function Panelists() {
     fetchCities()
   }, [profile, effectiveAccountId]) // Refrescar cuando cambie el perfil o la cuenta seleccionada
 
-  const fetchNodes = async () => {
+  const fetchNodes = async (currentNodeId?: string | null) => {
     console.log('[Panelists] fetchNodes - effectiveAccountId:', effectiveAccountId)
     
     // Construir query base
@@ -104,8 +104,11 @@ export function Panelists() {
     
     const assignedNodeIds = new Set(assignedNodes?.map(p => p.node_id) || [])
     
-    // Filtrar solo nodos disponibles (sin panelistas asignados)
-    const availableNodes = nodesData.filter(node => !assignedNodeIds.has(node.id))
+    // Filtrar nodos disponibles (sin panelistas asignados)
+    // Si se pasa currentNodeId (edición), incluir ese nodo aunque esté asignado
+    const availableNodes = nodesData.filter(node => 
+      !assignedNodeIds.has(node.id) || (currentNodeId && node.id === currentNodeId)
+    )
     
     setNodes(availableNodes as any)
   }
@@ -188,6 +191,8 @@ export function Panelists() {
   const handleOpenModal = (panelist?: any) => {
     if (panelist) {
       setEditingPanelist(panelist)
+      // Re-fetch nodes passing the current node_id so it's included in the list
+      fetchNodes(panelist.node_id)
       setFormData({
         panelist_code: panelist.panelist_code || '',
         name: panelist.name,
@@ -199,7 +204,7 @@ export function Panelists() {
         postal_code: panelist.postal_code || '',
         address_city: panelist.address_city || '',
         address_country: panelist.address_country || '',
-        node_id: panelist.node_id,
+        node_id: panelist.node_id || '',
         language: (panelist.language || 'en') as SupportedLanguage,
         status: panelist.status,
       })
@@ -247,7 +252,16 @@ export function Panelists() {
     
     try {
       if (editingPanelist) {
-        await updatePanelist(editingPanelist.id, formData)
+        // Convert empty node_id to null so it's stored as NULL in DB (unassign node)
+        const updateData = {
+          ...formData,
+          node_id: formData.node_id || undefined,
+        }
+        // If explicitly unassigning (was set and now empty), pass null
+        if (editingPanelist.node_id && !formData.node_id) {
+          (updateData as any).node_id = null
+        }
+        await updatePanelist(editingPanelist.id, updateData)
       } else {
         await createPanelist(formData)
       }
@@ -884,12 +898,11 @@ export function Panelists() {
                   Node
                 </label>
                 <select
-                  value={formData.node_id}
+                  value={formData.node_id || ''}
                   onChange={(e) => setFormData({ ...formData, node_id: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                  required
                 >
-                  <option value="">Select a node</option>
+                  <option value="">— No node assigned —</option>
                   {nodes.map((node: any) => (
                     <option key={node.id} value={node.id}>
                       {node.auto_id} - {node.city?.name || ''}
