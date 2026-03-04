@@ -131,11 +131,23 @@ export function usePanelists() {
         panelistCode = `PAN-${cityCode}-${nodeNumber}-${String(nextSerial).padStart(3, '0')}`
       }
 
+      // Inherit language from account if not explicitly set
+      let panelistLanguage = panelistData.language
+      if (!panelistLanguage) {
+        const { data: accountData } = await supabase
+          .from('accounts')
+          .select('default_language')
+          .eq('id', accountId)
+          .single()
+        panelistLanguage = accountData?.default_language || 'en'
+      }
+
       const { data, error: insertError } = await supabase
         .from('panelists')
         .insert({
           ...panelistData,
           panelist_code: panelistCode,
+          language: panelistLanguage,
           account_id: accountId,
           created_by: user.id,
         })

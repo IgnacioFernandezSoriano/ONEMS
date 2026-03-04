@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { Button } from '@/components/common/Button'
-import type { Account } from '@/lib/types'
-
+import type { Account, SupportedLanguage } from '@/lib/types'
+import { SUPPORTED_LANGUAGES } from '@/lib/types'
 import { useTranslation } from '@/hooks/useTranslation';
+
 interface AccountFormProps {
   account?: Account
-  onSubmit: (data: { name: string; slug: string; status?: 'active' | 'inactive' }) => Promise<void>
+  onSubmit: (data: { name: string; slug: string; status?: 'active' | 'inactive'; default_language: SupportedLanguage }) => Promise<void>
   onCancel: () => void
 }
 
@@ -14,6 +15,7 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
   const [name, setName] = useState(account?.name || '')
   const [slug, setSlug] = useState(account?.slug || '')
   const [status, setStatus] = useState<'active' | 'inactive'>(account?.status || 'active')
+  const [defaultLanguage, setDefaultLanguage] = useState<SupportedLanguage>(account?.default_language || 'en')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -23,7 +25,7 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
     setLoading(true)
 
     try {
-      await onSubmit({ name, slug, status })
+      await onSubmit({ name, slug, status, default_language: defaultLanguage })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error submitting form')
     } finally {
@@ -68,6 +70,27 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
         />
         <p className="text-xs text-gray-500 mt-1">
           Unique identifier (lowercase, no spaces)
+        </p>
+      </div>
+
+      <div>
+        <label htmlFor="default_language" className="block text-sm font-medium mb-1">
+          Default Language
+        </label>
+        <select
+          id="default_language"
+          value={defaultLanguage}
+          onChange={(e) => setDefaultLanguage(e.target.value as SupportedLanguage)}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md"
+        >
+          {SUPPORTED_LANGUAGES.map(lang => (
+            <option key={lang.code} value={lang.code}>
+              {lang.name}
+            </option>
+          ))}
+        </select>
+        <p className="text-xs text-gray-500 mt-1">
+          Language inherited by panelists of this account
         </p>
       </div>
 

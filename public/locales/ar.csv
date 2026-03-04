@@ -2415,3 +2415,6 @@ menu.segment_deep_dive,تحليل معمق للقطع
 menu.segment_deep_dive.tooltip,تحليل مفصل لقطع الرحلة حسب النوع والأداء
 menu.jk_performance_segments,أداء J+K (القطع)
 menu.jk_performance_segments.tooltip,تحليل أداء J+K على مستوى القطع مع مقاييس بالأيام
+accounts.default_language,اللغة الافتراضية
+accounts.default_language_hint,اللغة التي يرثها المشاركون من هذا الحساب
+panelists.language,اللغة

@@ -1,5 +1,6 @@
 import { Button } from '@/components/common/Button'
 import type { Account } from '@/lib/types'
+import { SUPPORTED_LANGUAGES } from '@/lib/types'
 
 interface AccountTableProps {
   accounts: Account[]
@@ -28,6 +29,9 @@ export function AccountTable({ accounts, onEdit, onDelete }: AccountTableProps) 
               Slug
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              Default Language
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
               Status
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
@@ -46,6 +50,9 @@ export function AccountTable({ accounts, onEdit, onDelete }: AccountTableProps) 
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {account.slug}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                {SUPPORTED_LANGUAGES.find(l => l.code === account.default_language)?.name || account.default_language || 'English'}
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <span

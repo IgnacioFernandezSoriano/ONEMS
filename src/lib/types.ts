@@ -1,11 +1,21 @@
 export type Role = 'superadmin' | 'admin' | 'user'
 export type Status = 'active' | 'inactive'
 
+export type SupportedLanguage = 'en' | 'es' | 'fr' | 'ar'
+
+export const SUPPORTED_LANGUAGES: { code: SupportedLanguage; name: string }[] = [
+  { code: 'en', name: 'English' },
+  { code: 'es', name: 'Español' },
+  { code: 'fr', name: 'Français' },
+  { code: 'ar', name: 'العربية' },
+]
+
 export interface Account {
   id: string
   name: string
   slug: string
   status: Status
+  default_language: SupportedLanguage
   created_at: string
   updated_at: string
 }
@@ -253,6 +263,7 @@ export interface Panelist {
   address_city?: string
   address_country?: string
   node_id: string
+  language: SupportedLanguage
   status: 'active' | 'inactive' | 'unavailable_temp'
   created_at: string
   updated_at: string

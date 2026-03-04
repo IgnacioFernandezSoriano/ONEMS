@@ -2519,3 +2519,6 @@ menu.segment_deep_dive,Segment Deep Dive
 menu.segment_deep_dive.tooltip,Detailed analysis of journey segments by type and performance
 menu.jk_performance_segments,J+K Performance (Segments)
 menu.jk_performance_segments.tooltip,Segment-level J+K performance analysis with days-based metrics
+accounts.default_language,Default Language
+accounts.default_language_hint,Language inherited by panelists of this account
+panelists.language,Language

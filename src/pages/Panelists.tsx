@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from 'react'
 import { usePanelists } from '@/lib/hooks/usePanelists'
 import { supabase } from '@/lib/supabase'
-import type { Node, City, Panelist } from '@/lib/types'
+import type { Node, City, Panelist, SupportedLanguage } from '@/lib/types'
+import { SUPPORTED_LANGUAGES } from '@/lib/types'
 import { PanelistUnavailabilityComponent } from '@/components/PanelistUnavailability'
 import { SmartTooltip } from '@/components/common/SmartTooltip'
 
@@ -47,6 +48,7 @@ export function Panelists() {
     address_city: '',
     address_country: '',
     node_id: '',
+    language: 'en' as SupportedLanguage,
     status: 'active' as 'active' | 'inactive',
   })
 
@@ -198,6 +200,7 @@ export function Panelists() {
         address_city: panelist.address_city || '',
         address_country: panelist.address_country || '',
         node_id: panelist.node_id,
+        language: (panelist.language || 'en') as SupportedLanguage,
         status: panelist.status,
       })
     } else {
@@ -214,8 +217,22 @@ export function Panelists() {
         address_city: '',
         address_country: '',
         node_id: '',
+        language: 'en' as SupportedLanguage,
         status: 'active',
       })
+      // Cargar idioma por defecto de la cuenta
+      if (effectiveAccountId) {
+        supabase
+          .from('accounts')
+          .select('default_language')
+          .eq('id', effectiveAccountId)
+          .single()
+          .then(({ data }) => {
+            if (data?.default_language) {
+              setFormData(prev => ({ ...prev, language: data.default_language as SupportedLanguage }))
+            }
+          })
+      }
     }
     setShowModal(true)
   }
@@ -615,6 +632,7 @@ export function Panelists() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('panelists.mobile')}</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('topology.node')}</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('topology.city')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Language</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('common.status')}</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('common.actions')}</th>
               </tr>
@@ -637,6 +655,9 @@ export function Panelists() {
                     <td className="px-6 py-4 text-sm">{panelist.mobile}</td>
                     <td className="px-6 py-4 text-sm font-mono">{panelist.node?.auto_id || '-'}</td>
                     <td className="px-6 py-4 text-sm">{panelist.city?.name || '-'}</td>
+                    <td className="px-6 py-4 text-sm text-gray-700">
+                      {SUPPORTED_LANGUAGES.find(l => l.code === panelist.language)?.name || panelist.language || 'English'}
+                    </td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                         panelist.status === 'active' 
@@ -691,7 +712,7 @@ export function Panelists() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={9} className="px-6 py-4 text-center text-gray-500">
+                  <td colSpan={10} className="px-6 py-4 text-center text-gray-500">
                     No panelists found. {filters.search || filters.city_id || filters.node_id || filters.status ? 'Try adjusting your filters.' : 'Click "Add Panelist" to create one.'}
                   </td>
                 </tr>
@@ -839,6 +860,23 @@ export function Panelists() {
                   onChange={(e) => setFormData({ ...formData, address_country: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Language
+                </label>
+                <select
+                  value={formData.language}
+                  onChange={(e) => setFormData({ ...formData, language: e.target.value as SupportedLanguage })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                >
+                  {SUPPORTED_LANGUAGES.map(lang => (
+                    <option key={lang.code} value={lang.code}>
+                      {lang.name}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div>

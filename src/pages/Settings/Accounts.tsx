@@ -5,7 +5,7 @@ import { Modal } from '@/components/common/Modal'
 import { AccountTable } from '@/components/accounts/AccountTable'
 import { AccountForm } from '@/components/accounts/AccountForm'
 import { useAccounts } from '@/hooks/useAccounts'
-import type { Account } from '@/lib/types'
+import type { Account, SupportedLanguage } from '@/lib/types'
 
 export function Accounts() {
   const { accounts, loading, createAccount, updateAccount, deleteAccount } = useAccounts()
@@ -22,7 +22,7 @@ export function Accounts() {
     setIsModalOpen(true)
   }
 
-  const handleSubmit = async (data: { name: string; slug: string; status?: 'active' | 'inactive' }) => {
+  const handleSubmit = async (data: { name: string; slug: string; status?: 'active' | 'inactive'; default_language: SupportedLanguage }) => {
     if (selectedAccount) {
       await updateAccount(selectedAccount.id, data)
     } else {

@@ -2519,3 +2519,6 @@ menu.segment_deep_dive,Análisis Profundo de Segmentos
 menu.segment_deep_dive.tooltip,Análisis detallado de segmentos de viaje por tipo y rendimiento
 menu.jk_performance_segments,Rendimiento J+K (Segmentos)
 menu.jk_performance_segments.tooltip,Análisis de rendimiento J+K a nivel de segmento con métricas en días
+accounts.default_language,Idioma predeterminado
+accounts.default_language_hint,Idioma que heredarán los panelistas de esta cuenta
+panelists.language,Idioma

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
-import type { Account } from '@/lib/types'
+import type { Account, SupportedLanguage } from '@/lib/types'
 
 export function useAccounts() {
   const [accounts, setAccounts] = useState<Account[]>([])
@@ -28,7 +28,7 @@ export function useAccounts() {
     fetchAccounts()
   }, [])
 
-  const createAccount = async (account: { name: string; slug: string }) => {
+  const createAccount = async (account: { name: string; slug: string; default_language?: SupportedLanguage }) => {
     const { data, error } = await supabase
       .from('accounts')
       .insert(account as any)
