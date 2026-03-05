@@ -163,9 +163,20 @@ export function usePanelists() {
       const { data, error: insertError } = await supabase
         .from('panelists')
         .insert({
-          ...panelistData,
+          // Explicit fields only - avoids sending empty strings as UUIDs
           panelist_code: panelistCode,
+          name: panelistData.name,
+          email: panelistData.email,
+          mobile: panelistData.mobile,
+          telegram_id: panelistData.telegram_id || null,
+          address_line1: panelistData.address_line1 || null,
+          address_line2: panelistData.address_line2 || null,
+          postal_code: panelistData.postal_code || null,
+          address_city: panelistData.address_city || null,
+          address_country: panelistData.address_country || null,
+          node_id: panelistData.node_id || null,
           language: panelistLanguage,
+          status: panelistData.status || 'active',
           account_id: accountId,
           created_by: user.id,
         })
@@ -192,6 +203,8 @@ export function usePanelists() {
         .from('panelists')
         .update({
           ...updates,
+          // Convert empty string to null for UUID fields
+          node_id: updates.node_id === '' ? null : updates.node_id,
           updated_by: user.id,
         })
         .eq('id', id)
