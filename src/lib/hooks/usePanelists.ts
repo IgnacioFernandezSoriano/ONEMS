@@ -83,52 +83,70 @@ export function usePanelists() {
       // Generate panelist_code if empty or null
       let panelistCode = panelistData.panelist_code
       if (!panelistCode || panelistCode.trim() === '') {
-        // Validate node_id is provided
-        if (!panelistData.node_id) {
-          throw new Error('Node must be selected to auto-generate panelist code')
-        }
+        if (panelistData.node_id) {
+          // Get node information to extract city and node number
+          const { data: nodeData, error: nodeError } = await supabase
+            .from('nodes')
+            .select('auto_id, city:cities(name)')
+            .eq('id', panelistData.node_id)
+            .single()
 
-        // Get node information to extract city and node number
-        const { data: nodeData, error: nodeError } = await supabase
-          .from('nodes')
-          .select('auto_id, city:cities(name)')
-          .eq('id', panelistData.node_id)
-          .single()
-
-        if (nodeError || !nodeData) {
-          throw new Error('Node not found')
-        }
-
-        // Extract node number from auto_id (e.g., "CENTRO-MAD-002" -> "002")
-        const nodeMatch = nodeData.auto_id?.match(/(\d+)$/)
-        const nodeNumber = nodeMatch ? nodeMatch[1] : '000'
-
-        // Get city name (first 3 letters, uppercase)
-        const cityName = (nodeData.city as any)?.name || 'XXX'
-        const cityCode = cityName.substring(0, 3).toUpperCase()
-
-        // Get the highest existing serial for this specific node
-        const { data: existingPanelists } = await supabase
-          .from('panelists')
-          .select('panelist_code')
-          .eq('account_id', accountId)
-          .eq('node_id', panelistData.node_id)
-          .not('panelist_code', 'is', null)
-          .order('panelist_code', { ascending: false })
-          .limit(1)
-
-        let nextSerial = 1
-        if (existingPanelists && existingPanelists.length > 0) {
-          const lastCode = existingPanelists[0].panelist_code
-          // Extract serial number from code like "PAN-MAD-002-001"
-          const serialMatch = lastCode?.match(/(\d+)$/)
-          if (serialMatch) {
-            nextSerial = parseInt(serialMatch[1], 10) + 1
+          if (nodeError || !nodeData) {
+            throw new Error('Node not found')
           }
+
+          // Extract node number from auto_id (e.g., "CENTRO-MAD-002" -> "002")
+          const nodeMatch = nodeData.auto_id?.match(/(\d+)$/)
+          const nodeNumber = nodeMatch ? nodeMatch[1] : '000'
+
+          // Get city name (first 3 letters, uppercase)
+          const cityName = (nodeData.city as any)?.name || 'XXX'
+          const cityCode = cityName.substring(0, 3).toUpperCase()
+
+          // Get the highest existing serial for this specific node
+          const { data: existingPanelists } = await supabase
+            .from('panelists')
+            .select('panelist_code')
+            .eq('account_id', accountId)
+            .eq('node_id', panelistData.node_id)
+            .not('panelist_code', 'is', null)
+            .order('panelist_code', { ascending: false })
+            .limit(1)
+
+          let nextSerial = 1
+          if (existingPanelists && existingPanelists.length > 0) {
+            const lastCode = existingPanelists[0].panelist_code
+            // Extract serial number from code like "PAN-MAD-002-001"
+            const serialMatch = lastCode?.match(/(\d+)$/)
+            if (serialMatch) {
+              nextSerial = parseInt(serialMatch[1], 10) + 1
+            }
+          }
+
+          // Generate new code with format PAN-CITY-NODE-SERIAL
+          panelistCode = `PAN-${cityCode}-${nodeNumber}-${String(nextSerial).padStart(3, '0')}`
+        } else {
+          // No node assigned: generate code with account-level serial
+          const { data: existingPanelists } = await supabase
+            .from('panelists')
+            .select('panelist_code')
+            .eq('account_id', accountId)
+            .not('panelist_code', 'is', null)
+            .order('panelist_code', { ascending: false })
+            .limit(1)
+
+          let nextSerial = 1
+          if (existingPanelists && existingPanelists.length > 0) {
+            const lastCode = existingPanelists[0].panelist_code
+            const serialMatch = lastCode?.match(/(\d+)$/)
+            if (serialMatch) {
+              nextSerial = parseInt(serialMatch[1], 10) + 1
+            }
+          }
+
+          // Generate code with format PAN-NOID-XXX (no node assigned)
+          panelistCode = `PAN-NOID-${String(nextSerial).padStart(3, '0')}`
         }
-        
-        // Generate new code with format PAN-CITY-NODE-SERIAL
-        panelistCode = `PAN-${cityCode}-${nodeNumber}-${String(nextSerial).padStart(3, '0')}`
       }
 
       // Inherit language from account if not explicitly set
