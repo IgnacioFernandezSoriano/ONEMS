@@ -90,8 +90,8 @@ export function AllocationPlanDetailRow({
 
       {/* Event ID */}
       {showIdColumn && (
-        <td className="px-4 py-3 text-xs text-gray-600 font-mono">
-          {detail.id.substring(0, 8)}...
+        <td className="px-4 py-3 text-xs text-gray-600 font-mono whitespace-nowrap">
+          {detail.id}
         </td>
       )}
 
