@@ -76,7 +76,7 @@ export function Sidebar() {
   const [isHovered, setIsHovered] = useState(false)
   const [accounts, setAccounts] = useState<Array<{ id: string; name: string }>>([])
   const [accountName, setAccountName] = useState<string>('')
-  const [moduleFilter, setModuleFilter] = useState<'all' | 'e2e' | 'diagnosis'>('all')
+  const [moduleFilter, setModuleFilter] = useState<'all' | 'e2e' | 'diagnosis'>('e2e')
   
   // Auto-expand on hover when collapsed
   const isExpanded = isCollapsed ? isHovered : true
@@ -901,7 +901,7 @@ export function Sidebar() {
               onChange={(e) => handleViewChange(e.target.value as SidebarView)}
               className="w-full px-3 py-2 text-sm font-medium bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
             >
-              <option value="all">🌐 All Modules</option>
+              <option value="all">🌐 Operations</option>
               <option value="setup">📋 Setup View</option>
             </select>
           </div>
@@ -909,16 +909,6 @@ export function Sidebar() {
           {/* Module Filter - Show in both views */}
           {(
             <div className="mt-2 flex items-center gap-1">
-              <button
-                onClick={() => setModuleFilter('all')}
-                className={`flex-1 px-2 py-1 text-xs font-medium rounded-md transition-colors ${
-                  moduleFilter === 'all'
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                All
-              </button>
               <button
                 onClick={() => setModuleFilter('e2e')}
                 className={`flex-1 px-2 py-1 text-xs font-medium rounded-md transition-colors ${
