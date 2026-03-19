@@ -844,11 +844,11 @@ export interface JourneyFilters {
 **Repository Information:**
 - **URL:** https://github.com/IgnacioFernandezSoriano/ONEMS
 - **Branch:** main
-- **Personal Access Token:** `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`
+- **Personal Access Token:** `[REDACTED_FOR_SECURITY]`
 
 **Clone Command:**
 ```bash
-git clone https://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@github.com/IgnacioFernandezSoriano/ONEMS.git
+git clone https://[REDACTED_FOR_SECURITY]@github.com/IgnacioFernandezSoriano/ONEMS.git
 ```
 
 **Key Directories:**
@@ -938,7 +938,7 @@ VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 **Local Setup:**
 ```bash
 # 1. Clone repository
-git clone https://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@github.com/IgnacioFernandezSoriano/ONEMS.git
+git clone https://[REDACTED_FOR_SECURITY]@github.com/IgnacioFernandezSoriano/ONEMS.git
 cd ONEMS
 
 # 2. Install dependencies
@@ -1010,7 +1010,7 @@ git push origin main
 
 | **Resource** | **URL/Endpoint** | **Credentials** |
 |--------------|------------------|-----------------|
-| GitHub Repo | https://github.com/IgnacioFernandezSoriano/ONEMS | PAT: `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` |
+| GitHub Repo | https://github.com/IgnacioFernandezSoriano/ONEMS | PAT: `[REDACTED_FOR_SECURITY]` |
 | Supabase Dashboard | https://supabase.com/dashboard/project/sehbnpgzqljrsqimwyuz | Login via browser |
 | Supabase API | https://sehbnpgzqljrsqimwyuz.supabase.co | Anon Key (see above) |
 | Supabase SQL Editor | https://supabase.com/dashboard/project/sehbnpgzqljrsqimwyuz/sql/new | Login via browser |

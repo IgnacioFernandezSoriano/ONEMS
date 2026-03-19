@@ -81,14 +81,14 @@ Durante esta sesión se completó exitosamente el **Sprint 4: Readers Module Enh
 
 ### GitHub
 - **Repositorio:** `https://github.com/IgnacioFernandezSoriano/ONEMS`
-- **Personal Access Token (PAT):** `ghp_****` (solicitar al usuario si es necesario)
+- **Personal Access Token (PAT):** [REDACTED FOR SECURITY]
 - **Rama Actual:** `main`
 - **Último Commit:** `6fd67fd` - fix(postal-centers): Calculation mode inheritance and filter correction - Sprint 4 complete
 - **Comandos de configuración:**
   ```bash
   cd /tmp
   rm -rf ONEMS
-  git clone https://[TOKEN]@github.com/IgnacioFernandezSoriano/ONEMS.git
+  git clone git@github.com:IgnacioFernandezSoriano/ONEMS.git
   cd ONEMS
   git config user.email "manus@ai.com"
   git config user.name "Manus AI"
