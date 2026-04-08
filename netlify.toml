@@ -7,6 +7,12 @@
   NPM_FLAGS = "--version"
 
 [[redirects]]
+  from = "/locales/*"
+  to = "/locales/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
