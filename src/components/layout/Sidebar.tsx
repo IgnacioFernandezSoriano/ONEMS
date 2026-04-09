@@ -77,6 +77,18 @@ export function Sidebar() {
   const [accounts, setAccounts] = useState<Array<{ id: string; name: string }>>([])
   const [accountName, setAccountName] = useState<string>('')
   const [moduleFilter, setModuleFilter] = useState<'all' | 'e2e' | 'diagnosis'>('e2e')
+
+  // Handle module filter change with auto-expand
+  const handleModuleFilterChange = (filter: 'all' | 'e2e' | 'diagnosis') => {
+    setModuleFilter(filter)
+    if (sidebarView === 'all') {
+      if (filter === 'diagnosis') {
+        setExpandedSections(['/rfid/setup'])
+      } else if (filter === 'e2e') {
+        setExpandedSections(['/e2e/setup'])
+      }
+    }
+  }
   
   // Auto-expand on hover when collapsed
   const isExpanded = isCollapsed ? isHovered : true
@@ -100,7 +112,12 @@ export function Sidebar() {
     
     // Collapse all sections when switching to 'all' view
     if (view === 'all') {
-      setExpandedSections([])
+      // Keep Setup expanded if filter is diagnosis
+      if (moduleFilter === 'diagnosis') {
+        setExpandedSections(['/rfid/setup'])
+      } else {
+        setExpandedSections(['/e2e/setup'])
+      }
     } else {
       // Expand all sections when switching to other views
       setExpandedSections([
@@ -910,7 +927,7 @@ export function Sidebar() {
           {(
             <div className="mt-2 flex items-center gap-1">
               <button
-                onClick={() => setModuleFilter('e2e')}
+                onClick={() => handleModuleFilterChange('e2e')}
                 className={`flex-1 px-2 py-1 text-xs font-medium rounded-md transition-colors ${
                   moduleFilter === 'e2e'
                     ? 'bg-blue-100 text-blue-700'
@@ -920,7 +937,7 @@ export function Sidebar() {
                 E2E
               </button>
               <button
-                onClick={() => setModuleFilter('diagnosis')}
+                onClick={() => handleModuleFilterChange('diagnosis')}
                 className={`flex-1 px-2 py-1 text-xs font-medium rounded-md transition-colors ${
                   moduleFilter === 'diagnosis'
                     ? 'bg-blue-100 text-blue-700'
