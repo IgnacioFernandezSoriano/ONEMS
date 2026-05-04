@@ -6,7 +6,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 
 interface AccountFormProps {
   account?: Account
-  onSubmit: (data: { name: string; slug: string; status?: 'active' | 'inactive'; default_language: SupportedLanguage }) => Promise<void>
+  onSubmit: (data: { name: string; slug: string; status?: 'active' | 'inactive'; default_language: SupportedLanguage; email_panelist_manager: string | null }) => Promise<void>
   onCancel: () => void
 }
 
@@ -16,6 +16,7 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
   const [slug, setSlug] = useState(account?.slug || '')
   const [status, setStatus] = useState<'active' | 'inactive'>(account?.status || 'active')
   const [defaultLanguage, setDefaultLanguage] = useState<SupportedLanguage>(account?.default_language || 'en')
+  const [emailPanelistManager, setEmailPanelistManager] = useState(account?.email_panelist_manager || '')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -25,7 +26,14 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
     setLoading(true)
 
     try {
-      await onSubmit({ name, slug, status, default_language: defaultLanguage })
+      const trimmed = emailPanelistManager.trim()
+      await onSubmit({
+        name,
+        slug,
+        status,
+        default_language: defaultLanguage,
+        email_panelist_manager: trimmed === '' ? null : trimmed,
+      })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error submitting form')
     } finally {
@@ -91,6 +99,23 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
         </select>
         <p className="text-xs text-gray-500 mt-1">
           Language inherited by panelists of this account
+        </p>
+      </div>
+
+      <div>
+        <label htmlFor="email_panelist_manager" className="block text-sm font-medium mb-1">
+          Panelist Manager Email
+        </label>
+        <input
+          id="email_panelist_manager"
+          type="email"
+          value={emailPanelistManager}
+          onChange={(e) => setEmailPanelistManager(e.target.value)}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md"
+          placeholder="manager@example.com"
+        />
+        <p className="text-xs text-gray-500 mt-1">
+          Contact email for the panelist manager of this account (optional)
         </p>
       </div>
 
