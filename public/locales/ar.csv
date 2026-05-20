@@ -2477,7 +2477,7 @@ readers_management.showing,عرض
 readers_management.total,الإجمالي
 readers_management.no_readers_found,لا يوجد قراء تطابق المرشحات الخاصة بك
 readers_management.create_reader,إنشاء قارئ
-readers_management.confirm_delete, هل أنت متأكد أنك تريد حذف هذا القارئ؟
+readers_management.confirm_delete,هل أنت متأكد أنك تريد حذف هذا القارئ؟
 readers_management.since,منذ
 readers_management.assignments,التعيينات
 readers_management.reassign,إعادة التعيين
