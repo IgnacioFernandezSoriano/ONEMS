@@ -2537,7 +2537,7 @@ menu.account_working_days,أيام العمل للحساب
 menu.e2e_onedb_generator,مولّد OneDB
 menu.e2e_country_topology,من البداية إلى النهاية: طوبولوجيا البلدان
 menu.e2e_carriers_products,من البداية إلى النهاية: الناقلون والمنتجات
-menu.e2e_panelists,من البداية إلى النهاية: المشاركون 
+menu.e2e_panelists,من البداية إلى النهاية: المشاركون
 menu.e2e_sla,من البداية إلى النهاية: اتفاقية مستوى الخدمة
 menu.e2e_allocation_generator,من البداية إلى النهاية: مولّد التخصيص
 menu.e2e_load_balancing,من البداية إلى النهاية: موازنة الأحمال
@@ -2619,3 +2619,16 @@ settings.password_hint,اختر كلمة مرور قوية لحماية حساب
 settings.password_tips,نصائح لكلمة المرور:
 admin.all_users_title,جميع المستخدمين
 reporting.compliance.samples,عينات
+reporting.compliance.jk_std,J+K قياسي
+reporting.compliance.jk_actual,J+K الفعلي
+reporting.compliance.std_pct,STD %
+reporting.compliance.actual_pct,النسبة الفعلية %
+reporting.compliance.deviation,"الانحراف (الفرق عن القيمة المرجعية)
+"
+reporting.compliance.download_csv,تنزيل عينات CSV
+load_balancing.total,الإجمالي
+load_balancing.avg_per_node,متوسط/عقدة:
+load_balancing.optimal,مثالي:
+load_balancing.urgent,عاجل:
+load_balancing.preventive,وقائي:
+load_balancing.balance_not_needed,لا حاجة لإعادة التوازن
