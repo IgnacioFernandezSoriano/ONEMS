@@ -2623,8 +2623,7 @@ reporting.compliance.jk_std,J+K STD
 reporting.compliance.jk_actual,J+K réel
 reporting.compliance.std_pct,STD %
 reporting.compliance.actual_pct,% réel
-reporting.compliance.deviation,"Écart (déviation)
-"
+reporting.compliance.deviation,Écart (déviation)
 reporting.compliance.download_csv,Télécharger les échantillons CSV
 load_balancing.total,Total
 load_balancing.avg_per_node,Moyenne/nœud :
