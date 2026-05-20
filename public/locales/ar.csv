@@ -2452,6 +2452,59 @@ menu.rfid_events_consolidation_numbered,1.دمج أحداث RFID
 menu.journey_segments_numbered,2. مقاطع الرحلة
 menu.complete_journeys_numbered,3. الرحلات المكتملة
 menu.center_working_days,أيام عمل المركز
+menu.center_working_days.tooltip,تكوين أيام العمل والعطلات للمراكز البريدية
+readers_management.filters,المرشحات
+readers_management.active,نشط
+readers_management.reset,إعادة تعيين
+readers_management.search,بحث
+readers_management.search_placeholder,البحث بالاسم أو الرمز…
+readers_management.postal_center,مركز بريدي
+readers_management.all_centers,جميع المراكز
+readers_management.unassigned,غير مخصص
+readers_management.reader_type,نوع القارئ
+readers_management.all_types,جميع الأنواع
+readers_management.entry,إدخال
+readers_management.exit,خروج
+readers_management.mixed,مختلط
+readers_management.assignment_status,حالة التعيين
+readers_management.all_statuses,جميع الحالات
+readers_management.assigned,مُعيَّن
+readers_management.mobility_status,حالة التنقل
+readers_management.all_mobility,الكل
+readers_management.has_history,لديه سجل
+readers_management.no_history,لا يوجد سجل
+readers_management.showing,عرض
+readers_management.total,الإجمالي
+readers_management.no_readers_found,لا يوجد قراء تطابق المرشحات الخاصة بك
+readers_management.create_reader,إنشاء قارئ
+readers_management.confirm_delete, هل أنت متأكد أنك تريد حذف هذا القارئ؟
+readers_management.since,منذ
+readers_management.assignments,التعيينات
+readers_management.reassign,إعادة التعيين
+readers_management.assign,تعيين
+readers_management.view_history,عرض السجل
+readers_management.location_history,سجل المواقع
+readers_management.current,الحالي
+readers_management.assigned_at,مُعيّن
+readers_management.unassigned_at,غير مخصص
+readers_management.duration,المدة
+readers_management.notes,ملاحظات
+readers_management.currently_active,نشط حاليًا
+readers_management.less_than_day,أقل من يوم واحد
+readers_management.one_day,يوم واحد
+readers_management.days,أيام
+readers_management.no_location_history,لا يوجد سجل مواقع متاح
+readers_management.reader_name,اسم القارئ
+readers_management.code,الرمز
+readers_management.type,النوع
+readers_management.status,الحالة
+readers_management.current_location,الموقع الحالي
+readers_management.carrier,الناقل
+readers_management.all_carriers,جميع الناقلين
+readers_management.movement_date,تاريخ الحركة
+readers_management.movement_date_help,تاريخ سريان هذا التعيين/إلغاء التعيين
+readers_management.assign_help,اختر مركزًا لتعيينه أو اتركه فارغًا لإلغاء التعيين.
+readers_management.edit_reader,تعديل القارئ
 menu.diagnosis,التشخيص
 menu.diagnosis.tooltip,أدوات تشخيص وتحليل أداء الشبكة
 menu.network_overview,نظرة عامة على الشبكة
