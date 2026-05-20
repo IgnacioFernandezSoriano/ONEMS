@@ -1,4 +1,4 @@
-account_config.add_holiday,إضافة عطلة
+key,translation
 account_config.calculation_mode,وضع الحساب
 account_config.calculation_mode_help,اختر كيفية حساب أوقات العبور: أيام طبيعية (24/7) أو أيام عمل (باستثناء ساعات غير العمل)
 account_config.confirm_delete_holiday,هل أنت متأكد من أنك تريد حذف هذه العطلة؟
@@ -1591,7 +1591,7 @@ receive_generator.demo_account_only,حساب تجريبي فقط - هذه الم
 receive_generator.end_date,تاريخ الانتهاء
 receive_generator.example_out_of_sla_records_can_arrive_up_to,📊 مثال: يمكن أن تصل السجلات خارج اتفاقية مستوى الخدمة حتى {{max}} يومًا (اتفاقية مستوى الخدمة: {{sla}} يومًا\
 receive_generator.example_records_can_arrive_between,📊 مثال: يمكن أن تصل السجلات بين {{min}} و {{max}} يومًا (اتفاقية مستوى الخدمة: {{sla}} يومًا)
-receive_generator.failed_records, (فشل {{count}})
+receive_generator.failed_records,(فشل {{count}})
 receive_generator.generate_records,توليد السجلات
 receive_generator.generating,جاري التوليد... {{progress}}%
 receive_generator.generation_complete,اكتمل التوليد
@@ -2259,113 +2259,113 @@ users.password,كلمة المرور
 users.promise,الوعد
 users.role,الدور
 users.select_account,اختر الحساب
-menu.journey_segments,"أقسام الرحلة"
-menu.journey_segments.tooltip,"إعادة بناء كاملة للرحلة مع أوقات العبور والامتثال لاتفاقية مستوى الخدمة"
-journey_segments.title,"أقسام الرحلة"
-journey_segments.description,"إعادة بناء كاملة للرحلة مع أوقات العبور والامتثال لاتفاقية مستوى الخدمة"
-journey_segments.loading,"جاري تحميل الأقسام..."
-journey_segments.error,"خطأ في تحميل الأقسام"
-journey_segments.run_reconstruction,"تشغيل إعادة البناء"
-journey_segments.run_reconstruction_tooltip,"إعادة بناء أقسام الرحلة من الأحداث المعالجة"
-journey_segments.export_csv,"تصدير CSV"
-journey_segments.export_tooltip,"تصدير الأقسام المحددة إلى CSV"
-journey_segments.export_selected,"تصدير المحدد"
-journey_segments.clear_selection,"مسح التحديد"
-journey_segments.selected_count,"{{count}} أقسام محددة"
-journey_segments.error_no_account,"لم يتم العثور على حساب نشط"
-journey_segments.reconstruction_success,"اكتملت إعادة البناء: تم إنشاء {{segments}} قسم من {{events}} حدث في {{time}} مللي ثانية"
-journey_segments.reconstruction_no_data,"لم يتم إنشاء أقسام جديدة"
-journey_segments.reconstruction_error,"خطأ في إعادة البناء: {{message}}"
-journey_segments.kpi.total,"الإجمالي"
-journey_segments.kpi.segments,"الأقسام"
-journey_segments.kpi.on_time,"في الوقت المحدد"
-journey_segments.kpi.warning,"تحذير"
-journey_segments.kpi.critical,"حرج"
-journey_segments.kpi.avg_time,"متوسط الوقت"
-journey_segments.kpi.minutes,"دقائق"
-journey_segments.filters.title,"المرشحات"
-journey_segments.filters.search,"بحث"
-journey_segments.filters.search_placeholder,"معرف العلامة أو المركز البريدي..."
-journey_segments.filters.segment_type,"نوع القسم"
-journey_segments.filters.all_types,"جميع الأنواع"
-journey_segments.filters.operational,"تشغيلي"
-journey_segments.filters.distribution,"توزيع"
-journey_segments.filters.postal_center,"المركز البريدي"
-journey_segments.filters.all_centers,"جميع المراكز"
-journey_segments.filters.from_center,"من المركز"
-journey_segments.filters.to_center,"إلى المركز"
-journey_segments.filters.sla_compliance,"الامتثال لاتفاقية مستوى الخدمة"
-journey_segments.filters.all_compliance,"جميع الحالات"
-journey_segments.filters.on_time,"في الوقت المحدد"
-journey_segments.filters.warning,"تحذير"
-journey_segments.filters.critical,"حرج"
-journey_segments.filters.violated,"منتهك"
-journey_segments.filters.no_sla,"بدون اتفاقية مستوى خدمة"
-journey_segments.filters.date_from,"من تاريخ"
-journey_segments.filters.date_to,"إلى تاريخ"
-journey_segments.filters.apply,"تطبيق المرشحات"
-journey_segments.filters.clear,"مسح المرشحات"
-journey_segments.table.tag_id,"معرف العلامة"
-journey_segments.table.type,"النوع"
-journey_segments.table.centers,"المراكز"
-journey_segments.table.entry_time,"وقت الدخول"
-journey_segments.table.exit_time,"وقت الخروج"
-journey_segments.table.duration,"المدة"
-journey_segments.table.actual,"الفعلي"
-journey_segments.table.sla,"اتفاقية مستوى الخدمة"
-journey_segments.table.compliance,"الامتثال"
-journey_segments.table.no_segments,"لم يتم العثور على أقسام"
-journey_segments.table.no_sla,"بدون اتفاقية مستوى خدمة"
-journey_segments.type.operational,"تشغيلي"
-journey_segments.type.distribution,"توزيع"
-journey_segments.compliance.on_time,"في الوقت المحدد"
-journey_segments.compliance.warning,"تحذير"
-journey_segments.compliance.critical,"حرج"
-journey_segments.compliance.violated,"منتهك"
-journey_segments.compliance.no_sla,"بدون اتفاقية مستوى خدمة"
+menu.journey_segments,أقسام الرحلة
+menu.journey_segments.tooltip,إعادة بناء كاملة للرحلة مع أوقات العبور والامتثال لاتفاقية مستوى الخدمة
+journey_segments.title,أقسام الرحلة
+journey_segments.description,إعادة بناء كاملة للرحلة مع أوقات العبور والامتثال لاتفاقية مستوى الخدمة
+journey_segments.loading,جاري تحميل الأقسام...
+journey_segments.error,خطأ في تحميل الأقسام
+journey_segments.run_reconstruction,تشغيل إعادة البناء
+journey_segments.run_reconstruction_tooltip,إعادة بناء أقسام الرحلة من الأحداث المعالجة
+journey_segments.export_csv,تصدير CSV
+journey_segments.export_tooltip,تصدير الأقسام المحددة إلى CSV
+journey_segments.export_selected,تصدير المحدد
+journey_segments.clear_selection,مسح التحديد
+journey_segments.selected_count,{{count}} أقسام محددة
+journey_segments.error_no_account,لم يتم العثور على حساب نشط
+journey_segments.reconstruction_success,اكتملت إعادة البناء: تم إنشاء {{segments}} قسم من {{events}} حدث في {{time}} مللي ثانية
+journey_segments.reconstruction_no_data,لم يتم إنشاء أقسام جديدة
+journey_segments.reconstruction_error,خطأ في إعادة البناء: {{message}}
+journey_segments.kpi.total,الإجمالي
+journey_segments.kpi.segments,الأقسام
+journey_segments.kpi.on_time,في الوقت المحدد
+journey_segments.kpi.warning,تحذير
+journey_segments.kpi.critical,حرج
+journey_segments.kpi.avg_time,متوسط الوقت
+journey_segments.kpi.minutes,دقائق
+journey_segments.filters.title,المرشحات
+journey_segments.filters.search,بحث
+journey_segments.filters.search_placeholder,معرف العلامة أو المركز البريدي...
+journey_segments.filters.segment_type,نوع القسم
+journey_segments.filters.all_types,جميع الأنواع
+journey_segments.filters.operational,تشغيلي
+journey_segments.filters.distribution,توزيع
+journey_segments.filters.postal_center,المركز البريدي
+journey_segments.filters.all_centers,جميع المراكز
+journey_segments.filters.from_center,من المركز
+journey_segments.filters.to_center,إلى المركز
+journey_segments.filters.sla_compliance,الامتثال لاتفاقية مستوى الخدمة
+journey_segments.filters.all_compliance,جميع الحالات
+journey_segments.filters.on_time,في الوقت المحدد
+journey_segments.filters.warning,تحذير
+journey_segments.filters.critical,حرج
+journey_segments.filters.violated,منتهك
+journey_segments.filters.no_sla,بدون اتفاقية مستوى خدمة
+journey_segments.filters.date_from,من تاريخ
+journey_segments.filters.date_to,إلى تاريخ
+journey_segments.filters.apply,تطبيق المرشحات
+journey_segments.filters.clear,مسح المرشحات
+journey_segments.table.tag_id,معرف العلامة
+journey_segments.table.type,النوع
+journey_segments.table.centers,المراكز
+journey_segments.table.entry_time,وقت الدخول
+journey_segments.table.exit_time,وقت الخروج
+journey_segments.table.duration,المدة
+journey_segments.table.actual,الفعلي
+journey_segments.table.sla,اتفاقية مستوى الخدمة
+journey_segments.table.compliance,الامتثال
+journey_segments.table.no_segments,لم يتم العثور على أقسام
+journey_segments.table.no_sla,بدون اتفاقية مستوى خدمة
+journey_segments.type.operational,تشغيلي
+journey_segments.type.distribution,توزيع
+journey_segments.compliance.on_time,في الوقت المحدد
+journey_segments.compliance.warning,تحذير
+journey_segments.compliance.critical,حرج
+journey_segments.compliance.violated,منتهك
+journey_segments.compliance.no_sla,بدون اتفاقية مستوى خدمة
 menu.complete_journeys,الرحلات الكاملة
-complete_journeys.title,Complete Journeys
-complete_journeys.description,Complete journey reconstruction with transit times and SLA compliance
-complete_journeys.run_assembly,Run Assembly
-complete_journeys.assembling,Assembling...
-complete_journeys.export_csv,Export CSV ({count})
-complete_journeys.kpi.total,Total
-complete_journeys.kpi.journeys,Journeys
-complete_journeys.kpi.on_time,On Time
-complete_journeys.kpi.warning,Warning
-complete_journeys.kpi.critical,Critical
-complete_journeys.kpi.avg_time,Average Time
-complete_journeys.kpi.minutes,minutes
-complete_journeys.filters.title,Filters
-complete_journeys.filters.search,Search
-complete_journeys.filters.search_placeholder,Tag ID or Postal Center...
-complete_journeys.filters.sla_compliance,SLA Compliance
-complete_journeys.filters.all_status,All Status
-complete_journeys.filters.min_segments,Min Segments
-complete_journeys.filters.max_segments,Max Segments
-complete_journeys.filters.date_from,Date From
-complete_journeys.filters.date_to,Date To
-complete_journeys.filters.apply,Apply Filters
-complete_journeys.filters.clear,Clear Filters
-complete_journeys.compliance.on_time,On Time
-complete_journeys.compliance.warning,Warning
-complete_journeys.compliance.critical,Critical
-complete_journeys.compliance.violated,Violated
-complete_journeys.compliance.no_sla,No SLA
-complete_journeys.compliance.mixed,Mixed
-complete_journeys.table.no_journeys,No journeys found
-complete_journeys.table.selected,{count} selected
-complete_journeys.table.clear_selection,Clear selection
-complete_journeys.table.tag_id,Tag ID
-complete_journeys.table.segments,Segments
-complete_journeys.table.centers,Centers Visited
-complete_journeys.table.start_time,Start Time
-complete_journeys.table.total_time,Total Time
-complete_journeys.table.compliance,Compliance
-complete_journeys.error_no_account,No account selected
-complete_journeys.assembly_success,Assembly completed: {created} created, {updated} updated in {time}ms
-complete_journeys.assembly_no_data,No data returned from assembly
-complete_journeys.assembly_error,Assembly error: {message}
+complete_journeys.title,رحلات كاملة
+complete_journeys.description,إعادة بناء الرحلة بالكامل مع أوقات العبور والالتزام باتفاقية مستوى الخدمة
+complete_journeys.run_assembly,تشغيل التجميع
+complete_journeys.assembling,جاري التحميل...
+complete_journeys.export_csv,تصدير ملف CSV ({count})
+complete_journeys.kpi.total,المجموع
+complete_journeys.kpi.journeys,مسار الشحنة
+complete_journeys.kpi.on_time,في الموعد المحدد
+complete_journeys.kpi.warning,تحذير
+complete_journeys.kpi.critical,حرِج
+complete_journeys.kpi.avg_time,متوسط الوقت
+complete_journeys.kpi.minutes,دقائق
+complete_journeys.filters.title,فلاتر
+complete_journeys.filters.search,بحث
+complete_journeys.filters.search_placeholder,رقم التتبع
+complete_journeys.filters.sla_compliance,الالتزام باتفاقية مستوى الخدمة
+complete_journeys.filters.all_status,جميع الحالات
+complete_journeys.filters.min_segments,الحد الأدنى من المقاطع
+complete_journeys.filters.max_segments,الحد الأقصى من المقاطع
+complete_journeys.filters.date_from,تاريخ البداية
+complete_journeys.filters.date_to,تاريخ النهاية
+complete_journeys.filters.apply,تطبيق الفلاتر
+complete_journeys.filters.clear,إعادة ضبط الفلاتر
+complete_journeys.compliance.on_time,في الوقت
+complete_journeys.compliance.warning,تحذير
+complete_journeys.compliance.critical,حرِج
+complete_journeys.compliance.violated,تمت المخالفة
+complete_journeys.compliance.no_sla,خارج اتفاقية مستوى الخدمة
+complete_journeys.compliance.mixed,مختلط
+complete_journeys.table.no_journeys,لم يتم العثور على أي مسار
+complete_journeys.table.selected,{count} محدد
+complete_journeys.table.clear_selection,إلغاء التحديد
+complete_journeys.table.tag_id,رقم التتبع
+complete_journeys.table.segments,مقاطع
+complete_journeys.table.centers,المراكز التي تمت زيارتها
+complete_journeys.table.start_time,وقت البدء
+complete_journeys.table.total_time,الوقت الإجمالي
+complete_journeys.table.compliance,الامتثال
+complete_journeys.error_no_account,لم يتم تحديد أي حساب
+complete_journeys.assembly_success,اكتمل التجميع: تم إنشاء {created}
+complete_journeys.assembly_no_data,لم يتم إرجاع أي بيانات من التجميع
+complete_journeys.assembly_error,خطأ في التجميع: {message}
 menu.cutoff_times,أوقات القطع
 menu.non_working_days,أيام العطل
 cutoff_times.title,أوقات القطع
@@ -2403,6 +2403,108 @@ non_working_days.form.description,الوصف
 non_working_days.form.type,النوع
 non_working_days.form.applies_to_all,ينطبق على جميع المراكز
 non_working_days.form.recurring,متكرر سنوياً
+menu.mobile_readers,أجهزة القراءة المحمولة
+menu.mobile_readers.tooltip,إدارة أجهزة القراءة المتنقلة والمؤقتة
+mobile_readers.description,إدارة أجهزة القراءة التي يمكن تعيينها إلى مراكز بريدية مختلفة عبر الزمن
+mobile_readers.create_reader,إنشاء جهاز قارئ متنقل
+mobile_readers.total_readers,إجمالي أجهزة القراءة
+mobile_readers.mobile,محمول
+mobile_readers.current_location,الموقع الحالي
+mobile_readers.since,منذ
+mobile_readers.unassigned,غير مُعيَّن
+mobile_readers.assignments,التعيينات
+mobile_readers.reassign,إعادة التعيين
+mobile_readers.assign,تعيين إلى مركز
+mobile_readers.view_history,عرض التاريخ
+mobile_readers.no_readers,لا توجد أجهزة قراءة متنقلة حتى الآن
+mobile_readers.no_readers_description,أنشئ أول جهاز قارئ متنقل لديك لبدء تتبع الإسنادات
+mobile_readers.create_first_reader,إنشاء أول قارئ
+mobile_readers.no_location_history,لا يتوفر أي سجل لمواقع التتبع.
+mobile_readers.location_history,سجل المواقع
+mobile_readers.less_than_day,أقل من يوم
+mobile_readers.one_day,يوم واحد
+mobile_readers.days,أيام
+mobile_readers.current,حالي
+mobile_readers.assigned,مُسنَد
+mobile_readers.currently_active,نشط حالياً
+mobile_readers.duration,المدة
+mobile_readers.notes,ملاحظات
+mobile_readers.assign_reader,تعيين القارئ إلى المركز
+mobile_readers.postal_center,مركز بريدي
+mobile_readers.select_center,اختر مركزًا…
+mobile_readers.select_center_help,اختر المركز البريدي الذي سيتم تعيين هذا القارئ فيه
+mobile_readers.select_center_error,يرجى اختيار مركز بريدي
+mobile_readers.assigned_at,تاريخ التعيين
+mobile_readers.assigned_at_help,الوقت الذي سيتم فيه تعيين القارئ في هذا المركز
+mobile_readers.unassigned_at,تاريخ إلغاء التعيين
+mobile_readers.unassigned_at_help,اختياري: الوقت الذي سيتم فيه إلغاء تعيين القارئ (اتركه فارغًا لغير محدد المدة)
+mobile_readers.notes_placeholder,مثال:
+mobile_readers.notes_help,ملاحظات اختيارية حول هذا التعيين
+mobile_readers.confirm_delete,هل أنت متأكد أنك تريد حذف هذا القارئ؟
+menu.readers_management,إدارة القرّاء
+menu.readers_management.tooltip,إدارة جميع القرّاء وسجل مواقعهم
+readers_management.description,إدارة جميع القرّاء وتتبع سجل مواقعهم
+readers_management.total_readers,إجمالي عدد القرّاء
+readers_management.with_history,مع سجل المواقع
+menu.rfid_data_consolidation,دمج بيانات RFID
+menu.rfid_data_consolidation.tooltip,قم بدمج ومعالجة أحداث RFID إلى مقاطع رحلات ورحلات مكتملة
+menu.rfid_events_consolidation_numbered,1.دمج أحداث RFID
+menu.journey_segments_numbered,2. مقاطع الرحلة
+menu.complete_journeys_numbered,3. الرحلات المكتملة
+menu.center_working_days,أيام عمل المركز
+menu.center_working_days.tooltip,تكوين أيام العمل والعطلات للمراكز البريدية
+readers_management.filters,المرشحات
+readers_management.active,نشط
+readers_management.reset,إعادة تعيين
+readers_management.search,بحث
+readers_management.search_placeholder,البحث بالاسم أو الرمز…
+readers_management.postal_center,مركز بريدي
+readers_management.all_centers,جميع المراكز
+readers_management.unassigned,غير مخصص
+readers_management.reader_type,نوع القارئ
+readers_management.all_types,جميع الأنواع
+readers_management.entry,إدخال
+readers_management.exit,خروج
+readers_management.mixed,مختلط
+readers_management.assignment_status,حالة التعيين
+readers_management.all_statuses,جميع الحالات
+readers_management.assigned,مُعيَّن
+readers_management.mobility_status,حالة التنقل
+readers_management.all_mobility,الكل
+readers_management.has_history,لديه سجل
+readers_management.no_history,لا يوجد سجل
+readers_management.showing,عرض
+readers_management.total,الإجمالي
+readers_management.no_readers_found,لا يوجد قراء تطابق المرشحات الخاصة بك
+readers_management.create_reader,إنشاء قارئ
+readers_management.confirm_delete,هل أنت متأكد أنك تريد حذف هذا القارئ؟
+readers_management.since,منذ
+readers_management.assignments,التعيينات
+readers_management.reassign,إعادة التعيين
+readers_management.assign,تعيين
+readers_management.view_history,عرض السجل
+readers_management.location_history,سجل المواقع
+readers_management.current,الحالي
+readers_management.assigned_at,مُعيّن
+readers_management.unassigned_at,غير مخصص
+readers_management.duration,المدة
+readers_management.notes,ملاحظات
+readers_management.currently_active,نشط حاليًا
+readers_management.less_than_day,أقل من يوم واحد
+readers_management.one_day,يوم واحد
+readers_management.days,أيام
+readers_management.no_location_history,لا يوجد سجل مواقع متاح
+readers_management.reader_name,اسم القارئ
+readers_management.code,الرمز
+readers_management.type,النوع
+readers_management.status,الحالة
+readers_management.current_location,الموقع الحالي
+readers_management.carrier,الناقل
+readers_management.all_carriers,جميع الناقلين
+readers_management.movement_date,تاريخ الحركة
+readers_management.movement_date_help,تاريخ سريان هذا التعيين/إلغاء التعيين
+readers_management.assign_help,اختر مركزًا لتعيينه أو اتركه فارغًا لإلغاء التعيين.
+readers_management.edit_reader,تعديل القارئ
 menu.diagnosis,التشخيص
 menu.diagnosis.tooltip,أدوات تشخيص وتحليل أداء الشبكة
 menu.network_overview,نظرة عامة على الشبكة
