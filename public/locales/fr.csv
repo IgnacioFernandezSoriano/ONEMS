@@ -1,4 +1,4 @@
-account_config.add_holiday,Ajouter un Jour Férié
+key,translation
 account_config.calculation_mode,Mode de Calcul
 account_config.calculation_mode_help,Choisissez comment calculer les temps de transit: jours naturels (24/7) ou jours ouvrables (hors heures non ouvrables)
 account_config.confirm_delete_holiday,Êtes-vous sûr de vouloir supprimer ce jour férié?
@@ -1591,7 +1591,7 @@ receive_generator.demo_account_only,Compte de démonstration uniquement - Cette 
 receive_generator.end_date,Date de fin
 receive_generator.example_out_of_sla_records_can_arrive_up_to,📊 Exemple : Les enregistrements hors SLA peuvent arriver jusqu'à {{max}} jours (SLA : {{sla}} jours\
 receive_generator.example_records_can_arrive_between,📊 Exemple : Les enregistrements peuvent arriver entre {{min}} et {{max}} jours (SLA : {{sla}} jours)
-receive_generator.failed_records, ({{count}} échoué)
+receive_generator.failed_records,({{count}} échoué)
 receive_generator.generate_records,Générer des enregistrements
 receive_generator.generating,Génération en cours... {{progress}}%
 receive_generator.generation_complete,Génération terminée
@@ -2259,113 +2259,113 @@ users.password,Mot de passe
 users.promise,Promesse
 users.role,Rôle
 users.select_account,Sélectionner un compte
-menu.journey_segments,"Segments de Parcours"
-menu.journey_segments.tooltip,"Reconstruction complète du parcours avec temps de transit et conformité SLA"
-journey_segments.title,"Segments de Parcours"
-journey_segments.description,"Reconstruction complète du parcours avec temps de transit et conformité SLA"
-journey_segments.loading,"Chargement des segments..."
-journey_segments.error,"Erreur lors du chargement des segments"
-journey_segments.run_reconstruction,"Exécuter la Reconstruction"
-journey_segments.run_reconstruction_tooltip,"Reconstruire les segments de parcours à partir des événements traités"
-journey_segments.export_csv,"Exporter CSV"
-journey_segments.export_tooltip,"Exporter les segments sélectionnés en CSV"
-journey_segments.export_selected,"Exporter la Sélection"
-journey_segments.clear_selection,"Effacer la Sélection"
-journey_segments.selected_count,"{{count}} segments sélectionnés"
-journey_segments.error_no_account,"Aucun compte actif trouvé"
-journey_segments.reconstruction_success,"Reconstruction terminée : {{segments}} segments créés à partir de {{events}} événements en {{time}}ms"
-journey_segments.reconstruction_no_data,"Aucun nouveau segment créé"
-journey_segments.reconstruction_error,"Erreur de reconstruction : {{message}}"
-journey_segments.kpi.total,"Total"
-journey_segments.kpi.segments,"Segments"
-journey_segments.kpi.on_time,"À Temps"
-journey_segments.kpi.warning,"Avertissement"
-journey_segments.kpi.critical,"Critique"
-journey_segments.kpi.avg_time,"Temps Moyen"
-journey_segments.kpi.minutes,"minutes"
-journey_segments.filters.title,"Filtres"
-journey_segments.filters.search,"Rechercher"
-journey_segments.filters.search_placeholder,"ID Étiquette ou Centre Postal..."
-journey_segments.filters.segment_type,"Type de Segment"
-journey_segments.filters.all_types,"Tous les Types"
-journey_segments.filters.operational,"Opérationnel"
-journey_segments.filters.distribution,"Distribution"
-journey_segments.filters.postal_center,"Centre Postal"
-journey_segments.filters.all_centers,"Tous les Centres"
-journey_segments.filters.from_center,"Centre d'Origine"
-journey_segments.filters.to_center,"Centre de Destination"
-journey_segments.filters.sla_compliance,"Conformité SLA"
-journey_segments.filters.all_compliance,"Tous les Statuts"
-journey_segments.filters.on_time,"À Temps"
-journey_segments.filters.warning,"Avertissement"
-journey_segments.filters.critical,"Critique"
-journey_segments.filters.violated,"Violé"
-journey_segments.filters.no_sla,"Sans SLA"
-journey_segments.filters.date_from,"Date de Début"
-journey_segments.filters.date_to,"Date de Fin"
-journey_segments.filters.apply,"Appliquer les Filtres"
-journey_segments.filters.clear,"Effacer les Filtres"
-journey_segments.table.tag_id,"ID Étiquette"
-journey_segments.table.type,"Type"
-journey_segments.table.centers,"Centres"
-journey_segments.table.entry_time,"Heure d'Entrée"
-journey_segments.table.exit_time,"Heure de Sortie"
-journey_segments.table.duration,"Durée"
-journey_segments.table.actual,"Réel"
-journey_segments.table.sla,"SLA"
-journey_segments.table.compliance,"Conformité"
-journey_segments.table.no_segments,"Aucun segment trouvé"
-journey_segments.table.no_sla,"Sans SLA"
-journey_segments.type.operational,"Opérationnel"
-journey_segments.type.distribution,"Distribution"
-journey_segments.compliance.on_time,"À Temps"
-journey_segments.compliance.warning,"Avertissement"
-journey_segments.compliance.critical,"Critique"
-journey_segments.compliance.violated,"Violé"
-journey_segments.compliance.no_sla,"Sans SLA"
+menu.journey_segments,Segments de Parcours
+menu.journey_segments.tooltip,Reconstruction complète du parcours avec temps de transit et conformité SLA
+journey_segments.title,Segments de Parcours
+journey_segments.description,Reconstruction complète du parcours avec temps de transit et conformité SLA
+journey_segments.loading,Chargement des segments...
+journey_segments.error,Erreur lors du chargement des segments
+journey_segments.run_reconstruction,Exécuter la Reconstruction
+journey_segments.run_reconstruction_tooltip,Reconstruire les segments de parcours à partir des événements traités
+journey_segments.export_csv,Exporter CSV
+journey_segments.export_tooltip,Exporter les segments sélectionnés en CSV
+journey_segments.export_selected,Exporter la Sélection
+journey_segments.clear_selection,Effacer la Sélection
+journey_segments.selected_count,{{count}} segments sélectionnés
+journey_segments.error_no_account,Aucun compte actif trouvé
+journey_segments.reconstruction_success,Reconstruction terminée : {{segments}} segments créés à partir de {{events}} événements en {{time}}ms
+journey_segments.reconstruction_no_data,Aucun nouveau segment créé
+journey_segments.reconstruction_error,Erreur de reconstruction : {{message}}
+journey_segments.kpi.total,Total
+journey_segments.kpi.segments,Segments
+journey_segments.kpi.on_time,À Temps
+journey_segments.kpi.warning,Avertissement
+journey_segments.kpi.critical,Critique
+journey_segments.kpi.avg_time,Temps Moyen
+journey_segments.kpi.minutes,minutes
+journey_segments.filters.title,Filtres
+journey_segments.filters.search,Rechercher
+journey_segments.filters.search_placeholder,ID Étiquette ou Centre Postal...
+journey_segments.filters.segment_type,Type de Segment
+journey_segments.filters.all_types,Tous les Types
+journey_segments.filters.operational,Opérationnel
+journey_segments.filters.distribution,Distribution
+journey_segments.filters.postal_center,Centre Postal
+journey_segments.filters.all_centers,Tous les Centres
+journey_segments.filters.from_center,Centre d'Origine
+journey_segments.filters.to_center,Centre de Destination
+journey_segments.filters.sla_compliance,Conformité SLA
+journey_segments.filters.all_compliance,Tous les Statuts
+journey_segments.filters.on_time,À Temps
+journey_segments.filters.warning,Avertissement
+journey_segments.filters.critical,Critique
+journey_segments.filters.violated,Violé
+journey_segments.filters.no_sla,Sans SLA
+journey_segments.filters.date_from,Date de Début
+journey_segments.filters.date_to,Date de Fin
+journey_segments.filters.apply,Appliquer les Filtres
+journey_segments.filters.clear,Effacer les Filtres
+journey_segments.table.tag_id,ID Étiquette
+journey_segments.table.type,Type
+journey_segments.table.centers,Centres
+journey_segments.table.entry_time,Heure d'Entrée
+journey_segments.table.exit_time,Heure de Sortie
+journey_segments.table.duration,Durée
+journey_segments.table.actual,Réel
+journey_segments.table.sla,SLA
+journey_segments.table.compliance,Conformité
+journey_segments.table.no_segments,Aucun segment trouvé
+journey_segments.table.no_sla,Sans SLA
+journey_segments.type.operational,Opérationnel
+journey_segments.type.distribution,Distribution
+journey_segments.compliance.on_time,À Temps
+journey_segments.compliance.warning,Avertissement
+journey_segments.compliance.critical,Critique
+journey_segments.compliance.violated,Violé
+journey_segments.compliance.no_sla,Sans SLA
 menu.complete_journeys,Trajets Complets
-complete_journeys.title,Complete Journeys
-complete_journeys.description,Complete journey reconstruction with transit times and SLA compliance
-complete_journeys.run_assembly,Run Assembly
-complete_journeys.assembling,Assembling...
-complete_journeys.export_csv,Export CSV ({count})
+complete_journeys.title,Parcours complets
+complete_journeys.description,"Reconstitution complète des trajets, avec indication des temps de transit et vérification du respect des accords de niveau de service (SLA)"
+complete_journeys.run_assembly,Exécuter l'assembly
+complete_journeys.assembling,Chargement...
+complete_journeys.export_csv,Exporter au format CSV ({count})
 complete_journeys.kpi.total,Total
-complete_journeys.kpi.journeys,Journeys
-complete_journeys.kpi.on_time,On Time
-complete_journeys.kpi.warning,Warning
-complete_journeys.kpi.critical,Critical
-complete_journeys.kpi.avg_time,Average Time
+complete_journeys.kpi.journeys,trajet
+complete_journeys.kpi.on_time,À l'heure
+complete_journeys.kpi.warning,Avertissement
+complete_journeys.kpi.critical,Critique
+complete_journeys.kpi.avg_time,Temps moyen
 complete_journeys.kpi.minutes,minutes
-complete_journeys.filters.title,Filters
-complete_journeys.filters.search,Search
-complete_journeys.filters.search_placeholder,Tag ID or Postal Center...
-complete_journeys.filters.sla_compliance,SLA Compliance
-complete_journeys.filters.all_status,All Status
-complete_journeys.filters.min_segments,Min Segments
-complete_journeys.filters.max_segments,Max Segments
-complete_journeys.filters.date_from,Date From
-complete_journeys.filters.date_to,Date To
-complete_journeys.filters.apply,Apply Filters
-complete_journeys.filters.clear,Clear Filters
-complete_journeys.compliance.on_time,On Time
-complete_journeys.compliance.warning,Warning
-complete_journeys.compliance.critical,Critical
-complete_journeys.compliance.violated,Violated
-complete_journeys.compliance.no_sla,No SLA
-complete_journeys.compliance.mixed,Mixed
-complete_journeys.table.no_journeys,No journeys found
-complete_journeys.table.selected,{count} selected
-complete_journeys.table.clear_selection,Clear selection
-complete_journeys.table.tag_id,Tag ID
+complete_journeys.filters.title,filtres
+complete_journeys.filters.search,recherche
+complete_journeys.filters.search_placeholder,ID de suivi / identifiant de suivi
+complete_journeys.filters.sla_compliance,Conformité au SLA (SLA = accord de niveau de service)
+complete_journeys.filters.all_status,Tous les statuts
+complete_journeys.filters.min_segments,Segments minimum
+complete_journeys.filters.max_segments,Segments maximum
+complete_journeys.filters.date_from,Date de début
+complete_journeys.filters.date_to,Date de fin
+complete_journeys.filters.apply,Appliquer les filtres
+complete_journeys.filters.clear,Réinitialiser les filtres
+complete_journeys.compliance.on_time,À l’heure
+complete_journeys.compliance.warning,Avertissement
+complete_journeys.compliance.critical,Critique
+complete_journeys.compliance.violated,En infraction
+complete_journeys.compliance.no_sla,Hors SLA (outside SLA agreement)
+complete_journeys.compliance.mixed,Mixte
+complete_journeys.table.no_journeys,Aucun trajet trouvé
+complete_journeys.table.selected,{count} sélectionné(s)
+complete_journeys.table.clear_selection,Tout désélectionner
+complete_journeys.table.tag_id,Identifiant de suivi
 complete_journeys.table.segments,Segments
-complete_journeys.table.centers,Centers Visited
-complete_journeys.table.start_time,Start Time
-complete_journeys.table.total_time,Total Time
-complete_journeys.table.compliance,Compliance
-complete_journeys.error_no_account,No account selected
-complete_journeys.assembly_success,Assembly completed: {created} created, {updated} updated in {time}ms
-complete_journeys.assembly_no_data,No data returned from assembly
-complete_journeys.assembly_error,Assembly error: {message}
+complete_journeys.table.centers,Centres visités
+complete_journeys.table.start_time,Heure de début
+complete_journeys.table.total_time,Temps total
+complete_journeys.table.compliance,Conformité
+complete_journeys.error_no_account,Aucun compte sélectionné
+complete_journeys.assembly_success,Assemblage terminé : {created} créés
+complete_journeys.assembly_no_data,Aucune donnée renvoyée par l’assemblage
+complete_journeys.assembly_error,Erreur d’assemblage : {message}
 menu.cutoff_times,Heures de Coupure
 menu.non_working_days,Jours Non Ouvrables
 cutoff_times.title,Heures de Coupure
@@ -2403,6 +2403,55 @@ non_working_days.form.description,Description
 non_working_days.form.type,Type
 non_working_days.form.applies_to_all,S'applique à tous les centres
 non_working_days.form.recurring,Récurrent annuellement
+menu.mobile_readers,Lecteurs mobiles
+menu.mobile_readers.tooltip,Gérer les lecteurs mobiles et temporaires
+mobile_readers.description,Gérer les lecteurs pouvant être affectés à différents centres postaux au fil du temps
+mobile_readers.create_reader,Créer un lecteur mobile
+mobile_readers.total_readers,Nombre total de lecteurs
+mobile_readers.mobile,Mobile
+mobile_readers.current_location,Emplacement actuel
+mobile_readers.since,À partir de
+mobile_readers.unassigned,Non assigné
+mobile_readers.assignments,Attributions
+mobile_readers.reassign,Réassigner
+mobile_readers.assign,Attribuer à un centre 
+mobile_readers.view_history,Voir l’historique
+mobile_readers.no_readers,Pas encore de lecteurs mobiles
+mobile_readers.no_readers_description,Créez votre premier lecteur mobile pour commencer le suivi des affectations
+mobile_readers.create_first_reader,Créer le premier lecteur
+mobile_readers.no_location_history,Aucun historique de localisation n’est disponible.
+mobile_readers.location_history,Historique de localisation
+mobile_readers.less_than_day,Moins d’un jour
+mobile_readers.one_day,1 jour
+mobile_readers.days,jours
+mobile_readers.current,Actuel
+mobile_readers.assigned,Attribué
+mobile_readers.currently_active,Actuellement actif
+mobile_readers.duration,Durée
+mobile_readers.notes,Remarques
+mobile_readers.assign_reader,Attribuer le lecteur au centre
+mobile_readers.postal_center,Centre postal
+mobile_readers.select_center,Sélectionnez un centre…
+mobile_readers.select_center_help,Choisissez le centre postal où ce lecteur sera affecté
+mobile_readers.select_center_error,Veuillez sélectionner un centre postal
+mobile_readers.assigned_at,Date d’affectation
+mobile_readers.assigned_at_help,Moment auquel le lecteur sera affecté à ce centre
+mobile_readers.unassigned_at,Date de désaffectation
+mobile_readers.unassigned_at_help,Facultatif : moment auquel le lecteur sera désaffecté (laisser vide pour une durée indéterminée)
+mobile_readers.notes_placeholder,p. ex.
+mobile_readers.notes_help,Remarques facultatives concernant cette affectation
+mobile_readers.confirm_delete,Êtes-vous sûr de vouloir supprimer ce lecteur ?
+menu.readers_management,Gestion des lecteurs
+menu.readers_management.tooltip,Gérez tous les lecteurs et leur historique de localisation
+readers_management.description,Gérez tous les lecteurs et suivez leur historique de localisation
+readers_management.total_readers,Nombre total de lecteurs
+readers_management.with_history,avec historique de localisation
+menu.rfid_data_consolidation,Consolidation des données RFID
+menu.rfid_data_consolidation.tooltip,Consolidez et traitez les événements RFID en segments de trajet et en trajets complets
+menu.rfid_events_consolidation_numbered,1.Consolidation des événements RFID
+menu.journey_segments_numbered,2. Segments de trajet
+menu.complete_journeys_numbered,3. Trajets complets
+menu.center_working_days,Jours ouvrables du centre
 menu.diagnosis,Diagnostic
 menu.diagnosis.tooltip,Outils de diagnostic et d'analyse des performances du réseau
 menu.network_overview,Aperçu du Réseau
