@@ -2520,114 +2520,102 @@ menu.jk_performance_segments.tooltip,تحليل أداء J+K على مستوى �
 accounts.default_language,اللغة الافتراضية
 accounts.default_language_hint,اللغة التي يرثها المشاركون من هذا الحساب
 panelists.language,اللغة
-menu.e2e,
-menu.diagnosis_section,
-menu.system_setup,
-menu.country_topology,
-menu.carriers_products,
-menu.allocation,
-menu.materials,
-menu.database,
-menu.e2e_database,
-menu.e2e_database_api,
-menu.segment_analysis,
-menu.epcis_pipeline_api,
-menu.rfid_events_database,
-menu.account_working_days,
-menu.e2e_onedb_generator,
-menu.e2e_country_topology,
-menu.e2e_carriers_products,
-menu.e2e_panelists,
-menu.e2e_sla,
-menu.e2e_allocation_generator,
-menu.e2e_load_balancing,
-menu.e2e_material_catalog,
-menu.diag_postal_centers,
-menu.diag_readers_management,
-menu.diag_segment_sla,
-menu.account_working_days.tooltip,
-menu.e2e_onedb_generator.tooltip,
-menu.e2e_country_topology.tooltip,
-menu.e2e_carriers_products.tooltip,
-menu.setup.tooltip,
-menu.allocation.tooltip,
-menu.materials.tooltip,
-menu.reporting.tooltip,
-menu.database.tooltip,
-menu.e2e_database.tooltip,
-menu.e2e_database_api.tooltip,
-menu.segment_analysis.tooltip,
-menu.epcis_pipeline_api.tooltip,
-menu.rfid_events_database.tooltip,
-common.no_data,
-common.items,
-common.avg_time,
-common.on_time,
-common.status.on_time,
-common.status.warning,
-common.status.critical,
-diagnosis.network.kpi_description,
-diagnosis.network.score_breakdown,
-diagnosis.network.automatic_findings,
-diagnosis.network.summary,
-diagnosis.network.route,
-diagnosis.network.total_items,
-diagnosis.network.active_routes,
-diagnosis.network.postal_centers,
-diagnosis.network.top5_routes,
-diagnosis.network.bottom5_routes,
-diagnosis.network.top5_centers,
-diagnosis.network.bottom5_centers,
-diagnosis.metric.on_time_delivery,
-diagnosis.metric.avg_transit_time,
-diagnosis.metric.avg_processing_time,
-diagnosis.metric.data_quality,
-diagnosis.metric.data_completeness,
-diagnosis.metric.sla_violations,
-diagnosis.pipeline.title,
-diagnosis.pipeline.raw_events,
-diagnosis.pipeline.processed,
-diagnosis.pipeline.segments,
-diagnosis.pipeline.routes,
-diagnosis.pipeline.phases,
-diagnosis.pipeline.recent_incidents,
-diagnosis.pipeline.last10_unresolved,
-diagnosis.pipeline.no_incidents,
-diagnosis.pipeline.execution_log,
-diagnosis.center.center,
-diagnosis.center.items,
-diagnosis.center.avg_time,
-diagnosis.center.p95_time,
-diagnosis.center.throughput,
-diagnosis.center.efficiency,
-diagnosis.segment.total_count,
-diagnosis.segment.sla_compliance,
-diagnosis.segment.avg_duration,
-diagnosis.segment.p50_duration,
-diagnosis.segment.p95_duration,
-diagnosis.segment.range,
-diagnosis.route.route,
-diagnosis.route.journeys,
-diagnosis.route.on_time_rate,
-diagnosis.route.avg_transit,
-diagnosis.route.p95_transit,
-diagnosis.route.missroute_rate,
-diagnosis.route.total_segments,
-settings.change_password,
-settings.security,
-settings.password_hint,
-settings.password_tips,
-admin.all_users_title,
-reporting.compliance.samples,
-reporting.compliance.jk_std,
-reporting.compliance.jk_actual,
-reporting.compliance.std_pct,
-reporting.compliance.actual_pct,
-reporting.compliance.deviation,
-reporting.compliance.download_csv,
-load_balancing.total,
-load_balancing.avg_per_node,
-load_balancing.optimal,
-load_balancing.urgent,
-load_balancing.preventive,
-load_balancing.balance_not_needed,
+menu.e2e,من البداية إلى النهاية
+menu.diagnosis_section,قياس التشخيص
+menu.system_setup,إعداد النظام
+menu.country_topology,طوبولوجيا البلدان
+menu.carriers_products,الناقلون والمنتجات
+menu.allocation,تخصيص
+menu.materials,المواد
+menu.database,قاعدة البيانات
+menu.e2e_database,قاعدة بيانات من البداية إلى النهاية
+menu.e2e_database_api,واجهة برمجة تطبيقات قاعدة بيانات من البداية إلى النهاية
+menu.segment_analysis,تحليل القطاعات
+menu.epcis_pipeline_api,واجهة برمجة تطبيقات خط أنابيب EPCIS
+menu.rfid_events_database,قاعدة بيانات أحداث RFID
+menu.account_working_days,أيام العمل للحساب
+menu.e2e_onedb_generator,مولّد OneDB
+menu.e2e_country_topology,من البداية إلى النهاية: طوبولوجيا البلدان
+menu.e2e_carriers_products,من البداية إلى النهاية: الناقلون والمنتجات
+menu.e2e_panelists,من البداية إلى النهاية: المشاركون 
+menu.e2e_sla,من البداية إلى النهاية: اتفاقية مستوى الخدمة
+menu.e2e_allocation_generator,من البداية إلى النهاية: مولّد التخصيص
+menu.e2e_load_balancing,من البداية إلى النهاية: موازنة الأحمال
+menu.e2e_material_catalog,من البداية إلى النهاية: فهرس المواد
+menu.diag_postal_centers,التشخيص: المراكز البريدية
+menu.diag_readers_management,التشخيص: إدارة القارئات
+menu.diag_segment_sla,التشخيص: اتفاقية مستوى خدمة القطاعات
+menu.account_working_days.tooltip,تكوين أيام العمل للحساب
+menu.e2e_onedb_generator.tooltip,توليد بيانات OneDB
+menu.e2e_country_topology.tooltip,تكوين طوبولوجيا البلدان والشبكة البريدية
+menu.e2e_carriers_products.tooltip,إدارة الناقلين ومنتجاتهم
+menu.setup.tooltip,إعداد الشبكة وتكوينها
+menu.allocation.tooltip,إدارة التخصيصات
+menu.materials.tooltip,إدارة المواد
+menu.reporting.tooltip,التقارير والتحليلات
+menu.database.tooltip,الوصول إلى قاعدة البيانات
+menu.e2e_database.tooltip,الوصول إلى قاعدة بيانات من البداية إلى النهاية
+menu.e2e_database_api.tooltip,واجهة برمجة تطبيقات قاعدة بيانات من البداية إلى النهاية
+menu.segment_analysis.tooltip,تحليل أداء القطاعات
+menu.epcis_pipeline_api.tooltip,واجهة برمجة تطبيقات خط أنابيب EPCIS
+menu.rfid_events_database.tooltip,قاعدة بيانات أحداث RFID
+common.no_data,لا توجد بيانات متاحة
+common.items,عناصر
+common.avg_time,متوسط الوقت
+common.on_time,في الوقت المحدد
+common.status.on_time,في الوقت المحدد
+common.status.warning,تحذير
+common.status.critical,حرج
+diagnosis.network.kpi_description,المتوسط المرجح لمؤشرات الأداء الرئيسية
+diagnosis.network.score_breakdown,تفصيل النتيجة
+diagnosis.network.automatic_findings,النتائج التلقائية
+diagnosis.network.summary,ملخص الشبكة
+diagnosis.network.route,مسار
+diagnosis.network.total_items,إجمالي العناصر
+diagnosis.network.active_routes,المسارات النشطة
+diagnosis.network.postal_centers,المراكز البريدية
+diagnosis.network.top5_routes,أفضل 5 مسارات
+diagnosis.network.bottom5_routes,أسوأ 5 مسارات
+diagnosis.network.top5_centers,أفضل 5 مراكز
+diagnosis.network.bottom5_centers,أسوأ 5 مراكز
+diagnosis.metric.on_time_delivery,التسليم في الوقت المحدد
+diagnosis.metric.avg_transit_time,متوسط زمن النقل
+diagnosis.metric.avg_processing_time,متوسط زمن المعالجة
+diagnosis.metric.data_quality,جودة البيانات
+diagnosis.metric.data_completeness,اكتمال البيانات
+diagnosis.metric.sla_violations,انتهاكات اتفاقية مستوى الخدمة
+diagnosis.pipeline.title,مراقب خط أنابيب EPCIS
+diagnosis.pipeline.raw_events,الأحداث الخام
+diagnosis.pipeline.processed,تمت المعالجة
+diagnosis.pipeline.segments,القطاعات
+diagnosis.pipeline.routes,المسارات
+diagnosis.pipeline.phases,مراحل خط الأنابيب
+diagnosis.pipeline.recent_incidents,الحوادث الأخيرة
+diagnosis.pipeline.last10_unresolved,آخر 10 غير محلولة
+diagnosis.pipeline.no_incidents,لا توجد حوادث حديثة
+diagnosis.pipeline.execution_log,سجل التنفيذ
+diagnosis.center.center,مركز
+diagnosis.center.items,عناصر
+diagnosis.center.avg_time,متوسط الوقت
+diagnosis.center.p95_time,النسبة المئوية 95 للوقت
+diagnosis.center.throughput,معدل الإنتاجية
+diagnosis.center.efficiency,الكفاءة
+diagnosis.segment.total_count,العدد الإجمالي
+diagnosis.segment.sla_compliance,الامتثال لاتفاقية مستوى الخدمة
+diagnosis.segment.avg_duration,متوسط المدة:
+diagnosis.segment.p50_duration,المدة عند النسبة المئوية 50:
+diagnosis.segment.p95_duration,المدة عند النسبة المئوية 95:
+diagnosis.segment.range,النطاق:
+diagnosis.route.route,مسار
+diagnosis.route.journeys,رحلات
+diagnosis.route.on_time_rate,معدل الالتزام بالوقت
+diagnosis.route.avg_transit,متوسط النقل
+diagnosis.route.p95_transit,النسبة المئوية 95 للنقل
+diagnosis.route.missroute_rate,معدل سوء التوجيه
+diagnosis.route.total_segments,إجمالي القطاعات
+settings.change_password,تغيير كلمة المرور
+settings.security,الأمن
+settings.password_hint,اختر كلمة مرور قوية لحماية حسابك
+settings.password_tips,نصائح لكلمة المرور:
+admin.all_users_title,جميع المستخدمين
+reporting.compliance.samples,عينات
