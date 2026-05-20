@@ -2414,7 +2414,7 @@ mobile_readers.since,À partir de
 mobile_readers.unassigned,Non assigné
 mobile_readers.assignments,Attributions
 mobile_readers.reassign,Réassigner
-mobile_readers.assign,Attribuer à un centre 
+mobile_readers.assign,Attribuer à un centre
 mobile_readers.view_history,Voir l’historique
 mobile_readers.no_readers,Pas encore de lecteurs mobiles
 mobile_readers.no_readers_description,Créez votre premier lecteur mobile pour commencer le suivi des affectations
@@ -2452,6 +2452,59 @@ menu.rfid_events_consolidation_numbered,1.Consolidation des événements RFID
 menu.journey_segments_numbered,2. Segments de trajet
 menu.complete_journeys_numbered,3. Trajets complets
 menu.center_working_days,Jours ouvrables du centre
+menu.center_working_days.tooltip,Configurer les jours ouvrables et les jours fériés des centres postaux
+readers_management.filters,Filtres
+readers_management.active,actif
+readers_management.reset,Réinitialiser
+readers_management.search,Rechercher
+readers_management.search_placeholder,Rechercher par nom ou code…
+readers_management.postal_center,Centre postal
+readers_management.all_centers,Tous les centres
+readers_management.unassigned,Non attribué
+readers_management.reader_type,Type de lecteur
+readers_management.all_types,Tous les types
+readers_management.entry,Entrée
+readers_management.exit,Sortie
+readers_management.mixed,Mixte
+readers_management.assignment_status,Statut d’affectation
+readers_management.all_statuses,Tous les statuts
+readers_management.assigned,Affecté
+readers_management.mobility_status,Statut de mobilité
+readers_management.all_mobility,Tous
+readers_management.has_history,A un historique
+readers_management.no_history,Aucun historique
+readers_management.showing,affichage de
+readers_management.total,total
+readers_management.no_readers_found,Aucun lecteur ne correspond à vos filtres
+readers_management.create_reader,Créer un lecteur
+readers_management.confirm_delete,Êtes-vous sûr de vouloir supprimer ce lecteur ?
+readers_management.since,Depuis
+readers_management.assignments,affectations
+readers_management.reassign,Réaffecter
+readers_management.assign,Affecter
+readers_management.view_history,Voir l’historique
+readers_management.location_history,Historique de localisation
+readers_management.current,Actuel
+readers_management.assigned_at,Attribué
+readers_management.unassigned_at,Non attribué
+readers_management.duration,Durée
+readers_management.notes,Remarques
+readers_management.currently_active,Actuellement actif
+readers_management.less_than_day,Moins d’un jour
+readers_management.one_day,1 jour
+readers_management.days,jours
+readers_management.no_location_history,Aucune historique de localisation disponible
+readers_management.reader_name,Nom du lecteur
+readers_management.code,Code
+readers_management.type,Type
+readers_management.status,Statut
+readers_management.current_location,Emplacement actuel
+readers_management.carrier,Transporteur
+readers_management.all_carriers,Tous les transporteurs
+readers_management.movement_date,Date de mouvement
+readers_management.movement_date_help,Date d’entrée en vigueur de cette affectation/désaffectation
+readers_management.assign_help,Sélectionnez un centre à attribuer ou laissez vide pour désattribuer.
+readers_management.edit_reader,Modifier le lecteur
 menu.diagnosis,Diagnostic
 menu.diagnosis.tooltip,Outils de diagnostic et d'analyse des performances du réseau
 menu.network_overview,Aperçu du Réseau
