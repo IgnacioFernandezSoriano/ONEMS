@@ -16,6 +16,7 @@ export interface Account {
   slug: string
   status: Status
   default_language: SupportedLanguage
+  email_panelist_manager: string | null
   created_at: string
   updated_at: string
 }

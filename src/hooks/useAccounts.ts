@@ -28,7 +28,7 @@ export function useAccounts() {
     fetchAccounts()
   }, [])
 
-  const createAccount = async (account: { name: string; slug: string; default_language?: SupportedLanguage }) => {
+  const createAccount = async (account: { name: string; slug: string; default_language?: SupportedLanguage; email_panelist_manager?: string | null }) => {
     const { data, error } = await supabase
       .from('accounts')
       .insert(account as any)

@@ -22,7 +22,7 @@ export function Accounts() {
     setIsModalOpen(true)
   }
 
-  const handleSubmit = async (data: { name: string; slug: string; status?: 'active' | 'inactive'; default_language: SupportedLanguage }) => {
+  const handleSubmit = async (data: { name: string; slug: string; status?: 'active' | 'inactive'; default_language: SupportedLanguage; email_panelist_manager: string | null }) => {
     if (selectedAccount) {
       await updateAccount(selectedAccount.id, data)
     } else {
