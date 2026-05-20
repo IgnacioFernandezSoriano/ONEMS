@@ -2529,8 +2529,7 @@ menu.allocation,Allocation
 menu.materials,Matériaux
 menu.database,Base de données
 menu.e2e_database,Base de données de bout en bout
-menu.e2e_database_api,"API de la base de données E2E
-"
+menu.e2e_database_api,API de la base de données E2E
 menu.segment_analysis,Analyse des segments
 menu.epcis_pipeline_api,API du pipeline EPCIS
 menu.rfid_events_database,Base de données des événements RFID
@@ -2555,8 +2554,7 @@ menu.allocation.tooltip,Gestion des allocations
 menu.materials.tooltip,Gestion des matériaux
 menu.reporting.tooltip,Rapports et analyses
 menu.database.tooltip,Accès à la base de données
-menu.e2e_database.tooltip,"Accès à la base de données E2E
-"
+menu.e2e_database.tooltip,Accès à la base de données E2E
 menu.e2e_database_api.tooltip,API de la base de données E2E
 menu.segment_analysis.tooltip,Analyse des performances des segments
 menu.epcis_pipeline_api.tooltip,API du pipeline EPCIS
@@ -2621,3 +2619,16 @@ settings.password_hint,Choisissez un mot de passe fort pour protéger votre comp
 settings.password_tips,Conseils pour le mot de passe :
 admin.all_users_title,Tous les utilisateurs
 reporting.compliance.samples,Échantillons
+reporting.compliance.jk_std,J+K STD
+reporting.compliance.jk_actual,J+K réel
+reporting.compliance.std_pct,STD %
+reporting.compliance.actual_pct,% réel
+reporting.compliance.deviation,"Écart (déviation)
+"
+reporting.compliance.download_csv,Télécharger les échantillons CSV
+load_balancing.total,Total
+load_balancing.avg_per_node,Moyenne/nœud :
+load_balancing.optimal,Optimal :
+load_balancing.urgent,Urgent
+load_balancing.preventive,Préventif :
+load_balancing.balance_not_needed,Équilibre non nécessaire
