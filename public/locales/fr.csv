@@ -2631,19 +2631,19 @@ load_balancing.optimal,Optimal :
 load_balancing.urgent,Urgent
 load_balancing.preventive,Préventif :
 load_balancing.balance_not_needed,Équilibre non nécessaire
-menu.ondb_generator,
-menu.ondb_generator.tooltip,
-menu.country_topology.tooltip,
-menu.e2e_sla.tooltip,
-menu.segment_sla,
-menu.segment_sla.tooltip,
-menu.territory_equity,
-menu.territory_equity.tooltip,
-menu.compliance,
-menu.compliance.tooltip,
-menu.e2e_db.tooltip,
-menu.operations,
-menu.setup_view,
-menu.account,
-menu.all_accounts,
-menu.sign_out,
+menu.ondb_generator,Générateur de base de données ONEDB
+menu.ondb_generator.tooltip,Générer des données de test ONEDB
+menu.country_topology.tooltip,Topologie du pays et réseau postal
+menu.e2e_sla.tooltip,Normes de livraison de bout en bout
+menu.segment_sla,Accord de niveau de service du segment
+menu.segment_sla.tooltip,Accords de niveau de service du segment
+menu.territory_equity,Équité territoriale
+menu.territory_equity.tooltip,Rapport sur l’équité territoriale
+menu.compliance,Conformité
+menu.compliance.tooltip,Rapports de conformité
+menu.e2e_db.tooltip,Base de données de bout en bout
+menu.operations,Opérations
+menu.setup_view,Configuration
+menu.account,Compte
+menu.all_accounts,Tous les comptes
+menu.sign_out,Se déconnecter
