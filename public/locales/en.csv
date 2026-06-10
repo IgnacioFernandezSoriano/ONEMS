@@ -2631,3 +2631,19 @@ load_balancing.optimal,Optimal:
 load_balancing.urgent,Urgent:
 load_balancing.preventive,Preventive:
 load_balancing.balance_not_needed,Balance Not Needed
+menu.ondb_generator,ONDB Generator
+menu.ondb_generator.tooltip,Generate ONDB test data
+menu.country_topology.tooltip,Country topology and postal network
+menu.e2e_sla.tooltip,End-to-end delivery standards
+menu.segment_sla,Segment SLA
+menu.segment_sla.tooltip,Segment service level agreements
+menu.territory_equity,Territory Equity
+menu.territory_equity.tooltip,Territory equity reporting
+menu.compliance,Compliance
+menu.compliance.tooltip,Compliance reporting
+menu.e2e_db.tooltip,End-to-end database
+menu.operations,Operations
+menu.setup_view,Setup
+menu.account,Account
+menu.all_accounts,All Accounts
+menu.sign_out,Sign Out
