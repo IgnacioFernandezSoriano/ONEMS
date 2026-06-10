@@ -2187,6 +2187,14 @@ topology.no_nodes_yet,There are no nodes in this city yet
 topology.no_regions,No regions found
 topology.no_topology_yet,No topology defined yet
 topology.node,Node
+topology.node_id,Node ID
+topology.node_status,Node status
+topology.assign_panelist,Assign panelist
+topology.no_panelist_option,— No panelist —
+topology.panelist_current,current
+topology.panelist_hint_city,Available panelists from {scope}, with no node assigned.
+topology.panelist_hint_region,Available panelists from the region of {scope} (Class C city), with no node assigned.
+topology.no_available_panelists,No available panelists match this scope.
 topology.nodes,Nodes
 topology.nodes_need_assignment,These nodes need a panelist assignment to be operational
 topology.nodes_without_panelists,Nodes without panelists

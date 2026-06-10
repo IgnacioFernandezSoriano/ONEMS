@@ -24,6 +24,7 @@ export function CountryTopology() {
     createNode,
     updateNode,
     deleteNode,
+    assignPanelistToNode,
   } = useTopology()
 
   // State for filters and UI
@@ -440,6 +441,7 @@ export function CountryTopology() {
             <TopologyTree
               regions={filteredData.regions}
               cities={filteredData.cities}
+              allCities={cities}
               nodes={filteredData.nodes}
               panelists={panelists}
               expandAll={expandAll}
@@ -449,6 +451,7 @@ export function CountryTopology() {
               onUpdateRegion={updateRegion}
               onUpdateCity={updateCity}
               onUpdateNode={updateNode}
+              onAssignPanelist={assignPanelistToNode}
               onDeleteRegion={deleteRegion}
               onDeleteCity={deleteCity}
               onDeleteNode={deleteNode}

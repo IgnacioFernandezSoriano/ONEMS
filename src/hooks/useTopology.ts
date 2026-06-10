@@ -28,8 +28,11 @@ export function useTopology() {
         nodesQuery = nodesQuery.eq('account_id', effectiveAccountId)
       }
 
-      // Fetch panelists for node status
-      let panelistsQuery = supabase.from('panelists').select('id, node_id, name, status')
+      // Fetch panelists for node status and assignment (address_city is used to
+      // match available panelists to a node's city / region — see NodeForm)
+      let panelistsQuery = supabase
+        .from('panelists')
+        .select('id, node_id, name, status, panelist_code, email, address_city')
       if (effectiveAccountId) {
         panelistsQuery = panelistsQuery.eq('account_id', effectiveAccountId)
       }
@@ -158,6 +161,30 @@ export function useTopology() {
     setNodes(nodes.filter(n => n.id !== id))
   }
 
+  // Panelist assignment from the topology screen.
+  // Assigns `panelistId` to `nodeId` (or clears the node when panelistId is null),
+  // unassigning any panelist currently sitting on that node.
+  const assignPanelistToNode = async (nodeId: string, panelistId: string | null) => {
+    const target = panelistId || null
+    const currentlyAssigned = panelists.filter((p: any) => p.node_id === nodeId)
+
+    // Unassign any panelist currently on this node that isn't the target
+    for (const p of currentlyAssigned) {
+      if (p.id !== target) {
+        const { error } = await supabase.from('panelists').update({ node_id: null }).eq('id', p.id)
+        if (error) throw error
+      }
+    }
+
+    // Assign the target panelist (if any and not already on this node)
+    if (target && !currentlyAssigned.some((p: any) => p.id === target)) {
+      const { error } = await supabase.from('panelists').update({ node_id: nodeId }).eq('id', target)
+      if (error) throw error
+    }
+
+    await fetchAll()
+  }
+
   return {
     regions,
     cities,
@@ -174,6 +201,7 @@ export function useTopology() {
     createNode,
     updateNode,
     deleteNode,
+    assignPanelistToNode,
     refresh: fetchAll,
   }
 }
