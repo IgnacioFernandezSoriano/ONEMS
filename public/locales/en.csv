@@ -1,4 +1,4 @@
-account_config.add_holiday,Add Holiday
+key,translation
 account_config.calculation_mode,Calculation Mode
 account_config.calculation_mode_help,Choose how to calculate transit times: natural days (24/7) or working days (excluding non-working hours)
 account_config.confirm_delete_holiday,Are you sure you want to delete this holiday?
@@ -2259,70 +2259,70 @@ users.password,Password
 users.promise,Promise
 users.role,Role
 users.select_account,Select account
-menu.journey_segments,"Journey Segments"
-menu.journey_segments.tooltip,"Complete journey reconstruction with transit times and SLA compliance"
-journey_segments.title,"Journey Segments"
-journey_segments.description,"Complete journey reconstruction with transit times and SLA compliance"
-journey_segments.loading,"Loading segments..."
-journey_segments.error,"Error loading segments"
-journey_segments.run_reconstruction,"Run Reconstruction"
-journey_segments.run_reconstruction_tooltip,"Reconstruct journey segments from processed events"
-journey_segments.export_csv,"Export CSV"
-journey_segments.export_tooltip,"Export selected segments to CSV"
-journey_segments.export_selected,"Export Selected"
-journey_segments.clear_selection,"Clear Selection"
-journey_segments.selected_count,"{{count}} segments selected"
-journey_segments.error_no_account,"No active account found"
-journey_segments.reconstruction_success,"Reconstruction completed: {{segments}} segments created from {{events}} events in {{time}}ms"
-journey_segments.reconstruction_no_data,"No new segments created"
-journey_segments.reconstruction_error,"Reconstruction error: {{message}}"
-journey_segments.kpi.total,"Total"
-journey_segments.kpi.segments,"Segments"
-journey_segments.kpi.on_time,"On Time"
-journey_segments.kpi.warning,"Warning"
-journey_segments.kpi.critical,"Critical"
-journey_segments.kpi.avg_time,"Average Time"
-journey_segments.kpi.minutes,"minutes"
-journey_segments.filters.title,"Filters"
-journey_segments.filters.search,"Search"
-journey_segments.filters.search_placeholder,"Tag ID or Postal Center..."
-journey_segments.filters.segment_type,"Segment Type"
-journey_segments.filters.all_types,"All Types"
-journey_segments.filters.operational,"Operational"
-journey_segments.filters.distribution,"Distribution"
-journey_segments.filters.postal_center,"Postal Center"
-journey_segments.filters.all_centers,"All Centers"
-journey_segments.filters.from_center,"From Center"
-journey_segments.filters.to_center,"To Center"
-journey_segments.filters.sla_compliance,"SLA Compliance"
-journey_segments.filters.all_compliance,"All Status"
-journey_segments.filters.on_time,"On Time"
-journey_segments.filters.warning,"Warning"
-journey_segments.filters.critical,"Critical"
-journey_segments.filters.violated,"Violated"
-journey_segments.filters.no_sla,"No SLA"
-journey_segments.filters.date_from,"Date From"
-journey_segments.filters.date_to,"Date To"
-journey_segments.filters.apply,"Apply Filters"
-journey_segments.filters.clear,"Clear Filters"
-journey_segments.table.tag_id,"Tag ID"
-journey_segments.table.type,"Type"
-journey_segments.table.centers,"Centers"
-journey_segments.table.entry_time,"Entry Time"
-journey_segments.table.exit_time,"Exit Time"
-journey_segments.table.duration,"Duration"
-journey_segments.table.actual,"Actual"
-journey_segments.table.sla,"SLA"
-journey_segments.table.compliance,"Compliance"
-journey_segments.table.no_segments,"No segments found"
-journey_segments.table.no_sla,"No SLA"
-journey_segments.type.operational,"Operational"
-journey_segments.type.distribution,"Distribution"
-journey_segments.compliance.on_time,"On Time"
-journey_segments.compliance.warning,"Warning"
-journey_segments.compliance.critical,"Critical"
-journey_segments.compliance.violated,"Violated"
-journey_segments.compliance.no_sla,"No SLA"
+menu.journey_segments,Journey Segments
+menu.journey_segments.tooltip,Complete journey reconstruction with transit times and SLA compliance
+journey_segments.title,Journey Segments
+journey_segments.description,Complete journey reconstruction with transit times and SLA compliance
+journey_segments.loading,Loading segments...
+journey_segments.error,Error loading segments
+journey_segments.run_reconstruction,Run Reconstruction
+journey_segments.run_reconstruction_tooltip,Reconstruct journey segments from processed events
+journey_segments.export_csv,Export CSV
+journey_segments.export_tooltip,Export selected segments to CSV
+journey_segments.export_selected,Export Selected
+journey_segments.clear_selection,Clear Selection
+journey_segments.selected_count,{{count}} segments selected
+journey_segments.error_no_account,No active account found
+journey_segments.reconstruction_success,Reconstruction completed: {{segments}} segments created from {{events}} events in {{time}}ms
+journey_segments.reconstruction_no_data,No new segments created
+journey_segments.reconstruction_error,Reconstruction error: {{message}}
+journey_segments.kpi.total,Total
+journey_segments.kpi.segments,Segments
+journey_segments.kpi.on_time,On Time
+journey_segments.kpi.warning,Warning
+journey_segments.kpi.critical,Critical
+journey_segments.kpi.avg_time,Average Time
+journey_segments.kpi.minutes,minutes
+journey_segments.filters.title,Filters
+journey_segments.filters.search,Search
+journey_segments.filters.search_placeholder,Tag ID or Postal Center...
+journey_segments.filters.segment_type,Segment Type
+journey_segments.filters.all_types,All Types
+journey_segments.filters.operational,Operational
+journey_segments.filters.distribution,Distribution
+journey_segments.filters.postal_center,Postal Center
+journey_segments.filters.all_centers,All Centers
+journey_segments.filters.from_center,From Center
+journey_segments.filters.to_center,To Center
+journey_segments.filters.sla_compliance,SLA Compliance
+journey_segments.filters.all_compliance,All Status
+journey_segments.filters.on_time,On Time
+journey_segments.filters.warning,Warning
+journey_segments.filters.critical,Critical
+journey_segments.filters.violated,Violated
+journey_segments.filters.no_sla,No SLA
+journey_segments.filters.date_from,Date From
+journey_segments.filters.date_to,Date To
+journey_segments.filters.apply,Apply Filters
+journey_segments.filters.clear,Clear Filters
+journey_segments.table.tag_id,Tag ID
+journey_segments.table.type,Type
+journey_segments.table.centers,Centers
+journey_segments.table.entry_time,Entry Time
+journey_segments.table.exit_time,Exit Time
+journey_segments.table.duration,Duration
+journey_segments.table.actual,Actual
+journey_segments.table.sla,SLA
+journey_segments.table.compliance,Compliance
+journey_segments.table.no_segments,No segments found
+journey_segments.table.no_sla,No SLA
+journey_segments.type.operational,Operational
+journey_segments.type.distribution,Distribution
+journey_segments.compliance.on_time,On Time
+journey_segments.compliance.warning,Warning
+journey_segments.compliance.critical,Critical
+journey_segments.compliance.violated,Violated
+journey_segments.compliance.no_sla,No SLA
 menu.complete_journeys,Complete Journeys
 complete_journeys.title,Complete Journeys
 complete_journeys.description,Complete journey reconstruction with transit times and SLA compliance
@@ -2363,7 +2363,7 @@ complete_journeys.table.start_time,Start Time
 complete_journeys.table.total_time,Total Time
 complete_journeys.table.compliance,Compliance
 complete_journeys.error_no_account,No account selected
-complete_journeys.assembly_success,Assembly completed: {created} created, {updated} updated in {time}ms
+complete_journeys.assembly_success,Assembly completed: {created} created
 complete_journeys.assembly_no_data,No data returned from assembly
 complete_journeys.assembly_error,Assembly error: {message}
 menu.cutoff_times,Cut-off Times
@@ -2426,7 +2426,6 @@ mobile_readers.one_day,1 day
 mobile_readers.days,days
 mobile_readers.current,Current
 mobile_readers.assigned,Assigned
-mobile_readers.unassigned,Unassigned
 mobile_readers.currently_active,Currently active
 mobile_readers.duration,Duration
 mobile_readers.notes,Notes
@@ -2439,12 +2438,12 @@ mobile_readers.assigned_at,Assignment Date
 mobile_readers.assigned_at_help,When the reader will be assigned to this center
 mobile_readers.unassigned_at,Unassignment Date
 mobile_readers.unassigned_at_help,Optional: When the reader will be unassigned (leave empty for indefinite)
-mobile_readers.notes_placeholder,e.g., Temporary deployment for peak season
+mobile_readers.notes_placeholder,e.g.
 mobile_readers.notes_help,Optional notes about this assignment
 mobile_readers.confirm_delete,Are you sure you want to delete this reader?
 menu.readers_management,Readers Management
 menu.readers_management.tooltip,Manage all readers and their location history
-readers_management.description,Manage all RFID readers. Track location history for readers that move between postal centers.
+readers_management.description,Manage all readers and track their location history
 readers_management.total_readers,total readers
 readers_management.with_history,with location history
 menu.rfid_data_consolidation,RFID Data Consolidation
@@ -2454,7 +2453,6 @@ menu.journey_segments_numbered,2. Journey Segments
 menu.complete_journeys_numbered,3. Complete Journeys
 menu.center_working_days,Center Working Days
 menu.center_working_days.tooltip,Configure working days and holidays for postal centers
-readers_management.description,Manage all readers and track their location history
 readers_management.filters,Filters
 readers_management.active,active
 readers_management.reset,Reset
