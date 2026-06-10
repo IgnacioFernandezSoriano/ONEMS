@@ -2520,114 +2520,114 @@ menu.jk_performance_segments.tooltip,Analyse de performance J+K au niveau des se
 accounts.default_language,Langue par défaut
 accounts.default_language_hint,Langue héritée par les panélistes de ce compte
 panelists.language,Langue
-menu.e2e,
-menu.diagnosis_section,
-menu.system_setup,
-menu.country_topology,
-menu.carriers_products,
-menu.allocation,
-menu.materials,
-menu.database,
-menu.e2e_database,
-menu.e2e_database_api,
-menu.segment_analysis,
-menu.epcis_pipeline_api,
-menu.rfid_events_database,
-menu.account_working_days,
-menu.e2e_onedb_generator,
-menu.e2e_country_topology,
-menu.e2e_carriers_products,
-menu.e2e_panelists,
-menu.e2e_sla,
-menu.e2e_allocation_generator,
-menu.e2e_load_balancing,
-menu.e2e_material_catalog,
-menu.diag_postal_centers,
-menu.diag_readers_management,
-menu.diag_segment_sla,
-menu.account_working_days.tooltip,
-menu.e2e_onedb_generator.tooltip,
-menu.e2e_country_topology.tooltip,
-menu.e2e_carriers_products.tooltip,
-menu.setup.tooltip,
-menu.allocation.tooltip,
-menu.materials.tooltip,
-menu.reporting.tooltip,
-menu.database.tooltip,
-menu.e2e_database.tooltip,
-menu.e2e_database_api.tooltip,
-menu.segment_analysis.tooltip,
-menu.epcis_pipeline_api.tooltip,
-menu.rfid_events_database.tooltip,
-common.no_data,
-common.items,
-common.avg_time,
-common.on_time,
-common.status.on_time,
-common.status.warning,
-common.status.critical,
-diagnosis.network.kpi_description,
-diagnosis.network.score_breakdown,
-diagnosis.network.automatic_findings,
-diagnosis.network.summary,
-diagnosis.network.route,
-diagnosis.network.total_items,
-diagnosis.network.active_routes,
-diagnosis.network.postal_centers,
-diagnosis.network.top5_routes,
-diagnosis.network.bottom5_routes,
-diagnosis.network.top5_centers,
-diagnosis.network.bottom5_centers,
-diagnosis.metric.on_time_delivery,
-diagnosis.metric.avg_transit_time,
-diagnosis.metric.avg_processing_time,
-diagnosis.metric.data_quality,
-diagnosis.metric.data_completeness,
-diagnosis.metric.sla_violations,
-diagnosis.pipeline.title,
-diagnosis.pipeline.raw_events,
-diagnosis.pipeline.processed,
-diagnosis.pipeline.segments,
-diagnosis.pipeline.routes,
-diagnosis.pipeline.phases,
-diagnosis.pipeline.recent_incidents,
-diagnosis.pipeline.last10_unresolved,
-diagnosis.pipeline.no_incidents,
-diagnosis.pipeline.execution_log,
-diagnosis.center.center,
-diagnosis.center.items,
-diagnosis.center.avg_time,
-diagnosis.center.p95_time,
-diagnosis.center.throughput,
-diagnosis.center.efficiency,
-diagnosis.segment.total_count,
-diagnosis.segment.sla_compliance,
-diagnosis.segment.avg_duration,
-diagnosis.segment.p50_duration,
-diagnosis.segment.p95_duration,
-diagnosis.segment.range,
-diagnosis.route.route,
-diagnosis.route.journeys,
-diagnosis.route.on_time_rate,
-diagnosis.route.avg_transit,
-diagnosis.route.p95_transit,
-diagnosis.route.missroute_rate,
-diagnosis.route.total_segments,
-settings.change_password,
-settings.security,
-settings.password_hint,
-settings.password_tips,
-admin.all_users_title,
-reporting.compliance.samples,
-reporting.compliance.jk_std,
-reporting.compliance.jk_actual,
-reporting.compliance.std_pct,
-reporting.compliance.actual_pct,
-reporting.compliance.deviation,
-reporting.compliance.download_csv,
-load_balancing.total,
-load_balancing.avg_per_node,
-load_balancing.optimal,
-load_balancing.urgent,
-load_balancing.preventive,
-load_balancing.balance_not_needed,
+menu.e2e,De bout en bout
+menu.diagnosis_section,Mesure de diagnostic
+menu.system_setup,Configuration du système
+menu.country_topology,Topologie des pays
+menu.carriers_products,Transporteurs et produits
+menu.allocation,Allocation
+menu.materials,Matériaux
+menu.database,Base de données
+menu.e2e_database,Base de données de bout en bout
+menu.e2e_database_api,API de la base de données E2E
+menu.segment_analysis,Analyse des segments
+menu.epcis_pipeline_api,API du pipeline EPCIS
+menu.rfid_events_database,Base de données des événements RFID
+menu.account_working_days,Jours ouvrables du compte
+menu.e2e_onedb_generator,Générateur OneDB
+menu.e2e_country_topology,E2E : topologie des pays
+menu.e2e_carriers_products,E2E : transporteurs et produits
+menu.e2e_panelists,E2E : panélistes
+menu.e2e_sla,E2E : SLA (accord de niveau de service)
+menu.e2e_allocation_generator,E2E : générateur d’allocation
+menu.e2e_load_balancing,E2E : équilibrage de charge
+menu.e2e_material_catalog,E2E : catalogue des matériaux
+menu.diag_postal_centers,Diag : centres postaux
+menu.diag_readers_management,Diag : gestion des lecteurs
+menu.diag_segment_sla,Diag : SLA des segments
+menu.account_working_days.tooltip,Configurer les jours ouvrables du compte
+menu.e2e_onedb_generator.tooltip,Générer des données OneDB
+menu.e2e_country_topology.tooltip,Configurer la topologie des pays et le réseau postal
+menu.e2e_carriers_products.tooltip,Gérer les transporteurs et leurs produits
+menu.setup.tooltip,Configuration et mise en place du réseau
+menu.allocation.tooltip,Gestion des allocations
+menu.materials.tooltip,Gestion des matériaux
+menu.reporting.tooltip,Rapports et analyses
+menu.database.tooltip,Accès à la base de données
+menu.e2e_database.tooltip,Accès à la base de données E2E
+menu.e2e_database_api.tooltip,API de la base de données E2E
+menu.segment_analysis.tooltip,Analyse des performances des segments
+menu.epcis_pipeline_api.tooltip,API du pipeline EPCIS
+menu.rfid_events_database.tooltip,Base de données des événements RFID
+common.no_data,Aucune donnée disponible
+common.items,Articles
+common.avg_time,Temps moyen
+common.on_time,À l’heure
+common.status.on_time,À l’heure
+common.status.warning,Avertissement
+common.status.critical,Critique
+diagnosis.network.kpi_description,Moyenne pondérée des indicateurs clés de performance
+diagnosis.network.score_breakdown,Détail du score
+diagnosis.network.automatic_findings,Constats automatiques
+diagnosis.network.summary,Résumé du réseau
+diagnosis.network.route,Itinéraire
+diagnosis.network.total_items,Total des articles
+diagnosis.network.active_routes,Itinéraires actifs
+diagnosis.network.postal_centers,Centres postaux
+diagnosis.network.top5_routes,Top 5 itinéraires
+diagnosis.network.bottom5_routes,5 derniers itinéraires
+diagnosis.network.top5_centers,Top 5 centres
+diagnosis.network.bottom5_centers,5 derniers centres
+diagnosis.metric.on_time_delivery,Livraison à l’heure
+diagnosis.metric.avg_transit_time,Temps de transit moyen
+diagnosis.metric.avg_processing_time,Temps de traitement moyen
+diagnosis.metric.data_quality,Qualité des données
+diagnosis.metric.data_completeness,Complétude des données
+diagnosis.metric.sla_violations,Violations de SLA
+diagnosis.pipeline.title,Moniteur de pipeline EPCIS
+diagnosis.pipeline.raw_events,Événements bruts
+diagnosis.pipeline.processed,Traité
+diagnosis.pipeline.segments,Segments
+diagnosis.pipeline.routes,Itinéraires
+diagnosis.pipeline.phases,Phases du pipeline
+diagnosis.pipeline.recent_incidents,Incidents récents
+diagnosis.pipeline.last10_unresolved,10 derniers non résolus
+diagnosis.pipeline.no_incidents,Aucun incident récent
+diagnosis.pipeline.execution_log,Journal d’exécution
+diagnosis.center.center,CENTRE
+diagnosis.center.items,ARTICLES
+diagnosis.center.avg_time,TEMPS MOYEN
+diagnosis.center.p95_time,P95 TEMPS
+diagnosis.center.throughput,DÉBIT
+diagnosis.center.efficiency,EFFICACITÉ
+diagnosis.segment.total_count,Nombre total
+diagnosis.segment.sla_compliance,Conformité SLA
+diagnosis.segment.avg_duration,Durée moyenne :
+diagnosis.segment.p50_duration,Durée P50 :
+diagnosis.segment.p95_duration,Durée P95 :
+diagnosis.segment.range,Plage :
+diagnosis.route.route,Itinéraire
+diagnosis.route.journeys,Trajets
+diagnosis.route.on_time_rate,Taux de ponctualité
+diagnosis.route.avg_transit,Transit moyen
+diagnosis.route.p95_transit,Transit P95
+diagnosis.route.missroute_rate,Taux de mauvaise orientation
+diagnosis.route.total_segments,Total des segments
+settings.change_password,Changer le mot de passe
+settings.security,Sécurité
+settings.password_hint,Choisissez un mot de passe fort pour protéger votre compte
+settings.password_tips,Conseils pour le mot de passe :
+admin.all_users_title,Tous les utilisateurs
+reporting.compliance.samples,Échantillons
+reporting.compliance.jk_std,J+K STD
+reporting.compliance.jk_actual,J+K réel
+reporting.compliance.std_pct,STD %
+reporting.compliance.actual_pct,% réel
+reporting.compliance.deviation,Écart (déviation)
+reporting.compliance.download_csv,Télécharger les échantillons CSV
+load_balancing.total,Total
+load_balancing.avg_per_node,Moyenne/nœud :
+load_balancing.optimal,Optimal :
+load_balancing.urgent,Urgent
+load_balancing.preventive,Préventif :
+load_balancing.balance_not_needed,Équilibre non nécessaire
