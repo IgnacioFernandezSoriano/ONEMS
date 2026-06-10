@@ -1,4 +1,4 @@
-account_config.add_holiday,Agregar Festivo
+key,translation
 account_config.calculation_mode,Modo de Cálculo
 account_config.calculation_mode_help,Elija cómo calcular los tiempos de tránsito: días naturales (24/7) o días laborables (excluyendo horas no laborables)
 account_config.confirm_delete_holiday,¿Está seguro de que desea eliminar este festivo?
@@ -136,7 +136,7 @@ allocation_generator.tooltip_usage_text,"Genera planes, revísalos en la pestañ
 allocation_generator.total_samples,Muestras Totales
 allocation_generator.user_not_authenticated,Usuario no autenticado
 allocation_generator.year,Año
-allocation_plans.add_record,Agregar registro  
+allocation_plans.add_record,Agregar registro
 allocation_plans.all_carriers,Todos los operadores
 allocation_plans.all_cities,Todas las ciudades
 allocation_plans.all_nodes,Todos los nodos
@@ -160,7 +160,7 @@ allocation_plans.city_distribution_matrix,Matriz de distribución por ciudad
 allocation_plans.city_distribution_matrix_a_b_c,Matriz de distribución por ciudad (A-B-C)
 allocation_plans.clear_selection,Borrar selección
 allocation_plans.completed,Completado
-allocation_plans.create_record,Crear registro  
+allocation_plans.create_record,Crear registro
 allocation_plans.delayed_shipments,Envíos retrasados
 allocation_plans.delete_selected,Eliminar seleccionados
 allocation_plans.dest_city,Ciudad dest.
@@ -258,7 +258,7 @@ allocation_plans.total_pending,Total y pendiente
 allocation_plans.total_samples,Total de muestras *
 allocation_plans.transfer_error,Error de transferencia
 allocation_plans.unavailable,No disponible
-allocation_plans.update_record,Actualizar registro  
+allocation_plans.update_record,Actualizar registro
 allocation_plans.validation_errors,Errores de validación:
 allocation_plans.view_and_manage,Ver y gestionar los planes de asignación generados
 allocation_plans.waiting,En espera
@@ -362,7 +362,7 @@ carriers.choose_how_to_add_material_to_this_product,Elige cómo agregar material
 carriers.clear_filters,Borrar filtros
 carriers.code,Código *
 carriers.collapse_all,Contraer todo
-carriers.collapse_product,Colapsar producto  
+carriers.collapse_product,Colapsar producto
 carriers.create,Crear
 carriers.create_carrier,Crear transportista
 carriers.create_new_material,Crear nuevo material
@@ -382,14 +382,14 @@ carriers.e_g_express_delivery_24_hours,"p. ej., entrega exprés 24 horas"
 carriers.e_g_express_standard_economy,"p. ej., exprés, estándar, económico"
 carriers.edit_carrier,Editar transportista
 carriers.edit_product,Editar producto
-carriers.edit_quantity,Editar cantidad  
-carriers.enter_new_quantity,"Introduzca la nueva cantidad para ""{name}"":  "
+carriers.edit_quantity,Editar cantidad
+carriers.enter_new_quantity,"Introduzca la nueva cantidad para ""{name}"":"
 carriers.every_product_has_materials_assigned_from_the_cata,Cada producto tiene materiales asignados del catálogo
 carriers.expand_all,Expandir todo
-carriers.expand_all_products,Expandir todos los productos en este transportista  
+carriers.expand_all_products,Expandir todos los productos en este transportista
 carriers.expand_all_products_in_this_carrier,Expandir todos los productos en este transportista
 carriers.expand_carrier,Expandir el operador
-carriers.expand_product,Expandir producto  
+carriers.expand_product,Expandir producto
 carriers.expand_products,Expandir todos los productos de este operador
 carriers.heures,Horas
 carriers.hours,Horas
@@ -408,7 +408,7 @@ carriers.no_active_materials_in_catalog_create_a_new_one_in,No hay materiales ac
 carriers.no_carriers,No se encontraron transportistas
 carriers.no_carriers_defined_yet,No se han definido transportistas aún
 carriers.no_carriers_yet,Aún no hay transportistas definidos
-carriers.no_materials,Aún no se han asignado materiales  
+carriers.no_materials,Aún no se han asignado materiales
 carriers.no_materials_assigned_yet,No se han asignado materiales aún
 carriers.no_products,No hay productos
 carriers.no_products_for_this_carrier_yet,No hay productos para este transportista aún
@@ -426,7 +426,7 @@ carriers.promise,Compromiso
 carriers.qty,Cant.
 carriers.quantity,Cantidad *
 carriers.remove_material,Eliminar material
-carriers.remove_material_confirm,"¿Eliminar el material ""{name}"" de este producto?  "
+carriers.remove_material_confirm,"¿Eliminar el material ""{name}"" de este producto?"
 carriers.rfid_tag,Etiqueta RFID
 carriers.search_carriers_or_products,Buscar transportistas o productos...
 carriers.search_placeholder,Buscar operadores o productos...
@@ -493,7 +493,7 @@ common.confirm,Confirmar
 common.confirm_delete,¿Eliminar este registro?
 common.create,Crear
 common.created_successfully,Creado exitosamente
-common.creating,Creando...  
+common.creating,Creando...
 common.cutoff,Cierre
 common.days,días
 common.delete,Eliminar
@@ -503,14 +503,14 @@ common.description,Descripción
 common.deselect_all,Deseleccionar Todo
 common.download,Descargar
 common.edit,Editar
-common.end_date,Fecha de fin  
+common.end_date,Fecha de fin
 common.error,Error
 common.expand_all,Expandir Todo
 common.export,Exportar
 common.export_csv,Exportar CSV
-common.export_to_csv,Exportar a CSV  
+common.export_to_csv,Exportar a CSV
 common.filters,Filtros
-common.first_semester,1er Semestre  
+common.first_semester,1er Semestre
 common.friday,Viernes
 common.generate_plan,Generar Plan
 common.generating,Generando...
@@ -527,7 +527,7 @@ common.loading,Cargando...
 common.loading_carriers,Cargando transportistas...
 common.loading_data,Cargando datos...
 common.loading_topology,Cargando topología...
-common.material,Material  
+common.material,Material
 common.minutes,minutos
 common.monday,Lunes
 common.no,No
@@ -551,14 +551,14 @@ common.saturday,Sábado
 common.save,Guardar
 common.saving,Guardando...
 common.search,Buscar
-common.second_semester,2º Semestre  
+common.second_semester,2º Semestre
 common.select,Seleccionar
 common.select_all,Seleccionar Todo
-common.show,Mostrar  
+common.show,Mostrar
 common.show_filters,Mostrar Filtros
 common.show_id,Mostrar ID
 common.sign_out,Cerrar sesión
-common.start_date,Fecha de inicio  
+common.start_date,Fecha de inicio
 common.status,Estado
 common.success,Éxito
 common.sunday,Domingo
@@ -571,7 +571,7 @@ common.unavailable,No disponible
 common.unit,Unidad
 common.update,Actualizar
 common.updated_successfully,Actualizado exitosamente
-common.updating,Actualizando...  
+common.updating,Actualizando...
 common.warning,Advertencia
 common.wednesday,Miércoles
 common.year,Año
@@ -910,30 +910,30 @@ material_requirements.description,Descripción
 material_requirements.end_date,Fecha Final
 material_requirements.export_csv,Exportar CSV
 material_requirements.filters,Filtros
-material_requirements.items_needed,artículos necesarios  
+material_requirements.items_needed,artículos necesarios
 material_requirements.loading,Cargando requisitos de material...
 material_requirements.material_code,Código de Material
 material_requirements.material_name,Nombre del Material
 material_requirements.node,Nodo
 material_requirements.panelist,Panelista
 material_requirements.panelist_distribution,Distribución de Panelistas
-material_requirements.panelist_requirements,Requisitos de los panelistas  
+material_requirements.panelist_requirements,Requisitos de los panelistas
 material_requirements.panelists_needing,Panelistas que Necesitan
 material_requirements.pending,Pendiente
 material_requirements.plans,Planes
 material_requirements.please_select_dates,Por favor seleccione fechas
 material_requirements.product,Producto
 material_requirements.purchase_orders,Órdenes de Compra
-material_requirements.purchase_requirements,Requisitos de compra  
+material_requirements.purchase_requirements,Requisitos de compra
 material_requirements.quantity,Cantidad
 material_requirements.quantity_needed,Cantidad Necesaria
-material_requirements.quick_period_selection,Selección rápida de período  
+material_requirements.quick_period_selection,Selección rápida de período
 material_requirements.region,Región
 material_requirements.shipments,Envíos
 material_requirements.start_date,Fecha Inicial
 material_requirements.status,Estado
 material_requirements.title,Requisitos de Material
-material_requirements.to_send,a enviar  
+material_requirements.to_send,a enviar
 material_requirements.total_materials,Materiales Totales
 material_requirements.total_requirements,Requisitos Totales
 material_requirements.unit,Unidad
@@ -1089,23 +1089,23 @@ months.may,Mayo
 months.nov,Nov
 months.oct,Oct
 months.sep,Sep
-nodeLoadBalancing.after,Después  
-nodeLoadBalancing.applyBalance,Aplicar balance  
-nodeLoadBalancing.balancePreview,Vista previa del balance  
-nodeLoadBalancing.before,Antes  
-nodeLoadBalancing.cancel,Cancelar  
-nodeLoadBalancing.highLoadNodes,Nodos con carga alta  
-nodeLoadBalancing.highLoadNodesDesc,Nodos con 120-150% de carga media  
-nodeLoadBalancing.loadDistributionMatrix,Matriz de distribución de carga  
-nodeLoadBalancing.loadLevel,Nivel de carga  
-nodeLoadBalancing.loading,Cargando...  
-nodeLoadBalancing.matrixView,Vista matricial  
-nodeLoadBalancing.saturatedNodes,Nodos saturados  
-nodeLoadBalancing.saturatedNodesDesc,Nodos por encima del 150% de carga media  
-nodeLoadBalancing.stdDevAfter,Desviación estándar después  
-nodeLoadBalancing.stdDevBefore,Desviación estándar antes  
-nodeLoadBalancing.totalShipments,Total de envíos  
-nodeLoadBalancing.totalShipmentsDesc,Todas las expediciones del período  
+nodeLoadBalancing.after,Después
+nodeLoadBalancing.applyBalance,Aplicar balance
+nodeLoadBalancing.balancePreview,Vista previa del balance
+nodeLoadBalancing.before,Antes
+nodeLoadBalancing.cancel,Cancelar
+nodeLoadBalancing.highLoadNodes,Nodos con carga alta
+nodeLoadBalancing.highLoadNodesDesc,Nodos con 120-150% de carga media
+nodeLoadBalancing.loadDistributionMatrix,Matriz de distribución de carga
+nodeLoadBalancing.loadLevel,Nivel de carga
+nodeLoadBalancing.loading,Cargando...
+nodeLoadBalancing.matrixView,Vista matricial
+nodeLoadBalancing.saturatedNodes,Nodos saturados
+nodeLoadBalancing.saturatedNodesDesc,Nodos por encima del 150% de carga media
+nodeLoadBalancing.stdDevAfter,Desviación estándar después
+nodeLoadBalancing.stdDevBefore,Desviación estándar antes
+nodeLoadBalancing.totalShipments,Total de envíos
+nodeLoadBalancing.totalShipmentsDesc,Todas las expediciones del período
 node_load_balancing.acceptable_deviation_tooltip,Desviación aceptable de la referencia
 node_load_balancing.deviation_tolerance,Tolerancia de Desviación (%)
 node_load_balancing.deviation_tolerance_label,Tolerancia de Desviación
@@ -1591,7 +1591,7 @@ receive_generator.demo_account_only,Cuenta de demostración únicamente - Esta f
 receive_generator.end_date,Fecha de fin
 receive_generator.example_out_of_sla_records_can_arrive_up_to,📊 Ejemplo: Los registros fuera de SLA pueden llegar hasta {{max}} días (SLA: {{sla}} días\
 receive_generator.example_records_can_arrive_between,📊 Ejemplo: Los registros pueden llegar entre {{min}} y {{max}} días (SLA: {{sla}} días)
-receive_generator.failed_records, ({{count}} fallidos)
+receive_generator.failed_records,({{count}} fallidos)
 receive_generator.generate_records,Generar registros
 receive_generator.generating,Generando... {{progress}}%
 receive_generator.generation_complete,Generación completada
@@ -1980,7 +1980,7 @@ stock.automation,Automatización
 stock.available_stock,Stock disponible
 stock.calculate_generate_shipments,Calcular y generar envíos
 stock.calculate_requirements,Calcular requisitos
-stock.calculating,Calculando...  
+stock.calculating,Calculando...
 stock.cancelled,Cancelado
 stock.change,Cambiar:
 stock.clear_filters,Borrar filtros
@@ -2053,8 +2053,8 @@ stock.out_of_stock,Sin Stock
 stock.packing_list_pdf,Lista de empaque PDF
 stock.panelist,Panelista
 stock.panelist_code_materials_count,Código: {code} • {count} material(es)
-stock.panelist_issue,Problema del panelista  
-stock.panelist_issues,Problemas del panelista  
+stock.panelist_issue,Problema del panelista
+stock.panelist_issues,Problemas del panelista
 stock.panelist_negative,Panelista Negativo
 stock.panelist_stock_help,Ver inventario de panelistas
 stock.panelist_stock_tab,Stock de Panelistas
@@ -2064,9 +2064,9 @@ stock.pending_shipments,Envíos Pendientes
 stock.period,Período
 stock.please_enter_quantity_and_note,Por favor ingrese la nueva cantidad y la nota de ajuste
 stock.please_enter_valid_quantity,Por favor ingrese una cantidad válida
-stock.please_select_dates,Por favor seleccione las fechas de inicio y fin  
-stock.please_select_requirements_export,Por favor seleccione requisitos para exportar  
-stock.please_select_requirements_po,Por favor seleccione requisitos para generar la orden de compra  
+stock.please_select_dates,Por favor seleccione las fechas de inicio y fin
+stock.please_select_requirements_export,Por favor seleccione requisitos para exportar
+stock.please_select_requirements_po,Por favor seleccione requisitos para generar la orden de compra
 stock.preview_shipments_will_be_generated,Previsualización: se generará(n) {count} envío(s)
 stock.promise,Compromiso
 stock.purchase_lead_time_days,Plazo de Compra (días)
@@ -2082,8 +2082,8 @@ stock.receive,Recibir
 stock.receive_purchase_order,Recibir Orden de Compra
 stock.received,Recibido
 stock.regulator_insufficient,Regulador Insuficiente
-stock.regulator_issue,Problema del regulador  
-stock.regulator_issues,Problemas del regulador  
+stock.regulator_issue,Problema del regulador
+stock.regulator_issues,Problemas del regulador
 stock.regulator_stock_help,Ver inventario del regulador
 stock.regulator_stock_tab,Stock del Regulador
 stock.removed_materials_will_create_new_pending_shipment,Materiales Eliminados (Se Creará un Nuevo Envío Pendiente)
@@ -2259,70 +2259,70 @@ users.password,Contraseña
 users.promise,Promesa
 users.role,Rol
 users.select_account,Seleccionar cuenta
-menu.journey_segments,"Segmentos de Trayecto"
-menu.journey_segments.tooltip,"Reconstrucción de trayectos completos con tiempos de tránsito y cumplimiento de SLA"
-journey_segments.title,"Segmentos de Trayecto"
-journey_segments.description,"Reconstrucción de trayectos completos con tiempos de tránsito y cumplimiento de SLA"
-journey_segments.loading,"Cargando segmentos..."
-journey_segments.error,"Error al cargar segmentos"
-journey_segments.run_reconstruction,"Ejecutar Reconstrucción"
-journey_segments.run_reconstruction_tooltip,"Reconstruir segmentos de trayecto desde eventos procesados"
-journey_segments.export_csv,"Exportar CSV"
-journey_segments.export_tooltip,"Exportar segmentos seleccionados a CSV"
-journey_segments.export_selected,"Exportar Seleccionados"
-journey_segments.clear_selection,"Limpiar Selección"
-journey_segments.selected_count,"{{count}} segmentos seleccionados"
-journey_segments.error_no_account,"No se encontró cuenta activa"
-journey_segments.reconstruction_success,"Reconstrucción completada: {{segments}} segmentos creados desde {{events}} eventos en {{time}}ms"
-journey_segments.reconstruction_no_data,"No se crearon segmentos nuevos"
-journey_segments.reconstruction_error,"Error en reconstrucción: {{message}}"
-journey_segments.kpi.total,"Total"
-journey_segments.kpi.segments,"Segmentos"
-journey_segments.kpi.on_time,"A Tiempo"
-journey_segments.kpi.warning,"Advertencia"
-journey_segments.kpi.critical,"Crítico"
-journey_segments.kpi.avg_time,"Tiempo Promedio"
-journey_segments.kpi.minutes,"minutos"
-journey_segments.filters.title,"Filtros"
-journey_segments.filters.search,"Buscar"
-journey_segments.filters.search_placeholder,"ID Etiqueta o Centro Postal..."
-journey_segments.filters.segment_type,"Tipo de Segmento"
-journey_segments.filters.all_types,"Todos los Tipos"
-journey_segments.filters.operational,"Operacional"
-journey_segments.filters.distribution,"Distribución"
-journey_segments.filters.postal_center,"Centro Postal"
-journey_segments.filters.all_centers,"Todos los Centros"
-journey_segments.filters.from_center,"Centro Origen"
-journey_segments.filters.to_center,"Centro Destino"
-journey_segments.filters.sla_compliance,"Cumplimiento SLA"
-journey_segments.filters.all_compliance,"Todos los Estados"
-journey_segments.filters.on_time,"A Tiempo"
-journey_segments.filters.warning,"Advertencia"
-journey_segments.filters.critical,"Crítico"
-journey_segments.filters.violated,"Violado"
-journey_segments.filters.no_sla,"Sin SLA"
-journey_segments.filters.date_from,"Fecha Desde"
-journey_segments.filters.date_to,"Fecha Hasta"
-journey_segments.filters.apply,"Aplicar Filtros"
-journey_segments.filters.clear,"Limpiar Filtros"
-journey_segments.table.tag_id,"ID Etiqueta"
-journey_segments.table.type,"Tipo"
-journey_segments.table.centers,"Centros"
-journey_segments.table.entry_time,"Hora Entrada"
-journey_segments.table.exit_time,"Hora Salida"
-journey_segments.table.duration,"Duración"
-journey_segments.table.actual,"Real"
-journey_segments.table.sla,"SLA"
-journey_segments.table.compliance,"Cumplimiento"
-journey_segments.table.no_segments,"No se encontraron segmentos"
-journey_segments.table.no_sla,"Sin SLA"
-journey_segments.type.operational,"Operacional"
-journey_segments.type.distribution,"Distribución"
-journey_segments.compliance.on_time,"A Tiempo"
-journey_segments.compliance.warning,"Advertencia"
-journey_segments.compliance.critical,"Crítico"
-journey_segments.compliance.violated,"Violado"
-journey_segments.compliance.no_sla,"Sin SLA"
+menu.journey_segments,Segmentos de Trayecto
+menu.journey_segments.tooltip,Reconstrucción de trayectos completos con tiempos de tránsito y cumplimiento de SLA
+journey_segments.title,Segmentos de Trayecto
+journey_segments.description,Reconstrucción de trayectos completos con tiempos de tránsito y cumplimiento de SLA
+journey_segments.loading,Cargando segmentos...
+journey_segments.error,Error al cargar segmentos
+journey_segments.run_reconstruction,Ejecutar Reconstrucción
+journey_segments.run_reconstruction_tooltip,Reconstruir segmentos de trayecto desde eventos procesados
+journey_segments.export_csv,Exportar CSV
+journey_segments.export_tooltip,Exportar segmentos seleccionados a CSV
+journey_segments.export_selected,Exportar Seleccionados
+journey_segments.clear_selection,Limpiar Selección
+journey_segments.selected_count,{{count}} segmentos seleccionados
+journey_segments.error_no_account,No se encontró cuenta activa
+journey_segments.reconstruction_success,Reconstrucción completada: {{segments}} segmentos creados desde {{events}} eventos en {{time}}ms
+journey_segments.reconstruction_no_data,No se crearon segmentos nuevos
+journey_segments.reconstruction_error,Error en reconstrucción: {{message}}
+journey_segments.kpi.total,Total
+journey_segments.kpi.segments,Segmentos
+journey_segments.kpi.on_time,A Tiempo
+journey_segments.kpi.warning,Advertencia
+journey_segments.kpi.critical,Crítico
+journey_segments.kpi.avg_time,Tiempo Promedio
+journey_segments.kpi.minutes,minutos
+journey_segments.filters.title,Filtros
+journey_segments.filters.search,Buscar
+journey_segments.filters.search_placeholder,ID Etiqueta o Centro Postal...
+journey_segments.filters.segment_type,Tipo de Segmento
+journey_segments.filters.all_types,Todos los Tipos
+journey_segments.filters.operational,Operacional
+journey_segments.filters.distribution,Distribución
+journey_segments.filters.postal_center,Centro Postal
+journey_segments.filters.all_centers,Todos los Centros
+journey_segments.filters.from_center,Centro Origen
+journey_segments.filters.to_center,Centro Destino
+journey_segments.filters.sla_compliance,Cumplimiento SLA
+journey_segments.filters.all_compliance,Todos los Estados
+journey_segments.filters.on_time,A Tiempo
+journey_segments.filters.warning,Advertencia
+journey_segments.filters.critical,Crítico
+journey_segments.filters.violated,Violado
+journey_segments.filters.no_sla,Sin SLA
+journey_segments.filters.date_from,Fecha Desde
+journey_segments.filters.date_to,Fecha Hasta
+journey_segments.filters.apply,Aplicar Filtros
+journey_segments.filters.clear,Limpiar Filtros
+journey_segments.table.tag_id,ID Etiqueta
+journey_segments.table.type,Tipo
+journey_segments.table.centers,Centros
+journey_segments.table.entry_time,Hora Entrada
+journey_segments.table.exit_time,Hora Salida
+journey_segments.table.duration,Duración
+journey_segments.table.actual,Real
+journey_segments.table.sla,SLA
+journey_segments.table.compliance,Cumplimiento
+journey_segments.table.no_segments,No se encontraron segmentos
+journey_segments.table.no_sla,Sin SLA
+journey_segments.type.operational,Operacional
+journey_segments.type.distribution,Distribución
+journey_segments.compliance.on_time,A Tiempo
+journey_segments.compliance.warning,Advertencia
+journey_segments.compliance.critical,Crítico
+journey_segments.compliance.violated,Violado
+journey_segments.compliance.no_sla,Sin SLA
 menu.complete_journeys,Trayectos Completos
 complete_journeys.title,Complete Journeys
 complete_journeys.description,Complete journey reconstruction with transit times and SLA compliance
@@ -2363,7 +2363,7 @@ complete_journeys.table.start_time,Start Time
 complete_journeys.table.total_time,Total Time
 complete_journeys.table.compliance,Compliance
 complete_journeys.error_no_account,No account selected
-complete_journeys.assembly_success,Assembly completed: {created} created, {updated} updated in {time}ms
+complete_journeys.assembly_success,Assembly completed: {created} created
 complete_journeys.assembly_no_data,No data returned from assembly
 complete_journeys.assembly_error,Assembly error: {message}
 menu.cutoff_times,Horarios de Corte
@@ -2411,7 +2411,7 @@ mobile_readers.total_readers,lectores totales
 mobile_readers.mobile,Móvil
 mobile_readers.current_location,Ubicación Actual
 mobile_readers.since,Desde
-mobile_readers.unassigned,Sin asignar
+mobile_readers.unassigned,Desasignado
 mobile_readers.assignments,asignaciones
 mobile_readers.reassign,Reasignar
 mobile_readers.assign,Asignar a Centro
@@ -2426,7 +2426,6 @@ mobile_readers.one_day,1 día
 mobile_readers.days,días
 mobile_readers.current,Actual
 mobile_readers.assigned,Asignado
-mobile_readers.unassigned,Desasignado
 mobile_readers.currently_active,Actualmente activo
 mobile_readers.duration,Duración
 mobile_readers.notes,Notas
@@ -2439,12 +2438,12 @@ mobile_readers.assigned_at,Fecha de Asignación
 mobile_readers.assigned_at_help,Cuándo se asignará el lector a este centro
 mobile_readers.unassigned_at,Fecha de Desasignación
 mobile_readers.unassigned_at_help,Opcional: Cuándo se desasignará el lector (dejar vacío para indefinido)
-mobile_readers.notes_placeholder,ej., Despliegue temporal para temporada alta
+mobile_readers.notes_placeholder,ej.
 mobile_readers.notes_help,Notas opcionales sobre esta asignación
 mobile_readers.confirm_delete,¿Estás seguro de que quieres eliminar este lector?
 menu.readers_management,Gestión de Lectores
 menu.readers_management.tooltip,Gestionar todos los lectores y su historial de ubicaciones
-readers_management.description,Gestiona todos los lectores RFID. Rastrea el historial de ubicaciones para lectores que se mueven entre centros postales.
+readers_management.description,Gestiona todos los lectores y rastrea su historial de ubicaciones
 readers_management.total_readers,lectores totales
 readers_management.with_history,con historial de ubicaciones
 menu.rfid_data_consolidation,Consolidación de Datos RFID
@@ -2454,7 +2453,6 @@ menu.journey_segments_numbered,2. Segmentos de Viaje
 menu.complete_journeys_numbered,3. Viajes Completos
 menu.center_working_days,Días Laborables de Centros
 menu.center_working_days.tooltip,Configura días laborables y festivos para centros postales
-readers_management.description,Gestiona todos los lectores y rastrea su historial de ubicaciones
 readers_management.filters,Filtros
 readers_management.active,activos
 readers_management.reset,Resetear
