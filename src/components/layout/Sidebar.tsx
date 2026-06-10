@@ -47,6 +47,7 @@ interface MenuItem {
   roles?: string[]
   children?: MenuItem[]
   module?: 'e2e' | 'diagnosis'
+  external?: boolean
 }
 
 interface MenuGroup {
@@ -842,11 +843,12 @@ export function Sidebar() {
         tooltip: t('menu.all_users.tooltip'),
       },
       {
-        path: '/admin/translations',
+        path: 'https://glossary-onems.edgeavs.net',
         label: t('menu.translations'),
         icon: Languages,
         roles: ['superadmin'],
         tooltip: t('menu.translations.tooltip'),
+        external: true,
       }
     ]
     
@@ -1030,6 +1032,24 @@ export function Sidebar() {
                             </>
                           )}
                         </button>
+                      ) : item.external ? (
+                        <SmartTooltip content={item.tooltip || item.label}>
+                          <a
+                            href={item.path}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${
+                              active
+                                ? 'bg-blue-50 text-blue-600'
+                                : 'text-gray-700 hover:bg-gray-50'
+                            }`}
+                          >
+                            <Icon className="w-5 h-5 flex-shrink-0" />
+                            {isExpanded && (
+                              <span className="text-sm font-medium">{item.label}</span>
+                            )}
+                          </a>
+                        </SmartTooltip>
                       ) : (
                         <SmartTooltip content={item.tooltip || item.label}>
                           <Link
