@@ -2633,3 +2633,19 @@ load_balancing.optimal,Óptimo:
 load_balancing.urgent,Urgente:
 load_balancing.preventive,Preventivo:
 load_balancing.balance_not_needed,Balanceo No Necesario
+menu.ondb_generator,Generador ONDB
+menu.ondb_generator.tooltip,Generar datos de prueba ONDB
+menu.country_topology.tooltip,Topología del país y red postal
+menu.e2e_sla.tooltip,Estándares de entrega E2E
+menu.segment_sla,SLA de Segmento
+menu.segment_sla.tooltip,Acuerdos de nivel de servicio por segmento
+menu.territory_equity,Equidad Territorial
+menu.territory_equity.tooltip,Informes de equidad territorial
+menu.compliance,Cumplimiento
+menu.compliance.tooltip,Informes de cumplimiento
+menu.e2e_db.tooltip,Base de datos E2E
+menu.operations,Operaciones
+menu.setup_view,Configuración
+menu.account,Cuenta
+menu.all_accounts,Todas las cuentas
+menu.sign_out,Cerrar sesión
