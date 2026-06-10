@@ -2631,19 +2631,19 @@ load_balancing.optimal,مثالي:
 load_balancing.urgent,عاجل:
 load_balancing.preventive,وقائي:
 load_balancing.balance_not_needed,لا حاجة لإعادة التوازن
-menu.ondb_generator,
-menu.ondb_generator.tooltip,
-menu.country_topology.tooltip,
-menu.e2e_sla.tooltip,
-menu.segment_sla,
-menu.segment_sla.tooltip,
-menu.territory_equity,
-menu.territory_equity.tooltip,
-menu.compliance,
-menu.compliance.tooltip,
-menu.e2e_db.tooltip,
-menu.operations,
-menu.setup_view,
-menu.account,
-menu.all_accounts,
-menu.sign_out,
+menu.ondb_generator, مولّد قاعدة بيانات ONEDB
+menu.ondb_generator.tooltip, إنشاء بيانات اختبار ONEDB
+menu.country_topology.tooltip,طوبولوجيا الدولة والشبكة البريدية
+menu.e2e_sla.tooltip,معايير التسليم الشاملة من البداية إلى النهاية
+menu.segment_sla,اتفاقية مستوى الخدمة للقطاع
+menu.segment_sla.tooltip,اتفاقيات مستوى الخدمة للقطاع
+menu.territory_equity,العدالة الإقليمية
+menu.territory_equity.tooltip,إعداد تقارير العدالة الإقليمية
+menu.compliance,الامتثال
+menu.compliance.tooltip,تقارير الامتثال
+menu.e2e_db.tooltip,قاعدة بيانات شاملة من البداية إلى النهاية
+menu.operations,العمليات
+menu.setup_view,الإعداد
+menu.account,حساب
+menu.all_accounts,جميع الحسابات
+menu.sign_out,تسجيل الخروج
