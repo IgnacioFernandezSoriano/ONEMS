@@ -880,7 +880,7 @@ export function Panelists() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Locality / area <span className="text-gray-400 text-xs">(optional detail)</span>
+                  {t('panelists.city_address', undefined, 'City Address')}
                 </label>
                 <input
                   type="text"
@@ -905,7 +905,7 @@ export function Panelists() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('panelists.assigned_city', undefined, 'Assigned City')}
+                  {t('panelists.allocation_plan_city', undefined, 'Allocation Plan City')}
                 </label>
                 <select
                   value={formData.city_id}

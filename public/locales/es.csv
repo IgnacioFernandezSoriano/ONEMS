@@ -1302,11 +1302,13 @@ panelists.all_panelists_in_system,Todos los panelistas en el sistema
 panelists.all_periods,Todos los períodos
 panelists.all_reasons,Todas las razones
 panelists.all_status,Todos los estados
+panelists.allocation_plan_city,Ciudad del Plan de Asignación
 panelists.apartment_suite_etc_optional,"Apartamento, suite, etc. (opcional)"
 panelists.available_for_deliveries,Disponible para entregas
 panelists.bulk_actions,Acciones Masivas
 panelists.choose_an_action_to_apply_to_all_selected_items,Elija una acción para aplicar a todos los elementos seleccionados
 panelists.city,Ciudad
+panelists.city_address,Ciudad de la Dirección
 panelists.clear_selection_btn,Limpiar Selección
 panelists.code,Código
 panelists.code_name_email,"Código, nombre, correo electrónico..."
