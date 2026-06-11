@@ -66,6 +66,7 @@ serve(async (req) => {
     since = state.backfill_since
       ?? new Date(Date.now() - 24 * 30 * 24 * 60 * 60 * 1000).toISOString()
   }
+  const sinceUsed = since   // the since value this run actually started from (null on cursor runs)
 
   let totalFetched = 0
   let pages = 0
@@ -94,6 +95,9 @@ serve(async (req) => {
       if (resp.status === 401 || resp.status === 403) {
         throw new Error(`provider auth error ${resp.status}`)
       }
+      if (resp.status === 429) {
+        throw new Error(`rate_limited: provider 429 after ${MAX_RETRIES} retries`)
+      }
       if (!resp.ok) {
         throw new Error(`provider error ${resp.status}: ${await resp.text()}`)
       }
@@ -115,7 +119,7 @@ serve(async (req) => {
       since = null
       await supabase.from('rfid_ingest_state').update({
         next_cursor: cursor,
-        last_since: state.backfill_since,
+        last_since: sinceUsed ?? state.last_since,
         updated_at: new Date().toISOString(),
       }).eq('id', SOURCE_ID)
 
@@ -155,7 +159,7 @@ serve(async (req) => {
     const message = err instanceof Error ? err.message : String(err)
     await supabase.from('rfid_ingest_state').update({
       last_run_at: new Date().toISOString(),
-      last_status: 'error',
+      last_status: message.startsWith('rate_limited') ? 'rate_limited' : 'error',
       last_error: message,
       updated_at: new Date().toISOString(),
     }).eq('id', SOURCE_ID)
