@@ -24,6 +24,10 @@ export function usePanelists() {
               *,
               region:regions (*)
             )
+          ),
+          own_city:cities!panelists_city_id_fkey (
+            *,
+            region:regions (*)
           )
         `)
 
@@ -36,14 +40,16 @@ export function usePanelists() {
 
       if (fetchError) throw fetchError
 
-      // Transform data to flatten relationships
+      // Transform data to flatten relationships.
+      // `city`/`region` reflect the panelist's OWN residence city (via city_id),
+      // not the city of the node they happen to be assigned to.
       const transformedData = data?.map((panelist: any) => ({
         ...panelist,
         node_id: panelist.node_id, // Explicitly preserve node_id
-        city_id: panelist.city_id, // Explicitly preserve city_id  
+        city_id: panelist.city_id, // Explicitly preserve city_id
         node: panelist.node,
-        city: panelist.node?.city,
-        region: panelist.node?.city?.region,
+        city: panelist.own_city,
+        region: panelist.own_city?.region,
       })) || []
 
       setPanelists(transformedData)
@@ -174,6 +180,7 @@ export function usePanelists() {
           postal_code: panelistData.postal_code || null,
           address_city: panelistData.address_city || null,
           address_country: panelistData.address_country || null,
+          city_id: panelistData.city_id || null,
           node_id: panelistData.node_id || null,
           language: panelistLanguage,
           status: panelistData.status || 'active',
@@ -205,6 +212,7 @@ export function usePanelists() {
           ...updates,
           // Convert empty string to null for UUID fields
           node_id: updates.node_id === '' ? null : updates.node_id,
+          city_id: updates.city_id === '' ? null : updates.city_id,
           updated_by: user.id,
         })
         .eq('id', id)

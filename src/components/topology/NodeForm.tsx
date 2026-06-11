@@ -7,13 +7,11 @@ interface NodeFormProps {
   node: Node
   /** Full (unfiltered) cities list — needed to resolve region siblings for Class C cities */
   cities: City[]
-  /** Panelists enriched with node_id, status and address_city */
+  /** Panelists enriched with node_id, status, city_id and city ({ id, name }) */
   panelists: any[]
   onSubmit: (data: { status: 'active' | 'inactive'; panelistId: string | null }) => Promise<void>
   onCancel: () => void
 }
-
-const norm = (s?: string | null) => (s || '').trim().toLowerCase()
 
 export function NodeForm({ node, cities, panelists, onSubmit, onCancel }: NodeFormProps) {
   const { t } = useTranslation()
@@ -27,35 +25,39 @@ export function NodeForm({ node, cities, panelists, onSubmit, onCancel }: NodeFo
     [panelists, node.id]
   )
 
-  // City names that count as "in scope": the node's own city, or every city of the
+  // City ids that count as "in scope": the node's own city, or every city of the
   // node's region when the city is Class C.
-  const scopeCityNames = useMemo(() => {
+  const scopeCityIds = useMemo(() => {
     if (!city) return new Set<string>()
-    const names = isClassC
-      ? cities.filter(c => c.region_id === city.region_id).map(c => c.name)
-      : [city.name]
-    return new Set(names.map(norm))
+    const ids = isClassC
+      ? cities.filter(c => c.region_id === city.region_id).map(c => c.id)
+      : [city.id]
+    return new Set(ids)
   }, [city, cities, isClassC])
 
-  // Available panelists: active, with no node assigned, located in the node's city
-  // (or region for Class C), matched by address_city text.
+  // Available panelists: active, with no node assigned, whose residence city
+  // (city_id) is in the node's city — or its region for Class C cities.
   const availablePanelists = useMemo(() => {
     return panelists
       .filter(
         (p: any) =>
           p.status === 'active' &&
           !p.node_id &&
-          scopeCityNames.has(norm(p.address_city))
+          p.city_id &&
+          scopeCityIds.has(p.city_id)
       )
       .sort((a: any, b: any) => (a.name || '').localeCompare(b.name || ''))
-  }, [panelists, scopeCityNames])
+  }, [panelists, scopeCityIds])
 
   const [status, setStatus] = useState<'active' | 'inactive'>(node.status)
   const [panelistId, setPanelistId] = useState<string>(currentPanelist?.id || '')
   const [loading, setLoading] = useState(false)
 
-  const panelistLabel = (p: any) =>
-    `${p.name}${p.panelist_code ? ` (${p.panelist_code})` : ''}`
+  const panelistLabel = (p: any) => {
+    const code = p.panelist_code ? ` (${p.panelist_code})` : ''
+    const cityName = p.city?.name ? ` — ${p.city.name}` : ''
+    return `${p.name}${code}${cityName}`
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

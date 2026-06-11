@@ -263,6 +263,9 @@ export interface Panelist {
   postal_code?: string
   address_city?: string
   address_country?: string
+  /** Panelist's residence city, referencing the account's city catalog (cities.id).
+   *  `address_city` is kept as optional free-text detail (locality/neighbourhood). */
+  city_id?: string | null
   node_id: string
   language: SupportedLanguage
   status: 'active' | 'inactive' | 'unavailable_temp'

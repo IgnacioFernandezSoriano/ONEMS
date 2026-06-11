@@ -28,11 +28,13 @@ export function useTopology() {
         nodesQuery = nodesQuery.eq('account_id', effectiveAccountId)
       }
 
-      // Fetch panelists for node status and assignment (address_city is used to
-      // match available panelists to a node's city / region — see NodeForm)
+      // Fetch panelists for node status and assignment. Available panelists are
+      // matched to a node's city / region by city_id (the panelist's residence
+      // city in the account catalog) — see NodeForm. `city` carries the name so
+      // it can be shown next to the panelist in the assignment dropdown.
       let panelistsQuery = supabase
         .from('panelists')
-        .select('id, node_id, name, status, panelist_code, email, address_city')
+        .select('id, node_id, name, status, panelist_code, email, address_city, city_id, city:cities!panelists_city_id_fkey(id, name, region_id)')
       if (effectiveAccountId) {
         panelistsQuery = panelistsQuery.eq('account_id', effectiveAccountId)
       }
