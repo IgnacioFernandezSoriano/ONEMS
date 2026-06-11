@@ -48,7 +48,7 @@ Todo entra por la tabla **`rfid_events_raw`**. Hoy hay tres orígenes posibles:
 
 | # | Origen | Mecanismo | Estado |
 |---|---|---|---|
-| 1 | **Proveedor RFID externo (AWS)** | ONEMS hace **polling incremental** contra la BD/API del proveedor y persiste en `rfid_events_raw`. El proveedor es pasivo (no hace push). | **Pendiente de integración** (spec en borrador, ver abajo) |
+| 1 | **Proveedor RFID externo (AWS)** | Edge Function `rfid-provider-poll` (cron 30 min) hace **polling incremental** (cursor) → landing `rfid_provider_reads` → `resolve_provider_reads()` normaliza tag y resuelve cuenta → `rfid_events_raw`. Encadena el ETL tras capturar. | **Implementado** (ver `docs/superpowers/specs/2026-06-11-rfid-aws-ingestion-design.md`). Bypassa la `rpc_ingest_epcis_events` heredada (§7 #1). |
 | 2 | **API REST de ingesta** | `POST /rest/v1/rpc/rpc_ingest_epcis_events` con `Authorization: Bearer <JWT>`. | Implementada (con salvedades, ver [§7](#7-observaciones-e-inconsistencias-a-verificar)) |
 | 3 | **Generadores de datos demo** | Scripts `generate_*_demo.mjs` y `scripts/generate_synthetic_events.py` insertan lotes directamente. | Solo entornos demo/test |
 
