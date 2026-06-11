@@ -116,11 +116,15 @@ export function Panelists() {
   }
 
   const fetchCities = async () => {
-    const { data } = await supabase
+    let query = supabase
       .from('cities')
       .select('*')
       .eq('status', 'active')
       .order('name')
+    if (effectiveAccountId) {
+      query = query.eq('account_id', effectiveAccountId)
+    }
+    const { data } = await query
     if (data) setCities(data)
   }
 
@@ -862,34 +866,16 @@ export function Panelists() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Postal Code
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.postal_code}
-                    onChange={(e) => setFormData({ ...formData, postal_code: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    City
-                  </label>
-                  <select
-                    value={formData.city_id}
-                    onChange={(e) => setFormData({ ...formData, city_id: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                  >
-                    <option value="">— Select city —</option>
-                    {cities.map(city => (
-                      <option key={city.id} value={city.id}>{city.name}</option>
-                    ))}
-                  </select>
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Postal Code
+                </label>
+                <input
+                  type="text"
+                  value={formData.postal_code}
+                  onChange={(e) => setFormData({ ...formData, postal_code: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                />
               </div>
 
               <div>
@@ -915,6 +901,22 @@ export function Panelists() {
                   onChange={(e) => setFormData({ ...formData, address_country: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {t('panelists.assigned_city', undefined, 'Assigned City')}
+                </label>
+                <select
+                  value={formData.city_id}
+                  onChange={(e) => setFormData({ ...formData, city_id: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                >
+                  <option value="">{t('panelists.select_city', undefined, '— Select city —')}</option>
+                  {cities.map(city => (
+                    <option key={city.id} value={city.id}>{city.name}</option>
+                  ))}
+                </select>
               </div>
 
               <div>
