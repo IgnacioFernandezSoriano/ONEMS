@@ -7,14 +7,16 @@ import { AssignReaderModal } from '@/components/mobile-readers/AssignReaderModal
 import { ReadersFilters, ReadersFiltersState } from '@/components/mobile-readers/ReadersFilters';
 import { useMobileReaders } from '@/hooks/useMobileReaders';
 import { useReaderLocationHistory } from '@/hooks/useReaderLocationHistory';
-import { useAuth } from '@/contexts/AuthContext';
+import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId';
 import { useTranslation } from '@/hooks/useTranslation';
 import type { ReaderFormData } from '@/lib/types_postal_centers';
 
 export default function ReadersManagement() {
   const { t } = useTranslation();
-  const { profile } = useAuth();
-  const accountId = profile?.account_id || undefined;
+  // Superadmin: usa la cuenta seleccionada en el sidebar (DEMO2, etc.).
+  // Usuario normal: su propia cuenta. Antes leía profile.account_id directo,
+  // que es null para superadmin -> "No account ID provided" al crear lector.
+  const accountId = useEffectiveAccountId() || undefined;
 
   const { readers, allReaders, createMobileReader, updateReader, deleteReader, refetch } =
     useMobileReaders(accountId);
