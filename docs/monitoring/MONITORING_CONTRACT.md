@@ -68,3 +68,50 @@ reader, resolve, reprocess), operators go to ONEMS: *Pipeline Monitor*
 ## Suggested polling cadence
 
 Every 5 min is plenty (capture runs every 30). The views are cheap aggregates.
+
+---
+
+## Consumer runbook (Plan B — global monitoring platform)
+
+Step-by-step for the team integrating ONEMS as a source. Assumes the same direct-Postgres polling used for the LEG2 source.
+
+### 1. Credentials (from the ONEMS team)
+- host `db.sehbnpgzqljrsqimwyuz.supabase.co`, port `5432`, db `postgres`
+- user `monitoring_reader`, password (out-of-band)
+- IPv4-only network: use the pooler with user `monitoring_reader.sehbnpgzqljrsqimwyuz`. Since you already connect to this project for LEG2, reuse that connection and just swap user/password.
+
+### 2. Test the connection (once)
+```bash
+psql "postgresql://monitoring_reader:PASSWORD@db.sehbnpgzqljrsqimwyuz.supabase.co:5432/postgres" \
+  -c "SELECT overall_status, minutes_since_capture, backlog_pending FROM monitoring.health;"
+```
+Expected: one row (e.g. `ok | 1.5 | 0`).
+
+### 3. Register ONEMS as a new source (like LEG2)
+- connection: above
+- poll interval: 5 min
+- health query: `SELECT * FROM monitoring.health;`
+
+### 4. Per-poll query (1 row) → map to your SLIs
+```sql
+SELECT * FROM monitoring.health;
+```
+Map `overall_status` to the source status; store `minutes_since_capture`, `capture_status`, `backlog_pending`, `last_unmatched_rate`, `open_incidents` as metrics/series.
+
+### 5. Drill-down queries (on alert)
+```sql
+SELECT * FROM monitoring.ingest_state;
+SELECT * FROM monitoring.provider_reads_summary ORDER BY reads_count DESC;
+SELECT * FROM monitoring.incidents_summary WHERE open_count > 0 ORDER BY open_count DESC;
+SELECT * FROM monitoring.pipeline_status;
+```
+
+### 6. Alert rules
+Alert on `overall_status` (it already encodes the main conditions), or use the raw-field thresholds in "Suggested alert thresholds" above for custom limits.
+
+### 7. Triage (read-only platform)
+Don't resolve incidents from the platform; deep-link back to ONEMS:
+- Pipeline Monitor: `<ONEMS_URL>/diagnosis/pipeline-monitor`
+- Consolidación de Eventos: `<ONEMS_URL>/diagnosis/event-consolidation`
+
+In short: connect as `monitoring_reader` → poll `monitoring.health` every 5 min → alert on `overall_status`/thresholds → deep-link to ONEMS for triage. Read-only end to end.
