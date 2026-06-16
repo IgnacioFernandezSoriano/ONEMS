@@ -12,6 +12,14 @@ BEGIN
   IF normalize_provider_tag('  01000FFFF12345635  ') IS DISTINCT FROM '01000FFFF12345635' THEN
     RAISE EXCEPTION 'FAIL: trim';
   END IF;
+  -- provider UPU element string G.<issuer>.<hex> → full string, uppercased
+  IF normalize_provider_tag('G.1UPU.01000FFFF00000007') IS DISTINCT FROM 'G.1UPU.01000FFFF00000007' THEN
+    RAISE EXCEPTION 'FAIL: UPU element string, got %', normalize_provider_tag('G.1UPU.01000FFFF00000007');
+  END IF;
+  -- UPU element string is trimmed too
+  IF normalize_provider_tag('  g.1upu.01000ffff00000008  ') IS DISTINCT FROM 'G.1UPU.01000FFFF00000008' THEN
+    RAISE EXCEPTION 'FAIL: UPU element string trim/upper, got %', normalize_provider_tag('  g.1upu.01000ffff00000008  ');
+  END IF;
   -- non-hex urn last token → NULL
   IF normalize_provider_tag('urn:oid:1.0.15961.14.B.NOTHEX!!') IS NOT NULL THEN
     RAISE EXCEPTION 'FAIL: non-hex urn token should be NULL';
