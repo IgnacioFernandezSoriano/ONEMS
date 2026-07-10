@@ -860,7 +860,6 @@ diagnosis.consolidation.status.resolved,تم الحل
 diagnosis.consolidation.success,اكتمل الدمج: {processed} حدث تمت معالجته - {incidents} حادث تم اكتشافه
 diagnosis.consolidation.title,دمج الأحداث
 diagnosis.consolidation.total_incidents,إجمالي الحوادث
-key,translation
 layout.all_accounts,جميع الحسابات
 layout.sign_out,تسجيل الخروج
 layout.view_as_account,عرض كحساب:

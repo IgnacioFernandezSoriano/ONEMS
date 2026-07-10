@@ -860,7 +860,6 @@ diagnosis.consolidation.status.resolved,Resuelto
 diagnosis.consolidation.success,Consolidación completada: {processed} eventos procesados - {incidents} incidencias detectadas
 diagnosis.consolidation.title,Consolidación de Eventos
 diagnosis.consolidation.total_incidents,Incidencias Totales
-key,translation
 layout.all_accounts,Todas las cuentas
 layout.sign_out,Cerrar sesión
 layout.view_as_account,Ver como cuenta:
