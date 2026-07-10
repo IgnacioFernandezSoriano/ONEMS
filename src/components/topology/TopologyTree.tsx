@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Modal } from '@/components/common/Modal'
 import { RegionForm } from './RegionForm'
 import { CityForm } from './CityForm'
+import { NodeForm } from './NodeForm'
 
 import type { Region, City, Node } from '@/lib/types'
 import { useTranslation } from '@/hooks/useTranslation'
@@ -9,6 +10,8 @@ import { useTranslation } from '@/hooks/useTranslation'
 interface TopologyTreeProps {
   regions: Region[]
   cities: City[]
+  /** Full (unfiltered) cities list — used by NodeForm to resolve region siblings for Class C cities */
+  allCities: City[]
   nodes: (Node & { hasPanelist?: boolean; panelist?: any })[]
   panelists: any[]
   expandAll: boolean
@@ -18,6 +21,7 @@ interface TopologyTreeProps {
   onUpdateRegion: (id: string, data: any) => Promise<void>
   onUpdateCity: (id: string, data: any) => Promise<void>
   onUpdateNode: (id: string, data: any) => Promise<void>
+  onAssignPanelist: (nodeId: string, panelistId: string | null) => Promise<void>
   onDeleteRegion: (id: string) => Promise<void>
   onDeleteCity: (id: string) => Promise<void>
   onDeleteNode: (id: string) => Promise<void>
@@ -26,6 +30,7 @@ interface TopologyTreeProps {
 export function TopologyTree({
   regions,
   cities,
+  allCities,
   nodes,
   panelists,
   expandAll,
@@ -35,6 +40,7 @@ export function TopologyTree({
   onUpdateRegion,
   onUpdateCity,
   onUpdateNode,
+  onAssignPanelist,
   onDeleteRegion,
   onDeleteCity,
   onDeleteNode,
@@ -378,7 +384,10 @@ export function TopologyTree({
                                         type: 'node',
                                         cityId: node.city_id,
                                         node: node,
-                                        onSubmit: (data: any) => onUpdateNode(node.id, data),
+                                        onSubmit: async (data: any) => {
+                                          await onUpdateNode(node.id, { status: data.status })
+                                          await onAssignPanelist(node.id, data.panelistId)
+                                        },
                                       })
                                     }
                                     className="p-1 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
@@ -443,6 +452,15 @@ export function TopologyTree({
             <CityForm
               city={modal.city}
               regionId={modal.regionId}
+              onSubmit={handleSubmit}
+              onCancel={() => setModal(null)}
+            />
+          )}
+          {modal.type === 'node' && (
+            <NodeForm
+              node={modal.node}
+              cities={allCities}
+              panelists={panelists}
               onSubmit={handleSubmit}
               onCancel={() => setModal(null)}
             />

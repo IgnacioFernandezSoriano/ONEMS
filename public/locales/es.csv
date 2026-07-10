@@ -1302,11 +1302,13 @@ panelists.all_panelists_in_system,Todos los panelistas en el sistema
 panelists.all_periods,Todos los períodos
 panelists.all_reasons,Todas las razones
 panelists.all_status,Todos los estados
+panelists.allocation_plan_city,Ciudad del Plan de Asignación
 panelists.apartment_suite_etc_optional,"Apartamento, suite, etc. (opcional)"
 panelists.available_for_deliveries,Disponible para entregas
 panelists.bulk_actions,Acciones Masivas
 panelists.choose_an_action_to_apply_to_all_selected_items,Elija una acción para aplicar a todos los elementos seleccionados
 panelists.city,Ciudad
+panelists.city_address,Ciudad de la Dirección
 panelists.clear_selection_btn,Limpiar Selección
 panelists.code,Código
 panelists.code_name_email,"Código, nombre, correo electrónico..."
@@ -2187,6 +2189,14 @@ topology.no_nodes_yet,Aún no hay nodos en esta ciudad
 topology.no_regions,No se encontraron regiones
 topology.no_topology_yet,Aún no hay topología definida
 topology.node,Nodo
+topology.node_id,ID del nodo
+topology.node_status,Estado del nodo
+topology.assign_panelist,Asignar panelista
+topology.no_panelist_option,— Sin panelista —
+topology.panelist_current,actual
+topology.panelist_hint_city,Panelistas disponibles de {scope}, sin nodo asignado.
+topology.panelist_hint_region,Panelistas disponibles de la región de {scope} (ciudad clase C), sin nodo asignado.
+topology.no_available_panelists,No hay panelistas disponibles para este ámbito.
 topology.nodes,Nodos
 topology.nodes_need_assignment,Estos nodos necesitan la asignación de un panelista para estar operativos
 topology.nodes_without_panelists,Nodos sin panelistas

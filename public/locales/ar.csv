@@ -1302,11 +1302,13 @@ panelists.all_panelists_in_system,جميع الأعضاء في النظام
 panelists.all_periods,جميع الفترات
 panelists.all_reasons,جميع الأسباب
 panelists.all_status,جميع الحالات
+panelists.allocation_plan_city,مدينة خطة التوزيع
 panelists.apartment_suite_etc_optional,شقة، جناح، إلخ. (اختياري)
 panelists.available_for_deliveries,متاح للتوصيل
 panelists.bulk_actions,إجراءات جماعية
 panelists.choose_an_action_to_apply_to_all_selected_items,اختر إجراءً لتطبيقه على جميع العناصر المحددة
 panelists.city,المدينة
+panelists.city_address,مدينة العنوان
 panelists.clear_selection_btn,مسح التحديد
 panelists.code,الرمز
 panelists.code_name_email,الرمز، الاسم، البريد الإلكتروني...

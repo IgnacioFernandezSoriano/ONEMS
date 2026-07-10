@@ -46,6 +46,7 @@ export function Panelists() {
     address_line1: '',
     address_line2: '',
     postal_code: '',
+    city_id: '',
     address_city: '',
     address_country: '',
     node_id: '',
@@ -115,11 +116,15 @@ export function Panelists() {
   }
 
   const fetchCities = async () => {
-    const { data } = await supabase
+    let query = supabase
       .from('cities')
       .select('*')
       .eq('status', 'active')
       .order('name')
+    if (effectiveAccountId) {
+      query = query.eq('account_id', effectiveAccountId)
+    }
+    const { data } = await query
     if (data) setCities(data)
   }
 
@@ -128,7 +133,7 @@ export function Panelists() {
     if (!panelists) return []
     
     return panelists.filter(panelist => {
-      if (filters.city_id && panelist.node?.city_id !== filters.city_id) return false
+      if (filters.city_id && panelist.city_id !== filters.city_id) return false
       if (filters.no_node && panelist.node_id) return false
       if (!filters.no_node && filters.node_id && panelist.node_id !== filters.node_id) return false
       if (filters.status && panelist.status !== filters.status) return false
@@ -204,6 +209,7 @@ export function Panelists() {
         address_line1: panelist.address_line1 || '',
         address_line2: panelist.address_line2 || '',
         postal_code: panelist.postal_code || '',
+        city_id: panelist.city_id || '',
         address_city: panelist.address_city || '',
         address_country: panelist.address_country || '',
         node_id: panelist.node_id || '',
@@ -221,6 +227,7 @@ export function Panelists() {
         address_line1: '',
         address_line2: '',
         postal_code: '',
+        city_id: '',
         address_city: '',
         address_country: '',
         node_id: '',
@@ -859,30 +866,29 @@ export function Panelists() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Postal Code
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.postal_code}
-                    onChange={(e) => setFormData({ ...formData, postal_code: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Postal Code
+                </label>
+                <input
+                  type="text"
+                  value={formData.postal_code}
+                  onChange={(e) => setFormData({ ...formData, postal_code: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                />
+              </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    City
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.address_city}
-                    onChange={(e) => setFormData({ ...formData, address_city: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {t('panelists.city_address', undefined, 'City Address')}
+                </label>
+                <input
+                  type="text"
+                  value={formData.address_city}
+                  onChange={(e) => setFormData({ ...formData, address_city: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  placeholder="Neighbourhood, district, etc. (e.g. Nairobi-GPO)"
+                />
               </div>
 
               <div>
@@ -895,6 +901,22 @@ export function Panelists() {
                   onChange={(e) => setFormData({ ...formData, address_country: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {t('panelists.allocation_plan_city', undefined, 'Allocation Plan City')}
+                </label>
+                <select
+                  value={formData.city_id}
+                  onChange={(e) => setFormData({ ...formData, city_id: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                >
+                  <option value="">{t('panelists.select_city', undefined, '— Select city —')}</option>
+                  {cities.map(city => (
+                    <option key={city.id} value={city.id}>{city.name}</option>
+                  ))}
+                </select>
               </div>
 
               <div>

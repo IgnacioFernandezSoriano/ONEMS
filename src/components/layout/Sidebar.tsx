@@ -55,25 +55,13 @@ interface MenuGroup {
   items: MenuItem[]
 }
 
-type SidebarView = 'all' | 'setup' | 'functional'
-
 export function Sidebar() {
   const { profile, signOut } = useAuth()
   const { selectedAccountId, setSelectedAccountId } = useAccount()
   const location = useLocation()
   const { isCollapsed, setIsCollapsed } = useSidebar()
   const { t, locale, setLocale } = useLocale()
-  const [sidebarView, setSidebarView] = useState<SidebarView>('all')
-  const [expandedSections, setExpandedSections] = useState<string[]>(() => {
-    if (sidebarView === 'all') {
-      return []
-    }
-    return [
-      '/reporting', '/diagnosis', '/setup/e2e', '/setup/diagnosis', '/e2e', '/rfid',
-      '/e2e/setup', '/e2e/allocation', '/e2e/materials', '/e2e/reporting', '/e2e/database',
-      '/rfid/setup', '/rfid/reporting', '/rfid/database'
-    ]
-  })
+  const [expandedSections, setExpandedSections] = useState<string[]>([])
   const [isHovered, setIsHovered] = useState(false)
   const [accounts, setAccounts] = useState<Array<{ id: string; name: string }>>([])
   const [accountName, setAccountName] = useState<string>('')
@@ -82,48 +70,15 @@ export function Sidebar() {
   // Handle module filter change with auto-expand
   const handleModuleFilterChange = (filter: 'all' | 'e2e' | 'diagnosis') => {
     setModuleFilter(filter)
-    if (sidebarView === 'all') {
-      if (filter === 'diagnosis') {
-        setExpandedSections(['/rfid/setup'])
-      } else if (filter === 'e2e') {
-        setExpandedSections(['/e2e/setup'])
-      }
+    if (filter === 'diagnosis') {
+      setExpandedSections(['/rfid/setup'])
+    } else if (filter === 'e2e') {
+      setExpandedSections(['/e2e/setup'])
     }
   }
   
   // Auto-expand on hover when collapsed
   const isExpanded = isCollapsed ? isHovered : true
-
-  // Load sidebar view preference from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem('sidebarView')
-    if (saved === 'setup' || saved === 'functional' || saved === 'all') {
-      setSidebarView(saved as SidebarView)
-    } else {
-      setSidebarView('all')
-      localStorage.setItem('sidebarView', 'all')
-    }
-  }, [])
-
-  // Handle sidebar view change
-  const handleViewChange = (view: SidebarView) => {
-    setSidebarView(view)
-    localStorage.setItem('sidebarView', view)
-    
-    if (view === 'all') {
-      if (moduleFilter === 'diagnosis') {
-        setExpandedSections(['/rfid/setup'])
-      } else {
-        setExpandedSections(['/e2e/setup'])
-      }
-    } else {
-      setExpandedSections([
-        '/reporting', '/diagnosis', '/setup/e2e', '/setup/diagnosis', '/e2e', '/rfid',
-        '/e2e/setup', '/e2e/allocation', '/e2e/materials', '/e2e/reporting', '/e2e/database',
-        '/rfid/setup', '/rfid/reporting', '/rfid/database'
-      ])
-    }
-  }
 
   // Load accounts for superadmin
   useEffect(() => {
@@ -151,141 +106,6 @@ export function Sidebar() {
         })
     }
   }, [profile?.account_id])
-
-  // SETUP VIEW MENU
-  const setupMenuGroups: MenuGroup[] = [
-    {
-      label: t('menu.administration'),
-      items: [
-        {
-          path: '/users',
-          label: t('menu.users'),
-          icon: Users,
-          roles: ['admin', 'superadmin'],
-          tooltip: t('menu.users.tooltip'),
-        },
-        {
-          path: '/settings/account-configuration',
-          label: t('menu.account_working_days'),
-          icon: Settings,
-          tooltip: t('menu.account_working_days.tooltip'),
-        },
-        ...(accountName === 'DEMO2' ? [
-          {
-            path: '/receive-generator',
-            label: t('menu.ondb_generator'),
-            icon: RefreshCw,
-            roles: ['admin', 'superadmin'] as string[],
-            tooltip: t('menu.ondb_generator.tooltip'),
-            module: 'e2e' as const,
-          },
-          {
-            path: '/admin/account-management',
-            label: t('menu.demo_reset'),
-            icon: RefreshCw,
-            roles: ['admin', 'superadmin'] as string[],
-            tooltip: t('menu.demo_reset.tooltip'),
-            module: 'e2e' as const,
-          },
-        ] : []),
-      ],
-    },
-    {
-      label: t('menu.system_setup'),
-      items: [
-        {
-          path: '/topology',
-          label: t('menu.country_topology'),
-          icon: Map,
-          roles: ['admin', 'superadmin'],
-          tooltip: t('menu.country_topology.tooltip'),
-          module: 'e2e',
-        },
-        {
-          path: '/carriers',
-          label: t('menu.carriers'),
-          icon: Truck,
-          roles: ['admin', 'superadmin'],
-          tooltip: t('menu.carriers.tooltip'),
-          module: 'e2e',
-        },
-        {
-          path: '/panelists',
-          label: t('menu.panelists'),
-          icon: UserCircle,
-          roles: ['admin', 'superadmin'],
-          tooltip: t('menu.panelists.tooltip'),
-          module: 'e2e',
-        },
-        {
-          path: '/delivery-standards',
-          label: t('menu.e2e_sla'),
-          icon: Clock,
-          roles: ['admin', 'superadmin'],
-          tooltip: t('menu.e2e_sla.tooltip'),
-          module: 'e2e',
-        },
-        {
-          path: '/postal-centers',
-          label: t('menu.postal_centers'),
-          icon: Building2,
-          roles: ['admin', 'superadmin'],
-          tooltip: t('menu.postal_centers.tooltip'),
-          module: 'diagnosis',
-        },
-        {
-          path: '/readers-management',
-          label: t('menu.readers_management'),
-          icon: MapPin,
-          roles: ['admin', 'superadmin'],
-          tooltip: t('menu.readers_management.tooltip'),
-          module: 'diagnosis',
-        },
-        {
-          path: '/slas-configuration',
-          label: t('menu.segment_sla'),
-          icon: Target,
-          roles: ['admin', 'superadmin'],
-          tooltip: t('menu.segment_sla.tooltip'),
-          module: 'diagnosis',
-        },
-      ],
-    },
-    {
-      label: t('menu.allocation_management'),
-      items: [
-        {
-          path: '/allocation-plan-generator',
-          label: t('menu.allocation_generator'),
-          icon: Target,
-          roles: ['admin', 'superadmin'],
-          tooltip: t('menu.allocation_generator.tooltip'),
-          module: 'e2e',
-        },
-        {
-          path: '/node-load-balancing',
-          label: t('menu.load_balancing'),
-          icon: Scale,
-          roles: ['admin', 'superadmin'],
-          tooltip: t('menu.load_balancing.tooltip'),
-          module: 'e2e',
-        },
-      ],
-    },
-    {
-      label: t('menu.materials_management'),
-      items: [
-        {
-          path: '/material-catalog',
-          label: t('menu.material_catalog'),
-          icon: Database,
-          roles: ['admin', 'superadmin'],
-          tooltip: t('menu.material_catalog.tooltip'),
-          module: 'e2e',
-        },
-      ],
-    },
-  ]
 
   // ALL MODULES VIEW MENU
   const allModulesMenuGroups: MenuGroup[] = [
@@ -554,277 +374,8 @@ export function Sidebar() {
     },
   ]
 
-  // FUNCTIONAL VIEW MENU
-  const functionalMenuGroups: MenuGroup[] = [
-    {
-      label: 'E2E',
-      items: [
-        {
-          path: '/e2e/setup',
-          label: t('menu.setup'),
-          icon: Settings,
-          roles: ['admin', 'superadmin'],
-          tooltip: t('menu.setup.tooltip'),
-          children: [
-            {
-              path: '/topology',
-              label: t('menu.country_topology'),
-              icon: Map,
-              roles: ['admin', 'superadmin'],
-              tooltip: t('menu.country_topology.tooltip'),
-            },
-            {
-              path: '/carriers',
-              label: t('menu.carriers'),
-              icon: Truck,
-              roles: ['admin', 'superadmin'],
-              tooltip: t('menu.carriers.tooltip'),
-            },
-            {
-              path: '/panelists',
-              label: t('menu.panelists'),
-              icon: UserCircle,
-              roles: ['admin', 'superadmin'],
-              tooltip: t('menu.panelists.tooltip'),
-            },
-            {
-              path: '/delivery-standards',
-              label: t('menu.e2e_sla'),
-              icon: Clock,
-              roles: ['admin', 'superadmin'],
-              tooltip: t('menu.e2e_sla.tooltip'),
-            },
-          ],
-        },
-        {
-          path: '/e2e/allocation',
-          label: t('menu.allocation'),
-          icon: Target,
-          roles: ['admin', 'superadmin'],
-          tooltip: t('menu.allocation.tooltip'),
-          children: [
-            {
-              path: '/allocation-plan-generator',
-              label: t('menu.allocation_generator'),
-              icon: Target,
-              roles: ['admin', 'superadmin'],
-              tooltip: t('menu.allocation_generator.tooltip'),
-            },
-            {
-              path: '/node-load-balancing',
-              label: t('menu.load_balancing'),
-              icon: Scale,
-              roles: ['admin', 'superadmin'],
-              tooltip: t('menu.load_balancing.tooltip'),
-            },
-            {
-              path: '/allocation-plans',
-              label: t('menu.allocation_plans'),
-              icon: Calendar,
-              roles: ['admin', 'superadmin'],
-              tooltip: t('menu.allocation_plans.tooltip'),
-            },
-          ],
-        },
-        {
-          path: '/e2e/materials',
-          label: t('menu.materials'),
-          icon: Package,
-          roles: ['admin', 'superadmin'],
-          tooltip: t('menu.materials.tooltip'),
-          children: [
-            {
-              path: '/material-requirements',
-              label: t('menu.material_requirements'),
-              icon: Package,
-              roles: ['admin', 'superadmin'],
-              tooltip: t('menu.material_requirements.tooltip'),
-            },
-            {
-              path: '/stock-management',
-              label: t('menu.stock_management'),
-              icon: Warehouse,
-              roles: ['admin', 'superadmin'],
-              tooltip: t('menu.stock_management.tooltip'),
-            },
-            {
-              path: '/material-catalog',
-              label: t('menu.material_catalog'),
-              icon: Database,
-              roles: ['admin', 'superadmin'],
-              tooltip: t('menu.material_catalog.tooltip'),
-            },
-          ],
-        },
-        {
-          path: '/e2e/reporting',
-          label: t('menu.reporting'),
-          icon: FileText,
-          roles: ['admin', 'superadmin'],
-          tooltip: t('menu.reporting.tooltip'),
-          children: [
-            {
-              path: '/reporting/territory-equity',
-              label: t('menu.territory_equity'),
-              icon: FileText,
-              roles: ['admin', 'superadmin'],
-              tooltip: t('menu.territory_equity.tooltip'),
-            },
-            {
-              path: '/reporting/compliance',
-              label: t('menu.compliance'),
-              icon: FileText,
-              roles: ['admin', 'superadmin'],
-              tooltip: t('menu.compliance.tooltip'),
-            },
-          ],
-        },
-        {
-          path: '/e2e/database',
-          label: t('menu.database'),
-          icon: Database,
-          roles: ['admin', 'superadmin'],
-          tooltip: t('menu.database.tooltip'),
-          children: [
-            {
-              path: '/one-db',
-              label: t('menu.e2e_db'),
-              icon: Database,
-              roles: ['admin', 'superadmin'],
-              tooltip: t('menu.e2e_db.tooltip'),
-            },
-            {
-              path: '/one-db-api',
-              label: t('menu.extract_e2e_db_api'),
-              icon: DatabaseZap,
-              roles: ['admin', 'superadmin'],
-              tooltip: t('menu.extract_e2e_db_api.tooltip'),
-            },
-          ],
-        },
-      ],
-    },
-    {
-      label: 'DIAGNOSIS',
-      items: [
-        {
-          path: '/rfid/setup',
-          label: t('menu.setup'),
-          icon: Settings,
-          roles: ['admin', 'superadmin'],
-          tooltip: t('menu.setup.tooltip'),
-          children: [
-            {
-              path: '/postal-centers',
-              label: t('menu.postal_centers'),
-              icon: Building2,
-              roles: ['admin', 'superadmin'],
-              tooltip: t('menu.postal_centers.tooltip'),
-            },
-            {
-              path: '/readers-management',
-              label: t('menu.readers_management'),
-              icon: MapPin,
-              roles: ['admin', 'superadmin'],
-              tooltip: t('menu.readers_management.tooltip'),
-            },
-            {
-              path: '/slas-configuration',
-              label: t('menu.slas_configuration'),
-              icon: Target,
-              roles: ['admin', 'superadmin'],
-              tooltip: t('menu.slas_configuration.tooltip'),
-            },
-          ],
-        },
-        {
-          path: '/rfid/reporting',
-          label: t('menu.reporting'),
-          icon: FileText,
-          roles: ['admin', 'superadmin'],
-          tooltip: t('menu.reporting.tooltip'),
-          children: [
-            {
-              path: '/diagnosis/route-path-analysis',
-              label: t('menu.route_analysis'),
-              icon: FileText,
-              roles: ['admin', 'superadmin'],
-              tooltip: t('menu.route_analysis.tooltip'),
-            },
-            {
-              path: '/diagnosis/jk-performance-segments',
-              label: t('menu.segment_analysis'),
-              icon: FileText,
-              roles: ['admin', 'superadmin'],
-              tooltip: t('menu.segment_analysis.tooltip'),
-            },
-          ],
-        },
-        {
-          path: '/rfid/database',
-          label: t('menu.database'),
-          icon: Database,
-          roles: ['admin', 'superadmin'],
-          tooltip: t('menu.database.tooltip'),
-          children: [
-            {
-              path: '/epcis-api',
-              label: t('menu.epcis_pipeline_api'),
-              icon: DatabaseZap,
-              roles: ['admin', 'superadmin'],
-              tooltip: t('menu.epcis_pipeline_api.tooltip'),
-            },
-            {
-              path: '/diagnosis/processed-events',
-              label: t('menu.rfid_events_database'),
-              icon: CheckCircle,
-              roles: ['admin', 'superadmin'],
-              tooltip: t('menu.rfid_events_database.tooltip'),
-            },
-          ],
-        },
-      ],
-    },
-    {
-      label: t('menu.administration'),
-      items: [
-        {
-          path: '/users',
-          label: t('menu.users'),
-          icon: Users,
-          roles: ['admin', 'superadmin'],
-          tooltip: t('menu.users.tooltip'),
-        },
-        {
-          path: '/settings/account-configuration',
-          label: t('menu.account_working_days'),
-          icon: Settings,
-          tooltip: t('menu.account_working_days.tooltip'),
-        },
-        ...(accountName === 'DEMO2' ? [
-          {
-            path: '/receive-generator',
-            label: t('menu.ondb_generator'),
-            icon: RefreshCw,
-            roles: ['admin', 'superadmin'] as string[],
-            tooltip: t('menu.ondb_generator.tooltip'),
-          },
-          {
-            path: '/admin/account-management',
-            label: t('menu.demo_reset'),
-            icon: RefreshCw,
-            roles: ['admin', 'superadmin'] as string[],
-            tooltip: t('menu.demo_reset.tooltip'),
-          },
-        ] : []),
-      ],
-    },
-  ]
-
   // Add superadmin items if applicable
   if (profile?.role === 'superadmin') {
-    const setupAdminGroup = setupMenuGroups.find(g => g.label === t('menu.administration'))
-    const functionalAdminGroup = functionalMenuGroups.find(g => g.label === t('menu.administration'))
     const allModulesAdminGroup = allModulesMenuGroups.find(g => g.label === t('menu.administration'))
     
     const superadminItems = [
@@ -852,24 +403,13 @@ export function Sidebar() {
       }
     ]
     
-    if (setupAdminGroup) {
-      setupAdminGroup.items.push(...superadminItems)
-    }
-    if (functionalAdminGroup) {
-      functionalAdminGroup.items.push(...superadminItems)
-    }
     if (allModulesAdminGroup) {
       allModulesAdminGroup.items.push(...superadminItems)
     }
   }
 
-  // Select menu groups based on view
-  let menuGroups: MenuGroup[]
-  if (sidebarView === 'all') {
-    menuGroups = allModulesMenuGroups
-  } else {
-    menuGroups = sidebarView === 'setup' ? setupMenuGroups : functionalMenuGroups
-  }
+  // Always show the Operations (all modules) menu
+  const menuGroups: MenuGroup[] = allModulesMenuGroups
 
   const hasAccess = (item: MenuItem) => {
     if (!item.roles) return true
@@ -916,22 +456,10 @@ export function Sidebar() {
         </button>
       </div>
 
-      {/* View Toggle */}
+      {/* Module Filter (E2E / Diagnosis) */}
       {isExpanded && (
         <div className="px-3 py-3 border-b border-gray-200">
-          <div className="relative">
-            <select
-              value={sidebarView}
-              onChange={(e) => handleViewChange(e.target.value as SidebarView)}
-              className="w-full px-3 py-2 text-sm font-medium bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
-            >
-              <option value="all">🌐 {t('menu.operations')}</option>
-              <option value="setup">📋 {t('menu.setup_view')}</option>
-            </select>
-          </div>
-          
-          {/* Module Filter */}
-          <div className="mt-2 flex items-center gap-1">
+          <div className="flex items-center gap-1">
             <button
               onClick={() => handleModuleFilterChange('e2e')}
               className={`flex-1 px-2 py-1 text-xs font-medium rounded-md transition-colors ${
@@ -962,21 +490,10 @@ export function Sidebar() {
           const hasAccessibleItems = group.items.some(hasAccess)
           if (!hasAccessibleItems) return null
 
-          // Apply module filter to all views
+          // Apply module filter: E2E hides the DIAGNOSIS group and vice versa
           if (moduleFilter !== 'all') {
-            if (sidebarView === 'functional' || sidebarView === 'all') {
-              if (moduleFilter === 'e2e' && group.label === 'DIAGNOSIS') return null
-              if (moduleFilter === 'diagnosis' && group.label === 'E2E') return null
-            }
-            // In setup view - filter by item.module field (not label prefix)
-            if (sidebarView === 'setup') {
-              const hasMatchingItems = group.items.some(item => {
-                if (moduleFilter === 'e2e') return item.module === 'e2e'
-                if (moduleFilter === 'diagnosis') return item.module === 'diagnosis'
-                return true
-              })
-              if (!hasMatchingItems) return null
-            }
+            if (moduleFilter === 'e2e' && group.label === 'DIAGNOSIS') return null
+            if (moduleFilter === 'diagnosis' && group.label === 'E2E') return null
           }
 
           return (
@@ -994,12 +511,6 @@ export function Sidebar() {
               <div className="space-y-1">
                 {group.items.map((item) => {
                   if (!hasAccess(item)) return null
-
-                  // Apply module filter to individual items in setup view
-                  if (sidebarView === 'setup' && moduleFilter !== 'all') {
-                    if (moduleFilter === 'e2e' && item.module !== 'e2e') return null
-                    if (moduleFilter === 'diagnosis' && item.module !== 'diagnosis') return null
-                  }
 
                   const Icon = item.icon
                   const active = isActive(item.path)
