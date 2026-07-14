@@ -1,0 +1,1884 @@
+﻿c:account_config.account_config_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:account_config.account_config_account_id_key UNIQUE (account_id)
+c:account_config.account_config_calculation_mode_check CHECK ((calculation_mode = ANY (ARRAY['natural_days'::text, 'working_days'::text])))
+c:account_config.account_config_created_by_fkey FOREIGN KEY (created_by) REFERENCES auth.users(id)
+c:account_config.account_config_mixed_reader_gap_minutes_check CHECK ((mixed_reader_gap_minutes > 0))
+c:account_config.account_config_pkey PRIMARY KEY (id)
+c:account_config.account_config_updated_by_fkey FOREIGN KEY (updated_by) REFERENCES auth.users(id)
+c:accounts.accounts_calculation_mode_check CHECK ((calculation_mode = ANY (ARRAY['natural_days'::text, 'working_days'::text])))
+c:accounts.accounts_default_language_check CHECK (((default_language)::text = ANY (ARRAY[('en'::character varying)::text, ('es'::character varying)::text, ('fr'::character varying)::text, ('ar'::character varying)::text])))
+c:accounts.accounts_pkey PRIMARY KEY (id)
+c:accounts.accounts_slug_key UNIQUE (slug)
+c:accounts.accounts_status_check CHECK ((status = ANY (ARRAY['active'::text, 'inactive'::text])))
+c:accounts.accounts_valid_timezone CHECK ((timezone = ANY (ARRAY['UTC'::text, 'Europe/Madrid'::text, 'Europe/London'::text, 'Europe/Paris'::text, 'America/New_York'::text, 'America/Los_Angeles'::text, 'America/Mexico_City'::text, 'America/Sao_Paulo'::text, 'America/Buenos_Aires'::text, 'Asia/Tokyo'::text, 'Asia/Shanghai'::text, 'Asia/Dubai'::text, 'Australia/Sydney'::text])))
+c:allocation_plan_details.allocation_plan_details_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:allocation_plan_details.allocation_plan_details_destination_node_id_fkey FOREIGN KEY (destination_node_id) REFERENCES nodes(id) ON DELETE CASCADE
+c:allocation_plan_details.allocation_plan_details_destination_panelist_id_fkey FOREIGN KEY (destination_panelist_id) REFERENCES panelists(id) ON DELETE SET NULL
+c:allocation_plan_details.allocation_plan_details_month_check CHECK (((month >= 1) AND (month <= 12)))
+c:allocation_plan_details.allocation_plan_details_origin_node_id_fkey FOREIGN KEY (origin_node_id) REFERENCES nodes(id) ON DELETE CASCADE
+c:allocation_plan_details.allocation_plan_details_origin_panelist_id_fkey FOREIGN KEY (origin_panelist_id) REFERENCES panelists(id) ON DELETE SET NULL
+c:allocation_plan_details.allocation_plan_details_original_destination_node_id_fkey FOREIGN KEY (original_destination_node_id) REFERENCES nodes(id)
+c:allocation_plan_details.allocation_plan_details_original_origin_node_id_fkey FOREIGN KEY (original_origin_node_id) REFERENCES nodes(id)
+c:allocation_plan_details.allocation_plan_details_pkey PRIMARY KEY (id)
+c:allocation_plan_details.allocation_plan_details_plan_id_fkey FOREIGN KEY (plan_id) REFERENCES allocation_plans(id) ON DELETE CASCADE
+c:allocation_plan_details.allocation_plan_details_reassigned_by_fkey FOREIGN KEY (reassigned_by) REFERENCES profiles(id)
+c:allocation_plan_details.allocation_plan_details_reassignment_reason_check CHECK ((reassignment_reason = ANY (ARRAY['panelist_unavailable'::text, 'manual'::text, 'rebalancing'::text])))
+c:allocation_plan_details.allocation_plan_details_status_check CHECK ((status = ANY (ARRAY['pending'::text, 'notified'::text, 'sent'::text, 'received'::text, 'cancelled'::text, 'incident'::text])))
+c:allocation_plan_details.allocation_plan_details_week_number_check CHECK (((week_number >= 1) AND (week_number <= 53)))
+c:allocation_plan_details.allocation_plan_details_year_check CHECK ((year >= 2000))
+c:allocation_plans.allocation_plans_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:allocation_plans.allocation_plans_account_id_plan_name_key UNIQUE (account_id, plan_name)
+c:allocation_plans.allocation_plans_applied_by_fkey FOREIGN KEY (applied_by) REFERENCES profiles(id)
+c:allocation_plans.allocation_plans_carrier_id_fkey FOREIGN KEY (carrier_id) REFERENCES carriers(id) ON DELETE CASCADE
+c:allocation_plans.allocation_plans_check CHECK ((end_date >= start_date))
+c:allocation_plans.allocation_plans_created_by_fkey FOREIGN KEY (created_by) REFERENCES profiles(id)
+c:allocation_plans.allocation_plans_pkey PRIMARY KEY (id)
+c:allocation_plans.allocation_plans_product_id_fkey FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+c:allocation_plans.allocation_plans_status_check CHECK ((status = ANY (ARRAY['active'::text, 'completed'::text, 'archived'::text])))
+c:allocation_plans.allocation_plans_total_samples_check CHECK ((total_samples > 0))
+c:api_keys.api_keys_api_key_key UNIQUE (api_key)
+c:api_keys.api_keys_pkey PRIMARY KEY (id)
+c:api_usage_log.api_usage_log_api_key_id_fkey FOREIGN KEY (api_key_id) REFERENCES api_keys(id) ON DELETE CASCADE
+c:api_usage_log.api_usage_log_pkey PRIMARY KEY (id)
+c:audit_raw_reads.audit_raw_reads_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:audit_raw_reads.audit_raw_reads_check_count CHECK ((read_count > 0))
+c:audit_raw_reads.audit_raw_reads_check_order CHECK ((first_read_datetime <= last_read_datetime))
+c:audit_raw_reads.audit_raw_reads_pkey PRIMARY KEY (id)
+c:carriers.carriers_account_id_code_key UNIQUE (account_id, code)
+c:carriers.carriers_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:carriers.carriers_pkey PRIMARY KEY (id)
+c:carriers.carriers_status_check CHECK ((status = ANY (ARRAY['active'::text, 'inactive'::text])))
+c:cities.cities_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:cities.cities_city_type_check CHECK ((city_type = ANY (ARRAY['capital'::text, 'major'::text, 'minor'::text])))
+c:cities.cities_classification_check CHECK (((classification)::text = ANY (ARRAY[('A'::character varying)::text, ('B'::character varying)::text, ('C'::character varying)::text])))
+c:cities.cities_pkey PRIMARY KEY (id)
+c:cities.cities_region_id_code_key UNIQUE (region_id, code)
+c:cities.cities_region_id_fkey FOREIGN KEY (region_id) REFERENCES regions(id) ON DELETE CASCADE
+c:cities.cities_status_check CHECK ((status = ANY (ARRAY['active'::text, 'inactive'::text])))
+c:delivery_standards.delivery_standards_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:delivery_standards.delivery_standards_carrier_id_fkey FOREIGN KEY (carrier_id) REFERENCES carriers(id) ON DELETE CASCADE
+c:delivery_standards.delivery_standards_destination_city_id_fkey FOREIGN KEY (destination_city_id) REFERENCES cities(id) ON DELETE CASCADE
+c:delivery_standards.delivery_standards_different_cities CHECK ((origin_city_id <> destination_city_id))
+c:delivery_standards.delivery_standards_origin_city_id_fkey FOREIGN KEY (origin_city_id) REFERENCES cities(id) ON DELETE CASCADE
+c:delivery_standards.delivery_standards_pkey PRIMARY KEY (id)
+c:delivery_standards.delivery_standards_product_id_fkey FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+c:delivery_standards.delivery_standards_success_percentage_check CHECK (((success_percentage >= (0)::numeric) AND (success_percentage <= (100)::numeric)))
+c:delivery_standards.delivery_standards_time_unit_check CHECK ((time_unit = ANY (ARRAY['hours'::text, 'days'::text])))
+c:delivery_standards.delivery_standards_unique UNIQUE (carrier_id, product_id, origin_city_id, destination_city_id)
+c:demo2_seed_data.demo2_seed_data_pkey PRIMARY KEY (id)
+c:demo2_seed_data.demo2_seed_data_table_name_key UNIQUE (table_name)
+c:diagnosis_anomalies.diagnosis_anomalies_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:diagnosis_anomalies.diagnosis_anomalies_pkey PRIMARY KEY (id)
+c:diagnosis_anomalies.diagnosis_anomalies_postal_center_id_fkey FOREIGN KEY (postal_center_id) REFERENCES postal_centers(id)
+c:diagnosis_anomalies.diagnosis_anomalies_route_id_fkey FOREIGN KEY (route_id) REFERENCES diagnosis_routes(id) ON DELETE CASCADE
+c:diagnosis_routes.diagnosis_routes_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:diagnosis_routes.diagnosis_routes_pkey PRIMARY KEY (id)
+c:diagnosis_time_metrics.diagnosis_time_metrics_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:diagnosis_time_metrics.diagnosis_time_metrics_from_postal_center_id_fkey FOREIGN KEY (from_postal_center_id) REFERENCES postal_centers(id)
+c:diagnosis_time_metrics.diagnosis_time_metrics_pkey PRIMARY KEY (id)
+c:diagnosis_time_metrics.diagnosis_time_metrics_route_id_fkey FOREIGN KEY (route_id) REFERENCES diagnosis_routes(id) ON DELETE CASCADE
+c:diagnosis_time_metrics.diagnosis_time_metrics_sla_status_check CHECK ((sla_status = ANY (ARRAY['on_time'::text, 'warning'::text, 'critical'::text])))
+c:diagnosis_time_metrics.diagnosis_time_metrics_to_postal_center_id_fkey FOREIGN KEY (to_postal_center_id) REFERENCES postal_centers(id)
+c:generated_allocation_plan_details.generated_allocation_plan_details_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:generated_allocation_plan_details.generated_allocation_plan_details_destination_node_id_fkey FOREIGN KEY (destination_node_id) REFERENCES nodes(id) ON DELETE CASCADE
+c:generated_allocation_plan_details.generated_allocation_plan_details_month_check CHECK (((month >= 1) AND (month <= 12)))
+c:generated_allocation_plan_details.generated_allocation_plan_details_origin_node_id_fkey FOREIGN KEY (origin_node_id) REFERENCES nodes(id) ON DELETE CASCADE
+c:generated_allocation_plan_details.generated_allocation_plan_details_pkey PRIMARY KEY (id)
+c:generated_allocation_plan_details.generated_allocation_plan_details_plan_id_fkey FOREIGN KEY (plan_id) REFERENCES generated_allocation_plans(id) ON DELETE CASCADE
+c:generated_allocation_plan_details.generated_allocation_plan_details_status_check CHECK ((status = ANY (ARRAY['pending'::text, 'sent'::text, 'delivered'::text, 'cancelled'::text])))
+c:generated_allocation_plan_details.generated_allocation_plan_details_week_number_check CHECK (((week_number >= 1) AND (week_number <= 53)))
+c:generated_allocation_plan_details.generated_allocation_plan_details_year_check CHECK ((year >= 2000))
+c:generated_allocation_plans.generated_allocation_plans_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:generated_allocation_plans.generated_allocation_plans_account_id_plan_name_key UNIQUE (account_id, plan_name)
+c:generated_allocation_plans.generated_allocation_plans_carrier_id_fkey FOREIGN KEY (carrier_id) REFERENCES carriers(id) ON DELETE CASCADE
+c:generated_allocation_plans.generated_allocation_plans_check CHECK ((end_date >= start_date))
+c:generated_allocation_plans.generated_allocation_plans_created_by_fkey FOREIGN KEY (created_by) REFERENCES profiles(id)
+c:generated_allocation_plans.generated_allocation_plans_pkey PRIMARY KEY (id)
+c:generated_allocation_plans.generated_allocation_plans_product_id_fkey FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+c:generated_allocation_plans.generated_allocation_plans_status_check CHECK ((status = ANY (ARRAY['draft'::text, 'pending'::text, 'applied'::text])))
+c:generated_allocation_plans.generated_allocation_plans_total_samples_check CHECK ((total_samples > 0))
+c:incidents.incidents_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:incidents.incidents_event_id_fkey FOREIGN KEY (event_id) REFERENCES processed_events(id) ON DELETE CASCADE
+c:incidents.incidents_incident_type_check CHECK ((incident_type = ANY (ARRAY['exit_before_entry'::text, 'missing_entry'::text, 'missing_exit'::text, 'sla_violation'::text, 'stuck_sample'::text, 'missroute'::text, 'duplicate_event'::text, 'invalid_sequence'::text, 'unknown_reader'::text, 'unknown_tag'::text])))
+c:incidents.incidents_pkey PRIMARY KEY (id)
+c:incidents.incidents_postal_center_id_fkey FOREIGN KEY (postal_center_id) REFERENCES postal_centers(id) ON DELETE SET NULL
+c:incidents.incidents_reader_id_fkey FOREIGN KEY (reader_id) REFERENCES readers(id) ON DELETE SET NULL
+c:incidents.incidents_resolved_by_fkey FOREIGN KEY (resolved_by) REFERENCES auth.users(id)
+c:incidents.incidents_segment_id_fkey FOREIGN KEY (segment_id) REFERENCES journey_segments(id) ON DELETE CASCADE
+c:incidents.incidents_severity_check CHECK ((severity = ANY (ARRAY['low'::text, 'medium'::text, 'high'::text, 'critical'::text])))
+c:journey_paths.journey_paths_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:journey_paths.journey_paths_carrier_id_fkey FOREIGN KEY (carrier_id) REFERENCES carriers(id)
+c:journey_paths.journey_paths_pkey PRIMARY KEY (id)
+c:journey_paths.journey_paths_product_id_fkey FOREIGN KEY (product_id) REFERENCES products(id)
+c:journey_paths.journey_paths_unique_path UNIQUE (account_id, carrier_id, product_id, origin_city_name, destination_city_name, path_signature)
+c:journey_segments.journey_segments_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:journey_segments.journey_segments_entry_event_id_fkey FOREIGN KEY (entry_event_id) REFERENCES processed_events(id) ON DELETE CASCADE
+c:journey_segments.journey_segments_exit_event_id_fkey FOREIGN KEY (exit_event_id) REFERENCES processed_events(id) ON DELETE CASCADE
+c:journey_segments.journey_segments_from_postal_center_id_fkey FOREIGN KEY (from_postal_center_id) REFERENCES postal_centers(id) ON DELETE RESTRICT
+c:journey_segments.journey_segments_natural_time_check CHECK (((natural_time_in_center_minutes >= 0) OR (natural_time_in_center_minutes IS NULL)))
+c:journey_segments.journey_segments_natural_transit_check CHECK (((natural_transit_time_minutes >= 0) OR (natural_transit_time_minutes IS NULL)))
+c:journey_segments.journey_segments_operational_fields_check CHECK ((((segment_type = 'operational'::text) AND (postal_center_id IS NOT NULL) AND (from_postal_center_id IS NULL) AND (to_postal_center_id IS NULL)) OR ((segment_type = 'distribution'::text) AND (from_postal_center_id IS NOT NULL) AND (to_postal_center_id IS NOT NULL) AND (postal_center_id IS NULL))))
+c:journey_segments.journey_segments_pkey PRIMARY KEY (id)
+c:journey_segments.journey_segments_postal_center_id_fkey FOREIGN KEY (postal_center_id) REFERENCES postal_centers(id) ON DELETE RESTRICT
+c:journey_segments.journey_segments_product_id_fkey FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE SET NULL
+c:journey_segments.journey_segments_segment_type_check CHECK ((segment_type = ANY (ARRAY['operational'::text, 'distribution'::text])))
+c:journey_segments.journey_segments_sla_compliance_check CHECK ((sla_compliance = ANY (ARRAY['on_time'::text, 'warning'::text, 'critical'::text, 'violated'::text, 'no_sla'::text])))
+c:journey_segments.journey_segments_sla_id_fkey FOREIGN KEY (sla_id) REFERENCES slas(id) ON DELETE SET NULL
+c:journey_segments.journey_segments_times_check CHECK (((exit_timestamp >= entry_timestamp) AND (actual_time_minutes >= 0) AND (adjusted_time_minutes >= 0)))
+c:journey_segments.journey_segments_to_postal_center_id_fkey FOREIGN KEY (to_postal_center_id) REFERENCES postal_centers(id) ON DELETE RESTRICT
+c:journey_segments.journey_segments_working_time_check CHECK (((working_time_in_center_minutes >= 0) OR (working_time_in_center_minutes IS NULL)))
+c:journey_segments.journey_segments_working_transit_check CHECK (((working_transit_time_minutes >= 0) OR (working_transit_time_minutes IS NULL)))
+c:journeys.journeys_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:journeys.journeys_account_id_tag_id_key UNIQUE (account_id, tag_id)
+c:journeys.journeys_destination_city_id_fkey FOREIGN KEY (destination_city_id) REFERENCES cities(id) ON DELETE SET NULL
+c:journeys.journeys_journey_status_check CHECK ((journey_status = ANY (ARRAY['in_progress'::text, 'completed'::text, 'anomalous'::text, 'stuck'::text])))
+c:journeys.journeys_origin_city_id_fkey FOREIGN KEY (origin_city_id) REFERENCES cities(id) ON DELETE SET NULL
+c:journeys.journeys_pkey PRIMARY KEY (id)
+c:journeys.journeys_product_id_fkey FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE SET NULL
+c:material_catalog.material_catalog_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:material_catalog.material_catalog_code_account_unique UNIQUE (account_id, code)
+c:material_catalog.material_catalog_pkey PRIMARY KEY (id)
+c:material_catalog.material_catalog_status_check CHECK ((status = ANY (ARRAY['active'::text, 'inactive'::text])))
+c:material_movements.material_movements_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:material_movements.material_movements_created_by_fkey FOREIGN KEY (created_by) REFERENCES profiles(id)
+c:material_movements.material_movements_material_id_fkey FOREIGN KEY (material_id) REFERENCES material_catalog(id) ON DELETE CASCADE
+c:material_movements.material_movements_pkey PRIMARY KEY (id)
+c:material_requirements_periods.material_requirements_periods_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:material_requirements_periods.material_requirements_periods_material_id_fkey FOREIGN KEY (material_id) REFERENCES material_catalog(id) ON DELETE CASCADE
+c:material_requirements_periods.material_requirements_periods_pkey PRIMARY KEY (id)
+c:material_requirements_periods.material_requirements_periods_status_check CHECK ((status = ANY (ARRAY['pending'::text, 'ordered'::text, 'received'::text])))
+c:material_requirements_periods.unique_account_period_material UNIQUE (account_id, period_start, period_end, material_id)
+c:material_shipment_items.material_shipment_items_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:material_shipment_items.material_shipment_items_material_id_fkey FOREIGN KEY (material_id) REFERENCES material_catalog(id) ON DELETE CASCADE
+c:material_shipment_items.material_shipment_items_material_shipment_id_fkey FOREIGN KEY (material_shipment_id) REFERENCES material_shipments(id) ON DELETE CASCADE
+c:material_shipment_items.material_shipment_items_pkey PRIMARY KEY (id)
+c:material_shipments.material_shipments_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:material_shipments.material_shipments_created_by_fkey FOREIGN KEY (created_by) REFERENCES profiles(id)
+c:material_shipments.material_shipments_panelist_id_fkey FOREIGN KEY (panelist_id) REFERENCES panelists(id) ON DELETE CASCADE
+c:material_shipments.material_shipments_pkey PRIMARY KEY (id)
+c:material_shipments.material_shipments_shipment_number_key UNIQUE (shipment_number)
+c:material_stocks.material_stocks_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:material_stocks.material_stocks_account_id_material_id_key UNIQUE (account_id, material_id)
+c:material_stocks.material_stocks_material_id_fkey FOREIGN KEY (material_id) REFERENCES material_catalog(id) ON DELETE CASCADE
+c:material_stocks.material_stocks_pkey PRIMARY KEY (id)
+c:materials.materials_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:materials.materials_pkey PRIMARY KEY (id)
+c:materials.materials_product_id_code_key UNIQUE (product_id, code)
+c:materials.materials_product_id_fkey FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+c:materials.materials_quantity_positive CHECK ((quantity > 0))
+c:materials.materials_status_check CHECK ((status = ANY (ARRAY['active'::text, 'inactive'::text])))
+c:n8n_upu_agent.n8n_upu_agent_pkey PRIMARY KEY (id)
+c:n8n_upu_incident.n8n_upu_incident_pkey PRIMARY KEY (id)
+c:n8n_upu_timeoff.n8n_upu_timeoff_pkey PRIMARY KEY (id)
+c:node_balancing_history.node_balancing_history_account_id_fkey FOREIGN KEY (account_id) REFERENCES auth.users(id) ON DELETE CASCADE
+c:node_balancing_history.node_balancing_history_city_id_fkey FOREIGN KEY (city_id) REFERENCES cities(id) ON DELETE CASCADE
+c:node_balancing_history.node_balancing_history_performed_by_fkey FOREIGN KEY (performed_by) REFERENCES auth.users(id)
+c:node_balancing_history.node_balancing_history_pkey PRIMARY KEY (id)
+c:nodes.nodes_account_id_auto_id_key UNIQUE (account_id, auto_id)
+c:nodes.nodes_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:nodes.nodes_city_id_fkey FOREIGN KEY (city_id) REFERENCES cities(id) ON DELETE CASCADE
+c:nodes.nodes_pkey PRIMARY KEY (id)
+c:nodes.nodes_status_check CHECK ((status = ANY (ARRAY['active'::text, 'inactive'::text])))
+c:non_working_days.non_working_days_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:non_working_days.non_working_days_account_id_postal_center_id_date_key UNIQUE (account_id, postal_center_id, date)
+c:non_working_days.non_working_days_created_by_fkey FOREIGN KEY (created_by) REFERENCES auth.users(id)
+c:non_working_days.non_working_days_pkey PRIMARY KEY (id)
+c:non_working_days.non_working_days_postal_center_id_fkey FOREIGN KEY (postal_center_id) REFERENCES postal_centers(id) ON DELETE CASCADE
+c:non_working_days.non_working_days_type_check CHECK ((type = ANY (ARRAY['holiday'::text, 'weekend'::text, 'other'::text])))
+c:one_db.one_db_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:one_db.one_db_allocation_detail_id_fkey FOREIGN KEY (allocation_detail_id) REFERENCES allocation_plan_details(id) ON UPDATE CASCADE ON DELETE SET NULL
+c:one_db.one_db_pkey PRIMARY KEY (id)
+c:one_db.one_db_unique_allocation_detail UNIQUE (allocation_detail_id)
+c:one_db.one_db_valid_timestamps CHECK ((sent_at <= received_at))
+c:one_db.one_db_valid_transit_days CHECK ((total_transit_days >= 0))
+c:panelist_context.panelist_context_pkey PRIMARY KEY (id)
+c:panelist_material_stocks.panelist_material_stocks_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:panelist_material_stocks.panelist_material_stocks_account_id_panelist_id_material_id_key UNIQUE (account_id, panelist_id, material_id)
+c:panelist_material_stocks.panelist_material_stocks_material_id_fkey FOREIGN KEY (material_id) REFERENCES material_catalog(id) ON DELETE CASCADE
+c:panelist_material_stocks.panelist_material_stocks_panelist_id_fkey FOREIGN KEY (panelist_id) REFERENCES panelists(id) ON DELETE CASCADE
+c:panelist_material_stocks.panelist_material_stocks_pkey PRIMARY KEY (id)
+c:panelist_unavailability.check_dates CHECK ((end_date >= start_date))
+c:panelist_unavailability.panelist_unavailability_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:panelist_unavailability.panelist_unavailability_created_by_fkey FOREIGN KEY (created_by) REFERENCES auth.users(id)
+c:panelist_unavailability.panelist_unavailability_panelist_id_fkey FOREIGN KEY (panelist_id) REFERENCES panelists(id) ON DELETE CASCADE
+c:panelist_unavailability.panelist_unavailability_pkey PRIMARY KEY (id)
+c:panelist_unavailability.panelist_unavailability_reason_check CHECK (((reason)::text = ANY (ARRAY[('vacation'::character varying)::text, ('sick_leave'::character varying)::text, ('personal'::character varying)::text, ('training'::character varying)::text, ('other'::character varying)::text])))
+c:panelist_unavailability.panelist_unavailability_status_check CHECK (((status)::text = ANY (ARRAY[('active'::character varying)::text, ('cancelled'::character varying)::text])))
+c:panelist_unavailability.panelist_unavailability_updated_by_fkey FOREIGN KEY (updated_by) REFERENCES auth.users(id)
+c:panelists.panelists_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:panelists.panelists_city_id_fkey FOREIGN KEY (city_id) REFERENCES cities(id) ON DELETE RESTRICT
+c:panelists.panelists_created_by_fkey FOREIGN KEY (created_by) REFERENCES auth.users(id)
+c:panelists.panelists_language_check CHECK (((language)::text = ANY (ARRAY[('en'::character varying)::text, ('es'::character varying)::text, ('fr'::character varying)::text, ('ar'::character varying)::text])))
+c:panelists.panelists_node_id_fkey FOREIGN KEY (node_id) REFERENCES nodes(id) ON DELETE RESTRICT
+c:panelists.panelists_pkey PRIMARY KEY (id)
+c:panelists.panelists_status_check CHECK (((status)::text = ANY (ARRAY[('active'::character varying)::text, ('inactive'::character varying)::text])))
+c:panelists.panelists_updated_by_fkey FOREIGN KEY (updated_by) REFERENCES auth.users(id)
+c:panelists.unique_panelist_code_per_account UNIQUE (account_id, panelist_code)
+c:postal_center_carriers.postal_center_carriers_carrier_id_fkey FOREIGN KEY (carrier_id) REFERENCES carriers(id) ON DELETE CASCADE
+c:postal_center_carriers.postal_center_carriers_created_by_fkey FOREIGN KEY (created_by) REFERENCES auth.users(id)
+c:postal_center_carriers.postal_center_carriers_pkey PRIMARY KEY (postal_center_id, carrier_id)
+c:postal_center_carriers.postal_center_carriers_postal_center_id_fkey FOREIGN KEY (postal_center_id) REFERENCES postal_centers(id) ON DELETE CASCADE
+c:postal_centers.postal_centers_account_id_code_key UNIQUE (account_id, code)
+c:postal_centers.postal_centers_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:postal_centers.postal_centers_calculation_mode_check CHECK ((calculation_mode = ANY (ARRAY['natural_days'::text, 'working_days'::text])))
+c:postal_centers.postal_centers_carrier_id_fkey FOREIGN KEY (carrier_id) REFERENCES carriers(id) ON DELETE SET NULL
+c:postal_centers.postal_centers_check CHECK (((cutoff_time IS NULL) OR (opening_hour IS NULL) OR (cutoff_time > opening_hour)))
+c:postal_centers.postal_centers_city_id_fkey FOREIGN KEY (city_id) REFERENCES cities(id) ON DELETE SET NULL
+c:postal_centers.postal_centers_created_by_fkey FOREIGN KEY (created_by) REFERENCES auth.users(id)
+c:postal_centers.postal_centers_mixed_reader_gap_minutes_check CHECK ((mixed_reader_gap_minutes > 0))
+c:postal_centers.postal_centers_pkey PRIMARY KEY (id)
+c:postal_centers.postal_centers_updated_by_fkey FOREIGN KEY (updated_by) REFERENCES auth.users(id)
+c:processed_events.processed_events_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:processed_events.processed_events_carrier_id_fkey FOREIGN KEY (carrier_id) REFERENCES carriers(id)
+c:processed_events.processed_events_event_type_check CHECK ((event_type = ANY (ARRAY['entry'::text, 'exit'::text])))
+c:processed_events.processed_events_pkey PRIMARY KEY (id)
+c:processed_events.processed_events_postal_center_id_fkey FOREIGN KEY (postal_center_id) REFERENCES postal_centers(id) ON DELETE RESTRICT
+c:processed_events.processed_events_product_id_fkey FOREIGN KEY (product_id) REFERENCES products(id)
+c:processed_events.processed_events_reader_id_fkey FOREIGN KEY (reader_id) REFERENCES readers(id) ON DELETE RESTRICT
+c:processed_events.processed_events_reader_type_check CHECK ((reader_type_snapshot = ANY (ARRAY['Entry'::text, 'Exit'::text, 'Mixed'::text])))
+c:product_materials.product_materials_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:product_materials.product_materials_material_catalog_id_fkey FOREIGN KEY (material_id) REFERENCES material_catalog(id) ON DELETE CASCADE
+c:product_materials.product_materials_pkey PRIMARY KEY (id)
+c:product_materials.product_materials_product_id_fkey FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+c:product_materials.product_materials_quantity_check CHECK ((quantity > 0))
+c:product_materials.product_materials_unique UNIQUE (product_id, material_id)
+c:products.products_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:products.products_carrier_id_code_key UNIQUE (carrier_id, code)
+c:products.products_carrier_id_fkey FOREIGN KEY (carrier_id) REFERENCES carriers(id) ON DELETE CASCADE
+c:products.products_pkey PRIMARY KEY (id)
+c:products.products_status_check CHECK ((status = ANY (ARRAY['active'::text, 'inactive'::text])))
+c:products.products_time_unit_check CHECK ((time_unit = ANY (ARRAY['hours'::text, 'days'::text])))
+c:profiles.check_account_role CHECK ((((role = 'superadmin'::text) AND (account_id IS NULL)) OR ((role <> 'superadmin'::text) AND (account_id IS NOT NULL))))
+c:profiles.profiles_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:profiles.profiles_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id) ON DELETE CASCADE
+c:profiles.profiles_pkey PRIMARY KEY (id)
+c:profiles.profiles_role_check CHECK ((role = ANY (ARRAY['superadmin'::text, 'admin'::text, 'user'::text])))
+c:profiles.profiles_status_check CHECK ((status = ANY (ARRAY['active'::text, 'inactive'::text])))
+c:purchase_order_items.purchase_order_items_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:purchase_order_items.purchase_order_items_material_id_fkey FOREIGN KEY (material_id) REFERENCES material_catalog(id) ON DELETE CASCADE
+c:purchase_order_items.purchase_order_items_pkey PRIMARY KEY (id)
+c:purchase_order_items.purchase_order_items_purchase_order_id_fkey FOREIGN KEY (purchase_order_id) REFERENCES purchase_orders(id) ON DELETE CASCADE
+c:purchase_orders.purchase_orders_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:purchase_orders.purchase_orders_created_by_fkey FOREIGN KEY (created_by) REFERENCES profiles(id)
+c:purchase_orders.purchase_orders_pkey PRIMARY KEY (id)
+c:purchase_orders.purchase_orders_po_number_key UNIQUE (po_number)
+c:reader_location_history.check_assignment_period CHECK (((unassigned_at IS NULL) OR (unassigned_at > assigned_at)))
+c:reader_location_history.reader_location_history_created_by_fkey FOREIGN KEY (created_by) REFERENCES auth.users(id)
+c:reader_location_history.reader_location_history_pkey PRIMARY KEY (id)
+c:reader_location_history.reader_location_history_postal_center_id_fkey FOREIGN KEY (postal_center_id) REFERENCES postal_centers(id) ON DELETE CASCADE
+c:reader_location_history.reader_location_history_reader_id_fkey FOREIGN KEY (reader_id) REFERENCES readers(id) ON DELETE CASCADE
+c:reader_location_history.reader_location_history_updated_by_fkey FOREIGN KEY (updated_by) REFERENCES auth.users(id)
+c:readers.readers_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:readers.readers_account_id_reader_id_key UNIQUE (account_id, reader_id)
+c:readers.readers_created_by_fkey FOREIGN KEY (created_by) REFERENCES auth.users(id)
+c:readers.readers_mixed_reader_gap_minutes_check CHECK ((mixed_reader_gap_minutes > 0))
+c:readers.readers_pkey PRIMARY KEY (id)
+c:readers.readers_postal_center_id_fkey FOREIGN KEY (postal_center_id) REFERENCES postal_centers(id) ON DELETE CASCADE
+c:readers.readers_type_check CHECK ((type = ANY (ARRAY['Entry'::text, 'Exit'::text, 'Mixed'::text])))
+c:readers.readers_updated_by_fkey FOREIGN KEY (updated_by) REFERENCES auth.users(id)
+c:regions.regions_account_id_code_key UNIQUE (account_id, code)
+c:regions.regions_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:regions.regions_pkey PRIMARY KEY (id)
+c:regions.regions_status_check CHECK ((status = ANY (ARRAY['active'::text, 'inactive'::text])))
+c:reporting_config.reporting_config_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:reporting_config.reporting_config_compliance_threshold_critical_check CHECK (((compliance_threshold_critical >= 0) AND (compliance_threshold_critical <= 100)))
+c:reporting_config.reporting_config_compliance_threshold_warning_check CHECK (((compliance_threshold_warning >= 0) AND (compliance_threshold_warning <= 100)))
+c:reporting_config.reporting_config_default_report_period_check CHECK ((default_report_period = ANY (ARRAY['week'::text, 'month'::text, 'quarter'::text])))
+c:reporting_config.reporting_config_pkey PRIMARY KEY (id)
+c:reporting_config.reporting_config_preferred_map_alternative_check CHECK ((preferred_map_alternative = ANY (ARRAY['treemap'::text, 'heatmap'::text])))
+c:reporting_config.reporting_config_unique_account UNIQUE (account_id)
+c:reporting_config.reporting_config_updated_by_fkey FOREIGN KEY (updated_by) REFERENCES auth.users(id)
+c:rfid_events_raw.rfid_events_raw_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:rfid_events_raw.rfid_events_raw_carrier_id_fkey FOREIGN KEY (carrier_id) REFERENCES carriers(id)
+c:rfid_events_raw.rfid_events_raw_event_id_unique UNIQUE (account_id, event_id)
+c:rfid_events_raw.rfid_events_raw_pkey PRIMARY KEY (id)
+c:rfid_events_raw.rfid_events_raw_product_id_fkey FOREIGN KEY (product_id) REFERENCES products(id)
+c:rfid_ingest_state.rfid_ingest_state_last_status_chk CHECK (((last_status IS NULL) OR (last_status = ANY (ARRAY['ok'::text, 'error'::text, 'rate_limited'::text]))))
+c:rfid_ingest_state.rfid_ingest_state_pkey PRIMARY KEY (id)
+c:rfid_intermediate_db.rfid_intermediate_db_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:rfid_intermediate_db.rfid_intermediate_db_pkey PRIMARY KEY (id)
+c:rfid_provider_reads.rfid_provider_reads_match_status_chk CHECK ((match_status = ANY (ARRAY['pending'::text, 'matched'::text, 'unknown_reader'::text, 'tag_decode_failed'::text])))
+c:rfid_provider_reads.rfid_provider_reads_pkey PRIMARY KEY (id)
+c:rfid_provider_reads.rfid_provider_reads_resolved_account_id_fkey FOREIGN KEY (resolved_account_id) REFERENCES accounts(id) ON DELETE SET NULL
+c:shipment_incident.shipment_incident_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:shipment_incident.shipment_incident_panelist_id_fkey FOREIGN KEY (panelist_id) REFERENCES panelists(id) ON DELETE SET NULL
+c:shipment_incident.shipment_incident_parcel_id_fkey FOREIGN KEY (parcel_id) REFERENCES allocation_plan_details(id) ON DELETE CASCADE
+c:shipment_incident.shipment_incident_pkey PRIMARY KEY (id)
+c:sla_definitions.sla_definitions_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:sla_definitions.sla_definitions_account_id_from_postal_center_id_to_postal__key UNIQUE (account_id, from_postal_center_id, to_postal_center_id)
+c:sla_definitions.sla_definitions_check CHECK ((critical_threshold_multiplier > warning_threshold_multiplier))
+c:sla_definitions.sla_definitions_check1 CHECK ((from_postal_center_id <> to_postal_center_id))
+c:sla_definitions.sla_definitions_created_by_fkey FOREIGN KEY (created_by) REFERENCES auth.users(id)
+c:sla_definitions.sla_definitions_expected_duration_hours_check CHECK ((expected_duration_hours > (0)::numeric))
+c:sla_definitions.sla_definitions_from_postal_center_id_fkey FOREIGN KEY (from_postal_center_id) REFERENCES postal_centers(id) ON DELETE CASCADE
+c:sla_definitions.sla_definitions_pkey PRIMARY KEY (id)
+c:sla_definitions.sla_definitions_to_postal_center_id_fkey FOREIGN KEY (to_postal_center_id) REFERENCES postal_centers(id) ON DELETE CASCADE
+c:sla_definitions.sla_definitions_updated_by_fkey FOREIGN KEY (updated_by) REFERENCES auth.users(id)
+c:sla_definitions.sla_definitions_warning_threshold_multiplier_check CHECK ((warning_threshold_multiplier > 1.0))
+c:slas.slas_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:slas.slas_carrier_id_fkey FOREIGN KEY (carrier_id) REFERENCES carriers(id) ON DELETE SET NULL
+c:slas.slas_created_by_fkey FOREIGN KEY (created_by) REFERENCES auth.users(id)
+c:slas.slas_critical_threshold_check CHECK (((critical_threshold >= 0) AND (critical_threshold <= 100)))
+c:slas.slas_distribution_different_centers CHECK (((sla_type <> 'distribution'::text) OR (from_postal_center_id <> to_postal_center_id)))
+c:slas.slas_expected_time_minutes_check CHECK ((expected_time_minutes > 0))
+c:slas.slas_from_postal_center_id_fkey FOREIGN KEY (from_postal_center_id) REFERENCES postal_centers(id) ON DELETE CASCADE
+c:slas.slas_on_time_percentage_check CHECK (((on_time_percentage >= 0) AND (on_time_percentage <= 100)))
+c:slas.slas_operational_fields_check CHECK ((((sla_type = 'operational'::text) AND (postal_center_id IS NOT NULL) AND (from_postal_center_id IS NULL) AND (to_postal_center_id IS NULL)) OR ((sla_type = 'distribution'::text) AND (from_postal_center_id IS NOT NULL) AND (to_postal_center_id IS NOT NULL) AND (postal_center_id IS NULL))))
+c:slas.slas_pkey PRIMARY KEY (id)
+c:slas.slas_postal_center_id_fkey FOREIGN KEY (postal_center_id) REFERENCES postal_centers(id) ON DELETE CASCADE
+c:slas.slas_product_id_fkey FOREIGN KEY (product_id) REFERENCES products(id)
+c:slas.slas_sla_type_check CHECK ((sla_type = ANY (ARRAY['operational'::text, 'distribution'::text])))
+c:slas.slas_thresholds_check CHECK (((on_time_percentage >= warning_threshold) AND (warning_threshold >= critical_threshold)))
+c:slas.slas_time_unit_check CHECK ((time_unit = ANY (ARRAY['minutes'::text, 'hours'::text])))
+c:slas.slas_to_postal_center_id_fkey FOREIGN KEY (to_postal_center_id) REFERENCES postal_centers(id) ON DELETE CASCADE
+c:slas.slas_unique_operational CHECK ((((sla_type = 'operational'::text) AND (postal_center_id IS NOT NULL) AND (from_postal_center_id IS NULL) AND (to_postal_center_id IS NULL)) OR ((sla_type = 'distribution'::text) AND (postal_center_id IS NULL) AND (from_postal_center_id IS NOT NULL) AND (to_postal_center_id IS NOT NULL))))
+c:slas.slas_updated_by_fkey FOREIGN KEY (updated_by) REFERENCES auth.users(id)
+c:slas.slas_warning_threshold_check CHECK (((warning_threshold >= 0) AND (warning_threshold <= 100)))
+c:stock_alerts.stock_alerts_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:stock_alerts.stock_alerts_account_id_material_id_alert_type_location_id__key UNIQUE (account_id, material_id, alert_type, location_id, created_at)
+c:stock_alerts.stock_alerts_alert_type_check CHECK ((alert_type = ANY (ARRAY['regulator_insufficient'::text, 'panelist_negative'::text])))
+c:stock_alerts.stock_alerts_material_id_fkey FOREIGN KEY (material_id) REFERENCES material_catalog(id) ON DELETE CASCADE
+c:stock_alerts.stock_alerts_pkey PRIMARY KEY (id)
+c:stock_settings.stock_settings_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:stock_settings.stock_settings_account_id_key UNIQUE (account_id)
+c:stock_settings.stock_settings_pkey PRIMARY KEY (id)
+c:weekly_schedule.weekly_schedule_account_id_fkey FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+c:weekly_schedule.weekly_schedule_account_id_postal_center_id_day_of_week_key UNIQUE (account_id, postal_center_id, day_of_week)
+c:weekly_schedule.weekly_schedule_check CHECK (((NOT is_working_day) OR ((opening_hour IS NOT NULL) AND (cutoff_time IS NOT NULL))))
+c:weekly_schedule.weekly_schedule_check1 CHECK (((cutoff_time IS NULL) OR (opening_hour IS NULL) OR (cutoff_time > opening_hour)))
+c:weekly_schedule.weekly_schedule_created_by_fkey FOREIGN KEY (created_by) REFERENCES auth.users(id)
+c:weekly_schedule.weekly_schedule_day_of_week_check CHECK (((day_of_week >= 0) AND (day_of_week <= 6)))
+c:weekly_schedule.weekly_schedule_pkey PRIMARY KEY (id)
+c:weekly_schedule.weekly_schedule_postal_center_id_fkey FOREIGN KEY (postal_center_id) REFERENCES postal_centers(id) ON DELETE CASCADE
+c:weekly_schedule.weekly_schedule_updated_by_fkey FOREIGN KEY (updated_by) REFERENCES auth.users(id)
+f:admin_reset_account_data(p_account_identifier text)
+f:admin_reset_account_data_backup(p_account_identifier text)
+f:admin_reset_and_seed_demo2()
+f:admin_reset_demo2()
+f:aggregate_journey_paths(p_account_id uuid, p_since timestamp with time zone)
+f:archive_raw_events(p_account_id uuid, p_tag_id text, p_reader_code text)
+f:assemble_journeys(p_account_id uuid)
+f:assign_reader_to_center(p_reader_id uuid, p_postal_center_id uuid, p_assigned_at timestamp with time zone, p_unassigned_at timestamp with time zone, p_notes text)
+f:auto_resolve_stock_alerts()
+f:balance_node_load_matrix(p_account_id uuid, p_city_id uuid, p_month integer, p_year integer, p_dry_run boolean)
+f:build_journey_segments(p_account_id uuid)
+f:calculate_adjusted_time(p_start_time timestamp with time zone, p_end_time timestamp with time zone, p_postal_center_id uuid, p_account_id uuid)
+f:calculate_business_days(p_start_date timestamp with time zone, p_end_date timestamp with time zone, p_account_id uuid)
+f:calculate_compliance_percentage(p_account_id uuid, p_date_from timestamp with time zone, p_date_to timestamp with time zone, p_carrier_name text, p_product_name text)
+f:calculate_network_health_score(p_account_id uuid, p_start_date timestamp with time zone, p_end_date timestamp with time zone)
+f:calculate_next_working_datetime(p_timestamp timestamp with time zone, p_postal_center_id uuid)
+f:calculate_pre_operational_wait(p_actual_entry_time timestamp with time zone, p_analysis_entry_time timestamp with time zone)
+f:calculate_working_days_time(p_start_datetime timestamp with time zone, p_end_datetime timestamp with time zone, p_postal_center_id uuid)
+f:calculate_working_hours(p_start_time timestamp with time zone, p_end_time timestamp with time zone, p_postal_center_id uuid, p_account_id uuid)
+f:calculate_working_minutes(p_start_timestamp timestamp with time zone, p_end_timestamp timestamp with time zone, p_account_id uuid)
+f:calculate_working_minutes_simple(p_start_timestamp timestamp with time zone, p_end_timestamp timestamp with time zone)
+f:calculate_working_time_minutes(p_start_time timestamp with time zone, p_end_time timestamp with time zone, p_postal_center_id uuid)
+f:check_unavailability_overlap()
+f:classify_route(p_origin_city_id uuid, p_destination_city_id uuid)
+f:cleanup_processed_rfid_events(p_account_id uuid, p_older_than_hours integer)
+f:consolidate_mixed_reader_events(p_account_id uuid, p_tag_id text, p_reader_code text, p_gap_threshold_minutes integer)
+f:consolidate_rfid_events(p_account_id uuid)
+f:current_user_account_id()
+f:current_user_role()
+f:daily_update_panelist_availability()
+f:detect_missing_exits(p_account_id uuid)
+f:determine_sla_compliance(p_adjusted_time_minutes integer, p_expected_time_minutes integer, p_on_time_percentage numeric, p_warning_threshold numeric, p_critical_threshold numeric)
+f:find_applicable_sla(p_account_id uuid, p_segment_type text, p_postal_center_id uuid, p_from_postal_center_id uuid, p_to_postal_center_id uuid, p_carrier_id uuid)
+f:generate_delivery_standards(p_carrier_ids uuid[], p_product_ids uuid[], p_origin_city_ids uuid[], p_destination_city_ids uuid[])
+f:generate_node_auto_id(p_city_id uuid)
+f:generate_panelist_code()
+f:get_carrier_comparison(p_account_id uuid, p_start_date timestamp with time zone, p_end_date timestamp with time zone)
+f:get_center_comparison(p_account_id uuid, p_start_date timestamp with time zone, p_end_date timestamp with time zone)
+f:get_center_performance(p_account_id uuid, p_start_date timestamp with time zone, p_end_date timestamp with time zone)
+f:get_center_trends(p_account_id uuid, p_period text, p_start_date timestamp with time zone, p_end_date timestamp with time zone)
+f:get_jk_carrier_performance_segments(p_account_id uuid, p_start_date timestamp with time zone, p_end_date timestamp with time zone)
+f:get_jk_city_performance_segments(p_account_id uuid, p_start_date timestamp with time zone, p_end_date timestamp with time zone)
+f:get_jk_performance_segments(p_account_id uuid, p_start_date timestamp with time zone, p_end_date timestamp with time zone, p_origin_city text, p_destination_city text, p_carrier text, p_product text, p_segment_type text, p_threshold text)
+f:get_jk_performance_segments(p_account_id uuid, p_start_date timestamp with time zone, p_end_date timestamp with time zone, p_origin_city text, p_destination_city text, p_carrier text, p_segment_type text)
+f:get_mobile_readers_summary(p_account_id uuid)
+f:get_panelist_for_node(p_node_id uuid, p_date date)
+f:get_postal_center_config(p_postal_center_id uuid)
+f:get_reader_info(p_reader_id_text text, p_account_id uuid)
+f:get_reader_location_at_time(p_reader_id uuid, p_timestamp timestamp with time zone)
+f:get_reader_location_history(p_reader_id uuid)
+f:get_route_performance(p_account_id uuid, p_start_date timestamp with time zone, p_end_date timestamp with time zone)
+f:get_route_trends(p_account_id uuid, p_origin_city text, p_destination_city text, p_start_date timestamp with time zone, p_end_date timestamp with time zone, p_interval text)
+f:get_segment_anomalies(p_account_id uuid, p_start_date timestamp with time zone, p_end_date timestamp with time zone, p_min_deviation_pct numeric)
+f:get_segment_overview(p_account_id uuid, p_start_date timestamp with time zone, p_end_date timestamp with time zone)
+f:get_segment_time_analysis(p_account_id uuid, p_segment_type text, p_start_date timestamp with time zone, p_end_date timestamp with time zone)
+f:get_sla_for_segment(p_account_id uuid, p_from_center_id uuid, p_to_center_id uuid)
+f:get_top_bottom_centers(p_account_id uuid, p_limit integer)
+f:get_top_bottom_routes(p_account_id uuid, p_limit integer)
+f:get_user_account_id()
+f:is_node_available(p_node_id uuid, p_date date)
+f:is_panelist_available(p_panelist_id uuid, p_date date)
+f:is_superadmin()
+f:is_user_superadmin()
+f:is_working_day(p_account_id uuid, p_postal_center_id uuid, p_date date)
+f:log_reader_location_change()
+f:normalize_provider_tag(p_raw text)
+f:prevent_account_id_change()
+f:process_all_accounts_pipeline()
+f:process_rfid_pipeline(p_account_id uuid)
+f:prune_tool_messages_chat_memory()
+f:reassign_on_unavailability()
+f:recalculate_on_time_delivery_on_sla_change()
+f:reconstruct_journeys(p_account_id uuid, p_tag_id text)
+f:reprocess_failed_events(p_account_id uuid)
+f:reprocess_transfer_errors(p_detail_ids uuid[])
+f:resolve_provider_reads()
+f:rpc_balance_node_load(p_city_id uuid, p_month integer, p_year integer, p_apply_changes boolean)
+f:rpc_balance_node_load_by_period(p_city_id uuid, p_start_date date, p_end_date date, p_apply_changes boolean)
+f:rpc_execute_pipeline_phase(p_phase text)
+f:rpc_get_node_load_by_period(p_account_id uuid, p_start_date date, p_end_date date, p_reference_load numeric, p_deviation_percent numeric)
+f:rpc_get_pipeline_status()
+f:rpc_get_recent_incidents(p_limit integer)
+f:rpc_ingest_epcis_events(p_events jsonb)
+f:rpc_query_journey_paths(p_carrier_id uuid, p_product_id uuid, p_origin_city text, p_destination_city text, p_min_tags integer, p_limit integer)
+f:set_account_id()
+f:transfer_to_one_db()
+f:unassign_reader_from_center(p_reader_id uuid, p_unassigned_at timestamp with time zone)
+f:update_panelists_updated_at()
+f:update_unavailability_updated_at()
+f:update_updated_at()
+f:update_updated_at_column()
+f:user_account_id()
+g:account_config.update_account_config_updated_at
+g:accounts.update_accounts_updated_at
+g:allocation_plan_details.set_allocation_plan_details_account_id
+g:allocation_plan_details.trigger_transfer_to_one_db
+g:allocation_plan_details.update_allocation_plan_details_updated_at
+g:allocation_plans.set_allocation_plans_account_id
+g:allocation_plans.update_allocation_plans_updated_at
+g:carriers.prevent_carriers_account_change
+g:carriers.set_carriers_account_id
+g:carriers.update_carriers_updated_at
+g:cities.prevent_cities_account_change
+g:cities.set_cities_account_id
+g:cities.update_cities_updated_at
+g:delivery_standards.prevent_delivery_standards_account_change
+g:delivery_standards.set_delivery_standards_account_id
+g:delivery_standards.trigger_recalculate_on_time_on_sla_change
+g:delivery_standards.update_delivery_standards_updated_at
+g:diagnosis_anomalies.prevent_diagnosis_anomalies_account_change
+g:diagnosis_anomalies.set_diagnosis_anomalies_account_id
+g:diagnosis_routes.prevent_diagnosis_routes_account_change
+g:diagnosis_routes.set_diagnosis_routes_account_id
+g:diagnosis_time_metrics.prevent_diagnosis_time_metrics_account_change
+g:diagnosis_time_metrics.set_diagnosis_time_metrics_account_id
+g:generated_allocation_plan_details.set_generated_allocation_plan_details_account_id
+g:generated_allocation_plan_details.update_generated_allocation_plan_details_updated_at
+g:generated_allocation_plans.set_generated_allocation_plans_account_id
+g:generated_allocation_plans.update_generated_allocation_plans_updated_at
+g:material_catalog.prevent_material_catalog_account_change
+g:material_catalog.set_material_catalog_account_id
+g:material_catalog.update_material_catalog_updated_at
+g:material_shipment_items.update_material_shipment_items_updated_at
+g:material_shipments.update_material_shipments_updated_at
+g:material_stocks.trigger_auto_resolve_regulator_alerts
+g:material_stocks.update_material_stocks_updated_at
+g:materials.prevent_materials_account_change
+g:materials.set_materials_account_id
+g:materials.update_materials_updated_at
+g:n8n_upu_agent.trg_prune_tool_messages
+g:n8n_upu_incident.trg_prune_tool_messages
+g:n8n_upu_timeoff.trg_prune_tool_messages
+g:nodes.prevent_nodes_account_change
+g:nodes.set_nodes_account_id
+g:nodes.update_nodes_updated_at
+g:panelist_material_stocks.trigger_auto_resolve_panelist_alerts
+g:panelist_material_stocks.update_panelist_material_stocks_updated_at
+g:panelist_unavailability.check_unavailability_overlap_trigger
+g:panelist_unavailability.reassign_on_unavailability_trigger
+g:panelist_unavailability.set_updated_at_panelist_unavailability
+g:panelist_unavailability.trigger_update_unavailability_updated_at
+g:panelist_unavailability.update_panelist_unavailability_updated_at
+g:panelists.generate_panelist_code_trigger
+g:panelists.set_updated_at_panelists
+g:panelists.trigger_update_panelists_updated_at
+g:postal_centers.update_postal_centers_updated_at
+g:product_materials.prevent_product_materials_account_change
+g:product_materials.set_product_materials_account_id
+g:product_materials.update_product_materials_updated_at
+g:products.prevent_products_account_change
+g:products.set_products_account_id
+g:products.update_products_updated_at
+g:profiles.prevent_profiles_account_change
+g:profiles.update_profiles_updated_at
+g:purchase_order_items.update_purchase_order_items_updated_at
+g:purchase_orders.update_purchase_orders_updated_at
+g:readers.reader_location_change_trigger
+g:readers.update_readers_updated_at
+g:regions.prevent_regions_account_change
+g:regions.set_regions_account_id
+g:regions.update_regions_updated_at
+g:rfid_intermediate_db.prevent_rfid_intermediate_db_account_change
+g:rfid_intermediate_db.set_rfid_intermediate_db_account_id
+g:sla_definitions.update_sla_definitions_updated_at
+g:stock_settings.update_stock_settings_updated_at
+g:weekly_schedule.update_weekly_schedule_updated_at
+i:account_config_account_id_key CREATE UNIQUE INDEX account_config_account_id_key ON public.account_config USING btree (account_id)
+i:account_config_pkey CREATE UNIQUE INDEX account_config_pkey ON public.account_config USING btree (id)
+i:accounts_pkey CREATE UNIQUE INDEX accounts_pkey ON public.accounts USING btree (id)
+i:accounts_slug_idx CREATE INDEX accounts_slug_idx ON public.accounts USING btree (slug)
+i:accounts_slug_key CREATE UNIQUE INDEX accounts_slug_key ON public.accounts USING btree (slug)
+i:allocation_plan_details_idtag_idx CREATE INDEX allocation_plan_details_idtag_idx ON public.allocation_plan_details USING btree (idtag) WHERE (idtag IS NOT NULL)
+i:allocation_plan_details_pkey CREATE UNIQUE INDEX allocation_plan_details_pkey ON public.allocation_plan_details USING btree (id)
+i:allocation_plans_account_id_plan_name_key CREATE UNIQUE INDEX allocation_plans_account_id_plan_name_key ON public.allocation_plans USING btree (account_id, plan_name)
+i:allocation_plans_pkey CREATE UNIQUE INDEX allocation_plans_pkey ON public.allocation_plans USING btree (id)
+i:api_keys_api_key_key CREATE UNIQUE INDEX api_keys_api_key_key ON public.api_keys USING btree (api_key)
+i:api_keys_pkey CREATE UNIQUE INDEX api_keys_pkey ON public.api_keys USING btree (id)
+i:api_usage_log_pkey CREATE UNIQUE INDEX api_usage_log_pkey ON public.api_usage_log USING btree (id)
+i:audit_raw_reads_pkey CREATE UNIQUE INDEX audit_raw_reads_pkey ON public.audit_raw_reads USING btree (id)
+i:carriers_account_id_code_key CREATE UNIQUE INDEX carriers_account_id_code_key ON public.carriers USING btree (account_id, code)
+i:carriers_account_id_idx CREATE INDEX carriers_account_id_idx ON public.carriers USING btree (account_id)
+i:carriers_pkey CREATE UNIQUE INDEX carriers_pkey ON public.carriers USING btree (id)
+i:cities_account_id_idx CREATE INDEX cities_account_id_idx ON public.cities USING btree (account_id)
+i:cities_account_lower_name_key CREATE UNIQUE INDEX cities_account_lower_name_key ON public.cities USING btree (account_id, lower(TRIM(BOTH FROM name)))
+i:cities_pkey CREATE UNIQUE INDEX cities_pkey ON public.cities USING btree (id)
+i:cities_region_id_code_key CREATE UNIQUE INDEX cities_region_id_code_key ON public.cities USING btree (region_id, code)
+i:cities_region_id_idx CREATE INDEX cities_region_id_idx ON public.cities USING btree (region_id)
+i:delivery_standards_account_id_idx CREATE INDEX delivery_standards_account_id_idx ON public.delivery_standards USING btree (account_id)
+i:delivery_standards_carrier_id_idx CREATE INDEX delivery_standards_carrier_id_idx ON public.delivery_standards USING btree (carrier_id)
+i:delivery_standards_destination_city_id_idx CREATE INDEX delivery_standards_destination_city_id_idx ON public.delivery_standards USING btree (destination_city_id)
+i:delivery_standards_origin_city_id_idx CREATE INDEX delivery_standards_origin_city_id_idx ON public.delivery_standards USING btree (origin_city_id)
+i:delivery_standards_pending_idx CREATE INDEX delivery_standards_pending_idx ON public.delivery_standards USING btree (standard_time, success_percentage) WHERE ((standard_time IS NULL) OR (success_percentage IS NULL))
+i:delivery_standards_pkey CREATE UNIQUE INDEX delivery_standards_pkey ON public.delivery_standards USING btree (id)
+i:delivery_standards_product_id_idx CREATE INDEX delivery_standards_product_id_idx ON public.delivery_standards USING btree (product_id)
+i:delivery_standards_unique CREATE UNIQUE INDEX delivery_standards_unique ON public.delivery_standards USING btree (carrier_id, product_id, origin_city_id, destination_city_id)
+i:demo2_seed_data_pkey CREATE UNIQUE INDEX demo2_seed_data_pkey ON public.demo2_seed_data USING btree (id)
+i:demo2_seed_data_table_name_key CREATE UNIQUE INDEX demo2_seed_data_table_name_key ON public.demo2_seed_data USING btree (table_name)
+i:diagnosis_anomalies_account_id_idx CREATE INDEX diagnosis_anomalies_account_id_idx ON public.diagnosis_anomalies USING btree (account_id)
+i:diagnosis_anomalies_pkey CREATE UNIQUE INDEX diagnosis_anomalies_pkey ON public.diagnosis_anomalies USING btree (id)
+i:diagnosis_anomalies_resolved_idx CREATE INDEX diagnosis_anomalies_resolved_idx ON public.diagnosis_anomalies USING btree (resolved)
+i:diagnosis_anomalies_route_id_idx CREATE INDEX diagnosis_anomalies_route_id_idx ON public.diagnosis_anomalies USING btree (route_id)
+i:diagnosis_anomalies_severity_idx CREATE INDEX diagnosis_anomalies_severity_idx ON public.diagnosis_anomalies USING btree (severity)
+i:diagnosis_anomalies_tag_id_idx CREATE INDEX diagnosis_anomalies_tag_id_idx ON public.diagnosis_anomalies USING btree (tag_id)
+i:diagnosis_anomalies_type_idx CREATE INDEX diagnosis_anomalies_type_idx ON public.diagnosis_anomalies USING btree (anomaly_type)
+i:diagnosis_routes_account_id_idx CREATE INDEX diagnosis_routes_account_id_idx ON public.diagnosis_routes USING btree (account_id)
+i:diagnosis_routes_end_time_idx CREATE INDEX diagnosis_routes_end_time_idx ON public.diagnosis_routes USING btree (route_end_time)
+i:diagnosis_routes_pkey CREATE UNIQUE INDEX diagnosis_routes_pkey ON public.diagnosis_routes USING btree (id)
+i:diagnosis_routes_start_time_idx CREATE INDEX diagnosis_routes_start_time_idx ON public.diagnosis_routes USING btree (route_start_time)
+i:diagnosis_routes_tag_id_idx CREATE INDEX diagnosis_routes_tag_id_idx ON public.diagnosis_routes USING btree (tag_id)
+i:diagnosis_time_metrics_account_id_idx CREATE INDEX diagnosis_time_metrics_account_id_idx ON public.diagnosis_time_metrics USING btree (account_id)
+i:diagnosis_time_metrics_pkey CREATE UNIQUE INDEX diagnosis_time_metrics_pkey ON public.diagnosis_time_metrics USING btree (id)
+i:diagnosis_time_metrics_readers_idx CREATE INDEX diagnosis_time_metrics_readers_idx ON public.diagnosis_time_metrics USING btree (from_reader_id, to_reader_id)
+i:diagnosis_time_metrics_route_id_idx CREATE INDEX diagnosis_time_metrics_route_id_idx ON public.diagnosis_time_metrics USING btree (route_id)
+i:diagnosis_time_metrics_tag_id_idx CREATE INDEX diagnosis_time_metrics_tag_id_idx ON public.diagnosis_time_metrics USING btree (tag_id)
+i:generated_allocation_plan_details_pkey CREATE UNIQUE INDEX generated_allocation_plan_details_pkey ON public.generated_allocation_plan_details USING btree (id)
+i:generated_allocation_plans_account_id_plan_name_key CREATE UNIQUE INDEX generated_allocation_plans_account_id_plan_name_key ON public.generated_allocation_plans USING btree (account_id, plan_name)
+i:generated_allocation_plans_pkey CREATE UNIQUE INDEX generated_allocation_plans_pkey ON public.generated_allocation_plans USING btree (id)
+i:idx_account_config_account CREATE INDEX idx_account_config_account ON public.account_config USING btree (account_id)
+i:idx_allocation_details_assigned_at CREATE INDEX idx_allocation_details_assigned_at ON public.allocation_plan_details USING btree (assigned_at)
+i:idx_allocation_details_dest_panelist CREATE INDEX idx_allocation_details_dest_panelist ON public.allocation_plan_details USING btree (destination_panelist_id)
+i:idx_allocation_details_origin_panelist CREATE INDEX idx_allocation_details_origin_panelist ON public.allocation_plan_details USING btree (origin_panelist_id)
+i:idx_allocation_details_tag_id CREATE INDEX idx_allocation_details_tag_id ON public.allocation_plan_details USING btree (tag_id)
+i:idx_allocation_plan_details_account CREATE INDEX idx_allocation_plan_details_account ON public.allocation_plan_details USING btree (account_id)
+i:idx_allocation_plan_details_date CREATE INDEX idx_allocation_plan_details_date ON public.allocation_plan_details USING btree (fecha_programada)
+i:idx_allocation_plan_details_dest_panelist CREATE INDEX idx_allocation_plan_details_dest_panelist ON public.allocation_plan_details USING btree (destination_panelist_id)
+i:idx_allocation_plan_details_destination CREATE INDEX idx_allocation_plan_details_destination ON public.allocation_plan_details USING btree (destination_node_id)
+i:idx_allocation_plan_details_origin CREATE INDEX idx_allocation_plan_details_origin ON public.allocation_plan_details USING btree (origin_node_id)
+i:idx_allocation_plan_details_origin_panelist CREATE INDEX idx_allocation_plan_details_origin_panelist ON public.allocation_plan_details USING btree (origin_panelist_id)
+i:idx_allocation_plan_details_plan CREATE INDEX idx_allocation_plan_details_plan ON public.allocation_plan_details USING btree (plan_id)
+i:idx_allocation_plan_details_ready_to_transfer CREATE INDEX idx_allocation_plan_details_ready_to_transfer ON public.allocation_plan_details USING btree (status, transferred_to_one_db_at) WHERE ((status = 'received'::text) AND (transferred_to_one_db_at IS NULL))
+i:idx_allocation_plan_details_status CREATE INDEX idx_allocation_plan_details_status ON public.allocation_plan_details USING btree (status)
+i:idx_allocation_plan_details_tag_id CREATE INDEX idx_allocation_plan_details_tag_id ON public.allocation_plan_details USING btree (tag_id)
+i:idx_allocation_plan_details_transfer_status CREATE INDEX idx_allocation_plan_details_transfer_status ON public.allocation_plan_details USING btree (status) WHERE (status = ANY (ARRAY['invalid'::text, 'transfer_error'::text]))
+i:idx_allocation_plans_account CREATE INDEX idx_allocation_plans_account ON public.allocation_plans USING btree (account_id)
+i:idx_allocation_plans_applied_date CREATE INDEX idx_allocation_plans_applied_date ON public.allocation_plans USING btree (applied_date)
+i:idx_allocation_plans_carrier CREATE INDEX idx_allocation_plans_carrier ON public.allocation_plans USING btree (carrier_id)
+i:idx_allocation_plans_product CREATE INDEX idx_allocation_plans_product ON public.allocation_plans USING btree (product_id)
+i:idx_allocation_plans_status CREATE INDEX idx_allocation_plans_status ON public.allocation_plans USING btree (status)
+i:idx_api_keys_account_id CREATE INDEX idx_api_keys_account_id ON public.api_keys USING btree (account_id)
+i:idx_api_keys_api_key CREATE INDEX idx_api_keys_api_key ON public.api_keys USING btree (api_key) WHERE (is_active = true)
+i:idx_api_usage_log_key_timestamp CREATE INDEX idx_api_usage_log_key_timestamp ON public.api_usage_log USING btree (api_key_id, request_timestamp DESC)
+i:idx_audit_raw_archived_at CREATE INDEX idx_audit_raw_archived_at ON public.audit_raw_reads USING btree (account_id, archived_at DESC)
+i:idx_audit_raw_tag_reader CREATE INDEX idx_audit_raw_tag_reader ON public.audit_raw_reads USING btree (account_id, tag_id, reader_id)
+i:idx_balancing_history_account CREATE INDEX idx_balancing_history_account ON public.node_balancing_history USING btree (account_id)
+i:idx_balancing_history_city_month CREATE INDEX idx_balancing_history_city_month ON public.node_balancing_history USING btree (city_id, month, year)
+i:idx_cities_region CREATE INDEX idx_cities_region ON public.cities USING btree (region_name) WHERE (region_name IS NOT NULL)
+i:idx_cities_type CREATE INDEX idx_cities_type ON public.cities USING btree (city_type) WHERE (city_type IS NOT NULL)
+i:idx_demo2_seed_data_table_name CREATE INDEX idx_demo2_seed_data_table_name ON public.demo2_seed_data USING btree (table_name)
+i:idx_diagnosis_anomalies_postal_center CREATE INDEX idx_diagnosis_anomalies_postal_center ON public.diagnosis_anomalies USING btree (postal_center_id)
+i:idx_diagnosis_time_metrics_from_center CREATE INDEX idx_diagnosis_time_metrics_from_center ON public.diagnosis_time_metrics USING btree (from_postal_center_id)
+i:idx_diagnosis_time_metrics_sla_status CREATE INDEX idx_diagnosis_time_metrics_sla_status ON public.diagnosis_time_metrics USING btree (sla_status)
+i:idx_diagnosis_time_metrics_to_center CREATE INDEX idx_diagnosis_time_metrics_to_center ON public.diagnosis_time_metrics USING btree (to_postal_center_id)
+i:idx_generated_allocation_plan_details_account CREATE INDEX idx_generated_allocation_plan_details_account ON public.generated_allocation_plan_details USING btree (account_id)
+i:idx_generated_allocation_plan_details_date CREATE INDEX idx_generated_allocation_plan_details_date ON public.generated_allocation_plan_details USING btree (fecha_programada)
+i:idx_generated_allocation_plan_details_destination CREATE INDEX idx_generated_allocation_plan_details_destination ON public.generated_allocation_plan_details USING btree (destination_node_id)
+i:idx_generated_allocation_plan_details_origin CREATE INDEX idx_generated_allocation_plan_details_origin ON public.generated_allocation_plan_details USING btree (origin_node_id)
+i:idx_generated_allocation_plan_details_plan CREATE INDEX idx_generated_allocation_plan_details_plan ON public.generated_allocation_plan_details USING btree (plan_id)
+i:idx_generated_allocation_plans_account CREATE INDEX idx_generated_allocation_plans_account ON public.generated_allocation_plans USING btree (account_id)
+i:idx_generated_allocation_plans_carrier CREATE INDEX idx_generated_allocation_plans_carrier ON public.generated_allocation_plans USING btree (carrier_id)
+i:idx_generated_allocation_plans_product CREATE INDEX idx_generated_allocation_plans_product ON public.generated_allocation_plans USING btree (product_id)
+i:idx_generated_allocation_plans_status CREATE INDEX idx_generated_allocation_plans_status ON public.generated_allocation_plans USING btree (status)
+i:idx_incidents_account CREATE INDEX idx_incidents_account ON public.incidents USING btree (account_id)
+i:idx_incidents_detected_at CREATE INDEX idx_incidents_detected_at ON public.incidents USING btree (detected_at)
+i:idx_incidents_postal_center CREATE INDEX idx_incidents_postal_center ON public.incidents USING btree (postal_center_id)
+i:idx_incidents_severity CREATE INDEX idx_incidents_severity ON public.incidents USING btree (account_id, severity)
+i:idx_incidents_tag_id CREATE INDEX idx_incidents_tag_id ON public.incidents USING btree (tag_id)
+i:idx_incidents_type CREATE INDEX idx_incidents_type ON public.incidents USING btree (account_id, incident_type)
+i:idx_incidents_unresolved CREATE INDEX idx_incidents_unresolved ON public.incidents USING btree (account_id, is_resolved) WHERE (is_resolved = false)
+i:idx_journey_paths_account_id CREATE INDEX idx_journey_paths_account_id ON public.journey_paths USING btree (account_id)
+i:idx_journey_paths_carrier_id CREATE INDEX idx_journey_paths_carrier_id ON public.journey_paths USING btree (carrier_id)
+i:idx_journey_paths_compliance_rate CREATE INDEX idx_journey_paths_compliance_rate ON public.journey_paths USING btree (compliance_rate)
+i:idx_journey_paths_destination_city CREATE INDEX idx_journey_paths_destination_city ON public.journey_paths USING btree (destination_city_name)
+i:idx_journey_paths_origin_city CREATE INDEX idx_journey_paths_origin_city ON public.journey_paths USING btree (origin_city_name)
+i:idx_journey_paths_path_signature CREATE INDEX idx_journey_paths_path_signature ON public.journey_paths USING btree (path_signature)
+i:idx_journey_paths_product_id CREATE INDEX idx_journey_paths_product_id ON public.journey_paths USING btree (product_id)
+i:idx_journey_paths_total_tags CREATE INDEX idx_journey_paths_total_tags ON public.journey_paths USING btree (total_tags DESC)
+i:idx_journey_segments_account CREATE INDEX idx_journey_segments_account ON public.journey_segments USING btree (account_id)
+i:idx_journey_segments_carrier_id CREATE INDEX idx_journey_segments_carrier_id ON public.journey_segments USING btree (carrier_id) WHERE (carrier_id IS NOT NULL)
+i:idx_journey_segments_compliance CREATE INDEX idx_journey_segments_compliance ON public.journey_segments USING btree (account_id, sla_compliance)
+i:idx_journey_segments_destination_city CREATE INDEX idx_journey_segments_destination_city ON public.journey_segments USING btree (destination_city_name)
+i:idx_journey_segments_distribution CREATE INDEX idx_journey_segments_distribution ON public.journey_segments USING btree (account_id, from_postal_center_id, to_postal_center_id) WHERE (segment_type = 'distribution'::text)
+i:idx_journey_segments_entry_timestamp CREATE INDEX idx_journey_segments_entry_timestamp ON public.journey_segments USING btree (entry_timestamp)
+i:idx_journey_segments_from_city CREATE INDEX idx_journey_segments_from_city ON public.journey_segments USING btree (from_postal_center_city)
+i:idx_journey_segments_operational CREATE INDEX idx_journey_segments_operational ON public.journey_segments USING btree (account_id, postal_center_id) WHERE (segment_type = 'operational'::text)
+i:idx_journey_segments_origin_city CREATE INDEX idx_journey_segments_origin_city ON public.journey_segments USING btree (origin_city_name)
+i:idx_journey_segments_product_id CREATE INDEX idx_journey_segments_product_id ON public.journey_segments USING btree (account_id, product_id) WHERE (product_id IS NOT NULL)
+i:idx_journey_segments_product_name CREATE INDEX idx_journey_segments_product_name ON public.journey_segments USING btree (account_id, product_name) WHERE (product_name IS NOT NULL)
+i:idx_journey_segments_segment_type CREATE INDEX idx_journey_segments_segment_type ON public.journey_segments USING btree (account_id, segment_type)
+i:idx_journey_segments_sla CREATE INDEX idx_journey_segments_sla ON public.journey_segments USING btree (sla_id) WHERE (sla_id IS NOT NULL)
+i:idx_journey_segments_tag_id CREATE INDEX idx_journey_segments_tag_id ON public.journey_segments USING btree (tag_id)
+i:idx_journey_segments_to_city CREATE INDEX idx_journey_segments_to_city ON public.journey_segments USING btree (to_postal_center_city)
+i:idx_journeys_account CREATE INDEX idx_journeys_account ON public.journeys USING btree (account_id)
+i:idx_journeys_first_event CREATE INDEX idx_journeys_first_event ON public.journeys USING btree (first_event_timestamp)
+i:idx_journeys_last_event CREATE INDEX idx_journeys_last_event ON public.journeys USING btree (last_event_timestamp)
+i:idx_journeys_missroute CREATE INDEX idx_journeys_missroute ON public.journeys USING btree (account_id, is_missroute) WHERE (is_missroute = true)
+i:idx_journeys_origin_dest CREATE INDEX idx_journeys_origin_dest ON public.journeys USING btree (account_id, origin_city_id, destination_city_id)
+i:idx_journeys_product_id CREATE INDEX idx_journeys_product_id ON public.journeys USING btree (account_id, product_id) WHERE (product_id IS NOT NULL)
+i:idx_journeys_product_name CREATE INDEX idx_journeys_product_name ON public.journeys USING btree (account_id, product_name) WHERE (product_name IS NOT NULL)
+i:idx_journeys_status CREATE INDEX idx_journeys_status ON public.journeys USING btree (account_id, journey_status)
+i:idx_journeys_tag_id CREATE INDEX idx_journeys_tag_id ON public.journeys USING btree (tag_id)
+i:idx_material_movements_account CREATE INDEX idx_material_movements_account ON public.material_movements USING btree (account_id)
+i:idx_material_movements_created CREATE INDEX idx_material_movements_created ON public.material_movements USING btree (created_at DESC)
+i:idx_material_movements_from_location CREATE INDEX idx_material_movements_from_location ON public.material_movements USING btree (from_location_type, from_location_id)
+i:idx_material_movements_material CREATE INDEX idx_material_movements_material ON public.material_movements USING btree (material_id)
+i:idx_material_movements_to_location CREATE INDEX idx_material_movements_to_location ON public.material_movements USING btree (to_location_type, to_location_id)
+i:idx_material_movements_type CREATE INDEX idx_material_movements_type ON public.material_movements USING btree (movement_type)
+i:idx_material_requirements_periods_account CREATE INDEX idx_material_requirements_periods_account ON public.material_requirements_periods USING btree (account_id)
+i:idx_material_requirements_periods_material CREATE INDEX idx_material_requirements_periods_material ON public.material_requirements_periods USING btree (material_id)
+i:idx_material_requirements_periods_period CREATE INDEX idx_material_requirements_periods_period ON public.material_requirements_periods USING btree (period_start, period_end)
+i:idx_material_requirements_periods_status CREATE INDEX idx_material_requirements_periods_status ON public.material_requirements_periods USING btree (status)
+i:idx_material_shipments_account CREATE INDEX idx_material_shipments_account ON public.material_shipments USING btree (account_id)
+i:idx_material_shipments_created CREATE INDEX idx_material_shipments_created ON public.material_shipments USING btree (created_at DESC)
+i:idx_material_shipments_panelist CREATE INDEX idx_material_shipments_panelist ON public.material_shipments USING btree (panelist_id)
+i:idx_material_shipments_status CREATE INDEX idx_material_shipments_status ON public.material_shipments USING btree (status)
+i:idx_material_stocks_account CREATE INDEX idx_material_stocks_account ON public.material_stocks USING btree (account_id)
+i:idx_material_stocks_location CREATE INDEX idx_material_stocks_location ON public.material_stocks USING btree (location_type, location_id)
+i:idx_material_stocks_material CREATE INDEX idx_material_stocks_material ON public.material_stocks USING btree (material_id)
+i:idx_non_working_days_account CREATE INDEX idx_non_working_days_account ON public.non_working_days USING btree (account_id)
+i:idx_non_working_days_date CREATE INDEX idx_non_working_days_date ON public.non_working_days USING btree (date)
+i:idx_non_working_days_postal_center CREATE INDEX idx_non_working_days_postal_center ON public.non_working_days USING btree (postal_center_id)
+i:idx_one_db_account_carrier CREATE INDEX idx_one_db_account_carrier ON public.one_db USING btree (account_id, carrier_name)
+i:idx_one_db_account_id CREATE INDEX idx_one_db_account_id ON public.one_db USING btree (account_id)
+i:idx_one_db_account_tag CREATE INDEX idx_one_db_account_tag ON public.one_db USING btree (account_id, tag_id)
+i:idx_one_db_carrier_product CREATE INDEX idx_one_db_carrier_product ON public.one_db USING btree (carrier_name, product_name)
+i:idx_one_db_cities CREATE INDEX idx_one_db_cities ON public.one_db USING btree (origin_city_name, destination_city_name)
+i:idx_one_db_destination_city CREATE INDEX idx_one_db_destination_city ON public.one_db USING btree (destination_city_name)
+i:idx_one_db_sent_at CREATE INDEX idx_one_db_sent_at ON public.one_db USING btree (sent_at)
+i:idx_panelist_context_lookup CREATE INDEX idx_panelist_context_lookup ON public.panelist_context USING btree (telegram_id, context_type)
+i:idx_panelist_stocks_account CREATE INDEX idx_panelist_stocks_account ON public.panelist_material_stocks USING btree (account_id)
+i:idx_panelist_stocks_material CREATE INDEX idx_panelist_stocks_material ON public.panelist_material_stocks USING btree (material_id)
+i:idx_panelist_stocks_panelist CREATE INDEX idx_panelist_stocks_panelist ON public.panelist_material_stocks USING btree (panelist_id)
+i:idx_panelist_unavailability_account_id CREATE INDEX idx_panelist_unavailability_account_id ON public.panelist_unavailability USING btree (account_id)
+i:idx_panelist_unavailability_dates CREATE INDEX idx_panelist_unavailability_dates ON public.panelist_unavailability USING btree (start_date, end_date)
+i:idx_panelist_unavailability_panelist_id CREATE INDEX idx_panelist_unavailability_panelist_id ON public.panelist_unavailability USING btree (panelist_id)
+i:idx_panelist_unavailability_status CREATE INDEX idx_panelist_unavailability_status ON public.panelist_unavailability USING btree (status)
+i:idx_panelists_account_id CREATE INDEX idx_panelists_account_id ON public.panelists USING btree (account_id)
+i:idx_panelists_city_id CREATE INDEX idx_panelists_city_id ON public.panelists USING btree (city_id)
+i:idx_panelists_code CREATE INDEX idx_panelists_code ON public.panelists USING btree (panelist_code)
+i:idx_panelists_code_account CREATE UNIQUE INDEX idx_panelists_code_account ON public.panelists USING btree (panelist_code, account_id)
+i:idx_panelists_email CREATE INDEX idx_panelists_email ON public.panelists USING btree (email)
+i:idx_panelists_node_id CREATE INDEX idx_panelists_node_id ON public.panelists USING btree (node_id)
+i:idx_panelists_node_unique CREATE UNIQUE INDEX idx_panelists_node_unique ON public.panelists USING btree (node_id) WHERE (((status)::text = 'active'::text) AND (node_id IS NOT NULL))
+i:idx_panelists_reserve CREATE INDEX idx_panelists_reserve ON public.panelists USING btree (account_id, status) WHERE (node_id IS NULL)
+i:idx_panelists_reserve_by_city CREATE INDEX idx_panelists_reserve_by_city ON public.panelists USING btree (city_id, status) WHERE (node_id IS NULL)
+i:idx_panelists_status CREATE INDEX idx_panelists_status ON public.panelists USING btree (status)
+i:idx_panelists_telegram_id CREATE INDEX idx_panelists_telegram_id ON public.panelists USING btree (telegram_id) WHERE (telegram_id IS NOT NULL)
+i:idx_po_items_material CREATE INDEX idx_po_items_material ON public.purchase_order_items USING btree (material_id)
+i:idx_po_items_po CREATE INDEX idx_po_items_po ON public.purchase_order_items USING btree (purchase_order_id)
+i:idx_postal_center_carriers_carrier_id CREATE INDEX idx_postal_center_carriers_carrier_id ON public.postal_center_carriers USING btree (carrier_id)
+i:idx_postal_centers_account CREATE INDEX idx_postal_centers_account ON public.postal_centers USING btree (account_id)
+i:idx_postal_centers_active CREATE INDEX idx_postal_centers_active ON public.postal_centers USING btree (is_active) WHERE (is_active = true)
+i:idx_postal_centers_carrier_id CREATE INDEX idx_postal_centers_carrier_id ON public.postal_centers USING btree (carrier_id)
+i:idx_postal_centers_city_id CREATE INDEX idx_postal_centers_city_id ON public.postal_centers USING btree (city_id)
+i:idx_postal_centers_code CREATE INDEX idx_postal_centers_code ON public.postal_centers USING btree (code)
+i:idx_postal_centers_deleted_at CREATE INDEX idx_postal_centers_deleted_at ON public.postal_centers USING btree (deleted_at) WHERE (deleted_at IS NULL)
+i:idx_processed_events_account CREATE INDEX idx_processed_events_account ON public.processed_events USING btree (account_id)
+i:idx_processed_events_analysis_datetime CREATE INDEX idx_processed_events_analysis_datetime ON public.processed_events USING btree (analysis_datetime)
+i:idx_processed_events_carrier_id CREATE INDEX idx_processed_events_carrier_id ON public.processed_events USING btree (carrier_id)
+i:idx_processed_events_carrier_product CREATE INDEX idx_processed_events_carrier_product ON public.processed_events USING btree (account_id, carrier_id, product_id)
+i:idx_processed_events_destination_city CREATE INDEX idx_processed_events_destination_city ON public.processed_events USING btree (destination_city_name)
+i:idx_processed_events_origin_city CREATE INDEX idx_processed_events_origin_city ON public.processed_events USING btree (origin_city_name)
+i:idx_processed_events_postal_center CREATE INDEX idx_processed_events_postal_center ON public.processed_events USING btree (postal_center_id)
+i:idx_processed_events_product_id CREATE INDEX idx_processed_events_product_id ON public.processed_events USING btree (product_id)
+i:idx_processed_events_reader CREATE INDEX idx_processed_events_reader ON public.processed_events USING btree (reader_id)
+i:idx_processed_events_tag_id CREATE INDEX idx_processed_events_tag_id ON public.processed_events USING btree (tag_id)
+i:idx_processed_events_tag_timestamp CREATE INDEX idx_processed_events_tag_timestamp ON public.processed_events USING btree (tag_id, "timestamp")
+i:idx_processed_events_timestamp CREATE INDEX idx_processed_events_timestamp ON public.processed_events USING btree ("timestamp")
+i:idx_processed_events_unconsolidated CREATE INDEX idx_processed_events_unconsolidated ON public.processed_events USING btree (account_id, is_consolidated) WHERE (is_consolidated = false)
+i:idx_purchase_orders_account CREATE INDEX idx_purchase_orders_account ON public.purchase_orders USING btree (account_id)
+i:idx_purchase_orders_created CREATE INDEX idx_purchase_orders_created ON public.purchase_orders USING btree (created_at DESC)
+i:idx_purchase_orders_status CREATE INDEX idx_purchase_orders_status ON public.purchase_orders USING btree (status)
+i:idx_reader_location_history_current CREATE INDEX idx_reader_location_history_current ON public.reader_location_history USING btree (reader_id) WHERE (unassigned_at IS NULL)
+i:idx_reader_location_history_period CREATE INDEX idx_reader_location_history_period ON public.reader_location_history USING btree (reader_id, assigned_at, unassigned_at)
+i:idx_reader_location_history_postal_center_id CREATE INDEX idx_reader_location_history_postal_center_id ON public.reader_location_history USING btree (postal_center_id)
+i:idx_reader_location_history_reader_id CREATE INDEX idx_reader_location_history_reader_id ON public.reader_location_history USING btree (reader_id)
+i:idx_readers_account CREATE INDEX idx_readers_account ON public.readers USING btree (account_id)
+i:idx_readers_active CREATE INDEX idx_readers_active ON public.readers USING btree (is_active) WHERE (is_active = true)
+i:idx_readers_deleted_at CREATE INDEX idx_readers_deleted_at ON public.readers USING btree (deleted_at) WHERE (deleted_at IS NULL)
+i:idx_readers_postal_center CREATE INDEX idx_readers_postal_center ON public.readers USING btree (postal_center_id)
+i:idx_readers_reader_id CREATE INDEX idx_readers_reader_id ON public.readers USING btree (reader_id)
+i:idx_readers_type CREATE INDEX idx_readers_type ON public.readers USING btree (type)
+i:idx_reporting_config_account CREATE INDEX idx_reporting_config_account ON public.reporting_config USING btree (account_id)
+i:idx_rfid_provider_reads_ingested_at CREATE INDEX idx_rfid_provider_reads_ingested_at ON public.rfid_provider_reads USING btree (ingested_at)
+i:idx_rfid_provider_reads_match_status CREATE INDEX idx_rfid_provider_reads_match_status ON public.rfid_provider_reads USING btree (match_status)
+i:idx_rfid_provider_reads_reader_id CREATE INDEX idx_rfid_provider_reads_reader_id ON public.rfid_provider_reads USING btree (reader_id)
+i:idx_rfid_raw_carrier_product CREATE INDEX idx_rfid_raw_carrier_product ON public.rfid_events_raw USING btree (account_id, carrier_id, product_id)
+i:idx_rfid_raw_not_processed CREATE INDEX idx_rfid_raw_not_processed ON public.rfid_events_raw USING btree (account_id, is_processed) WHERE (is_processed = false)
+i:idx_rfid_raw_reader CREATE INDEX idx_rfid_raw_reader ON public.rfid_events_raw USING btree (account_id, reader_id, read_local_datetime)
+i:idx_rfid_raw_tag_reader CREATE INDEX idx_rfid_raw_tag_reader ON public.rfid_events_raw USING btree (account_id, tag_id, reader_id, read_local_datetime)
+i:idx_shipment_incident_account CREATE INDEX idx_shipment_incident_account ON public.shipment_incident USING btree (account_id)
+i:idx_shipment_incident_panelist CREATE INDEX idx_shipment_incident_panelist ON public.shipment_incident USING btree (panelist_id)
+i:idx_shipment_incident_parcel CREATE INDEX idx_shipment_incident_parcel ON public.shipment_incident USING btree (parcel_id)
+i:idx_shipment_items_material CREATE INDEX idx_shipment_items_material ON public.material_shipment_items USING btree (material_id)
+i:idx_shipment_items_shipment CREATE INDEX idx_shipment_items_shipment ON public.material_shipment_items USING btree (material_shipment_id)
+i:idx_sla_definitions_account CREATE INDEX idx_sla_definitions_account ON public.sla_definitions USING btree (account_id)
+i:idx_sla_definitions_active CREATE INDEX idx_sla_definitions_active ON public.sla_definitions USING btree (is_active) WHERE (is_active = true)
+i:idx_sla_definitions_from_center CREATE INDEX idx_sla_definitions_from_center ON public.sla_definitions USING btree (from_postal_center_id)
+i:idx_sla_definitions_to_center CREATE INDEX idx_sla_definitions_to_center ON public.sla_definitions USING btree (to_postal_center_id)
+i:idx_slas_account_type CREATE INDEX idx_slas_account_type ON public.slas USING btree (account_id, sla_type)
+i:idx_slas_active CREATE INDEX idx_slas_active ON public.slas USING btree (is_active) WHERE (is_active = true)
+i:idx_slas_deleted_at CREATE INDEX idx_slas_deleted_at ON public.slas USING btree (deleted_at) WHERE (deleted_at IS NULL)
+i:idx_slas_distribution CREATE INDEX idx_slas_distribution ON public.slas USING btree (account_id, from_postal_center_id, to_postal_center_id) WHERE (sla_type = 'distribution'::text)
+i:idx_slas_operational CREATE INDEX idx_slas_operational ON public.slas USING btree (account_id, postal_center_id) WHERE (sla_type = 'operational'::text)
+i:idx_stock_alerts_account CREATE INDEX idx_stock_alerts_account ON public.stock_alerts USING btree (account_id)
+i:idx_stock_alerts_created CREATE INDEX idx_stock_alerts_created ON public.stock_alerts USING btree (created_at DESC)
+i:idx_stock_alerts_location CREATE INDEX idx_stock_alerts_location ON public.stock_alerts USING btree (location_id)
+i:idx_stock_alerts_material CREATE INDEX idx_stock_alerts_material ON public.stock_alerts USING btree (material_id)
+i:idx_stock_alerts_resolved CREATE INDEX idx_stock_alerts_resolved ON public.stock_alerts USING btree (resolved_at)
+i:idx_stock_alerts_type CREATE INDEX idx_stock_alerts_type ON public.stock_alerts USING btree (alert_type)
+i:idx_unavailability_account_id CREATE INDEX idx_unavailability_account_id ON public.panelist_unavailability USING btree (account_id)
+i:idx_unavailability_dates CREATE INDEX idx_unavailability_dates ON public.panelist_unavailability USING btree (start_date, end_date)
+i:idx_unavailability_panelist_id CREATE INDEX idx_unavailability_panelist_id ON public.panelist_unavailability USING btree (panelist_id)
+i:idx_unavailability_status CREATE INDEX idx_unavailability_status ON public.panelist_unavailability USING btree (status)
+i:idx_weekly_schedule_account CREATE INDEX idx_weekly_schedule_account ON public.weekly_schedule USING btree (account_id)
+i:idx_weekly_schedule_day CREATE INDEX idx_weekly_schedule_day ON public.weekly_schedule USING btree (day_of_week)
+i:idx_weekly_schedule_postal_center CREATE INDEX idx_weekly_schedule_postal_center ON public.weekly_schedule USING btree (postal_center_id)
+i:incidents_pkey CREATE UNIQUE INDEX incidents_pkey ON public.incidents USING btree (id)
+i:journey_paths_pkey CREATE UNIQUE INDEX journey_paths_pkey ON public.journey_paths USING btree (id)
+i:journey_paths_unique_path CREATE UNIQUE INDEX journey_paths_unique_path ON public.journey_paths USING btree (account_id, carrier_id, product_id, origin_city_name, destination_city_name, path_signature)
+i:journey_segments_pkey CREATE UNIQUE INDEX journey_segments_pkey ON public.journey_segments USING btree (id)
+i:journeys_account_id_tag_id_key CREATE UNIQUE INDEX journeys_account_id_tag_id_key ON public.journeys USING btree (account_id, tag_id)
+i:journeys_pkey CREATE UNIQUE INDEX journeys_pkey ON public.journeys USING btree (id)
+i:material_catalog_account_id_idx CREATE INDEX material_catalog_account_id_idx ON public.material_catalog USING btree (account_id)
+i:material_catalog_code_account_unique CREATE UNIQUE INDEX material_catalog_code_account_unique ON public.material_catalog USING btree (account_id, code)
+i:material_catalog_code_idx CREATE INDEX material_catalog_code_idx ON public.material_catalog USING btree (code)
+i:material_catalog_pkey CREATE UNIQUE INDEX material_catalog_pkey ON public.material_catalog USING btree (id)
+i:material_movements_pkey CREATE UNIQUE INDEX material_movements_pkey ON public.material_movements USING btree (id)
+i:material_requirements_periods_pkey CREATE UNIQUE INDEX material_requirements_periods_pkey ON public.material_requirements_periods USING btree (id)
+i:material_shipment_items_pkey CREATE UNIQUE INDEX material_shipment_items_pkey ON public.material_shipment_items USING btree (id)
+i:material_shipments_pkey CREATE UNIQUE INDEX material_shipments_pkey ON public.material_shipments USING btree (id)
+i:material_shipments_shipment_number_key CREATE UNIQUE INDEX material_shipments_shipment_number_key ON public.material_shipments USING btree (shipment_number)
+i:material_stocks_account_id_material_id_key CREATE UNIQUE INDEX material_stocks_account_id_material_id_key ON public.material_stocks USING btree (account_id, material_id)
+i:material_stocks_pkey CREATE UNIQUE INDEX material_stocks_pkey ON public.material_stocks USING btree (id)
+i:materials_account_id_idx CREATE INDEX materials_account_id_idx ON public.materials USING btree (account_id)
+i:materials_pkey CREATE UNIQUE INDEX materials_pkey ON public.materials USING btree (id)
+i:materials_product_id_code_key CREATE UNIQUE INDEX materials_product_id_code_key ON public.materials USING btree (product_id, code)
+i:materials_product_id_idx CREATE INDEX materials_product_id_idx ON public.materials USING btree (product_id)
+i:n8n_upu_agent_pkey CREATE UNIQUE INDEX n8n_upu_agent_pkey ON public.n8n_upu_agent USING btree (id)
+i:n8n_upu_incident_pkey CREATE UNIQUE INDEX n8n_upu_incident_pkey ON public.n8n_upu_incident USING btree (id)
+i:n8n_upu_timeoff_pkey CREATE UNIQUE INDEX n8n_upu_timeoff_pkey ON public.n8n_upu_timeoff USING btree (id)
+i:node_balancing_history_pkey CREATE UNIQUE INDEX node_balancing_history_pkey ON public.node_balancing_history USING btree (id)
+i:nodes_account_id_auto_id_key CREATE UNIQUE INDEX nodes_account_id_auto_id_key ON public.nodes USING btree (account_id, auto_id)
+i:nodes_account_id_idx CREATE INDEX nodes_account_id_idx ON public.nodes USING btree (account_id)
+i:nodes_auto_id_idx CREATE INDEX nodes_auto_id_idx ON public.nodes USING btree (auto_id)
+i:nodes_city_id_idx CREATE INDEX nodes_city_id_idx ON public.nodes USING btree (city_id)
+i:nodes_pkey CREATE UNIQUE INDEX nodes_pkey ON public.nodes USING btree (id)
+i:non_working_days_account_id_postal_center_id_date_key CREATE UNIQUE INDEX non_working_days_account_id_postal_center_id_date_key ON public.non_working_days USING btree (account_id, postal_center_id, date)
+i:non_working_days_pkey CREATE UNIQUE INDEX non_working_days_pkey ON public.non_working_days USING btree (id)
+i:one_db_pkey CREATE UNIQUE INDEX one_db_pkey ON public.one_db USING btree (id)
+i:one_db_unique_allocation_detail CREATE UNIQUE INDEX one_db_unique_allocation_detail ON public.one_db USING btree (allocation_detail_id)
+i:panelist_context_pkey CREATE UNIQUE INDEX panelist_context_pkey ON public.panelist_context USING btree (id)
+i:panelist_material_stocks_account_id_panelist_id_material_id_key CREATE UNIQUE INDEX panelist_material_stocks_account_id_panelist_id_material_id_key ON public.panelist_material_stocks USING btree (account_id, panelist_id, material_id)
+i:panelist_material_stocks_pkey CREATE UNIQUE INDEX panelist_material_stocks_pkey ON public.panelist_material_stocks USING btree (id)
+i:panelist_unavailability_pkey CREATE UNIQUE INDEX panelist_unavailability_pkey ON public.panelist_unavailability USING btree (id)
+i:panelists_pkey CREATE UNIQUE INDEX panelists_pkey ON public.panelists USING btree (id)
+i:postal_center_carriers_pkey CREATE UNIQUE INDEX postal_center_carriers_pkey ON public.postal_center_carriers USING btree (postal_center_id, carrier_id)
+i:postal_centers_account_id_code_key CREATE UNIQUE INDEX postal_centers_account_id_code_key ON public.postal_centers USING btree (account_id, code)
+i:postal_centers_pkey CREATE UNIQUE INDEX postal_centers_pkey ON public.postal_centers USING btree (id)
+i:processed_events_pkey CREATE UNIQUE INDEX processed_events_pkey ON public.processed_events USING btree (id)
+i:product_materials_material_id_idx CREATE INDEX product_materials_material_id_idx ON public.product_materials USING btree (material_id)
+i:product_materials_pkey CREATE UNIQUE INDEX product_materials_pkey ON public.product_materials USING btree (id)
+i:product_materials_product_id_idx CREATE INDEX product_materials_product_id_idx ON public.product_materials USING btree (product_id)
+i:product_materials_unique CREATE UNIQUE INDEX product_materials_unique ON public.product_materials USING btree (product_id, material_id)
+i:products_account_id_idx CREATE INDEX products_account_id_idx ON public.products USING btree (account_id)
+i:products_carrier_id_code_key CREATE UNIQUE INDEX products_carrier_id_code_key ON public.products USING btree (carrier_id, code)
+i:products_carrier_id_idx CREATE INDEX products_carrier_id_idx ON public.products USING btree (carrier_id)
+i:products_pkey CREATE UNIQUE INDEX products_pkey ON public.products USING btree (id)
+i:profiles_account_id_idx CREATE INDEX profiles_account_id_idx ON public.profiles USING btree (account_id)
+i:profiles_email_idx CREATE INDEX profiles_email_idx ON public.profiles USING btree (email)
+i:profiles_pkey CREATE UNIQUE INDEX profiles_pkey ON public.profiles USING btree (id)
+i:purchase_order_items_pkey CREATE UNIQUE INDEX purchase_order_items_pkey ON public.purchase_order_items USING btree (id)
+i:purchase_orders_pkey CREATE UNIQUE INDEX purchase_orders_pkey ON public.purchase_orders USING btree (id)
+i:purchase_orders_po_number_key CREATE UNIQUE INDEX purchase_orders_po_number_key ON public.purchase_orders USING btree (po_number)
+i:reader_location_history_pkey CREATE UNIQUE INDEX reader_location_history_pkey ON public.reader_location_history USING btree (id)
+i:readers_account_id_reader_id_key CREATE UNIQUE INDEX readers_account_id_reader_id_key ON public.readers USING btree (account_id, reader_id)
+i:readers_pkey CREATE UNIQUE INDEX readers_pkey ON public.readers USING btree (id)
+i:regions_account_id_code_key CREATE UNIQUE INDEX regions_account_id_code_key ON public.regions USING btree (account_id, code)
+i:regions_account_id_idx CREATE INDEX regions_account_id_idx ON public.regions USING btree (account_id)
+i:regions_pkey CREATE UNIQUE INDEX regions_pkey ON public.regions USING btree (id)
+i:reporting_config_pkey CREATE UNIQUE INDEX reporting_config_pkey ON public.reporting_config USING btree (id)
+i:reporting_config_unique_account CREATE UNIQUE INDEX reporting_config_unique_account ON public.reporting_config USING btree (account_id)
+i:rfid_events_raw_event_id_unique CREATE UNIQUE INDEX rfid_events_raw_event_id_unique ON public.rfid_events_raw USING btree (account_id, event_id)
+i:rfid_events_raw_pkey CREATE UNIQUE INDEX rfid_events_raw_pkey ON public.rfid_events_raw USING btree (id)
+i:rfid_ingest_state_pkey CREATE UNIQUE INDEX rfid_ingest_state_pkey ON public.rfid_ingest_state USING btree (id)
+i:rfid_intermediate_db_account_id_idx CREATE INDEX rfid_intermediate_db_account_id_idx ON public.rfid_intermediate_db USING btree (account_id)
+i:rfid_intermediate_db_event_id_idx CREATE INDEX rfid_intermediate_db_event_id_idx ON public.rfid_intermediate_db USING btree (event_id)
+i:rfid_intermediate_db_pkey CREATE UNIQUE INDEX rfid_intermediate_db_pkey ON public.rfid_intermediate_db USING btree (id)
+i:rfid_intermediate_db_processed_at_idx CREATE INDEX rfid_intermediate_db_processed_at_idx ON public.rfid_intermediate_db USING btree (processed_at)
+i:rfid_intermediate_db_tag_id_idx CREATE INDEX rfid_intermediate_db_tag_id_idx ON public.rfid_intermediate_db USING btree (tag_id)
+i:rfid_provider_reads_pkey CREATE UNIQUE INDEX rfid_provider_reads_pkey ON public.rfid_provider_reads USING btree (id)
+i:shipment_incident_pkey CREATE UNIQUE INDEX shipment_incident_pkey ON public.shipment_incident USING btree (id)
+i:sla_definitions_account_id_from_postal_center_id_to_postal__key CREATE UNIQUE INDEX sla_definitions_account_id_from_postal_center_id_to_postal__key ON public.sla_definitions USING btree (account_id, from_postal_center_id, to_postal_center_id)
+i:sla_definitions_pkey CREATE UNIQUE INDEX sla_definitions_pkey ON public.sla_definitions USING btree (id)
+i:slas_pkey CREATE UNIQUE INDEX slas_pkey ON public.slas USING btree (id)
+i:slas_unique_distribution_carrier_product CREATE UNIQUE INDEX slas_unique_distribution_carrier_product ON public.slas USING btree (account_id, from_postal_center_id, to_postal_center_id, carrier_id, product_id) WHERE (sla_type = 'distribution'::text)
+i:slas_unique_operational_carrier_product CREATE UNIQUE INDEX slas_unique_operational_carrier_product ON public.slas USING btree (account_id, postal_center_id, carrier_id, product_id) WHERE (sla_type = 'operational'::text)
+i:stock_alerts_account_id_material_id_alert_type_location_id__key CREATE UNIQUE INDEX stock_alerts_account_id_material_id_alert_type_location_id__key ON public.stock_alerts USING btree (account_id, material_id, alert_type, location_id, created_at)
+i:stock_alerts_pkey CREATE UNIQUE INDEX stock_alerts_pkey ON public.stock_alerts USING btree (id)
+i:stock_settings_account_id_key CREATE UNIQUE INDEX stock_settings_account_id_key ON public.stock_settings USING btree (account_id)
+i:stock_settings_pkey CREATE UNIQUE INDEX stock_settings_pkey ON public.stock_settings USING btree (id)
+i:unique_account_period_material CREATE UNIQUE INDEX unique_account_period_material ON public.material_requirements_periods USING btree (account_id, period_start, period_end, material_id)
+i:unique_active_panelist_per_node CREATE UNIQUE INDEX unique_active_panelist_per_node ON public.panelists USING btree (node_id) WHERE ((status)::text = 'active'::text)
+i:unique_panelist_code_per_account CREATE UNIQUE INDEX unique_panelist_code_per_account ON public.panelists USING btree (account_id, panelist_code)
+i:uq_readers_reader_id_active CREATE UNIQUE INDEX uq_readers_reader_id_active ON public.readers USING btree (reader_id) WHERE (deleted_at IS NULL)
+i:weekly_schedule_account_id_postal_center_id_day_of_week_key CREATE UNIQUE INDEX weekly_schedule_account_id_postal_center_id_day_of_week_key ON public.weekly_schedule USING btree (account_id, postal_center_id, day_of_week)
+i:weekly_schedule_pkey CREATE UNIQUE INDEX weekly_schedule_pkey ON public.weekly_schedule USING btree (id)
+p:account_config.Admins can manage account_config of their account ALL {public}
+p:account_config.Users can view account_config of their account SELECT {public}
+p:account_config.account_config_select_own_account SELECT {authenticated}
+p:account_config.account_config_update_own_account UPDATE {authenticated}
+p:accounts.Superadmin manages all accounts ALL {public}
+p:accounts.Users view their own account SELECT {public}
+p:allocation_plan_details.allocation_plan_details_delete DELETE {public}
+p:allocation_plan_details.allocation_plan_details_insert INSERT {public}
+p:allocation_plan_details.allocation_plan_details_select SELECT {public}
+p:allocation_plan_details.allocation_plan_details_update UPDATE {public}
+p:allocation_plan_details.superadmin_delete_allocation_plan_details DELETE {public}
+p:allocation_plan_details.superadmin_insert_allocation_plan_details INSERT {public}
+p:allocation_plan_details.superadmin_select_allocation_plan_details SELECT {public}
+p:allocation_plan_details.superadmin_update_allocation_plan_details UPDATE {public}
+p:allocation_plans.allocation_plans_delete DELETE {public}
+p:allocation_plans.allocation_plans_insert INSERT {public}
+p:allocation_plans.allocation_plans_select SELECT {public}
+p:allocation_plans.allocation_plans_update UPDATE {public}
+p:allocation_plans.superadmin_delete_allocation_plans DELETE {public}
+p:allocation_plans.superadmin_insert_allocation_plans INSERT {public}
+p:allocation_plans.superadmin_select_allocation_plans SELECT {public}
+p:allocation_plans.superadmin_update_allocation_plans UPDATE {public}
+p:api_keys.Service role bypass RLS ALL {service_role}
+p:api_keys.Users can manage their account's API keys ALL {public}
+p:api_usage_log.Service role bypass RLS ALL {service_role}
+p:api_usage_log.Users can view their account's API usage SELECT {public}
+p:audit_raw_reads.Service role can read all audit data SELECT {service_role}
+p:audit_raw_reads.Users can read audit data from their account SELECT {authenticated}
+p:audit_raw_reads.audit_raw_reads_insert_policy INSERT {public}
+p:audit_raw_reads.audit_raw_reads_select_policy SELECT {public}
+p:audit_raw_reads.audit_raw_reads_select_superadmin SELECT {public}
+p:carriers.carriers_delete DELETE {public}
+p:carriers.carriers_insert INSERT {public}
+p:carriers.carriers_select SELECT {public}
+p:carriers.carriers_update UPDATE {public}
+p:carriers.superadmin_delete_carriers DELETE {authenticated}
+p:carriers.superadmin_insert_carriers INSERT {authenticated}
+p:carriers.superadmin_update_carriers UPDATE {authenticated}
+p:cities.cities_delete DELETE {authenticated}
+p:cities.cities_insert INSERT {authenticated}
+p:cities.cities_select SELECT {authenticated}
+p:cities.cities_update UPDATE {authenticated}
+p:cities.superadmin_delete_cities DELETE {authenticated}
+p:cities.superadmin_insert_cities INSERT {authenticated}
+p:cities.superadmin_update_cities UPDATE {authenticated}
+p:delivery_standards.delivery_standards_delete DELETE {public}
+p:delivery_standards.delivery_standards_insert INSERT {public}
+p:delivery_standards.delivery_standards_select SELECT {public}
+p:delivery_standards.delivery_standards_update UPDATE {public}
+p:delivery_standards.superadmin_delete_delivery_standards DELETE {authenticated}
+p:delivery_standards.superadmin_insert_delivery_standards INSERT {authenticated}
+p:delivery_standards.superadmin_update_delivery_standards UPDATE {authenticated}
+p:diagnosis_anomalies.diagnosis_anomalies_delete DELETE {public}
+p:diagnosis_anomalies.diagnosis_anomalies_insert INSERT {public}
+p:diagnosis_anomalies.diagnosis_anomalies_select SELECT {public}
+p:diagnosis_anomalies.diagnosis_anomalies_update UPDATE {public}
+p:diagnosis_routes.diagnosis_routes_delete DELETE {public}
+p:diagnosis_routes.diagnosis_routes_insert INSERT {public}
+p:diagnosis_routes.diagnosis_routes_select SELECT {public}
+p:diagnosis_routes.diagnosis_routes_update UPDATE {public}
+p:diagnosis_time_metrics.diagnosis_time_metrics_delete DELETE {public}
+p:diagnosis_time_metrics.diagnosis_time_metrics_insert INSERT {public}
+p:diagnosis_time_metrics.diagnosis_time_metrics_select SELECT {public}
+p:diagnosis_time_metrics.diagnosis_time_metrics_update UPDATE {public}
+p:generated_allocation_plan_details.generated_allocation_plan_details_delete DELETE {public}
+p:generated_allocation_plan_details.generated_allocation_plan_details_insert INSERT {public}
+p:generated_allocation_plan_details.generated_allocation_plan_details_select SELECT {public}
+p:generated_allocation_plan_details.generated_allocation_plan_details_update UPDATE {public}
+p:generated_allocation_plan_details.superadmin_delete_generated_allocation_plan_details DELETE {public}
+p:generated_allocation_plan_details.superadmin_insert_generated_allocation_plan_details INSERT {public}
+p:generated_allocation_plan_details.superadmin_select_generated_allocation_plan_details SELECT {public}
+p:generated_allocation_plan_details.superadmin_update_generated_allocation_plan_details UPDATE {public}
+p:generated_allocation_plans.generated_allocation_plans_delete DELETE {public}
+p:generated_allocation_plans.generated_allocation_plans_insert INSERT {public}
+p:generated_allocation_plans.generated_allocation_plans_select SELECT {public}
+p:generated_allocation_plans.generated_allocation_plans_update UPDATE {public}
+p:generated_allocation_plans.superadmin_delete_generated_allocation_plans DELETE {public}
+p:generated_allocation_plans.superadmin_insert_generated_allocation_plans INSERT {public}
+p:generated_allocation_plans.superadmin_select_generated_allocation_plans SELECT {public}
+p:generated_allocation_plans.superadmin_update_generated_allocation_plans UPDATE {public}
+p:incidents.incidents_delete_policy DELETE {public}
+p:incidents.incidents_insert_policy INSERT {public}
+p:incidents.incidents_select_policy SELECT {public}
+p:incidents.incidents_update_policy UPDATE {public}
+p:journey_paths.journey_paths_account_isolation ALL {public}
+p:journey_segments.journey_segments_delete_policy DELETE {public}
+p:journey_segments.journey_segments_insert_policy INSERT {public}
+p:journey_segments.journey_segments_select_policy SELECT {public}
+p:journey_segments.journey_segments_update_policy UPDATE {public}
+p:journeys.journeys_delete_policy DELETE {public}
+p:journeys.journeys_insert_policy INSERT {public}
+p:journeys.journeys_select_policy SELECT {public}
+p:journeys.journeys_update_policy UPDATE {public}
+p:material_catalog.material_catalog_delete DELETE {public}
+p:material_catalog.material_catalog_insert INSERT {public}
+p:material_catalog.material_catalog_select SELECT {public}
+p:material_catalog.material_catalog_update UPDATE {public}
+p:material_catalog.superadmin_delete_material_catalog DELETE {authenticated}
+p:material_catalog.superadmin_insert_material_catalog INSERT {authenticated}
+p:material_catalog.superadmin_update_material_catalog UPDATE {authenticated}
+p:material_shipment_items.superadmin_delete_material_shipment_items DELETE {authenticated}
+p:material_shipment_items.superadmin_insert_material_shipment_items INSERT {authenticated}
+p:material_shipment_items.superadmin_update_material_shipment_items UPDATE {authenticated}
+p:material_shipments.superadmin_delete_material_shipments DELETE {authenticated}
+p:material_shipments.superadmin_insert_material_shipments INSERT {authenticated}
+p:material_shipments.superadmin_update_material_shipments UPDATE {authenticated}
+p:materials.materials_delete DELETE {public}
+p:materials.materials_insert INSERT {public}
+p:materials.materials_select SELECT {public}
+p:materials.materials_update UPDATE {public}
+p:materials.superadmin_delete_materials DELETE {authenticated}
+p:materials.superadmin_insert_materials INSERT {authenticated}
+p:materials.superadmin_update_materials UPDATE {authenticated}
+p:node_balancing_history.balancing_history_insert_policy INSERT {public}
+p:node_balancing_history.balancing_history_select_policy SELECT {public}
+p:node_balancing_history.superadmin_delete_node_balancing_history DELETE {authenticated}
+p:node_balancing_history.superadmin_insert_node_balancing_history INSERT {authenticated}
+p:node_balancing_history.superadmin_update_node_balancing_history UPDATE {authenticated}
+p:nodes.nodes_delete DELETE {authenticated}
+p:nodes.nodes_insert INSERT {authenticated}
+p:nodes.nodes_select SELECT {authenticated}
+p:nodes.nodes_update UPDATE {authenticated}
+p:nodes.superadmin_delete_nodes DELETE {authenticated}
+p:nodes.superadmin_insert_nodes INSERT {authenticated}
+p:nodes.superadmin_update_nodes UPDATE {authenticated}
+p:non_working_days.Admins can manage non_working_days of their account ALL {public}
+p:non_working_days.Users can view non_working_days of their account SELECT {public}
+p:non_working_days.non_working_days_delete_own_account DELETE {authenticated}
+p:non_working_days.non_working_days_insert_own_account INSERT {authenticated}
+p:non_working_days.non_working_days_select_own_account SELECT {authenticated}
+p:non_working_days.non_working_days_select_superadmin SELECT {authenticated}
+p:non_working_days.non_working_days_update_own_account UPDATE {authenticated}
+p:one_db.Enable delete for authenticated users on own account DELETE {authenticated}
+p:one_db.one_db_insert_policy INSERT {public}
+p:one_db.one_db_select_policy SELECT {public}
+p:one_db.superadmin_delete_one_db DELETE {authenticated}
+p:one_db.superadmin_insert_one_db INSERT {authenticated}
+p:one_db.superadmin_update_one_db UPDATE {authenticated}
+p:panelist_material_stocks.superadmin_delete_panelist_material_stocks DELETE {authenticated}
+p:panelist_material_stocks.superadmin_insert_panelist_material_stocks INSERT {authenticated}
+p:panelist_material_stocks.superadmin_update_panelist_material_stocks UPDATE {authenticated}
+p:panelist_unavailability.panelist_unavailability_delete_policy DELETE {public}
+p:panelist_unavailability.panelist_unavailability_insert_policy INSERT {public}
+p:panelist_unavailability.panelist_unavailability_select_policy SELECT {public}
+p:panelist_unavailability.panelist_unavailability_update_policy UPDATE {public}
+p:panelist_unavailability.superadmin_delete_panelist_unavailability DELETE {authenticated}
+p:panelist_unavailability.superadmin_insert_panelist_unavailability INSERT {authenticated}
+p:panelist_unavailability.superadmin_update_panelist_unavailability UPDATE {authenticated}
+p:panelist_unavailability.unavailability_delete_policy DELETE {public}
+p:panelist_unavailability.unavailability_insert_policy INSERT {public}
+p:panelist_unavailability.unavailability_select_policy SELECT {public}
+p:panelist_unavailability.unavailability_update_policy UPDATE {public}
+p:panelists.panelists_delete_policy DELETE {public}
+p:panelists.panelists_insert_policy INSERT {public}
+p:panelists.panelists_select_policy SELECT {public}
+p:panelists.panelists_update_policy UPDATE {public}
+p:panelists.superadmin_delete_panelists DELETE {authenticated}
+p:panelists.superadmin_insert_panelists INSERT {authenticated}
+p:panelists.superadmin_select_panelists SELECT {public}
+p:panelists.superadmin_update_panelists UPDATE {authenticated}
+p:postal_centers.Admins can manage postal_centers of their account ALL {public}
+p:postal_centers.Users can view postal_centers of their account SELECT {public}
+p:postal_centers.postal_centers_delete_own_account DELETE {authenticated}
+p:postal_centers.postal_centers_insert_own_account INSERT {authenticated}
+p:postal_centers.postal_centers_select_own_account SELECT {authenticated}
+p:postal_centers.postal_centers_select_superadmin SELECT {authenticated}
+p:postal_centers.postal_centers_update_own_account UPDATE {authenticated}
+p:processed_events.processed_events_delete_policy DELETE {public}
+p:processed_events.processed_events_insert_policy INSERT {public}
+p:processed_events.processed_events_select_policy SELECT {public}
+p:processed_events.processed_events_update_policy UPDATE {public}
+p:product_materials.product_materials_delete DELETE {public}
+p:product_materials.product_materials_insert INSERT {public}
+p:product_materials.product_materials_select SELECT {public}
+p:product_materials.product_materials_update UPDATE {public}
+p:products.products_delete DELETE {public}
+p:products.products_insert INSERT {public}
+p:products.products_select SELECT {public}
+p:products.products_update UPDATE {public}
+p:products.superadmin_delete_products DELETE {authenticated}
+p:products.superadmin_insert_products INSERT {authenticated}
+p:products.superadmin_update_products UPDATE {authenticated}
+p:profiles.Superadmin manages all profiles ALL {public}
+p:profiles.Users update their own profile UPDATE {public}
+p:profiles.admin_create_users INSERT {public}
+p:profiles.admin_delete_users DELETE {public}
+p:profiles.admin_update_users UPDATE {public}
+p:profiles.admin_view_account_profiles SELECT {public}
+p:profiles.profile_delete_admin DELETE {authenticated}
+p:profiles.profile_delete_superadmin DELETE {authenticated}
+p:profiles.profile_insert_admin INSERT {authenticated}
+p:profiles.profile_insert_superadmin INSERT {authenticated}
+p:profiles.profile_select_admin SELECT {authenticated}
+p:profiles.profile_select_own SELECT {authenticated}
+p:profiles.profile_select_superadmin SELECT {authenticated}
+p:profiles.profile_update_admin UPDATE {authenticated}
+p:profiles.profile_update_own UPDATE {authenticated}
+p:profiles.profile_update_superadmin UPDATE {authenticated}
+p:profiles.superadmin_full_access ALL {public}
+p:profiles.users_update_own_profile UPDATE {public}
+p:profiles.users_view_own_profile SELECT {public}
+p:purchase_order_items.superadmin_delete_purchase_order_items DELETE {authenticated}
+p:purchase_order_items.superadmin_insert_purchase_order_items INSERT {authenticated}
+p:purchase_order_items.superadmin_update_purchase_order_items UPDATE {authenticated}
+p:purchase_orders.superadmin_delete_purchase_orders DELETE {authenticated}
+p:purchase_orders.superadmin_insert_purchase_orders INSERT {authenticated}
+p:purchase_orders.superadmin_update_purchase_orders UPDATE {authenticated}
+p:reader_location_history.Users can insert reader location history for their account INSERT {public}
+p:reader_location_history.Users can update reader location history for their account UPDATE {public}
+p:reader_location_history.Users can view reader location history for their account SELECT {public}
+p:readers.Admins can manage readers of their account ALL {public}
+p:readers.Users can view readers of their account SELECT {public}
+p:readers.readers_delete_own_account DELETE {authenticated}
+p:readers.readers_delete_superadmin DELETE {authenticated}
+p:readers.readers_insert_own_account INSERT {authenticated}
+p:readers.readers_insert_superadmin INSERT {authenticated}
+p:readers.readers_select_own_account SELECT {authenticated}
+p:readers.readers_select_superadmin SELECT {authenticated}
+p:readers.readers_update_own_account UPDATE {authenticated}
+p:readers.readers_update_superadmin UPDATE {authenticated}
+p:regions.regions_delete DELETE {authenticated}
+p:regions.regions_insert INSERT {authenticated}
+p:regions.regions_select SELECT {authenticated}
+p:regions.regions_update UPDATE {authenticated}
+p:regions.superadmin_delete_regions DELETE {authenticated}
+p:regions.superadmin_insert_regions INSERT {authenticated}
+p:regions.superadmin_update_regions UPDATE {authenticated}
+p:reporting_config.reporting_config_select_policy SELECT {public}
+p:reporting_config.reporting_config_update_policy UPDATE {public}
+p:reporting_config.superadmin_delete_reporting_config DELETE {authenticated}
+p:reporting_config.superadmin_insert_reporting_config INSERT {authenticated}
+p:reporting_config.superadmin_update_reporting_config UPDATE {authenticated}
+p:rfid_events_raw.rfid_events_raw_delete_policy DELETE {public}
+p:rfid_events_raw.rfid_events_raw_insert_policy INSERT {public}
+p:rfid_events_raw.rfid_events_raw_select_policy SELECT {public}
+p:rfid_events_raw.rfid_events_raw_select_superadmin SELECT {public}
+p:rfid_events_raw.rfid_events_raw_update_policy UPDATE {public}
+p:rfid_ingest_state.rfid_ingest_state_select_superadmin SELECT {public}
+p:rfid_intermediate_db.rfid_intermediate_db_delete DELETE {public}
+p:rfid_intermediate_db.rfid_intermediate_db_insert INSERT {public}
+p:rfid_intermediate_db.rfid_intermediate_db_select SELECT {public}
+p:rfid_intermediate_db.rfid_intermediate_db_update UPDATE {public}
+p:rfid_provider_reads.rfid_provider_reads_select_account SELECT {public}
+p:rfid_provider_reads.rfid_provider_reads_select_superadmin SELECT {public}
+p:shipment_incident.managers_select_own_account_incidents SELECT {public}
+p:shipment_incident.service_role_full_access ALL {service_role}
+p:sla_definitions.Admins can manage sla_definitions of their account ALL {public}
+p:sla_definitions.Users can view sla_definitions of their account SELECT {public}
+p:slas.slas_delete_policy DELETE {public}
+p:slas.slas_insert_policy INSERT {public}
+p:slas.slas_select_policy SELECT {authenticated}
+p:slas.slas_update_policy UPDATE {public}
+p:stock_settings.superadmin_delete_stock_settings DELETE {authenticated}
+p:stock_settings.superadmin_insert_stock_settings INSERT {authenticated}
+p:stock_settings.superadmin_update_stock_settings UPDATE {authenticated}
+p:weekly_schedule.Admins can manage weekly_schedule of their account ALL {public}
+p:weekly_schedule.Users can view weekly_schedule of their account SELECT {public}
+p:weekly_schedule.weekly_schedule_delete_own_account DELETE {authenticated}
+p:weekly_schedule.weekly_schedule_insert_own_account INSERT {authenticated}
+p:weekly_schedule.weekly_schedule_select_own_account SELECT {authenticated}
+p:weekly_schedule.weekly_schedule_select_superadmin SELECT {authenticated}
+p:weekly_schedule.weekly_schedule_update_own_account UPDATE {authenticated}
+t:account_config.account_id uuid NN
+t:account_config.calculation_mode text NN
+t:account_config.created_at timestamp with time zone
+t:account_config.created_by uuid
+t:account_config.id uuid NN
+t:account_config.mixed_reader_gap_minutes integer NN
+t:account_config.updated_at timestamp with time zone
+t:account_config.updated_by uuid
+t:accounts.admin_email text
+t:accounts.calculation_mode text
+t:accounts.country_code character varying(2)
+t:accounts.created_at timestamp with time zone
+t:accounts.default_language character varying(5) NN
+t:accounts.email_panelist_manager text
+t:accounts.gap_threshold_minutes integer
+t:accounts.id uuid NN
+t:accounts.name text NN
+t:accounts.slug text NN
+t:accounts.status text
+t:accounts.timezone text NN
+t:accounts.updated_at timestamp with time zone
+t:allocation_plan_details.account_id uuid NN
+t:allocation_plan_details.assigned_at timestamp with time zone
+t:allocation_plan_details.created_at timestamp with time zone
+t:allocation_plan_details.delivered_at timestamp with time zone
+t:allocation_plan_details.delivery_date timestamp with time zone
+t:allocation_plan_details.destination_node_id uuid NN
+t:allocation_plan_details.destination_panelist_id uuid
+t:allocation_plan_details.destination_panelist_name text
+t:allocation_plan_details.fecha_programada date NN
+t:allocation_plan_details.id uuid NN
+t:allocation_plan_details.idtag text
+t:allocation_plan_details.month integer NN
+t:allocation_plan_details.origin_node_id uuid NN
+t:allocation_plan_details.origin_panelist_id uuid
+t:allocation_plan_details.origin_panelist_name text
+t:allocation_plan_details.original_destination_node_id uuid
+t:allocation_plan_details.original_origin_node_id uuid
+t:allocation_plan_details.plan_id uuid NN
+t:allocation_plan_details.reassigned_at timestamp with time zone
+t:allocation_plan_details.reassigned_by uuid
+t:allocation_plan_details.reassignment_reason text
+t:allocation_plan_details.received_at timestamp with time zone
+t:allocation_plan_details.sent_at timestamp with time zone
+t:allocation_plan_details.sent_date timestamp with time zone
+t:allocation_plan_details.status text NN
+t:allocation_plan_details.tag_id character varying(100)
+t:allocation_plan_details.transfer_error_message text
+t:allocation_plan_details.transferred_to_one_db_at timestamp with time zone
+t:allocation_plan_details.updated_at timestamp with time zone
+t:allocation_plan_details.validation_errors text[]
+t:allocation_plan_details.week_number integer NN
+t:allocation_plan_details.year integer NN
+t:allocation_plans.account_id uuid NN
+t:allocation_plans.applied_by uuid
+t:allocation_plans.applied_date timestamp with time zone NN
+t:allocation_plans.carrier_id uuid NN
+t:allocation_plans.created_at timestamp with time zone
+t:allocation_plans.created_by uuid
+t:allocation_plans.end_date date NN
+t:allocation_plans.id uuid NN
+t:allocation_plans.plan_name text NN
+t:allocation_plans.product_id uuid NN
+t:allocation_plans.start_date date NN
+t:allocation_plans.status text NN
+t:allocation_plans.total_samples integer NN
+t:allocation_plans.updated_at timestamp with time zone
+t:api_keys.account_id uuid NN
+t:api_keys.api_key text NN
+t:api_keys.created_at timestamp with time zone
+t:api_keys.created_by uuid
+t:api_keys.id uuid NN
+t:api_keys.is_active boolean
+t:api_keys.last_used_at timestamp with time zone
+t:api_keys.usage_count integer
+t:api_usage_log.api_key_id uuid NN
+t:api_usage_log.endpoint text NN
+t:api_usage_log.id uuid NN
+t:api_usage_log.ip_address text
+t:api_usage_log.request_timestamp timestamp with time zone
+t:api_usage_log.response_status integer
+t:api_usage_log.response_time_ms integer
+t:audit_raw_reads.account_id uuid NN
+t:audit_raw_reads.archived_at timestamp with time zone
+t:audit_raw_reads.first_read_datetime timestamp with time zone NN
+t:audit_raw_reads.id uuid NN
+t:audit_raw_reads.last_read_datetime timestamp with time zone NN
+t:audit_raw_reads.read_count integer NN
+t:audit_raw_reads.reader_id text NN
+t:audit_raw_reads.tag_id text NN
+t:carriers.account_id uuid NN
+t:carriers.code text NN
+t:carriers.created_at timestamp with time zone
+t:carriers.id uuid NN
+t:carriers.name text NN
+t:carriers.status text
+t:carriers.type text
+t:carriers.updated_at timestamp with time zone
+t:cities.account_id uuid NN
+t:cities.city_type text
+t:cities.classification character varying(1)
+t:cities.code text NN
+t:cities.created_at timestamp with time zone
+t:cities.id uuid NN
+t:cities.latitude numeric(10,8)
+t:cities.longitude numeric(11,8)
+t:cities.name text NN
+t:cities.population integer
+t:cities.region_id uuid NN
+t:cities.region_name text
+t:cities.status text
+t:cities.updated_at timestamp with time zone
+t:delivery_standards.account_id uuid NN
+t:delivery_standards.carrier_id uuid NN
+t:delivery_standards.created_at timestamp with time zone
+t:delivery_standards.critical_threshold numeric(5,2)
+t:delivery_standards.destination_city_id uuid NN
+t:delivery_standards.id uuid NN
+t:delivery_standards.origin_city_id uuid NN
+t:delivery_standards.product_id uuid NN
+t:delivery_standards.standard_time numeric(10,2)
+t:delivery_standards.success_percentage numeric(5,2)
+t:delivery_standards.threshold_type character varying(20)
+t:delivery_standards.time_unit text
+t:delivery_standards.updated_at timestamp with time zone
+t:delivery_standards.warning_threshold numeric(5,2)
+t:demo2_seed_data.created_at timestamp with time zone
+t:demo2_seed_data.data jsonb NN
+t:demo2_seed_data.id uuid NN
+t:demo2_seed_data.record_count integer NN
+t:demo2_seed_data.table_name text NN
+t:demo2_seed_data.updated_at timestamp with time zone
+t:diagnosis_anomalies.account_id uuid NN
+t:diagnosis_anomalies.actual_duration_hours numeric(10,2)
+t:diagnosis_anomalies.anomaly_type text NN
+t:diagnosis_anomalies.created_at timestamp with time zone
+t:diagnosis_anomalies.description text NN
+t:diagnosis_anomalies.detected_at timestamp with time zone NN
+t:diagnosis_anomalies.expected_duration_hours numeric(10,2)
+t:diagnosis_anomalies.id bigint NN
+t:diagnosis_anomalies.metadata jsonb
+t:diagnosis_anomalies.postal_center_id uuid
+t:diagnosis_anomalies.reader_id text
+t:diagnosis_anomalies.resolved boolean
+t:diagnosis_anomalies.resolved_at timestamp with time zone
+t:diagnosis_anomalies.route_id bigint
+t:diagnosis_anomalies.severity text NN
+t:diagnosis_anomalies.tag_id text NN
+t:diagnosis_routes.account_id uuid NN
+t:diagnosis_routes.created_at timestamp with time zone
+t:diagnosis_routes.event_count integer NN
+t:diagnosis_routes.id bigint NN
+t:diagnosis_routes.is_complete boolean
+t:diagnosis_routes.reader_sequence text[] NN
+t:diagnosis_routes.route_end_time timestamp with time zone NN
+t:diagnosis_routes.route_start_time timestamp with time zone NN
+t:diagnosis_routes.tag_id text NN
+t:diagnosis_routes.total_duration_hours numeric(10,2) NN
+t:diagnosis_routes.updated_at timestamp with time zone
+t:diagnosis_time_metrics.account_id uuid NN
+t:diagnosis_time_metrics.actual_duration_hours numeric(10,2)
+t:diagnosis_time_metrics.adjusted_duration_hours numeric(10,2)
+t:diagnosis_time_metrics.analysis_datetime_local timestamp without time zone
+t:diagnosis_time_metrics.created_at timestamp with time zone
+t:diagnosis_time_metrics.cutoff_adjusted boolean
+t:diagnosis_time_metrics.delay_hours numeric(10,2)
+t:diagnosis_time_metrics.expected_duration_hours numeric(10,2)
+t:diagnosis_time_metrics.from_postal_center_id uuid
+t:diagnosis_time_metrics.from_reader_id text NN
+t:diagnosis_time_metrics.id bigint NN
+t:diagnosis_time_metrics.is_delayed boolean
+t:diagnosis_time_metrics.route_id bigint NN
+t:diagnosis_time_metrics.segment_duration_hours numeric(10,2) NN
+t:diagnosis_time_metrics.segment_end_time timestamp with time zone NN
+t:diagnosis_time_metrics.segment_start_time timestamp with time zone NN
+t:diagnosis_time_metrics.sla_status text
+t:diagnosis_time_metrics.tag_id text NN
+t:diagnosis_time_metrics.to_postal_center_id uuid
+t:diagnosis_time_metrics.to_reader_id text NN
+t:generated_allocation_plan_details.account_id uuid NN
+t:generated_allocation_plan_details.created_at timestamp with time zone
+t:generated_allocation_plan_details.destination_node_id uuid NN
+t:generated_allocation_plan_details.fecha_programada date NN
+t:generated_allocation_plan_details.id uuid NN
+t:generated_allocation_plan_details.idtag text
+t:generated_allocation_plan_details.month integer NN
+t:generated_allocation_plan_details.origin_node_id uuid NN
+t:generated_allocation_plan_details.plan_id uuid NN
+t:generated_allocation_plan_details.status text NN
+t:generated_allocation_plan_details.updated_at timestamp with time zone
+t:generated_allocation_plan_details.week_number integer NN
+t:generated_allocation_plan_details.year integer NN
+t:generated_allocation_plans.account_id uuid NN
+t:generated_allocation_plans.carrier_id uuid NN
+t:generated_allocation_plans.created_at timestamp with time zone
+t:generated_allocation_plans.created_by uuid
+t:generated_allocation_plans.end_date date NN
+t:generated_allocation_plans.id uuid NN
+t:generated_allocation_plans.plan_name text NN
+t:generated_allocation_plans.product_id uuid NN
+t:generated_allocation_plans.start_date date NN
+t:generated_allocation_plans.status text NN
+t:generated_allocation_plans.total_samples integer NN
+t:generated_allocation_plans.updated_at timestamp with time zone
+t:incidents.account_id uuid NN
+t:incidents.created_at timestamp with time zone NN
+t:incidents.description text NN
+t:incidents.detected_at timestamp with time zone NN
+t:incidents.event_id bigint
+t:incidents.id bigint NN
+t:incidents.incident_type text NN
+t:incidents.is_resolved boolean NN
+t:incidents.metadata jsonb
+t:incidents.postal_center_id uuid
+t:incidents.reader_id uuid
+t:incidents.resolution_notes text
+t:incidents.resolved_at timestamp with time zone
+t:incidents.resolved_by uuid
+t:incidents.segment_id bigint
+t:incidents.severity text NN
+t:incidents.tag_id text
+t:journey_paths.account_id uuid NN
+t:journey_paths.avg_natural_time_minutes integer
+t:journey_paths.avg_working_time_minutes integer
+t:journey_paths.carrier_id uuid NN
+t:journey_paths.compliance_rate numeric(5,2)
+t:journey_paths.created_at timestamp with time zone NN
+t:journey_paths.destination_city_name text NN
+t:journey_paths.expected_time_minutes integer
+t:journey_paths.id uuid NN
+t:journey_paths.origin_city_name text NN
+t:journey_paths.path_segments jsonb NN
+t:journey_paths.path_signature text NN
+t:journey_paths.percent_real numeric(5,2)
+t:journey_paths.product_id uuid NN
+t:journey_paths.segment_details jsonb
+t:journey_paths.stddev_natural_time_minutes numeric(10,2)
+t:journey_paths.stddev_working_time_minutes numeric(10,2)
+t:journey_paths.total_tags integer NN
+t:journey_paths.updated_at timestamp with time zone NN
+t:journey_segments.account_id uuid NN
+t:journey_segments.actual_time_minutes integer NN
+t:journey_segments.adjusted_time_minutes integer NN
+t:journey_segments.carrier_id uuid
+t:journey_segments.carrier_name_snapshot text
+t:journey_segments.created_at timestamp with time zone NN
+t:journey_segments.destination_city_name text
+t:journey_segments.entry_analysis_datetime timestamp with time zone NN
+t:journey_segments.entry_event_id bigint
+t:journey_segments.entry_timestamp timestamp with time zone NN
+t:journey_segments.exit_analysis_datetime timestamp with time zone NN
+t:journey_segments.exit_event_id bigint
+t:journey_segments.exit_timestamp timestamp with time zone NN
+t:journey_segments.expected_time_minutes integer
+t:journey_segments.from_postal_center_city text
+t:journey_segments.from_postal_center_code_snapshot text
+t:journey_segments.from_postal_center_id uuid
+t:journey_segments.from_postal_center_name_snapshot text
+t:journey_segments.id bigint NN
+t:journey_segments.natural_time_in_center_minutes integer
+t:journey_segments.natural_transit_time_minutes integer
+t:journey_segments.next_entry_timestamp timestamp with time zone
+t:journey_segments.origin_city_name text
+t:journey_segments.postal_center_code_snapshot text
+t:journey_segments.postal_center_id uuid
+t:journey_segments.postal_center_name_snapshot text
+t:journey_segments.pre_operational_wait_minutes integer
+t:journey_segments.product_id uuid
+t:journey_segments.product_name text
+t:journey_segments.segment_type text NN
+t:journey_segments.sla_compliance text
+t:journey_segments.sla_id uuid
+t:journey_segments.tag_id text NN
+t:journey_segments.to_postal_center_city text
+t:journey_segments.to_postal_center_code_snapshot text
+t:journey_segments.to_postal_center_id uuid
+t:journey_segments.to_postal_center_name_snapshot text
+t:journey_segments.working_time_in_center_minutes integer
+t:journey_segments.working_transit_time_minutes integer
+t:journeys.account_id uuid NN
+t:journeys.created_at timestamp with time zone NN
+t:journeys.destination_city_id uuid
+t:journeys.destination_city_name text
+t:journeys.first_event_timestamp timestamp with time zone
+t:journeys.id bigint NN
+t:journeys.is_missroute boolean NN
+t:journeys.journey_status text NN
+t:journeys.last_event_timestamp timestamp with time zone
+t:journeys.missroute_reason text
+t:journeys.on_time_segments integer NN
+t:journeys.origin_city_id uuid
+t:journeys.origin_city_name text
+t:journeys.product_id uuid
+t:journeys.product_name text
+t:journeys.route_path jsonb NN
+t:journeys.tag_id text NN
+t:journeys.total_actual_time_minutes integer
+t:journeys.total_adjusted_time_minutes integer
+t:journeys.total_centers_visited integer NN
+t:journeys.total_distribution_time_minutes integer
+t:journeys.total_operational_time_minutes integer
+t:journeys.total_pre_operational_wait_minutes integer
+t:journeys.total_segments integer NN
+t:journeys.total_sla_violations integer NN
+t:journeys.updated_at timestamp with time zone NN
+t:material_catalog.account_id uuid NN
+t:material_catalog.code text NN
+t:material_catalog.created_at timestamp with time zone
+t:material_catalog.description text
+t:material_catalog.id uuid NN
+t:material_catalog.min_stock integer
+t:material_catalog.name text NN
+t:material_catalog.status text
+t:material_catalog.unit_measure text
+t:material_catalog.updated_at timestamp with time zone
+t:material_movements.account_id uuid NN
+t:material_movements.created_at timestamp with time zone
+t:material_movements.created_by uuid
+t:material_movements.from_location text
+t:material_movements.from_location_id uuid
+t:material_movements.from_location_type text
+t:material_movements.id uuid NN
+t:material_movements.material_id uuid NN
+t:material_movements.movement_type text NN
+t:material_movements.notes text
+t:material_movements.quantity numeric(10,2) NN
+t:material_movements.reference_id uuid
+t:material_movements.reference_type text
+t:material_movements.to_location text
+t:material_movements.to_location_id uuid
+t:material_movements.to_location_type text
+t:material_requirements_periods.account_id uuid NN
+t:material_requirements_periods.created_at timestamp with time zone
+t:material_requirements_periods.id uuid NN
+t:material_requirements_periods.material_id uuid NN
+t:material_requirements_periods.notes text
+t:material_requirements_periods.period_end date NN
+t:material_requirements_periods.period_start date NN
+t:material_requirements_periods.plans_count integer NN
+t:material_requirements_periods.quantity_needed numeric NN
+t:material_requirements_periods.quantity_ordered numeric NN
+t:material_requirements_periods.quantity_received numeric NN
+t:material_requirements_periods.status text NN
+t:material_requirements_periods.updated_at timestamp with time zone
+t:material_shipment_items.account_id uuid NN
+t:material_shipment_items.created_at timestamp with time zone
+t:material_shipment_items.id uuid NN
+t:material_shipment_items.material_id uuid NN
+t:material_shipment_items.material_shipment_id uuid NN
+t:material_shipment_items.notes text
+t:material_shipment_items.quantity_received numeric(10,2)
+t:material_shipment_items.quantity_sent numeric(10,2) NN
+t:material_shipment_items.updated_at timestamp with time zone
+t:material_shipments.account_id uuid NN
+t:material_shipments.created_at timestamp with time zone
+t:material_shipments.created_by uuid
+t:material_shipments.expected_date date
+t:material_shipments.id uuid NN
+t:material_shipments.notes text
+t:material_shipments.panelist_id uuid NN
+t:material_shipments.received_date date
+t:material_shipments.shipment_date date
+t:material_shipments.shipment_number text
+t:material_shipments.status text
+t:material_shipments.total_items integer
+t:material_shipments.tracking_number text
+t:material_shipments.updated_at timestamp with time zone
+t:material_stocks.account_id uuid NN
+t:material_stocks.created_at timestamp with time zone
+t:material_stocks.id uuid NN
+t:material_stocks.last_updated timestamp with time zone
+t:material_stocks.location_id uuid
+t:material_stocks.location_type text
+t:material_stocks.material_id uuid NN
+t:material_stocks.max_stock numeric(10,2)
+t:material_stocks.min_stock numeric(10,2)
+t:material_stocks.quantity numeric(10,2) NN
+t:material_stocks.updated_at timestamp with time zone
+t:materials.account_id uuid NN
+t:materials.code text NN
+t:materials.created_at timestamp with time zone
+t:materials.description text
+t:materials.id uuid NN
+t:materials.name text NN
+t:materials.product_id uuid NN
+t:materials.quantity integer NN
+t:materials.status text
+t:materials.unit_measure text
+t:materials.updated_at timestamp with time zone
+t:n8n_upu_agent.id integer NN
+t:n8n_upu_agent.message jsonb NN
+t:n8n_upu_agent.session_id character varying(255) NN
+t:n8n_upu_incident.id integer NN
+t:n8n_upu_incident.message jsonb NN
+t:n8n_upu_incident.session_id character varying(255) NN
+t:n8n_upu_timeoff.id integer NN
+t:n8n_upu_timeoff.message jsonb NN
+t:n8n_upu_timeoff.session_id character varying(255) NN
+t:node_balancing_history.account_id uuid NN
+t:node_balancing_history.city_id uuid NN
+t:node_balancing_history.id uuid NN
+t:node_balancing_history.improvement_percentage numeric(5,2)
+t:node_balancing_history.month integer NN
+t:node_balancing_history.movements jsonb NN
+t:node_balancing_history.notes text
+t:node_balancing_history.performed_at timestamp with time zone NN
+t:node_balancing_history.performed_by uuid
+t:node_balancing_history.shipments_moved integer NN
+t:node_balancing_history.stddev_after numeric(10,2)
+t:node_balancing_history.stddev_before numeric(10,2)
+t:node_balancing_history.strategy text NN
+t:node_balancing_history.year integer NN
+t:nodes.account_id uuid NN
+t:nodes.auto_id text NN
+t:nodes.city_id uuid NN
+t:nodes.created_at timestamp with time zone
+t:nodes.id uuid NN
+t:nodes.status text
+t:nodes.updated_at timestamp with time zone
+t:non_working_days.account_id uuid NN
+t:non_working_days.created_at timestamp with time zone
+t:non_working_days.created_by uuid
+t:non_working_days.date date NN
+t:non_working_days.id uuid NN
+t:non_working_days.postal_center_id uuid
+t:non_working_days.reason text
+t:non_working_days.type text
+t:one_db.account_id uuid NN
+t:one_db.allocation_detail_id uuid
+t:one_db.business_transit_days integer
+t:one_db.carrier_name text NN
+t:one_db.created_at timestamp with time zone NN
+t:one_db.destination_city_name text NN
+t:one_db.id uuid NN
+t:one_db.on_time_delivery boolean
+t:one_db.origin_city_name text NN
+t:one_db.plan_name text NN
+t:one_db.product_name text NN
+t:one_db.received_at timestamp with time zone NN
+t:one_db.sent_at timestamp with time zone NN
+t:one_db.source_data_snapshot jsonb NN
+t:one_db.tag_id text NN
+t:one_db.total_transit_days integer NN
+t:panelist_context.context_data jsonb
+t:panelist_context.context_type text NN
+t:panelist_context.created_at timestamp with time zone
+t:panelist_context.id bigint NN
+t:panelist_context.telegram_id text NN
+t:panelist_material_stocks.account_id uuid NN
+t:panelist_material_stocks.created_at timestamp with time zone
+t:panelist_material_stocks.id uuid NN
+t:panelist_material_stocks.last_updated timestamp with time zone
+t:panelist_material_stocks.material_id uuid NN
+t:panelist_material_stocks.panelist_id uuid NN
+t:panelist_material_stocks.quantity numeric(10,2) NN
+t:panelist_material_stocks.updated_at timestamp with time zone
+t:panelist_unavailability.account_id uuid NN
+t:panelist_unavailability.created_at timestamp with time zone
+t:panelist_unavailability.created_by uuid
+t:panelist_unavailability.end_date date NN
+t:panelist_unavailability.id uuid NN
+t:panelist_unavailability.notes text
+t:panelist_unavailability.panelist_id uuid NN
+t:panelist_unavailability.reason character varying(50) NN
+t:panelist_unavailability.start_date date NN
+t:panelist_unavailability.status character varying(20)
+t:panelist_unavailability.updated_at timestamp with time zone
+t:panelist_unavailability.updated_by uuid
+t:panelists.account_id uuid NN
+t:panelists.address_city text
+t:panelists.address_country text
+t:panelists.address_line1 text
+t:panelists.address_line2 text
+t:panelists.city_id uuid
+t:panelists.created_at timestamp with time zone
+t:panelists.created_by uuid
+t:panelists.email character varying(255) NN
+t:panelists.id uuid NN
+t:panelists.language character varying(5) NN
+t:panelists.mobile character varying(50) NN
+t:panelists.name character varying(255) NN
+t:panelists.node_id uuid
+t:panelists.panelist_code character varying(50) NN
+t:panelists.postal_code text
+t:panelists.status character varying(20)
+t:panelists.telegram_id text
+t:panelists.updated_at timestamp with time zone
+t:panelists.updated_by uuid
+t:postal_center_carriers.carrier_id uuid NN
+t:postal_center_carriers.created_at timestamp with time zone NN
+t:postal_center_carriers.created_by uuid
+t:postal_center_carriers.postal_center_id uuid NN
+t:postal_centers.account_id uuid NN
+t:postal_centers.calculation_mode text
+t:postal_centers.carrier_id uuid
+t:postal_centers.city text
+t:postal_centers.city_id uuid
+t:postal_centers.code text NN
+t:postal_centers.country text
+t:postal_centers.created_at timestamp with time zone
+t:postal_centers.created_by uuid
+t:postal_centers.cutoff_time time without time zone
+t:postal_centers.deleted_at timestamp with time zone
+t:postal_centers.description text
+t:postal_centers.id uuid NN
+t:postal_centers.is_active boolean
+t:postal_centers.latitude numeric(10,8)
+t:postal_centers.longitude numeric(11,8)
+t:postal_centers.mixed_reader_gap_minutes integer
+t:postal_centers.name text NN
+t:postal_centers.opening_hour time without time zone
+t:postal_centers.state text
+t:postal_centers.timezone text
+t:postal_centers.updated_at timestamp with time zone
+t:postal_centers.updated_by uuid
+t:postal_centers.working_hours_end time without time zone
+t:processed_events.account_id uuid NN
+t:processed_events.analysis_datetime timestamp with time zone NN
+t:processed_events.carrier_id uuid
+t:processed_events.created_at timestamp with time zone NN
+t:processed_events.destination_city_name text
+t:processed_events.event_type text NN
+t:processed_events.id bigint NN
+t:processed_events.is_consolidated boolean NN
+t:processed_events.is_estimated boolean
+t:processed_events.origin_city_name text
+t:processed_events.postal_center_city_snapshot text
+t:processed_events.postal_center_code_snapshot text NN
+t:processed_events.postal_center_id uuid NN
+t:processed_events.postal_center_name_snapshot text NN
+t:processed_events.processed_at timestamp with time zone
+t:processed_events.product_id uuid
+t:processed_events.raw_event_count integer NN
+t:processed_events.reader_id uuid NN
+t:processed_events.reader_id_snapshot text NN
+t:processed_events.reader_type_snapshot text NN
+t:processed_events.tag_id text NN
+t:processed_events.timestamp timestamp with time zone NN
+t:product_materials.account_id uuid NN
+t:product_materials.created_at timestamp with time zone
+t:product_materials.id uuid NN
+t:product_materials.material_id uuid NN
+t:product_materials.product_id uuid NN
+t:product_materials.quantity integer NN
+t:product_materials.updated_at timestamp with time zone
+t:products.account_id uuid NN
+t:products.carrier_id uuid NN
+t:products.code text NN
+t:products.created_at timestamp with time zone
+t:products.description text NN
+t:products.id uuid NN
+t:products.standard_delivery_hours integer NN
+t:products.status text
+t:products.time_unit text
+t:products.updated_at timestamp with time zone
+t:profiles.account_id uuid
+t:profiles.created_at timestamp with time zone
+t:profiles.email text NN
+t:profiles.full_name text
+t:profiles.id uuid NN
+t:profiles.preferred_language character varying(2)
+t:profiles.role text NN
+t:profiles.status text
+t:profiles.updated_at timestamp with time zone
+t:purchase_order_items.account_id uuid NN
+t:purchase_order_items.created_at timestamp with time zone
+t:purchase_order_items.id uuid NN
+t:purchase_order_items.material_id uuid NN
+t:purchase_order_items.notes text
+t:purchase_order_items.purchase_order_id uuid NN
+t:purchase_order_items.quantity_ordered numeric(10,2) NN
+t:purchase_order_items.quantity_received numeric(10,2)
+t:purchase_order_items.unit_price numeric(10,2)
+t:purchase_order_items.updated_at timestamp with time zone
+t:purchase_orders.account_id uuid NN
+t:purchase_orders.created_at timestamp with time zone
+t:purchase_orders.created_by uuid
+t:purchase_orders.expected_date date
+t:purchase_orders.id uuid NN
+t:purchase_orders.notes text
+t:purchase_orders.order_date date
+t:purchase_orders.po_number text
+t:purchase_orders.received_date date
+t:purchase_orders.status text
+t:purchase_orders.supplier text
+t:purchase_orders.total_items integer
+t:purchase_orders.updated_at timestamp with time zone
+t:reader_location_history.assigned_at timestamp with time zone NN
+t:reader_location_history.created_at timestamp with time zone NN
+t:reader_location_history.created_by uuid
+t:reader_location_history.id uuid NN
+t:reader_location_history.notes text
+t:reader_location_history.postal_center_id uuid NN
+t:reader_location_history.reader_id uuid NN
+t:reader_location_history.unassigned_at timestamp with time zone
+t:reader_location_history.updated_at timestamp with time zone NN
+t:reader_location_history.updated_by uuid
+t:readers.account_id uuid NN
+t:readers.created_at timestamp with time zone
+t:readers.created_by uuid
+t:readers.deleted_at timestamp with time zone
+t:readers.description text
+t:readers.id uuid NN
+t:readers.is_active boolean
+t:readers.mixed_reader_gap_minutes integer
+t:readers.name text NN
+t:readers.postal_center_id uuid
+t:readers.reader_id text NN
+t:readers.type text NN
+t:readers.updated_at timestamp with time zone
+t:readers.updated_by uuid
+t:regions.account_id uuid NN
+t:regions.code text NN
+t:regions.country_code character varying(2)
+t:regions.created_at timestamp with time zone
+t:regions.description text
+t:regions.id uuid NN
+t:regions.name text NN
+t:regions.status text
+t:regions.updated_at timestamp with time zone
+t:reporting_config.account_id uuid NN
+t:reporting_config.compliance_threshold_critical integer
+t:reporting_config.compliance_threshold_warning integer
+t:reporting_config.created_at timestamp with time zone NN
+t:reporting_config.default_report_period text
+t:reporting_config.id uuid NN
+t:reporting_config.preferred_map_alternative text
+t:reporting_config.updated_at timestamp with time zone NN
+t:reporting_config.updated_by uuid
+t:reporting_config.use_regional_grouping boolean
+t:rfid_events_raw.account_id uuid NN
+t:rfid_events_raw.carrier_id uuid
+t:rfid_events_raw.created_at timestamp with time zone
+t:rfid_events_raw.event_id text NN
+t:rfid_events_raw.id uuid NN
+t:rfid_events_raw.is_processed boolean
+t:rfid_events_raw.product_id uuid
+t:rfid_events_raw.read_local_datetime timestamp with time zone NN
+t:rfid_events_raw.reader_id text NN
+t:rfid_events_raw.tag_id text NN
+t:rfid_ingest_state.backfill_since timestamp with time zone
+t:rfid_ingest_state.id text NN
+t:rfid_ingest_state.last_error text
+t:rfid_ingest_state.last_fetched integer NN
+t:rfid_ingest_state.last_matched integer NN
+t:rfid_ingest_state.last_run_at timestamp with time zone
+t:rfid_ingest_state.last_since timestamp with time zone
+t:rfid_ingest_state.last_status text
+t:rfid_ingest_state.last_unmatched integer NN
+t:rfid_ingest_state.next_cursor text
+t:rfid_ingest_state.total_fetched bigint NN
+t:rfid_ingest_state.updated_at timestamp with time zone NN
+t:rfid_intermediate_db.account_id uuid NN
+t:rfid_intermediate_db.created_at timestamp with time zone
+t:rfid_intermediate_db.event_id uuid NN
+t:rfid_intermediate_db.id bigint NN
+t:rfid_intermediate_db.ingested_at timestamp with time zone
+t:rfid_intermediate_db.processed_at timestamp with time zone
+t:rfid_intermediate_db.read_local_date_time timestamp with time zone NN
+t:rfid_intermediate_db.reader_id text NN
+t:rfid_intermediate_db.tag_id text NN
+t:rfid_provider_reads.created_at timestamp with time zone NN
+t:rfid_provider_reads.id uuid NN
+t:rfid_provider_reads.ingested_at timestamp with time zone NN
+t:rfid_provider_reads.location text
+t:rfid_provider_reads.match_status text NN
+t:rfid_provider_reads.read_local_datetime timestamp with time zone NN
+t:rfid_provider_reads.reader_id text NN
+t:rfid_provider_reads.resolved_account_id uuid
+t:rfid_provider_reads.resolved_at timestamp with time zone
+t:rfid_provider_reads.rfid_events_raw_id uuid
+t:rfid_provider_reads.tag_id_normalized text
+t:rfid_provider_reads.tag_id_raw text NN
+t:rfid_provider_reads.unmatch_reason text
+t:shipment_incident.account_id uuid
+t:shipment_incident.description text NN
+t:shipment_incident.email_sent_at timestamp with time zone
+t:shipment_incident.email_sent_to text
+t:shipment_incident.id uuid NN
+t:shipment_incident.panelist_id uuid
+t:shipment_incident.panelist_language text
+t:shipment_incident.parcel_id uuid NN
+t:shipment_incident.reported_at timestamp with time zone NN
+t:shipment_incident.status text
+t:shipment_incident.telegram_id text NN
+t:sla_definitions.account_id uuid NN
+t:sla_definitions.created_at timestamp with time zone
+t:sla_definitions.created_by uuid
+t:sla_definitions.critical_threshold_multiplier numeric(5,2) NN
+t:sla_definitions.expected_duration_hours numeric(10,2) NN
+t:sla_definitions.from_postal_center_id uuid NN
+t:sla_definitions.id uuid NN
+t:sla_definitions.is_active boolean
+t:sla_definitions.to_postal_center_id uuid NN
+t:sla_definitions.updated_at timestamp with time zone
+t:sla_definitions.updated_by uuid
+t:sla_definitions.warning_threshold_multiplier numeric(5,2) NN
+t:slas.account_id uuid NN
+t:slas.carrier_id uuid
+t:slas.created_at timestamp with time zone
+t:slas.created_by uuid
+t:slas.critical_threshold integer NN
+t:slas.deleted_at timestamp with time zone
+t:slas.expected_time_minutes integer NN
+t:slas.from_postal_center_id uuid
+t:slas.id uuid NN
+t:slas.is_active boolean
+t:slas.on_time_percentage integer NN
+t:slas.postal_center_id uuid
+t:slas.product_id uuid
+t:slas.sla_type text NN
+t:slas.time_unit text NN
+t:slas.to_postal_center_id uuid
+t:slas.updated_at timestamp with time zone
+t:slas.updated_by uuid
+t:slas.warning_threshold integer NN
+t:stock_alerts.account_id uuid NN
+t:stock_alerts.alert_type text NN
+t:stock_alerts.created_at timestamp with time zone
+t:stock_alerts.current_quantity numeric NN
+t:stock_alerts.expected_quantity numeric
+t:stock_alerts.id uuid NN
+t:stock_alerts.location_id uuid
+t:stock_alerts.material_id uuid NN
+t:stock_alerts.notes text
+t:stock_alerts.reference_id uuid
+t:stock_alerts.reference_type text
+t:stock_alerts.resolved_at timestamp with time zone
+t:stock_settings.account_id uuid NN
+t:stock_settings.auto_generate_purchase_orders boolean
+t:stock_settings.auto_generate_shipments boolean
+t:stock_settings.created_at timestamp with time zone
+t:stock_settings.id uuid NN
+t:stock_settings.purchase_lead_time_days integer
+t:stock_settings.shipment_lead_time_days integer
+t:stock_settings.stock_control_enabled boolean
+t:stock_settings.updated_at timestamp with time zone
+t:weekly_schedule.account_id uuid NN
+t:weekly_schedule.created_at timestamp with time zone
+t:weekly_schedule.created_by uuid
+t:weekly_schedule.cutoff_time time without time zone
+t:weekly_schedule.day_of_week integer NN
+t:weekly_schedule.id uuid NN
+t:weekly_schedule.is_working_day boolean NN
+t:weekly_schedule.opening_hour time without time zone
+t:weekly_schedule.postal_center_id uuid
+t:weekly_schedule.updated_at timestamp with time zone
+t:weekly_schedule.updated_by uuid
+v:active_unavailability_periods
+v:allocation_details_full
+v:nodes_with_panelists
+v:panelists_availability_status
+v:v_active_stock_alerts
+v:v_allocation_details_with_availability
+v:v_city_coverage_status
+v:v_mobile_readers
+v:v_node_load_analysis
+v:v_postal_centers_extended
+v:v_reporting_by_locality
+v:v_reporting_compliance_by_classification
+v:v_reporting_general_performance
+v:v_reporting_individual_tracking
+v:v_segment_details

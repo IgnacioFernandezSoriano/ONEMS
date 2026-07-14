@@ -1,0 +1,503 @@
+func   admin_reset_account_data(p_account_identifier text)
+func   admin_reset_account_data_backup(p_account_identifier text)
+func   admin_reset_and_seed_demo2()
+func   admin_reset_demo2()
+func   aggregate_journey_paths(p_account_id uuid, p_since timestamp with time zone)
+func   archive_raw_events(p_account_id uuid, p_tag_id text, p_reader_code text)
+func   assemble_journeys(p_account_id uuid)
+func   assign_reader_to_center(p_reader_id uuid, p_postal_center_id uuid, p_assigned_at timestamp with time zone, p_unassigned_at timestamp with time zone, p_notes text)
+func   auto_resolve_stock_alerts()
+func   balance_node_load_matrix(p_account_id uuid, p_city_id uuid, p_month integer, p_year integer, p_dry_run boolean)
+func   build_journey_segments(p_account_id uuid)
+func   calculate_adjusted_time(p_start_time timestamp with time zone, p_end_time timestamp with time zone, p_postal_center_id uuid, p_account_id uuid)
+func   calculate_business_days(p_start_date timestamp with time zone, p_end_date timestamp with time zone, p_account_id uuid)
+func   calculate_compliance_percentage(p_account_id uuid, p_date_from timestamp with time zone, p_date_to timestamp with time zone, p_carrier_name text, p_product_name text)
+func   calculate_network_health_score(p_account_id uuid, p_start_date timestamp with time zone, p_end_date timestamp with time zone)
+func   calculate_next_working_datetime(p_timestamp timestamp with time zone, p_postal_center_id uuid)
+func   calculate_pre_operational_wait(p_actual_entry_time timestamp with time zone, p_analysis_entry_time timestamp with time zone)
+func   calculate_working_days_time(p_start_datetime timestamp with time zone, p_end_datetime timestamp with time zone, p_postal_center_id uuid)
+func   calculate_working_hours(p_start_time timestamp with time zone, p_end_time timestamp with time zone, p_postal_center_id uuid, p_account_id uuid)
+func   calculate_working_minutes(p_start_timestamp timestamp with time zone, p_end_timestamp timestamp with time zone, p_account_id uuid)
+func   calculate_working_minutes_simple(p_start_timestamp timestamp with time zone, p_end_timestamp timestamp with time zone)
+func   calculate_working_time_minutes(p_start_time timestamp with time zone, p_end_time timestamp with time zone, p_postal_center_id uuid)
+func   check_unavailability_overlap()
+func   classify_route(p_origin_city_id uuid, p_destination_city_id uuid)
+func   cleanup_processed_rfid_events(p_account_id uuid, p_older_than_hours integer)
+func   consolidate_mixed_reader_events(p_account_id uuid, p_tag_id text, p_reader_code text, p_gap_threshold_minutes integer)
+func   consolidate_rfid_events(p_account_id uuid)
+func   current_user_account_id()
+func   current_user_role()
+func   daily_update_panelist_availability()
+func   detect_missing_exits(p_account_id uuid)
+func   determine_sla_compliance(p_adjusted_time_minutes integer, p_expected_time_minutes integer, p_on_time_percentage numeric, p_warning_threshold numeric, p_critical_threshold numeric)
+func   find_applicable_sla(p_account_id uuid, p_segment_type text, p_postal_center_id uuid, p_from_postal_center_id uuid, p_to_postal_center_id uuid, p_carrier_id uuid)
+func   generate_delivery_standards(p_carrier_ids uuid[], p_product_ids uuid[], p_origin_city_ids uuid[], p_destination_city_ids uuid[])
+func   generate_node_auto_id(p_city_id uuid)
+func   generate_panelist_code()
+func   get_carrier_comparison(p_account_id uuid, p_start_date timestamp with time zone, p_end_date timestamp with time zone)
+func   get_center_comparison(p_account_id uuid, p_start_date timestamp with time zone, p_end_date timestamp with time zone)
+func   get_center_performance(p_account_id uuid, p_start_date timestamp with time zone, p_end_date timestamp with time zone)
+func   get_center_trends(p_account_id uuid, p_period text, p_start_date timestamp with time zone, p_end_date timestamp with time zone)
+func   get_jk_carrier_performance_segments(p_account_id uuid, p_start_date timestamp with time zone, p_end_date timestamp with time zone)
+func   get_jk_city_performance_segments(p_account_id uuid, p_start_date timestamp with time zone, p_end_date timestamp with time zone)
+func   get_jk_performance_segments(p_account_id uuid, p_start_date timestamp with time zone, p_end_date timestamp with time zone, p_origin_city text, p_destination_city text, p_carrier text, p_product text, p_segment_type text, p_threshold text)
+func   get_jk_performance_segments(p_account_id uuid, p_start_date timestamp with time zone, p_end_date timestamp with time zone, p_origin_city text, p_destination_city text, p_carrier text, p_segment_type text)
+func   get_mobile_readers_summary(p_account_id uuid)
+func   get_panelist_for_node(p_node_id uuid, p_date date)
+func   get_postal_center_config(p_postal_center_id uuid)
+func   get_reader_info(p_reader_id_text text, p_account_id uuid)
+func   get_reader_location_at_time(p_reader_id uuid, p_timestamp timestamp with time zone)
+func   get_reader_location_history(p_reader_id uuid)
+func   get_route_performance(p_account_id uuid, p_start_date timestamp with time zone, p_end_date timestamp with time zone)
+func   get_route_trends(p_account_id uuid, p_origin_city text, p_destination_city text, p_start_date timestamp with time zone, p_end_date timestamp with time zone, p_interval text)
+func   get_segment_anomalies(p_account_id uuid, p_start_date timestamp with time zone, p_end_date timestamp with time zone, p_min_deviation_pct numeric)
+func   get_segment_overview(p_account_id uuid, p_start_date timestamp with time zone, p_end_date timestamp with time zone)
+func   get_segment_time_analysis(p_account_id uuid, p_segment_type text, p_start_date timestamp with time zone, p_end_date timestamp with time zone)
+func   get_sla_for_segment(p_account_id uuid, p_from_center_id uuid, p_to_center_id uuid)
+func   get_top_bottom_centers(p_account_id uuid, p_limit integer)
+func   get_top_bottom_routes(p_account_id uuid, p_limit integer)
+func   get_user_account_id()
+func   is_node_available(p_node_id uuid, p_date date)
+func   is_panelist_available(p_panelist_id uuid, p_date date)
+func   is_superadmin()
+func   is_user_superadmin()
+func   is_working_day(p_account_id uuid, p_postal_center_id uuid, p_date date)
+func   log_reader_location_change()
+func   normalize_provider_tag(p_raw text)
+func   prevent_account_id_change()
+func   process_all_accounts_pipeline()
+func   process_rfid_pipeline(p_account_id uuid)
+func   prune_tool_messages_chat_memory()
+func   reassign_on_unavailability()
+func   recalculate_on_time_delivery_on_sla_change()
+func   reconstruct_journeys(p_account_id uuid, p_tag_id text)
+func   reprocess_failed_events(p_account_id uuid)
+func   reprocess_transfer_errors(p_detail_ids uuid[])
+func   resolve_provider_reads()
+func   rpc_balance_node_load(p_city_id uuid, p_month integer, p_year integer, p_apply_changes boolean)
+func   rpc_balance_node_load_by_period(p_city_id uuid, p_start_date date, p_end_date date, p_apply_changes boolean)
+func   rpc_execute_pipeline_phase(p_phase text)
+func   rpc_get_node_load_by_period(p_account_id uuid, p_start_date date, p_end_date date, p_reference_load numeric, p_deviation_percent numeric)
+func   rpc_get_pipeline_status()
+func   rpc_get_recent_incidents(p_limit integer)
+func   rpc_ingest_epcis_events(p_events jsonb)
+func   rpc_query_journey_paths(p_carrier_id uuid, p_product_id uuid, p_origin_city text, p_destination_city text, p_min_tags integer, p_limit integer)
+func   set_account_id()
+func   transfer_to_one_db()
+func   unassign_reader_from_center(p_reader_id uuid, p_unassigned_at timestamp with time zone)
+func   update_panelists_updated_at()
+func   update_unavailability_updated_at()
+func   update_updated_at()
+func   update_updated_at_column()
+func   user_account_id()
+policy account_config :: account_config_select_own_account
+policy account_config :: account_config_update_own_account
+policy account_config :: Admins can manage account_config of their account
+policy account_config :: Users can view account_config of their account
+policy accounts :: Superadmin manages all accounts
+policy accounts :: Users view their own account
+policy allocation_plan_details :: allocation_plan_details_delete
+policy allocation_plan_details :: allocation_plan_details_insert
+policy allocation_plan_details :: allocation_plan_details_select
+policy allocation_plan_details :: allocation_plan_details_update
+policy allocation_plan_details :: superadmin_delete_allocation_plan_details
+policy allocation_plan_details :: superadmin_insert_allocation_plan_details
+policy allocation_plan_details :: superadmin_select_allocation_plan_details
+policy allocation_plan_details :: superadmin_update_allocation_plan_details
+policy allocation_plans :: allocation_plans_delete
+policy allocation_plans :: allocation_plans_insert
+policy allocation_plans :: allocation_plans_select
+policy allocation_plans :: allocation_plans_update
+policy allocation_plans :: superadmin_delete_allocation_plans
+policy allocation_plans :: superadmin_insert_allocation_plans
+policy allocation_plans :: superadmin_select_allocation_plans
+policy allocation_plans :: superadmin_update_allocation_plans
+policy api_keys :: Service role bypass RLS
+policy api_keys :: Users can manage their account's API keys
+policy api_usage_log :: Service role bypass RLS
+policy api_usage_log :: Users can view their account's API usage
+policy audit_raw_reads :: audit_raw_reads_insert_policy
+policy audit_raw_reads :: audit_raw_reads_select_policy
+policy audit_raw_reads :: audit_raw_reads_select_superadmin
+policy audit_raw_reads :: Service role can read all audit data
+policy audit_raw_reads :: Users can read audit data from their account
+policy carriers :: carriers_delete
+policy carriers :: carriers_insert
+policy carriers :: carriers_select
+policy carriers :: carriers_update
+policy carriers :: superadmin_delete_carriers
+policy carriers :: superadmin_insert_carriers
+policy carriers :: superadmin_update_carriers
+policy cities :: cities_delete
+policy cities :: cities_insert
+policy cities :: cities_select
+policy cities :: cities_update
+policy cities :: superadmin_delete_cities
+policy cities :: superadmin_insert_cities
+policy cities :: superadmin_update_cities
+policy delivery_standards :: delivery_standards_delete
+policy delivery_standards :: delivery_standards_insert
+policy delivery_standards :: delivery_standards_select
+policy delivery_standards :: delivery_standards_update
+policy delivery_standards :: superadmin_delete_delivery_standards
+policy delivery_standards :: superadmin_insert_delivery_standards
+policy delivery_standards :: superadmin_update_delivery_standards
+policy diagnosis_anomalies :: diagnosis_anomalies_delete
+policy diagnosis_anomalies :: diagnosis_anomalies_insert
+policy diagnosis_anomalies :: diagnosis_anomalies_select
+policy diagnosis_anomalies :: diagnosis_anomalies_update
+policy diagnosis_routes :: diagnosis_routes_delete
+policy diagnosis_routes :: diagnosis_routes_insert
+policy diagnosis_routes :: diagnosis_routes_select
+policy diagnosis_routes :: diagnosis_routes_update
+policy diagnosis_time_metrics :: diagnosis_time_metrics_delete
+policy diagnosis_time_metrics :: diagnosis_time_metrics_insert
+policy diagnosis_time_metrics :: diagnosis_time_metrics_select
+policy diagnosis_time_metrics :: diagnosis_time_metrics_update
+policy generated_allocation_plan_details :: generated_allocation_plan_details_delete
+policy generated_allocation_plan_details :: generated_allocation_plan_details_insert
+policy generated_allocation_plan_details :: generated_allocation_plan_details_select
+policy generated_allocation_plan_details :: generated_allocation_plan_details_update
+policy generated_allocation_plan_details :: superadmin_delete_generated_allocation_plan_details
+policy generated_allocation_plan_details :: superadmin_insert_generated_allocation_plan_details
+policy generated_allocation_plan_details :: superadmin_select_generated_allocation_plan_details
+policy generated_allocation_plan_details :: superadmin_update_generated_allocation_plan_details
+policy generated_allocation_plans :: generated_allocation_plans_delete
+policy generated_allocation_plans :: generated_allocation_plans_insert
+policy generated_allocation_plans :: generated_allocation_plans_select
+policy generated_allocation_plans :: generated_allocation_plans_update
+policy generated_allocation_plans :: superadmin_delete_generated_allocation_plans
+policy generated_allocation_plans :: superadmin_insert_generated_allocation_plans
+policy generated_allocation_plans :: superadmin_select_generated_allocation_plans
+policy generated_allocation_plans :: superadmin_update_generated_allocation_plans
+policy incidents :: incidents_delete_policy
+policy incidents :: incidents_insert_policy
+policy incidents :: incidents_select_policy
+policy incidents :: incidents_update_policy
+policy journey_paths :: journey_paths_account_isolation
+policy journey_segments :: journey_segments_delete_policy
+policy journey_segments :: journey_segments_insert_policy
+policy journey_segments :: journey_segments_select_policy
+policy journey_segments :: journey_segments_update_policy
+policy journeys :: journeys_delete_policy
+policy journeys :: journeys_insert_policy
+policy journeys :: journeys_select_policy
+policy journeys :: journeys_update_policy
+policy material_catalog :: material_catalog_delete
+policy material_catalog :: material_catalog_insert
+policy material_catalog :: material_catalog_select
+policy material_catalog :: material_catalog_update
+policy material_catalog :: superadmin_delete_material_catalog
+policy material_catalog :: superadmin_insert_material_catalog
+policy material_catalog :: superadmin_update_material_catalog
+policy material_shipment_items :: superadmin_delete_material_shipment_items
+policy material_shipment_items :: superadmin_insert_material_shipment_items
+policy material_shipment_items :: superadmin_update_material_shipment_items
+policy material_shipments :: superadmin_delete_material_shipments
+policy material_shipments :: superadmin_insert_material_shipments
+policy material_shipments :: superadmin_update_material_shipments
+policy materials :: materials_delete
+policy materials :: materials_insert
+policy materials :: materials_select
+policy materials :: materials_update
+policy materials :: superadmin_delete_materials
+policy materials :: superadmin_insert_materials
+policy materials :: superadmin_update_materials
+policy node_balancing_history :: balancing_history_insert_policy
+policy node_balancing_history :: balancing_history_select_policy
+policy node_balancing_history :: superadmin_delete_node_balancing_history
+policy node_balancing_history :: superadmin_insert_node_balancing_history
+policy node_balancing_history :: superadmin_update_node_balancing_history
+policy nodes :: nodes_delete
+policy nodes :: nodes_insert
+policy nodes :: nodes_select
+policy nodes :: nodes_update
+policy nodes :: superadmin_delete_nodes
+policy nodes :: superadmin_insert_nodes
+policy nodes :: superadmin_update_nodes
+policy non_working_days :: Admins can manage non_working_days of their account
+policy non_working_days :: non_working_days_delete_own_account
+policy non_working_days :: non_working_days_insert_own_account
+policy non_working_days :: non_working_days_select_own_account
+policy non_working_days :: non_working_days_select_superadmin
+policy non_working_days :: non_working_days_update_own_account
+policy non_working_days :: Users can view non_working_days of their account
+policy one_db :: Enable delete for authenticated users on own account
+policy one_db :: one_db_insert_policy
+policy one_db :: one_db_select_policy
+policy one_db :: superadmin_delete_one_db
+policy one_db :: superadmin_insert_one_db
+policy one_db :: superadmin_update_one_db
+policy panelist_material_stocks :: superadmin_delete_panelist_material_stocks
+policy panelist_material_stocks :: superadmin_insert_panelist_material_stocks
+policy panelist_material_stocks :: superadmin_update_panelist_material_stocks
+policy panelist_unavailability :: panelist_unavailability_delete_policy
+policy panelist_unavailability :: panelist_unavailability_insert_policy
+policy panelist_unavailability :: panelist_unavailability_select_policy
+policy panelist_unavailability :: panelist_unavailability_update_policy
+policy panelist_unavailability :: superadmin_delete_panelist_unavailability
+policy panelist_unavailability :: superadmin_insert_panelist_unavailability
+policy panelist_unavailability :: superadmin_update_panelist_unavailability
+policy panelist_unavailability :: unavailability_delete_policy
+policy panelist_unavailability :: unavailability_insert_policy
+policy panelist_unavailability :: unavailability_select_policy
+policy panelist_unavailability :: unavailability_update_policy
+policy panelists :: panelists_delete_policy
+policy panelists :: panelists_insert_policy
+policy panelists :: panelists_select_policy
+policy panelists :: panelists_update_policy
+policy panelists :: superadmin_delete_panelists
+policy panelists :: superadmin_insert_panelists
+policy panelists :: superadmin_select_panelists
+policy panelists :: superadmin_update_panelists
+policy postal_centers :: Admins can manage postal_centers of their account
+policy postal_centers :: postal_centers_delete_own_account
+policy postal_centers :: postal_centers_insert_own_account
+policy postal_centers :: postal_centers_select_own_account
+policy postal_centers :: postal_centers_select_superadmin
+policy postal_centers :: postal_centers_update_own_account
+policy postal_centers :: Users can view postal_centers of their account
+policy processed_events :: processed_events_delete_policy
+policy processed_events :: processed_events_insert_policy
+policy processed_events :: processed_events_select_policy
+policy processed_events :: processed_events_update_policy
+policy product_materials :: product_materials_delete
+policy product_materials :: product_materials_insert
+policy product_materials :: product_materials_select
+policy product_materials :: product_materials_update
+policy products :: products_delete
+policy products :: products_insert
+policy products :: products_select
+policy products :: products_update
+policy products :: superadmin_delete_products
+policy products :: superadmin_insert_products
+policy products :: superadmin_update_products
+policy profiles :: admin_create_users
+policy profiles :: admin_delete_users
+policy profiles :: admin_update_users
+policy profiles :: admin_view_account_profiles
+policy profiles :: profile_delete_admin
+policy profiles :: profile_delete_superadmin
+policy profiles :: profile_insert_admin
+policy profiles :: profile_insert_superadmin
+policy profiles :: profile_select_admin
+policy profiles :: profile_select_own
+policy profiles :: profile_select_superadmin
+policy profiles :: profile_update_admin
+policy profiles :: profile_update_own
+policy profiles :: profile_update_superadmin
+policy profiles :: Superadmin manages all profiles
+policy profiles :: superadmin_full_access
+policy profiles :: Users update their own profile
+policy profiles :: users_update_own_profile
+policy profiles :: users_view_own_profile
+policy purchase_order_items :: superadmin_delete_purchase_order_items
+policy purchase_order_items :: superadmin_insert_purchase_order_items
+policy purchase_order_items :: superadmin_update_purchase_order_items
+policy purchase_orders :: superadmin_delete_purchase_orders
+policy purchase_orders :: superadmin_insert_purchase_orders
+policy purchase_orders :: superadmin_update_purchase_orders
+policy reader_location_history :: Users can insert reader location history for their account
+policy reader_location_history :: Users can update reader location history for their account
+policy reader_location_history :: Users can view reader location history for their account
+policy readers :: Admins can manage readers of their account
+policy readers :: readers_delete_own_account
+policy readers :: readers_delete_superadmin
+policy readers :: readers_insert_own_account
+policy readers :: readers_insert_superadmin
+policy readers :: readers_select_own_account
+policy readers :: readers_select_superadmin
+policy readers :: readers_update_own_account
+policy readers :: readers_update_superadmin
+policy readers :: Users can view readers of their account
+policy regions :: regions_delete
+policy regions :: regions_insert
+policy regions :: regions_select
+policy regions :: regions_update
+policy regions :: superadmin_delete_regions
+policy regions :: superadmin_insert_regions
+policy regions :: superadmin_update_regions
+policy reporting_config :: reporting_config_select_policy
+policy reporting_config :: reporting_config_update_policy
+policy reporting_config :: superadmin_delete_reporting_config
+policy reporting_config :: superadmin_insert_reporting_config
+policy reporting_config :: superadmin_update_reporting_config
+policy rfid_events_raw :: rfid_events_raw_delete_policy
+policy rfid_events_raw :: rfid_events_raw_insert_policy
+policy rfid_events_raw :: rfid_events_raw_select_policy
+policy rfid_events_raw :: rfid_events_raw_select_superadmin
+policy rfid_events_raw :: rfid_events_raw_update_policy
+policy rfid_ingest_state :: rfid_ingest_state_select_superadmin
+policy rfid_intermediate_db :: rfid_intermediate_db_delete
+policy rfid_intermediate_db :: rfid_intermediate_db_insert
+policy rfid_intermediate_db :: rfid_intermediate_db_select
+policy rfid_intermediate_db :: rfid_intermediate_db_update
+policy rfid_provider_reads :: rfid_provider_reads_select_account
+policy rfid_provider_reads :: rfid_provider_reads_select_superadmin
+policy shipment_incident :: managers_select_own_account_incidents
+policy shipment_incident :: service_role_full_access
+policy sla_definitions :: Admins can manage sla_definitions of their account
+policy sla_definitions :: Users can view sla_definitions of their account
+policy slas :: slas_delete_policy
+policy slas :: slas_insert_policy
+policy slas :: slas_select_policy
+policy slas :: slas_update_policy
+policy stock_settings :: superadmin_delete_stock_settings
+policy stock_settings :: superadmin_insert_stock_settings
+policy stock_settings :: superadmin_update_stock_settings
+policy weekly_schedule :: Admins can manage weekly_schedule of their account
+policy weekly_schedule :: Users can view weekly_schedule of their account
+policy weekly_schedule :: weekly_schedule_delete_own_account
+policy weekly_schedule :: weekly_schedule_insert_own_account
+policy weekly_schedule :: weekly_schedule_select_own_account
+policy weekly_schedule :: weekly_schedule_select_superadmin
+policy weekly_schedule :: weekly_schedule_update_own_account
+table  account_config
+table  accounts
+table  allocation_plan_details
+table  allocation_plans
+table  api_keys
+table  api_usage_log
+table  audit_raw_reads
+table  carriers
+table  cities
+table  delivery_standards
+table  demo2_seed_data
+table  diagnosis_anomalies
+table  diagnosis_routes
+table  diagnosis_time_metrics
+table  generated_allocation_plan_details
+table  generated_allocation_plans
+table  incidents
+table  journey_paths
+table  journey_segments
+table  journeys
+table  material_catalog
+table  material_movements
+table  material_requirements_periods
+table  material_shipment_items
+table  material_shipments
+table  material_stocks
+table  materials
+table  n8n_upu_agent
+table  n8n_upu_incident
+table  n8n_upu_timeoff
+table  node_balancing_history
+table  nodes
+table  non_working_days
+table  one_db
+table  panelist_context
+table  panelist_material_stocks
+table  panelist_unavailability
+table  panelists
+table  postal_center_carriers
+table  postal_centers
+table  processed_events
+table  product_materials
+table  products
+table  profiles
+table  purchase_order_items
+table  purchase_orders
+table  reader_location_history
+table  readers
+table  regions
+table  reporting_config
+table  rfid_events_raw
+table  rfid_ingest_state
+table  rfid_intermediate_db
+table  rfid_provider_reads
+table  shipment_incident
+table  sla_definitions
+table  slas
+table  stock_alerts
+table  stock_settings
+table  weekly_schedule
+trigger account_config :: update_account_config_updated_at
+trigger accounts :: update_accounts_updated_at
+trigger allocation_plan_details :: set_allocation_plan_details_account_id
+trigger allocation_plan_details :: trigger_transfer_to_one_db
+trigger allocation_plan_details :: update_allocation_plan_details_updated_at
+trigger allocation_plans :: set_allocation_plans_account_id
+trigger allocation_plans :: update_allocation_plans_updated_at
+trigger carriers :: prevent_carriers_account_change
+trigger carriers :: set_carriers_account_id
+trigger carriers :: update_carriers_updated_at
+trigger cities :: prevent_cities_account_change
+trigger cities :: set_cities_account_id
+trigger cities :: update_cities_updated_at
+trigger delivery_standards :: prevent_delivery_standards_account_change
+trigger delivery_standards :: set_delivery_standards_account_id
+trigger delivery_standards :: trigger_recalculate_on_time_on_sla_change
+trigger delivery_standards :: update_delivery_standards_updated_at
+trigger diagnosis_anomalies :: prevent_diagnosis_anomalies_account_change
+trigger diagnosis_anomalies :: set_diagnosis_anomalies_account_id
+trigger diagnosis_routes :: prevent_diagnosis_routes_account_change
+trigger diagnosis_routes :: set_diagnosis_routes_account_id
+trigger diagnosis_time_metrics :: prevent_diagnosis_time_metrics_account_change
+trigger diagnosis_time_metrics :: set_diagnosis_time_metrics_account_id
+trigger generated_allocation_plan_details :: set_generated_allocation_plan_details_account_id
+trigger generated_allocation_plan_details :: update_generated_allocation_plan_details_updated_at
+trigger generated_allocation_plans :: set_generated_allocation_plans_account_id
+trigger generated_allocation_plans :: update_generated_allocation_plans_updated_at
+trigger material_catalog :: prevent_material_catalog_account_change
+trigger material_catalog :: set_material_catalog_account_id
+trigger material_catalog :: update_material_catalog_updated_at
+trigger material_shipment_items :: update_material_shipment_items_updated_at
+trigger material_shipments :: update_material_shipments_updated_at
+trigger material_stocks :: trigger_auto_resolve_regulator_alerts
+trigger material_stocks :: update_material_stocks_updated_at
+trigger materials :: prevent_materials_account_change
+trigger materials :: set_materials_account_id
+trigger materials :: update_materials_updated_at
+trigger n8n_upu_agent :: trg_prune_tool_messages
+trigger n8n_upu_incident :: trg_prune_tool_messages
+trigger n8n_upu_timeoff :: trg_prune_tool_messages
+trigger nodes :: prevent_nodes_account_change
+trigger nodes :: set_nodes_account_id
+trigger nodes :: update_nodes_updated_at
+trigger panelist_material_stocks :: trigger_auto_resolve_panelist_alerts
+trigger panelist_material_stocks :: update_panelist_material_stocks_updated_at
+trigger panelist_unavailability :: check_unavailability_overlap_trigger
+trigger panelist_unavailability :: reassign_on_unavailability_trigger
+trigger panelist_unavailability :: set_updated_at_panelist_unavailability
+trigger panelist_unavailability :: trigger_update_unavailability_updated_at
+trigger panelist_unavailability :: update_panelist_unavailability_updated_at
+trigger panelists :: generate_panelist_code_trigger
+trigger panelists :: set_updated_at_panelists
+trigger panelists :: trigger_update_panelists_updated_at
+trigger postal_centers :: update_postal_centers_updated_at
+trigger product_materials :: prevent_product_materials_account_change
+trigger product_materials :: set_product_materials_account_id
+trigger product_materials :: update_product_materials_updated_at
+trigger products :: prevent_products_account_change
+trigger products :: set_products_account_id
+trigger products :: update_products_updated_at
+trigger profiles :: prevent_profiles_account_change
+trigger profiles :: update_profiles_updated_at
+trigger purchase_order_items :: update_purchase_order_items_updated_at
+trigger purchase_orders :: update_purchase_orders_updated_at
+trigger readers :: reader_location_change_trigger
+trigger readers :: update_readers_updated_at
+trigger regions :: prevent_regions_account_change
+trigger regions :: set_regions_account_id
+trigger regions :: update_regions_updated_at
+trigger rfid_intermediate_db :: prevent_rfid_intermediate_db_account_change
+trigger rfid_intermediate_db :: set_rfid_intermediate_db_account_id
+trigger sla_definitions :: update_sla_definitions_updated_at
+trigger stock_settings :: update_stock_settings_updated_at
+trigger weekly_schedule :: update_weekly_schedule_updated_at
+view   active_unavailability_periods
+view   allocation_details_full
+view   nodes_with_panelists
+view   panelists_availability_status
+view   v_active_stock_alerts
+view   v_allocation_details_with_availability
+view   v_city_coverage_status
+view   v_mobile_readers
+view   v_node_load_analysis
+view   v_postal_centers_extended
+view   v_reporting_by_locality
+view   v_reporting_compliance_by_classification
+view   v_reporting_general_performance
+view   v_reporting_individual_tracking
+view   v_segment_details

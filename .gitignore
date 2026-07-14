@@ -28,3 +28,11 @@ dist-ssr
 .env.local
 .env.production
 .env.resend
+
+# Secrets / tokens (NO commitear)
+one4claudecodekey.txt
+*key*.txt
+pat.txt
+
+
+graphify-out/
