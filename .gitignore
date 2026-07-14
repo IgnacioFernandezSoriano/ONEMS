@@ -36,3 +36,8 @@ pat.txt
 
 
 graphify-out/
+
+# Config personal / editor / locks (NO compartir)
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
+.obsidian/

@@ -1,0 +1,20 @@
+node_modules/
+dist/
+build/
+coverage/
+.venv/
+__pycache__/
+*.min.js
+*.min.css
+*.map
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+*.log
+.env*
+graphify-out/
+.obsidian/
+.claude/
+# Volcados crudos de validación de esquema (ruido, no conocimiento)
+supabase/tests/_sig_*.txt
+supabase/tests/_prod_schema_snapshot.txt
