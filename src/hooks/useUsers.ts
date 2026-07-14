@@ -38,55 +38,35 @@ export function useUsers() {
     account_id?: string
     preferred_language?: string
   }) => {
-    // Determinar rol y account_id según permisos del usuario actual
-    let finalRole = 'user'
-    let finalAccountId = userData.account_id
-
-    if (profile?.role === 'superadmin') {
-      // Superadmin puede crear admins o users
-      finalRole = userData.role || 'admin'
-      finalAccountId = userData.account_id
-    } else if (profile?.role === 'admin') {
-      // Admin solo puede crear users de su cuenta
-      finalRole = 'user'
-      finalAccountId = profile.account_id || undefined
-    } else {
-      throw new Error('Unauthorized to create users')
-    }
-
-    // Validar que se proporcione account_id para roles que no sean superadmin
-    if (finalRole !== 'superadmin' && !finalAccountId) {
-      throw new Error('Account is required for this role')
-    }
-
-    // 1. Crear usuario en Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: userData.email,
-      password: userData.password,
+    // La creación se hace en la Edge Function `create-user`, que usa service_role
+    // para: (a) crear el usuario ya confirmado (email_confirm: true), sin enviar
+    // correo ni tocar la sesión del admin, y (b) resolver rol/cuenta server-side.
+    const { data, error } = await supabase.functions.invoke('create-user', {
+      body: {
+        email: userData.email,
+        password: userData.password,
+        full_name: userData.full_name,
+        role: userData.role,
+        account_id: userData.account_id,
+        preferred_language: userData.preferred_language,
+      },
     })
 
-    if (authError) throw authError
-    if (!authData.user) throw new Error('Failed to create user')
-
-    // 2. Crear perfil
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .insert({
-        id: authData.user.id,
-        email: userData.email,
-        full_name: userData.full_name,
-        role: finalRole,
-        account_id: finalAccountId || undefined,
-        preferred_language: userData.preferred_language || 'en',
-      } as any)
-
-    if (profileError) {
-      // Si falla la creación del perfil, intentar eliminar el usuario de Auth
-      await supabase.auth.admin.deleteUser(authData.user.id)
-      throw profileError
+    if (error) {
+      // En supabase-js v2, si la función responde no-2xx, el cuerpo está en
+      // error.context (un Response). Extraemos el mensaje legible de la función.
+      let message = error.message
+      try {
+        const body = await (error as any).context?.json?.()
+        if (body?.error) message = body.error
+      } catch {
+        // sin cuerpo JSON: nos quedamos con error.message
+      }
+      throw new Error(message)
     }
 
     await fetchUsers()
+    return data
   }
 
   const updateUser = async (id: string, updates: Partial<ProfileWithAccount>) => {
@@ -112,14 +92,25 @@ export function useUsers() {
   }
 
   const deleteUser = async (id: string) => {
-    // Eliminar usuario de Supabase Auth (libera el email para reutilización)
-    const { error: authError } = await supabase.auth.admin.deleteUser(id)
-    if (authError) throw authError
+    // Borrado vía Edge Function `delete-user` (service_role). El perfil cae por
+    // CASCADE (ON DELETE CASCADE). No se puede borrar con anon key desde el cliente.
+    const { data, error } = await supabase.functions.invoke('delete-user', {
+      body: { user_id: id },
+    })
 
-    // El perfil se elimina automáticamente por CASCADE (ON DELETE CASCADE)
-    // No es necesario eliminar manualmente de profiles
-    
+    if (error) {
+      let message = error.message
+      try {
+        const body = await (error as any).context?.json?.()
+        if (body?.error) message = body.error
+      } catch {
+        // sin cuerpo JSON: nos quedamos con error.message
+      }
+      throw new Error(message)
+    }
+
     await fetchUsers()
+    return data
   }
 
   const resetPassword = async (userId: string, newPassword: string) => {
