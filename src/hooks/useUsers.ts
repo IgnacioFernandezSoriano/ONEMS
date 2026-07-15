@@ -1,7 +1,36 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
-import type { ProfileWithAccount } from '@/lib/types'
+import type { ProfileWithAccount, Profile, Role } from '@/lib/types'
+
+/**
+ * Reglas de cambio de rol. Espejo de las políticas RLS de `public.profiles`
+ * (ver 20260715120000_fix_profiles_role_update_policies.sql): esto sólo da un
+ * mensaje de error decente en la UI; quien manda es RLS.
+ *
+ *  - superadmin: cualquier rol, en cualquier cuenta.
+ *  - admin:      sólo entre `admin` y `user`, y sólo dentro de su cuenta.
+ *  - user:       ningún cambio de rol.
+ */
+function assertRoleChangeAllowed(
+  actor: Profile | null,
+  target: ProfileWithAccount,
+  nextRole: Role
+) {
+  if (actor?.role === 'superadmin') return
+
+  if (actor?.role === 'admin') {
+    if (target.account_id !== actor.account_id) {
+      throw new Error('You can only change roles of users in your own account')
+    }
+    if (target.role === 'superadmin' || nextRole === 'superadmin') {
+      throw new Error('Only a superadmin can grant or revoke the superadmin role')
+    }
+    return
+  }
+
+  throw new Error('You do not have permission to change roles')
+}
 
 export function useUsers() {
   const { profile } = useAuth()
@@ -70,11 +99,36 @@ export function useUsers() {
   }
 
   const updateUser = async (id: string, updates: Partial<ProfileWithAccount>) => {
-    // Validar que no se intente cambiar el rol o account_id
+    const target = users.find((u) => u.id === id)
+    if (!target) throw new Error('User not found')
+
     const cleanUpdates: any = { ...updates }
-    delete cleanUpdates.role
-    delete cleanUpdates.account_id
     delete cleanUpdates.email
+
+    const nextRole = cleanUpdates.role as Role | undefined
+    const roleChanged = !!nextRole && nextRole !== target.role
+
+    if (!roleChanged) {
+      // Sin cambio de rol no se toca ni el rol ni la cuenta: mover un perfil de
+      // cuenta es una operación aparte (`transferUser`).
+      delete cleanUpdates.role
+      delete cleanUpdates.account_id
+    } else {
+      assertRoleChangeAllowed(profile, target, nextRole!)
+
+      // La restricción `check_account_role` exige que un superadmin no tenga
+      // cuenta y que cualquier otro rol sí la tenga, así que rol y cuenta viajan
+      // juntos en el mismo UPDATE.
+      if (nextRole === 'superadmin') {
+        cleanUpdates.account_id = null
+      } else if (target.role === 'superadmin') {
+        if (!cleanUpdates.account_id) {
+          throw new Error('An account is required when a superadmin is demoted')
+        }
+      } else {
+        delete cleanUpdates.account_id
+      }
+    }
 
     // Si se proporciona una nueva contraseña, actualizarla via resetPassword
     if (cleanUpdates.password) {
@@ -82,12 +136,18 @@ export function useUsers() {
       delete cleanUpdates.password
     }
 
-    const { error } = await supabase
+    // `.select()` es imprescindible: si RLS filtra la fila, el UPDATE no es un
+    // error, simplemente afecta a 0 filas y el cambio se perdería en silencio.
+    const { data, error } = await supabase
       .from('profiles')
       .update(cleanUpdates)
       .eq('id', id)
+      .select('id')
 
     if (error) throw error
+    if (!data || data.length === 0) {
+      throw new Error('The change was rejected: you do not have permission to update this user')
+    }
     await fetchUsers()
   }
 

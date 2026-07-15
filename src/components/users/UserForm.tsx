@@ -46,8 +46,10 @@ export function UserForm({ user, onSubmit, onCancel }: UserFormProps) {
         data.password = password
       }
 
-      // Only set account_id when creating a new user
-      if (!user && role !== 'superadmin') {
+      // La cuenta se manda al crear y, al editar, sólo si quien edita es
+      // superadmin: la necesita para degradar a un superadmin (que no tiene
+      // cuenta) a un rol que sí exige una.
+      if (role !== 'superadmin' && (!user || isSuperadmin)) {
         data.account_id = accountId
       }
 
@@ -137,7 +139,7 @@ export function UserForm({ user, onSubmit, onCancel }: UserFormProps) {
             value={accountId}
             onChange={(e) => setAccountId(e.target.value)}
             required
-            disabled={!!user || !isSuperadmin}
+            disabled={!isSuperadmin}
             className="w-full px-3 py-2 border border-gray-300 rounded-md disabled:bg-gray-100"
           >
             <option value="">Select account</option>
