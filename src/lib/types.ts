@@ -281,7 +281,7 @@ export interface PanelistUnavailability {
   panelist_id: string
   start_date: string
   end_date: string
-  reason: 'vacation' | 'sick' | 'personal' | 'training' | 'other'
+  reason: 'vacation' | 'sick_leave' | 'personal' | 'training' | 'other'
   notes?: string
   status: 'active' | 'cancelled'
   created_at: string

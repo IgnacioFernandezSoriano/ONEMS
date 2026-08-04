@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useAccount } from '@/contexts/AccountContext'
 import type { PanelistUnavailability, PanelistUnavailabilityWithPanelist } from '@/lib/types'
 
 export function usePanelistUnavailability(panelistId?: string) {
+  const { effectiveAccountId } = useAccount()
   const [unavailabilityPeriods, setUnavailabilityPeriods] = useState<PanelistUnavailabilityWithPanelist[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -45,23 +47,21 @@ export function usePanelistUnavailability(panelistId?: string) {
     periodData: Omit<PanelistUnavailability, 'id' | 'created_at' | 'updated_at' | 'account_id'>
   ) => {
     try {
-      // Get current user's account_id
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('User not authenticated')
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('account_id')
-        .eq('id', user.id)
-        .single()
-
-      if (!profile?.account_id) throw new Error('User account not found')
+      // Usar la cuenta activa del contexto (para superadmin = cuenta seleccionada;
+      // para usuario normal = su propia cuenta). No leer profiles.account_id: un
+      // superadmin no tiene cuenta propia y eso rompía la creación.
+      if (!effectiveAccountId) {
+        throw new Error('No account selected. Please select an account first.')
+      }
 
       const { data, error: insertError } = await supabase
         .from('panelist_unavailability')
         .insert({
           ...periodData,
-          account_id: profile.account_id,
+          account_id: effectiveAccountId,
           created_by: user.id,
         })
         .select()
