@@ -24,10 +24,13 @@ serve(async (req) => {
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
 
-    // Service-role: la RPC es SECURITY DEFINER y deriva la cuenta de la propia baja.
+    // Cliente con el JWT del usuario: así auth.uid() llega a la RPC y su guard
+    // multi-tenant (generate_reassignment_proposals) rechaza cruces de cuenta.
+    // n8n (futuro) usará service-role directamente, fuera de este wrapper.
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      { global: { headers: { Authorization: authHeader } } }
     )
 
     const { data, error } = await supabase.rpc('generate_reassignment_proposals', {
