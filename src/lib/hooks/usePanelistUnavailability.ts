@@ -69,6 +69,19 @@ export function usePanelistUnavailability(panelistId?: string) {
 
       if (insertError) throw insertError
 
+      // Disparar el motor de propuestas de reasignación (subsistema B). Best-effort:
+      // la baja ya está creada; si el motor falla, no se revierte, solo se registra.
+      try {
+        const { error: engineError } = await supabase.functions.invoke('propose-reassignments', {
+          body: { unavailability_id: data.id },
+        })
+        if (engineError) {
+          console.error('propose-reassignments failed:', engineError)
+        }
+      } catch (engineErr) {
+        console.error('propose-reassignments threw:', engineErr)
+      }
+
       await fetchUnavailabilityPeriods()
       return data
     } catch (err: any) {
