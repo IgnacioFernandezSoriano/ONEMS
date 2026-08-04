@@ -101,14 +101,23 @@ lugar, la creación de la baja invoca la Edge Function del motor.
 
 ---
 
-## 3. El motor — Edge Function `propose-reassignments`
+## 3. El motor — RPC `generate_reassignment_proposals` + Edge Function fina
 
-**Ubicación:** `supabase/functions/propose-reassignments/` (Deno).
+**Decisión (refinada en planificación):** la **cascada de decisión vive en una función
+Postgres** `generate_reassignment_proposals(p_unavailability_id uuid)` (plpgsql, SECURITY
+DEFINER), no en TypeScript. Motivo: el harness de tests del repo es SQL puro
+(`replay.ps1` + `*.test.sql` contra el Postgres portable local); una Edge Function quedaría
+fuera de esa puerta de calidad. Poner la cascada en plpgsql la hace testeable rama a rama
+con la infraestructura existente y la mantiene consistente con las RPC `apply_*`.
+
+La **Edge Function `propose-reassignments`** (`supabase/functions/propose-reassignments/`,
+Deno) queda como **envoltorio HTTP delgado**: valida auth y llama a la RPC. Su única razón de
+existir es que la UI y **n8n** (subsistema A, futuro) puedan disparar el motor por HTTP.
 
 **Disparo:** tras el INSERT de una baja (desde la UI actual vía hook
-`usePanelistUnavailability`, o en el futuro desde n8n por HTTP), se llama a la función con
-`{ unavailability_id }`. Corre con service-role y filtra explícitamente por el `account_id`
-de esa baja.
+`usePanelistUnavailability`, o en el futuro desde n8n por HTTP), se invoca la Edge Function
+con `{ unavailability_id }`, que a su vez llama a `generate_reassignment_proposals`. La RPC
+filtra explícitamente por el `account_id` de esa baja.
 
 ### 3.1 Paso 0 — detección de muestras afectadas
 
@@ -199,7 +208,8 @@ se cruza cuenta.
 ### B entrega
 1. Migración forward-only (timestamp > baseline): tabla `panelist_reassignment_proposal` +
    columna `review_status` + DROP del trigger auto (función conservada).
-2. Edge Function `propose-reassignments` (las dos cascadas, sin mutar).
+2. RPC `generate_reassignment_proposals` (las dos cascadas en plpgsql, sin mutar) + Edge
+   Function fina `propose-reassignments` que la llama por HTTP.
 3. RPCs `apply_reassignment_proposal` + `apply_reassignment_proposals_bulk`.
 4. Enganche mínimo: la creación de baja (`usePanelistUnavailability`) invoca la Edge Function
    tras el INSERT.
