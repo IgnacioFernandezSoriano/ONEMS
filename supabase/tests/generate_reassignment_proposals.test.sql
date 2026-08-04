@@ -106,4 +106,53 @@ BEGIN
   RAISE NOTICE 'PASS: idempotencia (sin duplicar)';
 END $$;
 
+-- ---------- guarda multi-tenant (cross-tenant IDOR) ----------
+-- Cuenta B ajena, con un usuario autenticado cuyo profile.account_id = B.
+INSERT INTO public.accounts (id, name, slug) VALUES
+  ('a0000000-0000-0000-0000-000000000002','AccB','accb');
+INSERT INTO auth.users (id, email) VALUES
+  ('99999999-0000-0000-0000-000000000009','user.b@test.local');
+INSERT INTO public.profiles (id, email, full_name, role, account_id) VALUES
+  ('99999999-0000-0000-0000-000000000009','user.b@test.local','UserB','user','a0000000-0000-0000-0000-000000000002');
+
+GRANT USAGE ON SCHEMA public TO authenticated;
+
+CREATE OR REPLACE FUNCTION pg_temp.login(p_uid text) RETURNS void
+  LANGUAGE plpgsql AS $$
+BEGIN
+  PERFORM set_config('request.jwt.claim.sub', p_uid, true);
+  PERFORM set_config('request.jwt.claim.role', 'authenticated', true);
+END $$;
+
+-- Usuario de la cuenta B intenta generar propuestas sobre la baja de la cuenta A -> debe fallar.
+SET ROLE authenticated;
+SELECT pg_temp.login('99999999-0000-0000-0000-000000000009');
+
+DO $$
+BEGIN
+  BEGIN
+    PERFORM generate_reassignment_proposals('b0000000-0000-0000-0000-000000000001');
+    RAISE EXCEPTION 'FAIL guarda: se permitió generar propuestas cross-tenant';
+  EXCEPTION
+    WHEN OTHERS THEN
+      IF SQLERRM = 'Cross-tenant access denied' THEN
+        RAISE NOTICE 'PASS: guarda multi-tenant rechaza acceso cross-tenant';
+      ELSE
+        RAISE EXCEPTION 'FAIL guarda: error inesperado: %', SQLERRM;
+      END IF;
+  END;
+END $$;
+
+RESET ROLE;
+SELECT set_config('request.jwt.claim.sub', '', true);
+
+-- El path service-role (postgres, auth.uid() NULL) sigue funcionando igual que antes.
+DO $$
+DECLARE v_n integer;
+BEGIN
+  v_n := generate_reassignment_proposals('b0000000-0000-0000-0000-000000000001');
+  IF v_n <> 3 THEN RAISE EXCEPTION 'FAIL: service-role esperaba 3 propuestas, obtuve %', v_n; END IF;
+  RAISE NOTICE 'PASS: path service-role (auth.uid() NULL) sigue generando 3 propuestas';
+END $$;
+
 ROLLBACK;

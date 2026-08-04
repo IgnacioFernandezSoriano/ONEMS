@@ -51,6 +51,19 @@ BEGIN
   IF v_node_id IS NULL THEN RETURN 0; END IF;
   SELECT city_id INTO v_city_id FROM nodes WHERE id = v_node_id;
 
+  -- Guarda multi-tenant: un usuario autenticado solo puede generar propuestas
+  -- para su propia cuenta. El path service-role (edge function) tiene auth.uid()
+  -- NULL y se permite; superadmin también.
+  IF auth.uid() IS NOT NULL AND NOT is_superadmin() THEN
+    DECLARE v_actor_account uuid;
+    BEGIN
+      SELECT account_id INTO v_actor_account FROM profiles WHERE id = auth.uid();
+      IF v_actor_account IS DISTINCT FROM v_account_id THEN
+        RAISE EXCEPTION 'Cross-tenant access denied';
+      END IF;
+    END;
+  END IF;
+
   -- Idempotencia: borrar solo las propuestas 'pending' de esta baja; respetar confirmed/dismissed
   DELETE FROM panelist_reassignment_proposal
   WHERE unavailability_id = p_unavailability_id AND status = 'pending';
