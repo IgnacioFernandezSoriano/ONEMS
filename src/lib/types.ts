@@ -360,3 +360,52 @@ export type Database = {
     }
   }
 }
+
+export type ProposalAction = 'reroute' | 'shift_date' | 'cancel' | 'none'
+export type ProposalStatus = 'pending' | 'confirmed' | 'dismissed'
+export type AffectedRole = 'origin' | 'destination'
+
+export interface ReassignmentProposal {
+  id: string
+  account_id: string
+  unavailability_id: string
+  allocation_plan_detail_id: string
+  affected_role: AffectedRole
+  sample_status_at_detection: string | null
+  suggested_action: ProposalAction
+  suggested_target_node_id: string | null
+  suggested_date: string | null
+  suggested_reason: string | null
+  final_action: string | null
+  final_target_node_id: string | null
+  final_date: string | null
+  status: ProposalStatus
+  confirmed_by: string | null
+  confirmed_at: string | null
+  created_at: string
+  updated_at: string
+  // joins (opcionales, poblados por el hook)
+  detail?: { id: string; fecha_programada: string; status: string; origin_node_id: string; destination_node_id: string } | null
+  suggested_target_node?: { id: string; auto_id: string } | null
+}
+
+export interface IncidentInboxRow {
+  unavailability_id: string
+  panelist_name: string
+  panelist_code: string
+  node_label: string
+  city_name: string
+  start_date: string
+  end_date: string
+  affected_count: number
+  origin_count: number
+  destination_count: number
+  pending_count: number
+}
+
+export interface RerouteCandidate {
+  node_id: string
+  node_name: string
+  city_id: string
+  is_available: boolean
+}
