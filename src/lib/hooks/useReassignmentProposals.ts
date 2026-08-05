@@ -132,7 +132,7 @@ export function useReassignmentProposals() {
   const fetchUnavailabilityHeader = useCallback(async (unavailabilityId: string): Promise<UnavailabilityHeader | null> => {
     const { data, error: e } = await supabase
       .from('panelist_unavailability')
-      .select('id, start_date, end_date, reason, panelist:panelists ( name, panelist_code )')
+      .select('id, start_date, end_date, reason, panelist:panelists ( name, panelist_code, node:nodes ( id, auto_id, city:cities ( id, name ) ) )')
       .eq('id', unavailabilityId)
       .single()
     if (e) throw e
@@ -145,6 +145,10 @@ export function useReassignmentProposals() {
       start_date: d.start_date,
       end_date: d.end_date,
       reason: d.reason,
+      node_id: d.panelist?.node?.id ?? null,
+      node_code: d.panelist?.node?.auto_id ?? null,
+      city_id: d.panelist?.node?.city?.id ?? null,
+      city_name: d.panelist?.node?.city?.name ?? null,
     }
   }, [])
 

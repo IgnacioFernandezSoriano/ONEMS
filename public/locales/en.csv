@@ -2711,3 +2711,13 @@ incidents.reason.reroute_reception,Reroute reception to another node with an ava
 incidents.reason.no_alt_reception,No alternative node for the reception
 incidents.reason.in_transit,Already in transit; will arrive late or may not be recorded in time
 incidents.detail.cause,Cause
+incidents.balance.title,City balance
+incidents.balance.node,Node
+incidents.balance.status,Status
+incidents.balance.load,Load
+incidents.balance.saturation_normal,Normal
+incidents.balance.saturation_high,High
+incidents.balance.saturation_saturated,Saturated
+incidents.balance.freed,Freed
+incidents.balance.suggested,Suggested
+incidents.balance.no_data,No balance data for this period

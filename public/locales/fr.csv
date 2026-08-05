@@ -2703,3 +2703,13 @@ incidents.reason.reroute_reception,Réacheminer la réception vers un autre nœu
 incidents.reason.no_alt_reception,Aucun nœud alternatif pour la réception
 incidents.reason.in_transit,Déjà en transit ; arrivera en retard ou pourrait ne pas être enregistré à temps
 incidents.detail.cause,Cause
+incidents.balance.title,Équilibre de la ville
+incidents.balance.node,Nœud
+incidents.balance.status,État
+incidents.balance.load,Charge
+incidents.balance.saturation_normal,Normal
+incidents.balance.saturation_high,Élevée
+incidents.balance.saturation_saturated,Saturé
+incidents.balance.freed,Libéré
+incidents.balance.suggested,Suggéré
+incidents.balance.no_data,Aucune donnée d'équilibre pour cette période

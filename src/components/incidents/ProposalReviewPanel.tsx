@@ -1,7 +1,15 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from '@/hooks/useTranslation'
 import { useReassignmentProposals } from '@/lib/hooks/useReassignmentProposals'
+import { useCityNodeLoad } from '@/lib/hooks/useCityNodeLoad'
 import type { ReassignmentProposal, RerouteCandidate, ProposalAction, UnavailabilityHeader } from '@/lib/types'
+
+// Semáforo de saturación de un nodo.
+const SATURATION_BADGE_CLASS: Record<string, string> = {
+  normal: 'bg-green-100 text-green-800',
+  high: 'bg-yellow-100 text-yellow-800',
+  saturated: 'bg-red-100 text-red-800',
+}
 
 // Motivo de la baja (panelist_unavailability.reason) -> clave i18n existente.
 const UNAVAIL_REASON_KEY: Record<string, string> = {
@@ -34,6 +42,7 @@ export function ProposalReviewPanel({ unavailabilityId, onBack }: { unavailabili
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [balanceOpen, setBalanceOpen] = useState(true)
 
   const [overrideProposalTarget, setOverrideProposalTarget] = useState<ReassignmentProposal | null>(null)
   const [overrideAction, setOverrideAction] = useState<ProposalAction>('reroute')
@@ -63,6 +72,17 @@ export function ProposalReviewPanel({ unavailabilityId, onBack }: { unavailabili
       .catch(() => { /* la cabecera es informativa; si falla, no bloquea el detalle */ })
     return () => { cancelled = true }
   }, [fetchUnavailabilityHeader, unavailabilityId])
+
+  // Balance de la ciudad del panelista, en el rango de la baja. Reactivo a cada decisión.
+  const { nodes: cityLoad, loading: loadLoading, refetch: refetchLoad } =
+    useCityNodeLoad(header?.city_id, header?.start_date, header?.end_date)
+
+  // Nodos sugeridos por las propuestas pendientes (para el marcador ⭐).
+  const suggestedNodeIds = new Set(
+    proposals
+      .filter(p => p.status === 'pending' && p.suggested_action === 'reroute' && p.suggested_target_node_id)
+      .map(p => p.suggested_target_node_id as string)
+  )
 
   const pendingProposals = proposals.filter(p => p.status === 'pending')
   const hasPending = pendingProposals.length > 0
@@ -95,6 +115,7 @@ export function ProposalReviewPanel({ unavailabilityId, onBack }: { unavailabili
       await confirmProposal(p)
       pruneSelected([p.id])
       await loadProposals()
+      refetchLoad()
     } catch (err: any) {
       alert(err.message)
     }
@@ -105,6 +126,7 @@ export function ProposalReviewPanel({ unavailabilityId, onBack }: { unavailabili
       await dismissProposal(id)
       pruneSelected([id])
       await loadProposals()
+      refetchLoad()
     } catch (err: any) {
       alert(err.message)
     }
@@ -115,6 +137,7 @@ export function ProposalReviewPanel({ unavailabilityId, onBack }: { unavailabili
       await confirmMany(proposals.filter(p => selectedIds.has(p.id)))
       setSelectedIds(new Set())
       await loadProposals()
+      refetchLoad()
     } catch (err: any) {
       alert(err.message)
     }
@@ -125,6 +148,7 @@ export function ProposalReviewPanel({ unavailabilityId, onBack }: { unavailabili
       await dismissMany([...selectedIds])
       setSelectedIds(new Set())
       await loadProposals()
+      refetchLoad()
     } catch (err: any) {
       alert(err.message)
     }
@@ -167,6 +191,7 @@ export function ProposalReviewPanel({ unavailabilityId, onBack }: { unavailabili
       pruneSelected([overrideProposalTarget.id])
       closeOverrideModal()
       await loadProposals()
+      refetchLoad()
     } catch (err: any) {
       alert(err.message)
     }
@@ -199,11 +224,15 @@ export function ProposalReviewPanel({ unavailabilityId, onBack }: { unavailabili
       </div>
 
       {header && (
-        <div className="bg-white rounded-lg shadow p-4 mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-white rounded-lg shadow p-4 mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
             <div className="text-xs font-medium text-gray-500 uppercase">{t('incidents.inbox.panelist')}</div>
             <div className="text-sm font-medium">{header.panelist_name}</div>
             <div className="text-xs text-gray-500 font-mono">{header.panelist_code}</div>
+          </div>
+          <div>
+            <div className="text-xs font-medium text-gray-500 uppercase">{t('incidents.inbox.node')}</div>
+            <div className="text-sm">{header.node_code ?? '-'}{header.city_name ? ` · ${header.city_name}` : ''}</div>
           </div>
           <div>
             <div className="text-xs font-medium text-gray-500 uppercase">{t('incidents.inbox.dates')}</div>
@@ -215,6 +244,59 @@ export function ProposalReviewPanel({ unavailabilityId, onBack }: { unavailabili
               {header.reason ? t(UNAVAIL_REASON_KEY[header.reason] ?? '', undefined, header.reason) : '-'}
             </div>
           </div>
+        </div>
+      )}
+
+      {header?.city_id && (
+        <div className="bg-white rounded-lg shadow p-4 mb-6">
+          <button
+            onClick={() => setBalanceOpen(o => !o)}
+            className="w-full flex items-center justify-between text-left"
+          >
+            <span className="text-sm font-semibold text-gray-900">
+              {t('incidents.balance.title')}{header.city_name ? ` · ${header.city_name}` : ''}
+            </span>
+            <span className="text-gray-500 text-sm">{balanceOpen ? '▾' : '▸'}</span>
+          </button>
+          {balanceOpen && (
+            <div className="mt-4">
+              {loadLoading ? (
+                <div className="text-sm text-gray-500">{t('common.loading')}</div>
+              ) : cityLoad.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{t('incidents.balance.node')}</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{t('incidents.balance.status')}</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{t('incidents.balance.load')}</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase"></th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {cityLoad.map(n => (
+                        <tr key={n.node_id} className={n.node_id === header.node_id ? 'bg-gray-50' : ''}>
+                          <td className="px-4 py-2 text-sm font-mono">{n.node_code}</td>
+                          <td className="px-4 py-2">
+                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${SATURATION_BADGE_CLASS[n.saturation_level] ?? SATURATION_BADGE_CLASS.normal}`}>
+                              {t(`incidents.balance.saturation_${n.saturation_level}`)}
+                            </span>
+                          </td>
+                          <td className="px-4 py-2 text-sm">{n.load_count}</td>
+                          <td className="px-4 py-2 text-xs text-gray-600">
+                            {n.node_id === header.node_id && <span className="mr-2">🚫 {t('incidents.balance.freed')}</span>}
+                            {suggestedNodeIds.has(n.node_id) && <span>⭐ {t('incidents.balance.suggested')}</span>}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="text-sm text-gray-500">{t('incidents.balance.no_data')}</div>
+              )}
+            </div>
+          )}
         </div>
       )}
 

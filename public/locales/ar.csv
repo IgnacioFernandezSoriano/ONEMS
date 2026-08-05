@@ -2703,3 +2703,13 @@ incidents.reason.reroute_reception,إعادة توجيه الاستلام إلى
 incidents.reason.no_alt_reception,لا توجد عقدة بديلة للاستلام
 incidents.reason.in_transit,قيد النقل بالفعل؛ سيصل متأخراً أو قد لا يُسجَّل في الوقت المناسب
 incidents.detail.cause,السبب
+incidents.balance.title,توازن المدينة
+incidents.balance.node,العقدة
+incidents.balance.status,الحالة
+incidents.balance.load,الحِمل
+incidents.balance.saturation_normal,عادي
+incidents.balance.saturation_high,مرتفع
+incidents.balance.saturation_saturated,مشبع
+incidents.balance.freed,يُحرَّر
+incidents.balance.suggested,مقترح
+incidents.balance.no_data,لا توجد بيانات توازن لهذه الفترة

@@ -2711,3 +2711,13 @@ incidents.reason.reroute_reception,Reencaminar recepción a otro nodo con paneli
 incidents.reason.no_alt_reception,Sin nodo alternativo para la recepción
 incidents.reason.in_transit,Ya en tránsito; llegará con retraso o puede no registrarse a tiempo
 incidents.detail.cause,Causa
+incidents.balance.title,Balance de la ciudad
+incidents.balance.node,Nodo
+incidents.balance.status,Estado
+incidents.balance.load,Carga
+incidents.balance.saturation_normal,Normal
+incidents.balance.saturation_high,Alta
+incidents.balance.saturation_saturated,Saturada
+incidents.balance.freed,Se libera
+incidents.balance.suggested,Sugerido
+incidents.balance.no_data,Sin datos de balance para este periodo

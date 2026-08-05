@@ -417,4 +417,15 @@ export interface UnavailabilityHeader {
   start_date: string
   end_date: string
   reason: string | null
+  node_id: string | null
+  node_code: string | null
+  city_id: string | null
+  city_name: string | null
+}
+
+export interface CityNodeLoad {
+  node_id: string
+  node_code: string
+  saturation_level: 'normal' | 'high' | 'saturated'
+  load_count: number
 }
