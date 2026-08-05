@@ -57,7 +57,7 @@ export function useReassignmentProposals() {
   useEffect(() => { fetchInbox() }, [fetchInbox])
 
   // Nivel 2: propuestas de una baja concreta.
-  const fetchProposals = async (unavailabilityId: string): Promise<ReassignmentProposal[]> => {
+  const fetchProposals = useCallback(async (unavailabilityId: string): Promise<ReassignmentProposal[]> => {
     const { data, error: e } = await supabase
       .from('panelist_reassignment_proposal')
       .select(`
@@ -69,9 +69,9 @@ export function useReassignmentProposals() {
       .order('affected_role').order('created_at')
     if (e) throw e
     return (data || []) as any
-  }
+  }, [])
 
-  const confirmProposal = async (p: ReassignmentProposal) => {
+  const confirmProposal = useCallback(async (p: ReassignmentProposal) => {
     const { error: e } = await supabase.rpc('apply_reassignment_proposal', {
       p_proposal_id: p.id,
       p_final_action: p.suggested_action,
@@ -79,9 +79,9 @@ export function useReassignmentProposals() {
       p_final_date: p.suggested_date,
     })
     if (e) throw e
-  }
+  }, [])
 
-  const overrideProposal = async (
+  const overrideProposal = useCallback(async (
     id: string,
     action: 'reroute' | 'shift_date' | 'cancel',
     nodeId?: string | null,
@@ -96,29 +96,29 @@ export function useReassignmentProposals() {
       p_final_date: action === 'shift_date' ? (date ?? null) : null,
     })
     if (e) throw e
-  }
+  }, [])
 
-  const dismissProposal = async (id: string) => {
+  const dismissProposal = useCallback(async (id: string) => {
     const { error: e } = await supabase.rpc('apply_reassignment_proposal', {
       p_proposal_id: id, p_final_action: 'none', p_final_target_node_id: null, p_final_date: null,
     })
     if (e) throw e
-  }
+  }, [])
 
-  const confirmMany = async (props: ReassignmentProposal[]) => {
+  const confirmMany = useCallback(async (props: ReassignmentProposal[]) => {
     for (const p of props) { if (p.status === 'pending') await confirmProposal(p) }
-  }
-  const dismissMany = async (ids: string[]) => {
+  }, [confirmProposal])
+  const dismissMany = useCallback(async (ids: string[]) => {
     for (const id of ids) await dismissProposal(id)
-  }
+  }, [dismissProposal])
 
-  const listRerouteCandidates = async (detailId: string, role: 'origin' | 'destination'): Promise<RerouteCandidate[]> => {
+  const listRerouteCandidates = useCallback(async (detailId: string, role: 'origin' | 'destination'): Promise<RerouteCandidate[]> => {
     const { data, error: e } = await supabase.rpc('list_reroute_candidates', { p_detail_id: detailId, p_role: role })
     if (e) throw e
     return (data || []) as RerouteCandidate[]
-  }
+  }, [])
 
-  const markReviewed = async (unavailabilityId: string) => {
+  const markReviewed = useCallback(async (unavailabilityId: string) => {
     const { data: { user } } = await supabase.auth.getUser()
     const { error: e } = await supabase
       .from('panelist_unavailability')
@@ -126,7 +126,7 @@ export function useReassignmentProposals() {
       .eq('id', unavailabilityId)
     if (e) throw e
     await fetchInbox()
-  }
+  }, [fetchInbox])
 
   const pendingCount = inbox.length
 

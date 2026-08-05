@@ -63,9 +63,19 @@ export function ProposalReviewPanel({ unavailabilityId, onBack }: { unavailabili
     setSelectedIds(next)
   }
 
+  const pruneSelected = (ids: string[]) => {
+    setSelectedIds(prev => {
+      if (ids.every(id => !prev.has(id))) return prev
+      const next = new Set(prev)
+      for (const id of ids) next.delete(id)
+      return next
+    })
+  }
+
   const handleConfirm = async (p: ReassignmentProposal) => {
     try {
       await confirmProposal(p)
+      pruneSelected([p.id])
       await loadProposals()
     } catch (err: any) {
       alert(err.message)
@@ -75,6 +85,7 @@ export function ProposalReviewPanel({ unavailabilityId, onBack }: { unavailabili
   const handleDismiss = async (id: string) => {
     try {
       await dismissProposal(id)
+      pruneSelected([id])
       await loadProposals()
     } catch (err: any) {
       alert(err.message)
@@ -135,6 +146,7 @@ export function ProposalReviewPanel({ unavailabilityId, onBack }: { unavailabili
       } else {
         await overrideProposal(overrideProposalTarget.id, 'cancel')
       }
+      pruneSelected([overrideProposalTarget.id])
       closeOverrideModal()
       await loadProposals()
     } catch (err: any) {
@@ -171,7 +183,7 @@ export function ProposalReviewPanel({ unavailabilityId, onBack }: { unavailabili
       {selectedIds.size > 0 && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex items-center justify-between">
           <span className="text-sm font-medium text-blue-900">
-            {t('incidents.action.selected_count').replace('{count}', String(selectedIds.size))}
+            {t('incidents.action.selected_count', { count: selectedIds.size })}
           </span>
           <div className="flex gap-2">
             <button
@@ -360,7 +372,11 @@ export function ProposalReviewPanel({ unavailabilityId, onBack }: { unavailabili
             <div className="border-t p-6 flex gap-2">
               <button
                 onClick={handleApplyOverride}
-                className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                disabled={
+                  (overrideAction === 'reroute' && !overrideNodeId) ||
+                  (overrideAction === 'shift_date' && !overrideDate)
+                }
+                className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {t('incidents.override.apply')}
               </button>
