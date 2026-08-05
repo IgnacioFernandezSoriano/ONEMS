@@ -34,10 +34,12 @@ import {
   LayoutList,
   Network,
   FileText,
+  AlertTriangle,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useLocale } from '../../contexts/LocaleContext'
+import { useReassignmentProposals } from '../../lib/hooks/useReassignmentProposals'
 
 interface MenuItem {
   path: string
@@ -61,6 +63,7 @@ export function Sidebar() {
   const location = useLocation()
   const { isCollapsed, setIsCollapsed } = useSidebar()
   const { t, locale, setLocale } = useLocale()
+  const { pendingCount } = useReassignmentProposals()
   const [expandedSections, setExpandedSections] = useState<string[]>([])
   const [isHovered, setIsHovered] = useState(false)
   const [accounts, setAccounts] = useState<Array<{ id: string; name: string }>>([])
@@ -372,6 +375,18 @@ export function Sidebar() {
         ] : []),
       ],
     },
+    {
+      label: t('incidents.menu_group'),
+      items: [
+        {
+          path: '/incidents/panelist-availability',
+          label: t('incidents.panelist_availability'),
+          icon: AlertTriangle,
+          roles: ['admin', 'superadmin'],
+          tooltip: t('incidents.pending_badge_tooltip'),
+        },
+      ],
+    },
   ]
 
   // Add superadmin items if applicable
@@ -574,6 +589,11 @@ export function Sidebar() {
                             <Icon className="w-5 h-5 flex-shrink-0" />
                             {isExpanded && (
                               <span className="text-sm font-medium">{item.label}</span>
+                            )}
+                            {item.path === '/incidents/panelist-availability' && pendingCount > 0 && isExpanded && (
+                              <span className="ml-auto text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">
+                                {pendingCount}
+                              </span>
                             )}
                           </Link>
                         </SmartTooltip>
