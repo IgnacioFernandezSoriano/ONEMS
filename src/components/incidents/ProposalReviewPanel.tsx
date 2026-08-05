@@ -1,7 +1,16 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from '@/hooks/useTranslation'
 import { useReassignmentProposals } from '@/lib/hooks/useReassignmentProposals'
-import type { ReassignmentProposal, RerouteCandidate, ProposalAction } from '@/lib/types'
+import type { ReassignmentProposal, RerouteCandidate, ProposalAction, UnavailabilityHeader } from '@/lib/types'
+
+// Motivo de la baja (panelist_unavailability.reason) -> clave i18n existente.
+const UNAVAIL_REASON_KEY: Record<string, string> = {
+  vacation: 'unavailability.reason_vacation',
+  sick_leave: 'unavailability.reason_sick',
+  personal: 'unavailability.reason_personal',
+  training: 'unavailability.reason_training',
+  other: 'unavailability.reason_other',
+}
 
 const ACTION_BADGE_CLASS: Record<string, string> = {
   reroute: 'bg-blue-100 text-blue-800',
@@ -18,9 +27,10 @@ const STATUS_BADGE_CLASS: Record<string, string> = {
 
 export function ProposalReviewPanel({ unavailabilityId, onBack }: { unavailabilityId: string; onBack: () => void }) {
   const { t } = useTranslation()
-  const { fetchProposals, confirmProposal, overrideProposal, dismissProposal, confirmMany, dismissMany, listRerouteCandidates, markReviewed } = useReassignmentProposals()
+  const { fetchProposals, confirmProposal, overrideProposal, dismissProposal, confirmMany, dismissMany, listRerouteCandidates, markReviewed, fetchUnavailabilityHeader } = useReassignmentProposals()
 
   const [proposals, setProposals] = useState<ReassignmentProposal[]>([])
+  const [header, setHeader] = useState<UnavailabilityHeader | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -45,6 +55,14 @@ export function ProposalReviewPanel({ unavailabilityId, onBack }: { unavailabili
   }, [fetchProposals, unavailabilityId])
 
   useEffect(() => { loadProposals() }, [loadProposals])
+
+  useEffect(() => {
+    let cancelled = false
+    fetchUnavailabilityHeader(unavailabilityId)
+      .then(h => { if (!cancelled) setHeader(h) })
+      .catch(() => { /* la cabecera es informativa; si falla, no bloquea el detalle */ })
+    return () => { cancelled = true }
+  }, [fetchUnavailabilityHeader, unavailabilityId])
 
   const pendingProposals = proposals.filter(p => p.status === 'pending')
   const hasPending = pendingProposals.length > 0
@@ -180,6 +198,26 @@ export function ProposalReviewPanel({ unavailabilityId, onBack }: { unavailabili
         </button>
       </div>
 
+      {header && (
+        <div className="bg-white rounded-lg shadow p-4 mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <div className="text-xs font-medium text-gray-500 uppercase">{t('incidents.inbox.panelist')}</div>
+            <div className="text-sm font-medium">{header.panelist_name}</div>
+            <div className="text-xs text-gray-500 font-mono">{header.panelist_code}</div>
+          </div>
+          <div>
+            <div className="text-xs font-medium text-gray-500 uppercase">{t('incidents.inbox.dates')}</div>
+            <div className="text-sm">{header.start_date} – {header.end_date}</div>
+          </div>
+          <div>
+            <div className="text-xs font-medium text-gray-500 uppercase">{t('incidents.detail.cause')}</div>
+            <div className="text-sm">
+              {header.reason ? t(UNAVAIL_REASON_KEY[header.reason] ?? '', undefined, header.reason) : '-'}
+            </div>
+          </div>
+        </div>
+      )}
+
       {selectedIds.size > 0 && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex items-center justify-between">
           <span className="text-sm font-medium text-blue-900">
@@ -232,9 +270,8 @@ export function ProposalReviewPanel({ unavailabilityId, onBack }: { unavailabili
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {proposals.length > 0 ? (
-                proposals.map((p) => {
-                  const isPending = p.status === 'pending'
+              {pendingProposals.length > 0 ? (
+                pendingProposals.map((p) => {
                   const sampleLabel = p.detail?.fecha_programada
                     ? `${p.detail.fecha_programada} (${p.allocation_plan_detail_id.slice(0, 8)})`
                     : p.allocation_plan_detail_id.slice(0, 8)
@@ -245,16 +282,14 @@ export function ProposalReviewPanel({ unavailabilityId, onBack }: { unavailabili
                       : '-'
 
                   return (
-                    <tr key={p.id} className={`hover:bg-gray-50 ${!isPending ? 'opacity-60' : ''}`}>
+                    <tr key={p.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4">
-                        {isPending && (
-                          <input
-                            type="checkbox"
-                            checked={selectedIds.has(p.id)}
-                            onChange={() => handleSelectOne(p.id)}
-                            className="rounded"
-                          />
-                        )}
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.has(p.id)}
+                          onChange={() => handleSelectOne(p.id)}
+                          className="rounded"
+                        />
                       </td>
                       <td className="px-6 py-4 text-sm">{sampleLabel}</td>
                       <td className="px-6 py-4 text-sm">
@@ -267,35 +302,26 @@ export function ProposalReviewPanel({ unavailabilityId, onBack }: { unavailabili
                         </span>
                       </td>
                       <td className="px-6 py-4 text-sm">{suggestion}</td>
-                      <td className="px-6 py-4 text-sm">{p.suggested_reason ?? '-'}</td>
+                      <td className="px-6 py-4 text-sm">
+                        {p.suggested_reason ? t(`incidents.reason.${p.suggested_reason}`, undefined, p.suggested_reason) : '-'}
+                      </td>
                       <td className="px-6 py-4">
-                        {isPending ? (
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${STATUS_BADGE_CLASS[p.status]}`}>
-                            {t(`incidents.status.${p.status}`)}
-                          </span>
-                        ) : (
-                          <div>
-                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${STATUS_BADGE_CLASS[p.status]}`}>
-                              {t(`incidents.status.${p.status}`)}
-                            </span>
-                            <div className="text-xs text-gray-500 mt-1">{p.final_action ?? '-'}</div>
-                          </div>
-                        )}
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${STATUS_BADGE_CLASS[p.status]}`}>
+                          {t(`incidents.status.${p.status}`)}
+                        </span>
                       </td>
                       <td className="px-6 py-4 text-sm">
-                        {isPending && (
-                          <div className="flex gap-2">
-                            <button onClick={() => handleConfirm(p)} className="text-green-600 hover:text-green-800">
-                              {t('incidents.action.confirm')}
-                            </button>
-                            <button onClick={() => openOverrideModal(p)} className="text-blue-600 hover:text-blue-800">
-                              {t('incidents.action.change')}
-                            </button>
-                            <button onClick={() => handleDismiss(p.id)} className="text-red-600 hover:text-red-800">
-                              {t('incidents.action.dismiss')}
-                            </button>
-                          </div>
-                        )}
+                        <div className="flex gap-2">
+                          <button onClick={() => handleConfirm(p)} className="text-green-600 hover:text-green-800">
+                            {t('incidents.action.confirm')}
+                          </button>
+                          <button onClick={() => openOverrideModal(p)} className="text-blue-600 hover:text-blue-800">
+                            {t('incidents.action.change')}
+                          </button>
+                          <button onClick={() => handleDismiss(p.id)} className="text-red-600 hover:text-red-800">
+                            {t('incidents.action.dismiss')}
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   )

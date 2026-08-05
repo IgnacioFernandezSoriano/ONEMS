@@ -2696,3 +2696,10 @@ incidents.act.none,معلوماتي
 incidents.status.pending,قيد الانتظار
 incidents.status.confirmed,مؤكدة
 incidents.status.dismissed,مرفوضة
+incidents.reason.alt_node_same_city,عقدة بديلة مع محكّم متاح في نفس المدينة
+incidents.reason.shift_same_month,النقل إلى تاريخ متاح ضمن نفس الشهر
+incidents.reason.no_alt_no_date,لا توجد عقدة بديلة ولا تاريخ متاح هذا الشهر
+incidents.reason.reroute_reception,إعادة توجيه الاستلام إلى عقدة أخرى مع محكّم متاح
+incidents.reason.no_alt_reception,لا توجد عقدة بديلة للاستلام
+incidents.reason.in_transit,قيد النقل بالفعل؛ سيصل متأخراً أو قد لا يُسجَّل في الوقت المناسب
+incidents.detail.cause,السبب

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAccount } from '@/contexts/AccountContext'
-import type { ReassignmentProposal, IncidentInboxRow, RerouteCandidate } from '@/lib/types'
+import type { ReassignmentProposal, IncidentInboxRow, RerouteCandidate, UnavailabilityHeader } from '@/lib/types'
 
 export function useReassignmentProposals() {
   const { effectiveAccountId } = useAccount()
@@ -128,12 +128,33 @@ export function useReassignmentProposals() {
     await fetchInbox()
   }, [fetchInbox])
 
-  const pendingCount = inbox.length
+  // Cabecera de la baja (panelista, fechas, motivo) para el detalle.
+  const fetchUnavailabilityHeader = useCallback(async (unavailabilityId: string): Promise<UnavailabilityHeader | null> => {
+    const { data, error: e } = await supabase
+      .from('panelist_unavailability')
+      .select('id, start_date, end_date, reason, panelist:panelists ( name, panelist_code )')
+      .eq('id', unavailabilityId)
+      .single()
+    if (e) throw e
+    if (!data) return null
+    const d = data as any
+    return {
+      unavailability_id: d.id,
+      panelist_name: d.panelist?.name ?? '-',
+      panelist_code: d.panelist?.panelist_code ?? '-',
+      start_date: d.start_date,
+      end_date: d.end_date,
+      reason: d.reason,
+    }
+  }, [])
+
+  // El badge cuenta muestras (propuestas) pendientes de confirmar, no bajas.
+  const pendingCount = inbox.reduce((sum, r) => sum + r.pending_count, 0)
 
   return {
     inbox, loading, error, pendingCount,
     fetchInbox, fetchProposals,
     confirmProposal, overrideProposal, dismissProposal, confirmMany, dismissMany,
-    listRerouteCandidates, markReviewed,
+    listRerouteCandidates, markReviewed, fetchUnavailabilityHeader,
   }
 }

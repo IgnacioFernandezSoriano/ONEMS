@@ -2704,3 +2704,10 @@ incidents.act.none,Informative
 incidents.status.pending,Pending
 incidents.status.confirmed,Confirmed
 incidents.status.dismissed,Dismissed
+incidents.reason.alt_node_same_city,Alternative node with an available panelist in the same city
+incidents.reason.shift_same_month,Move to an available date within the same month
+incidents.reason.no_alt_no_date,No alternative node or available date this month
+incidents.reason.reroute_reception,Reroute reception to another node with an available panelist
+incidents.reason.no_alt_reception,No alternative node for the reception
+incidents.reason.in_transit,Already in transit; will arrive late or may not be recorded in time
+incidents.detail.cause,Cause

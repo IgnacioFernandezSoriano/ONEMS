@@ -409,3 +409,12 @@ export interface RerouteCandidate {
   city_id: string
   is_available: boolean
 }
+
+export interface UnavailabilityHeader {
+  unavailability_id: string
+  panelist_name: string
+  panelist_code: string
+  start_date: string
+  end_date: string
+  reason: string | null
+}

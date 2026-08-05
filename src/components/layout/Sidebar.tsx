@@ -342,6 +342,18 @@ export function Sidebar() {
       ],
     },
     {
+      label: t('incidents.menu_group'),
+      items: [
+        {
+          path: '/incidents/panelist-availability',
+          label: t('incidents.panelist_availability'),
+          icon: AlertTriangle,
+          roles: ['admin', 'superadmin'],
+          tooltip: t('incidents.pending_badge_tooltip'),
+        },
+      ],
+    },
+    {
       label: t('menu.administration'),
       items: [
         {
@@ -373,18 +385,6 @@ export function Sidebar() {
             tooltip: t('menu.demo_reset.tooltip'),
           },
         ] : []),
-      ],
-    },
-    {
-      label: t('incidents.menu_group'),
-      items: [
-        {
-          path: '/incidents/panelist-availability',
-          label: t('incidents.panelist_availability'),
-          icon: AlertTriangle,
-          roles: ['admin', 'superadmin'],
-          tooltip: t('incidents.pending_badge_tooltip'),
-        },
       ],
     },
   ]

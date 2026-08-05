@@ -2696,3 +2696,10 @@ incidents.act.none,Informatif
 incidents.status.pending,En attente
 incidents.status.confirmed,Confirmée
 incidents.status.dismissed,Rejetée
+incidents.reason.alt_node_same_city,Nœud alternatif avec un panéliste disponible dans la même ville
+incidents.reason.shift_same_month,Déplacer vers une date disponible dans le même mois
+incidents.reason.no_alt_no_date,Aucun nœud alternatif ni date disponible ce mois-ci
+incidents.reason.reroute_reception,Réacheminer la réception vers un autre nœud avec un panéliste disponible
+incidents.reason.no_alt_reception,Aucun nœud alternatif pour la réception
+incidents.reason.in_transit,Déjà en transit ; arrivera en retard ou pourrait ne pas être enregistré à temps
+incidents.detail.cause,Cause
