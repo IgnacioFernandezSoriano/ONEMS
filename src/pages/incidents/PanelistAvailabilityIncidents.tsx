@@ -8,8 +8,8 @@ export function PanelistAvailabilityIncidents() {
   const { inbox, loading, error, fetchInbox } = useReassignmentProposals()
   const [selected, setSelected] = useState<string | null>(null)
 
-  if (loading) return <div className="p-6">Loading...</div>
-  if (error) return <div className="p-6 text-red-600">Error: {error}</div>
+  if (loading) return <div className="p-6">{t('common.loading')}</div>
+  if (error) return <div className="p-6 text-red-600">{t('common.error')}: {error}</div>
 
   if (selected) {
     return (
