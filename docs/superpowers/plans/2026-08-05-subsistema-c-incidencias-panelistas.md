@@ -12,7 +12,7 @@
 
 - **Una sola BD:** `onems-dev`, ref `sehbnpgzqljrsqimwyuz`. Migraciones **forward-only** con timestamp posterior al baseline; nunca tocar `00000000000000_baseline_prod_schema.sql` ni `migrations_archive_pre_baseline/`. No ejecutar `db reset`/`db push` contra remoto.
 - **Multi-tenant:** todo por RLS/`account_id`. El frontend nunca escribe `allocation_plan_details` directamente: siempre vía RPC `SECURITY DEFINER` con guard cross-tenant.
-- **i18n obligatorio:** todo texto visible pasa por `useTranslation()`. Cada clave nueva se añade a los **4** ficheros: `src/locales/{en,es,fr,ar}/`. El árabe es RTL.
+- **i18n obligatorio:** todo texto visible pasa por `useTranslation()`. Las traducciones viven en **`public/locales/{en,es,fr,ar}.csv`** (formato `key,translation`; los `src/locales/*.json` son legacy sin uso — NO tocarlos). Cada clave nueva se añade a los **4** CSV. Sustitución de variables en `t(key, vars)`: **llave simple** `{var}` (no `{{var}}`). El árabe es RTL.
 - **Puerta de calidad:** `npm run lint` (`--max-warnings 0`) y `npm run build` deben pasar. No hay tests de frontend; para BD, validar con el Postgres portable local (`supabase/tests/replay.ps1`).
 - **Nombre visible de nodo** = `nodes.auto_id` (text). La ciudad tiene `cities.name`. `nodes` no tiene columna `name`.
 - **Convenciones:** páginas/componentes PascalCase `.tsx`; hooks camelCase `use…`. No crear ficheros `*.backup/_old`. Rama `develop`; no commitear/pushear salvo que el usuario lo pida (lo gestiona el flujo SDD por tarea).
@@ -233,82 +233,158 @@ git commit -m "feat(incidents): RPC list_reroute_candidates + test local"
 ## Task 2: Claves i18n (EN/ES/FR/AR)
 
 **Files:**
-- Modify: `src/locales/en/*.json`, `src/locales/es/*.json`, `src/locales/fr/*.json`, `src/locales/ar/*.json`
+- Modify: `public/locales/en.csv`, `public/locales/es.csv`, `public/locales/fr.csv`, `public/locales/ar.csv`
 
 **Interfaces:**
 - Produces: claves bajo `incidents.*` disponibles vía `t('incidents.…')` para Tasks 3–5.
 
-> Antes de escribir, el implementador debe localizar cómo se cargan los locales (`src/locales/<lang>/` — comprobar si hay un `index` que agrega ficheros por namespace, o un único `common.json`). Añadir las claves al fichero que corresponda al patrón existente (probablemente un namespace nuevo `incidents.json` si el proyecto separa por ficheros, o al fichero común si es monolítico). **Las mismas claves deben existir en los 4 idiomas.**
+> Las traducciones son **CSV** con cabecera `key,translation` (una fila por clave). Los
+> ficheros ya tienen ~2658 filas ordenadas alfabéticamente por clave. Añadir las nuevas
+> filas `incidents.*` (pueden ir juntas en bloque; si es fácil, insertarlas en orden
+> alfabético junto a otras claves `i*`, pero no es obligatorio — el parser no depende del
+> orden). **Regla CSV:** si una traducción contiene una coma, envolver el valor en comillas
+> dobles (`"…"`); las comillas internas se escriben `""`. Los valores de abajo no llevan
+> comas, así que no necesitan comillas. **Las mismas 47 claves deben existir en los 4 CSV.**
+> El `src/locales/*.json` es legacy: NO tocarlo.
 
-- [ ] **Step 1: Añadir el bloque de claves en los 4 idiomas**
+- [ ] **Step 1: Añadir las filas en los 4 CSV (valores EN de referencia)**
 
-Claves mínimas (valores EN de referencia; traducir a ES/FR/AR):
+Filas a añadir a `public/locales/en.csv` (formato exacto `clave,valor`):
 
 ```
-incidents.menu_group              = "Incidents"
-incidents.panelist_availability   = "Panelist availability"
-incidents.title                   = "Panelist availability incidents"
-incidents.pending_badge_tooltip   = "Unavailability records pending review"
-incidents.inbox.panelist          = "Panelist"
-incidents.inbox.node              = "Node / city"
-incidents.inbox.dates             = "Unavailability dates"
-incidents.inbox.affected          = "Affected samples"
-incidents.inbox.breakdown         = "Send / receive"
-incidents.inbox.pending           = "Pending"
-incidents.inbox.review            = "Review"
-incidents.inbox.empty             = "No pending incidents"
-incidents.detail.back             = "Back to list"
-incidents.detail.mark_reviewed    = "Mark as studied"
-incidents.detail.mark_reviewed_disabled = "Resolve every proposal first"
-incidents.detail.sample           = "Sample"
-incidents.detail.role             = "Role"
-incidents.detail.role_origin      = "Send"
-incidents.detail.role_destination = "Receive"
-incidents.detail.sample_status    = "Sample status"
-incidents.detail.suggested_action = "Suggested action"
-incidents.detail.suggestion       = "Suggestion"
-incidents.detail.reason           = "Reason"
-incidents.detail.proposal_status  = "Status"
-incidents.detail.actions          = "Actions"
-incidents.action.confirm          = "Confirm"
-incidents.action.change           = "Change…"
-incidents.action.dismiss          = "Dismiss"
-incidents.action.confirm_selected = "Confirm selected"
-incidents.action.dismiss_selected = "Dismiss selected"
-incidents.action.selected_count   = "{{count}} selected"
-incidents.override.title          = "Change resolution"
-incidents.override.choose_action  = "Final action"
-incidents.override.reroute        = "Reroute to another node"
-incidents.override.shift_date     = "Change date"
-incidents.override.cancel_sample  = "Cancel sample"
-incidents.override.target_node    = "Target node"
-incidents.override.node_unavailable = "(no panelist available)"
-incidents.override.new_date       = "New date"
-incidents.override.apply          = "Apply"
-incidents.override.cancel         = "Cancel"
-incidents.act.reroute             = "Reroute"
-incidents.act.shift_date          = "Shift date"
-incidents.act.cancel              = "Cancel"
-incidents.act.none                = "Informative"
-incidents.status.pending          = "Pending"
-incidents.status.confirmed        = "Confirmed"
-incidents.status.dismissed        = "Dismissed"
+incidents.menu_group,Incidents
+incidents.panelist_availability,Panelist availability
+incidents.title,Panelist availability incidents
+incidents.pending_badge_tooltip,Unavailability records pending review
+incidents.inbox.panelist,Panelist
+incidents.inbox.node,Node / city
+incidents.inbox.dates,Unavailability dates
+incidents.inbox.affected,Affected samples
+incidents.inbox.breakdown,Send / receive
+incidents.inbox.pending,Pending
+incidents.inbox.review,Review
+incidents.inbox.empty,No pending incidents
+incidents.detail.back,Back to list
+incidents.detail.mark_reviewed,Mark as studied
+incidents.detail.mark_reviewed_disabled,Resolve every proposal first
+incidents.detail.sample,Sample
+incidents.detail.role,Role
+incidents.detail.role_origin,Send
+incidents.detail.role_destination,Receive
+incidents.detail.sample_status,Sample status
+incidents.detail.suggested_action,Suggested action
+incidents.detail.suggestion,Suggestion
+incidents.detail.reason,Reason
+incidents.detail.proposal_status,Status
+incidents.detail.actions,Actions
+incidents.action.confirm,Confirm
+incidents.action.change,Change…
+incidents.action.dismiss,Dismiss
+incidents.action.confirm_selected,Confirm selected
+incidents.action.dismiss_selected,Dismiss selected
+incidents.action.selected_count,{count} selected
+incidents.override.title,Change resolution
+incidents.override.choose_action,Final action
+incidents.override.reroute,Reroute to another node
+incidents.override.shift_date,Change date
+incidents.override.cancel_sample,Cancel sample
+incidents.override.target_node,Target node
+incidents.override.node_unavailable,(no panelist available)
+incidents.override.new_date,New date
+incidents.override.apply,Apply
+incidents.override.cancel,Cancel
+incidents.act.reroute,Reroute
+incidents.act.shift_date,Shift date
+incidents.act.cancel,Cancel
+incidents.act.none,Informative
+incidents.status.pending,Pending
+incidents.status.confirmed,Confirmed
+incidents.status.dismissed,Dismissed
 ```
 
-(ES ejemplos: `incidents.menu_group="Incidencias"`, `panelist_availability="Disponibilidad de panelistas"`, `title="Incidencias de disponibilidad de panelistas"`, `action.confirm="Confirmar"`, `action.change="Cambiar…"`, `action.dismiss="Descartar"`, `detail.mark_reviewed="Dar por estudiado"`, etc. Traducir todas a ES, FR y AR con el mismo conjunto de claves.)
+(Nota: `incidents.action.selected_count` usa `{count}` — llave simple — porque `t()`
+sustituye variables con `{var}`.)
 
-- [ ] **Step 2: Verificar que las 4 lenguas tienen exactamente las mismas claves**
+- [ ] **Step 2: Añadir las MISMAS claves traducidas en ES, FR y AR**
 
-Run:
+`public/locales/es.csv` (Español). Traducciones (mismas claves):
+
 ```
-npm run build
+incidents.menu_group,Incidencias
+incidents.panelist_availability,Disponibilidad de panelistas
+incidents.title,Incidencias de disponibilidad de panelistas
+incidents.pending_badge_tooltip,Bajas pendientes de revisar
+incidents.inbox.panelist,Panelista
+incidents.inbox.node,Nodo / ciudad
+incidents.inbox.dates,Fechas de la baja
+incidents.inbox.affected,Muestras afectadas
+incidents.inbox.breakdown,Envío / recepción
+incidents.inbox.pending,Pendientes
+incidents.inbox.review,Revisar
+incidents.inbox.empty,No hay incidencias pendientes
+incidents.detail.back,Volver a la lista
+incidents.detail.mark_reviewed,Dar por estudiado
+incidents.detail.mark_reviewed_disabled,Resuelve antes cada propuesta
+incidents.detail.sample,Muestra
+incidents.detail.role,Rol
+incidents.detail.role_origin,Envío
+incidents.detail.role_destination,Recepción
+incidents.detail.sample_status,Estado de la muestra
+incidents.detail.suggested_action,Acción sugerida
+incidents.detail.suggestion,Sugerencia
+incidents.detail.reason,Motivo
+incidents.detail.proposal_status,Estado
+incidents.detail.actions,Acciones
+incidents.action.confirm,Confirmar
+incidents.action.change,Cambiar…
+incidents.action.dismiss,Descartar
+incidents.action.confirm_selected,Confirmar seleccionadas
+incidents.action.dismiss_selected,Descartar seleccionadas
+incidents.action.selected_count,{count} seleccionadas
+incidents.override.title,Cambiar resolución
+incidents.override.choose_action,Acción final
+incidents.override.reroute,Reencaminar a otro nodo
+incidents.override.shift_date,Cambiar fecha
+incidents.override.cancel_sample,Cancelar muestra
+incidents.override.target_node,Nodo destino
+incidents.override.node_unavailable,(sin panelista disponible)
+incidents.override.new_date,Nueva fecha
+incidents.override.apply,Aplicar
+incidents.override.cancel,Cancelar
+incidents.act.reroute,Reencaminar
+incidents.act.shift_date,Cambiar fecha
+incidents.act.cancel,Cancelar
+incidents.act.none,Informativa
+incidents.status.pending,Pendiente
+incidents.status.confirmed,Confirmada
+incidents.status.dismissed,Descartada
 ```
-Expected: build sin errores (TypeScript + Vite). Revisar que no falte ninguna clave en ningún idioma (mismo set en los 4 ficheros).
 
-- [ ] **Step 3: Commit**
+`public/locales/fr.csv` (Français): traducir las mismas 47 claves al francés
+(p.ej. `incidents.menu_group,Incidents`, `incidents.panelist_availability,Disponibilité des panélistes`,
+`incidents.detail.mark_reviewed,Marquer comme étudié`, `incidents.action.confirm,Confirmer`,
+`incidents.action.change,Modifier…`, `incidents.action.dismiss,Ignorer`,
+`incidents.action.selected_count,{count} sélectionnées`, etc.).
+
+`public/locales/ar.csv` (العربية, RTL): traducir las mismas 47 claves al árabe
+(p.ej. `incidents.menu_group,الحوادث`, `incidents.panelist_availability,توفر المحكّمين`,
+`incidents.action.confirm,تأكيد`, `incidents.action.change,تغيير…`, `incidents.action.dismiss,تجاهل`,
+`incidents.detail.mark_reviewed,اعتبارها مدروسة`, `incidents.action.selected_count,{count} محددة`,
+etc.). Mantener `{count}` literal en la cadena.
+
+- [ ] **Step 3: Verificar que los 4 CSV tienen exactamente las mismas 47 claves**
+
+Run (bash):
+```
+for l in en es fr ar; do echo -n "$l: "; grep -c "^incidents\." public/locales/$l.csv; done
+```
+Expected: `en: 47`, `es: 47`, `fr: 47`, `ar: 47`. Comprobar además que cada clave `incidents.*`
+existe en los 4 (mismo conjunto). Luego `npm run build` debe pasar sin errores.
+
+- [ ] **Step 4: Commit**
 
 ```bash
-git add src/locales
+git add public/locales/en.csv public/locales/es.csv public/locales/fr.csv public/locales/ar.csv
 git commit -m "i18n(incidents): claves del subsistema C en EN/ES/FR/AR"
 ```
 
