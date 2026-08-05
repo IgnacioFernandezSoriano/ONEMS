@@ -2648,3 +2648,51 @@ menu.setup_view,Configuration
 menu.account,Compte
 menu.all_accounts,Tous les comptes
 menu.sign_out,Se déconnecter
+incidents.menu_group,Incidents
+incidents.panelist_availability,Disponibilité des panélistes
+incidents.title,Incidents de disponibilité des panélistes
+incidents.pending_badge_tooltip,Indisponibilités en attente de révision
+incidents.inbox.panelist,Panéliste
+incidents.inbox.node,Nœud / ville
+incidents.inbox.dates,Dates d'indisponibilité
+incidents.inbox.affected,Échantillons concernés
+incidents.inbox.breakdown,Envoi / réception
+incidents.inbox.pending,En attente
+incidents.inbox.review,Examiner
+incidents.inbox.empty,Aucun incident en attente
+incidents.detail.back,Retour à la liste
+incidents.detail.mark_reviewed,Marquer comme étudié
+incidents.detail.mark_reviewed_disabled,Résolvez d'abord chaque proposition
+incidents.detail.sample,Échantillon
+incidents.detail.role,Rôle
+incidents.detail.role_origin,Envoi
+incidents.detail.role_destination,Réception
+incidents.detail.sample_status,Statut de l'échantillon
+incidents.detail.suggested_action,Action suggérée
+incidents.detail.suggestion,Suggestion
+incidents.detail.reason,Motif
+incidents.detail.proposal_status,Statut
+incidents.detail.actions,Actions
+incidents.action.confirm,Confirmer
+incidents.action.change,Modifier…
+incidents.action.dismiss,Ignorer
+incidents.action.confirm_selected,Confirmer la sélection
+incidents.action.dismiss_selected,Ignorer la sélection
+incidents.action.selected_count,{count} sélectionnées
+incidents.override.title,Modifier la résolution
+incidents.override.choose_action,Action finale
+incidents.override.reroute,Réacheminer vers un autre nœud
+incidents.override.shift_date,Changer la date
+incidents.override.cancel_sample,Annuler l'échantillon
+incidents.override.target_node,Nœud cible
+incidents.override.node_unavailable,(aucun panéliste disponible)
+incidents.override.new_date,Nouvelle date
+incidents.override.apply,Appliquer
+incidents.override.cancel,Annuler
+incidents.act.reroute,Réacheminer
+incidents.act.shift_date,Changer la date
+incidents.act.cancel,Annuler
+incidents.act.none,Informatif
+incidents.status.pending,En attente
+incidents.status.confirmed,Confirmée
+incidents.status.dismissed,Rejetée

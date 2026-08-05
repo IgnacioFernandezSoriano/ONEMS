@@ -2656,3 +2656,51 @@ menu.setup_view,Configuración
 menu.account,Cuenta
 menu.all_accounts,Todas las cuentas
 menu.sign_out,Cerrar sesión
+incidents.menu_group,Incidencias
+incidents.panelist_availability,Disponibilidad de panelistas
+incidents.title,Incidencias de disponibilidad de panelistas
+incidents.pending_badge_tooltip,Bajas pendientes de revisar
+incidents.inbox.panelist,Panelista
+incidents.inbox.node,Nodo / ciudad
+incidents.inbox.dates,Fechas de la baja
+incidents.inbox.affected,Muestras afectadas
+incidents.inbox.breakdown,Envío / recepción
+incidents.inbox.pending,Pendientes
+incidents.inbox.review,Revisar
+incidents.inbox.empty,No hay incidencias pendientes
+incidents.detail.back,Volver a la lista
+incidents.detail.mark_reviewed,Dar por estudiado
+incidents.detail.mark_reviewed_disabled,Resuelve antes cada propuesta
+incidents.detail.sample,Muestra
+incidents.detail.role,Rol
+incidents.detail.role_origin,Envío
+incidents.detail.role_destination,Recepción
+incidents.detail.sample_status,Estado de la muestra
+incidents.detail.suggested_action,Acción sugerida
+incidents.detail.suggestion,Sugerencia
+incidents.detail.reason,Motivo
+incidents.detail.proposal_status,Estado
+incidents.detail.actions,Acciones
+incidents.action.confirm,Confirmar
+incidents.action.change,Cambiar…
+incidents.action.dismiss,Descartar
+incidents.action.confirm_selected,Confirmar seleccionadas
+incidents.action.dismiss_selected,Descartar seleccionadas
+incidents.action.selected_count,{count} seleccionadas
+incidents.override.title,Cambiar resolución
+incidents.override.choose_action,Acción final
+incidents.override.reroute,Reencaminar a otro nodo
+incidents.override.shift_date,Cambiar fecha
+incidents.override.cancel_sample,Cancelar muestra
+incidents.override.target_node,Nodo destino
+incidents.override.node_unavailable,(sin panelista disponible)
+incidents.override.new_date,Nueva fecha
+incidents.override.apply,Aplicar
+incidents.override.cancel,Cancelar
+incidents.act.reroute,Reencaminar
+incidents.act.shift_date,Cambiar fecha
+incidents.act.cancel,Cancelar
+incidents.act.none,Informativa
+incidents.status.pending,Pendiente
+incidents.status.confirmed,Confirmada
+incidents.status.dismissed,Descartada

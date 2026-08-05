@@ -2656,3 +2656,51 @@ menu.setup_view,Setup
 menu.account,Account
 menu.all_accounts,All Accounts
 menu.sign_out,Sign Out
+incidents.menu_group,Incidents
+incidents.panelist_availability,Panelist availability
+incidents.title,Panelist availability incidents
+incidents.pending_badge_tooltip,Unavailability records pending review
+incidents.inbox.panelist,Panelist
+incidents.inbox.node,Node / city
+incidents.inbox.dates,Unavailability dates
+incidents.inbox.affected,Affected samples
+incidents.inbox.breakdown,Send / receive
+incidents.inbox.pending,Pending
+incidents.inbox.review,Review
+incidents.inbox.empty,No pending incidents
+incidents.detail.back,Back to list
+incidents.detail.mark_reviewed,Mark as studied
+incidents.detail.mark_reviewed_disabled,Resolve every proposal first
+incidents.detail.sample,Sample
+incidents.detail.role,Role
+incidents.detail.role_origin,Send
+incidents.detail.role_destination,Receive
+incidents.detail.sample_status,Sample status
+incidents.detail.suggested_action,Suggested action
+incidents.detail.suggestion,Suggestion
+incidents.detail.reason,Reason
+incidents.detail.proposal_status,Status
+incidents.detail.actions,Actions
+incidents.action.confirm,Confirm
+incidents.action.change,Change…
+incidents.action.dismiss,Dismiss
+incidents.action.confirm_selected,Confirm selected
+incidents.action.dismiss_selected,Dismiss selected
+incidents.action.selected_count,{count} selected
+incidents.override.title,Change resolution
+incidents.override.choose_action,Final action
+incidents.override.reroute,Reroute to another node
+incidents.override.shift_date,Change date
+incidents.override.cancel_sample,Cancel sample
+incidents.override.target_node,Target node
+incidents.override.node_unavailable,(no panelist available)
+incidents.override.new_date,New date
+incidents.override.apply,Apply
+incidents.override.cancel,Cancel
+incidents.act.reroute,Reroute
+incidents.act.shift_date,Shift date
+incidents.act.cancel,Cancel
+incidents.act.none,Informative
+incidents.status.pending,Pending
+incidents.status.confirmed,Confirmed
+incidents.status.dismissed,Dismissed

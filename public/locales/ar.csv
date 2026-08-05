@@ -2648,3 +2648,51 @@ menu.setup_view,الإعداد
 menu.account,حساب
 menu.all_accounts,جميع الحسابات
 menu.sign_out,تسجيل الخروج
+incidents.menu_group,الحوادث
+incidents.panelist_availability,توفر المحكّمين
+incidents.title,حوادث توفر المحكّمين
+incidents.pending_badge_tooltip,حالات عدم توفر بانتظار المراجعة
+incidents.inbox.panelist,المحكّم
+incidents.inbox.node,العقدة / المدينة
+incidents.inbox.dates,تواريخ عدم التوفر
+incidents.inbox.affected,العينات المتأثرة
+incidents.inbox.breakdown,الإرسال / الاستلام
+incidents.inbox.pending,قيد الانتظار
+incidents.inbox.review,مراجعة
+incidents.inbox.empty,لا توجد حوادث معلقة
+incidents.detail.back,العودة إلى القائمة
+incidents.detail.mark_reviewed,اعتبارها مدروسة
+incidents.detail.mark_reviewed_disabled,يجب حل كل اقتراح أولاً
+incidents.detail.sample,العينة
+incidents.detail.role,الدور
+incidents.detail.role_origin,الإرسال
+incidents.detail.role_destination,الاستلام
+incidents.detail.sample_status,حالة العينة
+incidents.detail.suggested_action,الإجراء المقترح
+incidents.detail.suggestion,اقتراح
+incidents.detail.reason,السبب
+incidents.detail.proposal_status,الحالة
+incidents.detail.actions,الإجراءات
+incidents.action.confirm,تأكيد
+incidents.action.change,تغيير…
+incidents.action.dismiss,تجاهل
+incidents.action.confirm_selected,تأكيد المحدد
+incidents.action.dismiss_selected,تجاهل المحدد
+incidents.action.selected_count,{count} محددة
+incidents.override.title,تغيير الحل
+incidents.override.choose_action,الإجراء النهائي
+incidents.override.reroute,إعادة التوجيه إلى عقدة أخرى
+incidents.override.shift_date,تغيير التاريخ
+incidents.override.cancel_sample,إلغاء العينة
+incidents.override.target_node,العقدة المستهدفة
+incidents.override.node_unavailable,(لا يوجد محكّم متاح)
+incidents.override.new_date,تاريخ جديد
+incidents.override.apply,تطبيق
+incidents.override.cancel,إلغاء
+incidents.act.reroute,إعادة توجيه
+incidents.act.shift_date,تغيير التاريخ
+incidents.act.cancel,إلغاء
+incidents.act.none,معلوماتي
+incidents.status.pending,قيد الانتظار
+incidents.status.confirmed,مؤكدة
+incidents.status.dismissed,مرفوضة
