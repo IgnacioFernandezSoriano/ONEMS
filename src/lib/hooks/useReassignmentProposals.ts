@@ -148,8 +148,8 @@ export function useReassignmentProposals() {
     }
   }, [])
 
-  // El badge cuenta muestras (propuestas) pendientes de confirmar, no bajas.
-  const pendingCount = inbox.reduce((sum, r) => sum + r.pending_count, 0)
+  // El badge cuenta BAJAS con casos pendientes de resolver (>=1 propuesta pending).
+  const pendingCount = inbox.filter(r => r.pending_count > 0).length
 
   return {
     inbox, loading, error, pendingCount,
