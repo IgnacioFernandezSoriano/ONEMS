@@ -73,8 +73,8 @@ export function ProposalReviewPanel({ unavailabilityId, onBack }: { unavailabili
     return () => { cancelled = true }
   }, [fetchUnavailabilityHeader, unavailabilityId])
 
-  // Balance de la ciudad del panelista, en el rango de la baja. Reactivo a cada decisión.
-  const { nodes: cityLoad, loading: loadLoading, refetch: refetchLoad } =
+  // Balance de la ciudad del panelista (matriz por semana). Reactivo a cada decisión.
+  const { weeks: loadWeeks, rows: loadRows, loading: loadLoading, refetch: refetchLoad } =
     useCityNodeLoad(header?.city_id, header?.start_date, header?.end_date)
 
   // Nodos sugeridos por las propuestas pendientes (para el marcador ⭐).
@@ -82,6 +82,15 @@ export function ProposalReviewPanel({ unavailabilityId, onBack }: { unavailabili
     proposals
       .filter(p => p.status === 'pending' && p.suggested_action === 'reroute' && p.suggested_target_node_id)
       .map(p => p.suggested_target_node_id as string)
+  )
+
+  // Semanas que solapan con la baja (columnas resaltadas).
+  const affectedWeeks = new Set(
+    header
+      ? loadWeeks
+          .filter(w => w.week_start_date <= header.end_date && w.week_end_date >= header.start_date)
+          .map(w => w.week_number)
+      : []
   )
 
   const pendingProposals = proposals.filter(p => p.status === 'pending')
@@ -262,36 +271,59 @@ export function ProposalReviewPanel({ unavailabilityId, onBack }: { unavailabili
             <div className="mt-4">
               {loadLoading ? (
                 <div className="text-sm text-gray-500">{t('common.loading')}</div>
-              ) : cityLoad.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{t('incidents.balance.node')}</th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{t('incidents.balance.status')}</th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{t('incidents.balance.load')}</th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase"></th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                      {cityLoad.map(n => (
-                        <tr key={n.node_id} className={n.node_id === header.node_id ? 'bg-gray-50' : ''}>
-                          <td className="px-4 py-2 text-sm font-mono">{n.node_code}</td>
-                          <td className="px-4 py-2">
-                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${SATURATION_BADGE_CLASS[n.saturation_level] ?? SATURATION_BADGE_CLASS.normal}`}>
-                              {t(`incidents.balance.saturation_${n.saturation_level}`)}
-                            </span>
-                          </td>
-                          <td className="px-4 py-2 text-sm">{n.load_count}</td>
-                          <td className="px-4 py-2 text-xs text-gray-600">
-                            {n.node_id === header.node_id && <span className="mr-2">🚫 {t('incidents.balance.freed')}</span>}
-                            {suggestedNodeIds.has(n.node_id) && <span>⭐ {t('incidents.balance.suggested')}</span>}
-                          </td>
+              ) : loadRows.length > 0 && loadWeeks.length > 0 ? (
+                <>
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase sticky left-0 bg-white">{t('incidents.balance.node')}</th>
+                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">{t('incidents.balance.status')}</th>
+                          {loadWeeks.map(w => (
+                            <th
+                              key={w.week_number}
+                              title={`${w.week_start_date} – ${w.week_end_date}`}
+                              className={`px-3 py-2 text-center text-xs font-medium uppercase ${affectedWeeks.has(w.week_number) ? 'bg-amber-100 text-amber-800' : 'text-gray-500'}`}
+                            >
+                              {t('incidents.balance.week_prefix')}{w.week_number}
+                            </th>
+                          ))}
+                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase">{t('incidents.balance.total')}</th>
+                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase"></th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100">
+                        {loadRows.map(n => (
+                          <tr key={n.node_id} className={n.node_id === header.node_id ? 'bg-gray-50' : ''}>
+                            <td className="px-3 py-2 text-sm font-mono sticky left-0 bg-inherit">{n.node_code}</td>
+                            <td className="px-3 py-2">
+                              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${SATURATION_BADGE_CLASS[n.saturation_level] ?? SATURATION_BADGE_CLASS.normal}`}>
+                                {t(`incidents.balance.saturation_${n.saturation_level}`)}
+                              </span>
+                            </td>
+                            {loadWeeks.map(w => (
+                              <td
+                                key={w.week_number}
+                                className={`px-3 py-2 text-center text-sm ${affectedWeeks.has(w.week_number) ? 'bg-amber-50 font-semibold' : ''}`}
+                              >
+                                {n.counts[w.week_number] ?? 0}
+                              </td>
+                            ))}
+                            <td className="px-3 py-2 text-center text-sm font-semibold">{n.total}</td>
+                            <td className="px-3 py-2 text-xs text-gray-600 whitespace-nowrap">
+                              {n.node_id === header.node_id && <span className="mr-2">🚫 {t('incidents.balance.freed')}</span>}
+                              {suggestedNodeIds.has(n.node_id) && <span>⭐ {t('incidents.balance.suggested')}</span>}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div className="mt-2 text-xs text-gray-500">
+                    <span className="inline-block w-3 h-3 bg-amber-100 rounded-sm align-middle mr-1"></span>
+                    {t('incidents.balance.affected_week')}
+                  </div>
+                </>
               ) : (
                 <div className="text-sm text-gray-500">{t('incidents.balance.no_data')}</div>
               )}

@@ -423,9 +423,16 @@ export interface UnavailabilityHeader {
   city_name: string | null
 }
 
-export interface CityNodeLoad {
+export interface CityLoadWeek {
+  week_number: number
+  week_start_date: string
+  week_end_date: string
+}
+
+export interface CityNodeLoadRow {
   node_id: string
   node_code: string
   saturation_level: 'normal' | 'high' | 'saturated'
-  load_count: number
+  counts: Record<number, number> // week_number -> shipment_count
+  total: number
 }

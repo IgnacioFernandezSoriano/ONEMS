@@ -2713,3 +2713,6 @@ incidents.balance.saturation_saturated,مشبع
 incidents.balance.freed,يُحرَّر
 incidents.balance.suggested,مقترح
 incidents.balance.no_data,لا توجد بيانات توازن لهذه الفترة
+incidents.balance.week_prefix,أ
+incidents.balance.total,الإجمالي
+incidents.balance.affected_week,الأسبوع المتأثر

@@ -2721,3 +2721,6 @@ incidents.balance.saturation_saturated,Saturada
 incidents.balance.freed,Se libera
 incidents.balance.suggested,Sugerido
 incidents.balance.no_data,Sin datos de balance para este periodo
+incidents.balance.week_prefix,S
+incidents.balance.total,Total
+incidents.balance.affected_week,Semana afectada

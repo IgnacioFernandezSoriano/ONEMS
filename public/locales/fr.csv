@@ -2713,3 +2713,6 @@ incidents.balance.saturation_saturated,Saturé
 incidents.balance.freed,Libéré
 incidents.balance.suggested,Suggéré
 incidents.balance.no_data,Aucune donnée d'équilibre pour cette période
+incidents.balance.week_prefix,S
+incidents.balance.total,Total
+incidents.balance.affected_week,Semaine concernée

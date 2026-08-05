@@ -37,15 +37,20 @@ de la ciudad**. Este panel, de **solo lectura**, muestra ese balance en la propi
   hook `useCityNodeLoad`). Así, al reasignar una muestra a un nodo, ese nodo sube su conteo en el
   panel al instante.
 
-## 3. Contenido
+## 3. Contenido — matriz nodo × semana
 
-Una fila (o tarjeta compacta) por **nodo de la ciudad del panelista de baja**, con:
+**Vista de matriz** (revisado tras feedback): filas = nodos de la ciudad, columnas = **semanas**.
+La **ventana** va desde el inicio de la baja hasta **fin del mes de la baja + 14 días** (las dos
+primeras semanas del mes siguiente), para ver la semana afectada y cómo evoluciona la carga.
+
+Cada fila (nodo de la ciudad del panelista de baja) tiene:
 
 - **Código del nodo** (`nodes.auto_id`).
 - **Semáforo de saturación** del periodo: `normal` (verde) / `high` (ámbar) / `saturated` (rojo),
   a partir de `saturation_level` del RPC.
-- **Conteo de carga**: total de muestras del nodo **en el rango de fechas de la baja**
-  (`start_date`..`end_date`), sumando `shipment_count`.
+- **Una celda por semana** con el conteo de muestras de ese nodo esa semana (`shipment_count`).
+  Las **columnas de las semanas que solapan con la baja** (semanas afectadas) van **resaltadas**.
+- **Total** de la fila en la ventana.
 - **Marcadores**:
   - 🚫 el **nodo que se libera** — el nodo del panelista de baja (queda sin panelista disponible).
   - ⭐ el/los **nodo(s) sugeridos** por las propuestas pendientes de esta baja (los
