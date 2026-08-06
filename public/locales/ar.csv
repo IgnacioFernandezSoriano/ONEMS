@@ -2723,3 +2723,54 @@ incidents.balance.receive_full,الواردة
 incidents.balance.week_filter_hint,انقر على أسبوع لتصفية العينات
 incidents.balance.week_filter_active,تصفية الأسبوع
 incidents.balance.week_filter_empty,لا توجد عينات معلقة في هذا الأسبوع
+reported_incidents.menu,الحوادث المبلَّغ عنها
+reported_incidents.badge_tooltip,حوادث أبلغ عنها الأعضاء بانتظار المراجعة
+reported_incidents.title,الحوادث المبلَّغ عنها من الأعضاء
+reported_incidents.open,فتح
+reported_incidents.empty,لا توجد حوادث مبلَّغ عنها
+reported_incidents.back,رجوع
+reported_incidents.linked_shipment,الشحنة المرتبطة
+reported_incidents.resolution_note,ملاحظة الحل
+reported_incidents.reply_to_panelist,الرد على العضو
+reported_incidents.resolve,حل
+reported_incidents.dismiss,تجاهل
+reported_incidents.filter.all_categories,جميع الفئات
+reported_incidents.filter.open_active,مفتوحة / نشطة
+reported_incidents.col.panelist,العضو
+reported_incidents.col.category,الفئة
+reported_incidents.col.status,الحالة
+reported_incidents.col.reported_at,تاريخ الإبلاغ
+reported_incidents.status.open,مفتوحة
+reported_incidents.status.in_progress,قيد المعالجة
+reported_incidents.status.resolved,تم الحل
+reported_incidents.status.dismissed,مرفوضة
+reported_incidents.category.missing_materials,نقص المواد
+reported_incidents.category.unreadable_label_receipt,ملصق / إيصال غير مقروء
+reported_incidents.category.parcel_damaged,طرد تالف
+reported_incidents.category.parcel_returned,طرد مُعاد
+reported_incidents.category.how_to_send,كيفية الإرسال
+reported_incidents.category.unavailability_request,طلب إجازة
+reported_incidents.category.tag_photo_problem,مشكلة في صورة البطاقة
+reported_incidents.category.contact_data_change,تغيير بيانات الاتصال
+reported_incidents.category.other,أخرى
+reported_incidents.action.mark_received,وضع علامة كمستلم
+reported_incidents.action.invalidate,إبطال
+reported_incidents.action.support_only,لا يوجد إجراء متاح؛ الدعم فقط.
+reported_incidents.action.new_date,تاريخ جديد
+reported_incidents.action.reschedule,إعادة الجدولة
+reported_incidents.action.cancel_shipment,إلغاء الشحنة
+reported_incidents.action.start_date,تاريخ البدء
+reported_incidents.action.end_date,تاريخ الانتهاء
+reported_incidents.action.reason,السبب
+reported_incidents.action.create_unavailability,إنشاء إجازة
+reported_incidents.action.requested_data,البيانات المطلوبة
+reported_incidents.action.telegram_id,معرف تيليجرام
+reported_incidents.action.phone,الهاتف
+reported_incidents.action.language,اللغة
+reported_incidents.action.apply_contact,تطبيق تغيير بيانات الاتصال
+reported_incidents.done.received,تم وضع علامة كمستلم
+reported_incidents.done.invalidated,تم إبطال العينة
+reported_incidents.done.rescheduled,تمت إعادة جدولة الشحنة
+reported_incidents.done.cancelled,تم إلغاء الشحنة
+reported_incidents.done.baja,تم إنشاء الإجازة
+reported_incidents.done.contact,تم تحديث بيانات الاتصال

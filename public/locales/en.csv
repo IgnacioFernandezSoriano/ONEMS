@@ -2731,3 +2731,54 @@ incidents.balance.receive_full,Received
 incidents.balance.week_filter_hint,Click a week to filter the samples
 incidents.balance.week_filter_active,Filtering week
 incidents.balance.week_filter_empty,No pending samples in this week
+reported_incidents.menu,Reported incidents
+reported_incidents.badge_tooltip,Incidents reported by panelists pending review
+reported_incidents.title,Incidents reported by panelists
+reported_incidents.open,Open
+reported_incidents.empty,No reported incidents
+reported_incidents.back,Back
+reported_incidents.linked_shipment,Linked shipment
+reported_incidents.resolution_note,Resolution note
+reported_incidents.reply_to_panelist,Reply to panelist
+reported_incidents.resolve,Resolve
+reported_incidents.dismiss,Dismiss
+reported_incidents.filter.all_categories,All categories
+reported_incidents.filter.open_active,Open / active
+reported_incidents.col.panelist,Panelist
+reported_incidents.col.category,Category
+reported_incidents.col.status,Status
+reported_incidents.col.reported_at,Reported at
+reported_incidents.status.open,Open
+reported_incidents.status.in_progress,In progress
+reported_incidents.status.resolved,Resolved
+reported_incidents.status.dismissed,Dismissed
+reported_incidents.category.missing_materials,Missing materials
+reported_incidents.category.unreadable_label_receipt,Unreadable label / receipt
+reported_incidents.category.parcel_damaged,Damaged parcel
+reported_incidents.category.parcel_returned,Returned parcel
+reported_incidents.category.how_to_send,How to send
+reported_incidents.category.unavailability_request,Unavailability request
+reported_incidents.category.tag_photo_problem,Tag photo problem
+reported_incidents.category.contact_data_change,Contact data change
+reported_incidents.category.other,Other
+reported_incidents.action.mark_received,Mark as received
+reported_incidents.action.invalidate,Invalidate
+reported_incidents.action.support_only,No action available; support only.
+reported_incidents.action.new_date,New date
+reported_incidents.action.reschedule,Reschedule
+reported_incidents.action.cancel_shipment,Cancel shipment
+reported_incidents.action.start_date,Start date
+reported_incidents.action.end_date,End date
+reported_incidents.action.reason,Reason
+reported_incidents.action.create_unavailability,Create unavailability
+reported_incidents.action.requested_data,Requested data
+reported_incidents.action.telegram_id,Telegram ID
+reported_incidents.action.phone,Phone
+reported_incidents.action.language,Language
+reported_incidents.action.apply_contact,Apply contact data change
+reported_incidents.done.received,Marked as received
+reported_incidents.done.invalidated,Sample invalidated
+reported_incidents.done.rescheduled,Shipment rescheduled
+reported_incidents.done.cancelled,Shipment cancelled
+reported_incidents.done.baja,Unavailability created
+reported_incidents.done.contact,Contact data updated

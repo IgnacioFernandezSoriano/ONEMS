@@ -2731,3 +2731,54 @@ incidents.balance.receive_full,Recibidos
 incidents.balance.week_filter_hint,Pulsa una semana para filtrar las muestras
 incidents.balance.week_filter_active,Filtrando semana
 incidents.balance.week_filter_empty,No hay muestras pendientes en esta semana
+reported_incidents.menu,Incidencias reportadas
+reported_incidents.badge_tooltip,Incidencias reportadas por panelistas pendientes de revisar
+reported_incidents.title,Incidencias reportadas por panelistas
+reported_incidents.open,Abrir
+reported_incidents.empty,No hay incidencias reportadas
+reported_incidents.back,Volver
+reported_incidents.linked_shipment,Envío vinculado
+reported_incidents.resolution_note,Nota de resolución
+reported_incidents.reply_to_panelist,Respuesta al panelista
+reported_incidents.resolve,Resolver
+reported_incidents.dismiss,Descartar
+reported_incidents.filter.all_categories,Todas las categorías
+reported_incidents.filter.open_active,Abiertas / activas
+reported_incidents.col.panelist,Panelista
+reported_incidents.col.category,Categoría
+reported_incidents.col.status,Estado
+reported_incidents.col.reported_at,Fecha de reporte
+reported_incidents.status.open,Abierta
+reported_incidents.status.in_progress,En curso
+reported_incidents.status.resolved,Resuelta
+reported_incidents.status.dismissed,Descartada
+reported_incidents.category.missing_materials,Falta de material
+reported_incidents.category.unreadable_label_receipt,Etiqueta / recibo ilegible
+reported_incidents.category.parcel_damaged,Paquete dañado
+reported_incidents.category.parcel_returned,Paquete devuelto
+reported_incidents.category.how_to_send,Cómo enviar
+reported_incidents.category.unavailability_request,Solicitud de baja
+reported_incidents.category.tag_photo_problem,Problema con la foto de la etiqueta
+reported_incidents.category.contact_data_change,Cambio de datos de contacto
+reported_incidents.category.other,Otro
+reported_incidents.action.mark_received,Marcar como recibido
+reported_incidents.action.invalidate,Invalidar
+reported_incidents.action.support_only,No hay acción disponible; solo soporte.
+reported_incidents.action.new_date,Nueva fecha
+reported_incidents.action.reschedule,Reprogramar
+reported_incidents.action.cancel_shipment,Cancelar envío
+reported_incidents.action.start_date,Fecha de inicio
+reported_incidents.action.end_date,Fecha de fin
+reported_incidents.action.reason,Motivo
+reported_incidents.action.create_unavailability,Crear baja
+reported_incidents.action.requested_data,Datos solicitados
+reported_incidents.action.telegram_id,ID de Telegram
+reported_incidents.action.phone,Teléfono
+reported_incidents.action.language,Idioma
+reported_incidents.action.apply_contact,Aplicar cambio de datos de contacto
+reported_incidents.done.received,Marcado como recibido
+reported_incidents.done.invalidated,Muestra invalidada
+reported_incidents.done.rescheduled,Envío reprogramado
+reported_incidents.done.cancelled,Envío cancelado
+reported_incidents.done.baja,Baja creada
+reported_incidents.done.contact,Datos de contacto actualizados
