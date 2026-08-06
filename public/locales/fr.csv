@@ -2716,3 +2716,10 @@ incidents.balance.no_data,Aucune donnée d'équilibre pour cette période
 incidents.balance.week_prefix,S
 incidents.balance.total,Total
 incidents.balance.affected_week,Semaine concernée
+incidents.balance.send,Env
+incidents.balance.receive,Reç
+incidents.balance.send_full,Envoyés
+incidents.balance.receive_full,Reçus
+incidents.balance.week_filter_hint,Cliquez sur une semaine pour filtrer les échantillons
+incidents.balance.week_filter_active,Filtre semaine
+incidents.balance.week_filter_empty,Aucun échantillon en attente cette semaine

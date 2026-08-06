@@ -2716,3 +2716,10 @@ incidents.balance.no_data,لا توجد بيانات توازن لهذه الف�
 incidents.balance.week_prefix,أ
 incidents.balance.total,الإجمالي
 incidents.balance.affected_week,الأسبوع المتأثر
+incidents.balance.send,صادر
+incidents.balance.receive,وارد
+incidents.balance.send_full,الصادرة
+incidents.balance.receive_full,الواردة
+incidents.balance.week_filter_hint,انقر على أسبوع لتصفية العينات
+incidents.balance.week_filter_active,تصفية الأسبوع
+incidents.balance.week_filter_empty,لا توجد عينات معلقة في هذا الأسبوع

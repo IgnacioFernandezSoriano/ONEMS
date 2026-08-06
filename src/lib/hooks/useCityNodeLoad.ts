@@ -66,17 +66,24 @@ export function useCityNodeLoad(
             node_code: row.node_code ?? '-',
             saturation_level: (row.saturation_level ?? 'normal') as CityNodeLoadRow['saturation_level'],
             counts: {},
-            total: 0,
+            total: { sent: 0, received: 0 },
           }
           nodeMap.set(row.node_id, node)
         }
-        const c = Number(row.shipment_count ?? 0)
-        node.counts[wn] = (node.counts[wn] ?? 0) + c
-        node.total += c
+        const sent = Number(row.sent_count ?? row.shipment_count ?? 0)
+        const received = Number(row.received_count ?? 0)
+        const cell = node.counts[wn] ?? { sent: 0, received: 0 }
+        cell.sent += sent
+        cell.received += received
+        node.counts[wn] = cell
+        node.total.sent += sent
+        node.total.received += received
       }
 
       const weekList = Array.from(weekMap.values()).sort((a, b) => a.week_number - b.week_number)
-      const rowList = Array.from(nodeMap.values()).sort((a, b) => a.total - b.total)
+      const rowList = Array.from(nodeMap.values()).sort(
+        (a, b) => (a.total.sent + a.total.received) - (b.total.sent + b.total.received)
+      )
       setWeeks(weekList)
       setRows(rowList)
     } catch (err: any) {

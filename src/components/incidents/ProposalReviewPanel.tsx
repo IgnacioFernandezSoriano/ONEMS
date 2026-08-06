@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, Fragment } from 'react'
 import { useTranslation } from '@/hooks/useTranslation'
 import { useReassignmentProposals } from '@/lib/hooks/useReassignmentProposals'
 import { useCityNodeLoad } from '@/lib/hooks/useCityNodeLoad'
@@ -43,6 +43,9 @@ export function ProposalReviewPanel({ unavailabilityId, onBack }: { unavailabili
   const [error, setError] = useState<string | null>(null)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [balanceOpen, setBalanceOpen] = useState(true)
+  // Semana seleccionada en la tabla de Balance para filtrar la lista de propuestas.
+  // null = sin filtro (se ven todas). Toggle al pulsar la misma semana.
+  const [selectedWeek, setSelectedWeek] = useState<number | null>(null)
 
   const [overrideProposalTarget, setOverrideProposalTarget] = useState<ReassignmentProposal | null>(null)
   const [overrideAction, setOverrideAction] = useState<ProposalAction>('reroute')
@@ -96,12 +99,28 @@ export function ProposalReviewPanel({ unavailabilityId, onBack }: { unavailabili
   const pendingProposals = proposals.filter(p => p.status === 'pending')
   const hasPending = pendingProposals.length > 0
 
+  // Filtro por semana: si hay semana seleccionada, solo las muestras cuya fecha cae
+  // dentro de [week_start_date, week_end_date] de esa semana. Sin selección => todas.
+  const selectedWeekBounds = selectedWeek != null
+    ? loadWeeks.find(w => w.week_number === selectedWeek) ?? null
+    : null
+  const visibleProposals = selectedWeekBounds
+    ? pendingProposals.filter(p =>
+        !!p.detail?.fecha_programada &&
+        p.detail.fecha_programada >= selectedWeekBounds.week_start_date &&
+        p.detail.fecha_programada <= selectedWeekBounds.week_end_date)
+    : pendingProposals
+
   const handleSelectAll = () => {
-    if (selectedIds.size === pendingProposals.length) {
+    if (selectedIds.size === visibleProposals.length) {
       setSelectedIds(new Set())
     } else {
-      setSelectedIds(new Set(pendingProposals.map(p => p.id)))
+      setSelectedIds(new Set(visibleProposals.map(p => p.id)))
     }
+  }
+
+  const toggleWeekFilter = (weekNumber: number) => {
+    setSelectedWeek(prev => (prev === weekNumber ? null : weekNumber))
   }
 
   const handleSelectOne = (id: string) => {
@@ -277,19 +296,31 @@ export function ProposalReviewPanel({ unavailabilityId, onBack }: { unavailabili
                     <table className="w-full">
                       <thead>
                         <tr className="border-b">
-                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase sticky left-0 bg-white">{t('incidents.balance.node')}</th>
-                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">{t('incidents.balance.status')}</th>
+                          <th rowSpan={2} className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase sticky left-0 bg-white align-bottom">{t('incidents.balance.node')}</th>
+                          <th rowSpan={2} className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase align-bottom">{t('incidents.balance.status')}</th>
                           {loadWeeks.map(w => (
                             <th
                               key={w.week_number}
+                              colSpan={2}
                               title={`${w.week_start_date} – ${w.week_end_date}`}
-                              className={`px-3 py-2 text-center text-xs font-medium uppercase ${affectedWeeks.has(w.week_number) ? 'bg-amber-100 text-amber-800' : 'text-gray-500'}`}
+                              onClick={() => toggleWeekFilter(w.week_number)}
+                              className={`px-3 py-2 text-center text-xs font-medium uppercase cursor-pointer select-none ${selectedWeek === w.week_number ? 'ring-2 ring-inset ring-blue-400 ' : ''}${affectedWeeks.has(w.week_number) ? 'bg-amber-100 text-amber-800' : 'text-gray-500 hover:bg-gray-100'}`}
                             >
                               {t('incidents.balance.week_prefix')}{w.week_number}
                             </th>
                           ))}
-                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase">{t('incidents.balance.total')}</th>
-                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase"></th>
+                          <th colSpan={2} className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase">{t('incidents.balance.total')}</th>
+                          <th rowSpan={2} className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase"></th>
+                        </tr>
+                        <tr className="border-b">
+                          {loadWeeks.map(w => (
+                            <Fragment key={w.week_number}>
+                              <th title={t('incidents.balance.send_full')} className={`px-2 py-1 text-center text-[10px] font-medium text-gray-400 ${affectedWeeks.has(w.week_number) ? 'bg-amber-50' : ''}`}>{t('incidents.balance.send')}</th>
+                              <th title={t('incidents.balance.receive_full')} className={`px-2 py-1 text-center text-[10px] font-medium text-gray-400 ${affectedWeeks.has(w.week_number) ? 'bg-amber-50' : ''}`}>{t('incidents.balance.receive')}</th>
+                            </Fragment>
+                          ))}
+                          <th title={t('incidents.balance.send_full')} className="px-2 py-1 text-center text-[10px] font-medium text-gray-400">{t('incidents.balance.send')}</th>
+                          <th title={t('incidents.balance.receive_full')} className="px-2 py-1 text-center text-[10px] font-medium text-gray-400">{t('incidents.balance.receive')}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
@@ -301,15 +332,20 @@ export function ProposalReviewPanel({ unavailabilityId, onBack }: { unavailabili
                                 {t(`incidents.balance.saturation_${n.saturation_level}`)}
                               </span>
                             </td>
-                            {loadWeeks.map(w => (
-                              <td
-                                key={w.week_number}
-                                className={`px-3 py-2 text-center text-sm ${affectedWeeks.has(w.week_number) ? 'bg-amber-50 font-semibold' : ''}`}
-                              >
-                                {n.counts[w.week_number] ?? 0}
-                              </td>
-                            ))}
-                            <td className="px-3 py-2 text-center text-sm font-semibold">{n.total}</td>
+                            {loadWeeks.map(w => {
+                              const cell = n.counts[w.week_number] ?? { sent: 0, received: 0 }
+                              const sel = selectedWeek === w.week_number
+                              const hi = affectedWeeks.has(w.week_number)
+                              const cls = `px-2 py-2 text-center text-sm ${sel ? 'bg-blue-50' : hi ? 'bg-amber-50 font-semibold' : ''}`
+                              return (
+                                <Fragment key={w.week_number}>
+                                  <td className={cls}>{cell.sent}</td>
+                                  <td className={cls}>{cell.received}</td>
+                                </Fragment>
+                              )
+                            })}
+                            <td className="px-2 py-2 text-center text-sm font-semibold">{n.total.sent}</td>
+                            <td className="px-2 py-2 text-center text-sm font-semibold">{n.total.received}</td>
                             <td className="px-3 py-2 text-xs text-gray-600 whitespace-nowrap">
                               {n.node_id === header.node_id && <span className="mr-2">🚫 {t('incidents.balance.freed')}</span>}
                               {suggestedNodeIds.has(n.node_id) && <span>⭐ {t('incidents.balance.suggested')}</span>}
@@ -319,9 +355,22 @@ export function ProposalReviewPanel({ unavailabilityId, onBack }: { unavailabili
                       </tbody>
                     </table>
                   </div>
-                  <div className="mt-2 text-xs text-gray-500">
-                    <span className="inline-block w-3 h-3 bg-amber-100 rounded-sm align-middle mr-1"></span>
-                    {t('incidents.balance.affected_week')}
+                  <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500">
+                    <span>
+                      <span className="inline-block w-3 h-3 bg-amber-100 rounded-sm align-middle mr-1"></span>
+                      {t('incidents.balance.affected_week')}
+                    </span>
+                    {selectedWeek == null ? (
+                      <span className="text-gray-400">{t('incidents.balance.week_filter_hint')}</span>
+                    ) : (
+                      <button
+                        onClick={() => setSelectedWeek(null)}
+                        className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-blue-700 hover:bg-blue-100"
+                      >
+                        {t('incidents.balance.week_filter_active')} {t('incidents.balance.week_prefix')}{selectedWeek}
+                        <span className="font-semibold">✕</span>
+                      </button>
+                    )}
                   </div>
                 </>
               ) : (
@@ -368,7 +417,7 @@ export function ProposalReviewPanel({ unavailabilityId, onBack }: { unavailabili
                 <th className="px-6 py-3 text-left">
                   <input
                     type="checkbox"
-                    checked={selectedIds.size === pendingProposals.length && pendingProposals.length > 0}
+                    checked={selectedIds.size === visibleProposals.length && visibleProposals.length > 0}
                     onChange={handleSelectAll}
                     className="rounded"
                   />
@@ -384,8 +433,8 @@ export function ProposalReviewPanel({ unavailabilityId, onBack }: { unavailabili
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {pendingProposals.length > 0 ? (
-                pendingProposals.map((p) => {
+              {visibleProposals.length > 0 ? (
+                visibleProposals.map((p) => {
                   const sampleLabel = p.detail?.fecha_programada
                     ? `${p.detail.fecha_programada} (${p.allocation_plan_detail_id.slice(0, 8)})`
                     : p.allocation_plan_detail_id.slice(0, 8)
@@ -443,7 +492,7 @@ export function ProposalReviewPanel({ unavailabilityId, onBack }: { unavailabili
               ) : (
                 <tr>
                   <td colSpan={9} className="px-6 py-4 text-center text-gray-500">
-                    {t('incidents.inbox.empty')}
+                    {selectedWeek != null ? t('incidents.balance.week_filter_empty') : t('incidents.inbox.empty')}
                   </td>
                 </tr>
               )}

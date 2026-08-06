@@ -433,6 +433,6 @@ export interface CityNodeLoadRow {
   node_id: string
   node_code: string
   saturation_level: 'normal' | 'high' | 'saturated'
-  counts: Record<number, number> // week_number -> shipment_count
-  total: number
+  counts: Record<number, { sent: number; received: number }> // week_number -> {send, receive}
+  total: { sent: number; received: number }
 }
