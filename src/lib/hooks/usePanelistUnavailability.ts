@@ -69,18 +69,9 @@ export function usePanelistUnavailability(panelistId?: string) {
 
       if (insertError) throw insertError
 
-      // Disparar el motor de propuestas de reasignación (subsistema B). Best-effort:
-      // la baja ya está creada; si el motor falla, no se revierte, solo se registra.
-      try {
-        const { error: engineError } = await supabase.functions.invoke('propose-reassignments', {
-          body: { unavailability_id: data.id },
-        })
-        if (engineError) {
-          console.error('propose-reassignments failed:', engineError)
-        }
-      } catch (engineErr) {
-        console.error('propose-reassignments threw:', engineErr)
-      }
+      // El motor de propuestas de reasignación (subsistema B) se dispara ahora en la BD
+      // mediante el trigger generate_proposals_on_unavailability_trigger (AFTER INSERT),
+      // así cubre cualquier vía de alta (app, n8n, SQL). No hace falta invocarlo aquí.
 
       await fetchUnavailabilityPeriods()
       return data
