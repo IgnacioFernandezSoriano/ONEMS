@@ -35,11 +35,13 @@ import {
   Network,
   FileText,
   AlertTriangle,
+  MessageSquareWarning,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useLocale } from '../../contexts/LocaleContext'
 import { useReassignmentProposals } from '../../lib/hooks/useReassignmentProposals'
+import { useReportedIncidents } from '../../lib/hooks/useReportedIncidents'
 
 interface MenuItem {
   path: string
@@ -64,6 +66,7 @@ export function Sidebar() {
   const { isCollapsed, setIsCollapsed } = useSidebar()
   const { t, locale, setLocale } = useLocale()
   const { pendingCount } = useReassignmentProposals()
+  const { openCount } = useReportedIncidents()
   const [expandedSections, setExpandedSections] = useState<string[]>([])
   const [isHovered, setIsHovered] = useState(false)
   const [accounts, setAccounts] = useState<Array<{ id: string; name: string }>>([])
@@ -345,6 +348,13 @@ export function Sidebar() {
       label: t('incidents.menu_group'),
       items: [
         {
+          path: '/incidents/panelist-reported',
+          label: t('reported_incidents.menu'),
+          icon: MessageSquareWarning,
+          roles: ['admin', 'superadmin'],
+          tooltip: t('reported_incidents.badge_tooltip'),
+        },
+        {
           path: '/incidents/panelist-availability',
           label: t('incidents.panelist_availability'),
           icon: AlertTriangle,
@@ -593,6 +603,11 @@ export function Sidebar() {
                             {item.path === '/incidents/panelist-availability' && pendingCount > 0 && isExpanded && (
                               <span className="ml-auto text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">
                                 {pendingCount}
+                              </span>
+                            )}
+                            {item.path === '/incidents/panelist-reported' && openCount > 0 && isExpanded && (
+                              <span className="ml-auto text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">
+                                {openCount}
                               </span>
                             )}
                           </Link>
