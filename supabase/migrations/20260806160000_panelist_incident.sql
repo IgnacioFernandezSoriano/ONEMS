@@ -99,13 +99,25 @@ BEGIN
 END; $$;
 
 -- Registrar recepción a mano (etiqueta ilegible / problema de foto).
+-- NOTA: el trigger baseline trigger_transfer_to_one_db / transfer_to_one_db() se dispara
+-- en todo UPDATE que ponga status='received', y su guarda es
+-- `NEW.transferred_to_one_db_at IS NULL` (baseline linea 7272). Las incidencias que usan
+-- esta RPC (etiqueta ilegible, foto de tag con problema) son precisamente los casos con
+-- datos incompletos (sent_at/tag_id/origin-destination panelist faltantes), asi que si se
+-- deja correr el trigger este intenta `UPDATE ... SET status='invalid'`, que viola
+-- allocation_plan_details_status_check ('invalid' no es un valor permitido) y aborta el RPC.
+-- Seteando transferred_to_one_db_at = now() en el mismo UPDATE se cumple la guarda del
+-- trigger (queda en NOT NULL) y el trigger no entra en su rama de validacion/transferencia;
+-- el detalle igual queda status='received' (es una recepcion real). No tocar el trigger
+-- baseline: ese bug (usar 'invalid' sin que este en el CHECK) se rastrea aparte.
 CREATE OR REPLACE FUNCTION public.mark_detail_received_manual(p_detail_id uuid)
 RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 DECLARE v_account uuid;
 BEGIN
   SELECT account_id INTO v_account FROM allocation_plan_details WHERE id = p_detail_id;
   PERFORM assert_same_account(v_account);
-  UPDATE allocation_plan_details SET status = 'received', received_at = now(), updated_at = now()
+  UPDATE allocation_plan_details
+  SET status = 'received', received_at = now(), transferred_to_one_db_at = now(), updated_at = now()
   WHERE id = p_detail_id;
 END; $$;
 
