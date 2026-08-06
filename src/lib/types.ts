@@ -436,3 +436,29 @@ export interface CityNodeLoadRow {
   counts: Record<number, { sent: number; received: number }> // week_number -> {send, receive}
   total: { sent: number; received: number }
 }
+
+export type ReportedIncidentCategory =
+  | 'missing_materials' | 'unreadable_label_receipt' | 'parcel_damaged' | 'parcel_returned'
+  | 'how_to_send' | 'unavailability_request' | 'tag_photo_problem' | 'contact_data_change' | 'other'
+
+export type ReportedIncidentStatus = 'open' | 'in_progress' | 'resolved' | 'dismissed'
+
+export interface ReportedIncident {
+  id: string
+  account_id: string
+  panelist_id: string
+  category: ReportedIncidentCategory
+  status: ReportedIncidentStatus
+  description: string | null
+  photo_url: string | null
+  allocation_plan_detail_id: string | null
+  linked_unavailability_id: string | null
+  payload: Record<string, any> | null
+  resolution_note: string | null
+  reply_to_panelist: string | null
+  reply_status: 'none' | 'pending_send' | 'sent'
+  reported_at: string
+  // joins para la bandeja
+  panelist_name?: string
+  panelist_code?: string
+}
