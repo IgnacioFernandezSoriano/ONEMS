@@ -389,30 +389,26 @@ export function useStockManagement() {
 
   const updateShipmentStatus = async (shipmentId: string, status: string, receivedDate?: string) => {
     try {
-      const updateData: any = { status }
-      
-      if (status === 'sent' && !receivedDate) {
-        updateData.shipment_date = new Date().toISOString()
+      // 'sent' and 'delivered' transitions now go through the dedicated RPCs
+      // (markShipmentSent / markShipmentReceived), which do the stock
+      // crediting/decrementing server-side. This function only remains for
+      // trivial status/date updates that are NOT part of the reception lifecycle.
+      if (status === 'sent') {
+        await markShipmentSent(shipmentId)
+        return
       }
-      
-      if (status === 'delivered' && receivedDate) {
+
+      if (status === 'delivered') {
+        await markShipmentReceived(shipmentId)
+        return
+      }
+
+      const updateData: any = { status }
+
+      if (receivedDate) {
         updateData.received_date = receivedDate
       }
 
-      // Get shipment details with items and panelist info
-      const { data: shipment, error: fetchError } = await supabase
-        .from('material_shipments')
-        .select(`
-          *,
-          items:material_shipment_items(*),
-          panelist:panelists(name, panelist_code)
-        `)
-        .eq('id', shipmentId)
-        .single()
-
-      if (fetchError) throw fetchError
-
-      // Update shipment status
       const { error } = await supabase
         .from('material_shipments')
         .update(updateData)
@@ -420,97 +416,31 @@ export function useStockManagement() {
 
       if (error) throw error
 
-      // If changing to 'sent', update stocks, create movements, and DELETE the shipment
-      if (status === 'sent' && shipment.items) {
-        for (const item of shipment.items) {
-          // 1. Decrement regulator stock
-          const { data: currentRegulatorStock } = await supabase
-            .from('material_stocks')
-            .select('quantity')
-            .eq('account_id', accountId)
-            .eq('material_id', item.material_id)
-            .single()
-
-          if (currentRegulatorStock) {
-            const newRegulatorQuantity = Math.max(0, currentRegulatorStock.quantity - item.quantity_sent)
-            await supabase
-              .from('material_stocks')
-              .update({ 
-                quantity: newRegulatorQuantity,
-                last_updated: new Date().toISOString()
-              })
-              .eq('account_id', accountId)
-              .eq('material_id', item.material_id)
-          }
-
-          // 2. Increment panelist stock
-          const { data: currentPanelistStock } = await supabase
-            .from('panelist_material_stocks')
-            .select('quantity')
-            .eq('account_id', accountId)
-            .eq('panelist_id', shipment.panelist_id)
-            .eq('material_id', item.material_id)
-            .single()
-
-          const newPanelistQuantity = (currentPanelistStock?.quantity || 0) + item.quantity_sent
-          await supabase
-            .from('panelist_material_stocks')
-            .upsert({
-              account_id: accountId,
-              panelist_id: shipment.panelist_id,
-              material_id: item.material_id,
-              quantity: newPanelistQuantity,
-              last_updated: new Date().toISOString()
-            }, {
-              onConflict: 'account_id,panelist_id,material_id'
-            })
-
-          // 3. Create movement OUT from regulator
-          await supabase
-            .from('material_movements')
-            .insert({
-              account_id: accountId,
-              material_id: item.material_id,
-              movement_type: 'dispatch',
-              quantity: item.quantity_sent,
-              from_location: 'Regulator',
-              to_location: shipment.panelist?.name || 'Unknown Panelist',
-              reference_id: shipmentId,
-              notes: `Shipment to ${shipment.panelist?.name || 'Unknown Panelist'}`,
-              created_by: profile?.id
-            })
-
-          // 4. Create movement IN to panelist
-          await supabase
-            .from('material_movements')
-            .insert({
-              account_id: accountId,
-              material_id: item.material_id,
-              movement_type: 'receipt',
-              quantity: item.quantity_sent,
-              from_location: 'Regulator',
-              to_location: shipment.panelist?.name || 'Unknown Panelist',
-              reference_id: shipmentId,
-              notes: `Received by ${shipment.panelist?.name || 'Unknown Panelist'}`,
-              created_by: profile?.id
-            })
-        }
-
-        // 5. DELETE the shipment after confirming (status = 'sent')
-        await supabase
-          .from('material_shipment_items')
-          .delete()
-          .eq('shipment_id', shipmentId)
-
-        await supabase
-          .from('material_shipments')
-          .delete()
-          .eq('id', shipmentId)
-      }
-
       await loadData()
     } catch (err: any) {
       console.error('Error updating shipment status:', err)
+      throw err
+    }
+  }
+
+  const markShipmentSent = async (shipmentId: string) => {
+    try {
+      const { error } = await supabase.rpc('send_material_shipment', { p_shipment_id: shipmentId })
+      if (error) throw error
+      await loadData()
+    } catch (err: any) {
+      console.error('Error marking shipment as sent:', err)
+      throw err
+    }
+  }
+
+  const markShipmentReceived = async (shipmentId: string) => {
+    try {
+      const { error } = await supabase.rpc('receive_material_shipment', { p_shipment_id: shipmentId })
+      if (error) throw error
+      await loadData()
+    } catch (err: any) {
+      console.error('Error marking shipment as received:', err)
       throw err
     }
   }
@@ -546,123 +476,18 @@ export function useStockManagement() {
           .eq('id', confirmedItem.id)
       }
 
-      // 4. Process confirmed items (send them)
-      for (const confirmedItem of confirmedItems) {
-        // Get current regulator stock
-        const { data: currentRegulatorStock } = await supabase
-          .from('material_stocks')
-          .select('quantity, material_catalog(code, name, unit_measure)')
-          .eq('account_id', accountId)
-          .eq('material_id', confirmedItem.material_id)
-          .single()
-
-        const stockAvailable = currentRegulatorStock?.quantity || 0
-        const hasStockIssue = confirmedItem.quantity_sent > stockAvailable
-
-        // Decrement regulator stock
-        if (currentRegulatorStock) {
-          const newRegulatorQuantity = Math.max(0, stockAvailable - confirmedItem.quantity_sent)
-          await supabase
-            .from('material_stocks')
-            .update({
-              quantity: newRegulatorQuantity,
-              last_updated: new Date().toISOString()
-            })
-            .eq('account_id', accountId)
-            .eq('material_id', confirmedItem.material_id)
-        }
-
-        // Increment panelist stock
-        const { data: currentPanelistStock } = await supabase
-          .from('panelist_material_stocks')
-          .select('quantity')
-          .eq('account_id', accountId)
-          .eq('panelist_id', shipment.panelist_id)
-          .eq('material_id', confirmedItem.material_id)
-          .single()
-
-        const newPanelistQuantity = (currentPanelistStock?.quantity || 0) + confirmedItem.quantity_sent
-        await supabase
-          .from('panelist_material_stocks')
-          .upsert({
-            account_id: accountId,
-            panelist_id: shipment.panelist_id,
-            material_id: confirmedItem.material_id,
-            quantity: newPanelistQuantity,
-            last_updated: new Date().toISOString()
-          }, {
-            onConflict: 'account_id,panelist_id,material_id'
-          })
-
-        // Create movement with stock alert if needed
-        const materialInfo = currentRegulatorStock?.material_catalog as any
-        const stockAlertNote = hasStockIssue
-          ? `⚠️ STOCK ALERT: Insufficient stock in regulator. Sent: ${confirmedItem.quantity_sent}, Available: ${stockAvailable} ${materialInfo?.unit_measure || 'units'}. Material: ${materialInfo?.name || confirmedItem.material_id}. Inventory check required.`
-          : `Shipment to ${shipment.panelist?.name || 'Unknown Panelist'}`
-
-        await supabase
-          .from('material_movements')
-          .insert({
-            account_id: accountId,
-            material_id: confirmedItem.material_id,
-            movement_type: 'dispatch',
-            quantity: confirmedItem.quantity_sent,
-            from_location_type: 'regulator',
-            from_location_id: null,
-            to_location_type: 'panelist',
-            to_location_id: shipment.panelist_id,
-            reference_id: shipmentId,
-            reference_type: 'shipment',
-            notes: stockAlertNote,
-            created_by: profile?.id
-          })
-
-        // Create stock alert if insufficient
-        if (hasStockIssue) {
-          await supabase
-            .from('stock_alerts')
-            .insert({
-              account_id: accountId,
-              material_id: confirmedItem.material_id,
-              alert_type: 'regulator_insufficient',
-              location_id: null,
-              current_quantity: currentRegulatorStock?.quantity || 0,
-              expected_quantity: confirmedItem.quantity_sent,
-              reference_id: shipmentId,
-              reference_type: 'shipment',
-              notes: stockAlertNote
-            })
-        }
-
-        // Create receipt movement for panelist
-        await supabase
-          .from('material_movements')
-          .insert({
-            account_id: accountId,
-            material_id: confirmedItem.material_id,
-            movement_type: 'receipt',
-            quantity: confirmedItem.quantity_sent,
-            from_location_type: 'regulator',
-            from_location_id: null,
-            to_location_type: 'panelist',
-            to_location_id: shipment.panelist_id,
-            reference_id: shipmentId,
-            reference_type: 'shipment',
-            notes: `Received by ${shipment.panelist?.name || 'Unknown Panelist'}`,
-            created_by: profile?.id
-          })
-      }
-
-      // 5. Delete confirmed items from shipment
-      for (const confirmedItem of confirmedItems) {
-        await supabase
-          .from('material_shipment_items')
-          .delete()
-          .eq('id', confirmedItem.id)
-      }
-
-      // 6. If there are removed items, create new pending shipment
+      // 4. If there are removed items, create a new pending shipment for them
+      //    and drop them from the current shipment. Stock crediting/decrementing
+      //    is NOT done here anymore: it happens server-side when the shipment is
+      //    actually sent/received via markShipmentSent/markShipmentReceived.
       if (removedItems.length > 0) {
+        for (const removedItem of removedItems) {
+          await supabase
+            .from('material_shipment_items')
+            .delete()
+            .eq('id', removedItem.id)
+        }
+
         const { data: newShipment, error: newShipmentError } = await supabase
           .from('material_shipments')
           .insert({
@@ -683,18 +508,13 @@ export function useStockManagement() {
           await supabase
             .from('material_shipment_items')
             .insert({
-              shipment_id: newShipment.id,
+              account_id: accountId,
+              material_shipment_id: newShipment.id,
               material_id: removedItem.material_id,
               quantity_sent: removedItem.quantity_sent
             })
         }
       }
-
-      // 7. Delete original shipment
-      await supabase
-        .from('material_shipments')
-        .delete()
-        .eq('id', shipmentId)
 
       await loadData()
     } catch (err: any) {
@@ -750,7 +570,7 @@ export function useStockManagement() {
       const { error: itemsError } = await supabase
         .from('material_shipment_items')
         .delete()
-        .eq('shipment_id', shipmentId)
+        .eq('material_shipment_id', shipmentId)
 
       if (itemsError) throw itemsError
 
@@ -781,6 +601,8 @@ export function useStockManagement() {
     createMovement,
     createShipment,
     updateShipmentStatus,
+    markShipmentSent,
+    markShipmentReceived,
     confirmShipment,
     updateShipmentItem,
     deleteShipment,
