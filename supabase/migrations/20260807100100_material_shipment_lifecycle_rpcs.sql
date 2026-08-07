@@ -11,7 +11,7 @@ declare
   v_ship   public.material_shipments%rowtype;
   v_item   record;
 begin
-  select * into v_ship from public.material_shipments where id = p_shipment_id;
+  select * into v_ship from public.material_shipments where id = p_shipment_id for update;
   if not found then raise exception 'shipment % not found', p_shipment_id; end if;
   perform public.assert_same_account(v_ship.account_id);
 
@@ -68,7 +68,7 @@ declare
   v_ship public.material_shipments%rowtype;
   v_item record;
 begin
-  select * into v_ship from public.material_shipments where id = p_shipment_id;
+  select * into v_ship from public.material_shipments where id = p_shipment_id for update;
   if not found then raise exception 'shipment % not found', p_shipment_id; end if;
   perform public.assert_same_account(v_ship.account_id);
 
