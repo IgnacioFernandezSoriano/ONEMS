@@ -81,6 +81,7 @@ export interface MaterialCatalog {
   min_stock?: number
   description?: string
   status: 'active' | 'inactive'
+  is_blocking: boolean
   created_at: string
   updated_at: string
 }

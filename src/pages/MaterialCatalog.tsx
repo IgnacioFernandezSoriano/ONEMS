@@ -13,6 +13,7 @@ export function MaterialCatalogPage() {
     loading,
     createCatalogItem,
     updateCatalogItem,
+    toggleBlocking,
     deleteCatalogItem,
   } = useMaterialCatalog()
 
@@ -30,6 +31,10 @@ export function MaterialCatalogPage() {
   const handleUpdate = async (id: string, data: any) => {
     await updateCatalogItem(id, data)
     setModal(null)
+  }
+
+  const handleToggleBlocking = async (id: string, value: boolean) => {
+    await toggleBlocking(id, value)
   }
 
   const handleDelete = async (id: string, name: string) => {
@@ -65,6 +70,12 @@ export function MaterialCatalogPage() {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Min Stock</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('topology.description')}</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('common.status')}</th>
+              <th
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                title={t('stock.material.blocking_hint')}
+              >
+                {t('stock.material.blocking')}
+              </th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">{t('common.actions')}</th>
             </tr>
           </thead>
@@ -96,6 +107,15 @@ export function MaterialCatalogPage() {
                   >
                     {material.status}
                   </span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <input
+                    type="checkbox"
+                    checked={material.is_blocking}
+                    onChange={(e) => handleToggleBlocking(material.id, e.target.checked)}
+                    title={t('stock.material.blocking_hint')}
+                    className="h-4 w-4 text-blue-600 rounded"
+                  />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <button

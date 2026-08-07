@@ -2024,6 +2024,8 @@ stock.low_stock_only,Stock faible uniquement
 stock.manage_description,Gérer les exigences en matériaux
 stock.mark_as_ordered,Marquer {count} comme commandé(s)
 stock.material,Matériel
+stock.material.blocking,Bloquant
+stock.material.blocking_hint,Un matériel bloquant (ex. étiquette RFID) empêche l'expédition de tout produit qui le nécessite
 stock.material_movements,Mouvements de Matériaux
 stock.material_requirements_help,Calculer les besoins en matériaux à partir des plans d'allocation. Commander des matériaux et recevoir des bons de commande pour mettre à jour le stock du régulateur.
 stock.material_requirements_tab,Besoins en Matériaux

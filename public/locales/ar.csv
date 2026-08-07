@@ -2024,6 +2024,8 @@ stock.low_stock_only,المخزون المنخفض فقط
 stock.manage_description,إدارة متطلبات المواد
 stock.mark_as_ordered,وضع علامة {count} كمطلوب(ة) الطلب
 stock.material,المادة
+stock.material.blocking,معيقة
+stock.material.blocking_hint,المادة المعيقة (مثل بطاقة RFID) تمنع شحن أي منتج يتطلبها
 stock.material_movements,حركات المواد
 stock.material_requirements_help,عرض متطلبات المواد المحسوبة
 stock.material_requirements_tab,متطلبات المواد

@@ -2024,6 +2024,8 @@ stock.low_stock_only,Solo bajo stock
 stock.manage_description,Gestionar los requisitos de materiales
 stock.mark_as_ordered,Marcar {count} como ordenado(s)
 stock.material,Material
+stock.material.blocking,Bloqueante
+stock.material.blocking_hint,Un material bloqueante (p. ej. la etiqueta RFID) impide que se envíe cualquier producto que lo requiera
 stock.material_movements,Movimientos de Materiales
 stock.material_requirements_help,Ver requisitos de material calculados
 stock.material_requirements_tab,Requisitos de Material

@@ -2024,6 +2024,8 @@ stock.low_stock_only,Low Stock Only
 stock.manage_description,Manage material requirements
 stock.mark_as_ordered,Mark {count} as ordered
 stock.material,Material
+stock.material.blocking,Blocking
+stock.material.blocking_hint,A blocking material (e.g. RFID tag) stops any product that requires it from being shipped
 stock.material_movements,Material Movements
 stock.material_requirements_help,Calculate material requirements from allocation plans. Order materials and receive purchase orders to update regulator stock.
 stock.material_requirements_tab,Material Requirements
