@@ -1,5 +1,32 @@
 import { supabase } from './supabase'
 
+/**
+ * Suma las cantidades ya en camino (envíos en 'pending'/'sent', aún no recibidos
+ * ni cancelados) por panelista+material, para descontarlas de la necesidad calculada.
+ */
+async function getInTransitMap(
+  accountId: string, panelistIds: string[], materialIds: string[]
+): Promise<Record<string, number>> {
+  const map: Record<string, number> = {}
+  if (panelistIds.length === 0 || materialIds.length === 0) return map
+  const { data } = await supabase
+    .from('material_shipments')
+    .select('panelist_id, status, items:material_shipment_items(material_id, quantity_sent)')
+    .eq('account_id', accountId)
+    .in('panelist_id', panelistIds)
+    .in('status', ['pending', 'sent'])   // en camino, aún no recibido ni cancelado
+  const shipments = data || []
+  shipments.forEach((s: any) => {
+    const items = s.items || []
+    items.forEach((it: any) => {
+      if (!materialIds.includes(it.material_id)) return
+      const key = `${s.panelist_id}_${it.material_id}`
+      map[key] = (map[key] || 0) + Number(it.quantity_sent)
+    })
+  })
+  return map
+}
+
 export interface MaterialRequirement {
   material_id: string
   material_code: string
@@ -147,6 +174,10 @@ export async function calculateMaterialRequirements(
       })
     }
 
+    // 8b. Get in-transit shipments to discount from requirements (not double-counted per detail)
+    const inTransitMap = await getInTransitMap(accountId, panelistIds, materialIds)
+    const inTransitSubtracted = new Set<string>()
+
     // 9. Calculate materials needed (considering panelist stock)
     const materialsNeeded: Record<string, {
       material: any
@@ -158,10 +189,10 @@ export async function calculateMaterialRequirements(
 
     for (const detail of enrichedDetails) {
       const materials = productMaterials.filter(pm => pm.product_id === detail.product_id)
-      
+
       for (const pm of materials) {
         if (!materialMap[pm.material_id]) continue
-        
+
         const materialId = pm.material_id
         if (!materialsNeeded[materialId]) {
           materialsNeeded[materialId] = {
@@ -172,14 +203,21 @@ export async function calculateMaterialRequirements(
             plans: new Set()
           }
         }
-        
+
         // Get panelist stock for this material
         const panelistStockKey = `${detail.origin_panelist_id}_${materialId}`
         const panelistStock = panelistStockMap[panelistStockKey] || 0
-        
-        // Only add to quantity needed if panelist doesn't have enough stock
-        const quantityNeededForThisDetail = Math.max(0, pm.quantity - panelistStock)
-        
+
+        // Get in-transit quantity for this panelist+material, only subtracted once
+        let inTransit = 0
+        if (!inTransitSubtracted.has(panelistStockKey)) {
+          inTransit = inTransitMap[panelistStockKey] || 0
+          inTransitSubtracted.add(panelistStockKey)
+        }
+
+        // Only add to quantity needed if panelist doesn't have enough stock/in-transit material
+        const quantityNeededForThisDetail = Math.max(0, pm.quantity - panelistStock - inTransit)
+
         materialsNeeded[materialId].quantity += quantityNeededForThisDetail
         materialsNeeded[materialId].panelistStockTotal += panelistStock
         materialsNeeded[materialId].shipments.add(detail.id)
@@ -379,6 +417,9 @@ export async function calculatePanelistRequirements(
       })
     }
 
+    // 6b. Get in-transit shipments to discount from requirements
+    const inTransitMap = await getInTransitMap(accountId, panelistIds, materialIds)
+
     // 7. Agrupar por nodo
     const nodesMap: Record<string, {
       node: any
@@ -444,9 +485,10 @@ export async function calculatePanelistRequirements(
           // Get panelist stock for this material
           const stockKey = `${panelistId}_${materialId}`
           const panelistStock = panelistStockMap[stockKey] || 0
-          
-          // Calculate net quantity needed (discount panelist stock)
-          const netQuantity = Math.max(0, matData.quantity - panelistStock)
+          const inTransit = inTransitMap[stockKey] || 0
+
+          // Calculate net quantity needed (discount panelist stock and in-transit shipments)
+          const netQuantity = Math.max(0, matData.quantity - panelistStock - inTransit)
           
           return {
             material_id: materialId,
