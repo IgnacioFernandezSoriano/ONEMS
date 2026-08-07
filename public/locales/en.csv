@@ -2766,6 +2766,20 @@ reported_incidents.category.other,Other
 reported_incidents.action.mark_received,Mark as received
 reported_incidents.action.invalidate,Invalidate
 reported_incidents.action.support_only,No action available; support only.
+reported_incidents.materials.step1_title,Reconcile stock
+reported_incidents.materials.real_qty,Real quantity
+reported_incidents.materials.step2_title,Recompute needs
+reported_incidents.materials.blocking_badge,Blocking
+reported_incidents.materials.step3_title,Supply
+reported_incidents.materials.from_central,From central stock
+reported_incidents.materials.from_donor,From donor {name}
+reported_incidents.materials.to_purchase,Needs purchase (manual/PDF)
+reported_incidents.materials.execute_supply,Execute supply
+reported_incidents.materials.step4_title,Displacement window
+reported_incidents.materials.create_baja,Create leave and displace samples
+reported_incidents.materials.step5_title,Close on reception
+reported_incidents.materials.go_to_availability,Resolve samples in panelist availability
+reported_incidents.materials.close_hint,The leave closes automatically when the panelist confirms reception.
 reported_incidents.action.new_date,New date
 reported_incidents.action.reschedule,Reschedule
 reported_incidents.action.cancel_shipment,Cancel shipment

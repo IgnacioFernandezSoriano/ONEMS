@@ -2758,6 +2758,20 @@ reported_incidents.category.other,Autre
 reported_incidents.action.mark_received,Marquer comme reçu
 reported_incidents.action.invalidate,Invalider
 reported_incidents.action.support_only,Aucune action disponible ; support uniquement.
+reported_incidents.materials.step1_title,Réconcilier le stock
+reported_incidents.materials.real_qty,Quantité réelle
+reported_incidents.materials.step2_title,Recalculer les besoins
+reported_incidents.materials.blocking_badge,Bloquant
+reported_incidents.materials.step3_title,Approvisionnement
+reported_incidents.materials.from_central,Depuis le stock central
+reported_incidents.materials.from_donor,Depuis le donateur {name}
+reported_incidents.materials.to_purchase,Nécessite un achat (manuel/PDF)
+reported_incidents.materials.execute_supply,Exécuter l'approvisionnement
+reported_incidents.materials.step4_title,Fenêtre de déplacement
+reported_incidents.materials.create_baja,Créer un congé et déplacer les échantillons
+reported_incidents.materials.step5_title,Clôture à la réception
+reported_incidents.materials.go_to_availability,Résoudre les échantillons dans la disponibilité des panélistes
+reported_incidents.materials.close_hint,Le congé se ferme automatiquement lorsque le panéliste confirme la réception.
 reported_incidents.action.new_date,Nouvelle date
 reported_incidents.action.reschedule,Reprogrammer
 reported_incidents.action.cancel_shipment,Annuler l'envoi

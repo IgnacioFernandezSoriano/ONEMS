@@ -2758,6 +2758,20 @@ reported_incidents.category.other,أخرى
 reported_incidents.action.mark_received,وضع علامة كمستلم
 reported_incidents.action.invalidate,إبطال
 reported_incidents.action.support_only,لا يوجد إجراء متاح؛ الدعم فقط.
+reported_incidents.materials.step1_title,مطابقة المخزون
+reported_incidents.materials.real_qty,الكمية الفعلية
+reported_incidents.materials.step2_title,إعادة حساب الاحتياج
+reported_incidents.materials.blocking_badge,معيق
+reported_incidents.materials.step3_title,التوريد
+reported_incidents.materials.from_central,من المخزون المركزي
+reported_incidents.materials.from_donor,من المتبرع {name}
+reported_incidents.materials.to_purchase,يتطلب شراء (يدوي/PDF)
+reported_incidents.materials.execute_supply,تنفيذ التوريد
+reported_incidents.materials.step4_title,نافذة النقل
+reported_incidents.materials.create_baja,إنشاء إجازة ونقل العينات
+reported_incidents.materials.step5_title,الإغلاق عند الاستلام
+reported_incidents.materials.go_to_availability,حل العينات في توفر المشاركين
+reported_incidents.materials.close_hint,تُغلق الإجازة تلقائيًا عند تأكيد المشارك للاستلام.
 reported_incidents.action.new_date,تاريخ جديد
 reported_incidents.action.reschedule,إعادة الجدولة
 reported_incidents.action.cancel_shipment,إلغاء الشحنة

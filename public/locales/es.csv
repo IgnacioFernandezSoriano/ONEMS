@@ -2766,6 +2766,20 @@ reported_incidents.category.other,Otro
 reported_incidents.action.mark_received,Marcar como recibido
 reported_incidents.action.invalidate,Invalidar
 reported_incidents.action.support_only,No hay acción disponible; solo soporte.
+reported_incidents.materials.step1_title,Reconciliar stock
+reported_incidents.materials.real_qty,Cantidad real
+reported_incidents.materials.step2_title,Recalcular necesidad
+reported_incidents.materials.blocking_badge,Bloqueante
+reported_incidents.materials.step3_title,Suministro
+reported_incidents.materials.from_central,Desde stock central
+reported_incidents.materials.from_donor,Desde donante {name}
+reported_incidents.materials.to_purchase,Requiere compra (manual/PDF)
+reported_incidents.materials.execute_supply,Ejecutar suministro
+reported_incidents.materials.step4_title,Ventana de desplazamiento
+reported_incidents.materials.create_baja,Crear baja y desplazar muestras
+reported_incidents.materials.step5_title,Cierre al recibir
+reported_incidents.materials.go_to_availability,Resolver muestras en disponibilidad de panelistas
+reported_incidents.materials.close_hint,La baja se cierra automáticamente cuando el panelista confirma la recepción.
 reported_incidents.action.new_date,Nueva fecha
 reported_incidents.action.reschedule,Reprogramar
 reported_incidents.action.cancel_shipment,Cancelar envío
