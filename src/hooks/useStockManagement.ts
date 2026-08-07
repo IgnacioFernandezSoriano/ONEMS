@@ -289,6 +289,7 @@ export function useStockManagement() {
     expected_date?: string
     tracking_number?: string
     notes?: string
+    source_panelist_id?: string
   }) => {
     try {
       // Check for existing pending shipments for this panelist
@@ -358,6 +359,7 @@ export function useStockManagement() {
           tracking_number: shipment.tracking_number,
           total_items: Object.keys(mergedItems).length,
           notes: shipment.notes,
+          source_panelist_id: shipment.source_panelist_id,
           created_by: profile?.id
         })
         .select()
