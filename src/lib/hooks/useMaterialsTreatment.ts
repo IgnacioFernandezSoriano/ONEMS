@@ -147,16 +147,21 @@ export function useMaterialsTreatment() {
     return plan
   }, [accountId])
 
-  const executeSupply = useCallback(async (supplyPlan: SupplyPlan, receiverPanelistId: string): Promise<{ centralShipmentId: string | null }> => {
+  const executeSupply = useCallback(async (supplyPlan: SupplyPlan, receiverPanelistId: string): Promise<{ centralShipmentId: string | null; donorShipmentIds: string[] }> => {
     let centralShipmentId: string | null = null
+    const donorShipmentIds: string[] = []
 
+    // Shipments are created as `pending` here and NOT dispatched yet: the
+    // incident must be linked and the displacement baja created before send
+    // (see linkShipmentToIncident/createDisplacementBaja), otherwise
+    // receive_material_shipment cannot auto-close the baja. Sending happens
+    // later, in the wizard's baja+link step.
     if (supplyPlan.fromCentral.length > 0) {
       const shipment = await createShipment({
         panelist_id: receiverPanelistId,
         items: supplyPlan.fromCentral.map(c => ({ material_id: c.material_id, quantity_sent: c.quantity }))
-      })
+      }, true)
       centralShipmentId = shipment.id
-      await markShipmentSent(shipment.id)
     }
 
     if (supplyPlan.fromDonor.length > 0) {
@@ -170,13 +175,13 @@ export function useMaterialsTreatment() {
           panelist_id: receiverPanelistId,
           items: byDonor[donorPanelistId],
           source_panelist_id: donorPanelistId
-        })
-        await markShipmentSent(donorShipment.id)
+        }, true)
+        donorShipmentIds.push(donorShipment.id)
       }
     }
 
-    return { centralShipmentId }
-  }, [createShipment, markShipmentSent])
+    return { centralShipmentId, donorShipmentIds }
+  }, [createShipment])
 
   const createDisplacementBaja = useCallback(async (incidentId: string, expectedDate: string): Promise<string> => {
     const today = new Date().toISOString().slice(0, 10)
@@ -200,6 +205,7 @@ export function useMaterialsTreatment() {
     resolveSupply,
     executeSupply,
     createDisplacementBaja,
-    linkShipmentToIncident
+    linkShipmentToIncident,
+    markShipmentSent
   }
 }

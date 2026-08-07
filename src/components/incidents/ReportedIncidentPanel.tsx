@@ -220,7 +220,7 @@ function MissingMaterialsActions({ incidentId, panelistId, payload, t }: {
   payload: Record<string, any> | null
   t: TFn
 }) {
-  const { reconcileStock, recomputeNeed, resolveSupply, executeSupply, createDisplacementBaja, linkShipmentToIncident } = useMaterialsTreatment()
+  const { reconcileStock, recomputeNeed, resolveSupply, executeSupply, createDisplacementBaja, linkShipmentToIncident, markShipmentSent } = useMaterialsTreatment()
   const effectiveAccountId = useEffectiveAccountId()
   const { profile } = useAuth()
   const accountId = effectiveAccountId || profile?.account_id
@@ -250,6 +250,8 @@ function MissingMaterialsActions({ incidentId, panelistId, payload, t }: {
   const [needLines, setNeedLines] = useState<NeedLine[] | null>(null)
   const [supplyPlan, setSupplyPlan] = useState<SupplyPlan | null>(null)
   const [centralShipmentId, setCentralShipmentId] = useState<string | null>(null)
+  const [donorShipmentIds, setDonorShipmentIds] = useState<string[]>([])
+  const [supplyPrepared, setSupplyPrepared] = useState(false)
   const [displaced, setDisplaced] = useState(false)
 
   const handleReconcile = async (materialId: string) => {
@@ -289,8 +291,14 @@ function MissingMaterialsActions({ incidentId, panelistId, payload, t }: {
     if (!supplyPlan) return
     setBusy(true); setError(null)
     try {
-      const { centralShipmentId: shipmentId } = await executeSupply(supplyPlan, panelistId)
+      // Prepares the shipment(s) as `pending` only. They are NOT dispatched
+      // here: dispatch happens after the baja is created and the incident is
+      // linked (handleCreateBaja), so receive_material_shipment can always
+      // find the link and auto-close the displacement.
+      const { centralShipmentId: shipmentId, donorShipmentIds: donorIds } = await executeSupply(supplyPlan, panelistId)
       setCentralShipmentId(shipmentId)
+      setDonorShipmentIds(donorIds)
+      setSupplyPrepared(true)
     } catch (e: any) { setError(e.message) }
     finally { setBusy(false) }
   }
@@ -312,8 +320,17 @@ function MissingMaterialsActions({ incidentId, panelistId, payload, t }: {
       expected.setDate(expected.getDate() + leadDays)
       const expectedDate = expected.toISOString().slice(0, 10)
 
+      // Order matters: baja + link must exist BEFORE the shipment is sent,
+      // otherwise receive_material_shipment can't find the incident to
+      // auto-close it.
       const unavailabilityId = await createDisplacementBaja(incidentId, expectedDate)
       if (centralShipmentId) await linkShipmentToIncident(incidentId, centralShipmentId)
+
+      if (centralShipmentId) await markShipmentSent(centralShipmentId)
+      for (const donorShipmentId of donorShipmentIds) {
+        await markShipmentSent(donorShipmentId)
+      }
+
       if (unavailabilityId) setDisplaced(true)
     } catch (e: any) { setError(e.message) }
     finally { setBusy(false) }
@@ -391,7 +408,7 @@ function MissingMaterialsActions({ incidentId, panelistId, payload, t }: {
             {supplyPlan.toPurchase.length > 0 && (
               <div>{t('reported_incidents.materials.to_purchase')}: {supplyPlan.toPurchase.map(p => `${p.material_id} (${p.quantity})`).join(', ')}</div>
             )}
-            <button disabled={busy || !!centralShipmentId} className={BTN_PRIMARY} onClick={handleExecuteSupply}>
+            <button disabled={busy || supplyPrepared} className={BTN_PRIMARY} onClick={handleExecuteSupply}>
               {t('reported_incidents.materials.execute_supply')}
             </button>
           </div>
@@ -400,7 +417,7 @@ function MissingMaterialsActions({ incidentId, panelistId, payload, t }: {
 
       <div>
         <h4 className="font-medium mb-2">{t('reported_incidents.materials.step4_title')}</h4>
-        <button disabled={busy || !supplyPlan || displaced} className={BTN_PRIMARY} onClick={handleCreateBaja}>
+        <button disabled={busy || !supplyPrepared || displaced} className={BTN_PRIMARY} onClick={handleCreateBaja}>
           {t('reported_incidents.materials.create_baja')}
         </button>
       </div>

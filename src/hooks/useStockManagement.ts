@@ -290,10 +290,10 @@ export function useStockManagement() {
     tracking_number?: string
     notes?: string
     source_panelist_id?: string
-  }) => {
+  }, skipUnify: boolean = false) => {
     try {
       // Check for existing pending shipments for this panelist
-      const { data: existingShipments } = await supabase
+      const existingShipments = skipUnify ? null : (await supabase
         .from('material_shipments')
         .select(`
           id,
@@ -302,7 +302,7 @@ export function useStockManagement() {
         `)
         .eq('account_id', accountId)
         .eq('panelist_id', shipment.panelist_id)
-        .eq('status', 'pending')
+        .eq('status', 'pending')).data
 
       // Group existing items by material
       const existingItemsMap: Record<string, { shipment_id: string; quantity: number }> = {}
@@ -320,14 +320,16 @@ export function useStockManagement() {
       }
 
       // Unify: Delete all existing pending shipments for this panelist
+      // (skipped entirely when skipUnify is true, so treatment shipments
+      // never absorb unrelated routine pending shipments)
       if (existingShipments && existingShipments.length > 0) {
         const shipmentIds = existingShipments.map(s => s.id)
-        
+
         await supabase
           .from('material_shipment_items')
           .delete()
           .in('material_shipment_id', shipmentIds)
-        
+
         await supabase
           .from('material_shipments')
           .delete()
@@ -336,12 +338,12 @@ export function useStockManagement() {
 
       // Merge new items with existing
       const mergedItems: Record<string, number> = {}
-      
+
       // Add existing quantities
       Object.keys(existingItemsMap).forEach(materialId => {
         mergedItems[materialId] = existingItemsMap[materialId].quantity
       })
-      
+
       // Add new quantities
       shipment.items.forEach(item => {
         mergedItems[item.material_id] = (mergedItems[item.material_id] || 0) + item.quantity_sent
@@ -517,6 +519,11 @@ export function useStockManagement() {
             })
         }
       }
+
+      // 5. Dispatch the (remaining) shipment: decrement source stock and
+      //    transition status -> sent server-side via the send RPC.
+      const { error: sendError } = await supabase.rpc('send_material_shipment', { p_shipment_id: shipmentId })
+      if (sendError) throw sendError
 
       await loadData()
     } catch (err: any) {
