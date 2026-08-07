@@ -65,9 +65,22 @@ export function useMaterialsTreatment() {
     }))
   }, [accountId])
 
-  const resolveSupply = useCallback(async (needLines: NeedLine[], panelistId: string): Promise<SupplyPlan> => {
+  const resolveSupply = useCallback(async (
+    needLines: NeedLine[],
+    panelistId: string,
+    startDate?: string,
+    endDate?: string
+  ): Promise<SupplyPlan> => {
     const plan: SupplyPlan = { fromCentral: [], fromDonor: [], toPurchase: [] }
     if (!accountId) return plan
+
+    // Misma ventana que usa recomputeNeed cuando el caller no la especifica (hoy .. hoy+90d)
+    const windowStart = startDate || new Date().toISOString().slice(0, 10)
+    const windowEnd = endDate || (() => {
+      const horizon = new Date()
+      horizon.setDate(horizon.getDate() + 90)
+      return horizon.toISOString().slice(0, 10)
+    })()
 
     const materialIds = needLines.map(n => n.material_id)
     const { data: centralStocks, error } = await supabase
@@ -78,6 +91,15 @@ export function useMaterialsTreatment() {
     if (error) throw error
     const centralMap: Record<string, number> = {}
     ;(centralStocks || []).forEach((s: any) => { centralMap[s.material_id] = s.quantity })
+
+    // Necesidad propia de cada panelista (para calcular excedente real de los donantes: stock - su propio plan)
+    const allRequirements = await calculatePanelistRequirements(accountId, windowStart, windowEnd)
+    const ownNeedMap: Record<string, number> = {}
+    allRequirements.forEach(r => {
+      (r.materials || []).forEach((m: any) => {
+        ownNeedMap[`${r.panelist_id}_${m.material_id}`] = m.quantity_needed
+      })
+    })
 
     for (const need of needLines) {
       let remaining = need.quantity_needed
@@ -96,6 +118,8 @@ export function useMaterialsTreatment() {
           p_material_id: need.material_id, p_quantity: remaining
         })
         if (donorsError) throw donorsError
+        // Orden ya resuelto por la RPC (same_city desc, available desc); se conserva tal cual.
+        // TODO futuro: preferencia de "tier A" de ciudad requiere catálogo `cities` con tipo/tier.
         const sortedDonors = ((donors || []) as any[]).sort((a, b) => {
           if (a.same_city !== b.same_city) return a.same_city ? -1 : 1
           return (b.available || 0) - (a.available || 0)
@@ -103,8 +127,10 @@ export function useMaterialsTreatment() {
         for (const donor of sortedDonors) {
           if (remaining <= 0) break
           const available = donor.available || 0
-          if (available <= 0) continue
-          const fromDonorQty = Math.min(available, remaining)
+          const ownNeed = ownNeedMap[`${donor.panelist_id}_${need.material_id}`] || 0
+          const usableSurplus = available - ownNeed
+          if (usableSurplus <= 0) continue
+          const fromDonorQty = Math.min(usableSurplus, remaining)
           plan.fromDonor.push({
             material_id: need.material_id, quantity: fromDonorQty,
             donor_panelist_id: donor.panelist_id, donor_name: donor.panelist_name
