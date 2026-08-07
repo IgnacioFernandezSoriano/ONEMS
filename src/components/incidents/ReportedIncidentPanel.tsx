@@ -225,11 +225,27 @@ function MissingMaterialsActions({ incidentId, panelistId, payload, t }: {
   const { profile } = useAuth()
   const accountId = effectiveAccountId || profile?.account_id
 
-  const reportedMaterials: { material_id: string; material_name?: string }[] = Array.isArray(payload?.materials) ? payload.materials : []
+  const reportedMaterials: { name: string; quantity: number }[] = Array.isArray(payload?.materials) ? payload.materials : []
+  const [catalogByKey, setCatalogByKey] = useState<Record<string, string>>({})
   const [realQty, setRealQty] = useState<Record<string, string>>({})
   const [reconciled, setReconciled] = useState<Record<string, boolean>>({})
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!accountId) return
+    supabase.from('material_catalog').select('id, code, name').eq('account_id', accountId)
+      .then(({ data }) => {
+        const map: Record<string, string> = {}
+        ;(data || []).forEach((row: any) => {
+          if (row.name) map[String(row.name).toLowerCase()] = row.id
+          if (row.code) map[String(row.code).toLowerCase()] = row.id
+        })
+        setCatalogByKey(map)
+      })
+  }, [accountId])
+
+  const resolveMaterialId = (name: string): string | undefined => catalogByKey[name.toLowerCase()]
 
   const [needLines, setNeedLines] = useState<NeedLine[] | null>(null)
   const [supplyPlan, setSupplyPlan] = useState<SupplyPlan | null>(null)
@@ -310,20 +326,26 @@ function MissingMaterialsActions({ incidentId, panelistId, payload, t }: {
       <div>
         <h4 className="font-medium mb-2">{t('reported_incidents.materials.step1_title')}</h4>
         <div className="space-y-2">
-          {reportedMaterials.map(m => (
-            <div key={m.material_id} className="flex items-center gap-2">
-              <span className="text-sm w-40 truncate">{m.material_name || m.material_id}</span>
-              <input type="number" className="border rounded p-2 text-sm w-28"
-                value={realQty[m.material_id] ?? ''}
-                onChange={e => setRealQty(prev => ({ ...prev, [m.material_id]: e.target.value }))}
-                placeholder={t('reported_incidents.materials.real_qty')} />
-              <button disabled={busy || reconciled[m.material_id]} className={BTN_SECONDARY}
-                onClick={() => handleReconcile(m.material_id)}>
-                {t('reported_incidents.materials.real_qty')}
-              </button>
-              {reconciled[m.material_id] && <span className="text-green-600 text-sm">✓</span>}
-            </div>
-          ))}
+          {reportedMaterials.map((m, idx) => {
+            const materialId = resolveMaterialId(m.name)
+            const rowKey = materialId ?? `unmatched-${idx}-${m.name}`
+            const qtyKey = materialId ?? rowKey
+            return (
+              <div key={rowKey} className="flex items-center gap-2">
+                <span className="text-sm w-40 truncate">{m.name}</span>
+                <input type="number" className="border rounded p-2 text-sm w-28" disabled={!materialId}
+                  value={realQty[qtyKey] ?? String(m.quantity)}
+                  onChange={e => setRealQty(prev => ({ ...prev, [qtyKey]: e.target.value }))}
+                  placeholder={t('reported_incidents.materials.real_qty')} />
+                <button disabled={busy || !materialId || reconciled[qtyKey]} className={BTN_SECONDARY}
+                  onClick={() => materialId && handleReconcile(materialId)}>
+                  {t('reported_incidents.materials.real_qty')}
+                </button>
+                {materialId && reconciled[qtyKey] && <span className="text-green-600 text-sm">✓</span>}
+                {!materialId && <span className="text-xs text-gray-500">{t('reported_incidents.materials.unmatched')}</span>}
+              </div>
+            )
+          })}
         </div>
       </div>
 

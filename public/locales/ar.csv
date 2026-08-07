@@ -2772,6 +2772,7 @@ reported_incidents.materials.create_baja,إنشاء إجازة ونقل العي
 reported_incidents.materials.step5_title,الإغلاق عند الاستلام
 reported_incidents.materials.go_to_availability,حل العينات في توفر المشاركين
 reported_incidents.materials.close_hint,تُغلق الإجازة تلقائيًا عند تأكيد المشارك للاستلام.
+reported_incidents.materials.unmatched,المادة غير موجودة في الكتالوج
 reported_incidents.action.new_date,تاريخ جديد
 reported_incidents.action.reschedule,إعادة الجدولة
 reported_incidents.action.cancel_shipment,إلغاء الشحنة

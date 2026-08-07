@@ -2780,6 +2780,7 @@ reported_incidents.materials.create_baja,Create leave and displace samples
 reported_incidents.materials.step5_title,Close on reception
 reported_incidents.materials.go_to_availability,Resolve samples in panelist availability
 reported_incidents.materials.close_hint,The leave closes automatically when the panelist confirms reception.
+reported_incidents.materials.unmatched,Material not found in catalog
 reported_incidents.action.new_date,New date
 reported_incidents.action.reschedule,Reschedule
 reported_incidents.action.cancel_shipment,Cancel shipment

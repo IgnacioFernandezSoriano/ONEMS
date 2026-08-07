@@ -2772,6 +2772,7 @@ reported_incidents.materials.create_baja,Créer un congé et déplacer les écha
 reported_incidents.materials.step5_title,Clôture à la réception
 reported_incidents.materials.go_to_availability,Résoudre les échantillons dans la disponibilité des panélistes
 reported_incidents.materials.close_hint,Le congé se ferme automatiquement lorsque le panéliste confirme la réception.
+reported_incidents.materials.unmatched,Matériel introuvable dans le catalogue
 reported_incidents.action.new_date,Nouvelle date
 reported_incidents.action.reschedule,Reprogrammer
 reported_incidents.action.cancel_shipment,Annuler l'envoi

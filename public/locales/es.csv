@@ -2780,6 +2780,7 @@ reported_incidents.materials.create_baja,Crear baja y desplazar muestras
 reported_incidents.materials.step5_title,Cierre al recibir
 reported_incidents.materials.go_to_availability,Resolver muestras en disponibilidad de panelistas
 reported_incidents.materials.close_hint,La baja se cierra automáticamente cuando el panelista confirma la recepción.
+reported_incidents.materials.unmatched,Material no encontrado en el catálogo
 reported_incidents.action.new_date,Nueva fecha
 reported_incidents.action.reschedule,Reprogramar
 reported_incidents.action.cancel_shipment,Cancelar envío
