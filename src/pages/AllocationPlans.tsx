@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useAllocationPlanDetails } from '@/lib/hooks/useAllocationPlanDetails'
 import { AllocationPlanFilters } from '@/components/allocation-plans/AllocationPlanFilters'
 import { AllocationPlanDetailRow } from '@/components/allocation-plans/AllocationPlanDetailRow'
@@ -51,6 +51,10 @@ export function AllocationPlans() {
   const [showRecordModal, setShowRecordModal] = useState(false)
   const [editingRecord, setEditingRecord] = useState<any | null>(null)
   const [showIdColumn, setShowIdColumn] = useState(false)
+  // Pagination: only the current page is rendered. Selection, bulk operations
+  // and CSV export keep working over the whole filtered set.
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(100)
 
   // Modal handlers
   const handleAddRecord = () => {
@@ -80,7 +84,7 @@ export function AllocationPlans() {
 
   // Filter and sort details
   const filteredDetails = useMemo(() => {
-    let filtered = details.filter((detail) => {
+    const filtered = details.filter((detail) => {
       if (filters.planId && detail.plan?.id !== filters.planId) return false
       if (filters.carrierId && detail.carrier?.id !== filters.carrierId) return false
       if (filters.productId && detail.product?.id !== filters.productId) return false
@@ -209,6 +213,23 @@ export function AllocationPlans() {
   }, [details, filters, sortField, sortDirection])
 
   // Calculate availability issue counts
+  const totalPages = Math.max(1, Math.ceil(filteredDetails.length / pageSize))
+
+  const pagedDetails = useMemo(
+    () => filteredDetails.slice((currentPage - 1) * pageSize, currentPage * pageSize),
+    [filteredDetails, currentPage, pageSize]
+  )
+
+  // Back to the first page whenever the visible set changes
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [filters, sortField, sortDirection, pageSize])
+
+  // Keep the page in range when rows disappear (e.g. after a bulk delete)
+  useEffect(() => {
+    if (currentPage > totalPages) setCurrentPage(totalPages)
+  }, [currentPage, totalPages])
+
   const availabilityCounts = useMemo(() => {
     return {
       unavailable: details.filter(d => 
@@ -815,7 +836,7 @@ export function AllocationPlans() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {filteredDetails.map((detail) => (
+                  {pagedDetails.map((detail) => (
                     <AllocationPlanDetailRow
                       key={detail.id}
                       detail={detail}
@@ -832,6 +853,43 @@ export function AllocationPlans() {
                   ))}
                 </tbody>
               </table>
+            </div>
+            <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-3 border-t border-gray-200 text-sm text-gray-600">
+              <div className="flex items-center gap-2">
+                <label htmlFor="allocation-plans-page-size">{t('common.rows_per_page')}</label>
+                <select
+                  id="allocation-plans-page-size"
+                  value={pageSize}
+                  onChange={(e) => setPageSize(Number(e.target.value))}
+                  className="border border-gray-300 rounded-md px-2 py-1"
+                >
+                  {[50, 100, 250, 500].map((n) => (
+                    <option key={n} value={n}>{n}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                {t('common.showing')} {(currentPage - 1) * pageSize + 1} - {Math.min(currentPage * pageSize, filteredDetails.length)} {t('common.of')} {filteredDetails.length}
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1 border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {t('common.previous')}
+                </button>
+                <span>{currentPage} / {totalPages}</span>
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1 border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {t('common.next')}
+                </button>
+              </div>
             </div>
           </div>
         )}

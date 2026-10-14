@@ -2799,3 +2799,7 @@ reported_incidents.done.rescheduled,Shipment rescheduled
 reported_incidents.done.cancelled,Shipment cancelled
 reported_incidents.done.baja,Unavailability created
 reported_incidents.done.contact,Contact data updated
+common.showing,Showing
+common.previous,Previous
+common.next,Next
+common.rows_per_page,Rows per page

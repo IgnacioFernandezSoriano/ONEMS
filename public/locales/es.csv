@@ -2799,3 +2799,7 @@ reported_incidents.done.rescheduled,Envío reprogramado
 reported_incidents.done.cancelled,Envío cancelado
 reported_incidents.done.baja,Baja creada
 reported_incidents.done.contact,Datos de contacto actualizados
+common.showing,Mostrando
+common.previous,Anterior
+common.next,Siguiente
+common.rows_per_page,Filas por página

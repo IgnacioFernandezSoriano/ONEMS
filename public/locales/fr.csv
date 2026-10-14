@@ -2791,3 +2791,7 @@ reported_incidents.done.rescheduled,Envoi reprogrammé
 reported_incidents.done.cancelled,Envoi annulé
 reported_incidents.done.baja,Indisponibilité créée
 reported_incidents.done.contact,Coordonnées mises à jour
+common.showing,Affichage
+common.previous,Précédent
+common.next,Suivant
+common.rows_per_page,Lignes par page

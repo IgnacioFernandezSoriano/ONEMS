@@ -1,5 +1,5 @@
 import React, { createContext, useContext, ReactNode, useEffect } from 'react'
-import { useTranslation } from '@/hooks/useTranslation'
+import { useTranslationLoader } from '@/hooks/useTranslationLoader'
 
 interface LocaleContextType {
   t: (key: string, vars?: Record<string, any>, fallback?: string) => string
@@ -18,7 +18,8 @@ interface LocaleProviderProps {
 }
 
 export function LocaleProvider({ children }: LocaleProviderProps) {
-  const translation = useTranslation()
+  // Single instance for the whole app: this is the only place the CSV is loaded.
+  const translation = useTranslationLoader()
 
   // Apply RTL direction to document when Arabic is selected
   useEffect(() => {

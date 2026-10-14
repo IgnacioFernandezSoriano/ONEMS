@@ -2791,3 +2791,7 @@ reported_incidents.done.rescheduled,تمت إعادة جدولة الشحنة
 reported_incidents.done.cancelled,تم إلغاء الشحنة
 reported_incidents.done.baja,تم إنشاء الإجازة
 reported_incidents.done.contact,تم تحديث بيانات الاتصال
+common.showing,عرض
+common.previous,السابق
+common.next,التالي
+common.rows_per_page,صفوف لكل صفحة
