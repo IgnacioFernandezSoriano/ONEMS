@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { OneDBRecord } from '../../hooks/useOneDB';
 import { SmartTooltip } from '../common/SmartTooltip';
+import { TablePagination } from '../common/TablePagination';
 import { useTranslation } from '@/hooks/useTranslation';
 
 interface OneDBTableProps {
@@ -19,6 +20,27 @@ export const OneDBTable: React.FC<OneDBTableProps> = ({
   const { t } = useTranslation();
   const allSelected = records.length > 0 && selectedRecords.length === records.length;
   const someSelected = selectedRecords.length > 0 && selectedRecords.length < records.length;
+
+  // Only the current page is rendered; `records` stays the whole filtered set so
+  // the select-all checkbox and the bulk actions keep covering all of it.
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(100);
+
+  const totalPages = Math.max(1, Math.ceil(records.length / pageSize));
+
+  const pagedRecords = useMemo(
+    () => records.slice((currentPage - 1) * pageSize, currentPage * pageSize),
+    [records, currentPage, pageSize]
+  );
+
+  // `records` is state in useOneDB, so its identity only changes on load or filter
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [records, pageSize]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) setCurrentPage(totalPages);
+  }, [currentPage, totalPages]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString('en-US', {
@@ -144,7 +166,7 @@ export const OneDBTable: React.FC<OneDBTableProps> = ({
                 </td>
               </tr>
             ) : (
-              records.map((record) => (
+              pagedRecords.map((record) => (
                 <tr
                   key={record.id}
                   className={`hover:bg-gray-50 transition-colors ${
@@ -194,6 +216,15 @@ export const OneDBTable: React.FC<OneDBTableProps> = ({
           </tbody>
         </table>
       </div>
+      <TablePagination
+        idPrefix="onedb"
+        currentPage={currentPage}
+        totalPages={totalPages}
+        pageSize={pageSize}
+        totalItems={records.length}
+        onPageChange={setCurrentPage}
+        onPageSizeChange={setPageSize}
+      />
     </div>
   );
 };

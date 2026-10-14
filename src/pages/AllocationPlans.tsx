@@ -4,6 +4,7 @@ import { AllocationPlanFilters } from '@/components/allocation-plans/AllocationP
 import { AllocationPlanDetailRow } from '@/components/allocation-plans/AllocationPlanDetailRow'
 import { BulkOperationsPanel } from '@/components/allocation-plans/BulkOperationsPanel'
 import { RecordModal } from '@/components/allocation-plans/RecordModal'
+import { TablePagination } from '@/components/common/TablePagination'
 import { PageHeader } from '@/components/common/PageHeader'
 import { SortableHeader } from '@/components/common/SortableHeader'
 import { SmartTooltip } from '@/components/common/SmartTooltip'
@@ -854,43 +855,15 @@ export function AllocationPlans() {
                 </tbody>
               </table>
             </div>
-            <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-3 border-t border-gray-200 text-sm text-gray-600">
-              <div className="flex items-center gap-2">
-                <label htmlFor="allocation-plans-page-size">{t('common.rows_per_page')}</label>
-                <select
-                  id="allocation-plans-page-size"
-                  value={pageSize}
-                  onChange={(e) => setPageSize(Number(e.target.value))}
-                  className="border border-gray-300 rounded-md px-2 py-1"
-                >
-                  {[50, 100, 250, 500].map((n) => (
-                    <option key={n} value={n}>{n}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                {t('common.showing')} {(currentPage - 1) * pageSize + 1} - {Math.min(currentPage * pageSize, filteredDetails.length)} {t('common.of')} {filteredDetails.length}
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
-                  className="px-3 py-1 border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {t('common.previous')}
-                </button>
-                <span>{currentPage} / {totalPages}</span>
-                <button
-                  type="button"
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={currentPage === totalPages}
-                  className="px-3 py-1 border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {t('common.next')}
-                </button>
-              </div>
-            </div>
+            <TablePagination
+              idPrefix="allocation-plans"
+              currentPage={currentPage}
+              totalPages={totalPages}
+              pageSize={pageSize}
+              totalItems={filteredDetails.length}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={setPageSize}
+            />
           </div>
         )}
       </div>
