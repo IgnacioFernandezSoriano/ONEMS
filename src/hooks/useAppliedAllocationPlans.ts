@@ -15,10 +15,17 @@ export function useAppliedAllocationPlans() {
       setError(null)
 
       // Fetch applied plans with relations
-      const { data: plansData, error: plansError } = await supabase
+      // RLS lets a superadmin see every account, so filter by the selected one
+      let plansQuery = supabase
         .from('allocation_plans')
         .select('*, carriers(*), products(*)')
         .order('applied_date', { ascending: false })
+
+      if (effectiveAccountId) {
+        plansQuery = plansQuery.eq('account_id', effectiveAccountId)
+      }
+
+      const { data: plansData, error: plansError } = await plansQuery
 
       if (plansError) throw plansError
 
