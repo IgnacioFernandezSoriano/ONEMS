@@ -52,7 +52,7 @@ export default function StockAlertsTab({ onNavigateToRegulatorStock, onNavigateT
 
   // Apply filters and sorting
   const filteredAndSortedAlerts = useMemo(() => {
-    let filtered = alerts.filter(alert => {
+    const filtered = alerts.filter(alert => {
       if (filterType !== 'all' && alert.alert_type !== filterType) return false
       if (filterMaterial !== 'all' && alert.material_id !== filterMaterial) return false
       if (filterPanelist !== 'all' && alert.panelist_name !== filterPanelist) return false

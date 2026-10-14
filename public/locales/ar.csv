@@ -2024,6 +2024,8 @@ stock.low_stock_only,المخزون المنخفض فقط
 stock.manage_description,إدارة متطلبات المواد
 stock.mark_as_ordered,وضع علامة {count} كمطلوب(ة) الطلب
 stock.material,المادة
+stock.material.blocking,معيقة
+stock.material.blocking_hint,المادة المعيقة (مثل بطاقة RFID) تمنع شحن أي منتج يتطلبها
 stock.material_movements,حركات المواد
 stock.material_requirements_help,عرض متطلبات المواد المحسوبة
 stock.material_requirements_tab,متطلبات المواد
@@ -2648,3 +2650,148 @@ menu.setup_view,الإعداد
 menu.account,حساب
 menu.all_accounts,جميع الحسابات
 menu.sign_out,تسجيل الخروج
+incidents.menu_group,الحوادث
+incidents.panelist_availability,توفر المحكّمين
+incidents.title,حوادث توفر المحكّمين
+incidents.pending_badge_tooltip,حالات عدم توفر بانتظار المراجعة
+incidents.inbox.panelist,المحكّم
+incidents.inbox.node,العقدة / المدينة
+incidents.inbox.dates,تواريخ عدم التوفر
+incidents.inbox.affected,العينات المتأثرة
+incidents.inbox.breakdown,الإرسال / الاستلام
+incidents.inbox.pending,قيد الانتظار
+incidents.inbox.review,مراجعة
+incidents.inbox.empty,لا توجد حوادث معلقة
+incidents.detail.back,العودة إلى القائمة
+incidents.detail.mark_reviewed,اعتبارها مدروسة
+incidents.detail.mark_reviewed_disabled,يجب حل كل اقتراح أولاً
+incidents.detail.sample,العينة
+incidents.detail.role,الدور
+incidents.detail.role_origin,الإرسال
+incidents.detail.role_destination,الاستلام
+incidents.detail.sample_status,حالة العينة
+incidents.detail.suggested_action,الإجراء المقترح
+incidents.detail.suggestion,اقتراح
+incidents.detail.reason,السبب
+incidents.detail.proposal_status,الحالة
+incidents.detail.actions,الإجراءات
+incidents.action.confirm,تأكيد
+incidents.action.change,تغيير…
+incidents.action.dismiss,تجاهل
+incidents.action.confirm_selected,تأكيد المحدد
+incidents.action.dismiss_selected,تجاهل المحدد
+incidents.action.selected_count,{count} محددة
+incidents.override.title,تغيير الحل
+incidents.override.choose_action,الإجراء النهائي
+incidents.override.reroute,إعادة التوجيه إلى عقدة أخرى
+incidents.override.shift_date,تغيير التاريخ
+incidents.override.cancel_sample,إلغاء العينة
+incidents.override.target_node,العقدة المستهدفة
+incidents.override.node_unavailable,(لا يوجد محكّم متاح)
+incidents.override.new_date,تاريخ جديد
+incidents.override.apply,تطبيق
+incidents.override.cancel,إلغاء
+incidents.act.reroute,إعادة توجيه
+incidents.act.shift_date,تغيير التاريخ
+incidents.act.cancel,إلغاء
+incidents.act.none,معلوماتي
+incidents.status.pending,قيد الانتظار
+incidents.status.confirmed,مؤكدة
+incidents.status.dismissed,مرفوضة
+incidents.reason.alt_node_same_city,عقدة بديلة مع محكّم متاح في نفس المدينة
+incidents.reason.shift_same_month,النقل إلى تاريخ متاح ضمن نفس الشهر
+incidents.reason.no_alt_no_date,لا توجد عقدة بديلة ولا تاريخ متاح هذا الشهر
+incidents.reason.reroute_reception,إعادة توجيه الاستلام إلى عقدة أخرى مع محكّم متاح
+incidents.reason.no_alt_reception,لا توجد عقدة بديلة للاستلام
+incidents.reason.in_transit,قيد النقل بالفعل؛ سيصل متأخراً أو قد لا يُسجَّل في الوقت المناسب
+incidents.detail.cause,السبب
+incidents.balance.title,توازن المدينة
+incidents.balance.node,العقدة
+incidents.balance.status,الحالة
+incidents.balance.load,الحِمل
+incidents.balance.saturation_normal,عادي
+incidents.balance.saturation_high,مرتفع
+incidents.balance.saturation_saturated,مشبع
+incidents.balance.freed,يُحرَّر
+incidents.balance.suggested,مقترح
+incidents.balance.no_data,لا توجد بيانات توازن لهذه الفترة
+incidents.balance.week_prefix,أ
+incidents.balance.total,الإجمالي
+incidents.balance.affected_week,الأسبوع المتأثر
+incidents.balance.send,صادر
+incidents.balance.receive,وارد
+incidents.balance.send_full,الصادرة
+incidents.balance.receive_full,الواردة
+incidents.balance.week_filter_hint,انقر على أسبوع لتصفية العينات
+incidents.balance.week_filter_active,تصفية الأسبوع
+incidents.balance.week_filter_empty,لا توجد عينات معلقة في هذا الأسبوع
+reported_incidents.menu,الحوادث المبلَّغ عنها
+reported_incidents.badge_tooltip,حوادث أبلغ عنها الأعضاء بانتظار المراجعة
+reported_incidents.title,الحوادث المبلَّغ عنها من الأعضاء
+reported_incidents.open,فتح
+reported_incidents.empty,لا توجد حوادث مبلَّغ عنها
+reported_incidents.back,رجوع
+reported_incidents.linked_shipment,الشحنة المرتبطة
+reported_incidents.resolution_note,ملاحظة الحل
+reported_incidents.reply_to_panelist,الرد على العضو
+reported_incidents.resolve,حل
+reported_incidents.dismiss,تجاهل
+reported_incidents.filter.all_categories,جميع الفئات
+reported_incidents.filter.open_active,مفتوحة / نشطة
+reported_incidents.col.panelist,العضو
+reported_incidents.col.category,الفئة
+reported_incidents.col.status,الحالة
+reported_incidents.col.reported_at,تاريخ الإبلاغ
+reported_incidents.status.open,مفتوحة
+reported_incidents.status.in_progress,قيد المعالجة
+reported_incidents.status.resolved,تم الحل
+reported_incidents.status.dismissed,مرفوضة
+reported_incidents.category.missing_materials,نقص المواد
+reported_incidents.category.unreadable_label_receipt,ملصق / إيصال غير مقروء
+reported_incidents.category.parcel_damaged,طرد تالف
+reported_incidents.category.parcel_returned,طرد مُعاد
+reported_incidents.category.how_to_send,كيفية الإرسال
+reported_incidents.category.unavailability_request,طلب إجازة
+reported_incidents.category.tag_photo_problem,مشكلة في صورة البطاقة
+reported_incidents.category.contact_data_change,تغيير بيانات الاتصال
+reported_incidents.category.other,أخرى
+reported_incidents.action.mark_received,وضع علامة كمستلم
+reported_incidents.action.invalidate,إبطال
+reported_incidents.action.support_only,لا يوجد إجراء متاح؛ الدعم فقط.
+reported_incidents.materials.step1_title,مطابقة المخزون
+reported_incidents.materials.real_qty,الكمية الفعلية
+reported_incidents.materials.step2_title,إعادة حساب الاحتياج
+reported_incidents.materials.blocking_badge,معيق
+reported_incidents.materials.step3_title,التوريد
+reported_incidents.materials.from_central,من المخزون المركزي
+reported_incidents.materials.from_donor,من المتبرع {name}
+reported_incidents.materials.to_purchase,يتطلب شراء (يدوي/PDF)
+reported_incidents.materials.execute_supply,تنفيذ التوريد
+reported_incidents.materials.step4_title,نافذة النقل
+reported_incidents.materials.create_baja,إنشاء إجازة ونقل العينات
+reported_incidents.materials.step5_title,الإغلاق عند الاستلام
+reported_incidents.materials.go_to_availability,حل العينات في توفر المشاركين
+reported_incidents.materials.close_hint,تُغلق الإجازة تلقائيًا عند تأكيد المشارك للاستلام.
+reported_incidents.materials.unmatched,المادة غير موجودة في الكتالوج
+reported_incidents.action.new_date,تاريخ جديد
+reported_incidents.action.reschedule,إعادة الجدولة
+reported_incidents.action.cancel_shipment,إلغاء الشحنة
+reported_incidents.action.start_date,تاريخ البدء
+reported_incidents.action.end_date,تاريخ الانتهاء
+reported_incidents.action.reason,السبب
+reported_incidents.action.create_unavailability,إنشاء إجازة
+reported_incidents.action.requested_data,البيانات المطلوبة
+reported_incidents.action.telegram_id,معرف تيليجرام
+reported_incidents.action.phone,الهاتف
+reported_incidents.action.language,اللغة
+reported_incidents.action.apply_contact,تطبيق تغيير بيانات الاتصال
+reported_incidents.done.received,تم وضع علامة كمستلم
+reported_incidents.done.invalidated,تم إبطال العينة
+reported_incidents.done.rescheduled,تمت إعادة جدولة الشحنة
+reported_incidents.done.cancelled,تم إلغاء الشحنة
+reported_incidents.done.baja,تم إنشاء الإجازة
+reported_incidents.done.contact,تم تحديث بيانات الاتصال
+common.showing,عرض
+common.previous,السابق
+common.next,التالي
+common.rows_per_page,صفوف لكل صفحة

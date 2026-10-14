@@ -1,7 +1,9 @@
+import { useEffect, useMemo, useState } from 'react';
 import { ProcessedEvent } from '../../hooks/useProcessedEvents';
 import { CheckSquare, Square, Link2, Link2Off } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { SmartTooltip } from '../common/SmartTooltip';
+import { TablePagination } from '../common/TablePagination';
 
 interface ProcessedEventsTableProps {
   records: ProcessedEvent[];
@@ -47,6 +49,29 @@ export function ProcessedEventsTable({
   };
 
   const allSelected = records.length > 0 && selectedRecords.length === records.length;
+
+  // Only the current page is rendered; `records` stays the whole filtered set so
+  // the select-all checkbox and the bulk actions keep covering all of it.
+  // Every hook runs before the empty-state return below, as React requires.
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(100);
+
+  const totalPages = Math.max(1, Math.ceil(records.length / pageSize));
+
+  const pagedRecords = useMemo(
+    () => records.slice((currentPage - 1) * pageSize, currentPage * pageSize),
+    [records, currentPage, pageSize]
+  );
+
+  // `records` is state in useProcessedEvents, so its identity only changes on
+  // load or filter
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [records, pageSize]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) setCurrentPage(totalPages);
+  }, [currentPage, totalPages]);
 
   if (records.length === 0) {
     return (
@@ -125,7 +150,7 @@ export function ProcessedEventsTable({
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {records.map((record) => {
+            {pagedRecords.map((record) => {
               const isSelected = selectedRecords.includes(record.id.toString());
               return (
                 <tr
@@ -194,6 +219,15 @@ export function ProcessedEventsTable({
           </tbody>
         </table>
       </div>
+      <TablePagination
+        idPrefix="processed-events"
+        currentPage={currentPage}
+        totalPages={totalPages}
+        pageSize={pageSize}
+        totalItems={records.length}
+        onPageChange={setCurrentPage}
+        onPageSizeChange={setPageSize}
+      />
     </div>
   );
 }

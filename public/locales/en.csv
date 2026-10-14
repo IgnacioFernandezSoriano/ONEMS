@@ -2024,6 +2024,8 @@ stock.low_stock_only,Low Stock Only
 stock.manage_description,Manage material requirements
 stock.mark_as_ordered,Mark {count} as ordered
 stock.material,Material
+stock.material.blocking,Blocking
+stock.material.blocking_hint,A blocking material (e.g. RFID tag) stops any product that requires it from being shipped
 stock.material_movements,Material Movements
 stock.material_requirements_help,Calculate material requirements from allocation plans. Order materials and receive purchase orders to update regulator stock.
 stock.material_requirements_tab,Material Requirements
@@ -2656,3 +2658,148 @@ menu.setup_view,Setup
 menu.account,Account
 menu.all_accounts,All Accounts
 menu.sign_out,Sign Out
+incidents.menu_group,Incidents
+incidents.panelist_availability,Panelist availability
+incidents.title,Panelist availability incidents
+incidents.pending_badge_tooltip,Unavailability records pending review
+incidents.inbox.panelist,Panelist
+incidents.inbox.node,Node / city
+incidents.inbox.dates,Unavailability dates
+incidents.inbox.affected,Affected samples
+incidents.inbox.breakdown,Send / receive
+incidents.inbox.pending,Pending
+incidents.inbox.review,Review
+incidents.inbox.empty,No pending incidents
+incidents.detail.back,Back to list
+incidents.detail.mark_reviewed,Mark as studied
+incidents.detail.mark_reviewed_disabled,Resolve every proposal first
+incidents.detail.sample,Sample
+incidents.detail.role,Role
+incidents.detail.role_origin,Send
+incidents.detail.role_destination,Receive
+incidents.detail.sample_status,Sample status
+incidents.detail.suggested_action,Suggested action
+incidents.detail.suggestion,Suggestion
+incidents.detail.reason,Reason
+incidents.detail.proposal_status,Status
+incidents.detail.actions,Actions
+incidents.action.confirm,Confirm
+incidents.action.change,Change…
+incidents.action.dismiss,Dismiss
+incidents.action.confirm_selected,Confirm selected
+incidents.action.dismiss_selected,Dismiss selected
+incidents.action.selected_count,{count} selected
+incidents.override.title,Change resolution
+incidents.override.choose_action,Final action
+incidents.override.reroute,Reroute to another node
+incidents.override.shift_date,Change date
+incidents.override.cancel_sample,Cancel sample
+incidents.override.target_node,Target node
+incidents.override.node_unavailable,(no panelist available)
+incidents.override.new_date,New date
+incidents.override.apply,Apply
+incidents.override.cancel,Cancel
+incidents.act.reroute,Reroute
+incidents.act.shift_date,Shift date
+incidents.act.cancel,Cancel
+incidents.act.none,Informative
+incidents.status.pending,Pending
+incidents.status.confirmed,Confirmed
+incidents.status.dismissed,Dismissed
+incidents.reason.alt_node_same_city,Alternative node with an available panelist in the same city
+incidents.reason.shift_same_month,Move to an available date within the same month
+incidents.reason.no_alt_no_date,No alternative node or available date this month
+incidents.reason.reroute_reception,Reroute reception to another node with an available panelist
+incidents.reason.no_alt_reception,No alternative node for the reception
+incidents.reason.in_transit,Already in transit; will arrive late or may not be recorded in time
+incidents.detail.cause,Cause
+incidents.balance.title,City balance
+incidents.balance.node,Node
+incidents.balance.status,Status
+incidents.balance.load,Load
+incidents.balance.saturation_normal,Normal
+incidents.balance.saturation_high,High
+incidents.balance.saturation_saturated,Saturated
+incidents.balance.freed,Freed
+incidents.balance.suggested,Suggested
+incidents.balance.no_data,No balance data for this period
+incidents.balance.week_prefix,W
+incidents.balance.total,Total
+incidents.balance.affected_week,Affected week
+incidents.balance.send,Snt
+incidents.balance.receive,Rcv
+incidents.balance.send_full,Sent
+incidents.balance.receive_full,Received
+incidents.balance.week_filter_hint,Click a week to filter the samples
+incidents.balance.week_filter_active,Filtering week
+incidents.balance.week_filter_empty,No pending samples in this week
+reported_incidents.menu,Reported incidents
+reported_incidents.badge_tooltip,Incidents reported by panelists pending review
+reported_incidents.title,Incidents reported by panelists
+reported_incidents.open,Open
+reported_incidents.empty,No reported incidents
+reported_incidents.back,Back
+reported_incidents.linked_shipment,Linked shipment
+reported_incidents.resolution_note,Resolution note
+reported_incidents.reply_to_panelist,Reply to panelist
+reported_incidents.resolve,Resolve
+reported_incidents.dismiss,Dismiss
+reported_incidents.filter.all_categories,All categories
+reported_incidents.filter.open_active,Open / active
+reported_incidents.col.panelist,Panelist
+reported_incidents.col.category,Category
+reported_incidents.col.status,Status
+reported_incidents.col.reported_at,Reported at
+reported_incidents.status.open,Open
+reported_incidents.status.in_progress,In progress
+reported_incidents.status.resolved,Resolved
+reported_incidents.status.dismissed,Dismissed
+reported_incidents.category.missing_materials,Missing materials
+reported_incidents.category.unreadable_label_receipt,Unreadable label / receipt
+reported_incidents.category.parcel_damaged,Damaged parcel
+reported_incidents.category.parcel_returned,Returned parcel
+reported_incidents.category.how_to_send,How to send
+reported_incidents.category.unavailability_request,Unavailability request
+reported_incidents.category.tag_photo_problem,Tag photo problem
+reported_incidents.category.contact_data_change,Contact data change
+reported_incidents.category.other,Other
+reported_incidents.action.mark_received,Mark as received
+reported_incidents.action.invalidate,Invalidate
+reported_incidents.action.support_only,No action available; support only.
+reported_incidents.materials.step1_title,Reconcile stock
+reported_incidents.materials.real_qty,Real quantity
+reported_incidents.materials.step2_title,Recompute needs
+reported_incidents.materials.blocking_badge,Blocking
+reported_incidents.materials.step3_title,Supply
+reported_incidents.materials.from_central,From central stock
+reported_incidents.materials.from_donor,From donor {name}
+reported_incidents.materials.to_purchase,Needs purchase (manual/PDF)
+reported_incidents.materials.execute_supply,Execute supply
+reported_incidents.materials.step4_title,Displacement window
+reported_incidents.materials.create_baja,Create leave and displace samples
+reported_incidents.materials.step5_title,Close on reception
+reported_incidents.materials.go_to_availability,Resolve samples in panelist availability
+reported_incidents.materials.close_hint,The leave closes automatically when the panelist confirms reception.
+reported_incidents.materials.unmatched,Material not found in catalog
+reported_incidents.action.new_date,New date
+reported_incidents.action.reschedule,Reschedule
+reported_incidents.action.cancel_shipment,Cancel shipment
+reported_incidents.action.start_date,Start date
+reported_incidents.action.end_date,End date
+reported_incidents.action.reason,Reason
+reported_incidents.action.create_unavailability,Create unavailability
+reported_incidents.action.requested_data,Requested data
+reported_incidents.action.telegram_id,Telegram ID
+reported_incidents.action.phone,Phone
+reported_incidents.action.language,Language
+reported_incidents.action.apply_contact,Apply contact data change
+reported_incidents.done.received,Marked as received
+reported_incidents.done.invalidated,Sample invalidated
+reported_incidents.done.rescheduled,Shipment rescheduled
+reported_incidents.done.cancelled,Shipment cancelled
+reported_incidents.done.baja,Unavailability created
+reported_incidents.done.contact,Contact data updated
+common.showing,Showing
+common.previous,Previous
+common.next,Next
+common.rows_per_page,Rows per page

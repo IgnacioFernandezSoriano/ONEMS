@@ -29,7 +29,7 @@ export function PanelistUnavailabilityComponent() {
     panelist_id: '',
     start_date: '',
     end_date: '',
-    reason: 'vacation' as 'vacation' | 'sick' | 'personal' | 'training' | 'other',
+    reason: 'vacation' as 'vacation' | 'sick_leave' | 'personal' | 'training' | 'other',
     notes: '',
     status: 'active' as 'active' | 'cancelled',
   })
@@ -356,7 +356,7 @@ export function PanelistUnavailabilityComponent() {
                 >
                   <option value="">{t('unavailability.all_reasons')}</option>
                   <option value="vacation">{t('unavailability.reason_vacation')}</option>
-                  <option value="sick">{t('unavailability.reason_sick')}</option>
+                  <option value="sick_leave">{t('unavailability.reason_sick')}</option>
                   <option value="personal">{t('unavailability.reason_personal')}</option>
                   <option value="training">{t('unavailability.reason_training')}</option>
                   <option value="other">{t('unavailability.reason_other')}</option>
@@ -584,7 +584,7 @@ export function PanelistUnavailabilityComponent() {
                     required
                   >
                     <option value="vacation">{t('panelistunavailability.tsx.vacation')}</option>
-                    <option value="sick">Sick Leave</option>
+                    <option value="sick_leave">Sick Leave</option>
                     <option value="personal">{t('panelistunavailability.tsx.personal')}</option>
                     <option value="training">{t('panelistunavailability.tsx.training')}</option>
                     <option value="other">{t('panelistunavailability.tsx.other')}</option>

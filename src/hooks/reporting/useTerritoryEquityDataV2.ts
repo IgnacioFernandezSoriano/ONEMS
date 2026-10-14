@@ -161,7 +161,7 @@ export function useTerritoryEquityDataV2(
         }
 
         setAllShipments(shipmentsData);
-        let shipments = shipmentsData;
+        const shipments = shipmentsData;
 
         // equityStatus filter is now handled in Product Analysis tab
 

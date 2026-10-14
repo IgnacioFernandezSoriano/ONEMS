@@ -51,6 +51,8 @@ import SegmentDeepDive from './pages/diagnosis/SegmentDeepDive'
 import JKPerformanceSegments from './pages/diagnosis/JKPerformanceSegments'
 import PipelineMonitor from './pages/diagnosis/PipelineMonitor'
 import RoutePathAnalysis from './pages/diagnosis/RoutePathAnalysis'
+import { PanelistAvailabilityIncidents } from './pages/incidents/PanelistAvailabilityIncidents'
+import { PanelistReportedIncidents } from './pages/incidents/PanelistReportedIncidents'
 
 
 function App() {
@@ -478,6 +480,26 @@ function App() {
                       }
                     />
                     
+                    {/* Panelist Availability Incidents - for admin and superadmin */}
+                    <Route
+                      path="/incidents/panelist-availability"
+                      element={
+                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                          <PanelistAvailabilityIncidents />
+                        </ProtectedRoute>
+                      }
+                    />
+
+                    {/* Panelist Reported Incidents - for admin and superadmin */}
+                    <Route
+                      path="/incidents/panelist-reported"
+                      element={
+                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                          <PanelistReportedIncidents />
+                        </ProtectedRoute>
+                      }
+                    />
+
                     <Route path="/" element={<Navigate to="/dashboard" />} />
                   </Routes>
                     </MainLayout>

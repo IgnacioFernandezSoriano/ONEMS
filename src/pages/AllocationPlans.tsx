@@ -1,9 +1,10 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useAllocationPlanDetails } from '@/lib/hooks/useAllocationPlanDetails'
 import { AllocationPlanFilters } from '@/components/allocation-plans/AllocationPlanFilters'
 import { AllocationPlanDetailRow } from '@/components/allocation-plans/AllocationPlanDetailRow'
 import { BulkOperationsPanel } from '@/components/allocation-plans/BulkOperationsPanel'
 import { RecordModal } from '@/components/allocation-plans/RecordModal'
+import { TablePagination } from '@/components/common/TablePagination'
 import { PageHeader } from '@/components/common/PageHeader'
 import { SortableHeader } from '@/components/common/SortableHeader'
 import { SmartTooltip } from '@/components/common/SmartTooltip'
@@ -51,6 +52,10 @@ export function AllocationPlans() {
   const [showRecordModal, setShowRecordModal] = useState(false)
   const [editingRecord, setEditingRecord] = useState<any | null>(null)
   const [showIdColumn, setShowIdColumn] = useState(false)
+  // Pagination: only the current page is rendered. Selection, bulk operations
+  // and CSV export keep working over the whole filtered set.
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(100)
 
   // Modal handlers
   const handleAddRecord = () => {
@@ -80,7 +85,7 @@ export function AllocationPlans() {
 
   // Filter and sort details
   const filteredDetails = useMemo(() => {
-    let filtered = details.filter((detail) => {
+    const filtered = details.filter((detail) => {
       if (filters.planId && detail.plan?.id !== filters.planId) return false
       if (filters.carrierId && detail.carrier?.id !== filters.carrierId) return false
       if (filters.productId && detail.product?.id !== filters.productId) return false
@@ -209,6 +214,23 @@ export function AllocationPlans() {
   }, [details, filters, sortField, sortDirection])
 
   // Calculate availability issue counts
+  const totalPages = Math.max(1, Math.ceil(filteredDetails.length / pageSize))
+
+  const pagedDetails = useMemo(
+    () => filteredDetails.slice((currentPage - 1) * pageSize, currentPage * pageSize),
+    [filteredDetails, currentPage, pageSize]
+  )
+
+  // Back to the first page whenever the visible set changes
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [filters, sortField, sortDirection, pageSize])
+
+  // Keep the page in range when rows disappear (e.g. after a bulk delete)
+  useEffect(() => {
+    if (currentPage > totalPages) setCurrentPage(totalPages)
+  }, [currentPage, totalPages])
+
   const availabilityCounts = useMemo(() => {
     return {
       unavailable: details.filter(d => 
@@ -815,7 +837,7 @@ export function AllocationPlans() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {filteredDetails.map((detail) => (
+                  {pagedDetails.map((detail) => (
                     <AllocationPlanDetailRow
                       key={detail.id}
                       detail={detail}
@@ -833,6 +855,15 @@ export function AllocationPlans() {
                 </tbody>
               </table>
             </div>
+            <TablePagination
+              idPrefix="allocation-plans"
+              currentPage={currentPage}
+              totalPages={totalPages}
+              pageSize={pageSize}
+              totalItems={filteredDetails.length}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={setPageSize}
+            />
           </div>
         )}
       </div>

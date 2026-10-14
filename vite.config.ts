@@ -10,6 +10,11 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  define: {
+    // Fixed per build: lets the browser cache /locales/*.csv for the whole
+    // session and still pick up new translations after each deploy.
+    __BUILD_ID__: JSON.stringify(String(Date.now())),
+  },
   build: {
     rollupOptions: {
       output: {

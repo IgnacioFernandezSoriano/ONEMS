@@ -2024,6 +2024,8 @@ stock.low_stock_only,Stock faible uniquement
 stock.manage_description,Gérer les exigences en matériaux
 stock.mark_as_ordered,Marquer {count} comme commandé(s)
 stock.material,Matériel
+stock.material.blocking,Bloquant
+stock.material.blocking_hint,Un matériel bloquant (ex. étiquette RFID) empêche l'expédition de tout produit qui le nécessite
 stock.material_movements,Mouvements de Matériaux
 stock.material_requirements_help,Calculer les besoins en matériaux à partir des plans d'allocation. Commander des matériaux et recevoir des bons de commande pour mettre à jour le stock du régulateur.
 stock.material_requirements_tab,Besoins en Matériaux
@@ -2648,3 +2650,148 @@ menu.setup_view,Configuration
 menu.account,Compte
 menu.all_accounts,Tous les comptes
 menu.sign_out,Se déconnecter
+incidents.menu_group,Incidents
+incidents.panelist_availability,Disponibilité des panélistes
+incidents.title,Incidents de disponibilité des panélistes
+incidents.pending_badge_tooltip,Indisponibilités en attente de révision
+incidents.inbox.panelist,Panéliste
+incidents.inbox.node,Nœud / ville
+incidents.inbox.dates,Dates d'indisponibilité
+incidents.inbox.affected,Échantillons concernés
+incidents.inbox.breakdown,Envoi / réception
+incidents.inbox.pending,En attente
+incidents.inbox.review,Examiner
+incidents.inbox.empty,Aucun incident en attente
+incidents.detail.back,Retour à la liste
+incidents.detail.mark_reviewed,Marquer comme étudié
+incidents.detail.mark_reviewed_disabled,Résolvez d'abord chaque proposition
+incidents.detail.sample,Échantillon
+incidents.detail.role,Rôle
+incidents.detail.role_origin,Envoi
+incidents.detail.role_destination,Réception
+incidents.detail.sample_status,Statut de l'échantillon
+incidents.detail.suggested_action,Action suggérée
+incidents.detail.suggestion,Suggestion
+incidents.detail.reason,Motif
+incidents.detail.proposal_status,Statut
+incidents.detail.actions,Actions
+incidents.action.confirm,Confirmer
+incidents.action.change,Modifier…
+incidents.action.dismiss,Ignorer
+incidents.action.confirm_selected,Confirmer la sélection
+incidents.action.dismiss_selected,Ignorer la sélection
+incidents.action.selected_count,{count} sélectionnées
+incidents.override.title,Modifier la résolution
+incidents.override.choose_action,Action finale
+incidents.override.reroute,Réacheminer vers un autre nœud
+incidents.override.shift_date,Changer la date
+incidents.override.cancel_sample,Annuler l'échantillon
+incidents.override.target_node,Nœud cible
+incidents.override.node_unavailable,(aucun panéliste disponible)
+incidents.override.new_date,Nouvelle date
+incidents.override.apply,Appliquer
+incidents.override.cancel,Annuler
+incidents.act.reroute,Réacheminer
+incidents.act.shift_date,Changer la date
+incidents.act.cancel,Annuler
+incidents.act.none,Informatif
+incidents.status.pending,En attente
+incidents.status.confirmed,Confirmée
+incidents.status.dismissed,Rejetée
+incidents.reason.alt_node_same_city,Nœud alternatif avec un panéliste disponible dans la même ville
+incidents.reason.shift_same_month,Déplacer vers une date disponible dans le même mois
+incidents.reason.no_alt_no_date,Aucun nœud alternatif ni date disponible ce mois-ci
+incidents.reason.reroute_reception,Réacheminer la réception vers un autre nœud avec un panéliste disponible
+incidents.reason.no_alt_reception,Aucun nœud alternatif pour la réception
+incidents.reason.in_transit,Déjà en transit ; arrivera en retard ou pourrait ne pas être enregistré à temps
+incidents.detail.cause,Cause
+incidents.balance.title,Équilibre de la ville
+incidents.balance.node,Nœud
+incidents.balance.status,État
+incidents.balance.load,Charge
+incidents.balance.saturation_normal,Normal
+incidents.balance.saturation_high,Élevée
+incidents.balance.saturation_saturated,Saturé
+incidents.balance.freed,Libéré
+incidents.balance.suggested,Suggéré
+incidents.balance.no_data,Aucune donnée d'équilibre pour cette période
+incidents.balance.week_prefix,S
+incidents.balance.total,Total
+incidents.balance.affected_week,Semaine concernée
+incidents.balance.send,Env
+incidents.balance.receive,Reç
+incidents.balance.send_full,Envoyés
+incidents.balance.receive_full,Reçus
+incidents.balance.week_filter_hint,Cliquez sur une semaine pour filtrer les échantillons
+incidents.balance.week_filter_active,Filtre semaine
+incidents.balance.week_filter_empty,Aucun échantillon en attente cette semaine
+reported_incidents.menu,Incidents signalés
+reported_incidents.badge_tooltip,Incidents signalés par les panélistes en attente d'examen
+reported_incidents.title,Incidents signalés par les panélistes
+reported_incidents.open,Ouvrir
+reported_incidents.empty,Aucun incident signalé
+reported_incidents.back,Retour
+reported_incidents.linked_shipment,Envoi lié
+reported_incidents.resolution_note,Note de résolution
+reported_incidents.reply_to_panelist,Réponse au panéliste
+reported_incidents.resolve,Résoudre
+reported_incidents.dismiss,Rejeter
+reported_incidents.filter.all_categories,Toutes les catégories
+reported_incidents.filter.open_active,Ouverts / actifs
+reported_incidents.col.panelist,Panéliste
+reported_incidents.col.category,Catégorie
+reported_incidents.col.status,État
+reported_incidents.col.reported_at,Date de signalement
+reported_incidents.status.open,Ouvert
+reported_incidents.status.in_progress,En cours
+reported_incidents.status.resolved,Résolu
+reported_incidents.status.dismissed,Rejeté
+reported_incidents.category.missing_materials,Matériel manquant
+reported_incidents.category.unreadable_label_receipt,Étiquette / reçu illisible
+reported_incidents.category.parcel_damaged,Colis endommagé
+reported_incidents.category.parcel_returned,Colis retourné
+reported_incidents.category.how_to_send,Comment envoyer
+reported_incidents.category.unavailability_request,Demande d'indisponibilité
+reported_incidents.category.tag_photo_problem,Problème de photo d'étiquette
+reported_incidents.category.contact_data_change,Changement de coordonnées
+reported_incidents.category.other,Autre
+reported_incidents.action.mark_received,Marquer comme reçu
+reported_incidents.action.invalidate,Invalider
+reported_incidents.action.support_only,Aucune action disponible ; support uniquement.
+reported_incidents.materials.step1_title,Réconcilier le stock
+reported_incidents.materials.real_qty,Quantité réelle
+reported_incidents.materials.step2_title,Recalculer les besoins
+reported_incidents.materials.blocking_badge,Bloquant
+reported_incidents.materials.step3_title,Approvisionnement
+reported_incidents.materials.from_central,Depuis le stock central
+reported_incidents.materials.from_donor,Depuis le donateur {name}
+reported_incidents.materials.to_purchase,Nécessite un achat (manuel/PDF)
+reported_incidents.materials.execute_supply,Exécuter l'approvisionnement
+reported_incidents.materials.step4_title,Fenêtre de déplacement
+reported_incidents.materials.create_baja,Créer un congé et déplacer les échantillons
+reported_incidents.materials.step5_title,Clôture à la réception
+reported_incidents.materials.go_to_availability,Résoudre les échantillons dans la disponibilité des panélistes
+reported_incidents.materials.close_hint,Le congé se ferme automatiquement lorsque le panéliste confirme la réception.
+reported_incidents.materials.unmatched,Matériel introuvable dans le catalogue
+reported_incidents.action.new_date,Nouvelle date
+reported_incidents.action.reschedule,Reprogrammer
+reported_incidents.action.cancel_shipment,Annuler l'envoi
+reported_incidents.action.start_date,Date de début
+reported_incidents.action.end_date,Date de fin
+reported_incidents.action.reason,Motif
+reported_incidents.action.create_unavailability,Créer une indisponibilité
+reported_incidents.action.requested_data,Données demandées
+reported_incidents.action.telegram_id,ID Telegram
+reported_incidents.action.phone,Téléphone
+reported_incidents.action.language,Langue
+reported_incidents.action.apply_contact,Appliquer le changement de coordonnées
+reported_incidents.done.received,Marqué comme reçu
+reported_incidents.done.invalidated,Échantillon invalidé
+reported_incidents.done.rescheduled,Envoi reprogrammé
+reported_incidents.done.cancelled,Envoi annulé
+reported_incidents.done.baja,Indisponibilité créée
+reported_incidents.done.contact,Coordonnées mises à jour
+common.showing,Affichage
+common.previous,Précédent
+common.next,Suivant
+common.rows_per_page,Lignes par page

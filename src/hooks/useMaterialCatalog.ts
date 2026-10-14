@@ -81,6 +81,19 @@ export function useMaterialCatalog() {
     return updated
   }
 
+  const toggleBlocking = async (id: string, value: boolean) => {
+    const { data: updated, error } = await supabase
+      .from('material_catalog')
+      .update({ is_blocking: value })
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) throw error
+    setCatalog(prev => prev.map(item => item.id === id ? updated : item))
+    return updated
+  }
+
   const deleteCatalogItem = async (id: string) => {
     const { error } = await supabase
       .from('material_catalog')
@@ -142,6 +155,7 @@ export function useMaterialCatalog() {
     fetchProductMaterials,
     createCatalogItem,
     updateCatalogItem,
+    toggleBlocking,
     deleteCatalogItem,
     addMaterialToProduct,
     updateProductMaterialQuantity,

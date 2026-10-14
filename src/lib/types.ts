@@ -81,6 +81,7 @@ export interface MaterialCatalog {
   min_stock?: number
   description?: string
   status: 'active' | 'inactive'
+  is_blocking: boolean
   created_at: string
   updated_at: string
 }
@@ -281,7 +282,7 @@ export interface PanelistUnavailability {
   panelist_id: string
   start_date: string
   end_date: string
-  reason: 'vacation' | 'sick' | 'personal' | 'training' | 'other'
+  reason: 'vacation' | 'sick_leave' | 'personal' | 'training' | 'other'
   notes?: string
   status: 'active' | 'cancelled'
   created_at: string
@@ -359,4 +360,106 @@ export type Database = {
       }
     }
   }
+}
+
+export type ProposalAction = 'reroute' | 'shift_date' | 'cancel' | 'none'
+export type ProposalStatus = 'pending' | 'confirmed' | 'dismissed'
+export type AffectedRole = 'origin' | 'destination'
+
+export interface ReassignmentProposal {
+  id: string
+  account_id: string
+  unavailability_id: string
+  allocation_plan_detail_id: string
+  affected_role: AffectedRole
+  sample_status_at_detection: string | null
+  suggested_action: ProposalAction
+  suggested_target_node_id: string | null
+  suggested_date: string | null
+  suggested_reason: string | null
+  final_action: string | null
+  final_target_node_id: string | null
+  final_date: string | null
+  status: ProposalStatus
+  confirmed_by: string | null
+  confirmed_at: string | null
+  created_at: string
+  updated_at: string
+  // joins (opcionales, poblados por el hook)
+  detail?: { id: string; fecha_programada: string; status: string; origin_node_id: string; destination_node_id: string } | null
+  suggested_target_node?: { id: string; auto_id: string } | null
+}
+
+export interface IncidentInboxRow {
+  unavailability_id: string
+  panelist_name: string
+  panelist_code: string
+  node_label: string
+  city_name: string
+  start_date: string
+  end_date: string
+  affected_count: number
+  origin_count: number
+  destination_count: number
+  pending_count: number
+}
+
+export interface RerouteCandidate {
+  node_id: string
+  node_name: string
+  city_id: string
+  is_available: boolean
+}
+
+export interface UnavailabilityHeader {
+  unavailability_id: string
+  panelist_name: string
+  panelist_code: string
+  start_date: string
+  end_date: string
+  reason: string | null
+  node_id: string | null
+  node_code: string | null
+  city_id: string | null
+  city_name: string | null
+}
+
+export interface CityLoadWeek {
+  week_number: number
+  week_start_date: string
+  week_end_date: string
+}
+
+export interface CityNodeLoadRow {
+  node_id: string
+  node_code: string
+  saturation_level: 'normal' | 'high' | 'saturated'
+  counts: Record<number, { sent: number; received: number }> // week_number -> {send, receive}
+  total: { sent: number; received: number }
+}
+
+export type ReportedIncidentCategory =
+  | 'missing_materials' | 'unreadable_label_receipt' | 'parcel_damaged' | 'parcel_returned'
+  | 'how_to_send' | 'unavailability_request' | 'tag_photo_problem' | 'contact_data_change' | 'other'
+
+export type ReportedIncidentStatus = 'open' | 'in_progress' | 'resolved' | 'dismissed'
+
+export interface ReportedIncident {
+  id: string
+  account_id: string
+  panelist_id: string
+  category: ReportedIncidentCategory
+  status: ReportedIncidentStatus
+  description: string | null
+  photo_url: string | null
+  allocation_plan_detail_id: string | null
+  linked_unavailability_id: string | null
+  payload: Record<string, any> | null
+  resolution_note: string | null
+  reply_to_panelist: string | null
+  reply_status: 'none' | 'pending_send' | 'sent'
+  reported_at: string
+  // joins para la bandeja
+  panelist_name?: string
+  panelist_code?: string
 }
