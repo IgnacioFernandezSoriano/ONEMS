@@ -37,12 +37,14 @@ export interface MaterialRequirementPeriod {
 export function useRegulatorRequirements() {
   const { profile } = useAuth()
   const effectiveAccountId = useEffectiveAccountId()
+  // A superadmin has no profile account: use the account selected in the sidebar
+  const accountId = effectiveAccountId || profile?.account_id
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [requirements, setRequirements] = useState<MaterialRequirementPeriod[]>([])
 
   const loadAllRequirements = useCallback(async () => {
-    if (!profile?.account_id) return
+    if (!accountId) return
 
     setLoading(true)
     try {
@@ -59,7 +61,7 @@ export function useRegulatorRequirements() {
             *,
             material:material_catalog(code, name, unit_measure)
           `)
-          .eq('account_id', profile.account_id)
+          .eq('account_id', accountId)
           .neq('status', 'received') // Show all pending and ordered
           .order('created_at', { ascending: false })
           .range(page * pageSize, (page + 1) * pageSize - 1)
@@ -80,7 +82,7 @@ export function useRegulatorRequirements() {
       const { data: stocks } = await supabase
         .from('material_stocks')
         .select('material_id, quantity')
-        .eq('account_id', profile.account_id)
+        .eq('account_id', accountId)
         .eq('location_type', 'regulator')
         .in('material_id', materialIds)
 
@@ -110,19 +112,16 @@ export function useRegulatorRequirements() {
     } finally {
       setLoading(false)
     }
-  }, [profile?.account_id])
+  }, [accountId])
 
   // Load all requirements on mount
   useEffect(() => {
-    if (profile?.account_id) {
+    if (accountId) {
       loadAllRequirements()
     }
-  }, [profile?.account_id, loadAllRequirements])
+  }, [accountId, loadAllRequirements])
 
   const calculate = useCallback(async (startDate: string, endDate: string) => {
-    // Use effectiveAccountId if available, otherwise fall back to profile.account_id
-    const accountId = effectiveAccountId || profile?.account_id
-    
     if (!accountId) {
       setError('No account ID found')
       return
@@ -266,10 +265,10 @@ export function useRegulatorRequirements() {
     } finally {
       setLoading(false)
     }
-  }, [profile?.account_id, effectiveAccountId, loadAllRequirements])
+  }, [accountId, loadAllRequirements])
 
   const loadRequirements = useCallback(async (startDate: string, endDate: string) => {
-    if (!profile?.account_id) return
+    if (!accountId) return
 
     try {
       const { data, error: loadError } = await supabase
@@ -278,7 +277,7 @@ export function useRegulatorRequirements() {
           *,
           material:material_catalog(code, name, unit_measure)
         `)
-        .eq('account_id', profile.account_id)
+        .eq('account_id', accountId)
         .eq('period_start', startDate)
         .eq('period_end', endDate)
         .neq('status', 'received') // Don't show received items
@@ -292,7 +291,7 @@ export function useRegulatorRequirements() {
       const { data: stocks } = await supabase
         .from('material_stocks')
         .select('material_id, quantity')
-        .eq('account_id', profile.account_id)
+        .eq('account_id', accountId)
         .eq('location_type', 'regulator')
         .in('material_id', materialIds)
 
@@ -320,10 +319,10 @@ export function useRegulatorRequirements() {
       console.error('Error loading requirements:', err)
       setError(err instanceof Error ? err.message : 'Error loading requirements')
     }
-  }, [profile?.account_id])
+  }, [accountId])
 
   const markAsOrdered = useCallback(async (requirementId: string, quantity: number | null) => {
-    if (!profile?.account_id) return
+    if (!accountId) return
 
     try {
       // If quantity is null, fetch it from the requirement
@@ -362,10 +361,10 @@ export function useRegulatorRequirements() {
       console.error('Error marking as ordered:', err)
       throw err
     }
-  }, [profile?.account_id, loadAllRequirements])
+  }, [accountId, loadAllRequirements])
 
   const markAsReceived = useCallback(async (requirementId: string, quantityReceived: number) => {
-    if (!profile?.account_id) return
+    if (!accountId) return
 
     try {
       // Get current requirement
@@ -396,13 +395,13 @@ export function useRegulatorRequirements() {
       console.error('Error marking as received:', err)
       throw err
     }
-  }, [profile?.account_id, loadAllRequirements])
+  }, [accountId, loadAllRequirements])
 
   const receiveAndTransferToStock = useCallback(async (
     requirementId: string,
     quantityReceived: number
   ) => {
-    if (!profile?.account_id) return
+    if (!accountId) return
 
     try {
       // Get requirement details
@@ -419,7 +418,7 @@ export function useRegulatorRequirements() {
       const { data: existingStock } = await supabase
         .from('material_stocks')
         .select('id, quantity')
-        .eq('account_id', profile.account_id)
+        .eq('account_id', accountId)
         .eq('material_id', requirement.material_id)
         .eq('location_type', 'regulator')
         .maybeSingle()
@@ -437,7 +436,7 @@ export function useRegulatorRequirements() {
         await supabase
           .from('material_stocks')
           .insert({
-            account_id: profile.account_id,
+            account_id: accountId,
             material_id: requirement.material_id,
             location_type: 'regulator',
             quantity: quantityReceived
@@ -460,7 +459,7 @@ export function useRegulatorRequirements() {
       console.error('Error receiving and transferring to stock:', err)
       throw err
     }
-  }, [profile?.account_id, loadAllRequirements])
+  }, [accountId, loadAllRequirements])
 
   const updateQuantityReceived = useCallback(async (
     requirementId: string,
@@ -502,7 +501,7 @@ export function useRegulatorRequirements() {
     requirementId: string,
     quantityReceived: number
   ) => {
-    if (!profile?.account_id) return
+    if (!accountId) return
 
     try {
       // Get requirement details
@@ -518,7 +517,7 @@ export function useRegulatorRequirements() {
       const { data: existingStock } = await supabase
         .from('material_stocks')
         .select('id, quantity')
-        .eq('account_id', profile.account_id)
+        .eq('account_id', accountId)
         .eq('material_id', requirement.material_id)
         .eq('location_type', 'regulator')
         .maybeSingle()
@@ -537,7 +536,7 @@ export function useRegulatorRequirements() {
         await supabase
           .from('material_stocks')
           .insert({
-            account_id: profile.account_id,
+            account_id: accountId,
             material_id: requirement.material_id,
             location_type: 'regulator',
             location_id: null,
@@ -551,7 +550,7 @@ export function useRegulatorRequirements() {
       await supabase
         .from('material_movements')
         .insert({
-          account_id: profile.account_id,
+          account_id: accountId,
           material_id: requirement.material_id,
           movement_type: 'receipt',
           quantity: quantityReceived,
@@ -581,7 +580,7 @@ export function useRegulatorRequirements() {
       console.error('Error receiving PO:', err)
       throw err
     }
-  }, [profile?.account_id, loadAllRequirements])
+  }, [accountId, loadAllRequirements])
 
   const reset = useCallback(() => {
     setRequirements([])
