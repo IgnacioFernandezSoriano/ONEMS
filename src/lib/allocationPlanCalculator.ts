@@ -526,11 +526,11 @@ function getFirstDayOfWeek(year: number, weekNumber: number): Date {
 }
 
 /**
- * Obtener fecha aleatoria en una semana
+ * Obtener fecha aleatoria en una semana (solo días laborables: lunes a viernes)
  */
 function getRandomDateInWeek(year: number, weekNumber: number): Date {
   const firstDay = getFirstDayOfWeek(year, weekNumber)
-  const randomDay = Math.floor(Math.random() * 7)
+  const randomDay = Math.floor(Math.random() * 5)
   const date = new Date(firstDay)
   date.setDate(date.getDate() + randomDay)
   return date

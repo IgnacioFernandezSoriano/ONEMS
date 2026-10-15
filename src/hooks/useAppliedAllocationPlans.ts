@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { AllocationPlanWithDetails } from '@/lib/types'
 import { useEffectiveAccountId } from './useEffectiveAccountId'
@@ -9,7 +9,7 @@ export function useAppliedAllocationPlans() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const fetchAll = async () => {
+  const fetchAll = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -52,11 +52,11 @@ export function useAppliedAllocationPlans() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [effectiveAccountId])
 
   useEffect(() => {
     fetchAll()
-  }, [effectiveAccountId])
+  }, [fetchAll])
 
   const getPlanDetails = async (planId: string) => {
     // Implement pagination to handle more than 1000 records

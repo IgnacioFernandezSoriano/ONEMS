@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { format } from 'date-fns'
 import { useTranslation } from '@/hooks/useTranslation'
 import { Button } from '@/components/common/Button'
 import type { Carrier, Product, City, Node } from '@/lib/types'
@@ -167,7 +168,9 @@ export function AllocationPlanGeneratorForm({
       const details = entries.map((entry) => ({
         origin_node_id: entry.originNodeId,
         destination_node_id: entry.destinationNodeId,
-        fecha_programada: entry.fechaProgramada.toISOString().split('T')[0],
+        // Format in local time: toISOString() converts to UTC, which moves a
+        // local-midnight Monday back to Sunday for users east of UTC
+        fecha_programada: format(entry.fechaProgramada, 'yyyy-MM-dd'),
         week_number: entry.weekNumber,
         month: entry.month,
         year: entry.year,
