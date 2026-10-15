@@ -178,7 +178,7 @@ export function useStockManagement() {
         .from('material_shipments')
         .select(`
           *,
-          panelist:panelists(name, panelist_code)
+          panelist:panelists!material_shipments_panelist_id_fkey(name, panelist_code)
         `)
         .eq('account_id', accountId)
         .order('created_at', { ascending: false })
@@ -461,7 +461,7 @@ export function useStockManagement() {
         .select(`
           *,
           items:material_shipment_items(*),
-          panelist:panelists(name, panelist_code)
+          panelist:panelists!material_shipments_panelist_id_fkey(name, panelist_code)
         `)
         .eq('id', shipmentId)
         .single()
