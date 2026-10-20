@@ -207,7 +207,7 @@ export function PanelistUnavailabilityComponent() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this unavailability period?')) return
+    if (!confirm(t('unavailability.confirm_delete_single'))) return
     await deleteUnavailabilityPeriod(id)
   }
 
@@ -251,12 +251,17 @@ export function PanelistUnavailabilityComponent() {
     }
   }
 
+  const reasonLabel = (reason: string) => {
+    const key = ({ vacation: 'reason_vacation', sick: 'reason_sick', sick_leave: 'reason_sick', personal: 'reason_personal', training: 'reason_training', other: 'reason_other', materials: 'reason_materials' } as Record<string, string>)[reason]
+    return key ? t('unavailability.' + key) : reason
+  }
+
   const isCurrentPeriod = (startDate: string, endDate: string) => {
     const today = new Date().toISOString().split('T')[0]
     return startDate <= today && endDate >= today
   }
 
-  if (loading) return <div className="p-6">Loading...</div>
+  if (loading) return <div className="p-6">{t('common.loading')}</div>
   if (error) return <div className="p-6 text-red-600">Error: {error}</div>
 
   return (
@@ -283,7 +288,7 @@ export function PanelistUnavailabilityComponent() {
             <button
               onClick={() => setShowFilters(!showFilters)}
               className="p-1 hover:bg-gray-100 rounded transition-colors"
-              title={showFilters ? "Collapse filters" : "Expand filters"}
+              title={showFilters ? t('unavailability.collapse_filters') : t('unavailability.expand_filters')}
             >
               {showFilters ? (
                 <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -301,19 +306,19 @@ export function PanelistUnavailabilityComponent() {
             <h3 className="text-lg font-semibold text-gray-900">{t('stock.filters')}</h3>
             {(filters.search || filters.panelist_id || filters.date_range !== 'all' || filters.reason || filters.status) && (
               <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">
-                Active
+                {t('common.active')}
               </span>
             )}
           </div>
           <button
             onClick={clearFilters}
             className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-            title="Reset all filters"
+            title={t('common.reset_filters')}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
-            Reset
+            {t('common.reset')}
           </button>
         </div>
         
@@ -326,7 +331,7 @@ export function PanelistUnavailabilityComponent() {
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
-                    Search
+                    {t('common.search')}
                   </div>
                 </label>
                 <input
@@ -433,7 +438,7 @@ export function PanelistUnavailabilityComponent() {
       {selectedIds.size > 0 && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex items-center justify-between">
           <span className="text-sm font-medium text-blue-900">
-            {selectedIds.size} period(s) selected
+            {t('unavailability.selected_count').replace('{count}', String(selectedIds.size))}
           </span>
           <div className="flex gap-2">
             <button
@@ -455,7 +460,7 @@ export function PanelistUnavailabilityComponent() {
               onClick={() => setSelectedIds(new Set())}
               className="px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300"
             >
-              Clear Selection
+              {t('unavailability.clear_selection')}
             </button>
           </div>
         </div>
@@ -476,8 +481,8 @@ export function PanelistUnavailabilityComponent() {
                   />
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('stock.panelist')}</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Start Date</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">End Date</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('unavailability.start_date')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('unavailability.end_date')}</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('panelistunavailability.tsx.duration')}</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('panelistunavailability.tsx.reason')}</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('common.status')}</th>
@@ -508,17 +513,17 @@ export function PanelistUnavailabilityComponent() {
                       <td className="px-6 py-4 text-sm">{period.start_date}</td>
                       <td className="px-6 py-4 text-sm">{period.end_date}</td>
                       <td className="px-6 py-4 text-sm">
-                        {duration} day{duration !== 1 ? 's' : ''}
-                        {isCurrent && <span className="ml-2 text-xs text-yellow-700 font-semibold">● ACTIVE NOW</span>}
+                        {duration} {duration !== 1 ? t('unavailability.days') : t('unavailability.day')}
+                        {isCurrent && <span className="ml-2 text-xs text-yellow-700 font-semibold">● {t('unavailability.active_now')}</span>}
                       </td>
                       <td className="px-6 py-4">
                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getReasonBadgeClass(period.reason)}`}>
-                          {period.reason}
+                          {reasonLabel(period.reason)}
                         </span>
                       </td>
                       <td className="px-6 py-4">
                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadgeClass(period.status)}`}>
-                          {period.status}
+                          {period.status === 'active' ? t('common.active') : period.status === 'cancelled' ? t('stock.cancelled') : period.status}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-sm max-w-xs truncate">{period.notes || '-'}</td>
@@ -553,7 +558,7 @@ export function PanelistUnavailabilityComponent() {
               ) : (
                 <tr>
                   <td colSpan={9} className="px-6 py-4 text-center text-gray-500">
-                    No unavailability periods found. {filters.search || filters.panelist_id || filters.status || filters.reason || filters.date_range !== 'all' ? 'Try adjusting your filters.' : 'Click "Add Unavailability Period" to create one.'}
+                    {t('unavailability.no_periods_found')} {filters.search || filters.panelist_id || filters.status || filters.reason || filters.date_range !== 'all' ? t('unavailability.adjust_filters') : t('unavailability.click_to_create')}
                   </td>
                 </tr>
               )}
@@ -575,7 +580,7 @@ export function PanelistUnavailabilityComponent() {
               <div className="flex-1 overflow-y-auto p-6 space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Panelist <span className="text-red-500">*</span>
+                    {t('unavailability.panelist')} <span className="text-red-500">*</span>
                   </label>
                   <select
                     value={formData.panelist_id}
@@ -584,7 +589,7 @@ export function PanelistUnavailabilityComponent() {
                     disabled={!!editingPeriod}
                     required
                   >
-                    <option value="">Select a panelist</option>
+                    <option value="">{t('unavailability.select_panelist')}</option>
                     {panelists.map((panelist: any) => (
                       <option key={panelist.id} value={panelist.id}>
                         {panelist.panelist_code} - {panelist.name}
@@ -596,7 +601,7 @@ export function PanelistUnavailabilityComponent() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Start Date <span className="text-red-500">*</span>
+                      {t('unavailability.start_date')} <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="date"
@@ -610,7 +615,7 @@ export function PanelistUnavailabilityComponent() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      End Date <span className="text-red-500">*</span>
+                      {t('unavailability.end_date')} <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="date"
@@ -631,7 +636,7 @@ export function PanelistUnavailabilityComponent() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Reason <span className="text-red-500">*</span>
+                    {t('unavailability.reason')} <span className="text-red-500">*</span>
                   </label>
                   <select
                     value={formData.reason}
@@ -640,7 +645,7 @@ export function PanelistUnavailabilityComponent() {
                     required
                   >
                     <option value="vacation">{t('panelistunavailability.tsx.vacation')}</option>
-                    <option value="sick_leave">Sick Leave</option>
+                    <option value="sick_leave">{t('unavailability.reason_sick')}</option>
                     <option value="personal">{t('panelistunavailability.tsx.personal')}</option>
                     <option value="training">{t('panelistunavailability.tsx.training')}</option>
                     <option value="other">{t('panelistunavailability.tsx.other')}</option>
@@ -649,20 +654,20 @@ export function PanelistUnavailabilityComponent() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Notes
+                    {t('unavailability.notes')}
                   </label>
                   <textarea
                     value={formData.notes}
                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                     rows={3}
-                    placeholder="Additional information about this unavailability period..."
+                    placeholder={t('unavailability.notes_placeholder')}
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Status
+                    {t('unavailability.status')}
                   </label>
                   <select
                     value={formData.status}

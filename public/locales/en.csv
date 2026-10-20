@@ -2897,3 +2897,9 @@ unavailability.bulk_skipped_active,{count} active period(s) in the selection wil
 unavailability.bulk_delete_disabled,Active periods cannot be deleted: cancel them instead.
 unavailability.cancel_error,Error cancelling the unavailability period: {message}
 unavailability.save_error,Error saving the unavailability period: {message}
+unavailability.collapse_filters,Collapse filters
+unavailability.expand_filters,Expand filters
+unavailability.selected_count,{count} period(s) selected
+unavailability.clear_selection,Clear selection
+unavailability.active_now,ACTIVE NOW
+unavailability.notes_placeholder,Additional information about this unavailability period...

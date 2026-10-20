@@ -2889,3 +2889,9 @@ unavailability.bulk_skipped_active,{count} période(s) active(s) de la sélectio
 unavailability.bulk_delete_disabled,Les périodes actives ne peuvent pas être supprimées : annulez-les à la place.
 unavailability.cancel_error,Erreur lors de l'annulation de la période d'indisponibilité : {message}
 unavailability.save_error,Erreur lors de l'enregistrement de la période d'indisponibilité : {message}
+unavailability.collapse_filters,Masquer les filtres
+unavailability.expand_filters,Afficher les filtres
+unavailability.selected_count,{count} période(s) sélectionnée(s)
+unavailability.clear_selection,Effacer la sélection
+unavailability.active_now,ACTIVE MAINTENANT
+unavailability.notes_placeholder,Informations complémentaires sur cette période d'indisponibilité...

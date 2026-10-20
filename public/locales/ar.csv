@@ -2889,3 +2889,9 @@ unavailability.bulk_skipped_active,سيتم تخطي {count} فترة نشطة �
 unavailability.bulk_delete_disabled,لا يمكن حذف الفترات النشطة: ألغِها بدلاً من ذلك.
 unavailability.cancel_error,خطأ أثناء إلغاء فترة عدم التوفر: {message}
 unavailability.save_error,خطأ أثناء حفظ فترة عدم التوفر: {message}
+unavailability.collapse_filters,إخفاء عوامل التصفية
+unavailability.expand_filters,إظهار عوامل التصفية
+unavailability.selected_count,{count} فترة (فترات) محددة
+unavailability.clear_selection,إلغاء التحديد
+unavailability.active_now,نشطة الآن
+unavailability.notes_placeholder,معلومات إضافية حول فترة عدم التوفر هذه...

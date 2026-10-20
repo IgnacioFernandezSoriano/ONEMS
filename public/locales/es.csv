@@ -2897,3 +2897,9 @@ unavailability.bulk_skipped_active,Se omitirán {count} periodo(s) activo(s) de 
 unavailability.bulk_delete_disabled,Los periodos activos no se pueden borrar: cancélalos en su lugar.
 unavailability.cancel_error,Error al cancelar el periodo de indisponibilidad: {message}
 unavailability.save_error,Error al guardar el periodo de indisponibilidad: {message}
+unavailability.collapse_filters,Ocultar filtros
+unavailability.expand_filters,Mostrar filtros
+unavailability.selected_count,{count} período(s) seleccionado(s)
+unavailability.clear_selection,Quitar selección
+unavailability.active_now,ACTIVA AHORA
+unavailability.notes_placeholder,Información adicional sobre este período de indisponibilidad...
