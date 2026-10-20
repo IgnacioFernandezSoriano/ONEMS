@@ -2811,6 +2811,8 @@ incidents.move_reason.other_end,es el otro extremo de la muestra (origen = desti
 incidents.move_reason.no_day,ningún día laborable de esa semana cabe (carga o disponibilidad)
 incidents.move_reason.not_in_cell,la muestra ya no está en esa casilla
 incidents.move_reason.has_incident_line,la muestra tiene una línea pendiente en una incidencia; resuélvela allí
+incidents.move_reason.inactive_node,el nodo de destino no está activo
+incidents.balance.counts_note,Los recuentos incluyen muestras canceladas; la lista muestra solo las activas
 incidents.reason.already_sent,Ya enviada; no hay nada que cambiar
 incidents.reason.shift_later_week,Mover a la primera semana posterior con capacidad
 incidents.reason.alt_node_later_week,Otro nodo de la ciudad en una semana posterior

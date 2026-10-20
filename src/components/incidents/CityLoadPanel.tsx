@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, Fragment } from 'react'
 import type { CSSProperties, DragEvent } from 'react'
-import { parseISO, isValid } from 'date-fns'
+import { format, parseISO, isValid } from 'date-fns'
 import { useTranslation } from '@/hooks/useTranslation'
 import { fmtDay, fmtWeekRange, weekCoverage, SATURATION_BADGE_CLASS } from '@/lib/incidentFormat'
 import type { WeekCoverage } from '@/lib/incidentFormat'
@@ -72,7 +72,8 @@ export function CityLoadPanel({
   const highlight = new Set(highlightNodeIds)
   const isAffected = (w: CityLoadWeek) => w.week_start_date <= bajaEnd && w.week_end_date >= bajaStart
   const selectedWeek = weeks.find(w => w.week_start_date === selectedWeekStart) ?? null
-  const todayMonth = todayMonday.slice(0, 7)
+  // Mes de hoy (no del lunes de esta semana, que puede caer en el mes anterior).
+  const todayMonth = format(new Date(), 'yyyy-MM')
 
   // Cobertura de bajas por casilla (nodo|lunes).
   const coverage = useMemo(() => {
@@ -214,7 +215,7 @@ export function CityLoadPanel({
                 <table className="w-full">
                   <thead>
                     <tr>
-                      <th rowSpan={3} className="px-3 py-2 text-start text-xs font-medium text-gray-500 uppercase sticky start-0 bg-white align-bottom border-b">{t('incidents.balance.node')}</th>
+                      <th rowSpan={3} className="px-3 py-2 text-start text-xs font-medium text-gray-500 uppercase sticky start-0 z-10 bg-white align-bottom border-b">{t('incidents.balance.node')}</th>
                       <th rowSpan={3} className="px-3 py-2 text-start text-xs font-medium text-gray-500 uppercase align-bottom border-b">{t('incidents.balance.status')}</th>
                       {months.map(m => {
                         const current = m.key === todayMonth
@@ -287,7 +288,7 @@ export function CityLoadPanel({
                   <tbody className="divide-y divide-gray-100">
                     {rows.map(n => (
                       <tr key={n.node_id} className={n.node_id === releasedNodeId ? 'bg-gray-50' : ''}>
-                        <td className="px-3 py-2 text-sm font-mono sticky start-0 bg-inherit">{n.node_code}</td>
+                        <td className={`px-3 py-2 text-sm font-mono sticky start-0 z-10 ${n.node_id === releasedNodeId ? 'bg-gray-50' : 'bg-white'}`}>{n.node_code}</td>
                         <td className="px-3 py-2">
                           <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${SATURATION_BADGE_CLASS[n.saturation_level] ?? SATURATION_BADGE_CLASS.normal}`}>
                             {t(`incidents.balance.saturation_${n.saturation_level}`)}
@@ -298,7 +299,8 @@ export function CityLoadPanel({
                           const cell = n.counts[w.week_start_date] ?? { sent: 0, received: 0 }
                           const cov = coverage.get(key)
                           const full = !!cov && cov.workdaysCovered >= 5
-                          const partial = !!cov && !full
+                          // Parcial solo si cubre algun dia laborable (una baja de sabado/domingo no sombrea).
+                          const partial = !!cov && cov.workdaysCovered > 0 && !full
                           const unavText = cov
                             ? t(full ? 'incidents.balance.unavailable_full' : 'incidents.balance.unavailable_partial', { days: cov.ranges.join(', ') })
                             : ''
@@ -375,6 +377,7 @@ export function CityLoadPanel({
                 )}
                 <span className="text-gray-400">{t('incidents.balance.drag_hint')}</span>
               </div>
+              <p className="mt-1 text-xs text-gray-400">{t('incidents.balance.counts_note')}</p>
             </>
           ) : (
             <div className="text-sm text-gray-500">{t('incidents.balance.no_data')}</div>

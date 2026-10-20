@@ -2811,6 +2811,8 @@ incidents.move_reason.other_end,it is the other end of the sample (origin = dest
 incidents.move_reason.no_day,no working day that week fits (load or availability)
 incidents.move_reason.not_in_cell,the sample is no longer in that cell
 incidents.move_reason.has_incident_line,the sample has a pending line in an incident; resolve it there
+incidents.move_reason.inactive_node,the target node is not active
+incidents.balance.counts_note,Counts include cancelled samples; the list shows only active ones
 incidents.reason.already_sent,Already sent; nothing to change
 incidents.reason.shift_later_week,Move to the first later week with capacity
 incidents.reason.alt_node_later_week,Another node of the city in a later week

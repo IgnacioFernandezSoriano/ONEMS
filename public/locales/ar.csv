@@ -2803,6 +2803,8 @@ incidents.move_reason.other_end,إنها الطرف الآخر للعينة (ا�
 incidents.move_reason.no_day,لا يوجد يوم عمل مناسب في ذلك الأسبوع (الحمل أو التوفر)
 incidents.move_reason.not_in_cell,العينة لم تعد في تلك الخانة
 incidents.move_reason.has_incident_line,للعينة سطر معلق في حادثة؛ عالجه هناك
+incidents.move_reason.inactive_node,العقدة الهدف غير نشطة
+incidents.balance.counts_note,تشمل الأعداد العينات الملغاة؛ تعرض القائمة العينات النشطة فقط
 incidents.reason.already_sent,أُرسلت بالفعل؛ لا شيء لتغييره
 incidents.reason.shift_later_week,النقل إلى أول أسبوع لاحق تتوفر فيه سعة
 incidents.reason.alt_node_later_week,عقدة أخرى في المدينة في أسبوع لاحق

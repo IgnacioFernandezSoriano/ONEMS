@@ -2803,6 +2803,8 @@ incidents.move_reason.other_end,c'est l'autre extrémité de l'échantillon (ori
 incidents.move_reason.no_day,aucun jour ouvré de cette semaine ne convient (charge ou disponibilité)
 incidents.move_reason.not_in_cell,l'échantillon n'est plus dans cette case
 incidents.move_reason.has_incident_line,l'échantillon a une ligne en attente dans un incident ; traitez-la là-bas
+incidents.move_reason.inactive_node,le nœud cible n'est pas actif
+incidents.balance.counts_note,Les totaux incluent les échantillons annulés ; la liste ne montre que les actifs
 incidents.reason.already_sent,Déjà envoyé ; rien à modifier
 incidents.reason.shift_later_week,Déplacer à la première semaine ultérieure disposant de capacité
 incidents.reason.alt_node_later_week,Un autre nœud de la ville une semaine ultérieure

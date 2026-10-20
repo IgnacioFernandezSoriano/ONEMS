@@ -10,7 +10,7 @@ import type { SelectedCell } from '@/components/incidents/CityLoadPanel'
 import { CellSamplesPanel } from '@/components/incidents/CellSamplesPanel'
 import { IncidentLinesTable } from '@/components/incidents/IncidentLinesTable'
 import {
-  sampleLabel, planLabel, fmtShort, fmtWeekRange, currentMonday, addWeeksTo, defaultWindowWeeks,
+  sampleLabel, planLabel, fmtShort, fmtWeekRange, currentMonday, addWeeksTo, defaultWindowWeeks, toMonday,
   SATURATION_BADGE_CLASS,
 } from '@/lib/incidentFormat'
 import { startMoveDrag } from '@/lib/incidentDrag'
@@ -93,8 +93,10 @@ export function IncidentReviewPanel({ unavailabilityId, onBack }: Props) {
 
   // Ventana de semanas: empieza en un lunes (nunca antes de la semana actual) y dura
   // max(8 semanas, hasta fin del mes de la baja + 14 dias desde la semana actual).
-  const todayMonday = useMemo(() => currentMonday(), [])
+  // Se recalcula en cada recarga: una pagina abierta pasado el domingo no deja la semana pasada.
+  const [todayMonday, setTodayMonday] = useState(() => currentMonday())
   const [windowStart, setWindowStart] = useState(todayMonday)
+  useEffect(() => { setWindowStart(ws => (ws < todayMonday ? todayMonday : ws)) }, [todayMonday])
   const windowWeeks = useMemo(() => defaultWindowWeeks(todayMonday, header?.start_date), [todayMonday, header?.start_date])
   const windowEnd = useMemo(() => {
     const p = parseISO(windowStart)
@@ -114,6 +116,7 @@ export function IncidentReviewPanel({ unavailabilityId, onBack }: Props) {
     const seq = ++reloadSeq.current
     const [h, ls] = await Promise.all([fetchHeader(unavailabilityId), fetchLines(unavailabilityId)])
     if (seq !== reloadSeq.current) return
+    setTodayMonday(currentMonday())
     setHeader(h)
     setLines(ls)
     setDataVersion(v => v + 1)
@@ -396,7 +399,11 @@ export function IncidentReviewPanel({ unavailabilityId, onBack }: Props) {
       return t('incidents.move.not_possible', { reason: t(`incidents.move_reason.${code}`, undefined, code) })
     }
     if (moveNothing) return t('incidents.move.nothing_to_change')
+    // load_after ya cuenta la muestra en su nuevo sitio (y no la cuenta dos veces). Si no cambia
+    // de nodo ni de semana ya estaba contada: la carga no varia.
     const after = Number(s.load_after ?? 0)
+    const sameCell = (s.node_id ?? move.nodeId) === move.payload.fromNodeId && toMonday(move.payload.fecha) === move.weekStart
+    const before = sameCell ? after : Math.max(0, after - 1)
     const ws = parseISO(move.weekStart)
     return t('incidents.move.proposal', {
       sample: move.payload.label,
@@ -404,7 +411,7 @@ export function IncidentReviewPanel({ unavailabilityId, onBack }: Props) {
       node: s.node_code ?? move.nodeCode,
       date: fmtShort(s.date),
       week: `${t('incidents.balance.week_prefix')}${isValid(ws) ? getISOWeek(ws) : ''} (${fmtWeekRange(move.weekStart)})`,
-      before: Math.max(0, after - 1),
+      before,
       after,
     })
   }

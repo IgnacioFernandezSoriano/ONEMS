@@ -449,7 +449,7 @@ export interface SamplePlanInfo {
 // Motivos de found:false de suggest_for_cell / suggest_for_sample_move.
 export type MoveReason =
   | 'not_found' | 'not_pending' | 'sample_not_movable' | 'other_city' | 'other_end' | 'no_day'
-  | 'not_in_cell' | 'has_incident_line'
+  | 'not_in_cell' | 'has_incident_line' | 'inactive_node'
 
 // Respuesta de suggest_for_cell / suggest_for_sample_move (side solo en la segunda).
 export interface MoveSuggestion {
