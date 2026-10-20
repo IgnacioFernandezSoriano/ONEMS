@@ -74,7 +74,7 @@ BEGIN
     RAISE EXCEPTION 'FAIL incident_suggest_cell ejecutable por anon/authenticated'; END IF;
   FOREACH f IN ARRAY ARRAY[
     'public.incident_suggest_sample_move(uuid,uuid,uuid,date,numeric,numeric)',
-    'public.incident_pick_day_in_week(uuid,date,numeric,numeric)'] LOOP
+    'public.incident_pick_day_in_week(uuid,date,numeric,numeric,uuid)'] LOOP
     IF has_function_privilege('anon', f, 'EXECUTE') OR has_function_privilege('authenticated', f, 'EXECUTE') THEN
       RAISE EXCEPTION 'FAIL % ejecutable por anon/authenticated', f; END IF;
   END LOOP;
@@ -162,6 +162,10 @@ SELECT public.resolve_unavailability_incident('f0000000-0000-0000-0000-000000000
 INSERT INTO public.panelist_unavailability (id, account_id, panelist_id, start_date, end_date, reason, status)
 VALUES ('f0000000-0000-0000-0000-000000000003','a0000000-0000-0000-0000-000000000001',
         'e3000000-0000-0000-0000-000000000003', '2027-04-19', '2027-04-25', 'vacation', 'active');
+-- P4 (N4, otro extremo de d1) de baja toda la semana del 26/04.
+INSERT INTO public.panelist_unavailability (id, account_id, panelist_id, start_date, end_date, reason, status)
+VALUES ('f0000000-0000-0000-0000-000000000004','a0000000-0000-0000-0000-000000000001',
+        'e4000000-0000-0000-0000-000000000004', '2027-04-26', '2027-04-30', 'vacation', 'active');
 SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
 DO $$
 DECLARE l1 public.panelist_reassignment_proposal; l2 public.panelist_reassignment_proposal; j jsonb; s public.allocation_plan_details;
@@ -185,6 +189,8 @@ BEGIN
   PERFORM pg_temp.expect_reason(public.suggest_for_cell(l1.id, 'b1000000-0000-0000-0000-000000000001', '2027-03-22'), 'no_day', 'nodo de la baja');
   -- Semana pasada.
   PERFORM pg_temp.expect_reason(public.suggest_for_cell(l1.id, 'b2000000-0000-0000-0000-000000000002', current_date - 14), 'no_day', 'semana pasada');
+  -- Otro extremo (P4 en N4) de baja toda la semana: no hay dia aunque el destino quepa.
+  PERFORM pg_temp.expect_reason(public.suggest_for_cell(l1.id, 'b2000000-0000-0000-0000-000000000002', '2027-04-26'), 'no_day', 'otro extremo de baja');
   -- Semana actual: nunca un dia anterior a hoy.
   j := public.suggest_for_cell(l1.id, 'b2000000-0000-0000-0000-000000000002', current_date);
   IF (j->>'found')::boolean AND (j->>'date')::date < current_date THEN RAISE EXCEPTION 'FAIL dia pasado %', j; END IF;
@@ -304,7 +310,16 @@ INSERT INTO public.panelist_unavailability (id, account_id, panelist_id, start_d
   ('f0000000-0000-0000-0000-000000000003','a0000000-0000-0000-0000-000000000001',
    'e3000000-0000-0000-0000-000000000003', '2027-05-03', '2027-05-09', 'vacation', 'active'),
   ('f0000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000001',
-   'e2000000-0000-0000-0000-000000000002', '2027-05-10', '2027-05-12', 'vacation', 'active');
+   'e2000000-0000-0000-0000-000000000002', '2027-05-10', '2027-05-12', 'vacation', 'active'),
+-- P4 (N4, otro extremo de d10) de baja el lunes 17/05 y toda la semana del 24/05.
+  ('f0000000-0000-0000-0000-000000000004','a0000000-0000-0000-0000-000000000001',
+   'e4000000-0000-0000-0000-000000000004', '2027-05-17', '2027-05-17', 'vacation', 'active'),
+  ('f0000000-0000-0000-0000-000000000005','a0000000-0000-0000-0000-000000000001',
+   'e4000000-0000-0000-0000-000000000004', '2027-05-24', '2027-05-28', 'vacation', 'active');
+-- N5 (ciudad C2) sin panelista activo: como otro extremo no bloquea ningun dia.
+INSERT INTO public.nodes (id, account_id, city_id, auto_id) VALUES
+  ('b5000000-0000-0000-0000-000000000005','a0000000-0000-0000-0000-000000000001','c2000000-0000-0000-0000-000000000002','N5');
+SELECT pg_temp.mk('d1000000-0000-0000-0000-000000000014','N1','N5','2027-04-05');
 SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
 DO $$
 DECLARE j jsonb; s public.allocation_plan_details; v_props int;
@@ -365,7 +380,15 @@ BEGIN
   s := pg_temp.smp('d1000000-0000-0000-0000-000000000010');
   IF s.original_fecha_programada <> '2027-04-05' OR s.original_origin_node_id <> N1 OR s.origin_node_id <> N2 THEN
     RAISE EXCEPTION 'FAIL sample originales % %', s.original_fecha_programada, s.original_origin_node_id; END IF;
-  RAISE NOTICE 'PASS mover muestra (mismo nodo, lado origen/destino, motivos, sin lineas nuevas)';
+  -- Otro extremo (N4) de baja el lunes 17/05: semana vacia -> martes 18/05 (no el lunes).
+  j := public.suggest_for_sample_move('d1000000-0000-0000-0000-000000000010', N2, N2, '2027-05-17');
+  IF NOT (j->>'found')::boolean OR (j->>'date')::date <> '2027-05-18' THEN RAISE EXCEPTION 'FAIL otro extremo de baja un dia %', j; END IF;
+  -- Otro extremo de baja toda la semana del 24/05 -> no_day.
+  PERFORM pg_temp.expect_reason(public.suggest_for_sample_move('d1000000-0000-0000-0000-000000000010', N2, N2, '2027-05-24'), 'no_day', 'otro extremo de baja semana');
+  -- Otro extremo sin panelista activo (N5): no bloquea -> lunes 17/05.
+  j := public.suggest_for_sample_move('d1000000-0000-0000-0000-000000000014', N1, N1, '2027-05-17');
+  IF NOT (j->>'found')::boolean OR (j->>'date')::date <> '2027-05-17' THEN RAISE EXCEPTION 'FAIL otro extremo sin panelista %', j; END IF;
+  RAISE NOTICE 'PASS mover muestra (mismo nodo, lado origen/destino, motivos, otro extremo de baja, sin lineas nuevas)';
 END $$;
 ROLLBACK;
 
@@ -385,6 +408,11 @@ BEGIN
     'b1000000-0000-0000-0000-000000000001', 'b2000000-0000-0000-0000-000000000002', '2027-04-12'), 'has_incident_line', 'linea pendiente');
   PERFORM pg_temp.expect_err(format('SELECT public.apply_sample_move(%L,%L,%L,%L)', 'd0000000-0000-0000-0000-000000000001',
     'b1000000-0000-0000-0000-000000000001', 'b2000000-0000-0000-0000-000000000002', '2027-04-12'), 'Cannot move: has_incident_line');
+  -- Tambien desde el otro lado (destino N4, sin linea en ese rol): la linea pendiente de origen quedaria obsoleta.
+  PERFORM pg_temp.expect_reason(public.suggest_for_sample_move('d0000000-0000-0000-0000-000000000001',
+    'b4000000-0000-0000-0000-000000000004', 'b4000000-0000-0000-0000-000000000004', '2027-04-12'), 'has_incident_line', 'linea pendiente otro lado');
+  PERFORM pg_temp.expect_err(format('SELECT public.apply_sample_move(%L,%L,%L,%L)', 'd0000000-0000-0000-0000-000000000001',
+    'b4000000-0000-0000-0000-000000000004', 'b4000000-0000-0000-0000-000000000004', '2027-04-12'), 'Cannot move: has_incident_line');
   RAISE NOTICE 'PASS has_incident_line';
 END $$;
 ROLLBACK;

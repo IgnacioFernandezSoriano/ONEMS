@@ -10,7 +10,8 @@
 
 -- (0) Dia de la semana elegida para un nodo (compartido por las dos propuestas). Interna.
 CREATE OR REPLACE FUNCTION public.incident_pick_day_in_week(
-  p_node_id uuid, p_week_start date, p_reference_load numeric, p_deviation_percent numeric)
+  p_node_id uuid, p_week_start date, p_reference_load numeric, p_deviation_percent numeric,
+  p_other_end_node_id uuid DEFAULT NULL)
 RETURNS date
 LANGUAGE sql
 STABLE
@@ -22,6 +23,10 @@ AS $$
    WHERE p_node_id IS NOT NULL AND p_week_start IS NOT NULL
      AND g::date >= current_date
      AND incident_node_fits(p_node_id, g::date, p_reference_load, p_deviation_percent)
+     -- Otro extremo de la muestra: solo disponibilidad (su carga no cambia). Sin panelista activo no bloquea.
+     AND (p_other_end_node_id IS NULL
+          OR NOT EXISTS (SELECT 1 FROM panelists p WHERE p.node_id = p_other_end_node_id AND p.status = 'active')
+          OR COALESCE(is_node_available(p_other_end_node_id, g::date), false))
    ORDER BY (SELECT count(*) FROM allocation_plan_details a
               WHERE (a.origin_node_id = p_node_id OR a.destination_node_id = p_node_id)
                 AND a.fecha_programada = g::date
@@ -90,7 +95,7 @@ BEGIN
   -- Origen = destino no tiene sentido.
   IF p_node_id = v_other THEN RETURN jsonb_build_object('found', false, 'reason', 'other_end'); END IF;
 
-  v_day := incident_pick_day_in_week(p_node_id, p_week_start, v_ref, v_dev);
+  v_day := incident_pick_day_in_week(p_node_id, p_week_start, v_ref, v_dev, v_other);
   IF v_day IS NULL THEN RETURN jsonb_build_object('found', false, 'reason', 'no_day'); END IF;
 
   v_load := incident_node_week_load(p_node_id, v_day) + 1;
@@ -202,7 +207,7 @@ $$;
 
 -- (4) Reequilibrio: mover CUALQUIER muestra del plan desde la casilla (p_from_node_id x semana) a otra.
 --     Lado a cambiar: aquel en que la muestra tiene hoy p_from_node_id (origen primero). Motivos de found:false,
---     en este orden: not_found, not_in_cell, sample_not_movable, has_incident_line (linea pendiente en ese lado:
+--     en este orden: not_found, not_in_cell, sample_not_movable, has_incident_line (alguna linea pendiente, de cualquier lado:
 --     la web debe usar apply_manager_move), other_city, other_end, no_day. Interna.
 CREATE OR REPLACE FUNCTION public.incident_suggest_sample_move(
   p_detail_id uuid,
@@ -250,11 +255,9 @@ BEGIN
     RETURN jsonb_build_object('found', false, 'reason', 'sample_not_movable');
   END IF;
 
+  -- Cualquier linea pendiente (de cualquier lado): mover la muestra la dejaria obsoleta.
   IF EXISTS (SELECT 1 FROM panelist_reassignment_proposal pr
-              WHERE pr.allocation_plan_detail_id = v_d.id
-                AND pr.status = 'pending'
-                AND (CASE WHEN pr.affected_role = 'origin' THEN v_d.origin_node_id ELSE v_d.destination_node_id END)
-                    = p_from_node_id) THEN
+              WHERE pr.allocation_plan_detail_id = v_d.id AND pr.status = 'pending') THEN
     RETURN jsonb_build_object('found', false, 'reason', 'has_incident_line');
   END IF;
 
@@ -267,7 +270,7 @@ BEGIN
 
   IF p_to_node_id = v_other THEN RETURN jsonb_build_object('found', false, 'reason', 'other_end'); END IF;
 
-  v_day := incident_pick_day_in_week(p_to_node_id, p_week_start, v_ref, v_dev);
+  v_day := incident_pick_day_in_week(p_to_node_id, p_week_start, v_ref, v_dev, v_other);
   IF v_day IS NULL THEN RETURN jsonb_build_object('found', false, 'reason', 'no_day'); END IF;
 
   v_load := incident_node_week_load(p_to_node_id, v_day) + 1;
@@ -407,7 +410,7 @@ $$;
 -- (7) Permisos. Internas (incident_pick_day_in_week, incident_suggest_cell, incident_suggest_sample_move): no
 --     ejecutables por anon/authenticated. Las dos propuestas internas llevan GRANT a service_role, igual que
 --     incident_suggest; el helper de dia no (como incident_find_shift_date). La web usa los envoltorios.
-REVOKE ALL ON FUNCTION public.incident_pick_day_in_week(uuid, date, numeric, numeric) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.incident_pick_day_in_week(uuid, date, numeric, numeric, uuid) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.incident_suggest_cell(uuid, uuid, date, numeric, numeric) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.incident_suggest_cell(uuid, uuid, date, numeric, numeric) TO service_role;
 REVOKE ALL ON FUNCTION public.incident_suggest_sample_move(uuid, uuid, uuid, date, numeric, numeric) FROM PUBLIC, anon, authenticated;
