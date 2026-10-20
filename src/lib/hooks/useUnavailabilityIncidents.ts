@@ -1,12 +1,20 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
+import { addDays, format, parseISO, isValid } from 'date-fns'
 import { supabase } from '@/lib/supabase'
 import { useAccount } from '@/contexts/AccountContext'
 import type {
   ReassignmentProposal, IncidentInboxRow, UnavailabilityHeader, IncidentStatus,
-  IncidentStatusFilter, WeekSuggestion,
+  IncidentStatusFilter, MoveSuggestion, CellSample,
 } from '@/lib/types'
 
-export type IncidentDecision = 'accept' | 'week' | 'cancel'
+export type IncidentDecision = 'accept' | 'cancel'
+
+// Carrier y producto del plan de una muestra. FKs explicitas: allocation_plans tiene FK a
+// carriers y a products (y products otra a carriers); sin hint PostgREST puede dar PGRST201.
+const PLAN_EMBED = `plan:allocation_plans!allocation_plan_details_plan_id_fkey (
+  carrier:carriers!allocation_plans_carrier_id_fkey ( name ),
+  product:products!allocation_plans_product_id_fkey ( code, description )
+)`
 
 export interface DecideManyResult {
   ok: string[]
@@ -116,7 +124,8 @@ export function useUnavailabilityIncidents() {
         detail:allocation_plan_details!prp_detail_fkey (
           id, fecha_programada, original_fecha_programada, status, origin_node_id, destination_node_id,
           origin_node:nodes!allocation_plan_details_origin_node_id_fkey ( auto_id ),
-          destination_node:nodes!allocation_plan_details_destination_node_id_fkey ( auto_id )
+          destination_node:nodes!allocation_plan_details_destination_node_id_fkey ( auto_id ),
+          ${PLAN_EMBED}
         ),
         suggested_target_node:nodes!prp_target_node_fkey ( id, auto_id ),
         final_target_node:nodes!prp_final_node_fkey ( id, auto_id )
@@ -130,35 +139,100 @@ export function useUnavailabilityIncidents() {
     return [...lines].sort((a, b) => rank(a.status) - rank(b.status))
   }, [])
 
-  const suggestForWeek = useCallback(async (
-    proposalId: string, weekStart: string, referenceLoad = 6, deviationPercent = 20,
-  ): Promise<WeekSuggestion> => {
-    const { data, error: e } = await supabase.rpc('suggest_for_week', {
+  // Decision sobre una linea pendiente: aceptar la propuesta del sistema o anular la muestra.
+  const decide = useCallback(async (proposalId: string, decision: IncidentDecision): Promise<IncidentStatus> => {
+    const { data, error: e } = await supabase.rpc('apply_manager_decision', {
       p_proposal_id: proposalId,
+      p_decision: decision,
+      p_week_start: null,
+      p_reference_load: 6,
+      p_deviation_percent: 20,
+    })
+    if (e) throw e
+    return (data as { incident_status: IncidentStatus }).incident_status
+  }, [])
+
+  // Arrastrar una linea pendiente a una casilla (nodo x semana): propuesta (solo lectura) y aplicar.
+  const suggestForCell = useCallback(async (
+    proposalId: string, nodeId: string, weekStart: string, referenceLoad: number, deviationPercent: number,
+  ): Promise<MoveSuggestion> => {
+    const { data, error: e } = await supabase.rpc('suggest_for_cell', {
+      p_proposal_id: proposalId,
+      p_node_id: nodeId,
       p_week_start: weekStart,
       p_reference_load: referenceLoad,
       p_deviation_percent: deviationPercent,
     })
     if (e) throw e
-    return (data || { found: false }) as WeekSuggestion
+    return (data || { found: false }) as MoveSuggestion
   }, [])
 
-  const decide = useCallback(async (
-    proposalId: string,
-    decision: IncidentDecision,
-    weekStart?: string,
-    referenceLoad = 6,
-    deviationPercent = 20,
-  ): Promise<IncidentStatus> => {
-    const { data, error: e } = await supabase.rpc('apply_manager_decision', {
+  const applyManagerMove = useCallback(async (
+    proposalId: string, nodeId: string, weekStart: string, referenceLoad: number, deviationPercent: number,
+  ): Promise<void> => {
+    const { error: e } = await supabase.rpc('apply_manager_move', {
       p_proposal_id: proposalId,
-      p_decision: decision,
-      p_week_start: weekStart ?? null,
+      p_node_id: nodeId,
+      p_week_start: weekStart,
       p_reference_load: referenceLoad,
       p_deviation_percent: deviationPercent,
     })
     if (e) throw e
-    return (data as { incident_status: IncidentStatus }).incident_status
+  }, [])
+
+  // Arrastrar cualquier muestra de una casilla (fromNodeId x semana) a otra.
+  const suggestForSampleMove = useCallback(async (
+    detailId: string, fromNodeId: string, toNodeId: string, weekStart: string,
+    referenceLoad: number, deviationPercent: number,
+  ): Promise<MoveSuggestion> => {
+    const { data, error: e } = await supabase.rpc('suggest_for_sample_move', {
+      p_detail_id: detailId,
+      p_from_node_id: fromNodeId,
+      p_to_node_id: toNodeId,
+      p_week_start: weekStart,
+      p_reference_load: referenceLoad,
+      p_deviation_percent: deviationPercent,
+    })
+    if (e) throw e
+    return (data || { found: false }) as MoveSuggestion
+  }, [])
+
+  const applySampleMove = useCallback(async (
+    detailId: string, fromNodeId: string, toNodeId: string, weekStart: string,
+    referenceLoad: number, deviationPercent: number,
+  ): Promise<void> => {
+    const { error: e } = await supabase.rpc('apply_sample_move', {
+      p_detail_id: detailId,
+      p_from_node_id: fromNodeId,
+      p_to_node_id: toNodeId,
+      p_week_start: weekStart,
+      p_reference_load: referenceLoad,
+      p_deviation_percent: deviationPercent,
+    })
+    if (e) throw e
+  }, [])
+
+  // Muestras no canceladas de un nodo (como origen o destino) en la semana que empieza weekStart.
+  const fetchCellSamples = useCallback(async (nodeId: string, weekStart: string): Promise<CellSample[]> => {
+    const s = parseISO(weekStart)
+    if (!isValid(s)) return []
+    const sunday = format(addDays(s, 6), 'yyyy-MM-dd')
+    const { data, error: e } = await supabase
+      .from('allocation_plan_details')
+      .select(`
+        id, fecha_programada, status, origin_node_id, destination_node_id,
+        origin_node:nodes!allocation_plan_details_origin_node_id_fkey ( auto_id ),
+        destination_node:nodes!allocation_plan_details_destination_node_id_fkey ( auto_id ),
+        ${PLAN_EMBED},
+        lines:panelist_reassignment_proposal!prp_detail_fkey ( id, unavailability_id, status, affected_role )
+      `)
+      .or(`origin_node_id.eq.${nodeId},destination_node_id.eq.${nodeId}`)
+      .gte('fecha_programada', weekStart)
+      .lte('fecha_programada', sunday)
+      .neq('status', 'cancelled')
+      .order('fecha_programada')
+    if (e) throw e
+    return (data || []) as unknown as CellSample[]
   }, [])
 
   // Secuencial; un error en una linea no corta las demas.
@@ -187,6 +261,7 @@ export function useUnavailabilityIncidents() {
   return {
     inbox, loading, error, pendingManagerCount,
     statusFilter, setStatusFilter,
-    fetchInbox, fetchHeader, fetchLines, suggestForWeek, decide, decideMany, saveResolution,
+    fetchInbox, fetchHeader, fetchLines, decide, decideMany, saveResolution,
+    suggestForCell, applyManagerMove, suggestForSampleMove, applySampleMove, fetchCellSamples,
   }
 }

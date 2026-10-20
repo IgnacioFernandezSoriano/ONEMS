@@ -1,5 +1,6 @@
+import type { DragEvent } from 'react'
 import { useTranslation } from '@/hooks/useTranslation'
-import { fmtDay, fmtDateTime, sampleLabel } from '@/lib/incidentFormat'
+import { fmtDay, fmtDateTime, sampleLabel, planLabel, planTitle } from '@/lib/incidentFormat'
 import type { ReassignmentProposal } from '@/lib/types'
 
 const LINE_STATUS_CLASS: Record<string, string> = {
@@ -20,19 +21,19 @@ interface Props {
   onToggle: (id: string) => void
   onToggleAll: (ids: string[]) => void
   onAccept: (line: ReassignmentProposal) => void
-  // trigger: boton pulsado, para devolverle el foco al cerrar el dialogo.
-  onOtherWeek: (line: ReassignmentProposal, trigger: HTMLElement) => void
   onCancel: (line: ReassignmentProposal) => void
   busyId: string | null
-  // Linea con el dialogo de "otra semana" abierto (se resalta).
-  editingId: string | null
+  // Arrastrar una linea pendiente a una casilla del balance de la ciudad.
+  onDragStartLine: (e: DragEvent, line: ReassignmentProposal) => void
+  onDragEnd: () => void
+  draggingLineId: string | null
   // Mensaje para el bloque de pendientes vacio (p. ej. filtro de semana activo).
   pendingEmptyText: string
 }
 
 export function IncidentLinesTable({
-  lines, selectedIds, onToggle, onToggleAll, onAccept, onOtherWeek, onCancel, busyId, editingId,
-  pendingEmptyText,
+  lines, selectedIds, onToggle, onToggleAll, onAccept, onCancel, busyId, onDragStartLine, onDragEnd,
+  draggingLineId, pendingEmptyText,
 }: Props) {
   const { t } = useTranslation()
   const pending = lines.filter(l => l.status === 'pending')
@@ -44,6 +45,10 @@ export function IncidentLinesTable({
     l.affected_role === 'origin' ? t('incidents.detail.role_origin') : t('incidents.detail.role_destination')
   const reasonLabel = (code: string | null) =>
     code ? t(`incidents.reason.${code}`, undefined, code) : null
+
+  // Solo se arrastran lineas cuya muestra sigue pendiente o notificada.
+  const canDrag = (l: ReassignmentProposal) =>
+    !busy && (l.detail?.status === 'pending' || l.detail?.status === 'notified')
 
   const th = 'px-4 py-3 text-start text-xs font-medium text-gray-500 uppercase'
   const td = 'px-4 py-3 text-sm align-top'
@@ -115,6 +120,7 @@ export function IncidentLinesTable({
                   />
                 </th>
                 <th className={th}>{t('incidents.detail.sample')}</th>
+                <th className={th}>{t('incidents.detail.carrier_product')}</th>
                 <th className={th}>{t('incidents.detail.role')}</th>
                 <th className={th}>{t('incidents.detail.original_date')}</th>
                 <th className={th}>{t('incidents.detail.system_proposal')}</th>
@@ -123,7 +129,14 @@ export function IncidentLinesTable({
             </thead>
             <tbody className="divide-y divide-gray-200">
               {pending.length > 0 ? pending.map(l => (
-                <tr key={l.id} className={editingId === l.id ? 'bg-blue-50' : 'hover:bg-gray-50'}>
+                <tr
+                  key={l.id}
+                  draggable={canDrag(l)}
+                  onDragStart={e => { if (canDrag(l)) onDragStartLine(e, l); else e.preventDefault() }}
+                  onDragEnd={onDragEnd}
+                  title={canDrag(l) ? t('incidents.detail.drag_hint') : undefined}
+                  className={draggingLineId === l.id ? 'bg-blue-50 opacity-60' : `hover:bg-gray-50 ${canDrag(l) ? 'cursor-grab' : ''}`}
+                >
                   <td className={td}>
                     <input
                       type="checkbox"
@@ -134,7 +147,11 @@ export function IncidentLinesTable({
                       className="rounded"
                     />
                   </td>
-                  <td className={`${td} font-mono`}>{sampleLabel(l)}</td>
+                  <td className={`${td} font-mono whitespace-nowrap`}>
+                    {canDrag(l) && <span className="me-1 text-gray-400" aria-hidden="true">⠿</span>}
+                    {sampleLabel(l)}
+                  </td>
+                  <td className={`${td} whitespace-nowrap`} title={planTitle(l.detail?.plan)}>{planLabel(l.detail?.plan)}</td>
                   <td className={td}>{roleLabel(l)}</td>
                   <td className={td}>{fmtDay(originalDate(l))}</td>
                   <td className={td}>{proposalCell(l)}</td>
@@ -146,15 +163,7 @@ export function IncidentLinesTable({
                         disabled={busy || l.suggested_action === 'none'}
                         className="text-green-700 hover:text-green-900 disabled:opacity-40 disabled:cursor-not-allowed"
                       >
-                        {t('incidents.action.accept')}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={e => onOtherWeek(l, e.currentTarget)}
-                        disabled={busy}
-                        className="text-blue-600 hover:text-blue-800 disabled:opacity-40 disabled:cursor-not-allowed"
-                      >
-                        {t('incidents.action.other_week')}
+                        {t('incidents.action.confirm_line')}
                       </button>
                       <button
                         type="button"
@@ -162,14 +171,14 @@ export function IncidentLinesTable({
                         disabled={busy}
                         className="text-red-600 hover:text-red-800 disabled:opacity-40 disabled:cursor-not-allowed"
                       >
-                        {t('incidents.action.cancel_sample')}
+                        {t('incidents.action.void_line')}
                       </button>
                     </div>
                     {busyId === l.id && <div className="text-xs text-gray-500 mt-1">{t('common.loading')}</div>}
                   </td>
                 </tr>
               )) : (
-                <tr><td colSpan={6} className="px-4 py-4 text-center text-sm text-gray-500">{pendingEmptyText}</td></tr>
+                <tr><td colSpan={7} className="px-4 py-4 text-center text-sm text-gray-500">{pendingEmptyText}</td></tr>
               )}
             </tbody>
           </table>
@@ -186,6 +195,7 @@ export function IncidentLinesTable({
               <tr>
                 <th className={th}>{t('incidents.inbox.status')}</th>
                 <th className={th}>{t('incidents.detail.sample')}</th>
+                <th className={th}>{t('incidents.detail.carrier_product')}</th>
                 <th className={th}>{t('incidents.detail.role')}</th>
                 <th className={th}>{t('incidents.detail.original_date')}</th>
                 <th className={th}>{t('incidents.detail.done')}</th>
@@ -201,7 +211,8 @@ export function IncidentLinesTable({
                       {t(`incidents.line_status.${l.status}`)}
                     </span>
                   </td>
-                  <td className={`${td} font-mono`}>{sampleLabel(l)}</td>
+                  <td className={`${td} font-mono whitespace-nowrap`}>{sampleLabel(l)}</td>
+                  <td className={`${td} whitespace-nowrap`} title={planTitle(l.detail?.plan)}>{planLabel(l.detail?.plan)}</td>
                   <td className={td}>{roleLabel(l)}</td>
                   <td className={td}>{fmtDay(originalDate(l))}</td>
                   <td className={td}>{doneCell(l)}</td>
@@ -209,7 +220,7 @@ export function IncidentLinesTable({
                   <td className={`${td} whitespace-nowrap`}>{fmtDateTime(l.applied_at ?? l.confirmed_at ?? l.updated_at)}</td>
                 </tr>
               )) : (
-                <tr><td colSpan={7} className="px-4 py-4 text-center text-sm text-gray-500">{t('incidents.detail.no_resolved')}</td></tr>
+                <tr><td colSpan={8} className="px-4 py-4 text-center text-sm text-gray-500">{t('incidents.detail.no_resolved')}</td></tr>
               )}
             </tbody>
           </table>

@@ -440,15 +440,6 @@ export interface UnavailabilityHeader {
   resolved_at: string | null
 }
 
-export interface WeekSuggestion {
-  found: boolean
-  date?: string
-  node_id?: string
-  node_code?: string
-  load_after?: number
-  saturation_level?: 'normal' | 'high' | 'saturated'
-}
-
 // Carrier y producto del plan de una muestra (allocation_plans -> carriers / products).
 export interface SamplePlanInfo {
   carrier?: { name: string | null } | null
@@ -519,7 +510,7 @@ export interface CityNodeLoadRow {
   node_id: string
   node_code: string
   saturation_level: 'normal' | 'high' | 'saturated'
-  counts: Record<number, { sent: number; received: number }> // week_number -> {send, receive}
+  counts: Record<string, { sent: number; received: number }> // week_start_date (lunes) -> {sent, received}
   total: { sent: number; received: number }
 }
 

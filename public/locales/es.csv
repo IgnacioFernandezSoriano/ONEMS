@@ -2767,19 +2767,50 @@ incidents.confirm.cancel_many,Esto anulará {n} muestras en el plan de asignaci�
 incidents.confirm.accept_with_cancel,{n} de las propuestas seleccionadas anulan la muestra en el plan de asignación. No se puede deshacer desde esta pantalla. ¿Continuar?
 incidents.confirm.back,Volver
 incidents.proposal.cancel,Anular la muestra
-incidents.action.accept,Aceptar propuesta
-incidents.action.other_week,Otra semana…
-incidents.action.cancel_sample,Cancelar muestra
 incidents.action.accept_selected,Aceptar seleccionadas
 incidents.action.cancel_selected,Cancelar seleccionadas
-incidents.week.title,Elige una semana
-incidents.week.hint,Haz clic en la cabecera de una semana del panel de carga o elige un lunes
-incidents.week.proposal,Propuesta para la semana {week}: {date} · nodo {node} · carga resultante {load}
-incidents.week.no_slot,No hay hueco disponible esa semana
-incidents.week.confirm,Mover muestra
 incidents.load.reference,Carga de referencia
 incidents.load.deviation,Desviación %
-incidents.load.range,Rango
+incidents.action.confirm_line,Confirmar
+incidents.action.void_line,Anular muestra
+incidents.detail.carrier_product,Carrier · producto
+incidents.detail.drag_hint,Arrástrala a una casilla del balance de la ciudad para moverla
+incidents.balance.window,Semanas visibles
+incidents.balance.window_back_month,4 semanas atrás
+incidents.balance.window_back_week,1 semana atrás
+incidents.balance.window_forward_week,1 semana adelante
+incidents.balance.window_forward_month,4 semanas adelante
+incidents.balance.current_month,Mes actual
+incidents.balance.today,hoy
+incidents.balance.unavailable_full,Panelista de baja: {days}
+incidents.balance.unavailable_partial,Panelista de baja parte de la semana: {days}
+incidents.balance.legend_unavailable,Panelista de baja toda la semana
+incidents.balance.legend_partial,Panelista de baja parte de la semana
+incidents.balance.drag_hint,Pincha una casilla para ver sus muestras; arrastra una muestra o línea pendiente a una casilla para moverla
+incidents.cell.title,Muestras de {node} · {week}
+incidents.cell.empty,No hay muestras en esta casilla
+incidents.cell.drag_hint,Arrastra una muestra a otra casilla para moverla
+incidents.cell.drag,Arrastrar
+incidents.cell.date,Fecha
+incidents.cell.incident,Incidencia
+incidents.cell.role_sends,Envía
+incidents.cell.role_receives,Recibe
+incidents.cell.this_incident,Esta incidencia
+incidents.cell.other_incident,Otra incidencia
+incidents.move.checking,Buscando el mejor día…
+incidents.move.proposal,Mover {sample} ({plan}) a {node}, {date} · carga semana {week}: {before} → {after}
+incidents.move.not_possible,No se puede mover ahí: {reason}
+incidents.move.nothing_to_change,La muestra ya está en ese día y nodo: no hay nada que cambiar
+incidents.move.block_past,Semana pasada: no se puede programar en el pasado
+incidents.move.block_unavailable,El panelista del nodo está de baja toda la semana
+incidents.move_reason.not_found,la muestra o la línea ya no existe
+incidents.move_reason.not_pending,la línea ya no está pendiente
+incidents.move_reason.sample_not_movable,la muestra ya se ha enviado o recibido
+incidents.move_reason.other_city,el nodo es de otra ciudad
+incidents.move_reason.other_end,es el otro extremo de la muestra (origen = destino)
+incidents.move_reason.no_day,ningún día laborable de esa semana cabe (carga o disponibilidad)
+incidents.move_reason.not_in_cell,la muestra ya no está en esa casilla
+incidents.move_reason.has_incident_line,la muestra tiene una línea pendiente en una incidencia; resuélvela allí
 incidents.reason.already_sent,Ya enviada; no hay nada que cambiar
 incidents.reason.shift_later_week,Mover a la primera semana posterior con capacidad
 incidents.reason.alt_node_later_week,Otro nodo de la ciudad en una semana posterior

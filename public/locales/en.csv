@@ -2767,19 +2767,50 @@ incidents.confirm.cancel_many,This will cancel {n} samples in the allocation pla
 incidents.confirm.accept_with_cancel,{n} of the selected proposals cancel the sample in the allocation plan. It cannot be undone from this screen. Continue?
 incidents.confirm.back,Back
 incidents.proposal.cancel,Cancel the sample
-incidents.action.accept,Accept proposal
-incidents.action.other_week,Other week…
-incidents.action.cancel_sample,Cancel sample
 incidents.action.accept_selected,Accept selected
 incidents.action.cancel_selected,Cancel selected
-incidents.week.title,Choose a week
-incidents.week.hint,Click a week header in the load panel or pick a Monday
-incidents.week.proposal,Proposal for week {week}: {date} · node {node} · load after {load}
-incidents.week.no_slot,No slot available that week
-incidents.week.confirm,Move sample
 incidents.load.reference,Reference load
 incidents.load.deviation,Deviation %
-incidents.load.range,Range
+incidents.action.confirm_line,Confirm
+incidents.action.void_line,Void sample
+incidents.detail.carrier_product,Carrier · product
+incidents.detail.drag_hint,Drag onto a cell of the city balance to move it
+incidents.balance.window,Weeks shown
+incidents.balance.window_back_month,4 weeks back
+incidents.balance.window_back_week,1 week back
+incidents.balance.window_forward_week,1 week forward
+incidents.balance.window_forward_month,4 weeks forward
+incidents.balance.current_month,Current month
+incidents.balance.today,today
+incidents.balance.unavailable_full,Panelist unavailable: {days}
+incidents.balance.unavailable_partial,Panelist partly unavailable: {days}
+incidents.balance.legend_unavailable,Panelist unavailable all week
+incidents.balance.legend_partial,Panelist unavailable part of the week
+incidents.balance.drag_hint,Click a cell to see its samples; drag a sample or pending line onto a cell to move it
+incidents.cell.title,Samples of {node} · {week}
+incidents.cell.empty,No samples in this cell
+incidents.cell.drag_hint,Drag a sample onto another cell to move it
+incidents.cell.drag,Drag
+incidents.cell.date,Date
+incidents.cell.incident,Incident
+incidents.cell.role_sends,Sends
+incidents.cell.role_receives,Receives
+incidents.cell.this_incident,This incident
+incidents.cell.other_incident,Other incident
+incidents.move.checking,Checking the best day…
+incidents.move.proposal,Move {sample} ({plan}) to {node}, {date} · load week {week}: {before} → {after}
+incidents.move.not_possible,It cannot be moved there: {reason}
+incidents.move.nothing_to_change,The sample is already on that day and node: nothing to change
+incidents.move.block_past,Past week: samples cannot be scheduled in the past
+incidents.move.block_unavailable,The node's panelist is unavailable all week
+incidents.move_reason.not_found,the sample or line no longer exists
+incidents.move_reason.not_pending,the line is no longer pending
+incidents.move_reason.sample_not_movable,the sample has already been sent or received
+incidents.move_reason.other_city,the node belongs to another city
+incidents.move_reason.other_end,it is the other end of the sample (origin = destination)
+incidents.move_reason.no_day,no working day that week fits (load or availability)
+incidents.move_reason.not_in_cell,the sample is no longer in that cell
+incidents.move_reason.has_incident_line,the sample has a pending line in an incident; resolve it there
 incidents.reason.already_sent,Already sent; nothing to change
 incidents.reason.shift_later_week,Move to the first later week with capacity
 incidents.reason.alt_node_later_week,Another node of the city in a later week

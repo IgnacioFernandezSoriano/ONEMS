@@ -2759,19 +2759,50 @@ incidents.confirm.cancel_many,Cela annulera {n} échantillons dans le plan d'all
 incidents.confirm.accept_with_cancel,{n} des propositions sélectionnées annulent l'échantillon dans le plan d'allocation. Impossible de revenir en arrière depuis cet écran. Continuer ?
 incidents.confirm.back,Retour
 incidents.proposal.cancel,Annuler l'échantillon
-incidents.action.accept,Accepter la proposition
-incidents.action.other_week,Autre semaine…
-incidents.action.cancel_sample,Annuler l'échantillon
 incidents.action.accept_selected,Accepter la sélection
 incidents.action.cancel_selected,Annuler la sélection
-incidents.week.title,Choisir une semaine
-incidents.week.hint,Cliquez sur l'en-tête d'une semaine du panneau de charge ou choisissez un lundi
-incidents.week.proposal,Proposition pour la semaine {week} : {date} · nœud {node} · charge après {load}
-incidents.week.no_slot,Aucun créneau disponible cette semaine-là
-incidents.week.confirm,Déplacer l'échantillon
 incidents.load.reference,Charge de référence
 incidents.load.deviation,Écart %
-incidents.load.range,Plage
+incidents.action.confirm_line,Confirmer
+incidents.action.void_line,Annuler l'échantillon
+incidents.detail.carrier_product,Transporteur · produit
+incidents.detail.drag_hint,Faites-la glisser vers une case du bilan de la ville pour la déplacer
+incidents.balance.window,Semaines affichées
+incidents.balance.window_back_month,4 semaines en arrière
+incidents.balance.window_back_week,1 semaine en arrière
+incidents.balance.window_forward_week,1 semaine en avant
+incidents.balance.window_forward_month,4 semaines en avant
+incidents.balance.current_month,Mois en cours
+incidents.balance.today,aujourd'hui
+incidents.balance.unavailable_full,Panéliste indisponible : {days}
+incidents.balance.unavailable_partial,Panéliste indisponible une partie de la semaine : {days}
+incidents.balance.legend_unavailable,Panéliste indisponible toute la semaine
+incidents.balance.legend_partial,Panéliste indisponible une partie de la semaine
+incidents.balance.drag_hint,Cliquez sur une case pour voir ses échantillons ; faites glisser un échantillon ou une ligne en attente vers une case pour le déplacer
+incidents.cell.title,Échantillons de {node} · {week}
+incidents.cell.empty,Aucun échantillon dans cette case
+incidents.cell.drag_hint,Faites glisser un échantillon vers une autre case pour le déplacer
+incidents.cell.drag,Glisser
+incidents.cell.date,Date
+incidents.cell.incident,Incident
+incidents.cell.role_sends,Envoie
+incidents.cell.role_receives,Reçoit
+incidents.cell.this_incident,Cet incident
+incidents.cell.other_incident,Autre incident
+incidents.move.checking,Recherche du meilleur jour…
+incidents.move.proposal,Déplacer {sample} ({plan}) vers {node}, {date} · charge semaine {week} : {before} → {after}
+incidents.move.not_possible,Impossible de le déplacer ici : {reason}
+incidents.move.nothing_to_change,L'échantillon est déjà à ce jour et ce nœud : rien à changer
+incidents.move.block_past,Semaine passée : impossible de planifier dans le passé
+incidents.move.block_unavailable,Le panéliste du nœud est indisponible toute la semaine
+incidents.move_reason.not_found,l'échantillon ou la ligne n'existe plus
+incidents.move_reason.not_pending,la ligne n'est plus en attente
+incidents.move_reason.sample_not_movable,l'échantillon a déjà été envoyé ou reçu
+incidents.move_reason.other_city,le nœud appartient à une autre ville
+incidents.move_reason.other_end,c'est l'autre extrémité de l'échantillon (origine = destination)
+incidents.move_reason.no_day,aucun jour ouvré de cette semaine ne convient (charge ou disponibilité)
+incidents.move_reason.not_in_cell,l'échantillon n'est plus dans cette case
+incidents.move_reason.has_incident_line,l'échantillon a une ligne en attente dans un incident ; traitez-la là-bas
 incidents.reason.already_sent,Déjà envoyé ; rien à modifier
 incidents.reason.shift_later_week,Déplacer à la première semaine ultérieure disposant de capacité
 incidents.reason.alt_node_later_week,Un autre nœud de la ville une semaine ultérieure

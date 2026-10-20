@@ -2759,19 +2759,50 @@ incidents.confirm.cancel_many,سيؤدي هذا إلى إلغاء {n} عينات
 incidents.confirm.accept_with_cancel,{n} من المقترحات المحددة تلغي العينة في خطة التوزيع. لا يمكن التراجع عن ذلك من هذه الشاشة. هل تريد المتابعة؟
 incidents.confirm.back,رجوع
 incidents.proposal.cancel,إلغاء العينة
-incidents.action.accept,قبول الاقتراح
-incidents.action.other_week,أسبوع آخر…
-incidents.action.cancel_sample,إلغاء العينة
 incidents.action.accept_selected,قبول المحدد
 incidents.action.cancel_selected,إلغاء المحدد
-incidents.week.title,اختر أسبوعًا
-incidents.week.hint,انقر على عنوان أسبوع في لوحة الحمل أو اختر يوم اثنين
-incidents.week.proposal,اقتراح للأسبوع {week}: {date} · العقدة {node} · الحمل بعد النقل {load}
-incidents.week.no_slot,لا توجد فترة متاحة في ذلك الأسبوع
-incidents.week.confirm,نقل العينة
 incidents.load.reference,الحمل المرجعي
 incidents.load.deviation,الانحراف %
-incidents.load.range,النطاق
+incidents.action.confirm_line,تأكيد
+incidents.action.void_line,إلغاء العينة
+incidents.detail.carrier_product,الناقل · المنتج
+incidents.detail.drag_hint,اسحبها إلى خانة في رصيد المدينة لنقلها
+incidents.balance.window,الأسابيع المعروضة
+incidents.balance.window_back_month,4 أسابيع إلى الوراء
+incidents.balance.window_back_week,أسبوع واحد إلى الوراء
+incidents.balance.window_forward_week,أسبوع واحد إلى الأمام
+incidents.balance.window_forward_month,4 أسابيع إلى الأمام
+incidents.balance.current_month,الشهر الحالي
+incidents.balance.today,اليوم
+incidents.balance.unavailable_full,اللوحي غير متاح: {days}
+incidents.balance.unavailable_partial,اللوحي غير متاح جزءًا من الأسبوع: {days}
+incidents.balance.legend_unavailable,اللوحي غير متاح طوال الأسبوع
+incidents.balance.legend_partial,اللوحي غير متاح جزءًا من الأسبوع
+incidents.balance.drag_hint,انقر على خانة لعرض عيناتها؛ اسحب عينة أو سطرًا معلقًا إلى خانة لنقله
+incidents.cell.title,عينات {node} · {week}
+incidents.cell.empty,لا توجد عينات في هذه الخانة
+incidents.cell.drag_hint,اسحب عينة إلى خانة أخرى لنقلها
+incidents.cell.drag,سحب
+incidents.cell.date,التاريخ
+incidents.cell.incident,الحادثة
+incidents.cell.role_sends,يرسل
+incidents.cell.role_receives,يستلم
+incidents.cell.this_incident,هذه الحادثة
+incidents.cell.other_incident,حادثة أخرى
+incidents.move.checking,جارٍ البحث عن أفضل يوم…
+incidents.move.proposal,نقل {sample} ({plan}) إلى {node}، {date} · حمل الأسبوع {week}: {before} → {after}
+incidents.move.not_possible,لا يمكن النقل إلى هناك: {reason}
+incidents.move.nothing_to_change,العينة موجودة بالفعل في هذا اليوم وهذه العقدة: لا شيء لتغييره
+incidents.move.block_past,أسبوع ماضٍ: لا يمكن الجدولة في الماضي
+incidents.move.block_unavailable,لوحي العقدة غير متاح طوال الأسبوع
+incidents.move_reason.not_found,العينة أو السطر لم يعد موجودًا
+incidents.move_reason.not_pending,السطر لم يعد معلقًا
+incidents.move_reason.sample_not_movable,تم إرسال العينة أو استلامها بالفعل
+incidents.move_reason.other_city,العقدة تنتمي إلى مدينة أخرى
+incidents.move_reason.other_end,إنها الطرف الآخر للعينة (المصدر = الوجهة)
+incidents.move_reason.no_day,لا يوجد يوم عمل مناسب في ذلك الأسبوع (الحمل أو التوفر)
+incidents.move_reason.not_in_cell,العينة لم تعد في تلك الخانة
+incidents.move_reason.has_incident_line,للعينة سطر معلق في حادثة؛ عالجه هناك
 incidents.reason.already_sent,أُرسلت بالفعل؛ لا شيء لتغييره
 incidents.reason.shift_later_week,النقل إلى أول أسبوع لاحق تتوفر فيه سعة
 incidents.reason.alt_node_later_week,عقدة أخرى في المدينة في أسبوع لاحق
