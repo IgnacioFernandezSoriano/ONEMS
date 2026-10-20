@@ -398,6 +398,7 @@ export interface ReassignmentProposal {
     destination_node_id: string
     origin_node?: { auto_id: string } | null
     destination_node?: { auto_id: string } | null
+    plan?: SamplePlanInfo | null
   } | null
   suggested_target_node?: { id: string; auto_id: string } | null
   final_target_node?: { id: string; auto_id: string } | null
@@ -446,6 +447,64 @@ export interface WeekSuggestion {
   node_code?: string
   load_after?: number
   saturation_level?: 'normal' | 'high' | 'saturated'
+}
+
+// Carrier y producto del plan de una muestra (allocation_plans -> carriers / products).
+export interface SamplePlanInfo {
+  carrier?: { name: string | null } | null
+  product?: { code: string | null; description: string | null } | null
+}
+
+// Motivos de found:false de suggest_for_cell / suggest_for_sample_move.
+export type MoveReason =
+  | 'not_found' | 'not_pending' | 'sample_not_movable' | 'other_city' | 'other_end' | 'no_day'
+  | 'not_in_cell' | 'has_incident_line'
+
+// Respuesta de suggest_for_cell / suggest_for_sample_move (side solo en la segunda).
+export interface MoveSuggestion {
+  found: boolean
+  reason?: MoveReason | string
+  date?: string
+  node_id?: string
+  node_code?: string
+  load_after?: number
+  saturation_level?: 'normal' | 'high' | 'saturated'
+  same_node?: boolean
+  side?: 'origin' | 'destination'
+}
+
+// Muestra (allocation_plan_details) de una casilla nodo x semana del balance de la ciudad.
+export interface CellSample {
+  id: string
+  fecha_programada: string
+  status: string
+  origin_node_id: string
+  destination_node_id: string
+  origin_node?: { auto_id: string } | null
+  destination_node?: { auto_id: string } | null
+  plan?: SamplePlanInfo | null
+  lines?: { id: string; unavailability_id: string; status: string; affected_role: string }[] | null
+}
+
+// Baja activa de un panelista, ya mapeada a su nodo (panelists.node_id).
+export interface NodeUnavailability {
+  id: string
+  panelist_id: string
+  node_id: string
+  start_date: string
+  end_date: string
+}
+
+// Lo que se arrastra a una casilla: una linea pendiente de esta incidencia o una muestra.
+export interface MoveDragPayload {
+  kind: 'line' | 'sample'
+  lineId?: string
+  detailId: string
+  fromNodeId: string
+  otherEndNodeId: string
+  fecha: string
+  label: string
+  plan?: SamplePlanInfo | null
 }
 
 export type IncidentStatusFilter = 'open' | 'all' | IncidentStatus // open = new + pending_manager
