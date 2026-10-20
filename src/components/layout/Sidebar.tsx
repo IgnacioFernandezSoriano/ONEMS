@@ -40,7 +40,7 @@ import {
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useLocale } from '../../contexts/LocaleContext'
-import { useReassignmentProposals } from '../../lib/hooks/useReassignmentProposals'
+import { useUnavailabilityIncidents } from '../../lib/hooks/useUnavailabilityIncidents'
 import { useReportedIncidents } from '../../lib/hooks/useReportedIncidents'
 
 interface MenuItem {
@@ -65,7 +65,7 @@ export function Sidebar() {
   const location = useLocation()
   const { isCollapsed, setIsCollapsed } = useSidebar()
   const { t, locale, setLocale } = useLocale()
-  const { pendingCount } = useReassignmentProposals()
+  const { pendingManagerCount } = useUnavailabilityIncidents()
   const { openCount } = useReportedIncidents()
   const [expandedSections, setExpandedSections] = useState<string[]>([])
   const [isHovered, setIsHovered] = useState(false)
@@ -600,9 +600,9 @@ export function Sidebar() {
                             {isExpanded && (
                               <span className="text-sm font-medium">{item.label}</span>
                             )}
-                            {item.path === '/incidents/panelist-availability' && pendingCount > 0 && isExpanded && (
+                            {item.path === '/incidents/panelist-availability' && pendingManagerCount > 0 && isExpanded && (
                               <span className="ml-auto text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">
-                                {pendingCount}
+                                {pendingManagerCount}
                               </span>
                             )}
                             {item.path === '/incidents/panelist-reported' && openCount > 0 && isExpanded && (

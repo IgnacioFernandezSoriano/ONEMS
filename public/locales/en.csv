@@ -2671,23 +2671,12 @@ incidents.inbox.pending,Pending
 incidents.inbox.review,Review
 incidents.inbox.empty,No pending incidents
 incidents.detail.back,Back to list
-incidents.detail.mark_reviewed,Mark as studied
-incidents.detail.mark_reviewed_disabled,Resolve every proposal first
 incidents.detail.sample,Sample
 incidents.detail.role,Role
 incidents.detail.role_origin,Send
 incidents.detail.role_destination,Receive
-incidents.detail.sample_status,Sample status
-incidents.detail.suggested_action,Suggested action
-incidents.detail.suggestion,Suggestion
 incidents.detail.reason,Reason
-incidents.detail.proposal_status,Status
 incidents.detail.actions,Actions
-incidents.action.confirm,Confirm
-incidents.action.change,Change…
-incidents.action.dismiss,Dismiss
-incidents.action.confirm_selected,Confirm selected
-incidents.action.dismiss_selected,Dismiss selected
 incidents.action.selected_count,{count} selected
 incidents.override.title,Change resolution
 incidents.override.choose_action,Final action
@@ -2703,9 +2692,6 @@ incidents.act.reroute,Reroute
 incidents.act.shift_date,Shift date
 incidents.act.cancel,Cancel
 incidents.act.none,Informative
-incidents.status.pending,Pending
-incidents.status.confirmed,Confirmed
-incidents.status.dismissed,Dismissed
 incidents.reason.alt_node_same_city,Alternative node with an available panelist in the same city
 incidents.reason.shift_same_month,Move to an available date within the same month
 incidents.reason.no_alt_no_date,No alternative node or available date this month
@@ -2733,6 +2719,109 @@ incidents.balance.receive_full,Received
 incidents.balance.week_filter_hint,Click a week to filter the samples
 incidents.balance.week_filter_active,Filtering week
 incidents.balance.week_filter_empty,No pending samples in this week
+incidents.status.new,New
+incidents.status.auto_resolved,Resolved automatically
+incidents.status.pending_manager,Pending manager decision
+incidents.status.resolved,Resolved
+incidents.line_status.pending,Pending
+incidents.line_status.auto_resolved,Resolved automatically
+incidents.line_status.manager_resolved,Resolved by manager
+incidents.line_status.info,Informational
+incidents.line_status.dismissed,Dismissed
+incidents.final_action.shift_date,Moved to a later date
+incidents.final_action.reroute,Moved to another node
+incidents.final_action.cancel,Cancelled
+incidents.final_action.none,No change
+incidents.final_action.manual,Edited manually
+incidents.filter.open,Open
+incidents.filter.all,All
+incidents.inbox.status,Status
+incidents.inbox.created,Declared
+incidents.summary.shift,{n} moved to a later date
+incidents.summary.reroute,{n} moved to another node
+incidents.summary.cancel,{n} cancelled
+incidents.summary.info,{n} informational
+incidents.summary.pending,{n} pending
+incidents.summary.none,No samples affected
+incidents.detail.final_resolution,Final resolution
+incidents.detail.final_resolution_placeholder,Add a note about how this incident was resolved…
+incidents.detail.save,Save
+incidents.detail.saved,Saved
+incidents.detail.pending_lines,Pending your decision
+incidents.detail.resolved_lines,Resolved
+incidents.detail.original_date,Original date
+incidents.detail.new_date,New date
+incidents.detail.new_node,New node
+incidents.detail.system_proposal,System proposal
+incidents.detail.resolved_by_system,System
+incidents.detail.resolved_by_manager,Manager
+incidents.detail.info_line,No action possible (already sent)
+incidents.detail.no_pending,No samples pending your decision
+incidents.detail.no_resolved,No resolved samples yet
+incidents.detail.done,What was done
+incidents.detail.done_by,By
+incidents.detail.done_at,When
+incidents.detail.summary,Automatic summary
+incidents.confirm.cancel_one,This will cancel the sample in the allocation plan. It cannot be undone from this screen. Continue?
+incidents.confirm.cancel_many,This will cancel {n} samples in the allocation plan. It cannot be undone from this screen. Continue?
+incidents.confirm.accept_with_cancel,{n} of the selected proposals cancel the sample in the allocation plan. It cannot be undone from this screen. Continue?
+incidents.confirm.back,Back
+incidents.proposal.cancel,Cancel the sample
+incidents.action.accept_selected,Accept selected
+incidents.action.cancel_selected,Cancel selected
+incidents.load.reference,Reference load
+incidents.load.deviation,Deviation %
+incidents.action.confirm_line,Confirm
+incidents.action.void_line,Void sample
+incidents.detail.carrier_product,Carrier · product
+incidents.detail.drag_hint,Drag onto a cell of the city balance to move it
+incidents.balance.window,Weeks shown
+incidents.balance.window_back_month,4 weeks back
+incidents.balance.window_back_week,1 week back
+incidents.balance.window_forward_week,1 week forward
+incidents.balance.window_forward_month,4 weeks forward
+incidents.balance.current_month,Current month
+incidents.balance.today,today
+incidents.balance.unavailable_full,Panelist unavailable: {days}
+incidents.balance.unavailable_partial,Panelist partly unavailable: {days}
+incidents.balance.legend_unavailable,Panelist unavailable all week
+incidents.balance.legend_partial,Panelist unavailable part of the week
+incidents.balance.drag_hint,Click a cell to see its samples; drag a sample or pending line onto a cell to move it
+incidents.cell.title,Samples of {node} · {week}
+incidents.cell.empty,No samples in this cell
+incidents.cell.drag_hint,Drag a sample onto another cell to move it
+incidents.cell.drag,Drag
+incidents.cell.date,Date
+incidents.cell.incident,Incident
+incidents.cell.role_sends,Sends
+incidents.cell.role_receives,Receives
+incidents.cell.this_incident,This incident
+incidents.cell.other_incident,Other incident
+incidents.move.checking,Checking the best day…
+incidents.move.proposal,Move {sample} ({plan}) to {node}, {date} · load week {week}: {before} → {after}
+incidents.move.not_possible,It cannot be moved there: {reason}
+incidents.move.nothing_to_change,The sample is already on that day and node: nothing to change
+incidents.move.block_past,Past week: samples cannot be scheduled in the past
+incidents.move.block_unavailable,The node's panelist is unavailable all week
+incidents.move_reason.not_found,the sample or line no longer exists
+incidents.move_reason.not_pending,the line is no longer pending
+incidents.move_reason.sample_not_movable,the sample has already been sent or received
+incidents.move_reason.other_city,the node belongs to another city
+incidents.move_reason.other_end,it is the other end of the sample (origin = destination)
+incidents.move_reason.no_day,no working day that week fits (load or availability)
+incidents.move_reason.not_in_cell,the sample is no longer in that cell
+incidents.move_reason.has_incident_line,the sample has a pending line in an incident; resolve it there
+incidents.move_reason.inactive_node,the target node is not active
+incidents.balance.counts_note,Counts include cancelled samples; the list shows only active ones
+incidents.reason.already_sent,Already sent; nothing to change
+incidents.reason.shift_later_week,Move to the first later week with capacity
+incidents.reason.alt_node_later_week,Another node of the city in a later week
+incidents.reason.no_slot_8_weeks,No slot within 8 weeks; suggest cancelling
+incidents.resolution.unavailability_cancelled,Unavailability cancelled by the panelist; changes reverted
+incidents.status_badge.pending_manager_tooltip,Incidents waiting for a manager decision
+unavailability.reason_materials,Materials
+unavailability.dates_locked,Dates come from the panelist and cannot be edited. Cancel and declare a new period if needed.
+unavailability.confirm_cancel_one,Cancel this unavailability period? Its changes to the plan will be reverted and it cannot be reactivated.
 reported_incidents.menu,Reported incidents
 reported_incidents.badge_tooltip,Incidents reported by panelists pending review
 reported_incidents.title,Incidents reported by panelists
@@ -2803,3 +2892,14 @@ common.showing,Showing
 common.previous,Previous
 common.next,Next
 common.rows_per_page,Rows per page
+unavailability.bulk_failed,Some operations failed ({count}). First error: {message}
+unavailability.bulk_skipped_active,{count} active period(s) in the selection will be skipped: cancel them instead of deleting.
+unavailability.bulk_delete_disabled,Active periods cannot be deleted: cancel them instead.
+unavailability.cancel_error,Error cancelling the unavailability period: {message}
+unavailability.save_error,Error saving the unavailability period: {message}
+unavailability.collapse_filters,Collapse filters
+unavailability.expand_filters,Expand filters
+unavailability.selected_count,{count} period(s) selected
+unavailability.clear_selection,Clear selection
+unavailability.active_now,ACTIVE NOW
+unavailability.notes_placeholder,Additional information about this unavailability period...

@@ -2671,23 +2671,12 @@ incidents.inbox.pending,Pendientes
 incidents.inbox.review,Revisar
 incidents.inbox.empty,No hay incidencias pendientes
 incidents.detail.back,Volver a la lista
-incidents.detail.mark_reviewed,Dar por estudiado
-incidents.detail.mark_reviewed_disabled,Resuelve antes cada propuesta
 incidents.detail.sample,Muestra
 incidents.detail.role,Rol
 incidents.detail.role_origin,Envío
 incidents.detail.role_destination,Recepción
-incidents.detail.sample_status,Estado de la muestra
-incidents.detail.suggested_action,Acción sugerida
-incidents.detail.suggestion,Sugerencia
 incidents.detail.reason,Motivo
-incidents.detail.proposal_status,Estado
 incidents.detail.actions,Acciones
-incidents.action.confirm,Confirmar
-incidents.action.change,Cambiar…
-incidents.action.dismiss,Descartar
-incidents.action.confirm_selected,Confirmar seleccionadas
-incidents.action.dismiss_selected,Descartar seleccionadas
 incidents.action.selected_count,{count} seleccionadas
 incidents.override.title,Cambiar resolución
 incidents.override.choose_action,Acción final
@@ -2703,9 +2692,6 @@ incidents.act.reroute,Reencaminar
 incidents.act.shift_date,Cambiar fecha
 incidents.act.cancel,Cancelar
 incidents.act.none,Informativa
-incidents.status.pending,Pendiente
-incidents.status.confirmed,Confirmada
-incidents.status.dismissed,Descartada
 incidents.reason.alt_node_same_city,Nodo alternativo con panelista disponible en la misma ciudad
 incidents.reason.shift_same_month,Desplazar a fecha disponible dentro del mismo mes
 incidents.reason.no_alt_no_date,Sin nodo alternativo ni fecha disponible en el mes
@@ -2733,6 +2719,109 @@ incidents.balance.receive_full,Recibidos
 incidents.balance.week_filter_hint,Pulsa una semana para filtrar las muestras
 incidents.balance.week_filter_active,Filtrando semana
 incidents.balance.week_filter_empty,No hay muestras pendientes en esta semana
+incidents.status.new,Nueva
+incidents.status.auto_resolved,Resuelta automáticamente
+incidents.status.pending_manager,Pendiente de decisión del gestor
+incidents.status.resolved,Resuelta
+incidents.line_status.pending,Pendiente
+incidents.line_status.auto_resolved,Resuelta automáticamente
+incidents.line_status.manager_resolved,Resuelta por el gestor
+incidents.line_status.info,Informativa
+incidents.line_status.dismissed,Descartada
+incidents.final_action.shift_date,Movida a una fecha posterior
+incidents.final_action.reroute,Movida a otro nodo
+incidents.final_action.cancel,Cancelada
+incidents.final_action.none,Sin cambios
+incidents.final_action.manual,Editada manualmente
+incidents.filter.open,Abiertas
+incidents.filter.all,Todas
+incidents.inbox.status,Estado
+incidents.inbox.created,Declarada
+incidents.summary.shift,{n} movidas a una fecha posterior
+incidents.summary.reroute,{n} movidas a otro nodo
+incidents.summary.cancel,{n} canceladas
+incidents.summary.info,{n} informativas
+incidents.summary.pending,{n} pendientes
+incidents.summary.none,Ninguna muestra afectada
+incidents.detail.final_resolution,Resolución final
+incidents.detail.final_resolution_placeholder,Añade una nota sobre cómo se resolvió esta incidencia…
+incidents.detail.save,Guardar
+incidents.detail.saved,Guardado
+incidents.detail.pending_lines,Pendientes de tu decisión
+incidents.detail.resolved_lines,Resueltas
+incidents.detail.original_date,Fecha original
+incidents.detail.new_date,Nueva fecha
+incidents.detail.new_node,Nuevo nodo
+incidents.detail.system_proposal,Propuesta del sistema
+incidents.detail.resolved_by_system,Sistema
+incidents.detail.resolved_by_manager,Gestor
+incidents.detail.info_line,Sin acción posible (ya enviada)
+incidents.detail.no_pending,No hay muestras pendientes de tu decisión
+incidents.detail.no_resolved,Todavía no hay muestras resueltas
+incidents.detail.done,Qué se hizo
+incidents.detail.done_by,Por
+incidents.detail.done_at,Cuándo
+incidents.detail.summary,Resumen automático
+incidents.confirm.cancel_one,Esto anulará la muestra en el plan de asignación. No se puede deshacer desde esta pantalla. ¿Continuar?
+incidents.confirm.cancel_many,Esto anulará {n} muestras en el plan de asignación. No se puede deshacer desde esta pantalla. ¿Continuar?
+incidents.confirm.accept_with_cancel,{n} de las propuestas seleccionadas anulan la muestra en el plan de asignación. No se puede deshacer desde esta pantalla. ¿Continuar?
+incidents.confirm.back,Volver
+incidents.proposal.cancel,Anular la muestra
+incidents.action.accept_selected,Aceptar seleccionadas
+incidents.action.cancel_selected,Cancelar seleccionadas
+incidents.load.reference,Carga de referencia
+incidents.load.deviation,Desviación %
+incidents.action.confirm_line,Confirmar
+incidents.action.void_line,Anular muestra
+incidents.detail.carrier_product,Carrier · producto
+incidents.detail.drag_hint,Arrástrala a una casilla del balance de la ciudad para moverla
+incidents.balance.window,Semanas visibles
+incidents.balance.window_back_month,4 semanas atrás
+incidents.balance.window_back_week,1 semana atrás
+incidents.balance.window_forward_week,1 semana adelante
+incidents.balance.window_forward_month,4 semanas adelante
+incidents.balance.current_month,Mes actual
+incidents.balance.today,hoy
+incidents.balance.unavailable_full,Panelista de baja: {days}
+incidents.balance.unavailable_partial,Panelista de baja parte de la semana: {days}
+incidents.balance.legend_unavailable,Panelista de baja toda la semana
+incidents.balance.legend_partial,Panelista de baja parte de la semana
+incidents.balance.drag_hint,Pincha una casilla para ver sus muestras; arrastra una muestra o línea pendiente a una casilla para moverla
+incidents.cell.title,Muestras de {node} · {week}
+incidents.cell.empty,No hay muestras en esta casilla
+incidents.cell.drag_hint,Arrastra una muestra a otra casilla para moverla
+incidents.cell.drag,Arrastrar
+incidents.cell.date,Fecha
+incidents.cell.incident,Incidencia
+incidents.cell.role_sends,Envía
+incidents.cell.role_receives,Recibe
+incidents.cell.this_incident,Esta incidencia
+incidents.cell.other_incident,Otra incidencia
+incidents.move.checking,Buscando el mejor día…
+incidents.move.proposal,Mover {sample} ({plan}) a {node}, {date} · carga semana {week}: {before} → {after}
+incidents.move.not_possible,No se puede mover ahí: {reason}
+incidents.move.nothing_to_change,La muestra ya está en ese día y nodo: no hay nada que cambiar
+incidents.move.block_past,Semana pasada: no se puede programar en el pasado
+incidents.move.block_unavailable,El panelista del nodo está de baja toda la semana
+incidents.move_reason.not_found,la muestra o la línea ya no existe
+incidents.move_reason.not_pending,la línea ya no está pendiente
+incidents.move_reason.sample_not_movable,la muestra ya se ha enviado o recibido
+incidents.move_reason.other_city,el nodo es de otra ciudad
+incidents.move_reason.other_end,es el otro extremo de la muestra (origen = destino)
+incidents.move_reason.no_day,ningún día laborable de esa semana cabe (carga o disponibilidad)
+incidents.move_reason.not_in_cell,la muestra ya no está en esa casilla
+incidents.move_reason.has_incident_line,la muestra tiene una línea pendiente en una incidencia; resuélvela allí
+incidents.move_reason.inactive_node,el nodo de destino no está activo
+incidents.balance.counts_note,Los recuentos incluyen muestras canceladas; la lista muestra solo las activas
+incidents.reason.already_sent,Ya enviada; no hay nada que cambiar
+incidents.reason.shift_later_week,Mover a la primera semana posterior con capacidad
+incidents.reason.alt_node_later_week,Otro nodo de la ciudad en una semana posterior
+incidents.reason.no_slot_8_weeks,Sin hueco en 8 semanas; se sugiere cancelar
+incidents.resolution.unavailability_cancelled,Indisponibilidad cancelada por el panelista; cambios revertidos
+incidents.status_badge.pending_manager_tooltip,Incidencias pendientes de decisión del gestor
+unavailability.reason_materials,Materiales
+unavailability.dates_locked,Las fechas vienen del panelista y no se pueden editar. Cancela y declara un nuevo periodo si es necesario.
+unavailability.confirm_cancel_one,¿Cancelar este periodo de indisponibilidad? Se revertirán sus cambios en el plan y no podrá reactivarse.
 reported_incidents.menu,Incidencias reportadas
 reported_incidents.badge_tooltip,Incidencias reportadas por panelistas pendientes de revisar
 reported_incidents.title,Incidencias reportadas por panelistas
@@ -2803,3 +2892,14 @@ common.showing,Mostrando
 common.previous,Anterior
 common.next,Siguiente
 common.rows_per_page,Filas por página
+unavailability.bulk_failed,Algunas operaciones han fallado ({count}). Primer error: {message}
+unavailability.bulk_skipped_active,Se omitirán {count} periodo(s) activo(s) de la selección: cancélalos en lugar de borrarlos.
+unavailability.bulk_delete_disabled,Los periodos activos no se pueden borrar: cancélalos en su lugar.
+unavailability.cancel_error,Error al cancelar el periodo de indisponibilidad: {message}
+unavailability.save_error,Error al guardar el periodo de indisponibilidad: {message}
+unavailability.collapse_filters,Ocultar filtros
+unavailability.expand_filters,Mostrar filtros
+unavailability.selected_count,{count} período(s) seleccionado(s)
+unavailability.clear_selection,Quitar selección
+unavailability.active_now,ACTIVA AHORA
+unavailability.notes_placeholder,Información adicional sobre este período de indisponibilidad...

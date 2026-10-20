@@ -363,7 +363,8 @@ export type Database = {
 }
 
 export type ProposalAction = 'reroute' | 'shift_date' | 'cancel' | 'none'
-export type ProposalStatus = 'pending' | 'confirmed' | 'dismissed'
+export type IncidentStatus = 'new' | 'auto_resolved' | 'pending_manager' | 'resolved'
+export type ProposalStatus = 'pending' | 'auto_resolved' | 'manager_resolved' | 'info' | 'dismissed'
 export type AffectedRole = 'origin' | 'destination'
 
 export interface ReassignmentProposal {
@@ -383,11 +384,24 @@ export interface ReassignmentProposal {
   status: ProposalStatus
   confirmed_by: string | null
   confirmed_at: string | null
+  resolution_note: string | null
+  applied_at: string | null
   created_at: string
   updated_at: string
   // joins (opcionales, poblados por el hook)
-  detail?: { id: string; fecha_programada: string; status: string; origin_node_id: string; destination_node_id: string } | null
+  detail?: {
+    id: string
+    fecha_programada: string
+    original_fecha_programada: string | null
+    status: string
+    origin_node_id: string
+    destination_node_id: string
+    origin_node?: { auto_id: string } | null
+    destination_node?: { auto_id: string } | null
+    plan?: SamplePlanInfo | null
+  } | null
   suggested_target_node?: { id: string; auto_id: string } | null
+  final_target_node?: { id: string; auto_id: string } | null
 }
 
 export interface IncidentInboxRow {
@@ -398,21 +412,19 @@ export interface IncidentInboxRow {
   city_name: string
   start_date: string
   end_date: string
+  reason: string | null
+  incident_status: IncidentStatus
+  auto_summary: string | null
+  created_at: string
   affected_count: number
   origin_count: number
   destination_count: number
   pending_count: number
 }
 
-export interface RerouteCandidate {
-  node_id: string
-  node_name: string
-  city_id: string
-  is_available: boolean
-}
-
 export interface UnavailabilityHeader {
   unavailability_id: string
+  account_id: string | null
   panelist_name: string
   panelist_code: string
   start_date: string
@@ -422,7 +434,71 @@ export interface UnavailabilityHeader {
   node_code: string | null
   city_id: string | null
   city_name: string | null
+  incident_status: IncidentStatus
+  auto_summary: string | null
+  final_resolution: string | null
+  resolved_at: string | null
 }
+
+// Carrier y producto del plan de una muestra (allocation_plans -> carriers / products).
+export interface SamplePlanInfo {
+  carrier?: { name: string | null } | null
+  product?: { code: string | null; description: string | null } | null
+}
+
+// Motivos de found:false de suggest_for_cell / suggest_for_sample_move.
+export type MoveReason =
+  | 'not_found' | 'not_pending' | 'sample_not_movable' | 'other_city' | 'other_end' | 'no_day'
+  | 'not_in_cell' | 'has_incident_line' | 'inactive_node'
+
+// Respuesta de suggest_for_cell / suggest_for_sample_move (side solo en la segunda).
+export interface MoveSuggestion {
+  found: boolean
+  reason?: MoveReason | string
+  date?: string
+  node_id?: string
+  node_code?: string
+  load_after?: number
+  saturation_level?: 'normal' | 'high' | 'saturated'
+  same_node?: boolean
+  side?: 'origin' | 'destination'
+}
+
+// Muestra (allocation_plan_details) de una casilla nodo x semana del balance de la ciudad.
+export interface CellSample {
+  id: string
+  fecha_programada: string
+  status: string
+  origin_node_id: string
+  destination_node_id: string
+  origin_node?: { auto_id: string } | null
+  destination_node?: { auto_id: string } | null
+  plan?: SamplePlanInfo | null
+  lines?: { id: string; unavailability_id: string; status: string; affected_role: string }[] | null
+}
+
+// Baja activa de un panelista, ya mapeada a su nodo (panelists.node_id).
+export interface NodeUnavailability {
+  id: string
+  panelist_id: string
+  node_id: string
+  start_date: string
+  end_date: string
+}
+
+// Lo que se arrastra a una casilla: una linea pendiente de esta incidencia o una muestra.
+export interface MoveDragPayload {
+  kind: 'line' | 'sample'
+  lineId?: string
+  detailId: string
+  fromNodeId: string
+  otherEndNodeId: string
+  fecha: string
+  label: string
+  plan?: SamplePlanInfo | null
+}
+
+export type IncidentStatusFilter = 'open' | 'all' | IncidentStatus // open = new + pending_manager
 
 export interface CityLoadWeek {
   week_number: number
@@ -434,7 +510,7 @@ export interface CityNodeLoadRow {
   node_id: string
   node_code: string
   saturation_level: 'normal' | 'high' | 'saturated'
-  counts: Record<number, { sent: number; received: number }> // week_number -> {send, receive}
+  counts: Record<string, { sent: number; received: number }> // week_start_date (lunes) -> {sent, received}
   total: { sent: number; received: number }
 }
 
