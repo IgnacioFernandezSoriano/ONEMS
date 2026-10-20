@@ -2,6 +2,7 @@
 \set ON_ERROR_STOP on
 BEGIN;
 \ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
 
 INSERT INTO public.allocation_plan_details
   (id, account_id, plan_id, origin_node_id, destination_node_id, fecha_programada, week_number, month, year, status) VALUES

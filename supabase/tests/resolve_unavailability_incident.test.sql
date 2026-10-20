@@ -1,8 +1,8 @@
 -- Motor resolve_unavailability_incident: retrasar (paso 1), otro nodo de la ciudad (paso 2/2b),
 -- propuesta al manager (incident_suggest), estado de la incidencia, aditivo/idempotente, guarda multi-tenant.
 -- Cada escenario va en su propia transaccion (BEGIN ... ROLLBACK) con la fixture comun.
--- Las bajas se insertan ANTES que sus muestras: el trigger viejo (Tarea 6 lo sustituye) llama a la funcion
--- borrada y solo deja WARNING; el motor se llama siempre de forma explicita.
+-- Los triggers de incidencias (Tarea 6) se desactivan en cada transaccion (fixtures/no_incident_triggers.sql):
+-- aqui el motor se llama siempre de forma explicita. Los triggers se prueban en incident_triggers.test.sql.
 -- Fechas: 2027-03-08 es lunes; 2027-03-10 miercoles; 2027-04-01 jueves.
 \set ON_ERROR_STOP on
 
@@ -73,6 +73,7 @@ END $$;
 -- ===== Sin muestras =====
 BEGIN;
 \ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
 SELECT pg_temp.baja('2027-03-10','2027-03-12');
 DO $$
 DECLARE n int; u public.panelist_unavailability;
@@ -91,6 +92,7 @@ ROLLBACK;
 -- ===== Baja inactiva: no hace nada =====
 BEGIN;
 \ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
 SELECT pg_temp.baja('2027-03-10','2027-03-12','cancelled');
 SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N1','N4','2027-03-10','notified');
 DO $$
@@ -104,6 +106,7 @@ ROLLBACK;
 -- ===== Nodo sin panelista activo (P1 inactive) =====
 BEGIN;
 \ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
 UPDATE public.panelists SET status='inactive' WHERE id='e1000000-0000-0000-0000-000000000001';
 SELECT pg_temp.baja('2027-03-10','2027-03-12');
 SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N1','N4','2027-03-10','notified');
@@ -120,6 +123,7 @@ ROLLBACK;
 -- ===== Paso 1: retrasar =====
 BEGIN;
 \ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
 SELECT pg_temp.baja('2027-03-10','2027-03-12');
 SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N1','N4','2027-03-10','notified');
 DO $$
@@ -145,6 +149,7 @@ ROLLBACK;
 -- ===== Reparto por dias: dos muestras del mismo dia =====
 BEGIN;
 \ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
 SELECT pg_temp.baja('2027-03-10','2027-03-12');
 SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N1','N4','2027-03-10');
 SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000002','N1','N4','2027-03-10');
@@ -162,6 +167,7 @@ ROLLBACK;
 -- ===== Baja que cruza fin de mes: muestras en dos meses =====
 BEGIN;
 \ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
 SELECT pg_temp.baja('2027-03-29','2027-04-02');
 SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N1','N4','2027-03-30');
 SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000002','N1','N4','2027-04-01');
@@ -185,6 +191,7 @@ ROLLBACK;
 -- ===== Paso 2: baja hasta fin de mes -> otro nodo =====
 BEGIN;
 \ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
 SELECT pg_temp.baja('2027-03-10','2027-03-31');
 SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N1','N4','2027-03-10','notified');
 DO $$
@@ -208,6 +215,7 @@ ROLLBACK;
 -- ===== Paso 2: nodo alternativo sin panelista activo se salta =====
 BEGIN;
 \ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
 UPDATE public.panelists SET status='inactive' WHERE id='e2000000-0000-0000-0000-000000000002';
 SELECT pg_temp.baja('2027-03-10','2027-03-31');
 SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N1','N4','2027-03-10');
@@ -223,6 +231,7 @@ ROLLBACK;
 -- ===== Paso 2: nunca crea origen = destino (muestra intra-ciudad N1->N2 y N2->N1) =====
 BEGIN;
 \ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
 SELECT pg_temp.baja('2027-03-10','2027-03-31');
 SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N1','N2','2027-03-10');
 SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000002','N2','N1','2027-03-10');
@@ -244,6 +253,7 @@ ROLLBACK;
 -- ===== Reparto entre nodos: 4 muestras -> 2 N2 / 2 N3 =====
 BEGIN;
 \ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
 SELECT pg_temp.baja('2027-03-10','2027-03-31');
 SELECT pg_temp.mk(('d0000000-0000-0000-0000-00000000000' || i)::uuid,'N1','N4','2027-03-10') FROM generate_series(1,4) i;
 DO $$
@@ -262,6 +272,7 @@ ROLLBACK;
 -- ===== Saturacion: N2/N3 saturados en la semana -> paso 2b otra semana de marzo =====
 BEGIN;
 \ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
 SELECT pg_temp.baja('2027-03-10','2027-03-31');
 SELECT pg_temp.fill('N2','2027-03-08','2027-03-08',8);
 SELECT pg_temp.fill('N3','2027-03-08','2027-03-08',8);
@@ -290,6 +301,7 @@ ROLLBACK;
 -- ===== Pendiente + propuesta al manager; idempotencia y aditivo sobre pendientes =====
 BEGIN;
 \ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
 SELECT pg_temp.baja('2027-03-01','2027-03-31');
 SELECT pg_temp.fill('N2','2027-03-01','2027-03-29',8);
 SELECT pg_temp.fill('N3','2027-03-01','2027-03-29',8);
@@ -374,6 +386,7 @@ ROLLBACK;
 -- ===== Propuesta en otro nodo (alt_node_later_week) =====
 BEGIN;
 \ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
 SELECT pg_temp.baja('2027-03-01','2027-03-31');
 SELECT pg_temp.fill('N2','2027-03-01','2027-03-29',8);
 SELECT pg_temp.fill('N3','2027-03-01','2027-03-29',8);
@@ -396,6 +409,7 @@ ROLLBACK;
 -- ===== Sin hueco en 8 semanas -> cancel =====
 BEGIN;
 \ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
 SELECT pg_temp.baja('2027-03-10','2027-05-31');
 SELECT pg_temp.fill('N2','2027-03-01','2027-06-07',8);
 SELECT pg_temp.fill('N3','2027-03-01','2027-06-07',8);
@@ -418,6 +432,7 @@ ROLLBACK;
 -- ===== Baja larga: la propuesta puede ser otro nodo el mes siguiente aunque siga de baja =====
 BEGIN;
 \ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
 SELECT pg_temp.baja('2027-03-10','2027-05-31');
 SELECT pg_temp.fill('N2','2027-03-01','2027-03-29',8);
 SELECT pg_temp.fill('N3','2027-03-01','2027-03-29',8);
@@ -438,6 +453,7 @@ ROLLBACK;
 -- ===== Recepcion: paso 1 retrasa; baja a fin de mes -> otro destino =====
 BEGIN;
 \ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
 SELECT pg_temp.baja('2027-03-10','2027-03-12');
 SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N4','N1','2027-03-11');
 DO $$
@@ -453,6 +469,7 @@ ROLLBACK;
 
 BEGIN;
 \ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
 SELECT pg_temp.baja('2027-03-10','2027-03-31');
 SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N4','N1','2027-03-11');
 DO $$
@@ -472,6 +489,7 @@ ROLLBACK;
 -- ===== Informativas (sent/received) y sin linea (cancelled/incident); idempotencia con cambios aplicados =====
 BEGIN;
 \ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
 SELECT pg_temp.baja('2027-03-10','2027-03-12');
 SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N4','N1','2027-03-11','sent');
 SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000002','N1','N4','2027-03-10','sent');
@@ -519,6 +537,7 @@ ROLLBACK;
 -- ===== Recompute: alguna manager_resolved y ninguna pendiente -> resolved =====
 BEGIN;
 \ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
 SELECT pg_temp.baja('2027-03-01','2027-03-31');
 SELECT pg_temp.fill('N2','2027-03-01','2027-03-29',8);
 SELECT pg_temp.fill('N3','2027-03-01','2027-03-29',8);
@@ -540,6 +559,7 @@ ROLLBACK;
 -- ===== Cross-tenant =====
 BEGIN;
 \ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
 SELECT pg_temp.baja('2027-03-01','2027-03-31');
 SELECT pg_temp.fill('N2','2027-03-01','2027-03-29',8);
 SELECT pg_temp.fill('N3','2027-03-01','2027-03-29',8);
