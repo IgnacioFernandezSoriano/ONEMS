@@ -62,7 +62,9 @@ DECLARE f text;
 BEGIN
   FOREACH f IN ARRAY ARRAY[
     'public.suggest_for_cell(uuid,uuid,date,numeric,numeric)',
-    'public.apply_manager_move(uuid,uuid,date,numeric,numeric)'] LOOP
+    'public.apply_manager_move(uuid,uuid,date,numeric,numeric)',
+    'public.suggest_for_sample_move(uuid,uuid,uuid,date,numeric,numeric)',
+    'public.apply_sample_move(uuid,uuid,uuid,date,numeric,numeric)'] LOOP
     IF NOT has_function_privilege('authenticated', f, 'EXECUTE') OR NOT has_function_privilege('service_role', f, 'EXECUTE') THEN
       RAISE EXCEPTION 'FAIL falta GRANT en %', f; END IF;
     IF has_function_privilege('anon', f, 'EXECUTE') THEN RAISE EXCEPTION 'FAIL anon con EXECUTE en %', f; END IF;
@@ -70,6 +72,12 @@ BEGIN
   IF has_function_privilege('anon', 'public.incident_suggest_cell(uuid,uuid,date,numeric,numeric)', 'EXECUTE')
      OR has_function_privilege('authenticated', 'public.incident_suggest_cell(uuid,uuid,date,numeric,numeric)', 'EXECUTE') THEN
     RAISE EXCEPTION 'FAIL incident_suggest_cell ejecutable por anon/authenticated'; END IF;
+  FOREACH f IN ARRAY ARRAY[
+    'public.incident_suggest_sample_move(uuid,uuid,uuid,date,numeric,numeric)',
+    'public.incident_pick_day_in_week(uuid,date,numeric,numeric)'] LOOP
+    IF has_function_privilege('anon', f, 'EXECUTE') OR has_function_privilege('authenticated', f, 'EXECUTE') THEN
+      RAISE EXCEPTION 'FAIL % ejecutable por anon/authenticated', f; END IF;
+  END LOOP;
   RAISE NOTICE 'PASS permisos';
 END $$;
 
@@ -275,5 +283,164 @@ BEGIN
   IF current_setting('t.st') <> 'resolved' THEN
     RAISE EXCEPTION 'FAIL apply_manager_move como authenticated (%)', current_setting('t.st'); END IF;
   RAISE NOTICE 'PASS envoltorios ejecutables como authenticated';
+END $$;
+ROLLBACK;
+
+-- =====================================================================================================
+-- Mover CUALQUIER muestra del plan (reequilibrio): incident_suggest_sample_move / suggest_for_sample_move /
+-- apply_sample_move. Sin baja salvo donde se indica.
+-- =====================================================================================================
+
+-- ===== Mismo nodo, otro nodo (lado origen y destino), motivos de rechazo, sin lineas nuevas =====
+BEGIN;
+\ir fixtures/incident_city.sql
+SELECT pg_temp.mk('d1000000-0000-0000-0000-000000000010','N1','N4','2027-04-05','notified');
+SELECT pg_temp.mk('d1000000-0000-0000-0000-000000000011','N1','N4','2027-04-05','sent');
+SELECT pg_temp.mk('d1000000-0000-0000-0000-000000000012','N1','N2','2027-04-06');
+SELECT pg_temp.mk('d1000000-0000-0000-0000-000000000013','N2','N1','2027-04-07');
+SELECT pg_temp.fill('N2','2027-04-26','2027-04-26',8);
+-- P3 (N3) de baja toda la semana del 03/05; P2 (N2) de baja lunes..miercoles de la semana del 10/05.
+INSERT INTO public.panelist_unavailability (id, account_id, panelist_id, start_date, end_date, reason, status) VALUES
+  ('f0000000-0000-0000-0000-000000000003','a0000000-0000-0000-0000-000000000001',
+   'e3000000-0000-0000-0000-000000000003', '2027-05-03', '2027-05-09', 'vacation', 'active'),
+  ('f0000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000001',
+   'e2000000-0000-0000-0000-000000000002', '2027-05-10', '2027-05-12', 'vacation', 'active');
+SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+DO $$
+DECLARE j jsonb; s public.allocation_plan_details; v_props int;
+  N1 uuid := 'b1000000-0000-0000-0000-000000000001'; N2 uuid := 'b2000000-0000-0000-0000-000000000002';
+  N3 uuid := 'b3000000-0000-0000-0000-000000000003'; N4 uuid := 'b4000000-0000-0000-0000-000000000004';
+BEGIN
+  -- Mismo nodo, otra semana (se pasa un jueves: se normaliza al lunes).
+  j := public.suggest_for_sample_move('d1000000-0000-0000-0000-000000000010', N1, N1, '2027-04-22');
+  IF NOT (j->>'found')::boolean OR (j->>'date')::date <> '2027-04-19' OR (j->>'node_id')::uuid <> N1
+     OR j->>'node_code' <> 'N1' OR (j->>'load_after')::int <> 1 OR j->>'saturation_level' <> 'normal'
+     OR NOT (j->>'same_node')::boolean OR j->>'side' <> 'origin' THEN
+    RAISE EXCEPTION 'FAIL sample mismo nodo sugerencia %', j; END IF;
+  j := public.apply_sample_move('d1000000-0000-0000-0000-000000000010', N1, N1, '2027-04-19');
+  s := pg_temp.smp('d1000000-0000-0000-0000-000000000010');
+  IF NOT (j->>'ok')::boolean OR (j->>'date')::date <> '2027-04-19' OR (j->>'node_id')::uuid <> N1 OR j->>'side' <> 'origin' THEN
+    RAISE EXCEPTION 'FAIL sample mismo nodo respuesta %', j; END IF;
+  IF s.fecha_programada <> '2027-04-19' OR s.original_fecha_programada <> '2027-04-05' OR s.origin_node_id <> N1
+     OR s.original_origin_node_id IS NOT NULL OR s.reassignment_reason <> 'rebalancing' OR s.reassigned_at IS NULL
+     OR s.reassigned_by <> '99000000-0000-0000-0000-000000000099' OR s.status <> 'pending' THEN
+    RAISE EXCEPTION 'FAIL sample mismo nodo muestra % % % %', s.fecha_programada, s.original_fecha_programada, s.reassignment_reason, s.status; END IF;
+
+  -- Motivos de rechazo.
+  PERFORM pg_temp.expect_reason(public.suggest_for_sample_move(gen_random_uuid(), N1, N2, '2027-04-12'), 'not_found', 'sample inexistente');
+  PERFORM pg_temp.expect_reason(public.suggest_for_sample_move('d1000000-0000-0000-0000-000000000010', N2, N3, '2027-04-12'), 'not_in_cell', 'no esta en la casilla');
+  PERFORM pg_temp.expect_reason(public.suggest_for_sample_move('d1000000-0000-0000-0000-000000000011', N1, N2, '2027-04-12'), 'sample_not_movable', 'sample enviada');
+  PERFORM pg_temp.expect_reason(public.suggest_for_sample_move('d1000000-0000-0000-0000-000000000010', N1, N4, '2027-04-12'), 'other_city', 'sample otra ciudad');
+  PERFORM pg_temp.expect_reason(public.suggest_for_sample_move('d1000000-0000-0000-0000-000000000012', N1, N2, '2027-04-12'), 'other_end', 'sample otro extremo');
+  PERFORM pg_temp.expect_reason(public.suggest_for_sample_move('d1000000-0000-0000-0000-000000000010', N1, N2, '2027-04-26'), 'no_day', 'sample destino saturado');
+  PERFORM pg_temp.expect_reason(public.suggest_for_sample_move('d1000000-0000-0000-0000-000000000010', N1, N3, '2027-05-03'), 'no_day', 'sample destino de baja');
+  PERFORM pg_temp.expect_reason(public.suggest_for_sample_move('d1000000-0000-0000-0000-000000000010', N1, N2, current_date - 14), 'no_day', 'sample semana pasada');
+  PERFORM pg_temp.expect_err(format('SELECT public.apply_sample_move(%L,%L,%L,%L)', 'd1000000-0000-0000-0000-000000000012', N1, N2, '2027-04-12'), 'Cannot move: other_end');
+  PERFORM pg_temp.expect_err(format('SELECT public.apply_sample_move(%L,NULL,%L,%L)', 'd1000000-0000-0000-0000-000000000010', N2, '2027-04-12'), 'Nodes and week required');
+
+  -- Otro nodo, lado origen: d12 N1->N2 pasa a N3->N2.
+  j := public.apply_sample_move('d1000000-0000-0000-0000-000000000012', N1, N3, '2027-04-12');
+  s := pg_temp.smp('d1000000-0000-0000-0000-000000000012');
+  IF j->>'side' <> 'origin' OR (j->>'date')::date <> '2027-04-12' OR (j->>'node_id')::uuid <> N3
+     OR s.origin_node_id <> N3 OR s.original_origin_node_id <> N1 OR s.destination_node_id <> N2
+     OR s.original_destination_node_id IS NOT NULL OR s.origin_panelist_name <> 'Pan3'
+     OR s.fecha_programada <> '2027-04-12' OR s.original_fecha_programada <> '2027-04-06' OR s.reassignment_reason <> 'rebalancing' THEN
+    RAISE EXCEPTION 'FAIL sample lado origen % / % % %', j, s.origin_node_id, s.original_origin_node_id, s.origin_panelist_name; END IF;
+
+  -- Otro nodo, lado destino: d13 N2->N1 pasa a N2->N3. El lunes 12/04 N3 ya tiene d12 -> martes 13/04.
+  j := public.apply_sample_move('d1000000-0000-0000-0000-000000000013', N1, N3, '2027-04-12');
+  s := pg_temp.smp('d1000000-0000-0000-0000-000000000013');
+  IF j->>'side' <> 'destination' OR (j->>'date')::date <> '2027-04-13'
+     OR s.destination_node_id <> N3 OR s.original_destination_node_id <> N1 OR s.origin_node_id <> N2
+     OR s.original_origin_node_id IS NOT NULL OR s.destination_panelist_name <> 'Pan3' OR s.fecha_programada <> '2027-04-13' THEN
+    RAISE EXCEPTION 'FAIL sample lado destino % / % % %', j, s.destination_node_id, s.original_destination_node_id, s.destination_panelist_name; END IF;
+
+  -- Destino dentro de otra baja activa (P2 lunes..miercoles): se elige jueves y no nace ninguna linea.
+  SELECT count(*) INTO v_props FROM public.panelist_reassignment_proposal;
+  j := public.apply_sample_move('d1000000-0000-0000-0000-000000000010', N1, N2, '2027-05-10');
+  IF (j->>'date')::date <> '2027-05-13' THEN RAISE EXCEPTION 'FAIL sample dentro de baja %', j; END IF;
+  IF (SELECT count(*) FROM public.panelist_reassignment_proposal) <> v_props THEN
+    RAISE EXCEPTION 'FAIL el movimiento creo lineas de incidencia'; END IF;
+  -- d10 ya se movio antes: original_fecha_programada conserva la primera fecha.
+  s := pg_temp.smp('d1000000-0000-0000-0000-000000000010');
+  IF s.original_fecha_programada <> '2027-04-05' OR s.original_origin_node_id <> N1 OR s.origin_node_id <> N2 THEN
+    RAISE EXCEPTION 'FAIL sample originales % %', s.original_fecha_programada, s.original_origin_node_id; END IF;
+  RAISE NOTICE 'PASS mover muestra (mismo nodo, lado origen/destino, motivos, sin lineas nuevas)';
+END $$;
+ROLLBACK;
+
+-- ===== Muestra con linea de incidencia pendiente en ese lado: has_incident_line =====
+BEGIN;
+\ir fixtures/incident_city.sql
+SELECT pg_temp.baja('2027-03-01','2027-03-31');
+SELECT pg_temp.fill('N2','2027-03-01','2027-03-29',8);
+SELECT pg_temp.fill('N3','2027-03-01','2027-03-29',8);
+SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N1','N4','2027-03-10');
+SELECT public.resolve_unavailability_incident('f0000000-0000-0000-0000-000000000001');
+SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+DO $$
+BEGIN
+  IF (pg_temp.line('d0000000-0000-0000-0000-000000000001')).status <> 'pending' THEN RAISE EXCEPTION 'FAIL precondicion'; END IF;
+  PERFORM pg_temp.expect_reason(public.suggest_for_sample_move('d0000000-0000-0000-0000-000000000001',
+    'b1000000-0000-0000-0000-000000000001', 'b2000000-0000-0000-0000-000000000002', '2027-04-12'), 'has_incident_line', 'linea pendiente');
+  PERFORM pg_temp.expect_err(format('SELECT public.apply_sample_move(%L,%L,%L,%L)', 'd0000000-0000-0000-0000-000000000001',
+    'b1000000-0000-0000-0000-000000000001', 'b2000000-0000-0000-0000-000000000002', '2027-04-12'), 'Cannot move: has_incident_line');
+  RAISE NOTICE 'PASS has_incident_line';
+END $$;
+ROLLBACK;
+
+-- ===== Avisos: solo si la fecha vieja o la nueva cae en la semana actual =====
+BEGIN;
+\ir fixtures/incident_city.sql
+SELECT pg_temp.mk('d2000000-0000-0000-0000-000000000020','N1','N4', date_trunc('week', current_date)::date);
+SELECT pg_temp.mk('d2000000-0000-0000-0000-000000000021','N1','N4', date_trunc('week', current_date)::date + 14);
+SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+DO $$
+DECLARE w0 date := date_trunc('week', current_date)::date; j jsonb; n int;
+BEGIN
+  j := public.apply_sample_move('d2000000-0000-0000-0000-000000000020', 'b1000000-0000-0000-0000-000000000001',
+                                'b1000000-0000-0000-0000-000000000001', w0 + 7);
+  IF (j->>'date')::date <> w0 + 7 THEN RAISE EXCEPTION 'FAIL aviso fecha %', j; END IF;
+  SELECT count(*) INTO n FROM public.panelist_notification
+   WHERE payload->>'detail_id' = 'd2000000-0000-0000-0000-000000000020' AND kind = 'plan_change_this_week'
+     AND payload->>'change' = 'shift_date' AND panelist_id = 'e1000000-0000-0000-0000-000000000001';
+  IF n <> 1 THEN RAISE EXCEPTION 'FAIL aviso semana actual (%)', n; END IF;
+
+  PERFORM public.apply_sample_move('d2000000-0000-0000-0000-000000000021', 'b1000000-0000-0000-0000-000000000001',
+                                   'b1000000-0000-0000-0000-000000000001', w0 + 21);
+  SELECT count(*) INTO n FROM public.panelist_notification WHERE payload->>'detail_id' = 'd2000000-0000-0000-0000-000000000021';
+  IF n <> 0 THEN RAISE EXCEPTION 'FAIL aviso fuera de la semana actual (%)', n; END IF;
+  RAISE NOTICE 'PASS avisos de mover muestra';
+END $$;
+ROLLBACK;
+
+-- ===== Mover muestra: cross-tenant y como rol authenticated =====
+BEGIN;
+\ir fixtures/incident_city.sql
+SELECT pg_temp.mk('d1000000-0000-0000-0000-000000000010','N1','N4','2027-04-05');
+DO $$
+BEGIN
+  PERFORM set_config('request.jwt.claim.sub','98000000-0000-0000-0000-000000000098', true);
+  PERFORM pg_temp.expect_err(format('SELECT public.suggest_for_sample_move(%L,%L,%L,%L)', 'd1000000-0000-0000-0000-000000000010',
+    'b1000000-0000-0000-0000-000000000001', 'b2000000-0000-0000-0000-000000000002', '2027-04-12'), 'Cross-tenant access denied');
+  PERFORM pg_temp.expect_err(format('SELECT public.apply_sample_move(%L,%L,%L,%L)', 'd1000000-0000-0000-0000-000000000010',
+    'b1000000-0000-0000-0000-000000000001', 'b2000000-0000-0000-0000-000000000002', '2027-04-12'), 'Cross-tenant access denied');
+  IF (pg_temp.smp('d1000000-0000-0000-0000-000000000010')).origin_node_id <> 'b1000000-0000-0000-0000-000000000001' THEN
+    RAISE EXCEPTION 'FAIL cross-tenant muta la muestra'; END IF;
+  PERFORM set_config('request.jwt.claim.sub','', true);
+  RAISE NOTICE 'PASS mover muestra cross-tenant';
+END $$;
+SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+SET LOCAL ROLE authenticated;
+SELECT set_config('t.sug', public.suggest_for_sample_move('d1000000-0000-0000-0000-000000000010',
+  'b1000000-0000-0000-0000-000000000001', 'b2000000-0000-0000-0000-000000000002', '2027-04-12')->>'found', true);
+SELECT set_config('t.ok', public.apply_sample_move('d1000000-0000-0000-0000-000000000010',
+  'b1000000-0000-0000-0000-000000000001', 'b2000000-0000-0000-0000-000000000002', '2027-04-12')->>'ok', true);
+RESET ROLE;
+DO $$
+BEGIN
+  IF current_setting('t.sug') <> 'true' OR current_setting('t.ok') <> 'true' THEN
+    RAISE EXCEPTION 'FAIL mover muestra como authenticated (% %)', current_setting('t.sug'), current_setting('t.ok'); END IF;
+  RAISE NOTICE 'PASS mover muestra como authenticated';
 END $$;
 ROLLBACK;
