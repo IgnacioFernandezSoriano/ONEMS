@@ -2859,3 +2859,8 @@ common.showing,Showing
 common.previous,Previous
 common.next,Next
 common.rows_per_page,Rows per page
+unavailability.bulk_failed,Some operations failed ({count}). First error: {message}
+unavailability.bulk_skipped_active,{count} active period(s) in the selection will be skipped: cancel them instead of deleting.
+unavailability.bulk_delete_disabled,Active periods cannot be deleted: cancel them instead.
+unavailability.cancel_error,Error cancelling the unavailability period: {message}
+unavailability.save_error,Error saving the unavailability period: {message}

@@ -2859,3 +2859,8 @@ common.showing,Mostrando
 common.previous,Anterior
 common.next,Siguiente
 common.rows_per_page,Filas por página
+unavailability.bulk_failed,Algunas operaciones han fallado ({count}). Primer error: {message}
+unavailability.bulk_skipped_active,Se omitirán {count} periodo(s) activo(s) de la selección: cancélalos en lugar de borrarlos.
+unavailability.bulk_delete_disabled,Los periodos activos no se pueden borrar: cancélalos en su lugar.
+unavailability.cancel_error,Error al cancelar el periodo de indisponibilidad: {message}
+unavailability.save_error,Error al guardar el periodo de indisponibilidad: {message}

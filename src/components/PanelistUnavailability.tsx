@@ -97,27 +97,56 @@ export function PanelistUnavailabilityComponent() {
   }
 
   // Bulk operations
+  const selectedPeriods = unavailabilityPeriods.filter(p => selectedIds.has(p.id))
+  const selectedActive = selectedPeriods.filter(p => p.status === 'active')
+  const selectedDeletable = selectedPeriods.filter(p => p.status !== 'active')
+
+  const reportBulkErrors = (failed: number, firstMessage: string) => {
+    if (failed > 0) {
+      alert(t('unavailability.bulk_failed').replace('{count}', String(failed)).replace('{message}', firstMessage))
+    }
+  }
+
   const handleBulkCancel = async () => {
-    if (!confirm(`Are you sure you want to cancel ${selectedIds.size} unavailability period(s)?`)) return
-    
-    for (const id of selectedIds) {
-      const period = unavailabilityPeriods.find(p => p.id === id)
-      if (period?.status !== 'active') continue
-      await cancelUnavailabilityPeriod(id)
+    if (selectedActive.length === 0) return
+    if (!confirm(t('unavailability.confirm_cancel').replace('{count}', String(selectedActive.length)))) return
+
+    let failed = 0
+    let firstMessage = ''
+    for (const period of selectedActive) {
+      try {
+        await cancelUnavailabilityPeriod(period.id)
+      } catch (err: any) {
+        failed++
+        if (!firstMessage) firstMessage = err?.message || String(err)
+      }
     }
     setSelectedIds(new Set())
+    reportBulkErrors(failed, firstMessage)
   }
 
   const handleBulkDelete = async () => {
-    if (!confirm(`Are you sure you want to delete ${selectedIds.size} unavailability period(s)? This action cannot be undone.`)) return
-    
-    for (const id of selectedIds) {
-      // Una baja activa no se borra: se cancela (queda trazado y se revierte su efecto en el plan)
-      const period = unavailabilityPeriods.find(p => p.id === id)
-      if (period?.status === 'active') continue
-      await deleteUnavailabilityPeriod(id)
+    if (selectedDeletable.length === 0) return
+    // Una baja activa no se borra: se cancela (queda trazado y se revierte su efecto en el plan)
+    const skipped = selectedActive.length
+    let msg = t('unavailability.confirm_delete').replace('{count}', String(selectedDeletable.length))
+    if (skipped > 0) {
+      msg += '\n\n' + t('unavailability.bulk_skipped_active').replace('{count}', String(skipped))
+    }
+    if (!confirm(msg)) return
+
+    let failed = 0
+    let firstMessage = ''
+    for (const period of selectedDeletable) {
+      try {
+        await deleteUnavailabilityPeriod(period.id)
+      } catch (err: any) {
+        failed++
+        if (!firstMessage) firstMessage = err?.message || String(err)
+      }
     }
     setSelectedIds(new Set())
+    reportBulkErrors(failed, firstMessage)
   }
 
   const clearFilters = () => {
@@ -173,7 +202,7 @@ export function PanelistUnavailabilityComponent() {
       handleCloseModal()
     } catch (err) {
       console.error('Error saving unavailability period:', err)
-      alert('Error saving unavailability period')
+      alert(t('unavailability.save_error').replace('{message}', (err as any)?.message || ''))
     }
   }
 
@@ -190,7 +219,7 @@ export function PanelistUnavailabilityComponent() {
       await cancelUnavailabilityPeriod(period.id)
     } catch (err) {
       console.error('Error cancelling unavailability period:', err)
-      alert('Error cancelling unavailability period')
+      alert(t('unavailability.cancel_error').replace('{message}', (err as any)?.message || ''))
     }
   }
 
@@ -409,14 +438,17 @@ export function PanelistUnavailabilityComponent() {
           <div className="flex gap-2">
             <button
               onClick={handleBulkCancel}
-              className="px-3 py-1 bg-yellow-600 text-white text-sm rounded hover:bg-yellow-700"
-            >
+              disabled={selectedActive.length === 0}
+              className="px-3 py-1 bg-yellow-600 text-white text-sm rounded hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
               {t('unavailability.cancel_periods')}
             </button>
             <button
               onClick={handleBulkDelete}
-              className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
-            >
+              disabled={selectedDeletable.length === 0}
+              title={selectedDeletable.length === 0 ? t('unavailability.bulk_delete_disabled') : undefined}
+              className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
               {t('unavailability.delete')}
             </button>
             <button

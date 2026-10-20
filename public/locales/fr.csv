@@ -2851,3 +2851,8 @@ common.showing,Affichage
 common.previous,Précédent
 common.next,Suivant
 common.rows_per_page,Lignes par page
+unavailability.bulk_failed,Certaines opérations ont échoué ({count}). Première erreur : {message}
+unavailability.bulk_skipped_active,{count} période(s) active(s) de la sélection seront ignorée(s) : annulez-les au lieu de les supprimer.
+unavailability.bulk_delete_disabled,Les périodes actives ne peuvent pas être supprimées : annulez-les à la place.
+unavailability.cancel_error,Erreur lors de l'annulation de la période d'indisponibilité : {message}
+unavailability.save_error,Erreur lors de l'enregistrement de la période d'indisponibilité : {message}

@@ -2851,3 +2851,8 @@ common.showing,عرض
 common.previous,السابق
 common.next,التالي
 common.rows_per_page,صفوف لكل صفحة
+unavailability.bulk_failed,فشلت بعض العمليات ({count}). أول خطأ: {message}
+unavailability.bulk_skipped_active,سيتم تخطي {count} فترة نشطة من التحديد: ألغِها بدلاً من حذفها.
+unavailability.bulk_delete_disabled,لا يمكن حذف الفترات النشطة: ألغِها بدلاً من ذلك.
+unavailability.cancel_error,خطأ أثناء إلغاء فترة عدم التوفر: {message}
+unavailability.save_error,خطأ أثناء حفظ فترة عدم التوفر: {message}
