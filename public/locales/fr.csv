@@ -2725,6 +2725,63 @@ incidents.balance.receive_full,Reçus
 incidents.balance.week_filter_hint,Cliquez sur une semaine pour filtrer les échantillons
 incidents.balance.week_filter_active,Filtre semaine
 incidents.balance.week_filter_empty,Aucun échantillon en attente cette semaine
+incidents.status.new,Nouvelle
+incidents.status.auto_resolved,Résolue automatiquement
+incidents.status.pending_manager,En attente de décision du gestionnaire
+incidents.status.resolved,Résolue
+incidents.line_status.pending,En attente
+incidents.line_status.auto_resolved,Résolue automatiquement
+incidents.line_status.manager_resolved,Résolue par le gestionnaire
+incidents.line_status.info,Informative
+incidents.line_status.dismissed,Écartée
+incidents.final_action.shift_date,Déplacée à une date ultérieure
+incidents.final_action.reroute,Déplacée vers un autre nœud
+incidents.final_action.cancel,Annulée
+incidents.final_action.none,Aucun changement
+incidents.filter.open,Ouvertes
+incidents.filter.all,Toutes
+incidents.inbox.status,Statut
+incidents.inbox.created,Déclarée
+incidents.summary.shift,{n} déplacés à une date ultérieure
+incidents.summary.reroute,{n} déplacés vers un autre nœud
+incidents.summary.cancel,{n} annulés
+incidents.summary.info,{n} informatifs
+incidents.summary.pending,{n} en attente
+incidents.summary.none,Aucun échantillon concerné
+incidents.detail.final_resolution,Résolution finale
+incidents.detail.final_resolution_placeholder,Ajoutez une note sur la façon dont cet incident a été résolu…
+incidents.detail.save,Enregistrer
+incidents.detail.saved,Enregistré
+incidents.detail.pending_lines,En attente de votre décision
+incidents.detail.resolved_lines,Résolues
+incidents.detail.original_date,Date d'origine
+incidents.detail.new_date,Nouvelle date
+incidents.detail.new_node,Nouveau nœud
+incidents.detail.system_proposal,Proposition du système
+incidents.detail.resolved_by_system,Système
+incidents.detail.resolved_by_manager,Gestionnaire
+incidents.detail.info_line,Aucune action possible (déjà envoyé)
+incidents.action.accept,Accepter la proposition
+incidents.action.other_week,Autre semaine…
+incidents.action.cancel_sample,Annuler l'échantillon
+incidents.action.accept_selected,Accepter la sélection
+incidents.action.cancel_selected,Annuler la sélection
+incidents.week.title,Choisir une semaine
+incidents.week.hint,Cliquez sur l'en-tête d'une semaine du panneau de charge ou choisissez un lundi
+incidents.week.proposal,Proposition pour la semaine {week} : {date} · nœud {node} · charge après {load}
+incidents.week.no_slot,Aucun créneau disponible cette semaine-là
+incidents.week.confirm,Déplacer l'échantillon
+incidents.load.reference,Charge de référence
+incidents.load.deviation,Écart %
+incidents.load.range,Plage
+incidents.reason.already_sent,Déjà envoyé ; rien à modifier
+incidents.reason.shift_later_week,Déplacer à la première semaine ultérieure disposant de capacité
+incidents.reason.alt_node_later_week,Un autre nœud de la ville une semaine ultérieure
+incidents.reason.no_slot_8_weeks,Aucun créneau sous 8 semaines ; annulation suggérée
+incidents.resolution.unavailability_cancelled,Indisponibilité annulée par le panéliste ; modifications annulées
+incidents.status_badge.pending_manager_tooltip,Incidents en attente de décision du gestionnaire
+unavailability.reason_materials,Matériel
+unavailability.dates_locked,Les dates proviennent du panéliste et ne peuvent pas être modifiées. Annulez et déclarez une nouvelle période si nécessaire.
 reported_incidents.menu,Incidents signalés
 reported_incidents.badge_tooltip,Incidents signalés par les panélistes en attente d'examen
 reported_incidents.title,Incidents signalés par les panélistes

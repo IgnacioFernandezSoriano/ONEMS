@@ -2725,6 +2725,63 @@ incidents.balance.receive_full,الواردة
 incidents.balance.week_filter_hint,انقر على أسبوع لتصفية العينات
 incidents.balance.week_filter_active,تصفية الأسبوع
 incidents.balance.week_filter_empty,لا توجد عينات معلقة في هذا الأسبوع
+incidents.status.new,جديدة
+incidents.status.auto_resolved,تمت المعالجة تلقائيًا
+incidents.status.pending_manager,بانتظار قرار المسؤول
+incidents.status.resolved,تمت المعالجة
+incidents.line_status.pending,قيد الانتظار
+incidents.line_status.auto_resolved,تمت المعالجة تلقائيًا
+incidents.line_status.manager_resolved,عالجها المسؤول
+incidents.line_status.info,للعلم فقط
+incidents.line_status.dismissed,مستبعدة
+incidents.final_action.shift_date,نُقلت إلى تاريخ لاحق
+incidents.final_action.reroute,نُقلت إلى عقدة أخرى
+incidents.final_action.cancel,أُلغيت
+incidents.final_action.none,بدون تغيير
+incidents.filter.open,المفتوحة
+incidents.filter.all,الكل
+incidents.inbox.status,الحالة
+incidents.inbox.created,تاريخ الإعلان
+incidents.summary.shift,{n} نُقلت إلى تاريخ لاحق
+incidents.summary.reroute,{n} نُقلت إلى عقدة أخرى
+incidents.summary.cancel,{n} أُلغيت
+incidents.summary.info,{n} للعلم فقط
+incidents.summary.pending,{n} قيد الانتظار
+incidents.summary.none,لا توجد عينات متأثرة
+incidents.detail.final_resolution,القرار النهائي
+incidents.detail.final_resolution_placeholder,أضف ملاحظة حول كيفية معالجة هذه الحادثة…
+incidents.detail.save,حفظ
+incidents.detail.saved,تم الحفظ
+incidents.detail.pending_lines,بانتظار قرارك
+incidents.detail.resolved_lines,تمت معالجتها
+incidents.detail.original_date,التاريخ الأصلي
+incidents.detail.new_date,التاريخ الجديد
+incidents.detail.new_node,العقدة الجديدة
+incidents.detail.system_proposal,اقتراح النظام
+incidents.detail.resolved_by_system,النظام
+incidents.detail.resolved_by_manager,المسؤول
+incidents.detail.info_line,لا يوجد إجراء ممكن (أُرسلت بالفعل)
+incidents.action.accept,قبول الاقتراح
+incidents.action.other_week,أسبوع آخر…
+incidents.action.cancel_sample,إلغاء العينة
+incidents.action.accept_selected,قبول المحدد
+incidents.action.cancel_selected,إلغاء المحدد
+incidents.week.title,اختر أسبوعًا
+incidents.week.hint,انقر على عنوان أسبوع في لوحة الحمل أو اختر يوم اثنين
+incidents.week.proposal,اقتراح للأسبوع {week}: {date} · العقدة {node} · الحمل بعد النقل {load}
+incidents.week.no_slot,لا توجد فترة متاحة في ذلك الأسبوع
+incidents.week.confirm,نقل العينة
+incidents.load.reference,الحمل المرجعي
+incidents.load.deviation,الانحراف %
+incidents.load.range,النطاق
+incidents.reason.already_sent,أُرسلت بالفعل؛ لا شيء لتغييره
+incidents.reason.shift_later_week,النقل إلى أول أسبوع لاحق تتوفر فيه سعة
+incidents.reason.alt_node_later_week,عقدة أخرى في المدينة في أسبوع لاحق
+incidents.reason.no_slot_8_weeks,لا توجد فترة متاحة خلال 8 أسابيع؛ يُقترح الإلغاء
+incidents.resolution.unavailability_cancelled,ألغى المشارك فترة عدم التوفر؛ تم التراجع عن التغييرات
+incidents.status_badge.pending_manager_tooltip,حوادث بانتظار قرار المسؤول
+unavailability.reason_materials,المواد
+unavailability.dates_locked,التواريخ يحددها المشارك ولا يمكن تعديلها. ألغِ وأعلن فترة جديدة عند الحاجة.
 reported_incidents.menu,الحوادث المبلَّغ عنها
 reported_incidents.badge_tooltip,حوادث أبلغ عنها الأعضاء بانتظار المراجعة
 reported_incidents.title,الحوادث المبلَّغ عنها من الأعضاء

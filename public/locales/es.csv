@@ -2733,6 +2733,63 @@ incidents.balance.receive_full,Recibidos
 incidents.balance.week_filter_hint,Pulsa una semana para filtrar las muestras
 incidents.balance.week_filter_active,Filtrando semana
 incidents.balance.week_filter_empty,No hay muestras pendientes en esta semana
+incidents.status.new,Nueva
+incidents.status.auto_resolved,Resuelta automáticamente
+incidents.status.pending_manager,Pendiente de decisión del gestor
+incidents.status.resolved,Resuelta
+incidents.line_status.pending,Pendiente
+incidents.line_status.auto_resolved,Resuelta automáticamente
+incidents.line_status.manager_resolved,Resuelta por el gestor
+incidents.line_status.info,Informativa
+incidents.line_status.dismissed,Descartada
+incidents.final_action.shift_date,Movida a una fecha posterior
+incidents.final_action.reroute,Movida a otro nodo
+incidents.final_action.cancel,Cancelada
+incidents.final_action.none,Sin cambios
+incidents.filter.open,Abiertas
+incidents.filter.all,Todas
+incidents.inbox.status,Estado
+incidents.inbox.created,Declarada
+incidents.summary.shift,{n} movidas a una fecha posterior
+incidents.summary.reroute,{n} movidas a otro nodo
+incidents.summary.cancel,{n} canceladas
+incidents.summary.info,{n} informativas
+incidents.summary.pending,{n} pendientes
+incidents.summary.none,Ninguna muestra afectada
+incidents.detail.final_resolution,Resolución final
+incidents.detail.final_resolution_placeholder,Añade una nota sobre cómo se resolvió esta incidencia…
+incidents.detail.save,Guardar
+incidents.detail.saved,Guardado
+incidents.detail.pending_lines,Pendientes de tu decisión
+incidents.detail.resolved_lines,Resueltas
+incidents.detail.original_date,Fecha original
+incidents.detail.new_date,Nueva fecha
+incidents.detail.new_node,Nuevo nodo
+incidents.detail.system_proposal,Propuesta del sistema
+incidents.detail.resolved_by_system,Sistema
+incidents.detail.resolved_by_manager,Gestor
+incidents.detail.info_line,Sin acción posible (ya enviada)
+incidents.action.accept,Aceptar propuesta
+incidents.action.other_week,Otra semana…
+incidents.action.cancel_sample,Cancelar muestra
+incidents.action.accept_selected,Aceptar seleccionadas
+incidents.action.cancel_selected,Cancelar seleccionadas
+incidents.week.title,Elige una semana
+incidents.week.hint,Haz clic en la cabecera de una semana del panel de carga o elige un lunes
+incidents.week.proposal,Propuesta para la semana {week}: {date} · nodo {node} · carga resultante {load}
+incidents.week.no_slot,No hay hueco disponible esa semana
+incidents.week.confirm,Mover muestra
+incidents.load.reference,Carga de referencia
+incidents.load.deviation,Desviación %
+incidents.load.range,Rango
+incidents.reason.already_sent,Ya enviada; no hay nada que cambiar
+incidents.reason.shift_later_week,Mover a la primera semana posterior con capacidad
+incidents.reason.alt_node_later_week,Otro nodo de la ciudad en una semana posterior
+incidents.reason.no_slot_8_weeks,Sin hueco en 8 semanas; se sugiere cancelar
+incidents.resolution.unavailability_cancelled,Indisponibilidad cancelada por el panelista; cambios revertidos
+incidents.status_badge.pending_manager_tooltip,Incidencias pendientes de decisión del gestor
+unavailability.reason_materials,Materiales
+unavailability.dates_locked,Las fechas vienen del panelista y no se pueden editar. Cancela y declara un nuevo periodo si es necesario.
 reported_incidents.menu,Incidencias reportadas
 reported_incidents.badge_tooltip,Incidencias reportadas por panelistas pendientes de revisar
 reported_incidents.title,Incidencias reportadas por panelistas

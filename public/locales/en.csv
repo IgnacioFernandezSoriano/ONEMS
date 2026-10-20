@@ -2733,6 +2733,63 @@ incidents.balance.receive_full,Received
 incidents.balance.week_filter_hint,Click a week to filter the samples
 incidents.balance.week_filter_active,Filtering week
 incidents.balance.week_filter_empty,No pending samples in this week
+incidents.status.new,New
+incidents.status.auto_resolved,Resolved automatically
+incidents.status.pending_manager,Pending manager decision
+incidents.status.resolved,Resolved
+incidents.line_status.pending,Pending
+incidents.line_status.auto_resolved,Resolved automatically
+incidents.line_status.manager_resolved,Resolved by manager
+incidents.line_status.info,Informational
+incidents.line_status.dismissed,Dismissed
+incidents.final_action.shift_date,Moved to a later date
+incidents.final_action.reroute,Moved to another node
+incidents.final_action.cancel,Cancelled
+incidents.final_action.none,No change
+incidents.filter.open,Open
+incidents.filter.all,All
+incidents.inbox.status,Status
+incidents.inbox.created,Declared
+incidents.summary.shift,{n} moved to a later date
+incidents.summary.reroute,{n} moved to another node
+incidents.summary.cancel,{n} cancelled
+incidents.summary.info,{n} informational
+incidents.summary.pending,{n} pending
+incidents.summary.none,No samples affected
+incidents.detail.final_resolution,Final resolution
+incidents.detail.final_resolution_placeholder,Add a note about how this incident was resolved…
+incidents.detail.save,Save
+incidents.detail.saved,Saved
+incidents.detail.pending_lines,Pending your decision
+incidents.detail.resolved_lines,Resolved
+incidents.detail.original_date,Original date
+incidents.detail.new_date,New date
+incidents.detail.new_node,New node
+incidents.detail.system_proposal,System proposal
+incidents.detail.resolved_by_system,System
+incidents.detail.resolved_by_manager,Manager
+incidents.detail.info_line,No action possible (already sent)
+incidents.action.accept,Accept proposal
+incidents.action.other_week,Other week…
+incidents.action.cancel_sample,Cancel sample
+incidents.action.accept_selected,Accept selected
+incidents.action.cancel_selected,Cancel selected
+incidents.week.title,Choose a week
+incidents.week.hint,Click a week header in the load panel or pick a Monday
+incidents.week.proposal,Proposal for week {week}: {date} · node {node} · load after {load}
+incidents.week.no_slot,No slot available that week
+incidents.week.confirm,Move sample
+incidents.load.reference,Reference load
+incidents.load.deviation,Deviation %
+incidents.load.range,Range
+incidents.reason.already_sent,Already sent; nothing to change
+incidents.reason.shift_later_week,Move to the first later week with capacity
+incidents.reason.alt_node_later_week,Another node of the city in a later week
+incidents.reason.no_slot_8_weeks,No slot within 8 weeks; suggest cancelling
+incidents.resolution.unavailability_cancelled,Unavailability cancelled by the panelist; changes reverted
+incidents.status_badge.pending_manager_tooltip,Incidents waiting for a manager decision
+unavailability.reason_materials,Materials
+unavailability.dates_locked,Dates come from the panelist and cannot be edited. Cancel and declare a new period if needed.
 reported_incidents.menu,Reported incidents
 reported_incidents.badge_tooltip,Incidents reported by panelists pending review
 reported_incidents.title,Incidents reported by panelists
