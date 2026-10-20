@@ -244,4 +244,17 @@ la semana en curso sí se mandarían, así que mejor hacerlo con calma y avisand
 
 ## 10. Registro de la ejecución real
 
-_(pendiente: se rellena al aplicar — fecha/hora, resultado de cada verificación, líneas creadas por baja)_
+**2026-10-20, ~12:10–12:20 (Madrid), proyecto onems-dev `sehbnpgzqljrsqimwyuz`, aplicado por MCP `apply_migration`
+una migración por llamada, en orden, con `SET lock_timeout='10s'` en la 1 y la 5.** Las siete respondieron `success`.
+
+- Pre-checks: 2 bajas vigentes, 12 propuestas `dismissed` (ninguna `confirmed`), CHECK de motivos con `materials`,
+  motor antiguo presente y nuevo ausente, nada de este despliegue existía.
+- Tras la 1: tabla de avisos creada, 4 columnas nuevas, 0 propuestas `confirmed`.
+- Tras la 5: los 6 triggers existen, `tg_unavailability_incident()` existe, el motor antiguo está borrado.
+- Tras la 7 (con **KENYA excluida por decisión del responsable**):
+  - Plan de KENYA **sin cambios**: 3600 filas y huella md5 idéntica antes y después (`39f765d4...`).
+  - `panelist_notification`: **0** avisos.
+  - Bajas: Nancy Weru `new` (activa, sin tocar), Petet Lokui Lokaale `resolved` (activa, ya revisada), las 3 de
+    Ignacio UPU (DEMO2) `resolved`.
+  - Propuestas: solo las 12 antiguas `dismissed`; el motor no creó líneas nuevas.
+- Pendiente: borrar la edge function `propose-reassignments` (sección 8) — requiere confirmación.
