@@ -348,7 +348,7 @@ $$;
 --      20261020130400). recipient_role relativo al estado nuevo: 'sender'/'receiver' si sigue en la muestra;
 --      'former_sender'/'former_receiver' si ya no. Un aviso por panelista (gana el papel del estado nuevo).
 --      Solo si la fecha antigua o la nueva cae en la semana actual; respeta onems.suppress_notifications.
---      Panelistas siempre de la cuenta de la muestra. Interna.
+--      Panelistas siempre de la cuenta de la muestra; payload minimo por papel. Interna.
 CREATE OR REPLACE FUNCTION public.incident_enqueue_change_full(
   p_detail_id uuid, p_change text, p_old_date date, p_old_origin_node_id uuid, p_old_destination_node_id uuid)
 RETURNS integer
@@ -361,6 +361,8 @@ DECLARE
   v_d record;
   v_dest record;
   v_payload jsonb;
+  v_sender_extra jsonb;
+  v_receiver_extra jsonb;
   v_count integer := 0;
   r record;
 BEGIN
@@ -391,25 +393,34 @@ BEGIN
     INTO v_dest FROM panelists p
    WHERE p.id = incident_node_panelist(v_d.destination_node_id, v_d.account_id) AND p.account_id = v_d.account_id;
 
+  -- Payload minimo por papel (minimizacion de datos personales):
+  --   comun (todos)    : detail_id, change, fechas, producto, transportista, recipient_role.
+  --   sender           : + codigos de nodo, nombre y direccion del receptor (los necesita para enviar).
+  --   receiver         : + codigos de nodo, nombre del emisor; nunca una direccion.
+  --   former_sender / former_receiver: solo lo comun (nada del nuevo titular).
   v_payload := jsonb_build_object(
     'detail_id', v_d.id,
     'change', p_change,
     'old_date', p_old_date,
     'new_date', v_d.fecha_programada,
     'scheduled_date', v_d.fecha_programada,
+    'product_description', v_d.product_description,
+    'carrier_name', v_d.carrier_name);
+  v_sender_extra := jsonb_build_object(
     'origin_node_code', v_d.origin_code,
     'destination_node_code', v_d.destination_code,
-    'origin_panelist_name', (SELECT p.name FROM panelists p
-                               WHERE p.id = incident_node_panelist(v_d.origin_node_id, v_d.account_id)
-                                 AND p.account_id = v_d.account_id),
     'destination_panelist_name', v_dest.name,
     'destination_address', jsonb_build_object(
       'address_line1', v_dest.address_line1,
       'address_line2', v_dest.address_line2,
       'postal_code', v_dest.postal_code,
-      'city', v_dest.address_city),
-    'product_description', v_d.product_description,
-    'carrier_name', v_d.carrier_name);
+      'city', v_dest.address_city));
+  v_receiver_extra := jsonb_build_object(
+    'origin_node_code', v_d.origin_code,
+    'destination_node_code', v_d.destination_code,
+    'origin_panelist_name', (SELECT p.name FROM panelists p
+                               WHERE p.id = incident_node_panelist(v_d.origin_node_id, v_d.account_id)
+                                 AND p.account_id = v_d.account_id));
 
   FOR r IN
     SELECT DISTINCT ON (x.panelist_id) x.panelist_id, x.role
@@ -430,7 +441,12 @@ BEGIN
      ORDER BY x.panelist_id, x.prio
   LOOP
     INSERT INTO panelist_notification (account_id, panelist_id, kind, payload)
-    VALUES (v_d.account_id, r.panelist_id, 'plan_change_this_week', v_payload || jsonb_build_object('recipient_role', r.role));
+    VALUES (v_d.account_id, r.panelist_id, 'plan_change_this_week',
+            v_payload
+            || CASE r.role WHEN 'sender' THEN v_sender_extra
+                           WHEN 'receiver' THEN v_receiver_extra
+                           ELSE '{}'::jsonb END
+            || jsonb_build_object('recipient_role', r.role));
     v_count := v_count + 1;
   END LOOP;
 

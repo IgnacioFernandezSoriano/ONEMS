@@ -508,8 +508,23 @@ BEGIN
               WHERE payload->>'change' = 'revert'
                 AND ((payload->>'detail_id')::uuid <> s.id OR (payload->>'new_date')::date <> pg_temp.dday()
                      OR kind <> 'plan_change_this_week'
-                     OR payload->>'destination_node_code' <> 'N1')) THEN
+                     OR (payload->>'recipient_role' IN ('sender','receiver') AND payload->>'destination_node_code' IS DISTINCT FROM 'N1'))) THEN
     RAISE EXCEPTION 'FAIL aviso destino: payload incorrecto'; END IF;
+  -- Minimizacion: el receptor anterior no recibe nombres, direcciones ni codigos de nodo del nuevo titular;
+  -- el receptor nuevo no recibe direccion; el emisor si (la necesita para enviar).
+  IF EXISTS (SELECT 1 FROM public.panelist_notification
+              WHERE payload->>'change' = 'revert' AND payload->>'recipient_role' LIKE 'former_%'
+                AND (payload ? 'destination_address' OR payload ? 'destination_panelist_name' OR payload ? 'origin_panelist_name'
+                     OR payload ? 'origin_node_code' OR payload ? 'destination_node_code')) THEN
+    RAISE EXCEPTION 'FAIL aviso destino: datos personales a former_*'; END IF;
+  IF EXISTS (SELECT 1 FROM public.panelist_notification
+              WHERE payload->>'change' = 'revert' AND payload->>'recipient_role' = 'receiver'
+                AND (payload ? 'destination_address' OR NOT payload ? 'origin_panelist_name')) THEN
+    RAISE EXCEPTION 'FAIL aviso destino: payload del receptor'; END IF;
+  IF NOT EXISTS (SELECT 1 FROM public.panelist_notification
+              WHERE payload->>'change' = 'revert' AND payload->>'recipient_role' = 'sender'
+                AND payload ? 'destination_address' AND payload->>'destination_panelist_name' = 'Pan1') THEN
+    RAISE EXCEPTION 'FAIL aviso destino: payload del emisor'; END IF;
   RAISE NOTICE 'PASS aviso de reversion (destino) en la semana actual';
 END $$;
 ROLLBACK;

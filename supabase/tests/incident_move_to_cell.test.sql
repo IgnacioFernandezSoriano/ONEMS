@@ -505,8 +505,24 @@ BEGIN
   IF EXISTS (SELECT 1 FROM public.panelist_notification WHERE payload->>'detail_id' = 'd3000000-0000-0000-0000-000000000030'
               AND (payload->>'change' <> 'reroute_origin' OR kind <> 'plan_change_this_week'
                    OR (payload->>'old_date')::date <> w0 OR (payload->>'new_date')::date <> w0 + 7
-                   OR payload->>'origin_node_code' <> 'N3')) THEN
+                   OR (payload->>'recipient_role' IN ('sender','receiver') AND payload->>'origin_node_code' IS DISTINCT FROM 'N3'))) THEN
     RAISE EXCEPTION 'FAIL payload lado origen'; END IF;
+  -- Minimizacion por papel: former_sender (Pan1) sin nombres, direcciones ni codigos de nodo; receptor sin
+  -- direccion pero con el nombre del emisor; emisor con la direccion y el nombre del receptor.
+  IF EXISTS (SELECT 1 FROM public.panelist_notification
+              WHERE payload->>'detail_id' = 'd3000000-0000-0000-0000-000000000030' AND payload->>'recipient_role' = 'former_sender'
+                AND (payload ? 'destination_address' OR payload ? 'destination_panelist_name' OR payload ? 'origin_panelist_name'
+                     OR payload ? 'origin_node_code' OR payload ? 'destination_node_code'
+                     OR NOT (payload ? 'scheduled_date' AND payload ? 'product_description' AND payload ? 'carrier_name'))) THEN
+    RAISE EXCEPTION 'FAIL payload former_sender'; END IF;
+  IF NOT EXISTS (SELECT 1 FROM public.panelist_notification
+              WHERE payload->>'detail_id' = 'd3000000-0000-0000-0000-000000000030' AND payload->>'recipient_role' = 'receiver'
+                AND NOT payload ? 'destination_address' AND payload->>'origin_panelist_name' = 'Pan3') THEN
+    RAISE EXCEPTION 'FAIL payload receptor'; END IF;
+  IF NOT EXISTS (SELECT 1 FROM public.panelist_notification
+              WHERE payload->>'detail_id' = 'd3000000-0000-0000-0000-000000000030' AND payload->>'recipient_role' = 'sender'
+                AND payload ? 'destination_address' AND payload->>'destination_panelist_name' = 'Pan2') THEN
+    RAISE EXCEPTION 'FAIL payload emisor'; END IF;
   -- Lado destino: N1->N2 pasa a N1->N3.
   PERFORM public.apply_sample_move('d3000000-0000-0000-0000-000000000031', N2, N3, w0 + 7);
   IF pg_temp.roles('d3000000-0000-0000-0000-000000000031') IS DISTINCT FROM 'Pan1:sender,Pan2:former_receiver,Pan3:receiver' THEN
@@ -514,6 +530,12 @@ BEGIN
   IF EXISTS (SELECT 1 FROM public.panelist_notification WHERE payload->>'detail_id' = 'd3000000-0000-0000-0000-000000000031'
               AND payload->>'change' <> 'reroute_destination') THEN
     RAISE EXCEPTION 'FAIL change lado destino'; END IF;
+  -- former_receiver (Pan2) no conoce la direccion ni el nombre del nuevo receptor.
+  IF EXISTS (SELECT 1 FROM public.panelist_notification
+              WHERE payload->>'detail_id' = 'd3000000-0000-0000-0000-000000000031' AND payload->>'recipient_role' = 'former_receiver'
+                AND (payload ? 'destination_address' OR payload ? 'destination_panelist_name' OR payload ? 'origin_panelist_name'
+                     OR payload ? 'origin_node_code' OR payload ? 'destination_node_code')) THEN
+    RAISE EXCEPTION 'FAIL payload former_receiver'; END IF;
   -- Fuera de la semana actual: ningun aviso.
   PERFORM public.apply_sample_move('d3000000-0000-0000-0000-000000000032', N1, N3, w0 + 21);
   IF pg_temp.roles('d3000000-0000-0000-0000-000000000032') IS NOT NULL THEN
