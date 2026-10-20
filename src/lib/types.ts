@@ -363,7 +363,8 @@ export type Database = {
 }
 
 export type ProposalAction = 'reroute' | 'shift_date' | 'cancel' | 'none'
-export type ProposalStatus = 'pending' | 'confirmed' | 'dismissed'
+export type IncidentStatus = 'new' | 'auto_resolved' | 'pending_manager' | 'resolved'
+export type ProposalStatus = 'pending' | 'auto_resolved' | 'manager_resolved' | 'info' | 'dismissed'
 export type AffectedRole = 'origin' | 'destination'
 
 export interface ReassignmentProposal {
@@ -383,11 +384,23 @@ export interface ReassignmentProposal {
   status: ProposalStatus
   confirmed_by: string | null
   confirmed_at: string | null
+  resolution_note: string | null
+  applied_at: string | null
   created_at: string
   updated_at: string
   // joins (opcionales, poblados por el hook)
-  detail?: { id: string; fecha_programada: string; status: string; origin_node_id: string; destination_node_id: string } | null
+  detail?: {
+    id: string
+    fecha_programada: string
+    original_fecha_programada: string | null
+    status: string
+    origin_node_id: string
+    destination_node_id: string
+    origin_node?: { auto_id: string } | null
+    destination_node?: { auto_id: string } | null
+  } | null
   suggested_target_node?: { id: string; auto_id: string } | null
+  final_target_node?: { id: string; auto_id: string } | null
 }
 
 export interface IncidentInboxRow {
@@ -398,6 +411,10 @@ export interface IncidentInboxRow {
   city_name: string
   start_date: string
   end_date: string
+  reason: string | null
+  incident_status: IncidentStatus
+  auto_summary: string | null
+  created_at: string
   affected_count: number
   origin_count: number
   destination_count: number
@@ -422,7 +439,22 @@ export interface UnavailabilityHeader {
   node_code: string | null
   city_id: string | null
   city_name: string | null
+  incident_status: IncidentStatus
+  auto_summary: string | null
+  final_resolution: string | null
+  resolved_at: string | null
 }
+
+export interface WeekSuggestion {
+  found: boolean
+  date?: string
+  node_id?: string
+  node_code?: string
+  load_after?: number
+  saturation_level?: 'normal' | 'high' | 'saturated'
+}
+
+export type IncidentStatusFilter = 'open' | 'all' | IncidentStatus // open = new + pending_manager
 
 export interface CityLoadWeek {
   week_number: number

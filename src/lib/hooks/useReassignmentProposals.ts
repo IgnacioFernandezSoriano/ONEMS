@@ -41,6 +41,7 @@ export function useReassignmentProposals() {
             node_label: u.panelist?.node?.auto_id ?? '-',
             city_name: u.panelist?.node?.city?.name ?? '-',
             start_date: u.start_date, end_date: u.end_date,
+            reason: null, incident_status: 'new', auto_summary: null, created_at: '',
             affected_count: 0, origin_count: 0, destination_count: 0, pending_count: 0,
           }
           byBaja.set(u.id, agg)
@@ -149,6 +150,10 @@ export function useReassignmentProposals() {
       node_code: d.panelist?.node?.auto_id ?? null,
       city_id: d.panelist?.node?.city?.id ?? null,
       city_name: d.panelist?.node?.city?.name ?? null,
+      incident_status: 'new',
+      auto_summary: null,
+      final_resolution: null,
+      resolved_at: null,
     }
   }, [])
 
