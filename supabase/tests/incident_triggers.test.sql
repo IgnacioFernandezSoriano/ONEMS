@@ -57,6 +57,20 @@ $$;
 CREATE FUNCTION pg_temp.s(p_id uuid) RETURNS public.allocation_plan_details LANGUAGE sql AS $$
   SELECT * FROM public.allocation_plan_details WHERE id = p_id;
 $$;
+-- Dia laborable de la semana actual: hoy si es lunes..viernes; si no, el lunes de esta semana.
+CREATE FUNCTION pg_temp.dday() RETURNS date LANGUAGE sql AS $$
+  SELECT CASE WHEN extract(isodow FROM current_date) <= 5 THEN current_date
+              ELSE date_trunc('week', current_date)::date END;
+$$;
+CREATE FUNCTION pg_temp.eom() RETURNS date LANGUAGE sql AS $$
+  SELECT (date_trunc('month', pg_temp.dday()) + interval '1 month - 1 day')::date;
+$$;
+-- Avisos 'revert' como "Nombre:rol,..." ordenado por nombre (NULL si no hay).
+CREATE FUNCTION pg_temp.revert_roles() RETURNS text LANGUAGE sql AS $$
+  SELECT string_agg(p.name || ':' || (n.payload->>'recipient_role'), ',' ORDER BY p.name)
+    FROM public.panelist_notification n JOIN public.panelists p ON p.id = n.panelist_id
+   WHERE n.payload->>'change' = 'revert';
+$$;
 
 -- ===== Estructura: trigger viejo fuera, triggers nuevos, permisos =====
 DO $$
@@ -78,7 +92,12 @@ BEGIN
                     AND t.tgname = 'refresh_incidents_on_plan_update' AND (t.tgtype & 1) = 0
                     AND t.tgnewtable IS NOT NULL AND t.tgoldtable IS NOT NULL) THEN
     RAISE EXCEPTION 'FAIL falta refresh_incidents_on_plan_update (sentencia + old/new table)'; END IF;
-  FOREACH f IN ARRAY ARRAY['public.tg_unavailability_incident()', 'public.tg_refresh_incidents_on_plan_change()'] LOOP
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger t WHERE t.tgrelid = 'public.panelist_unavailability'::regclass
+                    AND t.tgname = 'check_unavailability_panelist_account' AND NOT t.tgisinternal) THEN
+    RAISE EXCEPTION 'FAIL falta check_unavailability_panelist_account'; END IF;
+  FOREACH f IN ARRAY ARRAY['public.tg_unavailability_incident()', 'public.tg_refresh_incidents_on_plan_change()',
+                           'public.tg_unavailability_check_panelist_account()',
+                           'public.incident_enqueue_revert(uuid,date,uuid,uuid)'] LOOP
     IF has_function_privilege('anon', f, 'EXECUTE') OR has_function_privilege('authenticated', f, 'EXECUTE') THEN
       RAISE EXCEPTION 'FAIL % ejecutable por anon/authenticated', f; END IF;
     IF NOT (SELECT prosecdef FROM pg_proc WHERE oid = f::regprocedure) THEN
@@ -454,36 +473,217 @@ BEGIN
 END $$;
 ROLLBACK;
 
--- ===== Aviso de reversion: muestra en la semana actual =====
--- P1 recibe (destino N1) una muestra de P4 hoy; la baja de P1 cubre hoy. El motor la resuelve
--- (retraso o reencaminado segun el calendario); al cancelar, el emisor (P4) recibe un aviso 'revert'.
+-- ===== Avisos de reversion en la semana actual =====
+-- D = dia laborable de esta semana (hoy si es lunes..viernes; si no, el lunes de esta semana).
+-- Baja de P1 de D a fin de mes: no hay hueco de retraso en el mes -> el motor reencamina a N2 el dia D.
+-- Al cancelar, se avisa a los panelistas de antes y de despues, incluido P1 (vuelve a actuar).
+
+-- (a) Destino: N4 -> N1 reencaminada a N4 -> N2; vuelve a N1.
 BEGIN;
 \ir fixtures/incident_city.sql
-SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N4','N1', current_date);
-SELECT pg_temp.baja(current_date, current_date);
+SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N4','N1', pg_temp.dday());
+SELECT pg_temp.baja(pg_temp.dday(), pg_temp.eom());
 DO $$
 BEGIN
-  IF (pg_temp.line('d0000000-0000-0000-0000-000000000001')).status IS DISTINCT FROM 'auto_resolved' THEN
-    RAISE EXCEPTION 'FAIL aviso: la muestra de esta semana no se resolvio (%)',
-      (pg_temp.line('d0000000-0000-0000-0000-000000000001')).status; END IF;
+  IF (pg_temp.line('d0000000-0000-0000-0000-000000000001')).final_action IS DISTINCT FROM 'reroute'
+     OR (pg_temp.s('d0000000-0000-0000-0000-000000000001')).destination_node_id <> 'b2000000-0000-0000-0000-000000000002' THEN
+    RAISE EXCEPTION 'FAIL aviso destino: preparacion (%)', (pg_temp.line('d0000000-0000-0000-0000-000000000001')).final_action; END IF;
 END $$;
 UPDATE public.panelist_unavailability SET status = 'cancelled' WHERE id = 'f0000000-0000-0000-0000-000000000001';
 DO $$
-DECLARE n record; s record;
+DECLARE s record;
 BEGIN
   s := pg_temp.s('d0000000-0000-0000-0000-000000000001');
-  IF s.fecha_programada <> current_date OR s.destination_node_id <> 'b1000000-0000-0000-0000-000000000001' THEN
-    RAISE EXCEPTION 'FAIL aviso: muestra no revertida % %', s.fecha_programada, s.destination_node_id; END IF;
-  SELECT * INTO n FROM public.panelist_notification WHERE payload->>'change' = 'revert';
-  IF NOT FOUND THEN RAISE EXCEPTION 'FAIL aviso: no hay fila revert'; END IF;
-  IF n.panelist_id <> 'e4000000-0000-0000-0000-000000000004' OR n.kind <> 'plan_change_this_week'
-     OR n.payload->>'recipient_role' <> 'sender' OR (n.payload->>'detail_id')::uuid <> s.id
-     OR (n.payload->>'new_date')::date <> current_date THEN
-    RAISE EXCEPTION 'FAIL aviso: fila revert incorrecta %', n.payload; END IF;
+  IF s.fecha_programada <> pg_temp.dday() OR s.destination_node_id <> 'b1000000-0000-0000-0000-000000000001' THEN
+    RAISE EXCEPTION 'FAIL aviso destino: muestra no revertida % %', s.fecha_programada, s.destination_node_id; END IF;
+  IF pg_temp.revert_roles() IS DISTINCT FROM 'Pan1:receiver,Pan2:former_receiver,Pan4:sender' THEN
+    RAISE EXCEPTION 'FAIL aviso destino: destinatarios %', pg_temp.revert_roles(); END IF;
   IF EXISTS (SELECT 1 FROM public.panelist_notification
-              WHERE payload->>'change' = 'revert' AND panelist_id = 'e1000000-0000-0000-0000-000000000001') THEN
-    RAISE EXCEPTION 'FAIL aviso: se avisa al panelista de la baja'; END IF;
-  RAISE NOTICE 'PASS aviso de reversion en la semana actual';
+              WHERE payload->>'change' = 'revert'
+                AND ((payload->>'detail_id')::uuid <> s.id OR (payload->>'new_date')::date <> pg_temp.dday()
+                     OR kind <> 'plan_change_this_week'
+                     OR payload->>'destination_node_code' <> 'N1')) THEN
+    RAISE EXCEPTION 'FAIL aviso destino: payload incorrecto'; END IF;
+  RAISE NOTICE 'PASS aviso de reversion (destino) en la semana actual';
+END $$;
+ROLLBACK;
+
+-- (b) Origen: N1 -> N4 reencaminada a N2 -> N4; vuelve a N1. El emisor alternativo (P2) recibe 'former_sender'.
+BEGIN;
+\ir fixtures/incident_city.sql
+SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N1','N4', pg_temp.dday());
+SELECT pg_temp.baja(pg_temp.dday(), pg_temp.eom());
+DO $$
+BEGIN
+  IF (pg_temp.s('d0000000-0000-0000-0000-000000000001')).origin_node_id <> 'b2000000-0000-0000-0000-000000000002' THEN
+    RAISE EXCEPTION 'FAIL aviso origen: preparacion'; END IF;
+END $$;
+UPDATE public.panelist_unavailability SET status = 'cancelled' WHERE id = 'f0000000-0000-0000-0000-000000000001';
+DO $$
+BEGIN
+  IF (pg_temp.s('d0000000-0000-0000-0000-000000000001')).origin_node_id <> 'b1000000-0000-0000-0000-000000000001' THEN
+    RAISE EXCEPTION 'FAIL aviso origen: muestra no revertida'; END IF;
+  IF pg_temp.revert_roles() IS DISTINCT FROM 'Pan1:sender,Pan2:former_sender,Pan4:receiver' THEN
+    RAISE EXCEPTION 'FAIL aviso origen: destinatarios %', pg_temp.revert_roles(); END IF;
+  RAISE NOTICE 'PASS aviso de reversion (origen) en la semana actual';
+END $$;
+ROLLBACK;
+
+-- (c) Anulacion del manager de una muestra con P1 de emisor: vuelve a pending y se avisa a emisor y receptor.
+--     Con onems.suppress_notifications='on' no se encola nada.
+BEGIN;
+\ir fixtures/incident_city.sql
+-- N2/N3 saturados todas las semanas del mes de D -> la linea queda pendiente.
+SELECT pg_temp.fill('N2', date_trunc('week', date_trunc('month', pg_temp.dday()))::date, pg_temp.eom(), 8);
+SELECT pg_temp.fill('N3', date_trunc('week', date_trunc('month', pg_temp.dday()))::date, pg_temp.eom(), 8);
+SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N1','N4', pg_temp.dday());
+SELECT pg_temp.baja(pg_temp.dday(), pg_temp.eom());
+DO $$
+BEGIN
+  IF (pg_temp.line('d0000000-0000-0000-0000-000000000001')).status IS DISTINCT FROM 'pending' THEN
+    RAISE EXCEPTION 'FAIL aviso anulacion: preparacion (%)', (pg_temp.line('d0000000-0000-0000-0000-000000000001')).status; END IF;
+END $$;
+SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+SELECT public.apply_manager_decision((pg_temp.line('d0000000-0000-0000-0000-000000000001')).id, 'cancel');
+SELECT set_config('request.jwt.claim.sub','', true);
+SAVEPOINT sp_sup;
+SELECT set_config('onems.suppress_notifications','on', true);
+UPDATE public.panelist_unavailability SET status = 'cancelled' WHERE id = 'f0000000-0000-0000-0000-000000000001';
+DO $$
+BEGIN
+  IF (pg_temp.s('d0000000-0000-0000-0000-000000000001')).status <> 'pending' THEN
+    RAISE EXCEPTION 'FAIL aviso anulacion (suprimido): no vuelve a pending'; END IF;
+  IF pg_temp.revert_roles() IS NOT NULL THEN
+    RAISE EXCEPTION 'FAIL aviso anulacion: supresion ignorada (%)', pg_temp.revert_roles(); END IF;
+  RAISE NOTICE 'PASS aviso de reversion suprimido con onems.suppress_notifications';
+END $$;
+ROLLBACK TO SAVEPOINT sp_sup;
+SELECT set_config('onems.suppress_notifications','', true);
+UPDATE public.panelist_unavailability SET status = 'cancelled' WHERE id = 'f0000000-0000-0000-0000-000000000001';
+DO $$
+BEGIN
+  IF (pg_temp.s('d0000000-0000-0000-0000-000000000001')).status <> 'pending' THEN
+    RAISE EXCEPTION 'FAIL aviso anulacion: no vuelve a pending'; END IF;
+  IF pg_temp.revert_roles() IS DISTINCT FROM 'Pan1:sender,Pan4:receiver' THEN
+    RAISE EXCEPTION 'FAIL aviso anulacion: destinatarios %', pg_temp.revert_roles(); END IF;
+  RAISE NOTICE 'PASS aviso de reversion (anulacion en origen) en la semana actual';
+END $$;
+ROLLBACK;
+
+-- ===== Cancelar baja: guardas (ya salida, anulada por otra via, ediciones manuales posteriores) =====
+BEGIN;
+\ir fixtures/incident_city.sql
+SELECT pg_temp.baja('2027-03-10','2027-03-12');
+-- A y M: retraso automatico (15/03 y 16/03).
+INSERT INTO public.allocation_plan_details
+  (id, account_id, plan_id, origin_node_id, destination_node_id, fecha_programada, status)
+VALUES
+  ('d1000000-0000-0000-0000-000000000001','a0000000-0000-0000-0000-000000000001','cc000000-0000-0000-0000-000000000001',
+   'b1000000-0000-0000-0000-000000000001','b4000000-0000-0000-0000-000000000004','2027-03-10','pending'),
+  ('d2000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000001','cc000000-0000-0000-0000-000000000001',
+   'b1000000-0000-0000-0000-000000000001','b4000000-0000-0000-0000-000000000004','2027-03-10','pending');
+-- R: reencaminado automatico N1 -> N2.
+SELECT pg_temp.fill('N1','2027-03-15','2027-03-29',8);
+SELECT pg_temp.mk('d3000000-0000-0000-0000-000000000003','N1','N4','2027-03-11');
+-- X: pendiente -> anulada por el manager.
+SELECT pg_temp.fill('N2','2027-03-01','2027-03-29',8);
+SELECT pg_temp.fill('N3','2027-03-01','2027-03-29',8);
+SELECT pg_temp.mk('d4000000-0000-0000-0000-000000000004','N1','N4','2027-03-10');
+SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+SELECT public.apply_manager_decision((pg_temp.line('d4000000-0000-0000-0000-000000000004')).id, 'cancel');
+SELECT set_config('request.jwt.claim.sub','', true);
+DO $$
+BEGIN
+  IF (pg_temp.s('d1000000-0000-0000-0000-000000000001')).fecha_programada <> '2027-03-15'
+     OR (pg_temp.s('d2000000-0000-0000-0000-000000000002')).fecha_programada <> '2027-03-16'
+     OR (pg_temp.s('d3000000-0000-0000-0000-000000000003')).origin_node_id <> 'b2000000-0000-0000-0000-000000000002'
+     OR (pg_temp.s('d4000000-0000-0000-0000-000000000004')).status <> 'cancelled' THEN
+    RAISE EXCEPTION 'FAIL guardas: preparacion'; END IF;
+END $$;
+-- Despues de resolver: A sale; M y R se editan a mano; X pasa a anulada por otro motivo.
+UPDATE public.allocation_plan_details SET status = 'sent' WHERE id = 'd1000000-0000-0000-0000-000000000001';
+UPDATE public.allocation_plan_details SET fecha_programada = '2027-03-18' WHERE id = 'd2000000-0000-0000-0000-000000000002';
+UPDATE public.allocation_plan_details SET origin_node_id = 'b3000000-0000-0000-0000-000000000003' WHERE id = 'd3000000-0000-0000-0000-000000000003';
+UPDATE public.allocation_plan_details SET reassignment_reason = 'manual' WHERE id = 'd4000000-0000-0000-0000-000000000004';
+UPDATE public.panelist_unavailability SET status = 'cancelled' WHERE id = 'f0000000-0000-0000-0000-000000000001';
+DO $$
+BEGIN
+  IF (pg_temp.s('d1000000-0000-0000-0000-000000000001')).fecha_programada <> '2027-03-15'
+     OR (pg_temp.s('d1000000-0000-0000-0000-000000000001')).status <> 'sent' THEN
+    RAISE EXCEPTION 'FAIL guardas: muestra ya salida revertida'; END IF;
+  IF (pg_temp.s('d2000000-0000-0000-0000-000000000002')).fecha_programada <> '2027-03-18' THEN
+    RAISE EXCEPTION 'FAIL guardas: fecha editada a mano pisada (%)', (pg_temp.s('d2000000-0000-0000-0000-000000000002')).fecha_programada; END IF;
+  IF (pg_temp.s('d3000000-0000-0000-0000-000000000003')).origin_node_id <> 'b3000000-0000-0000-0000-000000000003' THEN
+    RAISE EXCEPTION 'FAIL guardas: nodo editado a mano pisado'; END IF;
+  IF (pg_temp.s('d4000000-0000-0000-0000-000000000004')).status <> 'cancelled' THEN
+    RAISE EXCEPTION 'FAIL guardas: anulada por otro motivo vuelve a pending'; END IF;
+  IF EXISTS (SELECT 1 FROM public.panelist_reassignment_proposal
+              WHERE unavailability_id = 'f0000000-0000-0000-0000-000000000001'
+                AND resolution_note IS DISTINCT FROM 'unavailability_cancelled') THEN
+    RAISE EXCEPTION 'FAIL guardas: lineas sin resolution_note'; END IF;
+  IF (pg_temp.inc()).incident_status <> 'resolved' THEN RAISE EXCEPTION 'FAIL guardas: incidencia no resuelta'; END IF;
+  RAISE NOTICE 'PASS guardas de cancelacion (salida, otra via, ediciones manuales)';
+END $$;
+ROLLBACK;
+
+-- ===== Seguridad: panelista de otra cuenta =====
+BEGIN;
+\ir fixtures/incident_city.sql
+INSERT INTO public.panelists (id, account_id, panelist_code, name, email, mobile, node_id, status, language) VALUES
+  ('e5000000-0000-0000-0000-000000000005','a0000000-0000-0000-0000-000000000002','Q5','Pan5','p5@t.l','5',NULL,'active','en');
+DO $$
+BEGIN
+  BEGIN
+    INSERT INTO public.panelist_unavailability (account_id, panelist_id, start_date, end_date, reason, status)
+    VALUES ('a0000000-0000-0000-0000-000000000001','e5000000-0000-0000-0000-000000000005','2027-03-10','2027-03-12','vacation','active');
+    RAISE EXCEPTION 'FAIL baja con panelista de otra cuenta aceptada';
+  EXCEPTION WHEN raise_exception THEN
+    IF SQLERRM NOT LIKE 'Panelist does not belong to account%' THEN RAISE; END IF;
+  END;
+  PERFORM pg_temp.baja('2027-03-10','2027-03-12');
+  BEGIN
+    UPDATE public.panelist_unavailability SET panelist_id = 'e5000000-0000-0000-0000-000000000005'
+     WHERE id = 'f0000000-0000-0000-0000-000000000001';
+    RAISE EXCEPTION 'FAIL cambio a panelista de otra cuenta aceptado';
+  EXCEPTION WHEN raise_exception THEN
+    IF SQLERRM NOT LIKE 'Panelist does not belong to account%' THEN RAISE; END IF;
+  END;
+  RAISE NOTICE 'PASS baja con panelista de otra cuenta rechazada';
+END $$;
+ROLLBACK;
+
+-- ===== Seguridad: un cambio del plan de la cuenta 1 nunca dispara el motor de una baja de la cuenta 2 =====
+-- Panelista de la cuenta 2 apuntando (mal) al nodo N1 de la cuenta 1, con baja activa en la cuenta 2.
+BEGIN;
+\ir fixtures/incident_city.sql
+-- (node_id es unico en panelists: se libera N1 de P1 para fabricar el caso.)
+UPDATE public.panelists SET node_id = NULL WHERE id = 'e1000000-0000-0000-0000-000000000001';
+INSERT INTO public.panelists (id, account_id, panelist_code, name, email, mobile, node_id, status, language) VALUES
+  ('e5000000-0000-0000-0000-000000000005','a0000000-0000-0000-0000-000000000002','Q5','Pan5','p5@t.l','5',
+   'b1000000-0000-0000-0000-000000000001','active','en');
+SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N1','N4','2027-03-10');
+INSERT INTO public.panelist_unavailability (id, account_id, panelist_id, start_date, end_date, reason, status)
+VALUES ('f2000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000002',
+        'e5000000-0000-0000-0000-000000000005','2027-03-10','2027-03-12','vacation','active');
+DO $$
+BEGIN
+  -- El motor (alta) no toca muestras de la cuenta 1.
+  IF EXISTS (SELECT 1 FROM public.panelist_reassignment_proposal) THEN
+    RAISE EXCEPTION 'FAIL cross-tenant: el motor creo lineas sobre la cuenta 1'; END IF;
+  IF (pg_temp.s('d0000000-0000-0000-0000-000000000001')).fecha_programada <> '2027-03-10' THEN
+    RAISE EXCEPTION 'FAIL cross-tenant: muestra de la cuenta 1 movida'; END IF;
+END $$;
+-- Marca: si el trigger del plan llamara al motor para esta baja, incident_status volveria a calcularse.
+UPDATE public.panelist_unavailability SET incident_status = 'new' WHERE id = 'f2000000-0000-0000-0000-000000000002';
+SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000002','N1','N4','2027-03-11');
+UPDATE public.allocation_plan_details SET fecha_programada = '2027-03-12' WHERE id = 'd0000000-0000-0000-0000-000000000001';
+DO $$
+BEGIN
+  IF (SELECT incident_status FROM public.panelist_unavailability WHERE id = 'f2000000-0000-0000-0000-000000000002') <> 'new' THEN
+    RAISE EXCEPTION 'FAIL cross-tenant: el trigger del plan de la cuenta 1 ejecuto el motor de la cuenta 2'; END IF;
+  IF EXISTS (SELECT 1 FROM public.panelist_reassignment_proposal) THEN
+    RAISE EXCEPTION 'FAIL cross-tenant: lineas creadas'; END IF;
+  RAISE NOTICE 'PASS cambios del plan acotados por cuenta';
 END $$;
 ROLLBACK;
 
