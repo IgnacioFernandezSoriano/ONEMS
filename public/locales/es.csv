@@ -2671,23 +2671,12 @@ incidents.inbox.pending,Pendientes
 incidents.inbox.review,Revisar
 incidents.inbox.empty,No hay incidencias pendientes
 incidents.detail.back,Volver a la lista
-incidents.detail.mark_reviewed,Dar por estudiado
-incidents.detail.mark_reviewed_disabled,Resuelve antes cada propuesta
 incidents.detail.sample,Muestra
 incidents.detail.role,Rol
 incidents.detail.role_origin,Envío
 incidents.detail.role_destination,Recepción
-incidents.detail.sample_status,Estado de la muestra
-incidents.detail.suggested_action,Acción sugerida
-incidents.detail.suggestion,Sugerencia
 incidents.detail.reason,Motivo
-incidents.detail.proposal_status,Estado
 incidents.detail.actions,Acciones
-incidents.action.confirm,Confirmar
-incidents.action.change,Cambiar…
-incidents.action.dismiss,Descartar
-incidents.action.confirm_selected,Confirmar seleccionadas
-incidents.action.dismiss_selected,Descartar seleccionadas
 incidents.action.selected_count,{count} seleccionadas
 incidents.override.title,Cambiar resolución
 incidents.override.choose_action,Acción final
@@ -2703,9 +2692,6 @@ incidents.act.reroute,Reencaminar
 incidents.act.shift_date,Cambiar fecha
 incidents.act.cancel,Cancelar
 incidents.act.none,Informativa
-incidents.status.pending,Pendiente
-incidents.status.confirmed,Confirmada
-incidents.status.dismissed,Descartada
 incidents.reason.alt_node_same_city,Nodo alternativo con panelista disponible en la misma ciudad
 incidents.reason.shift_same_month,Desplazar a fecha disponible dentro del mismo mes
 incidents.reason.no_alt_no_date,Sin nodo alternativo ni fecha disponible en el mes
@@ -2769,6 +2755,12 @@ incidents.detail.system_proposal,Propuesta del sistema
 incidents.detail.resolved_by_system,Sistema
 incidents.detail.resolved_by_manager,Gestor
 incidents.detail.info_line,Sin acción posible (ya enviada)
+incidents.detail.no_pending,No hay muestras pendientes de tu decisión
+incidents.detail.no_resolved,Todavía no hay muestras resueltas
+incidents.detail.done,Qué se hizo
+incidents.detail.done_by,Por
+incidents.detail.done_at,Cuándo
+incidents.detail.summary,Resumen automático
 incidents.action.accept,Aceptar propuesta
 incidents.action.other_week,Otra semana…
 incidents.action.cancel_sample,Cancelar muestra

@@ -2663,23 +2663,12 @@ incidents.inbox.pending,قيد الانتظار
 incidents.inbox.review,مراجعة
 incidents.inbox.empty,لا توجد حوادث معلقة
 incidents.detail.back,العودة إلى القائمة
-incidents.detail.mark_reviewed,اعتبارها مدروسة
-incidents.detail.mark_reviewed_disabled,يجب حل كل اقتراح أولاً
 incidents.detail.sample,العينة
 incidents.detail.role,الدور
 incidents.detail.role_origin,الإرسال
 incidents.detail.role_destination,الاستلام
-incidents.detail.sample_status,حالة العينة
-incidents.detail.suggested_action,الإجراء المقترح
-incidents.detail.suggestion,اقتراح
 incidents.detail.reason,السبب
-incidents.detail.proposal_status,الحالة
 incidents.detail.actions,الإجراءات
-incidents.action.confirm,تأكيد
-incidents.action.change,تغيير…
-incidents.action.dismiss,تجاهل
-incidents.action.confirm_selected,تأكيد المحدد
-incidents.action.dismiss_selected,تجاهل المحدد
 incidents.action.selected_count,{count} محددة
 incidents.override.title,تغيير الحل
 incidents.override.choose_action,الإجراء النهائي
@@ -2695,9 +2684,6 @@ incidents.act.reroute,إعادة توجيه
 incidents.act.shift_date,تغيير التاريخ
 incidents.act.cancel,إلغاء
 incidents.act.none,معلوماتي
-incidents.status.pending,قيد الانتظار
-incidents.status.confirmed,مؤكدة
-incidents.status.dismissed,مرفوضة
 incidents.reason.alt_node_same_city,عقدة بديلة مع محكّم متاح في نفس المدينة
 incidents.reason.shift_same_month,النقل إلى تاريخ متاح ضمن نفس الشهر
 incidents.reason.no_alt_no_date,لا توجد عقدة بديلة ولا تاريخ متاح هذا الشهر
@@ -2761,6 +2747,12 @@ incidents.detail.system_proposal,اقتراح النظام
 incidents.detail.resolved_by_system,النظام
 incidents.detail.resolved_by_manager,المسؤول
 incidents.detail.info_line,لا يوجد إجراء ممكن (أُرسلت بالفعل)
+incidents.detail.no_pending,لا توجد عينات بانتظار قرارك
+incidents.detail.no_resolved,لا توجد عينات محلولة بعد
+incidents.detail.done,ما تم
+incidents.detail.done_by,بواسطة
+incidents.detail.done_at,متى
+incidents.detail.summary,الملخص التلقائي
 incidents.action.accept,قبول الاقتراح
 incidents.action.other_week,أسبوع آخر…
 incidents.action.cancel_sample,إلغاء العينة

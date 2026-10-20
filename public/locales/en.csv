@@ -2671,23 +2671,12 @@ incidents.inbox.pending,Pending
 incidents.inbox.review,Review
 incidents.inbox.empty,No pending incidents
 incidents.detail.back,Back to list
-incidents.detail.mark_reviewed,Mark as studied
-incidents.detail.mark_reviewed_disabled,Resolve every proposal first
 incidents.detail.sample,Sample
 incidents.detail.role,Role
 incidents.detail.role_origin,Send
 incidents.detail.role_destination,Receive
-incidents.detail.sample_status,Sample status
-incidents.detail.suggested_action,Suggested action
-incidents.detail.suggestion,Suggestion
 incidents.detail.reason,Reason
-incidents.detail.proposal_status,Status
 incidents.detail.actions,Actions
-incidents.action.confirm,Confirm
-incidents.action.change,Change…
-incidents.action.dismiss,Dismiss
-incidents.action.confirm_selected,Confirm selected
-incidents.action.dismiss_selected,Dismiss selected
 incidents.action.selected_count,{count} selected
 incidents.override.title,Change resolution
 incidents.override.choose_action,Final action
@@ -2703,9 +2692,6 @@ incidents.act.reroute,Reroute
 incidents.act.shift_date,Shift date
 incidents.act.cancel,Cancel
 incidents.act.none,Informative
-incidents.status.pending,Pending
-incidents.status.confirmed,Confirmed
-incidents.status.dismissed,Dismissed
 incidents.reason.alt_node_same_city,Alternative node with an available panelist in the same city
 incidents.reason.shift_same_month,Move to an available date within the same month
 incidents.reason.no_alt_no_date,No alternative node or available date this month
@@ -2769,6 +2755,12 @@ incidents.detail.system_proposal,System proposal
 incidents.detail.resolved_by_system,System
 incidents.detail.resolved_by_manager,Manager
 incidents.detail.info_line,No action possible (already sent)
+incidents.detail.no_pending,No samples pending your decision
+incidents.detail.no_resolved,No resolved samples yet
+incidents.detail.done,What was done
+incidents.detail.done_by,By
+incidents.detail.done_at,When
+incidents.detail.summary,Automatic summary
 incidents.action.accept,Accept proposal
 incidents.action.other_week,Other week…
 incidents.action.cancel_sample,Cancel sample

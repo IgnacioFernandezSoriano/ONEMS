@@ -421,15 +421,9 @@ export interface IncidentInboxRow {
   pending_count: number
 }
 
-export interface RerouteCandidate {
-  node_id: string
-  node_name: string
-  city_id: string
-  is_available: boolean
-}
-
 export interface UnavailabilityHeader {
   unavailability_id: string
+  account_id: string | null
   panelist_name: string
   panelist_code: string
   start_date: string

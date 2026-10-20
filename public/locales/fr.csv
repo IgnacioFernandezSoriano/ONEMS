@@ -2663,23 +2663,12 @@ incidents.inbox.pending,En attente
 incidents.inbox.review,Examiner
 incidents.inbox.empty,Aucun incident en attente
 incidents.detail.back,Retour à la liste
-incidents.detail.mark_reviewed,Marquer comme étudié
-incidents.detail.mark_reviewed_disabled,Résolvez d'abord chaque proposition
 incidents.detail.sample,Échantillon
 incidents.detail.role,Rôle
 incidents.detail.role_origin,Envoi
 incidents.detail.role_destination,Réception
-incidents.detail.sample_status,Statut de l'échantillon
-incidents.detail.suggested_action,Action suggérée
-incidents.detail.suggestion,Suggestion
 incidents.detail.reason,Motif
-incidents.detail.proposal_status,Statut
 incidents.detail.actions,Actions
-incidents.action.confirm,Confirmer
-incidents.action.change,Modifier…
-incidents.action.dismiss,Ignorer
-incidents.action.confirm_selected,Confirmer la sélection
-incidents.action.dismiss_selected,Ignorer la sélection
 incidents.action.selected_count,{count} sélectionnées
 incidents.override.title,Modifier la résolution
 incidents.override.choose_action,Action finale
@@ -2695,9 +2684,6 @@ incidents.act.reroute,Réacheminer
 incidents.act.shift_date,Changer la date
 incidents.act.cancel,Annuler
 incidents.act.none,Informatif
-incidents.status.pending,En attente
-incidents.status.confirmed,Confirmée
-incidents.status.dismissed,Rejetée
 incidents.reason.alt_node_same_city,Nœud alternatif avec un panéliste disponible dans la même ville
 incidents.reason.shift_same_month,Déplacer vers une date disponible dans le même mois
 incidents.reason.no_alt_no_date,Aucun nœud alternatif ni date disponible ce mois-ci
@@ -2761,6 +2747,12 @@ incidents.detail.system_proposal,Proposition du système
 incidents.detail.resolved_by_system,Système
 incidents.detail.resolved_by_manager,Gestionnaire
 incidents.detail.info_line,Aucune action possible (déjà envoyé)
+incidents.detail.no_pending,Aucun échantillon en attente de votre décision
+incidents.detail.no_resolved,Aucun échantillon résolu pour l'instant
+incidents.detail.done,Action réalisée
+incidents.detail.done_by,Par
+incidents.detail.done_at,Quand
+incidents.detail.summary,Résumé automatique
 incidents.action.accept,Accepter la proposition
 incidents.action.other_week,Autre semaine…
 incidents.action.cancel_sample,Annuler l'échantillon

@@ -78,7 +78,7 @@ export function useUnavailabilityIncidents() {
     const { data, error: e } = await supabase
       .from('panelist_unavailability')
       .select(`
-        id, start_date, end_date, reason, incident_status, auto_summary, final_resolution, resolved_at,
+        id, account_id, start_date, end_date, reason, incident_status, auto_summary, final_resolution, resolved_at,
         panelist:panelists ( name, panelist_code, node:nodes ( id, auto_id, city:cities ( id, name ) ) )
       `)
       .eq('id', unavailabilityId)
@@ -88,6 +88,7 @@ export function useUnavailabilityIncidents() {
     const d = data as any
     return {
       unavailability_id: d.id,
+      account_id: d.account_id ?? null,
       panelist_name: d.panelist?.name ?? '-',
       panelist_code: d.panelist?.panelist_code ?? '-',
       start_date: d.start_date,
