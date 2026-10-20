@@ -7,6 +7,10 @@ import type {
   IncidentStatusFilter, MoveSuggestion, CellSample,
 } from '@/lib/types'
 
+// Aviso entre instancias del hook: tras una accion que cambia incidencias, el menu y la bandeja se refrescan.
+const INCIDENTS_CHANGED_EVENT = 'onems:incidents-changed'
+const notifyIncidentsChanged = () => { window.dispatchEvent(new Event(INCIDENTS_CHANGED_EVENT)) }
+
 export type IncidentDecision = 'accept' | 'cancel'
 
 // Carrier y producto del plan de una muestra. FKs explicitas: allocation_plans tiene FK a
@@ -29,9 +33,12 @@ export function useUnavailabilityIncidents() {
   const [statusFilter, setStatusFilter] = useState<IncidentStatusFilter>('open')
 
   // Bandeja: bajas de la cuenta con contadores de lineas calculados en JS.
-  const fetchInbox = useCallback(async () => {
+  // silent: recarga en segundo plano (sin pasar por "cargando"), p. ej. tras una decision en el detalle;
+  // asi el contador del menu se actualiza sin desmontar la pantalla abierta.
+  const fetchInbox = useCallback(async (silent = false) => {
     try {
-      setLoading(true); setError(null)
+      if (!silent) setLoading(true)
+      setError(null)
       let q = supabase
         .from('panelist_unavailability')
         .select(`
@@ -65,10 +72,25 @@ export function useUnavailabilityIncidents() {
       })
       setAllRows(rows)
     } catch (err: any) { setError(err.message); console.error('fetchInbox', err) }
-    finally { setLoading(false) }
+    finally { if (!silent) setLoading(false) }
   }, [effectiveAccountId])
 
   useEffect(() => { fetchInbox() }, [fetchInbox])
+
+  // Cualquier instancia del hook (menu lateral, bandeja, detalle) se refresca en silencio cuando otra avisa de un
+  // cambio (decision, movimiento, resolucion). Se agrupan los avisos seguidos (acciones en bloque).
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | null = null
+    const onChanged = () => {
+      if (timer) clearTimeout(timer)
+      timer = setTimeout(() => { fetchInbox(true) }, 300)
+    }
+    window.addEventListener(INCIDENTS_CHANGED_EVENT, onChanged)
+    return () => {
+      window.removeEventListener(INCIDENTS_CHANGED_EVENT, onChanged)
+      if (timer) clearTimeout(timer)
+    }
+  }, [fetchInbox])
 
   const inbox = useMemo(() => allRows.filter(r => {
     if (statusFilter === 'all') return true
@@ -148,6 +170,7 @@ export function useUnavailabilityIncidents() {
       p_reference_load: 6,
       p_deviation_percent: 20,
     })
+    notifyIncidentsChanged()
     if (e) throw e
     return (data as { incident_status: IncidentStatus }).incident_status
   }, [])
@@ -177,6 +200,7 @@ export function useUnavailabilityIncidents() {
       p_reference_load: referenceLoad,
       p_deviation_percent: deviationPercent,
     })
+    notifyIncidentsChanged()
     if (e) throw e
   }, [])
 
@@ -209,6 +233,7 @@ export function useUnavailabilityIncidents() {
       p_reference_load: referenceLoad,
       p_deviation_percent: deviationPercent,
     })
+    notifyIncidentsChanged()
     if (e) throw e
   }, [])
 
@@ -255,6 +280,7 @@ export function useUnavailabilityIncidents() {
     const { error: e } = await supabase.rpc('set_incident_resolution', {
       p_unavailability_id: unavailabilityId, p_text: text,
     })
+    notifyIncidentsChanged()
     if (e) throw e
   }, [])
 
