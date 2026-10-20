@@ -17,9 +17,11 @@ y reordena el procedimiento de [2026-08-06-falta-material-tratamiento-design.md]
   `ReportedIncidentPanel.tsx`, `useReportedIncidents.ts`, `useMaterialsTreatment.ts`) con
   bloque de acción por categoría y asistente de falta de material. En `main`.
 - n8n: "Report incident" (`hwsO71yoXRHIOfHC`) y "Deliver incident replies" (`zpCm5uOEeDTXUIco`).
-- **Pero en Telegram NO existe el menú de categorías.** Hoy el panelista pulsa "reportar
-  incidencia", elige el envío, describe el problema en texto libre y n8n inserta **siempre**
-  `category='other'` y pone la muestra en `status='incident'`. Las 9 categorías solo existen
+- **Pero en Telegram NO existe la elección de categoría.** Hoy hay dos vías: (1) el botón
+  "Reportar incidente": elige el envío, describe el problema y n8n inserta **siempre**
+  `category='other'` y pone la muestra en `status='incident'`; (2) texto libre al agente de IA
+  (`incident_subagent` → "Notify manager (AI tool)" `Z63nZ0hYRwbtKYbC`), que desde el
+  2026-10-14 ya pide a la IA la categoría y la inserta `open`, sin confirmación ni acción. Las 9 categorías solo existen
   en la BD y en la pantalla. Por eso en la BD viva hay 3 `other`, 2 `contact_data_change` y 1
   `missing_materials` (las dos últimas, pruebas manuales).
 
@@ -106,8 +108,9 @@ se conservan como registro para estudios posteriores.
   - `contact_data_change`: `{before: {...}, after: {...}}` solo con los campos cambiados, `applied: true`.
   - `parcel_returned`: `{decision: 'cancelled' | 'rerouted', to_node_id?, week_start?}`.
 - Papel del panelista en el envío señalado: **se calcula**, no se guarda. Si
-  `allocation_plan_details.sender_panelist_id = panelist_id` → emisor; si
-  `receiver_panelist_id = panelist_id` → receptor; si no hay envío → sin papel.
+  `allocation_plan_details.origin_panelist_id = panelist_id` (o, si es NULL, `origin_node_id` =
+  nodo del panelista) → emisor; si `destination_panelist_id = panelist_id` (o
+  `destination_node_id` = su nodo) → receptor; si no hay envío → sin papel.
 - Vídeos de E (futuro): se guardarán en **n8n** (nodo Set con mapa `{en, es, fr, ar} → file_id
   o URL`). ONEMS no necesita saber dónde están.
 
@@ -149,8 +152,8 @@ cantidad que nos consta, marca "bloqueante" si `material_catalog.is_blocking`). 
   (sección 3). Después queda fija en esta pantalla; si cambia, se gestiona en la pantalla de
   bajas (cancelar la baja y declarar otra), como cualquier baja.
 - **Días sin stock**: nº de días **laborables L–V** (regla vigente del proyecto; sin festivos)
-  entre hoy y la fecha prevista, y lista de las muestras del panelista como emisor con fecha
-  programada en ese rango cuyo producto requiere un material **bloqueante** que falta.
+  entre hoy y la fecha prevista, y lista de las muestras con `origin_node_id` = nodo del panelista y `fecha_programada`
+  en ese rango cuyo producto requiere un material **bloqueante** que falta.
 - Botón **"Confirmar suministro"** → `executeSupply` (existente), guarda en `payload`
   `expected_date`, `days_without_stock`, ids de envíos y `supply_executed_at`. **Idempotente:**
   si `payload.supply_executed_at` existe, el botón se deshabilita y muestra los envíos creados.
@@ -171,10 +174,12 @@ recepción del material).
 ### B. `unreadable_label_receipt` — Etiqueta ilegible (automática)
 
 - **n8n:** al elegir esta categoría, lista los envíos **en camino hacia el panelista**
-  (`allocation_plan_details` con `status='sent'` y `receiver_panelist_id` = él) mostrando
-  transportista, producto y nº de etiquetas del producto. El panelista elige uno; n8n lanza la
-  **declaración de recepción normal** (sub-workflow "Mark Parcel as received" con el
-  `detail_id` elegido). **Orden:** recepción primero; si tiene éxito, inserta la incidencia
+  (`allocation_plan_details` con `status='sent'` y `destination_node_id` = su nodo, como hace
+  el workflow "Parcels to receive") mostrando
+  transportista, producto y nº de etiquetas del producto. El panelista elige uno; n8n registra la
+  recepción con la RPC existente `mark_detail_received_manual(p_detail_id)` (`status='received'`,
+  `received_at=now()`, lo mismo que hace "Mark Parcel as received", que solo sabe buscar por
+  etiqueta y aquí la etiqueta es justo lo ilegible). Hay que darle `GRANT … TO service_role`. **Orden:** recepción primero; si tiene éxito, inserta la incidencia
   `auto_resolved` con `payload.chosen_detail_id`; si falla, inserta `open` con
   `payload.error` para que el manager la vea.
 - Si no hay candidatos, n8n lo dice al panelista e inserta `open` con
@@ -280,7 +285,7 @@ el manager, que se pone en contacto con el panelista.
 - `PanelistReportedIncidents.tsx`: filtro de estado con `auto_resolved`; por defecto
   `open`+`in_progress`.
 - `useReportedIncidents.ts`: traer `panelist` con email, mobile, telegram_id, language,
-  address_city; traer de la muestra enlazada `sender_panelist_id`, `receiver_panelist_id`,
+  address_city; traer de la muestra enlazada `origin_panelist_id`, `destination_panelist_id`,
   nodos origen/destino, transportista, producto, fecha; acciones `suggestSampleMove(...)`,
   `rerouteReturnedSample(...)`, `listNodesForMove(detailId)`.
 - `useMaterialsTreatment.ts`: `zeroAllStock(panelistId)`, `daysWithoutStock(panelistId,
@@ -331,8 +336,6 @@ Plantillas en los 4 idiomas; FR/AR con revisión nativa pendiente (nota del proy
   3 n8n DEV → 4 n8n PROD + contrato).
 - Si el selector de nodos de D reutiliza una consulta existente del frontend o la RPC §7.6.
 - Formato exacto del `payload` legible en las fichas de solo lectura.
-- Cómo el sub-workflow "Mark Parcel as received" recibe el `detail_id` elegido en B (leer el
-  workflow vivo antes de decidir).
 - Prompt de clasificación del `incident_subagent` y textos de confirmación en los 4 idiomas.
 
 ## 11. Decisiones cerradas (2026-10-20)
