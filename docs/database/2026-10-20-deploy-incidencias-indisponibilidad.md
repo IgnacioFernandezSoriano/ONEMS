@@ -155,8 +155,8 @@ Orden inverso. Revisar antes de ejecutar y pedir confirmación.
   `tg_refresh_incidents_on_plan_change`, `incident_enqueue_revert`). El trigger
   `generate_proposals_on_unavailability_trigger` **sí existía** antes: la migración lo borra y lo vuelve a crear
   apuntando a `tg_unavailability_incident()`. Para restaurar el comportamiento anterior hay que volver a crear su
-  función original `tg_generate_proposals_on_unavailability` y el trigger tal como estaban en las migraciones `20260806120000` y `20260806140000` (archivadas en el repo) /
-  `20260804*`, y para eso debe existir el motor antiguo (ver rollback de la 3). Es preferible
+  función original `tg_generate_proposals_on_unavailability` y el trigger tal como estaban en las migraciones `20260806120000` y `20260806140000` (y la 3 la borra, ver abajo)
+  y el motor antiguo (`20260804*`); para eso debe existir el motor antiguo (ver rollback de la 3). Es preferible
   arreglar hacia delante.
 - **4 (`130300`):** `drop function` de `suggest_for_week`, `apply_manager_decision`, `set_incident_resolution`;
   `apply_reassignment_proposal` se restaura con la versión anterior (migración `20260804121000`).
