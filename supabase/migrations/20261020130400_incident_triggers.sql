@@ -3,8 +3,12 @@
 --       cancelacion (active -> otro) -> revierte lo aplicado por el motor y por el manager, descarta
 --       pendientes y cierra la incidencia ('resolved', final_resolution 'unavailability_cancelled').
 --       Sustituye a tg_generate_proposals_on_unavailability (llamaba al motor viejo, ya borrado).
---   (0b) panelist_unavailability: BEFORE trigger, el panelista debe ser de la cuenta de la baja.
+--   (0b) panelist_unavailability: BEFORE trigger: panelista de la cuenta de la baja; no reactivar una baja
+--        cancelada; no editar fechas de una baja activa.
 --   (0c) incident_enqueue_revert: avisos de reversion a panelistas de antes y despues.
+--   (0d) incident_revert_unavailability: reversion de una baja (cancelacion y borrado de una baja activa).
+--   (1b) BEFORE DELETE de una baja activa: revierte su impacto antes de borrarla.
+--   (2b) AFTER DELETE (sentencia) en el plan: recalcula el estado de las bajas tocadas.
 --   (2) allocation_plan_details: triggers de SENTENCIA (INSERT / UPDATE con tablas de transicion) que
 --       re-ejecutan el motor, una vez por baja, para las bajas activas y vigentes tocadas por las filas.
 --       Se ignoran las filas cuyo reassigned_at cambia (resoluciones del motor/manager y reversiones, que
@@ -16,9 +20,12 @@
 -- (0) Trigger y funcion viejos fuera.
 DROP TRIGGER IF EXISTS generate_proposals_on_unavailability_trigger ON public.panelist_unavailability;
 DROP FUNCTION IF EXISTS public.tg_generate_proposals_on_unavailability();
+-- Motor viejo: se borra aqui (no en 130200), justo despues de retirar el unico trigger que lo llamaba.
+DROP FUNCTION IF EXISTS public.generate_reassignment_proposals(uuid);
 
--- (0b) Seguridad multi-tenant: el panelista de una baja debe ser de la cuenta de la baja (si no, el motor
---      escribiria en el plan de otra cuenta).
+-- (0b) Guardas de la baja (BEFORE): el panelista debe ser de la cuenta de la baja (si no, el motor escribiria en
+--      el plan de otra cuenta); una baja cancelada no se reactiva y las fechas de una baja activa no se editan
+--      (spec 5.7/5.8: se cancela y se declara otra).
 CREATE OR REPLACE FUNCTION public.tg_unavailability_check_panelist_account()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -29,13 +36,22 @@ BEGIN
   IF (SELECT p.account_id FROM panelists p WHERE p.id = NEW.panelist_id) IS DISTINCT FROM NEW.account_id THEN
     RAISE EXCEPTION 'Panelist does not belong to account';
   END IF;
+  IF TG_OP = 'UPDATE' THEN
+    IF OLD.status = 'cancelled' AND NEW.status = 'active' THEN
+      RAISE EXCEPTION 'Reactivating a cancelled unavailability is not supported; declare a new one';
+    END IF;
+    IF OLD.status = 'active' AND NEW.status = 'active'
+       AND (OLD.start_date, OLD.end_date) IS DISTINCT FROM (NEW.start_date, NEW.end_date) THEN
+      RAISE EXCEPTION 'Dates of an active unavailability cannot be edited; cancel and declare a new one';
+    END IF;
+  END IF;
   RETURN NEW;
 END;
 $$;
 
 DROP TRIGGER IF EXISTS check_unavailability_panelist_account ON public.panelist_unavailability;
 CREATE TRIGGER check_unavailability_panelist_account
-  BEFORE INSERT OR UPDATE OF panelist_id, account_id ON public.panelist_unavailability
+  BEFORE INSERT OR UPDATE OF panelist_id, account_id, status, start_date, end_date ON public.panelist_unavailability
   FOR EACH ROW EXECUTE FUNCTION public.tg_unavailability_check_panelist_account();
 
 -- (0c) Aviso de reversion (cancelacion de baja). Se llama DESPUES del UPDATE de reversion, con el estado
@@ -131,15 +147,17 @@ BEGIN
 END;
 $$;
 
--- (1) Alta / cancelacion de baja (por fila).
-CREATE OR REPLACE FUNCTION public.tg_unavailability_incident()
-RETURNS trigger
+-- (0d) Reversion de una baja (spec 5.8): la usan la cancelacion (p_close: cierra la incidencia) y el borrado de una
+--      baja activa (sin p_close: la fila de la baja desaparece). Interna; el llamante pone la guarda de re-entrada
+--      y el bloque best-effort.
+CREATE OR REPLACE FUNCTION public.incident_revert_unavailability(p_unavailability_id uuid, p_close boolean)
+RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public
 AS $$
 DECLARE
-  v_prev text := COALESCE(current_setting('onems.in_incident_engine', true), '');
+  v_u record;
   r record;
   v_d record;
   v_role_node uuid;
@@ -152,36 +170,19 @@ DECLARE
   v_pan_name text;
   v_notified uuid[] := '{}';
 BEGIN
-  IF v_prev = 'on' THEN RETURN NULL; END IF;
-
-  -- ===== Activacion: INSERT activa, o UPDATE que pasa a activa =====
-  IF NEW.status = 'active' AND (TG_OP = 'INSERT' OR OLD.status IS DISTINCT FROM 'active') THEN
-    BEGIN
-      PERFORM set_config('onems.in_incident_engine', 'on', true);
-      PERFORM resolve_unavailability_incident(NEW.id);
-    EXCEPTION WHEN OTHERS THEN
-      RAISE WARNING 'tg_unavailability_incident: motor fallido para la baja %: %', NEW.id, SQLERRM;
-    END;
-    PERFORM set_config('onems.in_incident_engine', v_prev, true);
-    RETURN NULL;
-  END IF;
-
-  -- ===== Desactivacion: active -> cualquier otro estado =====
-  -- Reactivar una baja cancelada NO esta soportado (spec 5.8: se cancela y se declara una nueva).
-  IF TG_OP = 'UPDATE' AND OLD.status = 'active' AND NEW.status IS DISTINCT FROM 'active' THEN
-    BEGIN
-      PERFORM set_config('onems.in_incident_engine', 'on', true);
+  SELECT u.id, u.account_id INTO v_u FROM panelist_unavailability u WHERE u.id = p_unavailability_id;
+  IF NOT FOUND THEN RETURN; END IF;
 
       FOR r IN
         SELECT pr.id, pr.allocation_plan_detail_id, pr.affected_role, pr.final_action, pr.final_date,
                pr.final_target_node_id
           FROM panelist_reassignment_proposal pr
-         WHERE pr.unavailability_id = NEW.id
+         WHERE pr.unavailability_id = v_u.id
            AND pr.status IN ('auto_resolved','manager_resolved')
          ORDER BY pr.created_at, pr.id
       LOOP
         SELECT * INTO v_d FROM allocation_plan_details
-         WHERE id = r.allocation_plan_detail_id AND account_id = NEW.account_id FOR UPDATE;
+         WHERE id = r.allocation_plan_detail_id AND account_id = v_u.account_id FOR UPDATE;
         IF FOUND THEN
           v_role_node := CASE WHEN r.affected_role = 'origin' THEN v_d.origin_node_id ELSE v_d.destination_node_id END;
           v_orig_node := CASE WHEN r.affected_role = 'origin' THEN v_d.original_origin_node_id
@@ -256,18 +257,53 @@ BEGIN
       -- Pendientes: ya no aplican.
       UPDATE panelist_reassignment_proposal
          SET status = 'dismissed', resolution_note = 'unavailability_cancelled', updated_at = now()
-       WHERE unavailability_id = NEW.id AND status = 'pending';
+       WHERE unavailability_id = v_u.id AND status = 'pending';
 
       -- Incidencia cerrada (codigo; la UI lo traduce). No se duplica si ya estaba.
-      UPDATE panelist_unavailability u
-         SET incident_status = 'resolved',
-             final_resolution = CASE
-               WHEN COALESCE(u.final_resolution, '') LIKE '%unavailability_cancelled%' THEN u.final_resolution
-               WHEN NULLIF(u.final_resolution, '') IS NULL THEN 'unavailability_cancelled'
-               ELSE u.final_resolution || E'\n' || 'unavailability_cancelled' END,
-             resolved_at = now(),
-             review_status = 'reviewed'
-       WHERE u.id = NEW.id;
+      IF p_close THEN
+        UPDATE panelist_unavailability u
+           SET incident_status = 'resolved',
+               final_resolution = CASE
+                 WHEN COALESCE(u.final_resolution, '') LIKE '%unavailability_cancelled%' THEN u.final_resolution
+                 WHEN NULLIF(u.final_resolution, '') IS NULL THEN 'unavailability_cancelled'
+                 ELSE u.final_resolution || E'\n' || 'unavailability_cancelled' END,
+               resolved_at = now(),
+               review_status = 'reviewed'
+         WHERE u.id = v_u.id;
+      END IF;
+END;
+$$;
+
+-- (1) Alta / cancelacion de baja (por fila).
+CREATE OR REPLACE FUNCTION public.tg_unavailability_incident()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_prev text := COALESCE(current_setting('onems.in_incident_engine', true), '');
+BEGIN
+  IF v_prev = 'on' THEN RETURN NULL; END IF;
+
+  -- ===== Activacion: INSERT activa, o UPDATE que pasa a activa (nunca desde 'cancelled': ver (0b)) =====
+  IF NEW.status = 'active' AND (TG_OP = 'INSERT' OR OLD.status IS DISTINCT FROM 'active') THEN
+    BEGIN
+      PERFORM set_config('onems.in_incident_engine', 'on', true);
+      PERFORM resolve_unavailability_incident(NEW.id);
+    EXCEPTION WHEN OTHERS THEN
+      RAISE WARNING 'tg_unavailability_incident: motor fallido para la baja %: %', NEW.id, SQLERRM;
+    END;
+    PERFORM set_config('onems.in_incident_engine', v_prev, true);
+    RETURN NULL;
+  END IF;
+
+  -- ===== Desactivacion: active -> cualquier otro estado =====
+  -- Reactivar una baja cancelada NO esta soportado (spec 5.8: se cancela y se declara una nueva; (0b) lo impide).
+  IF TG_OP = 'UPDATE' AND OLD.status = 'active' AND NEW.status IS DISTINCT FROM 'active' THEN
+    BEGIN
+      PERFORM set_config('onems.in_incident_engine', 'on', true);
+      PERFORM incident_revert_unavailability(NEW.id, true);
     EXCEPTION WHEN OTHERS THEN
       RAISE WARNING 'tg_unavailability_incident: no se pudo revertir la baja %: %', NEW.id, SQLERRM;
     END;
@@ -277,6 +313,36 @@ BEGIN
   RETURN NULL;
 END;
 $$;
+
+-- (1b) Borrar una baja activa = cancelarla (revierte su impacto) y luego borrar. BEFORE DELETE: las lineas aun
+--      existen (el ON DELETE CASCADE las borra despues). No se actualiza la propia fila de la baja (Postgres no
+--      permite modificar en un BEFORE DELETE la fila que se va a borrar): se revierte sin cerrarla. Best-effort.
+CREATE OR REPLACE FUNCTION public.tg_unavailability_delete()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_prev text := COALESCE(current_setting('onems.in_incident_engine', true), '');
+BEGIN
+  IF OLD.status = 'active' AND v_prev <> 'on' THEN
+    BEGIN
+      PERFORM set_config('onems.in_incident_engine', 'on', true);
+      PERFORM incident_revert_unavailability(OLD.id, false);
+    EXCEPTION WHEN OTHERS THEN
+      RAISE WARNING 'tg_unavailability_delete: no se pudo revertir la baja %: %', OLD.id, SQLERRM;
+    END;
+    PERFORM set_config('onems.in_incident_engine', v_prev, true);
+  END IF;
+  RETURN OLD;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS revert_on_unavailability_delete ON public.panelist_unavailability;
+CREATE TRIGGER revert_on_unavailability_delete
+  BEFORE DELETE ON public.panelist_unavailability
+  FOR EACH ROW EXECUTE FUNCTION public.tg_unavailability_delete();
 
 CREATE TRIGGER generate_proposals_on_unavailability_trigger
   AFTER INSERT OR UPDATE ON public.panelist_unavailability
@@ -371,8 +437,59 @@ CREATE TRIGGER refresh_incidents_on_plan_update
   REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows
   FOR EACH STATEMENT EXECUTE FUNCTION public.tg_refresh_incidents_on_plan_change();
 
+-- (2b) Borrado de muestras del plan: el ON DELETE CASCADE ya se llevo sus lineas; se recalcula el estado de las
+--      bajas activas y vigentes cuyo panelista tenia nodo en origen/destino de alguna fila borrada dentro de su
+--      rango (p. ej. borrar la unica pendiente de una incidencia 'pending_manager' la deja 'auto_resolved').
+CREATE OR REPLACE FUNCTION public.tg_recompute_incidents_on_plan_delete()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_id uuid;
+BEGIN
+  BEGIN
+    IF NOT EXISTS (SELECT 1 FROM panelist_unavailability WHERE status = 'active' AND end_date >= current_date) THEN
+      RETURN NULL;
+    END IF;
+    FOR v_id IN
+      WITH pos AS (
+        SELECT o.account_id, o.origin_node_id AS node_id, o.fecha_programada AS d FROM old_rows o
+        UNION
+        SELECT o.account_id, o.destination_node_id, o.fecha_programada FROM old_rows o)
+      SELECT DISTINCT u.id
+        FROM panelist_unavailability u
+        JOIN panelists p ON p.id = u.panelist_id AND p.account_id = u.account_id
+        JOIN pos ON pos.account_id = u.account_id AND pos.node_id = p.node_id
+                AND pos.d BETWEEN u.start_date AND u.end_date
+       WHERE u.status = 'active' AND u.end_date >= current_date
+       ORDER BY u.id
+    LOOP
+      BEGIN
+        PERFORM incident_recompute_status(v_id);
+      EXCEPTION WHEN OTHERS THEN
+        RAISE WARNING 'tg_recompute_incidents_on_plan_delete: estado no recalculado para la baja %: %', v_id, SQLERRM;
+      END;
+    END LOOP;
+  EXCEPTION WHEN OTHERS THEN
+    RAISE WARNING 'tg_recompute_incidents_on_plan_delete: recalculo omitido: %', SQLERRM;
+  END;
+  RETURN NULL;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS recompute_incidents_on_plan_delete ON public.allocation_plan_details;
+CREATE TRIGGER recompute_incidents_on_plan_delete
+  AFTER DELETE ON public.allocation_plan_details
+  REFERENCING OLD TABLE AS old_rows
+  FOR EACH STATEMENT EXECUTE FUNCTION public.tg_recompute_incidents_on_plan_delete();
+
 -- (3) Permisos: funciones de trigger, nunca invocables directamente.
 REVOKE ALL ON FUNCTION public.tg_unavailability_incident() FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.tg_refresh_incidents_on_plan_change() FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.tg_unavailability_check_panelist_account() FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.incident_enqueue_revert(uuid, date, uuid, uuid) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.incident_revert_unavailability(uuid, boolean) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.tg_unavailability_delete() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.tg_recompute_incidents_on_plan_delete() FROM PUBLIC, anon, authenticated;

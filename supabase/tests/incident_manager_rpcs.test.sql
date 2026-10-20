@@ -65,6 +65,17 @@ BEGIN
   END LOOP;
   IF has_function_privilege('anon', 'public.apply_reassignment_proposal(uuid,text,uuid,date)', 'EXECUTE') THEN
     RAISE EXCEPTION 'FAIL anon con EXECUTE en apply_reassignment_proposal'; END IF;
+  -- Motor y propuesta: solo service_role (la web usa los envoltorios).
+  IF has_function_privilege('authenticated', 'public.resolve_unavailability_incident(uuid,numeric,numeric)', 'EXECUTE')
+     OR has_function_privilege('authenticated', 'public.incident_suggest(uuid,date,numeric,numeric)', 'EXECUTE') THEN
+    RAISE EXCEPTION 'FAIL authenticated con EXECUTE en motor/incident_suggest'; END IF;
+  -- Heredadas: bulk sin uso -> nadie salvo service_role/owner; list_reroute_candidates solo authenticated (plan 2).
+  IF has_function_privilege('authenticated', 'public.apply_reassignment_proposals_bulk(uuid)', 'EXECUTE')
+     OR has_function_privilege('anon', 'public.apply_reassignment_proposals_bulk(uuid)', 'EXECUTE') THEN
+    RAISE EXCEPTION 'FAIL apply_reassignment_proposals_bulk ejecutable por anon/authenticated'; END IF;
+  IF has_function_privilege('anon', 'public.list_reroute_candidates(uuid,text)', 'EXECUTE')
+     OR NOT has_function_privilege('authenticated', 'public.list_reroute_candidates(uuid,text)', 'EXECUTE') THEN
+    RAISE EXCEPTION 'FAIL permisos de list_reroute_candidates'; END IF;
   RAISE NOTICE 'PASS permisos';
 END $$;
 
@@ -269,5 +280,28 @@ BEGIN
      OR (pg_temp.line('d0000000-0000-0000-0000-000000000001')).status <> 'manager_resolved' THEN
     RAISE EXCEPTION 'FAIL nodo valido no aplica'; END IF;
   RAISE NOTICE 'PASS apply_reassignment_proposal valida nodo destino';
+END $$;
+ROLLBACK;
+
+-- ===== Envoltorios como rol authenticated (sin EXECUTE directo sobre motor / incident_suggest) =====
+BEGIN;
+\ir fixtures/incident_city.sql
+SELECT pg_temp.baja('2027-03-01','2027-03-31');
+SELECT pg_temp.fill('N2','2027-03-01','2027-03-29',8);
+SELECT pg_temp.fill('N3','2027-03-01','2027-03-29',8);
+SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N1','N4','2027-03-10','notified');
+SELECT public.resolve_unavailability_incident('f0000000-0000-0000-0000-000000000001');
+SELECT (pg_temp.line('d0000000-0000-0000-0000-000000000001')).id AS lid \gset
+SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+SET LOCAL ROLE authenticated;
+SELECT set_config('t.sug', public.suggest_for_week(:'lid', '2027-04-12')->>'found', true);
+SELECT set_config('t.st', public.apply_manager_decision(:'lid', 'accept')->>'incident_status', true);
+RESET ROLE;
+DO $$
+BEGIN
+  IF current_setting('t.sug') <> 'true' THEN RAISE EXCEPTION 'FAIL suggest_for_week como authenticated'; END IF;
+  IF current_setting('t.st') <> 'resolved' THEN
+    RAISE EXCEPTION 'FAIL apply_manager_decision como authenticated (%)', current_setting('t.st'); END IF;
+  RAISE NOTICE 'PASS envoltorios ejecutables como authenticated';
 END $$;
 ROLLBACK;

@@ -180,6 +180,7 @@ BEGIN
     UPDATE panelist_reassignment_proposal
       SET status='dismissed', final_action=NULL, confirmed_by=v_actor, confirmed_at=now(), updated_at=now()
       WHERE id = p_proposal_id;
+    PERFORM incident_recompute_status(v_prop.unavailability_id);
     RETURN;
   END IF;
 
@@ -214,7 +215,8 @@ BEGIN
   ELSIF p_final_action = 'shift_date' THEN
     IF p_final_date IS NULL THEN RAISE EXCEPTION 'shift_date requires date'; END IF;
     UPDATE allocation_plan_details
-      SET fecha_programada = p_final_date,
+      SET original_fecha_programada = COALESCE(original_fecha_programada, fecha_programada),
+          fecha_programada = p_final_date,
           reassignment_reason='panelist_unavailable', reassigned_at=now(), reassigned_by=v_actor, updated_at=now()
       WHERE id = v_prop.allocation_plan_detail_id;
 
@@ -239,6 +241,9 @@ BEGIN
           destination_node_id = CASE
             WHEN v_prop.affected_role='destination' AND p_final_target_node_id IS NOT NULL
             THEN p_final_target_node_id ELSE destination_node_id END,
+          original_fecha_programada = CASE
+            WHEN p_final_date IS NOT NULL AND p_final_date IS DISTINCT FROM fecha_programada
+            THEN COALESCE(original_fecha_programada, fecha_programada) ELSE original_fecha_programada END,
           fecha_programada = COALESCE(p_final_date, fecha_programada),
           reassignment_reason='manual', reassigned_at=now(), reassigned_by=v_actor, updated_at=now()
       WHERE id = v_prop.allocation_plan_detail_id;
@@ -251,6 +256,9 @@ BEGIN
         final_target_node_id=p_final_target_node_id, final_date=p_final_date,
         confirmed_by=v_actor, confirmed_at=now(), updated_at=now()
     WHERE id = p_proposal_id;
+
+  -- El estado de la incidencia se recalcula (si no, se quedaria en pending_manager).
+  PERFORM incident_recompute_status(v_prop.unavailability_id);
 END;
 $$;
 
@@ -263,3 +271,6 @@ REVOKE ALL ON FUNCTION public.set_incident_resolution(uuid, text) FROM PUBLIC, a
 GRANT EXECUTE ON FUNCTION public.set_incident_resolution(uuid, text) TO authenticated, service_role;
 REVOKE ALL ON FUNCTION public.apply_reassignment_proposal(uuid, text, uuid, date) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.apply_reassignment_proposal(uuid, text, uuid, date) TO authenticated, service_role;
+-- Endurecimiento (heredadas): el bulk ya no lo llama nadie; list_reroute_candidates sigue para la web (plan 2).
+REVOKE ALL ON FUNCTION public.apply_reassignment_proposals_bulk(uuid) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.list_reroute_candidates(uuid, text) FROM PUBLIC, anon;

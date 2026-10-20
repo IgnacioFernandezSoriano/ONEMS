@@ -57,12 +57,13 @@ DO $$
 BEGIN
   IF to_regprocedure('public.generate_reassignment_proposals(uuid)') IS NOT NULL THEN
     RAISE EXCEPTION 'FAIL generate_reassignment_proposals sigue existiendo'; END IF;
-  IF NOT has_function_privilege('authenticated', 'public.resolve_unavailability_incident(uuid,numeric,numeric)', 'EXECUTE')
-     OR NOT has_function_privilege('service_role', 'public.resolve_unavailability_incident(uuid,numeric,numeric)', 'EXECUTE')
-     OR NOT has_function_privilege('authenticated', 'public.incident_suggest(uuid,date,numeric,numeric)', 'EXECUTE')
+  IF NOT has_function_privilege('service_role', 'public.resolve_unavailability_incident(uuid,numeric,numeric)', 'EXECUTE')
      OR NOT has_function_privilege('service_role', 'public.incident_suggest(uuid,date,numeric,numeric)', 'EXECUTE') THEN
-    RAISE EXCEPTION 'FAIL faltan GRANT a authenticated/service_role'; END IF;
-  IF has_function_privilege('anon', 'public.resolve_unavailability_incident(uuid,numeric,numeric)', 'EXECUTE')
+    RAISE EXCEPTION 'FAIL faltan GRANT a service_role'; END IF;
+  -- La web no los llama directamente: usa suggest_for_week / apply_manager_decision (SECURITY DEFINER).
+  IF has_function_privilege('authenticated', 'public.resolve_unavailability_incident(uuid,numeric,numeric)', 'EXECUTE')
+     OR has_function_privilege('authenticated', 'public.incident_suggest(uuid,date,numeric,numeric)', 'EXECUTE')
+     OR has_function_privilege('anon', 'public.resolve_unavailability_incident(uuid,numeric,numeric)', 'EXECUTE')
      OR has_function_privilege('anon', 'public.incident_suggest(uuid,date,numeric,numeric)', 'EXECUTE')
      OR has_function_privilege('anon', 'public.incident_recompute_status(uuid)', 'EXECUTE')
      OR has_function_privilege('authenticated', 'public.incident_recompute_status(uuid)', 'EXECUTE') THEN

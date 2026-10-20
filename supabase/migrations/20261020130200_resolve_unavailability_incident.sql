@@ -6,9 +6,8 @@
 -- que ya no aplican; crea lineas solo para muestras sin linea en ese rol.
 -- Los cambios del plan y los avisos los hacen incident_apply_change/incident_apply_cancel (Tarea 3).
 
--- (0) Motor viejo fuera. El trigger tg_generate_proposals_on_unavailability aun lo llama (lo sustituye la
---     Tarea 6); su EXCEPTION WHEN OTHERS lo convierte en WARNING.
-DROP FUNCTION IF EXISTS public.generate_reassignment_proposals(uuid);
+-- (0) El motor viejo (generate_reassignment_proposals) NO se borra aqui: lo borra 20261020130400 justo despues
+--     de retirar el trigger viejo que lo llama, para que ningun estado intermedio tenga un trigger roto.
 
 -- (1) Nodo alternativo para una muestra: incident_find_node + nunca el nodo del otro extremo de la muestra
 --     (evita origen = destino al reencaminar una muestra intra-ciudad). Interna.
@@ -369,6 +368,7 @@ $$;
 REVOKE ALL ON FUNCTION public.incident_find_node_for_sample(uuid, uuid, uuid, date, numeric, numeric) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.incident_recompute_status(uuid) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.incident_suggest(uuid, date, numeric, numeric) FROM PUBLIC, anon, authenticated;
-GRANT EXECUTE ON FUNCTION public.incident_suggest(uuid, date, numeric, numeric) TO authenticated, service_role;
+-- Solo service_role: la web usa los envoltorios suggest_for_week / apply_manager_decision (SECURITY DEFINER).
+GRANT EXECUTE ON FUNCTION public.incident_suggest(uuid, date, numeric, numeric) TO service_role;
 REVOKE ALL ON FUNCTION public.resolve_unavailability_incident(uuid, numeric, numeric) FROM PUBLIC, anon, authenticated;
-GRANT EXECUTE ON FUNCTION public.resolve_unavailability_incident(uuid, numeric, numeric) TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.resolve_unavailability_incident(uuid, numeric, numeric) TO service_role;

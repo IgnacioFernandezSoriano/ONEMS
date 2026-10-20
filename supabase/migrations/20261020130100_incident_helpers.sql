@@ -150,6 +150,7 @@ SET search_path = public
 AS $$
   SELECT p.id FROM panelists p
    WHERE p.node_id = p_node_id AND p.status = 'active' AND p.account_id = p_account_id
+   ORDER BY p.created_at, p.id
    LIMIT 1;
 $$;
 

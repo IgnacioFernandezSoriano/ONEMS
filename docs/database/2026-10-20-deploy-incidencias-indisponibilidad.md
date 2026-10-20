@@ -30,23 +30,29 @@ tenía que revisarlas una a una. Con este cambio:
 |---|---|---|
 | 1 | `20261020130000_incident_schema` | Columnas y estados nuevos, tabla de avisos, `confirmed` pasa a `manager_resolved` |
 | 2 | `20261020130100_incident_helpers` | Funciones auxiliares (carga por nodo, buscar fecha/nodo, encolar avisos, aplicar cambio) |
-| 3 | `20261020130200_resolve_unavailability_incident` | Motor nuevo. **Borra el motor antiguo** |
-| 4 | `20261020130300_incident_manager_rpcs` | Funciones del manager (`suggest_for_week`, `apply_manager_decision`, `set_incident_resolution`) |
-| 5 | `20261020130400_incident_triggers` | El trigger de la baja pasa a usar el motor nuevo; refresco por cambios del plan |
+| 3 | `20261020130200_resolve_unavailability_incident` | Motor nuevo (el antiguo sigue existiendo hasta la 5) |
+| 4 | `20261020130300_incident_manager_rpcs` | Funciones del manager (`suggest_for_week`, `apply_manager_decision`, `set_incident_resolution`); la función antigua `apply_reassignment_proposal` recalcula el estado y guarda la fecha original |
+| 5 | `20261020130400_incident_triggers` | El trigger de la baja pasa a usar el motor nuevo y **borra el motor antiguo**; refresco por cambios del plan; guardas de la baja (no reactivar, no editar fechas); borrado de bajas y de muestras |
 | 6 | `20261020130500_declare_panelist_unavailability` | Alta de bajas desde n8n y aviso "recibido" en altas web |
 | 7 | `20261020130600_incident_backfill` | Puesta al día de las bajas existentes (sin avisos) |
 
-> **ADVERTENCIA CRÍTICA:** la migración 3 (`130200`) borra el motor antiguo, pero el trigger antiguo
-> de las bajas lo sigue llamando hasta que la migración 5 (`130400`) lo sustituye. Si se aplica la 3 y
-> se queda sin aplicar la 5, **cualquier baja nueva dará error**. Por eso las **siete se aplican en una
-> sola sesión, seguidas y en orden**, sin dejar la 3 aplicada y parar.
+> Ningún punto intermedio deja un trigger llamando a una función inexistente (el motor antiguo se borra
+> en la 5, justo después de quitar el trigger que lo usaba). Aun así, las **siete se aplican en una sola
+> sesión, seguidas y en orden**.
 
 ## 3. Cómo se aplican
 
 Con la herramienta MCP `supabase-onems` → `apply_migration`, **una llamada por fichero**, usando como
 `name` el nombre del fichero sin `.sql` (p. ej. `20261020130000_incident_schema`) y como `query` el
 contenido completo del fichero. Tras cada una, ejecutar su verificación (sección 5) antes de pasar a
-la siguiente. Si una falla: parar y avisar (ver sección 6; no dejar el sistema con la 3 sin la 5).
+la siguiente. Si una falla: parar y avisar (ver sección 6).
+
+**Instrucción al aplicar (NO está dentro de los ficheros):** para la **1 (`130000`)** y la **5
+(`130400`)**, anteponer al `query` la línea `SET lock_timeout = '10s';`. Ambas toman bloqueos fuertes
+sobre `allocation_plan_details` (la 1 añade una columna con `ALTER TABLE ... ADD COLUMN`; la 5 crea
+triggers en esa tabla). El ETL escribe cada 30 minutos: **no aplicar a las :00 ni a las :30** (mejor
+hacia :10–:20 o :40–:50). Si da error de `lock timeout`, no ha cambiado nada: esperar un minuto y
+reintentar la misma migración.
 
 ## 4. Comprobaciones ANTES de aplicar (solo lectura)
 
@@ -73,7 +79,22 @@ select pg_get_constraintdef(oid) as definicion
 -- Estado actual: el motor antiguo existe, el nuevo no
 select to_regprocedure('generate_reassignment_proposals(uuid)') as motor_antiguo,
        to_regprocedure('resolve_unavailability_incident(uuid,numeric,numeric)') as motor_nuevo;
+
+-- Los CHECK que la migración 1 sustituye existen con ese nombre (si no, la 1 falla)
+select conname from pg_constraint
+ where conname in ('prp_status_check','prp_final_action_check') order by 1;   -- 2 filas
+
+-- Nada de este despliegue existe ya (todo debe salir NULL / false)
+select to_regprocedure('declare_panelist_unavailability(uuid,date,date,text,text)') as declare_fn,
+       to_regprocedure('tg_refresh_incidents_on_plan_change()')                     as refresh_fn,
+       to_regclass('panelist_notification')                                         as tabla_avisos,
+       exists (select 1 from information_schema.columns
+                where table_schema = 'public' and table_name = 'allocation_plan_details'
+                  and column_name = 'original_fecha_programada')                    as col_fecha_original;
 ```
+
+Si falta alguno de los dos CHECK, o si **cualquiera** de los cuatro objetos de la última consulta ya
+existe, **parar y avisar al responsable/controlador**: la base no está en el estado esperado.
 
 Lo visto el 2026-10-20 (solo lectura): 2 bajas vigentes (Petet y Nancy, ver sección 7), 12 propuestas
 antiguas todas en `dismissed` (ninguna `confirmed`), motor antiguo presente y nuevo ausente. La tabla
@@ -103,9 +124,8 @@ select proname from pg_proc where pronamespace='public'::regnamespace and pronam
 **Tras 3 (`130200`):**
 ```sql
 select to_regprocedure('public.resolve_unavailability_incident(uuid,numeric,numeric)') is not null as motor_nuevo,
-       to_regprocedure('public.generate_reassignment_proposals(uuid)') is null as motor_antiguo_borrado;  -- true, true
+       to_regprocedure('public.generate_reassignment_proposals(uuid)') is not null as motor_antiguo_sigue;  -- true, true
 ```
-(Recordatorio: seguir de inmediato con la 4 y la 5.)
 
 **Tras 4 (`130300`):**
 ```sql
@@ -117,8 +137,10 @@ select proname from pg_proc where pronamespace='public'::regnamespace
 ```sql
 select tgname from pg_trigger where not tgisinternal and tgname in
  ('generate_proposals_on_unavailability_trigger','check_unavailability_panelist_account',
-  'refresh_incidents_on_plan_insert','refresh_incidents_on_plan_update') order by 1;   -- 4 filas
-select to_regprocedure('public.tg_unavailability_incident()') is not null as func_trigger_baja;   -- true
+  'revert_on_unavailability_delete','refresh_incidents_on_plan_insert','refresh_incidents_on_plan_update',
+  'recompute_incidents_on_plan_delete') order by 1;   -- 6 filas
+select to_regprocedure('public.tg_unavailability_incident()') is not null as func_trigger_baja,
+       to_regprocedure('public.generate_reassignment_proposals(uuid)') is null as motor_antiguo_borrado;   -- true, true
 ```
 **Tras 6 (`130500`):**
 ```sql
@@ -138,6 +160,10 @@ La propia migración 7 falla (`RAISE EXCEPTION`) si queda alguna baja activa vig
 
 ## 6. Rollback por migración
 
+`apply_migration` ejecuta **cada fichero en una sola transacción**: si un fichero falla, no queda nada
+de ese fichero a medias (se deshace entero). Lo que puede quedar es la cadena aplicada hasta el fichero
+anterior; en ese caso, arreglar y seguir hacia delante o deshacer según lo de abajo.
+
 Orden inverso. Revisar antes de ejecutar y pedir confirmación.
 
 - **7 (`130600`):** los datos que cambia **no se revierten solos**. Cada muestra movida queda registrada
@@ -149,20 +175,24 @@ Orden inverso. Revisar antes de ejecutar y pedir confirmación.
 - **6 (`130500`):** `drop function public.declare_panelist_unavailability(uuid,date,date,text,text);`
   `drop trigger enqueue_unavailability_received_trigger on public.panelist_unavailability;`
   `drop function public.tg_enqueue_unavailability_received();`
-- **5 (`130400`):** los triggers `check_unavailability_panelist_account` (guarda de cuenta de la baja),
-  `refresh_incidents_on_plan_insert` y `refresh_incidents_on_plan_update` los **crea esta migración** (no
-  existían antes), así que se deshacen con `drop trigger` (más sus funciones `tg_unavailability_check_panelist_account`,
-  `tg_refresh_incidents_on_plan_change`, `incident_enqueue_revert`). El trigger
-  `generate_proposals_on_unavailability_trigger` **sí existía** antes: la migración lo borra y lo vuelve a crear
-  apuntando a `tg_unavailability_incident()`. Para restaurar el comportamiento anterior hay que volver a crear su
-  función original `tg_generate_proposals_on_unavailability` y el trigger tal como estaban en las migraciones `20260806120000` y `20260806140000` (y la 3 la borra, ver abajo)
-  y el motor antiguo (`20260804*`); para eso debe existir el motor antiguo (ver rollback de la 3). Es preferible
-  arreglar hacia delante.
+- **5 (`130400`):** los triggers `check_unavailability_panelist_account` (guardas de la baja),
+  `revert_on_unavailability_delete`, `refresh_incidents_on_plan_insert`, `refresh_incidents_on_plan_update` y
+  `recompute_incidents_on_plan_delete` los **crea esta migración** (no existían antes), así que se deshacen con
+  `drop trigger` (más sus funciones `tg_unavailability_check_panelist_account`, `tg_unavailability_delete`,
+  `tg_refresh_incidents_on_plan_change`, `tg_recompute_incidents_on_plan_delete`, `incident_enqueue_revert`,
+  `incident_revert_unavailability`). El trigger `generate_proposals_on_unavailability_trigger` **sí existía**
+  antes: la migración lo borra y lo vuelve a crear apuntando a `tg_unavailability_incident()`. Esta migración
+  también **borra el motor antiguo** `generate_reassignment_proposals`. Para restaurar el comportamiento anterior
+  hay que recrear el motor antiguo (migración `20260804120500`), la función original
+  `tg_generate_proposals_on_unavailability` y el trigger tal como estaban en `20260806120000` y `20260806140000`.
+  Es preferible arreglar hacia delante.
 - **4 (`130300`):** `drop function` de `suggest_for_week`, `apply_manager_decision`, `set_incident_resolution`;
-  `apply_reassignment_proposal` se restaura con la versión anterior (migración `20260804121000`).
+  `apply_reassignment_proposal` se restaura con la versión anterior (migración `20260804121000`); devolver
+  `grant execute` a `authenticated` sobre `apply_reassignment_proposals_bulk(uuid)` y a `anon` sobre
+  `list_reroute_candidates(uuid,text)` si se quisiera el estado anterior exacto.
 - **3 (`130200`):** `drop function` de `resolve_unavailability_incident`, `incident_suggest`,
-  `incident_recompute_status`, `incident_find_node_for_sample`; recrear el motor antiguo
-  (migración `20260804120500`).
+  `incident_recompute_status`, `incident_find_node_for_sample` (el motor antiguo sigue ahí: esta migración ya
+  no lo borra).
 - **2 (`130100`):** `drop function` de las `incident_*` y `panelist_local_today`.
 - **1 (`130000`):** esta migración también redefine `apply_reassignment_proposal` (cierra en
   `manager_resolved`): restaurar la definición anterior de `20260804121000` (coherente con la 4). Quitar las columnas nuevas (`incident_status`, `auto_summary`, `final_resolution`,
@@ -171,6 +201,12 @@ Orden inverso. Revisar antes de ejecutar y pedir confirmación.
   `confirmed` convertidas a `manager_resolved` ya no se distinguen.
 
 ## 7. Resultado esperado de la puesta al día en KENYA
+
+> **Importante, dicho claro:** la migración 7 **CAMBIA FILAS REALES DEL PLAN de KENYA en el momento de
+> aplicarla.** Las muestras de Nancy y de Petet que se puedan resolver pasan a tener **otra fecha
+> (`fecha_programada`) o otro nodo** de origen/destino. El aviso diario de las 9:00 usará **las fechas nuevas
+> a partir del día siguiente**. Esto es lo decidido: estas bajas se **tratan como bajas nuevas** (el motor
+> nuevo las resuelve igual que si se acabaran de declarar). No se manda ningún aviso por estos cambios.
 
 Lectura de solo lectura el 2026-10-20 (todas las muestras en `pending`; ninguna `sent`/`received`):
 
@@ -193,6 +229,10 @@ estado. Nancy (0 líneas, `pending_review`) queda en `new` tras la migración 1.
 - No manda avisos por cambios antiguos (la puesta al día va con los avisos suprimidos).
 - No toca muestras `sent`/`received`: solo informa.
 - No incluye Telegram/n8n ni la pantalla nueva del manager: llegan en los planes 2 y 3.
+- **Cambio de comportamiento para la web actual:** desde la migración 5, la base **rechaza** editar las fechas
+  de una baja activa ("Dates of an active unavailability cannot be edited; cancel and declare a new one") y
+  reactivar una baja cancelada. Si alguien usa "editar fechas" en la web actual verá un error; lo correcto es
+  cancelar la baja y declarar otra (spec 5.7/5.8). Borrar una baja activa ahora revierte primero su impacto.
 - **Edge function `propose-reassignments`:** sigue desplegada en Supabase. El frontend ya no la llama,
   así que se puede **eliminar justo después de aplicar las migraciones** (dashboard → Edge Functions, o
   MCP). Pedir confirmación antes.

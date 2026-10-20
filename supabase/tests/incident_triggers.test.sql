@@ -95,9 +95,15 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_trigger t WHERE t.tgrelid = 'public.panelist_unavailability'::regclass
                     AND t.tgname = 'check_unavailability_panelist_account' AND NOT t.tgisinternal) THEN
     RAISE EXCEPTION 'FAIL falta check_unavailability_panelist_account'; END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'revert_on_unavailability_delete' AND NOT tgisinternal)
+     OR NOT EXISTS (SELECT 1 FROM pg_trigger t WHERE t.tgname = 'recompute_incidents_on_plan_delete'
+                       AND (t.tgtype & 1) = 0 AND t.tgoldtable IS NOT NULL) THEN
+    RAISE EXCEPTION 'FAIL faltan triggers de borrado'; END IF;
   FOREACH f IN ARRAY ARRAY['public.tg_unavailability_incident()', 'public.tg_refresh_incidents_on_plan_change()',
                            'public.tg_unavailability_check_panelist_account()',
-                           'public.incident_enqueue_revert(uuid,date,uuid,uuid)'] LOOP
+                           'public.incident_enqueue_revert(uuid,date,uuid,uuid)',
+                           'public.incident_revert_unavailability(uuid,boolean)', 'public.tg_unavailability_delete()',
+                           'public.tg_recompute_incidents_on_plan_delete()'] LOOP
     IF has_function_privilege('anon', f, 'EXECUTE') OR has_function_privilege('authenticated', f, 'EXECUTE') THEN
       RAISE EXCEPTION 'FAIL % ejecutable por anon/authenticated', f; END IF;
     IF NOT (SELECT prosecdef FROM pg_proc WHERE oid = f::regprocedure) THEN
@@ -723,6 +729,116 @@ BEGIN
   IF EXISTS (SELECT 1 FROM public.panelist_notification WHERE account_id <> 'a0000000-0000-0000-0000-000000000001') THEN
     RAISE EXCEPTION 'FAIL fuga: aviso en otra cuenta'; END IF;
   RAISE NOTICE 'PASS avisos sin datos de otra cuenta (plan_change y revert)';
+END $$;
+ROLLBACK;
+
+-- ===== Guardas de la baja: no se reactiva una cancelada; no se editan fechas de una activa =====
+BEGIN;
+\ir fixtures/incident_city.sql
+SELECT pg_temp.baja('2027-03-10','2027-03-12');
+DO $$
+BEGIN
+  BEGIN
+    UPDATE public.panelist_unavailability SET end_date = '2027-03-15' WHERE id = 'f0000000-0000-0000-0000-000000000001';
+    RAISE EXCEPTION 'FAIL fechas de baja activa editadas';
+  EXCEPTION WHEN raise_exception THEN
+    IF SQLERRM NOT LIKE 'Dates of an active unavailability cannot be edited%' THEN RAISE; END IF;
+  END;
+  BEGIN
+    UPDATE public.panelist_unavailability SET start_date = '2027-03-09' WHERE id = 'f0000000-0000-0000-0000-000000000001';
+    RAISE EXCEPTION 'FAIL fecha de inicio de baja activa editada';
+  EXCEPTION WHEN raise_exception THEN
+    IF SQLERRM NOT LIKE 'Dates of an active unavailability cannot be edited%' THEN RAISE; END IF;
+  END;
+  -- Otras columnas si se pueden tocar.
+  UPDATE public.panelist_unavailability SET notes = 'ok' WHERE id = 'f0000000-0000-0000-0000-000000000001';
+  UPDATE public.panelist_unavailability SET status = 'cancelled' WHERE id = 'f0000000-0000-0000-0000-000000000001';
+  BEGIN
+    UPDATE public.panelist_unavailability SET status = 'active' WHERE id = 'f0000000-0000-0000-0000-000000000001';
+    RAISE EXCEPTION 'FAIL baja cancelada reactivada';
+  EXCEPTION WHEN raise_exception THEN
+    IF SQLERRM NOT LIKE 'Reactivating a cancelled unavailability is not supported%' THEN RAISE; END IF;
+  END;
+  -- Una cancelada si puede cambiar de fechas (ya no actua).
+  UPDATE public.panelist_unavailability SET end_date = '2027-03-13' WHERE id = 'f0000000-0000-0000-0000-000000000001';
+  RAISE NOTICE 'PASS guardas: reactivar y editar fechas rechazados';
+END $$;
+ROLLBACK;
+
+-- ===== Borrar una baja activa revierte su impacto =====
+BEGIN;
+\ir fixtures/incident_city.sql
+SELECT pg_temp.baja('2027-03-10','2027-03-12');
+SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N1','N4','2027-03-10');
+DO $$
+BEGIN
+  IF (pg_temp.s('d0000000-0000-0000-0000-000000000001')).fecha_programada <> '2027-03-15' THEN
+    RAISE EXCEPTION 'FAIL borrado: preparacion'; END IF;
+END $$;
+DELETE FROM public.panelist_unavailability WHERE id = 'f0000000-0000-0000-0000-000000000001';
+DO $$
+DECLARE s record;
+BEGIN
+  s := pg_temp.s('d0000000-0000-0000-0000-000000000001');
+  IF (pg_temp.inc()).id IS NOT NULL THEN RAISE EXCEPTION 'FAIL borrado: la baja sigue'; END IF;
+  IF s.fecha_programada <> '2027-03-10' OR s.original_fecha_programada IS NOT NULL OR s.reassigned_at IS NOT NULL
+     OR s.origin_node_id <> 'b1000000-0000-0000-0000-000000000001' THEN
+    RAISE EXCEPTION 'FAIL borrado: muestra no restaurada % %', s.fecha_programada, s.original_fecha_programada; END IF;
+  IF pg_temp.nlines() <> 0 THEN RAISE EXCEPTION 'FAIL borrado: lineas siguen'; END IF;
+  RAISE NOTICE 'PASS borrar baja activa revierte la muestra';
+END $$;
+ROLLBACK;
+
+-- ===== Borrar muestras del plan recalcula el estado =====
+BEGIN;
+\ir fixtures/incident_city.sql
+SELECT pg_temp.baja('2027-03-10','2027-03-12');
+SELECT pg_temp.fill('N1','2027-03-15','2027-03-29',8);
+SELECT pg_temp.fill('N2','2027-03-01','2027-03-29',8);
+SELECT pg_temp.fill('N3','2027-03-01','2027-03-29',8);
+SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N1','N4','2027-03-10');
+DO $$
+BEGIN
+  IF (pg_temp.inc()).incident_status <> 'pending_manager' THEN RAISE EXCEPTION 'FAIL borrado plan: preparacion'; END IF;
+END $$;
+DELETE FROM public.allocation_plan_details WHERE id = 'd0000000-0000-0000-0000-000000000001';
+DO $$
+BEGIN
+  IF pg_temp.nlines() <> 0 OR (pg_temp.inc()).incident_status <> 'auto_resolved'
+     OR (pg_temp.inc()).auto_summary <> 'shift=0;reroute=0;cancel=0;info=0;pending=0' THEN
+    RAISE EXCEPTION 'FAIL borrado plan: estado % %', (pg_temp.inc()).incident_status, (pg_temp.inc()).auto_summary; END IF;
+  RAISE NOTICE 'PASS borrar la unica pendiente deja la incidencia auto_resolved';
+END $$;
+ROLLBACK;
+
+-- ===== RPC heredada apply_reassignment_proposal: recalcula el estado y su retraso se revierte =====
+BEGIN;
+\ir fixtures/incident_city.sql
+SELECT pg_temp.baja('2027-03-10','2027-03-12');
+SELECT pg_temp.fill('N1','2027-03-15','2027-03-29',8);
+SELECT pg_temp.fill('N2','2027-03-01','2027-03-29',8);
+SELECT pg_temp.fill('N3','2027-03-01','2027-03-29',8);
+SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N1','N4','2027-03-10');
+SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+SELECT public.apply_reassignment_proposal((pg_temp.line('d0000000-0000-0000-0000-000000000001')).id, 'shift_date', NULL, '2027-04-05');
+SELECT set_config('request.jwt.claim.sub','', true);
+DO $$
+DECLARE s record;
+BEGIN
+  s := pg_temp.s('d0000000-0000-0000-0000-000000000001');
+  IF (pg_temp.inc()).incident_status <> 'resolved' THEN
+    RAISE EXCEPTION 'FAIL heredada: estado %', (pg_temp.inc()).incident_status; END IF;
+  IF s.fecha_programada <> '2027-04-05' OR s.original_fecha_programada IS DISTINCT FROM '2027-03-10'::date THEN
+    RAISE EXCEPTION 'FAIL heredada: original_fecha % %', s.fecha_programada, s.original_fecha_programada; END IF;
+END $$;
+UPDATE public.panelist_unavailability SET status = 'cancelled' WHERE id = 'f0000000-0000-0000-0000-000000000001';
+DO $$
+DECLARE s record;
+BEGIN
+  s := pg_temp.s('d0000000-0000-0000-0000-000000000001');
+  IF s.fecha_programada <> '2027-03-10' OR s.original_fecha_programada IS NOT NULL THEN
+    RAISE EXCEPTION 'FAIL heredada: retraso no revertido %', s.fecha_programada; END IF;
+  RAISE NOTICE 'PASS RPC heredada: estado recalculado y retraso revertido al cancelar';
 END $$;
 ROLLBACK;
 
