@@ -257,4 +257,4 @@ una migración por llamada, en orden, con `SET lock_timeout='10s'` en la 1 y la 
   - Bajas: Nancy Weru `new` (activa, sin tocar), Petet Lokui Lokaale `resolved` (activa, ya revisada), las 3 de
     Ignacio UPU (DEMO2) `resolved`.
   - Propuestas: solo las 12 antiguas `dismissed`; el motor no creó líneas nuevas.
-- Pendiente: borrar la edge function `propose-reassignments` (sección 8) — requiere confirmación.
+- Edge function `propose-reassignments` **borrada** (Management API DELETE, confirmado por el responsable); las otras 7 funciones siguen activas.
