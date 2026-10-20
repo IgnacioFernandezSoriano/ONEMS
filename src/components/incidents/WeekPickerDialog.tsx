@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { parseISO, getISOWeek } from 'date-fns'
 import { useTranslation } from '@/hooks/useTranslation'
-import { fmtDay, sampleLabel, toMonday, SATURATION_BADGE_CLASS } from '@/lib/incidentFormat'
+import { fmtDay, fmtWeekRange, sampleLabel, toMonday, SATURATION_BADGE_CLASS } from '@/lib/incidentFormat'
 import type { ReassignmentProposal, WeekSuggestion } from '@/lib/types'
 
 interface Props {
@@ -79,7 +79,7 @@ export function WeekPickerDialog({ line, weekStart, suggestion, loading, busy, o
             <div className="flex flex-wrap items-center gap-2">
               <span>
                 {t('incidents.week.proposal', {
-                  week: getISOWeek(parseISO(weekStart)),
+                  week: `${getISOWeek(parseISO(weekStart))} (${fmtWeekRange(weekStart)})`,
                   date: fmtDay(suggestion.date),
                   node: suggestion.node_code ?? '-',
                   load: suggestion.load_after ?? '-',

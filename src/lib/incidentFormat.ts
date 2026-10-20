@@ -1,4 +1,4 @@
-import { format, parseISO, isValid, startOfWeek } from 'date-fns'
+import { format, parseISO, isValid, startOfWeek, addDays } from 'date-fns'
 import type { ReassignmentProposal } from '@/lib/types'
 
 // Utilidades de presentacion del detalle de incidencias de indisponibilidad.
@@ -9,6 +9,21 @@ export const fmtDay = (d: string | null | undefined): string => {
   if (!d) return '-'
   const p = parseISO(d)
   return isValid(p) ? format(p, 'dd/MM/yyyy') : d
+}
+
+// Dia y mes (dd/MM) para cabeceras compactas.
+export const fmtShort = (d: string | null | undefined): string => {
+  if (!d) return '-'
+  const p = parseISO(d)
+  return isValid(p) ? format(p, 'dd/MM') : d
+}
+
+// Rango de una semana: "26/10 – 01/11". Si no se da el fin se toma lunes + 6 dias.
+export const fmtWeekRange = (start: string, end?: string | null): string => {
+  const s = parseISO(start)
+  const e = end ? parseISO(end) : (isValid(s) ? addDays(s, 6) : s)
+  if (!isValid(s) || !isValid(e)) return start
+  return `${format(s, 'dd/MM')} – ${format(e, 'dd/MM')}`
 }
 
 export const fmtDateTime = (d: string | null | undefined): string => {

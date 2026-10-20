@@ -1,6 +1,6 @@
 import { useState, useEffect, Fragment } from 'react'
 import { useTranslation } from '@/hooks/useTranslation'
-import { fmtDay, SATURATION_BADGE_CLASS } from '@/lib/incidentFormat'
+import { fmtDay, fmtWeekRange, SATURATION_BADGE_CLASS } from '@/lib/incidentFormat'
 import type { CityLoadWeek, CityNodeLoadRow } from '@/lib/types'
 
 interface Props {
@@ -130,9 +130,10 @@ export function CityLoadPanel({
                             type="button"
                             onClick={() => clickWeek(w)}
                             aria-pressed={selectedWeekStart === w.week_start_date}
-                            className="w-full px-3 py-2 uppercase select-none"
+                            className="w-full px-3 py-2 uppercase select-none leading-tight"
                           >
-                            {t('incidents.balance.week_prefix')}{w.week_number}
+                            <span className="block">{t('incidents.balance.week_prefix')}{w.week_number}</span>
+                            <span className="block text-[10px] font-normal normal-case whitespace-nowrap">{fmtWeekRange(w.week_start_date, w.week_end_date)}</span>
                           </button>
                         </th>
                       ))}
@@ -198,7 +199,7 @@ export function CityLoadPanel({
                     className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-blue-700 hover:bg-blue-100"
                   >
                     {t('incidents.balance.week_filter_active')}{' '}
-                    {selectedWeek ? `${t('incidents.balance.week_prefix')}${selectedWeek.week_number}` : fmtDay(selectedWeekStart)}
+                    {selectedWeek ? `${t('incidents.balance.week_prefix')}${selectedWeek.week_number} · ${fmtWeekRange(selectedWeek.week_start_date, selectedWeek.week_end_date)}` : fmtDay(selectedWeekStart)}
                     <span className="font-semibold" aria-hidden="true">✕</span>
                   </button>
                 )}
