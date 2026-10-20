@@ -2724,6 +2724,7 @@ incidents.final_action.shift_date,Déplacée à une date ultérieure
 incidents.final_action.reroute,Déplacée vers un autre nœud
 incidents.final_action.cancel,Annulée
 incidents.final_action.none,Aucun changement
+incidents.final_action.manual,Modifié manuellement
 incidents.filter.open,Ouvertes
 incidents.filter.all,Toutes
 incidents.inbox.status,Statut
@@ -2753,6 +2754,11 @@ incidents.detail.done,Action réalisée
 incidents.detail.done_by,Par
 incidents.detail.done_at,Quand
 incidents.detail.summary,Résumé automatique
+incidents.confirm.cancel_one,Cela annulera l'échantillon dans le plan d'allocation. Impossible de revenir en arrière depuis cet écran. Continuer ?
+incidents.confirm.cancel_many,Cela annulera {n} échantillons dans le plan d'allocation. Impossible de revenir en arrière depuis cet écran. Continuer ?
+incidents.confirm.accept_with_cancel,{n} des propositions sélectionnées annulent l'échantillon dans le plan d'allocation. Impossible de revenir en arrière depuis cet écran. Continuer ?
+incidents.confirm.back,Retour
+incidents.proposal.cancel,Annuler l'échantillon
 incidents.action.accept,Accepter la proposition
 incidents.action.other_week,Autre semaine…
 incidents.action.cancel_sample,Annuler l'échantillon

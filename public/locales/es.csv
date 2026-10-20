@@ -2732,6 +2732,7 @@ incidents.final_action.shift_date,Movida a una fecha posterior
 incidents.final_action.reroute,Movida a otro nodo
 incidents.final_action.cancel,Cancelada
 incidents.final_action.none,Sin cambios
+incidents.final_action.manual,Editada manualmente
 incidents.filter.open,Abiertas
 incidents.filter.all,Todas
 incidents.inbox.status,Estado
@@ -2761,6 +2762,11 @@ incidents.detail.done,Qué se hizo
 incidents.detail.done_by,Por
 incidents.detail.done_at,Cuándo
 incidents.detail.summary,Resumen automático
+incidents.confirm.cancel_one,Esto anulará la muestra en el plan de asignación. No se puede deshacer desde esta pantalla. ¿Continuar?
+incidents.confirm.cancel_many,Esto anulará {n} muestras en el plan de asignación. No se puede deshacer desde esta pantalla. ¿Continuar?
+incidents.confirm.accept_with_cancel,{n} de las propuestas seleccionadas anulan la muestra en el plan de asignación. No se puede deshacer desde esta pantalla. ¿Continuar?
+incidents.confirm.back,Volver
+incidents.proposal.cancel,Anular la muestra
 incidents.action.accept,Aceptar propuesta
 incidents.action.other_week,Otra semana…
 incidents.action.cancel_sample,Cancelar muestra

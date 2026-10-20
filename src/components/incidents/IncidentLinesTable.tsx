@@ -20,7 +20,8 @@ interface Props {
   onToggle: (id: string) => void
   onToggleAll: (ids: string[]) => void
   onAccept: (line: ReassignmentProposal) => void
-  onOtherWeek: (line: ReassignmentProposal) => void
+  // trigger: boton pulsado, para devolverle el foco al cerrar el dialogo.
+  onOtherWeek: (line: ReassignmentProposal, trigger: HTMLElement) => void
   onCancel: (line: ReassignmentProposal) => void
   busyId: string | null
   // Linea con el dialogo de "otra semana" abierto (se resalta).
@@ -50,7 +51,7 @@ export function IncidentLinesTable({
   const proposalCell = (l: ReassignmentProposal) => {
     const reason = reasonLabel(l.suggested_reason)
     let what: string
-    if (l.suggested_action === 'cancel') what = t('incidents.final_action.cancel')
+    if (l.suggested_action === 'cancel') what = t('incidents.proposal.cancel')
     else if (l.suggested_action === 'none') what = '-'
     else {
       const parts: string[] = []
@@ -149,7 +150,7 @@ export function IncidentLinesTable({
                       </button>
                       <button
                         type="button"
-                        onClick={() => onOtherWeek(l)}
+                        onClick={e => onOtherWeek(l, e.currentTarget)}
                         disabled={busy}
                         className="text-blue-600 hover:text-blue-800 disabled:opacity-40 disabled:cursor-not-allowed"
                       >

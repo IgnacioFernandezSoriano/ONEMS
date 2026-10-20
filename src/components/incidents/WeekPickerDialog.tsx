@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { parseISO, getISOWeek } from 'date-fns'
 import { useTranslation } from '@/hooks/useTranslation'
 import { fmtDay, sampleLabel, toMonday, SATURATION_BADGE_CLASS } from '@/lib/incidentFormat'
@@ -17,17 +17,28 @@ interface Props {
 
 // Panel flotante NO bloqueante: el manager tiene que poder pulsar la cabecera de una
 // semana en el panel de carga mientras esta abierto, por eso no hay fondo modal
-// (aria-modal="false"). Escape lo cierra; al abrirse recibe el foco.
+// (aria-modal="false"). Escape (con el foco dentro) lo cierra; al abrirse recibe el foco.
+// La fecha tecleada se guarda en local y solo se ajusta al lunes al salir del campo o
+// con Enter, para que escribir digito a digito no salte de mes.
 export function WeekPickerDialog({ line, weekStart, suggestion, loading, busy, onPickWeek, onConfirm, onClose }: Props) {
   const { t } = useTranslation()
   const inputRef = useRef<HTMLInputElement>(null)
 
+  const [draft, setDraft] = useState(weekStart ?? '')
+
   useEffect(() => { inputRef.current?.focus() }, [line.id])
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && !busy) onClose() }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [busy, onClose])
+  // La semana puede llegar de fuera (cabecera del panel de carga): se refleja en el campo.
+  useEffect(() => { setDraft(weekStart ?? '') }, [weekStart])
+
+  const commitDraft = () => {
+    const monday = toMonday(draft)
+    if (monday) {
+      if (monday !== weekStart) onPickWeek(monday)
+      else setDraft(monday)
+    } else {
+      setDraft(weekStart ?? '')
+    }
+  }
 
   const titleId = `week-picker-title-${line.id}`
   const canConfirm = !!weekStart && !!suggestion?.found && !loading && !busy
@@ -37,6 +48,9 @@ export function WeekPickerDialog({ line, weekStart, suggestion, loading, busy, o
       role="dialog"
       aria-modal="false"
       aria-labelledby={titleId}
+      onKeyDown={e => {
+        if (e.key === 'Escape' && !busy) { e.stopPropagation(); onClose() }
+      }}
       className="fixed bottom-4 end-4 z-50 w-[calc(100%-2rem)] max-w-md bg-white rounded-lg shadow-2xl border border-gray-200"
     >
       <div className="p-4 border-b">
@@ -52,11 +66,10 @@ export function WeekPickerDialog({ line, weekStart, suggestion, loading, busy, o
           ref={inputRef}
           type="date"
           aria-label={t('incidents.week.title')}
-          value={weekStart ?? ''}
-          onChange={e => {
-            const monday = e.target.value ? toMonday(e.target.value) : null
-            if (monday) onPickWeek(monday)
-          }}
+          value={draft}
+          onChange={e => setDraft(e.target.value)}
+          onBlur={commitDraft}
+          onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); commitDraft() } }}
           className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
         />
         <div className="text-sm min-h-[2.5rem]" aria-live="polite">

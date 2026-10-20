@@ -2732,6 +2732,7 @@ incidents.final_action.shift_date,Moved to a later date
 incidents.final_action.reroute,Moved to another node
 incidents.final_action.cancel,Cancelled
 incidents.final_action.none,No change
+incidents.final_action.manual,Edited manually
 incidents.filter.open,Open
 incidents.filter.all,All
 incidents.inbox.status,Status
@@ -2761,6 +2762,11 @@ incidents.detail.done,What was done
 incidents.detail.done_by,By
 incidents.detail.done_at,When
 incidents.detail.summary,Automatic summary
+incidents.confirm.cancel_one,This will cancel the sample in the allocation plan. It cannot be undone from this screen. Continue?
+incidents.confirm.cancel_many,This will cancel {n} samples in the allocation plan. It cannot be undone from this screen. Continue?
+incidents.confirm.accept_with_cancel,{n} of the selected proposals cancel the sample in the allocation plan. It cannot be undone from this screen. Continue?
+incidents.confirm.back,Back
+incidents.proposal.cancel,Cancel the sample
 incidents.action.accept,Accept proposal
 incidents.action.other_week,Other week…
 incidents.action.cancel_sample,Cancel sample

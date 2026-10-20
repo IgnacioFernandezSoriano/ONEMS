@@ -20,6 +20,11 @@ interface ActionError {
   failed?: { label: string; message: string }[]
 }
 
+interface ConfirmState {
+  text: string
+  run: () => void
+}
+
 interface SuggestionState {
   key: string
   data: WeekSuggestion | null
@@ -128,6 +133,40 @@ export function IncidentReviewPanel({ unavailabilityId, onBack }: Props) {
 
   const currentSuggestion = suggestion && suggestion.key === requestKey ? suggestion : null
 
+  const pending = lines.filter(l => l.status === 'pending')
+  const resolved = lines.filter(l => l.status !== 'pending')
+  // Filtro de semana sobre las pendientes (solo sin linea en edicion).
+  const filterActive = !editingId && !!weekFilter
+  const filterEnd = weekFilter ? format(addDays(parseISO(weekFilter), 6), 'yyyy-MM-dd') : null
+  const visiblePending = filterActive && weekFilter && filterEnd
+    ? pending.filter(l => {
+        const d = l.detail?.fecha_programada
+        return !!d && d >= weekFilter && d <= filterEnd
+      })
+    : pending
+  // La seleccion solo contiene lineas pendientes visibles: al cambiar el filtro (o al
+  // recargar) se quitan las ocultas, y las acciones en bloque usan solo estas.
+  const visibleKey = visiblePending.map(l => l.id).join(',')
+  useEffect(() => {
+    const visible = new Set(visibleKey ? visibleKey.split(',') : [])
+    setSelectedIds(prev => {
+      if ([...prev].every(id => visible.has(id))) return prev
+      return new Set([...prev].filter(id => visible.has(id)))
+    })
+  }, [visibleKey])
+  const selectedLines = visiblePending.filter(l => selectedIds.has(l.id))
+
+  // Paso de confirmacion para lo que anula muestras (no se puede deshacer aqui).
+  const [confirmState, setConfirmState] = useState<ConfirmState | null>(null)
+  // Boton "Otra semana..." que abrio el dialogo: recupera el foco al cerrarlo.
+  const returnFocusRef = useRef<HTMLElement | null>(null)
+  useEffect(() => {
+    if (editingId) return
+    const el = returnFocusRef.current
+    returnFocusRef.current = null
+    if (el && el.isConnected) el.focus()
+  }, [editingId])
+
   // Ejecuta una accion bloqueando los botones; siempre recarga al terminar.
   const runAction = async (id: string, fn: () => Promise<void>) => {
     if (busyRef.current) return
@@ -151,9 +190,22 @@ export function IncidentReviewPanel({ unavailabilityId, onBack }: Props) {
 
   const closeDialog = useCallback(() => { setEditingId(null); setPickedWeek(null) }, [])
 
-  const handleAccept = (l: ReassignmentProposal) => runAction(l.id, async () => { await decide(l.id, 'accept') })
-  const handleCancel = (l: ReassignmentProposal) => runAction(l.id, async () => { await decide(l.id, 'cancel') })
-  const handleOtherWeek = (l: ReassignmentProposal) => {
+  const doAccept = (l: ReassignmentProposal) => runAction(l.id, async () => { await decide(l.id, 'accept') })
+  const doCancel = (l: ReassignmentProposal) => runAction(l.id, async () => { await decide(l.id, 'cancel') })
+  // Aceptar una propuesta de anulacion tambien anula la muestra: se pide confirmacion.
+  const handleAccept = (l: ReassignmentProposal) => {
+    if (l.suggested_action === 'cancel') {
+      setConfirmState({ text: t('incidents.confirm.cancel_one'), run: () => doAccept(l) })
+    } else {
+      setConfirmState(null)
+      doAccept(l)
+    }
+  }
+  const handleCancel = (l: ReassignmentProposal) =>
+    setConfirmState({ text: t('incidents.confirm.cancel_one'), run: () => doCancel(l) })
+  const handleOtherWeek = (l: ReassignmentProposal, trigger: HTMLElement) => {
+    setConfirmState(null)
+    returnFocusRef.current = trigger
     setEditingId(l.id)
     setPickedWeek(defaultWeekFor(l))
   }
@@ -167,9 +219,9 @@ export function IncidentReviewPanel({ unavailabilityId, onBack }: Props) {
     })
   }
 
-  const handleBulk = (decision: 'accept' | 'cancel') => runAction('bulk', async () => {
-    const pendingById = new Map(lines.filter(l => l.status === 'pending').map(l => [l.id, l]))
-    const ids = [...selectedIds].filter(id => pendingById.has(id))
+  const doBulk = (decision: 'accept' | 'cancel', targets: ReassignmentProposal[]) => runAction('bulk', async () => {
+    const pendingById = new Map(targets.map(l => [l.id, l]))
+    const ids = targets.map(l => l.id)
     if (ids.length === 0) return
     const res = await decideMany(ids, decision)
     if (res.failed.length > 0) {
@@ -181,6 +233,37 @@ export function IncidentReviewPanel({ unavailabilityId, onBack }: Props) {
       })
     }
   })
+
+  const handleBulk = (decision: 'accept' | 'cancel') => {
+    // Se congela la seleccion visible en el momento del clic.
+    const targets = selectedLines
+    if (targets.length === 0) return
+    if (decision === 'cancel') {
+      setConfirmState({
+        text: t('incidents.confirm.cancel_many', { n: targets.length }),
+        run: () => doBulk('cancel', targets),
+      })
+      return
+    }
+    const cancelling = targets.filter(l => l.suggested_action === 'cancel').length
+    if (cancelling > 0) {
+      setConfirmState({
+        text: t('incidents.confirm.accept_with_cancel', { n: cancelling }),
+        run: () => doBulk('accept', targets),
+      })
+      return
+    }
+    setConfirmState(null)
+    doBulk('accept', targets)
+  }
+
+  // Confirmar: respeta la guarda de doble clic (runAction ignora si hay otra en curso).
+  const runConfirmed = () => {
+    if (!confirmState || busyRef.current) return
+    const { run } = confirmState
+    setConfirmState(null)
+    run()
+  }
 
   const handleSaveResolution = async (text: string) => {
     // El error del guardado lo muestra la cabecera; se recarga igualmente.
@@ -201,8 +284,13 @@ export function IncidentReviewPanel({ unavailabilityId, onBack }: Props) {
     if (next.has(id)) next.delete(id); else next.add(id)
     return next
   })
-  const toggleAll = (ids: string[]) => setSelectedIds(prev =>
-    ids.length > 0 && ids.every(id => prev.has(id)) ? new Set() : new Set(ids))
+  // Seleccionar/deseleccionar todas: solo afecta a las filas pendientes visibles.
+  const toggleAll = (ids: string[]) => setSelectedIds(prev => {
+    const next = new Set(prev)
+    if (ids.length > 0 && ids.every(id => prev.has(id))) ids.forEach(id => next.delete(id))
+    else ids.forEach(id => next.add(id))
+    return next
+  })
 
   if (loading) return <div className="p-6">{t('common.loading')}</div>
   if (!header) {
@@ -214,27 +302,18 @@ export function IncidentReviewPanel({ unavailabilityId, onBack }: Props) {
     )
   }
 
-  const pending = lines.filter(l => l.status === 'pending')
-  const resolved = lines.filter(l => l.status !== 'pending')
-  // Filtro de semana sobre las pendientes (solo sin linea en edicion).
-  const filterActive = !editingId && !!weekFilter
-  const filterEnd = weekFilter ? format(addDays(parseISO(weekFilter), 6), 'yyyy-MM-dd') : null
-  const visiblePending = filterActive && weekFilter && filterEnd
-    ? pending.filter(l => {
-        const d = l.detail?.fecha_programada
-        return !!d && d >= weekFilter && d <= filterEnd
-      })
-    : pending
   const pendingEmptyText = filterActive && pending.length > 0
     ? t('incidents.balance.week_filter_empty')
     : t('incidents.detail.no_pending')
 
+  // Estrella solo para destinos de reencaminamiento (un nodo distinto del liberado).
   const highlightNodeIds = pending
-    .map(l => l.suggested_target_node_id)
-    .filter((id): id is string => !!id)
-  if (currentSuggestion?.data?.found && currentSuggestion.data.node_id) highlightNodeIds.push(currentSuggestion.data.node_id)
+    .filter(l => l.suggested_action === 'reroute' && !!l.suggested_target_node_id && l.suggested_target_node_id !== header.node_id)
+    .map(l => l.suggested_target_node_id as string)
+  const sugNode = currentSuggestion?.data?.found ? currentSuggestion.data.node_id : undefined
+  if (sugNode && sugNode !== header.node_id) highlightNodeIds.push(sugNode)
 
-  const selectedPendingCount = pending.filter(l => selectedIds.has(l.id)).length
+  const selectedPendingCount = selectedLines.length
 
   return (
     <div className="pb-48">
@@ -287,6 +366,34 @@ export function IncidentReviewPanel({ unavailabilityId, onBack }: Props) {
           onSelectWeek={onSelectWeek}
           pickingWeek={!!editingId}
         />
+      )}
+
+      {confirmState && (
+        <div
+          role="alertdialog"
+          aria-labelledby="incident-confirm-text"
+          className="bg-amber-50 border border-amber-300 rounded-lg p-4 mb-6 flex flex-wrap items-center justify-between gap-3"
+        >
+          <span id="incident-confirm-text" className="text-sm font-medium text-amber-900">{confirmState.text}</span>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              autoFocus
+              onClick={runConfirmed}
+              disabled={busyId !== null}
+              className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {t('common.confirm')}
+            </button>
+            <button
+              type="button"
+              onClick={() => setConfirmState(null)}
+              className="px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300"
+            >
+              {t('incidents.confirm.back')}
+            </button>
+          </div>
+        </div>
       )}
 
       {selectedPendingCount > 0 && (

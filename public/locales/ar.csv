@@ -2724,6 +2724,7 @@ incidents.final_action.shift_date,نُقلت إلى تاريخ لاحق
 incidents.final_action.reroute,نُقلت إلى عقدة أخرى
 incidents.final_action.cancel,أُلغيت
 incidents.final_action.none,بدون تغيير
+incidents.final_action.manual,عُدّلت يدويًا
 incidents.filter.open,المفتوحة
 incidents.filter.all,الكل
 incidents.inbox.status,الحالة
@@ -2753,6 +2754,11 @@ incidents.detail.done,ما تم
 incidents.detail.done_by,بواسطة
 incidents.detail.done_at,متى
 incidents.detail.summary,الملخص التلقائي
+incidents.confirm.cancel_one,سيؤدي هذا إلى إلغاء العينة في خطة التوزيع. لا يمكن التراجع عن ذلك من هذه الشاشة. هل تريد المتابعة؟
+incidents.confirm.cancel_many,سيؤدي هذا إلى إلغاء {n} عينات في خطة التوزيع. لا يمكن التراجع عن ذلك من هذه الشاشة. هل تريد المتابعة؟
+incidents.confirm.accept_with_cancel,{n} من المقترحات المحددة تلغي العينة في خطة التوزيع. لا يمكن التراجع عن ذلك من هذه الشاشة. هل تريد المتابعة؟
+incidents.confirm.back,رجوع
+incidents.proposal.cancel,إلغاء العينة
 incidents.action.accept,قبول الاقتراح
 incidents.action.other_week,أسبوع آخر…
 incidents.action.cancel_sample,إلغاء العينة
