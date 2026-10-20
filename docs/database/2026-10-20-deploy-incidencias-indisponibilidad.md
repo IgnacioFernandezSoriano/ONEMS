@@ -65,6 +65,11 @@ order by u.start_date;
 -- Propuestas existentes por estado ('confirmed' pasará a 'manager_resolved')
 select status, count(*) from panelist_reassignment_proposal group by 1 order by 1;
 
+-- El CHECK de motivos ya admite 'materials' (lo puso la migración 20260807100000)
+select pg_get_constraintdef(oid) as definicion
+  from pg_constraint where conname = 'panelist_unavailability_reason_check';
+-- esperado: la definición contiene 'materials'
+
 -- Estado actual: el motor antiguo existe, el nuevo no
 select to_regprocedure('generate_reassignment_proposals(uuid)') as motor_antiguo,
        to_regprocedure('resolve_unavailability_incident(uuid,numeric,numeric)') as motor_nuevo;
@@ -73,6 +78,10 @@ select to_regprocedure('generate_reassignment_proposals(uuid)') as motor_antiguo
 Lo visto el 2026-10-20 (solo lectura): 2 bajas vigentes (Petet y Nancy, ver sección 7), 12 propuestas
 antiguas todas en `dismissed` (ninguna `confirmed`), motor antiguo presente y nuevo ausente. La tabla
 `panelist_notification` aún no existe.
+
+Si el CHECK de motivos **no** contiene `'materials'`, **parar**: la migración 6 (`130500`) ya no lo
+amplía (se quitó para no bloquear la tabla), y `declare_panelist_unavailability` rechazaría ese motivo.
+Hay que aplicar antes la migración `20260807100000` (o confirmar con el responsable).
 
 ## 5. Verificación DESPUÉS de cada migración (solo lectura)
 
@@ -140,19 +149,23 @@ Orden inverso. Revisar antes de ejecutar y pedir confirmación.
 - **6 (`130500`):** `drop function public.declare_panelist_unavailability(uuid,date,date,text,text);`
   `drop trigger enqueue_unavailability_received_trigger on public.panelist_unavailability;`
   `drop function public.tg_enqueue_unavailability_received();`
-- **5 (`130400`):** `drop trigger` de `generate_proposals_on_unavailability_trigger` y
-  `check_unavailability_panelist_account` (en `panelist_unavailability`) y de `refresh_incidents_on_plan_insert`
-  / `refresh_incidents_on_plan_update` (en `allocation_plan_details`), más sus funciones `tg_*` e
-  `incident_enqueue_revert`. **Ojo:** si la 3 sigue aplicada el motor antiguo ya no existe, así que el
-  trigger antiguo no se puede restaurar sin recrear `generate_reassignment_proposals` (migraciones
-  `20260804*` archivadas). Es preferible arreglar hacia delante.
+- **5 (`130400`):** los triggers `check_unavailability_panelist_account` (guarda de cuenta de la baja),
+  `refresh_incidents_on_plan_insert` y `refresh_incidents_on_plan_update` los **crea esta migración** (no
+  existían antes), así que se deshacen con `drop trigger` (más sus funciones `tg_unavailability_check_panelist_account`,
+  `tg_refresh_incidents_on_plan_change`, `incident_enqueue_revert`). El trigger
+  `generate_proposals_on_unavailability_trigger` **sí existía** antes: la migración lo borra y lo vuelve a crear
+  apuntando a `tg_unavailability_incident()`. Para restaurar el comportamiento anterior hay que volver a crear su
+  función original `tg_generate_proposals_on_unavailability` y el trigger tal como estaban en las migraciones `20260806120000` y `20260806140000` (archivadas en el repo) /
+  `20260804*`, y para eso debe existir el motor antiguo (ver rollback de la 3). Es preferible
+  arreglar hacia delante.
 - **4 (`130300`):** `drop function` de `suggest_for_week`, `apply_manager_decision`, `set_incident_resolution`;
   `apply_reassignment_proposal` se restaura con la versión anterior (migración `20260804121000`).
 - **3 (`130200`):** `drop function` de `resolve_unavailability_incident`, `incident_suggest`,
   `incident_recompute_status`, `incident_find_node_for_sample`; recrear el motor antiguo
   (migración `20260804120500`).
 - **2 (`130100`):** `drop function` de las `incident_*` y `panelist_local_today`.
-- **1 (`130000`):** quitar las columnas nuevas (`incident_status`, `auto_summary`, `final_resolution`,
+- **1 (`130000`):** esta migración también redefine `apply_reassignment_proposal` (cierra en
+  `manager_resolved`): restaurar la definición anterior de `20260804121000` (coherente con la 4). Quitar las columnas nuevas (`incident_status`, `auto_summary`, `final_resolution`,
   `resolved_at` en la baja; `resolution_note`, `applied_at` en la propuesta; `original_fecha_programada`
   en el plan), `drop table panelist_notification` y restaurar los CHECK anteriores. Las propuestas
   `confirmed` convertidas a `manager_resolved` ya no se distinguen.

@@ -6,15 +6,20 @@
 -- Sobre una BD vacia no hace nada.
 DO $$
 DECLARE r record; v integer;
+  v_prev text := COALESCE(current_setting('onems.in_incident_engine', true), '');
 BEGIN
   PERFORM set_config('onems.suppress_notifications', 'on', true);
   FOR r IN SELECT id FROM public.panelist_unavailability
             WHERE status = 'active' AND end_date >= current_date
             ORDER BY start_date LOOP
     BEGIN
+      -- Misma convencion que los triggers: guarda de re-entrada activa mientras corre el motor.
+      PERFORM set_config('onems.in_incident_engine', 'on', true);
       v := public.resolve_unavailability_incident(r.id);
+      PERFORM set_config('onems.in_incident_engine', v_prev, true);
       RAISE NOTICE 'baja %: % lineas nuevas', r.id, v;
     EXCEPTION WHEN OTHERS THEN
+      PERFORM set_config('onems.in_incident_engine', v_prev, true);
       RAISE WARNING 'puesta al dia fallo para %: %', r.id, SQLERRM;
     END;
   END LOOP;
