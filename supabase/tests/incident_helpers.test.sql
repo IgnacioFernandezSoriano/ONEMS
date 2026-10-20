@@ -21,6 +21,23 @@ BEGIN
   RAISE NOTICE 'PASS panelist_local_today';
 END $$;
 
+-- Guarda multi-tenant de panelist_local_today: actor 99 (cuenta 1) ok, actor 98 (cuenta 2) rechazado.
+DO $$
+BEGIN
+  PERFORM set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+  IF public.panelist_local_today('e1000000-0000-0000-0000-000000000001') IS NULL THEN
+    RAISE EXCEPTION 'FAIL actor 99 sin fecha'; END IF;
+  PERFORM set_config('request.jwt.claim.sub','98000000-0000-0000-0000-000000000098', true);
+  BEGIN
+    PERFORM public.panelist_local_today('e1000000-0000-0000-0000-000000000001');
+    RAISE EXCEPTION 'FAIL actor 98 accede a panelista de otra cuenta';
+  EXCEPTION WHEN raise_exception THEN
+    IF SQLERRM NOT LIKE 'Cross-tenant%' THEN RAISE; END IF;
+  END;
+  PERFORM set_config('request.jwt.claim.sub','', true);
+  RAISE NOTICE 'PASS panelist_local_today guarda multi-tenant';
+END $$;
+
 -- ===== incident_week_start =====
 DO $$
 BEGIN
@@ -156,13 +173,32 @@ INSERT INTO public.allocation_plan_details
   ('d1000000-0000-0000-0000-000000000001','a0000000-0000-0000-0000-000000000001','cc000000-0000-0000-0000-000000000001','b1000000-0000-0000-0000-000000000001','b4000000-0000-0000-0000-000000000004','2027-03-10',10,3,2027,'notified','Pan1','e1000000-0000-0000-0000-000000000001'),
   ('d2000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000001','cc000000-0000-0000-0000-000000000001','b1000000-0000-0000-0000-000000000001','b4000000-0000-0000-0000-000000000004','2027-03-10',10,3,2027,'pending','Pan1',NULL),
   ('d3000000-0000-0000-0000-000000000003','a0000000-0000-0000-0000-000000000001','cc000000-0000-0000-0000-000000000001','b1000000-0000-0000-0000-000000000001','b4000000-0000-0000-0000-000000000004','2027-03-10',10,3,2027,'notified','Pan1',NULL),
-  ('d4000000-0000-0000-0000-000000000004','a0000000-0000-0000-0000-000000000001','cc000000-0000-0000-0000-000000000001','b1000000-0000-0000-0000-000000000001','b4000000-0000-0000-0000-000000000004','2027-03-10',10,3,2027,'sent','Pan1',NULL);
+  ('d4000000-0000-0000-0000-000000000004','a0000000-0000-0000-0000-000000000001','cc000000-0000-0000-0000-000000000001','b1000000-0000-0000-0000-000000000001','b4000000-0000-0000-0000-000000000004','2027-03-10',10,3,2027,'sent','Pan1',NULL),
+  ('d7000000-0000-0000-0000-000000000007','a0000000-0000-0000-0000-000000000001','cc000000-0000-0000-0000-000000000001','b4000000-0000-0000-0000-000000000004','b1000000-0000-0000-0000-000000000001','2027-03-10',10,3,2027,'notified',NULL,NULL);
 INSERT INTO public.panelist_reassignment_proposal
   (id, account_id, unavailability_id, allocation_plan_detail_id, affected_role, sample_status_at_detection, suggested_action, status) VALUES
   ('f1000000-0000-0000-0000-000000000001','a0000000-0000-0000-0000-000000000001','b0000000-0000-0000-0000-000000000001','d1000000-0000-0000-0000-000000000001','origin','notified','reroute','pending'),
   ('f2000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000001','b0000000-0000-0000-0000-000000000001','d2000000-0000-0000-0000-000000000002','origin','pending','shift_date','pending'),
   ('f3000000-0000-0000-0000-000000000003','a0000000-0000-0000-0000-000000000001','b0000000-0000-0000-0000-000000000001','d3000000-0000-0000-0000-000000000003','origin','notified','cancel','pending'),
-  ('f4000000-0000-0000-0000-000000000004','a0000000-0000-0000-0000-000000000001','b0000000-0000-0000-0000-000000000001','d4000000-0000-0000-0000-000000000004','origin','sent','reroute','pending');
+  ('f4000000-0000-0000-0000-000000000004','a0000000-0000-0000-0000-000000000001','b0000000-0000-0000-0000-000000000001','d4000000-0000-0000-0000-000000000004','origin','sent','reroute','pending'),
+  ('f7000000-0000-0000-0000-000000000007','a0000000-0000-0000-0000-000000000001','b0000000-0000-0000-0000-000000000001','d7000000-0000-0000-0000-000000000007','destination','notified','reroute','pending');
+
+-- Auditoria por sentencia: cuenta UPDATEs que cambian fecha/origen/destino SIN cambiar reassigned_at en la misma sentencia
+-- (el trigger de refresco de la Tarea 6 depende de que el motor lo haga todo en un solo UPDATE).
+CREATE TEMP TABLE stmt_audit (bad_rows int NOT NULL);
+CREATE FUNCTION public.tg_test_stmt_audit() RETURNS trigger LANGUAGE plpgsql AS $f$
+BEGIN
+  INSERT INTO stmt_audit
+  SELECT count(*) FROM old_rows o JOIN new_rows n ON n.id = o.id
+   WHERE (n.fecha_programada IS DISTINCT FROM o.fecha_programada
+          OR n.origin_node_id IS DISTINCT FROM o.origin_node_id
+          OR n.destination_node_id IS DISTINCT FROM o.destination_node_id)
+     AND n.reassigned_at IS NOT DISTINCT FROM o.reassigned_at;
+  RETURN NULL;
+END $f$;
+CREATE TRIGGER test_stmt_audit AFTER UPDATE ON public.allocation_plan_details
+  REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows
+  FOR EACH STATEMENT EXECUTE FUNCTION public.tg_test_stmt_audit();
 
 SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
 
@@ -235,6 +271,26 @@ BEGIN
   IF (SELECT status FROM allocation_plan_details WHERE id='d4000000-0000-0000-0000-000000000004') <> 'sent' THEN
     RAISE EXCEPTION 'FAIL estado de sent alterado'; END IF;
   RAISE NOTICE 'PASS apply_change rechaza sent / otra ciudad / modo / vacio';
+END $$;
+
+DO $$
+DECLARE r record; l record;
+BEGIN
+  -- Nodo y fecha a la vez (rol destino): N1 -> N3 y 2027-03-10 -> 2027-03-18.
+  PERFORM public.incident_apply_change('f7000000-0000-0000-0000-000000000007', '2027-03-18', 'b3000000-0000-0000-0000-000000000003', 'auto');
+  SELECT * INTO r FROM allocation_plan_details WHERE id='d7000000-0000-0000-0000-000000000007';
+  SELECT * INTO l FROM panelist_reassignment_proposal WHERE id='f7000000-0000-0000-0000-000000000007';
+  IF r.destination_node_id <> 'b3000000-0000-0000-0000-000000000003' OR r.original_destination_node_id IS DISTINCT FROM 'b1000000-0000-0000-0000-000000000001'::uuid
+     OR r.fecha_programada <> '2027-03-18' OR r.original_fecha_programada IS DISTINCT FROM '2027-03-10'::date
+     OR r.destination_panelist_name IS DISTINCT FROM 'Pan3' OR r.status <> 'pending'
+     OR r.origin_node_id <> 'b4000000-0000-0000-0000-000000000004' OR r.original_origin_node_id IS NOT NULL THEN
+    RAISE EXCEPTION 'FAIL apply_change nodo+fecha'; END IF;
+  IF l.final_action IS DISTINCT FROM 'reroute' OR l.final_date IS DISTINCT FROM '2027-03-18'::date THEN
+    RAISE EXCEPTION 'FAIL linea nodo+fecha'; END IF;
+  IF (SELECT count(*) FROM stmt_audit) < 3 THEN RAISE EXCEPTION 'FAIL auditoria no registro las sentencias'; END IF;
+  IF EXISTS (SELECT 1 FROM stmt_audit WHERE bad_rows > 0) THEN
+    RAISE EXCEPTION 'FAIL % sentencias cambiaron fecha/nodo sin reassigned_at', (SELECT count(*) FROM stmt_audit WHERE bad_rows > 0); END IF;
+  RAISE NOTICE 'PASS apply_change nodo+fecha + una sola sentencia por cambio';
 END $$;
 
 -- ===== incident_apply_cancel =====

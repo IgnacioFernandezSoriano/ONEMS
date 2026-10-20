@@ -12,20 +12,28 @@ GRANT SELECT ON public.panelist_notification TO authenticated;
 -- (1) Hoy en la zona horaria del panelista (mismo mapa pais -> zona que el menu de Telegram).
 CREATE OR REPLACE FUNCTION public.panelist_local_today(p_panelist_id uuid)
 RETURNS date
-LANGUAGE sql
+LANGUAGE plpgsql
 STABLE
 SECURITY DEFINER
 SET search_path = public
 AS $$
-  SELECT (now() AT TIME ZONE COALESCE(
-           (SELECT CASE upper(trim(p.address_country))
-                     WHEN 'KENYA' THEN 'Africa/Nairobi'
-                     WHEN 'UNITED STATES' THEN 'America/New_York'
-                     WHEN 'USA' THEN 'America/New_York'
-                     WHEN 'SPAIN' THEN 'Europe/Madrid'
-                     ELSE 'UTC' END
-              FROM panelists p WHERE p.id = p_panelist_id),
-           'UTC'))::date;
+DECLARE
+  v_account uuid;
+  v_country text;
+BEGIN
+  SELECT p.account_id, p.address_country INTO v_account, v_country FROM panelists p WHERE p.id = p_panelist_id;
+  -- Guarda multi-tenant: service role / n8n (auth.uid() NULL) y superadmin pasan.
+  IF FOUND AND auth.uid() IS NOT NULL AND NOT is_superadmin()
+     AND v_account IS DISTINCT FROM (SELECT pr.account_id FROM profiles pr WHERE pr.id = auth.uid()) THEN
+    RAISE EXCEPTION 'Cross-tenant access denied';
+  END IF;
+  RETURN (now() AT TIME ZONE CASE upper(trim(v_country))
+                               WHEN 'KENYA' THEN 'Africa/Nairobi'
+                               WHEN 'UNITED STATES' THEN 'America/New_York'
+                               WHEN 'USA' THEN 'America/New_York'
+                               WHEN 'SPAIN' THEN 'Europe/Madrid'
+                               ELSE 'UTC' END)::date;
+END;
 $$;
 
 -- (2) Lunes de la semana de p_date.
@@ -232,7 +240,10 @@ DECLARE
   v_node_city uuid;
   v_new_city uuid;
   v_new_account uuid;
-  v_pan record;
+  v_pan_id uuid;
+  v_pan_name text;
+  v_new_origin boolean;
+  v_new_dest boolean;
   v_change text;
 BEGIN
   IF p_mode IS NULL OR p_mode NOT IN ('auto','manager') THEN RAISE EXCEPTION 'Unknown mode %', p_mode; END IF;
@@ -252,6 +263,8 @@ BEGIN
     RAISE EXCEPTION 'Nothing to apply for proposal %', p_proposal_id;
   END IF;
   v_eff_date := CASE WHEN v_date_changed THEN p_new_date ELSE v_d.fecha_programada END;
+  v_new_origin := p_new_node_id IS NOT NULL AND v_prop.affected_role = 'origin';
+  v_new_dest := p_new_node_id IS NOT NULL AND v_prop.affected_role <> 'origin';
 
   IF p_new_node_id IS NOT NULL THEN
     -- Nunca a otra cuenta ni a otra ciudad.
@@ -261,34 +274,29 @@ BEGIN
     IF v_new_account IS DISTINCT FROM v_d.account_id OR v_new_city IS DISTINCT FROM v_node_city THEN
       RAISE EXCEPTION 'Target node % not in the same account/city', p_new_node_id;
     END IF;
-    SELECT * INTO v_pan FROM get_panelist_for_node(p_new_node_id, v_eff_date);
-
-    IF v_prop.affected_role = 'origin' THEN
-      UPDATE allocation_plan_details
-         SET original_origin_node_id = COALESCE(original_origin_node_id, origin_node_id),
-             origin_node_id = p_new_node_id,
-             origin_panelist_name = v_pan.panelist_name,
-             origin_panelist_id = CASE WHEN origin_panelist_id IS NULL THEN NULL ELSE v_pan.panelist_id END
-       WHERE id = v_d.id;
-    ELSE
-      UPDATE allocation_plan_details
-         SET original_destination_node_id = COALESCE(original_destination_node_id, destination_node_id),
-             destination_node_id = p_new_node_id,
-             destination_panelist_name = v_pan.panelist_name,
-             destination_panelist_id = CASE WHEN destination_panelist_id IS NULL THEN NULL ELSE v_pan.panelist_id END
-       WHERE id = v_d.id;
-    END IF;
+    SELECT g.panelist_id, g.panelist_name INTO v_pan_id, v_pan_name
+      FROM get_panelist_for_node(p_new_node_id, v_eff_date) g;
   END IF;
 
-  IF v_date_changed THEN
-    UPDATE allocation_plan_details
-       SET original_fecha_programada = COALESCE(original_fecha_programada, fecha_programada),
-           fecha_programada = p_new_date
-     WHERE id = v_d.id;
-  END IF;
-
+  -- UNA sola sentencia: nodo, fecha, estado y reassigned_* cambian juntos (los triggers de refresco por
+  -- cambio de plan distinguen cambios del motor/manager porque reassigned_at cambia en el mismo UPDATE).
   UPDATE allocation_plan_details
-     SET status = CASE WHEN status = 'notified' THEN 'pending' ELSE status END,
+     SET original_origin_node_id = CASE WHEN v_new_origin
+           THEN COALESCE(original_origin_node_id, origin_node_id) ELSE original_origin_node_id END,
+         origin_node_id = CASE WHEN v_new_origin THEN p_new_node_id ELSE origin_node_id END,
+         origin_panelist_name = CASE WHEN v_new_origin THEN v_pan_name ELSE origin_panelist_name END,
+         origin_panelist_id = CASE WHEN v_new_origin AND origin_panelist_id IS NOT NULL
+           THEN v_pan_id ELSE origin_panelist_id END,
+         original_destination_node_id = CASE WHEN v_new_dest
+           THEN COALESCE(original_destination_node_id, destination_node_id) ELSE original_destination_node_id END,
+         destination_node_id = CASE WHEN v_new_dest THEN p_new_node_id ELSE destination_node_id END,
+         destination_panelist_name = CASE WHEN v_new_dest THEN v_pan_name ELSE destination_panelist_name END,
+         destination_panelist_id = CASE WHEN v_new_dest AND destination_panelist_id IS NOT NULL
+           THEN v_pan_id ELSE destination_panelist_id END,
+         original_fecha_programada = CASE WHEN v_date_changed
+           THEN COALESCE(original_fecha_programada, fecha_programada) ELSE original_fecha_programada END,
+         fecha_programada = v_eff_date,
+         status = CASE WHEN status = 'notified' THEN 'pending' ELSE status END,
          reassignment_reason = 'panelist_unavailable',
          reassigned_at = now(),
          reassigned_by = v_actor,
