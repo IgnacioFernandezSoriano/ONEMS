@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from '@/hooks/useTranslation'
-import { format } from 'date-fns'
+import { format, parseISO, isValid } from 'date-fns'
 import { useUnavailabilityIncidents } from '@/lib/hooks/useUnavailabilityIncidents'
 import { IncidentReviewPanel } from '@/components/incidents/IncidentReviewPanel'
 import { IncidentStatusBadge } from '@/components/incidents/IncidentStatusBadge'
@@ -8,7 +8,11 @@ import type { IncidentStatusFilter } from '@/lib/types'
 
 const FILTER_OPTIONS: IncidentStatusFilter[] = ['open', 'all', 'new', 'auto_resolved', 'pending_manager', 'resolved']
 
-const fmt = (d: string | null) => (d ? format(new Date(d), 'dd/MM/yyyy') : '-')
+const fmt = (d: string | null) => {
+  if (!d) return '-'
+  const p = parseISO(d)
+  return isValid(p) ? format(p, 'dd/MM/yyyy') : '-'
+}
 
 export function PanelistAvailabilityIncidents() {
   const { t } = useTranslation()
