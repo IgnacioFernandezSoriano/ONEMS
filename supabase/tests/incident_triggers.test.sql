@@ -687,6 +687,45 @@ BEGIN
 END $$;
 ROLLBACK;
 
+-- ===== Seguridad: los avisos nunca llevan datos de un panelista de otra cuenta =====
+-- Muestra de la cuenta 1 cuyo destino (mal) es un nodo de la cuenta 2 con panelista de la cuenta 2.
+BEGIN;
+\ir fixtures/incident_city.sql
+INSERT INTO public.regions (id, account_id, name, code) VALUES
+  ('e0000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000002','Reg2','R2');
+INSERT INTO public.cities (id, account_id, region_id, name, code) VALUES
+  ('c6000000-0000-0000-0000-000000000006','a0000000-0000-0000-0000-000000000002','e0000000-0000-0000-0000-000000000002','City6','C6');
+INSERT INTO public.nodes (id, account_id, city_id, auto_id) VALUES
+  ('b6000000-0000-0000-0000-000000000006','a0000000-0000-0000-0000-000000000002','c6000000-0000-0000-0000-000000000006','N6');
+INSERT INTO public.panelists (id, account_id, panelist_code, name, email, mobile, node_id, status, language,
+                              address_line1, postal_code, address_city) VALUES
+  ('e6000000-0000-0000-0000-000000000006','a0000000-0000-0000-0000-000000000002','Q6','SecretName','p6@t.l','6',
+   'b6000000-0000-0000-0000-000000000006','active','en','SecretStreet 1','SECRETZIP','SecretCity');
+INSERT INTO public.allocation_plan_details
+  (id, account_id, plan_id, origin_node_id, destination_node_id, fecha_programada, status)
+VALUES ('d0000000-0000-0000-0000-000000000001','a0000000-0000-0000-0000-000000000001','cc000000-0000-0000-0000-000000000001',
+        'b4000000-0000-0000-0000-000000000004','b6000000-0000-0000-0000-000000000006', pg_temp.dday(), 'pending');
+DO $$
+BEGIN
+  PERFORM public.incident_enqueue_plan_change('d0000000-0000-0000-0000-000000000001', 'reroute_destination',
+                                              pg_temp.dday(), pg_temp.dday(), NULL);
+  PERFORM public.incident_enqueue_revert('d0000000-0000-0000-0000-000000000001', pg_temp.dday(),
+                                         'b4000000-0000-0000-0000-000000000004', 'b6000000-0000-0000-0000-000000000006');
+  -- Control: el emisor de la cuenta 1 (P4) si recibe ambos avisos.
+  IF (SELECT count(*) FROM public.panelist_notification WHERE panelist_id = 'e4000000-0000-0000-0000-000000000004') <> 2 THEN
+    RAISE EXCEPTION 'FAIL fuga: control sin avisos (%)',
+      (SELECT count(*) FROM public.panelist_notification WHERE panelist_id = 'e4000000-0000-0000-0000-000000000004'); END IF;
+  IF EXISTS (SELECT 1 FROM public.panelist_notification WHERE panelist_id = 'e6000000-0000-0000-0000-000000000006') THEN
+    RAISE EXCEPTION 'FAIL fuga: aviso a un panelista de otra cuenta'; END IF;
+  IF EXISTS (SELECT 1 FROM public.panelist_notification
+              WHERE payload::text LIKE '%Secret%' OR payload::text LIKE '%SECRETZIP%') THEN
+    RAISE EXCEPTION 'FAIL fuga: datos de otra cuenta en el payload'; END IF;
+  IF EXISTS (SELECT 1 FROM public.panelist_notification WHERE account_id <> 'a0000000-0000-0000-0000-000000000001') THEN
+    RAISE EXCEPTION 'FAIL fuga: aviso en otra cuenta'; END IF;
+  RAISE NOTICE 'PASS avisos sin datos de otra cuenta (plan_change y revert)';
+END $$;
+ROLLBACK;
+
 -- ===== Bulk: un solo INSERT de muchas filas -> una llamada al motor por baja =====
 BEGIN;
 \ir fixtures/incident_city.sql

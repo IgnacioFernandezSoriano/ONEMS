@@ -4,8 +4,7 @@
 --       pendientes y cierra la incidencia ('resolved', final_resolution 'unavailability_cancelled').
 --       Sustituye a tg_generate_proposals_on_unavailability (llamaba al motor viejo, ya borrado).
 --   (0b) panelist_unavailability: BEFORE trigger, el panelista debe ser de la cuenta de la baja.
---   (0c) resolve_unavailability_incident: solo muestras de la cuenta de la baja.
---   (0d) incident_enqueue_revert: avisos de reversion a panelistas de antes y despues.
+--   (0c) incident_enqueue_revert: avisos de reversion a panelistas de antes y despues.
 --   (2) allocation_plan_details: triggers de SENTENCIA (INSERT / UPDATE con tablas de transicion) que
 --       re-ejecutan el motor, una vez por baja, para las bajas activas y vigentes tocadas por las filas.
 --       Se ignoran las filas cuyo reassigned_at cambia (resoluciones del motor/manager y reversiones, que
@@ -39,203 +38,10 @@ CREATE TRIGGER check_unavailability_panelist_account
   BEFORE INSERT OR UPDATE OF panelist_id, account_id ON public.panelist_unavailability
   FOR EACH ROW EXECUTE FUNCTION public.tg_unavailability_check_panelist_account();
 
--- (0c) Motor (Tarea 4, 20261020130200) con UN cambio minimo de seguridad: las muestras se seleccionan y se
---      releen solo de la cuenta de la baja (a.account_id = v_u.account_id). Resto identico.
---      Devuelve el numero de lineas nuevas creadas. Permisos sin cambios (CREATE OR REPLACE los conserva).
-CREATE OR REPLACE FUNCTION public.resolve_unavailability_incident(
-  p_unavailability_id uuid,
-  p_reference_load numeric DEFAULT 6,
-  p_deviation_percent numeric DEFAULT 20)
-RETURNS integer
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
-DECLARE
-  v_ref numeric := COALESCE(p_reference_load, 6);
-  v_dev numeric := COALESCE(p_deviation_percent, 20);
-  v_u record;
-  v_node uuid;
-  v_city uuid;
-  v_count integer := 0;
-  r record;
-  v_d record;
-  v_role_node uuid;
-  v_other uuid;
-  v_date date;
-  v_target uuid;
-  v_day date;
-  v_line uuid;
-  v_applied boolean;
-  v_s jsonb;
-  v_found boolean;
-  v_s_node uuid;
-BEGIN
-  SELECT * INTO v_u FROM panelist_unavailability WHERE id = p_unavailability_id;
-  IF NOT FOUND THEN RETURN 0; END IF;
-
-  -- Guarda multi-tenant: service role / triggers (auth.uid() NULL) y superadmin pasan.
-  IF auth.uid() IS NOT NULL AND NOT is_superadmin()
-     AND v_u.account_id IS DISTINCT FROM (SELECT pr.account_id FROM profiles pr WHERE pr.id = auth.uid()) THEN
-    RAISE EXCEPTION 'Cross-tenant access denied';
-  END IF;
-
-  IF v_u.status IS DISTINCT FROM 'active' THEN RETURN 0; END IF;
-
-  -- Nodo del panelista de baja (solo si sigue activo: un panelista inactivo no atiende el nodo).
-  SELECT p.node_id INTO v_node FROM panelists p WHERE p.id = v_u.panelist_id AND p.status = 'active';
-  SELECT n.city_id INTO v_city FROM nodes n WHERE n.id = v_node;
-
-  -- (a) Retirar lineas 'pending' que ya no aplican (muestra fuera de la baja, de otro nodo en ese rol,
-  --     o que ya no es pending/notified). Las resueltas e informativas no se tocan.
-  DELETE FROM panelist_reassignment_proposal pr
-   USING allocation_plan_details a
-   WHERE pr.unavailability_id = p_unavailability_id
-     AND pr.status = 'pending'
-     AND a.id = pr.allocation_plan_detail_id
-     AND NOT COALESCE(
-           v_node IS NOT NULL
-           AND a.fecha_programada BETWEEN v_u.start_date AND v_u.end_date
-           AND a.status IN ('pending','notified')
-           AND (CASE WHEN pr.affected_role = 'origin' THEN a.origin_node_id ELSE a.destination_node_id END) = v_node,
-           false);
-
-  -- (b)+(c) Muestras afectadas sin linea en ese rol. Orden determinista: los cambios aplicados alteran el
-  --     plan al momento y el reparto (por dias y por nodos) lee el estado real.
-  IF v_node IS NOT NULL THEN
-    FOR r IN
-      SELECT q.id, q.role FROM (
-        SELECT a.id, 'origin'::text AS role, a.fecha_programada
-          FROM allocation_plan_details a
-         WHERE a.origin_node_id = v_node
-           AND a.account_id = v_u.account_id
-           AND a.fecha_programada BETWEEN v_u.start_date AND v_u.end_date
-           AND a.status IN ('pending','notified','sent','received')
-        UNION ALL
-        SELECT a.id, 'destination'::text, a.fecha_programada
-          FROM allocation_plan_details a
-         WHERE a.destination_node_id = v_node
-           AND a.account_id = v_u.account_id
-           AND a.fecha_programada BETWEEN v_u.start_date AND v_u.end_date
-           AND a.status IN ('pending','notified','sent','received')) q
-       WHERE NOT EXISTS (SELECT 1 FROM panelist_reassignment_proposal pr
-                          WHERE pr.unavailability_id = p_unavailability_id
-                            AND pr.allocation_plan_detail_id = q.id
-                            AND pr.affected_role = q.role)
-       ORDER BY q.fecha_programada, q.id, q.role DESC  -- origin antes que destination
-    LOOP
-      BEGIN
-        -- Releer: una linea anterior de esta misma pasada puede haber movido la muestra.
-        SELECT * INTO v_d FROM allocation_plan_details WHERE id = r.id AND account_id = v_u.account_id FOR UPDATE;
-        IF NOT FOUND THEN CONTINUE; END IF;
-        IF r.role = 'origin' THEN
-          v_role_node := v_d.origin_node_id;  v_other := v_d.destination_node_id;
-        ELSE
-          v_role_node := v_d.destination_node_id;  v_other := v_d.origin_node_id;
-        END IF;
-        IF v_role_node IS DISTINCT FROM v_node
-           OR NOT COALESCE(v_d.fecha_programada BETWEEN v_u.start_date AND v_u.end_date, false) THEN
-          CONTINUE;
-        END IF;
-
-        -- Ya salida / recibida: informativa, no bloquea.
-        IF v_d.status IN ('sent','received') THEN
-          INSERT INTO panelist_reassignment_proposal
-            (account_id, unavailability_id, allocation_plan_detail_id, affected_role, sample_status_at_detection,
-             suggested_action, suggested_reason, status, final_action)
-          VALUES (v_u.account_id, p_unavailability_id, v_d.id, r.role, v_d.status,
-                  'none', CASE WHEN r.role = 'destination' AND v_d.status = 'sent' THEN 'in_transit' ELSE 'already_sent' END,
-                  'info', 'none');
-          v_count := v_count + 1;
-          CONTINUE;
-        END IF;
-        -- cancelled / incident: sin linea.
-        IF v_d.status NOT IN ('pending','notified') THEN CONTINUE; END IF;
-
-        -- Paso 1: retrasar en el mismo nodo (nunca a una fecha pasada).
-        v_target := NULL;
-        v_date := incident_find_shift_date(v_node, GREATEST(v_u.end_date, current_date - 1),
-                                           v_d.fecha_programada, v_ref, v_dev);
-        IF v_date IS NULL THEN
-          -- Paso 2: otro nodo de la ciudad, misma fecha.
-          v_target := incident_find_node_for_sample(v_city, v_node, v_other, v_d.fecha_programada, v_ref, v_dev);
-          IF v_target IS NULL THEN
-            -- Paso 2b: otro nodo en otra fecha laborable del mes de la muestra, la mas cercana primero.
-            FOR v_day IN
-              SELECT g::date
-                FROM generate_series(date_trunc('month', v_d.fecha_programada)::date,
-                                     (date_trunc('month', v_d.fecha_programada) + interval '1 month - 1 day')::date,
-                                     interval '1 day') g
-               WHERE extract(isodow FROM g) BETWEEN 1 AND 5
-                 AND g::date <> v_d.fecha_programada
-                 AND g::date >= current_date
-               ORDER BY abs(g::date - v_d.fecha_programada), g
-            LOOP
-              v_target := incident_find_node_for_sample(v_city, v_node, v_other, v_day, v_ref, v_dev);
-              IF v_target IS NOT NULL THEN v_date := v_day; EXIT; END IF;
-            END LOOP;
-          END IF;
-        END IF;
-
-        -- La linea nace 'pending' con la decision del motor; incident_apply_change la pasa a auto_resolved.
-        INSERT INTO panelist_reassignment_proposal
-          (account_id, unavailability_id, allocation_plan_detail_id, affected_role, sample_status_at_detection,
-           suggested_action, suggested_target_node_id, suggested_date, suggested_reason)
-        VALUES (v_u.account_id, p_unavailability_id, v_d.id, r.role, v_d.status,
-                CASE WHEN v_target IS NOT NULL THEN 'reroute' WHEN v_date IS NOT NULL THEN 'shift_date' ELSE 'cancel' END,
-                v_target, v_date,
-                CASE WHEN v_target IS NOT NULL THEN 'alt_node_same_city'
-                     WHEN v_date IS NOT NULL THEN 'shift_same_month'
-                     ELSE 'no_slot_8_weeks' END)
-        RETURNING id INTO v_line;
-        v_count := v_count + 1;
-
-        v_applied := false;
-        IF v_date IS NOT NULL OR v_target IS NOT NULL THEN
-          BEGIN
-            PERFORM incident_apply_change(v_line, v_date, v_target, 'auto');
-            v_applied := true;
-          EXCEPTION WHEN OTHERS THEN
-            RAISE WARNING 'resolve_unavailability_incident: no se pudo aplicar la linea % (muestra %): %',
-              v_line, v_d.id, SQLERRM;
-          END;
-        END IF;
-
-        -- Sin solucion automatica: queda pendiente con la mejor propuesta para el manager.
-        IF NOT v_applied THEN
-          BEGIN
-            v_s := incident_suggest(v_line, NULL, v_ref, v_dev);
-            v_found := COALESCE((v_s->>'found')::boolean, false);
-            v_s_node := CASE WHEN v_found THEN (v_s->>'node_id')::uuid END;
-            UPDATE panelist_reassignment_proposal
-               SET suggested_action = CASE WHEN NOT v_found THEN 'cancel'
-                                           WHEN v_s_node = v_node THEN 'shift_date' ELSE 'reroute' END,
-                   suggested_date = CASE WHEN v_found THEN (v_s->>'date')::date END,
-                   suggested_target_node_id = CASE WHEN v_found AND v_s_node <> v_node THEN v_s_node END,
-                   suggested_reason = CASE WHEN NOT v_found THEN 'no_slot_8_weeks'
-                                           WHEN v_s_node = v_node THEN 'shift_later_week' ELSE 'alt_node_later_week' END,
-                   updated_at = now()
-             WHERE id = v_line;
-          EXCEPTION WHEN OTHERS THEN
-            RAISE WARNING 'resolve_unavailability_incident: sin propuesta para la linea %: %', v_line, SQLERRM;
-          END;
-        END IF;
-      EXCEPTION WHEN OTHERS THEN
-        RAISE WARNING 'resolve_unavailability_incident: muestra % rol % omitida: %', r.id, r.role, SQLERRM;
-      END;
-    END LOOP;
-  END IF;
-
-  -- (d) Estado de la incidencia.
-  PERFORM incident_recompute_status(p_unavailability_id);
-  RETURN v_count;
-END;
-$$;
-
-
--- (0d) Aviso de reversion (cancelacion de baja). Se llama DESPUES del UPDATE de reversion, con el estado
+-- (0c) Aviso de reversion (cancelacion de baja). Se llama DESPUES del UPDATE de reversion, con el estado
 --      previo (fecha y nodos). Destinatarios: panelistas activos de los nodos de origen/destino de antes y de
---      despues, sin excluir al de la baja (la baja se cancela: vuelve a actuar). recipient_role relativo al
+--      despues (siempre de la cuenta de la muestra: incident_node_panelist + filtro por cuenta), sin excluir
+--      al de la baja (la baja se cancela: vuelve a actuar). recipient_role relativo al
 --      estado nuevo: 'sender'/'receiver' si sigue en la muestra; 'former_sender'/'former_receiver' si ya no.
 --      Solo si la fecha antigua o la nueva cae en la semana actual; respeta onems.suppress_notifications.
 CREATE OR REPLACE FUNCTION public.incident_enqueue_revert(
@@ -275,7 +81,7 @@ BEGIN
 
   SELECT p.id, p.name, p.address_line1, p.address_line2, p.postal_code, p.address_city
     INTO v_dest FROM panelists p
-   WHERE p.id = (SELECT g.panelist_id FROM get_panelist_for_node(v_d.destination_node_id, v_d.fecha_programada) g);
+   WHERE p.id = incident_node_panelist(v_d.destination_node_id, v_d.account_id) AND p.account_id = v_d.account_id;
 
   v_payload := jsonb_build_object(
     'detail_id', v_d.id,
@@ -285,7 +91,9 @@ BEGIN
     'scheduled_date', v_d.fecha_programada,
     'origin_node_code', v_d.origin_code,
     'destination_node_code', v_d.destination_code,
-    'origin_panelist_name', (SELECT g.panelist_name FROM get_panelist_for_node(v_d.origin_node_id, v_d.fecha_programada) g),
+    'origin_panelist_name', (SELECT p.name FROM panelists p
+                               WHERE p.id = incident_node_panelist(v_d.origin_node_id, v_d.account_id)
+                                 AND p.account_id = v_d.account_id),
     'destination_panelist_name', v_dest.name,
     'destination_address', jsonb_build_object(
       'address_line1', v_dest.address_line1,
@@ -299,16 +107,16 @@ BEGIN
   FOR r IN
     SELECT DISTINCT ON (x.panelist_id) x.panelist_id, x.role
       FROM (
-        SELECT (SELECT g.panelist_id FROM get_panelist_for_node(v_d.origin_node_id, v_d.fecha_programada) g) AS panelist_id,
+        SELECT incident_node_panelist(v_d.origin_node_id, v_d.account_id) AS panelist_id,
                'sender'::text AS role, 1 AS prio
         UNION ALL
-        SELECT (SELECT g.panelist_id FROM get_panelist_for_node(v_d.destination_node_id, v_d.fecha_programada) g),
+        SELECT incident_node_panelist(v_d.destination_node_id, v_d.account_id),
                'receiver', 2
         UNION ALL
-        SELECT (SELECT g.panelist_id FROM get_panelist_for_node(p_old_origin_node_id, p_old_date) g),
+        SELECT incident_node_panelist(p_old_origin_node_id, v_d.account_id),
                'former_sender', 3
         UNION ALL
-        SELECT (SELECT g.panelist_id FROM get_panelist_for_node(p_old_destination_node_id, p_old_date) g),
+        SELECT incident_node_panelist(p_old_destination_node_id, v_d.account_id),
                'former_receiver', 4) x
       JOIN panelists p ON p.id = x.panelist_id AND p.account_id = v_d.account_id
      WHERE x.panelist_id IS NOT NULL
@@ -380,6 +188,9 @@ BEGIN
                               ELSE v_d.original_destination_node_id END;
           -- Solo se revierte lo que no ha salido (una muestra ya enviada/recibida conserva el cambio ejecutado)
           -- y solo si sigue como lo dejo la resolucion: una edicion manual posterior no se pisa.
+          -- Si se salta la restauracion, original_* (nodo/fecha) queda obsoleto (valor previo a esta resolucion,
+          -- no el actual). Una resolucion posterior de OTRA baja sobre la misma muestra lo conserva (COALESCE en
+          -- incident_apply_change) y su reversion volveria a ese valor antiguo. Caso raro: edicion manual + 2a baja.
           v_restore_node := r.final_action = 'reroute' AND v_d.status IN ('pending','notified')
                             AND v_orig_node IS NOT NULL
                             AND v_role_node IS NOT DISTINCT FROM r.final_target_node_id;
@@ -394,8 +205,8 @@ BEGIN
             v_new_date := CASE WHEN v_restore_date THEN v_d.original_fecha_programada ELSE v_d.fecha_programada END;
             v_pan_id := NULL; v_pan_name := NULL;
             IF v_restore_node THEN
-              SELECT g.panelist_id, g.panelist_name INTO v_pan_id, v_pan_name
-                FROM get_panelist_for_node(v_orig_node, v_new_date) g;
+              SELECT p.id, p.name INTO v_pan_id, v_pan_name FROM panelists p
+               WHERE p.id = incident_node_panelist(v_orig_node, v_d.account_id) AND p.account_id = v_d.account_id;
             END IF;
 
             -- UNA sola sentencia: reassigned_at pasa a NULL junto con fecha/nodo, asi el trigger de refresco

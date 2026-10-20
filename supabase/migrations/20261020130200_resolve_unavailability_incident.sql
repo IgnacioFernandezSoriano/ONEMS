@@ -241,12 +241,14 @@ BEGIN
         SELECT a.id, 'origin'::text AS role, a.fecha_programada
           FROM allocation_plan_details a
          WHERE a.origin_node_id = v_node
+           AND a.account_id = v_u.account_id
            AND a.fecha_programada BETWEEN v_u.start_date AND v_u.end_date
            AND a.status IN ('pending','notified','sent','received')
         UNION ALL
         SELECT a.id, 'destination'::text, a.fecha_programada
           FROM allocation_plan_details a
          WHERE a.destination_node_id = v_node
+           AND a.account_id = v_u.account_id
            AND a.fecha_programada BETWEEN v_u.start_date AND v_u.end_date
            AND a.status IN ('pending','notified','sent','received')) q
        WHERE NOT EXISTS (SELECT 1 FROM panelist_reassignment_proposal pr
@@ -257,7 +259,7 @@ BEGIN
     LOOP
       BEGIN
         -- Releer: una linea anterior de esta misma pasada puede haber movido la muestra.
-        SELECT * INTO v_d FROM allocation_plan_details WHERE id = r.id FOR UPDATE;
+        SELECT * INTO v_d FROM allocation_plan_details WHERE id = r.id AND account_id = v_u.account_id FOR UPDATE;
         IF NOT FOUND THEN CONTINUE; END IF;
         IF r.role = 'origin' THEN
           v_role_node := v_d.origin_node_id;  v_other := v_d.destination_node_id;

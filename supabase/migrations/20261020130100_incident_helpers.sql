@@ -139,6 +139,20 @@ AS $$
    LIMIT 1;
 $$;
 
+-- (7b) Panelista activo de un nodo DENTRO de una cuenta (mismo criterio que get_panelist_for_node, que no
+--      filtra por cuenta). Todas las busquedas de panelista para avisos y nombres pasan por aqui.
+CREATE OR REPLACE FUNCTION public.incident_node_panelist(p_node_id uuid, p_account_id uuid)
+RETURNS uuid
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT p.id FROM panelists p
+   WHERE p.node_id = p_node_id AND p.status = 'active' AND p.account_id = p_account_id
+   LIMIT 1;
+$$;
+
 -- (8) Cola de avisos "cambio en tu plan de esta semana".
 CREATE OR REPLACE FUNCTION public.incident_enqueue_plan_change(
   p_detail_id uuid, p_change text, p_old_date date, p_new_date date, p_exclude_panelist_id uuid)
@@ -177,13 +191,13 @@ BEGIN
    WHERE a.id = p_detail_id;
   IF NOT FOUND THEN RETURN 0; END IF;
 
-  -- Panelista activo de cada nodo (mismo criterio que get_panelist_for_node).
+  -- Panelista activo de cada nodo, siempre de la cuenta de la muestra (nunca datos de otra cuenta).
   SELECT p.id, p.name, p.address_line1, p.address_line2, p.postal_code, p.address_city
     INTO v_orig FROM panelists p
-   WHERE p.id = (SELECT g.panelist_id FROM get_panelist_for_node(v_d.origin_node_id, v_d.fecha_programada) g);
+   WHERE p.id = incident_node_panelist(v_d.origin_node_id, v_d.account_id) AND p.account_id = v_d.account_id;
   SELECT p.id, p.name, p.address_line1, p.address_line2, p.postal_code, p.address_city
     INTO v_dest FROM panelists p
-   WHERE p.id = (SELECT g.panelist_id FROM get_panelist_for_node(v_d.destination_node_id, v_d.fecha_programada) g);
+   WHERE p.id = incident_node_panelist(v_d.destination_node_id, v_d.account_id) AND p.account_id = v_d.account_id;
 
   v_payload := jsonb_build_object(
     'detail_id', v_d.id,
@@ -274,8 +288,8 @@ BEGIN
     IF v_new_account IS DISTINCT FROM v_d.account_id OR v_new_city IS DISTINCT FROM v_node_city THEN
       RAISE EXCEPTION 'Target node % not in the same account/city', p_new_node_id;
     END IF;
-    SELECT g.panelist_id, g.panelist_name INTO v_pan_id, v_pan_name
-      FROM get_panelist_for_node(p_new_node_id, v_eff_date) g;
+    SELECT p.id, p.name INTO v_pan_id, v_pan_name FROM panelists p
+     WHERE p.id = incident_node_panelist(p_new_node_id, v_d.account_id) AND p.account_id = v_d.account_id;
   END IF;
 
   -- UNA sola sentencia: nodo, fecha, estado y reassigned_* cambian juntos (los triggers de refresco por
@@ -385,3 +399,4 @@ REVOKE ALL ON FUNCTION public.incident_find_node(uuid, uuid, date, numeric, nume
 REVOKE ALL ON FUNCTION public.incident_enqueue_plan_change(uuid, text, date, date, uuid) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.incident_apply_change(uuid, date, uuid, text) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.incident_apply_cancel(uuid, text) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.incident_node_panelist(uuid, uuid) FROM PUBLIC, anon, authenticated;

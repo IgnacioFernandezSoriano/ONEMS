@@ -590,3 +590,31 @@ BEGIN
   RAISE NOTICE 'PASS cross-tenant';
 END $$;
 ROLLBACK;
+
+-- ===== Cross-tenant: el motor nunca selecciona muestras de otra cuenta en un nodo coincidente =====
+-- Panelista de la cuenta 2 apuntando (mal) al nodo N1 de la cuenta 1 (node_id es unico: se libera de P1).
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+UPDATE public.panelists SET node_id = NULL WHERE id = 'e1000000-0000-0000-0000-000000000001';
+INSERT INTO public.panelists (id, account_id, panelist_code, name, email, mobile, node_id, status, language) VALUES
+  ('e5000000-0000-0000-0000-000000000005','a0000000-0000-0000-0000-000000000002','Q5','Pan5','p5@t.l','5',
+   'b1000000-0000-0000-0000-000000000001','active','en');
+INSERT INTO public.panelist_unavailability (id, account_id, panelist_id, start_date, end_date, reason, status)
+VALUES ('f2000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000002',
+        'e5000000-0000-0000-0000-000000000005','2027-03-10','2027-03-12','vacation','active');
+SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N1','N4','2027-03-10','notified');
+SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000002','N4','N1','2027-03-11');
+DO $$
+BEGIN
+  IF public.resolve_unavailability_incident('f2000000-0000-0000-0000-000000000002') <> 0 THEN
+    RAISE EXCEPTION 'FAIL cross-tenant motor: devuelve lineas'; END IF;
+  IF EXISTS (SELECT 1 FROM public.panelist_reassignment_proposal) THEN
+    RAISE EXCEPTION 'FAIL cross-tenant motor: lineas sobre muestras de otra cuenta'; END IF;
+  IF EXISTS (SELECT 1 FROM public.allocation_plan_details
+              WHERE id IN ('d0000000-0000-0000-0000-000000000001','d0000000-0000-0000-0000-000000000002')
+                AND (reassigned_at IS NOT NULL OR fecha_programada NOT IN ('2027-03-10','2027-03-11'))) THEN
+    RAISE EXCEPTION 'FAIL cross-tenant motor: muestras de otra cuenta modificadas'; END IF;
+  RAISE NOTICE 'PASS motor acotado a la cuenta de la baja';
+END $$;
+ROLLBACK;
