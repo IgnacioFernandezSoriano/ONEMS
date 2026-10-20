@@ -6,7 +6,7 @@ import type { Panelist, PanelistUnavailability } from '@/lib/types'
 import { useTranslation } from '@/hooks/useTranslation';
 export function PanelistUnavailabilityComponent() {
   const { t } = useTranslation();
-  const { unavailabilityPeriods, loading, error, createUnavailabilityPeriod, updateUnavailabilityPeriod, deleteUnavailabilityPeriod } = usePanelistUnavailability()
+  const { unavailabilityPeriods, loading, error, createUnavailabilityPeriod, updateUnavailabilityPeriod, cancelUnavailabilityPeriod, deleteUnavailabilityPeriod } = usePanelistUnavailability()
   const [showModal, setShowModal] = useState(false)
   const [editingPeriod, setEditingPeriod] = useState<any>(null)
   const [panelists, setPanelists] = useState<Panelist[]>([])
@@ -101,7 +101,9 @@ export function PanelistUnavailabilityComponent() {
     if (!confirm(`Are you sure you want to cancel ${selectedIds.size} unavailability period(s)?`)) return
     
     for (const id of selectedIds) {
-      await updateUnavailabilityPeriod(id, { status: 'cancelled' })
+      const period = unavailabilityPeriods.find(p => p.id === id)
+      if (period?.status !== 'active') continue
+      await cancelUnavailabilityPeriod(id)
     }
     setSelectedIds(new Set())
   }
@@ -110,6 +112,9 @@ export function PanelistUnavailabilityComponent() {
     if (!confirm(`Are you sure you want to delete ${selectedIds.size} unavailability period(s)? This action cannot be undone.`)) return
     
     for (const id of selectedIds) {
+      // Una baja activa no se borra: se cancela (queda trazado y se revierte su efecto en el plan)
+      const period = unavailabilityPeriods.find(p => p.id === id)
+      if (period?.status === 'active') continue
       await deleteUnavailabilityPeriod(id)
     }
     setSelectedIds(new Set())
@@ -160,7 +165,8 @@ export function PanelistUnavailabilityComponent() {
     
     try {
       if (editingPeriod) {
-        await updateUnavailabilityPeriod(editingPeriod.id, formData)
+        // Fechas y estado no se envian al editar: solo motivo y notas
+        await updateUnavailabilityPeriod(editingPeriod.id, { reason: formData.reason, notes: formData.notes })
       } else {
         await createUnavailabilityPeriod(formData)
       }
@@ -176,9 +182,16 @@ export function PanelistUnavailabilityComponent() {
     await deleteUnavailabilityPeriod(id)
   }
 
-  const handleToggleStatus = async (period: any) => {
-    const newStatus = period.status === 'active' ? 'cancelled' : 'active'
-    await updateUnavailabilityPeriod(period.id, { status: newStatus })
+  // Accion de un solo sentido: solo se cancelan bajas activas; una cancelada no se reactiva
+  const handleCancelPeriod = async (period: any) => {
+    if (period.status !== 'active') return
+    if (!confirm(t('unavailability.confirm_cancel_one'))) return
+    try {
+      await cancelUnavailabilityPeriod(period.id)
+    } catch (err) {
+      console.error('Error cancelling unavailability period:', err)
+      alert('Error cancelling unavailability period')
+    }
   }
 
   const getStatusBadgeClass = (status: string) => {
@@ -485,18 +498,21 @@ export function PanelistUnavailabilityComponent() {
                           >
                             {t('unavailability.edit')}
                           </button>
-                          <button
-                            onClick={() => handleToggleStatus(period)}
-                            className="text-yellow-600 hover:text-yellow-800"
-                          >
-                            {period.status === 'active' ? t('unavailability.cancel') : t('unavailability.activate')}
-                          </button>
-                          <button
-                            onClick={() => handleDelete(period.id)}
-                            className="text-red-600 hover:text-red-800"
-                          >
-                            {t('unavailability.delete')}
-                          </button>
+                          {period.status === 'active' ? (
+                            <button
+                              onClick={() => handleCancelPeriod(period)}
+                              className="text-yellow-600 hover:text-yellow-800"
+                            >
+                              {t('unavailability.cancel')}
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleDelete(period.id)}
+                              className="text-red-600 hover:text-red-800"
+                            >
+                              {t('unavailability.delete')}
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -532,7 +548,8 @@ export function PanelistUnavailabilityComponent() {
                   <select
                     value={formData.panelist_id}
                     onChange={(e) => setFormData({ ...formData, panelist_id: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg disabled:bg-gray-100"
+                    disabled={!!editingPeriod}
                     required
                   >
                     <option value="">Select a panelist</option>
@@ -553,7 +570,8 @@ export function PanelistUnavailabilityComponent() {
                       type="date"
                       value={formData.start_date}
                       onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg disabled:bg-gray-100"
+                      disabled={!!editingPeriod}
                       required
                     />
                   </div>
@@ -566,12 +584,18 @@ export function PanelistUnavailabilityComponent() {
                       type="date"
                       value={formData.end_date}
                       onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg disabled:bg-gray-100"
+                      disabled={!!editingPeriod}
                       required
                       min={formData.start_date}
                     />
                   </div>
                 </div>
+                {editingPeriod && (
+                  <p className="text-xs text-gray-600 bg-gray-50 border border-gray-200 rounded p-2">
+                    {t('unavailability.dates_locked')}
+                  </p>
+                )}
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -611,7 +635,8 @@ export function PanelistUnavailabilityComponent() {
                   <select
                     value={formData.status}
                     onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg disabled:bg-gray-100"
+                    disabled={!!editingPeriod}
                   >
                     <option value="active">{t('common.active')}</option>
                     <option value="cancelled">{t('stock.cancelled')}</option>

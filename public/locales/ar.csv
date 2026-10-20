@@ -2780,6 +2780,7 @@ incidents.resolution.unavailability_cancelled,ألغى المشارك فترة �
 incidents.status_badge.pending_manager_tooltip,حوادث بانتظار قرار المسؤول
 unavailability.reason_materials,المواد
 unavailability.dates_locked,التواريخ يحددها المشارك ولا يمكن تعديلها. ألغِ وأعلن فترة جديدة عند الحاجة.
+unavailability.confirm_cancel_one,هل تريد إلغاء فترة عدم التوفر هذه؟ سيتم التراجع عن تغييراتها في الخطة ولا يمكن إعادة تفعيلها.
 reported_incidents.menu,الحوادث المبلَّغ عنها
 reported_incidents.badge_tooltip,حوادث أبلغ عنها الأعضاء بانتظار المراجعة
 reported_incidents.title,الحوادث المبلَّغ عنها من الأعضاء

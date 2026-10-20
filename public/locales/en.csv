@@ -2788,6 +2788,7 @@ incidents.resolution.unavailability_cancelled,Unavailability cancelled by the pa
 incidents.status_badge.pending_manager_tooltip,Incidents waiting for a manager decision
 unavailability.reason_materials,Materials
 unavailability.dates_locked,Dates come from the panelist and cannot be edited. Cancel and declare a new period if needed.
+unavailability.confirm_cancel_one,Cancel this unavailability period? Its changes to the plan will be reverted and it cannot be reactivated.
 reported_incidents.menu,Reported incidents
 reported_incidents.badge_tooltip,Incidents reported by panelists pending review
 reported_incidents.title,Incidents reported by panelists

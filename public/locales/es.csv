@@ -2788,6 +2788,7 @@ incidents.resolution.unavailability_cancelled,Indisponibilidad cancelada por el 
 incidents.status_badge.pending_manager_tooltip,Incidencias pendientes de decisión del gestor
 unavailability.reason_materials,Materiales
 unavailability.dates_locked,Las fechas vienen del panelista y no se pueden editar. Cancela y declara un nuevo periodo si es necesario.
+unavailability.confirm_cancel_one,¿Cancelar este periodo de indisponibilidad? Se revertirán sus cambios en el plan y no podrá reactivarse.
 reported_incidents.menu,Incidencias reportadas
 reported_incidents.badge_tooltip,Incidencias reportadas por panelistas pendientes de revisar
 reported_incidents.title,Incidencias reportadas por panelistas

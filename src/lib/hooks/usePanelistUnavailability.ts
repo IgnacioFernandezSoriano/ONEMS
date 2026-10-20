@@ -87,10 +87,18 @@ export function usePanelistUnavailability(panelistId?: string) {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('User not authenticated')
 
+      // Las fechas de una baja no se editan (la BD lo rechaza): se quitan siempre.
+      // Una baja cancelada tampoco se reactiva: nunca se envia status 'active' sobre ella.
+      const { start_date: _startDate, end_date: _endDate, ...safeUpdates } = updates
+      const current = unavailabilityPeriods.find(p => p.id === id)
+      if (current?.status === 'cancelled' && safeUpdates.status === 'active') {
+        delete safeUpdates.status
+      }
+
       const { data, error: updateError } = await supabase
         .from('panelist_unavailability')
         .update({
-          ...updates,
+          ...safeUpdates,
           updated_by: user.id,
         })
         .eq('id', id)

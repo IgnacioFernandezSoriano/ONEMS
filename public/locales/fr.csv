@@ -2780,6 +2780,7 @@ incidents.resolution.unavailability_cancelled,Indisponibilité annulée par le p
 incidents.status_badge.pending_manager_tooltip,Incidents en attente de décision du gestionnaire
 unavailability.reason_materials,Matériel
 unavailability.dates_locked,Les dates proviennent du panéliste et ne peuvent pas être modifiées. Annulez et déclarez une nouvelle période si nécessaire.
+unavailability.confirm_cancel_one,Annuler cette période d'indisponibilité ? Ses modifications du plan seront annulées et elle ne pourra pas être réactivée.
 reported_incidents.menu,Incidents signalés
 reported_incidents.badge_tooltip,Incidents signalés par les panélistes en attente d'examen
 reported_incidents.title,Incidents signalés par les panélistes
