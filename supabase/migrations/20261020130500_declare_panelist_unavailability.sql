@@ -1,16 +1,10 @@
 -- Incidencias de indisponibilidad: puerta de entrada para n8n / integraciones y aviso "recibido" de altas web.
---   (0) CHECK de reason ampliado con 'materials' (falta de material), que declare_panelist_unavailability acepta.
 --   (1) tg_enqueue_unavailability_received: AFTER INSERT en panelist_unavailability. Solo altas desde la web
 --       (auth.uid() NOT NULL) y activas -> aviso 'unavailability_received' al panelista. Best-effort, acotado por
 --       cuenta, respeta onems.suppress_notifications. Las altas por n8n (service role, auth.uid() NULL) no
 --       encolan: n8n contesta en linea con el resultado de declare_panelist_unavailability.
 --   (2) declare_panelist_unavailability: valida, detecta solape (devuelve el error en vez de lanzar) e inserta;
 --       el trigger de la baja ejecuta el motor en la misma sentencia. Solo service_role.
-
--- (0)
-ALTER TABLE public.panelist_unavailability DROP CONSTRAINT panelist_unavailability_reason_check;
-ALTER TABLE public.panelist_unavailability ADD CONSTRAINT panelist_unavailability_reason_check
-  CHECK (reason::text = ANY (ARRAY['vacation','sick_leave','personal','training','other','materials']));
 
 -- (1)
 CREATE OR REPLACE FUNCTION public.tg_enqueue_unavailability_received()

@@ -1,5 +1,7 @@
 # Subsistema C — Marco "Incidencias" + Disponibilidad de panelistas (pantalla del manager)
 
+> **Nota (2026-10-20):** Sustituido en parte por `2026-10-20-incidencias-indisponibilidad-resolucion-automatica-design.md`.
+
 **Fecha:** 2026-08-05
 **Estado:** diseño aprobado, pendiente de plan de implementación.
 **Depende de:** subsistema B (motor de propuestas), ya vivo en `onems-dev`.
