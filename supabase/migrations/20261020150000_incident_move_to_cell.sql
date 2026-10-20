@@ -8,10 +8,28 @@
 -- excluye los dias en que el panelista de ese nodo no esta disponible, incluida la propia baja).
 -- Reparto: primero el dia con menos muestras no canceladas del nodo (origen o destino), luego el mas temprano.
 
--- (0) Dia de la semana elegida para un nodo (compartido por las dos propuestas). Interna.
+-- (0a) Carga semanal de un nodo sin contar una muestra (la que se mueve: no debe contarse dos veces). Interna.
+CREATE OR REPLACE FUNCTION public.incident_node_week_load_excl(p_node_id uuid, p_date date, p_exclude_detail_id uuid)
+RETURNS integer
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT count(*)::int
+    FROM allocation_plan_details a
+   WHERE (a.origin_node_id = p_node_id OR a.destination_node_id = p_node_id)
+     AND a.fecha_programada BETWEEN incident_week_start(p_date) AND incident_week_start(p_date) + 6
+     AND a.status <> 'cancelled'
+     AND a.id IS DISTINCT FROM p_exclude_detail_id;
+$$;
+
+-- (0b) Dia de la semana elegida para un nodo (compartido por las dos propuestas). Interna.
+--      Mismo criterio que incident_node_fits (panelista disponible + carga semanal + 1 <= umbral), pero sin contar
+--      la muestra que se mueve (p_exclude_detail_id).
 CREATE OR REPLACE FUNCTION public.incident_pick_day_in_week(
   p_node_id uuid, p_week_start date, p_reference_load numeric, p_deviation_percent numeric,
-  p_other_end_node_id uuid DEFAULT NULL)
+  p_other_end_node_id uuid DEFAULT NULL, p_exclude_detail_id uuid DEFAULT NULL)
 RETURNS date
 LANGUAGE sql
 STABLE
@@ -22,7 +40,9 @@ AS $$
     FROM generate_series(incident_week_start(p_week_start), incident_week_start(p_week_start) + 4, interval '1 day') g
    WHERE p_node_id IS NOT NULL AND p_week_start IS NOT NULL
      AND g::date >= current_date
-     AND incident_node_fits(p_node_id, g::date, p_reference_load, p_deviation_percent)
+     AND COALESCE(is_node_available(p_node_id, g::date), false)
+     AND incident_node_week_load_excl(p_node_id, g::date, p_exclude_detail_id) + 1
+         <= incident_saturation_threshold(p_reference_load, p_deviation_percent)
      -- Otro extremo de la muestra: solo disponibilidad (su carga no cambia). Sin panelista activo no bloquea.
      AND (p_other_end_node_id IS NULL
           OR NOT EXISTS (SELECT 1 FROM panelists p WHERE p.node_id = p_other_end_node_id AND p.status = 'active')
@@ -30,13 +50,14 @@ AS $$
    ORDER BY (SELECT count(*) FROM allocation_plan_details a
               WHERE (a.origin_node_id = p_node_id OR a.destination_node_id = p_node_id)
                 AND a.fecha_programada = g::date
-                AND a.status <> 'cancelled') ASC,
+                AND a.status <> 'cancelled'
+                AND a.id IS DISTINCT FROM p_exclude_detail_id) ASC,
             g ASC
    LIMIT 1;
 $$;
 
 -- (1) Propuesta para una casilla. Motivos de found:false, en este orden:
---     not_found, not_pending, sample_not_movable, other_city, other_end, no_day.
+--     not_found, not_pending, sample_not_movable, other_city, inactive_node, other_end, no_day.
 CREATE OR REPLACE FUNCTION public.incident_suggest_cell(
   p_proposal_id uuid,
   p_node_id uuid,
@@ -59,6 +80,7 @@ DECLARE
   v_city uuid;
   v_tgt_city uuid;
   v_tgt_account uuid;
+  v_tgt_status text;
   v_day date;
   v_load integer;
 BEGIN
@@ -87,18 +109,21 @@ BEGIN
 
   -- Nunca a otra cuenta ni a otra ciudad (la del nodo actual de la muestra en el lado afectado).
   SELECT n.city_id INTO v_city FROM nodes n WHERE n.id = v_node;
-  SELECT n.city_id, n.account_id INTO v_tgt_city, v_tgt_account FROM nodes n WHERE n.id = p_node_id;
+  SELECT n.city_id, n.account_id, COALESCE(n.status, 'active') INTO v_tgt_city, v_tgt_account, v_tgt_status
+    FROM nodes n WHERE n.id = p_node_id;
   IF v_tgt_account IS DISTINCT FROM v_d.account_id OR v_tgt_city IS NULL OR v_tgt_city IS DISTINCT FROM v_city THEN
     RETURN jsonb_build_object('found', false, 'reason', 'other_city');
   END IF;
+  IF v_tgt_status <> 'active' THEN RETURN jsonb_build_object('found', false, 'reason', 'inactive_node'); END IF;
 
   -- Origen = destino no tiene sentido.
   IF p_node_id = v_other THEN RETURN jsonb_build_object('found', false, 'reason', 'other_end'); END IF;
 
-  v_day := incident_pick_day_in_week(p_node_id, p_week_start, v_ref, v_dev, v_other);
+  -- La muestra que se mueve no cuenta en la carga del destino (evita contarla dos veces en su propia semana).
+  v_day := incident_pick_day_in_week(p_node_id, p_week_start, v_ref, v_dev, v_other, v_d.id);
   IF v_day IS NULL THEN RETURN jsonb_build_object('found', false, 'reason', 'no_day'); END IF;
 
-  v_load := incident_node_week_load(p_node_id, v_day) + 1;
+  v_load := incident_node_week_load_excl(p_node_id, v_day, v_d.id) + 1;
   RETURN jsonb_build_object(
     'found', true,
     'date', v_day,
@@ -208,7 +233,7 @@ $$;
 -- (4) Reequilibrio: mover CUALQUIER muestra del plan desde la casilla (p_from_node_id x semana) a otra.
 --     Lado a cambiar: aquel en que la muestra tiene hoy p_from_node_id (origen primero). Motivos de found:false,
 --     en este orden: not_found, not_in_cell, sample_not_movable, has_incident_line (alguna linea pendiente, de cualquier lado:
---     la web debe usar apply_manager_move), other_city, other_end, no_day. Interna.
+--     la web debe usar apply_manager_move), other_city, inactive_node, other_end, no_day. Interna.
 CREATE OR REPLACE FUNCTION public.incident_suggest_sample_move(
   p_detail_id uuid,
   p_from_node_id uuid,
@@ -231,6 +256,7 @@ DECLARE
   v_city uuid;
   v_tgt_city uuid;
   v_tgt_account uuid;
+  v_tgt_status text;
   v_day date;
   v_load integer;
 BEGIN
@@ -263,17 +289,19 @@ BEGIN
 
   -- Nunca a otra cuenta ni a otra ciudad (la del nodo de la casilla de origen).
   SELECT n.city_id INTO v_city FROM nodes n WHERE n.id = p_from_node_id;
-  SELECT n.city_id, n.account_id INTO v_tgt_city, v_tgt_account FROM nodes n WHERE n.id = p_to_node_id;
+  SELECT n.city_id, n.account_id, COALESCE(n.status, 'active') INTO v_tgt_city, v_tgt_account, v_tgt_status
+    FROM nodes n WHERE n.id = p_to_node_id;
   IF v_tgt_account IS DISTINCT FROM v_d.account_id OR v_tgt_city IS NULL OR v_tgt_city IS DISTINCT FROM v_city THEN
     RETURN jsonb_build_object('found', false, 'reason', 'other_city');
   END IF;
+  IF v_tgt_status <> 'active' THEN RETURN jsonb_build_object('found', false, 'reason', 'inactive_node'); END IF;
 
   IF p_to_node_id = v_other THEN RETURN jsonb_build_object('found', false, 'reason', 'other_end'); END IF;
 
-  v_day := incident_pick_day_in_week(p_to_node_id, p_week_start, v_ref, v_dev, v_other);
+  v_day := incident_pick_day_in_week(p_to_node_id, p_week_start, v_ref, v_dev, v_other, v_d.id);
   IF v_day IS NULL THEN RETURN jsonb_build_object('found', false, 'reason', 'no_day'); END IF;
 
-  v_load := incident_node_week_load(p_to_node_id, v_day) + 1;
+  v_load := incident_node_week_load_excl(p_to_node_id, v_day, v_d.id) + 1;
   RETURN jsonb_build_object(
     'found', true,
     'date', v_day,
@@ -314,6 +342,111 @@ BEGIN
   RETURN incident_suggest_sample_move(p_detail_id, p_from_node_id, p_to_node_id, p_week_start,
                                       p_reference_load, p_deviation_percent);
 END;
+$$;
+
+-- (5b) Avisos de un cambio a los panelistas de antes y despues (generaliza incident_enqueue_revert de
+--      20261020130400). recipient_role relativo al estado nuevo: 'sender'/'receiver' si sigue en la muestra;
+--      'former_sender'/'former_receiver' si ya no. Un aviso por panelista (gana el papel del estado nuevo).
+--      Solo si la fecha antigua o la nueva cae en la semana actual; respeta onems.suppress_notifications.
+--      Panelistas siempre de la cuenta de la muestra. Interna.
+CREATE OR REPLACE FUNCTION public.incident_enqueue_change_full(
+  p_detail_id uuid, p_change text, p_old_date date, p_old_origin_node_id uuid, p_old_destination_node_id uuid)
+RETURNS integer
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_week_start date := date_trunc('week', current_date)::date;
+  v_d record;
+  v_dest record;
+  v_payload jsonb;
+  v_count integer := 0;
+  r record;
+BEGIN
+  IF p_change IS NULL OR p_change NOT IN ('shift_date','reroute_origin','reroute_destination','cancel','revert') THEN
+    RAISE EXCEPTION 'Unknown plan change %', p_change;
+  END IF;
+  IF COALESCE(current_setting('onems.suppress_notifications', true), '') = 'on' THEN RETURN 0; END IF;
+
+  SELECT a.id, a.account_id, a.fecha_programada, a.origin_node_id, a.destination_node_id,
+         no.auto_id AS origin_code, nd.auto_id AS destination_code,
+         pr.description AS product_description, ca.name AS carrier_name
+    INTO v_d
+    FROM allocation_plan_details a
+    JOIN nodes no ON no.id = a.origin_node_id
+    JOIN nodes nd ON nd.id = a.destination_node_id
+    LEFT JOIN allocation_plans ap ON ap.id = a.plan_id
+    LEFT JOIN products pr ON pr.id = ap.product_id
+    LEFT JOIN carriers ca ON ca.id = ap.carrier_id
+   WHERE a.id = p_detail_id;
+  IF NOT FOUND THEN RETURN 0; END IF;
+
+  IF NOT (COALESCE(p_old_date BETWEEN v_week_start AND v_week_start + 6, false)
+          OR COALESCE(v_d.fecha_programada BETWEEN v_week_start AND v_week_start + 6, false)) THEN
+    RETURN 0;
+  END IF;
+
+  SELECT p.id, p.name, p.address_line1, p.address_line2, p.postal_code, p.address_city
+    INTO v_dest FROM panelists p
+   WHERE p.id = incident_node_panelist(v_d.destination_node_id, v_d.account_id) AND p.account_id = v_d.account_id;
+
+  v_payload := jsonb_build_object(
+    'detail_id', v_d.id,
+    'change', p_change,
+    'old_date', p_old_date,
+    'new_date', v_d.fecha_programada,
+    'scheduled_date', v_d.fecha_programada,
+    'origin_node_code', v_d.origin_code,
+    'destination_node_code', v_d.destination_code,
+    'origin_panelist_name', (SELECT p.name FROM panelists p
+                               WHERE p.id = incident_node_panelist(v_d.origin_node_id, v_d.account_id)
+                                 AND p.account_id = v_d.account_id),
+    'destination_panelist_name', v_dest.name,
+    'destination_address', jsonb_build_object(
+      'address_line1', v_dest.address_line1,
+      'address_line2', v_dest.address_line2,
+      'postal_code', v_dest.postal_code,
+      'city', v_dest.address_city),
+    'product_description', v_d.product_description,
+    'carrier_name', v_d.carrier_name);
+
+  FOR r IN
+    SELECT DISTINCT ON (x.panelist_id) x.panelist_id, x.role
+      FROM (
+        SELECT incident_node_panelist(v_d.origin_node_id, v_d.account_id) AS panelist_id,
+               'sender'::text AS role, 1 AS prio
+        UNION ALL
+        SELECT incident_node_panelist(v_d.destination_node_id, v_d.account_id),
+               'receiver', 2
+        UNION ALL
+        SELECT incident_node_panelist(p_old_origin_node_id, v_d.account_id),
+               'former_sender', 3
+        UNION ALL
+        SELECT incident_node_panelist(p_old_destination_node_id, v_d.account_id),
+               'former_receiver', 4) x
+      JOIN panelists p ON p.id = x.panelist_id AND p.account_id = v_d.account_id
+     WHERE x.panelist_id IS NOT NULL
+     ORDER BY x.panelist_id, x.prio
+  LOOP
+    INSERT INTO panelist_notification (account_id, panelist_id, kind, payload)
+    VALUES (v_d.account_id, r.panelist_id, 'plan_change_this_week', v_payload || jsonb_build_object('recipient_role', r.role));
+    v_count := v_count + 1;
+  END LOOP;
+
+  RETURN v_count;
+END;
+$$;
+
+-- (5c) incident_enqueue_revert pasa a ser un envoltorio fino (misma firma y comportamiento).
+CREATE OR REPLACE FUNCTION public.incident_enqueue_revert(
+  p_detail_id uuid, p_old_date date, p_old_origin_node_id uuid, p_old_destination_node_id uuid)
+RETURNS integer
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT incident_enqueue_change_full(p_detail_id, 'revert', p_old_date, p_old_origin_node_id, p_old_destination_node_id);
 $$;
 
 -- (6) apply_sample_move: aplica el reequilibrio en UNA sola sentencia (mismas columnas que incident_apply_change;
@@ -392,16 +525,20 @@ BEGIN
            THEN COALESCE(original_fecha_programada, fecha_programada) ELSE original_fecha_programada END,
          fecha_programada = v_date,
          status = CASE WHEN status = 'notified' THEN 'pending' ELSE status END,
-         reassignment_reason = 'rebalancing',
+         -- Una muestra ya movida por una baja conserva ese motivo.
+         reassignment_reason = CASE WHEN reassignment_reason = 'panelist_unavailable'
+           THEN reassignment_reason ELSE 'rebalancing' END,
          reassigned_at = now(),
          reassigned_by = v_actor,
          updated_at = now()
    WHERE id = v_d.id;
 
-  PERFORM incident_enqueue_plan_change(
+  -- Avisos a los panelistas de antes y despues (incluido el que deja la muestra: former_sender/former_receiver).
+  -- v_d conserva el estado previo al UPDATE.
+  PERFORM incident_enqueue_change_full(
     v_d.id,
     CASE WHEN v_same THEN 'shift_date' WHEN v_side = 'origin' THEN 'reroute_origin' ELSE 'reroute_destination' END,
-    v_d.fecha_programada, v_date, NULL);
+    v_d.fecha_programada, v_d.origin_node_id, v_d.destination_node_id);
 
   RETURN jsonb_build_object('ok', true, 'date', v_date, 'node_id', p_to_node_id, 'side', v_side);
 END;
@@ -410,7 +547,10 @@ $$;
 -- (7) Permisos. Internas (incident_pick_day_in_week, incident_suggest_cell, incident_suggest_sample_move): no
 --     ejecutables por anon/authenticated. Las dos propuestas internas llevan GRANT a service_role, igual que
 --     incident_suggest; el helper de dia no (como incident_find_shift_date). La web usa los envoltorios.
-REVOKE ALL ON FUNCTION public.incident_pick_day_in_week(uuid, date, numeric, numeric, uuid) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.incident_node_week_load_excl(uuid, date, uuid) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.incident_pick_day_in_week(uuid, date, numeric, numeric, uuid, uuid) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.incident_enqueue_change_full(uuid, text, date, uuid, uuid) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.incident_enqueue_revert(uuid, date, uuid, uuid) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.incident_suggest_cell(uuid, uuid, date, numeric, numeric) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.incident_suggest_cell(uuid, uuid, date, numeric, numeric) TO service_role;
 REVOKE ALL ON FUNCTION public.incident_suggest_sample_move(uuid, uuid, uuid, date, numeric, numeric) FROM PUBLIC, anon, authenticated;

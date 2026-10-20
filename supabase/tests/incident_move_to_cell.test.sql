@@ -74,7 +74,10 @@ BEGIN
     RAISE EXCEPTION 'FAIL incident_suggest_cell ejecutable por anon/authenticated'; END IF;
   FOREACH f IN ARRAY ARRAY[
     'public.incident_suggest_sample_move(uuid,uuid,uuid,date,numeric,numeric)',
-    'public.incident_pick_day_in_week(uuid,date,numeric,numeric,uuid)'] LOOP
+    'public.incident_pick_day_in_week(uuid,date,numeric,numeric,uuid,uuid)',
+    'public.incident_node_week_load_excl(uuid,date,uuid)',
+    'public.incident_enqueue_change_full(uuid,text,date,uuid,uuid)',
+    'public.incident_enqueue_revert(uuid,date,uuid,uuid)'] LOOP
     IF has_function_privilege('anon', f, 'EXECUTE') OR has_function_privilege('authenticated', f, 'EXECUTE') THEN
       RAISE EXCEPTION 'FAIL % ejecutable por anon/authenticated', f; END IF;
   END LOOP;
@@ -470,5 +473,108 @@ BEGIN
   IF current_setting('t.sug') <> 'true' OR current_setting('t.ok') <> 'true' THEN
     RAISE EXCEPTION 'FAIL mover muestra como authenticated (% %)', current_setting('t.sug'), current_setting('t.ok'); END IF;
   RAISE NOTICE 'PASS mover muestra como authenticated';
+END $$;
+ROLLBACK;
+
+-- =====================================================================================================
+-- Revision: avisos al panelista anterior, autoconteo en el umbral, nodo inactivo, motivo conservado.
+-- =====================================================================================================
+-- Papeles avisados de una muestra: 'Pan1:sender,Pan2:receiver,...' ordenado por nombre.
+CREATE FUNCTION pg_temp.roles(p_detail uuid) RETURNS text LANGUAGE sql AS $$
+  SELECT string_agg(p.name || ':' || (n.payload->>'recipient_role'), ',' ORDER BY p.name)
+    FROM public.panelist_notification n JOIN public.panelists p ON p.id = n.panelist_id
+   WHERE n.payload->>'detail_id' = p_detail::text;
+$$;
+
+-- ===== Avisos: nuevo emisor/receptor y el panelista que deja la muestra =====
+BEGIN;
+\ir fixtures/incident_city.sql
+SELECT pg_temp.mk('d3000000-0000-0000-0000-000000000030','N1','N2', date_trunc('week', current_date)::date, 'notified');
+SELECT pg_temp.mk('d3000000-0000-0000-0000-000000000031','N1','N2', date_trunc('week', current_date)::date, 'notified');
+SELECT pg_temp.mk('d3000000-0000-0000-0000-000000000032','N1','N2', date_trunc('week', current_date)::date + 14, 'notified');
+SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+DO $$
+DECLARE w0 date := date_trunc('week', current_date)::date;
+  N1 uuid := 'b1000000-0000-0000-0000-000000000001'; N2 uuid := 'b2000000-0000-0000-0000-000000000002';
+  N3 uuid := 'b3000000-0000-0000-0000-000000000003';
+BEGIN
+  -- Lado origen: N1->N2 pasa a N3->N2.
+  PERFORM public.apply_sample_move('d3000000-0000-0000-0000-000000000030', N1, N3, w0 + 7);
+  IF pg_temp.roles('d3000000-0000-0000-0000-000000000030') IS DISTINCT FROM 'Pan1:former_sender,Pan2:receiver,Pan3:sender' THEN
+    RAISE EXCEPTION 'FAIL avisos lado origen %', pg_temp.roles('d3000000-0000-0000-0000-000000000030'); END IF;
+  IF EXISTS (SELECT 1 FROM public.panelist_notification WHERE payload->>'detail_id' = 'd3000000-0000-0000-0000-000000000030'
+              AND (payload->>'change' <> 'reroute_origin' OR kind <> 'plan_change_this_week'
+                   OR (payload->>'old_date')::date <> w0 OR (payload->>'new_date')::date <> w0 + 7
+                   OR payload->>'origin_node_code' <> 'N3')) THEN
+    RAISE EXCEPTION 'FAIL payload lado origen'; END IF;
+  -- Lado destino: N1->N2 pasa a N1->N3.
+  PERFORM public.apply_sample_move('d3000000-0000-0000-0000-000000000031', N2, N3, w0 + 7);
+  IF pg_temp.roles('d3000000-0000-0000-0000-000000000031') IS DISTINCT FROM 'Pan1:sender,Pan2:former_receiver,Pan3:receiver' THEN
+    RAISE EXCEPTION 'FAIL avisos lado destino %', pg_temp.roles('d3000000-0000-0000-0000-000000000031'); END IF;
+  IF EXISTS (SELECT 1 FROM public.panelist_notification WHERE payload->>'detail_id' = 'd3000000-0000-0000-0000-000000000031'
+              AND payload->>'change' <> 'reroute_destination') THEN
+    RAISE EXCEPTION 'FAIL change lado destino'; END IF;
+  -- Fuera de la semana actual: ningun aviso.
+  PERFORM public.apply_sample_move('d3000000-0000-0000-0000-000000000032', N1, N3, w0 + 21);
+  IF pg_temp.roles('d3000000-0000-0000-0000-000000000032') IS NOT NULL THEN
+    RAISE EXCEPTION 'FAIL avisos fuera de semana %', pg_temp.roles('d3000000-0000-0000-0000-000000000032'); END IF;
+  RAISE NOTICE 'PASS avisos al panelista anterior (former_sender / former_receiver)';
+END $$;
+ROLLBACK;
+
+-- ===== Autoconteo en el umbral, nodo inactivo, motivo panelist_unavailable conservado =====
+BEGIN;
+\ir fixtures/incident_city.sql
+-- Lunes 07/06: d40 + 6 muestras mas de N1 -> carga semanal 7 (con d40). Sin excluir d40: 7+1 > 7.8.
+SELECT pg_temp.mk('d4000000-0000-0000-0000-000000000040','N1','N4','2027-06-07');
+SELECT pg_temp.fill('N1','2027-06-07','2027-06-07',6);
+SELECT pg_temp.mk('d4000000-0000-0000-0000-000000000041','N1','N4','2027-06-14');
+INSERT INTO public.nodes (id, account_id, city_id, auto_id, status) VALUES
+  ('b6000000-0000-0000-0000-000000000006','a0000000-0000-0000-0000-000000000001','c1000000-0000-0000-0000-000000000001','N6','inactive');
+UPDATE public.allocation_plan_details SET reassignment_reason = 'panelist_unavailable'
+ WHERE id = 'd4000000-0000-0000-0000-000000000041';
+SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+DO $$
+DECLARE j jsonb; s public.allocation_plan_details;
+  N1 uuid := 'b1000000-0000-0000-0000-000000000001'; N6 uuid := 'b6000000-0000-0000-0000-000000000006';
+BEGIN
+  j := public.suggest_for_sample_move('d4000000-0000-0000-0000-000000000040', N1, N1, '2027-06-07');
+  IF NOT COALESCE((j->>'found')::boolean, false) OR (j->>'date')::date <> '2027-06-08'
+     OR (j->>'load_after')::int <> 7 OR j->>'saturation_level' <> 'normal' THEN
+    RAISE EXCEPTION 'FAIL autoconteo umbral %', j; END IF;
+  j := public.apply_sample_move('d4000000-0000-0000-0000-000000000040', N1, N1, '2027-06-07');
+  IF (pg_temp.smp('d4000000-0000-0000-0000-000000000040')).fecha_programada <> '2027-06-08' THEN
+    RAISE EXCEPTION 'FAIL autoconteo aplicar %', j; END IF;
+
+  -- Nodo destino inactivo.
+  PERFORM pg_temp.expect_reason(public.suggest_for_sample_move('d4000000-0000-0000-0000-000000000041', N1, N6, '2027-06-21'), 'inactive_node', 'nodo inactivo');
+
+  -- Motivo panelist_unavailable se conserva al reequilibrar.
+  PERFORM public.apply_sample_move('d4000000-0000-0000-0000-000000000041', N1, N1, '2027-06-21');
+  s := pg_temp.smp('d4000000-0000-0000-0000-000000000041');
+  IF s.reassignment_reason <> 'panelist_unavailable' OR s.fecha_programada <> '2027-06-21' THEN
+    RAISE EXCEPTION 'FAIL motivo conservado % %', s.reassignment_reason, s.fecha_programada; END IF;
+  RAISE NOTICE 'PASS autoconteo en el umbral, inactive_node, motivo conservado';
+END $$;
+ROLLBACK;
+
+-- ===== incident_suggest_cell: nodo destino inactivo =====
+BEGIN;
+\ir fixtures/incident_city.sql
+INSERT INTO public.nodes (id, account_id, city_id, auto_id, status) VALUES
+  ('b6000000-0000-0000-0000-000000000006','a0000000-0000-0000-0000-000000000001','c1000000-0000-0000-0000-000000000001','N6','inactive');
+SELECT pg_temp.baja('2027-03-01','2027-03-31');
+SELECT pg_temp.fill('N2','2027-03-01','2027-03-29',8);
+SELECT pg_temp.fill('N3','2027-03-01','2027-03-29',8);
+SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N1','N4','2027-03-10');
+SELECT public.resolve_unavailability_incident('f0000000-0000-0000-0000-000000000001');
+SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+DO $$
+DECLARE l public.panelist_reassignment_proposal;
+BEGIN
+  l := pg_temp.line('d0000000-0000-0000-0000-000000000001');
+  IF l.status <> 'pending' THEN RAISE EXCEPTION 'FAIL precondicion %', l.status; END IF;
+  PERFORM pg_temp.expect_reason(public.suggest_for_cell(l.id, 'b6000000-0000-0000-0000-000000000006', '2027-04-12'), 'inactive_node', 'cell nodo inactivo');
+  RAISE NOTICE 'PASS suggest_for_cell inactive_node';
 END $$;
 ROLLBACK;
