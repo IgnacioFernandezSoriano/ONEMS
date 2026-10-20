@@ -49,7 +49,7 @@ BEGIN
   IF v_orig_orig <> 'b1000000-0000-0000-0000-000000000001' THEN RAISE EXCEPTION 'FAIL: original_origin no guardado (% )', v_orig_orig; END IF;
   IF v_reason <> 'panelist_unavailable' THEN RAISE EXCEPTION 'FAIL: reason (% )', v_reason; END IF;
   SELECT status INTO v_status FROM panelist_reassignment_proposal WHERE id='f1000000-0000-0000-0000-000000000001';
-  IF v_status <> 'confirmed' THEN RAISE EXCEPTION 'FAIL: propuesta no confirmed (% )', v_status; END IF;
+  IF v_status <> 'manager_resolved' THEN RAISE EXCEPTION 'FAIL: propuesta no manager_resolved (% )', v_status; END IF;
   RAISE NOTICE 'PASS: reroute muta plan + guarda original + confirma propuesta';
 END $$;
 
