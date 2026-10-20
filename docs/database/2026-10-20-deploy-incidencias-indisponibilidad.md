@@ -200,29 +200,27 @@ Orden inverso. Revisar antes de ejecutar y pedir confirmación.
   en el plan), `drop table panelist_notification` y restaurar los CHECK anteriores. Las propuestas
   `confirmed` convertidas a `manager_resolved` ya no se distinguen.
 
-## 7. Resultado esperado de la puesta al día en KENYA
+## 7. Resultado esperado de la puesta al día — KENYA NO SE TOCA
 
-> **Importante, dicho claro:** la migración 7 **CAMBIA FILAS REALES DEL PLAN de KENYA en el momento de
-> aplicarla.** Las muestras de Nancy y de Petet que se puedan resolver pasan a tener **otra fecha
-> (`fecha_programada`) o otro nodo** de origen/destino. El aviso diario de las 9:00 usará **las fechas nuevas
-> a partir del día siguiente**. Esto es lo decidido: estas bajas se **tratan como bajas nuevas** (el motor
-> nuevo las resuelve igual que si se acabaran de declarar). No se manda ningún aviso por estos cambios.
+> **Decisión del responsable (2026-10-20): "deja a KENYA sin cambiar".** La migración 7 **excluye la
+> cuenta KENYA** (`c4fe92f1-7673-41ae-9ed9-4b82d198be08`): no ejecuta el motor sobre sus bajas y **no
+> cambia ninguna fila del plan de KENYA**. Hoy KENYA es la única cuenta con bajas vigentes (Nancy Weru
+> 29/11–5/12 con 15 muestras afectadas; Petet Lokui Lokaale 16–20/11 con 8), así que la puesta al día
+> **no cambia ningún dato del plan**: solo marca como `resolved` las bajas antiguas (canceladas o ya
+> pasadas) que se quedaron en `new`.
 
-Lectura de solo lectura el 2026-10-20 (todas las muestras en `pending`; ninguna `sent`/`received`):
+Qué queda en KENYA tras aplicar:
+- Nancy Weru: `incident_status='new'`, 0 líneas. Petet: `resolved` (ya estaba revisada).
+- Ninguna muestra movida, ningún aviso.
 
-| Baja | Fechas | Muestras afectadas | Detalle |
-|---|---|---|---|
-| Nancy Weru | 29/11 – 5/12/2026 | **15** (9 como emisora, 6 como receptora) | 30/11: 9 emisora + 1 receptora; 2/12: 1; 3/12: 3; 4/12: 1 |
-| Petet Lokui Lokaale | 16 – 20/11/2026 | **8** (1 como emisor, 7 como receptor) | 16/11: 3 receptor + 1 emisor; 17/11: 2; 20/11: 2 |
+Importante: **desde ahora, cualquier cambio de FECHA o de NODO en el plan de KENYA que caiga dentro de
+esas bajas hace que el motor procese la baja afectada** (es el refresco automático por cambios del plan,
+spec 5.6). Si quieres que KENYA siga totalmente quieto hasta decidirlo, no apliques ni muevas planes de
+KENYA hasta entonces.
 
-Se resolverán automáticamente las que quepan (retraso de fecha o cambio de nodo); el resto quedará
-pendiente del manager. El reparto exacto (retrasadas / reencaminadas / pendientes) se sabrá al aplicar y
-se anota en la sección 10. Ninguna de las dos bajas empieza en la semana en curso, así que además no
-habría avisos aunque no estuvieran suprimidos.
-
-Nota: Petet tiene `review_status='reviewed'`, por lo que la migración 1 le pone `incident_status='resolved'`;
-la puesta al día lo procesa igualmente (el bucle no filtra por `incident_status`) y el motor recalcula su
-estado. Nancy (0 líneas, `pending_review`) queda en `new` tras la migración 1.
+Para procesar KENYA más adelante (cuando se decida), por baja:
+`select public.resolve_unavailability_incident('<id de la baja>');` (mueve muestras reales; los avisos de
+la semana en curso sí se mandarían, así que mejor hacerlo con calma y avisando).
 
 ## 8. Qué NO hace este despliegue
 
@@ -241,7 +239,7 @@ estado. Nancy (0 líneas, `pending_review`) queda en `new` tras la migración 1.
 
 - Al crear una baja, la incidencia aparece ya con las muestras resueltas automáticamente ("resuelta
   automáticamente") o "pendiente del manager" si alguna no cupo.
-- Las bajas antiguas ya revisadas siguen como "resueltas"; las vigentes se recalculan.
+- Las bajas antiguas ya revisadas siguen como "resueltas". Las de KENYA no se recalculan por decisión del responsable (ver sección 7).
 - La pantalla nueva del manager llega con el frontend (plan 2); mientras tanto los datos ya estarán listos.
 
 ## 10. Registro de la ejecución real
