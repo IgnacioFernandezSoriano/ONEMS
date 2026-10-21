@@ -282,3 +282,161 @@ REVOKE ALL ON FUNCTION public.record_material_question(uuid,text) FROM PUBLIC, a
 GRANT EXECUTE ON FUNCTION public.record_material_question(uuid,text) TO service_role;
 REVOKE ALL ON FUNCTION public.send_material_shipment(uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.send_material_shipment(uuid) TO authenticated, service_role;
+
+-- ============================================================================
+-- 3. Recepcion parcial de material y cierre de la incidencia SIN cancelar la baja
+-- ============================================================================
+
+-- Stub: la Tarea 4 lo sustituye por la liberacion real de envios retenidos.
+CREATE OR REPLACE FUNCTION public.refresh_material_hold(p_panelist_id uuid)
+RETURNS uuid[] LANGUAGE sql SECURITY DEFINER SET search_path = public AS $$
+  SELECT '{}'::uuid[];
+$$;
+REVOKE ALL ON FUNCTION public.refresh_material_hold(uuid) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.refresh_material_hold(uuid) TO service_role;
+
+-- p_items = [{material_id, quantity}] con lo recibido en ESTA confirmacion.
+CREATE OR REPLACE FUNCTION public.receive_material_shipment_items(p_shipment_id uuid, p_items jsonb)
+RETURNS jsonb
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE
+  v_ship      public.material_shipments%rowtype;
+  v_el        jsonb;
+  v_mat       uuid;
+  v_qty       numeric;
+  v_item      public.material_shipment_items%rowtype;
+  v_incident  uuid;
+  v_summary   text := '';
+  v_name      text;
+  v_complete  boolean;
+  v_resolved  boolean := false;
+  v_released  uuid[];
+BEGIN
+  SELECT * INTO v_ship FROM public.material_shipments WHERE id = p_shipment_id FOR UPDATE;
+  IF NOT FOUND THEN RAISE EXCEPTION 'shipment % not found', p_shipment_id; END IF;
+  PERFORM public.assert_same_account(v_ship.account_id);
+
+  IF v_ship.status = 'received' THEN
+    RETURN jsonb_build_object('status','received','incident_resolved',false,'released_detail_ids','[]'::jsonb);
+  END IF;
+  IF v_ship.status NOT IN ('sent','partially_received') THEN
+    RAISE EXCEPTION 'shipment % in status % cannot be received', p_shipment_id, v_ship.status;
+  END IF;
+
+  FOR v_el IN SELECT * FROM jsonb_array_elements(coalesce(p_items, '[]'::jsonb)) LOOP
+    v_mat := (v_el->>'material_id')::uuid;
+    v_qty := (v_el->>'quantity')::numeric;
+    IF v_qty IS NULL OR v_qty < 0 THEN RAISE EXCEPTION 'invalid quantity'; END IF;
+
+    SELECT * INTO v_item FROM public.material_shipment_items
+     WHERE material_shipment_id = p_shipment_id AND material_id = v_mat
+     FOR UPDATE;
+    IF NOT FOUND THEN RAISE EXCEPTION 'material not in shipment'; END IF;
+    IF coalesce(v_item.quantity_received, 0) + v_qty > v_item.quantity_sent THEN
+      RAISE EXCEPTION 'quantity exceeds sent'; END IF;
+
+    IF v_qty > 0 THEN
+      INSERT INTO public.panelist_material_stocks
+        (account_id, panelist_id, material_id, quantity, last_updated)
+      VALUES (v_ship.account_id, v_ship.panelist_id, v_mat, v_qty, now())
+      ON CONFLICT (account_id, panelist_id, material_id)
+      DO UPDATE SET quantity = public.panelist_material_stocks.quantity + excluded.quantity,
+                    last_updated = now();
+
+      UPDATE public.material_shipment_items
+         SET quantity_received = coalesce(quantity_received, 0) + v_qty, updated_at = now()
+       WHERE id = v_item.id;
+
+      INSERT INTO public.material_movements
+        (account_id, material_id, movement_type, quantity, reference_id, notes, created_by)
+      VALUES (v_ship.account_id, v_mat, 'receipt', v_qty, p_shipment_id,
+              'Recepcion confirmada por panelista', auth.uid());
+
+      SELECT name INTO v_name FROM public.material_catalog WHERE id = v_mat;
+      v_summary := v_summary || CASE WHEN v_summary = '' THEN '' ELSE ', ' END
+                   || coalesce(v_name, v_mat::text) || ' ' || v_qty::text;
+    END IF;
+  END LOOP;
+
+  SELECT NOT EXISTS (SELECT 1 FROM public.material_shipment_items
+                      WHERE material_shipment_id = p_shipment_id
+                        AND coalesce(quantity_received, 0) < quantity_sent)
+    INTO v_complete;
+
+  IF v_complete THEN
+    UPDATE public.material_shipments
+       SET status = 'received', received_date = now()
+     WHERE id = p_shipment_id;
+  ELSE
+    UPDATE public.material_shipments
+       SET status = 'partially_received', ask_count = 0, next_ask_at = now() + interval '2 days'
+     WHERE id = p_shipment_id;
+  END IF;
+
+  -- Incidencia enlazada (o, por compatibilidad, la que apunta a este envio).
+  v_incident := v_ship.panelist_incident_id;
+  IF v_incident IS NULL THEN
+    SELECT id INTO v_incident FROM public.panelist_incident
+     WHERE linked_material_shipment_id = p_shipment_id LIMIT 1;
+  END IF;
+
+  IF v_incident IS NOT NULL THEN
+    IF v_summary <> '' THEN
+      PERFORM public.log_incident_message('reported', v_incident, 'internal', 'system',
+        'Recibido: ' || v_summary, jsonb_build_object('shipment_id', p_shipment_id));
+    END IF;
+
+    IF v_complete AND NOT EXISTS (
+         SELECT 1 FROM public.material_shipments s
+          WHERE s.status NOT IN ('cancelled', 'received')
+            AND (s.panelist_incident_id = v_incident
+                 OR s.id IN (SELECT linked_material_shipment_id FROM public.panelist_incident WHERE id = v_incident))
+       ) THEN
+      -- NO se toca panelist_unavailability: la baja sigue su curso.
+      PERFORM public.resolve_panelist_incident(
+        v_incident, 'resolved', 'Material recibido; disponibilidad restaurada.', NULL);
+      PERFORM public.log_incident_message('reported', v_incident, 'internal', 'system',
+        'Material recibido completo', jsonb_build_object('shipment_id', p_shipment_id));
+      v_resolved := true;
+    END IF;
+  END IF;
+
+  v_released := public.refresh_material_hold(v_ship.panelist_id);
+
+  RETURN jsonb_build_object(
+    'status', CASE WHEN v_complete THEN 'received' ELSE 'partially_received' END,
+    'incident_resolved', v_resolved,
+    'released_detail_ids', coalesce(to_jsonb(v_released), '[]'::jsonb));
+END;
+$$;
+
+-- Boton antiguo: recibe todo lo pendiente; ya no cancela la baja.
+CREATE OR REPLACE FUNCTION public.receive_material_shipment(p_shipment_id uuid)
+RETURNS void
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE
+  v_ship  public.material_shipments%rowtype;
+  v_items jsonb;
+BEGIN
+  SELECT * INTO v_ship FROM public.material_shipments WHERE id = p_shipment_id;
+  IF NOT FOUND THEN RAISE EXCEPTION 'shipment % not found', p_shipment_id; END IF;
+  PERFORM public.assert_same_account(v_ship.account_id);
+  IF v_ship.status = 'received' THEN RETURN; END IF;
+  IF v_ship.status NOT IN ('sent','partially_received') THEN
+    RAISE EXCEPTION 'shipment % in status % cannot be received', p_shipment_id, v_ship.status;
+  END IF;
+
+  SELECT coalesce(jsonb_agg(jsonb_build_object(
+           'material_id', material_id,
+           'quantity', quantity_sent - coalesce(quantity_received, 0))), '[]'::jsonb)
+    INTO v_items
+    FROM public.material_shipment_items
+   WHERE material_shipment_id = p_shipment_id;
+
+  PERFORM public.receive_material_shipment_items(p_shipment_id, v_items);
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.receive_material_shipment_items(uuid,jsonb) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.receive_material_shipment_items(uuid,jsonb) TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.receive_material_shipment(uuid) TO authenticated, service_role;

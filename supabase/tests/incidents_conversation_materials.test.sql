@@ -278,3 +278,156 @@ BEGIN
     RAISE EXCEPTION 'FAIL falta GRANT en %', f; END IF;
 END $$;
 ROLLBACK;
+
+-- ===== Escenario 3: recepcion parcial y cierre de incidencia sin cancelar la baja =====
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+CREATE TEMP TABLE t_ids (k text PRIMARY KEY, v uuid);
+WITH x AS (
+  INSERT INTO public.panelist_incident (account_id, panelist_id, category, status)
+  VALUES ('a0000000-0000-0000-0000-000000000001','e1000000-0000-0000-0000-000000000001','missing_materials','open')
+  RETURNING id)
+INSERT INTO t_ids SELECT 'inc', id FROM x;
+WITH x AS (
+  INSERT INTO public.panelist_unavailability (panelist_id, account_id, start_date, end_date, reason, status)
+  VALUES ('e1000000-0000-0000-0000-000000000001','a0000000-0000-0000-0000-000000000001',
+          current_date + 1, current_date + 5, 'vacation', 'active')
+  RETURNING id)
+INSERT INTO t_ids SELECT 'unav', id FROM x;
+UPDATE public.panelist_incident SET linked_unavailability_id = (SELECT v FROM t_ids WHERE k='unav')
+ WHERE id = (SELECT v FROM t_ids WHERE k='inc');
+WITH x AS (INSERT INTO public.material_catalog (account_id, code, name)
+  VALUES ('a0000000-0000-0000-0000-000000000001','M1','Etiquetas') RETURNING id)
+INSERT INTO t_ids SELECT 'm1', id FROM x;
+WITH x AS (INSERT INTO public.material_catalog (account_id, code, name)
+  VALUES ('a0000000-0000-0000-0000-000000000001','M2','Bolsas') RETURNING id)
+INSERT INTO t_ids SELECT 'm2', id FROM x;
+-- s1 central (M1 x10, M2 x4), s2 donante (M1 x5), ambos enviados y enlazados a la incidencia
+WITH x AS (
+  INSERT INTO public.material_shipments (account_id, panelist_id, status, panelist_incident_id)
+  VALUES ('a0000000-0000-0000-0000-000000000001','e1000000-0000-0000-0000-000000000001','sent',(SELECT v FROM t_ids WHERE k='inc'))
+  RETURNING id)
+INSERT INTO t_ids SELECT 's1', id FROM x;
+WITH x AS (
+  INSERT INTO public.material_shipments (account_id, panelist_id, source_panelist_id, status, panelist_incident_id)
+  VALUES ('a0000000-0000-0000-0000-000000000001','e1000000-0000-0000-0000-000000000001','e2000000-0000-0000-0000-000000000002','sent',(SELECT v FROM t_ids WHERE k='inc'))
+  RETURNING id)
+INSERT INTO t_ids SELECT 's2', id FROM x;
+INSERT INTO public.material_shipment_items (account_id, material_shipment_id, material_id, quantity_sent) VALUES
+  ('a0000000-0000-0000-0000-000000000001',(SELECT v FROM t_ids WHERE k='s1'),(SELECT v FROM t_ids WHERE k='m1'),10),
+  ('a0000000-0000-0000-0000-000000000001',(SELECT v FROM t_ids WHERE k='s1'),(SELECT v FROM t_ids WHERE k='m2'),4),
+  ('a0000000-0000-0000-0000-000000000001',(SELECT v FROM t_ids WHERE k='s2'),(SELECT v FROM t_ids WHERE k='m1'),5);
+
+-- errores
+DO $$
+DECLARE s1 uuid := (SELECT v FROM t_ids WHERE k='s1'); m1 uuid := (SELECT v FROM t_ids WHERE k='m1');
+BEGIN
+  PERFORM set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+  PERFORM pg_temp.expect_err(format($q$SELECT public.receive_material_shipment_items(%L, %L::jsonb)$q$,
+    s1, format('[{"material_id":"%s","quantity":11}]', m1)), 'quantity exceeds sent');
+  PERFORM pg_temp.expect_err(format($q$SELECT public.receive_material_shipment_items(%L, %L::jsonb)$q$,
+    s1, format('[{"material_id":"%s","quantity":-1}]', m1)), 'invalid quantity');
+  PERFORM pg_temp.expect_err(format($q$SELECT public.receive_material_shipment_items(%L, %L::jsonb)$q$,
+    s1, '[{"material_id":"00000000-0000-0000-0000-000000000000","quantity":1}]'), 'material not in shipment');
+  PERFORM set_config('request.jwt.claim.sub','', true);
+END $$;
+
+-- parcial, luego el resto
+DO $$
+DECLARE s1 uuid := (SELECT v FROM t_ids WHERE k='s1'); m1 uuid := (SELECT v FROM t_ids WHERE k='m1'); m2 uuid := (SELECT v FROM t_ids WHERE k='m2');
+        inc uuid := (SELECT v FROM t_ids WHERE k='inc'); r jsonb;
+BEGIN
+  PERFORM set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+  r := public.receive_material_shipment_items(s1, format('[{"material_id":"%s","quantity":6},{"material_id":"%s","quantity":0}]', m1, m2)::jsonb);
+  IF r->>'status' <> 'partially_received' OR (r->>'incident_resolved')::boolean OR jsonb_array_length(r->'released_detail_ids') <> 0 THEN
+    RAISE EXCEPTION 'FAIL parcial 1: %', r; END IF;
+  IF NOT EXISTS (SELECT 1 FROM public.material_shipments WHERE id = s1 AND status='partially_received' AND ask_count = 0
+                 AND next_ask_at > now() + interval '1 day 23 hours' AND received_date IS NULL) THEN
+    RAISE EXCEPTION 'FAIL estado parcial'; END IF;
+  IF (SELECT quantity FROM public.panelist_material_stocks WHERE panelist_id='e1000000-0000-0000-0000-000000000001' AND material_id=m1) <> 6 THEN
+    RAISE EXCEPTION 'FAIL stock tras parcial'; END IF;
+  IF (SELECT count(*) FROM public.material_movements WHERE reference_id = s1 AND movement_type='receipt') <> 1 THEN
+    RAISE EXCEPTION 'FAIL movimientos tras parcial'; END IF;
+  r := public.receive_material_shipment_items(s1, format('[{"material_id":"%s","quantity":4}]', m1)::jsonb);
+  IF r->>'status' <> 'partially_received' THEN RAISE EXCEPTION 'FAIL parcial 2: %', r; END IF;
+  PERFORM pg_temp.expect_err(format($q$SELECT public.receive_material_shipment_items(%L, %L::jsonb)$q$, s1,
+    format('[{"material_id":"%s","quantity":5}]', m2)), 'quantity exceeds sent');
+  r := public.receive_material_shipment_items(s1, format('[{"material_id":"%s","quantity":4}]', m2)::jsonb);
+  IF r->>'status' <> 'received' OR (r->>'incident_resolved')::boolean THEN RAISE EXCEPTION 'FAIL completo s1: %', r; END IF;
+  IF (SELECT quantity FROM public.panelist_material_stocks WHERE panelist_id='e1000000-0000-0000-0000-000000000001' AND material_id=m1) <> 10
+     OR (SELECT quantity FROM public.panelist_material_stocks WHERE panelist_id='e1000000-0000-0000-0000-000000000001' AND material_id=m2) <> 4 THEN
+    RAISE EXCEPTION 'FAIL stock final s1'; END IF;
+  IF (SELECT count(*) FROM public.material_movements WHERE reference_id = s1 AND movement_type='receipt') <> 3 THEN
+    RAISE EXCEPTION 'FAIL movimientos s1'; END IF;
+  IF NOT EXISTS (SELECT 1 FROM public.material_shipments WHERE id = s1 AND status='received' AND received_date IS NOT NULL) THEN
+    RAISE EXCEPTION 'FAIL s1 received'; END IF;
+  IF (SELECT status FROM public.panelist_incident WHERE id = inc) <> 'open' THEN RAISE EXCEPTION 'FAIL incidencia resuelta antes de tiempo'; END IF;
+  r := public.receive_material_shipment_items(s1, '[]'::jsonb);
+  IF r->>'status' <> 'received' THEN RAISE EXCEPTION 'FAIL idempotencia'; END IF;
+  PERFORM set_config('request.jwt.claim.sub','', true);
+END $$;
+
+-- el ultimo envio cierra la incidencia pero NO la baja
+DO $$
+DECLARE s2 uuid := (SELECT v FROM t_ids WHERE k='s2'); m1 uuid := (SELECT v FROM t_ids WHERE k='m1');
+        inc uuid := (SELECT v FROM t_ids WHERE k='inc'); r jsonb;
+BEGIN
+  PERFORM set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+  r := public.receive_material_shipment_items(s2, format('[{"material_id":"%s","quantity":5}]', m1)::jsonb);
+  PERFORM set_config('request.jwt.claim.sub','', true);
+  IF r->>'status' <> 'received' OR NOT (r->>'incident_resolved')::boolean THEN RAISE EXCEPTION 'FAIL cierre: %', r; END IF;
+  IF (SELECT status FROM public.panelist_incident WHERE id = inc) <> 'resolved' THEN RAISE EXCEPTION 'FAIL incidencia no resuelta'; END IF;
+  IF (SELECT status FROM public.panelist_unavailability WHERE id = (SELECT v FROM t_ids WHERE k='unav')) <> 'active' THEN
+    RAISE EXCEPTION 'FAIL la baja ya no esta active'; END IF;
+  IF (SELECT quantity FROM public.panelist_material_stocks WHERE panelist_id='e1000000-0000-0000-0000-000000000001' AND material_id=m1) <> 15 THEN
+    RAISE EXCEPTION 'FAIL stock acumulado'; END IF;
+  IF (SELECT count(*) FROM public.incident_message WHERE incident_id = inc AND direction='internal' AND body LIKE 'Recibido:%') <> 4 THEN
+    RAISE EXCEPTION 'FAIL mensajes Recibido: %', (SELECT count(*) FROM public.incident_message WHERE incident_id = inc AND body LIKE 'Recibido:%'); END IF;
+  IF NOT EXISTS (SELECT 1 FROM public.incident_message WHERE incident_id = inc AND body = 'Material recibido completo') THEN
+    RAISE EXCEPTION 'FAIL mensaje cierre'; END IF;
+END $$;
+
+-- boton antiguo (incidencia enlazada por linked_material_shipment_id): recibe lo pendiente y la baja sigue active
+INSERT INTO public.panelist_incident (id, account_id, panelist_id, category, status, linked_unavailability_id)
+VALUES ('f0000000-0000-0000-0000-0000000000a1','a0000000-0000-0000-0000-000000000001','e1000000-0000-0000-0000-000000000001','missing_materials','open',(SELECT v FROM t_ids WHERE k='unav'));
+INSERT INTO public.material_shipments (id, account_id, panelist_id, status)
+VALUES ('f0000000-0000-0000-0000-0000000000b1','a0000000-0000-0000-0000-000000000001','e1000000-0000-0000-0000-000000000001','sent');
+UPDATE public.panelist_incident SET linked_material_shipment_id = 'f0000000-0000-0000-0000-0000000000b1' WHERE id = 'f0000000-0000-0000-0000-0000000000a1';
+INSERT INTO public.material_shipment_items (account_id, material_shipment_id, material_id, quantity_sent, quantity_received)
+VALUES ('a0000000-0000-0000-0000-000000000001','f0000000-0000-0000-0000-0000000000b1',(SELECT v FROM t_ids WHERE k='m2'),3,1);
+DO $$ BEGIN
+  PERFORM set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+  PERFORM public.receive_material_shipment('f0000000-0000-0000-0000-0000000000b1');
+  PERFORM public.receive_material_shipment('f0000000-0000-0000-0000-0000000000b1');
+  PERFORM set_config('request.jwt.claim.sub','', true);
+  IF NOT EXISTS (SELECT 1 FROM public.material_shipments WHERE id='f0000000-0000-0000-0000-0000000000b1' AND status='received') THEN
+    RAISE EXCEPTION 'FAIL boton antiguo no recibe'; END IF;
+  IF (SELECT quantity_received FROM public.material_shipment_items WHERE material_shipment_id='f0000000-0000-0000-0000-0000000000b1') <> 3 THEN
+    RAISE EXCEPTION 'FAIL cantidad restante'; END IF;
+  IF (SELECT quantity FROM public.panelist_material_stocks WHERE panelist_id='e1000000-0000-0000-0000-000000000001'
+        AND material_id=(SELECT v FROM t_ids WHERE k='m2')) <> 6 THEN RAISE EXCEPTION 'FAIL stock boton antiguo'; END IF;
+  IF (SELECT status FROM public.panelist_incident WHERE id='f0000000-0000-0000-0000-0000000000a1') <> 'resolved' THEN
+    RAISE EXCEPTION 'FAIL back-compat incidencia'; END IF;
+  IF (SELECT status FROM public.panelist_unavailability WHERE id = (SELECT v FROM t_ids WHERE k='unav')) <> 'active' THEN
+    RAISE EXCEPTION 'FAIL boton antiguo cancelo la baja'; END IF;
+END $$;
+
+-- envio pendiente no se recibe; privilegios
+UPDATE public.material_shipments SET status = 'pending' WHERE id = (SELECT v FROM t_ids WHERE k='s2');
+DO $$ BEGIN
+  PERFORM set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+  PERFORM pg_temp.expect_err(format($q$SELECT public.receive_material_shipment_items(%L, '[]')$q$, (SELECT v FROM t_ids WHERE k='s2')), 'shipment');
+  PERFORM set_config('request.jwt.claim.sub','', true);
+END $$;
+DO $$
+DECLARE f text := 'public.receive_material_shipment_items(uuid,jsonb)';
+BEGIN
+  IF has_function_privilege('anon', f, 'EXECUTE') THEN RAISE EXCEPTION 'FAIL anon con EXECUTE'; END IF;
+  IF NOT has_function_privilege('authenticated', f, 'EXECUTE') OR NOT has_function_privilege('service_role', f, 'EXECUTE') THEN
+    RAISE EXCEPTION 'FAIL falta GRANT'; END IF;
+  f := 'public.refresh_material_hold(uuid)';
+  IF has_function_privilege('anon', f, 'EXECUTE') OR has_function_privilege('authenticated', f, 'EXECUTE')
+     OR NOT has_function_privilege('service_role', f, 'EXECUTE') THEN RAISE EXCEPTION 'FAIL privilegios hold'; END IF;
+END $$;
+ROLLBACK;
