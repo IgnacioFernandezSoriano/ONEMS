@@ -107,3 +107,62 @@ VALUES ('d2000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-0000000
         'b1000000-0000-0000-0000-000000000001', 'b2000000-0000-0000-0000-000000000002', current_date + 7, 'sent');
 SELECT pg_temp.expect_err($$SELECT public.insert_panelist_incident_auto('e1000000-0000-0000-0000-000000000001', 'other', NULL, NULL, 'd2000000-0000-0000-0000-000000000002')$$, 'detail belongs to another account');
 ROLLBACK;
+
+-- ===== Escenario 4: reroute_returned_sample =====
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+-- Muestra devuelta N1 -> N2 (etiqueta T1). El motor no exige que la semana caiga dentro del plan.
+INSERT INTO public.allocation_plan_details (id, account_id, plan_id, origin_node_id, destination_node_id, fecha_programada, status, tag_id)
+VALUES ('d1000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001', 'cc000000-0000-0000-0000-000000000001',
+        'b1000000-0000-0000-0000-000000000001', 'b2000000-0000-0000-0000-000000000002', current_date - 3, 'sent', 'T1');
+-- cross-tenant (actor 98) mientras sigue 'sent': debe saltar la guarda, no el estado, y no mutar nada
+DO $$
+BEGIN
+  PERFORM set_config('request.jwt.claim.sub','98000000-0000-0000-0000-000000000098', true);
+  PERFORM pg_temp.expect_err($q$SELECT public.reroute_returned_sample('d1000000-0000-0000-0000-000000000001', 'b3000000-0000-0000-0000-000000000003', date_trunc('week', current_date + 14)::date)$q$, 'Cross-tenant access denied');
+  PERFORM set_config('request.jwt.claim.sub','', true);
+  IF (SELECT status FROM public.allocation_plan_details WHERE id = 'd1000000-0000-0000-0000-000000000001') <> 'sent' THEN
+    RAISE EXCEPTION 'FAIL cross-tenant muto la muestra'; END IF;
+END $$;
+-- inexistente
+SELECT pg_temp.expect_err($$SELECT public.reroute_returned_sample('d9000000-0000-0000-0000-000000000009', 'b3000000-0000-0000-0000-000000000003', date_trunc('week', current_date + 14)::date)$$, 'Sample d9000000-0000-0000-0000-000000000009 not found');
+-- camino feliz: N2 -> N3 (misma ciudad)
+DO $$ DECLARE j jsonb; r public.allocation_plan_details; w date := date_trunc('week', current_date + 14)::date;
+BEGIN
+  j := public.reroute_returned_sample('d1000000-0000-0000-0000-000000000001', 'b3000000-0000-0000-0000-000000000003', w);
+  SELECT * INTO r FROM public.allocation_plan_details WHERE id = 'd1000000-0000-0000-0000-000000000001';
+  IF r.status <> 'pending' OR r.destination_node_id <> 'b3000000-0000-0000-0000-000000000003'
+     OR r.original_destination_node_id <> 'b2000000-0000-0000-0000-000000000002' OR r.tag_id <> 'T1'
+     OR r.fecha_programada < w OR r.fecha_programada > w + 6 OR r.sent_at IS NOT NULL OR r.sent_date IS NOT NULL THEN
+    RAISE EXCEPTION 'FAIL reroute: % / %', j, row_to_json(r); END IF;
+  IF (j->>'side') <> 'destination' THEN RAISE EXCEPTION 'FAIL side=%', j->>'side'; END IF;
+END $$;
+-- ya pending -> no es devuelta
+SELECT pg_temp.expect_err($$SELECT public.reroute_returned_sample('d1000000-0000-0000-0000-000000000001', 'b2000000-0000-0000-0000-000000000002', date_trunc('week', current_date + 14)::date)$$, 'Sample is not returned-eligible');
+-- cancelled -> rechazada (received dispara transfer_to_one_db con datos incompletos)
+UPDATE public.allocation_plan_details SET status = 'cancelled' WHERE id = 'd1000000-0000-0000-0000-000000000001';
+SELECT pg_temp.expect_err($$SELECT public.reroute_returned_sample('d1000000-0000-0000-0000-000000000001', 'b2000000-0000-0000-0000-000000000002', date_trunc('week', current_date + 14)::date)$$, 'Sample is not returned-eligible');
+-- mismo nodo y mismo dia -> Nothing to change, y la muestra sigue 'incident' (el UPDATE a pending se revierte)
+DO $$ DECLARE v_day date; w date := date_trunc('week', current_date + 14)::date;
+BEGIN
+  UPDATE public.allocation_plan_details SET status = 'pending', destination_node_id = 'b2000000-0000-0000-0000-000000000002'
+   WHERE id = 'd1000000-0000-0000-0000-000000000001';
+  v_day := (public.suggest_for_sample_move('d1000000-0000-0000-0000-000000000001',
+            'b2000000-0000-0000-0000-000000000002', 'b2000000-0000-0000-0000-000000000002', w)->>'date')::date;
+  IF v_day IS NULL THEN RAISE EXCEPTION 'FAIL el motor no propuso dia'; END IF;
+  UPDATE public.allocation_plan_details SET status = 'incident', fecha_programada = v_day
+   WHERE id = 'd1000000-0000-0000-0000-000000000001';
+  PERFORM pg_temp.expect_err($q$SELECT public.reroute_returned_sample('d1000000-0000-0000-0000-000000000001', 'b2000000-0000-0000-0000-000000000002', date_trunc('week', current_date + 14)::date)$q$, 'Nothing to change');
+  IF (SELECT status FROM public.allocation_plan_details WHERE id = 'd1000000-0000-0000-0000-000000000001') <> 'incident' THEN
+    RAISE EXCEPTION 'FAIL la muestra no volvio a incident tras el error'; END IF;
+END $$;
+-- permisos
+DO $$
+DECLARE f text := 'public.reroute_returned_sample(uuid,uuid,date)';
+BEGIN
+  IF has_function_privilege('anon', f, 'EXECUTE') THEN RAISE EXCEPTION 'FAIL anon puede ejecutar %', f; END IF;
+  IF NOT has_function_privilege('authenticated', f, 'EXECUTE') THEN RAISE EXCEPTION 'FAIL authenticated sin EXECUTE'; END IF;
+  IF NOT has_function_privilege('service_role', f, 'EXECUTE') THEN RAISE EXCEPTION 'FAIL service_role sin EXECUTE'; END IF;
+END $$;
+ROLLBACK;

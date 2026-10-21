@@ -126,3 +126,35 @@ END; $$;
 
 REVOKE ALL ON FUNCTION public.insert_panelist_incident_auto(uuid,text,text,jsonb,uuid,text) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.insert_panelist_incident_auto(uuid,text,text,jsonb,uuid,text) TO authenticated, service_role;
+
+-- ===== 4) reroute_returned_sample =====
+-- Reenvia a otro nodo destino una muestra devuelta ('sent'/'incident'): la devuelve a 'pending'
+-- (conserva tag_id/idtag) y delega en apply_sample_move para elegir dia, mover y avisar.
+-- Si apply_sample_move lanza, el UPDATE a 'pending' se revierte (misma transaccion).
+CREATE OR REPLACE FUNCTION public.reroute_returned_sample(
+  p_detail_id uuid, p_to_node_id uuid, p_week_start date)
+RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE v_d allocation_plan_details;
+BEGIN
+  SELECT * INTO v_d FROM allocation_plan_details WHERE id = p_detail_id FOR UPDATE;
+  IF NOT FOUND THEN RAISE EXCEPTION 'Sample % not found', p_detail_id; END IF;
+
+  -- Guarda multi-tenant (igual que apply_sample_move).
+  IF auth.uid() IS NOT NULL AND NOT is_superadmin()
+     AND v_d.account_id IS DISTINCT FROM (SELECT pr.account_id FROM profiles pr WHERE pr.id = auth.uid()) THEN
+    RAISE EXCEPTION 'Cross-tenant access denied';
+  END IF;
+
+  IF v_d.status NOT IN ('sent','incident') THEN
+    RAISE EXCEPTION 'Sample is not returned-eligible';
+  END IF;
+
+  UPDATE allocation_plan_details
+     SET status = 'pending', sent_at = NULL, sent_date = NULL, updated_at = now()
+   WHERE id = v_d.id;
+
+  RETURN public.apply_sample_move(p_detail_id, v_d.destination_node_id, p_to_node_id, p_week_start);
+END; $$;
+
+REVOKE ALL ON FUNCTION public.reroute_returned_sample(uuid,uuid,date) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.reroute_returned_sample(uuid,uuid,date) TO authenticated, service_role;
