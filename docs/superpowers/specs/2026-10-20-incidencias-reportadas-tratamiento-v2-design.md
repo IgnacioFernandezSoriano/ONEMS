@@ -200,8 +200,9 @@ semana**; el emisor no cambia.
 
 - **Pantalla:** dos acciones:
   - **Anular**: `cancel_detail` (existente).
-  - **Reenviar a otro nodo**: selector de nodo destino (nodos de la cuenta en la **misma
-    ciudad del destino actual** primero, luego el resto) y de semana (desde la actual); al
+  - **Reenviar a otro nodo**: selector de nodo destino (solo nodos de la cuenta en la **misma
+    ciudad del destino actual**: el motor de movimiento no admite cambiar de ciudad) y de semana
+    (desde la actual); al
     elegir muestra el resultado de `suggest_for_sample_move(p_detail_id, from_node=destino
     actual, to_node, week_start)` (carga resultante / avisos) y botón **Confirmar** →
     RPC nueva `reroute_returned_sample(p_detail_id, p_to_node_id, p_week_start)` que:
@@ -261,7 +262,7 @@ el manager, que se pone en contacto con el panelista.
    de `vacation/sick_leave/personal/training/other` en `other`, así que la baja por materiales
    que crea el frontend hoy sale como `other` aunque el CHECK ya admite `materials`
    (migración `20260807100000`). Aceptar `materials`.
-3. `update_panelist_contact`: nueva firma `(p_panelist_id, p_telegram_id, p_phone, p_language,
+3. `update_panelist_contact`: nueva implementación **`update_panelist_contact_v2`** (la firma antigua de 4 parámetros queda como wrapper; con el mismo nombre la llamada posicional sería ambigua) con firma `(p_panelist_id, p_telegram_id, p_phone, p_language,
    p_email, p_address_line1, p_address_line2, p_address_city, p_address_country)`, todas
    `DEFAULT NULL` (NULL = no tocar). Si `auth.uid()` es NULL (n8n), **ignora** `p_telegram_id`.
    Valida email (`~* '^[^@\s]+@[^@\s]+\.[^@\s]+$'`) y `language IN ('en','es','fr','ar')`;
@@ -272,8 +273,8 @@ el manager, que se pone en contacto con el panelista.
    E, H (y para A, D, I con `p_status='open'`) en lugar del INSERT directo: una sola forma de
    insertar y el `account_id` siempre bien derivado. `GRANT EXECUTE` a `service_role`.
 5. RPC `reroute_returned_sample(p_detail_id, p_to_node_id, p_week_start)` (ficha D).
-6. RPC de lectura `list_nodes_for_sample_move(p_detail_id)` → nodos activos de la cuenta con
-   ciudad, ordenados (misma ciudad del destino actual primero). *(Si la pantalla de bajas ya
+6. RPC de lectura `list_nodes_for_sample_move(p_detail_id)` → nodos activos de la cuenta de la
+   misma ciudad que el destino actual (excluido éste), con ciudad y panelista. *(Si la pantalla de bajas ya
    tiene esa consulta en el frontend, reutilizarla y no crear la RPC — decisión del plan.)*
 7. Tests `supabase/tests/reported_incidents_v2.test.sql` con fechas relativas.
 
