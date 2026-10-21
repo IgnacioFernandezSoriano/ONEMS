@@ -2887,6 +2887,7 @@ reported_incidents.materials.source_only_neighbours,Neighbours only
 reported_incidents.materials.source_only_central,Central only
 reported_incidents.materials.source_purchase_all,Purchase all
 reported_incidents.materials.no_purchase_no_baja,All material is covered by neighbours or the central warehouse: no leave or re-plan is needed.
+reported_incidents.materials.nothing_needed,There is no material need in the selected period.
 reported_incidents.materials.change_source,Change source
 reported_incidents.action.new_date,New date
 reported_incidents.action.reschedule,Reschedule

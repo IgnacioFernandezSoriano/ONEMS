@@ -2887,6 +2887,7 @@ reported_incidents.materials.source_only_neighbours,Solo vecinos
 reported_incidents.materials.source_only_central,Solo central
 reported_incidents.materials.source_purchase_all,Comprar todo
 reported_incidents.materials.no_purchase_no_baja,Todo el material se cubre con vecinos o con el almacén central: no hace falta baja ni replanificar.
+reported_incidents.materials.nothing_needed,No hay necesidad de material en el periodo seleccionado.
 reported_incidents.materials.change_source,Cambiar origen
 reported_incidents.action.new_date,Nueva fecha
 reported_incidents.action.reschedule,Reprogramar

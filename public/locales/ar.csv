@@ -2879,6 +2879,7 @@ reported_incidents.materials.source_only_neighbours,الجيران فقط
 reported_incidents.materials.source_only_central,المركزي فقط
 reported_incidents.materials.source_purchase_all,شراء الكل
 reported_incidents.materials.no_purchase_no_baja,كل المواد مغطاة من الجيران أو من المخزون المركزي: لا حاجة إلى إجازة أو إعادة تخطيط.
+reported_incidents.materials.nothing_needed,لا يوجد احتياج للمواد في الفترة المحددة.
 reported_incidents.materials.change_source,تغيير المصدر
 reported_incidents.action.new_date,تاريخ جديد
 reported_incidents.action.reschedule,إعادة الجدولة

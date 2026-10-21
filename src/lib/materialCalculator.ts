@@ -5,7 +5,7 @@ import { supabase } from './supabase'
  * ni cancelados) por panelista+material, para descontarlas de la necesidad calculada.
  */
 async function getInTransitMap(
-  accountId: string, panelistIds: string[], materialIds: string[], excludeIncidentId?: string
+  accountId: string, panelistIds: string[], materialIds: string[], excludeIncidentId?: string, strict = false
 ): Promise<Record<string, number>> {
   const map: Record<string, number> = {}
   if (panelistIds.length === 0 || materialIds.length === 0) return map
@@ -14,12 +14,16 @@ async function getInTransitMap(
   const cols = excludeIncidentId
     ? 'panelist_id, status, panelist_incident_id, items:material_shipment_items(material_id, quantity_sent)'
     : 'panelist_id, status, items:material_shipment_items(material_id, quantity_sent)'
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('material_shipments')
     .select(cols)
     .eq('account_id', accountId)
     .in('panelist_id', panelistIds)
     .in('status', ['pending', 'sent'])   // en camino, aún no recibido ni cancelado
+  // strict (llamadas con opciones, p. ej. la incidencia de materiales): un fallo se propaga en vez
+  // de calcular como si no hubiera nada en camino. Sin opciones se conserva el comportamiento de
+  // siempre (las pantallas de necesidades lo toleran, p. ej. listas IN muy largas).
+  if (error && strict) throw error
   const shipments = data || []
   shipments.forEach((s: any) => {
     if (excludeIncidentId && s.panelist_incident_id === excludeIncidentId) return
@@ -435,7 +439,7 @@ export async function calculatePanelistRequirements(
     }
 
     // 6b. Get in-transit shipments to discount from requirements
-    const inTransitMap = await getInTransitMap(accountId, panelistIds, materialIds, opts?.excludeIncidentId)
+    const inTransitMap = await getInTransitMap(accountId, panelistIds, materialIds, opts?.excludeIncidentId, !!opts)
 
     // 7. Agrupar por nodo
     const nodesMap: Record<string, {

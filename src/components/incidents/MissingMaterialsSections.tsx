@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { addDays, endOfMonth, format, isValid, parseISO } from 'date-fns'
 import { useMaterialsTreatment, applySourceMode, toSupplyPlan, type SupplyLine, type SourceMode, type PanelistStockRow, type AffectedSample } from '@/lib/hooks/useMaterialsTreatment'
@@ -170,7 +170,7 @@ function SupplySection({ tr, accountId, incidentId, panelist, payload, executed,
   today: string
   datePast: boolean
   purchase: boolean | null
-  onPurchaseChange: (p: boolean) => void
+  onPurchaseChange: (p: boolean, nothingNeeded: boolean) => void
   onExecuted: (e: Executed) => void
   onChanged: () => Promise<void>
   t: TFn
@@ -190,6 +190,8 @@ function SupplySection({ tr, accountId, incidentId, panelist, payload, executed,
       : null
   })
   const [purchaseLead, setPurchaseLead] = useState<number | null>(null)
+  const [shipLead, setShipLead] = useState(7)
+  const inFlight = useRef(false) // guarda sincrona de doble clic (busy llega un render tarde)
   const [touched, setTouched] = useState(false)
   const [dws, setDws] = useState<{ businessDays: number; samples: AffectedSample[] } | null>(null)
   const [busy, setBusy] = useState(false)
@@ -209,10 +211,11 @@ function SupplySection({ tr, accountId, incidentId, panelist, payload, executed,
 
   useEffect(() => {
     if (!accountId) return
-    supabase.from('stock_settings').select('purchase_lead_time_days').eq('account_id', accountId).maybeSingle()
+    supabase.from('stock_settings').select('purchase_lead_time_days, shipment_lead_time_days').eq('account_id', accountId).maybeSingle()
       .then(({ data, error: e }) => {
         if (e) { setError(errMsg(t, e)); return }
         setPurchaseLead(data?.purchase_lead_time_days ?? 7)
+        setShipLead(data?.shipment_lead_time_days ?? 7)
       })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accountId])
@@ -221,7 +224,7 @@ function SupplySection({ tr, accountId, incidentId, panelist, payload, executed,
     () => (lines ? lines.map(l => applySourceMode(l, modes[l.material_id] ?? 'proposal')) : null), [lines, modes])
   const hasPurchase = (effective ?? []).some(l => l.toPurchase > 0)
   useEffect(() => {
-    if (!done && effective) onPurchaseChange(hasPurchase)
+    if (!done && effective) onPurchaseChange(hasPurchase, effective.length === 0)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasPurchase, !!effective, done])
   useEffect(() => {
@@ -241,7 +244,9 @@ function SupplySection({ tr, accountId, incidentId, panelist, payload, executed,
   }, [expectedDate, blockingKey, hasPurchase, !!effective, panelist.node_id])
 
   const confirmSupply = async () => {
+    if (inFlight.current) return
     if (!effective || effective.length === 0 || (hasPurchase && (!expectedDate || datePast))) return
+    inFlight.current = true
     setBusy(true); setError(null)
     try {
       // Reintento seguro: si los envios ya se crearon (fallo posterior, otra pestana o sesion), no se vuelven a crear.
@@ -255,7 +260,9 @@ function SupplySection({ tr, accountId, incidentId, panelist, payload, executed,
         if (fp.central_shipment_id || fd.length > 0) ids = { centralShipmentId: fp.central_shipment_id ?? null, donorShipmentIds: fd }
       }
       if (!ids) {
-        ids = await executeSupply(toSupplyPlan(effective), panelist.id)
+        // Fecha en que debe llegar cada envio: la prevista si hay compra; si no, hoy + plazo de envio
+        const shipExpected = hasPurchase ? expectedDate : format(addDays(new Date(), shipLead), DATE_FMT)
+        ids = await executeSupply(toSupplyPlan(effective), panelist.id, shipExpected)
         setCreated(ids) // guarda en memoria (misma sesion) ANTES de persistir (guarda entre sesiones)
         // Persistir los ids YA: si algo falla despues, un reintento (incluso tras recargar) no duplica envios
         await mergePayload(incidentId, { central_shipment_id: ids.centralShipmentId, donor_shipment_ids: ids.donorShipmentIds })
@@ -273,7 +280,7 @@ function SupplySection({ tr, accountId, incidentId, panelist, payload, executed,
       onExecuted({ expectedDate: expected, centralShipmentId: ids.centralShipmentId, donorShipmentIds: ids.donorShipmentIds })
       await onChanged()
     } catch (e: any) { setError(errMsg(t, e)) }
-    finally { setBusy(false) }
+    finally { inFlight.current = false; setBusy(false) }
   }
 
   const shipIds = executed ? [executed.centralShipmentId, ...executed.donorShipmentIds].filter(Boolean) as string[] : []
@@ -330,12 +337,13 @@ function SupplySection({ tr, accountId, incidentId, panelist, payload, executed,
 }
 
 // ---------- Seccion 3: replanificar (solo si queda algo a compra) ----------
-function ReplanSection({ tr, incidentId, unavailabilityId, executed, purchase, expectedDate, datePast, onBajaCreated, onChanged, t }: {
+function ReplanSection({ tr, incidentId, unavailabilityId, executed, purchase, nothingNeeded, expectedDate, datePast, onBajaCreated, onChanged, t }: {
   tr: Treatment
   incidentId: string
   unavailabilityId: string | null
   executed: Executed | null
   purchase: boolean | null
+  nothingNeeded: boolean
   expectedDate: string
   datePast: boolean
   onBajaCreated: (id: string) => void
@@ -345,9 +353,11 @@ function ReplanSection({ tr, incidentId, unavailabilityId, executed, purchase, e
   const { createDisplacementBaja } = tr
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const inFlight = useRef(false)
 
   const createBaja = async () => {
-    if (!expectedDate || datePast) return
+    if (inFlight.current || !expectedDate || datePast) return
+    inFlight.current = true
     setBusy(true); setError(null)
     try {
       // La fecha vigente del campo manda: se guarda en el payload y se usa para la baja
@@ -355,14 +365,14 @@ function ReplanSection({ tr, incidentId, unavailabilityId, executed, purchase, e
       onBajaCreated(await createDisplacementBaja(incidentId, expectedDate))
       await onChanged()
     } catch (e: any) { setError(errMsg(t, e)) }
-    finally { setBusy(false) }
+    finally { inFlight.current = false; setBusy(false) }
   }
 
   if (purchase === null && !unavailabilityId) return <Section title={t(m('s3_title'))}>{null}</Section>
   if (!purchase && !unavailabilityId) {
     return (
       <Section title={t(m('s3_title'))}>
-        <p className="text-sm text-gray-500">{t(m('no_purchase_no_baja'))}</p>
+        <p className="text-sm text-gray-500">{t(m(nothingNeeded ? 'nothing_needed' : 'no_purchase_no_baja'))}</p>
       </Section>
     )
   }
@@ -399,6 +409,7 @@ export function MissingMaterialsSections({ incidentId, accountId, panelist, payl
   const [expectedDate, setExpectedDate] = useState<string>(payload?.expected_date ?? '')
   const [createdBajaId, setCreatedBajaId] = useState<string | null>(null)
   const [livePurchase, setLivePurchase] = useState<boolean | null>(null)
+  const [liveNothing, setLiveNothing] = useState(false)
   if (!panelist) return null
   const today = format(new Date(), DATE_FMT)
   const datePast = !!expectedDate && expectedDate < today
@@ -419,9 +430,10 @@ export function MissingMaterialsSections({ incidentId, accountId, panelist, payl
         onStockChanged={() => setStockVersion(v => v + 1)} t={t} />
       <SupplySection tr={tr} accountId={accountId} incidentId={incidentId} panelist={panelist} payload={payload} executed={executed}
         bajaId={bajaId} stockVersion={stockVersion} expectedDate={expectedDate} setExpectedDate={setExpectedDate}
-        today={today} datePast={datePast} purchase={purchase} onPurchaseChange={setLivePurchase}
+        today={today} datePast={datePast} purchase={purchase} onPurchaseChange={(p, none) => { setLivePurchase(p); setLiveNothing(none) }}
         onExecuted={setLocal} onChanged={onChanged} t={t} />
       <ReplanSection tr={tr} incidentId={incidentId} unavailabilityId={bajaId} executed={executed} purchase={purchase}
+        nothingNeeded={!executed && liveNothing}
         expectedDate={expectedDate} datePast={datePast} onBajaCreated={setCreatedBajaId} onChanged={onChanged} t={t} />
     </div>
   )

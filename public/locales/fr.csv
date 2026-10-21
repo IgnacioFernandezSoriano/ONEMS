@@ -2879,6 +2879,7 @@ reported_incidents.materials.source_only_neighbours,Voisins uniquement
 reported_incidents.materials.source_only_central,Central uniquement
 reported_incidents.materials.source_purchase_all,Tout acheter
 reported_incidents.materials.no_purchase_no_baja,Tout le matériel est couvert par les voisins ou le stock central : aucun congé ni replanification n'est nécessaire.
+reported_incidents.materials.nothing_needed,Aucun besoin de matériel sur la période sélectionnée.
 reported_incidents.materials.change_source,Changer l'origine
 reported_incidents.action.new_date,Nouvelle date
 reported_incidents.action.reschedule,Reprogrammer
