@@ -643,3 +643,91 @@ DO $$ BEGIN
     RAISE EXCEPTION 'FAIL resolvio una incidencia ajena'; END IF;
 END $$;
 ROLLBACK;
+
+-- ===== Escenario 6: avisos y respuestas del manager quedan en la conversacion =====
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+CREATE TEMP TABLE t_ids (k text PRIMARY KEY, v uuid);
+WITH x AS (
+  INSERT INTO public.panelist_incident (account_id, panelist_id, category, status)
+  VALUES ('a0000000-0000-0000-0000-000000000001','e1000000-0000-0000-0000-000000000001','other','open')
+  RETURNING id)
+INSERT INTO t_ids SELECT 'inc', id FROM x;
+WITH x AS (
+  INSERT INTO public.panelist_unavailability (panelist_id, account_id, start_date, end_date, reason, status)
+  VALUES ('e1000000-0000-0000-0000-000000000001','a0000000-0000-0000-0000-000000000001',
+          current_date + 1, current_date + 5, 'vacation', 'active')
+  RETURNING id)
+INSERT INTO t_ids SELECT 'unav', id FROM x;
+
+INSERT INTO public.panelist_notification (id, account_id, panelist_id, kind, payload) VALUES
+  ('f1000000-0000-0000-0000-000000000001','a0000000-0000-0000-0000-000000000001','e1000000-0000-0000-0000-000000000001','material_pending_released',
+   jsonb_build_object('incident_kind','reported','incident_id',(SELECT v FROM t_ids WHERE k='inc'),'text','Ya tienes material')),
+  ('f1000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000001','e1000000-0000-0000-0000-000000000001','plan_change_this_week','{}'),
+  ('f1000000-0000-0000-0000-000000000003','a0000000-0000-0000-0000-000000000001','e1000000-0000-0000-0000-000000000001','unavailability_received',
+   jsonb_build_object('unavailability_id',(SELECT v FROM t_ids WHERE k='unav'))),
+  ('f1000000-0000-0000-0000-000000000004','a0000000-0000-0000-0000-000000000001','e1000000-0000-0000-0000-000000000001','material_pending_released',
+   jsonb_build_object('incident_kind','reported','incident_id',(SELECT v FROM t_ids WHERE k='inc'),'text','no enviado')),
+  ('f1000000-0000-0000-0000-000000000005','a0000000-0000-0000-0000-000000000001','e1000000-0000-0000-0000-000000000001','material_pending_released',
+   '{"incident_kind":"reported","incident_id":"no-es-uuid"}');
+
+DO $$
+DECLARE v_inc uuid := (SELECT v FROM t_ids WHERE k='inc'); v_un uuid := (SELECT v FROM t_ids WHERE k='unav'); r public.incident_message;
+BEGIN
+  IF (SELECT count(*) FROM public.incident_message) <> 0 THEN RAISE EXCEPTION 'FAIL se registra al insertar'; END IF;
+  UPDATE public.panelist_notification SET status = 'sent' WHERE id = 'f1000000-0000-0000-0000-000000000001';
+  SELECT * INTO r FROM public.incident_message WHERE incident_id = v_inc;
+  IF r.body <> 'Ya tienes material' OR r.direction <> 'outbound' OR r.author <> 'bot' OR r.status <> 'sent'
+     OR r.meta->>'notification_id' <> 'f1000000-0000-0000-0000-000000000001' OR r.meta->>'kind' <> 'material_pending_released' THEN
+    RAISE EXCEPTION 'FAIL aviso con incidencia: %', row_to_json(r); END IF;
+  -- sin claves ni baja: nada
+  UPDATE public.panelist_notification SET status = 'sent' WHERE id = 'f1000000-0000-0000-0000-000000000002';
+  IF (SELECT count(*) FROM public.incident_message) <> 1 THEN RAISE EXCEPTION 'FAIL registro aviso sin incidencia'; END IF;
+  -- baja: se registra contra la baja (sin texto -> kind)
+  UPDATE public.panelist_notification SET status = 'sent' WHERE id = 'f1000000-0000-0000-0000-000000000003';
+  SELECT * INTO r FROM public.incident_message WHERE incident_kind = 'unavailability' AND incident_id = v_un;
+  IF r.id IS NULL OR r.body <> 'unavailability_received' OR r.status <> 'sent' THEN RAISE EXCEPTION 'FAIL aviso de baja: %', row_to_json(r); END IF;
+  -- failed: nada
+  UPDATE public.panelist_notification SET status = 'failed' WHERE id = 'f1000000-0000-0000-0000-000000000004';
+  IF (SELECT count(*) FROM public.incident_message) <> 2 THEN RAISE EXCEPTION 'FAIL registro en failed'; END IF;
+  -- payload roto: la notificacion se actualiza igualmente y no se registra nada
+  UPDATE public.panelist_notification SET status = 'sent' WHERE id = 'f1000000-0000-0000-0000-000000000005';
+  IF (SELECT status FROM public.panelist_notification WHERE id = 'f1000000-0000-0000-0000-000000000005') <> 'sent'
+     OR (SELECT count(*) FROM public.incident_message) <> 2 THEN RAISE EXCEPTION 'FAIL payload roto'; END IF;
+  -- re-actualizar sin cambiar de estado: no duplica
+  UPDATE public.panelist_notification SET status = 'sent', error = 'x' WHERE id = 'f1000000-0000-0000-0000-000000000001';
+  IF (SELECT count(*) FROM public.incident_message) <> 2 THEN RAISE EXCEPTION 'FAIL duplicado aviso'; END IF;
+END $$;
+
+-- respuesta del manager (flujo antiguo) y cambio de estado
+DO $$
+DECLARE v_inc uuid := (SELECT v FROM t_ids WHERE k='inc'); r public.incident_message;
+BEGIN
+  PERFORM set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+  PERFORM public.resolve_panelist_incident(v_inc, 'in_progress', NULL, 'Lo miramos');
+  IF (SELECT reply_status FROM public.panelist_incident WHERE id = v_inc) <> 'pending_send' THEN
+    RAISE EXCEPTION 'FAIL reply_status cambiado'; END IF;
+  IF EXISTS (SELECT 1 FROM public.incident_message WHERE incident_id = v_inc AND author = 'manager') THEN
+    RAISE EXCEPTION 'FAIL registra respuesta aun pendiente'; END IF;
+  SELECT * INTO r FROM public.incident_message WHERE incident_id = v_inc AND author = 'system';
+  IF r.body <> 'Estado: in_progress' OR r.direction <> 'internal' OR r.meta->>'status' <> 'in_progress' THEN
+    RAISE EXCEPTION 'FAIL estado: %', row_to_json(r); END IF;
+  -- mismo estado: no se registra de nuevo
+  PERFORM public.resolve_panelist_incident(v_inc, 'in_progress', NULL, NULL);
+  IF (SELECT count(*) FROM public.incident_message WHERE incident_id = v_inc AND author = 'system') <> 1 THEN
+    RAISE EXCEPTION 'FAIL duplica estado'; END IF;
+  PERFORM public.resolve_panelist_incident(v_inc, 'resolved', 'Hecho', NULL);
+  IF NOT EXISTS (SELECT 1 FROM public.incident_message WHERE incident_id = v_inc AND body = 'Estado: resolved — Hecho') THEN
+    RAISE EXCEPTION 'FAIL estado resolved'; END IF;
+  PERFORM set_config('request.jwt.claim.sub','', true);
+  -- el envio de la respuesta (n8n) la deja en la conversacion una sola vez
+  UPDATE public.panelist_incident SET reply_status = 'sent' WHERE id = v_inc;
+  UPDATE public.panelist_incident SET reply_status = 'sent', updated_at = now() WHERE id = v_inc;
+  SELECT * INTO r FROM public.incident_message WHERE incident_id = v_inc AND author = 'manager';
+  IF r.body <> 'Lo miramos' OR r.direction <> 'outbound' OR r.status <> 'sent' OR r.meta->>'via' <> 'legacy_reply' THEN
+    RAISE EXCEPTION 'FAIL respuesta manager: %', row_to_json(r); END IF;
+  IF (SELECT count(*) FROM public.incident_message WHERE incident_id = v_inc AND author = 'manager') <> 1 THEN
+    RAISE EXCEPTION 'FAIL duplica respuesta'; END IF;
+END $$;
+ROLLBACK;

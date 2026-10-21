@@ -578,3 +578,93 @@ REVOKE ALL ON FUNCTION public.refresh_material_hold(uuid) FROM PUBLIC, anon, aut
 GRANT EXECUTE ON FUNCTION public.refresh_material_hold(uuid) TO service_role;
 REVOKE ALL ON FUNCTION public.panelist_held_detail_ids(uuid) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.panelist_held_detail_ids(uuid) TO service_role;
+
+-- ===== 5) avisos y respuestas a la conversacion =====
+-- Nueva clase de aviso: el material retenido de una incidencia vuelve a estar disponible.
+ALTER TABLE public.panelist_notification DROP CONSTRAINT IF EXISTS panelist_notification_kind_check;
+ALTER TABLE public.panelist_notification ADD CONSTRAINT panelist_notification_kind_check
+  CHECK (kind IN ('unavailability_received','plan_change_this_week','material_pending_released'));
+
+-- Al pasar un aviso a 'sent' se deja en la conversacion de su incidencia. Nunca aborta el UPDATE.
+CREATE OR REPLACE FUNCTION public.tg_log_notification_to_conversation()
+RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE v_kind text; v_id uuid;
+BEGIN
+  BEGIN
+    IF NEW.payload ? 'incident_kind' AND NEW.payload ? 'incident_id' THEN
+      v_kind := NEW.payload->>'incident_kind';
+      v_id := (NEW.payload->>'incident_id')::uuid;
+    ELSIF NEW.kind IN ('unavailability_received','plan_change_this_week') AND NEW.payload ? 'unavailability_id' THEN
+      v_kind := 'unavailability';
+      v_id := (NEW.payload->>'unavailability_id')::uuid;
+    END IF;
+    IF v_kind IS NOT NULL AND v_id IS NOT NULL THEN
+      PERFORM public.log_incident_message(v_kind, v_id, 'outbound', 'bot',
+        COALESCE(NEW.payload->>'text', NEW.kind),
+        jsonb_build_object('notification_id', NEW.id, 'kind', NEW.kind), 'sent');
+    END IF;
+  EXCEPTION WHEN OTHERS THEN
+    RAISE WARNING 'tg_log_notification_to_conversation: aviso % no registrado: %', NEW.id, SQLERRM;
+  END;
+  RETURN NULL;
+END; $$;
+
+DROP TRIGGER IF EXISTS log_notification_to_conversation ON public.panelist_notification;
+CREATE TRIGGER log_notification_to_conversation
+  AFTER UPDATE OF status ON public.panelist_notification
+  FOR EACH ROW WHEN (OLD.status IS DISTINCT FROM NEW.status AND NEW.status = 'sent')
+  EXECUTE FUNCTION public.tg_log_notification_to_conversation();
+
+-- Respuesta del manager entregada por el flujo antiguo (reply_status -> 'sent'): queda en la conversacion.
+CREATE OR REPLACE FUNCTION public.tg_log_reply_to_conversation()
+RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+BEGIN
+  BEGIN
+    PERFORM public.log_incident_message('reported', NEW.id, 'outbound', 'manager', NEW.reply_to_panelist,
+      jsonb_build_object('via', 'legacy_reply', 'manager_user_id', NEW.resolved_by), 'sent');
+  EXCEPTION WHEN OTHERS THEN
+    RAISE WARNING 'tg_log_reply_to_conversation: respuesta de la incidencia % no registrada: %', NEW.id, SQLERRM;
+  END;
+  RETURN NULL;
+END; $$;
+
+DROP TRIGGER IF EXISTS log_reply_to_conversation ON public.panelist_incident;
+CREATE TRIGGER log_reply_to_conversation
+  AFTER UPDATE OF reply_status ON public.panelist_incident
+  FOR EACH ROW WHEN (OLD.reply_status IS DISTINCT FROM NEW.reply_status AND NEW.reply_status = 'sent'
+                     AND NEW.reply_to_panelist IS NOT NULL)
+  EXECUTE FUNCTION public.tg_log_reply_to_conversation();
+
+REVOKE ALL ON FUNCTION public.tg_log_notification_to_conversation() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.tg_log_reply_to_conversation() FROM PUBLIC, anon, authenticated;
+
+-- Mismo cuerpo y permisos que antes; ademas deja el cambio de estado en la conversacion.
+CREATE OR REPLACE FUNCTION public.resolve_panelist_incident(
+  p_incident_id uuid, p_status text,
+  p_resolution_note text DEFAULT NULL, p_reply_text text DEFAULT NULL)
+RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE v_account uuid; v_old text;
+BEGIN
+  SELECT account_id, status INTO v_account, v_old FROM panelist_incident WHERE id = p_incident_id;
+  PERFORM assert_same_account(v_account);
+  IF p_status NOT IN ('open','in_progress','resolved','dismissed') THEN
+    RAISE EXCEPTION 'invalid status %', p_status; END IF;
+  UPDATE panelist_incident SET
+    status = p_status,
+    resolution_note = COALESCE(p_resolution_note, resolution_note),
+    reply_to_panelist = COALESCE(p_reply_text, reply_to_panelist),
+    reply_status = CASE WHEN p_reply_text IS NOT NULL THEN 'pending_send' ELSE reply_status END,
+    resolved_by = CASE WHEN p_status IN ('resolved','dismissed') THEN auth.uid() ELSE resolved_by END,
+    resolved_at = CASE WHEN p_status IN ('resolved','dismissed') THEN now() ELSE resolved_at END,
+    updated_at = now()
+  WHERE id = p_incident_id;
+  IF v_old IS DISTINCT FROM p_status THEN
+    BEGIN
+      PERFORM public.log_incident_message('reported', p_incident_id, 'internal', 'system',
+        'Estado: ' || p_status || COALESCE(' — ' || p_resolution_note, ''),
+        jsonb_build_object('status', p_status), 'sent');
+    EXCEPTION WHEN OTHERS THEN
+      RAISE WARNING 'resolve_panelist_incident: estado de la incidencia % no registrado: %', p_incident_id, SQLERRM;
+    END;
+  END IF;
+END; $$;
