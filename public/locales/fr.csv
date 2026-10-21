@@ -2946,3 +2946,7 @@ reported_incidents.returned.reason.other_end,Le nœud est l'autre extrémité de
 reported_incidents.returned.reason.no_day,Aucun jour disponible cette semaine
 reported_incidents.returned.reason.unknown,Renvoi impossible vers ce nœud et cette semaine
 reported_incidents.done.rerouted,Échantillon renvoyé
+reported_incidents.materials.date_in_past,La date ne peut pas être dans le passé
+reported_incidents.returned.not_returnable,Cet envoi n'est pas dans un état renvoyable (statut actuel)
+reported_incidents.returned.cancel_confirm,Annuler cet envoi ? L'échantillon ne sera pas renvoyé.
+reported_incidents.readonly.closed,Cet incident est clos : les actions sont en lecture seule

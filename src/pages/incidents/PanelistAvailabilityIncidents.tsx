@@ -21,15 +21,19 @@ export function PanelistAvailabilityIncidents() {
   const [selected, setSelected] = useState<string | null>(null)
   const [params, setParams] = useSearchParams()
 
-  // Abre una baja concreta si llega por URL (?unavailability=<id>) y esta en la bandeja
+  // Abre una baja concreta si llega por URL (?unavailability=<id>). La bandeja por defecto solo
+  // lista las abiertas: se pasa a 'all' y, una vez cargada, se abre si el id esta en la bandeja.
+  const linkedId = params.get('unavailability')
   useEffect(() => {
-    if (loading) return
-    const id = params.get('unavailability')
-    if (id && inbox.some((r) => r.unavailability_id === id)) {
-      setSelected(id)
+    if (linkedId && statusFilter !== 'all') setStatusFilter('all')
+  }, [linkedId, statusFilter, setStatusFilter])
+  useEffect(() => {
+    if (loading || !linkedId || statusFilter !== 'all') return
+    if (inbox.some((r) => r.unavailability_id === linkedId)) {
+      setSelected(linkedId)
       setParams({}, { replace: true })
     }
-  }, [loading, inbox, params, setParams])
+  }, [loading, inbox, linkedId, statusFilter, setParams])
 
   if (loading) return <div className="p-6">{t('common.loading')}</div>
   if (error) return <div className="p-6 text-red-600">{t('common.error')}: {error}</div>

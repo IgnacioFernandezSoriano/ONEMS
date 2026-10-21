@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
 import { addDays, format, parseISO, startOfWeek } from 'date-fns'
-import { useReportedIncidents } from '@/lib/hooks/useReportedIncidents'
 import type { ReportedIncidentDetail } from '@/lib/types'
 import { BTN_PRIMARY, BTN_SECONDARY } from './buttonStyles'
 
@@ -10,17 +9,22 @@ interface TFn {
 
 type NodeOption = { node_id: string; auto_id: string; city_name: string; panelist_name: string }
 
+const errMsg = (t: TFn, e: any) => `${t('common.error')}: ${e?.message ?? String(e)}`
+
 const REASONS = ['not_found', 'not_in_cell', 'not_pending', 'sample_not_movable', 'has_incident_line',
   'other_city', 'inactive_node', 'other_end', 'no_day']
 
-export function ReturnedSampleActions({ detail, busy, onCancel, onReroute, t }: {
+type Reroute = (detailId: string, toNodeId: string, weekStart: string) => Promise<Record<string, any>>
+
+export function ReturnedSampleActions({ detail, busy, onCancel, onReroute, listNodesForMove, suggestRerouteReturnedSample, t }: {
   detail: ReportedIncidentDetail['detail']
   busy: boolean
-  onCancel: () => Promise<void>
-  onReroute: (toNodeId: string, weekStart: string) => Promise<void>
+  onCancel: () => Promise<unknown>
+  onReroute: (toNodeId: string, weekStart: string) => Promise<unknown>
+  listNodesForMove: (detailId: string) => Promise<NodeOption[]>
+  suggestRerouteReturnedSample: Reroute
   t: TFn
 }) {
-  const { listNodesForMove, suggestRerouteReturnedSample } = useReportedIncidents()
   const detailId = detail?.id
   const [nodes, setNodes] = useState<NodeOption[] | null>(null)
   const [toNode, setToNode] = useState('')
@@ -38,24 +42,42 @@ export function ReturnedSampleActions({ detail, busy, onCancel, onReroute, t }: 
     let alive = true
     listNodesForMove(detailId)
       .then(r => { if (alive) setNodes(r) })
-      .catch(e => { if (alive) { setNodes([]); setError(e.message) } })
+      .catch(e => { if (alive) { setNodes([]); setError(errMsg(t, e)) } })
     return () => { alive = false }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [detailId, listNodesForMove])
 
   useEffect(() => {
-    if (!detailId || !toNode) { setPreview(null); return }
+    if (!detailId || !toNode) { setPreview(null); setChecking(false); return }
     let alive = true
     setChecking(true); setPreview(null); setError(null)
     suggestRerouteReturnedSample(detailId, toNode, week)
       .then(r => { if (alive) setPreview(r) })
-      .catch(e => { if (alive) setError(e.message) })
+      .catch(e => { if (alive) setError(errMsg(t, e)) })
       .finally(() => { if (alive) setChecking(false) })
     return () => { alive = false }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [detailId, toNode, week, suggestRerouteReturnedSample])
 
   if (!detail) return <p className="text-sm text-gray-500">{t('reported_incidents.returned.no_detail')}</p>
 
+  if (detail.status !== 'sent' && detail.status !== 'incident') {
+    return (
+      <p className="text-sm text-gray-500">
+        {t('reported_incidents.returned.not_returnable')}: <span className="font-mono">{detail.status}</span>
+      </p>
+    )
+  }
+
   const found = preview?.found === true
+  const doReroute = async () => {
+    const ok = await onReroute(toNode, week)
+    if (ok === true) { setPreview(null); setToNode('') }
+  }
+  const doCancel = async () => {
+    if (!confirm(t('reported_incidents.returned.cancel_confirm'))) return
+    await onCancel()
+  }
   const reasonKey = (r: unknown) =>
     typeof r === 'string' && REASONS.includes(r)
       ? `reported_incidents.returned.reason.${r}`
@@ -101,10 +123,10 @@ export function ReturnedSampleActions({ detail, busy, onCancel, onReroute, t }: 
       )}
       <div className="flex gap-2">
         <button disabled={busy || checking || !found || !toNode} className={BTN_PRIMARY}
-          onClick={() => onReroute(toNode, week)}>
+          onClick={doReroute}>
           {t('reported_incidents.returned.confirm_reroute')}
         </button>
-        <button disabled={busy} className={BTN_SECONDARY} onClick={() => onCancel()}>
+        <button disabled={busy} className={BTN_SECONDARY} onClick={doCancel}>
           {t('reported_incidents.action.cancel_shipment')}
         </button>
       </div>

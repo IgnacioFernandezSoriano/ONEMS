@@ -110,11 +110,11 @@ export interface StockSettings {
   updated_at: string
 }
 
-export function useStockManagement() {
+export function useStockManagement(accountIdOverride?: string) {
   const effectiveAccountId = useEffectiveAccountId()
   const { profile } = useAuth()
   // Use effectiveAccountId if available, otherwise fall back to profile.account_id
-  const accountId = effectiveAccountId || profile?.account_id
+  const accountId = accountIdOverride ?? (effectiveAccountId || profile?.account_id)
 
   const [regulatorStocks, setRegulatorStocks] = useState<MaterialStock[]>([])
   const [panelistStocks, setPanelistStocks] = useState<PanelistMaterialStock[]>([])

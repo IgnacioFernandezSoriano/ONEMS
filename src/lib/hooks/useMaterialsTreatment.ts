@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import { eachDayOfInterval, isWeekend } from 'date-fns'
+import { eachDayOfInterval, format, isWeekend } from 'date-fns'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId'
@@ -36,11 +36,11 @@ export interface AffectedSample {
   product: string
 }
 
-export function useMaterialsTreatment() {
+export function useMaterialsTreatment(accountIdOverride?: string) {
   const effectiveAccountId = useEffectiveAccountId()
   const { profile } = useAuth()
-  const accountId = effectiveAccountId || profile?.account_id
-  const { createShipment, markShipmentSent } = useStockManagement()
+  const accountId = accountIdOverride ?? (effectiveAccountId || profile?.account_id)
+  const { createShipment, markShipmentSent } = useStockManagement(accountIdOverride)
 
   const reconcileStock = useCallback(async (panelistId: string, materialId: string, realQty: number) => {
     const { error: e1 } = await supabase.from('panelist_material_stocks').upsert({
@@ -200,7 +200,7 @@ export function useMaterialsTreatment() {
   }, [createShipment])
 
   const createDisplacementBaja = useCallback(async (incidentId: string, expectedDate: string): Promise<string> => {
-    const today = new Date().toISOString().slice(0, 10)
+    const today = format(new Date(), 'yyyy-MM-dd') // fecha LOCAL: coherente con la validacion de la pantalla
     const { data, error } = await supabase.rpc('create_unavailability_from_incident', {
       p_incident_id: incidentId, p_start: today, p_end: expectedDate, p_reason: 'materials'
     })

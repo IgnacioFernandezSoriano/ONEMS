@@ -2946,3 +2946,7 @@ reported_incidents.returned.reason.other_end,العقدة هي الطرف الآ
 reported_incidents.returned.reason.no_day,لا يوجد يوم متاح في ذلك الأسبوع
 reported_incidents.returned.reason.unknown,لا يمكن إعادة الإرسال إلى هذه العقدة وهذا الأسبوع
 reported_incidents.done.rerouted,تمت إعادة إرسال العينة
+reported_incidents.materials.date_in_past,لا يمكن أن يكون التاريخ في الماضي
+reported_incidents.returned.not_returnable,هذه الشحنة ليست في حالة قابلة لإعادة الإرسال (الحالة الحالية)
+reported_incidents.returned.cancel_confirm,هل تريد إلغاء هذه الشحنة؟ لن يُعاد إرسال العينة.
+reported_incidents.readonly.closed,هذه الحادثة مغلقة: الإجراءات للقراءة فقط

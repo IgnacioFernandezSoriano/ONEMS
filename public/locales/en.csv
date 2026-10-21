@@ -2954,3 +2954,7 @@ reported_incidents.returned.reason.other_end,The node is the other end of the sh
 reported_incidents.returned.reason.no_day,No available day in that week
 reported_incidents.returned.reason.unknown,Cannot re-send to that node and week
 reported_incidents.done.rerouted,Sample re-sent
+reported_incidents.materials.date_in_past,The date cannot be in the past
+reported_incidents.returned.not_returnable,This shipment is not in a returnable state (current status)
+reported_incidents.returned.cancel_confirm,Cancel this shipment? The sample will not be re-sent.
+reported_incidents.readonly.closed,This incident is closed: actions are read-only

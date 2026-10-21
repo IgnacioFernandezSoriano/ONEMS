@@ -13,7 +13,7 @@ interface TFn {
 
 export function ReportedIncidentPanel({ incidentId, onBack }: { incidentId: string; onBack: () => void }) {
   const { t } = useTranslation()
-  const { fetchIncident, resolve, actCancel, rerouteReturnedSample, signedPhotoUrl } = useReportedIncidents()
+  const { fetchIncident, resolve, actCancel, rerouteReturnedSample, signedPhotoUrl, listNodesForMove, suggestRerouteReturnedSample } = useReportedIncidents()
   const [inc, setInc] = useState<ReportedIncidentDetail | null>(null)
   const [photo, setPhoto] = useState<string | null>(null)
   const [note, setNote] = useState('')
@@ -32,10 +32,13 @@ export function ReportedIncidentPanel({ incidentId, onBack }: { incidentId: stri
     else setPhoto(p ?? null)
   }, [inc, signedPhotoUrl])
 
-  const run = async (fn: () => Promise<void>, okKey: string) => {
+  // Solo una incidencia `open` pasa a `in_progress`: nunca se degradan las cerradas ni se toca `in_progress`
+  const markInProgress = async () => { if (inc?.status === 'open') await resolve(incidentId, 'in_progress') }
+
+  const run = async (fn: () => Promise<void>, okKey: string): Promise<boolean> => {
     setBusy(true); setMsg(null)
-    try { await fn(); await resolve(incidentId, 'in_progress'); await load(); setMsg(t(okKey)) }
-    catch (e: any) { setMsg(t('common.error') + ': ' + e.message) }
+    try { await fn(); await markInProgress(); await load(); setMsg(t(okKey)); return true }
+    catch (e: any) { setMsg(t('common.error') + ': ' + e.message); return false }
     finally { setBusy(false) }
   }
 
@@ -47,26 +50,29 @@ export function ReportedIncidentPanel({ incidentId, onBack }: { incidentId: stri
 
   if (!inc) return <div>{t('common.loading')}</div>
   const detailId = inc.allocation_plan_detail_id
+  const actionable = inc.status === 'open' || inc.status === 'in_progress'
 
   return (
     <div className="max-w-3xl">
       <button onClick={onBack} className="text-blue-600 hover:text-blue-800 mb-4">← {t('reported_incidents.back')}</button>
       <h3 className="text-lg font-bold mb-2">{t(`reported_incidents.category.${inc.category}`)}</h3>
       <ReportedIncidentHeader inc={inc} role={panelistRole(inc)} />
-      {detailId && <div className="text-sm text-gray-600 mb-4">{t('reported_incidents.linked_shipment')}: <span className="font-mono">{detailId.slice(0, 8)}</span></div>}
       {inc.description && <p className="bg-gray-50 rounded p-3 text-sm mb-3">{inc.description}</p>}
       {photo && <img src={photo} alt="" className="max-w-xs rounded border mb-3" />}
 
       {/* Bloque de acción por categoría (playbook) */}
       <div className="border rounded p-4 mb-4">
+        {!actionable && <p className="text-xs text-gray-500 mb-2">{t('reported_incidents.readonly.closed')}</p>}
+        <div className={actionable ? '' : 'pointer-events-none opacity-60'} aria-disabled={!actionable}>
         {inc.category === 'parcel_returned' ? (
           <ReturnedSampleActions detail={inc.detail} busy={busy} t={t}
+            listNodesForMove={listNodesForMove} suggestRerouteReturnedSample={suggestRerouteReturnedSample}
             onCancel={() => run(() => actCancel(detailId!), 'reported_incidents.done.cancelled')}
             onReroute={(toNode, week) => run(() => rerouteReturnedSample(detailId!, toNode, week), 'reported_incidents.done.rerouted')} />
         ) : inc.category === 'missing_materials' ? (
-          <MissingMaterialsSections incidentId={incidentId} panelist={inc.panelist} payload={inc.payload}
+          <MissingMaterialsSections incidentId={incidentId} accountId={inc.account_id} panelist={inc.panelist} payload={inc.payload}
             linkedUnavailabilityId={inc.linked_unavailability_id} t={t}
-            onChanged={async () => { await resolve(incidentId, 'in_progress'); await load() }} />
+            onChanged={async () => { await markInProgress(); await load() }} />
         ) : inc.category === 'contact_data_change' ? (
           <ReadonlyPayload payload={inc.payload} kind="contact" t={t} />
         ) : inc.category === 'unreadable_label_receipt' ? (
@@ -74,6 +80,7 @@ export function ReportedIncidentPanel({ incidentId, onBack }: { incidentId: stri
         ) : (
           <p className="text-sm text-gray-500">{t('reported_incidents.action.support_only')}</p>
         )}
+        </div>
         {msg && <p className="text-sm mt-2">{msg}</p>}
       </div>
 
@@ -118,7 +125,7 @@ function ReadonlyPayload({ payload, kind, t }: { payload: Record<string, any> | 
     return (
       <table className="w-full text-sm">
         <thead>
-          <tr className="text-left text-gray-500">
+          <tr className="text-start text-gray-500">
             <th className="py-1 font-medium" />
             <th className="py-1 font-medium">{t('reported_incidents.contact.before')}</th>
             <th className="py-1 font-medium">{t('reported_incidents.contact.after')}</th>
@@ -127,8 +134,8 @@ function ReadonlyPayload({ payload, kind, t }: { payload: Record<string, any> | 
         <tbody>
           {fields.map(f => (
             <tr key={f} className="border-t">
-              <td className="py-1 pr-2 text-gray-600">{t(`reported_incidents.contact.field.${f}`)}</td>
-              <td className="py-1 pr-2">{before[f] != null ? String(before[f]) : '-'}</td>
+              <td className="py-1 pe-2 text-gray-600">{t(`reported_incidents.contact.field.${f}`)}</td>
+              <td className="py-1 pe-2">{before[f] != null ? String(before[f]) : '-'}</td>
               <td className="py-1">{after[f] != null ? String(after[f]) : '-'}</td>
             </tr>
           ))}

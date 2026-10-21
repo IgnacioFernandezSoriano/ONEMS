@@ -1,9 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { addDays, format } from 'date-fns'
+import { addDays, format, isValid, parseISO } from 'date-fns'
 import { useMaterialsTreatment, type NeedLine, type SupplyPlan, type PanelistStockRow, type AffectedSample } from '@/lib/hooks/useMaterialsTreatment'
-import { useAuth } from '@/contexts/AuthContext'
-import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId'
 import { supabase } from '@/lib/supabase'
 import type { ReportedIncidentDetail } from '@/lib/types'
 import { BTN_PRIMARY, BTN_SECONDARY } from './buttonStyles'
@@ -16,10 +14,23 @@ interface CatalogEntry { id: string; name: string; code: string; is_blocking: bo
 const DATE_FMT = 'yyyy-MM-dd'
 const m = (k: string) => `reported_incidents.materials.${k}`
 
-function useAccountId() {
-  const effective = useEffectiveAccountId()
-  const { profile } = useAuth()
-  return effective || profile?.account_id
+type Treatment = ReturnType<typeof useMaterialsTreatment>
+
+const errMsg = (t: TFn, e: any) => `${t('common.error')}: ${e?.message ?? String(e)}`
+
+const fmtDate = (d: string | null | undefined) => {
+  if (!d) return '-'
+  const p = parseISO(d)
+  return isValid(p) ? format(p, 'dd/MM/yyyy') : '-'
+}
+
+// Fusiona un parche sobre el payload FRESCO de la BD (evita pisar cambios de otra sesion o pestana).
+async function mergePayload(incidentId: string, patch: Record<string, any>) {
+  const { data, error: e0 } = await supabase.from('panelist_incident').select('payload').eq('id', incidentId).single()
+  if (e0) throw e0
+  const { error: e1 } = await supabase.from('panelist_incident')
+    .update({ payload: { ...((data?.payload as Record<string, any> | null) ?? {}), ...patch } }).eq('id', incidentId)
+  if (e1) throw e1
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -36,15 +47,16 @@ function BlockingBadge({ t }: { t: TFn }) {
 }
 
 // ---------- Seccion 1: stock teorico ----------
-function StockSection({ panelist, reported, onChanged, onStockChanged, t }: {
+function StockSection({ accountId, tr, panelist, reported, onChanged, onStockChanged, t }: {
+  accountId: string | null | undefined
+  tr: Treatment
   panelist: Panelist
   reported: { name: string; quantity: number }[]
   onChanged: () => Promise<void>
   onStockChanged: () => void
   t: TFn
 }) {
-  const { fetchPanelistStock, zeroAllStock, reconcileStock } = useMaterialsTreatment()
-  const accountId = useAccountId()
+  const { fetchPanelistStock, zeroAllStock, reconcileStock } = tr
   const [rows, setRows] = useState<PanelistStockRow[] | null>(null)
   const [catalog, setCatalog] = useState<Record<string, CatalogEntry>>({})
   const [realQty, setRealQty] = useState<Record<string, string>>({})
@@ -53,12 +65,13 @@ function StockSection({ panelist, reported, onChanged, onStockChanged, t }: {
   const [error, setError] = useState<string | null>(null)
 
   const reload = useCallback(async () => { setRows(await fetchPanelistStock(panelist.id)) }, [fetchPanelistStock, panelist.id])
-  useEffect(() => { reload().catch(e => setError(e.message)) }, [reload])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { reload().catch(e => setError(errMsg(t, e))) }, [reload])
   useEffect(() => {
     if (!accountId) return
     supabase.from('material_catalog').select('id, code, name, is_blocking').eq('account_id', accountId)
       .then(({ data, error: e }) => {
-        if (e) { setError(e.message); return }
+        if (e) { setError(errMsg(t, e)); return }
         const map: Record<string, CatalogEntry> = {}
         ;(data || []).forEach((r: any) => {
           const v = { id: r.id, name: r.name, code: r.code, is_blocking: !!r.is_blocking }
@@ -67,6 +80,7 @@ function StockSection({ panelist, reported, onChanged, onStockChanged, t }: {
         })
         setCatalog(map)
       })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accountId])
 
   // Filas = stock del panelista + materiales reportados que aun no tienen fila de stock
@@ -83,7 +97,7 @@ function StockSection({ panelist, reported, onChanged, onStockChanged, t }: {
   const act = async (fn: () => Promise<void>) => {
     setBusy(true); setError(null); setInfo(null)
     try { await fn(); onStockChanged(); await reload(); await onChanged() }
-    catch (e: any) { setError(e.message) }
+    catch (e: any) { setError(errMsg(t, e)) }
     finally { setBusy(false) }
   }
   const canZero = (rows ?? []).some(r => r.quantity > 0)
@@ -100,7 +114,7 @@ function StockSection({ panelist, reported, onChanged, onStockChanged, t }: {
             return (
               <tr key={key} className="border-t">
                 <td className="py-1">{r.name}</td>
-                <td className="py-1 w-16 text-right pr-2">{r.quantity}</td>
+                <td className="py-1 w-16 text-end pe-2">{r.quantity}</td>
                 <td className="py-1">{r.is_blocking && <BlockingBadge t={t} />}</td>
                 <td className="py-1">
                   {r.unmatched ? <span className="text-xs text-gray-500">{t(m('unmatched'))}</span> : (
@@ -160,30 +174,41 @@ function buildPlan(needs: NeedLine[], plan: SupplyPlan, override: Record<string,
   return out
 }
 
-function SupplySection({ incidentId, panelist, payload, executed, stockVersion, onExecuted, onChanged, t }: {
+function SupplySection({ tr, accountId, incidentId, panelist, payload, executed, bajaId, stockVersion, expectedDate, setExpectedDate, today, datePast, onExecuted, onChanged, t }: {
+  tr: Treatment
+  accountId: string | null | undefined
   incidentId: string
   panelist: Panelist
   payload: Record<string, any> | null
   executed: Executed | null
+  bajaId: string | null
   stockVersion: number
+  expectedDate: string
+  setExpectedDate: (d: string) => void
+  today: string
+  datePast: boolean
   onExecuted: (e: Executed) => void
   onChanged: () => Promise<void>
   t: TFn
 }) {
-  const { recomputeNeed, resolveSupply, executeSupply, linkShipmentToIncident, daysWithoutStock } = useMaterialsTreatment()
-  const accountId = useAccountId()
+  const { recomputeNeed, resolveSupply, executeSupply, linkShipmentToIncident, daysWithoutStock } = tr
   const done: string | null = payload?.supply_executed_at ?? null
   const [needs, setNeeds] = useState<NeedLine[] | null>(null)
   const [plan, setPlan] = useState<SupplyPlan | null>(null)
   const [override, setOverride] = useState<Record<string, Override>>({})
-  const [created, setCreated] = useState<{ centralShipmentId: string | null; donorShipmentIds: string[] } | null>(null)
+  // Guarda de reintento: ids de envios ya creados (si el payload ya los tiene, p. ej. tras recargar, se reutilizan)
+  const [created, setCreated] = useState<{ centralShipmentId: string | null; donorShipmentIds: string[] } | null>(() => {
+    if (payload?.supply_executed_at) return null
+    const donors: string[] = Array.isArray(payload?.donor_shipment_ids) ? payload.donor_shipment_ids : []
+    return payload?.central_shipment_id || donors.length > 0
+      ? { centralShipmentId: payload?.central_shipment_id ?? null, donorShipmentIds: donors }
+      : null
+  })
   const [lead, setLead] = useState<{ ship: number; purchase: number } | null>(null)
-  const [expectedDate, setExpectedDate] = useState<string>(payload?.expected_date ?? '')
   const [touched, setTouched] = useState(false)
   const [dws, setDws] = useState<{ businessDays: number; samples: AffectedSample[] } | null>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const today = format(new Date(), DATE_FMT)
 
   useEffect(() => {
     if (done) return // confirmado: solo lectura, no se recalcula
@@ -194,7 +219,7 @@ function SupplySection({ incidentId, panelist, payload, executed, stockVersion, 
         const p = await resolveSupply(lines, panelist.id)
         if (cancelled) return
         setNeeds(lines); setPlan(p)
-      } catch (e: any) { if (!cancelled) setError(e.message) }
+      } catch (e: any) { if (!cancelled) setError(errMsg(t, e)) }
     })()
     return () => { cancelled = true }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -204,9 +229,10 @@ function SupplySection({ incidentId, panelist, payload, executed, stockVersion, 
     if (!accountId) return
     supabase.from('stock_settings').select('purchase_lead_time_days, shipment_lead_time_days').eq('account_id', accountId).maybeSingle()
       .then(({ data, error: e }) => {
-        if (e) { setError(e.message); return }
+        if (e) { setError(errMsg(t, e)); return }
         setLead({ ship: data?.shipment_lead_time_days ?? 7, purchase: data?.purchase_lead_time_days ?? 7 })
       })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accountId])
 
   const effective = useMemo(() => (needs && plan ? buildPlan(needs, plan, override) : null), [needs, plan, override])
@@ -214,39 +240,46 @@ function SupplySection({ incidentId, panelist, payload, executed, stockVersion, 
   useEffect(() => {
     if (touched || done || !lead) return
     setExpectedDate(format(addDays(new Date(), hasPurchase ? lead.purchase : lead.ship), DATE_FMT))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lead, hasPurchase, touched, done])
 
   const blockingIds = useMemo(
     () => (needs ?? []).filter(n => n.is_blocking && n.quantity_needed > 0).map(n => n.material_id), [needs])
   useEffect(() => {
     if (!expectedDate || !panelist.node_id || !needs) return
-    daysWithoutStock(panelist.node_id, today, expectedDate, blockingIds).then(setDws).catch(e => setError(e.message))
+    daysWithoutStock(panelist.node_id, today, expectedDate, blockingIds).then(setDws).catch(e => setError(errMsg(t, e)))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [expectedDate, blockingIds, needs, panelist.node_id])
 
   const confirmSupply = async () => {
-    if (!effective) return
+    if (!effective || datePast) return
     setBusy(true); setError(null)
     try {
-      // Reintento seguro: si los envios ya se crearon (fallo posterior), no se vuelven a crear.
+      // Reintento seguro: si los envios ya se crearon (fallo posterior, otra pestana o sesion), no se vuelven a crear.
       // Los envios quedan `pending`: se despachan en la seccion 3, despues de crear la baja.
       let ids = created
       if (!ids) {
-        ids = await executeSupply(effective, panelist.id)
-        setCreated(ids)
+        const { data: fresh, error: e0 } = await supabase.from('panelist_incident').select('payload').eq('id', incidentId).single()
+        if (e0) throw e0
+        const fp = (fresh?.payload as Record<string, any> | null) ?? {}
+        const fd: string[] = Array.isArray(fp.donor_shipment_ids) ? fp.donor_shipment_ids : []
+        if (fp.central_shipment_id || fd.length > 0) ids = { centralShipmentId: fp.central_shipment_id ?? null, donorShipmentIds: fd }
       }
+      if (!ids) {
+        ids = await executeSupply(effective, panelist.id)
+        // Persistir los ids YA: si algo falla despues, un reintento (incluso tras recargar) no duplica envios
+        await mergePayload(incidentId, { central_shipment_id: ids.centralShipmentId, donor_shipment_ids: ids.donorShipmentIds })
+      }
+      setCreated(ids)
       if (ids.centralShipmentId) await linkShipmentToIncident(incidentId, ids.centralShipmentId)
-      const { error: e } = await supabase.from('panelist_incident').update({
-        payload: {
-          ...(payload ?? {}), expected_date: expectedDate, days_without_stock: dws?.businessDays ?? 0,
-          central_shipment_id: ids.centralShipmentId, donor_shipment_ids: ids.donorShipmentIds,
-          supply_executed_at: new Date().toISOString()
-        }
-      }).eq('id', incidentId)
-      if (e) throw e
+      await mergePayload(incidentId, {
+        expected_date: expectedDate, days_without_stock: dws?.businessDays ?? 0,
+        central_shipment_id: ids.centralShipmentId, donor_shipment_ids: ids.donorShipmentIds,
+        supply_executed_at: new Date().toISOString()
+      })
       onExecuted({ expectedDate, centralShipmentId: ids.centralShipmentId, donorShipmentIds: ids.donorShipmentIds })
       await onChanged()
-    } catch (e: any) { setError(e.message) }
+    } catch (e: any) { setError(errMsg(t, e)) }
     finally { setBusy(false) }
   }
 
@@ -263,12 +296,12 @@ function SupplySection({ incidentId, panelist, payload, executed, stockVersion, 
   return (
     <Section title={t(m('s2_title'))}>
       {error && <p className="text-sm text-red-600">{error}</p>}
-      {done && <p className="text-sm text-gray-600 mb-2">{t(m('supply_done'), { date: format(new Date(done), DATE_FMT) })}</p>}
+      {done && <p className="text-sm text-gray-600 mb-2">{t(m('supply_done'), { date: fmtDate(done.slice(0, 10)) })}</p>}
       {!done && !needs && !error && <p className="text-sm text-gray-500">{t('common.loading')}</p>}
       {!done && needs && (
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-gray-500">
+            <tr className="text-start text-gray-500">
               <th /><th /><th className="font-medium">{t(m('source'))}</th><th className="font-medium">{t(m('change_source'))}</th>
             </tr>
           </thead>
@@ -293,24 +326,25 @@ function SupplySection({ incidentId, panelist, payload, executed, stockVersion, 
       )}
       <div className="mt-3 flex items-center gap-2 text-sm">
         <label>{t(m('expected_date'))}</label>
-        <input type="date" className="border rounded p-1" min={today} disabled={!!done} value={expectedDate}
+        <input type="date" className="border rounded p-1" min={today} disabled={!!bajaId} value={expectedDate}
           onChange={e => { setTouched(true); setExpectedDate(e.target.value) }} />
       </div>
+      {datePast && <p className="text-sm text-red-600 mt-1">{t(m('date_in_past'))}</p>}
       {dws && (
         <div className="mt-2 text-sm">
           <p className="font-medium">{t(m('days_without_stock'), { n: dws.businessDays })}</p>
           {dws.samples.length === 0 ? <p className="text-gray-500">{t(m('no_affected_samples'))}</p> : (
             <>
               <p className="text-gray-600">{t(m('affected_samples'))}</p>
-              <ul className="list-disc ml-5">
-                {dws.samples.map(s => <li key={s.id}>{s.fecha_programada} - {s.destination_auto_id} - {s.product}</li>)}
+              <ul className="list-disc ms-5">
+                {dws.samples.map(s => <li key={s.id}>{fmtDate(s.fecha_programada)} - {s.destination_auto_id} - {s.product}</li>)}
               </ul>
             </>
           )}
         </div>
       )}
       <div className="mt-3">
-        <button disabled={busy || !!done || !effective || !expectedDate} className={BTN_PRIMARY} onClick={confirmSupply}>
+        <button disabled={busy || !!done || !effective || !expectedDate || datePast} className={BTN_PRIMARY} onClick={confirmSupply}>
           {t(m('confirm_supply'))}
         </button>
         {done && shipIds.length > 0 && (
@@ -322,32 +356,36 @@ function SupplySection({ incidentId, panelist, payload, executed, stockVersion, 
 }
 
 // ---------- Seccion 3: replanificar ----------
-function ReplanSection({ incidentId, payload, linkedUnavailabilityId, executed, onChanged, t }: {
+function ReplanSection({ tr, incidentId, payload, unavailabilityId, executed, expectedDate, datePast, onBajaCreated, onChanged, t }: {
+  tr: Treatment
   incidentId: string
   payload: Record<string, any> | null
-  linkedUnavailabilityId: string | null
+  unavailabilityId: string | null
   executed: Executed | null
+  expectedDate: string
+  datePast: boolean
+  onBajaCreated: (id: string) => void
   onChanged: () => Promise<void>
   t: TFn
 }) {
-  const { createDisplacementBaja, markShipmentSent } = useMaterialsTreatment()
+  const { createDisplacementBaja, markShipmentSent } = tr
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [createdId, setCreatedId] = useState<string | null>(null)
   const [sentLocal, setSentLocal] = useState<string[]>([])
-  const unavailabilityId = linkedUnavailabilityId ?? createdId
 
   const allIds = executed ? [executed.centralShipmentId, ...executed.donorShipmentIds].filter(Boolean) as string[] : []
   const sent = new Set<string>([...(Array.isArray(payload?.sent_shipment_ids) ? payload.sent_shipment_ids : []), ...sentLocal])
   const pending = allIds.filter(id => !sent.has(id))
 
   const createBaja = async () => {
-    if (!executed?.expectedDate) return
+    if (!expectedDate || datePast) return
     setBusy(true); setError(null)
     try {
-      setCreatedId(await createDisplacementBaja(incidentId, executed.expectedDate))
+      // La fecha vigente del campo manda: se guarda en el payload y se usa para la baja
+      await mergePayload(incidentId, { expected_date: expectedDate })
+      onBajaCreated(await createDisplacementBaja(incidentId, expectedDate))
       await onChanged()
-    } catch (e: any) { setError(e.message) }
+    } catch (e: any) { setError(errMsg(t, e)) }
     finally { setBusy(false) }
   }
 
@@ -361,20 +399,19 @@ function ReplanSection({ incidentId, payload, linkedUnavailabilityId, executed, 
         await markShipmentSent(id)
         sentIds.push(id)
         setSentLocal(prev => [...prev, id])
-        const { error: e } = await supabase.from('panelist_incident')
-          .update({ payload: { ...(payload ?? {}), sent_shipment_ids: sentIds } }).eq('id', incidentId)
-        if (e) throw e
+        await mergePayload(incidentId, { sent_shipment_ids: sentIds })
       }
       await onChanged()
-    } catch (e: any) { setError(e.message) }
+    } catch (e: any) { setError(errMsg(t, e)) }
     finally { setBusy(false) }
   }
 
   return (
     <Section title={t(m('s3_title'))}>
       {error && <p className="text-sm text-red-600">{error}</p>}
+      {datePast && !unavailabilityId && <p className="text-sm text-red-600 mb-2">{t(m('date_in_past'))}</p>}
       <div className="flex gap-2">
-        <button disabled={busy || !executed || !!unavailabilityId} className={BTN_PRIMARY} onClick={createBaja}>
+        <button disabled={busy || !executed || !!unavailabilityId || !expectedDate || datePast} className={BTN_PRIMARY} onClick={createBaja}>
           {t(m('create_baja_replan'))}
         </button>
         {unavailabilityId && pending.length > 0 && (
@@ -391,17 +428,25 @@ function ReplanSection({ incidentId, payload, linkedUnavailabilityId, executed, 
   )
 }
 
-export function MissingMaterialsSections({ incidentId, panelist, payload, linkedUnavailabilityId, onChanged, t }: {
+export function MissingMaterialsSections({ incidentId, accountId, panelist, payload, linkedUnavailabilityId, onChanged, t }: {
   incidentId: string
+  accountId: string
   panelist: ReportedIncidentDetail['panelist']
   payload: Record<string, any> | null
   linkedUnavailabilityId: string | null
   onChanged: () => Promise<void>
   t: TFn
 }) {
+  // Una sola instancia (cada una carga el stock completo); siempre con la cuenta DEL INCIDENTE
+  const tr = useMaterialsTreatment(accountId)
   const [local, setLocal] = useState<Executed | null>(null)
   const [stockVersion, setStockVersion] = useState(0)
+  const [expectedDate, setExpectedDate] = useState<string>(payload?.expected_date ?? '')
+  const [createdBajaId, setCreatedBajaId] = useState<string | null>(null)
   if (!panelist) return null
+  const today = format(new Date(), DATE_FMT)
+  const datePast = !!expectedDate && expectedDate < today
+  const bajaId = linkedUnavailabilityId ?? createdBajaId
   const reported: { name: string; quantity: number }[] = Array.isArray(payload?.materials) ? payload.materials : []
   const executed: Executed | null = payload?.supply_executed_at
     ? {
@@ -412,12 +457,13 @@ export function MissingMaterialsSections({ incidentId, panelist, payload, linked
     : local
   return (
     <div className="space-y-5">
-      <StockSection panelist={panelist} reported={reported} onChanged={onChanged}
+      <StockSection accountId={accountId} tr={tr} panelist={panelist} reported={reported} onChanged={onChanged}
         onStockChanged={() => setStockVersion(v => v + 1)} t={t} />
-      <SupplySection incidentId={incidentId} panelist={panelist} payload={payload} executed={executed} stockVersion={stockVersion}
-        onExecuted={setLocal} onChanged={onChanged} t={t} />
-      <ReplanSection incidentId={incidentId} payload={payload} linkedUnavailabilityId={linkedUnavailabilityId} executed={executed}
-        onChanged={onChanged} t={t} />
+      <SupplySection tr={tr} accountId={accountId} incidentId={incidentId} panelist={panelist} payload={payload} executed={executed}
+        bajaId={bajaId} stockVersion={stockVersion} expectedDate={expectedDate} setExpectedDate={setExpectedDate}
+        today={today} datePast={datePast} onExecuted={setLocal} onChanged={onChanged} t={t} />
+      <ReplanSection tr={tr} incidentId={incidentId} payload={payload} unavailabilityId={bajaId} executed={executed}
+        expectedDate={expectedDate} datePast={datePast} onBajaCreated={setCreatedBajaId} onChanged={onChanged} t={t} />
     </div>
   )
 }

@@ -2954,3 +2954,7 @@ reported_incidents.returned.reason.other_end,El nodo es el otro extremo del env�
 reported_incidents.returned.reason.no_day,No hay día disponible en esa semana
 reported_incidents.returned.reason.unknown,No se puede reenviar a ese nodo y semana
 reported_incidents.done.rerouted,Muestra reenviada
+reported_incidents.materials.date_in_past,La fecha no puede estar en el pasado
+reported_incidents.returned.not_returnable,Este envío no está en un estado devolvible (estado actual)
+reported_incidents.returned.cancel_confirm,¿Anular este envío? La muestra no se reenviará.
+reported_incidents.readonly.closed,Esta incidencia está cerrada: las acciones son de solo lectura
