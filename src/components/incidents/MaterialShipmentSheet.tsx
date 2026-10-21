@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { format, isValid, parseISO } from 'date-fns'
 import { supabase } from '@/lib/supabase'
-import { useStockManagement } from '@/hooks/useStockManagement'
 import { downloadCSV, printPDF } from '@/lib/exportUtils'
 import { BTN_SECONDARY } from './buttonStyles'
 
@@ -25,6 +24,8 @@ const k = (s: string) => `material_sheet.${s}`
 const DASH = '—'
 const PANELIST_COLS = 'id, name, panelist_code, address_line1, address_line2, address_city, address_country, mobile, node_id'
 
+// Neutraliza formulas de hoja de calculo (CSV injection) en celdas de texto
+const safeCell = (v: string) => (/^[=+@-]/.test(v) || v.charCodeAt(0) === 9 || v.charCodeAt(0) === 13 ? `'${v}` : v)
 const escapeHtml = (v: unknown) =>
   String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
 
@@ -46,7 +47,6 @@ export function MaterialShipmentSheet({ incidentId, accountId, onChanged, t }: {
   onChanged: () => Promise<void> | void
   t: TFn
 }) {
-  const { markShipmentSent } = useStockManagement(accountId)
   const [lines, setLines] = useState<Line[] | null>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -118,7 +118,8 @@ export function MaterialShipmentSheet({ incidentId, accountId, onChanged, t }: {
     inFlight.current = true
     setBusy(true); setError(null)
     try {
-      await markShipmentSent(id)
+      const { error: e } = await supabase.rpc('send_material_shipment', { p_shipment_id: id })
+      if (e) throw e
       await load()
       await onChanged()
     } catch (e: any) { setError(`${t('common.error')}: ${e?.message ?? String(e)}`) }
@@ -127,12 +128,12 @@ export function MaterialShipmentSheet({ incidentId, accountId, onChanged, t }: {
 
   const exportCsv = () => {
     downloadCSV(lines.map(l => ({
-      [t(k('col.origin'))]: l.origin,
-      [t(k('col.destination'))]: l.destination,
-      [t(k('col.material'))]: `${l.code} - ${l.material}`,
-      [t(k('col.quantity'))]: qtyText(l),
-      [t(k('col.due'))]: l.due,
-      [t(k('col.status'))]: statusLabel(l.status)
+      [t(k('col.origin'))]: safeCell(l.origin),
+      [t(k('col.destination'))]: safeCell(l.destination),
+      [t(k('col.material'))]: safeCell(`${l.code} - ${l.material}`),
+      [t(k('col.quantity'))]: safeCell(qtyText(l)),
+      [t(k('col.due'))]: safeCell(l.due),
+      [t(k('col.status'))]: safeCell(statusLabel(l.status))
     })), `material-shipments-${format(new Date(), 'yyyyMMdd')}.csv`)
   }
 
