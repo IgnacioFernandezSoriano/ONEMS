@@ -54,7 +54,7 @@ END $$;
 
 SELECT pg_temp.expect_err($$SELECT public.log_incident_message('reported','00000000-0000-0000-0000-000000000000','outbound','bot','x')$$, 'incident not found');
 SELECT pg_temp.expect_err($$SELECT public.log_incident_message('unavailability','00000000-0000-0000-0000-000000000000','outbound','bot','x')$$, 'incident not found');
-SELECT pg_temp.expect_err($$SELECT public.log_incident_message('bad',(SELECT v FROM t_ids WHERE k='inc'),'outbound','bot','x')$$, '');
+SELECT pg_temp.expect_err($$SELECT public.log_incident_message('bad',(SELECT v FROM t_ids WHERE k='inc'),'outbound','bot','x')$$, 'invalid incident kind');
 SELECT pg_temp.expect_err($$SELECT public.log_incident_message('reported',(SELECT v FROM t_ids WHERE k='inc'),'sideways','bot','x')$$, '');
 
 -- send_manager_message: actor 99 (cuenta 1) OK; actor 98 (cuenta 2) denegado; vacio
@@ -79,49 +79,67 @@ BEGIN
   PERFORM set_config('request.jwt.claim.sub','', true);
 END $$;
 
--- pending_incident_messages: solo outbound pending_send, con telegram_id e idioma
-DO $$
-DECLARE n int; r record;
-BEGIN
-  SELECT count(*) INTO n FROM public.pending_incident_messages();
-  IF n <> 2 THEN RAISE EXCEPTION 'FAIL pendientes=% (esperaba 2)', n; END IF;
-  SELECT * INTO r FROM public.pending_incident_messages(1);
-  IF r.telegram_id <> 'tg-p1' OR r.language <> 'es' THEN RAISE EXCEPTION 'FAIL pending fila: %', row_to_json(r); END IF;
-  IF (SELECT count(*) FROM public.pending_incident_messages(1)) <> 1 THEN RAISE EXCEPTION 'FAIL limit'; END IF;
-END $$;
--- panelista sin telegram_id no aparece
+-- pending_incident_messages: reclama solo outbound pending_send con telegram_id; sin duplicados
 UPDATE public.panelists SET telegram_id = '' WHERE id = 'e1000000-0000-0000-0000-000000000001';
 DO $$ BEGIN
   IF (SELECT count(*) FROM public.pending_incident_messages()) <> 0 THEN RAISE EXCEPTION 'FAIL sin telegram_id aparece'; END IF;
 END $$;
 UPDATE public.panelists SET telegram_id = 'tg-p1' WHERE id = 'e1000000-0000-0000-0000-000000000001';
-
--- mark_incident_message_sent
 DO $$
-DECLARE a uuid; b uuid; r public.incident_message;
+DECLARE r record; a uuid; b uuid; n int; st text;
 BEGIN
-  SELECT id INTO a FROM public.pending_incident_messages() ORDER BY created_at, id LIMIT 1;
-  SELECT id INTO b FROM public.pending_incident_messages() WHERE id <> a LIMIT 1;
+  SELECT * INTO r FROM public.pending_incident_messages(1);
+  IF r.telegram_id <> 'tg-p1' OR r.language <> 'es' OR r.meta->>'claimed_at' IS NULL THEN RAISE EXCEPTION 'FAIL pending fila: %', row_to_json(r); END IF;
+  a := r.id;
+  SELECT count(*) INTO n FROM public.pending_incident_messages();
+  IF n <> 1 THEN RAISE EXCEPTION 'FAIL segundo reparto=% (esperaba 1, la otra fila)', n; END IF;
+  SELECT id INTO b FROM public.incident_message WHERE direction='outbound' AND status='pending_send' AND id <> a;
+  IF (SELECT count(*) FROM public.pending_incident_messages()) <> 0 THEN RAISE EXCEPTION 'FAIL reparte duplicados'; END IF;
   PERFORM public.mark_incident_message_sent(a, true, NULL, 'tgm-1');
-  SELECT * INTO r FROM public.incident_message WHERE id = a;
-  IF r.status <> 'sent' OR r.sent_at IS NULL OR r.telegram_message_id <> 'tgm-1' THEN RAISE EXCEPTION 'FAIL sent: %', row_to_json(r); END IF;
+  IF NOT EXISTS (SELECT 1 FROM public.incident_message WHERE id = a AND status='sent' AND sent_at IS NOT NULL AND telegram_message_id='tgm-1') THEN
+    RAISE EXCEPTION 'FAIL sent'; END IF;
   PERFORM public.mark_incident_message_sent(b, false, 'boom');
-  SELECT * INTO r FROM public.incident_message WHERE id = b;
-  IF r.status <> 'failed' OR r.error <> 'boom' THEN RAISE EXCEPTION 'FAIL failed: %', row_to_json(r); END IF;
-  IF (SELECT count(*) FROM public.pending_incident_messages()) <> 0 THEN RAISE EXCEPTION 'FAIL aun hay pendientes'; END IF;
+  SELECT status INTO st FROM public.incident_message WHERE id = b;
+  IF st <> 'failed' OR (SELECT error FROM public.incident_message WHERE id = b) <> 'boom' THEN RAISE EXCEPTION 'FAIL failed'; END IF;
+  IF (SELECT count(*) FROM public.pending_incident_messages()) <> 0 THEN RAISE EXCEPTION 'FAIL failed se reenvia'; END IF;
+  PERFORM pg_temp.expect_err($q$SELECT public.mark_incident_message_sent('00000000-0000-0000-0000-000000000000', true)$q$, 'message not found');
+  PERFORM pg_temp.expect_err(format($q$SELECT public.mark_incident_message_sent(%L, true)$q$,
+    (SELECT id FROM public.incident_message WHERE direction='inbound' LIMIT 1)), 'message not found');
 END $$;
+-- un reclamo caducado (>10 min) vuelve a repartirse
+DO $$ DECLARE mid uuid;
+BEGIN
+  mid := public.log_incident_message('reported', (SELECT v FROM t_ids WHERE k='inc'), 'outbound', 'bot', 'reintento');
+  PERFORM public.pending_incident_messages();
+  UPDATE public.incident_message SET meta = jsonb_set(meta, '{claimed_at}', to_jsonb(now() - interval '11 minutes')) WHERE id = mid;
+  IF (SELECT count(*) FROM public.pending_incident_messages()) <> 1 THEN RAISE EXCEPTION 'FAIL reclamo caducado no se reparte'; END IF;
+END $$;
+
+-- panelista de otra cuenta: el trigger lo impide; con el trigger apagado, las RPCs lo bloquean
+SELECT pg_temp.expect_err($$INSERT INTO public.panelist_incident (account_id, panelist_id, category, status)
+  VALUES ('a0000000-0000-0000-0000-000000000002','e1000000-0000-0000-0000-000000000001','other','open')$$,
+  'panelist belongs to another account');
+ALTER TABLE public.panelist_incident DISABLE TRIGGER panelist_incident_same_account;
+WITH x AS (
+  INSERT INTO public.panelist_incident (account_id, panelist_id, category, status)
+  VALUES ('a0000000-0000-0000-0000-000000000002','e1000000-0000-0000-0000-000000000001','other','open')
+  RETURNING id)
+INSERT INTO t_ids SELECT 'bad', id FROM x;
+ALTER TABLE public.panelist_incident ENABLE TRIGGER panelist_incident_same_account;
+SELECT pg_temp.expect_err($$SELECT public.send_manager_message('reported',(SELECT v FROM t_ids WHERE k='bad'),'x')$$, 'Cross-tenant access denied');
+SELECT pg_temp.expect_err($$SELECT public.log_incident_message('reported',(SELECT v FROM t_ids WHERE k='bad'),'outbound','bot','x')$$, 'Cross-tenant access denied');
 
 -- privilegios
 DO $$
 DECLARE f text;
 BEGIN
-  FOREACH f IN ARRAY ARRAY['public.log_incident_message(text,uuid,text,text,text,jsonb,text)',
-                           'public.send_manager_message(text,uuid,text)'] LOOP
+  FOREACH f IN ARRAY ARRAY['public.send_manager_message(text,uuid,text)'] LOOP
     IF has_function_privilege('anon', f, 'EXECUTE') THEN RAISE EXCEPTION 'FAIL anon con EXECUTE en %', f; END IF;
     IF NOT has_function_privilege('authenticated', f, 'EXECUTE') OR NOT has_function_privilege('service_role', f, 'EXECUTE') THEN
       RAISE EXCEPTION 'FAIL falta GRANT en %', f; END IF;
   END LOOP;
-  FOREACH f IN ARRAY ARRAY['public.mark_incident_message_sent(uuid,boolean,text,text)',
+  FOREACH f IN ARRAY ARRAY['public.log_incident_message(text,uuid,text,text,text,jsonb,text)',
+                           'public.mark_incident_message_sent(uuid,boolean,text,text)',
                            'public.pending_incident_messages(integer)'] LOOP
     IF has_function_privilege('anon', f, 'EXECUTE') OR has_function_privilege('authenticated', f, 'EXECUTE') THEN
       RAISE EXCEPTION 'FAIL anon/authenticated con EXECUTE en %', f; END IF;

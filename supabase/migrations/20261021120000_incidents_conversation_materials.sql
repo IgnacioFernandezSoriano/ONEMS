@@ -28,7 +28,7 @@ ALTER TABLE public.incident_message ENABLE ROW LEVEL SECURITY;
 CREATE POLICY incident_message_select ON public.incident_message
   FOR SELECT TO authenticated
   USING (account_id = current_user_account_id() OR is_superadmin());
-REVOKE ALL ON public.incident_message FROM PUBLIC, anon;
+REVOKE ALL ON public.incident_message FROM PUBLIC, anon, authenticated;
 GRANT SELECT ON public.incident_message TO authenticated;
 GRANT ALL ON public.incident_message TO service_role;
 
@@ -51,6 +51,8 @@ BEGIN
   END IF;
   IF v_account IS NULL THEN RAISE EXCEPTION 'incident not found'; END IF;
   PERFORM assert_same_account(v_account);
+  IF NOT EXISTS (SELECT 1 FROM panelists WHERE id = v_panelist AND account_id = v_account) THEN
+    RAISE EXCEPTION 'Cross-tenant access denied'; END IF;
   v_status := COALESCE(p_status, CASE p_direction
     WHEN 'outbound' THEN 'pending_send'
     WHEN 'inbound'  THEN 'received'
@@ -80,6 +82,8 @@ BEGIN
   END IF;
   IF v_account IS NULL THEN RAISE EXCEPTION 'incident not found'; END IF;
   PERFORM assert_same_account(v_account);
+  IF NOT EXISTS (SELECT 1 FROM panelists WHERE id = v_panelist AND account_id = v_account) THEN
+    RAISE EXCEPTION 'Cross-tenant access denied'; END IF;
   IF NULLIF(btrim(p_body), '') IS NULL THEN RAISE EXCEPTION 'empty message'; END IF;
   INSERT INTO incident_message (account_id, panelist_id, incident_kind, incident_id,
                                 direction, author, body, meta, status)
@@ -100,26 +104,52 @@ BEGIN
          sent_at = CASE WHEN p_ok THEN now() ELSE sent_at END,
          error = CASE WHEN p_ok THEN NULL ELSE p_error END,
          telegram_message_id = COALESCE(p_telegram_message_id, telegram_message_id)
-   WHERE id = p_id;
+   WHERE id = p_id AND direction = 'outbound';
+  IF NOT FOUND THEN RAISE EXCEPTION 'message not found'; END IF;
 END; $$;
 
--- Cola de salida para n8n: outbound pending_send de panelistas con telegram_id. Solo service_role.
+-- Cola de salida para n8n: reclama de forma atomica los outbound pending_send de panelistas con
+-- telegram_id (marca meta.claimed_at; un reclamo caduca a los 10 min). Solo service_role.
 CREATE OR REPLACE FUNCTION public.pending_incident_messages(p_limit int DEFAULT 50)
 RETURNS TABLE (id uuid, account_id uuid, panelist_id uuid, incident_kind text, incident_id uuid,
                body text, meta jsonb, created_at timestamptz, telegram_id text, language text)
-LANGUAGE sql SECURITY DEFINER SET search_path = public AS $$
-  SELECT m.id, m.account_id, m.panelist_id, m.incident_kind, m.incident_id,
-         m.body, m.meta, m.created_at, p.telegram_id, p.language
-    FROM incident_message m
-    JOIN panelists p ON p.id = m.panelist_id
-   WHERE m.direction = 'outbound' AND m.status = 'pending_send'
-     AND NULLIF(btrim(p.telegram_id), '') IS NOT NULL
-   ORDER BY m.created_at, m.id
-   LIMIT p_limit;
+LANGUAGE sql VOLATILE SECURITY DEFINER SET search_path = public AS $$
+  WITH claimed AS (
+    UPDATE incident_message u
+       SET meta = u.meta || jsonb_build_object('claimed_at', now())
+     WHERE u.id IN (
+       SELECT m.id FROM incident_message m
+         JOIN panelists p ON p.id = m.panelist_id AND p.account_id = m.account_id
+        WHERE m.direction = 'outbound' AND m.status = 'pending_send'
+          AND NULLIF(btrim(p.telegram_id), '') IS NOT NULL
+          AND (m.meta->>'claimed_at' IS NULL
+               OR (m.meta->>'claimed_at')::timestamptz < now() - interval '10 minutes')
+        ORDER BY m.created_at, m.id
+        LIMIT p_limit
+        FOR UPDATE OF m SKIP LOCKED)
+    RETURNING u.id, u.account_id, u.panelist_id, u.incident_kind, u.incident_id,
+              u.body, u.meta, u.created_at
+  )
+  SELECT c.id, c.account_id, c.panelist_id, c.incident_kind, c.incident_id,
+         c.body, c.meta, c.created_at, p.telegram_id, p.language
+    FROM claimed c JOIN panelists p ON p.id = c.panelist_id
+   ORDER BY c.created_at, c.id;
 $$;
 
-REVOKE ALL ON FUNCTION public.log_incident_message(text,uuid,text,text,text,jsonb,text) FROM PUBLIC, anon;
-GRANT EXECUTE ON FUNCTION public.log_incident_message(text,uuid,text,text,text,jsonb,text) TO authenticated, service_role;
+-- El panelista de una incidencia debe ser de la misma cuenta (RLS de panelist_incident solo mira account_id).
+CREATE OR REPLACE FUNCTION public.panelist_incident_same_account_check()
+RETURNS trigger LANGUAGE plpgsql SET search_path = public AS $$
+BEGIN
+  IF (SELECT account_id FROM panelists WHERE id = NEW.panelist_id) IS DISTINCT FROM NEW.account_id THEN
+    RAISE EXCEPTION 'panelist belongs to another account'; END IF;
+  RETURN NEW;
+END; $$;
+CREATE TRIGGER panelist_incident_same_account
+  BEFORE INSERT OR UPDATE OF panelist_id, account_id ON public.panelist_incident
+  FOR EACH ROW EXECUTE FUNCTION public.panelist_incident_same_account_check();
+
+REVOKE ALL ON FUNCTION public.log_incident_message(text,uuid,text,text,text,jsonb,text) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.log_incident_message(text,uuid,text,text,text,jsonb,text) TO service_role;
 REVOKE ALL ON FUNCTION public.send_manager_message(text,uuid,text) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.send_manager_message(text,uuid,text) TO authenticated, service_role;
 REVOKE ALL ON FUNCTION public.mark_incident_message_sent(uuid,boolean,text,text) FROM PUBLIC, anon, authenticated;
