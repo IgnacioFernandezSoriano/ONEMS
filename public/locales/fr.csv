@@ -2873,6 +2873,9 @@ reported_incidents.materials.supply_done,Approvisionnement confirmé le {date}
 reported_incidents.materials.create_baja_replan,Créer le congé pour manque de matériel et replanifier
 reported_incidents.materials.go_to_unavailability,Ouvrir l'incident d'indisponibilité
 reported_incidents.materials.no_stock_rows,Aucun enregistrement de stock
+reported_incidents.materials.source_plan,Conserver la répartition prévue
+reported_incidents.materials.change_source,Changer l'origine
+reported_incidents.materials.send_shipments,Envoyer les envois en attente
 reported_incidents.action.new_date,Nouvelle date
 reported_incidents.action.reschedule,Reprogrammer
 reported_incidents.action.cancel_shipment,Annuler l'envoi

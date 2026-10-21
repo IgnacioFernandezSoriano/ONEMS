@@ -2873,6 +2873,9 @@ reported_incidents.materials.supply_done,تم تأكيد التوريد بتار
 reported_incidents.materials.create_baja_replan,إنشاء إجازة بسبب نقص المواد وإعادة التخطيط
 reported_incidents.materials.go_to_unavailability,فتح حادثة عدم التوفر
 reported_incidents.materials.no_stock_rows,لا توجد سجلات مخزون
+reported_incidents.materials.source_plan,الإبقاء على التوزيع المخطط
+reported_incidents.materials.change_source,تغيير المصدر
+reported_incidents.materials.send_shipments,إرسال الشحنات المعلقة
 reported_incidents.action.new_date,تاريخ جديد
 reported_incidents.action.reschedule,إعادة الجدولة
 reported_incidents.action.cancel_shipment,إلغاء الشحنة

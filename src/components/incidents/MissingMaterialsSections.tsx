@@ -36,10 +36,11 @@ function BlockingBadge({ t }: { t: TFn }) {
 }
 
 // ---------- Seccion 1: stock teorico ----------
-function StockSection({ panelist, reported, onChanged, t }: {
+function StockSection({ panelist, reported, onChanged, onStockChanged, t }: {
   panelist: Panelist
   reported: { name: string; quantity: number }[]
   onChanged: () => Promise<void>
+  onStockChanged: () => void
   t: TFn
 }) {
   const { fetchPanelistStock, zeroAllStock, reconcileStock } = useMaterialsTreatment()
@@ -56,7 +57,8 @@ function StockSection({ panelist, reported, onChanged, t }: {
   useEffect(() => {
     if (!accountId) return
     supabase.from('material_catalog').select('id, code, name, is_blocking').eq('account_id', accountId)
-      .then(({ data }) => {
+      .then(({ data, error: e }) => {
+        if (e) { setError(e.message); return }
         const map: Record<string, CatalogEntry> = {}
         ;(data || []).forEach((r: any) => {
           const v = { id: r.id, name: r.name, code: r.code, is_blocking: !!r.is_blocking }
@@ -80,7 +82,7 @@ function StockSection({ panelist, reported, onChanged, t }: {
 
   const act = async (fn: () => Promise<void>) => {
     setBusy(true); setError(null); setInfo(null)
-    try { await fn(); await reload(); await onChanged() }
+    try { await fn(); onStockChanged(); await reload(); await onChanged() }
     catch (e: any) { setError(e.message) }
     finally { setBusy(false) }
   }
@@ -132,11 +134,38 @@ function StockSection({ panelist, reported, onChanged, t }: {
 }
 
 // ---------- Seccion 2: necesidad y suministro ----------
-function SupplySection({ incidentId, panelist, payload, executed, onExecuted, onChanged, t }: {
+type Override = 'plan' | 'central' | 'purchase'
+
+// Plan efectivo: por defecto el reparto propuesto por resolveSupply; el override
+// solo sustituye las lineas de ESE material por una unica fuente, sin superar
+// el stock conocido (el plan original solo incluye central hasta lo disponible).
+function buildPlan(needs: NeedLine[], plan: SupplyPlan, override: Record<string, Override>): SupplyPlan {
+  const out: SupplyPlan = { fromCentral: [], fromDonor: [], toPurchase: [] }
+  needs.filter(n => n.quantity_needed > 0).forEach(n => {
+    const id = n.material_id
+    const mode = override[id] ?? 'plan'
+    if (mode === 'plan') {
+      out.fromCentral.push(...plan.fromCentral.filter(x => x.material_id === id))
+      out.fromDonor.push(...plan.fromDonor.filter(x => x.material_id === id))
+      out.toPurchase.push(...plan.toPurchase.filter(x => x.material_id === id))
+    } else if (mode === 'central') {
+      const cap = plan.fromCentral.filter(x => x.material_id === id).reduce((sum, x) => sum + x.quantity, 0)
+      const q = Math.min(cap, n.quantity_needed)
+      if (q > 0) out.fromCentral.push({ material_id: id, quantity: q })
+      if (n.quantity_needed - q > 0) out.toPurchase.push({ material_id: id, quantity: n.quantity_needed - q })
+    } else {
+      out.toPurchase.push({ material_id: id, quantity: n.quantity_needed })
+    }
+  })
+  return out
+}
+
+function SupplySection({ incidentId, panelist, payload, executed, stockVersion, onExecuted, onChanged, t }: {
   incidentId: string
   panelist: Panelist
   payload: Record<string, any> | null
   executed: Executed | null
+  stockVersion: number
   onExecuted: (e: Executed) => void
   onChanged: () => Promise<void>
   t: TFn
@@ -146,7 +175,8 @@ function SupplySection({ incidentId, panelist, payload, executed, onExecuted, on
   const done: string | null = payload?.supply_executed_at ?? null
   const [needs, setNeeds] = useState<NeedLine[] | null>(null)
   const [plan, setPlan] = useState<SupplyPlan | null>(null)
-  const [sources, setSources] = useState<Record<string, string>>({})
+  const [override, setOverride] = useState<Record<string, Override>>({})
+  const [created, setCreated] = useState<{ centralShipmentId: string | null; donorShipmentIds: string[] } | null>(null)
   const [lead, setLead] = useState<{ ship: number; purchase: number } | null>(null)
   const [expectedDate, setExpectedDate] = useState<string>(payload?.expected_date ?? '')
   const [touched, setTouched] = useState(false)
@@ -156,34 +186,31 @@ function SupplySection({ incidentId, panelist, payload, executed, onExecuted, on
   const today = format(new Date(), DATE_FMT)
 
   useEffect(() => {
+    if (done) return // confirmado: solo lectura, no se recalcula
     let cancelled = false
     ;(async () => {
       try {
         const lines = await recomputeNeed(panelist.id, today, format(addDays(new Date(), 90), DATE_FMT))
         const p = await resolveSupply(lines, panelist.id)
         if (cancelled) return
-        const sel: Record<string, string> = {}
-        lines.forEach(n => {
-          if (p.fromCentral.some(c => c.material_id === n.material_id)) sel[n.material_id] = 'central'
-          else {
-            const d = p.fromDonor.find(x => x.material_id === n.material_id)
-            sel[n.material_id] = d ? `donor:${d.donor_panelist_id}` : 'purchase'
-          }
-        })
-        setNeeds(lines); setPlan(p); setSources(sel)
+        setNeeds(lines); setPlan(p)
       } catch (e: any) { if (!cancelled) setError(e.message) }
     })()
     return () => { cancelled = true }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [panelist.id])
+  }, [panelist.id, stockVersion, !!done])
 
   useEffect(() => {
     if (!accountId) return
     supabase.from('stock_settings').select('purchase_lead_time_days, shipment_lead_time_days').eq('account_id', accountId).maybeSingle()
-      .then(({ data }) => setLead({ ship: data?.shipment_lead_time_days ?? 7, purchase: data?.purchase_lead_time_days ?? 7 }))
+      .then(({ data, error: e }) => {
+        if (e) { setError(e.message); return }
+        setLead({ ship: data?.shipment_lead_time_days ?? 7, purchase: data?.purchase_lead_time_days ?? 7 })
+      })
   }, [accountId])
 
-  const hasPurchase = Object.values(sources).includes('purchase')
+  const effective = useMemo(() => (needs && plan ? buildPlan(needs, plan, override) : null), [needs, plan, override])
+  const hasPurchase = (effective?.toPurchase.length ?? 0) > 0
   useEffect(() => {
     if (touched || done || !lead) return
     setExpectedDate(format(addDays(new Date(), hasPurchase ? lead.purchase : lead.ship), DATE_FMT))
@@ -198,57 +225,64 @@ function SupplySection({ incidentId, panelist, payload, executed, onExecuted, on
   }, [expectedDate, blockingIds, needs, panelist.node_id])
 
   const confirmSupply = async () => {
-    if (!plan || !needs) return
+    if (!effective) return
     setBusy(true); setError(null)
     try {
-      const chosen: SupplyPlan = { fromCentral: [], fromDonor: [], toPurchase: [] }
-      needs.filter(n => n.quantity_needed > 0).forEach(n => {
-        const src = sources[n.material_id] ?? 'purchase'
-        if (src === 'central') chosen.fromCentral.push({ material_id: n.material_id, quantity: n.quantity_needed })
-        else if (src.startsWith('donor:')) {
-          const id = src.slice(6)
-          const d = plan.fromDonor.find(x => x.donor_panelist_id === id)
-          chosen.fromDonor.push({ material_id: n.material_id, quantity: n.quantity_needed, donor_panelist_id: id, donor_name: d?.donor_name ?? '' })
-        } else chosen.toPurchase.push({ material_id: n.material_id, quantity: n.quantity_needed })
-      })
+      // Reintento seguro: si los envios ya se crearon (fallo posterior), no se vuelven a crear.
       // Los envios quedan `pending`: se despachan en la seccion 3, despues de crear la baja.
-      const { centralShipmentId, donorShipmentIds } = await executeSupply(chosen, panelist.id)
-      if (centralShipmentId) await linkShipmentToIncident(incidentId, centralShipmentId)
+      let ids = created
+      if (!ids) {
+        ids = await executeSupply(effective, panelist.id)
+        setCreated(ids)
+      }
+      if (ids.centralShipmentId) await linkShipmentToIncident(incidentId, ids.centralShipmentId)
       const { error: e } = await supabase.from('panelist_incident').update({
         payload: {
           ...(payload ?? {}), expected_date: expectedDate, days_without_stock: dws?.businessDays ?? 0,
-          central_shipment_id: centralShipmentId, donor_shipment_ids: donorShipmentIds,
+          central_shipment_id: ids.centralShipmentId, donor_shipment_ids: ids.donorShipmentIds,
           supply_executed_at: new Date().toISOString()
         }
       }).eq('id', incidentId)
       if (e) throw e
-      onExecuted({ expectedDate, centralShipmentId, donorShipmentIds })
+      onExecuted({ expectedDate, centralShipmentId: ids.centralShipmentId, donorShipmentIds: ids.donorShipmentIds })
       await onChanged()
     } catch (e: any) { setError(e.message) }
     finally { setBusy(false) }
   }
 
-  const ids = executed ? [executed.centralShipmentId, ...executed.donorShipmentIds].filter(Boolean) as string[] : []
-  const donors = Array.from(new Map((plan?.fromDonor ?? []).map(d => [d.donor_panelist_id, d.donor_name])).entries())
+  const shipIds = executed ? [executed.centralShipmentId, ...executed.donorShipmentIds].filter(Boolean) as string[] : []
+  const splitText = (id: string) => {
+    if (!plan) return ''
+    const parts = [
+      ...plan.fromCentral.filter(x => x.material_id === id).map(x => `${t(m('source_central'))} ${x.quantity}`),
+      ...plan.fromDonor.filter(x => x.material_id === id).map(x => `${t(m('source_donor'), { name: x.donor_name || x.donor_panelist_id })} ${x.quantity}`),
+      ...plan.toPurchase.filter(x => x.material_id === id).map(x => `${t(m('source_purchase'))} ${x.quantity}`)
+    ]
+    return parts.join(' · ')
+  }
   return (
     <Section title={t(m('s2_title'))}>
       {error && <p className="text-sm text-red-600">{error}</p>}
-      {!needs && !error && <p className="text-sm text-gray-500">{t('common.loading')}</p>}
-      {needs && (
+      {done && <p className="text-sm text-gray-600 mb-2">{t(m('supply_done'), { date: format(new Date(done), DATE_FMT) })}</p>}
+      {!done && !needs && !error && <p className="text-sm text-gray-500">{t('common.loading')}</p>}
+      {!done && needs && (
         <table className="w-full text-sm">
-          <thead><tr className="text-left text-gray-500"><th /><th /><th className="font-medium">{t(m('source'))}</th></tr></thead>
+          <thead>
+            <tr className="text-left text-gray-500">
+              <th /><th /><th className="font-medium">{t(m('source'))}</th><th className="font-medium">{t(m('change_source'))}</th>
+            </tr>
+          </thead>
           <tbody>
             {needs.map(n => (
               <tr key={n.material_id} className="border-t">
                 <td className="py-1">{n.material_name} {n.is_blocking && <BlockingBadge t={t} />}</td>
                 <td className="py-1">{n.quantity_needed} {n.unit_measure}</td>
+                <td className="py-1">{splitText(n.material_id)}</td>
                 <td className="py-1">
-                  <select className="border rounded p-1 text-sm" disabled={!!done} value={sources[n.material_id] ?? 'purchase'}
-                    onChange={e => setSources(p => ({ ...p, [n.material_id]: e.target.value }))}>
+                  <select className="border rounded p-1 text-sm" value={override[n.material_id] ?? 'plan'}
+                    onChange={e => setOverride(p => ({ ...p, [n.material_id]: e.target.value as Override }))}>
+                    <option value="plan">{t(m('source_plan'))}</option>
                     <option value="central">{t(m('source_central'))}</option>
-                    {donors.map(([id, name]) => (
-                      <option key={id} value={`donor:${id}`}>{t(m('source_donor'), { name })}</option>
-                    ))}
                     <option value="purchase">{t(m('source_purchase'))}</option>
                   </select>
                 </td>
@@ -276,14 +310,11 @@ function SupplySection({ incidentId, panelist, payload, executed, onExecuted, on
         </div>
       )}
       <div className="mt-3">
-        <button disabled={busy || !!done || !needs || !expectedDate} className={BTN_PRIMARY} onClick={confirmSupply}>
+        <button disabled={busy || !!done || !effective || !expectedDate} className={BTN_PRIMARY} onClick={confirmSupply}>
           {t(m('confirm_supply'))}
         </button>
-        {done && (
-          <p className="text-sm text-gray-600 mt-2">
-            {t(m('supply_done'), { date: format(new Date(done), DATE_FMT) })}
-            {ids.length > 0 && <span className="font-mono"> ({ids.map(i => i.slice(0, 8)).join(', ')})</span>}
-          </p>
+        {done && shipIds.length > 0 && (
+          <p className="text-sm text-gray-600 mt-2 font-mono">{shipIds.map(i => i.slice(0, 8)).join(', ')}</p>
         )}
       </div>
     </Section>
@@ -291,8 +322,9 @@ function SupplySection({ incidentId, panelist, payload, executed, onExecuted, on
 }
 
 // ---------- Seccion 3: replanificar ----------
-function ReplanSection({ incidentId, linkedUnavailabilityId, executed, onChanged, t }: {
+function ReplanSection({ incidentId, payload, linkedUnavailabilityId, executed, onChanged, t }: {
   incidentId: string
+  payload: Record<string, any> | null
   linkedUnavailabilityId: string | null
   executed: Executed | null
   onChanged: () => Promise<void>
@@ -302,18 +334,37 @@ function ReplanSection({ incidentId, linkedUnavailabilityId, executed, onChanged
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [createdId, setCreatedId] = useState<string | null>(null)
+  const [sentLocal, setSentLocal] = useState<string[]>([])
   const unavailabilityId = linkedUnavailabilityId ?? createdId
+
+  const allIds = executed ? [executed.centralShipmentId, ...executed.donorShipmentIds].filter(Boolean) as string[] : []
+  const sent = new Set<string>([...(Array.isArray(payload?.sent_shipment_ids) ? payload.sent_shipment_ids : []), ...sentLocal])
+  const pending = allIds.filter(id => !sent.has(id))
 
   const createBaja = async () => {
     if (!executed?.expectedDate) return
     setBusy(true); setError(null)
     try {
-      // Orden: la baja y el enlace del envio deben existir ANTES de enviar,
-      // si no receive_material_shipment no puede cerrar la baja automaticamente.
-      const id = await createDisplacementBaja(incidentId, executed.expectedDate)
-      setCreatedId(id)
-      if (executed.centralShipmentId) await markShipmentSent(executed.centralShipmentId)
-      for (const sid of executed.donorShipmentIds) await markShipmentSent(sid)
+      setCreatedId(await createDisplacementBaja(incidentId, executed.expectedDate))
+      await onChanged()
+    } catch (e: any) { setError(e.message) }
+    finally { setBusy(false) }
+  }
+
+  // Solo tras crear la baja (receive_material_shipment necesita el enlace para cerrarla).
+  // Cada envio se registra como enviado al instante: un fallo deja el resto reintentable.
+  const sendPending = async () => {
+    setBusy(true); setError(null)
+    try {
+      const sentIds = [...sent]
+      for (const id of pending) {
+        await markShipmentSent(id)
+        sentIds.push(id)
+        setSentLocal(prev => [...prev, id])
+        const { error: e } = await supabase.from('panelist_incident')
+          .update({ payload: { ...(payload ?? {}), sent_shipment_ids: sentIds } }).eq('id', incidentId)
+        if (e) throw e
+      }
       await onChanged()
     } catch (e: any) { setError(e.message) }
     finally { setBusy(false) }
@@ -322,9 +373,14 @@ function ReplanSection({ incidentId, linkedUnavailabilityId, executed, onChanged
   return (
     <Section title={t(m('s3_title'))}>
       {error && <p className="text-sm text-red-600">{error}</p>}
-      <button disabled={busy || !executed || !!unavailabilityId} className={BTN_PRIMARY} onClick={createBaja}>
-        {t(m('create_baja_replan'))}
-      </button>
+      <div className="flex gap-2">
+        <button disabled={busy || !executed || !!unavailabilityId} className={BTN_PRIMARY} onClick={createBaja}>
+          {t(m('create_baja_replan'))}
+        </button>
+        {unavailabilityId && pending.length > 0 && (
+          <button disabled={busy} className={BTN_PRIMARY} onClick={sendPending}>{t(m('send_shipments'))}</button>
+        )}
+      </div>
       <p className="text-sm text-gray-500 mt-2">{t(m('close_hint'))}</p>
       {unavailabilityId && (
         <Link to={`/incidents/panelist-availability?unavailability=${unavailabilityId}`} className="text-blue-600 hover:text-blue-800 text-sm">
@@ -344,6 +400,7 @@ export function MissingMaterialsSections({ incidentId, panelist, payload, linked
   t: TFn
 }) {
   const [local, setLocal] = useState<Executed | null>(null)
+  const [stockVersion, setStockVersion] = useState(0)
   if (!panelist) return null
   const reported: { name: string; quantity: number }[] = Array.isArray(payload?.materials) ? payload.materials : []
   const executed: Executed | null = payload?.supply_executed_at
@@ -355,10 +412,11 @@ export function MissingMaterialsSections({ incidentId, panelist, payload, linked
     : local
   return (
     <div className="space-y-5">
-      <StockSection panelist={panelist} reported={reported} onChanged={onChanged} t={t} />
-      <SupplySection incidentId={incidentId} panelist={panelist} payload={payload} executed={executed}
+      <StockSection panelist={panelist} reported={reported} onChanged={onChanged}
+        onStockChanged={() => setStockVersion(v => v + 1)} t={t} />
+      <SupplySection incidentId={incidentId} panelist={panelist} payload={payload} executed={executed} stockVersion={stockVersion}
         onExecuted={setLocal} onChanged={onChanged} t={t} />
-      <ReplanSection incidentId={incidentId} linkedUnavailabilityId={linkedUnavailabilityId} executed={executed}
+      <ReplanSection incidentId={incidentId} payload={payload} linkedUnavailabilityId={linkedUnavailabilityId} executed={executed}
         onChanged={onChanged} t={t} />
     </div>
   )

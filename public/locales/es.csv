@@ -2881,6 +2881,9 @@ reported_incidents.materials.supply_done,Suministro confirmado el {date}
 reported_incidents.materials.create_baja_replan,Crear baja por materiales y replanificar
 reported_incidents.materials.go_to_unavailability,Ir a la incidencia de baja
 reported_incidents.materials.no_stock_rows,Sin registros de stock
+reported_incidents.materials.source_plan,Mantener reparto planificado
+reported_incidents.materials.change_source,Cambiar origen
+reported_incidents.materials.send_shipments,Enviar envíos pendientes
 reported_incidents.action.new_date,Nueva fecha
 reported_incidents.action.reschedule,Reprogramar
 reported_incidents.action.cancel_shipment,Cancelar envío

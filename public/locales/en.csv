@@ -2881,6 +2881,9 @@ reported_incidents.materials.supply_done,Supply confirmed on {date}
 reported_incidents.materials.create_baja_replan,Create leave for missing materials and re-plan
 reported_incidents.materials.go_to_unavailability,Open the unavailability incident
 reported_incidents.materials.no_stock_rows,No stock records
+reported_incidents.materials.source_plan,Planned split
+reported_incidents.materials.change_source,Change source
+reported_incidents.materials.send_shipments,Send pending shipments
 reported_incidents.action.new_date,New date
 reported_incidents.action.reschedule,Reschedule
 reported_incidents.action.cancel_shipment,Cancel shipment
