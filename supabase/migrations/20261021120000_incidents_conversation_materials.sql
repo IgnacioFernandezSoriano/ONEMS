@@ -440,3 +440,118 @@ $$;
 REVOKE ALL ON FUNCTION public.receive_material_shipment_items(uuid,jsonb) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.receive_material_shipment_items(uuid,jsonb) TO authenticated, service_role;
 GRANT EXECUTE ON FUNCTION public.receive_material_shipment(uuid) TO authenticated, service_role;
+
+-- ============================================================================
+-- 4. Envios parados por falta de material (material_hold)
+-- ============================================================================
+CREATE TABLE public.material_hold (
+  allocation_plan_detail_id uuid PRIMARY KEY REFERENCES public.allocation_plan_details(id) ON DELETE CASCADE,
+  account_id  uuid NOT NULL,
+  panelist_id uuid NOT NULL,
+  held_since  timestamptz NOT NULL DEFAULT now(),
+  released_at timestamptz
+);
+CREATE INDEX material_hold_panelist_idx ON public.material_hold (panelist_id) WHERE released_at IS NULL;
+
+ALTER TABLE public.material_hold ENABLE ROW LEVEL SECURITY;
+CREATE POLICY material_hold_select ON public.material_hold
+  FOR SELECT TO authenticated
+  USING (account_id = current_user_account_id() OR is_superadmin());
+REVOKE ALL ON public.material_hold FROM PUBLIC, anon, authenticated;
+GRANT SELECT ON public.material_hold TO authenticated;
+GRANT ALL ON public.material_hold TO service_role;
+
+-- Recalcula que envios del panelista (como emisor) quedan retenidos por falta de stock.
+-- Sin incidencia missing_materials abierta, libera todo. Devuelve los ids recien liberados
+-- que siguen en el conjunto actual de envios del panelista.
+CREATE OR REPLACE FUNCTION public.refresh_material_hold(p_panelist_id uuid)
+RETURNS uuid[] LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE
+  v_acc      uuid;
+  v_node     uuid;
+  v_open     boolean;
+  v_set      uuid[];
+  v_stock    jsonb;
+  v_det      record;
+  v_req      record;
+  v_held     boolean;
+  v_rem      numeric;
+  v_released uuid[] := '{}';
+  v_id       uuid;
+BEGIN
+  SELECT account_id, node_id INTO v_acc, v_node FROM panelists WHERE id = p_panelist_id;
+  IF NOT FOUND THEN RAISE EXCEPTION 'panelist not found'; END IF;
+
+  SELECT coalesce(array_agg(d.id), '{}') INTO v_set
+    FROM allocation_plan_details d
+   WHERE d.origin_node_id = v_node AND d.account_id = v_acc
+     AND d.status IN ('pending','notified') AND d.fecha_programada >= current_date;
+
+  -- Retenciones de envios que ya no estan en el conjunto (movidos, cancelados, pasados): se cierran sin devolverse.
+  UPDATE material_hold SET released_at = now()
+   WHERE panelist_id = p_panelist_id AND released_at IS NULL AND NOT (allocation_plan_detail_id = ANY (v_set));
+
+  SELECT EXISTS (SELECT 1 FROM panelist_incident
+                  WHERE panelist_id = p_panelist_id AND category = 'missing_materials'
+                    AND status IN ('open','in_progress'))
+    INTO v_open;
+
+  IF NOT v_open THEN
+    WITH r AS (
+      UPDATE material_hold SET released_at = now()
+       WHERE panelist_id = p_panelist_id AND released_at IS NULL
+       RETURNING allocation_plan_detail_id)
+    SELECT coalesce(array_agg(allocation_plan_detail_id), '{}') INTO v_released FROM r;
+    RETURN v_released;
+  END IF;
+
+  SELECT coalesce(jsonb_object_agg(material_id::text, quantity), '{}'::jsonb) INTO v_stock
+    FROM panelist_material_stocks WHERE panelist_id = p_panelist_id AND account_id = v_acc;
+
+  FOR v_det IN
+    SELECT d.id, p.product_id
+      FROM allocation_plan_details d
+      JOIN allocation_plans p ON p.id = d.plan_id
+     WHERE d.id = ANY (v_set)
+     ORDER BY d.fecha_programada, d.id
+  LOOP
+    v_held := false;
+    FOR v_req IN SELECT material_id, quantity FROM product_materials WHERE product_id = v_det.product_id LOOP
+      IF coalesce((v_stock->>v_req.material_id::text)::numeric, 0) < v_req.quantity THEN
+        v_held := true; EXIT;
+      END IF;
+    END LOOP;
+
+    IF v_held THEN
+      INSERT INTO material_hold (allocation_plan_detail_id, account_id, panelist_id)
+      VALUES (v_det.id, v_acc, p_panelist_id)
+      ON CONFLICT (allocation_plan_detail_id) DO UPDATE
+        SET held_since  = CASE WHEN material_hold.released_at IS NULL THEN material_hold.held_since ELSE now() END,
+            released_at = NULL,
+            panelist_id = excluded.panelist_id;
+    ELSE
+      FOR v_req IN SELECT material_id, quantity FROM product_materials WHERE product_id = v_det.product_id LOOP
+        v_rem := coalesce((v_stock->>v_req.material_id::text)::numeric, 0) - v_req.quantity;
+        v_stock := jsonb_set(v_stock, ARRAY[v_req.material_id::text], to_jsonb(v_rem), true);
+      END LOOP;
+      v_id := NULL;
+      UPDATE material_hold SET released_at = now()
+       WHERE allocation_plan_detail_id = v_det.id AND released_at IS NULL
+       RETURNING allocation_plan_detail_id INTO v_id;
+      IF v_id IS NOT NULL THEN v_released := v_released || v_id; END IF;
+    END IF;
+  END LOOP;
+
+  RETURN v_released;
+END; $$;
+
+CREATE OR REPLACE FUNCTION public.panelist_held_detail_ids(p_panelist_id uuid)
+RETURNS SETOF uuid LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
+  SELECT allocation_plan_detail_id FROM material_hold
+   WHERE panelist_id = p_panelist_id AND released_at IS NULL;
+$$;
+
+REVOKE ALL ON FUNCTION public.refresh_material_hold(uuid) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.refresh_material_hold(uuid) TO service_role;
+REVOKE ALL ON FUNCTION public.panelist_held_detail_ids(uuid) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.panelist_held_detail_ids(uuid) TO service_role;

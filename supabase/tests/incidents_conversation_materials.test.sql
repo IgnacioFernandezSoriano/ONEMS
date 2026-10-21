@@ -431,3 +431,122 @@ BEGIN
      OR NOT has_function_privilege('service_role', f, 'EXECUTE') THEN RAISE EXCEPTION 'FAIL privilegios hold'; END IF;
 END $$;
 ROLLBACK;
+
+-- ===== Escenario 4: envios retenidos por falta de material =====
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+CREATE TEMP TABLE t_ids (k text PRIMARY KEY, v uuid);
+WITH x AS (INSERT INTO public.material_catalog (account_id, code, name)
+  VALUES ('a0000000-0000-0000-0000-000000000001','M1','Etiquetas') RETURNING id)
+INSERT INTO t_ids SELECT 'm1', id FROM x;
+INSERT INTO public.products (id, account_id, carrier_id, code, description, standard_delivery_hours) VALUES
+  ('cb000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000001','ca000000-0000-0000-0000-000000000001','PR2','Prod2',48);
+INSERT INTO public.product_materials (account_id, product_id, material_id, quantity)
+VALUES ('a0000000-0000-0000-0000-000000000001','cb000000-0000-0000-0000-000000000002',(SELECT v FROM t_ids WHERE k='m1'),10);
+INSERT INTO public.allocation_plans (id, account_id, plan_name, carrier_id, product_id, total_samples, start_date, end_date) VALUES
+  ('cc000000-0000-0000-0000-000000000003','a0000000-0000-0000-0000-000000000001','Mat','ca000000-0000-0000-0000-000000000001','cb000000-0000-0000-0000-000000000002',10,'2027-03-01','2027-03-31');
+-- 3 envios de P1 (nodo N1) en +1, +2, +3 dias
+WITH x AS (
+  INSERT INTO public.allocation_plan_details (account_id, plan_id, origin_node_id, destination_node_id, fecha_programada, week_number, month, year, status)
+  SELECT 'a0000000-0000-0000-0000-000000000001','cc000000-0000-0000-0000-000000000003',
+         'b1000000-0000-0000-0000-000000000001','b4000000-0000-0000-0000-000000000004', current_date + n, 1, 1, 2027, 'pending'
+    FROM generate_series(1,3) n RETURNING id, fecha_programada)
+INSERT INTO t_ids SELECT 'd' || (fecha_programada - current_date), id FROM x;
+INSERT INTO public.panelist_incident (id, account_id, panelist_id, category, status)
+VALUES ('f0000000-0000-0000-0000-0000000000c1','a0000000-0000-0000-0000-000000000001','e1000000-0000-0000-0000-000000000001','missing_materials','open');
+CREATE FUNCTION pg_temp.set_stock(q numeric) RETURNS void LANGUAGE sql AS $$
+  INSERT INTO public.panelist_material_stocks (account_id, panelist_id, material_id, quantity)
+  VALUES ('a0000000-0000-0000-0000-000000000001','e1000000-0000-0000-0000-000000000001',(SELECT v FROM t_ids WHERE k='m1'), q)
+  ON CONFLICT (account_id, panelist_id, material_id) DO UPDATE SET quantity = excluded.quantity;
+$$;
+CREATE FUNCTION pg_temp.held() RETURNS uuid[] LANGUAGE sql AS $$
+  SELECT coalesce(array_agg(x ORDER BY x), '{}') FROM public.panelist_held_detail_ids('e1000000-0000-0000-0000-000000000001') x;
+$$;
+
+-- stock 15: el primero (dia +1) libre; segundo y tercero retenidos
+DO $$
+DECLARE d1 uuid := (SELECT v FROM t_ids WHERE k='d1'); d2 uuid := (SELECT v FROM t_ids WHERE k='d2'); d3 uuid := (SELECT v FROM t_ids WHERE k='d3'); r uuid[];
+BEGIN
+  PERFORM pg_temp.set_stock(15);
+  r := public.refresh_material_hold('e1000000-0000-0000-0000-000000000001');
+  IF r <> '{}' THEN RAISE EXCEPTION 'FAIL nada que liberar aun: %', r; END IF;
+  IF pg_temp.held() <> (SELECT array_agg(x ORDER BY x) FROM unnest(ARRAY[d2,d3]) x) THEN RAISE EXCEPTION 'FAIL retenidos stock 15: %', pg_temp.held(); END IF;
+  -- idempotente
+  r := public.refresh_material_hold('e1000000-0000-0000-0000-000000000001');
+  IF r <> '{}' OR (SELECT count(*) FROM public.material_hold WHERE released_at IS NULL) <> 2 THEN RAISE EXCEPTION 'FAIL idempotencia'; END IF;
+  -- stock 20: se libera el segundo (por fecha), el tercero sigue retenido
+  PERFORM pg_temp.set_stock(20);
+  r := public.refresh_material_hold('e1000000-0000-0000-0000-000000000001');
+  IF r <> ARRAY[d2] THEN RAISE EXCEPTION 'FAIL liberado stock 20: %', r; END IF;
+  IF pg_temp.held() <> ARRAY[d3] THEN RAISE EXCEPTION 'FAIL retenido stock 20: %', pg_temp.held(); END IF;
+  IF (SELECT released_at FROM public.material_hold WHERE allocation_plan_detail_id = d2) IS NULL THEN RAISE EXCEPTION 'FAIL released_at d2'; END IF;
+  -- incidencia resuelta: libera el resto
+  UPDATE public.panelist_incident SET status = 'resolved' WHERE id = 'f0000000-0000-0000-0000-0000000000c1';
+  r := public.refresh_material_hold('e1000000-0000-0000-0000-000000000001');
+  IF r <> ARRAY[d3] OR pg_temp.held() <> '{}' THEN RAISE EXCEPTION 'FAIL sin incidencia abierta: %', r; END IF;
+  -- sin incidencia abierta y sin stock: nada retenido
+  PERFORM pg_temp.set_stock(0);
+  r := public.refresh_material_hold('e1000000-0000-0000-0000-000000000001');
+  IF r <> '{}' OR pg_temp.held() <> '{}' THEN RAISE EXCEPTION 'FAIL retiene sin incidencia'; END IF;
+  -- reabierta y sin stock: todo retenido; un envio cancelado se cierra sin devolverse
+  UPDATE public.panelist_incident SET status = 'in_progress' WHERE id = 'f0000000-0000-0000-0000-0000000000c1';
+  r := public.refresh_material_hold('e1000000-0000-0000-0000-000000000001');
+  IF r <> '{}' OR cardinality(pg_temp.held()) <> 3 THEN RAISE EXCEPTION 'FAIL todo retenido'; END IF;
+  UPDATE public.allocation_plan_details SET status = 'cancelled' WHERE id = d3;
+  r := public.refresh_material_hold('e1000000-0000-0000-0000-000000000001');
+  IF r <> '{}' OR cardinality(pg_temp.held()) <> 2
+     OR (SELECT released_at FROM public.material_hold WHERE allocation_plan_detail_id = d3) IS NULL THEN
+    RAISE EXCEPTION 'FAIL cancelado: % %', r, pg_temp.held(); END IF;
+  UPDATE public.allocation_plan_details SET status = 'pending' WHERE id = d3;
+  r := public.refresh_material_hold('e1000000-0000-0000-0000-000000000001');
+  IF cardinality(pg_temp.held()) <> 3 THEN RAISE EXCEPTION 'FAIL re-retenido'; END IF;
+  -- stock suficiente para todo: nada retenido y se libera
+  PERFORM pg_temp.set_stock(100);
+  r := public.refresh_material_hold('e1000000-0000-0000-0000-000000000001');
+  IF r <> ARRAY[d1,d2,d3] OR pg_temp.held() <> '{}' THEN RAISE EXCEPTION 'FAIL stock suficiente: %', r; END IF;
+  -- producto sin materiales: libre
+  PERFORM pg_temp.set_stock(0);
+  DELETE FROM public.product_materials WHERE product_id = 'cb000000-0000-0000-0000-000000000002';
+  r := public.refresh_material_hold('e1000000-0000-0000-0000-000000000001');
+  IF pg_temp.held() <> '{}' THEN RAISE EXCEPTION 'FAIL producto sin materiales retenido'; END IF;
+  INSERT INTO public.product_materials (account_id, product_id, material_id, quantity)
+  VALUES ('a0000000-0000-0000-0000-000000000001','cb000000-0000-0000-0000-000000000002',(SELECT v FROM t_ids WHERE k='m1'),10);
+END $$;
+
+SELECT pg_temp.expect_err($$SELECT public.refresh_material_hold('00000000-0000-0000-0000-000000000000')$$, 'panelist not found');
+
+-- integracion con la recepcion: el stock recibido libera los envios (en orden de fecha)
+DO $$
+DECLARE d1 uuid := (SELECT v FROM t_ids WHERE k='d1'); d2 uuid := (SELECT v FROM t_ids WHERE k='d2'); m1 uuid := (SELECT v FROM t_ids WHERE k='m1');
+        s uuid; r jsonb;
+BEGIN
+  PERFORM public.refresh_material_hold('e1000000-0000-0000-0000-000000000001');
+  IF cardinality(pg_temp.held()) <> 3 THEN RAISE EXCEPTION 'FAIL previo integracion'; END IF;
+  INSERT INTO public.material_shipments (account_id, panelist_id, status)
+  VALUES ('a0000000-0000-0000-0000-000000000001','e1000000-0000-0000-0000-000000000001','sent') RETURNING id INTO s;
+  INSERT INTO public.material_shipment_items (account_id, material_shipment_id, material_id, quantity_sent)
+  VALUES ('a0000000-0000-0000-0000-000000000001', s, m1, 20);
+  PERFORM set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+  r := public.receive_material_shipment_items(s, format('[{"material_id":"%s","quantity":20}]', m1)::jsonb);
+  PERFORM set_config('request.jwt.claim.sub','', true);
+  IF r->'released_detail_ids' <> to_jsonb(ARRAY[d1,d2]) THEN RAISE EXCEPTION 'FAIL released_detail_ids: %', r; END IF;
+  IF cardinality(pg_temp.held()) <> 1 THEN RAISE EXCEPTION 'FAIL retenidos tras recepcion'; END IF;
+END $$;
+
+-- privilegios
+DO $$
+DECLARE f text;
+BEGIN
+  FOREACH f IN ARRAY ARRAY['public.refresh_material_hold(uuid)','public.panelist_held_detail_ids(uuid)'] LOOP
+    IF has_function_privilege('anon', f, 'EXECUTE') OR has_function_privilege('authenticated', f, 'EXECUTE') THEN
+      RAISE EXCEPTION 'FAIL anon/authenticated con EXECUTE en %', f; END IF;
+    IF NOT has_function_privilege('service_role', f, 'EXECUTE') THEN RAISE EXCEPTION 'FAIL service_role sin EXECUTE en %', f; END IF;
+  END LOOP;
+  IF has_table_privilege('anon', 'public.material_hold', 'SELECT') THEN RAISE EXCEPTION 'FAIL anon SELECT hold'; END IF;
+  IF NOT has_table_privilege('authenticated', 'public.material_hold', 'SELECT') THEN RAISE EXCEPTION 'FAIL authenticated sin SELECT hold'; END IF;
+  IF has_table_privilege('authenticated', 'public.material_hold', 'INSERT') OR has_table_privilege('authenticated', 'public.material_hold', 'UPDATE')
+     OR has_table_privilege('authenticated', 'public.material_hold', 'DELETE') THEN RAISE EXCEPTION 'FAIL authenticated escribe hold'; END IF;
+  IF NOT (SELECT relrowsecurity FROM pg_class WHERE oid = 'public.material_hold'::regclass) THEN RAISE EXCEPTION 'FAIL hold sin RLS'; END IF;
+END $$;
+ROLLBACK;
