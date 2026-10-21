@@ -59,3 +59,11 @@
 ### Task 6: Promoción a PROD
 
 - [ ] Confirmación explícita del usuario; replicar en PROD (`IkVtek2csP5AbWxB`, "Material receipt", "On new parcel to send", "Parcels to send", nuevo "Material questions", "Deliver incident messages"; desactivar "Deliver incident replies"); prueba de humo en DEMO2; exportar JSON al repo; contrato `docs/integrations/` actualizado; memoria.
+
+### Task 1b: Conversación de ida y vuelta (spec conversación §7)
+
+**Requiere** la migración pequeña de la Tarea 0 del plan 5b (`read_at`, RPCs de lectura/no leídos/aviso).
+- [ ] "Deliver incident messages": añade a cada mensaje del manager la cabecera de la incidencia y los botones `conv_reply:<id>` / `conv_close:<id>`; al enviar, renueva `pending_incident_reply` y marca `meta.ack_pending=true` en el contexto si es apertura nueva.
+- [ ] DEV main: `conv_reply:*` → recordatorio "Escribe tu respuesta"; `conv_close:*` → borra el contexto → menú; texto o FOTO con contexto abierto → `log_incident_message(... 'inbound','panelist', texto, {photo_path})` (foto subida al bucket `incident-photos` como hace hoy el alta de incidencias) → acuse solo si el contexto tiene `ack_pending` (y se apaga); cada mensaje renueva el plazo de 48 h.
+- [ ] Cierre automático al resolver/descartar: lo hace la BD (Tarea 0 del plan 5b) borrando el contexto.
+- [ ] Workflow nuevo INACTIVO "Notify unread incident replies" (cada 15 min): `SELECT * FROM due_unread_reply_notifications()` → email al manager por "Send Email via Resend" → `mark_unread_reply_notified(...)`.

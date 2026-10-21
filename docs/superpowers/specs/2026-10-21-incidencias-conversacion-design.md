@@ -51,3 +51,12 @@ Bloque **"Conversación"** en el detalle de ambas incidencias (reportadas y baja
 
 - Traducir automáticamente los mensajes del manager al idioma del panelista.
 - Registro retroactivo de conversaciones anteriores a esta versión (no se guardaron).
+
+## 7. Conversación de ida y vuelta por Telegram (acordado 2026-10-21)
+
+1. **Botones en cada mensaje del manager:** "Responder" (`conv_reply:<message_id>`) y "Volver al menú" (`conv_close:<message_id>`). El texto del mensaje incluye a qué incidencia se refiere (categoría + fecha, 4 idiomas).
+2. **Conversación abierta** = existe `panelist_context` `pending_incident_reply {incident_kind, incident_id}` creado al entregar el último mensaje del manager. Mientras esté abierta, el texto y las **fotos** del panelista se guardan en esa conversación (`inbound`; foto subida al bucket `incident-photos`, ruta en `meta.photo_path`). Varias incidencias: manda la del último mensaje del manager.
+3. **Se cierra** cuando: el panelista pulsa "Volver al menú"; el manager resuelve/descarta la incidencia; o pasan **48 h sin mensajes** (cada mensaje renueva el plazo). Al cerrarse, todo vuelve al enrutado normal.
+4. **Acuse de recibo una sola vez** por apertura ("Tu mensaje llega a tu responsable; escribe todo lo que necesites. Pulsa «Volver al menú» para salir."), no en cada mensaje.
+5. **Aviso al manager:** columna `incident_message.read_at` (lectura por el manager); la bandeja de cada tipo de incidencia marca "respuesta nueva" y el menú muestra el número de conversaciones con mensajes del panelista sin leer; abrir la incidencia marca como leídos. **Email** al manager de la cuenta cuando un mensaje del panelista lleva **más de 1 hora sin leer** (uno por incidencia y tanda; decisión mía, el usuario aprobó la propuesta).
+6. Las fotos se ven en la conversación (URL firmada del bucket, como en el detalle actual).
