@@ -40,6 +40,7 @@ export function PanelistReportedIncidents() {
           <option value="open_active">{t('reported_incidents.filter.open_active')}</option>
           <option value="resolved">{t('reported_incidents.status.resolved')}</option>
           <option value="dismissed">{t('reported_incidents.status.dismissed')}</option>
+          <option value="auto_resolved">{t('reported_incidents.status.auto_resolved')}</option>
         </select>
       </div>
       <div className="bg-white rounded-lg shadow overflow-hidden">

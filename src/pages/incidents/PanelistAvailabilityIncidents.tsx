@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from '@/hooks/useTranslation'
 import { format, parseISO, isValid } from 'date-fns'
 import { useUnavailabilityIncidents } from '@/lib/hooks/useUnavailabilityIncidents'
@@ -18,6 +19,17 @@ export function PanelistAvailabilityIncidents() {
   const { t } = useTranslation()
   const { inbox, loading, error, fetchInbox, statusFilter, setStatusFilter } = useUnavailabilityIncidents()
   const [selected, setSelected] = useState<string | null>(null)
+  const [params, setParams] = useSearchParams()
+
+  // Abre una baja concreta si llega por URL (?unavailability=<id>) y esta en la bandeja
+  useEffect(() => {
+    if (loading) return
+    const id = params.get('unavailability')
+    if (id && inbox.some((r) => r.unavailability_id === id)) {
+      setSelected(id)
+      setParams({}, { replace: true })
+    }
+  }, [loading, inbox, params, setParams])
 
   if (loading) return <div className="p-6">{t('common.loading')}</div>
   if (error) return <div className="p-6 text-red-600">{t('common.error')}: {error}</div>
