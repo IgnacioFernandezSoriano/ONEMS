@@ -2855,21 +2855,32 @@ reported_incidents.category.other,Otro
 reported_incidents.action.mark_received,Marcar como recibido
 reported_incidents.action.invalidate,Invalidar
 reported_incidents.action.support_only,No hay acción disponible; solo soporte.
-reported_incidents.materials.step1_title,Reconciliar stock
 reported_incidents.materials.real_qty,Cantidad real
-reported_incidents.materials.step2_title,Recalcular necesidad
 reported_incidents.materials.blocking_badge,Bloqueante
-reported_incidents.materials.step3_title,Suministro
 reported_incidents.materials.from_central,Desde stock central
 reported_incidents.materials.from_donor,Desde donante {name}
 reported_incidents.materials.to_purchase,Requiere compra (manual/PDF)
-reported_incidents.materials.execute_supply,Ejecutar suministro
-reported_incidents.materials.step4_title,Ventana de desplazamiento
-reported_incidents.materials.create_baja,Crear baja y desplazar muestras
-reported_incidents.materials.step5_title,Cierre al recibir
-reported_incidents.materials.go_to_availability,Resolver muestras en disponibilidad de panelistas
 reported_incidents.materials.close_hint,La baja se cierra automáticamente cuando el panelista confirma la recepción.
 reported_incidents.materials.unmatched,Material no encontrado en el catálogo
+reported_incidents.materials.s1_title,Stock teórico
+reported_incidents.materials.s2_title,Necesidad y suministro
+reported_incidents.materials.s3_title,Replanificar
+reported_incidents.materials.zero_stock,Poner stock a cero
+reported_incidents.materials.zero_confirm,¿Poner a cero todo el stock de materiales de este panelista?
+reported_incidents.materials.zero_done,{n} materiales puestos a cero
+reported_incidents.materials.source,Origen
+reported_incidents.materials.source_central,Stock central
+reported_incidents.materials.source_donor,Excedente de {name}
+reported_incidents.materials.source_purchase,Compra
+reported_incidents.materials.expected_date,Fecha prevista de llegada
+reported_incidents.materials.days_without_stock,{n} días laborables sin stock
+reported_incidents.materials.affected_samples,Muestras afectadas
+reported_incidents.materials.no_affected_samples,Ninguna muestra afectada
+reported_incidents.materials.confirm_supply,Confirmar suministro
+reported_incidents.materials.supply_done,Suministro confirmado el {date}
+reported_incidents.materials.create_baja_replan,Crear baja por materiales y replanificar
+reported_incidents.materials.go_to_unavailability,Ir a la incidencia de baja
+reported_incidents.materials.no_stock_rows,Sin registros de stock
 reported_incidents.action.new_date,Nueva fecha
 reported_incidents.action.reschedule,Reprogramar
 reported_incidents.action.cancel_shipment,Cancelar envío

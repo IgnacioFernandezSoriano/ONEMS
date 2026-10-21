@@ -1,4 +1,5 @@
 import { useCallback } from 'react'
+import { eachDayOfInterval, isWeekend } from 'date-fns'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId'
@@ -18,6 +19,21 @@ export interface SupplyPlan {
   fromCentral: { material_id: string; quantity: number }[]
   fromDonor: { material_id: string; quantity: number; donor_panelist_id: string; donor_name: string }[]
   toPurchase: { material_id: string; quantity: number }[]
+}
+
+export interface PanelistStockRow {
+  material_id: string
+  name: string
+  code: string
+  quantity: number
+  is_blocking: boolean
+}
+
+export interface AffectedSample {
+  id: string
+  fecha_programada: string
+  destination_auto_id: string
+  product: string
 }
 
 export function useMaterialsTreatment() {
@@ -199,8 +215,80 @@ export function useMaterialsTreatment() {
     if (error) throw error
   }, [])
 
+  const fetchPanelistStock = useCallback(async (panelistId: string): Promise<PanelistStockRow[]> => {
+    if (!accountId) return []
+    const { data, error } = await supabase
+      .from('panelist_material_stocks')
+      .select('material_id, quantity, material:material_catalog(name, code, is_blocking)')
+      .eq('account_id', accountId)
+      .eq('panelist_id', panelistId)
+    if (error) throw error
+    return ((data || []) as any[]).map(r => ({
+      material_id: r.material_id,
+      name: r.material?.name ?? '',
+      code: r.material?.code ?? '',
+      quantity: Number(r.quantity) || 0,
+      is_blocking: !!r.material?.is_blocking
+    }))
+  }, [accountId])
+
+  const zeroAllStock = useCallback(async (panelistId: string): Promise<number> => {
+    const rows = await fetchPanelistStock(panelistId)
+    let zeroed = 0
+    for (const r of rows) {
+      if (r.quantity > 0) {
+        await reconcileStock(panelistId, r.material_id, 0)
+        zeroed++
+      }
+    }
+    return zeroed
+  }, [fetchPanelistStock, reconcileStock])
+
+  const daysWithoutStock = useCallback(async (
+    panelistNodeId: string,
+    from: string,
+    to: string,
+    blockingMaterialIds: string[]
+  ): Promise<{ businessDays: number; samples: AffectedSample[] }> => {
+    if (to < from) return { businessDays: 0, samples: [] }
+    const businessDays = eachDayOfInterval({ start: new Date(`${from}T00:00:00`), end: new Date(`${to}T00:00:00`) })
+      .filter(d => !isWeekend(d)).length
+    if (blockingMaterialIds.length === 0) return { businessDays, samples: [] }
+
+    const { data: pm, error: e1 } = await supabase
+      .from('product_materials')
+      .select('product_id')
+      .in('material_id', blockingMaterialIds)
+    if (e1) throw e1
+    const productIds = Array.from(new Set((pm || []).map((r: any) => r.product_id)))
+    if (productIds.length === 0) return { businessDays, samples: [] }
+
+    const { data, error: e2 } = await supabase
+      .from('allocation_plan_details')
+      .select(`id, fecha_programada,
+        destination_node:nodes!allocation_plan_details_destination_node_id_fkey(auto_id),
+        plan:allocation_plans!inner(product_id, product:products(description))`)
+      .eq('origin_node_id', panelistNodeId)
+      .in('status', ['pending', 'notified'])
+      .gte('fecha_programada', from)
+      .lte('fecha_programada', to)
+      .in('plan.product_id', productIds)
+      .order('fecha_programada')
+    if (e2) throw e2
+    const samples = ((data || []) as any[]).map(r => ({
+      id: r.id,
+      fecha_programada: r.fecha_programada,
+      destination_auto_id: r.destination_node?.auto_id ?? '',
+      product: r.plan?.product?.description ?? ''
+    }))
+    return { businessDays, samples }
+  }, [])
+
   return {
     reconcileStock,
+    fetchPanelistStock,
+    zeroAllStock,
+    daysWithoutStock,
     recomputeNeed,
     resolveSupply,
     executeSupply,
