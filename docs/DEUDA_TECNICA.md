@@ -57,3 +57,15 @@ Migraciones con funciones que miran la fecha de hoy: `20261020130100_incident_he
 - **Qué pasa:** (1) la función `send_material_shipment` descuenta el stock con `greatest(0, …)` sin avisar si no había suficiente, y anota en el histórico la cantidad completa; además no filtra por tipo de ubicación del stock central. (2) El botón "Enviar seleccionados" de Stock → Envíos pone el estado `sent` directamente, sin pasar por esa función, así que no descuenta stock (también sobre envíos de una incidencia). (3) No hay forma de quitar o cancelar desde la incidencia un envío creado por error (desde Stock ya no se puede borrar un envío de incidencia).
 - **Riesgo:** el stock del histórico puede mostrar material que no existía; envíos "enviados" sin descuento.
 - **Solución:** migración que haga que `send_material_shipment` falle si `quantity < quantity_sent` y filtre `location_type`; cambiar "Enviar seleccionados" para llamar a esa función; acción "Cancelar envío" para envíos de incidencia en estado pendiente (con registro en la conversación). Requiere confirmación para aplicar en onems-dev.
+
+---
+
+## DT-7 — URGENTE: "Register new panelist" mete en SQL el texto que escribe cualquier desconocido
+
+- **Apuntado:** 2026-10-21 (revisión final de n8n antes de la promoción).
+- **Qué pasa:** el subflujo de alta de panelista (`Register new panelist` `2L2RHXdu7i94amgd`, PROD) construye consultas SQL con el texto que escribe la persona que habla con el bot por primera vez (nombre, email…). Cualquiera que encuentre el bot puede intentar alterar esas consultas. Está accesible hoy en producción y no lo ha introducido este trabajo.
+- **Solución:** pasar todos los valores como parámetros (`queryReplacement`) y validar formato (email, longitud). Cambio pequeño, pero en un flujo de PROD: requiere confirmación del usuario.
+
+## DT-8 — Panelistas de KENYA sin nodo
+
+- **Apuntado:** 2026-10-21. 22 panelistas de KENYA con Telegram no tienen `node_id`, así que las funciones de envíos del bot no les funcionan (antes y después de este trabajo).
