@@ -13,7 +13,7 @@ function fmtTime(iso: string | null | undefined): string {
 
 export function IncidentConversation({ kind, incidentId }: { kind: ConversationKind; incidentId: string }) {
   const { t } = useTranslation()
-  const { messages, loading, error, send } = useIncidentConversation(kind, incidentId)
+  const { messages, loading, error, send, photoUrls } = useIncidentConversation(kind, incidentId)
   const [text, setText] = useState('')
   const [sending, setSending] = useState(false)
   const [sendError, setSendError] = useState<string | null>(null)
@@ -62,12 +62,19 @@ export function IncidentConversation({ kind, incidentId }: { kind: ConversationK
       )
     }
     const mine = m.direction === 'outbound'
+    const photoPath = m.meta && typeof m.meta === 'object' && typeof m.meta.photo_path === 'string' ? m.meta.photo_path : null
+    const photoUrl = photoPath ? photoUrls[photoPath] : null
     const callback = m.meta && typeof m.meta === 'object' ? m.meta.callback : null
     return (
       <div key={m.id} className={`flex ${mine ? 'justify-end' : 'justify-start'} my-1`}>
         <div className={`max-w-[80%] rounded-lg px-3 py-2 text-sm text-start ${mine ? 'bg-blue-50 border border-blue-200' : 'bg-gray-100 border border-gray-200'}`}>
           <div className="text-xs font-medium text-gray-600 mb-0.5">{t(`incident_conversation.author.${m.author}`)}</div>
           <div className="whitespace-pre-wrap break-words">{m.body}</div>
+          {photoUrl && (
+            <a href={photoUrl} target="_blank" rel="noopener noreferrer" className="block mt-1">
+              <img src={photoUrl} alt={t('incident_conversation.photo_alt')} className="max-h-48 rounded border border-gray-200" />
+            </a>
+          )}
           {callback != null && callback !== '' && (
             <span className="inline-block mt-1 px-2 py-0.5 text-xs rounded-full bg-white border border-gray-300 text-gray-700">
               {t('incident_conversation.button_pressed')}: {String(callback)}

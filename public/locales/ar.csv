@@ -2994,3 +2994,6 @@ reported_incidents.materials.to_buy_title,للشراء
 reported_incidents.materials.to_buy_line,{name} ({code}): {n}
 material_sheet.to_buy_title,للشراء
 material_sheet.purchase_origin,شراء
+incident_conversation.unread_badge,محادثات تحتوي على ردود جديدة
+incident_conversation.new_reply,رد جديد
+incident_conversation.photo_alt,صورة أرسلها العضو

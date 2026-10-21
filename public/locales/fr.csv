@@ -2994,3 +2994,6 @@ reported_incidents.materials.to_buy_title,À acheter
 reported_incidents.materials.to_buy_line,{name} ({code}) : {n}
 material_sheet.to_buy_title,À acheter
 material_sheet.purchase_origin,Achat
+incident_conversation.unread_badge,Conversations avec de nouvelles réponses
+incident_conversation.new_reply,Nouvelle réponse
+incident_conversation.photo_alt,Photo envoyée par le panéliste

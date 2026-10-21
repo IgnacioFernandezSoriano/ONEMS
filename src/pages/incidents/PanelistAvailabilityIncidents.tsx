@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from '@/hooks/useTranslation'
 import { format, parseISO, isValid } from 'date-fns'
 import { useUnavailabilityIncidents } from '@/lib/hooks/useUnavailabilityIncidents'
+import { useUnreadConversations } from '@/lib/hooks/useUnreadConversations'
 import { IncidentReviewPanel } from '@/components/incidents/IncidentReviewPanel'
 import { IncidentStatusBadge } from '@/components/incidents/IncidentStatusBadge'
 import type { IncidentStatusFilter } from '@/lib/types'
@@ -18,6 +19,7 @@ const fmt = (d: string | null) => {
 export function PanelistAvailabilityIncidents() {
   const { t } = useTranslation()
   const { inbox, loading, error, fetchInbox, statusFilter, setStatusFilter } = useUnavailabilityIncidents()
+  const { unreadByKey } = useUnreadConversations()
   const [selected, setSelected] = useState<string | null>(null)
   const [params, setParams] = useSearchParams()
 
@@ -82,7 +84,7 @@ export function PanelistAvailabilityIncidents() {
               {inbox.length > 0 ? inbox.map((row) => (
                 <tr key={row.unavailability_id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 text-sm">
-                    <div className="font-medium">{row.panelist_name}</div>
+                    <div className="font-medium">{row.panelist_name}{(unreadByKey[`unavailability:${row.unavailability_id}`] ?? 0) > 0 && <span className="ms-2 text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">{t('incident_conversation.new_reply')}</span>}</div>
                     <div className="text-gray-500 text-xs font-mono">{row.panelist_code}</div>
                   </td>
                   <td className="px-6 py-4 text-sm">{row.node_label} · {row.city_name}</td>

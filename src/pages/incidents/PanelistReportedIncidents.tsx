@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useTranslation } from '@/hooks/useTranslation'
 import { useReportedIncidents } from '@/lib/hooks/useReportedIncidents'
+import { useUnreadConversations } from '@/lib/hooks/useUnreadConversations'
 import { ReportedIncidentPanel } from '@/components/incidents/ReportedIncidentPanel'
 import type { ReportedIncidentCategory, ReportedIncidentStatus } from '@/lib/types'
 
@@ -11,6 +12,7 @@ const CATEGORIES: ReportedIncidentCategory[] = [
 export function PanelistReportedIncidents() {
   const { t } = useTranslation()
   const { inbox, loading, error, fetchInbox } = useReportedIncidents()
+  const { unreadByKey } = useUnreadConversations()
   const [selected, setSelected] = useState<string | null>(null)
   const [catFilter, setCatFilter] = useState<ReportedIncidentCategory | 'all'>('all')
   const [statusFilter, setStatusFilter] = useState<ReportedIncidentStatus | 'open_active'>('open_active')
@@ -58,7 +60,7 @@ export function PanelistReportedIncidents() {
             <tbody className="divide-y divide-gray-200">
               {rows.length > 0 ? rows.map(r => (
                 <tr key={r.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm"><div className="font-medium">{r.panelist_name}</div><div className="text-gray-500 text-xs font-mono">{r.panelist_code}</div></td>
+                  <td className="px-6 py-4 text-sm"><div className="font-medium">{r.panelist_name}{(unreadByKey[`reported:${r.id}`] ?? 0) > 0 && <span className="ms-2 text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">{t('incident_conversation.new_reply')}</span>}</div><div className="text-gray-500 text-xs font-mono">{r.panelist_code}</div></td>
                   <td className="px-6 py-4 text-sm">{t(`reported_incidents.category.${r.category}`)}</td>
                   <td className="px-6 py-4 text-sm">{t(`reported_incidents.status.${r.status}`)}</td>
                   <td className="px-6 py-4 text-sm">{r.reported_at?.slice(0, 10)}</td>

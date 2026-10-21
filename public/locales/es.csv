@@ -3002,3 +3002,6 @@ reported_incidents.materials.to_buy_title,A comprar
 reported_incidents.materials.to_buy_line,{name} ({code}): {n}
 material_sheet.to_buy_title,A comprar
 material_sheet.purchase_origin,Compra
+incident_conversation.unread_badge,Conversaciones con respuestas nuevas
+incident_conversation.new_reply,Respuesta nueva
+incident_conversation.photo_alt,Foto enviada por el panelista
