@@ -33,7 +33,7 @@
 
 - Modify: `src/lib/types.ts:521` — `ReportedIncidentStatus` + `'auto_resolved'`.
 - Create: `src/components/incidents/buttonStyles.ts` — `BTN_PRIMARY`, `BTN_SECONDARY`.
-- Modify: `src/lib/hooks/useReportedIncidents.ts` — detalle ampliado, `listNodesForMove`, `suggestSampleMove`, `rerouteReturnedSample`; se eliminan `actMarkReceived`, `actInvalidate`, `actReschedule`, `actCreateUnavailability` (ya sin uso).
+- Modify: `src/lib/hooks/useReportedIncidents.ts` — detalle ampliado, `listNodesForMove`, `suggestRerouteReturnedSample`, `rerouteReturnedSample`; se eliminan `actMarkReceived`, `actInvalidate`, `actReschedule`, `actCreateUnavailability` (ya sin uso).
 - Create: `src/components/incidents/ReportedIncidentHeader.tsx` — cabecera (contacto + papel + envío).
 - Create: `src/components/incidents/ReturnedSampleActions.tsx` — ficha D.
 - Create: `src/components/incidents/MissingMaterialsSections.tsx` — ficha A (sustituye a `MissingMaterialsActions` dentro del panel).
@@ -69,7 +69,7 @@
     (select de supabase: `*, panelist:panelists(id,name,panelist_code,email,mobile,telegram_id,language,address_city,node_id), detail:allocation_plan_details(id,fecha_programada,status,tag_id,origin_node_id,destination_node_id,origin_panelist_id,destination_panelist_id, origin_node:nodes!allocation_plan_details_origin_node_id_fkey(auto_id), destination_node:nodes!allocation_plan_details_destination_node_id_fkey(auto_id), plan:allocation_plans(carrier:carriers(name), product:products(description)))` — comprobar los nombres reales de las FK en el baseline con `grep -n "allocation_plan_details.*FOREIGN KEY" supabase/migrations/00000000000000_baseline_prod_schema.sql`).
   - `panelistRole(inc: ReportedIncidentDetail): 'sender' | 'receiver' | null` — emisor si `detail.origin_panelist_id === panelist.id` o (`origin_panelist_id` NULL y `detail.origin_node_id === panelist.node_id`); receptor igual con destino; si no hay `detail`, `null`.
   - `listNodesForMove(detailId): Promise<{ node_id: string; auto_id: string; city_name: string; same_city: boolean; panelist_name: string }[]>` → `rpc('list_nodes_for_sample_move', { p_detail_id })`.
-  - `suggestSampleMove(detailId, fromNodeId, toNodeId, weekStart): Promise<Record<string, any>>` → `rpc('suggest_for_sample_move', { p_detail_id, p_from_node_id, p_to_node_id, p_week_start })`.
+  - `suggestRerouteReturnedSample(detailId, toNodeId, weekStart): Promise<Record<string, any>>` → `rpc('suggest_reroute_returned_sample', { p_detail_id, p_to_node_id, p_week_start })` (vista previa específica para muestras `sent`/`incident`; `suggest_for_sample_move` devolvería `sample_not_movable`).
   - `rerouteReturnedSample(detailId, toNodeId, weekStart): Promise<void>` → `rpc('reroute_returned_sample', …)`.
   - Se mantienen: `inbox`, `loading`, `error`, `openCount`, `fetchInbox`, `resolve`, `actCancel`, `signedPhotoUrl`. `actUpdateContact` se elimina (H es automática; si algún día hiciera falta, la RPC es `update_panelist_contact_v2`).
 - `ReportedIncidentStatus = 'open' | 'in_progress' | 'resolved' | 'dismissed' | 'auto_resolved'`.
@@ -131,9 +131,9 @@ git commit -m "feat(incidents): cabecera con contacto y papel; fichas de solo le
 - Modify: `public/locales/{en,es,fr,ar}.csv`
 
 **Interfaces:**
-- Consumes: `listNodesForMove`, `suggestSampleMove`, `rerouteReturnedSample`, `actCancel` (Tarea 1).
+- Consumes: `listNodesForMove`, `suggestRerouteReturnedSample`, `rerouteReturnedSample`, `actCancel` (Tarea 1).
 - Produces: `ReturnedSampleActions({ detail, busy, onCancel, onReroute, t })` con `detail: ReportedIncidentDetail['detail']`, `onCancel(): Promise<void>`, `onReroute(toNodeId: string, weekStart: string): Promise<void>`.
-- Comportamiento: si `!detail` → `reported_incidents.returned.no_detail`. Si no: `<select>` de nodos (al montar `listNodesForMove(detail.id)`; la RPC devuelve solo nodos de la misma ciudad que el destino actual, porque el motor no admite cambiar de ciudad; opción `${auto_id} — ${city_name} (${panelist_name})`; si la lista viene vacía, texto `reported_incidents.returned.no_nodes`); `<select>` de semanas: 8 lunes a partir del lunes de la semana actual (`startOfWeek(new Date(), { weekStartsOn: 1 })` + 7·k, k=0..7, etiqueta `dd/MM`); al cambiar nodo o semana → `suggestSampleMove(detail.id, detail.destination_node_id, toNode, week)` y pintar `found ? reported_incidents.returned.fits (date, load) : reported_incidents.returned.reason.<reason>`; botón **Confirmar reenvío** (`BTN_PRIMARY`, deshabilitado si `!found`) → `onReroute`; botón **Anular envío** (`BTN_SECONDARY`) → `onCancel`. El panel envuelve ambos con `run(…, 'reported_incidents.done.rerouted' | 'reported_incidents.done.cancelled')` (deja `in_progress`).
+- Comportamiento: si `!detail` → `reported_incidents.returned.no_detail`. Si no: `<select>` de nodos (al montar `listNodesForMove(detail.id)`; la RPC devuelve solo nodos de la misma ciudad que el destino actual, porque el motor no admite cambiar de ciudad; opción `${auto_id} — ${city_name} (${panelist_name})`; si la lista viene vacía, texto `reported_incidents.returned.no_nodes`); `<select>` de semanas: 8 lunes a partir del lunes de la semana actual (`startOfWeek(new Date(), { weekStartsOn: 1 })` + 7·k, k=0..7, etiqueta `dd/MM`); al cambiar nodo o semana → `suggestRerouteReturnedSample(detail.id, toNode, week)` y pintar `found ? reported_incidents.returned.fits (date, load) : reported_incidents.returned.reason.<reason>`; botón **Confirmar reenvío** (`BTN_PRIMARY`, deshabilitado si `!found`) → `onReroute`; botón **Anular envío** (`BTN_SECONDARY`) → `onCancel`. El panel envuelve ambos con `run(…, 'reported_incidents.done.rerouted' | 'reported_incidents.done.cancelled')` (deja `in_progress`).
 
 - [ ] **Step 1: Crear el componente y enchufarlo** en el panel para `parcel_returned`.
 

@@ -203,8 +203,9 @@ semana**; el emisor no cambia.
   - **Reenviar a otro nodo**: selector de nodo destino (solo nodos de la cuenta en la **misma
     ciudad del destino actual**: el motor de movimiento no admite cambiar de ciudad) y de semana
     (desde la actual); al
-    elegir muestra el resultado de `suggest_for_sample_move(p_detail_id, from_node=destino
-    actual, to_node, week_start)` (carga resultante / avisos) y botón **Confirmar** →
+    elegir muestra el resultado de `suggest_reroute_returned_sample(p_detail_id, to_node, week_start)`
+    (vista previa que simula la muestra como pendiente; `suggest_for_sample_move` no sirve para
+    muestras `sent`/`incident`) (carga resultante / avisos) y botón **Confirmar** →
     RPC nueva `reroute_returned_sample(p_detail_id, p_to_node_id, p_week_start)` que:
     (1) comprueba que el estado actual es `sent` o `incident`, (2) lo pone en `pending`
     conservando `tag_id`, (3) llama a `apply_sample_move` con el extremo destino, (4) devuelve
@@ -287,7 +288,7 @@ el manager, que se pone en contacto con el panelista.
   `open`+`in_progress`.
 - `useReportedIncidents.ts`: traer `panelist` con email, mobile, telegram_id, language,
   address_city; traer de la muestra enlazada `origin_panelist_id`, `destination_panelist_id`,
-  nodos origen/destino, transportista, producto, fecha; acciones `suggestSampleMove(...)`,
+  nodos origen/destino, transportista, producto, fecha; acciones `suggestRerouteReturnedSample(...)`,
   `rerouteReturnedSample(...)`, `listNodesForMove(detailId)`.
 - `useMaterialsTreatment.ts`: `zeroAllStock(panelistId)`, `daysWithoutStock(panelistId,
   from, to, missingBlockingMaterialIds)`; `createDisplacementBaja` sin cambios (la RPC
