@@ -2914,3 +2914,21 @@ reported_incidents.contact.field.address_line1,Adresse (ligne 1)
 reported_incidents.contact.field.address_line2,Adresse (ligne 2)
 reported_incidents.contact.field.address_city,Ville
 reported_incidents.contact.field.address_country,Pays
+reported_incidents.returned.title,Renvoyer l'échantillon retourné
+reported_incidents.returned.to_node,Nœud de destination
+reported_incidents.returned.no_nodes,Aucun autre nœud dans cette ville
+reported_incidents.returned.week,Semaine
+reported_incidents.returned.confirm_reroute,Confirmer le renvoi
+reported_incidents.returned.no_detail,Cet incident n'a pas d'envoi lié
+reported_incidents.returned.fits,Possible : {date} (charge {load})
+reported_incidents.returned.reason.not_found,Envoi ou nœud introuvable
+reported_incidents.returned.reason.not_in_cell,L'envoi n'est pas dans une cellule valide
+reported_incidents.returned.reason.not_pending,L'échantillon n'est pas en attente
+reported_incidents.returned.reason.sample_not_movable,Cet échantillon ne peut pas être déplacé
+reported_incidents.returned.reason.has_incident_line,L'envoi a une ligne d'incident ouverte
+reported_incidents.returned.reason.other_city,Le nœud est dans une autre ville
+reported_incidents.returned.reason.inactive_node,Le nœud n'est pas actif
+reported_incidents.returned.reason.other_end,Le nœud est l'autre extrémité de l'envoi
+reported_incidents.returned.reason.no_day,Aucun jour disponible cette semaine
+reported_incidents.returned.reason.unknown,Renvoi impossible vers ce nœud et cette semaine
+reported_incidents.done.rerouted,Échantillon renvoyé

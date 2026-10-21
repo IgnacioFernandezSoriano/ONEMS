@@ -2914,3 +2914,21 @@ reported_incidents.contact.field.address_line1,العنوان (السطر 1)
 reported_incidents.contact.field.address_line2,العنوان (السطر 2)
 reported_incidents.contact.field.address_city,المدينة
 reported_incidents.contact.field.address_country,البلد
+reported_incidents.returned.title,إعادة إرسال العينة المرتجعة
+reported_incidents.returned.to_node,العقدة الوجهة
+reported_incidents.returned.no_nodes,لا توجد عقدة أخرى في هذه المدينة
+reported_incidents.returned.week,الأسبوع
+reported_incidents.returned.confirm_reroute,تأكيد إعادة الإرسال
+reported_incidents.returned.no_detail,لا توجد شحنة مرتبطة بهذه الحادثة
+reported_incidents.returned.fits,ممكن: {date} (الحمل {load})
+reported_incidents.returned.reason.not_found,لم يتم العثور على الشحنة أو العقدة
+reported_incidents.returned.reason.not_in_cell,الشحنة ليست في خلية صالحة
+reported_incidents.returned.reason.not_pending,العينة ليست قيد الانتظار
+reported_incidents.returned.reason.sample_not_movable,لا يمكن نقل هذه العينة
+reported_incidents.returned.reason.has_incident_line,للشحنة بند حادثة مفتوح
+reported_incidents.returned.reason.other_city,العقدة في مدينة أخرى
+reported_incidents.returned.reason.inactive_node,العقدة غير نشطة
+reported_incidents.returned.reason.other_end,العقدة هي الطرف الآخر للشحنة
+reported_incidents.returned.reason.no_day,لا يوجد يوم متاح في ذلك الأسبوع
+reported_incidents.returned.reason.unknown,لا يمكن إعادة الإرسال إلى هذه العقدة وهذا الأسبوع
+reported_incidents.done.rerouted,تمت إعادة إرسال العينة

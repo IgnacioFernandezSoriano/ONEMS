@@ -2922,3 +2922,21 @@ reported_incidents.contact.field.address_line1,Dirección (línea 1)
 reported_incidents.contact.field.address_line2,Dirección (línea 2)
 reported_incidents.contact.field.address_city,Ciudad
 reported_incidents.contact.field.address_country,País
+reported_incidents.returned.title,Reenviar muestra devuelta
+reported_incidents.returned.to_node,Nodo de destino
+reported_incidents.returned.no_nodes,No hay otro nodo en esta ciudad
+reported_incidents.returned.week,Semana
+reported_incidents.returned.confirm_reroute,Confirmar reenvío
+reported_incidents.returned.no_detail,Esta incidencia no tiene envío vinculado
+reported_incidents.returned.fits,Cabe: {date} (carga {load})
+reported_incidents.returned.reason.not_found,Envío o nodo no encontrado
+reported_incidents.returned.reason.not_in_cell,El envío no está en una celda válida
+reported_incidents.returned.reason.not_pending,La muestra no está pendiente
+reported_incidents.returned.reason.sample_not_movable,Esta muestra no se puede mover
+reported_incidents.returned.reason.has_incident_line,El envío tiene una línea de incidencia abierta
+reported_incidents.returned.reason.other_city,El nodo está en otra ciudad
+reported_incidents.returned.reason.inactive_node,El nodo no está activo
+reported_incidents.returned.reason.other_end,El nodo es el otro extremo del envío
+reported_incidents.returned.reason.no_day,No hay día disponible en esa semana
+reported_incidents.returned.reason.unknown,No se puede reenviar a ese nodo y semana
+reported_incidents.done.rerouted,Muestra reenviada

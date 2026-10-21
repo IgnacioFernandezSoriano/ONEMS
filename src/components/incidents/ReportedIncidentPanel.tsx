@@ -9,6 +9,7 @@ import { supabase } from '@/lib/supabase'
 import type { ReportedIncidentDetail } from '@/lib/types'
 import { BTN_PRIMARY, BTN_SECONDARY } from './buttonStyles'
 import { ReportedIncidentHeader } from './ReportedIncidentHeader'
+import { ReturnedSampleActions } from './ReturnedSampleActions'
 
 interface TFn {
   (key: string, params?: Record<string, any>, fallback?: string): string
@@ -16,7 +17,7 @@ interface TFn {
 
 export function ReportedIncidentPanel({ incidentId, onBack }: { incidentId: string; onBack: () => void }) {
   const { t } = useTranslation()
-  const { fetchIncident, resolve, actCancel, signedPhotoUrl } = useReportedIncidents()
+  const { fetchIncident, resolve, actCancel, rerouteReturnedSample, signedPhotoUrl } = useReportedIncidents()
   const [inc, setInc] = useState<ReportedIncidentDetail | null>(null)
   const [photo, setPhoto] = useState<string | null>(null)
   const [note, setNote] = useState('')
@@ -63,10 +64,9 @@ export function ReportedIncidentPanel({ incidentId, onBack }: { incidentId: stri
       {/* Bloque de acción por categoría (playbook) */}
       <div className="border rounded p-4 mb-4">
         {inc.category === 'parcel_returned' ? (
-          <button disabled={busy || !detailId} className={BTN_SECONDARY}
-            onClick={() => run(() => actCancel(detailId!), 'reported_incidents.done.cancelled')}>
-            {t('reported_incidents.action.cancel_shipment')}
-          </button>
+          <ReturnedSampleActions detail={inc.detail} busy={busy} t={t}
+            onCancel={() => run(() => actCancel(detailId!), 'reported_incidents.done.cancelled')}
+            onReroute={(toNode, week) => run(() => rerouteReturnedSample(detailId!, toNode, week), 'reported_incidents.done.rerouted')} />
         ) : inc.category === 'missing_materials' ? (
           <MissingMaterialsActions incidentId={incidentId} panelistId={inc.panelist_id} payload={inc.payload} t={t} />
         ) : inc.category === 'contact_data_change' ? (

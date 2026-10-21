@@ -2922,3 +2922,21 @@ reported_incidents.contact.field.address_line1,Address line 1
 reported_incidents.contact.field.address_line2,Address line 2
 reported_incidents.contact.field.address_city,City
 reported_incidents.contact.field.address_country,Country
+reported_incidents.returned.title,Re-send returned sample
+reported_incidents.returned.to_node,Destination node
+reported_incidents.returned.no_nodes,No other node in this city
+reported_incidents.returned.week,Week
+reported_incidents.returned.confirm_reroute,Confirm re-send
+reported_incidents.returned.no_detail,This incident has no linked shipment
+reported_incidents.returned.fits,Fits: {date} (load {load})
+reported_incidents.returned.reason.not_found,Shipment or node not found
+reported_incidents.returned.reason.not_in_cell,The shipment is not in a valid cell
+reported_incidents.returned.reason.not_pending,The sample is not pending
+reported_incidents.returned.reason.sample_not_movable,This sample cannot be moved
+reported_incidents.returned.reason.has_incident_line,The shipment has an open incident line
+reported_incidents.returned.reason.other_city,The node is in a different city
+reported_incidents.returned.reason.inactive_node,The node is not active
+reported_incidents.returned.reason.other_end,The node is the other end of the shipment
+reported_incidents.returned.reason.no_day,No available day in that week
+reported_incidents.returned.reason.unknown,Cannot re-send to that node and week
+reported_incidents.done.rerouted,Sample re-sent
