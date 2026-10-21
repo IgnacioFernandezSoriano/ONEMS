@@ -49,7 +49,7 @@ DECLARE
   v_account uuid;
   v_tg text      := NULLIF(btrim(p_telegram_id), '');
   v_phone text   := NULLIF(btrim(p_phone), '');
-  v_lang text    := NULLIF(btrim(p_language), '');
+  v_lang text    := NULLIF(lower(btrim(p_language)), '');
   v_email text   := NULLIF(btrim(p_email), '');
   v_line1 text   := NULLIF(btrim(p_address_line1), '');
   v_line2 text   := NULLIF(btrim(p_address_line2), '');
@@ -64,6 +64,8 @@ BEGIN
     RAISE EXCEPTION 'invalid phone'; END IF;
   IF v_lang IS NOT NULL AND v_lang NOT IN ('en','es','fr','ar') THEN
     RAISE EXCEPTION 'invalid language'; END IF;
+  IF length(v_line1) > 200 OR length(v_line2) > 200 OR length(v_city) > 200 OR length(v_country) > 200 THEN
+    RAISE EXCEPTION 'invalid address'; END IF;
   UPDATE panelists SET
     telegram_id = CASE WHEN auth.uid() IS NULL THEN telegram_id ELSE COALESCE(v_tg, telegram_id) END,
     mobile = COALESCE(v_phone, mobile),
@@ -161,9 +163,44 @@ END; $$;
 REVOKE ALL ON FUNCTION public.reroute_returned_sample(uuid,uuid,date) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.reroute_returned_sample(uuid,uuid,date) TO authenticated, service_role;
 
+-- Previsualizacion del reenvio: devuelve lo que propondria el motor si la muestra estuviera
+-- 'pending', SIN persistir nada. El UPDATE a 'pending' y la propuesta ocurren dentro de un
+-- sub-bloque con EXCEPTION (savepoint); se aborta a proposito con P0999 y el savepoint deshace el UPDATE.
+CREATE OR REPLACE FUNCTION public.suggest_reroute_returned_sample(
+  p_detail_id uuid, p_to_node_id uuid, p_week_start date)
+RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE v_d allocation_plan_details; v_s jsonb;
+BEGIN
+  SELECT * INTO v_d FROM allocation_plan_details WHERE id = p_detail_id;
+  IF NOT FOUND THEN RAISE EXCEPTION 'Sample % not found', p_detail_id; END IF;
+
+  -- Guarda multi-tenant (igual que apply_sample_move).
+  IF auth.uid() IS NOT NULL AND NOT is_superadmin()
+     AND v_d.account_id IS DISTINCT FROM (SELECT pr.account_id FROM profiles pr WHERE pr.id = auth.uid()) THEN
+    RAISE EXCEPTION 'Cross-tenant access denied';
+  END IF;
+
+  IF v_d.status NOT IN ('sent','incident') THEN
+    RAISE EXCEPTION 'Sample is not returned-eligible';
+  END IF;
+
+  BEGIN
+    UPDATE allocation_plan_details SET status = 'pending' WHERE id = p_detail_id;
+    v_s := public.incident_suggest_sample_move(p_detail_id, v_d.destination_node_id, p_to_node_id,
+                                               p_week_start, 6, 20);
+    RAISE EXCEPTION USING ERRCODE = 'P0999', MESSAGE = v_s::text;
+  EXCEPTION WHEN SQLSTATE 'P0999' THEN
+    RETURN SQLERRM::jsonb;  -- el savepoint ya deshizo el UPDATE
+  END;
+END; $$;
+
+REVOKE ALL ON FUNCTION public.suggest_reroute_returned_sample(uuid,uuid,date) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.suggest_reroute_returned_sample(uuid,uuid,date) TO authenticated, service_role;
+
 -- ===== 5) list_nodes_for_sample_move =====
 -- Nodos candidatos para mover el destino de una muestra: misma cuenta y MISMA CIUDAD que el
--- destino actual (el motor rechaza otras ciudades), con un panelista activo, sin el destino actual.
+-- destino actual (el motor rechaza otras ciudades), con un panelista activo, sin el destino actual
+-- ni el origen (el motor rechaza ambos).
 -- same_city se mantiene por estabilidad de interfaz (siempre true).
 CREATE OR REPLACE FUNCTION public.list_nodes_for_sample_move(p_detail_id uuid)
 RETURNS TABLE (node_id uuid, auto_id text, city_name text, same_city boolean, panelist_name text)
@@ -181,6 +218,7 @@ BEGIN
 
   IF v_d.destination_node_id IS NULL THEN RETURN; END IF;
   SELECT n.city_id INTO v_city FROM nodes n WHERE n.id = v_d.destination_node_id;
+  IF v_city IS NULL THEN RETURN; END IF;
 
   RETURN QUERY
   SELECT n.id, n.auto_id::text, c.name::text, true, pn.name::text
@@ -192,8 +230,9 @@ BEGIN
        ORDER BY p.name LIMIT 1) pn
    WHERE n.account_id = v_d.account_id
      AND n.id <> v_d.destination_node_id
+     AND n.id IS DISTINCT FROM v_d.origin_node_id
      AND COALESCE(n.status, 'active') = 'active'
-     AND n.city_id IS NOT DISTINCT FROM v_city
+     AND n.city_id = v_city
    ORDER BY n.auto_id;
 END; $$;
 

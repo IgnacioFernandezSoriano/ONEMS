@@ -64,6 +64,23 @@ END $$;
 SELECT pg_temp.expect_err($$SELECT public.update_panelist_contact_v2('e1000000-0000-0000-0000-000000000001', p_email => 'sin-arroba')$$, 'invalid email');
 SELECT pg_temp.expect_err($$SELECT public.update_panelist_contact_v2('e1000000-0000-0000-0000-000000000001', p_phone => 'abc')$$, 'invalid phone');
 SELECT pg_temp.expect_err($$SELECT public.update_panelist_contact_v2('e1000000-0000-0000-0000-000000000001', p_language => 'xx')$$, 'invalid language');
+-- idioma en mayusculas: se normaliza y se guarda en minusculas
+SELECT public.update_panelist_contact_v2('e1000000-0000-0000-0000-000000000001', p_language => ' ES ');
+DO $$ BEGIN
+  IF (SELECT language FROM public.panelists WHERE id = 'e1000000-0000-0000-0000-000000000001') IS DISTINCT FROM 'es' THEN
+    RAISE EXCEPTION 'FAIL idioma ES no normalizado a es'; END IF;
+END $$;
+-- direccion demasiado larga
+SELECT pg_temp.expect_err(format($q$SELECT public.update_panelist_contact_v2('e1000000-0000-0000-0000-000000000001', p_address_city => %L)$q$, repeat('x', 201)), 'invalid address');
+-- con auth.uid() (actor 99, misma cuenta) SI se cambia telegram_id
+DO $$
+BEGIN
+  PERFORM set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+  PERFORM public.update_panelist_contact_v2('e1000000-0000-0000-0000-000000000001', p_telegram_id => 'tg-new');
+  PERFORM set_config('request.jwt.claim.sub','', true);
+  IF (SELECT telegram_id FROM public.panelists WHERE id = 'e1000000-0000-0000-0000-000000000001') IS DISTINCT FROM 'tg-new' THEN
+    RAISE EXCEPTION 'FAIL telegram_id no cambio con auth.uid()'; END IF;
+END $$;
 -- firma antigua sigue funcionando
 SELECT public.update_panelist_contact('e1000000-0000-0000-0000-000000000001', NULL, '600111222', 'es');
 DO $$ BEGIN
@@ -127,6 +144,32 @@ BEGIN
 END $$;
 -- inexistente
 SELECT pg_temp.expect_err($$SELECT public.reroute_returned_sample('d9000000-0000-0000-0000-000000000009', 'b3000000-0000-0000-0000-000000000003', date_trunc('week', current_date + 14)::date)$$, 'Sample d9000000-0000-0000-0000-000000000009 not found');
+-- previsualizacion (muestra 'sent' N1 -> N2): no persiste nada
+SELECT pg_temp.expect_err($$SELECT public.suggest_reroute_returned_sample('d9000000-0000-0000-0000-000000000009', 'b3000000-0000-0000-0000-000000000003', date_trunc('week', current_date + 14)::date)$$, 'Sample d9000000-0000-0000-0000-000000000009 not found');
+DO $$
+BEGIN
+  PERFORM set_config('request.jwt.claim.sub','98000000-0000-0000-0000-000000000098', true);
+  PERFORM pg_temp.expect_err($q$SELECT public.suggest_reroute_returned_sample('d1000000-0000-0000-0000-000000000001', 'b3000000-0000-0000-0000-000000000003', date_trunc('week', current_date + 14)::date)$q$, 'Cross-tenant access denied');
+  PERFORM set_config('request.jwt.claim.sub','', true);
+END $$;
+DO $$ DECLARE j jsonb; r public.allocation_plan_details; w date := date_trunc('week', current_date + 14)::date; f0 date;
+BEGIN
+  SELECT fecha_programada INTO f0 FROM public.allocation_plan_details WHERE id = 'd1000000-0000-0000-0000-000000000001';
+  -- actor 99 (misma cuenta) pasa la guarda
+  PERFORM set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+  j := public.suggest_reroute_returned_sample('d1000000-0000-0000-0000-000000000001', 'b3000000-0000-0000-0000-000000000003', w);
+  PERFORM set_config('request.jwt.claim.sub','', true);
+  IF NOT COALESCE((j->>'found')::boolean, false) OR j->>'side' <> 'destination' THEN
+    RAISE EXCEPTION 'FAIL preview: %', j; END IF;
+  SELECT * INTO r FROM public.allocation_plan_details WHERE id = 'd1000000-0000-0000-0000-000000000001';
+  IF r.status <> 'sent' OR r.fecha_programada IS DISTINCT FROM f0 OR r.destination_node_id <> 'b2000000-0000-0000-0000-000000000002' THEN
+    RAISE EXCEPTION 'FAIL preview persistio cambios: %', row_to_json(r); END IF;
+  -- otra ciudad (N4)
+  j := public.suggest_reroute_returned_sample('d1000000-0000-0000-0000-000000000001', 'b4000000-0000-0000-0000-000000000004', w);
+  IF (j->>'found')::boolean OR j->>'reason' <> 'other_city' THEN RAISE EXCEPTION 'FAIL preview otra ciudad: %', j; END IF;
+  IF (SELECT status FROM public.allocation_plan_details WHERE id = 'd1000000-0000-0000-0000-000000000001') <> 'sent' THEN
+    RAISE EXCEPTION 'FAIL preview otra ciudad muto la muestra'; END IF;
+END $$;
 -- camino feliz: N2 -> N3 (misma ciudad)
 DO $$ DECLARE j jsonb; r public.allocation_plan_details; w date := date_trunc('week', current_date + 14)::date;
 BEGIN
@@ -138,6 +181,19 @@ BEGIN
     RAISE EXCEPTION 'FAIL reroute: % / %', j, row_to_json(r); END IF;
   IF (j->>'side') <> 'destination' THEN RAISE EXCEPTION 'FAIL side=%', j->>'side'; END IF;
 END $$;
+-- desde 'incident' tambien se reenvia (actor 99, misma cuenta, pasa la guarda): N3 -> N2
+DO $$ DECLARE j jsonb; r public.allocation_plan_details; w date := date_trunc('week', current_date + 14)::date;
+BEGIN
+  UPDATE public.allocation_plan_details SET status = 'incident' WHERE id = 'd1000000-0000-0000-0000-000000000001';
+  PERFORM set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+  j := public.reroute_returned_sample('d1000000-0000-0000-0000-000000000001', 'b2000000-0000-0000-0000-000000000002', w);
+  PERFORM set_config('request.jwt.claim.sub','', true);
+  SELECT * INTO r FROM public.allocation_plan_details WHERE id = 'd1000000-0000-0000-0000-000000000001';
+  IF r.status <> 'pending' OR r.destination_node_id <> 'b2000000-0000-0000-0000-000000000002' OR r.tag_id <> 'T1' THEN
+    RAISE EXCEPTION 'FAIL reroute desde incident: % / %', j, row_to_json(r); END IF;
+END $$;
+-- preview sobre una muestra 'pending' -> no es devuelta
+SELECT pg_temp.expect_err($$SELECT public.suggest_reroute_returned_sample('d1000000-0000-0000-0000-000000000001', 'b3000000-0000-0000-0000-000000000003', date_trunc('week', current_date + 14)::date)$$, 'Sample is not returned-eligible');
 -- ya pending -> no es devuelta
 SELECT pg_temp.expect_err($$SELECT public.reroute_returned_sample('d1000000-0000-0000-0000-000000000001', 'b2000000-0000-0000-0000-000000000002', date_trunc('week', current_date + 14)::date)$$, 'Sample is not returned-eligible');
 -- cancelled -> rechazada (received dispara transfer_to_one_db con datos incompletos)
@@ -159,11 +215,13 @@ BEGIN
 END $$;
 -- permisos
 DO $$
-DECLARE f text := 'public.reroute_returned_sample(uuid,uuid,date)';
+DECLARE f text;
 BEGIN
-  IF has_function_privilege('anon', f, 'EXECUTE') THEN RAISE EXCEPTION 'FAIL anon puede ejecutar %', f; END IF;
-  IF NOT has_function_privilege('authenticated', f, 'EXECUTE') THEN RAISE EXCEPTION 'FAIL authenticated sin EXECUTE'; END IF;
-  IF NOT has_function_privilege('service_role', f, 'EXECUTE') THEN RAISE EXCEPTION 'FAIL service_role sin EXECUTE'; END IF;
+  FOREACH f IN ARRAY ARRAY['public.reroute_returned_sample(uuid,uuid,date)','public.suggest_reroute_returned_sample(uuid,uuid,date)'] LOOP
+    IF has_function_privilege('anon', f, 'EXECUTE') THEN RAISE EXCEPTION 'FAIL anon puede ejecutar %', f; END IF;
+    IF NOT has_function_privilege('authenticated', f, 'EXECUTE') THEN RAISE EXCEPTION 'FAIL authenticated sin EXECUTE en %', f; END IF;
+    IF NOT has_function_privilege('service_role', f, 'EXECUTE') THEN RAISE EXCEPTION 'FAIL service_role sin EXECUTE en %', f; END IF;
+  END LOOP;
 END $$;
 ROLLBACK;
 
@@ -174,19 +232,19 @@ BEGIN;
 INSERT INTO public.allocation_plan_details (id, account_id, plan_id, origin_node_id, destination_node_id, fecha_programada, status)
 VALUES ('d1000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001', 'cc000000-0000-0000-0000-000000000001',
         'b1000000-0000-0000-0000-000000000001', 'b2000000-0000-0000-0000-000000000002', current_date + 7, 'sent');
--- misma ciudad que el destino actual (N2): N1 y N3; N2 (destino) y N4 (otra ciudad) no aparecen
+-- misma ciudad que el destino actual (N2): solo N3; N2 (destino), N1 (origen) y N4 (otra ciudad) no aparecen
 DO $$ DECLARE ids text;
 BEGIN
   SELECT string_agg(auto_id || ':' || same_city::text, ',' ORDER BY same_city DESC, auto_id) INTO ids
     FROM public.list_nodes_for_sample_move('d1000000-0000-0000-0000-000000000001');
-  IF ids IS DISTINCT FROM 'N1:true,N3:true' THEN RAISE EXCEPTION 'FAIL lista=%', ids; END IF;
+  IF ids IS DISTINCT FROM 'N3:true' THEN RAISE EXCEPTION 'FAIL lista=%', ids; END IF;
 END $$;
 -- el orden de salida de la funcion es el declarado
 DO $$ DECLARE ids text;
 BEGIN
   SELECT string_agg(auto_id, ',') INTO ids
     FROM public.list_nodes_for_sample_move('d1000000-0000-0000-0000-000000000001');
-  IF ids IS DISTINCT FROM 'N1,N3' THEN RAISE EXCEPTION 'FAIL orden=%', ids; END IF;
+  IF ids IS DISTINCT FROM 'N3' THEN RAISE EXCEPTION 'FAIL orden=%', ids; END IF;
 END $$;
 -- un nodo sin panelista activo se excluye
 UPDATE public.panelists SET status = 'inactive' WHERE node_id = 'b3000000-0000-0000-0000-000000000003';
@@ -194,7 +252,7 @@ DO $$ DECLARE ids text;
 BEGIN
   SELECT string_agg(auto_id, ',' ORDER BY auto_id) INTO ids
     FROM public.list_nodes_for_sample_move('d1000000-0000-0000-0000-000000000001');
-  IF ids IS DISTINCT FROM 'N1' THEN RAISE EXCEPTION 'FAIL sin panelista activo: %', ids; END IF;
+  IF ids IS NOT NULL THEN RAISE EXCEPTION 'FAIL sin panelista activo: %', ids; END IF;
 END $$;
 -- cross-tenant (actor 98)
 DO $$
@@ -216,6 +274,7 @@ BEGIN
     'public.update_panelist_contact(uuid,text,text,text)',
     'public.insert_panelist_incident_auto(uuid,text,text,jsonb,uuid,text)',
     'public.reroute_returned_sample(uuid,uuid,date)',
+    'public.suggest_reroute_returned_sample(uuid,uuid,date)',
     'public.list_nodes_for_sample_move(uuid)',
     'public.mark_detail_received_manual(uuid)',
     'public.resolve_panelist_incident(uuid,text,text,text)',
@@ -227,7 +286,7 @@ BEGIN
     IF has_function_privilege('anon', f, 'EXECUTE') THEN RAISE EXCEPTION 'FAIL anon con EXECUTE en %', f; END IF;
   END LOOP;
 END $$;
--- las que solo van a authenticated: service_role no debe tener EXECUTE explicito
+-- las que solo van a authenticated: aqui no se comprueba service_role (los privilegios por defecto de Supabase pueden concederle EXECUTE)
 DO $$ DECLARE f text;
 BEGIN
   FOREACH f IN ARRAY ARRAY[
