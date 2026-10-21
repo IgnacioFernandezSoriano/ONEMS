@@ -2850,7 +2850,6 @@ reported_incidents.materials.real_qty,Quantité réelle
 reported_incidents.materials.blocking_badge,Bloquant
 reported_incidents.materials.from_central,Depuis le stock central
 reported_incidents.materials.from_donor,Depuis le donateur {name}
-reported_incidents.materials.to_purchase,Nécessite un achat (manuel/PDF)
 reported_incidents.materials.close_hint,La réception du matériel résout l'incident ; le congé n'est pas annulé et se termine à sa date.
 reported_incidents.materials.unmatched,Matériel introuvable dans le catalogue
 reported_incidents.materials.s1_title,Stock théorique
@@ -2990,3 +2989,8 @@ material_sheet.donor_confirms_telegram,Le panéliste donneur le confirme via Tel
 material_sheet.received_of,{received} sur {sent}
 stock.partially_received,Partiellement reçu
 stock.received_of,{received} sur {sent} reçus
+stock.cannot_delete_incident_shipment,Cet envoi appartient à un incident de matériel et ne peut pas être supprimé ni divisé depuis Stock. Gérez-le depuis l'incident.
+reported_incidents.materials.to_buy_title,À acheter
+reported_incidents.materials.to_buy_line,{name} ({code}) : {n}
+material_sheet.to_buy_title,À acheter
+material_sheet.purchase_origin,Achat

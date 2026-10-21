@@ -2850,7 +2850,6 @@ reported_incidents.materials.real_qty,الكمية الفعلية
 reported_incidents.materials.blocking_badge,معيق
 reported_incidents.materials.from_central,من المخزون المركزي
 reported_incidents.materials.from_donor,من المتبرع {name}
-reported_incidents.materials.to_purchase,يتطلب شراء (يدوي/PDF)
 reported_incidents.materials.close_hint,استلام المواد يحل الحادثة؛ لا تُلغى الإجازة وتنتهي تلقائيًا في تاريخها.
 reported_incidents.materials.unmatched,المادة غير موجودة في الكتالوج
 reported_incidents.materials.s1_title,المخزون النظري
@@ -2990,3 +2989,8 @@ material_sheet.donor_confirms_telegram,يؤكد العضو المانح ذلك �
 material_sheet.received_of,{received} من {sent}
 stock.partially_received,مستلم جزئياً
 stock.received_of,{received} من {sent} تم استلامها
+stock.cannot_delete_incident_shipment,هذه الشحنة تابعة لحادثة مواد ولا يمكن حذفها أو تقسيمها من المخزون. قم بإدارتها من الحادثة.
+reported_incidents.materials.to_buy_title,للشراء
+reported_incidents.materials.to_buy_line,{name} ({code}): {n}
+material_sheet.to_buy_title,للشراء
+material_sheet.purchase_origin,شراء

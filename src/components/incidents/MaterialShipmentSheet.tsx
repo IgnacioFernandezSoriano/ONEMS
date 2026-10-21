@@ -3,6 +3,7 @@ import { format, isValid, parseISO } from 'date-fns'
 import { supabase } from '@/lib/supabase'
 import { downloadCSV, printPDF } from '@/lib/exportUtils'
 import { BTN_SECONDARY } from './buttonStyles'
+import type { PurchaseLine } from '@/lib/hooks/useMaterialsTreatment'
 
 type TFn = (key: string, params?: Record<string, any>, fallback?: string) => string
 
@@ -10,6 +11,7 @@ interface Line {
   key: string
   shipmentId: string
   isCentral: boolean
+  isFirstOfShipment: boolean
   status: string
   origin: string
   destination: string
@@ -41,13 +43,21 @@ function describe(p: any, nodes: Record<string, string>): string {
   return [p.name, node, addr || DASH, p.mobile || DASH].filter(Boolean).join(' · ')
 }
 
-export function MaterialShipmentSheet({ incidentId, accountId, onChanged, t }: {
+// La hoja se puede imprimir/descargar siempre (tambien con la incidencia cerrada);
+// "Marcar enviado" solo con canMarkSent (incidencia abierta o en curso).
+// purchaseLines: lo que queda a compra al confirmar (payload.purchase_lines), con llegada purchaseDue.
+export function MaterialShipmentSheet({ incidentId, accountId, receiverPanelistId, purchaseLines, purchaseDue, canMarkSent, onChanged, t }: {
   incidentId: string
   accountId: string
+  receiverPanelistId: string | null
+  purchaseLines: PurchaseLine[]
+  purchaseDue: string | null
+  canMarkSent: boolean
   onChanged: () => Promise<void> | void
   t: TFn
 }) {
   const [lines, setLines] = useState<Line[] | null>(null)
+  const [receiverDesc, setReceiverDesc] = useState<string>(DASH)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const inFlight = useRef(false)
@@ -58,18 +68,22 @@ export function MaterialShipmentSheet({ incidentId, accountId, onChanged, t }: {
       .eq('panelist_incident_id', incidentId).eq('account_id', accountId).order('created_at')
     if (e1) throw e1
     const sh = ships ?? []
-    if (sh.length === 0) { setLines([]); return }
-    const { data: items, error: e2 } = await supabase.from('material_shipment_items')
-      .select('id, material_shipment_id, material_id, quantity_sent, quantity_received')
-      .in('material_shipment_id', sh.map((s: any) => s.id)).eq('account_id', accountId)
+    const shipIds = sh.map((s: any) => s.id)
+    const { data: items, error: e2 } = shipIds.length
+      ? await supabase.from('material_shipment_items')
+        .select('id, material_shipment_id, material_id, quantity_sent, quantity_received')
+        .in('material_shipment_id', shipIds).eq('account_id', accountId)
+      : { data: [] as any[], error: null }
     if (e2) throw e2
     const matIds = Array.from(new Set((items ?? []).map((i: any) => i.material_id)))
-    const panIds = Array.from(new Set(sh.flatMap((s: any) => [s.panelist_id, s.source_panelist_id]).filter(Boolean)))
+    const panIds = Array.from(new Set([...sh.flatMap((s: any) => [s.panelist_id, s.source_panelist_id]), receiverPanelistId].filter(Boolean)))
     const [mats, pans] = await Promise.all([
       matIds.length
         ? supabase.from('material_catalog').select('id, code, name').eq('account_id', accountId).in('id', matIds)
         : Promise.resolve({ data: [] as any[], error: null }),
-      supabase.from('panelists').select(PANELIST_COLS).eq('account_id', accountId).in('id', panIds)
+      panIds.length
+        ? supabase.from('panelists').select(PANELIST_COLS).eq('account_id', accountId).in('id', panIds)
+        : Promise.resolve({ data: [] as any[], error: null })
     ])
     if (mats.error) throw mats.error
     if (pans.error) throw pans.error
@@ -89,25 +103,31 @@ export function MaterialShipmentSheet({ incidentId, accountId, onChanged, t }: {
     sh.forEach((s: any) => {
       const origin = s.source_panelist_id ? (panMap[s.source_panelist_id] ?? DASH) : t(k('central_warehouse'))
       const destination = panMap[s.panelist_id] ?? DASH
-      ;(items ?? []).filter((i: any) => i.material_shipment_id === s.id).forEach((i: any) => {
+      ;(items ?? []).filter((i: any) => i.material_shipment_id === s.id).forEach((i: any, idx: number) => {
         const mat = matMap[i.material_id]
         out.push({
-          key: i.id, shipmentId: s.id, isCentral: !s.source_panelist_id, status: s.status ?? 'pending',
+          key: i.id, shipmentId: s.id, isCentral: !s.source_panelist_id, isFirstOfShipment: idx === 0, status: s.status ?? 'pending',
           origin, destination, code: mat?.code ?? DASH, material: mat?.name ?? DASH,
           sent: Number(i.quantity_sent) || 0, received: Number(i.quantity_received) || 0, due: fmtDate(s.expected_date)
         })
       })
     })
     setLines(out)
+    setReceiverDesc(receiverPanelistId ? (panMap[receiverPanelistId] ?? DASH) : DASH)
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [incidentId, accountId])
+  }, [incidentId, accountId, receiverPanelistId])
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { load().catch(e => setError(`${t('common.error')}: ${e?.message ?? String(e)}`)) }, [load])
 
-  if (!lines || lines.length === 0) {
+  if (!lines || (lines.length === 0 && purchaseLines.length === 0)) {
     return error ? <p className="text-sm text-red-600">{error}</p> : null
   }
+
+  // Bloque "A comprar": no son envios, solo informacion para la compra (origen Compra, destino el receptor)
+  const purchaseOrigin = t(k('purchase_origin'))
+  const purchaseStatus = t(k('to_buy_title'))
+  const purchaseDueText = fmtDate(purchaseDue)
 
   const statusLabel = (s: string) => t(k(`status.${s}`), undefined, s)
   const qtyText = (l: Line) => (l.received > 0 ? `${l.sent} (${t(k('received_of'), { received: l.received, sent: l.sent })})` : String(l.sent))
@@ -126,15 +146,20 @@ export function MaterialShipmentSheet({ incidentId, accountId, onChanged, t }: {
     finally { inFlight.current = false; setBusy(false) }
   }
 
+  const csvRow = (origin: string, destination: string, material: string, quantity: string, due: string, status: string) => ({
+    [t(k('col.origin'))]: safeCell(origin),
+    [t(k('col.destination'))]: safeCell(destination),
+    [t(k('col.material'))]: safeCell(material),
+    [t(k('col.quantity'))]: safeCell(quantity),
+    [t(k('col.due'))]: safeCell(due),
+    [t(k('col.status'))]: safeCell(status)
+  })
+
   const exportCsv = () => {
-    downloadCSV(lines.map(l => ({
-      [t(k('col.origin'))]: safeCell(l.origin),
-      [t(k('col.destination'))]: safeCell(l.destination),
-      [t(k('col.material'))]: safeCell(`${l.code} - ${l.material}`),
-      [t(k('col.quantity'))]: safeCell(qtyText(l)),
-      [t(k('col.due'))]: safeCell(l.due),
-      [t(k('col.status'))]: safeCell(statusLabel(l.status))
-    })), `material-shipments-${format(new Date(), 'yyyyMMdd')}.csv`)
+    downloadCSV([
+      ...lines.map(l => csvRow(l.origin, l.destination, `${l.code} - ${l.material}`, qtyText(l), l.due, statusLabel(l.status))),
+      ...purchaseLines.map(p => csvRow(purchaseOrigin, receiverDesc, `${p.code} - ${p.name}`, String(p.quantity), purchaseDueText, purchaseStatus))
+    ], `material-shipments-${format(new Date(), 'yyyyMMdd')}.csv`)
   }
 
   const COLS = ['origin', 'destination', 'material', 'quantity', 'due', 'status']
@@ -145,13 +170,18 @@ export function MaterialShipmentSheet({ incidentId, accountId, onChanged, t }: {
       <td>${escapeHtml(l.origin)}</td><td>${escapeHtml(l.destination)}</td>
       <td>${escapeHtml(l.code)} - ${escapeHtml(l.material)}</td><td>${escapeHtml(qtyText(l))}</td>
       <td>${escapeHtml(l.due)}</td><td>${escapeHtml(statusLabel(l.status))}</td></tr>`).join('')
+    const buy = purchaseLines.length === 0 ? '' : `<tr><td colspan="${COLS.length}" class="block">${escapeHtml(purchaseStatus)}</td></tr>`
+      + purchaseLines.map(p => `<tr>
+      <td>${escapeHtml(purchaseOrigin)}</td><td>${escapeHtml(receiverDesc)}</td>
+      <td>${escapeHtml(p.code)} - ${escapeHtml(p.name)}</td><td>${escapeHtml(p.quantity)}</td>
+      <td>${escapeHtml(purchaseDueText)}</td><td>${escapeHtml(purchaseStatus)}</td></tr>`).join('')
     const dir = document.documentElement.dir === 'rtl' ? 'rtl' : 'ltr'
     const html = `<!DOCTYPE html><html dir="${dir}"><head><meta charset="UTF-8"><title>${escapeHtml(t(k('title')))}</title>
 <style>body{font-family:Arial,sans-serif;margin:30px;color:#333}h1{font-size:22px;color:#10b981;border-bottom:3px solid #10b981;padding-bottom:10px}
 table{width:100%;border-collapse:collapse;font-size:12px}th{background:#10b981;color:#fff;padding:8px;text-align:start}
-td{border-bottom:1px solid #ddd;padding:8px;vertical-align:top}</style></head><body>
+td{border-bottom:1px solid #ddd;padding:8px;vertical-align:top}td.block{font-weight:bold;background:#f3f4f6}</style></head><body>
 <h1>${escapeHtml(t(k('title')))}</h1><p>${escapeHtml(format(new Date(), 'dd/MM/yyyy'))}</p>
-<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></body></html>`
+<table><thead><tr>${head}</tr></thead><tbody>${body}${buy}</tbody></table></body></html>`
     printPDF(html, 'material-shipments')
   }
 
@@ -184,13 +214,29 @@ td{border-bottom:1px solid #ddd;padding:8px;vertical-align:top}</style></head><b
                 <td className="py-1 pe-2">{l.due}</td>
                 <td className="py-1 pe-2">
                   <div>{statusLabel(l.status)}</div>
-                  {l.status === 'pending' && l.isCentral && (
+                  {/* Una sola accion por envio (en su primera linea) */}
+                  {l.isFirstOfShipment && l.status === 'pending' && l.isCentral && canMarkSent && (
                     <button disabled={busy} className={BTN_SECONDARY} onClick={() => markSent(l.shipmentId)}>{t(k('mark_sent'))}</button>
                   )}
-                  {l.status === 'pending' && !l.isCentral && (
+                  {l.isFirstOfShipment && l.status === 'pending' && !l.isCentral && (
                     <p className="text-xs text-gray-500">{t(k('donor_confirms_telegram'))}</p>
                   )}
                 </td>
+              </tr>
+            ))}
+            {purchaseLines.length > 0 && (
+              <tr className="border-t">
+                <td colSpan={COLS.length} className="py-1 pe-2 font-medium">{purchaseStatus}</td>
+              </tr>
+            )}
+            {purchaseLines.map(p => (
+              <tr key={`buy-${p.material_id || p.code}`} className="border-t align-top">
+                <td className="py-1 pe-2">{purchaseOrigin}</td>
+                <td className="py-1 pe-2">{receiverDesc}</td>
+                <td className="py-1 pe-2">{p.code} - {p.name}</td>
+                <td className="py-1 pe-2">{p.quantity}</td>
+                <td className="py-1 pe-2">{purchaseDueText}</td>
+                <td className="py-1 pe-2">{purchaseStatus}</td>
               </tr>
             ))}
           </tbody>

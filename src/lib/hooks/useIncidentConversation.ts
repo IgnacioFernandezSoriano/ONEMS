@@ -25,25 +25,33 @@ export function useIncidentConversation(kind: ConversationKind, incidentId: stri
   const [error, setError] = useState<string | null>(null)
   const inFlight = useRef(false)
   const alive = useRef(true)
+  // Recarga pedida mientras habia otra en vuelo (p. ej. tras enviar durante un poll): se repite al terminar
+  const again = useRef(false)
 
-  const reload = useCallback(async () => {
-    if (inFlight.current) return
+  const reload = useCallback(async (): Promise<void> => {
+    if (inFlight.current) { again.current = true; return }
     inFlight.current = true
     try {
-      const { data, error: e } = await supabase
-        .from('incident_message')
-        .select('*')
-        .eq('incident_kind', kind)
-        .eq('incident_id', incidentId)
-        .order('created_at', { ascending: true })
-      if (!alive.current) return
-      if (e) throw e
-      setMessages((data || []) as IncidentMessage[])
-      setError(null)
-    } catch (err: any) {
-      if (alive.current) setError(err.message ?? String(err))
+      do {
+        again.current = false
+        try {
+          const { data, error: e } = await supabase
+            .from('incident_message')
+            .select('*')
+            .eq('incident_kind', kind)
+            .eq('incident_id', incidentId)
+            .order('created_at', { ascending: true })
+          if (!alive.current) return
+          if (e) throw e
+          setMessages((data || []) as IncidentMessage[])
+          setError(null)
+        } catch (err: any) {
+          if (alive.current) setError(err.message ?? String(err))
+        }
+      } while (again.current && alive.current)
     } finally {
       inFlight.current = false
+      again.current = false
       if (alive.current) setLoading(false)
     }
   }, [kind, incidentId])

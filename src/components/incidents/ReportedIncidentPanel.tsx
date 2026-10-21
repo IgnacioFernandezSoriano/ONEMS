@@ -6,6 +6,8 @@ import { BTN_PRIMARY, BTN_SECONDARY } from './buttonStyles'
 import { ReportedIncidentHeader } from './ReportedIncidentHeader'
 import { ReturnedSampleActions } from './ReturnedSampleActions'
 import { MissingMaterialsSections } from './MissingMaterialsSections'
+import { readPurchaseLines } from '@/lib/hooks/useMaterialsTreatment'
+import { MaterialShipmentSheet } from './MaterialShipmentSheet'
 import { IncidentConversation } from './IncidentConversation'
 
 interface TFn {
@@ -63,7 +65,8 @@ export function ReportedIncidentPanel({ incidentId, onBack }: { incidentId: stri
       {/* Bloque de acción por categoría (playbook) */}
       <div className="border rounded p-4 mb-4">
         {!actionable && <p className="text-xs text-gray-500 mb-2">{t('reported_incidents.readonly.closed')}</p>}
-        <div className={actionable ? '' : 'pointer-events-none opacity-60'} aria-disabled={!actionable}>
+        {/* Cerrada: fieldset disabled bloquea de verdad los controles (raton y teclado), no solo el aspecto */}
+        <fieldset disabled={!actionable} aria-disabled={!actionable} className={`min-w-0 border-0 p-0 m-0 ${actionable ? '' : 'opacity-60'}`}>
         {inc.category === 'parcel_returned' ? (
           <ReturnedSampleActions detail={inc.detail} busy={busy} t={t}
             listNodesForMove={listNodesForMove} suggestRerouteReturnedSample={suggestRerouteReturnedSample}
@@ -80,7 +83,16 @@ export function ReportedIncidentPanel({ incidentId, onBack }: { incidentId: stri
         ) : (
           <p className="text-sm text-gray-500">{t('reported_incidents.action.support_only')}</p>
         )}
-        </div>
+        </fieldset>
+        {/* Hoja de envios FUERA del bloque de solo lectura: imprimir y CSV siempre; marcar enviado solo si es accionable */}
+        {inc.category === 'missing_materials' && (
+          <div className="mt-5">
+            <MaterialShipmentSheet key={inc.payload?.supply_executed_at ?? 'none'} incidentId={incidentId} accountId={inc.account_id}
+              receiverPanelistId={inc.panelist?.id ?? null} purchaseLines={readPurchaseLines(inc.payload)}
+              purchaseDue={inc.payload?.expected_date ?? null} canMarkSent={actionable} t={t}
+              onChanged={async () => { await markInProgress(); await load() }} />
+          </div>
+        )}
         {msg && <p className="text-sm mt-2">{msg}</p>}
       </div>
 

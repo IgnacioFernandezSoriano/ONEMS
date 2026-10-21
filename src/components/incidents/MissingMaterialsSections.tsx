@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { addDays, endOfMonth, format, isValid, parseISO } from 'date-fns'
-import { useMaterialsTreatment, applySourceMode, toSupplyPlan, type SupplyLine, type SourceMode, type PanelistStockRow, type AffectedSample } from '@/lib/hooks/useMaterialsTreatment'
+import { useMaterialsTreatment, applySourceMode, toSupplyPlan, readPurchaseLines, type SupplyLine, type SourceMode, type PanelistStockRow, type AffectedSample, type PurchaseLine } from '@/lib/hooks/useMaterialsTreatment'
 import { supabase } from '@/lib/supabase'
 import type { ReportedIncidentDetail } from '@/lib/types'
 import { BTN_PRIMARY, BTN_SECONDARY } from './buttonStyles'
 import { SupplyTable } from './SupplyTable'
-import { MaterialShipmentSheet } from './MaterialShipmentSheet'
 
 type TFn = (key: string, params?: Record<string, any>, fallback?: string) => string
 type Panelist = NonNullable<ReportedIncidentDetail['panelist']>
@@ -27,12 +26,16 @@ const fmtDate = (d: string | null | undefined) => {
 }
 
 // Fusiona un parche sobre el payload FRESCO de la BD (evita pisar cambios de otra sesion o pestana).
-async function mergePayload(incidentId: string, patch: Record<string, any>) {
+// Con unlessExecuted no escribe si el suministro ya se confirmo (otra pestana o sesion): devuelve false.
+async function mergePayload(incidentId: string, patch: Record<string, any>, opts?: { unlessExecuted?: boolean }): Promise<boolean> {
   const { data, error: e0 } = await supabase.from('panelist_incident').select('payload').eq('id', incidentId).single()
   if (e0) throw e0
+  const fresh = (data?.payload as Record<string, any> | null) ?? {}
+  if (opts?.unlessExecuted && fresh.supply_executed_at) return false
   const { error: e1 } = await supabase.from('panelist_incident')
-    .update({ payload: { ...((data?.payload as Record<string, any> | null) ?? {}), ...patch } }).eq('id', incidentId)
+    .update({ payload: { ...fresh, ...patch } }).eq('id', incidentId)
   if (e1) throw e1
+  return true
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -176,7 +179,7 @@ function SupplySection({ tr, accountId, incidentId, panelist, payload, executed,
   onChanged: () => Promise<void>
   t: TFn
 }) {
-  const { resolveSupplyV2, executeSupply, linkShipmentsToIncident, linkShipmentToIncident, daysWithoutStock } = tr
+  const { resolveSupplyV2, executeSupply, fetchIncidentShipments, linkShipmentsToIncident, linkShipmentToIncident, daysWithoutStock } = tr
   const done: string | null = payload?.supply_executed_at ?? null
   const [days, setDays] = useState('')
   const horizonEnd = useMemo(() => horizonFor(days), [days])
@@ -250,36 +253,43 @@ function SupplySection({ tr, accountId, incidentId, panelist, payload, executed,
     inFlight.current = true
     setBusy(true); setError(null)
     try {
-      // Reintento seguro: si los envios ya se crearon (fallo posterior, otra pestana o sesion), no se vuelven a crear.
-      // Quedan `pending`: el donante confirma el envio por Telegram y el central se marca enviado desde la hoja de envios.
-      let ids = created
-      if (!ids) {
-        const { data: fresh, error: e0 } = await supabase.from('panelist_incident').select('payload').eq('id', incidentId).single()
-        if (e0) throw e0
-        const fp = (fresh?.payload as Record<string, any> | null) ?? {}
-        const fd: string[] = Array.isArray(fp.donor_shipment_ids) ? fp.donor_shipment_ids : []
-        if (fp.central_shipment_id || fd.length > 0) ids = { centralShipmentId: fp.central_shipment_id ?? null, donorShipmentIds: fd }
-      }
-      if (!ids) {
-        // Fecha en que debe llegar cada envio (central/vecinos): siempre hoy + plazo habitual de envio.
-        // La compra no es un envio: payload.expected_date es solo la llegada de la compra (fin de la baja).
-        const shipExpected = format(addDays(new Date(), shipLead), DATE_FMT)
-        ids = await executeSupply(toSupplyPlan(effective), panelist.id, shipExpected)
-        setCreated(ids) // guarda en memoria (misma sesion) ANTES de persistir (guarda entre sesiones)
-        // Persistir los ids YA: si algo falla despues, un reintento (incluso tras recargar) no duplica envios
-        await mergePayload(incidentId, { central_shipment_id: ids.centralShipmentId, donor_shipment_ids: ids.donorShipmentIds })
-      }
+      // Otra pestana o sesion ya confirmo: no se crea ni se pisa nada, solo se recarga
+      const { data: fresh, error: e0 } = await supabase.from('panelist_incident').select('payload').eq('id', incidentId).single()
+      if (e0) throw e0
+      const fp = (fresh?.payload as Record<string, any> | null) ?? {}
+      if (fp.supply_executed_at) { await onChanged(); return }
+
+      // Reintento seguro: la BD manda. Los ids conocidos (memoria de esta sesion o payload) se enlazan
+      // primero a la incidencia; despues se leen los envios de la incidencia y SOLO se crean los origenes
+      // que faltan (un fallo parcial previo no duplica el central ni los donantes).
+      // Quedan `pending`: el donante confirma el envio por Telegram y el central se marca enviado desde la hoja.
+      const fd: unknown[] = Array.isArray(fp.donor_shipment_ids) ? fp.donor_shipment_ids : []
+      const known = Array.from(new Set([created?.centralShipmentId, ...(created?.donorShipmentIds ?? []), fp.central_shipment_id, ...fd]
+        .filter((x): x is string => typeof x === 'string' && x !== '')))
+      if (known.length > 0) await linkShipmentsToIncident(incidentId, known)
+      const existing = await fetchIncidentShipments(incidentId)
+      // Fecha en que debe llegar cada envio (central/vecinos): siempre hoy + plazo habitual de envio.
+      // La compra no es un envio: payload.expected_date es solo la llegada de la compra (fin de la baja).
+      const shipExpected = format(addDays(new Date(), shipLead), DATE_FMT)
+      const ids = await executeSupply(toSupplyPlan(effective), panelist.id, shipExpected, { incidentId, existing })
+      setCreated(ids) // guarda en memoria (misma sesion) ANTES de persistir
+      await mergePayload(incidentId, { central_shipment_id: ids.centralShipmentId, donor_shipment_ids: ids.donorShipmentIds })
       const allIds = [ids.centralShipmentId, ...ids.donorShipmentIds].filter(Boolean) as string[]
-      await linkShipmentsToIncident(incidentId, allIds)
+      await linkShipmentsToIncident(incidentId, allIds) // idempotente (ya enlazados en el INSERT)
       // Compatibilidad: linked_material_shipment_id sigue apuntando al envio central
       if (ids.centralShipmentId) await linkShipmentToIncident(incidentId, ids.centralShipmentId)
       const expected = hasPurchase ? expectedDate : null
-      await mergePayload(incidentId, {
+      const purchaseLines: PurchaseLine[] = effective
+        .filter(l => l.toPurchase > 0)
+        .map(l => ({ material_id: l.material_id, code: l.code, name: l.name, quantity: l.toPurchase }))
+      // Justo antes de la escritura final se relee el payload: si otra pestana ya confirmo, no se pisa
+      const written = await mergePayload(incidentId, {
         horizon_end: horizonEnd, expected_date: expected, days_without_stock: hasPurchase ? (dws?.businessDays ?? 0) : 0,
         central_shipment_id: ids.centralShipmentId, donor_shipment_ids: ids.donorShipmentIds,
+        purchase_lines: purchaseLines,
         supply_executed_at: new Date().toISOString()
-      })
-      onExecuted({ expectedDate: expected, centralShipmentId: ids.centralShipmentId, donorShipmentIds: ids.donorShipmentIds })
+      }, { unlessExecuted: true })
+      if (written) onExecuted({ expectedDate: expected, centralShipmentId: ids.centralShipmentId, donorShipmentIds: ids.donorShipmentIds })
       await onChanged()
     } catch (e: any) { setError(errMsg(t, e)) }
     finally { inFlight.current = false; setBusy(false) }
@@ -287,10 +297,19 @@ function SupplySection({ tr, accountId, incidentId, panelist, payload, executed,
 
   const shipIds = executed ? [executed.centralShipmentId, ...executed.donorShipmentIds].filter(Boolean) as string[] : []
   const showDate = done ? !!purchase : hasPurchase
+  const boughtLines = done ? readPurchaseLines(payload) : []
   return (
     <Section title={t(m('s2_title'))}>
       {error && <p className="text-sm text-red-600">{error}</p>}
       {done && <p className="text-sm text-gray-600 mb-2">{t(m('supply_done'), { date: fmtDate(done.slice(0, 10)) })}</p>}
+      {done && boughtLines.length > 0 && (
+        <div className="mb-2 text-sm">
+          <p className="font-medium">{t(m('to_buy_title'))}</p>
+          <ul className="list-disc ms-5">
+            {boughtLines.map(l => <li key={l.material_id || l.code}>{t(m('to_buy_line'), { name: l.name, code: l.code, n: l.quantity })}</li>)}
+          </ul>
+        </div>
+      )}
       {!done && (
         <div className="mb-2 flex flex-wrap items-center gap-2 text-sm">
           <label>{t(m('days_to_cover'))}</label>
@@ -370,7 +389,7 @@ function ReplanSection({ tr, incidentId, unavailabilityId, executed, purchase, n
     finally { inFlight.current = false; setBusy(false) }
   }
 
-  if (purchase === null && !unavailabilityId) return <Section title={t(m('s3_title'))}>{null}</Section>
+  if (purchase === null && !unavailabilityId) return null // calculando: sin cabecera vacia
   if (!purchase && !unavailabilityId) {
     return (
       <Section title={t(m('s3_title'))}>
@@ -434,7 +453,6 @@ export function MissingMaterialsSections({ incidentId, accountId, panelist, payl
         bajaId={bajaId} stockVersion={stockVersion} expectedDate={expectedDate} setExpectedDate={setExpectedDate}
         today={today} datePast={datePast} purchase={purchase} onPurchaseChange={(p, none) => { setLivePurchase(p); setLiveNothing(none) }}
         onExecuted={setLocal} onChanged={onChanged} t={t} />
-      <MaterialShipmentSheet key={payload?.supply_executed_at ?? 'none'} incidentId={incidentId} accountId={accountId} onChanged={onChanged} t={t} />
       <ReplanSection tr={tr} incidentId={incidentId} unavailabilityId={bajaId} executed={executed} purchase={purchase}
         nothingNeeded={!executed && liveNothing}
         expectedDate={expectedDate} datePast={datePast} onBajaCreated={setCreatedBajaId} onChanged={onChanged} t={t} />

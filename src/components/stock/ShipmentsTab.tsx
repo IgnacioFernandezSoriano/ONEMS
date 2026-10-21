@@ -283,13 +283,18 @@ export default function ShipmentsTab() {
       alert('Shipment deleted successfully')
       setSelectedShipmentIds(new Set())
     } catch (error: any) {
-      alert(`Error deleting shipment: ${error.message}`)
+      alert(error?.i18nKey ? t(error.i18nKey) : `Error deleting shipment: ${error.message}`)
     }
   }
 
   const handleDeleteSelected = async () => {
     if (selectedShipmentIds.size === 0) return
-    
+    // Los envios de una incidencia de materiales no se borran desde Stock: se avisa antes de borrar nada
+    if (shipments.some(s => selectedShipmentIds.has(s.id) && s.panelist_incident_id)) {
+      alert(t('stock.cannot_delete_incident_shipment'))
+      return
+    }
+
     const confirmed = confirm(`Delete ${selectedShipmentIds.size} shipment(s)? This action cannot be undone.`)
     if (!confirmed) return
 
@@ -300,7 +305,7 @@ export default function ShipmentsTab() {
       alert(`${selectedShipmentIds.size} shipment(s) deleted successfully`)
       setSelectedShipmentIds(new Set())
     } catch (error: any) {
-      alert(`Error deleting shipments: ${error.message}`)
+      alert(error?.i18nKey ? t(error.i18nKey) : `Error deleting shipments: ${error.message}`)
     }
   }
 
@@ -620,7 +625,6 @@ Note: Only panelists with assigned allocation plans will have shipments generate
                 <option value="">{t('stock.all_statuses')}</option>
                 <option value="pending">{t('stock.pending')}</option>
                 <option value="sent">{t('stock.sent')}</option>
-                <option value="partially_received">{t('stock.partially_received')}</option>
                 <option value="received">{t('stock.received')}</option>
                 <option value="cancelled">{t('stock.cancelled')}</option>
               </select>
@@ -893,7 +897,11 @@ Note: Only panelists with assigned allocation plans will have shipments generate
             setConfirmingShipment(null)
           }}
           onConfirm={async (shipmentId, confirmedItems, sentDate) => {
-            await confirmShipment(shipmentId, confirmedItems, sentDate)
+            try {
+              await confirmShipment(shipmentId, confirmedItems, sentDate)
+            } catch (e: any) {
+              throw e?.i18nKey ? new Error(t(e.i18nKey)) : e
+            }
             setShowConfirmModal(false)
             setConfirmingShipment(null)
           }}

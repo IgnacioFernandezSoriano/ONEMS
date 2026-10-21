@@ -68,6 +68,22 @@ export function toSupplyPlan(lines: SupplyLine[]): SupplyPlan {
   return plan
 }
 
+// Linea a comprar guardada al confirmar el suministro (payload.purchase_lines)
+export interface PurchaseLine { material_id: string; code: string; name: string; quantity: number }
+
+export function readPurchaseLines(payload: Record<string, any> | null | undefined): PurchaseLine[] {
+  const raw = payload?.purchase_lines
+  if (!Array.isArray(raw)) return []
+  return raw
+    .filter((r: any) => r && typeof r === 'object' && Number(r.quantity) > 0)
+    .map((r: any) => ({ material_id: String(r.material_id ?? ''), code: String(r.code ?? ''), name: String(r.name ?? ''), quantity: Number(r.quantity) }))
+}
+
+export interface ExistingIncidentShipments {
+  centralShipmentId: string | null
+  donorShipmentIds: Record<string, string> // source_panelist_id -> shipment id
+}
+
 export interface PanelistStockRow {
   material_id: string
   name: string
@@ -235,19 +251,48 @@ export function useMaterialsTreatment(accountIdOverride?: string) {
     })
   }, [accountId])
 
-  const executeSupply = useCallback(async (supplyPlan: SupplyPlan, receiverPanelistId: string, expectedDate?: string): Promise<{ centralShipmentId: string | null; donorShipmentIds: string[] }> => {
-    let centralShipmentId: string | null = null
-    const donorShipmentIds: string[] = []
+  // Envios ya creados para la incidencia (la BD es la fuente de idempotencia): central =
+  // source_panelist_id nulo; donantes por source_panelist_id. Se ignoran los cancelados.
+  const fetchIncidentShipments = useCallback(async (incidentId: string): Promise<ExistingIncidentShipments> => {
+    const out: ExistingIncidentShipments = { centralShipmentId: null, donorShipmentIds: {} }
+    if (!accountId) return out
+    const { data, error } = await supabase.from('material_shipments')
+      .select('id, source_panelist_id, created_at')
+      .eq('panelist_incident_id', incidentId)
+      .eq('account_id', accountId)
+      .neq('status', 'cancelled')
+      .order('created_at')
+    if (error) throw error
+    ;((data || []) as any[]).forEach(r => {
+      if (r.source_panelist_id) {
+        if (!out.donorShipmentIds[r.source_panelist_id]) out.donorShipmentIds[r.source_panelist_id] = r.id
+      } else if (!out.centralShipmentId) out.centralShipmentId = r.id
+    })
+    return out
+  }, [accountId])
+
+  const executeSupply = useCallback(async (
+    supplyPlan: SupplyPlan,
+    receiverPanelistId: string,
+    expectedDate?: string,
+    opts?: { incidentId?: string; existing?: ExistingIncidentShipments }
+  ): Promise<{ centralShipmentId: string | null; donorShipmentIds: string[] }> => {
+    // Lo ya existente en BD para la incidencia se reutiliza: solo se crean los origenes que faltan
+    // (un reintento tras un fallo parcial no duplica el central ni los donantes).
+    const existing = opts?.existing ?? { centralShipmentId: null, donorShipmentIds: {} }
+    let centralShipmentId: string | null = existing.centralShipmentId
+    const donorIds: Record<string, string> = { ...existing.donorShipmentIds }
 
     // Shipments are created as `pending` and NOT dispatched here (v2): the donor
     // confirms the dispatch by Telegram and the central shipment is marked as sent
-    // by the manager from the shipments sheet. The caller links every created
-    // shipment to the incident (linkShipmentsToIncident).
-    if (supplyPlan.fromCentral.length > 0) {
+    // by the manager from the shipments sheet. With opts.incidentId every shipment is
+    // linked to the incident on its own INSERT.
+    if (supplyPlan.fromCentral.length > 0 && !centralShipmentId) {
       const shipment = await createShipment({
         panelist_id: receiverPanelistId,
         items: supplyPlan.fromCentral.map(c => ({ material_id: c.material_id, quantity_sent: c.quantity })),
-        expected_date: expectedDate
+        expected_date: expectedDate,
+        panelist_incident_id: opts?.incidentId
       }, true)
       centralShipmentId = shipment.id
     }
@@ -259,17 +304,19 @@ export function useMaterialsTreatment(accountIdOverride?: string) {
         byDonor[d.donor_panelist_id].push({ material_id: d.material_id, quantity_sent: d.quantity })
       })
       for (const donorPanelistId of Object.keys(byDonor)) {
+        if (donorIds[donorPanelistId]) continue
         const donorShipment = await createShipment({
           panelist_id: receiverPanelistId,
           items: byDonor[donorPanelistId],
           source_panelist_id: donorPanelistId,
-          expected_date: expectedDate
+          expected_date: expectedDate,
+          panelist_incident_id: opts?.incidentId
         }, true)
-        donorShipmentIds.push(donorShipment.id)
+        donorIds[donorPanelistId] = donorShipment.id
       }
     }
 
-    return { centralShipmentId, donorShipmentIds }
+    return { centralShipmentId, donorShipmentIds: Object.values(donorIds) }
   }, [createShipment])
 
   const createDisplacementBaja = useCallback(async (incidentId: string, expectedDate: string): Promise<string> => {
@@ -374,6 +421,7 @@ export function useMaterialsTreatment(accountIdOverride?: string) {
     daysWithoutStock,
     resolveSupplyV2,
     executeSupply,
+    fetchIncidentShipments,
     createDisplacementBaja,
     linkShipmentToIncident,
     linkShipmentsToIncident

@@ -2858,7 +2858,6 @@ reported_incidents.materials.real_qty,Cantidad real
 reported_incidents.materials.blocking_badge,Bloqueante
 reported_incidents.materials.from_central,Desde stock central
 reported_incidents.materials.from_donor,Desde donante {name}
-reported_incidents.materials.to_purchase,Requiere compra (manual/PDF)
 reported_incidents.materials.close_hint,Recibir el material resuelve la incidencia; la baja no se cancela y termina sola en su fecha.
 reported_incidents.materials.unmatched,Material no encontrado en el catálogo
 reported_incidents.materials.s1_title,Stock teórico
@@ -2998,3 +2997,8 @@ material_sheet.donor_confirms_telegram,El panelista donante lo confirma por Tele
 material_sheet.received_of,{received} de {sent}
 stock.partially_received,Recibido en parte
 stock.received_of,{received} de {sent} recibidos
+stock.cannot_delete_incident_shipment,Este envío pertenece a una incidencia de materiales y no se puede borrar ni partir desde Stock. Gestiónalo desde la incidencia.
+reported_incidents.materials.to_buy_title,A comprar
+reported_incidents.materials.to_buy_line,{name} ({code}): {n}
+material_sheet.to_buy_title,A comprar
+material_sheet.purchase_origin,Compra

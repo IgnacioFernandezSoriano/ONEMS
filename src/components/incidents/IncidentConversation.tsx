@@ -40,7 +40,8 @@ export function IncidentConversation({ kind, incidentId }: { kind: ConversationK
       nearBottom.current = true
     } catch (e: any) {
       const m: string = e?.message ?? String(e)
-      setSendError(t('common.error') + ': ' + m + (m.includes('panelist has no telegram') ? ' — ' + t('incident_conversation.no_telegram') : ''))
+      // Sin Telegram: solo el aviso traducido (sin el texto tecnico en ingles)
+      setSendError(m.includes('panelist has no telegram') ? t('incident_conversation.no_telegram') : t('common.error') + ': ' + m)
     } finally { setSending(false) }
   }
 

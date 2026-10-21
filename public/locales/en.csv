@@ -2858,7 +2858,6 @@ reported_incidents.materials.real_qty,Real quantity
 reported_incidents.materials.blocking_badge,Blocking
 reported_incidents.materials.from_central,From central stock
 reported_incidents.materials.from_donor,From donor {name}
-reported_incidents.materials.to_purchase,Needs purchase (manual/PDF)
 reported_incidents.materials.close_hint,Receiving the material resolves the incident; the leave is not cancelled and ends on its own date.
 reported_incidents.materials.unmatched,Material not found in catalog
 reported_incidents.materials.s1_title,Theoretical stock
@@ -2998,3 +2997,8 @@ material_sheet.donor_confirms_telegram,The donor panelist confirms it via Telegr
 material_sheet.received_of,{received} of {sent}
 stock.partially_received,Partially received
 stock.received_of,{received} of {sent} received
+stock.cannot_delete_incident_shipment,This shipment belongs to a materials incident and cannot be deleted or split from Stock. Manage it from the incident.
+reported_incidents.materials.to_buy_title,To buy
+reported_incidents.materials.to_buy_line,{name} ({code}): {n}
+material_sheet.to_buy_title,To buy
+material_sheet.purchase_origin,Purchase
