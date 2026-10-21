@@ -314,6 +314,7 @@ DECLARE
   v_complete  boolean;
   v_resolved  boolean := false;
   v_released  uuid[];
+  v_held_before uuid[];
 BEGIN
   SELECT * INTO v_ship FROM public.material_shipments WHERE id = p_shipment_id FOR UPDATE;
   IF NOT FOUND THEN RAISE EXCEPTION 'shipment % not found', p_shipment_id; END IF;
@@ -392,6 +393,8 @@ BEGIN
 
   -- Libera ya lo que el nuevo stock cubre; si luego se resuelve la incidencia, esa resolucion libera el resto.
   v_released := public.refresh_material_hold(v_ship.panelist_id);
+  SELECT coalesce(array_agg(allocation_plan_detail_id), '{}') INTO v_held_before
+    FROM public.material_hold WHERE panelist_id = v_ship.panelist_id AND released_at IS NULL;
 
   IF v_incident IS NOT NULL THEN
     IF v_summary <> '' THEN
@@ -414,10 +417,18 @@ BEGIN
       PERFORM public.log_incident_message('reported', v_incident, 'internal', 'system',
         'Material recibido completo', jsonb_build_object('shipment_id', p_shipment_id));
       v_resolved := true;
-      -- resolve_panelist_incident ya libero los retenidos restantes: se anaden a los devueltos.
-      v_released := v_released || public.refresh_material_hold(v_ship.panelist_id);
     END IF;
   END IF;
+
+  -- Los retenidos que libero el cierre de la incidencia (resolve_panelist_incident) se suman a los
+  -- liberados por stock, sin duplicados y por fecha.
+  SELECT coalesce(array_agg(x.id ORDER BY d.fecha_programada, d.id), '{}') INTO v_released
+    FROM (SELECT unnest(v_released) AS id
+          UNION
+          SELECT h.allocation_plan_detail_id
+            FROM public.material_hold h
+           WHERE h.allocation_plan_detail_id = ANY (v_held_before) AND h.released_at IS NOT NULL) x
+    JOIN public.allocation_plan_details d ON d.id = x.id;
 
   RETURN jsonb_build_object(
     'status', CASE WHEN v_complete THEN 'received' ELSE 'partially_received' END,
@@ -512,7 +523,7 @@ DECLARE
   v_released uuid[] := '{}';
   v_id       uuid;
 BEGIN
-  SELECT account_id, node_id, (status = 'active') INTO v_acc, v_node, v_active FROM panelists WHERE id = p_panelist_id;
+  SELECT account_id, node_id, coalesce(status = 'active', false) INTO v_acc, v_node, v_active FROM panelists WHERE id = p_panelist_id;
   IF NOT FOUND THEN RAISE EXCEPTION 'panelist not found'; END IF;
   PERFORM pg_advisory_xact_lock(hashtextextended(p_panelist_id::text, 0));
 

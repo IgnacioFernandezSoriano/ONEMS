@@ -621,6 +621,26 @@ BEGIN
   IF cardinality(pg_temp.held()) <> 1 THEN RAISE EXCEPTION 'FAIL retenidos tras recepcion'; END IF;
 END $$;
 
+-- recepcion que COMPLETA la incidencia: el stock cubre 1 de 3 y el cierre libera los otros 2; se devuelven los 3
+DO $$
+DECLARE d1 uuid := (SELECT v FROM t_ids WHERE k='d1'); d2 uuid := (SELECT v FROM t_ids WHERE k='d2'); d3 uuid := (SELECT v FROM t_ids WHERE k='d3');
+        m1 uuid := (SELECT v FROM t_ids WHERE k='m1'); s uuid; r jsonb;
+BEGIN
+  PERFORM pg_temp.set_stock(0);
+  PERFORM public.refresh_material_hold('e1000000-0000-0000-0000-000000000001');
+  IF cardinality(pg_temp.held()) <> 3 THEN RAISE EXCEPTION 'FAIL previo cierre por recepcion'; END IF;
+  INSERT INTO public.material_shipments (account_id, panelist_id, status, panelist_incident_id)
+  VALUES ('a0000000-0000-0000-0000-000000000001','e1000000-0000-0000-0000-000000000001','sent','f0000000-0000-0000-0000-0000000000c1') RETURNING id INTO s;
+  INSERT INTO public.material_shipment_items (account_id, material_shipment_id, material_id, quantity_sent)
+  VALUES ('a0000000-0000-0000-0000-000000000001', s, m1, 10);
+  PERFORM set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+  r := public.receive_material_shipment_items(s, format('[{"material_id":"%s","quantity":10}]', m1)::jsonb);
+  PERFORM set_config('request.jwt.claim.sub','', true);
+  IF NOT (r->>'incident_resolved')::boolean THEN RAISE EXCEPTION 'FAIL no cerro la incidencia: %', r; END IF;
+  IF r->'released_detail_ids' <> to_jsonb(ARRAY[d1,d2,d3]) THEN RAISE EXCEPTION 'FAIL released_detail_ids al cerrar: %', r; END IF;
+  IF cardinality(pg_temp.held()) <> 0 THEN RAISE EXCEPTION 'FAIL quedan retenidos'; END IF;
+END $$;
+
 -- privilegios
 DO $$
 DECLARE f text;
