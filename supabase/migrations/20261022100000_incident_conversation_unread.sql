@@ -7,6 +7,11 @@ ALTER TABLE public.incident_message
   ADD COLUMN read_at     timestamptz,
   ADD COLUMN notified_at timestamptz;
 
+-- Los mensajes del panelista anteriores a esta migracion se dan por leidos y avisados
+-- (evita un email al manager sobre conversaciones de prueba ya vistas).
+UPDATE public.incident_message SET read_at = now(), notified_at = now()
+ WHERE direction = 'inbound' AND read_at IS NULL;
+
 CREATE INDEX incident_message_unread_idx
   ON public.incident_message (incident_kind, incident_id)
   WHERE direction = 'inbound' AND read_at IS NULL;
