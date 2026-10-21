@@ -8,7 +8,9 @@
 
 **Tech Stack:** n8n Cloud (`upu-one.app.n8n.cloud`), nodos Telegram / Postgres / OpenAI (`@n8n/n8n-nodes-langchain.openAi`) / Switch / Code; MCP `n8n-mcp` (`n8n_update_partial_workflow`, `n8n_validate_workflow`); repo backup `C:\Users\fernandezi\projects\ONE n8n\panelist_n8n` (`workflows/*.json`, flujo `feat/… → main`, commit DESPUÉS de promover).
 
-**Spec:** `docs/superpowers/specs/2026-10-20-incidencias-reportadas-tratamiento-v2-design.md` (§6, §9). Requiere **Plan 1 aplicado** (RPCs `insert_panelist_incident_auto`, `update_panelist_contact_v2` de 9 parámetros, `GRANT` a `service_role` de `mark_detail_received_manual`).
+**Spec:** `docs/superpowers/specs/2026-10-20-incidencias-reportadas-tratamiento-v2-design.md` (§6, §9).
+
+> **Orden (2026-10-21):** este plan se ejecuta **después del Plan 4** (`2026-10-21-incidencias-v2-4-bd-materiales-conversacion.md`, aplicado) y antes del Plan 6. El registro de cada mensaje en la conversación de la incidencia (`log_incident_message`) lo añade el Plan 6, Tarea 5; aquí basta con dejar los nodos con nombres estables. La categoría E (`how_to_send`) va al manager (no hay vídeos), como dice el spec. Requiere **Plan 1 aplicado** (RPCs `insert_panelist_incident_auto`, `update_panelist_contact_v2` de 9 parámetros, `GRANT` a `service_role` de `mark_detail_received_manual`).
 
 ## Global Constraints
 
