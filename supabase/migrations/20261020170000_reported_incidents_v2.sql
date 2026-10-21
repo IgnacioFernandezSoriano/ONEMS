@@ -109,12 +109,14 @@ BEGIN
     RAISE EXCEPTION 'invalid category'; END IF;
   SELECT account_id INTO v_account FROM panelists WHERE id = p_panelist_id;
   IF NOT FOUND THEN RAISE EXCEPTION 'panelist not found'; END IF;
+  -- Guarda multi-tenant ANTES de comparar la muestra: un usuario de otra cuenta no puede
+  -- averiguar a que cuenta pertenece una muestra por el mensaje de error.
+  PERFORM assert_same_account(v_account);
   IF p_detail_id IS NOT NULL THEN
     SELECT account_id INTO v_detail_account FROM allocation_plan_details WHERE id = p_detail_id;
     IF v_detail_account IS DISTINCT FROM v_account THEN
       RAISE EXCEPTION 'detail belongs to another account'; END IF;
   END IF;
-  PERFORM assert_same_account(v_account);
   INSERT INTO panelist_incident (account_id, panelist_id, category, description, payload,
                                  allocation_plan_detail_id, status, created_via, resolved_at)
   VALUES (v_account, p_panelist_id, p_category, p_description, p_payload,
@@ -158,3 +160,47 @@ END; $$;
 
 REVOKE ALL ON FUNCTION public.reroute_returned_sample(uuid,uuid,date) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.reroute_returned_sample(uuid,uuid,date) TO authenticated, service_role;
+
+-- ===== 5) list_nodes_for_sample_move =====
+-- Nodos candidatos para mover el destino de una muestra: misma cuenta y MISMA CIUDAD que el
+-- destino actual (el motor rechaza otras ciudades), con un panelista activo, sin el destino actual.
+-- same_city se mantiene por estabilidad de interfaz (siempre true).
+CREATE OR REPLACE FUNCTION public.list_nodes_for_sample_move(p_detail_id uuid)
+RETURNS TABLE (node_id uuid, auto_id text, city_name text, same_city boolean, panelist_name text)
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE v_d allocation_plan_details; v_city uuid;
+BEGIN
+  SELECT * INTO v_d FROM allocation_plan_details WHERE id = p_detail_id;
+  IF NOT FOUND THEN RAISE EXCEPTION 'Sample % not found', p_detail_id; END IF;
+
+  -- Guarda multi-tenant (igual que apply_sample_move).
+  IF auth.uid() IS NOT NULL AND NOT is_superadmin()
+     AND v_d.account_id IS DISTINCT FROM (SELECT pr.account_id FROM profiles pr WHERE pr.id = auth.uid()) THEN
+    RAISE EXCEPTION 'Cross-tenant access denied';
+  END IF;
+
+  IF v_d.destination_node_id IS NULL THEN RETURN; END IF;
+  SELECT n.city_id INTO v_city FROM nodes n WHERE n.id = v_d.destination_node_id;
+
+  RETURN QUERY
+  SELECT n.id, n.auto_id::text, c.name::text, true, pn.name::text
+    FROM nodes n
+    LEFT JOIN cities c ON c.id = n.city_id
+    CROSS JOIN LATERAL (
+      SELECT p.name FROM panelists p
+       WHERE p.node_id = n.id AND p.status = 'active'
+       ORDER BY p.name LIMIT 1) pn
+   WHERE n.account_id = v_d.account_id
+     AND n.id <> v_d.destination_node_id
+     AND COALESCE(n.status, 'active') = 'active'
+     AND n.city_id IS NOT DISTINCT FROM v_city
+   ORDER BY n.auto_id;
+END; $$;
+
+REVOKE ALL ON FUNCTION public.list_nodes_for_sample_move(uuid) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.list_nodes_for_sample_move(uuid) TO authenticated, service_role;
+
+-- ===== Permisos: mark_detail_received_manual =====
+-- Hoy solo 'authenticated' (y PUBLIC/anon por defecto); n8n (service_role) la usara para recepcion manual.
+REVOKE ALL ON FUNCTION public.mark_detail_received_manual(uuid) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.mark_detail_received_manual(uuid) TO authenticated, service_role;

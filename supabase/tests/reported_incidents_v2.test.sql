@@ -166,3 +166,60 @@ BEGIN
   IF NOT has_function_privilege('service_role', f, 'EXECUTE') THEN RAISE EXCEPTION 'FAIL service_role sin EXECUTE'; END IF;
 END $$;
 ROLLBACK;
+
+-- ===== Escenario 5: list_nodes_for_sample_move =====
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+INSERT INTO public.allocation_plan_details (id, account_id, plan_id, origin_node_id, destination_node_id, fecha_programada, status)
+VALUES ('d1000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001', 'cc000000-0000-0000-0000-000000000001',
+        'b1000000-0000-0000-0000-000000000001', 'b2000000-0000-0000-0000-000000000002', current_date + 7, 'sent');
+-- misma ciudad que el destino actual (N2): N1 y N3; N2 (destino) y N4 (otra ciudad) no aparecen
+DO $$ DECLARE ids text;
+BEGIN
+  SELECT string_agg(auto_id || ':' || same_city::text, ',' ORDER BY same_city DESC, auto_id) INTO ids
+    FROM public.list_nodes_for_sample_move('d1000000-0000-0000-0000-000000000001');
+  IF ids IS DISTINCT FROM 'N1:true,N3:true' THEN RAISE EXCEPTION 'FAIL lista=%', ids; END IF;
+END $$;
+-- el orden de salida de la funcion es el declarado
+DO $$ DECLARE ids text;
+BEGIN
+  SELECT string_agg(auto_id, ',') INTO ids
+    FROM public.list_nodes_for_sample_move('d1000000-0000-0000-0000-000000000001');
+  IF ids IS DISTINCT FROM 'N1,N3' THEN RAISE EXCEPTION 'FAIL orden=%', ids; END IF;
+END $$;
+-- un nodo sin panelista activo se excluye
+UPDATE public.panelists SET status = 'inactive' WHERE node_id = 'b3000000-0000-0000-0000-000000000003';
+DO $$ DECLARE ids text;
+BEGIN
+  SELECT string_agg(auto_id, ',' ORDER BY auto_id) INTO ids
+    FROM public.list_nodes_for_sample_move('d1000000-0000-0000-0000-000000000001');
+  IF ids IS DISTINCT FROM 'N1' THEN RAISE EXCEPTION 'FAIL sin panelista activo: %', ids; END IF;
+END $$;
+-- cross-tenant (actor 98)
+DO $$
+BEGIN
+  PERFORM set_config('request.jwt.claim.sub','98000000-0000-0000-0000-000000000098', true);
+  PERFORM pg_temp.expect_err($q$SELECT * FROM public.list_nodes_for_sample_move('d1000000-0000-0000-0000-000000000001')$q$, 'Cross-tenant access denied');
+  PERFORM set_config('request.jwt.claim.sub','', true);
+END $$;
+-- inexistente
+SELECT pg_temp.expect_err($$SELECT * FROM public.list_nodes_for_sample_move('d9000000-0000-0000-0000-000000000009')$$, 'Sample d9000000-0000-0000-0000-000000000009 not found');
+-- (destination_node_id es NOT NULL en la tabla: la rama 'sin destino' de la funcion es defensiva y no se puede forzar)
+ROLLBACK;
+
+-- ===== Permisos de las RPCs v2 =====
+DO $$ DECLARE f text;
+BEGIN
+  FOREACH f IN ARRAY ARRAY[
+    'public.update_panelist_contact_v2(uuid,text,text,text,text,text,text,text,text)',
+    'public.update_panelist_contact(uuid,text,text,text)',
+    'public.insert_panelist_incident_auto(uuid,text,text,jsonb,uuid,text)',
+    'public.reroute_returned_sample(uuid,uuid,date)',
+    'public.list_nodes_for_sample_move(uuid)',
+    'public.mark_detail_received_manual(uuid)'] LOOP
+    IF NOT has_function_privilege('authenticated', f, 'EXECUTE') OR NOT has_function_privilege('service_role', f, 'EXECUTE') THEN
+      RAISE EXCEPTION 'FAIL falta GRANT en %', f; END IF;
+    IF has_function_privilege('anon', f, 'EXECUTE') THEN RAISE EXCEPTION 'FAIL anon con EXECUTE en %', f; END IF;
+  END LOOP;
+END $$;
