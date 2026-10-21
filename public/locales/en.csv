@@ -2995,6 +2995,7 @@ material_sheet.download_csv,Download Excel (CSV)
 material_sheet.mark_sent,Mark as sent
 material_sheet.confirm_mark_sent,Mark this shipment as sent? Stock will be updated.
 material_sheet.donor_confirms_telegram,The donor panelist confirms it via Telegram
+material_sheet.empty,This incident has no shipments
 material_sheet.received_of,{received} of {sent}
 stock.partially_received,Partially received
 stock.received_of,{received} of {sent} received

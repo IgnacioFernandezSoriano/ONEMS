@@ -1,8 +1,9 @@
 import { supabase } from './supabase'
 
 /**
- * Suma las cantidades ya en camino (envíos en 'pending'/'sent', aún no recibidos
+ * Suma las cantidades ya en camino (envíos en 'pending'/'sent'/'partially_received', aún no recibidos del todo
  * ni cancelados) por panelista+material, para descontarlas de la necesidad calculada.
+ * En los parcialmente recibidos solo cuenta lo que falta por llegar (enviado - recibido).
  */
 async function getInTransitMap(
   accountId: string, panelistIds: string[], materialIds: string[], excludeIncidentId?: string, strict = false
@@ -12,14 +13,14 @@ async function getInTransitMap(
   // La columna panelist_incident_id solo se pide cuando hay que excluir una incidencia
   // (los callers de siempre mantienen exactamente la misma consulta).
   const cols = excludeIncidentId
-    ? 'panelist_id, status, panelist_incident_id, items:material_shipment_items(material_id, quantity_sent)'
-    : 'panelist_id, status, items:material_shipment_items(material_id, quantity_sent)'
+    ? 'panelist_id, status, panelist_incident_id, items:material_shipment_items(material_id, quantity_sent, quantity_received)'
+    : 'panelist_id, status, items:material_shipment_items(material_id, quantity_sent, quantity_received)'
   const { data, error } = await supabase
     .from('material_shipments')
     .select(cols)
     .eq('account_id', accountId)
     .in('panelist_id', panelistIds)
-    .in('status', ['pending', 'sent'])   // en camino, aún no recibido ni cancelado
+    .in('status', ['pending', 'sent', 'partially_received'])   // en camino, aún no recibido ni cancelado
   // strict (llamadas con opciones, p. ej. la incidencia de materiales): un fallo se propaga en vez
   // de calcular como si no hubiera nada en camino. Sin opciones se conserva el comportamiento de
   // siempre (las pantallas de necesidades lo toleran, p. ej. listas IN muy largas).
@@ -31,7 +32,7 @@ async function getInTransitMap(
     items.forEach((it: any) => {
       if (!materialIds.includes(it.material_id)) return
       const key = `${s.panelist_id}_${it.material_id}`
-      map[key] = (map[key] || 0) + Number(it.quantity_sent)
+      map[key] = (map[key] || 0) + Math.max(0, Number(it.quantity_sent) - Number(it.quantity_received ?? 0))
     })
   })
   return map

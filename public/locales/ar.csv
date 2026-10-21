@@ -2987,6 +2987,7 @@ material_sheet.download_csv,تنزيل Excel (CSV)
 material_sheet.mark_sent,تحديد كمُرسل
 material_sheet.confirm_mark_sent,هل تريد تحديد هذه الشحنة كمُرسلة؟ سيتم تحديث المخزون.
 material_sheet.donor_confirms_telegram,يؤكد العضو المانح ذلك عبر Telegram
+material_sheet.empty,لا توجد شحنات لهذه الحادثة
 material_sheet.received_of,{received} من {sent}
 stock.partially_received,مستلم جزئياً
 stock.received_of,{received} من {sent} تم استلامها

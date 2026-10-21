@@ -620,6 +620,7 @@ Note: Only panelists with assigned allocation plans will have shipments generate
                 <option value="">{t('stock.all_statuses')}</option>
                 <option value="pending">{t('stock.pending')}</option>
                 <option value="sent">{t('stock.sent')}</option>
+                <option value="partially_received">{t('stock.partially_received')}</option>
                 <option value="received">{t('stock.received')}</option>
                 <option value="cancelled">{t('stock.cancelled')}</option>
               </select>
@@ -772,6 +773,17 @@ Note: Only panelists with assigned allocation plans will have shipments generate
                       <div className="text-sm font-medium text-gray-900">
                         {shipment.shipment_number || 'N/A'}
                       </div>
+                      <div
+                        className={`text-xs font-medium ${
+                          shipment.status === 'sent' ? 'text-blue-600'
+                            : shipment.status === 'partially_received' ? 'text-amber-600'
+                            : shipment.status === 'received' ? 'text-green-600'
+                            : shipment.status === 'cancelled' ? 'text-red-600'
+                            : 'text-gray-500'
+                        }`}
+                      >
+                        {t(`stock.${shipment.status}`)}
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm font-medium text-gray-900">
@@ -789,6 +801,11 @@ Note: Only panelists with assigned allocation plans will have shipments generate
                               <div key={item.id} className="flex items-center justify-between gap-2">
                                 <span>
                                   {item.material?.code}: {item.quantity_sent} {item.material?.unit_measure}
+                                  {(shipment.status === 'partially_received' || (item.quantity_received ?? 0) > 0) && (
+                                    <span className="ml-1 text-xs text-gray-500">
+                                      ({t('stock.received_of', { received: item.quantity_received ?? 0, sent: item.quantity_sent })})
+                                    </span>
+                                  )}
                                 </span>
                                 {shipment.status === 'pending' && (
                                   <button
