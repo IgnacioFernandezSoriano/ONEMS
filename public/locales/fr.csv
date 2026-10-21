@@ -2851,7 +2851,7 @@ reported_incidents.materials.blocking_badge,Bloquant
 reported_incidents.materials.from_central,Depuis le stock central
 reported_incidents.materials.from_donor,Depuis le donateur {name}
 reported_incidents.materials.to_purchase,Nécessite un achat (manuel/PDF)
-reported_incidents.materials.close_hint,Le congé se ferme automatiquement lorsque le panéliste confirme la réception.
+reported_incidents.materials.close_hint,La réception du matériel résout l'incident ; le congé n'est pas annulé et se termine à sa date.
 reported_incidents.materials.unmatched,Matériel introuvable dans le catalogue
 reported_incidents.materials.s1_title,Stock théorique
 reported_incidents.materials.s2_title,Besoins et approvisionnement
@@ -2859,10 +2859,6 @@ reported_incidents.materials.s3_title,Replanifier
 reported_incidents.materials.zero_stock,Mettre le stock à zéro
 reported_incidents.materials.zero_confirm,Mettre à zéro tout le stock de matériel de ce panéliste ?
 reported_incidents.materials.zero_done,{n} matériels mis à zéro
-reported_incidents.materials.source,Origine
-reported_incidents.materials.source_central,Stock central
-reported_incidents.materials.source_donor,Surplus de {name}
-reported_incidents.materials.source_purchase,Achat
 reported_incidents.materials.expected_date,Date d'arrivée prévue
 reported_incidents.materials.days_without_stock,{n} jours ouvrés sans stock
 reported_incidents.materials.affected_samples,Échantillons concernés
@@ -2872,9 +2868,18 @@ reported_incidents.materials.supply_done,Approvisionnement confirmé le {date}
 reported_incidents.materials.create_baja_replan,Créer le congé pour manque de matériel et replanifier
 reported_incidents.materials.go_to_unavailability,Ouvrir l'incident d'indisponibilité
 reported_incidents.materials.no_stock_rows,Aucun enregistrement de stock
-reported_incidents.materials.source_plan,Conserver la répartition prévue
+reported_incidents.materials.days_to_cover,Jours de besoin à couvrir
+reported_incidents.materials.days_to_cover_hint,Vide = jusqu'à la fin du mois. Calculé jusqu'au {date}
+reported_incidents.materials.col_need,Besoin
+reported_incidents.materials.col_neighbours,Voisins
+reported_incidents.materials.col_central,Central
+reported_incidents.materials.col_purchase,Achat
+reported_incidents.materials.source_proposal,Proposition
+reported_incidents.materials.source_only_neighbours,Voisins uniquement
+reported_incidents.materials.source_only_central,Central uniquement
+reported_incidents.materials.source_purchase_all,Tout acheter
+reported_incidents.materials.no_purchase_no_baja,Tout le matériel est couvert par les voisins ou le stock central : aucun congé ni replanification n'est nécessaire.
 reported_incidents.materials.change_source,Changer l'origine
-reported_incidents.materials.send_shipments,Envoyer les envois en attente
 reported_incidents.action.new_date,Nouvelle date
 reported_incidents.action.reschedule,Reprogrammer
 reported_incidents.action.cancel_shipment,Annuler l'envoi

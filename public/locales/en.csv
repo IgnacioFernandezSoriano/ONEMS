@@ -2859,7 +2859,7 @@ reported_incidents.materials.blocking_badge,Blocking
 reported_incidents.materials.from_central,From central stock
 reported_incidents.materials.from_donor,From donor {name}
 reported_incidents.materials.to_purchase,Needs purchase (manual/PDF)
-reported_incidents.materials.close_hint,The leave closes automatically when the panelist confirms reception.
+reported_incidents.materials.close_hint,Receiving the material resolves the incident; the leave is not cancelled and ends on its own date.
 reported_incidents.materials.unmatched,Material not found in catalog
 reported_incidents.materials.s1_title,Theoretical stock
 reported_incidents.materials.s2_title,Needs and supply
@@ -2867,10 +2867,6 @@ reported_incidents.materials.s3_title,Re-plan
 reported_incidents.materials.zero_stock,Set stock to zero
 reported_incidents.materials.zero_confirm,Set all of this panelist's material stock to zero?
 reported_incidents.materials.zero_done,{n} materials set to zero
-reported_incidents.materials.source,Source
-reported_incidents.materials.source_central,Central stock
-reported_incidents.materials.source_donor,Surplus from {name}
-reported_incidents.materials.source_purchase,Purchase
 reported_incidents.materials.expected_date,Expected arrival
 reported_incidents.materials.days_without_stock,{n} business days without stock
 reported_incidents.materials.affected_samples,Affected samples
@@ -2880,9 +2876,18 @@ reported_incidents.materials.supply_done,Supply confirmed on {date}
 reported_incidents.materials.create_baja_replan,Create leave for missing materials and re-plan
 reported_incidents.materials.go_to_unavailability,Open the unavailability incident
 reported_incidents.materials.no_stock_rows,No stock records
-reported_incidents.materials.source_plan,Planned split
+reported_incidents.materials.days_to_cover,Days of need to cover
+reported_incidents.materials.days_to_cover_hint,Empty = until the end of the month. Calculated until {date}
+reported_incidents.materials.col_need,Need
+reported_incidents.materials.col_neighbours,Neighbours
+reported_incidents.materials.col_central,Central
+reported_incidents.materials.col_purchase,Purchase
+reported_incidents.materials.source_proposal,Proposal
+reported_incidents.materials.source_only_neighbours,Neighbours only
+reported_incidents.materials.source_only_central,Central only
+reported_incidents.materials.source_purchase_all,Purchase all
+reported_incidents.materials.no_purchase_no_baja,All material is covered by neighbours or the central warehouse: no leave or re-plan is needed.
 reported_incidents.materials.change_source,Change source
-reported_incidents.materials.send_shipments,Send pending shipments
 reported_incidents.action.new_date,New date
 reported_incidents.action.reschedule,Reschedule
 reported_incidents.action.cancel_shipment,Cancel shipment

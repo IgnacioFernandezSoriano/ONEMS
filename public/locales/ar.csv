@@ -2851,7 +2851,7 @@ reported_incidents.materials.blocking_badge,معيق
 reported_incidents.materials.from_central,من المخزون المركزي
 reported_incidents.materials.from_donor,من المتبرع {name}
 reported_incidents.materials.to_purchase,يتطلب شراء (يدوي/PDF)
-reported_incidents.materials.close_hint,تُغلق الإجازة تلقائيًا عند تأكيد المشارك للاستلام.
+reported_incidents.materials.close_hint,استلام المواد يحل الحادثة؛ لا تُلغى الإجازة وتنتهي تلقائيًا في تاريخها.
 reported_incidents.materials.unmatched,المادة غير موجودة في الكتالوج
 reported_incidents.materials.s1_title,المخزون النظري
 reported_incidents.materials.s2_title,الاحتياج والتوريد
@@ -2859,10 +2859,6 @@ reported_incidents.materials.s3_title,إعادة التخطيط
 reported_incidents.materials.zero_stock,تصفير المخزون
 reported_incidents.materials.zero_confirm,هل تريد تصفير كل مخزون المواد لهذا المشارك؟
 reported_incidents.materials.zero_done,تم تصفير {n} مواد
-reported_incidents.materials.source,المصدر
-reported_incidents.materials.source_central,المخزون المركزي
-reported_incidents.materials.source_donor,فائض من {name}
-reported_incidents.materials.source_purchase,شراء
 reported_incidents.materials.expected_date,تاريخ الوصول المتوقع
 reported_incidents.materials.days_without_stock,{n} أيام عمل بدون مخزون
 reported_incidents.materials.affected_samples,العينات المتأثرة
@@ -2872,9 +2868,18 @@ reported_incidents.materials.supply_done,تم تأكيد التوريد بتار
 reported_incidents.materials.create_baja_replan,إنشاء إجازة بسبب نقص المواد وإعادة التخطيط
 reported_incidents.materials.go_to_unavailability,فتح حادثة عدم التوفر
 reported_incidents.materials.no_stock_rows,لا توجد سجلات مخزون
-reported_incidents.materials.source_plan,الإبقاء على التوزيع المخطط
+reported_incidents.materials.days_to_cover,أيام الاحتياج المطلوب تغطيتها
+reported_incidents.materials.days_to_cover_hint,فارغ = حتى نهاية الشهر. يُحسب حتى {date}
+reported_incidents.materials.col_need,الاحتياج
+reported_incidents.materials.col_neighbours,الجيران
+reported_incidents.materials.col_central,المركزي
+reported_incidents.materials.col_purchase,شراء
+reported_incidents.materials.source_proposal,المقترح
+reported_incidents.materials.source_only_neighbours,الجيران فقط
+reported_incidents.materials.source_only_central,المركزي فقط
+reported_incidents.materials.source_purchase_all,شراء الكل
+reported_incidents.materials.no_purchase_no_baja,كل المواد مغطاة من الجيران أو من المخزون المركزي: لا حاجة إلى إجازة أو إعادة تخطيط.
 reported_incidents.materials.change_source,تغيير المصدر
-reported_incidents.materials.send_shipments,إرسال الشحنات المعلقة
 reported_incidents.action.new_date,تاريخ جديد
 reported_incidents.action.reschedule,إعادة الجدولة
 reported_incidents.action.cancel_shipment,إلغاء الشحنة

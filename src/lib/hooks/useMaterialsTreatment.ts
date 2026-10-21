@@ -21,6 +21,62 @@ export interface SupplyPlan {
   toPurchase: { material_id: string; quantity: number }[]
 }
 
+// Linea de suministro por material (v2: vecinos de la misma ciudad -> central -> compra).
+// `donors` y `centralAvailable` son la disponibilidad completa de cada origen: la pantalla
+// los usa para aplicar los cambios de origen del manager sin superar lo disponible.
+export interface SupplyLine {
+  material_id: string
+  code: string
+  name: string
+  is_blocking: boolean
+  need: number
+  fromNeighbours: { donor_panelist_id: string; donor_name: string; quantity: number }[]
+  fromCentral: number
+  toPurchase: number
+  donors: { donor_panelist_id: string; donor_name: string; available: number }[]
+  centralAvailable: number
+}
+
+// Restos por debajo de esto son error de coma flotante, no cantidad real (no es redondeo de cantidades)
+const EPS = 1e-9
+
+// Origen elegido por el manager para un material en la pantalla de suministro
+export type SourceMode = 'proposal' | 'neighbours_only' | 'central_only' | 'purchase_all'
+
+// Aplica el origen elegido por el manager a una linea. Nunca supera lo disponible en el
+// origen elegido (excedente de los vecinos / stock central): lo que no cabe pasa a compra.
+export function applySourceMode(line: SupplyLine, mode: SourceMode): SupplyLine {
+  if (mode === 'proposal') return line
+  const base = { ...line, fromNeighbours: [] as SupplyLine['fromNeighbours'], fromCentral: 0, toPurchase: line.need }
+  if (mode === 'purchase_all') return base
+  if (mode === 'central_only') {
+    const q = Math.min(line.centralAvailable, line.need)
+    const left = q > 0 ? line.need - q : line.need
+    return { ...base, fromCentral: q > 0 ? q : 0, toPurchase: left > EPS ? left : 0 }
+  }
+  let remaining = line.need
+  for (const d of line.donors) {
+    if (remaining <= EPS) break
+    const q = Math.min(d.available, remaining)
+    base.fromNeighbours.push({ donor_panelist_id: d.donor_panelist_id, donor_name: d.donor_name, quantity: q })
+    remaining -= q
+  }
+  return { ...base, toPurchase: remaining > EPS ? remaining : 0 }
+}
+
+// Convierte las lineas (ya con los cambios de origen) al plan que espera executeSupply.
+export function toSupplyPlan(lines: SupplyLine[]): SupplyPlan {
+  const plan: SupplyPlan = { fromCentral: [], fromDonor: [], toPurchase: [] }
+  lines.forEach(l => {
+    if (l.fromCentral > 0) plan.fromCentral.push({ material_id: l.material_id, quantity: l.fromCentral })
+    l.fromNeighbours.filter(n => n.quantity > 0).forEach(n => plan.fromDonor.push({
+      material_id: l.material_id, quantity: n.quantity, donor_panelist_id: n.donor_panelist_id, donor_name: n.donor_name
+    }))
+    if (l.toPurchase > 0) plan.toPurchase.push({ material_id: l.material_id, quantity: l.toPurchase })
+  })
+  return plan
+}
+
 export interface PanelistStockRow {
   material_id: string
   name: string
@@ -163,15 +219,123 @@ export function useMaterialsTreatment(accountIdOverride?: string) {
     return plan
   }, [accountId])
 
+  // v2 (anexo falta de material §3, §8b.5): una sola llamada a calculatePanelistRequirements
+  // da la necesidad de TODOS los panelistas en el horizonte. Necesidad del receptor = su linea
+  // neta (ya descuenta su stock y lo en camino que no sea de esta incidencia). Donantes =
+  // panelistas activos cuyo nodo esta en la misma ciudad (nodes.city_id), con
+  // excedente = stock - necesidad bruta propia en el mismo horizonte (> 0), de mayor a menor.
+  // Despues el almacen central y el resto a compra. Sin redondeos.
+  const resolveSupplyV2 = useCallback(async (
+    panelistId: string,
+    horizonEnd: string,
+    opts?: { excludeIncidentId?: string }
+  ): Promise<SupplyLine[]> => {
+    if (!accountId) return []
+    const today = format(new Date(), 'yyyy-MM-dd')
+    const all = await calculatePanelistRequirements(accountId, today, horizonEnd,
+      { excludeIncidentId: opts?.excludeIncidentId, includeCovered: true })
+    const own = (all.find(r => r.panelist_id === panelistId)?.materials || []).filter(x => x.quantity_needed > 0)
+    if (own.length === 0) return []
+    const materialIds = own.map(x => x.material_id)
+
+    // Necesidad bruta propia de cada panelista en el horizonte (para el excedente de los donantes)
+    const grossMap: Record<string, number> = {}
+    all.forEach(r => {
+      if (!r.panelist_id) return
+      r.materials.forEach(x => {
+        const k = `${r.panelist_id}_${x.material_id}`
+        grossMap[k] = (grossMap[k] || 0) + Number(x.gross_quantity ?? x.quantity_needed)
+      })
+    })
+
+    const { data: catalog, error: eCat } = await supabase
+      .from('material_catalog').select('id, is_blocking').in('id', materialIds)
+    if (eCat) throw eCat
+    const blocking: Record<string, boolean> = {}
+    ;(catalog || []).forEach((c: any) => { blocking[c.id] = !!c.is_blocking })
+
+    // Almacen central: filas de la cuenta (las mismas que descuenta send_material_shipment),
+    // limitadas a ubicacion central/regulador o sin ubicacion. Si hubiera varias filas por
+    // material se toma la mayor (send_material_shipment descuenta la cantidad en cada fila).
+    const { data: central, error: eCentral } = await supabase
+      .from('material_stocks')
+      .select('material_id, quantity, location_type')
+      .eq('account_id', accountId)
+      .in('material_id', materialIds)
+      .or('location_type.is.null,location_type.in.(central,regulator)')
+    if (eCentral) throw eCentral
+    const centralMap: Record<string, number> = {}
+    ;(central || []).forEach((r: any) => {
+      centralMap[r.material_id] = Math.max(centralMap[r.material_id] ?? 0, Number(r.quantity) || 0)
+    })
+
+    // Donantes: panelistas activos de la misma ciudad (por su nodo), distintos del receptor
+    let donorList: { id: string; name: string }[] = []
+    const { data: recv, error: eRecv } = await supabase
+      .from('panelists').select('node:nodes(city_id)').eq('id', panelistId).maybeSingle()
+    if (eRecv) throw eRecv
+    const cityId: string | null = (recv as any)?.node?.city_id ?? null
+    if (cityId) {
+      const { data: cityNodes, error: eNodes } = await supabase
+        .from('nodes').select('id').eq('account_id', accountId).eq('city_id', cityId)
+      if (eNodes) throw eNodes
+      const nodeIds = (cityNodes || []).map((n: any) => n.id)
+      if (nodeIds.length > 0) {
+        const { data: ps, error: ePs } = await supabase
+          .from('panelists').select('id, name')
+          .eq('account_id', accountId).eq('status', 'active').in('node_id', nodeIds).neq('id', panelistId)
+        if (ePs) throw ePs
+        donorList = (ps || []).map((p: any) => ({ id: p.id, name: p.name ?? '' }))
+      }
+    }
+    const donorStock: Record<string, number> = {}
+    if (donorList.length > 0) {
+      const { data: st, error: eSt } = await supabase
+        .from('panelist_material_stocks').select('panelist_id, material_id, quantity')
+        .eq('account_id', accountId).in('panelist_id', donorList.map(d => d.id)).in('material_id', materialIds)
+      if (eSt) throw eSt
+      ;(st || []).forEach((r: any) => { donorStock[`${r.panelist_id}_${r.material_id}`] = Number(r.quantity) || 0 })
+    }
+
+    return own.map(x => {
+      const need = Number(x.quantity_needed)
+      const donors = donorList
+        .map(d => {
+          const k = `${d.id}_${x.material_id}`
+          return { donor_panelist_id: d.id, donor_name: d.name, available: (donorStock[k] || 0) - (grossMap[k] || 0) }
+        })
+        .filter(d => d.available > 0)
+        .sort((a, b) => b.available - a.available)
+      const centralAvailable = centralMap[x.material_id] || 0
+      const line: SupplyLine = {
+        material_id: x.material_id, code: x.material_code, name: x.material_name,
+        is_blocking: blocking[x.material_id] ?? false, need,
+        fromNeighbours: [], fromCentral: 0, toPurchase: 0, donors, centralAvailable
+      }
+      let remaining = need
+      for (const d of donors) {
+        if (remaining <= EPS) break
+        const q = Math.min(d.available, remaining)
+        line.fromNeighbours.push({ donor_panelist_id: d.donor_panelist_id, donor_name: d.donor_name, quantity: q })
+        remaining -= q
+      }
+      if (remaining > EPS && centralAvailable > 0) {
+        line.fromCentral = Math.min(centralAvailable, remaining)
+        remaining -= line.fromCentral
+      }
+      line.toPurchase = remaining > EPS ? remaining : 0
+      return line
+    })
+  }, [accountId])
+
   const executeSupply = useCallback(async (supplyPlan: SupplyPlan, receiverPanelistId: string): Promise<{ centralShipmentId: string | null; donorShipmentIds: string[] }> => {
     let centralShipmentId: string | null = null
     const donorShipmentIds: string[] = []
 
-    // Shipments are created as `pending` here and NOT dispatched yet: the
-    // incident must be linked and the displacement baja created before send
-    // (see linkShipmentToIncident/createDisplacementBaja), otherwise
-    // receive_material_shipment cannot auto-close the baja. Sending happens
-    // later, in the wizard's baja+link step.
+    // Shipments are created as `pending` and NOT dispatched here (v2): the donor
+    // confirms the dispatch by Telegram and the central shipment is marked as sent
+    // by the manager from the shipments sheet. The caller links every created
+    // shipment to the incident (linkShipmentsToIncident).
     if (supplyPlan.fromCentral.length > 0) {
       const shipment = await createShipment({
         panelist_id: receiverPanelistId,
@@ -212,6 +376,16 @@ export function useMaterialsTreatment(accountIdOverride?: string) {
     const { error } = await supabase.from('panelist_incident')
       .update({ linked_material_shipment_id: shipmentId })
       .eq('id', incidentId)
+    if (error) throw error
+  }, [])
+
+  // v2: todos los envios de la incidencia (central y donantes) quedan enlazados a ella.
+  // Idempotente: repetirlo con los mismos ids no cambia nada.
+  const linkShipmentsToIncident = useCallback(async (incidentId: string, shipmentIds: string[]) => {
+    if (shipmentIds.length === 0) return
+    const { error } = await supabase.from('material_shipments')
+      .update({ panelist_incident_id: incidentId })
+      .in('id', shipmentIds)
     if (error) throw error
   }, [])
 
@@ -291,9 +465,11 @@ export function useMaterialsTreatment(accountIdOverride?: string) {
     daysWithoutStock,
     recomputeNeed,
     resolveSupply,
+    resolveSupplyV2,
     executeSupply,
     createDisplacementBaja,
     linkShipmentToIncident,
+    linkShipmentsToIncident,
     markShipmentSent
   }
 }

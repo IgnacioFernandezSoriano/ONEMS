@@ -5,18 +5,24 @@ import { supabase } from './supabase'
  * ni cancelados) por panelista+material, para descontarlas de la necesidad calculada.
  */
 async function getInTransitMap(
-  accountId: string, panelistIds: string[], materialIds: string[]
+  accountId: string, panelistIds: string[], materialIds: string[], excludeIncidentId?: string
 ): Promise<Record<string, number>> {
   const map: Record<string, number> = {}
   if (panelistIds.length === 0 || materialIds.length === 0) return map
+  // La columna panelist_incident_id solo se pide cuando hay que excluir una incidencia
+  // (los callers de siempre mantienen exactamente la misma consulta).
+  const cols = excludeIncidentId
+    ? 'panelist_id, status, panelist_incident_id, items:material_shipment_items(material_id, quantity_sent)'
+    : 'panelist_id, status, items:material_shipment_items(material_id, quantity_sent)'
   const { data } = await supabase
     .from('material_shipments')
-    .select('panelist_id, status, items:material_shipment_items(material_id, quantity_sent)')
+    .select(cols)
     .eq('account_id', accountId)
     .in('panelist_id', panelistIds)
     .in('status', ['pending', 'sent'])   // en camino, aún no recibido ni cancelado
   const shipments = data || []
   shipments.forEach((s: any) => {
+    if (excludeIncidentId && s.panelist_incident_id === excludeIncidentId) return
     const items = s.items || []
     items.forEach((it: any) => {
       if (!materialIds.includes(it.material_id)) return
@@ -53,6 +59,15 @@ export interface PanelistMaterial {
   material_name: string
   unit_measure: string
   quantity_needed: number
+  /** Necesidad bruta del periodo (sin descontar stock ni en camino). Solo con `includeCovered`. */
+  gross_quantity?: number
+}
+
+export interface PanelistRequirementsOptions {
+  /** No cuenta como "en camino" los envios de material enlazados a esta incidencia. */
+  excludeIncidentId?: string
+  /** Conserva materiales y panelistas con necesidad neta 0 y rellena `gross_quantity`. */
+  includeCovered?: boolean
 }
 
 /**
@@ -277,8 +292,10 @@ export async function calculateMaterialRequirements(
 export async function calculatePanelistRequirements(
   accountId: string,
   startDate: string,
-  endDate: string
+  endDate: string,
+  opts?: PanelistRequirementsOptions
 ): Promise<PanelistMaterialRequirement[]> {
+  const includeCovered = !!opts?.includeCovered
   try {
     // 1. Obtener allocation plan details con nodos (con paginación)
     let allPlanDetails: any[] = []
@@ -418,7 +435,7 @@ export async function calculatePanelistRequirements(
     }
 
     // 6b. Get in-transit shipments to discount from requirements
-    const inTransitMap = await getInTransitMap(accountId, panelistIds, materialIds)
+    const inTransitMap = await getInTransitMap(accountId, panelistIds, materialIds, opts?.excludeIncidentId)
 
     // 7. Agrupar por nodo
     const nodesMap: Record<string, {
@@ -490,15 +507,17 @@ export async function calculatePanelistRequirements(
           // Calculate net quantity needed (discount panelist stock and in-transit shipments)
           const netQuantity = Math.max(0, matData.quantity - panelistStock - inTransit)
           
-          return {
+          const line: PanelistMaterial = {
             material_id: materialId,
             material_code: matData.material.code,
             material_name: matData.material.name,
             unit_measure: matData.material.unit_measure || 'un',
             quantity_needed: netQuantity
           }
+          if (includeCovered) line.gross_quantity = matData.quantity
+          return line
         })
-        .filter(m => m.quantity_needed > 0) // Only include if quantity needed > 0
+        .filter(m => includeCovered || m.quantity_needed > 0) // Only include if quantity needed > 0
 
       const totalItems = panelistMaterials.reduce((sum, m) => sum + m.quantity_needed, 0)
 
@@ -513,7 +532,7 @@ export async function calculatePanelistRequirements(
       }
     })
 
-    return requirements.filter(r => r.total_items > 0).sort((a, b) => b.total_items - a.total_items)
+    return requirements.filter(r => includeCovered || r.total_items > 0).sort((a, b) => b.total_items - a.total_items)
   } catch (error) {
     console.error('Error calculating panelist requirements:', error)
     throw error
