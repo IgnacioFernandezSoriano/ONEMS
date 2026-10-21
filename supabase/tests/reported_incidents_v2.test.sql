@@ -71,4 +71,15 @@ DO $$ BEGIN
                  AND mobile = '600111222' AND language = 'es') THEN
     RAISE EXCEPTION 'FAIL firma antigua no aplico telefono/idioma'; END IF;
 END $$;
+-- permisos: anon sin EXECUTE; authenticated y service_role con EXECUTE
+DO $$
+DECLARE f text;
+BEGIN
+  FOREACH f IN ARRAY ARRAY['public.update_panelist_contact_v2(uuid,text,text,text,text,text,text,text,text)',
+                           'public.update_panelist_contact(uuid,text,text,text)'] LOOP
+    IF has_function_privilege('anon', f, 'EXECUTE') THEN RAISE EXCEPTION 'FAIL anon puede ejecutar %', f; END IF;
+    IF NOT has_function_privilege('authenticated', f, 'EXECUTE') THEN RAISE EXCEPTION 'FAIL authenticated sin EXECUTE en %', f; END IF;
+    IF NOT has_function_privilege('service_role', f, 'EXECUTE') THEN RAISE EXCEPTION 'FAIL service_role sin EXECUTE en %', f; END IF;
+  END LOOP;
+END $$;
 ROLLBACK;

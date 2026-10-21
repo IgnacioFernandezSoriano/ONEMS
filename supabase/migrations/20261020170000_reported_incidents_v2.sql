@@ -86,7 +86,7 @@ BEGIN
   PERFORM public.update_panelist_contact_v2(p_panelist_id, p_telegram_id, p_phone, p_language);
 END; $$;
 
-REVOKE ALL ON FUNCTION public.update_panelist_contact_v2(uuid,text,text,text,text,text,text,text,text) FROM PUBLIC;
-REVOKE ALL ON FUNCTION public.update_panelist_contact(uuid,text,text,text) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.update_panelist_contact_v2(uuid,text,text,text,text,text,text,text,text) FROM PUBLIC, anon;
+REVOKE ALL ON FUNCTION public.update_panelist_contact(uuid,text,text,text) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.update_panelist_contact_v2(uuid,text,text,text,text,text,text,text,text) TO authenticated, service_role;
 GRANT EXECUTE ON FUNCTION public.update_panelist_contact(uuid,text,text,text) TO authenticated, service_role;
