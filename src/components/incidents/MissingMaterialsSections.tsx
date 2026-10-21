@@ -267,10 +267,10 @@ function SupplySection({ tr, accountId, incidentId, panelist, payload, executed,
       }
       if (!ids) {
         ids = await executeSupply(effective, panelist.id)
+        setCreated(ids) // guarda en memoria (misma sesion) ANTES de persistir (guarda entre sesiones)
         // Persistir los ids YA: si algo falla despues, un reintento (incluso tras recargar) no duplica envios
         await mergePayload(incidentId, { central_shipment_id: ids.centralShipmentId, donor_shipment_ids: ids.donorShipmentIds })
       }
-      setCreated(ids)
       if (ids.centralShipmentId) await linkShipmentToIncident(incidentId, ids.centralShipmentId)
       await mergePayload(incidentId, {
         expected_date: expectedDate, days_without_stock: dws?.businessDays ?? 0,

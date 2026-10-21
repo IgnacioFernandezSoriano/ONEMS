@@ -29,10 +29,8 @@ export function PanelistAvailabilityIncidents() {
   }, [linkedId, statusFilter, setStatusFilter])
   useEffect(() => {
     if (loading || !linkedId || statusFilter !== 'all') return
-    if (inbox.some((r) => r.unavailability_id === linkedId)) {
-      setSelected(linkedId)
-      setParams({}, { replace: true })
-    }
+    if (inbox.some((r) => r.unavailability_id === linkedId)) setSelected(linkedId)
+    setParams({}, { replace: true }) // tambien si no esta en la bandeja: se limpia el parametro
   }, [loading, inbox, linkedId, statusFilter, setParams])
 
   if (loading) return <div className="p-6">{t('common.loading')}</div>
