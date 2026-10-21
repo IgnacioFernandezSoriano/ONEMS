@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase'
 import type { ReportedIncidentDetail } from '@/lib/types'
 import { BTN_PRIMARY, BTN_SECONDARY } from './buttonStyles'
 import { SupplyTable } from './SupplyTable'
+import { MaterialShipmentSheet } from './MaterialShipmentSheet'
 
 type TFn = (key: string, params?: Record<string, any>, fallback?: string) => string
 type Panelist = NonNullable<ReportedIncidentDetail['panelist']>
@@ -433,6 +434,7 @@ export function MissingMaterialsSections({ incidentId, accountId, panelist, payl
         bajaId={bajaId} stockVersion={stockVersion} expectedDate={expectedDate} setExpectedDate={setExpectedDate}
         today={today} datePast={datePast} purchase={purchase} onPurchaseChange={(p, none) => { setLivePurchase(p); setLiveNothing(none) }}
         onExecuted={setLocal} onChanged={onChanged} t={t} />
+      <MaterialShipmentSheet key={payload?.supply_executed_at ?? 'none'} incidentId={incidentId} accountId={accountId} onChanged={onChanged} t={t} />
       <ReplanSection tr={tr} incidentId={incidentId} unavailabilityId={bajaId} executed={executed} purchase={purchase}
         nothingNeeded={!executed && liveNothing}
         expectedDate={expectedDate} datePast={datePast} onBajaCreated={setCreatedBajaId} onChanged={onChanged} t={t} />

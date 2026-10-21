@@ -2977,3 +2977,23 @@ incident_conversation.status.sent,Enviado
 incident_conversation.status.failed,Fallido
 incident_conversation.button_pressed,Botón pulsado
 incident_conversation.no_telegram,"Este panelista no tiene Telegram vinculado, por lo que no se puede entregar el mensaje"
+material_sheet.title,Hoja de envíos de material
+material_sheet.col.origin,Origen
+material_sheet.col.destination,Destino
+material_sheet.col.material,Material
+material_sheet.col.quantity,Cantidad
+material_sheet.col.due,Debe llegar
+material_sheet.col.status,Estado
+material_sheet.central_warehouse,Almacén central
+material_sheet.status.pending,Pendiente
+material_sheet.status.sent,Enviado
+material_sheet.status.partially_received,Parcialmente recibido
+material_sheet.status.received,Recibido
+material_sheet.status.cancelled,Cancelado
+material_sheet.print,Imprimir / PDF
+material_sheet.download_csv,Descargar Excel (CSV)
+material_sheet.mark_sent,Marcar enviado
+material_sheet.confirm_mark_sent,¿Marcar este envío como enviado? Se actualizará el stock.
+material_sheet.donor_confirms_telegram,El panelista donante lo confirma por Telegram
+material_sheet.empty,Esta incidencia no tiene envíos
+material_sheet.received_of,{received} de {sent}

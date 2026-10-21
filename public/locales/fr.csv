@@ -2969,3 +2969,23 @@ incident_conversation.status.sent,Envoyé
 incident_conversation.status.failed,Échec
 incident_conversation.button_pressed,Bouton appuyé
 incident_conversation.no_telegram,"Ce panéliste n'a pas de Telegram associé, le message ne peut pas être livré"
+material_sheet.title,Feuille d'expéditions de matériel
+material_sheet.col.origin,Origine
+material_sheet.col.destination,Destination
+material_sheet.col.material,Matériel
+material_sheet.col.quantity,Quantité
+material_sheet.col.due,Date d'arrivée prévue
+material_sheet.col.status,Statut
+material_sheet.central_warehouse,Entrepôt central
+material_sheet.status.pending,En attente
+material_sheet.status.sent,Expédié
+material_sheet.status.partially_received,Partiellement reçu
+material_sheet.status.received,Reçu
+material_sheet.status.cancelled,Annulé
+material_sheet.print,Imprimer / PDF
+material_sheet.download_csv,Télécharger Excel (CSV)
+material_sheet.mark_sent,Marquer comme expédié
+material_sheet.confirm_mark_sent,Marquer cet envoi comme expédié ? Le stock sera mis à jour.
+material_sheet.donor_confirms_telegram,Le panéliste donneur le confirme via Telegram
+material_sheet.empty,Cet incident n'a aucun envoi
+material_sheet.received_of,{received} sur {sent}

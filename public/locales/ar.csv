@@ -2969,3 +2969,23 @@ incident_conversation.status.sent,تم الإرسال
 incident_conversation.status.failed,فشل
 incident_conversation.button_pressed,تم الضغط على الزر
 incident_conversation.no_telegram,هذا العضو ليس لديه Telegram مرتبط، لذا لا يمكن تسليم الرسالة
+material_sheet.title,ورقة شحنات المواد
+material_sheet.col.origin,المصدر
+material_sheet.col.destination,الوجهة
+material_sheet.col.material,المادة
+material_sheet.col.quantity,الكمية
+material_sheet.col.due,تاريخ الوصول المتوقع
+material_sheet.col.status,الحالة
+material_sheet.central_warehouse,المستودع المركزي
+material_sheet.status.pending,قيد الانتظار
+material_sheet.status.sent,تم الإرسال
+material_sheet.status.partially_received,مستلمة جزئيًا
+material_sheet.status.received,تم الاستلام
+material_sheet.status.cancelled,ملغاة
+material_sheet.print,طباعة / PDF
+material_sheet.download_csv,تنزيل Excel (CSV)
+material_sheet.mark_sent,تحديد كمُرسل
+material_sheet.confirm_mark_sent,هل تريد تحديد هذه الشحنة كمُرسلة؟ سيتم تحديث المخزون.
+material_sheet.donor_confirms_telegram,يؤكد العضو المانح ذلك عبر Telegram
+material_sheet.empty,لا توجد شحنات لهذه الحادثة
+material_sheet.received_of,{received} من {sent}

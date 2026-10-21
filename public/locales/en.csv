@@ -2977,3 +2977,23 @@ incident_conversation.status.sent,Sent
 incident_conversation.status.failed,Failed
 incident_conversation.button_pressed,Button pressed
 incident_conversation.no_telegram,"This panelist has no Telegram linked, so the message cannot be delivered"
+material_sheet.title,Material shipments sheet
+material_sheet.col.origin,Origin
+material_sheet.col.destination,Destination
+material_sheet.col.material,Material
+material_sheet.col.quantity,Quantity
+material_sheet.col.due,Due date
+material_sheet.col.status,Status
+material_sheet.central_warehouse,Central warehouse
+material_sheet.status.pending,Pending
+material_sheet.status.sent,Sent
+material_sheet.status.partially_received,Partially received
+material_sheet.status.received,Received
+material_sheet.status.cancelled,Cancelled
+material_sheet.print,Print / PDF
+material_sheet.download_csv,Download Excel (CSV)
+material_sheet.mark_sent,Mark as sent
+material_sheet.confirm_mark_sent,Mark this shipment as sent? Stock will be updated.
+material_sheet.donor_confirms_telegram,The donor panelist confirms it via Telegram
+material_sheet.empty,This incident has no shipments
+material_sheet.received_of,{received} of {sent}
