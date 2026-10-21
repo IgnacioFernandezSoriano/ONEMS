@@ -260,8 +260,9 @@ function SupplySection({ tr, accountId, incidentId, panelist, payload, executed,
         if (fp.central_shipment_id || fd.length > 0) ids = { centralShipmentId: fp.central_shipment_id ?? null, donorShipmentIds: fd }
       }
       if (!ids) {
-        // Fecha en que debe llegar cada envio: la prevista si hay compra; si no, hoy + plazo de envio
-        const shipExpected = hasPurchase ? expectedDate : format(addDays(new Date(), shipLead), DATE_FMT)
+        // Fecha en que debe llegar cada envio (central/vecinos): siempre hoy + plazo habitual de envio.
+        // La compra no es un envio: payload.expected_date es solo la llegada de la compra (fin de la baja).
+        const shipExpected = format(addDays(new Date(), shipLead), DATE_FMT)
         ids = await executeSupply(toSupplyPlan(effective), panelist.id, shipExpected)
         setCreated(ids) // guarda en memoria (misma sesion) ANTES de persistir (guarda entre sesiones)
         // Persistir los ids YA: si algo falla despues, un reintento (incluso tras recargar) no duplica envios
