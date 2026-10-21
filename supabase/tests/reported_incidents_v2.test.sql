@@ -83,3 +83,27 @@ BEGIN
   END LOOP;
 END $$;
 ROLLBACK;
+
+-- ===== Escenario 3: insert_panelist_incident_auto =====
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+DO $$ DECLARE v uuid; r public.panelist_incident;
+BEGIN
+  v := public.insert_panelist_incident_auto('e1000000-0000-0000-0000-000000000001', 'parcel_damaged', 'roto', '{"x":1}'::jsonb);
+  SELECT * INTO r FROM public.panelist_incident WHERE id = v;
+  IF r.account_id <> 'a0000000-0000-0000-0000-000000000001' OR r.status <> 'auto_resolved' OR r.resolved_at IS NULL
+     OR r.created_via <> 'telegram' OR r.payload->>'x' <> '1' THEN RAISE EXCEPTION 'FAIL auto: %', row_to_json(r); END IF;
+  v := public.insert_panelist_incident_auto('e1000000-0000-0000-0000-000000000001', 'how_to_send', NULL, NULL, NULL, 'open');
+  SELECT * INTO r FROM public.panelist_incident WHERE id = v;
+  IF r.status <> 'open' OR r.resolved_at IS NOT NULL THEN RAISE EXCEPTION 'FAIL open: %', row_to_json(r); END IF;
+END $$;
+SELECT pg_temp.expect_err($$SELECT public.insert_panelist_incident_auto('e1000000-0000-0000-0000-000000000001', 'bad_cat')$$, 'invalid category');
+SELECT pg_temp.expect_err($$SELECT public.insert_panelist_incident_auto('e1000000-0000-0000-0000-000000000001', 'other', NULL, NULL, NULL, 'resolved')$$, 'invalid status');
+SELECT pg_temp.expect_err($$SELECT public.insert_panelist_incident_auto('00000000-0000-0000-0000-000000000000', 'other')$$, 'panelist not found');
+-- muestra de la cuenta 2 con panelista de la cuenta 1
+INSERT INTO public.allocation_plan_details (id, account_id, plan_id, origin_node_id, destination_node_id, fecha_programada, status)
+VALUES ('d2000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000002', 'cc000000-0000-0000-0000-000000000001',
+        'b1000000-0000-0000-0000-000000000001', 'b2000000-0000-0000-0000-000000000002', current_date + 7, 'sent');
+SELECT pg_temp.expect_err($$SELECT public.insert_panelist_incident_auto('e1000000-0000-0000-0000-000000000001', 'other', NULL, NULL, 'd2000000-0000-0000-0000-000000000002')$$, 'detail belongs to another account');
+ROLLBACK;

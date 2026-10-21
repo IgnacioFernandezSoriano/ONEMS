@@ -90,3 +90,39 @@ REVOKE ALL ON FUNCTION public.update_panelist_contact_v2(uuid,text,text,text,tex
 REVOKE ALL ON FUNCTION public.update_panelist_contact(uuid,text,text,text) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.update_panelist_contact_v2(uuid,text,text,text,text,text,text,text,text) TO authenticated, service_role;
 GRANT EXECUTE ON FUNCTION public.update_panelist_contact(uuid,text,text,text) TO authenticated, service_role;
+
+-- ===== 3) insert_panelist_incident_auto =====
+-- Alta de incidencias desde n8n (service-role) o el panelista: el account_id se deriva del
+-- panelista, nunca se acepta del llamador. 'auto_resolved' = cerrada por el sistema.
+CREATE OR REPLACE FUNCTION public.insert_panelist_incident_auto(
+  p_panelist_id uuid, p_category text, p_description text DEFAULT NULL,
+  p_payload jsonb DEFAULT NULL, p_detail_id uuid DEFAULT NULL,
+  p_status text DEFAULT 'auto_resolved')
+RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE v_account uuid; v_detail_account uuid; v_new uuid;
+BEGIN
+  IF p_status IS NULL OR p_status NOT IN ('open','auto_resolved') THEN
+    RAISE EXCEPTION 'invalid status'; END IF;
+  IF p_category IS NULL OR p_category NOT IN ('missing_materials','unreadable_label_receipt',
+      'parcel_damaged','parcel_returned','how_to_send','unavailability_request',
+      'tag_photo_problem','contact_data_change','other') THEN
+    RAISE EXCEPTION 'invalid category'; END IF;
+  SELECT account_id INTO v_account FROM panelists WHERE id = p_panelist_id;
+  IF NOT FOUND THEN RAISE EXCEPTION 'panelist not found'; END IF;
+  IF p_detail_id IS NOT NULL THEN
+    SELECT account_id INTO v_detail_account FROM allocation_plan_details WHERE id = p_detail_id;
+    IF v_detail_account IS DISTINCT FROM v_account THEN
+      RAISE EXCEPTION 'detail belongs to another account'; END IF;
+  END IF;
+  PERFORM assert_same_account(v_account);
+  INSERT INTO panelist_incident (account_id, panelist_id, category, description, payload,
+                                 allocation_plan_detail_id, status, created_via, resolved_at)
+  VALUES (v_account, p_panelist_id, p_category, p_description, p_payload,
+          p_detail_id, p_status, 'telegram',
+          CASE WHEN p_status = 'auto_resolved' THEN now() END)
+  RETURNING id INTO v_new;
+  RETURN v_new;
+END; $$;
+
+REVOKE ALL ON FUNCTION public.insert_panelist_incident_auto(uuid,text,text,jsonb,uuid,text) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.insert_panelist_incident_auto(uuid,text,text,jsonb,uuid,text) TO authenticated, service_role;
