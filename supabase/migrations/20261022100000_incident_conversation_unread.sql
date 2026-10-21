@@ -42,11 +42,11 @@ END; $$;
 -- Cuenta del usuario; superadmin todas; sin usuario (service role) nada.
 CREATE OR REPLACE FUNCTION public.unread_incident_conversations()
 RETURNS TABLE (incident_kind text, incident_id uuid, unread int, last_at timestamptz)
--- Los botones pulsados por el panelista (meta.callback) no son respuestas: no cuentan como sin leer ni avisan.
+-- Solo cuentan las respuestas libres al manager: no los botones (meta.callback), ni el alta de la incidencia (meta.report_flow), ni las respuestas a preguntas de material (meta.kind material_*).
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
   SELECT m.incident_kind, m.incident_id, count(*)::int, max(m.created_at)
     FROM incident_message m
-   WHERE m.direction = 'inbound' AND m.read_at IS NULL AND NOT (m.meta ? 'callback')
+   WHERE m.direction = 'inbound' AND m.read_at IS NULL AND NOT (m.meta ?| array['callback','report_flow']) AND coalesce(m.meta->>'kind','') NOT LIKE 'material%'
      AND auth.uid() IS NOT NULL
      AND (is_superadmin() OR m.account_id = current_user_account_id())
    GROUP BY m.incident_kind, m.incident_id
@@ -64,7 +64,7 @@ LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
            (array_agg(m.panelist_id ORDER BY m.created_at))[1] AS panelist_id,
            count(*)::int AS unread, min(m.created_at) AS oldest_at
       FROM incident_message m
-     WHERE m.direction = 'inbound' AND m.read_at IS NULL AND m.notified_at IS NULL AND NOT (m.meta ? 'callback')
+     WHERE m.direction = 'inbound' AND m.read_at IS NULL AND m.notified_at IS NULL AND NOT (m.meta ?| array['callback','report_flow']) AND coalesce(m.meta->>'kind','') NOT LIKE 'material%'
      GROUP BY m.incident_kind, m.incident_id, m.account_id
     HAVING min(m.created_at) < p_now - interval '1 hour'
   )
