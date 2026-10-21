@@ -48,3 +48,12 @@ Migraciones con funciones que miran la fecha de hoy: `20261020130100_incident_he
 - **Afecta a:** las RPCs `SECURITY DEFINER` de incidencias (`resolve_panelist_incident`, `update_panelist_contact(_v2)`, `cancel_detail`, `reroute_returned_sample`, `apply_sample_move`, etc.). La guarda es `assert_same_account` / `profiles.account_id`: cualquier usuario **autenticado de la misma cuenta** puede llamarlas, aunque la pantalla solo la vean `admin`/`superadmin`.
 - **Riesgo:** bajo mientras todos los usuarios de una cuenta sean gestores; sube si se crean usuarios con rol de solo lectura.
 - **Solución:** un helper `assert_manager_role()` (rol en `profiles` ∈ `admin`,`superadmin`, o `is_superadmin()`) llamado tras `assert_same_account` en todas las RPCs de escritura, permitiendo `auth.uid() IS NULL` (service-role / n8n). Una migración forward-only con test de permisos.
+
+---
+
+## DT-5 — Envíos de material: faltan comprobaciones de stock al enviar
+
+- **Apuntado:** 2026-10-21 (revisión final del plan de pantalla de falta de material v2).
+- **Qué pasa:** (1) la función `send_material_shipment` descuenta el stock con `greatest(0, …)` sin avisar si no había suficiente, y anota en el histórico la cantidad completa; además no filtra por tipo de ubicación del stock central. (2) El botón "Enviar seleccionados" de Stock → Envíos pone el estado `sent` directamente, sin pasar por esa función, así que no descuenta stock (también sobre envíos de una incidencia). (3) No hay forma de quitar o cancelar desde la incidencia un envío creado por error (desde Stock ya no se puede borrar un envío de incidencia).
+- **Riesgo:** el stock del histórico puede mostrar material que no existía; envíos "enviados" sin descuento.
+- **Solución:** migración que haga que `send_material_shipment` falle si `quantity < quantity_sent` y filtre `location_type`; cambiar "Enviar seleccionados" para llamar a esa función; acción "Cancelar envío" para envíos de incidencia en estado pendiente (con registro en la conversación). Requiere confirmación para aplicar en onems-dev.
