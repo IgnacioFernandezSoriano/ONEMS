@@ -2822,7 +2822,6 @@ reported_incidents.empty,Aucun incident signalé
 reported_incidents.back,Retour
 reported_incidents.linked_shipment,Envoi lié
 reported_incidents.resolution_note,Note de résolution
-reported_incidents.reply_to_panelist,Réponse au panéliste
 reported_incidents.resolve,Résoudre
 reported_incidents.dismiss,Rejeter
 reported_incidents.filter.all_categories,Toutes les catégories
@@ -2950,3 +2949,17 @@ reported_incidents.materials.date_in_past,La date ne peut pas être dans le pass
 reported_incidents.returned.not_returnable,Cet envoi n'est pas dans un état renvoyable (statut actuel)
 reported_incidents.returned.cancel_confirm,Annuler cet envoi ? L'échantillon ne sera pas renvoyé.
 reported_incidents.readonly.closed,Cet incident est clos : les actions sont en lecture seule
+incident_conversation.title,Conversation avec le panéliste
+incident_conversation.empty,Aucun message pour le moment
+incident_conversation.placeholder,Écrivez un message au panéliste…
+incident_conversation.send,Envoyer
+incident_conversation.sending,Envoi…
+incident_conversation.author.bot,Bot
+incident_conversation.author.manager,Gestionnaire
+incident_conversation.author.panelist,Panéliste
+incident_conversation.author.system,Système
+incident_conversation.status.pending_send,En attente
+incident_conversation.status.sent,Envoyé
+incident_conversation.status.failed,Échec
+incident_conversation.button_pressed,Bouton appuyé
+incident_conversation.no_telegram,"Ce panéliste n'a pas de Telegram associé, le message ne peut pas être livré"

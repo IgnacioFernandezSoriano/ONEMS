@@ -2830,7 +2830,6 @@ reported_incidents.empty,No reported incidents
 reported_incidents.back,Back
 reported_incidents.linked_shipment,Linked shipment
 reported_incidents.resolution_note,Resolution note
-reported_incidents.reply_to_panelist,Reply to panelist
 reported_incidents.resolve,Resolve
 reported_incidents.dismiss,Dismiss
 reported_incidents.filter.all_categories,All categories
@@ -2958,3 +2957,17 @@ reported_incidents.materials.date_in_past,The date cannot be in the past
 reported_incidents.returned.not_returnable,This shipment is not in a returnable state (current status)
 reported_incidents.returned.cancel_confirm,Cancel this shipment? The sample will not be re-sent.
 reported_incidents.readonly.closed,This incident is closed: actions are read-only
+incident_conversation.title,Conversation with the panelist
+incident_conversation.empty,No messages yet
+incident_conversation.placeholder,Write a message to the panelist…
+incident_conversation.send,Send
+incident_conversation.sending,Sending…
+incident_conversation.author.bot,Bot
+incident_conversation.author.manager,Manager
+incident_conversation.author.panelist,Panelist
+incident_conversation.author.system,System
+incident_conversation.status.pending_send,Pending
+incident_conversation.status.sent,Sent
+incident_conversation.status.failed,Failed
+incident_conversation.button_pressed,Button pressed
+incident_conversation.no_telegram,"This panelist has no Telegram linked, so the message cannot be delivered"

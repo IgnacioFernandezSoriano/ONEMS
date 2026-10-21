@@ -9,6 +9,7 @@ import { CityLoadPanel } from '@/components/incidents/CityLoadPanel'
 import type { SelectedCell } from '@/components/incidents/CityLoadPanel'
 import { CellSamplesPanel } from '@/components/incidents/CellSamplesPanel'
 import { IncidentLinesTable } from '@/components/incidents/IncidentLinesTable'
+import { IncidentConversation } from '@/components/incidents/IncidentConversation'
 import {
   sampleLabel, planLabel, fmtShort, fmtWeekRange, currentMonday, addWeeksTo, defaultWindowWeeks, toMonday,
   SATURATION_BADGE_CLASS,
@@ -562,6 +563,8 @@ export function IncidentReviewPanel({ unavailabilityId, onBack }: Props) {
         draggingLineId={dragging?.kind === 'line' ? dragging.lineId ?? null : null}
         pendingEmptyText={pendingEmptyText}
       />
+
+      <IncidentConversation kind="unavailability" incidentId={unavailabilityId} />
 
       {move && (
         <div

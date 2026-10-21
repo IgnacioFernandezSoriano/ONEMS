@@ -2822,7 +2822,6 @@ reported_incidents.empty,لا توجد حوادث مبلَّغ عنها
 reported_incidents.back,رجوع
 reported_incidents.linked_shipment,الشحنة المرتبطة
 reported_incidents.resolution_note,ملاحظة الحل
-reported_incidents.reply_to_panelist,الرد على العضو
 reported_incidents.resolve,حل
 reported_incidents.dismiss,تجاهل
 reported_incidents.filter.all_categories,جميع الفئات
@@ -2950,3 +2949,17 @@ reported_incidents.materials.date_in_past,لا يمكن أن يكون التار
 reported_incidents.returned.not_returnable,هذه الشحنة ليست في حالة قابلة لإعادة الإرسال (الحالة الحالية)
 reported_incidents.returned.cancel_confirm,هل تريد إلغاء هذه الشحنة؟ لن يُعاد إرسال العينة.
 reported_incidents.readonly.closed,هذه الحادثة مغلقة: الإجراءات للقراءة فقط
+incident_conversation.title,المحادثة مع العضو
+incident_conversation.empty,لا توجد رسائل بعد
+incident_conversation.placeholder,اكتب رسالة إلى العضو…
+incident_conversation.send,إرسال
+incident_conversation.sending,جارٍ الإرسال…
+incident_conversation.author.bot,البوت
+incident_conversation.author.manager,المدير
+incident_conversation.author.panelist,العضو
+incident_conversation.author.system,النظام
+incident_conversation.status.pending_send,قيد الإرسال
+incident_conversation.status.sent,تم الإرسال
+incident_conversation.status.failed,فشل
+incident_conversation.button_pressed,تم الضغط على الزر
+incident_conversation.no_telegram,هذا العضو ليس لديه Telegram مرتبط، لذا لا يمكن تسليم الرسالة

@@ -6,6 +6,7 @@ import { BTN_PRIMARY, BTN_SECONDARY } from './buttonStyles'
 import { ReportedIncidentHeader } from './ReportedIncidentHeader'
 import { ReturnedSampleActions } from './ReturnedSampleActions'
 import { MissingMaterialsSections } from './MissingMaterialsSections'
+import { IncidentConversation } from './IncidentConversation'
 
 interface TFn {
   (key: string, params?: Record<string, any>, fallback?: string): string
@@ -17,7 +18,6 @@ export function ReportedIncidentPanel({ incidentId, onBack }: { incidentId: stri
   const [inc, setInc] = useState<ReportedIncidentDetail | null>(null)
   const [photo, setPhoto] = useState<string | null>(null)
   const [note, setNote] = useState('')
-  const [reply, setReply] = useState('')
   const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState<string | null>(null)
 
@@ -44,7 +44,7 @@ export function ReportedIncidentPanel({ incidentId, onBack }: { incidentId: stri
 
   const doResolve = async (status: 'resolved' | 'dismissed') => {
     setBusy(true); setMsg(null)
-    try { await resolve(incidentId, status, note || undefined, reply || undefined); onBack() }
+    try { await resolve(incidentId, status, note || undefined); onBack() }
     catch (e: any) { setMsg(t('common.error') + ': ' + e.message); setBusy(false) }
   }
 
@@ -84,13 +84,14 @@ export function ReportedIncidentPanel({ incidentId, onBack }: { incidentId: stri
         {msg && <p className="text-sm mt-2">{msg}</p>}
       </div>
 
-      {/* Resolver + respuesta al panelista */}
+      {/* Conversación con el panelista */}
+      <IncidentConversation kind="reported" incidentId={incidentId} />
+
+      {/* Resolver */}
       {inc.status !== 'auto_resolved' && (
-      <div className="border rounded p-4">
+      <div className="border rounded p-4 mt-4">
         <label className="block text-sm font-medium mb-1">{t('reported_incidents.resolution_note')}</label>
         <textarea className="w-full border rounded p-2 text-sm mb-3" rows={2} value={note} onChange={e => setNote(e.target.value)} />
-        <label className="block text-sm font-medium mb-1">{t('reported_incidents.reply_to_panelist')}</label>
-        <textarea className="w-full border rounded p-2 text-sm mb-3" rows={2} value={reply} onChange={e => setReply(e.target.value)} />
         <div className="flex gap-2">
           <button disabled={busy} className={BTN_PRIMARY} onClick={() => doResolve('resolved')}>{t('reported_incidents.resolve')}</button>
           <button disabled={busy} className={BTN_SECONDARY} onClick={() => doResolve('dismissed')}>{t('reported_incidents.dismiss')}</button>
