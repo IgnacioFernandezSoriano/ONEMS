@@ -2903,3 +2903,22 @@ unavailability.selected_count,{count} período(s) seleccionado(s)
 unavailability.clear_selection,Quitar selección
 unavailability.active_now,ACTIVA AHORA
 unavailability.notes_placeholder,Información adicional sobre este período de indisponibilidad...
+reported_incidents.role.sender,Emisor
+reported_incidents.role.receiver,Receptor
+reported_incidents.header.contact,Contacto
+reported_incidents.header.telegram_yes,Telegram: sí
+reported_incidents.header.telegram_no,Telegram: no
+reported_incidents.status.auto_resolved,Resuelta automáticamente
+reported_incidents.readonly.title,Tratada automáticamente
+reported_incidents.readonly.no_data,Sin datos
+reported_incidents.readonly.no_candidates,No había envíos en camino
+reported_incidents.readonly.chosen_shipment,Envío elegido
+reported_incidents.contact.before,Antes
+reported_incidents.contact.after,Después
+reported_incidents.contact.field.mobile,Móvil
+reported_incidents.contact.field.email,Correo electrónico
+reported_incidents.contact.field.language,Idioma
+reported_incidents.contact.field.address_line1,Dirección (línea 1)
+reported_incidents.contact.field.address_line2,Dirección (línea 2)
+reported_incidents.contact.field.address_city,Ciudad
+reported_incidents.contact.field.address_country,País

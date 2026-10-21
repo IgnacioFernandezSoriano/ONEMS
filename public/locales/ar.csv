@@ -2895,3 +2895,22 @@ unavailability.selected_count,{count} فترة (فترات) محددة
 unavailability.clear_selection,إلغاء التحديد
 unavailability.active_now,نشطة الآن
 unavailability.notes_placeholder,معلومات إضافية حول فترة عدم التوفر هذه...
+reported_incidents.role.sender,المُرسِل
+reported_incidents.role.receiver,المُستلِم
+reported_incidents.header.contact,جهة الاتصال
+reported_incidents.header.telegram_yes,تيليجرام: نعم
+reported_incidents.header.telegram_no,تيليجرام: لا
+reported_incidents.status.auto_resolved,تم الحل تلقائيًا
+reported_incidents.readonly.title,تتم المعالجة تلقائيًا
+reported_incidents.readonly.no_data,لا توجد بيانات
+reported_incidents.readonly.no_candidates,لم يتم العثور على شحنات قيد النقل
+reported_incidents.readonly.chosen_shipment,الشحنة المختارة
+reported_incidents.contact.before,قبل
+reported_incidents.contact.after,بعد
+reported_incidents.contact.field.mobile,الجوال
+reported_incidents.contact.field.email,البريد الإلكتروني
+reported_incidents.contact.field.language,اللغة
+reported_incidents.contact.field.address_line1,العنوان (السطر 1)
+reported_incidents.contact.field.address_line2,العنوان (السطر 2)
+reported_incidents.contact.field.address_city,المدينة
+reported_incidents.contact.field.address_country,البلد

@@ -1,18 +1,14 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from '@/hooks/useTranslation'
-import { useReportedIncidents } from '@/lib/hooks/useReportedIncidents'
+import { useReportedIncidents, panelistRole } from '@/lib/hooks/useReportedIncidents'
 import { useMaterialsTreatment, type NeedLine, type SupplyPlan } from '@/lib/hooks/useMaterialsTreatment'
 import { useAuth } from '@/contexts/AuthContext'
 import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId'
 import { supabase } from '@/lib/supabase'
-import type { ReportedIncident } from '@/lib/types'
+import type { ReportedIncidentDetail } from '@/lib/types'
 import { BTN_PRIMARY, BTN_SECONDARY } from './buttonStyles'
-
-type FetchedIncident = ReportedIncident & {
-  panelist?: { name: string; panelist_code: string; telegram_id: string | null; mobile: string | null; language: string | null } | null
-  detail?: { id: string; fecha_programada: string | null; status: string; origin_node_id: string | null; destination_node_id: string | null } | null
-}
+import { ReportedIncidentHeader } from './ReportedIncidentHeader'
 
 interface TFn {
   (key: string, params?: Record<string, any>, fallback?: string): string
@@ -21,7 +17,7 @@ interface TFn {
 export function ReportedIncidentPanel({ incidentId, onBack }: { incidentId: string; onBack: () => void }) {
   const { t } = useTranslation()
   const { fetchIncident, resolve, actCancel, signedPhotoUrl } = useReportedIncidents()
-  const [inc, setInc] = useState<FetchedIncident | null>(null)
+  const [inc, setInc] = useState<ReportedIncidentDetail | null>(null)
   const [photo, setPhoto] = useState<string | null>(null)
   const [note, setNote] = useState('')
   const [reply, setReply] = useState('')
@@ -30,7 +26,7 @@ export function ReportedIncidentPanel({ incidentId, onBack }: { incidentId: stri
 
   const load = useCallback(async () => {
     const d = await fetchIncident(incidentId)
-    setInc(d as FetchedIncident | null)
+    setInc(d)
   }, [fetchIncident, incidentId])
   useEffect(() => { load() }, [load])
   useEffect(() => {
@@ -54,17 +50,13 @@ export function ReportedIncidentPanel({ incidentId, onBack }: { incidentId: stri
 
   if (!inc) return <div>{t('common.loading')}</div>
   const detailId = inc.allocation_plan_detail_id
-  const panelistName = inc.panelist_name ?? inc.panelist?.name ?? '-'
-  const panelistCode = inc.panelist_code ?? inc.panelist?.panelist_code ?? '-'
 
   return (
     <div className="max-w-3xl">
       <button onClick={onBack} className="text-blue-600 hover:text-blue-800 mb-4">← {t('reported_incidents.back')}</button>
       <h3 className="text-lg font-bold mb-2">{t(`reported_incidents.category.${inc.category}`)}</h3>
-      <div className="text-sm text-gray-600 mb-4">
-        <div>{panelistName} · <span className="font-mono">{panelistCode}</span></div>
-        {detailId && <div>{t('reported_incidents.linked_shipment')}: <span className="font-mono">{detailId.slice(0, 8)}</span></div>}
-      </div>
+      <ReportedIncidentHeader inc={inc} role={panelistRole(inc)} />
+      {detailId && <div className="text-sm text-gray-600 mb-4">{t('reported_incidents.linked_shipment')}: <span className="font-mono">{detailId.slice(0, 8)}</span></div>}
       {inc.description && <p className="bg-gray-50 rounded p-3 text-sm mb-3">{inc.description}</p>}
       {photo && <img src={photo} alt="" className="max-w-xs rounded border mb-3" />}
 
@@ -77,6 +69,10 @@ export function ReportedIncidentPanel({ incidentId, onBack }: { incidentId: stri
           </button>
         ) : inc.category === 'missing_materials' ? (
           <MissingMaterialsActions incidentId={incidentId} panelistId={inc.panelist_id} payload={inc.payload} t={t} />
+        ) : inc.category === 'contact_data_change' ? (
+          <ReadonlyPayload payload={inc.payload} kind="contact" t={t} />
+        ) : inc.category === 'unreadable_label_receipt' ? (
+          <ReadonlyPayload payload={inc.payload} kind="receipt" t={t} />
         ) : (
           <p className="text-sm text-gray-500">{t('reported_incidents.action.support_only')}</p>
         )}
@@ -84,6 +80,7 @@ export function ReportedIncidentPanel({ incidentId, onBack }: { incidentId: stri
       </div>
 
       {/* Resolver + respuesta al panelista */}
+      {inc.status !== 'auto_resolved' && (
       <div className="border rounded p-4">
         <label className="block text-sm font-medium mb-1">{t('reported_incidents.resolution_note')}</label>
         <textarea className="w-full border rounded p-2 text-sm mb-3" rows={2} value={note} onChange={e => setNote(e.target.value)} />
@@ -94,6 +91,57 @@ export function ReportedIncidentPanel({ incidentId, onBack }: { incidentId: stri
           <button disabled={busy} className={BTN_SECONDARY} onClick={() => doResolve('dismissed')}>{t('reported_incidents.dismiss')}</button>
         </div>
       </div>
+      )}
+    </div>
+  )
+}
+
+const CONTACT_FIELDS = ['mobile', 'email', 'language', 'address_line1', 'address_line2', 'address_city', 'address_country'] as const
+
+function ReadonlyPayload({ payload, kind, t }: { payload: Record<string, any> | null; kind: 'contact' | 'receipt'; t: TFn }) {
+  const isObj = payload != null && typeof payload === 'object'
+  const body = (() => {
+    if (!isObj) return <p className="text-sm text-gray-500">{t('reported_incidents.readonly.no_data')}</p>
+    if (kind === 'receipt') {
+      if (payload.no_candidates) return <p className="text-sm text-gray-500">{t('reported_incidents.readonly.no_candidates')}</p>
+      if (payload.chosen_detail_id) {
+        return (
+          <p className="text-sm">
+            {t('reported_incidents.readonly.chosen_shipment')}: <span className="font-mono">{String(payload.chosen_detail_id).slice(0, 8)}</span>
+          </p>
+        )
+      }
+      return <p className="text-sm text-gray-500">{t('reported_incidents.readonly.no_data')}</p>
+    }
+    const before = payload.before && typeof payload.before === 'object' ? payload.before : {}
+    const after = payload.after && typeof payload.after === 'object' ? payload.after : {}
+    const fields = CONTACT_FIELDS.filter(f => before[f] != null || after[f] != null)
+    if (fields.length === 0) return <p className="text-sm text-gray-500">{t('reported_incidents.readonly.no_data')}</p>
+    return (
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="text-left text-gray-500">
+            <th className="py-1 font-medium" />
+            <th className="py-1 font-medium">{t('reported_incidents.contact.before')}</th>
+            <th className="py-1 font-medium">{t('reported_incidents.contact.after')}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {fields.map(f => (
+            <tr key={f} className="border-t">
+              <td className="py-1 pr-2 text-gray-600">{t(`reported_incidents.contact.field.${f}`)}</td>
+              <td className="py-1 pr-2">{before[f] != null ? String(before[f]) : '-'}</td>
+              <td className="py-1">{after[f] != null ? String(after[f]) : '-'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    )
+  })()
+  return (
+    <div>
+      <p className="text-xs font-medium text-gray-500 mb-2">{t('reported_incidents.readonly.title')}</p>
+      {body}
     </div>
   )
 }
