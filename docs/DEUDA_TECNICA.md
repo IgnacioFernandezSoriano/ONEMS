@@ -39,3 +39,12 @@ Migraciones con funciones que miran la fecha de hoy: `20261020130100_incident_he
 - **Apuntado:** 2026-10-20.
 - **Afecta a:** algunas pantallas antiguas que no pasan por `useTranslation()`, por ejemplo `StockAlertsTab.tsx`, `MaterialCatalog.tsx`, `AllocationPlans.tsx` ("No records found") y `AllocationPlanGeneratorForm.tsx`. Esos textos salen en inglés en cualquier idioma.
 - **Solución:** pasarlos por `t()` y añadir las claves a `public/locales/{en,es,fr,ar}.csv`.
+
+---
+
+## DT-4 — Las RPCs de incidencias comprueban la cuenta pero no el rol
+
+- **Apuntado:** 2026-10-21 (señalado por la revisión automática de seguridad al ampliar `update_panelist_contact`).
+- **Afecta a:** las RPCs `SECURITY DEFINER` de incidencias (`resolve_panelist_incident`, `update_panelist_contact(_v2)`, `cancel_detail`, `reroute_returned_sample`, `apply_sample_move`, etc.). La guarda es `assert_same_account` / `profiles.account_id`: cualquier usuario **autenticado de la misma cuenta** puede llamarlas, aunque la pantalla solo la vean `admin`/`superadmin`.
+- **Riesgo:** bajo mientras todos los usuarios de una cuenta sean gestores; sube si se crean usuarios con rol de solo lectura.
+- **Solución:** un helper `assert_manager_role()` (rol en `profiles` ∈ `admin`,`superadmin`, o `is_superadmin()`) llamado tras `assert_same_account` en todas las RPCs de escritura, permitiendo `auth.uid() IS NULL` (service-role / n8n). Una migración forward-only con test de permisos.
