@@ -85,6 +85,8 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM panelists WHERE id = v_panelist AND account_id = v_account) THEN
     RAISE EXCEPTION 'Cross-tenant access denied'; END IF;
   IF NULLIF(btrim(p_body), '') IS NULL THEN RAISE EXCEPTION 'empty message'; END IF;
+  IF NOT EXISTS (SELECT 1 FROM panelists WHERE id = v_panelist AND NULLIF(btrim(telegram_id), '') IS NOT NULL) THEN
+    RAISE EXCEPTION 'panelist has no telegram'; END IF;
   INSERT INTO incident_message (account_id, panelist_id, incident_kind, incident_id,
                                 direction, author, body, meta, status)
   VALUES (v_account, v_panelist, p_incident_kind, p_incident_id,
@@ -196,6 +198,7 @@ LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
     FROM material_shipments s
     JOIN panelists p ON p.id = s.panelist_id AND p.account_id = s.account_id
    WHERE s.status IN ('sent','partially_received') AND s.next_ask_at <= p_now
+     AND s.panelist_incident_id IS NOT NULL
      AND NULLIF(btrim(p.telegram_id), '') IS NOT NULL
    ORDER BY 1, 2;
 $$;
@@ -387,13 +390,18 @@ BEGIN
      ORDER BY created_at LIMIT 1;
   END IF;
 
+  -- Libera ya lo que el nuevo stock cubre; si luego se resuelve la incidencia, esa resolucion libera el resto.
+  v_released := public.refresh_material_hold(v_ship.panelist_id);
+
   IF v_incident IS NOT NULL THEN
     IF v_summary <> '' THEN
       PERFORM public.log_incident_message('reported', v_incident, 'internal', 'system',
         'Recibido: ' || v_summary, jsonb_build_object('shipment_id', p_shipment_id));
     END IF;
 
-    IF v_complete AND NOT EXISTS (
+    IF v_complete
+       AND (SELECT status FROM public.panelist_incident WHERE id = v_incident) IN ('open','in_progress')
+       AND NOT EXISTS (
          SELECT 1 FROM public.material_shipments s
           WHERE s.status NOT IN ('cancelled', 'received')
             AND s.account_id = v_ship.account_id AND s.panelist_id = v_ship.panelist_id
@@ -402,14 +410,14 @@ BEGIN
        ) THEN
       -- NO se toca panelist_unavailability: la baja sigue su curso.
       PERFORM public.resolve_panelist_incident(
-        v_incident, 'resolved', 'Material recibido; disponibilidad restaurada.', NULL);
+        v_incident, 'resolved', 'Material recibido.', NULL);
       PERFORM public.log_incident_message('reported', v_incident, 'internal', 'system',
         'Material recibido completo', jsonb_build_object('shipment_id', p_shipment_id));
       v_resolved := true;
+      -- resolve_panelist_incident ya libero los retenidos restantes: se anaden a los devueltos.
+      v_released := v_released || public.refresh_material_hold(v_ship.panelist_id);
     END IF;
   END IF;
-
-  v_released := public.refresh_material_hold(v_ship.panelist_id);
 
   RETURN jsonb_build_object(
     'status', CASE WHEN v_complete THEN 'received' ELSE 'partially_received' END,
@@ -444,6 +452,10 @@ BEGIN
   PERFORM public.receive_material_shipment_items(p_shipment_id, v_items);
 END;
 $$;
+
+-- Una linea por material en cada envio (la tabla esta vacia en vivo).
+ALTER TABLE public.material_shipment_items
+  ADD CONSTRAINT material_shipment_items_shipment_material_key UNIQUE (material_shipment_id, material_id);
 
 CREATE OR REPLACE FUNCTION public.material_shipment_incident_same_account_check()
 RETURNS trigger LANGUAGE plpgsql SET search_path = public AS $$
@@ -490,6 +502,7 @@ DECLARE
   v_acc      uuid;
   v_node     uuid;
   v_open     boolean;
+  v_active   boolean;
   v_set      uuid[];
   v_stock    jsonb;
   v_det      record;
@@ -499,7 +512,7 @@ DECLARE
   v_released uuid[] := '{}';
   v_id       uuid;
 BEGIN
-  SELECT account_id, node_id INTO v_acc, v_node FROM panelists WHERE id = p_panelist_id;
+  SELECT account_id, node_id, (status = 'active') INTO v_acc, v_node, v_active FROM panelists WHERE id = p_panelist_id;
   IF NOT FOUND THEN RAISE EXCEPTION 'panelist not found'; END IF;
   PERFORM pg_advisory_xact_lock(hashtextextended(p_panelist_id::text, 0));
 
@@ -512,7 +525,8 @@ BEGIN
   UPDATE material_hold SET released_at = now()
    WHERE panelist_id = p_panelist_id AND released_at IS NULL AND NOT (allocation_plan_detail_id = ANY (v_set));
 
-  SELECT EXISTS (SELECT 1 FROM panelist_incident
+  -- Un panelista inactivo no retiene nada (se trata como sin incidencia abierta).
+  SELECT v_active AND EXISTS (SELECT 1 FROM panelist_incident
                   WHERE panelist_id = p_panelist_id AND category = 'missing_materials'
                     AND status IN ('open','in_progress'))
     INTO v_open;
@@ -570,8 +584,11 @@ END; $$;
 
 CREATE OR REPLACE FUNCTION public.panelist_held_detail_ids(p_panelist_id uuid)
 RETURNS SETOF uuid LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
-  SELECT allocation_plan_detail_id FROM material_hold
-   WHERE panelist_id = p_panelist_id AND released_at IS NULL;
+  SELECT h.allocation_plan_detail_id FROM material_hold h
+   WHERE h.panelist_id = p_panelist_id AND h.released_at IS NULL
+     AND EXISTS (SELECT 1 FROM panelist_incident i
+                  WHERE i.panelist_id = p_panelist_id AND i.category = 'missing_materials'
+                    AND i.status IN ('open','in_progress'));
 $$;
 
 REVOKE ALL ON FUNCTION public.refresh_material_hold(uuid) FROM PUBLIC, anon, authenticated;
@@ -643,9 +660,10 @@ CREATE OR REPLACE FUNCTION public.resolve_panelist_incident(
   p_incident_id uuid, p_status text,
   p_resolution_note text DEFAULT NULL, p_reply_text text DEFAULT NULL)
 RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
-DECLARE v_account uuid; v_old text;
+DECLARE v_account uuid; v_old text; v_panelist uuid; v_cat text;
 BEGIN
-  SELECT account_id, status INTO v_account, v_old FROM panelist_incident WHERE id = p_incident_id;
+  SELECT account_id, status, panelist_id, category INTO v_account, v_old, v_panelist, v_cat
+    FROM panelist_incident WHERE id = p_incident_id;
   PERFORM assert_same_account(v_account);
   IF p_status NOT IN ('open','in_progress','resolved','dismissed') THEN
     RAISE EXCEPTION 'invalid status %', p_status; END IF;
@@ -658,10 +676,14 @@ BEGIN
     resolved_at = CASE WHEN p_status IN ('resolved','dismissed') THEN now() ELSE resolved_at END,
     updated_at = now()
   WHERE id = p_incident_id;
+  -- Efecto central (sin WARNING): al cerrar una incidencia de material, se liberan los envios retenidos.
+  IF v_cat = 'missing_materials' AND p_status IN ('resolved','dismissed') THEN
+    PERFORM public.refresh_material_hold(v_panelist);
+  END IF;
   IF v_old IS DISTINCT FROM p_status THEN
     BEGIN
       PERFORM public.log_incident_message('reported', p_incident_id, 'internal', 'system',
-        'Estado: ' || p_status || COALESCE(' — ' || p_resolution_note, ''),
+        'Estado: ' || p_status || COALESCE(' - ' || p_resolution_note, ''),
         jsonb_build_object('status', p_status), 'sent');
     EXCEPTION WHEN OTHERS THEN
       RAISE WARNING 'resolve_panelist_incident: estado de la incidencia % no registrado: %', p_incident_id, SQLERRM;

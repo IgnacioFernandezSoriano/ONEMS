@@ -81,6 +81,14 @@ END $$;
 
 -- pending_incident_messages: reclama solo outbound pending_send con telegram_id; sin duplicados
 UPDATE public.panelists SET telegram_id = '' WHERE id = 'e1000000-0000-0000-0000-000000000001';
+-- sin telegram_id el manager ve el error en vez de un mensaje atascado
+DO $$
+DECLARE v_inc uuid := (SELECT v FROM t_ids WHERE k='inc');
+BEGIN
+  PERFORM set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+  PERFORM pg_temp.expect_err(format($q$SELECT public.send_manager_message('reported', %L, 'hola')$q$, v_inc), 'panelist has no telegram');
+  PERFORM set_config('request.jwt.claim.sub','', true);
+END $$;
 DO $$ BEGIN
   IF (SELECT count(*) FROM public.pending_incident_messages()) <> 0 THEN RAISE EXCEPTION 'FAIL sin telegram_id aparece'; END IF;
 END $$;
@@ -254,6 +262,27 @@ DO $$ BEGIN
     RAISE EXCEPTION 'FAIL cuenta cruzada: % filas', (SELECT count(*) FROM public.due_material_questions()); END IF;
 END $$;
 
+-- envio fuera de una incidencia: no se pregunta
+INSERT INTO public.material_shipments (account_id, panelist_id, status, next_ask_at)
+VALUES ('a0000000-0000-0000-0000-000000000001','e1000000-0000-0000-0000-000000000001','sent', now() - interval '1 day');
+DO $$ BEGIN
+  IF (SELECT count(*) FROM public.due_material_questions()) <> 1
+     OR EXISTS (SELECT 1 FROM public.due_material_questions() q JOIN public.material_shipments m ON m.id = q.shipment_id
+                 WHERE m.panelist_incident_id IS NULL) THEN
+    RAISE EXCEPTION 'FAIL pregunta de envio sin incidencia: % filas', (SELECT count(*) FROM public.due_material_questions()); END IF;
+END $$;
+
+-- una sola linea por material en cada envio
+DO $$ BEGIN
+  BEGIN
+    INSERT INTO public.material_shipment_items (account_id, material_shipment_id, material_id, quantity_sent)
+    VALUES ('a0000000-0000-0000-0000-000000000001',(SELECT v FROM t_ids WHERE k='s1'),(SELECT v FROM t_ids WHERE k='mat'), 1);
+  EXCEPTION WHEN unique_violation THEN
+    RETURN;
+  END;
+  RAISE EXCEPTION 'FAIL linea duplicada aceptada';
+END $$;
+
 -- estado invalido, kind invalido, envio inexistente, FK SET NULL
 SELECT pg_temp.expect_err($$UPDATE public.material_shipments SET status = 'bogus'$$, 'new row for relation');
 SELECT pg_temp.expect_err($$SELECT public.record_material_question((SELECT v FROM t_ids WHERE k='s1'), 'bogus')$$, 'invalid question kind');
@@ -386,6 +415,30 @@ BEGIN
     RAISE EXCEPTION 'FAIL mensajes Recibido: %', (SELECT count(*) FROM public.incident_message WHERE incident_id = inc AND body LIKE 'Recibido:%'); END IF;
   IF NOT EXISTS (SELECT 1 FROM public.incident_message WHERE incident_id = inc AND body = 'Material recibido completo') THEN
     RAISE EXCEPTION 'FAIL mensaje cierre'; END IF;
+  IF (SELECT resolution_note FROM public.panelist_incident WHERE id = inc) <> 'Material recibido.' THEN
+    RAISE EXCEPTION 'FAIL nota de resolucion: %', (SELECT resolution_note FROM public.panelist_incident WHERE id = inc); END IF;
+END $$;
+
+-- una incidencia ya resuelta no se vuelve a resolver al recibir otro envio enlazado
+INSERT INTO public.material_shipments (id, account_id, panelist_id, status, panelist_incident_id)
+VALUES ('f0000000-0000-0000-0000-0000000000b9','a0000000-0000-0000-0000-000000000001','e1000000-0000-0000-0000-000000000001','sent',(SELECT v FROM t_ids WHERE k='inc'));
+INSERT INTO public.material_shipment_items (account_id, material_shipment_id, material_id, quantity_sent)
+VALUES ('a0000000-0000-0000-0000-000000000001','f0000000-0000-0000-0000-0000000000b9',(SELECT v FROM t_ids WHERE k='m1'),2);
+DO $$
+DECLARE inc uuid := (SELECT v FROM t_ids WHERE k='inc'); r jsonb; v_at timestamptz;
+BEGIN
+  SELECT resolved_at INTO v_at FROM public.panelist_incident WHERE id = inc;
+  PERFORM set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+  r := public.receive_material_shipment_items('f0000000-0000-0000-0000-0000000000b9',
+         format('[{"material_id":"%s","quantity":2}]', (SELECT v FROM t_ids WHERE k='m1'))::jsonb);
+  PERFORM set_config('request.jwt.claim.sub','', true);
+  IF r->>'status' <> 'received' OR (r->>'incident_resolved')::boolean THEN RAISE EXCEPTION 'FAIL re-resuelve: %', r; END IF;
+  IF (SELECT resolved_at FROM public.panelist_incident WHERE id = inc) IS DISTINCT FROM v_at THEN
+    RAISE EXCEPTION 'FAIL resolved_at cambiado'; END IF;
+  IF (SELECT count(*) FROM public.incident_message WHERE incident_id = inc AND body = 'Material recibido completo') <> 1 THEN
+    RAISE EXCEPTION 'FAIL segundo mensaje de cierre'; END IF;
+  IF (SELECT count(*) FROM public.incident_message WHERE incident_id = inc AND body LIKE 'Estado:%') <> 1 THEN
+    RAISE EXCEPTION 'FAIL segundo cambio de estado'; END IF;
 END $$;
 
 -- boton antiguo (incidencia enlazada por linked_material_shipment_id): recibe lo pendiente y la baja sigue active
@@ -512,6 +565,40 @@ BEGIN
   IF pg_temp.held() <> '{}' THEN RAISE EXCEPTION 'FAIL producto sin materiales retenido'; END IF;
   INSERT INTO public.product_materials (account_id, product_id, material_id, quantity)
   VALUES ('a0000000-0000-0000-0000-000000000001','cb000000-0000-0000-0000-000000000002',(SELECT v FROM t_ids WHERE k='m1'),10);
+END $$;
+
+-- cierre manual de la incidencia: los retenidos se ocultan y se liberan
+DO $$
+DECLARE d1 uuid := (SELECT v FROM t_ids WHERE k='d1'); d2 uuid := (SELECT v FROM t_ids WHERE k='d2'); d3 uuid := (SELECT v FROM t_ids WHERE k='d3');
+        r uuid[]; p constant uuid := 'e1000000-0000-0000-0000-000000000001'; i constant uuid := 'f0000000-0000-0000-0000-0000000000c1';
+BEGIN
+  PERFORM pg_temp.set_stock(0);
+  r := public.refresh_material_hold(p);
+  IF cardinality(pg_temp.held()) <> 3 THEN RAISE EXCEPTION 'FAIL previo cierre manual: %', pg_temp.held(); END IF;
+  -- sin refresh, una incidencia cerrada no devuelve retenidos
+  UPDATE public.panelist_incident SET status = 'resolved' WHERE id = i;
+  IF pg_temp.held() <> '{}' THEN RAISE EXCEPTION 'FAIL retenidos visibles con incidencia cerrada'; END IF;
+  UPDATE public.panelist_incident SET status = 'in_progress' WHERE id = i;
+  IF cardinality(pg_temp.held()) <> 3 THEN RAISE EXCEPTION 'FAIL retenidos no vuelven al reabrir'; END IF;
+  -- resolve_panelist_incident libera
+  PERFORM set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+  PERFORM public.resolve_panelist_incident(i, 'dismissed', 'Descartada', NULL);
+  PERFORM set_config('request.jwt.claim.sub','', true);
+  IF pg_temp.held() <> '{}' THEN RAISE EXCEPTION 'FAIL retenidos tras cierre manual'; END IF;
+  IF (SELECT count(*) FROM public.material_hold WHERE panelist_id = p AND released_at IS NULL) <> 0
+     OR (SELECT count(*) FROM public.material_hold WHERE panelist_id = p AND released_at IS NOT NULL) <> 3 THEN
+    RAISE EXCEPTION 'FAIL material_hold sin released_at tras cierre manual'; END IF;
+  UPDATE public.panelist_incident SET status = 'in_progress' WHERE id = i;
+  -- panelista inactivo: no retiene, se libera todo y se devuelven los del conjunto
+  r := public.refresh_material_hold(p);
+  IF cardinality(pg_temp.held()) <> 3 THEN RAISE EXCEPTION 'FAIL previo inactivo'; END IF;
+  UPDATE public.panelists SET status = 'inactive' WHERE id = p;
+  r := public.refresh_material_hold(p);
+  IF r <> ARRAY[d1,d2,d3] OR (SELECT count(*) FROM public.material_hold WHERE panelist_id = p AND released_at IS NULL) <> 0 THEN
+    RAISE EXCEPTION 'FAIL inactivo retiene: %', r; END IF;
+  UPDATE public.panelists SET status = 'active' WHERE id = p;
+  r := public.refresh_material_hold(p);
+  IF cardinality(pg_temp.held()) <> 3 THEN RAISE EXCEPTION 'FAIL reactivado no retiene'; END IF;
 END $$;
 
 SELECT pg_temp.expect_err($$SELECT public.refresh_material_hold('00000000-0000-0000-0000-000000000000')$$, 'panelist not found');
@@ -718,7 +805,7 @@ BEGIN
   IF (SELECT count(*) FROM public.incident_message WHERE incident_id = v_inc AND author = 'system') <> 1 THEN
     RAISE EXCEPTION 'FAIL duplica estado'; END IF;
   PERFORM public.resolve_panelist_incident(v_inc, 'resolved', 'Hecho', NULL);
-  IF NOT EXISTS (SELECT 1 FROM public.incident_message WHERE incident_id = v_inc AND body = 'Estado: resolved — Hecho') THEN
+  IF NOT EXISTS (SELECT 1 FROM public.incident_message WHERE incident_id = v_inc AND body = 'Estado: resolved - Hecho') THEN
     RAISE EXCEPTION 'FAIL estado resolved'; END IF;
   PERFORM set_config('request.jwt.claim.sub','', true);
   -- el envio de la respuesta (n8n) la deja en la conversacion una sola vez
