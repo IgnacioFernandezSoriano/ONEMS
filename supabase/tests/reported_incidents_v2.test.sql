@@ -39,3 +39,36 @@ BEGIN
     RAISE EXCEPTION 'FAIL incidencia no enlazada'; END IF;
 END $$;
 ROLLBACK;
+
+-- ===== Escenario 2: update_panelist_contact ampliada (_v2, 9 parametros) =====
+BEGIN;
+\ir fixtures/incident_city.sql
+UPDATE public.panelists SET telegram_id = 'tg-old' WHERE id = 'e1000000-0000-0000-0000-000000000001';
+SELECT public.update_panelist_contact_v2('e1000000-0000-0000-0000-000000000001',
+  p_telegram_id => 'tg-new', p_phone => '+34 600 000 000', p_language => 'fr',
+  p_email => 'nuevo@test.local', p_address_city => 'Lyon');
+DO $$ DECLARE r public.panelists;
+BEGIN
+  SELECT * INTO r FROM public.panelists WHERE id = 'e1000000-0000-0000-0000-000000000001';
+  IF r.telegram_id <> 'tg-old' THEN RAISE EXCEPTION 'FAIL telegram cambiado sin auth.uid()'; END IF;
+  IF r.mobile <> '+34 600 000 000' OR r.language <> 'fr' OR r.email <> 'nuevo@test.local' OR r.address_city <> 'Lyon' THEN
+    RAISE EXCEPTION 'FAIL campos no aplicados: %', row_to_json(r); END IF;
+END $$;
+-- cadena vacia = no tocar
+SELECT public.update_panelist_contact_v2('e1000000-0000-0000-0000-000000000001', p_email => '');
+DO $$ BEGIN
+  IF (SELECT email FROM public.panelists WHERE id = 'e1000000-0000-0000-0000-000000000001') <> 'nuevo@test.local' THEN
+    RAISE EXCEPTION 'FAIL email cambiado con cadena vacia'; END IF;
+END $$;
+-- validaciones
+SELECT pg_temp.expect_err($$SELECT public.update_panelist_contact_v2('e1000000-0000-0000-0000-000000000001', p_email => 'sin-arroba')$$, 'invalid email');
+SELECT pg_temp.expect_err($$SELECT public.update_panelist_contact_v2('e1000000-0000-0000-0000-000000000001', p_phone => 'abc')$$, 'invalid phone');
+SELECT pg_temp.expect_err($$SELECT public.update_panelist_contact_v2('e1000000-0000-0000-0000-000000000001', p_language => 'xx')$$, 'invalid language');
+-- firma antigua sigue funcionando
+SELECT public.update_panelist_contact('e1000000-0000-0000-0000-000000000001', NULL, '600111222', 'es');
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM public.panelists WHERE id = 'e1000000-0000-0000-0000-000000000001'
+                 AND mobile = '600111222' AND language = 'es') THEN
+    RAISE EXCEPTION 'FAIL firma antigua no aplico telefono/idioma'; END IF;
+END $$;
+ROLLBACK;
