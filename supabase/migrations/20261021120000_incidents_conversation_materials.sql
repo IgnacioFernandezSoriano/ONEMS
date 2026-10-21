@@ -375,9 +375,16 @@ BEGIN
 
   -- Incidencia enlazada (o, por compatibilidad, la que apunta a este envio).
   v_incident := v_ship.panelist_incident_id;
+  IF v_incident IS NOT NULL AND NOT EXISTS (
+       SELECT 1 FROM public.panelist_incident
+        WHERE id = v_incident AND account_id = v_ship.account_id AND panelist_id = v_ship.panelist_id) THEN
+    v_incident := NULL;
+  END IF;
   IF v_incident IS NULL THEN
     SELECT id INTO v_incident FROM public.panelist_incident
-     WHERE linked_material_shipment_id = p_shipment_id LIMIT 1;
+     WHERE linked_material_shipment_id = p_shipment_id
+       AND account_id = v_ship.account_id AND panelist_id = v_ship.panelist_id
+     ORDER BY created_at LIMIT 1;
   END IF;
 
   IF v_incident IS NOT NULL THEN
@@ -389,6 +396,7 @@ BEGIN
     IF v_complete AND NOT EXISTS (
          SELECT 1 FROM public.material_shipments s
           WHERE s.status NOT IN ('cancelled', 'received')
+            AND s.account_id = v_ship.account_id AND s.panelist_id = v_ship.panelist_id
             AND (s.panelist_incident_id = v_incident
                  OR s.id IN (SELECT linked_material_shipment_id FROM public.panelist_incident WHERE id = v_incident))
        ) THEN
@@ -437,6 +445,18 @@ BEGIN
 END;
 $$;
 
+CREATE OR REPLACE FUNCTION public.material_shipment_incident_same_account_check()
+RETURNS trigger LANGUAGE plpgsql SET search_path = public AS $$
+BEGIN
+  IF NEW.panelist_incident_id IS NOT NULL AND
+     (SELECT account_id FROM public.panelist_incident WHERE id = NEW.panelist_incident_id) IS DISTINCT FROM NEW.account_id THEN
+    RAISE EXCEPTION 'incident belongs to another account'; END IF;
+  RETURN NEW;
+END; $$;
+CREATE TRIGGER material_shipment_incident_same_account
+  BEFORE INSERT OR UPDATE OF panelist_incident_id, account_id ON public.material_shipments
+  FOR EACH ROW EXECUTE FUNCTION public.material_shipment_incident_same_account_check();
+
 REVOKE ALL ON FUNCTION public.receive_material_shipment_items(uuid,jsonb) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.receive_material_shipment_items(uuid,jsonb) TO authenticated, service_role;
 GRANT EXECUTE ON FUNCTION public.receive_material_shipment(uuid) TO authenticated, service_role;
@@ -481,6 +501,7 @@ DECLARE
 BEGIN
   SELECT account_id, node_id INTO v_acc, v_node FROM panelists WHERE id = p_panelist_id;
   IF NOT FOUND THEN RAISE EXCEPTION 'panelist not found'; END IF;
+  PERFORM pg_advisory_xact_lock(hashtextextended(p_panelist_id::text, 0));
 
   SELECT coalesce(array_agg(d.id), '{}') INTO v_set
     FROM allocation_plan_details d
@@ -501,7 +522,9 @@ BEGIN
       UPDATE material_hold SET released_at = now()
        WHERE panelist_id = p_panelist_id AND released_at IS NULL
        RETURNING allocation_plan_detail_id)
-    SELECT coalesce(array_agg(allocation_plan_detail_id), '{}') INTO v_released FROM r;
+    SELECT coalesce(array_agg(r.allocation_plan_detail_id ORDER BY d.fecha_programada, d.id), '{}') INTO v_released
+      FROM r JOIN allocation_plan_details d ON d.id = r.allocation_plan_detail_id
+     WHERE r.allocation_plan_detail_id = ANY (v_set);
     RETURN v_released;
   END IF;
 
@@ -516,8 +539,8 @@ BEGIN
      ORDER BY d.fecha_programada, d.id
   LOOP
     v_held := false;
-    FOR v_req IN SELECT material_id, quantity FROM product_materials WHERE product_id = v_det.product_id LOOP
-      IF coalesce((v_stock->>v_req.material_id::text)::numeric, 0) < v_req.quantity THEN
+    FOR v_req IN SELECT material_id, sum(coalesce(quantity, 0)) AS qty FROM product_materials WHERE product_id = v_det.product_id GROUP BY material_id LOOP
+      IF coalesce((v_stock->>v_req.material_id::text)::numeric, 0) < v_req.qty THEN
         v_held := true; EXIT;
       END IF;
     END LOOP;
@@ -530,8 +553,8 @@ BEGIN
             released_at = NULL,
             panelist_id = excluded.panelist_id;
     ELSE
-      FOR v_req IN SELECT material_id, quantity FROM product_materials WHERE product_id = v_det.product_id LOOP
-        v_rem := coalesce((v_stock->>v_req.material_id::text)::numeric, 0) - v_req.quantity;
+      FOR v_req IN SELECT material_id, sum(coalesce(quantity, 0)) AS qty FROM product_materials WHERE product_id = v_det.product_id GROUP BY material_id LOOP
+        v_rem := coalesce((v_stock->>v_req.material_id::text)::numeric, 0) - v_req.qty;
         v_stock := jsonb_set(v_stock, ARRAY[v_req.material_id::text], to_jsonb(v_rem), true);
       END LOOP;
       v_id := NULL;

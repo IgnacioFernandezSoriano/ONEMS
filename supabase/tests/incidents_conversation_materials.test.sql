@@ -550,3 +550,96 @@ BEGIN
   IF NOT (SELECT relrowsecurity FROM pg_class WHERE oid = 'public.material_hold'::regclass) THEN RAISE EXCEPTION 'FAIL hold sin RLS'; END IF;
 END $$;
 ROLLBACK;
+
+-- ===== Escenario 5: agregacion de materiales, aislamiento de cuenta y enlace de incidencia =====
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+CREATE TEMP TABLE t_ids (k text PRIMARY KEY, v uuid);
+WITH x AS (INSERT INTO public.material_catalog (account_id, code, name)
+  VALUES ('a0000000-0000-0000-0000-000000000001','M1','Etiquetas') RETURNING id)
+INSERT INTO t_ids SELECT 'm1', id FROM x;
+WITH x AS (INSERT INTO public.material_catalog (account_id, code, name)
+  VALUES ('a0000000-0000-0000-0000-000000000001','M2','Bolsas') RETURNING id)
+INSERT INTO t_ids SELECT 'm2', id FROM x;
+INSERT INTO public.products (id, account_id, carrier_id, code, description, standard_delivery_hours) VALUES
+  ('cb000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000001','ca000000-0000-0000-0000-000000000001','PR2','Prod2',48);
+INSERT INTO public.product_materials (account_id, product_id, material_id, quantity) VALUES
+  ('a0000000-0000-0000-0000-000000000001','cb000000-0000-0000-0000-000000000002',(SELECT v FROM t_ids WHERE k='m1'),10),
+  ('a0000000-0000-0000-0000-000000000001','cb000000-0000-0000-0000-000000000002',(SELECT v FROM t_ids WHERE k='m2'),5);
+INSERT INTO public.allocation_plans (id, account_id, plan_name, carrier_id, product_id, total_samples, start_date, end_date) VALUES
+  ('cc000000-0000-0000-0000-000000000003','a0000000-0000-0000-0000-000000000001','Mat','ca000000-0000-0000-0000-000000000001','cb000000-0000-0000-0000-000000000002',10,'2027-03-01','2027-03-31');
+WITH x AS (
+  INSERT INTO public.allocation_plan_details (account_id, plan_id, origin_node_id, destination_node_id, fecha_programada, week_number, month, year, status)
+  VALUES ('a0000000-0000-0000-0000-000000000001','cc000000-0000-0000-0000-000000000003',
+          'b1000000-0000-0000-0000-000000000001','b4000000-0000-0000-0000-000000000004', current_date + 1, 1, 1, 2027, 'pending')
+  RETURNING id)
+INSERT INTO t_ids SELECT 'd1', id FROM x;
+-- envio de OTRA cuenta con el mismo nodo origen: no cuenta
+WITH x AS (
+  INSERT INTO public.allocation_plan_details (account_id, plan_id, origin_node_id, destination_node_id, fecha_programada, week_number, month, year, status)
+  VALUES ('a0000000-0000-0000-0000-000000000002','cc000000-0000-0000-0000-000000000003',
+          'b1000000-0000-0000-0000-000000000001','b4000000-0000-0000-0000-000000000004', current_date + 1, 1, 1, 2027, 'pending')
+  RETURNING id)
+INSERT INTO t_ids SELECT 'dx', id FROM x;
+INSERT INTO public.panelist_incident (id, account_id, panelist_id, category, status)
+VALUES ('f0000000-0000-0000-0000-0000000000c1','a0000000-0000-0000-0000-000000000001','e1000000-0000-0000-0000-000000000001','missing_materials','open');
+CREATE FUNCTION pg_temp.set_stock(m text, q numeric) RETURNS void LANGUAGE sql AS $$
+  INSERT INTO public.panelist_material_stocks (account_id, panelist_id, material_id, quantity)
+  VALUES ('a0000000-0000-0000-0000-000000000001','e1000000-0000-0000-0000-000000000001',(SELECT v FROM t_ids WHERE k=m), q)
+  ON CONFLICT (account_id, panelist_id, material_id) DO UPDATE SET quantity = excluded.quantity;
+$$;
+
+DO $$
+DECLARE d1 uuid := (SELECT v FROM t_ids WHERE k='d1'); r uuid[]; p constant uuid := 'e1000000-0000-0000-0000-000000000001';
+BEGIN
+  -- dos materiales, uno corto: retenido
+  PERFORM pg_temp.set_stock('m1', 100); PERFORM pg_temp.set_stock('m2', 2);
+  r := public.refresh_material_hold(p);
+  IF NOT EXISTS (SELECT 1 FROM public.material_hold WHERE allocation_plan_detail_id = d1 AND released_at IS NULL) THEN
+    RAISE EXCEPTION 'FAIL material corto no retiene'; END IF;
+  -- el envio de otra cuenta no se considera
+  IF EXISTS (SELECT 1 FROM public.material_hold WHERE allocation_plan_detail_id = (SELECT v FROM t_ids WHERE k='dx')) THEN
+    RAISE EXCEPTION 'FAIL considera envio de otra cuenta'; END IF;
+  PERFORM pg_temp.set_stock('m2', 5);
+  r := public.refresh_material_hold(p);
+  IF r <> ARRAY[d1] THEN RAISE EXCEPTION 'FAIL liberado con ambos materiales: %', r; END IF;
+  -- material duplicado (se quita la unicidad solo en esta transaccion): se suma
+  ALTER TABLE public.product_materials DROP CONSTRAINT product_materials_unique;
+  INSERT INTO public.product_materials (account_id, product_id, material_id, quantity)
+  VALUES ('a0000000-0000-0000-0000-000000000001','cb000000-0000-0000-0000-000000000002',(SELECT v FROM t_ids WHERE k='m1'),10);
+  PERFORM pg_temp.set_stock('m1', 15);
+  r := public.refresh_material_hold(p);
+  IF r <> '{}' OR NOT EXISTS (SELECT 1 FROM public.material_hold WHERE allocation_plan_detail_id = d1 AND released_at IS NULL) THEN
+    RAISE EXCEPTION 'FAIL duplicado no suma'; END IF;
+  PERFORM pg_temp.set_stock('m1', 20);
+  r := public.refresh_material_hold(p);
+  IF r <> ARRAY[d1] THEN RAISE EXCEPTION 'FAIL duplicado suficiente: %', r; END IF;
+END $$;
+
+-- enlace de incidencia limitado a la cuenta/panelista del envio
+ALTER TABLE public.panelist_incident DISABLE TRIGGER panelist_incident_same_account;
+INSERT INTO public.panelist_incident (id, account_id, panelist_id, category, status) VALUES
+  ('f0000000-0000-0000-0000-0000000000c2','a0000000-0000-0000-0000-000000000002','e1000000-0000-0000-0000-000000000001','missing_materials','open');
+ALTER TABLE public.panelist_incident ENABLE TRIGGER panelist_incident_same_account;
+INSERT INTO public.panelist_incident (id, account_id, panelist_id, category, status) VALUES
+  ('f0000000-0000-0000-0000-0000000000c3','a0000000-0000-0000-0000-000000000001','e2000000-0000-0000-0000-000000000002','missing_materials','open');
+SELECT pg_temp.expect_err($$INSERT INTO public.material_shipments (account_id, panelist_id, status, panelist_incident_id)
+  VALUES ('a0000000-0000-0000-0000-000000000001','e1000000-0000-0000-0000-000000000001','sent','f0000000-0000-0000-0000-0000000000c2')$$,
+  'incident belongs to another account');
+-- envio de P1 enlazado a incidencia de otro panelista (misma cuenta) y referenciado desde la incidencia de otra cuenta
+INSERT INTO public.material_shipments (id, account_id, panelist_id, status, panelist_incident_id)
+VALUES ('f0000000-0000-0000-0000-0000000000b1','a0000000-0000-0000-0000-000000000001','e1000000-0000-0000-0000-000000000001','sent','f0000000-0000-0000-0000-0000000000c3');
+UPDATE public.panelist_incident SET linked_material_shipment_id = 'f0000000-0000-0000-0000-0000000000b1'
+ WHERE id = 'f0000000-0000-0000-0000-0000000000c2';
+INSERT INTO public.material_shipment_items (account_id, material_shipment_id, material_id, quantity_sent)
+VALUES ('a0000000-0000-0000-0000-000000000001','f0000000-0000-0000-0000-0000000000b1',(SELECT v FROM t_ids WHERE k='m1'),3);
+DO $$ BEGIN
+  PERFORM set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+  PERFORM public.receive_material_shipment('f0000000-0000-0000-0000-0000000000b1');
+  PERFORM set_config('request.jwt.claim.sub','', true);
+  IF (SELECT status FROM public.panelist_incident WHERE id = 'f0000000-0000-0000-0000-0000000000c2') <> 'open'
+     OR (SELECT status FROM public.panelist_incident WHERE id = 'f0000000-0000-0000-0000-0000000000c3') <> 'open' THEN
+    RAISE EXCEPTION 'FAIL resolvio una incidencia ajena'; END IF;
+END $$;
+ROLLBACK;
