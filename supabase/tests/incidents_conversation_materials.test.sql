@@ -152,3 +152,129 @@ BEGIN
   IF NOT (SELECT relrowsecurity FROM pg_class WHERE oid = 'public.incident_message'::regclass) THEN RAISE EXCEPTION 'FAIL sin RLS'; END IF;
 END $$;
 ROLLBACK;
+
+-- ===== Escenario 2: envios de material enlazados a la incidencia y agenda de preguntas =====
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+UPDATE public.panelists SET telegram_id = 'tg-p1', language = 'es' WHERE id = 'e1000000-0000-0000-0000-000000000001';
+UPDATE public.panelists SET telegram_id = 'tg-p2', language = 'fr' WHERE id = 'e2000000-0000-0000-0000-000000000002';
+CREATE TEMP TABLE t_ids (k text PRIMARY KEY, v uuid);
+WITH x AS (
+  INSERT INTO public.panelist_incident (account_id, panelist_id, category, status)
+  VALUES ('a0000000-0000-0000-0000-000000000001','e1000000-0000-0000-0000-000000000001','missing_materials','open')
+  RETURNING id)
+INSERT INTO t_ids SELECT 'inc', id FROM x;
+WITH x AS (
+  INSERT INTO public.material_catalog (account_id, code, name)
+  VALUES ('a0000000-0000-0000-0000-000000000001','M1','Etiquetas') RETURNING id)
+INSERT INTO t_ids SELECT 'mat', id FROM x;
+-- S1: envio de donante (P2 -> P1) enlazado a la incidencia; S2: envio central a P1 con fecha prevista manana
+WITH x AS (
+  INSERT INTO public.material_shipments (account_id, panelist_id, source_panelist_id, status, panelist_incident_id)
+  VALUES ('a0000000-0000-0000-0000-000000000001','e1000000-0000-0000-0000-000000000001',
+          'e2000000-0000-0000-0000-000000000002','pending',(SELECT v FROM t_ids WHERE k='inc'))
+  RETURNING id)
+INSERT INTO t_ids SELECT 's1', id FROM x;
+WITH x AS (
+  INSERT INTO public.material_shipments (account_id, panelist_id, status, expected_date, panelist_incident_id)
+  VALUES ('a0000000-0000-0000-0000-000000000001','e1000000-0000-0000-0000-000000000001',
+          'pending', current_date + 1,(SELECT v FROM t_ids WHERE k='inc'))
+  RETURNING id)
+INSERT INTO t_ids SELECT 's2', id FROM x;
+INSERT INTO public.material_shipment_items (account_id, material_shipment_id, material_id, quantity_sent)
+SELECT 'a0000000-0000-0000-0000-000000000001', v, (SELECT v FROM t_ids WHERE k='mat'), 5 FROM t_ids WHERE k IN ('s1','s2');
+
+-- el donante recibe la peticion de envio; el envio central no genera pregunta aun
+DO $$
+DECLARE s1 uuid := (SELECT v FROM t_ids WHERE k='s1'); r record;
+BEGIN
+  IF (SELECT count(*) FROM public.due_material_questions()) <> 1 THEN
+    RAISE EXCEPTION 'FAIL esperaba 1 pregunta pendiente, hay %', (SELECT count(*) FROM public.due_material_questions()); END IF;
+  SELECT * INTO r FROM public.due_material_questions();
+  IF r.shipment_id <> s1 OR r.kind <> 'donor_send_request' OR r.panelist_id <> 'e2000000-0000-0000-0000-000000000002'
+     OR r.telegram_id <> 'tg-p2' OR r.language <> 'fr' OR r.ask_count <> 0 THEN
+    RAISE EXCEPTION 'FAIL fila donante: %', row_to_json(r); END IF;
+  PERFORM public.record_material_question(s1, 'donor_send_request');
+  IF NOT EXISTS (SELECT 1 FROM public.material_shipments WHERE id = s1 AND ask_count = 1 AND source_notified_at IS NOT NULL
+                  AND last_asked_at IS NOT NULL AND next_ask_at > now() + interval '1 day 23 hours') THEN
+    RAISE EXCEPTION 'FAIL record donante'; END IF;
+  IF (SELECT count(*) FROM public.due_material_questions()) <> 0 THEN RAISE EXCEPTION 'FAIL reaparece antes de next_ask_at'; END IF;
+  SELECT * INTO r FROM public.due_material_questions(now() + interval '3 days');
+  IF r.shipment_id IS DISTINCT FROM s1 OR r.kind <> 'donor_send_request' OR r.ask_count <> 1 THEN
+    RAISE EXCEPTION 'FAIL no reaparece al vencer: %', row_to_json(r); END IF;
+END $$;
+
+-- al enviarse pasa a receipt_question (receptor) y reinicia el contador
+DO $$
+DECLARE s1 uuid := (SELECT v FROM t_ids WHERE k='s1'); s2 uuid := (SELECT v FROM t_ids WHERE k='s2'); r record;
+BEGIN
+  PERFORM set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+  PERFORM public.send_material_shipment(s1);
+  PERFORM public.send_material_shipment(s2);
+  PERFORM set_config('request.jwt.claim.sub','', true);
+  IF NOT EXISTS (SELECT 1 FROM public.material_shipments WHERE id = s1 AND status = 'sent' AND ask_count = 0
+                  AND next_ask_at > now() + interval '1 day 23 hours' AND next_ask_at < now() + interval '2 days 1 hour') THEN
+    RAISE EXCEPTION 'FAIL send donante: %', (SELECT row_to_json(m) FROM public.material_shipments m WHERE id = s1); END IF;
+  IF NOT EXISTS (SELECT 1 FROM public.material_shipments WHERE id = s2 AND status = 'sent' AND ask_count = 0
+                  AND next_ask_at = (current_date + 1)::timestamptz) THEN
+    RAISE EXCEPTION 'FAIL send central: %', (SELECT row_to_json(m) FROM public.material_shipments m WHERE id = s2); END IF;
+  IF (SELECT count(*) FROM public.due_material_questions()) <> 0 THEN RAISE EXCEPTION 'FAIL pregunta antes de tiempo'; END IF;
+  SELECT * INTO r FROM public.due_material_questions(now() + interval '3 days') WHERE shipment_id = s1;
+  IF r.kind <> 'receipt_question' OR r.panelist_id <> 'e1000000-0000-0000-0000-000000000001'
+     OR r.telegram_id <> 'tg-p1' OR r.language <> 'es' THEN RAISE EXCEPTION 'FAIL receipt_question: %', row_to_json(r); END IF;
+  IF (SELECT count(*) FROM public.due_material_questions(now() + interval '3 days')) <> 2 THEN
+    RAISE EXCEPTION 'FAIL esperaba 2 receipt_question'; END IF;
+  PERFORM public.record_material_question(s1, 'receipt_question');
+  IF NOT EXISTS (SELECT 1 FROM public.material_shipments WHERE id = s1 AND ask_count = 1) THEN RAISE EXCEPTION 'FAIL record receipt'; END IF;
+  IF (SELECT count(*) FROM public.due_material_questions(now() + interval '1 day')) <> 1 THEN
+    RAISE EXCEPTION 'FAIL s1 reaparece pronto'; END IF;
+  -- recepcion parcial: sigue preguntando
+  UPDATE public.material_shipments SET status = 'partially_received', next_ask_at = now() - interval '1 hour' WHERE id = s1;
+  SELECT * INTO r FROM public.due_material_questions() WHERE shipment_id = s1;
+  IF r.kind <> 'receipt_question' THEN RAISE EXCEPTION 'FAIL partially_received no pregunta'; END IF;
+  -- recibido o cancelado: no pregunta
+  UPDATE public.material_shipments SET status = 'received' WHERE id = s1;
+  UPDATE public.material_shipments SET status = 'cancelled' WHERE id = s2;
+  IF (SELECT count(*) FROM public.due_material_questions(now() + interval '30 days')) <> 0 THEN RAISE EXCEPTION 'FAIL pregunta de cerrados'; END IF;
+END $$;
+
+-- sin telegram_id no hay pregunta; panelista de otra cuenta tampoco
+UPDATE public.material_shipments SET status = 'sent', next_ask_at = now() - interval '1 hour'
+ WHERE id = (SELECT v FROM t_ids WHERE k='s1');
+UPDATE public.panelists SET telegram_id = '  ' WHERE id = 'e1000000-0000-0000-0000-000000000001';
+DO $$ BEGIN
+  IF (SELECT count(*) FROM public.due_material_questions()) <> 0 THEN RAISE EXCEPTION 'FAIL pregunta sin telegram_id'; END IF;
+END $$;
+UPDATE public.panelists SET telegram_id = 'tg-p1' WHERE id = 'e1000000-0000-0000-0000-000000000001';
+INSERT INTO public.material_shipments (account_id, panelist_id, status, next_ask_at)
+VALUES ('a0000000-0000-0000-0000-000000000002','e1000000-0000-0000-0000-000000000001','sent', now() - interval '1 day');
+DO $$ BEGIN
+  IF (SELECT count(*) FROM public.due_material_questions()) <> 1 THEN
+    RAISE EXCEPTION 'FAIL cuenta cruzada: % filas', (SELECT count(*) FROM public.due_material_questions()); END IF;
+END $$;
+
+-- estado invalido, kind invalido, envio inexistente, FK SET NULL
+SELECT pg_temp.expect_err($$UPDATE public.material_shipments SET status = 'bogus'$$, 'new row for relation');
+SELECT pg_temp.expect_err($$SELECT public.record_material_question((SELECT v FROM t_ids WHERE k='s1'), 'bogus')$$, 'invalid question kind');
+SELECT pg_temp.expect_err($$SELECT public.record_material_question('00000000-0000-0000-0000-000000000000', 'receipt_question')$$, 'shipment not found');
+DELETE FROM public.panelist_incident WHERE id = (SELECT v FROM t_ids WHERE k='inc');
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM public.material_shipments WHERE panelist_incident_id IS NOT NULL) THEN RAISE EXCEPTION 'FAIL FK no pone NULL'; END IF;
+END $$;
+
+-- privilegios
+DO $$
+DECLARE f text;
+BEGIN
+  FOREACH f IN ARRAY ARRAY['public.due_material_questions(timestamptz)','public.record_material_question(uuid,text)'] LOOP
+    IF has_function_privilege('anon', f, 'EXECUTE') OR has_function_privilege('authenticated', f, 'EXECUTE') THEN
+      RAISE EXCEPTION 'FAIL anon/authenticated con EXECUTE en %', f; END IF;
+    IF NOT has_function_privilege('service_role', f, 'EXECUTE') THEN RAISE EXCEPTION 'FAIL service_role sin EXECUTE en %', f; END IF;
+  END LOOP;
+  f := 'public.send_material_shipment(uuid)';
+  IF has_function_privilege('anon', f, 'EXECUTE') THEN RAISE EXCEPTION 'FAIL anon con EXECUTE en %', f; END IF;
+  IF NOT has_function_privilege('authenticated', f, 'EXECUTE') OR NOT has_function_privilege('service_role', f, 'EXECUTE') THEN
+    RAISE EXCEPTION 'FAIL falta GRANT en %', f; END IF;
+END $$;
+ROLLBACK;

@@ -156,3 +156,129 @@ REVOKE ALL ON FUNCTION public.mark_incident_message_sent(uuid,boolean,text,text)
 GRANT EXECUTE ON FUNCTION public.mark_incident_message_sent(uuid,boolean,text,text) TO service_role;
 REVOKE ALL ON FUNCTION public.pending_incident_messages(int) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.pending_incident_messages(int) TO service_role;
+
+-- ===== 2) Envios de material enlazados a la incidencia + agenda de preguntas por Telegram =====
+ALTER TABLE public.material_shipments
+  ADD COLUMN panelist_incident_id uuid REFERENCES public.panelist_incident(id) ON DELETE SET NULL,
+  ADD COLUMN source_notified_at   timestamptz,
+  ADD COLUMN ask_count            int NOT NULL DEFAULT 0,
+  ADD COLUMN last_asked_at        timestamptz,
+  ADD COLUMN next_ask_at          timestamptz;
+
+ALTER TABLE public.material_shipments DROP CONSTRAINT IF EXISTS material_shipments_status_check;
+ALTER TABLE public.material_shipments ADD CONSTRAINT material_shipments_status_check
+  CHECK (status IN ('pending','sent','partially_received','received','cancelled'));
+
+CREATE INDEX material_shipments_next_ask_idx
+  ON public.material_shipments (next_ask_at) WHERE status IN ('pending','sent','partially_received');
+CREATE INDEX material_shipments_incident_idx
+  ON public.material_shipments (panelist_incident_id) WHERE panelist_incident_id IS NOT NULL;
+
+-- Relleno: enlace inverso de los envios ya creados por el tratamiento de incidencias.
+UPDATE public.material_shipments s
+   SET panelist_incident_id = i.id
+  FROM public.panelist_incident i
+ WHERE i.linked_material_shipment_id = s.id AND s.panelist_incident_id IS NULL;
+
+-- Preguntas de Telegram vencidas. El destinatario es el donante (donor_send_request) o el receptor
+-- (receipt_question); debe tener telegram_id y ser de la misma cuenta que el envio. Solo service_role.
+CREATE OR REPLACE FUNCTION public.due_material_questions(p_now timestamptz DEFAULT now())
+RETURNS TABLE (shipment_id uuid, kind text, panelist_id uuid, telegram_id text, language text, ask_count int)
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
+  SELECT s.id, 'donor_send_request', p.id, p.telegram_id, p.language, s.ask_count
+    FROM material_shipments s
+    JOIN panelists p ON p.id = s.source_panelist_id AND p.account_id = s.account_id
+   WHERE s.source_panelist_id IS NOT NULL AND s.status = 'pending' AND s.panelist_incident_id IS NOT NULL
+     AND (s.source_notified_at IS NULL OR s.next_ask_at <= p_now)
+     AND NULLIF(btrim(p.telegram_id), '') IS NOT NULL
+  UNION ALL
+  SELECT s.id, 'receipt_question', p.id, p.telegram_id, p.language, s.ask_count
+    FROM material_shipments s
+    JOIN panelists p ON p.id = s.panelist_id AND p.account_id = s.account_id
+   WHERE s.status IN ('sent','partially_received') AND s.next_ask_at <= p_now
+     AND NULLIF(btrim(p.telegram_id), '') IS NOT NULL
+   ORDER BY 1, 2;
+$$;
+
+-- Registra que se hizo una pregunta: cuenta, marca y agenda la siguiente a 2 dias. Solo service_role.
+CREATE OR REPLACE FUNCTION public.record_material_question(p_shipment_id uuid, p_kind text)
+RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+BEGIN
+  IF p_kind NOT IN ('donor_send_request','receipt_question') THEN
+    RAISE EXCEPTION 'invalid question kind'; END IF;
+  UPDATE material_shipments
+     SET ask_count = ask_count + 1, last_asked_at = now(), next_ask_at = now() + interval '2 days',
+         source_notified_at = CASE WHEN p_kind = 'donor_send_request'
+                                   THEN COALESCE(source_notified_at, now()) ELSE source_notified_at END
+   WHERE id = p_shipment_id;
+  IF NOT FOUND THEN RAISE EXCEPTION 'shipment not found'; END IF;
+END; $$;
+
+-- send_material_shipment: mismo cuerpo que 20260807100100 + agenda de la primera pregunta de recepcion.
+CREATE OR REPLACE FUNCTION public.send_material_shipment(p_shipment_id uuid)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_ship   public.material_shipments%rowtype;
+  v_item   record;
+BEGIN
+  SELECT * INTO v_ship FROM public.material_shipments WHERE id = p_shipment_id FOR UPDATE;
+  IF NOT FOUND THEN RAISE EXCEPTION 'shipment % not found', p_shipment_id; END IF;
+  PERFORM public.assert_same_account(v_ship.account_id);
+
+  IF v_ship.status <> 'pending' THEN
+    RETURN; -- idempotente: ya enviado/recibido/cancelado
+  END IF;
+
+  FOR v_item IN
+    SELECT material_id, quantity_sent
+      FROM public.material_shipment_items
+     WHERE material_shipment_id = p_shipment_id
+  LOOP
+    IF v_ship.source_panelist_id IS NULL THEN
+      -- Origen: almacen central del regulador.
+      UPDATE public.material_stocks
+         SET quantity = greatest(0, quantity - v_item.quantity_sent),
+             last_updated = now()
+       WHERE account_id = v_ship.account_id
+         AND material_id = v_item.material_id;
+    ELSE
+      -- Origen: panelista donante.
+      UPDATE public.panelist_material_stocks
+         SET quantity = greatest(0, quantity - v_item.quantity_sent),
+             last_updated = now()
+       WHERE account_id = v_ship.account_id
+         AND panelist_id = v_ship.source_panelist_id
+         AND material_id = v_item.material_id;
+    END IF;
+
+    INSERT INTO public.material_movements
+      (account_id, material_id, movement_type, quantity, reference_id, notes, created_by)
+    VALUES
+      (v_ship.account_id, v_item.material_id, 'dispatch', v_item.quantity_sent,
+       p_shipment_id,
+       CASE WHEN v_ship.source_panelist_id IS NULL
+            THEN 'Dispatch central -> panelista'
+            ELSE 'Dispatch donante -> panelista' END,
+       auth.uid());
+  END LOOP;
+
+  UPDATE public.material_shipments
+     SET status = 'sent', shipment_date = coalesce(shipment_date, now()),
+         ask_count = 0,
+         next_ask_at = CASE WHEN v_ship.source_panelist_id IS NULL
+                            THEN COALESCE(v_ship.expected_date::timestamptz, now() + interval '2 days')
+                            ELSE now() + interval '2 days' END
+   WHERE id = p_shipment_id;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.due_material_questions(timestamptz) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.due_material_questions(timestamptz) TO service_role;
+REVOKE ALL ON FUNCTION public.record_material_question(uuid,text) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.record_material_question(uuid,text) TO service_role;
+REVOKE ALL ON FUNCTION public.send_material_shipment(uuid) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.send_material_shipment(uuid) TO authenticated, service_role;
