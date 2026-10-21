@@ -204,3 +204,22 @@ GRANT EXECUTE ON FUNCTION public.list_nodes_for_sample_move(uuid) TO authenticat
 -- Hoy solo 'authenticated' (y PUBLIC/anon por defecto); n8n (service_role) la usara para recepcion manual.
 REVOKE ALL ON FUNCTION public.mark_detail_received_manual(uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.mark_detail_received_manual(uuid) TO authenticated, service_role;
+
+-- Cierre de un hueco de privilegios PREEXISTENTE: por defecto de Supabase, anon tenia EXECUTE en
+-- estas funciones SECURITY DEFINER (y assert_same_account deja pasar auth.uid() NULL).
+REVOKE ALL ON FUNCTION public.resolve_panelist_incident(uuid,text,text,text) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.resolve_panelist_incident(uuid,text,text,text) TO authenticated, service_role;
+REVOKE ALL ON FUNCTION public.invalidate_detail(uuid,text) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.invalidate_detail(uuid,text) TO authenticated;
+REVOKE ALL ON FUNCTION public.reschedule_detail(uuid,date) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.reschedule_detail(uuid,date) TO authenticated;
+REVOKE ALL ON FUNCTION public.cancel_detail(uuid) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.cancel_detail(uuid) TO authenticated;
+REVOKE ALL ON FUNCTION public.create_unavailability_from_incident(uuid,date,date,text) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.create_unavailability_from_incident(uuid,date,date,text) TO authenticated;
+REVOKE ALL ON FUNCTION public.send_material_shipment(uuid) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.send_material_shipment(uuid) TO authenticated, service_role;
+REVOKE ALL ON FUNCTION public.receive_material_shipment(uuid) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.receive_material_shipment(uuid) TO authenticated, service_role;
+REVOKE ALL ON FUNCTION public.find_surplus_donors(uuid,uuid,uuid,numeric) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.find_surplus_donors(uuid,uuid,uuid,numeric) TO authenticated, service_role;

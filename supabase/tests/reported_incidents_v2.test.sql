@@ -217,9 +217,23 @@ BEGIN
     'public.insert_panelist_incident_auto(uuid,text,text,jsonb,uuid,text)',
     'public.reroute_returned_sample(uuid,uuid,date)',
     'public.list_nodes_for_sample_move(uuid)',
-    'public.mark_detail_received_manual(uuid)'] LOOP
+    'public.mark_detail_received_manual(uuid)',
+    'public.resolve_panelist_incident(uuid,text,text,text)',
+    'public.send_material_shipment(uuid)',
+    'public.receive_material_shipment(uuid)',
+    'public.find_surplus_donors(uuid,uuid,uuid,numeric)'] LOOP
     IF NOT has_function_privilege('authenticated', f, 'EXECUTE') OR NOT has_function_privilege('service_role', f, 'EXECUTE') THEN
       RAISE EXCEPTION 'FAIL falta GRANT en %', f; END IF;
+    IF has_function_privilege('anon', f, 'EXECUTE') THEN RAISE EXCEPTION 'FAIL anon con EXECUTE en %', f; END IF;
+  END LOOP;
+END $$;
+-- las que solo van a authenticated: service_role no debe tener EXECUTE explicito
+DO $$ DECLARE f text;
+BEGIN
+  FOREACH f IN ARRAY ARRAY[
+    'public.invalidate_detail(uuid,text)','public.reschedule_detail(uuid,date)','public.cancel_detail(uuid)',
+    'public.create_unavailability_from_incident(uuid,date,date,text)'] LOOP
+    IF NOT has_function_privilege('authenticated', f, 'EXECUTE') THEN RAISE EXCEPTION 'FAIL authenticated sin EXECUTE en %', f; END IF;
     IF has_function_privilege('anon', f, 'EXECUTE') THEN RAISE EXCEPTION 'FAIL anon con EXECUTE en %', f; END IF;
   END LOOP;
 END $$;
