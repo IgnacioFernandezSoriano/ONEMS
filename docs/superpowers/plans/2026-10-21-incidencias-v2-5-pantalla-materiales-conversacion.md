@@ -71,6 +71,13 @@
 
 - [ ] Steps: componente; enchufar; claves; lint/build; commit `feat(incidents): hoja de envios de material (pantalla, PDF, Excel)`.
 
+### Task 3b: Estado `partially_received` en Stock
+
+- [ ] `src/lib/materialCalculator.ts`: el material "en camino" cuenta envíos `pending`, `sent` y `partially_received`, y suma lo **pendiente** por línea (`quantity_sent - coalesce(quantity_received,0)`), no `quantity_sent`.
+- [ ] Pestaña de envíos de Stock (`ShipmentsTab`): filtro y etiqueta para `partially_received` (clave `stock.status_partially_received` en 4 CSV) y cantidades recibidas visibles.
+- [ ] lint/build; commit `fix(stock): envios parcialmente recibidos en el calculo y en la lista`.
+- **Debe ir en producción antes que el flujo de recepción parcial del Plan 6.**
+
 ### Task 4: Verificación de claves y cierre
 
 - [ ] Script de claves (todas las `t('…')` de `incident_conversation.*`, `material_sheet.*`, `reported_incidents.*` existen en los 4 CSV); lint/build; `graphify update .`; commit si hubo cambios.
