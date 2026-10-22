@@ -60,7 +60,7 @@ Migraciones con funciones que miran la fecha de hoy: `20261020130100_incident_he
 
 ---
 
-## DT-7 — URGENTE: "Register new panelist" mete en SQL el texto que escribe cualquier desconocido
+## DT-7 — "Register new panelist" mete en SQL el texto que escribe cualquier desconocido (el usuario decidió el 2026-10-22 que NO es un error y no se corrige)
 
 - **Apuntado:** 2026-10-21 (revisión final de n8n antes de la promoción).
 - **Qué pasa:** el subflujo de alta de panelista (`Register new panelist` `2L2RHXdu7i94amgd`, PROD) construye consultas SQL con el texto que escribe la persona que habla con el bot por primera vez (nombre, email…). Cualquiera que encuentre el bot puede intentar alterar esas consultas. Está accesible hoy en producción y no lo ha introducido este trabajo.
