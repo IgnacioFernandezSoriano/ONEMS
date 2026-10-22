@@ -14,12 +14,12 @@ Si se le pide a una IA una página nueva, se le pasa este documento y la página
 - Cada página es **un solo archivo HTML autocontenido**: CSS y JS dentro del archivo. No se cargan fuentes, librerías ni imágenes externas. La única excepción es el favicon `/favicon.svg`.
 - Nombre del archivo: `<tema-en-ingles-con-guiones>.<idioma>.html`. Por ejemplo, `incidents-and-availability.es.html`.
 - **Cuatro idiomas siempre**: `en`, `es`, `fr` y `ar`. Una página nueva no se da por terminada hasta que existen los cuatro archivos.
-- Desde el menú de ONEMS, el enlace abre el idioma activo del usuario. El patrón está en `src/components/layout/Sidebar.tsx`:
-  ```tsx
-  path: `/help/<tema>.${['en', 'es', 'fr', 'ar'].includes(locale) ? locale : 'en'}.html`,
-  external: true,
-  ```
-  La etiqueta y el tooltip del menú se añaden a los 4 CSV de `public/locales/` (claves `menu.help_<tema>` y `menu.help_<tema>.tooltip`).
+- **Todas las ayudas se ven en el Centro de ayuda de ONEMS** (menú **Ayuda › Centro de ayuda**, ruta `/help-center`). Ahí se muestran dentro de la aplicación, con un selector de idioma, «Abrir en una pestaña nueva» y, si son públicas, «Copiar enlace».
+- **Para dar de alta una ayuda nueva:**
+  1. Añadir una entrada al catálogo `src/lib/helpDocs.ts` con `id`, `file`, `audience` (`managers` o `panelists`), `roles` (si solo la ven algunos roles) y `public` (si se puede enviar a alguien sin cuenta).
+  2. Añadir a los 4 CSV de `public/locales/` las claves `help_center.doc.<id>.title` y `help_center.doc.<id>.desc`.
+  3. No crear entradas sueltas en el menú.
+- **Para enlazar una ayuda desde el código**, usar siempre `helpDocUrl(file, idioma, apartado?, absoluta?)`, que está en `src/lib/helpDocs.ts`.
 
 ## 2. Nombres de los sistemas (obligatorio)
 
@@ -189,6 +189,6 @@ Todas las conversaciones con el ONE bot se dibujan con este componente. La guía
 ### 10.1 Guía del panelista: cómo se llega a ella
 
 - **Desde Telegram:** botón «📖 Ayuda» en el menú de `/start` y en la bienvenida tras el registro, y comando `/ayuda` (`/help`, `/aide`, `/مساعدة`). El enlace es `https://onems.edgeavs.net/help/panelist-guide.<idioma>.html`, con el idioma del panelista.
-- **Desde ONEMS:** botón «📖 Insertar enlace a la ayuda» en la conversación de cada incidencia. Añade el enlace en el idioma del panelista y con el ancla del apartado de esa incidencia.
+- **Desde ONEMS:** Centro de ayuda (Copiar enlace) y botón «📖 Insertar enlace a la ayuda» en la conversación de cada incidencia. Añade el enlace en el idioma del panelista y con el ancla del apartado de esa incidencia.
 - **Los ids de los apartados son un contrato:** `ReportedIncidentPanel.tsx` (`HELP_SECTION`) e `IncidentReviewPanel.tsx` enlazan a `#c-material`, `#c-roto`, `#c-devuelto`, `#c-ilegible`, `#c-foto`, `#c-como`, `#c-datos`, `#c-otro` y `#c-vacaciones`. No se renombran sin cambiar también el código.
 - **Los textos del bot se copian de los workflows de n8n.** Si cambia un botón del bot, se cambia la guía en los 4 idiomas.

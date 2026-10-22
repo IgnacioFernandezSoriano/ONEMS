@@ -4,6 +4,7 @@ import { useTranslation } from '@/hooks/useTranslation'
 import { useIncidentConversation } from '@/lib/hooks/useIncidentConversation'
 import type { ConversationKind, IncidentMessage } from '@/lib/hooks/useIncidentConversation'
 import { BTN_PRIMARY, BTN_SECONDARY } from './buttonStyles'
+import { helpDocUrl } from '@/lib/helpDocs'
 
 function fmtTime(iso: string | null | undefined): string {
   if (!iso) return ''
@@ -14,8 +15,7 @@ function fmtTime(iso: string | null | undefined): string {
 // Enlace a la guía del panelista en su idioma, abierta en el apartado de la incidencia.
 // Usa el dominio de la web actual (dev o producción), donde vive public/help.
 function panelistGuideUrl(language: string | null | undefined, section?: string): string {
-  const lang = ['en', 'es', 'fr', 'ar'].includes(language ?? '') ? language : 'en'
-  return `${window.location.origin}/help/panelist-guide.${lang}.html${section ? '#' + section : ''}`
+  return helpDocUrl('panelist-guide', language, section, true)
 }
 
 interface Props {

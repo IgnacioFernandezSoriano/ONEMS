@@ -3001,3 +3001,20 @@ menu.help_incidents,Aide : Incidents
 menu.help_incidents.tooltip,Fonctionnement des incidents et de la disponibilité des panélistes (s'ouvre dans un nouvel onglet)
 incident_conversation.insert_help,📖 Insérer le lien d'aide
 incident_conversation.insert_help.tooltip,Ajoute au message le lien vers le guide du panéliste : dans sa langue et ouvert à la section de cet incident
+menu.help_group,Aide
+menu.help_center,Centre d'aide
+menu.help_center.tooltip,Toute l'aide d'ONEMS au même endroit
+help_center.title,Centre d'aide
+help_center.intro,Choisissez une aide pour l'afficher ici. Les guides pour panélistes sont publics : copiez le lien et envoyez-le au panéliste.
+help_center.empty,Aucune aide n'est disponible pour votre rôle.
+help_center.audience.managers,Managers
+help_center.audience.panelists,Panélistes
+help_center.public_badge,Publique
+help_center.doc.incidents.title,Incidents et disponibilité
+help_center.doc.incidents.desc,Comment traiter dans ONEMS les incidents signalés par les panélistes et leurs jours d'indisponibilité.
+help_center.doc.panelist_guide.title,Guide du panéliste (ONE bot sur Telegram)
+help_center.doc.panelist_guide.desc,Ce que voit le panéliste : les boutons du bot et quoi faire pour chaque problème.
+help_center.language,Langue
+help_center.open_new_tab,Ouvrir dans un nouvel onglet
+help_center.copy_link,Copier le lien
+help_center.copied,Lien copié
