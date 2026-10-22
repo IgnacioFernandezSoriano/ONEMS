@@ -30,6 +30,8 @@ export interface SupplyLine {
 
 // Restos por debajo de esto son error de coma flotante, no cantidad real (no es redondeo de cantidades)
 const EPS = 1e-9
+// Inicio del calculo de necesidad: incluye los envios pendientes atrasados (ver resolveSupplyV2)
+const OVERDUE_FROM = '2000-01-01'
 
 // Origen elegido por el manager para un material en la pantalla de suministro
 export type SourceMode = 'proposal' | 'neighbours_only' | 'central_only' | 'purchase_all'
@@ -130,8 +132,9 @@ export function useMaterialsTreatment(accountIdOverride?: string) {
     opts?: { excludeIncidentId?: string }
   ): Promise<SupplyLine[]> => {
     if (!accountId) return []
-    const today = format(new Date(), 'yyyy-MM-dd')
-    const all = await calculatePanelistRequirements(accountId, today, horizonEnd,
+    // Desde el principio: los envios pendientes/notificados con fecha pasada siguen sin enviar (el bot se los
+    // sigue mostrando al panelista), asi que tambien necesitan material. Solo el final del horizonte limita.
+    const all = await calculatePanelistRequirements(accountId, OVERDUE_FROM, horizonEnd,
       { excludeIncidentId: opts?.excludeIncidentId, includeCovered: true })
     const own = (all.find(r => r.panelist_id === panelistId)?.materials || []).filter(x => x.quantity_needed > 0)
     if (own.length === 0) return []
