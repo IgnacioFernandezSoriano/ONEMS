@@ -2859,6 +2859,7 @@ reported_incidents.materials.blocking_badge,Bloqueante
 reported_incidents.materials.from_central,Desde stock central
 reported_incidents.materials.from_donor,Desde donante {name}
 reported_incidents.materials.close_hint,Recibir el material resuelve la incidencia; la baja no se cancela y termina sola en su fecha.
+reported_incidents.materials.baja_already_covered,El panelista ya está de baja todos esos días por otra baja. No hace falta baja por materiales.
 reported_incidents.materials.unmatched,Material no encontrado en el catálogo
 reported_incidents.materials.s1_title,Stock teórico
 reported_incidents.materials.s2_title,Necesidad y suministro

@@ -6,8 +6,6 @@ import { BTN_PRIMARY, BTN_SECONDARY } from './buttonStyles'
 import { ReportedIncidentHeader } from './ReportedIncidentHeader'
 import { ReturnedSampleActions } from './ReturnedSampleActions'
 import { MissingMaterialsSections } from './MissingMaterialsSections'
-import { readPurchaseLines } from '@/lib/hooks/useMaterialsTreatment'
-import { MaterialShipmentSheet } from './MaterialShipmentSheet'
 import { IncidentConversation } from './IncidentConversation'
 
 // Apartado de la guía del panelista (public/help/panelist-guide.*.html) para cada categoría
@@ -96,15 +94,6 @@ export function ReportedIncidentPanel({ incidentId, onBack }: { incidentId: stri
           <p className="text-sm text-gray-500">{t('reported_incidents.action.support_only')}</p>
         )}
         </fieldset>
-        {/* Hoja de envios FUERA del bloque de solo lectura: imprimir y CSV siempre; marcar enviado solo si es accionable */}
-        {inc.category === 'missing_materials' && (
-          <div className="mt-5">
-            <MaterialShipmentSheet key={inc.payload?.supply_executed_at ?? 'none'} incidentId={incidentId} accountId={inc.account_id}
-              receiverPanelistId={inc.panelist?.id ?? null} purchaseLines={readPurchaseLines(inc.payload)}
-              purchaseDue={inc.payload?.expected_date ?? null} canMarkSent={actionable} t={t}
-              onChanged={async () => { await markInProgress(); await load() }} />
-          </div>
-        )}
         {msg && <p className="text-sm mt-2">{msg}</p>}
       </div>
 

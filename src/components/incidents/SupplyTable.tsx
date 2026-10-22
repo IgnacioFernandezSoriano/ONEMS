@@ -22,10 +22,10 @@ export function SupplyTable({ lines, modes, onModeChange, disabled, t }: {
       <thead>
         <tr className="text-gray-500">
           <th className="text-start font-medium" />
-          <th className="text-end font-medium pe-2">{t(m('col_need'))}</th>
-          <th className="text-start font-medium">{t(m('col_neighbours'))}</th>
-          <th className="text-end font-medium pe-2">{t(m('col_central'))}</th>
-          <th className="text-end font-medium pe-2">{t(m('col_purchase'))}</th>
+          <th className="text-center font-medium px-2">{t(m('col_need'))}</th>
+          <th className="text-center font-medium px-2">{t(m('col_neighbours'))}</th>
+          <th className="text-center font-medium px-2">{t(m('col_central'))}</th>
+          <th className="text-center font-medium px-2">{t(m('col_purchase'))}</th>
           <th className="text-start font-medium">{t(m('change_source'))}</th>
         </tr>
       </thead>
@@ -36,12 +36,12 @@ export function SupplyTable({ lines, modes, onModeChange, disabled, t }: {
               {l.name}{' '}
               {l.is_blocking && <span className="bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded">{t(m('blocking_badge'))}</span>}
             </td>
-            <td className="py-1 text-end pe-2">{l.need}</td>
-            <td className="py-1 text-start">
+            <td className="py-1 text-center px-2">{l.need}</td>
+            <td className="py-1 text-center px-2">
               {l.fromNeighbours.length === 0 ? '-' : l.fromNeighbours.map(n => `${n.donor_name || n.donor_panelist_id.slice(0, 8)}: ${n.quantity}`).join(', ')}
             </td>
-            <td className="py-1 text-end pe-2">{l.fromCentral || '-'}</td>
-            <td className={`py-1 text-end pe-2 ${l.toPurchase > 0 ? 'text-red-700 font-medium' : ''}`}>{l.toPurchase || '-'}</td>
+            <td className="py-1 text-center px-2">{l.fromCentral || '-'}</td>
+            <td className={`py-1 text-center px-2 ${l.toPurchase > 0 ? 'text-red-700 font-medium' : ''}`}>{l.toPurchase || '-'}</td>
             <td className="py-1 text-start">
               <select className="border rounded p-1 text-sm" disabled={disabled} value={modes[l.material_id] ?? 'proposal'}
                 onChange={e => onModeChange(l.material_id, e.target.value as SourceMode)}>
