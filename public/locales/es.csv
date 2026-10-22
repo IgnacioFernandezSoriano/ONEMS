@@ -3009,3 +3009,21 @@ menu.help_incidents,Ayuda: Incidencias
 menu.help_incidents.tooltip,Cómo funcionan las incidencias y la disponibilidad de panelistas (se abre en una pestaña nueva)
 incident_conversation.insert_help,📖 Insertar enlace a la ayuda
 incident_conversation.insert_help.tooltip,Añade al mensaje el enlace a la guía del panelista: en su idioma y abierta en el apartado de esta incidencia
+menu.help_group,Ayuda
+menu.help_center,Centro de ayuda
+menu.help_center.tooltip,Todas las ayudas de ONEMS en un solo sitio
+help_center.title,Centro de ayuda
+help_center.intro,Elige una ayuda para verla aquí. Las guías para panelistas son públicas: copia el enlace y envíaselo al panelista.
+help_center.empty,No hay ayudas disponibles para tu rol.
+help_center.audience.managers,Managers
+help_center.audience.panelists,Panelistas
+help_center.public_badge,Pública
+help_center.doc.incidents.title,Incidencias y disponibilidad
+help_center.doc.incidents.desc,Cómo tratar en ONEMS las incidencias que reportan los panelistas y sus días no disponibles.
+help_center.doc.panelist_guide.title,Guía del panelista (ONE bot en Telegram)
+help_center.doc.panelist_guide.desc,Lo que ve el panelista: los botones del bot y qué hacer ante cada problema.
+help_center.language,Idioma
+help_center.open_new_tab,Abrir en una pestaña nueva
+help_center.copy_link,Copiar enlace
+help_center.copied,Enlace copiado
+help_center.copy_hint,Elige el idioma del panelista antes de copiar. Desde la conversación de una incidencia el enlace ya va en su idioma.

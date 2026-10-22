@@ -364,15 +364,6 @@ export function Sidebar() {
           roles: ['admin', 'superadmin'],
           tooltip: t('incidents.pending_badge_tooltip'),
         },
-        {
-          // La ayuda existe en los 4 idiomas: se abre la del idioma activo
-          path: `/help/incidents-and-availability.${['en', 'es', 'fr', 'ar'].includes(locale) ? locale : 'en'}.html`,
-          label: t('menu.help_incidents'),
-          icon: HelpCircle,
-          roles: ['admin', 'superadmin'],
-          tooltip: t('menu.help_incidents.tooltip'),
-          external: true,
-        },
       ],
     },
     {
@@ -407,6 +398,18 @@ export function Sidebar() {
             tooltip: t('menu.demo_reset.tooltip'),
           },
         ] : []),
+      ],
+    },
+    {
+      // Todas las ayudas (public/help, catálogo en lib/helpDocs.ts) en una sola pantalla
+      label: t('menu.help_group'),
+      items: [
+        {
+          path: '/help-center',
+          label: t('menu.help_center'),
+          icon: HelpCircle,
+          tooltip: t('menu.help_center.tooltip'),
+        },
       ],
     },
   ]

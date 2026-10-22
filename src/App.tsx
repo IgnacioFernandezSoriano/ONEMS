@@ -53,6 +53,7 @@ import PipelineMonitor from './pages/diagnosis/PipelineMonitor'
 import RoutePathAnalysis from './pages/diagnosis/RoutePathAnalysis'
 import { PanelistAvailabilityIncidents } from './pages/incidents/PanelistAvailabilityIncidents'
 import { PanelistReportedIncidents } from './pages/incidents/PanelistReportedIncidents'
+import { HelpCenter } from './pages/HelpCenter'
 
 
 function App() {
@@ -496,6 +497,16 @@ function App() {
                       element={
                         <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
                           <PanelistReportedIncidents />
+                        </ProtectedRoute>
+                      }
+                    />
+
+                    {/* Help center - all roles (each help page filters by role in lib/helpDocs.ts) */}
+                    <Route
+                      path="/help-center"
+                      element={
+                        <ProtectedRoute>
+                          <HelpCenter />
                         </ProtectedRoute>
                       }
                     />

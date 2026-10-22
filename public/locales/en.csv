@@ -3009,3 +3009,21 @@ menu.help_incidents,Help: Incidents
 menu.help_incidents.tooltip,How incidents and panelist availability work (opens in a new tab)
 incident_conversation.insert_help,📖 Insert help link
 incident_conversation.insert_help.tooltip,Adds the link to the panelist guide to the message: in the panelist's language and opened at the section for this incident
+menu.help_group,Help
+menu.help_center,Help center
+menu.help_center.tooltip,All ONEMS help pages in one place
+help_center.title,Help center
+help_center.intro,Choose a help page to view it here. Panelist guides are public: copy the link and send it to the panelist.
+help_center.empty,There is no help available for your role.
+help_center.audience.managers,Managers
+help_center.audience.panelists,Panelists
+help_center.public_badge,Public
+help_center.doc.incidents.title,Incidents and availability
+help_center.doc.incidents.desc,How to handle in ONEMS the incidents panelists report and their unavailable days.
+help_center.doc.panelist_guide.title,Panelist guide (ONE bot on Telegram)
+help_center.doc.panelist_guide.desc,What the panelist sees: the bot buttons and what to do for each problem.
+help_center.language,Language
+help_center.open_new_tab,Open in a new tab
+help_center.copy_link,Copy link
+help_center.copied,Link copied
+help_center.copy_hint,Choose the panelist's language before copying. From an incident conversation the link already goes in their language.

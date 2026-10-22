@@ -3001,3 +3001,21 @@ menu.help_incidents,مساعدة: الحوادث
 menu.help_incidents.tooltip,كيف تعمل الحوادث وتوفر المحكّمين (تُفتح في علامة تبويب جديدة)
 incident_conversation.insert_help,📖 إدراج رابط المساعدة
 incident_conversation.insert_help.tooltip,يضيف إلى الرسالة رابط دليل المشارك بلغته ومفتوحًا على القسم الخاص بهذه الحادثة
+menu.help_group,مساعدة
+menu.help_center,مركز المساعدة
+menu.help_center.tooltip,كل صفحات المساعدة في ONEMS في مكان واحد
+help_center.title,مركز المساعدة
+help_center.intro,اختر صفحة مساعدة لعرضها هنا. أدلة المشاركين عامة: انسخ الرابط وأرسله إلى المشارك.
+help_center.empty,لا توجد مساعدة متاحة لدورك.
+help_center.audience.managers,المديرون
+help_center.audience.panelists,المشاركون
+help_center.public_badge,عامة
+help_center.doc.incidents.title,الحوادث والتوفر
+help_center.doc.incidents.desc,كيفية معالجة الحوادث التي يبلغ عنها المشاركون وأيام عدم توفرهم في ONEMS.
+help_center.doc.panelist_guide.title,دليل المشارك (ONE bot على Telegram)
+help_center.doc.panelist_guide.desc,ما يراه المشارك: أزرار البوت وما يجب فعله لكل مشكلة.
+help_center.language,اللغة
+help_center.open_new_tab,فتح في علامة تبويب جديدة
+help_center.copy_link,نسخ الرابط
+help_center.copied,تم نسخ الرابط
+help_center.copy_hint,اختر لغة المشارك قبل النسخ. من محادثة الحادثة يكون الرابط بلغته تلقائيًا.
