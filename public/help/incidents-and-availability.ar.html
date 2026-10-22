@@ -1,0 +1,886 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>مساعدة: الحوادث وتوفر أعضاء اللجنة</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<style>
+  :root {
+    --white: #ffffff; --g50: #f9fafb; --g100: #f3f4f6; --g200: #e5e7eb; --g300: #d1d5db;
+    --g400: #9ca3af; --g500: #6b7280; --g600: #4b5563; --g700: #374151; --g900: #111827;
+    --b50: #eff6ff; --b100: #dbeafe; --b600: #2563eb; --b700: #1d4ed8;
+    --r100: #fee2e2; --r700: #b91c1c; --gr100: #dcfce7; --gr700: #15803d;
+    --y100: #fef9c3; --y800: #854d0e; --p100: #f3e8ff; --p700: #7e22ce;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+      'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    -webkit-font-smoothing: antialiased; background: var(--g50); color: var(--g700); line-height: 1.6; font-size: 15px;
+  }
+  .layout { display: flex; min-height: 100vh; }
+
+  /* Sidebar, same look as the ONE menu */
+  .side {
+    width: 272px; flex-shrink: 0; background: var(--white); border-right: 1px solid var(--g200);
+    position: sticky; top: 0; height: 100vh; overflow-y: auto; display: flex; flex-direction: column;
+  }
+  .brand { padding: 24px 24px 16px; }
+  .brand h1 { font-size: 24px; line-height: 32px; font-weight: 700; color: var(--g900); }
+  .brand p { font-size: 14px; color: var(--g500); margin-top: 4px; }
+  .brand .doc { margin-top: 16px; font-size: 12px; font-weight: 600; color: var(--b700); background: var(--b50);
+    display: inline-block; padding: 2px 10px; border-radius: 999px; }
+  .nav { padding: 8px 12px 24px; flex: 1; }
+  .nav h3 { font-size: 12px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--g400);
+    padding: 16px 12px 6px; }
+  .nav a {
+    display: block; padding: 8px 12px; border-radius: 8px; font-size: 14px; font-weight: 500; color: var(--g600);
+    text-decoration: none; transition: background .15s, color .15s;
+  }
+  .nav a:hover { background: var(--g100); }
+  .nav a.active { background: var(--b50); color: var(--b700); }
+  .side-foot { padding: 16px 24px; border-top: 1px solid var(--g200); font-size: 12px; color: var(--g500); }
+
+  /* Content */
+  .main { flex: 1; min-width: 0; padding: 40px 32px 80px; }
+  .page { max-width: 880px; margin: 0 auto; }
+  .page > header { margin-bottom: 32px; }
+  .page > header h2 { font-size: 30px; line-height: 38px; font-weight: 700; color: var(--g900); }
+  .page > header p { margin-top: 8px; font-size: 17px; color: var(--g600); max-width: 640px; }
+  section { margin-top: 48px; }
+  section > h2 { font-size: 22px; font-weight: 700; color: var(--g900); padding-bottom: 8px; margin-bottom: 16px;
+    border-bottom: 1px solid var(--g200); }
+  h3 { font-size: 17px; font-weight: 600; color: var(--g900); margin: 28px 0 8px; }
+  p { margin: 8px 0; }
+  ul, ol { margin: 8px 0 8px 22px; }
+  li { margin: 4px 0; }
+  strong { color: var(--g900); font-weight: 600; }
+  code, kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px;
+    background: var(--g100); border: 1px solid var(--g200); border-radius: 6px; padding: 1px 6px; color: var(--g900); }
+  .card { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 20px 24px; margin: 16px 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 16px 0; }
+  .grid .card { margin: 0; }
+  .card h4 { font-size: 15px; font-weight: 600; color: var(--g900); margin-bottom: 4px; }
+  .card p { margin: 4px 0; font-size: 14px; color: var(--g600); }
+
+  .badge { display: inline-block; font-size: 12px; font-weight: 500; padding: 1px 10px; border-radius: 999px; white-space: nowrap; }
+  .b-red { background: var(--r100); color: var(--r700); }
+  .b-blue { background: var(--b100); color: var(--b700); }
+  .b-green { background: var(--gr100); color: var(--gr700); }
+  .b-yellow { background: var(--y100); color: var(--y800); }
+  .b-gray { background: var(--g100); color: var(--g600); }
+  .b-purple { background: var(--p100); color: var(--p700); }
+  .btn { display: inline-block; font-size: 13px; font-weight: 500; padding: 2px 10px; border-radius: 8px;
+    background: var(--white); border: 1px solid var(--g300); color: var(--g700); white-space: nowrap; }
+  .btn.primary { background: var(--b600); border-color: var(--b600); color: #fff; }
+
+  .callout { border-radius: 12px; padding: 14px 18px; margin: 16px 0; font-size: 14px; border: 1px solid; }
+  .callout.info { background: var(--b50); border-color: var(--b100); color: #1e3a8a; }
+  .callout.ok { background: #f0fdf4; border-color: var(--gr100); color: #14532d; }
+  .callout.warn { background: #fffbeb; border-color: var(--y100); color: var(--y800); }
+  .callout strong { color: inherit; }
+
+  .table-wrap { overflow-x: auto; margin: 16px 0; background: var(--white); border: 1px solid var(--g200); border-radius: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--g500); background: var(--g50); padding: 10px 14px; border-bottom: 1px solid var(--g200); }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--g100); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  td:first-child { font-weight: 500; color: var(--g900); }
+
+  /* Steps */
+  ol.steps { list-style: none; margin: 12px 0; counter-reset: s; }
+  ol.steps > li { counter-increment: s; position: relative; padding: 4px 0 12px 44px; margin: 0; }
+  ol.steps > li::before {
+    content: counter(s); position: absolute; left: 0; top: 2px; width: 28px; height: 28px; border-radius: 50%;
+    background: var(--b100); color: var(--b700); font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Telegram chat mock-ups */
+  .chat { background: #e9eef5; border: 1px solid var(--g200); border-radius: 16px; padding: 16px; margin: 16px 0; max-width: 460px; }
+  .chat .who { text-align: center; font-size: 12px; color: var(--g500); margin-bottom: 8px; font-weight: 500; }
+  .msg { max-width: 85%; padding: 8px 12px; border-radius: 14px; margin: 6px 0; font-size: 14px; line-height: 1.45; box-shadow: 0 1px 1px rgba(0,0,0,.06); }
+  .msg.bot { background: var(--white); border-top-left-radius: 4px; margin-right: auto; color: var(--g900); }
+  .msg.me { background: #dbeafe; border-top-right-radius: 4px; margin-left: auto; color: var(--g900); }
+  .kb { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 8px; max-width: 85%; }
+  .kb span { flex: 1 1 auto; text-align: center; background: rgba(37,99,235,.12); color: var(--b700); font-size: 13px; font-weight: 500;
+    padding: 6px 10px; border-radius: 10px; }
+  .kb.col span { flex-basis: 100%; }
+  .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; align-items: start; }
+  .two .chat { margin: 8px 0; }
+  .cap { font-size: 13px; color: var(--g500); margin-top: -6px; max-width: 460px; }
+
+  /* Flow */
+  .flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; margin: 16px 0; }
+  .flow .node { flex: 1 1 150px; background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 12px 14px; font-size: 13px; position: relative; }
+  .flow .node b { display: block; color: var(--g900); font-size: 14px; margin-bottom: 2px; }
+  .flow .node .tag { font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--b700); }
+  .flow .arrow { align-self: center; color: var(--g400); font-size: 18px; }
+
+  details { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; margin: 8px 0; }
+  summary { cursor: pointer; padding: 14px 18px; font-weight: 600; color: var(--g900); list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: '+'; color: var(--g400); font-size: 20px; line-height: 1; }
+  details[open] summary::after { content: '\2212'; }
+  details > div { padding: 0 18px 14px; color: var(--g600); font-size: 14px; }
+
+  /* ONEMS screen drawings */
+  .app { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; overflow: hidden; margin: 16px 0 6px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .app-bar { display: flex; gap: 6px; align-items: center; background: var(--g100); border-bottom: 1px solid var(--g200); padding: 8px 12px; font-size: 12px; color: var(--g500); }
+  .app-bar i { width: 9px; height: 9px; border-radius: 50%; background: var(--g300); display: inline-block; }
+  .app-bar span { margin-left: 8px; }
+  .app-body { padding: 20px; font-size: 13px; color: var(--g700); overflow-x: auto; }
+  .app-body.cols { display: grid; grid-template-columns: 210px 1fr; padding: 0; }
+  .app-body.cols > .sb { border-right: 1px solid var(--g200); padding: 14px 10px; background: #fff; }
+  .app-body.cols > .ct { padding: 20px; }
+  .sb .t { font-size: 20px; font-weight: 700; color: var(--g900); padding: 0 8px; }
+  .sb .s { font-size: 11px; color: var(--g500); padding: 0 8px 8px; }
+  .sb h5 { font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--g400); padding: 10px 8px 4px; }
+  .mi { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 8px; font-size: 13px; color: var(--g700); }
+  .mi.on { background: var(--b50); color: var(--b600); }
+  .mi .ic { width: 14px; height: 14px; border-radius: 4px; background: var(--g300); flex-shrink: 0; }
+  .mi.on .ic { background: var(--b600); }
+  .mi .badge { margin-left: auto; font-size: 11px; padding: 0 7px; }
+  .m-h { font-size: 18px; font-weight: 700; color: var(--g900); margin-bottom: 12px; }
+  .m-h3 { font-size: 15px; font-weight: 700; color: var(--g900); margin: 0 0 6px; }
+  .m-sel { display: inline-block; border: 1px solid var(--g300); border-radius: 4px; padding: 3px 24px 3px 8px; font-size: 12px; background: #fff; color: var(--g700); margin-right: 8px; position: relative; }
+  .m-sel::after { content: '\25BE'; position: absolute; right: 8px; color: var(--g400); }
+  .m-card { border: 1px solid var(--g200); border-radius: 8px; overflow: hidden; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.05); margin: 10px 0; }
+  .app table { font-size: 12px; }
+  .app th { padding: 8px 12px; font-size: 11px; }
+  .app td { padding: 8px 12px; }
+  .app td:first-child { font-weight: 400; color: inherit; }
+  .app .num { text-align: right; }
+  .m-link { color: var(--b600); }
+  .m-box { border: 1px solid var(--g200); border-radius: 6px; padding: 14px; margin: 10px 0; }
+  .m-note { background: var(--g50); border-radius: 6px; padding: 10px 12px; margin: 8px 0; font-size: 12px; }
+  .m-muted { color: var(--g500); font-size: 12px; }
+  .m-pbtn, .m-sbtn { display: inline-block; padding: 6px 14px; border-radius: 8px; font-size: 12px; margin: 2px 6px 2px 0; }
+  .m-pbtn { background: var(--b600); color: #fff; }
+  .m-sbtn { background: var(--g200); color: var(--g700); }
+  .m-ta { border: 1px solid var(--g300); border-radius: 4px; padding: 8px; font-size: 12px; color: var(--g400); background: #fff; margin: 6px 0 10px; }
+  .m-in { display: inline-block; border: 1px solid var(--g300); border-radius: 4px; padding: 3px 8px; font-size: 12px; background: #fff; min-width: 90px; }
+  .m-bub { max-width: 80%; padding: 6px 10px; border-radius: 10px; margin: 5px 0; font-size: 12px; }
+  .m-bub small { display: block; color: var(--g500); font-size: 10px; margin-top: 2px; }
+  .m-bub.l { background: var(--g100); margin-right: auto; }
+  .m-bub.r { background: var(--b100); margin-left: auto; }
+  .pin { display: inline-flex; width: 20px; height: 20px; border-radius: 50%; background: var(--b600); color: #fff; font-size: 11px; font-weight: 700; align-items: center; justify-content: center; margin-left: 6px; vertical-align: middle; flex-shrink: 0; }
+  .legend { counter-reset: l; list-style: none; margin: 10px 0 20px; }
+  .legend li { counter-increment: l; position: relative; padding: 2px 0 6px 34px; font-size: 14px; }
+  .legend li::before { content: counter(l); position: absolute; left: 0; top: 1px; width: 20px; height: 20px; border-radius: 50%; background: var(--b600); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .heat td { text-align: center; }
+  .heat .ok { background: #f0fdf4; } .heat .hi { background: var(--y100); } .heat .sat { background: var(--r100); }
+  .heat .off { background: repeating-linear-gradient(45deg, var(--g100), var(--g100) 4px, #fff 4px, #fff 8px); color: var(--g400); }
+  .heat .now { outline: 2px solid var(--b600); outline-offset: -2px; }
+
+  /* Right-to-left (Arabic) */
+  [dir=rtl] .side { border-right: 0; border-left: 1px solid var(--g200); }
+  [dir=rtl] .app-body.cols > .sb { border-right: 0; border-left: 1px solid var(--g200); }
+  [dir=rtl] th, [dir=rtl] td, [dir=rtl] .nav a { text-align: right; }
+  [dir=rtl] ul, [dir=rtl] ol { margin: 8px 22px 8px 0; }
+  [dir=rtl] ol.steps > li { padding: 4px 44px 12px 0; }
+  [dir=rtl] ol.steps > li::before { left: auto; right: 0; }
+  [dir=rtl] .legend li { padding: 2px 34px 6px 0; }
+  [dir=rtl] .legend li::before { left: auto; right: 0; }
+  [dir=rtl] .msg.bot { border-top-left-radius: 14px; border-top-right-radius: 4px; margin-right: 0; margin-left: auto; }
+  [dir=rtl] .msg.me { border-top-right-radius: 14px; border-top-left-radius: 4px; margin-left: 0; margin-right: auto; }
+  [dir=rtl] .m-bub.l { margin-right: 0; margin-left: auto; }
+  [dir=rtl] .m-bub.r { margin-left: 0; margin-right: auto; }
+  [dir=rtl] .pin { margin-left: 0; margin-right: 6px; }
+  [dir=rtl] .m-sel { padding: 3px 8px 3px 24px; margin-right: 0; margin-left: 8px; }
+  [dir=rtl] .m-sel::after { right: auto; left: 8px; }
+  [dir=rtl] .m-pbtn, [dir=rtl] .m-sbtn { margin: 2px 0 2px 6px; }
+  [dir=rtl] .mi .badge { margin-left: 0; margin-right: auto; }
+  [dir=rtl] .app-bar span { margin-left: 0; margin-right: 8px; }
+  [dir=rtl] .flow .arrow { transform: scaleX(-1); }
+  [dir=rtl] .app td:first-child { font-weight: 400; }
+  .mobile-top { display: none; }
+  @media (max-width: 900px) {
+    .app-body.cols { grid-template-columns: 1fr; }
+    .app-body.cols > .sb { border-right: 0; border-bottom: 1px solid var(--g200); }
+    .layout { display: block; }
+    .side { display: none; }
+    .mobile-top { display: block; position: sticky; top: 0; z-index: 5; background: var(--white); border-bottom: 1px solid var(--g200); padding: 10px 16px; }
+    .mobile-top b { font-size: 18px; color: var(--g900); }
+    .mobile-top span { font-size: 13px; color: var(--g500); margin-left: 6px; }
+    .mobile-top select { width: 100%; margin-top: 8px; padding: 8px; border: 1px solid var(--g300); border-radius: 8px; font-size: 14px; background: #fff; color: var(--g700); }
+    .main { padding: 24px 16px 64px; }
+    .page > header h2 { font-size: 24px; line-height: 32px; }
+  }
+  @media print { .side, .mobile-top { display: none; } .main { padding: 0; } body { background: #fff; } section { break-inside: avoid-page; } }
+</style>
+</head>
+<body>
+<div class="mobile-top">
+  <b>ONE</b><span>for Regulators &middot; مساعدة</span>
+  <select id="jump" aria-label="الانتقال إلى قسم"></select>
+</div>
+<div class="layout">
+  <aside class="side">
+    <div class="brand">
+      <h1>ONE</h1>
+      <p>for Regulators</p>
+      <span class="doc">مساعدة &middot; الحوادث</span>
+    </div>
+    <nav class="nav" id="nav">
+      <h3>البدء</h3>
+      <a href="#overview">نظرة عامة</a>
+      <a href="#how-it-works">آلية العمل</a>
+      <h3>أعضاء اللجنة على Telegram</h3>
+      <a href="#telegram-start">بدء استخدام البوت</a>
+      <a href="#telegram-menu">القائمة الرئيسية</a>
+      <a href="#telegram-shipments">الإرسال والاستلام</a>
+      <a href="#telegram-incident">الإبلاغ عن حادثة</a>
+      <a href="#telegram-unavailable">أيام عدم التوفر</a>
+      <a href="#telegram-replies">ردود المدير</a>
+      <h3>المديرون في ONEMS</h3>
+      <a href="#manager-screens">أين تجد كل شيء</a>
+      <a href="#screen-reported">شاشة الحوادث المبلَّغ عنها</a>
+      <a href="#incident-types">أنواع الحوادث</a>
+      <a href="#examples">التعامل مع كل نوع</a>
+      <a href="#material">نقص المواد</a>
+      <h3>التوفر</h3>
+      <a href="#availability">توفر المحكّمين</a>
+      <a href="#availability-declare">إعلان فترة عدم توفر</a>
+      <a href="#availability-screen">شاشة الحادثة</a>
+      <a href="#availability-example">مثال تطبيقي</a>
+      <h3>مرجع</h3>
+      <a href="#conversation">المحادثة والتنبيهات</a>
+      <a href="#faq">أسئلة شائعة</a>
+    </nav>
+    <div class="side-foot">آخر تحديث: 22 أكتوبر 2026</div>
+  </aside>
+
+  <main class="main">
+  <div class="page">
+    <header>
+      <h2>الحوادث وتوفر أعضاء اللجنة</h2>
+      <p>كيف يبلّغ أعضاء اللجنة عن المشاكل وعن أيام عدم التوفر عبر Telegram، وما الذي يعالجه ONEMS تلقائيًا، وما الذي تقرره أنت بصفتك مديرًا.</p>
+    </header>
+
+    <section id="overview">
+      <h2>نظرة عامة</h2>
+      <div class="grid">
+        <div class="card"><h4>أعضاء اللجنة يستخدمون Telegram</h4><p>يتحدثون مع بوت ONE بلغتهم (الإنجليزية أو الإسبانية أو الفرنسية أو العربية) لتأكيد الشحنات أو الإبلاغ عن مشكلة أو إعلان أيام عدم التوفر.</p></div>
+        <div class="card"><h4>ONEMS يعالج ما يمكنه معالجته</h4><p>تُغلق كثير من البلاغات تلقائيًا. وتُعاد جدولة أيام عدم التوفر بنقل العينات إلى تاريخ لاحق أو إلى عقدة أخرى في المدينة نفسها.</p></div>
+        <div class="card"><h4>المديرون يقررون الباقي</h4><p>ما لا يمكن حله تلقائيًا يظهر في <strong>الحوادث</strong> مع اقتراح جاهز، وتُحفظ كل رسالة داخل الحادثة.</p></div>
+      </div>
+      <p>تخاطب هذه الصفحة فئتين. تصف <a href="#telegram-start">أقسام عضو اللجنة والبوت</a> ما يراه عضو اللجنة. وتصف <a href="#manager-screens">أقسام المدير</a> ما تراه أنت في ONEMS.</p>
+    </section>
+
+    <section id="how-it-works">
+      <h2>آلية العمل</h2>
+      <div class="flow">
+        <div class="node"><span class="tag">1 &middot; Telegram</span><b>عضو اللجنة يكتب</b>رسالة، أو ضغطة على <em>الإبلاغ عن حادثة</em>.</div>
+        <div class="arrow">&rarr;</div>
+        <div class="node"><span class="tag">2 &middot; البوت</span><b>يفهم ويسأل</b>&laquo;هل تريد تسجيل هذا على أنه&hellip;؟&raquo; مع خياري نعم / لا.</div>
+        <div class="arrow">&rarr;</div>
+        <div class="node"><span class="tag">3 &middot; ONEMS</span><b>يحفظها</b>بعض الأنواع تُغلق تلقائيًا، وبعضها يُفتح لك.</div>
+        <div class="arrow">&rarr;</div>
+        <div class="node"><span class="tag">4 &middot; ONEMS</span><b>المدير يقرر</b>الحل، أو إعادة التوجيه، أو توريد المواد، أو الرد.</div>
+      </div>
+      <ul>
+        <li>لا يُحفظ شيء حتى يجيب عضو اللجنة بـ<strong>نعم</strong>. وإذا أجاب بـ<strong>لا</strong>، يعرض البوت القائمة من جديد.</li>
+        <li>كل ما يقوله البوت، وكل ما يجيب به عضو اللجنة، وكل ما تكتبه أنت يُحفظ في الحادثة.</li>
+        <li>تصلك رسالة بريد إلكتروني عندما تحتاج حادثة جديدة إليك، وعندما ينتظر ردّ من عضو اللجنة أكثر من ساعة.</li>
+      </ul>
+    </section>
+
+    <section id="telegram-start">
+      <h2>بدء استخدام البوت</h2>
+      <p>يرتبط كل عضو لجنة ببوت ONE عبر حسابه على Telegram. يفتح المحادثة ويرسل <code>/start</code>، أو يكتب تحية فقط. يرحّب به البوت باسمه الأول ويعرض القائمة الرئيسية.</p>
+      <div class="two">
+        <div>
+          <div class="chat">
+            <div class="who">بوت ONE</div>
+            <div class="me msg">/start</div>
+            <div class="msg bot">مرحبًا Marta، ماذا تحتاجين؟</div>
+            <div class="kb col"><span>عرض الشحنات المعلقة</span><span>عرض الطرود الواردة</span><span>تأكيد شحنة</span><span>تأكيد استلام</span><span>الإبلاغ عن حادثة</span><span>&#128467;&#65039; أيام عدم التوفر</span><span>&#128230; تأكيد استلام المواد</span></div>
+          </div>
+        </div>
+        <div>
+          <h3 style="margin-top:8px">من المفيد معرفته</h3>
+          <ul>
+            <li>يجيب البوت باللغة المحددة في الملف الشخصي لعضو اللجنة.</li>
+            <li>كتابة ما ليس طلبًا (&laquo;مرحبًا&raquo;، &laquo;شكرًا&raquo;) تعيد عرض القائمة فقط.</li>
+            <li>يعرض <code>/myid</code> معرّف Telegram الخاص بعضو اللجنة. وقد يطلبه الدعم عند ربط حساب.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="telegram-menu">
+      <h2>القائمة الرئيسية</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>الزر</th><th>وظيفته</th></tr></thead>
+        <tbody>
+          <tr><td>عرض الشحنات المعلقة</td><td>يعرض العينات التي يجب على عضو اللجنة إرسالها، خمسًا في كل مرة، مع زر <em>عرض المزيد</em>.</td></tr>
+          <tr><td>عرض الطرود الواردة</td><td>يعرض العينات التي في طريقها إلى عضو اللجنة.</td></tr>
+          <tr><td>تأكيد شحنة</td><td>يختار شحنة معلقة، ثم يؤكدها بصورة الملصق أو برقم الملصق.</td></tr>
+          <tr><td>تأكيد استلام</td><td>يؤكد وصول طرد بإرسال صورة لملصقه.</td></tr>
+          <tr><td>الإبلاغ عن حادثة</td><td>يصف مشكلة في رسالة واحدة (انظر <a href="#telegram-incident">الإبلاغ عن حادثة</a>).</td></tr>
+          <tr><td>أيام عدم التوفر</td><td>يعلن الأيام التي لا يستطيع فيها عضو اللجنة الإرسال أو الاستلام (انظر <a href="#telegram-unavailable">أيام عدم التوفر</a>).</td></tr>
+          <tr><td>تأكيد استلام المواد</td><td>يذكر ما إذا وصلت شحنة مواد وما الكمية (انظر <a href="#material">نقص المواد</a>).</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="telegram-shipments">
+      <h2>الإرسال والاستلام</h2>
+      <h3>تأكيد شحنة</h3>
+      <ol class="steps">
+        <li>يضغط عضو اللجنة على <span class="btn">تأكيد شحنة</span> أو <span class="btn">عرض الشحنات المعلقة</span> ويختار الشحنة.</li>
+        <li>يرسل <strong>صورة الملصق</strong> أو يكتب <strong>رقم الملصق</strong>.</li>
+        <li>يردّ البوت بأن الشحنة أُعلنت كمرسَلة. وإذا كان تنسيق الملصق غير صالح، لا يُحفظ شيء ويطلب البوت الإدخال مرة أخرى.</li>
+      </ol>
+      <h3>تأكيد استلام</h3>
+      <ol class="steps">
+        <li>يضغط عضو اللجنة على <span class="btn">تأكيد استلام</span>.</li>
+        <li>يرسل <strong>صورة ملصق</strong> الطرد الذي استلمه.</li>
+        <li>يسجّل ONEMS تلك العينة كمستلَمة. وإذا كان الملصق غير مقروء، يبلّغ عن ذلك كحادثة (<em>ملصق / إيصال غير مقروء</em>)، ويختار الطرد من قائمته فيُسجَّل تلقائيًا.</li>
+      </ol>
+      <div class="callout info"><strong>تذكير يومي.</strong> في الساعة 09:00 من كل يوم يرسل البوت إلى كل عضو لجنة الشحنات التي يجب إرسالها في ذلك اليوم. والشحنات التي لا يمكن تنفيذها بسبب نقص المواد تُستبعد من التذكير.</div>
+    </section>
+
+    <section id="telegram-incident">
+      <h2>الإبلاغ عن حادثة</h2>
+      <p>يضغط عضو اللجنة على <span class="btn">الإبلاغ عن حادثة</span> ويصف المشكلة في <strong>رسالة واحدة</strong>. يقترح البوت نوعًا ويطلب التأكيد.</p>
+      <div class="two">
+        <div>
+          <div class="chat">
+            <div class="who">بوت ONE</div>
+            <div class="msg me">وصل الطرد مكسورًا</div>
+            <div class="msg bot">هل تريد تسجيل هذا على أنه <strong>طرد تالف</strong>؟</div>
+            <div class="kb"><span>نعم</span><span>لا، إنها مشكلة أخرى</span></div>
+            <div class="msg me">نعم</div>
+            <div class="msg bot">تم التسجيل، شكرًا لإبلاغنا.</div>
+          </div>
+          <p class="cap">يُحفظ الطرد التالف ويُغلق تلقائيًا.</p>
+        </div>
+        <div>
+          <div class="chat">
+            <div class="who">بوت ONE</div>
+            <div class="msg me">أعادوا إليّ طردي</div>
+            <div class="msg bot">هل تريد تسجيل هذا على أنه <strong>طرد مُعاد</strong>؟</div>
+            <div class="kb"><span>نعم</span><span>لا، إنها مشكلة أخرى</span></div>
+            <div class="msg me">نعم</div>
+            <div class="msg bot">تم التسجيل. سيتواصل معك أحد المديرين.</div>
+          </div>
+          <p class="cap">يبقى الطرد المُعاد مفتوحًا للمدير.</p>
+        </div>
+      </div>
+      <div class="callout ok"><strong>آمن بحكم التصميم.</strong> إذا ضغط عضو اللجنة على <em>لا</em>، أو كتب شيئًا غير واضح، فلا يُسجَّل شيء. فقط <em>نعم</em> الصريحة تنشئ حادثة.</div>
+    </section>
+
+    <section id="telegram-unavailable">
+      <h2>أيام عدم التوفر</h2>
+      <p>يضغط عضو اللجنة على <span class="btn">&#128467;&#65039; أيام عدم التوفر</span> ويختار تاريخَي البداية والنهاية. ويمكنه أيضًا كتابة ذلك بكلمات عادية.</p>
+      <div class="chat">
+        <div class="who">بوت ONE</div>
+        <div class="msg me">الأسبوع القادم أنا في إجازة</div>
+        <div class="msg bot">فهمت أن الفترة <strong>من الاثنين 9 نوفمبر إلى الجمعة 13 نوفمبر</strong>. هل هذا صحيح؟</div>
+        <div class="kb"><span>نعم</span><span>لا</span></div>
+        <div class="msg me">نعم</div>
+        <div class="msg bot">تم الاستلام. شكرًا لإبلاغنا.</div>
+      </div>
+      <p>تُفحص القواعد تلقائيًا: لا يجوز أن يسبق تاريخ النهاية تاريخ البداية، ولا يجوز أن تكون الأيام في الماضي، والحد الأقصى للفترة <strong>90 يومًا</strong>، ولا يجوز أن تتداخل مع فترة نشطة أخرى. انظر <a href="#availability">توفر المحكّمين</a> لمعرفة ما يحدث بعد ذلك.</p>
+    </section>
+
+    <section id="telegram-replies">
+      <h2>ردود المدير</h2>
+      <p>عندما يكتب مدير في حادثة، تصل الرسالة إلى محادثة عضو اللجنة مع اسم الحادثة وزرّين.</p>
+      <div class="chat">
+        <div class="who">بوت ONE</div>
+        <div class="msg bot"><strong>طرد مُعاد</strong><br>مرحبًا Pablo، سنرسل العينة مرة أخرى الأسبوع القادم إلى عقدة أخرى. هل يمكنك الاحتفاظ بالملصق؟</div>
+        <div class="kb"><span>رد</span><span>العودة إلى القائمة</span></div>
+        <div class="msg me">رد</div>
+        <div class="msg bot">اكتب ردك.</div>
+        <div class="msg me">نعم، ما زال لديّ. الصورة مرفقة.</div>
+        <div class="msg bot">تم إرسال رسالتك إلى مديرك.</div>
+      </div>
+      <ul>
+        <li>ما دامت المحادثة مفتوحة، يذهب نص عضو اللجنة و<strong>صوره</strong> إلى الحادثة. ويغلقها زر <em>العودة إلى القائمة</em>.</li>
+        <li>تُغلق المحادثة من تلقاء نفسها عند حل الحادثة أو رفضها، أو بعد 48 ساعة دون نشاط.</li>
+      </ul>
+    </section>
+
+    <section id="manager-screens">
+      <h2>أين تجد كل شيء</h2>
+      <p>في قائمة ONEMS، افتح مجموعة <strong>الحوادث</strong>. كل ما يُشرح من هنا فصاعدًا موجود في هاتين الشاشتين.</p>
+      <div class="app">
+        <div class="app-bar"><i></i><i></i><i></i><span>ONEMS</span></div>
+        <div class="app-body cols">
+          <div class="sb">
+            <div class="t">ONEMS</div><div class="s">for Regulators</div>
+            <h5>الإعداد</h5>
+            <div class="mi"><span class="ic"></span>المشاركون في اللجنة</div>
+            <h5>الحوادث</h5>
+            <div class="mi on"><span class="ic"></span>الحوادث المبلَّغ عنها <span class="badge b-red">3</span><span class="badge b-blue" style="margin-left:4px">1</span><span class="pin">1</span></div>
+            <div class="mi"><span class="ic"></span>توفر المحكّمين <span class="badge b-red">2</span><span class="pin">2</span></div>
+            <div class="mi"><span class="ic"></span>مساعدة: الحوادث<span class="pin">3</span></div>
+            <h5>الإدارة</h5>
+            <div class="mi"><span class="ic"></span>المستخدمون</div>
+          </div>
+          <div class="ct">
+            <div class="m-h">الحوادث المبلَّغ عنها من الأعضاء</div>
+            <p class="m-muted">تُفتح هنا قائمة الحوادث المبلَّغ عنها (انظر القسم التالي).</p>
+          </div>
+        </div>
+      </div>
+      <ol class="legend">
+        <li><strong>الحوادث المبلَّغ عنها</strong>: كل ما يبلّغ عنه أعضاء اللجنة عبر Telegram. تعدّ الشارة <span class="badge b-red">الحمراء</span> الحوادث التي تنتظرك، وتعدّ الشارة <span class="badge b-blue">الزرقاء</span> المحادثات التي فيها ردّ لم تقرأه.</li>
+        <li><strong>توفر المحكّمين</strong>: كل فترة عدم توفر، مع العينات المتأثرة وما فعله ONEMS مع كل منها. وتعدّ الشارة الحمراء الحوادث التي تنتظر قرارك.</li>
+        <li><strong>مساعدة: الحوادث</strong>: هذه الصفحة.</li>
+      </ol>
+      <p>حالات <em>الحوادث المبلَّغ عنها</em>:
+        <span class="badge b-red">مفتوحة</span>
+        <span class="badge b-blue">قيد المعالجة</span>
+        <span class="badge b-green">تم الحل</span>
+        <span class="badge b-gray">مرفوضة</span>
+        <span class="badge b-purple">تم الحل تلقائيًا</span>
+      </p>
+    </section>
+
+    <section id="screen-reported">
+      <h2>الحوادث المبلَّغ عنها: القائمة والتفاصيل</h2>
+      <h3>القائمة</h3>
+      <div class="app">
+        <div class="app-bar"><i></i><i></i><i></i><span>ONEMS &rsaquo; الحوادث &rsaquo; الحوادث المبلَّغ عنها</span></div>
+        <div class="app-body">
+          <div class="m-h">الحوادث المبلَّغ عنها من الأعضاء</div>
+          <div style="margin-bottom:10px"><span class="m-sel">جميع الفئات</span><span class="m-sel">مفتوحة / نشطة</span><span class="pin">1</span></div>
+          <div class="m-card"><table>
+            <thead><tr><th>العضو</th><th>الفئة</th><th>الحالة</th><th>تاريخ الإبلاغ</th><th></th></tr></thead>
+            <tbody>
+              <tr><td>Luc&iacute;a Torres <span class="badge b-blue">رد جديد</span><span class="pin">2</span></td><td>نقص المواد</td><td>قيد المعالجة</td><td>2026-10-20</td><td><span class="m-link">فتح</span><span class="pin">3</span></td></tr>
+              <tr><td>Pablo Ruiz</td><td>طرد مُعاد</td><td>مفتوحة</td><td>2026-10-21</td><td><span class="m-link">فتح</span></td></tr>
+              <tr><td>Marta L&oacute;pez</td><td>كيفية الإرسال</td><td>مفتوحة</td><td>2026-10-22</td><td><span class="m-link">فتح</span></td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+      <ol class="legend">
+        <li><strong>المرشحات.</strong> يحصر <em>جميع الفئات</em> القائمة في نوع واحد. ويعرض مرشح الحالة <em>مفتوحة / نشطة</em> افتراضيًا؛ بدّله إلى <em>تم الحل</em> أو <em>مرفوضة</em> أو <em>تم الحل تلقائيًا</em> لرؤية الحوادث المغلقة.</li>
+        <li><strong>رد جديد.</strong> كتب عضو اللجنة شيئًا لم تقرأه بعد. تختفي هذه الشارة عند فتح الحادثة.</li>
+        <li><strong>فتح</strong> يعرض تفاصيل الحادثة.</li>
+      </ol>
+
+      <h3>التفاصيل</h3>
+      <div class="app">
+        <div class="app-bar"><i></i><i></i><i></i><span>ONEMS &rsaquo; الحوادث &rsaquo; الحوادث المبلَّغ عنها &rsaquo; طرد مُعاد</span></div>
+        <div class="app-body">
+          <div class="m-link" style="margin-bottom:8px">&rarr; رجوع</div>
+          <div class="m-h3">طرد مُعاد</div>
+          <div class="m-muted" style="line-height:1.7">Pablo Ruiz &middot; <code>PAN-BAL-01</code><br>&#128222; 600 111 222 &middot; &#9993; pablo@example.com &middot; تيليجرام: نعم &middot; es &middot; Palma<br><span class="badge b-blue">المُرسِل</span> &nbsp;<span dir="ltr">BAL-01 &rarr; SAC-01</span> &middot; Correos &middot; رسالة عادية &middot; 18/11/2026 &nbsp;<code>TAG-00412</code><span class="pin">1</span></div>
+          <div class="m-note">أعادوا إليّ طردي، كان العنوان خاطئًا.<span class="pin">2</span></div>
+          <div class="m-box">
+            <div class="m-h3" style="font-size:13px">إعادة إرسال العينة المرتجعة<span class="pin">3</span></div>
+            <div style="margin:8px 0">العقدة الوجهة <span class="m-in">SAC-02 &#9662;</span> &nbsp; الأسبوع <span class="m-in">أ48 &middot; 23/11/2026 &#9662;</span></div>
+            <div class="m-muted">ممكن: 24/11/2026 (الحمل 4)</div>
+            <div style="margin-top:8px"><span class="m-pbtn">تأكيد إعادة الإرسال</span><span class="m-sbtn">إلغاء الشحنة</span></div>
+          </div>
+          <div class="m-box">
+            <div class="m-h3" style="font-size:13px">المحادثة مع العضو<span class="pin">4</span></div>
+            <div class="m-bub l">هل تريد تسجيل هذا على أنه طرد مُعاد؟<small>البوت &middot; تم الإرسال</small></div>
+            <div class="m-bub r">نعم<small>العضو &middot; تم الضغط على زر</small></div>
+            <div class="m-bub l">مرحبًا Pablo، سنرسلها مرة أخرى الأسبوع القادم. هل يمكنك الاحتفاظ بالملصق؟<small>المدير &middot; تم الإرسال</small></div>
+            <div class="m-bub r">نعم، ما زال لديّ.<small>العضو</small></div>
+            <div class="m-ta">اكتب رسالة إلى العضو…</div>
+            <span class="m-pbtn">إرسال</span>
+          </div>
+          <div class="m-box">
+            <div class="m-muted">ملاحظة الحل<span class="pin">5</span></div>
+            <div class="m-ta">أُعيد الإرسال إلى SAC-02 في الأسبوع 48.</div>
+            <span class="m-pbtn">حل</span><span class="m-sbtn">تجاهل</span>
+          </div>
+        </div>
+      </div>
+      <ol class="legend">
+        <li><strong>الترويسة.</strong> اسم عضو اللجنة ورمزه، وبيانات الاتصال (الهاتف، البريد الإلكتروني، هل Telegram مرتبط، اللغة، المدينة) والشحنة المعنية: الدور (<span class="badge b-blue">المُرسِل</span> أو <span class="badge b-green">المُستلِم</span>)، والمسار، وشركة النقل، والمنتج، والتاريخ، والبطاقة.</li>
+        <li><strong>ما كتبه عضو اللجنة</strong>، والصورة إن أرسل واحدة.</li>
+        <li><strong>كتلة الإجراءات.</strong> تتغير بحسب النوع: إعادة الإرسال أو الإلغاء للطرد المُعاد، ومساعد التوريد لنقص المواد، وملخص للقراءة فقط للأنواع التلقائية، أو &laquo;لا يوجد إجراء متاح؛ الدعم فقط&raquo; لبقية الأنواع. وعند إغلاق الحادثة تصبح هذه الكتلة للقراءة فقط.</li>
+        <li><strong>المحادثة مع العضو.</strong> كل رسالة من البوت ومن عضو اللجنة ومنك، مع حالتها (<em>قيد الإرسال</em> أو <em>تم الإرسال</em> أو <em>فشل</em>). اكتب واضغط <em>إرسال</em> للكتابة إلى عضو اللجنة. انظر <a href="#conversation">المحادثة والتنبيهات</a>.</li>
+        <li><strong>الإغلاق.</strong> أضف ملاحظة حل واضغط <strong>حل</strong> (تمت المعالجة) أو <strong>تجاهل</strong> (ليست حادثة). الحوادث المحلولة تلقائيًا لا تحتوي على كتلة إغلاق.</li>
+      </ol>
+      <div class="callout info">أول إجراء تتخذه ينقل الحادثة تلقائيًا من <span class="badge b-red">مفتوحة</span> إلى <span class="badge b-blue">قيد المعالجة</span>.</div>
+    </section>
+
+    <section id="incident-types">
+      <h2>أنواع الحوادث</h2>
+      <p>هناك تسعة أنواع. أربعة منها تُغلق تلقائيًا ولا تترك سوى سجل.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>النوع</th><th>عضو اللجنة يقول&hellip;</th><th>ما يفعله ONEMS</th><th>ما تفعله أنت</th></tr></thead>
+        <tbody>
+          <tr><td>نقص المواد</td><td>&laquo;نفدت لديّ الأظرف والأختام&raquo;</td><td>يحسب ما يلزم للفترة ويقترح مصدر الحصول عليه.</td><td>تراجع ثم <em>تأكيد التوريد</em>.</td></tr>
+          <tr><td>ملصق / إيصال غير مقروء <span class="badge b-purple">تلقائي</span></td><td>&laquo;لا أستطيع قراءة الملصق&raquo;</td><td>يعرض الطرود التي في طريقها؛ يختار عضو اللجنة واحدًا ويُسجَّل الاستلام.</td><td>لا شيء، إلا إذا لم يطابق أي طرد.</td></tr>
+          <tr><td>طرد تالف <span class="badge b-purple">تلقائي</span></td><td>&laquo;وصل مكسورًا&raquo;</td><td>يسجّله ويشكر عضو اللجنة.</td><td>لا شيء. مجرد سجل.</td></tr>
+          <tr><td>طرد مُعاد</td><td>&laquo;أُعيد إليّ&raquo;</td><td>يفتح الحادثة ويرسل إليك بريدًا إلكترونيًا.</td><td>إلغاء الشحنة أو إعادة إرسالها إلى عقدة أخرى.</td></tr>
+          <tr><td>كيفية الإرسال</td><td>&laquo;لا أعرف كيف أرسل هذا&raquo;</td><td>يفتح الحادثة ويرسل إليك بريدًا إلكترونيًا.</td><td>التواصل مع عضو اللجنة. لا توجد مقاطع فيديو بعد.</td></tr>
+          <tr><td>طلب إجازة</td><td>&laquo;لا أستطيع المشاركة الأسبوع القادم&raquo;</td><td>يوجّهه إلى <em>أيام عدم التوفر</em>.</td><td>انظر <a href="#availability">توفر المحكّمين</a>.</td></tr>
+          <tr><td>مشكلة في صورة البطاقة <span class="badge b-purple">تلقائي</span></td><td>&laquo;لا أستطيع تصوير البطاقة&raquo;</td><td>يطلب رقم الملصق ويسجّل الشحنة.</td><td>لا شيء. لا تُنشأ حادثة.</td></tr>
+          <tr><td>تغيير بيانات الاتصال <span class="badge b-purple">تلقائي</span></td><td>&laquo;رقم هاتفي الجديد هو 600 123 456&raquo;</td><td>يتحقق منه ويطلب التأكيد ويحدّث السجل.</td><td>لا شيء. يُحتفظ بما قبل التغيير وما بعده.</td></tr>
+          <tr><td>أخرى</td><td>أي شيء آخر</td><td>يفتح الحادثة ويرسل إليك بريدًا إلكترونيًا.</td><td>الرد ثم <em>حل</em>.</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout info">لا يمكن تغيير معرّف Telegram والاسم من البوت. يستطيع المدير وحده تغييرهما من سجل عضو اللجنة.</div>
+    </section>
+
+    <section id="examples">
+      <h2>التعامل مع كل نوع في ONEMS</h2>
+      <p>ما تعرضه كتلة الإجراءات لكل نوع، وما عليك فعله. الأسماء والأرقام توضيحية.</p>
+
+      <h3>طرد مُعاد &mdash; القرار لك</h3>
+      <p>يعود الطرد المُعاد إلى <strong>المُرسِل</strong> الذي يحتفظ بالملصق. كتلة الإجراءات هي <strong>إعادة إرسال العينة المرتجعة</strong> (الظاهرة في التفاصيل أعلاه).</p>
+      <ol class="steps">
+        <li>اختر <strong>العقدة الوجهة</strong>. لا تُعرض إلا عقد <strong>المدينة نفسها</strong> التي توجد فيها الوجهة الحالية؛ وإذا لم توجد أي عقدة، تعرض الشاشة <em>لا توجد عقدة أخرى في هذه المدينة</em>.</li>
+        <li>اختر <strong>الأسبوع</strong>، ابتداءً من الأسبوع الحالي. يفحص ONEMS اليوم والحمل ويعرض <em>ممكن: التاريخ (الحمل n)</em>، أو سبب تعذّر النقل إلى هناك.</li>
+        <li>اضغط <strong>تأكيد إعادة الإرسال</strong>. تحتفظ العينة ببطاقتها وتعود إلى الخطة كمعلّقة. ويُبلَّغ أعضاء اللجنة المعنيون على Telegram.</li>
+        <li>أو اضغط <strong>إلغاء الشحنة</strong> إذا لم تعد العينة مطلوبة. لا يمكن التراجع عن ذلك من هذه الشاشة.</li>
+        <li>اكتب إلى عضو اللجنة إن كان ذلك مفيدًا، وأضف ملاحظة حل، ثم اضغط <strong>حل</strong>.</li>
+      </ol>
+
+      <h3>الأنواع التلقائية &mdash; للقراءة فقط</h3>
+      <p>بالنسبة إلى <em>تغيير بيانات الاتصال</em> و<em>ملصق / إيصال غير مقروء</em>، عنوان كتلة الإجراءات هو <strong>تتم المعالجة تلقائيًا</strong> وهي تعرض ما حدث فقط.</p>
+      <div class="app">
+        <div class="app-bar"><i></i><i></i><i></i><span>ONEMS &rsaquo; الحوادث المبلَّغ عنها &rsaquo; تغيير بيانات الاتصال</span></div>
+        <div class="app-body">
+          <div class="m-box" style="margin:0">
+            <div class="m-muted" style="margin-bottom:6px">تتم المعالجة تلقائيًا</div>
+            <table style="width:auto;min-width:360px">
+              <thead><tr><th></th><th>قبل</th><th>بعد</th></tr></thead>
+              <tbody><tr><td>الهاتف</td><td>600 999 888</td><td>600 123 456</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <ul>
+        <li><strong>تغيير بيانات الاتصال:</strong> جدول قبل / بعد للحقول التي غيّرها عضو اللجنة.</li>
+        <li><strong>ملصق / إيصال غير مقروء:</strong> الشحنة التي اختارها عضو اللجنة، أو <em>لم يتم العثور على شحنات قيد النقل</em> (الحالة الوحيدة التي تبقى مفتوحة لك).</li>
+        <li><strong>طرد تالف</strong> و<strong>مشكلة في صورة البطاقة</strong> لا تتطلبان منك شيئًا.</li>
+      </ul>
+
+      <h3>كيفية الإرسال، أخرى، طلب إجازة &mdash; الدعم فقط</h3>
+      <p>تعرض كتلة الإجراءات <em>لا يوجد إجراء متاح؛ الدعم فقط</em>. استخدم <strong>المحادثة مع العضو</strong> للرد، ثم <strong>حل</strong> أو <strong>تجاهل</strong>. وفي طلب الإجازة، أعلن الفترة من <a href="#availability-declare">توفر المحكّمين</a> إذا لم يفعل عضو اللجنة ذلك على Telegram.</p>
+    </section>
+
+    <section id="material">
+      <h2>نقص المواد</h2>
+      <p>هذا هو النوع الوحيد الذي له عدة خطوات في ONEMS، لأن المواد كثيرًا ما تنتقل بين أعضاء اللجنة. تتألف كتلة الإجراءات من ثلاثة أجزاء إضافة إلى ورقة الشحنات.</p>
+      <div class="app">
+        <div class="app-bar"><i></i><i></i><i></i><span>ONEMS &rsaquo; الحوادث المبلَّغ عنها &rsaquo; نقص المواد</span></div>
+        <div class="app-body">
+          <div class="m-box">
+            <div class="m-h3" style="font-size:13px">المخزون<span class="pin">1</span></div>
+            <table style="width:auto;min-width:420px">
+              <thead><tr><th>المادة</th><th class="num">الكمية الفعلية</th></tr></thead>
+              <tbody>
+                <tr><td>ظرف مستندات سريع <span class="badge b-red">معيق</span></td><td class="num"><span class="m-in" style="min-width:50px;text-align:right">100</span></td></tr>
+                <tr><td>ختم أمان مانع للعبث</td><td class="num"><span class="m-in" style="min-width:50px;text-align:right">200</span></td></tr>
+              </tbody>
+            </table>
+            <span class="m-sbtn">تصفير المخزون</span>
+          </div>
+          <div class="m-box">
+            <div class="m-h3" style="font-size:13px">الاحتياج والتوريد<span class="pin">2</span></div>
+            <div style="margin:6px 0">أيام الاحتياج المطلوب تغطيتها <span class="m-in" style="min-width:50px"></span> <span class="m-muted">فارغ = حتى نهاية الشهر. يُحسب حتى 30/11/2026</span></div>
+            <table>
+              <thead><tr><th></th><th class="num">الاحتياج</th><th>الجيران</th><th class="num">المركزي</th><th class="num">شراء</th><th>تغيير المصدر</th></tr></thead>
+              <tbody>
+                <tr><td>ظرف مستندات سريع <span class="badge b-red">معيق</span></td><td class="num">650</td><td>Ana P&eacute;rez: 350</td><td class="num">300</td><td class="num">-</td><td><span class="m-sel">المقترح</span></td></tr>
+                <tr><td>ختم أمان مانع للعبث</td><td class="num">400</td><td>Ana P&eacute;rez: 400</td><td class="num">-</td><td class="num">-</td><td><span class="m-sel">المقترح</span></td></tr>
+              </tbody>
+            </table>
+            <div style="margin:8px 0">تاريخ الوصول المتوقع <span class="m-in">03/11/2026</span> &nbsp; <span class="m-muted">7 أيام عمل بدون مخزون</span></div>
+            <div class="m-muted">العينات المتأثرة: <span dir="ltr">NY-03 &rarr; BOS-01</span> (26/10)، <span dir="ltr">NY-03 &rarr; CHI-02</span> (28/10)، <span dir="ltr">NY-03 &rarr; LA-02</span> (30/10)</div>
+            <div style="margin-top:8px"><span class="m-pbtn">تأكيد التوريد</span></div>
+          </div>
+          <div class="m-box">
+            <div class="m-h3" style="font-size:13px">إعادة التخطيط<span class="pin">3</span></div>
+            <span class="m-pbtn">إنشاء إجازة بسبب نقص المواد وإعادة التخطيط</span>
+          </div>
+          <div class="m-box">
+            <div class="m-h3" style="font-size:13px">ورقة شحنات المواد<span class="pin">4</span></div>
+            <table>
+              <thead><tr><th>المصدر</th><th>الوجهة</th><th>المادة</th><th class="num">الكمية</th><th>تاريخ الوصول المتوقع</th><th>الحالة</th><th></th></tr></thead>
+              <tbody>
+                <tr><td>Ana P&eacute;rez (PAN-NY-02)</td><td>Luc&iacute;a Torres (PAN-NY-03)</td><td>ظرف مستندات سريع</td><td class="num">350</td><td>03/11/2026</td><td>قيد الانتظار</td><td class="m-muted">يؤكد العضو المانح ذلك عبر Telegram</td></tr>
+                <tr><td>Ana P&eacute;rez (PAN-NY-02)</td><td>Luc&iacute;a Torres (PAN-NY-03)</td><td>ختم أمان مانع للعبث</td><td class="num">400</td><td>03/11/2026</td><td>تم الإرسال</td><td></td></tr>
+                <tr><td>المستودع المركزي</td><td>Luc&iacute;a Torres (PAN-NY-03)</td><td>ظرف مستندات سريع</td><td class="num">300</td><td>03/11/2026</td><td>قيد الانتظار</td><td><span class="m-sbtn">تحديد كمُرسل</span></td></tr>
+              </tbody>
+            </table>
+            <span class="m-sbtn">طباعة / PDF</span><span class="m-sbtn">تنزيل Excel (CSV)</span>
+          </div>
+        </div>
+      </div>
+      <ol class="legend">
+        <li><strong>المخزون.</strong> ما يعتقد ONEMS أن عضو اللجنة يملكه. يمكنك تصحيح كمية، أو الضغط على <em>تصفير المخزون</em> عندما يقول عضو اللجنة إنه لا يملك شيئًا. وتشير <span class="badge b-red">معيق</span> إلى مادة لا يمكن تنفيذ أي شحنة بدونها.</li>
+        <li><strong>الاحتياج والتوريد.</strong> الاحتياج للفترة (حتى نهاية الشهر، أو عدد الأيام الذي تكتبه). ويقترح ONEMS لكل مادة مصدرها بهذا الترتيب: <strong>الجيران</strong> في المدينة نفسها ممن لديهم فائض، ثم المخزون <strong>المركزي</strong>، ثم <strong>الشراء</strong>. استخدم <em>تغيير المصدر</em> لفرض <em>الجيران فقط</em> أو <em>المركزي فقط</em> أو <em>شراء الكل</em>. وفي الأسفل <em>تاريخ الوصول المتوقع</em> (قابل للتعديل)، وأيام العمل بدون مخزون، والعينات المتأثرة. يُنشئ <strong>تأكيد التوريد</strong> الشحنات؛ ولا يمكن تنفيذه إلا مرة واحدة.</li>
+        <li><strong>إعادة التخطيط.</strong> إذا كان عضو اللجنة سيبقى أيامًا دون مادة معيقة، فإن <em>إنشاء إجازة بسبب نقص المواد وإعادة التخطيط</em> يعلن فترة عدم توفر من اليوم حتى الوصول المتوقع؛ ويقوم <a href="#availability">محرك التوفر</a> بنقل العينات المتأثرة. وبعد ذلك يصبح الزر <em>فتح حادثة عدم التوفر</em>. وعندما تأتي كل المواد من الجيران أو من المستودع المركزي ضمن الفترة، تخبرك الشاشة بأنه لا حاجة إلى إجازة.</li>
+        <li><strong>ورقة شحنات المواد.</strong> سطر لكل مصدر ووجهة ومادة، بحالة <em>قيد الانتظار</em> أو <em>تم الإرسال</em> أو <em>مستلمة جزئيًا</em> أو <em>تم الاستلام</em> أو <em>ملغاة</em>. تحدّد أنت الشحنات المركزية كمُرسلة (<em>تحديد كمُرسل</em>، وهو يحدّث المخزون)؛ ويؤكد الجيران شحناتهم على Telegram. يمنحك <em>طباعة / PDF</em> و<em>تنزيل Excel (CSV)</em> الورقة للمستودع. وتظهر قائمة <em>للشراء</em> عندما يلزم شراء شيء.</li>
+      </ol>
+
+      <h3>ما يحدث بعد ذلك على Telegram</h3>
+      <ol class="steps">
+        <li>يتلقى المانح المواد والكميات و<strong>اسم المستلِم وعنوانه فقط</strong>، مع زر <em>لقد أرسلتها</em>.</li>
+        <li>عند حلول التاريخ، يُسأل المستلِم عمّا إذا كانت المواد قد وصلت وبأي كمية: <em>الكل</em> أو <em>كمية أخرى</em>. وإذا وصل جزء فقط، يسجّله ONEMS ويسأل مرة أخرى لاحقًا عن الباقي.</li>
+        <li>الشحنات التي تحتاج إلى المادة الناقصة تُستبعد من التذكير اليومي للمستلِم. وعند وصول المادة، يخبره البوت: <em>يمكنك الآن إرسال هذه&hellip;</em></li>
+        <li><strong>تُغلق الحادثة من تلقاء نفسها</strong> عند استلام كل شيء. أما الإجازة، إن وُجدت، فلا تُلغى: بل تنتهي في تاريخها.</li>
+      </ol>
+      <div class="callout warn"><strong>لا رد من مانح أو مستلِم؟</strong> بعد سؤالين دون إجابة إلى مانح، أو ثلاثة إلى مستلِم، تصلك رسالة بريد إلكتروني واحدة. وإذا لم يكن لدى المستلِم Telegram، يتخطى ONEMS السؤال ويرسل إليك بريدًا إلكترونيًا مرة واحدة.</div>
+    </section>
+
+    <section id="availability">
+      <h2>توفر المحكّمين</h2>
+      <p><strong>فترة عدم التوفر</strong> هي وقت لا يستطيع فيه عضو اللجنة إرسال العينات أو استلامها (عطلة، مرض، نقص مواد&hellip;). <strong>كل فترة تصبح حادثة</strong>، ويحاول ONEMS إصلاح العينات المتأثرة دون تدخلك.</p>
+
+      <h3>كيف تُعلَن الفترة</h3>
+      <ul>
+        <li><strong>أزرار Telegram:</strong> <em>أيام عدم التوفر</em> في قائمة البوت.</li>
+        <li><strong>نص حر على Telegram:</strong> &laquo;سأكون في إجازة الأسبوع القادم&raquo;. يقرأ البوت التواريخ ويطلب التأكيد. وتصلك أيضًا رسالة بريد إلكتروني.</li>
+        <li><strong>ONEMS:</strong> من شاشة <em>المشاركون في اللجنة</em> (القسم التالي).</li>
+      </ul>
+      <p>في كل الحالات يرى عضو اللجنة <em>تم الاستلام. شكرًا لإبلاغنا</em>.</p>
+
+      <h3>ما يفعله ONEMS مع كل عينة متأثرة</h3>
+      <p>لكل عينة مجدولة خلال الفترة يكون فيها عضو اللجنة مُرسِلًا أو مستلِمًا، يجرّب ONEMS ما يلي بالترتيب:</p>
+      <ol class="steps">
+        <li><strong>النقل إلى تاريخ لاحق.</strong> أول يوم عمل (من الاثنين إلى الجمعة) بعد انتهاء الفترة، <strong>ضمن الشهر نفسه</strong>، متى كانت العقدة متاحة. وتُوزَّع العينات على الأيام.</li>
+        <li><strong>النقل إلى عقدة أخرى في المدينة نفسها.</strong> العقدة ذات أقل حمل والتي لن تصبح مشبعة؛ أولًا في الأسبوع نفسه، ثم في تواريخ أخرى من الشهر.</li>
+        <li><strong>تركها لك.</strong> إذا لم ينجح أي من الحلين، تنتظر العينة قرارك مع اقتراح محسوب مسبقًا.</li>
+      </ol>
+      <div class="callout ok"><strong>قواعد لا تُخرق أبدًا.</strong> لا تُمَسّ عينة أُرسلت أو استُلمت بالفعل. ولا تنتقل عينة إلى مدينة أخرى. ولا تُحمَّل عقدة فوق طاقتها لمجرد الإسراع في الحل. ولا تقع الشحنات إلا في أيام العمل.</div>
+
+      <h3>الحالات</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>الحالة</th><th>المعنى</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge b-gray">جديدة</span></td><td>أُعلنت للتو؛ ONEMS يقوم بالحساب.</td></tr>
+          <tr><td><span class="badge b-green">تمت المعالجة تلقائيًا</span></td><td>نُقلت كل العينات، أو لم تتأثر أي عينة.</td></tr>
+          <tr><td><span class="badge b-yellow">بانتظار قرار المسؤول</span></td><td>عينة واحدة على الأقل تحتاج إليك.</td></tr>
+          <tr><td><span class="badge b-blue">تمت المعالجة</span></td><td>قررت أنت بشأن كل العينات المعلقة.</td></tr>
+        </tbody>
+      </table></div>
+      <p>إذا تغيرت الخطة بعد إعلان الفترة، يعيد ONEMS حسابها. ويتلقى أعضاء اللجنة المتأثرون بتغيير في الأسبوع الحالي تفاصيل الشحنة الجديدة على Telegram.</p>
+    </section>
+
+    <section id="availability-declare">
+      <h2>إعلان فترة في ONEMS</h2>
+      <p>انتقل إلى <strong>الإعداد &rsaquo; المشاركون في اللجنة</strong> وافتح تبويب <strong>فترات عدم التوفر</strong>. اضغط <strong>+ إضافة فترة عدم توفر</strong>.</p>
+      <div class="app">
+        <div class="app-bar"><i></i><i></i><i></i><span>ONEMS &rsaquo; المشاركون في اللجنة &rsaquo; فترات عدم التوفر</span></div>
+        <div class="app-body">
+          <div class="m-h">فترات عدم التوفر</div>
+          <p class="m-muted" style="margin-top:-8px">إدارة فترات عدم توفر المشاركين لإعادة تخصيص العينات تلقائيًا</p>
+          <div style="margin:8px 0 12px"><span class="m-sel">جميع المشاركين</span><span class="m-sel">جميع الفترات</span><span class="m-sel">جميع الأسباب</span> <span class="m-pbtn">+ إضافة فترة عدم توفر</span><span class="pin">1</span></div>
+          <div class="m-box" style="max-width:460px;background:var(--g50)">
+            <div class="m-h3" style="font-size:13px">إضافة فترة عدم توفر<span class="pin">2</span></div>
+            <div style="margin:6px 0">عضو اللجنة <span class="m-in" style="min-width:220px">Elena Garc&iacute;a (PAN-NY-01) &#9662;</span></div>
+            <div style="margin:6px 0">تاريخ البدء <span class="m-in">10/11/2026</span> &nbsp; تاريخ الانتهاء <span class="m-in">21/11/2026</span></div>
+            <div style="margin:6px 0">السبب <span class="m-in" style="min-width:140px">إجازة &#9662;</span></div>
+            <div style="margin:6px 0">ملاحظات <span class="m-in" style="min-width:300px;color:var(--g400)">اختياري</span></div>
+            <div style="margin-top:10px"><span class="m-pbtn">حفظ</span><span class="m-sbtn">إلغاء</span></div>
+          </div>
+          <div class="m-card"><table>
+            <thead><tr><th>عضو اللجنة</th><th>نطاق التواريخ</th><th>المدة</th><th>السبب</th><th>الحالة</th><th>إجراءات</th></tr></thead>
+            <tbody>
+              <tr><td>Elena Garc&iacute;a</td><td>10/11/2026 &ndash; 21/11/2026</td><td>12 يومًا</td><td>إجازة</td><td>القادمة</td><td><span class="m-link">إلغاء</span><span class="pin">3</span></td></tr>
+              <tr><td>Luc&iacute;a Torres</td><td>22/10/2026 &ndash; 03/11/2026</td><td>13 يومًا</td><td>المواد</td><td>الحالية (نشطة الآن)</td><td><span class="m-link">إلغاء</span></td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+      <ol class="legend">
+        <li><strong>+ إضافة فترة عدم توفر</strong> يفتح النموذج. وتحصر المرشحات القائمة بحسب عضو اللجنة والفترة (حالية، قادمة، ماضية) والسبب.</li>
+        <li><strong>النموذج.</strong> عضو اللجنة، وتاريخا البدء والانتهاء، والسبب (<em>إجازة</em> أو <em>إجازة مرضية</em> أو <em>تدريب</em> أو <em>شخصي</em> أو <em>أخرى</em>؛ أما <em>المواد</em> فيحدده ONEMS عندما تأتي الفترة من حادثة نقص مواد) وملاحظات اختيارية. يُنشئ الحفظ الحادثة ويشغّل المحرك فورًا. ويُبلَّغ عضو اللجنة على Telegram.</li>
+        <li><strong>إلغاء</strong> ينهي الفترة: تُلغى تغييراتها في الخطة ولا يمكن إعادة تفعيلها. ولا يمكن تعديل التواريخ التي جاءت من عضو اللجنة؛ ألغِ الفترة وأعلن فترة جديدة بدلًا من ذلك.</li>
+      </ol>
+    </section>
+
+    <section id="availability-screen">
+      <h2>شاشة الحادثة</h2>
+      <h3>القائمة</h3>
+      <div class="app">
+        <div class="app-bar"><i></i><i></i><i></i><span>ONEMS &rsaquo; الحوادث &rsaquo; توفر المحكّمين</span></div>
+        <div class="app-body">
+          <div class="m-h">حوادث توفر المحكّمين</div>
+          <div style="margin-bottom:10px">الحالة <span class="m-sel">المفتوحة</span><span class="pin">1</span></div>
+          <div class="m-card"><table>
+            <thead><tr><th>المحكّم</th><th>العقدة / المدينة</th><th>تواريخ عدم التوفر</th><th>تاريخ الإعلان</th><th class="num">العينات المتأثرة</th><th>الإرسال / الاستلام</th><th class="num">قيد الانتظار</th><th>الحالة</th><th>مراجعة</th></tr></thead>
+            <tbody>
+              <tr><td>Elena Garc&iacute;a<br><span class="m-muted">PAN-NY-01</span></td><td>NY-01 &middot; نيويورك</td><td>10/11/2026 &ndash; 21/11/2026</td><td>22/10/2026</td><td class="num">14</td><td>9 / 5</td><td class="num">2<span class="pin">2</span></td><td><span class="badge b-yellow">بانتظار قرار المسؤول</span></td><td><span class="m-link">مراجعة</span><span class="pin">3</span></td></tr>
+              <tr><td>Luc&iacute;a Torres<br><span class="m-muted">PAN-NY-03</span></td><td>NY-03 &middot; نيويورك</td><td>22/10/2026 &ndash; 03/11/2026</td><td>22/10/2026</td><td class="num">3</td><td>3 / 0</td><td class="num">0</td><td><span class="badge b-green">تمت المعالجة تلقائيًا</span></td><td><span class="m-link">مراجعة</span></td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+      <ol class="legend">
+        <li><strong>مرشح الحالة.</strong> تعرض <em>المفتوحة</em> (الافتراضي) ما لم ينتهِ بعد؛ وتعرض <em>الكل</em>، أو حالة واحدة، بقية الحوادث.</li>
+        <li><strong>قيد الانتظار</strong> هو عدد العينات التي تنتظر قرارك. ويوزّع <em>الإرسال / الاستلام</em> العينات المتأثرة بحسب دور عضو اللجنة.</li>
+        <li><strong>مراجعة</strong> تفتح الحادثة.</li>
+      </ol>
+
+      <h3>التفاصيل</h3>
+      <div class="app">
+        <div class="app-bar"><i></i><i></i><i></i><span>ONEMS &rsaquo; الحوادث &rsaquo; توفر المحكّمين &rsaquo; Elena Garc&iacute;a</span></div>
+        <div class="app-body">
+          <div class="m-link" style="margin-bottom:8px">&rarr; العودة إلى القائمة</div>
+          <div class="m-h3">Elena Garc&iacute;a &middot; NY-01 &middot; نيويورك &middot; 10/11/2026 &ndash; 21/11/2026 <span class="badge b-yellow">بانتظار قرار المسؤول</span></div>
+          <div class="m-note"><strong>الملخص التلقائي:</strong> 9 نُقلت إلى تاريخ لاحق &middot; 3 نُقلت إلى عقدة أخرى &middot; 2 قيد الانتظار<span class="pin">1</span></div>
+
+          <div class="m-h3" style="font-size:13px;margin-top:14px">توازن المدينة<span class="pin">2</span></div>
+          <div style="margin:4px 0 6px" class="m-muted">الأسابيع المعروضة <span class="m-sel">الشهر الحالي</span> &nbsp; الحمل المرجعي <span class="m-in" style="min-width:36px">6</span> &nbsp; الانحراف % <span class="m-in" style="min-width:36px">20</span></div>
+          <div class="m-card"><table class="heat">
+            <thead><tr><th>العقدة</th><th>أ45</th><th>أ46 <span class="m-muted">الأسبوع المتأثر</span></th><th>أ47 <span class="m-muted">الأسبوع المتأثر</span></th><th>أ48</th><th>الإجمالي</th></tr></thead>
+            <tbody>
+              <tr><td style="text-align:left">NY-01 <span class="m-muted">Elena</span></td><td class="ok">4 / 2</td><td class="off">عضو اللجنة غير متاح</td><td class="off">عضو اللجنة غير متاح</td><td class="hi">7 / 3</td><td>11 / 5</td></tr>
+              <tr><td style="text-align:left">NY-02 <span class="m-muted">Ana</span></td><td class="ok">3 / 3</td><td class="hi now">6 / 2</td><td class="ok">4 / 2</td><td class="ok">3 / 1</td><td>16 / 8</td></tr>
+              <tr><td style="text-align:left">NY-04 <span class="m-muted">Omar</span></td><td class="ok">2 / 1</td><td class="sat">8 / 3</td><td class="hi">6 / 3</td><td class="ok">2 / 2</td><td>18 / 9</td></tr>
+            </tbody>
+          </table></div>
+          <div class="m-muted">صادر / وارد لكل عقدة وأسبوع &middot; <span class="badge b-green">عادي</span> <span class="badge b-yellow">مرتفع</span> <span class="badge b-red">مشبع</span> &middot; انقر على خانة لعرض عيناتها؛ اسحب عينة أو سطرًا معلقًا إلى خانة لنقله</div>
+
+          <div class="m-h3" style="font-size:13px;margin-top:14px">بانتظار قرارك<span class="pin">3</span></div>
+          <div class="m-card"><table>
+            <thead><tr><th></th><th>العينة</th><th>شركة النقل &middot; المنتج</th><th>الدور</th><th>التاريخ الأصلي</th><th>اقتراح النظام</th><th>الإجراءات</th></tr></thead>
+            <tbody>
+              <tr><td>&#9745;</td><td><code>TAG-00517</code> <span dir="ltr">NY-01 &rarr; BOS-02</span></td><td>USPS &middot; Priority</td><td>الإرسال</td><td>12/11/2026</td><td>النقل إلى أول أسبوع لاحق فيه سعة &larr; NY-02، 24/11/2026</td><td><span class="m-sbtn">تأكيد</span><span class="m-sbtn">إلغاء العينة</span></td></tr>
+              <tr><td>&#9745;</td><td><code>TAG-00521</code> <span dir="ltr">CHI-01 &rarr; NY-01</span></td><td>USPS &middot; Priority</td><td>الاستلام</td><td>17/11/2026</td><td>لا توجد فترة متاحة خلال 8 أسابيع؛ يُقترح الإلغاء</td><td><span class="m-sbtn">تأكيد</span><span class="m-sbtn">إلغاء العينة</span></td></tr>
+            </tbody>
+          </table></div>
+          <div style="margin:6px 0"><span class="m-muted">تم تحديد 2</span> &nbsp;<span class="m-pbtn">قبول المحدد</span><span class="m-sbtn">إلغاء المحدد</span><span class="pin">4</span></div>
+
+          <div class="m-box" style="max-width:420px;background:var(--g50)">
+            <div class="m-h3" style="font-size:13px">تغيير الحل<span class="pin">5</span></div>
+            <div style="margin:6px 0">الإجراء النهائي <span class="m-sel">إعادة التوجيه إلى عقدة أخرى</span></div>
+            <div style="margin:6px 0">العقدة المستهدفة <span class="m-sel">NY-02</span> &nbsp; تاريخ جديد <span class="m-in">24/11/2026</span></div>
+            <span class="m-pbtn">تطبيق</span><span class="m-sbtn">إلغاء</span>
+          </div>
+
+          <div class="m-h3" style="font-size:13px;margin-top:14px">تمت معالجتها<span class="pin">6</span></div>
+          <div class="m-card"><table>
+            <thead><tr><th>الحالة</th><th>العينة</th><th>شركة النقل &middot; المنتج</th><th>الدور</th><th>التاريخ الأصلي</th><th>ما تم</th><th>بواسطة</th><th>متى</th></tr></thead>
+            <tbody>
+              <tr><td>تمت المعالجة تلقائيًا</td><td><code>TAG-00502</code> <span dir="ltr">NY-01 &rarr; LA-02</span></td><td>USPS &middot; Priority</td><td>الإرسال</td><td>10/11/2026</td><td>نُقلت إلى تاريخ لاحق &larr; 23/11/2026</td><td>النظام</td><td>22/10/2026</td></tr>
+              <tr><td>تمت المعالجة تلقائيًا</td><td><code>TAG-00509</code> <span dir="ltr">NY-01 &rarr; SEA-01</span></td><td>USPS &middot; Priority</td><td>الإرسال</td><td>13/11/2026</td><td>نُقلت إلى عقدة أخرى &larr; NY-02</td><td>النظام</td><td>22/10/2026</td></tr>
+              <tr><td>للعلم فقط</td><td><code>TAG-00498</code> <span dir="ltr">MIA-01 &rarr; NY-01</span></td><td>USPS &middot; Priority</td><td>الاستلام</td><td>11/11/2026</td><td>بدون تغيير (قيد النقل بالفعل)</td><td>النظام</td><td>22/10/2026</td></tr>
+            </tbody>
+          </table></div>
+
+          <div class="m-box">
+            <div class="m-muted">القرار النهائي<span class="pin">7</span></div>
+            <div class="m-ta">أضف ملاحظة حول كيفية معالجة هذه الحادثة…</div>
+            <span class="m-pbtn">حفظ</span>
+          </div>
+        </div>
+      </div>
+      <ol class="legend">
+        <li><strong>الملخص التلقائي.</strong> ما فعله المحرك: نُقلت إلى تاريخ لاحق، نُقلت إلى عقدة أخرى، أُلغيت، للعلم فقط، قيد الانتظار.</li>
+        <li><strong>توازن المدينة.</strong> الشحنات الصادرة / الواردة لكل عقدة وأسبوع في مدينة عضو اللجنة، بألوان <span class="badge b-green">عادي</span> أو <span class="badge b-yellow">مرتفع</span> أو <span class="badge b-red">مشبع</span> بحسب <em>الحمل المرجعي</em> و<em>الانحراف %</em> اللذين تحددهما. الخانات المخططة هي أسابيع عدم توفر عضو اللجنة. غيّر <em>الأسابيع المعروضة</em> للنظر إلى الوراء أو إلى الأمام. انقر على أسبوع لتصفية الأسطر أدناه؛ انقر على خانة لعرض عيناتها؛ <strong>اسحب سطرًا معلقًا إلى خانة</strong> لنقل العينة إليها (يفحص ONEMS أفضل يوم ويعرض الحمل الناتج قبل أن تؤكد).</li>
+        <li><strong>بانتظار قرارك.</strong> سطر لكل عينة لم يستطع المحرك حلها، مع دورها وتاريخها الأصلي و<em>اقتراح النظام</em> وسببه. يطبّق <strong>تأكيد</strong> الاقتراح على ذلك السطر؛ ويلغي <strong>إلغاء العينة</strong> العينة.</li>
+        <li><strong>قبول المحدد / إلغاء المحدد</strong> يفعلان الأمر نفسه لعدة أسطر دفعة واحدة. إلغاء عينة يزيلها من خطة التخصيص ولا يمكن التراجع عنه من هذه الشاشة، لذلك يطلب ONEMS تأكيدك.</li>
+        <li><strong>تغيير الحل.</strong> للقيام بشيء غير الاقتراح، اختر <em>الإجراء النهائي</em>: <em>إعادة التوجيه إلى عقدة أخرى</em> (اختر <em>العقدة المستهدفة</em>)، أو <em>تغيير التاريخ</em> (اختر <em>تاريخ جديد</em>)، أو <em>إلغاء العينة</em>، ثم <strong>تطبيق</strong>.</li>
+        <li><strong>تمت معالجتها.</strong> كل سطر عولج بالفعل، من <em>النظام</em> أو من <em>المدير</em>، مع ما تم ومتى. أسطر <em>للعلم فقط</em> هي عينات قيد النقل بالفعل: لا يمكن تغيير شيء فيها.</li>
+        <li><strong>القرار النهائي.</strong> ملاحظة حرة عن كيفية إغلاق الحادثة. اضغط <strong>حفظ</strong>. وعندما لا يبقى أي سطر معلق، تصبح الحادثة <span class="badge b-blue">تمت المعالجة</span>.</li>
+      </ol>
+      <div class="callout info"><strong>يُبلَّغ أعضاء اللجنة.</strong> كل تغيير تطبقه على عينة في الأسبوع الحالي يُرسل على Telegram إلى أعضاء اللجنة المعنيين، مع التاريخ الجديد أو العقدة الجديدة.</div>
+    </section>
+
+    <section id="availability-example">
+      <h2>مثال تطبيقي</h2>
+      <p>الأرقام توضيحية.</p>
+      <div class="chat">
+        <div class="who">بوت ONE</div>
+        <div class="msg me">من 10 إلى 21 نوفمبر سأكون في إجازة</div>
+        <div class="msg bot">فهمت أن الفترة <strong>10 نوفمبر – 21 نوفمبر</strong>. هل هذا صحيح؟</div>
+        <div class="kb"><span>نعم</span><span>لا</span></div>
+        <div class="msg me">نعم</div>
+        <div class="msg bot">تم الاستلام. شكرًا لإبلاغنا.</div>
+      </div>
+      <p>كان لدى <strong>Elena</strong> 14 عينة مجدولة في تلك الفترة. يلخّص ONEMS عمله في الحادثة:</p>
+      <div class="card"><strong>9 نُقلت إلى تاريخ لاحق &middot; 3 نُقلت إلى عقدة أخرى &middot; 2 قيد الانتظار</strong></div>
+      <ul>
+        <li><strong>9 نُقلت:</strong> إلى أول أيام العمل الشاغرة بعد 21 نوفمبر، ضمن شهر نوفمبر.</li>
+        <li><strong>3 إلى عقدة أخرى:</strong> لم يكن لدى Elena تاريخ ممكن في الشهر، فذهبت إلى عقد أخرى في المدينة ذات حمل منخفض. ويُبلَّغ أعضاء اللجنة المعنيون على Telegram.</li>
+        <li><strong>2 قيد الانتظار:</strong> لم تستطع أي عقدة استيعابهما دون أن تصبح مشبعة. تصبح الحادثة <span class="badge b-yellow">بانتظار قرار المسؤول</span>.</li>
+      </ul>
+      <h3>ما تفعله أنت</h3>
+      <ol class="steps">
+        <li>افتح <strong>توفر المحكّمين</strong> واضغط <em>مراجعة</em> على حادثة Elena. سترى الملخص وتوازن المدينة وعيناتها، المعالجة والمعلقة (الشاشة أعلاه).</li>
+        <li>تقترح العينة المعلقة الأولى NY-02 في الأسبوع 48، ويُظهر التوازن أن NY-02 <span class="badge b-green">عادي</span> في ذلك الأسبوع: اضغط <strong>تأكيد</strong>.</li>
+        <li>تقترح الثانية الإلغاء. تفضّل الاحتفاظ بها: اضغط <strong>تغيير الحل</strong>، واختر <em>تغيير التاريخ</em>، وحدد أول يوم عمل في ديسمبر ثم <strong>تطبيق</strong>.</li>
+        <li>اكتب ملاحظة <em>القرار النهائي</em> ثم <strong>حفظ</strong>. تصبح الحادثة <span class="badge b-blue">تمت المعالجة</span>؛ ويُبلَّغ Elena وأعضاء اللجنة الآخرون المعنيون على Telegram.</li>
+      </ol>
+      <div class="callout info"><strong>عدم التوفر بسبب نقص المواد.</strong> من حادثة نقص مواد يمكنك إنشاء فترة عدم توفر تمتد من اليوم حتى الموعد المتوقع لوصول المواد. وهي تتبع العملية نفسها تمامًا؛ ويظهر السبب <em>المواد</em>.</div>
+    </section>
+
+    <section id="conversation">
+      <h2>المحادثة والتنبيهات</h2>
+      <p>لكل حادثة <strong>محادثة مع العضو</strong> تحفظ رسائل البوت وردود عضو اللجنة (مع الصور) ورسائلك.</p>
+      <div class="app">
+        <div class="app-bar"><i></i><i></i><i></i><span>ONEMS &rsaquo; تفاصيل الحادثة</span></div>
+        <div class="app-body">
+          <div class="m-box" style="margin:0;max-width:520px">
+            <div class="m-h3" style="font-size:13px">المحادثة مع العضو</div>
+            <div class="m-bub l">هل تريد تسجيل هذا على أنه طرد مُعاد؟<small>البوت &middot; تم الإرسال</small></div>
+            <div class="m-bub r">نعم<small>العضو &middot; تم الضغط على زر</small></div>
+            <div class="m-bub l">مرحبًا Pablo، هل يمكنك الاحتفاظ بالملصق؟<small>المدير &middot; قيد الإرسال</small></div>
+            <div class="m-bub r">نعم، ما زال لديّ. <span class="m-muted">[صورة]</span><small>العضو &middot; <span class="badge b-blue">رد جديد</span></small></div>
+            <div class="m-ta">اكتب رسالة إلى العضو…</div>
+            <span class="m-pbtn">إرسال</span>
+          </div>
+        </div>
+      </div>
+      <ul>
+        <li><strong>الكتابة إلى عضو اللجنة.</strong> اكتب في الحادثة واضغط <em>إرسال</em>. تصل إلى Telegram الخاص به عادةً خلال خمس دقائق، كنص عادي.</li>
+        <li><strong>الردود غير المقروءة.</strong> تعرض ردود عضو اللجنة النصية الحرة شارة زرقاء في القائمة وفي القائمة الجانبية إلى أن تفتح الحادثة. أما الأزرار التي يضغط عليها عضو اللجنة فلا تُحتسب.</li>
+        <li><strong>تنبيه بالبريد الإلكتروني.</strong> إذا بقي ردّ غير مقروء أكثر من ساعة، تصلك رسالة بريد إلكتروني <strong>واحدة</strong> لكل حادثة. وإذا فتحتها قبل ذلك، لا يُرسل أي بريد.</li>
+        <li><strong>الإغلاق.</strong> حل الحادثة أو تجاهلها يغلق محادثة Telegram.</li>
+      </ul>
+    </section>
+
+    <section id="faq">
+      <h2>أسئلة شائعة</h2>
+      <details><summary>ماذا لو كتب عضو اللجنة شيئًا عشوائيًا؟</summary><div>يعرض البوت القائمة أو يقترح نوعًا. ولا يُحفظ شيء حتى يضغط عضو اللجنة على <strong>نعم</strong>.</div></details>
+      <details><summary>هل ينقل ONEMS أبدًا عينة أُرسلت بالفعل؟</summary><div>لا. تُنقل العينات المعلقة فقط. أما الطرد المُعاد فيُعاد إرساله من الحادثة، بقرار منك.</div></details>
+      <details><summary>هل يمكن أن تذهب العينات إلى مدينة أخرى؟</summary><div>لا. تغيير المدينة سيغيّر المسار المقيس.</div></details>
+      <details><summary>لماذا لم يعد عضو اللجنة يتلقى تذكيرًا ببعض الشحنات؟</summary><div>هذه الشحنات تحتاج إلى مواد لا يملكها عضو اللجنة. يتوقف ONEMS عن الإلحاح حتى تصل المواد، ثم يخبره بأنه يستطيع الإرسال.</div></details>
+      <details><summary>هل تقع الشحنات في عطلات نهاية الأسبوع؟</summary><div>لا. تُجدول الشحنات من الاثنين إلى الجمعة فقط.</div></details>
+      <details><summary>يقول عضو اللجنة إنه أبلغ عن شيء لكنني لا أراه.</summary><div>تحقق من أنه أكّد بـ<strong>نعم</strong>. إذا أجاب بلا، أو لم يجب، فلا يُحفظ شيء.</div></details>
+      <details><summary>من يستطيع رؤية الحادثة؟</summary><div>يرى كل حساب أعضاء اللجنة والحوادث الخاصة به فقط.</div></details>
+    </section>
+  </div>
+  </main>
+</div>
+
+
+<script>
+(function () {
+  var links = Array.prototype.slice.call(document.querySelectorAll('#nav a'));
+  var sections = links.map(function (a) { return document.querySelector(a.getAttribute('href')); }).filter(Boolean);
+
+  // Mobile section picker
+  var jump = document.getElementById('jump');
+  links.forEach(function (a) {
+    var o = document.createElement('option');
+    o.value = a.getAttribute('href'); o.textContent = a.textContent; jump.appendChild(o);
+  });
+  jump.addEventListener('change', function () { location.hash = jump.value; });
+
+  // Highlight the current section in the side menu
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          links.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id); });
+          jump.value = '#' + e.target.id;
+        }
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    sections.forEach(function (s) { io.observe(s); });
+  }
+})();
+</script>
+</body>
+</html>

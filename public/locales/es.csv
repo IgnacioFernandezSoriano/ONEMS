@@ -2830,7 +2830,6 @@ reported_incidents.empty,No hay incidencias reportadas
 reported_incidents.back,Volver
 reported_incidents.linked_shipment,Envío vinculado
 reported_incidents.resolution_note,Nota de resolución
-reported_incidents.reply_to_panelist,Respuesta al panelista
 reported_incidents.resolve,Resolver
 reported_incidents.dismiss,Descartar
 reported_incidents.filter.all_categories,Todas las categorías
@@ -2855,21 +2854,40 @@ reported_incidents.category.other,Otro
 reported_incidents.action.mark_received,Marcar como recibido
 reported_incidents.action.invalidate,Invalidar
 reported_incidents.action.support_only,No hay acción disponible; solo soporte.
-reported_incidents.materials.step1_title,Reconciliar stock
 reported_incidents.materials.real_qty,Cantidad real
-reported_incidents.materials.step2_title,Recalcular necesidad
 reported_incidents.materials.blocking_badge,Bloqueante
-reported_incidents.materials.step3_title,Suministro
 reported_incidents.materials.from_central,Desde stock central
 reported_incidents.materials.from_donor,Desde donante {name}
-reported_incidents.materials.to_purchase,Requiere compra (manual/PDF)
-reported_incidents.materials.execute_supply,Ejecutar suministro
-reported_incidents.materials.step4_title,Ventana de desplazamiento
-reported_incidents.materials.create_baja,Crear baja y desplazar muestras
-reported_incidents.materials.step5_title,Cierre al recibir
-reported_incidents.materials.go_to_availability,Resolver muestras en disponibilidad de panelistas
-reported_incidents.materials.close_hint,La baja se cierra automáticamente cuando el panelista confirma la recepción.
+reported_incidents.materials.close_hint,Recibir el material resuelve la incidencia; la baja no se cancela y termina sola en su fecha.
 reported_incidents.materials.unmatched,Material no encontrado en el catálogo
+reported_incidents.materials.s1_title,Stock teórico
+reported_incidents.materials.s2_title,Necesidad y suministro
+reported_incidents.materials.s3_title,Replanificar
+reported_incidents.materials.zero_stock,Poner stock a cero
+reported_incidents.materials.zero_confirm,¿Poner a cero todo el stock de materiales de este panelista?
+reported_incidents.materials.zero_done,{n} materiales puestos a cero
+reported_incidents.materials.expected_date,Fecha prevista de llegada
+reported_incidents.materials.days_without_stock,{n} días laborables sin stock
+reported_incidents.materials.affected_samples,Muestras afectadas
+reported_incidents.materials.no_affected_samples,Ninguna muestra afectada
+reported_incidents.materials.confirm_supply,Confirmar suministro
+reported_incidents.materials.supply_done,Suministro confirmado el {date}
+reported_incidents.materials.create_baja_replan,Crear baja por materiales y replanificar
+reported_incidents.materials.go_to_unavailability,Ir a la incidencia de baja
+reported_incidents.materials.no_stock_rows,Sin registros de stock
+reported_incidents.materials.days_to_cover,Días de necesidad a cubrir
+reported_incidents.materials.days_to_cover_hint,Vacío = hasta fin de mes. Se calcula hasta el {date}
+reported_incidents.materials.col_need,Necesidad
+reported_incidents.materials.col_neighbours,Vecinos
+reported_incidents.materials.col_central,Central
+reported_incidents.materials.col_purchase,Compra
+reported_incidents.materials.source_proposal,Propuesta
+reported_incidents.materials.source_only_neighbours,Solo vecinos
+reported_incidents.materials.source_only_central,Solo central
+reported_incidents.materials.source_purchase_all,Comprar todo
+reported_incidents.materials.no_purchase_no_baja,Todo el material se cubre con vecinos o con el almacén central: no hace falta baja ni replanificar.
+reported_incidents.materials.nothing_needed,No hay necesidad de material en el periodo seleccionado.
+reported_incidents.materials.change_source,Cambiar origen
 reported_incidents.action.new_date,Nueva fecha
 reported_incidents.action.reschedule,Reprogramar
 reported_incidents.action.cancel_shipment,Cancelar envío
@@ -2903,3 +2921,89 @@ unavailability.selected_count,{count} período(s) seleccionado(s)
 unavailability.clear_selection,Quitar selección
 unavailability.active_now,ACTIVA AHORA
 unavailability.notes_placeholder,Información adicional sobre este período de indisponibilidad...
+reported_incidents.role.sender,Emisor
+reported_incidents.role.receiver,Receptor
+reported_incidents.header.contact,Contacto
+reported_incidents.header.telegram_yes,Telegram: sí
+reported_incidents.header.telegram_no,Telegram: no
+reported_incidents.status.auto_resolved,Resuelta automáticamente
+reported_incidents.readonly.title,Tratada automáticamente
+reported_incidents.readonly.no_data,Sin datos
+reported_incidents.readonly.no_candidates,No había envíos en camino
+reported_incidents.readonly.chosen_shipment,Envío elegido
+reported_incidents.contact.before,Antes
+reported_incidents.contact.after,Después
+reported_incidents.contact.field.mobile,Móvil
+reported_incidents.contact.field.email,Correo electrónico
+reported_incidents.contact.field.language,Idioma
+reported_incidents.contact.field.address_line1,Dirección (línea 1)
+reported_incidents.contact.field.address_line2,Dirección (línea 2)
+reported_incidents.contact.field.address_city,Ciudad
+reported_incidents.contact.field.address_country,País
+reported_incidents.returned.title,Reenviar muestra devuelta
+reported_incidents.returned.to_node,Nodo de destino
+reported_incidents.returned.no_nodes,No hay otro nodo en esta ciudad
+reported_incidents.returned.week,Semana
+reported_incidents.returned.confirm_reroute,Confirmar reenvío
+reported_incidents.returned.no_detail,Esta incidencia no tiene envío vinculado
+reported_incidents.returned.fits,Cabe: {date} (carga {load})
+reported_incidents.returned.reason.not_found,Envío o nodo no encontrado
+reported_incidents.returned.reason.not_in_cell,El envío no está en una celda válida
+reported_incidents.returned.reason.not_pending,La muestra no está pendiente
+reported_incidents.returned.reason.sample_not_movable,Esta muestra no se puede mover
+reported_incidents.returned.reason.has_incident_line,El envío tiene una línea de incidencia abierta
+reported_incidents.returned.reason.other_city,El nodo está en otra ciudad
+reported_incidents.returned.reason.inactive_node,El nodo no está activo
+reported_incidents.returned.reason.other_end,El nodo es el otro extremo del envío
+reported_incidents.returned.reason.no_day,No hay día disponible en esa semana
+reported_incidents.returned.reason.unknown,No se puede reenviar a ese nodo y semana
+reported_incidents.done.rerouted,Muestra reenviada
+reported_incidents.materials.date_in_past,La fecha no puede estar en el pasado
+reported_incidents.returned.not_returnable,Este envío no está en un estado devolvible (estado actual)
+reported_incidents.returned.cancel_confirm,¿Anular este envío? La muestra no se reenviará.
+reported_incidents.readonly.closed,Esta incidencia está cerrada: las acciones son de solo lectura
+incident_conversation.title,Conversación con el panelista
+incident_conversation.empty,Sin mensajes todavía
+incident_conversation.placeholder,Escribe un mensaje al panelista…
+incident_conversation.send,Enviar
+incident_conversation.sending,Enviando…
+incident_conversation.author.bot,Bot
+incident_conversation.author.manager,Gestor
+incident_conversation.author.panelist,Panelista
+incident_conversation.author.system,Sistema
+incident_conversation.status.pending_send,Pendiente de envío
+incident_conversation.status.sent,Enviado
+incident_conversation.status.failed,Fallido
+incident_conversation.button_pressed,Botón pulsado
+incident_conversation.no_telegram,"Este panelista no tiene Telegram vinculado, por lo que no se puede entregar el mensaje"
+material_sheet.title,Hoja de envíos de material
+material_sheet.col.origin,Origen
+material_sheet.col.destination,Destino
+material_sheet.col.material,Material
+material_sheet.col.quantity,Cantidad
+material_sheet.col.due,Debe llegar
+material_sheet.col.status,Estado
+material_sheet.central_warehouse,Almacén central
+material_sheet.status.pending,Pendiente
+material_sheet.status.sent,Enviado
+material_sheet.status.partially_received,Parcialmente recibido
+material_sheet.status.received,Recibido
+material_sheet.status.cancelled,Cancelado
+material_sheet.print,Imprimir / PDF
+material_sheet.download_csv,Descargar Excel (CSV)
+material_sheet.mark_sent,Marcar enviado
+material_sheet.confirm_mark_sent,¿Marcar este envío como enviado? Se actualizará el stock.
+material_sheet.donor_confirms_telegram,El panelista donante lo confirma por Telegram
+material_sheet.received_of,{received} de {sent}
+stock.partially_received,Recibido en parte
+stock.received_of,{received} de {sent} recibidos
+stock.cannot_delete_incident_shipment,Este envío pertenece a una incidencia de materiales y no se puede borrar ni partir desde Stock. Gestiónalo desde la incidencia.
+reported_incidents.materials.to_buy_title,A comprar
+reported_incidents.materials.to_buy_line,{name} ({code}): {n}
+material_sheet.to_buy_title,A comprar
+material_sheet.purchase_origin,Compra
+incident_conversation.unread_badge,Conversaciones con respuestas nuevas
+incident_conversation.new_reply,Respuesta nueva
+incident_conversation.photo_alt,Foto enviada por el panelista
+menu.help_incidents,Ayuda: Incidencias
+menu.help_incidents.tooltip,Cómo funcionan las incidencias y la disponibilidad de panelistas (se abre en una pestaña nueva)

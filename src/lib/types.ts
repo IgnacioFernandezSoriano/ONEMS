@@ -518,7 +518,7 @@ export type ReportedIncidentCategory =
   | 'missing_materials' | 'unreadable_label_receipt' | 'parcel_damaged' | 'parcel_returned'
   | 'how_to_send' | 'unavailability_request' | 'tag_photo_problem' | 'contact_data_change' | 'other'
 
-export type ReportedIncidentStatus = 'open' | 'in_progress' | 'resolved' | 'dismissed'
+export type ReportedIncidentStatus = 'open' | 'in_progress' | 'resolved' | 'dismissed' | 'auto_resolved'
 
 export interface ReportedIncident {
   id: string
@@ -538,4 +538,18 @@ export interface ReportedIncident {
   // joins para la bandeja
   panelist_name?: string
   panelist_code?: string
+}
+
+export interface ReportedIncidentDetail extends ReportedIncident {
+  panelist: {
+    id: string; name: string; panelist_code: string; email: string | null; mobile: string | null
+    telegram_id: string | null; language: string | null; address_city: string | null; node_id: string | null
+  } | null
+  detail: {
+    id: string; fecha_programada: string | null; status: string; tag_id: string | null
+    origin_node_id: string | null; destination_node_id: string | null
+    origin_panelist_id: string | null; destination_panelist_id: string | null
+    origin_node: { auto_id: string } | null; destination_node: { auto_id: string } | null
+    plan: { carrier: { name: string } | null; product: { description: string } | null } | null
+  } | null
 }

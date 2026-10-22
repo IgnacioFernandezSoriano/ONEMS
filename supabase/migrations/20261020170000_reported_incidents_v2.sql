@@ -1,0 +1,264 @@
+-- Incidencias reportadas por el panelista, v2. Forward-only. NO toca el baseline.
+-- Cada seccion la anade una tarea del plan; ver docs/superpowers/plans/ (incidencias reportadas v2, plan 1 BD).
+
+-- ===== 1) Estado auto_resolved + razon 'materials' =====
+-- auto_resolved: incidencia cerrada automaticamente por el sistema (sin accion del manager).
+ALTER TABLE public.panelist_incident DROP CONSTRAINT pi_status_check;
+ALTER TABLE public.panelist_incident ADD CONSTRAINT pi_status_check
+  CHECK (status IN ('open','in_progress','resolved','dismissed','auto_resolved'));
+
+-- Igual que la version de 20260806160000, pero admite tambien reason='materials'
+-- (el CHECK de panelist_unavailability.reason ya la permite desde 20260807100000).
+CREATE OR REPLACE FUNCTION public.create_unavailability_from_incident(
+  p_incident_id uuid, p_start date, p_end date, p_reason text DEFAULT NULL)
+RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE v_account uuid; v_panelist uuid; v_new uuid;
+BEGIN
+  SELECT account_id, panelist_id INTO v_account, v_panelist
+    FROM panelist_incident WHERE id = p_incident_id;
+  PERFORM assert_same_account(v_account);
+  IF p_start IS NULL OR p_end IS NULL OR p_end < p_start THEN
+    RAISE EXCEPTION 'invalid date range'; END IF;
+  -- panelist_unavailability.reason es NOT NULL con CHECK IN
+  -- ('vacation','sick_leave','personal','training','other','materials'); si el llamador no
+  -- pasa un valor valido, usamos 'other' para no romper la constraint.
+  INSERT INTO panelist_unavailability (account_id, panelist_id, start_date, end_date, reason, status)
+  VALUES (
+    v_account, v_panelist, p_start, p_end,
+    CASE WHEN p_reason IN ('vacation','sick_leave','personal','training','other','materials')
+         THEN p_reason ELSE 'other' END,
+    'active')
+  RETURNING id INTO v_new;  -- el trigger generate_proposals_on_unavailability_trigger dispara el motor
+  UPDATE panelist_incident SET linked_unavailability_id = v_new, status = 'in_progress', updated_at = now()
+  WHERE id = p_incident_id;
+  RETURN v_new;
+END; $$;
+
+-- ===== 2) update_panelist_contact ampliada y validada =====
+-- Implementacion unica de 9 parametros. Lleva nombre propio (_v2) para que una llamada
+-- posicional de 4 argumentos no sea ambigua con la firma antigua (uuid,text,text,text).
+-- NULL o '' = no tocar. Si auth.uid() IS NULL (n8n / service-role) se ignora p_telegram_id.
+CREATE OR REPLACE FUNCTION public.update_panelist_contact_v2(
+  p_panelist_id uuid, p_telegram_id text DEFAULT NULL,
+  p_phone text DEFAULT NULL, p_language text DEFAULT NULL,
+  p_email text DEFAULT NULL, p_address_line1 text DEFAULT NULL,
+  p_address_line2 text DEFAULT NULL, p_address_city text DEFAULT NULL,
+  p_address_country text DEFAULT NULL)
+RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE
+  v_account uuid;
+  v_tg text      := NULLIF(btrim(p_telegram_id), '');
+  v_phone text   := NULLIF(btrim(p_phone), '');
+  v_lang text    := NULLIF(lower(btrim(p_language)), '');
+  v_email text   := NULLIF(btrim(p_email), '');
+  v_line1 text   := NULLIF(btrim(p_address_line1), '');
+  v_line2 text   := NULLIF(btrim(p_address_line2), '');
+  v_city text    := NULLIF(btrim(p_address_city), '');
+  v_country text := NULLIF(btrim(p_address_country), '');
+BEGIN
+  SELECT account_id INTO v_account FROM panelists WHERE id = p_panelist_id;
+  PERFORM assert_same_account(v_account);
+  IF v_email IS NOT NULL AND v_email !~* '^[^@\s]+@[^@\s]+\.[^@\s]+$' THEN
+    RAISE EXCEPTION 'invalid email'; END IF;
+  IF v_phone IS NOT NULL AND v_phone !~ '^[0-9+ ]{7,20}$' THEN
+    RAISE EXCEPTION 'invalid phone'; END IF;
+  IF v_lang IS NOT NULL AND v_lang NOT IN ('en','es','fr','ar') THEN
+    RAISE EXCEPTION 'invalid language'; END IF;
+  IF length(v_line1) > 200 OR length(v_line2) > 200 OR length(v_city) > 200 OR length(v_country) > 200 THEN
+    RAISE EXCEPTION 'invalid address'; END IF;
+  UPDATE panelists SET
+    telegram_id = CASE WHEN auth.uid() IS NULL THEN telegram_id ELSE COALESCE(v_tg, telegram_id) END,
+    mobile = COALESCE(v_phone, mobile),
+    language = COALESCE(v_lang, language),
+    email = COALESCE(v_email, email),
+    address_line1 = COALESCE(v_line1, address_line1),
+    address_line2 = COALESCE(v_line2, address_line2),
+    address_city = COALESCE(v_city, address_city),
+    address_country = COALESCE(v_country, address_country),
+    updated_at = now()
+  WHERE id = p_panelist_id;
+END; $$;
+
+-- Firma antigua: se mantiene (el frontend actual la usa) y delega en la nueva.
+CREATE OR REPLACE FUNCTION public.update_panelist_contact(
+  p_panelist_id uuid, p_telegram_id text DEFAULT NULL,
+  p_phone text DEFAULT NULL, p_language text DEFAULT NULL)
+RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+BEGIN
+  PERFORM public.update_panelist_contact_v2(p_panelist_id, p_telegram_id, p_phone, p_language);
+END; $$;
+
+REVOKE ALL ON FUNCTION public.update_panelist_contact_v2(uuid,text,text,text,text,text,text,text,text) FROM PUBLIC, anon;
+REVOKE ALL ON FUNCTION public.update_panelist_contact(uuid,text,text,text) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.update_panelist_contact_v2(uuid,text,text,text,text,text,text,text,text) TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.update_panelist_contact(uuid,text,text,text) TO authenticated, service_role;
+
+-- ===== 3) insert_panelist_incident_auto =====
+-- Alta de incidencias desde n8n (service-role) o el panelista: el account_id se deriva del
+-- panelista, nunca se acepta del llamador. 'auto_resolved' = cerrada por el sistema.
+CREATE OR REPLACE FUNCTION public.insert_panelist_incident_auto(
+  p_panelist_id uuid, p_category text, p_description text DEFAULT NULL,
+  p_payload jsonb DEFAULT NULL, p_detail_id uuid DEFAULT NULL,
+  p_status text DEFAULT 'auto_resolved')
+RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE v_account uuid; v_detail_account uuid; v_new uuid;
+BEGIN
+  IF p_status IS NULL OR p_status NOT IN ('open','auto_resolved') THEN
+    RAISE EXCEPTION 'invalid status'; END IF;
+  IF p_category IS NULL OR p_category NOT IN ('missing_materials','unreadable_label_receipt',
+      'parcel_damaged','parcel_returned','how_to_send','unavailability_request',
+      'tag_photo_problem','contact_data_change','other') THEN
+    RAISE EXCEPTION 'invalid category'; END IF;
+  SELECT account_id INTO v_account FROM panelists WHERE id = p_panelist_id;
+  IF NOT FOUND THEN RAISE EXCEPTION 'panelist not found'; END IF;
+  -- Guarda multi-tenant ANTES de comparar la muestra: un usuario de otra cuenta no puede
+  -- averiguar a que cuenta pertenece una muestra por el mensaje de error.
+  PERFORM assert_same_account(v_account);
+  IF p_detail_id IS NOT NULL THEN
+    SELECT account_id INTO v_detail_account FROM allocation_plan_details WHERE id = p_detail_id;
+    IF v_detail_account IS DISTINCT FROM v_account THEN
+      RAISE EXCEPTION 'detail belongs to another account'; END IF;
+  END IF;
+  INSERT INTO panelist_incident (account_id, panelist_id, category, description, payload,
+                                 allocation_plan_detail_id, status, created_via, resolved_at)
+  VALUES (v_account, p_panelist_id, p_category, p_description, p_payload,
+          p_detail_id, p_status, 'telegram',
+          CASE WHEN p_status = 'auto_resolved' THEN now() END)
+  RETURNING id INTO v_new;
+  RETURN v_new;
+END; $$;
+
+REVOKE ALL ON FUNCTION public.insert_panelist_incident_auto(uuid,text,text,jsonb,uuid,text) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.insert_panelist_incident_auto(uuid,text,text,jsonb,uuid,text) TO authenticated, service_role;
+
+-- ===== 4) reroute_returned_sample =====
+-- Reenvia a otro nodo destino una muestra devuelta ('sent'/'incident'): la devuelve a 'pending'
+-- (conserva tag_id/idtag) y delega en apply_sample_move para elegir dia, mover y avisar.
+-- Si apply_sample_move lanza, el UPDATE a 'pending' se revierte (misma transaccion).
+CREATE OR REPLACE FUNCTION public.reroute_returned_sample(
+  p_detail_id uuid, p_to_node_id uuid, p_week_start date)
+RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE v_d allocation_plan_details;
+BEGIN
+  SELECT * INTO v_d FROM allocation_plan_details WHERE id = p_detail_id FOR UPDATE;
+  IF NOT FOUND THEN RAISE EXCEPTION 'Sample % not found', p_detail_id; END IF;
+
+  -- Guarda multi-tenant (igual que apply_sample_move).
+  IF auth.uid() IS NOT NULL AND NOT is_superadmin()
+     AND v_d.account_id IS DISTINCT FROM (SELECT pr.account_id FROM profiles pr WHERE pr.id = auth.uid()) THEN
+    RAISE EXCEPTION 'Cross-tenant access denied';
+  END IF;
+
+  IF v_d.status NOT IN ('sent','incident') THEN
+    RAISE EXCEPTION 'Sample is not returned-eligible';
+  END IF;
+
+  UPDATE allocation_plan_details
+     SET status = 'pending', sent_at = NULL, sent_date = NULL, updated_at = now()
+   WHERE id = v_d.id;
+
+  RETURN public.apply_sample_move(p_detail_id, v_d.destination_node_id, p_to_node_id, p_week_start);
+END; $$;
+
+REVOKE ALL ON FUNCTION public.reroute_returned_sample(uuid,uuid,date) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.reroute_returned_sample(uuid,uuid,date) TO authenticated, service_role;
+
+-- Previsualizacion del reenvio: devuelve lo que propondria el motor si la muestra estuviera
+-- 'pending', SIN persistir nada. El UPDATE a 'pending' y la propuesta ocurren dentro de un
+-- sub-bloque con EXCEPTION (savepoint); se aborta a proposito con P0999 y el savepoint deshace el UPDATE.
+CREATE OR REPLACE FUNCTION public.suggest_reroute_returned_sample(
+  p_detail_id uuid, p_to_node_id uuid, p_week_start date)
+RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE v_d allocation_plan_details; v_s jsonb;
+BEGIN
+  SELECT * INTO v_d FROM allocation_plan_details WHERE id = p_detail_id;
+  IF NOT FOUND THEN RAISE EXCEPTION 'Sample % not found', p_detail_id; END IF;
+
+  -- Guarda multi-tenant (igual que apply_sample_move).
+  IF auth.uid() IS NOT NULL AND NOT is_superadmin()
+     AND v_d.account_id IS DISTINCT FROM (SELECT pr.account_id FROM profiles pr WHERE pr.id = auth.uid()) THEN
+    RAISE EXCEPTION 'Cross-tenant access denied';
+  END IF;
+
+  IF v_d.status NOT IN ('sent','incident') THEN
+    RAISE EXCEPTION 'Sample is not returned-eligible';
+  END IF;
+
+  BEGIN
+    UPDATE allocation_plan_details SET status = 'pending' WHERE id = p_detail_id;
+    v_s := public.incident_suggest_sample_move(p_detail_id, v_d.destination_node_id, p_to_node_id,
+                                               p_week_start, 6, 20);
+    RAISE EXCEPTION USING ERRCODE = 'P0999', MESSAGE = v_s::text;
+  EXCEPTION WHEN SQLSTATE 'P0999' THEN
+    RETURN SQLERRM::jsonb;  -- el savepoint ya deshizo el UPDATE
+  END;
+END; $$;
+
+REVOKE ALL ON FUNCTION public.suggest_reroute_returned_sample(uuid,uuid,date) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.suggest_reroute_returned_sample(uuid,uuid,date) TO authenticated, service_role;
+
+-- ===== 5) list_nodes_for_sample_move =====
+-- Nodos candidatos para mover el destino de una muestra: misma cuenta y MISMA CIUDAD que el
+-- destino actual (el motor rechaza otras ciudades), con un panelista activo, sin el destino actual
+-- ni el origen (el motor rechaza ambos).
+-- same_city se mantiene por estabilidad de interfaz (siempre true).
+CREATE OR REPLACE FUNCTION public.list_nodes_for_sample_move(p_detail_id uuid)
+RETURNS TABLE (node_id uuid, auto_id text, city_name text, same_city boolean, panelist_name text)
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE v_d allocation_plan_details; v_city uuid;
+BEGIN
+  SELECT * INTO v_d FROM allocation_plan_details WHERE id = p_detail_id;
+  IF NOT FOUND THEN RAISE EXCEPTION 'Sample % not found', p_detail_id; END IF;
+
+  -- Guarda multi-tenant (igual que apply_sample_move).
+  IF auth.uid() IS NOT NULL AND NOT is_superadmin()
+     AND v_d.account_id IS DISTINCT FROM (SELECT pr.account_id FROM profiles pr WHERE pr.id = auth.uid()) THEN
+    RAISE EXCEPTION 'Cross-tenant access denied';
+  END IF;
+
+  IF v_d.destination_node_id IS NULL THEN RETURN; END IF;
+  SELECT n.city_id INTO v_city FROM nodes n WHERE n.id = v_d.destination_node_id;
+  IF v_city IS NULL THEN RETURN; END IF;
+
+  RETURN QUERY
+  SELECT n.id, n.auto_id::text, c.name::text, true, pn.name::text
+    FROM nodes n
+    LEFT JOIN cities c ON c.id = n.city_id
+    CROSS JOIN LATERAL (
+      SELECT p.name FROM panelists p
+       WHERE p.node_id = n.id AND p.status = 'active'
+       ORDER BY p.name LIMIT 1) pn
+   WHERE n.account_id = v_d.account_id
+     AND n.id <> v_d.destination_node_id
+     AND n.id IS DISTINCT FROM v_d.origin_node_id
+     AND COALESCE(n.status, 'active') = 'active'
+     AND n.city_id = v_city
+   ORDER BY n.auto_id;
+END; $$;
+
+REVOKE ALL ON FUNCTION public.list_nodes_for_sample_move(uuid) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.list_nodes_for_sample_move(uuid) TO authenticated, service_role;
+
+-- ===== Permisos: mark_detail_received_manual =====
+-- Hoy solo 'authenticated' (y PUBLIC/anon por defecto); n8n (service_role) la usara para recepcion manual.
+REVOKE ALL ON FUNCTION public.mark_detail_received_manual(uuid) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.mark_detail_received_manual(uuid) TO authenticated, service_role;
+
+-- Cierre de un hueco de privilegios PREEXISTENTE: por defecto de Supabase, anon tenia EXECUTE en
+-- estas funciones SECURITY DEFINER (y assert_same_account deja pasar auth.uid() NULL).
+REVOKE ALL ON FUNCTION public.resolve_panelist_incident(uuid,text,text,text) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.resolve_panelist_incident(uuid,text,text,text) TO authenticated, service_role;
+REVOKE ALL ON FUNCTION public.invalidate_detail(uuid,text) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.invalidate_detail(uuid,text) TO authenticated;
+REVOKE ALL ON FUNCTION public.reschedule_detail(uuid,date) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.reschedule_detail(uuid,date) TO authenticated;
+REVOKE ALL ON FUNCTION public.cancel_detail(uuid) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.cancel_detail(uuid) TO authenticated;
+REVOKE ALL ON FUNCTION public.create_unavailability_from_incident(uuid,date,date,text) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.create_unavailability_from_incident(uuid,date,date,text) TO authenticated;
+REVOKE ALL ON FUNCTION public.send_material_shipment(uuid) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.send_material_shipment(uuid) TO authenticated, service_role;
+REVOKE ALL ON FUNCTION public.receive_material_shipment(uuid) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.receive_material_shipment(uuid) TO authenticated, service_role;
+REVOKE ALL ON FUNCTION public.find_surplus_donors(uuid,uuid,uuid,numeric) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.find_surplus_donors(uuid,uuid,uuid,numeric) TO authenticated, service_role;

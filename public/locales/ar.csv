@@ -2822,7 +2822,6 @@ reported_incidents.empty,لا توجد حوادث مبلَّغ عنها
 reported_incidents.back,رجوع
 reported_incidents.linked_shipment,الشحنة المرتبطة
 reported_incidents.resolution_note,ملاحظة الحل
-reported_incidents.reply_to_panelist,الرد على العضو
 reported_incidents.resolve,حل
 reported_incidents.dismiss,تجاهل
 reported_incidents.filter.all_categories,جميع الفئات
@@ -2847,21 +2846,40 @@ reported_incidents.category.other,أخرى
 reported_incidents.action.mark_received,وضع علامة كمستلم
 reported_incidents.action.invalidate,إبطال
 reported_incidents.action.support_only,لا يوجد إجراء متاح؛ الدعم فقط.
-reported_incidents.materials.step1_title,مطابقة المخزون
 reported_incidents.materials.real_qty,الكمية الفعلية
-reported_incidents.materials.step2_title,إعادة حساب الاحتياج
 reported_incidents.materials.blocking_badge,معيق
-reported_incidents.materials.step3_title,التوريد
 reported_incidents.materials.from_central,من المخزون المركزي
 reported_incidents.materials.from_donor,من المتبرع {name}
-reported_incidents.materials.to_purchase,يتطلب شراء (يدوي/PDF)
-reported_incidents.materials.execute_supply,تنفيذ التوريد
-reported_incidents.materials.step4_title,نافذة النقل
-reported_incidents.materials.create_baja,إنشاء إجازة ونقل العينات
-reported_incidents.materials.step5_title,الإغلاق عند الاستلام
-reported_incidents.materials.go_to_availability,حل العينات في توفر المشاركين
-reported_incidents.materials.close_hint,تُغلق الإجازة تلقائيًا عند تأكيد المشارك للاستلام.
+reported_incidents.materials.close_hint,استلام المواد يحل الحادثة؛ لا تُلغى الإجازة وتنتهي تلقائيًا في تاريخها.
 reported_incidents.materials.unmatched,المادة غير موجودة في الكتالوج
+reported_incidents.materials.s1_title,المخزون النظري
+reported_incidents.materials.s2_title,الاحتياج والتوريد
+reported_incidents.materials.s3_title,إعادة التخطيط
+reported_incidents.materials.zero_stock,تصفير المخزون
+reported_incidents.materials.zero_confirm,هل تريد تصفير كل مخزون المواد لهذا المشارك؟
+reported_incidents.materials.zero_done,تم تصفير {n} مواد
+reported_incidents.materials.expected_date,تاريخ الوصول المتوقع
+reported_incidents.materials.days_without_stock,{n} أيام عمل بدون مخزون
+reported_incidents.materials.affected_samples,العينات المتأثرة
+reported_incidents.materials.no_affected_samples,لا توجد عينات متأثرة
+reported_incidents.materials.confirm_supply,تأكيد التوريد
+reported_incidents.materials.supply_done,تم تأكيد التوريد بتاريخ {date}
+reported_incidents.materials.create_baja_replan,إنشاء إجازة بسبب نقص المواد وإعادة التخطيط
+reported_incidents.materials.go_to_unavailability,فتح حادثة عدم التوفر
+reported_incidents.materials.no_stock_rows,لا توجد سجلات مخزون
+reported_incidents.materials.days_to_cover,أيام الاحتياج المطلوب تغطيتها
+reported_incidents.materials.days_to_cover_hint,فارغ = حتى نهاية الشهر. يُحسب حتى {date}
+reported_incidents.materials.col_need,الاحتياج
+reported_incidents.materials.col_neighbours,الجيران
+reported_incidents.materials.col_central,المركزي
+reported_incidents.materials.col_purchase,شراء
+reported_incidents.materials.source_proposal,المقترح
+reported_incidents.materials.source_only_neighbours,الجيران فقط
+reported_incidents.materials.source_only_central,المركزي فقط
+reported_incidents.materials.source_purchase_all,شراء الكل
+reported_incidents.materials.no_purchase_no_baja,كل المواد مغطاة من الجيران أو من المخزون المركزي: لا حاجة إلى إجازة أو إعادة تخطيط.
+reported_incidents.materials.nothing_needed,لا يوجد احتياج للمواد في الفترة المحددة.
+reported_incidents.materials.change_source,تغيير المصدر
 reported_incidents.action.new_date,تاريخ جديد
 reported_incidents.action.reschedule,إعادة الجدولة
 reported_incidents.action.cancel_shipment,إلغاء الشحنة
@@ -2895,3 +2913,89 @@ unavailability.selected_count,{count} فترة (فترات) محددة
 unavailability.clear_selection,إلغاء التحديد
 unavailability.active_now,نشطة الآن
 unavailability.notes_placeholder,معلومات إضافية حول فترة عدم التوفر هذه...
+reported_incidents.role.sender,المُرسِل
+reported_incidents.role.receiver,المُستلِم
+reported_incidents.header.contact,جهة الاتصال
+reported_incidents.header.telegram_yes,تيليجرام: نعم
+reported_incidents.header.telegram_no,تيليجرام: لا
+reported_incidents.status.auto_resolved,تم الحل تلقائيًا
+reported_incidents.readonly.title,تتم المعالجة تلقائيًا
+reported_incidents.readonly.no_data,لا توجد بيانات
+reported_incidents.readonly.no_candidates,لم يتم العثور على شحنات قيد النقل
+reported_incidents.readonly.chosen_shipment,الشحنة المختارة
+reported_incidents.contact.before,قبل
+reported_incidents.contact.after,بعد
+reported_incidents.contact.field.mobile,الجوال
+reported_incidents.contact.field.email,البريد الإلكتروني
+reported_incidents.contact.field.language,اللغة
+reported_incidents.contact.field.address_line1,العنوان (السطر 1)
+reported_incidents.contact.field.address_line2,العنوان (السطر 2)
+reported_incidents.contact.field.address_city,المدينة
+reported_incidents.contact.field.address_country,البلد
+reported_incidents.returned.title,إعادة إرسال العينة المرتجعة
+reported_incidents.returned.to_node,العقدة الوجهة
+reported_incidents.returned.no_nodes,لا توجد عقدة أخرى في هذه المدينة
+reported_incidents.returned.week,الأسبوع
+reported_incidents.returned.confirm_reroute,تأكيد إعادة الإرسال
+reported_incidents.returned.no_detail,لا توجد شحنة مرتبطة بهذه الحادثة
+reported_incidents.returned.fits,ممكن: {date} (الحمل {load})
+reported_incidents.returned.reason.not_found,لم يتم العثور على الشحنة أو العقدة
+reported_incidents.returned.reason.not_in_cell,الشحنة ليست في خلية صالحة
+reported_incidents.returned.reason.not_pending,العينة ليست قيد الانتظار
+reported_incidents.returned.reason.sample_not_movable,لا يمكن نقل هذه العينة
+reported_incidents.returned.reason.has_incident_line,للشحنة بند حادثة مفتوح
+reported_incidents.returned.reason.other_city,العقدة في مدينة أخرى
+reported_incidents.returned.reason.inactive_node,العقدة غير نشطة
+reported_incidents.returned.reason.other_end,العقدة هي الطرف الآخر للشحنة
+reported_incidents.returned.reason.no_day,لا يوجد يوم متاح في ذلك الأسبوع
+reported_incidents.returned.reason.unknown,لا يمكن إعادة الإرسال إلى هذه العقدة وهذا الأسبوع
+reported_incidents.done.rerouted,تمت إعادة إرسال العينة
+reported_incidents.materials.date_in_past,لا يمكن أن يكون التاريخ في الماضي
+reported_incidents.returned.not_returnable,هذه الشحنة ليست في حالة قابلة لإعادة الإرسال (الحالة الحالية)
+reported_incidents.returned.cancel_confirm,هل تريد إلغاء هذه الشحنة؟ لن يُعاد إرسال العينة.
+reported_incidents.readonly.closed,هذه الحادثة مغلقة: الإجراءات للقراءة فقط
+incident_conversation.title,المحادثة مع العضو
+incident_conversation.empty,لا توجد رسائل بعد
+incident_conversation.placeholder,اكتب رسالة إلى العضو…
+incident_conversation.send,إرسال
+incident_conversation.sending,جارٍ الإرسال…
+incident_conversation.author.bot,البوت
+incident_conversation.author.manager,المدير
+incident_conversation.author.panelist,العضو
+incident_conversation.author.system,النظام
+incident_conversation.status.pending_send,قيد الإرسال
+incident_conversation.status.sent,تم الإرسال
+incident_conversation.status.failed,فشل
+incident_conversation.button_pressed,تم الضغط على الزر
+incident_conversation.no_telegram,هذا العضو ليس لديه Telegram مرتبط، لذا لا يمكن تسليم الرسالة
+material_sheet.title,ورقة شحنات المواد
+material_sheet.col.origin,المصدر
+material_sheet.col.destination,الوجهة
+material_sheet.col.material,المادة
+material_sheet.col.quantity,الكمية
+material_sheet.col.due,تاريخ الوصول المتوقع
+material_sheet.col.status,الحالة
+material_sheet.central_warehouse,المستودع المركزي
+material_sheet.status.pending,قيد الانتظار
+material_sheet.status.sent,تم الإرسال
+material_sheet.status.partially_received,مستلمة جزئيًا
+material_sheet.status.received,تم الاستلام
+material_sheet.status.cancelled,ملغاة
+material_sheet.print,طباعة / PDF
+material_sheet.download_csv,تنزيل Excel (CSV)
+material_sheet.mark_sent,تحديد كمُرسل
+material_sheet.confirm_mark_sent,هل تريد تحديد هذه الشحنة كمُرسلة؟ سيتم تحديث المخزون.
+material_sheet.donor_confirms_telegram,يؤكد العضو المانح ذلك عبر Telegram
+material_sheet.received_of,{received} من {sent}
+stock.partially_received,مستلم جزئياً
+stock.received_of,{received} من {sent} تم استلامها
+stock.cannot_delete_incident_shipment,هذه الشحنة تابعة لحادثة مواد ولا يمكن حذفها أو تقسيمها من المخزون. قم بإدارتها من الحادثة.
+reported_incidents.materials.to_buy_title,للشراء
+reported_incidents.materials.to_buy_line,{name} ({code}): {n}
+material_sheet.to_buy_title,للشراء
+material_sheet.purchase_origin,شراء
+incident_conversation.unread_badge,محادثات تحتوي على ردود جديدة
+incident_conversation.new_reply,رد جديد
+incident_conversation.photo_alt,صورة أرسلها العضو
+menu.help_incidents,مساعدة: الحوادث
+menu.help_incidents.tooltip,كيف تعمل الحوادث وتوفر المحكّمين (تُفتح في علامة تبويب جديدة)

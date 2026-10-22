@@ -1,0 +1,885 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Help: Incidents and panelist availability</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<style>
+  :root {
+    --white: #ffffff; --g50: #f9fafb; --g100: #f3f4f6; --g200: #e5e7eb; --g300: #d1d5db;
+    --g400: #9ca3af; --g500: #6b7280; --g600: #4b5563; --g700: #374151; --g900: #111827;
+    --b50: #eff6ff; --b100: #dbeafe; --b600: #2563eb; --b700: #1d4ed8;
+    --r100: #fee2e2; --r700: #b91c1c; --gr100: #dcfce7; --gr700: #15803d;
+    --y100: #fef9c3; --y800: #854d0e; --p100: #f3e8ff; --p700: #7e22ce;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+      'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    -webkit-font-smoothing: antialiased; background: var(--g50); color: var(--g700); line-height: 1.6; font-size: 15px;
+  }
+  .layout { display: flex; min-height: 100vh; }
+
+  /* Sidebar, same look as the ONE menu */
+  .side {
+    width: 272px; flex-shrink: 0; background: var(--white); border-right: 1px solid var(--g200);
+    position: sticky; top: 0; height: 100vh; overflow-y: auto; display: flex; flex-direction: column;
+  }
+  .brand { padding: 24px 24px 16px; }
+  .brand h1 { font-size: 24px; line-height: 32px; font-weight: 700; color: var(--g900); }
+  .brand p { font-size: 14px; color: var(--g500); margin-top: 4px; }
+  .brand .doc { margin-top: 16px; font-size: 12px; font-weight: 600; color: var(--b700); background: var(--b50);
+    display: inline-block; padding: 2px 10px; border-radius: 999px; }
+  .nav { padding: 8px 12px 24px; flex: 1; }
+  .nav h3 { font-size: 12px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--g400);
+    padding: 16px 12px 6px; }
+  .nav a {
+    display: block; padding: 8px 12px; border-radius: 8px; font-size: 14px; font-weight: 500; color: var(--g600);
+    text-decoration: none; transition: background .15s, color .15s;
+  }
+  .nav a:hover { background: var(--g100); }
+  .nav a.active { background: var(--b50); color: var(--b700); }
+  .side-foot { padding: 16px 24px; border-top: 1px solid var(--g200); font-size: 12px; color: var(--g500); }
+
+  /* Content */
+  .main { flex: 1; min-width: 0; padding: 40px 32px 80px; }
+  .page { max-width: 880px; margin: 0 auto; }
+  .page > header { margin-bottom: 32px; }
+  .page > header h2 { font-size: 30px; line-height: 38px; font-weight: 700; color: var(--g900); }
+  .page > header p { margin-top: 8px; font-size: 17px; color: var(--g600); max-width: 640px; }
+  section { margin-top: 48px; }
+  section > h2 { font-size: 22px; font-weight: 700; color: var(--g900); padding-bottom: 8px; margin-bottom: 16px;
+    border-bottom: 1px solid var(--g200); }
+  h3 { font-size: 17px; font-weight: 600; color: var(--g900); margin: 28px 0 8px; }
+  p { margin: 8px 0; }
+  ul, ol { margin: 8px 0 8px 22px; }
+  li { margin: 4px 0; }
+  strong { color: var(--g900); font-weight: 600; }
+  code, kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px;
+    background: var(--g100); border: 1px solid var(--g200); border-radius: 6px; padding: 1px 6px; color: var(--g900); }
+  .card { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 20px 24px; margin: 16px 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 16px 0; }
+  .grid .card { margin: 0; }
+  .card h4 { font-size: 15px; font-weight: 600; color: var(--g900); margin-bottom: 4px; }
+  .card p { margin: 4px 0; font-size: 14px; color: var(--g600); }
+
+  .badge { display: inline-block; font-size: 12px; font-weight: 500; padding: 1px 10px; border-radius: 999px; white-space: nowrap; }
+  .b-red { background: var(--r100); color: var(--r700); }
+  .b-blue { background: var(--b100); color: var(--b700); }
+  .b-green { background: var(--gr100); color: var(--gr700); }
+  .b-yellow { background: var(--y100); color: var(--y800); }
+  .b-gray { background: var(--g100); color: var(--g600); }
+  .b-purple { background: var(--p100); color: var(--p700); }
+  .btn { display: inline-block; font-size: 13px; font-weight: 500; padding: 2px 10px; border-radius: 8px;
+    background: var(--white); border: 1px solid var(--g300); color: var(--g700); white-space: nowrap; }
+  .btn.primary { background: var(--b600); border-color: var(--b600); color: #fff; }
+
+  .callout { border-radius: 12px; padding: 14px 18px; margin: 16px 0; font-size: 14px; border: 1px solid; }
+  .callout.info { background: var(--b50); border-color: var(--b100); color: #1e3a8a; }
+  .callout.ok { background: #f0fdf4; border-color: var(--gr100); color: #14532d; }
+  .callout.warn { background: #fffbeb; border-color: var(--y100); color: var(--y800); }
+  .callout strong { color: inherit; }
+
+  .table-wrap { overflow-x: auto; margin: 16px 0; background: var(--white); border: 1px solid var(--g200); border-radius: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--g500); background: var(--g50); padding: 10px 14px; border-bottom: 1px solid var(--g200); }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--g100); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  td:first-child { font-weight: 500; color: var(--g900); }
+
+  /* Steps */
+  ol.steps { list-style: none; margin: 12px 0; counter-reset: s; }
+  ol.steps > li { counter-increment: s; position: relative; padding: 4px 0 12px 44px; margin: 0; }
+  ol.steps > li::before {
+    content: counter(s); position: absolute; left: 0; top: 2px; width: 28px; height: 28px; border-radius: 50%;
+    background: var(--b100); color: var(--b700); font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Telegram chat mock-ups */
+  .chat { background: #e9eef5; border: 1px solid var(--g200); border-radius: 16px; padding: 16px; margin: 16px 0; max-width: 460px; }
+  .chat .who { text-align: center; font-size: 12px; color: var(--g500); margin-bottom: 8px; font-weight: 500; }
+  .msg { max-width: 85%; padding: 8px 12px; border-radius: 14px; margin: 6px 0; font-size: 14px; line-height: 1.45; box-shadow: 0 1px 1px rgba(0,0,0,.06); }
+  .msg.bot { background: var(--white); border-top-left-radius: 4px; margin-right: auto; color: var(--g900); }
+  .msg.me { background: #dbeafe; border-top-right-radius: 4px; margin-left: auto; color: var(--g900); }
+  .kb { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 8px; max-width: 85%; }
+  .kb span { flex: 1 1 auto; text-align: center; background: rgba(37,99,235,.12); color: var(--b700); font-size: 13px; font-weight: 500;
+    padding: 6px 10px; border-radius: 10px; }
+  .kb.col span { flex-basis: 100%; }
+  .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; align-items: start; }
+  .two .chat { margin: 8px 0; }
+  .cap { font-size: 13px; color: var(--g500); margin-top: -6px; max-width: 460px; }
+
+  /* Flow */
+  .flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; margin: 16px 0; }
+  .flow .node { flex: 1 1 150px; background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 12px 14px; font-size: 13px; position: relative; }
+  .flow .node b { display: block; color: var(--g900); font-size: 14px; margin-bottom: 2px; }
+  .flow .node .tag { font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--b700); }
+  .flow .arrow { align-self: center; color: var(--g400); font-size: 18px; }
+
+  details { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; margin: 8px 0; }
+  summary { cursor: pointer; padding: 14px 18px; font-weight: 600; color: var(--g900); list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: '+'; color: var(--g400); font-size: 20px; line-height: 1; }
+  details[open] summary::after { content: '\2212'; }
+  details > div { padding: 0 18px 14px; color: var(--g600); font-size: 14px; }
+
+  /* ONEMS screen drawings */
+  .app { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; overflow: hidden; margin: 16px 0 6px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .app-bar { display: flex; gap: 6px; align-items: center; background: var(--g100); border-bottom: 1px solid var(--g200); padding: 8px 12px; font-size: 12px; color: var(--g500); }
+  .app-bar i { width: 9px; height: 9px; border-radius: 50%; background: var(--g300); display: inline-block; }
+  .app-bar span { margin-left: 8px; }
+  .app-body { padding: 20px; font-size: 13px; color: var(--g700); overflow-x: auto; }
+  .app-body.cols { display: grid; grid-template-columns: 210px 1fr; padding: 0; }
+  .app-body.cols > .sb { border-right: 1px solid var(--g200); padding: 14px 10px; background: #fff; }
+  .app-body.cols > .ct { padding: 20px; }
+  .sb .t { font-size: 20px; font-weight: 700; color: var(--g900); padding: 0 8px; }
+  .sb .s { font-size: 11px; color: var(--g500); padding: 0 8px 8px; }
+  .sb h5 { font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--g400); padding: 10px 8px 4px; }
+  .mi { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 8px; font-size: 13px; color: var(--g700); }
+  .mi.on { background: var(--b50); color: var(--b600); }
+  .mi .ic { width: 14px; height: 14px; border-radius: 4px; background: var(--g300); flex-shrink: 0; }
+  .mi.on .ic { background: var(--b600); }
+  .mi .badge { margin-left: auto; font-size: 11px; padding: 0 7px; }
+  .m-h { font-size: 18px; font-weight: 700; color: var(--g900); margin-bottom: 12px; }
+  .m-h3 { font-size: 15px; font-weight: 700; color: var(--g900); margin: 0 0 6px; }
+  .m-sel { display: inline-block; border: 1px solid var(--g300); border-radius: 4px; padding: 3px 24px 3px 8px; font-size: 12px; background: #fff; color: var(--g700); margin-right: 8px; position: relative; }
+  .m-sel::after { content: '\25BE'; position: absolute; right: 8px; color: var(--g400); }
+  .m-card { border: 1px solid var(--g200); border-radius: 8px; overflow: hidden; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.05); margin: 10px 0; }
+  .app table { font-size: 12px; }
+  .app th { padding: 8px 12px; font-size: 11px; }
+  .app td { padding: 8px 12px; }
+  .app td:first-child { font-weight: 400; color: inherit; }
+  .app .num { text-align: right; }
+  .m-link { color: var(--b600); }
+  .m-box { border: 1px solid var(--g200); border-radius: 6px; padding: 14px; margin: 10px 0; }
+  .m-note { background: var(--g50); border-radius: 6px; padding: 10px 12px; margin: 8px 0; font-size: 12px; }
+  .m-muted { color: var(--g500); font-size: 12px; }
+  .m-pbtn, .m-sbtn { display: inline-block; padding: 6px 14px; border-radius: 8px; font-size: 12px; margin: 2px 6px 2px 0; }
+  .m-pbtn { background: var(--b600); color: #fff; }
+  .m-sbtn { background: var(--g200); color: var(--g700); }
+  .m-ta { border: 1px solid var(--g300); border-radius: 4px; padding: 8px; font-size: 12px; color: var(--g400); background: #fff; margin: 6px 0 10px; }
+  .m-in { display: inline-block; border: 1px solid var(--g300); border-radius: 4px; padding: 3px 8px; font-size: 12px; background: #fff; min-width: 90px; }
+  .m-bub { max-width: 80%; padding: 6px 10px; border-radius: 10px; margin: 5px 0; font-size: 12px; }
+  .m-bub small { display: block; color: var(--g500); font-size: 10px; margin-top: 2px; }
+  .m-bub.l { background: var(--g100); margin-right: auto; }
+  .m-bub.r { background: var(--b100); margin-left: auto; }
+  .pin { display: inline-flex; width: 20px; height: 20px; border-radius: 50%; background: var(--b600); color: #fff; font-size: 11px; font-weight: 700; align-items: center; justify-content: center; margin-left: 6px; vertical-align: middle; flex-shrink: 0; }
+  .legend { counter-reset: l; list-style: none; margin: 10px 0 20px; }
+  .legend li { counter-increment: l; position: relative; padding: 2px 0 6px 34px; font-size: 14px; }
+  .legend li::before { content: counter(l); position: absolute; left: 0; top: 1px; width: 20px; height: 20px; border-radius: 50%; background: var(--b600); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .heat td { text-align: center; }
+  .heat .ok { background: #f0fdf4; } .heat .hi { background: var(--y100); } .heat .sat { background: var(--r100); }
+  .heat .off { background: repeating-linear-gradient(45deg, var(--g100), var(--g100) 4px, #fff 4px, #fff 8px); color: var(--g400); }
+  .heat .now { outline: 2px solid var(--b600); outline-offset: -2px; }
+
+  /* Right-to-left (Arabic) */
+  [dir=rtl] .side { border-right: 0; border-left: 1px solid var(--g200); }
+  [dir=rtl] .app-body.cols > .sb { border-right: 0; border-left: 1px solid var(--g200); }
+  [dir=rtl] th, [dir=rtl] td, [dir=rtl] .nav a { text-align: right; }
+  [dir=rtl] ul, [dir=rtl] ol { margin: 8px 22px 8px 0; }
+  [dir=rtl] ol.steps > li { padding: 4px 44px 12px 0; }
+  [dir=rtl] ol.steps > li::before { left: auto; right: 0; }
+  [dir=rtl] .legend li { padding: 2px 34px 6px 0; }
+  [dir=rtl] .legend li::before { left: auto; right: 0; }
+  [dir=rtl] .msg.bot { border-top-left-radius: 14px; border-top-right-radius: 4px; margin-right: 0; margin-left: auto; }
+  [dir=rtl] .msg.me { border-top-right-radius: 14px; border-top-left-radius: 4px; margin-left: 0; margin-right: auto; }
+  [dir=rtl] .m-bub.l { margin-right: 0; margin-left: auto; }
+  [dir=rtl] .m-bub.r { margin-left: 0; margin-right: auto; }
+  [dir=rtl] .pin { margin-left: 0; margin-right: 6px; }
+  [dir=rtl] .m-sel { padding: 3px 8px 3px 24px; margin-right: 0; margin-left: 8px; }
+  [dir=rtl] .m-sel::after { right: auto; left: 8px; }
+  [dir=rtl] .m-pbtn, [dir=rtl] .m-sbtn { margin: 2px 0 2px 6px; }
+  [dir=rtl] .mi .badge { margin-left: 0; margin-right: auto; }
+  [dir=rtl] .app-bar span { margin-left: 0; margin-right: 8px; }
+  [dir=rtl] .flow .arrow { transform: scaleX(-1); }
+  [dir=rtl] .app td:first-child { font-weight: 400; }
+  .mobile-top { display: none; }
+  @media (max-width: 900px) {
+    .app-body.cols { grid-template-columns: 1fr; }
+    .app-body.cols > .sb { border-right: 0; border-bottom: 1px solid var(--g200); }
+    .layout { display: block; }
+    .side { display: none; }
+    .mobile-top { display: block; position: sticky; top: 0; z-index: 5; background: var(--white); border-bottom: 1px solid var(--g200); padding: 10px 16px; }
+    .mobile-top b { font-size: 18px; color: var(--g900); }
+    .mobile-top span { font-size: 13px; color: var(--g500); margin-left: 6px; }
+    .mobile-top select { width: 100%; margin-top: 8px; padding: 8px; border: 1px solid var(--g300); border-radius: 8px; font-size: 14px; background: #fff; color: var(--g700); }
+    .main { padding: 24px 16px 64px; }
+    .page > header h2 { font-size: 24px; line-height: 32px; }
+  }
+  @media print { .side, .mobile-top { display: none; } .main { padding: 0; } body { background: #fff; } section { break-inside: avoid-page; } }
+</style>
+</head>
+<body>
+<div class="mobile-top">
+  <b>ONE</b><span>for Regulators &middot; Help</span>
+  <select id="jump" aria-label="Jump to section"></select>
+</div>
+<div class="layout">
+  <aside class="side">
+    <div class="brand">
+      <h1>ONE</h1>
+      <p>for Regulators</p>
+      <span class="doc">Help &middot; Incidents</span>
+    </div>
+    <nav class="nav" id="nav">
+      <h3>Getting started</h3>
+      <a href="#overview">Overview</a>
+      <a href="#how-it-works">How it works</a>
+      <h3>Panelists on Telegram</h3>
+      <a href="#telegram-start">Starting the bot</a>
+      <a href="#telegram-menu">The main menu</a>
+      <a href="#telegram-shipments">Sending and receiving</a>
+      <a href="#telegram-incident">Reporting an incident</a>
+      <a href="#telegram-unavailable">Unavailable days</a>
+      <a href="#telegram-replies">Replies from your manager</a>
+      <h3>Managers in ONEMS</h3>
+      <a href="#manager-screens">Where to find things</a>
+      <a href="#screen-reported">Reported incidents screen</a>
+      <a href="#incident-types">Incident types</a>
+      <a href="#examples">Handling each type</a>
+      <a href="#material">Missing materials</a>
+      <h3>Availability</h3>
+      <a href="#availability">Panelist availability</a>
+      <a href="#availability-declare">Declaring a period</a>
+      <a href="#availability-screen">The incident screen</a>
+      <a href="#availability-example">Worked example</a>
+      <h3>Reference</h3>
+      <a href="#conversation">Conversation and alerts</a>
+      <a href="#faq">Questions</a>
+    </nav>
+    <div class="side-foot">Updated 22 October 2026</div>
+  </aside>
+
+  <main class="main">
+  <div class="page">
+    <header>
+      <h2>Incidents and panelist availability</h2>
+      <p>How panelists report problems and unavailable days through Telegram, what ONEMS resolves on its own, and what you decide as a manager.</p>
+    </header>
+
+    <section id="overview">
+      <h2>Overview</h2>
+      <div class="grid">
+        <div class="card"><h4>Panelists use Telegram</h4><p>They chat with the ONE bot in their own language (English, Spanish, French or Arabic) to confirm shipments, report a problem or declare unavailable days.</p></div>
+        <div class="card"><h4>ONEMS resolves what it can</h4><p>Many reports are closed automatically. Unavailable days are re-planned by moving samples to a later date or to another node in the same city.</p></div>
+        <div class="card"><h4>Managers decide the rest</h4><p>What cannot be resolved automatically appears in <strong>Incidents</strong> with a proposal ready, and every message is saved in the incident.</p></div>
+      </div>
+      <p>This page has two audiences. <a href="#telegram-start">Panelist and bot sections</a> describe what the panelist sees. <a href="#manager-screens">Manager sections</a> describe what you see in ONEMS.</p>
+    </section>
+
+    <section id="how-it-works">
+      <h2>How it works</h2>
+      <div class="flow">
+        <div class="node"><span class="tag">1 &middot; Telegram</span><b>Panelist writes</b>A message, or a tap on <em>Report incident</em>.</div>
+        <div class="arrow">&rarr;</div>
+        <div class="node"><span class="tag">2 &middot; Bot</span><b>Understands and asks</b>&ldquo;Register this as&hellip;?&rdquo; with Yes / No.</div>
+        <div class="arrow">&rarr;</div>
+        <div class="node"><span class="tag">3 &middot; ONEMS</span><b>Saves it</b>Some types close automatically; others open for you.</div>
+        <div class="arrow">&rarr;</div>
+        <div class="node"><span class="tag">4 &middot; ONEMS</span><b>Manager decides</b>Resolve, reroute, supply material, reply.</div>
+      </div>
+      <ul>
+        <li>Nothing is saved until the panelist answers <strong>Yes</strong>. If they answer <strong>No</strong>, the bot shows the menu again.</li>
+        <li>Everything the bot says, everything the panelist answers and everything you write is stored in the incident.</li>
+        <li>You get an email when a new incident needs you, and when a panelist reply has been waiting for more than an hour.</li>
+      </ul>
+    </section>
+
+    <section id="telegram-start">
+      <h2>Starting the bot</h2>
+      <p>Each panelist is linked to the ONE bot by their Telegram account. Open the chat and send <code>/start</code>, or just say hello. The bot greets them by first name and shows the main menu.</p>
+      <div class="two">
+        <div>
+          <div class="chat">
+            <div class="who">ONE bot</div>
+            <div class="me msg">/start</div>
+            <div class="msg bot">Hi Marta, what do you need?</div>
+            <div class="kb col"><span>View pending shipments</span><span>View packages to receive</span><span>Confirm a shipment</span><span>Confirm a reception</span><span>Report incident</span><span>&#128467;&#65039; Unavailable days</span><span>&#128230; Confirm material received</span></div>
+          </div>
+        </div>
+        <div>
+          <h3 style="margin-top:8px">Good to know</h3>
+          <ul>
+            <li>The bot answers in the language set in the panelist&rsquo;s profile.</li>
+            <li>Typing something that is not a request (&ldquo;Hello&rdquo;, &ldquo;thanks&rdquo;) just shows the menu again.</li>
+            <li><code>/myid</code> shows the panelist&rsquo;s Telegram ID. Support may ask for it when linking an account.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="telegram-menu">
+      <h2>The main menu</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Button</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td>View pending shipments</td><td>Lists the samples the panelist must send, five at a time, with a <em>See more</em> button.</td></tr>
+          <tr><td>View packages to receive</td><td>Lists the samples on their way to the panelist.</td></tr>
+          <tr><td>Confirm a shipment</td><td>Pick a pending shipment, then confirm it with the label photo or the label number.</td></tr>
+          <tr><td>Confirm a reception</td><td>Confirm that a package arrived by sending a photo of its label.</td></tr>
+          <tr><td>Report incident</td><td>Describe a problem in one message (see <a href="#telegram-incident">Reporting an incident</a>).</td></tr>
+          <tr><td>Unavailable days</td><td>Declare days when the panelist cannot send or receive (see <a href="#telegram-unavailable">Unavailable days</a>).</td></tr>
+          <tr><td>Confirm material received</td><td>Say whether a material shipment arrived and how much (see <a href="#material">Missing materials</a>).</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="telegram-shipments">
+      <h2>Sending and receiving</h2>
+      <h3>Confirming a shipment</h3>
+      <ol class="steps">
+        <li>The panelist taps <span class="btn">Confirm a shipment</span> or <span class="btn">View pending shipments</span> and picks the shipment.</li>
+        <li>They send a <strong>photo of the label</strong> or type the <strong>label number</strong>.</li>
+        <li>The bot replies that the shipment is declared as sent. If the label format is not valid, nothing is saved and the bot asks again.</li>
+      </ol>
+      <h3>Confirming a reception</h3>
+      <ol class="steps">
+        <li>The panelist taps <span class="btn">Confirm a reception</span>.</li>
+        <li>They send a <strong>photo of the label</strong> of the package received.</li>
+        <li>ONEMS marks that sample as received. If the label is unreadable, they report it as an incident instead (<em>Unreadable label / receipt</em>), choose the package from their list and it is registered automatically.</li>
+      </ol>
+      <div class="callout info"><strong>Daily reminder.</strong> Every day at 09:00 the bot sends each panelist the shipments to send that day. Shipments that cannot be made because of missing material are left out of the reminder.</div>
+    </section>
+
+    <section id="telegram-incident">
+      <h2>Reporting an incident</h2>
+      <p>The panelist taps <span class="btn">Report incident</span> and describes the problem in <strong>a single message</strong>. The bot suggests a type and asks for confirmation.</p>
+      <div class="two">
+        <div>
+          <div class="chat">
+            <div class="who">ONE bot</div>
+            <div class="msg me">The package arrived broken</div>
+            <div class="msg bot">Do you want to register this as a <strong>damaged parcel</strong>?</div>
+            <div class="kb"><span>Yes</span><span>No, it&rsquo;s something else</span></div>
+            <div class="msg me">Yes</div>
+            <div class="msg bot">Registered, thanks for letting us know.</div>
+          </div>
+          <p class="cap">A damaged parcel is saved and closed automatically.</p>
+        </div>
+        <div>
+          <div class="chat">
+            <div class="who">ONE bot</div>
+            <div class="msg me">They sent my package back</div>
+            <div class="msg bot">Do you want to register this as a <strong>returned parcel</strong>?</div>
+            <div class="kb"><span>Yes</span><span>No, it&rsquo;s something else</span></div>
+            <div class="msg me">Yes</div>
+            <div class="msg bot">Registered. A manager will contact you.</div>
+          </div>
+          <p class="cap">A returned parcel stays open for the manager.</p>
+        </div>
+      </div>
+      <div class="callout ok"><strong>Safe by design.</strong> If the panelist taps <em>No</em>, or types something unclear, nothing is registered. Only an explicit <em>Yes</em> creates an incident.</div>
+    </section>
+
+    <section id="telegram-unavailable">
+      <h2>Unavailable days</h2>
+      <p>The panelist taps <span class="btn">&#128467;&#65039; Unavailable days</span> and chooses the start and end dates. They can also write it in plain words.</p>
+      <div class="chat">
+        <div class="who">ONE bot</div>
+        <div class="msg me">Next week I&rsquo;m on holiday</div>
+        <div class="msg bot">I understood <strong>Mon 9 Nov &ndash; Fri 13 Nov</strong>. Is that right?</div>
+        <div class="kb"><span>Yes</span><span>No</span></div>
+        <div class="msg me">Yes</div>
+        <div class="msg bot">Received. Thank you for letting us know.</div>
+      </div>
+      <p>The rules are checked automatically: the end date cannot be before the start, the days cannot be in the past, the period is at most <strong>90 days</strong> and it cannot overlap another active period. See <a href="#availability">Panelist availability</a> for what happens next.</p>
+    </section>
+
+    <section id="telegram-replies">
+      <h2>Replies from your manager</h2>
+      <p>When a manager writes in an incident, the message arrives in the panelist&rsquo;s chat with the incident&rsquo;s name and two buttons.</p>
+      <div class="chat">
+        <div class="who">ONE bot</div>
+        <div class="msg bot"><strong>Returned parcel</strong><br>Hi Pablo, we will send the sample again next week to another node. Can you keep the label?</div>
+        <div class="kb"><span>Reply</span><span>Back to menu</span></div>
+        <div class="msg me">Reply</div>
+        <div class="msg bot">Write your reply.</div>
+        <div class="msg me">Yes, I still have it. Photo attached.</div>
+        <div class="msg bot">Your message has been sent to your manager.</div>
+      </div>
+      <ul>
+        <li>While a conversation is open, the panelist&rsquo;s text and <strong>photos</strong> go to the incident. <em>Back to menu</em> closes it.</li>
+        <li>The conversation closes by itself when the incident is resolved or dismissed, or after 48 hours without activity.</li>
+      </ul>
+    </section>
+
+    <section id="manager-screens">
+      <h2>Where to find things</h2>
+      <p>In the ONEMS menu, open the <strong>Incidents</strong> group. Everything described from here on lives in these two screens.</p>
+      <div class="app">
+        <div class="app-bar"><i></i><i></i><i></i><span>ONEMS</span></div>
+        <div class="app-body cols">
+          <div class="sb">
+            <div class="t">ONEMS</div><div class="s">for Regulators</div>
+            <h5>Setup</h5>
+            <div class="mi"><span class="ic"></span>Panelists</div>
+            <h5>Incidents</h5>
+            <div class="mi on"><span class="ic"></span>Reported incidents <span class="badge b-red">3</span><span class="badge b-blue" style="margin-left:4px">1</span><span class="pin">1</span></div>
+            <div class="mi"><span class="ic"></span>Panelist availability <span class="badge b-red">2</span><span class="pin">2</span></div>
+            <div class="mi"><span class="ic"></span>Help: Incidents<span class="pin">3</span></div>
+            <h5>Administration</h5>
+            <div class="mi"><span class="ic"></span>Users</div>
+          </div>
+          <div class="ct">
+            <div class="m-h">Incidents reported by panelists</div>
+            <p class="m-muted">The list of reported incidents opens here (see next section).</p>
+          </div>
+        </div>
+      </div>
+      <ol class="legend">
+        <li><strong>Reported incidents</strong>: everything panelists report through Telegram. The <span class="badge b-red">red</span> badge counts incidents waiting for you; the <span class="badge b-blue">blue</span> badge counts conversations with a reply you have not read.</li>
+        <li><strong>Panelist availability</strong>: every unavailable period, with the samples affected and what ONEMS did with each. The red badge counts incidents pending your decision.</li>
+        <li><strong>Help: Incidents</strong>: this page.</li>
+      </ol>
+      <p>Statuses in <em>Reported incidents</em>:
+        <span class="badge b-red">Open</span>
+        <span class="badge b-blue">In progress</span>
+        <span class="badge b-green">Resolved</span>
+        <span class="badge b-gray">Dismissed</span>
+        <span class="badge b-purple">Auto-resolved</span>
+      </p>
+    </section>
+
+    <section id="screen-reported">
+      <h2>Reported incidents: list and detail</h2>
+      <h3>The list</h3>
+      <div class="app">
+        <div class="app-bar"><i></i><i></i><i></i><span>ONEMS &rsaquo; Incidents &rsaquo; Reported incidents</span></div>
+        <div class="app-body">
+          <div class="m-h">Incidents reported by panelists</div>
+          <div style="margin-bottom:10px"><span class="m-sel">All categories</span><span class="m-sel">Open / active</span><span class="pin">1</span></div>
+          <div class="m-card"><table>
+            <thead><tr><th>Panelist</th><th>Category</th><th>Status</th><th>Reported at</th><th></th></tr></thead>
+            <tbody>
+              <tr><td>Luc&iacute;a Torres <span class="badge b-blue">New reply</span><span class="pin">2</span></td><td>Missing materials</td><td>In progress</td><td>2026-10-20</td><td><span class="m-link">Open</span><span class="pin">3</span></td></tr>
+              <tr><td>Pablo Ruiz</td><td>Returned parcel</td><td>Open</td><td>2026-10-21</td><td><span class="m-link">Open</span></td></tr>
+              <tr><td>Marta L&oacute;pez</td><td>How to send</td><td>Open</td><td>2026-10-22</td><td><span class="m-link">Open</span></td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+      <ol class="legend">
+        <li><strong>Filters.</strong> <em>All categories</em> narrows the list to one type. The status filter shows <em>Open / active</em> by default; switch to <em>Resolved</em>, <em>Dismissed</em> or <em>Auto-resolved</em> to see closed incidents.</li>
+        <li><strong>New reply.</strong> The panelist has written something you have not read yet. It disappears when you open the incident.</li>
+        <li><strong>Open</strong> shows the detail of the incident.</li>
+      </ol>
+
+      <h3>The detail</h3>
+      <div class="app">
+        <div class="app-bar"><i></i><i></i><i></i><span>ONEMS &rsaquo; Incidents &rsaquo; Reported incidents &rsaquo; Returned parcel</span></div>
+        <div class="app-body">
+          <div class="m-link" style="margin-bottom:8px">&larr; Back</div>
+          <div class="m-h3">Returned parcel</div>
+          <div class="m-muted" style="line-height:1.7">Pablo Ruiz &middot; <code>PAN-BAL-01</code><br>&#128222; 600 111 222 &middot; &#9993; pablo@example.com &middot; Telegram: yes &middot; es &middot; Palma<br><span class="badge b-blue">Sender</span> &nbsp;BAL-01 &rarr; SAC-01 &middot; Correos &middot; Standard letter &middot; 18/11/2026 &nbsp;<code>TAG-00412</code><span class="pin">1</span></div>
+          <div class="m-note">They sent my package back, the address was wrong.<span class="pin">2</span></div>
+          <div class="m-box">
+            <div class="m-h3" style="font-size:13px">Re-send returned sample<span class="pin">3</span></div>
+            <div style="margin:8px 0">Destination node <span class="m-in">SAC-02 &#9662;</span> &nbsp; Week <span class="m-in">W48 &middot; 23/11/2026 &#9662;</span></div>
+            <div class="m-muted">Fits: 24/11/2026 (load 4)</div>
+            <div style="margin-top:8px"><span class="m-pbtn">Confirm re-send</span><span class="m-sbtn">Cancel shipment</span></div>
+          </div>
+          <div class="m-box">
+            <div class="m-h3" style="font-size:13px">Conversation with the panelist<span class="pin">4</span></div>
+            <div class="m-bub l">Do you want to register this as a returned parcel?<small>Bot &middot; Sent</small></div>
+            <div class="m-bub r">Yes<small>Panelist &middot; Button pressed</small></div>
+            <div class="m-bub l">Hi Pablo, we will send it again next week. Can you keep the label?<small>Manager &middot; Sent</small></div>
+            <div class="m-bub r">Yes, I still have it.<small>Panelist</small></div>
+            <div class="m-ta">Write a message to the panelist&hellip;</div>
+            <span class="m-pbtn">Send</span>
+          </div>
+          <div class="m-box">
+            <div class="m-muted">Resolution note<span class="pin">5</span></div>
+            <div class="m-ta">Re-sent to SAC-02 in week 48.</div>
+            <span class="m-pbtn">Resolve</span><span class="m-sbtn">Dismiss</span>
+          </div>
+        </div>
+      </div>
+      <ol class="legend">
+        <li><strong>Header.</strong> Panelist name and code, contact details (phone, email, whether Telegram is linked, language, city) and the shipment concerned: role (<span class="badge b-blue">Sender</span> or <span class="badge b-green">Receiver</span>), route, carrier, product, date and tag.</li>
+        <li><strong>What the panelist wrote</strong>, and the photo if they sent one.</li>
+        <li><strong>Action block.</strong> It changes with the type: re-send or cancel for a returned parcel, the supply assistant for missing materials, a read-only summary for the automatic types, or &ldquo;No action available; support only&rdquo; for the rest. When the incident is closed, this block is read-only.</li>
+        <li><strong>Conversation with the panelist.</strong> Every message from the bot, the panelist and you, with its status (<em>Pending</em>, <em>Sent</em>, <em>Failed</em>). Type and press <em>Send</em> to write to the panelist. See <a href="#conversation">Conversation and alerts</a>.</li>
+        <li><strong>Closing.</strong> Add a resolution note and press <strong>Resolve</strong> (dealt with) or <strong>Dismiss</strong> (not an incident). Auto-resolved incidents have no closing block.</li>
+      </ol>
+      <div class="callout info">The first action you take moves the incident from <span class="badge b-red">Open</span> to <span class="badge b-blue">In progress</span> automatically.</div>
+    </section>
+
+    <section id="incident-types">
+      <h2>Incident types</h2>
+      <p>There are nine types. Four are closed automatically and only leave a record.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Type</th><th>Panelist says&hellip;</th><th>What ONEMS does</th><th>What you do</th></tr></thead>
+        <tbody>
+          <tr><td>Missing materials</td><td>&ldquo;I&rsquo;m out of envelopes and seals&rdquo;</td><td>Calculates what is needed for the period and proposes where to get it.</td><td>Review and <em>Confirm supply</em>.</td></tr>
+          <tr><td>Unreadable label / receipt <span class="badge b-purple">Auto</span></td><td>&ldquo;I can&rsquo;t read the label&rdquo;</td><td>Shows the packages on their way; the panelist picks one and the reception is recorded.</td><td>Nothing, unless no package matches.</td></tr>
+          <tr><td>Damaged parcel <span class="badge b-purple">Auto</span></td><td>&ldquo;It arrived broken&rdquo;</td><td>Registers it and says thanks.</td><td>Nothing. Record only.</td></tr>
+          <tr><td>Returned parcel</td><td>&ldquo;It was returned to me&rdquo;</td><td>Opens the incident and emails you.</td><td>Cancel the shipment or re-send it to another node.</td></tr>
+          <tr><td>How to send</td><td>&ldquo;I don&rsquo;t know how to send this&rdquo;</td><td>Opens the incident and emails you.</td><td>Contact the panelist. There are no videos yet.</td></tr>
+          <tr><td>Unavailability request</td><td>&ldquo;I can&rsquo;t take part next week&rdquo;</td><td>Directs them to <em>Unavailable days</em>.</td><td>See <a href="#availability">Panelist availability</a>.</td></tr>
+          <tr><td>Tag photo problem <span class="badge b-purple">Auto</span></td><td>&ldquo;I can&rsquo;t photograph the tag&rdquo;</td><td>Asks for the label number and records the shipment.</td><td>Nothing. No incident is created.</td></tr>
+          <tr><td>Contact data change <span class="badge b-purple">Auto</span></td><td>&ldquo;My new phone is 600 123 456&rdquo;</td><td>Validates, asks for confirmation and updates the record.</td><td>Nothing. The before and after are kept.</td></tr>
+          <tr><td>Other</td><td>Anything else</td><td>Opens the incident and emails you.</td><td>Reply and <em>Resolve</em>.</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout info">Telegram ID and name cannot be changed from the bot. Only a manager can change them from the panelist&rsquo;s record.</div>
+    </section>
+
+    <section id="examples">
+      <h2>Handling each type in ONEMS</h2>
+      <p>What the action block shows for each type, and what to do. Names and figures are illustrative.</p>
+
+      <h3>Returned parcel &mdash; you decide</h3>
+      <p>A returned package goes back to the <strong>sender</strong>, who keeps the label. The action block is <strong>Re-send returned sample</strong> (shown in the detail above).</p>
+      <ol class="steps">
+        <li>Pick a <strong>Destination node</strong>. Only nodes of the <strong>same city</strong> as the current destination are offered; if there is none, the screen says <em>No other node in this city</em>.</li>
+        <li>Pick a <strong>Week</strong>, from the current one onwards. ONEMS checks the day and the load and shows <em>Fits: date (load n)</em>, or the reason why it cannot be moved there.</li>
+        <li>Press <strong>Confirm re-send</strong>. The sample keeps its tag and goes back into the plan as pending. The panelists concerned are told on Telegram.</li>
+        <li>Or press <strong>Cancel shipment</strong> if the sample is no longer needed. This cannot be undone from this screen.</li>
+        <li>Write to the panelist if useful, add a resolution note and press <strong>Resolve</strong>.</li>
+      </ol>
+
+      <h3>Automatic types &mdash; read only</h3>
+      <p>For <em>Contact data change</em> and <em>Unreadable label / receipt</em> the action block is titled <strong>Handled automatically</strong> and only shows what happened.</p>
+      <div class="app">
+        <div class="app-bar"><i></i><i></i><i></i><span>ONEMS &rsaquo; Reported incidents &rsaquo; Contact data change</span></div>
+        <div class="app-body">
+          <div class="m-box" style="margin:0">
+            <div class="m-muted" style="margin-bottom:6px">Handled automatically</div>
+            <table style="width:auto;min-width:360px">
+              <thead><tr><th></th><th>Before</th><th>After</th></tr></thead>
+              <tbody><tr><td>Phone</td><td>600 999 888</td><td>600 123 456</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <ul>
+        <li><strong>Contact data change:</strong> a before / after table of the fields the panelist changed.</li>
+        <li><strong>Unreadable label / receipt:</strong> the shipment the panelist chose, or <em>No shipments in transit were found</em> (the only case that stays open for you).</li>
+        <li><strong>Damaged parcel</strong> and <strong>Tag photo problem</strong> need nothing from you.</li>
+      </ul>
+
+      <h3>How to send, Other, Unavailability request &mdash; support only</h3>
+      <p>The action block says <em>No action available; support only</em>. Use the <strong>Conversation with the panelist</strong> to answer, then <strong>Resolve</strong> or <strong>Dismiss</strong>. For an unavailability request, declare the period in <a href="#availability-declare">Panelist availability</a> if the panelist has not done it on Telegram.</p>
+    </section>
+
+    <section id="material">
+      <h2>Missing materials</h2>
+      <p>This is the only type with several steps in ONEMS, because material often has to travel between panelists. The action block has three parts plus the shipments sheet.</p>
+      <div class="app">
+        <div class="app-bar"><i></i><i></i><i></i><span>ONEMS &rsaquo; Reported incidents &rsaquo; Missing materials</span></div>
+        <div class="app-body">
+          <div class="m-box">
+            <div class="m-h3" style="font-size:13px">Stock<span class="pin">1</span></div>
+            <table style="width:auto;min-width:420px">
+              <thead><tr><th>Material</th><th class="num">Real quantity</th></tr></thead>
+              <tbody>
+                <tr><td>Express Document Envelope <span class="badge b-red">Blocking</span></td><td class="num"><span class="m-in" style="min-width:50px;text-align:right">100</span></td></tr>
+                <tr><td>Tamper-Evident Seal</td><td class="num"><span class="m-in" style="min-width:50px;text-align:right">200</span></td></tr>
+              </tbody>
+            </table>
+            <span class="m-sbtn">Set stock to zero</span>
+          </div>
+          <div class="m-box">
+            <div class="m-h3" style="font-size:13px">Need and supply<span class="pin">2</span></div>
+            <div style="margin:6px 0">Days of need to cover <span class="m-in" style="min-width:50px"></span> <span class="m-muted">Empty = until the end of the month. Calculated until 30/11/2026</span></div>
+            <table>
+              <thead><tr><th></th><th class="num">Need</th><th>Neighbours</th><th class="num">Central</th><th class="num">Purchase</th><th>Change source</th></tr></thead>
+              <tbody>
+                <tr><td>Express Document Envelope <span class="badge b-red">Blocking</span></td><td class="num">650</td><td>Ana P&eacute;rez: 350</td><td class="num">300</td><td class="num">-</td><td><span class="m-sel">Proposal</span></td></tr>
+                <tr><td>Tamper-Evident Seal</td><td class="num">400</td><td>Ana P&eacute;rez: 400</td><td class="num">-</td><td class="num">-</td><td><span class="m-sel">Proposal</span></td></tr>
+              </tbody>
+            </table>
+            <div style="margin:8px 0">Expected arrival <span class="m-in">03/11/2026</span> &nbsp; <span class="m-muted">7 business days without stock</span></div>
+            <div class="m-muted">Affected samples: NY-03 &rarr; BOS-01 (26/10), NY-03 &rarr; CHI-02 (28/10), NY-03 &rarr; LA-02 (30/10)</div>
+            <div style="margin-top:8px"><span class="m-pbtn">Confirm supply</span></div>
+          </div>
+          <div class="m-box">
+            <div class="m-h3" style="font-size:13px">Re-plan<span class="pin">3</span></div>
+            <span class="m-pbtn">Create leave for missing materials and re-plan</span>
+          </div>
+          <div class="m-box">
+            <div class="m-h3" style="font-size:13px">Material shipments sheet<span class="pin">4</span></div>
+            <table>
+              <thead><tr><th>Origin</th><th>Destination</th><th>Material</th><th class="num">Quantity</th><th>Due date</th><th>Status</th><th></th></tr></thead>
+              <tbody>
+                <tr><td>Ana P&eacute;rez (PAN-NY-02)</td><td>Luc&iacute;a Torres (PAN-NY-03)</td><td>Express Document Envelope</td><td class="num">350</td><td>03/11/2026</td><td>Pending</td><td class="m-muted">The donor panelist confirms it via Telegram</td></tr>
+                <tr><td>Ana P&eacute;rez (PAN-NY-02)</td><td>Luc&iacute;a Torres (PAN-NY-03)</td><td>Tamper-Evident Seal</td><td class="num">400</td><td>03/11/2026</td><td>Sent</td><td></td></tr>
+                <tr><td>Central warehouse</td><td>Luc&iacute;a Torres (PAN-NY-03)</td><td>Express Document Envelope</td><td class="num">300</td><td>03/11/2026</td><td>Pending</td><td><span class="m-sbtn">Mark as sent</span></td></tr>
+              </tbody>
+            </table>
+            <span class="m-sbtn">Print / PDF</span><span class="m-sbtn">Download Excel (CSV)</span>
+          </div>
+        </div>
+      </div>
+      <ol class="legend">
+        <li><strong>Stock.</strong> What ONEMS believes the panelist has. You can correct a quantity, or press <em>Set stock to zero</em> when the panelist says they have nothing. <span class="badge b-red">Blocking</span> marks material without which no shipment can be made.</li>
+        <li><strong>Need and supply.</strong> The need for the period (until the end of the month, or the number of days you type). For each material ONEMS proposes where it comes from, in this order: <strong>Neighbours</strong> in the same city with surplus, then <strong>Central</strong> warehouse, then <strong>Purchase</strong>. Use <em>Change source</em> to force <em>Neighbours only</em>, <em>Central only</em> or <em>Purchase all</em>. Below, the <em>Expected arrival</em> date (editable), the business days without stock and the samples affected. <strong>Confirm supply</strong> creates the shipments; it can only be done once.</li>
+        <li><strong>Re-plan.</strong> If the panelist will be without blocking material for some days, <em>Create leave for missing materials and re-plan</em> declares an unavailable period from today until the expected arrival; the <a href="#availability">availability engine</a> moves the samples affected. Afterwards the button becomes <em>Open the unavailability incident</em>. When all material comes from neighbours or the central warehouse within the period, the screen tells you no leave is needed.</li>
+        <li><strong>Material shipments sheet.</strong> One line per origin, destination and material, with <em>Pending</em>, <em>Sent</em>, <em>Partially received</em>, <em>Received</em> or <em>Cancelled</em>. Central shipments are marked sent by you (<em>Mark as sent</em>, which updates the stock); neighbours confirm theirs on Telegram. <em>Print / PDF</em> and <em>Download Excel (CSV)</em> give you the sheet for the warehouse. A <em>To buy</em> list appears when something must be purchased.</li>
+      </ol>
+
+      <h3>What happens next on Telegram</h3>
+      <ol class="steps">
+        <li>The donor receives the materials, quantities and the receiver&rsquo;s <strong>name and address only</strong>, with an <em>I have sent it</em> button.</li>
+        <li>When the date arrives, the receiver is asked whether the material arrived and how much: <em>All</em> or <em>Other quantity</em>. If only part arrived, ONEMS records it and asks again later about the rest.</li>
+        <li>Shipments that need the missing material are left out of the receiver&rsquo;s daily reminder. When the material arrives, the bot tells them: <em>You can now send these&hellip;</em></li>
+        <li><strong>The incident closes by itself</strong> when everything has been received. The leave, if any, is not cancelled: it ends on its own date.</li>
+      </ol>
+      <div class="callout warn"><strong>No reply from a donor or a receiver?</strong> After two unanswered questions to a donor, or three to a receiver, you get one email. If a receiver has no Telegram, ONEMS skips the question and emails you once.</div>
+    </section>
+
+    <section id="availability">
+      <h2>Panelist availability</h2>
+      <p>An <strong>unavailable period</strong> is a time when a panelist cannot send or receive samples (holidays, illness, lack of material&hellip;). <strong>Every period becomes an incident</strong>, and ONEMS tries to fix the samples affected without you.</p>
+
+      <h3>How a period is declared</h3>
+      <ul>
+        <li><strong>Telegram buttons:</strong> <em>Unavailable days</em> in the bot menu.</li>
+        <li><strong>Telegram free text:</strong> &ldquo;I&rsquo;m on holiday next week&rdquo;. The bot reads the dates and asks to confirm. You also receive an email.</li>
+        <li><strong>ONEMS:</strong> from the <em>Panelists</em> screen (next section).</li>
+      </ul>
+      <p>In every case the panelist sees <em>Received. Thank you for letting us know</em>.</p>
+
+      <h3>What ONEMS does with each affected sample</h3>
+      <p>For every sample scheduled during the period where the panelist sends or receives, ONEMS tries these in order:</p>
+      <ol class="steps">
+        <li><strong>Move to a later date.</strong> The first working day (Monday to Friday) after the period ends, <strong>within the same month</strong>, when the node is available. Samples are spread across days.</li>
+        <li><strong>Move to another node in the same city.</strong> The node with the lowest load that would not become saturated; first in the same week, then other dates in the month.</li>
+        <li><strong>Leave it to you.</strong> If neither works, the sample waits for your decision with a proposal already calculated.</li>
+      </ol>
+      <div class="callout ok"><strong>Rules that are never broken.</strong> A sample already sent or received is never touched. A sample never moves to another city. A node is never overloaded just to resolve quickly. Shipments only fall on working days.</div>
+
+      <h3>Statuses</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Status</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge b-gray">New</span></td><td>Just declared; ONEMS is calculating.</td></tr>
+          <tr><td><span class="badge b-green">Resolved automatically</span></td><td>All samples were moved, or none were affected.</td></tr>
+          <tr><td><span class="badge b-yellow">Pending manager decision</span></td><td>At least one sample needs you.</td></tr>
+          <tr><td><span class="badge b-blue">Resolved</span></td><td>You decided all pending samples.</td></tr>
+        </tbody>
+      </table></div>
+      <p>If the plan changes after the period was declared, ONEMS recalculates it. Panelists affected by a change in the current week receive the details of the new shipment on Telegram.</p>
+    </section>
+
+    <section id="availability-declare">
+      <h2>Declaring a period in ONEMS</h2>
+      <p>Go to <strong>Setup &rsaquo; Panelists</strong> and open the <strong>Unavailability periods</strong> tab. Press <strong>+ Add an unavailability period</strong>.</p>
+      <div class="app">
+        <div class="app-bar"><i></i><i></i><i></i><span>ONEMS &rsaquo; Panelists &rsaquo; Unavailability periods</span></div>
+        <div class="app-body">
+          <div class="m-h">Unavailability periods</div>
+          <p class="m-muted" style="margin-top:-8px">Manage panelists' unavailability periods for automatic sample reassignment</p>
+          <div style="margin:8px 0 12px"><span class="m-sel">All panelists</span><span class="m-sel">All periods</span><span class="m-sel">All reasons</span> <span class="m-pbtn">+ Add an unavailability period</span><span class="pin">1</span></div>
+          <div class="m-box" style="max-width:460px;background:var(--g50)">
+            <div class="m-h3" style="font-size:13px">Add an unavailability period<span class="pin">2</span></div>
+            <div style="margin:6px 0">Panelist <span class="m-in" style="min-width:220px">Elena Garc&iacute;a (PAN-NY-01) &#9662;</span></div>
+            <div style="margin:6px 0">Start date <span class="m-in">10/11/2026</span> &nbsp; End date <span class="m-in">21/11/2026</span></div>
+            <div style="margin:6px 0">Reason <span class="m-in" style="min-width:140px">Vacation &#9662;</span></div>
+            <div style="margin:6px 0">Notes <span class="m-in" style="min-width:300px;color:var(--g400)">Optional</span></div>
+            <div style="margin-top:10px"><span class="m-pbtn">Save</span><span class="m-sbtn">Cancel</span></div>
+          </div>
+          <div class="m-card"><table>
+            <thead><tr><th>Panelist</th><th>Date range</th><th>Duration</th><th>Reason</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+              <tr><td>Elena Garc&iacute;a</td><td>10/11/2026 &ndash; 21/11/2026</td><td>12 days</td><td>Vacation</td><td>Upcoming</td><td><span class="m-link">Cancel</span><span class="pin">3</span></td></tr>
+              <tr><td>Luc&iacute;a Torres</td><td>22/10/2026 &ndash; 03/11/2026</td><td>13 days</td><td>Materials</td><td>Current (active now)</td><td><span class="m-link">Cancel</span></td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+      <ol class="legend">
+        <li><strong>+ Add an unavailability period</strong> opens the form. The filters narrow the list by panelist, period (current, upcoming, past) and reason.</li>
+        <li><strong>The form.</strong> Panelist, start and end dates, a reason (<em>Vacation</em>, <em>Sick leave</em>, <em>Training</em>, <em>Personal</em>, <em>Other</em>; <em>Materials</em> is set by ONEMS when the period comes from a missing-materials incident) and optional notes. Saving creates the incident and runs the engine immediately. The panelist is told on Telegram.</li>
+        <li><strong>Cancel</strong> ends a period: its changes to the plan are reverted and it cannot be reactivated. Dates that came from the panelist cannot be edited; cancel and declare a new period instead.</li>
+      </ol>
+    </section>
+
+    <section id="availability-screen">
+      <h2>The incident screen</h2>
+      <h3>The list</h3>
+      <div class="app">
+        <div class="app-bar"><i></i><i></i><i></i><span>ONEMS &rsaquo; Incidents &rsaquo; Panelist availability</span></div>
+        <div class="app-body">
+          <div class="m-h">Panelist availability incidents</div>
+          <div style="margin-bottom:10px">Status <span class="m-sel">Open</span><span class="pin">1</span></div>
+          <div class="m-card"><table>
+            <thead><tr><th>Panelist</th><th>Node / city</th><th>Unavailability dates</th><th>Declared</th><th class="num">Affected samples</th><th>Send / receive</th><th class="num">Pending</th><th>Status</th><th>Review</th></tr></thead>
+            <tbody>
+              <tr><td>Elena Garc&iacute;a<br><span class="m-muted">PAN-NY-01</span></td><td>NY-01 &middot; New York</td><td>10/11/2026 &ndash; 21/11/2026</td><td>22/10/2026</td><td class="num">14</td><td>9 / 5</td><td class="num">2<span class="pin">2</span></td><td><span class="badge b-yellow">Pending manager decision</span></td><td><span class="m-link">Review</span><span class="pin">3</span></td></tr>
+              <tr><td>Luc&iacute;a Torres<br><span class="m-muted">PAN-NY-03</span></td><td>NY-03 &middot; New York</td><td>22/10/2026 &ndash; 03/11/2026</td><td>22/10/2026</td><td class="num">3</td><td>3 / 0</td><td class="num">0</td><td><span class="badge b-green">Resolved automatically</span></td><td><span class="m-link">Review</span></td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+      <ol class="legend">
+        <li><strong>Status filter.</strong> <em>Open</em> (default) shows what is not finished; <em>All</em>, or one status, shows the rest.</li>
+        <li><strong>Pending</strong> is the number of samples waiting for your decision. <em>Send / receive</em> splits the affected samples by the panelist&rsquo;s role.</li>
+        <li><strong>Review</strong> opens the incident.</li>
+      </ol>
+
+      <h3>The detail</h3>
+      <div class="app">
+        <div class="app-bar"><i></i><i></i><i></i><span>ONEMS &rsaquo; Incidents &rsaquo; Panelist availability &rsaquo; Elena Garc&iacute;a</span></div>
+        <div class="app-body">
+          <div class="m-link" style="margin-bottom:8px">&larr; Back to list</div>
+          <div class="m-h3">Elena Garc&iacute;a &middot; NY-01 &middot; New York &middot; 10/11/2026 &ndash; 21/11/2026 <span class="badge b-yellow">Pending manager decision</span></div>
+          <div class="m-note"><strong>Automatic summary:</strong> 9 moved to a later date &middot; 3 moved to another node &middot; 2 pending<span class="pin">1</span></div>
+
+          <div class="m-h3" style="font-size:13px;margin-top:14px">City balance<span class="pin">2</span></div>
+          <div style="margin:4px 0 6px" class="m-muted">Weeks shown <span class="m-sel">Current month</span> &nbsp; Reference load <span class="m-in" style="min-width:36px">6</span> &nbsp; Deviation % <span class="m-in" style="min-width:36px">20</span></div>
+          <div class="m-card"><table class="heat">
+            <thead><tr><th>Node</th><th>W45</th><th>W46 <span class="m-muted">Affected week</span></th><th>W47 <span class="m-muted">Affected week</span></th><th>W48</th><th>Total</th></tr></thead>
+            <tbody>
+              <tr><td style="text-align:left">NY-01 <span class="m-muted">Elena</span></td><td class="ok">4 / 2</td><td class="off">Panelist unavailable</td><td class="off">Panelist unavailable</td><td class="hi">7 / 3</td><td>11 / 5</td></tr>
+              <tr><td style="text-align:left">NY-02 <span class="m-muted">Ana</span></td><td class="ok">3 / 3</td><td class="hi now">6 / 2</td><td class="ok">4 / 2</td><td class="ok">3 / 1</td><td>16 / 8</td></tr>
+              <tr><td style="text-align:left">NY-04 <span class="m-muted">Omar</span></td><td class="ok">2 / 1</td><td class="sat">8 / 3</td><td class="hi">6 / 3</td><td class="ok">2 / 2</td><td>18 / 9</td></tr>
+            </tbody>
+          </table></div>
+          <div class="m-muted">Snt / Rcv per node and week &middot; <span class="badge b-green">Normal</span> <span class="badge b-yellow">High</span> <span class="badge b-red">Saturated</span> &middot; Click a cell to see its samples; drag a sample or pending line onto a cell to move it</div>
+
+          <div class="m-h3" style="font-size:13px;margin-top:14px">Pending your decision<span class="pin">3</span></div>
+          <div class="m-card"><table>
+            <thead><tr><th></th><th>Sample</th><th>Carrier &middot; product</th><th>Role</th><th>Original date</th><th>System proposal</th><th>Actions</th></tr></thead>
+            <tbody>
+              <tr><td>&#9745;</td><td><code>TAG-00517</code> NY-01 &rarr; BOS-02</td><td>USPS &middot; Priority</td><td>Send</td><td>12/11/2026</td><td>Move to the first later week with capacity &rarr; NY-02, 24/11/2026</td><td><span class="m-sbtn">Confirm</span><span class="m-sbtn">Void sample</span></td></tr>
+              <tr><td>&#9745;</td><td><code>TAG-00521</code> CHI-01 &rarr; NY-01</td><td>USPS &middot; Priority</td><td>Receive</td><td>17/11/2026</td><td>No slot within 8 weeks; suggest cancelling</td><td><span class="m-sbtn">Confirm</span><span class="m-sbtn">Void sample</span></td></tr>
+            </tbody>
+          </table></div>
+          <div style="margin:6px 0"><span class="m-muted">2 selected</span> &nbsp;<span class="m-pbtn">Accept selected</span><span class="m-sbtn">Cancel selected</span><span class="pin">4</span></div>
+
+          <div class="m-box" style="max-width:420px;background:var(--g50)">
+            <div class="m-h3" style="font-size:13px">Change resolution<span class="pin">5</span></div>
+            <div style="margin:6px 0">Final action <span class="m-sel">Reroute to another node</span></div>
+            <div style="margin:6px 0">Target node <span class="m-sel">NY-02</span> &nbsp; New date <span class="m-in">24/11/2026</span></div>
+            <span class="m-pbtn">Apply</span><span class="m-sbtn">Cancel</span>
+          </div>
+
+          <div class="m-h3" style="font-size:13px;margin-top:14px">Resolved<span class="pin">6</span></div>
+          <div class="m-card"><table>
+            <thead><tr><th>Status</th><th>Sample</th><th>Carrier &middot; product</th><th>Role</th><th>Original date</th><th>What was done</th><th>By</th><th>When</th></tr></thead>
+            <tbody>
+              <tr><td>Resolved automatically</td><td><code>TAG-00502</code> NY-01 &rarr; LA-02</td><td>USPS &middot; Priority</td><td>Send</td><td>10/11/2026</td><td>Moved to a later date &rarr; 23/11/2026</td><td>System</td><td>22/10/2026</td></tr>
+              <tr><td>Resolved automatically</td><td><code>TAG-00509</code> NY-01 &rarr; SEA-01</td><td>USPS &middot; Priority</td><td>Send</td><td>13/11/2026</td><td>Moved to another node &rarr; NY-02</td><td>System</td><td>22/10/2026</td></tr>
+              <tr><td>Informational</td><td><code>TAG-00498</code> MIA-01 &rarr; NY-01</td><td>USPS &middot; Priority</td><td>Receive</td><td>11/11/2026</td><td>No change (already in transit)</td><td>System</td><td>22/10/2026</td></tr>
+            </tbody>
+          </table></div>
+
+          <div class="m-box">
+            <div class="m-muted">Final resolution<span class="pin">7</span></div>
+            <div class="m-ta">Add a note about how this incident was resolved&hellip;</div>
+            <span class="m-pbtn">Save</span>
+          </div>
+        </div>
+      </div>
+      <ol class="legend">
+        <li><strong>Automatic summary.</strong> What the engine did: moved to a later date, moved to another node, cancelled, informational, pending.</li>
+        <li><strong>City balance.</strong> Shipments sent / received per node and week in the panelist&rsquo;s city, coloured <span class="badge b-green">Normal</span>, <span class="badge b-yellow">High</span> or <span class="badge b-red">Saturated</span> according to the <em>Reference load</em> and <em>Deviation %</em> you set. Striped cells are weeks the panelist is unavailable. Change <em>Weeks shown</em> to look further back or ahead. Click a week to filter the lines below; click a cell to list its samples; <strong>drag a pending line onto a cell</strong> to move the sample there (ONEMS checks the best day and shows the resulting load before you confirm).</li>
+        <li><strong>Pending your decision.</strong> One line per sample the engine could not resolve, with its role, original date, the <em>System proposal</em> and its cause. <strong>Confirm</strong> applies the proposal to that line; <strong>Void sample</strong> cancels the sample.</li>
+        <li><strong>Accept selected / Cancel selected</strong> do the same for several lines at once. Cancelling a sample removes it from the allocation plan and cannot be undone from this screen, so ONEMS asks you to confirm.</li>
+        <li><strong>Change resolution.</strong> To do something other than the proposal, choose a <em>Final action</em>: <em>Reroute to another node</em> (pick the <em>Target node</em>), <em>Change date</em> (pick the <em>New date</em>) or <em>Cancel sample</em>, then <strong>Apply</strong>.</li>
+        <li><strong>Resolved.</strong> Every line already handled, by the <em>System</em> or by a <em>Manager</em>, with what was done and when. <em>Informational</em> lines are samples already in transit: nothing can be changed.</li>
+        <li><strong>Final resolution.</strong> A free note about how the incident was closed. Press <strong>Save</strong>. When no line is pending, the incident becomes <span class="badge b-blue">Resolved</span>.</li>
+      </ol>
+      <div class="callout info"><strong>The panelists are informed.</strong> Every change you apply to a sample in the current week is sent on Telegram to the panelists concerned, with the new date or node.</div>
+    </section>
+
+    <section id="availability-example">
+      <h2>Worked example</h2>
+      <p>Figures are illustrative.</p>
+      <div class="chat">
+        <div class="who">ONE bot</div>
+        <div class="msg me">From 10 to 21 November I&rsquo;ll be on holiday</div>
+        <div class="msg bot">I understood <strong>10 Nov &ndash; 21 Nov</strong>. Is that right?</div>
+        <div class="kb"><span>Yes</span><span>No</span></div>
+        <div class="msg me">Yes</div>
+        <div class="msg bot">Received. Thank you for letting us know.</div>
+      </div>
+      <p><strong>Elena</strong> had 14 samples scheduled in that period. ONEMS summarises its work in the incident:</p>
+      <div class="card"><strong>9 moved to a later date &middot; 3 moved to another node &middot; 2 pending</strong></div>
+      <ul>
+        <li><strong>9 moved:</strong> to the first free working days after 21 November, within November.</li>
+        <li><strong>3 to another node:</strong> Elena had no possible date in the month, so they went to other nodes in the city with low load. Those panelists are told on Telegram.</li>
+        <li><strong>2 pending:</strong> no node could take them without becoming saturated. The incident is <span class="badge b-yellow">Pending manager decision</span>.</li>
+      </ul>
+      <h3>What you do</h3>
+      <ol class="steps">
+        <li>Open <strong>Panelist availability</strong> and press <em>Review</em> on Elena&rsquo;s incident. You see the summary, the city balance and her samples, resolved and pending (the screen above).</li>
+        <li>The first pending sample proposes NY-02 in week 48, and the balance shows NY-02 is <span class="badge b-green">Normal</span> that week: press <strong>Confirm</strong>.</li>
+        <li>The second proposes cancelling. You would rather keep it: press <strong>Change resolution</strong>, choose <em>Change date</em>, pick the first working day of December and <strong>Apply</strong>.</li>
+        <li>Write a <em>Final resolution</em> note and <strong>Save</strong>. The incident becomes <span class="badge b-blue">Resolved</span>; Elena and the other panelists concerned are told on Telegram.</li>
+      </ol>
+      <div class="callout info"><strong>Unavailability because of missing material.</strong> From a missing-materials incident you can create an unavailable period that runs from today until the material is expected. It follows exactly the same process; the reason shows as <em>Materials</em>.</div>
+    </section>
+
+    <section id="conversation">
+      <h2>Conversation and alerts</h2>
+      <p>Each incident has a <strong>Conversation with the panelist</strong> that keeps the bot&rsquo;s messages, the panelist&rsquo;s replies (with photos) and yours.</p>
+      <div class="app">
+        <div class="app-bar"><i></i><i></i><i></i><span>ONEMS &rsaquo; incident detail</span></div>
+        <div class="app-body">
+          <div class="m-box" style="margin:0;max-width:520px">
+            <div class="m-h3" style="font-size:13px">Conversation with the panelist</div>
+            <div class="m-bub l">Do you want to register this as a returned parcel?<small>Bot &middot; Sent</small></div>
+            <div class="m-bub r">Yes<small>Panelist &middot; Button pressed</small></div>
+            <div class="m-bub l">Hi Pablo, can you keep the label?<small>Manager &middot; Pending</small></div>
+            <div class="m-bub r">Yes, I still have it. <span class="m-muted">[photo]</span><small>Panelist &middot; <span class="badge b-blue">New reply</span></small></div>
+            <div class="m-ta">Write a message to the panelist&hellip;</div>
+            <span class="m-pbtn">Send</span>
+          </div>
+        </div>
+      </div>
+      <ul>
+        <li><strong>Writing to the panelist.</strong> Type in the incident and press <em>Send</em>. It reaches their Telegram, usually within five minutes, as plain text.</li>
+        <li><strong>Unread replies.</strong> Free-text replies from the panelist show a blue badge in the menu and in the list until you open the incident. Buttons the panelist taps do not count.</li>
+        <li><strong>Email alert.</strong> If a reply stays unread for more than an hour, you get <strong>one</strong> email per incident. If you open it first, no email is sent.</li>
+        <li><strong>Closing.</strong> Resolving or dismissing an incident closes the Telegram conversation.</li>
+      </ul>
+    </section>
+
+    <section id="faq">
+      <h2>Questions</h2>
+      <details><summary>What if a panelist types something random?</summary><div>The bot shows the menu or suggests a type. Nothing is saved until the panelist presses <strong>Yes</strong>.</div></details>
+      <details><summary>Does ONEMS ever move a sample that was already sent?</summary><div>No. Only pending samples are moved. A returned package is re-sent from the incident, by your decision.</div></details>
+      <details><summary>Can samples go to another city?</summary><div>No. Changing city would change the measured route.</div></details>
+      <details><summary>Why is a panelist no longer reminded of some shipments?</summary><div>Those shipments need material the panelist does not have. ONEMS stops insisting until the material arrives, then tells them they can send.</div></details>
+      <details><summary>Do shipments fall on weekends?</summary><div>No. Shipments are scheduled Monday to Friday only.</div></details>
+      <details><summary>A panelist says they reported something but I cannot see it.</summary><div>Check that they confirmed with <strong>Yes</strong>. If they answered No, or did not answer, nothing was saved.</div></details>
+      <details><summary>Who can see an incident?</summary><div>Each account sees only its own panelists and incidents.</div></details>
+    </section>
+  </div>
+  </main>
+</div>
+
+<script>
+(function () {
+  var links = Array.prototype.slice.call(document.querySelectorAll('#nav a'));
+  var sections = links.map(function (a) { return document.querySelector(a.getAttribute('href')); }).filter(Boolean);
+
+  // Mobile section picker
+  var jump = document.getElementById('jump');
+  links.forEach(function (a) {
+    var o = document.createElement('option');
+    o.value = a.getAttribute('href'); o.textContent = a.textContent; jump.appendChild(o);
+  });
+  jump.addEventListener('change', function () { location.hash = jump.value; });
+
+  // Highlight the current section in the side menu
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          links.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id); });
+          jump.value = '#' + e.target.id;
+        }
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    sections.forEach(function (s) { io.observe(s); });
+  }
+})();
+</script>
+</body>
+</html>

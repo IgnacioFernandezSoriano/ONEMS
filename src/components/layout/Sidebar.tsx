@@ -36,12 +36,14 @@ import {
   FileText,
   AlertTriangle,
   MessageSquareWarning,
+  HelpCircle,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useLocale } from '../../contexts/LocaleContext'
 import { useUnavailabilityIncidents } from '../../lib/hooks/useUnavailabilityIncidents'
 import { useReportedIncidents } from '../../lib/hooks/useReportedIncidents'
+import { useUnreadConversations } from '../../lib/hooks/useUnreadConversations'
 
 interface MenuItem {
   path: string
@@ -67,6 +69,7 @@ export function Sidebar() {
   const { t, locale, setLocale } = useLocale()
   const { pendingManagerCount } = useUnavailabilityIncidents()
   const { openCount } = useReportedIncidents()
+  const { totalReported, totalUnavailability } = useUnreadConversations()
   const [expandedSections, setExpandedSections] = useState<string[]>([])
   const [isHovered, setIsHovered] = useState(false)
   const [accounts, setAccounts] = useState<Array<{ id: string; name: string }>>([])
@@ -361,6 +364,15 @@ export function Sidebar() {
           roles: ['admin', 'superadmin'],
           tooltip: t('incidents.pending_badge_tooltip'),
         },
+        {
+          // La ayuda existe en los 4 idiomas: se abre la del idioma activo
+          path: `/help/incidents-and-availability.${['en', 'es', 'fr', 'ar'].includes(locale) ? locale : 'en'}.html`,
+          label: t('menu.help_incidents'),
+          icon: HelpCircle,
+          roles: ['admin', 'superadmin'],
+          tooltip: t('menu.help_incidents.tooltip'),
+          external: true,
+        },
       ],
     },
     {
@@ -608,6 +620,16 @@ export function Sidebar() {
                             {item.path === '/incidents/panelist-reported' && openCount > 0 && isExpanded && (
                               <span className="ml-auto text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">
                                 {openCount}
+                              </span>
+                            )}
+                            {item.path === '/incidents/panelist-reported' && totalReported > 0 && isExpanded && (
+                              <span title={t('incident_conversation.unread_badge')} className="ml-1 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">
+                                {totalReported}
+                              </span>
+                            )}
+                            {item.path === '/incidents/panelist-availability' && totalUnavailability > 0 && isExpanded && (
+                              <span title={t('incident_conversation.unread_badge')} className="ml-1 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">
+                                {totalUnavailability}
                               </span>
                             )}
                           </Link>

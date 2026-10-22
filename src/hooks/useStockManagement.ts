@@ -74,6 +74,9 @@ export interface MaterialShipment {
   created_by: string | null
   created_at: string
   updated_at: string
+  // Envio de una incidencia de materiales (no se unifica ni se borra desde Stock)
+  panelist_incident_id?: string | null
+  source_panelist_id?: string | null
   panelist?: {
     name: string
     panelist_code: string
@@ -110,11 +113,19 @@ export interface StockSettings {
   updated_at: string
 }
 
-export function useStockManagement() {
+// Error con clave i18n: la pantalla lo traduce (el hook no tiene acceso a t()).
+export const INCIDENT_SHIPMENT_LOCKED = 'stock.cannot_delete_incident_shipment'
+function incidentShipmentLocked(): Error {
+  const e: any = new Error(INCIDENT_SHIPMENT_LOCKED)
+  e.i18nKey = INCIDENT_SHIPMENT_LOCKED
+  return e
+}
+
+export function useStockManagement(accountIdOverride?: string) {
   const effectiveAccountId = useEffectiveAccountId()
   const { profile } = useAuth()
   // Use effectiveAccountId if available, otherwise fall back to profile.account_id
-  const accountId = effectiveAccountId || profile?.account_id
+  const accountId = accountIdOverride ?? (effectiveAccountId || profile?.account_id)
 
   const [regulatorStocks, setRegulatorStocks] = useState<MaterialStock[]>([])
   const [panelistStocks, setPanelistStocks] = useState<PanelistMaterialStock[]>([])
@@ -290,19 +301,29 @@ export function useStockManagement() {
     tracking_number?: string
     notes?: string
     source_panelist_id?: string
+    panelist_incident_id?: string
   }, skipUnify: boolean = false) => {
     try {
-      // Check for existing pending shipments for this panelist
-      const existingShipments = skipUnify ? null : (await supabase
-        .from('material_shipments')
-        .select(`
-          id,
-          expected_date,
-          items:material_shipment_items(material_id, quantity_sent)
-        `)
-        .eq('account_id', accountId)
-        .eq('panelist_id', shipment.panelist_id)
-        .eq('status', 'pending')).data
+      // Check for existing pending shipments for this panelist.
+      // Solo se unifican los envios rutinarios desde el central: los de una incidencia
+      // (panelist_incident_id) o desde un donante (source_panelist_id) NUNCA se tocan.
+      let existingShipments: { id: string; expected_date: string | null; items: any[] | null }[] | null = null
+      if (!skipUnify) {
+        const { data: ex, error: exError } = await supabase
+          .from('material_shipments')
+          .select(`
+            id,
+            expected_date,
+            items:material_shipment_items(material_id, quantity_sent)
+          `)
+          .eq('account_id', accountId)
+          .eq('panelist_id', shipment.panelist_id)
+          .eq('status', 'pending')
+          .is('panelist_incident_id', null)
+          .is('source_panelist_id', null)
+        if (exError) throw exError
+        existingShipments = ex as any
+      }
 
       // Group existing items by material
       const existingItemsMap: Record<string, { shipment_id: string; quantity: number }> = {}
@@ -325,15 +346,18 @@ export function useStockManagement() {
       if (existingShipments && existingShipments.length > 0) {
         const shipmentIds = existingShipments.map(s => s.id)
 
-        await supabase
+        // Si algun borrado falla se para aqui: no se crea el envio unificado (evita duplicar cantidades)
+        const { error: delItemsError } = await supabase
           .from('material_shipment_items')
           .delete()
           .in('material_shipment_id', shipmentIds)
+        if (delItemsError) throw delItemsError
 
-        await supabase
+        const { error: delShipError } = await supabase
           .from('material_shipments')
           .delete()
           .in('id', shipmentIds)
+        if (delShipError) throw delShipError
       }
 
       // Merge new items with existing
@@ -362,6 +386,8 @@ export function useStockManagement() {
           total_items: Object.keys(mergedItems).length,
           notes: shipment.notes,
           source_panelist_id: shipment.source_panelist_id,
+          // Enlace a la incidencia desde la creacion (fuente de idempotencia de los reintentos)
+          panelist_incident_id: shipment.panelist_incident_id,
           created_by: profile?.id
         })
         .select()
@@ -381,7 +407,12 @@ export function useStockManagement() {
         .from('material_shipment_items')
         .insert(itemsToInsert)
 
-      if (itemsError) throw itemsError
+      if (itemsError) {
+        // No dejar una cabecera sin lineas (mejor esfuerzo) y propagar el error original
+        const { error: cleanupError } = await supabase.from('material_shipments').delete().eq('id', shipmentData.id)
+        if (cleanupError) console.error('Error removing orphan shipment header:', cleanupError)
+        throw itemsError
+      }
 
       await loadData()
       return shipmentData
@@ -472,6 +503,9 @@ export function useStockManagement() {
       const confirmedItemIds = new Set(confirmedItems.map(i => i.id))
       const removedItems = (shipment.items || []).filter((item: any) => !confirmedItemIds.has(item.id))
 
+      // Un envio de incidencia no se parte desde Stock (sus lineas saldrian de la incidencia)
+      if (shipment.panelist_incident_id && removedItems.length > 0) throw incidentShipmentLocked()
+
       // 3. Update quantities of confirmed items in database
       for (const confirmedItem of confirmedItems) {
         await supabase
@@ -486,10 +520,11 @@ export function useStockManagement() {
       //    actually sent/received via markShipmentSent/markShipmentReceived.
       if (removedItems.length > 0) {
         for (const removedItem of removedItems) {
-          await supabase
+          const { error: delError } = await supabase
             .from('material_shipment_items')
             .delete()
             .eq('id', removedItem.id)
+          if (delError) throw delError
         }
 
         const { data: newShipment, error: newShipmentError } = await supabase
@@ -575,6 +610,15 @@ export function useStockManagement() {
 
   const deleteShipment = async (shipmentId: string) => {
     try {
+      // Los envios de una incidencia de materiales no se borran desde Stock
+      const { data: sh, error: fetchError } = await supabase
+        .from('material_shipments')
+        .select('panelist_incident_id')
+        .eq('id', shipmentId)
+        .maybeSingle()
+      if (fetchError) throw fetchError
+      if (sh?.panelist_incident_id) throw incidentShipmentLocked()
+
       // Delete shipment items first (foreign key constraint)
       const { error: itemsError } = await supabase
         .from('material_shipment_items')

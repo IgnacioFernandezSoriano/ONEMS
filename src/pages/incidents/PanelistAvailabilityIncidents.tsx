@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from '@/hooks/useTranslation'
 import { format, parseISO, isValid } from 'date-fns'
 import { useUnavailabilityIncidents } from '@/lib/hooks/useUnavailabilityIncidents'
+import { useUnreadConversations } from '@/lib/hooks/useUnreadConversations'
 import { IncidentReviewPanel } from '@/components/incidents/IncidentReviewPanel'
 import { IncidentStatusBadge } from '@/components/incidents/IncidentStatusBadge'
 import type { IncidentStatusFilter } from '@/lib/types'
@@ -17,7 +19,21 @@ const fmt = (d: string | null) => {
 export function PanelistAvailabilityIncidents() {
   const { t } = useTranslation()
   const { inbox, loading, error, fetchInbox, statusFilter, setStatusFilter } = useUnavailabilityIncidents()
+  const { unreadByKey } = useUnreadConversations()
   const [selected, setSelected] = useState<string | null>(null)
+  const [params, setParams] = useSearchParams()
+
+  // Abre una baja concreta si llega por URL (?unavailability=<id>). La bandeja por defecto solo
+  // lista las abiertas: se pasa a 'all' y, una vez cargada, se abre si el id esta en la bandeja.
+  const linkedId = params.get('unavailability')
+  useEffect(() => {
+    if (linkedId && statusFilter !== 'all') setStatusFilter('all')
+  }, [linkedId, statusFilter, setStatusFilter])
+  useEffect(() => {
+    if (loading || !linkedId || statusFilter !== 'all') return
+    if (inbox.some((r) => r.unavailability_id === linkedId)) setSelected(linkedId)
+    setParams({}, { replace: true }) // tambien si no esta en la bandeja: se limpia el parametro
+  }, [loading, inbox, linkedId, statusFilter, setParams])
 
   if (loading) return <div className="p-6">{t('common.loading')}</div>
   if (error) return <div className="p-6 text-red-600">{t('common.error')}: {error}</div>
@@ -68,7 +84,7 @@ export function PanelistAvailabilityIncidents() {
               {inbox.length > 0 ? inbox.map((row) => (
                 <tr key={row.unavailability_id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 text-sm">
-                    <div className="font-medium">{row.panelist_name}</div>
+                    <div className="font-medium">{row.panelist_name}{(unreadByKey[`unavailability:${row.unavailability_id}`] ?? 0) > 0 && <span className="ms-2 text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">{t('incident_conversation.new_reply')}</span>}</div>
                     <div className="text-gray-500 text-xs font-mono">{row.panelist_code}</div>
                   </td>
                   <td className="px-6 py-4 text-sm">{row.node_label} · {row.city_name}</td>

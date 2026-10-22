@@ -2822,7 +2822,6 @@ reported_incidents.empty,Aucun incident signalé
 reported_incidents.back,Retour
 reported_incidents.linked_shipment,Envoi lié
 reported_incidents.resolution_note,Note de résolution
-reported_incidents.reply_to_panelist,Réponse au panéliste
 reported_incidents.resolve,Résoudre
 reported_incidents.dismiss,Rejeter
 reported_incidents.filter.all_categories,Toutes les catégories
@@ -2847,21 +2846,40 @@ reported_incidents.category.other,Autre
 reported_incidents.action.mark_received,Marquer comme reçu
 reported_incidents.action.invalidate,Invalider
 reported_incidents.action.support_only,Aucune action disponible ; support uniquement.
-reported_incidents.materials.step1_title,Réconcilier le stock
 reported_incidents.materials.real_qty,Quantité réelle
-reported_incidents.materials.step2_title,Recalculer les besoins
 reported_incidents.materials.blocking_badge,Bloquant
-reported_incidents.materials.step3_title,Approvisionnement
 reported_incidents.materials.from_central,Depuis le stock central
 reported_incidents.materials.from_donor,Depuis le donateur {name}
-reported_incidents.materials.to_purchase,Nécessite un achat (manuel/PDF)
-reported_incidents.materials.execute_supply,Exécuter l'approvisionnement
-reported_incidents.materials.step4_title,Fenêtre de déplacement
-reported_incidents.materials.create_baja,Créer un congé et déplacer les échantillons
-reported_incidents.materials.step5_title,Clôture à la réception
-reported_incidents.materials.go_to_availability,Résoudre les échantillons dans la disponibilité des panélistes
-reported_incidents.materials.close_hint,Le congé se ferme automatiquement lorsque le panéliste confirme la réception.
+reported_incidents.materials.close_hint,La réception du matériel résout l'incident ; le congé n'est pas annulé et se termine à sa date.
 reported_incidents.materials.unmatched,Matériel introuvable dans le catalogue
+reported_incidents.materials.s1_title,Stock théorique
+reported_incidents.materials.s2_title,Besoins et approvisionnement
+reported_incidents.materials.s3_title,Replanifier
+reported_incidents.materials.zero_stock,Mettre le stock à zéro
+reported_incidents.materials.zero_confirm,Mettre à zéro tout le stock de matériel de ce panéliste ?
+reported_incidents.materials.zero_done,{n} matériels mis à zéro
+reported_incidents.materials.expected_date,Date d'arrivée prévue
+reported_incidents.materials.days_without_stock,{n} jours ouvrés sans stock
+reported_incidents.materials.affected_samples,Échantillons concernés
+reported_incidents.materials.no_affected_samples,Aucun échantillon concerné
+reported_incidents.materials.confirm_supply,Confirmer l'approvisionnement
+reported_incidents.materials.supply_done,Approvisionnement confirmé le {date}
+reported_incidents.materials.create_baja_replan,Créer le congé pour manque de matériel et replanifier
+reported_incidents.materials.go_to_unavailability,Ouvrir l'incident d'indisponibilité
+reported_incidents.materials.no_stock_rows,Aucun enregistrement de stock
+reported_incidents.materials.days_to_cover,Jours de besoin à couvrir
+reported_incidents.materials.days_to_cover_hint,Vide = jusqu'à la fin du mois. Calculé jusqu'au {date}
+reported_incidents.materials.col_need,Besoin
+reported_incidents.materials.col_neighbours,Voisins
+reported_incidents.materials.col_central,Central
+reported_incidents.materials.col_purchase,Achat
+reported_incidents.materials.source_proposal,Proposition
+reported_incidents.materials.source_only_neighbours,Voisins uniquement
+reported_incidents.materials.source_only_central,Central uniquement
+reported_incidents.materials.source_purchase_all,Tout acheter
+reported_incidents.materials.no_purchase_no_baja,Tout le matériel est couvert par les voisins ou le stock central : aucun congé ni replanification n'est nécessaire.
+reported_incidents.materials.nothing_needed,Aucun besoin de matériel sur la période sélectionnée.
+reported_incidents.materials.change_source,Changer l'origine
 reported_incidents.action.new_date,Nouvelle date
 reported_incidents.action.reschedule,Reprogrammer
 reported_incidents.action.cancel_shipment,Annuler l'envoi
@@ -2895,3 +2913,89 @@ unavailability.selected_count,{count} période(s) sélectionnée(s)
 unavailability.clear_selection,Effacer la sélection
 unavailability.active_now,ACTIVE MAINTENANT
 unavailability.notes_placeholder,Informations complémentaires sur cette période d'indisponibilité...
+reported_incidents.role.sender,Expéditeur
+reported_incidents.role.receiver,Destinataire
+reported_incidents.header.contact,Contact
+reported_incidents.header.telegram_yes,Telegram : oui
+reported_incidents.header.telegram_no,Telegram : non
+reported_incidents.status.auto_resolved,Résolue automatiquement
+reported_incidents.readonly.title,Traitée automatiquement
+reported_incidents.readonly.no_data,Aucune donnée disponible
+reported_incidents.readonly.no_candidates,Aucun envoi en transit n'a été trouvé
+reported_incidents.readonly.chosen_shipment,Envoi choisi
+reported_incidents.contact.before,Avant
+reported_incidents.contact.after,Après
+reported_incidents.contact.field.mobile,Mobile
+reported_incidents.contact.field.email,E-mail
+reported_incidents.contact.field.language,Langue
+reported_incidents.contact.field.address_line1,Adresse (ligne 1)
+reported_incidents.contact.field.address_line2,Adresse (ligne 2)
+reported_incidents.contact.field.address_city,Ville
+reported_incidents.contact.field.address_country,Pays
+reported_incidents.returned.title,Renvoyer l'échantillon retourné
+reported_incidents.returned.to_node,Nœud de destination
+reported_incidents.returned.no_nodes,Aucun autre nœud dans cette ville
+reported_incidents.returned.week,Semaine
+reported_incidents.returned.confirm_reroute,Confirmer le renvoi
+reported_incidents.returned.no_detail,Cet incident n'a pas d'envoi lié
+reported_incidents.returned.fits,Possible : {date} (charge {load})
+reported_incidents.returned.reason.not_found,Envoi ou nœud introuvable
+reported_incidents.returned.reason.not_in_cell,L'envoi n'est pas dans une cellule valide
+reported_incidents.returned.reason.not_pending,L'échantillon n'est pas en attente
+reported_incidents.returned.reason.sample_not_movable,Cet échantillon ne peut pas être déplacé
+reported_incidents.returned.reason.has_incident_line,L'envoi a une ligne d'incident ouverte
+reported_incidents.returned.reason.other_city,Le nœud est dans une autre ville
+reported_incidents.returned.reason.inactive_node,Le nœud n'est pas actif
+reported_incidents.returned.reason.other_end,Le nœud est l'autre extrémité de l'envoi
+reported_incidents.returned.reason.no_day,Aucun jour disponible cette semaine
+reported_incidents.returned.reason.unknown,Renvoi impossible vers ce nœud et cette semaine
+reported_incidents.done.rerouted,Échantillon renvoyé
+reported_incidents.materials.date_in_past,La date ne peut pas être dans le passé
+reported_incidents.returned.not_returnable,Cet envoi n'est pas dans un état renvoyable (statut actuel)
+reported_incidents.returned.cancel_confirm,Annuler cet envoi ? L'échantillon ne sera pas renvoyé.
+reported_incidents.readonly.closed,Cet incident est clos : les actions sont en lecture seule
+incident_conversation.title,Conversation avec le panéliste
+incident_conversation.empty,Aucun message pour le moment
+incident_conversation.placeholder,Écrivez un message au panéliste…
+incident_conversation.send,Envoyer
+incident_conversation.sending,Envoi…
+incident_conversation.author.bot,Bot
+incident_conversation.author.manager,Gestionnaire
+incident_conversation.author.panelist,Panéliste
+incident_conversation.author.system,Système
+incident_conversation.status.pending_send,En attente
+incident_conversation.status.sent,Envoyé
+incident_conversation.status.failed,Échec
+incident_conversation.button_pressed,Bouton appuyé
+incident_conversation.no_telegram,"Ce panéliste n'a pas de Telegram associé, le message ne peut pas être livré"
+material_sheet.title,Feuille d'expéditions de matériel
+material_sheet.col.origin,Origine
+material_sheet.col.destination,Destination
+material_sheet.col.material,Matériel
+material_sheet.col.quantity,Quantité
+material_sheet.col.due,Date d'arrivée prévue
+material_sheet.col.status,Statut
+material_sheet.central_warehouse,Entrepôt central
+material_sheet.status.pending,En attente
+material_sheet.status.sent,Expédié
+material_sheet.status.partially_received,Partiellement reçu
+material_sheet.status.received,Reçu
+material_sheet.status.cancelled,Annulé
+material_sheet.print,Imprimer / PDF
+material_sheet.download_csv,Télécharger Excel (CSV)
+material_sheet.mark_sent,Marquer comme expédié
+material_sheet.confirm_mark_sent,Marquer cet envoi comme expédié ? Le stock sera mis à jour.
+material_sheet.donor_confirms_telegram,Le panéliste donneur le confirme via Telegram
+material_sheet.received_of,{received} sur {sent}
+stock.partially_received,Partiellement reçu
+stock.received_of,{received} sur {sent} reçus
+stock.cannot_delete_incident_shipment,Cet envoi appartient à un incident de matériel et ne peut pas être supprimé ni divisé depuis Stock. Gérez-le depuis l'incident.
+reported_incidents.materials.to_buy_title,À acheter
+reported_incidents.materials.to_buy_line,{name} ({code}) : {n}
+material_sheet.to_buy_title,À acheter
+material_sheet.purchase_origin,Achat
+incident_conversation.unread_badge,Conversations avec de nouvelles réponses
+incident_conversation.new_reply,Nouvelle réponse
+incident_conversation.photo_alt,Photo envoyée par le panéliste
+menu.help_incidents,Aide : Incidents
+menu.help_incidents.tooltip,Fonctionnement des incidents et de la disponibilité des panélistes (s'ouvre dans un nouvel onglet)

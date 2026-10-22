@@ -283,13 +283,18 @@ export default function ShipmentsTab() {
       alert('Shipment deleted successfully')
       setSelectedShipmentIds(new Set())
     } catch (error: any) {
-      alert(`Error deleting shipment: ${error.message}`)
+      alert(error?.i18nKey ? t(error.i18nKey) : `Error deleting shipment: ${error.message}`)
     }
   }
 
   const handleDeleteSelected = async () => {
     if (selectedShipmentIds.size === 0) return
-    
+    // Los envios de una incidencia de materiales no se borran desde Stock: se avisa antes de borrar nada
+    if (shipments.some(s => selectedShipmentIds.has(s.id) && s.panelist_incident_id)) {
+      alert(t('stock.cannot_delete_incident_shipment'))
+      return
+    }
+
     const confirmed = confirm(`Delete ${selectedShipmentIds.size} shipment(s)? This action cannot be undone.`)
     if (!confirmed) return
 
@@ -300,7 +305,7 @@ export default function ShipmentsTab() {
       alert(`${selectedShipmentIds.size} shipment(s) deleted successfully`)
       setSelectedShipmentIds(new Set())
     } catch (error: any) {
-      alert(`Error deleting shipments: ${error.message}`)
+      alert(error?.i18nKey ? t(error.i18nKey) : `Error deleting shipments: ${error.message}`)
     }
   }
 
@@ -772,6 +777,17 @@ Note: Only panelists with assigned allocation plans will have shipments generate
                       <div className="text-sm font-medium text-gray-900">
                         {shipment.shipment_number || 'N/A'}
                       </div>
+                      <div
+                        className={`text-xs font-medium ${
+                          shipment.status === 'sent' ? 'text-blue-600'
+                            : shipment.status === 'partially_received' ? 'text-amber-600'
+                            : shipment.status === 'received' ? 'text-green-600'
+                            : shipment.status === 'cancelled' ? 'text-red-600'
+                            : 'text-gray-500'
+                        }`}
+                      >
+                        {t(`stock.${shipment.status}`)}
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm font-medium text-gray-900">
@@ -789,6 +805,11 @@ Note: Only panelists with assigned allocation plans will have shipments generate
                               <div key={item.id} className="flex items-center justify-between gap-2">
                                 <span>
                                   {item.material?.code}: {item.quantity_sent} {item.material?.unit_measure}
+                                  {(shipment.status === 'partially_received' || (item.quantity_received ?? 0) > 0) && (
+                                    <span className="ml-1 text-xs text-gray-500">
+                                      ({t('stock.received_of', { received: item.quantity_received ?? 0, sent: item.quantity_sent })})
+                                    </span>
+                                  )}
                                 </span>
                                 {shipment.status === 'pending' && (
                                   <button
@@ -876,7 +897,11 @@ Note: Only panelists with assigned allocation plans will have shipments generate
             setConfirmingShipment(null)
           }}
           onConfirm={async (shipmentId, confirmedItems, sentDate) => {
-            await confirmShipment(shipmentId, confirmedItems, sentDate)
+            try {
+              await confirmShipment(shipmentId, confirmedItems, sentDate)
+            } catch (e: any) {
+              throw e?.i18nKey ? new Error(t(e.i18nKey)) : e
+            }
             setShowConfirmModal(false)
             setConfirmingShipment(null)
           }}
