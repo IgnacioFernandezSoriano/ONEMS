@@ -365,7 +365,8 @@ export function Sidebar() {
           tooltip: t('incidents.pending_badge_tooltip'),
         },
         {
-          path: '/help/incidents-and-availability.html',
+          // La ayuda existe en los 4 idiomas: se abre la del idioma activo
+          path: `/help/incidents-and-availability.${['en', 'es', 'fr', 'ar'].includes(locale) ? locale : 'en'}.html`,
           label: t('menu.help_incidents'),
           icon: HelpCircle,
           roles: ['admin', 'superadmin'],
