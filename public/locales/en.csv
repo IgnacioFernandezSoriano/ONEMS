@@ -3026,3 +3026,4 @@ help_center.language,Language
 help_center.open_new_tab,Open in a new tab
 help_center.copy_link,Copy link
 help_center.copied,Link copied
+help_center.copy_hint,Choose the panelist's language before copying. From an incident conversation the link already goes in their language.

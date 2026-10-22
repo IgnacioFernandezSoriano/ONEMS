@@ -66,9 +66,12 @@ export function HelpCenter() {
               <ExternalLink className="w-4 h-4" />{t('help_center.open_new_tab')}
             </a>
             {current.public && (
-              <button type="button" onClick={copyLink} className="flex items-center gap-1 text-blue-600 hover:underline">
-                <Link2 className="w-4 h-4" />{copied ? t('help_center.copied') : t('help_center.copy_link')}
-              </button>
+              <>
+                <button type="button" onClick={copyLink} className="flex items-center gap-1 text-blue-600 hover:underline">
+                  <Link2 className="w-4 h-4" />{copied ? t('help_center.copied') : `${t('help_center.copy_link')} (${lang.toUpperCase()})`}
+                </button>
+                <span className="text-xs text-gray-500">{t('help_center.copy_hint')}</span>
+              </>
             )}
           </div>
           <iframe key={src} src={src} title={t(current.titleKey)} className="block w-full border-0" style={{ height: 'calc(100vh - 220px)', minHeight: 480 }} />

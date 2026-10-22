@@ -3026,3 +3026,4 @@ help_center.language,Idioma
 help_center.open_new_tab,Abrir en una pestaña nueva
 help_center.copy_link,Copiar enlace
 help_center.copied,Enlace copiado
+help_center.copy_hint,Elige el idioma del panelista antes de copiar. Desde la conversación de una incidencia el enlace ya va en su idioma.

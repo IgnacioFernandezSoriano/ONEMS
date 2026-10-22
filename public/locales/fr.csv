@@ -3018,3 +3018,4 @@ help_center.language,Langue
 help_center.open_new_tab,Ouvrir dans un nouvel onglet
 help_center.copy_link,Copier le lien
 help_center.copied,Lien copié
+help_center.copy_hint,Choisissez la langue du panéliste avant de copier. Depuis la conversation d'un incident le lien est déjà dans sa langue.
