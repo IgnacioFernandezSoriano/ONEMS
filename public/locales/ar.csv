@@ -2999,3 +2999,5 @@ incident_conversation.new_reply,رد جديد
 incident_conversation.photo_alt,صورة أرسلها العضو
 menu.help_incidents,مساعدة: الحوادث
 menu.help_incidents.tooltip,كيف تعمل الحوادث وتوفر المحكّمين (تُفتح في علامة تبويب جديدة)
+incident_conversation.insert_help,📖 إدراج رابط المساعدة
+incident_conversation.insert_help.tooltip,يضيف إلى الرسالة رابط دليل المشارك بلغته ومفتوحًا على القسم الخاص بهذه الحادثة

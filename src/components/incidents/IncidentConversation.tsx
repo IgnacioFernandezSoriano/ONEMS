@@ -3,7 +3,7 @@ import { format, isValid, parseISO } from 'date-fns'
 import { useTranslation } from '@/hooks/useTranslation'
 import { useIncidentConversation } from '@/lib/hooks/useIncidentConversation'
 import type { ConversationKind, IncidentMessage } from '@/lib/hooks/useIncidentConversation'
-import { BTN_PRIMARY } from './buttonStyles'
+import { BTN_PRIMARY, BTN_SECONDARY } from './buttonStyles'
 
 function fmtTime(iso: string | null | undefined): string {
   if (!iso) return ''
@@ -11,7 +11,21 @@ function fmtTime(iso: string | null | undefined): string {
   return isValid(d) ? format(d, 'dd/MM HH:mm') : ''
 }
 
-export function IncidentConversation({ kind, incidentId }: { kind: ConversationKind; incidentId: string }) {
+// Enlace a la guía del panelista en su idioma, abierta en el apartado de la incidencia.
+// Usa el dominio de la web actual (dev o producción), donde vive public/help.
+function panelistGuideUrl(language: string | null | undefined, section?: string): string {
+  const lang = ['en', 'es', 'fr', 'ar'].includes(language ?? '') ? language : 'en'
+  return `${window.location.origin}/help/panelist-guide.${lang}.html${section ? '#' + section : ''}`
+}
+
+interface Props {
+  kind: ConversationKind
+  incidentId: string
+  panelistLanguage?: string | null
+  helpSection?: string
+}
+
+export function IncidentConversation({ kind, incidentId, panelistLanguage, helpSection }: Props) {
   const { t } = useTranslation()
   const { messages, loading, error, send, photoUrls } = useIncidentConversation(kind, incidentId)
   const [text, setText] = useState('')
@@ -109,9 +123,20 @@ export function IncidentConversation({ kind, incidentId }: { kind: ConversationK
         onKeyDown={e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); doSend() } }}
       />
       {sendError && <p className="text-xs text-red-600 mb-2">{sendError}</p>}
-      <button type="button" className={BTN_PRIMARY} disabled={sending || !text.trim()} onClick={doSend}>
-        {sending ? t('incident_conversation.sending') : t('incident_conversation.send')}
-      </button>
+      <div className="flex flex-wrap gap-2">
+        <button type="button" className={BTN_PRIMARY} disabled={sending || !text.trim()} onClick={doSend}>
+          {sending ? t('incident_conversation.sending') : t('incident_conversation.send')}
+        </button>
+        <button
+          type="button"
+          className={BTN_SECONDARY}
+          disabled={sending}
+          title={t('incident_conversation.insert_help.tooltip')}
+          onClick={() => setText(prev => (prev.trim() ? prev.trimEnd() + '\n' : '') + panelistGuideUrl(panelistLanguage, helpSection))}
+        >
+          {t('incident_conversation.insert_help')}
+        </button>
+      </div>
     </div>
   )
 }

@@ -10,6 +10,18 @@ import { readPurchaseLines } from '@/lib/hooks/useMaterialsTreatment'
 import { MaterialShipmentSheet } from './MaterialShipmentSheet'
 import { IncidentConversation } from './IncidentConversation'
 
+// Apartado de la guía del panelista (public/help/panelist-guide.*.html) para cada categoría
+const HELP_SECTION: Record<string, string> = {
+  missing_materials: 'c-material',
+  parcel_damaged: 'c-roto',
+  parcel_returned: 'c-devuelto',
+  unreadable_label_receipt: 'c-ilegible',
+  tag_photo_problem: 'c-foto',
+  how_to_send: 'c-como',
+  contact_data_change: 'c-datos',
+  other: 'c-otro',
+}
+
 interface TFn {
   (key: string, params?: Record<string, any>, fallback?: string): string
 }
@@ -97,7 +109,8 @@ export function ReportedIncidentPanel({ incidentId, onBack }: { incidentId: stri
       </div>
 
       {/* Conversación con el panelista */}
-      <IncidentConversation kind="reported" incidentId={incidentId} />
+      <IncidentConversation kind="reported" incidentId={incidentId}
+        panelistLanguage={inc.panelist?.language} helpSection={HELP_SECTION[inc.category] ?? 'c-otro'} />
 
       {/* Resolver */}
       {inc.status !== 'auto_resolved' && (

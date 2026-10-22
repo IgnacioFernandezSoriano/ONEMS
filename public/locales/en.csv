@@ -3007,3 +3007,5 @@ incident_conversation.new_reply,New reply
 incident_conversation.photo_alt,Photo sent by the panelist
 menu.help_incidents,Help: Incidents
 menu.help_incidents.tooltip,How incidents and panelist availability work (opens in a new tab)
+incident_conversation.insert_help,📖 Insert help link
+incident_conversation.insert_help.tooltip,Adds the link to the panelist guide to the message: in the panelist's language and opened at the section for this incident

@@ -1,0 +1,774 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ayuda: Guía del panelista (ONE bot en Telegram)</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<style>
+  /* Sistema de diseño de la ayuda de ONE (docs/help/GUIA-DISENO-AYUDA.md): mismos tokens y componentes que public/help/incidents-and-availability.*.html */
+  :root {
+    --white: #ffffff; --g50: #f9fafb; --g100: #f3f4f6; --g200: #e5e7eb; --g300: #d1d5db;
+    --g400: #9ca3af; --g500: #6b7280; --g600: #4b5563; --g700: #374151; --g900: #111827;
+    --b50: #eff6ff; --b100: #dbeafe; --b600: #2563eb; --b700: #1d4ed8;
+    --r100: #fee2e2; --r700: #b91c1c; --gr100: #dcfce7; --gr700: #15803d;
+    --y100: #fef9c3; --y800: #854d0e; --p100: #f3e8ff; --p700: #7e22ce;
+    /* Telegram */
+    --tg-head: #517da2; --tg-wall-a: #d4e4bc; --tg-wall-b: #a9cba6; --tg-dot: rgba(255,255,255,.35);
+    --tg-in: #ffffff; --tg-out: #effdde; --tg-ink: #000000; --tg-time: #8a9aa6; --tg-time-out: #5eaf5c;
+    --tg-key: rgba(52, 92, 60, .42); --tg-ring: #ffd23f; --tg-photo: #c7d3dc;
+    color-scheme: light;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+      'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    -webkit-font-smoothing: antialiased; background: var(--g50); color: var(--g700); line-height: 1.6; font-size: 15px;
+  }
+  a { color: var(--b600); }
+  .layout { display: flex; min-height: 100vh; }
+
+  .side {
+    width: 272px; flex-shrink: 0; background: var(--white); border-right: 1px solid var(--g200);
+    position: sticky; top: 0; height: 100vh; overflow-y: auto; display: flex; flex-direction: column;
+  }
+  .brand { padding: 24px 24px 16px; }
+  .brand h1 { font-size: 24px; line-height: 32px; font-weight: 700; color: var(--g900); }
+  .brand p { font-size: 14px; color: var(--g500); margin-top: 4px; }
+  .brand .doc { margin-top: 16px; font-size: 12px; font-weight: 600; color: var(--b700); background: var(--b50);
+    display: inline-block; padding: 2px 10px; border-radius: 999px; }
+  .nav { padding: 8px 12px 24px; flex: 1; }
+  .nav h3 { font-size: 12px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--g400);
+    padding: 16px 12px 6px; margin: 0; }
+  .nav a {
+    display: block; padding: 8px 12px; border-radius: 8px; font-size: 14px; font-weight: 500; color: var(--g600);
+    text-decoration: none; transition: background .15s, color .15s;
+  }
+  .nav a:hover { background: var(--g100); }
+  .nav a.active { background: var(--b50); color: var(--b700); }
+  .side-foot { padding: 16px 24px; border-top: 1px solid var(--g200); font-size: 12px; color: var(--g500); }
+
+  .main { flex: 1; min-width: 0; padding: 40px 32px 80px; }
+  .page { max-width: 880px; margin: 0 auto; }
+  .page > header { margin-bottom: 32px; }
+  .page > header h2 { font-size: 30px; line-height: 38px; font-weight: 700; color: var(--g900); }
+  .page > header p { margin-top: 8px; font-size: 17px; color: var(--g600); max-width: 640px; }
+  section { margin-top: 48px; }
+  section > h2 { font-size: 22px; font-weight: 700; color: var(--g900); padding-bottom: 8px; margin-bottom: 16px;
+    border-bottom: 1px solid var(--g200); }
+  h3 { font-size: 17px; font-weight: 600; color: var(--g900); margin: 28px 0 8px; }
+  p { margin: 8px 0; }
+  ul, ol { margin: 8px 0 8px 22px; }
+  li { margin: 4px 0; }
+  strong { color: var(--g900); font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px;
+    background: var(--g100); border: 1px solid var(--g200); border-radius: 6px; padding: 1px 6px; color: var(--g900); }
+  .card { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 20px 24px; margin: 16px 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin: 16px 0; }
+  .grid .card { margin: 0; }
+  .card h4 { font-size: 15px; font-weight: 600; color: var(--g900); margin-bottom: 4px; }
+  .card p { margin: 4px 0; font-size: 14px; color: var(--g600); }
+  .card .ico { font-size: 22px; display: block; margin-bottom: 6px; }
+
+  .btn { display: inline-block; font-size: 13px; font-weight: 500; padding: 2px 10px; border-radius: 8px;
+    background: var(--white); border: 1px solid var(--g300); color: var(--g700); white-space: nowrap; }
+
+  .callout { border-radius: 12px; padding: 14px 18px; margin: 16px 0; font-size: 14px; border: 1px solid; }
+  .callout.info { background: var(--b50); border-color: var(--b100); color: #1e3a8a; }
+  .callout.ok { background: #f0fdf4; border-color: var(--gr100); color: #14532d; }
+  .callout.warn { background: #fffbeb; border-color: var(--y100); color: var(--y800); }
+  .callout strong { color: inherit; }
+
+  .table-wrap { overflow-x: auto; margin: 16px 0; background: var(--white); border: 1px solid var(--g200); border-radius: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--g500); background: var(--g50); padding: 10px 14px; border-bottom: 1px solid var(--g200); }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--g100); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  td:first-child { font-weight: 500; color: var(--g900); }
+
+  ol.steps { list-style: none; margin: 12px 0; counter-reset: s; }
+  ol.steps > li { counter-increment: s; position: relative; padding: 4px 0 12px 44px; margin: 0; }
+  ol.steps > li::before {
+    content: counter(s); position: absolute; left: 0; top: 2px; width: 28px; height: 28px; border-radius: 50%;
+    background: var(--b100); color: var(--b700); font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center;
+  }
+
+  .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; align-items: start; }
+  .cap { font-size: 13px; color: var(--g500); }
+
+  /* Casos: tarjeta con situación, pasos y chat */
+  .case { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 20px 24px; margin: 16px 0; scroll-margin-top: 24px; }
+  .case > h3 { margin: 0; display: flex; gap: 10px; align-items: center; }
+  .case > .sit { color: var(--g500); font-size: 14px; margin: 2px 0 12px; }
+  .case .callout { margin: 8px 0; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+  .chips a { text-decoration: none; font-size: 13px; font-weight: 500; padding: 4px 12px; border-radius: 999px;
+    background: var(--white); border: 1px solid var(--g200); color: var(--g700); }
+  .chips a:hover { background: var(--b50); border-color: var(--b100); color: var(--b700); }
+
+  details { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; margin: 8px 0; }
+  summary { cursor: pointer; padding: 14px 18px; font-weight: 600; color: var(--g900); list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: '+'; color: var(--g400); font-size: 20px; line-height: 1; }
+  details[open] summary::after { content: '\2212'; }
+  details > div { padding: 0 18px 14px; color: var(--g600); font-size: 14px; }
+  a:focus-visible, summary:focus-visible { outline: 2px solid var(--b600); outline-offset: 2px; border-radius: 6px; }
+
+  /* Componente Telegram (canónico: ver docs/help/GUIA-DISENO-AYUDA.md §5) */
+  .tg { max-width: 380px; border-radius: 16px; overflow: hidden; border: 1px solid var(--g200);
+    box-shadow: 0 4px 16px rgba(17,24,39,.10); background: var(--tg-in); }
+  .tg-head { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: var(--tg-head); color: #ffffff; }
+  .tg-back { font-size: 20px; line-height: 1; opacity: .9; }
+  .tg-av { width: 36px; height: 36px; border-radius: 50%; flex: none; display: grid; place-items: center;
+    background: linear-gradient(160deg, #72c2f4, #3d8fd9); color: #ffffff; font-weight: 700; font-size: 12px; }
+  .tg-name { flex: 1; min-width: 0; line-height: 1.2; }
+  .tg-name b { display: block; font-size: 15px; color: #ffffff; font-weight: 600; }
+  .tg-name small { font-size: 12.5px; opacity: .8; }
+  .tg-body { display: flex; flex-direction: column; gap: 6px; padding: 12px 10px 14px;
+    background-color: var(--tg-wall-a);
+    background-image: radial-gradient(var(--tg-dot) 1.4px, transparent 1.6px), linear-gradient(160deg, var(--tg-wall-a), var(--tg-wall-b));
+    background-size: 18px 18px, 100% 100%; }
+  .tg-msg { max-width: 84%; padding: 6px 9px 7px 10px; border-radius: 12px; font-size: 14.5px; line-height: 1.38; color: var(--tg-ink);
+    box-shadow: 0 1px 1px rgba(0,0,0,.13); overflow-wrap: anywhere; }
+  .tg-msg.in { background: var(--tg-in); align-self: flex-start; border-bottom-left-radius: 4px; }
+  .tg-msg.out { background: var(--tg-out); align-self: flex-end; border-bottom-right-radius: 4px; }
+  .tg-msg .t { float: right; font-size: 11px; color: var(--tg-time); margin: 8px 0 -4px 10px; line-height: 1; }
+  .tg-msg.out .t { color: var(--tg-time-out); }
+  .tg-msg.out .t::after { content: " \2713\2713"; letter-spacing: -2px; }
+  .tg-msg.photo { padding: 3px; }
+  .tg-msg.photo .img { display: grid; place-items: center; width: 170px; height: 104px; border-radius: 10px; background: var(--tg-photo); font-size: 30px; }
+  .tg-msg.photo .t { position: relative; margin: -18px 8px 4px 0; }
+  .tg-kb { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; align-self: flex-start; width: 84%; margin-top: -2px; }
+  .tg-kb.one { grid-template-columns: 1fr; }
+  .tg-kb span { background: var(--tg-key); color: #ffffff; border-radius: 8px; padding: 7px 6px; text-align: center; font-size: 13.5px; font-weight: 600; }
+  .tg-kb span.tap { box-shadow: inset 0 0 0 2px var(--tg-ring); }
+  .tg-kb span.tap::after { content: " \1F446"; }
+  .tg-input { display: flex; align-items: center; gap: 12px; padding: 9px 14px; background: #ffffff; color: var(--tg-time); font-size: 14px; }
+  .tg-input .ph { flex: 1; }
+
+  /* Derecha a izquierda (árabe) */
+  [dir=rtl] .side { border-right: 0; border-left: 1px solid var(--g200); }
+  [dir=rtl] th, [dir=rtl] td, [dir=rtl] .nav a { text-align: right; }
+  [dir=rtl] ul, [dir=rtl] ol { margin: 8px 22px 8px 0; }
+  [dir=rtl] ol.steps > li { padding: 4px 44px 12px 0; }
+  [dir=rtl] ol.steps > li::before { left: auto; right: 0; }
+  [dir=rtl] .tg-msg.in { border-bottom-left-radius: 12px; border-bottom-right-radius: 4px; }
+  [dir=rtl] .tg-msg.out { border-bottom-right-radius: 12px; border-bottom-left-radius: 4px; }
+  [dir=rtl] .tg-msg .t { float: left; margin: 8px 10px -4px 0; }
+  [dir=rtl] .tg-back { transform: scaleX(-1); }
+  [dir=rtl] .mobile-top span { margin-left: 0; margin-right: 6px; }
+
+  .mobile-top { display: none; }
+  @media (max-width: 900px) {
+    .layout { display: block; }
+    .side { display: none; }
+    .mobile-top { display: block; position: sticky; top: 0; z-index: 5; background: var(--white); border-bottom: 1px solid var(--g200); padding: 10px 16px; }
+    .mobile-top b { font-size: 18px; color: var(--g900); }
+    .mobile-top span { font-size: 13px; color: var(--g500); margin-left: 6px; }
+    .mobile-top select { width: 100%; margin-top: 8px; padding: 8px; border: 1px solid var(--g300); border-radius: 8px; font-size: 14px; background: var(--white); color: var(--g700); }
+    .main { padding: 24px 16px 64px; }
+    .page > header h2 { font-size: 24px; line-height: 32px; }
+    .case { padding: 16px; }
+    .tg { max-width: none; }
+  }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+
+<div class="mobile-top">
+  <b>ONE</b><span>for Regulators &middot; Ayuda</span>
+  <select id="jump" aria-label="Ir a la sección"></select>
+</div>
+<div class="layout">
+  <aside class="side">
+    <div class="brand">
+      <h1>ONE</h1>
+      <p>for Regulators</p>
+      <span class="doc">Ayuda &middot; Panelistas</span>
+    </div>
+    <nav class="nav" id="nav">
+      <h3>Primeros pasos</h3>
+      <a href="#reglas">Tres reglas</a>
+      <a href="#empezar">Abrir el bot</a>
+      <a href="#menu">Los botones del menú</a>
+      <h3>Tu día a día</h3>
+      <a href="#recordatorio">El aviso de las 09:00</a>
+      <a href="#enviar">Enviar un paquete</a>
+      <a href="#recibir">Recibir un paquete</a>
+      <h3>Si tienes un problema</h3>
+      <a href="#reportar">Reportar un problema</a>
+      <a href="#c-material">Me falta material</a>
+      <a href="#c-roto">Paquete roto o dañado</a>
+      <a href="#c-devuelto">Me han devuelto un envío</a>
+      <a href="#c-ilegible">No puedo leer una etiqueta</a>
+      <a href="#c-foto">No puedo hacer la foto del tag</a>
+      <a href="#c-como">Duda sobre cómo enviar</a>
+      <a href="#c-datos">Cambiar mis datos</a>
+      <a href="#c-otro">Otro problema</a>
+      <a href="#c-vacaciones">Días no disponibles</a>
+      <h3>Mensajes que te pueden llegar</h3>
+      <a href="#m-llega-material">¿Has recibido el material?</a>
+      <a href="#m-donar">Envía material a otro panelista</a>
+      <a href="#m-liberados">Ya puedes enviar estos</a>
+      <a href="#m-responsable">Mensaje de tu responsable</a>
+      <h3>Referencia</h3>
+      <a href="#preguntas">Preguntas</a>
+    </nav>
+    <div class="side-foot">Actualizado el 22 de octubre de 2026</div>
+  </aside>
+
+  <main class="main">
+  <div class="page">
+    <header>
+      <h2>Guía del panelista: el ONE bot en Telegram</h2>
+      <p>Con el ONE bot todo se hace con botones. Aquí tienes qué hace cada botón, qué elegir si tienes un problema y qué puede pasar después.</p>
+    </header>
+
+    <section id="reglas">
+      <h2>Tres reglas</h2>
+      <div class="grid">
+        <div class="card"><span class="ico">👆</span><h4>Pulsa los botones</h4><p>El bot siempre te ofrece las opciones. No hace falta escribir órdenes.</p></div>
+        <div class="card"><span class="ico">⚠️</span><h4>Un problema: «Reportar incidente»</h4><p>Pulsa ese botón y elige qué te pasa en la lista.</p></div>
+        <div class="card"><span class="ico">✍️</span><h4>Escribe solo cuando te lo pidan</h4><p>Un número, un código o un dato nuevo. Y para hablar con tu responsable.</p></div>
+      </div>
+    </section>
+
+    <section id="empezar">
+      <h2>Abrir el bot</h2>
+      <div class="two">
+        <div>
+          <p>Abre el chat del <strong>ONE bot</strong> en Telegram y escribe <code>/start</code>. Aparece el menú.</p>
+          <div class="callout info"><strong>¿Te has perdido?</strong> Escribe <code>/start</code> en cualquier momento y vuelves al menú.</div>
+          <p class="cap">El bot te habla en el idioma de tu perfil. Para cambiarlo, mira <a href="#c-datos">Cambiar mis datos</a>.</p>
+        </div>
+        <div class="tg" aria-label="Ejemplo: abrir el menú">
+          <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
+          <div class="tg-body">
+            <div class="tg-msg out">/start<span class="t">09:40</span></div>
+            <div class="tg-msg in">Hola Marta, ¿qué necesitas?<span class="t">09:40</span></div>
+            <div class="tg-kb one">
+              <span>Ver envíos pendientes</span><span>Ver paquetes a recibir</span>
+              <span>Confirmar un envío</span><span>Confirmar una recepción</span>
+              <span>Reportar incidente</span><span>🗓️ Días no disponibles</span>
+              <span>📦 Confirmar material recibido</span><span>📖 Ayuda</span>
+            </div>
+          </div>
+          <div class="tg-input"><span>📎</span><span class="ph">Mensaje</span><span>🎤</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="menu">
+      <h2>Los botones del menú</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Botón</th><th>Para qué sirve</th></tr></thead>
+        <tbody>
+          <tr><td>Ver envíos pendientes</td><td>Los paquetes que tienes que enviar, numerados.</td></tr>
+          <tr><td>Ver paquetes a recibir</td><td>Los paquetes que vienen hacia ti esta semana.</td></tr>
+          <tr><td>Confirmar un envío</td><td>Avisas de que ya has enviado un paquete.</td></tr>
+          <tr><td>Confirmar una recepción</td><td>Avisas de que te ha llegado un paquete.</td></tr>
+          <tr><td>Reportar incidente</td><td>Eliges qué problema tienes en una lista de botones.</td></tr>
+          <tr><td>🗓️ Días no disponibles</td><td>Avisas de los días en que no puedes enviar ni recibir.</td></tr>
+          <tr><td>📦 Confirmar material recibido</td><td>Avisas de que te ha llegado material (sobres, precintos…).</td></tr>
+          <tr><td>📖 Ayuda</td><td>Abre esta guía. También puedes escribir <code>/ayuda</code>.</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="recordatorio">
+      <h2>El aviso de las 09:00</h2>
+      <p>Cada mañana a las 09:00 el bot te manda la lista de paquetes que te toca enviar ese día. No tienes que pedirla. Los envíos son solo de lunes a viernes.</p>
+    </section>
+
+    <section id="enviar">
+      <h2>Enviar un paquete</h2>
+      <div class="two">
+        <ol class="steps">
+          <li>Pulsa <span class="btn">Confirmar un envío</span>.</li>
+          <li>Escribe el <strong>número</strong> del envío en la lista.</li>
+          <li>Haz una <strong>foto a la etiqueta</strong> y mándala, o escribe el código de la etiqueta.</li>
+        </ol>
+        <div class="tg" aria-label="Ejemplo: confirmar un envío">
+          <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
+          <div class="tg-body">
+            <div class="tg-kb one"><span class="tap">Confirmar un envío</span></div>
+            <div class="tg-msg in">🔢 Escribe el <strong>número</strong> del envío que quieres declarar de la lista actual.<span class="t">10:12</span></div>
+            <div class="tg-msg out">2<span class="t">10:12</span></div>
+            <div class="tg-msg in">📸 Haz una foto a la <strong>etiqueta de código de barras</strong> del paquete y envíala aquí — o escribe el código del tag.<span class="t">10:12</span></div>
+            <div class="tg-msg out photo"><div class="img">🖼️</div><span class="t">10:13</span></div>
+          </div>
+          <div class="tg-input"><span>📎</span><span class="ph">Mensaje</span><span>🎤</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="recibir">
+      <h2>Recibir un paquete</h2>
+      <div class="two">
+        <ol class="steps">
+          <li>Pulsa <span class="btn">Confirmar una recepción</span>.</li>
+          <li>Manda la <strong>foto del tag</strong> del paquete, o escribe su código.</li>
+        </ol>
+        <div class="tg" aria-label="Ejemplo: confirmar una recepción">
+          <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
+          <div class="tg-body">
+            <div class="tg-kb one"><span class="tap">Confirmar una recepción</span></div>
+            <div class="tg-msg in">📥 Modo recepción. Envíame ahora la <strong>foto del tag</strong> del paquete que has recibido o escribe el <strong>código alfanumérico</strong> de la etiqueta.<span class="t">17:05</span></div>
+            <div class="tg-msg out photo"><div class="img">🖼️</div><span class="t">17:06</span></div>
+            <div class="tg-msg in">Recepción registrada, gracias.<span class="t">17:06</span></div>
+          </div>
+          <div class="tg-input"><span>📎</span><span class="ph">Mensaje</span><span>🎤</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="reportar">
+      <h2>Reportar un problema</h2>
+      <div class="two">
+        <div>
+          <ol class="steps">
+            <li>Pulsa <span class="btn">Reportar incidente</span>.</li>
+            <li>Elige en la lista lo que te pasa.</li>
+            <li>Sigue los botones que te ofrece el bot. Abajo tienes qué pasa en cada caso.</li>
+          </ol>
+          <div class="callout info"><strong>¿Es sobre un paquete concreto?</strong> Ábrelo antes en <span class="btn">Ver envíos pendientes</span> y pulsa <strong>⚠️ Reportar incidencia</strong> en ese paquete. Así tu responsable sabe de cuál hablas.</div>
+          <div class="chips">
+            <a href="#c-material">📦 Me falta material</a><a href="#c-roto">💥 Paquete roto</a><a href="#c-devuelto">↩️ Me han devuelto un envío</a>
+            <a href="#c-ilegible">🔍 No puedo leer una etiqueta</a><a href="#c-foto">📷 Foto del tag</a><a href="#c-como">❓ Duda sobre cómo enviar</a>
+            <a href="#c-datos">📱 Cambiar mis datos</a><a href="#c-otro">💬 Otro problema</a><a href="#c-vacaciones">🗓️ Días no disponibles</a>
+          </div>
+        </div>
+        <div class="tg" aria-label="Ejemplo: elegir el problema">
+          <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
+          <div class="tg-body">
+            <div class="tg-kb one"><span class="tap">Reportar incidente</span></div>
+            <div class="tg-msg in">⚠️ ¿Qué ha pasado? Elige una opción:<span class="t">11:02</span></div>
+            <div class="tg-kb one">
+              <span>📦 Me falta material</span><span>💥 Paquete roto o dañado</span><span>↩️ Me han devuelto un envío</span>
+              <span>🔍 No puedo leer una etiqueta</span><span>📷 No puedo hacer la foto del tag</span><span>❓ Duda sobre cómo enviar</span>
+              <span>📱 Cambiar mis datos</span><span>💬 Otro problema</span><span>🗓️ Días no disponibles</span><span>↩️ Volver al menú</span>
+            </div>
+          </div>
+          <div class="tg-input"><span>📎</span><span class="ph">Mensaje</span><span>🎤</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="casos">
+      <h2>Qué pasa con cada problema</h2>
+
+      <article class="case" id="c-material">
+        <h3>📦 Me falta material</h3>
+        <p class="sit">Se te han acabado los sobres, precintos u otro material para preparar los envíos.</p>
+        <div class="two">
+          <div>
+            <ol class="steps">
+              <li>Pulsa <span class="btn">Reportar incidente</span> y luego <strong>📦 Me falta material</strong>.</li>
+              <li>Listo. Tu responsable ya lo sabe y prepara el reparto.</li>
+            </ol>
+            <div class="callout ok"><strong>Qué puede pasar después:</strong>
+              <ul>
+                <li><strong>Te llega material</strong> de otro panelista de tu ciudad o de la oficina central. Cuando debería haber llegado, el bot te pregunta <em>«¿Has recibido el material…?»</em> (<a href="#m-llega-material">ver</a>).</li>
+                <li><strong>Mientras no te llega, el bot deja de recordarte</strong> los envíos que no puedes hacer. No es un error.</li>
+                <li>Si va a tardar, <strong>tus envíos de esos días pueden pasar a otros panelistas</strong>. El bot te avisa.</li>
+                <li>Cuando recibes el material, el bot te dice <em>«Ya puedes enviar estos: …»</em> con la fecha y el destino de cada uno (<a href="#m-liberados">ver</a>).</li>
+                <li>Tu responsable puede escribirte para preguntarte algo (<a href="#m-responsable">ver</a>).</li>
+              </ul>
+            </div>
+          </div>
+          <div class="tg">
+            <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
+            <div class="tg-body">
+              <div class="tg-msg in">⚠️ ¿Qué ha pasado? Elige una opción:<span class="t">09:55</span></div>
+              <div class="tg-kb one"><span class="tap">📦 Me falta material</span></div>
+              <div class="tg-msg in">Registrado, gracias por avisar.<span class="t">09:55</span></div>
+            </div>
+            <div class="tg-input"><span>📎</span><span class="ph">Mensaje</span><span>🎤</span></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="case" id="c-roto">
+        <h3>💥 Paquete roto o dañado</h3>
+        <p class="sit">Al recibirlo ves la caja rota, mojada o abierta.</p>
+        <div class="two">
+          <div>
+            <ol class="steps">
+              <li>Pulsa <span class="btn">Reportar incidente</span> y luego <strong>💥 Paquete roto o dañado</strong>.</li>
+              <li>Si puedes leer la etiqueta, confirma la recepción como siempre.</li>
+            </ol>
+            <div class="callout ok"><strong>Qué puede pasar después:</strong> nada más. Queda anotado para la medición y no tienes que hacer nada.</div>
+          </div>
+          <div class="tg">
+            <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
+            <div class="tg-body">
+              <div class="tg-msg in">⚠️ ¿Qué ha pasado? Elige una opción:<span class="t">11:02</span></div>
+              <div class="tg-kb one"><span class="tap">💥 Paquete roto o dañado</span></div>
+              <div class="tg-msg in">Registrado, gracias por avisar.<span class="t">11:02</span></div>
+            </div>
+            <div class="tg-input"><span>📎</span><span class="ph">Mensaje</span><span>🎤</span></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="case" id="c-devuelto">
+        <h3>↩️ Me han devuelto un envío</h3>
+        <p class="sit">Un paquete que mandaste ha vuelto a tu casa.</p>
+        <div class="two">
+          <div>
+            <ol class="steps">
+              <li>Abre el paquete en <span class="btn">Ver envíos pendientes</span> si está, y pulsa <strong>⚠️ Reportar incidencia</strong>. Si no, usa <span class="btn">Reportar incidente</span>.</li>
+              <li>Elige <strong>↩️ Me han devuelto un envío</strong>.</li>
+              <li>Guarda el paquete y su etiqueta. No lo tires.</li>
+            </ol>
+            <div class="callout ok"><strong>Qué puede pasar después:</strong>
+              <ul>
+                <li>Tu responsable puede <strong>pedirte que lo envíes otra vez a otro destino</strong> de la misma ciudad. Aparecerá en tu lista de envíos pendientes con su nueva fecha.</li>
+                <li>O puede <strong>anularlo</strong>: entonces ya no tienes que hacer nada con él.</li>
+                <li>Si necesita algo (por ejemplo, una foto de la etiqueta), te escribe en este chat.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="tg">
+            <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
+            <div class="tg-body">
+              <div class="tg-msg in">⚠️ ¿Qué ha pasado? Elige una opción:<span class="t">12:20</span></div>
+              <div class="tg-kb one"><span class="tap">↩️ Me han devuelto un envío</span></div>
+              <div class="tg-msg in">Registrado. Tu responsable revisará qué hacer con este envío.<span class="t">12:20</span></div>
+            </div>
+            <div class="tg-input"><span>📎</span><span class="ph">Mensaje</span><span>🎤</span></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="case" id="c-ilegible">
+        <h3>🔍 No puedo leer una etiqueta</h3>
+        <p class="sit">Te ha llegado un paquete y su etiqueta está borrada, rota o tapada.</p>
+        <div class="two">
+          <div>
+            <ol class="steps">
+              <li>Pulsa <span class="btn">Reportar incidente</span> y luego <strong>🔍 No puedo leer una etiqueta</strong>.</li>
+              <li>El bot te enseña los paquetes que vienen hacia ti. Pulsa <strong>✅ Es este</strong> en el que te ha llegado.</li>
+              <li>Si no está, pulsa <strong>❌ Ninguno</strong>.</li>
+            </ol>
+            <div class="callout ok"><strong>Qué puede pasar después:</strong>
+              <ul>
+                <li>Si eliges uno: queda <strong>recibido</strong>. No hace falta foto.</li>
+                <li>Si no está en la lista: <em>«No encuentro envíos en camino hacia ti; un responsable lo revisará.»</em> Tu responsable te escribirá si necesita algo.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="tg">
+            <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
+            <div class="tg-body">
+              <div class="tg-kb one"><span class="tap">🔍 No puedo leer una etiqueta</span></div>
+              <div class="tg-msg in">¿Cuál de estos envíos te ha llegado? Toca el botón del envío correcto.<span class="t">16:40</span></div>
+              <div class="tg-msg in">De Madrid · 20/10<span class="t">16:40</span></div>
+              <div class="tg-kb one"><span>✅ Es este</span></div>
+              <div class="tg-msg in">De Sevilla · 21/10<span class="t">16:40</span></div>
+              <div class="tg-kb one"><span class="tap">✅ Es este</span></div>
+              <div class="tg-msg in">Recepción registrada, gracias.<span class="t">16:41</span></div>
+            </div>
+            <div class="tg-input"><span>📎</span><span class="ph">Mensaje</span><span>🎤</span></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="case" id="c-foto">
+        <h3>📷 No puedo hacer la foto del tag</h3>
+        <p class="sit">Vas a confirmar un envío y la cámara no funciona o la foto sale mal.</p>
+        <div class="two">
+          <div>
+            <ol class="steps">
+              <li>Pulsa <span class="btn">Reportar incidente</span> y luego <strong>📷 No puedo hacer la foto del tag</strong>.</li>
+              <li>Si el bot te lo pide, elige el envío de tu lista.</li>
+              <li>Escribe el <strong>código</strong> del tag, letra a letra.</li>
+            </ol>
+            <div class="callout ok"><strong>Qué puede pasar después:</strong> el envío queda confirmado con el código, igual que con la foto. Tu responsable no tiene que hacer nada.</div>
+            <div class="callout warn"><strong>Consejo:</strong> haz la foto con buena luz, de cerca y sin brillos. Así no tendrás que escribir el código.</div>
+          </div>
+          <div class="tg">
+            <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
+            <div class="tg-body">
+              <div class="tg-kb one"><span class="tap">📷 No puedo hacer la foto del tag</span></div>
+              <div class="tg-msg in">Escribe el código del tag.<span class="t">10:31</span></div>
+              <div class="tg-msg out">E2801170A3F1<span class="t">10:31</span></div>
+              <div class="tg-msg in">✅ Envío registrado.<span class="t">10:31</span></div>
+            </div>
+            <div class="tg-input"><span>📎</span><span class="ph">Mensaje</span><span>🎤</span></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="case" id="c-como">
+        <h3>❓ Duda sobre cómo enviar</h3>
+        <p class="sit">No sabes cómo preparar un paquete, dónde llevarlo o cómo poner la etiqueta.</p>
+        <div class="two">
+          <div>
+            <ol class="steps">
+              <li>Pulsa <span class="btn">Reportar incidente</span> y luego <strong>❓ Duda sobre cómo enviar</strong>.</li>
+              <li>Espera el mensaje de tu responsable.</li>
+            </ol>
+            <div class="callout ok"><strong>Qué puede pasar después:</strong> tu responsable te escribe en este chat para resolver la duda. Pulsa <strong>✍️ Responder</strong> y cuéntale lo que necesites (<a href="#m-responsable">ver</a>).</div>
+          </div>
+          <div class="tg">
+            <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
+            <div class="tg-body">
+              <div class="tg-kb one"><span class="tap">❓ Duda sobre cómo enviar</span></div>
+              <div class="tg-msg in">Registrado. Tu responsable te escribirá aquí.<span class="t">11:46</span></div>
+            </div>
+            <div class="tg-input"><span>📎</span><span class="ph">Mensaje</span><span>🎤</span></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="case" id="c-datos">
+        <h3>📱 Cambiar mis datos</h3>
+        <p class="sit">Has cambiado de teléfono, email, dirección o quieres el bot en otro idioma.</p>
+        <div class="two">
+          <div>
+            <ol class="steps">
+              <li>Pulsa <span class="btn">Reportar incidente</span> y luego <strong>📱 Cambiar mis datos</strong>.</li>
+              <li>Elige qué dato quieres cambiar.</li>
+              <li>Escribe el dato nuevo (el idioma se elige con botones) y confírmalo.</li>
+            </ol>
+            <div class="callout ok"><strong>Qué puede pasar después:</strong> <em>«Datos actualizados.»</em> El cambio se aplica al momento. Si el dato no es válido, el bot te lo dice y no cambia nada.</div>
+          </div>
+          <div class="tg">
+            <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
+            <div class="tg-body">
+              <div class="tg-kb one"><span class="tap">📱 Cambiar mis datos</span></div>
+              <div class="tg-msg in">¿Qué dato quieres cambiar?<span class="t">20:15</span></div>
+              <div class="tg-kb"><span class="tap">📱 Teléfono</span><span>✉️ Email</span><span>🏠 Dirección</span><span>🌐 Idioma</span></div>
+              <div class="tg-msg out">600 123 456<span class="t">20:16</span></div>
+              <div class="tg-kb"><span class="tap">✅ Sí</span><span>❌ No</span></div>
+              <div class="tg-msg in">Datos actualizados.<span class="t">20:16</span></div>
+            </div>
+            <div class="tg-input"><span>📎</span><span class="ph">Mensaje</span><span>🎤</span></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="case" id="c-otro">
+        <h3>💬 Otro problema</h3>
+        <p class="sit">Lo que te pasa no está en la lista.</p>
+        <div class="two">
+          <div>
+            <ol class="steps">
+              <li>Pulsa <span class="btn">Reportar incidente</span> y luego <strong>💬 Otro problema</strong>.</li>
+              <li>Espera el mensaje de tu responsable y contéstale con <strong>✍️ Responder</strong>: ahí sí puedes escribir todo lo que necesites y mandar fotos.</li>
+            </ol>
+            <div class="callout ok"><strong>Qué puede pasar después:</strong> tu responsable te escribe para saber qué pasa y te dice qué hacer.</div>
+          </div>
+          <div class="tg">
+            <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
+            <div class="tg-body">
+              <div class="tg-kb one"><span class="tap">💬 Otro problema</span></div>
+              <div class="tg-msg in">Registrado. Tu responsable te escribirá aquí.<span class="t">14:05</span></div>
+            </div>
+            <div class="tg-input"><span>📎</span><span class="ph">Mensaje</span><span>🎤</span></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="case" id="c-vacaciones">
+        <h3>🗓️ Días no disponibles</h3>
+        <p class="sit">Vacaciones, enfermedad, formación o motivos personales: hay días en que no puedes enviar ni recibir.</p>
+        <div class="two">
+          <div>
+            <ol class="steps">
+              <li>Pulsa <span class="btn">🗓️ Días no disponibles</span> (en el menú o en la lista de problemas) y luego <strong>➕ Declarar días no disponibles</strong>.</li>
+              <li>Pulsa <strong>Hoy</strong> o <strong>Mañana</strong>. Si son otros días, pulsa <strong>✏️ Desde–hasta</strong> y escribe las fechas así: <code>2026-11-09 a 2026-11-13</code> (o una sola fecha si es un día).</li>
+              <li>Revisa las fechas y pulsa <strong>✅ Confirmar</strong>.</li>
+            </ol>
+            <p class="cap">Con <strong>📋 Ver mis días no disponibles</strong> ves los que tienes y puedes anularlos con <strong>❌ Cancelar estos días</strong>.</p>
+            <div class="callout ok"><strong>Qué puede pasar después:</strong>
+              <ul>
+                <li>Los envíos que te tocaban esos días <strong>se pasan a otra fecha o a otro panelista</strong> de tu ciudad. No tienes que hacer nada.</li>
+                <li>Esos días el bot no te manda el aviso de las 09:00.</li>
+                <li>Tu responsable puede escribirte si necesita algo.</li>
+              </ul>
+            </div>
+            <div class="callout warn"><strong>Avisa con tiempo.</strong> Solo fechas futuras y como máximo 90 días seguidos.</div>
+          </div>
+          <div class="tg">
+            <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
+            <div class="tg-body">
+              <div class="tg-kb one"><span class="tap">🗓️ Días no disponibles</span></div>
+              <div class="tg-msg in">¿Qué quieres hacer con tus días no disponibles?<span class="t">18:10</span></div>
+              <div class="tg-kb one"><span class="tap">➕ Declarar días no disponibles</span><span>📋 Ver mis días no disponibles</span><span>⬅️ Volver al menú</span></div>
+              <div class="tg-msg in">¿Cuándo no estarás disponible?<span class="t">18:10</span></div>
+              <div class="tg-kb"><span>Hoy</span><span>Mañana</span></div>
+              <div class="tg-kb one"><span class="tap">✏️ Desde–hasta</span></div>
+              <div class="tg-msg in">Escribe el rango en formato <code>2026-08-20 a 2026-08-25</code>.<br>Si es un solo día, escribe solo esa fecha.<span class="t">18:10</span></div>
+              <div class="tg-msg out">2026-11-09 a 2026-11-13<span class="t">18:11</span></div>
+              <div class="tg-msg in">Vas a declararte no disponible del <strong>09/11/2026</strong> al <strong>13/11/2026</strong> (5 días). ¿Confirmas?<span class="t">18:11</span></div>
+              <div class="tg-kb"><span class="tap">✅ Confirmar</span><span>❌ Descartar</span></div>
+              <div class="tg-msg in">Recibido. Gracias por informar.<br>No disponible: <strong>09/11/2026 – 13/11/2026</strong>.<span class="t">18:11</span></div>
+            </div>
+            <div class="tg-input"><span>📎</span><span class="ph">Mensaje</span><span>🎤</span></div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section id="mensajes">
+      <h2>Mensajes que te pueden llegar</h2>
+      <p>A veces es el bot quien te escribe primero. Estos son los avisos que puedes recibir y qué tienes que pulsar.</p>
+
+      <article class="case" id="m-llega-material">
+        <h3>📬 «¿Has recibido el material…?»</h3>
+        <p class="sit">Te enviaron material (porque te faltaba) y el bot quiere saber si ya lo tienes.</p>
+        <div class="two">
+          <div>
+            <ol class="steps">
+              <li>Si ya lo tienes, pulsa <strong>✅ Sí</strong>. Si no, <strong>⏳ Todavía no</strong>: te lo volverá a preguntar más adelante.</li>
+              <li>Por cada material, pulsa <strong>✅ Todo</strong> si ha llegado completo, u <strong>✏️ Otra cantidad</strong> y escribe el número que te ha llegado.</li>
+            </ol>
+            <div class="callout ok"><strong>Qué puede pasar después:</strong>
+              <ul>
+                <li>Si llegó todo, se cierra y el bot te dice qué envíos ya puedes hacer.</li>
+                <li>Si falta algo, te preguntará por el resto más adelante.</li>
+                <li>Si después de varias preguntas no contestas, tu responsable recibe un aviso y te puede escribir.</li>
+              </ul>
+            </div>
+            <div class="callout info"><strong>¿Te llegó y el bot no te ha preguntado?</strong> Pulsa <span class="btn">📦 Confirmar material recibido</span> en el menú.</div>
+          </div>
+          <div class="tg">
+            <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
+            <div class="tg-body">
+              <div class="tg-msg in">¿Has recibido el material de Ana P. (sobres, precintos)?<span class="t">13:00</span></div>
+              <div class="tg-kb"><span class="tap">✅ Sí</span><span>⏳ Todavía no</span></div>
+              <div class="tg-msg in">Sobres: ¿cuánto te ha llegado?<span class="t">13:01</span></div>
+              <div class="tg-kb"><span class="tap">✅ Todo (200)</span><span>✏️ Otra cantidad</span></div>
+              <div class="tg-msg in">Precintos: ¿cuánto te ha llegado?<span class="t">13:01</span></div>
+              <div class="tg-kb"><span>✅ Todo (300)</span><span class="tap">✏️ Otra cantidad</span></div>
+              <div class="tg-msg in">Escribe cuántas unidades de Precintos te han llegado (un número de 0 a 300).<span class="t">13:01</span></div>
+              <div class="tg-msg out">150<span class="t">13:02</span></div>
+              <div class="tg-msg in">Anotado; te preguntaremos por el resto.<span class="t">13:02</span></div>
+            </div>
+            <div class="tg-input"><span>📎</span><span class="ph">Mensaje</span><span>🎤</span></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="case" id="m-donar">
+        <h3>🤝 Envía material a otro panelista</h3>
+        <p class="sit">Tienes material de sobra y a otro panelista de tu ciudad le falta. Te puede pasar aunque tú no hayas reportado nada.</p>
+        <div class="two">
+          <div>
+            <ol class="steps">
+              <li>El bot te dice qué material, cuánto, a quién (nombre y dirección) y para cuándo debe llegar.</li>
+              <li>Prepáralo y envíalo por correo normal.</li>
+              <li>Cuando lo hayas enviado, pulsa <strong>📦 Ya lo he enviado</strong>. Basta con una vez.</li>
+            </ol>
+            <div class="callout ok"><strong>Qué puede pasar después:</strong>
+              <ul>
+                <li>Ese material se descuenta de tu stock. No tienes que hacer nada más.</li>
+                <li>Si no pulsas el botón, el bot te lo recuerda cada dos días. Tras dos recordatorios, avisa a tu responsable.</li>
+                <li>Si no puedes enviarlo, pulsa <span class="btn">Reportar incidente</span> → <strong>💬 Otro problema</strong> y tu responsable te escribirá.</li>
+              </ul>
+            </div>
+            <div class="callout info"><strong>Privacidad:</strong> solo verás el nombre y la dirección del otro panelista, nunca su teléfono ni su email.</div>
+          </div>
+          <div class="tg">
+            <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
+            <div class="tg-body">
+              <div class="tg-msg in">📦 Tu responsable te pide que envíes este material a otro panelista:<br><br>• 350 sobres de documentos exprés<br>A: <strong>Pablo Ruiz</strong>, C/ Mayor 12, Toledo<br>Debe llegar antes del 03/11.<span class="t">10:00</span></div>
+              <div class="tg-kb one"><span class="tap">📦 Ya lo he enviado</span></div>
+              <div class="tg-msg in">Gracias, anotado.<span class="t">15:47</span></div>
+            </div>
+            <div class="tg-input"><span>📎</span><span class="ph">Mensaje</span><span>🎤</span></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="case" id="m-liberados">
+        <h3>✅ «Ya puedes enviar estos: …»</h3>
+        <p class="sit">Tenías envíos parados por falta de material y ya tienes material suficiente.</p>
+        <div class="two">
+          <div>
+            <p>El bot te lista los envíos que ya puedes hacer, con su fecha y su destino. Desde ese momento vuelven a salir en el aviso de las 09:00.</p>
+            <div class="callout ok"><strong>Qué tienes que hacer:</strong> enviarlos como siempre y confirmarlos con <span class="btn">Confirmar un envío</span>.</div>
+          </div>
+          <div class="tg">
+            <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
+            <div class="tg-body">
+              <div class="tg-msg in">Ya puedes enviar estos:<br>• 26/10 → Burgos<br>• 28/10 → Lyon<span class="t">13:02</span></div>
+            </div>
+            <div class="tg-input"><span>📎</span><span class="ph">Mensaje</span><span>🎤</span></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="case" id="m-responsable">
+        <h3>📌 Mensaje de tu responsable</h3>
+        <p class="sit">Tu responsable te escribe sobre algo que reportaste. Es el único momento en que escribes libremente.</p>
+        <div class="two">
+          <div>
+            <ol class="steps">
+              <li>Lee el mensaje. Arriba pone de qué se trata.</li>
+              <li>Pulsa <strong>✍️ Responder</strong> y escribe lo que necesites. También puedes mandar <strong>fotos</strong>.</li>
+              <li>Cuando termines, pulsa <strong>↩️ Volver al menú</strong>.</li>
+            </ol>
+            <div class="callout ok"><strong>Qué puede pasar después:</strong> tu responsable lee tu respuesta y te puede volver a escribir. La conversación se cierra sola cuando el tema se resuelve o tras 48 horas sin mensajes.</div>
+          </div>
+          <div class="tg">
+            <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
+            <div class="tg-body">
+              <div class="tg-msg in">📌 Mensaje de tu responsable sobre tu incidencia «Envío devuelto»<br><br>Hola Pablo, ¿puedes guardar la etiqueta?<span class="t">09:20</span></div>
+              <div class="tg-kb"><span class="tap">✍️ Responder</span><span>↩️ Volver al menú</span></div>
+              <div class="tg-msg in">Escribe tu respuesta y la recibirá tu responsable.<span class="t">09:21</span></div>
+              <div class="tg-msg out">Sí, la tengo. Te mando foto.<span class="t">09:22</span></div>
+              <div class="tg-msg out photo"><div class="img">🖼️</div><span class="t">09:22</span></div>
+            </div>
+            <div class="tg-input"><span>📎</span><span class="ph">Mensaje</span><span>🎤</span></div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section id="preguntas">
+      <h2>Preguntas</h2>
+      <details><summary>¿Tengo que escribir para contar un problema?</summary><div>No. Pulsa <strong>Reportar incidente</strong> y elige en la lista. Solo escribes si tu responsable te pregunta algo.</div></details>
+      <details><summary>Me equivoqué de botón.</summary><div>Pulsa <strong>↩️ Volver al menú</strong> si sale. Si ya quedó registrado, elige <strong>💬 Otro problema</strong> y explícaselo a tu responsable cuando te escriba.</div></details>
+      <details><summary>¿Por qué ya no me recuerda algunos envíos?</summary><div>Porque te falta material para hacerlos. Cuando te llegue, el bot te dirá «Ya puedes enviar estos».</div></details>
+      <details><summary>¿Me pueden quitar envíos?</summary><div>Sí, si avisas de días no disponibles o si te falta material durante un tiempo: pasan a otra fecha o a otro panelista de tu ciudad.</div></details>
+      <details><summary>¿Me pueden pedir que envíe material a otro panelista?</summary><div>Sí, si tienes de sobra. El bot te dice qué, cuánto, a quién y para cuándo. Pulsa «📦 Ya lo he enviado» cuando lo mandes.</div></details>
+      <details><summary>¿Hay envíos en fin de semana?</summary><div>No. Los envíos son solo de lunes a viernes.</div></details>
+      <p class="cap" style="margin-top:24px">Los mensajes del bot pueden cambiar ligeramente según tu idioma y tu caso. Los nombres, fechas y códigos de esta guía son ejemplos.</p>
+    </section>
+  </div>
+  </main>
+</div>
+
+<script>
+(function () {
+  var links = Array.prototype.slice.call(document.querySelectorAll('#nav a'));
+  var sections = links.map(function (a) { return document.querySelector(a.getAttribute('href')); }).filter(Boolean);
+
+  var jump = document.getElementById('jump');
+  links.forEach(function (a) {
+    var o = document.createElement('option');
+    o.value = a.getAttribute('href'); o.textContent = a.textContent; jump.appendChild(o);
+  });
+  jump.addEventListener('change', function () { location.hash = jump.value; });
+
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          links.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id); });
+          jump.value = '#' + e.target.id;
+        }
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    sections.forEach(function (s) { io.observe(s); });
+  }
+})();
+</script>
+</body>
+</html>
