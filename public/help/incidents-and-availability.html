@@ -1,0 +1,538 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Help: Incidents and panelist availability</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<style>
+  :root {
+    --white: #ffffff; --g50: #f9fafb; --g100: #f3f4f6; --g200: #e5e7eb; --g300: #d1d5db;
+    --g400: #9ca3af; --g500: #6b7280; --g600: #4b5563; --g700: #374151; --g900: #111827;
+    --b50: #eff6ff; --b100: #dbeafe; --b600: #2563eb; --b700: #1d4ed8;
+    --r100: #fee2e2; --r700: #b91c1c; --gr100: #dcfce7; --gr700: #15803d;
+    --y100: #fef9c3; --y800: #854d0e; --p100: #f3e8ff; --p700: #7e22ce;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+      'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    -webkit-font-smoothing: antialiased; background: var(--g50); color: var(--g700); line-height: 1.6; font-size: 15px;
+  }
+  .layout { display: flex; min-height: 100vh; }
+
+  /* Sidebar, same look as the ONE menu */
+  .side {
+    width: 272px; flex-shrink: 0; background: var(--white); border-right: 1px solid var(--g200);
+    position: sticky; top: 0; height: 100vh; overflow-y: auto; display: flex; flex-direction: column;
+  }
+  .brand { padding: 24px 24px 16px; }
+  .brand h1 { font-size: 24px; line-height: 32px; font-weight: 700; color: var(--g900); }
+  .brand p { font-size: 14px; color: var(--g500); margin-top: 4px; }
+  .brand .doc { margin-top: 16px; font-size: 12px; font-weight: 600; color: var(--b700); background: var(--b50);
+    display: inline-block; padding: 2px 10px; border-radius: 999px; }
+  .nav { padding: 8px 12px 24px; flex: 1; }
+  .nav h3 { font-size: 12px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--g400);
+    padding: 16px 12px 6px; }
+  .nav a {
+    display: block; padding: 8px 12px; border-radius: 8px; font-size: 14px; font-weight: 500; color: var(--g600);
+    text-decoration: none; transition: background .15s, color .15s;
+  }
+  .nav a:hover { background: var(--g100); }
+  .nav a.active { background: var(--b50); color: var(--b700); }
+  .side-foot { padding: 16px 24px; border-top: 1px solid var(--g200); font-size: 12px; color: var(--g500); }
+
+  /* Content */
+  .main { flex: 1; min-width: 0; padding: 40px 32px 80px; }
+  .page { max-width: 880px; margin: 0 auto; }
+  .page > header { margin-bottom: 32px; }
+  .page > header h2 { font-size: 30px; line-height: 38px; font-weight: 700; color: var(--g900); }
+  .page > header p { margin-top: 8px; font-size: 17px; color: var(--g600); max-width: 640px; }
+  section { margin-top: 48px; }
+  section > h2 { font-size: 22px; font-weight: 700; color: var(--g900); padding-bottom: 8px; margin-bottom: 16px;
+    border-bottom: 1px solid var(--g200); }
+  h3 { font-size: 17px; font-weight: 600; color: var(--g900); margin: 28px 0 8px; }
+  p { margin: 8px 0; }
+  ul, ol { margin: 8px 0 8px 22px; }
+  li { margin: 4px 0; }
+  strong { color: var(--g900); font-weight: 600; }
+  code, kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px;
+    background: var(--g100); border: 1px solid var(--g200); border-radius: 6px; padding: 1px 6px; color: var(--g900); }
+  .card { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 20px 24px; margin: 16px 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 16px 0; }
+  .grid .card { margin: 0; }
+  .card h4 { font-size: 15px; font-weight: 600; color: var(--g900); margin-bottom: 4px; }
+  .card p { margin: 4px 0; font-size: 14px; color: var(--g600); }
+
+  .badge { display: inline-block; font-size: 12px; font-weight: 500; padding: 1px 10px; border-radius: 999px; white-space: nowrap; }
+  .b-red { background: var(--r100); color: var(--r700); }
+  .b-blue { background: var(--b100); color: var(--b700); }
+  .b-green { background: var(--gr100); color: var(--gr700); }
+  .b-yellow { background: var(--y100); color: var(--y800); }
+  .b-gray { background: var(--g100); color: var(--g600); }
+  .b-purple { background: var(--p100); color: var(--p700); }
+  .btn { display: inline-block; font-size: 13px; font-weight: 500; padding: 2px 10px; border-radius: 8px;
+    background: var(--white); border: 1px solid var(--g300); color: var(--g700); white-space: nowrap; }
+  .btn.primary { background: var(--b600); border-color: var(--b600); color: #fff; }
+
+  .callout { border-radius: 12px; padding: 14px 18px; margin: 16px 0; font-size: 14px; border: 1px solid; }
+  .callout.info { background: var(--b50); border-color: var(--b100); color: #1e3a8a; }
+  .callout.ok { background: #f0fdf4; border-color: var(--gr100); color: #14532d; }
+  .callout.warn { background: #fffbeb; border-color: var(--y100); color: var(--y800); }
+  .callout strong { color: inherit; }
+
+  .table-wrap { overflow-x: auto; margin: 16px 0; background: var(--white); border: 1px solid var(--g200); border-radius: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--g500); background: var(--g50); padding: 10px 14px; border-bottom: 1px solid var(--g200); }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--g100); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  td:first-child { font-weight: 500; color: var(--g900); }
+
+  /* Steps */
+  ol.steps { list-style: none; margin: 12px 0; counter-reset: s; }
+  ol.steps > li { counter-increment: s; position: relative; padding: 4px 0 12px 44px; margin: 0; }
+  ol.steps > li::before {
+    content: counter(s); position: absolute; left: 0; top: 2px; width: 28px; height: 28px; border-radius: 50%;
+    background: var(--b100); color: var(--b700); font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Telegram chat mock-ups */
+  .chat { background: #e9eef5; border: 1px solid var(--g200); border-radius: 16px; padding: 16px; margin: 16px 0; max-width: 460px; }
+  .chat .who { text-align: center; font-size: 12px; color: var(--g500); margin-bottom: 8px; font-weight: 500; }
+  .msg { max-width: 85%; padding: 8px 12px; border-radius: 14px; margin: 6px 0; font-size: 14px; line-height: 1.45; box-shadow: 0 1px 1px rgba(0,0,0,.06); }
+  .msg.bot { background: var(--white); border-top-left-radius: 4px; margin-right: auto; color: var(--g900); }
+  .msg.me { background: #dbeafe; border-top-right-radius: 4px; margin-left: auto; color: var(--g900); }
+  .kb { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 8px; max-width: 85%; }
+  .kb span { flex: 1 1 auto; text-align: center; background: rgba(37,99,235,.12); color: var(--b700); font-size: 13px; font-weight: 500;
+    padding: 6px 10px; border-radius: 10px; }
+  .kb.col span { flex-basis: 100%; }
+  .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; align-items: start; }
+  .two .chat { margin: 8px 0; }
+  .cap { font-size: 13px; color: var(--g500); margin-top: -6px; max-width: 460px; }
+
+  /* Flow */
+  .flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; margin: 16px 0; }
+  .flow .node { flex: 1 1 150px; background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 12px 14px; font-size: 13px; position: relative; }
+  .flow .node b { display: block; color: var(--g900); font-size: 14px; margin-bottom: 2px; }
+  .flow .node .tag { font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--b700); }
+  .flow .arrow { align-self: center; color: var(--g400); font-size: 18px; }
+
+  details { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; margin: 8px 0; }
+  summary { cursor: pointer; padding: 14px 18px; font-weight: 600; color: var(--g900); list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: '+'; color: var(--g400); font-size: 20px; line-height: 1; }
+  details[open] summary::after { content: '\2212'; }
+  details > div { padding: 0 18px 14px; color: var(--g600); font-size: 14px; }
+
+  .mobile-top { display: none; }
+  @media (max-width: 900px) {
+    .layout { display: block; }
+    .side { display: none; }
+    .mobile-top { display: block; position: sticky; top: 0; z-index: 5; background: var(--white); border-bottom: 1px solid var(--g200); padding: 10px 16px; }
+    .mobile-top b { font-size: 18px; color: var(--g900); }
+    .mobile-top span { font-size: 13px; color: var(--g500); margin-left: 6px; }
+    .mobile-top select { width: 100%; margin-top: 8px; padding: 8px; border: 1px solid var(--g300); border-radius: 8px; font-size: 14px; background: #fff; color: var(--g700); }
+    .main { padding: 24px 16px 64px; }
+    .page > header h2 { font-size: 24px; line-height: 32px; }
+  }
+  @media print { .side, .mobile-top { display: none; } .main { padding: 0; } body { background: #fff; } section { break-inside: avoid-page; } }
+</style>
+</head>
+<body>
+<div class="mobile-top">
+  <b>ONE</b><span>for Regulators &middot; Help</span>
+  <select id="jump" aria-label="Jump to section"></select>
+</div>
+<div class="layout">
+  <aside class="side">
+    <div class="brand">
+      <h1>ONE</h1>
+      <p>for Regulators</p>
+      <span class="doc">Help &middot; Incidents</span>
+    </div>
+    <nav class="nav" id="nav">
+      <h3>Getting started</h3>
+      <a href="#overview">Overview</a>
+      <a href="#how-it-works">How it works</a>
+      <h3>Panelists on Telegram</h3>
+      <a href="#telegram-start">Starting the bot</a>
+      <a href="#telegram-menu">The main menu</a>
+      <a href="#telegram-shipments">Sending and receiving</a>
+      <a href="#telegram-incident">Reporting an incident</a>
+      <a href="#telegram-unavailable">Unavailable days</a>
+      <a href="#telegram-replies">Replies from your manager</a>
+      <h3>Managers in the web app</h3>
+      <a href="#manager-screens">Where to find things</a>
+      <a href="#incident-types">Incident types</a>
+      <a href="#examples">Examples</a>
+      <a href="#material">Missing materials</a>
+      <h3>Availability</h3>
+      <a href="#availability">Panelist availability</a>
+      <a href="#availability-example">Worked example</a>
+      <h3>Reference</h3>
+      <a href="#conversation">Conversation and alerts</a>
+      <a href="#faq">Questions</a>
+    </nav>
+    <div class="side-foot">Updated 22 October 2026</div>
+  </aside>
+
+  <main class="main">
+  <div class="page">
+    <header>
+      <h2>Incidents and panelist availability</h2>
+      <p>How panelists report problems and unavailable days through Telegram, what ONE resolves on its own, and what you decide as a manager.</p>
+    </header>
+
+    <section id="overview">
+      <h2>Overview</h2>
+      <div class="grid">
+        <div class="card"><h4>Panelists use Telegram</h4><p>They chat with the ONE bot in their own language (English, Spanish, French or Arabic) to confirm shipments, report a problem or declare unavailable days.</p></div>
+        <div class="card"><h4>ONE resolves what it can</h4><p>Many reports are closed automatically. Unavailable days are re-planned by moving samples to a later date or to another node in the same city.</p></div>
+        <div class="card"><h4>Managers decide the rest</h4><p>What cannot be resolved automatically appears in <strong>Incidents</strong> with a proposal ready, and every message is saved in the incident.</p></div>
+      </div>
+      <p>This page has two audiences. <a href="#telegram-start">Panelist and bot sections</a> describe what the panelist sees. <a href="#manager-screens">Manager sections</a> describe what you see in the web app.</p>
+    </section>
+
+    <section id="how-it-works">
+      <h2>How it works</h2>
+      <div class="flow">
+        <div class="node"><span class="tag">1 &middot; Telegram</span><b>Panelist writes</b>A message, or a tap on <em>Report incident</em>.</div>
+        <div class="arrow">&rarr;</div>
+        <div class="node"><span class="tag">2 &middot; Bot</span><b>Understands and asks</b>&ldquo;Register this as&hellip;?&rdquo; with Yes / No.</div>
+        <div class="arrow">&rarr;</div>
+        <div class="node"><span class="tag">3 &middot; ONE</span><b>Saves it</b>Some types close automatically; others open for you.</div>
+        <div class="arrow">&rarr;</div>
+        <div class="node"><span class="tag">4 &middot; Web app</span><b>Manager decides</b>Resolve, reroute, supply material, reply.</div>
+      </div>
+      <ul>
+        <li>Nothing is saved until the panelist answers <strong>Yes</strong>. If they answer <strong>No</strong>, the bot shows the menu again.</li>
+        <li>Everything the bot says, everything the panelist answers and everything you write is stored in the incident.</li>
+        <li>You get an email when a new incident needs you, and when a panelist reply has been waiting for more than an hour.</li>
+      </ul>
+    </section>
+
+    <section id="telegram-start">
+      <h2>Starting the bot</h2>
+      <p>Each panelist is linked to the ONE bot by their Telegram account. Open the chat and send <code>/start</code>, or just say hello. The bot greets them by first name and shows the main menu.</p>
+      <div class="two">
+        <div>
+          <div class="chat">
+            <div class="who">ONE bot</div>
+            <div class="me msg">/start</div>
+            <div class="msg bot">Hi Marta, what do you need?</div>
+            <div class="kb col"><span>View pending shipments</span><span>View packages to receive</span><span>Confirm a shipment</span><span>Confirm a reception</span><span>Report incident</span><span>&#128467;&#65039; Unavailable days</span><span>&#128230; Confirm material received</span></div>
+          </div>
+        </div>
+        <div>
+          <h3 style="margin-top:8px">Good to know</h3>
+          <ul>
+            <li>The bot answers in the language set in the panelist&rsquo;s profile.</li>
+            <li>Typing something that is not a request (&ldquo;Hello&rdquo;, &ldquo;thanks&rdquo;) just shows the menu again.</li>
+            <li><code>/myid</code> shows the panelist&rsquo;s Telegram ID. Support may ask for it when linking an account.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="telegram-menu">
+      <h2>The main menu</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Button</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td>View pending shipments</td><td>Lists the samples the panelist must send, five at a time, with a <em>See more</em> button.</td></tr>
+          <tr><td>View packages to receive</td><td>Lists the samples on their way to the panelist.</td></tr>
+          <tr><td>Confirm a shipment</td><td>Pick a pending shipment, then confirm it with the label photo or the label number.</td></tr>
+          <tr><td>Confirm a reception</td><td>Confirm that a package arrived by sending a photo of its label.</td></tr>
+          <tr><td>Report incident</td><td>Describe a problem in one message (see <a href="#telegram-incident">Reporting an incident</a>).</td></tr>
+          <tr><td>Unavailable days</td><td>Declare days when the panelist cannot send or receive (see <a href="#telegram-unavailable">Unavailable days</a>).</td></tr>
+          <tr><td>Confirm material received</td><td>Say whether a material shipment arrived and how much (see <a href="#material">Missing materials</a>).</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="telegram-shipments">
+      <h2>Sending and receiving</h2>
+      <h3>Confirming a shipment</h3>
+      <ol class="steps">
+        <li>The panelist taps <span class="btn">Confirm a shipment</span> or <span class="btn">View pending shipments</span> and picks the shipment.</li>
+        <li>They send a <strong>photo of the label</strong> or type the <strong>label number</strong>.</li>
+        <li>The bot replies that the shipment is declared as sent. If the label format is not valid, nothing is saved and the bot asks again.</li>
+      </ol>
+      <h3>Confirming a reception</h3>
+      <ol class="steps">
+        <li>The panelist taps <span class="btn">Confirm a reception</span>.</li>
+        <li>They send a <strong>photo of the label</strong> of the package received.</li>
+        <li>ONE marks that sample as received. If the label is unreadable, they report it as an incident instead (<em>Unreadable label / receipt</em>), choose the package from their list and it is registered automatically.</li>
+      </ol>
+      <div class="callout info"><strong>Daily reminder.</strong> Every day at 09:00 the bot sends each panelist the shipments to send that day. Shipments that cannot be made because of missing material are left out of the reminder.</div>
+    </section>
+
+    <section id="telegram-incident">
+      <h2>Reporting an incident</h2>
+      <p>The panelist taps <span class="btn">Report incident</span> and describes the problem in <strong>a single message</strong>. The bot suggests a type and asks for confirmation.</p>
+      <div class="two">
+        <div>
+          <div class="chat">
+            <div class="who">ONE bot</div>
+            <div class="msg me">The package arrived broken</div>
+            <div class="msg bot">Do you want to register this as a <strong>damaged parcel</strong>?</div>
+            <div class="kb"><span>Yes</span><span>No, it&rsquo;s something else</span></div>
+            <div class="msg me">Yes</div>
+            <div class="msg bot">Registered, thanks for letting us know.</div>
+          </div>
+          <p class="cap">A damaged parcel is saved and closed automatically.</p>
+        </div>
+        <div>
+          <div class="chat">
+            <div class="who">ONE bot</div>
+            <div class="msg me">They sent my package back</div>
+            <div class="msg bot">Do you want to register this as a <strong>returned parcel</strong>?</div>
+            <div class="kb"><span>Yes</span><span>No, it&rsquo;s something else</span></div>
+            <div class="msg me">Yes</div>
+            <div class="msg bot">Registered. A manager will contact you.</div>
+          </div>
+          <p class="cap">A returned parcel stays open for the manager.</p>
+        </div>
+      </div>
+      <div class="callout ok"><strong>Safe by design.</strong> If the panelist taps <em>No</em>, or types something unclear, nothing is registered. Only an explicit <em>Yes</em> creates an incident.</div>
+    </section>
+
+    <section id="telegram-unavailable">
+      <h2>Unavailable days</h2>
+      <p>The panelist taps <span class="btn">&#128467;&#65039; Unavailable days</span> and chooses the start and end dates. They can also write it in plain words.</p>
+      <div class="chat">
+        <div class="who">ONE bot</div>
+        <div class="msg me">Next week I&rsquo;m on holiday</div>
+        <div class="msg bot">I understood <strong>Mon 9 Nov &ndash; Fri 13 Nov</strong>. Is that right?</div>
+        <div class="kb"><span>Yes</span><span>No</span></div>
+        <div class="msg me">Yes</div>
+        <div class="msg bot">Received. Thank you for letting us know.</div>
+      </div>
+      <p>The rules are checked automatically: the end date cannot be before the start, the days cannot be in the past, the period is at most <strong>90 days</strong> and it cannot overlap another active period. See <a href="#availability">Panelist availability</a> for what happens next.</p>
+    </section>
+
+    <section id="telegram-replies">
+      <h2>Replies from your manager</h2>
+      <p>When a manager writes in an incident, the message arrives in the panelist&rsquo;s chat with the incident&rsquo;s name and two buttons.</p>
+      <div class="chat">
+        <div class="who">ONE bot</div>
+        <div class="msg bot"><strong>Returned parcel</strong><br>Hi Pablo, we will send the sample again next week to another node. Can you keep the label?</div>
+        <div class="kb"><span>Reply</span><span>Back to menu</span></div>
+        <div class="msg me">Reply</div>
+        <div class="msg bot">Write your reply.</div>
+        <div class="msg me">Yes, I still have it. Photo attached.</div>
+        <div class="msg bot">Your message has been sent to your manager.</div>
+      </div>
+      <ul>
+        <li>While a conversation is open, the panelist&rsquo;s text and <strong>photos</strong> go to the incident. <em>Back to menu</em> closes it.</li>
+        <li>The conversation closes by itself when the incident is resolved or dismissed, or after 48 hours without activity.</li>
+      </ul>
+    </section>
+
+    <section id="manager-screens">
+      <h2>Where to find things</h2>
+      <p>In the ONE menu, open the <strong>Incidents</strong> group:</p>
+      <div class="grid">
+        <div class="card"><h4>Reported incidents</h4><p>Everything panelists report through Telegram (missing materials, damaged or returned parcels, contact changes&hellip;).</p></div>
+        <div class="card"><h4>Panelist availability</h4><p>Every unavailable period, with the samples affected and what ONE did with each.</p></div>
+      </div>
+      <p>The menu shows a red badge for items that wait for you, and a blue badge when a panelist has written a reply you have not read yet.</p>
+      <p>Statuses in <em>Reported incidents</em>:
+        <span class="badge b-red">Open</span>
+        <span class="badge b-blue">In progress</span>
+        <span class="badge b-green">Resolved</span>
+        <span class="badge b-gray">Dismissed</span>
+        <span class="badge b-purple">Auto-resolved</span>
+      </p>
+    </section>
+
+    <section id="incident-types">
+      <h2>Incident types</h2>
+      <p>There are nine types. Four are closed automatically and only leave a record.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Type</th><th>Panelist says&hellip;</th><th>What ONE does</th><th>What you do</th></tr></thead>
+        <tbody>
+          <tr><td>Missing materials</td><td>&ldquo;I&rsquo;m out of envelopes and seals&rdquo;</td><td>Calculates what is needed for the period and proposes where to get it.</td><td>Review and <em>Confirm supply</em>.</td></tr>
+          <tr><td>Unreadable label / receipt <span class="badge b-purple">Auto</span></td><td>&ldquo;I can&rsquo;t read the label&rdquo;</td><td>Shows the packages on their way; the panelist picks one and the reception is recorded.</td><td>Nothing, unless no package matches.</td></tr>
+          <tr><td>Damaged parcel <span class="badge b-purple">Auto</span></td><td>&ldquo;It arrived broken&rdquo;</td><td>Registers it and says thanks.</td><td>Nothing. Record only.</td></tr>
+          <tr><td>Returned parcel</td><td>&ldquo;It was returned to me&rdquo;</td><td>Opens the incident and emails you.</td><td>Void the sample or re-send it to another node.</td></tr>
+          <tr><td>How to send</td><td>&ldquo;I don&rsquo;t know how to send this&rdquo;</td><td>Opens the incident and emails you.</td><td>Contact the panelist. There are no videos yet.</td></tr>
+          <tr><td>Unavailability request</td><td>&ldquo;I can&rsquo;t take part next week&rdquo;</td><td>Directs them to <em>Unavailable days</em>.</td><td>See <a href="#availability">Panelist availability</a>.</td></tr>
+          <tr><td>Tag photo problem <span class="badge b-purple">Auto</span></td><td>&ldquo;I can&rsquo;t photograph the tag&rdquo;</td><td>Asks for the label number and records the shipment.</td><td>Nothing. No incident is created.</td></tr>
+          <tr><td>Contact data change <span class="badge b-purple">Auto</span></td><td>&ldquo;My new phone is 600 123 456&rdquo;</td><td>Validates, asks for confirmation and updates the record.</td><td>Nothing. The before and after are kept.</td></tr>
+          <tr><td>Other</td><td>Anything else</td><td>Opens the incident and emails you.</td><td>Reply and <em>Resolve</em>.</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout info">Telegram ID and name cannot be changed from the bot. Only a manager can change them from the panelist&rsquo;s record.</div>
+    </section>
+
+    <section id="examples">
+      <h2>Examples</h2>
+      <p>Names and figures are illustrative.</p>
+
+      <h3>1. Damaged parcel &mdash; closes by itself</h3>
+      <ol class="steps">
+        <li>Marta writes &ldquo;The package arrived broken&rdquo; and taps <em>Yes</em>.</li>
+        <li>The incident appears as <span class="badge b-purple">Auto-resolved</span>, with the whole chat inside it.</li>
+        <li><strong>You do nothing.</strong></li>
+      </ol>
+
+      <h3>2. Returned parcel &mdash; you decide</h3>
+      <ol class="steps">
+        <li>Pablo writes &ldquo;They sent my package back&rdquo; and confirms. The incident is <span class="badge b-red">Open</span> and you get an email.</li>
+        <li>A returned package goes back to the <strong>sender</strong>, who keeps the label.</li>
+        <li>Choose one:
+          <ul>
+            <li><strong>Cancel shipment</strong>, if the sample is no longer needed.</li>
+            <li><strong>Re-send returned sample</strong>: pick a <em>Destination node</em> in the <strong>same city</strong> and a <em>Week</em>, check the preview of the load and press <strong>Confirm re-send</strong>.</li>
+          </ul>
+        </li>
+        <li>Write a message to Pablo and press <strong>Resolve</strong>.</li>
+      </ol>
+
+      <h3>3. Contact data change &mdash; closes by itself</h3>
+      <ol class="steps">
+        <li>Karim writes &ldquo;My new phone is 600 123 456&rdquo;.</li>
+        <li>The bot asks which field to change, validates the value and asks for a Yes / No.</li>
+        <li>The phone number is updated and the incident records the old and new value.</li>
+      </ol>
+    </section>
+
+    <section id="material">
+      <h2>Missing materials</h2>
+      <p>This is the only type with several automated steps, because material often has to travel between panelists.</p>
+      <ol class="steps">
+        <li><strong>The panelist reports it.</strong> &ldquo;I&rsquo;m out of envelopes and seals&rdquo; &rarr; confirmed with <em>Yes</em>.</li>
+        <li><strong>You open the incident</strong> and see three things: the stock ONE believes the panelist has, the need for the <strong>period</strong>, and the proposed supply. ONE covers the need in this order: <strong>neighbouring panelists</strong> in the same city with surplus, then the <strong>central warehouse</strong>, then <strong>purchase</strong>.</li>
+        <li><strong>You press <em>Confirm supply</em></strong> (you can change the origin of any material first). ONE creates the <strong>Material shipments sheet</strong>, which you can view, <em>Print / PDF</em> or download as Excel (CSV).</li>
+        <li><strong>Telegram does the rest.</strong>
+          <ul>
+            <li>The donor receives the materials, quantities and the receiver&rsquo;s <strong>name and address only</strong>, with an <em>I have sent it</em> button.</li>
+            <li>When the date arrives, the receiver is asked whether the material arrived and how much: <em>All</em> or <em>Other quantity</em>.</li>
+            <li>If only part arrived, ONE records it and asks again later about the rest.</li>
+          </ul>
+        </li>
+        <li><strong>The panelist is not pushed to do the impossible.</strong> Shipments that need the missing material are left out of the daily reminder. When the material arrives, the bot tells them: <em>You can now send these&hellip;</em></li>
+        <li><strong>The incident closes by itself</strong> when everything has been received.</li>
+      </ol>
+      <div class="callout warn"><strong>No reply from a donor or a receiver?</strong> After two unanswered questions to a donor, or three to a receiver, you get one email. If a receiver has no Telegram, ONE skips the question and emails you once.</div>
+    </section>
+
+    <section id="availability">
+      <h2>Panelist availability</h2>
+      <p>An <strong>unavailable period</strong> is a time when a panelist cannot send or receive samples (holidays, illness, lack of material&hellip;). <strong>Every period becomes an incident</strong>, and ONE tries to fix the samples affected without you.</p>
+
+      <h3>How a period is declared</h3>
+      <ul>
+        <li><strong>Telegram buttons:</strong> <em>Unavailable days</em> in the bot menu.</li>
+        <li><strong>Telegram free text:</strong> &ldquo;I&rsquo;m on holiday next week&rdquo;. The bot reads the dates and asks to confirm. You also receive an email.</li>
+        <li><strong>The web app:</strong> from the panelists screen.</li>
+      </ul>
+      <p>In every case the panelist sees <em>Received. Thank you for letting us know</em>.</p>
+
+      <h3>What ONE does with each affected sample</h3>
+      <p>For every sample scheduled during the period where the panelist sends or receives, ONE tries these in order:</p>
+      <ol class="steps">
+        <li><strong>Move to a later date.</strong> The first working day (Monday to Friday) after the period ends, <strong>within the same month</strong>, when the node is available. Samples are spread across days.</li>
+        <li><strong>Move to another node in the same city.</strong> The node with the lowest load that would not become saturated; first in the same week, then other dates in the month.</li>
+        <li><strong>Leave it to you.</strong> If neither works, the sample waits for your decision with a proposal already calculated.</li>
+      </ol>
+      <div class="callout ok"><strong>Rules that are never broken.</strong> A sample already sent or received is never touched. A sample never moves to another city. A node is never overloaded just to resolve quickly. Shipments only fall on working days.</div>
+
+      <h3>Statuses</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Status</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge b-gray">New</span></td><td>Just declared; ONE is calculating.</td></tr>
+          <tr><td><span class="badge b-green">Resolved automatically</span></td><td>All samples were moved, or none were affected.</td></tr>
+          <tr><td><span class="badge b-yellow">Pending manager decision</span></td><td>At least one sample needs you.</td></tr>
+          <tr><td><span class="badge b-blue">Resolved</span></td><td>You decided all pending samples.</td></tr>
+        </tbody>
+      </table></div>
+      <p>If the plan changes after the period was declared, ONE recalculates it. Panelists affected by a change in the current week receive the details of the new shipment on Telegram.</p>
+    </section>
+
+    <section id="availability-example">
+      <h2>Worked example</h2>
+      <p>Figures are illustrative.</p>
+      <div class="chat">
+        <div class="who">ONE bot</div>
+        <div class="msg me">From 10 to 21 November I&rsquo;ll be on holiday</div>
+        <div class="msg bot">I understood <strong>10 Nov &ndash; 21 Nov</strong>. Is that right?</div>
+        <div class="kb"><span>Yes</span><span>No</span></div>
+        <div class="msg me">Yes</div>
+        <div class="msg bot">Received. Thank you for letting us know.</div>
+      </div>
+      <p><strong>Elena</strong> had 14 samples scheduled in that period. ONE summarises its work in the incident:</p>
+      <div class="card"><strong>9 moved to a later date &middot; 3 sent to another node &middot; 2 pending</strong></div>
+      <ul>
+        <li><strong>9 moved:</strong> to the first free working days after 21 November, within November.</li>
+        <li><strong>3 to another node:</strong> Elena had no possible date in the month, so they went to other nodes in the city with low load. Those panelists are told on Telegram.</li>
+        <li><strong>2 pending:</strong> no node could take them without becoming saturated. The incident is <span class="badge b-yellow">Pending manager decision</span>.</li>
+      </ul>
+      <h3>What you do</h3>
+      <ol class="steps">
+        <li>Open <strong>Panelist availability</strong> and select Elena&rsquo;s incident. You see all her samples (resolved and pending) and the city&rsquo;s load by week.</li>
+        <li>Each pending sample has a proposal. Select the lines and press <strong>Accept selected</strong>, or press <strong>Confirm</strong> on a single line.</li>
+        <li>To do something different, use <strong>Change resolution</strong> and choose <em>Reroute to another node</em>, <em>Change date</em> or <em>Cancel sample</em>, then <strong>Apply</strong>. <strong>Cancel selected</strong> or <strong>Void sample</strong> remove samples you do not need.</li>
+        <li>When no line is pending, the incident becomes <span class="badge b-blue">Resolved</span>.</li>
+      </ol>
+      <div class="callout info"><strong>Unavailability because of missing material.</strong> From a missing-materials incident you can create an unavailable period that runs from today until the material is expected. It follows exactly the same process.</div>
+    </section>
+
+    <section id="conversation">
+      <h2>Conversation and alerts</h2>
+      <p>Each incident has a <strong>Conversation with the panelist</strong> that keeps the bot&rsquo;s messages, the panelist&rsquo;s replies (with photos) and yours.</p>
+      <ul>
+        <li><strong>Writing to the panelist.</strong> Type in the incident and press <em>Send</em>. It reaches their Telegram, usually within five minutes, as plain text.</li>
+        <li><strong>Unread replies.</strong> Free-text replies from the panelist show a blue badge in the menu and in the list until you open the incident. Buttons the panelist taps do not count.</li>
+        <li><strong>Email alert.</strong> If a reply stays unread for more than an hour, you get <strong>one</strong> email per incident. If you open it first, no email is sent.</li>
+        <li><strong>Closing.</strong> Resolving or dismissing an incident closes the Telegram conversation.</li>
+      </ul>
+    </section>
+
+    <section id="faq">
+      <h2>Questions</h2>
+      <details><summary>What if a panelist types something random?</summary><div>The bot shows the menu or suggests a type. Nothing is saved until the panelist presses <strong>Yes</strong>.</div></details>
+      <details><summary>Does ONE ever move a sample that was already sent?</summary><div>No. Only pending samples are moved. A returned package is re-sent from the incident, by your decision.</div></details>
+      <details><summary>Can samples go to another city?</summary><div>No. Changing city would change the measured route.</div></details>
+      <details><summary>Why is a panelist no longer reminded of some shipments?</summary><div>Those shipments need material the panelist does not have. ONE stops insisting until the material arrives, then tells them they can send.</div></details>
+      <details><summary>Do shipments fall on weekends?</summary><div>No. Shipments are scheduled Monday to Friday only.</div></details>
+      <details><summary>A panelist says they reported something but I cannot see it.</summary><div>Check that they confirmed with <strong>Yes</strong>. If they answered No, or did not answer, nothing was saved.</div></details>
+      <details><summary>Who can see an incident?</summary><div>Each account sees only its own panelists and incidents.</div></details>
+    </section>
+  </div>
+  </main>
+</div>
+
+<script>
+(function () {
+  var links = Array.prototype.slice.call(document.querySelectorAll('#nav a'));
+  var sections = links.map(function (a) { return document.querySelector(a.getAttribute('href')); }).filter(Boolean);
+
+  // Mobile section picker
+  var jump = document.getElementById('jump');
+  links.forEach(function (a) {
+    var o = document.createElement('option');
+    o.value = a.getAttribute('href'); o.textContent = a.textContent; jump.appendChild(o);
+  });
+  jump.addEventListener('change', function () { location.hash = jump.value; });
+
+  // Highlight the current section in the side menu
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          links.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id); });
+          jump.value = '#' + e.target.id;
+        }
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    sections.forEach(function (s) { io.observe(s); });
+  }
+})();
+</script>
+</body>
+</html>

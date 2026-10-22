@@ -36,6 +36,7 @@ import {
   FileText,
   AlertTriangle,
   MessageSquareWarning,
+  HelpCircle,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
@@ -362,6 +363,14 @@ export function Sidebar() {
           icon: AlertTriangle,
           roles: ['admin', 'superadmin'],
           tooltip: t('incidents.pending_badge_tooltip'),
+        },
+        {
+          path: '/help/incidents-and-availability.html',
+          label: t('menu.help_incidents'),
+          icon: HelpCircle,
+          roles: ['admin', 'superadmin'],
+          tooltip: t('menu.help_incidents.tooltip'),
+          external: true,
         },
       ],
     },

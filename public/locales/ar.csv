@@ -2997,3 +2997,5 @@ material_sheet.purchase_origin,شراء
 incident_conversation.unread_badge,محادثات تحتوي على ردود جديدة
 incident_conversation.new_reply,رد جديد
 incident_conversation.photo_alt,صورة أرسلها العضو
+menu.help_incidents,مساعدة: الحوادث
+menu.help_incidents.tooltip,كيف تعمل الحوادث وتوفر المحكّمين (تُفتح في علامة تبويب جديدة)

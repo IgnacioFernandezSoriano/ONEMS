@@ -3005,3 +3005,5 @@ material_sheet.purchase_origin,Purchase
 incident_conversation.unread_badge,Conversations with new replies
 incident_conversation.new_reply,New reply
 incident_conversation.photo_alt,Photo sent by the panelist
+menu.help_incidents,Help: Incidents
+menu.help_incidents.tooltip,How incidents and panelist availability work (opens in a new tab)

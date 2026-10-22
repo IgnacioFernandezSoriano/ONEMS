@@ -2997,3 +2997,5 @@ material_sheet.purchase_origin,Achat
 incident_conversation.unread_badge,Conversations avec de nouvelles réponses
 incident_conversation.new_reply,Nouvelle réponse
 incident_conversation.photo_alt,Photo envoyée par le panéliste
+menu.help_incidents,Aide : Incidents
+menu.help_incidents.tooltip,Fonctionnement des incidents et de la disponibilité des panélistes (s'ouvre dans un nouvel onglet)
