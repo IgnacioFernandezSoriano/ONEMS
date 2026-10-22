@@ -2859,6 +2859,7 @@ reported_incidents.materials.blocking_badge,Blocking
 reported_incidents.materials.from_central,From central stock
 reported_incidents.materials.from_donor,From donor {name}
 reported_incidents.materials.close_hint,Receiving the material resolves the incident; the leave is not cancelled and ends on its own date.
+reported_incidents.materials.baja_already_covered,The panelist is already on leave for all those days because of another leave. No leave for missing materials is needed.
 reported_incidents.materials.unmatched,Material not found in catalog
 reported_incidents.materials.s1_title,Theoretical stock
 reported_incidents.materials.s2_title,Needs and supply

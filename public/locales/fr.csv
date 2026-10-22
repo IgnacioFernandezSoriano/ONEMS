@@ -2851,6 +2851,7 @@ reported_incidents.materials.blocking_badge,Bloquant
 reported_incidents.materials.from_central,Depuis le stock central
 reported_incidents.materials.from_donor,Depuis le donateur {name}
 reported_incidents.materials.close_hint,La réception du matériel résout l'incident ; le congé n'est pas annulé et se termine à sa date.
+reported_incidents.materials.baja_already_covered,Le panéliste est déjà en congé tous ces jours à cause d'un autre congé. Aucun congé pour matériel manquant n'est nécessaire.
 reported_incidents.materials.unmatched,Matériel introuvable dans le catalogue
 reported_incidents.materials.s1_title,Stock théorique
 reported_incidents.materials.s2_title,Besoins et approvisionnement

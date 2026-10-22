@@ -2851,6 +2851,7 @@ reported_incidents.materials.blocking_badge,معيق
 reported_incidents.materials.from_central,من المخزون المركزي
 reported_incidents.materials.from_donor,من المتبرع {name}
 reported_incidents.materials.close_hint,استلام المواد يحل الحادثة؛ لا تُلغى الإجازة وتنتهي تلقائيًا في تاريخها.
+reported_incidents.materials.baja_already_covered,المشارك في إجازة بالفعل طوال هذه الأيام بسبب إجازة أخرى. لا حاجة إلى إجازة بسبب نقص المواد.
 reported_incidents.materials.unmatched,المادة غير موجودة في الكتالوج
 reported_incidents.materials.s1_title,المخزون النظري
 reported_incidents.materials.s2_title,الاحتياج والتوريد
