@@ -427,6 +427,7 @@ export interface UnavailabilityHeader {
   account_id: string | null
   panelist_name: string
   panelist_code: string
+  panelist_language: string | null
   start_date: string
   end_date: string
   reason: string | null

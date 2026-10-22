@@ -1,0 +1,773 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Help: Panelist guide (ONE bot on Telegram)</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<style>
+  /* Sistema de diseño de la ayuda de ONE (docs/help/GUIA-DISENO-AYUDA.md): mismos tokens y componentes que public/help/incidents-and-availability.*.html */
+  :root {
+    --white: #ffffff; --g50: #f9fafb; --g100: #f3f4f6; --g200: #e5e7eb; --g300: #d1d5db;
+    --g400: #9ca3af; --g500: #6b7280; --g600: #4b5563; --g700: #374151; --g900: #111827;
+    --b50: #eff6ff; --b100: #dbeafe; --b600: #2563eb; --b700: #1d4ed8;
+    --r100: #fee2e2; --r700: #b91c1c; --gr100: #dcfce7; --gr700: #15803d;
+    --y100: #fef9c3; --y800: #854d0e; --p100: #f3e8ff; --p700: #7e22ce;
+    /* Telegram */
+    --tg-head: #517da2; --tg-wall-a: #d4e4bc; --tg-wall-b: #a9cba6; --tg-dot: rgba(255,255,255,.35);
+    --tg-in: #ffffff; --tg-out: #effdde; --tg-ink: #000000; --tg-time: #8a9aa6; --tg-time-out: #5eaf5c;
+    --tg-key: rgba(52, 92, 60, .42); --tg-ring: #ffd23f; --tg-photo: #c7d3dc;
+    color-scheme: light;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+      'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    -webkit-font-smoothing: antialiased; background: var(--g50); color: var(--g700); line-height: 1.6; font-size: 15px;
+  }
+  a { color: var(--b600); }
+  .layout { display: flex; min-height: 100vh; }
+
+  .side {
+    width: 272px; flex-shrink: 0; background: var(--white); border-right: 1px solid var(--g200);
+    position: sticky; top: 0; height: 100vh; overflow-y: auto; display: flex; flex-direction: column;
+  }
+  .brand { padding: 24px 24px 16px; }
+  .brand h1 { font-size: 24px; line-height: 32px; font-weight: 700; color: var(--g900); }
+  .brand p { font-size: 14px; color: var(--g500); margin-top: 4px; }
+  .brand .doc { margin-top: 16px; font-size: 12px; font-weight: 600; color: var(--b700); background: var(--b50);
+    display: inline-block; padding: 2px 10px; border-radius: 999px; }
+  .nav { padding: 8px 12px 24px; flex: 1; }
+  .nav h3 { font-size: 12px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--g400);
+    padding: 16px 12px 6px; margin: 0; }
+  .nav a {
+    display: block; padding: 8px 12px; border-radius: 8px; font-size: 14px; font-weight: 500; color: var(--g600);
+    text-decoration: none; transition: background .15s, color .15s;
+  }
+  .nav a:hover { background: var(--g100); }
+  .nav a.active { background: var(--b50); color: var(--b700); }
+  .side-foot { padding: 16px 24px; border-top: 1px solid var(--g200); font-size: 12px; color: var(--g500); }
+
+  .main { flex: 1; min-width: 0; padding: 40px 32px 80px; }
+  .page { max-width: 880px; margin: 0 auto; }
+  .page > header { margin-bottom: 32px; }
+  .page > header h2 { font-size: 30px; line-height: 38px; font-weight: 700; color: var(--g900); }
+  .page > header p { margin-top: 8px; font-size: 17px; color: var(--g600); max-width: 640px; }
+  section { margin-top: 48px; }
+  section > h2 { font-size: 22px; font-weight: 700; color: var(--g900); padding-bottom: 8px; margin-bottom: 16px;
+    border-bottom: 1px solid var(--g200); }
+  h3 { font-size: 17px; font-weight: 600; color: var(--g900); margin: 28px 0 8px; }
+  p { margin: 8px 0; }
+  ul, ol { margin: 8px 0 8px 22px; }
+  li { margin: 4px 0; }
+  strong { color: var(--g900); font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px;
+    background: var(--g100); border: 1px solid var(--g200); border-radius: 6px; padding: 1px 6px; color: var(--g900); }
+  .card { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 20px 24px; margin: 16px 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin: 16px 0; }
+  .grid .card { margin: 0; }
+  .card h4 { font-size: 15px; font-weight: 600; color: var(--g900); margin-bottom: 4px; }
+  .card p { margin: 4px 0; font-size: 14px; color: var(--g600); }
+  .card .ico { font-size: 22px; display: block; margin-bottom: 6px; }
+
+  .btn { display: inline-block; font-size: 13px; font-weight: 500; padding: 2px 10px; border-radius: 8px;
+    background: var(--white); border: 1px solid var(--g300); color: var(--g700); white-space: nowrap; }
+
+  .callout { border-radius: 12px; padding: 14px 18px; margin: 16px 0; font-size: 14px; border: 1px solid; }
+  .callout.info { background: var(--b50); border-color: var(--b100); color: #1e3a8a; }
+  .callout.ok { background: #f0fdf4; border-color: var(--gr100); color: #14532d; }
+  .callout.warn { background: #fffbeb; border-color: var(--y100); color: var(--y800); }
+  .callout strong { color: inherit; }
+
+  .table-wrap { overflow-x: auto; margin: 16px 0; background: var(--white); border: 1px solid var(--g200); border-radius: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--g500); background: var(--g50); padding: 10px 14px; border-bottom: 1px solid var(--g200); }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--g100); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  td:first-child { font-weight: 500; color: var(--g900); }
+
+  ol.steps { list-style: none; margin: 12px 0; counter-reset: s; }
+  ol.steps > li { counter-increment: s; position: relative; padding: 4px 0 12px 44px; margin: 0; }
+  ol.steps > li::before {
+    content: counter(s); position: absolute; left: 0; top: 2px; width: 28px; height: 28px; border-radius: 50%;
+    background: var(--b100); color: var(--b700); font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center;
+  }
+
+  .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; align-items: start; }
+  .cap { font-size: 13px; color: var(--g500); }
+
+  /* Casos: tarjeta con situación, pasos y chat */
+  .case { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 20px 24px; margin: 16px 0; scroll-margin-top: 24px; }
+  .case > h3 { margin: 0; display: flex; gap: 10px; align-items: center; }
+  .case > .sit { color: var(--g500); font-size: 14px; margin: 2px 0 12px; }
+  .case .callout { margin: 8px 0; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+  .chips a { text-decoration: none; font-size: 13px; font-weight: 500; padding: 4px 12px; border-radius: 999px;
+    background: var(--white); border: 1px solid var(--g200); color: var(--g700); }
+  .chips a:hover { background: var(--b50); border-color: var(--b100); color: var(--b700); }
+
+  details { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; margin: 8px 0; }
+  summary { cursor: pointer; padding: 14px 18px; font-weight: 600; color: var(--g900); list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: '+'; color: var(--g400); font-size: 20px; line-height: 1; }
+  details[open] summary::after { content: '\2212'; }
+  details > div { padding: 0 18px 14px; color: var(--g600); font-size: 14px; }
+  a:focus-visible, summary:focus-visible { outline: 2px solid var(--b600); outline-offset: 2px; border-radius: 6px; }
+
+  /* Componente Telegram (canónico: ver docs/help/GUIA-DISENO-AYUDA.md §5) */
+  .tg { max-width: 380px; border-radius: 16px; overflow: hidden; border: 1px solid var(--g200);
+    box-shadow: 0 4px 16px rgba(17,24,39,.10); background: var(--tg-in); }
+  .tg-head { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: var(--tg-head); color: #ffffff; }
+  .tg-back { font-size: 20px; line-height: 1; opacity: .9; }
+  .tg-av { width: 36px; height: 36px; border-radius: 50%; flex: none; display: grid; place-items: center;
+    background: linear-gradient(160deg, #72c2f4, #3d8fd9); color: #ffffff; font-weight: 700; font-size: 12px; }
+  .tg-name { flex: 1; min-width: 0; line-height: 1.2; }
+  .tg-name b { display: block; font-size: 15px; color: #ffffff; font-weight: 600; }
+  .tg-name small { font-size: 12.5px; opacity: .8; }
+  .tg-body { display: flex; flex-direction: column; gap: 6px; padding: 12px 10px 14px;
+    background-color: var(--tg-wall-a);
+    background-image: radial-gradient(var(--tg-dot) 1.4px, transparent 1.6px), linear-gradient(160deg, var(--tg-wall-a), var(--tg-wall-b));
+    background-size: 18px 18px, 100% 100%; }
+  .tg-msg { max-width: 84%; padding: 6px 9px 7px 10px; border-radius: 12px; font-size: 14.5px; line-height: 1.38; color: var(--tg-ink);
+    box-shadow: 0 1px 1px rgba(0,0,0,.13); overflow-wrap: anywhere; }
+  .tg-msg.in { background: var(--tg-in); align-self: flex-start; border-bottom-left-radius: 4px; }
+  .tg-msg.out { background: var(--tg-out); align-self: flex-end; border-bottom-right-radius: 4px; }
+  .tg-msg .t { float: right; font-size: 11px; color: var(--tg-time); margin: 8px 0 -4px 10px; line-height: 1; }
+  .tg-msg.out .t { color: var(--tg-time-out); }
+  .tg-msg.out .t::after { content: " \2713\2713"; letter-spacing: -2px; }
+  .tg-msg.photo { padding: 3px; }
+  .tg-msg.photo .img { display: grid; place-items: center; width: 170px; height: 104px; border-radius: 10px; background: var(--tg-photo); font-size: 30px; }
+  .tg-msg.photo .t { position: relative; margin: -18px 8px 4px 0; }
+  .tg-kb { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; align-self: flex-start; width: 84%; margin-top: -2px; }
+  .tg-kb.one { grid-template-columns: 1fr; }
+  .tg-kb span { background: var(--tg-key); color: #ffffff; border-radius: 8px; padding: 7px 6px; text-align: center; font-size: 13.5px; font-weight: 600; }
+  .tg-kb span.tap { box-shadow: inset 0 0 0 2px var(--tg-ring); }
+  .tg-kb span.tap::after { content: " \1F446"; }
+  .tg-input { display: flex; align-items: center; gap: 12px; padding: 9px 14px; background: #ffffff; color: var(--tg-time); font-size: 14px; }
+  .tg-input .ph { flex: 1; }
+
+  /* Derecha a izquierda (árabe) */
+  [dir=rtl] .side { border-right: 0; border-left: 1px solid var(--g200); }
+  [dir=rtl] th, [dir=rtl] td, [dir=rtl] .nav a { text-align: right; }
+  [dir=rtl] ul, [dir=rtl] ol { margin: 8px 22px 8px 0; }
+  [dir=rtl] ol.steps > li { padding: 4px 44px 12px 0; }
+  [dir=rtl] ol.steps > li::before { left: auto; right: 0; }
+  [dir=rtl] .tg-msg.in { border-bottom-left-radius: 12px; border-bottom-right-radius: 4px; }
+  [dir=rtl] .tg-msg.out { border-bottom-right-radius: 12px; border-bottom-left-radius: 4px; }
+  [dir=rtl] .tg-msg .t { float: left; margin: 8px 10px -4px 0; }
+  [dir=rtl] .tg-back { transform: scaleX(-1); }
+  [dir=rtl] .mobile-top span { margin-left: 0; margin-right: 6px; }
+
+  .mobile-top { display: none; }
+  @media (max-width: 900px) {
+    .layout { display: block; }
+    .side { display: none; }
+    .mobile-top { display: block; position: sticky; top: 0; z-index: 5; background: var(--white); border-bottom: 1px solid var(--g200); padding: 10px 16px; }
+    .mobile-top b { font-size: 18px; color: var(--g900); }
+    .mobile-top span { font-size: 13px; color: var(--g500); margin-left: 6px; }
+    .mobile-top select { width: 100%; margin-top: 8px; padding: 8px; border: 1px solid var(--g300); border-radius: 8px; font-size: 14px; background: var(--white); color: var(--g700); }
+    .main { padding: 24px 16px 64px; }
+    .page > header h2 { font-size: 24px; line-height: 32px; }
+    .case { padding: 16px; }
+    .tg { max-width: none; }
+  }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+
+<div class="mobile-top">
+  <b>ONE</b><span>for Regulators &middot; Help</span>
+  <select id="jump" aria-label="Go to section"></select>
+</div>
+<div class="layout">
+  <aside class="side">
+    <div class="brand">
+      <h1>ONE</h1>
+      <p>for Regulators</p>
+      <span class="doc">Help &middot; Panelists</span>
+    </div>
+    <nav class="nav" id="nav">
+      <h3>Getting started</h3>
+      <a href="#reglas">Three rules</a>
+      <a href="#empezar">Open the bot</a>
+      <a href="#menu">The menu buttons</a>
+      <h3>Your day to day</h3>
+      <a href="#recordatorio">The 09:00 reminder</a>
+      <a href="#enviar">Send a parcel</a>
+      <a href="#recibir">Receive a parcel</a>
+      <h3>If you have a problem</h3>
+      <a href="#reportar">Report a problem</a>
+      <a href="#c-material">I'm missing materials</a>
+      <a href="#c-roto">Broken or damaged parcel</a>
+      <a href="#c-devuelto">A parcel was returned to me</a>
+      <a href="#c-ilegible">I can't read a label</a>
+      <a href="#c-foto">I can't take the tag photo</a>
+      <a href="#c-como">How do I send a parcel?</a>
+      <a href="#c-datos">Change my details</a>
+      <a href="#c-otro">Another problem</a>
+      <a href="#c-vacaciones">Unavailable days</a>
+      <h3>Messages you may get</h3>
+      <a href="#m-llega-material">Did you receive the materials?</a>
+      <a href="#m-donar">Send materials to another panelist</a>
+      <a href="#m-liberados">You can send these now</a>
+      <a href="#m-responsable">Message from your manager</a>
+      <h3>Reference</h3>
+      <a href="#preguntas">Questions</a>
+    </nav>
+    <div class="side-foot">Updated 22 October 2026</div>
+  </aside>
+
+  <main class="main">
+  <div class="page">
+    <header>
+      <h2>Panelist guide: the ONE bot on Telegram</h2>
+      <p>With the ONE bot, everything is done with buttons. Here is what each button does, what to choose if you have a problem and what can happen next.</p>
+    </header>
+
+    <section id="reglas">
+      <h2>Three rules</h2>
+      <div class="grid">
+        <div class="card"><span class="ico">👆</span><h4>Tap the buttons</h4><p>The bot always offers you the options. You don't need to type commands.</p></div>
+        <div class="card"><span class="ico">⚠️</span><h4>A problem: “Report incident”</h4><p>Tap that button and pick what happened from the list.</p></div>
+        <div class="card"><span class="ico">✍️</span><h4>Type only when asked</h4><p>A number, a code or a new detail. And to talk to your manager.</p></div>
+      </div>
+    </section>
+
+    <section id="empezar">
+      <h2>Open the bot</h2>
+      <div class="two">
+        <div>
+          <p>Open the <strong>ONE bot</strong> chat in Telegram and type <code>/start</code>. The menu appears.</p>
+          <div class="callout info"><strong>Lost?</strong> Type <code>/start</code> at any time and you are back at the menu.</div>
+          <p class="cap">The bot talks to you in the language of your profile. To change it, see <a href="#c-datos">Change my details</a>.</p>
+        </div>
+        <div class="tg" aria-label="Example: opening the menu">
+          <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
+          <div class="tg-body">
+            <div class="tg-msg out">/start<span class="t">09:40</span></div>
+            <div class="tg-msg in">Hi Marta, what do you need?<span class="t">09:40</span></div>
+            <div class="tg-kb one">
+              <span>View pending shipments</span><span>View packages to receive</span>
+              <span>Confirm a shipment</span><span>Confirm a reception</span>
+              <span>Report incident</span><span>🗓️ Unavailable days</span>
+              <span>📦 Confirm material received</span><span>📖 Help</span>
+            </div>
+          </div>
+          <div class="tg-input"><span>📎</span><span class="ph">Message</span><span>🎤</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="menu">
+      <h2>The menu buttons</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Button</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td>View pending shipments</td><td>The parcels you have to send, numbered.</td></tr>
+          <tr><td>View packages to receive</td><td>The parcels coming to you this week.</td></tr>
+          <tr><td>Confirm a shipment</td><td>You tell us you have sent a parcel.</td></tr>
+          <tr><td>Confirm a reception</td><td>You tell us a parcel has arrived.</td></tr>
+          <tr><td>Report incident</td><td>You pick your problem from a list of buttons.</td></tr>
+          <tr><td>🗓️ Unavailable days</td><td>You tell us the days when you can't send or receive.</td></tr>
+          <tr><td>📦 Confirm material received</td><td>You tell us materials (envelopes, seals…) have arrived.</td></tr>
+          <tr><td>📖 Help</td><td>Opens this guide. You can also type <code>/help</code>.</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="recordatorio">
+      <h2>The 09:00 reminder</h2>
+      <p>Every morning at 09:00 the bot sends you the list of parcels you have to send that day. You don't need to ask for it. Parcels are sent Monday to Friday only.</p>
+    </section>
+
+    <section id="enviar">
+      <h2>Send a parcel</h2>
+      <div class="two">
+        <ol class="steps">
+          <li>Tap <span class="btn">Confirm a shipment</span>.</li>
+          <li>Type the <strong>number</strong> of the parcel in the list.</li>
+          <li>Take a <strong>photo of the label</strong> and send it, or type the label code.</li>
+        </ol>
+        <div class="tg" aria-label="Example: confirming a shipment">
+          <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
+          <div class="tg-body">
+            <div class="tg-kb one"><span class="tap">Confirm a shipment</span></div>
+            <div class="tg-msg in">🔢 Type the <strong>number</strong> of the parcel you want to declare from the current list.<span class="t">10:12</span></div>
+            <div class="tg-msg out">2<span class="t">10:12</span></div>
+            <div class="tg-msg in">📸 Take a photo of the <strong>barcode label</strong> on the parcel and send it here — or type the tag code.<span class="t">10:12</span></div>
+            <div class="tg-msg out photo"><div class="img">🖼️</div><span class="t">10:13</span></div>
+          </div>
+          <div class="tg-input"><span>📎</span><span class="ph">Message</span><span>🎤</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="recibir">
+      <h2>Receive a parcel</h2>
+      <div class="two">
+        <ol class="steps">
+          <li>Tap <span class="btn">Confirm a reception</span>.</li>
+          <li>Send the <strong>tag photo</strong> of the parcel, or type its code.</li>
+        </ol>
+        <div class="tg" aria-label="Example: confirming a reception">
+          <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
+          <div class="tg-body">
+            <div class="tg-kb one"><span class="tap">Confirm a reception</span></div>
+            <div class="tg-msg in">📥 Receipt mode. Now send me the <strong>tag photo</strong> of the parcel you received, or type the <strong>alphanumeric code</strong> of the label.<span class="t">17:05</span></div>
+            <div class="tg-msg out photo"><div class="img">🖼️</div><span class="t">17:06</span></div>
+            <div class="tg-msg in">Receipt registered, thank you.<span class="t">17:06</span></div>
+          </div>
+          <div class="tg-input"><span>📎</span><span class="ph">Message</span><span>🎤</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="reportar">
+      <h2>Report a problem</h2>
+      <div class="two">
+        <div>
+          <ol class="steps">
+            <li>Tap <span class="btn">Report incident</span>.</li>
+            <li>Pick what happened from the list.</li>
+            <li>Follow the buttons the bot offers. Below you can see what happens in each case.</li>
+          </ol>
+          <div class="callout info"><strong>Is it about a specific parcel?</strong> First open it in <span class="btn">View pending shipments</span> and tap <strong>⚠️ Report incident</strong> on that parcel. That way your manager knows which one you mean.</div>
+          <div class="chips">
+            <a href="#c-material">📦 I'm missing materials</a><a href="#c-roto">💥 Broken parcel</a><a href="#c-devuelto">↩️ A parcel was returned to me</a>
+            <a href="#c-ilegible">🔍 I can't read a label</a><a href="#c-foto">📷 Tag photo</a><a href="#c-como">❓ How do I send a parcel?</a>
+            <a href="#c-datos">📱 Change my details</a><a href="#c-otro">💬 Another problem</a><a href="#c-vacaciones">🗓️ Unavailable days</a>
+          </div>
+        </div>
+        <div class="tg" aria-label="Example: choosing the problem">
+          <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
+          <div class="tg-body">
+            <div class="tg-kb one"><span class="tap">Report incident</span></div>
+            <div class="tg-msg in">⚠️ What happened? Choose an option:<span class="t">11:02</span></div>
+            <div class="tg-kb one">
+              <span>📦 I'm missing materials</span><span>💥 Broken or damaged parcel</span><span>↩️ A parcel was returned to me</span>
+              <span>🔍 I can't read a label</span><span>📷 I can't take the tag photo</span><span>❓ How do I send a parcel?</span>
+              <span>📱 Change my details</span><span>💬 Another problem</span><span>🗓️ Unavailable days</span><span>↩️ Back to menu</span>
+            </div>
+          </div>
+          <div class="tg-input"><span>📎</span><span class="ph">Message</span><span>🎤</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="casos">
+      <h2>What happens with each problem</h2>
+
+      <article class="case" id="c-material">
+        <h3>📦 I'm missing materials</h3>
+        <p class="sit">You have run out of envelopes, seals or other materials to prepare your parcels.</p>
+        <div class="two">
+          <div>
+            <ol class="steps">
+              <li>Tap <span class="btn">Report incident</span> and then <strong>📦 I'm missing materials</strong>.</li>
+              <li>Done. Your manager already knows and arranges the delivery.</li>
+            </ol>
+            <div class="callout ok"><strong>What can happen next:</strong>
+              <ul>
+                <li><strong>You get materials</strong> from another panelist in your city or from the head office. When they should have arrived, the bot asks you <em>“Did you receive the materials…?”</em> (<a href="#m-llega-material">see</a>).</li>
+                <li><strong>Until they arrive, the bot stops reminding you</strong> about the parcels you can't send. This is not an error.</li>
+                <li>If it will take a while, <strong>your parcels for those days may go to other panelists</strong>. The bot tells you.</li>
+                <li>When you receive the materials, the bot tells you <em>“You can send these now: …”</em> with the date and destination of each one (<a href="#m-liberados">see</a>).</li>
+                <li>Your manager may write to you to ask something (<a href="#m-responsable">see</a>).</li>
+              </ul>
+            </div>
+          </div>
+          <div class="tg">
+            <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
+            <div class="tg-body">
+              <div class="tg-msg in">⚠️ What happened? Choose an option:<span class="t">09:55</span></div>
+              <div class="tg-kb one"><span class="tap">📦 I'm missing materials</span></div>
+              <div class="tg-msg in">Noted, thanks for letting us know.<span class="t">09:55</span></div>
+            </div>
+            <div class="tg-input"><span>📎</span><span class="ph">Message</span><span>🎤</span></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="case" id="c-roto">
+        <h3>💥 Broken or damaged parcel</h3>
+        <p class="sit">When it arrives, the box is broken, wet or open.</p>
+        <div class="two">
+          <div>
+            <ol class="steps">
+              <li>Tap <span class="btn">Report incident</span> and then <strong>💥 Broken or damaged parcel</strong>.</li>
+              <li>If you can read the label, confirm the reception as usual.</li>
+            </ol>
+            <div class="callout ok"><strong>What can happen next:</strong> nothing else. It is recorded for the measurement and you don't have to do anything.</div>
+          </div>
+          <div class="tg">
+            <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
+            <div class="tg-body">
+              <div class="tg-msg in">⚠️ What happened? Choose an option:<span class="t">11:02</span></div>
+              <div class="tg-kb one"><span class="tap">💥 Broken or damaged parcel</span></div>
+              <div class="tg-msg in">Noted, thanks for letting us know.<span class="t">11:02</span></div>
+            </div>
+            <div class="tg-input"><span>📎</span><span class="ph">Message</span><span>🎤</span></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="case" id="c-devuelto">
+        <h3>↩️ A parcel was returned to me</h3>
+        <p class="sit">A parcel you sent has come back to your home.</p>
+        <div class="two">
+          <div>
+            <ol class="steps">
+              <li>Open the parcel in <span class="btn">View pending shipments</span> if it is there, and tap <strong>⚠️ Report incident</strong>. If not, use <span class="btn">Report incident</span>.</li>
+              <li>Choose <strong>↩️ A parcel was returned to me</strong>.</li>
+              <li>Keep the parcel and its label. Don't throw them away.</li>
+            </ol>
+            <div class="callout ok"><strong>What can happen next:</strong>
+              <ul>
+                <li>Your manager may <strong>ask you to send it again to another destination</strong> in the same city. It will show up in your pending shipments with its new date.</li>
+                <li>Or they may <strong>cancel it</strong>: then you don't have to do anything with it.</li>
+                <li>If they need something (for example, a photo of the label), they write to you in this chat.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="tg">
+            <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
+            <div class="tg-body">
+              <div class="tg-msg in">⚠️ What happened? Choose an option:<span class="t">12:20</span></div>
+              <div class="tg-kb one"><span class="tap">↩️ A parcel was returned to me</span></div>
+              <div class="tg-msg in">Noted. Your manager will review what to do with this parcel.<span class="t">12:20</span></div>
+            </div>
+            <div class="tg-input"><span>📎</span><span class="ph">Message</span><span>🎤</span></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="case" id="c-ilegible">
+        <h3>🔍 I can't read a label</h3>
+        <p class="sit">A parcel has arrived and its label is faded, torn or covered.</p>
+        <div class="two">
+          <div>
+            <ol class="steps">
+              <li>Tap <span class="btn">Report incident</span> and then <strong>🔍 I can't read a label</strong>.</li>
+              <li>The bot shows you the parcels on their way to you. Tap <strong>✅ This one</strong> on the one that arrived.</li>
+              <li>If it isn't there, tap <strong>❌ None</strong>.</li>
+            </ol>
+            <div class="callout ok"><strong>What can happen next:</strong>
+              <ul>
+                <li>If you pick one: it is marked as <strong>received</strong>. No photo needed.</li>
+                <li>If it isn't in the list: <em>“I can't find any parcels on their way to you; a manager will look into it.”</em> Your manager will write to you if they need anything.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="tg">
+            <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
+            <div class="tg-body">
+              <div class="tg-kb one"><span class="tap">🔍 I can't read a label</span></div>
+              <div class="tg-msg in">Which of these parcels has reached you? Tap the button of the right one.<span class="t">16:40</span></div>
+              <div class="tg-msg in">From Madrid · 20/10<span class="t">16:40</span></div>
+              <div class="tg-kb one"><span>✅ This one</span></div>
+              <div class="tg-msg in">From Seville · 21/10<span class="t">16:40</span></div>
+              <div class="tg-kb one"><span class="tap">✅ This one</span></div>
+              <div class="tg-msg in">Receipt registered, thank you.<span class="t">16:41</span></div>
+            </div>
+            <div class="tg-input"><span>📎</span><span class="ph">Message</span><span>🎤</span></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="case" id="c-foto">
+        <h3>📷 I can't take the tag photo</h3>
+        <p class="sit">You are confirming a shipment and the camera doesn't work or the photo comes out wrong.</p>
+        <div class="two">
+          <div>
+            <ol class="steps">
+              <li>Tap <span class="btn">Report incident</span> and then <strong>📷 I can't take the tag photo</strong>.</li>
+              <li>If the bot asks, choose the parcel from your list.</li>
+              <li>Type the tag <strong>code</strong>, letter by letter.</li>
+            </ol>
+            <div class="callout ok"><strong>What can happen next:</strong> the shipment is confirmed with the code, just like with the photo. Your manager doesn't have to do anything.</div>
+            <div class="callout warn"><strong>Tip:</strong> take the photo in good light, up close and without glare. That way you won't have to type the code.</div>
+          </div>
+          <div class="tg">
+            <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
+            <div class="tg-body">
+              <div class="tg-kb one"><span class="tap">📷 I can't take the tag photo</span></div>
+              <div class="tg-msg in">Type the tag code.<span class="t">10:31</span></div>
+              <div class="tg-msg out">E2801170A3F1<span class="t">10:31</span></div>
+              <div class="tg-msg in">✅ Shipment registered.<span class="t">10:31</span></div>
+            </div>
+            <div class="tg-input"><span>📎</span><span class="ph">Message</span><span>🎤</span></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="case" id="c-como">
+        <h3>❓ How do I send a parcel?</h3>
+        <p class="sit">You don't know how to prepare a parcel, where to take it or how to attach the label.</p>
+        <div class="two">
+          <div>
+            <ol class="steps">
+              <li>Tap <span class="btn">Report incident</span> and then <strong>❓ How do I send a parcel?</strong>.</li>
+              <li>Wait for the message from your manager.</li>
+            </ol>
+            <div class="callout ok"><strong>What can happen next:</strong> your manager writes to you in this chat to answer your question. Tap <strong>✍️ Reply</strong> and tell them whatever you need (<a href="#m-responsable">see</a>).</div>
+          </div>
+          <div class="tg">
+            <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
+            <div class="tg-body">
+              <div class="tg-kb one"><span class="tap">❓ How do I send a parcel?</span></div>
+              <div class="tg-msg in">Noted. Your manager will write to you here.<span class="t">11:46</span></div>
+            </div>
+            <div class="tg-input"><span>📎</span><span class="ph">Message</span><span>🎤</span></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="case" id="c-datos">
+        <h3>📱 Change my details</h3>
+        <p class="sit">You have a new phone number, email or address, or you want the bot in another language.</p>
+        <div class="two">
+          <div>
+            <ol class="steps">
+              <li>Tap <span class="btn">Report incident</span> and then <strong>📱 Change my details</strong>.</li>
+              <li>Choose which detail you want to change.</li>
+              <li>Type the new detail (the language is chosen with buttons) and confirm it.</li>
+            </ol>
+            <div class="callout ok"><strong>What can happen next:</strong> <em>“Details updated.”</em> The change applies right away. If the detail is not valid, the bot tells you and nothing changes.</div>
+          </div>
+          <div class="tg">
+            <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
+            <div class="tg-body">
+              <div class="tg-kb one"><span class="tap">📱 Change my details</span></div>
+              <div class="tg-msg in">Which detail do you want to change?<span class="t">20:15</span></div>
+              <div class="tg-kb"><span class="tap">📱 Phone</span><span>✉️ Email</span><span>🏠 Address</span><span>🌐 Language</span></div>
+              <div class="tg-msg out">600 123 456<span class="t">20:16</span></div>
+              <div class="tg-kb"><span class="tap">✅ Yes</span><span>❌ No</span></div>
+              <div class="tg-msg in">Details updated.<span class="t">20:16</span></div>
+            </div>
+            <div class="tg-input"><span>📎</span><span class="ph">Message</span><span>🎤</span></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="case" id="c-otro">
+        <h3>💬 Another problem</h3>
+        <p class="sit">What is happening to you is not in the list.</p>
+        <div class="two">
+          <div>
+            <ol class="steps">
+              <li>Tap <span class="btn">Report incident</span> and then <strong>💬 Another problem</strong>.</li>
+              <li>Wait for the message from your manager and answer with <strong>✍️ Reply</strong>: there you can type everything you need and send photos.</li>
+            </ol>
+            <div class="callout ok"><strong>What can happen next:</strong> your manager writes to you to find out what is going on and tells you what to do.</div>
+          </div>
+          <div class="tg">
+            <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
+            <div class="tg-body">
+              <div class="tg-kb one"><span class="tap">💬 Another problem</span></div>
+              <div class="tg-msg in">Noted. Your manager will write to you here.<span class="t">14:05</span></div>
+            </div>
+            <div class="tg-input"><span>📎</span><span class="ph">Message</span><span>🎤</span></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="case" id="c-vacaciones">
+        <h3>🗓️ Unavailable days</h3>
+        <p class="sit">Holiday, illness, training or personal reasons: there are days when you can't send or receive.</p>
+        <div class="two">
+          <div>
+            <ol class="steps">
+              <li>Tap <span class="btn">🗓️ Unavailable days</span> (in the menu or in the list of problems) and then <strong>➕ Declare unavailable days</strong>.</li>
+              <li>Tap <strong>Today</strong> or <strong>Tomorrow</strong>. For other days, tap <strong>✏️ From–to</strong> and type the dates like this: <code>2026-11-09 to 2026-11-13</code> (or a single date for one day).</li>
+              <li>Check the dates and tap <strong>✅ Confirm</strong>.</li>
+            </ol>
+            <p class="cap">With <strong>📋 View my unavailable days</strong> you can see the ones you have and cancel them with <strong>❌ Cancel these days</strong>.</p>
+            <div class="callout ok"><strong>What can happen next:</strong>
+              <ul>
+                <li>The parcels you had on those days <strong>move to another date or to another panelist</strong> in your city. You don't have to do anything.</li>
+                <li>On those days the bot doesn't send you the 09:00 reminder.</li>
+                <li>Your manager may write to you if they need anything.</li>
+              </ul>
+            </div>
+            <div class="callout warn"><strong>Let us know in advance.</strong> Future dates only, and at most 90 days in a row.</div>
+          </div>
+          <div class="tg">
+            <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
+            <div class="tg-body">
+              <div class="tg-kb one"><span class="tap">🗓️ Unavailable days</span></div>
+              <div class="tg-msg in">What would you like to do about your unavailable days?<span class="t">18:10</span></div>
+              <div class="tg-kb one"><span class="tap">➕ Declare unavailable days</span><span>📋 View my unavailable days</span><span>⬅️ Back to menu</span></div>
+              <div class="tg-msg in">When will you be unavailable?<span class="t">18:10</span></div>
+              <div class="tg-kb"><span>Today</span><span>Tomorrow</span></div>
+              <div class="tg-kb one"><span class="tap">✏️ From–to</span></div>
+              <div class="tg-msg in">Type the range as <code>2026-08-20 to 2026-08-25</code>.<br>For a single day, just type that date.<span class="t">18:10</span></div>
+              <div class="tg-msg out">2026-11-09 to 2026-11-13<span class="t">18:11</span></div>
+              <div class="tg-msg in">You are about to declare yourself unavailable from <strong>09/11/2026</strong> to <strong>13/11/2026</strong> (5 days). Confirm?<span class="t">18:11</span></div>
+              <div class="tg-kb"><span class="tap">✅ Confirm</span><span>❌ Discard</span></div>
+              <div class="tg-msg in">Received. Thank you for letting us know.<br>Unavailable: <strong>09/11/2026 – 13/11/2026</strong>.<span class="t">18:11</span></div>
+            </div>
+            <div class="tg-input"><span>📎</span><span class="ph">Message</span><span>🎤</span></div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section id="mensajes">
+      <h2>Messages you may get</h2>
+      <p>Sometimes the bot writes to you first. These are the messages you may receive and what to tap.</p>
+
+      <article class="case" id="m-llega-material">
+        <h3>📬 “Did you receive the materials…?”</h3>
+        <p class="sit">Materials were sent to you (because you were missing some) and the bot wants to know if you have them.</p>
+        <div class="two">
+          <div>
+            <ol class="steps">
+              <li>If you have them, tap <strong>Yes</strong>. If not, tap <strong>Not yet</strong>: it will ask you again later.</li>
+              <li>For each material, tap <strong>All</strong> if it all arrived, or <strong>Another amount</strong> and type the number that arrived.</li>
+            </ol>
+            <div class="callout ok"><strong>What can happen next:</strong>
+              <ul>
+                <li>If everything arrived, it is closed and the bot tells you which parcels you can send now.</li>
+                <li>If something is missing, it will ask you about the rest later.</li>
+                <li>If you don't answer after several questions, your manager gets a notice and may write to you.</li>
+              </ul>
+            </div>
+            <div class="callout info"><strong>Did it arrive and the bot hasn't asked you?</strong> Tap <span class="btn">📦 Confirm material received</span> in the menu.</div>
+          </div>
+          <div class="tg">
+            <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
+            <div class="tg-body">
+              <div class="tg-msg in">Did you receive the materials from Ana P. (envelopes, seals)?<span class="t">13:00</span></div>
+              <div class="tg-kb"><span class="tap">Yes</span><span>Not yet</span></div>
+              <div class="tg-msg in">Envelopes: how many arrived?<span class="t">13:01</span></div>
+              <div class="tg-kb"><span class="tap">All</span><span>Another amount</span></div>
+              <div class="tg-msg in">Seals: how many arrived?<span class="t">13:01</span></div>
+              <div class="tg-kb"><span>All</span><span class="tap">Another amount</span></div>
+              <div class="tg-msg out">150<span class="t">13:02</span></div>
+              <div class="tg-msg in">Noted; we will ask you about the rest.<span class="t">13:02</span></div>
+            </div>
+            <div class="tg-input"><span>📎</span><span class="ph">Message</span><span>🎤</span></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="case" id="m-donar">
+        <h3>🤝 Send materials to another panelist</h3>
+        <p class="sit">You have spare materials and another panelist in your city is missing some. This can happen even if you haven't reported anything.</p>
+        <div class="two">
+          <div>
+            <ol class="steps">
+              <li>The bot tells you which material, how much, to whom (name and address) and by when it must arrive.</li>
+              <li>Prepare it and send it by regular mail.</li>
+              <li>When you have sent it, tap <strong>I've sent it</strong>. Once is enough.</li>
+            </ol>
+            <div class="callout ok"><strong>What can happen next:</strong>
+              <ul>
+                <li>That material is subtracted from your stock. You don't have to do anything else.</li>
+                <li>If you don't tap the button, the bot reminds you every two days. After two reminders, it notifies your manager.</li>
+                <li>If you can't send it, tap <span class="btn">Report incident</span> → <strong>💬 Another problem</strong> and your manager will write to you.</li>
+              </ul>
+            </div>
+            <div class="callout info"><strong>Privacy:</strong> you will only see the other panelist's name and address, never their phone or email.</div>
+          </div>
+          <div class="tg">
+            <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
+            <div class="tg-body">
+              <div class="tg-msg in">Please send:<br>• 350 express document envelopes<br>to <strong>Pablo Ruiz</strong>, 12 Main St, Toledo<br>It must arrive before 03/11.<span class="t">10:00</span></div>
+              <div class="tg-kb one"><span class="tap">I've sent it</span></div>
+              <div class="tg-msg in">Thanks, noted.<span class="t">15:47</span></div>
+            </div>
+            <div class="tg-input"><span>📎</span><span class="ph">Message</span><span>🎤</span></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="case" id="m-liberados">
+        <h3>✅ “You can send these now: …”</h3>
+        <p class="sit">Your parcels were on hold because of missing materials and now you have enough.</p>
+        <div class="two">
+          <div>
+            <p>The bot lists the parcels you can now send, with their date and destination. From that moment they appear again in the 09:00 reminder.</p>
+            <div class="callout ok"><strong>What you need to do:</strong> send them as usual and confirm them with <span class="btn">Confirm a shipment</span>.</div>
+          </div>
+          <div class="tg">
+            <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
+            <div class="tg-body">
+              <div class="tg-msg in">You can send these now:<br>• 26/10 → Burgos<br>• 28/10 → Lyon<span class="t">13:02</span></div>
+            </div>
+            <div class="tg-input"><span>📎</span><span class="ph">Message</span><span>🎤</span></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="case" id="m-responsable">
+        <h3>📌 Message from your manager</h3>
+        <p class="sit">Your manager writes to you about something you reported. It is the only time you type freely.</p>
+        <div class="two">
+          <div>
+            <ol class="steps">
+              <li>Read the message. The top line says what it is about.</li>
+              <li>Tap <strong>✍️ Reply</strong> and type whatever you need. You can also send <strong>photos</strong>.</li>
+              <li>When you finish, tap <strong>↩️ Back to menu</strong>.</li>
+            </ol>
+            <div class="callout ok"><strong>What can happen next:</strong> your manager reads your reply and may write to you again. The conversation closes by itself when the matter is resolved or after 48 hours without messages.</div>
+          </div>
+          <div class="tg">
+            <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
+            <div class="tg-body">
+              <div class="tg-msg in">📌 Message from the person in charge about your incident «Returned parcel»<br><br>Hi Pablo, can you keep the label?<span class="t">09:20</span></div>
+              <div class="tg-kb"><span class="tap">✍️ Reply</span><span>↩️ Back to menu</span></div>
+              <div class="tg-msg in">Write your reply and the person in charge will receive it.<span class="t">09:21</span></div>
+              <div class="tg-msg out">Yes, I have it. I'll send you a photo.<span class="t">09:22</span></div>
+              <div class="tg-msg out photo"><div class="img">🖼️</div><span class="t">09:22</span></div>
+            </div>
+            <div class="tg-input"><span>📎</span><span class="ph">Message</span><span>🎤</span></div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section id="preguntas">
+      <h2>Questions</h2>
+      <details><summary>Do I have to type to report a problem?</summary><div>No. Tap <strong>Report incident</strong> and choose from the list. You only type if your manager asks you something.</div></details>
+      <details><summary>I tapped the wrong button.</summary><div>Tap <strong>↩️ Back to menu</strong> if it appears. If it was already registered, choose <strong>💬 Another problem</strong> and explain it to your manager when they write to you.</div></details>
+      <details><summary>Why is it no longer reminding me about some parcels?</summary><div>Because you are missing the materials to send them. When they arrive, the bot will tell you “You can send these now”.</div></details>
+      <details><summary>Can parcels be taken away from me?</summary><div>Yes, if you report unavailable days or if you are missing materials for a while: they move to another date or to another panelist in your city.</div></details>
+      <details><summary>Can I be asked to send materials to another panelist?</summary><div>Yes, if you have spare ones. The bot tells you what, how much, to whom and by when. Tap “I've sent it” when you send them.</div></details>
+      <details><summary>Are there parcels at the weekend?</summary><div>No. Parcels are sent Monday to Friday only.</div></details>
+      <p class="cap" style="margin-top:24px">The bot's messages may change slightly depending on your language and your case. The names, dates and codes in this guide are examples.</p>
+    </section>
+  </div>
+  </main>
+</div>
+
+<script>
+(function () {
+  var links = Array.prototype.slice.call(document.querySelectorAll('#nav a'));
+  var sections = links.map(function (a) { return document.querySelector(a.getAttribute('href')); }).filter(Boolean);
+
+  var jump = document.getElementById('jump');
+  links.forEach(function (a) {
+    var o = document.createElement('option');
+    o.value = a.getAttribute('href'); o.textContent = a.textContent; jump.appendChild(o);
+  });
+  jump.addEventListener('change', function () { location.hash = jump.value; });
+
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          links.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id); });
+          jump.value = '#' + e.target.id;
+        }
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    sections.forEach(function (s) { io.observe(s); });
+  }
+})();
+</script>
+</body>
+</html>

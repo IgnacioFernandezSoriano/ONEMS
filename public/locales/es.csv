@@ -3007,3 +3007,5 @@ incident_conversation.new_reply,Respuesta nueva
 incident_conversation.photo_alt,Foto enviada por el panelista
 menu.help_incidents,Ayuda: Incidencias
 menu.help_incidents.tooltip,Cómo funcionan las incidencias y la disponibilidad de panelistas (se abre en una pestaña nueva)
+incident_conversation.insert_help,📖 Insertar enlace a la ayuda
+incident_conversation.insert_help.tooltip,Añade al mensaje el enlace a la guía del panelista: en su idioma y abierta en el apartado de esta incidencia

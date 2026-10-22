@@ -109,7 +109,7 @@ export function useUnavailabilityIncidents() {
       .from('panelist_unavailability')
       .select(`
         id, account_id, start_date, end_date, reason, incident_status, auto_summary, final_resolution, resolved_at,
-        panelist:panelists ( name, panelist_code, node:nodes ( id, auto_id, city:cities ( id, name ) ) )
+        panelist:panelists ( name, panelist_code, language, node:nodes ( id, auto_id, city:cities ( id, name ) ) )
       `)
       .eq('id', unavailabilityId)
       .single()
@@ -121,6 +121,7 @@ export function useUnavailabilityIncidents() {
       account_id: d.account_id ?? null,
       panelist_name: d.panelist?.name ?? '-',
       panelist_code: d.panelist?.panelist_code ?? '-',
+      panelist_language: d.panelist?.language ?? null,
       start_date: d.start_date,
       end_date: d.end_date,
       reason: d.reason,

@@ -564,7 +564,8 @@ export function IncidentReviewPanel({ unavailabilityId, onBack }: Props) {
         pendingEmptyText={pendingEmptyText}
       />
 
-      <IncidentConversation kind="unavailability" incidentId={unavailabilityId} />
+      <IncidentConversation kind="unavailability" incidentId={unavailabilityId}
+        panelistLanguage={header?.panelist_language} helpSection="c-vacaciones" />
 
       {move && (
         <div

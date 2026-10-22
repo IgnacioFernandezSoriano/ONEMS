@@ -2999,3 +2999,5 @@ incident_conversation.new_reply,Nouvelle réponse
 incident_conversation.photo_alt,Photo envoyée par le panéliste
 menu.help_incidents,Aide : Incidents
 menu.help_incidents.tooltip,Fonctionnement des incidents et de la disponibilité des panélistes (s'ouvre dans un nouvel onglet)
+incident_conversation.insert_help,📖 Insérer le lien d'aide
+incident_conversation.insert_help.tooltip,Ajoute au message le lien vers le guide du panéliste : dans sa langue et ouvert à la section de cet incident
