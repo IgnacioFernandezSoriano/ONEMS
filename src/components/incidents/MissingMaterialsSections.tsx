@@ -180,7 +180,7 @@ function SupplySection({ tr, accountId, incidentId, panelist, payload, executed,
   onChanged: () => Promise<void>
   t: TFn
 }) {
-  const { resolveSupplyV2, executeSupply, fetchIncidentShipments, linkShipmentsToIncident, linkShipmentToIncident, daysWithoutStock, orderPurchaseLines } = tr
+  const { resolveSupplyV2, executeSupply, fetchIncidentShipments, linkShipmentsToIncident, linkShipmentToIncident, daysWithoutStock, requestPurchaseLines } = tr
   const done: string | null = payload?.supply_executed_at ?? null
   const [days, setDays] = useState('')
   const horizonEnd = useMemo(() => horizonFor(days), [days])
@@ -265,17 +265,19 @@ function SupplySection({ tr, accountId, incidentId, panelist, payload, executed,
       // que faltan (un fallo parcial previo no duplica el central ni los donantes).
       // Quedan `pending`: el donante confirma el envio por Telegram y el central se marca enviado desde la hoja.
       const fd: unknown[] = Array.isArray(fp.donor_shipment_ids) ? fp.donor_shipment_ids : []
-      const known = Array.from(new Set([created?.centralShipmentId, ...(created?.donorShipmentIds ?? []), fp.central_shipment_id, ...fd]
+      const known = Array.from(new Set([created?.centralShipmentId, ...(created?.donorShipmentIds ?? []), fp.central_shipment_id, fp.purchase_shipment_id, ...fd]
         .filter((x): x is string => typeof x === 'string' && x !== '')))
       if (known.length > 0) await linkShipmentsToIncident(incidentId, known)
       const existing = await fetchIncidentShipments(incidentId)
       // Fecha en que debe llegar cada envio (central/vecinos): siempre hoy + plazo habitual de envio.
-      // La compra no es un envio: payload.expected_date es solo la llegada de la compra (fin de la baja).
+      // Lo comprado va en un envio aparte que llega en la fecha prevista de la compra (payload.expected_date,
+      // tambien fin de la baja).
       const shipExpected = format(addDays(new Date(), shipLead), DATE_FMT)
-      const ids = await executeSupply(toSupplyPlan(effective), panelist.id, shipExpected, { incidentId, existing })
+      const ids = await executeSupply(toSupplyPlan(effective), panelist.id, shipExpected,
+        { incidentId, existing, purchaseExpectedDate: hasPurchase ? expectedDate : undefined })
       setCreated(ids) // guarda en memoria (misma sesion) ANTES de persistir
-      await mergePayload(incidentId, { central_shipment_id: ids.centralShipmentId, donor_shipment_ids: ids.donorShipmentIds })
-      const allIds = [ids.centralShipmentId, ...ids.donorShipmentIds].filter(Boolean) as string[]
+      await mergePayload(incidentId, { central_shipment_id: ids.centralShipmentId, donor_shipment_ids: ids.donorShipmentIds, purchase_shipment_id: ids.purchaseShipmentId })
+      const allIds = [ids.centralShipmentId, ids.purchaseShipmentId, ...ids.donorShipmentIds].filter(Boolean) as string[]
       await linkShipmentsToIncident(incidentId, allIds) // idempotente (ya enlazados en el INSERT)
       // Compatibilidad: linked_material_shipment_id sigue apuntando al envio central
       if (ids.centralShipmentId) await linkShipmentToIncident(incidentId, ids.centralShipmentId)
@@ -283,13 +285,13 @@ function SupplySection({ tr, accountId, incidentId, panelist, payload, executed,
       const purchaseLines: PurchaseLine[] = effective
         .filter(l => l.toPurchase > 0)
         .map(l => ({ material_id: l.material_id, code: l.code, name: l.name, quantity: l.toPurchase }))
-      // La compra queda como pedido en Stock management -> Material Requirements (se recibe alli)
-      if (purchaseLines.length > 0 && expected) await orderPurchaseLines(incidentId, purchaseLines, expected)
+      // La compra queda como requerimiento pendiente en Material Requirements (el gestor confirma y pide alli)
+      if (purchaseLines.length > 0 && expected) await requestPurchaseLines(incidentId, purchaseLines, expected)
       // Justo antes de la escritura final se relee el payload: si otra pestana ya confirmo, no se pisa
       const written = await mergePayload(incidentId, {
         horizon_end: horizonEnd, expected_date: expected, days_without_stock: hasPurchase ? (dws?.businessDays ?? 0) : 0,
         central_shipment_id: ids.centralShipmentId, donor_shipment_ids: ids.donorShipmentIds,
-        purchase_lines: purchaseLines,
+        purchase_shipment_id: ids.purchaseShipmentId, purchase_lines: purchaseLines,
         supply_executed_at: new Date().toISOString()
       }, { unlessExecuted: true })
       if (written) onExecuted({ expectedDate: expected, centralShipmentId: ids.centralShipmentId, donorShipmentIds: ids.donorShipmentIds })

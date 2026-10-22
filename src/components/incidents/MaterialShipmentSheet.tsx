@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { format, isValid, parseISO } from 'date-fns'
 import { supabase } from '@/lib/supabase'
-import type { PurchaseLine } from '@/lib/hooks/useMaterialsTreatment'
+import { PURCHASE_SHIPMENT_NOTE, type PurchaseLine } from '@/lib/hooks/useMaterialsTreatment'
 
 type TFn = (key: string, params?: Record<string, any>, fallback?: string) => string
 
@@ -47,10 +47,11 @@ export function MaterialShipmentSheet({ incidentId, accountId, receiverPanelistI
   const [lines, setLines] = useState<Line[] | null>(null)
   const [receiverDesc, setReceiverDesc] = useState<string>(DASH)
   const [error, setError] = useState<string | null>(null)
+  const [hasPurchaseShipment, setHasPurchaseShipment] = useState(false)
 
   const load = useCallback(async () => {
     const { data: ships, error: e1 } = await supabase.from('material_shipments')
-      .select('id, status, expected_date, panelist_id, source_panelist_id, created_at')
+      .select('id, status, expected_date, panelist_id, source_panelist_id, notes, created_at')
       .eq('panelist_incident_id', incidentId).eq('account_id', accountId).order('created_at')
     if (e1) throw e1
     const sh = ships ?? []
@@ -87,7 +88,9 @@ export function MaterialShipmentSheet({ incidentId, accountId, receiverPanelistI
 
     const out: Line[] = []
     sh.forEach((s: any) => {
-      const origin = s.source_panelist_id ? (panMap[s.source_panelist_id] ?? DASH) : t(k('central_warehouse'))
+      // Lo comprado sale del almacen cuando llega la compra: origen "Compra"
+      const origin = s.source_panelist_id ? (panMap[s.source_panelist_id] ?? DASH)
+        : t(k(s.notes === PURCHASE_SHIPMENT_NOTE ? 'purchase_origin' : 'central_warehouse'))
       const destination = panMap[s.panelist_id] ?? DASH
       ;(items ?? []).filter((i: any) => i.material_shipment_id === s.id).forEach((i: any) => {
         const mat = matMap[i.material_id]
@@ -99,6 +102,7 @@ export function MaterialShipmentSheet({ incidentId, accountId, receiverPanelistI
       })
     })
     setLines(out)
+    setHasPurchaseShipment(sh.some((s: any) => !s.source_panelist_id && s.notes === PURCHASE_SHIPMENT_NOTE))
     setReceiverDesc(receiverPanelistId ? (panMap[receiverPanelistId] ?? DASH) : DASH)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [incidentId, accountId, receiverPanelistId])
@@ -106,11 +110,13 @@ export function MaterialShipmentSheet({ incidentId, accountId, receiverPanelistI
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { load().catch(e => setError(`${t('common.error')}: ${e?.message ?? String(e)}`)) }, [load])
 
-  if (!lines || (lines.length === 0 && purchaseLines.length === 0)) {
+  // Bloque "A comprar" (solo incidencias antiguas): no son envios, solo informacion para la compra. Si ya existe
+  // el envio de lo comprado (origen Compra), ese envio lo sustituye y el bloque no se repite.
+  const buyLines = hasPurchaseShipment ? [] : purchaseLines
+  if (!lines || (lines.length === 0 && buyLines.length === 0)) {
     return error ? <p className="text-sm text-red-600">{error}</p> : null
   }
 
-  // Bloque "A comprar": no son envios, solo informacion para la compra (origen Compra, destino el receptor)
   const purchaseOrigin = t(k('purchase_origin'))
   const purchaseStatus = t(k('to_buy_title'))
   const purchaseDueText = fmtDate(purchaseDue)
@@ -144,12 +150,12 @@ export function MaterialShipmentSheet({ incidentId, accountId, receiverPanelistI
                 <td className="py-1 pe-2">{statusLabel(l.status)}</td>
               </tr>
             ))}
-            {purchaseLines.length > 0 && (
+            {buyLines.length > 0 && (
               <tr className="border-t">
                 <td colSpan={COLS.length} className="py-1 pe-2 font-medium">{purchaseStatus}</td>
               </tr>
             )}
-            {purchaseLines.map(p => (
+            {buyLines.map(p => (
               <tr key={`buy-${p.material_id || p.code}`} className="border-t align-top">
                 <td className="py-1 pe-2">{purchaseOrigin}</td>
                 <td className="py-1 pe-2">{receiverDesc}</td>

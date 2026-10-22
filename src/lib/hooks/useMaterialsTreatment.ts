@@ -84,7 +84,11 @@ export function readPurchaseLines(payload: Record<string, any> | null | undefine
 export interface ExistingIncidentShipments {
   centralShipmentId: string | null
   donorShipmentIds: Record<string, string> // source_panelist_id -> shipment id
+  purchaseShipmentId: string | null
 }
+
+// Nota que distingue el envio central->panelista de lo COMPRADO (sale cuando llega la compra) del envio central normal
+export const PURCHASE_SHIPMENT_NOTE = 'purchase'
 
 export interface PanelistStockRow {
   material_id: string
@@ -255,12 +259,13 @@ export function useMaterialsTreatment(accountIdOverride?: string) {
   }, [accountId])
 
   // Envios ya creados para la incidencia (la BD es la fuente de idempotencia): central =
-  // source_panelist_id nulo; donantes por source_panelist_id. Se ignoran los cancelados.
+  // source_panelist_id nulo; compra = central con la nota PURCHASE_SHIPMENT_NOTE; donantes por
+  // source_panelist_id. Se ignoran los cancelados.
   const fetchIncidentShipments = useCallback(async (incidentId: string): Promise<ExistingIncidentShipments> => {
-    const out: ExistingIncidentShipments = { centralShipmentId: null, donorShipmentIds: {} }
+    const out: ExistingIncidentShipments = { centralShipmentId: null, donorShipmentIds: {}, purchaseShipmentId: null }
     if (!accountId) return out
     const { data, error } = await supabase.from('material_shipments')
-      .select('id, source_panelist_id, created_at')
+      .select('id, source_panelist_id, notes, created_at')
       .eq('panelist_incident_id', incidentId)
       .eq('account_id', accountId)
       .neq('status', 'cancelled')
@@ -269,6 +274,8 @@ export function useMaterialsTreatment(accountIdOverride?: string) {
     ;((data || []) as any[]).forEach(r => {
       if (r.source_panelist_id) {
         if (!out.donorShipmentIds[r.source_panelist_id]) out.donorShipmentIds[r.source_panelist_id] = r.id
+      } else if (r.notes === PURCHASE_SHIPMENT_NOTE) {
+        if (!out.purchaseShipmentId) out.purchaseShipmentId = r.id
       } else if (!out.centralShipmentId) out.centralShipmentId = r.id
     })
     return out
@@ -278,12 +285,13 @@ export function useMaterialsTreatment(accountIdOverride?: string) {
     supplyPlan: SupplyPlan,
     receiverPanelistId: string,
     expectedDate?: string,
-    opts?: { incidentId?: string; existing?: ExistingIncidentShipments }
-  ): Promise<{ centralShipmentId: string | null; donorShipmentIds: string[] }> => {
+    opts?: { incidentId?: string; existing?: ExistingIncidentShipments; purchaseExpectedDate?: string }
+  ): Promise<{ centralShipmentId: string | null; donorShipmentIds: string[]; purchaseShipmentId: string | null }> => {
     // Lo ya existente en BD para la incidencia se reutiliza: solo se crean los origenes que faltan
-    // (un reintento tras un fallo parcial no duplica el central ni los donantes).
-    const existing = opts?.existing ?? { centralShipmentId: null, donorShipmentIds: {} }
+    // (un reintento tras un fallo parcial no duplica el central, la compra ni los donantes).
+    const existing = opts?.existing ?? { centralShipmentId: null, donorShipmentIds: {}, purchaseShipmentId: null }
     let centralShipmentId: string | null = existing.centralShipmentId
+    let purchaseShipmentId: string | null = existing.purchaseShipmentId
     const donorIds: Record<string, string> = { ...existing.donorShipmentIds }
 
     // Shipments are created as `pending` and NOT dispatched here (v2): the donor
@@ -319,7 +327,20 @@ export function useMaterialsTreatment(accountIdOverride?: string) {
       }
     }
 
-    return { centralShipmentId, donorShipmentIds: Object.values(donorIds) }
+    // Lo que se compra tambien hay que enviarselo: envio central->panelista aparte, con la llegada prevista
+    // de la compra. Queda `pending` en Stock management -> Shipments y se envia cuando llega la compra.
+    if (supplyPlan.toPurchase.length > 0 && !purchaseShipmentId) {
+      const shipment = await createShipment({
+        panelist_id: receiverPanelistId,
+        items: supplyPlan.toPurchase.map(c => ({ material_id: c.material_id, quantity_sent: c.quantity })),
+        expected_date: opts?.purchaseExpectedDate ?? expectedDate,
+        notes: PURCHASE_SHIPMENT_NOTE,
+        panelist_incident_id: opts?.incidentId
+      }, true)
+      purchaseShipmentId = shipment.id
+    }
+
+    return { centralShipmentId, donorShipmentIds: Object.values(donorIds), purchaseShipmentId }
   }, [createShipment])
 
   // Baja por materiales [hoy, expectedDate] SOLO en los dias que no cubre ya otra baja activa del panelista
@@ -357,10 +378,11 @@ export function useMaterialsTreatment(accountIdOverride?: string) {
     return first
   }, [])
 
-  // Lo que queda a compra se registra como PEDIDO en Stock management -> Material Requirements
-  // (material_requirements_periods, status 'ordered', periodo [hoy, llegada prevista]); se recibe con el boton
-  // "Recibir" que ya existe. Idempotente: las filas llevan la nota de la incidencia y un reintento no duplica.
-  const orderPurchaseLines = useCallback(async (incidentId: string, lines: PurchaseLine[], arrival: string) => {
+  // Lo que queda a compra se registra como REQUERIMIENTO DE COMPRA pendiente en Stock management -> Material
+  // Requirements (material_requirements_periods, status 'pending', periodo [hoy, llegada prevista]): el gestor
+  // confirma alli las cantidades finales y lo marca como pedido. Idempotente: las filas llevan la nota de la
+  // incidencia y un reintento no duplica. ("Calcular" de esa pestana suma las pendientes del mismo material.)
+  const requestPurchaseLines = useCallback(async (incidentId: string, lines: PurchaseLine[], arrival: string) => {
     if (!accountId) return
     const start = format(new Date(), 'yyyy-MM-dd')
     const note = `Incident ${incidentId}`
@@ -371,20 +393,19 @@ export function useMaterialsTreatment(accountIdOverride?: string) {
         .eq('account_id', accountId).eq('material_id', l.material_id).eq('notes', note).limit(1)
       if (e0) throw e0
       if (mine && mine.length > 0) continue
-      // Clave unica (cuenta, periodo, material): si ya hay fila con el mismo periodo se le suma el pedido
+      // Clave unica (cuenta, periodo, material): si ya hay fila con el mismo periodo se le suma la necesidad
       const { data: same, error: e1 } = await supabase.from('material_requirements_periods')
-        .select('id, quantity_needed, quantity_ordered')
+        .select('id, quantity_needed')
         .eq('account_id', accountId).eq('material_id', l.material_id).eq('period_start', start).eq('period_end', arrival)
         .maybeSingle()
       if (e1) throw e1
       const { error: e2 } = same
         ? await supabase.from('material_requirements_periods').update({
-            quantity_needed: Number(same.quantity_needed || 0) + qty, quantity_ordered: Number(same.quantity_ordered || 0) + qty,
-            status: 'ordered', notes: note, updated_at: new Date().toISOString()
+            quantity_needed: Number(same.quantity_needed || 0) + qty, notes: note, updated_at: new Date().toISOString()
           }).eq('id', same.id)
         : await supabase.from('material_requirements_periods').insert({
             account_id: accountId, material_id: l.material_id, period_start: start, period_end: arrival,
-            quantity_needed: qty, quantity_ordered: qty, quantity_received: 0, status: 'ordered', plans_count: 0, notes: note
+            quantity_needed: qty, quantity_ordered: 0, quantity_received: 0, status: 'pending', plans_count: 0, notes: note
           })
       if (e2) throw e2
     }
@@ -485,7 +506,7 @@ export function useMaterialsTreatment(accountIdOverride?: string) {
     executeSupply,
     fetchIncidentShipments,
     createDisplacementBaja,
-    orderPurchaseLines,
+    requestPurchaseLines,
     linkShipmentToIncident,
     linkShipmentsToIncident
   }
