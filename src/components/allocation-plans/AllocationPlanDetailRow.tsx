@@ -328,7 +328,7 @@ export function AllocationPlanDetailRow({
                 : 'bg-yellow-100 text-yellow-800' // pending
             }`}
           >
-            {detail.status}
+            {t(`allocation_plans.${detail.status}`, undefined, detail.status)}
           </span>
         )}
       </td>
@@ -340,7 +340,7 @@ export function AllocationPlanDetailRow({
             <button
               onClick={() => onEdit(detail)}
               className="p-1 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
-              title="Edit record"
+              title={t('allocation_plans.edit_record')}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -352,9 +352,9 @@ export function AllocationPlanDetailRow({
             <button
               onClick={() => setShowShipmentModal(true)}
               className="px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700"
-              title="Register shipment"
+              title={t('allocation_plans.register_shipment')}
             >
-              Send
+              {t('allocation_plans.send')}
             </button>
           ) : null}
           
@@ -362,9 +362,9 @@ export function AllocationPlanDetailRow({
             <button
               onClick={() => setShowReceptionModal(true)}
               className="px-3 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700"
-              title="Register reception"
+              title={t('allocation_plans.register_reception')}
             >
-              Receive
+              {t('allocation_plans.receive')}
             </button>
           ) : null}
           
