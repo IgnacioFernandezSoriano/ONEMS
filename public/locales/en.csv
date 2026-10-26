@@ -136,6 +136,7 @@ allocation_generator.tooltip_usage_text,"Generate plans, review them in ""Genera
 allocation_generator.total_samples,Total Samples
 allocation_generator.user_not_authenticated,User not authenticated
 allocation_generator.year,Year
+allocation_generator.nodes_without_panelist_excluded,"{count} active nodes have no panelist and will get no shipments in this plan:"
 allocation_plans.add_record,Add record
 allocation_plans.all_carriers,All Carriers
 allocation_plans.all_cities,All Cities

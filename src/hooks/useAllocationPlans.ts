@@ -18,6 +18,10 @@ export function useAllocationPlans() {
   const [products, setProducts] = useState<Product[]>([])
   const [cities, setCities] = useState<City[]>([])
   const [nodes, setNodes] = useState<Node[]>([])
+  // Nodes that have an active (or temporarily unavailable) panelist: the generator only uses these.
+  const [panelistNodeIds, setPanelistNodeIds] = useState<string[]>([])
+  // Account non-working days (yyyy-MM-dd): the generator never schedules on them.
+  const [nonWorkingDays, setNonWorkingDays] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -98,6 +102,27 @@ export function useAllocationPlans() {
 
       if (nodesError) throw nodesError
       setNodes(nodesData || [])
+
+      // Panelists' nodes
+      let panelistsQuery = supabase
+        .from('panelists')
+        .select('node_id')
+        .in('status', ['active', 'unavailable_temp'])
+        .not('node_id', 'is', null)
+      if (effectiveAccountId) panelistsQuery = panelistsQuery.eq('account_id', effectiveAccountId)
+      const { data: panelistsData, error: panelistsError } = await panelistsQuery
+      if (panelistsError) throw panelistsError
+      setPanelistNodeIds(Array.from(new Set((panelistsData || []).map((p: { node_id: string }) => p.node_id))))
+
+      // Non-working days (whole account, not tied to a postal center)
+      let nwdQuery = supabase
+        .from('non_working_days')
+        .select('date')
+        .is('postal_center_id', null)
+      if (effectiveAccountId) nwdQuery = nwdQuery.eq('account_id', effectiveAccountId)
+      const { data: nwdData, error: nwdError } = await nwdQuery
+      if (nwdError) throw nwdError
+      setNonWorkingDays((nwdData || []).map((d: { date: string }) => d.date))
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -310,6 +335,8 @@ export function useAllocationPlans() {
     products,
     cities,
     nodes,
+    panelistNodeIds,
+    nonWorkingDays,
     loading,
     error,
     createPlan,

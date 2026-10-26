@@ -136,6 +136,7 @@ allocation_generator.tooltip_usage_text,"أنشئ الخطط، راجعها في
 allocation_generator.total_samples,إجمالي العينات
 allocation_generator.user_not_authenticated,المستخدم غير مصادق عليه
 allocation_generator.year,السنة
+allocation_generator.nodes_without_panelist_excluded,"{count} من العقد النشطة ليس لديها مشارك ولن تتلقى أي شحنات في هذه الخطة:"
 allocation_plans.add_record,إضافة سجل
 allocation_plans.all_carriers,جميع شركات النقل
 allocation_plans.all_cities,جميع المدن
