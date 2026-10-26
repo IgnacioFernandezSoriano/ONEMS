@@ -16,6 +16,10 @@ interface AllocationPlanGeneratorFormProps {
   products: Product[]
   cities: City[]
   nodes: Node[]
+  /** Nodes with an active panelist; the rest are left out of the plan. */
+  panelistNodeIds: string[]
+  /** Account non-working days (yyyy-MM-dd). */
+  nonWorkingDays: string[]
   onGenerate: (planData: any, details: any[]) => Promise<void>
 }
 
@@ -24,9 +28,16 @@ export function AllocationPlanGeneratorForm({
   products,
   cities,
   nodes,
+  panelistNodeIds,
+  nonWorkingDays,
   onGenerate,
 }: AllocationPlanGeneratorFormProps) {
   const { t } = useTranslation()
+  // Active nodes without any panelist: the plan skips them (they would get shipments nobody can send).
+  const nodesWithoutPanelist = useMemo(() => {
+    const withPanelist = new Set(panelistNodeIds)
+    return nodes.filter((n) => n.status === 'active' && !withPanelist.has(n.id))
+  }, [nodes, panelistNodeIds])
   const [formData, setFormData] = useState({
     plan_name: '',
     carrier_id: '',
@@ -146,10 +157,13 @@ export function AllocationPlanGeneratorForm({
 
       const entries = generateAllocationPlan({
         totalSamples: parseInt(formData.total_samples),
-        startDate: new Date(formData.start_date),
-        endDate: new Date(formData.end_date),
+        // 'T00:00:00' parses as LOCAL midnight; a bare 'yyyy-MM-dd' would be read as UTC.
+        startDate: new Date(`${formData.start_date}T00:00:00`),
+        endDate: new Date(`${formData.end_date}T00:00:00`),
         cities,
         nodes,
+        eligibleNodeIds: panelistNodeIds,
+        nonWorkingDays,
         cityDistributionMatrix: filledMatrix,
         useSeasonalDistribution: useSeasonalDist,
         seasonalDistribution: filledSeasonal,
@@ -543,6 +557,15 @@ export function AllocationPlanGeneratorForm({
           </div>
         )}
       </div>
+
+      {nodesWithoutPanelist.length > 0 && (
+        <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+          <p className="font-medium">
+            {t('allocation_generator.nodes_without_panelist_excluded', { count: nodesWithoutPanelist.length })}
+          </p>
+          <p className="mt-1">{nodesWithoutPanelist.map((n) => n.auto_id).join(', ')}</p>
+        </div>
+      )}
 
       <div className="flex justify-end">
         <Button type="submit" disabled={loading}>

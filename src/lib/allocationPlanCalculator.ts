@@ -36,7 +36,12 @@ export interface AllocationPlanParams {
   cityDistributionMatrix: CityDistributionMatrix
   useSeasonalDistribution: boolean
   seasonalDistribution?: SeasonalDistribution
+  /** Not applied yet: the form sends a fixed 5 and its meaning (per route, node or panelist) is undecided. */
   maxSamplesPerWeek: number
+  /** Account non-working days (yyyy-MM-dd). Shipments are never scheduled on them. */
+  nonWorkingDays?: string[]
+  /** Nodes with an active panelist. When given, nodes outside this list get no shipments. */
+  eligibleNodeIds?: string[]
 }
 
 export interface AllocationEntry {
@@ -150,26 +155,27 @@ export function generateAllocationPlan(params: AllocationPlanParams): Allocation
     cityDistributionMatrix,
     useSeasonalDistribution,
     seasonalDistribution,
-    maxSamplesPerWeek,
+    nonWorkingDays,
+    eligibleNodeIds,
   } = params
+
+  // Only nodes with an active panelist can send or receive (a node without anyone produces impossible shipments).
+  const eligible = eligibleNodeIds ? new Set(eligibleNodeIds) : null
+  const usableNodes = eligible ? nodes.filter(n => eligible.has(n.id)) : nodes
+
+  // Working days of the period (Mon-Fri, inside [startDate, endDate], not an account non-working day),
+  // grouped by ISO week. Every shipment date is drawn from these days only.
+  const weeks = buildPlanWeeks(startDate, endDate, new Set(nonWorkingDays || []))
+  if (weeks.length === 0) return []
 
   const entries: AllocationEntry[] = []
 
   // PASO 1: Aplicar matriz A-B-C para obtener rutas ciudad-ciudad
-  const cityRoutes = generateCityRoutes(totalSamples, cities, nodes, cityDistributionMatrix)
+  const cityRoutes = generateCityRoutes(totalSamples, cities, usableNodes, cityDistributionMatrix)
 
   // PASO 2: Para cada ruta ciudad-ciudad, distribuir temporalmente y por nodos
   for (const route of cityRoutes) {
-    const routeEntries = generateEntriesForRoute(
-      route,
-      startDate,
-      endDate,
-      nodes,
-      useSeasonalDistribution,
-      seasonalDistribution,
-      maxSamplesPerWeek
-    )
-    entries.push(...routeEntries)
+    entries.push(...generateEntriesForRoute(route, weeks, usableNodes, useSeasonalDistribution, seasonalDistribution))
   }
 
   return entries
@@ -303,12 +309,10 @@ function generateCityRoutes(
  */
 function generateEntriesForRoute(
   route: CityPairRoute,
-  startDate: Date,
-  endDate: Date,
+  weeks: PlanWeek[],
   allNodes: Node[],
   useSeasonalDistribution: boolean,
-  seasonalDistribution?: SeasonalDistribution,
-  maxSamplesPerWeek: number = 10
+  seasonalDistribution?: SeasonalDistribution
 ): AllocationEntry[] {
   const entries: AllocationEntry[] = []
 
@@ -321,37 +325,19 @@ function generateEntriesForRoute(
     return []
   }
 
-  // Calcular semanas en el período
-  const weeks = getWeeksInPeriod(startDate, endDate)
-  
-  if (weeks.length === 0) return []
-
   // Distribuir muestras por semanas (aplicando estacionalidad si está habilitada)
-  const samplesPerWeek = distributeSamplesAcrossWeeks(
-    route.samples,
-    weeks,
-    useSeasonalDistribution,
-    seasonalDistribution
-  )
+  const samplesPerWeek = distributeSamplesAcrossWeeks(route.samples, weeks, useSeasonalDistribution, seasonalDistribution)
 
   // Para cada semana, crear asignaciones con balanceo bidireccional
   for (let i = 0; i < weeks.length; i++) {
     const week = weeks[i]
     const samples = samplesPerWeek[i]
-    
     if (samples === 0) continue
 
-    // Crear matriz de asignación balanceada
-    const assignments = createBalancedAssignments(
-      originNodes,
-      destNodes,
-      samples
-    )
+    const assignments = createBalancedAssignments(originNodes, destNodes, samples)
 
-    // Generar entradas
     for (const assignment of assignments) {
-      const date = getRandomDateInWeek(week.year, week.weekNumber)
-      
+      const date = week.days[Math.floor(Math.random() * week.days.length)]
       entries.push({
         originNodeId: assignment.originNodeId,
         destinationNodeId: assignment.destNodeId,
@@ -431,109 +417,93 @@ function createBalancedAssignments(
   return assignments
 }
 
-/**
- * Obtener todas las semanas en un período
- */
-function getWeeksInPeriod(startDate: Date, endDate: Date): Array<{ year: number; weekNumber: number }> {
-  const weeks: Array<{ year: number; weekNumber: number }> = []
-  const current = new Date(startDate)
+interface PlanWeek {
+  weekNumber: number
+  /** Working days of this ISO week inside the plan period (never empty). */
+  days: Date[]
+}
 
-  while (current <= endDate) {
-    const weekNumber = getWeekNumber(current)
-    const year = current.getFullYear()
+const MONTH_KEYS: (keyof SeasonalDistribution)[] = [
+  'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec',
+]
 
-    // Evitar duplicados
-    if (weeks.length === 0 || weeks[weeks.length - 1].weekNumber !== weekNumber || weeks[weeks.length - 1].year !== year) {
-      weeks.push({ year, weekNumber })
-    }
-
-    // Avanzar una semana
-    current.setDate(current.getDate() + 7)
-  }
-
-  return weeks
+function localDateKey(d: Date): string {
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${d.getFullYear()}-${m}-${day}`
 }
 
 /**
- * Distribuir muestras a lo largo de las semanas (con estacionalidad opcional)
+ * Working days of the period grouped by ISO week, in order. A day is a working day when it is Monday to
+ * Friday, falls inside [startDate, endDate] and is not an account non-working day. Weeks without any
+ * working day are left out, so a partial first or last week only offers its own days.
+ */
+function buildPlanWeeks(startDate: Date, endDate: Date, nonWorkingDays: Set<string>): PlanWeek[] {
+  const weeks = new Map<string, PlanWeek>()
+  const d = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate())
+  const end = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate())
+
+  while (d <= end) {
+    const dow = d.getDay()
+    if (dow !== 0 && dow !== 6 && !nonWorkingDays.has(localDateKey(d))) {
+      const monday = new Date(d)
+      monday.setDate(d.getDate() - (dow - 1))
+      const key = localDateKey(monday)
+      if (!weeks.has(key)) weeks.set(key, { weekNumber: getWeekNumber(d), days: [] })
+      weeks.get(key)!.days.push(new Date(d))
+    }
+    d.setDate(d.getDate() + 1)
+  }
+
+  return Array.from(weeks.values())
+}
+
+/**
+ * Distribute a route's samples across the weeks.
+ *
+ * Each week weighs its number of working days (times the seasonal percentage of its month when seasonality
+ * is on). Every week first gets the whole part of its share; the samples left over are then drawn at random,
+ * weighted by the fractional parts. Before 2026-10-26 the left-over always went to the FIRST weeks: with
+ * many routes and few samples per route (Kenya: 706 routes, 1.7 samples each) almost the whole plan landed
+ * in weeks 1-2. Drawing them at random keeps every route's total and spreads the plan evenly over time.
  */
 function distributeSamplesAcrossWeeks(
   totalSamples: number,
-  weeks: Array<{ year: number; weekNumber: number }>,
+  weeks: PlanWeek[],
   useSeasonalDistribution: boolean,
   seasonalDistribution?: SeasonalDistribution
 ): number[] {
-  const samplesPerWeek: number[] = []
-
-  if (!useSeasonalDistribution || !seasonalDistribution) {
-    // Distribución uniforme
-    const samplesPerWeekUniform = Math.floor(totalSamples / weeks.length)
-    let remaining = totalSamples - samplesPerWeekUniform * weeks.length
-
-    for (let i = 0; i < weeks.length; i++) {
-      samplesPerWeek.push(samplesPerWeekUniform + (remaining > 0 ? 1 : 0))
-      if (remaining > 0) remaining--
+  const weights = weeks.map(week => {
+    let w = week.days.length
+    if (useSeasonalDistribution && seasonalDistribution) {
+      w *= (seasonalDistribution[MONTH_KEYS[week.days[0].getMonth()]] || 0) / 100
     }
-  } else {
-    // Distribución estacional
-    const monthKeys: (keyof SeasonalDistribution)[] = [
-      'jan', 'feb', 'mar', 'apr', 'may', 'jun',
-      'jul', 'aug', 'sep', 'oct', 'nov', 'dec',
-    ]
+    return w
+  })
+  const weightSum = weights.reduce((sum, w) => sum + w, 0)
+  if (weightSum <= 0) return weeks.map(() => 0)
 
-    // Calcular factor estacional para cada semana
-    const seasonalFactors: number[] = []
-    for (const week of weeks) {
-      const date = getFirstDayOfWeek(week.year, week.weekNumber)
-      const month = date.getMonth()
-      const monthKey = monthKeys[month]
-      const factor = seasonalDistribution[monthKey] / 100
-      seasonalFactors.push(factor)
+  const exact = weights.map(w => (totalSamples * w) / weightSum)
+  const counts = exact.map(e => Math.floor(e))
+  const fractions = exact.map((e, i) => e - counts[i])
+  let remaining = totalSamples - counts.reduce((sum, c) => sum + c, 0)
+
+  while (remaining > 0) {
+    // Weighted draw without replacement on the fractional parts; plain weights only as a rounding fallback.
+    const pool = fractions.some(f => f > 1e-9) ? fractions : weights
+    const poolSum = pool.reduce((sum, f) => sum + f, 0)
+    let r = Math.random() * poolSum
+    let idx = 0
+    while (idx < pool.length - 1 && r >= pool[idx]) {
+      r -= pool[idx]
+      idx++
     }
-
-    // Normalizar factores
-    const totalFactor = seasonalFactors.reduce((sum, f) => sum + f, 0)
-    const normalizedFactors = seasonalFactors.map(f => f / totalFactor)
-
-    // Distribuir muestras
-    let assigned = 0
-    for (let i = 0; i < weeks.length; i++) {
-      const samples = Math.round(totalSamples * normalizedFactors[i])
-      samplesPerWeek.push(samples)
-      assigned += samples
-    }
-
-    // Ajustar diferencia
-    const diff = totalSamples - assigned
-    if (diff !== 0 && samplesPerWeek.length > 0) {
-      samplesPerWeek[0] += diff
-    }
+    counts[idx]++
+    fractions[idx] = 0
+    remaining--
   }
 
-  return samplesPerWeek
-}
-
-/**
- * Obtener primer día de una semana ISO
- */
-function getFirstDayOfWeek(year: number, weekNumber: number): Date {
-  const jan4 = new Date(year, 0, 4)
-  const jan4Day = jan4.getDay() || 7
-  const firstMonday = new Date(jan4)
-  firstMonday.setDate(jan4.getDate() - jan4Day + 1)
-  firstMonday.setDate(firstMonday.getDate() + (weekNumber - 1) * 7)
-  return firstMonday
-}
-
-/**
- * Obtener fecha aleatoria en una semana (solo días laborables: lunes a viernes)
- */
-function getRandomDateInWeek(year: number, weekNumber: number): Date {
-  const firstDay = getFirstDayOfWeek(year, weekNumber)
-  const randomDay = Math.floor(Math.random() * 5)
-  const date = new Date(firstDay)
-  date.setDate(date.getDate() + randomDay)
-  return date
+  return counts
 }
 
 /**
