@@ -1,7 +1,7 @@
 import React from 'react';
 import { NodeLoadData, NodeDayLoad } from '../../hooks/useNodeLoadBalancing';
 import type { DatePolicy } from '../../lib/workingDays';
-import { buildDayView, buildMonthView, dayCellKey, isConflict } from '../../lib/loadViews';
+import { buildDayView, buildMonthView, compareNatural, dayCellKey, isConflict, orderWeekNumbers } from '../../lib/loadViews';
 import { useTranslation } from '@/hooks/useTranslation';
 
 export type LoadScale = 'day' | 'week' | 'month';
@@ -45,13 +45,13 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
   const dayNodes = React.useMemo(() => {
     const m = new Map<string, string | null>();
     dayData.forEach((r) => { if (!m.has(r.node_code)) m.set(r.node_code, r.panelist_name); });
-    return [...m.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+    return [...m.entries()].sort((a, b) => compareNatural(a[0], b[0]));
   }, [dayData]);
   const [isRecommendationsExpanded, setIsRecommendationsExpanded] = React.useState(false);
   
   // Get unique weeks and nodes
-  const weeks = Array.from(new Set(cityData.map((d) => d.week_number))).sort();
-  const nodes = Array.from(new Set(cityData.map((d) => d.node_code))).sort();
+  const weeks = orderWeekNumbers(cityData);
+  const nodes = Array.from(new Set(cityData.map((d) => d.node_code))).sort(compareNatural);
 
   // Calculate city stats
   const totalShipments = cityData.reduce((sum, d) => sum + d.shipment_count, 0);

@@ -1,4 +1,5 @@
 import type { BalanceResult, MatrixCell } from '../hooks/useNodeLoadBalancing'
+import { compareNatural } from './loadViews'
 
 export interface AllCitiesRow {
   cityId: string
@@ -63,7 +64,7 @@ export interface WeekMatrix {
 
 /** Agrupa una matriz (semanal o diaria) por nodo y semana, sumando los dias. */
 export function groupMatrixByWeek(cells: MatrixCell[]): WeekMatrix {
-  const nodes = Array.from(new Set(cells.map((c) => c.node_code))).sort()
+  const nodes = Array.from(new Set(cells.map((c) => c.node_code))).sort(compareNatural)
   const weekMap = new Map<string, number>()
   const lookup: Record<string, number> = {}
   for (const c of cells) {

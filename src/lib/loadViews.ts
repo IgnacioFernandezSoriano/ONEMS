@@ -15,6 +15,30 @@ export interface DayView {
 
 export const dayCellKey = (nodeCode: string, day: string) => `${nodeCode}|${day}`
 
+/** Orden natural: "KE 2" antes que "KE 10" (el orden alfabetico puro pone el 10 antes que el 2). */
+export const compareNatural = (a: string, b: string) =>
+  a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })
+
+/**
+ * Numeros de semana distintos en orden cronologico. Si hay week_start_date se ordena por ella (asi la semana
+ * 1 va despues de la 52 al cruzar el ano); si no, numericamente. `Array.sort()` sin comparador ordena los
+ * numeros como texto (el 10 antes que el 9), que era el fallo.
+ */
+export function orderWeekNumbers(rows: Array<{ week_number: number; week_start_date?: string | null }>): number[] {
+  const start = new Map<number, string>()
+  for (const r of rows) {
+    const s = r.week_start_date ?? ''
+    const cur = start.get(r.week_number)
+    if (cur === undefined || (s && (!cur || s < cur))) start.set(r.week_number, s)
+  }
+  return [...start.keys()].sort((a, b) => {
+    const sa = start.get(a) ?? ''
+    const sb = start.get(b) ?? ''
+    if (sa && sb && sa !== sb) return sa < sb ? -1 : 1
+    return a - b
+  })
+}
+
 /** Dia de la semana (0 = domingo) de una fecha yyyy-MM-dd, sin depender de la zona horaria. */
 export function dowOf(day: string): number {
   const [y, m, d] = day.split('-').map(Number)
@@ -69,7 +93,7 @@ export function buildMonthView(rows: NodeDayLoad[]): MonthView {
     grandTotal += r.shipment_count
   }
   const months = [...monthSet].sort()
-  const nodes = Object.keys(totals).sort()
+  const nodes = Object.keys(totals).sort(compareNatural)
   const nodeAverages: Record<string, number> = {}
   for (const node of nodes) {
     const sum = Object.values(totals[node]).reduce((s, v) => s + v, 0)
