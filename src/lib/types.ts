@@ -181,7 +181,7 @@ export interface AllocationPlanDetail {
   week_number: number
   month: number
   year: number
-  status: 'pending' | 'notified' | 'sent' | 'received' | 'cancelled' | 'invalid' | 'transfer_error'
+  status: 'pending' | 'notified' | 'sent' | 'received' | 'cancelled' | 'invalid' | 'transfer_error' | 'deferred'
   // Tag and panelist fields
   tag_id?: string
   origin_panelist_id?: string

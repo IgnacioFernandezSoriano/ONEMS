@@ -1,3 +1,4 @@
+import { isPendingLike, isDeferredStatus } from '@/lib/planStatus'
 import { useState, useMemo, useEffect } from 'react'
 import { useAllocationPlanDetails } from '@/lib/hooks/useAllocationPlanDetails'
 import { AllocationPlanFilters } from '@/components/allocation-plans/AllocationPlanFilters'
@@ -104,7 +105,9 @@ export function AllocationPlans() {
         return false
       if (filters.startDate && detail.fecha_programada < filters.startDate) return false
       if (filters.endDate && detail.fecha_programada > filters.endDate) return false
-      if (filters.status && detail.status !== filters.status) return false
+      if (filters.status === 'pending') {
+        if (!isPendingLike(detail.status)) return false
+      } else if (filters.status && detail.status !== filters.status) return false
       
       // Tag ID filter (contains search)
       if (filters.tagId && detail.tag_id) {
@@ -274,7 +277,7 @@ export function AllocationPlans() {
     
     return {
       total: delayed.length,
-      pending: delayed.filter(d => d.status === 'pending' || d.status === 'notified').length,
+      pending: delayed.filter(d => isPendingLike(d.status)).length,
       sent: delayed.filter(d => d.status === 'sent').length,
       cancelled: delayed.filter(d => d.status === 'cancelled').length,
       invalid: delayed.filter(d => d.status === 'invalid').length,
@@ -320,9 +323,15 @@ export function AllocationPlans() {
     }
   }
 
+  // Las filas 'deferred' son sinteticas (vienen del registro deferred_samples, no de allocation_plan_details):
+  // no se pueden seleccionar, asi que nunca llegan a las operaciones masivas.
+  const deferredIds = new Set(filteredDetails.filter(d => isDeferredStatus(d.status)).map(d => d.id))
+  const selectableDetails = filteredDetails.filter(d => !isDeferredStatus(d.status))
+
   const handleToggleSelect = (id: string) => {
     setSelectedIds((prev) => {
       const newSet = new Set(prev)
+      if (deferredIds.has(id)) return prev // filas 'deferred' (sinteticas): solo lectura
       if (newSet.has(id)) {
         newSet.delete(id)
       } else {
@@ -333,10 +342,10 @@ export function AllocationPlans() {
   }
 
   const handleSelectAll = () => {
-    if (selectedIds.size === filteredDetails.length) {
+    if (selectedIds.size === selectableDetails.length) {
       setSelectedIds(new Set())
     } else {
-      setSelectedIds(new Set(filteredDetails.map((d) => d.id)))
+      setSelectedIds(new Set(selectableDetails.map((d) => d.id)))
     }
   }
 
@@ -538,7 +547,7 @@ export function AllocationPlans() {
                 onClick={() => handleCardClick('status', 'pending')}
                 className="text-lg font-bold text-amber-600 hover:text-amber-700 hover:underline cursor-pointer transition-colors"
               >
-                {details.filter(d => d.status === 'pending' || d.status === 'notified').length}
+                {details.filter(d => isPendingLike(d.status)).length}
               </button>
             </div>
           </div>
@@ -561,7 +570,7 @@ export function AllocationPlans() {
                 onClick={() => handleCardClick('status', 'pending')}
                 className="text-sm font-semibold text-amber-600 hover:text-amber-700 hover:underline cursor-pointer transition-colors"
               >
-                {details.filter(d => d.status === 'pending' || d.status === 'notified').length}
+                {details.filter(d => isPendingLike(d.status)).length}
               </button>
             </div>
             <div className="flex items-center justify-between">
@@ -817,8 +826,8 @@ export function AllocationPlans() {
                       <input
                         type="checkbox"
                         checked={
-                          filteredDetails.length > 0 &&
-                          selectedIds.size === filteredDetails.length
+                          selectableDetails.length > 0 &&
+                          selectedIds.size === selectableDetails.length
                         }
                         onChange={handleSelectAll}
                         className="rounded border-gray-300"

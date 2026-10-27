@@ -1469,3 +1469,135 @@ END;
 $function$;
 REVOKE ALL ON FUNCTION public.rpc_balance_city_v2(uuid, date, date, boolean) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.rpc_balance_city_v2(uuid, date, date, boolean) TO authenticated, service_role;
+
+
+-- ===== Task 4: el progreso del plan cuenta las muestras por compensar.
+-- Se re-crea la vista (definicion VIVA verbatim) + UNION ALL de filas sinteticas de deferred_samples pendientes
+-- (status 'deferred', id = id del registro). NO se cambia propietario, security_invoker ni grants de la vista.
+CREATE OR REPLACE VIEW public.v_allocation_details_with_availability AS
+ SELECT apd.id,
+    apd.account_id,
+    apd.plan_id,
+    apd.origin_node_id,
+    apd.destination_node_id,
+    apd.fecha_programada,
+    apd.week_number,
+    apd.month,
+    apd.year,
+    apd.status,
+    COALESCE(( SELECT panelists.name
+           FROM panelists
+          WHERE panelists.id = apd.origin_panelist_id), op.name) AS origin_panelist_name,
+    COALESCE(( SELECT panelists.name
+           FROM panelists
+          WHERE panelists.id = apd.destination_panelist_id), dp.name) AS destination_panelist_name,
+    apd.sent_date,
+    apd.delivery_date,
+    apd.created_at,
+    apd.updated_at,
+    apd.idtag,
+    apd.tag_id,
+    apd.origin_panelist_id,
+    apd.destination_panelist_id,
+    apd.assigned_at,
+    apd.sent_at,
+    apd.delivered_at,
+    apd.original_origin_node_id,
+    apd.original_destination_node_id,
+    apd.reassignment_reason,
+    apd.reassigned_at,
+    apd.reassigned_by,
+    on_node.city_id AS origin_city_id,
+    on_city.name AS origin_city_name,
+    op.status AS origin_panelist_status,
+        CASE
+            WHEN op.id IS NULL THEN 'unassigned'::text
+            WHEN (EXISTS ( SELECT 1
+               FROM panelist_unavailability pu
+              WHERE pu.panelist_id = op.id AND pu.status::text = 'active'::text AND apd.fecha_programada >= pu.start_date AND apd.fecha_programada <= pu.end_date)) THEN 'unavailable'::text
+            WHEN op.status::text = 'active'::text THEN 'available'::text
+            ELSE 'inactive'::text
+        END AS origin_availability_status,
+    ( SELECT pu.reason
+           FROM panelist_unavailability pu
+          WHERE pu.panelist_id = op.id AND pu.status::text = 'active'::text AND apd.fecha_programada >= pu.start_date AND apd.fecha_programada <= pu.end_date
+         LIMIT 1) AS origin_unavailability_reason,
+    dn_node.city_id AS destination_city_id,
+    dn_city.name AS destination_city_name,
+    dp.status AS destination_panelist_status,
+        CASE
+            WHEN dp.id IS NULL THEN 'unassigned'::text
+            WHEN (EXISTS ( SELECT 1
+               FROM panelist_unavailability pu
+              WHERE pu.panelist_id = dp.id AND pu.status::text = 'active'::text AND apd.fecha_programada >= pu.start_date AND apd.fecha_programada <= pu.end_date)) THEN 'unavailable'::text
+            WHEN dp.status::text = 'active'::text THEN 'available'::text
+            ELSE 'inactive'::text
+        END AS destination_availability_status,
+    ( SELECT pu.reason
+           FROM panelist_unavailability pu
+          WHERE pu.panelist_id = dp.id AND pu.status::text = 'active'::text AND apd.fecha_programada >= pu.start_date AND apd.fecha_programada <= pu.end_date
+         LIMIT 1) AS destination_unavailability_reason
+   FROM allocation_plan_details apd
+     LEFT JOIN nodes on_node ON apd.origin_node_id = on_node.id
+     LEFT JOIN cities on_city ON on_node.city_id = on_city.id
+     LEFT JOIN panelists op ON on_node.id = op.node_id AND (op.status::text = ANY (ARRAY['active'::character varying, 'unavailable_temp'::character varying]::text[]))
+     LEFT JOIN nodes dn_node ON apd.destination_node_id = dn_node.id
+     LEFT JOIN cities dn_city ON dn_node.city_id = dn_city.id
+     LEFT JOIN panelists dp ON dn_node.id = dp.node_id AND (dp.status::text = ANY (ARRAY['active'::character varying, 'unavailable_temp'::character varying]::text[]))
+UNION ALL
+ SELECT ds.id,
+    ds.account_id,
+    ds.plan_id,
+    ds.origin_node_id,
+    ds.destination_node_id,
+    ds.fecha_programada,
+    EXTRACT(week FROM ds.fecha_programada)::integer,
+    EXTRACT(month FROM ds.fecha_programada)::integer,
+    EXTRACT(year FROM ds.fecha_programada)::integer,
+    'deferred'::text,
+    op.name,
+    dp.name,
+    NULL::timestamp with time zone,
+    NULL::timestamp with time zone,
+    NULL::timestamp with time zone,
+    NULL::timestamp with time zone,
+    NULL::text,
+    NULL::character varying(100),
+    NULL::uuid,
+    NULL::uuid,
+    NULL::timestamp with time zone,
+    NULL::timestamp with time zone,
+    NULL::timestamp with time zone,
+    NULL::uuid,
+    NULL::uuid,
+    NULL::text,
+    NULL::timestamp with time zone,
+    NULL::uuid,
+    on_node.city_id,
+    on_city.name,
+    op.status,
+            CASE
+            WHEN op.id IS NULL THEN 'unassigned'::text
+            WHEN (EXISTS ( SELECT 1 FROM panelist_unavailability pu WHERE pu.panelist_id = op.id AND pu.status::text = 'active'::text AND ds.fecha_programada >= pu.start_date AND ds.fecha_programada <= pu.end_date)) THEN 'unavailable'::text
+            WHEN op.status::text = 'active'::text THEN 'available'::text
+            ELSE 'inactive'::text
+        END,
+    ( SELECT pu.reason FROM panelist_unavailability pu WHERE pu.panelist_id = op.id AND pu.status::text = 'active'::text AND ds.fecha_programada >= pu.start_date AND ds.fecha_programada <= pu.end_date LIMIT 1),
+    dn_node.city_id,
+    dn_city.name,
+    dp.status,
+            CASE
+            WHEN dp.id IS NULL THEN 'unassigned'::text
+            WHEN (EXISTS ( SELECT 1 FROM panelist_unavailability pu WHERE pu.panelist_id = dp.id AND pu.status::text = 'active'::text AND ds.fecha_programada >= pu.start_date AND ds.fecha_programada <= pu.end_date)) THEN 'unavailable'::text
+            WHEN dp.status::text = 'active'::text THEN 'available'::text
+            ELSE 'inactive'::text
+        END,
+    ( SELECT pu.reason FROM panelist_unavailability pu WHERE pu.panelist_id = dp.id AND pu.status::text = 'active'::text AND ds.fecha_programada >= pu.start_date AND ds.fecha_programada <= pu.end_date LIMIT 1)
+   FROM deferred_samples ds
+     LEFT JOIN nodes on_node ON ds.origin_node_id = on_node.id
+     LEFT JOIN cities on_city ON on_node.city_id = on_city.id
+     LEFT JOIN panelists op ON on_node.id = op.node_id AND (op.status::text = ANY (ARRAY['active'::character varying, 'unavailable_temp'::character varying]::text[]))
+     LEFT JOIN nodes dn_node ON ds.destination_node_id = dn_node.id
+     LEFT JOIN cities dn_city ON dn_node.city_id = dn_city.id
+     LEFT JOIN panelists dp ON dn_node.id = dp.node_id AND (dp.status::text = ANY (ARRAY['active'::character varying, 'unavailable_temp'::character varying]::text[]))
+  WHERE ds.status = 'pending';

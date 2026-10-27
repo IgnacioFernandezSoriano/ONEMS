@@ -3119,3 +3119,5 @@ lb2.help.rule5,L'envoi restant tourne entre les nœuds au lieu d'aller toujours 
 lb2.help.rule6,Politique hebdomadaire : tous les envois d'une semaine prennent le premier jour ouvré de cette semaine.
 lb2.help.rule7,POBOX : chaque jour ouvré, chaque ville doit expédier au moins un envoi. D'abord il déplace l'excédent des jours proches ; si cela ne suffit pas, il génère de nouveaux samples en choisissant la meilleure origine et destination selon la charge.
 lb2.help.preview_warning,L'aperçu montre les changements proposés. Vous devez confirmer pour les appliquer à l'Allocation Plan.
+allocation_plans.status_deferred,Différée (à compenser)
+allocation_plans.status_deferred_help,Cet échantillon a été retiré du plan car son nœud n'avait pas de panéliste. Il est en lecture seule et sera réintroduit par l'équilibrage.

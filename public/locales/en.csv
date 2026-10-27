@@ -3127,3 +3127,5 @@ lb2.help.rule5,The leftover shipment rotates between nodes instead of always goi
 lb2.help.rule6,Weekly policy: all shipments of a week take the first working day of that week.
 lb2.help.rule7,POBOX: every working day each city must send at least one shipment. First it moves surplus from nearby days; if that is not enough it generates new samples, choosing the best origin and destination by load.
 lb2.help.preview_warning,The preview shows the proposed changes. You must confirm to apply them to the Allocation Plan.
+allocation_plans.status_deferred,Deferred (to compensate)
+allocation_plans.status_deferred_help,This sample was removed from the plan because its node had no panelist. It is read-only and will be re-introduced by the balancer.

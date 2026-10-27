@@ -3127,3 +3127,5 @@ lb2.help.rule5,El envío sobrante rota entre nodos en lugar de ir siempre al pri
 lb2.help.rule6,Política semanal: todos los envíos de una semana toman el primer día laborable de esa semana.
 lb2.help.rule7,POBOX: cada día laborable cada ciudad debe enviar al menos un envío. Primero mueve excedentes de días cercanos; si no basta, genera nuevos samples eligiendo el mejor origen y destino según la carga.
 lb2.help.preview_warning,La vista previa muestra los cambios propuestos. Debes confirmar para aplicarlos al Allocation Plan.
+allocation_plans.status_deferred,Por compensar (diferida)
+allocation_plans.status_deferred_help,Esta muestra se retiró del plan porque su nodo no tenía panelista. Es de solo lectura y el balanceo la reintroducirá.
