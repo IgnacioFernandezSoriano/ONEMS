@@ -517,3 +517,155 @@ END $$;
 SELECT pg_temp.fail_if(NOT pg_temp.comp_caps_ok(), 'c12 mas de una compensation por (nodo destino, dia)');
 SELECT pg_temp.fail_if(count(*) <> 5, 'c12 total compensation') FROM public.allocation_plan_details WHERE generation_source = 'compensation';
 ROLLBACK;
+
+-- ===== Ronda de correcciones 2 (R7: una 'compensation' en hueco valido queda fija).
+
+-- ===== Caso 13a (semanal, aplicar dos veces): N1 unico nodo, politica semanal, periodo 8..12/3, 8 anotaciones.
+-- 1a: 5 reintroducidas (L-V). 2a sobre el mismo periodo: 0 nuevas y las 5 siguen en su dia (no se juntan el lunes).
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+UPDATE public.cities SET date_policy = 'weekly' WHERE id = 'c1000000-0000-0000-0000-000000000001';
+DELETE FROM public.panelists WHERE id IN ('e2000000-0000-0000-0000-000000000002','e3000000-0000-0000-0000-000000000003');
+SELECT pg_temp.mk_ds('N1', 'N4', '2027-03-04') FROM generate_series(1, 8);
+DO $$
+DECLARE r jsonb;
+BEGIN
+  r := public.rpc_balance_city_v2('c1000000-0000-0000-0000-000000000001', '2027-03-08', '2027-03-12', true);
+  PERFORM pg_temp.fail_if((r->'deferred'->>'reintroduced')::int IS DISTINCT FROM 5, 'c13a 1a: ' || r::text);
+END $$;
+CREATE TEMP TABLE c13a AS SELECT id, fecha_programada FROM public.allocation_plan_details WHERE generation_source = 'compensation';
+DO $$
+DECLARE r jsonb;
+BEGIN
+  r := public.rpc_balance_city_v2('c1000000-0000-0000-0000-000000000001', '2027-03-08', '2027-03-12', true);
+  PERFORM pg_temp.fail_if((r->'deferred'->>'reintroduced')::int IS DISTINCT FROM 0
+                          OR (r->'deferred'->>'waiting')::int IS DISTINCT FROM 3, 'c13a 2a: ' || r::text);
+  PERFORM pg_temp.fail_if((r->>'movements_count')::int IS DISTINCT FROM 0, 'c13a 2a movimientos: ' || r::text);
+  PERFORM pg_temp.fail_if(EXISTS (SELECT 1 FROM jsonb_array_elements(r->'warnings') w WHERE w->>'code' = 'no_valid_cell'),
+                          'c13a 2a no debe avisar no_valid_cell: ' || r::text);
+END $$;
+SELECT pg_temp.fail_if(count(*) <> 5, 'c13a 2a anadio filas: ' || count(*)) FROM public.allocation_plan_details;
+SELECT pg_temp.fail_if(count(*) <> 5, 'c13a las compensation cambiaron de dia')
+  FROM public.allocation_plan_details a JOIN c13a c ON c.id = a.id AND c.fecha_programada = a.fecha_programada;
+SELECT pg_temp.fail_if(count(DISTINCT fecha_programada) <> 5, 'c13a deben seguir en 5 dias distintos') FROM c13a;
+SELECT pg_temp.fail_if(NOT pg_temp.comp_caps_ok(), 'c13a topes');
+ROLLBACK;
+
+-- ===== Caso 13b (diaria, el reparto querria mover): N1 unico nodo, periodo 8..12/3, 3 anotaciones => 8, 9 y 10.
+-- Despues llegan 2 pendientes mas el dia 8: el reparto mueve esas (a 11 y 12), no las compensation.
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+DELETE FROM public.panelists WHERE id IN ('e2000000-0000-0000-0000-000000000002','e3000000-0000-0000-0000-000000000003');
+SELECT pg_temp.mk_ds('N1', 'N4', '2027-03-04') FROM generate_series(1, 3);
+DO $$
+BEGIN
+  PERFORM pg_temp.fail_if((public.rpc_balance_city_v2('c1000000-0000-0000-0000-000000000001', '2027-03-08', '2027-03-12', true)
+                           ->'deferred'->>'reintroduced')::int IS DISTINCT FROM 3, 'c13b 1a');
+END $$;
+CREATE TEMP TABLE c13b AS SELECT id, fecha_programada FROM public.allocation_plan_details WHERE generation_source = 'compensation';
+SELECT pg_temp.mk_to('N1', 'N4', '2027-03-08') FROM generate_series(1, 2);
+DO $$
+DECLARE r jsonb;
+BEGIN
+  r := public.rpc_balance_city_v2('c1000000-0000-0000-0000-000000000001', '2027-03-08', '2027-03-12', true);
+  PERFORM pg_temp.fail_if((r->'deferred'->>'reintroduced')::int IS DISTINCT FROM 0, 'c13b 2a: ' || r::text);
+  PERFORM pg_temp.fail_if(EXISTS (SELECT 1 FROM jsonb_array_elements(r->'warnings') w WHERE w->>'code' = 'no_valid_cell'),
+                          'c13b 2a no debe avisar no_valid_cell: ' || r::text);
+  -- carga final 1 por dia (las compensation cuentan como carga fija)
+  PERFORM pg_temp.fail_if(EXISTS (SELECT 1 FROM jsonb_array_elements(r->'matrix_after') m WHERE (m->>'load_count')::int <> 1),
+                          'c13b matrix_after: ' || r::text);
+END $$;
+SELECT pg_temp.fail_if(count(*) <> 3, 'c13b las compensation se movieron')
+  FROM public.allocation_plan_details a JOIN c13b c ON c.id = a.id AND c.fecha_programada = a.fecha_programada
+ WHERE a.reassigned_at IS NULL;
+SELECT pg_temp.fail_if(count(*) <> 2, 'c13b las pendientes nuevas deben ir a 11 y 12')
+  FROM public.allocation_plan_details WHERE generation_source = 'plan' AND fecha_programada IN ('2027-03-11', '2027-03-12');
+SELECT pg_temp.fail_if(NOT pg_temp.comp_caps_ok(), 'c13b topes');
+ROLLBACK;
+
+-- ===== Caso 13c (baja declarada despues): como 13b tras la 1a aplicacion (8, 9, 10); P1 declara baja el 8 => la
+-- compensation del 8 ya no esta en un hueco valido: se mueve (a 11 o 12); las del 9 y 10 no se tocan.
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+DELETE FROM public.panelists WHERE id IN ('e2000000-0000-0000-0000-000000000002','e3000000-0000-0000-0000-000000000003');
+SELECT pg_temp.mk_ds('N1', 'N4', '2027-03-04') FROM generate_series(1, 3);
+DO $$
+BEGIN
+  PERFORM pg_temp.fail_if((public.rpc_balance_city_v2('c1000000-0000-0000-0000-000000000001', '2027-03-08', '2027-03-12', true)
+                           ->'deferred'->>'reintroduced')::int IS DISTINCT FROM 3, 'c13c 1a');
+END $$;
+CREATE TEMP TABLE c13c AS SELECT id, fecha_programada FROM public.allocation_plan_details WHERE generation_source = 'compensation';
+SELECT pg_temp.fail_if((SELECT array_agg(fecha_programada ORDER BY fecha_programada) FROM c13c)
+                       IS DISTINCT FROM ARRAY['2027-03-08','2027-03-09','2027-03-10']::date[], 'c13c dias de partida');
+INSERT INTO public.panelist_unavailability (panelist_id, start_date, end_date, reason, status, account_id)
+VALUES ('e1000000-0000-0000-0000-000000000001', '2027-03-08', '2027-03-08', 'vacation', 'active', 'a0000000-0000-0000-0000-000000000001');
+DO $$
+DECLARE r jsonb;
+BEGIN
+  r := public.rpc_balance_city_v2('c1000000-0000-0000-0000-000000000001', '2027-03-08', '2027-03-12', true);
+  PERFORM pg_temp.fail_if((r->>'movements_count')::int IS DISTINCT FROM 1, 'c13c 2a movimientos: ' || r::text);
+END $$;
+SELECT pg_temp.fail_if((SELECT a.fecha_programada FROM public.allocation_plan_details a JOIN c13c c ON c.id = a.id
+                         WHERE c.fecha_programada = '2027-03-08') NOT IN ('2027-03-11', '2027-03-12'),
+                       'c13c la compensation del dia de baja debia moverse a 11 o 12');
+SELECT pg_temp.fail_if(count(*) <> 2, 'c13c las otras dos no debian moverse')
+  FROM public.allocation_plan_details a JOIN c13c c ON c.id = a.id AND c.fecha_programada = a.fecha_programada
+ WHERE c.fecha_programada IN ('2027-03-09', '2027-03-10');
+SELECT pg_temp.fail_if(count(*) <> 0, 'c13c compensation en el dia de baja')
+  FROM public.allocation_plan_details WHERE fecha_programada = '2027-03-08';
+SELECT pg_temp.fail_if(NOT pg_temp.comp_caps_ok(), 'c13c topes');
+ROLLBACK;
+
+-- ===== Caso 13d (POBOX no mueve una compensation a un (destino, dia) que ya recibe una): POBOX activo; 5
+-- compensation N1->N4 el 8/3 con P1 de baja ese dia (fuera de hueco valido => movibles). Sin mas, el reparto deja
+-- 8, 11 y 12 vacios y POBOX los cubre moviendo compensation. Si N4 ya recibe una compensation (de C3) esos dias,
+-- POBOX no puede mover las de C1 alli: crea.
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+SELECT pg_temp.pobox_on();
+INSERT INTO public.cities (id, account_id, region_id, name, code) VALUES
+  ('c3000000-0000-0000-0000-000000000003','a0000000-0000-0000-0000-000000000001','e0000000-0000-0000-0000-000000000001','City3','C3');
+INSERT INTO public.nodes (id, account_id, city_id, auto_id) VALUES
+  ('b6000000-0000-0000-0000-000000000006','a0000000-0000-0000-0000-000000000001','c3000000-0000-0000-0000-000000000003','N6');
+INSERT INTO public.panelists (id, account_id, panelist_code, name, email, mobile, node_id, status, language) VALUES
+  ('e6000000-0000-0000-0000-000000000006','a0000000-0000-0000-0000-000000000001','P6','Pan6','p6@t.l','6',
+   'b6000000-0000-0000-0000-000000000006','active','en');
+INSERT INTO public.panelist_unavailability (panelist_id, start_date, end_date, reason, status, account_id)
+VALUES ('e1000000-0000-0000-0000-000000000001', '2027-03-08', '2027-03-08', 'vacation', 'active', 'a0000000-0000-0000-0000-000000000001');
+INSERT INTO public.allocation_plan_details
+  (id, account_id, plan_id, origin_node_id, destination_node_id, fecha_programada, status, generation_source)
+SELECT gen_random_uuid(), 'a0000000-0000-0000-0000-000000000001', 'cc000000-0000-0000-0000-000000000001',
+       o.id, 'b4000000-0000-0000-0000-000000000004', d::date, 'pending', 'compensation'
+  FROM (SELECT id FROM public.nodes WHERE auto_id = 'N1') o, unnest(ARRAY['2027-03-08','2027-03-08','2027-03-08','2027-03-08','2027-03-08']) d;
+-- C3 -> N4 compensation los dias 8, 11 y 12
+INSERT INTO public.allocation_plan_details
+  (id, account_id, plan_id, origin_node_id, destination_node_id, fecha_programada, status, generation_source)
+SELECT gen_random_uuid(), 'a0000000-0000-0000-0000-000000000001', 'cc000000-0000-0000-0000-000000000001',
+       'b6000000-0000-0000-0000-000000000006', 'b4000000-0000-0000-0000-000000000004', d::date, 'pending', 'compensation'
+  FROM unnest(ARRAY['2027-03-08','2027-03-11','2027-03-12']) d;
+DO $$
+DECLARE r jsonb;
+BEGIN
+  r := public.rpc_balance_city_v2('c1000000-0000-0000-0000-000000000001', '2027-03-08', '2027-03-12', true);
+  PERFORM pg_temp.fail_if((r->'pobox'->>'days_missing')::int IS DISTINCT FROM 3
+                          OR (r->'pobox'->>'days_moved')::int IS DISTINCT FROM 0, 'c13d pobox: ' || r::text);
+END $$;
+SELECT pg_temp.fail_if(count(*) > 0, 'c13d POBOX movio una compensation a un (destino, dia) que ya recibe una')
+  FROM public.allocation_plan_details WHERE generation_source = 'compensation' AND reassignment_reason = 'pobox_move';
+-- (El montaje parte de 5 compensation apiladas en (N1, 8/3), ya fuera de tope; aqui solo se comprueba POBOX.)
+SELECT pg_temp.fail_if(count(*) <> 3 OR max(n) <> 1, 'c13d N4 debe recibir solo la compensation de C3 los dias 8, 11 y 12')
+  FROM (SELECT fecha_programada, count(*) AS n FROM public.allocation_plan_details
+         WHERE generation_source = 'compensation' AND destination_node_id = 'b4000000-0000-0000-0000-000000000004'
+           AND fecha_programada IN ('2027-03-08', '2027-03-11', '2027-03-12')
+         GROUP BY fecha_programada) x;
+SELECT pg_temp.fail_if(count(*) <> 3, 'c13d POBOX debia crear en 8, 11 y 12')
+  FROM public.allocation_plan_details WHERE generation_source = 'pobox';
+ROLLBACK;

@@ -345,10 +345,12 @@ BEGIN
     -- fase 0: motivo para apartarlo al registro (NULL = se queda en el plan)
     defer_reason text,
     -- fase 0: destino reasignado dentro de la ciudad destino (dest_node ya es el nuevo)
-    new_dest boolean NOT NULL DEFAULT false, new_dest_pid uuid, new_dest_pname text
+    new_dest boolean NOT NULL DEFAULT false, new_dest_pid uuid, new_dest_pname text,
+    -- muestra reintroducida (generation_source = 'compensation'); comp_frozen = fija en su hueco valido (R7)
+    comp boolean NOT NULL DEFAULT false, comp_frozen boolean NOT NULL DEFAULT false
   ) ON COMMIT DROP;
   INSERT INTO pg_temp.lb2_ship (id, cur_node, cur_code, cur_rank, dest_node, dest_city, fecha, month_key, dest_bad,
-                                plan_start, plan_end, pl_end)
+                                plan_start, plan_end, pl_end, comp)
   SELECT a.id, a.origin_node_id, n.node_code, n.all_rank, a.destination_node_id, dn.city_id, a.fecha_programada,
          date_trunc('month', GREATEST(a.fecha_programada, v_from))::date,
          -- destino sin panelista activo: ninguna fecha es valida para el (spec 5.3)
@@ -356,7 +358,7 @@ BEGIN
                       WHERE p.node_id = a.destination_node_id AND p.account_id = v_account_id AND p.status = 'active'),
          CASE WHEN a.fecha_programada BETWEEN pl.start_date AND pl.end_date THEN pl.start_date END,
          CASE WHEN a.fecha_programada BETWEEN pl.start_date AND pl.end_date THEN pl.end_date END,
-         pl.end_date
+         pl.end_date, a.generation_source = 'compensation'
     FROM public.allocation_plan_details a
     JOIN pg_temp.lb2_nodes n ON n.node_id = a.origin_node_id
     LEFT JOIN public.nodes dn ON dn.id = a.destination_node_id
@@ -462,6 +464,24 @@ BEGIN
    WHERE s.fecha < v_from AND m.next_month IS NOT NULL
      AND NOT EXISTS (SELECT 1 FROM pg_temp.lb2_cells c WHERE c.month_start = s.month_key);
 
+  -- R7. Una reintroducida pendiente ('compensation') que esta en un hueco valido se queda FIJA donde esta: no la
+  -- mueven ni el reparto equitativo, ni el paso al primer dia del tramo (politica semanal), ni POBOX. Asi los
+  -- topes totales de la fase R (1 compensation por (nodo origen, dia) y por (nodo destino, dia)) se mantienen al
+  -- repetir el balanceo. Hueco valido: dia laborable del periodo dentro de su plan, nodo origen valido y no
+  -- ausente, nodo destino activo con panelista activo, no ausente y distinto del origen. Cuenta como carga fija
+  -- (objetivos, desviaciones, matrices, topes) y no se avisa como no_valid_cell. Si deja de estar en un hueco
+  -- valido (baja declarada despues, nodo sin panelista...) se trata como cualquier otra muestra movible.
+  -- Politica semanal: por esto la reintroducida conserva para siempre su dia real.
+  UPDATE pg_temp.lb2_ship s SET frozen = true, comp_frozen = true
+   WHERE s.comp AND s.defer_reason IS NULL AND NOT s.frozen AND NOT s.dest_bad
+     AND s.plan_start IS NOT NULL                       -- fecha dentro de su plan
+     AND s.dest_node <> s.cur_node
+     AND EXISTS (SELECT 1 FROM pg_temp.lb2_days dd WHERE dd.d = s.fecha)
+     AND EXISTS (SELECT 1 FROM pg_temp.lb2_nodes n WHERE n.node_id = s.cur_node AND n.valid)
+     AND NOT EXISTS (SELECT 1 FROM pg_temp.lb2_absent x WHERE x.node_id = s.cur_node AND x.d = s.fecha)
+     AND EXISTS (SELECT 1 FROM public.nodes dn WHERE dn.id = s.dest_node AND dn.status = 'active')
+     AND NOT EXISTS (SELECT 1 FROM pg_temp.lb2_sdabs x WHERE x.node_id = s.dest_node AND x.d = s.fecha);
+
   -- 0c. Sin dia valido. Celda compatible = de otro nodo que el destino, sin ausencia del destino ese dia y dentro
   -- de las fechas del plan. Si el mes del envio no tiene ninguna, se busca en los demas meses del periodo (la
   -- celda compatible mas cercana decide el mes; el reparto normal elige luego la celda dentro de ese mes). Si no
@@ -478,7 +498,7 @@ BEGIN
                      ORDER BY abs(c.cell_date - GREATEST(s2.fecha, v_from)), c.cell_date, c.valid_rank
                      LIMIT 1) AS m
               FROM pg_temp.lb2_ship s2
-             WHERE s2.defer_reason IS NULL
+             WHERE s2.defer_reason IS NULL AND NOT s2.comp_frozen
                AND NOT EXISTS (SELECT 1 FROM pg_temp.lb2_cells c
                                 WHERE c.month_start = s2.month_key AND c.node_id <> s2.dest_node
                                   AND (s2.plan_start IS NULL OR c.cell_date BETWEEN s2.plan_start AND s2.plan_end)
@@ -486,7 +506,7 @@ BEGIN
                                                    WHERE a.node_id = s2.dest_node AND a.d = c.cell_date))) x
      WHERE x.id = s.id AND x.m IS NOT NULL;
     UPDATE pg_temp.lb2_ship s SET defer_reason = 'no_valid_day'
-     WHERE s.defer_reason IS NULL
+     WHERE s.defer_reason IS NULL AND NOT s.comp_frozen
        AND NOT EXISTS (SELECT 1 FROM pg_temp.lb2_cells c
                         WHERE c.month_start = s.month_key AND c.node_id <> s.dest_node
                           AND (s.plan_start IS NULL OR c.cell_date BETWEEN s.plan_start AND s.plan_end)
@@ -998,17 +1018,19 @@ BEGIN
     CREATE TEMP TABLE pg_temp.lb2_pb (
       id uuid PRIMARY KEY, node_id uuid, d date, movable boolean, plan_start date, plan_end date,
       dest_node uuid, dest_bad boolean NOT NULL DEFAULT false,
-      reint boolean NOT NULL DEFAULT false   -- muestra reintroducida en esta ejecucion (fase R)
+      reint boolean NOT NULL DEFAULT false,  -- muestra reintroducida en esta ejecucion (fase R)
+      comp boolean NOT NULL DEFAULT false    -- fila 'compensation' (ya existente o de esta ejecucion)
     ) ON COMMIT DROP;
-    INSERT INTO pg_temp.lb2_pb
+    INSERT INTO pg_temp.lb2_pb (id, node_id, d, movable, plan_start, plan_end, dest_node, dest_bad, comp)
     SELECT s.id, COALESCE(c.node_id, s.cur_node), COALESCE(c.cell_date, s.fecha), NOT s.frozen, p.start_date, p.end_date,
-           s.dest_node, s.dest_bad
+           s.dest_node, s.dest_bad, s.comp
       FROM pg_temp.lb2_ship s
       LEFT JOIN pg_temp.lb2_cells c ON c.cell_id = s.new_cell
       JOIN public.allocation_plan_details a ON a.id = s.id
       LEFT JOIN public.allocation_plans p ON p.id = a.plan_id;
-    INSERT INTO pg_temp.lb2_pb
-    SELECT a.id, a.origin_node_id, a.fecha_programada, false, NULL, NULL, a.destination_node_id, false
+    INSERT INTO pg_temp.lb2_pb (id, node_id, d, movable, plan_start, plan_end, dest_node, dest_bad, comp)
+    SELECT a.id, a.origin_node_id, a.fecha_programada, false, NULL, NULL, a.destination_node_id, false,
+           a.generation_source = 'compensation'
       FROM public.allocation_plan_details a
       JOIN pg_temp.lb2_nodes n ON n.node_id = a.origin_node_id
      WHERE a.account_id = v_account_id
@@ -1074,8 +1096,8 @@ BEGIN
        AND NOT EXISTS (SELECT 1 FROM pg_temp.lb2_defer d WHERE d.id = a.id)
      GROUP BY a.destination_node_id, a.fecha_programada;
     -- Las reintroducidas por la fase R cubren su dia, cargan su nodo origen y su destino (no son movibles).
-    INSERT INTO pg_temp.lb2_pb (id, node_id, d, movable, dest_node, reint)
-    SELECT r.id, r.o_node, r.d, false, r.d_node, true FROM pg_temp.lb2_reint r;
+    INSERT INTO pg_temp.lb2_pb (id, node_id, d, movable, dest_node, reint, comp)
+    SELECT r.id, r.o_node, r.d, false, r.d_node, true, true FROM pg_temp.lb2_reint r;
     INSERT INTO pg_temp.lb2_dload SELECT r.d_node, r.d, 1 FROM pg_temp.lb2_reint r;
     CREATE INDEX ON pg_temp.lb2_dload (node_id, d);
 
@@ -1105,6 +1127,14 @@ BEGIN
                GROUP BY x.d HAVING count(*) >= 2) dc ON dc.d = b.d
         JOIN pg_temp.lb2_cells cl ON cl.node_id = b.node_id AND cl.cell_date = v_day
        WHERE b.movable AND NOT b.dest_bad
+         -- una 'compensation' movible no va a un (nodo destino, dia) que ya recibe una (tope R5)
+         AND (NOT b.comp
+              OR (NOT EXISTS (SELECT 1 FROM pg_temp.lb2_pb x WHERE x.comp AND x.dest_node = b.dest_node AND x.d = v_day)
+                  AND NOT EXISTS (SELECT 1 FROM public.allocation_plan_details a
+                                   WHERE a.account_id = v_account_id AND a.generation_source = 'compensation'
+                                     AND a.status <> 'cancelled' AND a.destination_node_id = b.dest_node
+                                     AND a.fecha_programada = v_day
+                                     AND NOT EXISTS (SELECT 1 FROM pg_temp.lb2_pb y WHERE y.id = a.id))))
          AND NOT EXISTS (SELECT 1 FROM pg_temp.lb2_sdabs x WHERE x.node_id = b.dest_node AND x.d = v_day)
          AND v_day BETWEEN COALESCE(b.plan_start, v_day) AND COALESCE(b.plan_end, v_day)
        ORDER BY abs(date_trunc('week', b.d)::date - v_wk), (b.d > v_day), abs(b.d - v_day), b.id
@@ -1368,7 +1398,7 @@ BEGIN
   SELECT jsonb_agg(w) INTO v_warnings
     FROM (SELECT jsonb_build_object('code', 'no_valid_cell', 'count', count(*),
                                     'detail', string_agg(DISTINCT cur_code, ', ' ORDER BY cur_code)) AS w
-            FROM pg_temp.lb2_ship WHERE new_cell IS NULL AND NOT od_conflict HAVING count(*) > 0
+            FROM pg_temp.lb2_ship WHERE new_cell IS NULL AND NOT od_conflict AND NOT comp_frozen HAVING count(*) > 0
           UNION ALL
           SELECT jsonb_build_object('code', 'origin_equals_destination', 'count', count(*),
                                     'detail', string_agg(DISTINCT cur_code, ', ' ORDER BY cur_code))
