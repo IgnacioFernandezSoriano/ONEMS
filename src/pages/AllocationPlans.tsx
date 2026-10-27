@@ -400,6 +400,7 @@ export function AllocationPlans() {
     
     // CSV Headers
     const headers = [
+      'Event ID',
       'Plan Name',
       'Carrier',
       'Product',
@@ -423,6 +424,7 @@ export function AllocationPlans() {
 
     // CSV Rows
     const rows = selectedDetails.map(detail => [
+      detail.id || '',
       detail.plan?.plan_name || '',
       detail.carrier?.name || '',
       detail.product?.description || '',
