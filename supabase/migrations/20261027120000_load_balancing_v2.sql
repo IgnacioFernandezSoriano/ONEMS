@@ -837,3 +837,133 @@ END;
 $$;
 REVOKE ALL ON FUNCTION public.rpc_balance_cities_pending(uuid, date, date) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.rpc_balance_cities_pending(uuid, date, date) TO authenticated, service_role;
+
+-- Parte 5 (edicion de politicas): RPCs SECURITY DEFINER para que la pantalla de balanceo edite la politica de
+-- la cuenta, la de cada ciudad y los dias laborables de la cuenta sin depender de las politicas RLS de
+-- account_config (INSERT solo admin), cities (UPDATE solo admin) y weekly_schedule, que ademas dejan fuera al
+-- superadmin (su perfil no tiene account_id). Cada RPC escribe SOLO las columnas previstas.
+-- Guarda igual que rpc_get_node_load_by_day: con sesion de usuario solo miembros de la cuenta o superadmin.
+CREATE OR REPLACE FUNCTION public.rpc_set_account_balance_policy(
+  p_account_id uuid, p_date_policy text DEFAULT NULL, p_pobox_enabled boolean DEFAULT NULL)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_row public.account_config%ROWTYPE;
+BEGIN
+  IF auth.uid() IS NOT NULL AND NOT public.is_superadmin()
+     AND p_account_id IS DISTINCT FROM (SELECT p.account_id FROM public.profiles p WHERE p.id = auth.uid()) THEN
+    RAISE EXCEPTION 'No autorizado para esta cuenta' USING ERRCODE = '42501';
+  END IF;
+  IF p_date_policy IS NOT NULL AND p_date_policy NOT IN ('weekly', 'daily') THEN
+    RAISE EXCEPTION 'date_policy invalida: %', p_date_policy USING ERRCODE = '22023';
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM public.accounts a WHERE a.id = p_account_id) THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Account not found');
+  END IF;
+
+  INSERT INTO public.account_config AS ac (account_id, calculation_mode, date_policy, pobox_enabled, created_by, updated_by)
+  VALUES (p_account_id, 'natural_days', COALESCE(p_date_policy, 'daily'), COALESCE(p_pobox_enabled, false),
+          auth.uid(), auth.uid())
+  ON CONFLICT (account_id) DO UPDATE
+     SET date_policy   = COALESCE(p_date_policy, ac.date_policy),
+         pobox_enabled = COALESCE(p_pobox_enabled, ac.pobox_enabled),
+         updated_at    = now(),
+         updated_by    = auth.uid()
+  RETURNING ac.* INTO v_row;
+
+  RETURN jsonb_build_object('success', true, 'date_policy', v_row.date_policy, 'pobox_enabled', v_row.pobox_enabled);
+END;
+$$;
+REVOKE ALL ON FUNCTION public.rpc_set_account_balance_policy(uuid, text, boolean) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.rpc_set_account_balance_policy(uuid, text, boolean) TO authenticated, service_role;
+
+-- Politica de una ciudad. Cada columna solo se escribe si su p_set_* es true; NULL = hereda de la cuenta.
+CREATE OR REPLACE FUNCTION public.rpc_set_city_balance_policy(
+  p_city_id uuid, p_set_date_policy boolean, p_date_policy text, p_set_pobox boolean, p_pobox_enabled boolean)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_account_id uuid;
+  v_date_policy text;
+  v_pobox boolean;
+BEGIN
+  SELECT c.account_id INTO v_account_id FROM public.cities c WHERE c.id = p_city_id;
+  IF v_account_id IS NULL THEN
+    RETURN jsonb_build_object('success', false, 'error', 'City not found');
+  END IF;
+  IF auth.uid() IS NOT NULL AND NOT public.is_superadmin()
+     AND v_account_id IS DISTINCT FROM (SELECT p.account_id FROM public.profiles p WHERE p.id = auth.uid()) THEN
+    RAISE EXCEPTION 'No autorizado para esta cuenta' USING ERRCODE = '42501';
+  END IF;
+  IF COALESCE(p_set_date_policy, false) AND p_date_policy IS NOT NULL AND p_date_policy NOT IN ('weekly', 'daily') THEN
+    RAISE EXCEPTION 'date_policy invalida: %', p_date_policy USING ERRCODE = '22023';
+  END IF;
+
+  UPDATE public.cities c
+     SET date_policy   = CASE WHEN COALESCE(p_set_date_policy, false) THEN p_date_policy ELSE c.date_policy END,
+         pobox_enabled = CASE WHEN COALESCE(p_set_pobox, false) THEN p_pobox_enabled ELSE c.pobox_enabled END
+   WHERE c.id = p_city_id
+  RETURNING c.date_policy, c.pobox_enabled INTO v_date_policy, v_pobox;
+
+  RETURN jsonb_build_object('success', true, 'date_policy', v_date_policy, 'pobox_enabled', v_pobox);
+END;
+$$;
+REVOKE ALL ON FUNCTION public.rpc_set_city_balance_policy(uuid, boolean, text, boolean, boolean) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.rpc_set_city_balance_policy(uuid, boolean, text, boolean, boolean) TO authenticated, service_role;
+
+-- Dia laborable de la cuenta (solo filas con postal_center_id NULL). Antes de escribir se crean las filas de
+-- cuenta que falten con el valor por defecto (L-V laborable 08:00-18:00, S-D no), lo que no cambia el
+-- calendario efectivo (is_account_working_day usa ese mismo defecto para los dias sin fila); asi el primer
+-- clic sobre una cuenta sin filas siembra las 7 y solo cambia el dia pedido. Al encender un dia se garantizan
+-- opening_hour/cutoff_time (CHECK weekly_schedule_check).
+CREATE OR REPLACE FUNCTION public.rpc_set_working_day(p_account_id uuid, p_day_of_week integer, p_is_working boolean)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF auth.uid() IS NOT NULL AND NOT public.is_superadmin()
+     AND p_account_id IS DISTINCT FROM (SELECT p.account_id FROM public.profiles p WHERE p.id = auth.uid()) THEN
+    RAISE EXCEPTION 'No autorizado para esta cuenta' USING ERRCODE = '42501';
+  END IF;
+  IF p_day_of_week IS NULL OR p_day_of_week NOT BETWEEN 0 AND 6 OR p_is_working IS NULL THEN
+    RAISE EXCEPTION 'Dia de la semana invalido: %', p_day_of_week USING ERRCODE = '22023';
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM public.accounts a WHERE a.id = p_account_id) THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Account not found');
+  END IF;
+
+  -- Serializa la siembra (el UNIQUE no protege con postal_center_id NULL).
+  PERFORM pg_advisory_xact_lock(hashtext('weekly_schedule:' || p_account_id::text));
+
+  INSERT INTO public.weekly_schedule (account_id, postal_center_id, day_of_week, is_working_day, opening_hour, cutoff_time,
+                                      created_by, updated_by)
+  SELECT p_account_id, NULL, d, d BETWEEN 1 AND 5,
+         CASE WHEN d BETWEEN 1 AND 5 THEN '08:00'::time END, CASE WHEN d BETWEEN 1 AND 5 THEN '18:00'::time END,
+         auth.uid(), auth.uid()
+    FROM generate_series(0, 6) d
+   WHERE NOT EXISTS (SELECT 1 FROM public.weekly_schedule w
+                      WHERE w.account_id = p_account_id AND w.postal_center_id IS NULL AND w.day_of_week = d);
+
+  UPDATE public.weekly_schedule w
+     SET is_working_day = p_is_working,
+         opening_hour = CASE WHEN p_is_working AND (w.opening_hour IS NULL OR w.cutoff_time IS NULL)
+                             THEN '08:00'::time ELSE w.opening_hour END,
+         cutoff_time  = CASE WHEN p_is_working AND (w.opening_hour IS NULL OR w.cutoff_time IS NULL)
+                             THEN '18:00'::time ELSE w.cutoff_time END,
+         updated_at = now(),
+         updated_by = auth.uid()
+   WHERE w.account_id = p_account_id AND w.postal_center_id IS NULL AND w.day_of_week = p_day_of_week;
+
+  RETURN jsonb_build_object('success', true);
+END;
+$$;
+REVOKE ALL ON FUNCTION public.rpc_set_working_day(uuid, integer, boolean) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.rpc_set_working_day(uuid, integer, boolean) TO authenticated, service_role;

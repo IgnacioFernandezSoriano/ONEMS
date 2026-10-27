@@ -54,15 +54,16 @@ export function useBalancePolicies() {
 
   const updateAccountPolicy = async (p: Partial<AccountBalancePolicy>) => {
     if (!accountId) return { success: false, error: 'No account selected' }
-    // Un upsert con calculation_mode pisaria el valor de una fila existente: se distingue
-    // actualizar (fila existente) de insertar (cuenta sin fila; calculation_mode tiene DEFAULT).
-    const { data: existing, error: selErr } = await supabase
-      .from('account_config').select('id').eq('account_id', accountId).maybeSingle()
-    if (selErr) return { success: false, error: selErr.message }
-    const { error } = existing
-      ? await supabase.from('account_config').update(p).eq('account_id', accountId)
-      : await supabase.from('account_config').insert({ account_id: accountId, calculation_mode: 'natural_days', ...p })
+    // RPC SECURITY DEFINER (RLS solo deja insertar a admin y deja fuera al superadmin): hace upsert y
+    // escribe solo date_policy / pobox_enabled (NULL = no cambiar); nunca pisa calculation_mode.
+    const { data, error } = await supabase.rpc('rpc_set_account_balance_policy', {
+      p_account_id: accountId,
+      p_date_policy: p.date_policy ?? null,
+      p_pobox_enabled: p.pobox_enabled ?? null,
+    })
     if (error) return { success: false, error: error.message }
+    const res = data as { success?: boolean; error?: string } | null
+    if (res && res.success === false) return { success: false, error: res.error ?? 'Error' }
     await refetch()
     return { success: true }
   }
@@ -71,8 +72,18 @@ export function useBalancePolicies() {
     cityId: string,
     p: { date_policy?: DatePolicy | null; pobox_enabled?: boolean | null }
   ) => {
-    const { error } = await supabase.from('cities').update(p).eq('id', cityId)
+    // RPC SECURITY DEFINER (UPDATE de cities por RLS es solo admin). Solo se escriben las claves definidas
+    // en p; null = la ciudad hereda de la cuenta.
+    const { data, error } = await supabase.rpc('rpc_set_city_balance_policy', {
+      p_city_id: cityId,
+      p_set_date_policy: p.date_policy !== undefined,
+      p_date_policy: p.date_policy ?? null,
+      p_set_pobox: p.pobox_enabled !== undefined,
+      p_pobox_enabled: p.pobox_enabled ?? null,
+    })
     if (error) return { success: false, error: error.message }
+    const res = data as { success?: boolean; error?: string } | null
+    if (res && res.success === false) return { success: false, error: res.error ?? 'Error' }
     await refetch()
     return { success: true }
   }

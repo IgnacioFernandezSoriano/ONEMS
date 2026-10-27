@@ -187,8 +187,25 @@ export function useAccountConfig() {
     }
   }
 
-  const setWorkingDay = (dayOfWeek: number, isWorking: boolean) =>
-    updateWeeklySchedule(dayOfWeek, { is_working_day: isWorking })
+  // RPC SECURITY DEFINER: funciona para cualquier rol de la cuenta y para superadmin (RLS no lo permitiria),
+  // solo toca filas de la cuenta y siembra las 7 la primera vez (no deja la cuenta sin dias laborables).
+  const setWorkingDay = async (dayOfWeek: number, isWorking: boolean) => {
+    if (!effectiveAccountId) return { success: false, error: 'No account selected' }
+    try {
+      const { data, error: rpcError } = await supabase.rpc('rpc_set_working_day', {
+        p_account_id: effectiveAccountId,
+        p_day_of_week: dayOfWeek,
+        p_is_working: isWorking,
+      })
+      if (rpcError) throw rpcError
+      const res = data as { success?: boolean; error?: string } | null
+      if (res && res.success === false) return { success: false, error: res.error ?? 'Error' }
+      await fetchWeeklySchedule()
+      return { success: true }
+    } catch (err: any) {
+      return { success: false, error: err.message }
+    }
+  }
 
   const bulkImportNonWorkingDays = async (holidays: Array<{ date: string; reason: string }>) => {
     try {
