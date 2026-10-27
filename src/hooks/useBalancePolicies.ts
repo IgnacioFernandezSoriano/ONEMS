@@ -32,14 +32,25 @@ export function useBalancePolicies() {
     }
     setLoading(true)
     try {
+      // La politica de cuenta se lee por RPC: el SELECT de account_config (RLS) no deja ver la fila a un
+      // superadmin (no tiene account_id) y la casilla POBOX parecia no guardarse.
       const [cfg, cts] = await Promise.all([
-        supabase.from('account_config').select('date_policy, pobox_enabled').eq('account_id', accountId).maybeSingle(),
+        supabase.rpc('rpc_get_account_balance_policy', { p_account_id: accountId }),
         supabase.from('cities').select('id, name, date_policy, pobox_enabled').eq('account_id', accountId).order('name'),
       ])
-      if (cfg.error) throw cfg.error
       if (cts.error) throw cts.error
-      // Sin fila en account_config se aplican los valores por defecto de la columna
-      setAccount((cfg.data as AccountBalancePolicy | null) ?? DEFAULT_ACCOUNT_POLICY)
+      let accountPolicy: AccountBalancePolicy = DEFAULT_ACCOUNT_POLICY
+      if (!cfg.error && cfg.data) {
+        accountPolicy = cfg.data as AccountBalancePolicy
+      } else {
+        // RPC aun no desplegada: lectura directa (sirve para usuarios con cuenta propia)
+        console.warn('[useBalancePolicies] rpc_get_account_balance_policy no disponible, lectura directa:', cfg.error)
+        const direct = await supabase
+          .from('account_config').select('date_policy, pobox_enabled').eq('account_id', accountId).maybeSingle()
+        if (direct.error) throw direct.error
+        accountPolicy = (direct.data as AccountBalancePolicy | null) ?? DEFAULT_ACCOUNT_POLICY
+      }
+      setAccount(accountPolicy)
       setCities((cts.data as CityBalancePolicy[]) ?? [])
     } catch (err) {
       console.error('[useBalancePolicies] Error loading policies:', err)

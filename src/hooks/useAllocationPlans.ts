@@ -73,13 +73,20 @@ export function useAllocationPlans() {
     // Account policy (v2 columns; may not exist yet)
     try {
       if (!effectiveAccountId) throw new Error('no account')
-      const { data, error: e } = await supabase
-        .from('account_config')
-        .select('date_policy, pobox_enabled')
-        .eq('account_id', effectiveAccountId)
-        .maybeSingle()
-      if (e) throw e
-      setAccountPolicy((data as AccountPolicyRow | null) ?? null)
+      // Por RPC: el SELECT de account_config (RLS) no deja ver la fila a un superadmin.
+      const rpc = await supabase.rpc('rpc_get_account_balance_policy', { p_account_id: effectiveAccountId })
+      if (!rpc.error && rpc.data) {
+        setAccountPolicy(rpc.data as AccountPolicyRow)
+      } else {
+        // RPC aun no desplegada: lectura directa
+        const { data, error: e } = await supabase
+          .from('account_config')
+          .select('date_policy, pobox_enabled')
+          .eq('account_id', effectiveAccountId)
+          .maybeSingle()
+        if (e) throw e
+        setAccountPolicy((data as AccountPolicyRow | null) ?? null)
+      }
     } catch (err) {
       console.error('[useAllocationPlans] account policy:', err)
       setAccountPolicy(null)
