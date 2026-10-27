@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useNodeLoadBalancing, BalanceResult } from '../hooks/useNodeLoadBalancing';
-import { CityLoadCard } from '../components/NodeLoadBalancing/CityLoadCard';
+import { useNodeLoadBalancing, BalanceResult, type NodeDayLoad } from '../hooks/useNodeLoadBalancing';
+import { CityLoadCard, type LoadScale } from '../components/NodeLoadBalancing/CityLoadCard';
 import { BalancePreviewModal } from '../components/NodeLoadBalancing/BalancePreviewModal';
 import { BalancePoliciesPanel } from '../components/NodeLoadBalancing/BalancePoliciesPanel';
 import { useBalancePolicies } from '../hooks/useBalancePolicies';
@@ -20,11 +20,31 @@ export default function NodeLoadBalancing() {
   const [referenceLoad, setReferenceLoad] = useState(6); // Default reference samples per node
   const [deviationPercent, setDeviationPercent] = useState(20); // Default 20% deviation
 
-  const { loadData, citySummaries, loading, error, refetch, previewBalance, applyBalance, previewAll } =
+  const { loadData, dayData, citySummaries, loading, error, refetch, previewBalance, applyBalance, previewAll } =
     useNodeLoadBalancing(profile?.account_id || undefined, startDate, endDate, referenceLoad, deviationPercent);
 
   const { weeklySchedule, setWorkingDay } = useAccountConfig();
-  const { account: accountPolicy, updateAccountPolicy } = useBalancePolicies();
+  const { account: accountPolicy, cities: cityPolicies, updateAccountPolicy, updateCityPolicy, effectiveFor } =
+    useBalancePolicies();
+  const [scales, setScales] = useState<Record<string, LoadScale>>({});
+  const dayDataByCity = useMemo(() => {
+    const m = new Map<string, NodeDayLoad[]>();
+    (dayData || []).forEach((r) => {
+      const arr = m.get(r.city_id);
+      if (arr) arr.push(r);
+      else m.set(r.city_id, [r]);
+    });
+    return m;
+  }, [dayData]);
+  const noDayData = useMemo<NodeDayLoad[]>(() => [], []);
+
+  const handleCityPolicyChange = async (
+    cityId: string,
+    p: { date_policy?: DatePolicy | null; pobox_enabled?: boolean | null }
+  ) => {
+    const res = await updateCityPolicy(cityId, p);
+    if (!res.success) console.error('[NodeLoadBalancing] Error updating city policy:', res.error);
+  };
   const workingDows = useMemo(() => workingDowsFromSchedule(weeklySchedule), [weeklySchedule]);
   const [balancingAll, setBalancingAll] = useState<{ done: number; total: number } | null>(null);
   // Results of "Balance all cities" (shown in the modal in a later task)
@@ -539,6 +559,17 @@ export default function NodeLoadBalancing() {
               cityName={summary.city_name}
               cityData={citiesData[summary.city_id].data}
               onBalance={() => handleBalanceClick(summary.city_id, summary.city_name)}
+              dayData={dayDataByCity.get(summary.city_id) ?? noDayData}
+              scale={scales[summary.city_id] ?? 'week'}
+              onScaleChange={(sc) => setScales((prev) => ({ ...prev, [summary.city_id]: sc }))}
+              policy={{
+                ...effectiveFor(summary.city_id),
+                cityOverride: {
+                  date_policy: cityPolicies.find((c) => c.id === summary.city_id)?.date_policy ?? null,
+                  pobox_enabled: cityPolicies.find((c) => c.id === summary.city_id)?.pobox_enabled ?? null,
+                },
+              }}
+              onCityPolicyChange={(p) => handleCityPolicyChange(summary.city_id, p)}
             />
           ))}
         </div>

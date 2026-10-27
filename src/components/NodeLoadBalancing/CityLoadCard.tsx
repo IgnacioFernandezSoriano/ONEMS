@@ -1,17 +1,49 @@
 import React from 'react';
-import { NodeLoadData } from '../../hooks/useNodeLoadBalancing';
+import { NodeLoadData, NodeDayLoad } from '../../hooks/useNodeLoadBalancing';
+import type { DatePolicy } from '../../lib/workingDays';
+import { buildDayView, buildMonthView, dayCellKey, isConflict } from '../../lib/loadViews';
+import { useTranslation } from '@/hooks/useTranslation';
+
+export type LoadScale = 'day' | 'week' | 'month';
+
+export interface CityPolicyView {
+  datePolicy: DatePolicy;
+  pobox: boolean;
+  cityOverride: { date_policy: DatePolicy | null; pobox_enabled: boolean | null };
+}
 
 interface CityLoadCardProps {
   cityName: string;
   cityData: NodeLoadData[];
   onBalance: () => void;
+  dayData?: NodeDayLoad[];
+  scale?: LoadScale;
+  onScaleChange?: (s: LoadScale) => void;
+  policy?: CityPolicyView;
+  onCityPolicyChange?: (p: { date_policy?: DatePolicy | null; pobox_enabled?: boolean | null }) => void;
 }
+
+const UNAVAILABLE_CLASS =
+  'bg-gray-200 bg-[repeating-linear-gradient(45deg,transparent,transparent_4px,rgba(0,0,0,.08)_4px,rgba(0,0,0,.08)_8px)]';
 
 export const CityLoadCard: React.FC<CityLoadCardProps> = ({
   cityName,
   cityData,
   onBalance,
+  dayData = [],
+  scale = 'week',
+  onScaleChange,
+  policy,
+  onCityPolicyChange,
 }) => {
+  const { t } = useTranslation();
+  const dayView = React.useMemo(() => buildDayView(dayData), [dayData]);
+  const monthView = React.useMemo(() => buildMonthView(dayData), [dayData]);
+  const dayNodes = React.useMemo(() => {
+    const m = new Map<string, string | null>();
+    dayData.forEach((r) => { if (!m.has(r.node_code)) m.set(r.node_code, r.panelist_name); });
+    return [...m.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+  }, [dayData]);
   const [isRecommendationsExpanded, setIsRecommendationsExpanded] = React.useState(false);
   
   // Get unique weeks and nodes
@@ -124,8 +156,37 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
               </svg>
             </div>
             <h3 className="text-lg font-semibold text-gray-900">{cityName}</h3>
+            {policy && (
+              <div className="flex items-center gap-1">
+                <span className="px-2 py-0.5 text-xs rounded-full bg-gray-200 text-gray-700">
+                  {policy.datePolicy === 'daily' ? t('lb2.date_policy_daily') : t('lb2.date_policy_weekly')}
+                </span>
+                {policy.pobox && (
+                  <span className="px-2 py-0.5 text-xs rounded-full bg-purple-100 text-purple-700">
+                    {t('lb2.pobox')}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
-          <div className="flex items-center gap-6 text-sm">
+          <div className="flex flex-wrap items-center gap-4 text-sm">
+            {onScaleChange && (
+              <div className="inline-flex rounded-md border border-gray-300 overflow-hidden" role="group">
+                {(['day', 'week', 'month'] as LoadScale[]).map((sc) => (
+                  <button
+                    key={sc}
+                    type="button"
+                    onClick={() => onScaleChange(sc)}
+                    aria-pressed={scale === sc}
+                    className={`px-3 py-1 text-xs font-medium ${
+                      scale === sc ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    {t(`lb2.scale_${sc}`)}
+                  </button>
+                ))}
+              </div>
+            )}
             <div className="flex items-center gap-2">
               <span className="text-gray-600">Total:</span>
               <strong className="text-gray-900">{totalShipments} shipments</strong>
@@ -136,9 +197,170 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
             </div>
           </div>
         </div>
+        {policy && onCityPolicyChange && (
+          <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-gray-700">
+            <label className="flex items-center gap-1">
+              <span>{t('lb2.date_policy')}</span>
+              <select
+                value={policy.cityOverride.date_policy ?? ''}
+                disabled={policy.pobox}
+                title={policy.pobox ? t('lb2.pobox_forces_daily') : undefined}
+                onChange={(e) =>
+                  onCityPolicyChange({ date_policy: (e.target.value || null) as DatePolicy | null })
+                }
+                className="border border-gray-300 rounded px-2 py-1 disabled:bg-gray-100 disabled:text-gray-400"
+              >
+                <option value="">{t('lb2.city_policy_inherit')}</option>
+                <option value="daily">{t('lb2.date_policy_daily')}</option>
+                <option value="weekly">{t('lb2.date_policy_weekly')}</option>
+              </select>
+            </label>
+            {policy.pobox && <span className="text-gray-500">{t('lb2.pobox_forces_daily')}</span>}
+            <label className="flex items-center gap-1">
+              <span>{t('lb2.pobox')}</span>
+              <select
+                value={policy.cityOverride.pobox_enabled === null ? '' : String(policy.cityOverride.pobox_enabled)}
+                onChange={(e) =>
+                  onCityPolicyChange({ pobox_enabled: e.target.value === '' ? null : e.target.value === 'true' })
+                }
+                className="border border-gray-300 rounded px-2 py-1"
+              >
+                <option value="">{t('lb2.city_policy_inherit')}</option>
+                <option value="true">{t('common.yes')}</option>
+                <option value="false">{t('common.no')}</option>
+              </select>
+            </label>
+          </div>
+        )}
       </div>
 
+      {scale === 'day' && (
+        dayView.columns.length === 0 ? (
+          <p className="px-6 py-8 text-center text-gray-500">{t('node_load_balancing.no_data_message')}</p>
+        ) : (
+          <>
+            <div className="overflow-x-auto">
+              <table className="text-sm border-collapse">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="sticky left-0 z-10 bg-white px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                      Nœud
+                    </th>
+                    {dayView.columns.map((c) => (
+                      <th
+                        key={c.day}
+                        className={`px-2 py-2 text-center text-xs font-medium ${
+                          c.isWorkingDay ? 'text-gray-600' : 'text-gray-400 bg-gray-100'
+                        }`}
+                      >
+                        <div>{t(`lb2.day_short.${c.dow}`)}</div>
+                        <div>{c.dayNum}</div>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {dayNodes.map(([nodeCode, panelist]) => (
+                    <tr key={nodeCode}>
+                      <td className="sticky left-0 z-10 bg-white px-4 py-2">
+                        <div className="flex flex-col">
+                          <span className="font-medium text-gray-900">{nodeCode}</span>
+                          <span className="text-xs text-gray-500">{panelist || 'No panelist'}</span>
+                        </div>
+                      </td>
+                      {dayView.columns.map((c) => {
+                        const r = dayView.cells.get(dayCellKey(nodeCode, c.day));
+                        const shaded = r ? r.is_unavailable || !r.is_working_day : !c.isWorkingDay;
+                        const bg = r?.is_unavailable ? UNAVAILABLE_CLASS : shaded ? 'bg-gray-100' : '';
+                        const conflict = isConflict(r);
+                        return (
+                          <td key={c.day} className={`px-2 py-2 text-center min-w-[2.5rem] ${bg}`}>
+                            {r ? (
+                              <span className={conflict ? 'text-red-700 font-semibold' : 'text-gray-900'}>
+                                {r.shipment_count}
+                              </span>
+                            ) : (
+                              <span className="text-gray-300">—</span>
+                            )}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="flex flex-wrap items-center gap-4 px-6 py-2 text-xs text-gray-600 border-t border-gray-200">
+              <span className="flex items-center gap-1">
+                <span className={`inline-block w-4 h-4 border border-gray-300 ${UNAVAILABLE_CLASS}`} />
+                {t('lb2.unavailable_legend')}
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="inline-block w-4 h-4 border border-gray-300 bg-gray-100" />
+                {t('lb2.non_working_legend')}
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="text-red-700 font-semibold">1</span>
+                {t('lb2.conflict_legend')}
+              </span>
+            </div>
+          </>
+        )
+      )}
+
+      {scale === 'month' && (
+        monthView.months.length === 0 ? (
+          <p className="px-6 py-8 text-center text-gray-500">{t('node_load_balancing.no_data_message')}</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nœud</th>
+                  {monthView.months.map((m) => (
+                    <th key={m} className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">{m}</th>
+                  ))}
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                    Moyenne mensuelle
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {dayNodes.map(([nodeCode, panelist]) => (
+                  <tr key={nodeCode} className="hover:bg-gray-50">
+                    <td className="px-4 py-3">
+                      <div className="flex flex-col">
+                        <span className="font-medium text-gray-900">{nodeCode}</span>
+                        <span className="text-xs text-gray-500">{panelist || 'No panelist'}</span>
+                      </div>
+                    </td>
+                    {monthView.months.map((m) => (
+                      <td key={m} className="px-4 py-3 text-center text-gray-900">
+                        {monthView.totals[nodeCode]?.[m] ?? 0}
+                      </td>
+                    ))}
+                    <td className="px-4 py-3 text-center font-semibold text-gray-900">
+                      {(monthView.nodeAverages[nodeCode] ?? 0).toFixed(1)}
+                    </td>
+                  </tr>
+                ))}
+                <tr className="bg-gray-50 font-semibold border-t-2 border-gray-300">
+                  <td className="px-4 py-3 text-gray-900">Total</td>
+                  {monthView.months.map((m) => (
+                    <td key={m} className="px-4 py-3 text-center text-gray-900">{monthView.monthTotals[m] ?? 0}</td>
+                  ))}
+                  <td className="px-4 py-3 text-center text-gray-900">
+                    {(monthView.grandTotal / monthView.months.length).toFixed(1)}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        )
+      )}
+
       {/* Heat Map Table */}
+      {scale === 'week' && (
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 border-b border-gray-200">
@@ -238,6 +460,7 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
           </tbody>
         </table>
       </div>
+      )}
 
       {/* Recommendations Section */}
       <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-t border-gray-200">
