@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useEffectiveAccountId } from './useEffectiveAccountId'
 import { runForCities } from '../lib/balanceAll'
+import { fetchAllPages } from '../lib/fetchAllPages'
 
 export interface NodeLoadData {
   account_id: string;
@@ -179,17 +180,30 @@ export const useNodeLoadBalancing = (
 
       if (fetchError) throw fetchError;
 
-      const { data: dayRows, error: dayError } = await supabase
-        .rpc('rpc_get_node_load_by_day', {
-          p_account_id: activeAccountId,
-          p_start_date: startDate,
-          p_end_date: endDate
-        });
-      // No fatal: los datos semanales siguen funcionando si el detalle diario falla
-      if (dayError) console.error('[useNodeLoadBalancing] Error fetching day data:', dayError);
+      // Una fila por nodo x dia (>10k en cuentas grandes): PostgREST corta en max_rows (1000), asi que se
+      // pagina con .range() sobre el orden total (ciudad, nodo, dia) que fija la RPC.
+      let dayRows: NodeDayLoad[] = [];
+      try {
+        dayRows = await fetchAllPages<NodeDayLoad>((from, to) =>
+          supabase
+            .rpc('rpc_get_node_load_by_day', {
+              p_account_id: activeAccountId,
+              p_start_date: startDate,
+              p_end_date: endDate
+            })
+            .order('city_name')
+            .order('node_code')
+            .order('day')
+            .range(from, to)
+        );
+      } catch (dayError) {
+        // No fatal: los datos semanales siguen funcionando si el detalle diario falla
+        console.error('[useNodeLoadBalancing] Error fetching day data:', dayError);
+        dayRows = [];
+      }
 
       setLoadData(data || []);
-      setDayData(dayError ? [] : ((dayRows as NodeDayLoad[]) || []));
+      setDayData(dayRows);
 
       // Calculate city summaries
       if (data) {

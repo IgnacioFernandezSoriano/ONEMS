@@ -95,7 +95,7 @@ AS $$
 $$;
 
 -- Parte 2 (vista diaria): carga por nodo y dia para la vista dia/mes del balanceo.
--- Una fila por (nodo con ciudad, dia del periodo). SECURITY DEFINER (omite RLS), por eso:
+-- Una fila por (nodo con ciudad, dia del periodo); los envios cancelados no cuentan. SECURITY DEFINER (omite RLS), por eso:
 --   * todas las lecturas se filtran por p_account_id;
 --   * guarda: con sesion de usuario (auth.uid() no nulo) solo se permite a miembros de p_account_id o a
 --     superadmin (mismo patron que generate_reassignment_proposals / list_reroute_candidates); con
@@ -132,6 +132,7 @@ BEGIN
            count(*)::int AS total, (count(*) FILTER (WHERE a.status = 'pending'))::int AS pend
       FROM public.allocation_plan_details a
      WHERE a.account_id = p_account_id
+       AND a.status <> 'cancelled'
        AND a.fecha_programada BETWEEN p_start_date AND p_end_date
      GROUP BY a.origin_node_id, a.fecha_programada
   ),
@@ -148,6 +149,8 @@ BEGIN
     CROSS JOIN days
     LEFT JOIN ship ON ship.nid = nds.id AND ship.d = days.d
     LEFT JOIN una  ON una.nid  = nds.id AND una.d  = days.d
+   -- Orden total (auto_id es unico por cuenta): el cliente pagina con .range() porque PostgREST corta el
+   -- resultado (max_rows) y una cuenta grande tiene mas de 10k filas nodo x dia.
    ORDER BY nds.cname, nds.auto_id, days.d;
 END;
 $$;

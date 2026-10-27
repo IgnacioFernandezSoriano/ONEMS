@@ -19,6 +19,8 @@ $$;
 SELECT pg_temp.mk('N1', '2027-03-04') FROM generate_series(1, 3);
 SELECT pg_temp.mk('N1', '2027-03-06');
 SELECT pg_temp.mk('N1', '2027-03-04', 'sent');  -- cuenta en shipment_count pero no en pending_count
+SELECT pg_temp.mk('N1', '2027-03-04', 'cancelled');  -- no cuenta en ninguno de los dos
+SELECT pg_temp.mk('N2', '2027-03-05', 'cancelled');  -- dia solo con cancelados => 0 / 0
 
 INSERT INTO public.panelist_unavailability (panelist_id, start_date, end_date, reason, status, account_id)
 VALUES ('e2000000-0000-0000-0000-000000000002', '2027-03-08', '2027-03-09', 'vacation', 'active',
@@ -31,6 +33,11 @@ SELECT pg_temp.fail_if((SELECT count(*) FROM r) <> 4 * 31, 'filas: ' || (SELECT 
 SELECT pg_temp.fail_if(NOT EXISTS (SELECT 1 FROM r WHERE node_id = 'b1000000-0000-0000-0000-000000000001'
   AND day = '2027-03-04' AND shipment_count = 4 AND pending_count = 3 AND city_name = 'City1' AND panelist_name = 'Pan1'),
   'N1 04/03 conteos');
+SELECT pg_temp.fail_if(NOT EXISTS (SELECT 1 FROM r WHERE node_id = 'b2000000-0000-0000-0000-000000000002'
+  AND day = '2027-03-05' AND shipment_count = 0 AND pending_count = 0), 'N2 05/03 solo cancelados => 0');
+-- Orden determinista (ciudad, nodo, dia) para paginar con .range()
+SELECT pg_temp.fail_if((SELECT array_agg(node_code || day ORDER BY rn) FROM (SELECT node_code, day, row_number() OVER () rn FROM r) x)
+  IS DISTINCT FROM (SELECT array_agg(node_code || day ORDER BY city_name, node_code, day) FROM r), 'orden ciudad, nodo, dia');
 SELECT pg_temp.fail_if(NOT EXISTS (SELECT 1 FROM r WHERE node_id = 'b1000000-0000-0000-0000-000000000001'
   AND day = '2027-03-06' AND NOT is_working_day AND shipment_count = 1), 'N1 06/03 sabado');
 SELECT pg_temp.fail_if(NOT EXISTS (SELECT 1 FROM r WHERE node_id = 'b2000000-0000-0000-0000-000000000002'
