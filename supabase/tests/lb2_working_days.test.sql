@@ -45,3 +45,22 @@ UPDATE public.cities SET pobox_enabled = true WHERE id = 'c1000000-0000-0000-000
 SELECT pg_temp.fail_if(NOT EXISTS (SELECT 1 FROM public.effective_city_policy('c1000000-0000-0000-0000-000000000001')
   WHERE date_policy = 'daily' AND pobox_enabled), 'E3: POBOX fuerza daily');
 ROLLBACK;
+
+-- ===== Caso F: festivo de un solo centro postal NO afecta a la cuenta.
+BEGIN;
+\ir fixtures/incident_city.sql
+INSERT INTO public.postal_centers (id, account_id, code, name)
+  VALUES ('d1000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001', 'PC1', 'Centro1');
+INSERT INTO public.non_working_days (account_id, postal_center_id, date, reason)
+  VALUES ('a0000000-0000-0000-0000-000000000001', 'd1000000-0000-0000-0000-000000000001', '2027-03-08', 'festivo del centro');
+SELECT pg_temp.fail_if(NOT public.is_account_working_day('a0000000-0000-0000-0000-000000000001', '2027-03-08'), 'F: festivo de centro no debe afectar a la cuenta');
+ROLLBACK;
+
+-- ===== Caso G: POBOX heredado de la cuenta (ciudad NULL) fuerza daily aunque la cuenta sea weekly.
+BEGIN;
+\ir fixtures/incident_city.sql
+INSERT INTO public.account_config (account_id, date_policy, pobox_enabled)
+  VALUES ('a0000000-0000-0000-0000-000000000001', 'weekly', true);
+SELECT pg_temp.fail_if(NOT EXISTS (SELECT 1 FROM public.effective_city_policy('c1000000-0000-0000-0000-000000000001')
+  WHERE date_policy = 'daily' AND pobox_enabled), 'G: POBOX heredado de la cuenta fuerza daily');
+ROLLBACK;

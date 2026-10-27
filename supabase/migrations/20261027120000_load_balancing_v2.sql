@@ -43,7 +43,7 @@ LANGUAGE sql STABLE
 SET search_path = public
 AS $$
   SELECT NOT EXISTS (SELECT 1 FROM public.non_working_days n
-                      WHERE n.account_id = p_account_id AND n.date = p_date)
+                      WHERE n.account_id = p_account_id AND n.postal_center_id IS NULL AND n.date = p_date)
      AND CASE
            WHEN EXISTS (SELECT 1 FROM public.weekly_schedule w WHERE w.account_id = p_account_id)
            THEN EXISTS (SELECT 1 FROM public.weekly_schedule w
