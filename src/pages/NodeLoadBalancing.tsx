@@ -8,6 +8,7 @@ import { useBalancePolicies } from '../hooks/useBalancePolicies';
 import { useAccountConfig } from '../hooks/useAccountConfig';
 import { workingDowsFromSchedule, type DatePolicy } from '../lib/workingDays';
 import { cityIdsToApply, isCityFailed } from '../lib/balanceViews';
+import { isUsablePeriod } from '../lib/dateRange';
 
 import { useTranslation } from '@/hooks/useTranslation';
 export default function NodeLoadBalancing() {
@@ -21,8 +22,26 @@ export default function NodeLoadBalancing() {
   const [referenceLoad, setReferenceLoad] = useState(6); // Default reference samples per node
   const [deviationPercent, setDeviationPercent] = useState(20); // Default 20% deviation
 
+  // Las fechas que se escriben (startDate/endDate) y las que se consultan (applied) van separadas: mientras se
+  // teclea un <input type="date"> salen valores intermedios (anyo 0002, inicio > fin...) y cada uno lanzaba una
+  // consulta que sustituia toda la pagina por el indicador de carga. Solo se consulta con un periodo completo y
+  // valido, tras una breve pausa sin cambios (el boton Reset, con ambas vacias, se aplica al instante).
+  const [applied, setApplied] = useState({ start: '', end: '' });
+  useEffect(() => {
+    if (!startDate && !endDate) {
+      setApplied((prev) => (prev.start === '' && prev.end === '' ? prev : { start: '', end: '' }));
+      return;
+    }
+    if (!isUsablePeriod(startDate, endDate)) return;
+    const timer = setTimeout(() => {
+      setApplied((prev) => (prev.start === startDate && prev.end === endDate ? prev : { start: startDate, end: endDate }));
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [startDate, endDate]);
+  const datesPending = isUsablePeriod(startDate, endDate) && (startDate !== applied.start || endDate !== applied.end);
+
   const { loadData, dayData, citySummaries, loading, error, refetch, previewBalanceV2, applyBalanceV2, previewAll, applyAll } =
-    useNodeLoadBalancing(profile?.account_id || undefined, startDate, endDate, referenceLoad, deviationPercent);
+    useNodeLoadBalancing(profile?.account_id || undefined, applied.start, applied.end, referenceLoad, deviationPercent);
 
   const { weeklySchedule, setWorkingDay } = useAccountConfig();
   const { account: accountPolicy, cities: cityPolicies, updateAccountPolicy, updateCityPolicy, effectiveFor } =
@@ -330,7 +349,9 @@ export default function NodeLoadBalancing() {
 
   const stddevStatus = getStddevStatus(avgStddev);
 
-  if (loading) {
+  // Pantalla de carga completa solo la primera vez (aun no hay nada que mostrar). En las recargas por cambio de
+  // fechas se mantiene la pagina (y el foco en el campo de fecha) y solo se atenua el contenido.
+  if (loading && loadData.length === 0 && citySummaries.length === 0) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="flex items-center gap-3 text-gray-600">
@@ -341,16 +362,19 @@ export default function NodeLoadBalancing() {
     );
   }
 
-  if (error) {
-    return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-        <p className="text-red-700">Error loading data: {error}</p>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-700">Error loading data: {error}</p>
+        </div>
+      )}
+      {(loading || datesPending) && (
+        <div className="flex items-center gap-2 text-sm text-gray-500" role="status">
+          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-500"></div>
+          <span>{t("common.loading_data")}</span>
+        </div>
+      )}
       {notice && (
         <div
           role={notice.type === 'error' ? 'alert' : 'status'}
@@ -421,7 +445,7 @@ export default function NodeLoadBalancing() {
         onChangePolicy={handleChangePolicy}
         onBalanceAll={handleBalanceAll}
         balancingAll={progress}
-        disabled={!startDate || !endDate || applying}
+        disabled={!applied.start || !applied.end || datesPending || applying}
         locked={applying}
         balanceAllHint={t('lb2.balance_all_need_dates')}
       />
