@@ -3056,7 +3056,7 @@ lb2.date_policy_daily,Diaria
 lb2.date_policy_weekly,Semanal
 lb2.date_policy_help,Diaria: cada envío se coloca en un día laborable concreto. Semanal: solo se fija la semana y el envío va al primer día laborable de esa semana.
 lb2.pobox,POBOX
-lb2.pobox_help,Los nodos POBOX necesitan cobertura todos los días laborables: el balanceo asegurará al menos un envío por nodo POBOX en cada día laborable.
+lb2.pobox_help,POBOX: cada día laborable cada ciudad debe enviar al menos 1 envío. Al balancear, primero se mueven excedentes de días cercanos y, si no basta, se generan nuevos samples (eligiendo el mejor origen y destino según la carga). Los días sin ningún envío aparecen con un 0 en rojo en la vista por día.
 lb2.pobox_forces_daily,POBOX fuerza la política de fecha diaria.
 lb2.balance_all,Balancear todas las ciudades
 lb2.balance_all_progress,Balanceando {done}/{total}

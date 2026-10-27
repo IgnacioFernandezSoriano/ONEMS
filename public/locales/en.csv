@@ -3056,7 +3056,7 @@ lb2.date_policy_daily,Daily
 lb2.date_policy_weekly,Weekly
 lb2.date_policy_help,Daily: each shipment is placed on a specific working day. Weekly: only the week is fixed and the shipment goes to the first working day of that week.
 lb2.pobox,POBOX
-lb2.pobox_help,POBOX nodes need coverage every working day: balancing will ensure at least one shipment per POBOX node on each working day.
+lb2.pobox_help,POBOX: every working day each city must send at least 1 shipment. Balancing first moves surplus shipments from nearby days and, if that is not enough, generates new samples (choosing the best origin and destination by load). Days left without any shipment show a red 0 in the day view.
 lb2.pobox_forces_daily,POBOX forces the daily date policy.
 lb2.balance_all,Balance all cities
 lb2.balance_all_progress,Balancing {done}/{total}

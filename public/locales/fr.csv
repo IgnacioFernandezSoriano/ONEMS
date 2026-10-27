@@ -3048,7 +3048,7 @@ lb2.date_policy_daily,Quotidienne
 lb2.date_policy_weekly,Hebdomadaire
 lb2.date_policy_help,Quotidienne : chaque envoi est placé sur un jour ouvré précis. Hebdomadaire : seule la semaine est fixée et l'envoi va au premier jour ouvré de cette semaine.
 lb2.pobox,POBOX
-lb2.pobox_help,Les nœuds POBOX doivent être couverts chaque jour ouvré : l'équilibrage garantira au moins un envoi par nœud POBOX chaque jour ouvré.
+lb2.pobox_help,POBOX : chaque jour ouvré, chaque ville doit expédier au moins 1 envoi. L'équilibrage déplace d'abord les envois excédentaires des jours proches et, si cela ne suffit pas, génère de nouveaux samples (en choisissant la meilleure origine et destination selon la charge). Les jours sans aucun envoi apparaissent avec un 0 en rouge dans la vue par jour.
 lb2.pobox_forces_daily,POBOX impose la politique de date quotidienne.
 lb2.balance_all,Équilibrer toutes les villes
 lb2.balance_all_progress,Équilibrage {done}/{total}
