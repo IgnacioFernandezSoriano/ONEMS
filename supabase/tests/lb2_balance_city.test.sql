@@ -29,6 +29,7 @@ BEGIN;
 \ir fixtures/no_incident_triggers.sql
 SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
 SELECT pg_temp.mk('N1', '2027-03-04') FROM generate_series(1, 30);
+UPDATE public.allocation_plan_details SET origin_panelist_name = 'Original';
 DO $$
 DECLARE r jsonb;
 BEGIN
@@ -64,9 +65,17 @@ SELECT pg_temp.fail_if(count(*) > 0, 'movidos sin traza completa: ' || count(*))
         OR original_fecha_programada IS DISTINCT FROM '2027-03-04'
         OR original_origin_node_id IS DISTINCT FROM 'b1000000-0000-0000-0000-000000000001'
         OR week_number <> EXTRACT(week FROM fecha_programada) OR month <> 3 OR year <> 2027);
-SELECT pg_temp.fail_if(count(*) > 0, 'nombre de panelista origen no actualizado')
+-- El panelista origen se refresca solo si cambio el nodo; si solo cambio la fecha se conserva (todos los envios
+-- se crearon con origin_panelist_name = 'Original').
+SELECT pg_temp.fail_if(count(*) > 0, 'nombre de panelista origen no actualizado al cambiar de nodo')
   FROM public.allocation_plan_details a JOIN public.panelists p ON p.node_id = a.origin_node_id
- WHERE a.reassigned_at IS NOT NULL AND a.origin_panelist_name IS DISTINCT FROM p.name;
+ WHERE a.origin_node_id <> a.original_origin_node_id AND a.origin_panelist_name IS DISTINCT FROM p.name;
+SELECT pg_temp.fail_if(count(*) = 0, 'el caso deberia tener envios movidos solo de fecha')
+  FROM public.allocation_plan_details a
+ WHERE a.reassigned_at IS NOT NULL AND a.origin_node_id = a.original_origin_node_id;
+SELECT pg_temp.fail_if(count(*) > 0, 'cambio solo de fecha no debe tocar el panelista origen')
+  FROM public.allocation_plan_details a
+ WHERE a.origin_node_id = 'b1000000-0000-0000-0000-000000000001' AND a.origin_panelist_name IS DISTINCT FROM 'Original';
 SELECT pg_temp.fail_if(count(*) > 0, 'el destino no debe cambiar')
   FROM public.allocation_plan_details WHERE destination_node_id <> 'b4000000-0000-0000-0000-000000000004';
 ROLLBACK;
@@ -234,6 +243,26 @@ SELECT pg_temp.fail_if((SELECT count(*) FROM public.allocation_plan_details WHER
                        'marzo debe seguir con 10');
 SELECT pg_temp.fail_if((SELECT count(*) FROM public.allocation_plan_details WHERE fecha_programada BETWEEN '2027-04-01' AND '2027-04-30') <> 2,
                        'abril debe seguir con 2');
+ROLLBACK;
+
+-- ===== Caso 7 (atrasados): pendientes con fecha anterior a hoy dentro del periodo solo se mueven hacia delante.
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+SELECT pg_temp.mk('N1', current_date - 5) FROM generate_series(1, 4);
+SELECT pg_temp.mk('N2', current_date - 1) FROM generate_series(1, 2);
+DO $$
+DECLARE r jsonb;
+BEGIN
+  r := public.rpc_balance_city_v2('c1000000-0000-0000-0000-000000000001', current_date - 5, current_date + 10, true);
+  PERFORM pg_temp.fail_if((r->>'success')::boolean IS DISTINCT FROM true OR (r->>'movements_count')::int <> 6,
+                          'atrasados: los 6 deben moverse: ' || r::text);
+END $$;
+SELECT pg_temp.fail_if(count(*) > 0, 'atrasados: quedan fechas en el pasado: ' || string_agg(fecha_programada::text, ','))
+  FROM public.allocation_plan_details WHERE fecha_programada < current_date;
+SELECT pg_temp.fail_if(count(*) <> 6, 'atrasados: se perdieron envios') FROM public.allocation_plan_details
+ WHERE fecha_programada BETWEEN current_date AND current_date + 10;
 ROLLBACK;
 
 -- ===== Guarda: actor 98 (cuenta 2) sobre una ciudad de la cuenta 1 => 42501, y nada cambia.
