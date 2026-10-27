@@ -3090,3 +3090,32 @@ allocation_generator.pobox_added,"POBOX a ajouté {count} envois pour que chaque
 allocation_generator.warning_dropped,"{count} échantillons n'ont pas pu être placés (aucun jour ni nœud valide)."
 allocation_generator.warning_pobox_uncovered,"POBOX n'a pas pu couvrir {count} jours de ville (aucun nœud libre)."
 lb2.pobox_gap_legend,0 = jour ouvré sans aucun envoi dans la ville (POBOX exige au moins 1)
+lb2.rec.title,Recommandations
+lb2.rec.analysis,Analyse
+lb2.rec.stats,Statistiques
+lb2.rec.load_critical,{count} cellules semaine/nœud ({pct} %) sont saturées (≥{threshold} envois). Équilibrer en urgence.
+lb2.rec.load_warning,{count} cellules semaine/nœud ({pct} %) ont une charge élevée (≥{threshold} envois). Envisagez un équilibrage préventif.
+lb2.rec.load_ok,Les {total} cellules semaine/nœud sont dans la plage normale (<{threshold} envois).
+lb2.rec.conflicts,{count} envois en attente sont planifiés des jours où le panéliste est absent ou qui ne sont pas ouvrés (nœuds : {nodes}). L'équilibrage les déplace vers des jours valides.
+lb2.rec.no_panelist,{count} envois en attente sont sur des nœuds sans panéliste actif (nœuds : {nodes}). L'équilibrage les déplace vers des nœuds qui en ont un.
+lb2.rec.overdue,{count} envois en attente ont une date antérieure à aujourd'hui. L'équilibrage les avance ; jamais vers le passé.
+lb2.rec.daily_peaks,{count} nœuds-jours dépassent {threshold} envois (pic : {max} sur {node} le {date}). L'équilibrage les répartit sur les jours ouvrés du panéliste.
+lb2.rec.pobox_gap,POBOX : {count} jours ouvrés n'ont aucun envoi dans la ville ({dates}). L'équilibrage déplace les envois excédentaires des jours proches et, si cela ne suffit pas, génère de nouveaux samples.
+lb2.rec.pobox_ok,POBOX : chaque jour ouvré à partir d'aujourd'hui compte au moins un envoi dans la ville.
+lb2.rec.action_balance,Appuyez sur « Équilibrage auto » pour voir l'aperçu et appliquer les changements.
+lb2.rec.no_data,Aucune donnée à analyser pour la période sélectionnée.
+lb2.rec.stat_max,Cellule la plus chargée : {node} / S{week} ({count} envois)
+lb2.rec.stat_thresholds,Seuils : Élevé ≥{high}, Saturé ≥{saturated} envois par nœud et semaine
+lb2.rec.stat_reference,Référence : {reference} samples par nœud, {tolerance} % de tolérance
+lb2.auto_balance_city,Équilibrage auto {city}
+lb2.help.title,Algorithme d'équilibrage
+lb2.help.concept,Répartit équitablement les envois en attente de la ville entre les jours (ou semaines), les semaines et les nœuds, en n'utilisant que des créneaux valides. L'objectif est d'éviter les pics pour un panéliste ou entre panélistes.
+lb2.help.rules_title,Règles
+lb2.help.rule1,Seuls les envois en attente sont déplacés ; les envois expédiés ou reçus ne sont jamais touchés.
+lb2.help.rule2,Uniquement des jours ouvrés (voir Politiques d'équilibrage), jamais dans le passé et jamais les jours où le panéliste est absent.
+lb2.help.rule3,Seuls les nœuds avec un panéliste actif reçoivent des envois ; le nœud de destination n'est jamais modifié.
+lb2.help.rule4,Ne déplace que l'excédent des cellules surchargées vers celles qui manquent d'envois, en conservant le total de chaque mois (saisonnalité).
+lb2.help.rule5,L'envoi restant tourne entre les nœuds au lieu d'aller toujours au premier.
+lb2.help.rule6,Politique hebdomadaire : tous les envois d'une semaine prennent le premier jour ouvré de cette semaine.
+lb2.help.rule7,POBOX : chaque jour ouvré, chaque ville doit expédier au moins un envoi. D'abord il déplace l'excédent des jours proches ; si cela ne suffit pas, il génère de nouveaux samples en choisissant la meilleure origine et destination selon la charge.
+lb2.help.preview_warning,L'aperçu montre les changements proposés. Vous devez confirmer pour les appliquer à l'Allocation Plan.

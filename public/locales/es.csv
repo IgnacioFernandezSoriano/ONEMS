@@ -3098,3 +3098,32 @@ allocation_generator.pobox_added,"POBOX añadió {count} envíos para que cada c
 allocation_generator.warning_dropped,"{count} muestras no se pudieron colocar (sin día ni nodo válido)."
 allocation_generator.warning_pobox_uncovered,"POBOX no pudo cubrir {count} días de ciudad (sin nodo libre)."
 lb2.pobox_gap_legend,0 = día laborable sin ningún envío en la ciudad (POBOX exige al menos 1)
+lb2.rec.title,Recomendaciones
+lb2.rec.analysis,Análisis
+lb2.rec.stats,Estadísticas
+lb2.rec.load_critical,{count} celdas semana/nodo ({pct}%) están saturadas (≥{threshold} envíos). Balancear con urgencia.
+lb2.rec.load_warning,{count} celdas semana/nodo ({pct}%) tienen carga alta (≥{threshold} envíos). Considera balancear de forma preventiva.
+lb2.rec.load_ok,Las {total} celdas semana/nodo están en rango normal (<{threshold} envíos).
+lb2.rec.conflicts,{count} envíos pendientes están programados en días en que el panelista está ausente o que no son laborables (nodos: {nodes}). El balanceo los mueve a días válidos.
+lb2.rec.no_panelist,{count} envíos pendientes están en nodos sin panelista activo (nodos: {nodes}). El balanceo los mueve a nodos que sí tienen.
+lb2.rec.overdue,{count} envíos pendientes tienen fecha anterior a hoy. El balanceo los mueve hacia delante; nunca al pasado.
+lb2.rec.daily_peaks,{count} nodos-día superan {threshold} envíos (pico: {max} en {node} el {date}). El balanceo los reparte entre los días laborables del panelista.
+lb2.rec.pobox_gap,POBOX: {count} días laborables no tienen ningún envío en la ciudad ({dates}). El balanceo mueve excedentes de días cercanos y, si no basta, genera nuevos samples.
+lb2.rec.pobox_ok,POBOX: todos los días laborables desde hoy tienen al menos un envío en la ciudad.
+lb2.rec.action_balance,Pulsa Auto-Balance para ver la vista previa y aplicar los cambios.
+lb2.rec.no_data,No hay datos que analizar en el periodo seleccionado.
+lb2.rec.stat_max,Celda con mayor carga: {node} / S{week} ({count} envíos)
+lb2.rec.stat_thresholds,Umbrales: Alta ≥{high}, Saturada ≥{saturated} envíos por nodo y semana
+lb2.rec.stat_reference,Referencia: {reference} samples por nodo, {tolerance}% de tolerancia
+lb2.auto_balance_city,Auto-Balance {city}
+lb2.help.title,Algoritmo de balanceo
+lb2.help.concept,Reparte los envíos pendientes de la ciudad de forma equitativa entre días (o semanas), semanas y nodos, usando solo huecos válidos. El objetivo es evitar picos para un panelista o entre panelistas.
+lb2.help.rules_title,Reglas
+lb2.help.rule1,Solo se mueven los envíos pendientes; los enviados o recibidos nunca se tocan.
+lb2.help.rule2,Solo días laborables (ver Políticas de balanceo), nunca en el pasado y nunca en días en que el panelista está ausente.
+lb2.help.rule3,Solo los nodos con panelista activo reciben envíos; el nodo destino nunca se cambia.
+lb2.help.rule4,Mueve solo el excedente de las celdas sobrecargadas a las que les faltan envíos, conservando el total de cada mes (estacionalidad).
+lb2.help.rule5,El envío sobrante rota entre nodos en lugar de ir siempre al primero.
+lb2.help.rule6,Política semanal: todos los envíos de una semana toman el primer día laborable de esa semana.
+lb2.help.rule7,POBOX: cada día laborable cada ciudad debe enviar al menos un envío. Primero mueve excedentes de días cercanos; si no basta, genera nuevos samples eligiendo el mejor origen y destino según la carga.
+lb2.help.preview_warning,La vista previa muestra los cambios propuestos. Debes confirmar para aplicarlos al Allocation Plan.

@@ -3098,3 +3098,32 @@ allocation_generator.pobox_added,"{count} shipments were added by POBOX so every
 allocation_generator.warning_dropped,"{count} samples could not be placed (no valid day or node available)."
 allocation_generator.warning_pobox_uncovered,"POBOX could not cover {count} city-days (no free node)."
 lb2.pobox_gap_legend,0 = working day without any shipment in the city (POBOX needs at least 1)
+lb2.rec.title,Recommendations
+lb2.rec.analysis,Analysis
+lb2.rec.stats,Statistics
+lb2.rec.load_critical,{count} week/node cells ({pct}%) are saturated (≥{threshold} shipments). Balance urgently.
+lb2.rec.load_warning,{count} week/node cells ({pct}%) have high load (≥{threshold} shipments). Consider balancing preventively.
+lb2.rec.load_ok,All {total} week/node cells are within the normal range (<{threshold} shipments).
+lb2.rec.conflicts,{count} pending shipments are scheduled on days when the panelist is absent or that are not working days (nodes: {nodes}). Balancing moves them to valid days.
+lb2.rec.no_panelist,{count} pending shipments are on nodes without an active panelist (nodes: {nodes}). Balancing moves them to nodes that have one.
+lb2.rec.overdue,{count} pending shipments are dated before today. Balancing moves them forward; they are never moved to the past.
+lb2.rec.daily_peaks,{count} node-days exceed {threshold} shipments (peak: {max} at {node} on {date}). Balancing spreads them across the panelist's working days.
+lb2.rec.pobox_gap,POBOX: {count} working days have no shipment in the city ({dates}). Balancing moves surplus shipments from nearby days and, if that is not enough, generates new samples.
+lb2.rec.pobox_ok,POBOX: every working day from today has at least one shipment in the city.
+lb2.rec.action_balance,Press Auto-Balance to see the preview and apply the changes.
+lb2.rec.no_data,No data to analyze in the selected period.
+lb2.rec.stat_max,Highest-load cell: {node} / W{week} ({count} shipments)
+lb2.rec.stat_thresholds,Thresholds: High ≥{high}, Saturated ≥{saturated} shipments per node and week
+lb2.rec.stat_reference,Reference: {reference} samples per node, {tolerance}% tolerance
+lb2.auto_balance_city,Auto-Balance {city}
+lb2.help.title,Balancing algorithm
+lb2.help.concept,Distributes the city's pending shipments evenly across days (or weeks), weeks and nodes, using only valid slots. The goal is to avoid peaks for a panelist or between panelists.
+lb2.help.rules_title,Rules
+lb2.help.rule1,Only pending shipments move; sent or received ones are never touched.
+lb2.help.rule2,Only working days (see Balancing policies), never in the past and never on days when the panelist is absent.
+lb2.help.rule3,Only nodes with an active panelist receive shipments; the destination node is never changed.
+lb2.help.rule4,Moves only the surplus from overloaded cells to the cells that lack shipments, keeping each month's total (seasonality).
+lb2.help.rule5,The leftover shipment rotates between nodes instead of always going to the first one.
+lb2.help.rule6,Weekly policy: all shipments of a week take the first working day of that week.
+lb2.help.rule7,POBOX: every working day each city must send at least one shipment. First it moves surplus from nearby days; if that is not enough it generates new samples, choosing the best origin and destination by load.
+lb2.help.preview_warning,The preview shows the proposed changes. You must confirm to apply them to the Allocation Plan.

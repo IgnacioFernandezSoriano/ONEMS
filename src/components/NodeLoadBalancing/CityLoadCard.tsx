@@ -1,6 +1,7 @@
 import React from 'react';
 import { NodeLoadData, NodeDayLoad } from '../../hooks/useNodeLoadBalancing';
-import type { DatePolicy } from '../../lib/workingDays';
+import { localDateKey, type DatePolicy } from '../../lib/workingDays';
+import { analyzeCity, type Severity } from '../../lib/cityAnalysis';
 import { buildDayView, buildMonthView, compareNatural, dayCellKey, dayTotals, isConflict, isPoboxGap, orderWeekNumbers } from '../../lib/loadViews';
 import { useTranslation } from '@/hooks/useTranslation';
 
@@ -25,6 +26,13 @@ interface CityLoadCardProps {
   onCityPolicyChange?: (p: { date_policy?: DatePolicy | null; pobox_enabled?: boolean | null }) => void;
 }
 
+const FINDING_BULLET: Record<Severity, string> = {
+  critical: 'text-red-600',
+  warning: 'text-orange-600',
+  info: 'text-blue-600',
+  ok: 'text-green-600',
+};
+
 const UNAVAILABLE_CLASS =
   'bg-gray-200 bg-[repeating-linear-gradient(45deg,transparent,transparent_4px,rgba(0,0,0,.08)_4px,rgba(0,0,0,.08)_8px)]';
 
@@ -48,7 +56,7 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
     dayData.forEach((r) => { if (!m.has(r.node_code)) m.set(r.node_code, r.panelist_name); });
     return [...m.entries()].sort((a, b) => compareNatural(a[0], b[0]));
   }, [dayData]);
-  const [isRecommendationsExpanded, setIsRecommendationsExpanded] = React.useState(false);
+  const [isRecommendationsExpanded, setIsRecommendationsExpanded] = React.useState(true);
   
   // Get unique weeks and nodes
   const weeks = orderWeekNumbers(cityData);
@@ -102,6 +110,30 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
   // Calculate thresholds based on reference and deviation
   const highThreshold = referenceLoad * (1 + deviationPercent / 100);
   const saturatedThreshold = referenceLoad * (1 + (deviationPercent * 1.5) / 100);
+
+  // Analisis y recomendaciones segun las reglas del balanceador (carga, ausencias, nodos sin panelista,
+  // atrasados, picos diarios y huecos POBOX); los textos salen de lb2.rec.* en el idioma del usuario.
+  const findings = React.useMemo(
+    () =>
+      analyzeCity({
+        weekCells: cityData,
+        highThreshold,
+        saturatedThreshold,
+        dayRows: dayData,
+        datePolicy: policy?.datePolicy ?? 'daily',
+        pobox: !!policy?.pobox,
+        today: localDateKey(new Date()),
+      }),
+    [cityData, dayData, highThreshold, saturatedThreshold, policy?.datePolicy, policy?.pobox]
+  );
+  const actionableFindings = findings.filter((f) => f.severity === 'critical' || f.severity === 'warning').length;
+  const maxCell = React.useMemo(() => {
+    let best = { node: '', week: 0, count: 0 };
+    cityData.forEach((d) => {
+      if (d.shipment_count > best.count) best = { node: d.node_code, week: d.week_number, count: d.shipment_count };
+    });
+    return best;
+  }, [cityData]);
 
   const getLoadColor = (count: number) => {
     if (count >= saturatedThreshold) return 'text-red-700';
@@ -497,15 +529,14 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
       <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-t border-gray-200">
         <button
           onClick={() => setIsRecommendationsExpanded(!isRecommendationsExpanded)}
+          aria-expanded={isRecommendationsExpanded}
           className="w-full flex items-center justify-between hover:opacity-80 transition-opacity"
         >
           <div className="flex items-center gap-3">
-            <div className="flex-shrink-0">
-              <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <h4 className="text-sm font-semibold text-gray-900">💡 Recommendations</h4>
+            <h4 className="text-sm font-semibold text-gray-900">💡 {t('lb2.rec.title')}</h4>
+            {actionableFindings > 0 && (
+              <span className="px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-xs font-semibold">{actionableFindings}</span>
+            )}
           </div>
           <svg
             className={`w-5 h-5 text-gray-600 transition-transform ${isRecommendationsExpanded ? 'rotate-180' : ''}`}
@@ -515,181 +546,40 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
             <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
           </svg>
         </button>
-        
+
         {isRecommendationsExpanded && (
-          <div className="mt-4 flex items-start gap-3">
-            <div className="flex-1">
-            
-              {/* Optimization Recommendations */}
-              <div className="mb-3">
-                <p className="text-xs font-medium text-gray-700 mb-1">📊 Optimisation :</p>
-                <ul className="text-xs text-gray-600 space-y-1 ml-4">
-                  {(() => {
-                    // Analyze individual cells
-                    const saturatedCells: string[] = [];
-                    const highCells: string[] = [];
-                    const normalCells: string[] = [];
-                    
-                    nodes.forEach(nodeCode => {
-                      weeks.forEach(week => {
-                        const count = matrix[nodeCode]?.[week]?.shipment_count || 0;
-                        const cellId = `${nodeCode}-W${week}`;
-                        if (count >= saturatedThreshold) {
-                          saturatedCells.push(cellId);
-                        } else if (count >= highThreshold) {
-                          highCells.push(cellId);
-                        } else {
-                          normalCells.push(cellId);
-                        }
-                      });
-                    });
-                    
-                    const totalCells = nodes.length * weeks.length;
-                    const saturatedPct = (saturatedCells.length / totalCells) * 100;
-                    const highPct = (highCells.length / totalCells) * 100;
-                    const normalPct = (normalCells.length / totalCells) * 100;
-                    
-                    return (
-                      <>
-                        {saturatedCells.length > 0 && (
-                          <li className="flex items-start gap-1">
-                            <span className="text-red-600">•</span>
-                            <span><strong>Critical:</strong> {saturatedCells.length} cells ({saturatedPct.toFixed(0)}%) are saturated (≥{saturatedThreshold.toFixed(1)} shipments). Urgent balancing required.</span>
-                          </li>
-                        )}
-                        {highCells.length > 0 && (
-                          <li className="flex items-start gap-1">
-                            <span className="text-orange-600">•</span>
-                            <span><strong>Warning:</strong> {highCells.length} cells ({highPct.toFixed(0)}%) have high load (≥{highThreshold.toFixed(1)} shipments). Consider preventive balancing.</span>
-                          </li>
-                        )}
-                        {saturatedCells.length === 0 && highCells.length === 0 && (
-                          <li className="flex items-start gap-1">
-                            <span className="text-green-600">•</span>
-                            <span><strong>Optimal :</strong> Toutes les {totalCells} cellules sont dans la plage normale (&lt;{highThreshold.toFixed(1)} expéditions). Aucun équilibrage requis.</span>
-                          </li>
-                        )}
-                        {normalCells.length > 0 && (saturatedCells.length > 0 || highCells.length > 0) && (
-                          <li className="flex items-start gap-1">
-                            <span className="text-blue-600">•</span>
-                            <span>{normalCells.length} cells ({normalPct.toFixed(0)}%) are operating normally.</span>
-                          </li>
-                        )}
-                      </>
-                    );
-                  })()}
-                </ul>
-              </div>
-
-              {/* Action Recommendations */}
-              <div className="mb-3">
-                <p className="text-xs font-medium text-gray-700 mb-1">🎯 Actions suggérées :</p>
-                <ul className="text-xs text-gray-600 space-y-1 ml-4">
-                  {(() => {
-                    // Find specific problematic cells
-                    const saturatedCells: {node: string, week: number, count: number}[] = [];
-                    const highCells: {node: string, week: number, count: number}[] = [];
-                    
-                    nodes.forEach(nodeCode => {
-                      weeks.forEach(week => {
-                        const count = matrix[nodeCode]?.[week]?.shipment_count || 0;
-                        if (count >= saturatedThreshold) {
-                          saturatedCells.push({node: nodeCode, week, count});
-                        } else if (count >= highThreshold) {
-                          highCells.push({node: nodeCode, week, count});
-                        }
-                      });
-                    });
-                    
-                    // Group by node
-                    const saturatedNodes = [...new Set(saturatedCells.map(c => c.node))];
-                    const highNodes = [...new Set(highCells.map(c => c.node))];
-                    
-                    return (
-                      <>
-                        {saturatedCells.length > 0 && (
-                          <li className="flex items-start gap-1">
-                            <span className="text-red-600">•</span>
-                            <span><strong>Urgent :</strong> Équilibrer immédiatement. Cellules saturées dans les nœuds : {saturatedNodes.join(', ')}.</span>
-                          </li>
-                        )}
-                        {highCells.length > 0 && saturatedCells.length === 0 && (
-                          <li className="flex items-start gap-1">
-                            <span className="text-orange-600">•</span>
-                            <span><strong>Préventif :</strong> Équilibrage recommandé. Cellules à charge élevée dans les nœuds : {highNodes.join(', ')}.</span>
-                          </li>
-                        )}
-                        {saturatedCells.length === 0 && highCells.length === 0 && (
-                          <li className="flex items-start gap-1">
-                            <span className="text-green-600">•</span>
-                            <span>Aucune action requise. Toutes les cellules sont dans la plage acceptable.</span>
-                          </li>
-                        )}
-                        {(saturatedCells.length > 0 || highCells.length > 0) && (
-                          <li className="flex items-start gap-1">
-                            <span className="text-blue-600">•</span>
-                            <span>Utilisez le bouton "Équilibrage auto" ci-dessous pour redistribuer la charge automatiquement.</span>
-                          </li>
-                        )}
-                      </>
-                    );
-                  })()}
-                </ul>
-              </div>
-
-              {/* Additional Statistics */}
-              <div>
-                <p className="text-xs font-medium text-gray-700 mb-1">📈 Statistiques supplémentaires :</p>
-                <ul className="text-xs text-gray-600 space-y-1 ml-4">
-                  {(() => {
-                    // Find cell with max load
-                    let maxCell = {node: '', week: 0, count: 0};
-                    nodes.forEach(nodeCode => {
-                      weeks.forEach(week => {
-                        const count = matrix[nodeCode]?.[week]?.shipment_count || 0;
-                        if (count > maxCell.count) {
-                          maxCell = {node: nodeCode, week, count};
-                        }
-                      });
-                    });
-                    
-                    // Find cells above threshold
-                    const problematicCells: string[] = [];
-                    nodes.forEach(nodeCode => {
-                      weeks.forEach(week => {
-                        const count = matrix[nodeCode]?.[week]?.shipment_count || 0;
-                        if (count >= highThreshold) {
-                          problematicCells.push(`${nodeCode}/W${week}`);
-                        }
-                      });
-                    });
-                    
-                    return (
-                      <>
-                        {maxCell.count > 0 && (
-                          <li className="flex items-start gap-1">
-                            <span className="text-blue-600">•</span>
-                            <span>Cellule avec la charge la plus élevée : {maxCell.node} / S{maxCell.week} ({maxCell.count} expéditions)</span>
-                          </li>
-                        )}
-                        <li className="flex items-start gap-1">
-                          <span className="text-blue-600">•</span>
-                            <span>Cellules nécessitant une attention : {problematicCells.length > 0 ? problematicCells.slice(0, 5).join(', ') + (problematicCells.length > 5 ? ` +${problematicCells.length - 5} de plus` : '') : 'Aucune'}</span>
-                        </li>
-                        <li className="flex items-start gap-1">
-                          <span className="text-blue-600">•</span>
-                            <span>Seuils : Élevé ≥{highThreshold.toFixed(1)}, Saturé ≥{saturatedThreshold.toFixed(1)} expéditions/cellule</span>
-                        </li>
-                        <li className="flex items-start gap-1">
-                          <span className="text-blue-600">•</span>
-                            <span>Référence : {referenceLoad} échantillons/nœud, {deviationPercent.toFixed(0)}% tolérance</span>
-                        </li>
-                      </>
-                    );
-                  })()}
-                </ul>
-              </div>
+          <div className="mt-4 space-y-3">
+            <div>
+              <p className="text-xs font-medium text-gray-700 mb-1">📊 {t('lb2.rec.analysis')}</p>
+              <ul className="text-xs text-gray-700 space-y-1 ml-4">
+                {findings.map((f) => (
+                  <li key={f.code} className="flex items-start gap-1">
+                    <span className={FINDING_BULLET[f.severity]}>•</span>
+                    <span>{t(`lb2.rec.${f.code}`, f.params)}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
+
+            {maxCell.count > 0 && (
+              <div>
+                <p className="text-xs font-medium text-gray-700 mb-1">📈 {t('lb2.rec.stats')}</p>
+                <ul className="text-xs text-gray-600 space-y-1 ml-4">
+                  <li className="flex items-start gap-1">
+                    <span className="text-blue-600">•</span>
+                    <span>{t('lb2.rec.stat_max', { node: maxCell.node, week: maxCell.week, count: maxCell.count })}</span>
+                  </li>
+                  <li className="flex items-start gap-1">
+                    <span className="text-blue-600">•</span>
+                    <span>{t('lb2.rec.stat_thresholds', { high: highThreshold.toFixed(1), saturated: saturatedThreshold.toFixed(1) })}</span>
+                  </li>
+                  <li className="flex items-start gap-1">
+                    <span className="text-blue-600">•</span>
+                    <span>{t('lb2.rec.stat_reference', { reference: referenceLoad, tolerance: deviationPercent.toFixed(0) })}</span>
+                  </li>
+                </ul>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -707,7 +597,7 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
             }`}
           >
             <span>⚖️</span>
-            Auto-Balance {cityName}
+            {t('lb2.auto_balance_city', { city: cityName })}
           </button>
           {!needsBalancing && (
             <div className="invisible group-hover:visible absolute z-10 w-64 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg bottom-full left-0 mb-2">
@@ -733,36 +623,22 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
             />
           </svg>
           <div className="invisible group-hover:visible absolute z-10 w-[480px] p-4 bg-gray-900 text-white text-xs rounded-lg shadow-lg bottom-full left-0 mb-2">
-            <p className="font-semibold mb-2 text-sm">🎯 Algoritmo de Balanceo de Matriz Alícuota</p>
-            
-            <p className="mb-2">
-              <strong>Concepto:</strong> Trata toda la matriz (nodos × semanas) como un espacio único de distribución. Objetivo: que todas las celdas se acerquen al promedio global.
-            </p>
-            
-            <p className="mb-2">
-              <strong>Cálculo del objetivo:</strong><br/>
-              Promedio objetivo = Total shipments / (Nodos × Semanas)<br/>
-              <em>Ejemplo: 305 shipments / (1 nodo × 5 semanas) = 61 por celda</em>
-            </p>
-            
-            <p className="mb-2">
-              <strong>Proceso:</strong>
-            </p>
+            <p className="font-semibold mb-2 text-sm">🎯 {t('lb2.help.title')}</p>
+
+            <p className="mb-2">{t('lb2.help.concept')}</p>
+
+            <p className="mb-1 font-semibold">{t('lb2.help.rules_title')}</p>
             <ol className="list-decimal list-inside space-y-1 mb-2 ml-2">
-              <li>Identifica celdas sobrecargadas (&gt; objetivo × 1.2)</li>
-              <li>Identifica celdas subcargadas (&lt; objetivo × 0.9)</li>
-              <li>Mueve shipments de celdas sobrecargadas a subcargadas</li>
-              <li>Actualiza fecha_programada y node_id en allocation_plan_details</li>
-              <li>Minimiza la desviación estándar de toda la matriz</li>
+              <li>{t('lb2.help.rule1')}</li>
+              <li>{t('lb2.help.rule2')}</li>
+              <li>{t('lb2.help.rule3')}</li>
+              <li>{t('lb2.help.rule4')}</li>
+              <li>{t('lb2.help.rule5')}</li>
+              <li>{t('lb2.help.rule6')}</li>
+              <li>{t('lb2.help.rule7')}</li>
             </ol>
-            
-            <p className="mb-2">
-              <strong>Resultado:</strong> Distribución equitativa que reduce varianza, previene saturación y optimiza la eficiencia del sistema.
-            </p>
-            
-            <p className="text-yellow-300">
-              ⚠️ El preview muestra los cambios propuestos. Debes confirmar para aplicarlos al Allocation Plan.
-            </p>
+
+            <p className="text-yellow-300">⚠️ {t('lb2.help.preview_warning')}</p>
           </div>
         </span>
       </div>
