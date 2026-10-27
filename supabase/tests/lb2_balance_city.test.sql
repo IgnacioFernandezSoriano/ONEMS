@@ -156,7 +156,9 @@ SELECT pg_temp.fail_if(max(n) <> 4 OR min(n) <> 4, 'N1 deberia tener 4 por dia')
   FROM pg_temp.grid('2027-03-08', '2027-03-12') WHERE code = 'N1';
 ROLLBACK;
 
--- Caso 4b: P1 tambien ausente esa semana => no hay ninguna celda valida: no se mueve nada y se avisa.
+-- Caso 4b: P1 tambien ausente esa semana => no hay ninguna celda valida en el periodo: no se mueve nada.
+-- (Spec 2026-10-28, 3.1.3: sin dia valido en el periodo ni en otro mes => se apartan al registro como
+-- no_valid_day, ya no se quedan congeladas con aviso no_valid_cell.)
 BEGIN;
 \ir fixtures/incident_city.sql
 \ir fixtures/no_incident_triggers.sql
@@ -172,12 +174,15 @@ BEGIN
   r := public.rpc_balance_city_v2('c1000000-0000-0000-0000-000000000001', '2027-03-08', '2027-03-12', true);
   PERFORM pg_temp.fail_if((r->>'success')::boolean IS DISTINCT FROM true, 'sin celdas success: ' || r::text);
   PERFORM pg_temp.fail_if((r->>'movements_count')::int <> 0, 'sin celdas no debe mover: ' || r::text);
-  PERFORM pg_temp.fail_if(r->'warnings'->0->>'code' IS DISTINCT FROM 'no_valid_cell', 'aviso code: ' || r::text);
+  PERFORM pg_temp.fail_if(r->'warnings'->0->>'code' IS DISTINCT FROM 'deferred_removed', 'aviso code: ' || r::text);
   PERFORM pg_temp.fail_if((r->'warnings'->0->>'count')::int IS DISTINCT FROM 20, 'aviso count: ' || r::text);
-  PERFORM pg_temp.fail_if(position('N1' IN r->'warnings'->0->>'detail') = 0, 'aviso detail: ' || r::text);
+  PERFORM pg_temp.fail_if(position('no_valid_day=20' IN r->'warnings'->0->>'detail') = 0, 'aviso detail: ' || r::text);
+  PERFORM pg_temp.fail_if((r->'deferred'->'by_reason'->>'no_valid_day')::int IS DISTINCT FROM 20, 'apartadas: ' || r::text);
 END $$;
-SELECT pg_temp.fail_if(count(*) <> 20, 'se movio algo') FROM public.allocation_plan_details
- WHERE origin_node_id = 'b1000000-0000-0000-0000-000000000001' AND fecha_programada = '2027-03-08' AND reassigned_at IS NULL;
+SELECT pg_temp.fail_if(count(*) <> 0, 'quedan en el plan') FROM public.allocation_plan_details;
+SELECT pg_temp.fail_if(count(*) <> 20, 'no estan las 20 en el registro sin mover') FROM public.deferred_samples
+ WHERE reason = 'no_valid_day' AND origin_node_id = 'b1000000-0000-0000-0000-000000000001' AND fecha_programada = '2027-03-08'
+   AND row_snapshot->>'reassigned_at' IS NULL;
 ROLLBACK;
 
 -- ===== Caso 5 (sobrante rotativo): 7 envios, 3 nodos, 1 dia laborable.
@@ -292,7 +297,9 @@ SELECT pg_temp.fail_if(count(DISTINCT fecha_programada) <> 4, 'los otros 4 dias 
   FROM public.allocation_plan_details;
 ROLLBACK;
 
--- Caso 8b: el destino N4 ya no tiene panelista activo => ninguna fecha es valida: los envios se quedan y se avisa.
+-- Caso 8b: el destino N4 ya no tiene panelista activo y C2 no tiene otro nodo valido => no se mueve nada.
+-- (Spec 2026-10-28, 3.1.2: sin destino alternativo en la ciudad destino => se apartan al registro como
+-- dest_no_panelist, ya no se quedan congeladas con aviso no_valid_cell.)
 BEGIN;
 \ir fixtures/incident_city.sql
 \ir fixtures/no_incident_triggers.sql
@@ -304,16 +311,20 @@ DECLARE r jsonb;
 BEGIN
   r := public.rpc_balance_city_v2('c1000000-0000-0000-0000-000000000001', '2027-03-08', '2027-03-12', true);
   PERFORM pg_temp.fail_if((r->>'movements_count')::int <> 0, 'destino sin panelista: no debe mover: ' || r::text);
-  PERFORM pg_temp.fail_if(r->'warnings'->0->>'code' IS DISTINCT FROM 'no_valid_cell'
-                          OR (r->'warnings'->0->>'count')::int <> 6, 'aviso no_valid_cell: ' || r::text);
+  PERFORM pg_temp.fail_if(r->'warnings'->0->>'code' IS DISTINCT FROM 'deferred_removed'
+                          OR (r->'warnings'->0->>'count')::int <> 6, 'aviso deferred_removed: ' || r::text);
+  PERFORM pg_temp.fail_if((r->'deferred'->'by_reason'->>'dest_no_panelist')::int IS DISTINCT FROM 6, 'apartadas: ' || r::text);
 END $$;
+SELECT pg_temp.fail_if(count(*) <> 0, '8b: quedan en el plan') FROM public.allocation_plan_details;
+SELECT pg_temp.fail_if(count(*) <> 6, '8b: no estan las 6 en el registro') FROM public.deferred_samples
+ WHERE reason = 'dest_no_panelist' AND destination_node_id = 'b4000000-0000-0000-0000-000000000004';
 ROLLBACK;
 
--- ===== Caso 9 (I4, envios congelados): 12 pendientes en 3 dias (L 8/3 .. X 10/3/2027) x 3 nodos = 9 celdas.
--- 3 de ellos van a N5 (ciudad C2, sin panelista activo) => no se pueden mover y cuentan como carga FIJA en la
--- celda donde estan (uno en N1-L, N2-M y N3-X). Los 9 movibles estan en N1-L. Resultado esperado: los 3 fijos
--- siguen donde estaban, aviso no_valid_cell con count 3, y la carga final por celda (fijos incluidos) queda con
--- max - min <= 1; matrix_after coincide con las filas reales tras aplicar.
+-- ===== Caso 9: 12 pendientes en 3 dias (L 8/3 .. X 10/3/2027) x 3 nodos = 9 celdas.
+-- 3 de ellos van a N5 (ciudad C2, sin panelista activo). Antes (I4) se congelaban como carga fija; desde la spec
+-- 2026-10-28 (3.1.2) se reasigna su destino a N4 (otro nodo valido de C2) y pasan a ser movibles. Resultado
+-- esperado: los 3 con destino N4 (original N5), sin avisos, y la carga final por celda con max - min <= 1;
+-- matrix_after coincide con las filas reales tras aplicar. La carga fija se prueba ahora en el caso 9b.
 BEGIN;
 \ir fixtures/incident_city.sql
 \ir fixtures/no_incident_triggers.sql
@@ -341,23 +352,61 @@ BEGIN
   INSERT INTO res9 VALUES (r);
   PERFORM pg_temp.fail_if((r->>'success')::boolean IS DISTINCT FROM true, 'congelados success: ' || r::text);
   PERFORM pg_temp.fail_if(p->'matrix_after' IS DISTINCT FROM r->'matrix_after', 'preview y apply difieren: ' || p::text || ' / ' || r::text);
-  PERFORM pg_temp.fail_if(r->'warnings'->0->>'code' IS DISTINCT FROM 'no_valid_cell'
-                          OR (r->'warnings'->0->>'count')::int IS DISTINCT FROM 3, 'aviso congelados: ' || r::text);
+  PERFORM pg_temp.fail_if(jsonb_array_length(r->'warnings') <> 0, 'no deberia haber avisos: ' || r::text);
+  PERFORM pg_temp.fail_if((r->'deferred'->>'reassigned_dest')::int IS DISTINCT FROM 3
+                          OR (r->'deferred'->>'removed')::int IS DISTINCT FROM 0, 'destinos reasignados: ' || r::text);
   PERFORM pg_temp.fail_if((SELECT sum((e->>'load_count')::int) FROM jsonb_array_elements(r->'matrix_after') e) <> 12,
-                          'matrix_after debe sumar 12 (fijos incluidos): ' || r::text);
+                          'matrix_after debe sumar 12: ' || r::text);
 END $$;
-SELECT pg_temp.fail_if(count(*) <> 3, 'los congelados se movieron') FROM public.allocation_plan_details a
- JOIN public.nodes d ON d.id = a.destination_node_id AND d.auto_id = 'N5'
- WHERE a.reassigned_at IS NULL
-   AND (a.origin_node_id, a.fecha_programada) IN (('b1000000-0000-0000-0000-000000000001'::uuid, '2027-03-08'::date),
-                                                  ('b2000000-0000-0000-0000-000000000002'::uuid, '2027-03-09'::date),
-                                                  ('b3000000-0000-0000-0000-000000000003'::uuid, '2027-03-10'::date));
+SELECT pg_temp.fail_if(count(*) <> 3, 'los 3 de N5 deben ir a N4 con traza') FROM public.allocation_plan_details a
+ WHERE a.destination_node_id = 'b4000000-0000-0000-0000-000000000004'
+   AND a.original_destination_node_id = 'b5000000-0000-0000-0000-000000000005'
+   AND a.destination_panelist_id = 'e4000000-0000-0000-0000-000000000004'
+   AND a.reassignment_reason = 'rebalancing' AND a.reassigned_at IS NOT NULL;
+SELECT pg_temp.fail_if(count(*) <> 0, 'quedan destinos en N5') FROM public.allocation_plan_details
+ WHERE destination_node_id = 'b5000000-0000-0000-0000-000000000005';
 SELECT pg_temp.fail_if(max(n) - min(n) > 1, 'reparto con fijos desigual: ' || string_agg(code || ' ' || d || '=' || n, ', '))
   FROM pg_temp.grid('2027-03-08', '2027-03-10');
 SELECT pg_temp.fail_if(count(*) > 0, 'matrix_after no cuadra con las filas: ' || string_agg(g.code || ' ' || g.d || '=' || g.n || '/' || (e->>'load_count'), ', '))
   FROM pg_temp.grid('2027-03-08', '2027-03-10') g
   JOIN res9 ON true
   JOIN LATERAL jsonb_array_elements(res9.r->'matrix_after') e ON e->>'node_code' = g.code AND (e->>'day')::date = g.d
+ WHERE (e->>'load_count')::int <> g.n;
+ROLLBACK;
+
+-- ===== Caso 9b (I4, carga fija antes de objetivos): N1 unico nodo valido (P2, P3 borrados). 2 pendientes
+-- N1 -> N1 el 8/3 (origen = destino: el mes solo tiene celdas del propio destino => se congelan, NO se borran)
+-- y 4 pendientes N1 -> N4 el 8/3; periodo 8..10/3 (3 celdas). Los 2 fijos cuentan en N1-8/3: los 4 movibles van
+-- 2 al 9/3 y 2 al 10/3 (2/2/2). Aviso no_valid_cell 2; matrix_after cuadra con las filas.
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+DELETE FROM public.panelists WHERE id IN ('e2000000-0000-0000-0000-000000000002','e3000000-0000-0000-0000-000000000003');
+INSERT INTO public.allocation_plan_details (id, account_id, plan_id, origin_node_id, destination_node_id, fecha_programada, status)
+SELECT gen_random_uuid(), 'a0000000-0000-0000-0000-000000000001', 'cc000000-0000-0000-0000-000000000001',
+       'b1000000-0000-0000-0000-000000000001', 'b1000000-0000-0000-0000-000000000001', '2027-03-08', 'pending'
+  FROM generate_series(1, 2);
+SELECT pg_temp.mk('N1', '2027-03-08') FROM generate_series(1, 4);
+CREATE TEMP TABLE res9b (r jsonb);
+DO $$
+DECLARE r jsonb;
+BEGIN
+  r := public.rpc_balance_city_v2('c1000000-0000-0000-0000-000000000001', '2027-03-08', '2027-03-10', true);
+  INSERT INTO res9b VALUES (r);
+  PERFORM pg_temp.fail_if(r->'warnings'->0->>'code' IS DISTINCT FROM 'no_valid_cell'
+                          OR (r->'warnings'->0->>'count')::int IS DISTINCT FROM 2, '9b aviso congelados: ' || r::text);
+  PERFORM pg_temp.fail_if((r->'deferred'->>'removed')::int IS DISTINCT FROM 0, '9b no debe borrar: ' || r::text);
+  PERFORM pg_temp.fail_if((r->>'movements_count')::int IS DISTINCT FROM 4, '9b movimientos: ' || r::text);
+END $$;
+SELECT pg_temp.fail_if(count(*) <> 2, '9b los congelados se movieron') FROM public.allocation_plan_details
+ WHERE destination_node_id = 'b1000000-0000-0000-0000-000000000001' AND fecha_programada = '2027-03-08' AND reassigned_at IS NULL;
+SELECT pg_temp.fail_if(max(n) <> 2 OR min(n) <> 2, '9b N1 deberia tener 2 por dia')
+  FROM pg_temp.grid('2027-03-08', '2027-03-10') WHERE code = 'N1';
+SELECT pg_temp.fail_if(count(*) > 0, '9b matrix_after no cuadra')
+  FROM pg_temp.grid('2027-03-08', '2027-03-10') g
+  JOIN res9b ON true
+  JOIN LATERAL jsonb_array_elements(res9b.r->'matrix_after') e ON e->>'node_code' = g.code AND (e->>'day')::date = g.d
  WHERE (e->>'load_count')::int <> g.n;
 ROLLBACK;
 
