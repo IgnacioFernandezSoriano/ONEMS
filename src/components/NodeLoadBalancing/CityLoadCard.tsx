@@ -16,6 +16,8 @@ interface CityLoadCardProps {
   cityName: string;
   cityData: NodeLoadData[];
   onBalance: () => void;
+  /** Extra lock (e.g. a balance is being applied) on top of needsBalancing */
+  balanceDisabled?: boolean;
   dayData?: NodeDayLoad[];
   scale?: LoadScale;
   onScaleChange?: (s: LoadScale) => void;
@@ -30,6 +32,7 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
   cityName,
   cityData,
   onBalance,
+  balanceDisabled = false,
   dayData = [],
   scale = 'week',
   onScaleChange,
@@ -668,7 +671,7 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
         <div className="group relative">
           <button
             onClick={onBalance}
-            disabled={!needsBalancing}
+            disabled={!needsBalancing || balanceDisabled}
             className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
               needsBalancing
                 ? 'bg-blue-600 text-white hover:bg-blue-700 cursor-pointer'

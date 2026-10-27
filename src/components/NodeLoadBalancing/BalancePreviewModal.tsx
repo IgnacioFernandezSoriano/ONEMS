@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import type { BalanceResult, BalanceMovement, MatrixCell } from '../../hooks/useNodeLoadBalancing';
 import { useTranslation } from '../../hooks/useTranslation';
-import { groupMatrixByWeek, isCityFailed, totalsForAllCities } from '../../lib/balanceViews';
+import { cityHasChanges, groupMatrixByWeek, isCityFailed, totalsForAllCities } from '../../lib/balanceViews';
 
 export interface BalanceCityResult {
   cityId: string;
@@ -17,16 +17,15 @@ interface BalancePreviewModalProps {
   results: BalanceCityResult[];
   loading: boolean;
   progress?: { done: number; total: number } | null;
+  /** An apply is running: close, cancel and confirm are locked */
+  applying?: boolean;
   onClose: () => void;
   onConfirm: () => void;
 }
 
 const fmt = (n: number | null | undefined, digits = 1) => (n != null ? n.toFixed(digits) : 'N/A');
 
-/** Algo que aplicar: envios movidos o dias POBOX movidos/creados */
-const hasChanges = (r?: BalanceResult) =>
-  !!r && !r.error && r.success !== false &&
-  ((r.movements_count || 0) > 0 || (r.pobox?.days_moved || 0) > 0 || (r.pobox?.days_created || 0) > 0);
+const hasChanges = cityHasChanges;
 
 export const BalancePreviewModal: React.FC<BalancePreviewModalProps> = ({
   isOpen,
@@ -35,6 +34,7 @@ export const BalancePreviewModal: React.FC<BalancePreviewModalProps> = ({
   results,
   loading,
   progress,
+  applying = false,
   onClose,
   onConfirm,
 }) => {
@@ -59,8 +59,9 @@ export const BalancePreviewModal: React.FC<BalancePreviewModalProps> = ({
             <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
             <button
               onClick={onClose}
+              disabled={applying}
               aria-label={t('common.close')}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
+              className="text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <span className="text-2xl">×</span>
             </button>
@@ -101,13 +102,14 @@ export const BalancePreviewModal: React.FC<BalancePreviewModalProps> = ({
         <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-gray-700 hover:text-gray-900 transition-colors"
+            disabled={applying}
+            className="px-4 py-2 text-gray-700 hover:text-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {t('common.cancel')}
           </button>
           <button
             onClick={onConfirm}
-            disabled={loading || !canApply}
+            disabled={loading || applying || !canApply}
             className="px-6 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
           >
             {loading ? t('nodeLoadBalancing.loading') : t('nodeLoadBalancing.applyBalance')}

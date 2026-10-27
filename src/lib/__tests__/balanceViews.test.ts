@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { totalsForAllCities, groupMatrixByWeek, isCityFailed, type AllCitiesRow } from '../balanceViews'
+import { cityIdsToApply, totalsForAllCities, groupMatrixByWeek, isCityFailed, type AllCitiesRow } from '../balanceViews'
 import type { BalanceResult } from '../../hooks/useNodeLoadBalancing'
 
 const res = (o: Partial<BalanceResult>): BalanceResult => ({
@@ -23,6 +23,19 @@ describe('totalsForAllCities', () => {
     expect(isCityFailed(rows[0])).toBe(false)
     expect(isCityFailed(rows[2])).toBe(true)
     expect(isCityFailed(rows[3])).toBe(true)
+  })
+})
+
+describe('cityIdsToApply', () => {
+  it('solo ciudades no fallidas y con cambios', () => {
+    const rows: AllCitiesRow[] = [
+      { cityId: 'a', cityName: 'A', result: res({ movements_count: 2 }) },
+      { cityId: 'b', cityName: 'B', result: res({ movements_count: 0 }) },
+      { cityId: 'c', cityName: 'C', result: res({ movements_count: 0, pobox: { days_missing: 1, days_moved: 0, days_created: 1, days_uncovered: 0 } }) },
+      { cityId: 'd', cityName: 'D', error: 'x' },
+      { cityId: 'e', cityName: 'E', result: res({ success: false, error: 'bad', movements_count: 5 }) },
+    ]
+    expect(cityIdsToApply(rows)).toEqual(['a', 'c'])
   })
 })
 

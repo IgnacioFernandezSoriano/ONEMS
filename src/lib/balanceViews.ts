@@ -22,6 +22,17 @@ export function isCityFailed(r: AllCitiesRow): boolean {
   return !!r.error || !r.result || r.result.success === false || !!r.result.error
 }
 
+/** Algo que aplicar: envios movidos o dias POBOX movidos/creados */
+export function cityHasChanges(r?: BalanceResult): boolean {
+  return !!r && !r.error && r.success !== false &&
+    ((r.movements_count || 0) > 0 || (r.pobox?.days_moved || 0) > 0 || (r.pobox?.days_created || 0) > 0)
+}
+
+/** Ids exactos a aplicar tras la vista previa: ciudades no fallidas y con cambios. */
+export function cityIdsToApply(rows: AllCitiesRow[]): string[] {
+  return rows.filter((r) => !isCityFailed(r) && cityHasChanges(r.result)).map((r) => r.cityId)
+}
+
 /** Totales de la tabla "todas las ciudades". Las ciudades fallidas no suman. */
 export function totalsForAllCities(rows: AllCitiesRow[]): AllCitiesTotals {
   const t: AllCitiesTotals = {

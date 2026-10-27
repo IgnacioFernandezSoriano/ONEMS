@@ -7,7 +7,7 @@ import { BalancePoliciesPanel } from '../components/NodeLoadBalancing/BalancePol
 import { useBalancePolicies } from '../hooks/useBalancePolicies';
 import { useAccountConfig } from '../hooks/useAccountConfig';
 import { workingDowsFromSchedule, type DatePolicy } from '../lib/workingDays';
-import { isCityFailed } from '../lib/balanceViews';
+import { cityIdsToApply, isCityFailed } from '../lib/balanceViews';
 
 import { useTranslation } from '@/hooks/useTranslation';
 export default function NodeLoadBalancing() {
@@ -114,6 +114,9 @@ export default function NodeLoadBalancing() {
   const [modalState, setModalState] = useState(closedModal);
   // Ignore results of a request whose modal was closed (or replaced) meanwhile
   const requestId = useRef(0);
+  // True for the whole duration of any apply: locks the modal and every balance button
+  const [applying, setApplying] = useState(false);
+  const applyingRef = useRef(false);
 
   // Group load data by city
   const citiesData = loadData.reduce((acc, item) => {
@@ -128,6 +131,7 @@ export default function NodeLoadBalancing() {
   }, {} as { [cityId: string]: { cityName: string; data: typeof loadData } });
 
   const handleBalanceClick = async (cityId: string, cityName: string) => {
+    if (applyingRef.current) return;
     const id = ++requestId.current;
     setModalState({ ...closedModal, isOpen: true, mode: 'city', cityId, cityName, loading: true });
     try {
@@ -142,6 +146,7 @@ export default function NodeLoadBalancing() {
   };
 
   const handleBalanceAll = async () => {
+    if (applyingRef.current) return;
     const id = ++requestId.current;
     setModalState({ ...closedModal, isOpen: true, mode: 'all', loading: true });
     setProgress({ done: 0, total: 0 });
@@ -162,16 +167,32 @@ export default function NodeLoadBalancing() {
   };
 
   const handleConfirmBalance = async () => {
+    if (applyingRef.current) return;
+    applyingRef.current = true;
+    setApplying(true);
+    try {
+      await confirmBalance();
+    } finally {
+      applyingRef.current = false;
+      setApplying(false);
+    }
+  };
+
+  const confirmBalance = async () => {
     if (modalState.mode === 'all') {
       const id = ++requestId.current;
+      // Apply exactly the cities the user saw in the preview (not a fresh pending list)
+      const cityIds = cityIdsToApply(modalState.results);
+      const names = new Map(modalState.results.map((r) => [r.cityId, r.cityName]));
       setModalState((prev) => ({ ...prev, loading: true }));
       setProgress({ done: 0, total: 0 });
       try {
-        const results = await applyAll((done, total) => {
+        const raw = await applyAll((done, total) => {
           if (id === requestId.current) setProgress({ done, total });
-        });
+        }, cityIds);
+        const results = raw.map((r) => ({ ...r, cityName: r.cityName || names.get(r.cityId) || '' }));
         const failed = results.filter(isCityFailed);
-        setModalState(closedModal);
+        if (id === requestId.current) setModalState(closedModal);
         if (failed.length === 0) {
           showNotice('ok', t('lb2.applied_ok'));
         } else {
@@ -184,10 +205,10 @@ export default function NodeLoadBalancing() {
         }
       } catch (err) {
         console.error('[NodeLoadBalancing] Error applying balance to all cities:', err);
-        setModalState(closedModal);
+        if (id === requestId.current) setModalState(closedModal);
         showNotice('error', `${t('lb2.applied_error')} ${errMsg(err)}`);
       } finally {
-        setProgress(null);
+        if (id === requestId.current) setProgress(null);
         await refetch();
       }
       return;
@@ -196,11 +217,11 @@ export default function NodeLoadBalancing() {
     if (!modalState.cityId) return;
     const cityId = modalState.cityId;
     const cityName = modalState.cityName ?? '';
-    ++requestId.current;
+    const id = ++requestId.current;
     setModalState((prev) => ({ ...prev, loading: true }));
     try {
       const result = await applyBalanceV2(cityId);
-      setModalState(closedModal);
+      if (id === requestId.current) setModalState(closedModal);
       if (result.success && !result.error) {
         showNotice('ok', `${cityName}: ${t('lb2.applied_ok')}`);
       } else {
@@ -208,7 +229,7 @@ export default function NodeLoadBalancing() {
       }
     } catch (err) {
       console.error('[NodeLoadBalancing] Error applying balance:', err);
-      setModalState((prev) => ({ ...prev, loading: false }));
+      if (id === requestId.current) setModalState((prev) => ({ ...prev, loading: false }));
       showNotice('error', `${t('lb2.applied_error')} ${errMsg(err)}`);
     } finally {
       await refetch();
@@ -216,6 +237,7 @@ export default function NodeLoadBalancing() {
   };
 
   const handleCloseModal = () => {
+    if (applyingRef.current) return;
     ++requestId.current;
     setProgress(null);
     setModalState(closedModal);
@@ -396,7 +418,7 @@ export default function NodeLoadBalancing() {
         onChangePolicy={handleChangePolicy}
         onBalanceAll={handleBalanceAll}
         balancingAll={progress}
-        disabled={!startDate || !endDate}
+        disabled={!startDate || !endDate || applying}
         balanceAllHint={t('lb2.balance_all_need_dates')}
       />
 
@@ -637,6 +659,7 @@ export default function NodeLoadBalancing() {
               cityName={summary.city_name}
               cityData={citiesData[summary.city_id].data}
               onBalance={() => handleBalanceClick(summary.city_id, summary.city_name)}
+              balanceDisabled={applying}
               dayData={dayDataByCity.get(summary.city_id) ?? noDayData}
               scale={scales[summary.city_id] ?? 'week'}
               onScaleChange={(sc) => setScales((prev) => ({ ...prev, [summary.city_id]: sc }))}
@@ -663,6 +686,7 @@ export default function NodeLoadBalancing() {
         results={modalState.results}
         loading={modalState.loading}
         progress={progress}
+        applying={applying}
         onClose={handleCloseModal}
         onConfirm={handleConfirmBalance}
       />

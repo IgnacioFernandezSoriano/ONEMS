@@ -298,11 +298,16 @@ export const useNodeLoadBalancing = (
     return (data as PendingCity[]) || [];
   };
 
-  const runAll = async (apply: boolean, onProgress: (done: number, total: number) => void) => {
-    const pending = await listPendingCities();
+  const runAll = async (
+    apply: boolean,
+    onProgress: (done: number, total: number) => void,
+    cityIds?: string[]
+  ) => {
+    // With explicit ids (apply exactly what was previewed) the pending list is not consulted
+    const pending = cityIds ? [] : await listPendingCities();
     const names = new Map(pending.map((c) => [c.city_id, c.city_name]));
     const outcomes = await runForCities(
-      pending.map((c) => c.city_id),
+      cityIds ?? pending.map((c) => c.city_id),
       (id) => callBalanceV2(id, apply),
       onProgress
     );
@@ -316,9 +321,9 @@ export const useNodeLoadBalancing = (
 
   const previewAll = (onProgress: (done: number, total: number) => void) => runAll(false, onProgress);
 
-  const applyAll = async (onProgress: (done: number, total: number) => void) => {
+  const applyAll = async (onProgress: (done: number, total: number) => void, cityIds?: string[]) => {
     try {
-      return await runAll(true, onProgress);
+      return await runAll(true, onProgress, cityIds);
     } finally {
       await fetchLoadData();
     }
