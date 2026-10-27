@@ -266,6 +266,23 @@ export const useNodeLoadBalancing = (
     return summaries.sort((a, b) => b.monthly_stddev - a.monthly_stddev);
   };
 
+  // PostgREST devuelve el error como objeto {message, code, details, hint}, no como Error: String(obj) daba
+  // "[object Object]" en la pantalla.
+  const errorText = (err: unknown): string => {
+    if (err instanceof Error) return err.message;
+    if (err && typeof err === 'object') {
+      const e = err as { message?: unknown; code?: unknown; details?: unknown; hint?: unknown };
+      const parts = [e.message, e.details, e.hint].filter((x) => typeof x === 'string' && x) as string[];
+      if (parts.length) return e.code ? `${parts.join(' - ')} (${String(e.code)})` : parts.join(' - ');
+      try {
+        return JSON.stringify(err);
+      } catch {
+        return 'Unknown error';
+      }
+    }
+    return String(err);
+  };
+
   const failedResult = (err: unknown): BalanceResult => ({
     success: false,
     movements_count: 0,
@@ -274,7 +291,7 @@ export const useNodeLoadBalancing = (
     improvement_percentage: 0,
     movements: [],
     message: '',
-    error: err instanceof Error ? err.message : String(err),
+    error: errorText(err),
   });
 
   const callBalanceV2 = async (cityId: string, apply: boolean): Promise<BalanceResult> => {
