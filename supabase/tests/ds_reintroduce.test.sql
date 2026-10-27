@@ -342,3 +342,178 @@ END $$;
 SELECT pg_temp.fail_if(count(*) <> 0, 'c6 quedaron filas compensation') FROM public.allocation_plan_details;
 SELECT pg_temp.fail_if(count(*) <> 2, 'c6 registro cambiado') FROM public.deferred_samples WHERE status = 'pending';
 ROLLBACK;
+
+-- ===== Ronda de correcciones 1 (casos 6d..12). Comprobacion comun: ninguna fila compensation fuera de dia
+-- laborable o de su plan; como mucho 1 compensation por (nodo origen, dia) y por (nodo destino, dia).
+CREATE FUNCTION pg_temp.comp_caps_ok() RETURNS boolean LANGUAGE sql AS $$
+  SELECT NOT EXISTS (SELECT 1 FROM public.allocation_plan_details
+                      WHERE generation_source = 'compensation' AND status <> 'cancelled'
+                      GROUP BY origin_node_id, fecha_programada HAVING count(*) > 1)
+     AND NOT EXISTS (SELECT 1 FROM public.allocation_plan_details
+                      WHERE generation_source = 'compensation' AND status <> 'cancelled'
+                      GROUP BY destination_node_id, fecha_programada HAVING count(*) > 1)
+     AND NOT EXISTS (SELECT 1 FROM public.allocation_plan_details a JOIN public.allocation_plans p ON p.id = a.plan_id
+                      WHERE a.generation_source = 'compensation'
+                        AND (EXTRACT(isodow FROM a.fecha_programada) > 5
+                             OR a.fecha_programada NOT BETWEEN p.start_date AND p.end_date));
+$$;
+
+-- ===== Caso 6d (destino ausente): P4 ausente el 9 y el 10; periodo 8..12/3; 5 anotaciones => ninguna esos dias;
+-- con el tope de recepcion (1 por nodo destino y dia) caben 3 (8, 11, 12) y 2 esperan no_capacity.
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+INSERT INTO public.panelist_unavailability (panelist_id, start_date, end_date, reason, status, account_id)
+VALUES ('e4000000-0000-0000-0000-000000000004', '2027-03-09', '2027-03-10', 'vacation', 'active', 'a0000000-0000-0000-0000-000000000001');
+SELECT pg_temp.mk_ds('N1', 'N4', '2027-03-04') FROM generate_series(1, 5);
+DO $$
+DECLARE r jsonb;
+BEGIN
+  r := public.rpc_balance_city_v2('c1000000-0000-0000-0000-000000000001', '2027-03-08', '2027-03-12', true);
+  PERFORM pg_temp.fail_if((r->'deferred'->>'reintroduced')::int IS DISTINCT FROM 3
+                          OR (r->'deferred'->'waiting_by_reason'->>'no_capacity')::int IS DISTINCT FROM 2, 'c6d: ' || r::text);
+END $$;
+SELECT pg_temp.fail_if(count(*) <> 0, 'c6d compensation en dia de ausencia del destino')
+  FROM public.allocation_plan_details WHERE generation_source = 'compensation' AND fecha_programada IN ('2027-03-09', '2027-03-10');
+SELECT pg_temp.fail_if(NOT pg_temp.comp_caps_ok(), 'c6d topes');
+ROLLBACK;
+
+-- ===== Caso 7 (origen ausente): N1 unico nodo valido, P1 ausente 8 y 9; periodo 8..12; 5 anotaciones => van al
+-- 10, 11 y 12; 2 esperan.
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+DELETE FROM public.panelists WHERE id IN ('e2000000-0000-0000-0000-000000000002','e3000000-0000-0000-0000-000000000003');
+INSERT INTO public.panelist_unavailability (panelist_id, start_date, end_date, reason, status, account_id)
+VALUES ('e1000000-0000-0000-0000-000000000001', '2027-03-08', '2027-03-09', 'vacation', 'active', 'a0000000-0000-0000-0000-000000000001');
+SELECT pg_temp.mk_ds('N1', 'N4', '2027-03-04') FROM generate_series(1, 5);
+DO $$
+DECLARE r jsonb;
+BEGIN
+  r := public.rpc_balance_city_v2('c1000000-0000-0000-0000-000000000001', '2027-03-08', '2027-03-12', true);
+  PERFORM pg_temp.fail_if((r->'deferred'->>'reintroduced')::int IS DISTINCT FROM 3
+                          OR (r->'deferred'->>'waiting')::int IS DISTINCT FROM 2, 'c7: ' || r::text);
+END $$;
+SELECT pg_temp.fail_if(count(*) <> 0, 'c7 compensation en dia de ausencia del origen')
+  FROM public.allocation_plan_details WHERE generation_source = 'compensation' AND fecha_programada IN ('2027-03-08', '2027-03-09');
+SELECT pg_temp.fail_if(NOT pg_temp.comp_caps_ok(), 'c7 topes');
+ROLLBACK;
+
+-- ===== Caso 8 (plan que termina a mitad del periodo): Mar27 termina el 10/3; periodo 8..12; 5 anotaciones =>
+-- nada despues del 10.
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+UPDATE public.allocation_plans SET end_date = '2027-03-10' WHERE id = 'cc000000-0000-0000-0000-000000000001';
+SELECT pg_temp.mk_ds('N1', 'N4', '2027-03-04') FROM generate_series(1, 5);
+DO $$
+DECLARE r jsonb;
+BEGIN
+  r := public.rpc_balance_city_v2('c1000000-0000-0000-0000-000000000001', '2027-03-08', '2027-03-12', true);
+  PERFORM pg_temp.fail_if((r->'deferred'->>'reintroduced')::int IS DISTINCT FROM 3
+                          OR (r->'deferred'->>'waiting')::int IS DISTINCT FROM 2, 'c8: ' || r::text);
+END $$;
+SELECT pg_temp.fail_if(count(*) <> 0, 'c8 compensation despues del fin del plan')
+  FROM public.allocation_plan_details WHERE generation_source = 'compensation' AND fecha_programada > '2027-03-10';
+SELECT pg_temp.fail_if(NOT pg_temp.comp_caps_ok(), 'c8 topes');
+ROLLBACK;
+
+-- ===== Caso 9 (politica semanal): 4 pendientes el 8/3 y 4 anotaciones, periodo 8..19/3 => las 4 se reintroducen
+-- en dias laborables del periodo y del plan, respetando los topes.
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+UPDATE public.cities SET date_policy = 'weekly' WHERE id = 'c1000000-0000-0000-0000-000000000001';
+SELECT pg_temp.mk_to('N1', 'N4', '2027-03-08') FROM generate_series(1, 4);
+SELECT pg_temp.mk_ds('N1', 'N4', '2027-03-04') FROM generate_series(1, 4);
+DO $$
+DECLARE r jsonb;
+BEGIN
+  r := public.rpc_balance_city_v2('c1000000-0000-0000-0000-000000000001', '2027-03-08', '2027-03-19', true);
+  PERFORM pg_temp.fail_if(r->'policy'->>'date_policy' IS DISTINCT FROM 'weekly', 'c9 policy: ' || r::text);
+  PERFORM pg_temp.fail_if((r->'deferred'->>'reintroduced')::int IS DISTINCT FROM 4, 'c9 reintroduced: ' || r::text);
+  PERFORM pg_temp.fail_if(pg_temp.matrix_sum(r, 'matrix_after') <> 8, 'c9 matrix_after: ' || r::text);
+END $$;
+SELECT pg_temp.fail_if(count(*) <> 4, 'c9 compensation en el periodo')
+  FROM public.allocation_plan_details WHERE generation_source = 'compensation' AND fecha_programada BETWEEN '2027-03-08' AND '2027-03-19';
+SELECT pg_temp.fail_if(NOT pg_temp.comp_caps_ok(), 'c9 topes');
+ROLLBACK;
+
+-- ===== Caso 10 (otra cuenta): una anotacion de la cuenta 2 (aunque apunte a C1) nunca se reintroduce ni se toca.
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+INSERT INTO public.deferred_samples (account_id, plan_id, origin_city_id, dest_city_id, origin_node_id, destination_node_id,
+                                     fecha_programada, reason, row_snapshot)
+VALUES ('a0000000-0000-0000-0000-000000000002', 'cc000000-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000001',
+        'c2000000-0000-0000-0000-000000000002', 'b1000000-0000-0000-0000-000000000001', 'b4000000-0000-0000-0000-000000000004',
+        '2027-03-04', 'origin_no_panelist', '{}');
+DO $$
+DECLARE r jsonb;
+BEGIN
+  r := public.rpc_balance_city_v2('c1000000-0000-0000-0000-000000000001', '2027-03-01', '2027-03-31', true);
+  PERFORM pg_temp.fail_if((r->'deferred'->>'reintroduced')::int IS DISTINCT FROM 0
+                          OR (r->'deferred'->>'waiting')::int IS DISTINCT FROM 0, 'c10: ' || r::text);
+END $$;
+SELECT pg_temp.fail_if(count(*) <> 0, 'c10 se inserto algo') FROM public.allocation_plan_details;
+SELECT pg_temp.fail_if(count(*) <> 1, 'c10 la anotacion de la cuenta 2 cambio')
+  FROM public.deferred_samples WHERE status = 'pending' AND waiting_reason IS NULL AND reintroduced_detail_id IS NULL;
+ROLLBACK;
+
+-- ===== Caso 11 (R4, tope total): como el caso 2 (N1 unico, 1 pendiente por dia 8..12, 8 anotaciones). Tras la
+-- primera aplicacion cada (N1, dia) ya tiene su compensation: aplicar otra vez el MISMO periodo no anade nada.
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+DELETE FROM public.panelists WHERE id IN ('e2000000-0000-0000-0000-000000000002','e3000000-0000-0000-0000-000000000003');
+SELECT pg_temp.mk_to('N1', 'N4', g::date) FROM generate_series('2027-03-08'::date, '2027-03-12', interval '1 day') g;
+SELECT pg_temp.mk_ds('N1', 'N4', '2027-03-04') FROM generate_series(1, 8);
+DO $$
+DECLARE r jsonb;
+BEGIN
+  r := public.rpc_balance_city_v2('c1000000-0000-0000-0000-000000000001', '2027-03-08', '2027-03-12', true);
+  PERFORM pg_temp.fail_if((r->'deferred'->>'reintroduced')::int IS DISTINCT FROM 5, 'c11 1a: ' || r::text);
+  r := public.rpc_balance_city_v2('c1000000-0000-0000-0000-000000000001', '2027-03-08', '2027-03-12', false);
+  PERFORM pg_temp.fail_if((r->'deferred'->>'reintroduced')::int IS DISTINCT FROM 0, 'c11 2a preview: ' || r::text);
+  r := public.rpc_balance_city_v2('c1000000-0000-0000-0000-000000000001', '2027-03-08', '2027-03-12', true);
+  PERFORM pg_temp.fail_if((r->'deferred'->>'reintroduced')::int IS DISTINCT FROM 0
+                          OR (r->'deferred'->>'waiting')::int IS DISTINCT FROM 3
+                          OR (r->'deferred'->'waiting_by_reason'->>'no_capacity')::int IS DISTINCT FROM 3, 'c11 2a apply: ' || r::text);
+END $$;
+SELECT pg_temp.fail_if(count(*) <> 10, 'c11 la segunda aplicacion anadio filas: ' || count(*)) FROM public.allocation_plan_details;
+SELECT pg_temp.fail_if(NOT pg_temp.comp_caps_ok(), 'c11 topes');
+ROLLBACK;
+
+-- ===== Caso 12 (R5, tope de recepcion): C1 (N1) y C3 (N6) envian anotaciones al mismo destino N4 en 8..12/3.
+-- Tras balancear C1 (5 reintroducidas, una por dia) N4 ya recibe 1 compensation cada dia: C3 no anade ninguna.
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+INSERT INTO public.cities (id, account_id, region_id, name, code) VALUES
+  ('c3000000-0000-0000-0000-000000000003','a0000000-0000-0000-0000-000000000001','e0000000-0000-0000-0000-000000000001','City3','C3');
+INSERT INTO public.nodes (id, account_id, city_id, auto_id) VALUES
+  ('b6000000-0000-0000-0000-000000000006','a0000000-0000-0000-0000-000000000001','c3000000-0000-0000-0000-000000000003','N6');
+INSERT INTO public.panelists (id, account_id, panelist_code, name, email, mobile, node_id, status, language) VALUES
+  ('e6000000-0000-0000-0000-000000000006','a0000000-0000-0000-0000-000000000001','P6','Pan6','p6@t.l','6',
+   'b6000000-0000-0000-0000-000000000006','active','en');
+SELECT pg_temp.mk_ds('N1', 'N4', '2027-03-04') FROM generate_series(1, 5);
+SELECT pg_temp.mk_ds('N6', 'N4', '2027-03-04') FROM generate_series(1, 5);
+DO $$
+DECLARE r jsonb;
+BEGIN
+  r := public.rpc_balance_city_v2('c1000000-0000-0000-0000-000000000001', '2027-03-08', '2027-03-12', true);
+  PERFORM pg_temp.fail_if((r->'deferred'->>'reintroduced')::int IS DISTINCT FROM 5, 'c12 C1: ' || r::text);
+  r := public.rpc_balance_city_v2('c3000000-0000-0000-0000-000000000003', '2027-03-08', '2027-03-12', true);
+  PERFORM pg_temp.fail_if((r->'deferred'->>'reintroduced')::int IS DISTINCT FROM 0
+                          OR (r->'deferred'->'waiting_by_reason'->>'no_capacity')::int IS DISTINCT FROM 5, 'c12 C3: ' || r::text);
+END $$;
+SELECT pg_temp.fail_if(NOT pg_temp.comp_caps_ok(), 'c12 mas de una compensation por (nodo destino, dia)');
+SELECT pg_temp.fail_if(count(*) <> 5, 'c12 total compensation') FROM public.allocation_plan_details WHERE generation_source = 'compensation';
+ROLLBACK;

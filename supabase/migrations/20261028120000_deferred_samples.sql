@@ -135,11 +135,13 @@ GRANT EXECUTE ON FUNCTION public.rpc_deferred_samples_summary(uuid) TO authentic
 --   * Fase R (tras la equidad, antes de POBOX): las anotaciones 'pending' de esta ciudad origen con plan 'active'
 --     se colocan en un dia laborable del periodo y del plan, sin ausencia de origen ni destino, ruta ciudad->ciudad
 --     (nodo original si es valido ese dia; si no, el menos cargado de la misma ciudad), dia con menos envios del
---     nodo origen, tope 1 envio extra por (nodo origen, dia) sobre lo programado tras la equidad. Las que no caben
---     esperan con waiting_reason (solo se escribe al aplicar).
---   * POBOX: un dia sin envios tras la equidad que queda cubierto por una reintroducida cuenta como
---     days_reintroduced; si sigue sin cubrir y no se puede mover un excedente, se tira del registro (sin tope)
---     antes de crear una muestra 'pobox'.
+--     nodo origen. Topes TOTALES (no por ejecucion): como mucho 1 fila 'compensation' por (nodo origen, dia) y 1
+--     por (nodo destino, dia), contando las que ya existen. Las que no caben esperan con waiting_reason (solo se
+--     escribe al aplicar).
+--   * POBOX: los dias sin envios tras la equidad que una anotacion puede servir ya los cubre la fase R (que
+--     prefiere los dias vacios de la ciudad); POBOX los informa como days_reintroduced (paso 0) y solo despues
+--     mueve excedentes o crea muestras 'pobox'. (Un paso POBOX propio "tirar del registro" seria inalcanzable
+--     tras la fase R: cualquier anotacion que pudiera servir ese dia ya la habria colocado la fase R.)
 --   * Al aplicar: INSERT de filas 'compensation' + UPDATE del registro a 'reintroduced' con recuento exacto.
 CREATE OR REPLACE FUNCTION public.rpc_balance_city_v2(
   p_city_id uuid, p_start_date date, p_end_date date, p_apply_changes boolean DEFAULT false)
@@ -199,13 +201,11 @@ DECLARE
   v_def_bad        text;
   -- Reintroduccion (fase R y POBOX)
   v_rc             record;
-  v_rdst           record;
   v_rc_any         boolean := false;   -- la ciudad tiene anotaciones pendientes (existe lb2_rcand)
-  v_rc_built       boolean := false;   -- estructuras de la fase R creadas (hay candidatas colocables)
   v_r_onode        uuid;
+  v_r_dnode        uuid;
   v_r_day          date;
   v_r_cell         integer;
-  v_r_pull         boolean;
   v_reint          integer := 0;
   v_reint_ins      integer := 0;
   v_reint_upd      integer := 0;
@@ -256,7 +256,7 @@ BEGIN
                        pg_temp.lb2_dabsent, pg_temp.lb2_dload, pg_temp.lb2_sdabs,
                        pg_temp.lb2_alt, pg_temp.lb2_altload, pg_temp.lb2_altabs, pg_temp.lb2_defer, pg_temp.lb2_hz,
                        pg_temp.lb2_reint, pg_temp.lb2_rcand, pg_temp.lb2_rload, pg_temp.lb2_rday,
-                       pg_temp.lb2_rdest, pg_temp.lb2_rdabs, pg_temp.lb2_rdload, pg_temp.lb2_rdday;
+                       pg_temp.lb2_rdest, pg_temp.lb2_rdslot;
 
   -- ===== 1-2. Nodos de la ciudad (todos, para codigos) y validez (activo + panelista activo).
   CREATE TEMP TABLE pg_temp.lb2_nodes (
@@ -784,18 +784,18 @@ BEGIN
   -- POBOX. Candidatas: anotaciones 'pending' cuya ciudad origen es esta. Cada una se coloca en un hueco valido:
   --   * dia laborable de la cuenta en [v_from, fin] y en las fechas de su plan (plan 'active');
   --   * nodo origen: el original si es valido y no esta ausente ese dia; si no, el menos cargado de la ciudad;
-  --   * nodo destino: el original si es valido y no esta ausente ese dia; si no, el de menos recepciones de la
-  --     ciudad destino de la anotacion (la ruta ciudad->ciudad no cambia); siempre distinto del nodo origen;
-  --   * dia con menos envios del nodo origen (empate: menos envios de la ciudad, fecha); tope: como maximo 1
-  --     envio extra por (nodo origen, dia) sobre lo programado tras la equidad.
+  --   * nodo destino: el original si es valido y no esta ausente ese dia; si no, el de menos recepciones ese dia
+  --     de la ciudad destino de la anotacion (la ruta ciudad->ciudad no cambia); siempre distinto del nodo origen;
+  --   * dia con menos envios del nodo origen (empate: menos recepciones del destino ese dia, menos envios de la
+  --     ciudad, fecha); topes TOTALES: como maximo 1 fila 'compensation' por (nodo origen, dia) y 1 por (nodo
+  --     destino, dia), contando las que ya existen en el plan (repetir el balanceo no las apila).
   -- Las que no caben esperan con un motivo (plan_inactive, outside_period, no_origin_panelist,
   -- no_dest_panelist, no_capacity) que solo se escribe al aplicar. Las anotaciones apartadas en ESTA ejecucion
   -- (fase 0) aun no estan en el registro: no se reintroducen hasta el siguiente balanceo.
   -- (Sin indices: pocas filas; cada objeto temporal cuesta tiempo de catalogo en cada llamada.)
   CREATE TEMP TABLE pg_temp.lb2_reint (
     id uuid NOT NULL, ds_id uuid NOT NULL, plan_id uuid, o_node uuid, d_node uuid, d date,
-    o_pid uuid, o_pname text, d_pid uuid, d_pname text, ds_o_node uuid, ds_d_node uuid, cell_id integer,
-    via_pobox boolean NOT NULL DEFAULT false
+    o_pid uuid, o_pname text, d_pid uuid, d_pname text, ds_o_node uuid, ds_d_node uuid, cell_id integer
   ) ON COMMIT DROP;
 
   -- Al aplicar, las anotaciones de la ciudad se bloquean antes de leerlas (ademas del candado por ciudad).
@@ -828,9 +828,9 @@ BEGIN
     END IF;
 
     IF EXISTS (SELECT 1 FROM pg_temp.lb2_rcand WHERE waiting IS NULL) THEN
-      v_rc_built := true;
       -- Rejilla (nodo origen valido, dia laborable sin ausencia) con la carga tras la equidad. cell_id = celda de la
-      -- matriz donde cuenta (diaria: la del dia; semanal: la del tramo).
+      -- matriz donde cuenta (diaria: la del dia; semanal: la del tramo). Politica semanal: la reintroducida
+      -- conserva su dia real (no se lleva al primer dia del tramo; la spec no lo fija) y cuenta en su tramo.
       CREATE TEMP TABLE pg_temp.lb2_rload (
         node_id uuid, d date, vrank integer, cell_id integer,
         base integer NOT NULL DEFAULT 0, added integer NOT NULL DEFAULT 0
@@ -849,15 +849,19 @@ BEGIN
         SELECT c.node_id, c.cell_date, c.valid_rank, c.cell_id FROM pg_temp.lb2_cells c;
       END IF;
       -- Envios no cancelados con origen en la ciudad tras la equidad: los del periodo en su nueva celda (los
-      -- congelados donde estan) y el resto (no pendientes) donde estan; las apartadas no cuentan. Una sola
-      -- sentencia: carga por (nodo, dia) en lb2_rload.base y carga de la ciudad por dia en lb2_rday.
+      -- congelados donde estan) y el resto (no pendientes) donde estan; las apartadas no cuentan. Tope TOTAL
+      -- (no por ejecucion): 'added' parte de las filas 'compensation' que YA hay en ese (nodo, dia) y 'base' cuenta
+      -- el resto; asi repetir el balanceo sobre el mismo periodo no apila mas de 1 compensation por (nodo, dia).
+      -- Una sola sentencia: carga por (nodo, dia) en lb2_rload y carga de la ciudad por dia en lb2_rday.
       CREATE TEMP TABLE pg_temp.lb2_rday (d date NOT NULL, n integer NOT NULL DEFAULT 0) ON COMMIT DROP;
       WITH src AS (
-        SELECT COALESCE(c.node_id, s.cur_node) AS node_id, COALESCE(c.cell_date, s.fecha) AS d
+        SELECT COALESCE(c.node_id, s.cur_node) AS node_id, COALESCE(c.cell_date, s.fecha) AS d,
+               (a.generation_source = 'compensation') AS comp
           FROM pg_temp.lb2_ship s
+          JOIN public.allocation_plan_details a ON a.id = s.id
           LEFT JOIN pg_temp.lb2_cells c ON c.cell_id = s.new_cell AND NOT s.frozen
         UNION ALL
-        SELECT a.origin_node_id, a.fecha_programada
+        SELECT a.origin_node_id, a.fecha_programada, (a.generation_source = 'compensation')
           FROM public.allocation_plan_details a
           JOIN pg_temp.lb2_nodes n ON n.node_id = a.origin_node_id
          WHERE a.account_id = v_account_id AND a.status <> 'cancelled'
@@ -865,8 +869,10 @@ BEGIN
            AND NOT EXISTS (SELECT 1 FROM pg_temp.lb2_ship s WHERE s.id = a.id)
            AND NOT EXISTS (SELECT 1 FROM pg_temp.lb2_defer x WHERE x.id = a.id)),
       upd AS (
-        UPDATE pg_temp.lb2_rload g SET base = x.n
-          FROM (SELECT node_id, d, count(*)::int AS n FROM src GROUP BY node_id, d) x
+        UPDATE pg_temp.lb2_rload g SET base = x.nb, added = x.nc
+          FROM (SELECT node_id, d, (count(*) FILTER (WHERE NOT comp))::int AS nb,
+                       (count(*) FILTER (WHERE comp))::int AS nc
+                  FROM src GROUP BY node_id, d) x
          WHERE x.node_id = g.node_id AND x.d = g.d
         RETURNING 1)
       INSERT INTO pg_temp.lb2_rday (d, n)
@@ -886,69 +892,81 @@ BEGIN
                        ORDER BY p.created_at, p.id LIMIT 1) pan ON true
        WHERE n.account_id = v_account_id AND n.status = 'active'
          AND n.city_id IN (SELECT DISTINCT c.dest_city FROM pg_temp.lb2_rcand c WHERE c.waiting IS NULL);
-      CREATE TEMP TABLE pg_temp.lb2_rdabs (node_id uuid, d date) ON COMMIT DROP;
-      INSERT INTO pg_temp.lb2_rdabs
-      SELECT DISTINCT p.node_id, dd.d
-        FROM public.panelist_unavailability u
-        JOIN public.panelists p ON p.id = u.panelist_id AND p.account_id = v_account_id AND p.status = 'active'
-        JOIN pg_temp.lb2_rdest t ON t.node_id = p.node_id
-        JOIN pg_temp.lb2_days dd ON dd.d BETWEEN u.start_date AND u.end_date
-       WHERE u.account_id = v_account_id AND u.status = 'active';
-      -- Destinos disponibles por (ciudad destino, dia): n nodos; one_node = uno de ellos (si n = 1, el unico).
-      CREATE TEMP TABLE pg_temp.lb2_rdday (city_id uuid, d date, n integer, one_node uuid)
-        ON COMMIT DROP;
-      INSERT INTO pg_temp.lb2_rdday
-      SELECT t.city_id, dd.d, count(*)::int, (array_agg(t.node_id))[1]
+      -- Huecos de destino: (nodo destino valido, dia laborable del periodo sin ausencia). recv = recepciones no
+      -- canceladas ese dia (las de esta ciudad en su dia tras la equidad); comp = de ellas, 'compensation' (de
+      -- cualquier ciudad origen). Tope TOTAL de recepcion: como mucho 1 compensation por (nodo destino, dia).
+      CREATE TEMP TABLE pg_temp.lb2_rdslot (
+        city_id uuid, node_id uuid, node_code text, d date,
+        recv integer NOT NULL DEFAULT 0, comp integer NOT NULL DEFAULT 0
+      ) ON COMMIT DROP;
+      INSERT INTO pg_temp.lb2_rdslot (city_id, node_id, node_code, d)
+      SELECT t.city_id, t.node_id, t.node_code, dd.d
         FROM pg_temp.lb2_rdest t CROSS JOIN pg_temp.lb2_days dd
-       WHERE NOT EXISTS (SELECT 1 FROM pg_temp.lb2_rdabs x WHERE x.node_id = t.node_id AND x.d = dd.d)
-       GROUP BY t.city_id, dd.d;
-      CREATE TEMP TABLE pg_temp.lb2_rdload (node_id uuid, d date, n integer) ON COMMIT DROP;
-      INSERT INTO pg_temp.lb2_rdload
-      SELECT a.destination_node_id, a.fecha_programada, count(*)::int
-        FROM public.allocation_plan_details a
-        JOIN pg_temp.lb2_rdest t ON t.node_id = a.destination_node_id
-       WHERE a.account_id = v_account_id AND a.status <> 'cancelled'
-         AND a.fecha_programada BETWEEN date_trunc('week', v_from)::date AND p_end_date + 6
-         AND NOT EXISTS (SELECT 1 FROM pg_temp.lb2_defer x WHERE x.id = a.id)
-       GROUP BY a.destination_node_id, a.fecha_programada;
+       WHERE NOT EXISTS (SELECT 1 FROM public.panelist_unavailability u
+                           JOIN public.panelists p ON p.id = u.panelist_id AND p.account_id = v_account_id AND p.status = 'active'
+                          WHERE p.node_id = t.node_id AND u.account_id = v_account_id AND u.status = 'active'
+                            AND dd.d BETWEEN u.start_date AND u.end_date);
+      WITH rc AS (
+        SELECT s.dest_node AS node_id, COALESCE(c.cell_date, s.fecha) AS d, (a.generation_source = 'compensation') AS comp
+          FROM pg_temp.lb2_ship s
+          JOIN public.allocation_plan_details a ON a.id = s.id
+          LEFT JOIN pg_temp.lb2_cells c ON c.cell_id = s.new_cell AND NOT s.frozen
+        UNION ALL
+        SELECT a.destination_node_id, a.fecha_programada, (a.generation_source = 'compensation')
+          FROM public.allocation_plan_details a
+         WHERE a.account_id = v_account_id AND a.status <> 'cancelled'
+           AND a.destination_node_id IN (SELECT t.node_id FROM pg_temp.lb2_rdest t)
+           AND a.fecha_programada BETWEEN v_from AND p_end_date
+           AND NOT EXISTS (SELECT 1 FROM pg_temp.lb2_ship s WHERE s.id = a.id)
+           AND NOT EXISTS (SELECT 1 FROM pg_temp.lb2_defer x WHERE x.id = a.id))
+      UPDATE pg_temp.lb2_rdslot r SET recv = x.n, comp = x.nc
+        FROM (SELECT node_id, d, count(*)::int AS n, (count(*) FILTER (WHERE comp))::int AS nc
+                FROM rc GROUP BY node_id, d) x
+       WHERE x.node_id = r.node_id AND x.d = r.d;
+      -- Estadisticas para que el planificador elija bien las uniones de la busqueda por candidata.
+      ANALYZE pg_temp.lb2_rload;
+      ANALYZE pg_temp.lb2_rdslot;
+      ANALYZE pg_temp.lb2_rday;
 
       -- Una a una (orden: fecha original, alta) para que la carga de las ya colocadas cuente en las siguientes.
+      -- Se elige (nodo origen, dia, nodo destino) a la vez:
+      --   * origen: el original si ese dia es valido; si no, cualquier nodo valido de la ciudad ese dia;
+      --   * destino: el original si ese dia es valido (y distinto del origen); si no, otro de la ciudad destino;
+      --   * topes totales: 0 compensation previas en (origen, dia) y en (destino, dia);
+      --   * orden: menos envios del nodo origen ese dia, menos recepciones del destino ese dia, menos envios de la
+      --     ciudad ese dia (prefiere los dias vacios), fecha.
       FOR v_rc IN
         SELECT c.ds_id, c.plan_id, c.o_node, c.d_node, c.dest_city, c.ps, c.pe
           FROM pg_temp.lb2_rcand c WHERE c.waiting IS NULL ORDER BY c.ord
       LOOP
-        SELECT g.node_id, g.d, g.cell_id INTO v_r_onode, v_r_day, v_r_cell
+        SELECT g.node_id, g.d, g.cell_id, t.node_id INTO v_r_onode, v_r_day, v_r_cell, v_r_dnode
           FROM pg_temp.lb2_rload g
           JOIN pg_temp.lb2_rday y ON y.d = g.d
-          -- algun destino de la ciudad destino disponible ese dia y distinto del nodo origen
-          JOIN pg_temp.lb2_rdday r ON r.city_id = v_rc.dest_city AND r.d = g.d AND (r.n > 1 OR r.one_node <> g.node_id)
+          JOIN pg_temp.lb2_rdslot t ON t.city_id = v_rc.dest_city AND t.d = g.d AND t.node_id <> g.node_id
+          -- el nodo origen / destino original, si ese dia es valido (si lo es, solo se usa el original)
+          LEFT JOIN pg_temp.lb2_rload go ON go.node_id = v_rc.o_node AND go.d = g.d
+          LEFT JOIN pg_temp.lb2_rdslot td ON td.node_id = v_rc.d_node AND td.d = g.d AND td.node_id <> g.node_id
          WHERE g.d BETWEEN v_rc.ps AND v_rc.pe
-           AND g.added = 0                                       -- tope: 1 extra por (nodo, dia)
-           AND (g.node_id = v_rc.o_node                          -- el original si ese dia es valido
-                OR NOT EXISTS (SELECT 1 FROM pg_temp.lb2_rload o WHERE o.node_id = v_rc.o_node AND o.d = g.d))
-         ORDER BY g.base + g.added, y.n, g.d, g.vrank
+           AND g.added = 0                                       -- tope origen: 1 compensation por (nodo, dia)
+           AND t.comp = 0                                        -- tope destino: 1 compensation por (nodo, dia)
+           AND (g.node_id = v_rc.o_node OR go.node_id IS NULL)
+           AND (t.node_id = v_rc.d_node OR td.node_id IS NULL)
+         ORDER BY g.base + g.added, t.recv, y.n, g.d, g.vrank, t.node_code, t.node_id
          LIMIT 1;
-        CONTINUE WHEN NOT FOUND;
-        v_wk := date_trunc('week', v_r_day)::date;
-        SELECT t.node_id, t.panelist_id, t.panelist_name INTO v_rdst
-          FROM pg_temp.lb2_rdest t
-         WHERE t.city_id = v_rc.dest_city AND t.node_id <> v_r_onode
-           AND NOT EXISTS (SELECT 1 FROM pg_temp.lb2_rdabs x WHERE x.node_id = t.node_id AND x.d = v_r_day)
-         ORDER BY (t.node_id <> v_rc.d_node),
-                  (SELECT COALESCE(sum(l.n), 0) FROM pg_temp.lb2_rdload l
-                    WHERE l.node_id = t.node_id AND l.d BETWEEN v_wk AND v_wk + 6),
-                  (SELECT COALESCE(sum(l.n), 0) FROM pg_temp.lb2_rdload l
-                    WHERE l.node_id = t.node_id AND l.d BETWEEN v_from AND p_end_date),
-                  t.node_code, t.node_id
-         LIMIT 1;
+        IF NOT FOUND THEN
+          -- Sin ningun (nodo origen, dia) con hueco: las demas tampoco caben.
+          EXIT WHEN NOT EXISTS (SELECT 1 FROM pg_temp.lb2_rload WHERE added = 0);
+          CONTINUE;
+        END IF;
         INSERT INTO pg_temp.lb2_reint (id, ds_id, plan_id, o_node, d_node, d, o_pid, o_pname, d_pid, d_pname,
                                        ds_o_node, ds_d_node, cell_id)
-        SELECT gen_random_uuid(), v_rc.ds_id, v_rc.plan_id, v_r_onode, v_rdst.node_id, v_r_day, n.panelist_id,
-               n.panelist_name, v_rdst.panelist_id, v_rdst.panelist_name, v_rc.o_node, v_rc.d_node, v_r_cell
-          FROM pg_temp.lb2_nodes n WHERE n.node_id = v_r_onode;
+        SELECT gen_random_uuid(), v_rc.ds_id, v_rc.plan_id, v_r_onode, v_r_dnode, v_r_day, n.panelist_id,
+               n.panelist_name, t.panelist_id, t.panelist_name, v_rc.o_node, v_rc.d_node, v_r_cell
+          FROM pg_temp.lb2_nodes n, pg_temp.lb2_rdest t
+         WHERE n.node_id = v_r_onode AND t.node_id = v_r_dnode;
         UPDATE pg_temp.lb2_rload SET added = added + 1 WHERE node_id = v_r_onode AND d = v_r_day;
         UPDATE pg_temp.lb2_rday SET n = n + 1 WHERE d = v_r_day;
-        INSERT INTO pg_temp.lb2_rdload VALUES (v_rdst.node_id, v_r_day, 1);
+        UPDATE pg_temp.lb2_rdslot SET recv = recv + 1, comp = comp + 1 WHERE node_id = v_r_dnode AND d = v_r_day;
       END LOOP;
       UPDATE pg_temp.lb2_rcand c SET placed = true WHERE c.ds_id IN (SELECT r.ds_id FROM pg_temp.lb2_reint r);
 
@@ -958,8 +976,8 @@ BEGIN
                WHEN NOT EXISTS (SELECT 1 FROM pg_temp.lb2_rload g WHERE g.d BETWEEN c.ps AND c.pe)
                  THEN 'no_origin_panelist'
                WHEN NOT EXISTS (SELECT 1 FROM pg_temp.lb2_rload g
-                                  JOIN pg_temp.lb2_rdday r ON r.city_id = c.dest_city AND r.d = g.d
-                                                          AND (r.n > 1 OR r.one_node <> g.node_id)
+                                  JOIN pg_temp.lb2_rdslot t ON t.city_id = c.dest_city AND t.d = g.d
+                                                           AND t.node_id <> g.node_id
                                  WHERE g.d BETWEEN c.ps AND c.pe)
                  THEN 'no_dest_panelist'
                ELSE 'no_capacity' END
@@ -980,7 +998,7 @@ BEGIN
     CREATE TEMP TABLE pg_temp.lb2_pb (
       id uuid PRIMARY KEY, node_id uuid, d date, movable boolean, plan_start date, plan_end date,
       dest_node uuid, dest_bad boolean NOT NULL DEFAULT false,
-      reint boolean NOT NULL DEFAULT false   -- muestra reintroducida en esta ejecucion (fase R o tirando del registro)
+      reint boolean NOT NULL DEFAULT false   -- muestra reintroducida en esta ejecucion (fase R)
     ) ON COMMIT DROP;
     INSERT INTO pg_temp.lb2_pb
     SELECT s.id, COALESCE(c.node_id, s.cur_node), COALESCE(c.cell_date, s.fecha), NOT s.frozen, p.start_date, p.end_date,
@@ -1072,7 +1090,8 @@ BEGIN
       v_wk := date_trunc('week', v_day)::date;
 
       -- (0) Ya cubierto por una muestra reintroducida en la fase R (que prefiere los dias vacios de la ciudad):
-      -- el dia se cubre compensando la deuda, sin mover ni crear (spec 3.2 bis).
+      -- el dia se cubre compensando la deuda, sin mover ni crear (spec 3.2 bis). Es la unica via por la que POBOX
+      -- usa el registro: una anotacion que pudiera servir un dia vacio ya la ha colocado la fase R.
       IF EXISTS (SELECT 1 FROM pg_temp.lb2_pb b WHERE b.d = v_day AND b.reint) THEN
         v_pb_reint := v_pb_reint + 1;
         CONTINUE;
@@ -1095,58 +1114,6 @@ BEGIN
         UPDATE pg_temp.lb2_ship SET new_cell = v_mv_cell, pobox_move = true WHERE id = v_mv_id;
         v_pb_moved := v_pb_moved + 1;
         CONTINUE;
-      END IF;
-
-      -- (a bis) Tirar del registro (spec 3.2 bis): antes de crear, una anotacion pendiente no colocada de esta
-      -- ciudad cuyo plan activo cubre el dia, con las mismas reglas de nodos que la fase R; el dia es el dia sin
-      -- cubrir y no se aplica el tope (la ciudad no tiene ningun envio ese dia).
-      IF v_rc_built THEN
-        v_r_pull := false;
-        FOR v_rc IN
-          SELECT c.ds_id, c.plan_id, c.o_node, c.d_node, c.dest_city
-            FROM pg_temp.lb2_rcand c
-           WHERE NOT c.placed AND c.plan_ok AND v_day BETWEEN c.ps AND c.pe
-           ORDER BY c.ord
-        LOOP
-          SELECT g.node_id, g.cell_id INTO v_r_onode, v_r_cell
-            FROM pg_temp.lb2_rload g
-           WHERE g.d = v_day
-             AND (g.node_id = v_rc.o_node
-                  OR NOT EXISTS (SELECT 1 FROM pg_temp.lb2_rload o WHERE o.node_id = v_rc.o_node AND o.d = v_day))
-           ORDER BY g.base + g.added, g.vrank
-           LIMIT 1;
-          CONTINUE WHEN NOT FOUND;
-          SELECT t.node_id, t.panelist_id, t.panelist_name INTO v_rdst
-            FROM pg_temp.lb2_rdest t
-           WHERE t.city_id = v_rc.dest_city AND t.node_id <> v_r_onode
-             AND NOT EXISTS (SELECT 1 FROM pg_temp.lb2_rdabs x WHERE x.node_id = t.node_id AND x.d = v_day)
-           ORDER BY (t.node_id <> v_rc.d_node),
-                    (SELECT COALESCE(sum(l.n), 0) FROM pg_temp.lb2_rdload l
-                      WHERE l.node_id = t.node_id AND l.d BETWEEN v_wk AND v_wk + 6),
-                    (SELECT COALESCE(sum(l.n), 0) FROM pg_temp.lb2_rdload l
-                      WHERE l.node_id = t.node_id AND l.d BETWEEN v_from AND p_end_date),
-                    t.node_code, t.node_id
-           LIMIT 1;
-          CONTINUE WHEN NOT FOUND;
-          v_new_id := gen_random_uuid();
-          INSERT INTO pg_temp.lb2_reint (id, ds_id, plan_id, o_node, d_node, d, o_pid, o_pname, d_pid, d_pname,
-                                         ds_o_node, ds_d_node, cell_id, via_pobox)
-          SELECT v_new_id, v_rc.ds_id, v_rc.plan_id, v_r_onode, v_rdst.node_id, v_day, n.panelist_id,
-                 n.panelist_name, v_rdst.panelist_id, v_rdst.panelist_name, v_rc.o_node, v_rc.d_node, v_r_cell, true
-            FROM pg_temp.lb2_nodes n WHERE n.node_id = v_r_onode;
-          UPDATE pg_temp.lb2_rload SET added = added + 1 WHERE node_id = v_r_onode AND d = v_day;
-          INSERT INTO pg_temp.lb2_rdload VALUES (v_rdst.node_id, v_day, 1);
-          UPDATE pg_temp.lb2_rcand SET placed = true, waiting = NULL WHERE ds_id = v_rc.ds_id;
-          INSERT INTO pg_temp.lb2_pb (id, node_id, d, movable, dest_node, reint)
-          VALUES (v_new_id, v_r_onode, v_day, false, v_rdst.node_id, true);
-          INSERT INTO pg_temp.lb2_dload VALUES (v_rdst.node_id, v_day, 1);
-          v_r_pull := true;
-          EXIT;
-        END LOOP;
-        IF v_r_pull THEN
-          v_pb_reint := v_pb_reint + 1;
-          CONTINUE;
-        END IF;
       END IF;
 
       -- (b) Crear. Plan menos avanzado que cubre el dia (empate: fin mas lejano).
@@ -1440,7 +1407,7 @@ BEGIN
                        pg_temp.lb2_dabsent, pg_temp.lb2_dload, pg_temp.lb2_sdabs,
                        pg_temp.lb2_alt, pg_temp.lb2_altload, pg_temp.lb2_altabs, pg_temp.lb2_defer, pg_temp.lb2_hz,
                        pg_temp.lb2_reint, pg_temp.lb2_rcand, pg_temp.lb2_rload, pg_temp.lb2_rday,
-                       pg_temp.lb2_rdest, pg_temp.lb2_rdabs, pg_temp.lb2_rdload, pg_temp.lb2_rdday;
+                       pg_temp.lb2_rdest, pg_temp.lb2_rdslot;
 
   RETURN jsonb_build_object('success', true,
     'movements_count', v_movements_count,
@@ -1452,11 +1419,11 @@ BEGIN
     'warnings', COALESCE(v_warnings, '[]'::jsonb),
     'policy', jsonb_build_object('date_policy', v_date_policy, 'pobox_enabled', v_pobox),
     -- days_missing = dias sin envios tras la equidad; se cubren moviendo (days_moved), reintroduciendo anotadas
-    -- (days_reintroduced: fase R o tirando del registro), creando (days_created) o quedan sin cubrir.
+    -- (days_reintroduced: cubiertos por la fase R), creando (days_created) o quedan sin cubrir.
     'pobox', jsonb_build_object('days_missing', v_pb_missing, 'days_moved', v_pb_moved,
                                 'days_created', v_pb_created, 'days_uncovered', v_pb_uncovered,
                                 'days_reintroduced', v_pb_reint),
-    -- reintroduced = anotaciones reintroducidas en esta ejecucion (fase R + POBOX); waiting = anotaciones pendientes
+    -- reintroduced = anotaciones reintroducidas en esta ejecucion (fase R); waiting = anotaciones pendientes
     -- de la ciudad origen tras esta ejecucion (en la vista previa, incluidas las que se apartarian);
     -- waiting_by_reason = motivo de las anotaciones previas que siguen esperando.
     'deferred', jsonb_build_object('removed', v_def_removed, 'reassigned_dest', v_def_reassigned,
