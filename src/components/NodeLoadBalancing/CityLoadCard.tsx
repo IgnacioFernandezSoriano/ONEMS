@@ -244,7 +244,7 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
                     <th className="sticky left-0 z-10 bg-white px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                      Nœud
+                      {t('common.node')}
                     </th>
                     {dayView.columns.map((c) => (
                       <th
@@ -265,7 +265,7 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
                       <td className="sticky left-0 z-10 bg-white px-4 py-2">
                         <div className="flex flex-col">
                           <span className="font-medium text-gray-900">{nodeCode}</span>
-                          <span className="text-xs text-gray-500">{panelist || 'No panelist'}</span>
+                          <span className="text-xs text-gray-500">{panelist || t('common.no_panelist')}</span>
                         </div>
                       </td>
                       {dayView.columns.map((c) => {
@@ -316,12 +316,12 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
             <table className="w-full text-sm">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nœud</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('common.node')}</th>
                   {monthView.months.map((m) => (
                     <th key={m} className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">{m}</th>
                   ))}
                   <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
-                    Moyenne mensuelle
+                    {t('nodeloadbalancing.monthly_avg')}
                   </th>
                 </tr>
               </thead>
@@ -331,7 +331,7 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
                     <td className="px-4 py-3">
                       <div className="flex flex-col">
                         <span className="font-medium text-gray-900">{nodeCode}</span>
-                        <span className="text-xs text-gray-500">{panelist || 'No panelist'}</span>
+                        <span className="text-xs text-gray-500">{panelist || t('common.no_panelist')}</span>
                       </div>
                     </td>
                     {monthView.months.map((m) => (
@@ -345,7 +345,7 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
                   </tr>
                 ))}
                 <tr className="bg-gray-50 font-semibold border-t-2 border-gray-300">
-                  <td className="px-4 py-3 text-gray-900">Total</td>
+                  <td className="px-4 py-3 text-gray-900">{t('common.total')}</td>
                   {monthView.months.map((m) => (
                     <td key={m} className="px-4 py-3 text-center text-gray-900">{monthView.monthTotals[m] ?? 0}</td>
                   ))}
