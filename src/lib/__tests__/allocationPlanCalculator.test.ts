@@ -140,6 +140,29 @@ describe('generateAllocationPlan', () => {
     expect(entries.filter(e => e.destinationNodeId === 'B1' && keyOf(e) === '2027-03-03')).toHaveLength(0)
   })
 
+  const spread = (entries: AllocationEntry[], ids: string[], field: 'originNodeId' | 'destinationNodeId') => {
+    const counts = ids.map(id => entries.filter(e => e[field] === id).length)
+    return Math.max(...counts) - Math.min(...counts)
+  }
+
+  for (const total of [6, 12]) {
+    it(`(i) 3 nodos origen y 3 destino, ${total} muestras en 4 semanas: envios y recepciones por nodo difieren <= 1`, () => {
+      const nodes = [node('A1', 'A'), node('A2', 'A'), node('A3', 'A'), node('B1', 'B'), node('B2', 'B'), node('B3', 'B')]
+      const entries = generateAllocationPlan(base({ nodes, totalSamples: total, endDate: new Date(2027, 2, 26) }))
+      expect(entries).toHaveLength(total)
+      expect(spread(entries, ['A1', 'A2', 'A3'], 'originNodeId')).toBeLessThanOrEqual(1)
+      expect(spread(entries, ['B1', 'B2', 'B3'], 'destinationNodeId')).toBeLessThanOrEqual(1)
+    })
+  }
+
+  it('(ii) 2 nodos origen y 3 destino, total impar: envios y recepciones por nodo difieren <= 1', () => {
+    const nodes = [node('A1', 'A'), node('A2', 'A'), node('B1', 'B'), node('B2', 'B'), node('B3', 'B')]
+    const entries = generateAllocationPlan(base({ nodes, totalSamples: 7, endDate: new Date(2027, 2, 26) }))
+    expect(entries).toHaveLength(7)
+    expect(spread(entries, ['A1', 'A2'], 'originNodeId')).toBeLessThanOrEqual(1)
+    expect(spread(entries, ['B1', 'B2', 'B3'], 'destinationNodeId')).toBeLessThanOrEqual(1)
+  })
+
   it('sin ningun nodo origen disponible en la semana: las muestras se descartan y se avisa', () => {
     const warnings: Array<{ code: string; count: number }> = []
     const entries = generateAllocationPlan(base({

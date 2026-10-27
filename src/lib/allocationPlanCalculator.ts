@@ -205,6 +205,11 @@ export function generateAllocationPlan(params: AllocationPlanParams): Allocation
     destDayLoad: new Map(),
     cityDayLoad: new Map(),
     cursor: new Map(),
+    sendWeek: new Map(),
+    recvWeek: new Map(),
+    sendPeriod: new Map(),
+    recvPeriod: new Map(),
+    pairLoad: new Map(),
     dropped: 0,
   }
 
@@ -246,6 +251,14 @@ interface GenerationContext {
   cityDayLoad: Map<string, number>
   /** Round-robin start position per origin node (index into a week's days). */
   cursor: Map<string, number>
+  /** `${nodeId}|${weekIdx}` -> shipments sent / received by the node that week (all routes) */
+  sendWeek: Map<string, number>
+  recvWeek: Map<string, number>
+  /** nodeId -> shipments sent / received by the node in the whole plan so far (all routes) */
+  sendPeriod: Map<string, number>
+  recvPeriod: Map<string, number>
+  /** `${originId}|${destId}` -> shipments between that pair of nodes */
+  pairLoad: Map<string, number>
   /** Samples that found no valid day/node pair. */
   dropped: number
 }
@@ -435,19 +448,58 @@ function generateEntriesForRoute(
       continue
     }
 
-    const assignments = createBalancedAssignments(weekOrigins, weekDests, samples)
-
-    for (const assignment of assignments) {
-      const placed = placeAssignment(assignment, weekOrigins, weekDests, week, route.originCity.id, ctx)
+    for (let s = 0; s < samples; s++) {
+      const assignment = pickNodes(weekOrigins, weekDests, i, ctx)
+      const placed = placeAssignment(assignment, weekOrigins, weekDests, week, route.originCity.id, i, ctx)
       if (!placed) {
         ctx.dropped++
         continue
       }
+      recordNodeLoad(placed.originNodeId, placed.destNodeId, i, ctx)
       entries.push(makeEntry(placed.originNodeId, placed.destNodeId, placed.date, 'plan'))
     }
   }
 
   return entries
+}
+
+/** Node ids sorted by fewest load this week, then fewest in the whole plan so far, then list order. */
+function rankByLoad(ids: string[], weekLoad: Map<string, number>, periodLoad: Map<string, number>, weekIdx: number): string[] {
+  return ids
+    .map((id, order) => ({ id, order }))
+    .sort((a, b) =>
+      (weekLoad.get(`${a.id}|${weekIdx}`) ?? 0) - (weekLoad.get(`${b.id}|${weekIdx}`) ?? 0) ||
+      (periodLoad.get(a.id) ?? 0) - (periodLoad.get(b.id) ?? 0) ||
+      a.order - b.order)
+    .map(x => x.id)
+}
+
+/**
+ * Origin and destination node for the next sample of a route-week (spec §5 rule 6, node equity).
+ * Deterministic fewest-so-far over counters shared by every route of the run: the origin is the node of
+ * the origin city that has sent least this week (rule 5 first), then least in the whole plan, so the +1 of
+ * an uneven split goes to a different node each time instead of always to the first one. The destination
+ * is chosen the same way on receptions; among equals, the one this origin has sent to least, so a pair of
+ * nodes does not lock into always shipping to each other.
+ */
+function pickNodes(origins: Node[], dests: Node[], weekIdx: number, ctx: GenerationContext): { originNodeId: string; destNodeId: string } {
+  const originNodeId = rankByLoad(origins.map(n => n.id), ctx.sendWeek, ctx.sendPeriod, weekIdx)[0]
+  const destNodeId = dests
+    .map((n, order) => ({ id: n.id, order }))
+    .sort((a, b) =>
+      (ctx.recvWeek.get(`${a.id}|${weekIdx}`) ?? 0) - (ctx.recvWeek.get(`${b.id}|${weekIdx}`) ?? 0) ||
+      (ctx.recvPeriod.get(a.id) ?? 0) - (ctx.recvPeriod.get(b.id) ?? 0) ||
+      (ctx.pairLoad.get(`${originNodeId}|${a.id}`) ?? 0) - (ctx.pairLoad.get(`${originNodeId}|${b.id}`) ?? 0) ||
+      a.order - b.order)[0].id
+  return { originNodeId, destNodeId }
+}
+
+function recordNodeLoad(originId: string, destId: string, weekIdx: number, ctx: GenerationContext): void {
+  bump(ctx.sendWeek, `${originId}|${weekIdx}`)
+  bump(ctx.sendPeriod, originId)
+  bump(ctx.recvWeek, `${destId}|${weekIdx}`)
+  bump(ctx.recvPeriod, destId)
+  bump(ctx.pairLoad, `${originId}|${destId}`)
 }
 
 /**
@@ -461,10 +513,14 @@ function placeAssignment(
   dests: Node[],
   week: PlanWeek,
   originCityId: string,
+  weekIdx: number,
   ctx: GenerationContext
 ): { originNodeId: string; destNodeId: string; date: Date } | null {
-  const otherOrigins = origins.map(n => n.id).filter(id => id !== assignment.originNodeId)
-  const otherDests = dests.map(n => n.id).filter(id => id !== assignment.destNodeId)
+  // Fallback nodes in the same fewest-so-far order as the first choice.
+  const otherOrigins = rankByLoad(origins.map(n => n.id), ctx.sendWeek, ctx.sendPeriod, weekIdx)
+    .filter(id => id !== assignment.originNodeId)
+  const otherDests = rankByLoad(dests.map(n => n.id), ctx.recvWeek, ctx.recvPeriod, weekIdx)
+    .filter(id => id !== assignment.destNodeId)
   const pairs: Array<[string, string]> = [[assignment.originNodeId, assignment.destNodeId]]
   for (const d of otherDests) pairs.push([assignment.originNodeId, d])
   for (const o of otherOrigins) pairs.push([o, assignment.destNodeId])
@@ -683,71 +739,6 @@ function applyPobox(
     }
   }
   return uncovered
-}
-
-/**
- * Crear asignaciones balanceadas: cada nodo origen envía ~igual, cada nodo destino recibe ~igual
- */
-function createBalancedAssignments(
-  originNodes: Node[],
-  destNodes: Node[],
-  totalSamples: number
-): Array<{ originNodeId: string; destNodeId: string }> {
-  const assignments: Array<{ originNodeId: string; destNodeId: string }> = []
-
-  const numOrigins = originNodes.length
-  const numDests = destNodes.length
-
-  // Calcular cuánto debe enviar cada origen y recibir cada destino
-  const samplesPerOrigin = totalSamples / numOrigins
-  const samplesPerDest = totalSamples / numDests
-
-  // Crear matriz de asignación
-  const matrix: number[][] = []
-  for (let i = 0; i < numOrigins; i++) {
-    matrix[i] = []
-    for (let j = 0; j < numDests; j++) {
-      matrix[i][j] = 0
-    }
-  }
-
-  // Algoritmo de distribución balanceada con rotación
-  let remaining = totalSamples
-  const originSent = new Array(numOrigins).fill(0)
-  const destReceived = new Array(numDests).fill(0)
-  
-  let currentOrigin = 0
-  let currentDest = 0
-
-  while (remaining > 0) {
-    // Rotar entre orígenes y destinos para distribuir uniformemente
-    matrix[currentOrigin][currentDest]++
-    originSent[currentOrigin]++
-    destReceived[currentDest]++
-    remaining--
-    
-    // Avanzar al siguiente destino
-    currentDest = (currentDest + 1) % numDests
-    
-    // Si completamos un ciclo de destinos, avanzar al siguiente origen
-    if (currentDest === 0) {
-      currentOrigin = (currentOrigin + 1) % numOrigins
-    }
-  }
-
-  // Convertir matriz a lista de asignaciones
-  for (let i = 0; i < numOrigins; i++) {
-    for (let j = 0; j < numDests; j++) {
-      for (let k = 0; k < matrix[i][j]; k++) {
-        assignments.push({
-          originNodeId: originNodes[i].id,
-          destNodeId: destNodes[j].id,
-        })
-      }
-    }
-  }
-
-  return assignments
 }
 
 interface PlanWeek {
