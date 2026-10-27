@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAccount } from '../contexts/AccountContext'
+import type { DatePolicy } from '../lib/workingDays'
 
 export interface AccountConfig {
   id: string
   account_id: string
   calculation_mode: 'natural_days' | 'working_days'
   mixed_reader_gap_minutes: number
+  date_policy: DatePolicy
+  pobox_enabled: boolean
   created_at: string
   updated_at: string
 }
@@ -53,7 +56,7 @@ export function useAccountConfig() {
         .from('account_config')
         .select('*')
         .eq('account_id', effectiveAccountId)
-        .single()
+        .maybeSingle()
 
       if (fetchError) throw fetchError
       setConfig(data)
@@ -182,6 +185,9 @@ export function useAccountConfig() {
     }
   }
 
+  const setWorkingDay = (dayOfWeek: number, isWorking: boolean) =>
+    updateWeeklySchedule(dayOfWeek, { is_working_day: isWorking })
+
   const bulkImportNonWorkingDays = async (holidays: Array<{ date: string; reason: string }>) => {
     try {
       const records = holidays.map((h) => ({
@@ -212,6 +218,7 @@ export function useAccountConfig() {
     addNonWorkingDay,
     deleteNonWorkingDay,
     updateWeeklySchedule,
+    setWorkingDay,
     bulkImportNonWorkingDays,
     refetch: () => {
       fetchAccountConfig()
