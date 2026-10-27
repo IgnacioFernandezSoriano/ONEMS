@@ -3089,3 +3089,4 @@ allocation_generator.policy_summary,"Politique de dates : {policy}. Jours ouvré
 allocation_generator.pobox_added,"POBOX a ajouté {count} envois pour que chaque ville expédie chaque jour ouvré."
 allocation_generator.warning_dropped,"{count} échantillons n'ont pas pu être placés (aucun jour ni nœud valide)."
 allocation_generator.warning_pobox_uncovered,"POBOX n'a pas pu couvrir {count} jours de ville (aucun nœud libre)."
+lb2.pobox_gap_legend,0 = jour ouvré sans aucun envoi dans la ville (POBOX exige au moins 1)

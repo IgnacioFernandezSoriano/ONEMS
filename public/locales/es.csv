@@ -3097,3 +3097,4 @@ allocation_generator.policy_summary,"Política de fechas: {policy}. Días labora
 allocation_generator.pobox_added,"POBOX añadió {count} envíos para que cada ciudad envíe todos los días laborables."
 allocation_generator.warning_dropped,"{count} muestras no se pudieron colocar (sin día ni nodo válido)."
 allocation_generator.warning_pobox_uncovered,"POBOX no pudo cubrir {count} días de ciudad (sin nodo libre)."
+lb2.pobox_gap_legend,0 = día laborable sin ningún envío en la ciudad (POBOX exige al menos 1)

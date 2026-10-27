@@ -3089,3 +3089,4 @@ allocation_generator.policy_summary,"سياسة التواريخ: {policy}. أي
 allocation_generator.pobox_added,"أضاف POBOX عدد {count} من الشحنات ليرسل كل مدينة شحنة في كل يوم عمل."
 allocation_generator.warning_dropped,"تعذر وضع {count} من العينات (لا يوجد يوم أو عقدة صالحة)."
 allocation_generator.warning_pobox_uncovered,"تعذر على POBOX تغطية {count} من أيام المدن (لا توجد عقدة متاحة)."
+lb2.pobox_gap_legend,0 = يوم عمل بلا أي شحنة في المدينة (يتطلب POBOX شحنة واحدة على الأقل)

@@ -3097,3 +3097,4 @@ allocation_generator.policy_summary,"Date policy: {policy}. Working days: {days}
 allocation_generator.pobox_added,"{count} shipments were added by POBOX so every city ships each working day."
 allocation_generator.warning_dropped,"{count} samples could not be placed (no valid day or node available)."
 allocation_generator.warning_pobox_uncovered,"POBOX could not cover {count} city-days (no free node)."
+lb2.pobox_gap_legend,0 = working day without any shipment in the city (POBOX needs at least 1)

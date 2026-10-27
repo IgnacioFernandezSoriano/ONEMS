@@ -63,6 +63,18 @@ export function buildDayView(rows: NodeDayLoad[]): DayView {
   return { columns, cells }
 }
 
+/** Total de envios de la ciudad por dia (suma de sus nodos). */
+export function dayTotals(view: DayView): Map<string, number> {
+  const totals = new Map<string, number>()
+  for (const r of view.cells.values()) totals.set(r.day, (totals.get(r.day) ?? 0) + r.shipment_count)
+  return totals
+}
+
+/** Con POBOX, un dia laborable sin ningun envio en la ciudad es un hueco (problema), no un cero normal. */
+export function isPoboxGap(total: number, isWorkingDay: boolean, pobox: boolean): boolean {
+  return pobox && isWorkingDay && total === 0
+}
+
 /** Celda sombreada con envios = conflicto. */
 export function isConflict(r: NodeDayLoad | undefined): boolean {
   return !!r && (r.is_unavailable || !r.is_working_day) && r.shipment_count > 0

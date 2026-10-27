@@ -1,7 +1,7 @@
 import React from 'react';
 import { NodeLoadData, NodeDayLoad } from '../../hooks/useNodeLoadBalancing';
 import type { DatePolicy } from '../../lib/workingDays';
-import { buildDayView, buildMonthView, compareNatural, dayCellKey, isConflict, orderWeekNumbers } from '../../lib/loadViews';
+import { buildDayView, buildMonthView, compareNatural, dayCellKey, dayTotals, isConflict, isPoboxGap, orderWeekNumbers } from '../../lib/loadViews';
 import { useTranslation } from '@/hooks/useTranslation';
 
 export type LoadScale = 'day' | 'week' | 'month';
@@ -41,6 +41,7 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
 }) => {
   const { t } = useTranslation();
   const dayView = React.useMemo(() => buildDayView(dayData), [dayData]);
+  const dayTotalsMap = React.useMemo(() => dayTotals(dayView), [dayView]);
   const monthView = React.useMemo(() => buildMonthView(dayData), [dayData]);
   const dayNodes = React.useMemo(() => {
     const m = new Map<string, string | null>();
@@ -292,9 +293,35 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
                     </tr>
                   ))}
                 </tbody>
+                <tfoot className="border-t-2 border-gray-300 bg-gray-50">
+                  <tr>
+                    <td className="sticky left-0 z-10 bg-gray-50 px-4 py-2 font-semibold text-gray-900">
+                      {t('common.total')}
+                    </td>
+                    {dayView.columns.map((c) => {
+                      const total = dayTotalsMap.get(c.day) ?? 0;
+                      const gap = isPoboxGap(total, c.isWorkingDay, !!policy?.pobox);
+                      return (
+                        <td
+                          key={c.day}
+                          className={`px-2 py-2 text-center ${c.isWorkingDay ? '' : 'bg-gray-100'} ${gap ? 'bg-red-50' : ''}`}
+                          title={gap ? t('lb2.pobox_gap_legend') : undefined}
+                        >
+                          <span className={gap ? 'text-red-700 font-bold' : 'font-semibold text-gray-900'}>{total}</span>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                </tfoot>
               </table>
             </div>
             <div className="flex flex-wrap items-center gap-4 px-6 py-2 text-xs text-gray-600 border-t border-gray-200">
+              {policy?.pobox && (
+                <span className="flex items-center gap-1">
+                  <span className="text-red-700 font-bold">0</span>
+                  {t('lb2.pobox_gap_legend')}
+                </span>
+              )}
               <span className="flex items-center gap-1">
                 <span className={`inline-block w-4 h-4 border border-gray-300 ${UNAVAILABLE_CLASS}`} />
                 {t('lb2.unavailable_legend')}
