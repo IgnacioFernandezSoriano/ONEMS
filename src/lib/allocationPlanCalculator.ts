@@ -1,4 +1,5 @@
 import type { City, Node } from './types'
+import { localDateKey } from './workingDays'
 
 export interface CityDistributionMatrix {
   AA: number // A to A
@@ -426,12 +427,6 @@ interface PlanWeek {
 const MONTH_KEYS: (keyof SeasonalDistribution)[] = [
   'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec',
 ]
-
-function localDateKey(d: Date): string {
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${d.getFullYear()}-${m}-${day}`
-}
 
 /**
  * Working days of the period grouped by ISO week, in order. A day is a working day when it is Monday to
