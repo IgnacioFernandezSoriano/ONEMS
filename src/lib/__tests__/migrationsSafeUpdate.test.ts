@@ -32,7 +32,7 @@ function statementsWithoutWhere(sql: string): string[] {
 
 describe('migraciones de Load Balancing v2 compatibles con safeupdate', () => {
   const dir = join(process.cwd(), 'supabase', 'migrations')
-  const files = readdirSync(dir).filter((f) => /^202610271\d{5}_.*\.sql$/.test(f) && f !== '20261027120000_load_balancing_v2.sql')
+  const files = readdirSync(dir).filter((f) => /^2026102[78]\d{6}_.*\.sql$/.test(f) && f !== '20261027120000_load_balancing_v2.sql')
 
   it('el detector encuentra un UPDATE sin WHERE aunque haya WHERE en una subconsulta', () => {
     const sql = 'UPDATE t SET a = (SELECT b FROM u WHERE u.id = 1);\nUPDATE t SET a = 1 WHERE TRUE;'
