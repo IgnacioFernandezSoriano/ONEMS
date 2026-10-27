@@ -159,6 +159,8 @@ GRANT EXECUTE ON FUNCTION public.rpc_get_node_load_by_day(uuid, date, date) TO a
 -- nunca el destino. Pasos:
 --   1. Cuenta, zona horaria, v_from = GREATEST(inicio, hoy de la cuenta), politica efectiva de la ciudad.
 --   2. Nodos validos: activos y con panelista activo. Ausente = panelist_unavailability 'active' que cubre el dia.
+--      Un envio tampoco puede ir a un dia en que el panelista de su nodo DESTINO este ausente, ni a ningun dia si
+--      su destino no tiene panelista activo (spec 5.3); ver 6a y 6c.
 --   3. Envios: pending con origen en CUALQUIER nodo de la ciudad y fecha dentro de [inicio, fin].
 --   4. Celdas: 'daily' = nodo valido x dia laborable >= v_from sin ausencia; 'weekly' = nodo valido x tramo
 --      (semana ISO dentro de un mes) con fecha = primer dia laborable >= v_from libre de ausencia del nodo.
@@ -227,6 +229,7 @@ DECLARE
   v_org_cell      integer;
   v_dst_node      uuid;
   v_new_id        uuid;
+  v_fb_cell       integer;
   v_pb_missing    integer := 0;
   v_pb_moved      integer := 0;
   v_pb_created    integer := 0;
@@ -260,7 +263,7 @@ BEGIN
 
   DROP TABLE IF EXISTS pg_temp.lb2_nodes, pg_temp.lb2_days, pg_temp.lb2_absent, pg_temp.lb2_cells, pg_temp.lb2_segs, pg_temp.lb2_ship,
                        pg_temp.lb2_new, pg_temp.lb2_pb, pg_temp.lb2_plans, pg_temp.lb2_routes, pg_temp.lb2_dest,
-                       pg_temp.lb2_dabsent, pg_temp.lb2_dload;
+                       pg_temp.lb2_dabsent, pg_temp.lb2_dload, pg_temp.lb2_sdabs;
 
   -- ===== 1-2. Nodos de la ciudad (todos, para codigos) y validez (activo + panelista activo).
   CREATE TEMP TABLE pg_temp.lb2_nodes (
@@ -332,17 +335,32 @@ BEGIN
   CREATE TEMP TABLE pg_temp.lb2_ship (
     id uuid PRIMARY KEY, cur_node uuid, cur_code text, cur_rank integer, dest_node uuid, fecha date,
     month_key date, cur_cell integer, new_cell integer, keep boolean NOT NULL DEFAULT false,
-    od_conflict boolean NOT NULL DEFAULT false, pobox_move boolean NOT NULL DEFAULT false
+    od_conflict boolean NOT NULL DEFAULT false, pobox_move boolean NOT NULL DEFAULT false,
+    dest_bad boolean NOT NULL DEFAULT false
   ) ON COMMIT DROP;
-  INSERT INTO pg_temp.lb2_ship (id, cur_node, cur_code, cur_rank, dest_node, fecha, month_key)
+  INSERT INTO pg_temp.lb2_ship (id, cur_node, cur_code, cur_rank, dest_node, fecha, month_key, dest_bad)
   SELECT a.id, a.origin_node_id, n.node_code, n.all_rank, a.destination_node_id, a.fecha_programada,
-         date_trunc('month', GREATEST(a.fecha_programada, v_from))::date
+         date_trunc('month', GREATEST(a.fecha_programada, v_from))::date,
+         -- destino sin panelista activo: ninguna fecha es valida para el (spec 5.3)
+         NOT EXISTS (SELECT 1 FROM public.panelists p
+                      WHERE p.node_id = a.destination_node_id AND p.account_id = v_account_id AND p.status = 'active')
     FROM public.allocation_plan_details a
     JOIN pg_temp.lb2_nodes n ON n.node_id = a.origin_node_id
    WHERE a.account_id = v_account_id
      AND a.status = 'pending'
      AND a.fecha_programada BETWEEN p_start_date AND p_end_date;
   SELECT count(*) INTO v_total FROM pg_temp.lb2_ship;
+
+  -- Ausencias de los nodos DESTINO de esos envios (spec 5.3: no se programa un dia de ausencia ni como origen
+  -- ni como destino). Un envio no puede ir a una celda cuya fecha este aqui para su destino.
+  CREATE TEMP TABLE pg_temp.lb2_sdabs (node_id uuid, d date, PRIMARY KEY (node_id, d)) ON COMMIT DROP;
+  INSERT INTO pg_temp.lb2_sdabs
+  SELECT DISTINCT p.node_id, dd.d
+    FROM public.panelist_unavailability u
+    JOIN public.panelists p ON p.id = u.panelist_id AND p.account_id = v_account_id AND p.status = 'active'
+    JOIN (SELECT DISTINCT dest_node FROM pg_temp.lb2_ship) sd ON sd.dest_node = p.node_id
+    JOIN pg_temp.lb2_days dd ON dd.d BETWEEN u.start_date AND u.end_date
+   WHERE u.account_id = v_account_id AND u.status = 'active';
 
   -- Atrasados: cuentan en el mes de v_from; si ese mes ya no tiene celdas, en el primer mes siguiente que las tenga.
   UPDATE pg_temp.lb2_ship s SET month_key = m.next_month
@@ -421,10 +439,13 @@ BEGIN
 
   -- ===== 6. Asignacion con minimos movimientos.
   -- 6a. En cada celda se quedan hasta 'target' envios (los de fecha mas temprana; sale primero el mas lejano).
+  -- Un envio cuyo destino esta ausente ese dia (o no tiene panelista activo) no puede quedarse: es excedente.
   WITH k AS (
     SELECT s.id, c.target,
            row_number() OVER (PARTITION BY s.cur_cell ORDER BY s.fecha, s.id) AS rn
-      FROM pg_temp.lb2_ship s JOIN pg_temp.lb2_cells c ON c.cell_id = s.cur_cell)
+      FROM pg_temp.lb2_ship s JOIN pg_temp.lb2_cells c ON c.cell_id = s.cur_cell
+     WHERE NOT s.dest_bad
+       AND NOT EXISTS (SELECT 1 FROM pg_temp.lb2_sdabs x WHERE x.node_id = s.dest_node AND x.d = c.cell_date))
   UPDATE pg_temp.lb2_ship s SET keep = true, new_cell = s.cur_cell
     FROM k WHERE k.id = s.id AND k.rn <= k.target;
   UPDATE pg_temp.lb2_cells c SET kept = x.n
@@ -447,26 +468,50 @@ BEGIN
     FROM ex JOIN sl ON sl.month_start = ex.month_key AND sl.rk = ex.rk
    WHERE s.id = ex.id;
 
-  -- 6c. Un envio nunca puede quedar con origen = destino (rutas dentro de la ciudad): se intercambia la celda con
-  -- otro excedente del mismo mes compatible; si no hay ninguno, el envio se queda donde esta y se avisa.
+  -- 6c. Celda incompatible con el envio: origen = destino (ruta dentro de la ciudad), destino ausente ese dia o
+  -- destino sin panelista activo. Se intercambia la celda con otro excedente del mismo mes compatible en ambos
+  -- sentidos. Si no hay: origen = destino => el envio se queda donde esta (aviso origin_equals_destination);
+  -- destino ausente => celda compatible mas cercana del mismo mes (la menos cargada), y si no existe o el destino
+  -- no tiene panelista activo, el envio se queda donde esta (aviso no_valid_cell). Bucle vacio con datos normales.
   FOR v_conf IN
     SELECT s.id FROM pg_temp.lb2_ship s JOIN pg_temp.lb2_cells c ON c.cell_id = s.new_cell
-     WHERE NOT s.keep AND c.node_id = s.dest_node
+     WHERE NOT s.keep
+       AND (c.node_id = s.dest_node OR s.dest_bad
+            OR EXISTS (SELECT 1 FROM pg_temp.lb2_sdabs x WHERE x.node_id = s.dest_node AND x.d = c.cell_date))
+     ORDER BY s.fecha, s.id
   LOOP
-    SELECT s.new_cell, s.month_key, s.dest_node, s.fecha, c.node_id
+    SELECT s.new_cell, s.month_key, s.dest_node, s.dest_bad, s.fecha, c.node_id, c.cell_date,
+           EXISTS (SELECT 1 FROM pg_temp.lb2_sdabs x WHERE x.node_id = s.dest_node AND x.d = c.cell_date) AS dabs
       INTO v_cur FROM pg_temp.lb2_ship s JOIN pg_temp.lb2_cells c ON c.cell_id = s.new_cell WHERE s.id = v_conf.id;
-    CONTINUE WHEN v_cur.node_id IS DISTINCT FROM v_cur.dest_node;  -- ya resuelto por un intercambio previo
+    -- ya resuelto por un intercambio previo
+    CONTINUE WHEN NOT FOUND OR (v_cur.node_id <> v_cur.dest_node AND NOT v_cur.dest_bad AND NOT v_cur.dabs);
+    IF v_cur.dest_bad THEN
+      UPDATE pg_temp.lb2_ship SET new_cell = NULL WHERE id = v_conf.id;
+      CONTINUE;
+    END IF;
     SELECT s2.id, s2.new_cell INTO v_other
       FROM pg_temp.lb2_ship s2 JOIN pg_temp.lb2_cells c2 ON c2.cell_id = s2.new_cell
-     WHERE NOT s2.keep AND s2.month_key = v_cur.month_key AND s2.id <> v_conf.id
+     WHERE NOT s2.keep AND s2.month_key = v_cur.month_key AND s2.id <> v_conf.id AND NOT s2.dest_bad
        AND c2.node_id <> v_cur.dest_node AND s2.dest_node IS DISTINCT FROM v_cur.node_id
+       AND NOT EXISTS (SELECT 1 FROM pg_temp.lb2_sdabs x WHERE x.node_id = v_cur.dest_node AND x.d = c2.cell_date)
+       AND NOT EXISTS (SELECT 1 FROM pg_temp.lb2_sdabs x WHERE x.node_id = s2.dest_node AND x.d = v_cur.cell_date)
      ORDER BY abs(c2.cell_date - v_cur.fecha), c2.cell_date
      LIMIT 1;
     IF FOUND THEN
       UPDATE pg_temp.lb2_ship SET new_cell = v_cur.new_cell WHERE id = v_other.id;
       UPDATE pg_temp.lb2_ship SET new_cell = v_other.new_cell WHERE id = v_conf.id;
-    ELSE
+    ELSIF NOT v_cur.dabs THEN
       UPDATE pg_temp.lb2_ship SET new_cell = NULL, od_conflict = true WHERE id = v_conf.id;
+    ELSE
+      v_fb_cell := NULL;
+      SELECT c3.cell_id INTO v_fb_cell
+        FROM pg_temp.lb2_cells c3
+       WHERE c3.month_start = v_cur.month_key AND c3.node_id <> v_cur.dest_node
+         AND NOT EXISTS (SELECT 1 FROM pg_temp.lb2_sdabs x WHERE x.node_id = v_cur.dest_node AND x.d = c3.cell_date)
+       ORDER BY abs(c3.cell_date - v_cur.cell_date),
+                (SELECT count(*) FROM pg_temp.lb2_ship x WHERE x.new_cell = c3.cell_id), c3.cell_date, c3.valid_rank
+       LIMIT 1;
+      UPDATE pg_temp.lb2_ship SET new_cell = v_fb_cell WHERE id = v_conf.id;
     END IF;
   END LOOP;
 
@@ -481,16 +526,18 @@ BEGIN
     -- periodo (lb2_ship) son movibles y llevan el rango de su plan; el resto es fijo. Ventana: desde el lunes
     -- de la semana de v_from hasta fin + 6 (para contar la carga de semanas completas).
     CREATE TEMP TABLE pg_temp.lb2_pb (
-      id uuid PRIMARY KEY, node_id uuid, d date, movable boolean, plan_start date, plan_end date
+      id uuid PRIMARY KEY, node_id uuid, d date, movable boolean, plan_start date, plan_end date,
+      dest_node uuid, dest_bad boolean NOT NULL DEFAULT false
     ) ON COMMIT DROP;
     INSERT INTO pg_temp.lb2_pb
-    SELECT s.id, COALESCE(c.node_id, s.cur_node), COALESCE(c.cell_date, s.fecha), true, p.start_date, p.end_date
+    SELECT s.id, COALESCE(c.node_id, s.cur_node), COALESCE(c.cell_date, s.fecha), true, p.start_date, p.end_date,
+           s.dest_node, s.dest_bad
       FROM pg_temp.lb2_ship s
       LEFT JOIN pg_temp.lb2_cells c ON c.cell_id = s.new_cell
       JOIN public.allocation_plan_details a ON a.id = s.id
       LEFT JOIN public.allocation_plans p ON p.id = a.plan_id;
     INSERT INTO pg_temp.lb2_pb
-    SELECT a.id, a.origin_node_id, a.fecha_programada, false, NULL, NULL
+    SELECT a.id, a.origin_node_id, a.fecha_programada, false, NULL, NULL, a.destination_node_id, false
       FROM public.allocation_plan_details a
       JOIN pg_temp.lb2_nodes n ON n.node_id = a.origin_node_id
      WHERE a.account_id = v_account_id
@@ -571,7 +618,8 @@ BEGIN
         JOIN (SELECT x.d FROM pg_temp.lb2_pb x WHERE x.d BETWEEN v_from AND p_end_date
                GROUP BY x.d HAVING count(*) >= 2) dc ON dc.d = b.d
         JOIN pg_temp.lb2_cells cl ON cl.node_id = b.node_id AND cl.cell_date = v_day
-       WHERE b.movable
+       WHERE b.movable AND NOT b.dest_bad
+         AND NOT EXISTS (SELECT 1 FROM pg_temp.lb2_sdabs x WHERE x.node_id = b.dest_node AND x.d = v_day)
          AND v_day BETWEEN COALESCE(b.plan_start, v_day) AND COALESCE(b.plan_end, v_day)
        ORDER BY abs(date_trunc('week', b.d)::date - v_wk), (b.d > v_day), abs(b.d - v_day), b.id
        LIMIT 1;
@@ -618,7 +666,7 @@ BEGIN
 
       v_new_id := gen_random_uuid();
       INSERT INTO pg_temp.lb2_new VALUES (v_new_id, v_plan, v_org_node, v_org_cell, v_dst_node, v_day);
-      INSERT INTO pg_temp.lb2_pb VALUES (v_new_id, v_org_node, v_day, false, NULL, NULL);
+      INSERT INTO pg_temp.lb2_pb VALUES (v_new_id, v_org_node, v_day, false, NULL, NULL, v_dst_node, false);
       INSERT INTO pg_temp.lb2_dload VALUES (v_dst_node, v_day, 1);
       v_pb_created := v_pb_created + 1;
     END LOOP;
@@ -734,7 +782,7 @@ BEGIN
 
   DROP TABLE IF EXISTS pg_temp.lb2_nodes, pg_temp.lb2_days, pg_temp.lb2_absent, pg_temp.lb2_cells, pg_temp.lb2_segs, pg_temp.lb2_ship,
                        pg_temp.lb2_new, pg_temp.lb2_pb, pg_temp.lb2_plans, pg_temp.lb2_routes, pg_temp.lb2_dest,
-                       pg_temp.lb2_dabsent, pg_temp.lb2_dload;
+                       pg_temp.lb2_dabsent, pg_temp.lb2_dload, pg_temp.lb2_sdabs;
 
   RETURN jsonb_build_object('success', true,
     'movements_count', v_movements_count,

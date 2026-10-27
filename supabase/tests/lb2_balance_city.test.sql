@@ -265,6 +265,50 @@ SELECT pg_temp.fail_if(count(*) <> 6, 'atrasados: se perdieron envios') FROM pub
  WHERE fecha_programada BETWEEN current_date AND current_date + 10;
 ROLLBACK;
 
+-- ===== Caso 8 (ausencia del DESTINO): P4 (N4, ciudad C2, destino de todos los envios) ausente el 10/3/2027.
+-- El balanceo no puede programar ningun envio ese dia (spec 5.3: ni como origen ni como destino); los demas dias
+-- siguen permitidos. Los 2 que ya estaban el 10 (en N2) deben salir de ese dia.
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+INSERT INTO public.panelist_unavailability (panelist_id, start_date, end_date, reason, status, account_id)
+VALUES ('e4000000-0000-0000-0000-000000000004', '2027-03-10', '2027-03-10', 'vacation', 'active',
+        'a0000000-0000-0000-0000-000000000001');
+SELECT pg_temp.mk('N1', '2027-03-08') FROM generate_series(1, 15);
+SELECT pg_temp.mk('N2', '2027-03-10') FROM generate_series(1, 2);
+DO $$
+DECLARE r jsonb;
+BEGIN
+  r := public.rpc_balance_city_v2('c1000000-0000-0000-0000-000000000001', '2027-03-08', '2027-03-12', true);
+  PERFORM pg_temp.fail_if((r->>'success')::boolean IS DISTINCT FROM true, 'destino ausente success: ' || r::text);
+  PERFORM pg_temp.fail_if(jsonb_array_length(r->'warnings') <> 0, 'no deberia haber avisos: ' || r::text);
+END $$;
+SELECT pg_temp.fail_if(count(*) > 0, 'envios el dia de ausencia del destino: ' || count(*))
+  FROM public.allocation_plan_details WHERE fecha_programada = '2027-03-10';
+SELECT pg_temp.fail_if(count(*) <> 17, 'se perdieron envios') FROM public.allocation_plan_details
+ WHERE fecha_programada IN ('2027-03-08', '2027-03-09', '2027-03-11', '2027-03-12');
+SELECT pg_temp.fail_if(count(DISTINCT fecha_programada) <> 4, 'los otros 4 dias deben seguir usandose')
+  FROM public.allocation_plan_details;
+ROLLBACK;
+
+-- Caso 8b: el destino N4 ya no tiene panelista activo => ninguna fecha es valida: los envios se quedan y se avisa.
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+UPDATE public.panelists SET status = 'inactive' WHERE id = 'e4000000-0000-0000-0000-000000000004';
+SELECT pg_temp.mk('N1', '2027-03-08') FROM generate_series(1, 6);
+DO $$
+DECLARE r jsonb;
+BEGIN
+  r := public.rpc_balance_city_v2('c1000000-0000-0000-0000-000000000001', '2027-03-08', '2027-03-12', true);
+  PERFORM pg_temp.fail_if((r->>'movements_count')::int <> 0, 'destino sin panelista: no debe mover: ' || r::text);
+  PERFORM pg_temp.fail_if(r->'warnings'->0->>'code' IS DISTINCT FROM 'no_valid_cell'
+                          OR (r->'warnings'->0->>'count')::int <> 6, 'aviso no_valid_cell: ' || r::text);
+END $$;
+ROLLBACK;
+
 -- ===== Guarda: actor 98 (cuenta 2) sobre una ciudad de la cuenta 1 => 42501, y nada cambia.
 BEGIN;
 \ir fixtures/incident_city.sql

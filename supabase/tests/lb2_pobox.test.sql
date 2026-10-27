@@ -222,3 +222,55 @@ BEGIN
 END $$;
 SELECT pg_temp.fail_if(count(*) <> 1, 'sin POBOX no se crean envios') FROM public.allocation_plan_details;
 ROLLBACK;
+
+-- ===== Caso 7 (ausencia del DESTINO en POBOX): solo N1 valido en C1; C2 tiene N4 (P4) y N5 (P5). P4 ausente
+-- del 10 al 12/3. Dias 8 y 9 con un 'sent' (fijo) + un pendiente cada uno: el del 8 va a N5, el del 9 a N4.
+-- Dia 10: el donante mas cercano (dia 9) va a N4, ausente el 10 => no vale; se mueve el del dia 8 (a N5).
+-- Dias 11 y 12: el unico donante (dia 9, destino N4) no vale => se crean envios, con destino N5 (N4 ausente).
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+SELECT pg_temp.pobox_on();
+DELETE FROM public.panelists WHERE id IN ('e2000000-0000-0000-0000-000000000002', 'e3000000-0000-0000-0000-000000000003');
+INSERT INTO public.nodes (id, account_id, city_id, auto_id) VALUES
+  ('b5000000-0000-0000-0000-000000000005','a0000000-0000-0000-0000-000000000001','c2000000-0000-0000-0000-000000000002','N5');
+INSERT INTO public.panelists (id, account_id, panelist_code, name, email, mobile, node_id, status, language) VALUES
+  ('e5000000-0000-0000-0000-000000000005','a0000000-0000-0000-0000-000000000001','P5','Pan5','p5@t.l','5',
+   'b5000000-0000-0000-0000-000000000005','active','en');
+INSERT INTO public.panelist_unavailability (panelist_id, start_date, end_date, reason, status, account_id)
+VALUES ('e4000000-0000-0000-0000-000000000004', '2027-03-10', '2027-03-12', 'vacation', 'active',
+        'a0000000-0000-0000-0000-000000000001');
+INSERT INTO public.allocation_plan_details
+  (id, account_id, plan_id, origin_node_id, destination_node_id, fecha_programada, status)
+VALUES
+  ('d0000000-0000-0000-0000-000000000001','a0000000-0000-0000-0000-000000000001','cc000000-0000-0000-0000-000000000001',
+   'b1000000-0000-0000-0000-000000000001','b4000000-0000-0000-0000-000000000004','2027-03-08','sent'),
+  ('d0000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000001','cc000000-0000-0000-0000-000000000001',
+   'b1000000-0000-0000-0000-000000000001','b4000000-0000-0000-0000-000000000004','2027-03-09','sent'),
+  ('d0000000-0000-0000-0000-000000000003','a0000000-0000-0000-0000-000000000001','cc000000-0000-0000-0000-000000000001',
+   'b1000000-0000-0000-0000-000000000001','b5000000-0000-0000-0000-000000000005','2027-03-08','pending'),
+  ('d0000000-0000-0000-0000-000000000004','a0000000-0000-0000-0000-000000000001','cc000000-0000-0000-0000-000000000001',
+   'b1000000-0000-0000-0000-000000000001','b4000000-0000-0000-0000-000000000004','2027-03-09','pending');
+DO $$
+DECLARE r jsonb;
+BEGIN
+  r := public.rpc_balance_city_v2('c1000000-0000-0000-0000-000000000001', '2027-03-08', '2027-03-12', true);
+  PERFORM pg_temp.fail_if((r->'pobox'->>'days_missing')::int <> 3 OR (r->'pobox'->>'days_moved')::int <> 1
+                          OR (r->'pobox'->>'days_created')::int <> 2 OR (r->'pobox'->>'days_uncovered')::int <> 0,
+                          'destino ausente en POBOX: ' || r::text);
+END $$;
+SELECT pg_temp.fail_if(count(*) > 0, 'envio a N4 en un dia de ausencia de P4: ' || string_agg(fecha_programada::text, ','))
+  FROM public.allocation_plan_details
+ WHERE destination_node_id = 'b4000000-0000-0000-0000-000000000004' AND fecha_programada BETWEEN '2027-03-10' AND '2027-03-12';
+SELECT pg_temp.fail_if((SELECT fecha_programada FROM public.allocation_plan_details
+                         WHERE id = 'd0000000-0000-0000-0000-000000000003') IS DISTINCT FROM '2027-03-10',
+                       'debia moverse el donante con destino disponible (N5) al dia 10');
+SELECT pg_temp.fail_if((SELECT fecha_programada FROM public.allocation_plan_details
+                         WHERE id = 'd0000000-0000-0000-0000-000000000004') IS DISTINCT FROM '2027-03-09',
+                       'el donante con destino ausente no debia moverse');
+SELECT pg_temp.fail_if(count(*) <> 2 OR bool_or(destination_node_id <> 'b5000000-0000-0000-0000-000000000005'),
+                       'los creados deben ir a N5 (N4 ausente)')
+  FROM public.allocation_plan_details WHERE generation_source = 'pobox';
+SELECT pg_temp.fail_if(pg_temp.c1_uncovered('2027-03-08', '2027-03-12') <> 0, 'quedan dias sin cubrir');
+ROLLBACK;
