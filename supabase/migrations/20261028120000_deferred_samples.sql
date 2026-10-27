@@ -123,6 +123,9 @@ GRANT EXECUTE ON FUNCTION public.rpc_deferred_samples_summary(uuid) TO authentic
 --        si no hay, al registro (dest_no_panelist). Sustituye la regla "el destino nunca cambia";
 --     0c sin celda compatible en su mes => se busca en los demas meses del periodo dentro de las fechas del plan;
 --        si no hay ninguna => al registro (no_valid_day), salvo origen = destino (sigue el aviso de siempre).
+--        no_valid_day solo si tampoco hay hueco en el resto del horizonte del plan (R3); si lo hay, se queda.
+--     Nunca se aparta una muestra con material_hold, shipment_incident, panelist_incident u one_db enlazados
+--     (R2): se queda congelada y se avisa con deferred_blocked.
 --     Las apartadas no cuentan en totales, objetivos, desviaciones ni matrices.
 --   * Filtro por fechas del plan tambien en el reparto normal (antes solo POBOX).
 --   * Al aplicar: INSERT en deferred_samples + DELETE del plan sobre el mismo conjunto, con verificacion de
@@ -182,6 +185,8 @@ DECLARE
   v_def_waiting    integer := 0;
   v_def_ins        integer := 0;
   v_def_del        integer := 0;
+  v_def_blocked    integer := 0;
+  v_def_bad        text;
 BEGIN
   SELECT c.account_id, COALESCE(a.timezone, 'UTC'), c.balance_rotation_offset
     INTO v_account_id, v_tz, v_offset
@@ -194,7 +199,7 @@ BEGIN
       'movements', '[]'::jsonb, 'matrix_before', '[]'::jsonb, 'matrix_after', '[]'::jsonb, 'warnings', '[]'::jsonb,
       'policy', jsonb_build_object('date_policy', NULL, 'pobox_enabled', NULL),
       'pobox', jsonb_build_object('days_missing', 0, 'days_moved', 0, 'days_created', 0, 'days_uncovered', 0),
-      'deferred', jsonb_build_object('removed', 0, 'reassigned_dest', 0, 'reintroduced', 0, 'waiting', 0,
+      'deferred', jsonb_build_object('removed', 0, 'reassigned_dest', 0, 'reintroduced', 0, 'waiting', 0, 'blocked', 0,
                                      'by_reason', jsonb_build_object('origin_no_panelist', 0, 'dest_no_panelist', 0,
                                                                      'no_valid_day', 0)));
   END IF;
@@ -221,7 +226,7 @@ BEGIN
   DROP TABLE IF EXISTS pg_temp.lb2_nodes, pg_temp.lb2_days, pg_temp.lb2_absent, pg_temp.lb2_cells, pg_temp.lb2_segs, pg_temp.lb2_ship,
                        pg_temp.lb2_new, pg_temp.lb2_pb, pg_temp.lb2_plans, pg_temp.lb2_routes, pg_temp.lb2_dest,
                        pg_temp.lb2_dabsent, pg_temp.lb2_dload, pg_temp.lb2_sdabs,
-                       pg_temp.lb2_alt, pg_temp.lb2_altload, pg_temp.lb2_altabs, pg_temp.lb2_defer;
+                       pg_temp.lb2_alt, pg_temp.lb2_altload, pg_temp.lb2_altabs, pg_temp.lb2_defer, pg_temp.lb2_hz;
 
   -- ===== 1-2. Nodos de la ciudad (todos, para codigos) y validez (activo + panelista activo).
   CREATE TEMP TABLE pg_temp.lb2_nodes (
@@ -305,20 +310,23 @@ BEGIN
     -- fechas del plan del envio; NULL = sin restriccion (el envio ya esta fuera de su plan: dato incoherente que
     -- no se castiga borrandolo)
     plan_start date, plan_end date,
+    pl_end date,   -- fin real del plan (para el horizonte de R3 cuando el envio esta fuera de su plan)
+    def_blocked boolean NOT NULL DEFAULT false,   -- se apartaria pero tiene dependientes (R2): se queda
     -- fase 0: motivo para apartarlo al registro (NULL = se queda en el plan)
     defer_reason text,
     -- fase 0: destino reasignado dentro de la ciudad destino (dest_node ya es el nuevo)
     new_dest boolean NOT NULL DEFAULT false, new_dest_pid uuid, new_dest_pname text
   ) ON COMMIT DROP;
   INSERT INTO pg_temp.lb2_ship (id, cur_node, cur_code, cur_rank, dest_node, dest_city, fecha, month_key, dest_bad,
-                                plan_start, plan_end)
+                                plan_start, plan_end, pl_end)
   SELECT a.id, a.origin_node_id, n.node_code, n.all_rank, a.destination_node_id, dn.city_id, a.fecha_programada,
          date_trunc('month', GREATEST(a.fecha_programada, v_from))::date,
          -- destino sin panelista activo: ninguna fecha es valida para el (spec 5.3)
          NOT EXISTS (SELECT 1 FROM public.panelists p
                       WHERE p.node_id = a.destination_node_id AND p.account_id = v_account_id AND p.status = 'active'),
          CASE WHEN a.fecha_programada BETWEEN pl.start_date AND pl.end_date THEN pl.start_date END,
-         CASE WHEN a.fecha_programada BETWEEN pl.start_date AND pl.end_date THEN pl.end_date END
+         CASE WHEN a.fecha_programada BETWEEN pl.start_date AND pl.end_date THEN pl.end_date END,
+         pl.end_date
     FROM public.allocation_plan_details a
     JOIN pg_temp.lb2_nodes n ON n.node_id = a.origin_node_id
     LEFT JOIN public.nodes dn ON dn.id = a.destination_node_id
@@ -457,6 +465,68 @@ BEGIN
                         WHERE c.node_id = s.dest_node
                           AND (s.plan_start IS NULL OR c.cell_date BETWEEN s.plan_start AND s.plan_end));
   END IF;
+
+  -- 0c bis (R3). no_valid_day solo borra si no hay NINGUN hueco en el resto del horizonte del plan, no solo en el
+  -- periodo de la pantalla: dia laborable en [max(v_from, inicio del plan), fin del plan] con algun nodo valido de
+  -- esta ciudad no ausente y algun nodo valido (activo + panelista activo) de la ciudad destino no ausente. Si lo
+  -- hay, la muestra se queda donde esta (carga fija, aviso no_valid_cell) para balancear con un periodo mas ancho.
+  -- Por combinacion distinta (ciudad destino, horizonte), no por fila.
+  IF EXISTS (SELECT 1 FROM pg_temp.lb2_ship WHERE defer_reason = 'no_valid_day') THEN
+    CREATE TEMP TABLE pg_temp.lb2_hz (
+      dest_city uuid, h_from date, h_to date, has_slot boolean NOT NULL DEFAULT false
+    ) ON COMMIT DROP;
+    INSERT INTO pg_temp.lb2_hz (dest_city, h_from, h_to)
+    SELECT DISTINCT s.dest_city, GREATEST(v_from, COALESCE(s.plan_start, v_from)),
+           COALESCE(s.plan_end, GREATEST(s.pl_end, p_end_date))
+      FROM pg_temp.lb2_ship s WHERE s.defer_reason = 'no_valid_day';
+    UPDATE pg_temp.lb2_hz h
+       SET has_slot = EXISTS (
+             SELECT 1 FROM generate_series(h.h_from, h.h_to, interval '1 day') g
+              WHERE public.is_account_working_day(v_account_id, g::date)
+                AND EXISTS (SELECT 1 FROM pg_temp.lb2_nodes n
+                             WHERE n.valid
+                               AND NOT EXISTS (SELECT 1 FROM public.panelist_unavailability u
+                                                 JOIN public.panelists p ON p.id = u.panelist_id
+                                                  AND p.account_id = v_account_id AND p.status = 'active'
+                                                WHERE p.node_id = n.node_id AND u.account_id = v_account_id
+                                                  AND u.status = 'active' AND g::date BETWEEN u.start_date AND u.end_date))
+                AND EXISTS (SELECT 1 FROM public.nodes dn
+                             WHERE dn.city_id = h.dest_city AND dn.account_id = v_account_id AND dn.status = 'active'
+                               AND EXISTS (SELECT 1 FROM public.panelists p
+                                            WHERE p.node_id = dn.id AND p.account_id = v_account_id AND p.status = 'active')
+                               AND NOT EXISTS (SELECT 1 FROM public.panelist_unavailability u
+                                                 JOIN public.panelists p ON p.id = u.panelist_id
+                                                  AND p.account_id = v_account_id AND p.status = 'active'
+                                                WHERE p.node_id = dn.id AND u.account_id = v_account_id
+                                                  AND u.status = 'active' AND g::date BETWEEN u.start_date AND u.end_date)))
+     WHERE h.h_from <= h.h_to;
+    UPDATE pg_temp.lb2_ship s SET defer_reason = NULL, frozen = true
+      FROM pg_temp.lb2_hz h
+     WHERE s.defer_reason = 'no_valid_day' AND h.has_slot
+       AND h.dest_city = s.dest_city
+       AND h.h_from = GREATEST(v_from, COALESCE(s.plan_start, v_from))
+       AND h.h_to = COALESCE(s.plan_end, GREATEST(s.pl_end, p_end_date));
+  END IF;
+
+  -- 0c ter (R2). Nunca se borra una muestra con dependientes que el borrado arrastraria o desenlazaria:
+  -- material_hold.allocation_plan_detail_id (CASCADE), shipment_incident.parcel_id (CASCADE),
+  -- panelist_incident.allocation_plan_detail_id y one_db.allocation_detail_id (SET NULL). Se queda donde esta
+  -- (congelada, carga fija) y se avisa con deferred_blocked. Las propuestas de panelist_reassignment_proposal SI
+  -- caen en cascada: se refieren a una muestra que deja de existir en el plan (la anotacion conserva la fila).
+  UPDATE pg_temp.lb2_ship s SET defer_reason = NULL, frozen = true, def_blocked = true
+   WHERE s.defer_reason IS NOT NULL
+     AND s.id IN (SELECT m.allocation_plan_detail_id FROM public.material_hold m
+                   WHERE m.allocation_plan_detail_id IN (SELECT c.id FROM pg_temp.lb2_ship c WHERE c.defer_reason IS NOT NULL)
+                  UNION
+                  SELECT si.parcel_id FROM public.shipment_incident si
+                   WHERE si.parcel_id IN (SELECT c.id FROM pg_temp.lb2_ship c WHERE c.defer_reason IS NOT NULL)
+                  UNION
+                  SELECT pi.allocation_plan_detail_id FROM public.panelist_incident pi
+                   WHERE pi.allocation_plan_detail_id IN (SELECT c.id FROM pg_temp.lb2_ship c WHERE c.defer_reason IS NOT NULL)
+                  UNION
+                  SELECT o.allocation_detail_id FROM public.one_db o
+                   WHERE o.allocation_detail_id IN (SELECT c.id FROM pg_temp.lb2_ship c WHERE c.defer_reason IS NOT NULL));
+  SELECT count(*) INTO v_def_blocked FROM pg_temp.lb2_ship WHERE def_blocked;
 
   -- 0d. Las apartadas salen del calculo: no cuentan en totales del mes, objetivos, desviaciones ni matrices.
   CREATE TEMP TABLE pg_temp.lb2_defer (id uuid PRIMARY KEY, reason text NOT NULL) ON COMMIT DROP;
@@ -861,6 +931,25 @@ BEGIN
         JOIN pg_temp.lb2_defer d ON d.id = a.id
        WHERE a.account_id = v_account_id
          FOR UPDATE OF a;
+      -- Ya bloqueadas: si alguna dejo de estar pendiente, no tiene nodo destino o gano un dependiente (R2) entre la
+      -- lectura y el bloqueo, se aborta nombrando las muestras.
+      SELECT string_agg(d.id::text, ', ' ORDER BY d.id) INTO v_def_bad
+        FROM pg_temp.lb2_defer d
+        LEFT JOIN public.allocation_plan_details a ON a.id = d.id AND a.account_id = v_account_id AND a.status = 'pending'
+        LEFT JOIN public.nodes dn ON dn.id = a.destination_node_id
+       WHERE dn.id IS NULL;
+      IF v_def_bad IS NOT NULL THEN
+        RAISE EXCEPTION 'Balanceo abortado: muestras a apartar que ya no estan pendientes o sin nodo destino: %', v_def_bad;
+      END IF;
+      SELECT string_agg(d.id::text, ', ' ORDER BY d.id) INTO v_def_bad
+        FROM pg_temp.lb2_defer d
+       WHERE EXISTS (SELECT 1 FROM public.material_hold m WHERE m.allocation_plan_detail_id = d.id)
+          OR EXISTS (SELECT 1 FROM public.shipment_incident si WHERE si.parcel_id = d.id)
+          OR EXISTS (SELECT 1 FROM public.panelist_incident pi WHERE pi.allocation_plan_detail_id = d.id)
+          OR EXISTS (SELECT 1 FROM public.one_db o WHERE o.allocation_detail_id = d.id);
+      IF v_def_bad IS NOT NULL THEN
+        RAISE EXCEPTION 'Balanceo abortado: muestras a apartar con incidencias, material o lecturas asociadas: %', v_def_bad;
+      END IF;
       INSERT INTO public.deferred_samples
         (account_id, plan_id, origin_city_id, dest_city_id, origin_node_id, destination_node_id, fecha_programada,
          reason, row_snapshot, created_by)
@@ -871,12 +960,15 @@ BEGIN
         JOIN public.nodes dn ON dn.id = a.destination_node_id
        WHERE a.account_id = v_account_id AND a.status = 'pending';
       GET DIAGNOSTICS v_def_ins = ROW_COUNT;
+      -- OJO: el trigger AFTER DELETE recompute_incidents_on_plan_delete recalcula las bajas activas que tocan
+      -- estas filas; borrar la ultima muestra afectada de una baja puede pasar su incidencia a 'auto_resolved'
+      -- (los tests desactivan los triggers de incidencias y no lo cubren).
       DELETE FROM public.allocation_plan_details a
        USING pg_temp.lb2_defer d
        WHERE a.id = d.id AND a.account_id = v_account_id AND a.status = 'pending';
       GET DIAGNOSTICS v_def_del = ROW_COUNT;
       IF v_def_ins <> v_def_removed OR v_def_del <> v_def_ins THEN
-        RAISE EXCEPTION 'Balanceo abortado: muestras a apartar %, anotadas %, borradas % (el plan cambio durante el balanceo; reintentar)',
+        RAISE EXCEPTION 'Balanceo abortado: muestras a apartar %, anotadas %, borradas % (reintentar)',
           v_def_removed, v_def_ins, v_def_del;
       END IF;
     END IF;
@@ -1002,12 +1094,16 @@ BEGIN
                                       CASE WHEN v_def_origin > 0 THEN 'origin_no_panelist=' || v_def_origin END,
                                       CASE WHEN v_def_dest > 0 THEN 'dest_no_panelist=' || v_def_dest END,
                                       CASE WHEN v_def_day > 0 THEN 'no_valid_day=' || v_def_day END))
-           WHERE v_def_removed > 0) x;
+           WHERE v_def_removed > 0
+          UNION ALL
+          SELECT jsonb_build_object('code', 'deferred_blocked', 'count', count(*),
+                                    'detail', string_agg(DISTINCT cur_code, ', ' ORDER BY cur_code))
+            FROM pg_temp.lb2_ship WHERE def_blocked HAVING count(*) > 0) x;
 
   DROP TABLE IF EXISTS pg_temp.lb2_nodes, pg_temp.lb2_days, pg_temp.lb2_absent, pg_temp.lb2_cells, pg_temp.lb2_segs, pg_temp.lb2_ship,
                        pg_temp.lb2_new, pg_temp.lb2_pb, pg_temp.lb2_plans, pg_temp.lb2_routes, pg_temp.lb2_dest,
                        pg_temp.lb2_dabsent, pg_temp.lb2_dload, pg_temp.lb2_sdabs,
-                       pg_temp.lb2_alt, pg_temp.lb2_altload, pg_temp.lb2_altabs, pg_temp.lb2_defer;
+                       pg_temp.lb2_alt, pg_temp.lb2_altload, pg_temp.lb2_altabs, pg_temp.lb2_defer, pg_temp.lb2_hz;
 
   RETURN jsonb_build_object('success', true,
     'movements_count', v_movements_count,
@@ -1023,7 +1119,7 @@ BEGIN
     -- reintroduced: lo aporta la reintroduccion (parte siguiente); waiting = anotaciones pendientes de la ciudad
     -- origen tras esta ejecucion (en la vista previa, incluidas las que se apartarian).
     'deferred', jsonb_build_object('removed', v_def_removed, 'reassigned_dest', v_def_reassigned,
-                                   'reintroduced', 0, 'waiting', v_def_waiting,
+                                   'reintroduced', 0, 'waiting', v_def_waiting, 'blocked', v_def_blocked,
                                    'by_reason', jsonb_build_object('origin_no_panelist', v_def_origin,
                                                                    'dest_no_panelist', v_def_dest,
                                                                    'no_valid_day', v_def_day)),

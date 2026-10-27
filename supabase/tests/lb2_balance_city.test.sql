@@ -156,9 +156,8 @@ SELECT pg_temp.fail_if(max(n) <> 4 OR min(n) <> 4, 'N1 deberia tener 4 por dia')
   FROM pg_temp.grid('2027-03-08', '2027-03-12') WHERE code = 'N1';
 ROLLBACK;
 
--- Caso 4b: P1 tambien ausente esa semana => no hay ninguna celda valida en el periodo: no se mueve nada.
--- (Spec 2026-10-28, 3.1.3: sin dia valido en el periodo ni en otro mes => se apartan al registro como
--- no_valid_day, ya no se quedan congeladas con aviso no_valid_cell.)
+-- Caso 4b: P1 tambien ausente esa semana => no hay ninguna celda valida en el periodo: no se mueve nada y se
+-- avisa. El plan (todo marzo) si tiene huecos mas adelante, asi que NO se borran (regla R3, 2026-10-28).
 BEGIN;
 \ir fixtures/incident_city.sql
 \ir fixtures/no_incident_triggers.sql
@@ -174,13 +173,38 @@ BEGIN
   r := public.rpc_balance_city_v2('c1000000-0000-0000-0000-000000000001', '2027-03-08', '2027-03-12', true);
   PERFORM pg_temp.fail_if((r->>'success')::boolean IS DISTINCT FROM true, 'sin celdas success: ' || r::text);
   PERFORM pg_temp.fail_if((r->>'movements_count')::int <> 0, 'sin celdas no debe mover: ' || r::text);
-  PERFORM pg_temp.fail_if(r->'warnings'->0->>'code' IS DISTINCT FROM 'deferred_removed', 'aviso code: ' || r::text);
+  PERFORM pg_temp.fail_if(r->'warnings'->0->>'code' IS DISTINCT FROM 'no_valid_cell', 'aviso code: ' || r::text);
   PERFORM pg_temp.fail_if((r->'warnings'->0->>'count')::int IS DISTINCT FROM 20, 'aviso count: ' || r::text);
-  PERFORM pg_temp.fail_if(position('no_valid_day=20' IN r->'warnings'->0->>'detail') = 0, 'aviso detail: ' || r::text);
-  PERFORM pg_temp.fail_if((r->'deferred'->'by_reason'->>'no_valid_day')::int IS DISTINCT FROM 20, 'apartadas: ' || r::text);
+  PERFORM pg_temp.fail_if(position('N1' IN r->'warnings'->0->>'detail') = 0, 'aviso detail: ' || r::text);
+  PERFORM pg_temp.fail_if((r->'deferred'->>'removed')::int IS DISTINCT FROM 0, 'no debe borrar: ' || r::text);
 END $$;
-SELECT pg_temp.fail_if(count(*) <> 0, 'quedan en el plan') FROM public.allocation_plan_details;
-SELECT pg_temp.fail_if(count(*) <> 20, 'no estan las 20 en el registro sin mover') FROM public.deferred_samples
+SELECT pg_temp.fail_if(count(*) <> 20, 'se movio algo') FROM public.allocation_plan_details
+ WHERE origin_node_id = 'b1000000-0000-0000-0000-000000000001' AND fecha_programada = '2027-03-08' AND reassigned_at IS NULL;
+SELECT pg_temp.fail_if(count(*) <> 0, 'registro vacio') FROM public.deferred_samples;
+ROLLBACK;
+
+-- Caso 4c: igual que 4b pero P1 y P2 ausentes TODO el plan (1..31/3) => no hay hueco en todo el horizonte del
+-- plan: se apartan al registro (spec 2026-10-28, 3.1.3, regla R3).
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+INSERT INTO public.panelist_unavailability (panelist_id, start_date, end_date, reason, status, account_id)
+VALUES ('e2000000-0000-0000-0000-000000000002', '2027-03-01', '2027-03-31', 'vacation', 'active', 'a0000000-0000-0000-0000-000000000001'),
+       ('e1000000-0000-0000-0000-000000000001', '2027-03-01', '2027-03-31', 'vacation', 'active', 'a0000000-0000-0000-0000-000000000001');
+DELETE FROM public.panelists WHERE id = 'e3000000-0000-0000-0000-000000000003';
+SELECT pg_temp.mk('N1', '2027-03-08') FROM generate_series(1, 20);
+DO $$
+DECLARE r jsonb;
+BEGIN
+  r := public.rpc_balance_city_v2('c1000000-0000-0000-0000-000000000001', '2027-03-08', '2027-03-12', true);
+  PERFORM pg_temp.fail_if((r->>'movements_count')::int <> 0, '4c no debe mover: ' || r::text);
+  PERFORM pg_temp.fail_if(r->'warnings'->0->>'code' IS DISTINCT FROM 'deferred_removed'
+                          OR (r->'warnings'->0->>'count')::int IS DISTINCT FROM 20, '4c aviso: ' || r::text);
+  PERFORM pg_temp.fail_if((r->'deferred'->'by_reason'->>'no_valid_day')::int IS DISTINCT FROM 20, '4c apartadas: ' || r::text);
+END $$;
+SELECT pg_temp.fail_if(count(*) <> 0, '4c quedan en el plan') FROM public.allocation_plan_details;
+SELECT pg_temp.fail_if(count(*) <> 20, '4c no estan las 20 en el registro sin mover') FROM public.deferred_samples
  WHERE reason = 'no_valid_day' AND origin_node_id = 'b1000000-0000-0000-0000-000000000001' AND fecha_programada = '2027-03-08'
    AND row_snapshot->>'reassigned_at' IS NULL;
 ROLLBACK;

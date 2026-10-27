@@ -255,3 +255,133 @@ SELECT public.rpc_balance_city_v2('c1000000-0000-0000-0000-000000000001', '2027-
 SELECT pg_temp.fail_if((SELECT count(*) FROM public.deferred_samples) <> 5, 'c5c deben anotarse solo las 5 pendientes');
 SELECT pg_temp.fail_if((SELECT count(*) FROM public.allocation_plan_details WHERE status = 'notified') <> 1, 'c5c la notificada se toco');
 ROLLBACK;
+
+-- ===== Caso 6 (R2): muestras que se apartarian pero tienen dependientes NO se borran ni se anotan.
+-- C1 sin panelistas (origin_no_panelist) y 6 pendientes N1 -> N4: (1) material_hold, (2) shipment_incident,
+-- (3) panelist_incident enlazada, (4) one_db enlazada => bloqueadas; (5) con propuesta de reasignacion => SI se
+-- aparta y la propuesta cae en cascada (se refiere a una muestra que ya no existe: intencionado); (6) sin nada => se aparta.
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+DELETE FROM public.panelists WHERE id IN ('e1000000-0000-0000-0000-000000000001','e2000000-0000-0000-0000-000000000002',
+                                          'e3000000-0000-0000-0000-000000000003');
+CREATE TEMP TABLE c6 AS SELECT k, pg_temp.mk_to('N1', 'N4', '2027-03-04') AS id FROM generate_series(1, 6) k;
+INSERT INTO public.material_hold (allocation_plan_detail_id, account_id, panelist_id)
+SELECT id, 'a0000000-0000-0000-0000-000000000001', 'e4000000-0000-0000-0000-000000000004' FROM c6 WHERE k = 1;
+INSERT INTO public.shipment_incident (parcel_id, account_id, telegram_id, description)
+SELECT id, 'a0000000-0000-0000-0000-000000000001', 't1', 'roto' FROM c6 WHERE k = 2;
+INSERT INTO public.panelist_incident (account_id, panelist_id, category, allocation_plan_detail_id)
+SELECT 'a0000000-0000-0000-0000-000000000001', 'e4000000-0000-0000-0000-000000000004', 'other', id FROM c6 WHERE k = 3;
+INSERT INTO public.one_db (account_id, allocation_detail_id, tag_id, plan_name, carrier_name, product_name,
+                           origin_city_name, destination_city_name, sent_at, received_at, total_transit_days, source_data_snapshot)
+SELECT 'a0000000-0000-0000-0000-000000000001', id, 'TAG1', 'Mar27', 'Carrier', 'Prod', 'City1', 'City2',
+       '2027-03-04', '2027-03-05', 1, '{}'::jsonb FROM c6 WHERE k = 4;
+INSERT INTO public.panelist_unavailability (id, panelist_id, start_date, end_date, reason, status, account_id)
+VALUES ('f6000000-0000-0000-0000-000000000006', 'e4000000-0000-0000-0000-000000000004', '2028-01-10', '2028-01-11',
+        'vacation', 'active', 'a0000000-0000-0000-0000-000000000001');
+INSERT INTO public.panelist_reassignment_proposal (account_id, unavailability_id, allocation_plan_detail_id, affected_role, suggested_action)
+SELECT 'a0000000-0000-0000-0000-000000000001', 'f6000000-0000-0000-0000-000000000006', id, 'destination', 'none' FROM c6 WHERE k = 5;
+DO $$
+DECLARE r jsonb; w jsonb;
+BEGIN
+  r := public.rpc_balance_city_v2('c1000000-0000-0000-0000-000000000001', '2027-03-01', '2027-03-31', false);
+  PERFORM pg_temp.fail_if((r->'deferred'->>'removed')::int IS DISTINCT FROM 2 OR (r->'deferred'->>'blocked')::int IS DISTINCT FROM 4,
+                          'c6 preview removed 2 / blocked 4: ' || r::text);
+  r := public.rpc_balance_city_v2('c1000000-0000-0000-0000-000000000001', '2027-03-01', '2027-03-31', true);
+  PERFORM pg_temp.fail_if((r->'deferred'->>'removed')::int IS DISTINCT FROM 2 OR (r->'deferred'->>'blocked')::int IS DISTINCT FROM 4
+                          OR (r->'deferred'->'by_reason'->>'origin_no_panelist')::int IS DISTINCT FROM 2,
+                          'c6 apply removed 2 / blocked 4: ' || r::text);
+  SELECT x INTO w FROM jsonb_array_elements(r->'warnings') x WHERE x->>'code' = 'deferred_blocked';
+  PERFORM pg_temp.fail_if(w IS NULL OR (w->>'count')::int <> 4 OR w->>'detail' IS DISTINCT FROM 'N1', 'c6 aviso deferred_blocked: ' || r::text);
+  PERFORM pg_temp.fail_if(pg_temp.warn_count(r, 'deferred_removed') <> 2, 'c6 aviso deferred_removed: ' || r::text);
+END $$;
+SELECT pg_temp.fail_if(count(*) <> 4, 'c6 las 4 con dependientes deben seguir pendientes en el plan')
+  FROM public.allocation_plan_details a JOIN c6 ON c6.id = a.id WHERE c6.k <= 4 AND a.status = 'pending';
+SELECT pg_temp.fail_if((SELECT count(*) FROM public.deferred_samples) <> 2, 'c6 registro: 2');
+SELECT pg_temp.fail_if(count(*) <> 2, 'c6 anotadas deben ser la 5 y la 6')
+  FROM public.deferred_samples d JOIN c6 ON c6.id = (d.row_snapshot->>'id')::uuid WHERE c6.k IN (5, 6);
+SELECT pg_temp.fail_if(count(*) <> 0, 'c6 la 5 y la 6 deben salir del plan')
+  FROM public.allocation_plan_details a JOIN c6 ON c6.id = a.id WHERE c6.k IN (5, 6);
+SELECT pg_temp.fail_if((SELECT count(*) FROM public.material_hold) <> 1 OR (SELECT count(*) FROM public.shipment_incident) <> 1
+                       OR (SELECT count(*) FROM public.panelist_incident WHERE allocation_plan_detail_id IS NOT NULL) <> 1
+                       OR (SELECT count(*) FROM public.one_db WHERE allocation_detail_id IS NOT NULL) <> 1,
+                       'c6 los dependientes deben seguir intactos');
+SELECT pg_temp.fail_if((SELECT count(*) FROM public.panelist_reassignment_proposal) <> 0,
+                       'c6 la propuesta de la muestra apartada debe caer en cascada');
+ROLLBACK;
+
+-- ===== Caso 7 (R3): no_valid_day solo borra si no hay hueco en TODO el horizonte del plan (no solo en la pantalla).
+-- N1 unico nodo valido de C1 (P2, P3 borrados); plan Mar27 todo marzo; periodo de pantalla 8..12/3.
+-- 7a: P1 ausente solo 8..12/3 => hay hueco despues en marzo: no se borra; se queda (aviso no_valid_cell).
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+DELETE FROM public.panelists WHERE id IN ('e2000000-0000-0000-0000-000000000002','e3000000-0000-0000-0000-000000000003');
+INSERT INTO public.panelist_unavailability (panelist_id, start_date, end_date, reason, status, account_id)
+VALUES ('e1000000-0000-0000-0000-000000000001', '2027-03-08', '2027-03-12', 'vacation', 'active', 'a0000000-0000-0000-0000-000000000001');
+SELECT pg_temp.mk_to('N1', 'N4', '2027-03-10') FROM generate_series(1, 2);
+DO $$
+DECLARE r jsonb;
+BEGIN
+  r := public.rpc_balance_city_v2('c1000000-0000-0000-0000-000000000001', '2027-03-08', '2027-03-12', true);
+  PERFORM pg_temp.fail_if((r->'deferred'->>'removed')::int IS DISTINCT FROM 0, 'c7a no debe borrar: ' || r::text);
+  PERFORM pg_temp.fail_if(pg_temp.warn_count(r, 'no_valid_cell') <> 2, 'c7a aviso no_valid_cell 2: ' || r::text);
+END $$;
+SELECT pg_temp.fail_if(count(*) <> 2, 'c7a deben quedar donde estaban') FROM public.allocation_plan_details
+ WHERE fecha_programada = '2027-03-10' AND reassigned_at IS NULL AND status = 'pending';
+SELECT pg_temp.fail_if((SELECT count(*) FROM public.deferred_samples) <> 0, 'c7a registro vacio');
+ROLLBACK;
+
+-- 7b: P1 ausente todo el horizonte del plan (1..31/3) => no hay hueco: se borran (no_valid_day).
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+DELETE FROM public.panelists WHERE id IN ('e2000000-0000-0000-0000-000000000002','e3000000-0000-0000-0000-000000000003');
+INSERT INTO public.panelist_unavailability (panelist_id, start_date, end_date, reason, status, account_id)
+VALUES ('e1000000-0000-0000-0000-000000000001', '2027-03-01', '2027-03-31', 'vacation', 'active', 'a0000000-0000-0000-0000-000000000001');
+SELECT pg_temp.mk_to('N1', 'N4', '2027-03-10') FROM generate_series(1, 2);
+DO $$
+DECLARE r jsonb;
+BEGIN
+  r := public.rpc_balance_city_v2('c1000000-0000-0000-0000-000000000001', '2027-03-08', '2027-03-12', true);
+  PERFORM pg_temp.fail_if((r->'deferred'->'by_reason'->>'no_valid_day')::int IS DISTINCT FROM 2, 'c7b deben borrarse: ' || r::text);
+END $$;
+SELECT pg_temp.fail_if((SELECT count(*) FROM public.allocation_plan_details) <> 0, 'c7b quedan en el plan');
+ROLLBACK;
+
+-- 7c: destino ausente. P4 (unico nodo de C2) ausente 8..12/3 => hay hueco despues: se quedan.
+-- 7d: P4 ausente todo marzo => se borran.
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+INSERT INTO public.panelist_unavailability (id, panelist_id, start_date, end_date, reason, status, account_id)
+VALUES ('f7000000-0000-0000-0000-000000000007', 'e4000000-0000-0000-0000-000000000004', '2027-03-08', '2027-03-12',
+        'vacation', 'active', 'a0000000-0000-0000-0000-000000000001');
+SELECT pg_temp.mk_to('N1', 'N4', '2027-03-10') FROM generate_series(1, 2);
+DO $$
+DECLARE r jsonb;
+BEGIN
+  r := public.rpc_balance_city_v2('c1000000-0000-0000-0000-000000000001', '2027-03-08', '2027-03-12', false);
+  PERFORM pg_temp.fail_if((r->'deferred'->>'removed')::int IS DISTINCT FROM 0, 'c7c no debe borrar: ' || r::text);
+  PERFORM pg_temp.fail_if(pg_temp.warn_count(r, 'no_valid_cell') <> 2, 'c7c aviso no_valid_cell 2: ' || r::text);
+END $$;
+ROLLBACK;
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+INSERT INTO public.panelist_unavailability (panelist_id, start_date, end_date, reason, status, account_id)
+VALUES ('e4000000-0000-0000-0000-000000000004', '2027-03-01', '2027-03-31', 'vacation', 'active', 'a0000000-0000-0000-0000-000000000001');
+SELECT pg_temp.mk_to('N1', 'N4', '2027-03-10') FROM generate_series(1, 2);
+DO $$
+DECLARE r jsonb;
+BEGIN
+  r := public.rpc_balance_city_v2('c1000000-0000-0000-0000-000000000001', '2027-03-08', '2027-03-12', true);
+  PERFORM pg_temp.fail_if((r->'deferred'->'by_reason'->>'no_valid_day')::int IS DISTINCT FROM 2, 'c7d deben borrarse: ' || r::text);
+END $$;
+SELECT pg_temp.fail_if((SELECT count(*) FROM public.allocation_plan_details) <> 0, 'c7d quedan en el plan');
+ROLLBACK;
