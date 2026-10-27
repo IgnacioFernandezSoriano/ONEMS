@@ -3041,3 +3041,39 @@ help_center.open_new_tab,Ouvrir dans un nouvel onglet
 help_center.copy_link,Copier le lien
 help_center.copied,Lien copié
 help_center.copy_hint,Choisissez la langue du panéliste avant de copier. Depuis la conversation d'un incident le lien est déjà dans sa langue.
+lb2.policies_title,Politiques d'équilibrage
+lb2.working_days,Jours ouvrés
+lb2.date_policy,Politique de date
+lb2.date_policy_daily,Quotidienne
+lb2.date_policy_weekly,Hebdomadaire
+lb2.date_policy_help,Quotidienne : chaque envoi est placé sur un jour ouvré précis. Hebdomadaire : seule la semaine est fixée et l'envoi va au premier jour ouvré de cette semaine.
+lb2.pobox,POBOX
+lb2.pobox_help,Les nœuds POBOX doivent être couverts chaque jour ouvré : l'équilibrage garantira au moins un envoi par nœud POBOX chaque jour ouvré.
+lb2.pobox_forces_daily,POBOX impose la politique de date quotidienne.
+lb2.balance_all,Équilibrer toutes les villes
+lb2.balance_all_progress,Équilibrage {done}/{total}
+lb2.balance_all_need_dates,Indiquez les dates de début et de fin pour équilibrer toutes les villes.
+lb2.day_short.0,Dim
+lb2.day_short.1,Lun
+lb2.day_short.2,Mar
+lb2.day_short.3,Mer
+lb2.day_short.4,Jeu
+lb2.day_short.5,Ven
+lb2.day_short.6,Sam
+lb2.scale_day,Jour
+lb2.scale_week,Semaine
+lb2.scale_month,Mois
+lb2.unavailable_legend,Indisponible
+lb2.non_working_legend,Jour non ouvré
+lb2.conflict_legend,Conflit
+lb2.city_policy_inherit,Hériter du compte
+lb2.warnings_title,Avertissements
+lb2.warning.no_valid_cell,Aucun jour valide disponible pour cet envoi.
+lb2.warning.pobox_uncovered,Nœud POBOX non couvert certains jours ouvrés.
+lb2.pobox_days_missing,Jours POBOX manquants
+lb2.pobox_days_moved,Jours POBOX déplacés
+lb2.pobox_days_created,Jours POBOX créés
+lb2.pobox_days_uncovered,Jours POBOX non couverts
+lb2.applied_ok,Équilibrage appliqué avec succès.
+lb2.applied_error,Erreur lors de l'application de l'équilibrage.
+lb2.city_failed,Échec pour la ville {city}

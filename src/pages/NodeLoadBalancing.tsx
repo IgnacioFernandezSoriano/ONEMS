@@ -1,8 +1,12 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNodeLoadBalancing, BalanceResult } from '../hooks/useNodeLoadBalancing';
 import { CityLoadCard } from '../components/NodeLoadBalancing/CityLoadCard';
 import { BalancePreviewModal } from '../components/NodeLoadBalancing/BalancePreviewModal';
+import { BalancePoliciesPanel } from '../components/NodeLoadBalancing/BalancePoliciesPanel';
+import { useBalancePolicies } from '../hooks/useBalancePolicies';
+import { useAccountConfig } from '../hooks/useAccountConfig';
+import { workingDowsFromSchedule, type DatePolicy } from '../lib/workingDays';
 
 import { useTranslation } from '@/hooks/useTranslation';
 export default function NodeLoadBalancing() {
@@ -16,8 +20,46 @@ export default function NodeLoadBalancing() {
   const [referenceLoad, setReferenceLoad] = useState(6); // Default reference samples per node
   const [deviationPercent, setDeviationPercent] = useState(20); // Default 20% deviation
 
-  const { loadData, citySummaries, loading, error, refetch, previewBalance, applyBalance } =
+  const { loadData, citySummaries, loading, error, refetch, previewBalance, applyBalance, previewAll } =
     useNodeLoadBalancing(profile?.account_id || undefined, startDate, endDate, referenceLoad, deviationPercent);
+
+  const { weeklySchedule, setWorkingDay } = useAccountConfig();
+  const { account: accountPolicy, updateAccountPolicy } = useBalancePolicies();
+  const workingDows = useMemo(() => workingDowsFromSchedule(weeklySchedule), [weeklySchedule]);
+  const [balancingAll, setBalancingAll] = useState<{ done: number; total: number } | null>(null);
+  // Results of "Balance all cities" (shown in the modal in a later task)
+  const [, setAllResults] = useState<Awaited<ReturnType<typeof previewAll>> | null>(null);
+
+  const handleToggleDay = async (dow: number, on: boolean) => {
+    try {
+      await setWorkingDay(dow, on);
+    } catch (err) {
+      console.error('[NodeLoadBalancing] Error updating working day:', err);
+    }
+  };
+
+  const handleChangePolicy = async (p: { date_policy?: DatePolicy; pobox_enabled?: boolean }) => {
+    // POBOX forces the daily policy: store both together so the stored value is consistent
+    const patch = p.pobox_enabled === true ? { ...p, date_policy: 'daily' as DatePolicy } : p;
+    try {
+      await updateAccountPolicy(patch);
+    } catch (err) {
+      console.error('[NodeLoadBalancing] Error updating policy:', err);
+    }
+  };
+
+  const handleBalanceAll = async () => {
+    setBalancingAll({ done: 0, total: 0 });
+    try {
+      const results = await previewAll((done, total) => setBalancingAll({ done, total }));
+      setAllResults(results);
+      console.log('[NodeLoadBalancing] previewAll results:', results);
+    } catch (err) {
+      console.error('[NodeLoadBalancing] Error balancing all cities:', err);
+    } finally {
+      setBalancingAll(null);
+    }
+  };
 
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
@@ -247,6 +289,18 @@ export default function NodeLoadBalancing() {
           Refresh
         </button>
       </div>
+
+      <BalancePoliciesPanel
+        workingDows={workingDows}
+        onToggleDay={handleToggleDay}
+        datePolicy={accountPolicy?.date_policy ?? 'daily'}
+        pobox={accountPolicy?.pobox_enabled ?? false}
+        onChangePolicy={handleChangePolicy}
+        onBalanceAll={handleBalanceAll}
+        balancingAll={balancingAll}
+        disabled={!startDate || !endDate}
+        balanceAllHint={t('lb2.balance_all_need_dates')}
+      />
 
       {/* Filters */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">

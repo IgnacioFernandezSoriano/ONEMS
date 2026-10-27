@@ -3049,3 +3049,39 @@ help_center.open_new_tab,Open in a new tab
 help_center.copy_link,Copy link
 help_center.copied,Link copied
 help_center.copy_hint,Choose the panelist's language before copying. From an incident conversation the link already goes in their language.
+lb2.policies_title,Balancing policies
+lb2.working_days,Working days
+lb2.date_policy,Date policy
+lb2.date_policy_daily,Daily
+lb2.date_policy_weekly,Weekly
+lb2.date_policy_help,Daily: each shipment is placed on a specific working day. Weekly: only the week is fixed and the shipment goes to the first working day of that week.
+lb2.pobox,POBOX
+lb2.pobox_help,POBOX nodes need coverage every working day: balancing will ensure at least one shipment per POBOX node on each working day.
+lb2.pobox_forces_daily,POBOX forces the daily date policy.
+lb2.balance_all,Balance all cities
+lb2.balance_all_progress,Balancing {done}/{total}
+lb2.balance_all_need_dates,Set the start and end dates to balance all cities.
+lb2.day_short.0,Sun
+lb2.day_short.1,Mon
+lb2.day_short.2,Tue
+lb2.day_short.3,Wed
+lb2.day_short.4,Thu
+lb2.day_short.5,Fri
+lb2.day_short.6,Sat
+lb2.scale_day,Day
+lb2.scale_week,Week
+lb2.scale_month,Month
+lb2.unavailable_legend,Unavailable
+lb2.non_working_legend,Non-working day
+lb2.conflict_legend,Conflict
+lb2.city_policy_inherit,Inherit from account
+lb2.warnings_title,Warnings
+lb2.warning.no_valid_cell,No valid day available for this shipment.
+lb2.warning.pobox_uncovered,POBOX node left uncovered on some working days.
+lb2.pobox_days_missing,POBOX days missing
+lb2.pobox_days_moved,POBOX days moved
+lb2.pobox_days_created,POBOX days created
+lb2.pobox_days_uncovered,POBOX days uncovered
+lb2.applied_ok,Balancing applied successfully.
+lb2.applied_error,Error applying the balancing.
+lb2.city_failed,City {city} failed

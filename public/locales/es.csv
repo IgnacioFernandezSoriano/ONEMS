@@ -3049,3 +3049,39 @@ help_center.open_new_tab,Abrir en una pestaña nueva
 help_center.copy_link,Copiar enlace
 help_center.copied,Enlace copiado
 help_center.copy_hint,Elige el idioma del panelista antes de copiar. Desde la conversación de una incidencia el enlace ya va en su idioma.
+lb2.policies_title,Políticas de balanceo
+lb2.working_days,Días laborables
+lb2.date_policy,Política de fecha
+lb2.date_policy_daily,Diaria
+lb2.date_policy_weekly,Semanal
+lb2.date_policy_help,Diaria: cada envío se coloca en un día laborable concreto. Semanal: solo se fija la semana y el envío va al primer día laborable de esa semana.
+lb2.pobox,POBOX
+lb2.pobox_help,Los nodos POBOX necesitan cobertura todos los días laborables: el balanceo asegurará al menos un envío por nodo POBOX en cada día laborable.
+lb2.pobox_forces_daily,POBOX fuerza la política de fecha diaria.
+lb2.balance_all,Balancear todas las ciudades
+lb2.balance_all_progress,Balanceando {done}/{total}
+lb2.balance_all_need_dates,Indica las fechas de inicio y fin para balancear todas las ciudades.
+lb2.day_short.0,Dom
+lb2.day_short.1,Lun
+lb2.day_short.2,Mar
+lb2.day_short.3,Mié
+lb2.day_short.4,Jue
+lb2.day_short.5,Vie
+lb2.day_short.6,Sáb
+lb2.scale_day,Día
+lb2.scale_week,Semana
+lb2.scale_month,Mes
+lb2.unavailable_legend,No disponible
+lb2.non_working_legend,Día no laborable
+lb2.conflict_legend,Conflicto
+lb2.city_policy_inherit,Heredar de la cuenta
+lb2.warnings_title,Avisos
+lb2.warning.no_valid_cell,No hay ningún día válido para este envío.
+lb2.warning.pobox_uncovered,Nodo POBOX sin cubrir en algunos días laborables.
+lb2.pobox_days_missing,Días POBOX que faltan
+lb2.pobox_days_moved,Días POBOX movidos
+lb2.pobox_days_created,Días POBOX creados
+lb2.pobox_days_uncovered,Días POBOX sin cubrir
+lb2.applied_ok,Balanceo aplicado correctamente.
+lb2.applied_error,Error al aplicar el balanceo.
+lb2.city_failed,Falló la ciudad {city}

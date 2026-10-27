@@ -3041,3 +3041,39 @@ help_center.open_new_tab,فتح في علامة تبويب جديدة
 help_center.copy_link,نسخ الرابط
 help_center.copied,تم نسخ الرابط
 help_center.copy_hint,اختر لغة المشارك قبل النسخ. من محادثة الحادثة يكون الرابط بلغته تلقائيًا.
+lb2.policies_title,سياسات الموازنة
+lb2.working_days,أيام العمل
+lb2.date_policy,سياسة التاريخ
+lb2.date_policy_daily,يومية
+lb2.date_policy_weekly,أسبوعية
+lb2.date_policy_help,يومية: يوضع كل شحنة في يوم عمل محدد. أسبوعية: يُحدَّد الأسبوع فقط وتذهب الشحنة إلى أول يوم عمل في ذلك الأسبوع.
+lb2.pobox,POBOX
+lb2.pobox_help,تحتاج عقد POBOX إلى تغطية في كل يوم عمل: ستضمن الموازنة شحنة واحدة على الأقل لكل عقدة POBOX في كل يوم عمل.
+lb2.pobox_forces_daily,يفرض POBOX سياسة التاريخ اليومية.
+lb2.balance_all,موازنة جميع المدن
+lb2.balance_all_progress,جارٍ الموازنة {done}/{total}
+lb2.balance_all_need_dates,حدد تاريخ البداية والنهاية لموازنة جميع المدن.
+lb2.day_short.0,أحد
+lb2.day_short.1,إثنين
+lb2.day_short.2,ثلاثاء
+lb2.day_short.3,أربعاء
+lb2.day_short.4,خميس
+lb2.day_short.5,جمعة
+lb2.day_short.6,سبت
+lb2.scale_day,يوم
+lb2.scale_week,أسبوع
+lb2.scale_month,شهر
+lb2.unavailable_legend,غير متاح
+lb2.non_working_legend,يوم غير عمل
+lb2.conflict_legend,تعارض
+lb2.city_policy_inherit,وراثة من الحساب
+lb2.warnings_title,تنبيهات
+lb2.warning.no_valid_cell,لا يوجد يوم صالح لهذه الشحنة.
+lb2.warning.pobox_uncovered,عقدة POBOX غير مغطاة في بعض أيام العمل.
+lb2.pobox_days_missing,أيام POBOX الناقصة
+lb2.pobox_days_moved,أيام POBOX المنقولة
+lb2.pobox_days_created,أيام POBOX المنشأة
+lb2.pobox_days_uncovered,أيام POBOX غير المغطاة
+lb2.applied_ok,تم تطبيق الموازنة بنجاح.
+lb2.applied_error,حدث خطأ أثناء تطبيق الموازنة.
+lb2.city_failed,فشلت المدينة {city}
