@@ -86,3 +86,63 @@ AS $$
     LEFT JOIN public.account_config ac ON ac.account_id = c.account_id
    WHERE c.id = p_city_id;
 $$;
+
+-- Parte 2 (vista diaria): carga por nodo y dia para la vista dia/mes del balanceo.
+-- Una fila por (nodo con ciudad, dia del periodo). SECURITY DEFINER (omite RLS), por eso:
+--   * todas las lecturas se filtran por p_account_id;
+--   * guarda: con sesion de usuario (auth.uid() no nulo) solo se permite a miembros de p_account_id o a
+--     superadmin (mismo patron que generate_reassignment_proposals / list_reroute_candidates); con
+--     auth.uid() NULL (llamadas internas / service_role) se permite, como en esas funciones;
+--   * se revoca EXECUTE a PUBLIC/anon para que una peticion anonima (uid NULL) no la alcance.
+CREATE OR REPLACE FUNCTION public.rpc_get_node_load_by_day(p_account_id uuid, p_start_date date, p_end_date date)
+RETURNS TABLE(city_id uuid, city_name text, node_id uuid, node_code text, panelist_name text, day date,
+              shipment_count integer, pending_count integer, is_working_day boolean, is_unavailable boolean)
+LANGUAGE plpgsql STABLE SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF auth.uid() IS NOT NULL AND NOT public.is_superadmin()
+     AND p_account_id IS DISTINCT FROM (SELECT p.account_id FROM public.profiles p WHERE p.id = auth.uid()) THEN
+    RAISE EXCEPTION 'No autorizado para esta cuenta' USING ERRCODE = '42501';
+  END IF;
+
+  RETURN QUERY
+  WITH days AS (
+    SELECT d::date AS d, public.is_account_working_day(p_account_id, d::date) AS wd
+      FROM generate_series(p_start_date, p_end_date, interval '1 day') d
+  ),
+  nds AS (
+    SELECT n.id, n.auto_id, c.id AS cid, c.name AS cname,
+           (SELECT pa.name::text FROM public.panelists pa
+             WHERE pa.node_id = n.id AND pa.account_id = p_account_id AND pa.status = 'active'
+             ORDER BY pa.created_at LIMIT 1) AS pname
+      FROM public.nodes n
+      JOIN public.cities c ON c.id = n.city_id AND c.account_id = p_account_id
+     WHERE n.account_id = p_account_id
+  ),
+  ship AS (
+    SELECT a.origin_node_id AS nid, a.fecha_programada AS d,
+           count(*)::int AS total, (count(*) FILTER (WHERE a.status = 'pending'))::int AS pend
+      FROM public.allocation_plan_details a
+     WHERE a.account_id = p_account_id
+       AND a.fecha_programada BETWEEN p_start_date AND p_end_date
+     GROUP BY a.origin_node_id, a.fecha_programada
+  ),
+  una AS (
+    SELECT DISTINCT pa.node_id AS nid, dd.d
+      FROM public.panelist_unavailability u
+      JOIN public.panelists pa ON pa.id = u.panelist_id AND pa.account_id = p_account_id AND pa.status = 'active'
+      JOIN days dd ON dd.d BETWEEN u.start_date AND u.end_date
+     WHERE u.account_id = p_account_id AND u.status = 'active' AND pa.node_id IS NOT NULL
+  )
+  SELECT nds.cid, nds.cname, nds.id, nds.auto_id, nds.pname, days.d,
+         COALESCE(ship.total, 0), COALESCE(ship.pend, 0), days.wd, (una.nid IS NOT NULL)
+    FROM nds
+    CROSS JOIN days
+    LEFT JOIN ship ON ship.nid = nds.id AND ship.d = days.d
+    LEFT JOIN una  ON una.nid  = nds.id AND una.d  = days.d
+   ORDER BY nds.cname, nds.auto_id, days.d;
+END;
+$$;
+REVOKE ALL ON FUNCTION public.rpc_get_node_load_by_day(uuid, date, date) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.rpc_get_node_load_by_day(uuid, date, date) TO authenticated, service_role;
