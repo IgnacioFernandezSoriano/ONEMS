@@ -15,8 +15,8 @@ ROLLBACK;
 -- ===== Caso B: domingo-jueves laborables.
 BEGIN;
 \ir fixtures/incident_city.sql
-INSERT INTO public.weekly_schedule (account_id, day_of_week, is_working_day)
-  SELECT 'a0000000-0000-0000-0000-000000000001', d, d <= 4 FROM generate_series(0, 6) d;
+INSERT INTO public.weekly_schedule (account_id, day_of_week, is_working_day, opening_hour, cutoff_time)
+  SELECT 'a0000000-0000-0000-0000-000000000001', d, d <= 4, '08:00', '17:00' FROM generate_series(0, 6) d;
 SELECT pg_temp.fail_if(NOT public.is_account_working_day('a0000000-0000-0000-0000-000000000001', '2027-03-07'), 'B: domingo deberia ser laborable');
 SELECT pg_temp.fail_if(public.is_account_working_day('a0000000-0000-0000-0000-000000000001', '2027-03-05'), 'B: viernes deberia ser no laborable');
 
