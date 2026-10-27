@@ -3,7 +3,9 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNodeLoadBalancing, type NodeDayLoad } from '../hooks/useNodeLoadBalancing';
 import { CityLoadCard, type LoadScale } from '../components/NodeLoadBalancing/CityLoadCard';
 import { BalancePreviewModal, type BalanceCityResult } from '../components/NodeLoadBalancing/BalancePreviewModal';
+import { DeferredSamplesSection } from '../components/NodeLoadBalancing/DeferredSamplesSection';
 import { BalancePoliciesPanel } from '../components/NodeLoadBalancing/BalancePoliciesPanel';
+import { useDeferredSamples, notifyDeferredSamplesChanged } from '../hooks/useDeferredSamples';
 import { useBalancePolicies } from '../hooks/useBalancePolicies';
 import { useAccountConfig } from '../hooks/useAccountConfig';
 import { workingDowsFromSchedule, type DatePolicy } from '../lib/workingDays';
@@ -42,6 +44,14 @@ export default function NodeLoadBalancing() {
 
   const { loadData, dayData, citySummaries, loading, error, refetch, previewBalanceV2, applyBalanceV2, previewAll, applyAll } =
     useNodeLoadBalancing(profile?.account_id || undefined, applied.start, applied.end, referenceLoad, deviationPercent);
+
+  const { summary: deferredSummary } = useDeferredSamples();
+  const deferredByCity = useMemo(
+    () => new Map((deferredSummary?.by_city ?? []).map((c) => [c.city_id, c.count])),
+    [deferredSummary]
+  );
+  // Ultima vista previa por ciudad: muestras que se apartarian del plan (willRemove de las recomendaciones)
+  const [lastPreviewRemoved, setLastPreviewRemoved] = useState<Record<string, number>>({});
 
   const { weeklySchedule, setWorkingDay } = useAccountConfig();
   const { account: accountPolicy, cities: cityPolicies, updateAccountPolicy, updateCityPolicy, effectiveFor } =
@@ -159,6 +169,7 @@ export default function NodeLoadBalancing() {
     try {
       const result = await previewBalanceV2(cityId);
       if (id !== requestId.current) return;
+      setLastPreviewRemoved((prev) => ({ ...prev, [cityId]: result.success ? result.deferred?.removed ?? 0 : 0 }));
       setModalState((prev) => ({ ...prev, results: [{ cityId, cityName, result }], loading: false }));
     } catch (err) {
       if (id !== requestId.current) return;
@@ -177,6 +188,13 @@ export default function NodeLoadBalancing() {
         if (id === requestId.current) setProgress({ done, total });
       });
       if (id !== requestId.current) return;
+      setLastPreviewRemoved((prev) => {
+        const next = { ...prev };
+        results.forEach((r) => {
+          next[r.cityId] = r.result?.success ? r.result.deferred?.removed ?? 0 : 0;
+        });
+        return next;
+      });
       setModalState((prev) => ({ ...prev, results, loading: false }));
     } catch (err) {
       if (id !== requestId.current) return;
@@ -231,6 +249,8 @@ export default function NodeLoadBalancing() {
         showNotice('error', `${t('lb2.applied_error')} ${errMsg(err)}`);
       } finally {
         if (id === requestId.current) setProgress(null);
+        setLastPreviewRemoved({});
+        notifyDeferredSamplesChanged();
         await refetch();
       }
       return;
@@ -254,6 +274,8 @@ export default function NodeLoadBalancing() {
       if (id === requestId.current) setModalState((prev) => ({ ...prev, loading: false }));
       showNotice('error', `${t('lb2.applied_error')} ${errMsg(err)}`);
     } finally {
+      setLastPreviewRemoved((prev) => ({ ...prev, [cityId]: 0 }));
+      notifyDeferredSamplesChanged();
       await refetch();
     }
   };
@@ -682,6 +704,8 @@ export default function NodeLoadBalancing() {
         </div>
       )}
 
+      <DeferredSamplesSection summary={deferredSummary} />
+
       {/* Cities */}
       {citySummaries.length === 0 ? (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
@@ -699,6 +723,8 @@ export default function NodeLoadBalancing() {
               onBalance={() => handleBalanceClick(summary.city_id, summary.city_name)}
               balanceDisabled={applying}
               dayData={dayDataByCity.get(summary.city_id) ?? noDayData}
+              deferredPending={deferredByCity.get(summary.city_id) ?? 0}
+              willRemove={lastPreviewRemoved[summary.city_id] ?? 0}
               scale={scales[summary.city_id] ?? 'week'}
               onScaleChange={(sc) => setScales((prev) => ({ ...prev, [summary.city_id]: sc }))}
               policy={{

@@ -16,6 +16,10 @@ export interface AllCitiesTotals {
   poboxCreated: number
   poboxUncovered: number
   warnings: number
+  deferredRemoved: number
+  deferredReassignedDest: number
+  deferredReintroduced: number
+  deferredWaiting: number
 }
 
 /** Una ciudad cuenta como fallida si trae error o su resultado no es success. */
@@ -23,10 +27,11 @@ export function isCityFailed(r: AllCitiesRow): boolean {
   return !!r.error || !r.result || r.result.success === false || !!r.result.error
 }
 
-/** Algo que aplicar: envios movidos o dias POBOX movidos/creados */
+/** Algo que aplicar: envios movidos, dias POBOX movidos/creados o muestras por compensar apartadas/reasignadas/reintroducidas */
 export function cityHasChanges(r?: BalanceResult): boolean {
   return !!r && !r.error && r.success !== false &&
-    ((r.movements_count || 0) > 0 || (r.pobox?.days_moved || 0) > 0 || (r.pobox?.days_created || 0) > 0)
+    ((r.movements_count || 0) > 0 || (r.pobox?.days_moved || 0) > 0 || (r.pobox?.days_created || 0) > 0 ||
+      (r.deferred?.removed || 0) > 0 || (r.deferred?.reassigned_dest || 0) > 0 || (r.deferred?.reintroduced || 0) > 0)
 }
 
 /** Ids exactos a aplicar tras la vista previa: ciudades no fallidas y con cambios. */
@@ -38,6 +43,7 @@ export function cityIdsToApply(rows: AllCitiesRow[]): string[] {
 export function totalsForAllCities(rows: AllCitiesRow[]): AllCitiesTotals {
   const t: AllCitiesTotals = {
     cities: rows.length, failed: 0, movements: 0, poboxMoved: 0, poboxCreated: 0, poboxUncovered: 0, warnings: 0,
+    deferredRemoved: 0, deferredReassignedDest: 0, deferredReintroduced: 0, deferredWaiting: 0,
   }
   for (const r of rows) {
     if (isCityFailed(r)) {
@@ -50,6 +56,10 @@ export function totalsForAllCities(rows: AllCitiesRow[]): AllCitiesTotals {
     t.poboxCreated += res.pobox?.days_created || 0
     t.poboxUncovered += res.pobox?.days_uncovered || 0
     t.warnings += (res.warnings || []).length
+    t.deferredRemoved += res.deferred?.removed || 0
+    t.deferredReassignedDest += res.deferred?.reassigned_dest || 0
+    t.deferredReintroduced += res.deferred?.reintroduced || 0
+    t.deferredWaiting += res.deferred?.waiting || 0
   }
   return t
 }

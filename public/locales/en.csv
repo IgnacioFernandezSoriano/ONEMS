@@ -3129,3 +3129,32 @@ lb2.help.rule7,POBOX: every working day each city must send at least one shipmen
 lb2.help.preview_warning,The preview shows the proposed changes. You must confirm to apply them to the Allocation Plan.
 allocation_plans.status_deferred,Deferred (to compensate)
 allocation_plans.status_deferred_help,This sample was removed from the plan because its node had no panelist. It is read-only and will be re-introduced by the balancer.
+lb2.deferred.title,Samples to compensate
+lb2.deferred.pending_total,Pending samples to compensate
+lb2.deferred.by_city,By origin city
+lb2.deferred.by_plan,By plan
+lb2.deferred.removed,Set aside
+lb2.deferred.reassigned_dest,Reassigned destination
+lb2.deferred.reintroduced,Reintroduced
+lb2.deferred.waiting,Waiting
+lb2.deferred.blocked,Blocked
+lb2.deferred.remove_warning,Applying will remove {count} samples from the plan and record them as samples to compensate. They will be reintroduced automatically when a valid day and panelist are available.
+lb2.deferred.col_total,Total samples
+lb2.deferred.col_scheduled,Scheduled
+lb2.deferred.col_done,Done
+lb2.deferred.col_deferred,To compensate
+lb2.deferred.col_pobox_extra,POBOX extra
+lb2.deferred.col_city,City
+lb2.deferred.col_plan,Plan
+lb2.deferred.col_reason,Waiting reason
+lb2.deferred.waiting.no_origin_panelist,No active panelist at the origin node
+lb2.deferred.waiting.no_dest_panelist,No active panelist at the destination node
+lb2.deferred.waiting.no_capacity,No capacity on valid days
+lb2.deferred.waiting.plan_inactive,Plan not active
+lb2.deferred.waiting.outside_period,Outside the plan period
+lb2.deferred.empty,There are no samples to compensate.
+lb2.deferred.badge_tooltip,Samples to compensate waiting to be reintroduced
+lb2.warning.deferred_removed,Samples removed from the plan and recorded as samples to compensate.
+lb2.warning.deferred_blocked,Samples to compensate that cannot be moved because they are frozen.
+lb2.rec.deferred_waiting,{count} samples to compensate are waiting in this city. Balancing will reintroduce them when a valid day is available.
+lb2.rec.deferred_will_remove,The last preview would set aside {count} samples of this plan and record them as samples to compensate. Review the preview before applying.

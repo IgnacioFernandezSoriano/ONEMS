@@ -3121,3 +3121,32 @@ lb2.help.rule7,POBOX : chaque jour ouvré, chaque ville doit expédier au moins 
 lb2.help.preview_warning,L'aperçu montre les changements proposés. Vous devez confirmer pour les appliquer à l'Allocation Plan.
 allocation_plans.status_deferred,Différée (à compenser)
 allocation_plans.status_deferred_help,Cet échantillon a été retiré du plan car son nœud n'avait pas de panéliste. Il est en lecture seule et sera réintroduit par l'équilibrage.
+lb2.deferred.title,Échantillons à compenser
+lb2.deferred.pending_total,Échantillons en attente de compensation
+lb2.deferred.by_city,Par ville d’origine
+lb2.deferred.by_plan,Par plan
+lb2.deferred.removed,Mis de côté
+lb2.deferred.reassigned_dest,Destination réaffectée
+lb2.deferred.reintroduced,Réintroduits
+lb2.deferred.waiting,En attente
+lb2.deferred.blocked,Bloqués
+lb2.deferred.remove_warning,L’application retirera {count} échantillons du plan et les enregistrera comme échantillons à compenser. Ils seront réintroduits automatiquement dès qu’un jour et un panéliste valides seront disponibles.
+lb2.deferred.col_total,Échantillons totaux
+lb2.deferred.col_scheduled,Planifiés
+lb2.deferred.col_done,Réalisés
+lb2.deferred.col_deferred,À compenser
+lb2.deferred.col_pobox_extra,Extra POBOX
+lb2.deferred.col_city,Ville
+lb2.deferred.col_plan,Plan
+lb2.deferred.col_reason,Motif d’attente
+lb2.deferred.waiting.no_origin_panelist,Aucun panéliste actif au nœud d’origine
+lb2.deferred.waiting.no_dest_panelist,Aucun panéliste actif au nœud de destination
+lb2.deferred.waiting.no_capacity,Aucune capacité sur les jours valides
+lb2.deferred.waiting.plan_inactive,Plan non actif
+lb2.deferred.waiting.outside_period,Hors de la période du plan
+lb2.deferred.empty,Il n’y a aucun échantillon à compenser.
+lb2.deferred.badge_tooltip,Échantillons à compenser en attente de réintroduction
+lb2.warning.deferred_removed,Échantillons retirés du plan et enregistrés comme échantillons à compenser.
+lb2.warning.deferred_blocked,Échantillons à compenser impossibles à déplacer car ils sont figés.
+lb2.rec.deferred_waiting,{count} échantillons à compenser attendent dans cette ville. L’équilibrage les réintroduira dès qu’un jour valide sera disponible.
+lb2.rec.deferred_will_remove,La dernière prévisualisation mettrait de côté {count} échantillons de ce plan et les enregistrerait comme échantillons à compenser. Vérifiez la prévisualisation avant d’appliquer.

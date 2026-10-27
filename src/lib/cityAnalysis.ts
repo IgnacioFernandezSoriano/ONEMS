@@ -26,6 +26,10 @@ export interface CityAnalysisInput {
   pobox: boolean
   /** hoy, yyyy-MM-dd */
   today: string
+  /** filas del registro de muestras por compensar de esta ciudad que esperan (0 por defecto) */
+  deferredPending?: number
+  /** muestras que la ultima vista previa de esta ciudad apartaria del plan (0 por defecto) */
+  willRemove?: number
 }
 
 const SEVERITY_ORDER: Record<Severity, number> = { critical: 0, warning: 1, info: 2, ok: 3 }
@@ -135,6 +139,14 @@ export function analyzeCity(input: CityAnalysisInput): Finding[] {
         findings.push({ severity: 'ok', code: 'pobox_ok', params: {} })
       }
     }
+  }
+
+  // 7. Muestras por compensar (registro): esperando / que se apartarian al aplicar la vista previa
+  if ((input.deferredPending ?? 0) > 0) {
+    findings.push({ severity: 'info', code: 'deferred_waiting', params: { count: input.deferredPending! } })
+  }
+  if ((input.willRemove ?? 0) > 0) {
+    findings.push({ severity: 'critical', code: 'deferred_will_remove', params: { count: input.willRemove! } })
   }
 
   if (findings.length === 0) findings.push({ severity: 'info', code: 'no_data', params: {} })

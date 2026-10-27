@@ -44,6 +44,7 @@ import { useLocale } from '../../contexts/LocaleContext'
 import { useUnavailabilityIncidents } from '../../lib/hooks/useUnavailabilityIncidents'
 import { useReportedIncidents } from '../../lib/hooks/useReportedIncidents'
 import { useUnreadConversations } from '../../lib/hooks/useUnreadConversations'
+import { useDeferredSamples } from '../../hooks/useDeferredSamples'
 
 interface MenuItem {
   path: string
@@ -70,6 +71,15 @@ export function Sidebar() {
   const { pendingManagerCount } = useUnavailabilityIncidents()
   const { openCount } = useReportedIncidents()
   const { totalReported, totalUnavailability } = useUnreadConversations()
+  // Muestras por compensar: contador del item Load Balancing. Se consulta al montar, al cambiar de cuenta, al
+  // entrar/salir de /node-load-balancing y cuando la pantalla de balanceo avisa de un apply (sin polling).
+  const { summary: deferredSummary, refetch: refetchDeferred } = useDeferredSamples()
+  const deferredPending = deferredSummary?.pending_total ?? 0
+  const onBalancingPage = location.pathname.startsWith('/node-load-balancing')
+  useEffect(() => {
+    refetchDeferred()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onBalancingPage])
   const [expandedSections, setExpandedSections] = useState<string[]>([])
   const [isHovered, setIsHovered] = useState(false)
   const [accounts, setAccounts] = useState<Array<{ id: string; name: string }>>([])
@@ -569,12 +579,22 @@ export function Sidebar() {
                               : 'text-gray-700 hover:bg-gray-50'
                           }`}
                         >
-                          <Icon className="w-5 h-5 flex-shrink-0" />
+                          <span className="relative flex-shrink-0">
+                            <Icon className="w-5 h-5" />
+                            {!isExpanded && deferredPending > 0 && item.children!.some((c) => c.path === '/node-load-balancing') && (
+                              <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-amber-500" />
+                            )}
+                          </span>
                           {isExpanded && (
                             <>
                               <span className="flex-1 text-sm font-medium text-left">
                                 {item.label}
                               </span>
+                              {!isSectionExpanded && deferredPending > 0 && item.children!.some((c) => c.path === '/node-load-balancing') && (
+                                <span title={t('lb2.deferred.badge_tooltip')} className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">
+                                  {deferredPending}
+                                </span>
+                              )}
                               {isSectionExpanded ? (
                                 <ChevronDown className="w-4 h-4" />
                               ) : (
@@ -659,6 +679,11 @@ export function Sidebar() {
                               >
                                 <ChildIcon className="w-4 h-4 flex-shrink-0" />
                                 <span>{child.label}</span>
+                                {child.path === '/node-load-balancing' && deferredPending > 0 && (
+                                  <span title={t('lb2.deferred.badge_tooltip')} className="ml-auto text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">
+                                    {deferredPending}
+                                  </span>
+                                )}
                               </Link>
                             )
                           })}

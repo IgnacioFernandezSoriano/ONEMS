@@ -74,7 +74,7 @@ export interface NodeDayLoad {
 }
 
 export interface BalanceWarning {
-  code: 'no_valid_cell' | 'origin_equals_destination' | 'pobox_uncovered' | string;
+  code: 'no_valid_cell' | 'origin_equals_destination' | 'pobox_uncovered' | 'deferred_removed' | 'deferred_blocked' | string;
   count: number;
   detail: string | null;
 }
@@ -89,6 +89,19 @@ export interface BalancePobox {
   days_moved: number;
   days_created: number;
   days_uncovered: number;
+  /** Dias POBOX cubiertos reintroduciendo muestras por compensar */
+  days_reintroduced?: number;
+}
+
+/** Bloque `deferred` de rpc_balance_city_v2 (muestras por compensar). */
+export interface BalanceDeferred {
+  removed: number;
+  reassigned_dest: number;
+  reintroduced: number;
+  waiting: number;
+  blocked?: number;
+  by_reason?: { origin_no_panelist?: number; dest_no_panelist?: number; no_valid_day?: number };
+  waiting_by_reason?: Record<string, number>;
 }
 
 export interface PendingCity {
@@ -120,6 +133,7 @@ export interface BalanceResult {
   warnings?: BalanceWarning[];
   policy?: BalancePolicyInfo;
   pobox?: BalancePobox;
+  deferred?: BalanceDeferred;
   message: string;
   error?: string | null;
 }

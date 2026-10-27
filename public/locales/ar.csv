@@ -3121,3 +3121,32 @@ lb2.help.rule7,POBOX: في كل يوم عمل يجب أن ترسل كل مدين
 lb2.help.preview_warning,تعرض المعاينة التغييرات المقترحة. يجب التأكيد لتطبيقها على خطة التخصيص (Allocation Plan).
 allocation_plans.status_deferred,مؤجلة (للتعويض)
 allocation_plans.status_deferred_help,تمت إزالة هذه العينة من الخطة لأن عقدتها بلا مشارك. هي للقراءة فقط وسيعيد الموازن إدراجها.
+lb2.deferred.title,العينات المطلوب تعويضها
+lb2.deferred.pending_total,العينات المعلقة للتعويض
+lb2.deferred.by_city,حسب مدينة المصدر
+lb2.deferred.by_plan,حسب الخطة
+lb2.deferred.removed,مستبعدة
+lb2.deferred.reassigned_dest,وجهة معاد تعيينها
+lb2.deferred.reintroduced,معاد إدراجها
+lb2.deferred.waiting,في الانتظار
+lb2.deferred.blocked,محظورة
+lb2.deferred.remove_warning,سيؤدي التطبيق إلى إزالة {count} عينة من الخطة وتسجيلها كعينات مطلوب تعويضها. ستعاد إضافتها تلقائيا عند توفر يوم ومشارك صالحين.
+lb2.deferred.col_total,إجمالي العينات
+lb2.deferred.col_scheduled,المجدولة
+lb2.deferred.col_done,المنجزة
+lb2.deferred.col_deferred,للتعويض
+lb2.deferred.col_pobox_extra,إضافي POBOX
+lb2.deferred.col_city,المدينة
+lb2.deferred.col_plan,الخطة
+lb2.deferred.col_reason,سبب الانتظار
+lb2.deferred.waiting.no_origin_panelist,لا يوجد مشارك نشط في عقدة المصدر
+lb2.deferred.waiting.no_dest_panelist,لا يوجد مشارك نشط في عقدة الوجهة
+lb2.deferred.waiting.no_capacity,لا توجد سعة في الأيام الصالحة
+lb2.deferred.waiting.plan_inactive,الخطة غير نشطة
+lb2.deferred.waiting.outside_period,خارج فترة الخطة
+lb2.deferred.empty,لا توجد عينات مطلوب تعويضها.
+lb2.deferred.badge_tooltip,عينات مطلوب تعويضها في انتظار إعادة إدراجها
+lb2.warning.deferred_removed,عينات أزيلت من الخطة وسجلت كعينات مطلوب تعويضها.
+lb2.warning.deferred_blocked,عينات مطلوب تعويضها لا يمكن نقلها لأنها مجمدة.
+lb2.rec.deferred_waiting,توجد {count} عينة مطلوب تعويضها في انتظار الإدراج في هذه المدينة. ستعيد الموازنة إدراجها عند توفر يوم صالح.
+lb2.rec.deferred_will_remove,ستستبعد المعاينة الأخيرة {count} عينة من هذه الخطة وتسجلها كعينات مطلوب تعويضها. راجع المعاينة قبل التطبيق.

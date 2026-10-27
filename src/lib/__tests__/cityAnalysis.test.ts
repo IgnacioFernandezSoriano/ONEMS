@@ -88,4 +88,26 @@ describe('analyzeCity', () => {
     const sev = analyzeCity({ ...base, dayRows }).map((f) => f.severity)
     expect(sev).toEqual([...sev].sort((a, b) => ['critical', 'warning', 'info', 'ok'].indexOf(a) - ['critical', 'warning', 'info', 'ok'].indexOf(b)))
   })
+
+  it('muestras por compensar: por defecto (0) no hay hallazgos nuevos', () => {
+    expect(codes(base)).toEqual(['load_ok'])
+    expect(codes({ ...base, deferredPending: 0, willRemove: 0 })).toEqual(['load_ok'])
+  })
+
+  it('deferredPending > 0 emite deferred_waiting (info) con count', () => {
+    const f = analyzeCity({ ...base, deferredPending: 4 })
+    expect(f.map((x) => x.code)).toEqual(['deferred_waiting', 'load_ok'])
+    const w = f.find((x) => x.code === 'deferred_waiting')!
+    expect(w.severity).toBe('info')
+    expect(w.params).toEqual({ count: 4 })
+  })
+
+  it('willRemove > 0 emite deferred_will_remove (critical) con count y pide balancear', () => {
+    const f = analyzeCity({ ...base, willRemove: 6 })
+    const w = f.find((x) => x.code === 'deferred_will_remove')!
+    expect(w.severity).toBe('critical')
+    expect(w.params).toEqual({ count: 6 })
+    expect(f[0].code).toBe('deferred_will_remove')
+    expect(f.map((x) => x.code)).toContain('action_balance')
+  })
 })

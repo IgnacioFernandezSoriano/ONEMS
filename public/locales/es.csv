@@ -3129,3 +3129,32 @@ lb2.help.rule7,POBOX: cada día laborable cada ciudad debe enviar al menos un en
 lb2.help.preview_warning,La vista previa muestra los cambios propuestos. Debes confirmar para aplicarlos al Allocation Plan.
 allocation_plans.status_deferred,Por compensar (diferida)
 allocation_plans.status_deferred_help,Esta muestra se retiró del plan porque su nodo no tenía panelista. Es de solo lectura y el balanceo la reintroducirá.
+lb2.deferred.title,Muestras por compensar
+lb2.deferred.pending_total,Muestras pendientes de compensar
+lb2.deferred.by_city,Por ciudad de origen
+lb2.deferred.by_plan,Por plan
+lb2.deferred.removed,Apartadas
+lb2.deferred.reassigned_dest,Destino reasignado
+lb2.deferred.reintroduced,Reintroducidas
+lb2.deferred.waiting,En espera
+lb2.deferred.blocked,Bloqueadas
+lb2.deferred.remove_warning,Al aplicar se quitarán {count} muestras del plan y se anotarán como muestras por compensar. Se reintroducirán automáticamente cuando haya un día y un panelista válidos.
+lb2.deferred.col_total,Muestras totales
+lb2.deferred.col_scheduled,Programadas
+lb2.deferred.col_done,Realizadas
+lb2.deferred.col_deferred,Por compensar
+lb2.deferred.col_pobox_extra,Extra POBOX
+lb2.deferred.col_city,Ciudad
+lb2.deferred.col_plan,Plan
+lb2.deferred.col_reason,Motivo de espera
+lb2.deferred.waiting.no_origin_panelist,Sin panelista activo en el nodo de origen
+lb2.deferred.waiting.no_dest_panelist,Sin panelista activo en el nodo de destino
+lb2.deferred.waiting.no_capacity,Sin capacidad en los días válidos
+lb2.deferred.waiting.plan_inactive,Plan no activo
+lb2.deferred.waiting.outside_period,Fuera del periodo del plan
+lb2.deferred.empty,No hay muestras por compensar.
+lb2.deferred.badge_tooltip,Muestras por compensar pendientes de reintroducir
+lb2.warning.deferred_removed,Muestras quitadas del plan y anotadas como muestras por compensar.
+lb2.warning.deferred_blocked,Muestras por compensar que no se pueden mover porque están congeladas.
+lb2.rec.deferred_waiting,Hay {count} muestras por compensar esperando en esta ciudad. El balanceo las reintroducirá cuando haya un día válido.
+lb2.rec.deferred_will_remove,La última vista previa apartaría {count} muestras de este plan y las anotaría como muestras por compensar. Revisa la vista previa antes de aplicar.

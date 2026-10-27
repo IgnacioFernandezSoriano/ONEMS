@@ -20,6 +20,10 @@ interface CityLoadCardProps {
   /** Extra lock (e.g. a balance is being applied): also locks the per-city policy selects */
   balanceDisabled?: boolean;
   dayData?: NodeDayLoad[];
+  /** muestras por compensar de esta ciudad que esperan en el registro */
+  deferredPending?: number;
+  /** muestras que la ultima vista previa apartaria del plan */
+  willRemove?: number;
   scale?: LoadScale;
   onScaleChange?: (s: LoadScale) => void;
   policy?: CityPolicyView;
@@ -42,6 +46,8 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
   onBalance,
   balanceDisabled = false,
   dayData = [],
+  deferredPending = 0,
+  willRemove = 0,
   scale = 'week',
   onScaleChange,
   policy,
@@ -123,8 +129,10 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
         datePolicy: policy?.datePolicy ?? 'daily',
         pobox: !!policy?.pobox,
         today: localDateKey(new Date()),
+        deferredPending,
+        willRemove,
       }),
-    [cityData, dayData, highThreshold, saturatedThreshold, policy?.datePolicy, policy?.pobox]
+    [cityData, dayData, highThreshold, saturatedThreshold, policy?.datePolicy, policy?.pobox, deferredPending, willRemove]
   );
   const actionableFindings = findings.filter((f) => f.severity === 'critical' || f.severity === 'warning').length;
   const maxCell = React.useMemo(() => {

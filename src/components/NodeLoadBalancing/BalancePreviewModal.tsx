@@ -46,6 +46,11 @@ export const BalancePreviewModal: React.FC<BalancePreviewModalProps> = ({
     ? hasChanges(single?.result) && !single?.error
     : results.some((r) => !isCityFailed(r) && hasChanges(r.result));
 
+  // Muestras que se apartarian del plan al aplicar (ciudad: la suya; todas: suma de las ciudades correctas)
+  const removedTotal = mode === 'city'
+    ? (single?.error || single?.result?.error ? 0 : single?.result?.deferred?.removed ?? 0)
+    : totalsForAllCities(results).deferredRemoved;
+
   const title = mode === 'all'
     ? t('lb2.preview_all_title')
     : `${t('nodeLoadBalancing.balancePreview')} - ${cityName ?? ''}`;
@@ -97,6 +102,13 @@ export const BalancePreviewModal: React.FC<BalancePreviewModalProps> = ({
 
           {!loading && mode === 'all' && <AllBody results={results} />}
         </div>
+
+        {/* Aviso rojo: muestras que se apartarian del plan (justo encima del boton de confirmar) */}
+        {!loading && removedTotal > 0 && (
+          <div role="alert" className="mx-6 mb-3 bg-red-50 border border-red-300 rounded-lg p-3 text-sm font-medium text-red-800">
+            {t('lb2.deferred.remove_warning', { count: removedTotal })}
+          </div>
+        )}
 
         {/* Footer */}
         <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
@@ -206,6 +218,27 @@ const CityBody: React.FC<{ item: BalanceCityResult }> = ({ item }) => {
         </div>
       )}
 
+      {/* Muestras por compensar */}
+      {r.deferred && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+          <h3 className="font-semibold text-amber-900 mb-3">{t('lb2.deferred.title')}</h3>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            {([
+              ['lb2.deferred.removed', r.deferred.removed],
+              ['lb2.deferred.reassigned_dest', r.deferred.reassigned_dest],
+              ['lb2.deferred.reintroduced', r.deferred.reintroduced],
+              ['lb2.deferred.waiting', r.deferred.waiting],
+              ['lb2.deferred.blocked', r.deferred.blocked ?? 0],
+            ] as const).map(([k, v]) => (
+              <div key={k}>
+                <div className="text-sm text-amber-700">{t(k)}</div>
+                <div className="text-2xl font-bold text-amber-900">{v}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <WarningsList result={r} />
 
       {!hasChanges(r) && (
@@ -253,6 +286,10 @@ const AllBody: React.FC<{ results: BalanceCityResult[] }> = ({ results }) => {
             <th className={`${th} text-center`}>{t('lb2.pobox_days_moved')}</th>
             <th className={`${th} text-center`}>{t('lb2.pobox_days_created')}</th>
             <th className={`${th} text-center`}>{t('lb2.pobox_days_uncovered')}</th>
+            <th className={`${th} text-center`}>{t('lb2.deferred.removed')}</th>
+            <th className={`${th} text-center`}>{t('lb2.deferred.reassigned_dest')}</th>
+            <th className={`${th} text-center`}>{t('lb2.deferred.reintroduced')}</th>
+            <th className={`${th} text-center`}>{t('lb2.deferred.waiting')}</th>
             <th className={`${th} text-center`}>{t('lb2.warnings_title')}</th>
           </tr>
         </thead>
@@ -263,7 +300,7 @@ const AllBody: React.FC<{ results: BalanceCityResult[] }> = ({ results }) => {
               return (
                 <tr key={row.cityId} className="bg-red-50">
                   <td className="px-3 py-2 text-sm font-medium text-red-800">{row.cityName}</td>
-                  <td colSpan={7} className="px-3 py-2 text-sm text-red-700">
+                  <td colSpan={11} className="px-3 py-2 text-sm text-red-700">
                     {t('lb2.city_failed', { city: row.cityName })}{msg ? `: ${msg}` : ''}
                   </td>
                 </tr>
@@ -281,6 +318,10 @@ const AllBody: React.FC<{ results: BalanceCityResult[] }> = ({ results }) => {
                 <td className="px-3 py-2 text-center text-sm">{r.pobox?.days_moved ?? 0}</td>
                 <td className="px-3 py-2 text-center text-sm">{r.pobox?.days_created ?? 0}</td>
                 <td className="px-3 py-2 text-center text-sm">{r.pobox?.days_uncovered ?? 0}</td>
+                <td className="px-3 py-2 text-center text-sm">{r.deferred?.removed ?? 0}</td>
+                <td className="px-3 py-2 text-center text-sm">{r.deferred?.reassigned_dest ?? 0}</td>
+                <td className="px-3 py-2 text-center text-sm">{r.deferred?.reintroduced ?? 0}</td>
+                <td className="px-3 py-2 text-center text-sm">{r.deferred?.waiting ?? 0}</td>
                 <td className="px-3 py-2 text-center text-sm">{(r.warnings || []).length}</td>
               </tr>
             );
@@ -293,6 +334,10 @@ const AllBody: React.FC<{ results: BalanceCityResult[] }> = ({ results }) => {
             <td className="px-3 py-2 text-center text-sm">{totals.poboxMoved}</td>
             <td className="px-3 py-2 text-center text-sm">{totals.poboxCreated}</td>
             <td className="px-3 py-2 text-center text-sm">{totals.poboxUncovered}</td>
+            <td className="px-3 py-2 text-center text-sm">{totals.deferredRemoved}</td>
+            <td className="px-3 py-2 text-center text-sm">{totals.deferredReassignedDest}</td>
+            <td className="px-3 py-2 text-center text-sm">{totals.deferredReintroduced}</td>
+            <td className="px-3 py-2 text-center text-sm">{totals.deferredWaiting}</td>
             <td className="px-3 py-2 text-center text-sm">{totals.warnings}</td>
           </tr>
         </tbody>
