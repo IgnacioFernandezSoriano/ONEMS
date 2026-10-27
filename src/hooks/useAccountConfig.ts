@@ -89,6 +89,8 @@ export function useAccountConfig() {
         .from('weekly_schedule')
         .select('*')
         .eq('account_id', effectiveAccountId)
+        // Solo el horario de la cuenta: las filas de centro postal no son el calendario de la cuenta
+        .is('postal_center_id', null)
         .order('day_of_week', { ascending: true })
 
       if (fetchError) throw fetchError
@@ -151,7 +153,7 @@ export function useAccountConfig() {
     updates: Partial<WeeklySchedule>
   ) => {
     try {
-      const existing = weeklySchedule.find((s) => s.day_of_week === dayOfWeek)
+      const existing = weeklySchedule.find((s) => s.day_of_week === dayOfWeek && s.postal_center_id == null)
 
       if (existing) {
         const { error: updateError } = await supabase

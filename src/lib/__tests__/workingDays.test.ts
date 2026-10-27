@@ -23,9 +23,22 @@ describe('workingDays', () => {
   })
 
   it('horario domingo a jueves', () => {
-    const cal = calOf([0, 1, 2, 3, 4].map(d => ({ day_of_week: d, is_working_day: true })))
+    const cal = calOf([0, 1, 2, 3, 4, 5, 6].map(d => ({ day_of_week: d, is_working_day: d <= 4 })))
     expect(isWorkingDay(new Date(2027, 2, 7), cal)).toBe(true)
     expect(isWorkingDay(new Date(2027, 2, 5), cal)).toBe(false)
+  })
+
+  it('filas parciales: cada dia sin fila usa el defecto lunes-viernes', () => {
+    expect([...workingDowsFromSchedule([{ day_of_week: 1, is_working_day: false }])].sort()).toEqual([2, 3, 4, 5])
+    expect([...workingDowsFromSchedule([{ day_of_week: 6, is_working_day: true }])].sort()).toEqual([1, 2, 3, 4, 5, 6])
+  })
+
+  it('ignora filas de centro postal', () => {
+    const rows = [
+      { day_of_week: 6, is_working_day: true, postal_center_id: 'pc1' },
+      { day_of_week: 1, is_working_day: false, postal_center_id: 'pc1' },
+    ]
+    expect([...workingDowsFromSchedule(rows)].sort()).toEqual([1, 2, 3, 4, 5])
   })
 
   it('dia no laborable de la cuenta', () => {

@@ -5,8 +5,9 @@
 --   * columnas de politica: account_config.date_policy ('weekly'|'daily') y pobox_enabled; las ciudades
 --     pueden sobrescribirlas (NULL = hereda de la cuenta); cities.balance_rotation_offset;
 --   * allocation_plan_details / generated_allocation_plan_details.generation_source ('plan'|'pobox');
---   * is_account_working_day: dia laborable segun weekly_schedule de la cuenta (day_of_week 0=domingo ..
---     6=sabado; sin filas => lunes-viernes) y non_working_days;
+--   * is_account_working_day: dia laborable segun weekly_schedule de la cuenta (filas con postal_center_id
+--     NULL; day_of_week 0=domingo .. 6=sabado; cada dia sin fila usa el defecto lunes-viernes) y
+--     non_working_days;
 --   * working_day_in_range (misma firma) delega en is_account_working_day en vez de asumir lunes-viernes;
 --   * effective_city_policy: politica efectiva de una ciudad; POBOX activo fuerza 'daily'.
 
@@ -51,14 +52,13 @@ SET search_path = public
 AS $$
   SELECT NOT EXISTS (SELECT 1 FROM public.non_working_days n
                       WHERE n.account_id = p_account_id AND n.postal_center_id IS NULL AND n.date = p_date)
-     AND CASE
-           WHEN EXISTS (SELECT 1 FROM public.weekly_schedule w WHERE w.account_id = p_account_id)
-           THEN EXISTS (SELECT 1 FROM public.weekly_schedule w
-                         WHERE w.account_id = p_account_id
-                           AND w.day_of_week = EXTRACT(dow FROM p_date)::int
-                           AND w.is_working_day)
-           ELSE EXTRACT(isodow FROM p_date) <= 5
-         END;
+     -- Cada dia de la semana se decide por separado: si la cuenta tiene fila propia (no de centro postal)
+     -- para ese dia manda su is_working_day; si no, lunes-viernes laborable y sabado/domingo no.
+     AND COALESCE((SELECT w.is_working_day FROM public.weekly_schedule w
+                    WHERE w.account_id = p_account_id AND w.postal_center_id IS NULL
+                      AND w.day_of_week = EXTRACT(dow FROM p_date)::int
+                    ORDER BY w.is_working_day DESC LIMIT 1),
+                  EXTRACT(isodow FROM p_date) <= 5);
 $$;
 
 CREATE OR REPLACE FUNCTION public.working_day_in_range(

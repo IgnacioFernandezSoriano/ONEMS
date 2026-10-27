@@ -13,11 +13,22 @@ export function localDateKey(d: Date): string {
   return `${d.getFullYear()}-${m}-${day}`
 }
 
+/**
+ * Dias laborables de la cuenta. Cada dia de la semana se decide por separado (igual que
+ * is_account_working_day en SQL): si hay fila de cuenta (sin postal_center_id) para ese dia manda su
+ * is_working_day; si no, lunes-viernes laborable y sabado/domingo no.
+ */
 export function workingDowsFromSchedule(
-  rows: Array<{ day_of_week: number; is_working_day: boolean }>
+  rows: Array<{ day_of_week: number; is_working_day: boolean; postal_center_id?: string | null }>
 ): Set<number> {
-  if (!rows || rows.length === 0) return new Set([1, 2, 3, 4, 5])
-  return new Set(rows.filter(r => r.is_working_day).map(r => r.day_of_week))
+  const out = new Set<number>()
+  const accountRows = (rows ?? []).filter(r => r.postal_center_id == null)
+  for (let dow = 0; dow <= 6; dow++) {
+    const own = accountRows.filter(r => r.day_of_week === dow)
+    const working = own.length > 0 ? own.some(r => r.is_working_day) : dow >= 1 && dow <= 5
+    if (working) out.add(dow)
+  }
+  return out
 }
 
 export function isWorkingDay(d: Date, cal: WorkingCalendar): boolean {
