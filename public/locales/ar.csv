@@ -3085,3 +3085,7 @@ lb2.shipments_count,{count} شحنة
 lb2.city_balanced,لا حاجة للموازنة - المدينة متوازنة بالفعل!
 lb2.no_pending_cities,لا توجد مدن بها شحنات معلقة في الفترة المحددة.
 lb2.week_short,أ{week}
+allocation_generator.policy_summary,"سياسة التواريخ: {policy}. أيام العمل: {days}."
+allocation_generator.pobox_added,"أضاف POBOX عدد {count} من الشحنات ليرسل كل مدينة شحنة في كل يوم عمل."
+allocation_generator.warning_dropped,"تعذر وضع {count} من العينات (لا يوجد يوم أو عقدة صالحة)."
+allocation_generator.warning_pobox_uncovered,"تعذر على POBOX تغطية {count} من أيام المدن (لا توجد عقدة متاحة)."

@@ -3093,3 +3093,7 @@ lb2.shipments_count,{count} shipments
 lb2.city_balanced,No balancing needed - the city is already well balanced!
 lb2.no_pending_cities,No cities with pending shipments in the selected period.
 lb2.week_short,W{week}
+allocation_generator.policy_summary,"Date policy: {policy}. Working days: {days}."
+allocation_generator.pobox_added,"{count} shipments were added by POBOX so every city ships each working day."
+allocation_generator.warning_dropped,"{count} samples could not be placed (no valid day or node available)."
+allocation_generator.warning_pobox_uncovered,"POBOX could not cover {count} city-days (no free node)."

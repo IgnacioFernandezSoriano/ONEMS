@@ -8,8 +8,10 @@ import {
   autoFillMatrix,
   autoFillSeasonal,
   type CityDistributionMatrix,
+  summarizeGeneration,
   type SeasonalDistribution,
 } from '@/lib/allocationPlanCalculator'
+import { effectivePolicy, type DatePolicy } from '@/lib/workingDays'
 
 interface AllocationPlanGeneratorFormProps {
   carriers: Carrier[]
@@ -20,6 +22,14 @@ interface AllocationPlanGeneratorFormProps {
   panelistNodeIds: string[]
   /** Account non-working days (yyyy-MM-dd). */
   nonWorkingDays: string[]
+  /** Account working weekdays (getDay() convention). */
+  workingDows: Set<number>
+  /** Account date policy / POBOX; null = not loaded (defaults: daily, no POBOX). */
+  accountPolicy: { date_policy: DatePolicy; pobox_enabled: boolean } | null
+  /** Per-city overrides (null fields inherit the account policy). */
+  cityPolicies: Array<{ id: string; date_policy: DatePolicy | null; pobox_enabled: boolean | null }>
+  /** nodeId -> blocked days (yyyy-MM-dd) of its panelist. */
+  unavailabilityByNode: Map<string, Set<string>>
   onGenerate: (planData: any, details: any[]) => Promise<void>
 }
 
@@ -30,6 +40,10 @@ export function AllocationPlanGeneratorForm({
   nodes,
   panelistNodeIds,
   nonWorkingDays,
+  workingDows,
+  accountPolicy,
+  cityPolicies,
+  unavailabilityByNode,
   onGenerate,
 }: AllocationPlanGeneratorFormProps) {
   const { t } = useTranslation()
@@ -52,6 +66,14 @@ export function AllocationPlanGeneratorForm({
   const [seasonal, setSeasonal] = useState<Partial<SeasonalDistribution>>({})
   const [loading, setLoading] = useState(false)
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
+  // What the last generation applied: shown under the form.
+  const [notice, setNotice] = useState<{
+    policy: DatePolicy
+    days: number[]
+    pobox: number
+    dropped: number
+    poboxUncovered: number
+  } | null>(null)
 
   const availableProducts = products.filter(
     (p) => !formData.carrier_id || p.carrier_id === formData.carrier_id
@@ -155,6 +177,13 @@ export function AllocationPlanGeneratorForm({
       const filledMatrix = autoFillMatrix(matrix)
       const filledSeasonal = useSeasonalDist ? autoFillSeasonal(seasonal) : undefined
 
+      const account = accountPolicy ?? { date_policy: 'daily' as DatePolicy, pobox_enabled: false }
+      const accountEffective = effectivePolicy(account, null)
+      const cityEffective = new Map(
+        cityPolicies.map((c) => [c.id, effectivePolicy(account, c)] as const)
+      )
+      const warnings = { dropped_sample: 0, pobox_uncovered: 0 }
+
       const entries = generateAllocationPlan({
         totalSamples: parseInt(formData.total_samples),
         // 'T00:00:00' parses as LOCAL midnight; a bare 'yyyy-MM-dd' would be read as UTC.
@@ -168,6 +197,14 @@ export function AllocationPlanGeneratorForm({
         useSeasonalDistribution: useSeasonalDist,
         seasonalDistribution: filledSeasonal,
         maxSamplesPerWeek: 5, // Default capacity
+        workingDows,
+        datePolicy: accountEffective.datePolicy,
+        pobox: accountEffective.pobox,
+        cityPolicies: cityEffective,
+        unavailabilityByNode,
+        onWarning: ({ code, count }) => {
+          if (code === 'dropped_sample' || code === 'pobox_uncovered') warnings[code] += count
+        },
       })
 
       const planData = {
@@ -192,6 +229,14 @@ export function AllocationPlanGeneratorForm({
       }))
 
       await onGenerate(planData, details)
+
+      setNotice({
+        policy: accountEffective.datePolicy,
+        days: Array.from(workingDows).sort((a, b) => ((a + 6) % 7) - ((b + 6) % 7)),
+        pobox: summarizeGeneration(entries).pobox,
+        dropped: warnings.dropped_sample,
+        poboxUncovered: warnings.pobox_uncovered,
+      })
 
       // Reset form
       setFormData({
@@ -564,6 +609,26 @@ export function AllocationPlanGeneratorForm({
             {t('allocation_generator.nodes_without_panelist_excluded', { count: nodesWithoutPanelist.length })}
           </p>
           <p className="mt-1">{nodesWithoutPanelist.map((n) => n.auto_id).join(', ')}</p>
+        </div>
+      )}
+
+      {notice && (
+        <div className="rounded-md border border-blue-200 bg-blue-50 p-3 text-sm text-blue-900 space-y-1">
+          <p>
+            {t('allocation_generator.policy_summary', {
+              policy: t(`lb2.date_policy_${notice.policy}`),
+              days: notice.days.map((d) => t(`lb2.day_short.${d}`)).join(', '),
+            })}
+          </p>
+          {notice.pobox > 0 && <p>{t('allocation_generator.pobox_added', { count: notice.pobox })}</p>}
+          {notice.dropped > 0 && (
+            <p className="text-amber-800">{t('allocation_generator.warning_dropped', { count: notice.dropped })}</p>
+          )}
+          {notice.poboxUncovered > 0 && (
+            <p className="text-amber-800">
+              {t('allocation_generator.warning_pobox_uncovered', { count: notice.poboxUncovered })}
+            </p>
+          )}
         </div>
       )}
 

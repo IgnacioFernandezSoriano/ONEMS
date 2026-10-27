@@ -3093,3 +3093,7 @@ lb2.shipments_count,{count} envíos
 lb2.city_balanced,No hace falta balancear: ¡la ciudad ya está bien equilibrada!
 lb2.no_pending_cities,No hay ciudades con envíos pendientes en el periodo seleccionado.
 lb2.week_short,S{week}
+allocation_generator.policy_summary,"Política de fechas: {policy}. Días laborables: {days}."
+allocation_generator.pobox_added,"POBOX añadió {count} envíos para que cada ciudad envíe todos los días laborables."
+allocation_generator.warning_dropped,"{count} muestras no se pudieron colocar (sin día ni nodo válido)."
+allocation_generator.warning_pobox_uncovered,"POBOX no pudo cubrir {count} días de ciudad (sin nodo libre)."

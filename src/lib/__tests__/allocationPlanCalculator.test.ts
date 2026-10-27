@@ -116,6 +116,24 @@ describe('generateAllocationPlan', () => {
     }
   })
 
+  it("(h) cityPolicies: cuenta 'daily' y ciudad B 'weekly': los envios con origen B comparten una fecha por semana y nodo; los de A no", () => {
+    const entries = generateAllocationPlan(base({
+      totalSamples: 40,
+      cityDistributionMatrix: autoFillMatrix({ AB: 50, BA: 50, AA: 0, AC: 0, BB: 0, BC: 0, CA: 0, CB: 0, CC: 0 }),
+      datePolicy: 'daily',
+      cityPolicies: new Map([['B', { datePolicy: 'weekly', pobox: false }]]),
+    }))
+    expect(entries).toHaveLength(40)
+    const distinctDates = (origins: string[], week: string[]) =>
+      new Set(entries.filter(e => origins.includes(e.originNodeId) && week.includes(keyOf(e))).map(keyOf)).size
+    let aSpread = false
+    for (const week of [WEEK1, WEEK2]) {
+      for (const n of ['B1', 'B2']) expect(distinctDates([n], week)).toBeLessThanOrEqual(1)
+      for (const n of ['A1', 'A2']) if (distinctDates([n], week) > 1) aSpread = true
+    }
+    expect(aSpread).toBe(true)
+  })
+
   it('(e) nodo A1 ausente toda la semana 1: ningun envio de A1 en la semana 1', () => {
     const entries = generateAllocationPlan(base({ unavailabilityByNode: new Map([['A1', new Set(WEEK1)]]) }))
     expect(entries).toHaveLength(20)

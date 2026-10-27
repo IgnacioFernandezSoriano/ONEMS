@@ -51,6 +51,12 @@ export interface AllocationPlanParams {
   pobox?: boolean
   /** Days (yyyy-MM-dd) on which a node's panelist is absent: no shipment is sent from or to it on those days. */
   unavailabilityByNode?: Map<string, Set<string>>
+  /**
+   * Per ORIGIN city policy overrides (key = city id). When a city is present its policy replaces the
+   * account-level `datePolicy`/`pobox` for the entries it originates; POBOX is evaluated per city, and a
+   * city whose POBOX is on is forced daily. Default (omitted) = the account policy for every city.
+   */
+  cityPolicies?: Map<string, { datePolicy: DatePolicy; pobox: boolean }>
   /** Called once per kind of problem: 'dropped_sample' (no valid day/node) and 'pobox_uncovered' (POBOX day left empty). */
   onWarning?: (w: { code: string; count: number }) => void
 }
@@ -179,6 +185,7 @@ export function generateAllocationPlan(params: AllocationPlanParams): Allocation
     datePolicy,
     pobox,
     unavailabilityByNode,
+    cityPolicies,
     onWarning,
   } = params
 
@@ -198,7 +205,8 @@ export function generateAllocationPlan(params: AllocationPlanParams): Allocation
 
   const ctx: GenerationContext = {
     // POBOX needs a shipment every day, so it forces the daily policy.
-    datePolicy: pobox ? 'daily' : (datePolicy ?? 'daily'),
+    accountPolicy: { datePolicy: pobox ? 'daily' : (datePolicy ?? 'daily'), pobox: !!pobox },
+    cityPolicies: cityPolicies ?? new Map(),
     cal,
     unavailability: unavailabilityByNode ?? new Map(),
     originDayLoad: new Map(),
@@ -231,8 +239,9 @@ export function generateAllocationPlan(params: AllocationPlanParams): Allocation
   warn('dropped_sample', ctx.dropped)
 
   // PASO 3: POBOX, sobre los envíos recién generados (antes de guardar).
-  if (pobox) {
-    warn('pobox_uncovered', applyPobox(entries, weeks, cities, usableNodes, ctx.unavailability))
+  const poboxCityIds = new Set(cities.filter(c => policyOf(ctx, c.id).pobox).map(c => c.id))
+  if (poboxCityIds.size > 0) {
+    warn('pobox_uncovered', applyPobox(entries, weeks, cities, usableNodes, ctx.unavailability, poboxCityIds))
   }
 
   return entries
@@ -240,7 +249,8 @@ export function generateAllocationPlan(params: AllocationPlanParams): Allocation
 
 /** Shared state of one generation run: the day loads let routes of the same nodes/city avoid piling up. */
 interface GenerationContext {
-  datePolicy: DatePolicy
+  accountPolicy: { datePolicy: DatePolicy; pobox: boolean }
+  cityPolicies: Map<string, { datePolicy: DatePolicy; pobox: boolean }>
   cal: WorkingCalendar
   unavailability: Map<string, Set<string>>
   /** `${nodeId}|${yyyy-MM-dd}` -> shipments sent by the node that day */
@@ -261,6 +271,12 @@ interface GenerationContext {
   pairLoad: Map<string, number>
   /** Samples that found no valid day/node pair. */
   dropped: number
+}
+
+/** Effective policy of an origin city: its override, else the account policy; POBOX forces daily. */
+function policyOf(ctx: GenerationContext, cityId: string): { datePolicy: DatePolicy; pobox: boolean } {
+  const p = ctx.cityPolicies.get(cityId) ?? ctx.accountPolicy
+  return { datePolicy: p.pobox ? 'daily' : p.datePolicy, pobox: p.pobox }
 }
 
 function isBlocked(unavailability: Map<string, Set<string>>, nodeId: string, key: string): boolean {
@@ -548,7 +564,7 @@ function chooseDate(originId: string, destId: string, week: PlanWeek, originCity
     !isBlocked(ctx.unavailability, originId, keys[idx]) && !isBlocked(ctx.unavailability, destId, keys[idx])
 
   let chosen = -1
-  if (ctx.datePolicy === 'weekly') {
+  if (policyOf(ctx, originCityId).datePolicy === 'weekly') {
     const blocked = new Set<string>([
       ...(ctx.unavailability.get(originId) ?? []),
       ...(ctx.unavailability.get(destId) ?? []),
@@ -607,7 +623,8 @@ function applyPobox(
   weeks: PlanWeek[],
   cities: City[],
   usableNodes: Node[],
-  unavailability: Map<string, Set<string>>
+  unavailability: Map<string, Set<string>>,
+  poboxCityIds: Set<string>
 ): number {
   const activeNodes = usableNodes.filter(n => n.status === 'active')
   const cityOfNode = new Map(activeNodes.map(n => [n.id, n.city_id]))
@@ -617,6 +634,8 @@ function applyPobox(
     nodesByCity.get(n.city_id)!.push(n)
   }
   const poboxCities = cities.filter(c => c.status === 'active' && nodesByCity.has(c.id))
+  // Only these cities must ship every day; the others still serve as destinations.
+  const coveredCities = poboxCities.filter(c => poboxCityIds.has(c.id))
 
   const weekOfKey = new Map<string, number>()
   weeks.forEach((w, wi) => w.days.forEach(d => weekOfKey.set(localDateKey(d), wi)))
@@ -693,7 +712,7 @@ function applyPobox(
   }
 
   let uncovered = 0
-  for (const city of poboxCities) {
+  for (const city of coveredCities) {
     const cityNodes = nodesByCity.get(city.id)!
     const otherCities = poboxCities.map(c => c.id).filter(id => id !== city.id)
     const paired = otherCities.filter(id => pairedDestCities.get(city.id)?.has(id))

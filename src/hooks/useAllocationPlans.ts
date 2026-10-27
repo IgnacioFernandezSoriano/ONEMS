@@ -10,6 +10,32 @@ import type {
   City,
   Node,
 } from '@/lib/types'
+import { workingDowsFromSchedule, unavailabilityKeys, type DatePolicy } from '@/lib/workingDays'
+
+export interface AccountPolicyRow {
+  date_policy: DatePolicy
+  pobox_enabled: boolean
+}
+
+export interface CityPolicyRow {
+  id: string
+  date_policy: DatePolicy | null
+  pobox_enabled: boolean | null
+}
+
+const PAGE = 1000
+
+/** Reads every row of a query, 1000 at a time (Supabase caps a response at 1000 rows). */
+async function fetchAllRows<T>(build: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: any }>): Promise<T[]> {
+  const out: T[] = []
+  for (let from = 0; ; from += PAGE) {
+    const { data, error } = await build(from, from + PAGE - 1)
+    if (error) throw error
+    out.push(...(data || []))
+    if (!data || data.length < PAGE) break
+  }
+  return out
+}
 
 export function useAllocationPlans() {
   const effectiveAccountId = useEffectiveAccountId()
@@ -22,8 +48,79 @@ export function useAllocationPlans() {
   const [panelistNodeIds, setPanelistNodeIds] = useState<string[]>([])
   // Account non-working days (yyyy-MM-dd): the generator never schedules on them.
   const [nonWorkingDays, setNonWorkingDays] = useState<string[]>([])
+  // Policies of the generator (same ones as the load balancer). All of these tolerate a failed query
+  // (e.g. the v2 columns missing on the live DB): the generator then runs with the defaults.
+  const [workingDows, setWorkingDows] = useState<Set<number>>(new Set([1, 2, 3, 4, 5]))
+  const [accountPolicy, setAccountPolicy] = useState<AccountPolicyRow | null>(null)
+  const [cityPolicies, setCityPolicies] = useState<CityPolicyRow[]>([])
+  const [unavailabilityByNode, setUnavailabilityByNode] = useState<Map<string, Set<string>>>(new Map())
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  const fetchPolicies = async () => {
+    // Working weekdays of the account (rows not tied to a postal center)
+    try {
+      let q = supabase.from('weekly_schedule').select('day_of_week, is_working_day').is('postal_center_id', null)
+      if (effectiveAccountId) q = q.eq('account_id', effectiveAccountId)
+      const { data, error: e } = await q
+      if (e) throw e
+      setWorkingDows(workingDowsFromSchedule(data || []))
+    } catch (err) {
+      console.error('[useAllocationPlans] working days:', err)
+      setWorkingDows(new Set([1, 2, 3, 4, 5]))
+    }
+
+    // Account policy (v2 columns; may not exist yet)
+    try {
+      if (!effectiveAccountId) throw new Error('no account')
+      const { data, error: e } = await supabase
+        .from('account_config')
+        .select('date_policy, pobox_enabled')
+        .eq('account_id', effectiveAccountId)
+        .maybeSingle()
+      if (e) throw e
+      setAccountPolicy((data as AccountPolicyRow | null) ?? null)
+    } catch (err) {
+      console.error('[useAllocationPlans] account policy:', err)
+      setAccountPolicy(null)
+    }
+
+    // Per-city policy overrides (v2 columns; may not exist yet)
+    try {
+      if (!effectiveAccountId) throw new Error('no account')
+      const rows = await fetchAllRows<CityPolicyRow>((from, to) =>
+        supabase.from('cities').select('id, date_policy, pobox_enabled').eq('account_id', effectiveAccountId).order('id').range(from, to)
+      )
+      setCityPolicies(rows)
+    } catch (err) {
+      console.error('[useAllocationPlans] city policies:', err)
+      setCityPolicies([])
+    }
+
+    // Active absences of panelists, keyed by their node
+    try {
+      if (!effectiveAccountId) throw new Error('no account')
+      const absences = await fetchAllRows<{ panelist_id: string; start_date: string; end_date: string }>((from, to) =>
+        supabase.from('panelist_unavailability').select('panelist_id, start_date, end_date')
+          .eq('account_id', effectiveAccountId).eq('status', 'active').order('id').range(from, to)
+      )
+      if (absences.length === 0) {
+        setUnavailabilityByNode(new Map())
+      } else {
+        const panelists = await fetchAllRows<{ id: string; node_id: string | null }>((from, to) =>
+          supabase.from('panelists').select('id, node_id').eq('account_id', effectiveAccountId).not('node_id', 'is', null).order('id').range(from, to)
+        )
+        const nodeOf = new Map(panelists.map(p => [p.id, p.node_id as string]))
+        const periods = absences
+          .filter(a => nodeOf.has(a.panelist_id))
+          .map(a => ({ node_id: nodeOf.get(a.panelist_id)!, start_date: a.start_date, end_date: a.end_date }))
+        setUnavailabilityByNode(unavailabilityKeys(periods))
+      }
+    } catch (err) {
+      console.error('[useAllocationPlans] unavailability:', err)
+      setUnavailabilityByNode(new Map())
+    }
+  }
 
   const fetchAll = async () => {
     try {
@@ -123,6 +220,8 @@ export function useAllocationPlans() {
       const { data: nwdData, error: nwdError } = await nwdQuery
       if (nwdError) throw nwdError
       setNonWorkingDays((nwdData || []).map((d: { date: string }) => d.date))
+
+      await fetchPolicies()
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -337,6 +436,10 @@ export function useAllocationPlans() {
     nodes,
     panelistNodeIds,
     nonWorkingDays,
+    workingDows,
+    accountPolicy,
+    cityPolicies,
+    unavailabilityByNode,
     loading,
     error,
     createPlan,
