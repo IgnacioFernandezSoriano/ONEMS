@@ -226,6 +226,9 @@ export function AllocationPlanGeneratorForm({
         month: entry.month,
         year: entry.year,
         status: 'pending',
+        // 'plan' | 'pobox'. REQUIERE la migracion 20261027120000_load_balancing_v2 aplicada ANTES de desplegar
+        // este frontend: sin la columna generation_source el insert de los detalles falla.
+        generation_source: entry.generationSource,
       }))
 
       await onGenerate(planData, details)

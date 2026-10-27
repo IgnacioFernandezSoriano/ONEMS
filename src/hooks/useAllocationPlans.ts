@@ -411,6 +411,9 @@ export function useAllocationPlans() {
       month: d.month,
       year: d.year,
       status: d.status,
+      // Conserva el origen del envio ('pobox' = creado para cubrir un dia). REQUIERE la migracion
+      // 20261027120000_load_balancing_v2 aplicada antes de desplegar este frontend (columna generation_source).
+      generation_source: d.generation_source ?? 'plan',
     }))
 
     for (let i = 0; i < detailsToInsert.length; i += batchSize) {

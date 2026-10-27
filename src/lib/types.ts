@@ -149,6 +149,7 @@ export interface GeneratedAllocationPlanDetail {
   year: number
   status: 'pending' | 'notified' | 'sent' | 'received' | 'cancelled' | 'invalid' | 'transfer_error';
   idtag?: string
+  generation_source?: 'plan' | 'pobox'
   created_at: string
   updated_at: string
 }
