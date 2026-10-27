@@ -40,8 +40,17 @@ CREATE POLICY deferred_samples_select ON public.deferred_samples
   USING (account_id = public.current_user_account_id() OR public.is_superadmin());
 
 -- Escrituras solo por las funciones del balanceo (SECURITY DEFINER): defensa en profundidad ademas de RLS.
-REVOKE ALL ON public.deferred_samples FROM anon;
-REVOKE INSERT, UPDATE, DELETE ON public.deferred_samples FROM anon, authenticated;
+-- authenticated solo lee (filtrado por la politica RLS); anon nada; service_role conserva su acceso.
+REVOKE ALL ON public.deferred_samples FROM PUBLIC, anon, authenticated;
+GRANT SELECT ON public.deferred_samples TO authenticated;
+GRANT ALL ON public.deferred_samples TO service_role;   -- explicito (en Supabase ya viene por privilegios por defecto)
+
+-- Integridad: borrar un plan o una cuenta borra sus anotaciones (no quedan huerfanas contando en el contador).
+ALTER TABLE public.deferred_samples
+  DROP CONSTRAINT IF EXISTS deferred_samples_plan_id_fkey,
+  ADD CONSTRAINT deferred_samples_plan_id_fkey FOREIGN KEY (plan_id) REFERENCES public.allocation_plans(id) ON DELETE CASCADE,
+  DROP CONSTRAINT IF EXISTS deferred_samples_account_id_fkey,
+  ADD CONSTRAINT deferred_samples_account_id_fkey FOREIGN KEY (account_id) REFERENCES public.accounts(id) ON DELETE CASCADE;
 
 -- generation_source: 'plan' | 'pobox' | 'compensation'
 ALTER TABLE public.allocation_plan_details
@@ -831,10 +840,14 @@ BEGIN
       ds_id uuid NOT NULL, ord integer, plan_id uuid, o_node uuid, d_node uuid, dest_city uuid,
       ps date, pe date, plan_ok boolean NOT NULL, placed boolean NOT NULL DEFAULT false, waiting text
     ) ON COMMIT DROP;
+    -- Nunca HOY (R9): los avisos del dia (n8n, fecha_programada = hoy) pueden haber salido ya y una muestra
+    -- colocada hoy despues quedaria sin notificar y atrasada. La fase R empieza manana (el primer dia laborable
+    -- >= manana). La cobertura de HOY por POBOX (mover/crear) no cambia (comportamiento previo).
     INSERT INTO pg_temp.lb2_rcand (ds_id, ord, plan_id, o_node, d_node, dest_city, ps, pe, plan_ok)
     SELECT d.id, (row_number() OVER (ORDER BY d.fecha_programada, d.created_at, d.id))::int, d.plan_id,
            d.origin_node_id, d.destination_node_id, d.dest_city_id,
-           GREATEST(pl.start_date, v_from), LEAST(pl.end_date, p_end_date), COALESCE(pl.status = 'active', false)
+           GREATEST(pl.start_date, v_from, v_today + 1), LEAST(pl.end_date, p_end_date),
+           COALESCE(pl.status = 'active', false)
       FROM public.deferred_samples d
       LEFT JOIN public.allocation_plans pl ON pl.id = d.plan_id AND pl.account_id = v_account_id
      WHERE d.account_id = v_account_id AND d.origin_city_id = p_city_id AND d.status = 'pending';

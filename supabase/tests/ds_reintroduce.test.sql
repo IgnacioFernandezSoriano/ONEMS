@@ -669,3 +669,30 @@ SELECT pg_temp.fail_if(count(*) <> 3 OR max(n) <> 1, 'c13d N4 debe recibir solo 
 SELECT pg_temp.fail_if(count(*) <> 3, 'c13d POBOX debia crear en 8, 11 y 12')
   FROM public.allocation_plan_details WHERE generation_source = 'pobox';
 ROLLBACK;
+
+-- ===== Fix wave (R9). Caso 14: la fase R nunca coloca una compensation HOY (hoy de la cuenta): n8n ya pudo enviar
+-- los avisos del dia y la muestra quedaria sin notificar. Fechas relativas a hoy; periodo hoy..hoy+7 con un plan
+-- que lo cubre. Si hoy es fin de semana la comprobacion sigue siendo valida.
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+CREATE TEMP TABLE c14 AS
+SELECT (now() AT TIME ZONE COALESCE(a.timezone, 'UTC'))::date AS today
+  FROM public.accounts a WHERE a.id = 'a0000000-0000-0000-0000-000000000001';
+INSERT INTO public.allocation_plans (id, account_id, plan_name, carrier_id, product_id, total_samples, start_date, end_date, status)
+SELECT 'cc000000-0000-0000-0000-000000000014', 'a0000000-0000-0000-0000-000000000001', 'Now',
+       'ca000000-0000-0000-0000-000000000001', 'cb000000-0000-0000-0000-000000000001', 10, today - 30, today + 60, 'active'
+  FROM c14;
+SELECT pg_temp.mk_ds('N1', 'N4', (SELECT today - 3 FROM c14), 'cc000000-0000-0000-0000-000000000014') FROM generate_series(1, 3);
+DO $$
+DECLARE r jsonb; v_today date := (SELECT today FROM c14);
+BEGIN
+  r := public.rpc_balance_city_v2('c1000000-0000-0000-0000-000000000001', v_today, v_today + 7, true);
+  PERFORM pg_temp.fail_if((r->'deferred'->>'reintroduced')::int IS DISTINCT FROM 3, 'c14 reintroduced: ' || r::text);
+END $$;
+SELECT pg_temp.fail_if(count(*) > 0, 'c14 compensation hoy o antes: ' || string_agg(fecha_programada::text, ','))
+  FROM public.allocation_plan_details
+ WHERE generation_source = 'compensation' AND fecha_programada <= (SELECT today FROM c14);
+SELECT pg_temp.fail_if(NOT pg_temp.comp_caps_ok(), 'c14 topes');
+ROLLBACK;

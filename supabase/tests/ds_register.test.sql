@@ -83,3 +83,62 @@ ROLLBACK;
 -- ===== Permisos.
 SELECT pg_temp.fail_if(has_function_privilege('anon', 'public.rpc_deferred_samples_summary(uuid)', 'EXECUTE'), 'anon summary');
 SELECT pg_temp.fail_if(NOT has_function_privilege('authenticated', 'public.rpc_deferred_samples_summary(uuid)', 'EXECUTE'), 'authenticated summary');
+
+-- ===== Permisos de la tabla del registro: authenticated solo lee (RLS); anon nada; service_role conserva escritura.
+SELECT pg_temp.fail_if(NOT has_table_privilege('authenticated', 'public.deferred_samples', 'SELECT'), 'authenticated SELECT');
+SELECT pg_temp.fail_if(has_table_privilege('authenticated', 'public.deferred_samples', p), 'authenticated ' || p)
+  FROM unnest(ARRAY['INSERT','UPDATE','DELETE','TRUNCATE','REFERENCES','TRIGGER']) p;
+SELECT pg_temp.fail_if(has_table_privilege('anon', 'public.deferred_samples', p), 'anon ' || p)
+  FROM unnest(ARRAY['SELECT','INSERT','UPDATE','DELETE','TRUNCATE','REFERENCES','TRIGGER']) p;
+SELECT pg_temp.fail_if(NOT has_table_privilege('service_role', 'public.deferred_samples', 'INSERT'), 'service_role INSERT');
+-- Intento real como authenticated: INSERT y TRUNCATE rechazados por permisos.
+BEGIN;
+\ir fixtures/incident_city.sql
+SET LOCAL ROLE authenticated;
+DO $$
+BEGIN
+  BEGIN
+    INSERT INTO public.deferred_samples (account_id, plan_id, origin_city_id, dest_city_id, origin_node_id,
+                                         destination_node_id, fecha_programada, reason, row_snapshot)
+    VALUES ('a0000000-0000-0000-0000-000000000001','cc000000-0000-0000-0000-000000000001','c1000000-0000-0000-0000-000000000001',
+            'c2000000-0000-0000-0000-000000000002','b1000000-0000-0000-0000-000000000001','b4000000-0000-0000-0000-000000000004',
+            '2027-03-04','origin_no_panelist','{}');
+    RAISE EXCEPTION 'FAIL authenticated pudo insertar en el registro';
+  EXCEPTION WHEN insufficient_privilege THEN NULL;
+  END;
+  BEGIN
+    TRUNCATE public.deferred_samples;
+    RAISE EXCEPTION 'FAIL authenticated pudo vaciar el registro';
+  EXCEPTION WHEN insufficient_privilege THEN NULL;
+  END;
+END $$;
+ROLLBACK;
+
+-- ===== Integridad: borrar el plan (o la cuenta) borra sus anotaciones (FK ON DELETE CASCADE).
+BEGIN;
+\ir fixtures/incident_city.sql
+INSERT INTO public.deferred_samples (account_id, plan_id, origin_city_id, dest_city_id, origin_node_id, destination_node_id,
+                                     fecha_programada, reason, row_snapshot)
+SELECT 'a0000000-0000-0000-0000-000000000001', p, 'c1000000-0000-0000-0000-000000000001', 'c2000000-0000-0000-0000-000000000002',
+       'b1000000-0000-0000-0000-000000000001', 'b4000000-0000-0000-0000-000000000004', '2027-03-04', 'origin_no_panelist', '{}'
+  FROM unnest(ARRAY['cc000000-0000-0000-0000-000000000001','cc000000-0000-0000-0000-000000000001',
+                    'cc000000-0000-0000-0000-000000000002']::uuid[]) p;
+DELETE FROM public.allocation_plans WHERE id = 'cc000000-0000-0000-0000-000000000001';
+SELECT pg_temp.fail_if(count(*) <> 0, 'FK plan: quedan anotaciones del plan borrado: ' || count(*))
+  FROM public.deferred_samples WHERE plan_id = 'cc000000-0000-0000-0000-000000000001';
+SELECT pg_temp.fail_if(count(*) <> 1, 'FK plan: la anotacion del otro plan debia quedar') FROM public.deferred_samples;
+DO $$
+BEGIN
+  BEGIN
+    INSERT INTO public.deferred_samples (account_id, plan_id, origin_city_id, dest_city_id, origin_node_id,
+                                         destination_node_id, fecha_programada, reason, row_snapshot)
+    VALUES ('a0000000-0000-0000-0000-000000000001', gen_random_uuid(), 'c1000000-0000-0000-0000-000000000001',
+            'c2000000-0000-0000-0000-000000000002', 'b1000000-0000-0000-0000-000000000001',
+            'b4000000-0000-0000-0000-000000000004', '2027-03-04', 'origin_no_panelist', '{}');
+    RAISE EXCEPTION 'FAIL se acepto una anotacion de un plan inexistente';
+  EXCEPTION WHEN foreign_key_violation THEN NULL;
+  END;
+END $$;
+DELETE FROM public.accounts WHERE id = 'a0000000-0000-0000-0000-000000000001';
+SELECT pg_temp.fail_if(count(*) <> 0, 'FK cuenta: quedan anotaciones de la cuenta borrada') FROM public.deferred_samples;
+ROLLBACK;

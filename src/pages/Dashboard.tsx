@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
 import { useAllocationPlanDetails } from '@/lib/hooks/useAllocationPlanDetails';
+import { withoutDeferred } from '@/lib/planStatus';
 import { usePanelists } from '@/lib/hooks/usePanelists';
 import { usePanelistUnavailability } from '@/lib/hooks/usePanelistUnavailability';
 import { useCarriers } from '@/hooks/useCarriers';
@@ -238,8 +239,9 @@ export function Dashboard() {
       };
     }
 
-    // Filter by selected period
-    const filteredDetails = details.filter(detail => {
+    // Filter by selected period. Las muestras "por compensar" (status 'deferred') no estan en transito: no
+    // cuentan en el total, ni en retrasos, ni en alertas de disponibilidad.
+    const filteredDetails = withoutDeferred(details).filter(detail => {
       const scheduledDate = detail.fecha_programada;
       if (!scheduledDate) return false;
       return scheduledDate >= periodConfig.startDate && scheduledDate <= periodConfig.endDate;
