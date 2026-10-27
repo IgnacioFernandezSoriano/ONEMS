@@ -11,6 +11,8 @@ interface BalancePoliciesPanelProps {
   onBalanceAll: () => void;
   balancingAll?: { done: number; total: number } | null;
   disabled?: boolean;
+  /** Locks the working-day chips and the policy controls (e.g. while a balance is being applied) */
+  locked?: boolean;
   /** Hint shown (as tooltip) when "Balance all" is disabled by missing input */
   balanceAllHint?: string;
 }
@@ -27,6 +29,7 @@ export function BalancePoliciesPanel({
   onBalanceAll,
   balancingAll,
   disabled,
+  locked = false,
   balanceAllHint,
 }: BalancePoliciesPanelProps) {
   const { t } = useTranslation();
@@ -67,8 +70,9 @@ export function BalancePoliciesPanel({
                   key={dow}
                   type="button"
                   aria-pressed={on}
+                  disabled={locked}
                   onClick={() => onToggleDay(dow, !on)}
-                  className={`px-3 py-1.5 text-sm font-medium rounded-full border transition-colors ${FOCUS} ${
+                  className={`px-3 py-1.5 text-sm font-medium rounded-full border transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${FOCUS} ${
                     on
                       ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700'
                       : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
@@ -89,7 +93,7 @@ export function BalancePoliciesPanel({
           <div
             role="radiogroup"
             aria-labelledby="lb2-date-policy"
-            aria-disabled={pobox}
+            aria-disabled={pobox || locked}
             title={pobox ? t('lb2.pobox_forces_daily') : undefined}
             className="inline-flex rounded-lg border border-gray-300 overflow-hidden"
           >
@@ -101,7 +105,7 @@ export function BalancePoliciesPanel({
                   type="button"
                   role="radio"
                   aria-checked={selected}
-                  disabled={pobox}
+                  disabled={pobox || locked}
                   onClick={() => onChangePolicy({ date_policy: p })}
                   className={`px-4 py-1.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS} ${
                     selected ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'
@@ -125,8 +129,9 @@ export function BalancePoliciesPanel({
             <input
               type="checkbox"
               checked={pobox}
+              disabled={locked}
               onChange={(e) => onChangePolicy({ pobox_enabled: e.target.checked })}
-              className={`h-4 w-4 rounded border-gray-300 text-blue-600 ${FOCUS}`}
+              className={`h-4 w-4 rounded border-gray-300 text-blue-600 disabled:opacity-50 disabled:cursor-not-allowed ${FOCUS}`}
             />
             {t('lb2.pobox')}
           </label>

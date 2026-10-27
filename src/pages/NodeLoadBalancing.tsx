@@ -60,6 +60,7 @@ export default function NodeLoadBalancing() {
     cityId: string,
     p: { date_policy?: DatePolicy | null; pobox_enabled?: boolean | null }
   ) => {
+    if (applyingRef.current) return;
     try {
       const res = await updateCityPolicy(cityId, p);
       if (!res.success) {
@@ -76,6 +77,7 @@ export default function NodeLoadBalancing() {
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
 
   const handleToggleDay = async (dow: number, on: boolean) => {
+    if (applyingRef.current) return;
     try {
       const res = await setWorkingDay(dow, on);
       if (res && res.success === false) {
@@ -90,6 +92,7 @@ export default function NodeLoadBalancing() {
 
   const handleChangePolicy = async (p: { date_policy?: DatePolicy; pobox_enabled?: boolean }) => {
     // POBOX forces the daily policy: store both together so the stored value is consistent
+    if (applyingRef.current) return;
     const patch = p.pobox_enabled === true ? { ...p, date_policy: 'daily' as DatePolicy } : p;
     try {
       const res = await updateAccountPolicy(patch);
@@ -419,6 +422,7 @@ export default function NodeLoadBalancing() {
         onBalanceAll={handleBalanceAll}
         balancingAll={progress}
         disabled={!startDate || !endDate || applying}
+        locked={applying}
         balanceAllHint={t('lb2.balance_all_need_dates')}
       />
 
@@ -459,7 +463,8 @@ export default function NodeLoadBalancing() {
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  disabled={applying}
+                  className="disabled:opacity-50 disabled:cursor-not-allowed block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
               </div>
               <div>
@@ -470,7 +475,8 @@ export default function NodeLoadBalancing() {
                   type="date"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
-                  className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  disabled={applying}
+                  className="disabled:opacity-50 disabled:cursor-not-allowed block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
               </div>
             </div>
@@ -484,7 +490,8 @@ export default function NodeLoadBalancing() {
                 <select
                   value={selectedYear}
                   onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                  className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                  disabled={applying}
+                  className="disabled:opacity-50 disabled:cursor-not-allowed px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                 >
                   {yearRange.map(year => (
                     <option key={year} value={year}>{year}</option>
@@ -496,26 +503,30 @@ export default function NodeLoadBalancing() {
                   <button
                     key={month.num}
                     onClick={() => handleMonthSelect(selectedYear, month.num)}
-                    className="px-2 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    disabled={applying}
+                    className="disabled:opacity-50 disabled:cursor-not-allowed px-2 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     {month.name}
                   </button>
                 ))}
                 <button
                   onClick={handleFirstSemesterSelect}
-                  className="px-2 py-1 text-xs font-medium rounded border border-green-300 bg-green-50 hover:bg-green-100 hover:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  disabled={applying}
+                  className="disabled:opacity-50 disabled:cursor-not-allowed px-2 py-1 text-xs font-medium rounded border border-green-300 bg-green-50 hover:bg-green-100 hover:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
                 >
                   {t("common.first_semester")}
                 </button>
                 <button
                   onClick={handleSecondSemesterSelect}
-                  className="px-2 py-1 text-xs font-medium rounded border border-teal-300 bg-teal-50 hover:bg-teal-100 hover:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  disabled={applying}
+                  className="disabled:opacity-50 disabled:cursor-not-allowed px-2 py-1 text-xs font-medium rounded border border-teal-300 bg-teal-50 hover:bg-teal-100 hover:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
                 >
                   {t("common.second_semester")}
                 </button>
                 <button
                   onClick={handleYearSelect}
-                  className="px-2 py-1 text-xs font-medium rounded border border-purple-300 bg-purple-50 hover:bg-purple-100 hover:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  disabled={applying}
+                  className="disabled:opacity-50 disabled:cursor-not-allowed px-2 py-1 text-xs font-medium rounded border border-purple-300 bg-purple-50 hover:bg-purple-100 hover:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
                 >
                   {t("common.year")}
                 </button>
@@ -543,6 +554,7 @@ export default function NodeLoadBalancing() {
                   type="number"
                   value={referenceLoad}
                   onChange={(e) => setReferenceLoad(Number(e.target.value))}
+                  disabled={applying}
                   min="1"
                   className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
@@ -570,6 +582,7 @@ export default function NodeLoadBalancing() {
                   type="number"
                   value={deviationPercent}
                   onChange={(e) => setDeviationPercent(Number(e.target.value))}
+                  disabled={applying}
                   min="0"
                   max="100"
                   className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
@@ -582,7 +595,8 @@ export default function NodeLoadBalancing() {
             <div className="flex items-center gap-2 pt-2">
               <button
                 onClick={handleResetFilters}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  disabled={applying}
+                className="disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 {t("common.reset")}
               </button>

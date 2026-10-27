@@ -16,7 +16,7 @@ interface CityLoadCardProps {
   cityName: string;
   cityData: NodeLoadData[];
   onBalance: () => void;
-  /** Extra lock (e.g. a balance is being applied) on top of needsBalancing */
+  /** Extra lock (e.g. a balance is being applied): also locks the per-city policy selects */
   balanceDisabled?: boolean;
   dayData?: NodeDayLoad[];
   scale?: LoadScale;
@@ -206,7 +206,7 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
               <span>{t('lb2.date_policy')}</span>
               <select
                 value={policy.cityOverride.date_policy ?? ''}
-                disabled={policy.pobox}
+                disabled={policy.pobox || balanceDisabled}
                 title={policy.pobox ? t('lb2.pobox_forces_daily') : undefined}
                 onChange={(e) =>
                   onCityPolicyChange({ date_policy: (e.target.value || null) as DatePolicy | null })
@@ -223,10 +223,11 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
               <span>{t('lb2.pobox')}</span>
               <select
                 value={policy.cityOverride.pobox_enabled === null ? '' : String(policy.cityOverride.pobox_enabled)}
+                disabled={balanceDisabled}
                 onChange={(e) =>
                   onCityPolicyChange({ pobox_enabled: e.target.value === '' ? null : e.target.value === 'true' })
                 }
-                className="border border-gray-300 rounded px-2 py-1"
+                className="border border-gray-300 rounded px-2 py-1 disabled:bg-gray-100 disabled:text-gray-400"
               >
                 <option value="">{t('lb2.city_policy_inherit')}</option>
                 <option value="true">{t('common.yes')}</option>
