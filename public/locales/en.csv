@@ -193,6 +193,26 @@ allocation_plans.no_panelist_assigned_to_destination_node,No panelist assigned t
 allocation_plans.no_panelist_assigned_to_origin_node,No panelist assigned to origin node
 allocation_plans.no_records,No allocation plans found
 allocation_plans.notified,Notified
+allocation_plans.panelist_filter,Panelist
+allocation_plans.all_panelists,All Panelists
+allocation_plans.unassigned,Unassigned
+allocation_plans.any_issue,Any Issue
+allocation_plans.active_filters,{count} Active
+allocation_plans.tt_filter_header,Filter allocation plan details by plan, carrier, product, panelist, route, dates, status, or availability issues to focus on specific shipments.
+allocation_plans.tt_plan,Filter by allocation plan name. Shows only shipments belonging to the selected plan.
+allocation_plans.tt_carrier,Filter by logistics carrier. Shows only shipments for the selected carrier.
+allocation_plans.tt_product,Filter by carrier product/service type. Shows only shipments for the selected product.
+allocation_plans.tt_panelist,Filter by panelist name. Shows shipments where the panelist is the sender (origin) or the receiver (destination).
+allocation_plans.tt_status,Filter by shipment status: Pending (not started), Sent (dispatched), Received (delivered), Cancelled, etc.
+allocation_plans.tt_origin_city,Filter by origin city (where packages are picked up). Shows only routes starting from the selected city.
+allocation_plans.tt_origin_node,Filter by specific origin node within the selected city. Requires origin city to be selected first.
+allocation_plans.tt_dest_city,Filter by destination city (where packages are delivered). Shows only routes ending in the selected city.
+allocation_plans.tt_dest_node,Filter by specific destination node within the selected city. Requires destination city to be selected first.
+allocation_plans.tt_start_date,Filter shipments scheduled on or after this date. Combine with End Date for date range filtering.
+allocation_plans.tt_end_date,Filter shipments scheduled on or before this date. Combine with Start Date for date range filtering.
+allocation_plans.tt_tag_id,Search by physical tag identifier. Finds shipments with matching tag IDs (partial match supported).
+allocation_plans.tt_event_id,Search by allocation plan detail event ID. Useful for tracking specific shipment records in material movements (partial match supported).
+allocation_plans.tt_availability,Filter by panelist availability problems: Unavailable (not available on date), Unassigned (no panelist assigned), Inactive (panelist inactive).
 allocation_plans.optional,Optional
 allocation_plans.optional_distribute_samples_unevenly_across_months,Optional: Distribute samples unevenly across months to reflect seasonal patterns.
 allocation_plans.origin,Origin:

@@ -8,6 +8,7 @@ interface Props {
     planId: string
     carrierId: string
     productId: string
+    panelistId: string
     originCityId: string
     destinationCityId: string
     originNodeId: string
@@ -24,6 +25,7 @@ interface Props {
   products: any[]
   cities: any[]
   nodes: any[]
+  panelists: any[]
   availabilityCounts: {
     unavailable: number
     unassigned: number
@@ -41,6 +43,7 @@ export function AllocationPlanFilters({
   products,
   cities,
   nodes,
+  panelists,
   availabilityCounts,
   onFilterChange,
   onClearFilters,
@@ -74,10 +77,10 @@ export function AllocationPlanFilters({
         <div className="flex items-center gap-3">
           <Filter className="w-5 h-5 text-gray-400" />
           <span className="font-medium text-gray-900">{t('stock.filters')}</span>
-          <SmartTooltip content="Filter allocation plan details by plan, carrier, product, route, dates, status, or availability issues to focus on specific shipments." />
+          <SmartTooltip content={t('allocation_plans.tt_filter_header')} />
           {activeFilterCount > 0 && (
             <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
-              {activeFilterCount} Active
+              {t('allocation_plans.active_filters').replace('{count}', String(activeFilterCount))}
             </span>
           )}
         </div>
@@ -89,10 +92,10 @@ export function AllocationPlanFilters({
                 clearFilters();
               }}
               className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 hover:text-gray-900 transition-colors"
-              title="Reset filters"
+              title={t('allocation_plans.reset_filters')}
             >
               <RotateCcw className="w-4 h-4" />
-              Reset
+              {t('common.reset')}
             </button>
           )}
           <span className="text-gray-400">{isExpanded ? '▲' : '▼'}</span>
@@ -107,15 +110,15 @@ export function AllocationPlanFilters({
             <div>
               <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
                 <span>📋</span>
-                Plan
-                <SmartTooltip content="Filter by allocation plan name. Shows only shipments belonging to the selected plan." />
+                {t('allocation_plans.plan')}
+                <SmartTooltip content={t('allocation_plans.tt_plan')} />
               </label>
               <select
                 value={filters.planId}
                 onChange={(e) => onFilterChange('planId', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="">All Plans</option>
+                <option value="">{t('allocation_plans.all_plans')}</option>
                 {plans.map((plan) => (
                   <option key={plan.id} value={plan.id}>
                     {plan.plan_name}
@@ -128,15 +131,15 @@ export function AllocationPlanFilters({
             <div>
               <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
                 <span>🚚</span>
-                Carrier
-                <SmartTooltip content="Filter by logistics carrier. Shows only shipments for the selected carrier." />
+                {t('allocation_plans.carrier')}
+                <SmartTooltip content={t('allocation_plans.tt_carrier')} />
               </label>
               <select
                 value={filters.carrierId}
                 onChange={(e) => onFilterChange('carrierId', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="">All Carriers</option>
+                <option value="">{t('allocation_plans.all_carriers')}</option>
                 {carriers.map((carrier) => (
                   <option key={carrier.id} value={carrier.id}>
                     {carrier.name}
@@ -149,18 +152,39 @@ export function AllocationPlanFilters({
             <div>
               <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
                 <span>📦</span>
-                Product
-                <SmartTooltip content="Filter by carrier product/service type. Shows only shipments for the selected product." />
+                {t('allocation_plans.product')}
+                <SmartTooltip content={t('allocation_plans.tt_product')} />
               </label>
               <select
                 value={filters.productId}
                 onChange={(e) => onFilterChange('productId', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="">All Products</option>
+                <option value="">{t('allocation_plans.all_products')}</option>
                 {products.map((product) => (
                   <option key={product.id} value={product.id}>
                     {product.description}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Panelist (origin or destination) */}
+            <div>
+              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                <span>👤</span>
+                {t('allocation_plans.panelist_filter')}
+                <SmartTooltip content={t('allocation_plans.tt_panelist')} />
+              </label>
+              <select
+                value={filters.panelistId}
+                onChange={(e) => onFilterChange('panelistId', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="">{t('allocation_plans.all_panelists')}</option>
+                {panelists.map((panelist) => (
+                  <option key={panelist.id} value={panelist.id}>
+                    {panelist.name}
                   </option>
                 ))}
               </select>
@@ -170,22 +194,22 @@ export function AllocationPlanFilters({
             <div>
               <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
                 <span>🔵</span>
-                Status
-                <SmartTooltip content="Filter by shipment status: Pending (not started), Sent (dispatched), Received (delivered), Cancelled, etc." />
+                {t('allocation_plans.status')}
+                <SmartTooltip content={t('allocation_plans.tt_status')} />
               </label>
               <select
                 value={filters.status}
                 onChange={(e) => onFilterChange('status', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="">All Status</option>
+                <option value="">{t('allocation_plans.all_status')}</option>
                 <option value="pending">{t('stock.pending')}</option>
                 <option value="notified">{t('allocation_plans.notified')}</option>
                 <option value="sent">{t('stock.sent')}</option>
                 <option value="received">{t('stock.received')}</option>
                 <option value="cancelled">{t('stock.cancelled')}</option>
                 <option value="invalid">{t('allocation_plans.invalid')}</option>
-                <option value="transfer_error">Transfer Error</option>
+                <option value="transfer_error">{t('allocation_plans.transfer_error')}</option>
               </select>
             </div>
 
@@ -193,8 +217,8 @@ export function AllocationPlanFilters({
             <div>
               <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
                 <span>📍</span>
-                Origin City
-                <SmartTooltip content="Filter by origin city (where packages are picked up). Shows only routes starting from the selected city." />
+                {t('allocation_plans.origin_city')}
+                <SmartTooltip content={t('allocation_plans.tt_origin_city')} />
               </label>
               <select
                 value={filters.originCityId}
@@ -204,7 +228,7 @@ export function AllocationPlanFilters({
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="">All Cities</option>
+                <option value="">{t('allocation_plans.all_cities')}</option>
                 {cities.map((city) => (
                   <option key={city.id} value={city.id}>
                     {city.name}
@@ -217,8 +241,8 @@ export function AllocationPlanFilters({
             <div>
               <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
                 <span>📤</span>
-                Origin Node
-                <SmartTooltip content="Filter by specific origin node within the selected city. Requires origin city to be selected first." />
+                {t('allocation_plans.origin_node')}
+                <SmartTooltip content={t('allocation_plans.tt_origin_node')} />
               </label>
               <select
                 value={filters.originNodeId}
@@ -226,7 +250,7 @@ export function AllocationPlanFilters({
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
                 disabled={!filters.originCityId}
               >
-                <option value="">All Nodes</option>
+                <option value="">{t('allocation_plans.all_nodes')}</option>
                 {originNodes.map((node) => (
                   <option key={node.id} value={node.id}>
                     {node.auto_id}
@@ -239,8 +263,8 @@ export function AllocationPlanFilters({
             <div>
               <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
                 <span>🎯</span>
-                Destination City
-                <SmartTooltip content="Filter by destination city (where packages are delivered). Shows only routes ending in the selected city." />
+                {t('allocation_plans.destination_city')}
+                <SmartTooltip content={t('allocation_plans.tt_dest_city')} />
               </label>
               <select
                 value={filters.destinationCityId}
@@ -250,7 +274,7 @@ export function AllocationPlanFilters({
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="">All Cities</option>
+                <option value="">{t('allocation_plans.all_cities')}</option>
                 {cities.map((city) => (
                   <option key={city.id} value={city.id}>
                     {city.name}
@@ -263,8 +287,8 @@ export function AllocationPlanFilters({
             <div>
               <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
                 <span>📥</span>
-                Destination Node
-                <SmartTooltip content="Filter by specific destination node within the selected city. Requires destination city to be selected first." />
+                {t('allocation_plans.destination_node')}
+                <SmartTooltip content={t('allocation_plans.tt_dest_node')} />
               </label>
               <select
                 value={filters.destinationNodeId}
@@ -272,7 +296,7 @@ export function AllocationPlanFilters({
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
                 disabled={!filters.destinationCityId}
               >
-                <option value="">All Nodes</option>
+                <option value="">{t('allocation_plans.all_nodes')}</option>
                 {destinationNodes.map((node) => (
                   <option key={node.id} value={node.id}>
                     {node.auto_id}
@@ -285,8 +309,8 @@ export function AllocationPlanFilters({
             <div>
               <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
                 <span>📅</span>
-                Start Date
-                <SmartTooltip content="Filter shipments scheduled on or after this date. Combine with End Date for date range filtering." />
+                {t('allocation_plans.start_date')}
+                <SmartTooltip content={t('allocation_plans.tt_start_date')} />
               </label>
               <input
                 type="date"
@@ -300,8 +324,8 @@ export function AllocationPlanFilters({
             <div>
               <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
                 <span>📅</span>
-                End Date
-                <SmartTooltip content="Filter shipments scheduled on or before this date. Combine with Start Date for date range filtering." />
+                {t('allocation_plans.end_date')}
+                <SmartTooltip content={t('allocation_plans.tt_end_date')} />
               </label>
               <input
                 type="date"
@@ -315,14 +339,14 @@ export function AllocationPlanFilters({
             <div>
               <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
                 <span>🏷️</span>
-                Tag ID
-                <SmartTooltip content="Search by physical tag identifier. Finds shipments with matching tag IDs (partial match supported)." />
+                {t('allocation_plans.tag_id')}
+                <SmartTooltip content={t('allocation_plans.tt_tag_id')} />
               </label>
               <input
                 type="text"
                 value={filters.tagId}
                 onChange={(e) => onFilterChange('tagId', e.target.value)}
-                placeholder="Search by Tag ID..."
+                placeholder={t('allocation_plans.search_by_tag_id')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -331,14 +355,14 @@ export function AllocationPlanFilters({
             <div>
               <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
                 <span>🔑</span>
-                Event ID
-                <SmartTooltip content="Search by allocation plan detail event ID. Useful for tracking specific shipment records in material movements (partial match supported)." />
+                {t('allocation_plans.event_id')}
+                <SmartTooltip content={t('allocation_plans.tt_event_id')} />
               </label>
               <input
                 type="text"
                 value={filters.eventId}
                 onChange={(e) => onFilterChange('eventId', e.target.value)}
-                placeholder="Search by Event ID..."
+                placeholder={t('allocation_plans.search_by_event_id')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -347,19 +371,19 @@ export function AllocationPlanFilters({
             <div>
               <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
                 <span>⚠️</span>
-                Availability Issues
-                <SmartTooltip content="Filter by panelist availability problems: Unavailable (not available on date), Unassigned (no panelist assigned), Inactive (panelist inactive)." />
+                {t('allocation_plans.availability_issues')}
+                <SmartTooltip content={t('allocation_plans.tt_availability')} />
               </label>
               <select
                 value={filters.availabilityIssue}
                 onChange={(e) => onFilterChange('availabilityIssue', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="">All Records</option>
-                <option value="unavailable">⚠ Unavailable ({availabilityCounts.unavailable})</option>
-                <option value="unassigned">Unassigned ({availabilityCounts.unassigned})</option>
-                <option value="inactive">Inactive ({availabilityCounts.inactive})</option>
-                <option value="any_issue">Any Issue ({availabilityCounts.any_issue})</option>
+                <option value="">{t('allocation_plans.all_records')}</option>
+                <option value="unavailable">⚠ {t('allocation_plans.unavailable')} ({availabilityCounts.unavailable})</option>
+                <option value="unassigned">{t('allocation_plans.unassigned')} ({availabilityCounts.unassigned})</option>
+                <option value="inactive">{t('allocation_plans.inactive')} ({availabilityCounts.inactive})</option>
+                <option value="any_issue">{t('allocation_plans.any_issue')} ({availabilityCounts.any_issue})</option>
               </select>
             </div>
           </div>

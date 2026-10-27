@@ -34,6 +34,7 @@ export function AllocationPlans() {
     planId: '',
     carrierId: '',
     productId: '',
+    panelistId: '',
     originCityId: '',
     destinationCityId: '',
     originNodeId: '',
@@ -89,6 +90,12 @@ export function AllocationPlans() {
       if (filters.planId && detail.plan?.id !== filters.planId) return false
       if (filters.carrierId && detail.carrier?.id !== filters.carrierId) return false
       if (filters.productId && detail.product?.id !== filters.productId) return false
+      if (
+        filters.panelistId &&
+        detail.origin_panelist_id !== filters.panelistId &&
+        detail.destination_panelist_id !== filters.panelistId
+      )
+        return false
       if (filters.originCityId && detail.origin_city?.id !== filters.originCityId) return false
       if (filters.destinationCityId && detail.destination_city?.id !== filters.destinationCityId)
         return false
@@ -284,6 +291,7 @@ export function AllocationPlans() {
       planId: '',
       carrierId: '',
       productId: '',
+      panelistId: '',
       originCityId: '',
       destinationCityId: '',
       originNodeId: '',
@@ -731,6 +739,7 @@ export function AllocationPlans() {
         products={products}
         cities={cities}
         nodes={nodes}
+        panelists={panelists}
         availabilityCounts={availabilityCounts}
         onFilterChange={handleFilterChange}
         onClearFilters={handleClearFilters}
@@ -795,7 +804,7 @@ export function AllocationPlans() {
         </div>
 
         {filteredDetails.length === 0 ? (
-          <div className="text-gray-500 text-center py-8 px-6">No records found</div>
+          <div className="text-gray-500 text-center py-8 px-6">{t('allocation_plans.no_records')}</div>
         ) : (
           <div className="overflow-x-auto">
             <div className="max-h-[600px] overflow-y-auto">
