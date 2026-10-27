@@ -193,6 +193,26 @@ allocation_plans.no_panelist_assigned_to_destination_node,Aucun panéliste assig
 allocation_plans.no_panelist_assigned_to_origin_node,Aucun panéliste assigné au nœud d'origine
 allocation_plans.no_records,Aucun plan d'allocation trouvé
 allocation_plans.notified,Notifié
+allocation_plans.panelist_filter,Panéliste
+allocation_plans.all_panelists,Tous les panélistes
+allocation_plans.unassigned,Non assigné
+allocation_plans.any_issue,Tout problème
+allocation_plans.active_filters,{count} actifs
+allocation_plans.tt_filter_header,Filtrez le détail des plans par plan, transporteur, produit, panéliste, itinéraire, dates, statut ou problèmes de disponibilité pour cibler des envois précis.
+allocation_plans.tt_plan,Filtrer par nom de plan. Affiche uniquement les envois du plan sélectionné.
+allocation_plans.tt_carrier,Filtrer par transporteur logistique. Affiche uniquement les envois du transporteur sélectionné.
+allocation_plans.tt_product,Filtrer par produit ou type de service du transporteur. Affiche uniquement les envois du produit sélectionné.
+allocation_plans.tt_panelist,Filtrer par nom de panéliste. Affiche les envois où le panéliste est l'expéditeur (origine) ou le destinataire (destination).
+allocation_plans.tt_status,Filtrer par statut de l'envoi : En attente (non commencé), Envoyé, Reçu (livré), Annulé, etc.
+allocation_plans.tt_origin_city,Filtrer par ville d'origine (où les colis sont pris en charge). Affiche uniquement les itinéraires partant de la ville sélectionnée.
+allocation_plans.tt_origin_node,Filtrer par nœud d'origine précis dans la ville sélectionnée. Nécessite de choisir d'abord la ville d'origine.
+allocation_plans.tt_dest_city,Filtrer par ville de destination (où les colis sont livrés). Affiche uniquement les itinéraires se terminant dans la ville sélectionnée.
+allocation_plans.tt_dest_node,Filtrer par nœud de destination précis dans la ville sélectionnée. Nécessite de choisir d'abord la ville de destination.
+allocation_plans.tt_start_date,Filtrer les envois programmés à partir de cette date. À combiner avec la date de fin pour une plage.
+allocation_plans.tt_end_date,Filtrer les envois programmés jusqu'à cette date. À combiner avec la date de début pour une plage.
+allocation_plans.tt_tag_id,Rechercher par identifiant du tag physique. Trouve les envois dont l'ID de tag correspond (correspondance partielle possible).
+allocation_plans.tt_event_id,Rechercher par ID d'événement du détail du plan. Utile pour suivre des envois précis dans les mouvements de matériel (correspondance partielle possible).
+allocation_plans.tt_availability,Filtrer par problèmes de disponibilité du panéliste : Indisponible (pas disponible à la date), Non assigné (aucun panéliste) ou Inactif (panéliste inactif).
 allocation_plans.optional,Optionnel
 allocation_plans.optional_distribute_samples_unevenly_across_months,Optionnel : Distribuer les échantillons de manière inégale selon les mois pour refléter les variations saisonnières.
 allocation_plans.origin,Origine :

@@ -193,6 +193,26 @@ allocation_plans.no_panelist_assigned_to_destination_node,No hay panelista asign
 allocation_plans.no_panelist_assigned_to_origin_node,No hay panelista asignado al nodo de origen
 allocation_plans.no_records,No se encontraron planes de asignación
 allocation_plans.notified,Notificado
+allocation_plans.panelist_filter,Panelista
+allocation_plans.all_panelists,Todos los panelistas
+allocation_plans.unassigned,Sin asignar
+allocation_plans.any_issue,Cualquier incidencia
+allocation_plans.active_filters,{count} activos
+allocation_plans.tt_filter_header,Filtra el detalle de los planes por plan, carrier, producto, panelista, ruta, fechas, estado o problemas de disponibilidad para centrarte en envíos concretos.
+allocation_plans.tt_plan,Filtra por nombre del plan. Muestra solo los envíos del plan seleccionado.
+allocation_plans.tt_carrier,Filtra por carrier logístico. Muestra solo los envíos del carrier seleccionado.
+allocation_plans.tt_product,Filtra por producto o tipo de servicio del carrier. Muestra solo los envíos del producto seleccionado.
+allocation_plans.tt_panelist,Filtra por nombre del panelista. Muestra los envíos en que el panelista es quien envía (origen) o quien recibe (destino).
+allocation_plans.tt_status,Filtra por estado del envío: Pendiente (sin empezar), Enviado, Recibido (entregado), Cancelado, etc.
+allocation_plans.tt_origin_city,Filtra por ciudad de origen (de donde sale el paquete). Muestra solo las rutas que parten de la ciudad seleccionada.
+allocation_plans.tt_origin_node,Filtra por un nodo de origen concreto dentro de la ciudad seleccionada. Primero hay que elegir la ciudad de origen.
+allocation_plans.tt_dest_city,Filtra por ciudad de destino (donde se entrega el paquete). Muestra solo las rutas que terminan en la ciudad seleccionada.
+allocation_plans.tt_dest_node,Filtra por un nodo de destino concreto dentro de la ciudad seleccionada. Primero hay que elegir la ciudad de destino.
+allocation_plans.tt_start_date,Filtra los envíos programados desde esta fecha. Combínalo con la fecha de fin para un rango.
+allocation_plans.tt_end_date,Filtra los envíos programados hasta esta fecha. Combínalo con la fecha de inicio para un rango.
+allocation_plans.tt_tag_id,Busca por identificador de la etiqueta física. Encuentra envíos con ese ID de etiqueta (admite coincidencia parcial).
+allocation_plans.tt_event_id,Busca por ID de evento del detalle del plan. Útil para seguir envíos concretos en los movimientos de material (admite coincidencia parcial).
+allocation_plans.tt_availability,Filtra por problemas de disponibilidad del panelista: No disponible (no puede en esa fecha), Sin asignar (sin panelista) o Inactivo (panelista inactivo).
 allocation_plans.optional,Opcional
 allocation_plans.optional_distribute_samples_unevenly_across_months,Opcional: Distribuir las muestras de manera desigual a lo largo de los meses para reflejar patrones estacionales.
 allocation_plans.origin,Origen:

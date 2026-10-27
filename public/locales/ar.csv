@@ -193,6 +193,26 @@ allocation_plans.no_panelist_assigned_to_destination_node,لا يوجد مشار
 allocation_plans.no_panelist_assigned_to_origin_node,لا يوجد مشارك معين لعقدة الأصل
 allocation_plans.no_records,لم يتم العثور على خطط تخصيص
 allocation_plans.notified,تم الإخطار
+allocation_plans.panelist_filter,المشارك
+allocation_plans.all_panelists,جميع المشاركين
+allocation_plans.unassigned,غير معيّن
+allocation_plans.any_issue,أي مشكلة
+allocation_plans.active_filters,{count} نشط
+allocation_plans.tt_filter_header,قم بتصفية تفاصيل الخطط حسب الخطة أو الناقل أو المنتج أو المشارك أو المسار أو التواريخ أو الحالة أو مشاكل التوفر للتركيز على شحنات محددة.
+allocation_plans.tt_plan,التصفية حسب اسم الخطة. يعرض فقط الشحنات التابعة للخطة المحددة.
+allocation_plans.tt_carrier,التصفية حسب الناقل اللوجستي. يعرض فقط الشحنات الخاصة بالناقل المحدد.
+allocation_plans.tt_product,التصفية حسب منتج الناقل أو نوع الخدمة. يعرض فقط الشحنات الخاصة بالمنتج المحدد.
+allocation_plans.tt_panelist,التصفية حسب اسم المشارك. يعرض الشحنات التي يكون فيها المشارك هو المرسل (المصدر) أو المستلم (الوجهة).
+allocation_plans.tt_status,التصفية حسب حالة الشحنة: قيد الانتظار (لم تبدأ)، مرسلة، مستلمة (تم تسليمها)، ملغاة، إلخ.
+allocation_plans.tt_origin_city,التصفية حسب مدينة المصدر (حيث تُستلم الطرود). يعرض فقط المسارات التي تبدأ من المدينة المحددة.
+allocation_plans.tt_origin_node,التصفية حسب عقدة مصدر محددة داخل المدينة المحددة. يتطلب اختيار مدينة المصدر أولاً.
+allocation_plans.tt_dest_city,التصفية حسب مدينة الوجهة (حيث تُسلَّم الطرود). يعرض فقط المسارات التي تنتهي في المدينة المحددة.
+allocation_plans.tt_dest_node,التصفية حسب عقدة وجهة محددة داخل المدينة المحددة. يتطلب اختيار مدينة الوجهة أولاً.
+allocation_plans.tt_start_date,تصفية الشحنات المجدولة في هذا التاريخ أو بعده. اجمعها مع تاريخ الانتهاء لتحديد نطاق زمني.
+allocation_plans.tt_end_date,تصفية الشحنات المجدولة في هذا التاريخ أو قبله. اجمعها مع تاريخ البدء لتحديد نطاق زمني.
+allocation_plans.tt_tag_id,البحث بمعرّف العلامة المادية. يعثر على الشحنات ذات معرّف العلامة المطابق (يدعم المطابقة الجزئية).
+allocation_plans.tt_event_id,البحث بمعرّف حدث تفصيل الخطة. مفيد لتتبع شحنات محددة في حركات المواد (يدعم المطابقة الجزئية).
+allocation_plans.tt_availability,التصفية حسب مشاكل توفر المشارك: غير متاح (غير متوفر في التاريخ)، غير معيّن (لا يوجد مشارك)، أو غير نشط (المشارك غير نشط).
 allocation_plans.optional,اختياري
 allocation_plans.optional_distribute_samples_unevenly_across_months,اختياري: توزيع العينات بشكل غير متساوٍ عبر الأشهر لتعكس الأنماط الموسمية.
 allocation_plans.origin,الأصل:

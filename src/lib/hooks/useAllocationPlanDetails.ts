@@ -51,14 +51,17 @@ export function useAllocationPlanDetails() {
         }
       }
 
-      // Fetch additional data for filters and selectors
+      // Fetch additional data for filters and selectors.
+      // RLS lets a superadmin see every account, so scope each list to the selected one
+      // (normal users are already limited to their own account by RLS).
+      const scoped = (q: any) => (effectiveAccountId ? q.eq('account_id', effectiveAccountId) : q)
       const [plansRes, carriersRes, productsRes, citiesRes, nodesRes, panelistsRes] = await Promise.all([
-        supabase.from('allocation_plans').select('id, plan_name, carrier_id, product_id').order('plan_name'),
-        supabase.from('carriers').select('id, code, name').eq('status', 'active').order('name'),
-        supabase.from('products').select('id, code, description').eq('status', 'active').order('description'),
-        supabase.from('cities').select('id, code, name').eq('status', 'active').order('name'),
-        supabase.from('nodes').select('id, auto_id, city_id').eq('status', 'active').order('auto_id'),
-        supabase.from('panelists').select('id, panelist_code, name, node_id').eq('status', 'active').order('name'),
+        scoped(supabase.from('allocation_plans').select('id, plan_name, carrier_id, product_id').eq('status', 'active')).order('plan_name'),
+        scoped(supabase.from('carriers').select('id, code, name').eq('status', 'active')).order('name'),
+        scoped(supabase.from('products').select('id, code, description').eq('status', 'active')).order('description'),
+        scoped(supabase.from('cities').select('id, code, name').eq('status', 'active')).order('name'),
+        scoped(supabase.from('nodes').select('id, auto_id, city_id').eq('status', 'active')).order('auto_id'),
+        scoped(supabase.from('panelists').select('id, panelist_code, name, node_id')).order('name'),
       ])
 
       if (plansRes.error) throw plansRes.error
@@ -69,14 +72,14 @@ export function useAllocationPlanDetails() {
       if (panelistsRes.error) throw panelistsRes.error
 
       // Enrich details with related data
-      const enrichedDetails = allDetailsData.map((detail: any) => {
-        const plan = plansRes.data?.find((p) => p.id === detail.plan_id)
-        const originNode = nodesRes.data?.find((n) => n.id === detail.origin_node_id)
-        const destinationNode = nodesRes.data?.find((n) => n.id === detail.destination_node_id)
-        const originCity = citiesRes.data?.find((c) => c.id === detail.origin_city_id)
-        const destinationCity = citiesRes.data?.find((c) => c.id === detail.destination_city_id)
-        const carrier = carriersRes.data?.find((c) => c.id === plan?.carrier_id)
-        const product = productsRes.data?.find((p) => p.id === plan?.product_id)
+      const enrichedDetails = allDetailsData.filter((detail: any) => plansRes.data?.some((p: any) => p.id === detail.plan_id)).map((detail: any) => {
+        const plan = plansRes.data?.find((p: any) => p.id === detail.plan_id)
+        const originNode = nodesRes.data?.find((n: any) => n.id === detail.origin_node_id)
+        const destinationNode = nodesRes.data?.find((n: any) => n.id === detail.destination_node_id)
+        const originCity = citiesRes.data?.find((c: any) => c.id === detail.origin_city_id)
+        const destinationCity = citiesRes.data?.find((c: any) => c.id === detail.destination_city_id)
+        const carrier = carriersRes.data?.find((c: any) => c.id === plan?.carrier_id)
+        const product = productsRes.data?.find((p: any) => p.id === plan?.product_id)
 
         return {
           ...detail,
@@ -107,7 +110,7 @@ export function useAllocationPlanDetails() {
 
   useEffect(() => {
     fetchAll()
-  }, [])
+  }, [effectiveAccountId])
 
   const updateDetail = async (id: string, updates: Partial<AllocationPlanDetailWithRelations>) => {
     try {
