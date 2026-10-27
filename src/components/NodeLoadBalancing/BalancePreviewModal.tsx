@@ -1,26 +1,54 @@
 import React, { useState } from 'react';
-import { BalanceResult, MatrixCell } from '../../hooks/useNodeLoadBalancing';
+import type { BalanceResult, BalanceMovement, MatrixCell } from '../../hooks/useNodeLoadBalancing';
 import { useTranslation } from '../../hooks/useTranslation';
+import { groupMatrixByWeek, isCityFailed, totalsForAllCities } from '../../lib/balanceViews';
+
+export interface BalanceCityResult {
+  cityId: string;
+  cityName: string;
+  result?: BalanceResult;
+  error?: string;
+}
 
 interface BalancePreviewModalProps {
   isOpen: boolean;
-  cityName: string;
-  previewResult: BalanceResult | null;
+  mode: 'city' | 'all';
+  cityName?: string;
+  results: BalanceCityResult[];
   loading: boolean;
+  progress?: { done: number; total: number } | null;
   onClose: () => void;
   onConfirm: () => void;
 }
 
+const fmt = (n: number | null | undefined, digits = 1) => (n != null ? n.toFixed(digits) : 'N/A');
+
+/** Algo que aplicar: envios movidos o dias POBOX movidos/creados */
+const hasChanges = (r?: BalanceResult) =>
+  !!r && !r.error && r.success !== false &&
+  ((r.movements_count || 0) > 0 || (r.pobox?.days_moved || 0) > 0 || (r.pobox?.days_created || 0) > 0);
+
 export const BalancePreviewModal: React.FC<BalancePreviewModalProps> = ({
   isOpen,
+  mode,
   cityName,
-  previewResult,
+  results,
   loading,
+  progress,
   onClose,
   onConfirm,
 }) => {
   const { t } = useTranslation();
   if (!isOpen) return null;
+
+  const single = results[0];
+  const canApply = mode === 'city'
+    ? hasChanges(single?.result) && !single?.error
+    : results.some((r) => !isCityFailed(r) && hasChanges(r.result));
+
+  const title = mode === 'all'
+    ? t('lb2.preview_all_title')
+    : `${t('nodeLoadBalancing.balancePreview')} - ${cityName ?? ''}`;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -28,11 +56,10 @@ export const BalancePreviewModal: React.FC<BalancePreviewModalProps> = ({
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-gray-900">
-              Balance Preview - {cityName}
-            </h2>
+            <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
             <button
               onClick={onClose}
+              aria-label={t('common.close')}
               className="text-gray-400 hover:text-gray-600 transition-colors"
             >
               <span className="text-2xl">×</span>
@@ -44,157 +71,30 @@ export const BalancePreviewModal: React.FC<BalancePreviewModalProps> = ({
         <div className="flex-1 overflow-y-auto p-6">
           {loading && (
             <div className="flex items-center justify-center py-12">
-              <div className="flex items-center gap-3 text-gray-600">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-600"></div>
-                <span>Calculating balance preview...</span>
+              <div className="flex flex-col items-center gap-3 text-gray-600">
+                <div className="flex items-center gap-3">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-600"></div>
+                  <span>
+                    {progress && progress.total > 0
+                      ? t('lb2.balance_all_progress', { done: progress.done, total: progress.total })
+                      : t('nodeloadbalancing.calculating_balance_preview')}
+                  </span>
+                </div>
+                {progress && progress.total > 0 && (
+                  <div className="w-64 h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div
+                      className="h-2 bg-blue-600 transition-all"
+                      style={{ width: `${Math.round((progress.done / progress.total) * 100)}%` }}
+                    />
+                  </div>
+                )}
               </div>
             </div>
           )}
 
-          {!loading && previewResult?.error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <p className="text-red-700">Error: {previewResult.error}</p>
-            </div>
-          )}
+          {!loading && mode === 'city' && single && <CityBody item={single} />}
 
-          {!loading && previewResult && !previewResult.error && (
-            <>
-              {/* Summary */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                <h3 className="font-semibold text-blue-900 mb-3">Summary</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div>
-                    <div className="text-sm text-blue-700">Movements</div>
-                    <div className="text-2xl font-bold text-blue-900">
-                      {previewResult.movements_count}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-blue-700">Std Dev Before</div>
-                    <div className="text-2xl font-bold text-blue-900">
-                      {previewResult.stddev_before != null ? previewResult.stddev_before.toFixed(1) : 'N/A'}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-blue-700">Std Dev After</div>
-                    <div className="text-2xl font-bold text-green-700">
-                      {previewResult.stddev_after != null ? previewResult.stddev_after.toFixed(1) : 'N/A'}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-blue-700">Improvement</div>
-                    <div className="text-2xl font-bold text-green-700">
-                      {previewResult.improvement_percentage != null ? previewResult.improvement_percentage.toFixed(1) : 'N/A'}%
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Nodes Needed Warning */}
-              {previewResult.nodes_needed != null && previewResult.nodes_needed > 0 && (
-                <div className="bg-orange-50 border border-orange-300 rounded-lg p-4 mb-6">
-                  <div className="flex gap-3">
-                    <span className="text-orange-600 text-xl">⚠️</span>
-                    <div>
-                      <h3 className="font-semibold text-orange-900 mb-2">
-                        Additional Nodes Required
-                      </h3>
-                      <p className="text-sm text-orange-800 mb-3">
-                        Even after optimal balancing, the average load per node (
-                        <strong>{previewResult.avg_load_per_node?.toFixed(1)}</strong> samples/node)
-                        exceeds the acceptable threshold of{' '}
-                        <strong>{previewResult.max_acceptable_load?.toFixed(1)}</strong> samples/node
-                        (Reference: {previewResult.reference_load} + {previewResult.deviation_percent}% tolerance).
-                      </p>
-                      <div className="bg-orange-100 border border-orange-200 rounded-md p-3">
-                        <div className="flex items-center gap-2">
-                          <span className="text-3xl font-bold text-orange-900">
-                            +{previewResult.nodes_needed}
-                          </span>
-                          <div className="text-sm text-orange-800">
-                            <div className="font-semibold">Additional node{previewResult.nodes_needed > 1 ? 's' : ''} needed</div>
-                            <div>Current nodes: {previewResult.nodes_count}</div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* No movements needed */}
-              {previewResult.movements_count === 0 && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                  <p className="text-green-700">
-                    ✓ No balancing needed - the city is already well balanced!
-                  </p>
-                </div>
-              )}
-
-              {/* Matrix Visualization and Movements */}
-              {previewResult.movements_count > 0 && (
-                <MatrixVisualization
-                  matrixBefore={previewResult.matrix_before}
-                  matrixAfter={previewResult.matrix_after}
-                  movements={previewResult.movements}
-                />
-              )}
-
-              {/* Movements List (legacy, kept for reference) */}
-              {false && (
-                <>
-                  <h3 className="font-semibold text-gray-900 mb-3">
-                    Planned Movements ({previewResult?.movements?.length || 0})
-                  </h3>
-                  <div className="space-y-3">
-                    {previewResult?.movements?.map((movement, index) => (
-                      <div
-                        key={index}
-                        className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50"
-                      >
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-3">
-                            <span className="text-lg">📦</span>
-                            <div>
-                              <div className="font-medium text-gray-900">
-                                {movement.count} shipment{movement.count > 1 ? 's' : ''}
-                              </div>
-                              <div className="text-sm text-gray-600">
-                                From {movement.from_node_code} (Week {movement.from_week}) →{' '}
-                                {movement.to_node_code} (Week {movement.to_week})
-                              </div>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-xs text-gray-500">
-                              {movement.from_week === movement.to_week
-                                ? 'Same week'
-                                : 'Cross-week'}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Info */}
-                  <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                    <div className="flex gap-3">
-                      <span className="text-yellow-600">ℹ️</span>
-                      <div className="text-sm text-yellow-800">
-                        <p className="font-medium mb-1">Matrix Balancing Algorithm</p>
-                        <p>
-                          This algorithm considers the entire city-month matrix simultaneously,
-                          redistributing shipments across both nodes and weeks to achieve optimal
-                          balance. Only pending shipments without assigned panelists will be moved.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </>
-              )}
-            </>
-          )}
+          {!loading && mode === 'all' && <AllBody results={results} />}
         </div>
 
         {/* Footer */}
@@ -203,19 +103,14 @@ export const BalancePreviewModal: React.FC<BalancePreviewModalProps> = ({
             onClick={onClose}
             className="px-4 py-2 text-gray-700 hover:text-gray-900 transition-colors"
           >
-            Cancel
+            {t('common.cancel')}
           </button>
           <button
             onClick={onConfirm}
-            disabled={
-              loading ||
-              !previewResult ||
-              previewResult.error !== undefined ||
-              previewResult.movements_count === 0
-            }
+            disabled={loading || !canApply}
             className="px-6 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
           >
-            {loading ? 'Loading...' : 'Apply Balance'}
+            {loading ? t('nodeLoadBalancing.loading') : t('nodeLoadBalancing.applyBalance')}
           </button>
         </div>
       </div>
@@ -223,59 +118,218 @@ export const BalancePreviewModal: React.FC<BalancePreviewModalProps> = ({
   );
 };
 
-// Matrix Visualization Component
+// ---------------------------------------------------------------- city mode
+
+const WarningsList: React.FC<{ result: BalanceResult }> = ({ result }) => {
+  const { t } = useTranslation();
+  const warnings = result.warnings || [];
+  if (warnings.length === 0) return null;
+  return (
+    <div className="bg-orange-50 border border-orange-300 rounded-lg p-4 mb-6">
+      <h3 className="font-semibold text-orange-900 mb-2">{t('lb2.warnings_title')}</h3>
+      <ul className="space-y-1 text-sm text-orange-800">
+        {warnings.map((w, i) => {
+          const key = `lb2.warning.${w.code}`;
+          const label = t(key);
+          return (
+            <li key={`${w.code}-${i}`}>
+              {label && label !== key ? label : w.code} ({w.count}){w.detail ? ` - ${w.detail}` : ''}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+};
+
+const CityBody: React.FC<{ item: BalanceCityResult }> = ({ item }) => {
+  const { t } = useTranslation();
+  const r = item.result;
+  const errorText = item.error || r?.error || (r && r.success === false ? r.message : undefined);
+
+  if (errorText || !r) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+        <p className="text-red-700">{t('common.error')}: {errorText || ''}</p>
+      </div>
+    );
+  }
+
+  const pobox = r.pobox;
+  const showPobox = !!pobox && (r.policy?.pobox_enabled === true ||
+    pobox.days_missing + pobox.days_moved + pobox.days_created + pobox.days_uncovered > 0);
+
+  return (
+    <>
+      {/* Summary */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+        <h3 className="font-semibold text-blue-900 mb-3">{t('nodeloadbalancing.summary')}</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div>
+            <div className="text-sm text-blue-700">{t('nodeloadbalancing.movements')}</div>
+            <div className="text-2xl font-bold text-blue-900">{r.movements_count}</div>
+          </div>
+          <div>
+            <div className="text-sm text-blue-700">{t('nodeloadbalancing.std_dev_before')}</div>
+            <div className="text-2xl font-bold text-blue-900">{fmt(r.stddev_before)}</div>
+          </div>
+          <div>
+            <div className="text-sm text-blue-700">{t('nodeloadbalancing.std_dev_after')}</div>
+            <div className="text-2xl font-bold text-green-700">{fmt(r.stddev_after)}</div>
+          </div>
+          <div>
+            <div className="text-sm text-blue-700">{t('nodeloadbalancing.improvement')}</div>
+            <div className="text-2xl font-bold text-green-700">{fmt(r.improvement_percentage)}%</div>
+          </div>
+        </div>
+      </div>
+
+      {/* POBOX */}
+      {showPobox && pobox && (
+        <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-6">
+          <h3 className="font-semibold text-purple-900 mb-3">{t('lb2.pobox')}</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {([
+              ['lb2.pobox_days_missing', pobox.days_missing],
+              ['lb2.pobox_days_moved', pobox.days_moved],
+              ['lb2.pobox_days_created', pobox.days_created],
+              ['lb2.pobox_days_uncovered', pobox.days_uncovered],
+            ] as const).map(([k, v]) => (
+              <div key={k}>
+                <div className="text-sm text-purple-700">{t(k)}</div>
+                <div className="text-2xl font-bold text-purple-900">{v}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <WarningsList result={r} />
+
+      {!hasChanges(r) && (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+          <p className="text-green-700">✓ {t('lb2.city_balanced')}</p>
+        </div>
+      )}
+
+      {hasChanges(r) && (
+        <MatrixVisualization
+          matrixBefore={r.matrix_before}
+          matrixAfter={r.matrix_after}
+          movements={r.movements}
+          movementsCount={r.movements_count}
+        />
+      )}
+    </>
+  );
+};
+
+// ---------------------------------------------------------------- all mode
+
+const AllBody: React.FC<{ results: BalanceCityResult[] }> = ({ results }) => {
+  const { t } = useTranslation();
+  if (results.length === 0) {
+    return (
+      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+        <p className="text-gray-600">{t('lb2.no_pending_cities')}</p>
+      </div>
+    );
+  }
+  const totals = totalsForAllCities(results);
+  const th = 'px-3 py-2 text-xs font-medium text-gray-500 uppercase tracking-wider';
+  return (
+    <div className="overflow-x-auto border border-gray-200 rounded-lg">
+      <table className="min-w-full divide-y divide-gray-200">
+        <thead className="bg-gray-50">
+          <tr>
+            <th className={`${th} text-left`}>{t('common.city')}</th>
+            <th className={`${th} text-center`}>{t('nodeloadbalancing.movements')}</th>
+            <th className={`${th} text-center`}>
+              {t('nodeloadbalancing.std_dev_before')} → {t('nodeloadbalancing.std_dev_after')}
+            </th>
+            <th className={`${th} text-center`}>{t('nodeloadbalancing.improvement')}</th>
+            <th className={`${th} text-center`}>{t('lb2.pobox_days_moved')}</th>
+            <th className={`${th} text-center`}>{t('lb2.pobox_days_created')}</th>
+            <th className={`${th} text-center`}>{t('lb2.pobox_days_uncovered')}</th>
+            <th className={`${th} text-center`}>{t('lb2.warnings_title')}</th>
+          </tr>
+        </thead>
+        <tbody className="bg-white divide-y divide-gray-200">
+          {results.map((row) => {
+            if (isCityFailed(row)) {
+              const msg = row.error || row.result?.error || row.result?.message || '';
+              return (
+                <tr key={row.cityId} className="bg-red-50">
+                  <td className="px-3 py-2 text-sm font-medium text-red-800">{row.cityName}</td>
+                  <td colSpan={7} className="px-3 py-2 text-sm text-red-700">
+                    {t('lb2.city_failed', { city: row.cityName })}{msg ? `: ${msg}` : ''}
+                  </td>
+                </tr>
+              );
+            }
+            const r = row.result!;
+            return (
+              <tr key={row.cityId}>
+                <td className="px-3 py-2 text-sm font-medium text-gray-900">{row.cityName}</td>
+                <td className="px-3 py-2 text-center text-sm">{r.movements_count}</td>
+                <td className="px-3 py-2 text-center text-sm">
+                  {fmt(r.stddev_before)} → <span className="text-green-700 font-semibold">{fmt(r.stddev_after)}</span>
+                </td>
+                <td className="px-3 py-2 text-center text-sm text-green-700">{fmt(r.improvement_percentage)}%</td>
+                <td className="px-3 py-2 text-center text-sm">{r.pobox?.days_moved ?? 0}</td>
+                <td className="px-3 py-2 text-center text-sm">{r.pobox?.days_created ?? 0}</td>
+                <td className="px-3 py-2 text-center text-sm">{r.pobox?.days_uncovered ?? 0}</td>
+                <td className="px-3 py-2 text-center text-sm">{(r.warnings || []).length}</td>
+              </tr>
+            );
+          })}
+          <tr className="bg-gray-50 font-semibold">
+            <td className="px-3 py-2 text-sm text-gray-900">{t('common.total')}</td>
+            <td className="px-3 py-2 text-center text-sm">{totals.movements}</td>
+            <td className="px-3 py-2 text-center text-sm text-gray-400">-</td>
+            <td className="px-3 py-2 text-center text-sm text-gray-400">-</td>
+            <td className="px-3 py-2 text-center text-sm">{totals.poboxMoved}</td>
+            <td className="px-3 py-2 text-center text-sm">{totals.poboxCreated}</td>
+            <td className="px-3 py-2 text-center text-sm">{totals.poboxUncovered}</td>
+            <td className="px-3 py-2 text-center text-sm">{totals.warnings}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+// ------------------------------------------------- matrix + movements (city)
+
 interface MatrixVisualizationProps {
   matrixBefore?: MatrixCell[];
   matrixAfter?: MatrixCell[];
-  movements: BalanceResult['movements'];
+  movements: BalanceMovement[];
+  movementsCount: number;
 }
 
 const MatrixVisualization: React.FC<MatrixVisualizationProps> = ({
   matrixBefore,
   matrixAfter,
   movements,
+  movementsCount,
 }) => {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'matrix' | 'movements'>('matrix');
   const [matrixView, setMatrixView] = useState<'before' | 'after'>('before');
 
-  if (!matrixBefore || !matrixAfter) {
+  if (!matrixBefore || !matrixAfter || matrixBefore.length === 0) {
     return (
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-        <p className="text-gray-600">Matrix data not available</p>
+        <p className="text-gray-600">{t('nodeloadbalancing.matrix_data_not_available')}</p>
       </div>
     );
   }
 
-  // Extract unique nodes and weeks
-  const nodes = Array.from(new Set(matrixBefore.map((cell) => cell.node_code))).sort();
-  const weeks = Array.from(new Set(matrixBefore.map((cell) => cell.week_num))).sort((a, b) => a - b);
+  // Columnas por semana: en politica diaria se suman los dias de cada semana
+  const { nodes, weeks, lookup } = groupMatrixByWeek(matrixView === 'before' ? matrixBefore : matrixAfter);
+  const val = (node: string, weekKey: string) => lookup[`${node}|${weekKey}`] || 0;
 
-  // Build matrix lookup
-  const buildMatrixLookup = (matrix: MatrixCell[]) => {
-    const lookup: { [key: string]: number } = {};
-    matrix.forEach((cell) => {
-      lookup[`${cell.node_code}-${cell.week_num}`] = cell.load_count;
-    });
-    return lookup;
-  };
-
-  const matrixBeforeLookup = buildMatrixLookup(matrixBefore);
-  const matrixAfterLookup = buildMatrixLookup(matrixAfter);
-
-  // DEBUG: Log matrices for audit
-  console.log('=== MATRIX DEBUG ===');
-  console.log('Matrix Before:', JSON.stringify(matrixBefore, null, 2));
-  console.log('Matrix After:', JSON.stringify(matrixAfter, null, 2));
-  console.log('Nodes:', nodes);
-  console.log('Weeks:', weeks);
-  console.log('Before Lookup:', matrixBeforeLookup);
-  console.log('After Lookup:', matrixAfterLookup);
-  console.log('===================');
-
-  const currentMatrix = matrixView === 'before' ? matrixBeforeLookup : matrixAfterLookup;
-
-  // Calculate color intensity based on load
   const getColorClass = (count: number) => {
     if (count === 0) return 'bg-gray-100 text-gray-400';
     if (count <= 5) return 'bg-green-100 text-green-800';
@@ -296,7 +350,7 @@ const MatrixVisualization: React.FC<MatrixVisualizationProps> = ({
               : 'text-gray-600 hover:text-gray-900'
           }`}
         >
-          📊 Matrix View
+          {t('nodeLoadBalancing.matrixView')}
         </button>
         <button
           onClick={() => setActiveTab('movements')}
@@ -306,178 +360,115 @@ const MatrixVisualization: React.FC<MatrixVisualizationProps> = ({
               : 'text-gray-600 hover:text-gray-900'
           }`}
         >
-          📦 Movements ({movements.length})
+          {t('nodeloadbalancing.movements')} ({movementsCount})
         </button>
       </div>
 
-      {/* Matrix Tab */}
       {activeTab === 'matrix' && (
         <div className="space-y-4">
-          {/* Before/After Toggle */}
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-gray-900">
-              Load Distribution Matrix
-            </h3>
+            <h3 className="font-semibold text-gray-900">{t('nodeLoadBalancing.loadDistributionMatrix')}</h3>
             <div className="flex gap-2">
               <button
                 onClick={() => setMatrixView('before')}
                 className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                  matrixView === 'before'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  matrixView === 'before' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                 }`}
               >
-                Before
+                {t('nodeLoadBalancing.before')}
               </button>
               <button
                 onClick={() => setMatrixView('after')}
                 className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                  matrixView === 'after'
-                    ? 'bg-green-600 text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  matrixView === 'after' ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                 }`}
               >
-                After
+                {t('nodeLoadBalancing.after')}
               </button>
             </div>
           </div>
 
-          {/* Matrix Table */}
           <div className="overflow-x-auto border border-gray-200 rounded-lg">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50">
-                    Node
+                    {t('nodeloadbalancing.node')}
                   </th>
-                  {weeks.map((week) => (
-                    <th
-                      key={week}
-                      className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
-                      S{week}
+                  {weeks.map((w) => (
+                    <th key={w.key} className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {t('lb2.week_short', { week: w.weekNum })}
                     </th>
                   ))}
                   <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Total
+                    {t('common.total')}
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {nodes.map((node) => {
-                  const rowTotal = weeks.reduce(
-                    (sum, week) => sum + (currentMatrix[`${node}-${week}`] || 0),
-                    0
-                  );
-                  return (
-                    <tr key={node}>
-                      <td className="px-3 py-2 text-sm font-medium text-gray-900 sticky left-0 bg-white">
-                        {node}
-                      </td>
-                      {weeks.map((week) => {
-                        const count = currentMatrix[`${node}-${week}`] || 0;
-                        return (
-                          <td
-                            key={week}
-                            className={`px-3 py-2 text-center text-sm font-semibold ${getColorClass(
-                              count
-                            )}`}
-                          >
-                            {count}
-                          </td>
-                        );
-                      })}
-                      <td className="px-3 py-2 text-center text-sm font-bold text-gray-900 bg-gray-50">
-                        {rowTotal}
-                      </td>
-                    </tr>
-                  );
-                })}
-                {/* Totals Row */}
+                {nodes.map((node) => (
+                  <tr key={node}>
+                    <td className="px-3 py-2 text-sm font-medium text-gray-900 sticky left-0 bg-white">{node}</td>
+                    {weeks.map((w) => {
+                      const count = val(node, w.key);
+                      return (
+                        <td key={w.key} className={`px-3 py-2 text-center text-sm font-semibold ${getColorClass(count)}`}>
+                          {count}
+                        </td>
+                      );
+                    })}
+                    <td className="px-3 py-2 text-center text-sm font-bold text-gray-900 bg-gray-50">
+                      {weeks.reduce((s, w) => s + val(node, w.key), 0)}
+                    </td>
+                  </tr>
+                ))}
                 <tr className="bg-gray-50 font-semibold">
-                  <td className="px-3 py-2 text-sm text-gray-900">{t('nodeLoadBalancing.table.total')}</td>
-                  {weeks.map((week) => {
-                    const colTotal = nodes.reduce(
-                      (sum, node) => sum + (currentMatrix[`${node}-${week}`] || 0),
-                      0
-                    );
-                    return (
-                      <td key={week} className="px-3 py-2 text-center text-sm text-gray-900">
-                        {colTotal}
-                      </td>
-                    );
-                  })}
+                  <td className="px-3 py-2 text-sm text-gray-900">{t('common.total')}</td>
+                  {weeks.map((w) => (
+                    <td key={w.key} className="px-3 py-2 text-center text-sm text-gray-900">
+                      {nodes.reduce((s, n) => s + val(n, w.key), 0)}
+                    </td>
+                  ))}
                   <td className="px-3 py-2 text-center text-sm font-bold text-gray-900">
-                    {nodes.reduce(
-                      (sum, node) =>
-                        sum +
-                        weeks.reduce(
-                          (wSum, week) => wSum + (currentMatrix[`${node}-${week}`] || 0),
-                          0
-                        ),
-                      0
-                    )}
+                    {nodes.reduce((s, n) => s + weeks.reduce((ws, w) => ws + val(n, w.key), 0), 0)}
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
 
-          {/* Legend */}
           <div className="flex items-center gap-4 text-xs text-gray-600">
-            <span className="font-medium">Load Level:</span>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-gray-100 border border-gray-300"></div>
-              <span>0</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-green-100 border border-green-300"></div>
-              <span>1-5</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-yellow-100 border border-yellow-300"></div>
-              <span>6-10</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-orange-100 border border-orange-300"></div>
-              <span>11-15</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-red-100 border border-red-300"></div>
-              <span>16+</span>
-            </div>
+            <span className="font-medium">{t('nodeLoadBalancing.loadLevel')}:</span>
+            {[
+              ['bg-gray-100 border-gray-300', '0'],
+              ['bg-green-100 border-green-300', '1-5'],
+              ['bg-yellow-100 border-yellow-300', '6-10'],
+              ['bg-orange-100 border-orange-300', '11-15'],
+              ['bg-red-100 border-red-300', '16+'],
+            ].map(([cls, label]) => (
+              <div key={label} className="flex items-center gap-2">
+                <div className={`w-4 h-4 border ${cls}`}></div>
+                <span>{label}</span>
+              </div>
+            ))}
           </div>
         </div>
       )}
 
-      {/* Movements Tab */}
       {activeTab === 'movements' && (
         <div className="space-y-3">
-          <h3 className="font-semibold text-gray-900">
-            Planned Movements ({movements.length})
-          </h3>
+          <h3 className="font-semibold text-gray-900">{t('lb2.planned_movements')} ({movementsCount})</h3>
+          {movements.length < movementsCount && (
+            <p className="text-xs text-gray-500">
+              {t('lb2.movements_truncated', { shown: movements.length, total: movementsCount })}
+            </p>
+          )}
           <div className="space-y-2 max-h-96 overflow-y-auto">
-            {movements.map((movement, index) => (
-              <div
-                key={index}
-                className="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 text-sm"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-base">📦</span>
-                    <div>
-                      <div className="font-medium text-gray-900">
-                        {movement.count} shipment{movement.count > 1 ? 's' : ''}
-                      </div>
-                      <div className="text-xs text-gray-600">
-                        {movement.from_node_code} (W{movement.from_week}) →{' '}
-                        {movement.to_node_code} (W{movement.to_week})
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    {movement.from_week === movement.to_week ? 'Same week' : 'Cross-week'}
-                  </div>
+            {movements.map((m, index) => (
+              <div key={index} className="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 text-sm">
+                <div className="font-medium text-gray-900">{t('lb2.shipments_count', { count: m.count })}</div>
+                <div className="text-xs text-gray-600">
+                  {m.from_node_code} ({m.from_date}) → {m.to_node_code} ({m.to_date})
                 </div>
               </div>
             ))}

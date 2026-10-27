@@ -3077,3 +3077,11 @@ lb2.pobox_days_uncovered,أيام POBOX غير المغطاة
 lb2.applied_ok,تم تطبيق الموازنة بنجاح.
 lb2.applied_error,حدث خطأ أثناء تطبيق الموازنة.
 lb2.city_failed,فشلت المدينة {city}
+lb2.preview_all_title,معاينة الموازنة - جميع المدن
+lb2.warning.origin_equals_destination,عقدة المصدر وعقدة الوجهة متطابقتان في بعض الشحنات.
+lb2.planned_movements,الحركات المخططة
+lb2.movements_truncated,عرض أول {shown} من أصل {total} حركة.
+lb2.shipments_count,{count} شحنة
+lb2.city_balanced,لا حاجة للموازنة - المدينة متوازنة بالفعل!
+lb2.no_pending_cities,لا توجد مدن بها شحنات معلقة في الفترة المحددة.
+lb2.week_short,أ{week}

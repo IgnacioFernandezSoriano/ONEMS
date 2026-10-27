@@ -1,12 +1,13 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useNodeLoadBalancing, BalanceResult, type NodeDayLoad } from '../hooks/useNodeLoadBalancing';
+import { useNodeLoadBalancing, type NodeDayLoad } from '../hooks/useNodeLoadBalancing';
 import { CityLoadCard, type LoadScale } from '../components/NodeLoadBalancing/CityLoadCard';
-import { BalancePreviewModal } from '../components/NodeLoadBalancing/BalancePreviewModal';
+import { BalancePreviewModal, type BalanceCityResult } from '../components/NodeLoadBalancing/BalancePreviewModal';
 import { BalancePoliciesPanel } from '../components/NodeLoadBalancing/BalancePoliciesPanel';
 import { useBalancePolicies } from '../hooks/useBalancePolicies';
 import { useAccountConfig } from '../hooks/useAccountConfig';
 import { workingDowsFromSchedule, type DatePolicy } from '../lib/workingDays';
+import { isCityFailed } from '../lib/balanceViews';
 
 import { useTranslation } from '@/hooks/useTranslation';
 export default function NodeLoadBalancing() {
@@ -20,7 +21,7 @@ export default function NodeLoadBalancing() {
   const [referenceLoad, setReferenceLoad] = useState(6); // Default reference samples per node
   const [deviationPercent, setDeviationPercent] = useState(20); // Default 20% deviation
 
-  const { loadData, dayData, citySummaries, loading, error, refetch, previewBalance, applyBalance, previewAll } =
+  const { loadData, dayData, citySummaries, loading, error, refetch, previewBalanceV2, applyBalanceV2, previewAll, applyAll } =
     useNodeLoadBalancing(profile?.account_id || undefined, startDate, endDate, referenceLoad, deviationPercent);
 
   const { weeklySchedule, setWorkingDay } = useAccountConfig();
@@ -38,23 +39,52 @@ export default function NodeLoadBalancing() {
   }, [dayData]);
   const noDayData = useMemo<NodeDayLoad[]>(() => [], []);
 
+  // Inline notice (replaces alert()): auto-hides after 8 s
+  const [notice, setNotice] = useState<{ type: 'ok' | 'error'; text: string } | null>(null);
+  const noticeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const showNotice = (type: 'ok' | 'error', text: string) => {
+    if (noticeTimer.current) clearTimeout(noticeTimer.current);
+    setNotice({ type, text });
+    noticeTimer.current = setTimeout(() => setNotice(null), 8000);
+  };
+  useEffect(
+    () => () => {
+      if (noticeTimer.current) clearTimeout(noticeTimer.current);
+    },
+    []
+  );
+  const errMsg = (err: unknown) => (err instanceof Error ? err.message : String(err));
+  const showFailure = (err?: string) => showNotice('error', `${t('common.error')}: ${err ?? ''}`);
+
   const handleCityPolicyChange = async (
     cityId: string,
     p: { date_policy?: DatePolicy | null; pobox_enabled?: boolean | null }
   ) => {
-    const res = await updateCityPolicy(cityId, p);
-    if (!res.success) console.error('[NodeLoadBalancing] Error updating city policy:', res.error);
+    try {
+      const res = await updateCityPolicy(cityId, p);
+      if (!res.success) {
+        console.error('[NodeLoadBalancing] Error updating city policy:', res.error);
+        showFailure(res.error);
+      }
+    } catch (err) {
+      console.error('[NodeLoadBalancing] Error updating city policy:', err);
+      showFailure(errMsg(err));
+    }
   };
   const workingDows = useMemo(() => workingDowsFromSchedule(weeklySchedule), [weeklySchedule]);
-  const [balancingAll, setBalancingAll] = useState<{ done: number; total: number } | null>(null);
-  // Results of "Balance all cities" (shown in the modal in a later task)
-  const [, setAllResults] = useState<Awaited<ReturnType<typeof previewAll>> | null>(null);
+  // Progress of the all-cities run (preview or apply); also drives the header button
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
 
   const handleToggleDay = async (dow: number, on: boolean) => {
     try {
-      await setWorkingDay(dow, on);
+      const res = await setWorkingDay(dow, on);
+      if (res && res.success === false) {
+        console.error('[NodeLoadBalancing] Error updating working day:', res.error);
+        showFailure(res.error);
+      }
     } catch (err) {
       console.error('[NodeLoadBalancing] Error updating working day:', err);
+      showFailure(errMsg(err));
     }
   };
 
@@ -62,38 +92,28 @@ export default function NodeLoadBalancing() {
     // POBOX forces the daily policy: store both together so the stored value is consistent
     const patch = p.pobox_enabled === true ? { ...p, date_policy: 'daily' as DatePolicy } : p;
     try {
-      await updateAccountPolicy(patch);
+      const res = await updateAccountPolicy(patch);
+      if (res && res.success === false) {
+        console.error('[NodeLoadBalancing] Error updating policy:', res.error);
+        showFailure(res.error);
+      }
     } catch (err) {
       console.error('[NodeLoadBalancing] Error updating policy:', err);
+      showFailure(errMsg(err));
     }
   };
 
-  const handleBalanceAll = async () => {
-    setBalancingAll({ done: 0, total: 0 });
-    try {
-      const results = await previewAll((done, total) => setBalancingAll({ done, total }));
-      setAllResults(results);
-      console.log('[NodeLoadBalancing] previewAll results:', results);
-    } catch (err) {
-      console.error('[NodeLoadBalancing] Error balancing all cities:', err);
-    } finally {
-      setBalancingAll(null);
-    }
-  };
-
-  const [modalState, setModalState] = useState<{
-    isOpen: boolean;
-    cityId: string | null;
-    cityName: string | null;
-    previewResult: BalanceResult | null;
-    loading: boolean;
-  }>({
+  const closedModal = {
     isOpen: false,
-    cityId: null,
-    cityName: null,
-    previewResult: null,
+    mode: 'city' as 'city' | 'all',
+    cityId: null as string | null,
+    cityName: null as string | null,
+    results: [] as BalanceCityResult[],
     loading: false,
-  });
+  };
+  const [modalState, setModalState] = useState(closedModal);
+  // Ignore results of a request whose modal was closed (or replaced) meanwhile
+  const requestId = useRef(0);
 
   // Group load data by city
   const citiesData = loadData.reduce((acc, item) => {
@@ -108,60 +128,97 @@ export default function NodeLoadBalancing() {
   }, {} as { [cityId: string]: { cityName: string; data: typeof loadData } });
 
   const handleBalanceClick = async (cityId: string, cityName: string) => {
-    setModalState({
-      isOpen: true,
-      cityId,
-      cityName,
-      previewResult: null,
-      loading: true,
-    });
+    const id = ++requestId.current;
+    setModalState({ ...closedModal, isOpen: true, mode: 'city', cityId, cityName, loading: true });
+    try {
+      const result = await previewBalanceV2(cityId);
+      if (id !== requestId.current) return;
+      setModalState((prev) => ({ ...prev, results: [{ cityId, cityName, result }], loading: false }));
+    } catch (err) {
+      if (id !== requestId.current) return;
+      console.error('[NodeLoadBalancing] Error previewing balance:', err);
+      setModalState((prev) => ({ ...prev, results: [{ cityId, cityName, error: errMsg(err) }], loading: false }));
+    }
+  };
 
-    const result = await previewBalance(cityId);
-
-    setModalState((prev) => ({
-      ...prev,
-      previewResult: result,
-      loading: false,
-    }));
+  const handleBalanceAll = async () => {
+    const id = ++requestId.current;
+    setModalState({ ...closedModal, isOpen: true, mode: 'all', loading: true });
+    setProgress({ done: 0, total: 0 });
+    try {
+      const results = await previewAll((done, total) => {
+        if (id === requestId.current) setProgress({ done, total });
+      });
+      if (id !== requestId.current) return;
+      setModalState((prev) => ({ ...prev, results, loading: false }));
+    } catch (err) {
+      if (id !== requestId.current) return;
+      console.error('[NodeLoadBalancing] Error balancing all cities:', err);
+      setModalState(closedModal);
+      showFailure(errMsg(err));
+    } finally {
+      if (id === requestId.current) setProgress(null);
+    }
   };
 
   const handleConfirmBalance = async () => {
+    if (modalState.mode === 'all') {
+      const id = ++requestId.current;
+      setModalState((prev) => ({ ...prev, loading: true }));
+      setProgress({ done: 0, total: 0 });
+      try {
+        const results = await applyAll((done, total) => {
+          if (id === requestId.current) setProgress({ done, total });
+        });
+        const failed = results.filter(isCityFailed);
+        setModalState(closedModal);
+        if (failed.length === 0) {
+          showNotice('ok', t('lb2.applied_ok'));
+        } else {
+          showNotice(
+            'error',
+            `${t('lb2.applied_error')} ${failed
+              .map((f) => `${t('lb2.city_failed', { city: f.cityName })}${f.error ? ` (${f.error})` : ''}`)
+              .join('; ')}`
+          );
+        }
+      } catch (err) {
+        console.error('[NodeLoadBalancing] Error applying balance to all cities:', err);
+        setModalState(closedModal);
+        showNotice('error', `${t('lb2.applied_error')} ${errMsg(err)}`);
+      } finally {
+        setProgress(null);
+        await refetch();
+      }
+      return;
+    }
+
     if (!modalState.cityId) return;
-
+    const cityId = modalState.cityId;
+    const cityName = modalState.cityName ?? '';
+    ++requestId.current;
     setModalState((prev) => ({ ...prev, loading: true }));
-
-    const result = await applyBalance(modalState.cityId);
-
-    setModalState((prev) => ({ ...prev, loading: false }));
-
-    if (result.success) {
-      // Close modal first
-      setModalState({
-        isOpen: false,
-        cityId: null,
-        cityName: null,
-        previewResult: null,
-        loading: false,
-      });
-      
-      // Show success message
-      alert(`Balance applied successfully!\n${result.message}\nMoved: ${result.movements_count} shipments\nImprovement: ${result.improvement_percentage.toFixed(1)}%`);
-      
-      // Force refresh after modal closes
+    try {
+      const result = await applyBalanceV2(cityId);
+      setModalState(closedModal);
+      if (result.success && !result.error) {
+        showNotice('ok', `${cityName}: ${t('lb2.applied_ok')}`);
+      } else {
+        showNotice('error', `${t('lb2.applied_error')} ${t('lb2.city_failed', { city: cityName })}: ${result.error ?? result.message}`);
+      }
+    } catch (err) {
+      console.error('[NodeLoadBalancing] Error applying balance:', err);
+      setModalState((prev) => ({ ...prev, loading: false }));
+      showNotice('error', `${t('lb2.applied_error')} ${errMsg(err)}`);
+    } finally {
       await refetch();
-    } else {
-      alert(`Error applying balance: ${result.error}`);
     }
   };
 
   const handleCloseModal = () => {
-    setModalState({
-      isOpen: false,
-      cityId: null,
-      cityName: null,
-      previewResult: null,
-      loading: false,
-    });
+    ++requestId.current;
+    setProgress(null);
+    setModalState(closedModal);
   };
 
   // Date formatting helper
@@ -269,6 +326,27 @@ export default function NodeLoadBalancing() {
 
   return (
     <div className="space-y-6">
+      {notice && (
+        <div
+          role={notice.type === 'error' ? 'alert' : 'status'}
+          className={`flex items-start justify-between gap-3 rounded-lg border p-4 text-sm ${
+            notice.type === 'ok'
+              ? 'bg-green-50 border-green-200 text-green-800'
+              : 'bg-red-50 border-red-200 text-red-800'
+          }`}
+        >
+          <span>{notice.text}</span>
+          <button
+            type="button"
+            onClick={() => setNotice(null)}
+            aria-label={t('common.close')}
+            className="text-lg leading-none opacity-60 hover:opacity-100"
+          >
+            ×
+          </button>
+        </div>
+      )}
+
       {/* Header with Tooltip */}
       <div className="flex items-center justify-between">
         <div>
@@ -313,11 +391,11 @@ export default function NodeLoadBalancing() {
       <BalancePoliciesPanel
         workingDows={workingDows}
         onToggleDay={handleToggleDay}
-        datePolicy={accountPolicy?.date_policy ?? 'daily'}
+        datePolicy={(accountPolicy?.pobox_enabled ?? false) ? 'daily' : (accountPolicy?.date_policy ?? 'daily')}
         pobox={accountPolicy?.pobox_enabled ?? false}
         onChangePolicy={handleChangePolicy}
         onBalanceAll={handleBalanceAll}
-        balancingAll={balancingAll}
+        balancingAll={progress}
         disabled={!startDate || !endDate}
         balanceAllHint={t('lb2.balance_all_need_dates')}
       />
@@ -580,9 +658,11 @@ export default function NodeLoadBalancing() {
       {/* Balance Preview Modal */}
       <BalancePreviewModal
         isOpen={modalState.isOpen}
-        cityName={modalState.cityName || ''}
-        previewResult={modalState.previewResult}
+        mode={modalState.mode}
+        cityName={modalState.cityName ?? undefined}
+        results={modalState.results}
         loading={modalState.loading}
+        progress={progress}
         onClose={handleCloseModal}
         onConfirm={handleConfirmBalance}
       />

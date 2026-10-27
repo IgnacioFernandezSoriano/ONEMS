@@ -53,7 +53,7 @@ export interface MatrixCell {
   node_code: string;
   week_num: number;
   load_count: number;
-  /** Solo rpc_balance_city_v2: inicio de semana (yyyy-MM-dd) y dia (null en politica semanal) */
+  /** Inicio de semana (yyyy-MM-dd) y dia (null en politica semanal) */
   week_start?: string;
   day?: string | null;
 }
@@ -96,34 +96,26 @@ export interface PendingCity {
   pending_count: number;
 }
 
+/** Movimiento agrupado de rpc_balance_city_v2 (sin ids: nodos por codigo y fechas yyyy-MM-dd). La lista llega limitada a 100. */
+export interface BalanceMovement {
+  from_node_code: string;
+  from_date: string;
+  to_node_code: string;
+  to_date: string;
+  count: number;
+}
+
+/** Resultado de rpc_balance_city_v2 (preview y apply). */
 export interface BalanceResult {
   success: boolean;
+  /** Total de envios movidos (la lista `movements` puede venir truncada a 100 filas agrupadas) */
   movements_count: number;
   stddev_before: number;
   stddev_after: number;
   improvement_percentage: number;
-  movements: Array<{
-    from_node_id: string;
-    from_node_code: string;
-    from_week: number;
-    to_node_id: string;
-    to_node_code: string;
-    to_week: number;
-    shipment_ids: string[];
-    count: number;
-    /** Solo rpc_balance_city_v2 (no trae ids): from_node_code/to_node_code + fechas yyyy-MM-dd */
-    from_date?: string;
-    to_date?: string;
-  }>;
+  movements: BalanceMovement[];
   matrix_before?: MatrixCell[];
   matrix_after?: MatrixCell[];
-  nodes_count?: number;
-  avg_load_per_node?: number;
-  max_acceptable_load?: number;
-  nodes_needed?: number;
-  reference_load?: number;
-  deviation_percent?: number;
-  /** Solo rpc_balance_city_v2 */
   warnings?: BalanceWarning[];
   policy?: BalancePolicyInfo;
   pobox?: BalancePobox;
@@ -260,63 +252,6 @@ export const useNodeLoadBalancing = (
     return summaries.sort((a, b) => b.monthly_stddev - a.monthly_stddev);
   };
 
-  const previewBalance = async (cityId: string): Promise<BalanceResult> => {
-    try {
-      const { data, error: rpcError } = await supabase.rpc('rpc_balance_node_load_by_period', {
-        p_city_id: cityId,
-        p_start_date: startDate,
-        p_end_date: endDate,
-        p_apply_changes: false, // Preview only
-      });
-
-      if (rpcError) throw rpcError;
-
-      return data as BalanceResult;
-    } catch (err: any) {
-      console.error('Error previewing balance:', err);
-      return {
-        success: false,
-        movements_count: 0,
-        stddev_before: 0,
-        stddev_after: 0,
-        improvement_percentage: 0,
-        movements: [],
-        message: '',
-        error: err.message,
-      };
-    }
-  };
-
-  const applyBalance = async (cityId: string): Promise<BalanceResult> => {
-    try {
-      const { data, error: rpcError } = await supabase.rpc('rpc_balance_node_load_by_period', {
-        p_city_id: cityId,
-        p_start_date: startDate,
-        p_end_date: endDate,
-        p_apply_changes: true, // Apply changes
-      });
-
-      if (rpcError) throw rpcError;
-
-      // Refresh data after balancing
-      await fetchLoadData();
-
-      return data as BalanceResult;
-    } catch (err: any) {
-      console.error('Error applying balance:', err);
-      return {
-        success: false,
-        movements_count: 0,
-        stddev_before: 0,
-        stddev_after: 0,
-        improvement_percentage: 0,
-        movements: [],
-        message: '',
-        error: err.message,
-      };
-    }
-  };
-
   const failedResult = (err: unknown): BalanceResult => ({
     success: false,
     movements_count: 0,
@@ -400,8 +335,6 @@ export const useNodeLoadBalancing = (
     loading,
     error,
     refetch: fetchLoadData,
-    previewBalance,
-    applyBalance,
     previewBalanceV2,
     applyBalanceV2,
     listPendingCities,

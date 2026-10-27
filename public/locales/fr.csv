@@ -3077,3 +3077,11 @@ lb2.pobox_days_uncovered,Jours POBOX non couverts
 lb2.applied_ok,Équilibrage appliqué avec succès.
 lb2.applied_error,Erreur lors de l'application de l'équilibrage.
 lb2.city_failed,Échec pour la ville {city}
+lb2.preview_all_title,Aperçu de l'équilibrage - toutes les villes
+lb2.warning.origin_equals_destination,Le nœud d'origine et celui de destination coïncident pour certains envois.
+lb2.planned_movements,Mouvements prévus
+lb2.movements_truncated,Affichage des {shown} premiers mouvements sur {total}.
+lb2.shipments_count,{count} envois
+lb2.city_balanced,Aucun équilibrage nécessaire : la ville est déjà bien équilibrée !
+lb2.no_pending_cities,Aucune ville avec des envois en attente pour la période sélectionnée.
+lb2.week_short,S{week}

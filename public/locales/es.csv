@@ -3085,3 +3085,11 @@ lb2.pobox_days_uncovered,Días POBOX sin cubrir
 lb2.applied_ok,Balanceo aplicado correctamente.
 lb2.applied_error,Error al aplicar el balanceo.
 lb2.city_failed,Falló la ciudad {city}
+lb2.preview_all_title,Vista previa del balanceo - todas las ciudades
+lb2.warning.origin_equals_destination,El nodo de origen y el de destino coinciden en algunos envíos.
+lb2.planned_movements,Movimientos previstos
+lb2.movements_truncated,Mostrando los primeros {shown} de {total} movimientos.
+lb2.shipments_count,{count} envíos
+lb2.city_balanced,No hace falta balancear: ¡la ciudad ya está bien equilibrada!
+lb2.no_pending_cities,No hay ciudades con envíos pendientes en el periodo seleccionado.
+lb2.week_short,S{week}

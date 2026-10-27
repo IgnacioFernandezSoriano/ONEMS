@@ -3085,3 +3085,11 @@ lb2.pobox_days_uncovered,POBOX days uncovered
 lb2.applied_ok,Balancing applied successfully.
 lb2.applied_error,Error applying the balancing.
 lb2.city_failed,City {city} failed
+lb2.preview_all_title,Balance preview - all cities
+lb2.warning.origin_equals_destination,Origin and destination nodes coincide for some shipments.
+lb2.planned_movements,Planned movements
+lb2.movements_truncated,Showing the first {shown} of {total} movements.
+lb2.shipments_count,{count} shipments
+lb2.city_balanced,No balancing needed - the city is already well balanced!
+lb2.no_pending_cities,No cities with pending shipments in the selected period.
+lb2.week_short,W{week}
