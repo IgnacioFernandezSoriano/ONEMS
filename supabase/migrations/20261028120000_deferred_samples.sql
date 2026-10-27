@@ -1600,4 +1600,5 @@ UNION ALL
      LEFT JOIN nodes dn_node ON ds.destination_node_id = dn_node.id
      LEFT JOIN cities dn_city ON dn_node.city_id = dn_city.id
      LEFT JOIN panelists dp ON dn_node.id = dp.node_id AND (dp.status::text = ANY (ARRAY['active'::character varying, 'unavailable_temp'::character varying]::text[]))
-  WHERE ds.status = 'pending';
+  WHERE ds.status = 'pending'
+    AND (ds.account_id = public.current_user_account_id() OR public.is_superadmin());

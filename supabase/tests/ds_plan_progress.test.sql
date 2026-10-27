@@ -21,6 +21,7 @@ VALUES ('d2000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-00000000
         'c1000000-0000-0000-0000-000000000001', 'c2000000-0000-0000-0000-000000000002',
         'b1000000-0000-0000-0000-000000000001', 'b4000000-0000-0000-0000-000000000004',
         '2027-03-10', 'origin_no_panelist', '{}'::jsonb);
+SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
 DO $$
 DECLARE r record; n int;
 BEGIN
@@ -50,4 +51,44 @@ BEGIN
   SELECT count(*) INTO n FROM public.v_allocation_details_with_availability WHERE status = 'deferred';
   PERFORM pg_temp.fail_if(n <> 0, 'tras reintroducir sigue la sintetica');
 END $$;
+ROLLBACK;
+
+-- ===== Visibilidad de las filas sinteticas (la vista corre con permisos del propietario: se filtran por cuenta).
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+INSERT INTO auth.users (id, email) VALUES ('97000000-0000-0000-0000-000000000097', 'sa@t.l');
+INSERT INTO public.profiles (id, email, full_name, role, account_id)
+  VALUES ('97000000-0000-0000-0000-000000000097', 'sa@t.l', 'SA', 'superadmin', NULL);
+INSERT INTO public.allocation_plan_details (id, account_id, plan_id, origin_node_id, destination_node_id, fecha_programada,
+                                            week_number, month, year, status, generation_source) VALUES
+  ('d1000000-0000-0000-0000-000000000001','a0000000-0000-0000-0000-000000000001','cc000000-0000-0000-0000-000000000001',
+   'b1000000-0000-0000-0000-000000000001','b4000000-0000-0000-0000-000000000004','2027-03-11',10,3,2027,'pending','plan');
+INSERT INTO public.deferred_samples (id, account_id, plan_id, origin_city_id, dest_city_id, origin_node_id, destination_node_id,
+                                     fecha_programada, reason, row_snapshot)
+VALUES ('d2000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000001', 'cc000000-0000-0000-0000-000000000001',
+        'c1000000-0000-0000-0000-000000000001', 'c2000000-0000-0000-0000-000000000002',
+        'b1000000-0000-0000-0000-000000000001', 'b4000000-0000-0000-0000-000000000004',
+        '2027-03-10', 'origin_no_panelist', '{}'::jsonb);
+CREATE FUNCTION pg_temp.cnt(p_status text) RETURNS int LANGUAGE sql AS $$
+  SELECT count(*)::int FROM public.v_allocation_details_with_availability WHERE status = p_status $$;
+CREATE FUNCTION pg_temp.real_cnt() RETURNS int LANGUAGE sql AS $$
+  SELECT count(*)::int FROM public.v_allocation_details_with_availability WHERE id = 'd1000000-0000-0000-0000-000000000001' $$;
+
+-- (a) actor de la cuenta 1.
+SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+SELECT pg_temp.fail_if(pg_temp.cnt('deferred') <> 1, '(a) cuenta 1 debe ver 1 deferred');
+-- (b) actor de la cuenta 2.
+SELECT set_config('request.jwt.claim.sub','98000000-0000-0000-0000-000000000098', true);
+SELECT pg_temp.fail_if(pg_temp.cnt('deferred') <> 0, '(b) cuenta 2 no debe ver deferred');
+-- (e) la rama real NO se filtra (comportamiento previo intacto): la fila real sigue visible para la cuenta 2.
+SELECT pg_temp.fail_if(pg_temp.real_cnt() <> 1, '(e) fila real visible como antes');
+-- (c) sin claim (anon).
+SELECT set_config('request.jwt.claim.sub','', true);
+SELECT pg_temp.fail_if(pg_temp.cnt('deferred') <> 0, '(c) anon no debe ver deferred');
+SELECT pg_temp.fail_if(pg_temp.real_cnt() <> 1, '(e) fila real visible como antes (anon)');
+-- (d) superadmin.
+SELECT set_config('request.jwt.claim.sub','97000000-0000-0000-0000-000000000097', true);
+SELECT pg_temp.fail_if(pg_temp.cnt('deferred') <> 1, '(d) superadmin debe ver 1 deferred');
+SELECT pg_temp.fail_if(pg_temp.real_cnt() <> 1, '(e) fila real visible como antes (superadmin)');
 ROLLBACK;
