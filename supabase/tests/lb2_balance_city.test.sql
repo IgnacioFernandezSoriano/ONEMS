@@ -309,6 +309,110 @@ BEGIN
 END $$;
 ROLLBACK;
 
+-- ===== Caso 9 (I4, envios congelados): 12 pendientes en 3 dias (L 8/3 .. X 10/3/2027) x 3 nodos = 9 celdas.
+-- 3 de ellos van a N5 (ciudad C2, sin panelista activo) => no se pueden mover y cuentan como carga FIJA en la
+-- celda donde estan (uno en N1-L, N2-M y N3-X). Los 9 movibles estan en N1-L. Resultado esperado: los 3 fijos
+-- siguen donde estaban, aviso no_valid_cell con count 3, y la carga final por celda (fijos incluidos) queda con
+-- max - min <= 1; matrix_after coincide con las filas reales tras aplicar.
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+INSERT INTO public.nodes (id, account_id, city_id, auto_id) VALUES
+  ('b5000000-0000-0000-0000-000000000005','a0000000-0000-0000-0000-000000000001','c2000000-0000-0000-0000-000000000002','N5');
+CREATE FUNCTION pg_temp.mk_to(p_o text, p_d text, p_date date) RETURNS uuid LANGUAGE sql AS $$
+  INSERT INTO public.allocation_plan_details
+    (id, account_id, plan_id, origin_node_id, destination_node_id, fecha_programada, status)
+  SELECT gen_random_uuid(), 'a0000000-0000-0000-0000-000000000001', 'cc000000-0000-0000-0000-000000000001',
+         o.id, d.id, p_date, 'pending'
+    FROM public.nodes o, public.nodes d WHERE o.auto_id = p_o AND d.auto_id = p_d
+  RETURNING id;
+$$;
+SELECT pg_temp.mk('N1', '2027-03-08') FROM generate_series(1, 9);
+SELECT pg_temp.mk_to('N1', 'N5', '2027-03-08');
+SELECT pg_temp.mk_to('N2', 'N5', '2027-03-09');
+SELECT pg_temp.mk_to('N3', 'N5', '2027-03-10');
+CREATE TEMP TABLE res9 (r jsonb);
+DO $$
+DECLARE r jsonb; p jsonb;
+BEGIN
+  p := public.rpc_balance_city_v2('c1000000-0000-0000-0000-000000000001', '2027-03-08', '2027-03-10', false);
+  r := public.rpc_balance_city_v2('c1000000-0000-0000-0000-000000000001', '2027-03-08', '2027-03-10', true);
+  INSERT INTO res9 VALUES (r);
+  PERFORM pg_temp.fail_if((r->>'success')::boolean IS DISTINCT FROM true, 'congelados success: ' || r::text);
+  PERFORM pg_temp.fail_if(p->'matrix_after' IS DISTINCT FROM r->'matrix_after', 'preview y apply difieren: ' || p::text || ' / ' || r::text);
+  PERFORM pg_temp.fail_if(r->'warnings'->0->>'code' IS DISTINCT FROM 'no_valid_cell'
+                          OR (r->'warnings'->0->>'count')::int IS DISTINCT FROM 3, 'aviso congelados: ' || r::text);
+  PERFORM pg_temp.fail_if((SELECT sum((e->>'load_count')::int) FROM jsonb_array_elements(r->'matrix_after') e) <> 12,
+                          'matrix_after debe sumar 12 (fijos incluidos): ' || r::text);
+END $$;
+SELECT pg_temp.fail_if(count(*) <> 3, 'los congelados se movieron') FROM public.allocation_plan_details a
+ JOIN public.nodes d ON d.id = a.destination_node_id AND d.auto_id = 'N5'
+ WHERE a.reassigned_at IS NULL
+   AND (a.origin_node_id, a.fecha_programada) IN (('b1000000-0000-0000-0000-000000000001'::uuid, '2027-03-08'::date),
+                                                  ('b2000000-0000-0000-0000-000000000002'::uuid, '2027-03-09'::date),
+                                                  ('b3000000-0000-0000-0000-000000000003'::uuid, '2027-03-10'::date));
+SELECT pg_temp.fail_if(max(n) - min(n) > 1, 'reparto con fijos desigual: ' || string_agg(code || ' ' || d || '=' || n, ', '))
+  FROM pg_temp.grid('2027-03-08', '2027-03-10');
+SELECT pg_temp.fail_if(count(*) > 0, 'matrix_after no cuadra con las filas: ' || string_agg(g.code || ' ' || g.d || '=' || g.n || '/' || (e->>'load_count'), ', '))
+  FROM pg_temp.grid('2027-03-08', '2027-03-10') g
+  JOIN res9 ON true
+  JOIN LATERAL jsonb_array_elements(res9.r->'matrix_after') e ON e->>'node_code' = g.code AND (e->>'day')::date = g.d
+ WHERE (e->>'load_count')::int <> g.n;
+ROLLBACK;
+
+-- ===== Caso 10 (I4, origen = destino sin arreglo): 6 pendientes N2 -> N1 el 8/3/2027, periodo de 1 dia.
+-- Ninguno puede ir a N1 (su destino): 2 se quedan en N2 por objetivo, 2 van a N3 y los 2 que caerian en N1
+-- se quedan en N2 (aviso origin_equals_destination). matrix_after debe contar esos 2 en N2 (carga fija) y
+-- cuadrar con las filas reales; no debe congelar en cascada a los que si podian ir a N3.
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+INSERT INTO public.allocation_plan_details (id, account_id, plan_id, origin_node_id, destination_node_id, fecha_programada, status)
+SELECT gen_random_uuid(), 'a0000000-0000-0000-0000-000000000001', 'cc000000-0000-0000-0000-000000000001',
+       'b2000000-0000-0000-0000-000000000002', 'b1000000-0000-0000-0000-000000000001', '2027-03-08', 'pending'
+  FROM generate_series(1, 6);
+CREATE TEMP TABLE res10 (r jsonb);
+DO $$
+DECLARE r jsonb;
+BEGIN
+  r := public.rpc_balance_city_v2('c1000000-0000-0000-0000-000000000001', '2027-03-08', '2027-03-08', true);
+  INSERT INTO res10 VALUES (r);
+  PERFORM pg_temp.fail_if((r->>'movements_count')::int <> 2, 'od: deben moverse 2 a N3: ' || r::text);
+  PERFORM pg_temp.fail_if(NOT EXISTS (SELECT 1 FROM jsonb_array_elements(r->'warnings') w
+                                       WHERE w->>'code' = 'origin_equals_destination' AND (w->>'count')::int = 2),
+                          'od: aviso origin_equals_destination 2: ' || r::text);
+END $$;
+SELECT pg_temp.fail_if(count(*) <> 2, 'od: N3 deberia tener 2') FROM public.allocation_plan_details
+ WHERE origin_node_id = 'b3000000-0000-0000-0000-000000000003';
+SELECT pg_temp.fail_if(count(*) > 0, 'od: ningun envio con origen = destino nuevo') FROM public.allocation_plan_details
+ WHERE origin_node_id = destination_node_id;
+SELECT pg_temp.fail_if(count(*) > 0, 'od: matrix_after no cuadra: ' || string_agg(g.code || '=' || g.n || '/' || (e->>'load_count'), ', '))
+  FROM pg_temp.grid('2027-03-08', '2027-03-08') g
+  JOIN res10 ON true
+  JOIN LATERAL jsonb_array_elements(res10.r->'matrix_after') e ON e->>'node_code' = g.code AND (e->>'day')::date = g.d
+ WHERE (e->>'load_count')::int <> g.n;
+ROLLBACK;
+
+-- ===== Caso 5b (rotacion): aplicar sobre una ciudad ya equilibrada (con sobrante) no avanza el offset.
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+SELECT pg_temp.mk('N1', '2027-03-08') FROM generate_series(1, 3);
+SELECT pg_temp.mk('N2', '2027-03-08') FROM generate_series(1, 2);
+SELECT pg_temp.mk('N3', '2027-03-08') FROM generate_series(1, 2);
+DO $$
+DECLARE r jsonb;
+BEGIN
+  r := public.rpc_balance_city_v2('c1000000-0000-0000-0000-000000000001', '2027-03-08', '2027-03-08', true);
+  PERFORM pg_temp.fail_if((r->>'movements_count')::int <> 0, '5b: ya equilibrado no debe mover: ' || r::text);
+END $$;
+SELECT pg_temp.fail_if((SELECT balance_rotation_offset FROM public.cities WHERE id = 'c1000000-0000-0000-0000-000000000001') <> 0,
+                       '5b: sin movimientos el offset no debe avanzar');
+ROLLBACK;
+
 -- ===== Guarda: actor 98 (cuenta 2) sobre una ciudad de la cuenta 1 => 42501, y nada cambia.
 BEGIN;
 \ir fixtures/incident_city.sql

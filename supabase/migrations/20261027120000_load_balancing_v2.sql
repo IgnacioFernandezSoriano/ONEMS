@@ -168,10 +168,14 @@ GRANT EXECUTE ON FUNCTION public.rpc_get_node_load_by_day(uuid, date, date) TO a
 --   4. Celdas: 'daily' = nodo valido x dia laborable >= v_from sin ausencia; 'weekly' = nodo valido x tramo
 --      (semana ISO dentro de un mes) con fecha = primer dia laborable >= v_from libre de ausencia del nodo.
 --      El tramo es la semana ISO cortada por mes para no mover nunca envios de un mes a otro (regla 5).
---   5. Objetivos por mes: total del mes (los atrasados cuentan en el mes de v_from) repartido entre sus tramos
+--   4b. Congelados: envios que no se pueden mover (destino sin panelista activo, o ninguna celda compatible en su
+--      mes) se quedan donde estan y son carga FIJA de su celda actual; los que 6c deja sin celda tambien.
+--   5. Objetivos por mes: total del mes = movibles + fijos en celdas del mes (los atrasados cuentan en el mes de
+--      v_from) repartido entre sus tramos
 --      por dias laborables (resto mayor) y cada tramo entre sus celdas (suelo + sobrante rotativo que empieza
 --      en el nodo balance_rotation_offset mod N y continua de tramo en tramo; dentro del nodo los +1 caen en
---      dias distintos).
+--      dias distintos). 5d: el objetivo de cada celda se reduce en sus fijos y, si sobran huecos, se quitan los
+--      de nivel final mas alto (cada mes queda con tantos huecos como envios movibles).
 --   6. Minimos movimientos: se quedan los envios de cada celda hasta su objetivo (los de fecha mas temprana);
 --      el resto, mas los que estan fuera de toda celda, se emparejan por orden de fecha con los huecos de las
 --      celdas deficitarias del mismo mes (emparejamiento ordenado = menor distancia total en dias). Si el mes
@@ -188,8 +192,10 @@ GRANT EXECUTE ON FUNCTION public.rpc_get_node_load_by_day(uuid, date, date) TO a
 --      (aviso pobox_uncovered). Todo se calcula en tablas temporales: la vista previa da las mismas cifras.
 --   7. Solo con p_apply_changes: UPDATE de los movidos (traza + reassignment_reason = 'rebalancing' o
 --      'pobox_move'), INSERT de los envios POBOX (generation_source = 'pobox') y avance de
---      cities.balance_rotation_offset si hubo sobrante. La vista previa no escribe nada.
---   8. Desviacion tipica antes/despues sobre la carga de las celdas y matrices (matrix_after incluye POBOX).
+--      cities.balance_rotation_offset si hubo sobrante y algun movimiento. La vista previa no escribe nada.
+--      Al aplicar se toma pg_advisory_xact_lock por ciudad: dos aplicaciones concurrentes se serializan.
+--   8. Desviacion tipica antes/despues sobre la carga de las celdas y matrices (matrix_after incluye POBOX y los
+--      envios congelados en su celda actual).
 -- Tablas temporales cualificadas como pg_temp.lb2_* para que nunca resuelvan a una tabla public.lb2_*.
 -- SECURITY DEFINER (escribe en cities/allocation_plan_details sin depender de RLS): todas las lecturas se
 -- filtran por la cuenta de la ciudad y la guarda de cuenta es la misma que rpc_get_node_load_by_day.
@@ -259,6 +265,13 @@ BEGIN
     RAISE EXCEPTION 'No autorizado para esta cuenta' USING ERRCODE = '42501';
   END IF;
 
+  -- Dos aplicaciones concurrentes sobre la misma ciudad se serializan (la segunda calcula sobre lo que dejo la
+  -- primera). La vista previa no bloquea. El offset se relee tras el bloqueo.
+  IF p_apply_changes THEN
+    PERFORM pg_advisory_xact_lock(hashtext(p_city_id::text));
+    SELECT c.balance_rotation_offset INTO v_offset FROM public.cities c WHERE c.id = p_city_id;
+  END IF;
+
   SELECT ep.date_policy, ep.pobox_enabled INTO v_date_policy, v_pobox
     FROM public.effective_city_policy(p_city_id) ep;
   v_today := (now() AT TIME ZONE v_tz)::date;
@@ -309,7 +322,8 @@ BEGIN
     week_start date, month_start date, cell_date date,
     day_idx integer, node_cells integer,
     current_load integer NOT NULL DEFAULT 0, target integer NOT NULL DEFAULT 0,
-    kept integer NOT NULL DEFAULT 0, new_load integer NOT NULL DEFAULT 0
+    kept integer NOT NULL DEFAULT 0, new_load integer NOT NULL DEFAULT 0,
+    fixed integer NOT NULL DEFAULT 0   -- envios congelados (no movibles) que ya estan en la celda
   ) ON COMMIT DROP;
   IF v_date_policy = 'weekly' THEN
     INSERT INTO pg_temp.lb2_cells (node_id, node_code, valid_rank, week_start, month_start, cell_date)
@@ -339,7 +353,10 @@ BEGIN
     id uuid PRIMARY KEY, cur_node uuid, cur_code text, cur_rank integer, dest_node uuid, fecha date,
     month_key date, cur_cell integer, new_cell integer, keep boolean NOT NULL DEFAULT false,
     od_conflict boolean NOT NULL DEFAULT false, pobox_move boolean NOT NULL DEFAULT false,
-    dest_bad boolean NOT NULL DEFAULT false
+    dest_bad boolean NOT NULL DEFAULT false,
+    -- congelado: no se puede mover (destino sin panelista activo, origen = destino sin arreglo o sin celda
+    -- valida); se queda donde esta y cuenta como carga fija de su celda actual (si la tiene).
+    frozen boolean NOT NULL DEFAULT false
   ) ON COMMIT DROP;
   INSERT INTO pg_temp.lb2_ship (id, cur_node, cur_code, cur_rank, dest_node, fecha, month_key, dest_bad)
   SELECT a.id, a.origin_node_id, n.node_code, n.all_rank, a.destination_node_id, a.fecha_programada,
@@ -352,6 +369,7 @@ BEGIN
    WHERE a.account_id = v_account_id
      AND a.status = 'pending'
      AND a.fecha_programada BETWEEN p_start_date AND p_end_date;
+  UPDATE pg_temp.lb2_ship SET frozen = true WHERE dest_bad;
   SELECT count(*) INTO v_total FROM pg_temp.lb2_ship;
 
   -- Ausencias de los nodos DESTINO de esos envios (spec 5.3: no se programa un dia de ausencia ni como origen
@@ -402,8 +420,27 @@ BEGIN
       ON x.week_start = d.week_start AND x.month_start = d.month_start
    GROUP BY d.week_start, d.month_start, x.ncells;
 
-  -- 5a. Total del mes -> tramos (suelo + resto mayor; empate -> tramo mas temprano).
-  WITH mt AS (SELECT month_key, count(*)::numeric AS t FROM pg_temp.lb2_ship GROUP BY month_key),
+  -- Envios congelados ANTES de calcular objetivos: destino sin panelista activo (ya marcados) y envios cuyo
+  -- mes tiene celdas pero ninguna compatible (todas del nodo destino o en dias de ausencia del destino). Se
+  -- quedan donde estan y cuentan como carga fija de su celda actual, si la tienen.
+  UPDATE pg_temp.lb2_ship s SET frozen = true
+   WHERE NOT s.frozen
+     AND EXISTS (SELECT 1 FROM pg_temp.lb2_cells c WHERE c.month_start = s.month_key)
+     AND NOT EXISTS (SELECT 1 FROM pg_temp.lb2_cells c
+                      WHERE c.month_start = s.month_key AND c.node_id <> s.dest_node
+                        AND NOT EXISTS (SELECT 1 FROM pg_temp.lb2_sdabs x WHERE x.node_id = s.dest_node AND x.d = c.cell_date));
+  UPDATE pg_temp.lb2_cells c SET fixed = x.n
+    FROM (SELECT cur_cell, count(*)::int AS n FROM pg_temp.lb2_ship WHERE frozen AND cur_cell IS NOT NULL GROUP BY cur_cell) x
+   WHERE x.cur_cell = c.cell_id;
+
+  -- 5a. Total del mes -> tramos (suelo + resto mayor; empate -> tramo mas temprano). El total es la carga
+  -- final del mes: envios movibles + envios congelados que ya ocupan una celda del mes (carga fija). Los
+  -- congelados fuera de toda celda no cuentan.
+  WITH mt AS (SELECT month_key, sum(n)::numeric AS t
+                FROM (SELECT month_key, count(*) AS n FROM pg_temp.lb2_ship WHERE NOT frozen GROUP BY month_key
+                      UNION ALL
+                      SELECT month_start, sum(fixed) FROM pg_temp.lb2_cells WHERE fixed > 0 GROUP BY month_start) u
+               GROUP BY month_key),
   w AS (SELECT s.week_start, s.month_start, s.seg_from, mt.t,
                s.wdays * mt.t / sum(s.wdays) OVER (PARTITION BY s.month_start) AS raw
           FROM pg_temp.lb2_segs s JOIN mt ON mt.month_key = s.month_start),
@@ -440,6 +477,24 @@ BEGIN
   UPDATE pg_temp.lb2_cells c SET target = o.base + CASE WHEN o.ord <= o.rem THEN 1 ELSE 0 END
     FROM o WHERE o.cell_id = c.cell_id;
 
+  -- 5d. Carga fija: el objetivo de cada celda pasa a ser de envios MOVIBLES = objetivo total - fijos (>= 0).
+  -- Si una celda tiene mas fijos que su objetivo, sobran huecos en el mes: se quitan los de nivel final
+  -- (fijos + k) mas alto, de modo que cada mes tenga exactamente tantos huecos como envios movibles. Sin
+  -- congelados no cambia nada.
+  IF EXISTS (SELECT 1 FROM pg_temp.lb2_cells WHERE fixed > 0) THEN
+    UPDATE pg_temp.lb2_cells SET target = GREATEST(target - fixed, 0);
+    WITH mm AS (SELECT month_key, count(*)::int AS m FROM pg_temp.lb2_ship WHERE NOT frozen GROUP BY month_key),
+    u AS (SELECT c.cell_id, c.month_start,
+                 row_number() OVER (PARTITION BY c.month_start ORDER BY c.fixed + k.k, c.cell_date, c.valid_rank, k.k) AS rn
+            FROM pg_temp.lb2_cells c CROSS JOIN LATERAL generate_series(1, c.target) k(k)),
+    kp AS (SELECT u.cell_id, count(*)::int AS n
+             FROM u LEFT JOIN mm ON mm.month_key = u.month_start
+            WHERE u.rn <= COALESCE(mm.m, 0) GROUP BY u.cell_id)
+    UPDATE pg_temp.lb2_cells c SET target = COALESCE(kp.n, 0)
+      FROM pg_temp.lb2_cells c2 LEFT JOIN kp ON kp.cell_id = c2.cell_id
+     WHERE c2.cell_id = c.cell_id;
+  END IF;
+
   -- ===== 6. Asignacion con minimos movimientos.
   -- 6a. En cada celda se quedan hasta 'target' envios (los de fecha mas temprana; sale primero el mas lejano).
   -- Un envio cuyo destino esta ausente ese dia (o no tiene panelista activo) no puede quedarse: es excedente.
@@ -447,7 +502,7 @@ BEGIN
     SELECT s.id, c.target,
            row_number() OVER (PARTITION BY s.cur_cell ORDER BY s.fecha, s.id) AS rn
       FROM pg_temp.lb2_ship s JOIN pg_temp.lb2_cells c ON c.cell_id = s.cur_cell
-     WHERE NOT s.dest_bad
+     WHERE NOT s.frozen
        AND NOT EXISTS (SELECT 1 FROM pg_temp.lb2_sdabs x WHERE x.node_id = s.dest_node AND x.d = c.cell_date))
   UPDATE pg_temp.lb2_ship s SET keep = true, new_cell = s.cur_cell
     FROM k WHERE k.id = s.id AND k.rn <= k.target;
@@ -461,7 +516,7 @@ BEGIN
   WITH ex AS (
     SELECT s.id, s.month_key,
            row_number() OVER (PARTITION BY s.month_key ORDER BY s.fecha, s.cur_rank, s.id) AS rk
-      FROM pg_temp.lb2_ship s WHERE NOT s.keep),
+      FROM pg_temp.lb2_ship s WHERE NOT s.keep AND NOT s.frozen),
   sl AS (
     SELECT c.cell_id, c.month_start,
            row_number() OVER (PARTITION BY c.month_start ORDER BY c.cell_date, c.valid_rank, k.k) AS rk
@@ -512,11 +567,17 @@ BEGIN
        WHERE c3.month_start = v_cur.month_key AND c3.node_id <> v_cur.dest_node
          AND NOT EXISTS (SELECT 1 FROM pg_temp.lb2_sdabs x WHERE x.node_id = v_cur.dest_node AND x.d = c3.cell_date)
        ORDER BY abs(c3.cell_date - v_cur.cell_date),
-                (SELECT count(*) FROM pg_temp.lb2_ship x WHERE x.new_cell = c3.cell_id), c3.cell_date, c3.valid_rank
+                (SELECT count(*) FROM pg_temp.lb2_ship x WHERE x.new_cell = c3.cell_id) + c3.fixed, c3.cell_date, c3.valid_rank
        LIMIT 1;
       UPDATE pg_temp.lb2_ship SET new_cell = v_fb_cell WHERE id = v_conf.id;
     END IF;
   END LOOP;
+
+  -- Los que 6c deja sin celda (origen = destino sin intercambio posible; raro, porque tienen celdas
+  -- compatibles) se quedan donde estan: tambien cuentan como carga fija en su celda actual para new_load,
+  -- matrix_after y stddev_after. No se recalculan los objetivos: repetir la asignacion congelaria en cascada
+  -- envios que si se podian mover (su hueco queda libre; ver aviso origin_equals_destination).
+  UPDATE pg_temp.lb2_ship SET frozen = true WHERE NOT frozen AND new_cell IS NULL;
 
   -- ===== 6P. FASE POBOX (spec seccion 6). Con POBOX efectiva la politica es 'daily': una celda (nodo, dia)
   -- existe si y solo si el nodo es valido y esta disponible ese dia laborable >= v_from.
@@ -533,7 +594,7 @@ BEGIN
       dest_node uuid, dest_bad boolean NOT NULL DEFAULT false
     ) ON COMMIT DROP;
     INSERT INTO pg_temp.lb2_pb
-    SELECT s.id, COALESCE(c.node_id, s.cur_node), COALESCE(c.cell_date, s.fecha), true, p.start_date, p.end_date,
+    SELECT s.id, COALESCE(c.node_id, s.cur_node), COALESCE(c.cell_date, s.fecha), NOT s.frozen, p.start_date, p.end_date,
            s.dest_node, s.dest_bad
       FROM pg_temp.lb2_ship s
       LEFT JOIN pg_temp.lb2_cells c ON c.cell_id = s.new_cell
@@ -677,7 +738,10 @@ BEGIN
 
   UPDATE pg_temp.lb2_cells c SET new_load = x.n
     FROM (SELECT cell, count(*)::int AS n
-            FROM (SELECT new_cell AS cell FROM pg_temp.lb2_ship WHERE new_cell IS NOT NULL
+            FROM (SELECT new_cell AS cell FROM pg_temp.lb2_ship WHERE new_cell IS NOT NULL AND NOT frozen
+                  UNION ALL
+                  -- carga fija: los congelados cuentan en la celda donde ya estan
+                  SELECT cur_cell FROM pg_temp.lb2_ship WHERE frozen AND cur_cell IS NOT NULL
                   UNION ALL
                   SELECT origin_cell FROM pg_temp.lb2_new) u
            GROUP BY cell) x
@@ -724,7 +788,8 @@ BEGIN
         JOIN pg_temp.lb2_dest t ON t.node_id = w.dest_node;
     END IF;
 
-    IF v_had_remainder THEN
+    -- Solo si hubo sobrante Y se movio algo: re-aplicar sobre una ciudad ya equilibrada no rota.
+    IF v_had_remainder AND v_movements_count > 0 THEN
       UPDATE public.cities SET balance_rotation_offset = balance_rotation_offset + 1 WHERE id = p_city_id;
     END IF;
   ELSE
