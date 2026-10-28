@@ -397,7 +397,7 @@ export default function NodeLoadBalancing() {
     <div className="space-y-6">
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-700">Error loading data: {error}</p>
+          <p className="text-red-700">{t('lb2.error_loading', { error })}</p>
         </div>
       )}
       {(loading || datesPending) && (
@@ -447,13 +447,13 @@ export default function NodeLoadBalancing() {
               <div className="invisible group-hover:visible absolute z-10 w-96 p-3 bg-gray-900 text-white text-sm rounded-lg shadow-lg top-0 left-8">
                 <p className="font-semibold mb-2">{t("node_load_balancing.title")}</p>
                 <p className="mb-2">
-                  <strong>Purpose:</strong> Visualize and optimize shipment distribution across nodes within each city to prevent overload and improve efficiency.
+                  <strong>{t('lb2.page_help.purpose_label')}</strong> {t('lb2.page_help.purpose')}
                 </p>
                 <p className="mb-2">
-                  <strong>How it works:</strong> View weekly shipment loads in a matrix format (nodes × weeks). The system identifies saturated nodes and suggests rebalancing to distribute workload more evenly.
+                  <strong>{t('lb2.page_help.how_label')}</strong> {t('lb2.page_help.how')}
                 </p>
                 <p>
-                  <strong>Usage:</strong> Select month/year, review load matrices by city, click "Balance" to preview and apply automatic rebalancing.
+                  <strong>{t('lb2.page_help.usage_label')}</strong> {t('lb2.page_help.usage')}
                 </p>
               </div>
             </span>
@@ -464,7 +464,7 @@ export default function NodeLoadBalancing() {
           onClick={refetch}
           className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
         >
-          Refresh
+          {t('common.refresh')}
         </button>
       </div>
 
@@ -603,9 +603,9 @@ export default function NodeLoadBalancing() {
                     </svg>
                     <div className="invisible group-hover:visible absolute z-10 w-72 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg bottom-full left-0 mb-2">
                       <p className="font-semibold mb-1">{t('node_load_balancing.reference_load')}</p>
-                      <p className="mb-2">Define el número esperado de samples que cada nodo debería manejar en promedio durante el periodo seleccionado.</p>
-                      <p className="mb-2"><strong>Ejemplo:</strong> Si esperas 63 samples por nodo, este será tu valor de referencia.</p>
-                      <p>Este valor se usa junto con el % de desviación para clasificar nodos como Normal, High Load o Saturated.</p>
+                      <p className="mb-2">{t('lb2.ref_help.desc')}</p>
+                      <p className="mb-2"><strong>{t('lb2.example_label')}</strong> {t('lb2.ref_help.example')}</p>
+                      <p>{t('lb2.ref_help.usage')}</p>
                     </div>
                   </span>
                 </label>
@@ -628,12 +628,12 @@ export default function NodeLoadBalancing() {
                     </svg>
                     <div className="invisible group-hover:visible absolute z-10 w-72 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg bottom-full left-0 mb-2">
                       <p className="font-semibold mb-1">{t('node_load_balancing.deviation_tolerance_label')}</p>
-                      <p className="mb-2">Porcentaje de desviación aceptable respecto al valor de referencia.</p>
-                      <p className="mb-2"><strong>Clasificación:</strong></p>
-                      <p className="mb-1">• <strong>Normal:</strong> &lt; Ref × (1 + %)</p>
-                      <p className="mb-1">• <strong>High Load:</strong> ≥ Ref × (1 + %)</p>
-                      <p className="mb-2">• <strong>Saturated:</strong> ≥ Ref × (1 + % × 1.5)</p>
-                      <p><strong>Ejemplo:</strong> Con Ref=63 y %=20, Normal &lt; 75.6, High ≥ 75.6, Saturated ≥ 81.9</p>
+                      <p className="mb-2">{t('lb2.dev_help.desc')}</p>
+                      <p className="mb-2"><strong>{t('lb2.classification_label')}</strong></p>
+                      <p className="mb-1">• <strong>{t('lb2.level.normal')}:</strong> &lt; Ref × (1 + %)</p>
+                      <p className="mb-1">• <strong>{t('lb2.level.high')}:</strong> ≥ Ref × (1 + %)</p>
+                      <p className="mb-2">• <strong>{t('lb2.level.saturated')}:</strong> ≥ Ref × (1 + % × 1.5)</p>
+                      <p><strong>{t('lb2.example_label')}</strong> {t('lb2.dev_help.example')}</p>
                     </div>
                   </span>
                 </label>

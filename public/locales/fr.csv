@@ -3165,3 +3165,27 @@ lb2.pobox_shares_saved,Répartition enregistrée.
 lb2.pobox_shares_no_products,Aucun produit avec un plan actif.
 help_center.doc.load_balancing.title,Équilibrage de charge
 help_center.doc.load_balancing.desc,"Ce qu'est l'équilibrage, comment utiliser l'écran pas à pas et comment ONEMS choisit le jour et le nœud de chaque échantillon."
+lb2.level.normal,Normal
+lb2.level.high,Élevée
+lb2.level.saturated,Saturée
+lb2.week_label,Semaine {week}
+lb2.avg_per_node,Moy./nœud
+lb2.city_total,Total : {count} envois
+lb2.city_avg,Moy./nœud : {avg}
+lb2.balance_not_needed,Pas besoin d'équilibrer
+lb2.balance_not_needed_stddev,La charge est déjà bien équilibrée (écart type < 5)
+lb2.balance_not_needed_levels,Aucun nœud saturé ni à charge élevée
+lb2.error_loading,Erreur lors du chargement des données : {error}
+lb2.page_help.purpose_label,À quoi ça sert :
+lb2.page_help.purpose,Voir et mieux répartir les envois entre les nœuds de chaque ville pour éviter les surcharges.
+lb2.page_help.how_label,Comment ça marche :
+lb2.page_help.how,"Chaque ville affiche sa charge par nœud et par jour, semaine ou mois. ONEMS signale les nœuds saturés et propose une répartition plus équilibrée."
+lb2.page_help.usage_label,Utilisation :
+lb2.page_help.usage,"Choisissez la période, examinez chaque ville et cliquez sur Équilibrage auto pour voir l'aperçu et appliquer."
+lb2.example_label,Exemple :
+lb2.classification_label,Classification :
+lb2.ref_help.desc,Nombre d'échantillons que chaque nœud doit traiter en moyenne sur la période choisie.
+lb2.ref_help.example,"Si vous attendez 63 échantillons par nœud, c'est votre valeur de référence."
+lb2.ref_help.usage,"Elle sert, avec le % de déviation, à classer les nœuds en Normal, Élevée ou Saturée."
+lb2.dev_help.desc,Pourcentage de déviation acceptable par rapport à la valeur de référence.
+lb2.dev_help.example,"Avec Réf=63 et %=20 : Normal < 75,6 ; Élevée ≥ 75,6 ; Saturée ≥ 81,9"

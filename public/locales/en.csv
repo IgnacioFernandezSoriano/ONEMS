@@ -3173,3 +3173,27 @@ lb2.pobox_shares_saved,Split saved.
 lb2.pobox_shares_no_products,No products with an active plan.
 help_center.doc.load_balancing.title,Load balancing
 help_center.doc.load_balancing.desc,"What balancing is, how to use the screen step by step and how ONEMS decides the day and node of each sample."
+lb2.level.normal,Normal
+lb2.level.high,High
+lb2.level.saturated,Saturated
+lb2.week_label,Week {week}
+lb2.avg_per_node,Avg/node
+lb2.city_total,Total: {count} shipments
+lb2.city_avg,Avg/node: {avg}
+lb2.balance_not_needed,Balance not needed
+lb2.balance_not_needed_stddev,Load is already well balanced (std dev < 5)
+lb2.balance_not_needed_levels,No saturated or high load nodes
+lb2.error_loading,Error loading data: {error}
+lb2.page_help.purpose_label,Purpose:
+lb2.page_help.purpose,See and better distribute shipments across the nodes of each city to avoid overloads.
+lb2.page_help.how_label,How it works:
+lb2.page_help.how,"Each city shows its load per node and day, week or month. ONEMS flags saturated nodes and proposes a more even distribution."
+lb2.page_help.usage_label,Usage:
+lb2.page_help.usage,"Choose the period, review each city and click Auto-Balance to see the preview and apply."
+lb2.example_label,Example:
+lb2.classification_label,Classification:
+lb2.ref_help.desc,Number of samples each node is expected to handle on average in the selected period.
+lb2.ref_help.example,"If you expect 63 samples per node, that is your reference value."
+lb2.ref_help.usage,"It is used with the deviation % to classify nodes as Normal, High or Saturated."
+lb2.dev_help.desc,Acceptable deviation percentage from the reference value.
+lb2.dev_help.example,With Ref=63 and %=20: Normal < 75.6; High ≥ 75.6; Saturated ≥ 81.9

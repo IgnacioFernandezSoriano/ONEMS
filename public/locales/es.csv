@@ -3173,3 +3173,27 @@ lb2.pobox_shares_saved,Reparto guardado.
 lb2.pobox_shares_no_products,No hay productos con plan activo.
 help_center.doc.load_balancing.title,Balanceo de carga
 help_center.doc.load_balancing.desc,"Qué es el balanceo, cómo usar la pantalla paso a paso y cómo decide ONEMS el día y el nodo de cada muestra."
+lb2.level.normal,Normal
+lb2.level.high,Alta
+lb2.level.saturated,Saturada
+lb2.week_label,Semana {week}
+lb2.avg_per_node,Media/nodo
+lb2.city_total,Total: {count} envíos
+lb2.city_avg,Media/nodo: {avg}
+lb2.balance_not_needed,No hace falta balancear
+lb2.balance_not_needed_stddev,La carga ya está bien equilibrada (desviación estándar < 5)
+lb2.balance_not_needed_levels,No hay nodos saturados ni con carga alta
+lb2.error_loading,Error al cargar los datos: {error}
+lb2.page_help.purpose_label,Para qué sirve:
+lb2.page_help.purpose,Ver y repartir mejor los envíos entre los nodos de cada ciudad para evitar sobrecargas.
+lb2.page_help.how_label,Cómo funciona:
+lb2.page_help.how,"Cada ciudad muestra su carga por nodo y día, semana o mes. ONEMS señala los nodos saturados y propone un reparto más equilibrado."
+lb2.page_help.usage_label,Uso:
+lb2.page_help.usage,"Elija el periodo, revise cada ciudad y pulse Auto-Balance para ver la vista previa y aplicar."
+lb2.example_label,Ejemplo:
+lb2.classification_label,Clasificación:
+lb2.ref_help.desc,Número de muestras que se espera que cada nodo gestione de media en el periodo seleccionado.
+lb2.ref_help.example,"Si espera 63 muestras por nodo, ese es su valor de referencia."
+lb2.ref_help.usage,"Se usa junto con el % de desviación para clasificar los nodos como Normal, Alta o Saturada."
+lb2.dev_help.desc,Porcentaje de desviación aceptable respecto al valor de referencia.
+lb2.dev_help.example,"Con Ref=63 y %=20: Normal < 75,6; Alta ≥ 75,6; Saturada ≥ 81,9"
