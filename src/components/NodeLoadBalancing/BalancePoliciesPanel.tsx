@@ -1,6 +1,8 @@
 import React from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
 import type { DatePolicy } from '../../lib/workingDays';
+import type { PoboxProductShare } from '../../hooks/useBalancePolicies';
+import { PoboxProductShares } from './PoboxProductShares';
 
 interface BalancePoliciesPanelProps {
   workingDows: Set<number>;
@@ -18,6 +20,9 @@ interface BalancePoliciesPanelProps {
   /** Fence (yyyy-MM-dd): de hoy a esta fecha el balanceo no toca nada */
   fenceUntil: string;
   onChangeFence: (date: string) => void;
+  /** Reparto de las muestras POBOX extra por producto (se muestra solo con POBOX activo) */
+  poboxShares: PoboxProductShare[];
+  onSavePoboxShares: (shares: { product_id: string; pct: number }[]) => Promise<{ success: boolean; error?: string }>;
 }
 
 const WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0];
@@ -36,6 +41,8 @@ export function BalancePoliciesPanel({
   balanceAllHint,
   fenceUntil,
   onChangeFence,
+  poboxShares,
+  onSavePoboxShares,
 }: BalancePoliciesPanelProps) {
   const { t } = useTranslation();
   const running = !!balancingAll;
@@ -159,6 +166,8 @@ export function BalancePoliciesPanel({
           <p className="text-xs text-gray-500 mt-2">{t('node_load_balancing.fence_until_hint')}</p>
         </div>
       </div>
+
+      {pobox && <PoboxProductShares shares={poboxShares} onSave={onSavePoboxShares} locked={locked} />}
     </section>
   );
 }

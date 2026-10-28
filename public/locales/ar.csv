@@ -3155,3 +3155,11 @@ node_load_balancing.fence_until,التجميد حتى
 node_load_balancing.fence_until_hint,من اليوم حتى هذا التاريخ لا يقوم الموازنة بنقل أو حذف أو إنشاء أي عينة.
 lb2.deferred.replaced_pobox,{count} منها تحل محل عينات POBOX (نفس اليوم والعقدة، دون شحنة إضافية).
 lb2.fence_note,التجميد: تبقى العينات حتى {date} كما هي؛ تبدأ الموازنة في اليوم التالي.
+lb2.pobox_shares_title,عينات POBOX الإضافية حسب المنتج
+lb2.pobox_shares_help,نسبة العينات الإضافية التي ينشئها POBOX لكل منتج. الكل 0 = دون توزيع (الخطة الأقل تقدماً).
+lb2.pobox_shares_product,المنتج
+lb2.pobox_shares_current,عينات POBOX الحالية
+lb2.pobox_shares_total,المجموع: {total}%
+lb2.pobox_shares_sum_error,يجب أن يكون مجموع النسب 100 (أو الكل 0).
+lb2.pobox_shares_saved,تم حفظ التوزيع.
+lb2.pobox_shares_no_products,لا توجد منتجات بخطة نشطة.

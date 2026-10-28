@@ -3163,3 +3163,11 @@ node_load_balancing.fence_until,Fence until
 node_load_balancing.fence_until_hint,"From today to this date nothing is moved, removed or created when balancing."
 lb2.deferred.replaced_pobox,"{count} of them replace POBOX samples (same day and node, no extra shipment)."
 lb2.fence_note,Fence: samples up to {date} are kept as they are; balancing starts the next day.
+lb2.pobox_shares_title,POBOX extra samples by product
+lb2.pobox_shares_help,Share (%) of the extra samples POBOX creates that goes to each product. All 0 = no split (least advanced plan).
+lb2.pobox_shares_product,Product
+lb2.pobox_shares_current,POBOX samples now
+lb2.pobox_shares_total,Total: {total}%
+lb2.pobox_shares_sum_error,Percentages must add up to 100 (or all 0).
+lb2.pobox_shares_saved,Split saved.
+lb2.pobox_shares_no_products,No products with an active plan.

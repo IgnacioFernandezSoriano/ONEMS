@@ -3155,3 +3155,11 @@ node_load_balancing.fence_until,Gel jusqu'au
 node_load_balancing.fence_until_hint,"D'aujourd'hui à cette date, l'équilibrage ne déplace, ne supprime ni ne crée aucun échantillon."
 lb2.deferred.replaced_pobox,"{count} d'entre eux remplacent des échantillons POBOX (même jour et nœud, sans envoi supplémentaire)."
 lb2.fence_note,Gel : les échantillons jusqu'au {date} restent tels quels ; l'équilibrage commence le lendemain.
+lb2.pobox_shares_title,Échantillons POBOX supplémentaires par produit
+lb2.pobox_shares_help,Pourcentage des échantillons supplémentaires créés par POBOX attribué à chaque produit. Tout à 0 = pas de répartition (plan le moins avancé).
+lb2.pobox_shares_product,Produit
+lb2.pobox_shares_current,Échantillons POBOX actuels
+lb2.pobox_shares_total,Total : {total} %
+lb2.pobox_shares_sum_error,Les pourcentages doivent totaliser 100 (ou tous à 0).
+lb2.pobox_shares_saved,Répartition enregistrée.
+lb2.pobox_shares_no_products,Aucun produit avec un plan actif.
