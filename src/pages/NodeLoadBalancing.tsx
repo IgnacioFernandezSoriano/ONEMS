@@ -479,6 +479,8 @@ export default function NodeLoadBalancing() {
         disabled={!applied.start || !applied.end || datesPending || applying}
         locked={applying}
         balanceAllHint={t('lb2.balance_all_need_dates')}
+        fenceUntil={fenceUntil}
+        onChangeFence={setFenceUntil}
       />
 
       {/* Filters */}
@@ -509,7 +511,7 @@ export default function NodeLoadBalancing() {
         {showFilters && (
           <div className="p-4 space-y-4">
             {/* Date Range Filters */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   {t("common.start_date")}
@@ -533,20 +535,6 @@ export default function NodeLoadBalancing() {
                   disabled={applying}
                   className="disabled:opacity-50 disabled:cursor-not-allowed block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t("node_load_balancing.fence_until")}
-                </label>
-                <input
-                  type="date"
-                  value={fenceUntil}
-                  onChange={(e) => setFenceUntil(e.target.value)}
-                  disabled={applying}
-                  title={t("node_load_balancing.fence_until_hint")}
-                  className="disabled:opacity-50 disabled:cursor-not-allowed block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                />
-                <p className="mt-1 text-xs text-gray-500">{t("node_load_balancing.fence_until_hint")}</p>
               </div>
             </div>
 

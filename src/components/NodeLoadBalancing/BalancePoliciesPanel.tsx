@@ -15,6 +15,9 @@ interface BalancePoliciesPanelProps {
   locked?: boolean;
   /** Hint shown (as tooltip) when "Balance all" is disabled by missing input */
   balanceAllHint?: string;
+  /** Fence (yyyy-MM-dd): de hoy a esta fecha el balanceo no toca nada */
+  fenceUntil: string;
+  onChangeFence: (date: string) => void;
 }
 
 const WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0];
@@ -31,6 +34,8 @@ export function BalancePoliciesPanel({
   disabled,
   locked = false,
   balanceAllHint,
+  fenceUntil,
+  onChangeFence,
 }: BalancePoliciesPanelProps) {
   const { t } = useTranslation();
   const running = !!balancingAll;
@@ -56,7 +61,7 @@ export function BalancePoliciesPanel({
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Working days */}
         <div>
           <span id="lb2-working-days" className="block text-sm font-medium text-gray-700 mb-2">
@@ -136,6 +141,22 @@ export function BalancePoliciesPanel({
             {t('lb2.pobox')}
           </label>
           <p className="text-xs text-gray-500 mt-2">{t('lb2.pobox_help')}</p>
+        </div>
+
+        {/* Fence */}
+        <div>
+          <label htmlFor="lb2-fence-until" className="block text-sm font-medium text-gray-700 mb-2">
+            {t('node_load_balancing.fence_until')}
+          </label>
+          <input
+            id="lb2-fence-until"
+            type="date"
+            value={fenceUntil}
+            disabled={locked}
+            onChange={(e) => onChangeFence(e.target.value)}
+            className={`block w-full border border-gray-300 rounded-md shadow-sm py-1.5 px-3 text-sm disabled:opacity-50 disabled:cursor-not-allowed ${FOCUS}`}
+          />
+          <p className="text-xs text-gray-500 mt-2">{t('node_load_balancing.fence_until_hint')}</p>
         </div>
       </div>
     </section>
