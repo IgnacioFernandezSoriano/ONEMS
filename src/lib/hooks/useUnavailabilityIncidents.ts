@@ -286,7 +286,7 @@ export function useUnavailabilityIncidents() {
   }, [])
 
   return {
-    inbox, loading, error, pendingManagerCount,
+    inbox, allRows, loading, error, pendingManagerCount,
     statusFilter, setStatusFilter,
     fetchInbox, fetchHeader, fetchLines, decide, decideMany, saveResolution,
     suggestForCell, applyManagerMove, suggestForSampleMove, applySampleMove, fetchCellSamples,

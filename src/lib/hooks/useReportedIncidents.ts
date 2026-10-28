@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAccount } from '@/contexts/AccountContext'
+import { notifyIncidentAttention } from '@/lib/hooks/useIncidentAttention'
 import type { ReportedIncident, ReportedIncidentDetail, ReportedIncidentStatus } from '@/lib/types'
 
 export function useReportedIncidents() {
@@ -42,10 +43,18 @@ export function useReportedIncidents() {
     return data as any
   }, [])
 
+  // Primera apertura por el manager: deja de contar como nueva en el menu
+  const markSeen = useCallback(async (id: string) => {
+    const { data, error: e } = await supabase.rpc('mark_panelist_incident_seen', { p_incident_id: id })
+    if (e) { console.warn('mark_panelist_incident_seen', e); return }
+    if (data) notifyIncidentAttention()
+  }, [])
+
   const resolve = useCallback(async (id: string, status: ReportedIncidentStatus, note?: string, reply?: string) => {
     const { error: e } = await supabase.rpc('resolve_panelist_incident', {
       p_incident_id: id, p_status: status, p_resolution_note: note ?? null, p_reply_text: reply ?? null })
     if (e) throw e
+    notifyIncidentAttention()
   }, [])
 
   const actCancel = useCallback(async (detailId: string) => {
@@ -78,7 +87,7 @@ export function useReportedIncidents() {
 
   const openCount = inbox.filter(r => r.status === 'open' || r.status === 'in_progress').length
 
-  return { inbox, loading, error, openCount, fetchInbox, fetchIncident, resolve, actCancel, signedPhotoUrl,
+  return { inbox, loading, error, openCount, fetchInbox, fetchIncident, markSeen, resolve, actCancel, signedPhotoUrl,
     listNodesForMove, suggestRerouteReturnedSample, rerouteReturnedSample, panelistRole }
 }
 

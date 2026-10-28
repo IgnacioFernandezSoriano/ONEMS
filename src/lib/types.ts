@@ -537,6 +537,7 @@ export interface ReportedIncident {
   reply_to_panelist: string | null
   reply_status: 'none' | 'pending_send' | 'sent'
   reported_at: string
+  manager_seen_at?: string | null
   // joins para la bandeja
   panelist_name?: string
   panelist_code?: string

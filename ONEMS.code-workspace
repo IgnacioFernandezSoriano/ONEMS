@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"name": "ONEMS (app + base de datos)",
+			"path": "."
+		},
+		{
+			"name": "panelist_n8n (workflows n8n)",
+			"path": "../ONE n8n/panelist_n8n"
+		}
+	],
+	"settings": {}
+}

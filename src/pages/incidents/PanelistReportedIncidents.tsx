@@ -17,10 +17,15 @@ export function PanelistReportedIncidents() {
   const [catFilter, setCatFilter] = useState<ReportedIncidentCategory | 'all'>('all')
   const [statusFilter, setStatusFilter] = useState<ReportedIncidentStatus | 'open_active'>('open_active')
 
+  const hasReply = (id: string) => (unreadByKey[`reported:${id}`] ?? 0) > 0
+  const isNew = (r: { status: string; manager_seen_at?: string | null }) => r.status === 'open' && !r.manager_seen_at
+  // "Abiertas" incluye las cerradas con respuesta sin leer: son las que cuenta el menu
   const rows = useMemo(() => inbox.filter(r =>
     (catFilter === 'all' || r.category === catFilter) &&
-    (statusFilter === 'open_active' ? (r.status === 'open' || r.status === 'in_progress') : r.status === statusFilter)
-  ), [inbox, catFilter, statusFilter])
+    (statusFilter === 'open_active'
+      ? (r.status === 'open' || r.status === 'in_progress' || (unreadByKey[`reported:${r.id}`] ?? 0) > 0)
+      : r.status === statusFilter)
+  ), [inbox, catFilter, statusFilter, unreadByKey])
 
   if (loading) return <div className="p-6">{t('common.loading')}</div>
   if (error) return <div className="p-6 text-red-600">{t('common.error')}: {error}</div>
@@ -60,7 +65,7 @@ export function PanelistReportedIncidents() {
             <tbody className="divide-y divide-gray-200">
               {rows.length > 0 ? rows.map(r => (
                 <tr key={r.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm"><div className="font-medium">{r.panelist_name}{(unreadByKey[`reported:${r.id}`] ?? 0) > 0 && <span className="ms-2 text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">{t('incident_conversation.new_reply')}</span>}</div><div className="text-gray-500 text-xs font-mono">{r.panelist_code}</div></td>
+                  <td className="px-6 py-4 text-sm"><div className="font-medium">{r.panelist_name}{isNew(r) && <span className="ms-2 text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">{t('reported_incidents.new_badge')}</span>}{hasReply(r.id) && <span className="ms-2 text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">{t('incident_conversation.new_reply')}</span>}</div><div className="text-gray-500 text-xs font-mono">{r.panelist_code}</div></td>
                   <td className="px-6 py-4 text-sm">{t(`reported_incidents.category.${r.category}`)}</td>
                   <td className="px-6 py-4 text-sm">{t(`reported_incidents.status.${r.status}`)}</td>
                   <td className="px-6 py-4 text-sm">{r.reported_at?.slice(0, 10)}</td>

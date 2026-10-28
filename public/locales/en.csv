@@ -2682,7 +2682,7 @@ menu.sign_out,Sign Out
 incidents.menu_group,Incidents
 incidents.panelist_availability,Panelist availability
 incidents.title,Panelist availability incidents
-incidents.pending_badge_tooltip,Unavailability records pending review
+incidents.pending_badge_tooltip,Unavailabilities that need your action: awaiting your decision or with unread panelist replies
 incidents.inbox.panelist,Panelist
 incidents.inbox.node,Node / city
 incidents.inbox.dates,Unavailability dates
@@ -2844,7 +2844,8 @@ unavailability.reason_materials,Materials
 unavailability.dates_locked,Dates come from the panelist and cannot be edited. Cancel and declare a new period if needed.
 unavailability.confirm_cancel_one,Cancel this unavailability period? Its changes to the plan will be reverted and it cannot be reactivated.
 reported_incidents.menu,Reported incidents
-reported_incidents.badge_tooltip,Incidents reported by panelists pending review
+reported_incidents.badge_tooltip,Incidents that need your action: new or with unread panelist replies
+reported_incidents.new_badge,New
 reported_incidents.title,Incidents reported by panelists
 reported_incidents.open,Open
 reported_incidents.empty,No reported incidents

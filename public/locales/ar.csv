@@ -2674,7 +2674,7 @@ menu.sign_out,تسجيل الخروج
 incidents.menu_group,الحوادث
 incidents.panelist_availability,توفر المحكّمين
 incidents.title,حوادث توفر المحكّمين
-incidents.pending_badge_tooltip,حالات عدم توفر بانتظار المراجعة
+incidents.pending_badge_tooltip,حالات عدم توفر تتطلب إجراءً منك: بانتظار قرارك أو بها ردود غير مقروءة من العضو
 incidents.inbox.panelist,المحكّم
 incidents.inbox.node,العقدة / المدينة
 incidents.inbox.dates,تواريخ عدم التوفر
@@ -2836,7 +2836,8 @@ unavailability.reason_materials,المواد
 unavailability.dates_locked,التواريخ يحددها المشارك ولا يمكن تعديلها. ألغِ وأعلن فترة جديدة عند الحاجة.
 unavailability.confirm_cancel_one,هل تريد إلغاء فترة عدم التوفر هذه؟ سيتم التراجع عن تغييراتها في الخطة ولا يمكن إعادة تفعيلها.
 reported_incidents.menu,الحوادث المبلَّغ عنها
-reported_incidents.badge_tooltip,حوادث أبلغ عنها الأعضاء بانتظار المراجعة
+reported_incidents.badge_tooltip,حوادث تتطلب إجراءً منك: جديدة أو بها ردود غير مقروءة من العضو
+reported_incidents.new_badge,جديد
 reported_incidents.title,الحوادث المبلَّغ عنها من الأعضاء
 reported_incidents.open,فتح
 reported_incidents.empty,لا توجد حوادث مبلَّغ عنها

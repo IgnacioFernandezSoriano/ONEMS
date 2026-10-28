@@ -41,9 +41,7 @@ import {
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useLocale } from '../../contexts/LocaleContext'
-import { useUnavailabilityIncidents } from '../../lib/hooks/useUnavailabilityIncidents'
-import { useReportedIncidents } from '../../lib/hooks/useReportedIncidents'
-import { useUnreadConversations } from '../../lib/hooks/useUnreadConversations'
+import { useIncidentAttention } from '../../lib/hooks/useIncidentAttention'
 import { useDeferredSamples } from '../../hooks/useDeferredSamples'
 
 interface MenuItem {
@@ -68,9 +66,8 @@ export function Sidebar() {
   const location = useLocation()
   const { isCollapsed, setIsCollapsed } = useSidebar()
   const { t, locale, setLocale } = useLocale()
-  const { pendingManagerCount } = useUnavailabilityIncidents()
-  const { openCount } = useReportedIncidents()
-  const { totalReported, totalUnavailability } = useUnreadConversations()
+  // Un solo numero por item: incidencias en las que el manager tiene que actuar (cuenta seleccionada / propia).
+  const { reported: reportedAttention, unavailability: unavailabilityAttention } = useIncidentAttention()
   // Muestras por compensar: contador del item Load Balancing. Se consulta al montar, al cambiar de cuenta, al
   // entrar/salir de /node-load-balancing y cuando la pantalla de balanceo avisa de un apply (sin polling).
   const { summary: deferredSummary, refetch: refetchDeferred } = useDeferredSamples()
@@ -635,24 +632,14 @@ export function Sidebar() {
                             {isExpanded && (
                               <span className="text-sm font-medium">{item.label}</span>
                             )}
-                            {item.path === '/incidents/panelist-availability' && pendingManagerCount > 0 && isExpanded && (
-                              <span className="ml-auto text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">
-                                {pendingManagerCount}
+                            {item.path === '/incidents/panelist-availability' && unavailabilityAttention > 0 && isExpanded && (
+                              <span title={t('incidents.pending_badge_tooltip')} className="ml-auto text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">
+                                {unavailabilityAttention}
                               </span>
                             )}
-                            {item.path === '/incidents/panelist-reported' && openCount > 0 && isExpanded && (
-                              <span className="ml-auto text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">
-                                {openCount}
-                              </span>
-                            )}
-                            {item.path === '/incidents/panelist-reported' && totalReported > 0 && isExpanded && (
-                              <span title={t('incident_conversation.unread_badge')} className="ml-1 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">
-                                {totalReported}
-                              </span>
-                            )}
-                            {item.path === '/incidents/panelist-availability' && totalUnavailability > 0 && isExpanded && (
-                              <span title={t('incident_conversation.unread_badge')} className="ml-1 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">
-                                {totalUnavailability}
+                            {item.path === '/incidents/panelist-reported' && reportedAttention > 0 && isExpanded && (
+                              <span title={t('reported_incidents.badge_tooltip')} className="ml-auto text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">
+                                {reportedAttention}
                               </span>
                             )}
                           </Link>

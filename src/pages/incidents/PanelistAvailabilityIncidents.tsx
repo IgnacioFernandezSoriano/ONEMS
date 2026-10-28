@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from '@/hooks/useTranslation'
 import { format, parseISO, isValid } from 'date-fns'
@@ -18,8 +18,12 @@ const fmt = (d: string | null) => {
 
 export function PanelistAvailabilityIncidents() {
   const { t } = useTranslation()
-  const { inbox, loading, error, fetchInbox, statusFilter, setStatusFilter } = useUnavailabilityIncidents()
+  const { inbox: filtered, allRows, loading, error, fetchInbox, statusFilter, setStatusFilter } = useUnavailabilityIncidents()
   const { unreadByKey } = useUnreadConversations()
+  // "Abiertas" incluye las cerradas con respuesta sin leer: son las que cuenta el menu
+  const inbox = useMemo(() => statusFilter !== 'open' ? filtered
+    : allRows.filter(r => filtered.includes(r) || (unreadByKey[`unavailability:${r.unavailability_id}`] ?? 0) > 0),
+  [filtered, allRows, statusFilter, unreadByKey])
   const [selected, setSelected] = useState<string | null>(null)
   const [params, setParams] = useSearchParams()
 

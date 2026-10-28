@@ -1,0 +1,621 @@
+﻿{
+    "updatedAt":  "2026-04-28T15:21:26.601Z",
+    "createdAt":  "2026-02-10T15:00:51.243Z",
+    "id":  "p8497yoHcX1Z3cfH_9j5S",
+    "name":  "On new parcel to send",
+    "description":  null,
+    "active":  true,
+    "isArchived":  false,
+    "nodes":  [
+                  {
+                      "parameters":  {
+                                         "operation":  "executeQuery",
+                                         "query":  "SELECT DISTINCT\n  p_orig.telegram_id,\n  p_orig.language AS panelist_language\nFROM v_allocation_details_with_availability v\nJOIN panelists p_orig ON p_orig.node_id = v.origin_node_id\nWHERE v.fecha_programada = CURRENT_DATE\n  AND v.status = \u0027pending\u0027\n  AND p_orig.telegram_id IS NOT NULL\n  AND p_orig.telegram_id != \u0027\u0027\nORDER BY p_orig.telegram_id",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.postgres",
+                      "typeVersion":  2.6,
+                      "position":  [
+                                       208,
+                                       0
+                                   ],
+                      "id":  "6d8a1958-3baa-4a46-a23b-f306d56b8bed",
+                      "name":  "Get pending parcels to send",
+                      "credentials":  {
+                                          "postgres":  {
+                                                           "id":  "735a8hxfuUEDPIYD",
+                                                           "name":  "OneMS dev - Postgres account"
+                                                       }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "rule":  {
+                                                      "interval":  [
+                                                                       {
+                                                                           "triggerAtHour":  9
+                                                                       }
+                                                                   ]
+                                                  }
+                                     },
+                      "type":  "n8n-nodes-base.scheduleTrigger",
+                      "typeVersion":  1.2,
+                      "position":  [
+                                       0,
+                                       0
+                                   ],
+                      "id":  "224a4a01-554e-42da-b878-29112a473273",
+                      "name":  "Schedule Trigger"
+                  },
+                  {
+                      "parameters":  {
+                                         "rule":  {
+                                                      "interval":  [
+                                                                       {
+                                                                           "triggerAtHour":  9
+                                                                       }
+                                                                   ]
+                                                  }
+                                     },
+                      "type":  "n8n-nodes-base.scheduleTrigger",
+                      "typeVersion":  1.2,
+                      "position":  [
+                                       0,
+                                       256
+                                   ],
+                      "id":  "03644169-c802-46b5-bf1e-befc762f7796",
+                      "name":  "Schedule Trigger1"
+                  },
+                  {
+                      "parameters":  {
+                                         "workflowId":  {
+                                                            "__rl":  true,
+                                                            "value":  "Tm2yrywGUDq0PEj3",
+                                                            "mode":  "id"
+                                                        },
+                                         "workflowInputs":  {
+                                                                "mappingMode":  "defineBelow",
+                                                                "value":  {
+                                                                              "telegram_id":  "={{ $json.telegram_id }}",
+                                                                              "panelist_language":  "={{ $json.panelist_language }}"
+                                                                          },
+                                                                "schema":  [
+                                                                               {
+                                                                                   "id":  "telegram_id",
+                                                                                   "displayName":  "telegram_id",
+                                                                                   "required":  false,
+                                                                                   "defaultMatch":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  true
+                                                                               },
+                                                                               {
+                                                                                   "id":  "panelist_language",
+                                                                                   "displayName":  "panelist_language",
+                                                                                   "required":  false,
+                                                                                   "defaultMatch":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  true
+                                                                               }
+                                                                           ]
+                                                            },
+                                         "options":  {
+                                                         "executionMode":  "each"
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.executeWorkflow",
+                      "typeVersion":  1.3,
+                      "position":  [
+                                       544,
+                                       128
+                                   ],
+                      "id":  "da1240f0-f28d-4e54-acf7-dd68beaea6ca",
+                      "name":  "Execute Workflow"
+                  },
+                  {
+                      "parameters":  {
+                                         "operation":  "executeQuery",
+                                         "query":  "SELECT DISTINCT\n  p_orig.telegram_id,\n  p_orig.language AS panelist_language\nFROM v_allocation_details_with_availability v\nJOIN panelists p_orig ON p_orig.node_id = v.origin_node_id\nWHERE v.fecha_programada \u003c CURRENT_DATE\n  AND v.status = \u0027notified\u0027\n  AND p_orig.telegram_id IS NOT NULL\n  AND p_orig.telegram_id != \u0027\u0027\nORDER BY p_orig.telegram_id",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.postgres",
+                      "typeVersion":  2.6,
+                      "position":  [
+                                       224,
+                                       256
+                                   ],
+                      "id":  "4bf9c246-8a31-463b-8499-abbf2faf07dc",
+                      "name":  "Get pending parcels FOR REMINDER after 1 day",
+                      "credentials":  {
+                                          "postgres":  {
+                                                           "id":  "735a8hxfuUEDPIYD",
+                                                           "name":  "OneMS dev - Postgres account"
+                                                       }
+                                      }
+                  },
+                  {
+                      "id":  "sticky-main",
+                      "name":  "Sticky Note - Main",
+                      "type":  "n8n-nodes-base.stickyNote",
+                      "typeVersion":  1,
+                      "position":  [
+                                       -280,
+                                       -60
+                                   ],
+                      "parameters":  {
+                                         "content":  "## ?? Daily Parcel Notifications\n\n**Trigger:** Runs every morning at 8:00 AM\n\n**What it does:**\n1. Queries `v_allocation_details_with_availability` for panelists with parcels where `status = pending` and `fecha_programada = TODAY`\n2. Returns one row per distinct panelist (telegram_id + language)\n3. Calls **Parcels to send** workflow once per panelist\n\n**Parcels to send** workflow handles:\n- Fetches full parcel details for the panelist\n- Sends Telegram message with parcel list\n- Updates status ? `notified`\n- Saves conversation memory",
+                                         "height":  320,
+                                         "width":  380,
+                                         "color":  3
+                                     }
+                  },
+                  {
+                      "id":  "sticky-reminder",
+                      "name":  "Sticky Note - Reminder",
+                      "type":  "n8n-nodes-base.stickyNote",
+                      "typeVersion":  1,
+                      "position":  [
+                                       -280,
+                                       336
+                                   ],
+                      "parameters":  {
+                                         "content":  "## ?? Daily Reminder for Overdue Parcels\n\n**Trigger:** Runs every morning at 8:00 AM\n\n**What it does:**\n1. Queries panelists with parcels where `status = notified` and `fecha_programada \u003c TODAY`\n2. These are parcels that were notified but NOT yet sent by the panelist\n3. Calls **Parcels to send** workflow once per panelist as a reminder\n\n**Note:** Same workflow handles both first notifications and reminders.",
+                                         "height":  260,
+                                         "width":  380,
+                                         "color":  5
+                                     }
+                  },
+                  {
+                      "id":  "sticky-exec",
+                      "name":  "Sticky Note - Execute",
+                      "type":  "n8n-nodes-base.stickyNote",
+                      "typeVersion":  1,
+                      "position":  [
+                                       524,
+                                       -52
+                                   ],
+                      "parameters":  {
+                                         "content":  "## ? Execute Workflow\n\nCalls **Parcels to send** (`Tm2yrywGUDq0PEj3`) once per panelist.\n\n**Inputs passed:**\n- `telegram_id` - panelist\u0027s Telegram ID\n- `panelist_language` - for message localization (es/en/fr/ar)\n\n**Mode:** Run once for each item\n(one execution per panelist)",
+                                         "height":  200,
+                                         "width":  300,
+                                         "color":  7
+                                     }
+                  },
+                  {
+                      "id":  "send-list-auto-001",
+                      "name":  "Send parcel list",
+                      "type":  "n8n-nodes-base.telegram",
+                      "typeVersion":  1.2,
+                      "position":  [
+                                       768,
+                                       128
+                                   ],
+                      "parameters":  {
+                                         "chatId":  "={{ $json.telegram_id }}",
+                                         "text":  "={{ (() =\u003e {const lang = $json.panelist_language || \"en\";const parcels = JSON.parse($json.response);const pin      = String.fromCodePoint(0x1F4CD);const truck    = String.fromCodePoint(0x1F69A);const box      = String.fromCodePoint(0x1F4E6);const toolbox  = String.fromCodePoint(0x1F9F0);const cal      = String.fromCodePoint(0x1F4C5);const dash     = \"-\";const headers  = { en: box + \" *Parcels to send*\", es: box + \" *Paquetes a enviar*\", fr: box + \" *Colis � envoyer*\", ar: box + \" *?????? ???????*\" };const footers  = { en: \"Reply with the number to select a parcel and declare the shipment.\", es: \"Responde con el n�mero para seleccionar un paquete y declarar el env�o.\", fr: \"R�pondez avec le num�ro pour s�lectionner un colis.\", ar: \"?? ?????? ??????? ???.\" };let msg = (headers[lang] || headers[\"en\"]) + \"\\n\\n\";parcels.forEach((p, i) =\u003e {const parts = [p.address_line1, p.address_line2, (p.postal_code \u0026\u0026 p.destination_city) ? (p.postal_code + \" \" + p.destination_city) : (p.destination_city || p.postal_code), p.destination_country].filter(x =\u003e x \u0026\u0026 x.trim() !== \"\");const address = parts.join(\", \");const mats = Array.isArray(p.materials) ? p.materials : [];const matsText = mats.length \u003e 0 ? mats.map(m =\u003e \" . \" + m.material_name + \" \" + dash + \" \" + m.quantity + \" \" + (m.unit_measure || \"units\")).join(\"\\n\") : \" -\";msg += \"[\" + (i+1) + \"]. To: *\" + p.destination_panelist_name + \"*\\n\";msg += pin + \" \" + address + \"\\n\";msg += truck + \" Carrier: \" + p.carrier_name + \"\\n\";msg += box + \" Product: \" + p.product_description + \"\\n\";msg += toolbox + \" Materials needed:\\n\" + matsText + \"\\n\";msg += cal + \" Scheduled: \" + p.scheduled_date + \"\\n\\n\";});msg += footers[lang] || footers[\"en\"];return msg;})() }}",
+                                         "additionalFields":  {
+                                                                  "appendAttribution":  false,
+                                                                  "parse_mode":  "Markdown"
+                                                              }
+                                     },
+                      "credentials":  {
+                                          "telegramApi":  {
+                                                              "id":  "rp79mLnvGH8hxiaL",
+                                                              "name":  "One For Panelist Telegram account"
+                                                          }
+                                      },
+                      "webhookId":  "14933645-d93b-49eb-b3cb-a43d07afd7a6"
+                  }
+              ],
+    "connections":  {
+                        "Execute Workflow":  {
+                                                 "main":  [
+                                                              [
+                                                                  {
+                                                                      "node":  "Send parcel list",
+                                                                      "type":  "main",
+                                                                      "index":  0
+                                                                  }
+                                                              ]
+                                                          ]
+                                             },
+                        "Get pending parcels to send":  {
+                                                            "main":  [
+                                                                         [
+                                                                             {
+                                                                                 "node":  "Execute Workflow",
+                                                                                 "type":  "main",
+                                                                                 "index":  0
+                                                                             }
+                                                                         ]
+                                                                     ]
+                                                        },
+                        "Schedule Trigger":  {
+                                                 "main":  [
+                                                              [
+                                                                  {
+                                                                      "node":  "Get pending parcels to send",
+                                                                      "type":  "main",
+                                                                      "index":  0
+                                                                  }
+                                                              ]
+                                                          ]
+                                             },
+                        "Schedule Trigger1":  {
+                                                  "main":  [
+                                                               [
+                                                                   {
+                                                                       "node":  "Get pending parcels FOR REMINDER after 1 day",
+                                                                       "type":  "main",
+                                                                       "index":  0
+                                                                   }
+                                                               ]
+                                                           ]
+                                              },
+                        "Get pending parcels FOR REMINDER after 1 day":  {
+                                                                             "main":  [
+                                                                                          [
+                                                                                              {
+                                                                                                  "node":  "Execute Workflow",
+                                                                                                  "type":  "main",
+                                                                                                  "index":  0
+                                                                                              }
+                                                                                          ]
+                                                                                      ]
+                                                                         }
+                    },
+    "settings":  {
+                     "executionOrder":  "v1",
+                     "binaryMode":  "separate",
+                     "availableInMCP":  false,
+                     "callerPolicy":  "workflowsFromSameOwner"
+                 },
+    "staticData":  {
+                       "node:Schedule Trigger":  {
+                                                     "recurrenceRules":  [
+
+                                                                         ]
+                                                 },
+                       "node:Schedule Trigger1":  {
+                                                      "recurrenceRules":  [
+
+                                                                          ]
+                                                  }
+                   },
+    "meta":  {
+                 "templateCredsSetupCompleted":  true
+             },
+    "pinData":  {
+
+                },
+    "versionId":  "98a307f6-427b-4133-af23-f28119fc37ec",
+    "activeVersionId":  "98a307f6-427b-4133-af23-f28119fc37ec",
+    "versionCounter":  149,
+    "triggerCount":  2,
+    "shared":  [
+                   {
+                       "updatedAt":  "2026-02-10T15:00:51.246Z",
+                       "createdAt":  "2026-02-10T15:00:51.246Z",
+                       "role":  "workflow:owner",
+                       "workflowId":  "p8497yoHcX1Z3cfH_9j5S",
+                       "projectId":  "3p4DsIlSNKeYlFOh",
+                       "project":  {
+                                       "updatedAt":  "2026-02-11T11:37:10.000Z",
+                                       "createdAt":  "2026-02-10T14:57:36.407Z",
+                                       "id":  "3p4DsIlSNKeYlFOh",
+                                       "name":  "One Panelist",
+                                       "type":  "team",
+                                       "icon":  {
+                                                    "type":  "icon",
+                                                    "value":  "mail"
+                                                },
+                                       "description":  "",
+                                       "creatorId":  "310002b0-8d54-456b-8f9f-7611a34898fd"
+                                   }
+                   }
+               ],
+    "tags":  [
+                 {
+                     "updatedAt":  "2026-03-04T13:56:20.140Z",
+                     "createdAt":  "2026-03-04T13:56:20.140Z",
+                     "id":  "M3msxXpviN0m1Sze",
+                     "name":  "PROD"
+                 }
+             ],
+    "activeVersion":  {
+                          "updatedAt":  "2026-04-28T15:21:26.601Z",
+                          "createdAt":  "2026-04-28T15:21:26.601Z",
+                          "versionId":  "98a307f6-427b-4133-af23-f28119fc37ec",
+                          "workflowId":  "p8497yoHcX1Z3cfH_9j5S",
+                          "nodes":  [
+                                        {
+                                            "parameters":  {
+                                                               "operation":  "executeQuery",
+                                                               "query":  "SELECT DISTINCT\n  p_orig.telegram_id,\n  p_orig.language AS panelist_language\nFROM v_allocation_details_with_availability v\nJOIN panelists p_orig ON p_orig.node_id = v.origin_node_id\nWHERE v.fecha_programada = CURRENT_DATE\n  AND v.status = \u0027pending\u0027\n  AND p_orig.telegram_id IS NOT NULL\n  AND p_orig.telegram_id != \u0027\u0027\nORDER BY p_orig.telegram_id",
+                                                               "options":  {
+
+                                                                           }
+                                                           },
+                                            "type":  "n8n-nodes-base.postgres",
+                                            "typeVersion":  2.6,
+                                            "position":  [
+                                                             208,
+                                                             0
+                                                         ],
+                                            "id":  "6d8a1958-3baa-4a46-a23b-f306d56b8bed",
+                                            "name":  "Get pending parcels to send",
+                                            "credentials":  {
+                                                                "postgres":  {
+                                                                                 "id":  "735a8hxfuUEDPIYD",
+                                                                                 "name":  "OneMS dev - Postgres account"
+                                                                             }
+                                                            }
+                                        },
+                                        {
+                                            "parameters":  {
+                                                               "rule":  {
+                                                                            "interval":  [
+                                                                                             {
+                                                                                                 "triggerAtHour":  9
+                                                                                             }
+                                                                                         ]
+                                                                        }
+                                                           },
+                                            "type":  "n8n-nodes-base.scheduleTrigger",
+                                            "typeVersion":  1.2,
+                                            "position":  [
+                                                             0,
+                                                             0
+                                                         ],
+                                            "id":  "224a4a01-554e-42da-b878-29112a473273",
+                                            "name":  "Schedule Trigger"
+                                        },
+                                        {
+                                            "parameters":  {
+                                                               "rule":  {
+                                                                            "interval":  [
+                                                                                             {
+                                                                                                 "triggerAtHour":  9
+                                                                                             }
+                                                                                         ]
+                                                                        }
+                                                           },
+                                            "type":  "n8n-nodes-base.scheduleTrigger",
+                                            "typeVersion":  1.2,
+                                            "position":  [
+                                                             0,
+                                                             256
+                                                         ],
+                                            "id":  "03644169-c802-46b5-bf1e-befc762f7796",
+                                            "name":  "Schedule Trigger1"
+                                        },
+                                        {
+                                            "parameters":  {
+                                                               "workflowId":  {
+                                                                                  "__rl":  true,
+                                                                                  "value":  "Tm2yrywGUDq0PEj3",
+                                                                                  "mode":  "id"
+                                                                              },
+                                                               "workflowInputs":  {
+                                                                                      "mappingMode":  "defineBelow",
+                                                                                      "value":  {
+                                                                                                    "telegram_id":  "={{ $json.telegram_id }}",
+                                                                                                    "panelist_language":  "={{ $json.panelist_language }}"
+                                                                                                },
+                                                                                      "schema":  [
+                                                                                                     {
+                                                                                                         "id":  "telegram_id",
+                                                                                                         "displayName":  "telegram_id",
+                                                                                                         "required":  false,
+                                                                                                         "defaultMatch":  false,
+                                                                                                         "display":  true,
+                                                                                                         "type":  "string",
+                                                                                                         "canBeUsedToMatch":  true
+                                                                                                     },
+                                                                                                     {
+                                                                                                         "id":  "panelist_language",
+                                                                                                         "displayName":  "panelist_language",
+                                                                                                         "required":  false,
+                                                                                                         "defaultMatch":  false,
+                                                                                                         "display":  true,
+                                                                                                         "type":  "string",
+                                                                                                         "canBeUsedToMatch":  true
+                                                                                                     }
+                                                                                                 ]
+                                                                                  },
+                                                               "options":  {
+                                                                               "executionMode":  "each"
+                                                                           }
+                                                           },
+                                            "type":  "n8n-nodes-base.executeWorkflow",
+                                            "typeVersion":  1.3,
+                                            "position":  [
+                                                             544,
+                                                             128
+                                                         ],
+                                            "id":  "da1240f0-f28d-4e54-acf7-dd68beaea6ca",
+                                            "name":  "Execute Workflow"
+                                        },
+                                        {
+                                            "parameters":  {
+                                                               "operation":  "executeQuery",
+                                                               "query":  "SELECT DISTINCT\n  p_orig.telegram_id,\n  p_orig.language AS panelist_language\nFROM v_allocation_details_with_availability v\nJOIN panelists p_orig ON p_orig.node_id = v.origin_node_id\nWHERE v.fecha_programada \u003c CURRENT_DATE\n  AND v.status = \u0027notified\u0027\n  AND p_orig.telegram_id IS NOT NULL\n  AND p_orig.telegram_id != \u0027\u0027\nORDER BY p_orig.telegram_id",
+                                                               "options":  {
+
+                                                                           }
+                                                           },
+                                            "type":  "n8n-nodes-base.postgres",
+                                            "typeVersion":  2.6,
+                                            "position":  [
+                                                             224,
+                                                             256
+                                                         ],
+                                            "id":  "4bf9c246-8a31-463b-8499-abbf2faf07dc",
+                                            "name":  "Get pending parcels FOR REMINDER after 1 day",
+                                            "credentials":  {
+                                                                "postgres":  {
+                                                                                 "id":  "735a8hxfuUEDPIYD",
+                                                                                 "name":  "OneMS dev - Postgres account"
+                                                                             }
+                                                            }
+                                        },
+                                        {
+                                            "id":  "sticky-main",
+                                            "name":  "Sticky Note - Main",
+                                            "type":  "n8n-nodes-base.stickyNote",
+                                            "typeVersion":  1,
+                                            "position":  [
+                                                             -280,
+                                                             -60
+                                                         ],
+                                            "parameters":  {
+                                                               "content":  "## ?? Daily Parcel Notifications\n\n**Trigger:** Runs every morning at 8:00 AM\n\n**What it does:**\n1. Queries `v_allocation_details_with_availability` for panelists with parcels where `status = pending` and `fecha_programada = TODAY`\n2. Returns one row per distinct panelist (telegram_id + language)\n3. Calls **Parcels to send** workflow once per panelist\n\n**Parcels to send** workflow handles:\n- Fetches full parcel details for the panelist\n- Sends Telegram message with parcel list\n- Updates status ? `notified`\n- Saves conversation memory",
+                                                               "height":  320,
+                                                               "width":  380,
+                                                               "color":  3
+                                                           }
+                                        },
+                                        {
+                                            "id":  "sticky-reminder",
+                                            "name":  "Sticky Note - Reminder",
+                                            "type":  "n8n-nodes-base.stickyNote",
+                                            "typeVersion":  1,
+                                            "position":  [
+                                                             -280,
+                                                             336
+                                                         ],
+                                            "parameters":  {
+                                                               "content":  "## ?? Daily Reminder for Overdue Parcels\n\n**Trigger:** Runs every morning at 8:00 AM\n\n**What it does:**\n1. Queries panelists with parcels where `status = notified` and `fecha_programada \u003c TODAY`\n2. These are parcels that were notified but NOT yet sent by the panelist\n3. Calls **Parcels to send** workflow once per panelist as a reminder\n\n**Note:** Same workflow handles both first notifications and reminders.",
+                                                               "height":  260,
+                                                               "width":  380,
+                                                               "color":  5
+                                                           }
+                                        },
+                                        {
+                                            "id":  "sticky-exec",
+                                            "name":  "Sticky Note - Execute",
+                                            "type":  "n8n-nodes-base.stickyNote",
+                                            "typeVersion":  1,
+                                            "position":  [
+                                                             524,
+                                                             -52
+                                                         ],
+                                            "parameters":  {
+                                                               "content":  "## ? Execute Workflow\n\nCalls **Parcels to send** (`Tm2yrywGUDq0PEj3`) once per panelist.\n\n**Inputs passed:**\n- `telegram_id` - panelist\u0027s Telegram ID\n- `panelist_language` - for message localization (es/en/fr/ar)\n\n**Mode:** Run once for each item\n(one execution per panelist)",
+                                                               "height":  200,
+                                                               "width":  300,
+                                                               "color":  7
+                                                           }
+                                        },
+                                        {
+                                            "id":  "send-list-auto-001",
+                                            "name":  "Send parcel list",
+                                            "type":  "n8n-nodes-base.telegram",
+                                            "typeVersion":  1.2,
+                                            "position":  [
+                                                             768,
+                                                             128
+                                                         ],
+                                            "parameters":  {
+                                                               "chatId":  "={{ $json.telegram_id }}",
+                                                               "text":  "={{ (() =\u003e {const lang = $json.panelist_language || \"en\";const parcels = JSON.parse($json.response);const pin      = String.fromCodePoint(0x1F4CD);const truck    = String.fromCodePoint(0x1F69A);const box      = String.fromCodePoint(0x1F4E6);const toolbox  = String.fromCodePoint(0x1F9F0);const cal      = String.fromCodePoint(0x1F4C5);const dash     = \"-\";const headers  = { en: box + \" *Parcels to send*\", es: box + \" *Paquetes a enviar*\", fr: box + \" *Colis � envoyer*\", ar: box + \" *?????? ???????*\" };const footers  = { en: \"Reply with the number to select a parcel and declare the shipment.\", es: \"Responde con el n�mero para seleccionar un paquete y declarar el env�o.\", fr: \"R�pondez avec le num�ro pour s�lectionner un colis.\", ar: \"?? ?????? ??????? ???.\" };let msg = (headers[lang] || headers[\"en\"]) + \"\\n\\n\";parcels.forEach((p, i) =\u003e {const parts = [p.address_line1, p.address_line2, (p.postal_code \u0026\u0026 p.destination_city) ? (p.postal_code + \" \" + p.destination_city) : (p.destination_city || p.postal_code), p.destination_country].filter(x =\u003e x \u0026\u0026 x.trim() !== \"\");const address = parts.join(\", \");const mats = Array.isArray(p.materials) ? p.materials : [];const matsText = mats.length \u003e 0 ? mats.map(m =\u003e \" . \" + m.material_name + \" \" + dash + \" \" + m.quantity + \" \" + (m.unit_measure || \"units\")).join(\"\\n\") : \" -\";msg += \"[\" + (i+1) + \"]. To: *\" + p.destination_panelist_name + \"*\\n\";msg += pin + \" \" + address + \"\\n\";msg += truck + \" Carrier: \" + p.carrier_name + \"\\n\";msg += box + \" Product: \" + p.product_description + \"\\n\";msg += toolbox + \" Materials needed:\\n\" + matsText + \"\\n\";msg += cal + \" Scheduled: \" + p.scheduled_date + \"\\n\\n\";});msg += footers[lang] || footers[\"en\"];return msg;})() }}",
+                                                               "additionalFields":  {
+                                                                                        "appendAttribution":  false,
+                                                                                        "parse_mode":  "Markdown"
+                                                                                    }
+                                                           },
+                                            "credentials":  {
+                                                                "telegramApi":  {
+                                                                                    "id":  "rp79mLnvGH8hxiaL",
+                                                                                    "name":  "One For Panelist Telegram account"
+                                                                                }
+                                                            },
+                                            "webhookId":  "14933645-d93b-49eb-b3cb-a43d07afd7a6"
+                                        }
+                                    ],
+                          "connections":  {
+                                              "Execute Workflow":  {
+                                                                       "main":  [
+                                                                                    [
+                                                                                        {
+                                                                                            "node":  "Send parcel list",
+                                                                                            "type":  "main",
+                                                                                            "index":  0
+                                                                                        }
+                                                                                    ]
+                                                                                ]
+                                                                   },
+                                              "Get pending parcels to send":  {
+                                                                                  "main":  [
+                                                                                               [
+                                                                                                   {
+                                                                                                       "node":  "Execute Workflow",
+                                                                                                       "type":  "main",
+                                                                                                       "index":  0
+                                                                                                   }
+                                                                                               ]
+                                                                                           ]
+                                                                              },
+                                              "Schedule Trigger":  {
+                                                                       "main":  [
+                                                                                    [
+                                                                                        {
+                                                                                            "node":  "Get pending parcels to send",
+                                                                                            "type":  "main",
+                                                                                            "index":  0
+                                                                                        }
+                                                                                    ]
+                                                                                ]
+                                                                   },
+                                              "Schedule Trigger1":  {
+                                                                        "main":  [
+                                                                                     [
+                                                                                         {
+                                                                                             "node":  "Get pending parcels FOR REMINDER after 1 day",
+                                                                                             "type":  "main",
+                                                                                             "index":  0
+                                                                                         }
+                                                                                     ]
+                                                                                 ]
+                                                                    },
+                                              "Get pending parcels FOR REMINDER after 1 day":  {
+                                                                                                   "main":  [
+                                                                                                                [
+                                                                                                                    {
+                                                                                                                        "node":  "Execute Workflow",
+                                                                                                                        "type":  "main",
+                                                                                                                        "index":  0
+                                                                                                                    }
+                                                                                                                ]
+                                                                                                            ]
+                                                                                               }
+                                          },
+                          "authors":  "Ignacio Fernandez",
+                          "name":  null,
+                          "description":  null,
+                          "autosaved":  false,
+                          "workflowPublishHistory":  [
+                                                         {
+                                                             "createdAt":  "2026-04-28T15:21:26.764Z",
+                                                             "id":  697,
+                                                             "workflowId":  "p8497yoHcX1Z3cfH_9j5S",
+                                                             "versionId":  "98a307f6-427b-4133-af23-f28119fc37ec",
+                                                             "event":  "activated",
+                                                             "userId":  "310002b0-8d54-456b-8f9f-7611a34898fd"
+                                                         },
+                                                         {
+                                                             "createdAt":  "2026-04-28T15:21:26.687Z",
+                                                             "id":  696,
+                                                             "workflowId":  "p8497yoHcX1Z3cfH_9j5S",
+                                                             "versionId":  "98a307f6-427b-4133-af23-f28119fc37ec",
+                                                             "event":  "deactivated",
+                                                             "userId":  "310002b0-8d54-456b-8f9f-7611a34898fd"
+                                                         }
+                                                     ]
+                      }
+}
