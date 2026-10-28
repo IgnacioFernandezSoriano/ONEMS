@@ -23,6 +23,13 @@ export default function NodeLoadBalancing() {
   const [showFilters, setShowFilters] = useState(true);
   const [referenceLoad, setReferenceLoad] = useState(6); // Default reference samples per node
   const [deviationPercent, setDeviationPercent] = useState(20); // Default 20% deviation
+  // Fence: de hoy a esta fecha (incluida) el balanceo no toca nada. Por defecto, el domingo de la semana actual.
+  const endOfCurrentWeek = () => {
+    const d = new Date();
+    d.setDate(d.getDate() + (7 - (d.getDay() || 7)));
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  };
+  const [fenceUntil, setFenceUntil] = useState(endOfCurrentWeek);
 
   // Las fechas que se escriben (startDate/endDate) y las que se consultan (applied) van separadas: mientras se
   // teclea un <input type="date"> salen valores intermedios (anyo 0002, inicio > fin...) y cada uno lanzaba una
@@ -43,7 +50,8 @@ export default function NodeLoadBalancing() {
   const datesPending = isUsablePeriod(startDate, endDate) && (startDate !== applied.start || endDate !== applied.end);
 
   const { loadData, dayData, citySummaries, loading, error, refetch, previewBalanceV2, applyBalanceV2, previewAll, applyAll } =
-    useNodeLoadBalancing(profile?.account_id || undefined, applied.start, applied.end, referenceLoad, deviationPercent);
+    useNodeLoadBalancing(profile?.account_id || undefined, applied.start, applied.end, referenceLoad, deviationPercent,
+      fenceUntil);
 
   const { summary: deferredSummary } = useDeferredSamples();
   const deferredByCity = useMemo(
@@ -333,6 +341,7 @@ export default function NodeLoadBalancing() {
     setSelectedYear(new Date().getFullYear());
     setReferenceLoad(63);
     setDeviationPercent(20);
+    setFenceUntil(endOfCurrentWeek());
   };
 
   // Month names for buttons
@@ -470,6 +479,8 @@ export default function NodeLoadBalancing() {
         disabled={!applied.start || !applied.end || datesPending || applying}
         locked={applying}
         balanceAllHint={t('lb2.balance_all_need_dates')}
+        fenceUntil={fenceUntil}
+        onChangeFence={setFenceUntil}
       />
 
       {/* Filters */}

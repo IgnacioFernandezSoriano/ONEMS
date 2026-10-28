@@ -98,6 +98,8 @@ export interface BalanceDeferred {
   removed: number;
   reassigned_dest: number;
   reintroduced: number;
+  /** De las reintroducidas, cuantas ocupan el hueco de una muestra POBOX (la convierten, sin envio extra) */
+  replaced_pobox?: number;
   waiting: number;
   blocked?: number;
   by_reason?: { origin_no_panelist?: number; dest_no_panelist?: number; no_valid_day?: number };
@@ -134,6 +136,8 @@ export interface BalanceResult {
   policy?: BalancePolicyInfo;
   pobox?: BalancePobox;
   deferred?: BalanceDeferred;
+  /** Ultimo dia congelado (yyyy-MM-dd): de hoy a esta fecha el balanceo no toca nada. null = sin fence */
+  fence_until?: string | null;
   message: string;
   error?: string | null;
 }
@@ -143,7 +147,9 @@ export const useNodeLoadBalancing = (
   startDate: string, 
   endDate: string,
   referenceLoad: number = 6,
-  deviationPercent: number = 20
+  deviationPercent: number = 20,
+  /** Fence (yyyy-MM-dd): de hoy a esta fecha el balanceo no toca nada. Vacio = sin fence */
+  fenceUntil: string = ''
 ) => {
   const effectiveAccountId = useEffectiveAccountId()
   // Use effectiveAccountId if available, otherwise fall back to passed accountId
@@ -315,6 +321,7 @@ export const useNodeLoadBalancing = (
         p_start_date: startDate,
         p_end_date: endDate,
         p_apply_changes: apply,
+        p_fence_until: fenceUntil || null,
       });
       if (rpcError) throw rpcError;
       return data as BalanceResult;

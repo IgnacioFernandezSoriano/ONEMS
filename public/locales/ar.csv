@@ -3151,3 +3151,7 @@ lb2.warning.deferred_removed,عينات أزيلت من الخطة وسجلت ك
 lb2.warning.deferred_blocked,عينات مطلوب تعويضها لا يمكن نقلها لأنها مجمدة.
 lb2.rec.deferred_waiting,توجد {count} عينة مطلوب تعويضها في انتظار الإدراج في هذه المدينة. ستعيد الموازنة إدراجها عند توفر يوم صالح.
 lb2.rec.deferred_will_remove,ستستبعد المعاينة الأخيرة {count} عينة من هذه الخطة وتسجلها كعينات مطلوب تعويضها. راجع المعاينة قبل التطبيق.
+node_load_balancing.fence_until,التجميد حتى
+node_load_balancing.fence_until_hint,من اليوم حتى هذا التاريخ لا يقوم الموازنة بنقل أو حذف أو إنشاء أي عينة.
+lb2.deferred.replaced_pobox,{count} منها تحل محل عينات POBOX (نفس اليوم والعقدة، دون شحنة إضافية).
+lb2.fence_note,التجميد: تبقى العينات حتى {date} كما هي؛ تبدأ الموازنة في اليوم التالي.

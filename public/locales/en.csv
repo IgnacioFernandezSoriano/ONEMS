@@ -3159,3 +3159,7 @@ lb2.warning.deferred_removed,Samples removed from the plan and recorded as sampl
 lb2.warning.deferred_blocked,Samples to compensate that cannot be moved because they are frozen.
 lb2.rec.deferred_waiting,{count} samples to compensate are waiting in this city. Balancing will reintroduce them when a valid day is available.
 lb2.rec.deferred_will_remove,The last preview would set aside {count} samples of this plan and record them as samples to compensate. Review the preview before applying.
+node_load_balancing.fence_until,Fence until
+node_load_balancing.fence_until_hint,"From today to this date nothing is moved, removed or created when balancing."
+lb2.deferred.replaced_pobox,"{count} of them replace POBOX samples (same day and node, no extra shipment)."
+lb2.fence_note,Fence: samples up to {date} are kept as they are; balancing starts the next day.
