@@ -41,3 +41,6 @@ graphify-out/
 .claude/settings.local.json
 .claude/scheduled_tasks.lock
 .obsidian/
+
+# Videos de formacion (se publican en Supabase Storage, no en git)
+Videos/

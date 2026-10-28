@@ -1,0 +1,1129 @@
+﻿{
+    "updatedAt":  "2026-04-28T13:53:26.304Z",
+    "createdAt":  "2026-03-04T12:25:26.109Z",
+    "id":  "Tm2yrywGUDq0PEj3",
+    "name":  "Parcels to send",
+    "description":  null,
+    "active":  true,
+    "isArchived":  false,
+    "nodes":  [
+                  {
+                      "parameters":  {
+                                         "operation":  "getAll",
+                                         "tableId":  "panelists",
+                                         "limit":  1,
+                                         "filters":  {
+                                                         "conditions":  [
+                                                                            {
+                                                                                "keyName":  "telegram_id",
+                                                                                "condition":  "eq",
+                                                                                "keyValue":  "={{ $(\u0027When Executed by Another Workflow\u0027).first().json.telegram_id }}"
+                                                                            }
+                                                                        ]
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.supabase",
+                      "typeVersion":  1,
+                      "position":  [
+                                       -736,
+                                       192
+                                   ],
+                      "id":  "00fd54c7-cf8c-4c24-b4b7-3348d4c3e79a",
+                      "name":  "Get panelist from telegram id",
+                      "credentials":  {
+                                          "supabaseApi":  {
+                                                              "id":  "x5N8V225SfTxBA7Q",
+                                                              "name":  "Onems dev - Supabase account"
+                                                          }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "workflowInputs":  {
+                                                                "values":  [
+                                                                               {
+                                                                                   "name":  "telegram_id"
+                                                                               },
+                                                                               {
+                                                                                   "name":  "panelist_language",
+                                                                                   "type":  "string"
+                                                                               }
+                                                                           ]
+                                                            }
+                                     },
+                      "type":  "n8n-nodes-base.executeWorkflowTrigger",
+                      "typeVersion":  1.1,
+                      "position":  [
+                                       -1168,
+                                       192
+                                   ],
+                      "id":  "319d0b7b-27cc-4604-b279-20268484eddc",
+                      "name":  "When Executed by Another Workflow"
+                  },
+                  {
+                      "parameters":  {
+                                         "aggregate":  "aggregateAllItemData",
+                                         "destinationFieldName":  "response",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.aggregate",
+                      "typeVersion":  1,
+                      "position":  [
+                                       160,
+                                       96
+                                   ],
+                      "id":  "983ec17b-8344-4210-821c-dc8edcb73d9e",
+                      "name":  "Aggregate"
+                  },
+                  {
+                      "parameters":  {
+                                         "operation":  "executeQuery",
+                                         "query":  "SELECT \n  v.id AS parcel_id,\n  v.status,\n  v.fecha_programada::text AS fecha_programada,\n  v.week_number,\n  v.plan_id,\n  v.tag_id,\n  v.idtag,\n  v.origin_panelist_name,\n  v.destination_panelist_name,\n  v.origin_city_name,\n  v.destination_city_name,\n  c.name AS carrier_name,\n  pr.description AS product_description,\n  p_dest.address_line1 AS destination_address_line1,\n  p_dest.address_line2 AS destination_address_line2,\n  p_dest.postal_code AS destination_postal_code,\n  p_dest.address_city AS destination_city,\n  p_dest.address_country AS destination_country,\n  json_agg(\n    json_build_object(\n      \u0027material_name\u0027, mc.name,\n      \u0027material_code\u0027, mc.code,\n      \u0027unit_measure\u0027, mc.unit_measure,\n      \u0027quantity\u0027, pm.quantity\n    ) ORDER BY mc.name\n  ) FILTER (WHERE mc.id IS NOT NULL) AS materials\nFROM v_allocation_details_with_availability v\nLEFT JOIN allocation_plans ap ON ap.id = v.plan_id\nLEFT JOIN carriers c ON c.id = ap.carrier_id\nLEFT JOIN products pr ON pr.id = ap.product_id\nLEFT JOIN panelists p_dest ON p_dest.node_id = v.destination_node_id\nLEFT JOIN product_materials pm ON pm.product_id = ap.product_id\nLEFT JOIN material_catalog mc ON mc.id = pm.material_id\nWHERE v.origin_node_id = \u0027{{ $json.node_id }}\u0027\n  AND v.fecha_programada \u003c= (DATE_TRUNC(\u0027week\u0027, CURRENT_DATE) + INTERVAL \u00276 days\u0027)\n  AND v.status IN (\u0027pending\u0027, \u0027notified\u0027)\nGROUP BY \n  v.id, v.status, v.fecha_programada, v.week_number, v.plan_id,\n  v.tag_id, v.idtag, v.origin_panelist_name, v.destination_panelist_name,\n  v.origin_city_name, v.destination_city_name,\n  c.name, pr.description,\n  p_dest.address_line1, p_dest.address_line2, p_dest.postal_code,\n  p_dest.address_city, p_dest.address_country\nORDER BY v.fecha_programada ASC\nLIMIT 10",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.postgres",
+                      "typeVersion":  2.6,
+                      "position":  [
+                                       -512,
+                                       192
+                                   ],
+                      "id":  "bb6975db-e7ef-4631-a235-b62fc80bed0f",
+                      "name":  "Execute a SQL query",
+                      "alwaysOutputData":  true,
+                      "credentials":  {
+                                          "postgres":  {
+                                                           "id":  "735a8hxfuUEDPIYD",
+                                                           "name":  "OneMS dev - Postgres account"
+                                                       }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "conditions":  {
+                                                            "options":  {
+                                                                            "caseSensitive":  true,
+                                                                            "leftValue":  "",
+                                                                            "typeValidation":  "strict",
+                                                                            "version":  3
+                                                                        },
+                                                            "conditions":  [
+                                                                               {
+                                                                                   "id":  "44b9410e-87b9-4299-b112-6d5932166e6c",
+                                                                                   "leftValue":  "={{ $json }}",
+                                                                                   "rightValue":  "",
+                                                                                   "operator":  {
+                                                                                                    "type":  "object",
+                                                                                                    "operation":  "notEmpty",
+                                                                                                    "singleValue":  true
+                                                                                                }
+                                                                               }
+                                                                           ],
+                                                            "combinator":  "and"
+                                                        },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.if",
+                      "typeVersion":  2.3,
+                      "position":  [
+                                       -288,
+                                       192
+                                   ],
+                      "id":  "87276b30-c51c-4f73-ac64-64ed21c313f0",
+                      "name":  "If"
+                  },
+                  {
+                      "parameters":  {
+                                         "content":  "## General\nThis workflow is called by the AI Agent in order to get the user parcel\u0027s to send.\nThe last node (Aggregate) is sent back to the user as the response",
+                                         "height":  400,
+                                         "width":  400,
+                                         "color":  7
+                                     },
+                      "type":  "n8n-nodes-base.stickyNote",
+                      "typeVersion":  1,
+                      "position":  [
+                                       -1680,
+                                       -96
+                                   ],
+                      "id":  "44e15c3b-9042-44ef-b816-7234342a9b63",
+                      "name":  "Sticky Note"
+                  },
+                  {
+                      "parameters":  {
+                                         "assignments":  {
+                                                             "assignments":  [
+                                                                                 {
+                                                                                     "id":  "0bdcacef-2086-423b-9344-2fb51c43cd75",
+                                                                                     "name":  "Response",
+                                                                                     "value":  "You have no parcel to send",
+                                                                                     "type":  "string"
+                                                                                 }
+                                                                             ]
+                                                         },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.set",
+                      "typeVersion":  3.4,
+                      "position":  [
+                                       -64,
+                                       288
+                                   ],
+                      "id":  "458019b2-2739-48ee-b6f6-dc06435959ad",
+                      "name":  "Send error response"
+                  },
+                  {
+                      "parameters":  {
+                                         "assignments":  {
+                                                             "assignments":  [
+                                                                                 {
+                                                                                     "id":  "72d5e802-ffff-4946-9619-a228b596e5de",
+                                                                                     "name":  "scheduled_date",
+                                                                                     "value":  "={{ $json.fecha_programada || \u0027\u0027 }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "d3940408-257d-4318-97df-713e6c692084",
+                                                                                     "name":  "address_line1",
+                                                                                     "value":  "={{ $json.destination_address_line1 }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "b0270d0c-df49-406f-b94f-67179e50cfca",
+                                                                                     "name":  "address_line2",
+                                                                                     "value":  "={{ $json.destination_address_line2 }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "c1234567-1234-1234-1234-123456789012",
+                                                                                     "name":  "postal_code",
+                                                                                     "value":  "={{ $json.destination_postal_code }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "c2345678-2345-2345-2345-234567890123",
+                                                                                     "name":  "destination_city",
+                                                                                     "value":  "={{ $json.destination_city }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "c3456789-3456-3456-3456-345678901234",
+                                                                                     "name":  "destination_country",
+                                                                                     "value":  "={{ $json.destination_country }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "c4567890-4567-4567-4567-456789012345",
+                                                                                     "name":  "destination_panelist_name",
+                                                                                     "value":  "={{ $json.destination_panelist_name }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "c5678901-5678-5678-5678-567890123456",
+                                                                                     "name":  "plan_id",
+                                                                                     "value":  "={{ $json.plan_id }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "c6789012-6789-6789-6789-678901234567",
+                                                                                     "name":  "parcel_id",
+                                                                                     "value":  "={{ $json.parcel_id }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "c7890123-7890-7890-7890-789012345678",
+                                                                                     "name":  "status",
+                                                                                     "value":  "={{ $json.status }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "c8901234-8901-8901-8901-890123456789",
+                                                                                     "name":  "origin_city",
+                                                                                     "value":  "={{ $json.origin_city_name }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "c9012345-9012-9012-9012-901234567890",
+                                                                                     "name":  "origin_panelist_name",
+                                                                                     "value":  "={{ $json.origin_panelist_name }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "ca123456-a123-a123-a123-a12345678901",
+                                                                                     "name":  "carrier_name",
+                                                                                     "value":  "={{ $json.carrier_name }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "cb234567-b234-b234-b234-b23456789012",
+                                                                                     "name":  "product_description",
+                                                                                     "value":  "={{ $json.product_description }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "cc345678-c345-c345-c345-c34567890123",
+                                                                                     "name":  "materials",
+                                                                                     "value":  "={{ $json.materials }}",
+                                                                                     "type":  "array"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "cd456789-d456-d456-d456-d45678901234",
+                                                                                     "name":  "tag_id",
+                                                                                     "value":  "={{ $json.tag_id }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "ce567890-e567-e567-e567-e56789012345",
+                                                                                     "name":  "idtag",
+                                                                                     "value":  "={{ $json.idtag }}",
+                                                                                     "type":  "string"
+                                                                                 }
+                                                                             ]
+                                                         },
+                                         "options":  {
+                                                         "ignoreConversionErrors":  true
+                                                     }
+                                     },
+                      "id":  "37a7e664-8429-4d61-9e7c-f9ceb24a378e",
+                      "name":  "Destination Details1",
+                      "type":  "n8n-nodes-base.set",
+                      "typeVersion":  3.4,
+                      "position":  [
+                                       -64,
+                                       96
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "operation":  "executeQuery",
+                                         "query":  "-- Delete any existing pending_list context for this user\nDELETE FROM public.panelist_context \nWHERE telegram_id = \u0027{{ $(\"When Executed by Another Workflow\").first().json.telegram_id }}\u0027\n  AND context_type = \u0027pending_list\u0027;\n-- Insert new pending_list context with the parcels array\nINSERT INTO public.panelist_context (telegram_id, context_type, context_data)\nVALUES (\n    \u0027{{ $(\"When Executed by Another Workflow\").first().json.telegram_id }}\u0027,\n    \u0027pending_list\u0027,\n    \u0027{{ JSON.stringify($(\"Aggregate\").first().json.response) }}\u0027::jsonb\n);\nSELECT \u0027{{ $(\"When Executed by Another Workflow\").first().json.telegram_id }}\u0027 AS telegram_id,\n       \u0027{{ JSON.stringify($(\"Aggregate\").first().json.response) }}\u0027 AS parcels_list;",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "save-list-ctx-001",
+                      "name":  "Save pending list context",
+                      "type":  "n8n-nodes-base.postgres",
+                      "typeVersion":  2.5,
+                      "position":  [
+                                       1616,
+                                       304
+                                   ],
+                      "credentials":  {
+                                          "postgres":  {
+                                                           "id":  "735a8hxfuUEDPIYD",
+                                                           "name":  "OneMS dev - Postgres account"
+                                                       }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "assignments":  {
+                                                             "assignments":  [
+                                                                                 {
+                                                                                     "id":  "ret-response",
+                                                                                     "name":  "response",
+                                                                                     "value":  "={{ $json.Response !== undefined ? $json.Response : $(\u0027Aggregate\u0027).first().json.response }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "ret-telegram-id",
+                                                                                     "name":  "telegram_id",
+                                                                                     "value":  "={{ $(\u0027When Executed by Another Workflow\u0027).first().json.telegram_id }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "ret-lang",
+                                                                                     "name":  "panelist_language",
+                                                                                     "value":  "={{ $(\u0027When Executed by Another Workflow\u0027).first().json.panelist_language }}",
+                                                                                     "type":  "string"
+                                                                                 }
+                                                                             ]
+                                                         },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "restore-data-pts-001",
+                      "name":  "Return parcel list",
+                      "type":  "n8n-nodes-base.set",
+                      "typeVersion":  3.4,
+                      "position":  [
+                                       1840,
+                                       304
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "operation":  "executeQuery",
+                                         "query":  "UPDATE public.allocation_plan_details apd\nSET \n  status = \u0027notified\u0027,\n  origin_panelist_name = p_orig.name,\n  destination_panelist_name = p_dest.name\nFROM panelists p_orig, panelists p_dest\nWHERE apd.origin_node_id = \u0027{{ $(\u0027Get panelist from telegram id\u0027).first().json.node_id }}\u0027\n  AND apd.status = \u0027pending\u0027\n  AND apd.fecha_programada \u003c= (DATE_TRUNC(\u0027week\u0027, CURRENT_DATE) + INTERVAL \u00276 days\u0027)\n  AND p_orig.node_id = apd.origin_node_id\n  AND p_dest.node_id = apd.destination_node_id;\nSELECT \u0027{{ $(\"When Executed by Another Workflow\").first().json.telegram_id }}\u0027 AS telegram_id;",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "mark-notified-001",
+                      "name":  "Mark as notified",
+                      "type":  "n8n-nodes-base.postgres",
+                      "typeVersion":  2.5,
+                      "position":  [
+                                       384,
+                                       96
+                                   ],
+                      "credentials":  {
+                                          "postgres":  {
+                                                           "id":  "735a8hxfuUEDPIYD",
+                                                           "name":  "OneMS dev - Postgres account"
+                                                       }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "resource":  "message",
+                                         "operation":  "sendMessage",
+                                         "chatId":  "={{ $(\"When Executed by Another Workflow\").first().json.telegram_id }}",
+                                         "text":  "={{ $(\u0027When Executed by Another Workflow\u0027).first().json.panelist_language === \u0027es\u0027 ? \u0027? Obteniendo informaci?n. Esto puede tardar hasta 1 minuto.\u0027 : $(\u0027When Executed by Another Workflow\u0027).first().json.panelist_language === \u0027fr\u0027 ? \u0027? Collecte des informations. Cela peut prendre jusqu a 1 minute.\u0027 : $(\u0027When Executed by Another Workflow\u0027).first().json.panelist_language === \u0027ar\u0027 ? \u0027? ???? ??? ?????????. ?? ?????? ??? ????? ?????.\u0027 : \u0027? Gathering information. This may take up to 1 minute.\u0027 }}",
+                                         "additionalFields":  {
+
+                                                              }
+                                     },
+                      "type":  "n8n-nodes-base.telegram",
+                      "typeVersion":  1.2,
+                      "position":  [
+                                       -960,
+                                       192
+                                   ],
+                      "id":  "635e3f9b-bb98-4d03-8095-35aace23f92b",
+                      "name":  "Send Messege Garthering Information",
+                      "webhookId":  "d754d10b-2eb2-4cd8-a1a6-53c4eb3b8d38",
+                      "credentials":  {
+                                          "telegramApi":  {
+                                                              "id":  "rp79mLnvGH8hxiaL",
+                                                              "name":  "One For Panelist Telegram account"
+                                                          }
+                                      }
+                  }
+              ],
+    "connections":  {
+                        "When Executed by Another Workflow":  {
+                                                                  "main":  [
+                                                                               [
+                                                                                   {
+                                                                                       "node":  "Send Messege Garthering Information",
+                                                                                       "type":  "main",
+                                                                                       "index":  0
+                                                                                   }
+                                                                               ]
+                                                                           ]
+                                                              },
+                        "Get panelist from telegram id":  {
+                                                              "main":  [
+                                                                           [
+                                                                               {
+                                                                                   "node":  "Execute a SQL query",
+                                                                                   "type":  "main",
+                                                                                   "index":  0
+                                                                               }
+                                                                           ]
+                                                                       ]
+                                                          },
+                        "Execute a SQL query":  {
+                                                    "main":  [
+                                                                 [
+                                                                     {
+                                                                         "node":  "If",
+                                                                         "type":  "main",
+                                                                         "index":  0
+                                                                     }
+                                                                 ]
+                                                             ]
+                                                },
+                        "If":  {
+                                   "main":  [
+                                                [
+                                                    {
+                                                        "node":  "Destination Details1",
+                                                        "type":  "main",
+                                                        "index":  0
+                                                    }
+                                                ],
+                                                [
+                                                    {
+                                                        "node":  "Send error response",
+                                                        "type":  "main",
+                                                        "index":  0
+                                                    }
+                                                ]
+                                            ]
+                               },
+                        "Destination Details1":  {
+                                                     "main":  [
+                                                                  [
+                                                                      {
+                                                                          "node":  "Aggregate",
+                                                                          "type":  "main",
+                                                                          "index":  0
+                                                                      }
+                                                                  ]
+                                                              ]
+                                                 },
+                        "Aggregate":  {
+                                          "main":  [
+                                                       [
+                                                           {
+                                                               "node":  "Mark as notified",
+                                                               "type":  "main",
+                                                               "index":  0
+                                                           }
+                                                       ]
+                                                   ]
+                                      },
+                        "Save pending list context":  {
+                                                          "main":  [
+                                                                       [
+                                                                           {
+                                                                               "node":  "Return parcel list",
+                                                                               "type":  "main",
+                                                                               "index":  0
+                                                                           }
+                                                                       ]
+                                                                   ]
+                                                      },
+                        "Mark as notified":  {
+                                                 "main":  [
+                                                              [
+                                                                  {
+                                                                      "node":  "Save pending list context",
+                                                                      "type":  "main",
+                                                                      "index":  0
+                                                                  }
+                                                              ]
+                                                          ]
+                                             },
+                        "Send error response":  {
+                                                    "main":  [
+                                                                 [
+                                                                     {
+                                                                         "node":  "Return parcel list",
+                                                                         "type":  "main",
+                                                                         "index":  0
+                                                                     }
+                                                                 ]
+                                                             ]
+                                                },
+                        "Send Messege Garthering Information":  {
+                                                                    "main":  [
+                                                                                 [
+                                                                                     {
+                                                                                         "node":  "Get panelist from telegram id",
+                                                                                         "type":  "main",
+                                                                                         "index":  0
+                                                                                     }
+                                                                                 ]
+                                                                             ]
+                                                                }
+                    },
+    "settings":  {
+                     "executionOrder":  "v1",
+                     "availableInMCP":  false,
+                     "errorWorkflow":  "GL0zZodVtQDuVHO2gu_qJ",
+                     "callerPolicy":  "workflowsFromSameOwner",
+                     "binaryMode":  "separate"
+                 },
+    "staticData":  null,
+    "meta":  {
+                 "templateCredsSetupCompleted":  true
+             },
+    "pinData":  {
+
+                },
+    "versionId":  "6c9e606e-5c56-4921-aadf-0cabcd1a7edb",
+    "activeVersionId":  "6c9e606e-5c56-4921-aadf-0cabcd1a7edb",
+    "versionCounter":  156,
+    "triggerCount":  0,
+    "shared":  [
+                   {
+                       "updatedAt":  "2026-03-04T12:25:27.928Z",
+                       "createdAt":  "2026-03-04T12:25:27.928Z",
+                       "role":  "workflow:owner",
+                       "workflowId":  "Tm2yrywGUDq0PEj3",
+                       "projectId":  "3p4DsIlSNKeYlFOh",
+                       "project":  {
+                                       "updatedAt":  "2026-02-11T11:37:10.000Z",
+                                       "createdAt":  "2026-02-10T14:57:36.407Z",
+                                       "id":  "3p4DsIlSNKeYlFOh",
+                                       "name":  "One Panelist",
+                                       "type":  "team",
+                                       "icon":  {
+                                                    "type":  "icon",
+                                                    "value":  "mail"
+                                                },
+                                       "description":  "",
+                                       "creatorId":  "310002b0-8d54-456b-8f9f-7611a34898fd"
+                                   }
+                   }
+               ],
+    "tags":  [
+                 {
+                     "updatedAt":  "2026-03-04T13:56:20.140Z",
+                     "createdAt":  "2026-03-04T13:56:20.140Z",
+                     "id":  "M3msxXpviN0m1Sze",
+                     "name":  "PROD"
+                 }
+             ],
+    "activeVersion":  {
+                          "updatedAt":  "2026-04-28T13:53:26.305Z",
+                          "createdAt":  "2026-04-28T13:53:26.305Z",
+                          "versionId":  "6c9e606e-5c56-4921-aadf-0cabcd1a7edb",
+                          "workflowId":  "Tm2yrywGUDq0PEj3",
+                          "nodes":  [
+                                        {
+                                            "parameters":  {
+                                                               "operation":  "getAll",
+                                                               "tableId":  "panelists",
+                                                               "limit":  1,
+                                                               "filters":  {
+                                                                               "conditions":  [
+                                                                                                  {
+                                                                                                      "keyName":  "telegram_id",
+                                                                                                      "condition":  "eq",
+                                                                                                      "keyValue":  "={{ $(\u0027When Executed by Another Workflow\u0027).first().json.telegram_id }}"
+                                                                                                  }
+                                                                                              ]
+                                                                           }
+                                                           },
+                                            "type":  "n8n-nodes-base.supabase",
+                                            "typeVersion":  1,
+                                            "position":  [
+                                                             -736,
+                                                             192
+                                                         ],
+                                            "id":  "00fd54c7-cf8c-4c24-b4b7-3348d4c3e79a",
+                                            "name":  "Get panelist from telegram id",
+                                            "credentials":  {
+                                                                "supabaseApi":  {
+                                                                                    "id":  "x5N8V225SfTxBA7Q",
+                                                                                    "name":  "Onems dev - Supabase account"
+                                                                                }
+                                                            }
+                                        },
+                                        {
+                                            "parameters":  {
+                                                               "workflowInputs":  {
+                                                                                      "values":  [
+                                                                                                     {
+                                                                                                         "name":  "telegram_id"
+                                                                                                     },
+                                                                                                     {
+                                                                                                         "name":  "panelist_language",
+                                                                                                         "type":  "string"
+                                                                                                     }
+                                                                                                 ]
+                                                                                  }
+                                                           },
+                                            "type":  "n8n-nodes-base.executeWorkflowTrigger",
+                                            "typeVersion":  1.1,
+                                            "position":  [
+                                                             -1168,
+                                                             192
+                                                         ],
+                                            "id":  "319d0b7b-27cc-4604-b279-20268484eddc",
+                                            "name":  "When Executed by Another Workflow"
+                                        },
+                                        {
+                                            "parameters":  {
+                                                               "aggregate":  "aggregateAllItemData",
+                                                               "destinationFieldName":  "response",
+                                                               "options":  {
+
+                                                                           }
+                                                           },
+                                            "type":  "n8n-nodes-base.aggregate",
+                                            "typeVersion":  1,
+                                            "position":  [
+                                                             160,
+                                                             96
+                                                         ],
+                                            "id":  "983ec17b-8344-4210-821c-dc8edcb73d9e",
+                                            "name":  "Aggregate"
+                                        },
+                                        {
+                                            "parameters":  {
+                                                               "operation":  "executeQuery",
+                                                               "query":  "SELECT \n  v.id AS parcel_id,\n  v.status,\n  v.fecha_programada::text AS fecha_programada,\n  v.week_number,\n  v.plan_id,\n  v.tag_id,\n  v.idtag,\n  v.origin_panelist_name,\n  v.destination_panelist_name,\n  v.origin_city_name,\n  v.destination_city_name,\n  c.name AS carrier_name,\n  pr.description AS product_description,\n  p_dest.address_line1 AS destination_address_line1,\n  p_dest.address_line2 AS destination_address_line2,\n  p_dest.postal_code AS destination_postal_code,\n  p_dest.address_city AS destination_city,\n  p_dest.address_country AS destination_country,\n  json_agg(\n    json_build_object(\n      \u0027material_name\u0027, mc.name,\n      \u0027material_code\u0027, mc.code,\n      \u0027unit_measure\u0027, mc.unit_measure,\n      \u0027quantity\u0027, pm.quantity\n    ) ORDER BY mc.name\n  ) FILTER (WHERE mc.id IS NOT NULL) AS materials\nFROM v_allocation_details_with_availability v\nLEFT JOIN allocation_plans ap ON ap.id = v.plan_id\nLEFT JOIN carriers c ON c.id = ap.carrier_id\nLEFT JOIN products pr ON pr.id = ap.product_id\nLEFT JOIN panelists p_dest ON p_dest.node_id = v.destination_node_id\nLEFT JOIN product_materials pm ON pm.product_id = ap.product_id\nLEFT JOIN material_catalog mc ON mc.id = pm.material_id\nWHERE v.origin_node_id = \u0027{{ $json.node_id }}\u0027\n  AND v.fecha_programada \u003c= (DATE_TRUNC(\u0027week\u0027, CURRENT_DATE) + INTERVAL \u00276 days\u0027)\n  AND v.status IN (\u0027pending\u0027, \u0027notified\u0027)\nGROUP BY \n  v.id, v.status, v.fecha_programada, v.week_number, v.plan_id,\n  v.tag_id, v.idtag, v.origin_panelist_name, v.destination_panelist_name,\n  v.origin_city_name, v.destination_city_name,\n  c.name, pr.description,\n  p_dest.address_line1, p_dest.address_line2, p_dest.postal_code,\n  p_dest.address_city, p_dest.address_country\nORDER BY v.fecha_programada ASC\nLIMIT 10",
+                                                               "options":  {
+
+                                                                           }
+                                                           },
+                                            "type":  "n8n-nodes-base.postgres",
+                                            "typeVersion":  2.6,
+                                            "position":  [
+                                                             -512,
+                                                             192
+                                                         ],
+                                            "id":  "bb6975db-e7ef-4631-a235-b62fc80bed0f",
+                                            "name":  "Execute a SQL query",
+                                            "alwaysOutputData":  true,
+                                            "credentials":  {
+                                                                "postgres":  {
+                                                                                 "id":  "735a8hxfuUEDPIYD",
+                                                                                 "name":  "OneMS dev - Postgres account"
+                                                                             }
+                                                            }
+                                        },
+                                        {
+                                            "parameters":  {
+                                                               "conditions":  {
+                                                                                  "options":  {
+                                                                                                  "caseSensitive":  true,
+                                                                                                  "leftValue":  "",
+                                                                                                  "typeValidation":  "strict",
+                                                                                                  "version":  3
+                                                                                              },
+                                                                                  "conditions":  [
+                                                                                                     {
+                                                                                                         "id":  "44b9410e-87b9-4299-b112-6d5932166e6c",
+                                                                                                         "leftValue":  "={{ $json }}",
+                                                                                                         "rightValue":  "",
+                                                                                                         "operator":  {
+                                                                                                                          "type":  "object",
+                                                                                                                          "operation":  "notEmpty",
+                                                                                                                          "singleValue":  true
+                                                                                                                      }
+                                                                                                     }
+                                                                                                 ],
+                                                                                  "combinator":  "and"
+                                                                              },
+                                                               "options":  {
+
+                                                                           }
+                                                           },
+                                            "type":  "n8n-nodes-base.if",
+                                            "typeVersion":  2.3,
+                                            "position":  [
+                                                             -288,
+                                                             192
+                                                         ],
+                                            "id":  "87276b30-c51c-4f73-ac64-64ed21c313f0",
+                                            "name":  "If"
+                                        },
+                                        {
+                                            "parameters":  {
+                                                               "content":  "## General\nThis workflow is called by the AI Agent in order to get the user parcel\u0027s to send.\nThe last node (Aggregate) is sent back to the user as the response",
+                                                               "height":  400,
+                                                               "width":  400,
+                                                               "color":  7
+                                                           },
+                                            "type":  "n8n-nodes-base.stickyNote",
+                                            "typeVersion":  1,
+                                            "position":  [
+                                                             -1680,
+                                                             -96
+                                                         ],
+                                            "id":  "44e15c3b-9042-44ef-b816-7234342a9b63",
+                                            "name":  "Sticky Note"
+                                        },
+                                        {
+                                            "parameters":  {
+                                                               "assignments":  {
+                                                                                   "assignments":  [
+                                                                                                       {
+                                                                                                           "id":  "0bdcacef-2086-423b-9344-2fb51c43cd75",
+                                                                                                           "name":  "Response",
+                                                                                                           "value":  "You have no parcel to send",
+                                                                                                           "type":  "string"
+                                                                                                       }
+                                                                                                   ]
+                                                                               },
+                                                               "options":  {
+
+                                                                           }
+                                                           },
+                                            "type":  "n8n-nodes-base.set",
+                                            "typeVersion":  3.4,
+                                            "position":  [
+                                                             -64,
+                                                             288
+                                                         ],
+                                            "id":  "458019b2-2739-48ee-b6f6-dc06435959ad",
+                                            "name":  "Send error response"
+                                        },
+                                        {
+                                            "parameters":  {
+                                                               "assignments":  {
+                                                                                   "assignments":  [
+                                                                                                       {
+                                                                                                           "id":  "72d5e802-ffff-4946-9619-a228b596e5de",
+                                                                                                           "name":  "scheduled_date",
+                                                                                                           "value":  "={{ $json.fecha_programada || \u0027\u0027 }}",
+                                                                                                           "type":  "string"
+                                                                                                       },
+                                                                                                       {
+                                                                                                           "id":  "d3940408-257d-4318-97df-713e6c692084",
+                                                                                                           "name":  "address_line1",
+                                                                                                           "value":  "={{ $json.destination_address_line1 }}",
+                                                                                                           "type":  "string"
+                                                                                                       },
+                                                                                                       {
+                                                                                                           "id":  "b0270d0c-df49-406f-b94f-67179e50cfca",
+                                                                                                           "name":  "address_line2",
+                                                                                                           "value":  "={{ $json.destination_address_line2 }}",
+                                                                                                           "type":  "string"
+                                                                                                       },
+                                                                                                       {
+                                                                                                           "id":  "c1234567-1234-1234-1234-123456789012",
+                                                                                                           "name":  "postal_code",
+                                                                                                           "value":  "={{ $json.destination_postal_code }}",
+                                                                                                           "type":  "string"
+                                                                                                       },
+                                                                                                       {
+                                                                                                           "id":  "c2345678-2345-2345-2345-234567890123",
+                                                                                                           "name":  "destination_city",
+                                                                                                           "value":  "={{ $json.destination_city }}",
+                                                                                                           "type":  "string"
+                                                                                                       },
+                                                                                                       {
+                                                                                                           "id":  "c3456789-3456-3456-3456-345678901234",
+                                                                                                           "name":  "destination_country",
+                                                                                                           "value":  "={{ $json.destination_country }}",
+                                                                                                           "type":  "string"
+                                                                                                       },
+                                                                                                       {
+                                                                                                           "id":  "c4567890-4567-4567-4567-456789012345",
+                                                                                                           "name":  "destination_panelist_name",
+                                                                                                           "value":  "={{ $json.destination_panelist_name }}",
+                                                                                                           "type":  "string"
+                                                                                                       },
+                                                                                                       {
+                                                                                                           "id":  "c5678901-5678-5678-5678-567890123456",
+                                                                                                           "name":  "plan_id",
+                                                                                                           "value":  "={{ $json.plan_id }}",
+                                                                                                           "type":  "string"
+                                                                                                       },
+                                                                                                       {
+                                                                                                           "id":  "c6789012-6789-6789-6789-678901234567",
+                                                                                                           "name":  "parcel_id",
+                                                                                                           "value":  "={{ $json.parcel_id }}",
+                                                                                                           "type":  "string"
+                                                                                                       },
+                                                                                                       {
+                                                                                                           "id":  "c7890123-7890-7890-7890-789012345678",
+                                                                                                           "name":  "status",
+                                                                                                           "value":  "={{ $json.status }}",
+                                                                                                           "type":  "string"
+                                                                                                       },
+                                                                                                       {
+                                                                                                           "id":  "c8901234-8901-8901-8901-890123456789",
+                                                                                                           "name":  "origin_city",
+                                                                                                           "value":  "={{ $json.origin_city_name }}",
+                                                                                                           "type":  "string"
+                                                                                                       },
+                                                                                                       {
+                                                                                                           "id":  "c9012345-9012-9012-9012-901234567890",
+                                                                                                           "name":  "origin_panelist_name",
+                                                                                                           "value":  "={{ $json.origin_panelist_name }}",
+                                                                                                           "type":  "string"
+                                                                                                       },
+                                                                                                       {
+                                                                                                           "id":  "ca123456-a123-a123-a123-a12345678901",
+                                                                                                           "name":  "carrier_name",
+                                                                                                           "value":  "={{ $json.carrier_name }}",
+                                                                                                           "type":  "string"
+                                                                                                       },
+                                                                                                       {
+                                                                                                           "id":  "cb234567-b234-b234-b234-b23456789012",
+                                                                                                           "name":  "product_description",
+                                                                                                           "value":  "={{ $json.product_description }}",
+                                                                                                           "type":  "string"
+                                                                                                       },
+                                                                                                       {
+                                                                                                           "id":  "cc345678-c345-c345-c345-c34567890123",
+                                                                                                           "name":  "materials",
+                                                                                                           "value":  "={{ $json.materials }}",
+                                                                                                           "type":  "array"
+                                                                                                       },
+                                                                                                       {
+                                                                                                           "id":  "cd456789-d456-d456-d456-d45678901234",
+                                                                                                           "name":  "tag_id",
+                                                                                                           "value":  "={{ $json.tag_id }}",
+                                                                                                           "type":  "string"
+                                                                                                       },
+                                                                                                       {
+                                                                                                           "id":  "ce567890-e567-e567-e567-e56789012345",
+                                                                                                           "name":  "idtag",
+                                                                                                           "value":  "={{ $json.idtag }}",
+                                                                                                           "type":  "string"
+                                                                                                       }
+                                                                                                   ]
+                                                                               },
+                                                               "options":  {
+                                                                               "ignoreConversionErrors":  true
+                                                                           }
+                                                           },
+                                            "id":  "37a7e664-8429-4d61-9e7c-f9ceb24a378e",
+                                            "name":  "Destination Details1",
+                                            "type":  "n8n-nodes-base.set",
+                                            "typeVersion":  3.4,
+                                            "position":  [
+                                                             -64,
+                                                             96
+                                                         ]
+                                        },
+                                        {
+                                            "parameters":  {
+                                                               "operation":  "executeQuery",
+                                                               "query":  "-- Delete any existing pending_list context for this user\nDELETE FROM public.panelist_context \nWHERE telegram_id = \u0027{{ $(\"When Executed by Another Workflow\").first().json.telegram_id }}\u0027\n  AND context_type = \u0027pending_list\u0027;\n-- Insert new pending_list context with the parcels array\nINSERT INTO public.panelist_context (telegram_id, context_type, context_data)\nVALUES (\n    \u0027{{ $(\"When Executed by Another Workflow\").first().json.telegram_id }}\u0027,\n    \u0027pending_list\u0027,\n    \u0027{{ JSON.stringify($(\"Aggregate\").first().json.response) }}\u0027::jsonb\n);\nSELECT \u0027{{ $(\"When Executed by Another Workflow\").first().json.telegram_id }}\u0027 AS telegram_id,\n       \u0027{{ JSON.stringify($(\"Aggregate\").first().json.response) }}\u0027 AS parcels_list;",
+                                                               "options":  {
+
+                                                                           }
+                                                           },
+                                            "id":  "save-list-ctx-001",
+                                            "name":  "Save pending list context",
+                                            "type":  "n8n-nodes-base.postgres",
+                                            "typeVersion":  2.5,
+                                            "position":  [
+                                                             1616,
+                                                             304
+                                                         ],
+                                            "credentials":  {
+                                                                "postgres":  {
+                                                                                 "id":  "735a8hxfuUEDPIYD",
+                                                                                 "name":  "OneMS dev - Postgres account"
+                                                                             }
+                                                            }
+                                        },
+                                        {
+                                            "parameters":  {
+                                                               "assignments":  {
+                                                                                   "assignments":  [
+                                                                                                       {
+                                                                                                           "id":  "ret-response",
+                                                                                                           "name":  "response",
+                                                                                                           "value":  "={{ $json.Response !== undefined ? $json.Response : $(\u0027Aggregate\u0027).first().json.response }}",
+                                                                                                           "type":  "string"
+                                                                                                       },
+                                                                                                       {
+                                                                                                           "id":  "ret-telegram-id",
+                                                                                                           "name":  "telegram_id",
+                                                                                                           "value":  "={{ $(\u0027When Executed by Another Workflow\u0027).first().json.telegram_id }}",
+                                                                                                           "type":  "string"
+                                                                                                       },
+                                                                                                       {
+                                                                                                           "id":  "ret-lang",
+                                                                                                           "name":  "panelist_language",
+                                                                                                           "value":  "={{ $(\u0027When Executed by Another Workflow\u0027).first().json.panelist_language }}",
+                                                                                                           "type":  "string"
+                                                                                                       }
+                                                                                                   ]
+                                                                               },
+                                                               "options":  {
+
+                                                                           }
+                                                           },
+                                            "id":  "restore-data-pts-001",
+                                            "name":  "Return parcel list",
+                                            "type":  "n8n-nodes-base.set",
+                                            "typeVersion":  3.4,
+                                            "position":  [
+                                                             1840,
+                                                             304
+                                                         ]
+                                        },
+                                        {
+                                            "parameters":  {
+                                                               "operation":  "executeQuery",
+                                                               "query":  "UPDATE public.allocation_plan_details apd\nSET \n  status = \u0027notified\u0027,\n  origin_panelist_name = p_orig.name,\n  destination_panelist_name = p_dest.name\nFROM panelists p_orig, panelists p_dest\nWHERE apd.origin_node_id = \u0027{{ $(\u0027Get panelist from telegram id\u0027).first().json.node_id }}\u0027\n  AND apd.status = \u0027pending\u0027\n  AND apd.fecha_programada \u003c= (DATE_TRUNC(\u0027week\u0027, CURRENT_DATE) + INTERVAL \u00276 days\u0027)\n  AND p_orig.node_id = apd.origin_node_id\n  AND p_dest.node_id = apd.destination_node_id;\nSELECT \u0027{{ $(\"When Executed by Another Workflow\").first().json.telegram_id }}\u0027 AS telegram_id;",
+                                                               "options":  {
+
+                                                                           }
+                                                           },
+                                            "id":  "mark-notified-001",
+                                            "name":  "Mark as notified",
+                                            "type":  "n8n-nodes-base.postgres",
+                                            "typeVersion":  2.5,
+                                            "position":  [
+                                                             384,
+                                                             96
+                                                         ],
+                                            "credentials":  {
+                                                                "postgres":  {
+                                                                                 "id":  "735a8hxfuUEDPIYD",
+                                                                                 "name":  "OneMS dev - Postgres account"
+                                                                             }
+                                                            }
+                                        },
+                                        {
+                                            "parameters":  {
+                                                               "resource":  "message",
+                                                               "operation":  "sendMessage",
+                                                               "chatId":  "={{ $(\"When Executed by Another Workflow\").first().json.telegram_id }}",
+                                                               "text":  "={{ $(\u0027When Executed by Another Workflow\u0027).first().json.panelist_language === \u0027es\u0027 ? \u0027? Obteniendo informaci?n. Esto puede tardar hasta 1 minuto.\u0027 : $(\u0027When Executed by Another Workflow\u0027).first().json.panelist_language === \u0027fr\u0027 ? \u0027? Collecte des informations. Cela peut prendre jusqu a 1 minute.\u0027 : $(\u0027When Executed by Another Workflow\u0027).first().json.panelist_language === \u0027ar\u0027 ? \u0027? ???? ??? ?????????. ?? ?????? ??? ????? ?????.\u0027 : \u0027? Gathering information. This may take up to 1 minute.\u0027 }}",
+                                                               "additionalFields":  {
+
+                                                                                    }
+                                                           },
+                                            "type":  "n8n-nodes-base.telegram",
+                                            "typeVersion":  1.2,
+                                            "position":  [
+                                                             -960,
+                                                             192
+                                                         ],
+                                            "id":  "635e3f9b-bb98-4d03-8095-35aace23f92b",
+                                            "name":  "Send Messege Garthering Information",
+                                            "webhookId":  "d754d10b-2eb2-4cd8-a1a6-53c4eb3b8d38",
+                                            "credentials":  {
+                                                                "telegramApi":  {
+                                                                                    "id":  "rp79mLnvGH8hxiaL",
+                                                                                    "name":  "One For Panelist Telegram account"
+                                                                                }
+                                                            }
+                                        }
+                                    ],
+                          "connections":  {
+                                              "When Executed by Another Workflow":  {
+                                                                                        "main":  [
+                                                                                                     [
+                                                                                                         {
+                                                                                                             "node":  "Send Messege Garthering Information",
+                                                                                                             "type":  "main",
+                                                                                                             "index":  0
+                                                                                                         }
+                                                                                                     ]
+                                                                                                 ]
+                                                                                    },
+                                              "Get panelist from telegram id":  {
+                                                                                    "main":  [
+                                                                                                 [
+                                                                                                     {
+                                                                                                         "node":  "Execute a SQL query",
+                                                                                                         "type":  "main",
+                                                                                                         "index":  0
+                                                                                                     }
+                                                                                                 ]
+                                                                                             ]
+                                                                                },
+                                              "Execute a SQL query":  {
+                                                                          "main":  [
+                                                                                       [
+                                                                                           {
+                                                                                               "node":  "If",
+                                                                                               "type":  "main",
+                                                                                               "index":  0
+                                                                                           }
+                                                                                       ]
+                                                                                   ]
+                                                                      },
+                                              "If":  {
+                                                         "main":  [
+                                                                      [
+                                                                          {
+                                                                              "node":  "Destination Details1",
+                                                                              "type":  "main",
+                                                                              "index":  0
+                                                                          }
+                                                                      ],
+                                                                      [
+                                                                          {
+                                                                              "node":  "Send error response",
+                                                                              "type":  "main",
+                                                                              "index":  0
+                                                                          }
+                                                                      ]
+                                                                  ]
+                                                     },
+                                              "Destination Details1":  {
+                                                                           "main":  [
+                                                                                        [
+                                                                                            {
+                                                                                                "node":  "Aggregate",
+                                                                                                "type":  "main",
+                                                                                                "index":  0
+                                                                                            }
+                                                                                        ]
+                                                                                    ]
+                                                                       },
+                                              "Aggregate":  {
+                                                                "main":  [
+                                                                             [
+                                                                                 {
+                                                                                     "node":  "Mark as notified",
+                                                                                     "type":  "main",
+                                                                                     "index":  0
+                                                                                 }
+                                                                             ]
+                                                                         ]
+                                                            },
+                                              "Save pending list context":  {
+                                                                                "main":  [
+                                                                                             [
+                                                                                                 {
+                                                                                                     "node":  "Return parcel list",
+                                                                                                     "type":  "main",
+                                                                                                     "index":  0
+                                                                                                 }
+                                                                                             ]
+                                                                                         ]
+                                                                            },
+                                              "Mark as notified":  {
+                                                                       "main":  [
+                                                                                    [
+                                                                                        {
+                                                                                            "node":  "Save pending list context",
+                                                                                            "type":  "main",
+                                                                                            "index":  0
+                                                                                        }
+                                                                                    ]
+                                                                                ]
+                                                                   },
+                                              "Send error response":  {
+                                                                          "main":  [
+                                                                                       [
+                                                                                           {
+                                                                                               "node":  "Return parcel list",
+                                                                                               "type":  "main",
+                                                                                               "index":  0
+                                                                                           }
+                                                                                       ]
+                                                                                   ]
+                                                                      },
+                                              "Send Messege Garthering Information":  {
+                                                                                          "main":  [
+                                                                                                       [
+                                                                                                           {
+                                                                                                               "node":  "Get panelist from telegram id",
+                                                                                                               "type":  "main",
+                                                                                                               "index":  0
+                                                                                                           }
+                                                                                                       ]
+                                                                                                   ]
+                                                                                      }
+                                          },
+                          "authors":  "Ignacio Fernandez",
+                          "name":  null,
+                          "description":  null,
+                          "autosaved":  false,
+                          "workflowPublishHistory":  [
+                                                         {
+                                                             "createdAt":  "2026-04-28T13:53:26.462Z",
+                                                             "id":  687,
+                                                             "workflowId":  "Tm2yrywGUDq0PEj3",
+                                                             "versionId":  "6c9e606e-5c56-4921-aadf-0cabcd1a7edb",
+                                                             "event":  "activated",
+                                                             "userId":  "310002b0-8d54-456b-8f9f-7611a34898fd"
+                                                         },
+                                                         {
+                                                             "createdAt":  "2026-04-28T13:53:26.384Z",
+                                                             "id":  686,
+                                                             "workflowId":  "Tm2yrywGUDq0PEj3",
+                                                             "versionId":  "6c9e606e-5c56-4921-aadf-0cabcd1a7edb",
+                                                             "event":  "deactivated",
+                                                             "userId":  "310002b0-8d54-456b-8f9f-7611a34898fd"
+                                                         }
+                                                     ]
+                      }
+}

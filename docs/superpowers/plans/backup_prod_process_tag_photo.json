@@ -1,0 +1,1425 @@
+﻿{
+    "updatedAt":  "2026-04-22T10:29:04.348Z",
+    "createdAt":  "2026-03-05T13:01:14.717Z",
+    "id":  "PrbIkeUhaKrxP0KC",
+    "name":  "Process tag photo",
+    "description":  null,
+    "active":  true,
+    "isArchived":  false,
+    "nodes":  [
+                  {
+                      "id":  "trigger-1",
+                      "name":  "When Executed by Another Workflow",
+                      "type":  "n8n-nodes-base.executeWorkflowTrigger",
+                      "typeVersion":  1.1,
+                      "position":  [
+                                       100,
+                                       300
+                                   ],
+                      "parameters":  {
+                                         "workflowInputs":  {
+                                                                "values":  [
+                                                                               {
+                                                                                   "name":  "telegram_id"
+                                                                               },
+                                                                               {
+                                                                                   "name":  "tag_id"
+                                                                               },
+                                                                               {
+                                                                                   "name":  "panelist_language",
+                                                                                   "type":  "string"
+                                                                               }
+                                                                           ]
+                                                            }
+                                     }
+                  },
+                  {
+                      "id":  "get-panelist-1",
+                      "name":  "Get panelist",
+                      "type":  "n8n-nodes-base.postgres",
+                      "typeVersion":  2.5,
+                      "position":  [
+                                       300,
+                                       300
+                                   ],
+                      "parameters":  {
+                                         "operation":  "executeQuery",
+                                         "query":  "SELECT id, name, node_id, telegram_id FROM panelists WHERE telegram_id = \u0027{{ $json.telegram_id }}\u0027 LIMIT 1",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "credentials":  {
+                                          "postgres":  {
+                                                           "id":  "735a8hxfuUEDPIYD",
+                                                           "name":  "OneMS dev - Postgres account"
+                                                       }
+                                      }
+                  },
+                  {
+                      "id":  "set-ids-1",
+                      "name":  "Set IDs",
+                      "type":  "n8n-nodes-base.set",
+                      "typeVersion":  3.4,
+                      "position":  [
+                                       500,
+                                       300
+                                   ],
+                      "parameters":  {
+                                         "assignments":  {
+                                                             "assignments":  [
+                                                                                 {
+                                                                                     "id":  "a1",
+                                                                                     "name":  "telegram_id",
+                                                                                     "value":  "={{ String($(\u0027When Executed by Another Workflow\u0027).item.json.telegram_id).trim() }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "a2",
+                                                                                     "name":  "tag_id",
+                                                                                     "value":  "={{ $(\u0027When Executed by Another Workflow\u0027).item.json.tag_id.trim() }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "a3",
+                                                                                     "name":  "panelist_id",
+                                                                                     "value":  "={{ $json.id }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "a4",
+                                                                                     "name":  "node_id",
+                                                                                     "value":  "={{ $json.node_id }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "a5",
+                                                                                     "name":  "panelist_name",
+                                                                                     "value":  "={{ $json.name }}",
+                                                                                     "type":  "string"
+                                                                                 }
+                                                                             ]
+                                                         },
+                                         "options":  {
+
+                                                     }
+                                     }
+                  },
+                  {
+                      "id":  "check-tag-1",
+                      "name":  "Check tag in allocation plan",
+                      "type":  "n8n-nodes-base.postgres",
+                      "typeVersion":  2.5,
+                      "position":  [
+                                       700,
+                                       200
+                                   ],
+                      "parameters":  {
+                                         "operation":  "executeQuery",
+                                         "query":  "SELECT apd.id, apd.tag_id, apd.status, apd.fecha_programada, apd.destination_panelist_name, apd.origin_node_id, n.auto_id as origin_node_auto_id \nFROM allocation_plan_details apd \nLEFT JOIN nodes n ON n.id = apd.origin_node_id \nWHERE apd.tag_id = \u0027{{ $json.tag_id }}\u0027 \nAND apd.destination_node_id = \u0027{{ $json.node_id }}\u0027\nAND apd.status = \u0027sent\u0027 \nORDER BY apd.fecha_programada ASC \nLIMIT 1",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "credentials":  {
+                                          "postgres":  {
+                                                           "id":  "735a8hxfuUEDPIYD",
+                                                           "name":  "OneMS dev - Postgres account"
+                                                       }
+                                      }
+                  },
+                  {
+                      "id":  "if-tag-exists-1",
+                      "name":  "Tag exists?",
+                      "type":  "n8n-nodes-base.if",
+                      "typeVersion":  2,
+                      "position":  [
+                                       700,
+                                       400
+                                   ],
+                      "parameters":  {
+                                         "conditions":  {
+                                                            "options":  {
+                                                                            "caseSensitive":  true,
+                                                                            "leftValue":  "",
+                                                                            "typeValidation":  "strict"
+                                                                        },
+                                                            "conditions":  [
+                                                                               {
+                                                                                   "id":  "cond1",
+                                                                                   "leftValue":  "={{ $(\u0027Check tag in allocation plan\u0027).all().length }}",
+                                                                                   "rightValue":  0,
+                                                                                   "operator":  {
+                                                                                                    "type":  "number",
+                                                                                                    "operation":  "gt"
+                                                                                                }
+                                                                               }
+                                                                           ],
+                                                            "combinator":  "and"
+                                                        },
+                                         "options":  {
+
+                                                     }
+                                     }
+                  },
+                  {
+                      "id":  "mark-received-1",
+                      "name":  "Mark as received",
+                      "type":  "n8n-nodes-base.postgres",
+                      "typeVersion":  2.5,
+                      "position":  [
+                                       900,
+                                       200
+                                   ],
+                      "parameters":  {
+                                         "operation":  "executeQuery",
+                                         "query":  "UPDATE allocation_plan_details \nSET \n  status = \u0027received\u0027, \n  received_at = NOW(),\n  destination_panelist_id = (SELECT id FROM panelists WHERE node_id = \u0027{{ $(\u0027Set IDs\u0027).item.json.node_id }}\u0027 LIMIT 1),\n  origin_panelist_id = (SELECT id FROM panelists WHERE node_id = \u0027{{ $(\u0027Check tag in allocation plan\u0027).first().json.origin_node_id }}\u0027 LIMIT 1)\nWHERE id = \u0027{{ $(\u0027Check tag in allocation plan\u0027).first().json.id }}\u0027\nRETURNING id, tag_id, status, destination_panelist_name, origin_node_id",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "credentials":  {
+                                          "postgres":  {
+                                                           "id":  "735a8hxfuUEDPIYD",
+                                                           "name":  "OneMS dev - Postgres account"
+                                                       }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "const lang = $(\u0027Set IDs\u0027).first().json.panelist_language || \u0027en\u0027;\nconst tag = $(\u0027Check tag in allocation plan\u0027).first().json.tag_id || \u0027\u0027;\nlet msg;\nif (lang === \u0027es\u0027) msg = `✅ *¡Paquete recibido!* La etiqueta *${tag}* ha sido registrada correctamente.`;\nelse if (lang === \u0027fr\u0027) msg = `✅ *Colis recu !* L etiquette *${tag}* a ete enregistree avec succes.`;\nelse if (lang === \u0027ar\u0027) msg = `✅ *تم استلام الطرد!* تم تسجيل الملصق *${tag}* بنجاح.`;\nelse msg = `✅ *Parcel received!* The label *${tag}* has been registered successfully.`;\nreturn [{ json: { response: msg, action: \u0027received\u0027, tag_id: tag } }];"
+                                     },
+                      "id":  "response-received-1",
+                      "name":  "Response - received",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       1100,
+                                       200
+                                   ]
+                  },
+                  {
+                      "id":  "get-pending-1",
+                      "name":  "Get pending parcels",
+                      "type":  "n8n-nodes-base.postgres",
+                      "typeVersion":  2.5,
+                      "position":  [
+                                       900,
+                                       500
+                                   ],
+                      "parameters":  {
+                                         "operation":  "executeQuery",
+                                         "query":  "SELECT \n  apd.id, \n  apd.fecha_programada,\n  apd.destination_node_id,\n  COALESCE(dest_p.name, apd.destination_panelist_name, \u0027Desconocido\u0027) as destination_panelist_name,\n  c.name as carrier, \n  prod.description as product,\n  ROW_NUMBER() OVER (ORDER BY apd.fecha_programada ASC) as parcel_number \nFROM allocation_plan_details apd\nLEFT JOIN allocation_plans ap ON ap.id = apd.plan_id\nLEFT JOIN carriers c ON c.id = ap.carrier_id\nLEFT JOIN products prod ON prod.id = ap.product_id\nLEFT JOIN panelists dest_p ON dest_p.node_id = apd.destination_node_id\nWHERE apd.origin_node_id = \u0027{{ $json.node_id }}\u0027 \n  AND apd.status IN (\u0027pending\u0027, \u0027notified\u0027) \n  AND (apd.tag_id IS NULL OR apd.tag_id = \u0027\u0027) \nORDER BY apd.fecha_programada ASC \nLIMIT 10",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "credentials":  {
+                                          "postgres":  {
+                                                           "id":  "735a8hxfuUEDPIYD",
+                                                           "name":  "OneMS dev - Postgres account"
+                                                       }
+                                      }
+                  },
+                  {
+                      "id":  "format-pending-1",
+                      "name":  "Format pending list",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       1100,
+                                       500
+                                   ],
+                      "parameters":  {
+                                         "mode":  "runOnceForAllItems",
+                                         "jsCode":  "const items = $input.all();\nconst ids = $(\u0027Set IDs\u0027).first().json;\nconst lang = ids.panelist_language || \u0027en\u0027;\nconst tag = ids.tag_id || \u0027\u0027;\n\nif (items.length === 0) {\n  let noMsg;\n  if (lang === \u0027es\u0027) noMsg = \u0027📭 No se encontraron paquetes pendientes. Intentalo mas tarde.\u0027;\n  else if (lang === \u0027fr\u0027) noMsg = \u0027📭 Aucun colis en attente. Veuillez reessayer plus tard.\u0027;\n  else if (lang === \u0027ar\u0027) noMsg = \u0027📭 لم يتم العثور على طرود معلقة. يرجى المحاولة لاحقا.\u0027;\n  else noMsg = \u0027📭 No pending parcels found. Please try again later.\u0027;\n  return [{ json: { response: noMsg, action: \u0027no_parcels\u0027, tag_id: tag } }];\n}\n\nlet header;\nif (lang === \u0027es\u0027) header = `📦 *Paquetes pendientes de envio:*\\n?Cual estas enviando con la etiqueta *${tag}*?\\nResponde con el numero:`;\nelse if (lang === \u0027fr\u0027) header = `📦 *Colis en attente envoi :*\\nLequel envoyez-vous avec l etiquette *${tag}* ?\\nRepondez avec le numero :`;\nelse if (lang === \u0027ar\u0027) header = `📦 *الطرود المعلقة للإرسال:*\\nأيها ترسل بالملصق *${tag}*?\\nأجب بالرقم:`;\nelse header = `📦 *Pending parcels to send:*\\nWhich parcel are you sending with label *${tag}*?\\nReply with the number:`;\n\nlet list = header + \u0027\\n\\n\u0027;\nitems.forEach((item, i) =\u003e {\n  const d = item.json;\n  list += `*${i+1}.* ${d.destination_panelist_name || \u0027?\u0027} - ${d.destination_city_name || \u0027?\u0027} (${d.fecha_programada || \u0027?\u0027})\\n`;\n});\n\nreturn [{ json: { response: list.trim(), action: \u0027assign_pending\u0027, tag_id: tag } }];"
+                                     }
+                  },
+                  {
+                      "id":  "save-context-1",
+                      "name":  "Save assignment context",
+                      "type":  "n8n-nodes-base.postgres",
+                      "typeVersion":  2.5,
+                      "position":  [
+                                       1300,
+                                       500
+                                   ],
+                      "parameters":  {
+                                         "operation":  "executeQuery",
+                                         "query":  "-- Delete any existing pending_tag context for this user\nDELETE FROM public.panelist_context \nWHERE telegram_id = \u0027{{ $(\u0027Set IDs\u0027).first().json.telegram_id }}\u0027\n  AND context_type = \u0027pending_tag\u0027;\n\n-- Insert new pending_tag context with the tag_id and pending parcels list\nINSERT INTO public.panelist_context (telegram_id, context_type, context_data)\nVALUES (\n    \u0027{{ $(\u0027Set IDs\u0027).first().json.telegram_id }}\u0027,\n    \u0027pending_tag\u0027,\n    jsonb_build_object(\n        \u0027tag_id\u0027, \u0027{{ $(\u0027Set IDs\u0027).first().json.tag_id }}\u0027,\n        \u0027pending_parcels\u0027, \u0027{{ JSON.stringify($json.parcels) }}\u0027::jsonb\n    )\n);\n\nSELECT \n    \u0027{{ $json.response }}\u0027 as response,\n    \u0027assign_list\u0027 as action;",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "credentials":  {
+                                          "postgres":  {
+                                                           "id":  "735a8hxfuUEDPIYD",
+                                                           "name":  "OneMS dev - Postgres account"
+                                                       }
+                                      }
+                  },
+                  {
+                      "id":  "response-assign-1",
+                      "name":  "Response - assign list",
+                      "type":  "n8n-nodes-base.set",
+                      "typeVersion":  3.4,
+                      "position":  [
+                                       1500,
+                                       500
+                                   ],
+                      "parameters":  {
+                                         "assignments":  {
+                                                             "assignments":  [
+                                                                                 {
+                                                                                     "id":  "ra1",
+                                                                                     "name":  "response",
+                                                                                     "value":  "={{ $(\u0027Format pending list\u0027).item.json.response }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "ra2",
+                                                                                     "name":  "action",
+                                                                                     "value":  "={{ $(\u0027Format pending list\u0027).item.json.action }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "ral3",
+                                                                                     "name":  "tag_id",
+                                                                                     "value":  "={{ $(\u0027Set IDs\u0027).first().json.tag_id }}",
+                                                                                     "type":  "string"
+                                                                                 }
+                                                                             ]
+                                                         },
+                                         "options":  {
+
+                                                     }
+                                     }
+                  },
+                  {
+                      "id":  "delete-selected-ctx",
+                      "name":  "Pass direct assign data",
+                      "type":  "n8n-nodes-base.set",
+                      "typeVersion":  3.4,
+                      "position":  [
+                                       1320,
+                                       360
+                                   ],
+                      "parameters":  {
+                                         "assignments":  {
+                                                             "assignments":  [
+                                                                                 {
+                                                                                     "id":  "pass-1",
+                                                                                     "name":  "telegram_id",
+                                                                                     "value":  "={{ $json.telegram_id }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "pass-2",
+                                                                                     "name":  "tag_id",
+                                                                                     "value":  "={{ $json.tag_id }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "pass-3",
+                                                                                     "name":  "parcel_id",
+                                                                                     "value":  "={{ $json.parcel_id }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "pass-4",
+                                                                                     "name":  "panelist_language",
+                                                                                     "value":  "={{ $json.panelist_language }}",
+                                                                                     "type":  "string"
+                                                                                 }
+                                                                             ]
+                                                         },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "credentials":  {
+                                          "postgres":  {
+                                                           "id":  "735a8hxfuUEDPIYD",
+                                                           "name":  "OneMS dev - Postgres account"
+                                                       }
+                                      }
+                  },
+                  {
+                      "id":  "response-direct-assign",
+                      "name":  "Response direct assign success",
+                      "type":  "n8n-nodes-base.set",
+                      "typeVersion":  3.4,
+                      "position":  [
+                                       1540,
+                                       360
+                                   ],
+                      "parameters":  {
+                                         "assignments":  {
+                                                             "assignments":  [
+                                                                                 {
+                                                                                     "id":  "rda1",
+                                                                                     "name":  "response",
+                                                                                     "value":  "={{ (() =\u003e {\nconst lang = $(\u0027Set IDs\u0027).first().json.panelist_language || \u0027en\u0027;\nconst tag = $(\u0027Set IDs\u0027).first().json.tag_id || \u0027\u0027;\nif (lang === \u0027es\u0027) return `✅ *¡Etiqueta asignada!* La etiqueta *${tag}* ha sido vinculada a tu paquete y marcada como enviada.`;\nif (lang === \u0027fr\u0027) return `✅ *Etiquette assignee !* L etiquette *${tag}* a ete liee a votre colis et marquee comme envoyee.`;\nif (lang === \u0027ar\u0027) return `✅ *تم تعيين الملصق!* تم ربط الملصق *${tag}* بطردك وتم تمييزه كمرسل.`;\nreturn `✅ *Label assigned!* Tag *${tag}* has been linked to your parcel and marked as sent.`;\n})() }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "rda2",
+                                                                                     "name":  "action",
+                                                                                     "value":  "direct_assign",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "rda3",
+                                                                                     "name":  "tag_id",
+                                                                                     "value":  "={{ $(\u0027Set IDs\u0027).first().json.tag_id }}",
+                                                                                     "type":  "string"
+                                                                                 }
+                                                                             ]
+                                                         },
+                                         "options":  {
+
+                                                     }
+                                     }
+                  },
+                  {
+                      "id":  "check-selected-parcel",
+                      "name":  "Check selected parcel",
+                      "type":  "n8n-nodes-base.postgres",
+                      "typeVersion":  2.5,
+                      "position":  [
+                                       900,
+                                       600
+                                   ],
+                      "parameters":  {
+                                         "operation":  "executeQuery",
+                                         "query":  "SELECT id, context_data\nFROM public.panelist_context\nWHERE telegram_id = $1::text\n  AND context_type = \u0027selected_parcel\u0027\nORDER BY created_at DESC\nLIMIT 1",
+                                         "options":  {
+                                                         "queryReplacement":  "={{ [$(\u0027Set IDs\u0027).first().json.telegram_id] }}"
+                                                     }
+                                     },
+                      "credentials":  {
+                                          "postgres":  {
+                                                           "id":  "735a8hxfuUEDPIYD",
+                                                           "name":  "OneMS dev - Postgres account"
+                                                       }
+                                      }
+                  },
+                  {
+                      "id":  "has-selected-parcel",
+                      "name":  "Has selected parcel?",
+                      "type":  "n8n-nodes-base.if",
+                      "typeVersion":  2.2,
+                      "position":  [
+                                       1100,
+                                       600
+                                   ],
+                      "parameters":  {
+                                         "conditions":  {
+                                                            "options":  {
+                                                                            "caseSensitive":  true,
+                                                                            "leftValue":  "",
+                                                                            "typeValidation":  "strict"
+                                                                        },
+                                                            "conditions":  [
+                                                                               {
+                                                                                   "id":  "cond-1",
+                                                                                   "leftValue":  "={{ $json.id }}",
+                                                                                   "rightValue":  "",
+                                                                                   "operator":  {
+                                                                                                    "type":  "string",
+                                                                                                    "operation":  "notEmpty",
+                                                                                                    "singleValue":  true
+                                                                                                }
+                                                                               }
+                                                                           ],
+                                                            "combinator":  "and"
+                                                        }
+                                     }
+                  },
+                  {
+                      "id":  "set-direct-from-ctx",
+                      "name":  "Set direct assign from context",
+                      "type":  "n8n-nodes-base.set",
+                      "typeVersion":  3.4,
+                      "position":  [
+                                       1300,
+                                       500
+                                   ],
+                      "parameters":  {
+                                         "assignments":  {
+                                                             "assignments":  [
+                                                                                 {
+                                                                                     "id":  "sda1",
+                                                                                     "name":  "telegram_id",
+                                                                                     "value":  "={{ $(\u0027Set IDs\u0027).first().json.telegram_id }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "sda2",
+                                                                                     "name":  "tag_id",
+                                                                                     "value":  "={{ $(\u0027Set IDs\u0027).first().json.tag_id }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "sda3",
+                                                                                     "name":  "parcel_id",
+                                                                                     "value":  "={{ $json.context_data.parcel_id }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "sda4",
+                                                                                     "name":  "panelist_language",
+                                                                                     "value":  "={{ $(\u0027Set IDs\u0027).first().json.panelist_language }}",
+                                                                                     "type":  "string"
+                                                                                 }
+                                                                             ]
+                                                         },
+                                         "options":  {
+
+                                                     }
+                                     }
+                  },
+                  {
+                      "id":  "call-assign-direct-001",
+                      "name":  "Call Assign tag to parcel (direct)",
+                      "type":  "n8n-nodes-base.executeWorkflow",
+                      "typeVersion":  1.1,
+                      "position":  [
+                                       1420,
+                                       500
+                                   ],
+                      "parameters":  {
+                                         "workflowId":  {
+                                                            "__rl":  true,
+                                                            "value":  "NXKOurAMtMNsDeTw",
+                                                            "mode":  "id"
+                                                        },
+                                         "options":  {
+                                                         "waitForSubWorkflow":  true
+                                                     },
+                                         "workflowInputs":  {
+                                                                "mappingMode":  "defineBelow",
+                                                                "value":  {
+                                                                              "telegram_id":  "={{ $json.telegram_id }}",
+                                                                              "tag_id":  "={{ $json.tag_id }}",
+                                                                              "parcel_id":  "={{ $json.parcel_id }}",
+                                                                              "panelist_language":  "={{ $json.panelist_language }}"
+                                                                          },
+                                                                "matchingColumns":  [
+
+                                                                                    ],
+                                                                "schema":  [
+
+                                                                           ]
+                                                            }
+                                     }
+                  }
+              ],
+    "connections":  {
+                        "When Executed by Another Workflow":  {
+                                                                  "main":  [
+                                                                               [
+                                                                                   {
+                                                                                       "node":  "Get panelist",
+                                                                                       "type":  "main",
+                                                                                       "index":  0
+                                                                                   }
+                                                                               ]
+                                                                           ]
+                                                              },
+                        "Get panelist":  {
+                                             "main":  [
+                                                          [
+                                                              {
+                                                                  "node":  "Set IDs",
+                                                                  "type":  "main",
+                                                                  "index":  0
+                                                              }
+                                                          ]
+                                                      ]
+                                         },
+                        "Set IDs":  {
+                                        "main":  [
+                                                     [
+                                                         {
+                                                             "node":  "Check tag in allocation plan",
+                                                             "type":  "main",
+                                                             "index":  0
+                                                         },
+                                                         {
+                                                             "node":  "Tag exists?",
+                                                             "type":  "main",
+                                                             "index":  0
+                                                         }
+                                                     ]
+                                                 ]
+                                    },
+                        "Tag exists?":  {
+                                            "main":  [
+                                                         [
+                                                             {
+                                                                 "node":  "Mark as received",
+                                                                 "type":  "main",
+                                                                 "index":  0
+                                                             }
+                                                         ],
+                                                         [
+                                                             {
+                                                                 "node":  "Check selected parcel",
+                                                                 "type":  "main",
+                                                                 "index":  0
+                                                             }
+                                                         ]
+                                                     ]
+                                        },
+                        "Mark as received":  {
+                                                 "main":  [
+                                                              [
+                                                                  {
+                                                                      "node":  "Response - received",
+                                                                      "type":  "main",
+                                                                      "index":  0
+                                                                  }
+                                                              ]
+                                                          ]
+                                             },
+                        "Get pending parcels":  {
+                                                    "main":  [
+                                                                 [
+                                                                     {
+                                                                         "node":  "Format pending list",
+                                                                         "type":  "main",
+                                                                         "index":  0
+                                                                     }
+                                                                 ]
+                                                             ]
+                                                },
+                        "Format pending list":  {
+                                                    "main":  [
+                                                                 [
+                                                                     {
+                                                                         "node":  "Save assignment context",
+                                                                         "type":  "main",
+                                                                         "index":  0
+                                                                     }
+                                                                 ]
+                                                             ]
+                                                },
+                        "Save assignment context":  {
+                                                        "main":  [
+                                                                     [
+                                                                         {
+                                                                             "node":  "Response - assign list",
+                                                                             "type":  "main",
+                                                                             "index":  0
+                                                                         }
+                                                                     ]
+                                                                 ]
+                                                    },
+                        "Pass direct assign data":  {
+                                                        "main":  [
+                                                                     [
+                                                                         {
+                                                                             "node":  "Response direct assign success",
+                                                                             "type":  "main",
+                                                                             "index":  0
+                                                                         }
+                                                                     ]
+                                                                 ]
+                                                    },
+                        "Check selected parcel":  {
+                                                      "main":  [
+                                                                   [
+                                                                       {
+                                                                           "node":  "Has selected parcel?",
+                                                                           "type":  "main",
+                                                                           "index":  0
+                                                                       }
+                                                                   ]
+                                                               ]
+                                                  },
+                        "Has selected parcel?":  {
+                                                     "main":  [
+                                                                  [
+                                                                      {
+                                                                          "node":  "Set direct assign from context",
+                                                                          "type":  "main",
+                                                                          "index":  0
+                                                                      }
+                                                                  ],
+                                                                  [
+                                                                      {
+                                                                          "node":  "Get pending parcels",
+                                                                          "type":  "main",
+                                                                          "index":  0
+                                                                      }
+                                                                  ]
+                                                              ]
+                                                 },
+                        "Set direct assign from context":  {
+                                                               "main":  [
+                                                                            [
+                                                                                {
+                                                                                    "node":  "Call Assign tag to parcel (direct)",
+                                                                                    "type":  "main",
+                                                                                    "index":  0
+                                                                                }
+                                                                            ]
+                                                                        ]
+                                                           },
+                        "Call Assign tag to parcel (direct)":  {
+                                                                   "main":  [
+                                                                                [
+                                                                                    {
+                                                                                        "node":  "Response direct assign success",
+                                                                                        "type":  "main",
+                                                                                        "index":  0
+                                                                                    }
+                                                                                ]
+                                                                            ]
+                                                               }
+                    },
+    "settings":  {
+                     "executionOrder":  "v1",
+                     "callerPolicy":  "any",
+                     "availableInMCP":  false
+                 },
+    "staticData":  null,
+    "meta":  null,
+    "pinData":  null,
+    "versionId":  "279c1b64-ab69-4412-889b-6366b81786d9",
+    "activeVersionId":  "279c1b64-ab69-4412-889b-6366b81786d9",
+    "versionCounter":  131,
+    "triggerCount":  0,
+    "shared":  [
+                   {
+                       "updatedAt":  "2026-03-05T14:25:49.161Z",
+                       "createdAt":  "2026-03-05T14:25:49.161Z",
+                       "role":  "workflow:owner",
+                       "workflowId":  "PrbIkeUhaKrxP0KC",
+                       "projectId":  "3p4DsIlSNKeYlFOh",
+                       "project":  {
+                                       "updatedAt":  "2026-02-11T11:37:10.000Z",
+                                       "createdAt":  "2026-02-10T14:57:36.407Z",
+                                       "id":  "3p4DsIlSNKeYlFOh",
+                                       "name":  "One Panelist",
+                                       "type":  "team",
+                                       "icon":  {
+                                                    "type":  "icon",
+                                                    "value":  "mail"
+                                                },
+                                       "description":  "",
+                                       "creatorId":  "310002b0-8d54-456b-8f9f-7611a34898fd"
+                                   }
+                   }
+               ],
+    "tags":  [
+                 {
+                     "updatedAt":  "2026-03-04T13:56:20.140Z",
+                     "createdAt":  "2026-03-04T13:56:20.140Z",
+                     "id":  "M3msxXpviN0m1Sze",
+                     "name":  "PROD"
+                 }
+             ],
+    "activeVersion":  {
+                          "updatedAt":  "2026-04-22T10:29:04.349Z",
+                          "createdAt":  "2026-04-22T10:29:04.349Z",
+                          "versionId":  "279c1b64-ab69-4412-889b-6366b81786d9",
+                          "workflowId":  "PrbIkeUhaKrxP0KC",
+                          "nodes":  [
+                                        {
+                                            "id":  "trigger-1",
+                                            "name":  "When Executed by Another Workflow",
+                                            "type":  "n8n-nodes-base.executeWorkflowTrigger",
+                                            "typeVersion":  1.1,
+                                            "position":  [
+                                                             100,
+                                                             300
+                                                         ],
+                                            "parameters":  {
+                                                               "workflowInputs":  {
+                                                                                      "values":  [
+                                                                                                     {
+                                                                                                         "name":  "telegram_id"
+                                                                                                     },
+                                                                                                     {
+                                                                                                         "name":  "tag_id"
+                                                                                                     },
+                                                                                                     {
+                                                                                                         "name":  "panelist_language",
+                                                                                                         "type":  "string"
+                                                                                                     }
+                                                                                                 ]
+                                                                                  }
+                                                           }
+                                        },
+                                        {
+                                            "id":  "get-panelist-1",
+                                            "name":  "Get panelist",
+                                            "type":  "n8n-nodes-base.postgres",
+                                            "typeVersion":  2.5,
+                                            "position":  [
+                                                             300,
+                                                             300
+                                                         ],
+                                            "parameters":  {
+                                                               "operation":  "executeQuery",
+                                                               "query":  "SELECT id, name, node_id, telegram_id FROM panelists WHERE telegram_id = \u0027{{ $json.telegram_id }}\u0027 LIMIT 1",
+                                                               "options":  {
+
+                                                                           }
+                                                           },
+                                            "credentials":  {
+                                                                "postgres":  {
+                                                                                 "id":  "735a8hxfuUEDPIYD",
+                                                                                 "name":  "OneMS dev - Postgres account"
+                                                                             }
+                                                            }
+                                        },
+                                        {
+                                            "id":  "set-ids-1",
+                                            "name":  "Set IDs",
+                                            "type":  "n8n-nodes-base.set",
+                                            "typeVersion":  3.4,
+                                            "position":  [
+                                                             500,
+                                                             300
+                                                         ],
+                                            "parameters":  {
+                                                               "assignments":  {
+                                                                                   "assignments":  [
+                                                                                                       {
+                                                                                                           "id":  "a1",
+                                                                                                           "name":  "telegram_id",
+                                                                                                           "value":  "={{ String($(\u0027When Executed by Another Workflow\u0027).item.json.telegram_id).trim() }}",
+                                                                                                           "type":  "string"
+                                                                                                       },
+                                                                                                       {
+                                                                                                           "id":  "a2",
+                                                                                                           "name":  "tag_id",
+                                                                                                           "value":  "={{ $(\u0027When Executed by Another Workflow\u0027).item.json.tag_id.trim() }}",
+                                                                                                           "type":  "string"
+                                                                                                       },
+                                                                                                       {
+                                                                                                           "id":  "a3",
+                                                                                                           "name":  "panelist_id",
+                                                                                                           "value":  "={{ $json.id }}",
+                                                                                                           "type":  "string"
+                                                                                                       },
+                                                                                                       {
+                                                                                                           "id":  "a4",
+                                                                                                           "name":  "node_id",
+                                                                                                           "value":  "={{ $json.node_id }}",
+                                                                                                           "type":  "string"
+                                                                                                       },
+                                                                                                       {
+                                                                                                           "id":  "a5",
+                                                                                                           "name":  "panelist_name",
+                                                                                                           "value":  "={{ $json.name }}",
+                                                                                                           "type":  "string"
+                                                                                                       }
+                                                                                                   ]
+                                                                               },
+                                                               "options":  {
+
+                                                                           }
+                                                           }
+                                        },
+                                        {
+                                            "id":  "check-tag-1",
+                                            "name":  "Check tag in allocation plan",
+                                            "type":  "n8n-nodes-base.postgres",
+                                            "typeVersion":  2.5,
+                                            "position":  [
+                                                             700,
+                                                             200
+                                                         ],
+                                            "parameters":  {
+                                                               "operation":  "executeQuery",
+                                                               "query":  "SELECT apd.id, apd.tag_id, apd.status, apd.fecha_programada, apd.destination_panelist_name, apd.origin_node_id, n.auto_id as origin_node_auto_id \nFROM allocation_plan_details apd \nLEFT JOIN nodes n ON n.id = apd.origin_node_id \nWHERE apd.tag_id = \u0027{{ $json.tag_id }}\u0027 \nAND apd.destination_node_id = \u0027{{ $json.node_id }}\u0027\nAND apd.status = \u0027sent\u0027 \nORDER BY apd.fecha_programada ASC \nLIMIT 1",
+                                                               "options":  {
+
+                                                                           }
+                                                           },
+                                            "credentials":  {
+                                                                "postgres":  {
+                                                                                 "id":  "735a8hxfuUEDPIYD",
+                                                                                 "name":  "OneMS dev - Postgres account"
+                                                                             }
+                                                            }
+                                        },
+                                        {
+                                            "id":  "if-tag-exists-1",
+                                            "name":  "Tag exists?",
+                                            "type":  "n8n-nodes-base.if",
+                                            "typeVersion":  2,
+                                            "position":  [
+                                                             700,
+                                                             400
+                                                         ],
+                                            "parameters":  {
+                                                               "conditions":  {
+                                                                                  "options":  {
+                                                                                                  "caseSensitive":  true,
+                                                                                                  "leftValue":  "",
+                                                                                                  "typeValidation":  "strict"
+                                                                                              },
+                                                                                  "conditions":  [
+                                                                                                     {
+                                                                                                         "id":  "cond1",
+                                                                                                         "leftValue":  "={{ $(\u0027Check tag in allocation plan\u0027).all().length }}",
+                                                                                                         "rightValue":  0,
+                                                                                                         "operator":  {
+                                                                                                                          "type":  "number",
+                                                                                                                          "operation":  "gt"
+                                                                                                                      }
+                                                                                                     }
+                                                                                                 ],
+                                                                                  "combinator":  "and"
+                                                                              },
+                                                               "options":  {
+
+                                                                           }
+                                                           }
+                                        },
+                                        {
+                                            "id":  "mark-received-1",
+                                            "name":  "Mark as received",
+                                            "type":  "n8n-nodes-base.postgres",
+                                            "typeVersion":  2.5,
+                                            "position":  [
+                                                             900,
+                                                             200
+                                                         ],
+                                            "parameters":  {
+                                                               "operation":  "executeQuery",
+                                                               "query":  "UPDATE allocation_plan_details \nSET \n  status = \u0027received\u0027, \n  received_at = NOW(),\n  destination_panelist_id = (SELECT id FROM panelists WHERE node_id = \u0027{{ $(\u0027Set IDs\u0027).item.json.node_id }}\u0027 LIMIT 1),\n  origin_panelist_id = (SELECT id FROM panelists WHERE node_id = \u0027{{ $(\u0027Check tag in allocation plan\u0027).first().json.origin_node_id }}\u0027 LIMIT 1)\nWHERE id = \u0027{{ $(\u0027Check tag in allocation plan\u0027).first().json.id }}\u0027\nRETURNING id, tag_id, status, destination_panelist_name, origin_node_id",
+                                                               "options":  {
+
+                                                                           }
+                                                           },
+                                            "credentials":  {
+                                                                "postgres":  {
+                                                                                 "id":  "735a8hxfuUEDPIYD",
+                                                                                 "name":  "OneMS dev - Postgres account"
+                                                                             }
+                                                            }
+                                        },
+                                        {
+                                            "parameters":  {
+                                                               "jsCode":  "const lang = $(\u0027Set IDs\u0027).first().json.panelist_language || \u0027en\u0027;\nconst tag = $(\u0027Check tag in allocation plan\u0027).first().json.tag_id || \u0027\u0027;\nlet msg;\nif (lang === \u0027es\u0027) msg = `✅ *¡Paquete recibido!* La etiqueta *${tag}* ha sido registrada correctamente.`;\nelse if (lang === \u0027fr\u0027) msg = `✅ *Colis recu !* L etiquette *${tag}* a ete enregistree avec succes.`;\nelse if (lang === \u0027ar\u0027) msg = `✅ *تم استلام الطرد!* تم تسجيل الملصق *${tag}* بنجاح.`;\nelse msg = `✅ *Parcel received!* The label *${tag}* has been registered successfully.`;\nreturn [{ json: { response: msg, action: \u0027received\u0027, tag_id: tag } }];"
+                                                           },
+                                            "id":  "response-received-1",
+                                            "name":  "Response - received",
+                                            "type":  "n8n-nodes-base.code",
+                                            "typeVersion":  2,
+                                            "position":  [
+                                                             1100,
+                                                             200
+                                                         ]
+                                        },
+                                        {
+                                            "id":  "get-pending-1",
+                                            "name":  "Get pending parcels",
+                                            "type":  "n8n-nodes-base.postgres",
+                                            "typeVersion":  2.5,
+                                            "position":  [
+                                                             900,
+                                                             500
+                                                         ],
+                                            "parameters":  {
+                                                               "operation":  "executeQuery",
+                                                               "query":  "SELECT \n  apd.id, \n  apd.fecha_programada,\n  apd.destination_node_id,\n  COALESCE(dest_p.name, apd.destination_panelist_name, \u0027Desconocido\u0027) as destination_panelist_name,\n  c.name as carrier, \n  prod.description as product,\n  ROW_NUMBER() OVER (ORDER BY apd.fecha_programada ASC) as parcel_number \nFROM allocation_plan_details apd\nLEFT JOIN allocation_plans ap ON ap.id = apd.plan_id\nLEFT JOIN carriers c ON c.id = ap.carrier_id\nLEFT JOIN products prod ON prod.id = ap.product_id\nLEFT JOIN panelists dest_p ON dest_p.node_id = apd.destination_node_id\nWHERE apd.origin_node_id = \u0027{{ $json.node_id }}\u0027 \n  AND apd.status IN (\u0027pending\u0027, \u0027notified\u0027) \n  AND (apd.tag_id IS NULL OR apd.tag_id = \u0027\u0027) \nORDER BY apd.fecha_programada ASC \nLIMIT 10",
+                                                               "options":  {
+
+                                                                           }
+                                                           },
+                                            "credentials":  {
+                                                                "postgres":  {
+                                                                                 "id":  "735a8hxfuUEDPIYD",
+                                                                                 "name":  "OneMS dev - Postgres account"
+                                                                             }
+                                                            }
+                                        },
+                                        {
+                                            "id":  "format-pending-1",
+                                            "name":  "Format pending list",
+                                            "type":  "n8n-nodes-base.code",
+                                            "typeVersion":  2,
+                                            "position":  [
+                                                             1100,
+                                                             500
+                                                         ],
+                                            "parameters":  {
+                                                               "mode":  "runOnceForAllItems",
+                                                               "jsCode":  "const items = $input.all();\nconst ids = $(\u0027Set IDs\u0027).first().json;\nconst lang = ids.panelist_language || \u0027en\u0027;\nconst tag = ids.tag_id || \u0027\u0027;\n\nif (items.length === 0) {\n  let noMsg;\n  if (lang === \u0027es\u0027) noMsg = \u0027📭 No se encontraron paquetes pendientes. Intentalo mas tarde.\u0027;\n  else if (lang === \u0027fr\u0027) noMsg = \u0027📭 Aucun colis en attente. Veuillez reessayer plus tard.\u0027;\n  else if (lang === \u0027ar\u0027) noMsg = \u0027📭 لم يتم العثور على طرود معلقة. يرجى المحاولة لاحقا.\u0027;\n  else noMsg = \u0027📭 No pending parcels found. Please try again later.\u0027;\n  return [{ json: { response: noMsg, action: \u0027no_parcels\u0027, tag_id: tag } }];\n}\n\nlet header;\nif (lang === \u0027es\u0027) header = `📦 *Paquetes pendientes de envio:*\\n?Cual estas enviando con la etiqueta *${tag}*?\\nResponde con el numero:`;\nelse if (lang === \u0027fr\u0027) header = `📦 *Colis en attente envoi :*\\nLequel envoyez-vous avec l etiquette *${tag}* ?\\nRepondez avec le numero :`;\nelse if (lang === \u0027ar\u0027) header = `📦 *الطرود المعلقة للإرسال:*\\nأيها ترسل بالملصق *${tag}*?\\nأجب بالرقم:`;\nelse header = `📦 *Pending parcels to send:*\\nWhich parcel are you sending with label *${tag}*?\\nReply with the number:`;\n\nlet list = header + \u0027\\n\\n\u0027;\nitems.forEach((item, i) =\u003e {\n  const d = item.json;\n  list += `*${i+1}.* ${d.destination_panelist_name || \u0027?\u0027} - ${d.destination_city_name || \u0027?\u0027} (${d.fecha_programada || \u0027?\u0027})\\n`;\n});\n\nreturn [{ json: { response: list.trim(), action: \u0027assign_pending\u0027, tag_id: tag } }];"
+                                                           }
+                                        },
+                                        {
+                                            "id":  "save-context-1",
+                                            "name":  "Save assignment context",
+                                            "type":  "n8n-nodes-base.postgres",
+                                            "typeVersion":  2.5,
+                                            "position":  [
+                                                             1300,
+                                                             500
+                                                         ],
+                                            "parameters":  {
+                                                               "operation":  "executeQuery",
+                                                               "query":  "-- Delete any existing pending_tag context for this user\nDELETE FROM public.panelist_context \nWHERE telegram_id = \u0027{{ $(\u0027Set IDs\u0027).first().json.telegram_id }}\u0027\n  AND context_type = \u0027pending_tag\u0027;\n\n-- Insert new pending_tag context with the tag_id and pending parcels list\nINSERT INTO public.panelist_context (telegram_id, context_type, context_data)\nVALUES (\n    \u0027{{ $(\u0027Set IDs\u0027).first().json.telegram_id }}\u0027,\n    \u0027pending_tag\u0027,\n    jsonb_build_object(\n        \u0027tag_id\u0027, \u0027{{ $(\u0027Set IDs\u0027).first().json.tag_id }}\u0027,\n        \u0027pending_parcels\u0027, \u0027{{ JSON.stringify($json.parcels) }}\u0027::jsonb\n    )\n);\n\nSELECT \n    \u0027{{ $json.response }}\u0027 as response,\n    \u0027assign_list\u0027 as action;",
+                                                               "options":  {
+
+                                                                           }
+                                                           },
+                                            "credentials":  {
+                                                                "postgres":  {
+                                                                                 "id":  "735a8hxfuUEDPIYD",
+                                                                                 "name":  "OneMS dev - Postgres account"
+                                                                             }
+                                                            }
+                                        },
+                                        {
+                                            "id":  "response-assign-1",
+                                            "name":  "Response - assign list",
+                                            "type":  "n8n-nodes-base.set",
+                                            "typeVersion":  3.4,
+                                            "position":  [
+                                                             1500,
+                                                             500
+                                                         ],
+                                            "parameters":  {
+                                                               "assignments":  {
+                                                                                   "assignments":  [
+                                                                                                       {
+                                                                                                           "id":  "ra1",
+                                                                                                           "name":  "response",
+                                                                                                           "value":  "={{ $(\u0027Format pending list\u0027).item.json.response }}",
+                                                                                                           "type":  "string"
+                                                                                                       },
+                                                                                                       {
+                                                                                                           "id":  "ra2",
+                                                                                                           "name":  "action",
+                                                                                                           "value":  "={{ $(\u0027Format pending list\u0027).item.json.action }}",
+                                                                                                           "type":  "string"
+                                                                                                       },
+                                                                                                       {
+                                                                                                           "id":  "ral3",
+                                                                                                           "name":  "tag_id",
+                                                                                                           "value":  "={{ $(\u0027Set IDs\u0027).first().json.tag_id }}",
+                                                                                                           "type":  "string"
+                                                                                                       }
+                                                                                                   ]
+                                                                               },
+                                                               "options":  {
+
+                                                                           }
+                                                           }
+                                        },
+                                        {
+                                            "id":  "delete-selected-ctx",
+                                            "name":  "Pass direct assign data",
+                                            "type":  "n8n-nodes-base.set",
+                                            "typeVersion":  3.4,
+                                            "position":  [
+                                                             1320,
+                                                             360
+                                                         ],
+                                            "parameters":  {
+                                                               "assignments":  {
+                                                                                   "assignments":  [
+                                                                                                       {
+                                                                                                           "id":  "pass-1",
+                                                                                                           "name":  "telegram_id",
+                                                                                                           "value":  "={{ $json.telegram_id }}",
+                                                                                                           "type":  "string"
+                                                                                                       },
+                                                                                                       {
+                                                                                                           "id":  "pass-2",
+                                                                                                           "name":  "tag_id",
+                                                                                                           "value":  "={{ $json.tag_id }}",
+                                                                                                           "type":  "string"
+                                                                                                       },
+                                                                                                       {
+                                                                                                           "id":  "pass-3",
+                                                                                                           "name":  "parcel_id",
+                                                                                                           "value":  "={{ $json.parcel_id }}",
+                                                                                                           "type":  "string"
+                                                                                                       },
+                                                                                                       {
+                                                                                                           "id":  "pass-4",
+                                                                                                           "name":  "panelist_language",
+                                                                                                           "value":  "={{ $json.panelist_language }}",
+                                                                                                           "type":  "string"
+                                                                                                       }
+                                                                                                   ]
+                                                                               },
+                                                               "options":  {
+
+                                                                           }
+                                                           },
+                                            "credentials":  {
+                                                                "postgres":  {
+                                                                                 "id":  "735a8hxfuUEDPIYD",
+                                                                                 "name":  "OneMS dev - Postgres account"
+                                                                             }
+                                                            }
+                                        },
+                                        {
+                                            "id":  "response-direct-assign",
+                                            "name":  "Response direct assign success",
+                                            "type":  "n8n-nodes-base.set",
+                                            "typeVersion":  3.4,
+                                            "position":  [
+                                                             1540,
+                                                             360
+                                                         ],
+                                            "parameters":  {
+                                                               "assignments":  {
+                                                                                   "assignments":  [
+                                                                                                       {
+                                                                                                           "id":  "rda1",
+                                                                                                           "name":  "response",
+                                                                                                           "value":  "={{ (() =\u003e {\nconst lang = $(\u0027Set IDs\u0027).first().json.panelist_language || \u0027en\u0027;\nconst tag = $(\u0027Set IDs\u0027).first().json.tag_id || \u0027\u0027;\nif (lang === \u0027es\u0027) return `✅ *¡Etiqueta asignada!* La etiqueta *${tag}* ha sido vinculada a tu paquete y marcada como enviada.`;\nif (lang === \u0027fr\u0027) return `✅ *Etiquette assignee !* L etiquette *${tag}* a ete liee a votre colis et marquee comme envoyee.`;\nif (lang === \u0027ar\u0027) return `✅ *تم تعيين الملصق!* تم ربط الملصق *${tag}* بطردك وتم تمييزه كمرسل.`;\nreturn `✅ *Label assigned!* Tag *${tag}* has been linked to your parcel and marked as sent.`;\n})() }}",
+                                                                                                           "type":  "string"
+                                                                                                       },
+                                                                                                       {
+                                                                                                           "id":  "rda2",
+                                                                                                           "name":  "action",
+                                                                                                           "value":  "direct_assign",
+                                                                                                           "type":  "string"
+                                                                                                       },
+                                                                                                       {
+                                                                                                           "id":  "rda3",
+                                                                                                           "name":  "tag_id",
+                                                                                                           "value":  "={{ $(\u0027Set IDs\u0027).first().json.tag_id }}",
+                                                                                                           "type":  "string"
+                                                                                                       }
+                                                                                                   ]
+                                                                               },
+                                                               "options":  {
+
+                                                                           }
+                                                           }
+                                        },
+                                        {
+                                            "id":  "check-selected-parcel",
+                                            "name":  "Check selected parcel",
+                                            "type":  "n8n-nodes-base.postgres",
+                                            "typeVersion":  2.5,
+                                            "position":  [
+                                                             900,
+                                                             600
+                                                         ],
+                                            "parameters":  {
+                                                               "operation":  "executeQuery",
+                                                               "query":  "SELECT id, context_data\nFROM public.panelist_context\nWHERE telegram_id = $1::text\n  AND context_type = \u0027selected_parcel\u0027\nORDER BY created_at DESC\nLIMIT 1",
+                                                               "options":  {
+                                                                               "queryReplacement":  "={{ [$(\u0027Set IDs\u0027).first().json.telegram_id] }}"
+                                                                           }
+                                                           },
+                                            "credentials":  {
+                                                                "postgres":  {
+                                                                                 "id":  "735a8hxfuUEDPIYD",
+                                                                                 "name":  "OneMS dev - Postgres account"
+                                                                             }
+                                                            }
+                                        },
+                                        {
+                                            "id":  "has-selected-parcel",
+                                            "name":  "Has selected parcel?",
+                                            "type":  "n8n-nodes-base.if",
+                                            "typeVersion":  2.2,
+                                            "position":  [
+                                                             1100,
+                                                             600
+                                                         ],
+                                            "parameters":  {
+                                                               "conditions":  {
+                                                                                  "options":  {
+                                                                                                  "caseSensitive":  true,
+                                                                                                  "leftValue":  "",
+                                                                                                  "typeValidation":  "strict"
+                                                                                              },
+                                                                                  "conditions":  [
+                                                                                                     {
+                                                                                                         "id":  "cond-1",
+                                                                                                         "leftValue":  "={{ $json.id }}",
+                                                                                                         "rightValue":  "",
+                                                                                                         "operator":  {
+                                                                                                                          "type":  "string",
+                                                                                                                          "operation":  "notEmpty",
+                                                                                                                          "singleValue":  true
+                                                                                                                      }
+                                                                                                     }
+                                                                                                 ],
+                                                                                  "combinator":  "and"
+                                                                              }
+                                                           }
+                                        },
+                                        {
+                                            "id":  "set-direct-from-ctx",
+                                            "name":  "Set direct assign from context",
+                                            "type":  "n8n-nodes-base.set",
+                                            "typeVersion":  3.4,
+                                            "position":  [
+                                                             1300,
+                                                             500
+                                                         ],
+                                            "parameters":  {
+                                                               "assignments":  {
+                                                                                   "assignments":  [
+                                                                                                       {
+                                                                                                           "id":  "sda1",
+                                                                                                           "name":  "telegram_id",
+                                                                                                           "value":  "={{ $(\u0027Set IDs\u0027).first().json.telegram_id }}",
+                                                                                                           "type":  "string"
+                                                                                                       },
+                                                                                                       {
+                                                                                                           "id":  "sda2",
+                                                                                                           "name":  "tag_id",
+                                                                                                           "value":  "={{ $(\u0027Set IDs\u0027).first().json.tag_id }}",
+                                                                                                           "type":  "string"
+                                                                                                       },
+                                                                                                       {
+                                                                                                           "id":  "sda3",
+                                                                                                           "name":  "parcel_id",
+                                                                                                           "value":  "={{ $json.context_data.parcel_id }}",
+                                                                                                           "type":  "string"
+                                                                                                       },
+                                                                                                       {
+                                                                                                           "id":  "sda4",
+                                                                                                           "name":  "panelist_language",
+                                                                                                           "value":  "={{ $(\u0027Set IDs\u0027).first().json.panelist_language }}",
+                                                                                                           "type":  "string"
+                                                                                                       }
+                                                                                                   ]
+                                                                               },
+                                                               "options":  {
+
+                                                                           }
+                                                           }
+                                        },
+                                        {
+                                            "id":  "call-assign-direct-001",
+                                            "name":  "Call Assign tag to parcel (direct)",
+                                            "type":  "n8n-nodes-base.executeWorkflow",
+                                            "typeVersion":  1.1,
+                                            "position":  [
+                                                             1420,
+                                                             500
+                                                         ],
+                                            "parameters":  {
+                                                               "workflowId":  {
+                                                                                  "__rl":  true,
+                                                                                  "value":  "NXKOurAMtMNsDeTw",
+                                                                                  "mode":  "id"
+                                                                              },
+                                                               "options":  {
+                                                                               "waitForSubWorkflow":  true
+                                                                           },
+                                                               "workflowInputs":  {
+                                                                                      "mappingMode":  "defineBelow",
+                                                                                      "value":  {
+                                                                                                    "telegram_id":  "={{ $json.telegram_id }}",
+                                                                                                    "tag_id":  "={{ $json.tag_id }}",
+                                                                                                    "parcel_id":  "={{ $json.parcel_id }}",
+                                                                                                    "panelist_language":  "={{ $json.panelist_language }}"
+                                                                                                },
+                                                                                      "matchingColumns":  [
+
+                                                                                                          ],
+                                                                                      "schema":  [
+
+                                                                                                 ]
+                                                                                  }
+                                                           }
+                                        }
+                                    ],
+                          "connections":  {
+                                              "When Executed by Another Workflow":  {
+                                                                                        "main":  [
+                                                                                                     [
+                                                                                                         {
+                                                                                                             "node":  "Get panelist",
+                                                                                                             "type":  "main",
+                                                                                                             "index":  0
+                                                                                                         }
+                                                                                                     ]
+                                                                                                 ]
+                                                                                    },
+                                              "Get panelist":  {
+                                                                   "main":  [
+                                                                                [
+                                                                                    {
+                                                                                        "node":  "Set IDs",
+                                                                                        "type":  "main",
+                                                                                        "index":  0
+                                                                                    }
+                                                                                ]
+                                                                            ]
+                                                               },
+                                              "Set IDs":  {
+                                                              "main":  [
+                                                                           [
+                                                                               {
+                                                                                   "node":  "Check tag in allocation plan",
+                                                                                   "type":  "main",
+                                                                                   "index":  0
+                                                                               },
+                                                                               {
+                                                                                   "node":  "Tag exists?",
+                                                                                   "type":  "main",
+                                                                                   "index":  0
+                                                                               }
+                                                                           ]
+                                                                       ]
+                                                          },
+                                              "Tag exists?":  {
+                                                                  "main":  [
+                                                                               [
+                                                                                   {
+                                                                                       "node":  "Mark as received",
+                                                                                       "type":  "main",
+                                                                                       "index":  0
+                                                                                   }
+                                                                               ],
+                                                                               [
+                                                                                   {
+                                                                                       "node":  "Check selected parcel",
+                                                                                       "type":  "main",
+                                                                                       "index":  0
+                                                                                   }
+                                                                               ]
+                                                                           ]
+                                                              },
+                                              "Mark as received":  {
+                                                                       "main":  [
+                                                                                    [
+                                                                                        {
+                                                                                            "node":  "Response - received",
+                                                                                            "type":  "main",
+                                                                                            "index":  0
+                                                                                        }
+                                                                                    ]
+                                                                                ]
+                                                                   },
+                                              "Get pending parcels":  {
+                                                                          "main":  [
+                                                                                       [
+                                                                                           {
+                                                                                               "node":  "Format pending list",
+                                                                                               "type":  "main",
+                                                                                               "index":  0
+                                                                                           }
+                                                                                       ]
+                                                                                   ]
+                                                                      },
+                                              "Format pending list":  {
+                                                                          "main":  [
+                                                                                       [
+                                                                                           {
+                                                                                               "node":  "Save assignment context",
+                                                                                               "type":  "main",
+                                                                                               "index":  0
+                                                                                           }
+                                                                                       ]
+                                                                                   ]
+                                                                      },
+                                              "Save assignment context":  {
+                                                                              "main":  [
+                                                                                           [
+                                                                                               {
+                                                                                                   "node":  "Response - assign list",
+                                                                                                   "type":  "main",
+                                                                                                   "index":  0
+                                                                                               }
+                                                                                           ]
+                                                                                       ]
+                                                                          },
+                                              "Pass direct assign data":  {
+                                                                              "main":  [
+                                                                                           [
+                                                                                               {
+                                                                                                   "node":  "Response direct assign success",
+                                                                                                   "type":  "main",
+                                                                                                   "index":  0
+                                                                                               }
+                                                                                           ]
+                                                                                       ]
+                                                                          },
+                                              "Check selected parcel":  {
+                                                                            "main":  [
+                                                                                         [
+                                                                                             {
+                                                                                                 "node":  "Has selected parcel?",
+                                                                                                 "type":  "main",
+                                                                                                 "index":  0
+                                                                                             }
+                                                                                         ]
+                                                                                     ]
+                                                                        },
+                                              "Has selected parcel?":  {
+                                                                           "main":  [
+                                                                                        [
+                                                                                            {
+                                                                                                "node":  "Set direct assign from context",
+                                                                                                "type":  "main",
+                                                                                                "index":  0
+                                                                                            }
+                                                                                        ],
+                                                                                        [
+                                                                                            {
+                                                                                                "node":  "Get pending parcels",
+                                                                                                "type":  "main",
+                                                                                                "index":  0
+                                                                                            }
+                                                                                        ]
+                                                                                    ]
+                                                                       },
+                                              "Set direct assign from context":  {
+                                                                                     "main":  [
+                                                                                                  [
+                                                                                                      {
+                                                                                                          "node":  "Call Assign tag to parcel (direct)",
+                                                                                                          "type":  "main",
+                                                                                                          "index":  0
+                                                                                                      }
+                                                                                                  ]
+                                                                                              ]
+                                                                                 },
+                                              "Call Assign tag to parcel (direct)":  {
+                                                                                         "main":  [
+                                                                                                      [
+                                                                                                          {
+                                                                                                              "node":  "Response direct assign success",
+                                                                                                              "type":  "main",
+                                                                                                              "index":  0
+                                                                                                          }
+                                                                                                      ]
+                                                                                                  ]
+                                                                                     }
+                                          },
+                          "authors":  "Ignacio Fernandez",
+                          "name":  null,
+                          "description":  null,
+                          "autosaved":  false,
+                          "workflowPublishHistory":  [
+                                                         {
+                                                             "createdAt":  "2026-04-22T10:29:04.544Z",
+                                                             "id":  583,
+                                                             "workflowId":  "PrbIkeUhaKrxP0KC",
+                                                             "versionId":  "279c1b64-ab69-4412-889b-6366b81786d9",
+                                                             "event":  "activated",
+                                                             "userId":  "310002b0-8d54-456b-8f9f-7611a34898fd"
+                                                         },
+                                                         {
+                                                             "createdAt":  "2026-04-22T10:29:04.464Z",
+                                                             "id":  582,
+                                                             "workflowId":  "PrbIkeUhaKrxP0KC",
+                                                             "versionId":  "279c1b64-ab69-4412-889b-6366b81786d9",
+                                                             "event":  "deactivated",
+                                                             "userId":  "310002b0-8d54-456b-8f9f-7611a34898fd"
+                                                         }
+                                                     ]
+                      }
+}
