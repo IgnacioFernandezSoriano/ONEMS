@@ -23,6 +23,13 @@ export default function NodeLoadBalancing() {
   const [showFilters, setShowFilters] = useState(true);
   const [referenceLoad, setReferenceLoad] = useState(6); // Default reference samples per node
   const [deviationPercent, setDeviationPercent] = useState(20); // Default 20% deviation
+  // Fence: de hoy a esta fecha (incluida) el balanceo no toca nada. Por defecto, el domingo de la semana actual.
+  const endOfCurrentWeek = () => {
+    const d = new Date();
+    d.setDate(d.getDate() + (7 - (d.getDay() || 7)));
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  };
+  const [fenceUntil, setFenceUntil] = useState(endOfCurrentWeek);
 
   // Las fechas que se escriben (startDate/endDate) y las que se consultan (applied) van separadas: mientras se
   // teclea un <input type="date"> salen valores intermedios (anyo 0002, inicio > fin...) y cada uno lanzaba una
@@ -43,7 +50,8 @@ export default function NodeLoadBalancing() {
   const datesPending = isUsablePeriod(startDate, endDate) && (startDate !== applied.start || endDate !== applied.end);
 
   const { loadData, dayData, citySummaries, loading, error, refetch, previewBalanceV2, applyBalanceV2, previewAll, applyAll } =
-    useNodeLoadBalancing(profile?.account_id || undefined, applied.start, applied.end, referenceLoad, deviationPercent);
+    useNodeLoadBalancing(profile?.account_id || undefined, applied.start, applied.end, referenceLoad, deviationPercent,
+      fenceUntil);
 
   const { summary: deferredSummary } = useDeferredSamples();
   const deferredByCity = useMemo(
@@ -333,6 +341,7 @@ export default function NodeLoadBalancing() {
     setSelectedYear(new Date().getFullYear());
     setReferenceLoad(63);
     setDeviationPercent(20);
+    setFenceUntil(endOfCurrentWeek());
   };
 
   // Month names for buttons
@@ -500,7 +509,7 @@ export default function NodeLoadBalancing() {
         {showFilters && (
           <div className="p-4 space-y-4">
             {/* Date Range Filters */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   {t("common.start_date")}
@@ -524,6 +533,20 @@ export default function NodeLoadBalancing() {
                   disabled={applying}
                   className="disabled:opacity-50 disabled:cursor-not-allowed block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {t("node_load_balancing.fence_until")}
+                </label>
+                <input
+                  type="date"
+                  value={fenceUntil}
+                  onChange={(e) => setFenceUntil(e.target.value)}
+                  disabled={applying}
+                  title={t("node_load_balancing.fence_until_hint")}
+                  className="disabled:opacity-50 disabled:cursor-not-allowed block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
+                <p className="mt-1 text-xs text-gray-500">{t("node_load_balancing.fence_until_hint")}</p>
               </div>
             </div>
 

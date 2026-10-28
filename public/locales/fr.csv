@@ -3151,3 +3151,7 @@ lb2.warning.deferred_removed,Échantillons retirés du plan et enregistrés comm
 lb2.warning.deferred_blocked,Échantillons à compenser impossibles à déplacer car ils sont figés.
 lb2.rec.deferred_waiting,{count} échantillons à compenser attendent dans cette ville. L’équilibrage les réintroduira dès qu’un jour valide sera disponible.
 lb2.rec.deferred_will_remove,La dernière prévisualisation mettrait de côté {count} échantillons de ce plan et les enregistrerait comme échantillons à compenser. Vérifiez la prévisualisation avant d’appliquer.
+node_load_balancing.fence_until,Gel jusqu'au
+node_load_balancing.fence_until_hint,"D'aujourd'hui à cette date, l'équilibrage ne déplace, ne supprime ni ne crée aucun échantillon."
+lb2.deferred.replaced_pobox,"{count} d'entre eux remplacent des échantillons POBOX (même jour et nœud, sans envoi supplémentaire)."
+lb2.fence_note,Gel : les échantillons jusqu'au {date} restent tels quels ; l'équilibrage commence le lendemain.

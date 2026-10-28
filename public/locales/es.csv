@@ -3159,3 +3159,7 @@ lb2.warning.deferred_removed,Muestras quitadas del plan y anotadas como muestras
 lb2.warning.deferred_blocked,Muestras por compensar que no se pueden mover porque están congeladas.
 lb2.rec.deferred_waiting,Hay {count} muestras por compensar esperando en esta ciudad. El balanceo las reintroducirá cuando haya un día válido.
 lb2.rec.deferred_will_remove,La última vista previa apartaría {count} muestras de este plan y las anotaría como muestras por compensar. Revisa la vista previa antes de aplicar.
+node_load_balancing.fence_until,Fence hasta
+node_load_balancing.fence_until_hint,"Desde hoy hasta esta fecha el balanceo no mueve, borra ni crea muestras."
+lb2.deferred.replaced_pobox,"{count} de ellas sustituyen a muestras POBOX (mismo día y nodo, sin envío extra)."
+lb2.fence_note,Fence: las muestras hasta el {date} se quedan como están; el balanceo empieza el día siguiente.

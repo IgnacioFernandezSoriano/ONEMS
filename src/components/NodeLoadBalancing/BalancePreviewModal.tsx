@@ -236,7 +236,18 @@ const CityBody: React.FC<{ item: BalanceCityResult }> = ({ item }) => {
               </div>
             ))}
           </div>
+          {(r.deferred.replaced_pobox ?? 0) > 0 && (
+            <p className="mt-3 text-sm text-amber-800">
+              {t('lb2.deferred.replaced_pobox', { count: r.deferred.replaced_pobox ?? 0 })}
+            </p>
+          )}
         </div>
+      )}
+
+      {r.fence_until && (
+        <p className="mb-4 text-sm text-gray-600">
+          {t('lb2.fence_note', { date: r.fence_until })}
+        </p>
       )}
 
       <WarningsList result={r} />
