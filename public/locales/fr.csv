@@ -3163,3 +3163,5 @@ lb2.pobox_shares_total,Total : {total} %
 lb2.pobox_shares_sum_error,Les pourcentages doivent totaliser 100 (ou tous à 0).
 lb2.pobox_shares_saved,Répartition enregistrée.
 lb2.pobox_shares_no_products,Aucun produit avec un plan actif.
+help_center.doc.load_balancing.title,Équilibrage de charge
+help_center.doc.load_balancing.desc,"Ce qu'est l'équilibrage, comment utiliser l'écran pas à pas et comment ONEMS choisit le jour et le nœud de chaque échantillon."

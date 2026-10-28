@@ -3163,3 +3163,5 @@ lb2.pobox_shares_total,المجموع: {total}%
 lb2.pobox_shares_sum_error,يجب أن يكون مجموع النسب 100 (أو الكل 0).
 lb2.pobox_shares_saved,تم حفظ التوزيع.
 lb2.pobox_shares_no_products,لا توجد منتجات بخطة نشطة.
+help_center.doc.load_balancing.title,موازنة الحمل
+help_center.doc.load_balancing.desc,ما هي الموازنة، وكيفية استخدام الشاشة خطوة بخطوة، وكيف يحدد ONEMS يوم كل عينة وعقدتها.

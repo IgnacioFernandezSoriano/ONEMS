@@ -3171,3 +3171,5 @@ lb2.pobox_shares_total,Total: {total}%
 lb2.pobox_shares_sum_error,Los porcentajes deben sumar 100 (o todos 0).
 lb2.pobox_shares_saved,Reparto guardado.
 lb2.pobox_shares_no_products,No hay productos con plan activo.
+help_center.doc.load_balancing.title,Balanceo de carga
+help_center.doc.load_balancing.desc,"Qué es el balanceo, cómo usar la pantalla paso a paso y cómo decide ONEMS el día y el nodo de cada muestra."
