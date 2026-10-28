@@ -2674,7 +2674,7 @@ menu.sign_out,Se déconnecter
 incidents.menu_group,Incidents
 incidents.panelist_availability,Disponibilité des panélistes
 incidents.title,Incidents de disponibilité des panélistes
-incidents.pending_badge_tooltip,Indisponibilités en attente de révision
+incidents.pending_badge_tooltip,Indisponibilités qui demandent votre action : en attente de votre décision ou avec des réponses du panéliste non lues
 incidents.inbox.panelist,Panéliste
 incidents.inbox.node,Nœud / ville
 incidents.inbox.dates,Dates d'indisponibilité
@@ -2836,7 +2836,8 @@ unavailability.reason_materials,Matériel
 unavailability.dates_locked,Les dates proviennent du panéliste et ne peuvent pas être modifiées. Annulez et déclarez une nouvelle période si nécessaire.
 unavailability.confirm_cancel_one,Annuler cette période d'indisponibilité ? Ses modifications du plan seront annulées et elle ne pourra pas être réactivée.
 reported_incidents.menu,Incidents signalés
-reported_incidents.badge_tooltip,Incidents signalés par les panélistes en attente d'examen
+reported_incidents.badge_tooltip,Incidents qui demandent votre action : nouveaux ou avec des réponses du panéliste non lues
+reported_incidents.new_badge,Nouveau
 reported_incidents.title,Incidents signalés par les panélistes
 reported_incidents.open,Ouvrir
 reported_incidents.empty,Aucun incident signalé

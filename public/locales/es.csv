@@ -2682,7 +2682,7 @@ menu.sign_out,Cerrar sesión
 incidents.menu_group,Incidencias
 incidents.panelist_availability,Disponibilidad de panelistas
 incidents.title,Incidencias de disponibilidad de panelistas
-incidents.pending_badge_tooltip,Bajas pendientes de revisar
+incidents.pending_badge_tooltip,Bajas que requieren tu acción: pendientes de tu decisión o con respuestas del panelista sin leer
 incidents.inbox.panelist,Panelista
 incidents.inbox.node,Nodo / ciudad
 incidents.inbox.dates,Fechas de la baja
@@ -2844,7 +2844,8 @@ unavailability.reason_materials,Materiales
 unavailability.dates_locked,Las fechas vienen del panelista y no se pueden editar. Cancela y declara un nuevo periodo si es necesario.
 unavailability.confirm_cancel_one,¿Cancelar este periodo de indisponibilidad? Se revertirán sus cambios en el plan y no podrá reactivarse.
 reported_incidents.menu,Incidencias reportadas
-reported_incidents.badge_tooltip,Incidencias reportadas por panelistas pendientes de revisar
+reported_incidents.badge_tooltip,Incidencias que requieren tu acción: nuevas o con respuestas del panelista sin leer
+reported_incidents.new_badge,Nueva
 reported_incidents.title,Incidencias reportadas por panelistas
 reported_incidents.open,Abrir
 reported_incidents.empty,No hay incidencias reportadas

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { notifyIncidentAttention } from '@/lib/hooks/useIncidentAttention'
 
 export type ConversationKind = 'reported' | 'unavailability'
 
@@ -61,6 +62,7 @@ export function useIncidentConversation(kind: ConversationKind, incidentId: stri
               p_incident_kind: kind, p_incident_id: incidentId,
             })
             if (re && !warnedRead) { warnedRead = true; console.warn('mark_incident_conversation_read no disponible', re) }
+            if (!re) notifyIncidentAttention()
           }
         } catch (err: any) {
           if (alive.current) setError(err.message ?? String(err))

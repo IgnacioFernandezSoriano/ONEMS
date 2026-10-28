@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { INCIDENT_ATTENTION_EVENT } from '@/lib/hooks/useIncidentAttention'
 
 interface UnreadRow {
   incident_kind: 'reported' | 'unavailability'
@@ -30,7 +31,8 @@ export function useUnreadConversations() {
   useEffect(() => {
     load()
     const id = setInterval(load, REFRESH_MS)
-    return () => clearInterval(id)
+    window.addEventListener(INCIDENT_ATTENTION_EVENT, load)
+    return () => { clearInterval(id); window.removeEventListener(INCIDENT_ATTENTION_EVENT, load) }
   }, [load])
 
   return useMemo(() => {

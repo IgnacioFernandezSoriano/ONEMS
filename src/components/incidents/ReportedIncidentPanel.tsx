@@ -26,7 +26,7 @@ interface TFn {
 
 export function ReportedIncidentPanel({ incidentId, onBack }: { incidentId: string; onBack: () => void }) {
   const { t } = useTranslation()
-  const { fetchIncident, resolve, actCancel, rerouteReturnedSample, signedPhotoUrl, listNodesForMove, suggestRerouteReturnedSample } = useReportedIncidents()
+  const { fetchIncident, markSeen, resolve, actCancel, rerouteReturnedSample, signedPhotoUrl, listNodesForMove, suggestRerouteReturnedSample } = useReportedIncidents()
   const [inc, setInc] = useState<ReportedIncidentDetail | null>(null)
   const [photo, setPhoto] = useState<string | null>(null)
   const [note, setNote] = useState('')
@@ -38,6 +38,8 @@ export function ReportedIncidentPanel({ incidentId, onBack }: { incidentId: stri
     setInc(d)
   }, [fetchIncident, incidentId])
   useEffect(() => { load() }, [load])
+  // Abrirla la quita de "nuevas" en el contador del menu
+  useEffect(() => { markSeen(incidentId) }, [markSeen, incidentId])
   useEffect(() => {
     const p = inc?.photo_url
     if (p && !/^https?:\/\//.test(p)) signedPhotoUrl(p).then(setPhoto)
