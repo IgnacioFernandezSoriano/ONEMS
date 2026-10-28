@@ -3163,3 +3163,11 @@ node_load_balancing.fence_until,Fence hasta
 node_load_balancing.fence_until_hint,"Desde hoy hasta esta fecha el balanceo no mueve, borra ni crea muestras."
 lb2.deferred.replaced_pobox,"{count} de ellas sustituyen a muestras POBOX (mismo día y nodo, sin envío extra)."
 lb2.fence_note,Fence: las muestras hasta el {date} se quedan como están; el balanceo empieza el día siguiente.
+lb2.pobox_shares_title,Muestras POBOX extra por producto
+lb2.pobox_shares_help,Porcentaje de las muestras extra que crea POBOX que va a cada producto. Todo a 0 = sin reparto (plan menos avanzado).
+lb2.pobox_shares_product,Producto
+lb2.pobox_shares_current,Muestras POBOX actuales
+lb2.pobox_shares_total,Total: {total}%
+lb2.pobox_shares_sum_error,Los porcentajes deben sumar 100 (o todos 0).
+lb2.pobox_shares_saved,Reparto guardado.
+lb2.pobox_shares_no_products,No hay productos con plan activo.

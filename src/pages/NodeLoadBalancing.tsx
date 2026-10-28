@@ -62,8 +62,8 @@ export default function NodeLoadBalancing() {
   const [lastPreviewRemoved, setLastPreviewRemoved] = useState<Record<string, number>>({});
 
   const { weeklySchedule, setWorkingDay } = useAccountConfig();
-  const { account: accountPolicy, cities: cityPolicies, updateAccountPolicy, updateCityPolicy, effectiveFor } =
-    useBalancePolicies();
+  const { account: accountPolicy, cities: cityPolicies, poboxShares, updateAccountPolicy, updateCityPolicy,
+    savePoboxShares, effectiveFor } = useBalancePolicies();
   const [scales, setScales] = useState<Record<string, LoadScale>>({});
   const dayDataByCity = useMemo(() => {
     const m = new Map<string, NodeDayLoad[]>();
@@ -481,6 +481,8 @@ export default function NodeLoadBalancing() {
         balanceAllHint={t('lb2.balance_all_need_dates')}
         fenceUntil={fenceUntil}
         onChangeFence={setFenceUntil}
+        poboxShares={poboxShares}
+        onSavePoboxShares={savePoboxShares}
       />
 
       {/* Filters */}

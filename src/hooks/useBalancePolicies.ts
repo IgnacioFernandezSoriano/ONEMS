@@ -15,22 +15,39 @@ export interface CityBalancePolicy {
   pobox_enabled: boolean | null
 }
 
+/** Producto en el reparto de las muestras POBOX extra (pct 0 = no recibe; los pct > 0 suman 100). */
+export interface PoboxProductShare {
+  product_id: string
+  code: string
+  description: string | null
+  pct: number
+  /** Muestras POBOX no canceladas que ya tiene el producto */
+  pobox_count: number
+}
+
 const DEFAULT_ACCOUNT_POLICY: AccountBalancePolicy = { date_policy: 'daily', pobox_enabled: false }
 
 export function useBalancePolicies() {
   const accountId = useEffectiveAccountId()
   const [account, setAccount] = useState<AccountBalancePolicy | null>(null)
   const [cities, setCities] = useState<CityBalancePolicy[]>([])
+  const [poboxShares, setPoboxShares] = useState<PoboxProductShare[]>([])
   const [loading, setLoading] = useState(true)
 
   const refetch = useCallback(async () => {
     if (!accountId) {
       setAccount(null)
       setCities([])
+      setPoboxShares([])
       setLoading(false)
       return
     }
     setLoading(true)
+    // Reparto de POBOX por producto (no bloquea el resto si la RPC aun no existe)
+    supabase.rpc('rpc_get_pobox_product_shares', { p_account_id: accountId }).then(({ data, error }) => {
+      if (error) console.warn('[useBalancePolicies] rpc_get_pobox_product_shares no disponible:', error)
+      setPoboxShares(error ? [] : ((data as PoboxProductShare[] | null) ?? []))
+    })
     try {
       // La politica de cuenta se lee por RPC: el SELECT de account_config (RLS) no deja ver la fila a un
       // superadmin (no tiene account_id) y la casilla POBOX parecia no guardarse.
@@ -99,8 +116,24 @@ export function useBalancePolicies() {
     return { success: true }
   }
 
+  /** Guarda el reparto (solo pct > 0; deben sumar 100, o todo 0 = sin reparto). */
+  const savePoboxShares = async (shares: { product_id: string; pct: number }[]) => {
+    if (!accountId) return { success: false, error: 'No account selected' }
+    const { data, error } = await supabase.rpc('rpc_set_pobox_product_shares', {
+      p_account_id: accountId,
+      p_shares: shares.filter((s) => s.pct > 0),
+    })
+    if (error) return { success: false, error: error.message }
+    const res = data as { success?: boolean; error?: string } | null
+    if (res && res.success === false) return { success: false, error: res.error ?? 'Error' }
+    await refetch()
+    return { success: true }
+  }
+
   const effectiveFor = (cityId: string): { datePolicy: DatePolicy; pobox: boolean } =>
     effectivePolicy(account ?? DEFAULT_ACCOUNT_POLICY, cities.find((c) => c.id === cityId))
 
-  return { account, cities, updateAccountPolicy, updateCityPolicy, effectiveFor, loading, refetch }
+  return {
+    account, cities, poboxShares, updateAccountPolicy, updateCityPolicy, savePoboxShares, effectiveFor, loading, refetch,
+  }
 }
