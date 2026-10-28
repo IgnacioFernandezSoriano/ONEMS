@@ -1,22 +1,72 @@
 import React from 'react';
-import { NodeLoadData } from '../../hooks/useNodeLoadBalancing';
+import { NodeLoadData, NodeDayLoad } from '../../hooks/useNodeLoadBalancing';
+import { localDateKey, type DatePolicy } from '../../lib/workingDays';
+import { analyzeCity, type Severity } from '../../lib/cityAnalysis';
+import { buildDayView, buildMonthView, compareNatural, dayCellKey, dayTotals, isConflict, isPoboxGap, orderWeekNumbers } from '../../lib/loadViews';
+import { useTranslation } from '@/hooks/useTranslation';
+
+export type LoadScale = 'day' | 'week' | 'month';
+
+export interface CityPolicyView {
+  datePolicy: DatePolicy;
+  pobox: boolean;
+  cityOverride: { date_policy: DatePolicy | null; pobox_enabled: boolean | null };
+}
 
 interface CityLoadCardProps {
   cityName: string;
   cityData: NodeLoadData[];
   onBalance: () => void;
+  /** Extra lock (e.g. a balance is being applied): also locks the per-city policy selects */
+  balanceDisabled?: boolean;
+  dayData?: NodeDayLoad[];
+  /** muestras por compensar de esta ciudad que esperan en el registro */
+  deferredPending?: number;
+  /** muestras que la ultima vista previa apartaria del plan */
+  willRemove?: number;
+  scale?: LoadScale;
+  onScaleChange?: (s: LoadScale) => void;
+  policy?: CityPolicyView;
+  onCityPolicyChange?: (p: { date_policy?: DatePolicy | null; pobox_enabled?: boolean | null }) => void;
 }
+
+const FINDING_BULLET: Record<Severity, string> = {
+  critical: 'text-red-600',
+  warning: 'text-orange-600',
+  info: 'text-blue-600',
+  ok: 'text-green-600',
+};
+
+const UNAVAILABLE_CLASS =
+  'bg-gray-200 bg-[repeating-linear-gradient(45deg,transparent,transparent_4px,rgba(0,0,0,.08)_4px,rgba(0,0,0,.08)_8px)]';
 
 export const CityLoadCard: React.FC<CityLoadCardProps> = ({
   cityName,
   cityData,
   onBalance,
+  balanceDisabled = false,
+  dayData = [],
+  deferredPending = 0,
+  willRemove = 0,
+  scale = 'week',
+  onScaleChange,
+  policy,
+  onCityPolicyChange,
 }) => {
-  const [isRecommendationsExpanded, setIsRecommendationsExpanded] = React.useState(false);
+  const { t } = useTranslation();
+  const dayView = React.useMemo(() => buildDayView(dayData), [dayData]);
+  const dayTotalsMap = React.useMemo(() => dayTotals(dayView), [dayView]);
+  const monthView = React.useMemo(() => buildMonthView(dayData), [dayData]);
+  const dayNodes = React.useMemo(() => {
+    const m = new Map<string, string | null>();
+    dayData.forEach((r) => { if (!m.has(r.node_code)) m.set(r.node_code, r.panelist_name); });
+    return [...m.entries()].sort((a, b) => compareNatural(a[0], b[0]));
+  }, [dayData]);
+  const [isRecommendationsExpanded, setIsRecommendationsExpanded] = React.useState(true);
   
   // Get unique weeks and nodes
-  const weeks = Array.from(new Set(cityData.map((d) => d.week_number))).sort();
-  const nodes = Array.from(new Set(cityData.map((d) => d.node_code))).sort();
+  const weeks = orderWeekNumbers(cityData);
+  const nodes = Array.from(new Set(cityData.map((d) => d.node_code))).sort(compareNatural);
 
   // Calculate city stats
   const totalShipments = cityData.reduce((sum, d) => sum + d.shipment_count, 0);
@@ -66,6 +116,32 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
   // Calculate thresholds based on reference and deviation
   const highThreshold = referenceLoad * (1 + deviationPercent / 100);
   const saturatedThreshold = referenceLoad * (1 + (deviationPercent * 1.5) / 100);
+
+  // Analisis y recomendaciones segun las reglas del balanceador (carga, ausencias, nodos sin panelista,
+  // atrasados, picos diarios y huecos POBOX); los textos salen de lb2.rec.* en el idioma del usuario.
+  const findings = React.useMemo(
+    () =>
+      analyzeCity({
+        weekCells: cityData,
+        highThreshold,
+        saturatedThreshold,
+        dayRows: dayData,
+        datePolicy: policy?.datePolicy ?? 'daily',
+        pobox: !!policy?.pobox,
+        today: localDateKey(new Date()),
+        deferredPending,
+        willRemove,
+      }),
+    [cityData, dayData, highThreshold, saturatedThreshold, policy?.datePolicy, policy?.pobox, deferredPending, willRemove]
+  );
+  const actionableFindings = findings.filter((f) => f.severity === 'critical' || f.severity === 'warning').length;
+  const maxCell = React.useMemo(() => {
+    let best = { node: '', week: 0, count: 0 };
+    cityData.forEach((d) => {
+      if (d.shipment_count > best.count) best = { node: d.node_code, week: d.week_number, count: d.shipment_count };
+    });
+    return best;
+  }, [cityData]);
 
   const getLoadColor = (count: number) => {
     if (count >= saturatedThreshold) return 'text-red-700';
@@ -124,8 +200,37 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
               </svg>
             </div>
             <h3 className="text-lg font-semibold text-gray-900">{cityName}</h3>
+            {policy && (
+              <div className="flex items-center gap-1">
+                <span className="px-2 py-0.5 text-xs rounded-full bg-gray-200 text-gray-700">
+                  {policy.datePolicy === 'daily' ? t('lb2.date_policy_daily') : t('lb2.date_policy_weekly')}
+                </span>
+                {policy.pobox && (
+                  <span className="px-2 py-0.5 text-xs rounded-full bg-purple-100 text-purple-700">
+                    {t('lb2.pobox')}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
-          <div className="flex items-center gap-6 text-sm">
+          <div className="flex flex-wrap items-center gap-4 text-sm">
+            {onScaleChange && (
+              <div className="inline-flex rounded-md border border-gray-300 overflow-hidden" role="group">
+                {(['day', 'week', 'month'] as LoadScale[]).map((sc) => (
+                  <button
+                    key={sc}
+                    type="button"
+                    onClick={() => onScaleChange(sc)}
+                    aria-pressed={scale === sc}
+                    className={`px-3 py-1 text-xs font-medium ${
+                      scale === sc ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    {t(`lb2.scale_${sc}`)}
+                  </button>
+                ))}
+              </div>
+            )}
             <div className="flex items-center gap-2">
               <span className="text-gray-600">Total:</span>
               <strong className="text-gray-900">{totalShipments} shipments</strong>
@@ -136,9 +241,197 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
             </div>
           </div>
         </div>
+        {policy && onCityPolicyChange && (
+          <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-gray-700">
+            <label className="flex items-center gap-1">
+              <span>{t('lb2.date_policy')}</span>
+              <select
+                value={policy.cityOverride.date_policy ?? ''}
+                disabled={policy.pobox || balanceDisabled}
+                title={policy.pobox ? t('lb2.pobox_forces_daily') : undefined}
+                onChange={(e) =>
+                  onCityPolicyChange({ date_policy: (e.target.value || null) as DatePolicy | null })
+                }
+                className="border border-gray-300 rounded px-2 py-1 disabled:bg-gray-100 disabled:text-gray-400"
+              >
+                <option value="">{t('lb2.city_policy_inherit')}</option>
+                <option value="daily">{t('lb2.date_policy_daily')}</option>
+                <option value="weekly">{t('lb2.date_policy_weekly')}</option>
+              </select>
+            </label>
+            {policy.pobox && <span className="text-gray-500">{t('lb2.pobox_forces_daily')}</span>}
+            <label className="flex items-center gap-1">
+              <span>{t('lb2.pobox')}</span>
+              <select
+                value={policy.cityOverride.pobox_enabled === null ? '' : String(policy.cityOverride.pobox_enabled)}
+                disabled={balanceDisabled}
+                onChange={(e) =>
+                  onCityPolicyChange({ pobox_enabled: e.target.value === '' ? null : e.target.value === 'true' })
+                }
+                className="border border-gray-300 rounded px-2 py-1 disabled:bg-gray-100 disabled:text-gray-400"
+              >
+                <option value="">{t('lb2.city_policy_inherit')}</option>
+                <option value="true">{t('common.yes')}</option>
+                <option value="false">{t('common.no')}</option>
+              </select>
+            </label>
+          </div>
+        )}
       </div>
 
+      {scale === 'day' && (
+        dayView.columns.length === 0 ? (
+          <p className="px-6 py-8 text-center text-gray-500">{t('node_load_balancing.no_data_message')}</p>
+        ) : (
+          <>
+            <div className="overflow-x-auto">
+              <table className="text-sm border-collapse">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="sticky left-0 z-10 bg-white px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                      {t('common.node')}
+                    </th>
+                    {dayView.columns.map((c) => (
+                      <th
+                        key={c.day}
+                        className={`px-2 py-2 text-center text-xs font-medium ${
+                          c.isWorkingDay ? 'text-gray-600' : 'text-gray-400 bg-gray-100'
+                        }`}
+                      >
+                        <div>{t(`lb2.day_short.${c.dow}`)}</div>
+                        <div>{c.dayNum}</div>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {dayNodes.map(([nodeCode, panelist]) => (
+                    <tr key={nodeCode}>
+                      <td className="sticky left-0 z-10 bg-white px-4 py-2">
+                        <div className="flex flex-col">
+                          <span className="font-medium text-gray-900">{nodeCode}</span>
+                          <span className="text-xs text-gray-500">{panelist || t('common.no_panelist')}</span>
+                        </div>
+                      </td>
+                      {dayView.columns.map((c) => {
+                        const r = dayView.cells.get(dayCellKey(nodeCode, c.day));
+                        const shaded = r ? r.is_unavailable || !r.is_working_day : !c.isWorkingDay;
+                        const bg = r?.is_unavailable ? UNAVAILABLE_CLASS : shaded ? 'bg-gray-100' : '';
+                        const conflict = isConflict(r);
+                        return (
+                          <td key={c.day} className={`px-2 py-2 text-center min-w-[2.5rem] ${bg}`}>
+                            {r ? (
+                              <span className={conflict ? 'text-red-700 font-semibold' : 'text-gray-900'}>
+                                {r.shipment_count}
+                              </span>
+                            ) : (
+                              <span className="text-gray-300">—</span>
+                            )}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot className="border-t-2 border-gray-300 bg-gray-50">
+                  <tr>
+                    <td className="sticky left-0 z-10 bg-gray-50 px-4 py-2 font-semibold text-gray-900">
+                      {t('common.total')}
+                    </td>
+                    {dayView.columns.map((c) => {
+                      const total = dayTotalsMap.get(c.day) ?? 0;
+                      const gap = isPoboxGap(total, c.isWorkingDay, !!policy?.pobox);
+                      return (
+                        <td
+                          key={c.day}
+                          className={`px-2 py-2 text-center ${c.isWorkingDay ? '' : 'bg-gray-100'} ${gap ? 'bg-red-50' : ''}`}
+                          title={gap ? t('lb2.pobox_gap_legend') : undefined}
+                        >
+                          <span className={gap ? 'text-red-700 font-bold' : 'font-semibold text-gray-900'}>{total}</span>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+            <div className="flex flex-wrap items-center gap-4 px-6 py-2 text-xs text-gray-600 border-t border-gray-200">
+              {policy?.pobox && (
+                <span className="flex items-center gap-1">
+                  <span className="text-red-700 font-bold">0</span>
+                  {t('lb2.pobox_gap_legend')}
+                </span>
+              )}
+              <span className="flex items-center gap-1">
+                <span className={`inline-block w-4 h-4 border border-gray-300 ${UNAVAILABLE_CLASS}`} />
+                {t('lb2.unavailable_legend')}
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="inline-block w-4 h-4 border border-gray-300 bg-gray-100" />
+                {t('lb2.non_working_legend')}
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="text-red-700 font-semibold">1</span>
+                {t('lb2.conflict_legend')}
+              </span>
+            </div>
+          </>
+        )
+      )}
+
+      {scale === 'month' && (
+        monthView.months.length === 0 ? (
+          <p className="px-6 py-8 text-center text-gray-500">{t('node_load_balancing.no_data_message')}</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('common.node')}</th>
+                  {monthView.months.map((m) => (
+                    <th key={m} className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">{m}</th>
+                  ))}
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                    {t('nodeloadbalancing.monthly_avg')}
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {dayNodes.map(([nodeCode, panelist]) => (
+                  <tr key={nodeCode} className="hover:bg-gray-50">
+                    <td className="px-4 py-3">
+                      <div className="flex flex-col">
+                        <span className="font-medium text-gray-900">{nodeCode}</span>
+                        <span className="text-xs text-gray-500">{panelist || t('common.no_panelist')}</span>
+                      </div>
+                    </td>
+                    {monthView.months.map((m) => (
+                      <td key={m} className="px-4 py-3 text-center text-gray-900">
+                        {monthView.totals[nodeCode]?.[m] ?? 0}
+                      </td>
+                    ))}
+                    <td className="px-4 py-3 text-center font-semibold text-gray-900">
+                      {(monthView.nodeAverages[nodeCode] ?? 0).toFixed(1)}
+                    </td>
+                  </tr>
+                ))}
+                <tr className="bg-gray-50 font-semibold border-t-2 border-gray-300">
+                  <td className="px-4 py-3 text-gray-900">{t('common.total')}</td>
+                  {monthView.months.map((m) => (
+                    <td key={m} className="px-4 py-3 text-center text-gray-900">{monthView.monthTotals[m] ?? 0}</td>
+                  ))}
+                  <td className="px-4 py-3 text-center text-gray-900">
+                    {(monthView.grandTotal / monthView.months.length).toFixed(1)}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        )
+      )}
+
       {/* Heat Map Table */}
+      {scale === 'week' && (
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 border-b border-gray-200">
@@ -238,20 +531,20 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
           </tbody>
         </table>
       </div>
+      )}
 
       {/* Recommendations Section */}
       <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-t border-gray-200">
         <button
           onClick={() => setIsRecommendationsExpanded(!isRecommendationsExpanded)}
+          aria-expanded={isRecommendationsExpanded}
           className="w-full flex items-center justify-between hover:opacity-80 transition-opacity"
         >
           <div className="flex items-center gap-3">
-            <div className="flex-shrink-0">
-              <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <h4 className="text-sm font-semibold text-gray-900">💡 Recommendations</h4>
+            <h4 className="text-sm font-semibold text-gray-900">💡 {t('lb2.rec.title')}</h4>
+            {actionableFindings > 0 && (
+              <span className="px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-xs font-semibold">{actionableFindings}</span>
+            )}
           </div>
           <svg
             className={`w-5 h-5 text-gray-600 transition-transform ${isRecommendationsExpanded ? 'rotate-180' : ''}`}
@@ -261,181 +554,40 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
             <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
           </svg>
         </button>
-        
+
         {isRecommendationsExpanded && (
-          <div className="mt-4 flex items-start gap-3">
-            <div className="flex-1">
-            
-              {/* Optimization Recommendations */}
-              <div className="mb-3">
-                <p className="text-xs font-medium text-gray-700 mb-1">📊 Optimisation :</p>
-                <ul className="text-xs text-gray-600 space-y-1 ml-4">
-                  {(() => {
-                    // Analyze individual cells
-                    const saturatedCells: string[] = [];
-                    const highCells: string[] = [];
-                    const normalCells: string[] = [];
-                    
-                    nodes.forEach(nodeCode => {
-                      weeks.forEach(week => {
-                        const count = matrix[nodeCode]?.[week]?.shipment_count || 0;
-                        const cellId = `${nodeCode}-W${week}`;
-                        if (count >= saturatedThreshold) {
-                          saturatedCells.push(cellId);
-                        } else if (count >= highThreshold) {
-                          highCells.push(cellId);
-                        } else {
-                          normalCells.push(cellId);
-                        }
-                      });
-                    });
-                    
-                    const totalCells = nodes.length * weeks.length;
-                    const saturatedPct = (saturatedCells.length / totalCells) * 100;
-                    const highPct = (highCells.length / totalCells) * 100;
-                    const normalPct = (normalCells.length / totalCells) * 100;
-                    
-                    return (
-                      <>
-                        {saturatedCells.length > 0 && (
-                          <li className="flex items-start gap-1">
-                            <span className="text-red-600">•</span>
-                            <span><strong>Critical:</strong> {saturatedCells.length} cells ({saturatedPct.toFixed(0)}%) are saturated (≥{saturatedThreshold.toFixed(1)} shipments). Urgent balancing required.</span>
-                          </li>
-                        )}
-                        {highCells.length > 0 && (
-                          <li className="flex items-start gap-1">
-                            <span className="text-orange-600">•</span>
-                            <span><strong>Warning:</strong> {highCells.length} cells ({highPct.toFixed(0)}%) have high load (≥{highThreshold.toFixed(1)} shipments). Consider preventive balancing.</span>
-                          </li>
-                        )}
-                        {saturatedCells.length === 0 && highCells.length === 0 && (
-                          <li className="flex items-start gap-1">
-                            <span className="text-green-600">•</span>
-                            <span><strong>Optimal :</strong> Toutes les {totalCells} cellules sont dans la plage normale (&lt;{highThreshold.toFixed(1)} expéditions). Aucun équilibrage requis.</span>
-                          </li>
-                        )}
-                        {normalCells.length > 0 && (saturatedCells.length > 0 || highCells.length > 0) && (
-                          <li className="flex items-start gap-1">
-                            <span className="text-blue-600">•</span>
-                            <span>{normalCells.length} cells ({normalPct.toFixed(0)}%) are operating normally.</span>
-                          </li>
-                        )}
-                      </>
-                    );
-                  })()}
-                </ul>
-              </div>
-
-              {/* Action Recommendations */}
-              <div className="mb-3">
-                <p className="text-xs font-medium text-gray-700 mb-1">🎯 Actions suggérées :</p>
-                <ul className="text-xs text-gray-600 space-y-1 ml-4">
-                  {(() => {
-                    // Find specific problematic cells
-                    const saturatedCells: {node: string, week: number, count: number}[] = [];
-                    const highCells: {node: string, week: number, count: number}[] = [];
-                    
-                    nodes.forEach(nodeCode => {
-                      weeks.forEach(week => {
-                        const count = matrix[nodeCode]?.[week]?.shipment_count || 0;
-                        if (count >= saturatedThreshold) {
-                          saturatedCells.push({node: nodeCode, week, count});
-                        } else if (count >= highThreshold) {
-                          highCells.push({node: nodeCode, week, count});
-                        }
-                      });
-                    });
-                    
-                    // Group by node
-                    const saturatedNodes = [...new Set(saturatedCells.map(c => c.node))];
-                    const highNodes = [...new Set(highCells.map(c => c.node))];
-                    
-                    return (
-                      <>
-                        {saturatedCells.length > 0 && (
-                          <li className="flex items-start gap-1">
-                            <span className="text-red-600">•</span>
-                            <span><strong>Urgent :</strong> Équilibrer immédiatement. Cellules saturées dans les nœuds : {saturatedNodes.join(', ')}.</span>
-                          </li>
-                        )}
-                        {highCells.length > 0 && saturatedCells.length === 0 && (
-                          <li className="flex items-start gap-1">
-                            <span className="text-orange-600">•</span>
-                            <span><strong>Préventif :</strong> Équilibrage recommandé. Cellules à charge élevée dans les nœuds : {highNodes.join(', ')}.</span>
-                          </li>
-                        )}
-                        {saturatedCells.length === 0 && highCells.length === 0 && (
-                          <li className="flex items-start gap-1">
-                            <span className="text-green-600">•</span>
-                            <span>Aucune action requise. Toutes les cellules sont dans la plage acceptable.</span>
-                          </li>
-                        )}
-                        {(saturatedCells.length > 0 || highCells.length > 0) && (
-                          <li className="flex items-start gap-1">
-                            <span className="text-blue-600">•</span>
-                            <span>Utilisez le bouton "Équilibrage auto" ci-dessous pour redistribuer la charge automatiquement.</span>
-                          </li>
-                        )}
-                      </>
-                    );
-                  })()}
-                </ul>
-              </div>
-
-              {/* Additional Statistics */}
-              <div>
-                <p className="text-xs font-medium text-gray-700 mb-1">📈 Statistiques supplémentaires :</p>
-                <ul className="text-xs text-gray-600 space-y-1 ml-4">
-                  {(() => {
-                    // Find cell with max load
-                    let maxCell = {node: '', week: 0, count: 0};
-                    nodes.forEach(nodeCode => {
-                      weeks.forEach(week => {
-                        const count = matrix[nodeCode]?.[week]?.shipment_count || 0;
-                        if (count > maxCell.count) {
-                          maxCell = {node: nodeCode, week, count};
-                        }
-                      });
-                    });
-                    
-                    // Find cells above threshold
-                    const problematicCells: string[] = [];
-                    nodes.forEach(nodeCode => {
-                      weeks.forEach(week => {
-                        const count = matrix[nodeCode]?.[week]?.shipment_count || 0;
-                        if (count >= highThreshold) {
-                          problematicCells.push(`${nodeCode}/W${week}`);
-                        }
-                      });
-                    });
-                    
-                    return (
-                      <>
-                        {maxCell.count > 0 && (
-                          <li className="flex items-start gap-1">
-                            <span className="text-blue-600">•</span>
-                            <span>Cellule avec la charge la plus élevée : {maxCell.node} / S{maxCell.week} ({maxCell.count} expéditions)</span>
-                          </li>
-                        )}
-                        <li className="flex items-start gap-1">
-                          <span className="text-blue-600">•</span>
-                            <span>Cellules nécessitant une attention : {problematicCells.length > 0 ? problematicCells.slice(0, 5).join(', ') + (problematicCells.length > 5 ? ` +${problematicCells.length - 5} de plus` : '') : 'Aucune'}</span>
-                        </li>
-                        <li className="flex items-start gap-1">
-                          <span className="text-blue-600">•</span>
-                            <span>Seuils : Élevé ≥{highThreshold.toFixed(1)}, Saturé ≥{saturatedThreshold.toFixed(1)} expéditions/cellule</span>
-                        </li>
-                        <li className="flex items-start gap-1">
-                          <span className="text-blue-600">•</span>
-                            <span>Référence : {referenceLoad} échantillons/nœud, {deviationPercent.toFixed(0)}% tolérance</span>
-                        </li>
-                      </>
-                    );
-                  })()}
-                </ul>
-              </div>
+          <div className="mt-4 space-y-3">
+            <div>
+              <p className="text-xs font-medium text-gray-700 mb-1">📊 {t('lb2.rec.analysis')}</p>
+              <ul className="text-xs text-gray-700 space-y-1 ml-4">
+                {findings.map((f) => (
+                  <li key={f.code} className="flex items-start gap-1">
+                    <span className={FINDING_BULLET[f.severity]}>•</span>
+                    <span>{t(`lb2.rec.${f.code}`, f.params)}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
+
+            {maxCell.count > 0 && (
+              <div>
+                <p className="text-xs font-medium text-gray-700 mb-1">📈 {t('lb2.rec.stats')}</p>
+                <ul className="text-xs text-gray-600 space-y-1 ml-4">
+                  <li className="flex items-start gap-1">
+                    <span className="text-blue-600">•</span>
+                    <span>{t('lb2.rec.stat_max', { node: maxCell.node, week: maxCell.week, count: maxCell.count })}</span>
+                  </li>
+                  <li className="flex items-start gap-1">
+                    <span className="text-blue-600">•</span>
+                    <span>{t('lb2.rec.stat_thresholds', { high: highThreshold.toFixed(1), saturated: saturatedThreshold.toFixed(1) })}</span>
+                  </li>
+                  <li className="flex items-start gap-1">
+                    <span className="text-blue-600">•</span>
+                    <span>{t('lb2.rec.stat_reference', { reference: referenceLoad, tolerance: deviationPercent.toFixed(0) })}</span>
+                  </li>
+                </ul>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -445,7 +597,7 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
         <div className="group relative">
           <button
             onClick={onBalance}
-            disabled={!needsBalancing}
+            disabled={!needsBalancing || balanceDisabled}
             className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
               needsBalancing
                 ? 'bg-blue-600 text-white hover:bg-blue-700 cursor-pointer'
@@ -453,7 +605,7 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
             }`}
           >
             <span>⚖️</span>
-            Auto-Balance {cityName}
+            {t('lb2.auto_balance_city', { city: cityName })}
           </button>
           {!needsBalancing && (
             <div className="invisible group-hover:visible absolute z-10 w-64 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg bottom-full left-0 mb-2">
@@ -479,36 +631,22 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
             />
           </svg>
           <div className="invisible group-hover:visible absolute z-10 w-[480px] p-4 bg-gray-900 text-white text-xs rounded-lg shadow-lg bottom-full left-0 mb-2">
-            <p className="font-semibold mb-2 text-sm">🎯 Algoritmo de Balanceo de Matriz Alícuota</p>
-            
-            <p className="mb-2">
-              <strong>Concepto:</strong> Trata toda la matriz (nodos × semanas) como un espacio único de distribución. Objetivo: que todas las celdas se acerquen al promedio global.
-            </p>
-            
-            <p className="mb-2">
-              <strong>Cálculo del objetivo:</strong><br/>
-              Promedio objetivo = Total shipments / (Nodos × Semanas)<br/>
-              <em>Ejemplo: 305 shipments / (1 nodo × 5 semanas) = 61 por celda</em>
-            </p>
-            
-            <p className="mb-2">
-              <strong>Proceso:</strong>
-            </p>
+            <p className="font-semibold mb-2 text-sm">🎯 {t('lb2.help.title')}</p>
+
+            <p className="mb-2">{t('lb2.help.concept')}</p>
+
+            <p className="mb-1 font-semibold">{t('lb2.help.rules_title')}</p>
             <ol className="list-decimal list-inside space-y-1 mb-2 ml-2">
-              <li>Identifica celdas sobrecargadas (&gt; objetivo × 1.2)</li>
-              <li>Identifica celdas subcargadas (&lt; objetivo × 0.9)</li>
-              <li>Mueve shipments de celdas sobrecargadas a subcargadas</li>
-              <li>Actualiza fecha_programada y node_id en allocation_plan_details</li>
-              <li>Minimiza la desviación estándar de toda la matriz</li>
+              <li>{t('lb2.help.rule1')}</li>
+              <li>{t('lb2.help.rule2')}</li>
+              <li>{t('lb2.help.rule3')}</li>
+              <li>{t('lb2.help.rule4')}</li>
+              <li>{t('lb2.help.rule5')}</li>
+              <li>{t('lb2.help.rule6')}</li>
+              <li>{t('lb2.help.rule7')}</li>
             </ol>
-            
-            <p className="mb-2">
-              <strong>Resultado:</strong> Distribución equitativa que reduce varianza, previene saturación y optimiza la eficiencia del sistema.
-            </p>
-            
-            <p className="text-yellow-300">
-              ⚠️ El preview muestra los cambios propuestos. Debes confirmar para aplicarlos al Allocation Plan.
-            </p>
+
+            <p className="text-yellow-300">⚠️ {t('lb2.help.preview_warning')}</p>
           </div>
         </span>
       </div>

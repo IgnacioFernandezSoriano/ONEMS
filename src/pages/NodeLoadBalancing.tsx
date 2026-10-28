@@ -1,8 +1,16 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useNodeLoadBalancing, BalanceResult } from '../hooks/useNodeLoadBalancing';
-import { CityLoadCard } from '../components/NodeLoadBalancing/CityLoadCard';
-import { BalancePreviewModal } from '../components/NodeLoadBalancing/BalancePreviewModal';
+import { useNodeLoadBalancing, type NodeDayLoad } from '../hooks/useNodeLoadBalancing';
+import { CityLoadCard, type LoadScale } from '../components/NodeLoadBalancing/CityLoadCard';
+import { BalancePreviewModal, type BalanceCityResult } from '../components/NodeLoadBalancing/BalancePreviewModal';
+import { DeferredSamplesSection } from '../components/NodeLoadBalancing/DeferredSamplesSection';
+import { BalancePoliciesPanel } from '../components/NodeLoadBalancing/BalancePoliciesPanel';
+import { useDeferredSamples, notifyDeferredSamplesChanged } from '../hooks/useDeferredSamples';
+import { useBalancePolicies } from '../hooks/useBalancePolicies';
+import { useAccountConfig } from '../hooks/useAccountConfig';
+import { workingDowsFromSchedule, type DatePolicy } from '../lib/workingDays';
+import { cityIdsToApply, isCityFailed } from '../lib/balanceViews';
+import { isUsablePeriod } from '../lib/dateRange';
 
 import { useTranslation } from '@/hooks/useTranslation';
 export default function NodeLoadBalancing() {
@@ -16,22 +24,131 @@ export default function NodeLoadBalancing() {
   const [referenceLoad, setReferenceLoad] = useState(6); // Default reference samples per node
   const [deviationPercent, setDeviationPercent] = useState(20); // Default 20% deviation
 
-  const { loadData, citySummaries, loading, error, refetch, previewBalance, applyBalance } =
-    useNodeLoadBalancing(profile?.account_id || undefined, startDate, endDate, referenceLoad, deviationPercent);
+  // Las fechas que se escriben (startDate/endDate) y las que se consultan (applied) van separadas: mientras se
+  // teclea un <input type="date"> salen valores intermedios (anyo 0002, inicio > fin...) y cada uno lanzaba una
+  // consulta que sustituia toda la pagina por el indicador de carga. Solo se consulta con un periodo completo y
+  // valido, tras una breve pausa sin cambios (el boton Reset, con ambas vacias, se aplica al instante).
+  const [applied, setApplied] = useState({ start: '', end: '' });
+  useEffect(() => {
+    if (!startDate && !endDate) {
+      setApplied((prev) => (prev.start === '' && prev.end === '' ? prev : { start: '', end: '' }));
+      return;
+    }
+    if (!isUsablePeriod(startDate, endDate)) return;
+    const timer = setTimeout(() => {
+      setApplied((prev) => (prev.start === startDate && prev.end === endDate ? prev : { start: startDate, end: endDate }));
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [startDate, endDate]);
+  const datesPending = isUsablePeriod(startDate, endDate) && (startDate !== applied.start || endDate !== applied.end);
 
-  const [modalState, setModalState] = useState<{
-    isOpen: boolean;
-    cityId: string | null;
-    cityName: string | null;
-    previewResult: BalanceResult | null;
-    loading: boolean;
-  }>({
+  const { loadData, dayData, citySummaries, loading, error, refetch, previewBalanceV2, applyBalanceV2, previewAll, applyAll } =
+    useNodeLoadBalancing(profile?.account_id || undefined, applied.start, applied.end, referenceLoad, deviationPercent);
+
+  const { summary: deferredSummary } = useDeferredSamples();
+  const deferredByCity = useMemo(
+    () => new Map((deferredSummary?.by_city ?? []).map((c) => [c.city_id, c.count])),
+    [deferredSummary]
+  );
+  // Ultima vista previa por ciudad: muestras que se apartarian del plan (willRemove de las recomendaciones)
+  const [lastPreviewRemoved, setLastPreviewRemoved] = useState<Record<string, number>>({});
+
+  const { weeklySchedule, setWorkingDay } = useAccountConfig();
+  const { account: accountPolicy, cities: cityPolicies, updateAccountPolicy, updateCityPolicy, effectiveFor } =
+    useBalancePolicies();
+  const [scales, setScales] = useState<Record<string, LoadScale>>({});
+  const dayDataByCity = useMemo(() => {
+    const m = new Map<string, NodeDayLoad[]>();
+    (dayData || []).forEach((r) => {
+      const arr = m.get(r.city_id);
+      if (arr) arr.push(r);
+      else m.set(r.city_id, [r]);
+    });
+    return m;
+  }, [dayData]);
+  const noDayData = useMemo<NodeDayLoad[]>(() => [], []);
+
+  // Inline notice (replaces alert()): auto-hides after 8 s
+  const [notice, setNotice] = useState<{ type: 'ok' | 'error'; text: string } | null>(null);
+  const noticeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const showNotice = (type: 'ok' | 'error', text: string) => {
+    if (noticeTimer.current) clearTimeout(noticeTimer.current);
+    setNotice({ type, text });
+    noticeTimer.current = setTimeout(() => setNotice(null), 8000);
+  };
+  useEffect(
+    () => () => {
+      if (noticeTimer.current) clearTimeout(noticeTimer.current);
+    },
+    []
+  );
+  const errMsg = (err: unknown) => (err instanceof Error ? err.message : String(err));
+  const showFailure = (err?: string) => showNotice('error', `${t('common.error')}: ${err ?? ''}`);
+
+  const handleCityPolicyChange = async (
+    cityId: string,
+    p: { date_policy?: DatePolicy | null; pobox_enabled?: boolean | null }
+  ) => {
+    if (applyingRef.current) return;
+    try {
+      const res = await updateCityPolicy(cityId, p);
+      if (!res.success) {
+        console.error('[NodeLoadBalancing] Error updating city policy:', res.error);
+        showFailure(res.error);
+      }
+    } catch (err) {
+      console.error('[NodeLoadBalancing] Error updating city policy:', err);
+      showFailure(errMsg(err));
+    }
+  };
+  const workingDows = useMemo(() => workingDowsFromSchedule(weeklySchedule), [weeklySchedule]);
+  // Progress of the all-cities run (preview or apply); also drives the header button
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
+
+  const handleToggleDay = async (dow: number, on: boolean) => {
+    if (applyingRef.current) return;
+    try {
+      const res = await setWorkingDay(dow, on);
+      if (res && res.success === false) {
+        console.error('[NodeLoadBalancing] Error updating working day:', res.error);
+        showFailure(res.error);
+      }
+    } catch (err) {
+      console.error('[NodeLoadBalancing] Error updating working day:', err);
+      showFailure(errMsg(err));
+    }
+  };
+
+  const handleChangePolicy = async (p: { date_policy?: DatePolicy; pobox_enabled?: boolean }) => {
+    // POBOX forces the daily policy: store both together so the stored value is consistent
+    if (applyingRef.current) return;
+    const patch = p.pobox_enabled === true ? { ...p, date_policy: 'daily' as DatePolicy } : p;
+    try {
+      const res = await updateAccountPolicy(patch);
+      if (res && res.success === false) {
+        console.error('[NodeLoadBalancing] Error updating policy:', res.error);
+        showFailure(res.error);
+      }
+    } catch (err) {
+      console.error('[NodeLoadBalancing] Error updating policy:', err);
+      showFailure(errMsg(err));
+    }
+  };
+
+  const closedModal = {
     isOpen: false,
-    cityId: null,
-    cityName: null,
-    previewResult: null,
+    mode: 'city' as 'city' | 'all',
+    cityId: null as string | null,
+    cityName: null as string | null,
+    results: [] as BalanceCityResult[],
     loading: false,
-  });
+  };
+  const [modalState, setModalState] = useState(closedModal);
+  // Ignore results of a request whose modal was closed (or replaced) meanwhile
+  const requestId = useRef(0);
+  // True for the whole duration of any apply: locks the modal and every balance button
+  const [applying, setApplying] = useState(false);
+  const applyingRef = useRef(false);
 
   // Group load data by city
   const citiesData = loadData.reduce((acc, item) => {
@@ -46,60 +163,128 @@ export default function NodeLoadBalancing() {
   }, {} as { [cityId: string]: { cityName: string; data: typeof loadData } });
 
   const handleBalanceClick = async (cityId: string, cityName: string) => {
-    setModalState({
-      isOpen: true,
-      cityId,
-      cityName,
-      previewResult: null,
-      loading: true,
-    });
+    if (applyingRef.current) return;
+    const id = ++requestId.current;
+    setModalState({ ...closedModal, isOpen: true, mode: 'city', cityId, cityName, loading: true });
+    try {
+      const result = await previewBalanceV2(cityId);
+      if (id !== requestId.current) return;
+      setLastPreviewRemoved((prev) => ({ ...prev, [cityId]: result.success ? result.deferred?.removed ?? 0 : 0 }));
+      setModalState((prev) => ({ ...prev, results: [{ cityId, cityName, result }], loading: false }));
+    } catch (err) {
+      if (id !== requestId.current) return;
+      console.error('[NodeLoadBalancing] Error previewing balance:', err);
+      setModalState((prev) => ({ ...prev, results: [{ cityId, cityName, error: errMsg(err) }], loading: false }));
+    }
+  };
 
-    const result = await previewBalance(cityId);
-
-    setModalState((prev) => ({
-      ...prev,
-      previewResult: result,
-      loading: false,
-    }));
+  const handleBalanceAll = async () => {
+    if (applyingRef.current) return;
+    const id = ++requestId.current;
+    setModalState({ ...closedModal, isOpen: true, mode: 'all', loading: true });
+    setProgress({ done: 0, total: 0 });
+    try {
+      const results = await previewAll((done, total) => {
+        if (id === requestId.current) setProgress({ done, total });
+      });
+      if (id !== requestId.current) return;
+      setLastPreviewRemoved((prev) => {
+        const next = { ...prev };
+        results.forEach((r) => {
+          next[r.cityId] = r.result?.success ? r.result.deferred?.removed ?? 0 : 0;
+        });
+        return next;
+      });
+      setModalState((prev) => ({ ...prev, results, loading: false }));
+    } catch (err) {
+      if (id !== requestId.current) return;
+      console.error('[NodeLoadBalancing] Error balancing all cities:', err);
+      setModalState(closedModal);
+      showFailure(errMsg(err));
+    } finally {
+      if (id === requestId.current) setProgress(null);
+    }
   };
 
   const handleConfirmBalance = async () => {
+    if (applyingRef.current) return;
+    applyingRef.current = true;
+    setApplying(true);
+    try {
+      await confirmBalance();
+    } finally {
+      applyingRef.current = false;
+      setApplying(false);
+    }
+  };
+
+  const confirmBalance = async () => {
+    if (modalState.mode === 'all') {
+      const id = ++requestId.current;
+      // Apply exactly the cities the user saw in the preview (not a fresh pending list)
+      const cityIds = cityIdsToApply(modalState.results);
+      const names = new Map(modalState.results.map((r) => [r.cityId, r.cityName]));
+      setModalState((prev) => ({ ...prev, loading: true }));
+      setProgress({ done: 0, total: 0 });
+      try {
+        const raw = await applyAll((done, total) => {
+          if (id === requestId.current) setProgress({ done, total });
+        }, cityIds);
+        const results = raw.map((r) => ({ ...r, cityName: r.cityName || names.get(r.cityId) || '' }));
+        const failed = results.filter(isCityFailed);
+        if (id === requestId.current) setModalState(closedModal);
+        if (failed.length === 0) {
+          showNotice('ok', t('lb2.applied_ok'));
+        } else {
+          showNotice(
+            'error',
+            `${t('lb2.applied_error')} ${failed
+              .map((f) => `${t('lb2.city_failed', { city: f.cityName })}${f.error ? ` (${f.error})` : ''}`)
+              .join('; ')}`
+          );
+        }
+      } catch (err) {
+        console.error('[NodeLoadBalancing] Error applying balance to all cities:', err);
+        if (id === requestId.current) setModalState(closedModal);
+        showNotice('error', `${t('lb2.applied_error')} ${errMsg(err)}`);
+      } finally {
+        if (id === requestId.current) setProgress(null);
+        setLastPreviewRemoved({});
+        notifyDeferredSamplesChanged();
+        await refetch();
+      }
+      return;
+    }
+
     if (!modalState.cityId) return;
-
+    const cityId = modalState.cityId;
+    const cityName = modalState.cityName ?? '';
+    const id = ++requestId.current;
     setModalState((prev) => ({ ...prev, loading: true }));
-
-    const result = await applyBalance(modalState.cityId);
-
-    setModalState((prev) => ({ ...prev, loading: false }));
-
-    if (result.success) {
-      // Close modal first
-      setModalState({
-        isOpen: false,
-        cityId: null,
-        cityName: null,
-        previewResult: null,
-        loading: false,
-      });
-      
-      // Show success message
-      alert(`Balance applied successfully!\n${result.message}\nMoved: ${result.movements_count} shipments\nImprovement: ${result.improvement_percentage.toFixed(1)}%`);
-      
-      // Force refresh after modal closes
+    try {
+      const result = await applyBalanceV2(cityId);
+      if (id === requestId.current) setModalState(closedModal);
+      if (result.success && !result.error) {
+        showNotice('ok', `${cityName}: ${t('lb2.applied_ok')}`);
+      } else {
+        showNotice('error', `${t('lb2.applied_error')} ${t('lb2.city_failed', { city: cityName })}: ${result.error ?? result.message}`);
+      }
+    } catch (err) {
+      console.error('[NodeLoadBalancing] Error applying balance:', err);
+      if (id === requestId.current) setModalState((prev) => ({ ...prev, loading: false }));
+      showNotice('error', `${t('lb2.applied_error')} ${errMsg(err)}`);
+    } finally {
+      setLastPreviewRemoved((prev) => ({ ...prev, [cityId]: 0 }));
+      notifyDeferredSamplesChanged();
       await refetch();
-    } else {
-      alert(`Error applying balance: ${result.error}`);
     }
   };
 
   const handleCloseModal = () => {
-    setModalState({
-      isOpen: false,
-      cityId: null,
-      cityName: null,
-      previewResult: null,
-      loading: false,
-    });
+    if (applyingRef.current) return;
+    ++requestId.current;
+    setProgress(null);
+    setModalState(closedModal);
   };
 
   // Date formatting helper
@@ -186,7 +371,9 @@ export default function NodeLoadBalancing() {
 
   const stddevStatus = getStddevStatus(avgStddev);
 
-  if (loading) {
+  // Pantalla de carga completa solo la primera vez (aun no hay nada que mostrar). En las recargas por cambio de
+  // fechas se mantiene la pagina (y el foco en el campo de fecha) y solo se atenua el contenido.
+  if (loading && loadData.length === 0 && citySummaries.length === 0) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="flex items-center gap-3 text-gray-600">
@@ -197,16 +384,40 @@ export default function NodeLoadBalancing() {
     );
   }
 
-  if (error) {
-    return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-        <p className="text-red-700">Error loading data: {error}</p>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-700">Error loading data: {error}</p>
+        </div>
+      )}
+      {(loading || datesPending) && (
+        <div className="flex items-center gap-2 text-sm text-gray-500" role="status">
+          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-500"></div>
+          <span>{t("common.loading_data")}</span>
+        </div>
+      )}
+      {notice && (
+        <div
+          role={notice.type === 'error' ? 'alert' : 'status'}
+          className={`flex items-start justify-between gap-3 rounded-lg border p-4 text-sm ${
+            notice.type === 'ok'
+              ? 'bg-green-50 border-green-200 text-green-800'
+              : 'bg-red-50 border-red-200 text-red-800'
+          }`}
+        >
+          <span>{notice.text}</span>
+          <button
+            type="button"
+            onClick={() => setNotice(null)}
+            aria-label={t('common.close')}
+            className="text-lg leading-none opacity-60 hover:opacity-100"
+          >
+            ×
+          </button>
+        </div>
+      )}
+
       {/* Header with Tooltip */}
       <div className="flex items-center justify-between">
         <div>
@@ -248,6 +459,19 @@ export default function NodeLoadBalancing() {
         </button>
       </div>
 
+      <BalancePoliciesPanel
+        workingDows={workingDows}
+        onToggleDay={handleToggleDay}
+        datePolicy={(accountPolicy?.pobox_enabled ?? false) ? 'daily' : (accountPolicy?.date_policy ?? 'daily')}
+        pobox={accountPolicy?.pobox_enabled ?? false}
+        onChangePolicy={handleChangePolicy}
+        onBalanceAll={handleBalanceAll}
+        balancingAll={progress}
+        disabled={!applied.start || !applied.end || datesPending || applying}
+        locked={applying}
+        balanceAllHint={t('lb2.balance_all_need_dates')}
+      />
+
       {/* Filters */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
         {/* Filter Header */}
@@ -285,7 +509,8 @@ export default function NodeLoadBalancing() {
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  disabled={applying}
+                  className="disabled:opacity-50 disabled:cursor-not-allowed block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
               </div>
               <div>
@@ -296,7 +521,8 @@ export default function NodeLoadBalancing() {
                   type="date"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
-                  className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  disabled={applying}
+                  className="disabled:opacity-50 disabled:cursor-not-allowed block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
               </div>
             </div>
@@ -310,7 +536,8 @@ export default function NodeLoadBalancing() {
                 <select
                   value={selectedYear}
                   onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                  className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                  disabled={applying}
+                  className="disabled:opacity-50 disabled:cursor-not-allowed px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                 >
                   {yearRange.map(year => (
                     <option key={year} value={year}>{year}</option>
@@ -322,26 +549,30 @@ export default function NodeLoadBalancing() {
                   <button
                     key={month.num}
                     onClick={() => handleMonthSelect(selectedYear, month.num)}
-                    className="px-2 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    disabled={applying}
+                    className="disabled:opacity-50 disabled:cursor-not-allowed px-2 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     {month.name}
                   </button>
                 ))}
                 <button
                   onClick={handleFirstSemesterSelect}
-                  className="px-2 py-1 text-xs font-medium rounded border border-green-300 bg-green-50 hover:bg-green-100 hover:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  disabled={applying}
+                  className="disabled:opacity-50 disabled:cursor-not-allowed px-2 py-1 text-xs font-medium rounded border border-green-300 bg-green-50 hover:bg-green-100 hover:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
                 >
                   {t("common.first_semester")}
                 </button>
                 <button
                   onClick={handleSecondSemesterSelect}
-                  className="px-2 py-1 text-xs font-medium rounded border border-teal-300 bg-teal-50 hover:bg-teal-100 hover:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  disabled={applying}
+                  className="disabled:opacity-50 disabled:cursor-not-allowed px-2 py-1 text-xs font-medium rounded border border-teal-300 bg-teal-50 hover:bg-teal-100 hover:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
                 >
                   {t("common.second_semester")}
                 </button>
                 <button
                   onClick={handleYearSelect}
-                  className="px-2 py-1 text-xs font-medium rounded border border-purple-300 bg-purple-50 hover:bg-purple-100 hover:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  disabled={applying}
+                  className="disabled:opacity-50 disabled:cursor-not-allowed px-2 py-1 text-xs font-medium rounded border border-purple-300 bg-purple-50 hover:bg-purple-100 hover:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
                 >
                   {t("common.year")}
                 </button>
@@ -369,6 +600,7 @@ export default function NodeLoadBalancing() {
                   type="number"
                   value={referenceLoad}
                   onChange={(e) => setReferenceLoad(Number(e.target.value))}
+                  disabled={applying}
                   min="1"
                   className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
@@ -396,6 +628,7 @@ export default function NodeLoadBalancing() {
                   type="number"
                   value={deviationPercent}
                   onChange={(e) => setDeviationPercent(Number(e.target.value))}
+                  disabled={applying}
                   min="0"
                   max="100"
                   className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
@@ -408,7 +641,8 @@ export default function NodeLoadBalancing() {
             <div className="flex items-center gap-2 pt-2">
               <button
                 onClick={handleResetFilters}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  disabled={applying}
+                className="disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 {t("common.reset")}
               </button>
@@ -470,6 +704,8 @@ export default function NodeLoadBalancing() {
         </div>
       )}
 
+      <DeferredSamplesSection summary={deferredSummary} />
+
       {/* Cities */}
       {citySummaries.length === 0 ? (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
@@ -485,6 +721,20 @@ export default function NodeLoadBalancing() {
               cityName={summary.city_name}
               cityData={citiesData[summary.city_id].data}
               onBalance={() => handleBalanceClick(summary.city_id, summary.city_name)}
+              balanceDisabled={applying}
+              dayData={dayDataByCity.get(summary.city_id) ?? noDayData}
+              deferredPending={deferredByCity.get(summary.city_id) ?? 0}
+              willRemove={lastPreviewRemoved[summary.city_id] ?? 0}
+              scale={scales[summary.city_id] ?? 'week'}
+              onScaleChange={(sc) => setScales((prev) => ({ ...prev, [summary.city_id]: sc }))}
+              policy={{
+                ...effectiveFor(summary.city_id),
+                cityOverride: {
+                  date_policy: cityPolicies.find((c) => c.id === summary.city_id)?.date_policy ?? null,
+                  pobox_enabled: cityPolicies.find((c) => c.id === summary.city_id)?.pobox_enabled ?? null,
+                },
+              }}
+              onCityPolicyChange={(p) => handleCityPolicyChange(summary.city_id, p)}
             />
           ))}
         </div>
@@ -495,9 +745,12 @@ export default function NodeLoadBalancing() {
       {/* Balance Preview Modal */}
       <BalancePreviewModal
         isOpen={modalState.isOpen}
-        cityName={modalState.cityName || ''}
-        previewResult={modalState.previewResult}
+        mode={modalState.mode}
+        cityName={modalState.cityName ?? undefined}
+        results={modalState.results}
         loading={modalState.loading}
+        progress={progress}
+        applying={applying}
         onClose={handleCloseModal}
         onConfirm={handleConfirmBalance}
       />

@@ -22,6 +22,10 @@ export function AllocationPlanGenerator() {
     nodes,
     panelistNodeIds,
     nonWorkingDays,
+    workingDows,
+    accountPolicy,
+    cityPolicies,
+    unavailabilityByNode,
     loading,
     createPlan,
     createPlanDetails,
@@ -246,6 +250,10 @@ export function AllocationPlanGenerator() {
               nodes={nodes}
               panelistNodeIds={panelistNodeIds}
               nonWorkingDays={nonWorkingDays}
+              workingDows={workingDows}
+              accountPolicy={accountPolicy}
+              cityPolicies={cityPolicies}
+              unavailabilityByNode={unavailabilityByNode}
               onGenerate={handleGenerate}
             />
           </div>

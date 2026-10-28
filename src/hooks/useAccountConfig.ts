@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAccount } from '../contexts/AccountContext'
+import type { DatePolicy } from '../lib/workingDays'
 
 export interface AccountConfig {
   id: string
   account_id: string
   calculation_mode: 'natural_days' | 'working_days'
   mixed_reader_gap_minutes: number
+  date_policy: DatePolicy
+  pobox_enabled: boolean
   created_at: string
   updated_at: string
 }
@@ -53,7 +56,7 @@ export function useAccountConfig() {
         .from('account_config')
         .select('*')
         .eq('account_id', effectiveAccountId)
-        .single()
+        .maybeSingle()
 
       if (fetchError) throw fetchError
       setConfig(data)
@@ -86,6 +89,8 @@ export function useAccountConfig() {
         .from('weekly_schedule')
         .select('*')
         .eq('account_id', effectiveAccountId)
+        // Solo el horario de la cuenta: las filas de centro postal no son el calendario de la cuenta
+        .is('postal_center_id', null)
         .order('day_of_week', { ascending: true })
 
       if (fetchError) throw fetchError
@@ -148,7 +153,7 @@ export function useAccountConfig() {
     updates: Partial<WeeklySchedule>
   ) => {
     try {
-      const existing = weeklySchedule.find((s) => s.day_of_week === dayOfWeek)
+      const existing = weeklySchedule.find((s) => s.day_of_week === dayOfWeek && s.postal_center_id == null)
 
       if (existing) {
         const { error: updateError } = await supabase
@@ -175,6 +180,26 @@ export function useAccountConfig() {
         if (insertError) throw insertError
       }
 
+      await fetchWeeklySchedule()
+      return { success: true }
+    } catch (err: any) {
+      return { success: false, error: err.message }
+    }
+  }
+
+  // RPC SECURITY DEFINER: funciona para cualquier rol de la cuenta y para superadmin (RLS no lo permitiria),
+  // solo toca filas de la cuenta y siembra las 7 la primera vez (no deja la cuenta sin dias laborables).
+  const setWorkingDay = async (dayOfWeek: number, isWorking: boolean) => {
+    if (!effectiveAccountId) return { success: false, error: 'No account selected' }
+    try {
+      const { data, error: rpcError } = await supabase.rpc('rpc_set_working_day', {
+        p_account_id: effectiveAccountId,
+        p_day_of_week: dayOfWeek,
+        p_is_working: isWorking,
+      })
+      if (rpcError) throw rpcError
+      const res = data as { success?: boolean; error?: string } | null
+      if (res && res.success === false) return { success: false, error: res.error ?? 'Error' }
       await fetchWeeklySchedule()
       return { success: true }
     } catch (err: any) {
@@ -212,6 +237,7 @@ export function useAccountConfig() {
     addNonWorkingDay,
     deleteNonWorkingDay,
     updateWeeklySchedule,
+    setWorkingDay,
     bulkImportNonWorkingDays,
     refetch: () => {
       fetchAccountConfig()

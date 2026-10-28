@@ -38,7 +38,9 @@ export function AllocationPlanDetailRow({
 
   // Determine if record is editable
   const isCompleted = detail.status === 'received'
-  const isNonEditable = ['sent', 'received', 'cancelled', 'invalid'].includes(detail.status) || isCompleted
+  // 'deferred' = fila sintetica del registro por compensar: solo lectura (sin editar, enviar, recibir ni seleccionar)
+  const isDeferred = detail.status === 'deferred'
+  const isNonEditable = isDeferred || ['sent', 'received', 'cancelled', 'invalid'].includes(detail.status) || isCompleted
   const canEdit = !isNonEditable
 
   const originNodes = detail.origin_city_id ? getNodesByCity(detail.origin_city_id) : []
@@ -84,6 +86,7 @@ export function AllocationPlanDetailRow({
           type="checkbox"
           checked={selected}
           onChange={onToggleSelect}
+          disabled={isDeferred}
           className="rounded border-gray-300"
         />
       </td>
@@ -314,6 +317,13 @@ export function AllocationPlanDetailRow({
               </div>
             )}
           </div>
+        ) : isDeferred ? (
+          <span
+            className="px-2 py-1 rounded text-xs font-medium bg-amber-50 text-amber-800 border border-dashed border-amber-400 cursor-help"
+            title={t('allocation_plans.status_deferred_help')}
+          >
+            {t('allocation_plans.status_deferred')}
+          </span>
         ) : (
           <span
             className={`px-2 py-1 rounded text-xs font-medium ${

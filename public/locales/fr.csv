@@ -3041,3 +3041,112 @@ help_center.open_new_tab,Ouvrir dans un nouvel onglet
 help_center.copy_link,Copier le lien
 help_center.copied,Lien copié
 help_center.copy_hint,Choisissez la langue du panéliste avant de copier. Depuis la conversation d'un incident le lien est déjà dans sa langue.
+lb2.policies_title,Politiques d'équilibrage
+lb2.working_days,Jours ouvrés
+lb2.date_policy,Politique de date
+lb2.date_policy_daily,Quotidienne
+lb2.date_policy_weekly,Hebdomadaire
+lb2.date_policy_help,Quotidienne : chaque envoi est placé sur un jour ouvré précis. Hebdomadaire : seule la semaine est fixée et l'envoi va au premier jour ouvré de cette semaine.
+lb2.pobox,POBOX
+lb2.pobox_help,POBOX : chaque jour ouvré, chaque ville doit expédier au moins 1 envoi. L'équilibrage déplace d'abord les envois excédentaires des jours proches et, si cela ne suffit pas, génère de nouveaux samples (en choisissant la meilleure origine et destination selon la charge). Les jours sans aucun envoi apparaissent avec un 0 en rouge dans la vue par jour.
+lb2.pobox_forces_daily,POBOX impose la politique de date quotidienne.
+lb2.balance_all,Équilibrer toutes les villes
+lb2.balance_all_progress,Équilibrage {done}/{total}
+lb2.balance_all_need_dates,Indiquez les dates de début et de fin pour équilibrer toutes les villes.
+lb2.day_short.0,Dim
+lb2.day_short.1,Lun
+lb2.day_short.2,Mar
+lb2.day_short.3,Mer
+lb2.day_short.4,Jeu
+lb2.day_short.5,Ven
+lb2.day_short.6,Sam
+lb2.scale_day,Jour
+lb2.scale_week,Semaine
+lb2.scale_month,Mois
+lb2.unavailable_legend,Indisponible
+lb2.non_working_legend,Jour non ouvré
+lb2.conflict_legend,Conflit
+lb2.city_policy_inherit,Hériter du compte
+lb2.warnings_title,Avertissements
+lb2.warning.no_valid_cell,Aucun jour valide disponible pour cet envoi.
+lb2.warning.pobox_uncovered,Nœud POBOX non couvert certains jours ouvrés.
+lb2.pobox_days_missing,Jours POBOX manquants
+lb2.pobox_days_moved,Jours POBOX déplacés
+lb2.pobox_days_created,Jours POBOX créés
+lb2.pobox_days_uncovered,Jours POBOX non couverts
+lb2.applied_ok,Équilibrage appliqué avec succès.
+lb2.applied_error,Erreur lors de l'application de l'équilibrage.
+lb2.city_failed,Échec pour la ville {city}
+lb2.preview_all_title,Aperçu de l'équilibrage - toutes les villes
+lb2.warning.origin_equals_destination,Le nœud d'origine et celui de destination coïncident pour certains envois.
+lb2.planned_movements,Mouvements prévus
+lb2.movements_truncated,Affichage des {shown} premiers mouvements sur {total}.
+lb2.shipments_count,{count} envois
+lb2.city_balanced,Aucun équilibrage nécessaire : la ville est déjà bien équilibrée !
+lb2.no_pending_cities,Aucune ville avec des envois en attente pour la période sélectionnée.
+lb2.week_short,S{week}
+allocation_generator.policy_summary,"Politique de dates : {policy}. Jours ouvrés : {days}."
+allocation_generator.pobox_added,"POBOX a ajouté {count} envois pour que chaque ville expédie chaque jour ouvré."
+allocation_generator.warning_dropped,"{count} échantillons n'ont pas pu être placés (aucun jour ni nœud valide)."
+allocation_generator.warning_pobox_uncovered,"POBOX n'a pas pu couvrir {count} jours de ville (aucun nœud libre)."
+lb2.pobox_gap_legend,0 = jour ouvré sans aucun envoi dans la ville (POBOX exige au moins 1)
+lb2.rec.title,Recommandations
+lb2.rec.analysis,Analyse
+lb2.rec.stats,Statistiques
+lb2.rec.load_critical,{count} cellules semaine/nœud ({pct} %) sont saturées (≥{threshold} envois). Équilibrer en urgence.
+lb2.rec.load_warning,{count} cellules semaine/nœud ({pct} %) ont une charge élevée (≥{threshold} envois). Envisagez un équilibrage préventif.
+lb2.rec.load_ok,Les {total} cellules semaine/nœud sont dans la plage normale (<{threshold} envois).
+lb2.rec.conflicts,{count} envois en attente sont planifiés des jours où le panéliste est absent ou qui ne sont pas ouvrés (nœuds : {nodes}). L'équilibrage les déplace vers des jours valides.
+lb2.rec.no_panelist,{count} envois en attente sont sur des nœuds sans panéliste actif (nœuds : {nodes}). L'équilibrage les déplace vers des nœuds qui en ont un.
+lb2.rec.overdue,{count} envois en attente ont une date antérieure à aujourd'hui. L'équilibrage les avance ; jamais vers le passé.
+lb2.rec.daily_peaks,{count} nœuds-jours dépassent {threshold} envois (pic : {max} sur {node} le {date}). L'équilibrage les répartit sur les jours ouvrés du panéliste.
+lb2.rec.pobox_gap,POBOX : {count} jours ouvrés n'ont aucun envoi dans la ville ({dates}). L'équilibrage déplace les envois excédentaires des jours proches et, si cela ne suffit pas, génère de nouveaux samples.
+lb2.rec.pobox_ok,POBOX : chaque jour ouvré à partir d'aujourd'hui compte au moins un envoi dans la ville.
+lb2.rec.action_balance,Appuyez sur « Équilibrage auto » pour voir l'aperçu et appliquer les changements.
+lb2.rec.no_data,Aucune donnée à analyser pour la période sélectionnée.
+lb2.rec.stat_max,Cellule la plus chargée : {node} / S{week} ({count} envois)
+lb2.rec.stat_thresholds,Seuils : Élevé ≥{high}, Saturé ≥{saturated} envois par nœud et semaine
+lb2.rec.stat_reference,Référence : {reference} samples par nœud, {tolerance} % de tolérance
+lb2.auto_balance_city,Équilibrage auto {city}
+lb2.help.title,Algorithme d'équilibrage
+lb2.help.concept,Répartit équitablement les envois en attente de la ville entre les jours (ou semaines), les semaines et les nœuds, en n'utilisant que des créneaux valides. L'objectif est d'éviter les pics pour un panéliste ou entre panélistes.
+lb2.help.rules_title,Règles
+lb2.help.rule1,Seuls les envois en attente sont déplacés ; les envois expédiés ou reçus ne sont jamais touchés.
+lb2.help.rule2,Uniquement des jours ouvrés (voir Politiques d'équilibrage), jamais dans le passé et jamais les jours où le panéliste est absent.
+lb2.help.rule3,Seuls les nœuds avec un panéliste actif reçoivent des envois ; le nœud de destination n'est jamais modifié.
+lb2.help.rule4,Ne déplace que l'excédent des cellules surchargées vers celles qui manquent d'envois, en conservant le total de chaque mois (saisonnalité).
+lb2.help.rule5,L'envoi restant tourne entre les nœuds au lieu d'aller toujours au premier.
+lb2.help.rule6,Politique hebdomadaire : tous les envois d'une semaine prennent le premier jour ouvré de cette semaine.
+lb2.help.rule7,POBOX : chaque jour ouvré, chaque ville doit expédier au moins un envoi. D'abord il déplace l'excédent des jours proches ; si cela ne suffit pas, il génère de nouveaux samples en choisissant la meilleure origine et destination selon la charge.
+lb2.help.preview_warning,L'aperçu montre les changements proposés. Vous devez confirmer pour les appliquer à l'Allocation Plan.
+allocation_plans.status_deferred,Différée (à compenser)
+allocation_plans.status_deferred_help,Cet échantillon a été retiré du plan car son nœud n'avait pas de panéliste. Il est en lecture seule et sera réintroduit par l'équilibrage.
+lb2.deferred.title,Échantillons à compenser
+lb2.deferred.pending_total,Échantillons en attente de compensation
+lb2.deferred.by_city,Par ville d’origine
+lb2.deferred.by_plan,Par plan
+lb2.deferred.removed,Mis de côté
+lb2.deferred.reassigned_dest,Destination réaffectée
+lb2.deferred.reintroduced,Réintroduits
+lb2.deferred.waiting,En attente
+lb2.deferred.blocked,Bloqués
+lb2.deferred.remove_warning,L’application retirera {count} échantillons du plan et les enregistrera comme échantillons à compenser. Ils seront réintroduits automatiquement dès qu’un jour et un panéliste valides seront disponibles.
+lb2.deferred.col_total,Échantillons totaux
+lb2.deferred.col_scheduled,Planifiés
+lb2.deferred.col_done,Réalisés
+lb2.deferred.col_deferred,À compenser
+lb2.deferred.col_pobox_extra,Extra POBOX
+lb2.deferred.col_city,Ville
+lb2.deferred.col_plan,Plan
+lb2.deferred.col_reason,Motif d’attente
+lb2.deferred.waiting.no_origin_panelist,Aucun panéliste actif au nœud d’origine
+lb2.deferred.waiting.no_dest_panelist,Aucun panéliste actif au nœud de destination
+lb2.deferred.waiting.no_capacity,Aucune capacité sur les jours valides
+lb2.deferred.waiting.plan_inactive,Plan non actif
+lb2.deferred.waiting.outside_period,Hors de la période du plan
+lb2.deferred.empty,Il n’y a aucun échantillon à compenser.
+lb2.deferred.badge_tooltip,Échantillons à compenser en attente de réintroduction
+lb2.warning.deferred_removed,Échantillons retirés du plan et enregistrés comme échantillons à compenser.
+lb2.warning.deferred_blocked,Échantillons à compenser impossibles à déplacer car ils sont figés.
+lb2.rec.deferred_waiting,{count} échantillons à compenser attendent dans cette ville. L’équilibrage les réintroduira dès qu’un jour valide sera disponible.
+lb2.rec.deferred_will_remove,La dernière prévisualisation mettrait de côté {count} échantillons de ce plan et les enregistrerait comme échantillons à compenser. Vérifiez la prévisualisation avant d’appliquer.

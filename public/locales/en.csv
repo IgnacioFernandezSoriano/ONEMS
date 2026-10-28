@@ -3049,3 +3049,112 @@ help_center.open_new_tab,Open in a new tab
 help_center.copy_link,Copy link
 help_center.copied,Link copied
 help_center.copy_hint,Choose the panelist's language before copying. From an incident conversation the link already goes in their language.
+lb2.policies_title,Balancing policies
+lb2.working_days,Working days
+lb2.date_policy,Date policy
+lb2.date_policy_daily,Daily
+lb2.date_policy_weekly,Weekly
+lb2.date_policy_help,Daily: each shipment is placed on a specific working day. Weekly: only the week is fixed and the shipment goes to the first working day of that week.
+lb2.pobox,POBOX
+lb2.pobox_help,POBOX: every working day each city must send at least 1 shipment. Balancing first moves surplus shipments from nearby days and, if that is not enough, generates new samples (choosing the best origin and destination by load). Days left without any shipment show a red 0 in the day view.
+lb2.pobox_forces_daily,POBOX forces the daily date policy.
+lb2.balance_all,Balance all cities
+lb2.balance_all_progress,Balancing {done}/{total}
+lb2.balance_all_need_dates,Set the start and end dates to balance all cities.
+lb2.day_short.0,Sun
+lb2.day_short.1,Mon
+lb2.day_short.2,Tue
+lb2.day_short.3,Wed
+lb2.day_short.4,Thu
+lb2.day_short.5,Fri
+lb2.day_short.6,Sat
+lb2.scale_day,Day
+lb2.scale_week,Week
+lb2.scale_month,Month
+lb2.unavailable_legend,Unavailable
+lb2.non_working_legend,Non-working day
+lb2.conflict_legend,Conflict
+lb2.city_policy_inherit,Inherit from account
+lb2.warnings_title,Warnings
+lb2.warning.no_valid_cell,No valid day available for this shipment.
+lb2.warning.pobox_uncovered,POBOX node left uncovered on some working days.
+lb2.pobox_days_missing,POBOX days missing
+lb2.pobox_days_moved,POBOX days moved
+lb2.pobox_days_created,POBOX days created
+lb2.pobox_days_uncovered,POBOX days uncovered
+lb2.applied_ok,Balancing applied successfully.
+lb2.applied_error,Error applying the balancing.
+lb2.city_failed,City {city} failed
+lb2.preview_all_title,Balance preview - all cities
+lb2.warning.origin_equals_destination,Origin and destination nodes coincide for some shipments.
+lb2.planned_movements,Planned movements
+lb2.movements_truncated,Showing the first {shown} of {total} movements.
+lb2.shipments_count,{count} shipments
+lb2.city_balanced,No balancing needed - the city is already well balanced!
+lb2.no_pending_cities,No cities with pending shipments in the selected period.
+lb2.week_short,W{week}
+allocation_generator.policy_summary,"Date policy: {policy}. Working days: {days}."
+allocation_generator.pobox_added,"{count} shipments were added by POBOX so every city ships each working day."
+allocation_generator.warning_dropped,"{count} samples could not be placed (no valid day or node available)."
+allocation_generator.warning_pobox_uncovered,"POBOX could not cover {count} city-days (no free node)."
+lb2.pobox_gap_legend,0 = working day without any shipment in the city (POBOX needs at least 1)
+lb2.rec.title,Recommendations
+lb2.rec.analysis,Analysis
+lb2.rec.stats,Statistics
+lb2.rec.load_critical,{count} week/node cells ({pct}%) are saturated (≥{threshold} shipments). Balance urgently.
+lb2.rec.load_warning,{count} week/node cells ({pct}%) have high load (≥{threshold} shipments). Consider balancing preventively.
+lb2.rec.load_ok,All {total} week/node cells are within the normal range (<{threshold} shipments).
+lb2.rec.conflicts,{count} pending shipments are scheduled on days when the panelist is absent or that are not working days (nodes: {nodes}). Balancing moves them to valid days.
+lb2.rec.no_panelist,{count} pending shipments are on nodes without an active panelist (nodes: {nodes}). Balancing moves them to nodes that have one.
+lb2.rec.overdue,{count} pending shipments are dated before today. Balancing moves them forward; they are never moved to the past.
+lb2.rec.daily_peaks,{count} node-days exceed {threshold} shipments (peak: {max} at {node} on {date}). Balancing spreads them across the panelist's working days.
+lb2.rec.pobox_gap,POBOX: {count} working days have no shipment in the city ({dates}). Balancing moves surplus shipments from nearby days and, if that is not enough, generates new samples.
+lb2.rec.pobox_ok,POBOX: every working day from today has at least one shipment in the city.
+lb2.rec.action_balance,Press Auto-Balance to see the preview and apply the changes.
+lb2.rec.no_data,No data to analyze in the selected period.
+lb2.rec.stat_max,Highest-load cell: {node} / W{week} ({count} shipments)
+lb2.rec.stat_thresholds,Thresholds: High ≥{high}, Saturated ≥{saturated} shipments per node and week
+lb2.rec.stat_reference,Reference: {reference} samples per node, {tolerance}% tolerance
+lb2.auto_balance_city,Auto-Balance {city}
+lb2.help.title,Balancing algorithm
+lb2.help.concept,Distributes the city's pending shipments evenly across days (or weeks), weeks and nodes, using only valid slots. The goal is to avoid peaks for a panelist or between panelists.
+lb2.help.rules_title,Rules
+lb2.help.rule1,Only pending shipments move; sent or received ones are never touched.
+lb2.help.rule2,Only working days (see Balancing policies), never in the past and never on days when the panelist is absent.
+lb2.help.rule3,Only nodes with an active panelist receive shipments; the destination node is never changed.
+lb2.help.rule4,Moves only the surplus from overloaded cells to the cells that lack shipments, keeping each month's total (seasonality).
+lb2.help.rule5,The leftover shipment rotates between nodes instead of always going to the first one.
+lb2.help.rule6,Weekly policy: all shipments of a week take the first working day of that week.
+lb2.help.rule7,POBOX: every working day each city must send at least one shipment. First it moves surplus from nearby days; if that is not enough it generates new samples, choosing the best origin and destination by load.
+lb2.help.preview_warning,The preview shows the proposed changes. You must confirm to apply them to the Allocation Plan.
+allocation_plans.status_deferred,Deferred (to compensate)
+allocation_plans.status_deferred_help,This sample was removed from the plan because its node had no panelist. It is read-only and will be re-introduced by the balancer.
+lb2.deferred.title,Samples to compensate
+lb2.deferred.pending_total,Pending samples to compensate
+lb2.deferred.by_city,By origin city
+lb2.deferred.by_plan,By plan
+lb2.deferred.removed,Set aside
+lb2.deferred.reassigned_dest,Reassigned destination
+lb2.deferred.reintroduced,Reintroduced
+lb2.deferred.waiting,Waiting
+lb2.deferred.blocked,Blocked
+lb2.deferred.remove_warning,Applying will remove {count} samples from the plan and record them as samples to compensate. They will be reintroduced automatically when a valid day and panelist are available.
+lb2.deferred.col_total,Total samples
+lb2.deferred.col_scheduled,Scheduled
+lb2.deferred.col_done,Done
+lb2.deferred.col_deferred,To compensate
+lb2.deferred.col_pobox_extra,POBOX extra
+lb2.deferred.col_city,City
+lb2.deferred.col_plan,Plan
+lb2.deferred.col_reason,Waiting reason
+lb2.deferred.waiting.no_origin_panelist,No active panelist at the origin node
+lb2.deferred.waiting.no_dest_panelist,No active panelist at the destination node
+lb2.deferred.waiting.no_capacity,No capacity on valid days
+lb2.deferred.waiting.plan_inactive,Plan not active
+lb2.deferred.waiting.outside_period,Outside the plan period
+lb2.deferred.empty,There are no samples to compensate.
+lb2.deferred.badge_tooltip,Samples to compensate waiting to be reintroduced
+lb2.warning.deferred_removed,Samples removed from the plan and recorded as samples to compensate.
+lb2.warning.deferred_blocked,Samples to compensate that cannot be moved because they are frozen.
+lb2.rec.deferred_waiting,{count} samples to compensate are waiting in this city. Balancing will reintroduce them when a valid day is available.
+lb2.rec.deferred_will_remove,The last preview would set aside {count} samples of this plan and record them as samples to compensate. Review the preview before applying.

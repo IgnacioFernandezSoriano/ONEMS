@@ -210,6 +210,7 @@ export function AllocationPlanFilters({
                 <option value="cancelled">{t('stock.cancelled')}</option>
                 <option value="invalid">{t('allocation_plans.invalid')}</option>
                 <option value="transfer_error">{t('allocation_plans.transfer_error')}</option>
+                <option value="deferred">{t('allocation_plans.status_deferred')}</option>
               </select>
             </div>
 

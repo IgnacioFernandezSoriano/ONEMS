@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useEffectiveAccountId } from './useEffectiveAccountId'
+import { runForCities } from '../lib/balanceAll'
+import { fetchAllPages } from '../lib/fetchAllPages'
 
 export interface NodeLoadData {
   account_id: string;
@@ -52,34 +54,88 @@ export interface MatrixCell {
   node_code: string;
   week_num: number;
   load_count: number;
+  /** Inicio de semana (yyyy-MM-dd) y dia (null en politica semanal) */
+  week_start?: string;
+  day?: string | null;
 }
 
+/** Fila de rpc_get_node_load_by_day */
+export interface NodeDayLoad {
+  city_id: string;
+  city_name: string;
+  node_id: string;
+  node_code: string;
+  panelist_name: string | null;
+  day: string; // yyyy-MM-dd
+  shipment_count: number;
+  pending_count: number;
+  is_working_day: boolean;
+  is_unavailable: boolean;
+}
+
+export interface BalanceWarning {
+  code: 'no_valid_cell' | 'origin_equals_destination' | 'pobox_uncovered' | 'deferred_removed' | 'deferred_blocked' | string;
+  count: number;
+  detail: string | null;
+}
+
+export interface BalancePolicyInfo {
+  date_policy: 'weekly' | 'daily' | null;
+  pobox_enabled: boolean | null;
+}
+
+export interface BalancePobox {
+  days_missing: number;
+  days_moved: number;
+  days_created: number;
+  days_uncovered: number;
+  /** Dias POBOX cubiertos reintroduciendo muestras por compensar */
+  days_reintroduced?: number;
+}
+
+/** Bloque `deferred` de rpc_balance_city_v2 (muestras por compensar). */
+export interface BalanceDeferred {
+  removed: number;
+  reassigned_dest: number;
+  reintroduced: number;
+  waiting: number;
+  blocked?: number;
+  by_reason?: { origin_no_panelist?: number; dest_no_panelist?: number; no_valid_day?: number };
+  waiting_by_reason?: Record<string, number>;
+}
+
+export interface PendingCity {
+  city_id: string;
+  city_name: string;
+  pending_count: number;
+}
+
+/** Movimiento agrupado de rpc_balance_city_v2 (sin ids: nodos por codigo y fechas yyyy-MM-dd). La lista llega limitada a 100. */
+export interface BalanceMovement {
+  from_node_code: string;
+  from_date: string;
+  to_node_code: string;
+  to_date: string;
+  count: number;
+}
+
+/** Resultado de rpc_balance_city_v2 (preview y apply). */
 export interface BalanceResult {
   success: boolean;
+  /** Total de envios movidos (la lista `movements` puede venir truncada a 100 filas agrupadas) */
   movements_count: number;
   stddev_before: number;
   stddev_after: number;
   improvement_percentage: number;
-  movements: Array<{
-    from_node_id: string;
-    from_node_code: string;
-    from_week: number;
-    to_node_id: string;
-    to_node_code: string;
-    to_week: number;
-    shipment_ids: string[];
-    count: number;
-  }>;
+  movements: BalanceMovement[];
   matrix_before?: MatrixCell[];
   matrix_after?: MatrixCell[];
-  nodes_count?: number;
-  avg_load_per_node?: number;
-  max_acceptable_load?: number;
-  nodes_needed?: number;
-  reference_load?: number;
-  deviation_percent?: number;
+  warnings?: BalanceWarning[];
+  policy?: BalancePolicyInfo;
+  pobox?: BalancePobox;
+  deferred?: BalanceDeferred;
   message: string;
-  error?: string;
+  error?: string | null;
 }
 
 export const useNodeLoadBalancing = (
@@ -95,6 +151,7 @@ export const useNodeLoadBalancing = (
 
   const [loadData, setLoadData] = useState<NodeLoadData[]>([]);
   const [citySummaries, setCitySummaries] = useState<CityLoadSummary[]>([]);
+  const [dayData, setDayData] = useState<NodeDayLoad[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -115,6 +172,7 @@ export const useNodeLoadBalancing = (
         console.log('[useNodeLoadBalancing] No dates provided, skipping fetch');
         setLoadData([]);
         setCitySummaries([]);
+        setDayData([]);
         setLoading(false);
         return;
       }
@@ -136,7 +194,30 @@ export const useNodeLoadBalancing = (
 
       if (fetchError) throw fetchError;
 
+      // Una fila por nodo x dia (>10k en cuentas grandes): PostgREST corta en max_rows (1000), asi que se
+      // pagina con .range() sobre el orden total (ciudad, nodo, dia) que fija la RPC.
+      let dayRows: NodeDayLoad[] = [];
+      try {
+        dayRows = await fetchAllPages<NodeDayLoad>((from, to) =>
+          supabase
+            .rpc('rpc_get_node_load_by_day', {
+              p_account_id: activeAccountId,
+              p_start_date: startDate,
+              p_end_date: endDate
+            })
+            .order('city_name')
+            .order('node_code')
+            .order('day')
+            .range(from, to)
+        );
+      } catch (dayError) {
+        // No fatal: los datos semanales siguen funcionando si el detalle diario falla
+        console.error('[useNodeLoadBalancing] Error fetching day data:', dayError);
+        dayRows = [];
+      }
+
       setLoadData(data || []);
+      setDayData(dayRows);
 
       // Calculate city summaries
       if (data) {
@@ -199,60 +280,97 @@ export const useNodeLoadBalancing = (
     return summaries.sort((a, b) => b.monthly_stddev - a.monthly_stddev);
   };
 
-  const previewBalance = async (cityId: string): Promise<BalanceResult> => {
+  // PostgREST devuelve el error como objeto {message, code, details, hint}, no como Error: String(obj) daba
+  // "[object Object]" en la pantalla.
+  const errorText = (err: unknown): string => {
+    if (err instanceof Error) return err.message;
+    if (err && typeof err === 'object') {
+      const e = err as { message?: unknown; code?: unknown; details?: unknown; hint?: unknown };
+      const parts = [e.message, e.details, e.hint].filter((x) => typeof x === 'string' && x) as string[];
+      if (parts.length) return e.code ? `${parts.join(' - ')} (${String(e.code)})` : parts.join(' - ');
+      try {
+        return JSON.stringify(err);
+      } catch {
+        return 'Unknown error';
+      }
+    }
+    return String(err);
+  };
+
+  const failedResult = (err: unknown): BalanceResult => ({
+    success: false,
+    movements_count: 0,
+    stddev_before: 0,
+    stddev_after: 0,
+    improvement_percentage: 0,
+    movements: [],
+    message: '',
+    error: errorText(err),
+  });
+
+  const callBalanceV2 = async (cityId: string, apply: boolean): Promise<BalanceResult> => {
     try {
-      const { data, error: rpcError } = await supabase.rpc('rpc_balance_node_load_by_period', {
+      const { data, error: rpcError } = await supabase.rpc('rpc_balance_city_v2', {
         p_city_id: cityId,
         p_start_date: startDate,
         p_end_date: endDate,
-        p_apply_changes: false, // Preview only
+        p_apply_changes: apply,
       });
-
       if (rpcError) throw rpcError;
-
       return data as BalanceResult;
-    } catch (err: any) {
-      console.error('Error previewing balance:', err);
-      return {
-        success: false,
-        movements_count: 0,
-        stddev_before: 0,
-        stddev_after: 0,
-        improvement_percentage: 0,
-        movements: [],
-        message: '',
-        error: err.message,
-      };
+    } catch (err) {
+      console.error('Error in rpc_balance_city_v2:', err);
+      return failedResult(err);
     }
   };
 
-  const applyBalance = async (cityId: string): Promise<BalanceResult> => {
+  const previewBalanceV2 = (cityId: string) => callBalanceV2(cityId, false);
+
+  const applyBalanceV2 = async (cityId: string): Promise<BalanceResult> => {
+    const result = await callBalanceV2(cityId, true);
+    await fetchLoadData();
+    return result;
+  };
+
+  const listPendingCities = async (): Promise<PendingCity[]> => {
+    if (!activeAccountId || !startDate || !endDate) return [];
+    const { data, error: rpcError } = await supabase.rpc('rpc_balance_cities_pending', {
+      p_account_id: activeAccountId,
+      p_start_date: startDate,
+      p_end_date: endDate,
+    });
+    if (rpcError) throw rpcError;
+    return (data as PendingCity[]) || [];
+  };
+
+  const runAll = async (
+    apply: boolean,
+    onProgress: (done: number, total: number) => void,
+    cityIds?: string[]
+  ) => {
+    // With explicit ids (apply exactly what was previewed) the pending list is not consulted
+    const pending = cityIds ? [] : await listPendingCities();
+    const names = new Map(pending.map((c) => [c.city_id, c.city_name]));
+    const outcomes = await runForCities(
+      cityIds ?? pending.map((c) => c.city_id),
+      (id) => callBalanceV2(id, apply),
+      onProgress
+    );
+    return outcomes.map((o) => ({
+      cityId: o.cityId,
+      cityName: names.get(o.cityId) ?? '',
+      result: o.result,
+      error: o.error ?? (o.result && o.result.success === false ? o.result.error ?? undefined : undefined),
+    }));
+  };
+
+  const previewAll = (onProgress: (done: number, total: number) => void) => runAll(false, onProgress);
+
+  const applyAll = async (onProgress: (done: number, total: number) => void, cityIds?: string[]) => {
     try {
-      const { data, error: rpcError } = await supabase.rpc('rpc_balance_node_load_by_period', {
-        p_city_id: cityId,
-        p_start_date: startDate,
-        p_end_date: endDate,
-        p_apply_changes: true, // Apply changes
-      });
-
-      if (rpcError) throw rpcError;
-
-      // Refresh data after balancing
+      return await runAll(true, onProgress, cityIds);
+    } finally {
       await fetchLoadData();
-
-      return data as BalanceResult;
-    } catch (err: any) {
-      console.error('Error applying balance:', err);
-      return {
-        success: false,
-        movements_count: 0,
-        stddev_before: 0,
-        stddev_after: 0,
-        improvement_percentage: 0,
-        movements: [],
-        message: '',
-        error: err.message,
-      };
     }
   };
 
@@ -263,10 +381,14 @@ export const useNodeLoadBalancing = (
   return {
     loadData,
     citySummaries,
+    dayData,
     loading,
     error,
     refetch: fetchLoadData,
-    previewBalance,
-    applyBalance,
+    previewBalanceV2,
+    applyBalanceV2,
+    listPendingCities,
+    previewAll,
+    applyAll,
   };
 };

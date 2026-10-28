@@ -3049,3 +3049,112 @@ help_center.open_new_tab,Abrir en una pestaña nueva
 help_center.copy_link,Copiar enlace
 help_center.copied,Enlace copiado
 help_center.copy_hint,Elige el idioma del panelista antes de copiar. Desde la conversación de una incidencia el enlace ya va en su idioma.
+lb2.policies_title,Políticas de balanceo
+lb2.working_days,Días laborables
+lb2.date_policy,Política de fecha
+lb2.date_policy_daily,Diaria
+lb2.date_policy_weekly,Semanal
+lb2.date_policy_help,Diaria: cada envío se coloca en un día laborable concreto. Semanal: solo se fija la semana y el envío va al primer día laborable de esa semana.
+lb2.pobox,POBOX
+lb2.pobox_help,POBOX: cada día laborable cada ciudad debe enviar al menos 1 envío. Al balancear, primero se mueven excedentes de días cercanos y, si no basta, se generan nuevos samples (eligiendo el mejor origen y destino según la carga). Los días sin ningún envío aparecen con un 0 en rojo en la vista por día.
+lb2.pobox_forces_daily,POBOX fuerza la política de fecha diaria.
+lb2.balance_all,Balancear todas las ciudades
+lb2.balance_all_progress,Balanceando {done}/{total}
+lb2.balance_all_need_dates,Indica las fechas de inicio y fin para balancear todas las ciudades.
+lb2.day_short.0,Dom
+lb2.day_short.1,Lun
+lb2.day_short.2,Mar
+lb2.day_short.3,Mié
+lb2.day_short.4,Jue
+lb2.day_short.5,Vie
+lb2.day_short.6,Sáb
+lb2.scale_day,Día
+lb2.scale_week,Semana
+lb2.scale_month,Mes
+lb2.unavailable_legend,No disponible
+lb2.non_working_legend,Día no laborable
+lb2.conflict_legend,Conflicto
+lb2.city_policy_inherit,Heredar de la cuenta
+lb2.warnings_title,Avisos
+lb2.warning.no_valid_cell,No hay ningún día válido para este envío.
+lb2.warning.pobox_uncovered,Nodo POBOX sin cubrir en algunos días laborables.
+lb2.pobox_days_missing,Días POBOX que faltan
+lb2.pobox_days_moved,Días POBOX movidos
+lb2.pobox_days_created,Días POBOX creados
+lb2.pobox_days_uncovered,Días POBOX sin cubrir
+lb2.applied_ok,Balanceo aplicado correctamente.
+lb2.applied_error,Error al aplicar el balanceo.
+lb2.city_failed,Falló la ciudad {city}
+lb2.preview_all_title,Vista previa del balanceo - todas las ciudades
+lb2.warning.origin_equals_destination,El nodo de origen y el de destino coinciden en algunos envíos.
+lb2.planned_movements,Movimientos previstos
+lb2.movements_truncated,Mostrando los primeros {shown} de {total} movimientos.
+lb2.shipments_count,{count} envíos
+lb2.city_balanced,No hace falta balancear: ¡la ciudad ya está bien equilibrada!
+lb2.no_pending_cities,No hay ciudades con envíos pendientes en el periodo seleccionado.
+lb2.week_short,S{week}
+allocation_generator.policy_summary,"Política de fechas: {policy}. Días laborables: {days}."
+allocation_generator.pobox_added,"POBOX añadió {count} envíos para que cada ciudad envíe todos los días laborables."
+allocation_generator.warning_dropped,"{count} muestras no se pudieron colocar (sin día ni nodo válido)."
+allocation_generator.warning_pobox_uncovered,"POBOX no pudo cubrir {count} días de ciudad (sin nodo libre)."
+lb2.pobox_gap_legend,0 = día laborable sin ningún envío en la ciudad (POBOX exige al menos 1)
+lb2.rec.title,Recomendaciones
+lb2.rec.analysis,Análisis
+lb2.rec.stats,Estadísticas
+lb2.rec.load_critical,{count} celdas semana/nodo ({pct}%) están saturadas (≥{threshold} envíos). Balancear con urgencia.
+lb2.rec.load_warning,{count} celdas semana/nodo ({pct}%) tienen carga alta (≥{threshold} envíos). Considera balancear de forma preventiva.
+lb2.rec.load_ok,Las {total} celdas semana/nodo están en rango normal (<{threshold} envíos).
+lb2.rec.conflicts,{count} envíos pendientes están programados en días en que el panelista está ausente o que no son laborables (nodos: {nodes}). El balanceo los mueve a días válidos.
+lb2.rec.no_panelist,{count} envíos pendientes están en nodos sin panelista activo (nodos: {nodes}). El balanceo los mueve a nodos que sí tienen.
+lb2.rec.overdue,{count} envíos pendientes tienen fecha anterior a hoy. El balanceo los mueve hacia delante; nunca al pasado.
+lb2.rec.daily_peaks,{count} nodos-día superan {threshold} envíos (pico: {max} en {node} el {date}). El balanceo los reparte entre los días laborables del panelista.
+lb2.rec.pobox_gap,POBOX: {count} días laborables no tienen ningún envío en la ciudad ({dates}). El balanceo mueve excedentes de días cercanos y, si no basta, genera nuevos samples.
+lb2.rec.pobox_ok,POBOX: todos los días laborables desde hoy tienen al menos un envío en la ciudad.
+lb2.rec.action_balance,Pulsa Auto-Balance para ver la vista previa y aplicar los cambios.
+lb2.rec.no_data,No hay datos que analizar en el periodo seleccionado.
+lb2.rec.stat_max,Celda con mayor carga: {node} / S{week} ({count} envíos)
+lb2.rec.stat_thresholds,Umbrales: Alta ≥{high}, Saturada ≥{saturated} envíos por nodo y semana
+lb2.rec.stat_reference,Referencia: {reference} samples por nodo, {tolerance}% de tolerancia
+lb2.auto_balance_city,Auto-Balance {city}
+lb2.help.title,Algoritmo de balanceo
+lb2.help.concept,Reparte los envíos pendientes de la ciudad de forma equitativa entre días (o semanas), semanas y nodos, usando solo huecos válidos. El objetivo es evitar picos para un panelista o entre panelistas.
+lb2.help.rules_title,Reglas
+lb2.help.rule1,Solo se mueven los envíos pendientes; los enviados o recibidos nunca se tocan.
+lb2.help.rule2,Solo días laborables (ver Políticas de balanceo), nunca en el pasado y nunca en días en que el panelista está ausente.
+lb2.help.rule3,Solo los nodos con panelista activo reciben envíos; el nodo destino nunca se cambia.
+lb2.help.rule4,Mueve solo el excedente de las celdas sobrecargadas a las que les faltan envíos, conservando el total de cada mes (estacionalidad).
+lb2.help.rule5,El envío sobrante rota entre nodos en lugar de ir siempre al primero.
+lb2.help.rule6,Política semanal: todos los envíos de una semana toman el primer día laborable de esa semana.
+lb2.help.rule7,POBOX: cada día laborable cada ciudad debe enviar al menos un envío. Primero mueve excedentes de días cercanos; si no basta, genera nuevos samples eligiendo el mejor origen y destino según la carga.
+lb2.help.preview_warning,La vista previa muestra los cambios propuestos. Debes confirmar para aplicarlos al Allocation Plan.
+allocation_plans.status_deferred,Por compensar (diferida)
+allocation_plans.status_deferred_help,Esta muestra se retiró del plan porque su nodo no tenía panelista. Es de solo lectura y el balanceo la reintroducirá.
+lb2.deferred.title,Muestras por compensar
+lb2.deferred.pending_total,Muestras pendientes de compensar
+lb2.deferred.by_city,Por ciudad de origen
+lb2.deferred.by_plan,Por plan
+lb2.deferred.removed,Apartadas
+lb2.deferred.reassigned_dest,Destino reasignado
+lb2.deferred.reintroduced,Reintroducidas
+lb2.deferred.waiting,En espera
+lb2.deferred.blocked,Bloqueadas
+lb2.deferred.remove_warning,Al aplicar se quitarán {count} muestras del plan y se anotarán como muestras por compensar. Se reintroducirán automáticamente cuando haya un día y un panelista válidos.
+lb2.deferred.col_total,Muestras totales
+lb2.deferred.col_scheduled,Programadas
+lb2.deferred.col_done,Realizadas
+lb2.deferred.col_deferred,Por compensar
+lb2.deferred.col_pobox_extra,Extra POBOX
+lb2.deferred.col_city,Ciudad
+lb2.deferred.col_plan,Plan
+lb2.deferred.col_reason,Motivo de espera
+lb2.deferred.waiting.no_origin_panelist,Sin panelista activo en el nodo de origen
+lb2.deferred.waiting.no_dest_panelist,Sin panelista activo en el nodo de destino
+lb2.deferred.waiting.no_capacity,Sin capacidad en los días válidos
+lb2.deferred.waiting.plan_inactive,Plan no activo
+lb2.deferred.waiting.outside_period,Fuera del periodo del plan
+lb2.deferred.empty,No hay muestras por compensar.
+lb2.deferred.badge_tooltip,Muestras por compensar pendientes de reintroducir
+lb2.warning.deferred_removed,Muestras quitadas del plan y anotadas como muestras por compensar.
+lb2.warning.deferred_blocked,Muestras por compensar que no se pueden mover porque están congeladas.
+lb2.rec.deferred_waiting,Hay {count} muestras por compensar esperando en esta ciudad. El balanceo las reintroducirá cuando haya un día válido.
+lb2.rec.deferred_will_remove,La última vista previa apartaría {count} muestras de este plan y las anotaría como muestras por compensar. Revisa la vista previa antes de aplicar.
