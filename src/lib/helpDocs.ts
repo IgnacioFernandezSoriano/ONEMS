@@ -28,6 +28,15 @@ export const HELP_DOCS: HelpDoc[] = [
     public: false,
   },
   {
+    id: 'load-balancing',
+    file: 'load-balancing',
+    titleKey: 'help_center.doc.load_balancing.title',
+    descKey: 'help_center.doc.load_balancing.desc',
+    audience: 'managers',
+    roles: ['admin', 'superadmin'],
+    public: false,
+  },
+  {
     id: 'panelist-guide',
     file: 'panelist-guide',
     titleKey: 'help_center.doc.panelist_guide.title',

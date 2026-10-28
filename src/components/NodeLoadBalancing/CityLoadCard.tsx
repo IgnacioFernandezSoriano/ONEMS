@@ -170,20 +170,20 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
     if (hasSaturated) {
       return (
         <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 text-xs font-medium rounded-full">
-          SATURATED
+          {t('lb2.level.saturated')}
         </span>
       );
     }
     if (hasHigh) {
       return (
         <span className="inline-flex items-center gap-1 px-2 py-1 bg-orange-100 text-orange-700 text-xs font-medium rounded-full">
-          HIGH
+          {t('lb2.level.high')}
         </span>
       );
     }
     return (
       <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
-        Normal
+        {t('lb2.level.normal')}
       </span>
     );
   };
@@ -232,12 +232,10 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
               </div>
             )}
             <div className="flex items-center gap-2">
-              <span className="text-gray-600">Total:</span>
-              <strong className="text-gray-900">{totalShipments} shipments</strong>
+              <strong className="text-gray-900">{t('lb2.city_total', { count: totalShipments })}</strong>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-gray-600">Avg/Node:</span>
-              <strong className="text-gray-900">{avgPerNode.toFixed(1)}</strong>
+              <strong className="text-gray-900">{t('lb2.city_avg', { avg: avgPerNode.toFixed(1) })}</strong>
             </div>
           </div>
         </div>
@@ -437,21 +435,21 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Nœud
+                {t('common.node')}
               </th>
               {weeks.map((week) => (
                 <th
                   key={week}
                   className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase"
                 >
-                  Semaine {week}
+                  {t('lb2.week_label', { week })}
                 </th>
               ))}
               <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
-                Moyenne mensuelle
+                {t('nodeloadbalancing.monthly_avg')}
               </th>
               <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
-                Statut
+                {t('common.status')}
               </th>
             </tr>
           </thead>
@@ -467,7 +465,7 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
                   <div className="flex flex-col">
                     <span className="font-medium text-gray-900">{nodeCode}</span>
                     <span className="text-xs text-gray-500">
-                      {panelistName || 'No panelist'}
+                      {panelistName || t('common.no_panelist')}
                     </span>
                   </div>
                 </td>
@@ -503,7 +501,7 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
 
             {/* Totals Row */}
             <tr className="bg-gray-50 font-semibold border-t-2 border-gray-300">
-              <td className="px-4 py-3 text-gray-900">Total</td>
+              <td className="px-4 py-3 text-gray-900">{t('common.total')}</td>
               {weeks.map((week) => (
                 <td key={week} className="px-4 py-3 text-center text-gray-900">
                   {weekTotals[week]}
@@ -517,7 +515,7 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
 
             {/* Average Row */}
             <tr className="bg-gray-50 font-semibold">
-              <td className="px-4 py-3 text-gray-900">Moy/Nœud</td>
+              <td className="px-4 py-3 text-gray-900">{t('lb2.avg_per_node')}</td>
               {weeks.map((week) => (
                 <td key={week} className="px-4 py-3 text-center text-gray-900">
                   {weekAverages[week].toFixed(1)}
@@ -609,11 +607,11 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
           </button>
           {!needsBalancing && (
             <div className="invisible group-hover:visible absolute z-10 w-64 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg bottom-full left-0 mb-2">
-              <p className="font-semibold mb-1">Balance Not Needed</p>
+              <p className="font-semibold mb-1">{t('lb2.balance_not_needed')}</p>
               <p>
                 {monthlyStddev < 5
-                  ? 'Load is already well balanced (stddev < 5)'
-                  : 'No saturated or high load nodes detected'}
+                  ? t('lb2.balance_not_needed_stddev')
+                  : t('lb2.balance_not_needed_levels')}
               </p>
             </div>
           )}

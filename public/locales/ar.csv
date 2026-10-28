@@ -3163,3 +3163,29 @@ lb2.pobox_shares_total,المجموع: {total}%
 lb2.pobox_shares_sum_error,يجب أن يكون مجموع النسب 100 (أو الكل 0).
 lb2.pobox_shares_saved,تم حفظ التوزيع.
 lb2.pobox_shares_no_products,لا توجد منتجات بخطة نشطة.
+help_center.doc.load_balancing.title,موازنة الحمل
+help_center.doc.load_balancing.desc,ما هي الموازنة، وكيفية استخدام الشاشة خطوة بخطوة، وكيف يحدد ONEMS يوم كل عينة وعقدتها.
+lb2.level.normal,عادي
+lb2.level.high,مرتفع
+lb2.level.saturated,مشبع
+lb2.week_label,الأسبوع {week}
+lb2.avg_per_node,المتوسط/العقدة
+lb2.city_total,الإجمالي: {count} شحنة
+lb2.city_avg,المتوسط/العقدة: {avg}
+lb2.balance_not_needed,لا حاجة إلى الموازنة
+lb2.balance_not_needed_stddev,الحمل متوازن بالفعل (الانحراف المعياري < 5)
+lb2.balance_not_needed_levels,لا توجد عقد مشبعة أو ذات حمل عالٍ
+lb2.error_loading,خطأ في تحميل البيانات: {error}
+lb2.page_help.purpose_label,الغرض:
+lb2.page_help.purpose,عرض الشحنات وتوزيعها بشكل أفضل بين عقد كل مدينة لتجنب الحمل الزائد.
+lb2.page_help.how_label,كيف يعمل:
+lb2.page_help.how,تعرض كل مدينة حملها لكل عقدة حسب اليوم أو الأسبوع أو الشهر. يحدد ONEMS العقد المشبعة ويقترح توزيعًا أكثر توازنًا.
+lb2.page_help.usage_label,الاستخدام:
+lb2.page_help.usage,اختر الفترة وراجع كل مدينة ثم اضغط موازنة تلقائية لعرض المعاينة والتطبيق.
+lb2.example_label,مثال:
+lb2.classification_label,التصنيف:
+lb2.ref_help.desc,عدد العينات المتوقع أن تعالجها كل عقدة في المتوسط خلال الفترة المحددة.
+lb2.ref_help.example,إذا كنت تتوقع 63 عينة لكل عقدة، فهذه هي القيمة المرجعية.
+lb2.ref_help.usage,تُستخدم مع نسبة الانحراف لتصنيف العقد إلى عادي أو مرتفع أو مشبع.
+lb2.dev_help.desc,نسبة الانحراف المقبولة عن القيمة المرجعية.
+lb2.dev_help.example,مع المرجع=63 والنسبة=20: عادي < 75.6؛ مرتفع ≥ 75.6؛ مشبع ≥ 81.9

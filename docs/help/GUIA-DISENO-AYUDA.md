@@ -184,6 +184,7 @@ Todas las conversaciones con el ONE bot se dibujan con este componente. La guía
 | Página | Público | Archivos | Chat Telegram |
 |---|---|---|---|
 | Incidencias y disponibilidad | Managers | `public/help/incidents-and-availability.{en,es,fr,ar}.html` | Versión antigua (`.chat`), pendiente de migrar a `.tg` |
+| Balanceo de carga de nodos | Managers (admin y superadmin) | `public/help/load-balancing.{en,es,fr,ar}.html` | No lleva |
 | Guía del panelista: el ONE bot en Telegram | Panelistas (pública, sin login) | `public/help/panelist-guide.{en,es,fr,ar}.html` | `.tg` (canónico) |
 
 ### 10.1 Guía del panelista: cómo se llega a ella

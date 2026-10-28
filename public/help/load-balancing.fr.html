@@ -1,0 +1,610 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aide : Équilibrage de charge des nœuds</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<style>
+  :root {
+    --white: #ffffff; --g50: #f9fafb; --g100: #f3f4f6; --g200: #e5e7eb; --g300: #d1d5db;
+    --g400: #9ca3af; --g500: #6b7280; --g600: #4b5563; --g700: #374151; --g900: #111827;
+    --b50: #eff6ff; --b100: #dbeafe; --b600: #2563eb; --b700: #1d4ed8;
+    --r100: #fee2e2; --r700: #b91c1c; --gr100: #dcfce7; --gr700: #15803d;
+    --y100: #fef9c3; --y800: #854d0e; --p100: #f3e8ff; --p700: #7e22ce;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+      'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    -webkit-font-smoothing: antialiased; background: var(--g50); color: var(--g700); line-height: 1.6; font-size: 15px;
+  }
+  .layout { display: flex; min-height: 100vh; }
+
+  /* Sidebar, same look as the ONE menu */
+  .side {
+    width: 272px; flex-shrink: 0; background: var(--white); border-right: 1px solid var(--g200);
+    position: sticky; top: 0; height: 100vh; overflow-y: auto; display: flex; flex-direction: column;
+  }
+  .brand { padding: 24px 24px 16px; }
+  .brand h1 { font-size: 24px; line-height: 32px; font-weight: 700; color: var(--g900); }
+  .brand p { font-size: 14px; color: var(--g500); margin-top: 4px; }
+  .brand .doc { margin-top: 16px; font-size: 12px; font-weight: 600; color: var(--b700); background: var(--b50);
+    display: inline-block; padding: 2px 10px; border-radius: 999px; }
+  .nav { padding: 8px 12px 24px; flex: 1; }
+  .nav h3 { font-size: 12px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--g400);
+    padding: 16px 12px 6px; }
+  .nav a {
+    display: block; padding: 8px 12px; border-radius: 8px; font-size: 14px; font-weight: 500; color: var(--g600);
+    text-decoration: none; transition: background .15s, color .15s;
+  }
+  .nav a:hover { background: var(--g100); }
+  .nav a.active { background: var(--b50); color: var(--b700); }
+  .side-foot { padding: 16px 24px; border-top: 1px solid var(--g200); font-size: 12px; color: var(--g500); }
+
+  /* Content */
+  .main { flex: 1; min-width: 0; padding: 40px 32px 80px; }
+  .page { max-width: 880px; margin: 0 auto; }
+  .page > header { margin-bottom: 32px; }
+  .page > header h2 { font-size: 30px; line-height: 38px; font-weight: 700; color: var(--g900); }
+  .page > header p { margin-top: 8px; font-size: 17px; color: var(--g600); max-width: 640px; }
+  section { margin-top: 48px; }
+  section > h2 { font-size: 22px; font-weight: 700; color: var(--g900); padding-bottom: 8px; margin-bottom: 16px;
+    border-bottom: 1px solid var(--g200); }
+  h3 { font-size: 17px; font-weight: 600; color: var(--g900); margin: 28px 0 8px; }
+  p { margin: 8px 0; }
+  ul, ol { margin: 8px 0 8px 22px; }
+  li { margin: 4px 0; }
+  strong { color: var(--g900); font-weight: 600; }
+  code, kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px;
+    background: var(--g100); border: 1px solid var(--g200); border-radius: 6px; padding: 1px 6px; color: var(--g900); }
+  .card { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 20px 24px; margin: 16px 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 16px 0; }
+  .grid .card { margin: 0; }
+  .card h4 { font-size: 15px; font-weight: 600; color: var(--g900); margin-bottom: 4px; }
+  .card p { margin: 4px 0; font-size: 14px; color: var(--g600); }
+
+  .badge { display: inline-block; font-size: 12px; font-weight: 500; padding: 1px 10px; border-radius: 999px; white-space: nowrap; }
+  .b-red { background: var(--r100); color: var(--r700); }
+  .b-blue { background: var(--b100); color: var(--b700); }
+  .b-green { background: var(--gr100); color: var(--gr700); }
+  .b-yellow { background: var(--y100); color: var(--y800); }
+  .b-gray { background: var(--g100); color: var(--g600); }
+  .b-purple { background: var(--p100); color: var(--p700); }
+  .btn { display: inline-block; font-size: 13px; font-weight: 500; padding: 2px 10px; border-radius: 8px;
+    background: var(--white); border: 1px solid var(--g300); color: var(--g700); white-space: nowrap; }
+  .btn.primary { background: var(--b600); border-color: var(--b600); color: #fff; }
+
+  .callout { border-radius: 12px; padding: 14px 18px; margin: 16px 0; font-size: 14px; border: 1px solid; }
+  .callout.info { background: var(--b50); border-color: var(--b100); color: #1e3a8a; }
+  .callout.ok { background: #f0fdf4; border-color: var(--gr100); color: #14532d; }
+  .callout.warn { background: #fffbeb; border-color: var(--y100); color: var(--y800); }
+  .callout strong { color: inherit; }
+
+  .table-wrap { overflow-x: auto; margin: 16px 0; background: var(--white); border: 1px solid var(--g200); border-radius: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--g500); background: var(--g50); padding: 10px 14px; border-bottom: 1px solid var(--g200); }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--g100); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  td:first-child { font-weight: 500; color: var(--g900); }
+
+  /* Steps */
+  ol.steps { list-style: none; margin: 12px 0; counter-reset: s; }
+  ol.steps > li { counter-increment: s; position: relative; padding: 4px 0 12px 44px; margin: 0; }
+  ol.steps > li::before {
+    content: counter(s); position: absolute; left: 0; top: 2px; width: 28px; height: 28px; border-radius: 50%;
+    background: var(--b100); color: var(--b700); font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Telegram chat mock-ups */
+  .chat { background: #e9eef5; border: 1px solid var(--g200); border-radius: 16px; padding: 16px; margin: 16px 0; max-width: 460px; }
+  .chat .who { text-align: center; font-size: 12px; color: var(--g500); margin-bottom: 8px; font-weight: 500; }
+  .msg { max-width: 85%; padding: 8px 12px; border-radius: 14px; margin: 6px 0; font-size: 14px; line-height: 1.45; box-shadow: 0 1px 1px rgba(0,0,0,.06); }
+  .msg.bot { background: var(--white); border-top-left-radius: 4px; margin-right: auto; color: var(--g900); }
+  .msg.me { background: #dbeafe; border-top-right-radius: 4px; margin-left: auto; color: var(--g900); }
+  .kb { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 8px; max-width: 85%; }
+  .kb span { flex: 1 1 auto; text-align: center; background: rgba(37,99,235,.12); color: var(--b700); font-size: 13px; font-weight: 500;
+    padding: 6px 10px; border-radius: 10px; }
+  .kb.col span { flex-basis: 100%; }
+  .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; align-items: start; }
+  .two .chat { margin: 8px 0; }
+  .cap { font-size: 13px; color: var(--g500); margin-top: -6px; max-width: 460px; }
+
+  /* Flow */
+  .flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; margin: 16px 0; }
+  .flow .node { flex: 1 1 150px; background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 12px 14px; font-size: 13px; position: relative; }
+  .flow .node b { display: block; color: var(--g900); font-size: 14px; margin-bottom: 2px; }
+  .flow .node .tag { font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--b700); }
+  .flow .arrow { align-self: center; color: var(--g400); font-size: 18px; }
+
+  details { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; margin: 8px 0; }
+  summary { cursor: pointer; padding: 14px 18px; font-weight: 600; color: var(--g900); list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: '+'; color: var(--g400); font-size: 20px; line-height: 1; }
+  details[open] summary::after { content: '\2212'; }
+  details > div { padding: 0 18px 14px; color: var(--g600); font-size: 14px; }
+
+  /* ONEMS screen drawings */
+  .app { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; overflow: hidden; margin: 16px 0 6px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .app-bar { display: flex; gap: 6px; align-items: center; background: var(--g100); border-bottom: 1px solid var(--g200); padding: 8px 12px; font-size: 12px; color: var(--g500); }
+  .app-bar i { width: 9px; height: 9px; border-radius: 50%; background: var(--g300); display: inline-block; }
+  .app-bar span { margin-left: 8px; }
+  .app-body { padding: 20px; font-size: 13px; color: var(--g700); overflow-x: auto; }
+  .app-body.cols { display: grid; grid-template-columns: 210px 1fr; padding: 0; }
+  .app-body.cols > .sb { border-right: 1px solid var(--g200); padding: 14px 10px; background: #fff; }
+  .app-body.cols > .ct { padding: 20px; }
+  .sb .t { font-size: 20px; font-weight: 700; color: var(--g900); padding: 0 8px; }
+  .sb .s { font-size: 11px; color: var(--g500); padding: 0 8px 8px; }
+  .sb h5 { font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--g400); padding: 10px 8px 4px; }
+  .mi { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 8px; font-size: 13px; color: var(--g700); }
+  .mi.on { background: var(--b50); color: var(--b600); }
+  .mi .ic { width: 14px; height: 14px; border-radius: 4px; background: var(--g300); flex-shrink: 0; }
+  .mi.on .ic { background: var(--b600); }
+  .mi .badge { margin-left: auto; font-size: 11px; padding: 0 7px; }
+  .m-h { font-size: 18px; font-weight: 700; color: var(--g900); margin-bottom: 12px; }
+  .m-h3 { font-size: 15px; font-weight: 700; color: var(--g900); margin: 0 0 6px; }
+  .m-sel { display: inline-block; border: 1px solid var(--g300); border-radius: 4px; padding: 3px 24px 3px 8px; font-size: 12px; background: #fff; color: var(--g700); margin-right: 8px; position: relative; }
+  .m-sel::after { content: '\25BE'; position: absolute; right: 8px; color: var(--g400); }
+  .m-card { border: 1px solid var(--g200); border-radius: 8px; overflow: hidden; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.05); margin: 10px 0; }
+  .app table { font-size: 12px; }
+  .app th { padding: 8px 12px; font-size: 11px; }
+  .app td { padding: 8px 12px; }
+  .app td:first-child { font-weight: 400; color: inherit; }
+  .app .num { text-align: right; }
+  .m-link { color: var(--b600); }
+  .m-box { border: 1px solid var(--g200); border-radius: 6px; padding: 14px; margin: 10px 0; }
+  .m-note { background: var(--g50); border-radius: 6px; padding: 10px 12px; margin: 8px 0; font-size: 12px; }
+  .m-muted { color: var(--g500); font-size: 12px; }
+  .m-pbtn, .m-sbtn { display: inline-block; padding: 6px 14px; border-radius: 8px; font-size: 12px; margin: 2px 6px 2px 0; }
+  .m-pbtn { background: var(--b600); color: #fff; }
+  .m-sbtn { background: var(--g200); color: var(--g700); }
+  .m-ta { border: 1px solid var(--g300); border-radius: 4px; padding: 8px; font-size: 12px; color: var(--g400); background: #fff; margin: 6px 0 10px; }
+  .m-in { display: inline-block; border: 1px solid var(--g300); border-radius: 4px; padding: 3px 8px; font-size: 12px; background: #fff; min-width: 90px; }
+  .m-bub { max-width: 80%; padding: 6px 10px; border-radius: 10px; margin: 5px 0; font-size: 12px; }
+  .m-bub small { display: block; color: var(--g500); font-size: 10px; margin-top: 2px; }
+  .m-bub.l { background: var(--g100); margin-right: auto; }
+  .m-bub.r { background: var(--b100); margin-left: auto; }
+  .pin { display: inline-flex; width: 20px; height: 20px; border-radius: 50%; background: var(--b600); color: #fff; font-size: 11px; font-weight: 700; align-items: center; justify-content: center; margin-left: 6px; vertical-align: middle; flex-shrink: 0; }
+  .legend { counter-reset: l; list-style: none; margin: 10px 0 20px; }
+  .legend li { counter-increment: l; position: relative; padding: 2px 0 6px 34px; font-size: 14px; }
+  .legend li::before { content: counter(l); position: absolute; left: 0; top: 1px; width: 20px; height: 20px; border-radius: 50%; background: var(--b600); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .heat td { text-align: center; }
+  .heat .ok { background: #f0fdf4; } .heat .hi { background: var(--y100); } .heat .sat { background: var(--r100); }
+  .heat .off { background: repeating-linear-gradient(45deg, var(--g100), var(--g100) 4px, #fff 4px, #fff 8px); color: var(--g400); }
+  .heat .now { outline: 2px solid var(--b600); outline-offset: -2px; }
+
+  /* Right-to-left (Arabic) */
+  [dir=rtl] .side { border-right: 0; border-left: 1px solid var(--g200); }
+  [dir=rtl] .app-body.cols > .sb { border-right: 0; border-left: 1px solid var(--g200); }
+  [dir=rtl] th, [dir=rtl] td, [dir=rtl] .nav a { text-align: right; }
+  [dir=rtl] ul, [dir=rtl] ol { margin: 8px 22px 8px 0; }
+  [dir=rtl] ol.steps > li { padding: 4px 44px 12px 0; }
+  [dir=rtl] ol.steps > li::before { left: auto; right: 0; }
+  [dir=rtl] .legend li { padding: 2px 34px 6px 0; }
+  [dir=rtl] .legend li::before { left: auto; right: 0; }
+  [dir=rtl] .msg.bot { border-top-left-radius: 14px; border-top-right-radius: 4px; margin-right: 0; margin-left: auto; }
+  [dir=rtl] .msg.me { border-top-right-radius: 14px; border-top-left-radius: 4px; margin-left: 0; margin-right: auto; }
+  [dir=rtl] .m-bub.l { margin-right: 0; margin-left: auto; }
+  [dir=rtl] .m-bub.r { margin-left: 0; margin-right: auto; }
+  [dir=rtl] .pin { margin-left: 0; margin-right: 6px; }
+  [dir=rtl] .m-sel { padding: 3px 8px 3px 24px; margin-right: 0; margin-left: 8px; }
+  [dir=rtl] .m-sel::after { right: auto; left: 8px; }
+  [dir=rtl] .m-pbtn, [dir=rtl] .m-sbtn { margin: 2px 0 2px 6px; }
+  [dir=rtl] .mi .badge { margin-left: 0; margin-right: auto; }
+  [dir=rtl] .app-bar span { margin-left: 0; margin-right: 8px; }
+  [dir=rtl] .flow .arrow { transform: scaleX(-1); }
+  [dir=rtl] .app td:first-child { font-weight: 400; }
+  .mobile-top { display: none; }
+  @media (max-width: 900px) {
+    .app-body.cols { grid-template-columns: 1fr; }
+    .app-body.cols > .sb { border-right: 0; border-bottom: 1px solid var(--g200); }
+    .layout { display: block; }
+    .side { display: none; }
+    .mobile-top { display: block; position: sticky; top: 0; z-index: 5; background: var(--white); border-bottom: 1px solid var(--g200); padding: 10px 16px; }
+    .mobile-top b { font-size: 18px; color: var(--g900); }
+    .mobile-top span { font-size: 13px; color: var(--g500); margin-left: 6px; }
+    .mobile-top select { width: 100%; margin-top: 8px; padding: 8px; border: 1px solid var(--g300); border-radius: 8px; font-size: 14px; background: #fff; color: var(--g700); }
+    .main { padding: 24px 16px 64px; }
+    .page > header h2 { font-size: 24px; line-height: 32px; }
+  }
+  @media print { .side, .mobile-top { display: none; } .main { padding: 0; } body { background: #fff; } section { break-inside: avoid-page; } }
+</style>
+</head>
+<body>
+<div class="mobile-top">
+  <b>ONE</b><span>for Regulators &middot; Aide</span>
+  <select id="jump" aria-label="Aller à la section"></select>
+</div>
+<div class="layout">
+  <aside class="side">
+    <div class="brand">
+      <h1>ONE</h1>
+      <p>for Regulators</p>
+      <span class="doc">Aide &middot; Équilibrage de charge</span>
+    </div>
+    <nav class="nav" id="nav">
+      <h3>Premiers pas</h3>
+      <a href="#overview">À quoi ça sert</a>
+      <a href="#concepts">Notions de base</a>
+      <h3>L&rsquo;écran</h3>
+      <a href="#screen">Où le trouver et son contenu</a>
+      <a href="#policies">Politiques d&rsquo;équilibrage</a>
+      <a href="#filters">Période et critères</a>
+      <a href="#city-card">La carte de chaque ville</a>
+      <a href="#deferred">Échantillons à compenser</a>
+      <h3>Comment faire</h3>
+      <a href="#balance-city">Équilibrer une ville</a>
+      <a href="#balance-all">Équilibrer toutes les villes</a>
+      <a href="#preview">Lire l&rsquo;aperçu</a>
+      <h3>Logique du calcul</h3>
+      <a href="#logic">Le calcul en cinq étapes</a>
+      <a href="#logic-fix">1 · Corriger l&rsquo;impossible</a>
+      <a href="#logic-equity">2 · Répartition équitable</a>
+      <a href="#logic-compensate">3 · Réintroduire les compensations</a>
+      <a href="#logic-pobox">4 · POBOX</a>
+      <a href="#logic-rules">Règles jamais enfreintes</a>
+      <h3>Référence</h3>
+      <a href="#faq">Questions</a>
+    </nav>
+    <div class="side-foot">Mis à jour le 28 octobre 2026</div>
+  </aside>
+
+  <main class="main">
+  <div class="page">
+    <header>
+      <h2>Équilibrage de charge des nœuds</h2>
+      <p>Ce que fait l&rsquo;équilibrage, comment utiliser l&rsquo;écran pas à pas et comment ONEMS décide à quel jour et à quel nœud va chaque échantillon.</p>
+    </header>
+
+    <section id="overview">
+      <h2>À quoi ça sert</h2>
+      <p>L&rsquo;<strong>Allocation Plan</strong> indique quels échantillons envoyer, depuis quel nœud, vers quel nœud et quel jour. Avec le temps, cette répartition se dérègle : un panéliste part en vacances, un nœud se retrouve sans panéliste, des échantillons sont ajoutés, ou certains jours comptent beaucoup d&rsquo;envois et d&rsquo;autres aucun.</p>
+      <p>L&rsquo;<strong>équilibrage</strong> réorganise les échantillons <strong>en attente</strong> de chaque ville pour que le travail soit réparti équitablement entre les jours et entre les panélistes, sans modifier ce qui est mesuré.</p>
+      <div class="grid">
+        <div class="card"><h4>Évite les pics</h4><p>Aucun panéliste ne reçoit d&rsquo;un coup beaucoup d&rsquo;échantillons le même jour ou la même semaine pendant que d&rsquo;autres n&rsquo;en ont aucun.</p></div>
+        <div class="card"><h4>Respecte la disponibilité</h4><p>Ne programme aucun envoi les jours non ouvrés, dans le passé, ni les jours où le panéliste a signalé son absence.</p></div>
+        <div class="card"><h4>Préserve la mesure</h4><p>Conserve la ville d&rsquo;origine et la ville de destination de chaque échantillon, ainsi que le total d&rsquo;échantillons de chaque mois.</p></div>
+      </div>
+      <div class="callout info"><strong>C&rsquo;est toujours vous qui décidez.</strong> L&rsquo;équilibrage commence par vous montrer un <em>aperçu</em> avec tous les changements. Rien n&rsquo;est modifié dans le plan tant que vous n&rsquo;avez pas cliqué sur <span class="btn primary">Appliquer l&rsquo;équilibrage</span>.</div>
+    </section>
+
+    <section id="concepts">
+      <h2>Notions de base</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Terme</th><th>Ce que cela signifie ici</th></tr></thead>
+        <tbody>
+          <tr><td>Échantillon (envoi)</td><td>Une ligne de l&rsquo;Allocation Plan : un envoi d&rsquo;un nœud d&rsquo;origine vers un nœud de destination à une date. Seuls ceux qui sont <span class="badge b-yellow">en attente</span> sont déplacés. Les échantillons expédiés ou reçus ne sont jamais touchés.</td></tr>
+          <tr><td>Nœud</td><td>Un point du réseau dans une ville (par exemple <code>NAK-01</code>), tenu par un panéliste.</td></tr>
+          <tr><td>Nœud valide</td><td>Un nœud actif qui a un panéliste actif. Seuls les nœuds valides envoient ou reçoivent des échantillons.</td></tr>
+          <tr><td>Jour valide</td><td>Un jour ouvré (selon les <a href="#policies">Politiques d&rsquo;équilibrage</a>), jamais dans le passé, dans les dates du plan, et où ni le panéliste d&rsquo;origine ni celui de destination n&rsquo;ont déclaré être indisponibles.</td></tr>
+          <tr><td>Période</td><td>Les dates de début et de fin que vous choisissez dans les filtres. L&rsquo;équilibrage ne regarde que les échantillons de cette période.</td></tr>
+          <tr><td>Gel</td><td>Une date de protection. D&rsquo;aujourd&rsquo;hui jusqu&rsquo;à cette date, l&rsquo;équilibrage ne déplace, ne supprime et ne crée aucun échantillon. Il évite de changer ce que les panélistes ont déjà prévu cette semaine.</td></tr>
+          <tr><td>Échantillon à compenser</td><td>Un échantillon qui n&rsquo;a pu être placé nulle part de valide (par exemple parce que la ville n&rsquo;a pas de panéliste). Il est retiré du plan, noté à part, et l&rsquo;équilibrage le remet dès qu&rsquo;une place se libère.</td></tr>
+          <tr><td>POBOX</td><td>Règle facultative : chaque jour ouvré, chaque ville doit expédier au moins un échantillon.</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="screen">
+      <h2>Où le trouver et son contenu</h2>
+      <p>Ouvrez le menu <strong>Allocation › Équilibrage de charge</strong>. L&rsquo;écran se lit de haut en bas : d&rsquo;abord les règles, puis la période, puis le résumé et enfin une carte par ville.</p>
+      <div class="app" role="img" aria-label="Écran Équilibrage de Charge des Nœuds">
+        <div class="app-bar"><i></i><i></i><i></i><span>ONEMS › Allocation › Équilibrage de charge</span></div>
+        <div class="app-body">
+          <div class="m-h">Équilibrage de Charge des Nœuds</div>
+          <div class="m-box"><div class="m-h3">Politiques d&rsquo;équilibrage<span class="pin">1</span> <span class="m-pbtn" style="float:right">Équilibrer toutes les villes</span></div>
+            <span class="m-muted">Jours ouvrés</span> <span class="m-pbtn">Lun</span><span class="m-pbtn">Mar</span><span class="m-pbtn">Mer</span><span class="m-pbtn">Jeu</span><span class="m-pbtn">Ven</span><span class="m-sbtn">Sam</span><span class="m-sbtn">Dim</span>
+            <div style="margin-top:8px"><span class="m-muted">Politique de date</span> <span class="m-pbtn">Quotidienne</span><span class="m-sbtn">Hebdomadaire</span> &nbsp; <span class="m-muted">&#9744; POBOX</span> &nbsp; <span class="m-muted">Gel jusqu&rsquo;au</span> <span class="m-in">01/11/2026</span></div>
+          </div>
+          <div class="m-box"><div class="m-h3">Filtres<span class="pin">2</span></div>
+            <span class="m-muted">Date de début</span> <span class="m-in">01/11/2026</span> <span class="m-muted">Date de fin</span> <span class="m-in">30/11/2026</span>
+            <div style="margin-top:8px"><span class="m-muted">Échantillons de Référence/Nœud</span> <span class="m-in">6</span> <span class="m-muted">Tolérance de Déviation (%)</span> <span class="m-in">20</span></div>
+          </div>
+          <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin:10px 0">
+            <div class="m-box" style="margin:0"><span class="m-muted">Nœuds saturés</span><br><b style="font-size:18px;color:var(--r700)">2</b><span class="pin">3</span></div>
+            <div class="m-box" style="margin:0"><span class="m-muted">Nœuds à charge élevée</span><br><b style="font-size:18px;color:#c2410c">3</b></div>
+            <div class="m-box" style="margin:0"><span class="m-muted">Total des expéditions</span><br><b style="font-size:18px;color:var(--b700)">412</b></div>
+          </div>
+          <div class="m-box"><div class="m-h3">Échantillons à compenser<span class="pin">4</span></div><span class="m-muted">Échantillons en attente de compensation : 12</span></div>
+          <div class="m-box"><div class="m-h3">Nakuru <span class="badge b-gray">Quotidienne</span><span class="pin">5</span> <span style="float:right"><span class="m-sbtn">Jour</span><span class="m-pbtn">Semaine</span><span class="m-sbtn">Mois</span></span></div>
+            <span class="m-muted">Matrice nœuds × semaines, recommandations et bouton</span> <span class="m-pbtn">&#9878;&#65039; Équilibrage auto Nakuru</span>
+          </div>
+        </div>
+      </div>
+      <ol class="legend">
+        <li><strong>Politiques d&rsquo;équilibrage :</strong> les règles utilisées par le calcul (jours ouvrés, politique de date, POBOX et gel) et le bouton pour équilibrer toutes les villes à la fois.</li>
+        <li><strong>Filtres :</strong> la période à équilibrer et les critères de coloration de la charge.</li>
+        <li><strong>Résumé :</strong> combien de nœuds sont saturés ou à charge élevée, et le total des expéditions de la période.</li>
+        <li><strong>Échantillons à compenser :</strong> les échantillons mis de côté qui attendent une place.</li>
+        <li><strong>Une carte par ville :</strong> la charge de chaque nœud, les recommandations et le bouton pour équilibrer cette ville.</li>
+      </ol>
+      <div class="callout info">L&rsquo;écran est visible par les utilisateurs ayant le rôle <strong>admin</strong> ou <strong>superadmin</strong>. Chaque compte ne voit que ses propres villes.</div>
+    </section>
+
+    <section id="policies">
+      <h2>Politiques d&rsquo;équilibrage</h2>
+      <p>Ce sont les règles du compte. Elles sont enregistrées dès que vous les modifiez et s&rsquo;appliquent à toutes les villes, sauf si une ville a sa propre règle (voir <a href="#city-card">La carte de chaque ville</a>).</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Réglage</th><th>Ce qu&rsquo;il fait</th></tr></thead>
+        <tbody>
+          <tr><td>Jours ouvrés</td><td>Les jours où un envoi peut être programmé. Cliquez sur un jour pour l&rsquo;activer (bleu) ou le désactiver (blanc). Le plus courant est du lundi au vendredi.</td></tr>
+          <tr><td>Politique de date</td><td><strong>Quotidienne :</strong> chaque envoi est placé sur un jour précis et la répartition se fait jour par jour. <strong>Hebdomadaire :</strong> seule la semaine est fixée ; l&rsquo;envoi va au premier jour ouvré de cette semaine.</td></tr>
+          <tr><td>POBOX</td><td>Si la case est cochée, chaque jour ouvré, chaque ville doit expédier au moins un échantillon. POBOX impose la politique <strong>Quotidienne</strong>. Voir <a href="#logic-pobox">POBOX</a>.</td></tr>
+          <tr><td>Gel jusqu&rsquo;au</td><td>Date de protection. Par défaut, c&rsquo;est le <strong>dimanche de la semaine en cours</strong>. D&rsquo;aujourd&rsquo;hui jusqu&rsquo;à cette date, aucun échantillon n&rsquo;est touché ; l&rsquo;équilibrage commence le lendemain. Vous pouvez l&rsquo;avancer, la reculer ou l&rsquo;effacer.</td></tr>
+          <tr><td>Échantillons POBOX supplémentaires par produit</td><td>N&rsquo;apparaît que si POBOX est coché. Indique quel pourcentage des nouveaux échantillons créés par POBOX va à chaque produit. Les pourcentages doivent totaliser 100, ou être tous à 0 (le plan le moins avancé est alors utilisé). Cliquez sur <span class="btn">Enregistrer</span>.</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout warn"><strong>Les échantillons en retard</strong> (en attente avec une date antérieure à aujourd&rsquo;hui) ne restent jamais dans le passé : l&rsquo;équilibrage les amène au premier jour valide après le gel.</div>
+    </section>
+
+    <section id="filters">
+      <h2>Période et critères</h2>
+      <ul>
+        <li><strong>Date de début</strong> et <strong>Date de fin</strong> : la période analysée et équilibrée. Vous pouvez utiliser la <strong>Sélection Rapide</strong> : un mois, un semestre ou l&rsquo;année entière.</li>
+        <li><strong>Échantillons de Référence/Nœud</strong> : combien d&rsquo;échantillons par nœud et par semaine vous jugez normaux.</li>
+        <li><strong>Tolérance de Déviation (%)</strong> : de combien un nœud peut dépasser la référence avant d&rsquo;être signalé.</li>
+      </ul>
+      <p>Ces deux valeurs servent à colorer chaque case nœud × semaine :</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Couleur</th><th>Règle</th><th>Exemple avec référence 6 et 20 %</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge b-green">Normal</span></td><td>Moins de référence × (1 + %)</td><td>moins de 7,2</td></tr>
+          <tr><td><span class="badge b-yellow">Élevée</span></td><td>À partir de référence × (1 + %)</td><td>7,2 ou plus</td></tr>
+          <tr><td><span class="badge b-red">Saturée</span></td><td>À partir de référence × (1 + % × 1,5)</td><td>7,8 ou plus</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout info">La référence et la tolérance <strong>servent uniquement à colorer et à avertir</strong>. Le calcul de l&rsquo;équilibrage ne les utilise pas : il répartit toujours à parts égales entre les nœuds valides.</div>
+      <p><span class="btn">Réinitialiser</span> rétablit les valeurs initiales, y compris le gel.</p>
+    </section>
+
+    <section id="city-card">
+      <h2>La carte de chaque ville</h2>
+      <p>Chaque ville qui a des échantillons sur la période a sa carte. Dans l&rsquo;en-tête, vous voyez le nom, la politique appliquée (<span class="badge b-gray">Quotidienne</span> ou <span class="badge b-gray">Hebdomadaire</span>, et <span class="badge b-purple">POBOX</span> s&rsquo;il est actif) et trois vues.</p>
+      <h3>Les trois vues</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Vue</th><th>Ce qu&rsquo;elle montre</th></tr></thead>
+        <tbody>
+          <tr><td>Jour</td><td>Les envois de chaque nœud, jour par jour. Les cases grises sont des jours non ouvrés et les cases hachurées, des jours où le panéliste est absent. Un nombre en rouge est un <strong>conflit</strong> : un échantillon placé un jour où il ne peut pas partir. Avec POBOX, un <strong style="color:var(--r700)">0</strong> rouge dans le total est un jour ouvré sans aucun envoi de la ville.</td></tr>
+          <tr><td>Semaine</td><td>Les envois de chaque nœud, semaine par semaine, avec la couleur Normal / Élevée / Saturée, la moyenne et l&rsquo;état du nœud.</td></tr>
+          <tr><td>Mois</td><td>Les totaux de chaque nœud par mois et sa moyenne mensuelle.</td></tr>
+        </tbody>
+      </table></div>
+      <div class="app" role="img" aria-label="Vue Jour de la ville de Nakuru">
+        <div class="app-bar"><i></i><i></i><i></i><span>Nakuru · Jour</span></div>
+        <div class="app-body">
+          <table class="heat">
+            <thead><tr><th>Nœud</th><th>Lun 2</th><th>Mar 3</th><th>Mer 4</th><th>Jeu 5</th><th>Ven 6</th><th>Sam 7</th></tr></thead>
+            <tbody>
+              <tr><td>NAK-01<br><span class="m-muted">Grace W.</span></td><td>3</td><td>2</td><td>2</td><td>2</td><td>2</td><td class="off">—</td></tr>
+              <tr><td>NAK-02<br><span class="m-muted">Peter O.</span></td><td>1</td><td class="off">0</td><td class="off" style="color:var(--r700);font-weight:700">1</td><td>0</td><td>1</td><td class="off">—</td></tr>
+              <tr><td>NAK-03<br><span class="m-muted">Pas de Panéliste</span></td><td>0</td><td>1</td><td>0</td><td>0</td><td>0</td><td class="off">—</td></tr>
+              <tr><td><b>Total</b></td><td><b>4</b></td><td><b>3</b></td><td><b>3</b></td><td><b>2</b></td><td><b>3</b></td><td class="off">—</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <p class="cap">Exemple : Peter est absent le mardi et le mercredi (hachuré) et a un échantillon le mercredi (en rouge, conflit). NAK-03 n&rsquo;a pas de panéliste. Grace a presque tout le travail.</p>
+      <h3>Recommandations</h3>
+      <p>Sous le tableau, <strong>💡 Recommandations</strong> explique en mots ce que voit ONEMS : cases saturées, échantillons les jours d&rsquo;absence, nœuds sans panéliste, échantillons en retard, pics quotidiens et jours sans envoi avec POBOX. Le nombre rouge à côté du titre indique combien d&rsquo;avertissements importants il y a.</p>
+      <h3>Règle propre à une ville</h3>
+      <p>Sous le nom de la ville, il y a deux sélecteurs, <strong>Politique de date</strong> et <strong>POBOX</strong>. Avec <em>Hériter du compte</em>, la ville suit les Politiques d&rsquo;équilibrage. Choisissez une autre valeur si cette ville doit fonctionner différemment.</p>
+    </section>
+
+    <section id="deferred">
+      <h2>Échantillons à compenser</h2>
+      <p>Parfois un échantillon ne peut aller nulle part : la ville d&rsquo;origine ou celle de destination n&rsquo;a plus aucun panéliste actif, ou il ne reste aucun jour valide jusqu&rsquo;à la fin du plan. Au lieu de le laisser un jour où il ne peut pas partir, l&rsquo;équilibrage le <strong>retire du plan et le note</strong> dans ce bloc.</p>
+      <ul>
+        <li><strong>Par ville d&rsquo;origine :</strong> combien attendent dans chaque ville et le <strong>Motif d&rsquo;attente</strong> le plus fréquent.</li>
+        <li><strong>Par plan :</strong> pour chaque plan, les échantillons totaux, planifiés, réalisés, à compenser et les <strong>Extra POBOX</strong> (créés par POBOX).</li>
+      </ul>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Motif d&rsquo;attente</th><th>Que faire</th></tr></thead>
+        <tbody>
+          <tr><td>Aucun panéliste actif au nœud d&rsquo;origine</td><td>Créer ou réactiver un panéliste dans la ville d&rsquo;origine.</td></tr>
+          <tr><td>Aucun panéliste actif au nœud de destination</td><td>Créer ou réactiver un panéliste dans la ville de destination.</td></tr>
+          <tr><td>Plan non actif</td><td>Le plan de l&rsquo;échantillon n&rsquo;est pas actif. Activez-le s&rsquo;il doit continuer.</td></tr>
+          <tr><td>Aucune capacité sur les jours valides</td><td>Il ne reste aucune place sur la période. Équilibrez sur une période plus longue.</td></tr>
+          <tr><td>Hors de la période du plan</td><td>Il ne reste aucun jour valide dans les dates du plan.</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout ok"><strong>Et ensuite :</strong> vous n&rsquo;avez rien d&rsquo;autre à faire. À chaque équilibrage de cette ville, ONEMS essaie de réintroduire les échantillons notés. Le menu affiche un compteur de ceux qui attendent encore.</div>
+    </section>
+
+    <section id="balance-city">
+      <h2>Équilibrer une ville</h2>
+      <ol class="steps">
+        <li>Ouvrez <strong>Allocation › Équilibrage de charge</strong>.</li>
+        <li>Vérifiez les <strong>Politiques d&rsquo;équilibrage</strong> : jours ouvrés, politique de date, POBOX et la date de <strong>Gel jusqu&rsquo;au</strong>.</li>
+        <li>Dans <strong>Filtres</strong>, choisissez la <strong>Date de début</strong> et la <strong>Date de fin</strong>, par exemple avec le bouton du mois.</li>
+        <li>Repérez la carte de la ville et lisez ses <strong>💡 Recommandations</strong>. Utilisez la vue <strong>Jour</strong> pour voir les conflits et les jours vides.</li>
+        <li>Cliquez sur <strong>⚖️ Équilibrage auto &lt;ville&gt;</strong>. L&rsquo;<a href="#preview">aperçu</a> s&rsquo;ouvre. Rien n&rsquo;a encore changé.</li>
+        <li>Vérifiez le résumé, les avertissements et la matrice <strong>Avant</strong> / <strong>Après</strong>.</li>
+        <li>Cliquez sur <strong>Appliquer l&rsquo;équilibrage</strong> pour enregistrer les changements, ou sur <strong>Annuler</strong> pour tout laisser comme avant.</li>
+      </ol>
+      <div class="callout ok"><strong>Et ensuite :</strong> le message « Équilibrage appliqué avec succès. » apparaît et la carte se met à jour. Les panélistes verront leurs nouvelles dates dans le bot ONE sur Telegram, avec les rappels de chaque jour. Vous pouvez relancer l&rsquo;équilibrage quand vous voulez : si la ville est déjà équilibrée, l&rsquo;aperçu vous le dira et ne déplacera rien.</div>
+    </section>
+
+    <section id="balance-all">
+      <h2>Équilibrer toutes les villes</h2>
+      <ol class="steps">
+        <li>Choisissez la <strong>Date de début</strong> et la <strong>Date de fin</strong>. Sans elles, le bouton est désactivé.</li>
+        <li>Cliquez sur <strong>Équilibrer toutes les villes</strong>, dans le bloc Politiques d&rsquo;équilibrage. Le bouton affiche l&rsquo;avancement : « Équilibrage 3/12 ».</li>
+        <li>L&rsquo;<strong>Aperçu de l&rsquo;équilibrage - toutes les villes</strong> s&rsquo;ouvre, avec une ligne par ville et une ligne de total.</li>
+        <li>Cliquez sur <strong>Appliquer l&rsquo;équilibrage</strong> pour appliquer toutes les villes, ou sur <strong>Annuler</strong>.</li>
+      </ol>
+      <div class="callout warn">Chaque ville est appliquée séparément. Si l&rsquo;une échoue (« Échec pour la ville … »), les autres sont tout de même appliquées. Vérifiez la ligne en rouge et relancez l&rsquo;équilibrage de cette ville seule.</div>
+    </section>
+
+    <section id="preview">
+      <h2>Lire l&rsquo;aperçu</h2>
+      <div class="app" role="img" aria-label="Aperçu de l&rsquo;équilibrage de Nakuru">
+        <div class="app-bar"><i></i><i></i><i></i><span>Aperçu de l&rsquo;équilibrage - Nakuru</span></div>
+        <div class="app-body">
+          <div class="m-box"><div class="m-h3">Résumé<span class="pin">1</span></div>
+            <span class="m-muted">Mouvements</span> <b>9</b> &nbsp; <span class="m-muted">Écart type avant</span> <b>1,4</b> &nbsp; <span class="m-muted">Écart type après</span> <b>0,2</b> &nbsp; <span class="m-muted">Amélioration</span> <b>86 %</b></div>
+          <div class="m-box"><div class="m-h3">POBOX<span class="pin">2</span></div><span class="m-muted">Jours POBOX manquants 2 · Jours POBOX déplacés 1 · Jours POBOX créés 1 · Jours POBOX non couverts 0</span></div>
+          <div class="m-box"><div class="m-h3">Échantillons à compenser<span class="pin">3</span></div><span class="m-muted">Mis de côté 0 · Destination réaffectée 1 · Réintroduits 2 · En attente 3</span><br><span class="m-muted">2 d&rsquo;entre eux remplacent des échantillons POBOX (même jour et nœud, sans envoi supplémentaire).</span></div>
+          <div class="m-note">Gel : les échantillons jusqu&rsquo;au 2026-11-01 restent tels quels ; l&rsquo;équilibrage commence le lendemain.<span class="pin">4</span></div>
+          <span class="m-sbtn">Vue matricielle</span><span class="m-sbtn">Mouvements (9)</span><span class="pin">5</span>
+          <div style="margin-top:10px"><span class="m-sbtn">Annuler</span><span class="m-pbtn">Appliquer l&rsquo;équilibrage</span></div>
+        </div>
+      </div>
+      <ol class="legend">
+        <li><strong>Résumé :</strong> combien d&rsquo;échantillons changent et de combien la charge s&rsquo;uniformise. L&rsquo;écart type mesure l&rsquo;inégalité de la répartition : plus il est bas, plus elle est homogène. <em>Amélioration</em> est la baisse en pourcentage.</li>
+        <li><strong>POBOX</strong> (s&rsquo;il est actif) : les jours ouvrés sans envoi, combien sont couverts en déplaçant un échantillon, combien en en créant un nouveau et combien restent non couverts.</li>
+        <li><strong>Échantillons à compenser :</strong> ceux qui seraient mis de côté, ceux qui changent de nœud de destination dans la même ville, ceux qui reviennent dans le plan et ceux qui attendent encore.</li>
+        <li><strong>Gel :</strong> rappelle jusqu&rsquo;à quelle date rien n&rsquo;est touché.</li>
+        <li><strong>Vue matricielle / Mouvements :</strong> la charge de chaque nœud et de chaque semaine avant et après, ou la liste des changements (« de NAK-01, jour 2, vers NAK-02, jour 5 : 1 envoi »).</li>
+      </ol>
+      <div class="callout warn">Si l&rsquo;aperçu signale que des <strong>échantillons seront retirés du plan</strong>, un avertissement orange apparaît avant le bouton Appliquer. Lisez-le : ces échantillons passent dans <a href="#deferred">Échantillons à compenser</a>.</div>
+    </section>
+
+    <section id="logic">
+      <h2>Le calcul en cinq étapes</h2>
+      <p>Quand vous cliquez sur Équilibrage auto, ONEMS procède ainsi pour la ville, toujours sur les échantillons <strong>en attente</strong> de la période et à partir du <strong>premier jour autorisé</strong> : le plus tardif entre la date de début, aujourd&rsquo;hui et le lendemain du gel.</p>
+      <div class="flow">
+        <div class="node"><span class="tag">Étape 1</span><b>Corriger l&rsquo;impossible</b>Destinations sans panéliste et échantillons sans aucun jour possible.</div>
+        <div class="arrow">&rarr;</div>
+        <div class="node"><span class="tag">Étape 2</span><b>Répartir à parts égales</b>Entre semaines, jours et nœuds, sans changer le total du mois.</div>
+        <div class="arrow">&rarr;</div>
+        <div class="node"><span class="tag">Étape 3</span><b>Réintroduire</b>Les échantillons à compenser reviennent s&rsquo;il y a de la place.</div>
+        <div class="arrow">&rarr;</div>
+        <div class="node"><span class="tag">Étape 4</span><b>POBOX</b>Au moins un envoi chaque jour ouvré.</div>
+        <div class="arrow">&rarr;</div>
+        <div class="node"><span class="tag">Étape 5</span><b>Aperçu ou enregistrement</b>Tout ou rien.</div>
+      </div>
+      <p>Les échantillons situés dans le gel, ainsi que les échantillons expédiés et reçus, n&rsquo;entrent pas dans le calcul.</p>
+    </section>
+
+    <section id="logic-fix">
+      <h2>1 · Corriger l&rsquo;impossible</h2>
+      <p>Avant de répartir, ONEMS repère les échantillons qui ne pourraient pas partir tels quels :</p>
+      <ol class="steps">
+        <li><strong>Le nœud de destination n&rsquo;a pas de panéliste actif.</strong> ONEMS cherche un autre nœud valide dans la <strong>même ville de destination</strong> : celui qui reçoit le moins cette semaine et, si possible, un nœud disponible ce jour-là. Le trajet ville → ville ne change pas. Dans l&rsquo;aperçu, cela compte comme <em>Destination réaffectée</em>.</li>
+        <li><strong>La ville d&rsquo;origine n&rsquo;a aucun nœud valide</strong>, ou celle de destination non plus : l&rsquo;échantillon passe dans <a href="#deferred">Échantillons à compenser</a>.</li>
+        <li><strong>Aucun jour valide</strong> pour l&rsquo;échantillon sur tout ce qui reste de son plan (pas seulement sur la période affichée) : il passe dans Échantillons à compenser. S&rsquo;il existe un jour hors période, il est laissé où il est et un avertissement s&rsquo;affiche, pour que vous équilibriez sur une période plus longue.</li>
+      </ol>
+      <div class="callout info">Un échantillon auquel quelque chose est lié (matériel retenu, un incident ou une lecture du tag) n&rsquo;est <strong>jamais retiré du plan</strong>. Il est laissé où il est et l&rsquo;aperçu prévient par « Échantillons à compenser impossibles à déplacer car ils sont figés. ».</div>
+    </section>
+
+    <section id="logic-equity">
+      <h2>2 · Répartition équitable</h2>
+      <p>C&rsquo;est le cœur de l&rsquo;équilibrage. Le principe : <strong>chaque mois conserve son nombre d&rsquo;échantillons</strong> (la saisonnalité du plan est ainsi respectée) et ce nombre est réparti à parts égales entre les places valides du mois.</p>
+      <ol class="steps">
+        <li><strong>Mois → semaines.</strong> Le total du mois est réparti entre ses semaines selon le nombre de jours ouvrés de chacune dans la période. Une semaine de 5 jours reçoit plus qu&rsquo;une semaine de 2.</li>
+        <li><strong>Semaine → nœud et jour.</strong> Avec la politique Quotidienne, chaque semaine est répartie à parts égales entre les cases (nœud valide × jour valide). Avec la politique Hebdomadaire, entre les nœuds valides, et l&rsquo;envoi va au premier jour ouvré de la semaine.</li>
+        <li><strong>Ce qui ne se divise pas exactement.</strong> S&rsquo;il reste un ou deux échantillons, ils vont un par un vers des nœuds différents et des jours différents. De plus, le tour tourne : la prochaine fois que vous équilibrez, ce ne sera pas le même nœud qui sera servi.</li>
+        <li><strong>Déplacer le moins possible.</strong> Chaque case garde ses échantillons jusqu&rsquo;à son objectif (ceux dont la date est la plus proche). Seul l&rsquo;excédent est déplacé, vers des cases du même mois qui ont moins que leur part, en appariant par date pour que chaque échantillon se décale du plus petit nombre de jours.</li>
+        <li><strong>Vérifier chaque destination.</strong> Un échantillon ne va pas un jour où le panéliste de destination est absent, ni vers un nœud qui est à la fois son origine et sa destination. Si cela arrive, il est échangé avec un autre échantillon ou va à la place compatible la plus proche.</li>
+      </ol>
+      <h3>Exemple</h3>
+      <p>Nakuru a 15 échantillons en attente sur une semaine de 5 jours ouvrés. NAK-03 n&rsquo;a pas de panéliste et Peter (NAK-02) est absent le mardi et le mercredi.</p>
+      <div class="two">
+        <div>
+          <div class="app" role="img" aria-label="Avant l&rsquo;équilibrage"><div class="app-bar"><i></i><i></i><i></i><span>Avant</span></div>
+            <div class="app-body"><table class="heat"><thead><tr><th>Nœud</th><th>Lun</th><th>Mar</th><th>Mer</th><th>Jeu</th><th>Ven</th></tr></thead><tbody>
+              <tr><td>NAK-01</td><td>3</td><td>2</td><td>2</td><td>2</td><td>2</td></tr>
+              <tr><td>NAK-02</td><td>1</td><td class="off">0</td><td class="off" style="color:var(--r700);font-weight:700">1</td><td>0</td><td>1</td></tr>
+              <tr><td>NAK-03</td><td>0</td><td>1</td><td>0</td><td>0</td><td>0</td></tr>
+            </tbody></table></div></div>
+        </div>
+        <div>
+          <div class="app" role="img" aria-label="Après l&rsquo;équilibrage"><div class="app-bar"><i></i><i></i><i></i><span>Après</span></div>
+            <div class="app-body"><table class="heat"><thead><tr><th>Nœud</th><th>Lun</th><th>Mar</th><th>Mer</th><th>Jeu</th><th>Ven</th></tr></thead><tbody>
+              <tr><td>NAK-01</td><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td></tr>
+              <tr><td>NAK-02</td><td>2</td><td class="off">0</td><td class="off">0</td><td>2</td><td>1</td></tr>
+              <tr><td>NAK-03</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+            </tbody></table></div></div>
+        </div>
+      </div>
+      <p class="cap">Il y a 8 cases valides (5 jours pour NAK-01 et 3 pour NAK-02) pour 15 échantillons : 1 par case, et il en reste 7, répartis un par un. On obtient sept cases à 2 et une à 1. NAK-03 reste vide car il n&rsquo;a pas de panéliste, et Peter ne reçoit rien ses jours d&rsquo;absence. La semaine compte toujours 15 échantillons.</p>
+    </section>
+
+    <section id="logic-compensate">
+      <h2>3 · Réintroduire les compensations</h2>
+      <p>Après la répartition, ONEMS essaie de remettre dans le plan les <a href="#deferred">Échantillons à compenser</a> de la ville :</p>
+      <ol class="steps">
+        <li><strong>D&rsquo;abord, ils remplacent des échantillons POBOX.</strong> Si, sur un nœud et un jour, il y a un échantillon créé par POBOX, l&rsquo;échantillon à compenser prend sa place : même nœud d&rsquo;origine, même jour, mais avec sa propre destination (son trajet d&rsquo;origine). Le plan est ainsi respecté sans ajouter d&rsquo;envoi supplémentaire.</li>
+        <li><strong>Sinon, ils sont placés dans une place libre :</strong> le jour qui compte le moins d&rsquo;envois sur le nœud d&rsquo;origine, un jour valide dans les dates de leur plan, qui doit être actif.</li>
+        <li><strong>Limites :</strong> au maximum <strong>un</strong> échantillon compensé par nœud d&rsquo;origine et par jour, et un par nœud de destination et par jour. Ils ne sont jamais placés aujourd&rsquo;hui, car les rappels du jour ont peut-être déjà été envoyés.</li>
+        <li><strong>Ceux qui ne rentrent pas</strong> continuent d&rsquo;attendre, avec leur motif.</li>
+      </ol>
+      <div class="callout info">Un échantillon réintroduit qui se trouve déjà sur une place valide reste <strong>fixe</strong> : les équilibrages suivants ne le déplacent pas.</div>
+    </section>
+
+    <section id="logic-pobox">
+      <h2>4 · POBOX</h2>
+      <p>Uniquement si POBOX est actif pour la ville. Pour chaque jour ouvré sans aucun envoi depuis la ville, ONEMS essaie, dans cet ordre :</p>
+      <ol class="steps">
+        <li><strong>Un échantillon réintroduit le couvre-t-il déjà ?</strong> Alors rien d&rsquo;autre n&rsquo;est nécessaire.</li>
+        <li><strong>Déplacer :</strong> il amène un échantillon en attente du jour le plus proche qui compte 2 envois ou plus. Il cherche d&rsquo;abord dans la même semaine, puis dans les semaines voisines.</li>
+        <li><strong>Créer :</strong> s&rsquo;il n&rsquo;y a rien à déplacer, il crée un nouvel échantillon (Extra POBOX).
+          <ul>
+            <li><strong>Produit :</strong> s&rsquo;il existe une répartition par produit, celui qui est le plus en dessous de son pourcentage ; sinon, le plan le moins avancé ce jour-là.</li>
+            <li><strong>Origine :</strong> le nœud de la ville qui a le moins d&rsquo;envois cette semaine.</li>
+            <li><strong>Destination :</strong> un nœud valide d&rsquo;une autre ville, en privilégiant les villes déjà destinataires dans ce plan et le nœud qui reçoit le moins.</li>
+          </ul>
+        </li>
+        <li>Si rien de cela n&rsquo;est possible, le jour compte comme <em>Jours POBOX non couverts</em>.</li>
+      </ol>
+    </section>
+
+    <section id="logic-rules">
+      <h2>Règles jamais enfreintes</h2>
+      <ul>
+        <li>Seuls les échantillons <strong>en attente</strong> sont déplacés. Les échantillons expédiés et reçus ne sont pas touchés.</li>
+        <li>Rien ne change <strong>d&rsquo;aujourd&rsquo;hui jusqu&rsquo;à la date du gel</strong>.</li>
+        <li>Rien n&rsquo;est jamais programmé dans le passé, un jour non ouvré ni un jour d&rsquo;absence du panéliste d&rsquo;origine ou de destination.</li>
+        <li>La <strong>ville d&rsquo;origine</strong> et la <strong>ville de destination</strong> de chaque échantillon ne changent pas. Au plus, le nœud change au sein de la même ville.</li>
+        <li>Le <strong>total de chaque mois</strong> est conservé. Seul POBOX peut ajouter des échantillons, et seul le manque de place peut en mettre de côté.</li>
+        <li>À l&rsquo;application, on enregistre <strong>tout ou rien</strong> : si quelque chose ne colle pas, aucun échantillon de cette ville n&rsquo;est modifié.</li>
+        <li>Si deux personnes appliquent en même temps sur la même ville, la seconde calcule sur le résultat de la première.</li>
+      </ul>
+    </section>
+
+    <section id="faq">
+      <h2>Questions</h2>
+      <details><summary>J&rsquo;ai équilibré et presque rien n&rsquo;a changé. Est-ce normal ?</summary><div>Oui. L&rsquo;équilibrage déplace le minimum. Si la ville est déjà bien répartie, l&rsquo;aperçu indique « Aucun équilibrage nécessaire : la ville est déjà bien équilibrée ! ». Vérifiez aussi le gel : ce qui tombe avant cette date n&rsquo;est pas déplacé.</div></details>
+      <details><summary>Pourquoi les échantillons à compenser ne sont-ils pas placés ?</summary><div>Regardez le <strong>Motif d&rsquo;attente</strong>. Le plus souvent, la ville d&rsquo;origine ou celle de destination n&rsquo;a aucun panéliste actif. Ils seront placés d&rsquo;eux-mêmes dès qu&rsquo;elle en aura un et que vous relancerez l&rsquo;équilibrage.</div></details>
+      <details><summary>Pourquoi les échantillons Extra POBOX ne diminuent-ils pas après l&rsquo;équilibrage ?</summary><div>Les échantillons à compenser ne remplacent un POBOX que si le trajet de la compensation a un panéliste à l&rsquo;origine et à la destination ce jour-là. Si la ville de destination n&rsquo;a pas de panéliste, le POBOX reste.</div></details>
+      <details><summary>Un échantillon peut-il changer de ville ?</summary><div>Non. Changer de ville modifierait le trajet mesuré. Il peut seulement changer de nœud au sein de la même ville.</div></details>
+      <details><summary>Que deviennent les échantillons de cette semaine ?</summary><div>Avec le gel par défaut (dimanche de cette semaine), ils ne sont pas touchés. Si vous voulez que l&rsquo;équilibrage les réorganise aussi, mettez une date de gel antérieure ou effacez-la.</div></details>
+      <details><summary>Quelle différence entre Quotidienne et Hebdomadaire ?</summary><div>Avec Quotidienne, la répartition se fait jour par jour. Avec Hebdomadaire, seule la semaine compte et tous les échantillons de la semaine sont placés sur son premier jour ouvré. Avec POBOX, c&rsquo;est toujours Quotidienne.</div></details>
+      <details><summary>Puis-je annuler un équilibrage ?</summary><div>Il n&rsquo;y a pas de bouton pour annuler. C&rsquo;est pourquoi il y a un aperçu : vérifiez-le avant d&rsquo;appliquer. Si quelque chose ne vous convient pas, cliquez sur Annuler.</div></details>
+      <details><summary>Qui voit cet écran ?</summary><div>Les utilisateurs admin et superadmin. Chaque compte ne voit que ses villes et ses plans.</div></details>
+    </section>
+  </div>
+  </main>
+</div>
+
+<script>
+(function () {
+  var links = Array.prototype.slice.call(document.querySelectorAll('#nav a'));
+  var sections = links.map(function (a) { return document.querySelector(a.getAttribute('href')); }).filter(Boolean);
+
+  // Mobile section picker
+  var jump = document.getElementById('jump');
+  links.forEach(function (a) {
+    var o = document.createElement('option');
+    o.value = a.getAttribute('href'); o.textContent = a.textContent; jump.appendChild(o);
+  });
+  jump.addEventListener('change', function () { location.hash = jump.value; });
+
+  // Highlight the current section in the side menu
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          links.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id); });
+          jump.value = '#' + e.target.id;
+        }
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    sections.forEach(function (s) { io.observe(s); });
+  }
+})();
+</script>
+</body>
+</html>

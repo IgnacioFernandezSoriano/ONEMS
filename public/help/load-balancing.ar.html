@@ -1,0 +1,610 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>مساعدة: موازنة حمل العقد</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<style>
+  :root {
+    --white: #ffffff; --g50: #f9fafb; --g100: #f3f4f6; --g200: #e5e7eb; --g300: #d1d5db;
+    --g400: #9ca3af; --g500: #6b7280; --g600: #4b5563; --g700: #374151; --g900: #111827;
+    --b50: #eff6ff; --b100: #dbeafe; --b600: #2563eb; --b700: #1d4ed8;
+    --r100: #fee2e2; --r700: #b91c1c; --gr100: #dcfce7; --gr700: #15803d;
+    --y100: #fef9c3; --y800: #854d0e; --p100: #f3e8ff; --p700: #7e22ce;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+      'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    -webkit-font-smoothing: antialiased; background: var(--g50); color: var(--g700); line-height: 1.6; font-size: 15px;
+  }
+  .layout { display: flex; min-height: 100vh; }
+
+  /* Sidebar, same look as the ONE menu */
+  .side {
+    width: 272px; flex-shrink: 0; background: var(--white); border-right: 1px solid var(--g200);
+    position: sticky; top: 0; height: 100vh; overflow-y: auto; display: flex; flex-direction: column;
+  }
+  .brand { padding: 24px 24px 16px; }
+  .brand h1 { font-size: 24px; line-height: 32px; font-weight: 700; color: var(--g900); }
+  .brand p { font-size: 14px; color: var(--g500); margin-top: 4px; }
+  .brand .doc { margin-top: 16px; font-size: 12px; font-weight: 600; color: var(--b700); background: var(--b50);
+    display: inline-block; padding: 2px 10px; border-radius: 999px; }
+  .nav { padding: 8px 12px 24px; flex: 1; }
+  .nav h3 { font-size: 12px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--g400);
+    padding: 16px 12px 6px; }
+  .nav a {
+    display: block; padding: 8px 12px; border-radius: 8px; font-size: 14px; font-weight: 500; color: var(--g600);
+    text-decoration: none; transition: background .15s, color .15s;
+  }
+  .nav a:hover { background: var(--g100); }
+  .nav a.active { background: var(--b50); color: var(--b700); }
+  .side-foot { padding: 16px 24px; border-top: 1px solid var(--g200); font-size: 12px; color: var(--g500); }
+
+  /* Content */
+  .main { flex: 1; min-width: 0; padding: 40px 32px 80px; }
+  .page { max-width: 880px; margin: 0 auto; }
+  .page > header { margin-bottom: 32px; }
+  .page > header h2 { font-size: 30px; line-height: 38px; font-weight: 700; color: var(--g900); }
+  .page > header p { margin-top: 8px; font-size: 17px; color: var(--g600); max-width: 640px; }
+  section { margin-top: 48px; }
+  section > h2 { font-size: 22px; font-weight: 700; color: var(--g900); padding-bottom: 8px; margin-bottom: 16px;
+    border-bottom: 1px solid var(--g200); }
+  h3 { font-size: 17px; font-weight: 600; color: var(--g900); margin: 28px 0 8px; }
+  p { margin: 8px 0; }
+  ul, ol { margin: 8px 0 8px 22px; }
+  li { margin: 4px 0; }
+  strong { color: var(--g900); font-weight: 600; }
+  code, kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px;
+    background: var(--g100); border: 1px solid var(--g200); border-radius: 6px; padding: 1px 6px; color: var(--g900); }
+  .card { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 20px 24px; margin: 16px 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 16px 0; }
+  .grid .card { margin: 0; }
+  .card h4 { font-size: 15px; font-weight: 600; color: var(--g900); margin-bottom: 4px; }
+  .card p { margin: 4px 0; font-size: 14px; color: var(--g600); }
+
+  .badge { display: inline-block; font-size: 12px; font-weight: 500; padding: 1px 10px; border-radius: 999px; white-space: nowrap; }
+  .b-red { background: var(--r100); color: var(--r700); }
+  .b-blue { background: var(--b100); color: var(--b700); }
+  .b-green { background: var(--gr100); color: var(--gr700); }
+  .b-yellow { background: var(--y100); color: var(--y800); }
+  .b-gray { background: var(--g100); color: var(--g600); }
+  .b-purple { background: var(--p100); color: var(--p700); }
+  .btn { display: inline-block; font-size: 13px; font-weight: 500; padding: 2px 10px; border-radius: 8px;
+    background: var(--white); border: 1px solid var(--g300); color: var(--g700); white-space: nowrap; }
+  .btn.primary { background: var(--b600); border-color: var(--b600); color: #fff; }
+
+  .callout { border-radius: 12px; padding: 14px 18px; margin: 16px 0; font-size: 14px; border: 1px solid; }
+  .callout.info { background: var(--b50); border-color: var(--b100); color: #1e3a8a; }
+  .callout.ok { background: #f0fdf4; border-color: var(--gr100); color: #14532d; }
+  .callout.warn { background: #fffbeb; border-color: var(--y100); color: var(--y800); }
+  .callout strong { color: inherit; }
+
+  .table-wrap { overflow-x: auto; margin: 16px 0; background: var(--white); border: 1px solid var(--g200); border-radius: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--g500); background: var(--g50); padding: 10px 14px; border-bottom: 1px solid var(--g200); }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--g100); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  td:first-child { font-weight: 500; color: var(--g900); }
+
+  /* Steps */
+  ol.steps { list-style: none; margin: 12px 0; counter-reset: s; }
+  ol.steps > li { counter-increment: s; position: relative; padding: 4px 0 12px 44px; margin: 0; }
+  ol.steps > li::before {
+    content: counter(s); position: absolute; left: 0; top: 2px; width: 28px; height: 28px; border-radius: 50%;
+    background: var(--b100); color: var(--b700); font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Telegram chat mock-ups */
+  .chat { background: #e9eef5; border: 1px solid var(--g200); border-radius: 16px; padding: 16px; margin: 16px 0; max-width: 460px; }
+  .chat .who { text-align: center; font-size: 12px; color: var(--g500); margin-bottom: 8px; font-weight: 500; }
+  .msg { max-width: 85%; padding: 8px 12px; border-radius: 14px; margin: 6px 0; font-size: 14px; line-height: 1.45; box-shadow: 0 1px 1px rgba(0,0,0,.06); }
+  .msg.bot { background: var(--white); border-top-left-radius: 4px; margin-right: auto; color: var(--g900); }
+  .msg.me { background: #dbeafe; border-top-right-radius: 4px; margin-left: auto; color: var(--g900); }
+  .kb { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 8px; max-width: 85%; }
+  .kb span { flex: 1 1 auto; text-align: center; background: rgba(37,99,235,.12); color: var(--b700); font-size: 13px; font-weight: 500;
+    padding: 6px 10px; border-radius: 10px; }
+  .kb.col span { flex-basis: 100%; }
+  .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; align-items: start; }
+  .two .chat { margin: 8px 0; }
+  .cap { font-size: 13px; color: var(--g500); margin-top: -6px; max-width: 460px; }
+
+  /* Flow */
+  .flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; margin: 16px 0; }
+  .flow .node { flex: 1 1 150px; background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 12px 14px; font-size: 13px; position: relative; }
+  .flow .node b { display: block; color: var(--g900); font-size: 14px; margin-bottom: 2px; }
+  .flow .node .tag { font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--b700); }
+  .flow .arrow { align-self: center; color: var(--g400); font-size: 18px; }
+
+  details { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; margin: 8px 0; }
+  summary { cursor: pointer; padding: 14px 18px; font-weight: 600; color: var(--g900); list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: '+'; color: var(--g400); font-size: 20px; line-height: 1; }
+  details[open] summary::after { content: '\2212'; }
+  details > div { padding: 0 18px 14px; color: var(--g600); font-size: 14px; }
+
+  /* ONEMS screen drawings */
+  .app { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; overflow: hidden; margin: 16px 0 6px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .app-bar { display: flex; gap: 6px; align-items: center; background: var(--g100); border-bottom: 1px solid var(--g200); padding: 8px 12px; font-size: 12px; color: var(--g500); }
+  .app-bar i { width: 9px; height: 9px; border-radius: 50%; background: var(--g300); display: inline-block; }
+  .app-bar span { margin-left: 8px; }
+  .app-body { padding: 20px; font-size: 13px; color: var(--g700); overflow-x: auto; }
+  .app-body.cols { display: grid; grid-template-columns: 210px 1fr; padding: 0; }
+  .app-body.cols > .sb { border-right: 1px solid var(--g200); padding: 14px 10px; background: #fff; }
+  .app-body.cols > .ct { padding: 20px; }
+  .sb .t { font-size: 20px; font-weight: 700; color: var(--g900); padding: 0 8px; }
+  .sb .s { font-size: 11px; color: var(--g500); padding: 0 8px 8px; }
+  .sb h5 { font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--g400); padding: 10px 8px 4px; }
+  .mi { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 8px; font-size: 13px; color: var(--g700); }
+  .mi.on { background: var(--b50); color: var(--b600); }
+  .mi .ic { width: 14px; height: 14px; border-radius: 4px; background: var(--g300); flex-shrink: 0; }
+  .mi.on .ic { background: var(--b600); }
+  .mi .badge { margin-left: auto; font-size: 11px; padding: 0 7px; }
+  .m-h { font-size: 18px; font-weight: 700; color: var(--g900); margin-bottom: 12px; }
+  .m-h3 { font-size: 15px; font-weight: 700; color: var(--g900); margin: 0 0 6px; }
+  .m-sel { display: inline-block; border: 1px solid var(--g300); border-radius: 4px; padding: 3px 24px 3px 8px; font-size: 12px; background: #fff; color: var(--g700); margin-right: 8px; position: relative; }
+  .m-sel::after { content: '\25BE'; position: absolute; right: 8px; color: var(--g400); }
+  .m-card { border: 1px solid var(--g200); border-radius: 8px; overflow: hidden; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.05); margin: 10px 0; }
+  .app table { font-size: 12px; }
+  .app th { padding: 8px 12px; font-size: 11px; }
+  .app td { padding: 8px 12px; }
+  .app td:first-child { font-weight: 400; color: inherit; }
+  .app .num { text-align: right; }
+  .m-link { color: var(--b600); }
+  .m-box { border: 1px solid var(--g200); border-radius: 6px; padding: 14px; margin: 10px 0; }
+  .m-note { background: var(--g50); border-radius: 6px; padding: 10px 12px; margin: 8px 0; font-size: 12px; }
+  .m-muted { color: var(--g500); font-size: 12px; }
+  .m-pbtn, .m-sbtn { display: inline-block; padding: 6px 14px; border-radius: 8px; font-size: 12px; margin: 2px 6px 2px 0; }
+  .m-pbtn { background: var(--b600); color: #fff; }
+  .m-sbtn { background: var(--g200); color: var(--g700); }
+  .m-ta { border: 1px solid var(--g300); border-radius: 4px; padding: 8px; font-size: 12px; color: var(--g400); background: #fff; margin: 6px 0 10px; }
+  .m-in { display: inline-block; border: 1px solid var(--g300); border-radius: 4px; padding: 3px 8px; font-size: 12px; background: #fff; min-width: 90px; }
+  .m-bub { max-width: 80%; padding: 6px 10px; border-radius: 10px; margin: 5px 0; font-size: 12px; }
+  .m-bub small { display: block; color: var(--g500); font-size: 10px; margin-top: 2px; }
+  .m-bub.l { background: var(--g100); margin-right: auto; }
+  .m-bub.r { background: var(--b100); margin-left: auto; }
+  .pin { display: inline-flex; width: 20px; height: 20px; border-radius: 50%; background: var(--b600); color: #fff; font-size: 11px; font-weight: 700; align-items: center; justify-content: center; margin-left: 6px; vertical-align: middle; flex-shrink: 0; }
+  .legend { counter-reset: l; list-style: none; margin: 10px 0 20px; }
+  .legend li { counter-increment: l; position: relative; padding: 2px 0 6px 34px; font-size: 14px; }
+  .legend li::before { content: counter(l); position: absolute; left: 0; top: 1px; width: 20px; height: 20px; border-radius: 50%; background: var(--b600); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .heat td { text-align: center; }
+  .heat .ok { background: #f0fdf4; } .heat .hi { background: var(--y100); } .heat .sat { background: var(--r100); }
+  .heat .off { background: repeating-linear-gradient(45deg, var(--g100), var(--g100) 4px, #fff 4px, #fff 8px); color: var(--g400); }
+  .heat .now { outline: 2px solid var(--b600); outline-offset: -2px; }
+
+  /* Right-to-left (Arabic) */
+  [dir=rtl] .side { border-right: 0; border-left: 1px solid var(--g200); }
+  [dir=rtl] .app-body.cols > .sb { border-right: 0; border-left: 1px solid var(--g200); }
+  [dir=rtl] th, [dir=rtl] td, [dir=rtl] .nav a { text-align: right; }
+  [dir=rtl] ul, [dir=rtl] ol { margin: 8px 22px 8px 0; }
+  [dir=rtl] ol.steps > li { padding: 4px 44px 12px 0; }
+  [dir=rtl] ol.steps > li::before { left: auto; right: 0; }
+  [dir=rtl] .legend li { padding: 2px 34px 6px 0; }
+  [dir=rtl] .legend li::before { left: auto; right: 0; }
+  [dir=rtl] .msg.bot { border-top-left-radius: 14px; border-top-right-radius: 4px; margin-right: 0; margin-left: auto; }
+  [dir=rtl] .msg.me { border-top-right-radius: 14px; border-top-left-radius: 4px; margin-left: 0; margin-right: auto; }
+  [dir=rtl] .m-bub.l { margin-right: 0; margin-left: auto; }
+  [dir=rtl] .m-bub.r { margin-left: 0; margin-right: auto; }
+  [dir=rtl] .pin { margin-left: 0; margin-right: 6px; }
+  [dir=rtl] .m-sel { padding: 3px 8px 3px 24px; margin-right: 0; margin-left: 8px; }
+  [dir=rtl] .m-sel::after { right: auto; left: 8px; }
+  [dir=rtl] .m-pbtn, [dir=rtl] .m-sbtn { margin: 2px 0 2px 6px; }
+  [dir=rtl] .mi .badge { margin-left: 0; margin-right: auto; }
+  [dir=rtl] .app-bar span { margin-left: 0; margin-right: 8px; }
+  [dir=rtl] .flow .arrow { transform: scaleX(-1); }
+  [dir=rtl] .app td:first-child { font-weight: 400; }
+  .mobile-top { display: none; }
+  @media (max-width: 900px) {
+    .app-body.cols { grid-template-columns: 1fr; }
+    .app-body.cols > .sb { border-right: 0; border-bottom: 1px solid var(--g200); }
+    .layout { display: block; }
+    .side { display: none; }
+    .mobile-top { display: block; position: sticky; top: 0; z-index: 5; background: var(--white); border-bottom: 1px solid var(--g200); padding: 10px 16px; }
+    .mobile-top b { font-size: 18px; color: var(--g900); }
+    .mobile-top span { font-size: 13px; color: var(--g500); margin-left: 6px; }
+    .mobile-top select { width: 100%; margin-top: 8px; padding: 8px; border: 1px solid var(--g300); border-radius: 8px; font-size: 14px; background: #fff; color: var(--g700); }
+    .main { padding: 24px 16px 64px; }
+    .page > header h2 { font-size: 24px; line-height: 32px; }
+  }
+  @media print { .side, .mobile-top { display: none; } .main { padding: 0; } body { background: #fff; } section { break-inside: avoid-page; } }
+</style>
+</head>
+<body>
+<div class="mobile-top">
+  <b>ONE</b><span>for Regulators &middot; مساعدة</span>
+  <select id="jump" aria-label="الانتقال إلى قسم"></select>
+</div>
+<div class="layout">
+  <aside class="side">
+    <div class="brand">
+      <h1>ONE</h1>
+      <p>for Regulators</p>
+      <span class="doc">مساعدة &middot; موازنة الحمل</span>
+    </div>
+    <nav class="nav" id="nav">
+      <h3>البدء</h3>
+      <a href="#overview">ما هي الموازنة ولماذا نستخدمها</a>
+      <a href="#concepts">المفاهيم الأساسية</a>
+      <h3>الشاشة</h3>
+      <a href="#screen">أين تجدها وماذا تحتوي</a>
+      <a href="#policies">سياسات الموازنة</a>
+      <a href="#filters">الفترة والمعايير</a>
+      <a href="#city-card">بطاقة كل مدينة</a>
+      <a href="#deferred">العينات المطلوب تعويضها</a>
+      <h3>كيف تنفذ</h3>
+      <a href="#balance-city">موازنة مدينة</a>
+      <a href="#balance-all">موازنة جميع المدن</a>
+      <a href="#preview">قراءة المعاينة</a>
+      <h3>منطق الحساب</h3>
+      <a href="#logic">الحساب في خمس خطوات</a>
+      <a href="#logic-fix">1 · معالجة المستحيل</a>
+      <a href="#logic-equity">2 · التوزيع العادل</a>
+      <a href="#logic-compensate">3 · إعادة إدراج التعويضات</a>
+      <a href="#logic-pobox">4 · POBOX</a>
+      <a href="#logic-rules">قواعد لا تُكسر أبدًا</a>
+      <h3>مرجع</h3>
+      <a href="#faq">أسئلة شائعة</a>
+    </nav>
+    <div class="side-foot">آخر تحديث: 28 أكتوبر 2026</div>
+  </aside>
+
+  <main class="main">
+  <div class="page">
+    <header>
+      <h2>موازنة حمل العقد</h2>
+      <p>ماذا تفعل الموازنة، وكيف تستخدم الشاشة خطوة بخطوة، وكيف يقرر ONEMS في أي يوم وإلى أي عقدة تذهب كل عينة.</p>
+    </header>
+
+    <section id="overview">
+      <h2>ما هي الموازنة ولماذا نستخدمها</h2>
+      <p>تحدد <strong>خطة التخصيص (Allocation Plan)</strong> العينات التي يجب إرسالها، ومن أي عقدة، وإلى أي عقدة، وفي أي يوم. ومع الوقت يختل هذا التوزيع: يسافر عضو في اللجنة، أو تبقى عقدة بلا عضو، أو تُضاف عينات، أو تتكدس الشحنات في أيام وتخلو منها أيام أخرى.</p>
+      <p>تعيد <strong>الموازنة</strong> ترتيب العينات <strong>المعلّقة</strong> في كل مدينة، ليتوزع العمل بعدل بين الأيام وبين أعضاء اللجنة، دون تغيير ما يجري قياسه.</p>
+      <div class="grid">
+        <div class="card"><h4>تتجنب الذروات</h4><p>لا يتلقى أي عضو عددًا كبيرًا من العينات دفعة واحدة في يوم أو أسبوع واحد بينما لا يتلقى غيره شيئًا.</p></div>
+        <div class="card"><h4>تحترم التوفر</h4><p>لا تجدول شحنات في أيام غير العمل، ولا في الماضي، ولا في أيام أبلغ فيها العضو بأنه غائب.</p></div>
+        <div class="card"><h4>تحافظ على القياس</h4><p>تُبقي مدينة المصدر ومدينة الوجهة لكل عينة، وإجمالي عينات كل شهر.</p></div>
+      </div>
+      <div class="callout info"><strong>القرار دائمًا لك.</strong> تعرض لك الموازنة أولًا <em>معاينة</em> بجميع التغييرات. ولا يتغير شيء في الخطة حتى تضغط <span class="btn primary">تطبيق التوازن</span>.</div>
+    </section>
+
+    <section id="concepts">
+      <h2>المفاهيم الأساسية</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>الكلمة</th><th>معناها هنا</th></tr></thead>
+        <tbody>
+          <tr><td>العينة (الشحنة)</td><td>صف واحد في خطة التخصيص (Allocation Plan): شحنة من عقدة مصدر إلى عقدة وجهة في تاريخ محدد. تُنقل فقط العينات <span class="badge b-yellow">المعلّقة</span>. أما المرسلة أو المستلمة فلا تُمس أبدًا.</td></tr>
+          <tr><td>العقدة</td><td>نقطة في الشبكة داخل مدينة (مثلًا <span dir="ltr"><code>NAK-01</code></span>)، يخدمها عضو في اللجنة.</td></tr>
+          <tr><td>عقدة صالحة</td><td>عقدة نشطة لها عضو نشط في اللجنة. العقد الصالحة وحدها ترسل العينات أو تستلمها.</td></tr>
+          <tr><td>يوم صالح</td><td>يوم عمل (بحسب <a href="#policies">سياسات الموازنة</a>)، ليس في الماضي، ضمن تواريخ الخطة، ولم يعلن فيه عضو المصدر ولا عضو الوجهة أنه غير متاح.</td></tr>
+          <tr><td>الفترة</td><td>تاريخا البدء والانتهاء اللذان تختارهما في الفلاتر. لا تنظر الموازنة إلا إلى عينات هذه الفترة.</td></tr>
+          <tr><td>التجميد</td><td>تاريخ حماية. من اليوم حتى هذا التاريخ لا تنقل الموازنة أي عينة ولا تحذفها ولا تنشئها. الغرض ألا يتغير ما يتوقعه الأعضاء بالفعل هذا الأسبوع.</td></tr>
+          <tr><td>عينة مطلوب تعويضها</td><td>عينة تعذر وضعها في أي مكان صالح (مثلًا لأن المدينة بلا عضو). تُزال من الخطة وتُسجَّل على حدة، وتعيدها الموازنة فور توفر مكان.</td></tr>
+          <tr><td>POBOX</td><td>قاعدة اختيارية: في كل يوم عمل يجب أن ترسل كل مدينة عينة واحدة على الأقل.</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="screen">
+      <h2>أين تجدها وماذا تحتوي</h2>
+      <p>افتح القائمة <strong>تخصيص › موازنة الحمل</strong>. تُقرأ الشاشة من الأعلى إلى الأسفل: القواعد أولًا، ثم الفترة، ثم الملخص، وأخيرًا بطاقة لكل مدينة.</p>
+      <div class="app" role="img" aria-label="شاشة موازنة حمل العقد">
+        <div class="app-bar"><i></i><i></i><i></i><span>ONEMS › تخصيص › موازنة الحمل</span></div>
+        <div class="app-body">
+          <div class="m-h">موازنة حمل العقد</div>
+          <div class="m-box"><div class="m-h3">سياسات الموازنة<span class="pin">1</span> <span class="m-pbtn" style="float:right">موازنة جميع المدن</span></div>
+            <span class="m-muted">أيام العمل</span> <span class="m-pbtn">إثنين</span><span class="m-pbtn">ثلاثاء</span><span class="m-pbtn">أربعاء</span><span class="m-pbtn">خميس</span><span class="m-pbtn">جمعة</span><span class="m-sbtn">سبت</span><span class="m-sbtn">أحد</span>
+            <div style="margin-top:8px"><span class="m-muted">سياسة التاريخ</span> <span class="m-pbtn">يومية</span><span class="m-sbtn">أسبوعية</span> &nbsp; <span class="m-muted">&#9744; POBOX</span> &nbsp; <span class="m-muted">التجميد حتى</span> <span class="m-in"><span dir="ltr">01/11/2026</span></span></div>
+          </div>
+          <div class="m-box"><div class="m-h3">الفلاتر<span class="pin">2</span></div>
+            <span class="m-muted">تاريخ البدء</span> <span class="m-in"><span dir="ltr">01/11/2026</span></span> <span class="m-muted">تاريخ الانتهاء</span> <span class="m-in"><span dir="ltr">30/11/2026</span></span>
+            <div style="margin-top:8px"><span class="m-muted">عينات مرجعية/عقدة</span> <span class="m-in">6</span> <span class="m-muted">تحمل الانحراف (%)</span> <span class="m-in">20</span></div>
+          </div>
+          <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin:10px 0">
+            <div class="m-box" style="margin:0"><span class="m-muted">العقد المشبعة</span><br><b style="font-size:18px;color:var(--r700)">2</b><span class="pin">3</span></div>
+            <div class="m-box" style="margin:0"><span class="m-muted">العقد ذات الحمل العالي</span><br><b style="font-size:18px;color:#c2410c">3</b></div>
+            <div class="m-box" style="margin:0"><span class="m-muted">إجمالي الشحنات</span><br><b style="font-size:18px;color:var(--b700)">412</b></div>
+          </div>
+          <div class="m-box"><div class="m-h3">العينات المطلوب تعويضها<span class="pin">4</span></div><span class="m-muted">العينات المعلقة للتعويض: 12</span></div>
+          <div class="m-box"><div class="m-h3">Nakuru <span class="badge b-gray">يومية</span><span class="pin">5</span> <span style="float:right"><span class="m-sbtn">يوم</span><span class="m-pbtn">أسبوع</span><span class="m-sbtn">شهر</span></span></div>
+            <span class="m-muted">مصفوفة العقد × الأسابيع، والتوصيات، والزر</span> <span class="m-pbtn">&#9878;&#65039; موازنة تلقائية Nakuru</span>
+          </div>
+        </div>
+      </div>
+      <ol class="legend">
+        <li><strong>سياسات الموازنة:</strong> القواعد التي يستخدمها الحساب (أيام العمل، وسياسة التاريخ، وPOBOX، والتجميد) وزر موازنة جميع المدن دفعة واحدة.</li>
+        <li><strong>الفلاتر:</strong> الفترة التي تُوازَن، ومعايير تلوين الحمل.</li>
+        <li><strong>الملخص:</strong> عدد العقد المشبعة أو ذات الحمل العالي، وإجمالي شحنات الفترة.</li>
+        <li><strong>العينات المطلوب تعويضها:</strong> العينات المستبعدة التي تنتظر مكانًا.</li>
+        <li><strong>بطاقة لكل مدينة:</strong> حمل كل عقدة، والتوصيات، وزر موازنة تلك المدينة.</li>
+      </ol>
+      <div class="callout info">يرى هذه الشاشة المستخدمون الذين لهم دور <strong>admin</strong> أو <strong>superadmin</strong>. ويرى كل حساب مدنه فقط.</div>
+    </section>
+
+    <section id="policies">
+      <h2>سياسات الموازنة</h2>
+      <p>هذه قواعد الحساب. تُحفظ عند تغييرها وتُطبَّق على جميع المدن، إلا إذا كانت لمدينة قاعدتها الخاصة (انظر <a href="#city-card">بطاقة كل مدينة</a>).</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>عنصر التحكم</th><th>وظيفته</th></tr></thead>
+        <tbody>
+          <tr><td>أيام العمل</td><td>الأيام التي يمكن جدولة شحنة فيها. اضغط على يوم لتفعيله (أزرق) أو إلغائه (أبيض). المعتاد من الإثنين إلى الجمعة.</td></tr>
+          <tr><td>سياسة التاريخ</td><td><strong>يومية:</strong> توضع كل شحنة في يوم محدد ويجري التوزيع يومًا بيوم. <strong>أسبوعية:</strong> يُحدَّد الأسبوع فقط، وتذهب الشحنة إلى أول يوم عمل في ذلك الأسبوع.</td></tr>
+          <tr><td>POBOX</td><td>إذا كان محددًا، ففي كل يوم عمل يجب أن ترسل كل مدينة عينة واحدة على الأقل. يفرض POBOX سياسة <strong>يومية</strong>. انظر <a href="#logic-pobox">POBOX</a>.</td></tr>
+          <tr><td>التجميد حتى</td><td>تاريخ الحماية. الافتراضي هو <strong>الأحد من الأسبوع الحالي</strong>. من اليوم حتى هذا التاريخ لا تُمس أي عينة، وتبدأ الموازنة في اليوم التالي. يمكنك تقديمه أو تأخيره أو حذفه.</td></tr>
+          <tr><td>عينات POBOX الإضافية حسب المنتج</td><td>لا يظهر إلا عند تحديد POBOX. يحدد نسبة العينات الجديدة التي ينشئها POBOX لكل منتج. يجب أن يكون مجموع النسب <span dir="ltr">100</span>، أو أن تكون كلها <span dir="ltr">0</span> (فتُستخدم الخطة الأقل تقدمًا). اضغط <span class="btn">حفظ</span>.</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout warn"><strong>العينات المتأخرة</strong> (المعلّقة بتاريخ سابق لليوم) لا تبقى في الماضي أبدًا: تنقلها الموازنة إلى أول يوم صالح بعد التجميد.</div>
+    </section>
+
+    <section id="filters">
+      <h2>الفترة والمعايير</h2>
+      <ul>
+        <li><strong>تاريخ البدء</strong> و<strong>تاريخ الانتهاء</strong>: الفترة التي تُحلَّل وتُوازَن. يمكنك استخدام <strong>تحديد سريع</strong>: شهر أو نصف سنة أو السنة كاملة.</li>
+        <li><strong>عينات مرجعية/عقدة</strong>: عدد العينات لكل عقدة في الأسبوع الذي تعدّه طبيعيًا.</li>
+        <li><strong>تحمل الانحراف (%)</strong>: مقدار ما يمكن أن تتجاوز به العقدة المرجع قبل أن تُعلَّم.</li>
+      </ul>
+      <p>بهاتين القيمتين تُلوَّن كل خلية عقدة × أسبوع:</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>اللون</th><th>القاعدة</th><th>مثال بمرجع <span dir="ltr">6</span> و<span dir="ltr">20 %</span></th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge b-green">عادي</span></td><td>أقل من المرجع × <span dir="ltr">(1 + %)</span></td><td>أقل من <span dir="ltr">7.2</span></td></tr>
+          <tr><td><span class="badge b-yellow">مرتفع</span></td><td>من المرجع × <span dir="ltr">(1 + %)</span></td><td><span dir="ltr">7.2</span> أو أكثر</td></tr>
+          <tr><td><span class="badge b-red">مشبع</span></td><td>من المرجع × <span dir="ltr">(1 + % × 1.5)</span></td><td><span dir="ltr">7.8</span> أو أكثر</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout info">المرجع والتحمل <strong>يُستخدمان للتلوين والتنبيه فقط</strong>. لا يعتمد عليهما حساب الموازنة: فهو يوزع دائمًا بالتساوي بين العقد الصالحة.</div>
+      <p>يعيد <span class="btn">إعادة تعيين</span> القيم الأولية، بما فيها التجميد.</p>
+    </section>
+
+    <section id="city-card">
+      <h2>بطاقة كل مدينة</h2>
+      <p>لكل مدينة لديها عينات في الفترة بطاقتها. في الترويسة ترى الاسم، والسياسة المطبقة عليها (<span class="badge b-gray">يومية</span> أو <span class="badge b-gray">أسبوعية</span>، و<span class="badge b-purple">POBOX</span> إذا كان مفعّلًا)، وثلاثة عروض.</p>
+      <h3>العروض الثلاثة</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>العرض</th><th>ما يعرضه</th></tr></thead>
+        <tbody>
+          <tr><td>يوم</td><td>شحنات كل عقدة في كل يوم. الخلايا الرمادية أيام غير عمل، والمخططة أيام غياب العضو. الرقم الأحمر <strong>تعارض</strong>: عينة في يوم لا يمكن أن تخرج فيه. وعند تفعيل POBOX، يعني <strong style="color:var(--r700)">0</strong> الأحمر في الإجمالي يوم عمل بلا أي شحنة من المدينة.</td></tr>
+          <tr><td>أسبوع</td><td>شحنات كل عقدة في كل أسبوع، بالألوان عادي / مرتفع / مشبع، مع المتوسط وحالة العقدة.</td></tr>
+          <tr><td>شهر</td><td>إجماليات كل عقدة في كل شهر ومتوسطها الشهري.</td></tr>
+        </tbody>
+      </table></div>
+      <div class="app" role="img" aria-label="عرض اليوم لمدينة Nakuru">
+        <div class="app-bar"><i></i><i></i><i></i><span>Nakuru · يوم</span></div>
+        <div class="app-body">
+          <table class="heat">
+            <thead><tr><th>العقدة</th><th>إثنين <span dir="ltr">2</span></th><th>ثلاثاء <span dir="ltr">3</span></th><th>أربعاء <span dir="ltr">4</span></th><th>خميس <span dir="ltr">5</span></th><th>جمعة <span dir="ltr">6</span></th><th>سبت <span dir="ltr">7</span></th></tr></thead>
+            <tbody>
+              <tr><td><span dir="ltr">NAK-01</span><br><span class="m-muted">Grace W.</span></td><td>3</td><td>2</td><td>2</td><td>2</td><td>2</td><td class="off">—</td></tr>
+              <tr><td><span dir="ltr">NAK-02</span><br><span class="m-muted">Peter O.</span></td><td>1</td><td class="off">0</td><td class="off" style="color:var(--r700);font-weight:700">1</td><td>0</td><td>1</td><td class="off">—</td></tr>
+              <tr><td><span dir="ltr">NAK-03</span><br><span class="m-muted">لا يوجد عضو</span></td><td>0</td><td>1</td><td>0</td><td>0</td><td>0</td><td class="off">—</td></tr>
+              <tr><td><b>الإجمالي</b></td><td><b>4</b></td><td><b>3</b></td><td><b>3</b></td><td><b>2</b></td><td><b>3</b></td><td class="off">—</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <p class="cap">مثال: Peter غائب يومي الثلاثاء والأربعاء (مخطط)، وله عينة يوم الأربعاء (بالأحمر، تعارض). العقدة <span dir="ltr">NAK-03</span> بلا عضو. أما Grace فعليها معظم العمل.</p>
+      <h3>التوصيات</h3>
+      <p>أسفل الجدول، يشرح قسم <strong>💡 التوصيات</strong> بالكلمات ما يراه ONEMS: خلايا مشبعة، وعينات في أيام غياب، وعقد بلا عضو، وعينات متأخرة، وذروات يومية، وأيام بلا شحنات مع POBOX. يبيّن الرقم الأحمر بجانب العنوان عدد التنبيهات المهمة.</p>
+      <h3>قاعدة خاصة بمدينة</h3>
+      <p>تحت اسم المدينة قائمتان: <strong>سياسة التاريخ</strong> و<strong>POBOX</strong>. مع الخيار <em>وراثة من الحساب</em> تتبع المدينة سياسات الموازنة. اختر قيمة أخرى إذا كان على تلك المدينة أن تعمل بشكل مختلف.</p>
+    </section>
+
+    <section id="deferred">
+      <h2>العينات المطلوب تعويضها</h2>
+      <p>أحيانًا لا تجد العينة مكانًا تذهب إليه: مدينة المصدر أو مدينة الوجهة بلا أي عضو نشط، أو لم يبق أي يوم صالح حتى نهاية الخطة. وبدل تركها في يوم لا يمكن أن تخرج فيه، <strong>تزيلها الموازنة من الخطة وتسجلها</strong> في هذا القسم.</p>
+      <ul>
+        <li><strong>حسب مدينة المصدر:</strong> عدد العينات المنتظرة في كل مدينة، و<strong>سبب الانتظار</strong> الأكثر تكرارًا.</li>
+        <li><strong>حسب الخطة:</strong> لكل خطة: إجمالي العينات، والمجدولة، والمنجزة، والتي للتعويض، و<strong>إضافي POBOX</strong> (التي أنشأها POBOX).</li>
+      </ul>
+      <div class="table-wrap"><table>
+        <thead><tr><th>سبب الانتظار</th><th>ما العمل</th></tr></thead>
+        <tbody>
+          <tr><td>لا يوجد مشارك نشط في عقدة المصدر</td><td>سجّل عضوًا في مدينة المصدر أو أعد تفعيله.</td></tr>
+          <tr><td>لا يوجد مشارك نشط في عقدة الوجهة</td><td>سجّل عضوًا في مدينة الوجهة أو أعد تفعيله.</td></tr>
+          <tr><td>الخطة غير نشطة</td><td>خطة العينة غير نشطة. فعّلها إن كان يجب أن تستمر.</td></tr>
+          <tr><td>لا توجد سعة في الأيام الصالحة</td><td>لا يوجد مكان في الفترة. وازن بفترة أطول.</td></tr>
+          <tr><td>خارج فترة الخطة</td><td>لا يوجد يوم صالح ضمن تواريخ الخطة.</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout ok"><strong>وبعد ذلك:</strong> لا يلزمك أي إجراء آخر. في كل مرة توازن فيها تلك المدينة، يحاول ONEMS إعادة إدراج العينات المسجلة. وتعرض القائمة عدّادًا بالعينات التي ما زالت تنتظر.</div>
+    </section>
+
+    <section id="balance-city">
+      <h2>موازنة مدينة</h2>
+      <ol class="steps">
+        <li>افتح <strong>تخصيص › موازنة الحمل</strong>.</li>
+        <li>راجع <strong>سياسات الموازنة</strong>: أيام العمل، وسياسة التاريخ، وPOBOX، وتاريخ <strong>التجميد حتى</strong>.</li>
+        <li>في <strong>الفلاتر</strong>، اختر <strong>تاريخ البدء</strong> و<strong>تاريخ الانتهاء</strong>، مثلًا بزر الشهر.</li>
+        <li>ابحث عن بطاقة المدينة واقرأ <strong>💡 التوصيات</strong>. استخدم عرض <strong>يوم</strong> لترى التعارضات والأيام الفارغة.</li>
+        <li>اضغط <strong>⚖️ موازنة تلقائية &lt;المدينة&gt;</strong>. تُفتح <a href="#preview">المعاينة</a>. لم يتغير شيء بعد.</li>
+        <li>راجع الملخص والتنبيهات ومصفوفة <strong>قبل</strong> / <strong>بعد</strong>.</li>
+        <li>اضغط <strong>تطبيق التوازن</strong> لحفظ التغييرات، أو <strong>إلغاء</strong> لتبقى الحال كما كانت.</li>
+      </ol>
+      <div class="callout ok"><strong>وبعد ذلك:</strong> تظهر الرسالة «تم تطبيق الموازنة بنجاح.» وتتحدث البطاقة. سيرى أعضاء اللجنة تواريخهم الجديدة في ONE bot على Telegram مع تنبيهات كل يوم. يمكنك تكرار الموازنة متى شئت: إذا كانت المدينة متوازنة بالفعل، ستخبرك المعاينة بذلك ولن تنقل شيئًا.</div>
+    </section>
+
+    <section id="balance-all">
+      <h2>موازنة جميع المدن</h2>
+      <ol class="steps">
+        <li>اختر <strong>تاريخ البدء</strong> و<strong>تاريخ الانتهاء</strong>. بدونهما يكون الزر معطلًا.</li>
+        <li>اضغط <strong>موازنة جميع المدن</strong> في قسم سياسات الموازنة. يعرض الزر التقدم: «جارٍ الموازنة <span dir="ltr">3/12</span>».</li>
+        <li>تُفتح <strong>معاينة الموازنة - جميع المدن</strong>، بصف لكل مدينة وصف للإجمالي.</li>
+        <li>اضغط <strong>تطبيق التوازن</strong> لتطبيق جميع المدن، أو <strong>إلغاء</strong>.</li>
+      </ol>
+      <div class="callout warn">تُطبَّق كل مدينة على حدة. إذا فشلت إحداها («فشلت المدينة …»)، تُطبَّق الباقيات رغم ذلك. راجع الصف الأحمر ثم وازن تلك المدينة وحدها من جديد.</div>
+    </section>
+
+    <section id="preview">
+      <h2>قراءة المعاينة</h2>
+      <div class="app" role="img" aria-label="معاينة التوازن لمدينة Nakuru">
+        <div class="app-bar"><i></i><i></i><i></i><span>معاينة التوازن - Nakuru</span></div>
+        <div class="app-body">
+          <div class="m-box"><div class="m-h3">الملخص<span class="pin">1</span></div>
+            <span class="m-muted">الحركات</span> <b>9</b> &nbsp; <span class="m-muted">الانحراف المعياري قبل</span> <b><span dir="ltr">1.4</span></b> &nbsp; <span class="m-muted">الانحراف المعياري بعد</span> <b><span dir="ltr">0.2</span></b> &nbsp; <span class="m-muted">تحسين</span> <b><span dir="ltr">86 %</span></b></div>
+          <div class="m-box"><div class="m-h3">POBOX<span class="pin">2</span></div><span class="m-muted">أيام POBOX الناقصة 2 · أيام POBOX المنقولة 1 · أيام POBOX المنشأة 1 · أيام POBOX غير المغطاة 0</span></div>
+          <div class="m-box"><div class="m-h3">العينات المطلوب تعويضها<span class="pin">3</span></div><span class="m-muted">مستبعدة 0 · وجهة معاد تعيينها 1 · معاد إدراجها 2 · في الانتظار 3</span><br><span class="m-muted">2 منها تحل محل عينات POBOX (نفس اليوم والعقدة، دون شحنة إضافية).</span></div>
+          <div class="m-note">التجميد: تبقى العينات حتى <span dir="ltr">2026-11-01</span> كما هي؛ تبدأ الموازنة في اليوم التالي.<span class="pin">4</span></div>
+          <span class="m-sbtn">عرض مصفوفي</span><span class="m-sbtn">الحركات (9)</span><span class="pin">5</span>
+          <div style="margin-top:10px"><span class="m-sbtn">إلغاء</span><span class="m-pbtn">تطبيق التوازن</span></div>
+        </div>
+      </div>
+      <ol class="legend">
+        <li><strong>الملخص:</strong> كم عينة تتغير وإلى أي حد يتساوى الحمل. يقيس الانحراف المعياري مدى عدم تساوي التوزيع: كلما انخفض كان التوزيع أكثر تساويًا. و<em>تحسين</em> هو نسبة هذا الانخفاض.</li>
+        <li><strong>POBOX</strong> (إذا كان مفعّلًا): أيام العمل بلا شحنات، وكم منها يُغطى بنقل عينة، وكم بإنشاء عينة جديدة، وكم يبقى بلا تغطية.</li>
+        <li><strong>العينات المطلوب تعويضها:</strong> التي ستُستبعد، والتي تغيّر عقدة وجهتها داخل المدينة نفسها، والتي تعود إلى الخطة، والتي ما زالت تنتظر.</li>
+        <li><strong>التجميد:</strong> يذكّرك بالتاريخ الذي لا يُمس شيء قبله.</li>
+        <li><strong>عرض مصفوفي / الحركات:</strong> حمل كل عقدة وأسبوع قبل التغيير وبعده، أو قائمة التغييرات («من <span dir="ltr">NAK-01</span>، اليوم <span dir="ltr">2</span>، إلى <span dir="ltr">NAK-02</span>، اليوم <span dir="ltr">5</span>: شحنة واحدة»).</li>
+      </ol>
+      <div class="callout warn">إذا نبّهت المعاينة إلى أنه <strong>ستُزال عينات من الخطة</strong>، يظهر تنبيه كهرماني قبل زر التطبيق. اقرأه: تنتقل هذه العينات إلى <a href="#deferred">العينات المطلوب تعويضها</a>.</div>
+    </section>
+
+    <section id="logic">
+      <h2>الحساب في خمس خطوات</h2>
+      <p>عندما تضغط موازنة تلقائية، يفعل ONEMS ما يلي للمدينة، دائمًا على العينات <strong>المعلّقة</strong> في الفترة وابتداءً من <strong>أول يوم مسموح</strong>: الأبعد بين تاريخ البدء واليوم واليوم التالي للتجميد.</p>
+      <div class="flow">
+        <div class="node"><span class="tag">الخطوة 1</span><b>معالجة المستحيل</b>وجهات بلا عضو، وعينات بلا أي يوم ممكن.</div>
+        <div class="arrow">&rarr;</div>
+        <div class="node"><span class="tag">الخطوة 2</span><b>التوزيع بالتساوي</b>بين الأسابيع والأيام والعقد، دون تغيير إجمالي الشهر.</div>
+        <div class="arrow">&rarr;</div>
+        <div class="node"><span class="tag">الخطوة 3</span><b>إعادة الإدراج</b>تعود العينات المطلوب تعويضها إذا وُجد مكان.</div>
+        <div class="arrow">&rarr;</div>
+        <div class="node"><span class="tag">الخطوة 4</span><b>POBOX</b>شحنة واحدة على الأقل في كل يوم عمل.</div>
+        <div class="arrow">&rarr;</div>
+        <div class="node"><span class="tag">الخطوة 5</span><b>معاينة أو حفظ</b>الكل أو لا شيء.</div>
+      </div>
+      <p>لا تدخل في الحساب العينات داخل التجميد، ولا المرسلة، ولا المستلمة.</p>
+    </section>
+
+    <section id="logic-fix">
+      <h2>1 · معالجة المستحيل</h2>
+      <p>قبل التوزيع، ينظر ONEMS في العينات التي لا يمكن أن تخرج كما هي:</p>
+      <ol class="steps">
+        <li><strong>عقدة الوجهة بلا عضو نشط.</strong> يُبحث عن عقدة صالحة أخرى في <strong>مدينة الوجهة نفسها</strong>: الأقل استلامًا في ذلك الأسبوع، وإن أمكن عقدة متاحة في ذلك اليوم. لا يتغير المسار مدينة ← مدينة. تُحسب في المعاينة ضمن <em>وجهة معاد تعيينها</em>.</li>
+        <li><strong>مدينة المصدر بلا أي عقدة صالحة</strong>، أو مدينة الوجهة كذلك: تنتقل العينة إلى <a href="#deferred">العينات المطلوب تعويضها</a>.</li>
+        <li><strong>لا يوجد أي يوم صالح</strong> للعينة في كل ما تبقى من خطتها (لا في فترة الشاشة فقط): تنتقل إلى العينات المطلوب تعويضها. وإذا وُجد يوم خارج الفترة، تُترك العينة مكانها ويظهر تنبيه، لتوازن بفترة أطول.</li>
+      </ol>
+      <div class="callout info">العينة المرتبطة بشيء (مواد محجوزة أو حادثة أو قراءة للعلامة) <strong>لا تُزال من الخطة أبدًا</strong>. تُترك مكانها وتنبّه المعاينة بالرسالة «عينات مطلوب تعويضها لا يمكن نقلها لأنها مجمدة.»</div>
+    </section>
+
+    <section id="logic-equity">
+      <h2>2 · التوزيع العادل</h2>
+      <p>هذا قلب الموازنة. الفكرة: <strong>يحتفظ كل شهر بعدد عيناته</strong> (فيُحترم الطابع الموسمي للخطة)، ويُوزَّع هذا العدد بالتساوي على الأماكن الصالحة في الشهر.</p>
+      <ol class="steps">
+        <li><strong>الشهر ← الأسابيع.</strong> يُوزَّع إجمالي الشهر على أسابيعه بحسب عدد أيام العمل في كل أسبوع ضمن الفترة. الأسبوع ذو 5 أيام يأخذ أكثر من الأسبوع ذي يومين.</li>
+        <li><strong>الأسبوع ← العقدة واليوم.</strong> مع السياسة اليومية، يُوزَّع كل أسبوع بالتساوي على الخلايا (عقدة صالحة × يوم صالح). ومع السياسة الأسبوعية، يُوزَّع على العقد الصالحة، وتذهب الشحنة إلى أول يوم عمل في الأسبوع.</li>
+        <li><strong>ما لا ينقسم بالتساوي.</strong> إذا زادت عينة أو عينتان، تذهب واحدة واحدة إلى عقد مختلفة وفي أيام مختلفة. كما يتناوب الدور: في الموازنة التالية لن تقع على العقدة نفسها.</li>
+        <li><strong>أقل قدر من النقل.</strong> تحتفظ كل خلية بعيناتها حتى هدفها (الأبكر تاريخًا). ويُنقل الفائض فقط، إلى خلايا في الشهر نفسه ينقصها عن حصتها، مع المطابقة بالتاريخ ليتحرك كل عينة بأقل عدد من الأيام.</li>
+        <li><strong>التحقق من كل وجهة.</strong> لا تذهب العينة إلى يوم يغيب فيه عضو الوجهة، ولا إلى عقدة هي مصدرها ووجهتها معًا. وإن حدث ذلك، تُبدَّل بعينة أخرى أو تذهب إلى أقرب مكان متوافق.</li>
+      </ol>
+      <h3>مثال</h3>
+      <p>لدى Nakuru <span dir="ltr">15</span> عينة معلّقة في أسبوع من 5 أيام عمل. العقدة <span dir="ltr">NAK-03</span> بلا عضو، وPeter (<span dir="ltr">NAK-02</span>) غائب يومي الثلاثاء والأربعاء.</p>
+      <div class="two">
+        <div>
+          <div class="app" role="img" aria-label="قبل الموازنة"><div class="app-bar"><i></i><i></i><i></i><span>قبل</span></div>
+            <div class="app-body"><table class="heat"><thead><tr><th>العقدة</th><th>إثنين</th><th>ثلاثاء</th><th>أربعاء</th><th>خميس</th><th>جمعة</th></tr></thead><tbody>
+              <tr><td><span dir="ltr">NAK-01</span></td><td>3</td><td>2</td><td>2</td><td>2</td><td>2</td></tr>
+              <tr><td><span dir="ltr">NAK-02</span></td><td>1</td><td class="off">0</td><td class="off" style="color:var(--r700);font-weight:700">1</td><td>0</td><td>1</td></tr>
+              <tr><td><span dir="ltr">NAK-03</span></td><td>0</td><td>1</td><td>0</td><td>0</td><td>0</td></tr>
+            </tbody></table></div></div>
+        </div>
+        <div>
+          <div class="app" role="img" aria-label="بعد الموازنة"><div class="app-bar"><i></i><i></i><i></i><span>بعد</span></div>
+            <div class="app-body"><table class="heat"><thead><tr><th>العقدة</th><th>إثنين</th><th>ثلاثاء</th><th>أربعاء</th><th>خميس</th><th>جمعة</th></tr></thead><tbody>
+              <tr><td><span dir="ltr">NAK-01</span></td><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td></tr>
+              <tr><td><span dir="ltr">NAK-02</span></td><td>2</td><td class="off">0</td><td class="off">0</td><td>2</td><td>1</td></tr>
+              <tr><td><span dir="ltr">NAK-03</span></td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+            </tbody></table></div></div>
+        </div>
+      </div>
+      <p class="cap">توجد 8 خلايا صالحة (5 أيام لـ<span dir="ltr">NAK-01</span> و3 لـ<span dir="ltr">NAK-02</span>) لـ15 عينة: عينة واحدة لكل خلية ويبقى 7، تُوزَّع واحدة واحدة. فتصبح سبع خلايا بعينتين وخلية بعينة واحدة. تبقى <span dir="ltr">NAK-03</span> فارغة لأنها بلا عضو، ولا يتلقى Peter شيئًا في أيام غيابه. ويبقى في الأسبوع 15 عينة.</p>
+    </section>
+
+    <section id="logic-compensate">
+      <h2>3 · إعادة إدراج التعويضات</h2>
+      <p>بعد التوزيع، يحاول ONEMS إعادة <a href="#deferred">العينات المطلوب تعويضها</a> الخاصة بالمدينة إلى الخطة:</p>
+      <ol class="steps">
+        <li><strong>تحل أولًا محل عينات POBOX.</strong> إذا وُجدت في عقدة ويوم عينة أنشأها POBOX، تحتل العينة المطلوب تعويضها مكانها: عقدة المصدر نفسها، واليوم نفسه، لكن بوجهتها هي (مسارها الأصلي). وهكذا تُنفَّذ الخطة دون شحنة إضافية.</li>
+        <li><strong>وإلا توضع في مكان شاغر:</strong> اليوم الأقل شحنات في عقدة المصدر، في يوم صالح ضمن تواريخ خطتها، ويجب أن تكون نشطة.</li>
+        <li><strong>الحدود:</strong> عينة معوَّضة <strong>واحدة</strong> على الأكثر لكل عقدة مصدر ويوم، وواحدة لكل عقدة وجهة ويوم. ولا توضع أبدًا في اليوم الحالي، لأن تنبيهات اليوم ربما صدرت بالفعل.</li>
+        <li><strong>التي لا تتسع</strong> تبقى منتظرة مع سببها.</li>
+      </ol>
+      <div class="callout info">العينة المعاد إدراجها التي صارت في مكان صالح تبقى <strong>ثابتة</strong>: لا تنقلها الموازنات التالية.</div>
+    </section>
+
+    <section id="logic-pobox">
+      <h2>4 · POBOX</h2>
+      <p>فقط إذا كان POBOX مفعّلًا للمدينة. لكل يوم عمل بلا أي شحنة من المدينة، يجرب ONEMS بهذا الترتيب:</p>
+      <ol class="steps">
+        <li><strong>هل تغطيه عينة معاد إدراجها؟</strong> إذا كان الجواب نعم فلا حاجة إلى شيء آخر.</li>
+        <li><strong>النقل:</strong> يجلب عينة معلّقة من أقرب يوم فيه شحنتان أو أكثر. يبحث أولًا في الأسبوع نفسه ثم في الأسابيع المجاورة.</li>
+        <li><strong>الإنشاء:</strong> إذا لم يوجد ما يُنقل، يُنشئ عينة جديدة (إضافي POBOX).
+          <ul>
+            <li><strong>المنتج:</strong> إذا وُجد توزيع حسب المنتج، فالمنتج الأبعد تحت نسبته؛ وإلا فالخطة الأقل تقدمًا في ذلك اليوم.</li>
+            <li><strong>المصدر:</strong> عقدة المدينة الأقل شحنات في ذلك الأسبوع.</li>
+            <li><strong>الوجهة:</strong> عقدة صالحة في مدينة أخرى، مع تفضيل المدن التي هي وجهة أصلًا في تلك الخطة والعقدة الأقل استلامًا.</li>
+          </ul>
+        </li>
+        <li>إذا تعذر كل ذلك، يُحسب اليوم ضمن <em>أيام POBOX غير المغطاة</em>.</li>
+      </ol>
+    </section>
+
+    <section id="logic-rules">
+      <h2>قواعد لا تُكسر أبدًا</h2>
+      <ul>
+        <li>تُنقل العينات <strong>المعلّقة</strong> فقط. المرسلة والمستلمة لا تُمس.</li>
+        <li>لا يتغير شيء <strong>من اليوم حتى تاريخ التجميد</strong>.</li>
+        <li>لا تُجدول عينة أبدًا في الماضي، ولا في أيام غير العمل، ولا في أيام غياب عضو المصدر أو عضو الوجهة.</li>
+        <li><strong>مدينة المصدر</strong> و<strong>مدينة الوجهة</strong> لكل عينة لا تتغيران. والأكثر أن تتغير العقدة داخل المدينة نفسها.</li>
+        <li><strong>إجمالي كل شهر</strong> محفوظ. POBOX وحده يمكنه إضافة عينات، ولا يستبعدها إلا نقص المكان.</li>
+        <li>عند التطبيق يُحفظ <strong>الكل أو لا شيء</strong>: إذا لم يتطابق شيء، لا تتغير أي عينة في تلك المدينة.</li>
+        <li>إذا طبّق شخصان في وقت واحد على المدينة نفسها، يحسب الثاني على نتيجة الأول.</li>
+      </ul>
+    </section>
+
+    <section id="faq">
+      <h2>أسئلة شائعة</h2>
+      <details><summary>وازنت ولم يتغير شيء تقريبًا. هل هذا طبيعي؟</summary><div>نعم. تنقل الموازنة أقل قدر ممكن. إذا كانت المدينة موزعة بالفعل، تقول المعاينة «لا حاجة للموازنة - المدينة متوازنة بالفعل!». راجع أيضًا التجميد: ما يقع قبل ذلك التاريخ لا يُنقل.</div></details>
+      <details><summary>لماذا لا توضع العينات المطلوب تعويضها؟</summary><div>انظر <strong>سبب الانتظار</strong>. الأكثر شيوعًا أن مدينة المصدر أو الوجهة بلا أي عضو نشط. ستوضع من تلقاء نفسها حين يتوفر عضو وتوازن من جديد.</div></details>
+      <details><summary>لماذا لا تنخفض عينات إضافي POBOX بعد الموازنة؟</summary><div>لا تحل العينات المطلوب تعويضها محل POBOX إلا إذا كان لمسار التعويض عضو في المصدر وفي الوجهة في ذلك اليوم. وإذا لم يكن لمدينة الوجهة عضو، يبقى POBOX.</div></details>
+      <details><summary>هل يمكن أن تغيّر العينة مدينتها؟</summary><div>لا. تغيير المدينة يغيّر المسار الذي يجري قياسه. يمكن أن تتغير العقدة فقط داخل المدينة نفسها.</div></details>
+      <details><summary>ماذا يحدث لعينات هذا الأسبوع؟</summary><div>مع التجميد الافتراضي (الأحد من هذا الأسبوع) لا تُمس. إذا أردت أن ترتبها الموازنة أيضًا، اجعل التجميد تاريخًا أسبق أو احذفه.</div></details>
+      <details><summary>ما الفرق بين يومية وأسبوعية؟</summary><div>مع اليومية يجري التوزيع يومًا بيوم. ومع الأسبوعية يهم الأسبوع فقط، وتوضع كل عينات الأسبوع في أول يوم عمل منه. ومع POBOX تكون السياسة يومية دائمًا.</div></details>
+      <details><summary>هل يمكنني التراجع عن موازنة؟</summary><div>لا يوجد زر للتراجع. لذلك توجد المعاينة: راجعها قبل التطبيق. وإذا لم يقنعك شيء، اضغط إلغاء.</div></details>
+      <details><summary>من يرى هذه الشاشة؟</summary><div>مستخدمو admin وsuperadmin. ويرى كل حساب مدنه وخططه فقط.</div></details>
+    </section>
+  </div>
+  </main>
+</div>
+
+<script>
+(function () {
+  var links = Array.prototype.slice.call(document.querySelectorAll('#nav a'));
+  var sections = links.map(function (a) { return document.querySelector(a.getAttribute('href')); }).filter(Boolean);
+
+  // Mobile section picker
+  var jump = document.getElementById('jump');
+  links.forEach(function (a) {
+    var o = document.createElement('option');
+    o.value = a.getAttribute('href'); o.textContent = a.textContent; jump.appendChild(o);
+  });
+  jump.addEventListener('change', function () { location.hash = jump.value; });
+
+  // Highlight the current section in the side menu
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          links.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id); });
+          jump.value = '#' + e.target.id;
+        }
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    sections.forEach(function (s) { io.observe(s); });
+  }
+})();
+</script>
+</body>
+</html>

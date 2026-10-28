@@ -1,8 +1,5 @@
 {
   "permissions": {
-    "allow": [
-      "Bash(node mm-prod.js --apply)"
-    ],
     "additionalDirectories": [
       "c:\\Users\\fernandezi\\projects\\ONEMS"
     ]
