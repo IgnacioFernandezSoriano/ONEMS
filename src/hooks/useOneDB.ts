@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useEffectiveAccountId } from './useEffectiveAccountId'
+import { formatInTz, toUnit, TimeUnit } from '../lib/accountTime'
 
 export interface OneDBRecord {
   id: string;
@@ -16,6 +17,10 @@ export interface OneDBRecord {
   received_at: string;
   total_transit_days: number;
   business_transit_days: number | null;
+  total_transit_hours: number | null;
+  business_transit_hours: number | null;
+  sent_at_local: string | null;
+  received_at_local: string | null;
   on_time_delivery: boolean | null;
   created_at: string;
   source_data_snapshot: any;
@@ -149,7 +154,9 @@ export const useOneDB = (accountId: string | undefined) => {
     setFilteredRecords(filtered);
   };
 
-  const exportToCSV = (selectedRecords: OneDBRecord[]) => {
+  const exportToCSV = (selectedRecords: OneDBRecord[], opts: { tz: string; unit: TimeUnit }) => {
+    const suffix = opts.unit === 'hours' ? 'h' : 'd';
+    const num = (h: number | null) => (h === null || h === undefined ? '' : toUnit(h, opts.unit).toFixed(2));
     const dataToExport = selectedRecords.length > 0 ? selectedRecords : filteredRecords;
 
     const headers = [
@@ -159,20 +166,16 @@ export const useOneDB = (accountId: string | undefined) => {
       'Product',
       'Origin City',
       'Destination City',
-      'Sent Date',
-      'Sent Time',
-      'Received Date',
-      'Received Time',
-      'Total Transit Days',
-      'Business Transit Days',
+      'Sent (local)',
+      'Received (local)',
+      `Transit time (${suffix})`,
+      `Business time (${suffix})`,
       'On Time Delivery',
       'Created Date',
       'Created Time',
     ];
 
     const rows = dataToExport.map((record) => {
-      const sentDate = new Date(record.sent_at);
-      const receivedDate = new Date(record.received_at);
       const createdDate = new Date(record.created_at);
 
       return [
@@ -182,12 +185,10 @@ export const useOneDB = (accountId: string | undefined) => {
         record.product_name,
         record.origin_city_name,
         record.destination_city_name,
-        sentDate.toLocaleDateString(),
-        sentDate.toLocaleTimeString(),
-        receivedDate.toLocaleDateString(),
-        receivedDate.toLocaleTimeString(),
-        record.total_transit_days,
-        record.business_transit_days ?? 'N/A',
+        formatInTz(record.sent_at, opts.tz),
+        formatInTz(record.received_at, opts.tz),
+        num(record.total_transit_hours),
+        num(record.business_transit_hours),
         record.on_time_delivery === null ? 'N/A' : record.on_time_delivery ? 'Yes' : 'No',
         createdDate.toLocaleDateString(),
         createdDate.toLocaleTimeString(),

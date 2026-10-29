@@ -3,12 +3,15 @@ import { OneDBRecord } from '../../hooks/useOneDB';
 import { SmartTooltip } from '../common/SmartTooltip';
 import { TablePagination } from '../common/TablePagination';
 import { useTranslation } from '@/hooks/useTranslation';
+import { formatInTz, formatDuration, TimeUnit } from '../../lib/accountTime';
 
 interface OneDBTableProps {
   records: OneDBRecord[];
   selectedRecords: string[];
   onSelectRecord: (id: string) => void;
   onSelectAll: () => void;
+  tz: string;
+  unit: TimeUnit;
 }
 
 export const OneDBTable: React.FC<OneDBTableProps> = ({
@@ -16,6 +19,8 @@ export const OneDBTable: React.FC<OneDBTableProps> = ({
   selectedRecords,
   onSelectRecord,
   onSelectAll,
+  tz,
+  unit,
 }) => {
   const { t } = useTranslation();
   const allSelected = records.length > 0 && selectedRecords.length === records.length;
@@ -42,15 +47,8 @@ export const OneDBTable: React.FC<OneDBTableProps> = ({
     if (currentPage > totalPages) setCurrentPage(totalPages);
   }, [currentPage, totalPages]);
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString('en-US', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
+  const formatDate = (dateString: string) => formatInTz(dateString, tz);
+  const unitLabel = unit === 'hours' ? 'h' : 'd';
 
   const OnTimeDeliveryBadge = ({ value }: { value: boolean | null }) => {
     if (value === null) {
@@ -140,13 +138,13 @@ export const OneDBTable: React.FC<OneDBTableProps> = ({
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 <div className="flex items-center gap-1">
-                  {t('onedb.transit_days')}
+                  {t('onedb.transit_time')} ({unitLabel})
                   <SmartTooltip content="Total calendar days from sent to received. Includes weekends and holidays." />
                 </div>
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 <div className="flex items-center gap-1">
-                  {t('onedb.business_days')}
+                  {t('onedb.business_time')} ({unitLabel})
                   <SmartTooltip content="Business days only (excludes weekends and holidays). Used for compliance calculations." />
                 </div>
               </th>
@@ -202,10 +200,10 @@ export const OneDBTable: React.FC<OneDBTableProps> = ({
                     {formatDate(record.received_at)}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-900 font-medium">
-                    {record.total_transit_days}
+                    {formatDuration(record.total_transit_hours, unit)}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-700">
-                    {record.business_transit_days ?? 'N/A'}
+                    {formatDuration(record.business_transit_hours, unit)}
                   </td>
                   <td className="px-4 py-3">
                     <OnTimeDeliveryBadge value={record.on_time_delivery} />
