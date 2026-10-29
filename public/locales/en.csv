@@ -1685,6 +1685,7 @@ reporting.avg_j_k_actual,Avg J+K Actual
 reporting.avg_jk_actual,Avg. J+K Actual
 reporting.avg_standard,Average standard ({percent} %)
 reporting.avg_transit_days,Avg Transit Days
+reporting.avg_transit_time,Avg transit time
 reporting.basic_information,Basic Information
 reporting.below_critical_threshold_with_penalty,Below critical threshold (with penalty)
 reporting.below_standard_but_above_critical_no_penalty,Below standard but above critical (no penalty)

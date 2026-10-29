@@ -21,7 +21,8 @@ export interface KPIMetric {
 export interface GeneralPerformanceData {
   period: Date;
   compliancePercentage: number;
-  avgBusinessDays: number;
+  /** Media semanal de horas laborables de transito */
+  avgBusinessHours: number;
   totalShipments: number;
 }
 

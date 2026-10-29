@@ -3,6 +3,8 @@ import { supabase } from '@/lib/supabase';
 // Removed dateUtils import - using same filtering as ONE DB
 import { calculateJKActualFromDays } from '@/lib/jkCalculations';
 import { useEffectiveAccountId } from '../useEffectiveAccountId';
+import type { TimeUnit } from '@/lib/accountTime';
+import { measureOf, measureUnit } from '@/lib/transitMeasure';
 
 interface Filters {
   startDate?: string;
@@ -21,8 +23,16 @@ export interface RouteData {
   totalShipments: number;
   compliantShipments: number;
   compliancePercentage: number;
-  avgBusinessDays: number;
-  standardDays: number;
+  /** Unidad de la medida de la ruta (la del estandar; 'hours' si no hay estandar) */
+  unit: TimeUnit;
+  /** Estandar en la unidad de la ruta */
+  standardTime: number;
+  /** J+K real en la unidad de la ruta */
+  jkActual: number;
+  /** J+K real en horas (dias*24 si la ruta mide en dias) */
+  avgBusinessHours: number;
+  /** Estandar en horas (dias*24 si la ruta mide en dias) */
+  standardHours: number;
   standardPercentage: number;
   warningThreshold: number;
   criticalThreshold: number;
@@ -40,8 +50,10 @@ export interface ProductData {
   warningShipments: number;
   criticalShipments: number;
   compliancePercentage: number;
-  avgBusinessDays: number;
-  standardDays: number;
+  /** Media ponderada, en horas */
+  avgBusinessHours: number;
+  /** Estandar medio ponderado, en horas */
+  standardHours: number;
   standardPercentage: number;
 }
 
@@ -53,8 +65,10 @@ export interface CarrierData {
   warningShipments: number;
   criticalShipments: number;
   compliancePercentage: number;
-  avgBusinessDays: number;
-  standardDays: number;
+  /** Media ponderada, en horas */
+  avgBusinessHours: number;
+  /** Estandar medio ponderado, en horas */
+  standardHours: number;
   standardPercentage: number;
 }
 
@@ -172,7 +186,8 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
 
         // Create standards map using UUIDs as key
         const standardsMap = new Map<string, { 
-          allowedDays: number; 
+          standardTime: number;
+          unit: TimeUnit;
           successPercentage: number;
           warningThreshold: number;
           criticalThreshold: number;
@@ -187,18 +202,17 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
           
           if (carrierName && productName && originName && destName) {
             const key = `${carrierName}|${productName}|${originName}|${destName}`;
-            // Convert standard_time to days
-            const allowedDays = std.time_unit === 'days' 
-              ? std.standard_time 
-              : (std.standard_time / 24);
+            // El estandar se guarda en su propia unidad (sin convertir)
+            const unit = measureUnit(std);
             standardsMap.set(key, {
-              allowedDays: allowedDays || 0,
+              standardTime: std.standard_time || 0,
+              unit,
               successPercentage: std.success_percentage || 0,
               warningThreshold: std.warning_threshold || 5,
               criticalThreshold: std.critical_threshold || 10,
               thresholdType: std.threshold_type || 'relative'
             });
-            console.log(`✅ Standard mapped: ${key} -> ${allowedDays} days, ${std.success_percentage}%`);
+            console.log(`✅ Standard mapped: ${key} -> ${std.standard_time} ${unit}, ${std.success_percentage}%`);
           } else {
             console.warn('⚠️ Incomplete standard data:', { 
               carrier_id: std.carrier_id, 
@@ -243,8 +257,9 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
             routes: Map<string, {
               totalShipments: number;
               compliantShipments: number;
-              daysArray: number[];
-              standardDays: number;
+              measureArray: number[];
+              unit: TimeUnit;
+              standardTime: number;
               standardPercentage: number;
               warningThreshold: number;
               criticalThreshold: number;
@@ -287,8 +302,9 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
             product.routes.set(routeKey, {
               totalShipments: 0,
               compliantShipments: 0,
-              daysArray: [],
-              standardDays: standard?.allowedDays || 0,
+              measureArray: [],
+              unit: standard?.unit || 'hours',
+              standardTime: standard?.standardTime || 0,
               standardPercentage: standard?.successPercentage || 0,
               warningThreshold: standard?.warningThreshold || 5,
               criticalThreshold: standard?.criticalThreshold || 10,
@@ -301,8 +317,9 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
           const route = product.routes.get(routeKey)!;
           route.totalShipments++;
           route.compliantShipments += shipment.on_time_delivery ? 1 : 0;
-          if (shipment.business_transit_days != null) {
-            route.daysArray.push(shipment.business_transit_days);
+          const measured = measureOf(shipment, route.unit);
+          if (measured != null) {
+            route.measureArray.push(measured);
           }
         });
 
@@ -337,6 +354,13 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
                 complianceStatus = 'critical';
               }
               
+              const toHours = route.unit === 'days' ? 24 : 1;
+              const jkActual = calculateJKActualFromDays(
+                route.measureArray,
+                route.standardPercentage,
+                route.standardTime
+              );
+
               return {
                 route: routeKey,
                 originCity: route.originCity,
@@ -344,12 +368,11 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
                 totalShipments: route.totalShipments,
                 compliantShipments: route.compliantShipments,
                 compliancePercentage: actualPercentage,
-                avgBusinessDays: calculateJKActualFromDays(
-                  route.daysArray,
-                  route.standardPercentage,
-                  route.standardDays
-                ),
-                standardDays: route.standardDays,
+                unit: route.unit,
+                standardTime: route.standardTime,
+                jkActual,
+                avgBusinessHours: jkActual * toHours,
+                standardHours: route.standardTime * toHours,
                 standardPercentage: route.standardPercentage,
                 warningThreshold: route.warningThreshold,
                 criticalThreshold: route.criticalThreshold,
@@ -369,16 +392,16 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
               sum + (r.complianceStatus === 'critical' ? r.totalShipments : 0), 0);
             
             // Weighted average of standard days (weighted by shipment count)
-            const productStandardDays = routes.reduce((sum, r) => 
-              sum + (r.standardDays * r.totalShipments), 0) / productTotalShipments;
+            const productStandardHours = routes.reduce((sum, r) =>
+              sum + (r.standardHours * r.totalShipments), 0) / productTotalShipments;
             
             // Weighted average of standard percentage (weighted by shipment count)
             const productStandardPercentage = routes.reduce((sum, r) => 
               sum + (r.standardPercentage * r.totalShipments), 0) / productTotalShipments;
             
             // Weighted average of actual days (weighted by shipment count)
-            const productAvgDays = routes.reduce((sum, r) => 
-              sum + (r.avgBusinessDays * r.totalShipments), 0) / productTotalShipments;
+            const productAvgHours = routes.reduce((sum, r) =>
+              sum + (r.avgBusinessHours * r.totalShipments), 0) / productTotalShipments;
 
             return {
               product: productName,
@@ -388,8 +411,8 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
               warningShipments: productWarningShipments,
               criticalShipments: productCriticalShipments,
               compliancePercentage: (productCompliantShipments / productTotalShipments) * 100,
-              avgBusinessDays: productAvgDays,
-              standardDays: productStandardDays,
+              avgBusinessHours: productAvgHours,
+              standardHours: productStandardHours,
               standardPercentage: productStandardPercentage
             };
           });
@@ -401,16 +424,16 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
           const carrierCriticalShipments = products.reduce((sum, p) => sum + p.criticalShipments, 0);
           
           // Weighted average of standard days (weighted by shipment count)
-          const carrierStandardDays = products.reduce((sum, p) => 
-            sum + (p.standardDays * p.totalShipments), 0) / carrierTotalShipments;
+          const carrierStandardHours = products.reduce((sum, p) =>
+            sum + (p.standardHours * p.totalShipments), 0) / carrierTotalShipments;
           
           // Weighted average of standard percentage (weighted by shipment count)
           const carrierStandardPercentage = products.reduce((sum, p) => 
             sum + (p.standardPercentage * p.totalShipments), 0) / carrierTotalShipments;
           
           // Weighted average of actual days (weighted by shipment count)
-          const carrierAvgDays = products.reduce((sum, p) => 
-            sum + (p.avgBusinessDays * p.totalShipments), 0) / carrierTotalShipments;
+          const carrierAvgHours = products.reduce((sum, p) =>
+            sum + (p.avgBusinessHours * p.totalShipments), 0) / carrierTotalShipments;
 
           return {
             carrier: carrierName,
@@ -420,8 +443,8 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
             warningShipments: carrierWarningShipments,
             criticalShipments: carrierCriticalShipments,
             compliancePercentage: (carrierCompliantShipments / carrierTotalShipments) * 100,
-            avgBusinessDays: carrierAvgDays,
-            standardDays: carrierStandardDays,
+            avgBusinessHours: carrierAvgHours,
+            standardHours: carrierStandardHours,
             standardPercentage: carrierStandardPercentage
           };
         });

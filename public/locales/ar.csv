@@ -1685,6 +1685,7 @@ reporting.avg_j_k_actual,متوسط J+K الفعلي
 reporting.avg_jk_actual,متوسط J+K الفعلي
 reporting.avg_standard,المتوسط المعياري ({percent} %)
 reporting.avg_transit_days,متوسط أيام العبور
+reporting.avg_transit_time,متوسط وقت العبور
 reporting.basic_information,معلومات أساسية
 reporting.below_critical_threshold_with_penalty,أدنى من العتبة الحرجة (مع عقوبة)
 reporting.below_standard_but_above_critical_no_penalty,أدنى من المعيار ولكن أعلى من العتبة الحرجة (بدون عقوبة)

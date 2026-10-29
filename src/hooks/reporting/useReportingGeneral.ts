@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase';
 import type { GeneralPerformanceData } from '@/types/reporting';
 // Removed dateUtils import - using same filtering as ONE DB
 import { useEffectiveAccountId } from '../useEffectiveAccountId';
+import { shipmentHours } from '@/lib/transitMeasure';
 
 interface Filters {
   originCity?: string;
@@ -84,7 +85,8 @@ export function useReportingGeneral(accountId: string | undefined, filters?: Fil
         const weeklyData = new Map<string, {
           compliant: number;
           total: number;
-          totalDays: number;
+          totalHours: number;
+          timedCount: number;
         }>();
 
         (shipments || []).forEach(shipment => {
@@ -93,11 +95,13 @@ export function useReportingGeneral(accountId: string | undefined, filters?: Fil
           weekStart.setDate(sentDate.getDate() - sentDate.getDay());
           const weekKey = weekStart.toISOString().split('T')[0];
 
-          const existing = weeklyData.get(weekKey) || { compliant: 0, total: 0, totalDays: 0 };
+          const hours = shipmentHours(shipment);
+          const existing = weeklyData.get(weekKey) || { compliant: 0, total: 0, totalHours: 0, timedCount: 0 };
           weeklyData.set(weekKey, {
             compliant: existing.compliant + (shipment.on_time_delivery ? 1 : 0),
             total: existing.total + 1,
-            totalDays: existing.totalDays + (shipment.business_transit_days || 0)
+            totalHours: existing.totalHours + (hours ?? 0),
+            timedCount: existing.timedCount + (hours === null ? 0 : 1)
           });
         });
 
@@ -106,7 +110,7 @@ export function useReportingGeneral(accountId: string | undefined, filters?: Fil
           .map(([weekKey, stats]) => ({
             period: new Date(weekKey),
             compliancePercentage: (stats.compliant / stats.total) * 100,
-            avgBusinessDays: stats.totalDays / stats.total,
+            avgBusinessHours: stats.timedCount > 0 ? stats.totalHours / stats.timedCount : 0,
             totalShipments: stats.total
           }))
           .sort((a, b) => a.period.getTime() - b.period.getTime())

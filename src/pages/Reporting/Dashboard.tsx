@@ -11,9 +11,13 @@ import CarrierProductOverview from '@/components/reporting/CarrierProductOvervie
 import { TrendingUp, Package, Clock, CheckCircle, Info } from 'lucide-react';
 import { SmartTooltip } from '@/components/common/SmartTooltip';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useTimeUnit } from '@/hooks/useTimeUnit';
+import { TimeUnitToggle } from '@/components/common/TimeUnitToggle';
+import { formatDuration } from '@/lib/accountTime';
 
 export default function Dashboard() {
   const { t } = useTranslation();
+  const { unit } = useTimeUnit();
   const { profile } = useAuth();
   const accountId = profile?.account_id || undefined;
   const { filters, setFilters, resetFilters } = useReportingFilters();
@@ -73,17 +77,20 @@ export default function Dashboard() {
     ? (totalCompliantShipments / totalShipments) * 100
     : 0;
   
-  // Calculate weighted average transit days
-  const totalTransitDays = data.reduce((sum, d) => sum + (d.avgBusinessDays * d.totalShipments), 0);
-  const avgTransitDays = totalShipments > 0
-    ? totalTransitDays / totalShipments
-    : 0;
+  // Calculate weighted average transit time (in hours; the selector only changes how it is displayed)
+  const totalTransitHours = data.reduce((sum, d) => sum + (d.avgBusinessHours * d.totalShipments), 0);
+  const avgTransitHours = totalShipments > 0
+    ? totalTransitHours / totalShipments
+    : null;
 
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{t('reporting.general_performance_dashboard')}</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold text-gray-900">{t('reporting.general_performance_dashboard')}</h1>
+            <TimeUnitToggle />
+          </div>
           <p className="text-gray-600 mt-1">{t('reporting.overall_compliance_and_transit_time_metrics')}</p>
         </div>
         <SmartTooltip content="General Performance Dashboard: Provides a high-level overview of delivery performance across your entire ecosystem. This is the starting point for regulatory analysis. You'll see overall compliance rates, average transit times, shipment volumes, and temporal trends. When no filters are applied, you'll also see a breakdown by carrier and product. Use this dashboard to quickly assess the overall health of the delivery network, identify underperforming carriers, and detect emerging compliance issues before they become systemic problems. Use filters to drill down into specific carriers, products, or routes, and navigate to other reports for detailed analysis." />
@@ -106,11 +113,11 @@ export default function Dashboard() {
           }}
         />
         <KPICard
-          title={t('reporting.avg_transit_days')}
-          value={avgTransitDays.toFixed(1)}
+          title={t('reporting.avg_transit_time')}
+          value={formatDuration(avgTransitHours, unit)}
           icon={Clock}
           trend="neutral"
-          trendValue={t('reporting.business_days')}
+          trendValue={t(unit === 'hours' ? 'common.unit_hours' : 'common.unit_days')}
           color="blue"
           tooltip={{
             description: "Average number of business days from shipment origin to final delivery across all routes.",
@@ -151,7 +158,7 @@ export default function Dashboard() {
           <h2 className="text-lg font-semibold text-gray-900">{t('reporting.performance_trend')}</h2>
           <SmartTooltip content="Performance Trend Over Time: Dual-axis chart showing compliance percentage (green line) and average transit days (blue line) over the selected time period. Upward compliance trend indicates improving service quality. Downward transit days show faster deliveries. Look for correlations between both metrics. Use to identify seasonal patterns, detect performance degradation, and verify if improvement plans are working." />
         </div>
-        <DualLineChart data={data} />
+        <DualLineChart data={data} unit={unit} />
       </div>
 
       {!filters.carrier && !filters.product && (
@@ -165,6 +172,7 @@ export default function Dashboard() {
             loading={carrierProductLoading}
             globalWarningThreshold={cpWarningThreshold}
             globalCriticalThreshold={cpCriticalThreshold}
+            displayUnit={unit}
           />
         </div>
       )}

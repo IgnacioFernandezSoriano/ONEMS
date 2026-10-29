@@ -1685,6 +1685,7 @@ reporting.avg_j_k_actual,Moyenne J+K Réelle
 reporting.avg_jk_actual,Moy. J+K Réel
 reporting.avg_standard,Norme moyenne ({percent} %)
 reporting.avg_transit_days,Jours de transit moyens
+reporting.avg_transit_time,Temps moyen de transit
 reporting.basic_information,Informations de base
 reporting.below_critical_threshold_with_penalty,En dessous du seuil critique (avec pénalité)
 reporting.below_standard_but_above_critical_no_penalty,En dessous de la norme mais au-dessus du critique (sans pénalité)

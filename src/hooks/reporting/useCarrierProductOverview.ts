@@ -2,12 +2,16 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 // Removed dateUtils import - using same filtering as ONE DB
 import { useEffectiveAccountId } from '../useEffectiveAccountId';
+import type { TimeUnit } from '@/lib/accountTime';
+import { measureHours, measureUnit } from '@/lib/transitMeasure';
 
 interface CarrierProductData {
   carrier: string;
   product: string;
   routes: number;
   totalSamples: number;
+  /** Unidad de jkStandard/jkActual/deviation: 'days' solo si todas las rutas con estandar miden en dias; si no, 'hours' */
+  unit: TimeUnit;
   jkStandard: number;
   jkActual: number;
   deviation: number;
@@ -61,7 +65,7 @@ export function useCarrierProductOverview(accountId: string | undefined, filters
         if (stdError) throw stdError;
 
         // Create standards map with correct field names
-        const standardsMap = new Map<string, { jkStandard: number; successPercentage: number; warningThreshold: number; criticalThreshold: number }>();
+        const standardsMap = new Map<string, { jkStandard: number; unit: TimeUnit; successPercentage: number; warningThreshold: number; criticalThreshold: number }>();
         (standards || []).forEach(std => {
           const originCityName = std.origin_city?.name;
           const destCityName = std.destination_city?.name;
@@ -74,9 +78,9 @@ export function useCarrierProductOverview(accountId: string | undefined, filters
           }
           
           const routeKey = `${originCityName}-${destCityName}-${carrierName}-${productName}`;
-          const jkStandard = std.time_unit === 'days' 
-            ? std.standard_time 
-            : std.standard_time / 24;
+          // Estandar en su propia unidad (sin convertir); la unidad decide la medida
+          const unit = measureUnit(std);
+          const jkStandard = std.standard_time;
           
           const successPct = std.success_percentage || 95;
           const warningThreshold = std.threshold_type === 'relative'
@@ -88,6 +92,7 @@ export function useCarrierProductOverview(accountId: string | undefined, filters
           
           standardsMap.set(routeKey, {
             jkStandard: jkStandard || 0,
+            unit,
             successPercentage: successPct,
             warningThreshold: warningThreshold,
             criticalThreshold: criticalThreshold,
@@ -122,6 +127,7 @@ export function useCarrierProductOverview(accountId: string | undefined, filters
               product_name, 
               on_time_delivery, 
               business_transit_days,
+              business_transit_hours,
               origin_city_name,
               destination_city_name
             `)
@@ -168,8 +174,11 @@ export function useCarrierProductOverview(accountId: string | undefined, filters
           routes: Set<string>;
           onTimeCount: number;
           total: number;
-          dayDistribution: Map<number, number>; // day -> count
-          totalStandardDays: number;
+          hourDistribution: Map<number, number>; // horas (medida de la ruta en horas) -> count
+          timedTotal: number;
+          daysRoutes: number; // envios cuya ruta tiene estandar en dias
+          hoursRoutes: number; // envios cuya ruta tiene estandar en horas
+          totalStandardHours: number;
           standardPercentageSum: number;
           standardPercentageCount: number;
           routePerformance: Map<string, { onTime: number; total: number }>;
@@ -186,8 +195,11 @@ export function useCarrierProductOverview(accountId: string | undefined, filters
               routes: new Set(),
               onTimeCount: 0,
               total: 0,
-              dayDistribution: new Map(),
-              totalStandardDays: 0,
+              hourDistribution: new Map(),
+              timedTotal: 0,
+              daysRoutes: 0,
+              hoursRoutes: 0,
+              totalStandardHours: 0,
               standardPercentageSum: 0,
               standardPercentageCount: 0,
               routePerformance: new Map()
@@ -199,11 +211,19 @@ export function useCarrierProductOverview(accountId: string | undefined, filters
           stats.onTimeCount += shipment.on_time_delivery ? 1 : 0;
           stats.total += 1;
           
-          // Accumulate day distribution
-          const transitDays = shipment.business_transit_days || 0;
-          stats.dayDistribution.set(transitDays, (stats.dayDistribution.get(transitDays) || 0) + 1);
-          
-          stats.totalStandardDays += standard?.jkStandard || 0;
+          // Medida segun la unidad del estandar de la ruta, expresada en horas
+          const unit: TimeUnit = standard?.unit || 'hours';
+          if (standard) {
+            if (unit === 'days') stats.daysRoutes++; else stats.hoursRoutes++;
+          }
+          const transitHours = measureHours(shipment, unit);
+          if (transitHours !== null) {
+            const bucket = Math.round(transitHours);
+            stats.hourDistribution.set(bucket, (stats.hourDistribution.get(bucket) || 0) + 1);
+            stats.timedTotal += 1;
+          }
+
+          stats.totalStandardHours += (standard?.jkStandard || 0) * (unit === 'days' ? 24 : 1);
           if (standard?.successPercentage) {
             stats.standardPercentageSum += standard.successPercentage;
             stats.standardPercentageCount++;
@@ -223,7 +243,7 @@ export function useCarrierProductOverview(accountId: string | undefined, filters
         grouped.forEach((stats, key) => {
           const [carrier, product] = key.split('|');
           const onTimePercentage = (stats.onTimeCount / stats.total) * 100;
-          const jkStandard = stats.totalStandardDays / stats.total;
+          let jkStandard = stats.totalStandardHours / stats.total;
           
           // Calculate J+K Actual (days to reach STD %)
           const targetStdPercentage = stats.standardPercentageCount > 0 
@@ -231,18 +251,25 @@ export function useCarrierProductOverview(accountId: string | undefined, filters
             : 85;
           
           let jkActual = 0;
-          const sortedDays = Array.from(stats.dayDistribution.keys()).sort((a, b) => a - b);
+          const sortedHours = Array.from(stats.hourDistribution.keys()).sort((a, b) => a - b);
           let cumulativeSamples = 0;
-          const targetSamples = (targetStdPercentage / 100) * stats.total;
-          
-          for (const day of sortedDays) {
-            cumulativeSamples += stats.dayDistribution.get(day) || 0;
+          const targetSamples = (targetStdPercentage / 100) * stats.timedTotal;
+
+          for (const h of sortedHours) {
+            cumulativeSamples += stats.hourDistribution.get(h) || 0;
             if (cumulativeSamples >= targetSamples) {
-              jkActual = day;
+              jkActual = h;
               break;
             }
           }
-          
+
+          // Si todas las rutas con estandar miden en dias, se devuelve en dias; si hay mezcla, en horas
+          const groupUnit: TimeUnit = stats.daysRoutes > 0 && stats.hoursRoutes === 0 ? 'days' : 'hours';
+          if (groupUnit === 'days') {
+            jkStandard = jkStandard / 24;
+            jkActual = jkActual / 24;
+          }
+
           const deviation = jkActual - jkStandard;
           
           // Count problematic routes (on-time < critical threshold)
@@ -269,6 +296,7 @@ export function useCarrierProductOverview(accountId: string | undefined, filters
             product,
             routes: stats.routes.size,
             totalSamples: stats.total,
+            unit: groupUnit,
             jkStandard,
             jkActual,
             deviation,
