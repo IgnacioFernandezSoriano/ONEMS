@@ -27,8 +27,8 @@ export default function DualLineChart({ data, unit = 'hours' }: DualLineChartPro
           <YAxis yAxisId="left" />
           <YAxis yAxisId="right" orientation="right" unit={` ${unitSuffix(unit)}`} />
           <Tooltip
-            formatter={(value: number, _name: string, item: { dataKey?: unknown }) =>
-              item?.dataKey === 'compliance' ? value : `${value} ${unitSuffix(unit)}`
+            formatter={(value, _name, item) =>
+              item?.dataKey === 'compliance' ? (value ?? '') : `${value ?? ''} ${unitSuffix(unit)}`
             }
           />
           <Legend />
