@@ -285,8 +285,6 @@ export default function ReceiveGenerator() {
               receiveDate = new Date(shipmentDate.getTime() + (standardDays + variance) * 24 * 60 * 60 * 1000)
             }
 
-            const transitDays = Math.floor((receiveDate.getTime() - shipmentDate.getTime()) / (1000 * 60 * 60 * 24))
-            
             const record: any = {
               account_id: accountId,
               // allocation_detail_id omitted for synthetic data - no FK constraint
@@ -298,8 +296,6 @@ export default function ReceiveGenerator() {
               destination_city_name: destCity.name,
               sent_at: shipmentDate.toISOString(),
               received_at: receiveDate.toISOString(),
-              total_transit_days: transitDays,
-              business_transit_days: transitDays,
               on_time_delivery: !isOutOfSla,
               source_data_snapshot: {
                 generated: true,
