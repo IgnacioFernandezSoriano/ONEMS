@@ -1,6 +1,9 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { ChevronDown, ChevronRight, Download } from 'lucide-react';
 import { downloadRouteSamples } from '@/utils/downloadRouteSamples';
+import { useTimeUnit } from '@/hooks/useTimeUnit';
+import type { TimeUnit } from '@/lib/accountTime';
+import { aggregateJK, formatJK } from '@/lib/transitMeasure';
 
 interface RouteData {
   origin: string;
@@ -11,17 +14,20 @@ interface RouteData {
   standardPercentage: number;
   actualPercentage: number;
   deviation: number;
-  standardDays: number;
-  actualDays: number;
+  unit: TimeUnit; // unidad del estandar de la ruta (la de jkStandard/jkActual)
+  jkStandard: number;
+  jkActual: number;
   status: 'compliant' | 'warning' | 'critical';
-  carrierStandardDays?: number;
-  carrierActualDays?: number;
+  carrierUnit?: TimeUnit;
+  carrierJkStandard?: number;
+  carrierJkActual?: number;
   carrierStandardPercentage?: number;
   carrierActualPercentage?: number;
   carrierDeviation?: number;
   carrierStatus?: 'compliant' | 'warning' | 'critical';
-  productStandardDays?: number;
-  productActualDays?: number;
+  productUnit?: TimeUnit;
+  productJkStandard?: number;
+  productJkActual?: number;
   productStandardPercentage?: number;
   productActualPercentage?: number;
   productDeviation?: number;
@@ -35,6 +41,7 @@ interface ComplianceHierarchicalTableProps {
 }
 
 export function ComplianceHierarchicalTable({ data, warningThreshold, criticalThreshold }: ComplianceHierarchicalTableProps) {
+  const { unit: displayUnit } = useTimeUnit();
   const [expandedCarriers, setExpandedCarriers] = useState<Set<string>>(new Set());
   const [expandedProducts, setExpandedProducts] = useState<Set<string>>(new Set());
 
@@ -84,14 +91,16 @@ export function ComplianceHierarchicalTable({ data, warningThreshold, criticalTh
         const routes = productData.routes;
         const totalSamples = routes.reduce((sum: number, r: RouteData) => sum + (r.totalShipments || 0), 0);
         
-        // Weighted averages for product
-        const standardDaysSum = routes.reduce((sum: number, r: RouteData) => sum + (r.standardDays * r.totalShipments), 0);
-        const actualDaysSum = routes.reduce((sum: number, r: RouteData) => sum + (r.actualDays * r.totalShipments), 0);
+        // Weighted averages for product (J+K en la unidad comun de sus rutas; horas si mezclan)
+        const jk = aggregateJK(routes.map((r: RouteData) => ({
+          unit: r.unit,
+          jkStandard: r.jkStandard,
+          jkActual: r.jkActual,
+          totalSamples: r.totalShipments || 0,
+        })));
         const standardPercentageSum = routes.reduce((sum: number, r: RouteData) => sum + (r.standardPercentage * r.totalShipments), 0);
         const actualPercentageSum = routes.reduce((sum: number, r: RouteData) => sum + (r.actualPercentage * r.totalShipments), 0);
         
-        const standardDays = totalSamples > 0 ? standardDaysSum / totalSamples : 0;
-        const actualDays = totalSamples > 0 ? actualDaysSum / totalSamples : 0;
         const standardPercentage = totalSamples > 0 ? standardPercentageSum / totalSamples : 0;
         const actualPercentage = totalSamples > 0 ? actualPercentageSum / totalSamples : 0;
         const deviation = actualPercentage - standardPercentage;
@@ -105,8 +114,9 @@ export function ComplianceHierarchicalTable({ data, warningThreshold, criticalTh
         return {
           product: productData.product,
           totalSamples,
-          standardDays,
-          actualDays,
+          unit: jk.unit,
+          jkStandard: jk.jkStandard,
+          jkActual: jk.jkActual,
           standardPercentage,
           actualPercentage,
           deviation,
@@ -117,13 +127,10 @@ export function ComplianceHierarchicalTable({ data, warningThreshold, criticalTh
       
       // Calculate carrier metrics from visible products
       const totalSamples = products.reduce((sum: number, p: any) => sum + p.totalSamples, 0);
-      const standardDaysSum = products.reduce((sum: number, p: any) => sum + (p.standardDays * p.totalSamples), 0);
-      const actualDaysSum = products.reduce((sum: number, p: any) => sum + (p.actualDays * p.totalSamples), 0);
+      const jk = aggregateJK(products);
       const standardPercentageSum = products.reduce((sum: number, p: any) => sum + (p.standardPercentage * p.totalSamples), 0);
       const actualPercentageSum = products.reduce((sum: number, p: any) => sum + (p.actualPercentage * p.totalSamples), 0);
       
-      const standardDays = totalSamples > 0 ? standardDaysSum / totalSamples : 0;
-      const actualDays = totalSamples > 0 ? actualDaysSum / totalSamples : 0;
       const standardPercentage = totalSamples > 0 ? standardPercentageSum / totalSamples : 0;
       const actualPercentage = totalSamples > 0 ? actualPercentageSum / totalSamples : 0;
       const deviation = actualPercentage - standardPercentage;
@@ -137,8 +144,9 @@ export function ComplianceHierarchicalTable({ data, warningThreshold, criticalTh
       return {
         carrier: carrierData.carrier,
         totalSamples,
-        standardDays,
-        actualDays,
+        unit: jk.unit,
+        jkStandard: jk.jkStandard,
+        jkActual: jk.jkActual,
         standardPercentage,
         actualPercentage,
         deviation,
@@ -212,10 +220,10 @@ export function ComplianceHierarchicalTable({ data, warningThreshold, criticalTh
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm text-right font-bold">{carrierItem.totalSamples}</td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm text-right font-bold">
-                  {carrierItem.standardDays > 0 ? carrierItem.standardDays.toFixed(1) : '-'}
+                  {carrierItem.jkStandard > 0 ? formatJK(carrierItem.jkStandard, carrierItem.unit, displayUnit) : '-'}
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm text-right font-bold">
-                  {carrierItem.actualDays > 0 ? carrierItem.actualDays.toFixed(1) : '-'}
+                  {carrierItem.jkActual > 0 ? formatJK(carrierItem.jkActual, carrierItem.unit, displayUnit) : '-'}
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm text-right font-bold">
                   {carrierItem.standardPercentage > 0 ? `${carrierItem.standardPercentage.toFixed(1)}%` : '-'}
@@ -260,10 +268,10 @@ export function ComplianceHierarchicalTable({ data, warningThreshold, criticalTh
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-right font-semibold">{productItem.totalSamples}</td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-right font-semibold">
-                      {productItem.standardDays > 0 ? productItem.standardDays.toFixed(1) : '-'}
+                      {productItem.jkStandard > 0 ? formatJK(productItem.jkStandard, productItem.unit, displayUnit) : '-'}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-right font-semibold">
-                      {productItem.actualDays > 0 ? productItem.actualDays.toFixed(1) : '-'}
+                      {productItem.jkActual > 0 ? formatJK(productItem.jkActual, productItem.unit, displayUnit) : '-'}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-right font-semibold">
                       {productItem.standardPercentage > 0 ? `${productItem.standardPercentage.toFixed(1)}%` : '-'}
@@ -305,8 +313,8 @@ export function ComplianceHierarchicalTable({ data, warningThreshold, criticalTh
                           {route.origin} → {route.destination}
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-right">{route.totalShipments || 0}</td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-right">{route.standardDays?.toFixed(1)}</td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-right">{route.actualDays?.toFixed(1)}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-right">{formatJK(route.jkStandard, route.unit, displayUnit)}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-right">{formatJK(route.jkActual, route.unit, displayUnit)}</td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-right">{route.standardPercentage?.toFixed(1)}%</td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-900">
                           {route.actualPercentage?.toFixed(1)}%

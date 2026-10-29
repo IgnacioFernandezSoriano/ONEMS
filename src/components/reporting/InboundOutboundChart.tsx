@@ -3,6 +3,9 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceL
 import { formatNumber } from '@/lib/formatNumber';
 import type { CityEquityData } from '@/types/reporting';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useTimeUnit } from '@/hooks/useTimeUnit';
+import type { TimeUnit } from '@/lib/accountTime';
+import { commonUnit, convertUnit, formatJK } from '@/lib/transitMeasure';
 
 interface InboundOutboundChartProps {
   data: CityEquityData[];
@@ -11,6 +14,11 @@ interface InboundOutboundChartProps {
 
 export function InboundOutboundChart({ data, scenarioDescription }: InboundOutboundChartProps) {
   const { t } = useTranslation();
+  const { unit: displayUnit } = useTimeUnit();
+  // J+K de entrada (en su unidad; sin unidad = dato legado en dias) -> horas para promediar
+  const toH = (v: number, u?: TimeUnit) => convertUnit(v, u ?? 'days', 'hours');
+  // Presentacion: de horas a la unidad del grupo (horas si mezcla)
+  const jkH = (hours: number, u: TimeUnit) => formatJK(convertUnit(hours, 'hours', u), u, displayUnit);
   
   // Helper function to calculate metrics from visible carrier/product breakdown
   const calculateMetricsFromBreakdown = (city: CityEquityData) => {
@@ -23,10 +31,12 @@ export function InboundOutboundChart({ data, scenarioDescription }: InboundOutbo
         outbound: city.outboundPercentage,
         inboundStandardPercentage: city.inboundStandardPercentage,
         outboundStandardPercentage: city.outboundStandardPercentage,
-        inboundStandardDays: city.inboundStandardDays,
-        inboundActualDays: city.inboundActualDays,
-        outboundStandardDays: city.outboundStandardDays,
-        outboundActualDays: city.outboundActualDays,
+        inboundUnit: (city.inboundUnit ?? 'days') as TimeUnit,
+        outboundUnit: (city.outboundUnit ?? 'days') as TimeUnit,
+        inboundStandardHours: toH(city.inboundStandardDays, city.inboundUnit),
+        inboundActualHours: toH(city.inboundActualDays, city.inboundUnit),
+        outboundStandardHours: toH(city.outboundStandardDays, city.outboundUnit),
+        outboundActualHours: toH(city.outboundActualDays, city.outboundUnit),
       };
     }
     
@@ -41,14 +51,15 @@ export function InboundOutboundChart({ data, scenarioDescription }: InboundOutbo
       ? breakdown.reduce((sum, cp) => sum + (cp.inboundShipments * cp.standardPercentage), 0) / totalInbound
       : 0;
     
-    // Calculate weighted average for inbound days
-    const inboundStandardDays = totalInbound > 0
-      ? breakdown.reduce((sum, cp) => sum + (cp.inboundShipments * cp.standardDays), 0) / totalInbound
+    // Calculate weighted average for inbound J+K (en horas)
+    const inboundStandardHours = totalInbound > 0
+      ? breakdown.reduce((sum, cp) => sum + (cp.inboundShipments * toH(cp.standardDays, cp.unit)), 0) / totalInbound
       : 0;
     
-    const inboundActualDays = totalInbound > 0
-      ? breakdown.reduce((sum, cp) => sum + (cp.inboundShipments * cp.actualDays), 0) / totalInbound
+    const inboundActualHours = totalInbound > 0
+      ? breakdown.reduce((sum, cp) => sum + (cp.inboundShipments * toH(cp.actualDays, cp.unit)), 0) / totalInbound
       : 0;
+    const inboundUnit = commonUnit(breakdown.filter(cp => cp.inboundShipments > 0).map(cp => cp.unit ?? 'days'));
     
     // Calculate outbound metrics from visible breakdown
     const totalOutbound = breakdown.reduce((sum, cp) => sum + cp.outboundShipments, 0);
@@ -61,24 +72,27 @@ export function InboundOutboundChart({ data, scenarioDescription }: InboundOutbo
       ? breakdown.reduce((sum, cp) => sum + (cp.outboundShipments * cp.standardPercentage), 0) / totalOutbound
       : 0;
     
-    // Calculate weighted average for outbound days
-    const outboundStandardDays = totalOutbound > 0
-      ? breakdown.reduce((sum, cp) => sum + (cp.outboundShipments * cp.standardDays), 0) / totalOutbound
+    // Calculate weighted average for outbound J+K (en horas)
+    const outboundStandardHours = totalOutbound > 0
+      ? breakdown.reduce((sum, cp) => sum + (cp.outboundShipments * toH(cp.standardDays, cp.unit)), 0) / totalOutbound
       : 0;
     
-    const outboundActualDays = totalOutbound > 0
-      ? breakdown.reduce((sum, cp) => sum + (cp.outboundShipments * cp.actualDays), 0) / totalOutbound
+    const outboundActualHours = totalOutbound > 0
+      ? breakdown.reduce((sum, cp) => sum + (cp.outboundShipments * toH(cp.actualDays, cp.unit)), 0) / totalOutbound
       : 0;
+    const outboundUnit = commonUnit(breakdown.filter(cp => cp.outboundShipments > 0).map(cp => cp.unit ?? 'days'));
     
     return {
       inbound: inboundPercentage,
       outbound: outboundPercentage,
       inboundStandardPercentage,
       outboundStandardPercentage,
-      inboundStandardDays,
-      inboundActualDays,
-      outboundStandardDays,
-      outboundActualDays,
+      inboundUnit,
+      outboundUnit,
+      inboundStandardHours,
+      inboundActualHours,
+      outboundStandardHours,
+      outboundActualHours,
     };
   };
   
@@ -106,10 +120,12 @@ export function InboundOutboundChart({ data, scenarioDescription }: InboundOutbo
     outbound: metrics.outbound,
     inboundStandardPercentage: metrics.inboundStandardPercentage,
     outboundStandardPercentage: metrics.outboundStandardPercentage,
-    inboundStandardDays: metrics.inboundStandardDays,
-    inboundActualDays: metrics.inboundActualDays,
-    outboundStandardDays: metrics.outboundStandardDays,
-    outboundActualDays: metrics.outboundActualDays,
+    inboundUnit: metrics.inboundUnit,
+    outboundUnit: metrics.outboundUnit,
+    inboundStandardHours: metrics.inboundStandardHours,
+    inboundActualHours: metrics.inboundActualHours,
+    outboundStandardHours: metrics.outboundStandardHours,
+    outboundActualHours: metrics.outboundActualHours,
   }));
 
   // Calculate average standard for reference line (using inbound as reference)
@@ -142,12 +158,12 @@ export function InboundOutboundChart({ data, scenarioDescription }: InboundOutbo
                     <div className="mb-2">
                       <p className="text-blue-600 font-medium">Inbound:</p>
                       <p className="text-sm ml-2">Std %: {formatNumber(data.inboundStandardPercentage)}% | Actual %: {formatNumber(data.inbound)}%</p>
-                      <p className="text-sm ml-2">J+K Std: {formatNumber(data.inboundStandardDays)} days | J+K Actual: {formatNumber(data.inboundActualDays)} days</p>
+                      <p className="text-sm ml-2">J+K Std: {jkH(data.inboundStandardHours, data.inboundUnit)} | J+K Actual: {jkH(data.inboundActualHours, data.inboundUnit)}</p>
                     </div>
                     <div>
                       <p className="text-green-600 font-medium">Outbound:</p>
                       <p className="text-sm ml-2">Std %: {formatNumber(data.outboundStandardPercentage)}% | Actual %: {formatNumber(data.outbound)}%</p>
-                      <p className="text-sm ml-2">J+K Std: {formatNumber(data.outboundStandardDays)} days | J+K Actual: {formatNumber(data.outboundActualDays)} days</p>
+                      <p className="text-sm ml-2">J+K Std: {jkH(data.outboundStandardHours, data.outboundUnit)} | J+K Actual: {jkH(data.outboundActualHours, data.outboundUnit)}</p>
                     </div>
                   </div>
                 );

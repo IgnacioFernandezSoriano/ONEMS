@@ -6,6 +6,7 @@ import { ComplianceHierarchicalTable } from '@/components/reporting/ComplianceHi
 import { Shield, AlertTriangle, CheckCircle, XCircle, Info, FileDown } from 'lucide-react';
 import { SmartTooltip } from '@/components/common/SmartTooltip';
 import { useTranslation } from '@/hooks/useTranslation';
+import { TimeUnitToggle } from '@/components/common/TimeUnitToggle';
 import type { TerritoryEquityFilters as Filters } from '@/types/reporting';
 
 export default function ComplianceReport() {
@@ -68,10 +69,13 @@ export default function ComplianceReport() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <Shield className="w-6 h-6 text-blue-600" />
-            {t('reporting.regulatory_compliance_report')}
-          </h1>
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+              <Shield className="w-6 h-6 text-blue-600" />
+              {t('reporting.regulatory_compliance_report')}
+            </h1>
+            <TimeUnitToggle />
+          </div>
           <p className="text-gray-600 mt-1">
             {t('reporting.compliance_analysis_description')}
           </p>

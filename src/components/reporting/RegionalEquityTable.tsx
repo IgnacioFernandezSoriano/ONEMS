@@ -4,6 +4,9 @@ import { ChevronDown, ChevronRight, ChevronsDown, ChevronsUp } from 'lucide-reac
 import type { RegionEquityData } from '@/types/reporting';
 import type { ScenarioInfo } from '@/hooks/reporting/useFilterScenario';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useTimeUnit } from '@/hooks/useTimeUnit';
+import type { TimeUnit } from '@/lib/accountTime';
+import { commonUnit, convertUnit, formatJK } from '@/lib/transitMeasure';
 
 interface RegionalEquityTableProps {
   data: RegionEquityData[];
@@ -24,8 +27,9 @@ type RegionRow = {
   standardPercentage: number;
   actualPercentage: number;
   deviation: number;
-  standardDays: number;
-  actualDays: number;
+  standardHours: number; // J+K en horas (para agregar y ordenar)
+  actualHours: number;
+  unit: TimeUnit; // unidad de presentacion del J+K
   status: 'compliant' | 'warning' | 'critical';
   originalRegion: RegionEquityData;
   carrierBreakdown: CarrierRow[];
@@ -38,8 +42,9 @@ type CarrierRow = {
   standardPercentage: number;
   actualPercentage: number;
   deviation: number;
-  standardDays: number;
-  actualDays: number;
+  standardHours: number; // J+K en horas (para agregar y ordenar)
+  actualHours: number;
+  unit: TimeUnit; // unidad de presentacion del J+K
   status: 'compliant' | 'warning' | 'critical';
   productBreakdown: ProductRow[];
 };
@@ -51,8 +56,9 @@ type ProductRow = {
   standardPercentage: number;
   actualPercentage: number;
   deviation: number;
-  standardDays: number;
-  actualDays: number;
+  standardHours: number; // J+K en horas (para agregar y ordenar)
+  actualHours: number;
+  unit: TimeUnit; // unidad de presentacion del J+K
   status: 'compliant' | 'warning' | 'critical';
 };
 
@@ -65,6 +71,11 @@ export function RegionalEquityTable({
   scenarioDescription 
 }: RegionalEquityTableProps) {
   const { t } = useTranslation();
+  const { unit: displayUnit } = useTimeUnit();
+  // J+K de entrada (en su unidad; sin unidad = dato legado en dias) -> horas para agregar y ordenar
+  const toH = (v: number, u?: TimeUnit) => convertUnit(v, u ?? 'days', 'hours');
+  // Presentacion: de horas a la unidad de la fila (la de sus rutas; horas si mezclan)
+  const jkH = (hours: number, u: TimeUnit) => formatJK(convertUnit(hours, 'hours', u), u, displayUnit);
   const [sortField, setSortField] = useState<keyof RegionRow>('regionName');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [expandedRegions, setExpandedRegions] = useState<Set<string>>(new Set());
@@ -183,6 +194,7 @@ export function RegionalEquityTable({
         standardDaysCount: number;
         actualDaysSum: number;
         actualDaysCount: number;
+        units: Set<TimeUnit>;
       }>();
 
       // Group carrier/product breakdown by carrier
@@ -207,6 +219,7 @@ export function RegionalEquityTable({
             standardDaysCount: 0,
             actualDaysSum: 0,
             actualDaysCount: 0,
+            units: new Set<TimeUnit>(),
           });
         }
 
@@ -227,10 +240,11 @@ export function RegionalEquityTable({
         carrierData.totalCompliant += (relevantShipments * relevantPercentage / 100);
         carrierData.standardSum += cp.standardPercentage * relevantShipments;
         carrierData.standardCount += relevantShipments;
-        carrierData.standardDaysSum += cp.standardDays * relevantShipments;
+        carrierData.standardDaysSum += toH(cp.standardDays, cp.unit) * relevantShipments;
+        carrierData.units.add(cp.unit ?? 'days');
         carrierData.standardDaysCount += relevantShipments;
         if (cp.actualDays > 0) {
-          carrierData.actualDaysSum += cp.actualDays * relevantShipments;
+          carrierData.actualDaysSum += toH(cp.actualDays, cp.unit) * relevantShipments;
           carrierData.actualDaysCount += relevantShipments;
         }
         
@@ -245,8 +259,9 @@ export function RegionalEquityTable({
           standardPercentage: cp.standardPercentage,
           actualPercentage: relevantPercentage,
           deviation: relevantPercentage - cp.standardPercentage,
-          standardDays: cp.standardDays,
-          actualDays: cp.actualDays,
+          standardHours: toH(cp.standardDays, cp.unit),
+          actualHours: toH(cp.actualDays, cp.unit),
+          unit: cp.unit ?? 'days',
           status: productStatus,
         });
       });
@@ -283,8 +298,9 @@ export function RegionalEquityTable({
           standardPercentage: carrierStandardPercentage,
           actualPercentage: carrierActualPercentage,
           deviation: carrierActualPercentage - carrierStandardPercentage,
-          standardDays: carrierStandardDays,
-          actualDays: carrierActualDays,
+          standardHours: carrierStandardDays,
+          actualHours: carrierActualDays,
+          unit: commonUnit(carrierData.units),
           status: carrierStatus,
           productBreakdown: Array.from(carrierData.products.values()),
         };
@@ -298,10 +314,10 @@ export function RegionalEquityTable({
       const regionStandardPercentageSum = carrierBreakdown.reduce((sum, c) => sum + (c.standardPercentage * c.shipments), 0);
       const regionStandardPercentage = regionTotalShipments > 0 ? regionStandardPercentageSum / regionTotalShipments : 95;
       
-      const regionStandardDaysSum = carrierBreakdown.reduce((sum, c) => sum + (c.standardDays * c.shipments), 0);
+      const regionStandardDaysSum = carrierBreakdown.reduce((sum, c) => sum + (c.standardHours * c.shipments), 0);
       const regionStandardDays = regionTotalShipments > 0 ? regionStandardDaysSum / regionTotalShipments : 0;
       
-      const regionActualDaysSum = carrierBreakdown.reduce((sum, c) => sum + (c.actualDays * c.shipments), 0);
+      const regionActualDaysSum = carrierBreakdown.reduce((sum, c) => sum + (c.actualHours * c.shipments), 0);
       const regionActualDays = regionTotalShipments > 0 ? regionActualDaysSum / regionTotalShipments : 0;
       
       const regionDeviation = regionActualPercentage - regionStandardPercentage;
@@ -325,8 +341,9 @@ export function RegionalEquityTable({
         standardPercentage: regionStandardPercentage,
         actualPercentage: regionActualPercentage,
         deviation: regionDeviation,
-        standardDays: regionStandardDays,
-        actualDays: regionActualDays,
+        standardHours: regionStandardDays,
+        actualHours: regionActualDays,
+        unit: commonUnit(carrierBreakdown.map(c => c.unit)),
         status: regionStatus,
         originalRegion: region,
         carrierBreakdown,
@@ -414,10 +431,10 @@ export function RegionalEquityTable({
               <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => handleSort('shipments')}>
                 {t('reporting.total')}
               </th>
-              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => handleSort('standardDays')}>
+              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => handleSort('standardHours')}>
                 {t('reporting.jk_std')}
               </th>
-              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => handleSort('actualDays')}>
+              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => handleSort('actualHours')}>
                 {t('reporting.jk_actual')}
               </th>
               <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => handleSort('standardPercentage')}>
@@ -463,10 +480,10 @@ export function RegionalEquityTable({
                     {formatNumber(region.shipments)}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 text-right">
-                    {formatNumber(region.standardDays)}
+                    {jkH(region.standardHours, region.unit)}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 text-right">
-                    {formatNumber(region.actualDays)}
+                    {jkH(region.actualHours, region.unit)}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 text-right">
                     {formatNumber(region.standardPercentage)}%
@@ -508,10 +525,10 @@ export function RegionalEquityTable({
                           {formatNumber(carrier.shipments)}
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700 text-right">
-                          {formatNumber(carrier.standardDays)}
+                          {jkH(carrier.standardHours, carrier.unit)}
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700 text-right">
-                          {formatNumber(carrier.actualDays)}
+                          {jkH(carrier.actualHours, carrier.unit)}
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700 text-right">
                           {formatNumber(carrier.standardPercentage)}%
@@ -539,10 +556,10 @@ export function RegionalEquityTable({
                             {formatNumber(product.shipments)}
                           </td>
                           <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-600 text-right">
-                            {formatNumber(product.standardDays)}
+                            {jkH(product.standardHours, product.unit)}
                           </td>
                           <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-600 text-right">
-                            {formatNumber(product.actualDays)}
+                            {jkH(product.actualHours, product.unit)}
                           </td>
                           <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-600 text-right">
                             {formatNumber(product.standardPercentage)}%

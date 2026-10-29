@@ -1,6 +1,9 @@
 import { X } from 'lucide-react';
 import type { CityEquityData } from '@/types/reporting';
 import { formatNumber } from '@/lib/formatNumber';
+import { useTimeUnit } from '@/hooks/useTimeUnit';
+import type { TimeUnit } from '@/lib/accountTime';
+import { formatJK } from '@/lib/transitMeasure';
 
 interface CityDetailModalProps {
   city: CityEquityData;
@@ -8,6 +11,9 @@ interface CityDetailModalProps {
 }
 
 export function CityDetailModal({ city, onClose }: CityDetailModalProps) {
+  const { unit: displayUnit } = useTimeUnit();
+  // J+K en la unidad de su grupo (sin unidad = dato legado en dias)
+  const jk = (v: number, u?: TimeUnit) => formatJK(v, u ?? 'days', displayUnit);
   const carrierProductData = city.carrierProductBreakdown || [];
 
   const getStatusBadge = (status: string) => {
@@ -126,11 +132,11 @@ export function CityDetailModal({ city, onClose }: CityDetailModalProps) {
                   </div>
                   <div>
                     <p className="text-xs text-gray-600">J+K Std:</p>
-                    <p className="text-sm font-medium">{formatNumber(city.inboundStandardDays)} days</p>
+                    <p className="text-sm font-medium">{jk(city.inboundStandardDays, city.inboundUnit)}</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-600">J+K Actual:</p>
-                    <p className="text-sm font-medium">{formatNumber(city.inboundActualDays)} days</p>
+                    <p className="text-sm font-medium">{jk(city.inboundActualDays, city.inboundUnit)}</p>
                   </div>
                 </div>
               </div>
@@ -160,11 +166,11 @@ export function CityDetailModal({ city, onClose }: CityDetailModalProps) {
                   </div>
                   <div>
                     <p className="text-xs text-gray-600">J+K Std:</p>
-                    <p className="text-sm font-medium">{formatNumber(city.outboundStandardDays)} days</p>
+                    <p className="text-sm font-medium">{jk(city.outboundStandardDays, city.outboundUnit)}</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-600">J+K Actual:</p>
-                    <p className="text-sm font-medium">{formatNumber(city.outboundActualDays)} days</p>
+                    <p className="text-sm font-medium">{jk(city.outboundActualDays, city.outboundUnit)}</p>
                   </div>
                 </div>
               </div>
@@ -250,10 +256,10 @@ export function CityDetailModal({ city, onClose }: CityDetailModalProps) {
                           {formatNumber(cp.standardPercentage)}%
                         </td>
                         <td className="px-4 py-3 text-sm text-right text-gray-900">
-                          {formatNumber(cp.standardDays)}
+                          {jk(cp.standardDays, cp.unit)}
                         </td>
                         <td className="px-4 py-3 text-sm text-right text-gray-900">
-                          {formatNumber(cp.actualDays)}
+                          {jk(cp.actualDays, cp.unit)}
                         </td>
                         <td
                           className={`px-4 py-3 text-sm text-right font-medium ${

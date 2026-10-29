@@ -1,4 +1,5 @@
 // TypeScript interfaces for Reporting Module
+import type { TimeUnit } from '@/lib/accountTime';
 
 export interface ReportingFilters {
   dateFrom: Date;
@@ -123,6 +124,7 @@ export interface CityEquityData {
   totalShipments: number;
   compliantShipments: number;
   standardPercentage: number;  // Weighted avg from delivery_standards
+  unit?: TimeUnit;  // unidad de standardDays/actualDays (J+K): la del estandar; 'hours' si el grupo mezcla. Ausente (hook V1 legado) = dias
   standardDays: number;  // J+K Standard: Weighted avg allowed_days from delivery_standards
   actualDays: number;  // J+K Actual: Weighted avg business_days
   actualPercentage: number;
@@ -136,6 +138,7 @@ export interface CityEquityData {
   inboundCompliant: number;
   inboundPercentage: number;
   inboundStandardPercentage: number;
+  inboundUnit?: TimeUnit;  // unidad de inboundStandardDays/inboundActualDays
   inboundStandardDays: number;
   inboundActualDays: number;
   inboundDeviation: number;
@@ -145,6 +148,7 @@ export interface CityEquityData {
   outboundCompliant: number;
   outboundPercentage: number;
   outboundStandardPercentage: number;
+  outboundUnit?: TimeUnit;  // unidad de outboundStandardDays/outboundActualDays
   outboundStandardDays: number;
   outboundActualDays: number;
   outboundDeviation: number;
@@ -160,6 +164,7 @@ export interface CityEquityData {
     compliantShipments: number;
     actualPercentage: number;
     standardPercentage: number;
+    unit?: TimeUnit;  // unidad de standardDays/actualDays (J+K): la del estandar; 'hours' si el grupo mezcla. Ausente (hook V1 legado) = dias
     standardDays: number;  // J+K Standard
     actualDays: number;  // J+K Actual
     deviation: number;
@@ -181,6 +186,7 @@ export interface RegionEquityData {
   totalShipments: number;
   compliantShipments: number;
   standardPercentage: number;
+  unit?: TimeUnit;  // unidad de standardDays/actualDays (J+K): la del estandar; 'hours' si el grupo mezcla. Ausente (hook V1 legado) = dias
   standardDays: number;  // J+K Standard
   actualDays: number;  // J+K Actual
   actualPercentage: number;
@@ -195,6 +201,7 @@ export interface RegionEquityData {
   inboundCompliant: number;
   inboundPercentage: number;
   inboundStandardPercentage: number;
+  inboundUnit?: TimeUnit;  // unidad de inboundStandardDays/inboundActualDays
   inboundStandardDays: number;
   inboundActualDays: number;
   inboundDeviation: number;
@@ -204,6 +211,7 @@ export interface RegionEquityData {
   outboundCompliant: number;
   outboundPercentage: number;
   outboundStandardPercentage: number;
+  outboundUnit?: TimeUnit;  // unidad de outboundStandardDays/outboundActualDays
   outboundStandardDays: number;
   outboundActualDays: number;
   outboundDeviation: number;
@@ -218,6 +226,7 @@ export interface RegionEquityData {
     compliantShipments: number;
     actualPercentage: number;
     standardPercentage: number;
+    unit?: TimeUnit;  // unidad de standardDays/actualDays (J+K): la del estandar; 'hours' si el grupo mezcla. Ausente (hook V1 legado) = dias
     standardDays: number;  // J+K Standard
     actualDays: number;  // J+K Actual
     deviation: number;
@@ -244,6 +253,7 @@ export interface TerritoryEquityMetrics {
     actualPercentage: number;
     deviation: number;
     standardPercentage: number;
+    unit?: TimeUnit;  // unidad de standardDays/actualDays (J+K): la del estandar; 'hours' si el grupo mezcla. Ausente (hook V1 legado) = dias
     standardDays: number;
     actualDays: number;
     inboundPercentage: number;
@@ -254,6 +264,7 @@ export interface TerritoryEquityMetrics {
     actualPercentage: number;
     deviation: number;
     standardPercentage: number;
+    unit?: TimeUnit;  // unidad de standardDays/actualDays (J+K): la del estandar; 'hours' si el grupo mezcla. Ausente (hook V1 legado) = dias
     standardDays: number;
     actualDays: number;
     inboundPercentage: number;
@@ -267,6 +278,7 @@ export interface TerritoryEquityMetrics {
     actualPercentage: number;
     deviation: number;
     standardPercentage: number;
+    unit?: TimeUnit;  // unidad de standardDays/actualDays (J+K): la del estandar; 'hours' si el grupo mezcla. Ausente (hook V1 legado) = dias
     standardDays: number;
     actualDays: number;
     inboundPercentage: number;
@@ -277,6 +289,7 @@ export interface TerritoryEquityMetrics {
     actualPercentage: number;
     deviation: number;
     standardPercentage: number;
+    unit?: TimeUnit;  // unidad de standardDays/actualDays (J+K): la del estandar; 'hours' si el grupo mezcla. Ausente (hook V1 legado) = dias
     standardDays: number;
     actualDays: number;
     inboundPercentage: number;
