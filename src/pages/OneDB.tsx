@@ -7,11 +7,16 @@ import { OneDBBulkPanel } from '../components/OneDB/OneDBBulkPanel';
 import { Database, CheckCircle, XCircle, Clock, Trash2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { SmartTooltip } from '../components/common/SmartTooltip';
-
+import { useAccount } from '../contexts/AccountContext';
+import { useTimeUnit } from '../hooks/useTimeUnit';
+import { TimeUnitToggle } from '../components/common/TimeUnitToggle';
+import { formatDuration } from '../lib/accountTime';
 import { useTranslation } from '@/hooks/useTranslation';
 export default function OneDB() {
   const { t } = useTranslation();
   const { user, profile } = useAuth();
+  const { accountTimezone } = useAccount();
+  const { unit } = useTimeUnit();
   const { records, filteredRecords, loading, error, refetch, applyFilters, exportToCSV } =
     useOneDB(profile?.account_id || undefined);
 
@@ -33,7 +38,7 @@ export default function OneDB() {
 
   const handleExport = () => {
     const recordsToExport = filteredRecords.filter((r) => selectedRecords.includes(r.id));
-    exportToCSV(recordsToExport);
+    exportToCSV(recordsToExport, { tz: accountTimezone, unit });
   };
 
   const handleClearSelection = () => {
@@ -83,11 +88,12 @@ export default function OneDB() {
     const total = filteredRecords.length;
     const onTime = filteredRecords.filter(r => r.on_time_delivery === true).length;
     const delayed = filteredRecords.filter(r => r.on_time_delivery === false).length;
-    const avgTransitDays = total > 0
-      ? (filteredRecords.reduce((sum, r) => sum + (r.total_transit_days || 0), 0) / total).toFixed(1)
-      : '0.0';
-    
-    return { total, onTime, delayed, avgTransitDays };
+    const withBusiness = filteredRecords.filter(r => r.business_transit_hours !== null && r.business_transit_hours !== undefined);
+    const avgBusinessHours = withBusiness.length > 0
+      ? withBusiness.reduce((sum, r) => sum + (r.business_transit_hours as number), 0) / withBusiness.length
+      : null;
+
+    return { total, onTime, delayed, avgBusinessHours };
   }, [filteredRecords]);
 
   if (loading) {
@@ -127,6 +133,8 @@ export default function OneDB() {
             </p>
           </div>
         </div>
+        <div className="flex items-center gap-3">
+        <TimeUnitToggle />
         <button
           onClick={handleExport}
           disabled={selectedRecords.length === 0}
@@ -136,6 +144,7 @@ export default function OneDB() {
           <Database className="w-4 h-4" />
           Export CSV ({selectedRecords.length})
         </button>
+        </div>
       </div>
 
       {/* KPI Cards */}
@@ -186,9 +195,9 @@ export default function OneDB() {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 mb-1">{t('onedb.avg_transit_days')}</p>
-              <p className="text-3xl font-bold text-gray-900">{kpis.avgTransitDays}</p>
-              <p className="text-xs text-gray-500 mt-1">{t('onedb.business_days_average')}</p>
+              <p className="text-sm text-gray-600 mb-1">{t('onedb.avg_transit_time')}</p>
+              <p className="text-3xl font-bold text-gray-900">{formatDuration(kpis.avgBusinessHours, unit)}</p>
+              <p className="text-xs text-gray-500 mt-1">{t('onedb.business_time_average')}</p>
             </div>
             <div className="p-3 bg-gray-50 rounded-lg">
               <Clock className="w-6 h-6 text-gray-600" />
@@ -206,6 +215,8 @@ export default function OneDB() {
         selectedRecords={selectedRecords}
         onSelectRecord={handleSelectRecord}
         onSelectAll={handleSelectAll}
+        tz={accountTimezone}
+        unit={unit}
       />
 
       {/* Bulk Operations Panel */}

@@ -1,4 +1,6 @@
 import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
+import type { TimeUnit } from '@/lib/accountTime';
+import { unitSuffix } from '@/lib/accountTime';
 import { formatNumber } from '@/lib/formatNumber';
 
 interface RouteData {
@@ -17,13 +19,15 @@ interface RouteData {
 }
 
 interface PerformanceDistributionChartProps {
+  unit?: TimeUnit; // unidad de las cubetas de la distribucion (por defecto dias)
+  axisLabel?: string; // etiqueta del eje X
   routeData: RouteData[];
   maxDays?: number;
   carrierFilter?: string;
   productFilter?: string;
 }
 
-export function PerformanceDistributionChart({ routeData, carrierFilter, productFilter }: PerformanceDistributionChartProps) {
+export function PerformanceDistributionChart({ routeData, carrierFilter, productFilter, unit = 'days', axisLabel }: PerformanceDistributionChartProps) {
   if (!routeData || routeData.length === 0) {
     return (
       <div className="h-80 flex items-center justify-center text-gray-400">
@@ -74,14 +78,14 @@ export function PerformanceDistributionChart({ routeData, carrierFilter, product
   const chartData = Array.from(distributionMap.entries())
     .map(([day, counts]) => ({
       day,
-      dayLabel: `${day}d`,
+      dayLabel: `${day}${unitSuffix(unit)}`,
       before: counts.before,
       onTime: counts.onTime,
       after: counts.after,
       total: counts.before + counts.onTime + counts.after,
     }))
     .sort((a, b) => a.day - b.day)
-    .slice(0, 15); // Limit to first 15 days for readability
+    .slice(0, unit === 'hours' ? 120 : 15); // Limit to first 15 days for readability
 
   // Calculate cumulative samples and find day where STD % is reached
   let dayReachingStdPercentage: number | null = null;
@@ -168,7 +172,7 @@ export function PerformanceDistributionChart({ routeData, carrierFilter, product
           <XAxis 
             dataKey="dayLabel" 
             tick={{ fontSize: 12, fill: '#6b7280' }}
-            label={{ value: 'Transit Days (J+K)', position: 'insideBottom', offset: -10, style: { fontSize: 12, fill: '#6b7280' } }}
+            label={{ value: axisLabel ?? 'Transit Days (J+K)', position: 'insideBottom', offset: -10, style: { fontSize: 12, fill: '#6b7280' } }}
           />
           <YAxis 
             yAxisId="left"
@@ -189,12 +193,12 @@ export function PerformanceDistributionChart({ routeData, carrierFilter, product
           {/* Vertical line at day reaching STD % */}
           {isSingleCarrierProduct && dayReachingStdPercentage !== null && (
             <ReferenceLine 
-              x={`${dayReachingStdPercentage}d`} 
+              x={`${dayReachingStdPercentage}${unitSuffix(unit)}`} 
               stroke="#000000" 
               strokeWidth={2}
               strokeDasharray="5 5"
               label={{ 
-                value: `${targetStandardPercentage.toFixed(0)}% at ${dayReachingStdPercentage}d`, 
+                value: `${targetStandardPercentage.toFixed(0)}% at ${dayReachingStdPercentage}${unitSuffix(unit)}`, 
                 position: 'top',
                 fill: '#000000',
                 fontSize: 11,
@@ -246,7 +250,7 @@ export function PerformanceDistributionChart({ routeData, carrierFilter, product
         Distribution of shipments by actual transit time vs delivery standard
         {isSingleCarrierProduct && targetStandardPercentage > 0 && dayReachingStdPercentage !== null && (
           <span className="ml-2 text-gray-900 font-medium">
-            • {carrierFilter} - {productFilter}: {targetStandardPercentage.toFixed(0)}% reached at {dayReachingStdPercentage}d (J+K Std: {targetJKDays}d)
+            • {carrierFilter} - {productFilter}: {targetStandardPercentage.toFixed(0)}% reached at {dayReachingStdPercentage}{unitSuffix(unit)} (J+K Std: {targetJKDays}{unitSuffix(unit)})
           </span>
         )}
       </div>

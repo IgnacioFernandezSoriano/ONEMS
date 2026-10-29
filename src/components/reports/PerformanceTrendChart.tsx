@@ -10,12 +10,15 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { format, startOfWeek, startOfMonth } from 'date-fns';
+import { useTimeUnit } from '@/hooks/useTimeUnit';
+import { useTranslation } from '@/hooks/useTranslation';
+import { formatDuration, toUnit } from '@/lib/accountTime';
 
 interface TrendDataPoint {
   date: string;
-  avgDays: number;
+  avgHours: number; // tiempo medio en horas (dias*24 si la ruta mide en dias)
   compliancePercent: number;
-  standardDays: number;
+  standardHours: number; // estandar medio en horas
   standardPercent: number;
 }
 
@@ -27,6 +30,8 @@ interface PerformanceTrendChartProps {
 type TimeScale = 'day' | 'week' | 'month';
 
 export function PerformanceTrendChart({ data, title = 'Performance Trend' }: PerformanceTrendChartProps) {
+  const { unit } = useTimeUnit();
+  const { t } = useTranslation();
   const [timeScale, setTimeScale] = useState<TimeScale>('week');
   const [visibleLines, setVisibleLines] = useState({
     avgDays: true,
@@ -40,6 +45,7 @@ export function PerformanceTrendChart({ data, title = 'Performance Trend' }: Per
     if (timeScale === 'day') {
       return data.map((point) => ({
         ...point,
+        avgDays: toUnit(point.avgHours, unit), // valor dibujado en la unidad del selector
         displayDate: format(new Date(point.date), 'MMM d'),
       }));
     }
@@ -76,9 +82,9 @@ export function PerformanceTrendChart({ data, title = 'Performance Trend' }: Per
       }
 
       const group = groupMap.get(groupKey)!;
-      group.totalAvgDays += point.avgDays;
+      group.totalAvgDays += point.avgHours;
       group.totalCompliance += point.compliancePercent;
-      group.totalStandardDays += point.standardDays;
+      group.totalStandardDays += point.standardHours;
       group.totalStandardPercent += point.standardPercent;
       group.count++;
     });
@@ -86,9 +92,10 @@ export function PerformanceTrendChart({ data, title = 'Performance Trend' }: Per
     return Array.from(groupMap.entries())
       .map(([dateKey, group]) => ({
         date: dateKey,
-        avgDays: group.totalAvgDays / group.count,
+        avgHours: group.totalAvgDays / group.count,
+        avgDays: toUnit(group.totalAvgDays / group.count, unit), // valor dibujado en la unidad del selector
         compliancePercent: group.totalCompliance / group.count,
-        standardDays: group.totalStandardDays / group.count,
+        standardHours: group.totalStandardDays / group.count,
         standardPercent: group.totalStandardPercent / group.count,
         displayDate:
           timeScale === 'week'
@@ -96,7 +103,7 @@ export function PerformanceTrendChart({ data, title = 'Performance Trend' }: Per
             : format(new Date(dateKey), 'MMM yyyy'),
       }))
       .sort((a, b) => a.date.localeCompare(b.date));
-  }, [data, timeScale]);
+  }, [data, timeScale, unit]);
 
   // Custom tooltip - shows all 4 metrics
   const CustomTooltip = ({ active, payload }: any) => {
@@ -106,13 +113,13 @@ export function PerformanceTrendChart({ data, title = 'Performance Trend' }: Per
         <div className="bg-white p-3 border border-gray-300 rounded shadow-lg">
           <p className="font-semibold text-gray-800 mb-2">{data.displayDate}</p>
           <p className="text-blue-600">
-            <span className="font-medium">J+K Actual:</span> {data.avgDays.toFixed(2)} days
+            <span className="font-medium">J+K Actual:</span> {formatDuration(data.avgHours, unit)}
           </p>
           <p className="text-green-600">
             <span className="font-medium">% Actual:</span> {data.compliancePercent.toFixed(1)}%
           </p>
           <p className="text-purple-600">
-            <span className="font-medium">J+K STD:</span> {data.standardDays.toFixed(2)} days
+            <span className="font-medium">J+K STD:</span> {formatDuration(data.standardHours, unit)}
           </p>
           <p className="text-orange-600">
             <span className="font-medium">% STD:</span> {data.standardPercent.toFixed(1)}%
@@ -209,7 +216,7 @@ export function PerformanceTrendChart({ data, title = 'Performance Trend' }: Per
           <YAxis
             yAxisId="left"
             stroke="#3b82f6"
-            label={{ value: 'Days', angle: -90, position: 'insideLeft', style: { fill: '#3b82f6' } }}
+            label={{ value: unit === 'hours' ? t('common.unit_hours') : t('common.unit_days'), angle: -90, position: 'insideLeft', style: { fill: '#3b82f6' } }}
             style={{ fontSize: '12px' }}
           />
           <YAxis

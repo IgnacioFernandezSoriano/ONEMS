@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-// Removed dateUtils import - using same filtering as ONE DB
+import { useAccount } from '@/contexts/AccountContext';
+import { startOfDayInTz, endOfDayInTz } from '@/lib/dateUtils';
 import { useEffectiveAccountId } from '../useEffectiveAccountId';
+import type { TimeUnit } from '@/lib/accountTime';
+import { buildStandardsIndex, commonUnit, convertUnit, measureOf, measureUnit, routeKey, uniqueStandards } from '@/lib/transitMeasure';
 
 export interface JKRouteData {
   routeKey: string;
+  unit: TimeUnit; // unidad del estandar de la ruta; samples/distribution/jkActual/jkStandard/deviation estan en ella
   origin: string;
   destination: string;
   originCity: string;
@@ -23,7 +27,7 @@ export interface JKRouteData {
   onTimeSamples: number;
   beforeStandardSamples: number; // samples delivered before standard
   afterStandardSamples: number; // samples delivered after standard
-  distribution: Map<number, number>; // day -> count
+  distribution: Map<number, number>; // bucket (horas redondeadas o dias) -> count
   standardPercentage: number; // target percentage from delivery_standards (e.g., 85%)
   warningThreshold: number; // warning threshold percentage (e.g., 80%)
   criticalThreshold: number; // critical threshold percentage (e.g., 75%)
@@ -31,6 +35,7 @@ export interface JKRouteData {
 }
 
 export interface JKCityData {
+  unit: TimeUnit; // unidad de jkStandard/jkActual/deviation (horas si el grupo mezcla unidades)
   cityName: string;
   direction: 'inbound' | 'outbound';
   regionName: string;
@@ -47,6 +52,7 @@ export interface JKCityData {
 }
 
 export interface JKRegionData {
+  unit: TimeUnit; // unidad de jkStandard/jkActual/deviation (horas si el grupo mezcla unidades)
   regionName: string;
   direction: 'inbound' | 'outbound';
   cities: number;
@@ -63,6 +69,7 @@ export interface JKRegionData {
 }
 
 export interface JKCarrierData {
+  unit: TimeUnit; // unidad de jkStandard/jkActual/deviation (horas si el grupo mezcla unidades)
   carrier: string;
   routes: number;
   totalSamples: number;
@@ -79,6 +86,7 @@ export interface JKCarrierData {
 }
 
 export interface JKProductData {
+  unit: TimeUnit; // unidad de jkStandard/jkActual/deviation (horas si el grupo mezcla unidades)
   product: string;
   routes: number;
   totalSamples: number;
@@ -95,6 +103,7 @@ export interface JKProductData {
 }
 
 export interface JKProductBreakdown {
+  unit: TimeUnit; // unidad de jkStandard/jkActual/deviation (horas si el grupo mezcla unidades)
   product: string;
   routes: number;
   totalSamples: number;
@@ -109,6 +118,7 @@ export interface JKProductBreakdown {
 }
 
 export interface JKCarrierBreakdown {
+  unit: TimeUnit; // unidad de jkStandard/jkActual/deviation (horas si el grupo mezcla unidades)
   carrier: string;
   routes: number;
   totalSamples: number;
@@ -130,6 +140,7 @@ export interface WeeklySample {
 }
 
 export interface JKMetrics {
+  unit: TimeUnit; // unidad de jkStandard/jkActual/deviation (horas si el grupo mezcla unidades)
   totalSamples: number;
   avgJKStandard: number;
   avgJKActual: number;
@@ -150,6 +161,7 @@ interface Filters {
 
 export function useJKPerformance(accountId: string | undefined, filters?: Filters) {
   const effectiveAccountId = useEffectiveAccountId();
+  const { accountTimezone } = useAccount();
   const activeAccountId = effectiveAccountId || accountId;
 
   const [routeData, setRouteData] = useState<JKRouteData[]>([]);
@@ -159,6 +171,7 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
   const [productData, setProductData] = useState<JKProductData[]>([]);
   const [weeklySamples, setWeeklySamples] = useState<WeeklySample[]>([]);
   const [metrics, setMetrics] = useState<JKMetrics>({
+    unit: 'hours',
     totalSamples: 0,
     avgJKStandard: 0,
     avgJKActual: 0,
@@ -166,7 +179,8 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
     onTimeSamples: 0,
     problematicRoutes: 0,
   });
-  const [maxDays, setMaxDays] = useState(0);
+  // Maximo observado por unidad: cada grafica de distribucion escala con la suya
+  const [maxMeasure, setMaxMeasure] = useState<{ hours: number; days: number }>({ hours: 0, days: 0 });
   const [globalWarningThreshold, setGlobalWarningThreshold] = useState(80);
   const [globalCriticalThreshold, setGlobalCriticalThreshold] = useState(75);
   const [loading, setLoading] = useState(true);
@@ -196,8 +210,8 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
             .range(start, start + pageSize - 1)
 
           // Use same date filtering as ONE DB (no time adjustment)
-          if (filters?.startDate && filters.startDate !== '') query = query.gte('sent_at', filters.startDate)
-          if (filters?.endDate && filters.endDate !== '') query = query.lte('sent_at', filters.endDate)
+          if (filters?.startDate && filters.startDate !== '') query = query.gte('sent_at', startOfDayInTz(filters.startDate.slice(0, 10), accountTimezone))
+          if (filters?.endDate && filters.endDate !== '') query = query.lte('sent_at', endOfDayInTz(filters.endDate.slice(0, 10), accountTimezone))
           if (filters?.originCity) query = query.eq('origin_city_name', filters.originCity)
           if (filters?.destinationCity) query = query.eq('destination_city_name', filters.destinationCity)
           if (filters?.carrier) query = query.eq('carrier_name', filters.carrier)
@@ -239,24 +253,26 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
 
         // 4. Create lookup maps
         const carrierMap = new Map(carriersRes.data?.map(c => [c.id, c.name]) || []);
-        const productMap = new Map(productsRes.data?.map(p => [p.id, `${p.code} - ${p.description}`]) || []);
+        const productMap = new Map(productsRes.data?.map(p => [p.id, p]) || []);
         const cityMap = new Map(citiesRes.data?.map(c => [c.id, c.name]) || []);
         const cityRegionMap = new Map(citiesRes.data?.map(c => [c.name, c.region_id]) || []);
         const regionMap = new Map(regionsRes.data?.map(r => [r.id, r.name]) || []);
 
-        // 5. Create standards map (key: carrier|product|origin|destination)
-        const standardsMap = new Map<string, { jkStandard: number; successPercentage: number; warningThreshold: number; criticalThreshold: number }>();
-        (standards || []).forEach(std => {
-          const carrierName = carrierMap.get(std.carrier_id);
-          const productName = productMap.get(std.product_id);
-          const originName = cityMap.get(std.origin_city_id);
-          const destName = cityMap.get(std.destination_city_id);
-
-          if (carrierName && productName && originName && destName) {
-            const key = `${carrierName}|${productName}|${originName}|${destName}`;
-            const jkStandard = std.time_unit === 'days' 
-              ? std.standard_time 
-              : std.standard_time / 24;
+        // 5. Indice de estandares (clave: carrier|product|origin|destination por nombre;
+        // producto por description y por "code - description")
+        const standardsMap = buildStandardsIndex(
+          standards || [],
+          std => ({
+            carrier: carrierMap.get(std.carrier_id),
+            productCode: productMap.get(std.product_id)?.code,
+            productDescription: productMap.get(std.product_id)?.description,
+            origin: cityMap.get(std.origin_city_id),
+            destination: cityMap.get(std.destination_city_id),
+          }),
+          std => {
+            // El estandar se queda en su unidad (nunca se convierte a dias)
+            const unit: TimeUnit = measureUnit(std);
+            const jkStandard = Number(std.standard_time);
             // Calculate warning and critical thresholds
             const successPct = std.success_percentage || 95;
             const warningThreshold = std.threshold_type === 'relative' 
@@ -265,28 +281,28 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
             const criticalThreshold = std.threshold_type === 'relative'
               ? successPct - (successPct * (std.critical_threshold || 10) / 100)
               : successPct - (std.critical_threshold || 10);
-            
-            standardsMap.set(key, {
+            return {
               jkStandard: jkStandard || 0,
+              unit,
               successPercentage: successPct,
               warningThreshold: warningThreshold,
               criticalThreshold: criticalThreshold,
-            });
-          }
-        });
+            };
+          },
+        );
 
         // Calculate global thresholds (average of all standards)
         let warningThreshold = 80;
         let criticalThreshold = 75;
         if (standardsMap.size > 0) {
-          const thresholds = Array.from(standardsMap.values());
+          const thresholds = uniqueStandards(standardsMap);
           warningThreshold = thresholds.reduce((sum, s) => sum + s.warningThreshold, 0) / thresholds.length;
           criticalThreshold = thresholds.reduce((sum, s) => sum + s.criticalThreshold, 0) / thresholds.length;
         }
         setGlobalWarningThreshold(warningThreshold);
         setGlobalCriticalThreshold(criticalThreshold);
         
-        console.log('[useJKPerformance] Loaded standards:', standardsMap.size, 'Global thresholds:', { warning: warningThreshold, critical: criticalThreshold });
+        console.log('[useJKPerformance] Loaded standards:', uniqueStandards(standardsMap).length, 'Global thresholds:', { warning: warningThreshold, critical: criticalThreshold });
 
         // 6. Group shipments by route
         const routeMap = new Map<string, {
@@ -294,21 +310,25 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
           destinationCity: string;
           carrier: string;
           product: string;
+          unit: TimeUnit;
           samples: number[];
           onTimeSamples: number;
           standardDaysArray: number[];
           distribution: Map<number, number>;
         }>();
 
-        let calculatedMaxDays = 0;
+        const calculatedMax = { hours: 0, days: 0 };
 
         (shipments || []).forEach(shipment => {
-          const key = `${shipment.carrier_name}|${shipment.product_name}|${shipment.origin_city_name}|${shipment.destination_city_name}`;
+          const key = routeKey(shipment.carrier_name, shipment.product_name, shipment.origin_city_name, shipment.destination_city_name);
           const standard = standardsMap.get(key);
-          const days = shipment.business_transit_days || 0;
+          const rowUnit: TimeUnit = standard?.unit ?? 'hours';
+          const measure = measureOf(shipment, rowUnit); // medida en la unidad de la ruta
+          // Sin medida (no entregado / sin calcular): no cuenta ni como a tiempo ni como tarde
+          if (measure === null) return;
 
-          if (days > calculatedMaxDays) {
-            calculatedMaxDays = days;
+          if (measure > calculatedMax[rowUnit]) {
+            calculatedMax[rowUnit] = measure;
           }
 
           if (!routeMap.has(key)) {
@@ -317,6 +337,7 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
               destinationCity: shipment.destination_city_name,
               carrier: shipment.carrier_name,
               product: shipment.product_name,
+              unit: rowUnit,
               samples: [],
               onTimeSamples: 0,
               standardDaysArray: [],
@@ -325,7 +346,7 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
           }
 
           const route = routeMap.get(key)!;
-          route.samples.push(days);
+          route.samples.push(measure);
           
           // Collect standard_time for J+K calculation (same logic as useTerritoryEquityDataV2)
           if (standard?.jkStandard != null) {
@@ -333,11 +354,14 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
           }
           
           // Update distribution
-          const currentCount = route.distribution.get(days) || 0;
-          route.distribution.set(days, currentCount + 1);
+          // Cubetas de 1 h: un envio de 48.4 h cae en la cubeta 48 aunque a tiempo lo cuenta como tarde (inherente)
+          const bucket = rowUnit === 'hours' ? Math.round(measure) : measure;
+          const currentCount = route.distribution.get(bucket) || 0;
+          route.distribution.set(bucket, currentCount + 1);
         });
 
-        setMaxDays(calculatedMaxDays);
+        // Maximo en cubetas enteras (techo) para que la grafica llegue a la ultima cubeta
+        setMaxMeasure({ hours: Math.ceil(calculatedMax.hours), days: Math.ceil(calculatedMax.days) });
 
         // 7. Build route data
         const routes: JKRouteData[] = Array.from(routeMap.entries()).map(([key, route]) => {
@@ -390,6 +414,7 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
           
           return {
             routeKey: key,
+            unit: route.unit,
             origin: route.originCity,
             destination: route.destinationCity,
             originCity: route.originCity,
@@ -442,7 +467,19 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
           };
         }>();
 
+        // Unidad de cada fila (ciudad+sentido): la de sus rutas, horas si mezclan
+        const cityUnits = new Map<string, Set<TimeUnit>>();
         routes.forEach(route => {
+          for (const k of [`in|${route.destinationCity}`, `out|${route.originCity}`]) {
+            if (!cityUnits.has(k)) cityUnits.set(k, new Set());
+            cityUnits.get(k)!.add(route.unit);
+          }
+        });
+        const cityUnitOf = (dir: 'in' | 'out', city: string): TimeUnit => commonUnit(cityUnits.get(`${dir}|${city}`) || []);
+
+        routes.forEach(route => {
+          const inUnit = cityUnitOf('in', route.destinationCity);
+          const outUnit = cityUnitOf('out', route.originCity);
           // Inbound (destination city)
           if (!cityStatsMap.has(route.destinationCity)) {
             cityStatsMap.set(route.destinationCity, {
@@ -452,10 +489,10 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
           }
           const destStats = cityStatsMap.get(route.destinationCity)!;
           for (let i = 0; i < route.totalSamples; i++) {
-            destStats.inbound.samples.push(route.jkActual);
+            destStats.inbound.samples.push(convertUnit(route.jkActual, route.unit, inUnit));
           }
           destStats.inbound.onTimeSamples += route.onTimeSamples;
-          destStats.inbound.standardSum += route.jkStandard * route.totalSamples;
+          destStats.inbound.standardSum += convertUnit(route.jkStandard, route.unit, inUnit) * route.totalSamples;
           destStats.inbound.standardCount += route.totalSamples;
           destStats.inbound.standardPercentageSum += route.standardPercentage * route.totalSamples;
           destStats.inbound.warningThresholdSum += route.warningThreshold * route.totalSamples;
@@ -472,10 +509,10 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
           }
           const originStats = cityStatsMap.get(route.originCity)!;
           for (let i = 0; i < route.totalSamples; i++) {
-            originStats.outbound.samples.push(route.jkActual);
+            originStats.outbound.samples.push(convertUnit(route.jkActual, route.unit, outUnit));
           }
           originStats.outbound.onTimeSamples += route.onTimeSamples;
-          originStats.outbound.standardSum += route.jkStandard * route.totalSamples;
+          originStats.outbound.standardSum += convertUnit(route.jkStandard, route.unit, outUnit) * route.totalSamples;
           originStats.outbound.standardCount += route.totalSamples;
           originStats.outbound.standardPercentageSum += route.standardPercentage * route.totalSamples;
           originStats.outbound.warningThresholdSum += route.warningThreshold * route.totalSamples;
@@ -515,6 +552,7 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
               onTimePercentage >= cityCriticalThreshold ? 'warning' : 'critical';
 
             cities.push({
+              unit: cityUnitOf('in', cityName),
               cityName,
               direction: 'inbound',
               regionName,
@@ -557,6 +595,7 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
               onTimePercentage >= cityCriticalThreshold ? 'warning' : 'critical';
 
             cities.push({
+              unit: cityUnitOf('out', cityName),
               cityName,
               direction: 'outbound',
               regionName,
@@ -602,7 +641,16 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
           };
         }>();
 
+        const regionUnits = new Map<string, Set<TimeUnit>>();
         cities.forEach(city => {
+          const k = `${city.direction}|${city.regionName}`;
+          if (!regionUnits.has(k)) regionUnits.set(k, new Set());
+          regionUnits.get(k)!.add(city.unit);
+        });
+        const regionUnitOf = (dir: 'inbound' | 'outbound', region: string): TimeUnit => commonUnit(regionUnits.get(`${dir}|${region}`) || []);
+
+        cities.forEach(city => {
+          const rUnit = regionUnitOf(city.direction, city.regionName);
           if (!regionStatsMap.has(city.regionName)) {
             regionStatsMap.set(city.regionName, {
               inbound: { samples: [], onTimeSamples: 0, standardSum: 0, standardCount: 0, standardPercentageSum: 0, warningThresholdSum: 0, criticalThresholdSum: 0, thresholdCount: 0, routes: new Set(), cities: new Set() },
@@ -614,10 +662,10 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
           const directionStats = city.direction === 'inbound' ? regionStats.inbound : regionStats.outbound;
           
           for (let i = 0; i < city.totalSamples; i++) {
-            directionStats.samples.push(city.jkActual);
+            directionStats.samples.push(convertUnit(city.jkActual, city.unit, rUnit));
           }
           directionStats.onTimeSamples += (city.onTimePercentage / 100) * city.totalSamples;
-          directionStats.standardSum += city.jkStandard * city.totalSamples;
+          directionStats.standardSum += convertUnit(city.jkStandard, city.unit, rUnit) * city.totalSamples;
           directionStats.standardCount += city.totalSamples;
           directionStats.standardPercentageSum += city.standardPercentage * city.totalSamples;
           directionStats.warningThresholdSum += city.warningThreshold * city.totalSamples;
@@ -654,6 +702,7 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
               onTimePercentage >= regionCriticalThreshold ? 'warning' : 'critical';
 
             regions.push({
+              unit: regionUnitOf('inbound', regionName),
               regionName,
               direction: 'inbound',
               cities: stats.inbound.cities.size,
@@ -696,6 +745,7 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
               onTimePercentage >= regionCriticalThreshold ? 'warning' : 'critical';
 
             regions.push({
+              unit: regionUnitOf('outbound', regionName),
               regionName,
               direction: 'outbound',
               cities: stats.outbound.cities.size,
@@ -738,7 +788,18 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
           }>;
         }>();
 
+        const carrierUnits = new Map<string, Set<TimeUnit>>();
         routes.forEach(route => {
+          for (const k of [`c|${route.carrier}`, `cp|${route.carrier}|${route.product}`, `p|${route.product}`, `pc|${route.product}|${route.carrier}`]) {
+            if (!carrierUnits.has(k)) carrierUnits.set(k, new Set());
+            carrierUnits.get(k)!.add(route.unit);
+          }
+        });
+        const groupUnitOf = (k: string): TimeUnit => commonUnit(carrierUnits.get(k) || []);
+
+        routes.forEach(route => {
+          const cUnit = groupUnitOf(`c|${route.carrier}`);
+          const cpUnit = groupUnitOf(`cp|${route.carrier}|${route.product}`);
           if (!carrierStatsMap.has(route.carrier)) {
             carrierStatsMap.set(route.carrier, {
               routes: new Set(),
@@ -758,10 +819,10 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
           const carrierStats = carrierStatsMap.get(route.carrier)!;
           carrierStats.routes.add(route.routeKey);
           for (let i = 0; i < route.totalSamples; i++) {
-            carrierStats.samples.push(route.jkActual);
+            carrierStats.samples.push(convertUnit(route.jkActual, route.unit, cUnit));
           }
           carrierStats.onTimeSamples += route.onTimeSamples;
-          carrierStats.standardSum += route.jkStandard * route.totalSamples;
+          carrierStats.standardSum += convertUnit(route.jkStandard, route.unit, cUnit) * route.totalSamples;
           carrierStats.standardCount += route.totalSamples;
           carrierStats.standardPercentageSum += route.standardPercentage * route.totalSamples;
           carrierStats.warningThresholdSum += route.warningThreshold * route.totalSamples;
@@ -788,10 +849,10 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
           const productStats = carrierStats.products.get(route.product)!;
           productStats.routes.add(route.routeKey);
           for (let i = 0; i < route.totalSamples; i++) {
-            productStats.samples.push(route.jkActual);
+            productStats.samples.push(convertUnit(route.jkActual, route.unit, cpUnit));
           }
           productStats.onTimeSamples += route.onTimeSamples;
-          productStats.standardSum += route.jkStandard * route.totalSamples;
+          productStats.standardSum += convertUnit(route.jkStandard, route.unit, cpUnit) * route.totalSamples;
           productStats.standardCount += route.totalSamples;
           productStats.standardPercentageSum += route.standardPercentage * route.totalSamples;
           productStats.warningThresholdSum += route.warningThreshold * route.totalSamples;
@@ -852,6 +913,7 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
             else if (pOnTimePercentage < pWarningThreshold) pStatus = 'warning';
 
             return {
+              unit: groupUnitOf(`cp|${carrier}|${product}`),
               product,
               routes: pStats.routes.size,
               totalSamples: pStats.samples.length,
@@ -867,6 +929,7 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
           });
 
           return {
+            unit: groupUnitOf(`c|${carrier}`),
             carrier,
             routes: stats.routes.size,
             totalSamples: stats.samples.length,
@@ -909,6 +972,8 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
         }>();
 
         routes.forEach(route => {
+          const pUnit = groupUnitOf(`p|${route.product}`);
+          const pcUnit = groupUnitOf(`pc|${route.product}|${route.carrier}`);
           if (!productStatsMap.has(route.product)) {
             productStatsMap.set(route.product, {
               routes: new Set(),
@@ -928,10 +993,10 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
           const productStats = productStatsMap.get(route.product)!;
           productStats.routes.add(route.routeKey);
           for (let i = 0; i < route.totalSamples; i++) {
-            productStats.samples.push(route.jkActual);
+            productStats.samples.push(convertUnit(route.jkActual, route.unit, pUnit));
           }
           productStats.onTimeSamples += route.onTimeSamples;
-          productStats.standardSum += route.jkStandard * route.totalSamples;
+          productStats.standardSum += convertUnit(route.jkStandard, route.unit, pUnit) * route.totalSamples;
           productStats.standardCount += route.totalSamples;
           productStats.standardPercentageSum += route.standardPercentage * route.totalSamples;
           productStats.warningThresholdSum += route.warningThreshold * route.totalSamples;
@@ -958,10 +1023,10 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
           const carrierStats = productStats.carriers.get(route.carrier)!;
           carrierStats.routes.add(route.routeKey);
           for (let i = 0; i < route.totalSamples; i++) {
-            carrierStats.samples.push(route.jkActual);
+            carrierStats.samples.push(convertUnit(route.jkActual, route.unit, pcUnit));
           }
           carrierStats.onTimeSamples += route.onTimeSamples;
-          carrierStats.standardSum += route.jkStandard * route.totalSamples;
+          carrierStats.standardSum += convertUnit(route.jkStandard, route.unit, pcUnit) * route.totalSamples;
           carrierStats.standardCount += route.totalSamples;
         });
 
@@ -1018,6 +1083,7 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
             else if (cOnTimePercentage < cWarningThreshold) cStatus = 'warning';
 
             return {
+              unit: groupUnitOf(`pc|${product}|${carrier}`),
               carrier,
               routes: cStats.routes.size,
               totalSamples: cStats.samples.length,
@@ -1033,6 +1099,7 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
           });
 
           return {
+            unit: groupUnitOf(`p|${product}`),
             product,
             routes: stats.routes.size,
             totalSamples: stats.samples.length,
@@ -1082,11 +1149,13 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
         // 13. Calculate global metrics
         const totalSamples = routes.reduce((sum, r) => sum + r.totalSamples, 0);
         const totalOnTimeSamples = routes.reduce((sum, r) => sum + r.onTimeSamples, 0);
-        const weightedStandardSum = routes.reduce((sum, r) => sum + r.jkStandard * r.totalSamples, 0);
-        const weightedActualSum = routes.reduce((sum, r) => sum + r.jkActual * r.totalSamples, 0);
+        const metricsUnit = commonUnit(routes.map(r => r.unit));
+        const weightedStandardSum = routes.reduce((sum, r) => sum + convertUnit(r.jkStandard, r.unit, metricsUnit) * r.totalSamples, 0);
+        const weightedActualSum = routes.reduce((sum, r) => sum + convertUnit(r.jkActual, r.unit, metricsUnit) * r.totalSamples, 0);
         const problematicRoutes = routes.filter(r => r.onTimePercentage <= r.criticalThreshold).length;
 
         const globalMetrics: JKMetrics = {
+          unit: metricsUnit,
           totalSamples,
           avgJKStandard: totalSamples > 0 ? weightedStandardSum / totalSamples : 0,
           avgJKActual: totalSamples > 0 ? weightedActualSum / totalSamples : 0,
@@ -1120,6 +1189,7 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
     filters?.carrier,
     filters?.product,
     filters?.region,
+    accountTimezone,
   ]);
 
   return {
@@ -1130,7 +1200,7 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
     productData,
     weeklySamples,
     metrics,
-    maxDays,
+    maxMeasure,
     globalWarningThreshold,
     globalCriticalThreshold,
     loading,

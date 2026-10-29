@@ -1,7 +1,9 @@
 import { useState, useMemo } from 'react';
 import { Download, AlertCircle } from 'lucide-react';
-import type { CityEquityData } from '@/types/reporting';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useTimeUnit } from '@/hooks/useTimeUnit';
+import type { TimeUnit } from '@/lib/accountTime';
+import { convertUnit, formatJK, measureOf } from '@/lib/transitMeasure';
 
 interface ProductAnalysisTableProps {
   routeData: any[];
@@ -16,8 +18,11 @@ type ProductRow = {
   carrier: string;
   product: string;
   totalShipments: number;
-  standardDays?: number;
-  actualDays?: number;
+  unit: TimeUnit; // unidad del estandar de la ruta (la de jkStandard/jkActual)
+  jkStandard?: number;
+  jkActual?: number;
+  jkStandardHours?: number; // solo para ordenar rutas de unidades distintas
+  jkActualHours?: number;
   standardPercentage: number;
   actualPercentage: number;
   deviation: number;
@@ -31,6 +36,7 @@ export function ProductAnalysisTable({
   globalCriticalThreshold,
 }: ProductAnalysisTableProps) {
   const { t } = useTranslation();
+  const { unit: displayUnit } = useTimeUnit();
   const [equityStatusFilter, setEquityStatusFilter] = useState<string[]>([]);
   const [sortField, setSortField] = useState<keyof ProductRow>('origin');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
@@ -43,8 +49,11 @@ export function ProductAnalysisTable({
       carrier: route.carrier,
       product: route.product,
       totalShipments: route.totalShipments,
-      standardDays: route.standardDays,
-      actualDays: route.actualDays,
+      unit: (route.unit as TimeUnit) || 'hours',
+      jkStandard: route.jkStandard,
+      jkActual: route.jkActual,
+      jkStandardHours: route.jkStandard != null ? convertUnit(route.jkStandard, route.unit || 'hours', 'hours') : undefined,
+      jkActualHours: route.jkActual != null ? convertUnit(route.jkActual, route.unit || 'hours', 'hours') : undefined,
       standardPercentage: route.standardPercentage,
       actualPercentage: route.actualPercentage,
       deviation: route.deviation,
@@ -77,6 +86,9 @@ export function ProductAnalysisTable({
   }, [filteredRows, sortField, sortDirection]);
 
   const handleSort = (field: keyof ProductRow) => {
+    // J+K: se ordena por su equivalente en horas (las rutas pueden medir en horas o en dias)
+    if (field === 'jkStandard') field = 'jkStandardHours';
+    if (field === 'jkActual') field = 'jkActualHours';
     if (sortField === field) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
@@ -105,7 +117,8 @@ export function ProductAnalysisTable({
       'Product',
       'Sent At',
       'Delivered At',
-      'Transit Days',
+      'Unit',
+      'Business Time',
       'Standard Time',
       'J+K Actual',
       'On Time',
@@ -115,13 +128,15 @@ export function ProductAnalysisTable({
     const csvContent = [
       headers.join(','),
       ...filteredShipments.map(s => {
-        const transitDays = s.business_transit_days || 0;
         // Find standard for this shipment from routeData
         const routeKey = `${s.origin_city_name}|${s.destination_city_name}|${s.carrier_name}|${s.product_name}`;
         const route = sortedRows.find(r => `${r.origin}|${r.destination}|${r.carrier}|${r.product}` === routeKey);
-        const standardTime = route?.standardDays || 0;
-        const jkActual = transitDays;
-        const onTime = s.on_time_delivery || false;
+        const unit: TimeUnit = route?.unit || 'hours';
+        // Medida en la unidad del estandar de la ruta (vacia si el envio no tiene medida)
+        const measure = measureOf(s, unit);
+        const standardTime = route?.jkStandard || 0;
+        // on_time_delivery nulo (sin estandar / sin medida) -> N/A, no "No"
+        const onTime = typeof s.on_time_delivery === 'boolean' ? (s.on_time_delivery ? 'Yes' : 'No') : 'N/A';
         const status = route?.status || '';
         
         return [
@@ -132,10 +147,11 @@ export function ProductAnalysisTable({
           s.product_name || '',
           s.sent_at || '',
           s.delivered_at || '',
-          transitDays.toFixed(1),
+          unit,
+          measure != null ? measure.toFixed(1) : '',
           standardTime.toFixed(1),
-          jkActual.toFixed(1),
-          onTime ? 'Yes' : 'No',
+          measure != null ? measure.toFixed(1) : '',
+          onTime,
           status
         ].join(',');
       }),
@@ -217,8 +233,8 @@ export function ProductAnalysisTable({
                 { key: 'carrier', label: 'Carrier' },
                 { key: 'product', label: 'Product' },
                 { key: 'totalShipments', label: 'Total' },
-                { key: 'standardDays', label: 'J+K STD' },
-                { key: 'actualDays', label: 'J+K ACTUAL' },
+                { key: 'jkStandard', label: 'J+K STD' },
+                { key: 'jkActual', label: 'J+K ACTUAL' },
                 { key: 'standardPercentage', label: 'Standard %' },
                 { key: 'actualPercentage', label: 'Actual %' },
                 { key: 'deviation', label: 'Deviation' },
@@ -230,7 +246,7 @@ export function ProductAnalysisTable({
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                 >
                   {label}
-                  {sortField === key && (
+                  {(sortField === key || sortField === `${key}Hours`) && (
                     <span className="ml-1">{sortDirection === 'asc' ? '▲' : '▼'}</span>
                   )}
                 </th>
@@ -252,8 +268,8 @@ export function ProductAnalysisTable({
                 <td className="px-6 py-4 whitespace-nowrap text-sm">{row.carrier}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">{row.product}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-right">{row.totalShipments}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-right">{row.standardDays?.toFixed(1) || '-'}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-right">{row.actualDays?.toFixed(1) || '-'}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-right">{row.jkStandard != null ? formatJK(row.jkStandard, row.unit, displayUnit) : '-'}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-right">{row.jkActual != null ? formatJK(row.jkActual, row.unit, displayUnit) : '-'}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-right">{row.standardPercentage.toFixed(1)}%</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-right">{row.actualPercentage.toFixed(1)}%</td>
                 <td className={`px-6 py-4 whitespace-nowrap text-sm text-right font-medium ${

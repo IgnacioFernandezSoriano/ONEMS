@@ -1,12 +1,15 @@
 import React from 'react';
 import { ColumnTooltip } from './ColumnTooltip';
 import { formatNumber } from '@/lib/formatNumber';
+import type { TimeUnit } from '@/lib/accountTime';
+import { formatJK } from '@/lib/transitMeasure';
 
 interface CarrierProductData {
   carrier: string;
   product: string;
   routes: number;
   totalSamples: number;
+  unit: TimeUnit;
   jkStandard: number;
   jkActual: number;
   deviation: number;
@@ -20,9 +23,10 @@ interface CarrierProductOverviewProps {
   loading: boolean;
   globalWarningThreshold: number;
   globalCriticalThreshold: number;
+  displayUnit?: TimeUnit;
 }
 
-export default function CarrierProductOverview({ data, loading, globalWarningThreshold, globalCriticalThreshold }: CarrierProductOverviewProps) {
+export default function CarrierProductOverview({ data, loading, globalWarningThreshold, globalCriticalThreshold, displayUnit = 'hours' }: CarrierProductOverviewProps) {
   if (loading) {
     return (
       <div className="text-center text-gray-500 py-8">Loading...</div>
@@ -74,7 +78,8 @@ export default function CarrierProductOverview({ data, loading, globalWarningThr
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
           {sortedData.map((item, index) => {
-            const deviationColor = item.deviation <= 0 ? 'text-green-600' : item.deviation <= 1 ? 'text-yellow-600' : 'text-red-600';
+            const warnDeviation = item.unit === 'days' ? 1 : 24;
+            const deviationColor = item.deviation <= 0 ? 'text-green-600' : item.deviation <= warnDeviation ? 'text-yellow-600' : 'text-red-600';
             const onTimeColor = item.onTimePercentage >= globalWarningThreshold ? 'text-green-600 font-semibold' : item.onTimePercentage > globalCriticalThreshold ? 'text-yellow-600' : 'text-red-600 font-semibold';
             const statusColor = item.status === 'compliant' ? 'bg-green-500' : item.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500';
             
@@ -86,10 +91,10 @@ export default function CarrierProductOverview({ data, loading, globalWarningThr
                 </td>
                 <td className="px-3 py-2 text-sm text-gray-700">{item.routes}</td>
                 <td className="px-3 py-2 text-sm text-gray-900">{item.totalSamples}</td>
-                <td className="px-3 py-2 text-sm text-gray-900">{formatNumber(item.jkStandard)}</td>
-                <td className="px-3 py-2 text-sm text-gray-900">{formatNumber(item.jkActual)}</td>
+                <td className="px-3 py-2 text-sm text-gray-900">{formatJK(item.jkStandard, item.unit, displayUnit)}</td>
+                <td className="px-3 py-2 text-sm text-gray-900">{formatJK(item.jkActual, item.unit, displayUnit)}</td>
                 <td className={`px-3 py-2 text-sm ${deviationColor}`}>
-                  {item.deviation > 0 ? '+' : ''}{formatNumber(item.deviation)}
+                  {formatJK(item.deviation, item.unit, displayUnit, true)}
                 </td>
                 <td className={`px-3 py-2 text-sm ${onTimeColor}`}>
                   {formatNumber(item.onTimePercentage)}%

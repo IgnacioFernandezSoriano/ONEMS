@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { GeneralPerformanceData } from '@/types/reporting';
-// Removed dateUtils import - using same filtering as ONE DB
+import { useAccount } from '@/contexts/AccountContext';
+import { startOfDayInTz, endOfDayInTz } from '@/lib/dateUtils';
 import { useEffectiveAccountId } from '../useEffectiveAccountId';
+import { shipmentHours } from '@/lib/transitMeasure';
 
 interface Filters {
   originCity?: string;
@@ -15,6 +17,7 @@ interface Filters {
 
 export function useReportingGeneral(accountId: string | undefined, filters?: Filters) {
   const effectiveAccountId = useEffectiveAccountId();
+  const { accountTimezone } = useAccount();
   // Use effectiveAccountId if available, otherwise fall back to passed accountId
   const activeAccountId = effectiveAccountId || accountId;
 
@@ -59,10 +62,10 @@ export function useReportingGeneral(accountId: string | undefined, filters?: Fil
           }
           // Use same date filtering as ONE DB (no time adjustment)
           if (filters?.dateFrom && filters.dateFrom !== '') {
-            query = query.gte('sent_at', filters.dateFrom)
+            query = query.gte('sent_at', startOfDayInTz(filters.dateFrom.slice(0, 10), accountTimezone))
           }
           if (filters?.dateTo && filters.dateTo !== '') {
-            query = query.lte('sent_at', filters.dateTo)
+            query = query.lte('sent_at', endOfDayInTz(filters.dateTo.slice(0, 10), accountTimezone))
           }
 
           const { data, error: err } = await query
@@ -83,8 +86,10 @@ export function useReportingGeneral(accountId: string | undefined, filters?: Fil
         // Group by week and calculate metrics
         const weeklyData = new Map<string, {
           compliant: number;
+          evaluated: number;
           total: number;
-          totalDays: number;
+          totalHours: number;
+          timedCount: number;
         }>();
 
         (shipments || []).forEach(shipment => {
@@ -93,11 +98,16 @@ export function useReportingGeneral(accountId: string | undefined, filters?: Fil
           weekStart.setDate(sentDate.getDate() - sentDate.getDay());
           const weekKey = weekStart.toISOString().split('T')[0];
 
-          const existing = weeklyData.get(weekKey) || { compliant: 0, total: 0, totalDays: 0 };
+          const hours = shipmentHours(shipment);
+          const existing = weeklyData.get(weekKey) || { compliant: 0, evaluated: 0, total: 0, totalHours: 0, timedCount: 0 };
+          // on_time_delivery nulo no cuenta ni como a tiempo ni como tarde
+          const evaluated = typeof shipment.on_time_delivery === 'boolean';
           weeklyData.set(weekKey, {
-            compliant: existing.compliant + (shipment.on_time_delivery ? 1 : 0),
+            compliant: existing.compliant + (shipment.on_time_delivery === true ? 1 : 0),
+            evaluated: existing.evaluated + (evaluated ? 1 : 0),
             total: existing.total + 1,
-            totalDays: existing.totalDays + (shipment.business_transit_days || 0)
+            totalHours: existing.totalHours + (hours ?? 0),
+            timedCount: existing.timedCount + (hours === null ? 0 : 1)
           });
         });
 
@@ -105,9 +115,12 @@ export function useReportingGeneral(accountId: string | undefined, filters?: Fil
         const mapped: GeneralPerformanceData[] = Array.from(weeklyData.entries())
           .map(([weekKey, stats]) => ({
             period: new Date(weekKey),
-            compliancePercentage: (stats.compliant / stats.total) * 100,
-            avgBusinessDays: stats.totalDays / stats.total,
-            totalShipments: stats.total
+            compliancePercentage: stats.evaluated > 0 ? (stats.compliant / stats.evaluated) * 100 : 0,
+            avgBusinessHours: stats.timedCount > 0 ? stats.totalHours / stats.timedCount : null,
+            totalShipments: stats.total,
+            compliantCount: stats.compliant,
+            evaluatedCount: stats.evaluated,
+            timedCount: stats.timedCount
           }))
           .sort((a, b) => a.period.getTime() - b.period.getTime())
           .slice(-12); // Last 12 weeks
@@ -121,7 +134,7 @@ export function useReportingGeneral(accountId: string | undefined, filters?: Fil
     }
 
     fetchData();
-  }, [activeAccountId, filters?.originCity, filters?.destinationCity, filters?.carrier, filters?.product, filters?.dateFrom, filters?.dateTo]);
+  }, [activeAccountId, filters?.originCity, filters?.destinationCity, filters?.carrier, filters?.product, filters?.dateFrom, filters?.dateTo, accountTimezone]);
 
   return { data, loading, error };
 }

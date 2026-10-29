@@ -17,6 +17,7 @@ export interface Account {
   status: Status
   default_language: SupportedLanguage
   email_panelist_manager: string | null
+  timezone: string
   created_at: string
   updated_at: string
 }

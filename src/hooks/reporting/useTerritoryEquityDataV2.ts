@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-// Removed dateUtils import - using same filtering as ONE DB
+import { useAccount } from '@/contexts/AccountContext';
+import { startOfDayInTz, endOfDayInTz } from '@/lib/dateUtils';
 import { calculateJKActualFromDays } from '@/lib/jkCalculations';
 import type {
   CityEquityData,
@@ -10,19 +11,45 @@ import type {
 } from '@/types/reporting';
 import { useEffectiveAccountId } from '../useEffectiveAccountId';
 import { useFilterScenario } from './useFilterScenario';
+import type { TimeUnit } from '@/lib/accountTime';
+import { buildStandardsIndex, commonUnit, convertUnit, measureHours, measureOf, measureUnit, routeKey, uniqueStandards } from '@/lib/transitMeasure';
+
+// Acumulador de J+K de un grupo (ciudad, region, transportista...): estandares y medidas se
+// guardan en horas (dias*24 si la ruta mide en dias) junto con las unidades vistas; al cerrar
+// el grupo se expresan en su unidad comun (la de sus rutas, u horas si mezclan).
+interface JKAcc {
+  standardHoursSum: number;
+  standardHoursCount: number;
+  actualHoursArray: number[];
+  units: Set<TimeUnit>;
+}
+
+function groupJK(
+  acc: JKAcc,
+  standardPercentage: number
+): { unit: TimeUnit; jkStandard: number; jkActual: number } {
+  const unit = commonUnit(acc.units);
+  const jkStandard = acc.standardHoursCount > 0
+    ? convertUnit(acc.standardHoursSum / acc.standardHoursCount, 'hours', unit)
+    : 0;
+  const measures = acc.actualHoursArray.map(h => convertUnit(h, 'hours', unit));
+  const jkActual = calculateJKActualFromDays(measures, standardPercentage, jkStandard);
+  return { unit, jkStandard, jkActual };
+}
 
 export function useTerritoryEquityDataV2(
   accountId: string | undefined,
   filters?: TerritoryEquityFilters
 ) {
   const effectiveAccountId = useEffectiveAccountId();
+  const { accountTimezone } = useAccount();
   const activeAccountId = effectiveAccountId || accountId;
 
   const [cityData, setCityData] = useState<CityEquityData[]>([]);
   const [regionData, setRegionData] = useState<RegionEquityData[]>([]);
   const [metrics, setMetrics] = useState<TerritoryEquityMetrics | null>(null);
   const [routeData, setRouteData] = useState<any[]>([]);
-  const [trendData, setTrendData] = useState<Array<{ date: string; avgDays: number; compliancePercent: number; standardDays: number; standardPercent: number }>>([]);
+  const [trendData, setTrendData] = useState<Array<{ date: string; avgHours: number; compliancePercent: number; standardHours: number; standardPercent: number }>>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [globalWarningThreshold, setGlobalWarningThreshold] = useState<number>(80);
@@ -81,30 +108,27 @@ export function useTerritoryEquityDataV2(
           ])
         );
 
-        const cityNameToIdMap = new Map(cities.map((c) => [c.name, c.id]));
         const regionMap = new Map(regions.map((r) => [r.id, r]));
-        const carrierNameToIdMap = new Map(carriers.map((c) => [c.name, c.id]));
-        
-        // Product map: support multiple formats
-        const productDescToIdMap = new Map<string, string>();
-        products.forEach(p => {
-          productDescToIdMap.set(`${p.code} - ${p.description}`, p.id); // Full format
-          productDescToIdMap.set(p.code, p.id); // Code only
-          productDescToIdMap.set(p.description, p.id); // Description only
-        });
 
-
-
-        // Standards map: "carrier_id|product_id|origin_id|dest_id" → standard
-        const standardsMap = new Map(
-          standards.map((s) => [
-            `${s.carrier_id}|${s.product_id}|${s.origin_city_id}|${s.destination_city_id}`,
-            s,
-          ])
+        // Indice de estandares por nombre de ruta (carrier|product|origin|destination, nombres sin
+        // espacios sobrantes; producto por description, "code - description" y codigo)
+        const cityIdToName = new Map(cities.map((c) => [c.id, c.name]));
+        const carrierIdToName = new Map(carriers.map((c) => [c.id, c.name]));
+        const productById = new Map(products.map((p) => [p.id, p]));
+        const standardsMap = buildStandardsIndex(
+          standards,
+          (s: any) => ({
+            carrier: carrierIdToName.get(s.carrier_id),
+            productCode: productById.get(s.product_id)?.code,
+            productDescription: productById.get(s.product_id)?.description,
+            origin: cityIdToName.get(s.origin_city_id),
+            destination: cityIdToName.get(s.destination_city_id),
+          }),
+          (s: any) => s,
         );
         
         console.log('[DEBUG] Standards map:', {
-          size: standardsMap.size,
+          size: uniqueStandards(standardsMap).length,
           sampleKeys: Array.from(standardsMap.keys()).slice(0, 3),
           sampleValues: Array.from(standardsMap.values()).slice(0, 1),
         });
@@ -141,8 +165,8 @@ export function useTerritoryEquityDataV2(
           let query = supabase.from('one_db').select('*').eq('account_id', activeAccountId).range(start, start + pageSize - 1)
 
           // Use same date filtering as ONE DB (no time adjustment)
-          if (filters?.startDate && filters.startDate !== '') query = query.gte('sent_at', filters.startDate)
-          if (filters?.endDate && filters.endDate !== '') query = query.lte('sent_at', filters.endDate)
+          if (filters?.startDate && filters.startDate !== '') query = query.gte('sent_at', startOfDayInTz(filters.startDate.slice(0, 10), accountTimezone))
+          if (filters?.endDate && filters.endDate !== '') query = query.lte('sent_at', endOfDayInTz(filters.endDate.slice(0, 10), accountTimezone))
           if (filters?.carrier) query = query.eq('carrier_name', filters.carrier)
           if (filters?.product) query = query.eq('product_name', filters.product)
           if (filters?.originCity) query = query.eq('origin_city_name', filters.originCity)
@@ -198,9 +222,10 @@ export function useTerritoryEquityDataV2(
               compliant: number;
               standardsSum: number;
               standardsCount: number;
-              standardDaysSum: number;
-              standardDaysCount: number;
-              actualDaysArray: number[];
+              standardHoursSum: number;
+              standardHoursCount: number;
+              actualHoursArray: number[];
+              units: Set<TimeUnit>;
               warningThresholdSum: number;
               warningThresholdCount: number;
               criticalThresholdSum: number;
@@ -211,9 +236,10 @@ export function useTerritoryEquityDataV2(
               compliant: number;
               standardsSum: number;
               standardsCount: number;
-              standardDaysSum: number;
-              standardDaysCount: number;
-              actualDaysArray: number[];
+              standardHoursSum: number;
+              standardHoursCount: number;
+              actualHoursArray: number[];
+              units: Set<TimeUnit>;
               warningThresholdSum: number;
               warningThresholdCount: number;
               criticalThresholdSum: number;
@@ -221,9 +247,10 @@ export function useTerritoryEquityDataV2(
             };
             standardsSum: number;
             standardsCount: number;
-            standardDaysSum: number;
-            standardDaysCount: number;
-            actualDaysArray: number[];
+            standardHoursSum: number;
+            standardHoursCount: number;
+            actualHoursArray: number[];
+            units: Set<TimeUnit>;
             warningThresholdSum: number;
             warningThresholdCount: number;
             criticalThresholdSum: number;
@@ -237,14 +264,27 @@ export function useTerritoryEquityDataV2(
               outbound: { total: number; compliant: number };
               standardsSum: number;
               standardsCount: number;
-              standardDaysSum: number;
-              standardDaysCount: number;
-              actualDaysArray: number[];
+              standardHoursSum: number;
+              standardHoursCount: number;
+              actualHoursArray: number[];
+              units: Set<TimeUnit>;
             }>;
           }
         >();
 
+        // Estandar de la ruta de un envio (carrier|product|origen|destino por ids)
+        const standardOfShipment = (shipment: any) =>
+          standardsMap.get(routeKey(shipment.carrier_name, shipment.product_name, shipment.origin_city_name, shipment.destination_city_name));
+
         shipments.forEach((shipment) => {
+          // Medida segun la unidad del estandar de la ruta (en horas para acumular); null = sin medida
+          const routeStandard = standardOfShipment(shipment);
+          const routeUnit: TimeUnit = measureUnit(routeStandard);
+          const shipmentMeasureHours = measureHours(shipment, routeUnit);
+          const routeStandardHours = routeStandard?.standard_time != null
+            ? convertUnit(Number(routeStandard.standard_time), routeUnit, 'hours')
+            : null;
+
           // Process as INBOUND (destination)
           const destCity = shipment.destination_city_name;
           if (!cityStatsMap.has(destCity)) {
@@ -254,9 +294,10 @@ export function useTerritoryEquityDataV2(
                 compliant: 0,
                 standardsSum: 0,
                 standardsCount: 0,
-                standardDaysSum: 0,
-                standardDaysCount: 0,
-                actualDaysArray: [],
+                standardHoursSum: 0,
+                standardHoursCount: 0,
+                actualHoursArray: [],
+                units: new Set<TimeUnit>(),
                 warningThresholdSum: 0,
                 warningThresholdCount: 0,
                 criticalThresholdSum: 0,
@@ -267,9 +308,10 @@ export function useTerritoryEquityDataV2(
                 compliant: 0,
                 standardsSum: 0,
                 standardsCount: 0,
-                standardDaysSum: 0,
-                standardDaysCount: 0,
-                actualDaysArray: [],
+                standardHoursSum: 0,
+                standardHoursCount: 0,
+                actualHoursArray: [],
+                units: new Set<TimeUnit>(),
                 warningThresholdSum: 0,
                 warningThresholdCount: 0,
                 criticalThresholdSum: 0,
@@ -277,9 +319,10 @@ export function useTerritoryEquityDataV2(
               },
               standardsSum: 0,
               standardsCount: 0,
-              standardDaysSum: 0,
-              standardDaysCount: 0,
-              actualDaysArray: [],
+              standardHoursSum: 0,
+              standardHoursCount: 0,
+              actualHoursArray: [],
+              units: new Set<TimeUnit>(),
               warningThresholdSum: 0,
               warningThresholdCount: 0,
               criticalThresholdSum: 0,
@@ -304,9 +347,10 @@ export function useTerritoryEquityDataV2(
               outbound: { total: 0, compliant: 0 },
               standardsSum: 0,
               standardsCount: 0,
-              standardDaysSum: 0,
-              standardDaysCount: 0,
-              actualDaysArray: [],
+              standardHoursSum: 0,
+              standardHoursCount: 0,
+              actualHoursArray: [],
+              units: new Set<TimeUnit>(),
             });
           }
           const cpStats = destStats.carrierProduct.get(cpKey)!;
@@ -317,41 +361,32 @@ export function useTerritoryEquityDataV2(
             cpStats.inbound.compliant++;
           }
           
-          // Lookup IDs for standard
-          const carrierId = carrierNameToIdMap.get(shipment.carrier_name);
-          const productId = productDescToIdMap.get(shipment.product_name);
-          const originCityId = cityNameToIdMap.get(shipment.origin_city_name);
-          const destCityId = cityNameToIdMap.get(shipment.destination_city_name);
-          
           // Add standard for this carrier/product
-          if (carrierId && productId && originCityId && destCityId) {
-            const key = `${carrierId}|${productId}|${originCityId}|${destCityId}`;
-            const standard = standardsMap.get(key);
+          {
+            const standard = routeStandard;
             if (standard) {
               if (standard.success_percentage) {
                 cpStats.standardsSum += standard.success_percentage;
                 cpStats.standardsCount++;
               }
-              // Convert standard_time to days based on time_unit
-              if (standard.standard_time != null) {
-                const allowedDays = standard.time_unit === 'days' 
-                  ? standard.standard_time 
-                  : (standard.standard_time / 24);
-                cpStats.standardDaysSum += allowedDays;
-                cpStats.standardDaysCount++;
+              // Estandar en su unidad, acumulado en horas (nunca se pasa a dias)
+              if (routeStandardHours != null) {
+                cpStats.standardHoursSum += routeStandardHours;
+                cpStats.standardHoursCount++;
+                cpStats.units.add(routeUnit);
               }
             }
           }
           
-          // Track actual business days for this shipment
-          if (shipment.business_transit_days != null) {
-            cpStats.actualDaysArray.push(shipment.business_transit_days);
+          // Medida del envio en la unidad de la ruta (los nulos no cuentan)
+          if (shipmentMeasureHours != null) {
+            cpStats.actualHoursArray.push(shipmentMeasureHours);
+            if (routeStandard) cpStats.units.add(routeUnit);
           }
 
           // Also add to city-level standard (overall + inbound-specific)
-          if (carrierId && productId && originCityId && destCityId) {
-            const key = `${carrierId}|${productId}|${originCityId}|${destCityId}`;
-            const standard = standardsMap.get(key);
+          {
+            const standard = routeStandard;
             if (standard) {
               if (standard.success_percentage) {
                 destStats.standardsSum += standard.success_percentage;
@@ -359,15 +394,13 @@ export function useTerritoryEquityDataV2(
                 destStats.inbound.standardsSum += standard.success_percentage;
                 destStats.inbound.standardsCount++;
               }
-              // Convert standard_time to days based on time_unit
-              if (standard.standard_time != null) {
-                const allowedDays = standard.time_unit === 'days' 
-                  ? standard.standard_time 
-                  : (standard.standard_time / 24);
-                destStats.standardDaysSum += allowedDays;
-                destStats.standardDaysCount++;
-                destStats.inbound.standardDaysSum += allowedDays;
-                destStats.inbound.standardDaysCount++;
+              if (routeStandardHours != null) {
+                destStats.standardHoursSum += routeStandardHours;
+                destStats.standardHoursCount++;
+                destStats.units.add(routeUnit);
+                destStats.inbound.standardHoursSum += routeStandardHours;
+                destStats.inbound.standardHoursCount++;
+                destStats.inbound.units.add(routeUnit);
               }
               // Distinguish between absolute and relative thresholds
               const successPct = standard.success_percentage || 95;
@@ -388,10 +421,15 @@ export function useTerritoryEquityDataV2(
             }
           }
           
-          // Track actual business days at city level (overall + inbound-specific)
-          if (shipment.business_transit_days != null) {
-            destStats.actualDaysArray.push(shipment.business_transit_days);
-            destStats.inbound.actualDaysArray.push(shipment.business_transit_days);
+          // Medida a nivel ciudad (global + entrada)
+          if (shipmentMeasureHours != null) {
+            destStats.actualHoursArray.push(shipmentMeasureHours);
+            destStats.inbound.actualHoursArray.push(shipmentMeasureHours);
+            // La unidad solo la fija una ruta con estandar (sin estandar no fuerza horas)
+            if (routeStandard) {
+              destStats.units.add(routeUnit);
+              destStats.inbound.units.add(routeUnit);
+            }
           }
 
           // Process as OUTBOUND (origin)
@@ -403,9 +441,10 @@ export function useTerritoryEquityDataV2(
                 compliant: 0,
                 standardsSum: 0,
                 standardsCount: 0,
-                standardDaysSum: 0,
-                standardDaysCount: 0,
-                actualDaysArray: [],
+                standardHoursSum: 0,
+                standardHoursCount: 0,
+                actualHoursArray: [],
+                units: new Set<TimeUnit>(),
                 warningThresholdSum: 0,
                 warningThresholdCount: 0,
                 criticalThresholdSum: 0,
@@ -416,9 +455,10 @@ export function useTerritoryEquityDataV2(
                 compliant: 0,
                 standardsSum: 0,
                 standardsCount: 0,
-                standardDaysSum: 0,
-                standardDaysCount: 0,
-                actualDaysArray: [],
+                standardHoursSum: 0,
+                standardHoursCount: 0,
+                actualHoursArray: [],
+                units: new Set<TimeUnit>(),
                 warningThresholdSum: 0,
                 warningThresholdCount: 0,
                 criticalThresholdSum: 0,
@@ -426,9 +466,10 @@ export function useTerritoryEquityDataV2(
               },
               standardsSum: 0,
               standardsCount: 0,
-              standardDaysSum: 0,
-              standardDaysCount: 0,
-              actualDaysArray: [],
+              standardHoursSum: 0,
+              standardHoursCount: 0,
+              actualHoursArray: [],
+              units: new Set<TimeUnit>(),
               warningThresholdSum: 0,
               warningThresholdCount: 0,
               criticalThresholdSum: 0,
@@ -453,9 +494,10 @@ export function useTerritoryEquityDataV2(
               outbound: { total: 0, compliant: 0 },
               standardsSum: 0,
               standardsCount: 0,
-              standardDaysSum: 0,
-              standardDaysCount: 0,
-              actualDaysArray: [],
+              standardHoursSum: 0,
+              standardHoursCount: 0,
+              actualHoursArray: [],
+              units: new Set<TimeUnit>(),
             });
           }
           const cpStatsOrigin = originStats.carrierProduct.get(cpKeyOrigin)!;
@@ -467,45 +509,33 @@ export function useTerritoryEquityDataV2(
           }
           
           // Add standard for this carrier/product (outbound)
-          const carrierIdOut = carrierNameToIdMap.get(shipment.carrier_name);
-          const productIdOut = productDescToIdMap.get(shipment.product_name);
-          const originCityIdOut = cityNameToIdMap.get(shipment.origin_city_name);
-          const destCityIdOut = cityNameToIdMap.get(shipment.destination_city_name);
-          
-          if (carrierIdOut && productIdOut && originCityIdOut && destCityIdOut) {
-            const keyOut = `${carrierIdOut}|${productIdOut}|${originCityIdOut}|${destCityIdOut}`;
-            const standardOut = standardsMap.get(keyOut);
+          {
+            const standardOut = routeStandard;
             if (standardOut) {
               if (standardOut.success_percentage) {
                 cpStatsOrigin.standardsSum += standardOut.success_percentage;
                 cpStatsOrigin.standardsCount++;
               }
-              // Convert standard_time to days based on time_unit
-              if (standardOut.standard_time != null) {
-                const allowedDays = standardOut.time_unit === 'days' 
-                  ? standardOut.standard_time 
-                  : (standardOut.standard_time / 24);
-                cpStatsOrigin.standardDaysSum += allowedDays;
-                cpStatsOrigin.standardDaysCount++;
+              if (routeStandardHours != null) {
+                cpStatsOrigin.standardHoursSum += routeStandardHours;
+                cpStatsOrigin.standardHoursCount++;
+                cpStatsOrigin.units.add(routeUnit);
               }
             }
           }
           
           // Also add outbound standards to origin city
-          if (carrierIdOut && productIdOut && originCityIdOut && destCityIdOut) {
-            const keyOut = `${carrierIdOut}|${productIdOut}|${originCityIdOut}|${destCityIdOut}`;
-            const standardOut = standardsMap.get(keyOut);
+          {
+            const standardOut = routeStandard;
             if (standardOut) {
               if (standardOut.success_percentage) {
                 originStats.outbound.standardsSum += standardOut.success_percentage;
                 originStats.outbound.standardsCount++;
               }
-              if (standardOut.standard_time != null) {
-                const allowedDays = standardOut.time_unit === 'days' 
-                  ? standardOut.standard_time 
-                  : (standardOut.standard_time / 24);
-                originStats.outbound.standardDaysSum += allowedDays;
-                originStats.outbound.standardDaysCount++;
+              if (routeStandardHours != null) {
+                originStats.outbound.standardHoursSum += routeStandardHours;
+                originStats.outbound.standardHoursCount++;
+                originStats.outbound.units.add(routeUnit);
               }
               // Distinguish between absolute and relative thresholds
               const successPctOut = standardOut.success_percentage || 95;
@@ -522,11 +552,16 @@ export function useTerritoryEquityDataV2(
             }
           }
           
-          // Track actual business days for outbound shipment (overall + outbound-specific)
-          if (shipment.business_transit_days != null) {
-            cpStatsOrigin.actualDaysArray.push(shipment.business_transit_days);
-            originStats.actualDaysArray.push(shipment.business_transit_days);
-            originStats.outbound.actualDaysArray.push(shipment.business_transit_days);
+          // Medida del envio de salida (global + salida)
+          if (shipmentMeasureHours != null) {
+            cpStatsOrigin.actualHoursArray.push(shipmentMeasureHours);
+            originStats.actualHoursArray.push(shipmentMeasureHours);
+            originStats.outbound.actualHoursArray.push(shipmentMeasureHours);
+            if (routeStandard) {
+              cpStatsOrigin.units.add(routeUnit);
+              originStats.units.add(routeUnit);
+              originStats.outbound.units.add(routeUnit);
+            }
           }
         });
 
@@ -545,54 +580,15 @@ export function useTerritoryEquityDataV2(
             const longitude = city.longitude || null;
 
             // Determine which direction to use based on scenario
-            let totalShipments: number;
-            let compliantShipments: number;
-            let actualPercentage: number;
-            let standardPercentage: number;
-            let standardDays: number;
-            let actualDays: number;
-            let deviation: number;
-
-            if (scenarioInfo.isOriginView) {
-              // Origin view: show INBOUND data (city as destination)
-              totalShipments = stats.inbound.total;
-              compliantShipments = stats.inbound.compliant;
-              actualPercentage = totalShipments > 0 ? (compliantShipments / totalShipments) * 100 : 0;
-              standardPercentage = stats.inbound.standardsCount > 0 ? stats.inbound.standardsSum / stats.inbound.standardsCount : 95;
-              standardDays = stats.inbound.standardDaysCount > 0 ? stats.inbound.standardDaysSum / stats.inbound.standardDaysCount : 0;
-              actualDays = calculateJKActualFromDays(
-                stats.inbound.actualDaysArray,
-                standardPercentage,
-                standardDays
-              );
-              deviation = actualPercentage - standardPercentage;
-            } else if (scenarioInfo.isDestinationView) {
-              // Destination view: show OUTBOUND data (city as origin)
-              totalShipments = stats.outbound.total;
-              compliantShipments = stats.outbound.compliant;
-              actualPercentage = totalShipments > 0 ? (compliantShipments / totalShipments) * 100 : 0;
-              standardPercentage = stats.outbound.standardsCount > 0 ? stats.outbound.standardsSum / stats.outbound.standardsCount : 95;
-              standardDays = stats.outbound.standardDaysCount > 0 ? stats.outbound.standardDaysSum / stats.outbound.standardDaysCount : 0;
-              actualDays = calculateJKActualFromDays(
-                stats.outbound.actualDaysArray,
-                standardPercentage,
-                standardDays
-              );
-              deviation = actualPercentage - standardPercentage;
-            } else {
-              // General view or route view: show OUTBOUND data (default)
-              totalShipments = stats.outbound.total;
-              compliantShipments = stats.outbound.compliant;
-              actualPercentage = totalShipments > 0 ? (compliantShipments / totalShipments) * 100 : 0;
-              standardPercentage = stats.outbound.standardsCount > 0 ? stats.outbound.standardsSum / stats.outbound.standardsCount : 95;
-              standardDays = stats.outbound.standardDaysCount > 0 ? stats.outbound.standardDaysSum / stats.outbound.standardDaysCount : 0;
-              actualDays = calculateJKActualFromDays(
-                stats.outbound.actualDaysArray,
-                standardPercentage,
-                standardDays
-              );
-              deviation = actualPercentage - standardPercentage;
-            }
+            // Origin view: INBOUND (city as destination); destination/general/route view: OUTBOUND
+            const dir = scenarioInfo.isOriginView ? stats.inbound : stats.outbound;
+            const totalShipments = dir.total;
+            const compliantShipments = dir.compliant;
+            const actualPercentage = totalShipments > 0 ? (compliantShipments / totalShipments) * 100 : 0;
+            const standardPercentage = dir.standardsCount > 0 ? dir.standardsSum / dir.standardsCount : 95;
+            // J+K estandar/real en `unit` (la del estandar de sus rutas; horas si mezclan)
+            const { unit, jkStandard: standardDays, jkActual: actualDays } = groupJK(dir, standardPercentage);
+            const deviation = actualPercentage - standardPercentage;
 
             // Calculate aggregated thresholds (weighted average)
             const aggregatedWarningThreshold = stats.warningThresholdCount > 0
@@ -612,13 +608,11 @@ export function useTerritoryEquityDataV2(
               stats.inbound.total > 0 ? (stats.inbound.compliant / stats.inbound.total) * 100 : 0;
             const inboundStandardPercentage =
               stats.inbound.standardsCount > 0 ? stats.inbound.standardsSum / stats.inbound.standardsCount : 95;
-            const inboundStandardDays =
-              stats.inbound.standardDaysCount > 0 ? stats.inbound.standardDaysSum / stats.inbound.standardDaysCount : 0;
-            const inboundActualDays = calculateJKActualFromDays(
-              stats.inbound.actualDaysArray,
-              inboundStandardPercentage,
-              inboundStandardDays
-            );
+            const {
+              unit: inboundUnit,
+              jkStandard: inboundStandardDays,
+              jkActual: inboundActualDays,
+            } = groupJK(stats.inbound, inboundStandardPercentage);
             const inboundDeviation = inboundPercentage - inboundStandardPercentage;
             
             // Outbound metrics
@@ -626,13 +620,11 @@ export function useTerritoryEquityDataV2(
               stats.outbound.total > 0 ? (stats.outbound.compliant / stats.outbound.total) * 100 : 0;
             const outboundStandardPercentage =
               stats.outbound.standardsCount > 0 ? stats.outbound.standardsSum / stats.outbound.standardsCount : 95;
-            const outboundStandardDays =
-              stats.outbound.standardDaysCount > 0 ? stats.outbound.standardDaysSum / stats.outbound.standardDaysCount : 0;
-            const outboundActualDays = calculateJKActualFromDays(
-              stats.outbound.actualDaysArray,
-              outboundStandardPercentage,
-              outboundStandardDays
-            );
+            const {
+              unit: outboundUnit,
+              jkStandard: outboundStandardDays,
+              jkActual: outboundActualDays,
+            } = groupJK(stats.outbound, outboundStandardPercentage);
             const outboundDeviation = outboundPercentage - outboundStandardPercentage;
             
             const directionGap = Math.abs(inboundPercentage - outboundPercentage);
@@ -641,12 +633,11 @@ export function useTerritoryEquityDataV2(
             const carrierProductBreakdown = Array.from(stats.carrierProduct.values()).map(cp => {
               const cpActualPercentage = cp.total > 0 ? (cp.compliant / cp.total) * 100 : 0;
               const cpStandardPercentage = cp.standardsCount > 0 ? cp.standardsSum / cp.standardsCount : 95;
-              const cpStandardDays = cp.standardDaysCount > 0 ? cp.standardDaysSum / cp.standardDaysCount : 0;
-              const cpActualDays = calculateJKActualFromDays(
-                cp.actualDaysArray,
-                cpStandardPercentage,
-                cpStandardDays
-              );
+              const {
+                unit: cpUnit,
+                jkStandard: cpStandardDays,
+                jkActual: cpActualDays,
+              } = groupJK(cp, cpStandardPercentage);
               const cpInboundPercentage = cp.inbound.total > 0 ? (cp.inbound.compliant / cp.inbound.total) * 100 : 0;
               const cpOutboundPercentage = cp.outbound.total > 0 ? (cp.outbound.compliant / cp.outbound.total) * 100 : 0;
               
@@ -657,6 +648,7 @@ export function useTerritoryEquityDataV2(
                 compliantShipments: cp.compliant,
                 actualPercentage: cpActualPercentage,
                 standardPercentage: cpStandardPercentage,
+                unit: cpUnit,
                 standardDays: cpStandardDays,
                 actualDays: cpActualDays,
                 deviation: cpActualPercentage - cpStandardPercentage,
@@ -679,6 +671,7 @@ export function useTerritoryEquityDataV2(
               totalShipments,
               compliantShipments,
               standardPercentage,
+              unit,
               standardDays,
               actualDays,
               actualPercentage,
@@ -690,6 +683,7 @@ export function useTerritoryEquityDataV2(
               inboundCompliant: stats.inbound.compliant,
               inboundPercentage,
               inboundStandardPercentage,
+              inboundUnit,
               inboundStandardDays,
               inboundActualDays,
               inboundDeviation,
@@ -697,6 +691,7 @@ export function useTerritoryEquityDataV2(
               outboundCompliant: stats.outbound.compliant,
               outboundPercentage,
               outboundStandardPercentage,
+              outboundUnit,
               outboundStandardDays,
               outboundActualDays,
               outboundDeviation,
@@ -759,18 +754,10 @@ export function useTerritoryEquityDataV2(
           
           if (!destinationRouteMap.has(key)) {
             // Get standard for this route
-            const carrierId = carrierNameToIdMap.get(carrier);
-            const productId = productDescToIdMap.get(product);
-            const originCityId = cityNameToIdMap.get(shipment.origin_city_name);
-            const destCityId = cityNameToIdMap.get(destCity);
-            
             let standardPercentage = 95; // default
-            if (carrierId && productId && originCityId && destCityId) {
-              const standardKey = `${carrierId}|${productId}|${originCityId}|${destCityId}`;
-              const standard = standardsMap.get(standardKey);
-              if (standard?.success_percentage) {
-                standardPercentage = standard.success_percentage;
-              }
+            const standard = standardOfShipment(shipment);
+            if (standard?.success_percentage) {
+              standardPercentage = standard.success_percentage;
             }
             
             destinationRouteMap.set(key, {
@@ -999,6 +986,7 @@ export function useTerritoryEquityDataV2(
             : scenarioInfo.isDestinationView
             ? c.outboundActualDays
             : c.outboundActualDays;
+          const relevantUnit: TimeUnit = (scenarioInfo.isOriginView ? c.inboundUnit : c.outboundUnit) ?? 'hours';
           const relevantDeviation = relevantPercentage - relevantStandardPercentage;
           
           return {
@@ -1007,6 +995,7 @@ export function useTerritoryEquityDataV2(
             relevantStandardPercentage,
             relevantStandardDays,
             relevantActualDays,
+            relevantUnit,
             relevantDeviation,
           };
         }).sort((a, b) => b.relevantDeviation - a.relevantDeviation);
@@ -1016,6 +1005,7 @@ export function useTerritoryEquityDataV2(
           actualPercentage: c.relevantPercentage,
           deviation: c.relevantDeviation,
           standardPercentage: c.relevantStandardPercentage,
+          unit: c.relevantUnit,
           standardDays: c.relevantStandardDays,
           actualDays: c.relevantActualDays,
           inboundPercentage: c.inboundPercentage,
@@ -1029,6 +1019,7 @@ export function useTerritoryEquityDataV2(
             actualPercentage: c.relevantPercentage,
             deviation: c.relevantDeviation,
             standardPercentage: c.relevantStandardPercentage,
+            unit: c.relevantUnit,
             standardDays: c.relevantStandardDays,
             actualDays: c.relevantActualDays,
             inboundPercentage: c.inboundPercentage,
@@ -1047,9 +1038,10 @@ export function useTerritoryEquityDataV2(
             compliantShipments: number;
             standardsSum: number;
             standardsCount: number;
-            standardDaysSum: number;
-            standardDaysCount: number;
-            actualDaysArray: number[];
+            standardHoursSum: number;
+            standardHoursCount: number;
+            actualHoursArray: number[];
+            units: Set<TimeUnit>;
             warningThresholdSum: number;
             warningThresholdCount: number;
             criticalThresholdSum: number;
@@ -1059,9 +1051,10 @@ export function useTerritoryEquityDataV2(
             inboundCompliant: number;
             inboundStandardsSum: number;
             inboundStandardsCount: number;
-            inboundStandardDaysSum: number;
-            inboundStandardDaysCount: number;
-            inboundActualDaysArray: number[];
+            inboundStandardHoursSum: number;
+            inboundStandardHoursCount: number;
+            inboundActualHoursArray: number[];
+            inboundUnits: Set<TimeUnit>;
             inboundWarningThresholdSum: number;
             inboundWarningThresholdCount: number;
             inboundCriticalThresholdSum: number;
@@ -1070,9 +1063,10 @@ export function useTerritoryEquityDataV2(
             outboundCompliant: number;
             outboundStandardsSum: number;
             outboundStandardsCount: number;
-            outboundStandardDaysSum: number;
-            outboundStandardDaysCount: number;
-            outboundActualDaysArray: number[];
+            outboundStandardHoursSum: number;
+            outboundStandardHoursCount: number;
+            outboundActualHoursArray: number[];
+            outboundUnits: Set<TimeUnit>;
             outboundWarningThresholdSum: number;
             outboundWarningThresholdCount: number;
             outboundCriticalThresholdSum: number;
@@ -1086,9 +1080,10 @@ export function useTerritoryEquityDataV2(
               outbound: { total: number; compliant: number };
               standardsSum: number;
               standardsCount: number;
-              standardDaysSum: number;
-              standardDaysCount: number;
-              actualDaysArray: number[];
+              standardHoursSum: number;
+              standardHoursCount: number;
+              actualHoursArray: number[];
+              units: Set<TimeUnit>;
             }>;
           }
         >();
@@ -1103,9 +1098,10 @@ export function useTerritoryEquityDataV2(
               compliantShipments: 0,
               standardsSum: 0,
               standardsCount: 0,
-              standardDaysSum: 0,
-              standardDaysCount: 0,
-              actualDaysArray: [],
+              standardHoursSum: 0,
+              standardHoursCount: 0,
+              actualHoursArray: [],
+              units: new Set<TimeUnit>(),
               warningThresholdSum: 0,
               warningThresholdCount: 0,
               criticalThresholdSum: 0,
@@ -1115,9 +1111,10 @@ export function useTerritoryEquityDataV2(
               inboundCompliant: 0,
               inboundStandardsSum: 0,
               inboundStandardsCount: 0,
-              inboundStandardDaysSum: 0,
-              inboundStandardDaysCount: 0,
-              inboundActualDaysArray: [],
+              inboundStandardHoursSum: 0,
+              inboundStandardHoursCount: 0,
+              inboundActualHoursArray: [],
+              inboundUnits: new Set<TimeUnit>(),
               inboundWarningThresholdSum: 0,
               inboundWarningThresholdCount: 0,
               inboundCriticalThresholdSum: 0,
@@ -1126,9 +1123,10 @@ export function useTerritoryEquityDataV2(
               outboundCompliant: 0,
               outboundStandardsSum: 0,
               outboundStandardsCount: 0,
-              outboundStandardDaysSum: 0,
-              outboundStandardDaysCount: 0,
-              outboundActualDaysArray: [],
+              outboundStandardHoursSum: 0,
+              outboundStandardHoursCount: 0,
+              outboundActualHoursArray: [],
+              outboundUnits: new Set<TimeUnit>(),
               outboundWarningThresholdSum: 0,
               outboundWarningThresholdCount: 0,
               outboundCriticalThresholdSum: 0,
@@ -1144,8 +1142,13 @@ export function useTerritoryEquityDataV2(
           regionStats.compliantShipments += city.compliantShipments;
           regionStats.standardsSum += city.standardPercentage * city.totalShipments;
           regionStats.standardsCount += city.totalShipments;
-          regionStats.standardDaysSum += city.standardDays * city.totalShipments;
-          regionStats.standardDaysCount += city.totalShipments;
+          // J+K de la ciudad (en su unidad) acumulado en horas, ponderado por envios
+          const cityUnit: TimeUnit = city.unit ?? 'hours';
+          const cityInUnit: TimeUnit = city.inboundUnit ?? 'hours';
+          const cityOutUnit: TimeUnit = city.outboundUnit ?? 'hours';
+          regionStats.standardHoursSum += convertUnit(city.standardDays, cityUnit, 'hours') * city.totalShipments;
+          regionStats.standardHoursCount += city.totalShipments;
+          if (city.totalShipments > 0) regionStats.units.add(cityUnit);
           // Accumulate thresholds (weighted by total shipments)
           regionStats.warningThresholdSum += city.aggregatedWarningThreshold * city.totalShipments;
           regionStats.warningThresholdCount += city.totalShipments;
@@ -1153,25 +1156,27 @@ export function useTerritoryEquityDataV2(
           regionStats.criticalThresholdCount += city.totalShipments;
           // Replicate actualDays for weighted aggregation
           for (let i = 0; i < city.totalShipments; i++) {
-            regionStats.actualDaysArray.push(city.actualDays);
+            regionStats.actualHoursArray.push(convertUnit(city.actualDays, cityUnit, 'hours'));
           }
           regionStats.inboundShipments += city.inboundShipments;
           regionStats.inboundCompliant += city.inboundCompliant;
           regionStats.inboundStandardsSum += city.inboundStandardPercentage * city.inboundShipments;
           regionStats.inboundStandardsCount += city.inboundShipments;
-          regionStats.inboundStandardDaysSum += city.inboundStandardDays * city.inboundShipments;
-          regionStats.inboundStandardDaysCount += city.inboundShipments;
+          regionStats.inboundStandardHoursSum += convertUnit(city.inboundStandardDays, cityInUnit, 'hours') * city.inboundShipments;
+          regionStats.inboundStandardHoursCount += city.inboundShipments;
+          if (city.inboundShipments > 0) regionStats.inboundUnits.add(cityInUnit);
           for (let i = 0; i < city.inboundShipments; i++) {
-            regionStats.inboundActualDaysArray.push(city.inboundActualDays);
+            regionStats.inboundActualHoursArray.push(convertUnit(city.inboundActualDays, cityInUnit, 'hours'));
           }
           regionStats.outboundShipments += city.outboundShipments;
           regionStats.outboundCompliant += city.outboundCompliant;
           regionStats.outboundStandardsSum += city.outboundStandardPercentage * city.outboundShipments;
           regionStats.outboundStandardsCount += city.outboundShipments;
-          regionStats.outboundStandardDaysSum += city.outboundStandardDays * city.outboundShipments;
-          regionStats.outboundStandardDaysCount += city.outboundShipments;
+          regionStats.outboundStandardHoursSum += convertUnit(city.outboundStandardDays, cityOutUnit, 'hours') * city.outboundShipments;
+          regionStats.outboundStandardHoursCount += city.outboundShipments;
+          if (city.outboundShipments > 0) regionStats.outboundUnits.add(cityOutUnit);
           for (let i = 0; i < city.outboundShipments; i++) {
-            regionStats.outboundActualDaysArray.push(city.outboundActualDays);
+            regionStats.outboundActualHoursArray.push(convertUnit(city.outboundActualDays, cityOutUnit, 'hours'));
           }
           if (city.status === 'critical') regionStats.underservedCities++;
           
@@ -1189,9 +1194,10 @@ export function useTerritoryEquityDataV2(
                   outbound: { total: 0, compliant: 0 },
                   standardsSum: 0,
                   standardsCount: 0,
-                  standardDaysSum: 0,
-                  standardDaysCount: 0,
-                  actualDaysArray: [],
+                  standardHoursSum: 0,
+                  standardHoursCount: 0,
+                  actualHoursArray: [],
+                  units: new Set<TimeUnit>(),
             });
               }
               const cpStats = regionStats.carrierProduct.get(cpKey)!;
@@ -1203,10 +1209,12 @@ export function useTerritoryEquityDataV2(
               cpStats.outbound.compliant += cp.compliantShipments * (cp.outboundPercentage / 100);
               cpStats.standardsSum += cp.standardPercentage;
               cpStats.standardsCount++;
-              cpStats.standardDaysSum += cp.standardDays;
-              cpStats.standardDaysCount++;
+              const cpUnit: TimeUnit = cp.unit ?? 'hours';
+              cpStats.standardHoursSum += convertUnit(cp.standardDays, cpUnit, 'hours');
+              cpStats.standardHoursCount++;
+              cpStats.units.add(cpUnit);
               for (let i = 0; i < cp.totalShipments; i++) {
-                cpStats.actualDaysArray.push(cp.actualDays);
+                cpStats.actualHoursArray.push(convertUnit(cp.actualDays, cpUnit, 'hours'));
               }
             });
           }
@@ -1218,13 +1226,7 @@ export function useTerritoryEquityDataV2(
               stats.totalShipments > 0 ? (stats.compliantShipments / stats.totalShipments) * 100 : 0;
             const standardPercentage =
               stats.standardsCount > 0 ? stats.standardsSum / stats.standardsCount : 95;
-            const standardDays =
-              stats.standardDaysCount > 0 ? stats.standardDaysSum / stats.standardDaysCount : 0;
-            const actualDays = calculateJKActualFromDays(
-              stats.actualDaysArray,
-              standardPercentage,
-              standardDays
-            );
+            const { unit, jkStandard: standardDays, jkActual: actualDays } = groupJK(stats, standardPercentage);
             const deviation = actualPercentage - standardPercentage;
 
             // Calculate aggregated thresholds (weighted average)
@@ -1247,14 +1249,16 @@ export function useTerritoryEquityDataV2(
             const inboundStandardPercentage = stats.inboundStandardsCount > 0
               ? stats.inboundStandardsSum / stats.inboundStandardsCount
               : 95;
-            const inboundStandardDays = stats.inboundStandardDaysCount > 0
-              ? stats.inboundStandardDaysSum / stats.inboundStandardDaysCount
-              : 0;
-            const inboundActualDays = calculateJKActualFromDays(
-              stats.inboundActualDaysArray,
-              inboundStandardPercentage,
-              inboundStandardDays
-            );
+            const {
+              unit: inboundUnit,
+              jkStandard: inboundStandardDays,
+              jkActual: inboundActualDays,
+            } = groupJK({
+              standardHoursSum: stats.inboundStandardHoursSum,
+              standardHoursCount: stats.inboundStandardHoursCount,
+              actualHoursArray: stats.inboundActualHoursArray,
+              units: stats.inboundUnits,
+            }, inboundStandardPercentage);
             const inboundDeviation = inboundPercentage - inboundStandardPercentage;
             
             // Outbound metrics
@@ -1264,14 +1268,16 @@ export function useTerritoryEquityDataV2(
             const outboundStandardPercentage = stats.outboundStandardsCount > 0
               ? stats.outboundStandardsSum / stats.outboundStandardsCount
               : 95;
-            const outboundStandardDays = stats.outboundStandardDaysCount > 0
-              ? stats.outboundStandardDaysSum / stats.outboundStandardDaysCount
-              : 0;
-            const outboundActualDays = calculateJKActualFromDays(
-              stats.outboundActualDaysArray,
-              outboundStandardPercentage,
-              outboundStandardDays
-            );
+            const {
+              unit: outboundUnit,
+              jkStandard: outboundStandardDays,
+              jkActual: outboundActualDays,
+            } = groupJK({
+              standardHoursSum: stats.outboundStandardHoursSum,
+              standardHoursCount: stats.outboundStandardHoursCount,
+              actualHoursArray: stats.outboundActualHoursArray,
+              units: stats.outboundUnits,
+            }, outboundStandardPercentage);
             const outboundDeviation = outboundPercentage - outboundStandardPercentage;
             
             const directionGap = Math.abs(inboundPercentage - outboundPercentage);
@@ -1280,12 +1286,11 @@ export function useTerritoryEquityDataV2(
             const carrierProductBreakdown = Array.from(stats.carrierProduct.values()).map(cp => {
               const cpActualPercentage = cp.total > 0 ? (cp.compliant / cp.total) * 100 : 0;
               const cpStandardPercentage = cp.standardsCount > 0 ? cp.standardsSum / cp.standardsCount : 95;
-              const cpStandardDays = cp.standardDaysCount > 0 ? cp.standardDaysSum / cp.standardDaysCount : 0;
-              const cpActualDays = calculateJKActualFromDays(
-                cp.actualDaysArray,
-                cpStandardPercentage,
-                cpStandardDays
-              );
+              const {
+                unit: cpUnit,
+                jkStandard: cpStandardDays,
+                jkActual: cpActualDays,
+              } = groupJK(cp, cpStandardPercentage);
               const cpInboundPercentage = cp.inbound.total > 0 ? (cp.inbound.compliant / cp.inbound.total) * 100 : 0;
               const cpOutboundPercentage = cp.outbound.total > 0 ? (cp.outbound.compliant / cp.outbound.total) * 100 : 0;
               
@@ -1296,6 +1301,7 @@ export function useTerritoryEquityDataV2(
                 compliantShipments: cp.compliant,
                 actualPercentage: cpActualPercentage,
                 standardPercentage: cpStandardPercentage,
+                unit: cpUnit,
                 standardDays: cpStandardDays,
                 actualDays: cpActualDays,
                 deviation: cpActualPercentage - cpStandardPercentage,
@@ -1314,6 +1320,7 @@ export function useTerritoryEquityDataV2(
               totalShipments: stats.totalShipments,
               compliantShipments: stats.compliantShipments,
               standardPercentage,
+              unit,
               standardDays,
               actualDays,
               actualPercentage,
@@ -1326,6 +1333,7 @@ export function useTerritoryEquityDataV2(
               inboundCompliant: stats.inboundCompliant,
               inboundPercentage,
               inboundStandardPercentage,
+              inboundUnit,
               inboundStandardDays,
               inboundActualDays,
               inboundDeviation,
@@ -1333,6 +1341,7 @@ export function useTerritoryEquityDataV2(
               outboundCompliant: stats.outboundCompliant,
               outboundPercentage,
               outboundStandardPercentage,
+              outboundUnit,
               outboundStandardDays,
               outboundActualDays,
               outboundDeviation,
@@ -1350,6 +1359,7 @@ export function useTerritoryEquityDataV2(
           actualPercentage: r.actualPercentage,
           deviation: r.deviation,
           standardPercentage: r.standardPercentage,
+          unit: r.unit,
           standardDays: r.standardDays,
           actualDays: r.actualDays,
           inboundPercentage: r.inboundPercentage,
@@ -1363,6 +1373,7 @@ export function useTerritoryEquityDataV2(
             actualPercentage: r.actualPercentage,
             deviation: r.deviation,
             standardPercentage: r.standardPercentage,
+            unit: r.unit,
             standardDays: r.standardDays,
             actualDays: r.actualDays,
             inboundPercentage: r.inboundPercentage,
@@ -1371,76 +1382,55 @@ export function useTerritoryEquityDataV2(
           }));
 
         // 9. Build route-level data for Product Analysis
-        const routeMap = new Map<string, {
+        // Cada ruta mide en la unidad de su estandar (dias -> dias laborables; horas o sin estandar -> horas)
+        type RouteAcc = {
           origin: string;
           destination: string;
           carrier: string;
           product: string;
+          unit: TimeUnit;
           total: number;
           compliant: number;
           standardPercentage: number;  // Single value, not averaged
-          actualDaysArray: number[];
-          standardDaysArray: number[];
-          distribution: Map<number, number>;  // day -> count for distribution charts
-        }>();
+          measureArray: number[];  // medidas en `unit` (sin nulos)
+          standardArray: number[];  // estandar en `unit`
+          distribution: Map<number, number>;  // cubeta (1 h o 1 dia) -> count for distribution charts
+        };
+        const routeMap = new Map<string, RouteAcc>();
 
         shipments.forEach(s => {
-          const routeKey = `${s.origin_city_name}|${s.destination_city_name}|${s.carrier_name}|${s.product_name}`;
-          if (!routeMap.has(routeKey)) {
-            // Get standard for this route (same logic as Underserved Cities)
-            const originCityId = cityNameToIdMap.get(s.origin_city_name);
-            const destCityId = cityNameToIdMap.get(s.destination_city_name);
-            const carrierId = carrierNameToIdMap.get(s.carrier_name);
-            const productId = productDescToIdMap.get(s.product_name);
-            
-            let standardPercentage = 95; // default (same as Underserved Cities)
-            if (carrierId && productId && originCityId && destCityId) {
-              const standardKey = `${carrierId}|${productId}|${originCityId}|${destCityId}`;
-              const standard = standardsMap.get(standardKey);
-              if (standard?.success_percentage) {
-                standardPercentage = standard.success_percentage;
-              }
-            }
-            
-            routeMap.set(routeKey, {
+          const rKey = `${s.origin_city_name}|${s.destination_city_name}|${s.carrier_name}|${s.product_name}`;
+          const standard = standardOfShipment(s);
+          if (!routeMap.has(rKey)) {
+            routeMap.set(rKey, {
               origin: s.origin_city_name,
               destination: s.destination_city_name,
               carrier: s.carrier_name,
               product: s.product_name,
+              unit: measureUnit(standard),
               total: 0,
               compliant: 0,
-              standardPercentage,
-              actualDaysArray: [],
-              standardDaysArray: [],
+              // default 95 (same as Underserved Cities)
+              standardPercentage: standard?.success_percentage || 95,
+              measureArray: [],
+              standardArray: [],
               distribution: new Map<number, number>(),
             });
           }
-          const route = routeMap.get(routeKey)!;
+          const route = routeMap.get(rKey)!;
           route.total++;
           if (s.on_time_delivery) route.compliant++;
-          
-          // Collect standard_time for J+K calculation
-          const originCityId = cityNameToIdMap.get(s.origin_city_name);
-          const destCityId = cityNameToIdMap.get(s.destination_city_name);
-          const carrierId = carrierNameToIdMap.get(s.carrier_name);
-          const productId = productDescToIdMap.get(s.product_name);
-          
-          const standard = (originCityId && destCityId && carrierId && productId)
-            ? standardsMap.get(`${carrierId}|${productId}|${originCityId}|${destCityId}`)
-            : undefined;
-          
+
+          // Estandar en su propia unidad (nunca convertido a dias)
           if (standard?.standard_time != null) {
-            const allowedDays = standard.time_unit === 'days' 
-              ? standard.standard_time 
-              : (standard.standard_time / 24);
-            route.standardDaysArray.push(allowedDays);
+            route.standardArray.push(Number(standard.standard_time));
           }
-          if (s.business_transit_days != null) {
-            route.actualDaysArray.push(s.business_transit_days);
-            // Update distribution map
-            const days = Math.round(s.business_transit_days);
-            const currentCount = route.distribution.get(days) || 0;
-            route.distribution.set(days, currentCount + 1);
+          const measure = measureOf(s, route.unit);
+          if (measure != null) {
+            route.measureArray.push(measure);
+            // Cubetas de 1 h (horas redondeadas) o de 1 dia
+            const bucket = Math.round(measure);
+            route.distribution.set(bucket, (route.distribution.get(bucket) || 0) + 1);
           }
         });
 
@@ -1449,15 +1439,15 @@ export function useTerritoryEquityDataV2(
           const standardPercentage = r.standardPercentage;  // Use the single value calculated at route creation
           const actualPercentage = r.total > 0 ? (r.compliant / r.total) * 100 : 0;
           const deviation = actualPercentage - standardPercentage;
-          const standardDays = r.standardDaysArray.length > 0
-            ? r.standardDaysArray.reduce((sum, d) => sum + d, 0) / r.standardDaysArray.length
+          const jkStandard = r.standardArray.length > 0
+            ? r.standardArray.reduce((sum, d) => sum + d, 0) / r.standardArray.length
             : 0;
-          const actualDays = calculateJKActualFromDays(
-            r.actualDaysArray,
+          const jkActual = calculateJKActualFromDays(
+            r.measureArray,
             standardPercentage,
-            standardDays
+            jkStandard
           );
-          
+
           // Calculate status using global SLA thresholds
           let status: 'compliant' | 'warning' | 'critical';
           if (actualPercentage >= defaultWarningThreshold) {
@@ -1473,151 +1463,84 @@ export function useTerritoryEquityDataV2(
             destination: r.destination,
             carrier: r.carrier,
             product: r.product,
+            unit: r.unit,  // unidad de jkStandard/jkActual/distribution
             totalShipments: r.total,
             standardPercentage,
             actualPercentage,
             deviation,
-            standardDays,
-            actualDays,
+            jkStandard,
+            jkActual,
+            // Alias (mismo valor, en `unit`) para componentes compartidos con J+K Performance
+            standardDays: jkStandard,
+            actualDays: jkActual,
             status,
             distribution: r.distribution,
           };
         });
 
         // 9.5. Build aggregated J+K metrics for carriers and products
-        const carrierAggregateMap = new Map<string, {
-          actualDaysArray: number[];
-          standardDaysArray: number[];
+        // Medidas y estandares en horas + unidades vistas; se expresan en la unidad comun del grupo
+        type AggJK = JKAcc & {
           standardPercentageSum: number;
           standardPercentageCount: number;
           totalShipments: number;
           compliantShipments: number;
-        }>();
+        };
+        const newAgg = (): AggJK => ({
+          standardHoursSum: 0,
+          standardHoursCount: 0,
+          actualHoursArray: [],
+          units: new Set<TimeUnit>(),
+          standardPercentageSum: 0,
+          standardPercentageCount: 0,
+          totalShipments: 0,
+          compliantShipments: 0,
+        });
+        const addRouteToAgg = (agg: AggJK, r: RouteAcc) => {
+          r.measureArray.forEach(m => agg.actualHoursArray.push(convertUnit(m, r.unit, 'hours')));
+          r.standardArray.forEach(st => {
+            agg.standardHoursSum += convertUnit(st, r.unit, 'hours');
+            agg.standardHoursCount++;
+          });
+          if (r.measureArray.length > 0 || r.standardArray.length > 0) agg.units.add(r.unit);
+          agg.standardPercentageSum += r.standardPercentage;
+          agg.standardPercentageCount++;
+          agg.totalShipments += r.total;
+          agg.compliantShipments += r.compliant;
+        };
 
-        const productAggregateMap = new Map<string, {
-          actualDaysArray: number[];
-          standardDaysArray: number[];
-          standardPercentageSum: number;
-          standardPercentageCount: number;
-          totalShipments: number;
-          compliantShipments: number;
-        }>();
+        const carrierAggregateMap = new Map<string, AggJK>();
+        const productAggregateMap = new Map<string, AggJK>();
 
-        // Collect all transit days for each carrier and product
+        // Collect all transit measures for each carrier and product
         Array.from(routeMap.values()).forEach(r => {
-          const carrier = r.carrier;
           const productKey = `${r.carrier}|${r.product}`;
-          
-          // Carrier aggregation
-          if (!carrierAggregateMap.has(carrier)) {
-            carrierAggregateMap.set(carrier, {
-              actualDaysArray: [],
-              standardDaysArray: [],
-              standardPercentageSum: 0,
-              standardPercentageCount: 0,
-              totalShipments: 0,
-              compliantShipments: 0,
-            });
-          }
-          const carrierAgg = carrierAggregateMap.get(carrier)!;
-          carrierAgg.actualDaysArray.push(...r.actualDaysArray);
-          carrierAgg.standardDaysArray.push(...r.standardDaysArray);
-          carrierAgg.standardPercentageSum += r.standardPercentage;
-          carrierAgg.standardPercentageCount++;
-          carrierAgg.totalShipments += r.total;
-          carrierAgg.compliantShipments += r.compliant;
-          
-          // Product aggregation
-          if (!productAggregateMap.has(productKey)) {
-            productAggregateMap.set(productKey, {
-              actualDaysArray: [],
-              standardDaysArray: [],
-              standardPercentageSum: 0,
-              standardPercentageCount: 0,
-              totalShipments: 0,
-              compliantShipments: 0,
-            });
-          }
-          const productAgg = productAggregateMap.get(productKey)!;
-          productAgg.actualDaysArray.push(...r.actualDaysArray);
-          productAgg.standardDaysArray.push(...r.standardDaysArray);
-          productAgg.standardPercentageSum += r.standardPercentage;
-          productAgg.standardPercentageCount++;
-          productAgg.totalShipments += r.total;
-          productAgg.compliantShipments += r.compliant;
+          if (!carrierAggregateMap.has(r.carrier)) carrierAggregateMap.set(r.carrier, newAgg());
+          addRouteToAgg(carrierAggregateMap.get(r.carrier)!, r);
+          if (!productAggregateMap.has(productKey)) productAggregateMap.set(productKey, newAgg());
+          addRouteToAgg(productAggregateMap.get(productKey)!, r);
         });
 
         // Calculate aggregated J+K for carriers and products
-        const carrierJK = new Map<string, { 
-          standardDays: number; 
-          actualDays: number;
+        type AggMetrics = {
+          unit: TimeUnit;
+          jkStandard: number;
+          jkActual: number;
           standardPercentage: number;
           actualPercentage: number;
           deviation: number;
           status: 'compliant' | 'warning' | 'critical';
-        }>();
-        carrierAggregateMap.forEach((agg, carrier) => {
-          const avgStandardPercentage = agg.standardPercentageCount > 0 
-            ? agg.standardPercentageSum / agg.standardPercentageCount 
+        };
+        const finishAgg = (agg: AggJK): AggMetrics => {
+          const avgStandardPercentage = agg.standardPercentageCount > 0
+            ? agg.standardPercentageSum / agg.standardPercentageCount
             : 95;
-          const standardDays = agg.standardDaysArray.length > 0
-            ? agg.standardDaysArray.reduce((sum, d) => sum + d, 0) / agg.standardDaysArray.length
-            : 0;
-          const actualDays = calculateJKActualFromDays(
-            agg.actualDaysArray,
-            avgStandardPercentage,
-            standardDays
-          );
-          const actualPercentage = agg.totalShipments > 0 
-            ? (agg.compliantShipments / agg.totalShipments) * 100 
+          const { unit, jkStandard, jkActual } = groupJK(agg, avgStandardPercentage);
+          const actualPercentage = agg.totalShipments > 0
+            ? (agg.compliantShipments / agg.totalShipments) * 100
             : 0;
           const deviation = actualPercentage - avgStandardPercentage;
-          
-          // Calculate status using global SLA thresholds
-          let status: 'compliant' | 'warning' | 'critical';
-          if (actualPercentage >= defaultWarningThreshold) {
-            status = 'compliant';
-          } else if (actualPercentage >= defaultCriticalThreshold) {
-            status = 'warning';
-          } else {
-            status = 'critical';
-          }
-          
-          carrierJK.set(carrier, { 
-            standardDays, 
-            actualDays, 
-            standardPercentage: avgStandardPercentage,
-            actualPercentage,
-            deviation,
-            status
-          });
-        });
 
-        const productJK = new Map<string, { 
-          standardDays: number; 
-          actualDays: number;
-          standardPercentage: number;
-          actualPercentage: number;
-          deviation: number;
-          status: 'compliant' | 'warning' | 'critical';
-        }>();
-        productAggregateMap.forEach((agg, productKey) => {
-          const avgStandardPercentage = agg.standardPercentageCount > 0 
-            ? agg.standardPercentageSum / agg.standardPercentageCount 
-            : 95;
-          const standardDays = agg.standardDaysArray.length > 0
-            ? agg.standardDaysArray.reduce((sum, d) => sum + d, 0) / agg.standardDaysArray.length
-            : 0;
-          const actualDays = calculateJKActualFromDays(
-            agg.actualDaysArray,
-            avgStandardPercentage,
-            standardDays
-          );
-          const actualPercentage = agg.totalShipments > 0 
-            ? (agg.compliantShipments / agg.totalShipments) * 100 
-            : 0;
-          const deviation = actualPercentage - avgStandardPercentage;
-          
           // Calculate status using global SLA thresholds
           let status: 'compliant' | 'warning' | 'critical';
           if (actualPercentage >= defaultWarningThreshold) {
@@ -1627,16 +1550,12 @@ export function useTerritoryEquityDataV2(
           } else {
             status = 'critical';
           }
-          
-          productJK.set(productKey, { 
-            standardDays, 
-            actualDays,
-            standardPercentage: avgStandardPercentage,
-            actualPercentage,
-            deviation,
-            status
-          });
-        });
+          return { unit, jkStandard, jkActual, standardPercentage: avgStandardPercentage, actualPercentage, deviation, status };
+        };
+        const carrierJK = new Map<string, AggMetrics>();
+        carrierAggregateMap.forEach((agg, carrier) => carrierJK.set(carrier, finishAgg(agg)));
+        const productJK = new Map<string, AggMetrics>();
+        productAggregateMap.forEach((agg, productKey) => productJK.set(productKey, finishAgg(agg)));
 
         // Extend routeData to include aggregated metrics
         const routeDataWithAggregates = routeData.map(r => {
@@ -1644,14 +1563,16 @@ export function useTerritoryEquityDataV2(
           const productMetrics = productJK.get(`${r.carrier}|${r.product}`);
           return {
             ...r,
-            carrierStandardDays: carrierMetrics?.standardDays || 0,
-            carrierActualDays: carrierMetrics?.actualDays || 0,
+            carrierUnit: carrierMetrics?.unit || 'hours',
+            carrierJkStandard: carrierMetrics?.jkStandard || 0,
+            carrierJkActual: carrierMetrics?.jkActual || 0,
             carrierStandardPercentage: carrierMetrics?.standardPercentage || 0,
             carrierActualPercentage: carrierMetrics?.actualPercentage || 0,
             carrierDeviation: carrierMetrics?.deviation || 0,
             carrierStatus: carrierMetrics?.status || 'compliant',
-            productStandardDays: productMetrics?.standardDays || 0,
-            productActualDays: productMetrics?.actualDays || 0,
+            productUnit: productMetrics?.unit || 'hours',
+            productJkStandard: productMetrics?.jkStandard || 0,
+            productJkActual: productMetrics?.jkActual || 0,
             productStandardPercentage: productMetrics?.standardPercentage || 0,
             productActualPercentage: productMetrics?.actualPercentage || 0,
             productDeviation: productMetrics?.deviation || 0,
@@ -1659,59 +1580,53 @@ export function useTerritoryEquityDataV2(
           };
         });
 
-        // 10. Calculate trend data (daily aggregation)
-        const trendMap = new Map<string, { 
-          totalDays: number; 
-          count: number; 
+        // 10. Calculate trend data (daily aggregation) - tiempos en horas (dias*24 si la ruta mide en dias)
+        const trendMap = new Map<string, {
+          totalHours: number;
+          measuredCount: number;
+          count: number;
           compliant: number;
-          standardDaysSum: number;
-          standardDaysCount: number;
+          standardHoursSum: number;
+          standardHoursCount: number;
           standardPercentSum: number;
           standardPercentCount: number;
         }>();
-        
+
         shipments.forEach(s => {
           if (!s.sent_at) return;
           const date = new Date(s.sent_at);
           const dateKey = date.toISOString().split('T')[0]; // YYYY-MM-DD
           if (!trendMap.has(dateKey)) {
-            trendMap.set(dateKey, { 
-              totalDays: 0, 
-              count: 0, 
+            trendMap.set(dateKey, {
+              totalHours: 0,
+              measuredCount: 0,
+              count: 0,
               compliant: 0,
-              standardDaysSum: 0,
-              standardDaysCount: 0,
+              standardHoursSum: 0,
+              standardHoursCount: 0,
               standardPercentSum: 0,
               standardPercentCount: 0,
             });
           }
           const trend = trendMap.get(dateKey)!;
           trend.count++;
-          if (s.business_transit_days != null) {
-            trend.totalDays += s.business_transit_days;
-          }
           if (s.on_time_delivery) {
             trend.compliant++;
           }
-          
+
           // Find standard for this shipment
-          const originCityId = cityNameToIdMap.get(s.origin_city_name);
-          const destCityId = cityNameToIdMap.get(s.destination_city_name);
-          const carrierId = carrierNameToIdMap.get(s.carrier_name);
-          const productId = productDescToIdMap.get(s.product_name);
-          
-          const standard = (originCityId && destCityId && carrierId && productId)
-            ? standardsMap.get(`${carrierId}|${productId}|${originCityId}|${destCityId}`)
-            : undefined;
-          
+          const standard = standardOfShipment(s);
+          const unit = measureUnit(standard);
+          const hours = measureHours(s, unit);
+          if (hours != null) {
+            trend.totalHours += hours;
+            trend.measuredCount++;
+          }
+
           if (standard) {
-            // Convert standard_time to days based on time_unit
             if (standard.standard_time != null) {
-              const allowedDays = standard.time_unit === 'days' 
-                ? standard.standard_time 
-                : (standard.standard_time / 24);
-              trend.standardDaysSum += allowedDays;
-              trend.standardDaysCount++;
+              trend.standardHoursSum += convertUnit(Number(standard.standard_time), unit, 'hours');
+              trend.standardHoursCount++;
             }
             const successPct = standard.success_percentage || 85;
             trend.standardPercentSum += successPct;
@@ -1722,9 +1637,9 @@ export function useTerritoryEquityDataV2(
         const trendDataArray = Array.from(trendMap.entries())
           .map(([dateKey, data]) => ({
             date: dateKey,
-            avgDays: data.count > 0 ? data.totalDays / data.count : 0,
+            avgHours: data.measuredCount > 0 ? data.totalHours / data.measuredCount : 0,
             compliancePercent: data.count > 0 ? (data.compliant / data.count) * 100 : 0,
-            standardDays: data.standardDaysCount > 0 ? data.standardDaysSum / data.standardDaysCount : 0,
+            standardHours: data.standardHoursCount > 0 ? data.standardHoursSum / data.standardHoursCount : 0,
             standardPercent: data.standardPercentCount > 0 ? data.standardPercentSum / data.standardPercentCount : 85,
           }))
           .sort((a, b) => a.date.localeCompare(b.date));
@@ -1761,7 +1676,7 @@ export function useTerritoryEquityDataV2(
     }
 
     fetchData();
-  }, [activeAccountId, JSON.stringify(filters)]);
+  }, [activeAccountId, JSON.stringify(filters), accountTimezone]);
 
   // Generate scenario description
   const getScenarioDescription = () => {

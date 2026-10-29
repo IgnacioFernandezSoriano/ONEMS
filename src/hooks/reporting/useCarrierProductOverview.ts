@@ -1,13 +1,18 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-// Removed dateUtils import - using same filtering as ONE DB
+import { useAccount } from '@/contexts/AccountContext';
+import { startOfDayInTz, endOfDayInTz } from '@/lib/dateUtils';
 import { useEffectiveAccountId } from '../useEffectiveAccountId';
+import type { TimeUnit } from '@/lib/accountTime';
+import { buildStandardsIndex, measureHours, measureUnit, routeKey, uniqueStandards } from '@/lib/transitMeasure';
 
 interface CarrierProductData {
   carrier: string;
   product: string;
   routes: number;
   totalSamples: number;
+  /** Unidad de jkStandard/jkActual/deviation: 'days' solo si todas las rutas con estandar miden en dias; si no, 'hours' */
+  unit: TimeUnit;
   jkStandard: number;
   jkActual: number;
   deviation: number;
@@ -28,6 +33,7 @@ interface Filters {
 
 export function useCarrierProductOverview(accountId: string | undefined, filters: Filters) {
   const effectiveAccountId = useEffectiveAccountId();
+  const { accountTimezone } = useAccount();
   const activeAccountId = effectiveAccountId || accountId;
 
   const [data, setData] = useState<CarrierProductData[]>([]);
@@ -60,47 +66,45 @@ export function useCarrierProductOverview(accountId: string | undefined, filters
 
         if (stdError) throw stdError;
 
-        // Create standards map with correct field names
-        const standardsMap = new Map<string, { jkStandard: number; successPercentage: number; warningThreshold: number; criticalThreshold: number }>();
-        (standards || []).forEach(std => {
-          const originCityName = std.origin_city?.name;
-          const destCityName = std.destination_city?.name;
-          const carrierName = std.carrier?.name;
-          const productName = `${std.product?.code} - ${std.product?.description}`;
-          
-          if (!originCityName || !destCityName || !carrierName || !productName) {
-            console.warn('[useCarrierProductOverview] Skipping standard with missing data:', std);
-            return;
-          }
-          
-          const routeKey = `${originCityName}-${destCityName}-${carrierName}-${productName}`;
-          const jkStandard = std.time_unit === 'days' 
-            ? std.standard_time 
-            : std.standard_time / 24;
-          
-          const successPct = std.success_percentage || 95;
-          const warningThreshold = std.threshold_type === 'relative'
-            ? successPct - (successPct * (std.warning_threshold || 5) / 100)
-            : successPct - (std.warning_threshold || 5);
-          const criticalThreshold = std.threshold_type === 'relative'
-            ? successPct - (successPct * (std.critical_threshold || 10) / 100)
-            : successPct - (std.critical_threshold || 10);
-          
-          standardsMap.set(routeKey, {
-            jkStandard: jkStandard || 0,
-            successPercentage: successPct,
-            warningThreshold: warningThreshold,
-            criticalThreshold: criticalThreshold,
-          });
-        });
+        // Indice de estandares por ruta (carrier|product|origin|destination por nombre;
+        // producto por description, que es lo que guarda one_db.product_name, y por "code - description")
+        const standardsMap = buildStandardsIndex(
+          standards || [],
+          std => ({
+            carrier: std.carrier?.name,
+            productCode: std.product?.code,
+            productDescription: std.product?.description,
+            origin: std.origin_city?.name,
+            destination: std.destination_city?.name,
+          }),
+          std => {
+            // Estandar en su propia unidad (sin convertir); la unidad decide la medida
+            const unit: TimeUnit = measureUnit(std);
+            const jkStandard = std.standard_time;
+            const successPct = std.success_percentage || 95;
+            const warningThreshold = std.threshold_type === 'relative'
+              ? successPct - (successPct * (std.warning_threshold || 5) / 100)
+              : successPct - (std.warning_threshold || 5);
+            const criticalThreshold = std.threshold_type === 'relative'
+              ? successPct - (successPct * (std.critical_threshold || 10) / 100)
+              : successPct - (std.critical_threshold || 10);
+            return {
+              jkStandard: (jkStandard || 0) as number,
+              unit,
+              successPercentage: successPct as number,
+              warningThreshold: warningThreshold as number,
+              criticalThreshold: criticalThreshold as number,
+            };
+          },
+        );
 
-        console.log('[useCarrierProductOverview] Loaded standards:', standardsMap.size);
+        console.log('[useCarrierProductOverview] Loaded standards:', uniqueStandards(standardsMap).length);
 
         // Calculate global thresholds (average of all standards)
         let warningThreshold = 80;
         let criticalThreshold = 75;
         if (standardsMap.size > 0) {
-          const thresholds = Array.from(standardsMap.values());
+          const thresholds = uniqueStandards(standardsMap);
           warningThreshold = thresholds.reduce((sum, s) => sum + s.warningThreshold, 0) / thresholds.length;
           criticalThreshold = thresholds.reduce((sum, s) => sum + s.criticalThreshold, 0) / thresholds.length;
         }
@@ -122,6 +126,7 @@ export function useCarrierProductOverview(accountId: string | undefined, filters
               product_name, 
               on_time_delivery, 
               business_transit_days,
+              business_transit_hours,
               origin_city_name,
               destination_city_name
             `)
@@ -130,10 +135,10 @@ export function useCarrierProductOverview(accountId: string | undefined, filters
 
           // Use same date filtering as ONE DB (no time adjustment)
           if (filters.dateFrom && filters.dateFrom !== '') {
-            query = query.gte('sent_at', filters.dateFrom)
+            query = query.gte('sent_at', startOfDayInTz(filters.dateFrom.slice(0, 10), accountTimezone))
           }
           if (filters.dateTo && filters.dateTo !== '') {
-            query = query.lte('sent_at', filters.dateTo)
+            query = query.lte('sent_at', endOfDayInTz(filters.dateTo.slice(0, 10), accountTimezone))
           }
           if (filters.originCity) {
             query = query.eq('origin_city_name', filters.originCity)
@@ -167,9 +172,13 @@ export function useCarrierProductOverview(accountId: string | undefined, filters
         const grouped = new Map<string, {
           routes: Set<string>;
           onTimeCount: number;
+          onTimeEvaluated: number; // envios con on_time_delivery no nulo (los nulos no cuentan como tarde)
           total: number;
-          dayDistribution: Map<number, number>; // day -> count
-          totalStandardDays: number;
+          hourDistribution: Map<number, number>; // horas (medida de la ruta en horas) -> count
+          timedTotal: number;
+          daysRoutes: number; // envios cuya ruta tiene estandar en dias
+          hoursRoutes: number; // envios cuya ruta tiene estandar en horas
+          totalStandardHours: number;
           standardPercentageSum: number;
           standardPercentageCount: number;
           routePerformance: Map<string, { onTime: number; total: number }>;
@@ -177,17 +186,21 @@ export function useCarrierProductOverview(accountId: string | undefined, filters
 
         (shipments || []).forEach(shipment => {
           const key = `${shipment.carrier_name}|${shipment.product_name}`;
-          const routeKey = `${shipment.origin_city_name}-${shipment.destination_city_name}`;
-          const standardKey = `${shipment.origin_city_name}-${shipment.destination_city_name}-${shipment.carrier_name}-${shipment.product_name}`;
+          const pairKey = `${shipment.origin_city_name}-${shipment.destination_city_name}`;
+          const standardKey = routeKey(shipment.carrier_name, shipment.product_name, shipment.origin_city_name, shipment.destination_city_name);
           const standard = standardsMap.get(standardKey);
           
           if (!grouped.has(key)) {
             grouped.set(key, {
               routes: new Set(),
               onTimeCount: 0,
+              onTimeEvaluated: 0,
               total: 0,
-              dayDistribution: new Map(),
-              totalStandardDays: 0,
+              hourDistribution: new Map(),
+              timedTotal: 0,
+              daysRoutes: 0,
+              hoursRoutes: 0,
+              totalStandardHours: 0,
               standardPercentageSum: 0,
               standardPercentageCount: 0,
               routePerformance: new Map()
@@ -195,35 +208,49 @@ export function useCarrierProductOverview(accountId: string | undefined, filters
           }
           
           const stats = grouped.get(key)!;
-          stats.routes.add(routeKey);
-          stats.onTimeCount += shipment.on_time_delivery ? 1 : 0;
+          stats.routes.add(pairKey);
+          const hasOnTime = typeof shipment.on_time_delivery === 'boolean';
+          if (hasOnTime) {
+            stats.onTimeEvaluated += 1;
+            stats.onTimeCount += shipment.on_time_delivery ? 1 : 0;
+          }
           stats.total += 1;
           
-          // Accumulate day distribution
-          const transitDays = shipment.business_transit_days || 0;
-          stats.dayDistribution.set(transitDays, (stats.dayDistribution.get(transitDays) || 0) + 1);
-          
-          stats.totalStandardDays += standard?.jkStandard || 0;
+          // Medida segun la unidad del estandar de la ruta, expresada en horas
+          const unit: TimeUnit = standard?.unit || 'hours';
+          if (standard) {
+            if (unit === 'days') stats.daysRoutes++; else stats.hoursRoutes++;
+          }
+          const transitHours = measureHours(shipment, unit);
+          if (transitHours !== null) {
+            const bucket = Math.round(transitHours);
+            stats.hourDistribution.set(bucket, (stats.hourDistribution.get(bucket) || 0) + 1);
+            stats.timedTotal += 1;
+          }
+
+          stats.totalStandardHours += (standard?.jkStandard || 0) * (unit === 'days' ? 24 : 1);
           if (standard?.successPercentage) {
             stats.standardPercentageSum += standard.successPercentage;
             stats.standardPercentageCount++;
           }
           
           // Track route performance
-          if (!stats.routePerformance.has(routeKey)) {
-            stats.routePerformance.set(routeKey, { onTime: 0, total: 0 });
+          if (!stats.routePerformance.has(pairKey)) {
+            stats.routePerformance.set(pairKey, { onTime: 0, total: 0 });
           }
-          const routeStats = stats.routePerformance.get(routeKey)!;
-          routeStats.onTime += shipment.on_time_delivery ? 1 : 0;
-          routeStats.total += 1;
+          const routeStats = stats.routePerformance.get(pairKey)!;
+          if (hasOnTime) {
+            routeStats.onTime += shipment.on_time_delivery ? 1 : 0;
+            routeStats.total += 1;
+          }
         });
 
         // Calculate metrics for each carrier-product combination
         const result: CarrierProductData[] = [];
         grouped.forEach((stats, key) => {
           const [carrier, product] = key.split('|');
-          const onTimePercentage = (stats.onTimeCount / stats.total) * 100;
-          const jkStandard = stats.totalStandardDays / stats.total;
+          const onTimePercentage = stats.onTimeEvaluated > 0 ? (stats.onTimeCount / stats.onTimeEvaluated) * 100 : 0;
+          let jkStandard = stats.totalStandardHours / stats.total;
           
           // Calculate J+K Actual (days to reach STD %)
           const targetStdPercentage = stats.standardPercentageCount > 0 
@@ -231,23 +258,31 @@ export function useCarrierProductOverview(accountId: string | undefined, filters
             : 85;
           
           let jkActual = 0;
-          const sortedDays = Array.from(stats.dayDistribution.keys()).sort((a, b) => a - b);
+          const sortedHours = Array.from(stats.hourDistribution.keys()).sort((a, b) => a - b);
           let cumulativeSamples = 0;
-          const targetSamples = (targetStdPercentage / 100) * stats.total;
-          
-          for (const day of sortedDays) {
-            cumulativeSamples += stats.dayDistribution.get(day) || 0;
+          const targetSamples = (targetStdPercentage / 100) * stats.timedTotal;
+
+          for (const h of sortedHours) {
+            cumulativeSamples += stats.hourDistribution.get(h) || 0;
             if (cumulativeSamples >= targetSamples) {
-              jkActual = day;
+              jkActual = h;
               break;
             }
           }
-          
+
+          // Si todas las rutas con estandar miden en dias, se devuelve en dias; si hay mezcla, en horas
+          const groupUnit: TimeUnit = stats.daysRoutes > 0 && stats.hoursRoutes === 0 ? 'days' : 'hours';
+          if (groupUnit === 'days') {
+            jkStandard = jkStandard / 24;
+            jkActual = jkActual / 24;
+          }
+
           const deviation = jkActual - jkStandard;
           
           // Count problematic routes (on-time < critical threshold)
           let problematicRoutes = 0;
           stats.routePerformance.forEach(routeStats => {
+            if (routeStats.total === 0) return;
             const routeOnTime = (routeStats.onTime / routeStats.total) * 100;
             if (routeOnTime <= criticalThreshold) {
               problematicRoutes++;
@@ -269,6 +304,7 @@ export function useCarrierProductOverview(accountId: string | undefined, filters
             product,
             routes: stats.routes.size,
             totalSamples: stats.total,
+            unit: groupUnit,
             jkStandard,
             jkActual,
             deviation,
@@ -287,7 +323,7 @@ export function useCarrierProductOverview(accountId: string | undefined, filters
     }
 
     fetchData();
-  }, [activeAccountId, filters.dateFrom, filters.dateTo, filters.routeType, filters.originCity, filters.destinationCity, filters.carrier, filters.product]);
+  }, [activeAccountId, filters.dateFrom, filters.dateTo, filters.routeType, filters.originCity, filters.destinationCity, filters.carrier, filters.product, accountTimezone]);
 
   return { data, loading, error, globalWarningThreshold, globalCriticalThreshold };
 }

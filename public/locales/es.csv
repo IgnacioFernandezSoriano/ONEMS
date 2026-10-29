@@ -590,6 +590,8 @@ common.tuesday,Martes
 common.type,Tipo
 common.unavailable,No disponible
 common.unit,Unidad
+common.unit_days,Días
+common.unit_hours,Horas
 common.update,Actualizar
 common.updated_successfully,Actualizado exitosamente
 common.updating,Actualizando...
@@ -1211,8 +1213,11 @@ onedb.all_products,Todos los productos
 onedb.all_records,Todos los registros
 onedb.all_shipment_records,Todos los registros de envíos
 onedb.avg_transit_days,Días promedio de tránsito
+onedb.avg_transit_time,Tiempo medio de tránsito
 onedb.business_days,Días hábiles
 onedb.business_days_average,Promedio de días hábiles
+onedb.business_time,Tiempo hábil
+onedb.business_time_average,Promedio de tiempo hábil
 onedb.carrier,Transportista
 onedb.delayed,Retrasado
 onedb.destination,Destino:
@@ -1243,6 +1248,7 @@ onedb.title,ONE DB
 onedb.to_date,Hasta la fecha
 onedb.total_records,Total de registros
 onedb.transit_days,Días en tránsito
+onedb.transit_time,Tiempo en tránsito
 onedb.validated_postal_quality_analytics_repository,Repositorio validado de análisis de calidad postal
 onedb_api.api_key_label,Tu clave API
 onedb_api.api_tester_title,Probador de API
@@ -1679,6 +1685,7 @@ reporting.avg_j_k_actual,Promedio J+K Real
 reporting.avg_jk_actual,Prom. J+K Real
 reporting.avg_standard,Estándar promedio ({percent} %)
 reporting.avg_transit_days,Promedio de Días de Tránsito
+reporting.avg_transit_time,Tiempo medio de tránsito
 reporting.basic_information,Información Básica
 reporting.below_critical_threshold_with_penalty,Por debajo del umbral crítico (con penalización)
 reporting.below_standard_but_above_critical_no_penalty,Por debajo del estándar pero por encima del crítico (sin penalización)
