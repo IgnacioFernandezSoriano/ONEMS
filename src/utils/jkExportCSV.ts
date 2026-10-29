@@ -2,15 +2,18 @@ import type { JKRouteData, JKCityData, JKRegionData, JKCarrierData } from '@/hoo
 
 // `unit` es opcional: otras pantallas (equidad territorial) pasan rutas medidas en dias
 export function exportRouteCSV(data: Array<Omit<JKRouteData, 'unit'> & { unit?: JKRouteData['unit'] }>) {
+  // h / d segun la unidad de las rutas (mezcla: ver columna Unit)
+  const units = new Set(data.map(r => r.unit ?? 'days'));
+  const sfx = units.size === 1 ? (units.has('hours') ? 'h' : 'd') : 'h/d';
   const headers = [
     'Origin City',
     'Destination City',
     'Carrier',
     'Product',
     'Total Samples',
-    'J+K Standard (days)',
-    'J+K Actual (days)',
-    'Deviation (days)',
+    `J+K Standard (${sfx})`,
+    `J+K Actual (${sfx})`,
+    `Deviation (${sfx})`,
     'STD %',
     'On-Time %',
     'On-Time Samples',
@@ -177,7 +180,9 @@ export function exportCumulativeCSV(routes: Array<{
   standardPercentage: number;
   distribution: Map<number, number>;
   totalSamples: number;
-}>, maxDays: number) {
+}>, maxDays: number, unit: 'hours' | 'days' = 'days') {
+  const suffix = unit === 'hours' ? 'h' : 'd';
+  const cap = unit === 'hours' ? 120 : 20;
   // Find max day needed
   let maxNeededDay = 0;
   routes.forEach(route => {
@@ -192,16 +197,16 @@ export function exportCumulativeCSV(routes: Array<{
     }
   });
 
-  const days = Array.from({ length: Math.min(maxNeededDay + 1, 20) }, (_, i) => i);
+  const days = Array.from({ length: Math.min(maxNeededDay + 1, cap) }, (_, i) => i);
 
   // Build headers
   const headers = [
     'Route',
     'Carrier',
     'Product',
-    'J+K Std (days)',
+    `J+K Std (${unit})`,
     'Std %',
-    ...days.map(d => `${d}d Cumulative %`)
+    ...days.map(d => `${d}${suffix} Cumulative %`)
   ];
 
   const rows: string[][] = [headers];

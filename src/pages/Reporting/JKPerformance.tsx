@@ -593,7 +593,7 @@ export default function JKPerformance() {
           icon={Clock}
           trend={metrics.avgJKActual <= metrics.avgJKStandard ? 'up' : 'down'}
           trendValue={`${t('reporting.vs_std')}: ${fmtAvgJK(metrics.avgJKStandard, metrics.unit)}`}
-          color={metrics.avgJKActual <= metrics.avgJKStandard ? 'green' : metrics.avgJKActual <= metrics.avgJKStandard + 1 ? 'amber' : 'red'}
+          color={metrics.avgJKActual <= metrics.avgJKStandard ? 'green' : metrics.avgJKActual <= metrics.avgJKStandard + (metrics.unit === 'hours' ? 24 : 1) ? 'amber' : 'red'}
           tooltip={{
             description: "Weighted average of days required to reach the STD % target across all routes in the selection.",
             interpretation: "Represents the actual day when cumulative deliveries reach the target percentage. Compare against J+K Standard to assess performance gap.",
@@ -790,7 +790,7 @@ export default function JKPerformance() {
                         return a.onTimePercentage - b.onTimePercentage;
                       })
                       .map((route, idx) => {
-                      const deviationColor = route.deviation <= 0 ? 'text-green-600' : route.deviation < 1 ? 'text-yellow-600' : 'text-red-600';
+                      const deviationColor = route.deviation <= 0 ? 'text-green-600' : route.deviation < (route.unit === 'hours' ? 24 : 1) ? 'text-yellow-600' : 'text-red-600';
                       const onTimeColor = route.onTimePercentage >= route.warningThreshold ? 'text-green-600 font-semibold' : route.onTimePercentage > route.criticalThreshold ? 'text-yellow-600' : 'text-red-600 font-semibold';
                       const statusColor = route.status === 'compliant' ? 'bg-green-500' : route.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500';
                       
@@ -884,7 +884,7 @@ export default function JKPerformance() {
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {cityData.map((city, idx) => {
-                      const deviationColor = city.deviation <= 0 ? 'text-green-600' : city.deviation < 1 ? 'text-yellow-600' : 'text-red-600';
+                      const deviationColor = city.deviation <= 0 ? 'text-green-600' : city.deviation < (city.unit === 'hours' ? 24 : 1) ? 'text-yellow-600' : 'text-red-600';
                       const onTimeColor = city.onTimePercentage >= city.warningThreshold ? 'text-green-600 font-semibold' : city.onTimePercentage > city.criticalThreshold ? 'text-yellow-600' : 'text-red-600 font-semibold';
                       const statusColor = city.status === 'compliant' ? 'bg-green-500' : city.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500';
                       const directionIcon = city.direction === 'inbound' ? '🔵 ↓' : '🟢 ↑';
@@ -988,7 +988,7 @@ export default function JKPerformance() {
                         return a.onTimePercentage - b.onTimePercentage;
                       })
                       .map((region, idx) => {
-                      const deviationColor = region.deviation <= 0 ? 'text-green-600' : region.deviation < 1 ? 'text-yellow-600' : 'text-red-600';
+                      const deviationColor = region.deviation <= 0 ? 'text-green-600' : region.deviation < (region.unit === 'hours' ? 24 : 1) ? 'text-yellow-600' : 'text-red-600';
                       const onTimeColor = region.onTimePercentage >= region.warningThreshold ? 'text-green-600 font-semibold' : region.onTimePercentage > region.criticalThreshold ? 'text-yellow-600' : 'text-red-600 font-semibold';
                       const statusColor = region.status === 'compliant' ? 'bg-green-500' : region.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500';
                       const directionIcon = region.direction === 'inbound' ? '🔵 ↓' : '🟢 ↑';
@@ -1092,7 +1092,7 @@ export default function JKPerformance() {
                         return a.onTimePercentage - b.onTimePercentage;
                       })
                       .map((carrier, carrierIdx) => {
-                      const carrierDeviationColor = carrier.deviation <= 0 ? 'text-green-600' : carrier.deviation < 1 ? 'text-yellow-600' : 'text-red-600';
+                      const carrierDeviationColor = carrier.deviation <= 0 ? 'text-green-600' : carrier.deviation < (carrier.unit === 'hours' ? 24 : 1) ? 'text-yellow-600' : 'text-red-600';
                       const carrierOnTimeColor = carrier.onTimePercentage >= carrier.warningThreshold ? 'text-green-600 font-semibold' : carrier.onTimePercentage > carrier.criticalThreshold ? 'text-yellow-600' : 'text-red-600 font-semibold';
                       const carrierStatusColor = carrier.status === 'compliant' ? 'bg-green-500' : carrier.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500';
                       
@@ -1123,7 +1123,7 @@ export default function JKPerformance() {
                           </tr>
                           {/* Product Rows */}
                           {carrier.products.map((product, productIdx) => {
-                            const productDeviationColor = product.deviation <= 0 ? 'text-green-600' : product.deviation < 1 ? 'text-yellow-600' : 'text-red-600';
+                            const productDeviationColor = product.deviation <= 0 ? 'text-green-600' : product.deviation < (product.unit === 'hours' ? 24 : 1) ? 'text-yellow-600' : 'text-red-600';
                             const productOnTimeColor = product.onTimePercentage >= product.warningThreshold ? 'text-green-600 font-semibold' : product.onTimePercentage > product.criticalThreshold ? 'text-yellow-600' : 'text-red-600 font-semibold';
                             const productStatusColor = product.status === 'compliant' ? 'bg-green-500' : product.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500';
                             
@@ -1176,7 +1176,7 @@ export default function JKPerformance() {
                         standardPercentage: route.standardPercentage,
                         distribution: route.distribution,
                         totalSamples: route.totalSamples,
-                      })), chartMax)}
+                      })), chartMax, chartUnit)}
                       className="flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
                     >
                       <FileDown className="w-4 h-4" />
@@ -1218,6 +1218,8 @@ export default function JKPerformance() {
                     distribution: route.distribution,
                     totalShipments: route.totalSamples,
                   }))}
+                  unit={chartUnit}
+                  axisLabel={chartAxisLabel}
                 />
               ) : (
                 <CumulativeDistributionTable

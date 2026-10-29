@@ -320,10 +320,12 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
           const key = `${shipment.carrier_name}|${shipment.product_name}|${shipment.origin_city_name}|${shipment.destination_city_name}`;
           const standard = standardsMap.get(key);
           const rowUnit: TimeUnit = standard?.unit ?? 'hours';
-          const days = measureOf(shipment, rowUnit) ?? 0; // medida en la unidad de la ruta
+          const measure = measureOf(shipment, rowUnit); // medida en la unidad de la ruta
+          // Sin medida (no entregado / sin calcular): no cuenta ni como a tiempo ni como tarde
+          if (measure === null) return;
 
-          if (days > calculatedMax[rowUnit]) {
-            calculatedMax[rowUnit] = days;
+          if (measure > calculatedMax[rowUnit]) {
+            calculatedMax[rowUnit] = measure;
           }
 
           if (!routeMap.has(key)) {
@@ -341,7 +343,7 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
           }
 
           const route = routeMap.get(key)!;
-          route.samples.push(days);
+          route.samples.push(measure);
           
           // Collect standard_time for J+K calculation (same logic as useTerritoryEquityDataV2)
           if (standard?.jkStandard != null) {
@@ -349,12 +351,14 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
           }
           
           // Update distribution
-          const bucket = rowUnit === 'hours' ? Math.round(days) : days;
+          // Cubetas de 1 h: un envio de 48.4 h cae en la cubeta 48 aunque a tiempo lo cuenta como tarde (inherente)
+          const bucket = rowUnit === 'hours' ? Math.round(measure) : measure;
           const currentCount = route.distribution.get(bucket) || 0;
           route.distribution.set(bucket, currentCount + 1);
         });
 
-        setMaxMeasure(calculatedMax);
+        // Maximo en cubetas enteras (techo) para que la grafica llegue a la ultima cubeta
+        setMaxMeasure({ hours: Math.ceil(calculatedMax.hours), days: Math.ceil(calculatedMax.days) });
 
         // 7. Build route data
         const routes: JKRouteData[] = Array.from(routeMap.entries()).map(([key, route]) => {
