@@ -294,3 +294,97 @@ BEGIN
   RETURN NEW;
 END;
 $function$;
+
+-- Seccion 3: correccion de los datos existentes de one_db.
+--   Las filas antiguas tienen sent_at/received_at desplazados por el offset de la cuenta (el transfer viejo lo
+--   restaba) y NULL en las columnas nuevas. one_db_backfill_transit():
+--     (a) copia sent_at/received_at del detalle (allocation_plan_details) cuando existe, tiene ambas fechas y difieren;
+--     (b) UPDATE ... SET sent_at = sent_at para que el trigger recalcule todas las medidas (devuelve estas filas);
+--     (c) recalcula on_time_delivery: por ids si la fila tiene detalle; por nombres (acotado por cuenta) si no.
+--         Filas sin estandar => NULL.
+CREATE OR REPLACE FUNCTION public.one_db_backfill_transit()
+RETURNS integer
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_rows integer;
+BEGIN
+  -- (a) fechas reales desde el detalle (ambas a la vez: respeta one_db_valid_timestamps)
+  UPDATE one_db o
+     SET sent_at = d.sent_at, received_at = d.received_at
+    FROM allocation_plan_details d
+   WHERE d.id = o.allocation_detail_id
+     AND d.sent_at IS NOT NULL AND d.received_at IS NOT NULL
+     AND (o.sent_at IS DISTINCT FROM d.sent_at OR o.received_at IS DISTINCT FROM d.received_at);
+
+  -- (b) el trigger one_db_compute_transit recalcula horas/dias/locales de todas las filas
+  UPDATE one_db SET sent_at = sent_at;
+  GET DIAGNOSTICS v_rows = ROW_COUNT;
+
+  -- (c1) filas con detalle: estandar por ids
+  UPDATE one_db o
+     SET on_time_delivery = one_db_on_time(o.business_transit_hours, o.business_transit_days, ds.standard_time, ds.time_unit)
+    FROM allocation_plan_details d
+    JOIN allocation_plans ap ON ap.id = d.plan_id
+    LEFT JOIN nodes onode ON onode.id = d.origin_node_id
+    LEFT JOIN nodes dnode ON dnode.id = d.destination_node_id
+    LEFT JOIN LATERAL (
+      SELECT s.standard_time, s.time_unit
+        FROM delivery_standards s
+       WHERE s.carrier_id = ap.carrier_id
+         AND s.product_id = ap.product_id
+         AND s.origin_city_id = onode.city_id
+         AND s.destination_city_id = dnode.city_id
+       LIMIT 1
+    ) ds ON true
+   WHERE d.id = o.allocation_detail_id;
+
+  -- (c2) filas sin detalle: estandar por nombres dentro de la cuenta
+  UPDATE one_db o
+     SET on_time_delivery = one_db_on_time(o.business_transit_hours, o.business_transit_days, ds.standard_time, ds.time_unit)
+    FROM (SELECT o2.id AS oid FROM one_db o2
+           WHERE NOT EXISTS (SELECT 1 FROM allocation_plan_details d WHERE d.id = o2.allocation_detail_id)) nd
+    LEFT JOIN LATERAL (
+      SELECT s.standard_time, s.time_unit
+        FROM delivery_standards s
+        JOIN carriers c  ON c.id  = s.carrier_id
+        JOIN products p  ON p.id  = s.product_id
+        JOIN cities co   ON co.id = s.origin_city_id
+        JOIN cities cd   ON cd.id = s.destination_city_id
+        JOIN one_db o3   ON o3.id = nd.oid
+       WHERE s.account_id = o3.account_id
+         AND c.name = o3.carrier_name
+         AND p.description = o3.product_name
+         AND co.name = o3.origin_city_name
+         AND cd.name = o3.destination_city_name
+       LIMIT 1
+    ) ds ON true
+   WHERE o.id = nd.oid;
+
+  RETURN v_rows;
+END $$;
+
+-- Aparte: al editar un estandar, el recalculo de one_db debe correr con permisos propios; con RLS un admin de
+-- cuenta (no superadmin) no veia las filas de one_db y la actualizacion era un no-op silencioso.
+-- Se reemite la definicion de la seccion 2 anadiendo solo SECURITY DEFINER y SET search_path.
+CREATE OR REPLACE FUNCTION public.recalculate_on_time_delivery_on_sla_change()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $function$
+BEGIN
+  UPDATE one_db
+     SET on_time_delivery = one_db_on_time(one_db.business_transit_hours, one_db.business_transit_days, NEW.standard_time, NEW.time_unit)
+   WHERE one_db.account_id = NEW.account_id
+     AND one_db.carrier_name IN (SELECT name FROM carriers WHERE id = NEW.carrier_id)
+     AND one_db.product_name IN (SELECT description FROM products WHERE id = NEW.product_id)
+     AND one_db.origin_city_name IN (SELECT name FROM cities WHERE id = NEW.origin_city_id)
+     AND one_db.destination_city_name IN (SELECT name FROM cities WHERE id = NEW.destination_city_id);
+  RETURN NEW;
+END;
+$function$;
+
+SELECT public.one_db_backfill_transit();

@@ -123,6 +123,8 @@ SELECT pg_temp.fail_if((SELECT total_transit_hours FROM one_db WHERE tag_id='D1'
 SELECT pg_temp.fail_if((SELECT business_transit_hours FROM one_db WHERE tag_id='D1') IS DISTINCT FROM 41.94, 'T3 business_transit_hours');
 SELECT pg_temp.fail_if((SELECT business_transit_days FROM one_db WHERE tag_id='D1') IS DISTINCT FROM 2, 'T3 business_transit_days');
 SELECT pg_temp.fail_if((SELECT sent_at_local FROM one_db WHERE tag_id='D1') IS DISTINCT FROM '2026-10-27 16:44:18'::timestamp, 'T3 sent_at_local');
+SELECT pg_temp.fail_if((SELECT total_transit_days FROM one_db WHERE tag_id='D1') IS DISTINCT FROM 2, 'T3 total_transit_days');
+SELECT pg_temp.fail_if((SELECT received_at_local FROM one_db WHERE tag_id='D1') IS DISTINCT FROM '2026-10-29 10:40:57'::timestamp, 'T3 received_at_local');
 -- (fin < inicio => 0 queda cubierto en H4/D5b: el CHECK one_db_valid_timestamps impide filas invertidas)
 ROLLBACK;
 
@@ -143,4 +145,39 @@ SELECT pg_temp.fail_if((SELECT on_time_delivery FROM one_db WHERE tag_id='000103
 UPDATE public.delivery_standards SET standard_time = 30, time_unit = NULL WHERE id = 'd1000000-0000-0000-0000-000000000003';
 SELECT pg_temp.ship('cc000000-0000-0000-0000-000000000003','b1000000-0000-0000-0000-000000000003','b2000000-0000-0000-0000-000000000003','00010310','2026-10-27 13:44:18Z','2026-10-29 07:40:57Z');
 SELECT pg_temp.fail_if((SELECT on_time_delivery FROM one_db WHERE tag_id='00010310') IS DISTINCT FROM false, 'T5b time_unit NULL en horas: 41.94 > 30');
+ROLLBACK;
+
+-- ===== T6: backfill de una fila vieja con detalle: copia fechas del detalle, recalcula medidas y on_time por ids
+BEGIN;
+\ir fixtures/one_db_kenya.sql
+INSERT INTO public.allocation_plan_details (id, account_id, plan_id, origin_node_id, destination_node_id, fecha_programada, week_number, month, year, status, tag_id, sent_at, received_at, transferred_to_one_db_at)
+VALUES ('f0000000-0000-0000-0000-000000000006','a0000000-0000-0000-0000-000000000003','cc000000-0000-0000-0000-000000000003','b1000000-0000-0000-0000-000000000003','b2000000-0000-0000-0000-000000000003','2026-10-27',44,10,2026,'received','00010305','2026-10-27 13:44:18Z','2026-10-29 07:40:57Z', now());
+-- fila "vieja": sent_at desplazado -3 h (ya no cabe en el estandar de dias) y medidas incorrectas
+INSERT INTO public.one_db (account_id, allocation_detail_id, tag_id, plan_name, carrier_name, product_name, origin_city_name, destination_city_name, sent_at, received_at, source_data_snapshot)
+VALUES ('a0000000-0000-0000-0000-000000000003','f0000000-0000-0000-0000-000000000006','00010305','PlanHoras','KENYA POST','Economy delivery within 48hrs','Kericho','Garissa','2026-10-27 10:44:18Z','2026-10-29 07:40:57Z','{}');
+UPDATE public.one_db SET total_transit_days = 99, business_transit_hours = NULL, business_transit_days = NULL, sent_at_local = NULL, on_time_delivery = false;
+SELECT pg_temp.fail_if(public.one_db_backfill_transit() IS DISTINCT FROM 1, 'T6 esperaba 1 fila tocada');
+SELECT pg_temp.fail_if((SELECT sent_at FROM one_db) IS DISTINCT FROM '2026-10-27 13:44:18Z'::timestamptz, 'T6 sent_at del detalle');
+SELECT pg_temp.fail_if((SELECT sent_at_local FROM one_db) IS DISTINCT FROM '2026-10-27 16:44:18'::timestamp, 'T6 sent_at_local');
+SELECT pg_temp.fail_if((SELECT received_at_local FROM one_db) IS DISTINCT FROM '2026-10-29 10:40:57'::timestamp, 'T6 received_at_local');
+SELECT pg_temp.fail_if((SELECT total_transit_hours FROM one_db) IS DISTINCT FROM 41.94, 'T6 total_transit_hours');
+SELECT pg_temp.fail_if((SELECT business_transit_hours FROM one_db) IS DISTINCT FROM 41.94, 'T6 business_transit_hours');
+SELECT pg_temp.fail_if((SELECT total_transit_days FROM one_db) IS DISTINCT FROM 2, 'T6 total_transit_days');
+SELECT pg_temp.fail_if((SELECT business_transit_days FROM one_db) IS DISTINCT FROM 2, 'T6 business_transit_days');
+SELECT pg_temp.fail_if((SELECT on_time_delivery FROM one_db) IS DISTINCT FROM true, 'T6 on_time_delivery (41.94 <= 48 h)');
+ROLLBACK;
+
+-- ===== T7: fila sin detalle conserva sus fechas, se recalcula y resuelve el estandar por nombres (NULL si no hay)
+BEGIN;
+\ir fixtures/one_db_kenya.sql
+INSERT INTO public.one_db (account_id, tag_id, plan_name, carrier_name, product_name, origin_city_name, destination_city_name, sent_at, received_at, source_data_snapshot) VALUES
+ ('a0000000-0000-0000-0000-000000000003','N1','P','KENYA POST','Economy delivery within 48hrs','Kericho','Garissa','2026-10-27 13:44:18Z','2026-10-29 07:40:57Z','{}'),
+ ('a0000000-0000-0000-0000-000000000003','N2','P','KENYA POST','Producto inexistente','Kericho','Garissa','2026-10-27 13:44:18Z','2026-10-29 07:40:57Z','{}');
+UPDATE public.one_db SET total_transit_days = 99, business_transit_hours = NULL, on_time_delivery = false;
+SELECT pg_temp.fail_if(public.one_db_backfill_transit() IS DISTINCT FROM 2, 'T7 esperaba 2 filas tocadas');
+SELECT pg_temp.fail_if((SELECT sent_at FROM one_db WHERE tag_id='N1') IS DISTINCT FROM '2026-10-27 13:44:18Z'::timestamptz, 'T7 conserva sent_at');
+SELECT pg_temp.fail_if((SELECT business_transit_hours FROM one_db WHERE tag_id='N1') IS DISTINCT FROM 41.94, 'T7 business_transit_hours');
+SELECT pg_temp.fail_if((SELECT total_transit_days FROM one_db WHERE tag_id='N1') IS DISTINCT FROM 2, 'T7 total_transit_days');
+SELECT pg_temp.fail_if((SELECT on_time_delivery FROM one_db WHERE tag_id='N1') IS DISTINCT FROM true, 'T7 por nombres a tiempo');
+SELECT pg_temp.fail_if((SELECT on_time_delivery FROM one_db WHERE tag_id='N2') IS NOT NULL, 'T7 sin estandar => NULL');
 ROLLBACK;
