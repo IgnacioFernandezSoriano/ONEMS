@@ -162,7 +162,7 @@ export function RoutePerformanceTableV2({ data }: RoutePerformanceTableV2Props) 
                 return a.onTimePercentage - b.onTimePercentage;
               })
               .map((route, idx) => {
-                const rowUnit: TimeUnit = route.unit ?? 'days';
+                const rowUnit: TimeUnit = route.unit ?? 'hours';
                 const tolerance = rowUnit === 'hours' ? 24 : 1;
                 const deviationColor = route.deviation <= 0 ? 'text-green-600' : route.deviation < tolerance ? 'text-yellow-600' : 'text-red-600';
                 const onTimeColor = route.onTimePercentage >= route.warningThreshold ? 'text-green-600 font-semibold' : route.onTimePercentage > route.criticalThreshold ? 'text-yellow-600' : 'text-red-600 font-semibold';

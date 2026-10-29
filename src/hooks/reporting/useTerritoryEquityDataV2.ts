@@ -12,7 +12,7 @@ import type {
 import { useEffectiveAccountId } from '../useEffectiveAccountId';
 import { useFilterScenario } from './useFilterScenario';
 import type { TimeUnit } from '@/lib/accountTime';
-import { commonUnit, convertUnit, measureHours, measureOf, measureUnit } from '@/lib/transitMeasure';
+import { buildStandardsIndex, commonUnit, convertUnit, measureHours, measureOf, measureUnit, routeKey, uniqueStandards } from '@/lib/transitMeasure';
 
 // Acumulador de J+K de un grupo (ciudad, region, transportista...): estandares y medidas se
 // guardan en horas (dias*24 si la ruta mide en dias) junto con las unidades vistas; al cerrar
@@ -108,30 +108,27 @@ export function useTerritoryEquityDataV2(
           ])
         );
 
-        const cityNameToIdMap = new Map(cities.map((c) => [c.name, c.id]));
         const regionMap = new Map(regions.map((r) => [r.id, r]));
-        const carrierNameToIdMap = new Map(carriers.map((c) => [c.name, c.id]));
-        
-        // Product map: support multiple formats
-        const productDescToIdMap = new Map<string, string>();
-        products.forEach(p => {
-          productDescToIdMap.set(`${p.code} - ${p.description}`, p.id); // Full format
-          productDescToIdMap.set(p.code, p.id); // Code only
-          productDescToIdMap.set(p.description, p.id); // Description only
-        });
 
-
-
-        // Standards map: "carrier_id|product_id|origin_id|dest_id" → standard
-        const standardsMap = new Map(
-          standards.map((s) => [
-            `${s.carrier_id}|${s.product_id}|${s.origin_city_id}|${s.destination_city_id}`,
-            s,
-          ])
+        // Indice de estandares por nombre de ruta (carrier|product|origin|destination, nombres sin
+        // espacios sobrantes; producto por description, "code - description" y codigo)
+        const cityIdToName = new Map(cities.map((c) => [c.id, c.name]));
+        const carrierIdToName = new Map(carriers.map((c) => [c.id, c.name]));
+        const productById = new Map(products.map((p) => [p.id, p]));
+        const standardsMap = buildStandardsIndex(
+          standards,
+          (s: any) => ({
+            carrier: carrierIdToName.get(s.carrier_id),
+            productCode: productById.get(s.product_id)?.code,
+            productDescription: productById.get(s.product_id)?.description,
+            origin: cityIdToName.get(s.origin_city_id),
+            destination: cityIdToName.get(s.destination_city_id),
+          }),
+          (s: any) => s,
         );
         
         console.log('[DEBUG] Standards map:', {
-          size: standardsMap.size,
+          size: uniqueStandards(standardsMap).length,
           sampleKeys: Array.from(standardsMap.keys()).slice(0, 3),
           sampleValues: Array.from(standardsMap.values()).slice(0, 1),
         });
@@ -276,14 +273,8 @@ export function useTerritoryEquityDataV2(
         >();
 
         // Estandar de la ruta de un envio (carrier|product|origen|destino por ids)
-        const standardOfShipment = (shipment: any) => {
-          const carrierId = carrierNameToIdMap.get(shipment.carrier_name);
-          const productId = productDescToIdMap.get(shipment.product_name);
-          const originCityId = cityNameToIdMap.get(shipment.origin_city_name);
-          const destCityId = cityNameToIdMap.get(shipment.destination_city_name);
-          if (!carrierId || !productId || !originCityId || !destCityId) return undefined;
-          return standardsMap.get(`${carrierId}|${productId}|${originCityId}|${destCityId}`);
-        };
+        const standardOfShipment = (shipment: any) =>
+          standardsMap.get(routeKey(shipment.carrier_name, shipment.product_name, shipment.origin_city_name, shipment.destination_city_name));
 
         shipments.forEach((shipment) => {
           // Medida segun la unidad del estandar de la ruta (en horas para acumular); null = sin medida
@@ -370,16 +361,9 @@ export function useTerritoryEquityDataV2(
             cpStats.inbound.compliant++;
           }
           
-          // Lookup IDs for standard
-          const carrierId = carrierNameToIdMap.get(shipment.carrier_name);
-          const productId = productDescToIdMap.get(shipment.product_name);
-          const originCityId = cityNameToIdMap.get(shipment.origin_city_name);
-          const destCityId = cityNameToIdMap.get(shipment.destination_city_name);
-          
           // Add standard for this carrier/product
-          if (carrierId && productId && originCityId && destCityId) {
-            const key = `${carrierId}|${productId}|${originCityId}|${destCityId}`;
-            const standard = standardsMap.get(key);
+          {
+            const standard = routeStandard;
             if (standard) {
               if (standard.success_percentage) {
                 cpStats.standardsSum += standard.success_percentage;
@@ -397,13 +381,12 @@ export function useTerritoryEquityDataV2(
           // Medida del envio en la unidad de la ruta (los nulos no cuentan)
           if (shipmentMeasureHours != null) {
             cpStats.actualHoursArray.push(shipmentMeasureHours);
-            cpStats.units.add(routeUnit);
+            if (routeStandard) cpStats.units.add(routeUnit);
           }
 
           // Also add to city-level standard (overall + inbound-specific)
-          if (carrierId && productId && originCityId && destCityId) {
-            const key = `${carrierId}|${productId}|${originCityId}|${destCityId}`;
-            const standard = standardsMap.get(key);
+          {
+            const standard = routeStandard;
             if (standard) {
               if (standard.success_percentage) {
                 destStats.standardsSum += standard.success_percentage;
@@ -441,9 +424,12 @@ export function useTerritoryEquityDataV2(
           // Medida a nivel ciudad (global + entrada)
           if (shipmentMeasureHours != null) {
             destStats.actualHoursArray.push(shipmentMeasureHours);
-            destStats.units.add(routeUnit);
             destStats.inbound.actualHoursArray.push(shipmentMeasureHours);
-            destStats.inbound.units.add(routeUnit);
+            // La unidad solo la fija una ruta con estandar (sin estandar no fuerza horas)
+            if (routeStandard) {
+              destStats.units.add(routeUnit);
+              destStats.inbound.units.add(routeUnit);
+            }
           }
 
           // Process as OUTBOUND (origin)
@@ -523,14 +509,8 @@ export function useTerritoryEquityDataV2(
           }
           
           // Add standard for this carrier/product (outbound)
-          const carrierIdOut = carrierNameToIdMap.get(shipment.carrier_name);
-          const productIdOut = productDescToIdMap.get(shipment.product_name);
-          const originCityIdOut = cityNameToIdMap.get(shipment.origin_city_name);
-          const destCityIdOut = cityNameToIdMap.get(shipment.destination_city_name);
-          
-          if (carrierIdOut && productIdOut && originCityIdOut && destCityIdOut) {
-            const keyOut = `${carrierIdOut}|${productIdOut}|${originCityIdOut}|${destCityIdOut}`;
-            const standardOut = standardsMap.get(keyOut);
+          {
+            const standardOut = routeStandard;
             if (standardOut) {
               if (standardOut.success_percentage) {
                 cpStatsOrigin.standardsSum += standardOut.success_percentage;
@@ -545,9 +525,8 @@ export function useTerritoryEquityDataV2(
           }
           
           // Also add outbound standards to origin city
-          if (carrierIdOut && productIdOut && originCityIdOut && destCityIdOut) {
-            const keyOut = `${carrierIdOut}|${productIdOut}|${originCityIdOut}|${destCityIdOut}`;
-            const standardOut = standardsMap.get(keyOut);
+          {
+            const standardOut = routeStandard;
             if (standardOut) {
               if (standardOut.success_percentage) {
                 originStats.outbound.standardsSum += standardOut.success_percentage;
@@ -576,11 +555,13 @@ export function useTerritoryEquityDataV2(
           // Medida del envio de salida (global + salida)
           if (shipmentMeasureHours != null) {
             cpStatsOrigin.actualHoursArray.push(shipmentMeasureHours);
-            cpStatsOrigin.units.add(routeUnit);
             originStats.actualHoursArray.push(shipmentMeasureHours);
-            originStats.units.add(routeUnit);
             originStats.outbound.actualHoursArray.push(shipmentMeasureHours);
-            originStats.outbound.units.add(routeUnit);
+            if (routeStandard) {
+              cpStatsOrigin.units.add(routeUnit);
+              originStats.units.add(routeUnit);
+              originStats.outbound.units.add(routeUnit);
+            }
           }
         });
 
@@ -773,18 +754,10 @@ export function useTerritoryEquityDataV2(
           
           if (!destinationRouteMap.has(key)) {
             // Get standard for this route
-            const carrierId = carrierNameToIdMap.get(carrier);
-            const productId = productDescToIdMap.get(product);
-            const originCityId = cityNameToIdMap.get(shipment.origin_city_name);
-            const destCityId = cityNameToIdMap.get(destCity);
-            
             let standardPercentage = 95; // default
-            if (carrierId && productId && originCityId && destCityId) {
-              const standardKey = `${carrierId}|${productId}|${originCityId}|${destCityId}`;
-              const standard = standardsMap.get(standardKey);
-              if (standard?.success_percentage) {
-                standardPercentage = standard.success_percentage;
-              }
+            const standard = standardOfShipment(shipment);
+            if (standard?.success_percentage) {
+              standardPercentage = standard.success_percentage;
             }
             
             destinationRouteMap.set(key, {
@@ -1426,10 +1399,10 @@ export function useTerritoryEquityDataV2(
         const routeMap = new Map<string, RouteAcc>();
 
         shipments.forEach(s => {
-          const routeKey = `${s.origin_city_name}|${s.destination_city_name}|${s.carrier_name}|${s.product_name}`;
+          const rKey = `${s.origin_city_name}|${s.destination_city_name}|${s.carrier_name}|${s.product_name}`;
           const standard = standardOfShipment(s);
-          if (!routeMap.has(routeKey)) {
-            routeMap.set(routeKey, {
+          if (!routeMap.has(rKey)) {
+            routeMap.set(rKey, {
               origin: s.origin_city_name,
               destination: s.destination_city_name,
               carrier: s.carrier_name,
@@ -1444,7 +1417,7 @@ export function useTerritoryEquityDataV2(
               distribution: new Map<number, number>(),
             });
           }
-          const route = routeMap.get(routeKey)!;
+          const route = routeMap.get(rKey)!;
           route.total++;
           if (s.on_time_delivery) route.compliant++;
 

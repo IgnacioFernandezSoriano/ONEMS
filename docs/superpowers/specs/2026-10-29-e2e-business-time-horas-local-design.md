@@ -194,3 +194,26 @@ aplicada en `onems-dev`; la nueva redefine las funciones con `CREATE OR REPLACE`
 3. Informes (Dashboard, Compliance, J+K, Territory Equity, ProductAnalysisTable, e2eCalculations).
 4. Datos demo y generador de pruebas.
 5. Festivos de Kenya (cuando el usuario facilite la lista).
+
+   **Runbook (obligatorio tras cargar los festivos).** Las medidas guardadas en `one_db`
+   (`business_transit_hours`, `business_transit_days`, `on_time_delivery`) **no se recalculan
+   solas** cuando cambian `non_working_days`, `weekly_schedule` o `accounts.timezone`. Después de
+   cargar los festivos de Kenya (o de cambiar el calendario semanal o la zona horaria de una
+   cuenta) hay que ejecutar en onems-dev:
+
+   ```sql
+   SELECT public.one_db_backfill_transit();
+   ```
+
+   Es una escritura en la BD de producción: antes de lanzarla, nombrar el proyecto
+   (**onems-dev**, ref `sehbnpgzqljrsqimwyuz`) y pedir confirmación explícita al usuario.
+
+   **Candidatos a migración de seguimiento** (no incluidos en esta rama; cada uno sería una
+   migración nueva forward-only, con visto bueno del usuario):
+   - Trigger que recalcule las medidas de `one_db` de la cuenta afectada al cambiar
+     `non_working_days`, `weekly_schedule` o `accounts.timezone`.
+   - `SET search_path` en `transfer_to_one_db` (como el resto de funciones `SECURITY DEFINER`).
+   - Búsqueda del estándar en `transfer_to_one_db` acotada a la cuenta (`account_id`) y con orden
+     determinista cuando haya más de un estándar candidato.
+   - Tope de 400 días de tramo en `calculate_business_hours` / `calculate_business_days` (evita
+     bucles largos con fechas erróneas).

@@ -124,3 +124,56 @@ export function aggregateJK(items: JKItem[]): { unit: TimeUnit; jkStandard: numb
   })
   return finishJK(acc)
 }
+
+// ---- Indice de estandares por nombre de ruta ----
+
+// Clave de ruta por nombres (carrier|producto|origen|destino), sin espacios sobrantes:
+// filas antiguas de one_db pueden traer nombres de ciudad con espacios al final.
+export function routeKey(
+  carrier: string | null | undefined,
+  product: string | null | undefined,
+  origin: string | null | undefined,
+  destination: string | null | undefined,
+): string {
+  return [carrier, product, origin, destination].map(v => String(v ?? '').trim()).join('|')
+}
+
+export interface StandardNames {
+  carrier: string | null | undefined
+  productCode: string | null | undefined
+  productDescription: string | null | undefined
+  origin: string | null | undefined
+  destination: string | null | undefined
+}
+
+// Indice de estandares por clave de ruta. one_db.product_name guarda products.description,
+// pero hay datos que usan "code - description" (o solo el codigo): se registran todas las claves
+// (el mismo objeto valor en las dos, para poder deduplicar con new Set(map.values())).
+export function buildStandardsIndex<S, V>(
+  standards: S[],
+  namesOf: (s: S) => StandardNames,
+  valueOf: (s: S) => V,
+): Map<string, V> {
+  const index = new Map<string, V>()
+  standards.forEach(s => {
+    const n = namesOf(s)
+    const carrier = String(n.carrier ?? '').trim()
+    const origin = String(n.origin ?? '').trim()
+    const destination = String(n.destination ?? '').trim()
+    const description = String(n.productDescription ?? '').trim()
+    const code = String(n.productCode ?? '').trim()
+    if (!carrier || !origin || !destination || (!description && !code)) return
+    const value = valueOf(s)
+    if (description) index.set(routeKey(carrier, description, origin, destination), value)
+    if (code && description) index.set(routeKey(carrier, `${code} - ${description}`, origin, destination), value)
+    if (code && !index.has(routeKey(carrier, code, origin, destination))) {
+      index.set(routeKey(carrier, code, origin, destination), value)
+    }
+  })
+  return index
+}
+
+// Valores unicos de un indice (cada estandar aparece bajo varias claves)
+export function uniqueStandards<V>(index: Map<string, V>): V[] {
+  return Array.from(new Set(index.values()))
+}

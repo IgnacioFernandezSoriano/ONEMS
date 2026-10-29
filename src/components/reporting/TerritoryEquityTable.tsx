@@ -77,8 +77,8 @@ export function TerritoryEquityTable({
 }: TerritoryEquityTableProps) {
   const { t } = useTranslation();
   const { unit: displayUnit } = useTimeUnit();
-  // J+K de entrada (en su unidad; sin unidad = dato legado en dias) -> horas para agregar y ordenar
-  const toH = (v: number, u?: TimeUnit) => convertUnit(v, u ?? 'days', 'hours');
+  // J+K de entrada (en su unidad; sin unidad = horas, regla de medida) -> horas para agregar y ordenar
+  const toH = (v: number, u?: TimeUnit) => convertUnit(v, u ?? 'hours', 'hours');
   // Presentacion: de horas a la unidad de la fila (la de sus rutas; horas si mezclan)
   const jkH = (hours: number, u: TimeUnit) => formatJK(convertUnit(hours, 'hours', u), u, displayUnit);
   const [sortField, setSortField] = useState<keyof CityRow>('cityName');
@@ -253,7 +253,7 @@ export function TerritoryEquityTable({
         carrierData.standardSum += cp.standardPercentage * relevantShipments;
         carrierData.standardCount += relevantShipments;
         carrierData.standardDaysSum += toH(cp.standardDays, cp.unit) * relevantShipments;
-        carrierData.units.add(cp.unit ?? 'days');
+        carrierData.units.add(cp.unit ?? 'hours');
         carrierData.standardDaysCount += relevantShipments;
         // Accumulate actual days weighted by shipments
         if (cp.actualDays > 0) {
@@ -283,7 +283,7 @@ export function TerritoryEquityTable({
           deviation: relevantPercentage - cp.standardPercentage,  // Recalculate deviation
           standardHours: toH(cp.standardDays, cp.unit),
           actualHours: toH(cp.actualDays, cp.unit),
-          unit: cp.unit ?? 'days',
+          unit: cp.unit ?? 'hours',
           status: productStatus,
         });
       });

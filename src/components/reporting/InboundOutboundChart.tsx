@@ -15,8 +15,8 @@ interface InboundOutboundChartProps {
 export function InboundOutboundChart({ data, scenarioDescription }: InboundOutboundChartProps) {
   const { t } = useTranslation();
   const { unit: displayUnit } = useTimeUnit();
-  // J+K de entrada (en su unidad; sin unidad = dato legado en dias) -> horas para promediar
-  const toH = (v: number, u?: TimeUnit) => convertUnit(v, u ?? 'days', 'hours');
+  // J+K de entrada (en su unidad; sin unidad = horas, regla de medida) -> horas para promediar
+  const toH = (v: number, u?: TimeUnit) => convertUnit(v, u ?? 'hours', 'hours');
   // Presentacion: de horas a la unidad del grupo (horas si mezcla)
   const jkH = (hours: number, u: TimeUnit) => formatJK(convertUnit(hours, 'hours', u), u, displayUnit);
   
@@ -31,8 +31,8 @@ export function InboundOutboundChart({ data, scenarioDescription }: InboundOutbo
         outbound: city.outboundPercentage,
         inboundStandardPercentage: city.inboundStandardPercentage,
         outboundStandardPercentage: city.outboundStandardPercentage,
-        inboundUnit: (city.inboundUnit ?? 'days') as TimeUnit,
-        outboundUnit: (city.outboundUnit ?? 'days') as TimeUnit,
+        inboundUnit: (city.inboundUnit ?? 'hours') as TimeUnit,
+        outboundUnit: (city.outboundUnit ?? 'hours') as TimeUnit,
         inboundStandardHours: toH(city.inboundStandardDays, city.inboundUnit),
         inboundActualHours: toH(city.inboundActualDays, city.inboundUnit),
         outboundStandardHours: toH(city.outboundStandardDays, city.outboundUnit),
@@ -59,7 +59,7 @@ export function InboundOutboundChart({ data, scenarioDescription }: InboundOutbo
     const inboundActualHours = totalInbound > 0
       ? breakdown.reduce((sum, cp) => sum + (cp.inboundShipments * toH(cp.actualDays, cp.unit)), 0) / totalInbound
       : 0;
-    const inboundUnit = commonUnit(breakdown.filter(cp => cp.inboundShipments > 0).map(cp => cp.unit ?? 'days'));
+    const inboundUnit = commonUnit(breakdown.filter(cp => cp.inboundShipments > 0).map(cp => cp.unit ?? 'hours'));
     
     // Calculate outbound metrics from visible breakdown
     const totalOutbound = breakdown.reduce((sum, cp) => sum + cp.outboundShipments, 0);
@@ -80,7 +80,7 @@ export function InboundOutboundChart({ data, scenarioDescription }: InboundOutbo
     const outboundActualHours = totalOutbound > 0
       ? breakdown.reduce((sum, cp) => sum + (cp.outboundShipments * toH(cp.actualDays, cp.unit)), 0) / totalOutbound
       : 0;
-    const outboundUnit = commonUnit(breakdown.filter(cp => cp.outboundShipments > 0).map(cp => cp.unit ?? 'days'));
+    const outboundUnit = commonUnit(breakdown.filter(cp => cp.outboundShipments > 0).map(cp => cp.unit ?? 'hours'));
     
     return {
       inbound: inboundPercentage,

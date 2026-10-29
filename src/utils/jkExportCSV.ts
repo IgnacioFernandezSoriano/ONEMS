@@ -1,10 +1,28 @@
 import type { JKRouteData, JKCityData, JKRegionData, JKCarrierData } from '@/hooks/reporting/useJKPerformance';
+import type { TimeUnit } from '@/lib/accountTime';
 
-// `unit` es opcional: otras pantallas (equidad territorial) pasan rutas medidas en dias
+// Cada fila se exporta en SU unidad (la columna Unit dice cual): filas en dias -> numero de dias
+// (J+n, sin pasar a horas); filas en horas -> horas. La cabecera indica h, d o h/d si mezcla.
+function unitSuffix(units: Iterable<TimeUnit | undefined>): string {
+  const set = new Set(Array.from(units, u => u ?? 'hours'));
+  if (set.size === 0) return 'h';
+  return set.size === 1 ? (set.has('days') ? 'd' : 'h') : 'h/d';
+}
+
+function jkValue(v: number, unit: TimeUnit | undefined, signed = false): string {
+  const sign = signed && v > 0 ? '+' : '';
+  if ((unit ?? 'hours') === 'days') {
+    // Dias: entero (J+n) si lo es; medias de varias rutas con un decimal
+    const txt = Math.abs(v - Math.round(v)) < 0.05 ? String(Math.round(v)) : v.toFixed(1);
+    return `${sign}${txt}`;
+  }
+  return `${sign}${v.toFixed(1)}`;
+}
+
+// `unit` es opcional (otras pantallas pasan rutas sin ella): ausente = horas, regla de medida
 export function exportRouteCSV(data: Array<Omit<JKRouteData, 'unit'> & { unit?: JKRouteData['unit'] }>) {
   // h / d segun la unidad de las rutas (mezcla: ver columna Unit)
-  const units = new Set(data.map(r => r.unit ?? 'days'));
-  const sfx = units.size === 1 ? (units.has('hours') ? 'h' : 'd') : 'h/d';
+  const sfx = unitSuffix(data.map(r => r.unit));
   const headers = [
     'Origin City',
     'Destination City',
@@ -32,16 +50,16 @@ export function exportRouteCSV(data: Array<Omit<JKRouteData, 'unit'> & { unit?: 
       route.carrier,
       route.product,
       route.totalSamples.toString(),
-      route.jkStandard.toFixed(1),
-      route.jkActual.toFixed(1),
-      (route.deviation > 0 ? '+' : '') + route.deviation.toFixed(1),
+      jkValue(route.jkStandard, route.unit),
+      jkValue(route.jkActual, route.unit),
+      jkValue(route.deviation, route.unit, true),
       route.standardPercentage.toFixed(0) + '%',
       route.onTimePercentage.toFixed(1) + '%',
       route.onTimeSamples.toString(),
       route.beforeStandardSamples.toString(),
       route.afterStandardSamples.toString(),
       route.status === 'compliant' ? 'Compliant' : route.status === 'warning' ? 'Warning' : 'Critical',
-      route.unit ?? 'days'
+      route.unit ?? 'hours'
     ]);
   });
 
@@ -49,17 +67,19 @@ export function exportRouteCSV(data: Array<Omit<JKRouteData, 'unit'> & { unit?: 
 }
 
 export function exportCityCSV(data: JKCityData[]) {
+  const sfx = unitSuffix(data.map(c => c.unit));
   const headers = [
     'City',
     'Direction',
     'Region',
     'Routes',
     'Total Samples',
-    'J+K Standard (days)',
-    'J+K Actual (days)',
-    'Deviation (days)',
+    `J+K Standard (${sfx})`,
+    `J+K Actual (${sfx})`,
+    `Deviation (${sfx})`,
     'On-Time %',
-    'Status'
+    'Status',
+    'Unit'
   ];
 
   const rows: string[][] = [headers];
@@ -71,11 +91,12 @@ export function exportCityCSV(data: JKCityData[]) {
       city.regionName,
       city.routes.toString(),
       city.totalSamples.toString(),
-      city.jkStandard.toFixed(1),
-      city.jkActual.toFixed(1),
-      (city.deviation > 0 ? '+' : '') + city.deviation.toFixed(1),
+      jkValue(city.jkStandard, city.unit),
+      jkValue(city.jkActual, city.unit),
+      jkValue(city.deviation, city.unit, true),
       city.onTimePercentage.toFixed(1) + '%',
-      city.status === 'compliant' ? 'Compliant' : city.status === 'warning' ? 'Warning' : 'Critical'
+      city.status === 'compliant' ? 'Compliant' : city.status === 'warning' ? 'Warning' : 'Critical',
+      city.unit ?? 'hours'
     ]);
   });
 
@@ -83,17 +104,19 @@ export function exportCityCSV(data: JKCityData[]) {
 }
 
 export function exportRegionCSV(data: JKRegionData[]) {
+  const sfx = unitSuffix(data.map(r => r.unit));
   const headers = [
     'Region',
     'Direction',
     'Cities',
     'Routes',
     'Total Samples',
-    'J+K Standard (days)',
-    'J+K Actual (days)',
-    'Deviation (days)',
+    `J+K Standard (${sfx})`,
+    `J+K Actual (${sfx})`,
+    `Deviation (${sfx})`,
     'On-Time %',
-    'Status'
+    'Status',
+    'Unit'
   ];
 
   const rows: string[][] = [headers];
@@ -105,11 +128,12 @@ export function exportRegionCSV(data: JKRegionData[]) {
       region.cities.toString(),
       region.routes.toString(),
       region.totalSamples.toString(),
-      region.jkStandard.toFixed(1),
-      region.jkActual.toFixed(1),
-      (region.deviation > 0 ? '+' : '') + region.deviation.toFixed(1),
+      jkValue(region.jkStandard, region.unit),
+      jkValue(region.jkActual, region.unit),
+      jkValue(region.deviation, region.unit, true),
       region.onTimePercentage.toFixed(1) + '%',
-      region.status === 'compliant' ? 'Compliant' : region.status === 'warning' ? 'Warning' : 'Critical'
+      region.status === 'compliant' ? 'Compliant' : region.status === 'warning' ? 'Warning' : 'Critical',
+      region.unit ?? 'hours'
     ]);
   });
 
@@ -117,18 +141,20 @@ export function exportRegionCSV(data: JKRegionData[]) {
 }
 
 export function exportCarrierProductCSV(data: JKCarrierData[]) {
+  const sfx = unitSuffix(data.flatMap(c => [c.unit, ...c.products.map(p => p.unit)]));
   const headers = [
     'Level',
     'Carrier',
     'Product',
     'Routes',
     'Total Samples',
-    'J+K Standard (days)',
-    'J+K Actual (days)',
-    'Deviation (days)',
+    `J+K Standard (${sfx})`,
+    `J+K Actual (${sfx})`,
+    `Deviation (${sfx})`,
     'On-Time %',
     'Problem Routes',
-    'Status'
+    'Status',
+    'Unit'
   ];
 
   const rows: string[][] = [headers];
@@ -141,12 +167,13 @@ export function exportCarrierProductCSV(data: JKCarrierData[]) {
       '',
       carrier.routes.toString(),
       carrier.totalSamples.toString(),
-      carrier.jkStandard.toFixed(1),
-      carrier.jkActual.toFixed(1),
-      (carrier.deviation > 0 ? '+' : '') + carrier.deviation.toFixed(1),
+      jkValue(carrier.jkStandard, carrier.unit),
+      jkValue(carrier.jkActual, carrier.unit),
+      jkValue(carrier.deviation, carrier.unit, true),
       carrier.onTimePercentage.toFixed(1) + '%',
       carrier.problematicRoutes.toString(),
-      carrier.status === 'compliant' ? 'Compliant' : carrier.status === 'warning' ? 'Warning' : 'Critical'
+      carrier.status === 'compliant' ? 'Compliant' : carrier.status === 'warning' ? 'Warning' : 'Critical',
+      carrier.unit ?? 'hours'
     ]);
 
     // Product rows
@@ -157,12 +184,13 @@ export function exportCarrierProductCSV(data: JKCarrierData[]) {
         product.product,
         product.routes.toString(),
         product.totalSamples.toString(),
-        product.jkStandard.toFixed(1),
-        product.jkActual.toFixed(1),
-        (product.deviation > 0 ? '+' : '') + product.deviation.toFixed(1),
+        jkValue(product.jkStandard, product.unit),
+        jkValue(product.jkActual, product.unit),
+        jkValue(product.deviation, product.unit, true),
         product.onTimePercentage.toFixed(1) + '%',
         '',
-        product.status === 'compliant' ? 'Compliant' : product.status === 'warning' ? 'Warning' : 'Critical'
+        product.status === 'compliant' ? 'Compliant' : product.status === 'warning' ? 'Warning' : 'Critical',
+        product.unit ?? 'hours'
       ]);
     });
   });

@@ -38,9 +38,9 @@ export default function TerritoryEquity() {
   const { unit: displayUnit } = useTimeUnit();
   // Unidad de las graficas de distribucion (solo si hay rutas en horas Y en dias se puede elegir)
   const [chartUnitChoice, setChartUnitChoice] = useState<TimeUnit | null>(null);
-  // J+K en su unidad (sin unidad = dato legado en dias): CSV en la unidad del selector; pantalla con formatJK
-  const jkCsv = (v: number, u?: TimeUnit) => toUnit(convertUnit(v, u ?? 'days', 'hours'), displayUnit).toFixed(1);
-  const fmtJKU = (v: number, u?: TimeUnit) => formatJK(v, u ?? 'days', displayUnit);
+  // J+K en su unidad (sin unidad = horas, regla de medida): CSV en la unidad del selector; pantalla con formatJK
+  const jkCsv = (v: number, u?: TimeUnit) => toUnit(convertUnit(v, u ?? 'hours', 'hours'), displayUnit).toFixed(1);
+  const fmtJKU = (v: number, u?: TimeUnit) => formatJK(v, u ?? 'hours', displayUnit);
   const [activeTab, setActiveTab] = useState<'city' | 'regional' | 'map' | 'jk-performance'>('city');
   const [selectedCity, setSelectedCity] = useState<CityEquityData | null>(null);
   const [selectedRegion, setSelectedRegion] = useState<RegionEquityData | null>(null);

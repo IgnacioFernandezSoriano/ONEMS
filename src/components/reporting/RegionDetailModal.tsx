@@ -12,8 +12,8 @@ interface RegionDetailModalProps {
 
 export function RegionDetailModal({ region, onClose }: RegionDetailModalProps) {
   const { unit: displayUnit } = useTimeUnit();
-  // J+K en la unidad de su grupo (sin unidad = dato legado en dias)
-  const jk = (v: number, u?: TimeUnit) => formatJK(v, u ?? 'days', displayUnit);
+  // J+K en la unidad de su grupo (sin unidad = horas, regla de medida)
+  const jk = (v: number, u?: TimeUnit) => formatJK(v, u ?? 'hours', displayUnit);
   const carrierProductData = region.carrierProductBreakdown || [];
 
   const getStatusBadge = (status: string) => {

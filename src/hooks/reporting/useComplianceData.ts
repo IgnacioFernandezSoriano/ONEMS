@@ -5,7 +5,7 @@ import { startOfDayInTz, endOfDayInTz } from '@/lib/dateUtils';
 import { calculateJKActualFromDays } from '@/lib/jkCalculations';
 import { useEffectiveAccountId } from '../useEffectiveAccountId';
 import type { TimeUnit } from '@/lib/accountTime';
-import { measureOf, measureUnit } from '@/lib/transitMeasure';
+import { buildStandardsIndex, measureOf, measureUnit, routeKey as standardRouteKey, uniqueStandards } from '@/lib/transitMeasure';
 
 interface Filters {
   startDate?: string;
@@ -23,6 +23,8 @@ export interface RouteData {
   destinationCity: string;
   totalShipments: number;
   compliantShipments: number;
+  /** Envios con on_time_delivery no nulo: denominador del % de cumplimiento */
+  evaluatedShipments: number;
   compliancePercentage: number;
   /** Unidad de la medida de la ruta (la del estandar; 'hours' si no hay estandar) */
   unit: TimeUnit;
@@ -48,6 +50,7 @@ export interface ProductData {
   routes: RouteData[];
   totalShipments: number;
   compliantShipments: number;
+  evaluatedShipments: number;
   warningShipments: number;
   criticalShipments: number;
   compliancePercentage: number;
@@ -63,6 +66,7 @@ export interface CarrierData {
   products: ProductData[];
   totalShipments: number;
   compliantShipments: number;
+  evaluatedShipments: number;
   warningShipments: number;
   criticalShipments: number;
   compliancePercentage: number;
@@ -183,51 +187,29 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
 
         // Create lookup maps
         const carrierMap = new Map(carriers?.map(c => [c.id, c.name]) || []);
-        const productMap = new Map(products?.map(p => [p.id, `${p.code} - ${p.description}`]) || []);
+        const productMap = new Map(products?.map(p => [p.id, p]) || []);
         const cityMap = new Map(cities?.map(c => [c.id, c.name]) || []);
 
-        // Create standards map using UUIDs as key
-        const standardsMap = new Map<string, { 
-          standardTime: number;
-          unit: TimeUnit;
-          successPercentage: number;
-          warningThreshold: number;
-          criticalThreshold: number;
-          thresholdType: 'relative' | 'absolute';
-        }>();
-        
-        (standards || []).forEach(std => {
-          const carrierName = carrierMap.get(std.carrier_id);
-          const productName = productMap.get(std.product_id);
-          const originName = cityMap.get(std.origin_city_id);
-          const destName = cityMap.get(std.destination_city_id);
-          
-          if (carrierName && productName && originName && destName) {
-            const key = `${carrierName}|${productName}|${originName}|${destName}`;
+        // Indice de estandares por nombre de ruta (producto por description y por "code - description")
+        const standardsMap = buildStandardsIndex(
+          standards || [],
+          std => ({
+            carrier: carrierMap.get(std.carrier_id),
+            productCode: productMap.get(std.product_id)?.code,
+            productDescription: productMap.get(std.product_id)?.description,
+            origin: cityMap.get(std.origin_city_id),
+            destination: cityMap.get(std.destination_city_id),
+          }),
+          std => ({
+            standardTime: (std.standard_time || 0) as number,
             // El estandar se guarda en su propia unidad (sin convertir)
-            const unit = measureUnit(std);
-            standardsMap.set(key, {
-              standardTime: std.standard_time || 0,
-              unit,
-              successPercentage: std.success_percentage || 0,
-              warningThreshold: std.warning_threshold || 5,
-              criticalThreshold: std.critical_threshold || 10,
-              thresholdType: std.threshold_type || 'relative'
-            });
-            console.log(`✅ Standard mapped: ${key} -> ${std.standard_time} ${unit}, ${std.success_percentage}%`);
-          } else {
-            console.warn('⚠️ Incomplete standard data:', { 
-              carrier_id: std.carrier_id, 
-              carrierName,
-              product_id: std.product_id,
-              productName,
-              origin_city_id: std.origin_city_id,
-              originName,
-              destination_city_id: std.destination_city_id,
-              destName
-            });
-          }
-        });
+            unit: measureUnit(std) as TimeUnit,
+            successPercentage: (std.success_percentage || 0) as number,
+            warningThreshold: (std.warning_threshold || 5) as number,
+            criticalThreshold: (std.critical_threshold || 10) as number,
+            thresholdType: (std.threshold_type || 'relative') as 'relative' | 'absolute',
+          }),
+        );
 
         console.log('📊 Standards map size:', standardsMap.size);
         console.log('📊 Standards map keys:', Array.from(standardsMap.keys()));
@@ -236,7 +218,7 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
         let warningThreshold = 80;
         let criticalThreshold = 75;
         if (standardsMap.size > 0) {
-          const thresholds = Array.from(standardsMap.values()).map(s => {
+          const thresholds = uniqueStandards(standardsMap).map(s => {
             const successPct = s.successPercentage;
             const warnThresh = s.thresholdType === 'relative'
               ? successPct - s.warningThreshold
@@ -259,6 +241,7 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
             routes: Map<string, {
               totalShipments: number;
               compliantShipments: number;
+              evaluatedShipments: number;
               measureArray: number[];
               unit: TimeUnit;
               standardTime: number;
@@ -278,7 +261,7 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
           const routeKey = `${shipment.origin_city_name} → ${shipment.destination_city_name}`;
           
           // Get standard for this specific carrier+product+route
-          const standardKey = `${carrierName}|${productName}|${shipment.origin_city_name}|${shipment.destination_city_name}`;
+          const standardKey = standardRouteKey(carrierName, productName, shipment.origin_city_name, shipment.destination_city_name);
           const standard = standardsMap.get(standardKey);
 
           if (!standard) {
@@ -304,6 +287,7 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
             product.routes.set(routeKey, {
               totalShipments: 0,
               compliantShipments: 0,
+              evaluatedShipments: 0,
               measureArray: [],
               unit: standard?.unit || 'hours',
               standardTime: standard?.standardTime || 0,
@@ -318,7 +302,11 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
           
           const route = product.routes.get(routeKey)!;
           route.totalShipments++;
-          route.compliantShipments += shipment.on_time_delivery ? 1 : 0;
+          // on_time_delivery nulo (sin estandar / sin medida) no cuenta ni como a tiempo ni como tarde
+          if (typeof shipment.on_time_delivery === 'boolean') {
+            route.evaluatedShipments++;
+            route.compliantShipments += shipment.on_time_delivery ? 1 : 0;
+          }
           const measured = measureOf(shipment, route.unit);
           if (measured != null) {
             route.measureArray.push(measured);
@@ -329,7 +317,9 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
         const result: CarrierData[] = Array.from(carrierGroupMap.entries()).map(([carrierName, carrier]) => {
           const products: ProductData[] = Array.from(carrier.products.entries()).map(([productName, product]) => {
             const routes: RouteData[] = Array.from(product.routes.entries()).map(([routeKey, route]) => {
-              const actualPercentage = (route.compliantShipments / route.totalShipments) * 100;
+              const actualPercentage = route.evaluatedShipments > 0
+                ? (route.compliantShipments / route.evaluatedShipments) * 100
+                : 0;
               
               // Calculate threshold limits
               let warningLimit: number;
@@ -369,6 +359,7 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
                 destinationCity: route.destinationCity,
                 totalShipments: route.totalShipments,
                 compliantShipments: route.compliantShipments,
+                evaluatedShipments: route.evaluatedShipments,
                 compliancePercentage: actualPercentage,
                 unit: route.unit,
                 standardTime: route.standardTime,
@@ -388,6 +379,7 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
             // Calculate weighted averages for product level
             const productTotalShipments = routes.reduce((sum, r) => sum + r.totalShipments, 0);
             const productCompliantShipments = routes.reduce((sum, r) => sum + r.compliantShipments, 0);
+            const productEvaluatedShipments = routes.reduce((sum, r) => sum + r.evaluatedShipments, 0);
             const productWarningShipments = routes.reduce((sum, r) => 
               sum + (r.complianceStatus === 'warning' ? r.totalShipments : 0), 0);
             const productCriticalShipments = routes.reduce((sum, r) => 
@@ -412,7 +404,8 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
               compliantShipments: productCompliantShipments,
               warningShipments: productWarningShipments,
               criticalShipments: productCriticalShipments,
-              compliancePercentage: (productCompliantShipments / productTotalShipments) * 100,
+              evaluatedShipments: productEvaluatedShipments,
+              compliancePercentage: productEvaluatedShipments > 0 ? (productCompliantShipments / productEvaluatedShipments) * 100 : 0,
               avgBusinessHours: productAvgHours,
               standardHours: productStandardHours,
               standardPercentage: productStandardPercentage
@@ -422,6 +415,7 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
           // Calculate weighted averages for carrier level
           const carrierTotalShipments = products.reduce((sum, p) => sum + p.totalShipments, 0);
           const carrierCompliantShipments = products.reduce((sum, p) => sum + p.compliantShipments, 0);
+          const carrierEvaluatedShipments = products.reduce((sum, p) => sum + p.evaluatedShipments, 0);
           const carrierWarningShipments = products.reduce((sum, p) => sum + p.warningShipments, 0);
           const carrierCriticalShipments = products.reduce((sum, p) => sum + p.criticalShipments, 0);
           
@@ -444,7 +438,8 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
             compliantShipments: carrierCompliantShipments,
             warningShipments: carrierWarningShipments,
             criticalShipments: carrierCriticalShipments,
-            compliancePercentage: (carrierCompliantShipments / carrierTotalShipments) * 100,
+            evaluatedShipments: carrierEvaluatedShipments,
+            compliancePercentage: carrierEvaluatedShipments > 0 ? (carrierCompliantShipments / carrierEvaluatedShipments) * 100 : 0,
             avgBusinessHours: carrierAvgHours,
             standardHours: carrierStandardHours,
             standardPercentage: carrierStandardPercentage

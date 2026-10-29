@@ -4,7 +4,7 @@ import { useAccount } from '@/contexts/AccountContext';
 import { startOfDayInTz, endOfDayInTz } from '@/lib/dateUtils';
 import { useEffectiveAccountId } from '../useEffectiveAccountId';
 import type { TimeUnit } from '@/lib/accountTime';
-import { commonUnit, convertUnit, measureOf, measureUnit } from '@/lib/transitMeasure';
+import { buildStandardsIndex, commonUnit, convertUnit, measureOf, measureUnit, routeKey, uniqueStandards } from '@/lib/transitMeasure';
 
 export interface JKRouteData {
   routeKey: string;
@@ -253,23 +253,25 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
 
         // 4. Create lookup maps
         const carrierMap = new Map(carriersRes.data?.map(c => [c.id, c.name]) || []);
-        const productMap = new Map(productsRes.data?.map(p => [p.id, `${p.code} - ${p.description}`]) || []);
+        const productMap = new Map(productsRes.data?.map(p => [p.id, p]) || []);
         const cityMap = new Map(citiesRes.data?.map(c => [c.id, c.name]) || []);
         const cityRegionMap = new Map(citiesRes.data?.map(c => [c.name, c.region_id]) || []);
         const regionMap = new Map(regionsRes.data?.map(r => [r.id, r.name]) || []);
 
-        // 5. Create standards map (key: carrier|product|origin|destination)
-        const standardsMap = new Map<string, { jkStandard: number; unit: TimeUnit; successPercentage: number; warningThreshold: number; criticalThreshold: number }>();
-        (standards || []).forEach(std => {
-          const carrierName = carrierMap.get(std.carrier_id);
-          const productName = productMap.get(std.product_id);
-          const originName = cityMap.get(std.origin_city_id);
-          const destName = cityMap.get(std.destination_city_id);
-
-          if (carrierName && productName && originName && destName) {
-            const key = `${carrierName}|${productName}|${originName}|${destName}`;
+        // 5. Indice de estandares (clave: carrier|product|origin|destination por nombre;
+        // producto por description y por "code - description")
+        const standardsMap = buildStandardsIndex(
+          standards || [],
+          std => ({
+            carrier: carrierMap.get(std.carrier_id),
+            productCode: productMap.get(std.product_id)?.code,
+            productDescription: productMap.get(std.product_id)?.description,
+            origin: cityMap.get(std.origin_city_id),
+            destination: cityMap.get(std.destination_city_id),
+          }),
+          std => {
             // El estandar se queda en su unidad (nunca se convierte a dias)
-            const unit = measureUnit(std);
+            const unit: TimeUnit = measureUnit(std);
             const jkStandard = Number(std.standard_time);
             // Calculate warning and critical thresholds
             const successPct = std.success_percentage || 95;
@@ -279,29 +281,28 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
             const criticalThreshold = std.threshold_type === 'relative'
               ? successPct - (successPct * (std.critical_threshold || 10) / 100)
               : successPct - (std.critical_threshold || 10);
-            
-            standardsMap.set(key, {
+            return {
               jkStandard: jkStandard || 0,
               unit,
               successPercentage: successPct,
               warningThreshold: warningThreshold,
               criticalThreshold: criticalThreshold,
-            });
-          }
-        });
+            };
+          },
+        );
 
         // Calculate global thresholds (average of all standards)
         let warningThreshold = 80;
         let criticalThreshold = 75;
         if (standardsMap.size > 0) {
-          const thresholds = Array.from(standardsMap.values());
+          const thresholds = uniqueStandards(standardsMap);
           warningThreshold = thresholds.reduce((sum, s) => sum + s.warningThreshold, 0) / thresholds.length;
           criticalThreshold = thresholds.reduce((sum, s) => sum + s.criticalThreshold, 0) / thresholds.length;
         }
         setGlobalWarningThreshold(warningThreshold);
         setGlobalCriticalThreshold(criticalThreshold);
         
-        console.log('[useJKPerformance] Loaded standards:', standardsMap.size, 'Global thresholds:', { warning: warningThreshold, critical: criticalThreshold });
+        console.log('[useJKPerformance] Loaded standards:', uniqueStandards(standardsMap).length, 'Global thresholds:', { warning: warningThreshold, critical: criticalThreshold });
 
         // 6. Group shipments by route
         const routeMap = new Map<string, {
@@ -319,7 +320,7 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
         const calculatedMax = { hours: 0, days: 0 };
 
         (shipments || []).forEach(shipment => {
-          const key = `${shipment.carrier_name}|${shipment.product_name}|${shipment.origin_city_name}|${shipment.destination_city_name}`;
+          const key = routeKey(shipment.carrier_name, shipment.product_name, shipment.origin_city_name, shipment.destination_city_name);
           const standard = standardsMap.get(key);
           const rowUnit: TimeUnit = standard?.unit ?? 'hours';
           const measure = measureOf(shipment, rowUnit); // medida en la unidad de la ruta

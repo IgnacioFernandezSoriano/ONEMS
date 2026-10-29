@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useEffectiveAccountId } from './useEffectiveAccountId'
 import { formatInTz, toUnit, unitSuffix, TimeUnit } from '../lib/accountTime'
+import { startOfDayInTz, endOfDayInTz } from '../lib/dateUtils'
+import { useAccount } from '../contexts/AccountContext'
 
 export interface OneDBRecord {
   id: string;
@@ -41,6 +43,7 @@ export const useOneDB = (accountId: string | undefined) => {
   const effectiveAccountId = useEffectiveAccountId()
   // Use effectiveAccountId if available, otherwise fall back to passed accountId
   const activeAccountId = effectiveAccountId || accountId
+  const { accountTimezone } = useAccount()
   
   const [records, setRecords] = useState<OneDBRecord[]>([]);
   const [filteredRecords, setFilteredRecords] = useState<OneDBRecord[]>([]);
@@ -142,13 +145,20 @@ export const useOneDB = (accountId: string | undefined) => {
       filtered = filtered.filter((record) => record.on_time_delivery === filters.on_time_delivery);
     }
 
-    // Date range filter (sent_at)
+    // Date range filter (sent_at): dias completos en la zona horaria de la cuenta, igual que los informes.
+    // Se compara por instante (Date), no por texto: sent_at llega como "...+00:00" y los limites como "...Z".
     if (filters.date_from) {
-      filtered = filtered.filter((record) => record.sent_at >= filters.date_from!);
+      const fromMs = new Date(startOfDayInTz(filters.date_from.slice(0, 10), accountTimezone)).getTime();
+      if (!Number.isNaN(fromMs)) {
+        filtered = filtered.filter((record) => !!record.sent_at && new Date(record.sent_at).getTime() >= fromMs);
+      }
     }
 
     if (filters.date_to) {
-      filtered = filtered.filter((record) => record.sent_at <= filters.date_to!);
+      const toMs = new Date(endOfDayInTz(filters.date_to.slice(0, 10), accountTimezone)).getTime();
+      if (!Number.isNaN(toMs)) {
+        filtered = filtered.filter((record) => !!record.sent_at && new Date(record.sent_at).getTime() <= toMs);
+      }
     }
 
     setFilteredRecords(filtered);

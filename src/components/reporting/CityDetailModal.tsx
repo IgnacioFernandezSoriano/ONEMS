@@ -12,8 +12,8 @@ interface CityDetailModalProps {
 
 export function CityDetailModal({ city, onClose }: CityDetailModalProps) {
   const { unit: displayUnit } = useTimeUnit();
-  // J+K en la unidad de su grupo (sin unidad = dato legado en dias)
-  const jk = (v: number, u?: TimeUnit) => formatJK(v, u ?? 'days', displayUnit);
+  // J+K en la unidad de su grupo (sin unidad = horas, regla de medida)
+  const jk = (v: number, u?: TimeUnit) => formatJK(v, u ?? 'hours', displayUnit);
   const carrierProductData = city.carrierProductBreakdown || [];
 
   const getStatusBadge = (status: string) => {

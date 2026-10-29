@@ -135,7 +135,8 @@ export function ProductAnalysisTable({
         // Medida en la unidad del estandar de la ruta (vacia si el envio no tiene medida)
         const measure = measureOf(s, unit);
         const standardTime = route?.jkStandard || 0;
-        const onTime = s.on_time_delivery || false;
+        // on_time_delivery nulo (sin estandar / sin medida) -> N/A, no "No"
+        const onTime = typeof s.on_time_delivery === 'boolean' ? (s.on_time_delivery ? 'Yes' : 'No') : 'N/A';
         const status = route?.status || '';
         
         return [
@@ -150,7 +151,7 @@ export function ProductAnalysisTable({
           measure != null ? measure.toFixed(1) : '',
           standardTime.toFixed(1),
           measure != null ? measure.toFixed(1) : '',
-          onTime ? 'Yes' : 'No',
+          onTime,
           status
         ].join(',');
       }),

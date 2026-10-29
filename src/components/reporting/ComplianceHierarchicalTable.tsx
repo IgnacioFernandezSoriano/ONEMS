@@ -313,8 +313,8 @@ export function ComplianceHierarchicalTable({ data, warningThreshold, criticalTh
                           {route.origin} → {route.destination}
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-right">{route.totalShipments || 0}</td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-right">{formatJK(route.jkStandard, route.unit, displayUnit)}</td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-right">{formatJK(route.jkActual, route.unit, displayUnit)}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-right">{route.jkStandard > 0 ? formatJK(route.jkStandard, route.unit, displayUnit) : '-'}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-right">{route.jkActual > 0 ? formatJK(route.jkActual, route.unit, displayUnit) : '-'}</td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-right">{route.standardPercentage?.toFixed(1)}%</td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-900">
                           {route.actualPercentage?.toFixed(1)}%

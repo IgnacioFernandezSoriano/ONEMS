@@ -70,6 +70,16 @@ SELECT pg_temp.fail_if(public.calculate_business_days('2026-10-28 23:30:00+00', 
 SELECT pg_temp.fail_if(public.calculate_business_days('2026-11-02 07:00:00+00', '2026-10-30 13:00:00+00', NULL) IS DISTINCT FROM 0, 'D5b esperaba 0');
 ROLLBACK;
 
+-- ===== Caso WS1: weekly_schedule propio (lunes-sabado laborables, domingo no).
+-- vie 16:00 -> lun 10:00 Nairobi = 8 (vie) + 24 (sab) + 10 (lun) = 42.00 h; dias = 2 (vie, sab)
+BEGIN;
+\ir fixtures/one_db_kenya.sql
+INSERT INTO public.weekly_schedule (account_id, day_of_week, is_working_day, opening_hour, cutoff_time)
+  SELECT 'a0000000-0000-0000-0000-000000000003', d, d BETWEEN 1 AND 6, '08:00', '17:00' FROM generate_series(0, 6) d;
+SELECT pg_temp.fail_if(public.calculate_business_hours('2026-10-30 13:00:00+00', '2026-11-02 07:00:00+00', 'a0000000-0000-0000-0000-000000000003') IS DISTINCT FROM 42.00, 'WS1 horas esperaba 42.00');
+SELECT pg_temp.fail_if(public.calculate_business_days('2026-10-30 13:00:00+00', '2026-11-02 07:00:00+00', 'a0000000-0000-0000-0000-000000000003') IS DISTINCT FROM 2, 'WS1 dias esperaba 2');
+ROLLBACK;
+
 -- ===================== Task 2: trigger en one_db, transfer_to_one_db y recalculo por estandar =====================
 -- Helper: crea un envio en estado 'sent' (nodo origen -> nodo destino) y lo recibe en p_recv.
 CREATE FUNCTION pg_temp.ship(p_plan uuid, p_o uuid, p_d uuid, p_tag text, p_sent timestamptz, p_recv timestamptz) RETURNS void LANGUAGE plpgsql AS $$

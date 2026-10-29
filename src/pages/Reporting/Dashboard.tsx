@@ -69,18 +69,19 @@ export default function Dashboard() {
   // FIX: Calculate weighted average compliance (not simple average of weekly percentages)
   // This ensures weeks with more shipments have proportional weight
   const totalShipments = data.reduce((sum, d) => sum + d.totalShipments, 0);
-  const totalCompliantShipments = data.reduce((sum, d) => {
-    const compliantCount = Math.round((d.compliancePercentage / 100) * d.totalShipments);
-    return sum + compliantCount;
-  }, 0);
-  const avgCompliance = totalShipments > 0
-    ? (totalCompliantShipments / totalShipments) * 100
+  // Cumplimiento sobre los envios evaluados (on_time_delivery no nulo)
+  const totalCompliantShipments = data.reduce((sum, d) => sum + d.compliantCount, 0);
+  const totalEvaluatedShipments = data.reduce((sum, d) => sum + d.evaluatedCount, 0);
+  const avgCompliance = totalEvaluatedShipments > 0
+    ? (totalCompliantShipments / totalEvaluatedShipments) * 100
     : 0;
   
   // Calculate weighted average transit time (in hours; the selector only changes how it is displayed)
-  const totalTransitHours = data.reduce((sum, d) => sum + (d.avgBusinessHours * d.totalShipments), 0);
-  const avgTransitHours = totalShipments > 0
-    ? totalTransitHours / totalShipments
+  // Ponderada por los envios con medida (timedCount); null -> N/A si ninguno tiene medida
+  const totalTimed = data.reduce((sum, d) => sum + d.timedCount, 0);
+  const totalTransitHours = data.reduce((sum, d) => sum + ((d.avgBusinessHours ?? 0) * d.timedCount), 0);
+  const avgTransitHours = totalTimed > 0
+    ? totalTransitHours / totalTimed
     : null;
 
   return (

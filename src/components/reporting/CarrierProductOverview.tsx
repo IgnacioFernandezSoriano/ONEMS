@@ -2,14 +2,7 @@ import React from 'react';
 import { ColumnTooltip } from './ColumnTooltip';
 import { formatNumber } from '@/lib/formatNumber';
 import type { TimeUnit } from '@/lib/accountTime';
-
-// Valor J+K segun la unidad de la fila: dias tal cual; horas con h (o convertido a d si el selector esta en dias)
-function formatJK(value: number, rowUnit: TimeUnit, displayUnit: TimeUnit, signed = false): string {
-  const sign = signed && value > 0 ? '+' : '';
-  if (rowUnit === 'days') return `${sign}${formatNumber(value)}`;
-  if (displayUnit === 'days') return `${sign}${(value / 24).toFixed(2)} d`;
-  return `${sign}${value.toFixed(1)} h`;
-}
+import { formatJK } from '@/lib/transitMeasure';
 
 interface CarrierProductData {
   carrier: string;

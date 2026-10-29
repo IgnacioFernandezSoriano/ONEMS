@@ -11,8 +11,8 @@ interface RegionalEquityChartProps {
 
 export function RegionalEquityChart({ data }: RegionalEquityChartProps) {
   const { unit: displayUnit } = useTimeUnit();
-  // J+K en la unidad de su grupo (sin unidad = dato legado en dias)
-  const jk = (v: number, u?: TimeUnit) => formatJK(v, u ?? 'days', displayUnit);
+  // J+K en la unidad de su grupo (sin unidad = horas, regla de medida)
+  const jk = (v: number, u?: TimeUnit) => formatJK(v, u ?? 'hours', displayUnit);
   const chartData = data.map((region) => ({
     region: region.regionName,
     actual: region.actualPercentage,
