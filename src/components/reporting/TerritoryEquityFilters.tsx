@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Calendar, Filter, RotateCcw, MapPin, Navigation, AlertCircle } from 'lucide-react';
 import { SmartTooltip } from '@/components/common/SmartTooltip';
 import { QuickMonthSelector } from '@/components/common/QuickMonthSelector';
-import { useAuth } from '@/contexts/AuthContext';
+import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId';
 import { supabase } from '@/lib/supabase';
 import type { TerritoryEquityFilters as Filters } from '@/types/reporting';
 
@@ -15,7 +15,7 @@ interface TerritoryEquityFiltersProps {
 
 export function TerritoryEquityFilters({ filters, onChange, onReset }: TerritoryEquityFiltersProps) {
   const { t } = useTranslation();
-  const { profile } = useAuth();
+  const accountId = useEffectiveAccountId();
   const [carriers, setCarriers] = useState<string[]>([]);
   const [products, setProducts] = useState<string[]>([]);
   const [regions, setRegions] = useState<string[]>([]);
@@ -29,7 +29,7 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
 
   useEffect(() => {
     async function loadFilterOptions() {
-      if (!profile?.account_id) return;
+      if (!accountId) return;
 
       try {
         setLoading(true);
@@ -38,34 +38,34 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
         const { data: carrierData } = await supabase
           .from('one_db')
           .select('carrier_name')
-          .eq('account_id', profile.account_id)
+          .eq('account_id', accountId)
           .not('carrier_name', 'is', null);
 
         // Get unique products
         const { data: productData } = await supabase
           .from('one_db')
           .select('product_name')
-          .eq('account_id', profile.account_id)
+          .eq('account_id', accountId)
           .not('product_name', 'is', null);
 
         // Get regions
         const { data: regionData } = await supabase
           .from('regions')
           .select('name')
-          .eq('account_id', profile.account_id);
+          .eq('account_id', accountId);
 
         // Get unique origin cities
         const { data: originCityData } = await supabase
           .from('one_db')
           .select('origin_city_name')
-          .eq('account_id', profile.account_id)
+          .eq('account_id', accountId)
           .not('origin_city_name', 'is', null);
 
         // Get unique destination cities
         const { data: destCityData } = await supabase
           .from('one_db')
           .select('destination_city_name')
-          .eq('account_id', profile.account_id)
+          .eq('account_id', accountId)
           .not('destination_city_name', 'is', null);
 
         const uniqueCarriers = [...new Set(carrierData?.map(d => d.carrier_name) || [])];
@@ -87,12 +87,12 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
     }
 
     loadFilterOptions();
-  }, [profile?.account_id]);
+  }, [accountId]);
 
   // Filter products by selected carrier
   useEffect(() => {
     async function filterProductsByCarrier() {
-      if (!profile?.account_id) return;
+      if (!accountId) return;
       
       if (!filters.carrier) {
         setFilteredProducts(products);
@@ -103,7 +103,7 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
         const { data } = await supabase
           .from('one_db')
           .select('product_name')
-          .eq('account_id', profile.account_id)
+          .eq('account_id', accountId)
           .eq('carrier_name', filters.carrier)
           .not('product_name', 'is', null);
 
@@ -126,7 +126,7 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
     }
 
     filterProductsByCarrier();
-  }, [filters.carrier, products, profile?.account_id]);
+  }, [filters.carrier, products, accountId]);
 
   const handleChange = useCallback((field: keyof Filters, value: string | string[] | undefined) => {
     onChange({

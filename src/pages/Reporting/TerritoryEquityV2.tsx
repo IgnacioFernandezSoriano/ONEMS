@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId';
 import { supabase } from '@/lib/supabase';
 import { useTerritoryEquityDataV2 as useTerritoryEquityData } from '@/hooks/reporting/useTerritoryEquityDataV2';
 import { TerritoryEquityTable } from '@/components/reporting/TerritoryEquityTable';
@@ -33,7 +33,7 @@ import { KPICard } from '@/components/reporting/KPICard';
 import { Package, Clock, CheckCircle, AlertTriangle as AlertTriangleIcon, TrendingUp } from 'lucide-react';
 export default function TerritoryEquity() {
   const { t } = useTranslation();
-  const { profile } = useAuth();
+  const effectiveAccountId = useEffectiveAccountId();
   const { accountTimezone } = useAccount();
   const { unit: displayUnit } = useTimeUnit();
   // Unidad de las graficas de distribucion (solo si hay rutas en horas Y en dias se puede elegir)
@@ -69,7 +69,7 @@ export default function TerritoryEquity() {
     scenarioInfo: hookScenarioInfo,
     populationWeightedCitizensAffected
   } = useTerritoryEquityData(
-    profile?.account_id || undefined,
+    effectiveAccountId || undefined,
     filters
   );
 
@@ -173,7 +173,7 @@ export default function TerritoryEquity() {
   };
 
   const handleExportRawSamples = async () => {
-    if (!profile?.account_id) return;
+    if (!effectiveAccountId) return;
 
     try {
       // Build query
@@ -193,7 +193,7 @@ export default function TerritoryEquity() {
           on_time_delivery,
           created_at
         `)
-        .eq('account_id', profile.account_id);
+        .eq('account_id', effectiveAccountId);
 
       // Apply filters (mismos criterios que el hook: nombres y sent_at)
       if (filters.startDate) {

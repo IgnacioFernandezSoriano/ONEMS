@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId';
 import { supabase } from '@/lib/supabase';
 import { useTerritoryEquityDataV2 as useTerritoryEquityData } from '@/hooks/reporting/useTerritoryEquityDataV2';
 import { TerritoryEquityTable } from '@/components/reporting/TerritoryEquityTable';
@@ -35,7 +35,7 @@ import { convertUnit, formatJK } from '@/lib/transitMeasure';
 export default function TerritoryEquity() {
   const [searchParams] = useSearchParams();
   const { t } = useTranslation();
-  const { profile } = useAuth();
+  const effectiveAccountId = useEffectiveAccountId();
   const { unit: displayUnit } = useTimeUnit();
   // Unidad de las graficas de distribucion (solo si hay rutas en horas Y en dias se puede elegir)
   const [chartUnitChoice, setChartUnitChoice] = useState<TimeUnit | null>(null);
@@ -70,13 +70,13 @@ export default function TerritoryEquity() {
   // Load available regions
   useEffect(() => {
     async function loadRegions() {
-      if (!profile?.account_id) return;
+      if (!effectiveAccountId) return;
       
       try {
         const { data } = await supabase
           .from('regions')
           .select('name')
-          .eq('account_id', profile.account_id)
+          .eq('account_id', effectiveAccountId)
           .order('name');
         
         setAvailableRegions(data?.map(r => r.name) || []);
@@ -86,7 +86,7 @@ export default function TerritoryEquity() {
     }
     
     loadRegions();
-  }, [profile?.account_id]);
+  }, [effectiveAccountId]);
 
   // Prepare filters based on active tab - region filter only applies in Regional Analysis
   const effectiveFilters = useMemo(() => {
@@ -112,7 +112,7 @@ export default function TerritoryEquity() {
     scenarioDescription,
     scenarioInfo: hookScenarioInfo
   } = useTerritoryEquityData(
-    profile?.account_id || undefined,
+    effectiveAccountId || undefined,
     effectiveFilters
   );
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Calendar, Filter, RotateCcw, MapPin } from 'lucide-react';
 import { SmartTooltip } from '@/components/common/SmartTooltip';
-import { useAuth } from '@/contexts/AuthContext';
+import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId';
 import { supabase } from '@/lib/supabase';
 
 import { useTranslation } from '@/hooks/useTranslation';
@@ -21,7 +21,7 @@ interface ReportFiltersProps {
 
 export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps) {
   const { t } = useTranslation();
-  const { profile } = useAuth();
+  const accountId = useEffectiveAccountId();
   const [carriers, setCarriers] = useState<string[]>([]);
   const [products, setProducts] = useState<string[]>([]);
   const [originCities, setOriginCities] = useState<string[]>([]);
@@ -31,7 +31,7 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
 
   useEffect(() => {
     async function loadFilterOptions() {
-      if (!profile?.account_id) return;
+      if (!accountId) return;
 
       try {
         setLoading(true);
@@ -40,28 +40,28 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
         const { data: carrierData } = await supabase
           .from('one_db')
           .select('carrier_name')
-          .eq('account_id', profile.account_id)
+          .eq('account_id', accountId)
           .not('carrier_name', 'is', null);
 
         // Get unique products from one_db for this account
         const { data: productData } = await supabase
           .from('one_db')
           .select('product_name')
-          .eq('account_id', profile.account_id)
+          .eq('account_id', accountId)
           .not('product_name', 'is', null);
 
         // Get unique origin cities
         const { data: originData } = await supabase
           .from('one_db')
           .select('origin_city_name')
-          .eq('account_id', profile.account_id)
+          .eq('account_id', accountId)
           .not('origin_city_name', 'is', null);
 
         // Get unique destination cities
         const { data: destinationData } = await supabase
           .from('one_db')
           .select('destination_city_name')
-          .eq('account_id', profile.account_id)
+          .eq('account_id', accountId)
           .not('destination_city_name', 'is', null);
 
         // Extract unique values
@@ -82,7 +82,7 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
     }
 
     loadFilterOptions();
-  }, [profile?.account_id]);
+  }, [accountId]);
 
   const handleChange = (field: string, value: string) => {
     onChange({
