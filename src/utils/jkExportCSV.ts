@@ -1,6 +1,7 @@
 import type { JKRouteData, JKCityData, JKRegionData, JKCarrierData } from '@/hooks/reporting/useJKPerformance';
 
-export function exportRouteCSV(data: JKRouteData[]) {
+// `unit` es opcional: otras pantallas (equidad territorial) pasan rutas medidas en dias
+export function exportRouteCSV(data: Array<Omit<JKRouteData, 'unit'> & { unit?: JKRouteData['unit'] }>) {
   const headers = [
     'Origin City',
     'Destination City',
@@ -15,7 +16,8 @@ export function exportRouteCSV(data: JKRouteData[]) {
     'On-Time Samples',
     'Before Standard',
     'After Standard',
-    'Status'
+    'Status',
+    'Unit'
   ];
 
   const rows: string[][] = [headers];
@@ -35,7 +37,8 @@ export function exportRouteCSV(data: JKRouteData[]) {
       route.onTimeSamples.toString(),
       route.beforeStandardSamples.toString(),
       route.afterStandardSamples.toString(),
-      route.status === 'compliant' ? 'Compliant' : route.status === 'warning' ? 'Warning' : 'Critical'
+      route.status === 'compliant' ? 'Compliant' : route.status === 'warning' ? 'Warning' : 'Critical',
+      route.unit ?? 'days'
     ]);
   });
 

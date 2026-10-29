@@ -13,9 +13,16 @@ import { exportRouteCSV, exportCityCSV, exportRegionCSV, exportCarrierProductCSV
 import { ColumnTooltip } from '@/components/reporting/ColumnTooltip';
 import { SmartTooltip } from '@/components/common/SmartTooltip';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useTimeUnit } from '@/hooks/useTimeUnit';
+import { TimeUnitToggle } from '@/components/common/TimeUnitToggle';
+import type { TimeUnit } from '@/lib/accountTime';
+import { addJK, aggregateJK, finishJK, formatJK } from '@/lib/transitMeasure';
 
 export default function JKPerformance() {
   const { t } = useTranslation();
+  const { unit: displayUnit } = useTimeUnit();
+  // Unidad de las graficas de distribucion (solo si hay rutas en horas Y en dias se puede elegir)
+  const [chartUnitChoice, setChartUnitChoice] = useState<TimeUnit | null>(null);
   const { profile } = useAuth();
   const accountId = profile?.account_id || undefined;
   const { filters, setFilters, resetFilters } = useReportingFilters();
@@ -31,7 +38,7 @@ export default function JKPerformance() {
     productData: rawProductData,
     weeklySamples: rawWeeklySamples,
     metrics: rawMetrics,
-    maxDays,
+    maxMeasure,
     globalWarningThreshold,
     globalCriticalThreshold,
     loading,
@@ -81,16 +88,16 @@ export default function JKPerformance() {
       
       // Recalculate metrics from filtered data
       const totalSamples = baseRouteData.reduce((sum, r) => sum + r.totalSamples, 0);
-      const totalWeightedJKActual = baseRouteData.reduce((sum, r) => sum + r.jkActual * r.totalSamples, 0);
-      const totalWeightedJKStandard = baseRouteData.reduce((sum, r) => sum + r.jkStandard * r.totalSamples, 0);
+      const jkAgg = aggregateJK(baseRouteData);
       const onTimeSamples = baseRouteData.reduce((sum, r) => sum + r.onTimeSamples, 0);
-      const avgJKActual = totalSamples > 0 ? totalWeightedJKActual / totalSamples : 0;
-      const avgJKStandard = totalSamples > 0 ? totalWeightedJKStandard / totalSamples : 0;
+      const avgJKActual = jkAgg.jkActual;
+      const avgJKStandard = jkAgg.jkStandard;
       const onTimePercentage = totalSamples > 0 ? (onTimeSamples / totalSamples) * 100 : 0;
       const problematicRoutes = baseRouteData.filter(r => r.onTimePercentage <= r.criticalThreshold).length;
 
       const filteredMetrics = {
         totalSamples,
+        unit: jkAgg.unit,
         avgJKActual,
         avgJKStandard,
         onTimePercentage,
@@ -127,16 +134,16 @@ export default function JKPerformance() {
 
     // Recalculate metrics from filtered routes
     const totalSamples = routeData.reduce((sum, r) => sum + r.totalSamples, 0);
-    const totalWeightedJKActual = routeData.reduce((sum, r) => sum + r.jkActual * r.totalSamples, 0);
-    const totalWeightedJKStandard = routeData.reduce((sum, r) => sum + r.jkStandard * r.totalSamples, 0);
+    const jkAgg = aggregateJK(routeData);
     const onTimeSamples = routeData.reduce((sum, r) => sum + r.onTimeSamples, 0);
-    const avgJKActual = totalSamples > 0 ? totalWeightedJKActual / totalSamples : 0;
-    const avgJKStandard = totalSamples > 0 ? totalWeightedJKStandard / totalSamples : 0;
+    const avgJKActual = jkAgg.jkActual;
+    const avgJKStandard = jkAgg.jkStandard;
     const onTimePercentage = totalSamples > 0 ? (onTimeSamples / totalSamples) * 100 : 0;
     const problematicRoutes = routeData.filter(r => r.onTimePercentage <= r.criticalThreshold).length;
 
     const metrics = {
       totalSamples,
+      unit: jkAgg.unit,
       avgJKActual,
       avgJKStandard,
       onTimePercentage,
@@ -164,8 +171,7 @@ export default function JKPerformance() {
       const outbound = cityMap.get(outboundKey);
       outbound.routes++;
       outbound.totalSamples += route.totalSamples;
-      outbound.totalWeightedJKStandard += route.jkStandard * route.totalSamples;
-      outbound.totalWeightedJKActual += route.jkActual * route.totalSamples;
+      addJK(outbound, route);
       outbound.onTimeSamples += route.onTimeSamples;
 
       // Inbound (destination city)
@@ -185,8 +191,7 @@ export default function JKPerformance() {
       const inbound = cityMap.get(inboundKey);
       inbound.routes++;
       inbound.totalSamples += route.totalSamples;
-      inbound.totalWeightedJKStandard += route.jkStandard * route.totalSamples;
-      inbound.totalWeightedJKActual += route.jkActual * route.totalSamples;
+      addJK(inbound, route);
       inbound.onTimeSamples += route.onTimeSamples;
       inbound.standardPercentageSum += route.standardPercentage;
       inbound.warningThresholdSum += route.warningThreshold;
@@ -195,8 +200,7 @@ export default function JKPerformance() {
     });
 
     const cityData = Array.from(cityMap.values()).map(city => {
-      const jkStandard = city.totalSamples > 0 ? city.totalWeightedJKStandard / city.totalSamples : 0;
-      const jkActual = city.totalSamples > 0 ? city.totalWeightedJKActual / city.totalSamples : 0;
+      const { unit, jkStandard, jkActual } = finishJK(city);
       const deviation = jkActual - jkStandard;
       const onTimePercentage = city.totalSamples > 0 ? (city.onTimeSamples / city.totalSamples) * 100 : 0;
       const standardPercentage = city.thresholdCount > 0 ? city.standardPercentageSum / city.thresholdCount : 85;
@@ -210,6 +214,7 @@ export default function JKPerformance() {
       return {
         ...city,
         regionName: originalCity?.regionName || '',
+        unit,
         jkStandard,
         jkActual,
         deviation,
@@ -245,8 +250,7 @@ export default function JKPerformance() {
       region.cities.add(city.cityName);
       region.routes += city.routes;
       region.totalSamples += city.totalSamples;
-      region.totalWeightedJKStandard += city.jkStandard * city.totalSamples;
-      region.totalWeightedJKActual += city.jkActual * city.totalSamples;
+      addJK(region, city);
       region.onTimeSamples += city.onTimeSamples;
       region.standardPercentageSum += city.standardPercentage;
       region.warningThresholdSum += city.warningThreshold;
@@ -255,8 +259,7 @@ export default function JKPerformance() {
     });
 
     const regionData = Array.from(regionMap.values()).map(region => {
-      const jkStandard = region.totalSamples > 0 ? region.totalWeightedJKStandard / region.totalSamples : 0;
-      const jkActual = region.totalSamples > 0 ? region.totalWeightedJKActual / region.totalSamples : 0;
+      const { unit, jkStandard, jkActual } = finishJK(region);
       const deviation = jkActual - jkStandard;
       const onTimePercentage = region.totalSamples > 0 ? (region.onTimeSamples / region.totalSamples) * 100 : 0;
       const standardPercentage = region.thresholdCount > 0 ? region.standardPercentageSum / region.thresholdCount : 85;
@@ -270,6 +273,7 @@ export default function JKPerformance() {
         cities: region.cities.size,
         routes: region.routes,
         totalSamples: region.totalSamples,
+        unit,
         jkStandard,
         jkActual,
         deviation,
@@ -303,8 +307,7 @@ export default function JKPerformance() {
       const carrier = carrierMap.get(route.carrier);
       carrier.routes++;
       carrier.totalSamples += route.totalSamples;
-      carrier.totalWeightedJKStandard += route.jkStandard * route.totalSamples;
-      carrier.totalWeightedJKActual += route.jkActual * route.totalSamples;
+      addJK(carrier, route);
       carrier.onTimeSamples += route.onTimeSamples;
       carrier.standardPercentageSum += route.standardPercentage;
       carrier.warningThresholdSum += route.warningThreshold;
@@ -332,8 +335,7 @@ export default function JKPerformance() {
       const product = carrier.products.get(route.product);
       product.routes++;
       product.totalSamples += route.totalSamples;
-      product.totalWeightedJKStandard += route.jkStandard * route.totalSamples;
-      product.totalWeightedJKActual += route.jkActual * route.totalSamples;
+      addJK(product, route);
       product.onTimeSamples += route.onTimeSamples;
       product.standardPercentageSum += route.standardPercentage;
       product.warningThresholdSum += route.warningThreshold;
@@ -342,8 +344,7 @@ export default function JKPerformance() {
     });
 
     const carrierData = Array.from(carrierMap.values()).map(carrier => {
-      const jkStandard = carrier.totalSamples > 0 ? carrier.totalWeightedJKStandard / carrier.totalSamples : 0;
-      const jkActual = carrier.totalSamples > 0 ? carrier.totalWeightedJKActual / carrier.totalSamples : 0;
+      const { unit, jkStandard, jkActual } = finishJK(carrier);
       const deviation = jkActual - jkStandard;
       const onTimePercentage = carrier.totalSamples > 0 ? (carrier.onTimeSamples / carrier.totalSamples) * 100 : 0;
       const standardPercentage = carrier.thresholdCount > 0 ? carrier.standardPercentageSum / carrier.thresholdCount : 85;
@@ -352,8 +353,7 @@ export default function JKPerformance() {
       const status: 'compliant' | 'warning' | 'critical' = onTimePercentage >= warningThreshold ? 'compliant' : onTimePercentage > criticalThreshold ? 'warning' : 'critical';
       
       const products = Array.from(carrier.products.values()).map((p: any) => {
-        const pJkStandard = p.totalSamples > 0 ? p.totalWeightedJKStandard / p.totalSamples : 0;
-        const pJkActual = p.totalSamples > 0 ? p.totalWeightedJKActual / p.totalSamples : 0;
+        const { unit: pUnit, jkStandard: pJkStandard, jkActual: pJkActual } = finishJK(p);
         const pDeviation = pJkActual - pJkStandard;
         const pOnTimePercentage = p.totalSamples > 0 ? (p.onTimeSamples / p.totalSamples) * 100 : 0;
         const pStandardPercentage = p.thresholdCount > 0 ? p.standardPercentageSum / p.thresholdCount : 85;
@@ -365,6 +365,7 @@ export default function JKPerformance() {
           product: p.product,
           routes: p.routes,
           totalSamples: p.totalSamples,
+          unit: pUnit,
           jkStandard: pJkStandard,
           jkActual: pJkActual,
           deviation: pDeviation,
@@ -380,6 +381,7 @@ export default function JKPerformance() {
         carrier: carrier.carrier,
         routes: carrier.routes,
         totalSamples: carrier.totalSamples,
+        unit,
         jkStandard,
         jkActual,
         deviation,
@@ -411,8 +413,7 @@ export default function JKPerformance() {
       const product = productMap.get(route.product);
       product.routes++;
       product.totalSamples += route.totalSamples;
-      product.totalWeightedJKStandard += route.jkStandard * route.totalSamples;
-      product.totalWeightedJKActual += route.jkActual * route.totalSamples;
+      addJK(product, route);
       product.onTimeSamples += route.onTimeSamples;
       if (route.onTimePercentage <= route.criticalThreshold) {
         product.problematicRoutes++;
@@ -432,21 +433,18 @@ export default function JKPerformance() {
       const carrierInProduct = product.carriers.get(route.carrier);
       carrierInProduct.routes++;
       carrierInProduct.totalSamples += route.totalSamples;
-      carrierInProduct.totalWeightedJKStandard += route.jkStandard * route.totalSamples;
-      carrierInProduct.totalWeightedJKActual += route.jkActual * route.totalSamples;
+      addJK(carrierInProduct, route);
       carrierInProduct.onTimeSamples += route.onTimeSamples;
     });
 
     const productData = Array.from(productMap.values()).map(product => {
-      const jkStandard = product.totalSamples > 0 ? product.totalWeightedJKStandard / product.totalSamples : 0;
-      const jkActual = product.totalSamples > 0 ? product.totalWeightedJKActual / product.totalSamples : 0;
+      const { unit, jkStandard, jkActual } = finishJK(product);
       const deviation = jkActual - jkStandard;
       const onTimePercentage = product.totalSamples > 0 ? (product.onTimeSamples / product.totalSamples) * 100 : 0;
       const status: 'compliant' | 'warning' | 'critical' = onTimePercentage >= globalWarningThreshold ? 'compliant' : onTimePercentage > globalCriticalThreshold ? 'warning' : 'critical';
       
       const carriers = Array.from(product.carriers.values()).map((c: any) => {
-        const cJkStandard = c.totalSamples > 0 ? c.totalWeightedJKStandard / c.totalSamples : 0;
-        const cJkActual = c.totalSamples > 0 ? c.totalWeightedJKActual / c.totalSamples : 0;
+        const { unit: cUnit, jkStandard: cJkStandard, jkActual: cJkActual } = finishJK(c);
         const cDeviation = cJkActual - cJkStandard;
         const cOnTimePercentage = c.totalSamples > 0 ? (c.onTimeSamples / c.totalSamples) * 100 : 0;
         const cStatus: 'compliant' | 'warning' | 'critical' = cOnTimePercentage >= globalWarningThreshold ? 'compliant' : cOnTimePercentage > globalCriticalThreshold ? 'warning' : 'critical';
@@ -455,6 +453,7 @@ export default function JKPerformance() {
           carrier: c.carrier,
           routes: c.routes,
           totalSamples: c.totalSamples,
+          unit: cUnit,
           jkStandard: cJkStandard,
           jkActual: cJkActual,
           deviation: cDeviation,
@@ -467,6 +466,7 @@ export default function JKPerformance() {
         product: product.product,
         routes: product.routes,
         totalSamples: product.totalSamples,
+        unit,
         jkStandard,
         jkActual,
         deviation,
@@ -542,12 +542,28 @@ export default function JKPerformance() {
     );
   }
 
+  // Graficas de distribucion: una sola unidad a la vez (cubetas de 1 h o de 1 dia)
+  const hasHoursRoutes = routeData.some(r => r.unit === 'hours');
+  const hasDaysRoutes = routeData.some(r => r.unit === 'days');
+  const chartUnit: TimeUnit = chartUnitChoice && (chartUnitChoice === 'hours' ? hasHoursRoutes : hasDaysRoutes)
+    ? chartUnitChoice
+    : (hasDaysRoutes && !hasHoursRoutes ? 'days' : 'hours');
+  const chartRoutes = routeData.filter(r => r.unit === chartUnit);
+  const chartMax = maxMeasure[chartUnit];
+  const chartAxisLabel = chartUnit === 'hours' ? t('common.unit_hours') : t('common.unit_days');
+  // Medias en dias: un decimal (como antes); en horas: formato de J+K
+  const fmtAvgJK = (v: number, u: TimeUnit) =>
+    u === 'days' ? `${v.toFixed(1)} ${t('reporting.days')}` : formatJK(v, u, displayUnit);
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{t('reporting.jk_performance_report')}</h1>
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="text-2xl font-bold text-gray-900">{t('reporting.jk_performance_report')}</h1>
+            <TimeUnitToggle />
+          </div>
           <p className="text-gray-600 mt-1">{t('reporting.transit_time_analysis_and_delivery_performance_tracking')}</p>
         </div>
         <SmartTooltip content="J+K Performance Report: Analyzes actual transit times (J+K Actual) against delivery standards (J+K Std) to identify routes, cities, carriers, or products with systematic delays. Multi-level analysis showing Route, City, Region, Carrier, and Product performance. J+K Standard is the expected delivery time in days from delivery_standards table. J+K Actual is the average actual transit time in business days. Deviation is the difference between Actual and Standard (positive values indicate delays). On-Time % is the percentage of shipments delivered within or before the standard time. Color coding: Green (≥95%), Yellow (90-95%), Red (<90%)." />
@@ -573,10 +589,10 @@ export default function JKPerformance() {
         />
         <KPICard
           title={t('reporting.avg_jk_actual')}
-          value={`${metrics.avgJKActual.toFixed(1)} ${t('reporting.days')}`}
+          value={fmtAvgJK(metrics.avgJKActual, metrics.unit)}
           icon={Clock}
           trend={metrics.avgJKActual <= metrics.avgJKStandard ? 'up' : 'down'}
-          trendValue={`${t('reporting.vs_std')}: ${metrics.avgJKStandard.toFixed(1)} ${t('reporting.days')}`}
+          trendValue={`${t('reporting.vs_std')}: ${fmtAvgJK(metrics.avgJKStandard, metrics.unit)}`}
           color={metrics.avgJKActual <= metrics.avgJKStandard ? 'green' : metrics.avgJKActual <= metrics.avgJKStandard + 1 ? 'amber' : 'red'}
           tooltip={{
             description: "Weighted average of days required to reach the STD % target across all routes in the selection.",
@@ -633,9 +649,26 @@ export default function JKPerformance() {
             <h3 className="text-lg font-semibold text-gray-900">{t('reporting.performance_distribution')}</h3>
             <SmartTooltip content="Performance Distribution: Shows how shipments are distributed by actual transit time vs. delivery standard (J+K Std). Categories: After Standard (red, delivered AFTER J+K Std = late), Before/On-Time (green, delivered WITHIN J+K Std = on-time), On Standard (blue, delivered EXACTLY on J+K Std day). Use to visualize overall network performance. Large red bars indicate systematic delays requiring investigation." />
           </div>
+          {hasHoursRoutes && hasDaysRoutes && (
+            <div role="group" className="inline-flex mb-3">
+              {(['hours', 'days'] as TimeUnit[]).map(u => (
+                <button
+                  key={u}
+                  type="button"
+                  aria-pressed={chartUnit === u}
+                  onClick={() => setChartUnitChoice(u)}
+                  className={`px-3 py-1 text-xs font-medium border border-gray-300 first:rounded-l-md last:rounded-r-md ${chartUnit === u ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+                >
+                  {u === 'hours' ? t('common.unit_hours') : t('common.unit_days')}
+                </button>
+              ))}
+            </div>
+          )}
           <PerformanceDistributionChart 
-            routeData={routeData} 
-            maxDays={maxDays} 
+            routeData={chartRoutes}
+            maxDays={chartMax}
+            unit={chartUnit}
+            axisLabel={chartAxisLabel}
             carrierFilter={filters.carrier}
             productFilter={filters.product}
           />
@@ -768,10 +801,10 @@ export default function JKPerformance() {
                             <div className="text-xs text-gray-500">{route.carrier} · {route.product}</div>
                           </td>
                           <td className="px-3 py-2 text-sm text-gray-900">{route.totalSamples}</td>
-                          <td className="px-3 py-2 text-sm text-gray-900">{route.jkStandard.toFixed(1)}</td>
-                          <td className="px-3 py-2 text-sm text-gray-900">{route.jkActual.toFixed(1)}</td>
+                          <td className="px-3 py-2 text-sm text-gray-900">{formatJK(route.jkStandard, route.unit, displayUnit)}</td>
+                          <td className="px-3 py-2 text-sm text-gray-900">{formatJK(route.jkActual, route.unit, displayUnit)}</td>
                           <td className={`px-3 py-2 text-sm ${deviationColor}`}>
-                            {route.deviation > 0 ? '+' : ''}{route.deviation.toFixed(1)}
+                            {formatJK(route.deviation, route.unit, displayUnit, true)}
                           </td>
                           <td className="px-3 py-2 text-sm text-gray-900 font-medium">
                             {route.standardPercentage.toFixed(0)}%
@@ -862,10 +895,10 @@ export default function JKPerformance() {
                           <td className="px-3 py-2 text-sm">{directionIcon} {city.direction}</td>
                           <td className="px-3 py-2 text-sm text-gray-600">{city.regionName}</td>
                           <td className="px-3 py-2 text-sm text-gray-900">{city.totalSamples}</td>
-                          <td className="px-3 py-2 text-sm text-gray-900">{city.jkStandard.toFixed(1)}</td>
-                          <td className="px-3 py-2 text-sm text-gray-900">{city.jkActual.toFixed(1)}</td>
+                          <td className="px-3 py-2 text-sm text-gray-900">{formatJK(city.jkStandard, city.unit, displayUnit)}</td>
+                          <td className="px-3 py-2 text-sm text-gray-900">{formatJK(city.jkActual, city.unit, displayUnit)}</td>
                           <td className={`px-3 py-2 text-sm ${deviationColor}`}>
-                            {city.deviation > 0 ? '+' : ''}{city.deviation.toFixed(1)}
+                            {formatJK(city.deviation, city.unit, displayUnit, true)}
                           </td>
                           <td className="px-3 py-2 text-sm text-gray-900">
                             {city.standardPercentage.toFixed(0)}%
@@ -966,10 +999,10 @@ export default function JKPerformance() {
                           <td className="px-3 py-2 text-sm">{directionIcon} {region.direction}</td>
                           <td className="px-3 py-2 text-sm text-gray-600">{region.cities}</td>
                           <td className="px-3 py-2 text-sm text-gray-900">{region.totalSamples}</td>
-                          <td className="px-3 py-2 text-sm text-gray-900">{region.jkStandard.toFixed(1)}</td>
-                          <td className="px-3 py-2 text-sm text-gray-900">{region.jkActual.toFixed(1)}</td>
+                          <td className="px-3 py-2 text-sm text-gray-900">{formatJK(region.jkStandard, region.unit, displayUnit)}</td>
+                          <td className="px-3 py-2 text-sm text-gray-900">{formatJK(region.jkActual, region.unit, displayUnit)}</td>
                           <td className={`px-3 py-2 text-sm ${deviationColor}`}>
-                            {region.deviation > 0 ? '+' : ''}{region.deviation.toFixed(1)}
+                            {formatJK(region.deviation, region.unit, displayUnit, true)}
                           </td>
                           <td className="px-3 py-2 text-sm text-gray-900">
                             {region.standardPercentage.toFixed(0)}%
@@ -1070,10 +1103,10 @@ export default function JKPerformance() {
                             <td className="px-3 py-2 text-sm font-bold text-gray-900">{carrier.carrier}</td>
                             <td className="px-3 py-2 text-sm font-semibold text-gray-700">{carrier.routes}</td>
                             <td className="px-3 py-2 text-sm font-semibold text-gray-900">{carrier.totalSamples}</td>
-                            <td className="px-3 py-2 text-sm font-semibold text-gray-900">{carrier.jkStandard.toFixed(1)}</td>
-                            <td className="px-3 py-2 text-sm font-semibold text-gray-900">{carrier.jkActual.toFixed(1)}</td>
+                            <td className="px-3 py-2 text-sm font-semibold text-gray-900">{formatJK(carrier.jkStandard, carrier.unit, displayUnit)}</td>
+                            <td className="px-3 py-2 text-sm font-semibold text-gray-900">{formatJK(carrier.jkActual, carrier.unit, displayUnit)}</td>
                             <td className={`px-3 py-2 text-sm font-semibold ${carrierDeviationColor}`}>
-                              {carrier.deviation > 0 ? '+' : ''}{carrier.deviation.toFixed(1)}
+                              {formatJK(carrier.deviation, carrier.unit, displayUnit, true)}
                             </td>
                             <td className="px-3 py-2 text-sm font-semibold text-gray-900">
                               {carrier.standardPercentage.toFixed(0)}%
@@ -1099,10 +1132,10 @@ export default function JKPerformance() {
                                 <td className="px-3 py-2 pl-8 text-sm text-gray-700">↳ {product.product}</td>
                                 <td className="px-3 py-2 text-sm text-gray-600">{product.routes}</td>
                                 <td className="px-3 py-2 text-sm text-gray-900">{product.totalSamples}</td>
-                                <td className="px-3 py-2 text-sm text-gray-900">{product.jkStandard.toFixed(1)}</td>
-                                <td className="px-3 py-2 text-sm text-gray-900">{product.jkActual.toFixed(1)}</td>
+                                <td className="px-3 py-2 text-sm text-gray-900">{formatJK(product.jkStandard, product.unit, displayUnit)}</td>
+                                <td className="px-3 py-2 text-sm text-gray-900">{formatJK(product.jkActual, product.unit, displayUnit)}</td>
                                 <td className={`px-3 py-2 text-sm ${productDeviationColor}`}>
-                                  {product.deviation > 0 ? '+' : ''}{product.deviation.toFixed(1)}
+                                  {formatJK(product.deviation, product.unit, displayUnit, true)}
                                 </td>
                                 <td className="px-3 py-2 text-sm text-gray-900">
                                   {product.standardPercentage.toFixed(0)}%
@@ -1133,7 +1166,7 @@ export default function JKPerformance() {
                 <div className="flex gap-2">
                   {cumulativeView === 'table' && (
                     <button
-                      onClick={() => exportCumulativeCSV(routeData.map(route => ({
+                      onClick={() => exportCumulativeCSV(chartRoutes.map(route => ({
                         routeKey: route.routeKey,
                         originCity: route.originCity,
                         destinationCity: route.destinationCity,
@@ -1143,7 +1176,7 @@ export default function JKPerformance() {
                         standardPercentage: route.standardPercentage,
                         distribution: route.distribution,
                         totalSamples: route.totalSamples,
-                      })), maxDays)}
+                      })), chartMax)}
                       className="flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
                     >
                       <FileDown className="w-4 h-4" />
@@ -1175,7 +1208,7 @@ export default function JKPerformance() {
 
               {cumulativeView === 'chart' ? (
                 <CumulativeDistributionChart
-                  routes={routeData.map(route => ({
+                  routes={chartRoutes.map(route => ({
                     origin: route.originCity,
                     destination: route.destinationCity,
                     carrier: route.carrier,
@@ -1188,7 +1221,7 @@ export default function JKPerformance() {
                 />
               ) : (
                 <CumulativeDistributionTable
-                  routes={routeData.map(route => ({
+                  routes={chartRoutes.map(route => ({
                     routeKey: route.routeKey,
                     origin: route.originCity,
                     destination: route.destinationCity,
@@ -1203,7 +1236,8 @@ export default function JKPerformance() {
                     totalShipments: route.totalSamples,
                     totalSamples: route.totalSamples,
                   }))}
-                  maxDays={maxDays}
+                  maxDays={chartMax}
+                  unit={chartUnit}
                 />
               )}
             </div>
