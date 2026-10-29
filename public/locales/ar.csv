@@ -590,6 +590,8 @@ common.tuesday,الثلاثاء
 common.type,النوع
 common.unavailable,غير متاح
 common.unit,الوحدة
+common.unit_days,أيام
+common.unit_hours,ساعات
 common.update,تحديث
 common.updated_successfully,تم التحديث بنجاح
 common.updating,جارٍ التحديث...
@@ -1211,8 +1213,11 @@ onedb.all_products,جميع المنتجات
 onedb.all_records,جميع السجلات
 onedb.all_shipment_records,جميع سجلات الشحن
 onedb.avg_transit_days,متوسط أيام العبور
+onedb.avg_transit_time,متوسط وقت العبور
 onedb.business_days,أيام العمل
 onedb.business_days_average,متوسط أيام العمل
+onedb.business_time,الوقت الفعلي
+onedb.business_time_average,متوسط الوقت الفعلي
 onedb.carrier,الناقل
 onedb.delayed,متأخر
 onedb.destination,الوجهة:
@@ -1243,6 +1248,7 @@ onedb.title,قاعدة البيانات الموحدة
 onedb.to_date,حتى تاريخه
 onedb.total_records,إجمالي السجلات
 onedb.transit_days,أيام العبور
+onedb.transit_time,وقت العبور
 onedb.validated_postal_quality_analytics_repository,مستودع تحليلات جودة البريد المعتمد
 onedb_api.api_key_label,مفتاح API الخاص بك
 onedb_api.api_tester_title,مختبر API
