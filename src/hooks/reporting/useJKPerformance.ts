@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-// Removed dateUtils import - using same filtering as ONE DB
+import { useAccount } from '@/contexts/AccountContext';
+import { startOfDayInTz, endOfDayInTz } from '@/lib/dateUtils';
 import { useEffectiveAccountId } from '../useEffectiveAccountId';
 import type { TimeUnit } from '@/lib/accountTime';
 import { commonUnit, convertUnit, measureOf, measureUnit } from '@/lib/transitMeasure';
@@ -160,6 +161,7 @@ interface Filters {
 
 export function useJKPerformance(accountId: string | undefined, filters?: Filters) {
   const effectiveAccountId = useEffectiveAccountId();
+  const { accountTimezone } = useAccount();
   const activeAccountId = effectiveAccountId || accountId;
 
   const [routeData, setRouteData] = useState<JKRouteData[]>([]);
@@ -208,8 +210,8 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
             .range(start, start + pageSize - 1)
 
           // Use same date filtering as ONE DB (no time adjustment)
-          if (filters?.startDate && filters.startDate !== '') query = query.gte('sent_at', filters.startDate)
-          if (filters?.endDate && filters.endDate !== '') query = query.lte('sent_at', filters.endDate)
+          if (filters?.startDate && filters.startDate !== '') query = query.gte('sent_at', startOfDayInTz(filters.startDate.slice(0, 10), accountTimezone))
+          if (filters?.endDate && filters.endDate !== '') query = query.lte('sent_at', endOfDayInTz(filters.endDate.slice(0, 10), accountTimezone))
           if (filters?.originCity) query = query.eq('origin_city_name', filters.originCity)
           if (filters?.destinationCity) query = query.eq('destination_city_name', filters.destinationCity)
           if (filters?.carrier) query = query.eq('carrier_name', filters.carrier)
@@ -1186,6 +1188,7 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
     filters?.carrier,
     filters?.product,
     filters?.region,
+    accountTimezone,
   ]);
 
   return {

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-// Removed dateUtils import - using same filtering as ONE DB
+import { useAccount } from '@/contexts/AccountContext';
+import { startOfDayInTz, endOfDayInTz } from '@/lib/dateUtils';
 import { calculateJKActualFromDays } from '@/lib/jkCalculations';
 import type {
   CityEquityData,
@@ -41,6 +42,7 @@ export function useTerritoryEquityDataV2(
   filters?: TerritoryEquityFilters
 ) {
   const effectiveAccountId = useEffectiveAccountId();
+  const { accountTimezone } = useAccount();
   const activeAccountId = effectiveAccountId || accountId;
 
   const [cityData, setCityData] = useState<CityEquityData[]>([]);
@@ -166,8 +168,8 @@ export function useTerritoryEquityDataV2(
           let query = supabase.from('one_db').select('*').eq('account_id', activeAccountId).range(start, start + pageSize - 1)
 
           // Use same date filtering as ONE DB (no time adjustment)
-          if (filters?.startDate && filters.startDate !== '') query = query.gte('sent_at', filters.startDate)
-          if (filters?.endDate && filters.endDate !== '') query = query.lte('sent_at', filters.endDate)
+          if (filters?.startDate && filters.startDate !== '') query = query.gte('sent_at', startOfDayInTz(filters.startDate.slice(0, 10), accountTimezone))
+          if (filters?.endDate && filters.endDate !== '') query = query.lte('sent_at', endOfDayInTz(filters.endDate.slice(0, 10), accountTimezone))
           if (filters?.carrier) query = query.eq('carrier_name', filters.carrier)
           if (filters?.product) query = query.eq('product_name', filters.product)
           if (filters?.originCity) query = query.eq('origin_city_name', filters.originCity)
@@ -1701,7 +1703,7 @@ export function useTerritoryEquityDataV2(
     }
 
     fetchData();
-  }, [activeAccountId, JSON.stringify(filters)]);
+  }, [activeAccountId, JSON.stringify(filters), accountTimezone]);
 
   // Generate scenario description
   const getScenarioDescription = () => {

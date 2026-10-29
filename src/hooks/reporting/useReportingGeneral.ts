@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { GeneralPerformanceData } from '@/types/reporting';
-// Removed dateUtils import - using same filtering as ONE DB
+import { useAccount } from '@/contexts/AccountContext';
+import { startOfDayInTz, endOfDayInTz } from '@/lib/dateUtils';
 import { useEffectiveAccountId } from '../useEffectiveAccountId';
 import { shipmentHours } from '@/lib/transitMeasure';
 
@@ -16,6 +17,7 @@ interface Filters {
 
 export function useReportingGeneral(accountId: string | undefined, filters?: Filters) {
   const effectiveAccountId = useEffectiveAccountId();
+  const { accountTimezone } = useAccount();
   // Use effectiveAccountId if available, otherwise fall back to passed accountId
   const activeAccountId = effectiveAccountId || accountId;
 
@@ -60,10 +62,10 @@ export function useReportingGeneral(accountId: string | undefined, filters?: Fil
           }
           // Use same date filtering as ONE DB (no time adjustment)
           if (filters?.dateFrom && filters.dateFrom !== '') {
-            query = query.gte('sent_at', filters.dateFrom)
+            query = query.gte('sent_at', startOfDayInTz(filters.dateFrom.slice(0, 10), accountTimezone))
           }
           if (filters?.dateTo && filters.dateTo !== '') {
-            query = query.lte('sent_at', filters.dateTo)
+            query = query.lte('sent_at', endOfDayInTz(filters.dateTo.slice(0, 10), accountTimezone))
           }
 
           const { data, error: err } = await query
@@ -125,7 +127,7 @@ export function useReportingGeneral(accountId: string | undefined, filters?: Fil
     }
 
     fetchData();
-  }, [activeAccountId, filters?.originCity, filters?.destinationCity, filters?.carrier, filters?.product, filters?.dateFrom, filters?.dateTo]);
+  }, [activeAccountId, filters?.originCity, filters?.destinationCity, filters?.carrier, filters?.product, filters?.dateFrom, filters?.dateTo, accountTimezone]);
 
   return { data, loading, error };
 }

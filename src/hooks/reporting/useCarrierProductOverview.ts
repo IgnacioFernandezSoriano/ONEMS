@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-// Removed dateUtils import - using same filtering as ONE DB
+import { useAccount } from '@/contexts/AccountContext';
+import { startOfDayInTz, endOfDayInTz } from '@/lib/dateUtils';
 import { useEffectiveAccountId } from '../useEffectiveAccountId';
 import type { TimeUnit } from '@/lib/accountTime';
 import { measureHours, measureUnit } from '@/lib/transitMeasure';
@@ -32,6 +33,7 @@ interface Filters {
 
 export function useCarrierProductOverview(accountId: string | undefined, filters: Filters) {
   const effectiveAccountId = useEffectiveAccountId();
+  const { accountTimezone } = useAccount();
   const activeAccountId = effectiveAccountId || accountId;
 
   const [data, setData] = useState<CarrierProductData[]>([]);
@@ -136,10 +138,10 @@ export function useCarrierProductOverview(accountId: string | undefined, filters
 
           // Use same date filtering as ONE DB (no time adjustment)
           if (filters.dateFrom && filters.dateFrom !== '') {
-            query = query.gte('sent_at', filters.dateFrom)
+            query = query.gte('sent_at', startOfDayInTz(filters.dateFrom.slice(0, 10), accountTimezone))
           }
           if (filters.dateTo && filters.dateTo !== '') {
-            query = query.lte('sent_at', filters.dateTo)
+            query = query.lte('sent_at', endOfDayInTz(filters.dateTo.slice(0, 10), accountTimezone))
           }
           if (filters.originCity) {
             query = query.eq('origin_city_name', filters.originCity)
@@ -315,7 +317,7 @@ export function useCarrierProductOverview(accountId: string | undefined, filters
     }
 
     fetchData();
-  }, [activeAccountId, filters.dateFrom, filters.dateTo, filters.routeType, filters.originCity, filters.destinationCity, filters.carrier, filters.product]);
+  }, [activeAccountId, filters.dateFrom, filters.dateTo, filters.routeType, filters.originCity, filters.destinationCity, filters.carrier, filters.product, accountTimezone]);
 
   return { data, loading, error, globalWarningThreshold, globalCriticalThreshold };
 }

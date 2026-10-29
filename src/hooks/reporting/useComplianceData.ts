@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-// Removed dateUtils import - using same filtering as ONE DB
+import { useAccount } from '@/contexts/AccountContext';
+import { startOfDayInTz, endOfDayInTz } from '@/lib/dateUtils';
 import { calculateJKActualFromDays } from '@/lib/jkCalculations';
 import { useEffectiveAccountId } from '../useEffectiveAccountId';
 import type { TimeUnit } from '@/lib/accountTime';
@@ -74,6 +75,7 @@ export interface CarrierData {
 
 export function useComplianceData(accountId: string | undefined, filters?: Filters) {
   const effectiveAccountId = useEffectiveAccountId();
+  const { accountTimezone } = useAccount();
   const activeAccountId = effectiveAccountId || accountId;
 
   const [data, setData] = useState<CarrierData[]>([]);
@@ -108,10 +110,10 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
 
           // Use same date filtering as ONE DB (no time adjustment)
           if (filters?.startDate && filters.startDate !== '') {
-            query = query.gte('sent_at', filters.startDate)
+            query = query.gte('sent_at', startOfDayInTz(filters.startDate.slice(0, 10), accountTimezone))
           }
           if (filters?.endDate && filters.endDate !== '') {
-            query = query.lte('sent_at', filters.endDate)
+            query = query.lte('sent_at', endOfDayInTz(filters.endDate.slice(0, 10), accountTimezone))
           }
           if (filters?.originCity) {
             query = query.eq('origin_city_name', filters.originCity)
@@ -474,7 +476,7 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
     }
 
     fetchData();
-  }, [activeAccountId, filters?.startDate, filters?.endDate, filters?.originCity, filters?.destinationCity, filters?.carrier, filters?.product, filters?.complianceStatus]);
+  }, [activeAccountId, filters?.startDate, filters?.endDate, filters?.originCity, filters?.destinationCity, filters?.carrier, filters?.product, filters?.complianceStatus, accountTimezone]);
 
   return { data, loading, error, globalWarningThreshold, globalCriticalThreshold };
 }

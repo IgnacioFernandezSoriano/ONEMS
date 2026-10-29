@@ -21,6 +21,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { useAccount } from '@/contexts/AccountContext';
 import { useTimeUnit } from '@/hooks/useTimeUnit';
 import { TimeUnitToggle } from '@/components/common/TimeUnitToggle';
+import { startOfDayInTz, endOfDayInTz } from '@/lib/dateUtils';
 import { formatInTz, toUnit, unitSuffix } from '@/lib/accountTime';
 import type { TimeUnit } from '@/lib/accountTime';
 import { aggregateJK, convertUnit, formatJK } from '@/lib/transitMeasure';
@@ -196,10 +197,10 @@ export default function TerritoryEquity() {
 
       // Apply filters (mismos criterios que el hook: nombres y sent_at)
       if (filters.startDate) {
-        query = query.gte('sent_at', filters.startDate);
+        query = query.gte('sent_at', startOfDayInTz(filters.startDate.slice(0, 10), accountTimezone));
       }
       if (filters.endDate) {
-        query = query.lte('sent_at', filters.endDate);
+        query = query.lte('sent_at', endOfDayInTz(filters.endDate.slice(0, 10), accountTimezone));
       }
       if (filters.carrier) {
         query = query.eq('carrier_name', filters.carrier);

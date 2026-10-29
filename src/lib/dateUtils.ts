@@ -37,3 +37,51 @@ export function adjustStartDateForFilter(dateString: string): string {
   // Add time to start from beginning of day
   return `${dateString} 00:00:00`;
 }
+
+function safeTz(tz: string): string {
+  try {
+    new Intl.DateTimeFormat('en-US', { timeZone: tz || 'UTC' });
+    return tz || 'UTC';
+  } catch {
+    return 'UTC';
+  }
+}
+
+/** Offset (ms) of `tz` relative to UTC at the given instant. */
+function tzOffsetMs(utcMs: number, tz: string): number {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: tz,
+    hourCycle: 'h23',
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric',
+  }).formatToParts(new Date(utcMs));
+  const get = (t: string) => Number(parts.find((p) => p.type === t)?.value);
+  const asUtc = Date.UTC(get('year'), get('month') - 1, get('day'), get('hour') % 24, get('minute'), get('second'));
+  return asUtc - Math.floor(utcMs / 1000) * 1000;
+}
+
+function localToUtcIso(ymd: string, h: number, mi: number, s: number, tz: string): string {
+  if (!ymd) return '';
+  const [y, m, d] = ymd.slice(0, 10).split('-').map(Number);
+  if (!y || !m || !d) return '';
+  const zone = safeTz(tz);
+  const guess = Date.UTC(y, m - 1, d, h, mi, s);
+  let utc = guess - tzOffsetMs(guess, zone);
+  // second pass handles DST transitions between guess and result
+  utc = guess - tzOffsetMs(utc, zone);
+  return new Date(utc).toISOString();
+}
+
+/** ISO UTC of 00:00:00 local (zone `tz`) on `ymd`; '' if empty. */
+export function startOfDayInTz(ymd: string, tz: string): string {
+  return localToUtcIso(ymd, 0, 0, 0, tz);
+}
+
+/** ISO UTC of 23:59:59 local (zone `tz`) on `ymd`; '' if empty. */
+export function endOfDayInTz(ymd: string, tz: string): string {
+  return localToUtcIso(ymd, 23, 59, 59, tz);
+}
