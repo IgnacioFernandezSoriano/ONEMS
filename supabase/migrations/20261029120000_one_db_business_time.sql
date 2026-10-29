@@ -316,7 +316,7 @@ BEGIN
      SET sent_at = d.sent_at, received_at = d.received_at
     FROM allocation_plan_details d
    WHERE d.id = o.allocation_detail_id
-     AND d.sent_at IS NOT NULL AND d.received_at IS NOT NULL
+     AND d.sent_at IS NOT NULL AND d.received_at IS NOT NULL AND d.sent_at <= d.received_at
      AND (o.sent_at IS DISTINCT FROM d.sent_at OR o.received_at IS DISTINCT FROM d.received_at);
 
   -- (b) el trigger one_db_compute_transit recalcula horas/dias/locales de todas las filas
@@ -326,20 +326,23 @@ BEGIN
   -- (c1) filas con detalle: estandar por ids
   UPDATE one_db o
      SET on_time_delivery = one_db_on_time(o.business_transit_hours, o.business_transit_days, ds.standard_time, ds.time_unit)
-    FROM allocation_plan_details d
-    JOIN allocation_plans ap ON ap.id = d.plan_id
+    FROM one_db o4  -- re-join de la fila: un JOIN del FROM no puede referenciar el destino del UPDATE ("o")
+    JOIN allocation_plan_details d ON d.id = o4.allocation_detail_id
+    LEFT JOIN allocation_plans ap ON ap.id = d.plan_id AND ap.account_id = o4.account_id
     LEFT JOIN nodes onode ON onode.id = d.origin_node_id
     LEFT JOIN nodes dnode ON dnode.id = d.destination_node_id
     LEFT JOIN LATERAL (
       SELECT s.standard_time, s.time_unit
         FROM delivery_standards s
-       WHERE s.carrier_id = ap.carrier_id
+       WHERE s.account_id = o4.account_id
+         AND s.carrier_id = ap.carrier_id
          AND s.product_id = ap.product_id
          AND s.origin_city_id = onode.city_id
          AND s.destination_city_id = dnode.city_id
+       ORDER BY s.created_at, s.id
        LIMIT 1
     ) ds ON true
-   WHERE d.id = o.allocation_detail_id;
+   WHERE o.id = o4.id;
 
   -- (c2) filas sin detalle: estandar por nombres dentro de la cuenta
   UPDATE one_db o
@@ -353,18 +356,22 @@ BEGIN
         JOIN products p  ON p.id  = s.product_id
         JOIN cities co   ON co.id = s.origin_city_id
         JOIN cities cd   ON cd.id = s.destination_city_id
-        JOIN one_db o3   ON o3.id = nd.oid
+        JOIN one_db o3   ON o3.id = nd.oid  -- re-join de la fila: el LATERAL no ve "o" (destino del UPDATE) en un FROM con subconsulta
        WHERE s.account_id = o3.account_id
-         AND c.name = o3.carrier_name
-         AND p.description = o3.product_name
-         AND co.name = o3.origin_city_name
-         AND cd.name = o3.destination_city_name
+         AND btrim(c.name) = btrim(o3.carrier_name)
+         AND btrim(p.description) = btrim(o3.product_name)
+         AND btrim(co.name) = btrim(o3.origin_city_name)
+         AND btrim(cd.name) = btrim(o3.destination_city_name)
+       ORDER BY s.created_at, s.id
        LIMIT 1
     ) ds ON true
    WHERE o.id = nd.oid;
 
   RETURN v_rows;
 END $$;
+
+-- Funcion de mantenimiento: no debe ser un RPC publico (SECURITY DEFINER + PostgREST).
+REVOKE ALL ON FUNCTION public.one_db_backfill_transit() FROM PUBLIC, anon, authenticated;
 
 -- Aparte: al editar un estandar, el recalculo de one_db debe correr con permisos propios; con RLS un admin de
 -- cuenta (no superadmin) no veia las filas de one_db y la actualizacion era un no-op silencioso.
@@ -379,12 +386,20 @@ BEGIN
   UPDATE one_db
      SET on_time_delivery = one_db_on_time(one_db.business_transit_hours, one_db.business_transit_days, NEW.standard_time, NEW.time_unit)
    WHERE one_db.account_id = NEW.account_id
-     AND one_db.carrier_name IN (SELECT name FROM carriers WHERE id = NEW.carrier_id)
-     AND one_db.product_name IN (SELECT description FROM products WHERE id = NEW.product_id)
-     AND one_db.origin_city_name IN (SELECT name FROM cities WHERE id = NEW.origin_city_id)
-     AND one_db.destination_city_name IN (SELECT name FROM cities WHERE id = NEW.destination_city_id);
+     AND EXISTS (SELECT 1 FROM carriers cx WHERE cx.id = NEW.carrier_id AND cx.account_id = NEW.account_id)
+     AND btrim(one_db.carrier_name) IN (SELECT btrim(name) FROM carriers WHERE id = NEW.carrier_id)
+     AND btrim(one_db.product_name) IN (SELECT btrim(description) FROM products WHERE id = NEW.product_id)
+     AND btrim(one_db.origin_city_name) IN (SELECT btrim(name) FROM cities WHERE id = NEW.origin_city_id)
+     AND btrim(one_db.destination_city_name) IN (SELECT btrim(name) FROM cities WHERE id = NEW.destination_city_id);
   RETURN NEW;
 END;
 $function$;
+
+-- Aparte: con el recalculo SECURITY DEFINER, la politica de INSERT dejaba a cualquier admin crear estandares con
+-- un account_id ajeno. Se acota a su propia cuenta (superadmin sin limite); se mantienen los roles (public).
+DROP POLICY IF EXISTS delivery_standards_insert ON public.delivery_standards;
+CREATE POLICY delivery_standards_insert ON public.delivery_standards AS PERMISSIVE FOR INSERT TO public
+  WITH CHECK (current_user_role() = 'superadmin'
+              OR (current_user_role() = 'admin' AND account_id = current_user_account_id()));
 
 SELECT public.one_db_backfill_transit();

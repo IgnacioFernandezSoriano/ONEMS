@@ -173,8 +173,11 @@ BEGIN;
 INSERT INTO public.one_db (account_id, tag_id, plan_name, carrier_name, product_name, origin_city_name, destination_city_name, sent_at, received_at, source_data_snapshot) VALUES
  ('a0000000-0000-0000-0000-000000000003','N1','P','KENYA POST','Economy delivery within 48hrs','Kericho','Garissa','2026-10-27 13:44:18Z','2026-10-29 07:40:57Z','{}'),
  ('a0000000-0000-0000-0000-000000000003','N2','P','KENYA POST','Producto inexistente','Kericho','Garissa','2026-10-27 13:44:18Z','2026-10-29 07:40:57Z','{}');
+INSERT INTO public.one_db (account_id, tag_id, plan_name, carrier_name, product_name, origin_city_name, destination_city_name, sent_at, received_at, source_data_snapshot)
+VALUES ('a0000000-0000-0000-0000-000000000003','N3','P','KENYA POST ','Economy delivery within 48hrs','Kericho ','Garissa','2026-10-27 13:44:18Z','2026-10-29 07:40:57Z','{}');
 UPDATE public.one_db SET total_transit_days = 99, business_transit_hours = NULL, on_time_delivery = false;
-SELECT pg_temp.fail_if(public.one_db_backfill_transit() IS DISTINCT FROM 2, 'T7 esperaba 2 filas tocadas');
+SELECT pg_temp.fail_if(public.one_db_backfill_transit() IS DISTINCT FROM 3, 'T7 esperaba 3 filas tocadas');
+SELECT pg_temp.fail_if((SELECT on_time_delivery FROM one_db WHERE tag_id='N3') IS DISTINCT FROM true, 'T7 nombres con espacio final');
 SELECT pg_temp.fail_if((SELECT sent_at FROM one_db WHERE tag_id='N1') IS DISTINCT FROM '2026-10-27 13:44:18Z'::timestamptz, 'T7 conserva sent_at');
 SELECT pg_temp.fail_if((SELECT business_transit_hours FROM one_db WHERE tag_id='N1') IS DISTINCT FROM 41.94, 'T7 business_transit_hours');
 SELECT pg_temp.fail_if((SELECT total_transit_days FROM one_db WHERE tag_id='N1') IS DISTINCT FROM 2, 'T7 total_transit_days');
