@@ -1,4 +1,6 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Cell, Legend } from 'recharts';
+import type { TimeUnit } from '@/lib/accountTime';
+import { unitSuffix } from '@/lib/accountTime';
 import { useMemo } from 'react';
 import { formatNumber } from '@/lib/formatNumber';
 
@@ -15,12 +17,14 @@ interface RouteDistribution {
 }
 
 interface CumulativeDistributionChartV2Props {
+  unit?: TimeUnit; // unidad de las cubetas de la distribucion (por defecto dias)
+  axisLabel?: string; // etiqueta del eje X
   routes: RouteDistribution[];
   maxDays: number;
   selectedRoute?: string; // routeKey to display, if undefined show aggregated
 }
 
-export function CumulativeDistributionChartV2({ routes, maxDays, selectedRoute }: CumulativeDistributionChartV2Props) {
+export function CumulativeDistributionChartV2({ routes, maxDays, selectedRoute, unit = 'days', axisLabel }: CumulativeDistributionChartV2Props) {
   const { chartData, standardDay, standardPercentage } = useMemo(() => {
     if (!routes || routes.length === 0) {
       return { chartData: [], standardDay: 0, standardPercentage: 85 };
@@ -54,7 +58,7 @@ export function CumulativeDistributionChartV2({ routes, maxDays, selectedRoute }
     avgStandardPercentage = totalSamples > 0 ? avgStandardPercentage / totalSamples : 85;
 
     // Build cumulative chart data
-    const maxDisplayDays = Math.min(maxDays, 20);
+    const maxDisplayDays = Math.min(maxDays, unit === 'hours' ? 120 : 20);
     
     // Find first day with data
     let minDayWithData = maxDisplayDays;
@@ -76,7 +80,7 @@ export function CumulativeDistributionChartV2({ routes, maxDays, selectedRoute }
 
       data.push({
         day,
-        dayLabel: `${day}d`,
+        dayLabel: `${day}${unitSuffix(unit)}`,
         cumulativePercentage,
         isBeforeOrAtStandard: day <= Math.round(avgStandard),
       });
@@ -90,7 +94,7 @@ export function CumulativeDistributionChartV2({ routes, maxDays, selectedRoute }
       standardDay: Math.round(avgStandard),
       standardPercentage: avgStandardPercentage,
     };
-  }, [routes, maxDays, selectedRoute]);
+  }, [routes, maxDays, selectedRoute, unit]);
 
   if (chartData.length === 0) {
     return (
@@ -138,7 +142,7 @@ export function CumulativeDistributionChartV2({ routes, maxDays, selectedRoute }
             dataKey="dayLabel" 
             tick={{ fontSize: 12, fill: '#6b7280' }}
             label={{ 
-              value: 'Transit Days (J+K)', 
+              value: axisLabel ?? 'Transit Days (J+K)', 
               position: 'insideBottom', 
               offset: -15, 
               style: { fontSize: 13, fill: '#374151', fontWeight: 500 } 

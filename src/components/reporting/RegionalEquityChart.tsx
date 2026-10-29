@@ -1,22 +1,30 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine, ResponsiveContainer, Cell } from 'recharts';
 import type { RegionEquityData } from '@/types/reporting';
 import { formatNumber } from '@/lib/formatNumber';
+import { useTimeUnit } from '@/hooks/useTimeUnit';
+import type { TimeUnit } from '@/lib/accountTime';
+import { formatJK } from '@/lib/transitMeasure';
 
 interface RegionalEquityChartProps {
   data: RegionEquityData[];
 }
 
 export function RegionalEquityChart({ data }: RegionalEquityChartProps) {
+  const { unit: displayUnit } = useTimeUnit();
+  // J+K en la unidad de su grupo (sin unidad = horas, regla de medida)
+  const jk = (v: number, u?: TimeUnit) => formatJK(v, u ?? 'hours', displayUnit);
   const chartData = data.map((region) => ({
     region: region.regionName,
     actual: region.actualPercentage,
     standard: region.standardPercentage,
     inboundStandardPercentage: region.inboundStandardPercentage,
     inboundPercentage: region.inboundPercentage,
+    inboundUnit: region.inboundUnit,
     inboundStandardDays: region.inboundStandardDays,
     inboundActualDays: region.inboundActualDays,
     outboundStandardPercentage: region.outboundStandardPercentage,
     outboundPercentage: region.outboundPercentage,
+    outboundUnit: region.outboundUnit,
     outboundStandardDays: region.outboundStandardDays,
     outboundActualDays: region.outboundActualDays,
     status: region.status,
@@ -62,12 +70,12 @@ export function RegionalEquityChart({ data }: RegionalEquityChartProps) {
                     <div className="mb-2">
                       <p className="text-blue-600 font-medium">Inbound:</p>
                       <p className="text-sm ml-2">Std %: {formatNumber(data.inboundStandardPercentage)}% | Actual %: {formatNumber(data.inboundPercentage)}%</p>
-                      <p className="text-sm ml-2">J+K Std: {formatNumber(data.inboundStandardDays)} days | J+K Actual: {formatNumber(data.inboundActualDays)} days</p>
+                      <p className="text-sm ml-2">J+K Std: {jk(data.inboundStandardDays, data.inboundUnit)} | J+K Actual: {jk(data.inboundActualDays, data.inboundUnit)}</p>
                     </div>
                     <div>
                       <p className="text-green-600 font-medium">Outbound:</p>
                       <p className="text-sm ml-2">Std %: {formatNumber(data.outboundStandardPercentage)}% | Actual %: {formatNumber(data.outboundPercentage)}%</p>
-                      <p className="text-sm ml-2">J+K Std: {formatNumber(data.outboundStandardDays)} days | J+K Actual: {formatNumber(data.outboundActualDays)} days</p>
+                      <p className="text-sm ml-2">J+K Std: {jk(data.outboundStandardDays, data.outboundUnit)} | J+K Actual: {jk(data.outboundActualDays, data.outboundUnit)}</p>
                     </div>
                   </div>
                 );

@@ -2,6 +2,9 @@ import { FileDown, Download } from 'lucide-react';
 import { ColumnTooltip } from './ColumnTooltip';
 import { exportRouteCSV } from '@/utils/jkExportCSV';
 import { downloadRouteSamples } from '@/utils/downloadRouteSamples';
+import { useTimeUnit } from '@/hooks/useTimeUnit';
+import type { TimeUnit } from '@/lib/accountTime';
+import { formatJK } from '@/lib/transitMeasure';
 
 
 interface JKRouteData {
@@ -18,6 +21,7 @@ interface JKRouteData {
   to_postal_center_id?: string;
   totalSamples: number;
   totalShipments: number;
+  unit?: TimeUnit; // unidad de jkStandard/jkActual/deviation (sin unidad = dias)
   jkStandard: number;
   standardDays: number;
   jkActual: number;
@@ -42,6 +46,7 @@ interface RoutePerformanceTableV2Props {
 
 export function RoutePerformanceTableV2({ data }: RoutePerformanceTableV2Props) {
   const routeData = data;
+  const { unit: displayUnit } = useTimeUnit();
   const handleRowClick = (route: JKRouteData) => {
     const params = new URLSearchParams();
     if (route.carrier_id) params.set('carrier_id', route.carrier_id);
@@ -157,7 +162,9 @@ export function RoutePerformanceTableV2({ data }: RoutePerformanceTableV2Props) 
                 return a.onTimePercentage - b.onTimePercentage;
               })
               .map((route, idx) => {
-                const deviationColor = route.deviation <= 0 ? 'text-green-600' : route.deviation < 1 ? 'text-yellow-600' : 'text-red-600';
+                const rowUnit: TimeUnit = route.unit ?? 'hours';
+                const tolerance = rowUnit === 'hours' ? 24 : 1;
+                const deviationColor = route.deviation <= 0 ? 'text-green-600' : route.deviation < tolerance ? 'text-yellow-600' : 'text-red-600';
                 const onTimeColor = route.onTimePercentage >= route.warningThreshold ? 'text-green-600 font-semibold' : route.onTimePercentage > route.criticalThreshold ? 'text-yellow-600' : 'text-red-600 font-semibold';
                 const statusColor = route.status === 'compliant' ? 'bg-green-500' : route.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500';
                 
@@ -185,10 +192,10 @@ export function RoutePerformanceTableV2({ data }: RoutePerformanceTableV2Props) 
                       </div>
                     </td>
                     <td className="px-3 py-2 text-sm text-gray-900">{route.totalSamples}</td>
-                    <td className="px-3 py-2 text-sm text-gray-900">{route.jkStandard.toFixed(1)}</td>
-                    <td className="px-3 py-2 text-sm text-gray-900">{route.jkActual.toFixed(1)}</td>
+                    <td className="px-3 py-2 text-sm text-gray-900">{formatJK(route.jkStandard, rowUnit, displayUnit)}</td>
+                    <td className="px-3 py-2 text-sm text-gray-900">{formatJK(route.jkActual, rowUnit, displayUnit)}</td>
                     <td className={`px-3 py-2 text-sm ${deviationColor}`}>
-                      {route.deviation > 0 ? '+' : ''}{route.deviation.toFixed(1)}
+                      {formatJK(route.deviation, rowUnit, displayUnit, true)}
                     </td>
                     <td className="px-3 py-2 text-sm text-gray-900 font-medium">
                       {route.standardPercentage.toFixed(0)}%

@@ -590,6 +590,8 @@ common.tuesday,Tuesday
 common.type,Type
 common.unavailable,Unavailable
 common.unit,Unit
+common.unit_days,Days
+common.unit_hours,Hours
 common.update,Update
 common.updated_successfully,Updated successfully
 common.updating,Updating...
@@ -1211,8 +1213,11 @@ onedb.all_products,All Products
 onedb.all_records,All Records
 onedb.all_shipment_records,All shipment records
 onedb.avg_transit_days,Avg Transit Days
+onedb.avg_transit_time,Avg transit time
 onedb.business_days,Business Days
 onedb.business_days_average,Business days average
+onedb.business_time,Business time
+onedb.business_time_average,Business time average
 onedb.carrier,Carrier
 onedb.delayed,Delayed
 onedb.destination,Destination:
@@ -1243,6 +1248,7 @@ onedb.title,ONE DB
 onedb.to_date,To Date
 onedb.total_records,Total Records
 onedb.transit_days,Transit Days
+onedb.transit_time,Transit time
 onedb.validated_postal_quality_analytics_repository,Validated postal quality analytics repository
 onedb_api.api_key_label,Your API Key
 onedb_api.api_tester_title,API Tester
@@ -1679,6 +1685,7 @@ reporting.avg_j_k_actual,Avg J+K Actual
 reporting.avg_jk_actual,Avg. J+K Actual
 reporting.avg_standard,Average standard ({percent} %)
 reporting.avg_transit_days,Avg Transit Days
+reporting.avg_transit_time,Avg transit time
 reporting.basic_information,Basic Information
 reporting.below_critical_threshold_with_penalty,Below critical threshold (with penalty)
 reporting.below_standard_but_above_critical_no_penalty,Below standard but above critical (no penalty)

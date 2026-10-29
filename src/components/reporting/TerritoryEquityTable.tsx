@@ -4,6 +4,9 @@ import { ChevronDown, ChevronRight, ChevronsDown, ChevronsUp } from 'lucide-reac
 import type { CityEquityData } from '@/types/reporting';
 import type { ScenarioInfo } from '@/hooks/reporting/useFilterScenario';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useTimeUnit } from '@/hooks/useTimeUnit';
+import type { TimeUnit } from '@/lib/accountTime';
+import { commonUnit, convertUnit, formatJK } from '@/lib/transitMeasure';
 
 interface TerritoryEquityTableProps {
   data: CityEquityData[];
@@ -27,8 +30,9 @@ type CityRow = {
   standardPercentage: number;
   actualPercentage: number;
   deviation: number;
-  standardDays: number;
-  actualDays: number;
+  standardHours: number; // J+K en horas (para agregar y ordenar)
+  actualHours: number;
+  unit: TimeUnit; // unidad de presentacion del J+K
   status: 'compliant' | 'warning' | 'critical';
   originalCity: CityEquityData;
   carrierBreakdown: CarrierRow[];
@@ -41,8 +45,9 @@ type CarrierRow = {
   standardPercentage: number;
   actualPercentage: number;
   deviation: number;
-  standardDays: number;
-  actualDays: number;
+  standardHours: number; // J+K en horas (para agregar y ordenar)
+  actualHours: number;
+  unit: TimeUnit; // unidad de presentacion del J+K
   status: 'compliant' | 'warning' | 'critical';
   productBreakdown: ProductRow[];
 };
@@ -54,8 +59,9 @@ type ProductRow = {
   standardPercentage: number;
   actualPercentage: number;
   deviation: number;
-  standardDays: number;
-  actualDays: number;
+  standardHours: number; // J+K en horas (para agregar y ordenar)
+  actualHours: number;
+  unit: TimeUnit; // unidad de presentacion del J+K
   status: 'compliant' | 'warning' | 'critical';
 };
 
@@ -70,6 +76,11 @@ export function TerritoryEquityTable({
   equityStatusFilter = []
 }: TerritoryEquityTableProps) {
   const { t } = useTranslation();
+  const { unit: displayUnit } = useTimeUnit();
+  // J+K de entrada (en su unidad; sin unidad = horas, regla de medida) -> horas para agregar y ordenar
+  const toH = (v: number, u?: TimeUnit) => convertUnit(v, u ?? 'hours', 'hours');
+  // Presentacion: de horas a la unidad de la fila (la de sus rutas; horas si mezclan)
+  const jkH = (hours: number, u: TimeUnit) => formatJK(convertUnit(hours, 'hours', u), u, displayUnit);
   const [sortField, setSortField] = useState<keyof CityRow>('cityName');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [expandedCities, setExpandedCities] = useState<Set<string>>(new Set());
@@ -190,6 +201,7 @@ export function TerritoryEquityTable({
         standardDaysCount: number;
         actualDaysSum: number;
         actualDaysCount: number;
+        units: Set<TimeUnit>;
       }>();
 
       // Group carrier/product breakdown by carrier
@@ -217,6 +229,7 @@ export function TerritoryEquityTable({
             standardDaysCount: 0,
             actualDaysSum: 0,
             actualDaysCount: 0,
+            units: new Set<TimeUnit>(),
           });
         }
 
@@ -239,11 +252,12 @@ export function TerritoryEquityTable({
         carrierData.totalCompliant += (relevantShipments * relevantPercentage / 100);
         carrierData.standardSum += cp.standardPercentage * relevantShipments;
         carrierData.standardCount += relevantShipments;
-        carrierData.standardDaysSum += cp.standardDays * relevantShipments;
+        carrierData.standardDaysSum += toH(cp.standardDays, cp.unit) * relevantShipments;
+        carrierData.units.add(cp.unit ?? 'hours');
         carrierData.standardDaysCount += relevantShipments;
         // Accumulate actual days weighted by shipments
         if (cp.actualDays > 0) {
-          carrierData.actualDaysSum += cp.actualDays * relevantShipments;
+          carrierData.actualDaysSum += toH(cp.actualDays, cp.unit) * relevantShipments;
           carrierData.actualDaysCount += relevantShipments;
         }
         
@@ -267,8 +281,9 @@ export function TerritoryEquityTable({
           standardPercentage: cp.standardPercentage,
           actualPercentage: relevantPercentage,  // Use direction-specific percentage
           deviation: relevantPercentage - cp.standardPercentage,  // Recalculate deviation
-          standardDays: cp.standardDays,
-          actualDays: cp.actualDays,
+          standardHours: toH(cp.standardDays, cp.unit),
+          actualHours: toH(cp.actualDays, cp.unit),
+          unit: cp.unit ?? 'hours',
           status: productStatus,
         });
       });
@@ -310,8 +325,9 @@ export function TerritoryEquityTable({
           standardPercentage: carrierStandardPercentage,
           actualPercentage: carrierActualPercentage,
           deviation: carrierActualPercentage - carrierStandardPercentage,
-          standardDays: carrierStandardDays,
-          actualDays: carrierActualDays,
+          standardHours: carrierStandardDays,
+          actualHours: carrierActualDays,
+          unit: commonUnit(carrierData.units),
           status: carrierStatus,
           productBreakdown: Array.from(carrierData.products.values()),
         };
@@ -325,10 +341,10 @@ export function TerritoryEquityTable({
       const cityStandardPercentageSum = carrierBreakdown.reduce((sum, c) => sum + (c.standardPercentage * c.shipments), 0);
       const cityStandardPercentage = cityTotalShipments > 0 ? cityStandardPercentageSum / cityTotalShipments : 95;
       
-      const cityStandardDaysSum = carrierBreakdown.reduce((sum, c) => sum + (c.standardDays * c.shipments), 0);
+      const cityStandardDaysSum = carrierBreakdown.reduce((sum, c) => sum + (c.standardHours * c.shipments), 0);
       const cityStandardDays = cityTotalShipments > 0 ? cityStandardDaysSum / cityTotalShipments : 0;
       
-      const cityActualDaysSum = carrierBreakdown.reduce((sum, c) => sum + (c.actualDays * c.shipments), 0);
+      const cityActualDaysSum = carrierBreakdown.reduce((sum, c) => sum + (c.actualHours * c.shipments), 0);
       const cityActualDays = cityTotalShipments > 0 ? cityActualDaysSum / cityTotalShipments : 0;
       
       const cityDeviation = cityActualPercentage - cityStandardPercentage;
@@ -353,8 +369,9 @@ export function TerritoryEquityTable({
         standardPercentage: cityStandardPercentage,
         actualPercentage: cityActualPercentage,
         deviation: cityDeviation,
-        standardDays: cityStandardDays,
-        actualDays: cityActualDays,
+        standardHours: cityStandardDays,
+        actualHours: cityActualDays,
+        unit: commonUnit(carrierBreakdown.map(c => c.unit)),
         status: cityStatus,
         originalCity: city,
         carrierBreakdown,
@@ -503,15 +520,15 @@ export function TerritoryEquityTable({
               </th>
               <th
                 className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                onClick={() => handleSort('standardDays')}
+                onClick={() => handleSort('standardHours')}
               >
-                {t('reporting.jk_std')} <SortIcon field="standardDays" />
+                {t('reporting.jk_std')} <SortIcon field="standardHours" />
               </th>
               <th
                 className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                onClick={() => handleSort('actualDays')}
+                onClick={() => handleSort('actualHours')}
               >
-                {t('reporting.jk_actual')} <SortIcon field="actualDays" />
+                {t('reporting.jk_actual')} <SortIcon field="actualHours" />
               </th>
               <th
                 className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
@@ -583,10 +600,10 @@ export function TerritoryEquityTable({
                       {city.shipments}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
-                      {formatNumber(city.standardDays)}
+                      {jkH(city.standardHours, city.unit)}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
-                      {formatNumber(city.actualDays)}
+                      {jkH(city.actualHours, city.unit)}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-700">
                       {formatNumber(city.standardPercentage)}%
@@ -641,10 +658,10 @@ export function TerritoryEquityTable({
                             {carrier.shipments}
                           </td>
                           <td className="px-4 py-2 whitespace-nowrap text-sm text-right text-gray-700">
-                            {formatNumber(carrier.standardDays)}
+                            {jkH(carrier.standardHours, carrier.unit)}
                           </td>
                           <td className="px-4 py-2 whitespace-nowrap text-sm text-right text-gray-700">
-                            {formatNumber(carrier.actualDays)}
+                            {jkH(carrier.actualHours, carrier.unit)}
                           </td>
                           <td className="px-4 py-2 whitespace-nowrap text-sm text-right text-gray-700">
                             {formatNumber(carrier.standardPercentage)}%
@@ -680,10 +697,10 @@ export function TerritoryEquityTable({
                               {product.shipments}
                             </td>
                             <td className="px-4 py-2 whitespace-nowrap text-sm text-right text-gray-700">
-                              {formatNumber(product.standardDays)}
+                              {jkH(product.standardHours, product.unit)}
                             </td>
                             <td className="px-4 py-2 whitespace-nowrap text-sm text-right text-gray-700">
-                              {formatNumber(product.actualDays)}
+                              {jkH(product.actualHours, product.unit)}
                             </td>
                             <td className="px-4 py-2 whitespace-nowrap text-sm text-right text-gray-700">
                               {formatNumber(product.standardPercentage)}%

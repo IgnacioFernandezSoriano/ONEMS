@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId';
 import { supabase } from '@/lib/supabase';
 import { useTerritoryEquityDataV2 as useTerritoryEquityData } from '@/hooks/reporting/useTerritoryEquityDataV2';
 import { TerritoryEquityTable } from '@/components/reporting/TerritoryEquityTable';
@@ -26,11 +26,22 @@ import type { CityEquityData, RegionEquityData, TerritoryEquityFilters as Filter
 import { useTranslation } from '@/hooks/useTranslation';
 import { useFilterScenario } from '@/hooks/reporting/useFilterScenario';
 import { useSearchParams } from 'react-router-dom';
+import { useTimeUnit } from '@/hooks/useTimeUnit';
+import { TimeUnitToggle } from '@/components/common/TimeUnitToggle';
+import { toUnit, unitSuffix } from '@/lib/accountTime';
+import type { TimeUnit } from '@/lib/accountTime';
+import { convertUnit, formatJK } from '@/lib/transitMeasure';
 
 export default function TerritoryEquity() {
   const [searchParams] = useSearchParams();
   const { t } = useTranslation();
-  const { profile } = useAuth();
+  const effectiveAccountId = useEffectiveAccountId();
+  const { unit: displayUnit } = useTimeUnit();
+  // Unidad de las graficas de distribucion (solo si hay rutas en horas Y en dias se puede elegir)
+  const [chartUnitChoice, setChartUnitChoice] = useState<TimeUnit | null>(null);
+  // J+K en su unidad (sin unidad = horas, regla de medida): CSV en la unidad del selector; pantalla con formatJK
+  const jkCsv = (v: number, u?: TimeUnit) => toUnit(convertUnit(v, u ?? 'hours', 'hours'), displayUnit).toFixed(1);
+  const fmtJKU = (v: number, u?: TimeUnit) => formatJK(v, u ?? 'hours', displayUnit);
   // Read URL params
   const urlTab = searchParams.get('tab') as 'city' | 'regional' | 'map' | 'product' | 'jk' | null;
   const urlOrigin = searchParams.get('origin');
@@ -59,13 +70,13 @@ export default function TerritoryEquity() {
   // Load available regions
   useEffect(() => {
     async function loadRegions() {
-      if (!profile?.account_id) return;
+      if (!effectiveAccountId) return;
       
       try {
         const { data } = await supabase
           .from('regions')
           .select('name')
-          .eq('account_id', profile.account_id)
+          .eq('account_id', effectiveAccountId)
           .order('name');
         
         setAvailableRegions(data?.map(r => r.name) || []);
@@ -75,7 +86,7 @@ export default function TerritoryEquity() {
     }
     
     loadRegions();
-  }, [profile?.account_id]);
+  }, [effectiveAccountId]);
 
   // Prepare filters based on active tab - region filter only applies in Regional Analysis
   const effectiveFilters = useMemo(() => {
@@ -101,7 +112,7 @@ export default function TerritoryEquity() {
     scenarioDescription,
     scenarioInfo: hookScenarioInfo
   } = useTerritoryEquityData(
-    profile?.account_id || undefined,
+    effectiveAccountId || undefined,
     effectiveFilters
   );
 
@@ -142,8 +153,8 @@ export default function TerritoryEquity() {
       'Standard %',
       'Actual %',
       'Deviation',
-      'J+K Std',
-      'J+K Actual',
+      `J+K Std (${unitSuffix(displayUnit)})`,
+      `J+K Actual (${unitSuffix(displayUnit)})`,
       'Status',
       'Carrier',
       'Product',
@@ -152,8 +163,8 @@ export default function TerritoryEquity() {
       'CP Standard %',
       'CP Actual %',
       'CP Deviation',
-      'CP J+K Std',
-      'CP J+K Actual',
+      `CP J+K Std (${unitSuffix(displayUnit)})`,
+      `CP J+K Actual (${unitSuffix(displayUnit)})`,
     ];
 
     const rows: string[][] = [];
@@ -176,8 +187,8 @@ export default function TerritoryEquity() {
               city.inboundStandardPercentage.toFixed(1),
               city.inboundPercentage.toFixed(1),
               city.inboundDeviation.toFixed(1),
-              city.inboundStandardDays.toFixed(1),
-              city.inboundActualDays.toFixed(1),
+              jkCsv(city.inboundStandardDays, city.inboundUnit),
+              jkCsv(city.inboundActualDays, city.inboundUnit),
               city.inboundPercentage >= globalWarningThreshold ? 'compliant' : (city.inboundPercentage > globalCriticalThreshold ? 'warning' : 'critical'),
               cp.carrier,
               cp.product,
@@ -186,8 +197,8 @@ export default function TerritoryEquity() {
               cp.standardPercentage.toFixed(1),
               cp.actualPercentage.toFixed(1),
               cp.deviation.toFixed(1),
-              cp.standardDays.toFixed(1),
-              cp.actualDays.toFixed(1),
+              jkCsv(cp.standardDays, cp.unit),
+              jkCsv(cp.actualDays, cp.unit),
             ]);
           });
         } else {
@@ -203,8 +214,8 @@ export default function TerritoryEquity() {
             city.inboundStandardPercentage.toFixed(1),
             city.inboundPercentage.toFixed(1),
             city.inboundDeviation.toFixed(1),
-            city.inboundStandardDays.toFixed(1),
-            city.inboundActualDays.toFixed(1),
+            jkCsv(city.inboundStandardDays, city.inboundUnit),
+            jkCsv(city.inboundActualDays, city.inboundUnit),
             city.inboundPercentage >= globalWarningThreshold ? 'compliant' : (city.inboundPercentage > globalCriticalThreshold ? 'warning' : 'critical'),
             '', '', '', '', '', '', '', '', '',
           ]);
@@ -225,8 +236,8 @@ export default function TerritoryEquity() {
               city.outboundStandardPercentage.toFixed(1),
               city.outboundPercentage.toFixed(1),
               city.outboundDeviation.toFixed(1),
-              city.outboundStandardDays.toFixed(1),
-              city.outboundActualDays.toFixed(1),
+              jkCsv(city.outboundStandardDays, city.outboundUnit),
+              jkCsv(city.outboundActualDays, city.outboundUnit),
               city.outboundPercentage >= globalWarningThreshold ? 'compliant' : (city.outboundPercentage > globalCriticalThreshold ? 'warning' : 'critical'),
               cp.carrier,
               cp.product,
@@ -235,8 +246,8 @@ export default function TerritoryEquity() {
               cp.standardPercentage.toFixed(1),
               cp.actualPercentage.toFixed(1),
               cp.deviation.toFixed(1),
-              cp.standardDays.toFixed(1),
-              cp.actualDays.toFixed(1),
+              jkCsv(cp.standardDays, cp.unit),
+              jkCsv(cp.actualDays, cp.unit),
             ]);
           });
         } else {
@@ -252,8 +263,8 @@ export default function TerritoryEquity() {
             city.outboundStandardPercentage.toFixed(1),
             city.outboundPercentage.toFixed(1),
             city.outboundDeviation.toFixed(1),
-            city.outboundStandardDays.toFixed(1),
-            city.outboundActualDays.toFixed(1),
+            jkCsv(city.outboundStandardDays, city.outboundUnit),
+            jkCsv(city.outboundActualDays, city.outboundUnit),
             city.outboundPercentage >= globalWarningThreshold ? 'compliant' : (city.outboundPercentage > globalCriticalThreshold ? 'warning' : 'critical'),
             '', '', '', '', '', '', '', '', '',
           ]);
@@ -271,8 +282,8 @@ export default function TerritoryEquity() {
           city.inboundStandardPercentage.toFixed(1),
           city.inboundPercentage.toFixed(1),
           city.inboundDeviation.toFixed(1),
-          city.inboundStandardDays.toFixed(1),
-          city.inboundActualDays.toFixed(1),
+          jkCsv(city.inboundStandardDays, city.inboundUnit),
+          jkCsv(city.inboundActualDays, city.inboundUnit),
           city.inboundPercentage >= globalWarningThreshold ? 'compliant' : (city.inboundPercentage > globalCriticalThreshold ? 'warning' : 'critical'),
           '', '', '', '', '', '', '', '', '',
         ]);
@@ -288,8 +299,8 @@ export default function TerritoryEquity() {
           city.outboundStandardPercentage.toFixed(1),
           city.outboundPercentage.toFixed(1),
           city.outboundDeviation.toFixed(1),
-          city.outboundStandardDays.toFixed(1),
-          city.outboundActualDays.toFixed(1),
+          jkCsv(city.outboundStandardDays, city.outboundUnit),
+          jkCsv(city.outboundActualDays, city.outboundUnit),
           city.outboundPercentage >= globalWarningThreshold ? 'compliant' : (city.outboundPercentage > globalCriticalThreshold ? 'warning' : 'critical'),
           '', '', '', '', '', '', '', '', '',
         ]);
@@ -317,8 +328,8 @@ export default function TerritoryEquity() {
       'Standard %',
       'Actual %',
       'Deviation',
-      'J+K Std',
-      'J+K Actual',
+      `J+K Std (${unitSuffix(displayUnit)})`,
+      `J+K Actual (${unitSuffix(displayUnit)})`,
       'Status',
       'Underserved Cities',
       'Carrier',
@@ -328,8 +339,8 @@ export default function TerritoryEquity() {
       'CP Standard %',
       'CP Actual %',
       'CP Deviation',
-      'CP J+K Std',
-      'CP J+K Actual',
+      `CP J+K Std (${unitSuffix(displayUnit)})`,
+      `CP J+K Actual (${unitSuffix(displayUnit)})`,
     ];
 
     const rows: string[][] = [];
@@ -349,8 +360,8 @@ export default function TerritoryEquity() {
               region.inboundStandardPercentage.toFixed(1),
               region.inboundPercentage.toFixed(1),
               region.inboundDeviation.toFixed(1),
-              region.inboundStandardDays.toFixed(1),
-              region.inboundActualDays.toFixed(1),
+              jkCsv(region.inboundStandardDays, region.inboundUnit),
+              jkCsv(region.inboundActualDays, region.inboundUnit),
               region.inboundPercentage >= globalWarningThreshold ? 'compliant' : (region.inboundPercentage > globalCriticalThreshold ? 'warning' : 'critical'),
               region.underservedCitiesCount.toString(),
               cp.carrier,
@@ -360,8 +371,8 @@ export default function TerritoryEquity() {
               cp.standardPercentage.toFixed(1),
               cp.actualPercentage.toFixed(1),
               cp.deviation.toFixed(1),
-              cp.standardDays.toFixed(1),
-              cp.actualDays.toFixed(1),
+              jkCsv(cp.standardDays, cp.unit),
+              jkCsv(cp.actualDays, cp.unit),
             ]);
           });
         } else {
@@ -373,8 +384,8 @@ export default function TerritoryEquity() {
             region.inboundStandardPercentage.toFixed(1),
             region.inboundPercentage.toFixed(1),
             region.inboundDeviation.toFixed(1),
-            region.inboundStandardDays.toFixed(1),
-            region.inboundActualDays.toFixed(1),
+            jkCsv(region.inboundStandardDays, region.inboundUnit),
+            jkCsv(region.inboundActualDays, region.inboundUnit),
             region.inboundPercentage >= globalWarningThreshold ? 'compliant' : (region.inboundPercentage > globalCriticalThreshold ? 'warning' : 'critical'),
             region.underservedCitiesCount.toString(),
             '', '', '', '', '', '', '', '', '',
@@ -393,8 +404,8 @@ export default function TerritoryEquity() {
               region.outboundStandardPercentage.toFixed(1),
               region.outboundPercentage.toFixed(1),
               region.outboundDeviation.toFixed(1),
-              region.outboundStandardDays.toFixed(1),
-              region.outboundActualDays.toFixed(1),
+              jkCsv(region.outboundStandardDays, region.outboundUnit),
+              jkCsv(region.outboundActualDays, region.outboundUnit),
               region.outboundPercentage >= globalWarningThreshold ? 'compliant' : (region.outboundPercentage > globalCriticalThreshold ? 'warning' : 'critical'),
               region.underservedCitiesCount.toString(),
               cp.carrier,
@@ -404,8 +415,8 @@ export default function TerritoryEquity() {
               cp.standardPercentage.toFixed(1),
               cp.actualPercentage.toFixed(1),
               cp.deviation.toFixed(1),
-              cp.standardDays.toFixed(1),
-              cp.actualDays.toFixed(1),
+              jkCsv(cp.standardDays, cp.unit),
+              jkCsv(cp.actualDays, cp.unit),
             ]);
           });
         } else {
@@ -417,8 +428,8 @@ export default function TerritoryEquity() {
             region.outboundStandardPercentage.toFixed(1),
             region.outboundPercentage.toFixed(1),
             region.outboundDeviation.toFixed(1),
-            region.outboundStandardDays.toFixed(1),
-            region.outboundActualDays.toFixed(1),
+            jkCsv(region.outboundStandardDays, region.outboundUnit),
+            jkCsv(region.outboundActualDays, region.outboundUnit),
             region.outboundPercentage >= globalWarningThreshold ? 'compliant' : (region.outboundPercentage > globalCriticalThreshold ? 'warning' : 'critical'),
             region.underservedCitiesCount.toString(),
             '', '', '', '', '', '', '', '', '',
@@ -434,8 +445,8 @@ export default function TerritoryEquity() {
           region.inboundStandardPercentage.toFixed(1),
           region.inboundPercentage.toFixed(1),
           region.inboundDeviation.toFixed(1),
-          region.inboundStandardDays.toFixed(1),
-          region.inboundActualDays.toFixed(1),
+          jkCsv(region.inboundStandardDays, region.inboundUnit),
+          jkCsv(region.inboundActualDays, region.inboundUnit),
           region.inboundPercentage >= globalWarningThreshold ? 'compliant' : (region.inboundPercentage > globalCriticalThreshold ? 'warning' : 'critical'),
           region.underservedCitiesCount.toString(),
           '', '', '', '', '', '', '', '', '',
@@ -449,8 +460,8 @@ export default function TerritoryEquity() {
           region.outboundStandardPercentage.toFixed(1),
           region.outboundPercentage.toFixed(1),
           region.outboundDeviation.toFixed(1),
-          region.outboundStandardDays.toFixed(1),
-          region.outboundActualDays.toFixed(1),
+          jkCsv(region.outboundStandardDays, region.outboundUnit),
+          jkCsv(region.outboundActualDays, region.outboundUnit),
           region.outboundPercentage >= globalWarningThreshold ? 'compliant' : (region.outboundPercentage > globalCriticalThreshold ? 'warning' : 'critical'),
           region.underservedCitiesCount.toString(),
           '', '', '', '', '', '', '', '', '',
@@ -469,6 +480,15 @@ export default function TerritoryEquity() {
   };
 
   // Tooltip component replaced with SmartTooltip for consistency
+
+  // Graficas de distribucion: una sola unidad a la vez (cubetas de 1 h o de 1 dia)
+  const hasHoursRoutes = routeData.some(r => r.unit === 'hours');
+  const hasDaysRoutes = routeData.some(r => r.unit === 'days');
+  const chartUnit: TimeUnit = chartUnitChoice && (chartUnitChoice === 'hours' ? hasHoursRoutes : hasDaysRoutes)
+    ? chartUnitChoice
+    : (hasDaysRoutes && !hasHoursRoutes ? 'days' : 'hours');
+  const chartRoutes = routeData.filter(r => r.unit === chartUnit);
+  const chartAxisLabel = chartUnit === 'hours' ? t('common.unit_hours') : t('common.unit_days');
 
   if (loading) {
     return (
@@ -491,15 +511,18 @@ export default function TerritoryEquity() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">
-            {scenarioInfo.isRouteView
-              ? `Route Analysis: ${scenarioInfo.originCityName} → ${scenarioInfo.destinationCityName}`
-              : scenarioInfo.isOriginView
-              ? `Territory Performance Report: Outbound from ${scenarioInfo.originCityName}`
-              : scenarioInfo.isDestinationView
-              ? `Territory Performance Report: Inbound to ${scenarioInfo.destinationCityName}`
-              : t('reporting.territory_equity_report')}
-          </h1>
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="text-3xl font-bold text-gray-900">
+              {scenarioInfo.isRouteView
+                ? `Route Analysis: ${scenarioInfo.originCityName} → ${scenarioInfo.destinationCityName}`
+                : scenarioInfo.isOriginView
+                ? `Territory Performance Report: Outbound from ${scenarioInfo.originCityName}`
+                : scenarioInfo.isDestinationView
+                ? `Territory Performance Report: Inbound to ${scenarioInfo.destinationCityName}`
+                : t('reporting.territory_equity_report')}
+            </h1>
+            <TimeUnitToggle />
+          </div>
           <p className="text-gray-600 mt-1">
             {scenarioInfo.isRouteView
               ? `Detailed performance analysis for the route from ${scenarioInfo.originCityName} to ${scenarioInfo.destinationCityName}`
@@ -627,10 +650,10 @@ export default function TerritoryEquity() {
                       {city.standardPercentage.toFixed(1)}%
                     </div>
                     <div className="text-right text-gray-600">
-                      {city.standardDays.toFixed(1)}
+                      {fmtJKU(city.standardDays, city.unit)}
                     </div>
                     <div className="text-right text-gray-600">
-                      {city.actualDays.toFixed(1)}
+                      {fmtJKU(city.actualDays, city.unit)}
                     </div>
                     <div className="text-right text-gray-600">
                       {city.inboundPercentage.toFixed(1)}%
@@ -666,10 +689,10 @@ export default function TerritoryEquity() {
                       {city.standardPercentage.toFixed(1)}%
                     </div>
                     <div className="text-right text-gray-600">
-                      {city.standardDays.toFixed(1)}
+                      {fmtJKU(city.standardDays, city.unit)}
                     </div>
                     <div className="text-right text-gray-600">
-                      {city.actualDays.toFixed(1)}
+                      {fmtJKU(city.actualDays, city.unit)}
                     </div>
                     <div className="text-right text-gray-600">
                       {city.inboundPercentage.toFixed(1)}%
@@ -727,10 +750,10 @@ export default function TerritoryEquity() {
                       {region.standardPercentage.toFixed(1)}%
                     </div>
                     <div className="text-right text-gray-600">
-                      {region.standardDays.toFixed(1)}
+                      {fmtJKU(region.standardDays, region.unit)}
                     </div>
                     <div className="text-right text-gray-600">
-                      {region.actualDays.toFixed(1)}
+                      {fmtJKU(region.actualDays, region.unit)}
                     </div>
                     <div className="text-right text-gray-600">
                       {region.inboundPercentage.toFixed(1)}%
@@ -766,10 +789,10 @@ export default function TerritoryEquity() {
                       {region.standardPercentage.toFixed(1)}%
                     </div>
                     <div className="text-right text-gray-600">
-                      {region.standardDays.toFixed(1)}
+                      {fmtJKU(region.standardDays, region.unit)}
                     </div>
                     <div className="text-right text-gray-600">
-                      {region.actualDays.toFixed(1)}
+                      {fmtJKU(region.actualDays, region.unit)}
                     </div>
                     <div className="text-right text-gray-600">
                       {region.inboundPercentage.toFixed(1)}%
@@ -1043,8 +1066,25 @@ export default function TerritoryEquity() {
                   {/* Left: Performance Distribution */}
                   <div className="bg-white p-6 rounded-lg border border-gray-200">
                     <h4 className="text-md font-semibold mb-4">Performance Distribution</h4>
-                    <PerformanceDistributionChart 
-                      routeData={routeData}
+                    {hasHoursRoutes && hasDaysRoutes && (
+                      <div role="group" className="inline-flex mb-3">
+                        {(['hours', 'days'] as TimeUnit[]).map(u => (
+                          <button
+                            key={u}
+                            type="button"
+                            aria-pressed={chartUnit === u}
+                            onClick={() => setChartUnitChoice(u)}
+                            className={`px-3 py-1 text-xs font-medium border border-gray-300 first:rounded-l-md last:rounded-r-md ${chartUnit === u ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+                          >
+                            {u === 'hours' ? t('common.unit_hours') : t('common.unit_days')}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    <PerformanceDistributionChart
+                      routeData={chartRoutes}
+                      unit={chartUnit}
+                      axisLabel={chartAxisLabel}
                       carrierFilter={effectiveFilters.carrier}
                       productFilter={effectiveFilters.product}
                     />
@@ -1078,9 +1118,9 @@ export default function TerritoryEquity() {
                       </div>
                     </div>
                     {cumulativeView === 'chart' ? (
-                      <CumulativeDistributionChart routes={routeData} />
+                      <CumulativeDistributionChart routes={chartRoutes} unit={chartUnit} axisLabel={chartAxisLabel} />
                     ) : (
-                      <CumulativeDistributionTable routes={routeData} />
+                      <CumulativeDistributionTable routes={chartRoutes} unit={chartUnit} />
                     )}
                   </div>
                 </div>

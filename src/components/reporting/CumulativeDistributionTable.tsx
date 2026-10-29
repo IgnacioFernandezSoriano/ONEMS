@@ -1,4 +1,6 @@
 import React, { useMemo } from 'react';
+import type { TimeUnit } from '@/lib/accountTime';
+import { unitSuffix } from '@/lib/accountTime';
 import { ColumnTooltip } from './ColumnTooltip';
 import { formatNumber } from '@/lib/formatNumber';
 
@@ -14,11 +16,12 @@ interface RouteDistribution {
 }
 
 interface CumulativeDistributionTableProps {
+  unit?: TimeUnit; // unidad de las cubetas de la distribucion (por defecto dias)
   routes: RouteDistribution[];
   maxDays?: number;
 }
 
-export function CumulativeDistributionTable({ routes }: CumulativeDistributionTableProps) {
+export function CumulativeDistributionTable({ routes, unit = 'days' }: CumulativeDistributionTableProps) {
   const { tableData, dayColumns } = useMemo(() => {
     if (!routes || routes.length === 0) {
       return { tableData: [], dayColumns: [] };
@@ -26,7 +29,7 @@ export function CumulativeDistributionTable({ routes }: CumulativeDistributionTa
 
     // Calculate maxDays from distribution data
     const maxDays = Math.max(...routes.flatMap(r => Array.from(r.distribution.keys())), 10);
-    const maxDisplayDays = Math.min(maxDays, 20);
+    const maxDisplayDays = Math.min(maxDays, unit === 'hours' ? 120 : 20);
     
     // Find the minimum day with data and maximum day needed to reach 100%
     let minDayWithData = maxDisplayDays;
@@ -88,7 +91,7 @@ export function CumulativeDistributionTable({ routes }: CumulativeDistributionTa
     });
 
     return { tableData: data, dayColumns: days };
-  }, [routes]);
+  }, [routes, unit]);
 
   if (tableData.length === 0) {
     return (
@@ -143,7 +146,7 @@ export function CumulativeDistributionTable({ routes }: CumulativeDistributionTa
                     isStandardDay ? 'text-green-600' : 'text-gray-500'
                   }`}
                 >
-                  {day}d
+                  {day}{unitSuffix(unit)}
                 </th>
               );
             })}

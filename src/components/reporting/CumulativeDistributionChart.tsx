@@ -1,4 +1,6 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Cell, Legend } from 'recharts';
+import type { TimeUnit } from '@/lib/accountTime';
+import { unitSuffix } from '@/lib/accountTime';
 import { useMemo } from 'react';
 import { formatNumber } from '@/lib/formatNumber';
 
@@ -14,10 +16,12 @@ interface RouteDistribution {
 }
 
 interface CumulativeDistributionChartProps {
+  unit?: TimeUnit; // unidad de las cubetas de la distribucion (por defecto dias)
+  axisLabel?: string; // etiqueta del eje X
   routes: RouteDistribution[];
 }
 
-export function CumulativeDistributionChart({ routes }: CumulativeDistributionChartProps) {
+export function CumulativeDistributionChart({ routes, unit = 'days', axisLabel }: CumulativeDistributionChartProps) {
   const { chartData, standardDay, standardPercentage } = useMemo(() => {
     if (!routes || routes.length === 0) {
       return { chartData: [], standardDay: 0, standardPercentage: 85 };
@@ -43,7 +47,7 @@ export function CumulativeDistributionChart({ routes }: CumulativeDistributionCh
 
     // Build cumulative chart data
     const maxDisplayDays = Math.max(...Array.from(aggregatedDistribution.keys()), 10);
-    const maxDisplayDaysLimit = Math.min(maxDisplayDays, 20);
+    const maxDisplayDaysLimit = Math.min(maxDisplayDays, unit === 'hours' ? 120 : 20);
     
     // Find first day with data
     let minDayWithData = maxDisplayDaysLimit;
@@ -65,7 +69,7 @@ export function CumulativeDistributionChart({ routes }: CumulativeDistributionCh
 
       data.push({
         day,
-        dayLabel: `${day}d`,
+        dayLabel: `${day}${unitSuffix(unit)}`,
         cumulativePercentage,
         isBeforeOrAtStandard: day <= Math.round(avgStandard),
       });
@@ -79,7 +83,7 @@ export function CumulativeDistributionChart({ routes }: CumulativeDistributionCh
       standardDay: Math.round(avgStandard),
       standardPercentage: avgStandardPercentage,
     };
-  }, [routes]);
+  }, [routes, unit]);
 
   if (chartData.length === 0) {
     return (
@@ -127,7 +131,7 @@ export function CumulativeDistributionChart({ routes }: CumulativeDistributionCh
             dataKey="dayLabel" 
             tick={{ fontSize: 12, fill: '#6b7280' }}
             label={{ 
-              value: 'Transit Days (J+K)', 
+              value: axisLabel ?? 'Transit Days (J+K)', 
               position: 'insideBottom', 
               offset: -15, 
               style: { fontSize: 13, fill: '#374151', fontWeight: 500 } 
