@@ -43,3 +43,7 @@ export function formatDuration(hours: number | null | undefined, unit: TimeUnit)
 export function toUnit(hours: number, unit: TimeUnit): number {
   return unit === 'days' ? hours / 24 : hours
 }
+
+export function unitSuffix(unit: TimeUnit): 'h' | 'd' {
+  return unit === 'hours' ? 'h' : 'd'
+}

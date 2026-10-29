@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from '@/hooks/useTranslation'
+import { useAccount } from '@/contexts/AccountContext'
+import { formatInTz } from '@/lib/accountTime'
 import type { AllocationPlanDetailWithRelations } from '@/lib/types'
 
 interface Props {
@@ -15,6 +17,7 @@ interface Props {
 
 export function RegisterReceptionModal({ detail, panelists, onClose, onRegister }: Props) {
   const { t } = useTranslation()
+  const { accountTimezone } = useAccount()
   const [receivedAt, setReceivedAt] = useState('')
   const [receivedByPanelistId, setReceivedByPanelistId] = useState('')
   const [saving, setSaving] = useState(false)
@@ -106,7 +109,7 @@ export function RegisterReceptionModal({ detail, panelists, onClose, onRegister 
                 <div>
                   <span className="text-gray-600">Sent at:</span>
                   <p className="font-medium">
-                    {new Date(detail.sent_at).toLocaleString()}
+                    {formatInTz(detail.sent_at, accountTimezone)}
                   </p>
                 </div>
               )}

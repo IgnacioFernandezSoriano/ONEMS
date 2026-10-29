@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useEffectiveAccountId } from './useEffectiveAccountId'
-import { formatInTz, toUnit, TimeUnit } from '../lib/accountTime'
+import { formatInTz, toUnit, unitSuffix, TimeUnit } from '../lib/accountTime'
 
 export interface OneDBRecord {
   id: string;
@@ -155,7 +155,7 @@ export const useOneDB = (accountId: string | undefined) => {
   };
 
   const exportToCSV = (selectedRecords: OneDBRecord[], opts: { tz: string; unit: TimeUnit }) => {
-    const suffix = opts.unit === 'hours' ? 'h' : 'd';
+    const suffix = unitSuffix(opts.unit);
     const num = (h: number | null) => (h === null || h === undefined ? '' : toUnit(h, opts.unit).toFixed(2));
     const dataToExport = selectedRecords.length > 0 ? selectedRecords : filteredRecords;
 
@@ -171,13 +171,10 @@ export const useOneDB = (accountId: string | undefined) => {
       `Transit time (${suffix})`,
       `Business time (${suffix})`,
       'On Time Delivery',
-      'Created Date',
-      'Created Time',
+      'Created (local)',
     ];
 
     const rows = dataToExport.map((record) => {
-      const createdDate = new Date(record.created_at);
-
       return [
         record.tag_id,
         record.plan_name,
@@ -190,8 +187,7 @@ export const useOneDB = (accountId: string | undefined) => {
         num(record.total_transit_hours),
         num(record.business_transit_hours),
         record.on_time_delivery === null ? 'N/A' : record.on_time_delivery ? 'Yes' : 'No',
-        createdDate.toLocaleDateString(),
-        createdDate.toLocaleTimeString(),
+        formatInTz(record.created_at, opts.tz),
       ];
     });
 

@@ -3,7 +3,7 @@ import { OneDBRecord } from '../../hooks/useOneDB';
 import { SmartTooltip } from '../common/SmartTooltip';
 import { TablePagination } from '../common/TablePagination';
 import { useTranslation } from '@/hooks/useTranslation';
-import { formatInTz, formatDuration, TimeUnit } from '../../lib/accountTime';
+import { formatInTz, formatDuration, unitSuffix, TimeUnit } from '../../lib/accountTime';
 
 interface OneDBTableProps {
   records: OneDBRecord[];
@@ -48,7 +48,7 @@ export const OneDBTable: React.FC<OneDBTableProps> = ({
   }, [currentPage, totalPages]);
 
   const formatDate = (dateString: string) => formatInTz(dateString, tz);
-  const unitLabel = unit === 'hours' ? 'h' : 'd';
+  const unitLabel = unitSuffix(unit);
 
   const OnTimeDeliveryBadge = ({ value }: { value: boolean | null }) => {
     if (value === null) {

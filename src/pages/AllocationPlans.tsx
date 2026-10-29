@@ -11,8 +11,11 @@ import { SortableHeader } from '@/components/common/SortableHeader'
 import { SmartTooltip } from '@/components/common/SmartTooltip'
 
 import { useTranslation } from '@/hooks/useTranslation';
+import { useAccount } from '@/contexts/AccountContext'
+import { formatInTz } from '@/lib/accountTime'
 export function AllocationPlans() {
   const { t } = useTranslation();
+  const { accountTimezone } = useAccount();
   const {
     details,
     plans,
@@ -447,8 +450,8 @@ export function AllocationPlans() {
       detail.year || '',
       detail.status || '',
       detail.tag_id || '',
-      detail.sent_at ? new Date(detail.sent_at).toLocaleString() : '',
-      detail.received_at ? new Date(detail.received_at).toLocaleString() : '',
+      detail.sent_at ? formatInTz(detail.sent_at, accountTimezone) : '',
+      detail.received_at ? formatInTz(detail.received_at, accountTimezone) : '',
       detail.origin_panelist_name || '',
       detail.destination_panelist_name || '',
       detail.origin_availability_status || '',
