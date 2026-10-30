@@ -1,36 +1,34 @@
+-- Regla 2026-10-30: la cadena del proveedor es prefijo fijo G.1UPU.01000FFFF + numero impreso.
+-- La clave ONEMS es el numero impreso normalizado (normalize_tag), igual que lo teclea el panelista.
 DO $$
 BEGIN
-  -- urn:oid sample → last token, uppercased
-  IF normalize_provider_tag('urn:oid:1.0.15961.14.B.A00122245737') IS DISTINCT FROM 'A00122245737' THEN
-    RAISE EXCEPTION 'FAIL: urn:oid decode, got %', normalize_provider_tag('urn:oid:1.0.15961.14.B.A00122245737');
+  -- cadena UPU completa -> numero impreso de 8 digitos
+  IF normalize_provider_tag('G.1UPU.01000FFFF00000007') IS DISTINCT FROM '00000007' THEN
+    RAISE EXCEPTION 'FAIL: UPU -> numero impreso, got %', normalize_provider_tag('G.1UPU.01000FFFF00000007');
   END IF;
-  -- already-hex passthrough, uppercased
-  IF normalize_provider_tag('30b1d226a8240000b000650c') IS DISTINCT FROM '30B1D226A8240000B000650C' THEN
-    RAISE EXCEPTION 'FAIL: hex passthrough';
+  -- minusculas y espacios
+  IF normalize_provider_tag('  g.1upu.01000ffff00000008  ') IS DISTINCT FROM '00000008' THEN
+    RAISE EXCEPTION 'FAIL: trim/upper, got %', normalize_provider_tag('  g.1upu.01000ffff00000008  ');
   END IF;
-  -- whitespace trimmed
-  IF normalize_provider_tag('  01000FFFF12345635  ') IS DISTINCT FROM '01000FFFF12345635' THEN
-    RAISE EXCEPTION 'FAIL: trim';
+  -- mas de 8 digitos: se respeta tal cual (sin ceros a la izquierda)
+  IF normalize_provider_tag('G.1UPU.01000FFFF123456789') IS DISTINCT FROM '123456789' THEN
+    RAISE EXCEPTION 'FAIL: 9 digitos, got %', normalize_provider_tag('G.1UPU.01000FFFF123456789');
   END IF;
-  -- provider UPU element string G.<issuer>.<hex> → full string, uppercased
-  IF normalize_provider_tag('G.1UPU.01000FFFF00000007') IS DISTINCT FROM 'G.1UPU.01000FFFF00000007' THEN
-    RAISE EXCEPTION 'FAIL: UPU element string, got %', normalize_provider_tag('G.1UPU.01000FFFF00000007');
+  -- otro emisor / otro formato -> NULL (tag_decode_failed)
+  IF normalize_provider_tag('urn:oid:1.0.15961.14.B.A00122245737') IS NOT NULL THEN
+    RAISE EXCEPTION 'FAIL: urn:oid debe ser NULL';
   END IF;
-  -- UPU element string is trimmed too
-  IF normalize_provider_tag('  g.1upu.01000ffff00000008  ') IS DISTINCT FROM 'G.1UPU.01000FFFF00000008' THEN
-    RAISE EXCEPTION 'FAIL: UPU element string trim/upper, got %', normalize_provider_tag('  g.1upu.01000ffff00000008  ');
+  IF normalize_provider_tag('30b1d226a8240000b000650c') IS NOT NULL THEN
+    RAISE EXCEPTION 'FAIL: hex suelto debe ser NULL';
   END IF;
-  -- non-hex urn last token → NULL
-  IF normalize_provider_tag('urn:oid:1.0.15961.14.B.NOTHEX!!') IS NOT NULL THEN
-    RAISE EXCEPTION 'FAIL: non-hex urn token should be NULL';
+  IF normalize_provider_tag('G.1UPU.01000FFFF') IS NOT NULL THEN
+    RAISE EXCEPTION 'FAIL: prefijo sin numero debe ser NULL';
   END IF;
-  -- garbage → NULL
   IF normalize_provider_tag('hello world') IS NOT NULL THEN
-    RAISE EXCEPTION 'FAIL: garbage should be NULL';
+    RAISE EXCEPTION 'FAIL: basura debe ser NULL';
   END IF;
-  -- NULL in → NULL out
-  IF normalize_provider_tag(NULL) IS NOT NULL THEN
-    RAISE EXCEPTION 'FAIL: NULL should be NULL';
+  IF normalize_provider_tag('') IS NOT NULL OR normalize_provider_tag(NULL) IS NOT NULL THEN
+    RAISE EXCEPTION 'FAIL: vacio/NULL deben ser NULL';
   END IF;
   RAISE NOTICE 'PASS: normalize_provider_tag';
 END $$;
