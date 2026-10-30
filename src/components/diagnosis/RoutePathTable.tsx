@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { ChevronDown, ChevronRight, AlertCircle, Info } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import SegmentTable from './SegmentTable'
+import { useTimeUnit } from '../../hooks/useTimeUnit'
+import { formatMinutes, formatMinutesDiff } from '../../lib/accountTime'
 
 interface SegmentDetail {
   from_city: string
@@ -54,10 +56,12 @@ interface RoutePathData {
 interface Props {
   routePaths: RoutePathData[]
   postalCenters: any[]
+  accountId: string
   onRouteMetricsUpdate?: (pathId: string, metrics: Partial<RoutePathData>) => void
 }
 
-export default function RoutePathTable({ routePaths, postalCenters, onRouteMetricsUpdate }: Props) {
+export default function RoutePathTable({ routePaths, postalCenters, accountId, onRouteMetricsUpdate }: Props) {
+  const { unit } = useTimeUnit()
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
   const [hoveredSegment, setHoveredSegment] = useState<string | null>(null)
   const [segmentCounts, setSegmentCounts] = useState<Record<string, number>>({})
@@ -94,35 +98,11 @@ export default function RoutePathTable({ routePaths, postalCenters, onRouteMetri
     setExpandedRows(newExpanded)
   }
 
-  // Convert minutes to J+K format (in days)
-  const formatJK = (minutes: number) => {
-    const days = minutes / (24 * 60)
-    
-    if (days < 1) {
-      // Less than 1 day: 2 decimals
-      return `${days.toFixed(2)} days`
-    } else if (days === Math.floor(days)) {
-      // Complete day: no decimals
-      return `${Math.floor(days)} days`
-    } else {
-      // Partial day: 2 decimals
-      return `${days.toFixed(2)} days`
-    }
-  }
+  // Tiempos en la unidad elegida (horas o dias)
+  const formatJK = (minutes: number) => formatMinutes(minutes, unit)
 
-  // Format time difference
-  const formatTimeDiff = (actual: number, expected: number) => {
-    const diff = actual - expected
-    const sign = diff >= 0 ? '+' : ''
-    const minutes = Math.abs(diff)
-    
-    if (minutes < 60) {
-      return `${sign}${Math.round(minutes)}m`
-    }
-    const hours = Math.floor(minutes / 60)
-    const mins = Math.round(minutes % 60)
-    return `${sign}${hours}h ${mins}m`
-  }
+  // Diferencia real - estandar, con signo
+  const formatTimeDiff = (actual: number, expected: number) => formatMinutesDiff(actual - expected, unit)
 
   // Format percentage difference
   const formatPercentDiff = (actual: number, expected: number) => {
@@ -311,7 +291,7 @@ export default function RoutePathTable({ routePaths, postalCenters, onRouteMetri
                           <SegmentTable 
                             pathId={path.id}
                             pathSignature={path.path_signature}
-                            accountId="f4d823d2-93e6-4755-9a89-9da87e7fa86e"
+                            accountId={accountId}
                             carrierId={path.carrier_id}
                             carrierName={path.carrier_name}
                             productId={path.product_id}

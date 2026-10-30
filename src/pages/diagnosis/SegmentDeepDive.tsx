@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAccount } from '@/contexts/AccountContext';
+import { useTimeUnit } from '@/hooks/useTimeUnit';
+import { TimeUnitToggle } from '@/components/common/TimeUnitToggle';
+import { formatMinutes } from '@/lib/accountTime';
 import { supabase } from '../../lib/supabase';
 import { Layers, Clock, AlertTriangle, TrendingUp } from 'lucide-react';
 
@@ -45,7 +48,8 @@ interface SegmentAnomaly {
 }
 
 const SegmentDeepDive: React.FC = () => {
-  const { profile } = useAuth();
+  const { effectiveAccountId } = useAccount();
+  const { unit } = useTimeUnit();
   const [activeTab, setActiveTab] = useState<'overview' | 'time' | 'anomalies'>('overview');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -68,17 +72,17 @@ const SegmentDeepDive: React.FC = () => {
     } else if (activeTab === 'anomalies') {
       loadAnomalies();
     }
-  }, [activeTab, profile?.account_id, selectedSegmentType]);
+  }, [activeTab, effectiveAccountId, selectedSegmentType]);
 
   const loadSegmentOverview = async () => {
-    if (!profile?.account_id) return;
+    if (!effectiveAccountId) return;
 
     try {
       setLoading(true);
       setError(null);
 
       const { data, error: rpcError } = await supabase.rpc('get_segment_overview', {
-        p_account_id: profile.account_id
+        p_account_id: effectiveAccountId
       });
 
       if (rpcError) throw rpcError;
@@ -91,14 +95,14 @@ const SegmentDeepDive: React.FC = () => {
   };
 
   const loadTimeAnalysis = async () => {
-    if (!profile?.account_id) return;
+    if (!effectiveAccountId) return;
 
     try {
       setLoading(true);
       setError(null);
 
       const { data, error: rpcError } = await supabase.rpc('get_segment_time_analysis', {
-        p_account_id: profile.account_id,
+        p_account_id: effectiveAccountId,
         p_segment_type: selectedSegmentType
       });
 
@@ -112,14 +116,14 @@ const SegmentDeepDive: React.FC = () => {
   };
 
   const loadAnomalies = async () => {
-    if (!profile?.account_id) return;
+    if (!effectiveAccountId) return;
 
     try {
       setLoading(true);
       setError(null);
 
       const { data, error: rpcError } = await supabase.rpc('get_segment_anomalies', {
-        p_account_id: profile.account_id
+        p_account_id: effectiveAccountId
       });
 
       if (rpcError) throw rpcError;
@@ -187,20 +191,20 @@ const SegmentDeepDive: React.FC = () => {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Avg Duration:</span>
-                    <span className="font-semibold">{segment.avg_duration_minutes}m</span>
+                    <span className="font-semibold">{formatMinutes(segment.avg_duration_minutes, unit)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">P50 Duration:</span>
-                    <span className="font-semibold">{segment.p50_duration_minutes}m</span>
+                    <span className="font-semibold">{formatMinutes(segment.p50_duration_minutes, unit)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">P95 Duration:</span>
-                    <span className="font-semibold">{segment.p95_duration_minutes}m</span>
+                    <span className="font-semibold">{formatMinutes(segment.p95_duration_minutes, unit)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Range:</span>
                     <span className="font-semibold">
-                      {segment.min_duration_minutes}m - {segment.max_duration_minutes}m
+                      {formatMinutes(segment.min_duration_minutes, unit)} - {formatMinutes(segment.max_duration_minutes, unit)}
                     </span>
                   </div>
                 </div>
@@ -275,9 +279,9 @@ const SegmentDeepDive: React.FC = () => {
                     {row.hour_of_day}:00
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.segment_count}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.avg_duration_minutes}m</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.p50_duration_minutes}m</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.p95_duration_minutes}m</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatMinutes(row.avg_duration_minutes, unit)}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatMinutes(row.p50_duration_minutes, unit)}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatMinutes(row.p95_duration_minutes, unit)}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {row.outlier_count > 0 ? (
                       <span className="text-orange-600 font-semibold">{row.outlier_count}</span>
@@ -341,13 +345,13 @@ const SegmentDeepDive: React.FC = () => {
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {anomaly.actual_duration_minutes}m
+                    {formatMinutes(anomaly.actual_duration_minutes, unit)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {anomaly.expected_duration_minutes}m
+                    {formatMinutes(anomaly.expected_duration_minutes, unit)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <div className="text-red-600 font-semibold">+{anomaly.deviation_minutes}m</div>
+                    <div className="text-red-600 font-semibold">+{formatMinutes(anomaly.deviation_minutes, unit)}</div>
                     <div className="text-xs text-gray-500">({anomaly.deviation_percentage}%)</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -367,9 +371,12 @@ const SegmentDeepDive: React.FC = () => {
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="mb-6">
-        <div className="flex items-center gap-2 mb-2">
-          <Layers className="h-6 w-6 text-blue-600" />
-          <h1 className="text-2xl font-bold text-gray-900">Segment Deep Dive</h1>
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <Layers className="h-6 w-6 text-blue-600" />
+            <h1 className="text-2xl font-bold text-gray-900">Segment Deep Dive</h1>
+          </div>
+          <TimeUnitToggle />
         </div>
         <p className="text-gray-600">Detailed analysis of journey segments by type and performance</p>
       </div>

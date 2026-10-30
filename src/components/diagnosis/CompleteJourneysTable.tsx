@@ -1,4 +1,6 @@
 import { useTranslation } from '@/hooks/useTranslation';
+import { useTimeUnit } from '@/hooks/useTimeUnit';
+import { formatMinutes } from '@/lib/accountTime';
 import { CompleteJourney } from '@/hooks/useCompleteJourneys';
 import { CheckCircle, AlertTriangle, XCircle, Circle, MapPin } from 'lucide-react';
 import { format } from 'date-fns';
@@ -19,6 +21,7 @@ export function CompleteJourneysTable({
   onClearSelection,
 }: CompleteJourneysTableProps) {
   const { t } = useTranslation();
+  const { unit } = useTimeUnit();
 
   const getStatusIcon = (status: string, violations: number) => {
     if (violations === 0) {
@@ -46,12 +49,7 @@ export function CompleteJourneysTable({
     return t('complete_journeys.compliance.critical');
   };
 
-  const formatDuration = (minutes: number | null) => {
-    if (!minutes) return '-';
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
-  };
+  const formatDuration = (minutes: number | null) => (minutes ? formatMinutes(minutes, unit) : '-');
 
   if (journeys.length === 0) {
     return (

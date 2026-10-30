@@ -1,6 +1,8 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import { useTimeUnit } from '../../hooks/useTimeUnit'
+import { formatMinutes } from '../../lib/accountTime'
 
 interface SegmentData {
   segment_name: string
@@ -43,6 +45,7 @@ interface SegmentTableProps {
 
 export default function SegmentTable({ pathId, pathSignature, accountId, carrierId, carrierName, productId, productName, originCity, destinationCity, onSegmentCountChange, onSegmentsCalculated }: SegmentTableProps) {
   const navigate = useNavigate()
+  const { unit } = useTimeUnit()
   const [segments, setSegments] = React.useState<SegmentData[]>([])
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
@@ -241,21 +244,7 @@ export default function SegmentTable({ pathId, pathSignature, accountId, carrier
     }
   }
 
-  const formatTime = (minutes: number) => {
-    if (minutes === 0) return '-'
-    
-    const days = Math.floor(minutes / 1440)
-    const hours = Math.floor((minutes % 1440) / 60)
-    const mins = Math.round(minutes % 60)
-    
-    if (days > 0) {
-      return `${days.toFixed(2)} days`
-    } else if (hours > 0) {
-      return `${hours}h ${mins}m`
-    } else {
-      return `${mins}m`
-    }
-  }
+  const formatTime = (minutes: number) => (minutes === 0 ? '-' : formatMinutes(minutes, unit))
 
   const getThresholdColor = (threshold: string) => {
     switch (threshold) {

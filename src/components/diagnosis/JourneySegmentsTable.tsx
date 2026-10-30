@@ -1,4 +1,6 @@
 import { useTranslation } from '@/hooks/useTranslation';
+import { useTimeUnit } from '@/hooks/useTimeUnit';
+import { formatMinutes } from '@/lib/accountTime';
 import { JourneySegment } from '@/hooks/useJourneySegments';
 import { CheckCircle, AlertTriangle, XCircle, Clock, MapPin, ArrowRight } from 'lucide-react';
 
@@ -16,6 +18,7 @@ export function JourneySegmentsTable({
   onSelectAll,
 }: JourneySegmentsTableProps) {
   const { t } = useTranslation();
+  const { unit } = useTimeUnit();
 
   const getComplianceBadge = (compliance: string) => {
     const badges: Record<string, { color: string; icon: any; label: string }> = {
@@ -85,19 +88,7 @@ export function JourneySegmentsTable({
     });
   };
 
-  const formatDuration = (minutes: number) => {
-    if (minutes < 60) {
-      return `${minutes}m`;
-    } else if (minutes < 1440) {
-      const hours = Math.floor(minutes / 60);
-      const mins = minutes % 60;
-      return `${hours}h ${mins}m`;
-    } else {
-      const days = Math.floor(minutes / 1440);
-      const hours = Math.floor((minutes % 1440) / 60);
-      return `${days}d ${hours}h`;
-    }
-  };
+  const formatDuration = (minutes: number) => formatMinutes(minutes, unit);
 
   const getCenterDisplay = (segment: JourneySegment) => {
     if (segment.segment_type === 'operational') {

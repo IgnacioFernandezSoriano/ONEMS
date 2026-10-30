@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAccount } from '@/contexts/AccountContext';
+import { useTimeUnit } from '@/hooks/useTimeUnit';
+import { TimeUnitToggle } from '@/components/common/TimeUnitToggle';
+import { formatDuration } from '@/lib/accountTime';
 import { supabase } from '../../lib/supabase';
 import { Route, TrendingUp, Users, Calendar } from 'lucide-react';
 
@@ -34,7 +37,8 @@ interface RouteTrend {
 }
 
 const RouteAnalysis: React.FC = () => {
-  const { profile } = useAuth();
+  const { effectiveAccountId } = useAccount();
+  const { unit } = useTimeUnit();
   const [activeTab, setActiveTab] = useState<'performance' | 'carriers' | 'trends'>('performance');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -58,17 +62,17 @@ const RouteAnalysis: React.FC = () => {
     } else if (activeTab === 'trends') {
       loadRouteTrends();
     }
-  }, [activeTab, profile?.account_id, selectedRoute, trendInterval]);
+  }, [activeTab, effectiveAccountId, selectedRoute, trendInterval]);
 
   const loadRoutePerformance = async () => {
-    if (!profile?.account_id) return;
+    if (!effectiveAccountId) return;
 
     try {
       setLoading(true);
       setError(null);
 
       const { data, error: rpcError } = await supabase.rpc('get_route_performance', {
-        p_account_id: profile.account_id
+        p_account_id: effectiveAccountId
       });
 
       if (rpcError) throw rpcError;
@@ -81,14 +85,14 @@ const RouteAnalysis: React.FC = () => {
   };
 
   const loadCarrierComparison = async () => {
-    if (!profile?.account_id) return;
+    if (!effectiveAccountId) return;
 
     try {
       setLoading(true);
       setError(null);
 
       const { data, error: rpcError } = await supabase.rpc('get_carrier_comparison', {
-        p_account_id: profile.account_id
+        p_account_id: effectiveAccountId
       });
 
       if (rpcError) throw rpcError;
@@ -101,14 +105,14 @@ const RouteAnalysis: React.FC = () => {
   };
 
   const loadRouteTrends = async () => {
-    if (!profile?.account_id) return;
+    if (!effectiveAccountId) return;
 
     try {
       setLoading(true);
       setError(null);
 
       const { data, error: rpcError } = await supabase.rpc('get_route_trends', {
-        p_account_id: profile.account_id,
+        p_account_id: effectiveAccountId,
         p_origin_city: selectedRoute?.origin || null,
         p_destination_city: selectedRoute?.destination || null,
         p_interval: trendInterval
@@ -153,10 +157,10 @@ const RouteAnalysis: React.FC = () => {
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {route.avg_transit_hours?.toFixed(1)}h
+                  {formatDuration(route.avg_transit_hours, unit)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {route.p95_transit_hours?.toFixed(1)}h
+                  {formatDuration(route.p95_transit_hours, unit)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {route.total_sla_violations}
@@ -189,7 +193,7 @@ const RouteAnalysis: React.FC = () => {
               </div>
               <div className="flex justify-between">
                 <span className="text-sm text-gray-500">Avg Transit Time</span>
-                <span className="text-sm font-medium text-gray-900">{carrier.avg_transit_hours?.toFixed(1)}h</span>
+                <span className="text-sm font-medium text-gray-900">{formatDuration(carrier.avg_transit_hours, unit)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-sm text-gray-500">Total Segments</span>
@@ -245,7 +249,7 @@ const RouteAnalysis: React.FC = () => {
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {trend.avg_transit_hours?.toFixed(1)}h
+                  {formatDuration(trend.avg_transit_hours, unit)}
                 </td>
               </tr>
             ))}
@@ -258,10 +262,13 @@ const RouteAnalysis: React.FC = () => {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-          <Route className="w-6 h-6" />
-          Route Analysis
-        </h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <Route className="w-6 h-6" />
+            Route Analysis
+          </h1>
+          <TimeUnitToggle />
+        </div>
         <p className="text-gray-600 mt-1">Detailed performance analysis by route and carrier</p>
       </div>
 

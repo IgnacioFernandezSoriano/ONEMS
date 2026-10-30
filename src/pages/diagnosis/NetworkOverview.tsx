@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAccount } from '@/contexts/AccountContext';
+import { useTimeUnit } from '@/hooks/useTimeUnit';
+import { TimeUnitToggle } from '@/components/common/TimeUnitToggle';
+import { formatDuration } from '@/lib/accountTime';
 import { supabase } from '../../lib/supabase';
 import { Activity, TrendingUp, TrendingDown, AlertCircle, Info } from 'lucide-react';
 
@@ -32,7 +35,8 @@ interface CenterPerformance {
 }
 
 export default function NetworkOverview() {
-  const { profile } = useAuth();
+  const { effectiveAccountId } = useAccount();
+  const { unit } = useTimeUnit();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [healthData, setHealthData] = useState<HealthScoreData | null>(null);
@@ -43,7 +47,7 @@ export default function NetworkOverview() {
     let isMounted = true;
 
     const loadData = async () => {
-      if (!profile?.account_id) {
+      if (!effectiveAccountId) {
         console.log('[NetworkOverview] No account ID');
         return;
       }
@@ -55,7 +59,7 @@ export default function NetworkOverview() {
         // Load health score
         const { data: healthScore, error: healthError } = await supabase.rpc(
           'calculate_network_health_score',
-          { p_account_id: profile.account_id }
+          { p_account_id: effectiveAccountId }
         );
 
         if (healthError) throw healthError;
@@ -63,7 +67,7 @@ export default function NetworkOverview() {
         // Load top/bottom routes
         const { data: routesData, error: routesError } = await supabase.rpc(
           'get_top_bottom_routes',
-          { p_account_id: profile.account_id, p_limit: 5 }
+          { p_account_id: effectiveAccountId, p_limit: 5 }
         );
 
         if (routesError) throw routesError;
@@ -71,7 +75,7 @@ export default function NetworkOverview() {
         // Load top/bottom centers
         const { data: centersData, error: centersError } = await supabase.rpc(
           'get_top_bottom_centers',
-          { p_account_id: profile.account_id, p_limit: 5 }
+          { p_account_id: effectiveAccountId, p_limit: 5 }
         );
 
         if (centersError) throw centersError;
@@ -98,7 +102,7 @@ export default function NetworkOverview() {
     return () => {
       isMounted = false;
     };
-  }, [profile?.account_id]);
+  }, [effectiveAccountId]);
 
   if (loading) {
     return (
@@ -163,7 +167,7 @@ export default function NetworkOverview() {
   }
 
   if (avgTransit < 1) {
-    findings.push({ type: 'success', text: `Average transit time of ${avgTransit.toFixed(1)}h indicates efficient network operations.` });
+    findings.push({ type: 'success', text: `Average transit time of ${formatDuration(avgTransit, unit)} indicates efficient network operations.` });
   }
 
   const topRoutes = routes.filter(r => r.rank_type === 'top');
@@ -175,10 +179,13 @@ export default function NetworkOverview() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 flex items-center">
-          <Activity className="h-6 w-6 mr-2 text-blue-600" />
-          Network Overview
-        </h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center">
+            <Activity className="h-6 w-6 mr-2 text-blue-600" />
+            Network Overview
+          </h1>
+          <TimeUnitToggle />
+        </div>
         <p className="text-gray-600 mt-1">Comprehensive health assessment of the postal network</p>
       </div>
 
@@ -238,14 +245,14 @@ export default function NetworkOverview() {
         <KPICard
           icon="⏱️"
           title="Avg Transit Time"
-          value={`${avgTransit.toFixed(1)}h`}
+          value={`${formatDuration(avgTransit, unit)}`}
           subtitle={`${healthData.total_routes} routes`}
           tooltip="Average end-to-end transit time across all completed journeys. Calculated from first event to last event timestamp. Lower is better."
         />
         <KPICard
           icon="🏢"
           title="Avg Processing Time"
-          value={`${avgProcessing.toFixed(1)}h`}
+          value={`${formatDuration(avgProcessing, unit)}`}
           subtitle={`${healthData.total_centers} centers`}
           tooltip="Average time items spend at postal centers for processing. Calculated from processing segments only. Lower indicates faster operations."
         />
@@ -355,6 +362,7 @@ function SummaryItem({ label, value, highlight }: any) {
 }
 
 function PerformanceTable({ title, icon, data, type }: any) {
+  const { unit } = useTimeUnit();
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-4">
       <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center">
@@ -392,14 +400,14 @@ function PerformanceTable({ title, icon, data, type }: any) {
                     </td>
                     <td className="text-right py-2 px-2 text-gray-700">{row.total_journeys}</td>
                     <td className="text-right py-2 px-2 text-gray-700">{parseFloat(row.on_time_rate).toFixed(1)}%</td>
-                    <td className="text-right py-2 px-2 text-gray-700">{parseFloat(row.avg_transit_hours).toFixed(1)}h</td>
+                    <td className="text-right py-2 px-2 text-gray-700">{formatDuration(parseFloat(row.avg_transit_hours), unit)}</td>
                   </>
                 ) : (
                   <>
                     <td className="py-2 px-2 text-gray-900">{row.center_name}</td>
                     <td className="text-right py-2 px-2 text-gray-700">{row.total_items}</td>
                     <td className="text-right py-2 px-2 text-gray-700">{parseFloat(row.outbound_on_time_rate).toFixed(1)}%</td>
-                    <td className="text-right py-2 px-2 text-gray-700">{parseFloat(row.avg_processing_hours).toFixed(1)}h</td>
+                    <td className="text-right py-2 px-2 text-gray-700">{formatDuration(parseFloat(row.avg_processing_hours), unit)}</td>
                   </>
                 )}
               </tr>
