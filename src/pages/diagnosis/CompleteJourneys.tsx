@@ -1,5 +1,8 @@
 import { useState } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useTimeUnit } from '@/hooks/useTimeUnit';
+import { TimeUnitToggle } from '@/components/common/TimeUnitToggle';
+import { formatMinutes } from '@/lib/accountTime';
 import { useCompleteJourneys } from '@/hooks/useCompleteJourneys';
 import { CompleteJourneysFilters } from '@/components/diagnosis/CompleteJourneysFilters';
 import { CompleteJourneysTable } from '@/components/diagnosis/CompleteJourneysTable';
@@ -8,6 +11,7 @@ import { SmartTooltip } from '@/components/common/SmartTooltip';
 
 export default function CompleteJourneys() {
   const { t } = useTranslation();
+  const { unit } = useTimeUnit();
   const {
     journeys,
     loading,
@@ -104,7 +108,8 @@ export default function CompleteJourneys() {
             <p className="text-sm text-gray-600">{t('complete_journeys.description')}</p>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
+          <TimeUnitToggle />
           <SmartTooltip content={t('complete_journeys.run_assembly')}>
             <button
               onClick={handleRunAssembly}
@@ -185,8 +190,7 @@ export default function CompleteJourneys() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">{t('complete_journeys.kpi.avg_time')}</p>
-              <p className="text-2xl font-bold text-blue-600">{kpis.avg_time.toFixed(1)}</p>
-              <p className="text-xs text-gray-500">{t('complete_journeys.kpi.minutes')}</p>
+              <p className="text-2xl font-bold text-blue-600">{formatMinutes(kpis.avg_time, unit)}</p>
             </div>
             <Clock className="w-8 h-8 text-blue-500" />
           </div>

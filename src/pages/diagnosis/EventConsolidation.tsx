@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useAccount } from '@/contexts/AccountContext';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/common/Button';
 import { RefreshCw, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
@@ -24,6 +25,7 @@ interface Incident {
 
 export function EventConsolidation() {
   const { t } = useTranslation();
+  const { effectiveAccountId } = useAccount();
   const [metrics, setMetrics] = useState<ConsolidationMetrics>({
     pending_events: 0,
     total_incidents: 0,
@@ -111,28 +113,15 @@ export function EventConsolidation() {
   const runConsolidation = async () => {
     setIsConsolidating(true);
     try {
-      // Get user's account_id
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
+      // Cuenta seleccionada en la cabecera (no la del perfil)
+      if (!effectiveAccountId) {
         alert(t('diagnosis.consolidation.error_no_session'));
-        return;
-      }
-
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('account_id')
-        .eq('id', user.id)
-        .single();
-
-      if (!profile) {
-        alert('Profile not found');
         return;
       }
 
       // Call SQL function directly
       const { data: result, error } = await supabase.rpc('consolidate_rfid_events', {
-        p_account_id: profile.account_id,
+        p_account_id: effectiveAccountId,
       });
 
       if (error) {

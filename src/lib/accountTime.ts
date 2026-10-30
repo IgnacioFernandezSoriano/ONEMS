@@ -47,3 +47,15 @@ export function toUnit(hours: number, unit: TimeUnit): number {
 export function unitSuffix(unit: TimeUnit): 'h' | 'd' {
   return unit === 'hours' ? 'h' : 'd'
 }
+
+// Duraciones almacenadas en minutos (tramos, viajes, diagnostico) -> unidad elegida
+export function formatMinutes(minutes: number | null | undefined, unit: TimeUnit): string {
+  if (minutes === null || minutes === undefined || Number.isNaN(minutes)) return '-'
+  return formatDuration(minutes / 60, unit)
+}
+
+// Diferencia en minutos con signo (+1.5 h / -0.20 d)
+export function formatMinutesDiff(diffMinutes: number, unit: TimeUnit): string {
+  const sign = diffMinutes > 0 ? '+' : diffMinutes < 0 ? '-' : ''
+  return `${sign}${formatDuration(Math.abs(diffMinutes) / 60, unit)}`
+}

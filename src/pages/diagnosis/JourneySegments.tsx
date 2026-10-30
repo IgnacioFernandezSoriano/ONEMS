@@ -1,6 +1,9 @@
 import { useState, useMemo } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAccount } from '@/contexts/AccountContext';
+import { useTimeUnit } from '@/hooks/useTimeUnit';
+import { TimeUnitToggle } from '@/components/common/TimeUnitToggle';
+import { formatMinutes } from '@/lib/accountTime';
 import { useJourneySegments } from '@/hooks/useJourneySegments';
 import { JourneySegmentsFilters } from '@/components/diagnosis/JourneySegmentsFilters';
 import { JourneySegmentsTable } from '@/components/diagnosis/JourneySegmentsTable';
@@ -9,7 +12,8 @@ import { SmartTooltip } from '@/components/common/SmartTooltip';
 
 export default function JourneySegments() {
   const { t } = useTranslation();
-  const { profile } = useAuth();
+  const { effectiveAccountId } = useAccount();
+  const { unit } = useTimeUnit();
   const {
     segments,
     filteredSegments,
@@ -20,7 +24,7 @@ export default function JourneySegments() {
     exportToCSV,
     runReconstruction,
     isReconstructing,
-  } = useJourneySegments(profile?.account_id || undefined);
+  } = useJourneySegments(effectiveAccountId || undefined);
 
   const [selectedSegments, setSelectedSegments] = useState<string[]>([]);
 
@@ -68,10 +72,8 @@ export default function JourneySegments() {
 
     const avgTime =
       total > 0
-        ? (
-            filteredSegments.reduce((sum, s) => sum + (s.adjusted_time_minutes || 0), 0) / total
-          ).toFixed(1)
-        : '0.0';
+        ? filteredSegments.reduce((sum, s) => sum + (s.adjusted_time_minutes || 0), 0) / total
+        : 0;
 
     const onTimePercentage = total > 0 ? ((onTime / total) * 100).toFixed(1) : '0.0';
 
@@ -114,6 +116,7 @@ export default function JourneySegments() {
           </div>
         </div>
         <div className="flex items-center gap-3">
+          <TimeUnitToggle />
           <button
             onClick={handleRunReconstruction}
             disabled={isReconstructing}
@@ -205,8 +208,7 @@ export default function JourneySegments() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 mb-1">{t('journey_segments.kpi.avg_time')}</p>
-              <p className="text-3xl font-bold text-blue-600">{kpis.avgTime}</p>
-              <p className="text-xs text-gray-500 mt-1">{t('journey_segments.kpi.minutes')}</p>
+              <p className="text-3xl font-bold text-blue-600">{formatMinutes(kpis.avgTime, unit)}</p>
             </div>
             <div className="p-3 bg-blue-50 rounded-lg">
               <Clock className="w-6 h-6 text-blue-600" />

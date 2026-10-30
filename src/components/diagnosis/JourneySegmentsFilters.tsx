@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAccount } from '@/contexts/AccountContext';
 import { supabase } from '@/lib/supabase';
 import { Filter, X, RotateCcw } from 'lucide-react';
 
@@ -10,7 +10,7 @@ interface JourneySegmentsFiltersProps {
 
 export function JourneySegmentsFilters({ onFilterChange }: JourneySegmentsFiltersProps) {
   const { t } = useTranslation();
-  const { profile } = useAuth();
+  const { effectiveAccountId } = useAccount();
 
   const [search, setSearch] = useState('');
   const [segmentType, setSegmentType] = useState<string>('');
@@ -25,16 +25,16 @@ export function JourneySegmentsFilters({ onFilterChange }: JourneySegmentsFilter
 
   useEffect(() => {
     loadPostalCenters();
-  }, [profile?.account_id]);
+  }, [effectiveAccountId]);
 
   const loadPostalCenters = async () => {
-    if (!profile?.account_id) return;
+    if (!effectiveAccountId) return;
 
     try {
       const { data, error } = await supabase
         .from('postal_centers')
         .select('id, code, name')
-        .eq('account_id', profile.account_id)
+        .eq('account_id', effectiveAccountId)
         .order('name');
 
       if (error) throw error;

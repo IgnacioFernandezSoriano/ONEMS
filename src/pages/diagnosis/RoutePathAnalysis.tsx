@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase'
 import { Filter, Map as MapIcon, List, Download } from 'lucide-react'
 import RoutePathMapLeaflet from '../../components/diagnosis/RoutePathMapLeaflet'
 import RoutePathTable from '../../components/diagnosis/RoutePathTable'
+import { TimeUnitToggle } from '../../components/common/TimeUnitToggle'
 
 interface JourneySegment {
   id: string
@@ -367,6 +368,8 @@ export default function RoutePathAnalysis() {
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Route Path Analysis</h1>
+        <div className="flex items-center gap-3">
+        <TimeUnitToggle />
         <button
           onClick={handleExport}
           className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 flex items-center gap-2"
@@ -374,6 +377,7 @@ export default function RoutePathAnalysis() {
           <Download className="w-4 h-4" />
           Export
         </button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -500,6 +504,7 @@ export default function RoutePathAnalysis() {
             <RoutePathTable 
               routePaths={routePaths} 
               postalCenters={postalCenters}
+              accountId={effectiveAccountId || ''}
               onRouteMetricsUpdate={(pathId, metrics) => {
                 setRouteMetrics(prev => ({ ...prev, [pathId]: metrics }))
               }}

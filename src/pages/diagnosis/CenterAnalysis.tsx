@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAccount } from '@/contexts/AccountContext';
+import { useTimeUnit } from '@/hooks/useTimeUnit';
+import { TimeUnitToggle } from '@/components/common/TimeUnitToggle';
+import { formatMinutes } from '@/lib/accountTime';
 import { supabase } from '../../lib/supabase';
 import { Building2, TrendingUp, BarChart3, Calendar } from 'lucide-react';
 
@@ -34,7 +37,8 @@ interface CenterTrend {
 }
 
 const CenterAnalysis: React.FC = () => {
-  const { profile } = useAuth();
+  const { effectiveAccountId } = useAccount();
+  const { unit } = useTimeUnit();
   const [activeTab, setActiveTab] = useState<'performance' | 'comparison' | 'trends'>('performance');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -57,17 +61,17 @@ const CenterAnalysis: React.FC = () => {
     } else if (activeTab === 'trends') {
       loadCenterTrends();
     }
-  }, [activeTab, profile?.account_id, trendPeriod]);
+  }, [activeTab, effectiveAccountId, trendPeriod]);
 
   const loadCenterPerformance = async () => {
-    if (!profile?.account_id) return;
+    if (!effectiveAccountId) return;
 
     try {
       setLoading(true);
       setError(null);
 
       const { data, error: rpcError } = await supabase.rpc('get_center_performance', {
-        p_account_id: profile.account_id
+        p_account_id: effectiveAccountId
       });
 
       if (rpcError) throw rpcError;
@@ -80,14 +84,14 @@ const CenterAnalysis: React.FC = () => {
   };
 
   const loadCenterComparison = async () => {
-    if (!profile?.account_id) return;
+    if (!effectiveAccountId) return;
 
     try {
       setLoading(true);
       setError(null);
 
       const { data, error: rpcError } = await supabase.rpc('get_center_comparison', {
-        p_account_id: profile.account_id
+        p_account_id: effectiveAccountId
       });
 
       if (rpcError) throw rpcError;
@@ -100,14 +104,14 @@ const CenterAnalysis: React.FC = () => {
   };
 
   const loadCenterTrends = async () => {
-    if (!profile?.account_id) return;
+    if (!effectiveAccountId) return;
 
     try {
       setLoading(true);
       setError(null);
 
       const { data, error: rpcError } = await supabase.rpc('get_center_trends', {
-        p_account_id: profile.account_id,
+        p_account_id: effectiveAccountId,
         p_period: trendPeriod
       });
 
@@ -149,8 +153,8 @@ const CenterAnalysis: React.FC = () => {
                     <div className="text-sm text-gray-500">{center.center_code}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{center.total_segments}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{center.avg_processing_minutes}m</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{center.p95_processing_minutes}m</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatMinutes(center.avg_processing_minutes, unit)}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatMinutes(center.p95_processing_minutes, unit)}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{center.throughput_per_hour} items/h</td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
@@ -199,7 +203,7 @@ const CenterAnalysis: React.FC = () => {
                 </div>
                 <div>
                   <div className="text-gray-500">Avg Time</div>
-                  <div className="font-semibold text-gray-900">{center.avg_processing_minutes}m</div>
+                  <div className="font-semibold text-gray-900">{formatMinutes(center.avg_processing_minutes, unit)}</div>
                 </div>
                 <div>
                   <div className="text-gray-500">Code</div>
@@ -266,7 +270,7 @@ const CenterAnalysis: React.FC = () => {
                             {new Date(trend.period_date).toLocaleDateString()}
                           </td>
                           <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{trend.items_count}</td>
-                          <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{trend.avg_processing_minutes}m</td>
+                          <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{formatMinutes(trend.avg_processing_minutes, unit)}</td>
                           <td className="px-4 py-2 whitespace-nowrap">
                             <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                               trend.efficiency_percentage >= 90 ? 'bg-green-100 text-green-800' :
@@ -292,9 +296,12 @@ const CenterAnalysis: React.FC = () => {
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="mb-6">
-        <div className="flex items-center gap-2 mb-2">
-          <Building2 className="h-6 w-6 text-blue-600" />
-          <h1 className="text-2xl font-bold text-gray-900">Center Analysis</h1>
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <Building2 className="h-6 w-6 text-blue-600" />
+            <h1 className="text-2xl font-bold text-gray-900">Center Analysis</h1>
+          </div>
+          <TimeUnitToggle />
         </div>
         <p className="text-gray-600">Operational performance analysis by center</p>
       </div>
