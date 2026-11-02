@@ -248,7 +248,7 @@
       <h3>Reference</h3>
       <a href="#faq">Questions</a>
     </nav>
-    <div class="side-foot">Updated 28 October 2026</div>
+    <div class="side-foot">Updated 30 October 2026</div>
   </aside>
 
   <main class="main">
@@ -398,6 +398,7 @@
       <ul>
         <li><strong>By origin city:</strong> how many are waiting in each city and the most frequent <strong>Waiting reason</strong>.</li>
         <li><strong>By plan:</strong> for each plan, the total, scheduled, done and to-compensate samples, and the <strong>POBOX extra</strong> ones (created by POBOX).</li>
+        <li><strong>Reason:</strong> why each sample was set aside: no panelist at the origin or destination, no valid day, or a POBOX reception that was cancelled.</li>
       </ul>
       <div class="table-wrap"><table>
         <thead><tr><th>Waiting reason</th><th>What to do</th></tr></thead>
@@ -406,10 +407,15 @@
           <tr><td>No active panelist at the destination node</td><td>Register or reactivate a panelist in the destination city.</td></tr>
           <tr><td>Plan not active</td><td>The plan of the sample is not active. Activate it if it should continue.</td></tr>
           <tr><td>No capacity on valid days</td><td>There is no free slot in the period. Balance with a longer period.</td></tr>
-          <tr><td>Outside the plan period</td><td>No valid day is left within the plan dates.</td></tr>
+          <tr><td>Outside the plan period</td><td>The balanced period ends before the plan starts, or has no working days. Balance a period that reaches the plan.</td></tr>
+          <tr><td>Possible late receipt: panelist on leave</td><td>Nothing: the sample is brought back on its own in the next balancing of the origin city. If it happens again with the same panelist, remind them to declare shipments and receptions on the same day.</td></tr>
+          <tr><td>Possible late receipt: panelist did not visit the PO box the day before</td><td>Nothing: the sample is brought back on its own in the next balancing of the origin city. If it happens again with the same panelist, remind them to declare shipments and receptions on the same day.</td></tr>
         </tbody>
       </table></div>
-      <div class="callout ok"><strong>What happens next:</strong> you do not have to do anything else. Each time you balance that city, ONEMS tries to bring the recorded samples back. The menu shows a counter with the ones still waiting.</div>
+      <h3>POBOX receptions after an absence</h3>
+      <p>This rule only applies to POBOX cities with a single node. When a panelist declares a reception in the ONE bot, ONEMS looks at the <strong>last working day before it</strong>. If on that day the panelist declared no shipment (the proof that they went to the PO box) and the package could already have been there, the reception is <strong>cancelled</strong>: it does not count for E2E and the sample goes back to <em>Samples to compensate</em>. For express services (standard in hours) it also applies if the package left that same day. If on that day the panelist had neither an unavailability nor a scheduled shipment, there is no way to know whether they went to the PO box, so the reception is treated as <strong>valid</strong>.</p>
+      <p><strong>Example:</strong> a panelist comes back from holidays on Monday and declares a reception: it is cancelled. If on Friday they did go to the PO box and declared a shipment, the reception is valid.</p>
+      <div class="callout ok"><strong>What happens next:</strong> you do not have to do anything else. Each time you balance that city, ONEMS tries to bring the recorded samples back. The menu shows a counter with the ones still waiting. It also brings them back if the plan has already ended, as long as it is still active.</div>
     </section>
 
     <section id="balance-city">
@@ -527,7 +533,7 @@
       <p>After the distribution, ONEMS tries to return the city's <a href="#deferred">Samples to compensate</a> to the plan:</p>
       <ol class="steps">
         <li><strong>First they replace POBOX samples.</strong> If a node has a POBOX-created sample on a day, the sample to compensate takes its place: same origin node, same day, but with its own destination (its original route). The plan is fulfilled without adding an extra shipment.</li>
-        <li><strong>If not, they go into a free slot:</strong> the day with the fewest shipments at the origin node, on a valid day within the dates of its plan, which must be active.</li>
+        <li><strong>If not, they go into a free slot:</strong> the day with the fewest shipments at the origin node, on a valid day, which may be after the end date of its plan; the plan must still be active.</li>
         <li><strong>Limits:</strong> at most <strong>one</strong> compensated sample per origin node and day, and one per destination node and day. They are never placed today, because the notices for the day may already have gone out.</li>
         <li><strong>The ones that do not fit</strong> keep waiting, with their reason.</li>
       </ol>

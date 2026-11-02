@@ -248,7 +248,7 @@
       <h3>Référence</h3>
       <a href="#faq">Questions</a>
     </nav>
-    <div class="side-foot">Mis à jour le 28 octobre 2026</div>
+    <div class="side-foot">Mis à jour le 30 octobre 2026</div>
   </aside>
 
   <main class="main">
@@ -398,6 +398,7 @@
       <ul>
         <li><strong>Par ville d&rsquo;origine :</strong> combien attendent dans chaque ville et le <strong>Motif d&rsquo;attente</strong> le plus fréquent.</li>
         <li><strong>Par plan :</strong> pour chaque plan, les échantillons totaux, planifiés, réalisés, à compenser et les <strong>Extra POBOX</strong> (créés par POBOX).</li>
+        <li><strong>Motif :</strong> pourquoi chaque échantillon a été mis de côté : aucun panéliste à l&rsquo;origine ou à la destination, aucun jour valide, ou une réception POBOX annulée.</li>
       </ul>
       <div class="table-wrap"><table>
         <thead><tr><th>Motif d&rsquo;attente</th><th>Que faire</th></tr></thead>
@@ -406,10 +407,15 @@
           <tr><td>Aucun panéliste actif au nœud de destination</td><td>Créer ou réactiver un panéliste dans la ville de destination.</td></tr>
           <tr><td>Plan non actif</td><td>Le plan de l&rsquo;échantillon n&rsquo;est pas actif. Activez-le s&rsquo;il doit continuer.</td></tr>
           <tr><td>Aucune capacité sur les jours valides</td><td>Il ne reste aucune place sur la période. Équilibrez sur une période plus longue.</td></tr>
-          <tr><td>Hors de la période du plan</td><td>Il ne reste aucun jour valide dans les dates du plan.</td></tr>
+          <tr><td>Hors de la période du plan</td><td>La période équilibrée se termine avant le début du plan, ou n&rsquo;a pas de jours ouvrés. Équilibrez une période qui atteigne le plan.</td></tr>
+          <tr><td>Réception possiblement tardive : panéliste absent</td><td>Rien : l&rsquo;échantillon est réintroduit tout seul au prochain équilibrage de la ville d&rsquo;origine. Si cela se répète avec le même panéliste, rappelez-lui de déclarer les envois et les réceptions le jour même.</td></tr>
+          <tr><td>Réception possiblement tardive : le panéliste n'est pas passé à la boîte postale la veille</td><td>Rien : l&rsquo;échantillon est réintroduit tout seul au prochain équilibrage de la ville d&rsquo;origine. Si cela se répète avec le même panéliste, rappelez-lui de déclarer les envois et les réceptions le jour même.</td></tr>
         </tbody>
       </table></div>
-      <div class="callout ok"><strong>Et ensuite :</strong> vous n&rsquo;avez rien d&rsquo;autre à faire. À chaque équilibrage de cette ville, ONEMS essaie de réintroduire les échantillons notés. Le menu affiche un compteur de ceux qui attendent encore.</div>
+      <h3>Réceptions POBOX après une absence</h3>
+      <p>Cette règle ne s&rsquo;applique qu&rsquo;aux villes POBOX n&rsquo;ayant qu&rsquo;un seul nœud. Quand un panéliste déclare une réception dans le ONE bot, ONEMS regarde le <strong>dernier jour ouvré précédent</strong>. Si ce jour-là le panéliste n&rsquo;a déclaré aucun envoi (la preuve qu&rsquo;il est allé à la boîte postale) et que le colis pouvait déjà s&rsquo;y trouver, la réception est <strong>annulée</strong> : elle ne compte pas pour le E2E et l&rsquo;échantillon retourne dans <em>Échantillons à compenser</em>. Pour les services express (standard en heures), la règle s&rsquo;applique aussi si le colis est parti le jour même. Si ce jour-là le panéliste n&rsquo;avait ni indisponibilité ni envoi programmé, on ne peut pas savoir s&rsquo;il est allé à la boîte postale et la réception est considérée comme <strong>valable</strong>.</p>
+      <p><strong>Exemple :</strong> un panéliste revient de vacances le lundi et déclare une réception : elle est annulée. Si le vendredi il est bien allé à la boîte postale et a déclaré un envoi, la réception est valable.</p>
+      <div class="callout ok"><strong>Et ensuite :</strong> vous n&rsquo;avez rien d&rsquo;autre à faire. À chaque équilibrage de cette ville, ONEMS essaie de réintroduire les échantillons notés. Le menu affiche un compteur de ceux qui attendent encore. Il les réintroduit aussi si le plan est déjà terminé, tant qu&rsquo;il reste actif.</div>
     </section>
 
     <section id="balance-city">
@@ -527,7 +533,7 @@
       <p>Après la répartition, ONEMS essaie de remettre dans le plan les <a href="#deferred">Échantillons à compenser</a> de la ville :</p>
       <ol class="steps">
         <li><strong>D&rsquo;abord, ils remplacent des échantillons POBOX.</strong> Si, sur un nœud et un jour, il y a un échantillon créé par POBOX, l&rsquo;échantillon à compenser prend sa place : même nœud d&rsquo;origine, même jour, mais avec sa propre destination (son trajet d&rsquo;origine). Le plan est ainsi respecté sans ajouter d&rsquo;envoi supplémentaire.</li>
-        <li><strong>Sinon, ils sont placés dans une place libre :</strong> le jour qui compte le moins d&rsquo;envois sur le nœud d&rsquo;origine, un jour valide dans les dates de leur plan, qui doit être actif.</li>
+        <li><strong>Sinon, ils sont placés dans une place libre :</strong> le jour qui compte le moins d&rsquo;envois sur le nœud d&rsquo;origine, un jour valide, qui peut être postérieur à la date de fin de leur plan ; le plan doit rester actif.</li>
         <li><strong>Limites :</strong> au maximum <strong>un</strong> échantillon compensé par nœud d&rsquo;origine et par jour, et un par nœud de destination et par jour. Ils ne sont jamais placés aujourd&rsquo;hui, car les rappels du jour ont peut-être déjà été envoyés.</li>
         <li><strong>Ceux qui ne rentrent pas</strong> continuent d&rsquo;attendre, avec leur motif.</li>
       </ol>
