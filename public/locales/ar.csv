@@ -3152,6 +3152,12 @@ lb2.deferred.waiting.no_dest_panelist,لا يوجد مشارك نشط في عق�
 lb2.deferred.waiting.no_capacity,لا توجد سعة في الأيام الصالحة
 lb2.deferred.waiting.plan_inactive,الخطة غير نشطة
 lb2.deferred.waiting.outside_period,خارج فترة الخطة
+lb2.deferred.col_defer_reason,السبب
+lb2.deferred.reason.origin_no_panelist,لا يوجد مشارك في عقدة الأصل
+lb2.deferred.reason.dest_no_panelist,لا يوجد مشارك في عقدة الوجهة
+lb2.deferred.reason.no_valid_day,لا يوجد يوم صالح في الخطة
+lb2.deferred.reason.pobox_absent_unavailable,احتمال تأخر الاستلام بسبب غياب المشارك
+lb2.deferred.reason.pobox_absent_no_visit,احتمال تأخر الاستلام: لم يزر المشارك صندوق البريد في اليوم السابق
 lb2.deferred.empty,لا توجد عينات مطلوب تعويضها.
 lb2.deferred.badge_tooltip,عينات مطلوب تعويضها في انتظار إعادة إدراجها
 lb2.warning.deferred_removed,عينات أزيلت من الخطة وسجلت كعينات مطلوب تعويضها.

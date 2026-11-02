@@ -3160,6 +3160,12 @@ lb2.deferred.waiting.no_dest_panelist,Sin panelista activo en el nodo de destino
 lb2.deferred.waiting.no_capacity,Sin capacidad en los días válidos
 lb2.deferred.waiting.plan_inactive,Plan no activo
 lb2.deferred.waiting.outside_period,Fuera del periodo del plan
+lb2.deferred.col_defer_reason,Motivo
+lb2.deferred.reason.origin_no_panelist,Sin panelista en el nodo de origen
+lb2.deferred.reason.dest_no_panelist,Sin panelista en el nodo de destino
+lb2.deferred.reason.no_valid_day,Sin día válido en el plan
+lb2.deferred.reason.pobox_absent_unavailable,Posible retraso de recepción por vacaciones del panelista
+lb2.deferred.reason.pobox_absent_no_visit,Posible retraso de recepción: el panelista no fue al apartado el día anterior
 lb2.deferred.empty,No hay muestras por compensar.
 lb2.deferred.badge_tooltip,Muestras por compensar pendientes de reintroducir
 lb2.warning.deferred_removed,Muestras quitadas del plan y anotadas como muestras por compensar.

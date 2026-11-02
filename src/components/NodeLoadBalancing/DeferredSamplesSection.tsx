@@ -23,6 +23,12 @@ export const DeferredSamplesSection: React.FC<DeferredSamplesSectionProps> = ({ 
     return label && label !== key ? label : reason;
   };
 
+  const deferReasonLabel = (reason: string) => {
+    const key = `lb2.deferred.reason.${reason}`;
+    const label = t(key);
+    return label && label !== key ? label : reason;
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200">
       <button
@@ -59,6 +65,7 @@ export const DeferredSamplesSection: React.FC<DeferredSamplesSectionProps> = ({ 
                   <thead className="bg-gray-50">
                     <tr>
                       <th className={`${th} text-left`}>{t('lb2.deferred.col_city')}</th>
+                      <th className={`${th} text-left`}>{t('lb2.deferred.col_defer_reason')}</th>
                       <th className={`${th} text-center`}>{t('lb2.deferred.waiting')}</th>
                       <th className={`${th} text-left`}>{t('lb2.deferred.col_reason')}</th>
                     </tr>
@@ -67,6 +74,17 @@ export const DeferredSamplesSection: React.FC<DeferredSamplesSectionProps> = ({ 
                     {summary.by_city.map((c) => (
                       <tr key={c.city_id}>
                         <td className="px-3 py-2 text-sm font-medium text-gray-900">{c.city_name}</td>
+                        <td className="px-3 py-2 text-sm text-gray-700">
+                          {c.by_reason && Object.keys(c.by_reason).length > 0
+                            ? Object.entries(c.by_reason)
+                                .sort(([, a], [, b]) => b - a)
+                                .map(([reason, n]) => (
+                                  <div key={reason}>
+                                    {n} · {deferReasonLabel(reason)}
+                                  </div>
+                                ))
+                            : '—'}
+                        </td>
                         <td className="px-3 py-2 text-center text-sm">{c.count}</td>
                         <td className="px-3 py-2 text-sm text-gray-700">{reasonLabel(c.waiting_reason)}</td>
                       </tr>
