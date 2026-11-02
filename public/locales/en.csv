@@ -3160,6 +3160,12 @@ lb2.deferred.waiting.no_dest_panelist,No active panelist at the destination node
 lb2.deferred.waiting.no_capacity,No capacity on valid days
 lb2.deferred.waiting.plan_inactive,Plan not active
 lb2.deferred.waiting.outside_period,Outside the plan period
+lb2.deferred.col_defer_reason,Reason
+lb2.deferred.reason.origin_no_panelist,No panelist at origin node
+lb2.deferred.reason.dest_no_panelist,No panelist at destination node
+lb2.deferred.reason.no_valid_day,No valid day in the plan
+lb2.deferred.reason.pobox_absent_unavailable,Possible late receipt: panelist on leave
+lb2.deferred.reason.pobox_absent_no_visit,Possible late receipt: panelist did not visit the PO box the day before
 lb2.deferred.empty,There are no samples to compensate.
 lb2.deferred.badge_tooltip,Samples to compensate waiting to be reintroduced
 lb2.warning.deferred_removed,Samples removed from the plan and recorded as samples to compensate.

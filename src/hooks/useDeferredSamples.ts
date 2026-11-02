@@ -7,6 +7,7 @@ export interface DeferredCityRow {
   city_name: string
   count: number
   waiting_reason: string | null
+  by_reason?: Record<string, number>
 }
 
 export interface DeferredPlanRow {

@@ -248,7 +248,7 @@
       <h3>Referencia</h3>
       <a href="#faq">Preguntas</a>
     </nav>
-    <div class="side-foot">Actualizado el 28 de octubre de 2026</div>
+    <div class="side-foot">Actualizado el 30 de octubre de 2026</div>
   </aside>
 
   <main class="main">
@@ -398,6 +398,7 @@
       <ul>
         <li><strong>Por ciudad de origen:</strong> cuántas esperan en cada ciudad y el <strong>Motivo de espera</strong> más frecuente.</li>
         <li><strong>Por plan:</strong> por cada plan, las muestras totales, programadas, realizadas, por compensar y las <strong>Extra POBOX</strong> (creadas por POBOX).</li>
+        <li><strong>Motivo:</strong> por qué se apartó cada muestra: sin panelista en el origen o en el destino, sin día válido, o una recepción en POBOX que se anuló.</li>
       </ul>
       <div class="table-wrap"><table>
         <thead><tr><th>Motivo de espera</th><th>Qué hacer</th></tr></thead>
@@ -406,10 +407,15 @@
           <tr><td>Sin panelista activo en el nodo de destino</td><td>Dar de alta o reactivar un panelista en la ciudad de destino.</td></tr>
           <tr><td>Plan no activo</td><td>El plan de la muestra no está activo. Actívelo si debe seguir.</td></tr>
           <tr><td>Sin capacidad en los días válidos</td><td>No queda hueco en el periodo. Balancee con un periodo más largo.</td></tr>
-          <tr><td>Fuera del periodo del plan</td><td>No queda ningún día válido dentro de las fechas del plan.</td></tr>
+          <tr><td>Fuera del periodo del plan</td><td>El periodo balanceado termina antes de que empiece el plan, o no tiene días laborables. Balancee un periodo que llegue al plan.</td></tr>
+          <tr><td>Posible retraso de recepción por vacaciones del panelista</td><td>Nada: la muestra se reintroduce sola en el siguiente balanceo de la ciudad de origen. Si se repite con el mismo panelista, recuérdele declarar envíos y recepciones el mismo día.</td></tr>
+          <tr><td>Posible retraso de recepción: el panelista no fue al apartado el día anterior</td><td>Nada: la muestra se reintroduce sola en el siguiente balanceo de la ciudad de origen. Si se repite con el mismo panelista, recuérdele declarar envíos y recepciones el mismo día.</td></tr>
         </tbody>
       </table></div>
-      <div class="callout ok"><strong>Y después:</strong> no tiene que hacer nada más. Cada vez que balancee esa ciudad, ONEMS intentará reintroducir las muestras anotadas. El menú muestra un contador con las que siguen esperando.</div>
+      <h3>Recepciones en POBOX tras una ausencia</h3>
+      <p>Esta regla solo se aplica a ciudades POBOX con un único nodo. Cuando un panelista declara una recepción en el ONE bot, ONEMS mira el <strong>último día laborable anterior</strong>. Si ese día el panelista no declaró ningún envío (la prueba de que fue al apartado de correos) y el paquete ya podía estar allí, la recepción se <strong>anula</strong>: no cuenta para el E2E y la muestra vuelve a <em>Muestras por compensar</em>. En los servicios exprés (estándar en horas) se aplica también si el paquete salió ese mismo día. Si ese día el panelista no tenía ninguna indisponibilidad ni ningún envío programado, no se puede saber si fue o no al apartado y la recepción se da por <strong>válida</strong>.</p>
+      <p><strong>Ejemplo:</strong> un panelista vuelve el lunes de vacaciones y declara una recepción: se anula. Si el viernes sí fue al apartado y declaró un envío, la recepción vale.</p>
+      <div class="callout ok"><strong>Y después:</strong> no tiene que hacer nada más. Cada vez que balancee esa ciudad, ONEMS intentará reintroducir las muestras anotadas. El menú muestra un contador con las que siguen esperando. También las reintroduce aunque el plan ya haya terminado, mientras siga activo.</div>
     </section>
 
     <section id="balance-city">
@@ -527,7 +533,7 @@
       <p>Después del reparto, ONEMS intenta devolver al plan las <a href="#deferred">Muestras por compensar</a> de la ciudad:</p>
       <ol class="steps">
         <li><strong>Primero sustituyen a muestras POBOX.</strong> Si en un nodo y día hay una muestra creada por POBOX, la muestra por compensar ocupa su lugar: mismo nodo de origen, mismo día, pero con su propio destino (su ruta original). Así se cumple el plan sin añadir un envío extra.</li>
-        <li><strong>Si no, se colocan en un hueco libre:</strong> el día con menos envíos del nodo de origen, en un día válido dentro de las fechas de su plan, que debe estar activo.</li>
+        <li><strong>Si no, se colocan en un hueco libre:</strong> el día con menos envíos del nodo de origen, en un día válido, que puede ser posterior a la fecha de fin de su plan; el plan debe seguir activo.</li>
         <li><strong>Límites:</strong> como mucho <strong>una</strong> muestra compensada por nodo de origen y día, y una por nodo de destino y día. Nunca se colocan hoy, porque los avisos del día ya pueden haber salido.</li>
         <li><strong>Las que no caben</strong> siguen esperando, con su motivo.</li>
       </ol>

@@ -3152,6 +3152,12 @@ lb2.deferred.waiting.no_dest_panelist,Aucun panéliste actif au nœud de destina
 lb2.deferred.waiting.no_capacity,Aucune capacité sur les jours valides
 lb2.deferred.waiting.plan_inactive,Plan non actif
 lb2.deferred.waiting.outside_period,Hors de la période du plan
+lb2.deferred.col_defer_reason,Motif
+lb2.deferred.reason.origin_no_panelist,Aucun panéliste au nœud d'origine
+lb2.deferred.reason.dest_no_panelist,Aucun panéliste au nœud de destination
+lb2.deferred.reason.no_valid_day,Aucun jour valide dans le plan
+lb2.deferred.reason.pobox_absent_unavailable,Réception possiblement tardive : panéliste absent
+lb2.deferred.reason.pobox_absent_no_visit,Réception possiblement tardive : le panéliste n'est pas passé à la boîte postale la veille
 lb2.deferred.empty,Il n’y a aucun échantillon à compenser.
 lb2.deferred.badge_tooltip,Échantillons à compenser en attente de réintroduction
 lb2.warning.deferred_removed,Échantillons retirés du plan et enregistrés comme échantillons à compenser.

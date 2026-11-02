@@ -402,7 +402,7 @@ SELECT pg_temp.fail_if(NOT pg_temp.comp_caps_ok(), 'c7 topes');
 ROLLBACK;
 
 -- ===== Caso 8 (plan que termina a mitad del periodo): Mar27 termina el 10/3; periodo 8..12; 5 anotaciones =>
--- nada despues del 10.
+-- desde 2026-10-30 (spec recepcion POBOX 3.4 bis) el fin del plan ya no acota: se reintroducen las 5 (8..12).
 BEGIN;
 \ir fixtures/incident_city.sql
 \ir fixtures/no_incident_triggers.sql
@@ -413,12 +413,23 @@ DO $$
 DECLARE r jsonb;
 BEGIN
   r := public.rpc_balance_city_v2('c1000000-0000-0000-0000-000000000001', '2027-03-08', '2027-03-12', true);
-  PERFORM pg_temp.fail_if((r->'deferred'->>'reintroduced')::int IS DISTINCT FROM 3
-                          OR (r->'deferred'->>'waiting')::int IS DISTINCT FROM 2, 'c8: ' || r::text);
+  PERFORM pg_temp.fail_if((r->'deferred'->>'reintroduced')::int IS DISTINCT FROM 5
+                          OR (r->'deferred'->>'waiting')::int IS DISTINCT FROM 0, 'c8: ' || r::text);
 END $$;
-SELECT pg_temp.fail_if(count(*) <> 0, 'c8 compensation despues del fin del plan')
+SELECT pg_temp.fail_if(count(*) <> 2, 'c8 compensation despues del fin del plan (11 y 12)')
   FROM public.allocation_plan_details WHERE generation_source = 'compensation' AND fecha_programada > '2027-03-10';
-SELECT pg_temp.fail_if(NOT pg_temp.comp_caps_ok(), 'c8 topes');
+-- (comp_caps_ok exige fecha dentro del plan, que ya no aplica: aqui solo topes 1 por nodo/dia y dias laborables)
+SELECT pg_temp.fail_if(EXISTS (SELECT 1 FROM public.allocation_plan_details
+                                WHERE generation_source = 'compensation' AND status <> 'cancelled'
+                                GROUP BY origin_node_id, fecha_programada HAVING count(*) > 1)
+                       OR EXISTS (SELECT 1 FROM public.allocation_plan_details
+                                   WHERE generation_source = 'compensation' AND status <> 'cancelled'
+                                   GROUP BY destination_node_id, fecha_programada HAVING count(*) > 1)
+                       OR EXISTS (SELECT 1 FROM public.allocation_plan_details
+                                   WHERE generation_source = 'compensation'
+                                     AND (EXTRACT(isodow FROM fecha_programada) > 5
+                                          OR fecha_programada < (SELECT start_date FROM public.allocation_plans
+                                                                  WHERE id = 'cc000000-0000-0000-0000-000000000001'))), 'c8 topes');
 ROLLBACK;
 
 -- ===== Caso 9 (politica semanal): 4 pendientes el 8/3 y 4 anotaciones, periodo 8..19/3 => las 4 se reintroducen
