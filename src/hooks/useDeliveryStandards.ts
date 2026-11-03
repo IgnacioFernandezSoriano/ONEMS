@@ -75,7 +75,9 @@ export function useDeliveryStandards() {
     success_percentage?: number | null
     time_unit: 'hours' | 'days'
   }) => {
-    const { error } = await supabase.from('delivery_standards').insert(data)
+    const { error } = await supabase
+      .from('delivery_standards')
+      .insert(effectiveAccountId ? { ...data, account_id: effectiveAccountId } : data)
     if (error) throw error
     await fetchAll()
   }
