@@ -291,8 +291,10 @@ export function useAllocationPlans() {
   const createPlanDetails = async (planId: string, details: any[]) => {
     // Insert in batches to handle Supabase 1000 records limit
     const batchSize = 1000
+    // Cuenta explicita: un superadmin no tiene account_id en su perfil y el trigger la dejaria nula.
     const detailsToInsert = details.map((d) => ({
       plan_id: planId,
+      ...(effectiveAccountId ? { account_id: effectiveAccountId } : {}),
       ...d,
     }))
 
@@ -401,6 +403,7 @@ export function useAllocationPlans() {
         status: 'active',
         created_by: plan.created_by,
         applied_by: appliedBy,
+        account_id: plan.account_id,
       })
       .select()
       .single()
@@ -411,6 +414,7 @@ export function useAllocationPlans() {
     const batchSize = 1000
     const detailsToInsert = allDetails.map((d) => ({
       plan_id: appliedPlan.id,
+      account_id: plan.account_id,
       origin_node_id: d.origin_node_id,
       destination_node_id: d.destination_node_id,
       fecha_programada: d.fecha_programada,

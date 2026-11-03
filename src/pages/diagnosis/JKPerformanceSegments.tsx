@@ -575,13 +575,13 @@ export default function JKPerformanceSegments() {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">From Center</label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">{t('hc.jk_performance_segments.from_center')}</label>
               <select
                 value={fromCenter}
                 onChange={(e) => setFromCenter(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
               >
-                <option value="">All</option>
+                <option value="">{t('hc.jk_performance_segments.all')}</option>
                 {postalCenters.map(center => (
                   <option key={center.id} value={center.name}>{center.name}</option>
                 ))}
@@ -589,13 +589,13 @@ export default function JKPerformanceSegments() {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">To Center</label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">{t('hc.jk_performance_segments.to_center')}</label>
               <select
                 value={toCenter}
                 onChange={(e) => setToCenter(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
               >
-                <option value="">All</option>
+                <option value="">{t('hc.jk_performance_segments.all')}</option>
                 {postalCenters.map(center => (
                   <option key={center.id} value={center.name}>{center.name}</option>
                 ))}
@@ -643,7 +643,7 @@ export default function JKPerformanceSegments() {
 
           <div className="bg-white rounded-lg shadow-sm p-4">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-xs text-gray-500">Avg J+K Actual</span>
+              <span className="text-xs text-gray-500">{t('hc.jk_performance_segments.avg_jk_actual')}</span>
               <Info className="w-3 h-3 text-gray-400" />
             </div>
             <div className="text-2xl font-bold text-gray-900">{avgJKActual.toFixed(2)}d</div>
@@ -651,7 +651,7 @@ export default function JKPerformanceSegments() {
 
           <div className="bg-white rounded-lg shadow-sm p-4">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-xs text-gray-500">Avg J+K Standard</span>
+              <span className="text-xs text-gray-500">{t('hc.jk_performance_segments.avg_jk_standard')}</span>
               <Info className="w-3 h-3 text-gray-400" />
             </div>
             <div className="text-2xl font-bold text-gray-900">{avgJKStandard.toFixed(2)}d</div>
@@ -659,7 +659,7 @@ export default function JKPerformanceSegments() {
 
           <div className="bg-white rounded-lg shadow-sm p-4">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-xs text-gray-500">% On Time</span>
+              <span className="text-xs text-gray-500">{t('hc.jk_performance_segments.on_time_pct')}</span>
               <Info className="w-3 h-3 text-gray-400" />
             </div>
             <div className={`text-2xl font-bold ${
@@ -673,7 +673,7 @@ export default function JKPerformanceSegments() {
 
           <div className="bg-white rounded-lg shadow-sm p-4">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-xs text-gray-500">Problematic Segments</span>
+              <span className="text-xs text-gray-500">{t('hc.jk_performance_segments.problematic_segments')}</span>
               <Info className="w-3 h-3 text-gray-400" />
             </div>
             <div className="text-2xl font-bold text-red-600">{problematicSegments}</div>
@@ -683,14 +683,14 @@ export default function JKPerformanceSegments() {
         {loading ? (
           <div className="text-center py-12">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <p className="mt-2 text-sm text-gray-600">Cargando datos de segmentos...</p>
+            <p className="mt-2 text-sm text-gray-600">{t('hc.jk_performance_segments.loading')}</p>
           </div>
         ) : (
           <>
             {/* Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
               <div className="bg-white rounded-lg shadow-sm p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Distribución de Rendimiento</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('hc.jk_performance_segments.perf_distribution')}</h3>
                 <PerformanceDistributionChart
                   routeData={routeDataForCharts}
                   maxDays={maxDays}
@@ -701,7 +701,7 @@ export default function JKPerformanceSegments() {
 
               <div className="bg-white rounded-lg shadow-sm p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Distribución Acumulada</h3>
+                  <h3 className="text-lg font-semibold text-gray-900">{t('hc.jk_performance_segments.cumulative_distribution')}</h3>
                   <div className="flex gap-2">
                     <button
                       onClick={() => setViewMode('chart')}
@@ -711,7 +711,7 @@ export default function JKPerformanceSegments() {
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                     >
-                      Gráfico
+                      {t('hc.jk_performance_segments.chart')}
                     </button>
                     <button
                       onClick={() => setViewMode('table')}
@@ -721,7 +721,7 @@ export default function JKPerformanceSegments() {
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                     >
-                      Tabla
+                      {t('hc.jk_performance_segments.table')}
                     </button>
                   </div>
                 </div>

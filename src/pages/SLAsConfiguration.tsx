@@ -85,14 +85,14 @@ export function SLAsConfiguration() {
       return
     }
 
-    if (!confirm(`Delete ${selectedIds.size} selected records?`)) return
+    if (!confirm(t('hc.slas_configuration.confirm_delete_n', { count: selectedIds.size }))) return
 
     try {
       await deleteMultiple(Array.from(selectedIds))
       setSelectedIds(new Set())
-      alert(`Deleted ${selectedIds.size} records successfully`)
+      alert(t('hc.slas_configuration.deleted_n', { count: selectedIds.size }))
     } catch (error: any) {
-      alert(`Error: ${error.message}`)
+      alert(t('hc.slas_configuration.error', { message: error.message }))
     }
   }
 
@@ -114,7 +114,7 @@ export function SLAsConfiguration() {
       await updateSLA(id, { [field]: numValue } as any)
       setEditingCell(null)
     } catch (error: any) {
-      alert(`Error: ${error.message}`)
+      alert(t('hc.slas_configuration.error', { message: error.message }))
     }
   }
 
@@ -182,7 +182,7 @@ export function SLAsConfiguration() {
   }
 
   if (loading) return <div className="p-6">{t("common.loading")}</div>
-  if (error) return <div className="p-6 text-red-600">Error: {error}</div>
+  if (error) return <div className="p-6 text-red-600">{t('hc.slas_configuration.error', { message: error })}</div>
 
   return (
     <div className="p-6">
@@ -302,7 +302,7 @@ export function SLAsConfiguration() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Carrier
+                {t('hc.slas_configuration.carrier')}
               </label>
               <select
                 value={filters.carrier_id}
@@ -318,7 +318,7 @@ export function SLAsConfiguration() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Product
+                {t('hc.slas_configuration.product')}
               </label>
               <select
                 value={filters.product_id}
@@ -375,10 +375,10 @@ export function SLAsConfiguration() {
                 {t('slas.route')}
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Carrier
+                {t('hc.slas_configuration.carrier')}
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Product
+                {t('hc.slas_configuration.product')}
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                 {t('slas.expected_time')}
@@ -418,7 +418,7 @@ export function SLAsConfiguration() {
                     <div>
                       <div className="font-medium">{sla.postal_center?.name}</div>
                       <div className="text-gray-500 text-xs">
-                        Entry → Exit
+                        {t('hc.slas_configuration.entry_exit')}
                       </div>
                     </div>
                   ) : (
@@ -561,7 +561,7 @@ export function SLAsConfiguration() {
                 setShowCreateModal(false)
                 alert(t('slas.sla_created_successfully'))
               } catch (error: any) {
-                alert(error.message || 'Error al crear SLA')
+                alert(error.message || t('hc.slas_configuration.create_error'))
                 throw error // Re-throw to keep form in loading state if needed
               }
             }}

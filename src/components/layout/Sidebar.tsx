@@ -487,13 +487,13 @@ export function Sidebar() {
         {isExpanded && (
           <div>
             <h1 className="text-2xl font-bold text-gray-900">ONE</h1>
-            <p className="text-sm text-gray-500 mt-1">for Regulators</p>
+            <p className="text-sm text-gray-500 mt-1">{t('hc.sidebar.for_regulators')}</p>
           </div>
         )}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
           className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-          title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          title={isCollapsed ? t('hc.sidebar.expand_sidebar') : t('hc.sidebar.collapse_sidebar')}
         >
           {isCollapsed ? (
             <Menu className="w-5 h-5 text-gray-600" />
@@ -550,7 +550,7 @@ export function Sidebar() {
                 <h3 className={`text-xs font-semibold text-gray-400 uppercase tracking-wider transition-opacity ${
                   isExpanded ? 'opacity-100' : 'opacity-0'
                 }`}>
-                  {group.label}
+                  {group.label === 'DIAGNOSIS' ? t('menu.diagnosis') : group.label}
                 </h3>
               </div>
 
@@ -720,6 +720,7 @@ export function Sidebar() {
               <option value="es">Español</option>
               <option value="fr">Français</option>
               <option value="ar">العربية</option>
+              <option value="pt">Português</option>
             </select>
           </div>
         )}

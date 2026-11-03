@@ -37,7 +37,7 @@ interface PeriodConfig {
   endDate: string;
 }
 
-function getPeriodDates(period: PeriodOption): PeriodConfig {
+function getPeriodDates(period: PeriodOption, t: (key: string, vars?: Record<string, any>) => string): PeriodConfig {
   const today = new Date();
   const year = today.getFullYear();
   const month = today.getMonth();
@@ -47,7 +47,7 @@ function getPeriodDates(period: PeriodOption): PeriodConfig {
       const start = new Date(year, month, 1);
       const end = new Date(year, month + 1, 0);
       return {
-        label: `Current Month (${start.toLocaleString('default', { month: 'long' })} ${year})`,
+        label: t('hc.dashboard.current_month_label', { month: start.toLocaleString('default', { month: 'long' }), year }),
         startDate: start.toISOString().split('T')[0],
         endDate: end.toISOString().split('T')[0]
       };
@@ -56,7 +56,7 @@ function getPeriodDates(period: PeriodOption): PeriodConfig {
       const start = new Date(year, month + 1, 1);
       const end = new Date(year, month + 2, 0);
       return {
-        label: `Next Month (${start.toLocaleString('default', { month: 'long' })} ${start.getFullYear()})`,
+        label: t('hc.dashboard.next_month_label', { month: start.toLocaleString('default', { month: 'long' }), year: start.getFullYear() }),
         startDate: start.toISOString().split('T')[0],
         endDate: end.toISOString().split('T')[0]
       };
@@ -65,7 +65,7 @@ function getPeriodDates(period: PeriodOption): PeriodConfig {
       const start = new Date(today);
       start.setDate(today.getDate() - 30);
       return {
-        label: 'Last 30 days',
+        label: t('hc.dashboard.last_n_days', { days: 30 }),
         startDate: start.toISOString().split('T')[0],
         endDate: today.toISOString().split('T')[0]
       };
@@ -74,7 +74,7 @@ function getPeriodDates(period: PeriodOption): PeriodConfig {
       const start = new Date(today);
       start.setDate(today.getDate() - 60);
       return {
-        label: 'Last 60 days',
+        label: t('hc.dashboard.last_n_days', { days: 60 }),
         startDate: start.toISOString().split('T')[0],
         endDate: today.toISOString().split('T')[0]
       };
@@ -83,7 +83,7 @@ function getPeriodDates(period: PeriodOption): PeriodConfig {
       const start = new Date(today);
       start.setDate(today.getDate() - 90);
       return {
-        label: 'Last 90 days',
+        label: t('hc.dashboard.last_n_days', { days: 90 }),
         startDate: start.toISOString().split('T')[0],
         endDate: today.toISOString().split('T')[0]
       };
@@ -98,7 +98,7 @@ export function Dashboard() {
   const navigate = useNavigate();
   
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodOption>('current_month');
-  const periodConfig = getPeriodDates(selectedPeriod);
+  const periodConfig = getPeriodDates(selectedPeriod, t);
   
   // Get allocation plans data
   const { details, loading: plansLoading } = useAllocationPlanDetails();
@@ -353,7 +353,7 @@ export function Dashboard() {
 
       {/* Selected Period Info */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 text-sm text-blue-800">
-        <strong>{t('dashboard.selected_period')}:</strong> {periodConfig.label} ({periodConfig.startDate} to {periodConfig.endDate})
+        <strong>{t('dashboard.selected_period')}:</strong> {periodConfig.label} ({t('hc.dashboard.period_range', { start: periodConfig.startDate, end: periodConfig.endDate })})
       </div>
 
       {/* Critical Alerts - Only show if there are real issues */}
@@ -371,7 +371,7 @@ export function Dashboard() {
                     onClick={() => navigateWithFilter('endDate', 'yesterday')}
                     className="block hover:text-red-900 hover:underline text-left"
                   >
-                    • <strong>{allocationMetrics.delayed.total}</strong> delayed shipments in selected period
+                    • <strong>{allocationMetrics.delayed.total}</strong> {t('hc.dashboard.alert_delayed')}
                   </button>
                 )}
                 {allocationMetrics.availability.any_issue > 0 && (
@@ -379,22 +379,22 @@ export function Dashboard() {
                     onClick={() => navigateWithFilter('availabilityIssue', 'any')}
                     className="block hover:text-red-900 hover:underline text-left"
                   >
-                    • <strong>{allocationMetrics.availability.any_issue}</strong> plans with panelist availability issues
+                    • <strong>{allocationMetrics.availability.any_issue}</strong> {t('hc.dashboard.alert_availability')}
                   </button>
                 )}
                 {alertCounts.total > 0 && (
                   <Link to="/stock-management" className="block text-red-700 hover:text-red-900 hover:underline">
-                    • <strong>{alertCounts.total}</strong> stock alerts ({alertCounts.regulator} regulator, {alertCounts.panelist} panelist)
+                    • <strong>{alertCounts.total}</strong> {t('hc.dashboard.alert_stock', { regulator: alertCounts.regulator, panelist: alertCounts.panelist })}
                   </Link>
                 )}
                 {panelistMetrics.onVacation > 0 && (
                   <Link to="/panelists" className="block text-red-700 hover:text-red-900 hover:underline">
-                    • <strong>{panelistMetrics.onVacation}</strong> panelists currently on vacation
+                    • <strong>{panelistMetrics.onVacation}</strong> {t('hc.dashboard.alert_vacation')}
                   </Link>
                 )}
                 {materialMetrics.pendingRequirements > 0 && (
                   <Link to="/stock-management" className="block text-red-700 hover:text-red-900 hover:underline">
-                    • <strong>{materialMetrics.pendingRequirements}</strong> pending material requirements
+                    • <strong>{materialMetrics.pendingRequirements}</strong> {t('hc.dashboard.alert_requirements')}
                   </Link>
                 )}
               </div>
@@ -407,7 +407,7 @@ export function Dashboard() {
       <div>
         <div className="flex items-center gap-2 mb-4">
           <h2 className="text-xl font-semibold text-gray-900">{t('dashboard.allocation_plans')}</h2>
-          <SmartTooltip content="Allocation Plans: Manage shipment assignments between panelists. Monitor pending plans, shipment status, availability issues, and delayed shipments in the selected period." />
+          <SmartTooltip content={t('hc.dashboard.tip_allocation_plans')} />
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Total & Status Card */}
@@ -426,21 +426,21 @@ export function Dashboard() {
               </div>
               <div className="flex justify-between items-center py-2 border-b border-gray-100">
                 <div className="flex items-center gap-2">
-                  <span className="text-orange-600">⏳ Pending</span>
-                  <SmartTooltip content="Plans awaiting action (pending/notified status)" />
+                  <span className="text-orange-600">⏳ {t('hc.dashboard.pending')}</span>
+                  <SmartTooltip content={t('hc.dashboard.tip_pending')} />
                 </div>
                 <span className="text-2xl font-bold text-orange-600">{allocationMetrics.pending}</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-gray-100">
                 <div className="flex items-center gap-2">
-                  <span className="text-blue-600">📤 Sent</span>
+                  <span className="text-blue-600">📤 {t('hc.dashboard.sent')}</span>
                   <SmartTooltip content={t('dashboard.tooltip_sent_plans')} />
                 </div>
                 <span className="text-2xl font-bold text-blue-600">{allocationMetrics.sent}</span>
               </div>
               <div className="flex justify-between items-center py-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-green-600">✓ Received</span>
+                  <span className="text-green-600">✓ {t('hc.dashboard.received')}</span>
                   <SmartTooltip content={t('dashboard.tooltip_received_plans')} />
                 </div>
                 <span className="text-2xl font-bold text-green-600">{allocationMetrics.received}</span>
@@ -458,7 +458,7 @@ export function Dashboard() {
               <div className="flex justify-between items-center py-2 border-b border-gray-100">
                 <div className="flex items-center gap-2">
                   <span className="text-gray-600">{t('dashboard.availability_issues')}</span>
-                  <SmartTooltip content="Plans with panelist availability problems (unavailable, unassigned, inactive)" />
+                  <SmartTooltip content={t('hc.dashboard.tip_availability')} />
                 </div>
                 <button
                   onClick={() => navigateWithFilter('availabilityIssue', 'any')}
@@ -469,15 +469,15 @@ export function Dashboard() {
               </div>
               <div className="pl-4 space-y-2 text-sm">
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-500">⚠️ Unavailable</span>
+                  <span className="text-gray-500">⚠️ {t('hc.dashboard.unavailable')}</span>
                   <span className="font-semibold text-gray-700">{allocationMetrics.availability.unavailable}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-500">👤 No Panelist</span>
+                  <span className="text-gray-500">👤 {t('hc.dashboard.no_panelist')}</span>
                   <span className="font-semibold text-gray-700">{allocationMetrics.availability.unassigned}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-500">✗ Inactive</span>
+                  <span className="text-gray-500">✗ {t('hc.dashboard.inactive')}</span>
                   <span className="font-semibold text-gray-700">{allocationMetrics.availability.inactive}</span>
                 </div>
               </div>
@@ -496,25 +496,25 @@ export function Dashboard() {
               </div>
               <div className="pl-4 space-y-2 text-sm">
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-500">⏳ Pending</span>
+                  <span className="text-gray-500">⏳ {t('hc.dashboard.pending')}</span>
                   <span className="font-semibold text-gray-700">{allocationMetrics.delayed.pending}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-500">📤 Sent</span>
+                  <span className="text-gray-500">📤 {t('hc.dashboard.sent')}</span>
                   <span className="font-semibold text-gray-700">{allocationMetrics.delayed.sent}</span>
                 </div>
                 {(allocationMetrics.delayed.cancelled + allocationMetrics.delayed.invalid + allocationMetrics.delayed.transfer_error) > 0 && (
                   <>
                     <div className="flex justify-between items-center">
-                      <span className="text-gray-500">✗ Cancelled</span>
+                      <span className="text-gray-500">✗ {t('hc.dashboard.cancelled')}</span>
                       <span className="font-semibold text-gray-700">{allocationMetrics.delayed.cancelled}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-gray-500">⚠️ Invalid</span>
+                      <span className="text-gray-500">⚠️ {t('hc.dashboard.invalid')}</span>
                       <span className="font-semibold text-gray-700">{allocationMetrics.delayed.invalid}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-gray-500">🔄 Transfer Error</span>
+                      <span className="text-gray-500">🔄 {t('hc.dashboard.transfer_error')}</span>
                       <span className="font-semibold text-gray-700">{allocationMetrics.delayed.transfer_error}</span>
                     </div>
                   </>
@@ -529,7 +529,7 @@ export function Dashboard() {
       <div>
         <div className="flex items-center gap-2 mb-4">
           <h2 className="text-xl font-semibold text-gray-900">{t('dashboard.panelists_availability')}</h2>
-          <SmartTooltip content="Panelists & Availability: Monitor panelist status and vacation periods. Track active/inactive panelists, current vacations, and upcoming unavailability to plan allocation assignments effectively." />
+          <SmartTooltip content={t('hc.dashboard.tip_panelists')} />
         </div>
         <Link to="/panelists" className="block bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
           <div className="flex items-center justify-between mb-4">
@@ -552,7 +552,7 @@ export function Dashboard() {
             <div className={panelistMetrics.onVacation > 0 ? "border-l-4 border-red-500 pl-4" : ""}>
               <div className="flex items-center gap-2 mb-2">
                 <p className="text-sm font-medium text-red-600">{t('dashboard.on_vacation')}</p>
-                <SmartTooltip content="Panelists currently unavailable (vacation period includes today)" />
+                <SmartTooltip content={t('hc.dashboard.tip_on_vacation')} />
               </div>
               <p className="text-3xl font-bold text-red-600">{panelistMetrics.onVacation}</p>
               <p className="text-xs text-gray-500 mt-2">{t('dashboard.currently_unavailable')}</p>
@@ -561,7 +561,7 @@ export function Dashboard() {
             <div className={panelistMetrics.upcomingVacations > 0 ? "border-l-4 border-yellow-500 pl-4" : ""}>
               <div className="flex items-center gap-2 mb-2">
                 <p className="text-sm font-medium text-yellow-600">{t('dashboard.upcoming_vacations')}</p>
-                <SmartTooltip content="Panelists with vacation periods starting in the next 30 days" />
+                <SmartTooltip content={t('hc.dashboard.tip_upcoming')} />
               </div>
               <p className="text-3xl font-bold text-yellow-600">{panelistMetrics.upcomingVacations}</p>
               <p className="text-xs text-gray-500 mt-2">{t('dashboard.next_30_days')}</p>
@@ -570,7 +570,7 @@ export function Dashboard() {
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <p className="text-sm font-medium text-blue-600">{t('dashboard.availability_rate')}</p>
-                <SmartTooltip content="Percentage of panelists currently available (not on vacation)" />
+                <SmartTooltip content={t('hc.dashboard.tip_availability_rate')} />
               </div>
               <p className="text-3xl font-bold text-blue-600">{panelistMetrics.availabilityRate.toFixed(1)}%</p>
               <p className="text-xs text-gray-500 mt-2">{panelistMetrics.total - panelistMetrics.onVacation} {t('dashboard.of')} {panelistMetrics.total} {t('dashboard.available')}</p>
@@ -583,7 +583,7 @@ export function Dashboard() {
       <div>
         <div className="flex items-center gap-2 mb-4">
           <h2 className="text-xl font-semibold text-gray-900">{t('carriers.carriers_products')}</h2>
-          <SmartTooltip content="Carriers & Products: Monitor active carriers and products. Track available carrier-product combinations for routing and allocation planning." />
+          <SmartTooltip content={t('hc.dashboard.tip_carriers')} />
         </div>
         <Link to="/carriers" className="block bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
           <div className="flex items-center justify-between mb-4">
@@ -606,13 +606,13 @@ export function Dashboard() {
                 <SmartTooltip content={t('dashboard.tooltip_active_products')} />
               </div>
               <p className="text-3xl font-bold text-gray-900">{carrierProductMetrics.activeProducts}</p>
-              <p className="text-xs text-gray-500 mt-2">of 1 total</p>
+              <p className="text-xs text-gray-500 mt-2">{t('hc.dashboard.of_1_total')}</p>
             </div>
 
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <p className="text-sm font-medium text-blue-600">{t('dashboard.carrier_product_pairs')}</p>
-                <SmartTooltip content="Total number of carrier-product combinations available for routing" />
+                <SmartTooltip content={t('hc.dashboard.tip_pairs')} />
               </div>
               <p className="text-3xl font-bold text-blue-600">
                 {carrierProductMetrics.activeCarriers * carrierProductMetrics.activeProducts}
@@ -629,7 +629,7 @@ export function Dashboard() {
         <div>
           <div className="flex items-center gap-2 mb-4">
             <h2 className="text-xl font-semibold text-gray-900">{t('dashboard.material_management')}</h2>
-            <SmartTooltip content="Material Management: Track material requirements, purchase orders, and shipments to panelists. Monitor pending items to ensure timely material availability." />
+            <SmartTooltip content={t('hc.dashboard.tip_material')} />
           </div>
           <Link to="/stock-management" className="block bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
             <div className="flex items-center justify-between mb-4">
@@ -648,7 +648,7 @@ export function Dashboard() {
               <div className="flex justify-between items-center py-2 border-l-4 border-blue-500 pl-4">
                 <div className="flex items-center gap-2">
                   <span className="text-blue-600">{t('dashboard.purchase_orders')}</span>
-                  <SmartTooltip content="Purchase orders placed with suppliers (ordered status)" />
+                  <SmartTooltip content={t('hc.dashboard.tip_po')} />
                 </div>
                 <span className="text-2xl font-bold text-blue-600">{materialMetrics.pendingPurchaseOrders}</span>
               </div>
@@ -668,7 +668,7 @@ export function Dashboard() {
         <div>
           <div className="flex items-center gap-2 mb-4">
             <h2 className="text-xl font-semibold text-gray-900">{t('dashboard.stock_alerts')}</h2>
-            <SmartTooltip content="Stock Alerts: Monitor stock levels and alerts for regulator and panelist locations. Address alerts promptly to avoid shipment delays." />
+            <SmartTooltip content={t('hc.dashboard.tip_stock')} />
           </div>
           <Link to="/stock-management" className="block bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
             <div className="flex items-center justify-between mb-4">
@@ -679,7 +679,7 @@ export function Dashboard() {
               <div className={alertCounts.regulator > 0 ? "flex justify-between items-center py-2 border-l-4 border-red-500 pl-4" : "flex justify-between items-center py-2"}>
                 <div className="flex items-center gap-2">
                   <span className="text-red-600">{t('dashboard.regulator_stock')}</span>
-                  <SmartTooltip content="Stock alerts in regulator (HAL) warehouse" />
+                  <SmartTooltip content={t('hc.dashboard.tip_regulator_stock')} />
                 </div>
                 <span className="text-2xl font-bold text-red-600">{alertCounts.regulator}</span>
               </div>
@@ -708,7 +708,7 @@ export function Dashboard() {
       <div>
         <div className="flex items-center gap-2 mb-4">
           <h2 className="text-xl font-semibold text-gray-900">{t('dashboard.delivery_standards')}</h2>
-          <SmartTooltip content="Delivery Standards: Monitor configured delivery standards and coverage. Ensure all routes have complete standards (time and success percentage) for accurate compliance tracking." />
+          <SmartTooltip content={t('hc.dashboard.tip_standards')} />
         </div>
         <Link to="/delivery-standards" className="block bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
           <div className="flex items-center justify-between mb-4">
@@ -722,16 +722,16 @@ export function Dashboard() {
                 <SmartTooltip content={t('dashboard.tooltip_total_standards')} />
               </div>
               <p className="text-3xl font-bold text-gray-900">{standardsMetrics.totalStandards}</p>
-              <p className="text-xs text-gray-500 mt-2">Configured routes</p>
+              <p className="text-xs text-gray-500 mt-2">{t('hc.dashboard.configured_routes')}</p>
             </div>
 
             <div className={standardsMetrics.standardsNeedingReview > 0 ? "border-l-4 border-yellow-500 pl-4" : ""}>
               <div className="flex items-center gap-2 mb-2">
-                <p className="text-sm font-medium text-yellow-600">Needing Review</p>
+                <p className="text-sm font-medium text-yellow-600">{t('hc.dashboard.needing_review')}</p>
                 <SmartTooltip content={t('dashboard.tooltip_needs_review')} />
               </div>
               <p className="text-3xl font-bold text-yellow-600">{standardsMetrics.standardsNeedingReview}</p>
-              <p className="text-xs text-gray-500 mt-2">Incomplete standards</p>
+              <p className="text-xs text-gray-500 mt-2">{t('hc.dashboard.incomplete_standards')}</p>
             </div>
 
             <div>
@@ -740,7 +740,7 @@ export function Dashboard() {
                 <SmartTooltip content={t('dashboard.tooltip_coverage_rate')} />
               </div>
               <p className="text-3xl font-bold text-blue-600">{standardsMetrics.coverageRate}%</p>
-              <p className="text-xs text-gray-500 mt-2">{standardsMetrics.totalStandards - standardsMetrics.standardsNeedingReview} complete</p>
+              <p className="text-xs text-gray-500 mt-2">{t('hc.dashboard.n_complete', { count: standardsMetrics.totalStandards - standardsMetrics.standardsNeedingReview })}</p>
             </div>
           </div>
         </Link>

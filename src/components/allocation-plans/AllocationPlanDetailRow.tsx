@@ -71,7 +71,7 @@ export function AllocationPlanDetailRow({
       
       setEditing(null)
     } catch (error: any) {
-      alert(`Error: ${error.message}`)
+      alert(t('hc.allocation_plan_detail_row.error', { message: error.message }))
     } finally {
       setSaving(false)
     }
@@ -208,7 +208,7 @@ export function AllocationPlanDetailRow({
             autoFocus
             className="w-full border rounded px-2 py-1 text-sm"
             disabled={saving}
-            placeholder="Enter tag ID"
+            placeholder={t('hc.allocation_plan_detail_row.tag_id_placeholder')}
           />
         ) : (
           <button
@@ -231,7 +231,7 @@ export function AllocationPlanDetailRow({
         {detail.origin_availability_status === 'unavailable' ? (
           <div className="flex flex-col gap-1">
             <span className="px-2 py-1 rounded text-xs bg-red-100 text-red-800 font-semibold">
-              ⚠ UNAVAILABLE
+              ⚠ {t('hc.allocation_plan_detail_row.unavailable')}
             </span>
             {detail.origin_unavailability_reason && (
               <span className="text-xs text-gray-500">
@@ -241,15 +241,15 @@ export function AllocationPlanDetailRow({
           </div>
         ) : detail.origin_availability_status === 'unassigned' ? (
           <span className="px-2 py-1 rounded text-xs bg-gray-100 text-gray-600">
-            No Panelist
+            {t('hc.allocation_plan_detail_row.no_panelist')}
           </span>
         ) : detail.origin_availability_status === 'inactive' ? (
           <span className="px-2 py-1 rounded text-xs bg-gray-300 text-gray-700">
-            Inactive
+            {t('hc.allocation_plan_detail_row.inactive')}
           </span>
         ) : (
           <span className="px-2 py-1 rounded text-xs bg-green-100 text-green-800">
-            ✓ Available
+            ✓ {t('hc.allocation_plan_detail_row.available')}
           </span>
         )}
       </td>
@@ -264,7 +264,7 @@ export function AllocationPlanDetailRow({
         {detail.destination_availability_status === 'unavailable' ? (
           <div className="flex flex-col gap-1">
             <span className="px-2 py-1 rounded text-xs bg-red-100 text-red-800 font-semibold">
-              ⚠ UNAVAILABLE
+              ⚠ {t('hc.allocation_plan_detail_row.unavailable')}
             </span>
             {detail.destination_unavailability_reason && (
               <span className="text-xs text-gray-500">
@@ -274,15 +274,15 @@ export function AllocationPlanDetailRow({
           </div>
         ) : detail.destination_availability_status === 'unassigned' ? (
           <span className="px-2 py-1 rounded text-xs bg-gray-100 text-gray-600">
-            No Panelist
+            {t('hc.allocation_plan_detail_row.no_panelist')}
           </span>
         ) : detail.destination_availability_status === 'inactive' ? (
           <span className="px-2 py-1 rounded text-xs bg-gray-300 text-gray-700">
-            Inactive
+            {t('hc.allocation_plan_detail_row.inactive')}
           </span>
         ) : (
           <span className="px-2 py-1 rounded text-xs bg-green-100 text-green-800">
-            ✓ Available
+            ✓ {t('hc.allocation_plan_detail_row.available')}
           </span>
         )}
       </td>
@@ -292,10 +292,10 @@ export function AllocationPlanDetailRow({
         {detail.status === 'invalid' && detail.validation_errors ? (
           <div className="group relative inline-block">
             <span className="px-2 py-1 rounded text-xs font-medium bg-red-100 text-red-800 border border-red-300 cursor-help">
-              ⚠ Invalid
+              ⚠ {t('hc.allocation_plan_detail_row.invalid')}
             </span>
             <div className="absolute z-50 invisible group-hover:visible bg-gray-900 text-white text-xs rounded py-2 px-3 bottom-full left-0 mb-2 w-64 shadow-lg">
-              <div className="font-semibold mb-1">Validation Errors:</div>
+              <div className="font-semibold mb-1">{t('hc.allocation_plan_detail_row.validation_errors')}</div>
               <ul className="list-disc list-inside space-y-1">
                 {detail.validation_errors.map((error, idx) => (
                   <li key={idx}>{error}</li>
@@ -307,11 +307,11 @@ export function AllocationPlanDetailRow({
         ) : detail.status === 'transfer_error' ? (
           <div className="group relative inline-block">
             <span className="px-2 py-1 rounded text-xs font-medium bg-orange-100 text-orange-800 border border-orange-300 cursor-help">
-              ⚠ Transfer Error
+              ⚠ {t('hc.allocation_plan_detail_row.transfer_error')}
             </span>
             {detail.transfer_error_message && (
               <div className="absolute z-50 invisible group-hover:visible bg-gray-900 text-white text-xs rounded py-2 px-3 bottom-full left-0 mb-2 w-64 shadow-lg">
-                <div className="font-semibold mb-1">Error:</div>
+                <div className="font-semibold mb-1">{t('hc.allocation_plan_detail_row.error_label')}</div>
                 <div>{detail.transfer_error_message}</div>
                 <div className="absolute top-full left-4 -mt-1 border-4 border-transparent border-t-gray-900"></div>
               </div>

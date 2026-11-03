@@ -35,7 +35,7 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
         email_panelist_manager: trimmed === '' ? null : trimmed,
       })
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error submitting form')
+      setError(err instanceof Error ? err.message : t('hc.account_form.submit_error'))
     } finally {
       setLoading(false)
     }
@@ -51,7 +51,7 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
 
       <div>
         <label htmlFor="name" className="block text-sm font-medium mb-1">
-          Account Name
+          {t('hc.account_form.account_name')}
         </label>
         <input
           id="name"
@@ -65,7 +65,7 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
 
       <div>
         <label htmlFor="slug" className="block text-sm font-medium mb-1">
-          Slug
+          {t('hc.account_form.slug')}
         </label>
         <input
           id="slug"
@@ -77,13 +77,13 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
           className="w-full px-3 py-2 border border-gray-300 rounded-md disabled:bg-gray-100"
         />
         <p className="text-xs text-gray-500 mt-1">
-          Unique identifier (lowercase, no spaces)
+          {t('hc.account_form.slug_help')}
         </p>
       </div>
 
       <div>
         <label htmlFor="default_language" className="block text-sm font-medium mb-1">
-          Default Language
+          {t('hc.account_form.default_language')}
         </label>
         <select
           id="default_language"
@@ -98,13 +98,13 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
           ))}
         </select>
         <p className="text-xs text-gray-500 mt-1">
-          Language inherited by panelists of this account
+          {t('hc.account_form.default_language_help')}
         </p>
       </div>
 
       <div>
         <label htmlFor="email_panelist_manager" className="block text-sm font-medium mb-1">
-          Panelist Manager Email
+          {t('hc.account_form.manager_email')}
         </label>
         <input
           id="email_panelist_manager"
@@ -115,14 +115,14 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
           placeholder="manager@example.com"
         />
         <p className="text-xs text-gray-500 mt-1">
-          Contact email for the panelist manager of this account (optional)
+          {t('hc.account_form.manager_email_help')}
         </p>
       </div>
 
       {account && (
         <div>
           <label htmlFor="status" className="block text-sm font-medium mb-1">
-            Status
+            {t('hc.account_form.status')}
           </label>
           <select
             id="status"
@@ -138,10 +138,10 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
 
       <div className="flex gap-2 justify-end">
         <Button type="button" variant="secondary" onClick={onCancel}>
-          Cancel
+          {t('hc.account_form.cancel')}
         </Button>
         <Button type="submit" disabled={loading}>
-          {loading ? 'Saving...' : account ? 'Update' : 'Create'}
+          {loading ? t('hc.account_form.saving') : account ? t('hc.account_form.update') : t('hc.account_form.create')}
         </Button>
       </div>
     </form>

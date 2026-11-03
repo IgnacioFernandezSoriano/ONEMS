@@ -26,7 +26,7 @@ export default function PanelistStockTab() {
     const stock = panelistStocks.find(s => s.panelist_id === id)
     return {
       id,
-      name: stock?.panelist?.name || 'No name',
+      name: stock?.panelist?.name || t('hc.panelist_stock_tab.no_name'),
       code: stock?.panelist?.panelist_code || 'N/A'
     }
   }).sort((a, b) => a.name.localeCompare(b.name))
@@ -62,7 +62,7 @@ export default function PanelistStockTab() {
 
   const handleExportCSV = () => {
     if (filteredStocks.length === 0) {
-      alert('No stock data to export')
+      alert(t('hc.panelist_stock_tab.no_stock_to_export'))
       return
     }
 
@@ -81,7 +81,7 @@ export default function PanelistStockTab() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Loading panelist stock...</div>
+        <div className="text-gray-500">{t('hc.panelist_stock_tab.loading')}</div>
       </div>
     )
   }
@@ -133,7 +133,7 @@ export default function PanelistStockTab() {
       <div className="space-y-6">
         {Object.keys(groupedStocks).length === 0 ? (
           <div className="text-center py-12 text-gray-500">
-            {searchTerm || selectedPanelist ? 'No materials found' : 'No panelist stock'}
+            {searchTerm || selectedPanelist ? t('hc.panelist_stock_tab.no_materials_found') : t('hc.panelist_stock_tab.no_panelist_stock')}
           </div>
         ) : (
           Object.entries(groupedStocks).map(([panelistId, { panelist, stocks }]) => (
@@ -144,7 +144,7 @@ export default function PanelistStockTab() {
                   <User className="h-5 w-5 text-gray-400" />
                   <div>
                     <h3 className="text-lg font-medium text-gray-900">
-                      {panelist?.name || 'No name'}
+                      {panelist?.name || t('hc.panelist_stock_tab.no_name')}
                     </h3>
                     <p className="text-sm text-gray-500">
                       {t('stock.panelist_code_materials_count', { code: panelist?.panelist_code || 'N/A', count: stocks.length })}
@@ -161,13 +161,13 @@ export default function PanelistStockTab() {
                       <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         <div className="flex items-center gap-1">
                           {t('common.material')}
-                          <SmartTooltip content="Material code and name" />
+                          <SmartTooltip content={t('hc.panelist_stock_tab.tt_material')} />
                         </div>
                       </th>
                       <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         <div className="flex items-center gap-1">
                           {t('stock.quantity')}
-                          <SmartTooltip content="Current quantity in panelist stock" />
+                          <SmartTooltip content={t('hc.panelist_stock_tab.tt_quantity')} />
                         </div>
                       </th>
                       <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -176,7 +176,7 @@ export default function PanelistStockTab() {
                       <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         <div className="flex items-center gap-1">
                           {t('stock.last_updated')}
-                          <SmartTooltip content="Date of last movement for this material" />
+                          <SmartTooltip content={t('hc.panelist_stock_tab.tt_last_movement')} />
                         </div>
                       </th>
                       <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -192,7 +192,7 @@ export default function PanelistStockTab() {
                             {stock.material?.code || 'N/A'}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {stock.material?.name || 'No name'}
+                            {stock.material?.name || t('hc.panelist_stock_tab.no_name')}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -240,8 +240,8 @@ export default function PanelistStockTab() {
       {/* Summary */}
       <div className="bg-gray-50 px-4 py-3 rounded-md">
         <div className="text-sm text-gray-700">
-          <span className="font-medium">Total records:</span> {filteredStocks.length}
-          {(searchTerm || selectedPanelist) && ` (filtered from ${panelistStocks.length})`}
+          <span className="font-medium">{t('hc.panelist_stock_tab.total_records')}</span> {filteredStocks.length}
+          {(searchTerm || selectedPanelist) && ` (${t('hc.panelist_stock_tab.filtered_from', { count: panelistStocks.length })})`}
         </div>
       </div>
 
@@ -251,20 +251,20 @@ export default function PanelistStockTab() {
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
             <div className="px-6 py-4 border-b border-gray-200">
               <h3 className="text-lg font-medium text-gray-900">
-                Adjust Panelist Stock: {selectedStock.material?.code}
+                {t('hc.panelist_stock_tab.adjust_title', { code: selectedStock.material?.code })}
               </h3>
               <p className="text-sm text-gray-500 mt-1">
                 {selectedStock.material?.name}
               </p>
               <p className="text-sm text-gray-600 mt-1">
-                Panelist: {selectedStock.panelist?.name} ({selectedStock.panelist?.panelist_code})
+                {t('hc.panelist_stock_tab.panelist_line', { name: selectedStock.panelist?.name, code: selectedStock.panelist?.panelist_code })}
               </p>
             </div>
 
             <div className="px-6 py-4 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Current Quantity
+                  {t('hc.panelist_stock_tab.current_quantity')}
                 </label>
                 <div className="text-lg font-semibold text-gray-900">
                   {selectedStock.quantity.toLocaleString()} {selectedStock.material?.unit_measure || 'un'}
@@ -273,7 +273,7 @@ export default function PanelistStockTab() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  New Quantity <span className="text-red-500">*</span>
+                  {t('hc.panelist_stock_tab.new_quantity')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
@@ -282,27 +282,27 @@ export default function PanelistStockTab() {
                   min="0"
                   step="1"
                   className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  placeholder="Enter new absolute quantity"
+                  placeholder={t('hc.panelist_stock_tab.new_qty_placeholder')}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Adjustment Note <span className="text-red-500">*</span>
+                  {t('hc.panelist_stock_tab.adjustment_note')} <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   value={adjustNote}
                   onChange={(e) => setAdjustNote(e.target.value)}
                   rows={3}
                   className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  placeholder="Explain the reason for this adjustment..."
+                  placeholder={t('hc.panelist_stock_tab.note_placeholder')}
                 />
               </div>
 
               {adjustQuantity && (
                 <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
                   <p className="text-sm text-blue-800">
-                    <strong>Change:</strong> {parseInt(adjustQuantity) - selectedStock.quantity > 0 ? '+' : ''}
+                    <strong>{t('hc.panelist_stock_tab.change')}</strong> {parseInt(adjustQuantity) - selectedStock.quantity > 0 ? '+' : ''}
                     {(parseInt(adjustQuantity) - selectedStock.quantity).toLocaleString()} {selectedStock.material?.unit_measure || 'un'}
                   </p>
                 </div>
@@ -320,18 +320,18 @@ export default function PanelistStockTab() {
                 disabled={adjusting}
                 className="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
               >
-                Cancel
+                {t('hc.panelist_stock_tab.cancel')}
               </button>
               <button
                 onClick={async () => {
                   if (!adjustQuantity || !adjustNote.trim()) {
-                    alert('Please enter new quantity and adjustment note')
+                    alert(t('hc.panelist_stock_tab.enter_qty_and_note'))
                     return
                   }
 
                   const qty = parseInt(adjustQuantity)
                   if (isNaN(qty) || qty < 0) {
-                    alert('Please enter a valid quantity')
+                    alert(t('hc.panelist_stock_tab.enter_valid_qty'))
                     return
                   }
 
@@ -373,10 +373,10 @@ export default function PanelistStockTab() {
                     setSelectedStock(null)
                     setAdjustQuantity('')
                     setAdjustNote('')
-                    alert('Panelist stock adjusted successfully')
+                    alert(t('hc.panelist_stock_tab.adjusted_ok'))
                   } catch (error: any) {
                     console.error('Error adjusting panelist stock:', error)
-                    alert('Failed to adjust stock: ' + error.message)
+                    alert(t('hc.panelist_stock_tab.adjust_failed', { message: error.message }))
                   } finally {
                     setAdjusting(false)
                   }
@@ -384,7 +384,7 @@ export default function PanelistStockTab() {
                 disabled={adjusting || !adjustQuantity || !adjustNote.trim()}
                 className="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
               >
-                {adjusting ? 'Adjusting...' : 'Confirm Adjustment'}
+                {adjusting ? t('hc.panelist_stock_tab.adjusting') : t('hc.panelist_stock_tab.confirm_adjustment')}
               </button>
             </div>
           </div>

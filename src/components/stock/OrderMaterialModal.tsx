@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { X, ShoppingCart } from 'lucide-react'
+import { useTranslation } from '@/hooks/useTranslation'
 
 interface OrderMaterialModalProps {
   requirement: {
@@ -15,12 +16,13 @@ interface OrderMaterialModalProps {
 }
 
 export default function OrderMaterialModal({ requirement, onConfirm, onClose }: OrderMaterialModalProps) {
+  const { t } = useTranslation()
   const [quantity, setQuantity] = useState(requirement.net_quantity)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (quantity <= 0) {
-      alert('Quantity must be greater than 0')
+      alert(t('hc.order_material_modal.qty_gt_zero'))
       return
     }
     onConfirm(quantity)
@@ -33,7 +35,7 @@ export default function OrderMaterialModal({ requirement, onConfirm, onClose }: 
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <div className="flex items-center gap-3">
             <ShoppingCart className="h-6 w-6 text-orange-600" />
-            <h3 className="text-lg font-medium text-gray-900">Order Material</h3>
+            <h3 className="text-lg font-medium text-gray-900">{t('hc.order_material_modal.title')}</h3>
           </div>
           <button
             onClick={onClose}
@@ -59,7 +61,7 @@ export default function OrderMaterialModal({ requirement, onConfirm, onClose }: 
             {/* Quantity Input */}
             <div>
               <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-1">
-                Quantity to Order
+                {t('hc.order_material_modal.qty_to_order')}
               </label>
               <div className="flex items-center gap-2">
                 <input
@@ -77,14 +79,14 @@ export default function OrderMaterialModal({ requirement, onConfirm, onClose }: 
                 </span>
               </div>
               <p className="mt-1 text-xs text-gray-500">
-                Suggested: {requirement.net_quantity.toLocaleString()} {requirement.unit_measure} (net quantity needed)
+                {t('hc.order_material_modal.suggested', { quantity: requirement.net_quantity.toLocaleString(), unit: requirement.unit_measure })}
               </p>
             </div>
 
             {/* Info */}
             <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
               <p className="text-sm text-orange-700">
-                This will mark the requirement as "ordered" and record the quantity ordered. You can receive the PO later when materials arrive.
+                {t('hc.order_material_modal.info')}
               </p>
             </div>
           </div>
@@ -96,13 +98,13 @@ export default function OrderMaterialModal({ requirement, onConfirm, onClose }: 
               onClick={onClose}
               className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
             >
-              Cancel
+              {t('hc.order_material_modal.cancel')}
             </button>
             <button
               type="submit"
               className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
             >
-              Confirm Order
+              {t('hc.order_material_modal.confirm_order')}
             </button>
           </div>
         </form>

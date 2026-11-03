@@ -134,7 +134,7 @@ export default function ShipmentsTab() {
 
   const handleCalculate = () => {
     if (!startDate || !endDate) {
-      alert('Please select both start and end dates')
+      alert(t('hc.shipments_tab.select_both_dates'))
       return
     }
     calculate(startDate, endDate)
@@ -192,7 +192,7 @@ export default function ShipmentsTab() {
 
   const handleGenerateShipments = async () => {
     if (filteredProposedShipments.length === 0) {
-      alert('No shipments to generate')
+      alert(t('hc.shipments_tab.no_shipments_to_generate'))
       return
     }
 
@@ -203,7 +203,7 @@ export default function ShipmentsTab() {
 
     const validShipments = filteredProposedShipments.filter(ps => ps.panelist_id)
     if (validShipments.length === 0) {
-      alert('No valid shipments to generate (all nodes need assigned panelists)')
+      alert(t('hc.shipments_tab.no_valid_shipments'))
       return
     }
 
@@ -223,10 +223,10 @@ export default function ShipmentsTab() {
         })
       }
 
-      alert(`${validShipments.length} shipment(s) generated successfully as pending`)
+      alert(t('hc.shipments_tab.generated_ok', { count: validShipments.length }))
       reload()
     } catch (error: any) {
-      alert(`Error generating shipments: ${error.message}`)
+      alert(t('hc.shipments_tab.generate_error', { message: error.message }))
     }
   }
 
@@ -258,7 +258,7 @@ export default function ShipmentsTab() {
 
   const handleSendSelected = async () => {
     if (selectedShipmentIds.size === 0) {
-      alert('No shipments selected')
+      alert(t('hc.shipments_tab.none_selected'))
       return
     }
 
@@ -266,24 +266,24 @@ export default function ShipmentsTab() {
       for (const shipmentId of selectedShipmentIds) {
         await updateShipmentStatus(shipmentId, 'sent')
       }
-      alert(`${selectedShipmentIds.size} shipment(s) sent successfully`)
+      alert(t('hc.shipments_tab.sent_ok', { count: selectedShipmentIds.size }))
       reload()
       setSelectedShipmentIds(new Set())
     } catch (error: any) {
-      alert(`Error sending shipments: ${error.message}`)
+      alert(t('hc.shipments_tab.send_error', { message: error.message }))
     }
   }
 
   const handleDelete = async (shipmentId: string) => {
-    const confirmed = confirm('Are you sure you want to delete this shipment?')
+    const confirmed = confirm(t('hc.shipments_tab.confirm_delete_one'))
     if (!confirmed) return
 
     try {
       await deleteShipment(shipmentId)
-      alert('Shipment deleted successfully')
+      alert(t('hc.shipments_tab.deleted_one_ok'))
       setSelectedShipmentIds(new Set())
     } catch (error: any) {
-      alert(error?.i18nKey ? t(error.i18nKey) : `Error deleting shipment: ${error.message}`)
+      alert(error?.i18nKey ? t(error.i18nKey) : t('hc.shipments_tab.delete_one_error', { message: error.message }))
     }
   }
 
@@ -295,23 +295,23 @@ export default function ShipmentsTab() {
       return
     }
 
-    const confirmed = confirm(`Delete ${selectedShipmentIds.size} shipment(s)? This action cannot be undone.`)
+    const confirmed = confirm(t('hc.shipments_tab.confirm_delete_many', { count: selectedShipmentIds.size }))
     if (!confirmed) return
 
     try {
       for (const shipmentId of selectedShipmentIds) {
         await deleteShipment(shipmentId)
       }
-      alert(`${selectedShipmentIds.size} shipment(s) deleted successfully`)
+      alert(t('hc.shipments_tab.deleted_many_ok', { count: selectedShipmentIds.size }))
       setSelectedShipmentIds(new Set())
     } catch (error: any) {
-      alert(error?.i18nKey ? t(error.i18nKey) : `Error deleting shipments: ${error.message}`)
+      alert(error?.i18nKey ? t(error.i18nKey) : t('hc.shipments_tab.delete_many_error', { message: error.message }))
     }
   }
 
   const handleExportCSV = () => {
     if (selectedShipmentIds.size === 0) {
-      alert('Please select shipments to export')
+      alert(t('hc.shipments_tab.select_to_export'))
       return
     }
 
@@ -335,7 +335,7 @@ export default function ShipmentsTab() {
 
   const handleGeneratePackingList = () => {
     if (selectedShipmentIds.size === 0) {
-      alert('Please select shipments to generate packing list')
+      alert(t('hc.shipments_tab.select_for_packing'))
       return
     }
 
@@ -362,7 +362,7 @@ export default function ShipmentsTab() {
           >
             <div className="flex items-center gap-2">
               <Package className="h-4 w-4 text-gray-500" />
-              <span className="font-medium text-gray-900">Metrics Overview</span>
+              <span className="font-medium text-gray-900">{t('hc.shipments_tab.metrics_overview')}</span>
             </div>
             {isMetricsCollapsed ? (
               <ChevronDown className="h-4 w-4 text-gray-500" />
@@ -418,7 +418,7 @@ export default function ShipmentsTab() {
           <div className="flex items-center gap-2">
             <Filter className="h-4 w-4 text-gray-500" />
             <span className="font-medium text-gray-900">{t('stock.calculate_generate_shipments')}</span>
-            <SmartTooltip content="Use this section to calculate material requirements for panelists based on allocation plans, then generate shipments to send materials to them" />
+            <SmartTooltip content={t('hc.shipments_tab.tt_calc')} />
           </div>
           <span className="text-sm text-gray-500">
             {isFiltersCollapsed ? t('common.show') : t('common.hide')}
@@ -431,8 +431,8 @@ export default function ShipmentsTab() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
-                  Start Date
-                  <SmartTooltip content="Start date for allocation plans to include" />
+                  {t('hc.shipments_tab.start_date')}
+                  <SmartTooltip content={t('hc.shipments_tab.tt_start')} />
                 </label>
                 <input
                   type="date"
@@ -444,8 +444,8 @@ export default function ShipmentsTab() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
-                  End Date
-                  <SmartTooltip content="End date for allocation plans to include" />
+                  {t('hc.shipments_tab.end_date')}
+                  <SmartTooltip content={t('hc.shipments_tab.tt_end')} />
                 </label>
                 <input
                   type="date"
@@ -458,7 +458,7 @@ export default function ShipmentsTab() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
                   {t('common.material')}
-                  <SmartTooltip content="Filter by specific material" />
+                  <SmartTooltip content={t('hc.shipments_tab.tt_filter_material')} />
                 </label>
                 <select
                   value={selectedMaterialId}
@@ -475,7 +475,7 @@ export default function ShipmentsTab() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
                   {t('stock.node')}
-                  <SmartTooltip content="Filter by specific node" />
+                  <SmartTooltip content={t('hc.shipments_tab.tt_filter_node')} />
                 </label>
                 <select
                   value={selectedNodeId}
@@ -495,7 +495,7 @@ export default function ShipmentsTab() {
               <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
                 <Calendar className="h-4 w-4" />
                 {t('stock.quick_month_selection')}
-                <SmartTooltip content="Click a month to set start/end dates for that entire month" />
+                <SmartTooltip content={t('hc.shipments_tab.tt_month')} />
               </label>
               <div className="flex items-center gap-2">
                 <select
@@ -514,7 +514,7 @@ export default function ShipmentsTab() {
                       onClick={() => handleMonthSelect(selectedYear, month.num)}
                       className="px-2 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                      {month.name}
+                      {t(`hc.shipments_tab.month_${month.name.toLowerCase()}`)}
                     </button>
                   ))}
                   <button
@@ -559,21 +559,7 @@ export default function ShipmentsTab() {
                     <Package className="h-4 w-4 mr-2" />
                     {t('stock.generate_shipments', { count: filteredProposedShipments.filter(ps => ps.panelist_id).length })}
                   </button>
-                  <SmartTooltip content="Generate shipments for panelists based on allocation plans. The system will:
-
-1. Analyze all allocation plans in the date range
-2. Group materials by panelist (based on origin_panelist_id)
-3. Calculate quantity needed per material per panelist
-4. Discount panelist stock (if panelist already has the material)
-5. Create shipment records with status 'pending'
-
-Unification Logic:
-- If a pending shipment already exists for the same panelist, it will be unified
-- All materials for that panelist will be consolidated into one shipment
-- Quantities will be summed
-- The expected date will be updated to the most recent
-
-Note: Only panelists with assigned allocation plans will have shipments generated">
+                  <SmartTooltip content={t('hc.shipments_tab.tt_generate')}>
                     <Info className="h-5 w-5 text-green-500 cursor-help" />
                   </SmartTooltip>
                 </>
@@ -608,14 +594,14 @@ Note: Only panelists with assigned allocation plans will have shipments generate
       <div className="bg-white border border-gray-200 rounded-lg">
         <div className="px-4 py-3 border-b border-gray-200 flex items-center gap-2">
           <h3 className="text-lg font-medium text-gray-900">{t('stock.shipments')}</h3>
-          <SmartTooltip content="View and manage all generated shipments. Filter by status, panelist, or material to find specific shipments. Pending shipments can be confirmed for sending." />
+          <SmartTooltip content={t('hc.shipments_tab.tt_shipments')} />
         </div>
         <div className="px-4 py-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
                 {t('common.status')}
-                <SmartTooltip content="Filter shipments by status" />
+                <SmartTooltip content={t('hc.shipments_tab.tt_filter_status')} />
               </label>
               <select
                 value={historyStatusFilter}
@@ -633,7 +619,7 @@ Note: Only panelists with assigned allocation plans will have shipments generate
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
                 {t('stock.panelist')}
-                <SmartTooltip content="Filter shipments by panelist" />
+                <SmartTooltip content={t('hc.shipments_tab.tt_filter_panelist')} />
               </label>
               <select
                 value={historyPanelistFilter}
@@ -650,7 +636,7 @@ Note: Only panelists with assigned allocation plans will have shipments generate
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
                 {t('common.material')}
-                <SmartTooltip content="Filter shipments containing specific material" />
+                <SmartTooltip content={t('hc.shipments_tab.tt_filter_has_material')} />
               </label>
               <select
                 value={historyMaterialFilter}
@@ -704,21 +690,21 @@ Note: Only panelists with assigned allocation plans will have shipments generate
                   className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
                   <Download className="h-4 w-4 mr-1" />
-                  Export CSV
+                  {t('hc.shipments_tab.export_csv')}
                 </button>
                 <button
                   onClick={handleGeneratePackingList}
                   className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
                   <FileText className="h-4 w-4 mr-1" />
-                  Packing List PDF
+                  {t('hc.shipments_tab.packing_list_pdf')}
                 </button>
                 <button
                   onClick={handleDeleteSelected}
                   className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                 >
                   <Trash2 className="h-4 w-4 mr-1" />
-                  Delete {selectedShipmentIds.size} Selected
+                  {t('hc.shipments_tab.delete_selected', { count: selectedShipmentIds.size })}
                 </button>
               </div>
             )}
@@ -738,7 +724,7 @@ Note: Only panelists with assigned allocation plans will have shipments generate
                       ) : (
                         <Square className="h-4 w-4" />
                       )}
-                      Select
+                      {t('hc.shipments_tab.select')}
                     </button>
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -775,7 +761,7 @@ Note: Only panelists with assigned allocation plans will have shipments generate
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">
-                        {shipment.shipment_number || 'N/A'}
+                        {shipment.shipment_number || t('hc.shipments_tab.na')}
                       </div>
                       <div
                         className={`text-xs font-medium ${
@@ -791,10 +777,10 @@ Note: Only panelists with assigned allocation plans will have shipments generate
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm font-medium text-gray-900">
-                        {shipment.panelist?.name || 'No panelist'}
+                        {shipment.panelist?.name || t('hc.shipments_tab.no_panelist')}
                       </div>
                       <div className="text-sm text-gray-500">
-                        {shipment.panelist?.panelist_code || 'N/A'}
+                        {shipment.panelist?.panelist_code || t('hc.shipments_tab.na')}
                       </div>
                     </td>
                     <td className="px-6 py-4">
@@ -818,7 +804,7 @@ Note: Only panelists with assigned allocation plans will have shipments generate
                                       setShowEditModal(true)
                                     }}
                                     className="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-700 bg-blue-100 hover:bg-blue-200 rounded"
-                                    title="Edit quantity"
+                                    title={t('hc.shipments_tab.edit_quantity')}
                                   >
                                     <Edit className="h-3 w-3" />
                                   </button>
@@ -827,7 +813,7 @@ Note: Only panelists with assigned allocation plans will have shipments generate
                             ))}
                           </div>
                         ) : (
-                          'No items'
+                          t('hc.shipments_tab.no_items')
                         )}
                       </div>
                     </td>
@@ -867,7 +853,7 @@ Note: Only panelists with assigned allocation plans will have shipments generate
       {/* Empty States */}
       {!loadingProposed && !loadingShipments && pendingShipments.length === 0 && filteredProposedShipments.length === 0 && (
         <div className="text-center py-12 text-gray-500">
-          Select date range and click "Calculate" to generate shipments from allocation plans
+          {t('hc.shipments_tab.empty_hint')}
         </div>
       )}
 

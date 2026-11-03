@@ -63,7 +63,7 @@ export function RegisterReceptionModal({ detail, panelists, onClose, onRegister 
       })
       onClose()
     } catch (error: any) {
-      alert(`Error: ${error.message}`)
+      alert(t('hc.register_reception_modal.error_message', { message: error.message }))
     } finally {
       setSaving(false)
     }
@@ -92,22 +92,22 @@ export function RegisterReceptionModal({ detail, panelists, onClose, onRegister 
               <div className="grid grid-cols-2 gap-2 mb-2">
                 <div>
                   <span className="text-gray-600">{t('allocation_plans.origin')}</span>
-                  <p className="font-medium">{detail.origin_node?.auto_id || 'N/A'}</p>
+                  <p className="font-medium">{detail.origin_node?.auto_id || t('hc.register_reception_modal.na')}</p>
                 </div>
                 <div>
                   <span className="text-gray-600">{t('allocation_plans.destination')}</span>
-                  <p className="font-medium">{detail.destination_node?.auto_id || 'N/A'}</p>
+                  <p className="font-medium">{detail.destination_node?.auto_id || t('hc.register_reception_modal.na')}</p>
                 </div>
               </div>
               {detail.tag_id && (
                 <div>
-                  <span className="text-gray-600">Tag ID:</span>
+                  <span className="text-gray-600">{t('hc.register_reception_modal.tag_id')}</span>
                   <p className="font-medium">{detail.tag_id}</p>
                 </div>
               )}
               {detail.sent_at && (
                 <div>
-                  <span className="text-gray-600">Sent at:</span>
+                  <span className="text-gray-600">{t('hc.register_reception_modal.sent_at')}</span>
                   <p className="font-medium">
                     {formatInTz(detail.sent_at, accountTimezone)}
                   </p>
@@ -118,7 +118,7 @@ export function RegisterReceptionModal({ detail, panelists, onClose, onRegister 
             {/* Received Date/Time */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Received Date & Time <span className="text-red-500">*</span>
+                {t('hc.register_reception_modal.received_datetime')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="datetime-local"
@@ -133,7 +133,7 @@ export function RegisterReceptionModal({ detail, panelists, onClose, onRegister 
             {/* Received By Panelist */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Registered By <span className="text-red-500">*</span>
+                {t('hc.register_reception_modal.registered_by')} <span className="text-red-500">*</span>
               </label>
               <div className="text-sm text-gray-600 mb-2">
                 {(() => {
@@ -143,7 +143,7 @@ export function RegisterReceptionModal({ detail, panelists, onClose, onRegister 
                       {destinationPanelist.name} ({destinationPanelist.panelist_code})
                     </span>
                   ) : (
-                    <span className="text-orange-600">No panelist assigned to destination node</span>
+                    <span className="text-orange-600">{t('hc.register_reception_modal.no_panelist')}</span>
                   )
                 })()}
               </div>
@@ -164,14 +164,14 @@ export function RegisterReceptionModal({ detail, panelists, onClose, onRegister 
                 disabled={saving}
                 className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:bg-gray-100"
               >
-                Cancel
+                {t('hc.register_reception_modal.cancel')}
               </button>
               <button
                 type="submit"
                 disabled={saving || !receivedByPanelistId}
                 className="flex-1 px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700 disabled:bg-gray-300"
               >
-                {saving ? 'Registering...' : 'Register Reception'}
+                {saving ? t('hc.register_reception_modal.registering') : t('hc.register_reception_modal.register')}
               </button>
             </div>
           </form>

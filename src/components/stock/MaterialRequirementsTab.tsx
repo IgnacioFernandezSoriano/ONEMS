@@ -34,10 +34,10 @@ export default function MaterialRequirementsTab() {
 
   // Month names
   const months = [
-    { name: 'Jan', num: 1 }, { name: 'Feb', num: 2 }, { name: 'Mar', num: 3 },
-    { name: 'Apr', num: 4 }, { name: 'May', num: 5 }, { name: 'Jun', num: 6 },
-    { name: 'Jul', num: 7 }, { name: 'Aug', num: 8 }, { name: 'Sep', num: 9 },
-    { name: 'Oct', num: 10 }, { name: 'Nov', num: 11 }, { name: 'Dec', num: 12 }
+    { name: t('hc.material_requirements_tab.month_jan'), num: 1 }, { name: t('hc.material_requirements_tab.month_feb'), num: 2 }, { name: t('hc.material_requirements_tab.month_mar'), num: 3 },
+    { name: t('hc.material_requirements_tab.month_apr'), num: 4 }, { name: t('hc.material_requirements_tab.month_may'), num: 5 }, { name: t('hc.material_requirements_tab.month_jun'), num: 6 },
+    { name: t('hc.material_requirements_tab.month_jul'), num: 7 }, { name: t('hc.material_requirements_tab.month_aug'), num: 8 }, { name: t('hc.material_requirements_tab.month_sep'), num: 9 },
+    { name: t('hc.material_requirements_tab.month_oct'), num: 10 }, { name: t('hc.material_requirements_tab.month_nov'), num: 11 }, { name: t('hc.material_requirements_tab.month_dec'), num: 12 }
   ]
 
   // Generate year range (current year to current year + 10)
@@ -181,7 +181,7 @@ export default function MaterialRequirementsTab() {
   const handleMarkSelectedAsOrdered = async () => {
     if (selectedRequirements.size === 0) return
     
-    const confirmed = confirm(`Mark ${selectedRequirements.size} requirement(s) as ordered?`)
+    const confirmed = confirm(t('hc.material_requirements_tab.confirm_mark_ordered', { count: selectedRequirements.size }))
     if (!confirmed) return
 
     for (const reqId of selectedRequirements) {
@@ -192,31 +192,31 @@ export default function MaterialRequirementsTab() {
   }
 
   const handleDelete = async (requirementId: string) => {
-    const confirmed = confirm('Are you sure you want to delete this requirement?')
+    const confirmed = confirm(t('hc.material_requirements_tab.confirm_delete'))
     if (!confirmed) return
 
     try {
       await deleteRequirement(requirementId)
-      alert('Requirement deleted successfully')
+      alert(t('hc.material_requirements_tab.deleted_ok'))
     } catch (error: any) {
-      alert(`Error deleting requirement: ${error.message}`)
+      alert(t('hc.material_requirements_tab.error_deleting', { message: error.message }))
     }
   }
 
   const handleDeleteSelected = async () => {
     if (selectedRequirements.size === 0) return
     
-    const confirmed = confirm(`Delete ${selectedRequirements.size} requirement(s)? This action cannot be undone.`)
+    const confirmed = confirm(t('hc.material_requirements_tab.confirm_delete_selected', { count: selectedRequirements.size }))
     if (!confirmed) return
 
     try {
       for (const reqId of selectedRequirements) {
         await deleteRequirement(reqId)
       }
-      alert(`${selectedRequirements.size} requirement(s) deleted successfully`)
+      alert(t('hc.material_requirements_tab.deleted_selected_ok', { count: selectedRequirements.size }))
       setSelectedRequirements(new Set())
     } catch (error: any) {
-      alert(`Error deleting requirements: ${error.message}`)
+      alert(t('hc.material_requirements_tab.error_deleting_many', { message: error.message }))
     }
   }
 
@@ -261,9 +261,15 @@ export default function MaterialRequirementsTab() {
       received: 'bg-green-100 text-green-800'
     }
     
+    const statusLabels: Record<string, string> = {
+      pending: t('stock.pending'),
+      ordered: t('stock.ordered'),
+      received: t('stock.received')
+    }
+
     return (
       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${styles[status as keyof typeof styles] || styles.pending}`}>
-        {status.charAt(0).toUpperCase() + status.slice(1)}
+        {statusLabels[status] ?? status.charAt(0).toUpperCase() + status.slice(1)}
       </span>
     )
   }
@@ -338,7 +344,7 @@ export default function MaterialRequirementsTab() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
                   {t('common.start_date')}
-                  <SmartTooltip content="Select the start date of the period for which you want to calculate material requirements based on allocation plans" />
+                  <SmartTooltip content={t('hc.material_requirements_tab.tip_start_date')} />
                 </label>
                 <input
                   type="date"
@@ -351,7 +357,7 @@ export default function MaterialRequirementsTab() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
                   {t('common.end_date')}
-                  <SmartTooltip content="Select the end date of the period. The system will analyze all allocation plans within this date range to determine material needs" />
+                  <SmartTooltip content={t('hc.material_requirements_tab.tip_end_date')} />
                 </label>
                 <input
                   type="date"
@@ -364,7 +370,7 @@ export default function MaterialRequirementsTab() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
                   {t('common.material')}
-                  <SmartTooltip content="Filter calculated requirements by a specific material to focus on individual items" />
+                  <SmartTooltip content={t('hc.material_requirements_tab.tip_material')} />
                 </label>
                 <select
                   value={selectedMaterialId}
@@ -381,7 +387,7 @@ export default function MaterialRequirementsTab() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
                   {t('common.status')}
-                  <SmartTooltip content="Filter requirements by their current status: Pending (not yet ordered), Ordered (purchase order placed), or Received (materials in stock)" />
+                  <SmartTooltip content={t('hc.material_requirements_tab.tip_status')} />
                 </label>
                 <select
                   value={selectedStatus}
@@ -401,7 +407,7 @@ export default function MaterialRequirementsTab() {
               <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
                 <Calendar className="h-4 w-4" />
                 {t('stock.quick_month_selection')}
-                <SmartTooltip content="Click any month button to automatically set the start and end dates for that entire month. This is the fastest way to calculate requirements for a specific month." />
+                <SmartTooltip content={t('hc.material_requirements_tab.tip_months')} />
               </label>
               <div className="flex items-center gap-2">
                 <select
@@ -427,19 +433,19 @@ export default function MaterialRequirementsTab() {
                     onClick={handleFirstSemesterSelect}
                     className="px-3 py-1 text-sm font-medium rounded-md border border-green-300 bg-green-50 hover:bg-green-100 hover:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
                   >
-                    1st Semester
+                    {t('hc.material_requirements_tab.first_semester')}
                   </button>
                   <button
                     onClick={handleSecondSemesterSelect}
                     className="px-3 py-1 text-sm font-medium rounded-md border border-teal-300 bg-teal-50 hover:bg-teal-100 hover:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
                   >
-                    2nd Semester
+                    {t('hc.material_requirements_tab.second_semester')}
                   </button>
                   <button
                     onClick={handleYearSelect}
                     className="px-3 py-1 text-sm font-medium rounded-md border border-purple-300 bg-purple-50 hover:bg-purple-100 hover:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
                   >
-                    Year
+                    {t('hc.material_requirements_tab.year')}
                   </button>
                 </div>
               </div>
@@ -455,21 +461,23 @@ export default function MaterialRequirementsTab() {
                 <Package className="h-4 w-4 mr-2" />
                 {loadingRequirements ? t('stock.calculating') : t('stock.calculate_requirements')}
               </button>
-              <SmartTooltip content="Calculate material requirements for the selected period. The system will:
-
-1. Analyze all allocation plans in the date range
-2. Calculate total material needed per product
-3. Discount panelist stock (if panelist already has the material)
-4. Discount regulator stock
-5. Discount already ordered quantities (in transit)
-6. Add safety stock if current stock is below minimum
-
-Formula: Net Quantity = (Needed - Panelist Stock - Regulator Stock - Ordered) + Safety Stock
-
-Unification Logic:
-- If multiple pending requirements exist for the same material, they will be unified into one record
-- The period will span from the earliest start date to the latest end date
-- Quantities will be summed">
+              <SmartTooltip content={[
+                t('hc.material_requirements_tab.calc_tip_intro'),
+                '',
+                t('hc.material_requirements_tab.calc_tip_s1'),
+                t('hc.material_requirements_tab.calc_tip_s2'),
+                t('hc.material_requirements_tab.calc_tip_s3'),
+                t('hc.material_requirements_tab.calc_tip_s4'),
+                t('hc.material_requirements_tab.calc_tip_s5'),
+                t('hc.material_requirements_tab.calc_tip_s6'),
+                '',
+                t('hc.material_requirements_tab.calc_tip_formula'),
+                '',
+                t('hc.material_requirements_tab.calc_tip_unif_title'),
+                t('hc.material_requirements_tab.calc_tip_unif1'),
+                t('hc.material_requirements_tab.calc_tip_unif2'),
+                t('hc.material_requirements_tab.calc_tip_unif3')
+              ].join('\n')}>
                 <Info className="h-5 w-5 text-blue-500 cursor-help" />
               </SmartTooltip>
 
@@ -478,7 +486,7 @@ Unification Logic:
                 className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 <RotateCcw className="h-4 w-4 mr-1" />
-                Reset
+                {t('hc.material_requirements_tab.reset')}
               </button>
             </div>
           </div>
@@ -628,7 +636,7 @@ Unification Logic:
                             className="inline-flex items-center px-2 py-1 border border-transparent text-xs font-medium rounded text-green-700 bg-green-100 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                           >
                             <Package className="h-3 w-3 mr-1" />
-                            Receive
+                            {t('hc.material_requirements_tab.receive')}
                           </button>
                         )}
                         <button

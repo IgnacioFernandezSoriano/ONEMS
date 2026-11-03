@@ -122,9 +122,9 @@ export function DeliveryStandards() {
       setShowBulkEdit(false)
       setSelectedIds(new Set())
       setBulkEditData({ standard_time: '', success_percentage: '', time_unit: 'hours', warning_threshold: '', critical_threshold: '', threshold_type: 'relative' })
-      alert(`Updated ${selectedIds.size} records successfully`)
+      alert(t('hc.delivery_standards.updated_records', { count: selectedIds.size }))
     } catch (error: any) {
-      alert(`Error: ${error.message}`)
+      alert(t('hc.delivery_standards.error_msg', { message: error.message }))
     }
   }
 
@@ -134,14 +134,14 @@ export function DeliveryStandards() {
       return
     }
 
-    if (!confirm(`Delete ${selectedIds.size} selected records?`)) return
+    if (!confirm(t('hc.delivery_standards.confirm_delete_selected', { count: selectedIds.size }))) return
 
     try {
       await deleteMultiple(Array.from(selectedIds))
       setSelectedIds(new Set())
-      alert(`Deleted ${selectedIds.size} records successfully`)
+      alert(t('hc.delivery_standards.deleted_records', { count: selectedIds.size }))
     } catch (error: any) {
-      alert(`Error: ${error.message}`)
+      alert(t('hc.delivery_standards.error_msg', { message: error.message }))
     }
   }
 
@@ -218,7 +218,7 @@ export function DeliveryStandards() {
       setShowCreateModal(false)
       alert(t('delivery_standards.created'))
     } catch (error: any) {
-      alert(`Error: ${error.message}`)
+      alert(t('hc.delivery_standards.error_msg', { message: error.message }))
       throw error
     }
   }
@@ -231,7 +231,7 @@ export function DeliveryStandards() {
       setEditingStandard(null)
       alert(t('delivery_standards.updated'))
     } catch (error: any) {
-      alert(`Error: ${error.message}`)
+      alert(t('hc.delivery_standards.error_msg', { message: error.message }))
       throw error
     }
   }
@@ -242,7 +242,7 @@ export function DeliveryStandards() {
       await deleteStandard(id)
       alert(t('delivery_standards.deleted'))
     } catch (error: any) {
-      alert(`Error: ${error.message}`)
+      alert(t('hc.delivery_standards.error_msg', { message: error.message }))
     }
   }
 
@@ -254,7 +254,7 @@ export function DeliveryStandards() {
     try {
       await updateStandard(id, { [field]: value })
     } catch (error: any) {
-      alert(`Error: ${error.message}`)
+      alert(t('hc.delivery_standards.error_msg', { message: error.message }))
     }
   }
 
@@ -288,14 +288,14 @@ export function DeliveryStandards() {
               <div className="absolute left-0 top-6 w-80 bg-gray-900 text-white text-sm rounded-lg p-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 shadow-xl">
                 <div className="font-semibold mb-2">{ t('common.about')} { t('delivery_standards.title')}</div>
                 <div className="space-y-2 text-gray-200">
-                  <p><strong>Purpose:</strong> Define expected delivery times (J+K) and success rates between city pairs for each carrier-product combination.</p>
-                  <p><strong>Key Metrics:</strong></p>
+                  <p><strong>{t('hc.delivery_standards.about_purpose_label')}</strong> {t('hc.delivery_standards.about_purpose')}</p>
+                  <p><strong>{t('hc.delivery_standards.about_key_metrics')}</strong></p>
                   <ul className="list-disc list-inside ml-2 space-y-1">
-                    <li><strong>J+K:</strong> Standard delivery time (e.g., J+2 means 2 days from pickup)</li>
-                    <li><strong>Std %:</strong> Target percentage of deliveries meeting the J+K standard</li>
-                    <li><strong>Thresholds:</strong> Warning and critical deviation levels for performance monitoring</li>
+                    <li><strong>J+K:</strong> {t('hc.delivery_standards.about_jk_desc')}</li>
+                    <li><strong>Std %:</strong> {t('hc.delivery_standards.about_std_desc')}</li>
+                    <li><strong>{t('hc.delivery_standards.about_thresholds_label')}</strong> {t('hc.delivery_standards.about_thresholds_desc')}</li>
                   </ul>
-                  <p><strong>Usage:</strong> These standards are used for compliance reporting, carrier performance evaluation, and SLA management.</p>
+                  <p><strong>{t('hc.delivery_standards.about_usage_label')}</strong> {t('hc.delivery_standards.about_usage_desc')}</p>
                 </div>
                 <div className="absolute -top-1 left-4 w-2 h-2 bg-gray-900 transform rotate-45"></div>
               </div>
@@ -303,7 +303,7 @@ export function DeliveryStandards() {
           </div>
         </div>
         <p className="text-gray-600 mt-2">
-          Manage delivery time standards between cities for each carrier and product
+          {t('hc.delivery_standards.subtitle')}
         </p>
       </div>
 
@@ -313,7 +313,7 @@ export function DeliveryStandards() {
           <div className="flex items-center justify-between">
             <div>
               <div className="text-3xl font-bold text-gray-900">{standards.length}</div>
-              <div className="text-xs text-gray-500 mt-1">Total Standards</div>
+              <div className="text-xs text-gray-500 mt-1">{t('hc.delivery_standards.total_standards')}</div>
             </div>
             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
               <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -371,12 +371,12 @@ export function DeliveryStandards() {
       {showBulkEdit && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <h3 className="font-medium text-blue-900 mb-3">
-            Bulk Edit {selectedIds.size} Records
+            {t('hc.delivery_standards.bulk_edit_records', { count: selectedIds.size })}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Standard Time
+                {t('hc.delivery_standards.standard_time')}
               </label>
               <input
                 type="number"
@@ -386,12 +386,12 @@ export function DeliveryStandards() {
                   setBulkEditData({ ...bulkEditData, standard_time: e.target.value })
                 }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                placeholder="e.g., 24"
+                placeholder={t('hc.delivery_standards.eg_value', { value: 24 })}
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Success %
+                {t('hc.delivery_standards.success_pct')}
               </label>
               <input
                 type="number"
@@ -403,11 +403,11 @@ export function DeliveryStandards() {
                   setBulkEditData({ ...bulkEditData, success_percentage: e.target.value })
                 }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                placeholder="e.g., 85"
+                placeholder={t('hc.delivery_standards.eg_value', { value: 85 })}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Time Unit</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('hc.delivery_standards.time_unit')}</label>
               <select
                 value={bulkEditData.time_unit}
                 onChange={(e) =>
@@ -424,7 +424,7 @@ export function DeliveryStandards() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Warning Threshold (%)
+                {t('hc.delivery_standards.warning_threshold')}
               </label>
               <input
                 type="number"
@@ -436,12 +436,12 @@ export function DeliveryStandards() {
                   setBulkEditData({ ...bulkEditData, warning_threshold: e.target.value })
                 }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                placeholder="e.g., 10"
+                placeholder={t('hc.delivery_standards.eg_value', { value: 10 })}
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Critical Threshold (%)
+                {t('hc.delivery_standards.critical_threshold')}
               </label>
               <input
                 type="number"
@@ -453,26 +453,26 @@ export function DeliveryStandards() {
                   setBulkEditData({ ...bulkEditData, critical_threshold: e.target.value })
                 }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                placeholder="e.g., 20"
+                placeholder={t('hc.delivery_standards.eg_value', { value: 20 })}
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
-                Threshold Type
+                {t('hc.delivery_standards.threshold_type')}
                 <span className="group relative">
                   <svg className="w-4 h-4 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                   </svg>
                   <div className="invisible group-hover:visible absolute z-10 w-80 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg -top-2 left-6">
-                    <div className="font-semibold mb-2">Tipo de Cálculo de Thresholds:</div>
+                    <div className="font-semibold mb-2">{t('hc.delivery_standards.threshold_calc_title')}</div>
                     <div className="space-y-2">
                       <div>
-                        <span className="font-semibold text-blue-300">Relativo:</span> Los thresholds se calculan como % del Success %.<br/>
-                        <span className="text-gray-300">Ejemplo: Success=95%, Warning=5% → Límite=90.25% (95% - 95%×5%)</span>
+                        <span className="font-semibold text-blue-300">{t('hc.delivery_standards.relative_label')}</span> {t('hc.delivery_standards.relative_desc')}<br/>
+                        <span className="text-gray-300">{t('hc.delivery_standards.relative_example')}</span>
                       </div>
                       <div>
-                        <span className="font-semibold text-green-300">Absoluto:</span> Los thresholds se calculan como % del 100%.<br/>
-                        <span className="text-gray-300">Ejemplo: Success=95%, Warning=10% → Límite=90% (100% - 10%)</span>
+                        <span className="font-semibold text-green-300">{t('hc.delivery_standards.absolute_label')}</span> {t('hc.delivery_standards.absolute_desc')}<br/>
+                        <span className="text-gray-300">{t('hc.delivery_standards.absolute_example')}</span>
                       </div>
                     </div>
                   </div>
@@ -488,17 +488,17 @@ export function DeliveryStandards() {
                 }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
               >
-                <option value="relative">Relativo (% del Success %)</option>
-                <option value="absolute">Absoluto (% del 100%)</option>
+                <option value="relative">{t('hc.delivery_standards.relative_option')}</option>
+                <option value="absolute">{t('hc.delivery_standards.absolute_option')}</option>
               </select>
             </div>
           </div>
           <div className="flex items-end gap-2 mt-4">
             <Button onClick={handleBulkUpdate} className="flex-1">
-              Apply
+              {t('hc.delivery_standards.apply')}
             </Button>
             <Button variant="secondary" onClick={() => setShowBulkEdit(false)}>
-              Cancel
+              {t('hc.delivery_standards.cancel')}
             </Button>
           </div>
         </div>
@@ -511,7 +511,7 @@ export function DeliveryStandards() {
             <button
               onClick={() => setShowFilters(!showFilters)}
               className="p-1 hover:bg-gray-100 rounded transition-colors"
-              title={showFilters ? "Collapse filters" : "Expand filters"}
+              title={showFilters ? t('hc.delivery_standards.collapse_filters') : t('hc.delivery_standards.expand_filters')}
             >
               {showFilters ? (
                 <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -529,23 +529,23 @@ export function DeliveryStandards() {
             <h3 className="text-lg font-semibold text-gray-900">{t('stock.filters')}</h3>
             {(filters.carrier_id || filters.product_id || filters.origin_city_id || filters.destination_city_id || filters.origin_classification || filters.destination_classification || filters.pending_only) && (
               <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">
-                Active
+                {t('hc.delivery_standards.active')}
               </span>
             )}
           </div>
           <div className="flex items-center gap-2">
-            <Button onClick={() => setShowCreateModal(true)}>+ Create Standard</Button>
-            <Button onClick={() => setShowGenerateModal(true)}>⚡ Generate Combinations</Button>
+            <Button onClick={() => setShowCreateModal(true)}>+ {t('hc.delivery_standards.create_standard')}</Button>
+            <Button onClick={() => setShowGenerateModal(true)}>⚡ {t('hc.delivery_standards.generate_combinations')}</Button>
             {selectedIds.size > 0 && (
               <>
                 <Button variant="secondary" onClick={() => setShowBulkEdit(!showBulkEdit)}>
-                  ✏️ Bulk Edit ({selectedIds.size})
+                  ✏️ {t('hc.delivery_standards.bulk_edit')} ({selectedIds.size})
                 </Button>
                 <Button variant="secondary" onClick={handleBulkDelete}>
-                  🗑️ Delete Selected
+                  🗑️ {t('hc.delivery_standards.delete_selected')}
                 </Button>
                 <Button variant="secondary" onClick={handleExportCSV}>
-                  📥 Export CSV ({selectedIds.size})
+                  📥 {t('hc.delivery_standards.export_csv')} ({selectedIds.size})
                 </Button>
               </>
             )}
@@ -560,12 +560,12 @@ export function DeliveryStandards() {
                 pending_only: false,
               })}
               className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-              title="Reset all filters"
+              title={t('hc.delivery_standards.reset_all_filters')}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
-              Reset
+              {t('hc.delivery_standards.reset')}
             </button>
           </div>
         </div>
@@ -575,13 +575,13 @@ export function DeliveryStandards() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
             <label className="flex items-center gap-1 text-sm font-medium text-gray-700 mb-1">
-              Carrier
+              {t('hc.delivery_standards.carrier')}
               <span className="group relative">
                 <svg className="w-3 h-3 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                 </svg>
                 <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
-                  Filter standards by specific carrier. Shows only standards for the selected carrier.
+                  {t('hc.delivery_standards.f_carrier_tip')}
                 </div>
               </span>
             </label>
@@ -590,7 +590,7 @@ export function DeliveryStandards() {
               onChange={(e) => setFilters({ ...filters, carrier_id: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
             >
-              <option value="">All Carriers</option>
+              <option value="">{t('hc.delivery_standards.all_carriers')}</option>
               {carriers.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
@@ -600,13 +600,13 @@ export function DeliveryStandards() {
           </div>
           <div>
             <label className="flex items-center gap-1 text-sm font-medium text-gray-700 mb-1">
-              Product
+              {t('hc.delivery_standards.product')}
               <span className="group relative">
                 <svg className="w-3 h-3 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                 </svg>
                 <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
-                  Filter standards by carrier product/service type. Shows only standards for the selected product.
+                  {t('hc.delivery_standards.f_product_tip')}
                 </div>
               </span>
             </label>
@@ -615,7 +615,7 @@ export function DeliveryStandards() {
               onChange={(e) => setFilters({ ...filters, product_id: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
             >
-              <option value="">All Products</option>
+              <option value="">{t('hc.delivery_standards.all_products')}</option>
               {products.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.description}
@@ -625,13 +625,13 @@ export function DeliveryStandards() {
           </div>
           <div>
             <label className="flex items-center gap-1 text-sm font-medium text-gray-700 mb-1">
-              Origin City
+              {t('hc.delivery_standards.origin_city')}
               <span className="group relative">
                 <svg className="w-3 h-3 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                 </svg>
                 <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
-                  Filter standards by origin city (where packages are picked up). Shows only routes starting from the selected city.
+                  {t('hc.delivery_standards.f_origin_tip')}
                 </div>
               </span>
             </label>
@@ -640,7 +640,7 @@ export function DeliveryStandards() {
               onChange={(e) => setFilters({ ...filters, origin_city_id: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
             >
-              <option value="">All Cities</option>
+              <option value="">{t('hc.delivery_standards.all_cities')}</option>
               {cities.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
@@ -650,13 +650,13 @@ export function DeliveryStandards() {
           </div>
           <div>
             <label className="flex items-center gap-1 text-sm font-medium text-gray-700 mb-1">
-              Destination City
+              {t('hc.delivery_standards.destination_city')}
               <span className="group relative">
                 <svg className="w-3 h-3 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                 </svg>
                 <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
-                  Filter standards by destination city (where packages are delivered). Shows only routes ending in the selected city.
+                  {t('hc.delivery_standards.f_dest_tip')}
                 </div>
               </span>
             </label>
@@ -665,7 +665,7 @@ export function DeliveryStandards() {
               onChange={(e) => setFilters({ ...filters, destination_city_id: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
             >
-              <option value="">All Cities</option>
+              <option value="">{t('hc.delivery_standards.all_cities')}</option>
               {cities.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
@@ -675,13 +675,13 @@ export function DeliveryStandards() {
           </div>
           <div>
             <label className="flex items-center gap-1 text-sm font-medium text-gray-700 mb-1">
-              Origin Type
+              {t('hc.delivery_standards.origin_type')}
               <span className="group relative">
                 <svg className="w-3 h-3 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                 </svg>
                 <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
-                  Filter by origin city classification (A, B, or C). Shows only routes starting from cities of the selected type.
+                  {t('hc.delivery_standards.f_origin_type_tip')}
                 </div>
               </span>
             </label>
@@ -692,21 +692,21 @@ export function DeliveryStandards() {
               }
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
             >
-              <option value="">All Types</option>
-              <option value="A">Type A</option>
-              <option value="B">Type B</option>
-              <option value="C">Type C</option>
+              <option value="">{t('hc.delivery_standards.all_types')}</option>
+              <option value="A">{t('hc.delivery_standards.type_letter', { type: 'A' })}</option>
+              <option value="B">{t('hc.delivery_standards.type_letter', { type: 'B' })}</option>
+              <option value="C">{t('hc.delivery_standards.type_letter', { type: 'C' })}</option>
             </select>
           </div>
           <div>
             <label className="flex items-center gap-1 text-sm font-medium text-gray-700 mb-1">
-              Destination Type
+              {t('hc.delivery_standards.destination_type')}
               <span className="group relative">
                 <svg className="w-3 h-3 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                 </svg>
                 <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
-                  Filter by destination city classification (A, B, or C). Shows only routes ending in cities of the selected type.
+                  {t('hc.delivery_standards.f_dest_type_tip')}
                 </div>
               </span>
             </label>
@@ -717,10 +717,10 @@ export function DeliveryStandards() {
               }
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
             >
-              <option value="">All Types</option>
-              <option value="A">Type A</option>
-              <option value="B">Type B</option>
-              <option value="C">Type C</option>
+              <option value="">{t('hc.delivery_standards.all_types')}</option>
+              <option value="A">{t('hc.delivery_standards.type_letter', { type: 'A' })}</option>
+              <option value="B">{t('hc.delivery_standards.type_letter', { type: 'B' })}</option>
+              <option value="C">{t('hc.delivery_standards.type_letter', { type: 'C' })}</option>
             </select>
           </div>
           <div className="flex items-end">
@@ -732,13 +732,13 @@ export function DeliveryStandards() {
                 className="rounded"
               />
               <span className="flex items-center gap-1 text-sm font-medium text-gray-700">
-                Pending Only
+                {t('hc.delivery_standards.pending_only')}
                 <span className="group relative">
                   <svg className="w-3 h-3 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                   </svg>
                   <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
-                    Show only standards that are not yet configured (missing J+K or Std % values). Useful for identifying routes that need configuration.
+                    {t('hc.delivery_standards.f_pending_tip')}
                   </div>
                 </span>
               </span>
@@ -774,7 +774,7 @@ export function DeliveryStandards() {
                         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                       </svg>
                       <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
-                        Logistics carrier responsible for delivery (e.g., DHL, FedEx)
+                        {t('hc.delivery_standards.h_carrier_tip')}
                       </div>
                     </span>
                   </div>
@@ -787,7 +787,7 @@ export function DeliveryStandards() {
                         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                       </svg>
                       <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
-                        Carrier's product/service type (e.g., Express, Standard, Economy)
+                        {t('hc.delivery_standards.h_product_tip')}
                       </div>
                     </span>
                   </div>
@@ -800,7 +800,7 @@ export function DeliveryStandards() {
                         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                       </svg>
                       <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
-                        City where the package is picked up (origin city)
+                        {t('hc.delivery_standards.h_origin_tip')}
                       </div>
                     </span>
                   </div>
@@ -813,7 +813,7 @@ export function DeliveryStandards() {
                         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                       </svg>
                       <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
-                        City where the package is delivered (destination city)
+                        {t('hc.delivery_standards.h_dest_tip')}
                       </div>
                     </span>
                   </div>
@@ -826,20 +826,20 @@ export function DeliveryStandards() {
                         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                       </svg>
                       <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
-                        Standard delivery time (J+K notation). J = pickup day, K = number of days. Example: J+2 means delivery within 2 days from pickup.
+                        {t('hc.delivery_standards.h_jk_tip')}
                       </div>
                     </span>
                   </div>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   <div className="flex items-center gap-1">
-                    Unit
+                    {t('hc.delivery_standards.unit')}
                     <span className="group relative">
                       <svg className="w-3 h-3 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                       </svg>
                       <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
-                        Time unit for the J+K value (hours or days)
+                        {t('hc.delivery_standards.h_unit_tip')}
                       </div>
                     </span>
                   </div>
@@ -852,7 +852,7 @@ export function DeliveryStandards() {
                         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                       </svg>
                       <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
-                        Target percentage of deliveries that must meet the J+K standard. Example: 85% means at least 85 out of 100 deliveries should arrive within J+K time.
+                        {t('hc.delivery_standards.h_std_tip')}
                       </div>
                     </span>
                   </div>
@@ -865,7 +865,7 @@ export function DeliveryStandards() {
                         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                       </svg>
                       <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
-                        Acceptable deviation from Std % without penalty. Example: If Std % is 85% and Warning is 10%, performance between 75-85% triggers a warning but no penalty.
+                        {t('hc.delivery_standards.h_warn_tip')}
                       </div>
                     </span>
                   </div>
@@ -878,20 +878,20 @@ export function DeliveryStandards() {
                         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                       </svg>
                       <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
-                        Critical deviation from Std % that triggers penalties. Example: If Std % is 85% and Critical is 20%, performance below 65% results in carrier penalties.
+                        {t('hc.delivery_standards.h_crit_tip')}
                       </div>
                     </span>
                   </div>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   <div className="flex items-center gap-1">
-                    Type
+                    {t('hc.delivery_standards.type')}
                     <span className="group relative">
                       <svg className="w-3 h-3 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                       </svg>
                       <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
-                        Threshold calculation type: Relative (percentage-based) or Absolute (fixed value)
+                        {t('hc.delivery_standards.h_type_tip')}
                       </div>
                     </span>
                   </div>
@@ -904,7 +904,7 @@ export function DeliveryStandards() {
                         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                       </svg>
                       <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
-                        Edit or delete this delivery standard
+                        {t('hc.delivery_standards.h_actions_tip')}
                       </div>
                     </span>
                   </div>
@@ -931,7 +931,7 @@ export function DeliveryStandards() {
                     <div>{std.origin_city?.name}</div>
                     {std.origin_city?.classification && (
                       <div className="text-xs text-gray-500">
-                        Type {std.origin_city.classification}
+                        {t('hc.delivery_standards.type_letter', { type: std.origin_city.classification })}
                       </div>
                     )}
                   </td>
@@ -939,7 +939,7 @@ export function DeliveryStandards() {
                     <div>{std.destination_city?.name}</div>
                     {std.destination_city?.classification && (
                       <div className="text-xs text-gray-500">
-                        Type {std.destination_city.classification}
+                        {t('hc.delivery_standards.type_letter', { type: std.destination_city.classification })}
                       </div>
                     )}
                   </td>
@@ -996,7 +996,7 @@ export function DeliveryStandards() {
                     {std.critical_threshold != null ? `${std.critical_threshold}%` : '-'}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500">
-                    {std.threshold_type === 'relative' ? 'Rel' : std.threshold_type === 'absolute' ? 'Abs' : '-'}
+                    {std.threshold_type === 'relative' ? t('hc.delivery_standards.rel_abbr') : std.threshold_type === 'absolute' ? t('hc.delivery_standards.abs_abbr') : '-'}
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex gap-2">
@@ -1007,13 +1007,13 @@ export function DeliveryStandards() {
                         }}
                         className="text-blue-600 hover:text-blue-800 text-sm"
                       >
-                        Edit
+                        {t('hc.delivery_standards.edit')}
                       </button>
                       <button
                         onClick={() => handleDelete(std.id)}
                         className="text-red-600 hover:text-red-800 text-sm"
                       >
-                        Delete
+                        {t('hc.delivery_standards.delete')}
                       </button>
                     </div>
                   </td>
@@ -1024,7 +1024,7 @@ export function DeliveryStandards() {
 
           {filteredStandards.length === 0 && (
             <div className="text-center py-12 text-gray-500">
-              No delivery standards found. Generate combinations to get started.
+              {t('hc.delivery_standards.none_found')}
             </div>
           )}
         </div>
@@ -1044,7 +1044,7 @@ export function DeliveryStandards() {
       <Modal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
-        title="Create Delivery Standard"
+        title={t('hc.delivery_standards.create_title')}
       >
         <DeliveryStandardForm
           carriers={carriers}
@@ -1062,7 +1062,7 @@ export function DeliveryStandards() {
           setShowEditModal(false)
           setEditingStandard(null)
         }}
-        title="Edit Delivery Standard"
+        title={t('hc.delivery_standards.edit_title')}
       >
         {editingStandard && (
           <DeliveryStandardForm

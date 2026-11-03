@@ -1,10 +1,12 @@
 import { useState } from 'react'
+import { useTranslation } from '@/hooks/useTranslation'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/common/Button'
 import { PageHeader } from '@/components/common/PageHeader'
 import { Eye, EyeOff, Lock } from 'lucide-react'
 
 export function ChangePassword() {
+  const { t } = useTranslation()
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showNewPassword, setShowNewPassword] = useState(false)
@@ -18,12 +20,12 @@ export function ChangePassword() {
 
     // Validaciones
     if (newPassword !== confirmPassword) {
-      setMessage({ type: 'error', text: 'Passwords do not match' })
+      setMessage({ type: 'error', text: t('hc.change_password.passwords_no_match') })
       return
     }
 
     if (newPassword.length < 8) {
-      setMessage({ type: 'error', text: 'Password must be at least 8 characters long' })
+      setMessage({ type: 'error', text: t('hc.change_password.min_length_error') })
       return
     }
 
@@ -36,7 +38,7 @@ export function ChangePassword() {
 
       if (error) throw error
 
-      setMessage({ type: 'success', text: 'Password changed successfully!' })
+      setMessage({ type: 'success', text: t('hc.change_password.success') })
       setNewPassword('')
       setConfirmPassword('')
       setShowNewPassword(false)
@@ -44,7 +46,7 @@ export function ChangePassword() {
     } catch (error) {
       setMessage({ 
         type: 'error', 
-        text: error instanceof Error ? error.message : 'Failed to change password' 
+        text: error instanceof Error ? error.message : t('hc.change_password.failed') 
       })
     } finally {
       setLoading(false)
@@ -54,7 +56,7 @@ export function ChangePassword() {
   return (
     <div className="p-8">
       <PageHeader
-        title="Change Password"
+        title={t('hc.change_password.title')}
       />
 
       <div className="max-w-md mx-auto mt-8">
@@ -64,8 +66,8 @@ export function ChangePassword() {
               <Lock className="text-blue-600" size={24} />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900">Security</h3>
-              <p className="text-sm text-gray-500">Choose a strong password to protect your account</p>
+              <h3 className="font-semibold text-gray-900">{t('hc.change_password.security')}</h3>
+              <p className="text-sm text-gray-500">{t('hc.change_password.choose_strong')}</p>
             </div>
           </div>
 
@@ -84,7 +86,7 @@ export function ChangePassword() {
 
             <div>
               <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                New Password *
+                {t('hc.change_password.new_password_label')}
               </label>
               <div className="relative">
                 <input
@@ -95,7 +97,7 @@ export function ChangePassword() {
                   required
                   minLength={8}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-10"
-                  placeholder="Enter new password"
+                  placeholder={t('hc.change_password.enter_new_placeholder')}
                 />
                 <button
                   type="button"
@@ -106,13 +108,13 @@ export function ChangePassword() {
                 </button>
               </div>
               <p className="text-xs text-gray-500 mt-1">
-                Minimum 8 characters
+                {t('hc.change_password.min_8_chars')}
               </p>
             </div>
 
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                Confirm New Password *
+                {t('hc.change_password.confirm_label')}
               </label>
               <div className="relative">
                 <input
@@ -123,7 +125,7 @@ export function ChangePassword() {
                   required
                   minLength={8}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-10"
-                  placeholder="Confirm new password"
+                  placeholder={t('hc.change_password.confirm_placeholder')}
                 />
                 <button
                   type="button"
@@ -141,18 +143,18 @@ export function ChangePassword() {
                 disabled={loading || !newPassword || !confirmPassword}
                 className="w-full"
               >
-                {loading ? 'Changing Password...' : 'Change Password'}
+                {loading ? t('hc.change_password.changing') : t('hc.change_password.title')}
               </Button>
             </div>
           </form>
 
           <div className="mt-6 p-4 bg-blue-50 rounded-md">
-            <h4 className="text-sm font-medium text-blue-900 mb-2">Password Tips:</h4>
+            <h4 className="text-sm font-medium text-blue-900 mb-2">{t('hc.change_password.tips_title')}</h4>
             <ul className="text-xs text-blue-800 space-y-1">
-              <li>• Use at least 8 characters</li>
-              <li>• Mix uppercase and lowercase letters</li>
-              <li>• Include numbers and symbols</li>
-              <li>• Avoid common words or patterns</li>
+              <li>• {t('hc.change_password.tip_length')}</li>
+              <li>• {t('hc.change_password.tip_case')}</li>
+              <li>• {t('hc.change_password.tip_symbols')}</li>
+              <li>• {t('hc.change_password.tip_avoid')}</li>
             </ul>
           </div>
         </div>

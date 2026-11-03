@@ -4,6 +4,7 @@ import { downloadRouteSamples } from '@/utils/downloadRouteSamples';
 import { useTimeUnit } from '@/hooks/useTimeUnit';
 import type { TimeUnit } from '@/lib/accountTime';
 import { aggregateJK, formatJK } from '@/lib/transitMeasure';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface RouteData {
   origin: string;
@@ -41,7 +42,9 @@ interface ComplianceHierarchicalTableProps {
 }
 
 export function ComplianceHierarchicalTable({ data, warningThreshold, criticalThreshold }: ComplianceHierarchicalTableProps) {
+  const { t } = useTranslation();
   const { unit: displayUnit } = useTimeUnit();
+  const statusLabel = (s: string) => s === 'compliant' ? t('hc.compliance_hierarchical_table.status_compliant') : s === 'warning' ? t('hc.compliance_hierarchical_table.status_warning') : t('hc.compliance_hierarchical_table.status_critical');
   const [expandedCarriers, setExpandedCarriers] = useState<Set<string>>(new Set());
   const [expandedProducts, setExpandedProducts] = useState<Set<string>>(new Set());
 
@@ -191,16 +194,16 @@ export function ComplianceHierarchicalTable({ data, warningThreshold, criticalTh
         <thead className="bg-gray-50">
           <tr>
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Carrier / Product / Route
+              {t('hc.compliance_hierarchical_table.col_carrier_product_route')}
             </th>
-            <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Samples</th>
-            <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">J+K STD</th>
-            <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">J+K Actual</th>
-            <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">STD %</th>
-            <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actual %</th>
-            <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Deviation</th>
-            <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-            <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{t('hc.compliance_hierarchical_table.col_samples')}</th>
+            <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{t('hc.compliance_hierarchical_table.col_jk_std')}</th>
+            <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{t('hc.compliance_hierarchical_table.col_jk_actual')}</th>
+            <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{t('hc.compliance_hierarchical_table.col_std_pct')}</th>
+            <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{t('hc.compliance_hierarchical_table.col_actual_pct')}</th>
+            <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{t('hc.compliance_hierarchical_table.col_deviation')}</th>
+            <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">{t('hc.compliance_hierarchical_table.col_status')}</th>
+            <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">{t('hc.compliance_hierarchical_table.col_actions')}</th>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
@@ -242,7 +245,7 @@ export function ComplianceHierarchicalTable({ data, warningThreshold, criticalTh
                     carrierItem.status === 'warning' ? 'bg-yellow-100 text-yellow-800' :
                     'bg-red-100 text-red-800'
                   }`}>
-                    {carrierItem.status}
+                    {statusLabel(carrierItem.status)}
                   </span>
                 </td>
                 <td></td>
@@ -290,7 +293,7 @@ export function ComplianceHierarchicalTable({ data, warningThreshold, criticalTh
                         productItem.status === 'warning' ? 'bg-yellow-100 text-yellow-800' :
                         'bg-red-100 text-red-800'
                       }`}>
-                        {productItem.status}
+                        {statusLabel(productItem.status)}
                       </span>
                     </td>
                     <td></td>
@@ -330,7 +333,7 @@ export function ComplianceHierarchicalTable({ data, warningThreshold, criticalTh
                             route.status === 'warning' ? 'bg-yellow-100 text-yellow-800' :
                             'bg-red-100 text-red-800'
                           }`}>
-                            {route.status}
+                            {statusLabel(route.status)}
                           </span>
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap text-center">
@@ -340,7 +343,7 @@ export function ComplianceHierarchicalTable({ data, warningThreshold, criticalTh
                               handleDownloadCSV(route);
                             }}
                             className="text-blue-600 hover:text-blue-800"
-                            title="Download samples CSV"
+                            title={t('hc.compliance_hierarchical_table.download_samples_csv')}
                           >
                             <Download className="w-4 h-4" />
                           </button>
@@ -356,7 +359,7 @@ export function ComplianceHierarchicalTable({ data, warningThreshold, criticalTh
       </table>
       {hierarchicalData.length === 0 && (
         <div className="text-center py-8 text-gray-500">
-          No compliance data available
+          {t('hc.compliance_hierarchical_table.no_data')}
         </div>
       )}
     </div>

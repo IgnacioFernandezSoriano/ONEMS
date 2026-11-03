@@ -6,8 +6,10 @@ import { UserTable } from '@/components/users/UserTable'
 import { UserForm } from '@/components/users/UserForm'
 import { useUsers } from '@/hooks/useUsers'
 import type { ProfileWithAccount } from '@/lib/types'
+import { useTranslation } from '@/hooks/useTranslation'
 
 export function Users() {
+  const { t } = useTranslation()
   const { users, loading, createUser, updateUser, deleteUser, resetPassword } = useUsers()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<ProfileWithAccount | undefined>()
@@ -36,16 +38,16 @@ export function Users() {
   }
 
   if (loading) {
-    return <div className="p-8">Loading...</div>
+    return <div className="p-8">{t('hc.users.loading')}</div>
   }
 
   return (
     <div className="p-8">
       <PageHeader
-        title="User Management"
+        title={t('hc.users.title')}
         action={
           <Button onClick={handleCreate}>
-            Create User
+            {t('hc.users.create')}
           </Button>
         }
       />
@@ -60,7 +62,7 @@ export function Users() {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={selectedUser ? 'Edit User' : 'Create User'}
+        title={selectedUser ? t('hc.users.edit') : t('hc.users.create')}
       >
         <UserForm
           user={selectedUser}

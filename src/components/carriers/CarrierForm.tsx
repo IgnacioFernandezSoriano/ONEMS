@@ -31,27 +31,27 @@ export function CarrierForm({ carrier, onSubmit, onCancel }: CarrierFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium mb-1">Code *</label>
+        <label className="block text-sm font-medium mb-1">{t('hc.carrier_form.code')} *</label>
         <input
           type="text"
           required
           value={formData.code}
           onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
           className="w-full px-3 py-2 border rounded-md"
-          placeholder="e.g., DHL, UPS"
+          placeholder={t('hc.carrier_form.code_placeholder')}
           maxLength={20}
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">Name *</label>
+        <label className="block text-sm font-medium mb-1">{t('hc.carrier_form.name')} *</label>
         <input
           type="text"
           required
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
           className="w-full px-3 py-2 border rounded-md"
-          placeholder="e.g., DHL Express"
+          placeholder={t('hc.carrier_form.name_placeholder')}
         />
       </div>
 
@@ -62,12 +62,12 @@ export function CarrierForm({ carrier, onSubmit, onCancel }: CarrierFormProps) {
           value={formData.type}
           onChange={(e) => setFormData({ ...formData, type: e.target.value })}
           className="w-full px-3 py-2 border rounded-md"
-          placeholder="e.g., express, standard, economy"
+          placeholder={t('hc.carrier_form.type_placeholder')}
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">Status *</label>
+        <label className="block text-sm font-medium mb-1">{t('hc.carrier_form.status')} *</label>
         <select
           required
           value={formData.status}
@@ -85,14 +85,14 @@ export function CarrierForm({ carrier, onSubmit, onCancel }: CarrierFormProps) {
           onClick={onCancel}
           className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
         >
-          Cancel
+          {t('hc.carrier_form.cancel')}
         </button>
         <button
           type="submit"
           disabled={loading}
           className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
         >
-          {loading ? 'Saving...' : carrier ? 'Update' : 'Create'}
+          {loading ? t('hc.carrier_form.saving') : carrier ? t('hc.carrier_form.update') : t('hc.carrier_form.create')}
         </button>
       </div>
     </form>

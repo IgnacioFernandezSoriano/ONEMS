@@ -1,13 +1,14 @@
 export type Role = 'superadmin' | 'admin' | 'user'
 export type Status = 'active' | 'inactive'
 
-export type SupportedLanguage = 'en' | 'es' | 'fr' | 'ar'
+export type SupportedLanguage = 'en' | 'es' | 'fr' | 'ar' | 'pt'
 
 export const SUPPORTED_LANGUAGES: { code: SupportedLanguage; name: string }[] = [
   { code: 'en', name: 'English' },
   { code: 'es', name: 'Español' },
   { code: 'fr', name: 'Français' },
   { code: 'ar', name: 'العربية' },
+  { code: 'pt', name: 'Português' },
 ]
 
 export interface Account {

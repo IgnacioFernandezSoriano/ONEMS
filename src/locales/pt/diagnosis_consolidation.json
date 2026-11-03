@@ -1,0 +1,69 @@
+{
+  "diagnosis": {
+    "consolidation": {
+      "title": "Consolidação de Eventos",
+      "description": "Processa eventos RFID por processar e deteta anomalias no sistema",
+      "run_button": "Executar Consolidação",
+      "pending_events": "Eventos Pendentes",
+      "total_incidents": "Total de Incidências",
+      "last_consolidation": "Última Consolidação",
+      "never": "Nunca",
+      "incidents_table_title": "Incidências Detetadas",
+      "no_incidents": "Não foram detetadas incidências",
+      "success": "Consolidação concluída: {{processed}} eventos processados, {{created}} eventos criados, {{incidents}} incidências detetadas",
+      "error": "Erro na consolidação: {{message}}",
+      "error_no_session": "Sessão inválida. Por favor, inicie sessão novamente.",
+      "incident_resolved": "Incidência marcada como resolvida com sucesso",
+      "columns": {
+        "tag_id": "ID da Etiqueta",
+        "incident_type": "Tipo",
+        "postal_center": "Centro Postal",
+        "description": "Descrição",
+        "detected_at": "Detetado",
+        "status": "Estado"
+      },
+      "incident_types": {
+        "missing_exit": "Saída em Falta",
+        "unknown_reader": "Leitor Desconhecido",
+        "data_quality": "Qualidade dos Dados",
+        "missing_entry": "Entrada em Falta",
+        "exit_before_entry": "Saída Antes da Entrada",
+        "sla_violation": "Violação de SLA",
+        "stuck_sample": "Amostra Retida",
+        "missroute": "Rota Incorreta",
+        "duplicate_event": "Evento Duplicado",
+        "invalid_sequence": "Sequência Inválida"
+      },
+      "status": {
+        "resolved": "Resolvido",
+        "pending": "Pendente"
+      },
+      "details": {
+        "incident_summary": "Resumo da Incidência",
+        "affected_events": "Eventos Afetados",
+        "reader_code": "Código do Leitor",
+        "severity": "Gravidade",
+        "detected_at": "Detetado em",
+        "raw_events": "Eventos EPCIS por Processar",
+        "no_raw_events": "Não há eventos por processar disponíveis",
+        "quick_actions": "Ações Rápidas",
+        "event_of": "Evento {{current}} de {{total}}",
+        "event_id": "ID do Evento",
+        "tag_id_epc": "ID da Etiqueta (EPC)",
+        "reader_id": "ID do Leitor",
+        "read_datetime": "Data/Hora da Leitura",
+        "created_at": "Criado em",
+        "is_processed": "Processado",
+        "internal_id": "ID Interno",
+        "yes": "Sim",
+        "no": "Não"
+      },
+      "actions": {
+        "create_reader": "Criar Leitor",
+        "mark_resolved": "Marcar como Resolvido",
+        "reprocess": "Reprocessar",
+        "view_history": "Ver Histórico"
+      }
+    }
+  }
+}

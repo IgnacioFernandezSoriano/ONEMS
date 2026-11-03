@@ -1,0 +1,886 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ajuda: Incidências e disponibilidade dos painelistas</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<style>
+  :root {
+    --white: #ffffff; --g50: #f9fafb; --g100: #f3f4f6; --g200: #e5e7eb; --g300: #d1d5db;
+    --g400: #9ca3af; --g500: #6b7280; --g600: #4b5563; --g700: #374151; --g900: #111827;
+    --b50: #eff6ff; --b100: #dbeafe; --b600: #2563eb; --b700: #1d4ed8;
+    --r100: #fee2e2; --r700: #b91c1c; --gr100: #dcfce7; --gr700: #15803d;
+    --y100: #fef9c3; --y800: #854d0e; --p100: #f3e8ff; --p700: #7e22ce;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+      'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    -webkit-font-smoothing: antialiased; background: var(--g50); color: var(--g700); line-height: 1.6; font-size: 15px;
+  }
+  .layout { display: flex; min-height: 100vh; }
+
+  /* Sidebar, same look as the ONE menu */
+  .side {
+    width: 272px; flex-shrink: 0; background: var(--white); border-right: 1px solid var(--g200);
+    position: sticky; top: 0; height: 100vh; overflow-y: auto; display: flex; flex-direction: column;
+  }
+  .brand { padding: 24px 24px 16px; }
+  .brand h1 { font-size: 24px; line-height: 32px; font-weight: 700; color: var(--g900); }
+  .brand p { font-size: 14px; color: var(--g500); margin-top: 4px; }
+  .brand .doc { margin-top: 16px; font-size: 12px; font-weight: 600; color: var(--b700); background: var(--b50);
+    display: inline-block; padding: 2px 10px; border-radius: 999px; }
+  .nav { padding: 8px 12px 24px; flex: 1; }
+  .nav h3 { font-size: 12px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--g400);
+    padding: 16px 12px 6px; }
+  .nav a {
+    display: block; padding: 8px 12px; border-radius: 8px; font-size: 14px; font-weight: 500; color: var(--g600);
+    text-decoration: none; transition: background .15s, color .15s;
+  }
+  .nav a:hover { background: var(--g100); }
+  .nav a.active { background: var(--b50); color: var(--b700); }
+  .side-foot { padding: 16px 24px; border-top: 1px solid var(--g200); font-size: 12px; color: var(--g500); }
+
+  /* Content */
+  .main { flex: 1; min-width: 0; padding: 40px 32px 80px; }
+  .page { max-width: 880px; margin: 0 auto; }
+  .page > header { margin-bottom: 32px; }
+  .page > header h2 { font-size: 30px; line-height: 38px; font-weight: 700; color: var(--g900); }
+  .page > header p { margin-top: 8px; font-size: 17px; color: var(--g600); max-width: 640px; }
+  section { margin-top: 48px; }
+  section > h2 { font-size: 22px; font-weight: 700; color: var(--g900); padding-bottom: 8px; margin-bottom: 16px;
+    border-bottom: 1px solid var(--g200); }
+  h3 { font-size: 17px; font-weight: 600; color: var(--g900); margin: 28px 0 8px; }
+  p { margin: 8px 0; }
+  ul, ol { margin: 8px 0 8px 22px; }
+  li { margin: 4px 0; }
+  strong { color: var(--g900); font-weight: 600; }
+  code, kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px;
+    background: var(--g100); border: 1px solid var(--g200); border-radius: 6px; padding: 1px 6px; color: var(--g900); }
+  .card { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 20px 24px; margin: 16px 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 16px 0; }
+  .grid .card { margin: 0; }
+  .card h4 { font-size: 15px; font-weight: 600; color: var(--g900); margin-bottom: 4px; }
+  .card p { margin: 4px 0; font-size: 14px; color: var(--g600); }
+
+  .badge { display: inline-block; font-size: 12px; font-weight: 500; padding: 1px 10px; border-radius: 999px; white-space: nowrap; }
+  .b-red { background: var(--r100); color: var(--r700); }
+  .b-blue { background: var(--b100); color: var(--b700); }
+  .b-green { background: var(--gr100); color: var(--gr700); }
+  .b-yellow { background: var(--y100); color: var(--y800); }
+  .b-gray { background: var(--g100); color: var(--g600); }
+  .b-purple { background: var(--p100); color: var(--p700); }
+  .btn { display: inline-block; font-size: 13px; font-weight: 500; padding: 2px 10px; border-radius: 8px;
+    background: var(--white); border: 1px solid var(--g300); color: var(--g700); white-space: nowrap; }
+  .btn.primary { background: var(--b600); border-color: var(--b600); color: #fff; }
+
+  .callout { border-radius: 12px; padding: 14px 18px; margin: 16px 0; font-size: 14px; border: 1px solid; }
+  .callout.info { background: var(--b50); border-color: var(--b100); color: #1e3a8a; }
+  .callout.ok { background: #f0fdf4; border-color: var(--gr100); color: #14532d; }
+  .callout.warn { background: #fffbeb; border-color: var(--y100); color: var(--y800); }
+  .callout strong { color: inherit; }
+
+  .table-wrap { overflow-x: auto; margin: 16px 0; background: var(--white); border: 1px solid var(--g200); border-radius: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--g500); background: var(--g50); padding: 10px 14px; border-bottom: 1px solid var(--g200); }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--g100); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  td:first-child { font-weight: 500; color: var(--g900); }
+
+  /* Steps */
+  ol.steps { list-style: none; margin: 12px 0; counter-reset: s; }
+  ol.steps > li { counter-increment: s; position: relative; padding: 4px 0 12px 44px; margin: 0; }
+  ol.steps > li::before {
+    content: counter(s); position: absolute; left: 0; top: 2px; width: 28px; height: 28px; border-radius: 50%;
+    background: var(--b100); color: var(--b700); font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Telegram chat mock-ups */
+  .chat { background: #e9eef5; border: 1px solid var(--g200); border-radius: 16px; padding: 16px; margin: 16px 0; max-width: 460px; }
+  .chat .who { text-align: center; font-size: 12px; color: var(--g500); margin-bottom: 8px; font-weight: 500; }
+  .msg { max-width: 85%; padding: 8px 12px; border-radius: 14px; margin: 6px 0; font-size: 14px; line-height: 1.45; box-shadow: 0 1px 1px rgba(0,0,0,.06); }
+  .msg.bot { background: var(--white); border-top-left-radius: 4px; margin-right: auto; color: var(--g900); }
+  .msg.me { background: #dbeafe; border-top-right-radius: 4px; margin-left: auto; color: var(--g900); }
+  .kb { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 8px; max-width: 85%; }
+  .kb span { flex: 1 1 auto; text-align: center; background: rgba(37,99,235,.12); color: var(--b700); font-size: 13px; font-weight: 500;
+    padding: 6px 10px; border-radius: 10px; }
+  .kb.col span { flex-basis: 100%; }
+  .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; align-items: start; }
+  .two .chat { margin: 8px 0; }
+  .cap { font-size: 13px; color: var(--g500); margin-top: -6px; max-width: 460px; }
+
+  /* Flow */
+  .flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; margin: 16px 0; }
+  .flow .node { flex: 1 1 150px; background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 12px 14px; font-size: 13px; position: relative; }
+  .flow .node b { display: block; color: var(--g900); font-size: 14px; margin-bottom: 2px; }
+  .flow .node .tag { font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--b700); }
+  .flow .arrow { align-self: center; color: var(--g400); font-size: 18px; }
+
+  details { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; margin: 8px 0; }
+  summary { cursor: pointer; padding: 14px 18px; font-weight: 600; color: var(--g900); list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: '+'; color: var(--g400); font-size: 20px; line-height: 1; }
+  details[open] summary::after { content: '\2212'; }
+  details > div { padding: 0 18px 14px; color: var(--g600); font-size: 14px; }
+
+  /* ONEMS screen drawings */
+  .app { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; overflow: hidden; margin: 16px 0 6px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .app-bar { display: flex; gap: 6px; align-items: center; background: var(--g100); border-bottom: 1px solid var(--g200); padding: 8px 12px; font-size: 12px; color: var(--g500); }
+  .app-bar i { width: 9px; height: 9px; border-radius: 50%; background: var(--g300); display: inline-block; }
+  .app-bar span { margin-left: 8px; }
+  .app-body { padding: 20px; font-size: 13px; color: var(--g700); overflow-x: auto; }
+  .app-body.cols { display: grid; grid-template-columns: 210px 1fr; padding: 0; }
+  .app-body.cols > .sb { border-right: 1px solid var(--g200); padding: 14px 10px; background: #fff; }
+  .app-body.cols > .ct { padding: 20px; }
+  .sb .t { font-size: 20px; font-weight: 700; color: var(--g900); padding: 0 8px; }
+  .sb .s { font-size: 11px; color: var(--g500); padding: 0 8px 8px; }
+  .sb h5 { font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--g400); padding: 10px 8px 4px; }
+  .mi { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 8px; font-size: 13px; color: var(--g700); }
+  .mi.on { background: var(--b50); color: var(--b600); }
+  .mi .ic { width: 14px; height: 14px; border-radius: 4px; background: var(--g300); flex-shrink: 0; }
+  .mi.on .ic { background: var(--b600); }
+  .mi .badge { margin-left: auto; font-size: 11px; padding: 0 7px; }
+  .m-h { font-size: 18px; font-weight: 700; color: var(--g900); margin-bottom: 12px; }
+  .m-h3 { font-size: 15px; font-weight: 700; color: var(--g900); margin: 0 0 6px; }
+  .m-sel { display: inline-block; border: 1px solid var(--g300); border-radius: 4px; padding: 3px 24px 3px 8px; font-size: 12px; background: #fff; color: var(--g700); margin-right: 8px; position: relative; }
+  .m-sel::after { content: '\25BE'; position: absolute; right: 8px; color: var(--g400); }
+  .m-card { border: 1px solid var(--g200); border-radius: 8px; overflow: hidden; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.05); margin: 10px 0; }
+  .app table { font-size: 12px; }
+  .app th { padding: 8px 12px; font-size: 11px; }
+  .app td { padding: 8px 12px; }
+  .app td:first-child { font-weight: 400; color: inherit; }
+  .app .num { text-align: right; }
+  .m-link { color: var(--b600); }
+  .m-box { border: 1px solid var(--g200); border-radius: 6px; padding: 14px; margin: 10px 0; }
+  .m-note { background: var(--g50); border-radius: 6px; padding: 10px 12px; margin: 8px 0; font-size: 12px; }
+  .m-muted { color: var(--g500); font-size: 12px; }
+  .m-pbtn, .m-sbtn { display: inline-block; padding: 6px 14px; border-radius: 8px; font-size: 12px; margin: 2px 6px 2px 0; }
+  .m-pbtn { background: var(--b600); color: #fff; }
+  .m-sbtn { background: var(--g200); color: var(--g700); }
+  .m-ta { border: 1px solid var(--g300); border-radius: 4px; padding: 8px; font-size: 12px; color: var(--g400); background: #fff; margin: 6px 0 10px; }
+  .m-in { display: inline-block; border: 1px solid var(--g300); border-radius: 4px; padding: 3px 8px; font-size: 12px; background: #fff; min-width: 90px; }
+  .m-bub { max-width: 80%; padding: 6px 10px; border-radius: 10px; margin: 5px 0; font-size: 12px; }
+  .m-bub small { display: block; color: var(--g500); font-size: 10px; margin-top: 2px; }
+  .m-bub.l { background: var(--g100); margin-right: auto; }
+  .m-bub.r { background: var(--b100); margin-left: auto; }
+  .pin { display: inline-flex; width: 20px; height: 20px; border-radius: 50%; background: var(--b600); color: #fff; font-size: 11px; font-weight: 700; align-items: center; justify-content: center; margin-left: 6px; vertical-align: middle; flex-shrink: 0; }
+  .legend { counter-reset: l; list-style: none; margin: 10px 0 20px; }
+  .legend li { counter-increment: l; position: relative; padding: 2px 0 6px 34px; font-size: 14px; }
+  .legend li::before { content: counter(l); position: absolute; left: 0; top: 1px; width: 20px; height: 20px; border-radius: 50%; background: var(--b600); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .heat td { text-align: center; }
+  .heat .ok { background: #f0fdf4; } .heat .hi { background: var(--y100); } .heat .sat { background: var(--r100); }
+  .heat .off { background: repeating-linear-gradient(45deg, var(--g100), var(--g100) 4px, #fff 4px, #fff 8px); color: var(--g400); }
+  .heat .now { outline: 2px solid var(--b600); outline-offset: -2px; }
+
+  /* Right-to-left (Arabic) */
+  [dir=rtl] .side { border-right: 0; border-left: 1px solid var(--g200); }
+  [dir=rtl] .app-body.cols > .sb { border-right: 0; border-left: 1px solid var(--g200); }
+  [dir=rtl] th, [dir=rtl] td, [dir=rtl] .nav a { text-align: right; }
+  [dir=rtl] ul, [dir=rtl] ol { margin: 8px 22px 8px 0; }
+  [dir=rtl] ol.steps > li { padding: 4px 44px 12px 0; }
+  [dir=rtl] ol.steps > li::before { left: auto; right: 0; }
+  [dir=rtl] .legend li { padding: 2px 34px 6px 0; }
+  [dir=rtl] .legend li::before { left: auto; right: 0; }
+  [dir=rtl] .msg.bot { border-top-left-radius: 14px; border-top-right-radius: 4px; margin-right: 0; margin-left: auto; }
+  [dir=rtl] .msg.me { border-top-right-radius: 14px; border-top-left-radius: 4px; margin-left: 0; margin-right: auto; }
+  [dir=rtl] .m-bub.l { margin-right: 0; margin-left: auto; }
+  [dir=rtl] .m-bub.r { margin-left: 0; margin-right: auto; }
+  [dir=rtl] .pin { margin-left: 0; margin-right: 6px; }
+  [dir=rtl] .m-sel { padding: 3px 8px 3px 24px; margin-right: 0; margin-left: 8px; }
+  [dir=rtl] .m-sel::after { right: auto; left: 8px; }
+  [dir=rtl] .m-pbtn, [dir=rtl] .m-sbtn { margin: 2px 0 2px 6px; }
+  [dir=rtl] .mi .badge { margin-left: 0; margin-right: auto; }
+  [dir=rtl] .app-bar span { margin-left: 0; margin-right: 8px; }
+  [dir=rtl] .flow .arrow { transform: scaleX(-1); }
+  [dir=rtl] .app td:first-child { font-weight: 400; }
+  .mobile-top { display: none; }
+  @media (max-width: 900px) {
+    .app-body.cols { grid-template-columns: 1fr; }
+    .app-body.cols > .sb { border-right: 0; border-bottom: 1px solid var(--g200); }
+    .layout { display: block; }
+    .side { display: none; }
+    .mobile-top { display: block; position: sticky; top: 0; z-index: 5; background: var(--white); border-bottom: 1px solid var(--g200); padding: 10px 16px; }
+    .mobile-top b { font-size: 18px; color: var(--g900); }
+    .mobile-top span { font-size: 13px; color: var(--g500); margin-left: 6px; }
+    .mobile-top select { width: 100%; margin-top: 8px; padding: 8px; border: 1px solid var(--g300); border-radius: 8px; font-size: 14px; background: #fff; color: var(--g700); }
+    .main { padding: 24px 16px 64px; }
+    .page > header h2 { font-size: 24px; line-height: 32px; }
+  }
+  @media print { .side, .mobile-top { display: none; } .main { padding: 0; } body { background: #fff; } section { break-inside: avoid-page; } }
+</style>
+</head>
+<body>
+<div class="mobile-top">
+  <b>ONE</b><span>for Regulators &middot; Ajuda</span>
+  <select id="jump" aria-label="Ir para a secção"></select>
+</div>
+<div class="layout">
+  <aside class="side">
+    <div class="brand">
+      <h1>ONE</h1>
+      <p>for Regulators</p>
+      <span class="doc">Ajuda &middot; Incidências</span>
+    </div>
+    <nav class="nav" id="nav">
+      <h3>Primeiros passos</h3>
+      <a href="#overview">Visão geral</a>
+      <a href="#how-it-works">Como funciona</a>
+      <h3>Painelistas no Telegram</h3>
+      <a href="#telegram-start">Iniciar o bot</a>
+      <a href="#telegram-menu">O menu principal</a>
+      <a href="#telegram-shipments">Enviar e receber</a>
+      <a href="#telegram-incident">Reportar uma incidência</a>
+      <a href="#telegram-unavailable">Dias indisponíveis</a>
+      <a href="#telegram-replies">Respostas do gestor</a>
+      <h3>Gestores no ONEMS</h3>
+      <a href="#manager-screens">Onde encontrar cada coisa</a>
+      <a href="#screen-reported">Ecrã de incidências reportadas</a>
+      <a href="#incident-types">Tipos de incidência</a>
+      <a href="#examples">Como tratar cada tipo</a>
+      <a href="#material">Falta de material</a>
+      <h3>Disponibilidade</h3>
+      <a href="#availability">Disponibilidade dos painelistas</a>
+      <a href="#availability-declare">Declarar um período</a>
+      <a href="#availability-screen">O ecrã de incidências</a>
+      <a href="#availability-example">Exemplo prático</a>
+      <h3>Referência</h3>
+      <a href="#conversation">Conversa e avisos</a>
+      <a href="#faq">Perguntas</a>
+    </nav>
+    <div class="side-foot">Atualizado a 22 de outubro de 2026</div>
+  </aside>
+
+  <main class="main">
+  <div class="page">
+    <header>
+      <h2>Incidências e disponibilidade dos painelistas</h2>
+      <p>Como os painelistas reportam problemas e dias indisponíveis através do Telegram, o que o ONEMS resolve por si só e o que decide o utilizador como gestor.</p>
+    </header>
+
+    <section id="overview">
+      <h2>Visão geral</h2>
+      <div class="grid">
+        <div class="card"><h4>Os painelistas usam o Telegram</h4><p>Conversam com o bot ONE no seu próprio idioma (inglês, espanhol, francês ou árabe) para confirmar envios, reportar um problema ou declarar dias indisponíveis.</p></div>
+        <div class="card"><h4>O ONEMS resolve o que consegue</h4><p>Muitos reportes são fechados automaticamente. Os dias indisponíveis são replanificados, passando as amostras para uma data posterior ou para outro nó da mesma cidade.</p></div>
+        <div class="card"><h4>Os gestores decidem o resto</h4><p>O que não se consegue resolver automaticamente aparece em <strong>Incidências</strong> com uma proposta preparada, e cada mensagem fica guardada na incidência.</p></div>
+      </div>
+      <p>Esta página destina-se a dois públicos. As <a href="#telegram-start">secções de painelistas e bot</a> descrevem o que vê o painelista. As <a href="#manager-screens">secções de gestores</a> descrevem o que vê o utilizador no ONEMS.</p>
+    </section>
+
+    <section id="how-it-works">
+      <h2>Como funciona</h2>
+      <div class="flow">
+        <div class="node"><span class="tag">1 &middot; Telegram</span><b>O painelista escreve</b>Uma mensagem, ou um toque em <em>Reportar incidência</em>.</div>
+        <div class="arrow">&rarr;</div>
+        <div class="node"><span class="tag">2 &middot; Bot</span><b>Percebe e pergunta</b>«Queres registar isto como&hellip;?» com Sim / Não.</div>
+        <div class="arrow">&rarr;</div>
+        <div class="node"><span class="tag">3 &middot; ONEMS</span><b>Guarda-o</b>Alguns tipos fecham-se sozinhos; outros abrem-se para o utilizador.</div>
+        <div class="arrow">&rarr;</div>
+        <div class="node"><span class="tag">4 &middot; ONEMS</span><b>O gestor decide</b>Resolver, reencaminhar, fornecer material, responder.</div>
+      </div>
+      <ul>
+        <li>Não se guarda nada até o painelista responder <strong>Sim</strong>. Se responder <strong>Não</strong>, o bot volta a mostrar o menu.</li>
+        <li>Tudo o que o bot diz, tudo o que o painelista responde e tudo o que o utilizador escreve fica guardado na incidência.</li>
+        <li>O utilizador recebe um e-mail quando uma nova incidência requer a sua atenção, e quando uma resposta do painelista está à espera há mais de uma hora.</li>
+      </ul>
+    </section>
+
+    <section id="telegram-start">
+      <h2>Iniciar o bot</h2>
+      <p>Cada painelista está associado ao bot ONE através da sua conta de Telegram. O painelista abre a conversa e envia <code>/start</code>, ou simplesmente cumprimenta. O bot cumprimenta-o pelo nome próprio e mostra o menu principal.</p>
+      <div class="two">
+        <div>
+          <div class="chat">
+            <div class="who">Bot ONE</div>
+            <div class="me msg">/start</div>
+            <div class="msg bot">Olá Marta, de que precisas?</div>
+            <div class="kb col"><span>Ver envios pendentes</span><span>Ver pacotes a receber</span><span>Confirmar um envio</span><span>Confirmar uma receção</span><span>Reportar incidência</span><span>&#128467;&#65039; Dias indisponíveis</span><span>&#128230; Confirmar material recebido</span></div>
+          </div>
+        </div>
+        <div>
+          <h3 style="margin-top:8px">Convém saber</h3>
+          <ul>
+            <li>O bot responde no idioma configurado no perfil do painelista.</li>
+            <li>Se for escrito algo que não é um pedido («Olá», «obrigado»), o bot limita-se a voltar a mostrar o menu.</li>
+            <li><code>/myid</code> mostra o ID de Telegram do painelista. O suporte pode pedi-lo ao associar uma conta.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="telegram-menu">
+      <h2>O menu principal</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Botão</th><th>O que faz</th></tr></thead>
+        <tbody>
+          <tr><td>Ver envios pendentes</td><td>Lista as amostras que o painelista deve enviar, de cinco em cinco, com um botão <em>Ver mais</em>.</td></tr>
+          <tr><td>Ver pacotes a receber</td><td>Lista as amostras que vão a caminho do painelista.</td></tr>
+          <tr><td>Confirmar um envio</td><td>Escolhe-se um envio pendente e confirma-se com a foto da etiqueta ou com o número da etiqueta.</td></tr>
+          <tr><td>Confirmar uma receção</td><td>Confirma que chegou um pacote enviando uma foto da sua etiqueta.</td></tr>
+          <tr><td>Reportar incidência</td><td>Descreve um problema numa única mensagem (ver <a href="#telegram-incident">Reportar uma incidência</a>).</td></tr>
+          <tr><td>Dias indisponíveis</td><td>Declara os dias em que o painelista não pode enviar nem receber (ver <a href="#telegram-unavailable">Dias indisponíveis</a>).</td></tr>
+          <tr><td>Confirmar material recebido</td><td>Indica se chegou um envio de material e em que quantidade (ver <a href="#material">Falta de material</a>).</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="telegram-shipments">
+      <h2>Enviar e receber</h2>
+      <h3>Confirmar um envio</h3>
+      <ol class="steps">
+        <li>O painelista prime <span class="btn">Confirmar um envio</span> ou <span class="btn">Ver envios pendentes</span> e escolhe o envio.</li>
+        <li>Envia uma <strong>foto da etiqueta</strong> ou escreve o <strong>número da etiqueta</strong>.</li>
+        <li>O bot responde que o envio fica declarado como enviado. Se o formato da etiqueta não for válido, não se guarda nada e o bot volta a perguntar.</li>
+      </ol>
+      <h3>Confirmar uma receção</h3>
+      <ol class="steps">
+        <li>O painelista prime <span class="btn">Confirmar uma receção</span>.</li>
+        <li>Envia uma <strong>foto da etiqueta</strong> do pacote recebido.</li>
+        <li>O ONEMS marca essa amostra como recebida. Se a etiqueta for ilegível, o painelista reporta-o como incidência (<em>Etiqueta / recibo ilegível</em>), escolhe o pacote da sua lista e fica registado automaticamente.</li>
+      </ol>
+      <div class="callout info"><strong>Lembrete diário.</strong> Todos os dias às 09:00 o bot envia a cada painelista os envios que deve fazer nesse dia. Os envios que não se podem fazer por falta de material ficam fora do lembrete.</div>
+    </section>
+
+    <section id="telegram-incident">
+      <h2>Reportar uma incidência</h2>
+      <p>O painelista prime <span class="btn">Reportar incidência</span> e descreve o problema numa <strong>única mensagem</strong>. O bot sugere um tipo e pede confirmação.</p>
+      <div class="two">
+        <div>
+          <div class="chat">
+            <div class="who">Bot ONE</div>
+            <div class="msg me">O pacote chegou partido</div>
+            <div class="msg bot">Queres registar isto como <strong>pacote danificado</strong>?</div>
+            <div class="kb"><span>Sim</span><span>Não, é outra coisa</span></div>
+            <div class="msg me">Sim</div>
+            <div class="msg bot">Registado, obrigado por nos avisares.</div>
+          </div>
+          <p class="cap">Um pacote danificado é guardado e fechado automaticamente.</p>
+        </div>
+        <div>
+          <div class="chat">
+            <div class="who">Bot ONE</div>
+            <div class="msg me">Devolveram-me o pacote</div>
+            <div class="msg bot">Queres registar isto como <strong>pacote devolvido</strong>?</div>
+            <div class="kb"><span>Sim</span><span>Não, é outra coisa</span></div>
+            <div class="msg me">Sim</div>
+            <div class="msg bot">Registado. Um gestor entrará em contacto contigo.</div>
+          </div>
+          <p class="cap">Um pacote devolvido fica aberto para o gestor.</p>
+        </div>
+      </div>
+      <div class="callout ok"><strong>Seguro por conceção.</strong> Se o painelista premir <em>Não</em>, ou escrever algo pouco claro, não se regista nada. Só um <em>Sim</em> explícito cria uma incidência.</div>
+    </section>
+
+    <section id="telegram-unavailable">
+      <h2>Dias indisponíveis</h2>
+      <p>O painelista prime <span class="btn">&#128467;&#65039; Dias indisponíveis</span> e escolhe as datas de início e de fim. Também pode escrevê-lo por palavras suas.</p>
+      <div class="chat">
+        <div class="who">Bot ONE</div>
+        <div class="msg me">Na próxima semana estou de férias</div>
+        <div class="msg bot">Percebo que: <strong>seg 9 nov &ndash; sex 13 nov</strong>. É isso?</div>
+        <div class="kb"><span>Sim</span><span>Não</span></div>
+        <div class="msg me">Sim</div>
+        <div class="msg bot">Recebido. Obrigado por nos avisares.</div>
+      </div>
+      <p>As regras são verificadas automaticamente: a data de fim não pode ser anterior à de início, os dias não podem estar no passado, o período é de <strong>90 dias</strong> no máximo e não pode sobrepor-se a outro período ativo. Consulte <a href="#availability">Disponibilidade dos painelistas</a> para saber o que acontece a seguir.</p>
+    </section>
+
+    <section id="telegram-replies">
+      <h2>Respostas do gestor</h2>
+      <p>Quando um gestor escreve numa incidência, a mensagem chega à conversa do painelista com o nome da incidência e dois botões.</p>
+      <div class="chat">
+        <div class="who">Bot ONE</div>
+        <div class="msg bot"><strong>Pacote devolvido</strong><br>Olá Pablo, vamos enviar a amostra de novo na próxima semana para outro nó. Podes guardar a etiqueta?</div>
+        <div class="kb"><span>Responder</span><span>Voltar ao menu</span></div>
+        <div class="msg me">Responder</div>
+        <div class="msg bot">Escreve a tua resposta.</div>
+        <div class="msg me">Sim, ainda a tenho. Foto anexada.</div>
+        <div class="msg bot">A tua mensagem foi enviada ao teu gestor.</div>
+      </div>
+      <ul>
+        <li>Enquanto há uma conversa aberta, o texto e as <strong>fotos</strong> do painelista vão para a incidência. <em>Voltar ao menu</em> fecha-a.</li>
+        <li>A conversa fecha-se sozinha quando a incidência é resolvida ou descartada, ou após 48 horas sem atividade.</li>
+      </ul>
+    </section>
+
+    <section id="manager-screens">
+      <h2>Onde encontrar cada coisa</h2>
+      <p>No menu do ONEMS, abra o grupo <strong>Incidências</strong>. Tudo o que se descreve a partir daqui está nestes dois ecrãs.</p>
+      <div class="app">
+        <div class="app-bar"><i></i><i></i><i></i><span>ONEMS</span></div>
+        <div class="app-body cols">
+          <div class="sb">
+            <div class="t">ONEMS</div><div class="s">for Regulators</div>
+            <h5>Configuração</h5>
+            <div class="mi"><span class="ic"></span>Painelistas</div>
+            <h5>Incidências</h5>
+            <div class="mi on"><span class="ic"></span>Incidências reportadas <span class="badge b-red">3</span><span class="badge b-blue" style="margin-left:4px">1</span><span class="pin">1</span></div>
+            <div class="mi"><span class="ic"></span>Disponibilidade dos painelistas <span class="badge b-red">2</span><span class="pin">2</span></div>
+            <div class="mi"><span class="ic"></span>Ajuda: Incidências<span class="pin">3</span></div>
+            <h5>Administração</h5>
+            <div class="mi"><span class="ic"></span>Utilizadores</div>
+          </div>
+          <div class="ct">
+            <div class="m-h">Incidências reportadas por painelistas</div>
+            <p class="m-muted">Aqui abre-se a lista de incidências reportadas (ver a secção seguinte).</p>
+          </div>
+        </div>
+      </div>
+      <ol class="legend">
+        <li><strong>Incidências reportadas</strong>: tudo o que os painelistas reportam pelo Telegram. O distintivo <span class="badge b-red">vermelho</span> conta as incidências que aguardam a sua atenção; o distintivo <span class="badge b-blue">azul</span> conta as conversas com uma resposta que o utilizador ainda não leu.</li>
+        <li><strong>Disponibilidade dos painelistas</strong>: todos os períodos de indisponibilidade, com as amostras afetadas e o que o ONEMS fez com cada uma. O distintivo vermelho conta as incidências pendentes da sua decisão.</li>
+        <li><strong>Ajuda: Incidências</strong>: esta página.</li>
+      </ol>
+      <p>Estados em <em>Incidências reportadas</em>:
+        <span class="badge b-red">Aberta</span>
+        <span class="badge b-blue">Em curso</span>
+        <span class="badge b-green">Resolvida</span>
+        <span class="badge b-gray">Descartada</span>
+        <span class="badge b-purple">Resolvida automaticamente</span>
+      </p>
+    </section>
+
+    <section id="screen-reported">
+      <h2>Incidências reportadas: lista e detalhe</h2>
+      <h3>A lista</h3>
+      <div class="app">
+        <div class="app-bar"><i></i><i></i><i></i><span>ONEMS &rsaquo; Incidências &rsaquo; Incidências reportadas</span></div>
+        <div class="app-body">
+          <div class="m-h">Incidências reportadas por painelistas</div>
+          <div style="margin-bottom:10px"><span class="m-sel">Todas as categorias</span><span class="m-sel">Abertas / ativas</span><span class="pin">1</span></div>
+          <div class="m-card"><table>
+            <thead><tr><th>Painelista</th><th>Categoria</th><th>Estado</th><th>Data de reporte</th><th></th></tr></thead>
+            <tbody>
+              <tr><td>Luc&iacute;a Torres <span class="badge b-blue">Resposta nova</span><span class="pin">2</span></td><td>Falta de material</td><td>Em curso</td><td>2026-10-20</td><td><span class="m-link">Abrir</span><span class="pin">3</span></td></tr>
+              <tr><td>Pablo Ruiz</td><td>Pacote devolvido</td><td>Aberta</td><td>2026-10-21</td><td><span class="m-link">Abrir</span></td></tr>
+              <tr><td>Marta L&oacute;pez</td><td>Como enviar</td><td>Aberta</td><td>2026-10-22</td><td><span class="m-link">Abrir</span></td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+      <ol class="legend">
+        <li><strong>Filtros.</strong> <em>Todas as categorias</em> reduz a lista a um só tipo. O filtro de estado mostra por predefinição <em>Abertas / ativas</em>; mude para <em>Resolvida</em>, <em>Descartada</em> ou <em>Resolvida automaticamente</em> para ver as incidências fechadas.</li>
+        <li><strong>Resposta nova.</strong> O painelista escreveu algo que o utilizador ainda não leu. Desaparece quando abre a incidência.</li>
+        <li><strong>Abrir</strong> mostra o detalhe da incidência.</li>
+      </ol>
+
+      <h3>O detalhe</h3>
+      <div class="app">
+        <div class="app-bar"><i></i><i></i><i></i><span>ONEMS &rsaquo; Incidências &rsaquo; Incidências reportadas &rsaquo; Pacote devolvido</span></div>
+        <div class="app-body">
+          <div class="m-link" style="margin-bottom:8px">&larr; Voltar</div>
+          <div class="m-h3">Pacote devolvido</div>
+          <div class="m-muted" style="line-height:1.7">Pablo Ruiz &middot; <code>PAN-BAL-01</code><br>&#128222; 600 111 222 &middot; &#9993; pablo@example.com &middot; Telegram: sim &middot; es &middot; Palma<br><span class="badge b-blue">Emissor</span> &nbsp;BAL-01 &rarr; SAC-01 &middot; Correos &middot; Carta normal &middot; 18/11/2026 &nbsp;<code>TAG-00412</code><span class="pin">1</span></div>
+          <div class="m-note">Devolveram-me o pacote, a morada estava incorreta.<span class="pin">2</span></div>
+          <div class="m-box">
+            <div class="m-h3" style="font-size:13px">Reenviar amostra devolvida<span class="pin">3</span></div>
+            <div style="margin:8px 0">Nó de destino <span class="m-in">SAC-02 &#9662;</span> &nbsp; Semana <span class="m-in">S48 &middot; 23/11/2026 &#9662;</span></div>
+            <div class="m-muted">Cabe: 24/11/2026 (carga 4)</div>
+            <div style="margin-top:8px"><span class="m-pbtn">Confirmar reenvio</span><span class="m-sbtn">Cancelar envio</span></div>
+          </div>
+          <div class="m-box">
+            <div class="m-h3" style="font-size:13px">Conversa com o painelista<span class="pin">4</span></div>
+            <div class="m-bub l">Queres registar isto como um pacote devolvido?<small>Bot &middot; Enviado</small></div>
+            <div class="m-bub r">Sim<small>Painelista &middot; Botão premido</small></div>
+            <div class="m-bub l">Olá Pablo, vamos enviá-lo de novo na próxima semana. Podes guardar a etiqueta?<small>Gestor &middot; Enviado</small></div>
+            <div class="m-bub r">Sim, ainda a tenho.<small>Painelista</small></div>
+            <div class="m-ta">Escreve uma mensagem ao painelista&hellip;</div>
+            <span class="m-pbtn">Enviar</span>
+          </div>
+          <div class="m-box">
+            <div class="m-muted">Nota de resolução<span class="pin">5</span></div>
+            <div class="m-ta">Reenviada para SAC-02 na semana 48.</div>
+            <span class="m-pbtn">Resolver</span><span class="m-sbtn">Descartar</span>
+          </div>
+        </div>
+      </div>
+      <ol class="legend">
+        <li><strong>Cabeçalho.</strong> Nome e código do painelista, dados de contacto (telefone, e-mail, se o Telegram está associado, idioma, cidade) e o envio afetado: função (<span class="badge b-blue">Emissor</span> ou <span class="badge b-green">Recetor</span>), rota, transportadora, produto, data e etiqueta.</li>
+        <li><strong>O que escreveu o painelista</strong>, e a foto, se enviou alguma.</li>
+        <li><strong>Bloco de ação.</strong> Muda conforme o tipo: reenviar ou cancelar para um pacote devolvido, o assistente de fornecimento para a falta de material, um resumo só de leitura para os tipos automáticos, ou «Não há ação disponível; apenas suporte.» para os restantes. Quando a incidência está fechada, este bloco é só de leitura.</li>
+        <li><strong>Conversa com o painelista.</strong> Cada mensagem do bot, do painelista e sua, com o seu estado (<em>Pendente de envio</em>, <em>Enviado</em>, <em>Falhado</em>). Escreva e prima <em>Enviar</em> para escrever ao painelista. Ver <a href="#conversation">Conversa e avisos</a>.</li>
+        <li><strong>Fecho.</strong> Adicione uma nota de resolução e prima <strong>Resolver</strong> (tratada) ou <strong>Descartar</strong> (não é uma incidência). As incidências resolvidas automaticamente não têm bloco de fecho.</li>
+      </ol>
+      <div class="callout info">A primeira ação que realizar passa a incidência de <span class="badge b-red">Aberta</span> a <span class="badge b-blue">Em curso</span> automaticamente.</div>
+    </section>
+
+    <section id="incident-types">
+      <h2>Tipos de incidência</h2>
+      <p>Há nove tipos. Quatro fecham-se automaticamente e deixam apenas um registo.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Tipo</th><th>O painelista diz&hellip;</th><th>O que faz o ONEMS</th><th>O que faz o utilizador</th></tr></thead>
+        <tbody>
+          <tr><td>Falta de material</td><td>«Fiquei sem envelopes nem selos»</td><td>Calcula o necessário para o período e propõe de onde obtê-lo.</td><td>Rever e <em>Confirmar fornecimento</em>.</td></tr>
+          <tr><td>Etiqueta / recibo ilegível <span class="badge b-purple">Auto</span></td><td>«Não consigo ler a etiqueta»</td><td>Mostra os pacotes a caminho; o painelista escolhe um e a receção fica registada.</td><td>Nada, a menos que nenhum pacote coincida.</td></tr>
+          <tr><td>Pacote danificado <span class="badge b-purple">Auto</span></td><td>«Chegou partido»</td><td>Regista-o e agradece.</td><td>Nada. Apenas registo.</td></tr>
+          <tr><td>Pacote devolvido</td><td>«Devolveram-mo»</td><td>Abre a incidência e envia-lhe um e-mail.</td><td>Cancelar o envio ou reenviá-lo para outro nó.</td></tr>
+          <tr><td>Como enviar</td><td>«Não sei como enviar isto»</td><td>Abre a incidência e envia-lhe um e-mail.</td><td>Contactar o painelista. Ainda não há vídeos.</td></tr>
+          <tr><td>Pedido de baixa</td><td>«Não posso participar na próxima semana»</td><td>Encaminha-o para <em>Dias indisponíveis</em>.</td><td>Ver <a href="#availability">Disponibilidade dos painelistas</a>.</td></tr>
+          <tr><td>Problema com a foto da etiqueta <span class="badge b-purple">Auto</span></td><td>«Não consigo fotografar a etiqueta»</td><td>Pede o número da etiqueta e regista o envio.</td><td>Nada. Não se cria nenhuma incidência.</td></tr>
+          <tr><td>Alteração de dados de contacto <span class="badge b-purple">Auto</span></td><td>«O meu novo telefone é o 600 123 456»</td><td>Valida, pede confirmação e atualiza a ficha.</td><td>Nada. Conservam-se o antes e o depois.</td></tr>
+          <tr><td>Outro</td><td>Qualquer outra coisa</td><td>Abre a incidência e envia-lhe um e-mail.</td><td>Responder e <em>Resolver</em>.</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout info">O ID de Telegram e o nome não podem ser alterados a partir do bot. Só um gestor os pode alterar a partir da ficha do painelista.</div>
+    </section>
+
+    <section id="examples">
+      <h2>Como tratar cada tipo no ONEMS</h2>
+      <p>O que mostra o bloco de ação para cada tipo e o que fazer. Os nomes e os números são ilustrativos.</p>
+
+      <h3>Pacote devolvido &mdash; o utilizador decide</h3>
+      <p>Um pacote devolvido volta ao <strong>emissor</strong>, que conserva a etiqueta. O bloco de ação é <strong>Reenviar amostra devolvida</strong> (visível no detalhe acima).</p>
+      <ol class="steps">
+        <li>Escolha um <strong>Nó de destino</strong>. Só são oferecidos nós da <strong>mesma cidade</strong> que o destino atual; se não houver nenhum, o ecrã indica <em>Não há outro nó nesta cidade</em>.</li>
+        <li>Escolha uma <strong>Semana</strong>, a partir da atual. O ONEMS verifica o dia e a carga e mostra <em>Cabe: data (carga n)</em>, ou o motivo pelo qual não se pode mover para lá.</li>
+        <li>Prima <strong>Confirmar reenvio</strong>. A amostra conserva a sua etiqueta e volta ao plano como pendente. Os painelistas afetados recebem o aviso pelo Telegram.</li>
+        <li>Ou prima <strong>Cancelar envio</strong> se a amostra já não for necessária. Isto não se pode desfazer a partir deste ecrã.</li>
+        <li>Escreva ao painelista, se for útil, adicione uma nota de resolução e prima <strong>Resolver</strong>.</li>
+      </ol>
+
+      <h3>Tipos automáticos &mdash; só de leitura</h3>
+      <p>Para <em>Alteração de dados de contacto</em> e <em>Etiqueta / recibo ilegível</em> o bloco de ação intitula-se <strong>Tratada automaticamente</strong> e mostra apenas o que aconteceu.</p>
+      <div class="app">
+        <div class="app-bar"><i></i><i></i><i></i><span>ONEMS &rsaquo; Incidências reportadas &rsaquo; Alteração de dados de contacto</span></div>
+        <div class="app-body">
+          <div class="m-box" style="margin:0">
+            <div class="m-muted" style="margin-bottom:6px">Tratada automaticamente</div>
+            <table style="width:auto;min-width:360px">
+              <thead><tr><th></th><th>Antes</th><th>Depois</th></tr></thead>
+              <tbody><tr><td>Telefone</td><td>600 999 888</td><td>600 123 456</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <ul>
+        <li><strong>Alteração de dados de contacto:</strong> uma tabela de antes / depois com os campos que o painelista alterou.</li>
+        <li><strong>Etiqueta / recibo ilegível:</strong> o envio que o painelista escolheu, ou <em>Não havia envios a caminho</em> (o único caso que fica aberto para o utilizador).</li>
+        <li><strong>Pacote danificado</strong> e <strong>Problema com a foto da etiqueta</strong> não requerem nada do utilizador.</li>
+      </ul>
+
+      <h3>Como enviar, Outro, Pedido de baixa &mdash; apenas suporte</h3>
+      <p>O bloco de ação diz <em>Não há ação disponível; apenas suporte.</em> Utilize a <strong>Conversa com o painelista</strong> para responder e depois <strong>Resolver</strong> ou <strong>Descartar</strong>. Num pedido de baixa, declare o período em <a href="#availability-declare">Disponibilidade dos painelistas</a> se o painelista não o fez pelo Telegram.</p>
+    </section>
+
+    <section id="material">
+      <h2>Falta de material</h2>
+      <p>É o único tipo com vários passos no ONEMS, porque o material tem muitas vezes de viajar entre painelistas. O bloco de ação tem três partes mais a folha de envios.</p>
+      <div class="app">
+        <div class="app-bar"><i></i><i></i><i></i><span>ONEMS &rsaquo; Incidências reportadas &rsaquo; Falta de material</span></div>
+        <div class="app-body">
+          <div class="m-box">
+            <div class="m-h3" style="font-size:13px">Stock<span class="pin">1</span></div>
+            <table style="width:auto;min-width:420px">
+              <thead><tr><th>Material</th><th class="num">Quantidade real</th></tr></thead>
+              <tbody>
+                <tr><td>Envelope de documentos expresso <span class="badge b-red">Bloqueante</span></td><td class="num"><span class="m-in" style="min-width:50px;text-align:right">100</span></td></tr>
+                <tr><td>Selo de segurança</td><td class="num"><span class="m-in" style="min-width:50px;text-align:right">200</span></td></tr>
+              </tbody>
+            </table>
+            <span class="m-sbtn">Pôr stock a zero</span>
+          </div>
+          <div class="m-box">
+            <div class="m-h3" style="font-size:13px">Necessidade e fornecimento<span class="pin">2</span></div>
+            <div style="margin:6px 0">Dias de necessidade a cobrir <span class="m-in" style="min-width:50px"></span> <span class="m-muted">Vazio = até ao fim do mês. Calcula-se até 30/11/2026</span></div>
+            <table>
+              <thead><tr><th></th><th class="num">Necessidade</th><th>Vizinhos</th><th class="num">Central</th><th class="num">Compra</th><th>Alterar origem</th></tr></thead>
+              <tbody>
+                <tr><td>Envelope de documentos expresso <span class="badge b-red">Bloqueante</span></td><td class="num">650</td><td>Ana P&eacute;rez: 350</td><td class="num">300</td><td class="num">-</td><td><span class="m-sel">Proposta</span></td></tr>
+                <tr><td>Selo de segurança</td><td class="num">400</td><td>Ana P&eacute;rez: 400</td><td class="num">-</td><td class="num">-</td><td><span class="m-sel">Proposta</span></td></tr>
+              </tbody>
+            </table>
+            <div style="margin:8px 0">Data prevista de chegada <span class="m-in">03/11/2026</span> &nbsp; <span class="m-muted">7 dias úteis sem stock</span></div>
+            <div class="m-muted">Amostras afetadas: NY-03 &rarr; BOS-01 (26/10), NY-03 &rarr; CHI-02 (28/10), NY-03 &rarr; LA-02 (30/10)</div>
+            <div style="margin-top:8px"><span class="m-pbtn">Confirmar fornecimento</span></div>
+          </div>
+          <div class="m-box">
+            <div class="m-h3" style="font-size:13px">Replanificar<span class="pin">3</span></div>
+            <span class="m-pbtn">Criar baixa por materiais e replanificar</span>
+          </div>
+          <div class="m-box">
+            <div class="m-h3" style="font-size:13px">Folha de envios de material<span class="pin">4</span></div>
+            <table>
+              <thead><tr><th>Origem</th><th>Destino</th><th>Material</th><th class="num">Quantidade</th><th>Deve chegar</th><th>Estado</th><th></th></tr></thead>
+              <tbody>
+                <tr><td>Ana P&eacute;rez (PAN-NY-02)</td><td>Luc&iacute;a Torres (PAN-NY-03)</td><td>Envelope de documentos expresso</td><td class="num">350</td><td>03/11/2026</td><td>Pendente</td><td class="m-muted">O painelista doador confirma-o pelo Telegram</td></tr>
+                <tr><td>Ana P&eacute;rez (PAN-NY-02)</td><td>Luc&iacute;a Torres (PAN-NY-03)</td><td>Selo de segurança</td><td class="num">400</td><td>03/11/2026</td><td>Enviado</td><td></td></tr>
+                <tr><td>Armazém central</td><td>Luc&iacute;a Torres (PAN-NY-03)</td><td>Envelope de documentos expresso</td><td class="num">300</td><td>03/11/2026</td><td>Pendente</td><td><span class="m-sbtn">Marcar enviado</span></td></tr>
+              </tbody>
+            </table>
+            <span class="m-sbtn">Imprimir / PDF</span><span class="m-sbtn">Descarregar Excel (CSV)</span>
+          </div>
+        </div>
+      </div>
+      <ol class="legend">
+        <li><strong>Stock.</strong> O que o ONEMS crê que o painelista tem. Pode corrigir uma quantidade, ou premir <em>Pôr stock a zero</em> quando o painelista diz que não tem nada. <span class="badge b-red">Bloqueante</span> assinala o material sem o qual não se pode fazer nenhum envio.</li>
+        <li><strong>Necessidade e fornecimento.</strong> A necessidade do período (até ao fim do mês, ou o número de dias que o utilizador escrever). Para cada material, o ONEMS propõe de onde sai, por esta ordem: <strong>Vizinhos</strong> da mesma cidade com excedente, depois o armazém <strong>Central</strong>, depois <strong>Compra</strong>. Use <em>Alterar origem</em> para forçar <em>Só vizinhos</em>, <em>Só central</em> ou <em>Comprar tudo</em>. Em baixo, a <em>Data prevista de chegada</em> (editável), os dias úteis sem stock e as amostras afetadas. <strong>Confirmar fornecimento</strong> cria os envios; só se pode fazer uma vez.</li>
+        <li><strong>Replanificar.</strong> Se o painelista vai ficar sem material bloqueante durante alguns dias, <em>Criar baixa por materiais e replanificar</em> declara um período de indisponibilidade desde hoje até à chegada prevista; o <a href="#availability">motor de disponibilidade</a> move as amostras afetadas. Depois, o botão passa a ser <em>Ir para a incidência de baixa</em>. Quando todo o material provém de vizinhos ou do armazém central dentro do período, o ecrã indica que não é necessária baixa.</li>
+        <li><strong>Folha de envios de material.</strong> Uma linha por origem, destino e material, com <em>Pendente</em>, <em>Enviado</em>, <em>Parcialmente recebido</em>, <em>Recebido</em> ou <em>Cancelado</em>. Os envios a partir da central são marcados como enviados pelo utilizador (<em>Marcar enviado</em>, que atualiza o stock); os vizinhos confirmam os seus pelo Telegram. <em>Imprimir / PDF</em> e <em>Descarregar Excel (CSV)</em> dão-lhe a folha para o armazém. Aparece uma lista <em>A comprar</em> quando é preciso adquirir algo.</li>
+      </ol>
+
+      <h3>O que acontece depois no Telegram</h3>
+      <ol class="steps">
+        <li>O doador recebe os materiais, as quantidades e <strong>apenas o nome e a morada</strong> do recetor, com um botão <em>Já o enviei</em>.</li>
+        <li>Quando chega a data, pergunta-se ao recetor se o material chegou e em que quantidade: <em>Tudo</em> ou <em>Outra quantidade</em>. Se só chegou uma parte, o ONEMS regista-a e volta a perguntar mais tarde pelo resto.</li>
+        <li>Os envios que precisam do material em falta ficam fora do lembrete diário do recetor. Quando o material chega, o bot comunica-lho: <em>Já podes enviar estes&hellip;</em></li>
+        <li><strong>A incidência fecha-se sozinha</strong> quando tudo foi recebido. A baixa, se existir, não se cancela: termina na sua própria data.</li>
+      </ol>
+      <div class="callout warn"><strong>Sem resposta de um doador ou de um recetor?</strong> Após duas perguntas sem resposta a um doador, ou três a um recetor, o utilizador recebe um e-mail. Se um recetor não tem Telegram, o ONEMS omite a pergunta e envia-lhe um e-mail uma única vez.</div>
+    </section>
+
+    <section id="availability">
+      <h2>Disponibilidade dos painelistas</h2>
+      <p>Um <strong>período de indisponibilidade</strong> é um tempo em que um painelista não pode enviar nem receber amostras (férias, doença, falta de material&hellip;). <strong>Cada período converte-se numa incidência</strong>, e o ONEMS tenta arranjar as amostras afetadas sem necessidade do utilizador.</p>
+
+      <h3>Como se declara um período</h3>
+      <ul>
+        <li><strong>Botões do Telegram:</strong> <em>Dias indisponíveis</em> no menu do bot.</li>
+        <li><strong>Texto livre no Telegram:</strong> «Na próxima semana estou de férias». O bot lê as datas e pede confirmação. O utilizador também recebe um e-mail.</li>
+        <li><strong>ONEMS:</strong> a partir do ecrã <em>Painelistas</em> (secção seguinte).</li>
+      </ul>
+      <p>Em todos os casos o painelista vê <em>Recebido. Obrigado por nos avisares</em>.</p>
+
+      <h3>O que faz o ONEMS com cada amostra afetada</h3>
+      <p>Para cada amostra programada durante o período em que o painelista envia ou recebe, o ONEMS tenta o seguinte por ordem:</p>
+      <ol class="steps">
+        <li><strong>Mover para uma data posterior.</strong> O primeiro dia útil (de segunda a sexta-feira) após o fim do período, <strong>dentro do mesmo mês</strong>, quando o nó está disponível. As amostras repartem-se pelos dias.</li>
+        <li><strong>Mover para outro nó da mesma cidade.</strong> O nó com menor carga que não chegaria a saturar-se; primeiro na mesma semana, depois noutras datas do mês.</li>
+        <li><strong>Deixá-lo nas mãos do utilizador.</strong> Se nenhuma das duas opções funcionar, a amostra aguarda a sua decisão com uma proposta já calculada.</li>
+      </ol>
+      <div class="callout ok"><strong>Regras que nunca se quebram.</strong> Uma amostra já enviada ou recebida nunca é tocada. Uma amostra nunca é movida para outra cidade. Um nó nunca é sobrecarregado só para resolver depressa. Os envios só caem em dias úteis.</div>
+
+      <h3>Estados</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Estado</th><th>Significado</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge b-gray">Nova</span></td><td>Acabou de ser declarada; o ONEMS está a calcular.</td></tr>
+          <tr><td><span class="badge b-green">Resolvida automaticamente</span></td><td>Todas as amostras foram movidas, ou nenhuma estava afetada.</td></tr>
+          <tr><td><span class="badge b-yellow">Pendente de decisão do gestor</span></td><td>Pelo menos uma amostra requer a sua decisão.</td></tr>
+          <tr><td><span class="badge b-blue">Resolvida</span></td><td>O utilizador decidiu todas as amostras pendentes.</td></tr>
+        </tbody>
+      </table></div>
+      <p>Se o plano mudar depois de o período ter sido declarado, o ONEMS recalcula-o. Os painelistas afetados por uma alteração na semana em curso recebem pelo Telegram os detalhes do novo envio.</p>
+    </section>
+
+    <section id="availability-declare">
+      <h2>Declarar um período no ONEMS</h2>
+      <p>Vá a <strong>Configuração &rsaquo; Painelistas</strong> e abra o separador <strong>Períodos de indisponibilidade</strong>. Prima <strong>+ Adicionar um período de indisponibilidade</strong>.</p>
+      <div class="app">
+        <div class="app-bar"><i></i><i></i><i></i><span>ONEMS &rsaquo; Painelistas &rsaquo; Períodos de indisponibilidade</span></div>
+        <div class="app-body">
+          <div class="m-h">Períodos de indisponibilidade</div>
+          <p class="m-muted" style="margin-top:-8px">Gerir os períodos de indisponibilidade dos painelistas para a reatribuição automática de amostras</p>
+          <div style="margin:8px 0 12px"><span class="m-sel">Todos os painelistas</span><span class="m-sel">Todos os períodos</span><span class="m-sel">Todos os motivos</span> <span class="m-pbtn">+ Adicionar um período de indisponibilidade</span><span class="pin">1</span></div>
+          <div class="m-box" style="max-width:460px;background:var(--g50)">
+            <div class="m-h3" style="font-size:13px">Adicionar um período de indisponibilidade<span class="pin">2</span></div>
+            <div style="margin:6px 0">Painelista <span class="m-in" style="min-width:220px">Elena Garc&iacute;a (PAN-NY-01) &#9662;</span></div>
+            <div style="margin:6px 0">Data de início <span class="m-in">10/11/2026</span> &nbsp; Data de fim <span class="m-in">21/11/2026</span></div>
+            <div style="margin:6px 0">Motivo <span class="m-in" style="min-width:140px">Férias &#9662;</span></div>
+            <div style="margin:6px 0">Notas <span class="m-in" style="min-width:300px;color:var(--g400)">Opcional</span></div>
+            <div style="margin-top:10px"><span class="m-pbtn">Guardar</span><span class="m-sbtn">Cancelar</span></div>
+          </div>
+          <div class="m-card"><table>
+            <thead><tr><th>Painelista</th><th>Intervalo de datas</th><th>Duração</th><th>Motivo</th><th>Estado</th><th>Ações</th></tr></thead>
+            <tbody>
+              <tr><td>Elena Garc&iacute;a</td><td>10/11/2026 &ndash; 21/11/2026</td><td>12 dias</td><td>Férias</td><td>Próximos</td><td><span class="m-link">Cancelar</span><span class="pin">3</span></td></tr>
+              <tr><td>Luc&iacute;a Torres</td><td>22/10/2026 &ndash; 03/11/2026</td><td>13 dias</td><td>Materiais</td><td>Atuais (ativos agora)</td><td><span class="m-link">Cancelar</span></td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+      <ol class="legend">
+        <li><strong>+ Adicionar um período de indisponibilidade</strong> abre o formulário. Os filtros reduzem a lista por painelista, período (atuais, próximos, passados) e motivo.</li>
+        <li><strong>O formulário.</strong> Painelista, datas de início e de fim, um motivo (<em>Férias</em>, <em>Baixa por doença</em>, <em>Formação</em>, <em>Pessoal</em>, <em>Outro</em>; <em>Materiais</em> é atribuído pelo ONEMS quando o período provém de uma incidência de falta de material) e notas opcionais. Ao guardar, cria-se a incidência e o motor é executado de imediato. O painelista recebe o aviso pelo Telegram.</li>
+        <li><strong>Cancelar</strong> termina um período: revertem-se as suas alterações ao plano e não se pode reativar. As datas que provêm do painelista não podem ser editadas; cancele e declare um novo período.</li>
+      </ol>
+    </section>
+
+    <section id="availability-screen">
+      <h2>O ecrã de incidências</h2>
+      <h3>A lista</h3>
+      <div class="app">
+        <div class="app-bar"><i></i><i></i><i></i><span>ONEMS &rsaquo; Incidências &rsaquo; Disponibilidade dos painelistas</span></div>
+        <div class="app-body">
+          <div class="m-h">Incidências de disponibilidade dos painelistas</div>
+          <div style="margin-bottom:10px">Estado <span class="m-sel">Abertas</span><span class="pin">1</span></div>
+          <div class="m-card"><table>
+            <thead><tr><th>Painelista</th><th>Nó / cidade</th><th>Datas da baixa</th><th>Declarada</th><th class="num">Amostras afetadas</th><th>Envio / receção</th><th class="num">Pendentes</th><th>Estado</th><th>Rever</th></tr></thead>
+            <tbody>
+              <tr><td>Elena Garc&iacute;a<br><span class="m-muted">PAN-NY-01</span></td><td>NY-01 &middot; Nova Iorque</td><td>10/11/2026 &ndash; 21/11/2026</td><td>22/10/2026</td><td class="num">14</td><td>9 / 5</td><td class="num">2<span class="pin">2</span></td><td><span class="badge b-yellow">Pendente de decisão do gestor</span></td><td><span class="m-link">Rever</span><span class="pin">3</span></td></tr>
+              <tr><td>Luc&iacute;a Torres<br><span class="m-muted">PAN-NY-03</span></td><td>NY-03 &middot; Nova Iorque</td><td>22/10/2026 &ndash; 03/11/2026</td><td>22/10/2026</td><td class="num">3</td><td>3 / 0</td><td class="num">0</td><td><span class="badge b-green">Resolvida automaticamente</span></td><td><span class="m-link">Rever</span></td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+      <ol class="legend">
+        <li><strong>Filtro de estado.</strong> <em>Abertas</em> (por predefinição) mostra o que não terminou; <em>Todas</em>, ou um estado concreto, mostra o resto.</li>
+        <li><strong>Pendentes</strong> é o número de amostras que aguardam a sua decisão. <em>Envio / receção</em> reparte as amostras afetadas segundo a função do painelista.</li>
+        <li><strong>Rever</strong> abre a incidência.</li>
+      </ol>
+
+      <h3>O detalhe</h3>
+      <div class="app">
+        <div class="app-bar"><i></i><i></i><i></i><span>ONEMS &rsaquo; Incidências &rsaquo; Disponibilidade dos painelistas &rsaquo; Elena Garc&iacute;a</span></div>
+        <div class="app-body">
+          <div class="m-link" style="margin-bottom:8px">&larr; Voltar à lista</div>
+          <div class="m-h3">Elena Garc&iacute;a &middot; NY-01 &middot; Nova Iorque &middot; 10/11/2026 &ndash; 21/11/2026 <span class="badge b-yellow">Pendente de decisão do gestor</span></div>
+          <div class="m-note"><strong>Resumo automático:</strong> 9 movidas para uma data posterior &middot; 3 movidas para outro nó &middot; 2 pendentes<span class="pin">1</span></div>
+
+          <div class="m-h3" style="font-size:13px;margin-top:14px">Balanço da cidade<span class="pin">2</span></div>
+          <div style="margin:4px 0 6px" class="m-muted">Semanas visíveis <span class="m-sel">Mês atual</span> &nbsp; Carga de referência <span class="m-in" style="min-width:36px">6</span> &nbsp; Desvio % <span class="m-in" style="min-width:36px">20</span></div>
+          <div class="m-card"><table class="heat">
+            <thead><tr><th>Nó</th><th>S45</th><th>S46 <span class="m-muted">Semana afetada</span></th><th>S47 <span class="m-muted">Semana afetada</span></th><th>S48</th><th>Total</th></tr></thead>
+            <tbody>
+              <tr><td style="text-align:left">NY-01 <span class="m-muted">Elena</span></td><td class="ok">4 / 2</td><td class="off">Painelista de baixa</td><td class="off">Painelista de baixa</td><td class="hi">7 / 3</td><td>11 / 5</td></tr>
+              <tr><td style="text-align:left">NY-02 <span class="m-muted">Ana</span></td><td class="ok">3 / 3</td><td class="hi now">6 / 2</td><td class="ok">4 / 2</td><td class="ok">3 / 1</td><td>16 / 8</td></tr>
+              <tr><td style="text-align:left">NY-04 <span class="m-muted">Omar</span></td><td class="ok">2 / 1</td><td class="sat">8 / 3</td><td class="hi">6 / 3</td><td class="ok">2 / 2</td><td>18 / 9</td></tr>
+            </tbody>
+          </table></div>
+          <div class="m-muted">Env / Rec por nó e semana &middot; <span class="badge b-green">Normal</span> <span class="badge b-yellow">Alta</span> <span class="badge b-red">Saturada</span> &middot; Clica numa casa para ver as suas amostras; arrasta uma amostra ou linha pendente para uma casa para a mover</div>
+
+          <div class="m-h3" style="font-size:13px;margin-top:14px">Pendentes da tua decisão<span class="pin">3</span></div>
+          <div class="m-card"><table>
+            <thead><tr><th></th><th>Amostra</th><th>Transportadora &middot; produto</th><th>Função</th><th>Data original</th><th>Proposta do sistema</th><th>Ações</th></tr></thead>
+            <tbody>
+              <tr><td>&#9745;</td><td><code>TAG-00517</code> NY-01 &rarr; BOS-02</td><td>USPS &middot; Priority</td><td>Envio</td><td>12/11/2026</td><td>Mover para a primeira semana posterior com capacidade &rarr; NY-02, 24/11/2026</td><td><span class="m-sbtn">Confirmar</span><span class="m-sbtn">Anular amostra</span></td></tr>
+              <tr><td>&#9745;</td><td><code>TAG-00521</code> CHI-01 &rarr; NY-01</td><td>USPS &middot; Priority</td><td>Receção</td><td>17/11/2026</td><td>Sem vaga em 8 semanas; sugere-se cancelar</td><td><span class="m-sbtn">Confirmar</span><span class="m-sbtn">Anular amostra</span></td></tr>
+            </tbody>
+          </table></div>
+          <div style="margin:6px 0"><span class="m-muted">2 selecionadas</span> &nbsp;<span class="m-pbtn">Aceitar selecionadas</span><span class="m-sbtn">Cancelar selecionadas</span><span class="pin">4</span></div>
+
+          <div class="m-box" style="max-width:420px;background:var(--g50)">
+            <div class="m-h3" style="font-size:13px">Alterar resolução<span class="pin">5</span></div>
+            <div style="margin:6px 0">Ação final <span class="m-sel">Reencaminhar para outro nó</span></div>
+            <div style="margin:6px 0">Nó de destino <span class="m-sel">NY-02</span> &nbsp; Nova data <span class="m-in">24/11/2026</span></div>
+            <span class="m-pbtn">Aplicar</span><span class="m-sbtn">Cancelar</span>
+          </div>
+
+          <div class="m-h3" style="font-size:13px;margin-top:14px">Resolvidas<span class="pin">6</span></div>
+          <div class="m-card"><table>
+            <thead><tr><th>Estado</th><th>Amostra</th><th>Transportadora &middot; produto</th><th>Função</th><th>Data original</th><th>O que se fez</th><th>Por</th><th>Quando</th></tr></thead>
+            <tbody>
+              <tr><td>Resolvida automaticamente</td><td><code>TAG-00502</code> NY-01 &rarr; LA-02</td><td>USPS &middot; Priority</td><td>Envio</td><td>10/11/2026</td><td>Movida para uma data posterior &rarr; 23/11/2026</td><td>Sistema</td><td>22/10/2026</td></tr>
+              <tr><td>Resolvida automaticamente</td><td><code>TAG-00509</code> NY-01 &rarr; SEA-01</td><td>USPS &middot; Priority</td><td>Envio</td><td>13/11/2026</td><td>Movida para outro nó &rarr; NY-02</td><td>Sistema</td><td>22/10/2026</td></tr>
+              <tr><td>Informativa</td><td><code>TAG-00498</code> MIA-01 &rarr; NY-01</td><td>USPS &middot; Priority</td><td>Receção</td><td>11/11/2026</td><td>Sem alterações (já em trânsito)</td><td>Sistema</td><td>22/10/2026</td></tr>
+            </tbody>
+          </table></div>
+
+          <div class="m-box">
+            <div class="m-muted">Resolução final<span class="pin">7</span></div>
+            <div class="m-ta">Adiciona uma nota sobre como esta incidência foi resolvida&hellip;</div>
+            <span class="m-pbtn">Guardar</span>
+          </div>
+        </div>
+      </div>
+      <ol class="legend">
+        <li><strong>Resumo automático.</strong> O que fez o motor: movidas para uma data posterior, movidas para outro nó, canceladas, informativas, pendentes.</li>
+        <li><strong>Balanço da cidade.</strong> Envios enviados / recebidos por nó e semana na cidade do painelista, coloridos <span class="badge b-green">Normal</span>, <span class="badge b-yellow">Alta</span> ou <span class="badge b-red">Saturada</span> segundo a <em>Carga de referência</em> e o <em>Desvio %</em> que o utilizador definir. As casas riscadas são semanas em que o painelista não está disponível. Altere <em>Semanas visíveis</em> para olhar mais atrás ou mais à frente. Prima uma semana para filtrar as linhas abaixo; prima uma casa para listar as suas amostras; <strong>arraste uma linha pendente para uma casa</strong> para mover a amostra para lá (o ONEMS verifica o melhor dia e mostra a carga resultante antes de o utilizador confirmar).</li>
+        <li><strong>Pendentes da tua decisão.</strong> Uma linha por cada amostra que o motor não conseguiu resolver, com a sua função, data original, a <em>Proposta do sistema</em> e a sua causa. <strong>Confirmar</strong> aplica a proposta a essa linha; <strong>Anular amostra</strong> cancela a amostra.</li>
+        <li><strong>Aceitar selecionadas / Cancelar selecionadas</strong> fazem o mesmo com várias linhas ao mesmo tempo. Cancelar uma amostra elimina-a do plano de alocação e não se pode desfazer a partir deste ecrã, por isso o ONEMS pede confirmação.</li>
+        <li><strong>Alterar resolução.</strong> Para fazer algo diferente da proposta, escolha uma <em>Ação final</em>: <em>Reencaminhar para outro nó</em> (escolha o <em>Nó de destino</em>), <em>Alterar data</em> (escolha a <em>Nova data</em>) ou <em>Cancelar amostra</em>, e depois <strong>Aplicar</strong>.</li>
+        <li><strong>Resolvidas.</strong> Todas as linhas já tratadas, pelo <em>Sistema</em> ou por um <em>Gestor</em>, com o que se fez e quando. As linhas <em>Informativa</em> são amostras que já estão em trânsito: não se pode alterar nada.</li>
+        <li><strong>Resolução final.</strong> Uma nota livre sobre como se fechou a incidência. Prima <strong>Guardar</strong>. Quando não resta nenhuma linha pendente, a incidência passa a <span class="badge b-blue">Resolvida</span>.</li>
+      </ol>
+      <div class="callout info"><strong>Os painelistas são informados.</strong> Cada alteração que o utilizador aplica a uma amostra da semana em curso é enviada pelo Telegram aos painelistas afetados, com a nova data ou o novo nó.</div>
+    </section>
+
+    <section id="availability-example">
+      <h2>Exemplo prático</h2>
+      <p>Os números são ilustrativos.</p>
+      <div class="chat">
+        <div class="who">Bot ONE</div>
+        <div class="msg me">De 10 a 21 de novembro estarei de férias</div>
+        <div class="msg bot">Percebo que: <strong>10 nov &ndash; 21 nov</strong>. É isso?</div>
+        <div class="kb"><span>Sim</span><span>Não</span></div>
+        <div class="msg me">Sim</div>
+        <div class="msg bot">Recebido. Obrigado por nos avisares.</div>
+      </div>
+      <p>A <strong>Elena</strong> tinha 14 amostras programadas nesse período. O ONEMS resume o seu trabalho na incidência:</p>
+      <div class="card"><strong>9 movidas para uma data posterior &middot; 3 movidas para outro nó &middot; 2 pendentes</strong></div>
+      <ul>
+        <li><strong>9 movidas:</strong> para os primeiros dias úteis livres depois de 21 de novembro, dentro de novembro.</li>
+        <li><strong>3 para outro nó:</strong> a Elena não tinha nenhuma data possível no mês, pelo que passaram para outros nós da cidade com pouca carga. Esses painelistas recebem o aviso pelo Telegram.</li>
+        <li><strong>2 pendentes:</strong> nenhum nó as podia assumir sem se saturar. A incidência está <span class="badge b-yellow">Pendente de decisão do gestor</span>.</li>
+      </ul>
+      <h3>O que faz o utilizador</h3>
+      <ol class="steps">
+        <li>Abra <strong>Disponibilidade dos painelistas</strong> e prima <em>Rever</em> na incidência da Elena. Verá o resumo, o balanço da cidade e as suas amostras, resolvidas e pendentes (o ecrã acima).</li>
+        <li>A primeira amostra pendente propõe NY-02 na semana 48, e o balanço mostra que NY-02 está em <span class="badge b-green">Normal</span> nessa semana: prima <strong>Confirmar</strong>.</li>
+        <li>A segunda propõe cancelar. O utilizador prefere conservá-la: prima <strong>Alterar resolução</strong>, escolha <em>Alterar data</em>, escolha o primeiro dia útil de dezembro e prima <strong>Aplicar</strong>.</li>
+        <li>Escreva uma nota de <em>Resolução final</em> e prima <strong>Guardar</strong>. A incidência passa a <span class="badge b-blue">Resolvida</span>; a Elena e os restantes painelistas afetados recebem o aviso pelo Telegram.</li>
+      </ol>
+      <div class="callout info"><strong>Indisponibilidade por falta de material.</strong> A partir de uma incidência de falta de material pode criar um período de indisponibilidade que vai desde hoje até à chegada prevista do material. Segue exatamente o mesmo processo; o motivo aparece como <em>Materiais</em>.</div>
+    </section>
+
+    <section id="conversation">
+      <h2>Conversa e avisos</h2>
+      <p>Cada incidência tem uma <strong>Conversa com o painelista</strong> que conserva as mensagens do bot, as respostas do painelista (com fotos) e as do utilizador.</p>
+      <div class="app">
+        <div class="app-bar"><i></i><i></i><i></i><span>ONEMS &rsaquo; detalhe da incidência</span></div>
+        <div class="app-body">
+          <div class="m-box" style="margin:0;max-width:520px">
+            <div class="m-h3" style="font-size:13px">Conversa com o painelista</div>
+            <div class="m-bub l">Queres registar isto como um pacote devolvido?<small>Bot &middot; Enviado</small></div>
+            <div class="m-bub r">Sim<small>Painelista &middot; Botão premido</small></div>
+            <div class="m-bub l">Olá Pablo, podes guardar a etiqueta?<small>Gestor &middot; Pendente de envio</small></div>
+            <div class="m-bub r">Sim, ainda a tenho. <span class="m-muted">[foto]</span><small>Painelista &middot; <span class="badge b-blue">Resposta nova</span></small></div>
+            <div class="m-ta">Escreve uma mensagem ao painelista&hellip;</div>
+            <span class="m-pbtn">Enviar</span>
+          </div>
+        </div>
+      </div>
+      <ul>
+        <li><strong>Escrever ao painelista.</strong> Escreva na incidência e prima <em>Enviar</em>. Chega ao seu Telegram, normalmente em menos de cinco minutos, como texto simples.</li>
+        <li><strong>Respostas por ler.</strong> As respostas de texto livre do painelista mostram um distintivo azul no menu e na lista até o utilizador abrir a incidência. Os botões que o painelista prime não contam.</li>
+        <li><strong>Aviso por e-mail.</strong> Se uma resposta permanecer por ler durante mais de uma hora, o utilizador recebe <strong>um</strong> e-mail por incidência. Se a abrir antes, não se envia nenhum e-mail.</li>
+        <li><strong>Fecho.</strong> Resolver ou descartar uma incidência fecha a conversa do Telegram.</li>
+      </ul>
+    </section>
+
+    <section id="faq">
+      <h2>Perguntas</h2>
+      <details><summary>O que acontece se um painelista escrever algo ao acaso?</summary><div>O bot mostra o menu ou sugere um tipo. Não se guarda nada até o painelista premir <strong>Sim</strong>.</div></details>
+      <details><summary>O ONEMS move alguma vez uma amostra que já foi enviada?</summary><div>Não. Só se movem as amostras pendentes. Um pacote devolvido é reenviado a partir da incidência, por decisão sua.</div></details>
+      <details><summary>Podem as amostras ir para outra cidade?</summary><div>Não. Mudar de cidade alteraria a rota medida.</div></details>
+      <details><summary>Porque é que a um painelista deixam de ser lembrados alguns envios?</summary><div>Esses envios precisam de material que o painelista não tem. O ONEMS deixa de insistir até chegar o material e então avisa-o de que já pode enviar.</div></details>
+      <details><summary>Há envios que caiam ao fim de semana?</summary><div>Não. Os envios são programados apenas de segunda a sexta-feira.</div></details>
+      <details><summary>Um painelista diz que reportou algo mas eu não o vejo.</summary><div>Verifique se confirmou com <strong>Sim</strong>. Se respondeu Não, ou não respondeu, não se guardou nada.</div></details>
+      <details><summary>Quem pode ver uma incidência?</summary><div>Cada conta vê unicamente os seus próprios painelistas e incidências.</div></details>
+    </section>
+  </div>
+  </main>
+</div>
+
+
+<script>
+(function () {
+  var links = Array.prototype.slice.call(document.querySelectorAll('#nav a'));
+  var sections = links.map(function (a) { return document.querySelector(a.getAttribute('href')); }).filter(Boolean);
+
+  // Mobile section picker
+  var jump = document.getElementById('jump');
+  links.forEach(function (a) {
+    var o = document.createElement('option');
+    o.value = a.getAttribute('href'); o.textContent = a.textContent; jump.appendChild(o);
+  });
+  jump.addEventListener('change', function () { location.hash = jump.value; });
+
+  // Highlight the current section in the side menu
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          links.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id); });
+          jump.value = '#' + e.target.id;
+        }
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    sections.forEach(function (s) { io.observe(s); });
+  }
+})();
+</script>
+</body>
+</html>

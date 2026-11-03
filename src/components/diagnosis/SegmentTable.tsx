@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useTimeUnit } from '../../hooks/useTimeUnit'
 import { formatMinutes } from '../../lib/accountTime'
+import { useTranslation } from '@/hooks/useTranslation'
 
 interface SegmentData {
   segment_name: string
@@ -44,6 +45,7 @@ interface SegmentTableProps {
 }
 
 export default function SegmentTable({ pathId, pathSignature, accountId, carrierId, carrierName, productId, productName, originCity, destinationCity, onSegmentCountChange, onSegmentsCalculated }: SegmentTableProps) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { unit } = useTimeUnit()
   const [segments, setSegments] = React.useState<SegmentData[]>([])
@@ -155,7 +157,7 @@ export default function SegmentTable({ pathId, pathSignature, accountId, carrier
                            realPercentage >= criticalThreshold ? 'Warning' : 'Critical'
 
           segmentDataArray.push({
-            segment_name: `${fromCenterName} (Center)`,
+            segment_name: `${fromCenterName} (${t('hc.segment_table.center')})`,
             segment_type: 'center',
             from_center_id: firstSeg.segment_type === 'operational' ? firstSeg.postal_center_id : firstSeg.from_postal_center_id,
             to_center_id: null,
@@ -280,15 +282,15 @@ export default function SegmentTable({ pathId, pathSignature, accountId, carrier
   }
 
   if (loading) {
-    return <div className="text-center py-4 text-gray-500">Loading segments...</div>
+    return <div className="text-center py-4 text-gray-500">{t('hc.segment_table.loading')}</div>
   }
 
   if (error) {
-    return <div className="text-center py-4 text-red-500">Error: {error}</div>
+    return <div className="text-center py-4 text-red-500">{t('hc.segment_table.error', { message: error })}</div>
   }
 
   if (segments.length === 0) {
-    return <div className="text-center py-4 text-gray-500">No segments found</div>
+    return <div className="text-center py-4 text-gray-500">{t('hc.segment_table.none')}</div>
   }
 
   return (
@@ -296,14 +298,14 @@ export default function SegmentTable({ pathId, pathSignature, accountId, carrier
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-100">
           <tr>
-            <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Segment</th>
-            <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">J+K STD</th>
-            <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">Natural Time</th>
-            <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">Working Time</th>
-            <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">% STD</th>
-            <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">% Real</th>
-            <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">Diff %</th>
-            <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">Threshold</th>
+            <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">{t('hc.segment_table.col_segment')}</th>
+            <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">{t('hc.segment_table.col_jk_std')}</th>
+            <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">{t('hc.segment_table.col_natural')}</th>
+            <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">{t('hc.segment_table.col_working')}</th>
+            <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">{t('hc.segment_table.col_pct_std')}</th>
+            <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">{t('hc.segment_table.col_pct_real')}</th>
+            <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">{t('hc.segment_table.col_diff')}</th>
+            <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">{t('hc.segment_table.col_threshold')}</th>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
@@ -316,7 +318,7 @@ export default function SegmentTable({ pathId, pathSignature, accountId, carrier
               <td className="px-3 py-2 text-sm font-medium text-gray-900">
                 {segment.segment_name}
                 <span className="ml-2 text-xs text-gray-500">
-                  ({segment.segment_type === 'center' ? 'Center' : 'Transit'})
+                  ({segment.segment_type === 'center' ? t('hc.segment_table.center') : t('hc.segment_table.transit')})
                 </span>
               </td>
               <td className="px-3 py-2 text-right text-sm font-mono text-gray-900">
@@ -360,7 +362,7 @@ export default function SegmentTable({ pathId, pathSignature, accountId, carrier
               <td className="px-3 py-2 text-right">
                 {segment.real_percentage !== null && segment.real_percentage !== undefined ? (
                   <span className={`px-2 py-0.5 rounded text-xs font-semibold ${getThresholdColor(segment.threshold)}`}>
-                    {segment.threshold}
+                    {segment.threshold === 'Compliant' ? t('hc.segment_table.compliant') : segment.threshold === 'Warning' ? t('hc.segment_table.warning') : t('hc.segment_table.critical')}
                   </span>
                 ) : (
                   <span className="text-gray-400">-</span>

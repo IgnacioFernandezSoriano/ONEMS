@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import SegmentTable from './SegmentTable'
 import { useTimeUnit } from '../../hooks/useTimeUnit'
 import { formatMinutes, formatMinutesDiff } from '../../lib/accountTime'
+import { useTranslation } from '@/hooks/useTranslation'
 
 interface SegmentDetail {
   from_city: string
@@ -61,6 +62,7 @@ interface Props {
 }
 
 export default function RoutePathTable({ routePaths, postalCenters, accountId, onRouteMetricsUpdate }: Props) {
+  const { t } = useTranslation()
   const { unit } = useTimeUnit()
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
   const [hoveredSegment, setHoveredSegment] = useState<string | null>(null)
@@ -138,9 +140,9 @@ export default function RoutePathTable({ routePaths, postalCenters, accountId, o
     <>
       <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900">Route Performance Details</h2>
+          <h2 className="text-lg font-semibold text-gray-900">{t('hc.route_path_table.title')}</h2>
           <p className="text-sm text-gray-600">
-            Click rows to expand segments. Click segments to view J+K report.
+            {t('hc.route_path_table.hint')}
           </p>
         </div>
         <button
@@ -156,12 +158,12 @@ export default function RoutePathTable({ routePaths, postalCenters, accountId, o
           {expandedRows.size === routePaths.length ? (
             <>
               <ChevronRight className="w-4 h-4" />
-              Collapse All
+              {t('hc.route_path_table.collapse_all')}
             </>
           ) : (
             <>
               <ChevronDown className="w-4 h-4" />
-              Expand All
+              {t('hc.route_path_table.expand_all')}
             </>
           )}
         </button>
@@ -172,34 +174,34 @@ export default function RoutePathTable({ routePaths, postalCenters, accountId, o
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
               <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase w-8"></th>
-              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Carrier</th>
-              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Product</th>
-              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Origin</th>
-              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Destination</th>
-              <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">Seg</th>
+              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">{t('hc.route_path_table.th_carrier')}</th>
+              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">{t('hc.route_path_table.th_product')}</th>
+              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">{t('hc.route_path_table.th_origin')}</th>
+              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">{t('hc.route_path_table.th_destination')}</th>
+              <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">{t('hc.route_path_table.th_seg')}</th>
               <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">
                 <div className="flex items-center justify-end gap-1">
-                  J+K Std
+                  {t('hc.route_path_table.th_jk_std')}
                   <Info className="w-3 h-3 text-gray-400" />
                 </div>
               </th>
               <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">
                 <div className="flex items-center justify-end gap-1">
-                  Natural Time
+                  {t('hc.route_path_table.th_natural_time')}
                   <Info className="w-3 h-3 text-gray-400" />
                 </div>
               </th>
               <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">
                 <div className="flex items-center justify-end gap-1">
-                  Working Time
+                  {t('hc.route_path_table.th_working_time')}
                   <Info className="w-3 h-3 text-gray-400" />
                 </div>
               </th>
-              <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">% Std</th>
-              <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">% Real</th>
-              <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">Diff %</th>
-              <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">Threshold</th>
-              <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">Tags</th>
+              <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">{t('hc.route_path_table.th_pct_std')}</th>
+              <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">{t('hc.route_path_table.th_pct_real')}</th>
+              <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">{t('hc.route_path_table.th_diff_pct')}</th>
+              <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">{t('hc.route_path_table.th_threshold')}</th>
+              <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">{t('hc.route_path_table.th_tags')}</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -274,7 +276,7 @@ export default function RoutePathTable({ routePaths, postalCenters, accountId, o
                         realPercentage >= 80 ? 'bg-yellow-100 text-yellow-800' :
                         'bg-red-100 text-red-800'
                       }`}>
-                        {realPercentage >= 90 ? 'Compliant' : realPercentage >= 80 ? 'Warning' : 'Critical'}
+                        {realPercentage >= 90 ? t('hc.route_path_table.compliant') : realPercentage >= 80 ? t('hc.route_path_table.warning') : t('hc.route_path_table.critical')}
                       </span>
                     </td>
                     <td className="px-3 py-2 text-right font-semibold text-gray-900">
@@ -287,7 +289,7 @@ export default function RoutePathTable({ routePaths, postalCenters, accountId, o
                     <tr>
                       <td colSpan={13} className="px-3 py-3 bg-gray-50">
                         <div className="space-y-2">
-                          <div className="text-xs font-semibold text-gray-600 uppercase mb-2">Segment Details</div>
+                          <div className="text-xs font-semibold text-gray-600 uppercase mb-2">{t('hc.route_path_table.segment_details')}</div>
                           <SegmentTable 
                             pathId={path.id}
                             pathSignature={path.path_signature}
@@ -327,7 +329,7 @@ export default function RoutePathTable({ routePaths, postalCenters, accountId, o
         {routePaths.length === 0 && (
           <div className="text-center py-12 text-gray-500">
             <AlertCircle className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-            <p>No route paths found</p>
+            <p>{t('hc.route_path_table.no_routes')}</p>
           </div>
         )}
       </div>

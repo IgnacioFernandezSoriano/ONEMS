@@ -107,7 +107,7 @@ export function CarriersTree({
   }
 
   const handleDelete = async (type: 'carrier' | 'product', id: string, name: string) => {
-    if (!confirm(`Are you sure you want to delete ${name}?`)) return
+    if (!confirm(t('hc.carriers_tree.confirm_delete', { name }))) return
     
     try {
       if (type === 'carrier') await onDeleteCarrier(id)
@@ -118,7 +118,7 @@ export function CarriersTree({
   }
 
   const handleRemoveMaterial = async (pmId: string, materialName: string) => {
-    if (!confirm(`Remove material "${materialName}" from this product?`)) return
+    if (!confirm(t('hc.carriers_tree.confirm_remove_material', { name: materialName }))) return
     
     try {
       await onRemoveProductMaterial(pmId)
@@ -128,12 +128,12 @@ export function CarriersTree({
   }
 
   const handleUpdateQuantity = async (pmId: string, currentQty: number, materialName: string) => {
-    const newQty = prompt(`Enter new quantity for "${materialName}":`, currentQty.toString())
+    const newQty = prompt(t('hc.carriers_tree.prompt_quantity', { name: materialName }), currentQty.toString())
     if (!newQty) return
     
     const quantity = parseFloat(newQty)
     if (isNaN(quantity) || quantity <= 0) {
-      alert('Please enter a valid positive number')
+      alert(t('hc.carriers_tree.invalid_number'))
       return
     }
     
@@ -158,7 +158,7 @@ export function CarriersTree({
                 <button
                   onClick={() => toggleCarrier(carrier.id)}
                   className="text-gray-400 hover:text-gray-600 transition-colors"
-                  title={isExpanded ? 'Collapse carrier' : 'Expand carrier'}
+                  title={isExpanded ? t('hc.carriers_tree.collapse_carrier') : t('hc.carriers_tree.expand_carrier')}
                 >
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                     {isExpanded ? (
@@ -201,7 +201,7 @@ export function CarriersTree({
                   <button
                     onClick={() => expandCarrierAndProducts(carrier.id)}
                     className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                    title="Expand all products in this carrier"
+                    title={t('hc.carriers_tree.expand_all_products')}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
@@ -210,7 +210,7 @@ export function CarriersTree({
                   <button
                     onClick={() =>
                       setModal({
-                        title: 'Add Product',
+                        title: t('hc.carriers_tree.add_product_title'),
                         type: 'product',
                         carrierId: carrier.id,
                         onSubmit: onCreateProduct,
@@ -221,19 +221,19 @@ export function CarriersTree({
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                               </svg>
-                              Product
+                              {t('hc.carriers_tree.product_btn')}
                             </button>
                   <button
                     onClick={() =>
                       setModal({
-                        title: 'Edit Carrier',
+                        title: t('hc.carriers_tree.edit_carrier_title'),
                         type: 'carrier',
                         data: carrier,
                         onSubmit: (data: any) => onUpdateCarrier(carrier.id, data),
                       })
                     }
                     className="p-1.5 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                    title="Edit carrier"
+                    title={t('hc.carriers_tree.edit_carrier')}
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -242,7 +242,7 @@ export function CarriersTree({
                   <button
                     onClick={() => handleDelete('carrier', carrier.id, carrier.name)}
                     className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    title="Delete carrier"
+                    title={t('hc.carriers_tree.delete_carrier')}
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -269,7 +269,7 @@ export function CarriersTree({
                           <button
                             onClick={() => toggleProduct(product.id)}
                             className="text-gray-400 hover:text-gray-600 transition-colors ml-2"
-                            title={isProductExpanded ? 'Collapse product' : 'Expand product'}
+                            title={isProductExpanded ? t('hc.carriers_tree.collapse_product') : t('hc.carriers_tree.expand_product')}
                           >
                             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                               {isProductExpanded ? (
@@ -333,7 +333,7 @@ export function CarriersTree({
                             <button
                               onClick={() =>
                                 setModal({
-                                  title: 'Add Material',
+                                  title: t('hc.carriers_tree.add_material_title'),
                                   type: 'material',
                                   productId: product.id,
                                   onSubmit: onAddMaterialToProduct,
@@ -344,12 +344,12 @@ export function CarriersTree({
                               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                               </svg>
-                              Add a material
+                              {t('hc.carriers_tree.add_a_material')}
                             </button>
                             <button
                               onClick={() =>
                                 setModal({
-                                  title: 'Edit Product',
+                                  title: t('hc.carriers_tree.edit_product_title'),
                                   type: 'product',
                                   carrierId: product.carrier_id,
                                   data: product,
@@ -357,16 +357,16 @@ export function CarriersTree({
                                 })
                               }
                               className="p-1 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                              title="Edit product"
+                              title={t('hc.carriers_tree.edit_product')}
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                               </svg>
                             </button>
                             <button
-                              onClick={() => handleDelete('product', product.id, product.code || 'product')}
+                              onClick={() => handleDelete('product', product.id, product.code || t('hc.carriers_tree.product_fallback'))}
                               className="p-1 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                              title="Delete product"
+                              title={t('hc.carriers_tree.delete_product')}
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -379,7 +379,7 @@ export function CarriersTree({
                           <div className="pl-6 pb-2 space-y-1">
                             {productMats.length === 0 && (
                               <div className="text-sm text-gray-500 italic p-3 ml-4">
-                                No materials assigned yet
+                                {t('hc.carriers_tree.no_materials')}
                               </div>
                             )}
                             {productMats.map((pm) => (
@@ -397,31 +397,31 @@ export function CarriersTree({
                                 {/* Material Info */}
                                 <div className="flex-1 flex items-center gap-2">
                                   <span className="text-sm font-medium text-gray-900">
-                                    {pm.material_catalog?.name || 'Unknown Material'}
+                                    {pm.material_catalog?.name || t('hc.carriers_tree.unknown_material')}
                                   </span>
                                   <span className="text-xs text-gray-500">
                                     ({pm.material_catalog?.code})
                                   </span>
                                   <span className="text-xs font-medium bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
-                                    Qty: {pm.quantity}
+                                    {t('hc.carriers_tree.qty', { qty: pm.quantity })}
                                   </span>
                                 </div>
 
                                 {/* Action Buttons */}
                                 <div className="flex items-center gap-1">
                                   <button
-                                    onClick={() => handleUpdateQuantity(pm.id, pm.quantity, pm.material_catalog?.name || 'material')}
+                                    onClick={() => handleUpdateQuantity(pm.id, pm.quantity, pm.material_catalog?.name || t('hc.carriers_tree.material_fallback'))}
                                     className="p-1 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                                    title="Update quantity"
+                                    title={t('hc.carriers_tree.update_quantity')}
                                   >
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                     </svg>
                                   </button>
                                   <button
-                                    onClick={() => handleRemoveMaterial(pm.id, pm.material_catalog?.name || 'material')}
+                                    onClick={() => handleRemoveMaterial(pm.id, pm.material_catalog?.name || t('hc.carriers_tree.material_fallback'))}
                                     className="p-1 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                    title="Remove material"
+                                    title={t('hc.carriers_tree.remove_material')}
                                   >
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

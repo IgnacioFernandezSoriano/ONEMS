@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAccount } from '@/contexts/AccountContext';
+import { useTranslation } from '@/hooks/useTranslation';
 import { useTimeUnit } from '@/hooks/useTimeUnit';
 import { TimeUnitToggle } from '@/components/common/TimeUnitToggle';
 import { formatMinutes } from '@/lib/accountTime';
@@ -37,6 +38,7 @@ interface CenterTrend {
 }
 
 const CenterAnalysis: React.FC = () => {
+  const { t } = useTranslation();
   const { effectiveAccountId } = useAccount();
   const { unit } = useTimeUnit();
   const [activeTab, setActiveTab] = useState<'performance' | 'comparison' | 'trends'>('performance');
@@ -127,22 +129,22 @@ const CenterAnalysis: React.FC = () => {
   const renderPerformanceTab = () => (
     <div className="space-y-4">
       {loading ? (
-        <div className="text-center py-8 text-gray-500">Loading...</div>
+        <div className="text-center py-8 text-gray-500">{t('hc.center_analysis.loading')}</div>
       ) : error ? (
-        <div className="text-center py-8 text-red-500">Error: {error}</div>
+        <div className="text-center py-8 text-red-500">{t('hc.center_analysis.error', { message: error })}</div>
       ) : centerPerformance.length === 0 ? (
-        <div className="text-center py-8 text-gray-500">No data available</div>
+        <div className="text-center py-8 text-gray-500">{t('hc.center_analysis.no_data')}</div>
       ) : (
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CENTER</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ITEMS</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">AVG TIME</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">P95 TIME</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">THROUGHPUT</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">EFFICIENCY</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('hc.center_analysis.center')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('hc.center_analysis.items')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('hc.center_analysis.avg_time')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('hc.center_analysis.p95_time')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('hc.center_analysis.throughput')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('hc.center_analysis.efficiency')}</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -155,7 +157,7 @@ const CenterAnalysis: React.FC = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{center.total_segments}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatMinutes(center.avg_processing_minutes, unit)}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatMinutes(center.p95_processing_minutes, unit)}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{center.throughput_per_hour} items/h</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{t('hc.center_analysis.items_per_hour', { count: center.throughput_per_hour })}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                       center.efficiency_percentage >= 90 ? 'bg-green-100 text-green-800' :
@@ -177,11 +179,11 @@ const CenterAnalysis: React.FC = () => {
   const renderComparisonTab = () => (
     <div className="space-y-4">
       {loading ? (
-        <div className="text-center py-8 text-gray-500">Loading...</div>
+        <div className="text-center py-8 text-gray-500">{t('hc.center_analysis.loading')}</div>
       ) : error ? (
-        <div className="text-center py-8 text-red-500">Error: {error}</div>
+        <div className="text-center py-8 text-red-500">{t('hc.center_analysis.error', { message: error })}</div>
       ) : centerComparison.length === 0 ? (
-        <div className="text-center py-8 text-gray-500">No data available</div>
+        <div className="text-center py-8 text-gray-500">{t('hc.center_analysis.no_data')}</div>
       ) : (
         <div className="grid gap-4">
           {centerComparison.map((center) => (
@@ -189,24 +191,24 @@ const CenterAnalysis: React.FC = () => {
               <div className="flex items-center justify-between mb-3">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">{center.center_name}</h3>
-                  <p className="text-sm text-gray-500">Rank #{center.performance_rank}</p>
+                  <p className="text-sm text-gray-500">{t('hc.center_analysis.rank', { rank: center.performance_rank })}</p>
                 </div>
                 <div className="text-right">
                   <div className="text-2xl font-bold text-gray-900">{center.efficiency_score}%</div>
-                  <div className="text-sm text-gray-500">Efficiency</div>
+                  <div className="text-sm text-gray-500">{t('hc.center_analysis.efficiency_label')}</div>
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-4 text-sm">
                 <div>
-                  <div className="text-gray-500">Items Processed</div>
+                  <div className="text-gray-500">{t('hc.center_analysis.items_processed')}</div>
                   <div className="font-semibold text-gray-900">{center.items_processed}</div>
                 </div>
                 <div>
-                  <div className="text-gray-500">Avg Time</div>
+                  <div className="text-gray-500">{t('hc.center_analysis.avg_time_label')}</div>
                   <div className="font-semibold text-gray-900">{formatMinutes(center.avg_processing_minutes, unit)}</div>
                 </div>
                 <div>
-                  <div className="text-gray-500">Code</div>
+                  <div className="text-gray-500">{t('hc.center_analysis.code')}</div>
                   <div className="font-semibold text-gray-900">{center.center_code}</div>
                 </div>
               </div>
@@ -230,24 +232,24 @@ const CenterAnalysis: React.FC = () => {
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-2 mb-4">
-          <label className="text-sm font-medium text-gray-700">Period:</label>
+          <label className="text-sm font-medium text-gray-700">{t('hc.center_analysis.period')}</label>
           <select
             value={trendPeriod}
             onChange={(e) => setTrendPeriod(e.target.value as 'daily' | 'weekly' | 'monthly')}
             className="px-3 py-1 border border-gray-300 rounded-md text-sm"
           >
-            <option value="daily">Daily</option>
-            <option value="weekly">Weekly</option>
-            <option value="monthly">Monthly</option>
+            <option value="daily">{t('hc.center_analysis.daily')}</option>
+            <option value="weekly">{t('hc.center_analysis.weekly')}</option>
+            <option value="monthly">{t('hc.center_analysis.monthly')}</option>
           </select>
         </div>
 
         {loading ? (
-          <div className="text-center py-8 text-gray-500">Loading...</div>
+          <div className="text-center py-8 text-gray-500">{t('hc.center_analysis.loading')}</div>
         ) : error ? (
-          <div className="text-center py-8 text-red-500">Error: {error}</div>
+          <div className="text-center py-8 text-red-500">{t('hc.center_analysis.error', { message: error })}</div>
         ) : centerTrends.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">No data available</div>
+          <div className="text-center py-8 text-gray-500">{t('hc.center_analysis.no_data')}</div>
         ) : (
           <div className="space-y-6">
             {Object.entries(trendsByCenter).map(([centerName, trends]) => (
@@ -257,10 +259,10 @@ const CenterAnalysis: React.FC = () => {
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">PERIOD</th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">ITEMS</th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">AVG TIME</th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">EFFICIENCY</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{t('hc.center_analysis.period_header')}</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{t('hc.center_analysis.items')}</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{t('hc.center_analysis.avg_time')}</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{t('hc.center_analysis.efficiency')}</th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
@@ -299,11 +301,11 @@ const CenterAnalysis: React.FC = () => {
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <Building2 className="h-6 w-6 text-blue-600" />
-            <h1 className="text-2xl font-bold text-gray-900">Center Analysis</h1>
+            <h1 className="text-2xl font-bold text-gray-900">{t('hc.center_analysis.title')}</h1>
           </div>
           <TimeUnitToggle />
         </div>
-        <p className="text-gray-600">Operational performance analysis by center</p>
+        <p className="text-gray-600">{t('hc.center_analysis.subtitle')}</p>
       </div>
 
       {/* Tabs */}
@@ -318,7 +320,7 @@ const CenterAnalysis: React.FC = () => {
             }`}
           >
             <TrendingUp className="h-4 w-4" />
-            Performance
+            {t('hc.center_analysis.tab_performance')}
           </button>
           <button
             onClick={() => setActiveTab('comparison')}
@@ -329,7 +331,7 @@ const CenterAnalysis: React.FC = () => {
             }`}
           >
             <BarChart3 className="h-4 w-4" />
-            Comparison
+            {t('hc.center_analysis.tab_comparison')}
           </button>
           <button
             onClick={() => setActiveTab('trends')}
@@ -340,7 +342,7 @@ const CenterAnalysis: React.FC = () => {
             }`}
           >
             <Calendar className="h-4 w-4" />
-            Trends
+            {t('hc.center_analysis.tab_trends')}
           </button>
         </nav>
       </div>

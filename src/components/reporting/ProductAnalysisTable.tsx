@@ -181,7 +181,7 @@ export function ProductAnalysisTable({
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             <AlertCircle className="w-4 h-4 inline mr-1" />
-            Filter by Equity Status
+            {t('hc.product_analysis_table.filter_equity')}
           </label>
           <div className="flex gap-4">
             <label className="flex items-center gap-2 cursor-pointer">
@@ -191,7 +191,7 @@ export function ProductAnalysisTable({
                 onChange={() => toggleStatus('compliant')}
                 className="w-4 h-4 text-green-600 rounded"
               />
-              <span className="text-sm">✅ Compliant</span>
+              <span className="text-sm">✅ {t('hc.product_analysis_table.compliant')}</span>
             </label>
             <label className="flex items-center gap-2 cursor-pointer">
               <input
@@ -200,7 +200,7 @@ export function ProductAnalysisTable({
                 onChange={() => toggleStatus('warning')}
                 className="w-4 h-4 text-yellow-600 rounded"
               />
-              <span className="text-sm">⚠️ Warning</span>
+              <span className="text-sm">⚠️ {t('hc.product_analysis_table.warning')}</span>
             </label>
             <label className="flex items-center gap-2 cursor-pointer">
               <input
@@ -209,7 +209,7 @@ export function ProductAnalysisTable({
                 onChange={() => toggleStatus('critical')}
                 className="w-4 h-4 text-red-600 rounded"
               />
-              <span className="text-sm">🔴 Critical</span>
+              <span className="text-sm">🔴 {t('hc.product_analysis_table.critical')}</span>
             </label>
           </div>
         </div>
@@ -218,7 +218,7 @@ export function ProductAnalysisTable({
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
         >
           <Download className="w-4 h-4" />
-          Export Samples CSV
+          {t('hc.product_analysis_table.export_samples')}
         </button>
       </div>
 
@@ -228,17 +228,17 @@ export function ProductAnalysisTable({
           <thead className="bg-gray-50">
             <tr>
               {[
-                { key: 'origin', label: 'Origin' },
-                { key: 'destination', label: 'Destination' },
-                { key: 'carrier', label: 'Carrier' },
-                { key: 'product', label: 'Product' },
-                { key: 'totalShipments', label: 'Total' },
-                { key: 'jkStandard', label: 'J+K STD' },
-                { key: 'jkActual', label: 'J+K ACTUAL' },
-                { key: 'standardPercentage', label: 'Standard %' },
-                { key: 'actualPercentage', label: 'Actual %' },
-                { key: 'deviation', label: 'Deviation' },
-                { key: 'status', label: 'Status' },
+                { key: 'origin', label: t('hc.product_analysis_table.origin') },
+                { key: 'destination', label: t('hc.product_analysis_table.destination') },
+                { key: 'carrier', label: t('hc.product_analysis_table.carrier') },
+                { key: 'product', label: t('hc.product_analysis_table.product') },
+                { key: 'totalShipments', label: t('hc.product_analysis_table.total') },
+                { key: 'jkStandard', label: t('hc.product_analysis_table.jk_std') },
+                { key: 'jkActual', label: t('hc.product_analysis_table.jk_actual') },
+                { key: 'standardPercentage', label: t('hc.product_analysis_table.standard_pct') },
+                { key: 'actualPercentage', label: t('hc.product_analysis_table.actual_pct') },
+                { key: 'deviation', label: t('hc.product_analysis_table.deviation') },
+                { key: 'status', label: t('hc.product_analysis_table.status') },
               ].map(({ key, label }) => (
                 <th
                   key={key}
@@ -283,7 +283,7 @@ export function ProductAnalysisTable({
                     row.status === 'warning' ? 'bg-yellow-100 text-yellow-800' :
                     'bg-red-100 text-red-800'
                   }`}>
-                    {row.status === 'compliant' ? '✅' : row.status === 'warning' ? '⚠️' : '🔴'} {row.status}
+                    {row.status === 'compliant' ? '✅' : row.status === 'warning' ? '⚠️' : '🔴'} {row.status === 'compliant' ? t('hc.product_analysis_table.compliant') : row.status === 'warning' ? t('hc.product_analysis_table.warning') : row.status === 'critical' ? t('hc.product_analysis_table.critical') : row.status}
                   </span>
                 </td>
               </tr>
@@ -292,7 +292,7 @@ export function ProductAnalysisTable({
         </table>
         {sortedRows.length === 0 && (
           <div className="text-center py-8 text-gray-500">
-            No data available
+            {t('hc.product_analysis_table.no_data')}
           </div>
         )}
       </div>

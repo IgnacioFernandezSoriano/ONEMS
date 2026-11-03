@@ -28,7 +28,7 @@ export function MaterialSelector({ productId, onSelect, onCreateNew, onCancel }:
 
   const handleSelectFromCatalog = async () => {
     if (!selectedMaterialId || quantity <= 0) {
-      alert('Please select a material and enter a valid quantity')
+      alert(t('hc.material_selector.select_material_qty_alert'))
       return
     }
     
@@ -42,7 +42,7 @@ export function MaterialSelector({ productId, onSelect, onCreateNew, onCancel }:
 
   const handleCreateNew = async () => {
     if (!newMaterial.code || !newMaterial.name || quantity <= 0) {
-      alert('Please fill in code, name, and quantity')
+      alert(t('hc.material_selector.fill_code_name_qty_alert'))
       return
     }
 
@@ -60,7 +60,7 @@ export function MaterialSelector({ productId, onSelect, onCreateNew, onCancel }:
   if (!mode) {
     return (
       <div className="space-y-4">
-        <p className="text-gray-600 mb-4">Choose how to add material to this product:</p>
+        <p className="text-gray-600 mb-4">{t('hc.material_selector.choose_how_to_add')}</p>
         
         <button
           onClick={() => setMode('select')}
@@ -69,8 +69,8 @@ export function MaterialSelector({ productId, onSelect, onCreateNew, onCancel }:
           <div className="flex items-center gap-3">
             <span className="text-3xl">📚</span>
             <div>
-              <div className="font-medium text-lg">Select from Catalog</div>
-              <div className="text-sm text-gray-600">Choose an existing material from your catalog</div>
+              <div className="font-medium text-lg">{t('hc.material_selector.select_from_catalog')}</div>
+              <div className="text-sm text-gray-600">{t('hc.material_selector.choose_existing')}</div>
             </div>
           </div>
         </button>
@@ -82,15 +82,15 @@ export function MaterialSelector({ productId, onSelect, onCreateNew, onCancel }:
           <div className="flex items-center gap-3">
             <span className="text-3xl">➕</span>
             <div>
-              <div className="font-medium text-lg">Create New Material</div>
-              <div className="text-sm text-gray-600">Add a new material to catalog and assign to product</div>
+              <div className="font-medium text-lg">{t('hc.material_selector.create_new_material')}</div>
+              <div className="text-sm text-gray-600">{t('hc.material_selector.add_new_to_catalog')}</div>
             </div>
           </div>
         </button>
 
         <div className="flex justify-end pt-4">
           <Button variant="secondary" onClick={onCancel}>
-            Cancel
+            {t('hc.material_selector.cancel')}
           </Button>
         </div>
       </div>
@@ -106,12 +106,12 @@ export function MaterialSelector({ productId, onSelect, onCreateNew, onCancel }:
           onClick={() => setMode(null)}
           className="text-sm text-blue-600 hover:text-blue-800 mb-2"
         >
-          ← Back to options
+          {t('hc.material_selector.back_to_options')}
         </button>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Select Material *
+            {t('hc.material_selector.select_material_label')}
           </label>
           <select
             value={selectedMaterialId}
@@ -119,7 +119,7 @@ export function MaterialSelector({ productId, onSelect, onCreateNew, onCancel }:
             className="w-full px-3 py-2 border border-gray-300 rounded-md"
             required
           >
-            <option value="">-- Choose a material --</option>
+            <option value="">{t('hc.material_selector.choose_a_material')}</option>
             {activeMaterials.map((material) => (
               <option key={material.id} value={material.id}>
                 {material.code} - {material.name} {material.unit_measure ? `(${material.unit_measure})` : ''}
@@ -128,14 +128,14 @@ export function MaterialSelector({ productId, onSelect, onCreateNew, onCancel }:
           </select>
           {activeMaterials.length === 0 && (
             <p className="text-sm text-amber-600 mt-1">
-              No active materials in catalog. Create a new one instead.
+              {t('hc.material_selector.no_active_materials')}
             </p>
           )}
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Quantity *
+            {t('hc.material_selector.quantity_label')}
           </label>
           <input
             type="number"
@@ -150,10 +150,10 @@ export function MaterialSelector({ productId, onSelect, onCreateNew, onCancel }:
 
         <div className="flex gap-2 justify-end pt-4">
           <Button variant="secondary" onClick={onCancel}>
-            Cancel
+            {t('hc.material_selector.cancel')}
           </Button>
           <Button onClick={handleSelectFromCatalog} disabled={submitting || !selectedMaterialId}>
-            {submitting ? 'Adding...' : 'Add to Product'}
+            {submitting ? t('hc.material_selector.adding') : t('hc.material_selector.add_to_product')}
           </Button>
         </div>
       </div>
@@ -167,12 +167,12 @@ export function MaterialSelector({ productId, onSelect, onCreateNew, onCancel }:
         onClick={() => setMode(null)}
         className="text-sm text-blue-600 hover:text-blue-800 mb-2"
       >
-        ← Back to options
+        {t('hc.material_selector.back_to_options')}
       </button>
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Code *
+          {t('hc.material_selector.code_label')}
         </label>
         <input
           type="text"
@@ -186,7 +186,7 @@ export function MaterialSelector({ productId, onSelect, onCreateNew, onCancel }:
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Name *
+          {t('hc.material_selector.name_label')}
         </label>
         <input
           type="text"
@@ -200,33 +200,33 @@ export function MaterialSelector({ productId, onSelect, onCreateNew, onCancel }:
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Unit Measure
+          {t('hc.material_selector.unit_measure')}
         </label>
         <input
           type="text"
           value={newMaterial.unit_measure}
           onChange={(e) => setNewMaterial({ ...newMaterial, unit_measure: e.target.value })}
           className="w-full px-3 py-2 border border-gray-300 rounded-md"
-          placeholder="units, kg, etc."
+          placeholder={t('hc.material_selector.unit_placeholder')}
         />
       </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Description
+          {t('hc.material_selector.description')}
         </label>
         <textarea
           value={newMaterial.description}
           onChange={(e) => setNewMaterial({ ...newMaterial, description: e.target.value })}
           className="w-full px-3 py-2 border border-gray-300 rounded-md"
           rows={2}
-          placeholder="Additional details..."
+          placeholder={t('hc.material_selector.details_placeholder')}
         />
       </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Quantity *
+          {t('hc.material_selector.quantity_label')}
         </label>
         <input
           type="number"
@@ -241,10 +241,10 @@ export function MaterialSelector({ productId, onSelect, onCreateNew, onCancel }:
 
       <div className="flex gap-2 justify-end pt-4">
         <Button variant="secondary" onClick={onCancel}>
-          Cancel
+          {t('hc.material_selector.cancel')}
         </Button>
         <Button onClick={handleCreateNew} disabled={submitting}>
-          {submitting ? 'Creating...' : 'Create & Add to Product'}
+          {submitting ? t('hc.material_selector.creating') : t('hc.material_selector.create_and_add')}
         </Button>
       </div>
     </div>

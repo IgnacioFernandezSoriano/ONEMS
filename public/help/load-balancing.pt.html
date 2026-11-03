@@ -1,0 +1,616 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ajuda: Balanceamento de carga de nós</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<style>
+  :root {
+    --white: #ffffff; --g50: #f9fafb; --g100: #f3f4f6; --g200: #e5e7eb; --g300: #d1d5db;
+    --g400: #9ca3af; --g500: #6b7280; --g600: #4b5563; --g700: #374151; --g900: #111827;
+    --b50: #eff6ff; --b100: #dbeafe; --b600: #2563eb; --b700: #1d4ed8;
+    --r100: #fee2e2; --r700: #b91c1c; --gr100: #dcfce7; --gr700: #15803d;
+    --y100: #fef9c3; --y800: #854d0e; --p100: #f3e8ff; --p700: #7e22ce;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+      'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    -webkit-font-smoothing: antialiased; background: var(--g50); color: var(--g700); line-height: 1.6; font-size: 15px;
+  }
+  .layout { display: flex; min-height: 100vh; }
+
+  /* Sidebar, same look as the ONE menu */
+  .side {
+    width: 272px; flex-shrink: 0; background: var(--white); border-right: 1px solid var(--g200);
+    position: sticky; top: 0; height: 100vh; overflow-y: auto; display: flex; flex-direction: column;
+  }
+  .brand { padding: 24px 24px 16px; }
+  .brand h1 { font-size: 24px; line-height: 32px; font-weight: 700; color: var(--g900); }
+  .brand p { font-size: 14px; color: var(--g500); margin-top: 4px; }
+  .brand .doc { margin-top: 16px; font-size: 12px; font-weight: 600; color: var(--b700); background: var(--b50);
+    display: inline-block; padding: 2px 10px; border-radius: 999px; }
+  .nav { padding: 8px 12px 24px; flex: 1; }
+  .nav h3 { font-size: 12px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--g400);
+    padding: 16px 12px 6px; }
+  .nav a {
+    display: block; padding: 8px 12px; border-radius: 8px; font-size: 14px; font-weight: 500; color: var(--g600);
+    text-decoration: none; transition: background .15s, color .15s;
+  }
+  .nav a:hover { background: var(--g100); }
+  .nav a.active { background: var(--b50); color: var(--b700); }
+  .side-foot { padding: 16px 24px; border-top: 1px solid var(--g200); font-size: 12px; color: var(--g500); }
+
+  /* Content */
+  .main { flex: 1; min-width: 0; padding: 40px 32px 80px; }
+  .page { max-width: 880px; margin: 0 auto; }
+  .page > header { margin-bottom: 32px; }
+  .page > header h2 { font-size: 30px; line-height: 38px; font-weight: 700; color: var(--g900); }
+  .page > header p { margin-top: 8px; font-size: 17px; color: var(--g600); max-width: 640px; }
+  section { margin-top: 48px; }
+  section > h2 { font-size: 22px; font-weight: 700; color: var(--g900); padding-bottom: 8px; margin-bottom: 16px;
+    border-bottom: 1px solid var(--g200); }
+  h3 { font-size: 17px; font-weight: 600; color: var(--g900); margin: 28px 0 8px; }
+  p { margin: 8px 0; }
+  ul, ol { margin: 8px 0 8px 22px; }
+  li { margin: 4px 0; }
+  strong { color: var(--g900); font-weight: 600; }
+  code, kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px;
+    background: var(--g100); border: 1px solid var(--g200); border-radius: 6px; padding: 1px 6px; color: var(--g900); }
+  .card { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 20px 24px; margin: 16px 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 16px 0; }
+  .grid .card { margin: 0; }
+  .card h4 { font-size: 15px; font-weight: 600; color: var(--g900); margin-bottom: 4px; }
+  .card p { margin: 4px 0; font-size: 14px; color: var(--g600); }
+
+  .badge { display: inline-block; font-size: 12px; font-weight: 500; padding: 1px 10px; border-radius: 999px; white-space: nowrap; }
+  .b-red { background: var(--r100); color: var(--r700); }
+  .b-blue { background: var(--b100); color: var(--b700); }
+  .b-green { background: var(--gr100); color: var(--gr700); }
+  .b-yellow { background: var(--y100); color: var(--y800); }
+  .b-gray { background: var(--g100); color: var(--g600); }
+  .b-purple { background: var(--p100); color: var(--p700); }
+  .btn { display: inline-block; font-size: 13px; font-weight: 500; padding: 2px 10px; border-radius: 8px;
+    background: var(--white); border: 1px solid var(--g300); color: var(--g700); white-space: nowrap; }
+  .btn.primary { background: var(--b600); border-color: var(--b600); color: #fff; }
+
+  .callout { border-radius: 12px; padding: 14px 18px; margin: 16px 0; font-size: 14px; border: 1px solid; }
+  .callout.info { background: var(--b50); border-color: var(--b100); color: #1e3a8a; }
+  .callout.ok { background: #f0fdf4; border-color: var(--gr100); color: #14532d; }
+  .callout.warn { background: #fffbeb; border-color: var(--y100); color: var(--y800); }
+  .callout strong { color: inherit; }
+
+  .table-wrap { overflow-x: auto; margin: 16px 0; background: var(--white); border: 1px solid var(--g200); border-radius: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--g500); background: var(--g50); padding: 10px 14px; border-bottom: 1px solid var(--g200); }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--g100); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  td:first-child { font-weight: 500; color: var(--g900); }
+
+  /* Steps */
+  ol.steps { list-style: none; margin: 12px 0; counter-reset: s; }
+  ol.steps > li { counter-increment: s; position: relative; padding: 4px 0 12px 44px; margin: 0; }
+  ol.steps > li::before {
+    content: counter(s); position: absolute; left: 0; top: 2px; width: 28px; height: 28px; border-radius: 50%;
+    background: var(--b100); color: var(--b700); font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Telegram chat mock-ups */
+  .chat { background: #e9eef5; border: 1px solid var(--g200); border-radius: 16px; padding: 16px; margin: 16px 0; max-width: 460px; }
+  .chat .who { text-align: center; font-size: 12px; color: var(--g500); margin-bottom: 8px; font-weight: 500; }
+  .msg { max-width: 85%; padding: 8px 12px; border-radius: 14px; margin: 6px 0; font-size: 14px; line-height: 1.45; box-shadow: 0 1px 1px rgba(0,0,0,.06); }
+  .msg.bot { background: var(--white); border-top-left-radius: 4px; margin-right: auto; color: var(--g900); }
+  .msg.me { background: #dbeafe; border-top-right-radius: 4px; margin-left: auto; color: var(--g900); }
+  .kb { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 8px; max-width: 85%; }
+  .kb span { flex: 1 1 auto; text-align: center; background: rgba(37,99,235,.12); color: var(--b700); font-size: 13px; font-weight: 500;
+    padding: 6px 10px; border-radius: 10px; }
+  .kb.col span { flex-basis: 100%; }
+  .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; align-items: start; }
+  .two .chat { margin: 8px 0; }
+  .cap { font-size: 13px; color: var(--g500); margin-top: -6px; max-width: 460px; }
+
+  /* Flow */
+  .flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; margin: 16px 0; }
+  .flow .node { flex: 1 1 150px; background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 12px 14px; font-size: 13px; position: relative; }
+  .flow .node b { display: block; color: var(--g900); font-size: 14px; margin-bottom: 2px; }
+  .flow .node .tag { font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--b700); }
+  .flow .arrow { align-self: center; color: var(--g400); font-size: 18px; }
+
+  details { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; margin: 8px 0; }
+  summary { cursor: pointer; padding: 14px 18px; font-weight: 600; color: var(--g900); list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: '+'; color: var(--g400); font-size: 20px; line-height: 1; }
+  details[open] summary::after { content: '\2212'; }
+  details > div { padding: 0 18px 14px; color: var(--g600); font-size: 14px; }
+
+  /* ONEMS screen drawings */
+  .app { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; overflow: hidden; margin: 16px 0 6px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .app-bar { display: flex; gap: 6px; align-items: center; background: var(--g100); border-bottom: 1px solid var(--g200); padding: 8px 12px; font-size: 12px; color: var(--g500); }
+  .app-bar i { width: 9px; height: 9px; border-radius: 50%; background: var(--g300); display: inline-block; }
+  .app-bar span { margin-left: 8px; }
+  .app-body { padding: 20px; font-size: 13px; color: var(--g700); overflow-x: auto; }
+  .app-body.cols { display: grid; grid-template-columns: 210px 1fr; padding: 0; }
+  .app-body.cols > .sb { border-right: 1px solid var(--g200); padding: 14px 10px; background: #fff; }
+  .app-body.cols > .ct { padding: 20px; }
+  .sb .t { font-size: 20px; font-weight: 700; color: var(--g900); padding: 0 8px; }
+  .sb .s { font-size: 11px; color: var(--g500); padding: 0 8px 8px; }
+  .sb h5 { font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--g400); padding: 10px 8px 4px; }
+  .mi { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 8px; font-size: 13px; color: var(--g700); }
+  .mi.on { background: var(--b50); color: var(--b600); }
+  .mi .ic { width: 14px; height: 14px; border-radius: 4px; background: var(--g300); flex-shrink: 0; }
+  .mi.on .ic { background: var(--b600); }
+  .mi .badge { margin-left: auto; font-size: 11px; padding: 0 7px; }
+  .m-h { font-size: 18px; font-weight: 700; color: var(--g900); margin-bottom: 12px; }
+  .m-h3 { font-size: 15px; font-weight: 700; color: var(--g900); margin: 0 0 6px; }
+  .m-sel { display: inline-block; border: 1px solid var(--g300); border-radius: 4px; padding: 3px 24px 3px 8px; font-size: 12px; background: #fff; color: var(--g700); margin-right: 8px; position: relative; }
+  .m-sel::after { content: '\25BE'; position: absolute; right: 8px; color: var(--g400); }
+  .m-card { border: 1px solid var(--g200); border-radius: 8px; overflow: hidden; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.05); margin: 10px 0; }
+  .app table { font-size: 12px; }
+  .app th { padding: 8px 12px; font-size: 11px; }
+  .app td { padding: 8px 12px; }
+  .app td:first-child { font-weight: 400; color: inherit; }
+  .app .num { text-align: right; }
+  .m-link { color: var(--b600); }
+  .m-box { border: 1px solid var(--g200); border-radius: 6px; padding: 14px; margin: 10px 0; }
+  .m-note { background: var(--g50); border-radius: 6px; padding: 10px 12px; margin: 8px 0; font-size: 12px; }
+  .m-muted { color: var(--g500); font-size: 12px; }
+  .m-pbtn, .m-sbtn { display: inline-block; padding: 6px 14px; border-radius: 8px; font-size: 12px; margin: 2px 6px 2px 0; }
+  .m-pbtn { background: var(--b600); color: #fff; }
+  .m-sbtn { background: var(--g200); color: var(--g700); }
+  .m-ta { border: 1px solid var(--g300); border-radius: 4px; padding: 8px; font-size: 12px; color: var(--g400); background: #fff; margin: 6px 0 10px; }
+  .m-in { display: inline-block; border: 1px solid var(--g300); border-radius: 4px; padding: 3px 8px; font-size: 12px; background: #fff; min-width: 90px; }
+  .m-bub { max-width: 80%; padding: 6px 10px; border-radius: 10px; margin: 5px 0; font-size: 12px; }
+  .m-bub small { display: block; color: var(--g500); font-size: 10px; margin-top: 2px; }
+  .m-bub.l { background: var(--g100); margin-right: auto; }
+  .m-bub.r { background: var(--b100); margin-left: auto; }
+  .pin { display: inline-flex; width: 20px; height: 20px; border-radius: 50%; background: var(--b600); color: #fff; font-size: 11px; font-weight: 700; align-items: center; justify-content: center; margin-left: 6px; vertical-align: middle; flex-shrink: 0; }
+  .legend { counter-reset: l; list-style: none; margin: 10px 0 20px; }
+  .legend li { counter-increment: l; position: relative; padding: 2px 0 6px 34px; font-size: 14px; }
+  .legend li::before { content: counter(l); position: absolute; left: 0; top: 1px; width: 20px; height: 20px; border-radius: 50%; background: var(--b600); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .heat td { text-align: center; }
+  .heat .ok { background: #f0fdf4; } .heat .hi { background: var(--y100); } .heat .sat { background: var(--r100); }
+  .heat .off { background: repeating-linear-gradient(45deg, var(--g100), var(--g100) 4px, #fff 4px, #fff 8px); color: var(--g400); }
+  .heat .now { outline: 2px solid var(--b600); outline-offset: -2px; }
+
+  /* Right-to-left (Arabic) */
+  [dir=rtl] .side { border-right: 0; border-left: 1px solid var(--g200); }
+  [dir=rtl] .app-body.cols > .sb { border-right: 0; border-left: 1px solid var(--g200); }
+  [dir=rtl] th, [dir=rtl] td, [dir=rtl] .nav a { text-align: right; }
+  [dir=rtl] ul, [dir=rtl] ol { margin: 8px 22px 8px 0; }
+  [dir=rtl] ol.steps > li { padding: 4px 44px 12px 0; }
+  [dir=rtl] ol.steps > li::before { left: auto; right: 0; }
+  [dir=rtl] .legend li { padding: 2px 34px 6px 0; }
+  [dir=rtl] .legend li::before { left: auto; right: 0; }
+  [dir=rtl] .msg.bot { border-top-left-radius: 14px; border-top-right-radius: 4px; margin-right: 0; margin-left: auto; }
+  [dir=rtl] .msg.me { border-top-right-radius: 14px; border-top-left-radius: 4px; margin-left: 0; margin-right: auto; }
+  [dir=rtl] .m-bub.l { margin-right: 0; margin-left: auto; }
+  [dir=rtl] .m-bub.r { margin-left: 0; margin-right: auto; }
+  [dir=rtl] .pin { margin-left: 0; margin-right: 6px; }
+  [dir=rtl] .m-sel { padding: 3px 8px 3px 24px; margin-right: 0; margin-left: 8px; }
+  [dir=rtl] .m-sel::after { right: auto; left: 8px; }
+  [dir=rtl] .m-pbtn, [dir=rtl] .m-sbtn { margin: 2px 0 2px 6px; }
+  [dir=rtl] .mi .badge { margin-left: 0; margin-right: auto; }
+  [dir=rtl] .app-bar span { margin-left: 0; margin-right: 8px; }
+  [dir=rtl] .flow .arrow { transform: scaleX(-1); }
+  [dir=rtl] .app td:first-child { font-weight: 400; }
+  .mobile-top { display: none; }
+  @media (max-width: 900px) {
+    .app-body.cols { grid-template-columns: 1fr; }
+    .app-body.cols > .sb { border-right: 0; border-bottom: 1px solid var(--g200); }
+    .layout { display: block; }
+    .side { display: none; }
+    .mobile-top { display: block; position: sticky; top: 0; z-index: 5; background: var(--white); border-bottom: 1px solid var(--g200); padding: 10px 16px; }
+    .mobile-top b { font-size: 18px; color: var(--g900); }
+    .mobile-top span { font-size: 13px; color: var(--g500); margin-left: 6px; }
+    .mobile-top select { width: 100%; margin-top: 8px; padding: 8px; border: 1px solid var(--g300); border-radius: 8px; font-size: 14px; background: #fff; color: var(--g700); }
+    .main { padding: 24px 16px 64px; }
+    .page > header h2 { font-size: 24px; line-height: 32px; }
+  }
+  @media print { .side, .mobile-top { display: none; } .main { padding: 0; } body { background: #fff; } section { break-inside: avoid-page; } }
+</style>
+</head>
+<body>
+<div class="mobile-top">
+  <b>ONE</b><span>for Regulators &middot; Ajuda</span>
+  <select id="jump" aria-label="Ir para a secção"></select>
+</div>
+<div class="layout">
+  <aside class="side">
+    <div class="brand">
+      <h1>ONE</h1>
+      <p>for Regulators</p>
+      <span class="doc">Ajuda &middot; Balanceamento de carga</span>
+    </div>
+    <nav class="nav" id="nav">
+      <h3>Primeiros passos</h3>
+      <a href="#overview">O que é e para que serve</a>
+      <a href="#concepts">Conceitos básicos</a>
+      <h3>O ecrã</h3>
+      <a href="#screen">Onde está e o que contém</a>
+      <a href="#policies">Políticas de balanceamento</a>
+      <a href="#filters">Período e critérios</a>
+      <a href="#city-card">O cartão de cada cidade</a>
+      <a href="#deferred">Amostras por compensar</a>
+      <h3>Como fazer</h3>
+      <a href="#balance-city">Balancear uma cidade</a>
+      <a href="#balance-all">Balancear todas as cidades</a>
+      <a href="#preview">Ler a pré-visualização</a>
+      <h3>Lógica do cálculo</h3>
+      <a href="#logic">O cálculo em cinco passos</a>
+      <a href="#logic-fix">1 · Corrigir o impossível</a>
+      <a href="#logic-equity">2 · Distribuição equitativa</a>
+      <a href="#logic-compensate">3 · Reintroduzir compensações</a>
+      <a href="#logic-pobox">4 · POBOX</a>
+      <a href="#logic-rules">Regras que nunca se quebram</a>
+      <h3>Referência</h3>
+      <a href="#faq">Perguntas</a>
+    </nav>
+    <div class="side-foot">Atualizado a 30 de outubro de 2026</div>
+  </aside>
+
+  <main class="main">
+  <div class="page">
+    <header>
+      <h2>Balanceamento de carga de nós</h2>
+      <p>O que faz o balanceamento, como usar o ecrã passo a passo e como decide o ONEMS em que dia e para que nó vai cada amostra.</p>
+    </header>
+
+    <section id="overview">
+      <h2>O que é e para que serve</h2>
+      <p>O <strong>Allocation Plan</strong> diz que amostras é preciso enviar, de que nó, para que nó e em que dia. Com o tempo essa distribuição desorganiza-se: um painelista vai de férias, um nó fica sem painelista, acrescentam-se amostras ou há dias com muitos envios e dias com nenhum.</p>
+      <p>O <strong>balanceamento</strong> volta a organizar as amostras <strong>pendentes</strong> de cada cidade para que o trabalho fique repartido de forma justa entre os dias e entre os painelistas, sem alterar aquilo que se mede.</p>
+      <div class="grid">
+        <div class="card"><h4>Evita picos</h4><p>Nenhum painelista recebe de repente muitas amostras no mesmo dia ou semana enquanto outros não têm nenhuma.</p></div>
+        <div class="card"><h4>Respeita a disponibilidade</h4><p>Não programa envios em dias não úteis, no passado nem em dias em que o painelista avisou que não está.</p></div>
+        <div class="card"><h4>Preserva a medição</h4><p>Mantém a cidade de origem e a de destino de cada amostra e o total de amostras de cada mês.</p></div>
+      </div>
+      <div class="callout info"><strong>É sempre você quem decide.</strong> O balanceamento mostra primeiro uma <em>pré-visualização</em> com todas as alterações. Nada é modificado no plano até carregar em <span class="btn primary">Aplicar balanceamento</span>.</div>
+    </section>
+
+    <section id="concepts">
+      <h2>Conceitos básicos</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Palavra</th><th>O que significa aqui</th></tr></thead>
+        <tbody>
+          <tr><td>Amostra (envio)</td><td>Uma linha do Allocation Plan: um envio de um nó de origem para um nó de destino numa data. Só se movem as que estão <span class="badge b-yellow">pendentes</span>. As enviadas ou recebidas nunca são alteradas.</td></tr>
+          <tr><td>Nó</td><td>Um ponto da rede numa cidade (por exemplo <code>NAK-01</code>), atendido por um painelista.</td></tr>
+          <tr><td>Nó válido</td><td>Um nó ativo que tem um painelista ativo. Só os nós válidos enviam ou recebem amostras.</td></tr>
+          <tr><td>Dia válido</td><td>Um dia útil (segundo as <a href="#policies">Políticas de balanceamento</a>), nunca no passado, dentro das datas do plano, e em que nem o painelista de origem nem o de destino declararam indisponibilidade.</td></tr>
+          <tr><td>Período</td><td>As datas de início e de fim que escolhe nos filtros. O balanceamento só considera as amostras desse período.</td></tr>
+          <tr><td>Limite (fence)</td><td>Uma data de proteção. Desde hoje até essa data, o balanceamento não move, não apaga e não cria nenhuma amostra. Serve para não alterar o que os painelistas já têm previsto esta semana.</td></tr>
+          <tr><td>Amostra por compensar</td><td>Uma amostra que não foi possível colocar em nenhum sítio válido (por exemplo, porque a cidade não tem painelista). É retirada do plano, anotada à parte e o balanceamento volta a introduzi-la assim que houver um espaço.</td></tr>
+          <tr><td>POBOX</td><td>Regra opcional: em cada dia útil cada cidade deve enviar pelo menos uma amostra.</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="screen">
+      <h2>Onde está e o que contém</h2>
+      <p>Abra o menu <strong>Alocação › Balanceamento de Carga</strong>. O ecrã lê-se de cima para baixo: primeiro as regras, depois o período, depois o resumo e, por fim, um cartão por cidade.</p>
+      <div class="app" role="img" aria-label="Ecrã Balanceamento de Carga de Nós">
+        <div class="app-bar"><i></i><i></i><i></i><span>ONEMS › Alocação › Balanceamento de Carga</span></div>
+        <div class="app-body">
+          <div class="m-h">Balanceamento de Carga de Nós</div>
+          <div class="m-box"><div class="m-h3">Políticas de balanceamento<span class="pin">1</span> <span class="m-pbtn" style="float:right">Balancear todas as cidades</span></div>
+            <span class="m-muted">Dias úteis</span> <span class="m-pbtn">Seg</span><span class="m-pbtn">Ter</span><span class="m-pbtn">Qua</span><span class="m-pbtn">Qui</span><span class="m-pbtn">Sex</span><span class="m-sbtn">Sáb</span><span class="m-sbtn">Dom</span>
+            <div style="margin-top:8px"><span class="m-muted">Política de data</span> <span class="m-pbtn">Diária</span><span class="m-sbtn">Semanal</span> &nbsp; <span class="m-muted">&#9744; POBOX</span> &nbsp; <span class="m-muted">Limite (fence) até</span> <span class="m-in">01/11/2026</span></div>
+          </div>
+          <div class="m-box"><div class="m-h3">Filtros<span class="pin">2</span></div>
+            <span class="m-muted">Data de início</span> <span class="m-in">01/11/2026</span> <span class="m-muted">Data de fim</span> <span class="m-in">30/11/2026</span>
+            <div style="margin-top:8px"><span class="m-muted">Amostras de Referência/Nó</span> <span class="m-in">6</span> <span class="m-muted">Tolerância de Desvio (%)</span> <span class="m-in">20</span></div>
+          </div>
+          <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin:10px 0">
+            <div class="m-box" style="margin:0"><span class="m-muted">Nós saturados</span><br><b style="font-size:18px;color:var(--r700)">2</b><span class="pin">3</span></div>
+            <div class="m-box" style="margin:0"><span class="m-muted">Nós com carga alta</span><br><b style="font-size:18px;color:#c2410c">3</b></div>
+            <div class="m-box" style="margin:0"><span class="m-muted">Total de envios</span><br><b style="font-size:18px;color:var(--b700)">412</b></div>
+          </div>
+          <div class="m-box"><div class="m-h3">Amostras por compensar<span class="pin">4</span></div><span class="m-muted">Amostras pendentes de compensar: 12</span></div>
+          <div class="m-box"><div class="m-h3">Nakuru <span class="badge b-gray">Diária</span><span class="pin">5</span> <span style="float:right"><span class="m-sbtn">Dia</span><span class="m-pbtn">Semana</span><span class="m-sbtn">Mês</span></span></div>
+            <span class="m-muted">Matriz nós × semanas, recomendações e botão</span> <span class="m-pbtn">&#9878;&#65039; Auto-Balance Nakuru</span>
+          </div>
+        </div>
+      </div>
+      <ol class="legend">
+        <li><strong>Políticas de balanceamento:</strong> as regras que o cálculo usa (dias úteis, política de data, POBOX e limite (fence)) e o botão para balancear todas as cidades de uma só vez.</li>
+        <li><strong>Filtros:</strong> o período que se balanceia e os critérios para colorir a carga.</li>
+        <li><strong>Resumo:</strong> quantos nós estão saturados ou com carga alta e o total de envios do período.</li>
+        <li><strong>Amostras por compensar:</strong> as amostras postas de parte que esperam um espaço.</li>
+        <li><strong>Um cartão por cidade:</strong> a carga de cada nó, as recomendações e o botão para balancear essa cidade.</li>
+      </ol>
+      <div class="callout info">O ecrã é visto pelos utilizadores com perfil <strong>admin</strong> ou <strong>superadmin</strong>. Cada conta vê apenas as suas próprias cidades.</div>
+    </section>
+
+    <section id="policies">
+      <h2>Políticas de balanceamento</h2>
+      <p>São as regras da conta. Guardam-se ao alterá-las e aplicam-se a todas as cidades, a não ser que uma cidade tenha a sua própria regra (veja <a href="#city-card">O cartão de cada cidade</a>).</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Controlo</th><th>O que faz</th></tr></thead>
+        <tbody>
+          <tr><td>Dias úteis</td><td>Os dias em que se pode programar um envio. Carregue num dia para o ativar (azul) ou desativar (branco). O habitual é de segunda a sexta-feira.</td></tr>
+          <tr><td>Política de data</td><td><strong>Diária:</strong> cada envio é colocado num dia concreto e a distribuição faz-se dia a dia. <strong>Semanal:</strong> só se fixa a semana; o envio vai para o primeiro dia útil dessa semana.</td></tr>
+          <tr><td>POBOX</td><td>Se estiver assinalado, em cada dia útil cada cidade deve enviar pelo menos uma amostra. O POBOX obriga a usar a política <strong>Diária</strong>. Veja <a href="#logic-pobox">POBOX</a>.</td></tr>
+          <tr><td>Limite (fence) até</td><td>Data de proteção. Por defeito é o <strong>domingo da semana atual</strong>. Desde hoje até essa data nenhuma amostra é alterada; o balanceamento começa no dia seguinte. Pode antecipá-la, adiá-la ou apagá-la.</td></tr>
+          <tr><td>Amostras POBOX extra por produto</td><td>Só aparece com o POBOX assinalado. Indica que percentagem das amostras novas que o POBOX cria vai para cada produto. As percentagens devem somar 100, ou estar todas a 0 (nesse caso usa-se o plano menos avançado). Carregue em <span class="btn">Guardar</span>.</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout warn"><strong>As amostras em atraso</strong> (pendentes com data anterior a hoje) nunca ficam no passado: o balanceamento leva-as para o primeiro dia válido depois do limite (fence).</div>
+    </section>
+
+    <section id="filters">
+      <h2>Período e critérios</h2>
+      <ul>
+        <li><strong>Data de início</strong> e <strong>Data de fim</strong>: o período que se analisa e se balanceia. Pode usar a <strong>Seleção Rápida</strong>: um mês, um semestre ou o ano inteiro.</li>
+        <li><strong>Amostras de Referência/Nó</strong>: quantas amostras por nó e por semana considera normais.</li>
+        <li><strong>Tolerância de Desvio (%)</strong>: quanto pode um nó exceder a referência antes de ser assinalado.</li>
+      </ul>
+      <p>Com estes dois valores colore-se cada casa nó × semana:</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Cor</th><th>Regra</th><th>Exemplo com referência 6 e 20 %</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge b-green">Normal</span></td><td>Menos de referência × (1 + %)</td><td>menos de 7,2</td></tr>
+          <tr><td><span class="badge b-yellow">Alta</span></td><td>A partir de referência × (1 + %)</td><td>7,2 ou mais</td></tr>
+          <tr><td><span class="badge b-red">Saturada</span></td><td>A partir de referência × (1 + % × 1,5)</td><td>7,8 ou mais</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout info">A referência e a tolerância <strong>só servem para colorir e avisar</strong>. O cálculo do balanceamento não as usa: reparte sempre por igual entre os nós válidos.</div>
+      <p><span class="btn">Repor</span> volta aos valores iniciais, incluindo o limite (fence).</p>
+    </section>
+
+    <section id="city-card">
+      <h2>O cartão de cada cidade</h2>
+      <p>Cada cidade com amostras no período tem o seu cartão. No cabeçalho vê o nome, a política que lhe é aplicada (<span class="badge b-gray">Diária</span> ou <span class="badge b-gray">Semanal</span>, e <span class="badge b-purple">POBOX</span> se estiver ativo) e três vistas.</p>
+      <h3>As três vistas</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Vista</th><th>O que mostra</th></tr></thead>
+        <tbody>
+          <tr><td>Dia</td><td>Envios de cada nó em cada dia. As casas cinzentas são dias não úteis e as riscadas, dias em que o painelista não está. Um número a vermelho é um <strong>conflito</strong>: uma amostra num dia em que não pode sair. Com POBOX, um <strong style="color:var(--r700)">0</strong> vermelho no total é um dia útil sem qualquer envio da cidade.</td></tr>
+          <tr><td>Semana</td><td>Envios de cada nó em cada semana, com a cor Normal / Alta / Saturada, a média e o estado do nó.</td></tr>
+          <tr><td>Mês</td><td>Totais de cada nó em cada mês e a sua média mensal.</td></tr>
+        </tbody>
+      </table></div>
+      <div class="app" role="img" aria-label="Vista Dia da cidade Nakuru">
+        <div class="app-bar"><i></i><i></i><i></i><span>Nakuru · Dia</span></div>
+        <div class="app-body">
+          <table class="heat">
+            <thead><tr><th>Nó</th><th>Seg 2</th><th>Ter 3</th><th>Qua 4</th><th>Qui 5</th><th>Sex 6</th><th>Sáb 7</th></tr></thead>
+            <tbody>
+              <tr><td>NAK-01<br><span class="m-muted">Grace W.</span></td><td>3</td><td>2</td><td>2</td><td>2</td><td>2</td><td class="off">—</td></tr>
+              <tr><td>NAK-02<br><span class="m-muted">Peter O.</span></td><td>1</td><td class="off">0</td><td class="off" style="color:var(--r700);font-weight:700">1</td><td>0</td><td>1</td><td class="off">—</td></tr>
+              <tr><td>NAK-03<br><span class="m-muted">Sem Painelista</span></td><td>0</td><td>1</td><td>0</td><td>0</td><td>0</td><td class="off">—</td></tr>
+              <tr><td><b>Total</b></td><td><b>4</b></td><td><b>3</b></td><td><b>3</b></td><td><b>2</b></td><td><b>3</b></td><td class="off">—</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <p class="cap">Exemplo: o Peter não está na terça e na quarta-feira (riscado) e tem uma amostra na quarta-feira (a vermelho, conflito). O NAK-03 não tem painelista. A Grace tem quase todo o trabalho.</p>
+      <h3>Recomendações</h3>
+      <p>Por baixo da tabela, <strong>💡 Recomendações</strong> explica por palavras o que o ONEMS vê: casas saturadas, amostras em dias de ausência, nós sem painelista, amostras em atraso, picos diários e dias sem envio com POBOX. O número vermelho junto ao título indica quantos avisos importantes existem.</p>
+      <h3>Regra própria de uma cidade</h3>
+      <p>Sob o nome da cidade há dois seletores, <strong>Política de data</strong> e <strong>POBOX</strong>. Com <em>Herdar da conta</em> a cidade segue as Políticas de balanceamento. Escolha outro valor se essa cidade deve funcionar de forma diferente.</p>
+    </section>
+
+    <section id="deferred">
+      <h2>Amostras por compensar</h2>
+      <p>Por vezes uma amostra não pode ir para lado nenhum: a cidade de origem ou a de destino ficou sem nenhum painelista ativo, ou não resta nenhum dia válido até ao fim do plano. Em vez de a deixar num dia em que não pode sair, o balanceamento <strong>retira-a do plano e anota-a</strong> neste bloco.</p>
+      <ul>
+        <li><strong>Por cidade de origem:</strong> quantas esperam em cada cidade e o <strong>Motivo de espera</strong> mais frequente.</li>
+        <li><strong>Por plano:</strong> por cada plano, as amostras totais, programadas, realizadas, por compensar e as <strong>Extra POBOX</strong> (criadas pelo POBOX).</li>
+        <li><strong>Motivo:</strong> porque é que cada amostra foi posta de parte: sem painelista na origem ou no destino, sem dia válido, ou uma receção em POBOX que foi anulada.</li>
+      </ul>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Motivo de espera</th><th>O que fazer</th></tr></thead>
+        <tbody>
+          <tr><td>Sem painelista ativo no nó de origem</td><td>Registar ou reativar um painelista na cidade de origem.</td></tr>
+          <tr><td>Sem painelista ativo no nó de destino</td><td>Registar ou reativar um painelista na cidade de destino.</td></tr>
+          <tr><td>Plano não ativo</td><td>O plano da amostra não está ativo. Ative-o se deve continuar.</td></tr>
+          <tr><td>Sem capacidade nos dias válidos</td><td>Não resta espaço no período. Balanceie com um período mais longo.</td></tr>
+          <tr><td>Fora do período do plano</td><td>O período balanceado termina antes de o plano começar, ou não tem dias úteis. Balanceie um período que chegue ao plano.</td></tr>
+          <tr><td>Possível atraso de receção por férias do painelista</td><td>Nada: a amostra é reintroduzida sozinha no próximo balanceamento da cidade de origem. Se se repetir com o mesmo painelista, lembre-o de declarar envios e receções no mesmo dia.</td></tr>
+          <tr><td>Possível atraso de receção: o painelista não foi à caixa postal no dia anterior</td><td>Nada: a amostra é reintroduzida sozinha no próximo balanceamento da cidade de origem. Se se repetir com o mesmo painelista, lembre-o de declarar envios e receções no mesmo dia.</td></tr>
+        </tbody>
+      </table></div>
+      <h3>Receções em POBOX após uma ausência</h3>
+      <p>Esta regra só se aplica a cidades POBOX com um único nó. Quando um painelista declara uma receção no ONE bot, o ONEMS olha para o <strong>último dia útil anterior</strong>. Se nesse dia o painelista não declarou nenhum envio (a prova de que foi à caixa postal) e o pacote já podia estar lá, a receção é <strong>anulada</strong>: não conta para o E2E e a amostra volta a <em>Amostras por compensar</em>. Nos serviços expresso (padrão em horas) aplica-se também se o pacote saiu nesse mesmo dia. Se nesse dia o painelista não tinha nenhuma indisponibilidade nem nenhum envio programado, não se pode saber se foi ou não à caixa postal e a receção é dada como <strong>válida</strong>.</p>
+      <p><strong>Exemplo:</strong> um painelista regressa na segunda-feira de férias e declara uma receção: é anulada. Se na sexta-feira foi à caixa postal e declarou um envio, a receção é válida.</p>
+      <div class="callout ok"><strong>E depois:</strong> não tem de fazer mais nada. Sempre que balancear essa cidade, o ONEMS tentará reintroduzir as amostras anotadas. O menu mostra um contador com as que continuam a esperar. Também as reintroduz mesmo que o plano já tenha terminado, enquanto continuar ativo.</div>
+    </section>
+
+    <section id="balance-city">
+      <h2>Balancear uma cidade</h2>
+      <ol class="steps">
+        <li>Abra <strong>Alocação › Balanceamento de Carga</strong>.</li>
+        <li>Reveja as <strong>Políticas de balanceamento</strong>: dias úteis, política de data, POBOX e a data do <strong>Limite (fence) até</strong>.</li>
+        <li>Em <strong>Filtros</strong>, escolha a <strong>Data de início</strong> e a <strong>Data de fim</strong>, por exemplo com o botão do mês.</li>
+        <li>Procure o cartão da cidade e leia as suas <strong>💡 Recomendações</strong>. Use a vista <strong>Dia</strong> para ver conflitos e dias vazios.</li>
+        <li>Carregue em <strong>⚖️ Auto-Balance &lt;cidade&gt;</strong>. Abre-se a <a href="#preview">pré-visualização</a>. Ainda nada foi alterado.</li>
+        <li>Reveja o resumo, os avisos e a matriz <strong>Antes</strong> / <strong>Depois</strong>.</li>
+        <li>Carregue em <strong>Aplicar balanceamento</strong> para guardar as alterações, ou em <strong>Cancelar</strong> para deixar tudo como estava.</li>
+      </ol>
+      <div class="callout ok"><strong>E depois:</strong> aparece «Balanceamento aplicado com sucesso» e o cartão atualiza-se. Os painelistas verão as suas novas datas no ONE bot do Telegram com os avisos de cada dia. Pode repetir o balanceamento quando quiser: se a cidade já estiver equilibrada, a pré-visualização di-lo-á e não moverá nada.</div>
+    </section>
+
+    <section id="balance-all">
+      <h2>Balancear todas as cidades</h2>
+      <ol class="steps">
+        <li>Escolha a <strong>Data de início</strong> e a <strong>Data de fim</strong>. Sem elas o botão está desativado.</li>
+        <li>Carregue em <strong>Balancear todas as cidades</strong>, no bloco Políticas de balanceamento. O botão mostra o progresso: «A balancear 3/12».</li>
+        <li>Abre-se a <strong>Pré-visualização do balanceamento - todas as cidades</strong>, com uma linha por cidade e uma linha de total.</li>
+        <li>Carregue em <strong>Aplicar balanceamento</strong> para aplicar todas as cidades, ou em <strong>Cancelar</strong>.</li>
+      </ol>
+      <div class="callout warn">Cada cidade é aplicada em separado. Se uma falhar («Falhou a cidade …»), as restantes são aplicadas na mesma. Reveja a linha a vermelho e volte a balancear essa cidade sozinha.</div>
+    </section>
+
+    <section id="preview">
+      <h2>Ler a pré-visualização</h2>
+      <div class="app" role="img" aria-label="Pré-visualização do balanceamento de Nakuru">
+        <div class="app-bar"><i></i><i></i><i></i><span>Pré-visualização do balanceamento - Nakuru</span></div>
+        <div class="app-body">
+          <div class="m-box"><div class="m-h3">Resumo<span class="pin">1</span></div>
+            <span class="m-muted">Movimentos</span> <b>9</b> &nbsp; <span class="m-muted">Desvio padrão antes</span> <b>1,4</b> &nbsp; <span class="m-muted">Desvio padrão depois</span> <b>0,2</b> &nbsp; <span class="m-muted">Melhoria</span> <b>86 %</b></div>
+          <div class="m-box"><div class="m-h3">POBOX<span class="pin">2</span></div><span class="m-muted">Dias POBOX em falta 2 · Dias POBOX movidos 1 · Dias POBOX criados 1 · Dias POBOX por cobrir 0</span></div>
+          <div class="m-box"><div class="m-h3">Amostras por compensar<span class="pin">3</span></div><span class="m-muted">Postas de parte 0 · Destino reatribuído 1 · Reintroduzidas 2 · Em espera 3</span><br><span class="m-muted">2 delas substituem amostras POBOX (mesmo dia e nó, sem envio extra).</span></div>
+          <div class="m-note">Limite (fence): as amostras até 2026-11-01 ficam como estão; o balanceamento começa no dia seguinte.<span class="pin">4</span></div>
+          <span class="m-sbtn">Vista matricial</span><span class="m-sbtn">Movimentos (9)</span><span class="pin">5</span>
+          <div style="margin-top:10px"><span class="m-sbtn">Cancelar</span><span class="m-pbtn">Aplicar balanceamento</span></div>
+        </div>
+      </div>
+      <ol class="legend">
+        <li><strong>Resumo:</strong> quantas amostras mudam e quanto se iguala a carga. O desvio padrão mede o quão desigual é a distribuição: quanto mais baixo, mais igualada. <em>Melhoria</em> é quanto desce, em percentagem.</li>
+        <li><strong>POBOX</strong> (se estiver ativo): dias úteis sem envio, quantos são cobertos movendo uma amostra, quantos criando uma nova e quantos ficam por cobrir.</li>
+        <li><strong>Amostras por compensar:</strong> as que seriam postas de parte, as que mudam de nó de destino dentro da mesma cidade, as que voltam ao plano e as que continuam a esperar.</li>
+        <li><strong>Limite (fence):</strong> lembra até que data não se altera nada.</li>
+        <li><strong>Vista matricial / Movimentos:</strong> a carga de cada nó e semana antes e depois, ou a lista de alterações («de NAK-01, dia 2, para NAK-02, dia 5: 1 envio»).</li>
+      </ol>
+      <div class="callout warn">Se a pré-visualização avisar que serão <strong>retiradas amostras do plano</strong>, aparece um aviso âmbar antes do botão Aplicar. Leia-o: essas amostras passam para <a href="#deferred">Amostras por compensar</a>.</div>
+    </section>
+
+    <section id="logic">
+      <h2>O cálculo em cinco passos</h2>
+      <p>Quando carrega em Auto-Balance, o ONEMS faz o seguinte para a cidade, sempre sobre as amostras <strong>pendentes</strong> do período e a partir do <strong>primeiro dia permitido</strong>: o mais tardio entre a data de início, hoje e o dia seguinte ao limite (fence).</p>
+      <div class="flow">
+        <div class="node"><span class="tag">Passo 1</span><b>Corrigir o impossível</b>Destinos sem painelista e amostras sem nenhum dia possível.</div>
+        <div class="arrow">&rarr;</div>
+        <div class="node"><span class="tag">Passo 2</span><b>Repartir por igual</b>Entre semanas, dias e nós, sem alterar o total do mês.</div>
+        <div class="arrow">&rarr;</div>
+        <div class="node"><span class="tag">Passo 3</span><b>Reintroduzir</b>As amostras por compensar voltam se houver espaço.</div>
+        <div class="arrow">&rarr;</div>
+        <div class="node"><span class="tag">Passo 4</span><b>POBOX</b>Pelo menos um envio em cada dia útil.</div>
+        <div class="arrow">&rarr;</div>
+        <div class="node"><span class="tag">Passo 5</span><b>Pré-visualizar ou guardar</b>Tudo ou nada.</div>
+      </div>
+      <p>As amostras dentro do limite (fence), as enviadas e as recebidas não entram no cálculo.</p>
+    </section>
+
+    <section id="logic-fix">
+      <h2>1 · Corrigir o impossível</h2>
+      <p>Antes de repartir, o ONEMS olha para as amostras que não poderiam sair tal como estão:</p>
+      <ol class="steps">
+        <li><strong>O nó de destino não tem painelista ativo.</strong> Procura-se outro nó válido da <strong>mesma cidade de destino</strong>: o que menos recebe nessa semana e, se possível, um que esteja disponível nesse dia. A rota cidade → cidade não muda. Na pré-visualização conta como <em>Destino reatribuído</em>.</li>
+        <li><strong>A cidade de origem não tem nenhum nó válido</strong>, ou a de destino também não tem nenhum: a amostra passa para <a href="#deferred">Amostras por compensar</a>.</li>
+        <li><strong>Não há nenhum dia válido</strong> para a amostra em tudo o que resta do seu plano (não apenas no período do ecrã): passa para Amostras por compensar. Se houver algum dia fora do período, deixa-se onde está e avisa-se, para que balanceie com um período mais longo.</li>
+      </ol>
+      <div class="callout info">Uma amostra que tenha algo associado (material retido, uma incidência ou uma leitura da etiqueta) <strong>nunca é retirada do plano</strong>. Deixa-se onde está e a pré-visualização avisa com «Amostras por compensar que não se podem mover porque estão congeladas».</div>
+    </section>
+
+    <section id="logic-equity">
+      <h2>2 · Distribuição equitativa</h2>
+      <p>É o coração do balanceamento. A ideia: <strong>cada mês conserva o seu número de amostras</strong> (assim respeita-se a sazonalidade do plano) e esse número é repartido por igual entre os espaços válidos do mês.</p>
+      <ol class="steps">
+        <li><strong>Mês → semanas.</strong> O total do mês reparte-se pelas suas semanas segundo o número de dias úteis que cada uma tem dentro do período. Uma semana de 5 dias recebe mais do que uma de 2.</li>
+        <li><strong>Semana → nó e dia.</strong> Com política Diária, cada semana reparte-se por igual entre as casas (nó válido × dia válido). Com política Semanal, entre os nós válidos, e o envio vai para o primeiro dia útil da semana.</li>
+        <li><strong>O que não se divide exatamente.</strong> Se sobrarem uma ou duas amostras, vão uma a uma para nós diferentes e em dias diferentes. Além disso, o turno roda: da próxima vez que balancear, não calharão ao mesmo nó.</li>
+        <li><strong>Mover o menos possível.</strong> Cada casa conserva as suas amostras até ao seu objetivo (as de data mais cedo). Só o excedente se move, para casas do mesmo mês que têm menos do que lhes cabe, emparelhando por data para que cada amostra se desloque o menor número de dias.</li>
+        <li><strong>Verificar cada destino.</strong> Uma amostra não vai para um dia em que o painelista de destino não está, nem para um nó que seja ao mesmo tempo a sua origem e o seu destino. Se acontecer, troca-se com outra amostra ou vai para o espaço compatível mais próximo.</li>
+      </ol>
+      <h3>Exemplo</h3>
+      <p>Nakuru tem 15 amostras pendentes numa semana de 5 dias úteis. O NAK-03 não tem painelista e o Peter (NAK-02) não está na terça e na quarta-feira.</p>
+      <div class="two">
+        <div>
+          <div class="app" role="img" aria-label="Antes do balanceamento"><div class="app-bar"><i></i><i></i><i></i><span>Antes</span></div>
+            <div class="app-body"><table class="heat"><thead><tr><th>Nó</th><th>Seg</th><th>Ter</th><th>Qua</th><th>Qui</th><th>Sex</th></tr></thead><tbody>
+              <tr><td>NAK-01</td><td>3</td><td>2</td><td>2</td><td>2</td><td>2</td></tr>
+              <tr><td>NAK-02</td><td>1</td><td class="off">0</td><td class="off" style="color:var(--r700);font-weight:700">1</td><td>0</td><td>1</td></tr>
+              <tr><td>NAK-03</td><td>0</td><td>1</td><td>0</td><td>0</td><td>0</td></tr>
+            </tbody></table></div></div>
+        </div>
+        <div>
+          <div class="app" role="img" aria-label="Depois do balanceamento"><div class="app-bar"><i></i><i></i><i></i><span>Depois</span></div>
+            <div class="app-body"><table class="heat"><thead><tr><th>Nó</th><th>Seg</th><th>Ter</th><th>Qua</th><th>Qui</th><th>Sex</th></tr></thead><tbody>
+              <tr><td>NAK-01</td><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td></tr>
+              <tr><td>NAK-02</td><td>2</td><td class="off">0</td><td class="off">0</td><td>2</td><td>1</td></tr>
+              <tr><td>NAK-03</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+            </tbody></table></div></div>
+        </div>
+      </div>
+      <p class="cap">Há 8 casas válidas (5 dias do NAK-01 e 3 do NAK-02) para 15 amostras: 1 por casa e sobram 7, que se repartem uma a uma. Ficam sete casas com 2 e uma com 1. O NAK-03 fica vazio porque não tem painelista, e o Peter não recebe nada nos seus dias de ausência. A semana continua a ter 15 amostras.</p>
+    </section>
+
+    <section id="logic-compensate">
+      <h2>3 · Reintroduzir compensações</h2>
+      <p>Depois da distribuição, o ONEMS tenta devolver ao plano as <a href="#deferred">Amostras por compensar</a> da cidade:</p>
+      <ol class="steps">
+        <li><strong>Primeiro substituem amostras POBOX.</strong> Se num nó e dia houver uma amostra criada pelo POBOX, a amostra por compensar ocupa o seu lugar: mesmo nó de origem, mesmo dia, mas com o seu próprio destino (a sua rota original). Assim cumpre-se o plano sem acrescentar um envio extra.</li>
+        <li><strong>Se não, colocam-se num espaço livre:</strong> o dia com menos envios do nó de origem, num dia válido, que pode ser posterior à data de fim do seu plano; o plano deve continuar ativo.</li>
+        <li><strong>Limites:</strong> no máximo <strong>uma</strong> amostra compensada por nó de origem e dia, e uma por nó de destino e dia. Nunca se colocam hoje, porque os avisos do dia já podem ter saído.</li>
+        <li><strong>As que não cabem</strong> continuam a esperar, com o seu motivo.</li>
+      </ol>
+      <div class="callout info">Uma amostra reintroduzida que já está num espaço válido fica <strong>fixa</strong>: os balanceamentos seguintes não a movem.</div>
+    </section>
+
+    <section id="logic-pobox">
+      <h2>4 · POBOX</h2>
+      <p>Só se o POBOX estiver ativo para a cidade. Para cada dia útil sem nenhum envio a partir da cidade, o ONEMS tenta, por esta ordem:</p>
+      <ol class="steps">
+        <li><strong>Já o cobre uma amostra reintroduzida?</strong> Então não é preciso mais nada.</li>
+        <li><strong>Mover:</strong> traz uma amostra pendente do dia mais próximo que tenha 2 ou mais envios. Procura primeiro na mesma semana e depois nas semanas vizinhas.</li>
+        <li><strong>Criar:</strong> se não houver nada para mover, cria uma amostra nova (Extra POBOX).
+          <ul>
+            <li><strong>Produto:</strong> se houver distribuição por produto, o que está mais abaixo da sua percentagem; se não, o plano menos avançado nesse dia.</li>
+            <li><strong>Origem:</strong> o nó da cidade com menos envios nessa semana.</li>
+            <li><strong>Destino:</strong> um nó válido de outra cidade, preferindo as cidades que já são destino nesse plano e o nó que menos recebe.</li>
+          </ul>
+        </li>
+        <li>Se nada disto for possível, o dia conta como <em>Dias POBOX por cobrir</em>.</li>
+      </ol>
+    </section>
+
+    <section id="logic-rules">
+      <h2>Regras que nunca se quebram</h2>
+      <ul>
+        <li>Só se movem amostras <strong>pendentes</strong>. As enviadas e recebidas não são alteradas.</li>
+        <li>Nada muda <strong>desde hoje até à data do limite (fence)</strong>.</li>
+        <li>Nunca se programa no passado, em dias não úteis nem em dias de ausência do painelista de origem ou de destino.</li>
+        <li>A <strong>cidade de origem</strong> e a <strong>cidade de destino</strong> de cada amostra não mudam. No máximo muda o nó dentro da mesma cidade.</li>
+        <li>O <strong>total de cada mês</strong> conserva-se. Só o POBOX pode acrescentar amostras, e só a falta de espaço pode pô-las de parte.</li>
+        <li>Ao aplicar, guarda-se <strong>tudo ou nada</strong>: se algo não bater certo, não se altera nenhuma amostra dessa cidade.</li>
+        <li>Se duas pessoas aplicarem ao mesmo tempo sobre a mesma cidade, a segunda calcula sobre o resultado da primeira.</li>
+      </ul>
+    </section>
+
+    <section id="faq">
+      <h2>Perguntas</h2>
+      <details><summary>Balanceei e quase nada mudou. É normal?</summary><div>Sim. O balanceamento move o mínimo. Se a cidade já está bem repartida, a pré-visualização diz «Não é preciso balancear: a cidade já está bem equilibrada!». Verifique também o limite (fence): o que cai antes dessa data não se move.</div></details>
+      <details><summary>Porque é que as amostras por compensar não são colocadas?</summary><div>Veja o <strong>Motivo de espera</strong>. O mais habitual é que a cidade de origem ou a de destino não tenha nenhum painelista ativo. Serão colocadas sozinhas assim que o tiver e voltar a balancear.</div></details>
+      <details><summary>Porque é que as amostras Extra POBOX não diminuem depois de balancear?</summary><div>As amostras por compensar só substituem uma POBOX quando a rota da compensação tem painelista na origem e no destino nesse dia. Se a cidade de destino não tiver painelista, a POBOX fica.</div></details>
+      <details><summary>Pode uma amostra mudar de cidade?</summary><div>Não. Mudar de cidade alteraria a rota medida. Só pode mudar de nó dentro da mesma cidade.</div></details>
+      <details><summary>O que acontece com as amostras desta semana?</summary><div>Com o limite (fence) por defeito (domingo desta semana), não são alteradas. Se quiser que o balanceamento também as organize, defina como limite uma data anterior ou apague-o.</div></details>
+      <details><summary>Qual é a diferença entre Diária e Semanal?</summary><div>Com Diária a distribuição faz-se dia a dia. Com Semanal só importa a semana e todas as amostras da semana são colocadas no seu primeiro dia útil. Com POBOX é sempre Diária.</div></details>
+      <details><summary>Posso desfazer um balanceamento?</summary><div>Não há botão de desfazer. Por isso existe a pré-visualização: reveja-a antes de aplicar. Se algo não o convencer, carregue em Cancelar.</div></details>
+      <details><summary>Quem vê este ecrã?</summary><div>Os utilizadores admin e superadmin. Cada conta vê apenas as suas cidades e os seus planos.</div></details>
+    </section>
+  </div>
+  </main>
+</div>
+
+<script>
+(function () {
+  var links = Array.prototype.slice.call(document.querySelectorAll('#nav a'));
+  var sections = links.map(function (a) { return document.querySelector(a.getAttribute('href')); }).filter(Boolean);
+
+  // Mobile section picker
+  var jump = document.getElementById('jump');
+  links.forEach(function (a) {
+    var o = document.createElement('option');
+    o.value = a.getAttribute('href'); o.textContent = a.textContent; jump.appendChild(o);
+  });
+  jump.addEventListener('change', function () { location.hash = jump.value; });
+
+  // Highlight the current section in the side menu
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          links.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id); });
+          jump.value = '#' + e.target.id;
+        }
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    sections.forEach(function (s) { io.observe(s); });
+  }
+})();
+</script>
+</body>
+</html>

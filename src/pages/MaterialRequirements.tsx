@@ -176,7 +176,7 @@ export default function MaterialRequirements() {
         <Package className="w-8 h-8 text-blue-600" />
         <div className="flex items-center gap-2">
           <h1 className="text-2xl font-bold text-gray-900">{t('material_requirements.title')}</h1>
-          <SmartTooltip content="Calculate material needs based on allocation plans within a date range. This module shows what materials need to be purchased and which panelists need to receive materials for their scheduled shipments." />
+          <SmartTooltip content={t('hc.material_requirements.title_tip')} />
         </div>
       </div>
 
@@ -184,7 +184,7 @@ export default function MaterialRequirements() {
 
       {error && (
         <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-          Error calculating requirements
+          {t('hc.material_requirements.error_calculating')}
         </div>
       )}
 
@@ -222,7 +222,7 @@ export default function MaterialRequirements() {
             <button
               onClick={() => setIsFiltersCollapsed(!isFiltersCollapsed)}
               className="p-1 hover:bg-gray-100 rounded transition-colors"
-              title={isFiltersCollapsed ? "Expand filters" : "Collapse filters"}
+              title={isFiltersCollapsed ? t('hc.material_requirements.expand_filters') : t('hc.material_requirements.collapse_filters')}
             >
               {isFiltersCollapsed ? (
                 <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -236,12 +236,12 @@ export default function MaterialRequirements() {
             </button>
             <Filter className="w-5 h-5 text-gray-600" />
             <h3 className="text-lg font-semibold text-gray-900">{t('stock.filters')}</h3>
-            <SmartTooltip content="Filter material requirements by date range, material type, or node. Use the quick month selector for easy date selection." />
+            <SmartTooltip content={t('hc.material_requirements.filters_tip')} />
           </div>
           <button
             onClick={handleResetFilters}
             className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-            title="Reset all filters"
+            title={t('hc.material_requirements.reset_filters')}
           >
             <RotateCcw className="w-4 h-4" />
             {t('common.reset')}
@@ -256,7 +256,7 @@ export default function MaterialRequirements() {
                 <label className="flex items-center gap-2 block text-sm font-medium text-gray-700 mb-2">
                   <Calendar className="w-4 h-4" />
                   {t('common.start_date')}
-                  <SmartTooltip content="The beginning date of the period for which to calculate material requirements." />
+                  <SmartTooltip content={t('hc.material_requirements.start_date_tip')} />
                 </label>
                 <input
                   type="date"
@@ -270,7 +270,7 @@ export default function MaterialRequirements() {
                 <label className="flex items-center gap-2 block text-sm font-medium text-gray-700 mb-2">
                   <Calendar className="w-4 h-4" />
                   {t('common.end_date')}
-                  <SmartTooltip content="The ending date of the period for which to calculate material requirements." />
+                  <SmartTooltip content={t('hc.material_requirements.end_date_tip')} />
                 </label>
                 <input
                   type="date"
@@ -284,7 +284,7 @@ export default function MaterialRequirements() {
                 <label className="flex items-center gap-2 block text-sm font-medium text-gray-700 mb-2">
                   <Package className="w-4 h-4" />
                   {t('common.material')}
-                  <SmartTooltip content="Filter results to show only a specific material. Leave empty to show all materials." />
+                  <SmartTooltip content={t('hc.material_requirements.material_tip')} />
                 </label>
                 <select
                   value={selectedMaterialId}
@@ -304,7 +304,7 @@ export default function MaterialRequirements() {
                 <label className="flex items-center gap-2 block text-sm font-medium text-gray-700 mb-2">
                   <Users className="w-4 h-4" />
                   {t('common.node')}
-                  <SmartTooltip content="Filter panelist requirements to show only a specific node. This filter only applies to the Panelist Requirements tab." />
+                  <SmartTooltip content={t('hc.material_requirements.node_tip')} />
                 </label>
                 <select
                   value={selectedNodeId}
@@ -325,7 +325,7 @@ export default function MaterialRequirements() {
             <div className="mb-4">
               <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
                 {t('material_requirements.quick_period_selection')}
-                <SmartTooltip content="Click any month button to automatically set the start and end dates for that entire month, or use semester/year buttons for longer periods." />
+                <SmartTooltip content={t('hc.material_requirements.quick_period_tip')} />
               </label>
               <div className="flex items-center gap-2 mb-2">
                 <select
@@ -395,7 +395,7 @@ export default function MaterialRequirements() {
               >
                 <ShoppingCart className="w-4 h-4" />
                 {t('material_requirements.purchase_requirements')}
-                <SmartTooltip content="Shows the total quantity of each material needed to be purchased to fulfill all allocation plans in the selected date range." />
+                <SmartTooltip content={t('hc.material_requirements.purchase_tip')} />
               </button>
               <button
                 onClick={() => setActiveTab('panelist')}
@@ -407,7 +407,7 @@ export default function MaterialRequirements() {
               >
                 <Users className="w-4 h-4" />
                 {t('material_requirements.panelist_requirements')}
-                <SmartTooltip content="Shows which materials need to be sent to each panelist/node for their scheduled shipments." />
+                <SmartTooltip content={t('hc.material_requirements.panelist_tip')} />
               </button>
             </div>
 
@@ -465,7 +465,7 @@ export default function MaterialRequirements() {
                             {panelist.panelist_name ? (
                               <span className="text-green-600">→ {panelist.panelist_name}</span>
                             ) : (
-                              <span className="text-orange-600">→ Pending assignment</span>
+                              <span className="text-orange-600">{t('hc.material_requirements.pending_assignment')}</span>
                             )}
                           </p>
                         </div>

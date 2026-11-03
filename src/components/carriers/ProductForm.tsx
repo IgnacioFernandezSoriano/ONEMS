@@ -50,7 +50,7 @@ export function ProductForm({ product, carrierId, onSubmit, onCancel }: ProductF
           value={formData.code}
           onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
           className="w-full px-3 py-2 border rounded-md"
-          placeholder="e.g., DHL-EXP-24"
+          placeholder={t('hc.product_form.ph_code')}
           maxLength={50}
         />
       </div>
@@ -62,7 +62,7 @@ export function ProductForm({ product, carrierId, onSubmit, onCancel }: ProductF
           value={formData.description}
           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
           className="w-full px-3 py-2 border rounded-md"
-          placeholder="e.g., Express delivery 24 hours"
+          placeholder={t('hc.product_form.ph_description')}
           rows={3}
         />
       </div>
@@ -77,7 +77,7 @@ export function ProductForm({ product, carrierId, onSubmit, onCancel }: ProductF
             value={formData.standard_delivery_hours}
             onChange={(e) => setFormData({ ...formData, standard_delivery_hours: e.target.value })}
             className="w-full px-3 py-2 border rounded-md"
-            placeholder="e.g., 24"
+            placeholder={t('hc.product_form.ph_hours')}
           />
         </div>
         <div>
@@ -95,7 +95,7 @@ export function ProductForm({ product, carrierId, onSubmit, onCancel }: ProductF
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">Status *</label>
+        <label className="block text-sm font-medium mb-1">{t('hc.product_form.status')} *</label>
         <select
           required
           value={formData.status}

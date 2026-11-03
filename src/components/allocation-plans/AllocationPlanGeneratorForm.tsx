@@ -254,9 +254,9 @@ export function AllocationPlanGeneratorForm({
       setSeasonal({})
       setUseSeasonalDist(false)
 
-      alert(`Plan generated successfully with ${details.length} samples!`)
+      alert(t('hc.allocation_plan_generator_form.plan_generated', { count: details.length }))
     } catch (error: any) {
-      alert(`Error: ${error.message}`)
+      alert(t('hc.allocation_plan_generator_form.error_message', { message: error.message }))
     } finally {
       setLoading(false)
     }
@@ -274,7 +274,7 @@ export function AllocationPlanGeneratorForm({
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
               </svg>
               <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
-                Unique identifier for this allocation plan. Use descriptive names like "Q1_2025_Madrid_Express".
+                {t('hc.allocation_plan_generator_form.tt_plan_name')}
               </div>
             </span>
           </label>
@@ -295,7 +295,7 @@ export function AllocationPlanGeneratorForm({
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
               </svg>
               <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
-                Total number of samples to allocate across the date range. Will be distributed according to city and seasonal patterns.
+                {t('hc.allocation_plan_generator_form.tt_total_samples')}
               </div>
             </span>
           </label>
@@ -313,13 +313,13 @@ export function AllocationPlanGeneratorForm({
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="flex items-center gap-1 text-sm font-medium mb-1">
-            Carrier *
+            {t('hc.allocation_plan_generator_form.carrier')} *
             <span className="group relative">
               <svg className="w-3 h-3 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
               </svg>
               <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
-                Logistics carrier for this allocation plan (e.g., DHL, FedEx). Determines available products.
+                {t('hc.allocation_plan_generator_form.tt_carrier')}
               </div>
             </span>
           </label>
@@ -340,13 +340,13 @@ export function AllocationPlanGeneratorForm({
 
         <div>
           <label className="flex items-center gap-1 text-sm font-medium mb-1">
-            Product *
+            {t('hc.allocation_plan_generator_form.product')} *
             <span className="group relative">
               <svg className="w-3 h-3 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
               </svg>
               <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
-                Carrier product/service type (e.g., Express, Standard). Filtered by selected carrier.
+                {t('hc.allocation_plan_generator_form.tt_product')}
               </div>
             </span>
           </label>
@@ -375,7 +375,7 @@ export function AllocationPlanGeneratorForm({
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
               </svg>
               <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
-                First day of the allocation period. Samples will be scheduled from this date.
+                {t('hc.allocation_plan_generator_form.tt_start_date')}
               </div>
             </span>
           </label>
@@ -396,7 +396,7 @@ export function AllocationPlanGeneratorForm({
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
               </svg>
               <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
-                Last day of the allocation period. Samples will be scheduled until this date.
+                {t('hc.allocation_plan_generator_form.tt_end_date')}
               </div>
             </span>
           </label>
@@ -413,13 +413,13 @@ export function AllocationPlanGeneratorForm({
       {/* Quick Period Selection */}
       <div className="border rounded-lg p-4 bg-gray-50">
         <label className="flex items-center gap-2 text-sm font-medium mb-3">
-          Quick Period Selection
+          {t('hc.allocation_plan_generator_form.quick_period')}
           <span className="group relative">
             <svg className="w-3 h-3 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
             </svg>
             <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
-              Click any month button to automatically set the start and end dates for that entire month, or use semester/year buttons for longer periods.
+              {t('hc.allocation_plan_generator_form.tt_quick_period')}
             </div>
           </span>
         </label>
@@ -441,7 +441,7 @@ export function AllocationPlanGeneratorForm({
                 onClick={() => handleMonthSelect(selectedYear, month.num)}
                 className="px-3 py-1 text-sm font-medium rounded-md border border-gray-300 hover:bg-blue-50 hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                {month.name}
+                {t(`hc.allocation_plan_generator_form.month_${month.name.toLowerCase()}`)}
               </button>
             ))}
             <button
@@ -449,21 +449,21 @@ export function AllocationPlanGeneratorForm({
               onClick={handleFirstSemesterSelect}
               className="px-3 py-1 text-sm font-medium rounded-md border border-green-300 bg-green-50 hover:bg-green-100 hover:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
             >
-              1st Semester
+              {t('hc.allocation_plan_generator_form.first_semester')}
             </button>
             <button
               type="button"
               onClick={handleSecondSemesterSelect}
               className="px-3 py-1 text-sm font-medium rounded-md border border-teal-300 bg-teal-50 hover:bg-teal-100 hover:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
             >
-              2nd Semester
+              {t('hc.allocation_plan_generator_form.second_semester')}
             </button>
             <button
               type="button"
               onClick={handleYearSelect}
               className="px-3 py-1 text-sm font-medium rounded-md border border-purple-300 bg-purple-50 hover:bg-purple-100 hover:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
-              Year
+              {t('hc.allocation_plan_generator_form.year')}
             </button>
           </div>
         </div>
@@ -479,12 +479,12 @@ export function AllocationPlanGeneratorForm({
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
               </svg>
               <div className="invisible group-hover:visible absolute z-10 w-80 p-3 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
-                <p className="font-semibold mb-1">City Distribution Matrix</p>
-                <p className="mb-2">Defines the percentage of samples allocated between city classification pairs (A, B, C).</p>
-                <p className="mb-1"><strong>Example:</strong></p>
-                <p className="mb-1">• AA = 20% (Class A origin → Class A destination)</p>
-                <p className="mb-1">• AB = 15% (Class A origin → Class B destination)</p>
-                <p>Fill some cells manually, then click {t('allocation_plans.auto_fill_to_100')} to distribute the remaining percentage equally across empty cells.</p>
+                <p className="font-semibold mb-1">{t('hc.allocation_plan_generator_form.matrix_title')}</p>
+                <p className="mb-2">{t('hc.allocation_plan_generator_form.matrix_desc')}</p>
+                <p className="mb-1"><strong>{t('hc.allocation_plan_generator_form.example')}</strong></p>
+                <p className="mb-1">{t('hc.allocation_plan_generator_form.matrix_ex_aa')}</p>
+                <p className="mb-1">{t('hc.allocation_plan_generator_form.matrix_ex_ab')}</p>
+                <p>{t('hc.allocation_plan_generator_form.matrix_fill_hint', { action: t('allocation_plans.auto_fill_to_100') })}</p>
               </div>
             </span>
           </div>
@@ -542,11 +542,11 @@ export function AllocationPlanGeneratorForm({
                 </svg>
                 <div className="invisible group-hover:visible absolute z-10 w-80 p-3 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
                   <p className="font-semibold mb-1">{t('allocation_plans.seasonal_distribution')}</p>
-                  <p className="mb-2">Optional: Distribute samples unevenly across months to reflect seasonal patterns.</p>
-                  <p className="mb-1"><strong>Example:</strong></p>
-                  <p className="mb-1">• December = 15% (high season)</p>
-                  <p className="mb-1">• January = 5% (low season)</p>
-                  <p>When disabled, samples are distributed evenly across all months. Fill some months manually, then click {t('allocation_plans.auto_fill_to_100')} to distribute the remaining percentage.</p>
+                  <p className="mb-2">{t('hc.allocation_plan_generator_form.seasonal_desc')}</p>
+                  <p className="mb-1"><strong>{t('hc.allocation_plan_generator_form.example')}</strong></p>
+                  <p className="mb-1">{t('hc.allocation_plan_generator_form.seasonal_ex_dec')}</p>
+                  <p className="mb-1">{t('hc.allocation_plan_generator_form.seasonal_ex_jan')}</p>
+                  <p>{t('hc.allocation_plan_generator_form.seasonal_fill_hint', { action: t('allocation_plans.auto_fill_to_100') })}</p>
                 </div>
               </span>
             </div>
@@ -558,14 +558,14 @@ export function AllocationPlanGeneratorForm({
                 onClick={clearSeasonalHandler}
                 className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition-colors"
               >
-                Clear
+                {t('hc.allocation_plan_generator_form.clear')}
               </button>
               <button
                 type="button"
                 onClick={autoFillSeasonalHandler}
                 className="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
               >
-                Auto-fill to 100%
+                {t('hc.allocation_plan_generator_form.auto_fill_100')}
               </button>
             </div>
           )}
@@ -590,7 +590,7 @@ export function AllocationPlanGeneratorForm({
               ] as const
             ).map((month) => (
               <div key={month}>
-                <label className="block text-xs mb-1 capitalize">{month} (%)</label>
+                <label className="block text-xs mb-1 capitalize">{t(`hc.allocation_plan_generator_form.month_${month}`)} (%)</label>
                 <input
                   type="number"
                   step="1"

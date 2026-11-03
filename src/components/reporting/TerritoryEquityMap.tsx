@@ -58,7 +58,7 @@ export function TerritoryEquityMap({ data }: TerritoryEquityMapProps) {
     return (
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
         <p className="text-gray-600">
-          No cities with geographic coordinates available. Please add latitude and longitude data to cities.
+          {t('hc.territory_equity_map.no_coords')}
         </p>
       </div>
     );

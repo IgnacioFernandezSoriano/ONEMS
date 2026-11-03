@@ -45,7 +45,7 @@ export default function AccountReportingConfig() {
 
     // Validation
     if (warningThreshold <= criticalThreshold) {
-      alert('Warning threshold must be greater than critical threshold');
+      alert(t('hc.account_reporting_config.warning_gt_critical'));
       return;
     }
 
@@ -79,7 +79,7 @@ export default function AccountReportingConfig() {
   if (configLoading || classLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Loading configuration...</div>
+        <div className="text-gray-500">{t('hc.account_reporting_config.loading')}</div>
       </div>
     );
   }
@@ -88,7 +88,7 @@ export default function AccountReportingConfig() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-red-500">
-          Error loading configuration: {(configError || classError)?.message}
+          {t('hc.account_reporting_config.error_loading', { message: (configError || classError)?.message })}
         </div>
       </div>
     );
@@ -98,36 +98,36 @@ export default function AccountReportingConfig() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Account Reporting Configuration</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t('hc.account_reporting_config.title')}</h1>
         <p className="text-gray-600 mt-1">
-          Configure reporting thresholds and city classifications for this account
+          {t('hc.account_reporting_config.subtitle')}
         </p>
       </div>
 
       {/* General Settings Card */}
       <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">General Settings</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('hc.account_reporting_config.general_settings')}</h2>
         
         <div className="space-y-6">
           <ThresholdSlider
-            label="Compliance Warning Threshold"
+            label={t('hc.account_reporting_config.warning_threshold')}
             value={warningThreshold}
             onChange={setWarningThreshold}
             color="yellow"
-            description="Shipments below this threshold will show a yellow warning"
+            description={t('hc.account_reporting_config.warning_desc')}
           />
 
           <ThresholdSlider
-            label="Compliance Critical Threshold"
+            label={t('hc.account_reporting_config.critical_threshold')}
             value={criticalThreshold}
             onChange={setCriticalThreshold}
             color="red"
-            description="Shipments below this threshold will show a red alert"
+            description={t('hc.account_reporting_config.critical_desc')}
           />
 
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">
-              Default Report Period
+              {t('hc.account_reporting_config.default_period')}
             </label>
             <select
               value={reportPeriod}
@@ -139,7 +139,7 @@ export default function AccountReportingConfig() {
               <option value="quarter">{t('settings.quarterly')}</option>
             </select>
             <p className="text-xs text-gray-600">
-              Default time period for generating reports
+              {t('hc.account_reporting_config.default_period_desc')}
             </p>
           </div>
         </div>
@@ -150,13 +150,13 @@ export default function AccountReportingConfig() {
             {saveStatus === 'success' && (
               <div className="flex items-center gap-2 text-green-600">
                 <CheckCircle className="w-5 h-5" />
-                <span className="text-sm font-medium">Configuration saved successfully</span>
+                <span className="text-sm font-medium">{t('hc.account_reporting_config.saved')}</span>
               </div>
             )}
             {saveStatus === 'error' && (
               <div className="flex items-center gap-2 text-red-600">
                 <AlertCircle className="w-5 h-5" />
-                <span className="text-sm font-medium">Error saving configuration</span>
+                <span className="text-sm font-medium">{t('hc.account_reporting_config.save_error')}</span>
               </div>
             )}
           </div>
@@ -167,7 +167,7 @@ export default function AccountReportingConfig() {
               disabled={!hasChanges || saveStatus === 'saving'}
               className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              Reset
+              {t('hc.account_reporting_config.reset')}
             </button>
             <button
               onClick={handleSave}
@@ -175,7 +175,7 @@ export default function AccountReportingConfig() {
               className="flex items-center gap-2 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <Save className="w-4 h-4" />
-              {saveStatus === 'saving' ? 'Saving...' : 'Save Changes'}
+              {saveStatus === 'saving' ? t('hc.account_reporting_config.saving') : t('hc.account_reporting_config.save_changes')}
             </button>
           </div>
         </div>
@@ -184,9 +184,9 @@ export default function AccountReportingConfig() {
       {/* City Classification Card */}
       <div className="bg-white rounded-lg shadow p-6">
         <div className="mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">City Classifications</h2>
+          <h2 className="text-lg font-semibold text-gray-900">{t('hc.account_reporting_config.city_classifications')}</h2>
           <p className="text-sm text-gray-600 mt-1">
-            Define custom city classifications for this account. Cities not listed here will use default classifications.
+            {t('hc.account_reporting_config.city_classifications_desc')}
           </p>
         </div>
 
@@ -202,12 +202,12 @@ export default function AccountReportingConfig() {
         <div className="flex gap-3">
           <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
           <div className="text-sm text-blue-800">
-            <p className="font-semibold mb-1">Configuration Notes:</p>
+            <p className="font-semibold mb-1">{t('hc.account_reporting_config.notes_title')}</p>
             <ul className="list-disc list-inside space-y-1">
-              <li>Warning threshold must be greater than critical threshold</li>
-              <li>Changes to thresholds will affect all reporting views</li>
-              <li>City classifications override default classifications from the topology</li>
-              <li>Only superadmin users can modify these settings</li>
+              <li>{t('hc.account_reporting_config.note_warning')}</li>
+              <li>{t('hc.account_reporting_config.note_changes')}</li>
+              <li>{t('hc.account_reporting_config.note_classifications')}</li>
+              <li>{t('hc.account_reporting_config.note_superadmin')}</li>
             </ul>
           </div>
         </div>

@@ -2,6 +2,7 @@ import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
 import type { TimeUnit } from '@/lib/accountTime';
 import { unitSuffix } from '@/lib/accountTime';
 import { formatNumber } from '@/lib/formatNumber';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface RouteData {
   origin: string;
@@ -28,10 +29,11 @@ interface PerformanceDistributionChartProps {
 }
 
 export function PerformanceDistributionChart({ routeData, carrierFilter, productFilter, unit = 'days', axisLabel }: PerformanceDistributionChartProps) {
+  const { t } = useTranslation();
   if (!routeData || routeData.length === 0) {
     return (
       <div className="h-80 flex items-center justify-center text-gray-400">
-        No performance data available
+        {t('hc.performance_distribution_chart.no_data')}
       </div>
     );
   }
@@ -126,12 +128,12 @@ export function PerformanceDistributionChart({ routeData, carrierFilter, product
           {cumulativePayload && cumulativePercentage !== undefined && (
             <div className="mb-2 pb-2 border-b border-gray-200">
               <div className="flex items-center justify-between text-sm font-semibold text-gray-900">
-                <span>Cumulative:</span>
+                <span>{t('hc.performance_distribution_chart.cumulative')}</span>
                 <span>{cumulativePayload.value.toLocaleString()}</span>
               </div>
               <div className="flex items-center justify-between text-xs text-gray-600 mt-1">
-                <span>% of Total:</span>
-                <span>{formatNumber(cumulativePercentage)}% (Target: {targetStandardPercentage.toFixed(0)}%)</span>
+                <span>{t('hc.performance_distribution_chart.pct_of_total')}</span>
+                <span>{formatNumber(cumulativePercentage)}% ({t('hc.performance_distribution_chart.target', { percent: targetStandardPercentage.toFixed(0) })})</span>
               </div>
             </div>
           )}
@@ -154,7 +156,7 @@ export function PerformanceDistributionChart({ routeData, carrierFilter, product
           
           <div className="mt-2 pt-2 border-t border-gray-200">
             <div className="flex items-center justify-between text-sm font-semibold">
-              <span className="text-gray-600">Total:</span>
+              <span className="text-gray-600">{t('hc.performance_distribution_chart.total')}</span>
               <span className="text-gray-900">{total.toLocaleString()}</span>
             </div>
           </div>
@@ -172,19 +174,19 @@ export function PerformanceDistributionChart({ routeData, carrierFilter, product
           <XAxis 
             dataKey="dayLabel" 
             tick={{ fontSize: 12, fill: '#6b7280' }}
-            label={{ value: axisLabel ?? 'Transit Days (J+K)', position: 'insideBottom', offset: -10, style: { fontSize: 12, fill: '#6b7280' } }}
+            label={{ value: axisLabel ?? t('hc.performance_distribution_chart.transit_days'), position: 'insideBottom', offset: -10, style: { fontSize: 12, fill: '#6b7280' } }}
           />
           <YAxis 
             yAxisId="left"
             tick={{ fontSize: 12, fill: '#6b7280' }}
-            label={{ value: 'Shipments', angle: -90, position: 'insideLeft', style: { fontSize: 12, fill: '#6b7280' } }}
+            label={{ value: t('hc.performance_distribution_chart.shipments'), angle: -90, position: 'insideLeft', style: { fontSize: 12, fill: '#6b7280' } }}
           />
           {isSingleCarrierProduct && (
             <YAxis 
               yAxisId="right"
               orientation="right"
               tick={{ fontSize: 12, fill: '#000000' }}
-              label={{ value: 'Cumulative Samples', angle: 90, position: 'insideRight', style: { fontSize: 12, fill: '#000000' } }}
+              label={{ value: t('hc.performance_distribution_chart.cumulative_samples'), angle: 90, position: 'insideRight', style: { fontSize: 12, fill: '#000000' } }}
             />
           )}
           <Tooltip content={<CustomTooltip />} />
@@ -198,7 +200,7 @@ export function PerformanceDistributionChart({ routeData, carrierFilter, product
               strokeWidth={2}
               strokeDasharray="5 5"
               label={{ 
-                value: `${targetStandardPercentage.toFixed(0)}% at ${dayReachingStdPercentage}${unitSuffix(unit)}`, 
+                value: t('hc.performance_distribution_chart.pct_at', { percent: targetStandardPercentage.toFixed(0), at: `${dayReachingStdPercentage}${unitSuffix(unit)}` }), 
                 position: 'top',
                 fill: '#000000',
                 fontSize: 11,
@@ -211,7 +213,7 @@ export function PerformanceDistributionChart({ routeData, carrierFilter, product
             dataKey="before" 
             stackId="a" 
             fill="#10b981" 
-            name="Before Standard"
+            name={t('hc.performance_distribution_chart.before_standard')}
             radius={[0, 0, 0, 0]}
             yAxisId="left"
           />
@@ -219,7 +221,7 @@ export function PerformanceDistributionChart({ routeData, carrierFilter, product
             dataKey="onTime" 
             stackId="a" 
             fill="#3b82f6" 
-            name="On Standard"
+            name={t('hc.performance_distribution_chart.on_standard')}
             radius={[0, 0, 0, 0]}
             yAxisId="left"
           />
@@ -227,7 +229,7 @@ export function PerformanceDistributionChart({ routeData, carrierFilter, product
             dataKey="after" 
             stackId="a" 
             fill="#ef4444" 
-            name="After Standard"
+            name={t('hc.performance_distribution_chart.after_standard')}
             radius={[4, 4, 0, 0]}
             yAxisId="left"
           />
@@ -240,17 +242,17 @@ export function PerformanceDistributionChart({ routeData, carrierFilter, product
               stroke="#000000"
               strokeWidth={2}
               dot={{ fill: '#000000', r: 4 }}
-              name="Cumulative Samples"
+              name={t('hc.performance_distribution_chart.cumulative_samples')}
               yAxisId="right"
             />
           )}
         </ComposedChart>
       </ResponsiveContainer>
       <div className="mt-2 text-xs text-gray-500 text-center">
-        Distribution of shipments by actual transit time vs delivery standard
+        {t('hc.performance_distribution_chart.caption')}
         {isSingleCarrierProduct && targetStandardPercentage > 0 && dayReachingStdPercentage !== null && (
           <span className="ml-2 text-gray-900 font-medium">
-            • {carrierFilter} - {productFilter}: {targetStandardPercentage.toFixed(0)}% reached at {dayReachingStdPercentage}{unitSuffix(unit)} (J+K Std: {targetJKDays}{unitSuffix(unit)})
+            • {t('hc.performance_distribution_chart.reached', { carrier: carrierFilter ?? '', product: productFilter ?? '', percent: targetStandardPercentage.toFixed(0), at: `${dayReachingStdPercentage}${unitSuffix(unit)}`, jk: `${targetJKDays}${unitSuffix(unit)}` })}
           </span>
         )}
       </div>

@@ -3,6 +3,7 @@ import { ColumnTooltip } from './ColumnTooltip';
 import { exportRouteCSV } from '@/utils/jkExportCSV';
 import { downloadRouteSamples } from '@/utils/downloadRouteSamples';
 import { useTimeUnit } from '@/hooks/useTimeUnit';
+import { useTranslation } from '@/hooks/useTranslation';
 import type { TimeUnit } from '@/lib/accountTime';
 import { formatJK } from '@/lib/transitMeasure';
 
@@ -45,6 +46,7 @@ interface RoutePerformanceTableV2Props {
 }
 
 export function RoutePerformanceTableV2({ data }: RoutePerformanceTableV2Props) {
+  const { t } = useTranslation();
   const routeData = data;
   const { unit: displayUnit } = useTimeUnit();
   const handleRowClick = (route: JKRouteData) => {
@@ -71,7 +73,7 @@ export function RoutePerformanceTableV2({ data }: RoutePerformanceTableV2Props) 
   if (!routeData || routeData.length === 0) {
     return (
       <div className="text-center py-8 text-gray-400">
-        No route data available
+        {t('hc.route_performance_table_v2.no_route_data')}
       </div>
     );
   }
@@ -80,14 +82,14 @@ export function RoutePerformanceTableV2({ data }: RoutePerformanceTableV2Props) 
     <div>
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-gray-900">
-          Route performance ({routeData.length} routes)
+          {t('hc.route_performance_table_v2.title', { count: routeData.length })}
         </h3>
         <button
           onClick={() => exportRouteCSV(routeData)}
           className="flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
         >
           <FileDown className="w-4 h-4" />
-          Export CSV
+          {t('hc.route_performance_table_v2.export_csv')}
         </button>
       </div>
       <div className="max-h-96 overflow-y-auto">
@@ -96,56 +98,56 @@ export function RoutePerformanceTableV2({ data }: RoutePerformanceTableV2Props) 
             <tr>
               <th className="sticky left-0 z-30 bg-gray-50 px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase border-r border-gray-200">
                 <div className="flex items-center gap-1">
-                  Route
-                  <ColumnTooltip content="Origin city → Destination city. Each route is unique by carrier, product, and city pair." />
+                  {t('hc.route_performance_table_v2.route')}
+                  <ColumnTooltip content={t('hc.route_performance_table_v2.route_tip')} />
                 </div>
               </th>
               <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                 <div className="flex items-center gap-1">
-                  Samples
-                  <ColumnTooltip content="Total number of samples for this route in the selected date range." />
+                  {t('hc.route_performance_table_v2.samples')}
+                  <ColumnTooltip content={t('hc.route_performance_table_v2.samples_tip')} />
                 </div>
               </th>
               <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                 <div className="flex items-center gap-1">
-                  J+K Std
-                  <ColumnTooltip content="Expected delivery time in days from delivery_standards table." />
+                  {t('hc.route_performance_table_v2.jk_std')}
+                  <ColumnTooltip content={t('hc.route_performance_table_v2.jk_std_tip')} />
                 </div>
               </th>
               <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                 <div className="flex items-center gap-1">
-                  J+K Actual
-                  <ColumnTooltip content="Number of days required to reach the STD % target for this route." />
+                  {t('hc.route_performance_table_v2.jk_actual')}
+                  <ColumnTooltip content={t('hc.route_performance_table_v2.jk_actual_tip')} />
                 </div>
               </th>
               <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                 <div className="flex items-center gap-1">
-                  Deviation
-                  <ColumnTooltip content="Difference between J+K Actual and J+K Std (Actual - Standard)." />
+                  {t('hc.route_performance_table_v2.deviation')}
+                  <ColumnTooltip content={t('hc.route_performance_table_v2.deviation_tip')} />
                 </div>
               </th>
               <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                 <div className="flex items-center gap-1">
-                  STD %
-                  <ColumnTooltip content="Target on-time percentage defined in delivery_standards for this route." />
+                  {t('hc.route_performance_table_v2.std_pct')}
+                  <ColumnTooltip content={t('hc.route_performance_table_v2.std_pct_tip')} />
                 </div>
               </th>
               <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                 <div className="flex items-center gap-1">
-                  On-Time %
-                  <ColumnTooltip content="Percentage of samples delivered within or before J+K Std." />
+                  {t('hc.route_performance_table_v2.on_time_pct')}
+                  <ColumnTooltip content={t('hc.route_performance_table_v2.on_time_pct_tip')} />
                 </div>
               </th>
               <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                 <div className="flex items-center gap-1">
-                  Status
-                  <ColumnTooltip content="Visual indicator: Green (compliant), Yellow (warning), Red (critical)." />
+                  {t('hc.route_performance_table_v2.status')}
+                  <ColumnTooltip content={t('hc.route_performance_table_v2.status_tip')} />
                 </div>
               </th>
               <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase">
                 <div className="flex items-center gap-1 justify-center">
-                  Samples
-                  <ColumnTooltip content="Download raw samples data for this specific route from ONE DB." />
+                  {t('hc.route_performance_table_v2.samples')}
+                  <ColumnTooltip content={t('hc.route_performance_table_v2.samples_download_tip')} />
                 </div>
               </th>
             </tr>
@@ -178,11 +180,11 @@ export function RoutePerformanceTableV2({ data }: RoutePerformanceTableV2Props) 
                       <div className="flex items-start gap-2">
                         {route.segmentType === 'operational' ? (
                           <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 whitespace-nowrap">
-                            Operational
+                            {t('hc.route_performance_table_v2.operational')}
                           </span>
                         ) : (
                           <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 whitespace-nowrap">
-                            Distribution
+                            {t('hc.route_performance_table_v2.distribution')}
                           </span>
                         )}
                         <div className="flex-1">
@@ -213,7 +215,7 @@ export function RoutePerformanceTableV2({ data }: RoutePerformanceTableV2Props) 
                           downloadRouteSamples(route);
                         }}
                         className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded transition-colors"
-                        title="Download samples for this route"
+                        title={t('hc.route_performance_table_v2.download_samples')}
                       >
                         <Download className="w-3 h-3" />
                         CSV

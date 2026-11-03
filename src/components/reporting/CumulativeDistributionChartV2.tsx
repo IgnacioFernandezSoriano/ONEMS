@@ -3,6 +3,7 @@ import type { TimeUnit } from '@/lib/accountTime';
 import { unitSuffix } from '@/lib/accountTime';
 import { useMemo } from 'react';
 import { formatNumber } from '@/lib/formatNumber';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface RouteDistribution {
   routeKey: string;
@@ -25,6 +26,7 @@ interface CumulativeDistributionChartV2Props {
 }
 
 export function CumulativeDistributionChartV2({ routes, maxDays, selectedRoute, unit = 'days', axisLabel }: CumulativeDistributionChartV2Props) {
+  const { t } = useTranslation();
   const { chartData, standardDay, standardPercentage } = useMemo(() => {
     if (!routes || routes.length === 0) {
       return { chartData: [], standardDay: 0, standardPercentage: 85 };
@@ -99,7 +101,7 @@ export function CumulativeDistributionChartV2({ routes, maxDays, selectedRoute, 
   if (chartData.length === 0) {
     return (
       <div className="h-80 flex items-center justify-center text-gray-400">
-        No distribution data available
+        {t('hc.cumulative_distribution_chart_v2.no_data')}
       </div>
     );
   }
@@ -111,11 +113,11 @@ export function CumulativeDistributionChartV2({ routes, maxDays, selectedRoute, 
         <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3">
           <p className="font-semibold text-gray-900 mb-1">{data.dayLabel}</p>
           <div className="text-sm text-gray-600">
-            Cumulative: <span className="font-medium text-gray-900">{formatNumber(data.cumulativePercentage)}%</span>
+            {t('hc.cumulative_distribution_chart_v2.cumulative')}: <span className="font-medium text-gray-900">{formatNumber(data.cumulativePercentage)}%</span>
           </div>
           {data.day === standardDay && (
             <div className="mt-1 text-xs text-green-600 font-medium">
-              ← J+K Standard
+              ← {t('hc.cumulative_distribution_chart_v2.jk_standard')}
             </div>
           )}
         </div>
@@ -142,7 +144,7 @@ export function CumulativeDistributionChartV2({ routes, maxDays, selectedRoute, 
             dataKey="dayLabel" 
             tick={{ fontSize: 12, fill: '#6b7280' }}
             label={{ 
-              value: axisLabel ?? 'Transit Days (J+K)', 
+              value: axisLabel ?? t('hc.cumulative_distribution_chart_v2.transit_days'), 
               position: 'insideBottom', 
               offset: -15, 
               style: { fontSize: 13, fill: '#374151', fontWeight: 500 } 
@@ -153,7 +155,7 @@ export function CumulativeDistributionChartV2({ routes, maxDays, selectedRoute, 
             tick={{ fontSize: 12, fill: '#6b7280' }}
             domain={[0, 100]}
             label={{ 
-              value: 'Cumulative %', 
+              value: t('hc.cumulative_distribution_chart_v2.cumulative_pct'), 
               angle: -90, 
               position: 'insideLeft', 
               style: { fontSize: 13, fill: '#374151', fontWeight: 500 } 
@@ -169,7 +171,7 @@ export function CumulativeDistributionChartV2({ routes, maxDays, selectedRoute, 
             strokeDasharray="5 5" 
             strokeWidth={2}
             label={{ 
-              value: `${standardPercentage.toFixed(0)}% Target`, 
+              value: t('hc.cumulative_distribution_chart_v2.target', { value: standardPercentage.toFixed(0) }), 
               position: 'right',
               fill: '#3b82f6',
               fontSize: 11,
@@ -183,7 +185,7 @@ export function CumulativeDistributionChartV2({ routes, maxDays, selectedRoute, 
             stroke="#10b981" 
             strokeWidth={2}
             label={{ 
-              value: `${standardDay}d Std`, 
+              value: t('hc.cumulative_distribution_chart_v2.std_day', { value: standardDay }), 
               position: 'top',
               fill: '#10b981',
               fontSize: 11,

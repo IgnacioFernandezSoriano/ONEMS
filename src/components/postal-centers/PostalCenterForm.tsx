@@ -234,7 +234,7 @@ export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCen
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
             required
-            placeholder="Madrid Hub"
+            placeholder={t('hc.postal_center_form.name_placeholder')}
           />
         </div>
 
@@ -247,13 +247,13 @@ export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCen
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
             rows={3}
-            placeholder="Main distribution hub for Madrid region"
+            placeholder={t('hc.postal_center_form.description_placeholder')}
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Carrier
+            {t('hc.postal_center_form.carrier')}
           </label>
           <select
             value={formData.carrier_id || ''}
@@ -261,7 +261,7 @@ export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCen
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
             disabled={loadingCarriers}
           >
-            <option value="">-- No carrier assigned --</option>
+            <option value="">{t('hc.postal_center_form.no_carrier_assigned')}</option>
             {carriers.map((carrier) => (
               <option key={carrier.id} value={carrier.id}>
                 {carrier.name}
@@ -274,7 +274,7 @@ export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCen
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              City
+              {t('hc.postal_center_form.city')}
             </label>
             <input
               type="text"
@@ -287,7 +287,7 @@ export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCen
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              State
+              {t('hc.postal_center_form.state')}
             </label>
             <input
               type="text"
@@ -302,7 +302,7 @@ export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCen
         <div className="grid grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Country
+              {t('hc.postal_center_form.country')}
             </label>
             <input
               type="text"
@@ -315,7 +315,7 @@ export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCen
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Latitude
+              {t('hc.postal_center_form.latitude')}
             </label>
             <input
               type="number"
@@ -329,7 +329,7 @@ export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCen
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Longitude
+              {t('hc.postal_center_form.longitude')}
             </label>
             <input
               type="number"
@@ -344,7 +344,7 @@ export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCen
 
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Timezone
+            {t('hc.postal_center_form.timezone')}
           </label>
           <select
             value={formData.timezone || 'America/New_York'}

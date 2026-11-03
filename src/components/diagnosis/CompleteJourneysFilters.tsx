@@ -47,10 +47,10 @@ export function CompleteJourneysFilters({ onFilterChange }: CompleteJourneysFilt
         <button
           onClick={handleClearFilters}
           className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-          title="Reset all filters"
+          title={t('hc.complete_journeys_filters.reset_title')}
         >
           <RotateCcw className="w-4 h-4" />
-          Reset
+          {t('hc.complete_journeys_filters.reset')}
         </button>
       </div>
 
@@ -80,10 +80,10 @@ export function CompleteJourneysFilters({ onFilterChange }: CompleteJourneysFilt
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
           >
             <option value="">{t('complete_journeys.filters.all_status')}</option>
-            <option value="in_progress">In Progress</option>
-            <option value="completed">Completed</option>
-            <option value="anomalous">Anomalous</option>
-            <option value="stuck">Stuck</option>
+            <option value="in_progress">{t('hc.complete_journeys_filters.in_progress')}</option>
+            <option value="completed">{t('hc.complete_journeys_filters.completed')}</option>
+            <option value="anomalous">{t('hc.complete_journeys_filters.anomalous')}</option>
+            <option value="stuck">{t('hc.complete_journeys_filters.stuck')}</option>
           </select>
         </div>
 

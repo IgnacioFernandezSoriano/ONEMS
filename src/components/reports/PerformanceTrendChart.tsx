@@ -29,9 +29,10 @@ interface PerformanceTrendChartProps {
 
 type TimeScale = 'day' | 'week' | 'month';
 
-export function PerformanceTrendChart({ data, title = 'Performance Trend' }: PerformanceTrendChartProps) {
+export function PerformanceTrendChart({ data, title }: PerformanceTrendChartProps) {
   const { unit } = useTimeUnit();
   const { t } = useTranslation();
+  const chartTitle = title ?? t('hc.performance_trend_chart.default_title');
   const [timeScale, setTimeScale] = useState<TimeScale>('week');
   const [visibleLines, setVisibleLines] = useState({
     avgDays: true,
@@ -99,11 +100,11 @@ export function PerformanceTrendChart({ data, title = 'Performance Trend' }: Per
         standardPercent: group.totalStandardPercent / group.count,
         displayDate:
           timeScale === 'week'
-            ? `Week of ${format(new Date(dateKey), 'MMM d')}`
+            ? t('hc.performance_trend_chart.week_of', { date: format(new Date(dateKey), 'MMM d') })
             : format(new Date(dateKey), 'MMM yyyy'),
       }))
       .sort((a, b) => a.date.localeCompare(b.date));
-  }, [data, timeScale, unit]);
+  }, [data, timeScale, unit, t]);
 
   // Custom tooltip - shows all 4 metrics
   const CustomTooltip = ({ active, payload }: any) => {
@@ -113,16 +114,16 @@ export function PerformanceTrendChart({ data, title = 'Performance Trend' }: Per
         <div className="bg-white p-3 border border-gray-300 rounded shadow-lg">
           <p className="font-semibold text-gray-800 mb-2">{data.displayDate}</p>
           <p className="text-blue-600">
-            <span className="font-medium">J+K Actual:</span> {formatDuration(data.avgHours, unit)}
+            <span className="font-medium">{t('hc.performance_trend_chart.jk_actual')}:</span> {formatDuration(data.avgHours, unit)}
           </p>
           <p className="text-green-600">
-            <span className="font-medium">% Actual:</span> {data.compliancePercent.toFixed(1)}%
+            <span className="font-medium">{t('hc.performance_trend_chart.pct_actual')}:</span> {data.compliancePercent.toFixed(1)}%
           </p>
           <p className="text-purple-600">
-            <span className="font-medium">J+K STD:</span> {formatDuration(data.standardHours, unit)}
+            <span className="font-medium">{t('hc.performance_trend_chart.jk_std')}:</span> {formatDuration(data.standardHours, unit)}
           </p>
           <p className="text-orange-600">
-            <span className="font-medium">% STD:</span> {data.standardPercent.toFixed(1)}%
+            <span className="font-medium">{t('hc.performance_trend_chart.pct_std')}:</span> {data.standardPercent.toFixed(1)}%
           </p>
         </div>
       );
@@ -133,8 +134,8 @@ export function PerformanceTrendChart({ data, title = 'Performance Trend' }: Per
   if (!data || data.length === 0) {
     return (
       <div className="bg-white p-6 rounded-lg shadow">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">{title}</h3>
-        <p className="text-gray-500">No data available for the selected period</p>
+        <h3 className="text-lg font-semibold text-gray-800 mb-4">{chartTitle}</h3>
+        <p className="text-gray-500">{t('hc.performance_trend_chart.no_data')}</p>
       </div>
     );
   }
@@ -142,7 +143,7 @@ export function PerformanceTrendChart({ data, title = 'Performance Trend' }: Per
   return (
     <div className="bg-white p-6 rounded-lg shadow">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
+        <h3 className="text-lg font-semibold text-gray-800">{chartTitle}</h3>
         <div className="flex gap-2">
           <button
             onClick={() => setTimeScale('day')}
@@ -152,7 +153,7 @@ export function PerformanceTrendChart({ data, title = 'Performance Trend' }: Per
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
           >
-            Day
+            {t('hc.performance_trend_chart.day')}
           </button>
           <button
             onClick={() => setTimeScale('week')}
@@ -162,7 +163,7 @@ export function PerformanceTrendChart({ data, title = 'Performance Trend' }: Per
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
           >
-            Week
+            {t('hc.performance_trend_chart.week')}
           </button>
           <button
             onClick={() => setTimeScale('month')}
@@ -172,7 +173,7 @@ export function PerformanceTrendChart({ data, title = 'Performance Trend' }: Per
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
           >
-            Month
+            {t('hc.performance_trend_chart.month')}
           </button>
         </div>
       </div>
@@ -188,7 +189,7 @@ export function PerformanceTrendChart({ data, title = 'Performance Trend' }: Per
           />
           <span className="text-sm text-gray-700 flex items-center gap-1">
             <span className="w-3 h-0.5 bg-blue-600 inline-block"></span>
-            J+K Actual
+            {t('hc.performance_trend_chart.jk_actual')}
           </span>
         </label>
         <label className="flex items-center gap-2 cursor-pointer">
@@ -200,7 +201,7 @@ export function PerformanceTrendChart({ data, title = 'Performance Trend' }: Per
           />
           <span className="text-sm text-gray-700 flex items-center gap-1">
             <span className="w-3 h-0.5 bg-green-600 inline-block"></span>
-            % Actual
+            {t('hc.performance_trend_chart.pct_actual')}
           </span>
         </label>
       </div>
@@ -224,7 +225,7 @@ export function PerformanceTrendChart({ data, title = 'Performance Trend' }: Per
             orientation="right"
             stroke="#10b981"
             domain={[0, 100]}
-            label={{ value: 'Percentage %', angle: 90, position: 'insideRight', style: { fill: '#10b981' } }}
+            label={{ value: t('hc.performance_trend_chart.percentage'), angle: 90, position: 'insideRight', style: { fill: '#10b981' } }}
             style={{ fontSize: '12px' }}
           />
           <Tooltip content={<CustomTooltip />} />
@@ -243,7 +244,7 @@ export function PerformanceTrendChart({ data, title = 'Performance Trend' }: Per
               strokeWidth={2}
               dot={{ fill: '#3b82f6', r: 4 }}
               activeDot={{ r: 6 }}
-              name="J+K Actual"
+              name={t('hc.performance_trend_chart.jk_actual')}
             />
           )}
           
@@ -257,7 +258,7 @@ export function PerformanceTrendChart({ data, title = 'Performance Trend' }: Per
               strokeWidth={2}
               dot={{ fill: '#10b981', r: 4 }}
             activeDot={{ r: 6 }}
-            name="% Actual"
+            name={t('hc.performance_trend_chart.pct_actual')}
           />
           )}
         </LineChart>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { X, Package } from 'lucide-react'
+import { useTranslation } from '@/hooks/useTranslation'
 
 interface ReceivePOModalProps {
   requirement: {
@@ -15,12 +16,13 @@ interface ReceivePOModalProps {
 }
 
 export default function ReceivePOModal({ requirement, onConfirm, onClose }: ReceivePOModalProps) {
+  const { t } = useTranslation()
   const [quantity, setQuantity] = useState(requirement.quantity_ordered)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (quantity <= 0) {
-      alert('Quantity must be greater than 0')
+      alert(t('hc.receive_po_modal.quantity_gt_zero'))
       return
     }
     onConfirm(requirement.id, quantity)
@@ -33,7 +35,7 @@ export default function ReceivePOModal({ requirement, onConfirm, onClose }: Rece
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <div className="flex items-center gap-3">
             <Package className="h-6 w-6 text-green-600" />
-            <h3 className="text-lg font-medium text-gray-900">Receive Purchase Order</h3>
+            <h3 className="text-lg font-medium text-gray-900">{t('hc.receive_po_modal.title')}</h3>
           </div>
           <button
             onClick={onClose}
@@ -55,14 +57,14 @@ export default function ReceivePOModal({ requirement, onConfirm, onClose }: Rece
                 {requirement.material_name}
               </div>
               <div className="text-xs text-gray-500 mt-1">
-                Ordered: {requirement.quantity_ordered.toLocaleString()} {requirement.unit_measure}
+                {t('hc.receive_po_modal.ordered', { quantity: requirement.quantity_ordered.toLocaleString(), unit: requirement.unit_measure })}
               </div>
             </div>
 
             {/* Quantity Input */}
             <div>
               <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-1">
-                Quantity Received
+                {t('hc.receive_po_modal.quantity_received')}
               </label>
               <div className="flex items-center gap-2">
                 <input
@@ -80,14 +82,14 @@ export default function ReceivePOModal({ requirement, onConfirm, onClose }: Rece
                 </span>
               </div>
               <p className="mt-1 text-xs text-gray-500">
-                Expected: {requirement.quantity_ordered.toLocaleString()} {requirement.unit_measure} (quantity ordered)
+                {t('hc.receive_po_modal.expected', { quantity: requirement.quantity_ordered.toLocaleString(), unit: requirement.unit_measure })}
               </p>
             </div>
 
             {/* Info */}
             <div className="bg-green-50 border border-green-200 rounded-lg p-3">
               <p className="text-sm text-green-700">
-                This will add the received quantity to regulator stock, create a receipt movement, and mark this requirement as received.
+                {t('hc.receive_po_modal.info')}
               </p>
             </div>
           </div>
@@ -99,13 +101,13 @@ export default function ReceivePOModal({ requirement, onConfirm, onClose }: Rece
               onClick={onClose}
               className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
             >
-              Cancel
+              {t('hc.receive_po_modal.cancel')}
             </button>
             <button
               type="submit"
               className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
             >
-              Confirm Receipt
+              {t('hc.receive_po_modal.confirm_receipt')}
             </button>
           </div>
         </form>

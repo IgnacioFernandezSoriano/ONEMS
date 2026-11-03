@@ -33,7 +33,7 @@ export function CityClassificationTable({
     if (result.success) {
       setEditingId(null);
     } else {
-      alert(`Error: ${result.error?.message}`);
+      alert(t('hc.city_classification_table.error', { message: result.error?.message ?? '' }));
     }
   };
 
@@ -42,10 +42,10 @@ export function CityClassificationTable({
   };
 
   const handleDelete = async (cityId: string) => {
-    if (confirm('Are you sure you want to delete this classification?')) {
+    if (confirm(t('hc.city_classification_table.confirm_delete'))) {
       const result = await onDelete(cityId);
       if (!result.success) {
-        alert(`Error: ${result.error?.message}`);
+        alert(t('hc.city_classification_table.error', { message: result.error?.message ?? '' }));
       }
     }
   };
@@ -65,7 +65,7 @@ export function CityClassificationTable({
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
         <input
           type="text"
-          placeholder="Search cities..."
+          placeholder={t('hc.city_classification_table.search_placeholder')}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -77,13 +77,13 @@ export function CityClassificationTable({
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                City Name
+                {t('hc.city_classification_table.city_name')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Classification
+                {t('hc.city_classification_table.classification')}
               </th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
+                {t('hc.city_classification_table.actions')}
               </th>
             </tr>
           </thead>
@@ -91,7 +91,7 @@ export function CityClassificationTable({
             {filteredClassifications.length === 0 ? (
               <tr>
                 <td colSpan={3} className="px-6 py-8 text-center text-gray-500">
-                  No city classifications found
+                  {t('hc.city_classification_table.none_found')}
                 </td>
               </tr>
             ) : (
@@ -162,7 +162,7 @@ export function CityClassificationTable({
       </div>
 
       <div className="text-sm text-gray-500">
-        Showing {filteredClassifications.length} of {classifications.length} classifications
+        {t('hc.city_classification_table.showing', { shown: filteredClassifications.length, total: classifications.length })}
       </div>
     </div>
   );

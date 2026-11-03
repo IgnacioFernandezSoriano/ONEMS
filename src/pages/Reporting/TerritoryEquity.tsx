@@ -493,7 +493,7 @@ export default function TerritoryEquity() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-lg text-gray-600">Loading territory equity data...</div>
+        <div className="text-lg text-gray-600">{t('hc.territory_equity.loading_data')}</div>
       </div>
     );
   }
@@ -501,7 +501,7 @@ export default function TerritoryEquity() {
   if (error) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-lg text-red-600">Error loading data: {error.message}</div>
+        <div className="text-lg text-red-600">{t('hc.territory_equity.error_loading', { message: error.message })}</div>
       </div>
     );
   }
@@ -514,22 +514,22 @@ export default function TerritoryEquity() {
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="text-3xl font-bold text-gray-900">
               {scenarioInfo.isRouteView
-                ? `Route Analysis: ${scenarioInfo.originCityName} → ${scenarioInfo.destinationCityName}`
+                ? t('hc.territory_equity.route_title', { origin: scenarioInfo.originCityName, destination: scenarioInfo.destinationCityName })
                 : scenarioInfo.isOriginView
-                ? `Territory Performance Report: Outbound from ${scenarioInfo.originCityName}`
+                ? t('hc.territory_equity.outbound_title', { origin: scenarioInfo.originCityName })
                 : scenarioInfo.isDestinationView
-                ? `Territory Performance Report: Inbound to ${scenarioInfo.destinationCityName}`
+                ? t('hc.territory_equity.inbound_title', { destination: scenarioInfo.destinationCityName })
                 : t('reporting.territory_equity_report')}
             </h1>
             <TimeUnitToggle />
           </div>
           <p className="text-gray-600 mt-1">
             {scenarioInfo.isRouteView
-              ? `Detailed performance analysis for the route from ${scenarioInfo.originCityName} to ${scenarioInfo.destinationCityName}`
+              ? t('hc.territory_equity.route_desc', { origin: scenarioInfo.originCityName, destination: scenarioInfo.destinationCityName })
               : scenarioInfo.isOriginView
-              ? `Analyze outbound service equity from ${scenarioInfo.originCityName} to all destinations`
+              ? t('hc.territory_equity.outbound_desc', { origin: scenarioInfo.originCityName })
               : scenarioInfo.isDestinationView
-              ? `Analyze inbound service equity to ${scenarioInfo.destinationCityName} from all origins`
+              ? t('hc.territory_equity.inbound_desc', { destination: scenarioInfo.destinationCityName })
               : t('reporting.analyze_service_equity_across_cities_and_regions')}
           </p>
         </div>
@@ -537,7 +537,7 @@ export default function TerritoryEquity() {
           <button
             disabled
             className="flex items-center gap-2 px-4 py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed"
-            title="Coming soon"
+            title={t('hc.territory_equity.coming_soon')}
           >
             <FileText className="w-4 h-4" />
             {t('reporting.export_audit_report')}
@@ -552,7 +552,7 @@ export default function TerritoryEquity() {
           className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors rounded-lg mb-2"
         >
           <span className="text-sm font-medium text-gray-700">
-            {filtersExpanded ? 'Hide Filters & Metrics' : 'Show Filters & Metrics'}
+            {filtersExpanded ? t('hc.territory_equity.hide_filters') : t('hc.territory_equity.show_filters')}
           </span>
           <svg
             className={`w-5 h-5 text-gray-500 transition-transform ${filtersExpanded ? 'rotate-180' : ''}`}
@@ -595,7 +595,7 @@ export default function TerritoryEquity() {
           <div className="flex items-center gap-1 mt-1">
             <AlertTriangle className="w-4 h-4 text-red-500" />
             <span className="text-sm text-gray-500">
-              of {metrics?.totalCities || 0} cities
+              {t('hc.territory_equity.of_cities', { count: metrics?.totalCities || 0 })}
             </span>
           </div>
           <div className="border-t mt-3 pt-3">
@@ -605,7 +605,7 @@ export default function TerritoryEquity() {
             </div>
             <div className="flex items-center gap-1 mt-1">
               <Users className="w-4 h-4 text-red-500" />
-              <span className="text-xs text-gray-500">citizens in underserved cities</span>
+              <span className="text-xs text-gray-500">{t('hc.territory_equity.citizens_underserved')}</span>
             </div>
           </div>
         </div>
@@ -614,7 +614,7 @@ export default function TerritoryEquity() {
         <div className="bg-white rounded-lg shadow p-6 col-span-1 md:col-span-2 lg:col-span-2">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-medium text-gray-600">
-              Top Cities Performance
+              {t('hc.territory_equity.top_cities_performance')}
             </h3>
             <SmartTooltip content={tooltips.topBestServed} />
           </div>
@@ -623,17 +623,17 @@ export default function TerritoryEquity() {
           <div className="mb-3">
             <div className="flex items-center gap-1 mb-2">
               <Award className="w-3 h-3 text-green-600" />
-              <span className="text-xs font-medium text-green-600">Best Served</span>
+              <span className="text-xs font-medium text-green-600">{t('hc.territory_equity.best_served')}</span>
             </div>
             <div className="space-y-1">
               <div className="grid grid-cols-7 gap-1 text-[10px] font-medium text-gray-500 border-b pb-1">
-                <div>City</div>
-                <div className="text-right">Compl.</div>
-                <div className="text-right">Std.</div>
-                <div className="text-right">J+K Std</div>
-                <div className="text-right">J+K Act</div>
-                <div className="text-right">Inb.</div>
-                <div className="text-right">Outb.</div>
+                <div>{t('hc.territory_equity.col_city')}</div>
+                <div className="text-right">{t('hc.territory_equity.col_compl')}</div>
+                <div className="text-right">{t('hc.territory_equity.col_std')}</div>
+                <div className="text-right">{t('hc.territory_equity.col_jk_std')}</div>
+                <div className="text-right">{t('hc.territory_equity.col_jk_act')}</div>
+                <div className="text-right">{t('hc.territory_equity.col_inb')}</div>
+                <div className="text-right">{t('hc.territory_equity.col_outb')}</div>
               </div>
               {metrics?.topBestCities.slice(0, 3).map((city, idx) => {
                 const relevantPercentage = hookScenarioInfo.isOriginView 
@@ -671,7 +671,7 @@ export default function TerritoryEquity() {
           <div>
             <div className="flex items-center gap-1 mb-2">
               <AlertTriangle className="w-3 h-3 text-red-600" />
-              <span className="text-xs font-medium text-red-600">Worst Served</span>
+              <span className="text-xs font-medium text-red-600">{t('hc.territory_equity.worst_served')}</span>
             </div>
             <div className="space-y-1">
               {metrics?.topWorstCities.filter(c => c.status === 'critical' || c.status === 'warning').slice(0, 3).map((city, idx) => {
@@ -714,26 +714,26 @@ export default function TerritoryEquity() {
         <div className="bg-white rounded-lg shadow p-6 col-span-1 md:col-span-2 lg:col-span-2">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-medium text-gray-600">
-              Top Regions Performance
+              {t('hc.territory_equity.top_regions_performance')}
             </h3>
-            <SmartTooltip content="Performance ranking of regions based on service equity compliance" />
+            <SmartTooltip content={t('hc.territory_equity.regions_ranking_tooltip')} />
           </div>
           
           {/* Best Regions */}
           <div className="mb-3">
             <div className="flex items-center gap-1 mb-2">
               <Award className="w-3 h-3 text-green-600" />
-              <span className="text-xs font-medium text-green-600">Best Served</span>
+              <span className="text-xs font-medium text-green-600">{t('hc.territory_equity.best_served')}</span>
             </div>
             <div className="space-y-1">
               <div className="grid grid-cols-7 gap-1 text-[10px] font-medium text-gray-500 border-b pb-1">
-                <div>Region</div>
-                <div className="text-right">Compl.</div>
-                <div className="text-right">Std.</div>
-                <div className="text-right">J+K Std</div>
-                <div className="text-right">J+K Act</div>
-                <div className="text-right">Inb.</div>
-                <div className="text-right">Outb.</div>
+                <div>{t('hc.territory_equity.col_region')}</div>
+                <div className="text-right">{t('hc.territory_equity.col_compl')}</div>
+                <div className="text-right">{t('hc.territory_equity.col_std')}</div>
+                <div className="text-right">{t('hc.territory_equity.col_jk_std')}</div>
+                <div className="text-right">{t('hc.territory_equity.col_jk_act')}</div>
+                <div className="text-right">{t('hc.territory_equity.col_inb')}</div>
+                <div className="text-right">{t('hc.territory_equity.col_outb')}</div>
               </div>
               {metrics?.topBestRegions.slice(0, 3).map((region, idx) => {
                 const relevantPercentage = hookScenarioInfo.isOriginView 
@@ -771,7 +771,7 @@ export default function TerritoryEquity() {
           <div>
             <div className="flex items-center gap-1 mb-2">
               <AlertTriangle className="w-3 h-3 text-red-600" />
-              <span className="text-xs font-medium text-red-600">Worst Served</span>
+              <span className="text-xs font-medium text-red-600">{t('hc.territory_equity.worst_served')}</span>
             </div>
             <div className="space-y-1">
               {metrics?.topWorstRegions.filter(r => r.status === 'critical' || r.status === 'warning').slice(0, 3).map((region, idx) => {
@@ -804,7 +804,7 @@ export default function TerritoryEquity() {
                 );
               })}
               {(!metrics?.topWorstRegions || metrics.topWorstRegions.filter(r => r.status === 'critical' || r.status === 'warning').length === 0) && (
-                <div className="text-[10px] text-gray-500 text-center py-1">No underserved regions</div>
+                <div className="text-[10px] text-gray-500 text-center py-1">{t('hc.territory_equity.no_underserved_regions')}</div>
               )}
             </div>
           </div>
@@ -857,7 +857,7 @@ export default function TerritoryEquity() {
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              Low Profile Routes
+              {t('hc.territory_equity.low_profile_routes')}
             </button>
             <button
               onClick={() => setActiveTab('jk')}
@@ -867,7 +867,7 @@ export default function TerritoryEquity() {
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              J+K Performance
+              {t('hc.territory_equity.jk_performance')}
             </button>
           </div>
         </div>
@@ -954,20 +954,20 @@ export default function TerritoryEquity() {
 
               {/* Performance Trend Chart */}
               <div>
-                <PerformanceTrendChart data={trendData} title="Regional Performance Trend" />
+                <PerformanceTrendChart data={trendData} title={t('hc.territory_equity.regional_trend')} />
               </div>
 
               {/* Region Filter */}
               <div className="bg-white p-4 rounded-lg border border-gray-200">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Region - Analyze inbound shipments to cities within a specific region
+                  {t('hc.territory_equity.region_filter_label')}
                 </label>
                 <select
                   value={filters.region || ''}
                   onChange={(e) => setFilters({ ...filters, region: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="">All Regions (Treemap view only)</option>
+                  <option value="">{t('hc.territory_equity.all_regions_treemap')}</option>
                   {availableRegions.map(region => (
                     <option key={region} value={region}>{region}</option>
                   ))}
@@ -982,9 +982,9 @@ export default function TerritoryEquity() {
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
                       <h3 className="text-lg font-semibold">
-                        Cities in {filters.region} Region - Inbound Analysis
+                        {t('hc.territory_equity.cities_in_region', { region: filters.region })}
                       </h3>
-                      <SmartTooltip content="Detailed breakdown of cities within the selected region, showing inbound shipments and service equity metrics." />
+                      <SmartTooltip content={t('hc.territory_equity.cities_in_region_tooltip')} />
                     </div>
                     <button
                       onClick={handleExportCSV}
@@ -1006,7 +1006,7 @@ export default function TerritoryEquity() {
                       isRouteView: false,
                       isGeneralView: false
                     }}
-                    scenarioDescription={`Showing cities in ${filters.region} region with inbound shipment analysis`}
+                    scenarioDescription={t('hc.territory_equity.showing_cities_in_region', { region: filters.region })}
                   />
                 </div>
                 );
@@ -1036,9 +1036,9 @@ export default function TerritoryEquity() {
             <div className="space-y-6">
               <div>
                 <div className="mb-4">
-                  <h3 className="text-lg font-semibold mb-2">Low Profile Routes</h3>
+                  <h3 className="text-lg font-semibold mb-2">{t('hc.territory_equity.low_profile_routes')}</h3>
                   <p className="text-sm text-gray-600">
-                    Detailed breakdown of all routes by carrier and product. Filter by equity status to identify specific compliance issues.
+                    {t('hc.territory_equity.low_profile_desc')}
                   </p>
                 </div>
                 <ProductAnalysisTable 
@@ -1056,16 +1056,16 @@ export default function TerritoryEquity() {
               {/* Distribution Analysis */}
               <div>
                 <div className="mb-4">
-                  <h3 className="text-lg font-semibold mb-2">Distribution Analysis</h3>
+                  <h3 className="text-lg font-semibold mb-2">{t('hc.territory_equity.distribution_analysis')}</h3>
                   <p className="text-sm text-gray-600">
-                    Detailed analysis of transit time distribution and cumulative performance metrics.
+                    {t('hc.territory_equity.distribution_desc')}
                   </p>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                   {/* Left: Performance Distribution */}
                   <div className="bg-white p-6 rounded-lg border border-gray-200">
-                    <h4 className="text-md font-semibold mb-4">Performance Distribution</h4>
+                    <h4 className="text-md font-semibold mb-4">{t('hc.territory_equity.performance_distribution')}</h4>
                     {hasHoursRoutes && hasDaysRoutes && (
                       <div role="group" className="inline-flex mb-3">
                         {(['hours', 'days'] as TimeUnit[]).map(u => (
@@ -1093,7 +1093,7 @@ export default function TerritoryEquity() {
                   {/* Right: Cumulative Distribution with toggle */}
                   <div className="bg-white p-6 rounded-lg border border-gray-200">
                     <div className="flex items-center justify-between mb-4">
-                      <h4 className="text-md font-semibold">Cumulative Distribution</h4>
+                      <h4 className="text-md font-semibold">{t('hc.territory_equity.cumulative_distribution')}</h4>
                       <div className="flex gap-2">
                         <button
                           onClick={() => setCumulativeView('chart')}
@@ -1103,7 +1103,7 @@ export default function TerritoryEquity() {
                               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                           }`}
                         >
-                          Chart
+                          {t('hc.territory_equity.chart')}
                         </button>
                         <button
                           onClick={() => setCumulativeView('table')}
@@ -1113,7 +1113,7 @@ export default function TerritoryEquity() {
                               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                           }`}
                         >
-                          Table
+                          {t('hc.territory_equity.table')}
                         </button>
                       </div>
                     </div>
@@ -1128,9 +1128,9 @@ export default function TerritoryEquity() {
                 {/* Route Performance Table */}
                 <div className="bg-white p-6 rounded-lg border border-gray-200">
                   <div className="mb-4">
-                    <h4 className="text-md font-semibold mb-2">Route Performance</h4>
+                    <h4 className="text-md font-semibold mb-2">{t('hc.territory_equity.route_performance')}</h4>
                     <p className="text-sm text-gray-600">
-                      Detailed breakdown of all routes by carrier and product.
+                      {t('hc.territory_equity.route_performance_desc')}
                     </p>
                   </div>
                   <ProductAnalysisTable 

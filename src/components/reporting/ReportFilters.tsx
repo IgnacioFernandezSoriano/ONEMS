@@ -115,7 +115,7 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
             className="p-1 hover:bg-gray-100 rounded transition-colors"
-            title={isCollapsed ? "Expand filters" : "Collapse filters"}
+            title={isCollapsed ? t('hc.report_filters.expand_filters') : t('hc.report_filters.collapse_filters')}
           >
             {isCollapsed ? (
               <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -129,15 +129,15 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
           </button>
           <Filter className="w-5 h-5 text-gray-600" />
           <h3 className="text-lg font-semibold text-gray-900">{t('stock.filters')}</h3>
-          <SmartTooltip content="Filters apply to all reporting views. Use them to narrow your analysis to specific time periods, carriers, products, or routes. Empty filters show all available data." />
+          <SmartTooltip content={t('hc.report_filters.filters_tip')} />
         </div>
         <button
           onClick={handleReset}
           className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-          title="Reset all filters"
+          title={t('hc.report_filters.reset_all_filters')}
         >
           <RotateCcw className="w-4 h-4" />
-          Reset
+          {t('hc.report_filters.reset')}
         </button>
       </div>
       
@@ -148,7 +148,7 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
           <label className="block text-sm font-medium text-gray-700 mb-1">
             <Calendar className="w-4 h-4 inline mr-1" />
             {t('reporting.start_date')}
-            <SmartTooltip content="Filter shipments sent on or after this date. Leave empty to include all historical data. Useful for analyzing specific time periods or recent performance." />
+            <SmartTooltip content={t('hc.report_filters.start_date_tip')} />
           </label>
           <input
             type="date"
@@ -162,7 +162,7 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
           <label className="block text-sm font-medium text-gray-700 mb-1">
             <Calendar className="w-4 h-4 inline mr-1" />
             {t('reporting.end_date')}
-            <SmartTooltip content="Filter shipments sent on or before this date. Leave empty to include data up to today. Combine with Start Date to analyze a specific date range." />
+            <SmartTooltip content={t('hc.report_filters.end_date_tip')} />
           </label>
           <input
             type="date"
@@ -175,7 +175,7 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             {t('reporting.carrier')}
-            <SmartTooltip content="Filter by specific carrier (e.g., DHL, FedEx). Shows only shipments handled by the selected carrier. Use to compare carrier performance or investigate specific carrier issues." />
+            <SmartTooltip content={t('hc.report_filters.carrier_tip')} />
           </label>
           <select
             value={filters.carrier}
@@ -193,7 +193,7 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             {t('reporting.product')}
-            <SmartTooltip content="Filter by service type (e.g., Express 24h, Standard). Shows only shipments using the selected product. Use to analyze performance by service level or compare product offerings." />
+            <SmartTooltip content={t('hc.report_filters.product_tip')} />
           </label>
           <select
             value={filters.product}
@@ -212,7 +212,7 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
           <label className="block text-sm font-medium text-gray-700 mb-1">
             <MapPin className="w-4 h-4 inline mr-1" />
             {t('reporting.origin_city')}
-            <SmartTooltip content="Filter by departure city. When selected, shows performance FROM this city TO all destinations (or to specific destination if also filtered). Use to analyze outbound performance from a specific location." />
+            <SmartTooltip content={t('hc.report_filters.origin_tip')} />
           </label>
           <select
             value={filters.originCity}
@@ -231,7 +231,7 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
           <label className="block text-sm font-medium text-gray-700 mb-1">
             <MapPin className="w-4 h-4 inline mr-1" />
             {t('reporting.destination_city')}
-            <SmartTooltip content="Filter by arrival city. When selected, shows performance TO this city FROM all origins (or from specific origin if also filtered). Use to analyze inbound performance to a specific location." />
+            <SmartTooltip content={t('hc.report_filters.destination_tip')} />
           </label>
           <select
             value={filters.destinationCity}
@@ -249,7 +249,7 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             {t('reporting.compliance_status')}
-            <SmartTooltip content="Select multiple compliance statuses to filter routes. Compliant (✅ meeting standard), Warning (⚠️ below standard but above critical), or Critical (🔴 below critical threshold with penalty)." />
+            <SmartTooltip content={t('hc.report_filters.compliance_tip')} />
           </label>
           <div className="border border-gray-300 rounded-lg p-2 bg-white">
             <label className="flex items-center gap-2 py-1 cursor-pointer hover:bg-gray-50 px-2 rounded">

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Info } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface InfoTooltipProps {
   title: string;
@@ -9,6 +10,7 @@ interface InfoTooltipProps {
 }
 
 export function InfoTooltip({ title, description, interpretation, utility }: InfoTooltipProps) {
+  const { t } = useTranslation();
   const [isVisible, setIsVisible] = useState(false);
 
   return (
@@ -31,12 +33,12 @@ export function InfoTooltip({ title, description, interpretation, utility }: Inf
             </div>
 
             <div>
-              <h5 className="font-medium text-gray-800 text-sm mb-1">📊 Interpretation</h5>
+              <h5 className="font-medium text-gray-800 text-sm mb-1">📊 {t('hc.info_tooltip.interpretation')}</h5>
               <p className="text-sm text-gray-600">{interpretation}</p>
             </div>
 
             <div>
-              <h5 className="font-medium text-gray-800 text-sm mb-1">🎯 Regulatory Utility</h5>
+              <h5 className="font-medium text-gray-800 text-sm mb-1">🎯 {t('hc.info_tooltip.regulatory_utility')}</h5>
               <p className="text-sm text-gray-600">{utility}</p>
             </div>
           </div>
