@@ -32,7 +32,7 @@ export default function TranslationManager() {
       }
 
       const header = lines[0].toLowerCase()
-      const requiredColumns = ['key', 'en', 'es', 'fr', 'ar']
+      const requiredColumns = ['key', 'en', 'es', 'fr', 'ar', 'pt']
       const missingColumns = requiredColumns.filter(col => !header.includes(col))
       
       if (missingColumns.length > 0) {
@@ -43,7 +43,7 @@ export default function TranslationManager() {
       const translationCount = lines.length - 1 // Exclude header
       
       // Extract language-specific CSVs and upload to Supabase Storage
-      const languages = ['en', 'es', 'fr', 'ar']
+      const languages = ['en', 'es', 'fr', 'ar', 'pt']
       const headerParts = lines[0].split(',')
       const keyIdx = headerParts.findIndex(h => h.trim().toLowerCase() === 'key')
       
@@ -132,7 +132,7 @@ export default function TranslationManager() {
         </h2>
         <ol className="list-decimal list-inside space-y-2 text-blue-800">
           <li>Download the CSV template using the button below</li>
-          <li>Translate the empty columns (es, fr, ar) in Excel or Google Sheets</li>
+          <li>Translate the empty columns (es, fr, ar, pt) in Excel or Google Sheets</li>
           <li>Save the file as CSV (UTF-8 encoding)</li>
           <li>Upload the translated CSV file here</li>
           <li className="font-semibold">✨ Translations are applied automatically - no deployment needed!</li>
@@ -214,12 +214,13 @@ export default function TranslationManager() {
       {/* Current Languages */}
       <div className="bg-white border border-gray-200 rounded-lg p-6 mt-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-3">Supported Languages</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           {[
             { code: 'en', name: 'English', flag: '🇬🇧' },
             { code: 'es', name: 'Español', flag: '🇪🇸' },
             { code: 'fr', name: 'Français', flag: '🇫🇷' },
-            { code: 'ar', name: 'العربية', flag: '🇸🇦' }
+            { code: 'ar', name: 'العربية', flag: '🇸🇦' },
+            { code: 'pt', name: 'Português', flag: '🇵🇹' }
           ].map(lang => (
             <div
               key={lang.code}

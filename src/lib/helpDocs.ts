@@ -1,7 +1,7 @@
 // Catálogo de las páginas de ayuda de public/help (una por idioma: <file>.<idioma>.html).
-// Para añadir una ayuda nueva: crear los 4 archivos (docs/help/GUIA-DISENO-AYUDA.md) y añadirla aquí.
+// Para añadir una ayuda nueva: crear los 5 archivos (docs/help/GUIA-DISENO-AYUDA.md) y añadirla aquí.
 
-export const HELP_LANGS = ['en', 'es', 'fr', 'ar'] as const
+export const HELP_LANGS = ['en', 'es', 'fr', 'ar', 'pt'] as const
 export type HelpLang = typeof HELP_LANGS[number]
 
 export interface HelpDoc {

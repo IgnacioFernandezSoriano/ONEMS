@@ -183,6 +183,7 @@ export function UserForm({ user, onSubmit, onCancel }: UserFormProps) {
           <option value="es">Español</option>
           <option value="fr">Français</option>
           <option value="ar">العربية (Arabic)</option>
+          <option value="pt">Português</option>
         </select>
       </div>
 

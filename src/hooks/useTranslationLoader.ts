@@ -214,7 +214,8 @@ export function useTranslationLoader() {
       { code: 'en', name: 'English' },
       { code: 'es', name: 'Español' },
       { code: 'fr', name: 'Français' },
-      { code: 'ar', name: 'العربية' }
+      { code: 'ar', name: 'العربية' },
+      { code: 'pt', name: 'Português' }
     ] as const
   }
 }
