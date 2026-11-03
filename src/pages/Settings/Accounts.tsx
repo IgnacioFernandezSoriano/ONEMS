@@ -6,8 +6,10 @@ import { AccountTable } from '@/components/accounts/AccountTable'
 import { AccountForm } from '@/components/accounts/AccountForm'
 import { useAccounts } from '@/hooks/useAccounts'
 import type { Account, SupportedLanguage } from '@/lib/types'
+import { useTranslation } from '@/hooks/useTranslation'
 
 export function Accounts() {
+  const { t } = useTranslation()
   const { accounts, loading, createAccount, updateAccount, deleteAccount } = useAccounts()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedAccount, setSelectedAccount] = useState<Account | undefined>()
@@ -36,16 +38,16 @@ export function Accounts() {
   }
 
   if (loading) {
-    return <div className="p-8">Loading...</div>
+    return <div className="p-8">{t('hc.accounts.loading')}</div>
   }
 
   return (
     <div className="p-8">
       <PageHeader
-        title="Account Management"
+        title={t('hc.accounts.title')}
         action={
           <Button onClick={handleCreate}>
-            Create Account
+            {t('hc.accounts.create')}
           </Button>
         }
       />
@@ -59,7 +61,7 @@ export function Accounts() {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={selectedAccount ? 'Edit Account' : 'Create Account'}
+        title={selectedAccount ? t('hc.accounts.edit') : t('hc.accounts.create')}
       >
         <AccountForm
           account={selectedAccount}

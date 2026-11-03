@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from '@/hooks/useTranslation'
 import { PageHeader } from '@/components/common/PageHeader'
 import { Button } from '@/components/common/Button'
 import { Modal } from '@/components/common/Modal'
@@ -8,6 +9,7 @@ import { useUsers } from '@/hooks/useUsers'
 import type { ProfileWithAccount } from '@/lib/types'
 
 export function AllUsers() {
+  const { t } = useTranslation()
   const { users, loading, createUser, updateUser, deleteUser, resetPassword } = useUsers()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<ProfileWithAccount | undefined>()
@@ -36,16 +38,16 @@ export function AllUsers() {
   }
 
   if (loading) {
-    return <div className="p-8">Loading...</div>
+    return <div className="p-8">{t('hc.all_users.loading')}</div>
   }
 
   return (
     <div className="p-8">
       <PageHeader
-        title="All Users"
+        title={t('hc.all_users.title')}
         action={
           <Button onClick={handleCreate}>
-            Create User
+            {t('hc.all_users.create_user')}
           </Button>
         }
       />
@@ -60,7 +62,7 @@ export function AllUsers() {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={selectedUser ? 'Edit User' : 'Create User'}
+        title={selectedUser ? t('hc.all_users.edit_user') : t('hc.all_users.create_user')}
       >
         <UserForm
           user={selectedUser}

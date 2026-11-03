@@ -163,7 +163,7 @@ export function CountryTopology() {
     return (
       <div className="p-8">
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-          Error: {error}
+          {t('hc.country_topology.error', { message: error })}
         </div>
       </div>
     )
@@ -184,7 +184,7 @@ export function CountryTopology() {
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-3">
             <h1 className="text-3xl font-bold text-gray-900">{t('topology.title')}</h1>
-            <SmartTooltip content="About Country Topology - Purpose: Define and manage your country's network infrastructure hierarchy in a three-level structure. Structure: Regions (top-level geographic divisions like Norte, Sur, Centro), Cities (urban centers within each region like Madrid, Barcelona), and Nodes (specific delivery points or addresses within cities). Usage: This topology is used throughout the system for allocation planning, reporting, and territory equity analysis.">
+            <SmartTooltip content={t('hc.country_topology.about_tooltip')}>
               <svg className="w-5 h-5 text-gray-400 hover:text-gray-600 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -369,8 +369,8 @@ export function CountryTopology() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="all">{t('topology.all_nodes')}</option>
-                <option value="with">With Panelist</option>
-                <option value="without">Without Panelist</option>
+                <option value="with">{t('hc.country_topology.with_panelist')}</option>
+                <option value="without">{t('hc.country_topology.without_panelist')}</option>
               </select>
             </div>
 
@@ -384,7 +384,7 @@ export function CountryTopology() {
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
                   </svg>
-                  Collapse All
+                  {t('hc.country_topology.collapse_all')}
                 </>
               ) : (
                 <>
@@ -407,7 +407,7 @@ export function CountryTopology() {
                 }}
                 className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
               >
-                Clear Filters
+                {t('hc.country_topology.clear_filters')}
               </button>
             )}
           </div>
@@ -422,7 +422,7 @@ export function CountryTopology() {
               <div className="text-4xl mb-4">🗺️</div>
               <h3 className="text-lg font-semibold mb-2">{t("topology.no_topology_yet")}</h3>
               <p className="text-gray-600 mb-4">
-                Start by creating your first region to build your country topology
+                {t('hc.country_topology.start_first_region')}
               </p>
             </div>
           )}
@@ -432,7 +432,7 @@ export function CountryTopology() {
               <div className="text-4xl mb-4">🔍</div>
               <h3 className="text-lg font-semibold mb-2">{t("common.no_results_found")}</h3>
               <p className="text-gray-600">
-                Try adjusting your search or filters
+                {t('hc.country_topology.adjust_search')}
               </p>
             </div>
           )}
@@ -462,9 +462,9 @@ export function CountryTopology() {
         <div className="bg-white border border-gray-200 rounded-lg p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Nodes without Panelists</h3>
+              <h3 className="text-lg font-semibold text-gray-900">{t('hc.country_topology.nodes_without_panelists')}</h3>
               <p className="text-sm text-gray-600 mt-1">
-                These nodes need panelist assignment to be operational
+                {t('hc.country_topology.nodes_need_panelist')}
               </p>
             </div>
             <button
@@ -475,16 +475,16 @@ export function CountryTopology() {
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              Download CSV
+              {t('hc.country_topology.download_csv')}
             </button>
           </div>
 
           {nodesWithoutPanelists.length === 0 ? (
             <div className="text-center py-12">
               <div className="text-4xl mb-4">✅</div>
-              <h3 className="text-lg font-semibold mb-2 text-gray-900">All nodes have panelists!</h3>
+              <h3 className="text-lg font-semibold mb-2 text-gray-900">{t('hc.country_topology.all_nodes_have')}</h3>
               <p className="text-gray-600">
-                Every node in your topology has a panelist assigned
+                {t('hc.country_topology.every_node_assigned')}
               </p>
             </div>
           ) : (
@@ -493,7 +493,7 @@ export function CountryTopology() {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Node ID
+                      {t('hc.country_topology.th_node_id')}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       {t("common.city")}
@@ -523,7 +523,7 @@ export function CountryTopology() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className="px-2 py-1 text-xs font-medium rounded-full bg-amber-100 text-amber-800">
-                            Pending Panelist
+                            {t('hc.country_topology.pending_panelist')}
                           </span>
                         </td>
                       </tr>
@@ -549,7 +549,7 @@ export function CountryTopology() {
                 await createRegion(data)
                 setShowRegionModal(false)
               } catch (err: any) {
-                alert(`Error creating region: ${err.message}`)
+                alert(t('hc.country_topology.error_creating_region', { message: err.message }))
                 throw err
               }
             }}

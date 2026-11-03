@@ -146,7 +146,7 @@ export function GenerateCombinationsModal({
       onClose()
     } catch (error) {
       console.error('Error generating SLAs:', error)
-      alert(error instanceof Error ? error.message : 'Error generating SLAs')
+      alert(error instanceof Error ? error.message : t('hc.generate_combinations_modal.error_generating'))
     } finally {
       setLoading(false)
     }
@@ -203,7 +203,7 @@ export function GenerateCombinationsModal({
             {/* Carrier Selection */}
             <div className="mb-6">
               <div className="flex justify-between items-center mb-2">
-                <h3 className="font-medium text-gray-900">Select Carriers</h3>
+                <h3 className="font-medium text-gray-900">{t('hc.generate_combinations_modal.select_carriers')}</h3>
                 <button
                   onClick={() => {
                     if (selectedCarriers.size === carriers.length) {
@@ -243,7 +243,7 @@ export function GenerateCombinationsModal({
             {/* Product Selection */}
             <div className="mb-6">
               <div className="flex justify-between items-center mb-2">
-                <h3 className="font-medium text-gray-900">Select Products</h3>
+                <h3 className="font-medium text-gray-900">{t('hc.generate_combinations_modal.select_products')}</h3>
                 <button
                   onClick={() => {
                     if (selectedProducts.size === products.length) {
@@ -303,7 +303,7 @@ export function GenerateCombinationsModal({
                         onChange={() => handleToggleCenter(center.id)}
                         className="mr-2"
                       />
-                      <span className="text-sm">{center.name} (Entry → Exit)</span>
+                      <span className="text-sm">{t('hc.generate_combinations_modal.entry_exit', { name: center.name })}</span>
                     </label>
                   ))}
                 </div>

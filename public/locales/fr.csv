@@ -3202,3 +3202,1850 @@ lb2.ref_help.example,"Si vous attendez 63 échantillons par nœud, c'est votre v
 lb2.ref_help.usage,"Elle sert, avec le % de déviation, à classer les nœuds en Normal, Élevée ou Saturée."
 lb2.dev_help.desc,Pourcentage de déviation acceptable par rapport à la valeur de référence.
 lb2.dev_help.example,"Avec Réf=63 et %=20 : Normal < 75,6 ; Élevée ≥ 75,6 ; Saturée ≥ 81,9"
+hc.material_selector.select_material_qty_alert,Veuillez sélectionner un matériel et saisir une quantité valide
+hc.material_selector.fill_code_name_qty_alert,"Veuillez renseigner le code, le nom et la quantité"
+hc.material_selector.choose_how_to_add,Choisissez comment ajouter du matériel à ce produit :
+hc.material_selector.select_from_catalog,Sélectionner dans le catalogue
+hc.material_selector.choose_existing,Choisissez un matériel existant dans votre catalogue
+hc.material_selector.create_new_material,Créer un nouveau matériel
+hc.material_selector.add_new_to_catalog,Ajoutez un nouveau matériel au catalogue et affectez-le au produit
+hc.material_selector.cancel,Annuler
+hc.material_selector.back_to_options,← Retour aux options
+hc.material_selector.select_material_label,Sélectionner un matériel *
+hc.material_selector.choose_a_material,-- Choisissez un matériel --
+hc.material_selector.no_active_materials,Aucun matériel actif dans le catalogue. Créez-en un nouveau.
+hc.material_selector.quantity_label,Quantité *
+hc.material_selector.adding,Ajout en cours...
+hc.material_selector.add_to_product,Ajouter au produit
+hc.material_selector.code_label,Code *
+hc.material_selector.name_label,Nom *
+hc.material_selector.unit_measure,Unité de mesure
+hc.material_selector.description,Description
+hc.material_selector.unit_placeholder,"unités, kg, etc."
+hc.material_selector.details_placeholder,Détails supplémentaires...
+hc.material_selector.creating,Création en cours...
+hc.material_selector.create_and_add,Créer et ajouter au produit
+hc.change_password.passwords_no_match,Les mots de passe ne correspondent pas
+hc.change_password.min_length_error,Le mot de passe doit contenir au moins 8 caractères
+hc.change_password.success,Mot de passe modifié avec succès !
+hc.change_password.failed,Échec de la modification du mot de passe
+hc.change_password.title,Changer le mot de passe
+hc.change_password.security,Sécurité
+hc.change_password.choose_strong,Choisissez un mot de passe robuste pour protéger votre compte
+hc.change_password.new_password_label,Nouveau mot de passe *
+hc.change_password.enter_new_placeholder,Saisissez le nouveau mot de passe
+hc.change_password.min_8_chars,8 caractères minimum
+hc.change_password.confirm_label,Confirmer le nouveau mot de passe *
+hc.change_password.confirm_placeholder,Confirmez le nouveau mot de passe
+hc.change_password.changing,Modification en cours...
+hc.change_password.tips_title,Conseils pour le mot de passe :
+hc.change_password.tip_length,Utilisez au moins 8 caractères
+hc.change_password.tip_case,Combinez majuscules et minuscules
+hc.change_password.tip_symbols,Incluez des chiffres et des symboles
+hc.change_password.tip_avoid,Évitez les mots ou schémas courants
+hc.translation_manager.upload_csv_error,Veuillez téléverser un fichier CSV
+hc.translation_manager.empty_csv,Le fichier CSV est vide ou invalide
+hc.translation_manager.missing_columns,Colonnes obligatoires manquantes dans le CSV : {columns}
+hc.translation_manager.upload_failed,Échec du téléversement de {file} : {message}
+hc.translation_manager.success,{count} traductions traitées et {files} fichiers de langue téléversés avec succès. Les modifications seront appliquées immédiatement pour tous les utilisateurs.
+hc.translation_manager.process_failed,Échec du traitement du fichier CSV
+hc.translation_manager.title,Gestionnaire de traductions
+hc.translation_manager.subtitle,Téléversez des fichiers CSV traduits pour mettre à jour les traductions de l'application
+hc.translation_manager.how_to_use,Mode d'emploi
+hc.translation_manager.step_a,Téléchargez le modèle CSV avec le bouton ci-dessous
+hc.translation_manager.step_b,"Traduisez les colonnes vides (es, fr, ar, pt) dans Excel ou Google Sheets"
+hc.translation_manager.step_c,Enregistrez le fichier au format CSV (encodage UTF-8)
+hc.translation_manager.step_d,Téléversez ici le fichier CSV traduit
+hc.translation_manager.auto_applied,"Les traductions sont appliquées automatiquement, aucun déploiement nécessaire !"
+hc.translation_manager.step1_title,Étape 1 : Télécharger le modèle
+hc.translation_manager.step1_desc,Téléchargez le modèle CSV contenant tous les textes de l'application à traduire
+hc.translation_manager.download_template,Télécharger le modèle CSV
+hc.translation_manager.step2_title,Étape 2 : Téléverser le CSV traduit
+hc.translation_manager.step2_desc,Téléversez votre fichier CSV traduit : les modifications seront appliquées immédiatement
+hc.translation_manager.click_to_upload,Cliquez pour téléverser
+hc.translation_manager.or_drag_drop,ou glissez-déposez
+hc.translation_manager.csv_only,Fichier CSV uniquement
+hc.translation_manager.processing,Traitement et téléversement du fichier CSV...
+hc.translation_manager.supported_languages,Langues prises en charge
+hc.bulk_operations_panel.error_prefix,Erreur : {message}
+hc.bulk_operations_panel.clear_selection,Effacer la sélection
+hc.bulk_operations_panel.change_origin_node,Changer le nœud d'origine
+hc.bulk_operations_panel.select_node,Sélectionner un nœud...
+hc.bulk_operations_panel.apply,Appliquer
+hc.bulk_operations_panel.change_destination_node,Changer le nœud de destination
+hc.bulk_operations_panel.change_scheduled_date,Changer la date prévue
+hc.bulk_operations_panel.cancel_selected,Annuler la sélection
+hc.bulk_operations_panel.cancel_n_records,Annuler {count} enregistrements
+hc.bulk_operations_panel.reprocess_errors,Retraiter les erreurs
+hc.bulk_operations_panel.retry_n_errors,Réessayer {count} erreurs
+hc.bulk_operations_panel.delete_selected,Supprimer la sélection
+hc.bulk_operations_panel.delete_n_records,Supprimer {count} enregistrements
+hc.performance_trend_chart.default_title,Tendance de performance
+hc.performance_trend_chart.week_of,Semaine du {date}
+hc.performance_trend_chart.jk_actual,J+K réel
+hc.performance_trend_chart.pct_actual,% réel
+hc.performance_trend_chart.jk_std,J+K standard
+hc.performance_trend_chart.pct_std,% standard
+hc.performance_trend_chart.no_data,Aucune donnée disponible pour la période sélectionnée
+hc.performance_trend_chart.day,Jour
+hc.performance_trend_chart.week,Semaine
+hc.performance_trend_chart.month,Mois
+hc.performance_trend_chart.percentage,Pourcentage %
+hc.jk_hierarchical_table.compliant,Conforme
+hc.jk_hierarchical_table.warning,Avertissement
+hc.jk_hierarchical_table.critical,Critique
+hc.jk_hierarchical_table.no_data,Aucune donnée de performance J+K disponible
+hc.jk_hierarchical_table.city_carrier_product,Ville / Opérateur / Produit
+hc.jk_hierarchical_table.routes,Routes
+hc.jk_hierarchical_table.samples,Échantillons
+hc.jk_hierarchical_table.jk_std_days,J+K standard (jours)
+hc.jk_hierarchical_table.jk_actual_days,J+K réel (jours)
+hc.jk_hierarchical_table.deviation_days,Écart (jours)
+hc.jk_hierarchical_table.on_time_pct,% dans les délais
+hc.jk_hierarchical_table.std_pct,% standard
+hc.jk_hierarchical_table.status,Statut
+hc.receive_po_modal.quantity_gt_zero,La quantité doit être supérieure à 0
+hc.receive_po_modal.title,Réceptionner la commande d'achat
+hc.receive_po_modal.ordered,Commandé : {quantity} {unit}
+hc.receive_po_modal.quantity_received,Quantité reçue
+hc.receive_po_modal.expected,Attendu : {quantity} {unit} (quantité commandée)
+hc.receive_po_modal.info,"Cette action ajoutera la quantité reçue au stock du régulateur, créera un mouvement de réception et marquera ce besoin comme reçu."
+hc.receive_po_modal.cancel,Annuler
+hc.receive_po_modal.confirm_receipt,Confirmer la réception
+hc.territory_equity_treemap.k_pop,{value}K hab.
+hc.territory_equity_treemap.shipments_count,{count} envois
+hc.territory_equity_treemap.compliance,Conformité
+hc.territory_equity_treemap.population,Population
+hc.territory_equity_treemap.shipments,Envois
+hc.territory_equity_treemap.status,Statut
+hc.territory_equity_treemap.no_data,Aucune donnée disponible pour le treemap
+hc.territory_equity_table.collapse_all,Tout réduire
+hc.territory_equity_table.expand_all,Tout développer
+hc.territory_equity_table.no_data,Aucune donnée disponible
+hc.report_filters.expand_filters,Développer les filtres
+hc.report_filters.collapse_filters,Réduire les filtres
+hc.report_filters.filters_tip,"Les filtres s'appliquent à toutes les vues de reporting. Utilisez-les pour restreindre l'analyse à des périodes, opérateurs, produits ou routes précis. Sans filtre, toutes les données disponibles sont affichées."
+hc.report_filters.reset_all_filters,Réinitialiser tous les filtres
+hc.report_filters.reset,Réinitialiser
+hc.report_filters.start_date_tip,Filtre les envois expédiés à partir de cette date. Laissez vide pour inclure tout l'historique. Utile pour analyser des périodes précises ou la performance récente.
+hc.report_filters.end_date_tip,Filtre les envois expédiés jusqu'à cette date. Laissez vide pour inclure les données jusqu'à aujourd'hui. Combinez avec la date de début pour analyser une plage précise.
+hc.report_filters.carrier_tip,"Filtre par opérateur (p. ex. DHL, FedEx). Affiche uniquement les envois traités par l'opérateur sélectionné. Utile pour comparer la performance des opérateurs ou examiner des problèmes spécifiques."
+hc.report_filters.product_tip,"Filtre par type de service (p. ex. Express 24h, Standard). Affiche uniquement les envois utilisant le produit sélectionné. Utile pour analyser la performance par niveau de service ou comparer les offres."
+hc.report_filters.origin_tip,"Filtre par ville de départ. Une fois sélectionnée, affiche la performance DEPUIS cette ville VERS toutes les destinations (ou vers une destination précise si elle est aussi filtrée). Utile pour analyser la performance sortante d'un lieu."
+hc.report_filters.destination_tip,"Filtre par ville d'arrivée. Une fois sélectionnée, affiche la performance VERS cette ville DEPUIS toutes les origines (ou depuis une origine précise si elle est aussi filtrée). Utile pour analyser la performance entrante d'un lieu."
+hc.report_filters.compliance_tip,"Sélectionnez plusieurs statuts de conformité pour filtrer les routes. Conforme (✅ respecte le standard), Avertissement (⚠️ sous le standard mais au-dessus du seuil critique) ou Critique (🔴 sous le seuil critique, avec pénalité)."
+hc.territory_equity_tooltips.description_label,Description :
+hc.territory_equity_tooltips.interpretation_label,Interprétation :
+hc.territory_equity_tooltips.regulatory_use_label,Usage réglementaire :
+hc.territory_equity_tooltips.service_equity_index_title,Indice d'équité du service
+hc.territory_equity_tooltips.service_equity_index_desc,"Mesure la constance de la qualité de service dans toutes les villes, pondérée par la population. Échelle de 0 à 100, où 100 représente l'équité parfaite."
+hc.territory_equity_tooltips.service_equity_index_interp,Des valeurs élevées indiquent une répartition du service plus uniforme. Des valeurs inférieures à 80 suggèrent des disparités importantes entre villes.
+hc.territory_equity_tooltips.service_equity_index_use,Démontre le respect des obligations de service universel. À utiliser dans les rapports réglementaires pour montrer une fourniture équitable du service sur les territoires.
+hc.territory_equity_tooltips.pop_weighted_title,Conformité pondérée par la population
+hc.territory_equity_tooltips.pop_weighted_desc,Pourcentage de la population totale recevant un service dans les délais. Calculé en pondérant la conformité de chaque ville par sa population.
+hc.territory_equity_tooltips.pop_weighted_interp,Reflète l'impact réel sur les citoyens plutôt que la couverture géographique. Une ville de 1 M d'habitants pèse plus qu'une ville de 10 K.
+hc.territory_equity_tooltips.pop_weighted_use,Indicateur principal pour démontrer une qualité de service centrée sur le citoyen. À utiliser pour montrer le pourcentage de population servie dans les standards.
+hc.territory_equity_tooltips.underserved_title,Villes mal desservies
+hc.territory_equity_tooltips.underserved_desc,Nombre de villes dont la conformité est inférieure au seuil critique (généralement <80 %). Indique des défaillances de qualité de service.
+hc.territory_equity_tooltips.underserved_interp,L'objectif est zéro. Toute valeur positive indique des villes nécessitant une intervention immédiate.
+hc.territory_equity_tooltips.underserved_use,Identifie les territoires non conformes pour des actions coercitives. À utiliser pour prioriser les plans d'amélioration des opérateurs.
+hc.territory_equity_tooltips.citizens_affected_title,Citoyens concernés
+hc.territory_equity_tooltips.citizens_affected_desc,Population totale vivant dans des villes mal desservies (statut critique). Quantifie l'impact humain des défaillances du service.
+hc.territory_equity_tooltips.citizens_affected_interp,Montre l'ampleur du problème de qualité de service en termes humains. Des chiffres élevés indiquent un impact généralisé nécessitant une action urgente.
+hc.territory_equity_tooltips.citizens_affected_use,Démontre la gravité du non-respect dans les procédures coercitives. À utiliser pour justifier des pénalités ou des exigences d'intervention.
+hc.territory_equity_tooltips.best_served_title,Les 3 villes les mieux desservies
+hc.territory_equity_tooltips.best_served_desc,Villes présentant l'écart positif le plus élevé par rapport au standard. Montre où le service dépasse les attentes.
+hc.territory_equity_tooltips.best_served_interp,Identifie les bonnes pratiques et les modèles de service réussis. De grands écarts positifs peuvent indiquer un sur-service.
+hc.territory_equity_tooltips.best_served_use,Mettez en avant les réussites dans les rapports réglementaires. À utiliser pour identifier des bonnes pratiques transposables aux zones sous-performantes.
+hc.territory_equity_tooltips.worst_served_title,Les 3 villes les moins bien desservies
+hc.territory_equity_tooltips.worst_served_desc,Villes présentant l'écart le plus bas (le plus négatif) par rapport au standard. N'affiche que les villes en statut critique ou d'avertissement.
+hc.territory_equity_tooltips.worst_served_interp,Identifie les zones prioritaires d'intervention. Une présence persistante indique des problèmes systémiques nécessitant une action de l'opérateur.
+hc.territory_equity_tooltips.worst_served_use,Cibler les actions coercitives et les exigences d'amélioration. À utiliser pour démontrer la nécessité d'une intervention ou de pénalités envers les opérateurs.
+hc.territory_equity_tooltips.in_out_chart_title,Graphique de conformité entrant vs sortant
+hc.territory_equity_tooltips.in_out_chart_desc,Affiche les 10 villes présentant le plus grand écart entre les taux de conformité entrants (arrivées) et sortants (départs).
+hc.territory_equity_tooltips.in_out_chart_interp,De grands écarts indiquent des déséquilibres directionnels du service. Peuvent révéler des problèmes propres à certaines routes ou au réseau hub/spoke.
+hc.territory_equity_tooltips.in_out_chart_use,Identifiez les biais directionnels systématiques nécessitant une enquête au niveau des routes. À utiliser pour imposer des améliorations du réseau des opérateurs.
+hc.territory_equity_tooltips.city_table_title,Tableau détaillé de l'équité par ville
+hc.territory_equity_tooltips.city_table_desc,Détail complet des indicateurs d'équité du service pour chaque ville. Cliquez sur le nom d'une ville pour la performance détaillée par opérateur/produit. Les lignes dépliables affichent la ventilation opérateur-produit.
+hc.territory_equity_tooltips.city_table_interp,Triez par n'importe quelle colonne pour repérer des tendances. Le statut rouge indique une non-conformité critique. Cliquez sur développer (▼) pour voir quels opérateurs/produits posent problème.
+hc.territory_equity_tooltips.city_table_use,Preuves détaillées pour les procédures coercitives. Exportez en CSV pour les rapports formels. Utilisez la ventilation par opérateur pour attribuer les responsabilités.
+hc.territory_equity_tooltips.regional_chart_title,Graphique comparatif de l'équité régionale
+hc.territory_equity_tooltips.regional_chart_desc,"Comparaison visuelle des taux de conformité réels entre régions. La couleur de la barre indique le statut (vert=conforme, ambre=avertissement, rouge=critique). La ligne rouge en pointillés indique le seuil standard moyen."
+hc.territory_equity_tooltips.regional_chart_interp,Les barres sous la ligne rouge indiquent une non-conformité. Des groupes de barres basses suggèrent des problèmes systémiques régionaux.
+hc.territory_equity_tooltips.regional_chart_use,Preuve visuelle des disparités régionales pour les présentations. Déterminez si les retards sont systématiques (intervention de l'opérateur requise) ou sporadiques (enquête au cas par cas).
+hc.territory_equity_tooltips.regional_table_title,Tableau d'analyse de l'équité régionale
+hc.territory_equity_tooltips.regional_table_desc,Indicateurs d'équité du service agrégés par région. Cliquez sur le nom d'une région pour la ventilation par opérateur/produit. Les lignes dépliables affichent la performance opérateur-produit.
+hc.territory_equity_tooltips.regional_table_interp,Aide à repérer les tendances géographiques de la qualité de service. Un nombre élevé de villes mal desservies indique des problèmes régionaux.
+hc.territory_equity_tooltips.regional_table_use,Démontrez l'équité géographique dans la fourniture du service. À utiliser pour justifier des interventions ou des exigences d'investissement propres à une région.
+hc.territory_equity_tooltips.treemap_title,Treemap de l'équité du service par ville
+hc.territory_equity_tooltips.treemap_desc,"Représentation visuelle où la taille du rectangle représente la population et la couleur indique le statut de conformité (vert=conforme, ambre=avertissement, rouge=critique)."
+hc.territory_equity_tooltips.treemap_interp,Les grands rectangles rouges indiquent des villes très peuplées au service médiocre : priorité maximale d'intervention. Les petits rectangles verts montrent des villes conformes à faible impact.
+hc.territory_equity_tooltips.treemap_use,Preuve visuelle des tendances de conformité. Déterminez si les retards sont systématiques (intervention de l'opérateur requise) ou sporadiques (enquête au cas par cas). À utiliser dans les présentations coercitives pour illustrer les tendances de non-conformité.
+hc.delivery_standards.updated_records,{count} enregistrements mis à jour avec succès
+hc.delivery_standards.error_msg,Erreur : {message}
+hc.delivery_standards.confirm_delete_selected,Supprimer {count} enregistrements sélectionnés ?
+hc.delivery_standards.deleted_records,{count} enregistrements supprimés avec succès
+hc.delivery_standards.about_purpose_label,Objectif :
+hc.delivery_standards.about_purpose,Définit les délais de livraison attendus (J+K) et les taux de réussite entre paires de villes pour chaque combinaison transporteur-produit.
+hc.delivery_standards.about_key_metrics,Indicateurs clés :
+hc.delivery_standards.about_jk_desc,"Délai de livraison standard (p. ex., J+2 signifie 2 jours après la collecte)"
+hc.delivery_standards.about_std_desc,Pourcentage cible de livraisons respectant le standard J+K
+hc.delivery_standards.about_thresholds_label,Seuils :
+hc.delivery_standards.about_thresholds_desc,Niveaux d'écart d'avertissement et critique pour le suivi des performances
+hc.delivery_standards.about_usage_label,Utilisation :
+hc.delivery_standards.about_usage_desc,"Ces standards sont utilisés pour les rapports de conformité, l'évaluation des performances des transporteurs et la gestion des SLA."
+hc.delivery_standards.subtitle,Gérez les standards de délai de livraison entre villes pour chaque transporteur et produit
+hc.delivery_standards.total_standards,Total des standards
+hc.delivery_standards.bulk_edit_records,Modification groupée de {count} enregistrements
+hc.delivery_standards.standard_time,Délai standard
+hc.delivery_standards.eg_value,"p. ex., {value}"
+hc.delivery_standards.success_pct,% de réussite
+hc.delivery_standards.time_unit,Unité de temps
+hc.delivery_standards.warning_threshold,Seuil d'avertissement (%)
+hc.delivery_standards.critical_threshold,Seuil critique (%)
+hc.delivery_standards.threshold_type,Type de seuil
+hc.delivery_standards.threshold_calc_title,Type de calcul des seuils :
+hc.delivery_standards.relative_label,Relatif :
+hc.delivery_standards.relative_desc,Les seuils sont calculés en % du % de réussite.
+hc.delivery_standards.relative_example,"Exemple : Réussite=95 %, Avertissement=5 % → Limite=90,25 % (95 % - 95 %×5 %)"
+hc.delivery_standards.absolute_label,Absolu :
+hc.delivery_standards.absolute_desc,Les seuils sont calculés en % de 100 %.
+hc.delivery_standards.absolute_example,"Exemple : Réussite=95 %, Avertissement=10 % → Limite=90 % (100 % - 10 %)"
+hc.delivery_standards.relative_option,Relatif (% du % de réussite)
+hc.delivery_standards.absolute_option,Absolu (% de 100 %)
+hc.delivery_standards.apply,Appliquer
+hc.delivery_standards.cancel,Annuler
+hc.delivery_standards.collapse_filters,Réduire les filtres
+hc.delivery_standards.expand_filters,Développer les filtres
+hc.delivery_standards.active,Actif
+hc.delivery_standards.create_standard,Créer un standard
+hc.delivery_standards.generate_combinations,Générer des combinaisons
+hc.delivery_standards.bulk_edit,Modification groupée
+hc.delivery_standards.delete_selected,Supprimer la sélection
+hc.delivery_standards.export_csv,Exporter en CSV
+hc.delivery_standards.reset_all_filters,Réinitialiser tous les filtres
+hc.delivery_standards.reset,Réinitialiser
+hc.delivery_standards.carrier,Transporteur
+hc.delivery_standards.f_carrier_tip,Filtre les standards par transporteur. Affiche uniquement les standards du transporteur sélectionné.
+hc.delivery_standards.all_carriers,Tous les transporteurs
+hc.delivery_standards.product,Produit
+hc.delivery_standards.f_product_tip,Filtre les standards par produit/type de service du transporteur. Affiche uniquement les standards du produit sélectionné.
+hc.delivery_standards.all_products,Tous les produits
+hc.delivery_standards.origin_city,Ville d'origine
+hc.delivery_standards.f_origin_tip,Filtre les standards par ville d'origine (où les envois sont collectés). Affiche uniquement les routes partant de la ville sélectionnée.
+hc.delivery_standards.all_cities,Toutes les villes
+hc.delivery_standards.destination_city,Ville de destination
+hc.delivery_standards.f_dest_tip,Filtre les standards par ville de destination (où les envois sont livrés). Affiche uniquement les routes se terminant dans la ville sélectionnée.
+hc.delivery_standards.origin_type,Type d'origine
+hc.delivery_standards.f_origin_type_tip,"Filtre par classification de la ville d'origine (A, B ou C). Affiche uniquement les routes partant de villes du type sélectionné."
+hc.delivery_standards.destination_type,Type de destination
+hc.delivery_standards.f_dest_type_tip,"Filtre par classification de la ville de destination (A, B ou C). Affiche uniquement les routes se terminant dans des villes du type sélectionné."
+hc.delivery_standards.all_types,Tous les types
+hc.delivery_standards.type_letter,Type {type}
+hc.delivery_standards.pending_only,En attente uniquement
+hc.delivery_standards.f_pending_tip,Affiche uniquement les standards non encore configurés (valeurs J+K ou Std % manquantes). Utile pour identifier les routes à configurer.
+hc.delivery_standards.h_carrier_tip,"Transporteur logistique responsable de la livraison (p. ex., DHL, FedEx)"
+hc.delivery_standards.h_product_tip,"Produit/type de service du transporteur (p. ex., Express, Standard, Économique)"
+hc.delivery_standards.h_origin_tip,Ville où l'envoi est collecté (ville d'origine)
+hc.delivery_standards.h_dest_tip,Ville où l'envoi est livré (ville de destination)
+hc.delivery_standards.h_jk_tip,"Délai de livraison standard (notation J+K). J = jour de collecte, K = nombre de jours. Exemple : J+2 signifie une livraison sous 2 jours après la collecte."
+hc.delivery_standards.unit,Unité
+hc.delivery_standards.h_unit_tip,Unité de temps de la valeur J+K (heures ou jours)
+hc.delivery_standards.h_std_tip,Pourcentage cible de livraisons devant respecter le standard J+K. Exemple : 85 % signifie qu'au moins 85 livraisons sur 100 doivent arriver dans le délai J+K.
+hc.delivery_standards.h_warn_tip,"Écart acceptable par rapport à Std % sans pénalité. Exemple : si Std % est de 85 % et l'avertissement de 10 %, une performance entre 75 et 85 % déclenche un avertissement sans pénalité."
+hc.delivery_standards.h_crit_tip,"Écart critique par rapport à Std % déclenchant des pénalités. Exemple : si Std % est de 85 % et le critique de 20 %, une performance inférieure à 65 % entraîne des pénalités pour le transporteur."
+hc.delivery_standards.type,Type
+hc.delivery_standards.h_type_tip,Type de calcul du seuil : Relatif (en pourcentage) ou Absolu (valeur fixe)
+hc.delivery_standards.h_actions_tip,Modifier ou supprimer ce standard de livraison
+hc.delivery_standards.rel_abbr,Rel
+hc.delivery_standards.abs_abbr,Abs
+hc.delivery_standards.edit,Modifier
+hc.delivery_standards.delete,Supprimer
+hc.delivery_standards.none_found,Aucun standard de livraison trouvé. Générez des combinaisons pour commencer.
+hc.delivery_standards.create_title,Créer un standard de livraison
+hc.delivery_standards.edit_title,Modifier le standard de livraison
+hc.route_path_map_leaflet.days_value,{value} jours
+hc.route_path_map_leaflet.loading_map,Chargement de la carte...
+hc.route_path_map_leaflet.no_route_data,Aucune donnée de route avec des coordonnées valides. Veuillez vous assurer que les centres postaux disposent de données de latitude et de longitude.
+hc.route_path_map_leaflet.type,Type :
+hc.route_path_map_leaflet.transit,Transit
+hc.route_path_map_leaflet.tags,Étiquettes :
+hc.route_path_map_leaflet.natural_time,Temps naturel :
+hc.route_path_map_leaflet.working_time,Temps ouvré :
+hc.route_path_map_leaflet.real_pct,% réel :
+hc.route_path_map_leaflet.status,Statut :
+hc.route_path_map_leaflet.compliant,Conforme
+hc.route_path_map_leaflet.warning,Avertissement
+hc.route_path_map_leaflet.critical,Critique
+hc.route_path_map_leaflet.transit_point,Point de transit (sans données opérationnelles)
+hc.route_path_map_leaflet.segment_compliance,Conformité par segment
+hc.route_path_analysis.title,Analyse des itinéraires
+hc.route_path_analysis.export,Exporter
+hc.route_path_analysis.filters,Filtres
+hc.route_path_analysis.carrier,Transporteur
+hc.route_path_analysis.select_carrier,Sélectionnez un transporteur...
+hc.route_path_analysis.product,Produit
+hc.route_path_analysis.select_product,Sélectionnez un produit...
+hc.route_path_analysis.origin_city,Ville d'origine
+hc.route_path_analysis.select_origin,Sélectionnez l'origine...
+hc.route_path_analysis.destination_city,Ville de destination
+hc.route_path_analysis.select_destination,Sélectionnez la destination...
+hc.route_path_analysis.total_routes,Total des itinéraires
+hc.route_path_analysis.total_tags,Total des étiquettes
+hc.route_path_analysis.avg_compliance,Conformité moyenne
+hc.route_path_analysis.loading,Chargement des itinéraires...
+hc.route_path_analysis.none_found,Aucun itinéraire trouvé. Essayez de modifier vos filtres.
+hc.jk_performance_segments.from_center,Centre d'origine
+hc.jk_performance_segments.to_center,Centre de destination
+hc.jk_performance_segments.all,Tous
+hc.jk_performance_segments.avg_jk_actual,J+K réel moyen
+hc.jk_performance_segments.avg_jk_standard,J+K standard moyen
+hc.jk_performance_segments.on_time_pct,% dans les délais
+hc.jk_performance_segments.problematic_segments,Segments problématiques
+hc.jk_performance_segments.loading,Chargement des données de segments...
+hc.jk_performance_segments.perf_distribution,Distribution des performances
+hc.jk_performance_segments.cumulative_distribution,Distribution cumulée
+hc.jk_performance_segments.chart,Graphique
+hc.jk_performance_segments.table,Tableau
+hc.territory_equity_filters.expand_filters,Développer les filtres
+hc.territory_equity_filters.collapse_filters,Réduire les filtres
+hc.territory_equity_filters.filters_tip,"Filtrez le rapport de performance territoriale par période, transporteur, produit, région, direction (entrant/sortant) ou statut d'équité. Tous les filtres sont facultatifs."
+hc.territory_equity_filters.reset_all_filters,Réinitialiser tous les filtres
+hc.territory_equity_filters.reset,Réinitialiser
+hc.territory_equity_filters.start_date,Date de début
+hc.territory_equity_filters.start_date_tip,Filtre les envois effectués à partir de cette date. Laissez vide pour inclure toutes les données historiques.
+hc.territory_equity_filters.end_date,Date de fin
+hc.territory_equity_filters.end_date_tip,Filtre les envois effectués jusqu'à cette date. Laissez vide pour inclure les données jusqu'à aujourd'hui.
+hc.territory_equity_filters.carrier,Transporteur
+hc.territory_equity_filters.carrier_tip,"Filtre par transporteur (p. ex., DHL). Affiche uniquement les envois gérés par le transporteur sélectionné."
+hc.territory_equity_filters.all_carriers,Tous les transporteurs
+hc.territory_equity_filters.product,Produit
+hc.territory_equity_filters.product_tip,"Filtre par type de service (p. ex., Express 24h). Affiche uniquement les envois utilisant le produit sélectionné."
+hc.territory_equity_filters.all_products,Tous les produits
+hc.territory_equity_filters.origin_city,Ville d'origine
+hc.territory_equity_filters.origin_city_tip,Filtre par ville d'origine (d'où partent les envois). Affiche uniquement les envois provenant de la ville sélectionnée.
+hc.territory_equity_filters.all_origins,Toutes les origines
+hc.territory_equity_filters.destination_city,Ville de destination
+hc.territory_equity_filters.destination_city_tip,Filtre par ville de destination (où arrivent les envois). Affiche uniquement les envois livrés dans la ville sélectionnée.
+hc.territory_equity_filters.all_destinations,Toutes les destinations
+hc.topology_tree.collapse_region,Réduire la région
+hc.topology_tree.expand_region,Développer la région
+hc.topology_tree.active,Actif
+hc.topology_tree.inactive,Inactif
+hc.topology_tree.expand_all_cities,Développer toutes les villes de cette région
+hc.topology_tree.edit_region,Modifier la région
+hc.topology_tree.delete_region_confirm,Supprimer cette région et toutes ses villes/nœuds ?
+hc.topology_tree.delete_region,Supprimer la région
+hc.topology_tree.no_cities,Aucune ville dans cette région pour le moment
+hc.topology_tree.edit_city,Modifier la ville
+hc.topology_tree.delete_city,Supprimer la ville
+hc.topology_tree.panelist_assigned,Panéliste assigné
+hc.topology_tree.pending_panelist,Panéliste en attente
+hc.topology_tree.edit_node,Modifier le nœud
+hc.topology_tree.delete_node,Supprimer le nœud
+hc.generate_combinations_modal.error_msg,Erreur : {message}
+hc.generate_combinations_modal.generation_complete,Génération terminée
+hc.generate_combinations_modal.success,Succès
+hc.generate_combinations_modal.new_created,nouvelles combinaisons créées
+hc.generate_combinations_modal.already_existed,combinaisons existaient déjà
+hc.generate_combinations_modal.generate_title,Générer des standards de livraison
+hc.generate_combinations_modal.smart_generation,Génération intelligente :
+hc.generate_combinations_modal.smart_generation_text,Tous les champs sont facultatifs. Laissez-les vides pour utiliser toutes les options disponibles. Le système générera des combinaisons en respectant les relations transporteur-produit.
+hc.generate_combinations_modal.estimated,Combinaisons estimées :
+hc.generate_combinations_modal.estimated_breakdown,{carriers} transporteurs × {products} produits × {origins} origines × {destinations} destinations
+hc.generate_combinations_modal.clear_all,Effacer toutes les sélections
+hc.generate_combinations_modal.all,tous
+hc.generate_combinations_modal.n_selected,({count} sélectionnés)
+hc.generate_combinations_modal.carriers,Transporteurs
+hc.generate_combinations_modal.deselect_all,Tout désélectionner
+hc.generate_combinations_modal.select_all,Tout sélectionner
+hc.generate_combinations_modal.products,Produits
+hc.generate_combinations_modal.no_products_for_carriers,Aucun produit pour les transporteurs sélectionnés
+hc.generate_combinations_modal.no_products_available,Aucun produit disponible
+hc.generate_combinations_modal.origin_cities,Villes d'origine
+hc.generate_combinations_modal.type_letter,Type {type}
+hc.generate_combinations_modal.destination_cities,Villes de destination
+hc.generate_combinations_modal.cancel,Annuler
+hc.generate_combinations_modal.generating,Génération en cours...
+hc.generate_combinations_modal.generate_n,Générer {count} combinaisons
+hc.product_analysis_table.filter_equity,Filtrer par statut d'équité
+hc.product_analysis_table.compliant,Conforme
+hc.product_analysis_table.warning,Avertissement
+hc.product_analysis_table.critical,Critique
+hc.product_analysis_table.export_samples,Exporter les échantillons en CSV
+hc.product_analysis_table.origin,Origine
+hc.product_analysis_table.destination,Destination
+hc.product_analysis_table.carrier,Transporteur
+hc.product_analysis_table.product,Produit
+hc.product_analysis_table.total,Total
+hc.product_analysis_table.jk_std,J+K STD
+hc.product_analysis_table.jk_actual,J+K RÉEL
+hc.product_analysis_table.standard_pct,% standard
+hc.product_analysis_table.actual_pct,% réel
+hc.product_analysis_table.deviation,Écart
+hc.product_analysis_table.status,Statut
+hc.product_analysis_table.no_data,Aucune donnée disponible
+hc.order_material_modal.qty_gt_zero,La quantité doit être supérieure à 0
+hc.order_material_modal.title,Commander du matériel
+hc.order_material_modal.qty_to_order,Quantité à commander
+hc.order_material_modal.suggested,Suggéré : {quantity} {unit} (quantité nette nécessaire)
+hc.order_material_modal.info,Cela marquera le besoin comme « commandé » et enregistrera la quantité commandée. Vous pourrez réceptionner la commande plus tard à l'arrivée du matériel.
+hc.order_material_modal.cancel,Annuler
+hc.order_material_modal.confirm_order,Confirmer la commande
+hc.regional_equity_treemap.pop_k,{value}K hab.
+hc.regional_equity_treemap.shipments_count,{count} envois
+hc.regional_equity_treemap.compliance,Conformité
+hc.regional_equity_treemap.population,Population
+hc.regional_equity_treemap.shipments,Envois
+hc.regional_equity_treemap.status,Statut
+hc.regional_equity_treemap.no_data,Aucune donnée disponible pour le treemap
+hc.cumulative_distribution_chart_v2.no_data,Aucune donnée de distribution disponible
+hc.cumulative_distribution_chart_v2.cumulative,Cumulé
+hc.cumulative_distribution_chart_v2.jk_standard,J+K standard
+hc.cumulative_distribution_chart_v2.transit_days,Jours de transit (J+K)
+hc.cumulative_distribution_chart_v2.cumulative_pct,% cumulé
+hc.cumulative_distribution_chart_v2.target,Objectif {value} %
+hc.cumulative_distribution_chart_v2.std_day,{value}j std
+hc.regional_equity_chart.compliance_pct,% de conformité
+hc.regional_equity_chart.inbound,Entrant :
+hc.regional_equity_chart.outbound,Sortant :
+hc.regional_equity_chart.std_actual_pct,% std : {std} % | % réel : {actual} %
+hc.regional_equity_chart.jk_std_actual,J+K std : {std} | J+K réel : {actual}
+hc.regional_equity_chart.avg_standard,Standard moyen ({value} %)
+hc.regional_equity_chart.actual_compliance,% de conformité réelle
+hc.epcisapi.tab_overview,Aperçu
+hc.epcisapi.tab_documentation,Documentation
+hc.epcisapi.tab_testing,Tests
+hc.epcisapi.tab_usage,Utilisation
+hc.epcisapi.title,API du pipeline EPCIS
+hc.epcisapi.subtitle,"API REST pour l'ingestion des événements EPCIS et la gestion du pipeline. Comprend des points d'accès pour l'exécution manuelle, le suivi de l'état et la consultation des parcours."
+hc.epcisapi.api_endpoint,Point d'accès de l'API
+hc.epcisapi.base_url,URL de base
+hc.epcisapi.copied,Copié
+hc.epcisapi.copy,Copier
+hc.epcisapi.authentication,Authentification
+hc.epcisapi.auth_requirement,Toutes les requêtes API nécessitent une authentification avec votre jeton JWT Supabase.
+hc.epcisapi.security_note,Note de sécurité
+hc.epcisapi.security_note_text,Utilisez votre jeton d'authentification Supabase pour tous les appels à l'API. Le jeton est inclus automatiquement lorsque vous utilisez le client Supabase.
+hc.epcisapi.available_endpoints,Points d'accès disponibles
+hc.epcisapi.execute_phase_desc,Exécuter manuellement les phases du pipeline EPCIS
+hc.epcisapi.parameters,Paramètres
+hc.epcisapi.parameter,Paramètre
+hc.epcisapi.type,Type
+hc.epcisapi.description,Description
+hc.epcisapi.required,Obligatoire
+hc.epcisapi.phase_values,"'consolidation', 'segments', 'aggregation' ou 'all'"
+hc.epcisapi.example_request,Exemple de requête
+hc.epcisapi.status_desc,Obtenir l'état actuel du pipeline EPCIS
+hc.epcisapi.query_desc,Consulter les parcours agrégés avec des filtres
+hc.epcisapi.no,Non
+hc.epcisapi.filter_carrier,Filtrer par transporteur
+hc.epcisapi.filter_product,Filtrer par produit
+hc.epcisapi.filter_origin_city,Filtrer par ville d'origine
+hc.epcisapi.filter_destination_city,Filtrer par ville de destination
+hc.epcisapi.min_tags,Nombre minimal d'étiquettes
+hc.epcisapi.max_results,Résultats max. (par défaut : 100)
+hc.epcisapi.ingest_desc,Insertion en masse d'événements EPCIS depuis un système externe
+hc.epcisapi.api_testing,Tests de l'API
+hc.epcisapi.testing_text,Utilisez le client Supabase ou n'importe quel client HTTP pour tester les points d'accès de l'API. Consultez l'onglet Documentation pour des exemples de requêtes.
+hc.epcisapi.testing_tip,Conseil de test
+hc.epcisapi.testing_tip_text,"Pour des tests interactifs, accédez à la page Moniteur du pipeline, où vous pouvez exécuter manuellement chaque phase et consulter les résultats."
+hc.epcisapi.api_usage,Utilisation de l'API
+hc.epcisapi.usage_text,Suivez l'utilisation de l'API et ses indicateurs de performance.
+hc.epcisapi.usage_coming_soon,Statistiques d'utilisation bientôt disponibles
+hc.info_tooltip.interpretation,Interprétation
+hc.info_tooltip.regulatory_utility,Utilité réglementaire
+hc.account_table.no_accounts,Aucun compte trouvé
+hc.account_table.name,Nom
+hc.account_table.slug,Slug
+hc.account_table.default_language,Langue par défaut
+hc.account_table.status,Statut
+hc.account_table.created,Créé le
+hc.account_table.actions,Actions
+hc.account_table.english,Anglais
+hc.account_table.edit,Modifier
+hc.account_table.delete,Supprimer
+hc.account_table.confirm_delete,Voulez-vous vraiment supprimer ce compte ?
+hc.cumulative_distribution_chart.no_data,Aucune donnée de distribution disponible
+hc.cumulative_distribution_chart.cumulative,Cumulé :
+hc.cumulative_distribution_chart.jk_standard,← Standard J+K
+hc.cumulative_distribution_chart.transit_days_jk,Jours de transit (J+K)
+hc.cumulative_distribution_chart.cumulative_pct,% cumulé
+hc.cumulative_distribution_chart.target_label,Objectif {pct}%
+hc.cumulative_distribution_chart.std_label,Std {days}j
+hc.performance_distribution_chart_v2.no_data,Aucune donnée de performance disponible
+hc.performance_distribution_chart_v2.cumulative,Cumulé :
+hc.performance_distribution_chart_v2.pct_of_total,% du total :
+hc.performance_distribution_chart_v2.target,Objectif : {pct}%
+hc.performance_distribution_chart_v2.total,Total :
+hc.performance_distribution_chart_v2.transit_days_jk,Jours de transit (J+K)
+hc.performance_distribution_chart_v2.shipments,Envois
+hc.performance_distribution_chart_v2.cumulative_samples,Échantillons cumulés
+hc.performance_distribution_chart_v2.pct_at_day,{pct}% à {day}
+hc.performance_distribution_chart_v2.before_standard,Avant le standard
+hc.performance_distribution_chart_v2.on_standard,Dans le standard
+hc.performance_distribution_chart_v2.after_standard,Après le standard
+hc.performance_distribution_chart_v2.caption,Répartition des envois selon le temps de transit réel par rapport au standard de livraison (données E2E)
+hc.performance_distribution_chart_v2.reached_summary,{carrier} - {product} : {pct}% atteint à {day} (Std J+K : {std})
+hc.top_cities_jk_performance.no_jk_data,Aucune donnée de performance J+K disponible
+hc.top_cities_jk_performance.title,Performance J+K des principales villes
+hc.top_cities_jk_performance.best_performing,Meilleures performances
+hc.top_cities_jk_performance.needs_improvement,À améliorer
+hc.top_cities_jk_performance.city,Ville
+hc.top_cities_jk_performance.on_time_pct,% dans les délais
+hc.top_cities_jk_performance.jk_std,Std J+K
+hc.top_cities_jk_performance.jk_act,Réel J+K
+hc.top_cities_jk_performance.dev,Écart
+hc.top_cities_jk_performance.no_data,Aucune donnée disponible
+hc.top_cities_jk_performance.all_good,Toutes les villes ont de bons résultats
+hc.carrier_product_overview.loading,Chargement...
+hc.carrier_product_overview.no_data,Aucune donnée disponible
+hc.carrier_product_overview.carrier_product,Transporteur / Produit
+hc.carrier_product_overview.carrier_product_tip,Combinaison transporteur et produit pour le service de livraison.
+hc.carrier_product_overview.routes,Routes
+hc.carrier_product_overview.routes_tip,Nombre de routes uniques (paires de villes) desservies par cette combinaison transporteur-produit.
+hc.carrier_product_overview.samples,Échantillons
+hc.carrier_product_overview.samples_tip,Total des envois de cette combinaison transporteur-produit sur toutes les routes.
+hc.carrier_product_overview.jk_std,Std J+K
+hc.carrier_product_overview.jk_std_tip,Moyenne pondérée des standards J+K de toutes les routes de cette combinaison transporteur-produit.
+hc.carrier_product_overview.jk_actual,J+K réel
+hc.carrier_product_overview.jk_actual_tip,Moyenne pondérée des temps de transit réels de toutes les routes de cette combinaison transporteur-produit.
+hc.carrier_product_overview.deviation,Écart
+hc.carrier_product_overview.deviation_tip,Écart moyen pondéré (Réel - Standard) sur toutes les routes de cette combinaison transporteur-produit.
+hc.carrier_product_overview.on_time_pct,% dans les délais
+hc.carrier_product_overview.on_time_pct_tip,Pourcentage de l'ensemble des envois livrés dans les délais pour cette combinaison transporteur-produit.
+hc.carrier_product_overview.problem_routes,Routes problématiques
+hc.carrier_product_overview.problem_routes_tip,Nombre de routes dont la ponctualité est inférieure à 90 %.
+hc.carrier_product_overview.status,Statut
+hc.carrier_product_overview.status_tip,"Indicateur visuel : vert (≥95 %), jaune (90-95 %), rouge (<90 %)."
+hc.user_form.error_submitting,Erreur lors de l'envoi du formulaire
+hc.user_form.email,E-mail
+hc.user_form.password,Mot de passe
+hc.user_form.full_name,Nom complet
+hc.user_form.role,Rôle
+hc.user_form.account,Compte
+hc.user_form.select_account,Sélectionner un compte
+hc.user_form.status,Statut
+hc.user_form.preferred_language,Langue préférée
+hc.user_form.cancel,Annuler
+hc.user_form.saving,Enregistrement...
+hc.user_form.update,Mettre à jour
+hc.user_form.create,Créer
+hc.sidebar.for_regulators,pour les régulateurs
+hc.sidebar.expand_sidebar,Développer la barre latérale
+hc.sidebar.collapse_sidebar,Réduire la barre latérale
+hc.material_requirements_tab.month_jan,Janv.
+hc.material_requirements_tab.month_feb,Févr.
+hc.material_requirements_tab.month_mar,Mars
+hc.material_requirements_tab.month_apr,Avr.
+hc.material_requirements_tab.month_may,Mai
+hc.material_requirements_tab.month_jun,Juin
+hc.material_requirements_tab.month_jul,Juil.
+hc.material_requirements_tab.month_aug,Août
+hc.material_requirements_tab.month_sep,Sept.
+hc.material_requirements_tab.month_oct,Oct.
+hc.material_requirements_tab.month_nov,Nov.
+hc.material_requirements_tab.month_dec,Déc.
+hc.material_requirements_tab.confirm_mark_ordered,Marquer {count} besoin(s) comme commandé(s) ?
+hc.material_requirements_tab.confirm_delete,Voulez-vous vraiment supprimer ce besoin ?
+hc.material_requirements_tab.deleted_ok,Besoin supprimé avec succès
+hc.material_requirements_tab.error_deleting,Erreur lors de la suppression du besoin : {message}
+hc.material_requirements_tab.confirm_delete_selected,Supprimer {count} besoin(s) ? Cette action est irréversible.
+hc.material_requirements_tab.deleted_selected_ok,{count} besoin(s) supprimé(s) avec succès
+hc.material_requirements_tab.error_deleting_many,Erreur lors de la suppression des besoins : {message}
+hc.material_requirements_tab.tip_start_date,Sélectionnez la date de début de la période pour laquelle vous souhaitez calculer les besoins en matériel à partir des plans d'allocation
+hc.material_requirements_tab.tip_end_date,Sélectionnez la date de fin de la période. Le système analysera tous les plans d'allocation de cette plage de dates pour déterminer les besoins en matériel
+hc.material_requirements_tab.tip_material,Filtrez les besoins calculés par matériel spécifique pour vous concentrer sur des articles individuels
+hc.material_requirements_tab.tip_status,"Filtrez les besoins selon leur statut actuel : En attente (pas encore commandé), Commandé (bon de commande émis) ou Reçu (matériel en stock)"
+hc.material_requirements_tab.tip_months,Cliquez sur un mois pour définir automatiquement les dates de début et de fin de ce mois entier. C'est le moyen le plus rapide de calculer les besoins d'un mois précis.
+hc.material_requirements_tab.first_semester,1er semestre
+hc.material_requirements_tab.second_semester,2e semestre
+hc.material_requirements_tab.year,Année
+hc.material_requirements_tab.reset,Réinitialiser
+hc.material_requirements_tab.receive,Réceptionner
+hc.material_requirements_tab.calc_tip_intro,Calcule les besoins en matériel pour la période sélectionnée. Le système va :
+hc.material_requirements_tab.calc_tip_s1,1. Analyser tous les plans d'allocation de la plage de dates
+hc.material_requirements_tab.calc_tip_s2,2. Calculer le matériel total nécessaire par produit
+hc.material_requirements_tab.calc_tip_s3,3. Déduire le stock du panéliste (s'il dispose déjà du matériel)
+hc.material_requirements_tab.calc_tip_s4,4. Déduire le stock du régulateur
+hc.material_requirements_tab.calc_tip_s5,5. Déduire les quantités déjà commandées (en transit)
+hc.material_requirements_tab.calc_tip_s6,6. Ajouter un stock de sécurité si le stock actuel est inférieur au minimum
+hc.material_requirements_tab.calc_tip_formula,Formule : Quantité nette = (Nécessaire - Stock du panéliste - Stock du régulateur - Commandé) + Stock de sécurité
+hc.material_requirements_tab.calc_tip_unif_title,Logique d'unification :
+hc.material_requirements_tab.calc_tip_unif1,"- S'il existe plusieurs besoins en attente pour le même matériel, ils seront regroupés en un seul enregistrement"
+hc.material_requirements_tab.calc_tip_unif2,- La période ira de la date de début la plus ancienne à la date de fin la plus tardive
+hc.material_requirements_tab.calc_tip_unif3,- Les quantités seront additionnées
+hc.route_analysis.route,Route
+hc.route_analysis.journeys,Trajets
+hc.route_analysis.on_time_rate,Taux de ponctualité
+hc.route_analysis.avg_transit,Transit moyen
+hc.route_analysis.p95_transit,Transit P95
+hc.route_analysis.sla_violations,Violations de SLA
+hc.route_analysis.missroute_rate,Taux d'erreurs d'acheminement
+hc.route_analysis.period,Période
+hc.route_analysis.avg_transit_time,Temps de transit moyen
+hc.route_analysis.total_segments,Total des tronçons
+hc.route_analysis.routes_covered,Routes couvertes
+hc.route_analysis.daily,Quotidien
+hc.route_analysis.weekly,Hebdomadaire
+hc.route_analysis.monthly,Mensuel
+hc.route_analysis.title,Analyse des routes
+hc.route_analysis.subtitle,Analyse détaillée de la performance par route et par transporteur
+hc.route_analysis.tab_performance,Performance
+hc.route_analysis.tab_carrier_comparison,Comparaison des transporteurs
+hc.route_analysis.tab_trends,Tendances
+hc.route_analysis.error,Erreur : {message}
+hc.dashboard.current_month_label,Mois en cours ({month} {year})
+hc.dashboard.next_month_label,Mois suivant ({month} {year})
+hc.dashboard.last_n_days,{days} derniers jours
+hc.dashboard.period_range,{start} au {end}
+hc.dashboard.alert_delayed,envois en retard dans la période sélectionnée
+hc.dashboard.alert_availability,plans avec des problèmes de disponibilité du panéliste
+hc.dashboard.alert_stock,"alertes de stock ({regulator} régulateur, {panelist} panéliste)"
+hc.dashboard.alert_vacation,panélistes actuellement en congé
+hc.dashboard.alert_requirements,besoins en matériel en attente
+hc.dashboard.tip_allocation_plans,"Plans d'allocation : gérez l'attribution des envois entre panélistes. Suivez les plans en attente, l'état des envois, les problèmes de disponibilité et les envois en retard de la période sélectionnée."
+hc.dashboard.pending,En attente
+hc.dashboard.tip_pending,Plans en attente d'action (statut en attente/notifié)
+hc.dashboard.sent,Envoyé
+hc.dashboard.received,Reçu
+hc.dashboard.tip_availability,"Plans avec des problèmes de disponibilité du panéliste (indisponible, non attribué, inactif)"
+hc.dashboard.unavailable,Indisponible
+hc.dashboard.no_panelist,Sans panéliste
+hc.dashboard.inactive,Inactif
+hc.dashboard.cancelled,Annulé
+hc.dashboard.invalid,Invalide
+hc.dashboard.transfer_error,Erreur de transfert
+hc.dashboard.tip_panelists,"Panélistes et disponibilité : suivez le statut des panélistes et leurs périodes de congé. Suivez les panélistes actifs/inactifs, les congés en cours et les indisponibilités à venir pour planifier efficacement les attributions."
+hc.dashboard.tip_on_vacation,Panélistes actuellement indisponibles (la période de congé inclut aujourd'hui)
+hc.dashboard.tip_upcoming,Panélistes dont une période de congé commence dans les 30 prochains jours
+hc.dashboard.tip_availability_rate,Pourcentage de panélistes actuellement disponibles (non en congé)
+hc.dashboard.tip_carriers,Transporteurs et produits : suivez les transporteurs et produits actifs. Suivez les combinaisons transporteur-produit disponibles pour l'acheminement et la planification des allocations.
+hc.dashboard.of_1_total,sur 1 au total
+hc.dashboard.tip_pairs,Nombre total de combinaisons transporteur-produit disponibles pour l'acheminement
+hc.dashboard.tip_material,"Gestion du matériel : suivez les besoins en matériel, les bons de commande et les envois aux panélistes. Surveillez les éléments en attente pour garantir la disponibilité du matériel en temps voulu."
+hc.dashboard.tip_po,Bons de commande passés auprès des fournisseurs (statut commandé)
+hc.dashboard.tip_stock,Alertes de stock : surveillez les niveaux de stock et les alertes des sites du régulateur et des panélistes. Traitez rapidement les alertes pour éviter les retards d'envoi.
+hc.dashboard.tip_regulator_stock,Alertes de stock dans l'entrepôt du régulateur (HAL)
+hc.dashboard.tip_standards,Standards de livraison : surveillez les standards de livraison configurés et leur couverture. Veillez à ce que toutes les routes disposent de standards complets (délai et pourcentage de réussite) pour un suivi fiable de la conformité.
+hc.dashboard.configured_routes,Routes configurées
+hc.dashboard.needing_review,À vérifier
+hc.dashboard.incomplete_standards,Standards incomplets
+hc.dashboard.n_complete,{count} complets
+hc.postal_center_form.name_placeholder,Hub de Madrid
+hc.postal_center_form.description_placeholder,Centre de distribution principal de la région de Madrid
+hc.postal_center_form.carrier,Opérateur
+hc.postal_center_form.no_carrier_assigned,-- Aucun opérateur assigné --
+hc.postal_center_form.city,Ville
+hc.postal_center_form.state,État/Province
+hc.postal_center_form.country,Pays
+hc.postal_center_form.latitude,Latitude
+hc.postal_center_form.longitude,Longitude
+hc.postal_center_form.timezone,Fuseau horaire
+hc.center_analysis.loading,Chargement...
+hc.center_analysis.error,Erreur : {message}
+hc.center_analysis.no_data,Aucune donnée disponible
+hc.center_analysis.center,Centre
+hc.center_analysis.items,Envois
+hc.center_analysis.avg_time,Temps moyen
+hc.center_analysis.p95_time,Temps P95
+hc.center_analysis.throughput,Débit
+hc.center_analysis.efficiency,Efficacité
+hc.center_analysis.items_per_hour,{count} envois/h
+hc.center_analysis.rank,Rang n° {rank}
+hc.center_analysis.efficiency_label,Efficacité
+hc.center_analysis.items_processed,Envois traités
+hc.center_analysis.avg_time_label,Temps moyen
+hc.center_analysis.code,Code
+hc.center_analysis.period,Période :
+hc.center_analysis.daily,Quotidien
+hc.center_analysis.weekly,Hebdomadaire
+hc.center_analysis.monthly,Mensuel
+hc.center_analysis.period_header,Période
+hc.center_analysis.title,Analyse des centres
+hc.center_analysis.subtitle,Analyse de la performance opérationnelle par centre
+hc.center_analysis.tab_performance,Performance
+hc.center_analysis.tab_comparison,Comparaison
+hc.center_analysis.tab_trends,Tendances
+hc.user_table.password_required,Le mot de passe est obligatoire
+hc.user_table.password_min_length,Le mot de passe doit contenir au moins 8 caractères
+hc.user_table.reset_failed,Échec de la réinitialisation du mot de passe
+hc.user_table.no_users,Aucun utilisateur trouvé
+hc.user_table.email,E-mail
+hc.user_table.name,Nom
+hc.user_table.role,Rôle
+hc.user_table.account,Compte
+hc.user_table.status,Statut
+hc.user_table.actions,Actions
+hc.user_table.edit,Modifier
+hc.user_table.reset_password,Réinitialiser le mot de passe
+hc.user_table.confirm_delete,Voulez-vous vraiment supprimer définitivement cet utilisateur ? Cette action est irréversible.
+hc.user_table.delete,Supprimer
+hc.user_table.reset_user_password,Réinitialiser le mot de passe de l'utilisateur
+hc.user_table.reset_password_for,Réinitialiser le mot de passe de :
+hc.user_table.new_password,Nouveau mot de passe
+hc.user_table.enter_new_password,Saisissez le nouveau mot de passe
+hc.user_table.generate_password,Générer un mot de passe
+hc.user_table.copy_password,Copier le mot de passe
+hc.user_table.remember_send,N'oubliez pas d'envoyer ce mot de passe à l'utilisateur par e-mail ou par un autre canal sécurisé.
+hc.user_table.cancel,Annuler
+hc.user_table.resetting,Réinitialisation...
+hc.route_performance_table_v2.no_route_data,Aucune donnée de route disponible
+hc.route_performance_table_v2.title,Performance des routes ({count} routes)
+hc.route_performance_table_v2.export_csv,Exporter en CSV
+hc.route_performance_table_v2.route,Route
+hc.route_performance_table_v2.route_tip,"Ville d'origine → ville de destination. Chaque route est unique par opérateur, produit et paire de villes."
+hc.route_performance_table_v2.samples,Échantillons
+hc.route_performance_table_v2.samples_tip,Nombre total d'échantillons de cette route dans la période sélectionnée.
+hc.route_performance_table_v2.jk_std,J+K standard
+hc.route_performance_table_v2.jk_std_tip,Délai de livraison attendu en jours d'après la table delivery_standards.
+hc.route_performance_table_v2.jk_actual,J+K réel
+hc.route_performance_table_v2.jk_actual_tip,Nombre de jours nécessaires pour atteindre l'objectif de % standard sur cette route.
+hc.route_performance_table_v2.deviation,Écart
+hc.route_performance_table_v2.deviation_tip,Différence entre le J+K réel et le J+K standard (réel - standard).
+hc.route_performance_table_v2.std_pct,% standard
+hc.route_performance_table_v2.std_pct_tip,Pourcentage cible de livraisons dans les délais défini dans delivery_standards pour cette route.
+hc.route_performance_table_v2.on_time_pct,% dans les délais
+hc.route_performance_table_v2.on_time_pct_tip,Pourcentage d'échantillons livrés dans le J+K standard ou avant.
+hc.route_performance_table_v2.status,Statut
+hc.route_performance_table_v2.status_tip,"Indicateur visuel : vert (conforme), jaune (avertissement), rouge (critique)."
+hc.route_performance_table_v2.samples_download_tip,Télécharger les données brutes des échantillons de cette route depuis ONE DB.
+hc.route_performance_table_v2.operational,Opérationnel
+hc.route_performance_table_v2.distribution,Distribution
+hc.route_performance_table_v2.download_samples,Télécharger les échantillons de cette route
+hc.route_flow_map.no_route_data,Aucune donnée de route disponible
+hc.route_flow_map.flow_map,Carte des flux
+hc.route_flow_map.help,L'épaisseur des lignes représente le nombre d'étiquettes. Survolez les lignes pour plus de détails.
+hc.route_flow_map.tags,Étiquettes
+hc.route_flow_map.paths,Parcours
+hc.route_flow_map.jk_standard,J+K standard
+hc.route_flow_map.natural_time,Temps naturel
+hc.route_flow_map.working_time,Temps ouvré
+hc.route_flow_map.pct_std,% standard
+hc.route_flow_map.pct_real,% réel
+hc.route_flow_map.diff_pct,% écart
+hc.route_flow_map.aggregated_one,Agrégé à partir de 1 parcours de route
+hc.route_flow_map.aggregated_many,Agrégé à partir de {count} parcours de route
+hc.route_flow_map.legend_high,≥90 % SLA
+hc.route_flow_map.legend_mid,70-89 % SLA
+hc.route_flow_map.legend_low,<70 % SLA
+hc.material_catalog_form.code,Code
+hc.material_catalog_form.name,Nom
+hc.material_catalog_form.name_placeholder,Étiquette RFID
+hc.material_catalog_form.unit_measure,Unité de mesure
+hc.material_catalog_form.unit_placeholder,"unités, kg, etc."
+hc.material_catalog_form.min_stock,Stock minimum (stock de sécurité)
+hc.material_catalog_form.min_stock_help,Quantité minimale à maintenir dans le stock du régulateur. Utilisée pour calculer les besoins en matériel.
+hc.material_catalog_form.description,Description
+hc.material_catalog_form.description_placeholder,Détails supplémentaires...
+hc.material_catalog_form.status,Statut
+hc.material_catalog_form.cancel,Annuler
+hc.material_catalog_form.saving,Enregistrement...
+hc.material_catalog_form.update,Mettre à jour
+hc.material_catalog_form.create,Créer
+hc.account_form.submit_error,Erreur lors de l'envoi du formulaire
+hc.account_form.account_name,Nom du compte
+hc.account_form.slug,Slug
+hc.account_form.slug_help,"Identifiant unique (minuscules, sans espaces)"
+hc.account_form.default_language,Langue par défaut
+hc.account_form.default_language_help,Langue héritée par les panélistes de ce compte
+hc.account_form.manager_email,E-mail du responsable des panélistes
+hc.account_form.manager_email_help,E-mail de contact du responsable des panélistes de ce compte (facultatif)
+hc.account_form.status,Statut
+hc.account_form.cancel,Annuler
+hc.account_form.saving,Enregistrement...
+hc.account_form.update,Mettre à jour
+hc.account_form.create,Créer
+hc.carrier_form.code,Code
+hc.carrier_form.name,Nom
+hc.carrier_form.status,Statut
+hc.carrier_form.code_placeholder,"p. ex., DHL, UPS"
+hc.carrier_form.name_placeholder,"p. ex., DHL Express"
+hc.carrier_form.type_placeholder,"p. ex., express, standard, économique"
+hc.carrier_form.cancel,Annuler
+hc.carrier_form.saving,Enregistrement...
+hc.carrier_form.update,Mettre à jour
+hc.carrier_form.create,Créer
+hc.city_classification_table.error,Erreur : {message}
+hc.city_classification_table.confirm_delete,Voulez-vous vraiment supprimer cette classification ?
+hc.city_classification_table.search_placeholder,Rechercher des villes...
+hc.city_classification_table.city_name,Nom de la ville
+hc.city_classification_table.classification,Classification
+hc.city_classification_table.actions,Actions
+hc.city_classification_table.none_found,Aucune classification de ville trouvée
+hc.city_classification_table.showing,Affichage de {shown} sur {total} classifications
+hc.performance_distribution_chart.no_data,Aucune donnée de performance disponible
+hc.performance_distribution_chart.cumulative,Cumulé :
+hc.performance_distribution_chart.pct_of_total,% du total :
+hc.performance_distribution_chart.target,Objectif : {percent} %
+hc.performance_distribution_chart.total,Total :
+hc.performance_distribution_chart.transit_days,Jours de transit (J+K)
+hc.performance_distribution_chart.shipments,Envois
+hc.performance_distribution_chart.cumulative_samples,Échantillons cumulés
+hc.performance_distribution_chart.pct_at,{percent} % à {at}
+hc.performance_distribution_chart.before_standard,Avant le standard
+hc.performance_distribution_chart.on_standard,Dans le standard
+hc.performance_distribution_chart.after_standard,Après le standard
+hc.performance_distribution_chart.caption,Répartition des envois selon le temps de transit réel par rapport au standard de livraison
+hc.performance_distribution_chart.reached,{carrier} - {product} : {percent} % atteint à {at} (J+K standard : {jk})
+hc.reader_form.name_placeholder,Lecteur MAD 001
+hc.reader_form.description_placeholder,Portique d'entrée au quai de chargement
+hc.inbound_outbound_chart.inbound,Entrant
+hc.inbound_outbound_chart.outbound,Sortant
+hc.inbound_outbound_chart.std_pct,% standard
+hc.inbound_outbound_chart.actual_pct,% réel
+hc.inbound_outbound_chart.jk_std,J+K standard
+hc.inbound_outbound_chart.jk_actual,J+K réel
+hc.jk_performance_v2.loading,Chargement des données de performance J+K...
+hc.jk_performance_v2.error_loading,Erreur lors du chargement des données : {message}
+hc.jk_performance_v2.header_tooltip,"Rapport de performance J+K : analyse les temps de transit réels (J+K Réel) par rapport aux normes de livraison (J+K Std) afin d'identifier les routes, villes, transporteurs ou produits présentant des retards systématiques. Analyse multiniveau de la performance par route, ville, région, transporteur et produit. J+K Std est le délai de livraison attendu, en jours, issu de la table delivery_standards. J+K Réel est le temps de transit réel moyen en jours ouvrés. L'écart est la différence entre le réel et la norme (les valeurs positives indiquent des retards). % dans les délais est le pourcentage d'envois livrés dans le délai standard ou avant. Code couleur : vert (≥95 %), jaune (90-95 %), rouge (<90 %)."
+hc.jk_performance_v2.weekly_tooltip,"Volume hebdomadaire d'échantillons : indique le nombre d'envois analysés par semaine sur la période sélectionnée. Code couleur : vert (20 % au-dessus de la moyenne), bleu (au-dessus de la moyenne), jaune (80-100 % de la moyenne), rouge (en dessous de 80 % de la moyenne). À utiliser pour repérer les semaines à faible échantillon pouvant nuire à la fiabilité statistique. Un minimum de 30 échantillons par semaine est recommandé pour être statistiquement significatif."
+hc.jk_performance_v2.distribution_tooltip,"Répartition de la performance : montre comment les envois se répartissent selon le temps de transit réel par rapport à la norme de livraison (J+K Std). Catégories : après la norme (rouge, livré APRÈS le J+K Std = en retard), avant/dans les délais (vert, livré DANS le J+K Std = à temps), sur la norme (bleu, livré EXACTEMENT le jour du J+K Std). À utiliser pour visualiser la performance globale du réseau. De grandes barres rouges indiquent des retards systématiques à analyser."
+hc.jk_performance_v2.kpi_total_desc,Nombre total d'envois analysés dans la sélection de filtres actuelle.
+hc.jk_performance_v2.kpi_total_interp,Des échantillons plus grands donnent des résultats statistiques plus fiables. Un minimum de 30 échantillons par route est recommandé pour être significatif.
+hc.jk_performance_v2.kpi_total_util,Valide la fiabilité des indicateurs de performance. De faibles échantillons peuvent indiquer des données incomplètes ou des filtres trop restrictifs.
+hc.jk_performance_v2.kpi_actual_desc,Moyenne pondérée des jours nécessaires pour atteindre l'objectif de % STD sur toutes les routes de la sélection.
+hc.jk_performance_v2.kpi_actual_interp,Représente le jour réel où les livraisons cumulées atteignent le pourcentage cible. À comparer au J+K Std pour évaluer l'écart de performance.
+hc.jk_performance_v2.kpi_actual_util,Indicateur principal pour évaluer la rapidité avec laquelle les routes atteignent leurs objectifs de livraison. Des valeurs plus élevées indiquent une atteinte plus lente des seuils de performance.
+hc.jk_performance_v2.kpi_ontime_desc,Pourcentage d'envois livrés dans le délai de livraison standard (J+K Std) ou avant.
+hc.jk_performance_v2.kpi_ontime_interp,"Les seuils sont dynamiques et définis par route dans la table delivery_standards. Vert (≥95 %), jaune (90-95 %) et rouge (<90 %) ne sont que des repères visuels."
+hc.jk_performance_v2.kpi_ontime_util,Indicateur clé de performance de la qualité de service. À comparer au pourcentage standard propre à chaque route (% Std) de delivery_standards.
+hc.jk_performance_v2.kpi_problem_desc,Nombre de routes dont la ponctualité est égale ou inférieure à leur seuil critique de SLA.
+hc.jk_performance_v2.kpi_problem_interp,Routes ne respectant pas leurs normes de livraison critiques. Chaque route a son propre seuil critique défini dans la table delivery_standards.
+hc.jk_performance_v2.kpi_problem_util,Cliquez pour filtrer et n'afficher que les routes problématiques. Outil de priorisation des améliorations opérationnelles.
+hc.jk_performance_v2.route_performance,Performance par route ({count} routes)
+hc.jk_performance_v2.city_performance,Performance par ville ({count} villes)
+hc.jk_performance_v2.region_performance,Performance par région ({count} régions)
+hc.jk_performance_v2.carrier_performance,Performance par transporteur / produit ({count} transporteurs)
+hc.jk_performance_v2.problematic_only,Problématiques uniquement
+hc.jk_performance_v2.col_route,Route
+hc.jk_performance_v2.col_samples,Échantillons
+hc.jk_performance_v2.col_jk_std,J+K Std
+hc.jk_performance_v2.col_jk_actual,J+K Réel
+hc.jk_performance_v2.col_deviation,Écart
+hc.jk_performance_v2.col_std_pct,% STD
+hc.jk_performance_v2.col_ontime_pct,% dans les délais
+hc.jk_performance_v2.col_status,Statut
+hc.jk_performance_v2.col_city,Ville
+hc.jk_performance_v2.col_direction,Sens
+hc.jk_performance_v2.col_region,Région
+hc.jk_performance_v2.col_cities,Villes
+hc.jk_performance_v2.col_routes,Routes
+hc.jk_performance_v2.col_carrier_product,Transporteur / Produit
+hc.jk_performance_v2.col_problem_routes,Routes problématiques
+hc.jk_performance_v2.tt_route_route,"Ville d'origine → ville de destination. Chaque route est unique par transporteur, produit et paire de villes."
+hc.jk_performance_v2.tt_route_samples,Nombre total d'envois pour cette route sur la période sélectionnée. Un minimum de 30 échantillons est recommandé pour être statistiquement significatif.
+hc.jk_performance_v2.tt_route_jk_std,"Délai de livraison attendu, en jours, issu de la table delivery_standards. Converti automatiquement depuis les heures si nécessaire (heures/24)."
+hc.jk_performance_v2.tt_route_jk_actual,Nombre de jours nécessaires pour atteindre l'objectif de % STD de cette route. Représente le jour où le pourcentage cumulé de livraisons atteint le seuil standard (p. ex. 85 %). À comparer au J+K Std pour évaluer la performance.
+hc.jk_performance_v2.tt_route_deviation,"Différence entre J+K Réel et J+K Std (Réel - Norme). Les valeurs positives indiquent des retards, les négatives des livraisons en avance."
+hc.jk_performance_v2.tt_route_std_pct,Pourcentage cible de ponctualité défini dans delivery_standards pour cette route. C'est le seuil de performance exigé (p. ex. 85 %) à atteindre. À comparer à la colonne % dans les délais pour évaluer la conformité.
+hc.jk_performance_v2.tt_route_ontime,Pourcentage d'envois livrés dans le J+K Std ou avant. À comparer au % Std propre à la route dans delivery_standards (non affiché dans ce tableau).
+hc.jk_performance_v2.tt_route_status,"Indicateur visuel : vert (conforme, ≥95 %), jaune (avertissement, 90-95 %), rouge (critique, <90 %). Ce sont des repères généraux ; les normes réelles sont propres à chaque route."
+hc.jk_performance_v2.tt_city_city,Nom de la ville regroupant toutes les routes dont elle est l'origine ou la destination.
+hc.jk_performance_v2.tt_city_direction,Entrant (la ville est la destination) ou sortant (la ville est l'origine). Indique le sens du flux de trafic.
+hc.jk_performance_v2.tt_city_region,Région géographique à laquelle appartient cette ville (table topology.regions).
+hc.jk_performance_v2.tt_city_samples,Total des envois agrégés sur toutes les routes impliquant cette ville dans le sens indiqué.
+hc.jk_performance_v2.tt_city_jk_std,Moyenne pondérée des normes J+K de toutes les routes impliquant cette ville. Les routes comptant plus d'envois ont un poids plus élevé.
+hc.jk_performance_v2.tt_city_jk_actual,Moyenne pondérée des jours nécessaires pour atteindre l'objectif de % STD sur toutes les routes impliquant cette ville. Représente la performance réelle par rapport au délai de livraison standard.
+hc.jk_performance_v2.tt_city_deviation,Écart moyen pondéré (Réel - Norme) sur toutes les routes impliquant cette ville.
+hc.jk_performance_v2.tt_city_std_pct,Pourcentage cible de ponctualité moyen pondéré issu de delivery_standards pour toutes les routes impliquant cette ville.
+hc.jk_performance_v2.tt_city_ontime,Pourcentage de tous les envois (toutes routes confondues) livrés dans les délais pour cette ville.
+hc.jk_performance_v2.tt_status_pct,"Indicateur visuel basé sur le pourcentage de ponctualité : vert (≥95 %), jaune (90-95 %), rouge (<90 %)."
+hc.jk_performance_v2.tt_region_region,Région géographique regroupant toutes les villes et routes qu'elle contient (table topology.regions).
+hc.jk_performance_v2.tt_region_direction,Entrant (la région est la destination) ou sortant (la région est l'origine). Indique le flux de trafic régional.
+hc.jk_performance_v2.tt_region_cities,Nombre de villes distinctes de cette région ayant des données d'envois dans le sens indiqué.
+hc.jk_performance_v2.tt_region_samples,Total des envois agrégés sur toutes les routes impliquant des villes de cette région.
+hc.jk_performance_v2.tt_region_jk_std,Moyenne pondérée des normes J+K de toutes les routes de cette région. Les routes comptant plus d'envois ont un poids plus élevé.
+hc.jk_performance_v2.tt_region_jk_actual,Moyenne pondérée des jours nécessaires pour atteindre l'objectif de % STD sur toutes les routes de cette région. Représente la performance réelle par rapport au délai de livraison standard.
+hc.jk_performance_v2.tt_region_deviation,Écart moyen pondéré (Réel - Norme) sur toutes les routes de cette région.
+hc.jk_performance_v2.tt_region_std_pct,Pourcentage cible de ponctualité moyen pondéré sur toutes les routes de cette région. C'est le seuil de performance exigé à atteindre.
+hc.jk_performance_v2.tt_region_ontime,Pourcentage de tous les envois (toutes routes confondues) livrés dans les délais dans cette région.
+hc.jk_performance_v2.tt_carrier_hierarchy,Vue hiérarchique : les lignes de transporteur (fond bleu) affichent les indicateurs agrégés. Les lignes de produit (en retrait avec ↳) affichent les indicateurs de chaque produit de ce transporteur.
+hc.jk_performance_v2.tt_carrier_routes,Nombre de routes distinctes (paires de villes) desservies par ce transporteur ou ce produit.
+hc.jk_performance_v2.tt_carrier_samples,Total des envois de ce transporteur ou produit sur toutes les routes.
+hc.jk_performance_v2.tt_carrier_jk_std,Moyenne pondérée des normes J+K de toutes les routes de ce transporteur ou produit.
+hc.jk_performance_v2.tt_carrier_jk_actual,Moyenne pondérée des jours nécessaires pour atteindre l'objectif de % STD sur toutes les routes de ce transporteur ou produit. Représente la performance réelle par rapport au délai de livraison standard.
+hc.jk_performance_v2.tt_carrier_deviation,Écart moyen pondéré (Réel - Norme) sur toutes les routes de ce transporteur ou produit.
+hc.jk_performance_v2.tt_carrier_std_pct,Pourcentage cible de ponctualité moyen pondéré sur toutes les routes de ce transporteur ou produit. C'est le seuil de performance exigé à atteindre.
+hc.jk_performance_v2.tt_carrier_ontime,Pourcentage de tous les envois livrés dans les délais pour ce transporteur ou produit.
+hc.jk_performance_v2.tt_carrier_problem,Nombre de routes dont la ponctualité est <90 %. Affiché uniquement au niveau du transporteur (les produits affichent '-').
+hc.jk_performance_v2.tt_carrier_status,"Indicateur visuel : vert (≥95 %), jaune (90-95 %), rouge (<90 %). Affiché pour les transporteurs comme pour les produits."
+hc.panelists.confirm_activate,Activer {count} panélistes ?
+hc.panelists.confirm_deactivate,Désactiver {count} panélistes ?
+hc.panelists.confirm_delete_many,Supprimer {count} panélistes ? Cette action est irréversible.
+hc.panelists.error_saving,Erreur lors de l'enregistrement du panéliste
+hc.panelists.confirm_delete_one,Voulez-vous vraiment supprimer ce panéliste ?
+hc.panelists.error_prefix,Erreur : {message}
+hc.panelists.about_tooltip,"À propos de la gestion des panélistes - Objectif : gérer le réseau de panélistes qui envoient et reçoivent des envois dans votre topologie. Fonctions clés : enregistrer les panélistes avec leurs coordonnées, les affecter à des nœuds précis, suivre les périodes de disponibilité, gérer l'intégration Telegram pour les notifications et suivre l'activité des panélistes. Utilisation : ajoutez des panélistes, affectez-les à des nœuds, définissez des périodes d'indisponibilité, configurez Telegram pour les notifications automatiques et utilisez-les dans la planification des allocations."
+hc.panelists.tab_panelists_tooltip,"Onglet Panélistes - Consultez et gérez tous les panélistes de votre réseau. Filtrez par ville, nœud ou statut. Utilisez les opérations groupées pour activer, désactiver ou supprimer plusieurs panélistes à la fois."
+hc.panelists.tab_unavail_tooltip,"Périodes d'indisponibilité - Définissez les périodes pendant lesquelles les panélistes ne sont pas disponibles pour les livraisons (congés, arrêt maladie, etc.). Cela garantit une planification des allocations précise et évite d'affecter des panélistes indisponibles."
+hc.panelists.total_panelists,Total des panélistes
+hc.panelists.collapse_filters,Réduire les filtres
+hc.panelists.expand_filters,Développer les filtres
+hc.panelists.reset_filters,Réinitialiser tous les filtres
+hc.panelists.search,Rechercher
+hc.panelists.city,Ville
+hc.panelists.node,Nœud
+hc.panelists.status,Statut
+hc.panelists.filtered_by_city,(filtré par ville)
+hc.panelists.no_node_assigned,Aucun nœud affecté
+hc.panelists.n_selected,{count} panéliste(s) sélectionné(s)
+hc.panelists.choose_action,Choisissez une action à appliquer à tous les éléments sélectionnés
+hc.panelists.bulk_activate,Activer
+hc.panelists.bulk_deactivate,Désactiver
+hc.panelists.bulk_delete,Supprimer
+hc.panelists.bulk_clear,Effacer
+hc.panelists.manage_profiles,Gérez les profils et les affectations des panélistes
+hc.panelists.language,Langue
+hc.panelists.edit_panelist,Modifier le panéliste
+hc.panelists.deactivate_panelist,Désactiver le panéliste
+hc.panelists.activate_panelist,Activer le panéliste
+hc.panelists.delete_panelist,Supprimer le panéliste
+hc.panelists.no_panelists_found,Aucun panéliste trouvé.
+hc.panelists.try_adjusting_filters,Essayez de modifier vos filtres.
+hc.panelists.click_add_panelist,Cliquez sur « Ajouter un panéliste » pour en créer un.
+hc.panelists.modal_edit,Modifier le panéliste
+hc.panelists.modal_add,Ajouter un panéliste
+hc.panelists.panelist_code,Code du panéliste
+hc.panelists.auto_generated,(généré automatiquement si vide)
+hc.panelists.ph_auto_generate,Laisser vide pour générer automatiquement
+hc.panelists.name,Nom
+hc.panelists.email,E-mail
+hc.panelists.mobile,Mobile
+hc.panelists.telegram_id,ID Telegram
+hc.panelists.address_line1,Adresse (ligne 1)
+hc.panelists.address_line2,Adresse (ligne 2)
+hc.panelists.postal_code,Code postal
+hc.panelists.country,Pays
+hc.panelists.ph_telegram,@nom_d'utilisateur ou ID numérique
+hc.panelists.ph_street,Adresse postale
+hc.panelists.ph_apartment,"Appartement, étage, etc. (facultatif)"
+hc.panelists.ph_neighbourhood,"Quartier, district, etc. (p. ex. Nairobi-GPO)"
+hc.panelists.opt_no_node,— Aucun nœud affecté —
+hc.panelists.update,Mettre à jour
+hc.panelists.create,Créer
+hc.panelists.cancel,Annuler
+hc.allocation_plan_generator_form.plan_generated,Plan généré avec succès avec {count} échantillons !
+hc.allocation_plan_generator_form.error_message,Erreur : {message}
+hc.allocation_plan_generator_form.tt_plan_name,Identifiant unique de ce plan d'allocation. Utilisez des noms descriptifs comme « Q1_2025_Madrid_Express ».
+hc.allocation_plan_generator_form.tt_total_samples,Nombre total d'échantillons à allouer sur la période. Ils seront répartis selon les profils par ville et saisonniers.
+hc.allocation_plan_generator_form.tt_carrier,"Transporteur logistique de ce plan d'allocation (p. ex. DHL, FedEx). Détermine les produits disponibles."
+hc.allocation_plan_generator_form.tt_product,"Type de produit/service du transporteur (p. ex. Express, Standard). Filtré selon le transporteur sélectionné."
+hc.allocation_plan_generator_form.tt_start_date,Premier jour de la période d'allocation. Les échantillons seront planifiés à partir de cette date.
+hc.allocation_plan_generator_form.tt_end_date,Dernier jour de la période d'allocation. Les échantillons seront planifiés jusqu'à cette date.
+hc.allocation_plan_generator_form.tt_quick_period,"Cliquez sur un mois pour définir automatiquement les dates de début et de fin de ce mois entier, ou utilisez les boutons semestre/année pour des périodes plus longues."
+hc.allocation_plan_generator_form.carrier,Transporteur
+hc.allocation_plan_generator_form.product,Produit
+hc.allocation_plan_generator_form.quick_period,Sélection rapide de période
+hc.allocation_plan_generator_form.first_semester,1er semestre
+hc.allocation_plan_generator_form.second_semester,2e semestre
+hc.allocation_plan_generator_form.year,Année
+hc.allocation_plan_generator_form.month_jan,Janv.
+hc.allocation_plan_generator_form.month_feb,Févr.
+hc.allocation_plan_generator_form.month_mar,Mars
+hc.allocation_plan_generator_form.month_apr,Avr.
+hc.allocation_plan_generator_form.month_may,Mai
+hc.allocation_plan_generator_form.month_jun,Juin
+hc.allocation_plan_generator_form.month_jul,Juil.
+hc.allocation_plan_generator_form.month_aug,Août
+hc.allocation_plan_generator_form.month_sep,Sept.
+hc.allocation_plan_generator_form.month_oct,Oct.
+hc.allocation_plan_generator_form.month_nov,Nov.
+hc.allocation_plan_generator_form.month_dec,Déc.
+hc.allocation_plan_generator_form.matrix_title,Matrice de répartition par ville
+hc.allocation_plan_generator_form.matrix_desc,"Définit le pourcentage d'échantillons alloués entre les paires de classification de villes (A, B, C)."
+hc.allocation_plan_generator_form.example,Exemple :
+hc.allocation_plan_generator_form.matrix_ex_aa,• AA = 20 % (origine classe A → destination classe A)
+hc.allocation_plan_generator_form.matrix_ex_ab,• AB = 15 % (origine classe A → destination classe B)
+hc.allocation_plan_generator_form.matrix_fill_hint,"Remplissez quelques cellules manuellement, puis cliquez sur {action} pour répartir équitablement le pourcentage restant entre les cellules vides."
+hc.allocation_plan_generator_form.seasonal_desc,Facultatif : répartit les échantillons de façon inégale entre les mois pour refléter les profils saisonniers.
+hc.allocation_plan_generator_form.seasonal_ex_dec,• Décembre = 15 % (haute saison)
+hc.allocation_plan_generator_form.seasonal_ex_jan,• Janvier = 5 % (basse saison)
+hc.allocation_plan_generator_form.seasonal_fill_hint,"Si désactivé, les échantillons sont répartis uniformément sur tous les mois. Remplissez quelques mois manuellement, puis cliquez sur {action} pour répartir le pourcentage restant."
+hc.allocation_plan_generator_form.clear,Effacer
+hc.allocation_plan_generator_form.auto_fill_100,Compléter automatiquement à 100 %
+hc.territory_equity_v2.no_samples_found,Aucun échantillon trouvé pour les filtres sélectionnés
+hc.territory_equity_v2.export_raw_failed,Échec de l'exportation des échantillons bruts
+hc.territory_equity_v2.loading,Chargement des données d'équité territoriale...
+hc.territory_equity_v2.error_loading,Erreur lors du chargement des données : {message}
+hc.territory_equity_v2.title_route,Analyse de la route : {origin} → {destination}
+hc.territory_equity_v2.title_outbound,Rapport d'équité territoriale : sortant de {city}
+hc.territory_equity_v2.title_inbound,Rapport d'équité territoriale : entrant vers {city}
+hc.territory_equity_v2.sub_route,Analyse détaillée de la performance de la route de {origin} à {destination}
+hc.territory_equity_v2.sub_outbound,Analysez l'équité du service sortant de {city} vers toutes les destinations
+hc.territory_equity_v2.sub_inbound,Analysez l'équité du service entrant vers {city} depuis toutes les origines
+hc.territory_equity_v2.export_raw_title,Exporter les échantillons bruts de ONE DB (pour validation)
+hc.territory_equity_v2.export_raw,Exporter les données brutes
+hc.territory_equity_v2.route_compliance,Conformité de la route
+hc.territory_equity_v2.no_data,Aucune donnée
+hc.territory_equity_v2.jk_performance,Performance J+K
+hc.territory_equity_v2.loading_jk,Chargement des données de performance J+K...
+hc.territory_equity_v2.error_loading_jk,Erreur lors du chargement des données de performance J+K
+hc.territory_equity_v2.kpi_total_samples,Total des échantillons
+hc.territory_equity_v2.kpi_avg_actual,J+K réel moyen
+hc.territory_equity_v2.kpi_avg_standard,J+K standard moyen
+hc.territory_equity_v2.kpi_ontime,Performance dans les délais
+hc.territory_equity_v2.perf_distribution,Répartition de la performance
+hc.territory_equity_v2.cum_distribution,Répartition cumulée
+hc.territory_equity_v2.route_performance,Performance par route
+hc.stock_alerts_tab.loading,Chargement des alertes...
+hc.stock_alerts_tab.clear_filters,Effacer les filtres
+hc.stock_alerts_tab.regulator_insufficient,Stock du régulateur insuffisant
+hc.stock_alerts_tab.panelist_negative,Stock négatif du panéliste
+hc.stock_alerts_tab.col_type,Type
+hc.stock_alerts_tab.col_material,Matériel
+hc.stock_alerts_tab.col_location,Emplacement
+hc.stock_alerts_tab.col_current_stock,Stock actuel
+hc.stock_alerts_tab.col_date,Date
+hc.stock_alerts_tab.col_expected,Attendu
+hc.stock_alerts_tab.col_notes,Notes
+hc.stock_alerts_tab.regulator,Régulateur
+hc.stock_alerts_tab.unknown_panelist,Panéliste inconnu
+hc.stock_alerts_tab.panelist_info_missing,⚠️ ERREUR : informations du panéliste manquantes (location_id : {location})
+hc.segment_flow_diagram.days_value,{value} jours
+hc.segment_flow_diagram.status_compliant,Conforme
+hc.segment_flow_diagram.status_warning,Avertissement
+hc.segment_flow_diagram.status_critical,Critique
+hc.segment_flow_diagram.unknown_center,Centre inconnu
+hc.segment_flow_diagram.segment_flow,Flux des tronçons
+hc.segment_flow_diagram.origin,Origine :
+hc.segment_flow_diagram.destination,Destination :
+hc.segment_flow_diagram.operational,Opérationnel
+hc.segment_flow_diagram.tags,Étiquettes :
+hc.segment_flow_diagram.jk_std,J+K Std :
+hc.segment_flow_diagram.jk_natural,J+K naturel :
+hc.segment_flow_diagram.jk_working,J+K ouvré :
+hc.segment_flow_diagram.pct_std,% Std :
+hc.segment_flow_diagram.pct_real,% Réel :
+hc.segment_flow_diagram.status,Statut :
+hc.shipments_tab.select_both_dates,Veuillez sélectionner les dates de début et de fin
+hc.shipments_tab.no_shipments_to_generate,Aucun envoi à générer
+hc.shipments_tab.no_valid_shipments,Aucun envoi valide à générer (tous les nœuds doivent avoir un panéliste affecté)
+hc.shipments_tab.generated_ok,{count} envoi(s) généré(s) avec succès en attente
+hc.shipments_tab.generate_error,Erreur lors de la génération des envois : {message}
+hc.shipments_tab.none_selected,Aucun envoi sélectionné
+hc.shipments_tab.sent_ok,{count} envoi(s) expédié(s) avec succès
+hc.shipments_tab.send_error,Erreur lors de l'expédition des envois : {message}
+hc.shipments_tab.confirm_delete_one,Voulez-vous vraiment supprimer cet envoi ?
+hc.shipments_tab.deleted_one_ok,Envoi supprimé avec succès
+hc.shipments_tab.delete_one_error,Erreur lors de la suppression de l'envoi : {message}
+hc.shipments_tab.confirm_delete_many,Supprimer {count} envoi(s) ? Cette action est irréversible.
+hc.shipments_tab.deleted_many_ok,{count} envoi(s) supprimé(s) avec succès
+hc.shipments_tab.delete_many_error,Erreur lors de la suppression des envois : {message}
+hc.shipments_tab.select_to_export,Veuillez sélectionner les envois à exporter
+hc.shipments_tab.select_for_packing,Veuillez sélectionner les envois pour générer la liste de colisage
+hc.shipments_tab.month_jan,Janv.
+hc.shipments_tab.month_feb,Févr.
+hc.shipments_tab.month_mar,Mars
+hc.shipments_tab.month_apr,Avr.
+hc.shipments_tab.month_may,Mai
+hc.shipments_tab.month_jun,Juin
+hc.shipments_tab.month_jul,Juil.
+hc.shipments_tab.month_aug,Août
+hc.shipments_tab.month_sep,Sept.
+hc.shipments_tab.month_oct,Oct.
+hc.shipments_tab.month_nov,Nov.
+hc.shipments_tab.month_dec,Déc.
+hc.shipments_tab.metrics_overview,Aperçu des indicateurs
+hc.shipments_tab.tt_calc,"Utilisez cette section pour calculer les besoins en matériel des panélistes selon les plans d'allocation, puis générer les envois pour le leur expédier."
+hc.shipments_tab.tt_start,Date de début des plans d'allocation à inclure
+hc.shipments_tab.tt_end,Date de fin des plans d'allocation à inclure
+hc.shipments_tab.tt_filter_material,Filtrer par matériel précis
+hc.shipments_tab.tt_filter_node,Filtrer par nœud précis
+hc.shipments_tab.tt_month,Cliquez sur un mois pour définir les dates de début et de fin de ce mois entier
+hc.shipments_tab.tt_shipments,"Consultez et gérez tous les envois générés. Filtrez par statut, panéliste ou matériel pour trouver des envois précis. Les envois en attente peuvent être confirmés pour expédition."
+hc.shipments_tab.tt_filter_status,Filtrer les envois par statut
+hc.shipments_tab.tt_filter_panelist,Filtrer les envois par panéliste
+hc.shipments_tab.tt_filter_has_material,Filtrer les envois contenant un matériel précis
+hc.shipments_tab.start_date,Date de début
+hc.shipments_tab.end_date,Date de fin
+hc.shipments_tab.tt_generate,"Génère des envois pour les panélistes à partir des plans d'allocation. Le système :  1. Analyse tous les plans d'allocation de la période 2. Regroupe les matériels par panéliste (selon origin_panelist_id) 3. Calcule la quantité nécessaire par matériel et par panéliste 4. Déduit le stock du panéliste (s'il possède déjà le matériel) 5. Crée les enregistrements d'envoi au statut « en attente »  Logique d'unification : - S'il existe déjà un envoi en attente pour le même panéliste, il est unifié - Tous les matériels de ce panéliste sont consolidés en un seul envoi - Les quantités sont additionnées - La date prévue est mise à jour avec la plus récente  Remarque : seuls les panélistes ayant des plans d'allocation affectés se voient générer des envois"
+hc.shipments_tab.export_csv,Exporter en CSV
+hc.shipments_tab.packing_list_pdf,Liste de colisage en PDF
+hc.shipments_tab.delete_selected,Supprimer {count} sélectionné(s)
+hc.shipments_tab.select,Sélectionner
+hc.shipments_tab.na,N/D
+hc.shipments_tab.no_panelist,Aucun panéliste
+hc.shipments_tab.edit_quantity,Modifier la quantité
+hc.shipments_tab.no_items,Aucun article
+hc.shipments_tab.empty_hint,Sélectionnez la période et cliquez sur « Calculer » pour générer des envois à partir des plans d'allocation
+hc.register_reception_modal.error_message,Erreur : {message}
+hc.register_reception_modal.na,N/D
+hc.register_reception_modal.tag_id,ID d'étiquette :
+hc.register_reception_modal.sent_at,Envoyé le :
+hc.register_reception_modal.received_datetime,Date et heure de réception
+hc.register_reception_modal.registered_by,Enregistré par
+hc.register_reception_modal.no_panelist,Aucun panéliste affecté au nœud de destination
+hc.register_reception_modal.cancel,Annuler
+hc.register_reception_modal.registering,Enregistrement...
+hc.register_reception_modal.register,Enregistrer la réception
+hc.all_users.loading,Chargement...
+hc.all_users.title,Tous les utilisateurs
+hc.all_users.create_user,Créer un utilisateur
+hc.all_users.edit_user,Modifier l'utilisateur
+hc.material_catalog.confirm_delete,Supprimer le matériel « {name} » ? Il sera retiré de tous les produits.
+hc.material_catalog.subtitle,Gérez les matériels réutilisables pour tous les produits
+hc.material_catalog.create_material,Créer un matériel
+hc.material_catalog.edit_material,Modifier le matériel
+hc.material_catalog.min_stock,Stock minimum
+hc.material_catalog.empty,Aucun matériel dans le catalogue. Créez votre premier matériel pour commencer.
+hc.product_form.ph_code,p. ex. DHL-EXP-24
+hc.product_form.ph_description,p. ex. Livraison express en 24 heures
+hc.product_form.ph_hours,p. ex. 24
+hc.product_form.status,Statut
+hc.jk_performance.loading_data,Chargement des données de performance J+K...
+hc.jk_performance.error_loading,Erreur lors du chargement des données : {message}
+hc.jk_performance.kpi_samples_desc,Nombre total d'envois analysés dans la sélection de filtres actuelle.
+hc.jk_performance.kpi_samples_interp,Des échantillons plus grands fournissent des analyses statistiques plus fiables. Un minimum de 30 échantillons par route est recommandé pour la significativité.
+hc.jk_performance.kpi_samples_utility,Valide la fiabilité des indicateurs de performance. Un faible nombre d'échantillons peut indiquer des données incomplètes ou des filtres trop restrictifs.
+hc.jk_performance.kpi_actual_desc,Moyenne pondérée des jours nécessaires pour atteindre l'objectif de % standard sur toutes les routes de la sélection.
+hc.jk_performance.kpi_actual_interp,Représente le jour réel où les livraisons cumulées atteignent le pourcentage cible. À comparer au J+K Standard pour évaluer l'écart de performance.
+hc.jk_performance.kpi_actual_utility,Indicateur principal pour évaluer la rapidité avec laquelle les routes atteignent leurs objectifs de livraison. Des valeurs plus élevées indiquent une atteinte plus lente des seuils de performance.
+hc.jk_performance.kpi_ontime_desc,Pourcentage d'envois livrés dans le délai de livraison standard (J+K Std) ou avant.
+hc.jk_performance.kpi_ontime_interp,"Les seuils sont dynamiques et définis par route dans la table delivery_standards. Vert (≥95 %), jaune (90-95 %), rouge (<90 %) ne sont que des repères visuels."
+hc.jk_performance.kpi_ontime_utility,Indicateur clé de performance de la qualité de service. À comparer au pourcentage standard propre à chaque route (% Std) de delivery_standards.
+hc.jk_performance.kpi_problem_desc,Nombre de routes dont la performance à l'heure est égale ou inférieure à leur seuil critique de SLA.
+hc.jk_performance.kpi_problem_interp,Routes ne respectant pas leurs normes de livraison critiques. Chaque route a son propre seuil critique défini dans la table delivery_standards.
+hc.jk_performance.kpi_problem_utility,Cliquez pour filtrer et n'afficher que les routes problématiques. Outil de priorisation des améliorations opérationnelles.
+hc.jk_performance.route_perf_title,Performance par route ({count} routes)
+hc.jk_performance.city_perf_title,Performance par ville ({count} villes)
+hc.jk_performance.region_perf_title,Performance par région ({count} régions)
+hc.jk_performance.carrier_perf_title,Performance par opérateur / produit ({count} opérateurs)
+hc.jk_performance.problematic_only,Uniquement problématiques
+hc.jk_performance.inbound,entrant
+hc.jk_performance.outbound,sortant
+hc.jk_performance.col_route,Route
+hc.jk_performance.col_samples,Échantillons
+hc.jk_performance.col_jk_std,J+K Std
+hc.jk_performance.col_jk_actual,J+K Réel
+hc.jk_performance.col_deviation,Écart
+hc.jk_performance.col_std_pct,% Std
+hc.jk_performance.col_ontime_pct,% à l'heure
+hc.jk_performance.col_status,Statut
+hc.jk_performance.col_city,Ville
+hc.jk_performance.col_direction,Direction
+hc.jk_performance.col_region,Région
+hc.jk_performance.col_cities,Villes
+hc.jk_performance.col_routes,Routes
+hc.jk_performance.col_carrier_product,Opérateur / Produit
+hc.jk_performance.col_problem_routes,Routes problématiques
+hc.jk_performance.tip_01,"Rapport de performance J+K : analyse les temps de transit réels (J+K Réel) par rapport aux normes de livraison (J+K Std) afin d'identifier les routes, villes, opérateurs ou produits présentant des retards systématiques. Analyse multiniveau de la performance par route, ville, région, opérateur et produit. J+K Standard est le délai de livraison attendu en jours issu de la table delivery_standards. J+K Réel est le temps de transit réel moyen en jours ouvrables. L'écart est la différence entre le réel et le standard (les valeurs positives indiquent des retards). % à l'heure est le pourcentage d'envois livrés dans le délai standard ou avant. Code couleur : vert (≥95 %), jaune (90-95 %), rouge (<90 %)."
+hc.jk_performance.tip_02,"Volume hebdomadaire d'échantillons : affiche le nombre d'envois analysés par semaine dans la période sélectionnée. Code couleur : vert (20 % au-dessus de la moyenne), bleu (au-dessus de la moyenne), jaune (80-100 % de la moyenne), rouge (en dessous de 80 % de la moyenne). Permet d'identifier les semaines avec peu d'échantillons pouvant nuire à la fiabilité statistique. Un minimum de 30 échantillons par semaine est recommandé pour la significativité statistique."
+hc.jk_performance.tip_03,"Distribution de la performance : montre la répartition des envois selon le temps de transit réel par rapport à la norme de livraison (J+K Std). Catégories : après la norme (rouge, livré APRÈS le J+K Std = en retard), avant/à l'heure (vert, livré DANS le J+K Std = à l'heure), sur la norme (bleu, livré EXACTEMENT le jour du J+K Std). Permet de visualiser la performance globale du réseau. De grandes barres rouges indiquent des retards systématiques à examiner."
+hc.jk_performance.tip_04,"Ville d'origine → ville de destination. Chaque route est unique par opérateur, produit et paire de villes."
+hc.jk_performance.tip_05,Nombre total d'envois pour cette route sur la période sélectionnée. Un minimum de 30 échantillons est recommandé pour la significativité statistique.
+hc.jk_performance.tip_06,Délai de livraison attendu en jours issu de la table delivery_standards. Converti automatiquement depuis les heures si nécessaire (heures/24).
+hc.jk_performance.tip_07,Nombre de jours nécessaires pour atteindre l'objectif de % standard pour cette route. Représente le jour où le pourcentage cumulé de livraisons atteint le seuil standard (p. ex. 85 %). À comparer au J+K Std pour évaluer la performance.
+hc.jk_performance.tip_08,"Différence entre J+K Réel et J+K Std (réel - standard). Les valeurs positives indiquent des retards, les valeurs négatives une livraison anticipée."
+hc.jk_performance.tip_09,Pourcentage cible de livraisons à l'heure défini dans delivery_standards pour cette route. C'est le seuil de performance requis (p. ex. 85 %) à atteindre. À comparer à la colonne % à l'heure pour évaluer la conformité.
+hc.jk_performance.tip_10,Pourcentage d'envois livrés dans le J+K Std ou avant. À comparer au % Std propre à la route issu de delivery_standards (non affiché dans ce tableau).
+hc.jk_performance.tip_11,"Indicateur visuel : vert (conforme, ≥95 %), jaune (avertissement, 90-95 %), rouge (critique, <90 %). Ce sont des repères généraux ; les normes réelles sont propres à chaque route."
+hc.jk_performance.tip_12,"Nom de la ville, regroupant toutes les routes dont cette ville est l'origine ou la destination."
+hc.jk_performance.tip_13,Entrant (la ville est la destination) ou sortant (la ville est l'origine). Indique le sens du flux.
+hc.jk_performance.tip_14,Région géographique à laquelle appartient cette ville (table topology.regions).
+hc.jk_performance.tip_15,Total des envois agrégés sur toutes les routes impliquant cette ville dans le sens indiqué.
+hc.jk_performance.tip_16,Moyenne pondérée des normes J+K sur toutes les routes impliquant cette ville. Les routes comptant plus d'envois ont un poids plus élevé.
+hc.jk_performance.tip_17,Moyenne pondérée des jours nécessaires pour atteindre l'objectif de % standard sur toutes les routes impliquant cette ville. Représente la performance réelle par rapport au délai de livraison standard.
+hc.jk_performance.tip_18,Écart moyen pondéré (réel - standard) sur toutes les routes impliquant cette ville.
+hc.jk_performance.tip_19,Moyenne pondérée du pourcentage cible de livraisons à l'heure issu de delivery_standards pour toutes les routes impliquant cette ville.
+hc.jk_performance.tip_20,Pourcentage de tous les envois (toutes routes confondues) livrés à l'heure pour cette ville.
+hc.jk_performance.tip_21,"Indicateur visuel basé sur le pourcentage à l'heure : vert (≥95 %), jaune (90-95 %), rouge (<90 %)."
+hc.jk_performance.tip_22,Région géographique regroupant toutes les villes et routes qu'elle contient (table topology.regions).
+hc.jk_performance.tip_23,Entrant (la région est la destination) ou sortant (la région est l'origine). Indique le flux régional.
+hc.jk_performance.tip_24,Nombre de villes distinctes de cette région disposant de données d'envois dans le sens indiqué.
+hc.jk_performance.tip_25,Total des envois agrégés sur toutes les routes impliquant des villes de cette région.
+hc.jk_performance.tip_26,Moyenne pondérée des normes J+K sur toutes les routes de cette région. Les routes comptant plus d'envois ont un poids plus élevé.
+hc.jk_performance.tip_27,Moyenne pondérée des jours nécessaires pour atteindre l'objectif de % standard sur toutes les routes de cette région. Représente la performance réelle par rapport au délai de livraison standard.
+hc.jk_performance.tip_28,Écart moyen pondéré (réel - standard) sur toutes les routes de cette région.
+hc.jk_performance.tip_29,Moyenne pondérée du pourcentage cible de livraisons à l'heure sur toutes les routes de cette région. C'est le seuil de performance requis à atteindre.
+hc.jk_performance.tip_30,Pourcentage de tous les envois (toutes routes confondues) livrés à l'heure dans cette région.
+hc.jk_performance.tip_31,Vue hiérarchique : les lignes d'opérateur (fond bleu) affichent les indicateurs agrégés. Les lignes de produit (en retrait ↳) affichent les indicateurs de chaque produit de cet opérateur.
+hc.jk_performance.tip_32,Nombre de routes distinctes (paires de villes) desservies par cet opérateur ou ce produit.
+hc.jk_performance.tip_33,Total des envois de cet opérateur ou produit sur toutes les routes.
+hc.jk_performance.tip_34,Moyenne pondérée des normes J+K sur toutes les routes de cet opérateur ou produit.
+hc.jk_performance.tip_35,Moyenne pondérée des jours nécessaires pour atteindre l'objectif de % standard sur toutes les routes de cet opérateur ou produit. Représente la performance réelle par rapport au délai de livraison standard.
+hc.jk_performance.tip_36,Écart moyen pondéré (réel - standard) sur toutes les routes de cet opérateur ou produit.
+hc.jk_performance.tip_37,Moyenne pondérée du pourcentage cible de livraisons à l'heure sur toutes les routes de cet opérateur ou produit. C'est le seuil de performance requis à atteindre.
+hc.jk_performance.tip_38,Pourcentage de tous les envois livrés à l'heure pour cet opérateur ou produit.
+hc.jk_performance.tip_39,Nombre de routes dont la performance à l'heure est <90 %. Affiché uniquement au niveau opérateur (les produits affichent '-').
+hc.jk_performance.tip_40,"Indicateur visuel : vert (≥95 %), jaune (90-95 %), rouge (<90 %). Affiché pour les opérateurs et les produits."
+hc.network_overview.loading,Chargement de la vue d'ensemble du réseau...
+hc.network_overview.error_loading,Erreur lors du chargement des données : {message}
+hc.network_overview.no_data,Aucune donnée disponible
+hc.network_overview.no_journey_data,Aucune donnée de trajet trouvée pour ce compte. Veuillez vous assurer que les données ont été ingérées.
+hc.network_overview.on_time_delivery,Livraison à l'heure
+hc.network_overview.transit_time,Temps de transit
+hc.network_overview.processing_time,Temps de traitement
+hc.network_overview.data_quality,Qualité des données
+hc.network_overview.finding_excellent,"Excellente performance de ponctualité de {rate} %, dépassant les standards du secteur."
+hc.network_overview.finding_below_target,Le taux de livraison à l'heure de {rate} % est inférieur à l'objectif. Une analyse est recommandée.
+hc.network_overview.finding_zero_sla,Aucune violation de SLA enregistrée sur l'ensemble des routes.
+hc.network_overview.finding_sla_violations,{count} violations de SLA détectées. Examinez les routes concernées.
+hc.network_overview.finding_avg_transit,Un temps de transit moyen de {time} indique un fonctionnement efficace du réseau.
+hc.network_overview.title,Vue d'ensemble du réseau
+hc.network_overview.subtitle,Évaluation complète de la santé du réseau postal
+hc.network_overview.health_score,Score de santé du réseau
+hc.network_overview.health_score_desc,Moyenne pondérée des indicateurs clés de performance
+hc.network_overview.out_of_100,sur 100
+hc.network_overview.score_breakdown,Détail du score
+hc.network_overview.weight,Pondération : {weight} %
+hc.network_overview.points,+{value} pts
+hc.network_overview.items_count,{count} éléments
+hc.network_overview.tip_on_time,"Pourcentage de trajets réalisés sans violation de SLA. Calculé comme : (trajets avec 0 violation de SLA / total des trajets) × 100. Plus c'est élevé, mieux c'est."
+hc.network_overview.avg_transit,Temps de transit moyen
+hc.network_overview.routes_count,{count} routes
+hc.network_overview.tip_avg_transit,"Temps de transit moyen de bout en bout sur tous les trajets terminés. Calculé entre l'horodatage du premier et du dernier événement. Plus c'est bas, mieux c'est."
+hc.network_overview.avg_processing,Temps de traitement moyen
+hc.network_overview.centers_count,{count} centres
+hc.network_overview.tip_avg_processing,Temps moyen passé par les envois dans les centres postaux pour traitement. Calculé uniquement à partir des segments de traitement. Une valeur plus basse indique des opérations plus rapides.
+hc.network_overview.data_completeness,Complétude des données
+hc.network_overview.tip_data_quality,Pourcentage d'enregistrements de données complets et valides. Basé sur la présence des champs obligatoires et des contrôles de cohérence des données.
+hc.network_overview.auto_findings,Constats automatiques
+hc.network_overview.network_summary,Résumé du réseau
+hc.network_overview.total_items,Total des envois
+hc.network_overview.active_routes,Routes actives
+hc.network_overview.postal_centers,Centres postaux
+hc.network_overview.sla_violations,Violations de SLA
+hc.network_overview.top5_routes,Top 5 des routes
+hc.network_overview.bottom5_routes,5 routes les moins performantes
+hc.network_overview.top5_centers,Top 5 des centres
+hc.network_overview.bottom5_centers,5 centres les moins performants
+hc.network_overview.col_route,Route
+hc.network_overview.col_items,Envois
+hc.network_overview.col_on_time,À l'heure
+hc.network_overview.col_avg_time,Temps moyen
+hc.network_overview.col_center,Centre
+hc.network_overview.col_proc_time,Temps de trait.
+hc.route_performance_table.no_data,Aucune donnée de route disponible
+hc.route_performance_table.title,Performance par route ({count} routes)
+hc.route_performance_table.export_csv,Exporter en CSV
+hc.route_performance_table.col_route,Route
+hc.route_performance_table.col_samples,Échantillons
+hc.route_performance_table.col_jk_std,J+K Std
+hc.route_performance_table.col_jk_actual,J+K Réel
+hc.route_performance_table.col_deviation,Écart
+hc.route_performance_table.col_std_pct,% Std
+hc.route_performance_table.col_ontime_pct,% à l'heure
+hc.route_performance_table.col_status,Statut
+hc.route_performance_table.tip_route,"Ville d'origine → ville de destination. Chaque route est unique par opérateur, produit et paire de villes."
+hc.route_performance_table.tip_samples,Nombre total d'échantillons pour cette route sur la période sélectionnée.
+hc.route_performance_table.tip_jk_std,Délai de livraison attendu en jours issu de la table delivery_standards.
+hc.route_performance_table.tip_jk_actual,Nombre de jours nécessaires pour atteindre l'objectif de % standard pour cette route.
+hc.route_performance_table.tip_deviation,Différence entre J+K Réel et J+K Std (réel - standard).
+hc.route_performance_table.tip_std_pct,Pourcentage cible de livraisons à l'heure défini dans delivery_standards pour cette route.
+hc.route_performance_table.tip_ontime,Pourcentage d'échantillons livrés dans le J+K Std ou avant.
+hc.route_performance_table.tip_status,"Indicateur visuel : vert (conforme), jaune (avertissement), rouge (critique)."
+hc.route_performance_table.tip_download,Téléchargez les données brutes des échantillons de cette route depuis ONE DB.
+hc.route_performance_table.operational,Opérationnel
+hc.route_performance_table.distribution,Distribution
+hc.route_performance_table.download_title,Télécharger les échantillons de cette route
+hc.allocation_plan_detail_row.error,Erreur : {message}
+hc.allocation_plan_detail_row.tag_id_placeholder,Saisissez l'ID de l'étiquette
+hc.allocation_plan_detail_row.unavailable,INDISPONIBLE
+hc.allocation_plan_detail_row.no_panelist,Aucun panéliste
+hc.allocation_plan_detail_row.inactive,Inactif
+hc.allocation_plan_detail_row.available,Disponible
+hc.allocation_plan_detail_row.invalid,Invalide
+hc.allocation_plan_detail_row.validation_errors,Erreurs de validation :
+hc.allocation_plan_detail_row.transfer_error,Erreur de transfert
+hc.allocation_plan_detail_row.error_label,Erreur :
+hc.carriers.error,Erreur : {message}
+hc.carriers.about_tip,"À propos des opérateurs et produits - Objectif : gérer les opérateurs logistiques et leurs produits de service qui seront utilisés dans les plans d'allocation. Structure : les opérateurs (sociétés de transport) contiennent des produits (services de livraison), qui nécessitent des matériels (emballages, étiquettes, etc.) du catalogue de matériels. Fonctions clés : définir les informations de l'opérateur, configurer les produits avec des normes de livraison, établir les structures de coûts et gérer les besoins en matériels. Utilisation : ajoutez des opérateurs, créez des produits pour chaque opérateur, affectez des matériels aux produits, précisez les délais et coûts de livraison et utilisez-les dans la planification des allocations."
+hc.carriers.collapse_all,Tout réduire
+hc.carriers.clear_filters,Effacer les filtres
+hc.carriers.start_first_carrier,Commencez par créer votre premier opérateur pour gérer les produits d'expédition
+hc.carriers.adjust_search,Essayez d'ajuster votre recherche ou vos filtres
+hc.carriers.download_csv,Télécharger le CSV
+hc.carriers.all_have_materials,Tous les produits ont des matériels !
+hc.carriers.all_assigned,Chaque produit a des matériels affectés depuis le catalogue
+hc.carriers.col_product_code,Code produit
+hc.carriers.col_delivery_hours,Heures de livraison
+hc.carriers.pending_materials,Matériels en attente
+hc.segment_table.center,Centre
+hc.segment_table.transit,Transit
+hc.segment_table.loading,Chargement des segments...
+hc.segment_table.error,Erreur : {message}
+hc.segment_table.none,Aucun segment trouvé
+hc.segment_table.col_segment,Segment
+hc.segment_table.col_jk_std,J+K STD
+hc.segment_table.col_natural,Temps naturel
+hc.segment_table.col_working,Temps ouvré
+hc.segment_table.col_pct_std,% STD
+hc.segment_table.col_pct_real,% Réel
+hc.segment_table.col_diff,Écart %
+hc.segment_table.col_threshold,Seuil
+hc.segment_table.compliant,Conforme
+hc.segment_table.warning,Avertissement
+hc.segment_table.critical,Critique
+hc.complete_journeys_filters.reset_title,Réinitialiser tous les filtres
+hc.complete_journeys_filters.reset,Réinitialiser
+hc.complete_journeys_filters.in_progress,En cours
+hc.complete_journeys_filters.completed,Terminé
+hc.complete_journeys_filters.anomalous,Anormal
+hc.complete_journeys_filters.stuck,Bloqué
+hc.cumulative_distribution_table.no_data,Aucune donnée de distribution disponible
+hc.cumulative_distribution_table.col_route,Route
+hc.cumulative_distribution_table.col_carrier,Opérateur
+hc.cumulative_distribution_table.col_product,Produit
+hc.cumulative_distribution_table.col_jk_st,J+K ST
+hc.cumulative_distribution_table.col_std_pct,% Std
+hc.cumulative_distribution_table.tip_route,Paire de villes origine → destination. Chaque route affiche les pourcentages cumulés de livraison par jour.
+hc.cumulative_distribution_table.tip_carrier,Opérateur de transport pour cette route.
+hc.cumulative_distribution_table.tip_product,Produit de service (p. ex. Express 24 heures) pour cette route.
+hc.cumulative_distribution_table.tip_jk_st,Délai de livraison attendu en jours issu de delivery_standards. L'en-tête de colonne devient vert lorsqu'il correspond à cette valeur.
+hc.cumulative_distribution_table.tip_std,"Pourcentage de réussite cible issu de delivery_standards (p. ex. 85 %, 95 %). C'est le seuil que la route doit atteindre."
+hc.accounts.loading,Chargement...
+hc.accounts.title,Gestion des comptes
+hc.accounts.create,Créer un compte
+hc.accounts.edit,Modifier le compte
+hc.users.loading,Chargement...
+hc.users.title,Gestion des utilisateurs
+hc.users.create,Créer un utilisateur
+hc.users.edit,Modifier l'utilisateur
+hc.sla_form.carrier,Opérateur
+hc.sla_form.product,Produit
+hc.journey_segments_filters.reset_title,Réinitialiser tous les filtres
+hc.journey_segments_filters.reset,Réinitialiser
+hc.delivery_standard_form.cities_different,Les villes d'origine et de destination doivent être différentes
+hc.delivery_standard_form.carrier,Opérateur *
+hc.delivery_standard_form.select_carrier,Sélectionner un opérateur
+hc.delivery_standard_form.product,Produit *
+hc.delivery_standard_form.select_product,Sélectionner un produit
+hc.delivery_standard_form.no_products,Aucun produit pour cet opérateur
+hc.delivery_standard_form.origin_city,Ville d'origine *
+hc.delivery_standard_form.select_origin,Sélectionner l'origine
+hc.delivery_standard_form.type_value,Type {value}
+hc.delivery_standard_form.destination_city,Ville de destination *
+hc.delivery_standard_form.select_destination,Sélectionner la destination
+hc.delivery_standard_form.cannot_change,"L'opérateur, le produit, l'origine et la destination ne peuvent pas être modifiés. Supprimez l'enregistrement et créez-en un nouveau si nécessaire."
+hc.delivery_standard_form.standard_time,Délai standard
+hc.delivery_standard_form.eg_24,p. ex. 24
+hc.delivery_standard_form.success_pct,% de réussite
+hc.delivery_standard_form.eg_85,p. ex. 85
+hc.delivery_standard_form.time_unit,Unité de temps *
+hc.delivery_standard_form.warning_pct,% d'avertissement
+hc.delivery_standard_form.eg_5,p. ex. 5
+hc.delivery_standard_form.critical_pct,% critique
+hc.delivery_standard_form.eg_20,p. ex. 20
+hc.delivery_standard_form.type,Type
+hc.delivery_standard_form.abs,Abs
+hc.delivery_standard_form.rel,Rel
+hc.delivery_standard_form.cancel,Annuler
+hc.delivery_standard_form.saving,Enregistrement...
+hc.delivery_standard_form.update,Mettre à jour
+hc.delivery_standard_form.create,Créer
+hc.segment_deep_dive.loading,Chargement...
+hc.segment_deep_dive.error,Erreur : {message}
+hc.segment_deep_dive.no_data,Aucune donnée disponible
+hc.segment_deep_dive.segments_title,Segments {type}
+hc.segment_deep_dive.total_count,Nombre total
+hc.segment_deep_dive.sla_compliance,Conformité SLA
+hc.segment_deep_dive.avg_duration,Durée moyenne :
+hc.segment_deep_dive.p50_duration,Durée P50 :
+hc.segment_deep_dive.p95_duration,Durée P95 :
+hc.segment_deep_dive.range,Plage :
+hc.segment_deep_dive.on_time,À temps
+hc.segment_deep_dive.warning,Avertissement
+hc.segment_deep_dive.critical,Critique
+hc.segment_deep_dive.violated,Dépassé
+hc.segment_deep_dive.segment_type,Type de segment :
+hc.segment_deep_dive.all_types,Tous les types
+hc.segment_deep_dive.operational,Opérationnel
+hc.segment_deep_dive.distribution,Distribution
+hc.segment_deep_dive.hour,Heure
+hc.segment_deep_dive.segments,Segments
+hc.segment_deep_dive.avg_time,Temps moyen
+hc.segment_deep_dive.p50_time,Temps P50
+hc.segment_deep_dive.p95_time,Temps P95
+hc.segment_deep_dive.outliers,Valeurs aberrantes
+hc.segment_deep_dive.sla_pct,SLA %
+hc.segment_deep_dive.no_anomalies,Aucune anomalie détectée
+hc.segment_deep_dive.tag_id,ID d'étiquette
+hc.segment_deep_dive.type,Type
+hc.segment_deep_dive.center_carrier,Centre/Transporteur
+hc.segment_deep_dive.actual,Réel
+hc.segment_deep_dive.expected,Attendu
+hc.segment_deep_dive.deviation,Écart
+hc.segment_deep_dive.anomaly,Anomalie
+hc.segment_deep_dive.title,Analyse approfondie des segments
+hc.segment_deep_dive.subtitle,Analyse détaillée des segments du trajet par type et performance
+hc.segment_deep_dive.tab_overview,Aperçu
+hc.segment_deep_dive.tab_time,Analyse temporelle
+hc.segment_deep_dive.tab_anomalies,Anomalies
+hc.region_detail_modal.title,Détails de la région : {name}
+hc.region_detail_modal.regional_summary,Résumé régional
+hc.region_detail_modal.total_cities,Total des villes :
+hc.region_detail_modal.population,Population :
+hc.region_detail_modal.total_shipments,Total des envois :
+hc.region_detail_modal.performance_metrics,Indicateurs de performance
+hc.region_detail_modal.compliant,Conformes :
+hc.region_detail_modal.standard,Standard :
+hc.region_detail_modal.deviation,Écart :
+hc.region_detail_modal.status,Statut :
+hc.region_detail_modal.status_compliant,✅ Conforme
+hc.region_detail_modal.status_warning,⚠️ Avertissement
+hc.region_detail_modal.status_critical,🔴 Critique
+hc.region_detail_modal.underserved_cities,Villes mal desservies :
+hc.region_detail_modal.directional_analysis,Analyse directionnelle
+hc.region_detail_modal.inbound,Entrant (arrivées)
+hc.region_detail_modal.actual_pct,% réel :
+hc.region_detail_modal.standard_pct,% standard :
+hc.region_detail_modal.jk_std,J+K standard :
+hc.region_detail_modal.jk_actual,J+K réel :
+hc.region_detail_modal.outbound,Sortant (départs)
+hc.region_detail_modal.direction_gap,Écart directionnel :
+hc.region_detail_modal.imbalanced,⚠️ Service déséquilibré
+hc.region_detail_modal.balanced,✅ Service équilibré
+hc.region_detail_modal.carrier_product_breakdown,Répartition par transporteur et produit
+hc.region_detail_modal.th_carrier,Transporteur
+hc.region_detail_modal.th_product,Produit
+hc.region_detail_modal.th_shipments,Envois
+hc.region_detail_modal.th_compliant,Conformes
+hc.region_detail_modal.th_actual_pct,% réel
+hc.region_detail_modal.th_standard_pct,% standard
+hc.region_detail_modal.th_jk_std,J+K standard
+hc.region_detail_modal.th_jk_actual,J+K réel
+hc.region_detail_modal.th_deviation,Écart
+hc.region_detail_modal.th_inbound_pct,% entrant
+hc.region_detail_modal.th_outbound_pct,% sortant
+hc.region_detail_modal.no_data,Aucune donnée disponible
+hc.region_detail_modal.close,Fermer
+hc.route_path_table.title,Détail de la performance des routes
+hc.route_path_table.hint,Cliquez sur les lignes pour développer les segments. Cliquez sur les segments pour voir le rapport J+K.
+hc.route_path_table.collapse_all,Tout réduire
+hc.route_path_table.expand_all,Tout développer
+hc.route_path_table.th_carrier,Transporteur
+hc.route_path_table.th_product,Produit
+hc.route_path_table.th_origin,Origine
+hc.route_path_table.th_destination,Destination
+hc.route_path_table.th_seg,Seg
+hc.route_path_table.th_jk_std,J+K standard
+hc.route_path_table.th_natural_time,Temps naturel
+hc.route_path_table.th_working_time,Temps ouvré
+hc.route_path_table.th_pct_std,% standard
+hc.route_path_table.th_pct_real,% réel
+hc.route_path_table.th_diff_pct,Écart %
+hc.route_path_table.th_threshold,Seuil
+hc.route_path_table.th_tags,Étiquettes
+hc.route_path_table.compliant,Conforme
+hc.route_path_table.warning,Avertissement
+hc.route_path_table.critical,Critique
+hc.route_path_table.segment_details,Détail des segments
+hc.route_path_table.no_routes,Aucun chemin de route trouvé
+hc.pipeline_monitor.phase_consolidation,Phase 2 : Consolidation
+hc.pipeline_monitor.phase_segments,Phase 3 : Construction des segments
+hc.pipeline_monitor.phase_aggregation,Phase 4 : Agrégation des routes
+hc.pipeline_monitor.phase_started,{phase} démarrée...
+hc.pipeline_monitor.phase_completed,✅ {phase} terminée en {duration} s
+hc.pipeline_monitor.events_processed,{count} événements traités
+hc.pipeline_monitor.events_created,{count} événements consolidés créés
+hc.pipeline_monitor.segments_created,{count} segments créés
+hc.pipeline_monitor.paths_created,{count} chemins uniques créés
+hc.pipeline_monitor.phase_failed,❌ {phase} a échoué : {message}
+hc.pipeline_monitor.full_started,🚀 Démarrage de l'exécution complète du pipeline...
+hc.pipeline_monitor.full_completed,✅ Exécution complète du pipeline terminée
+hc.pipeline_monitor.logs_cleared,Journal effacé
+hc.pipeline_monitor.never,Jamais
+hc.pipeline_monitor.seconds_ago,il y a {n} s
+hc.pipeline_monitor.minutes_ago,il y a {n} min
+hc.pipeline_monitor.hours_ago,il y a {n} h
+hc.pipeline_monitor.title,Moniteur du pipeline EPCIS
+hc.pipeline_monitor.auto_refresh,Actualisation automatique (30 s)
+hc.pipeline_monitor.raw_events,Événements bruts
+hc.pipeline_monitor.pending,en attente
+hc.pipeline_monitor.processed,Traités
+hc.pipeline_monitor.events,événements
+hc.pipeline_monitor.segments,Segments
+hc.pipeline_monitor.segments_unit,segments
+hc.pipeline_monitor.routes,Routes
+hc.pipeline_monitor.unique_paths,chemins uniques
+hc.pipeline_monitor.pipeline_phases,Phases du pipeline
+hc.pipeline_monitor.status_idle,Inactive
+hc.pipeline_monitor.status_running,En cours
+hc.pipeline_monitor.status_ready,Prête
+hc.pipeline_monitor.status_error,Erreur
+hc.pipeline_monitor.run_now,Exécuter maintenant
+hc.pipeline_monitor.last_run,Dernière exécution : {time}
+hc.pipeline_monitor.duration,Durée : {seconds} s
+hc.pipeline_monitor.run_full,Exécuter le pipeline complet
+hc.pipeline_monitor.recent_incidents,Incidents récents
+hc.pipeline_monitor.last_10_unresolved,10 derniers non résolus
+hc.pipeline_monitor.no_incidents,Aucun incident récent
+hc.pipeline_monitor.incident_tag,| Étiquette : {id}...
+hc.pipeline_monitor.execution_log,Journal d'exécution
+hc.pipeline_monitor.clear_log,Effacer le journal
+hc.pipeline_monitor.no_log,Aucune entrée dans le journal pour le moment
+hc.jk_treemap.samples_count,{count} échantillons
+hc.jk_treemap.on_time,À temps :
+hc.jk_treemap.jk_std,J+K standard :
+hc.jk_treemap.jk_actual,J+K réel :
+hc.jk_treemap.days_value,{value} jours
+hc.jk_treemap.deviation,Écart :
+hc.jk_treemap.samples,Échantillons :
+hc.jk_treemap.routes,Routes :
+hc.jk_treemap.status,Statut :
+hc.jk_treemap.status_compliant,✅ Conforme
+hc.jk_treemap.status_warning,⚠️ Avertissement
+hc.jk_treemap.status_critical,🔴 Critique
+hc.jk_treemap.no_data,Aucune donnée J+K disponible pour le treemap
+hc.jk_treemap.help,La taille de la ville représente le nombre d'échantillons. La couleur indique l'état de performance J+K.
+hc.jk_treemap.legend_compliant,Conforme
+hc.jk_treemap.legend_warning,Avertissement
+hc.jk_treemap.legend_critical,Critique
+hc.carriers_tree.confirm_delete,Voulez-vous vraiment supprimer {name} ?
+hc.carriers_tree.confirm_remove_material,Retirer le matériel « {name} » de ce produit ?
+hc.carriers_tree.prompt_quantity,Saisissez la nouvelle quantité pour « {name} » :
+hc.carriers_tree.invalid_number,Veuillez saisir un nombre positif valide
+hc.carriers_tree.collapse_carrier,Réduire le transporteur
+hc.carriers_tree.expand_carrier,Développer le transporteur
+hc.carriers_tree.expand_all_products,Développer tous les produits de ce transporteur
+hc.carriers_tree.add_product_title,Ajouter un produit
+hc.carriers_tree.product_btn,Produit
+hc.carriers_tree.edit_carrier_title,Modifier le transporteur
+hc.carriers_tree.edit_carrier,Modifier le transporteur
+hc.carriers_tree.delete_carrier,Supprimer le transporteur
+hc.carriers_tree.collapse_product,Réduire le produit
+hc.carriers_tree.expand_product,Développer le produit
+hc.carriers_tree.add_material_title,Ajouter un matériel
+hc.carriers_tree.add_a_material,Ajouter un matériel
+hc.carriers_tree.edit_product_title,Modifier le produit
+hc.carriers_tree.edit_product,Modifier le produit
+hc.carriers_tree.delete_product,Supprimer le produit
+hc.carriers_tree.product_fallback,produit
+hc.carriers_tree.material_fallback,matériel
+hc.carriers_tree.no_materials,Aucun matériel affecté pour le moment
+hc.carriers_tree.unknown_material,Matériel inconnu
+hc.carriers_tree.qty,Qté : {qty}
+hc.carriers_tree.update_quantity,Mettre à jour la quantité
+hc.carriers_tree.remove_material,Retirer le matériel
+hc.compliance_report.export_coming_soon,Exporter le rapport d'audit - Bientôt disponible
+hc.compliance_report.loading,Chargement des données de conformité...
+hc.compliance_report.error_loading,Erreur lors du chargement des données
+hc.compliance_report.coming_soon,Bientôt disponible
+hc.compliance_report.overall_compliance,Conformité globale
+hc.compliance_report.overall_compliance_tip,Pourcentage de routes respectant les normes de conformité
+hc.compliance_report.routes_ratio,{compliant}/{total} routes
+hc.compliance_report.compliant_routes,Routes conformes
+hc.compliance_report.compliant_routes_tip,Routes respectant la norme
+hc.compliance_report.meeting_standard,Conformes à la norme
+hc.compliance_report.warning_routes,Routes en avertissement
+hc.compliance_report.warning_routes_tip,Routes avec problèmes mineurs
+hc.compliance_report.no_penalty,Sans pénalité
+hc.compliance_report.critical_routes,Routes critiques
+hc.compliance_report.critical_routes_tip,Routes avec pénalités
+hc.compliance_report.with_penalty,Avec pénalité
+hc.compliance_report.total_routes,Total des routes
+hc.compliance_report.total_routes_tip,Toutes les routes analysées
+hc.compliance_report.across_carriers,Tous transporteurs confondus
+hc.compliance_report.compliance_analysis,Analyse de conformité
+hc.compliance_report.hierarchy_tip,Vue hiérarchique : Transporteur → Produit → Route
+hc.register_shipment_modal.error,Erreur : {message}
+hc.register_shipment_modal.tag_id,ID d'étiquette
+hc.register_shipment_modal.enter_tag_id,Saisissez l'ID d'étiquette
+hc.register_shipment_modal.sent_datetime,Date et heure d'envoi
+hc.register_shipment_modal.registered_by,Enregistré par
+hc.register_shipment_modal.no_panelist,Aucun panéliste affecté au nœud d'origine
+hc.register_shipment_modal.cancel,Annuler
+hc.register_shipment_modal.registering,Enregistrement...
+hc.register_shipment_modal.register_shipment,Enregistrer l'envoi
+hc.login_form.error_signing_in,Erreur de connexion
+hc.login_form.email_label,E-mail :
+hc.login_form.password_label,Mot de passe :
+hc.login_form.hide_password,Masquer le mot de passe
+hc.login_form.show_password,Afficher le mot de passe
+hc.login_form.signing_in,Connexion en cours...
+hc.city_form.name_placeholder,"p. ex., Madrid, Barcelone"
+hc.city_form.code_placeholder,"p. ex., MAD, BCN"
+hc.city_form.population_placeholder,"p. ex., 3200000"
+hc.city_form.status,Statut
+hc.generate_combinations_modal.error_generating,Erreur lors de la génération des SLA
+hc.generate_combinations_modal.select_carriers,Sélectionner les transporteurs
+hc.generate_combinations_modal.select_products,Sélectionner les produits
+hc.generate_combinations_modal.entry_exit,{name} (Entrée → Sortie)
+hc.csv_handler.import_error,Erreur d'importation : {message}
+hc.csv_handler.import_csv,Importer un CSV
+hc.csv_handler.download_template,Télécharger le modèle CSV
+hc.material_requirements.title_tip,Calcule les besoins en matériel à partir des plans d'allocation sur une période donnée. Ce module indique quels matériels doivent être achetés et quels panélistes doivent en recevoir pour leurs envois planifiés.
+hc.material_requirements.error_calculating,Erreur lors du calcul des besoins
+hc.material_requirements.expand_filters,Développer les filtres
+hc.material_requirements.collapse_filters,Réduire les filtres
+hc.material_requirements.filters_tip,"Filtrez les besoins en matériel par période, type de matériel ou nœud. Utilisez le sélecteur rapide de mois pour choisir facilement les dates."
+hc.material_requirements.reset_filters,Réinitialiser tous les filtres
+hc.material_requirements.start_date_tip,Date de début de la période pour laquelle calculer les besoins en matériel.
+hc.material_requirements.end_date_tip,Date de fin de la période pour laquelle calculer les besoins en matériel.
+hc.material_requirements.material_tip,Filtrez les résultats pour n'afficher qu'un matériel précis. Laissez vide pour afficher tous les matériels.
+hc.material_requirements.node_tip,Filtrez les besoins des panélistes pour n'afficher qu'un nœud précis. Ce filtre s'applique uniquement à l'onglet Besoins des panélistes.
+hc.material_requirements.quick_period_tip,"Cliquez sur un bouton de mois pour définir automatiquement les dates de début et de fin de ce mois entier, ou utilisez les boutons semestre/année pour des périodes plus longues."
+hc.material_requirements.purchase_tip,Affiche la quantité totale de chaque matériel à acheter pour satisfaire tous les plans d'allocation de la période sélectionnée.
+hc.material_requirements.panelist_tip,Indique quels matériels doivent être envoyés à chaque panéliste/nœud pour leurs envois planifiés.
+hc.material_requirements.pending_assignment,→ Affectation en attente
+hc.territory_equity.loading_data,Chargement des données d'équité territoriale...
+hc.territory_equity.error_loading,Erreur lors du chargement des données : {message}
+hc.territory_equity.route_title,Analyse de l'itinéraire : {origin} → {destination}
+hc.territory_equity.outbound_title,Rapport de performance territoriale : départs de {origin}
+hc.territory_equity.inbound_title,Rapport de performance territoriale : arrivées à {destination}
+hc.territory_equity.route_desc,Analyse détaillée de la performance de l'itinéraire de {origin} à {destination}
+hc.territory_equity.outbound_desc,Analysez l'équité du service au départ de {origin} vers toutes les destinations
+hc.territory_equity.inbound_desc,Analysez l'équité du service à l'arrivée à {destination} depuis toutes les origines
+hc.territory_equity.coming_soon,Bientôt disponible
+hc.territory_equity.hide_filters,Masquer les filtres et les indicateurs
+hc.territory_equity.show_filters,Afficher les filtres et les indicateurs
+hc.territory_equity.of_cities,sur {count} villes
+hc.territory_equity.citizens_underserved,citoyens dans des villes mal desservies
+hc.territory_equity.top_cities_performance,Performance des principales villes
+hc.territory_equity.top_regions_performance,Performance des principales régions
+hc.territory_equity.best_served,Mieux desservies
+hc.territory_equity.worst_served,Moins bien desservies
+hc.territory_equity.col_city,Ville
+hc.territory_equity.col_region,Région
+hc.territory_equity.col_compl,Conf.
+hc.territory_equity.col_std,Std.
+hc.territory_equity.col_jk_std,J+K Std
+hc.territory_equity.col_jk_act,J+K Réel
+hc.territory_equity.col_inb,Entr.
+hc.territory_equity.col_outb,Sort.
+hc.territory_equity.regions_ranking_tooltip,Classement de la performance des régions selon le respect de l'équité du service
+hc.territory_equity.no_underserved_regions,Aucune région mal desservie
+hc.territory_equity.low_profile_routes,Itinéraires à faible volume
+hc.territory_equity.jk_performance,Performance J+K
+hc.territory_equity.regional_trend,Tendance de performance régionale
+hc.territory_equity.region_filter_label,Région : analysez les envois entrants vers les villes d'une région donnée
+hc.territory_equity.all_regions_treemap,Toutes les régions (vue treemap uniquement)
+hc.territory_equity.cities_in_region,Villes de la région {region} : analyse des arrivées
+hc.territory_equity.cities_in_region_tooltip,"Détail des villes de la région sélectionnée, avec les envois entrants et les indicateurs d'équité du service."
+hc.territory_equity.showing_cities_in_region,Affichage des villes de la région {region} avec analyse des envois entrants
+hc.territory_equity.low_profile_desc,Détail de tous les itinéraires par opérateur et par produit. Filtrez par statut d'équité pour repérer les problèmes de conformité.
+hc.territory_equity.distribution_analysis,Analyse de la distribution
+hc.territory_equity.distribution_desc,Analyse détaillée de la distribution des délais de transit et des indicateurs de performance cumulés.
+hc.territory_equity.performance_distribution,Distribution de la performance
+hc.territory_equity.cumulative_distribution,Distribution cumulée
+hc.territory_equity.chart,Graphique
+hc.territory_equity.table,Tableau
+hc.territory_equity.route_performance,Performance des itinéraires
+hc.territory_equity.route_performance_desc,Détail de tous les itinéraires par opérateur et par produit.
+hc.city_detail_modal.title,Détails de la ville : {city}
+hc.city_detail_modal.basic_information,Informations de base
+hc.city_detail_modal.label_region,Région :
+hc.city_detail_modal.label_classification,Classification :
+hc.city_detail_modal.label_population,Population :
+hc.city_detail_modal.performance_metrics,Indicateurs de performance
+hc.city_detail_modal.label_total_shipments,Total des envois :
+hc.city_detail_modal.label_compliant,Conformes :
+hc.city_detail_modal.label_standard,Standard :
+hc.city_detail_modal.label_deviation,Écart :
+hc.city_detail_modal.label_status,Statut :
+hc.city_detail_modal.status_compliant,conforme
+hc.city_detail_modal.status_warning,avertissement
+hc.city_detail_modal.status_critical,critique
+hc.city_detail_modal.directional_analysis,Analyse directionnelle
+hc.city_detail_modal.inbound_arrivals,Entrant (arrivées)
+hc.city_detail_modal.outbound_departures,Sortant (départs)
+hc.city_detail_modal.label_shipments,Envois :
+hc.city_detail_modal.shipments_compliant,{count} ({compliant} conformes)
+hc.city_detail_modal.label_actual_pct,% réel :
+hc.city_detail_modal.label_standard_pct,% standard :
+hc.city_detail_modal.label_jk_std,J+K standard :
+hc.city_detail_modal.label_jk_actual,J+K réel :
+hc.city_detail_modal.direction_gap,Écart entre directions :
+hc.city_detail_modal.balanced_service,Service équilibré
+hc.city_detail_modal.imbalanced_service,Service déséquilibré
+hc.city_detail_modal.carrier_product_breakdown,Détail par opérateur et produit
+hc.city_detail_modal.th_carrier,Opérateur
+hc.city_detail_modal.th_product,Produit
+hc.city_detail_modal.th_shipments,Envois
+hc.city_detail_modal.th_compliant,Conformes
+hc.city_detail_modal.th_actual_pct,% réel
+hc.city_detail_modal.th_standard_pct,% standard
+hc.city_detail_modal.th_jk_std,J+K standard
+hc.city_detail_modal.th_jk_actual,J+K réel
+hc.city_detail_modal.th_deviation,Écart
+hc.city_detail_modal.th_inbound_pct,% entrant
+hc.city_detail_modal.th_outbound_pct,% sortant
+hc.city_detail_modal.no_data,Aucune donnée disponible
+hc.city_detail_modal.close,Fermer
+hc.account_reporting_config.warning_gt_critical,Le seuil d'avertissement doit être supérieur au seuil critique
+hc.account_reporting_config.loading,Chargement de la configuration...
+hc.account_reporting_config.error_loading,Erreur lors du chargement de la configuration : {message}
+hc.account_reporting_config.title,Configuration des rapports du compte
+hc.account_reporting_config.subtitle,Configurez les seuils de reporting et les classifications des villes de ce compte
+hc.account_reporting_config.general_settings,Paramètres généraux
+hc.account_reporting_config.warning_threshold,Seuil d'avertissement de conformité
+hc.account_reporting_config.warning_desc,Les envois sous ce seuil afficheront un avertissement jaune
+hc.account_reporting_config.critical_threshold,Seuil critique de conformité
+hc.account_reporting_config.critical_desc,Les envois sous ce seuil afficheront une alerte rouge
+hc.account_reporting_config.default_period,Période de rapport par défaut
+hc.account_reporting_config.default_period_desc,Période par défaut pour la génération des rapports
+hc.account_reporting_config.saved,Configuration enregistrée avec succès
+hc.account_reporting_config.save_error,Erreur lors de l'enregistrement de la configuration
+hc.account_reporting_config.reset,Réinitialiser
+hc.account_reporting_config.saving,Enregistrement...
+hc.account_reporting_config.save_changes,Enregistrer les modifications
+hc.account_reporting_config.city_classifications,Classifications des villes
+hc.account_reporting_config.city_classifications_desc,Définissez des classifications de villes personnalisées pour ce compte. Les villes non listées ici utiliseront les classifications par défaut.
+hc.account_reporting_config.notes_title,Notes de configuration :
+hc.account_reporting_config.note_warning,Le seuil d'avertissement doit être supérieur au seuil critique
+hc.account_reporting_config.note_changes,Les modifications des seuils affecteront toutes les vues de reporting
+hc.account_reporting_config.note_classifications,Les classifications de villes remplacent les classifications par défaut de la topologie
+hc.account_reporting_config.note_superadmin,Seuls les superadministrateurs peuvent modifier ces paramètres
+hc.confirm_shipment_modal.min_one_material,Au moins un matériel doit rester dans l'envoi
+hc.confirm_shipment_modal.qty_gt_zero,Toutes les quantités doivent être supérieures à 0
+hc.confirm_shipment_modal.error,Erreur : {message}
+hc.confirm_shipment_modal.title,Confirmer l'envoi
+hc.confirm_shipment_modal.to,À : {name}
+hc.confirm_shipment_modal.unknown_panelist,Panéliste inconnu
+hc.confirm_shipment_modal.sent_date,Date d'envoi
+hc.confirm_shipment_modal.stock_alert,Alerte de stock
+hc.confirm_shipment_modal.stock_alert_desc,Certains matériels ont un stock insuffisant chez le régulateur. Un contrôle d'inventaire est nécessaire. L'envoi sera enregistré avec une note d'incident de stock.
+hc.confirm_shipment_modal.materials_to_send,Matériels à envoyer
+hc.confirm_shipment_modal.th_material,Matériel
+hc.confirm_shipment_modal.th_available_stock,Stock disponible
+hc.confirm_shipment_modal.th_qty_to_send,Quantité à envoyer
+hc.confirm_shipment_modal.th_actions,Actions
+hc.confirm_shipment_modal.insufficient,Insuffisant
+hc.confirm_shipment_modal.cannot_remove_last,Impossible de retirer le dernier élément
+hc.confirm_shipment_modal.remove_from_shipment,Retirer de l'envoi
+hc.confirm_shipment_modal.remove,Retirer
+hc.confirm_shipment_modal.removed_materials,Matériels retirés (créeront un nouvel envoi en attente)
+hc.confirm_shipment_modal.th_quantity,Quantité
+hc.confirm_shipment_modal.restore,Restaurer
+hc.confirm_shipment_modal.cancel,Annuler
+hc.confirm_shipment_modal.sending,Envoi en cours...
+hc.confirm_shipment_modal.confirm_send,Confirmer l'envoi
+hc.country_topology.error,Erreur : {message}
+hc.country_topology.about_tooltip,"À propos de la topologie du pays - Objectif : définir et gérer la hiérarchie de l'infrastructure réseau de votre pays selon une structure à trois niveaux. Structure : régions (divisions géographiques de premier niveau comme Nord, Sud, Centre), villes (centres urbains au sein de chaque région comme Madrid, Barcelone) et nœuds (points de livraison ou adresses précises au sein des villes). Utilisation : cette topologie est utilisée dans tout le système pour la planification des allocations, le reporting et l'analyse de l'équité territoriale."
+hc.country_topology.with_panelist,Avec panéliste
+hc.country_topology.without_panelist,Sans panéliste
+hc.country_topology.collapse_all,Tout réduire
+hc.country_topology.clear_filters,Effacer les filtres
+hc.country_topology.start_first_region,Commencez par créer votre première région pour construire la topologie de votre pays
+hc.country_topology.adjust_search,Essayez de modifier votre recherche ou vos filtres
+hc.country_topology.nodes_without_panelists,Nœuds sans panélistes
+hc.country_topology.nodes_need_panelist,Ces nœuds doivent se voir attribuer un panéliste pour être opérationnels
+hc.country_topology.download_csv,Télécharger le CSV
+hc.country_topology.all_nodes_have,Tous les nœuds ont des panélistes !
+hc.country_topology.every_node_assigned,Chaque nœud de votre topologie a un panéliste attribué
+hc.country_topology.th_node_id,ID du nœud
+hc.country_topology.pending_panelist,Panéliste en attente
+hc.country_topology.error_creating_region,Erreur lors de la création de la région : {message}
+hc.compliance_hierarchical_table.status_compliant,conforme
+hc.compliance_hierarchical_table.status_warning,avertissement
+hc.compliance_hierarchical_table.status_critical,critique
+hc.compliance_hierarchical_table.col_carrier_product_route,Opérateur / Produit / Itinéraire
+hc.compliance_hierarchical_table.col_samples,Échantillons
+hc.compliance_hierarchical_table.col_jk_std,J+K STD
+hc.compliance_hierarchical_table.col_jk_actual,J+K réel
+hc.compliance_hierarchical_table.col_std_pct,% STD
+hc.compliance_hierarchical_table.col_actual_pct,% réel
+hc.compliance_hierarchical_table.col_deviation,Écart
+hc.compliance_hierarchical_table.col_status,Statut
+hc.compliance_hierarchical_table.col_actions,Actions
+hc.compliance_hierarchical_table.download_samples_csv,Télécharger le CSV des échantillons
+hc.compliance_hierarchical_table.no_data,Aucune donnée de conformité disponible
+hc.panelist_stock_tab.no_name,Sans nom
+hc.panelist_stock_tab.no_stock_to_export,Aucune donnée de stock à exporter
+hc.panelist_stock_tab.loading,Chargement du stock des panélistes...
+hc.panelist_stock_tab.no_materials_found,Aucun matériel trouvé
+hc.panelist_stock_tab.no_panelist_stock,Aucun stock de panéliste
+hc.panelist_stock_tab.tt_material,Code et nom du matériel
+hc.panelist_stock_tab.tt_quantity,Quantité actuelle dans le stock du panéliste
+hc.panelist_stock_tab.tt_last_movement,Date du dernier mouvement de ce matériel
+hc.panelist_stock_tab.total_records,Total des enregistrements :
+hc.panelist_stock_tab.filtered_from,filtré sur {count}
+hc.panelist_stock_tab.adjust_title,Ajuster le stock du panéliste : {code}
+hc.panelist_stock_tab.panelist_line,Panéliste : {name} ({code})
+hc.panelist_stock_tab.current_quantity,Quantité actuelle
+hc.panelist_stock_tab.new_quantity,Nouvelle quantité
+hc.panelist_stock_tab.new_qty_placeholder,Saisissez la nouvelle quantité absolue
+hc.panelist_stock_tab.adjustment_note,Note d'ajustement
+hc.panelist_stock_tab.note_placeholder,Expliquez le motif de cet ajustement...
+hc.panelist_stock_tab.change,Variation :
+hc.panelist_stock_tab.cancel,Annuler
+hc.panelist_stock_tab.enter_qty_and_note,Veuillez saisir la nouvelle quantité et la note d'ajustement
+hc.panelist_stock_tab.enter_valid_qty,Veuillez saisir une quantité valide
+hc.panelist_stock_tab.adjusted_ok,Stock du panéliste ajusté avec succès
+hc.panelist_stock_tab.adjust_failed,Échec de l'ajustement du stock : {message}
+hc.panelist_stock_tab.adjusting,Ajustement en cours...
+hc.panelist_stock_tab.confirm_adjustment,Confirmer l'ajustement
+hc.region_form.region_name,Nom de la région *
+hc.region_form.region_code,Code de la région *
+hc.region_form.country_code,Code pays *
+hc.region_form.status,Statut *
+hc.region_form.ph_name,"p. ex., Espagne, France"
+hc.region_form.ph_code,"p. ex., ES, FR"
+hc.region_form.cancel,Annuler
+hc.region_form.saving,Enregistrement...
+hc.region_form.update,Mettre à jour
+hc.region_form.create,Créer
+hc.slas_configuration.confirm_delete_n,Supprimer les {count} enregistrements sélectionnés ?
+hc.slas_configuration.deleted_n,{count} enregistrements supprimés avec succès
+hc.slas_configuration.error,Erreur : {message}
+hc.slas_configuration.carrier,Opérateur
+hc.slas_configuration.product,Produit
+hc.slas_configuration.entry_exit,Entrée → Sortie
+hc.slas_configuration.create_error,Erreur lors de la création du SLA
+hc.edit_shipment_item_modal.qty_gt_zero,La quantité doit être supérieure à 0
+hc.edit_shipment_item_modal.error,Erreur : {message}
+hc.edit_shipment_item_modal.title,Modifier la quantité de l'envoi
+hc.edit_shipment_item_modal.unknown_material,Matériel inconnu
+hc.edit_shipment_item_modal.no_description,Sans description
+hc.edit_shipment_item_modal.current_quantity,Quantité actuelle : {quantity} {unit}
+hc.edit_shipment_item_modal.units,unités
+hc.edit_shipment_item_modal.new_quantity,Nouvelle quantité
+hc.edit_shipment_item_modal.info,Cela mettra à jour la quantité envoyée dans cet envoi. L'envoi doit être au statut « en attente » pour être modifié.
+hc.edit_shipment_item_modal.cancel,Annuler
+hc.edit_shipment_item_modal.saving,Enregistrement...
+hc.edit_shipment_item_modal.save_changes,Enregistrer les modifications
+hc.movements_tab.loading,Chargement des mouvements...
+hc.movements_tab.search,Rechercher
+hc.movements_tab.tt_search,Rechercher par code ou nom du matériel
+hc.movements_tab.tt_filter_type,Filtrer par type de mouvement
+hc.movements_tab.tt_filter_panelist,Filtrer par panéliste de destination
+hc.movements_tab.tt_from_date,Filtrer les mouvements à partir de cette date
+hc.movements_tab.tt_until_date,Filtrer les mouvements jusqu'à cette date
+hc.movements_tab.tt_date_time,Date et heure du mouvement
+hc.movements_tab.tt_type,"Type de mouvement (entrée, sortie, transfert)"
+hc.movements_tab.tt_origin,Emplacement d'origine du matériel
+hc.movements_tab.tt_destination,Emplacement de destination du matériel
+hc.movements_tab.panelist,Panéliste
+hc.movements_tab.no_movements_found,Aucun mouvement trouvé
+hc.movements_tab.no_movements_recorded,Aucun mouvement enregistré
+hc.movements_tab.no_name,Sans nom
+hc.movements_tab.total_movements,Total des mouvements :
+hc.movements_tab.filtered_from,filtré sur {count}
+hc.territory_equity_map.no_coords,Aucune ville avec coordonnées géographiques disponible. Veuillez ajouter les données de latitude et de longitude aux villes.
+hc.one_db_bulk_panel.selected_of,{selected} sur {total} sélectionnés
+hc.one_db_bulk_panel.export_csv,Exporter en CSV
+hc.one_db_bulk_panel.delete_n,Supprimer ({count})
+hc.one_db_bulk_panel.clear,Effacer
+account_config.add_holiday,Ajouter un jour férié
+admin.restored_records,Enregistrements restaurés
+common.add,Ajouter
+common.carrier,Transporteur
+common.compliant,Conforme
+common.critical,Critique
+common.destination_city,Ville de destination
+common.no_results,Aucun résultat trouvé
+common.optional,facultatif
+common.origin_city,Ville d'origine
+common.product,Produit
+common.threshold,Seuil
+dashboard.active_lowercase,actifs
+diagnosis.distribution,Distribution
+diagnosis.jk_performance_segments.description,Analyse des performances par segment avec les métriques J+K (jours)
+diagnosis.jk_performance_segments.title,Performance J+K (Segments)
+diagnosis.operational,Opérationnel
+diagnosis.segment_type,Type de segment
+diagnosis.total_segments,Total des segments
+panelists.select_city,— Sélectionner une ville —
+processed_events.paired,Appariés
+processed_events.unpaired,Non appariés
+readers.unassigned,Non assigné
+reporting.compliance_analysis_description,Analyse du respect du niveau de service par transporteur; produit et route
+reporting.regional_service_equity_treemap,Équité régionale du service (Treemap)
+slas.sla_created_successfully,SLA créé avec succès
+stock.auto_generate_shipments_description,Crée automatiquement des envois lorsque le stock du panéliste est bas
+stock.feature_not_available,Fonction désactivée : les bons de commande ne sont pas utilisés dans ce module
+stock.generate_shipments,Générer {count} envois
+stock.not_applicable_purchase_orders,Sans objet : les bons de commande ne sont pas utilisés
+stock.stock_control_description,Active le suivi des stocks et le système d'alertes
+stock.used_to_calculate_delivery_dates,Utilisé pour calculer les dates de livraison estimées

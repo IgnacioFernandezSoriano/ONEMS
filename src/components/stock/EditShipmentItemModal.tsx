@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { X, Package } from 'lucide-react'
 import type { MaterialShipmentItem } from '../../hooks/useStockManagement'
+import { useTranslation } from '@/hooks/useTranslation'
 
 interface EditShipmentItemModalProps {
   item: MaterialShipmentItem
@@ -9,6 +10,7 @@ interface EditShipmentItemModalProps {
 }
 
 export default function EditShipmentItemModal({ item, onClose, onSave }: EditShipmentItemModalProps) {
+  const { t } = useTranslation()
   const [quantity, setQuantity] = useState(item.quantity_sent)
   const [saving, setSaving] = useState(false)
 
@@ -16,7 +18,7 @@ export default function EditShipmentItemModal({ item, onClose, onSave }: EditShi
     e.preventDefault()
     
     if (quantity <= 0) {
-      alert('Quantity must be greater than 0')
+      alert(t('hc.edit_shipment_item_modal.qty_gt_zero'))
       return
     }
 
@@ -25,7 +27,7 @@ export default function EditShipmentItemModal({ item, onClose, onSave }: EditShi
       await onSave(item.id, quantity)
       onClose()
     } catch (error: any) {
-      alert(`Error: ${error.message}`)
+      alert(t('hc.edit_shipment_item_modal.error', { message: error.message }))
     } finally {
       setSaving(false)
     }
@@ -38,7 +40,7 @@ export default function EditShipmentItemModal({ item, onClose, onSave }: EditShi
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <div className="flex items-center gap-3">
             <Package className="h-6 w-6 text-blue-600" />
-            <h3 className="text-lg font-medium text-gray-900">Edit Shipment Quantity</h3>
+            <h3 className="text-lg font-medium text-gray-900">{t('hc.edit_shipment_item_modal.title')}</h3>
           </div>
           <button
             onClick={onClose}
@@ -55,20 +57,20 @@ export default function EditShipmentItemModal({ item, onClose, onSave }: EditShi
             {/* Material Info */}
             <div className="bg-gray-50 rounded-lg p-4">
               <div className="text-sm font-medium text-gray-900">
-                {item.material?.code || 'Unknown Material'}
+                {item.material?.code || t('hc.edit_shipment_item_modal.unknown_material')}
               </div>
               <div className="text-sm text-gray-500">
-                {item.material?.name || 'No description'}
+                {item.material?.name || t('hc.edit_shipment_item_modal.no_description')}
               </div>
               <div className="text-xs text-gray-500 mt-1">
-                Current Quantity: {item.quantity_sent.toLocaleString()} {item.material?.unit_measure || 'units'}
+                {t('hc.edit_shipment_item_modal.current_quantity', { quantity: item.quantity_sent.toLocaleString(), unit: item.material?.unit_measure || t('hc.edit_shipment_item_modal.units') })}
               </div>
             </div>
 
             {/* Quantity Input */}
             <div>
               <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-1">
-                New Quantity
+                {t('hc.edit_shipment_item_modal.new_quantity')}
               </label>
               <div className="flex items-center gap-2">
                 <input
@@ -83,7 +85,7 @@ export default function EditShipmentItemModal({ item, onClose, onSave }: EditShi
                   disabled={saving}
                 />
                 <span className="text-sm text-gray-500 whitespace-nowrap">
-                  {item.material?.unit_measure || 'units'}
+                  {item.material?.unit_measure || t('hc.edit_shipment_item_modal.units')}
                 </span>
               </div>
             </div>
@@ -91,7 +93,7 @@ export default function EditShipmentItemModal({ item, onClose, onSave }: EditShi
             {/* Info */}
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
               <p className="text-sm text-blue-700">
-                This will update the quantity sent in this shipment. The shipment must be in "pending" status to edit.
+                {t('hc.edit_shipment_item_modal.info')}
               </p>
             </div>
           </div>
@@ -104,14 +106,14 @@ export default function EditShipmentItemModal({ item, onClose, onSave }: EditShi
               disabled={saving}
               className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-100"
             >
-              Cancel
+              {t('hc.edit_shipment_item_modal.cancel')}
             </button>
             <button
               type="submit"
               disabled={saving}
               className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-300"
             >
-              {saving ? 'Saving...' : 'Save Changes'}
+              {saving ? t('hc.edit_shipment_item_modal.saving') : t('hc.edit_shipment_item_modal.save_changes')}
             </button>
           </div>
         </form>

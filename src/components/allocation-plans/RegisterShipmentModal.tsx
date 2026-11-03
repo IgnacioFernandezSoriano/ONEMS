@@ -68,7 +68,7 @@ export function RegisterShipmentModal({ detail, panelists, onClose, onRegister }
       })
       onClose()
     } catch (error: any) {
-      alert(`Error: ${error.message}`)
+      alert(t('hc.register_shipment_modal.error', { message: error.message }))
     } finally {
       setSaving(false)
     }
@@ -109,13 +109,13 @@ export function RegisterShipmentModal({ detail, panelists, onClose, onRegister }
             {/* Tag ID */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Tag ID <span className="text-red-500">*</span>
+                {t('hc.register_shipment_modal.tag_id')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 value={tagId}
                 onChange={(e) => setTagId(e.target.value)}
-                placeholder="Enter tag ID"
+                placeholder={t('hc.register_shipment_modal.enter_tag_id')}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 disabled={saving}
                 required
@@ -125,7 +125,7 @@ export function RegisterShipmentModal({ detail, panelists, onClose, onRegister }
             {/* Sent Date/Time */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Sent Date & Time <span className="text-red-500">*</span>
+                {t('hc.register_shipment_modal.sent_datetime')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="datetime-local"
@@ -140,7 +140,7 @@ export function RegisterShipmentModal({ detail, panelists, onClose, onRegister }
             {/* Sent By Panelist */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Registered By <span className="text-red-500">*</span>
+                {t('hc.register_shipment_modal.registered_by')} <span className="text-red-500">*</span>
               </label>
               <div className="text-sm text-gray-600 mb-2">
                 {(() => {
@@ -150,7 +150,7 @@ export function RegisterShipmentModal({ detail, panelists, onClose, onRegister }
                       {originPanelist.name} ({originPanelist.panelist_code})
                     </span>
                   ) : (
-                    <span className="text-orange-600">No panelist assigned to origin node</span>
+                    <span className="text-orange-600">{t('hc.register_shipment_modal.no_panelist')}</span>
                   )
                 })()}
               </div>
@@ -171,14 +171,14 @@ export function RegisterShipmentModal({ detail, panelists, onClose, onRegister }
                 disabled={saving}
                 className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:bg-gray-100"
               >
-                Cancel
+                {t('hc.register_shipment_modal.cancel')}
               </button>
               <button
                 type="submit"
                 disabled={saving || !sentByPanelistId}
                 className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 disabled:bg-gray-300"
               >
-                {saving ? 'Registering...' : 'Register Shipment'}
+                {saving ? t('hc.register_shipment_modal.registering') : t('hc.register_shipment_modal.register_shipment')}
               </button>
             </div>
           </form>

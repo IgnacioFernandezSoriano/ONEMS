@@ -147,7 +147,7 @@ export function SLAForm({ postalCenters, carriers, products, initialData, onSubm
       {/* Carrier */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Carrier
+          {t('hc.sla_form.carrier')}
         </label>
         <select
           value={formData.carrier_id || ''}
@@ -164,7 +164,7 @@ export function SLAForm({ postalCenters, carriers, products, initialData, onSubm
       {/* Product */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Product
+          {t('hc.sla_form.product')}
         </label>
         <select
           value={formData.product_id || ''}

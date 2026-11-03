@@ -82,7 +82,7 @@ export default function MovementsTab() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Loading movements...</div>
+        <div className="text-gray-500">{t('hc.movements_tab.loading')}</div>
       </div>
     )
   }
@@ -94,8 +94,8 @@ export default function MovementsTab() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
-              Search
-              <SmartTooltip content="Search by material code or name" />
+              {t('hc.movements_tab.search')}
+              <SmartTooltip content={t('hc.movements_tab.tt_search')} />
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -114,7 +114,7 @@ export default function MovementsTab() {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
               {t('stock.movement_type')}
-              <SmartTooltip content="Filter by movement type" />
+              <SmartTooltip content={t('hc.movements_tab.tt_filter_type')} />
             </label>
             <select
               value={filterType}
@@ -133,7 +133,7 @@ export default function MovementsTab() {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
               {t('stock.panelist')}
-              <SmartTooltip content="Filter by destination panelist" />
+              <SmartTooltip content={t('hc.movements_tab.tt_filter_panelist')} />
             </label>
             <select
               value={filterPanelist}
@@ -143,7 +143,7 @@ export default function MovementsTab() {
               <option value="">{t('stock.all_panelists')}</option>
               {panelists.map((panelist) => (
                 <option key={panelist} value={panelist}>
-                  {panelist.replace('panelist_', 'Panelist ')}
+                  {panelist.replace('panelist_', t('hc.movements_tab.panelist') + ' ')}
                 </option>
               ))}
             </select>
@@ -152,7 +152,7 @@ export default function MovementsTab() {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
               {t('common.start_date')}
-              <SmartTooltip content="Filter movements from this date" />
+              <SmartTooltip content={t('hc.movements_tab.tt_from_date')} />
             </label>
             <input
               type="date"
@@ -167,7 +167,7 @@ export default function MovementsTab() {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
               {t('common.end_date')}
-              <SmartTooltip content="Filter movements until this date" />
+              <SmartTooltip content={t('hc.movements_tab.tt_until_date')} />
             </label>
             <input
               type="date"
@@ -251,13 +251,13 @@ export default function MovementsTab() {
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 <div className="flex items-center gap-1">
                   {t('stock.date')}
-                  <SmartTooltip content="Date and time of the movement" />
+                  <SmartTooltip content={t('hc.movements_tab.tt_date_time')} />
                 </div>
               </th>
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 <div className="flex items-center gap-1">
                   {t('common.type')}
-                  <SmartTooltip content="Type of movement (in, out, transfer)" />
+                  <SmartTooltip content={t('hc.movements_tab.tt_type')} />
                 </div>
               </th>
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -269,13 +269,13 @@ export default function MovementsTab() {
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 <div className="flex items-center gap-1">
                   {t('stock.from')}
-                  <SmartTooltip content="Origin location of the material" />
+                  <SmartTooltip content={t('hc.movements_tab.tt_origin')} />
                 </div>
               </th>
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 <div className="flex items-center gap-1">
                   {t('common.to')}
-                  <SmartTooltip content="Destination location of the material" />
+                  <SmartTooltip content={t('hc.movements_tab.tt_destination')} />
                 </div>
               </th>
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -287,7 +287,7 @@ export default function MovementsTab() {
             {filteredMovements.length === 0 ? (
               <tr>
                 <td colSpan={7} className="px-6 py-4 text-center text-sm text-gray-500">
-                  {searchTerm || filterType ? 'No movements found' : 'No movements recorded'}
+                  {searchTerm || filterType ? t('hc.movements_tab.no_movements_found') : t('hc.movements_tab.no_movements_recorded')}
                 </td>
               </tr>
             ) : (
@@ -317,7 +317,7 @@ export default function MovementsTab() {
                       {movement.material?.code || 'N/A'}
                     </div>
                     <div className="text-sm text-gray-500">
-                      {movement.material?.name || 'No name'}
+                      {movement.material?.name || t('hc.movements_tab.no_name')}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -350,8 +350,8 @@ export default function MovementsTab() {
         {/* Summary */}
         <div className="bg-gray-50 px-4 py-3 border-t border-gray-200">
         <div className="text-sm text-gray-700">
-          <span className="font-medium">Total movements:</span> {filteredMovements.length}
-          {(searchTerm || filterType) && ` (filtered from ${movements.length})`}
+          <span className="font-medium">{t('hc.movements_tab.total_movements')}</span> {filteredMovements.length}
+          {(searchTerm || filterType) && ` (${t('hc.movements_tab.filtered_from', { count: movements.length })})`}
         </div>
         </div>
       </div>

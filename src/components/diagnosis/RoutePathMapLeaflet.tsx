@@ -4,6 +4,7 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { supabase } from '@/lib/supabase'
 import { useAccount } from '@/contexts/AccountContext'
+import { useTranslation } from '@/hooks/useTranslation'
 
 // Fix for default marker icons in Leaflet with Webpack/Vite
 delete (L.Icon.Default.prototype as any)._getIconUrl
@@ -72,6 +73,7 @@ function AutoFitBounds({ centers }: { centers: PostalCenter[] }) {
 
 export default function RoutePathMapLeaflet({ routePaths }: Props) {
   const { effectiveAccountId } = useAccount()
+  const { t } = useTranslation()
   const mapRef = useRef<L.Map>(null)
   const [segments, setSegments] = useState<SegmentData[]>([])
   const [loading, setLoading] = useState(true)
@@ -260,7 +262,7 @@ export default function RoutePathMapLeaflet({ routePaths }: Props) {
     const mins = Math.round(minutes % 60)
     
     if (days > 0) {
-      return `${days.toFixed(2)} days`
+      return t('hc.route_path_map_leaflet.days_value', { value: days.toFixed(2) })
     } else if (hours > 0) {
       return `${hours}h ${mins}m`
     } else {
@@ -281,7 +283,7 @@ export default function RoutePathMapLeaflet({ routePaths }: Props) {
   if (loading) {
     return (
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
-        <p className="text-gray-600">Loading map...</p>
+        <p className="text-gray-600">{t('hc.route_path_map_leaflet.loading_map')}</p>
       </div>
     )
   }
@@ -290,7 +292,7 @@ export default function RoutePathMapLeaflet({ routePaths }: Props) {
     return (
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
         <p className="text-gray-600">
-          No route data with valid coordinates available. Please ensure postal centers have latitude and longitude data.
+          {t('hc.route_path_map_leaflet.no_route_data')}
         </p>
       </div>
     )
@@ -336,11 +338,11 @@ export default function RoutePathMapLeaflet({ routePaths }: Props) {
                   </div>
                   <div className="space-y-1">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Type:</span>
-                      <span className="font-medium">Transit</span>
+                      <span className="text-gray-600">{t('hc.route_path_map_leaflet.type')}</span>
+                      <span className="font-medium">{t('hc.route_path_map_leaflet.transit')}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Tags:</span>
+                      <span className="text-gray-600">{t('hc.route_path_map_leaflet.tags')}</span>
                       <span className="font-medium">{segment.tags}</span>
                     </div>
                     <div className="flex justify-between">
@@ -348,7 +350,7 @@ export default function RoutePathMapLeaflet({ routePaths }: Props) {
                       <span className="font-medium">{formatTime(segment.jkStd)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Natural Time:</span>
+                      <span className="text-gray-600">{t('hc.route_path_map_leaflet.natural_time')}</span>
                       <span className="font-medium">
                         {formatTime(segment.naturalTime)}
                         <span style={{
@@ -361,7 +363,7 @@ export default function RoutePathMapLeaflet({ routePaths }: Props) {
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Working Time:</span>
+                      <span className="text-gray-600">{t('hc.route_path_map_leaflet.working_time')}</span>
                       <span className="font-medium">
                         {formatTime(segment.workingTime)}
                         <span style={{
@@ -378,7 +380,7 @@ export default function RoutePathMapLeaflet({ routePaths }: Props) {
                       <span className="font-medium">{segment.stdPercentage}%</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">% Real:</span>
+                      <span className="text-gray-600">{t('hc.route_path_map_leaflet.real_pct')}</span>
                       <span className="font-medium">
                         {segment.realPercentage.toFixed(1)}%
                         <span style={{
@@ -391,15 +393,15 @@ export default function RoutePathMapLeaflet({ routePaths }: Props) {
                       </span>
                     </div>
                     <div className="flex justify-between items-center mt-2 pt-1 border-t border-gray-300">
-                      <span className="text-gray-600">Status:</span>
+                      <span className="text-gray-600">{t('hc.route_path_map_leaflet.status')}</span>
                       <span className="font-semibold px-2 py-0.5 rounded" style={{
                         backgroundColor: segment.threshold === 'Compliant' ? '#d1fae5' : 
                                        segment.threshold === 'Warning' ? '#fef3c7' : '#fee2e2',
                         color: segment.threshold === 'Compliant' ? '#065f46' : 
                                segment.threshold === 'Warning' ? '#92400e' : '#991b1b'
                       }}>
-                        {segment.threshold === 'Compliant' ? '✓ Compliant' : 
-                         segment.threshold === 'Warning' ? '⚠ Warning' : '✗ Critical'}
+                        {segment.threshold === 'Compliant' ? `✓ ${t('hc.route_path_map_leaflet.compliant')}` : 
+                         segment.threshold === 'Warning' ? `⚠ ${t('hc.route_path_map_leaflet.warning')}` : `✗ ${t('hc.route_path_map_leaflet.critical')}`}
                       </span>
                     </div>
                   </div>
@@ -435,7 +437,7 @@ export default function RoutePathMapLeaflet({ routePaths }: Props) {
                       {center.name}
                     </div>
                     <div className="text-gray-600">{center.city}</div>
-                    <div className="mt-2 text-gray-500">Transit point (no operational data)</div>
+                    <div className="mt-2 text-gray-500">{t('hc.route_path_map_leaflet.transit_point')}</div>
                   </div>
                 </Tooltip>
               </CircleMarker>
@@ -473,7 +475,7 @@ export default function RoutePathMapLeaflet({ routePaths }: Props) {
                   
                   <div className="space-y-1">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Tags:</span>
+                      <span className="text-gray-600">{t('hc.route_path_map_leaflet.tags')}</span>
                       <span className="font-medium">{totalTags}</span>
                     </div>
                     <div className="flex justify-between">
@@ -481,7 +483,7 @@ export default function RoutePathMapLeaflet({ routePaths }: Props) {
                       <span className="font-medium">{formatTime(avgJkStd)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Natural Time:</span>
+                      <span className="text-gray-600">{t('hc.route_path_map_leaflet.natural_time')}</span>
                       <span className="font-medium">
                         {formatTime(avgNatural)}
                         <span style={{
@@ -494,7 +496,7 @@ export default function RoutePathMapLeaflet({ routePaths }: Props) {
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Working Time:</span>
+                      <span className="text-gray-600">{t('hc.route_path_map_leaflet.working_time')}</span>
                       <span className="font-medium">
                         {formatTime(avgWorking)}
                         <span style={{
@@ -511,7 +513,7 @@ export default function RoutePathMapLeaflet({ routePaths }: Props) {
                       <span className="font-medium">{avgStdPct.toFixed(0)}%</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">% Real:</span>
+                      <span className="text-gray-600">{t('hc.route_path_map_leaflet.real_pct')}</span>
                       <span className="font-medium">
                         {avgRealPct.toFixed(1)}%
                         <span style={{
@@ -524,15 +526,15 @@ export default function RoutePathMapLeaflet({ routePaths }: Props) {
                       </span>
                     </div>
                     <div className="flex justify-between items-center mt-2 pt-2 border-t border-gray-200">
-                      <span className="text-gray-600">Status:</span>
+                      <span className="text-gray-600">{t('hc.route_path_map_leaflet.status')}</span>
                       <span className="px-2 py-0.5 rounded text-xs font-semibold" style={{
                         backgroundColor: threshold === 'Compliant' ? '#dcfce7' : 
                                        threshold === 'Warning' ? '#fef3c7' : '#fee2e2',
                         color: threshold === 'Compliant' ? '#166534' : 
                                threshold === 'Warning' ? '#92400e' : '#991b1b'
                       }}>
-                        {threshold === 'Compliant' ? '✓ Compliant' : 
-                         threshold === 'Warning' ? '⚠ Warning' : '✗ Critical'}
+                        {threshold === 'Compliant' ? `✓ ${t('hc.route_path_map_leaflet.compliant')}` : 
+                         threshold === 'Warning' ? `⚠ ${t('hc.route_path_map_leaflet.warning')}` : `✗ ${t('hc.route_path_map_leaflet.critical')}`}
                       </span>
                     </div>
                   </div>
@@ -545,19 +547,19 @@ export default function RoutePathMapLeaflet({ routePaths }: Props) {
 
       {/* Legend */}
       <div className="absolute bottom-4 right-4 bg-white p-3 rounded-lg shadow-lg border border-gray-200 text-xs">
-        <div className="font-semibold mb-2">Segment Compliance</div>
+        <div className="font-semibold mb-2">{t('hc.route_path_map_leaflet.segment_compliance')}</div>
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <div className="w-8 h-0.5 bg-green-500"></div>
-            <span>Compliant</span>
+            <span>{t('hc.route_path_map_leaflet.compliant')}</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-8 h-0.5 bg-yellow-500"></div>
-            <span>Warning</span>
+            <span>{t('hc.route_path_map_leaflet.warning')}</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-8 h-0.5 bg-red-500"></div>
-            <span>Critical</span>
+            <span>{t('hc.route_path_map_leaflet.critical')}</span>
           </div>
         </div>
       </div>

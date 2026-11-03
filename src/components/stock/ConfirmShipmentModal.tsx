@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { X, Send, Trash2, AlertTriangle, Package } from 'lucide-react'
 import type { MaterialShipment } from '../../hooks/useStockManagement'
+import { useTranslation } from '@/hooks/useTranslation'
 
 interface ConfirmShipmentModalProps {
   shipment: MaterialShipment
@@ -32,6 +33,7 @@ export default function ConfirmShipmentModal({
   onClose,
   onConfirm
 }: ConfirmShipmentModalProps) {
+  const { t } = useTranslation()
   const [sentDate, setSentDate] = useState(
     shipment.expected_date || new Date().toISOString().split('T')[0]
   )
@@ -83,12 +85,12 @@ export default function ConfirmShipmentModal({
     e.preventDefault()
 
     if (activeItems.length === 0) {
-      alert('At least one material must remain in the shipment')
+      alert(t('hc.confirm_shipment_modal.min_one_material'))
       return
     }
 
     if (activeItems.some(item => item.quantity_sent <= 0)) {
-      alert('All quantities must be greater than 0')
+      alert(t('hc.confirm_shipment_modal.qty_gt_zero'))
       return
     }
 
@@ -102,7 +104,7 @@ export default function ConfirmShipmentModal({
       await onConfirm(shipment.id, confirmedItems, sentDate)
       onClose()
     } catch (error: any) {
-      alert(`Error: ${error.message}`)
+      alert(t('hc.confirm_shipment_modal.error', { message: error.message }))
     } finally {
       setSaving(false)
     }
@@ -116,9 +118,9 @@ export default function ConfirmShipmentModal({
           <div className="flex items-center gap-3">
             <Send className="h-6 w-6 text-blue-600" />
             <div>
-              <h3 className="text-lg font-medium text-gray-900">Confirm Shipment</h3>
+              <h3 className="text-lg font-medium text-gray-900">{t('hc.confirm_shipment_modal.title')}</h3>
               <p className="text-sm text-gray-500">
-                To: {shipment.panelist?.name || 'Unknown Panelist'}
+                {t('hc.confirm_shipment_modal.to', { name: shipment.panelist?.name || t('hc.confirm_shipment_modal.unknown_panelist') })}
               </p>
             </div>
           </div>
@@ -137,7 +139,7 @@ export default function ConfirmShipmentModal({
             {/* Sent Date */}
             <div>
               <label htmlFor="sentDate" className="block text-sm font-medium text-gray-700 mb-1">
-                Sent Date
+                {t('hc.confirm_shipment_modal.sent_date')}
               </label>
               <input
                 type="date"
@@ -154,10 +156,9 @@ export default function ConfirmShipmentModal({
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-start gap-3">
                 <AlertTriangle className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
                 <div className="flex-1">
-                  <h4 className="text-sm font-medium text-yellow-800">Stock Alert</h4>
+                  <h4 className="text-sm font-medium text-yellow-800">{t('hc.confirm_shipment_modal.stock_alert')}</h4>
                   <p className="text-sm text-yellow-700 mt-1">
-                    Some materials have insufficient stock in the regulator. An inventory check is required.
-                    The shipment will be registered with a stock incident note.
+                    {t('hc.confirm_shipment_modal.stock_alert_desc')}
                   </p>
                 </div>
               </div>
@@ -165,22 +166,22 @@ export default function ConfirmShipmentModal({
 
             {/* Active Items Table */}
             <div>
-              <h4 className="text-sm font-medium text-gray-900 mb-2">Materials to Send</h4>
+              <h4 className="text-sm font-medium text-gray-900 mb-2">{t('hc.confirm_shipment_modal.materials_to_send')}</h4>
               <div className="border border-gray-200 rounded-lg overflow-hidden">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Material
+                        {t('hc.confirm_shipment_modal.th_material')}
                       </th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Available Stock
+                        {t('hc.confirm_shipment_modal.th_available_stock')}
                       </th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Quantity to Send
+                        {t('hc.confirm_shipment_modal.th_qty_to_send')}
                       </th>
                       <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Actions
+                        {t('hc.confirm_shipment_modal.th_actions')}
                       </th>
                     </tr>
                   </thead>
@@ -197,7 +198,7 @@ export default function ConfirmShipmentModal({
                             <div className={`text-sm ${hasIssue ? 'text-yellow-700 font-medium' : 'text-gray-900'}`}>
                               {item.stock_available.toLocaleString()} {item.unit_measure}
                               {hasIssue && (
-                                <span className="ml-2 text-xs">⚠️ Insufficient</span>
+                                <span className="ml-2 text-xs">⚠️ {t('hc.confirm_shipment_modal.insufficient')}</span>
                               )}
                             </div>
                           </td>
@@ -218,10 +219,10 @@ export default function ConfirmShipmentModal({
                               onClick={() => handleRemoveItem(item.id)}
                               className="inline-flex items-center px-2 py-1 text-xs font-medium text-red-700 bg-red-100 hover:bg-red-200 rounded"
                               disabled={saving || activeItems.length === 1}
-                              title={activeItems.length === 1 ? 'Cannot remove last item' : 'Remove from shipment'}
+                              title={activeItems.length === 1 ? t('hc.confirm_shipment_modal.cannot_remove_last') : t('hc.confirm_shipment_modal.remove_from_shipment')}
                             >
                               <Trash2 className="h-3 w-3 mr-1" />
-                              Remove
+                              {t('hc.confirm_shipment_modal.remove')}
                             </button>
                           </td>
                         </tr>
@@ -235,19 +236,19 @@ export default function ConfirmShipmentModal({
             {/* Removed Items */}
             {removedItems.length > 0 && (
               <div>
-                <h4 className="text-sm font-medium text-gray-900 mb-2">Removed Materials (Will Create New Pending Shipment)</h4>
+                <h4 className="text-sm font-medium text-gray-900 mb-2">{t('hc.confirm_shipment_modal.removed_materials')}</h4>
                 <div className="border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-100">
                       <tr>
                         <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Material
+                          {t('hc.confirm_shipment_modal.th_material')}
                         </th>
                         <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Quantity
+                          {t('hc.confirm_shipment_modal.th_quantity')}
                         </th>
                         <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Actions
+                          {t('hc.confirm_shipment_modal.th_actions')}
                         </th>
                       </tr>
                     </thead>
@@ -271,7 +272,7 @@ export default function ConfirmShipmentModal({
                               disabled={saving}
                             >
                               <Package className="h-3 w-3 mr-1" />
-                              Restore
+                              {t('hc.confirm_shipment_modal.restore')}
                             </button>
                           </td>
                         </tr>
@@ -291,7 +292,7 @@ export default function ConfirmShipmentModal({
               disabled={saving}
               className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-100"
             >
-              Cancel
+              {t('hc.confirm_shipment_modal.cancel')}
             </button>
             <button
               type="submit"
@@ -299,7 +300,7 @@ export default function ConfirmShipmentModal({
               className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-300"
             >
               <Send className="h-4 w-4 mr-2" />
-              {saving ? 'Sending...' : 'Confirm Send'}
+              {saving ? t('hc.confirm_shipment_modal.sending') : t('hc.confirm_shipment_modal.confirm_send')}
             </button>
           </div>
         </form>

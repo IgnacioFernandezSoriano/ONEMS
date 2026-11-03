@@ -5,6 +5,7 @@ import { TimeUnitToggle } from '@/components/common/TimeUnitToggle';
 import { formatDuration } from '@/lib/accountTime';
 import { supabase } from '../../lib/supabase';
 import { Route, TrendingUp, Users, Calendar } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface RoutePerformance {
   origin_city_name: string;
@@ -37,6 +38,7 @@ interface RouteTrend {
 }
 
 const RouteAnalysis: React.FC = () => {
+  const { t } = useTranslation();
   const { effectiveAccountId } = useAccount();
   const { unit } = useTimeUnit();
   const [activeTab, setActiveTab] = useState<'performance' | 'carriers' | 'trends'>('performance');
@@ -133,13 +135,13 @@ const RouteAnalysis: React.FC = () => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Route</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Journeys</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">On-time Rate</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avg Transit</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">P95 Transit</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SLA Violations</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Missroute Rate</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('hc.route_analysis.route')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('hc.route_analysis.journeys')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('hc.route_analysis.on_time_rate')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('hc.route_analysis.avg_transit')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('hc.route_analysis.p95_transit')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('hc.route_analysis.sla_violations')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('hc.route_analysis.missroute_rate')}</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -186,21 +188,21 @@ const RouteAnalysis: React.FC = () => {
             <h3 className="text-lg font-semibold text-gray-900 mb-4">{carrier.carrier_name}</h3>
             <div className="space-y-3">
               <div className="flex justify-between">
-                <span className="text-sm text-gray-500">On-time Rate</span>
+                <span className="text-sm text-gray-500">{t('hc.route_analysis.on_time_rate')}</span>
                 <span className={`text-sm font-semibold ${carrier.on_time_rate >= 90 ? 'text-green-600' : carrier.on_time_rate >= 75 ? 'text-yellow-600' : 'text-red-600'}`}>
                   {carrier.on_time_rate?.toFixed(1)}%
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-gray-500">Avg Transit Time</span>
+                <span className="text-sm text-gray-500">{t('hc.route_analysis.avg_transit_time')}</span>
                 <span className="text-sm font-medium text-gray-900">{formatDuration(carrier.avg_transit_hours, unit)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-gray-500">Total Segments</span>
+                <span className="text-sm text-gray-500">{t('hc.route_analysis.total_segments')}</span>
                 <span className="text-sm font-medium text-gray-900">{carrier.total_segments}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-gray-500">Routes Covered</span>
+                <span className="text-sm text-gray-500">{t('hc.route_analysis.routes_covered')}</span>
                 <span className="text-sm font-medium text-gray-900">{carrier.total_routes}</span>
               </div>
             </div>
@@ -218,9 +220,9 @@ const RouteAnalysis: React.FC = () => {
           onChange={(e) => setTrendInterval(e.target.value as 'day' | 'week' | 'month')}
           className="px-3 py-2 border border-gray-300 rounded-md"
         >
-          <option value="day">Daily</option>
-          <option value="week">Weekly</option>
-          <option value="month">Monthly</option>
+          <option value="day">{t('hc.route_analysis.daily')}</option>
+          <option value="week">{t('hc.route_analysis.weekly')}</option>
+          <option value="month">{t('hc.route_analysis.monthly')}</option>
         </select>
       </div>
 
@@ -228,10 +230,10 @@ const RouteAnalysis: React.FC = () => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Period</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Journeys</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">On-time Rate</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avg Transit</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('hc.route_analysis.period')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('hc.route_analysis.journeys')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('hc.route_analysis.on_time_rate')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('hc.route_analysis.avg_transit')}</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -265,11 +267,11 @@ const RouteAnalysis: React.FC = () => {
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
             <Route className="w-6 h-6" />
-            Route Analysis
+            {t('hc.route_analysis.title')}
           </h1>
           <TimeUnitToggle />
         </div>
-        <p className="text-gray-600 mt-1">Detailed performance analysis by route and carrier</p>
+        <p className="text-gray-600 mt-1">{t('hc.route_analysis.subtitle')}</p>
       </div>
 
       {/* Tabs */}
@@ -284,7 +286,7 @@ const RouteAnalysis: React.FC = () => {
             } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2`}
           >
             <TrendingUp className="w-4 h-4" />
-            Performance
+            {t('hc.route_analysis.tab_performance')}
           </button>
           <button
             onClick={() => setActiveTab('carriers')}
@@ -295,7 +297,7 @@ const RouteAnalysis: React.FC = () => {
             } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2`}
           >
             <Users className="w-4 h-4" />
-            Carrier Comparison
+            {t('hc.route_analysis.tab_carrier_comparison')}
           </button>
           <button
             onClick={() => setActiveTab('trends')}
@@ -306,7 +308,7 @@ const RouteAnalysis: React.FC = () => {
             } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2`}
           >
             <Calendar className="w-4 h-4" />
-            Trends
+            {t('hc.route_analysis.tab_trends')}
           </button>
         </nav>
       </div>
@@ -318,7 +320,7 @@ const RouteAnalysis: React.FC = () => {
         </div>
       ) : error ? (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-800">Error: {error}</p>
+          <p className="text-red-800">{t('hc.route_analysis.error', { message: error })}</p>
         </div>
       ) : (
         <>

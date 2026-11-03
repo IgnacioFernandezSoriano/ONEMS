@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Button } from '@/components/common/Button'
 import { Modal } from '@/components/common/Modal'
 import { ROLE_LABELS } from '@/utils/constants'
+import { useTranslation } from '@/hooks/useTranslation'
 import { useAuth } from '@/contexts/AuthContext'
 import type { ProfileWithAccount } from '@/lib/types'
 import { Key, RefreshCw, Copy, Check, Eye, EyeOff } from 'lucide-react'
@@ -14,6 +15,7 @@ interface UserTableProps {
 }
 
 export function UserTable({ users, onEdit, onDelete, onResetPassword }: UserTableProps) {
+  const { t } = useTranslation()
   const { profile } = useAuth()
   const [resetUserId, setResetUserId] = useState<string | null>(null)
   const [resetUserEmail, setResetUserEmail] = useState<string>('')
@@ -94,12 +96,12 @@ export function UserTable({ users, onEdit, onDelete, onResetPassword }: UserTabl
   // Ejecutar reset de contraseña
   const handleResetPassword = async () => {
     if (!resetUserId || !newPassword) {
-      setError('Password is required')
+      setError(t('hc.user_table.password_required'))
       return
     }
 
     if (newPassword.length < 8) {
-      setError('Password must be at least 8 characters')
+      setError(t('hc.user_table.password_min_length'))
       return
     }
 
@@ -110,7 +112,7 @@ export function UserTable({ users, onEdit, onDelete, onResetPassword }: UserTabl
       await onResetPassword(resetUserId, newPassword)
       closeResetModal()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to reset password')
+      setError(err instanceof Error ? err.message : t('hc.user_table.reset_failed'))
     } finally {
       setLoading(false)
     }
@@ -119,7 +121,7 @@ export function UserTable({ users, onEdit, onDelete, onResetPassword }: UserTabl
   if (users.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
-        No users found
+        {t('hc.user_table.no_users')}
       </div>
     )
   }
@@ -131,22 +133,22 @@ export function UserTable({ users, onEdit, onDelete, onResetPassword }: UserTabl
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Email
+                {t('hc.user_table.email')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Name
+                {t('hc.user_table.name')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Role
+                {t('hc.user_table.role')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Account
+                {t('hc.user_table.account')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Status
+                {t('hc.user_table.status')}
               </th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                Actions
+                {t('hc.user_table.actions')}
               </th>
             </tr>
           </thead>
@@ -184,7 +186,7 @@ export function UserTable({ users, onEdit, onDelete, onResetPassword }: UserTabl
                     variant="secondary"
                     onClick={() => onEdit(user)}
                   >
-                    Edit
+                    {t('hc.user_table.edit')}
                   </Button>
                   {canResetPassword(user) && (
                     <Button
@@ -194,19 +196,19 @@ export function UserTable({ users, onEdit, onDelete, onResetPassword }: UserTabl
                       className="inline-flex items-center gap-1"
                     >
                       <Key size={14} />
-                      <span className="hidden sm:inline">Reset Password</span>
+                      <span className="hidden sm:inline">{t('hc.user_table.reset_password')}</span>
                     </Button>
                   )}
                   <Button
                     size="sm"
                     variant="danger"
                     onClick={() => {
-                      if (confirm('Are you sure you want to permanently delete this user? This action cannot be undone.')) {
+                      if (confirm(t('hc.user_table.confirm_delete'))) {
                         onDelete(user.id)
                       }
                     }}
                   >
-                    Delete
+                    {t('hc.user_table.delete')}
                   </Button>
                 </td>
               </tr>
@@ -219,7 +221,7 @@ export function UserTable({ users, onEdit, onDelete, onResetPassword }: UserTabl
       <Modal
         isOpen={!!resetUserId}
         onClose={closeResetModal}
-        title="Reset User Password"
+        title={t('hc.user_table.reset_user_password')}
       >
         <div className="space-y-4">
           {error && (
@@ -230,13 +232,13 @@ export function UserTable({ users, onEdit, onDelete, onResetPassword }: UserTabl
 
           <div>
             <p className="text-sm text-gray-600 mb-4">
-              Reset password for: <strong>{resetUserEmail}</strong>
+              {t('hc.user_table.reset_password_for')} <strong>{resetUserEmail}</strong>
             </p>
           </div>
 
           <div>
             <label className="block text-sm font-medium mb-2">
-              New Password *
+              {t('hc.user_table.new_password')} *
             </label>
             <div className="flex gap-2">
               <div className="flex-1 relative">
@@ -244,7 +246,7 @@ export function UserTable({ users, onEdit, onDelete, onResetPassword }: UserTabl
                   type={showPassword ? 'text' : 'password'}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Enter new password"
+                  placeholder={t('hc.user_table.enter_new_password')}
                   minLength={8}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md pr-10"
                 />
@@ -260,7 +262,7 @@ export function UserTable({ users, onEdit, onDelete, onResetPassword }: UserTabl
                 type="button"
                 onClick={generatePassword}
                 className="px-3 py-2 bg-blue-50 text-blue-700 rounded-md hover:bg-blue-100 transition-colors"
-                title="Generate password"
+                title={t('hc.user_table.generate_password')}
               >
                 <RefreshCw size={18} />
               </button>
@@ -269,7 +271,7 @@ export function UserTable({ users, onEdit, onDelete, onResetPassword }: UserTabl
                   type="button"
                   onClick={copyPassword}
                   className="px-3 py-2 bg-green-50 text-green-700 rounded-md hover:bg-green-100 transition-colors"
-                  title="Copy password"
+                  title={t('hc.user_table.copy_password')}
                 >
                   {copied ? <Check size={18} /> : <Copy size={18} />}
                 </button>
@@ -277,7 +279,7 @@ export function UserTable({ users, onEdit, onDelete, onResetPassword }: UserTabl
             </div>
             {newPassword && (
               <p className="text-xs text-orange-600 mt-2">
-                ⚠️ Remember to send this password to the user via email or other secure channel.
+                ⚠️ {t('hc.user_table.remember_send')}
               </p>
             )}
           </div>
@@ -288,13 +290,13 @@ export function UserTable({ users, onEdit, onDelete, onResetPassword }: UserTabl
               onClick={closeResetModal}
               disabled={loading}
             >
-              Cancel
+              {t('hc.user_table.cancel')}
             </Button>
             <Button
               onClick={handleResetPassword}
               disabled={loading || !newPassword}
             >
-              {loading ? 'Resetting...' : 'Reset Password'}
+              {loading ? t('hc.user_table.resetting') : t('hc.user_table.reset_password')}
             </Button>
           </div>
         </div>

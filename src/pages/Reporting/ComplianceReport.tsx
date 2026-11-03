@@ -45,13 +45,13 @@ export default function ComplianceReport() {
   const overallCompliance = totalRoutes > 0 ? (compliantRoutes / totalRoutes) * 100 : 0;
 
   const handleExportAuditReport = () => {
-    alert('Export Audit Report - Coming soon');
+    alert(t('hc.compliance_report.export_coming_soon'));
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-lg text-gray-600">Loading compliance data...</div>
+        <div className="text-lg text-gray-600">{t('hc.compliance_report.loading')}</div>
       </div>
     );
   }
@@ -59,7 +59,7 @@ export default function ComplianceReport() {
   if (error) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-lg text-red-600">Error loading data</div>
+        <div className="text-lg text-red-600">{t('hc.compliance_report.error_loading')}</div>
       </div>
     );
   }
@@ -84,7 +84,7 @@ export default function ComplianceReport() {
           onClick={handleExportAuditReport}
           disabled
           className="flex items-center gap-2 px-4 py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed"
-          title="Coming soon"
+          title={t('hc.compliance_report.coming_soon')}
         >
           <FileDown className="w-4 h-4" />
           {t('reporting.export_audit_report')}
@@ -105,8 +105,8 @@ export default function ComplianceReport() {
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-gray-600 flex items-center gap-1">
-              Overall Compliance
-              <SmartTooltip content="Percentage of routes meeting compliance standards" />
+              {t('hc.compliance_report.overall_compliance')}
+              <SmartTooltip content={t('hc.compliance_report.overall_compliance_tip')} />
             </h3>
           </div>
           <div className="flex items-center gap-2">
@@ -115,7 +115,7 @@ export default function ComplianceReport() {
               {overallCompliance.toFixed(1)}%
             </span>
           </div>
-          <p className="text-sm text-gray-500 mt-1">{compliantRoutes}/{totalRoutes} routes</p>
+          <p className="text-sm text-gray-500 mt-1">{t('hc.compliance_report.routes_ratio', { compliant: compliantRoutes, total: totalRoutes })}</p>
         </div>
 
         {/* Compliant Routes */}
@@ -123,12 +123,12 @@ export default function ComplianceReport() {
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-gray-600 flex items-center gap-1">
               <CheckCircle className="w-4 h-4 text-green-600" />
-              Compliant Routes
-              <SmartTooltip content="Routes meeting standard" />
+              {t('hc.compliance_report.compliant_routes')}
+              <SmartTooltip content={t('hc.compliance_report.compliant_routes_tip')} />
             </h3>
           </div>
           <div className="text-3xl font-bold text-green-600">{compliantRoutes}</div>
-          <p className="text-sm text-gray-500 mt-1">Meeting standard</p>
+          <p className="text-sm text-gray-500 mt-1">{t('hc.compliance_report.meeting_standard')}</p>
         </div>
 
         {/* Warning Routes */}
@@ -136,12 +136,12 @@ export default function ComplianceReport() {
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-gray-600 flex items-center gap-1">
               <AlertTriangle className="w-4 h-4 text-amber-600" />
-              Warning Routes
-              <SmartTooltip content="Routes with minor issues" />
+              {t('hc.compliance_report.warning_routes')}
+              <SmartTooltip content={t('hc.compliance_report.warning_routes_tip')} />
             </h3>
           </div>
           <div className="text-3xl font-bold text-amber-600">{warningRoutes}</div>
-          <p className="text-sm text-gray-500 mt-1">No penalty</p>
+          <p className="text-sm text-gray-500 mt-1">{t('hc.compliance_report.no_penalty')}</p>
         </div>
 
         {/* Critical Routes */}
@@ -149,12 +149,12 @@ export default function ComplianceReport() {
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-gray-600 flex items-center gap-1">
               <XCircle className="w-4 h-4 text-red-600" />
-              Critical Routes
-              <SmartTooltip content="Routes with penalties" />
+              {t('hc.compliance_report.critical_routes')}
+              <SmartTooltip content={t('hc.compliance_report.critical_routes_tip')} />
             </h3>
           </div>
           <div className="text-3xl font-bold text-red-600">{criticalRoutes}</div>
-          <p className="text-sm text-gray-500 mt-1">With penalty</p>
+          <p className="text-sm text-gray-500 mt-1">{t('hc.compliance_report.with_penalty')}</p>
         </div>
 
         {/* Total Routes */}
@@ -162,12 +162,12 @@ export default function ComplianceReport() {
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-gray-600 flex items-center gap-1">
               <Info className="w-4 h-4 text-blue-600" />
-              Total Routes
-              <SmartTooltip content="All routes analyzed" />
+              {t('hc.compliance_report.total_routes')}
+              <SmartTooltip content={t('hc.compliance_report.total_routes_tip')} />
             </h3>
           </div>
           <div className="text-3xl font-bold text-blue-600">{totalRoutes}</div>
-          <p className="text-sm text-gray-500 mt-1">Across all carriers</p>
+          <p className="text-sm text-gray-500 mt-1">{t('hc.compliance_report.across_carriers')}</p>
         </div>
       </div>
 
@@ -175,8 +175,8 @@ export default function ComplianceReport() {
       <div className="bg-white rounded-lg shadow">
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Compliance Analysis</h2>
-            <SmartTooltip content="Hierarchical view: Carrier → Product → Route" />
+            <h2 className="text-lg font-semibold">{t('hc.compliance_report.compliance_analysis')}</h2>
+            <SmartTooltip content={t('hc.compliance_report.hierarchy_tip')} />
           </div>
         </div>
         <div className="p-6">

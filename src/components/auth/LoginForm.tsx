@@ -25,7 +25,7 @@ export function LoginForm() {
       await new Promise(resolve => setTimeout(resolve, 500))
       navigate('/dashboard')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error signing in')
+      setError(err instanceof Error ? err.message : t('hc.login_form.error_signing_in'))
     } finally {
       setLoading(false)
     }
@@ -58,11 +58,11 @@ export function LoginForm() {
               <h3 className="text-sm font-semibold text-blue-900 mb-2">{t('auth.try_demo_account')}</h3>
               <div className="text-xs text-blue-800 space-y-1 mb-3">
                 <div className="flex items-center gap-2">
-                  <span className="font-medium">Email:</span>
+                  <span className="font-medium">{t('hc.login_form.email_label')}</span>
                   <code className="bg-blue-100 px-2 py-0.5 rounded">demo@myone.int</code>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="font-medium">Password:</span>
+                  <span className="font-medium">{t('hc.login_form.password_label')}</span>
                   <code className="bg-blue-100 px-2 py-0.5 rounded">{t('auth.wherequalitystarts')}</code>
                 </div>
               </div>
@@ -120,7 +120,7 @@ export function LoginForm() {
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                title={showPassword ? 'Hide password' : 'Show password'}
+                title={showPassword ? t('hc.login_form.hide_password') : t('hc.login_form.show_password')}
               >
                 {showPassword ? (
                   <EyeOff className="w-5 h-5" />
@@ -143,7 +143,7 @@ export function LoginForm() {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                Signing in...
+                {t('hc.login_form.signing_in')}
               </span>
             ) : (
               t('auth.sign_in')

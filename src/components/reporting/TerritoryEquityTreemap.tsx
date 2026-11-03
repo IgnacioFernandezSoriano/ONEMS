@@ -175,7 +175,7 @@ export function TerritoryEquityTreemap({ data, scenarioInfo, globalWarningThresh
                 strokeWidth={0.5}
                 opacity={0.9}
               >
-                {population ? `${(population / 1000).toFixed(0)}K pop` : `${totalShipments} shipments`}
+                {population ? t('hc.territory_equity_treemap.k_pop', { value: (population / 1000).toFixed(0) }) : t('hc.territory_equity_treemap.shipments_count', { count: totalShipments })}
               </text>
             )}
           </>
@@ -191,18 +191,18 @@ export function TerritoryEquityTreemap({ data, scenarioInfo, globalWarningThresh
         <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3">
           <p className="font-semibold text-gray-900">{data.name}</p>
           <p className="text-sm text-gray-600">
-            Compliance: <span className="font-medium">{(data.actualPercentage || 0).toFixed(1)}%</span>
+            {t('hc.territory_equity_treemap.compliance')}: <span className="font-medium">{(data.actualPercentage || 0).toFixed(1)}%</span>
           </p>
           {data.population && (
             <p className="text-sm text-gray-600">
-              Population: <span className="font-medium">{data.population.toLocaleString()}</span>
+              {t('hc.territory_equity_treemap.population')}: <span className="font-medium">{data.population.toLocaleString()}</span>
             </p>
           )}
           <p className="text-sm text-gray-600">
-            Shipments: <span className="font-medium">{data.totalShipments}</span>
+            {t('hc.territory_equity_treemap.shipments')}: <span className="font-medium">{data.totalShipments}</span>
           </p>
           <p className="text-sm">
-            Status:{' '}
+            {t('hc.territory_equity_treemap.status')}:{' '}
             <span className={`font-medium ${
               data.status === 'compliant' ? 'text-green-600' :
               data.status === 'warning' ? 'text-amber-600' :
@@ -222,7 +222,7 @@ export function TerritoryEquityTreemap({ data, scenarioInfo, globalWarningThresh
   if (!data || data.length === 0) {
     return (
       <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
-        <p className="text-gray-500">No data available for treemap</p>
+        <p className="text-gray-500">{t('hc.territory_equity_treemap.no_data')}</p>
       </div>
     );
   }

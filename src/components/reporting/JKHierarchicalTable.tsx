@@ -74,7 +74,7 @@ export function JKHierarchicalTable({
     const colorClass = getStatusColor(status);
     return (
       <span className={`px-2 py-1 text-xs font-medium rounded-full ${colorClass}`}>
-        {status === 'compliant' ? '✓ Compliant' : status === 'warning' ? '⚠ Warning' : '✕ Critical'}
+        {status === 'compliant' ? `✓ ${t('hc.jk_hierarchical_table.compliant')}` : status === 'warning' ? `⚠ ${t('hc.jk_hierarchical_table.warning')}` : `✕ ${t('hc.jk_hierarchical_table.critical')}`}
       </span>
     );
   };
@@ -83,7 +83,7 @@ export function JKHierarchicalTable({
     return (
       <div className="bg-white rounded-lg shadow p-6">
         <div className="text-center py-8 text-gray-400">
-          No J+K performance data available
+          {t('hc.jk_hierarchical_table.no_data')}
         </div>
       </div>
     );
@@ -101,31 +101,31 @@ export function JKHierarchicalTable({
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                City / Carrier / Product
+                {t('hc.jk_hierarchical_table.city_carrier_product')}
               </th>
               <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Routes
+                {t('hc.jk_hierarchical_table.routes')}
               </th>
               <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Samples
+                {t('hc.jk_hierarchical_table.samples')}
               </th>
               <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                J+K Std (days)
+                {t('hc.jk_hierarchical_table.jk_std_days')}
               </th>
               <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                J+K Actual (days)
+                {t('hc.jk_hierarchical_table.jk_actual_days')}
               </th>
               <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Deviation (days)
+                {t('hc.jk_hierarchical_table.deviation_days')}
               </th>
               <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                On-Time %
+                {t('hc.jk_hierarchical_table.on_time_pct')}
               </th>
               <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Std %
+                {t('hc.jk_hierarchical_table.std_pct')}
               </th>
               <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
+                {t('hc.jk_hierarchical_table.status')}
               </th>
             </tr>
           </thead>

@@ -4,6 +4,7 @@ import { formatNumber } from '@/lib/formatNumber';
 import { useTimeUnit } from '@/hooks/useTimeUnit';
 import type { TimeUnit } from '@/lib/accountTime';
 import { formatJK } from '@/lib/transitMeasure';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface RegionDetailModalProps {
   region: RegionEquityData;
@@ -11,6 +12,7 @@ interface RegionDetailModalProps {
 }
 
 export function RegionDetailModal({ region, onClose }: RegionDetailModalProps) {
+  const { t } = useTranslation();
   const { unit: displayUnit } = useTimeUnit();
   // J+K en la unidad de su grupo (sin unidad = horas, regla de medida)
   const jk = (v: number, u?: TimeUnit) => formatJK(v, u ?? 'hours', displayUnit);
@@ -29,7 +31,7 @@ export function RegionDetailModal({ region, onClose }: RegionDetailModalProps) {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-gray-900">Region Details: {region.regionName}</h2>
+          <h2 className="text-2xl font-bold text-gray-900">{t('hc.region_detail_modal.title', { name: region.regionName })}</h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -41,20 +43,20 @@ export function RegionDetailModal({ region, onClose }: RegionDetailModalProps) {
         <div className="p-6 space-y-6">
           {/* Basic Information */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">Regional Summary</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">{t('hc.region_detail_modal.regional_summary')}</h3>
             <div className="grid grid-cols-3 gap-4">
               <div>
-                <p className="text-sm text-gray-500">Total Cities:</p>
+                <p className="text-sm text-gray-500">{t('hc.region_detail_modal.total_cities')}</p>
                 <p className="font-medium text-gray-900">{region.totalCities}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Population:</p>
+                <p className="text-sm text-gray-500">{t('hc.region_detail_modal.population')}</p>
                 <p className="font-medium text-gray-900">
                   {region.totalPopulation.toLocaleString()}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Total Shipments:</p>
+                <p className="text-sm text-gray-500">{t('hc.region_detail_modal.total_shipments')}</p>
                 <p className="font-medium text-gray-900">{region.totalShipments}</p>
               </div>
             </div>
@@ -62,20 +64,20 @@ export function RegionDetailModal({ region, onClose }: RegionDetailModalProps) {
 
           {/* Performance Metrics */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">Performance Metrics</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">{t('hc.region_detail_modal.performance_metrics')}</h3>
             <div className="grid grid-cols-3 gap-4">
               <div>
-                <p className="text-sm text-gray-500">Compliant:</p>
+                <p className="text-sm text-gray-500">{t('hc.region_detail_modal.compliant')}</p>
                 <p className="font-medium text-gray-900">
                   {region.compliantShipments} ({formatNumber(region.actualPercentage)}%)
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Standard:</p>
+                <p className="text-sm text-gray-500">{t('hc.region_detail_modal.standard')}</p>
                 <p className="font-medium text-gray-900">{formatNumber(region.standardPercentage)}%</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Deviation:</p>
+                <p className="text-sm text-gray-500">{t('hc.region_detail_modal.deviation')}</p>
                 <p
                   className={`font-medium ${
                     region.deviation >= 0 ? 'text-green-600' : 'text-red-600'
@@ -86,19 +88,19 @@ export function RegionDetailModal({ region, onClose }: RegionDetailModalProps) {
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Status:</p>
+                <p className="text-sm text-gray-500">{t('hc.region_detail_modal.status')}</p>
                 <span
                   className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${getStatusBadge(
                     region.status
                   )}`}
                 >
-                  {region.status === 'compliant' && '✅ compliant'}
-                  {region.status === 'warning' && '⚠️ warning'}
-                  {region.status === 'critical' && '🔴 critical'}
+                  {region.status === 'compliant' && t('hc.region_detail_modal.status_compliant')}
+                  {region.status === 'warning' && t('hc.region_detail_modal.status_warning')}
+                  {region.status === 'critical' && t('hc.region_detail_modal.status_critical')}
                 </span>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Underserved Cities:</p>
+                <p className="text-sm text-gray-500">{t('hc.region_detail_modal.underserved_cities')}</p>
                 <p className="font-medium text-gray-900">{region.underservedCitiesCount}</p>
               </div>
             </div>
@@ -106,59 +108,59 @@ export function RegionDetailModal({ region, onClose }: RegionDetailModalProps) {
 
           {/* Directional Analysis */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">Directional Analysis</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">{t('hc.region_detail_modal.directional_analysis')}</h3>
             <div className="space-y-3">
               <div className="bg-blue-50 p-4 rounded-lg">
-                <p className="text-sm font-medium text-gray-700 mb-2">Inbound (Arrivals)</p>
+                <p className="text-sm font-medium text-gray-700 mb-2">{t('hc.region_detail_modal.inbound')}</p>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-xs text-gray-600">Actual %:</p>
+                    <p className="text-xs text-gray-600">{t('hc.region_detail_modal.actual_pct')}</p>
                     <p className="text-lg font-bold text-blue-600">{formatNumber(region.inboundPercentage)}%</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-600">Standard %:</p>
+                    <p className="text-xs text-gray-600">{t('hc.region_detail_modal.standard_pct')}</p>
                     <p className="text-sm font-medium">{formatNumber(region.inboundStandardPercentage)}%</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-600">Deviation:</p>
+                    <p className="text-xs text-gray-600">{t('hc.region_detail_modal.deviation')}</p>
                     <p className={`text-sm font-medium ${region.inboundDeviation >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                       {region.inboundDeviation >= 0 ? '+' : ''}{formatNumber(region.inboundDeviation)}%
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-600">J+K Std:</p>
+                    <p className="text-xs text-gray-600">{t('hc.region_detail_modal.jk_std')}</p>
                     <p className="text-sm font-medium">{jk(region.inboundStandardDays, region.inboundUnit)}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-600">J+K Actual:</p>
+                    <p className="text-xs text-gray-600">{t('hc.region_detail_modal.jk_actual')}</p>
                     <p className="text-sm font-medium">{jk(region.inboundActualDays, region.inboundUnit)}</p>
                   </div>
                 </div>
               </div>
 
               <div className="bg-green-50 p-4 rounded-lg">
-                <p className="text-sm font-medium text-gray-700 mb-2">Outbound (Departures)</p>
+                <p className="text-sm font-medium text-gray-700 mb-2">{t('hc.region_detail_modal.outbound')}</p>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-xs text-gray-600">Actual %:</p>
+                    <p className="text-xs text-gray-600">{t('hc.region_detail_modal.actual_pct')}</p>
                     <p className="text-lg font-bold text-green-600">{formatNumber(region.outboundPercentage)}%</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-600">Standard %:</p>
+                    <p className="text-xs text-gray-600">{t('hc.region_detail_modal.standard_pct')}</p>
                     <p className="text-sm font-medium">{formatNumber(region.outboundStandardPercentage)}%</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-600">Deviation:</p>
+                    <p className="text-xs text-gray-600">{t('hc.region_detail_modal.deviation')}</p>
                     <p className={`text-sm font-medium ${region.outboundDeviation >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                       {region.outboundDeviation >= 0 ? '+' : ''}{formatNumber(region.outboundDeviation)}%
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-600">J+K Std:</p>
+                    <p className="text-xs text-gray-600">{t('hc.region_detail_modal.jk_std')}</p>
                     <p className="text-sm font-medium">{jk(region.outboundStandardDays, region.outboundUnit)}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-600">J+K Actual:</p>
+                    <p className="text-xs text-gray-600">{t('hc.region_detail_modal.jk_actual')}</p>
                     <p className="text-sm font-medium">{jk(region.outboundActualDays, region.outboundUnit)}</p>
                   </div>
                 </div>
@@ -167,9 +169,9 @@ export function RegionDetailModal({ region, onClose }: RegionDetailModalProps) {
               <div className="bg-gray-50 p-4 rounded-lg">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-600">Direction Gap:</p>
+                    <p className="text-sm text-gray-600">{t('hc.region_detail_modal.direction_gap')}</p>
                     <p className="text-xs text-gray-500">
-                      {region.directionGap > 5 ? '⚠️ Imbalanced service' : '✅ Balanced service'}
+                      {region.directionGap > 5 ? t('hc.region_detail_modal.imbalanced') : t('hc.region_detail_modal.balanced')}
                     </p>
                   </div>
                   <p className="text-2xl font-bold text-gray-700">
@@ -182,44 +184,44 @@ export function RegionDetailModal({ region, onClose }: RegionDetailModalProps) {
 
           {/* Carrier & Product Breakdown */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">Carrier & Product Breakdown</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">{t('hc.region_detail_modal.carrier_product_breakdown')}</h3>
             {carrierProductData.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Carrier
+                        {t('hc.region_detail_modal.th_carrier')}
                       </th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Product
+                        {t('hc.region_detail_modal.th_product')}
                       </th>
                       <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                        Shipments
+                        {t('hc.region_detail_modal.th_shipments')}
                       </th>
                       <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                        Compliant
+                        {t('hc.region_detail_modal.th_compliant')}
                       </th>
                       <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                        Actual %
+                        {t('hc.region_detail_modal.th_actual_pct')}
                       </th>
                       <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                        Standard %
+                        {t('hc.region_detail_modal.th_standard_pct')}
                       </th>
                       <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                        J+K Std
+                        {t('hc.region_detail_modal.th_jk_std')}
                       </th>
                       <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                        J+K Actual
+                        {t('hc.region_detail_modal.th_jk_actual')}
                       </th>
                       <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                        Deviation
+                        {t('hc.region_detail_modal.th_deviation')}
                       </th>
                       <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                        Inbound %
+                        {t('hc.region_detail_modal.th_inbound_pct')}
                       </th>
                       <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                        Outbound %
+                        {t('hc.region_detail_modal.th_outbound_pct')}
                       </th>
                     </tr>
                   </thead>
@@ -266,7 +268,7 @@ export function RegionDetailModal({ region, onClose }: RegionDetailModalProps) {
                 </table>
               </div>
             ) : (
-              <p className="text-center py-8 text-gray-500">No data available</p>
+              <p className="text-center py-8 text-gray-500">{t('hc.region_detail_modal.no_data')}</p>
             )}
           </div>
         </div>
@@ -276,7 +278,7 @@ export function RegionDetailModal({ region, onClose }: RegionDetailModalProps) {
             onClick={onClose}
             className="w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
           >
-            Close
+            {t('hc.region_detail_modal.close')}
           </button>
         </div>
       </div>

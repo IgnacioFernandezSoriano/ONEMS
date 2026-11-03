@@ -55,7 +55,7 @@ export function UserForm({ user, onSubmit, onCancel }: UserFormProps) {
 
       await onSubmit(data)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error submitting form')
+      setError(err instanceof Error ? err.message : t('hc.user_form.error_submitting'))
     } finally {
       setLoading(false)
     }
@@ -71,7 +71,7 @@ export function UserForm({ user, onSubmit, onCancel }: UserFormProps) {
 
       <div>
         <label htmlFor="email" className="block text-sm font-medium mb-1">
-          Email
+          {t('hc.user_form.email')}
         </label>
         <input
           id="email"
@@ -87,7 +87,7 @@ export function UserForm({ user, onSubmit, onCancel }: UserFormProps) {
       {!user && (
         <div>
           <label htmlFor="password" className="block text-sm font-medium mb-1">
-            Password
+            {t('hc.user_form.password')}
           </label>
           <input
             id="password"
@@ -102,7 +102,7 @@ export function UserForm({ user, onSubmit, onCancel }: UserFormProps) {
 
       <div>
         <label htmlFor="fullName" className="block text-sm font-medium mb-1">
-          Full Name
+          {t('hc.user_form.full_name')}
         </label>
         <input
           id="fullName"
@@ -115,7 +115,7 @@ export function UserForm({ user, onSubmit, onCancel }: UserFormProps) {
 
       <div>
         <label htmlFor="role" className="block text-sm font-medium mb-1">
-          Role
+          {t('hc.user_form.role')}
         </label>
         <select
           id="role"
@@ -132,7 +132,7 @@ export function UserForm({ user, onSubmit, onCancel }: UserFormProps) {
       {role !== 'superadmin' && (
         <div>
           <label htmlFor="account" className="block text-sm font-medium mb-1">
-            Account
+            {t('hc.user_form.account')}
           </label>
           <select
             id="account"
@@ -142,7 +142,7 @@ export function UserForm({ user, onSubmit, onCancel }: UserFormProps) {
             disabled={!isSuperadmin}
             className="w-full px-3 py-2 border border-gray-300 rounded-md disabled:bg-gray-100"
           >
-            <option value="">Select account</option>
+            <option value="">{t('hc.user_form.select_account')}</option>
             {accounts.map((account) => (
               <option key={account.id} value={account.id}>
                 {account.name}
@@ -155,7 +155,7 @@ export function UserForm({ user, onSubmit, onCancel }: UserFormProps) {
       {user && (
         <div>
           <label htmlFor="status" className="block text-sm font-medium mb-1">
-            Status
+            {t('hc.user_form.status')}
           </label>
           <select
             id="status"
@@ -171,7 +171,7 @@ export function UserForm({ user, onSubmit, onCancel }: UserFormProps) {
 
       <div>
         <label htmlFor="preferredLanguage" className="block text-sm font-medium mb-1">
-          Preferred Language
+          {t('hc.user_form.preferred_language')}
         </label>
         <select
           id="preferredLanguage"
@@ -189,10 +189,10 @@ export function UserForm({ user, onSubmit, onCancel }: UserFormProps) {
 
       <div className="flex gap-2 justify-end">
         <Button type="button" variant="secondary" onClick={onCancel}>
-          Cancel
+          {t('hc.user_form.cancel')}
         </Button>
         <Button type="submit" disabled={loading}>
-          {loading ? 'Saving...' : user ? 'Update' : 'Create'}
+          {loading ? t('hc.user_form.saving') : user ? t('hc.user_form.update') : t('hc.user_form.create')}
         </Button>
       </div>
     </form>

@@ -169,7 +169,7 @@ export function Panelists() {
 
   // Bulk operations
   const handleBulkActivate = async () => {
-    if (!confirm(`Activate ${selectedIds.size} panelists?`)) return
+    if (!confirm(t('hc.panelists.confirm_activate', { count: selectedIds.size }))) return
     
     for (const id of selectedIds) {
       await updatePanelist(id, { status: 'active' })
@@ -178,7 +178,7 @@ export function Panelists() {
   }
 
   const handleBulkDeactivate = async () => {
-    if (!confirm(`Deactivate ${selectedIds.size} panelists?`)) return
+    if (!confirm(t('hc.panelists.confirm_deactivate', { count: selectedIds.size }))) return
     
     for (const id of selectedIds) {
       await updatePanelist(id, { status: 'inactive' })
@@ -187,7 +187,7 @@ export function Panelists() {
   }
 
   const handleBulkDelete = async () => {
-    if (!confirm(`Delete ${selectedIds.size} panelists? This action cannot be undone.`)) return
+    if (!confirm(t('hc.panelists.confirm_delete_many', { count: selectedIds.size }))) return
     
     for (const id of selectedIds) {
       await deletePanelist(id)
@@ -279,7 +279,7 @@ export function Panelists() {
       await fetchNodes()
     } catch (err) {
       console.error('Error saving panelist:', err)
-      alert('Error saving panelist')
+      alert(t('hc.panelists.error_saving'))
     }
   }
 
@@ -289,7 +289,7 @@ export function Panelists() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this panelist?')) return
+    if (!confirm(t('hc.panelists.confirm_delete_one'))) return
     await deletePanelist(id)
     // Refrescar la lista de nodos disponibles
     await fetchNodes()
@@ -306,7 +306,7 @@ export function Panelists() {
   }
 
   if (loading) return <div className="p-6">{t("common.loading")}</div>
-  if (error) return <div className="p-6 text-red-600">Error: {error}</div>
+  if (error) return <div className="p-6 text-red-600">{t('hc.panelists.error_prefix', { message: error })}</div>
 
   // Calculate stats
   const stats = {
@@ -322,7 +322,7 @@ export function Panelists() {
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-3">
             <h1 className="text-3xl font-bold text-gray-900">{t('panelists.management')}</h1>
-            <SmartTooltip content="About Panelists Management - Purpose: Manage the network of panelists who send and receive shipments across your topology. Key Features: Register panelists with contact details, assign them to specific nodes, track availability periods, manage Telegram integration for notifications, and monitor panelist activity. Usage: Add panelists, assign to nodes, set unavailability periods, configure Telegram for automated notifications, and use in allocation planning.">
+            <SmartTooltip content={t('hc.panelists.about_tooltip')}>
               <svg className="w-5 h-5 text-gray-400 hover:text-gray-600 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -339,7 +339,7 @@ export function Panelists() {
         {/* Total Panelists */}
         <div className="bg-gradient-to-br from-blue-50 to-white border border-blue-100 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-blue-700">Total Panelists</span>
+            <span className="text-sm font-medium text-blue-700">{t('hc.panelists.total_panelists')}</span>
             <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
               <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -393,7 +393,7 @@ export function Panelists() {
             >
               {t("panelists.panelists")}
             </button>
-            <SmartTooltip content="Panelists Tab - View and manage all panelists in your network. Filter by city, node, or status. Use bulk operations to activate, deactivate, or delete multiple panelists at once.">
+            <SmartTooltip content={t('hc.panelists.tab_panelists_tooltip')}>
               <svg className="w-4 h-4 text-gray-400 hover:text-gray-600 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -411,7 +411,7 @@ export function Panelists() {
             >
               {t('panelists.unavailability_periods')}
             </button>
-            <SmartTooltip content="Unavailability Periods - Define time periods when panelists are not available for deliveries (vacations, sick leave, etc.). This ensures accurate allocation planning and prevents assignments to unavailable panelists.">
+            <SmartTooltip content={t('hc.panelists.tab_unavail_tooltip')}>
               <svg className="w-4 h-4 text-gray-400 hover:text-gray-600 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -430,7 +430,7 @@ export function Panelists() {
                 <button
                   onClick={() => setShowFilters(!showFilters)}
                   className="p-1 hover:bg-gray-100 rounded transition-colors"
-                  title={showFilters ? "Collapse filters" : "Expand filters"}
+                  title={showFilters ? t('hc.panelists.collapse_filters') : t('hc.panelists.expand_filters')}
                 >
                   {showFilters ? (
                     <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -455,7 +455,7 @@ export function Panelists() {
               <button
                 onClick={clearFilters}
                 className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-                title="Reset all filters"
+                title={t('hc.panelists.reset_filters')}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -474,7 +474,7 @@ export function Panelists() {
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
-                        Search
+                        {t('hc.panelists.search')}
                       </div>
                     </label>
                     <input
@@ -493,7 +493,7 @@ export function Panelists() {
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                         </svg>
-                        City
+                        {t('hc.panelists.city')}
                       </div>
                     </label>
                     <select
@@ -515,8 +515,8 @@ export function Panelists() {
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
                         </svg>
-                        Node
-                        {filters.city_id && <span className="text-xs text-gray-500 font-normal">(filtered by city)</span>}
+                        {t('hc.panelists.node')}
+                        {filters.city_id && <span className="text-xs text-gray-500 font-normal">{t('hc.panelists.filtered_by_city')}</span>}
                       </div>
                     </label>
                     <select
@@ -548,7 +548,7 @@ export function Panelists() {
                         <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
                         </svg>
-                        <span className="text-sm font-medium text-gray-700">No node assigned</span>
+                        <span className="text-sm font-medium text-gray-700">{t('hc.panelists.no_node_assigned')}</span>
                       </div>
                     </label>
                   </div>
@@ -560,7 +560,7 @@ export function Panelists() {
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        Status
+                        {t('hc.panelists.status')}
                       </div>
                     </label>
                     <select
@@ -590,10 +590,10 @@ export function Panelists() {
               </div>
               <div>
                 <div className="text-sm font-semibold text-blue-900">
-                  {selectedIds.size} panelist{selectedIds.size > 1 ? 's' : ''} selected
+                  {t('hc.panelists.n_selected', { count: selectedIds.size })}
                 </div>
                 <div className="text-xs text-blue-700">
-                  Choose an action to apply to all selected items
+                  {t('hc.panelists.choose_action')}
                 </div>
               </div>
             </div>
@@ -605,7 +605,7 @@ export function Panelists() {
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                Activate
+                {t('hc.panelists.bulk_activate')}
               </button>
               <button
                 onClick={handleBulkDeactivate}
@@ -614,7 +614,7 @@ export function Panelists() {
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                Deactivate
+                {t('hc.panelists.bulk_deactivate')}
               </button>
               <button
                 onClick={handleBulkDelete}
@@ -623,7 +623,7 @@ export function Panelists() {
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
-                Delete
+                {t('hc.panelists.bulk_delete')}
               </button>
               <button
                 onClick={() => setSelectedIds(new Set())}
@@ -632,7 +632,7 @@ export function Panelists() {
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
-                Clear
+                {t('hc.panelists.bulk_clear')}
               </button>
             </div>
           </div>
@@ -646,7 +646,7 @@ export function Panelists() {
           <div>
             <h2 className="text-xl font-bold">{t('panelists.panelists')}</h2>
             <p className="text-sm text-gray-600 mt-1">
-              Manage panelist profiles and assignments
+              {t('hc.panelists.manage_profiles')}
             </p>
           </div>
           <button
@@ -674,7 +674,7 @@ export function Panelists() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('panelists.mobile')}</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('topology.node')}</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('topology.city')}</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Language</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('hc.panelists.language')}</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('common.status')}</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('common.actions')}</th>
               </tr>
@@ -714,7 +714,7 @@ export function Panelists() {
                         <button
                           onClick={() => handleOpenModal(panelist)}
                           className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                          title="Edit panelist"
+                          title={t('hc.panelists.edit_panelist')}
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -727,7 +727,7 @@ export function Panelists() {
                               ? 'text-yellow-600 hover:bg-yellow-50'
                               : 'text-green-600 hover:bg-green-50'
                           }`}
-                          title={panelist.status === 'active' ? 'Deactivate panelist' : 'Activate panelist'}
+                          title={panelist.status === 'active' ? t('hc.panelists.deactivate_panelist') : t('hc.panelists.activate_panelist')}
                         >
                           {panelist.status === 'active' ? (
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -742,7 +742,7 @@ export function Panelists() {
                         <button
                           onClick={() => handleDelete(panelist.id)}
                           className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                          title="Delete panelist"
+                          title={t('hc.panelists.delete_panelist')}
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -755,7 +755,7 @@ export function Panelists() {
               ) : (
                 <tr>
                   <td colSpan={10} className="px-6 py-4 text-center text-gray-500">
-                    No panelists found. {filters.search || filters.city_id || filters.node_id || filters.status ? 'Try adjusting your filters.' : 'Click "Add Panelist" to create one.'}
+                    {t('hc.panelists.no_panelists_found')} {filters.search || filters.city_id || filters.node_id || filters.status ? t('hc.panelists.try_adjusting_filters') : t('hc.panelists.click_add_panelist')}
                   </td>
                 </tr>
               )}
@@ -770,27 +770,27 @@ export function Panelists() {
           <div className="bg-white rounded-lg w-full max-w-md max-h-[90vh] flex flex-col">
             <div className="p-6 border-b">
               <h2 className="text-xl font-bold">
-                {editingPanelist ? 'Edit Panelist' : 'Add Panelist'}
+                {editingPanelist ? t('hc.panelists.modal_edit') : t('hc.panelists.modal_add')}
               </h2>
             </div>
             <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
               <div className="flex-1 overflow-y-auto p-6 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Panelist Code <span className="text-gray-400 text-xs">(auto-generated if empty)</span>
+                  {t('hc.panelists.panelist_code')} <span className="text-gray-400 text-xs">{t('hc.panelists.auto_generated')}</span>
                 </label>
                 <input
                   type="text"
                   value={formData.panelist_code}
                   onChange={(e) => setFormData({ ...formData, panelist_code: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                  placeholder="Leave empty to auto-generate"
+                  placeholder={t('hc.panelists.ph_auto_generate')}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Name
+                  {t('hc.panelists.name')}
                 </label>
                 <input
                   type="text"
@@ -803,7 +803,7 @@ export function Panelists() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email
+                  {t('hc.panelists.email')}
                 </label>
                 <input
                   type="email"
@@ -816,7 +816,7 @@ export function Panelists() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Mobile
+                  {t('hc.panelists.mobile')}
                 </label>
                 <input
                   type="tel"
@@ -829,46 +829,46 @@ export function Panelists() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Telegram ID
+                  {t('hc.panelists.telegram_id')}
                 </label>
                 <input
                   type="text"
                   value={formData.telegram_id}
                   onChange={(e) => setFormData({ ...formData, telegram_id: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                  placeholder="@username or numeric ID"
+                  placeholder={t('hc.panelists.ph_telegram')}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Address Line 1
+                  {t('hc.panelists.address_line1')}
                 </label>
                 <input
                   type="text"
                   value={formData.address_line1}
                   onChange={(e) => setFormData({ ...formData, address_line1: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                  placeholder="Street address"
+                  placeholder={t('hc.panelists.ph_street')}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Address Line 2
+                  {t('hc.panelists.address_line2')}
                 </label>
                 <input
                   type="text"
                   value={formData.address_line2}
                   onChange={(e) => setFormData({ ...formData, address_line2: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                  placeholder="Apartment, suite, etc. (optional)"
+                  placeholder={t('hc.panelists.ph_apartment')}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Postal Code
+                  {t('hc.panelists.postal_code')}
                 </label>
                 <input
                   type="text"
@@ -887,13 +887,13 @@ export function Panelists() {
                   value={formData.address_city}
                   onChange={(e) => setFormData({ ...formData, address_city: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                  placeholder="Neighbourhood, district, etc. (e.g. Nairobi-GPO)"
+                  placeholder={t('hc.panelists.ph_neighbourhood')}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Country
+                  {t('hc.panelists.country')}
                 </label>
                 <input
                   type="text"
@@ -921,7 +921,7 @@ export function Panelists() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Language
+                  {t('hc.panelists.language')}
                 </label>
                 <select
                   value={formData.language}
@@ -938,14 +938,14 @@ export function Panelists() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Node
+                  {t('hc.panelists.node')}
                 </label>
                 <select
                   value={formData.node_id || ''}
                   onChange={(e) => setFormData({ ...formData, node_id: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 >
-                  <option value="">— No node assigned —</option>
+                  <option value="">{t('hc.panelists.opt_no_node')}</option>
                   {nodes.map((node: any) => (
                     <option key={node.id} value={node.id}>
                       {node.auto_id} - {node.city?.name || ''}
@@ -956,7 +956,7 @@ export function Panelists() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Status
+                  {t('hc.panelists.status')}
                 </label>
                 <select
                   value={formData.status}
@@ -974,14 +974,14 @@ export function Panelists() {
                   type="submit"
                   className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
                 >
-                  {editingPanelist ? 'Update' : 'Create'}
+                  {editingPanelist ? t('hc.panelists.update') : t('hc.panelists.create')}
                 </button>
                 <button
                   type="button"
                   onClick={handleCloseModal}
                   className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300"
                 >
-                  Cancel
+                  {t('hc.panelists.cancel')}
                 </button>
               </div>
             </form>

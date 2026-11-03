@@ -3,6 +3,7 @@ import type { TimeUnit } from '@/lib/accountTime';
 import { unitSuffix } from '@/lib/accountTime';
 import { ColumnTooltip } from './ColumnTooltip';
 import { formatNumber } from '@/lib/formatNumber';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface RouteDistribution {
   origin: string;
@@ -22,6 +23,7 @@ interface CumulativeDistributionTableProps {
 }
 
 export function CumulativeDistributionTable({ routes, unit = 'days' }: CumulativeDistributionTableProps) {
+  const { t } = useTranslation();
   const { tableData, dayColumns } = useMemo(() => {
     if (!routes || routes.length === 0) {
       return { tableData: [], dayColumns: [] };
@@ -96,7 +98,7 @@ export function CumulativeDistributionTable({ routes, unit = 'days' }: Cumulativ
   if (tableData.length === 0) {
     return (
       <div className="text-center py-8 text-gray-400">
-        No distribution data available
+        {t('hc.cumulative_distribution_table.no_data')}
       </div>
     );
   }
@@ -108,32 +110,32 @@ export function CumulativeDistributionTable({ routes, unit = 'days' }: Cumulativ
           <tr>
             <th className="sticky left-0 z-30 bg-gray-50 px-1 py-2 text-left text-xs font-medium text-gray-500 uppercase border-r border-gray-200 min-w-[120px]">
               <div className="flex items-center gap-1">
-                Route
-                <ColumnTooltip content="Origin → Destination city pair. Each route shows cumulative delivery percentages by day." />
+                {t('hc.cumulative_distribution_table.col_route')}
+                <ColumnTooltip content={t('hc.cumulative_distribution_table.tip_route')} />
               </div>
             </th>
             <th className="sticky z-20 bg-gray-50 px-1 py-2 text-left text-xs font-medium text-gray-500 uppercase min-w-[80px]" style={{ left: '120px' }}>
               <div className="flex items-center gap-1">
-                Carrier
-                <ColumnTooltip content="Shipping carrier for this route." />
+                {t('hc.cumulative_distribution_table.col_carrier')}
+                <ColumnTooltip content={t('hc.cumulative_distribution_table.tip_carrier')} />
               </div>
             </th>
             <th className="sticky z-20 bg-gray-50 px-1 py-2 text-left text-xs font-medium text-gray-500 uppercase min-w-[100px]" style={{ left: '200px' }}>
               <div className="flex items-center gap-1">
-                Product
-                <ColumnTooltip content="Service product (e.g., Express 24 horas) for this route." />
+                {t('hc.cumulative_distribution_table.col_product')}
+                <ColumnTooltip content={t('hc.cumulative_distribution_table.tip_product')} />
               </div>
             </th>
             <th className="sticky z-20 bg-gray-50 px-1 py-2 text-center text-xs font-medium text-gray-500 uppercase min-w-[60px]" style={{ left: '300px' }}>
               <div className="flex items-center gap-1 justify-center">
-                J+K ST
-                <ColumnTooltip content="Expected delivery time in days from delivery_standards. Column header turns green when it matches this value." />
+                {t('hc.cumulative_distribution_table.col_jk_st')}
+                <ColumnTooltip content={t('hc.cumulative_distribution_table.tip_jk_st')} />
               </div>
             </th>
             <th className="sticky z-20 bg-gray-50 px-1 py-2 text-center text-xs font-medium text-gray-500 uppercase min-w-[60px] border-r border-gray-300" style={{ left: '360px' }}>
               <div className="flex items-center gap-1 justify-center">
-                STD %
-                <ColumnTooltip content="Target success percentage from delivery_standards (e.g., 85%, 95%). This is the threshold the route must meet." />
+                {t('hc.cumulative_distribution_table.col_std_pct')}
+                <ColumnTooltip content={t('hc.cumulative_distribution_table.tip_std')} />
               </div>
             </th>
             {dayColumns.map(day => {

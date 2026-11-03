@@ -129,7 +129,7 @@ export function TopologyTree({
                 <button
                   onClick={() => toggleRegion(region.id)}
                   className="text-gray-400 hover:text-gray-600 transition-colors"
-                  title={isExpanded ? 'Collapse region' : 'Expand region'}
+                  title={isExpanded ? t('hc.topology_tree.collapse_region') : t('hc.topology_tree.expand_region')}
                 >
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                     {isExpanded ? (
@@ -160,7 +160,7 @@ export function TopologyTree({
                         : 'bg-gray-100 text-gray-600'
                     }`}
                   >
-                    {region.status === 'active' ? 'Active' : 'Inactive'}
+                    {region.status === 'active' ? t('hc.topology_tree.active') : t('hc.topology_tree.inactive')}
                   </span>
                 </div>
 
@@ -169,7 +169,7 @@ export function TopologyTree({
                   <button
                     onClick={() => expandRegionAndCities(region.id)}
                     className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                    title="Expand all cities in this region"
+                    title={t('hc.topology_tree.expand_all_cities')}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
@@ -199,7 +199,7 @@ export function TopologyTree({
                       })
                     }
                     className="p-1.5 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                    title="Edit region"
+                    title={t('hc.topology_tree.edit_region')}
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -207,12 +207,12 @@ export function TopologyTree({
                   </button>
                   <button
                     onClick={() => {
-                      if (confirm('Delete this region and all its cities/nodes?')) {
+                      if (confirm(t('hc.topology_tree.delete_region_confirm'))) {
                         onDeleteRegion(region.id)
                       }
                     }}
                     className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    title="Delete region"
+                    title={t('hc.topology_tree.delete_region')}
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -225,7 +225,7 @@ export function TopologyTree({
                 <div className="pl-8 pb-2 space-y-1">
                   {regionCities.length === 0 && (
                     <div className="text-sm text-gray-500 italic p-4">
-                      No cities in this region yet
+                      {t('hc.topology_tree.no_cities')}
                     </div>
                   )}
                   {regionCities.map((city) => {
@@ -300,7 +300,7 @@ export function TopologyTree({
                                 })
                               }
                               className="p-1 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                              title="Edit city"
+                              title={t('hc.topology_tree.edit_city')}
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -313,7 +313,7 @@ export function TopologyTree({
                                 }
                               }}
                               className="p-1 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                              title="Delete city"
+                              title={t('hc.topology_tree.delete_city')}
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -354,14 +354,14 @@ export function TopologyTree({
                                       <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                       </svg>
-                                      Panelist Assigned
+                                      {t('hc.topology_tree.panelist_assigned')}
                                     </span>
                                   ) : (
                                     <span className="inline-flex items-center gap-1 text-xs font-medium bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
                                       <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                       </svg>
-                                      Pending Panelist
+                                      {t('hc.topology_tree.pending_panelist')}
                                     </span>
                                   )}
 
@@ -372,7 +372,7 @@ export function TopologyTree({
                                         : 'bg-gray-100 text-gray-600'
                                     }`}
                                   >
-                                    {node.status === 'active' ? 'Active' : 'Inactive'}
+                                    {node.status === 'active' ? t('hc.topology_tree.active') : t('hc.topology_tree.inactive')}
                                   </span>
                                 </div>
 
@@ -391,7 +391,7 @@ export function TopologyTree({
                                       })
                                     }
                                     className="p-1 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                                    title="Edit node"
+                                    title={t('hc.topology_tree.edit_node')}
                                   >
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -404,7 +404,7 @@ export function TopologyTree({
                                       }
                                     }}
                                     className="p-1 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                    title="Delete node"
+                                    title={t('hc.topology_tree.delete_node')}
                                   >
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

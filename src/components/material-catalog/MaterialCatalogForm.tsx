@@ -35,7 +35,7 @@ export function MaterialCatalogForm({ material, onSubmit, onCancel }: MaterialCa
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Code *
+          {t('hc.material_catalog_form.code')} *
         </label>
         <input
           type="text"
@@ -49,7 +49,7 @@ export function MaterialCatalogForm({ material, onSubmit, onCancel }: MaterialCa
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Name *
+          {t('hc.material_catalog_form.name')} *
         </label>
         <input
           type="text"
@@ -57,26 +57,26 @@ export function MaterialCatalogForm({ material, onSubmit, onCancel }: MaterialCa
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
           className="w-full px-3 py-2 border border-gray-300 rounded-md"
-          placeholder="RFID Tag"
+          placeholder={t('hc.material_catalog_form.name_placeholder')}
         />
       </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Unit Measure
+          {t('hc.material_catalog_form.unit_measure')}
         </label>
         <input
           type="text"
           value={formData.unit_measure}
           onChange={(e) => setFormData({ ...formData, unit_measure: e.target.value })}
           className="w-full px-3 py-2 border border-gray-300 rounded-md"
-          placeholder="units, kg, etc."
+          placeholder={t('hc.material_catalog_form.unit_placeholder')}
         />
       </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Minimum Stock (Safety Stock)
+          {t('hc.material_catalog_form.min_stock')}
         </label>
         <input
           type="number"
@@ -88,26 +88,26 @@ export function MaterialCatalogForm({ material, onSubmit, onCancel }: MaterialCa
           placeholder="0"
         />
         <p className="text-xs text-gray-500 mt-1">
-          Minimum quantity to maintain in regulator stock. Used for calculating material requirements.
+          {t('hc.material_catalog_form.min_stock_help')}
         </p>
       </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Description
+          {t('hc.material_catalog_form.description')}
         </label>
         <textarea
           value={formData.description}
           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
           className="w-full px-3 py-2 border border-gray-300 rounded-md"
           rows={3}
-          placeholder="Additional details..."
+          placeholder={t('hc.material_catalog_form.description_placeholder')}
         />
       </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Status
+          {t('hc.material_catalog_form.status')}
         </label>
         <select
           value={formData.status}
@@ -121,10 +121,10 @@ export function MaterialCatalogForm({ material, onSubmit, onCancel }: MaterialCa
 
       <div className="flex gap-2 justify-end pt-4">
         <Button type="button" variant="secondary" onClick={onCancel}>
-          Cancel
+          {t('hc.material_catalog_form.cancel')}
         </Button>
         <Button type="submit" disabled={loading}>
-          {loading ? 'Saving...' : material ? 'Update' : 'Create'}
+          {loading ? t('hc.material_catalog_form.saving') : material ? t('hc.material_catalog_form.update') : t('hc.material_catalog_form.create')}
         </Button>
       </div>
     </form>

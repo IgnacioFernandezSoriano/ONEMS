@@ -16,7 +16,7 @@ export function CSVHandler({ onImport, onDownloadTemplate }: CSVHandlerProps) {
       await onImport(file)
       e.target.value = '' // Reset input
     } catch (error: any) {
-      alert(`Import error: ${error.message}`)
+      alert(t('hc.csv_handler.import_error', { message: error.message }))
     }
   }
 
@@ -32,13 +32,13 @@ export function CSVHandler({ onImport, onDownloadTemplate }: CSVHandlerProps) {
             id="csv-upload"
           />
           <span className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer">
-            Import CSV
+            {t('hc.csv_handler.import_csv')}
           </span>
         </label>
       </div>
 
       <Button variant="secondary" onClick={onDownloadTemplate}>
-        Download CSV Template
+        {t('hc.csv_handler.download_template')}
       </Button>
     </div>
   )

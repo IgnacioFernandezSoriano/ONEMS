@@ -529,7 +529,7 @@ export default function JKPerformance() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Loading J+K performance data...</div>
+        <div className="text-gray-500">{t('hc.jk_performance.loading_data')}</div>
       </div>
     );
   }
@@ -537,7 +537,7 @@ export default function JKPerformance() {
   if (error) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-red-500">Error loading data: {error.message}</div>
+        <div className="text-red-500">{t('hc.jk_performance.error_loading', { message: error.message })}</div>
       </div>
     );
   }
@@ -566,7 +566,7 @@ export default function JKPerformance() {
           </div>
           <p className="text-gray-600 mt-1">{t('reporting.transit_time_analysis_and_delivery_performance_tracking')}</p>
         </div>
-        <SmartTooltip content="J+K Performance Report: Analyzes actual transit times (J+K Actual) against delivery standards (J+K Std) to identify routes, cities, carriers, or products with systematic delays. Multi-level analysis showing Route, City, Region, Carrier, and Product performance. J+K Standard is the expected delivery time in days from delivery_standards table. J+K Actual is the average actual transit time in business days. Deviation is the difference between Actual and Standard (positive values indicate delays). On-Time % is the percentage of shipments delivered within or before the standard time. Color coding: Green (≥95%), Yellow (90-95%), Red (<90%)." />
+        <SmartTooltip content={t('hc.jk_performance.tip_01')} />
       </div>
 
       {/* Filters */}
@@ -582,9 +582,9 @@ export default function JKPerformance() {
           trendValue={t('reporting.statistical_significance')}
           color="blue"
           tooltip={{
-            description: "Total number of shipments analyzed in the current filter selection.",
-            interpretation: "Higher sample sizes provide more reliable statistical insights. Minimum 30 samples recommended per route for significance.",
-            utility: "Validates the reliability of performance metrics. Low sample sizes may indicate incomplete data or narrow filters."
+            description: t('hc.jk_performance.kpi_samples_desc'),
+            interpretation: t('hc.jk_performance.kpi_samples_interp'),
+            utility: t('hc.jk_performance.kpi_samples_utility')
           }}
         />
         <KPICard
@@ -595,9 +595,9 @@ export default function JKPerformance() {
           trendValue={`${t('reporting.vs_std')}: ${fmtAvgJK(metrics.avgJKStandard, metrics.unit)}`}
           color={metrics.avgJKActual <= metrics.avgJKStandard ? 'green' : metrics.avgJKActual <= metrics.avgJKStandard + (metrics.unit === 'hours' ? 24 : 1) ? 'amber' : 'red'}
           tooltip={{
-            description: "Weighted average of days required to reach the STD % target across all routes in the selection.",
-            interpretation: "Represents the actual day when cumulative deliveries reach the target percentage. Compare against J+K Standard to assess performance gap.",
-            utility: "Primary metric for evaluating how quickly routes achieve their delivery targets. Higher values indicate slower achievement of performance thresholds."
+            description: t('hc.jk_performance.kpi_actual_desc'),
+            interpretation: t('hc.jk_performance.kpi_actual_interp'),
+            utility: t('hc.jk_performance.kpi_actual_utility')
           }}
         />
         <KPICard
@@ -608,9 +608,9 @@ export default function JKPerformance() {
           trendValue={t('reporting.on_time_count', { count: metrics.onTimeSamples.toLocaleString() })}
           color={metrics.onTimePercentage >= 95 ? 'green' : metrics.onTimePercentage >= 90 ? 'amber' : 'red'}
           tooltip={{
-            description: "Percentage of shipments delivered within or before the standard delivery time (J+K Std).",
-            interpretation: "Thresholds are dynamic and defined in delivery_standards table per route. Green (≥95%), Yellow (90-95%), Red (<90%) are visual guides only.",
-            utility: "Key performance indicator for service quality. Compare against route-specific standard percentage (Std %) from delivery_standards."
+            description: t('hc.jk_performance.kpi_ontime_desc'),
+            interpretation: t('hc.jk_performance.kpi_ontime_interp'),
+            utility: t('hc.jk_performance.kpi_ontime_utility')
           }}
         />
         <KPICard
@@ -621,9 +621,9 @@ export default function JKPerformance() {
           trendValue={t('reporting.require_intervention')}
           color={metrics.problematicRoutes === 0 ? 'green' : metrics.problematicRoutes <= 3 ? 'amber' : 'red'}
           tooltip={{
-            description: "Number of routes with on-time performance at or below their critical SLA threshold.",
-            interpretation: "Routes failing to meet their critical delivery standards. Each route has its own critical threshold defined in delivery_standards table.",
-            utility: "Click to filter and show only problematic routes. Prioritization tool for operational improvements."
+            description: t('hc.jk_performance.kpi_problem_desc'),
+            interpretation: t('hc.jk_performance.kpi_problem_interp'),
+            utility: t('hc.jk_performance.kpi_problem_utility')
           }}
           onClick={() => {
             setShowProblematicOnly(!showProblematicOnly);
@@ -638,7 +638,7 @@ export default function JKPerformance() {
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center gap-2 mb-4">
             <h3 className="text-lg font-semibold text-gray-900">{t('reporting.weekly_sample_volume')}</h3>
-            <SmartTooltip content="Weekly Sample Volume: Shows the number of shipments analyzed per week in the selected date range. Color coding: Green (20% above average), Blue (above average), Yellow (80-100% of average), Red (below 80% of average). Use to identify weeks with low sample sizes that may affect statistical reliability. Minimum 30 samples/week recommended for statistical significance." />
+            <SmartTooltip content={t('hc.jk_performance.tip_02')} />
           </div>
           <WeeklySamplesChart data={weeklySamples} />
         </div>
@@ -647,7 +647,7 @@ export default function JKPerformance() {
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center gap-2 mb-4">
             <h3 className="text-lg font-semibold text-gray-900">{t('reporting.performance_distribution')}</h3>
-            <SmartTooltip content="Performance Distribution: Shows how shipments are distributed by actual transit time vs. delivery standard (J+K Std). Categories: After Standard (red, delivered AFTER J+K Std = late), Before/On-Time (green, delivered WITHIN J+K Std = on-time), On Standard (blue, delivered EXACTLY on J+K Std day). Use to visualize overall network performance. Large red bars indicate systematic delays requiring investigation." />
+            <SmartTooltip content={t('hc.jk_performance.tip_03')} />
           </div>
           {hasHoursRoutes && hasDaysRoutes && (
             <div role="group" className="inline-flex mb-3">
@@ -707,12 +707,12 @@ export default function JKPerformance() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <h3 className="text-lg font-semibold text-gray-900">
-                    Route performance ({routeData.length} routes)
+                    {t('hc.jk_performance.route_perf_title', { count: routeData.length })}
                   </h3>
                   {showProblematicOnly && (
                     <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded">
                       <AlertTriangle className="w-3 h-3" />
-                      Problematic only
+                      {t('hc.jk_performance.problematic_only')}
                     </span>
                   )}
                 </div>
@@ -730,50 +730,50 @@ export default function JKPerformance() {
                     <tr>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                         <div className="flex items-center gap-1">
-                          Route
-                          <ColumnTooltip content="Origin city → Destination city. Each route is unique by carrier, product, and city pair." />
+                          {t('hc.jk_performance.col_route')}
+                          <ColumnTooltip content={t('hc.jk_performance.tip_04')} />
                         </div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                         <div className="flex items-center gap-1">
-                          Samples
-                          <ColumnTooltip content="Total number of shipments for this route in the selected date range. Minimum 30 samples recommended for statistical significance." />
+                          {t('hc.jk_performance.col_samples')}
+                          <ColumnTooltip content={t('hc.jk_performance.tip_05')} />
                         </div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                         <div className="flex items-center gap-1">
-                          J+K Std
-                          <ColumnTooltip content="Expected delivery time in days from delivery_standards table. Automatically converted from hours if needed (hours/24)." />
+                          {t('hc.jk_performance.col_jk_std')}
+                          <ColumnTooltip content={t('hc.jk_performance.tip_06')} />
                         </div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                         <div className="flex items-center gap-1">
-                          J+K Actual
-                          <ColumnTooltip content="Number of days required to reach the STD % target for this route. Represents the day when the cumulative percentage of deliveries reaches the standard threshold (e.g., 85%). Compare with J+K Std to assess performance." />
+                          {t('hc.jk_performance.col_jk_actual')}
+                          <ColumnTooltip content={t('hc.jk_performance.tip_07')} />
                         </div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                         <div className="flex items-center gap-1">
-                          Deviation
-                          <ColumnTooltip content="Difference between J+K Actual and J+K Std (Actual - Standard). Positive values indicate delays, negative values indicate early delivery." />
+                          {t('hc.jk_performance.col_deviation')}
+                          <ColumnTooltip content={t('hc.jk_performance.tip_08')} />
                         </div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                         <div className="flex items-center gap-1">
-                          STD %
-                          <ColumnTooltip content="Target on-time percentage defined in delivery_standards for this route. This is the required performance threshold (e.g., 85%) that must be achieved. Compare with On-Time % column to assess compliance." />
+                          {t('hc.jk_performance.col_std_pct')}
+                          <ColumnTooltip content={t('hc.jk_performance.tip_09')} />
                         </div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                         <div className="flex items-center gap-1">
-                          On-Time %
-                          <ColumnTooltip content="Percentage of shipments delivered within or before J+K Std. Compare against route-specific Std % from delivery_standards (not shown in this table)." />
+                          {t('hc.jk_performance.col_ontime_pct')}
+                          <ColumnTooltip content={t('hc.jk_performance.tip_10')} />
                         </div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                         <div className="flex items-center gap-1">
-                          Status
-                          <ColumnTooltip content="Visual indicator: Green (compliant, ≥95%), Yellow (warning, 90-95%), Red (critical, <90%). These are general guides; actual standards are route-specific." />
+                          {t('hc.jk_performance.col_status')}
+                          <ColumnTooltip content={t('hc.jk_performance.tip_11')} />
                         </div>
                       </th>
                     </tr>
@@ -829,12 +829,12 @@ export default function JKPerformance() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <h3 className="text-lg font-semibold text-gray-900">
-                    City performance ({cityData.length} cities)
+                    {t('hc.jk_performance.city_perf_title', { count: cityData.length })}
                   </h3>
                   {showProblematicOnly && (
                     <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded">
                       <AlertTriangle className="w-3 h-3" />
-                      Problematic only
+                      {t('hc.jk_performance.problematic_only')}
                     </span>
                   )}
                 </div>
@@ -851,34 +851,34 @@ export default function JKPerformance() {
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                        <div className="flex items-center gap-1">City <ColumnTooltip content="City name aggregating all routes where this city is origin or destination." /></div>
+                        <div className="flex items-center gap-1">{t('hc.jk_performance.col_city')} <ColumnTooltip content={t('hc.jk_performance.tip_12')} /></div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                        <div className="flex items-center gap-1">Direction <ColumnTooltip content="Inbound (city is destination) or Outbound (city is origin). Shows traffic flow direction." /></div>
+                        <div className="flex items-center gap-1">{t('hc.jk_performance.col_direction')} <ColumnTooltip content={t('hc.jk_performance.tip_13')} /></div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                        <div className="flex items-center gap-1">Region <ColumnTooltip content="Geographic region to which this city belongs (from topology.regions table)." /></div>
+                        <div className="flex items-center gap-1">{t('hc.jk_performance.col_region')} <ColumnTooltip content={t('hc.jk_performance.tip_14')} /></div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                        <div className="flex items-center gap-1">Samples <ColumnTooltip content="Total shipments aggregated across all routes involving this city in the specified direction." /></div>
+                        <div className="flex items-center gap-1">{t('hc.jk_performance.col_samples')} <ColumnTooltip content={t('hc.jk_performance.tip_15')} /></div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                        <div className="flex items-center gap-1">J+K Std <ColumnTooltip content="Weighted average of J+K standards across all routes involving this city. Routes with more shipments have higher weight." /></div>
+                        <div className="flex items-center gap-1">{t('hc.jk_performance.col_jk_std')} <ColumnTooltip content={t('hc.jk_performance.tip_16')} /></div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                        <div className="flex items-center gap-1">J+K Actual <ColumnTooltip content="Weighted average of days required to reach the STD % target across all routes involving this city. Represents the actual performance vs the standard delivery time." /></div>
+                        <div className="flex items-center gap-1">{t('hc.jk_performance.col_jk_actual')} <ColumnTooltip content={t('hc.jk_performance.tip_17')} /></div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                        <div className="flex items-center gap-1">Deviation <ColumnTooltip content="Weighted average deviation (Actual - Standard) across all routes involving this city." /></div>
+                        <div className="flex items-center gap-1">{t('hc.jk_performance.col_deviation')} <ColumnTooltip content={t('hc.jk_performance.tip_18')} /></div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                        <div className="flex items-center gap-1">STD % <ColumnTooltip content="Weighted average target on-time percentage from delivery_standards for all routes involving this city." /></div>
+                        <div className="flex items-center gap-1">{t('hc.jk_performance.col_std_pct')} <ColumnTooltip content={t('hc.jk_performance.tip_19')} /></div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                        <div className="flex items-center gap-1">On-Time % <ColumnTooltip content="Percentage of all shipments (across all routes) delivered on-time for this city." /></div>
+                        <div className="flex items-center gap-1">{t('hc.jk_performance.col_ontime_pct')} <ColumnTooltip content={t('hc.jk_performance.tip_20')} /></div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                        <div className="flex items-center gap-1">Status <ColumnTooltip content="Visual indicator based on on-time percentage: Green (≥95%), Yellow (90-95%), Red (<90%)." /></div>
+                        <div className="flex items-center gap-1">{t('hc.jk_performance.col_status')} <ColumnTooltip content={t('hc.jk_performance.tip_21')} /></div>
                       </th>
                     </tr>
                   </thead>
@@ -892,7 +892,7 @@ export default function JKPerformance() {
                       return (
                         <tr key={idx} className="hover:bg-gray-50">
                           <td className="px-3 py-2 text-sm text-gray-900">{city.cityName}</td>
-                          <td className="px-3 py-2 text-sm">{directionIcon} {city.direction}</td>
+                          <td className="px-3 py-2 text-sm">{directionIcon} {city.direction === 'inbound' ? t('hc.jk_performance.inbound') : t('hc.jk_performance.outbound')}</td>
                           <td className="px-3 py-2 text-sm text-gray-600">{city.regionName}</td>
                           <td className="px-3 py-2 text-sm text-gray-900">{city.totalSamples}</td>
                           <td className="px-3 py-2 text-sm text-gray-900">{formatJK(city.jkStandard, city.unit, displayUnit)}</td>
@@ -923,12 +923,12 @@ export default function JKPerformance() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <h3 className="text-lg font-semibold text-gray-900">
-                    Region performance ({regionData.length} regions)
+                    {t('hc.jk_performance.region_perf_title', { count: regionData.length })}
                   </h3>
                   {showProblematicOnly && (
                     <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded">
                       <AlertTriangle className="w-3 h-3" />
-                      Problematic only
+                      {t('hc.jk_performance.problematic_only')}
                     </span>
                   )}
                 </div>
@@ -945,34 +945,34 @@ export default function JKPerformance() {
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                        <div className="flex items-center gap-1">Region <ColumnTooltip content="Geographic region aggregating all cities and routes within it (from topology.regions table)." /></div>
+                        <div className="flex items-center gap-1">{t('hc.jk_performance.col_region')} <ColumnTooltip content={t('hc.jk_performance.tip_22')} /></div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                        <div className="flex items-center gap-1">Direction <ColumnTooltip content="Inbound (region is destination) or Outbound (region is origin). Shows regional traffic flow." /></div>
+                        <div className="flex items-center gap-1">{t('hc.jk_performance.col_direction')} <ColumnTooltip content={t('hc.jk_performance.tip_23')} /></div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                        <div className="flex items-center gap-1">Cities <ColumnTooltip content="Number of unique cities in this region with shipment data in the specified direction." /></div>
+                        <div className="flex items-center gap-1">{t('hc.jk_performance.col_cities')} <ColumnTooltip content={t('hc.jk_performance.tip_24')} /></div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                        <div className="flex items-center gap-1">Samples <ColumnTooltip content="Total shipments aggregated across all routes involving cities in this region." /></div>
+                        <div className="flex items-center gap-1">{t('hc.jk_performance.col_samples')} <ColumnTooltip content={t('hc.jk_performance.tip_25')} /></div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                        <div className="flex items-center gap-1">J+K Std <ColumnTooltip content="Weighted average of J+K standards across all routes in this region. Routes with more shipments have higher weight." /></div>
+                        <div className="flex items-center gap-1">{t('hc.jk_performance.col_jk_std')} <ColumnTooltip content={t('hc.jk_performance.tip_26')} /></div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                        <div className="flex items-center gap-1">J+K Actual <ColumnTooltip content="Weighted average of days required to reach the STD % target across all routes in this region. Represents the actual performance vs the standard delivery time." /></div>
+                        <div className="flex items-center gap-1">{t('hc.jk_performance.col_jk_actual')} <ColumnTooltip content={t('hc.jk_performance.tip_27')} /></div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                        <div className="flex items-center gap-1">Deviation <ColumnTooltip content="Weighted average deviation (Actual - Standard) across all routes in this region." /></div>
+                        <div className="flex items-center gap-1">{t('hc.jk_performance.col_deviation')} <ColumnTooltip content={t('hc.jk_performance.tip_28')} /></div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                        <div className="flex items-center gap-1">STD % <ColumnTooltip content="Weighted average target on-time percentage across all routes in this region. This is the required performance threshold that must be achieved." /></div>
+                        <div className="flex items-center gap-1">{t('hc.jk_performance.col_std_pct')} <ColumnTooltip content={t('hc.jk_performance.tip_29')} /></div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                        <div className="flex items-center gap-1">On-Time % <ColumnTooltip content="Percentage of all shipments (across all routes) delivered on-time in this region." /></div>
+                        <div className="flex items-center gap-1">{t('hc.jk_performance.col_ontime_pct')} <ColumnTooltip content={t('hc.jk_performance.tip_30')} /></div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                        <div className="flex items-center gap-1">Status <ColumnTooltip content="Visual indicator based on on-time percentage: Green (≥95%), Yellow (90-95%), Red (<90%)." /></div>
+                        <div className="flex items-center gap-1">{t('hc.jk_performance.col_status')} <ColumnTooltip content={t('hc.jk_performance.tip_21')} /></div>
                       </th>
                     </tr>
                   </thead>
@@ -996,7 +996,7 @@ export default function JKPerformance() {
                       return (
                         <tr key={idx} className="hover:bg-gray-50">
                           <td className="px-3 py-2 text-sm text-gray-900">{region.regionName}</td>
-                          <td className="px-3 py-2 text-sm">{directionIcon} {region.direction}</td>
+                          <td className="px-3 py-2 text-sm">{directionIcon} {region.direction === 'inbound' ? t('hc.jk_performance.inbound') : t('hc.jk_performance.outbound')}</td>
                           <td className="px-3 py-2 text-sm text-gray-600">{region.cities}</td>
                           <td className="px-3 py-2 text-sm text-gray-900">{region.totalSamples}</td>
                           <td className="px-3 py-2 text-sm text-gray-900">{formatJK(region.jkStandard, region.unit, displayUnit)}</td>
@@ -1027,12 +1027,12 @@ export default function JKPerformance() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <h3 className="text-lg font-semibold text-gray-900">
-                    Carrier / Product performance ({carrierData.length} carriers)
+                    {t('hc.jk_performance.carrier_perf_title', { count: carrierData.length })}
                   </h3>
                   {showProblematicOnly && (
                     <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded">
                       <AlertTriangle className="w-3 h-3" />
-                      Problematic only
+                      {t('hc.jk_performance.problematic_only')}
                     </span>
                   )}
                 </div>
@@ -1049,34 +1049,34 @@ export default function JKPerformance() {
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                        <div className="flex items-center gap-1">Carrier / Product <ColumnTooltip content="Hierarchical view: Carrier rows (blue background) show aggregated metrics. Product rows (indented with ↳) show metrics for each product under that carrier." /></div>
+                        <div className="flex items-center gap-1">{t('hc.jk_performance.col_carrier_product')} <ColumnTooltip content={t('hc.jk_performance.tip_31')} /></div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                        <div className="flex items-center gap-1">Routes <ColumnTooltip content="Number of unique routes (city pairs) served by this carrier or product." /></div>
+                        <div className="flex items-center gap-1">{t('hc.jk_performance.col_routes')} <ColumnTooltip content={t('hc.jk_performance.tip_32')} /></div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                        <div className="flex items-center gap-1">Samples <ColumnTooltip content="Total shipments for this carrier or product across all routes." /></div>
+                        <div className="flex items-center gap-1">{t('hc.jk_performance.col_samples')} <ColumnTooltip content={t('hc.jk_performance.tip_33')} /></div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                        <div className="flex items-center gap-1">J+K Std <ColumnTooltip content="Weighted average of J+K standards across all routes for this carrier or product." /></div>
+                        <div className="flex items-center gap-1">{t('hc.jk_performance.col_jk_std')} <ColumnTooltip content={t('hc.jk_performance.tip_34')} /></div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                        <div className="flex items-center gap-1">J+K Actual <ColumnTooltip content="Weighted average of days required to reach the STD % target across all routes for this carrier or product. Represents the actual performance vs the standard delivery time." /></div>
+                        <div className="flex items-center gap-1">{t('hc.jk_performance.col_jk_actual')} <ColumnTooltip content={t('hc.jk_performance.tip_35')} /></div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                        <div className="flex items-center gap-1">Deviation <ColumnTooltip content="Weighted average deviation (Actual - Standard) across all routes for this carrier or product." /></div>
+                        <div className="flex items-center gap-1">{t('hc.jk_performance.col_deviation')} <ColumnTooltip content={t('hc.jk_performance.tip_36')} /></div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                        <div className="flex items-center gap-1">STD % <ColumnTooltip content="Weighted average target on-time percentage across all routes for this carrier or product. This is the required performance threshold that must be achieved." /></div>
+                        <div className="flex items-center gap-1">{t('hc.jk_performance.col_std_pct')} <ColumnTooltip content={t('hc.jk_performance.tip_37')} /></div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                        <div className="flex items-center gap-1">On-Time % <ColumnTooltip content="Percentage of all shipments delivered on-time for this carrier or product." /></div>
+                        <div className="flex items-center gap-1">{t('hc.jk_performance.col_ontime_pct')} <ColumnTooltip content={t('hc.jk_performance.tip_38')} /></div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                        <div className="flex items-center gap-1">Problem Routes <ColumnTooltip content="Number of routes with on-time performance <90%. Only shown at carrier level (products show '-')." /></div>
+                        <div className="flex items-center gap-1">{t('hc.jk_performance.col_problem_routes')} <ColumnTooltip content={t('hc.jk_performance.tip_39')} /></div>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                        <div className="flex items-center gap-1">Status <ColumnTooltip content="Visual indicator: Green (≥95%), Yellow (90-95%), Red (<90%). Shown for both carriers and products." /></div>
+                        <div className="flex items-center gap-1">{t('hc.jk_performance.col_status')} <ColumnTooltip content={t('hc.jk_performance.tip_40')} /></div>
                       </th>
                     </tr>
                   </thead>

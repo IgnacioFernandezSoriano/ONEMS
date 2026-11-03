@@ -469,12 +469,12 @@ export function TerritoryEquityTable({
           {expandAll ? (
             <>
               <ChevronsUp className="w-4 h-4" />
-              Collapse All
+              {t('hc.territory_equity_table.collapse_all')}
             </>
           ) : (
             <>
               <ChevronsDown className="w-4 h-4" />
-              Expand All
+              {t('hc.territory_equity_table.expand_all')}
             </>
           )}
         </button>
@@ -731,7 +731,7 @@ export function TerritoryEquityTable({
           </tbody>
         </table>
         {sortedData.length === 0 && (
-          <div className="text-center py-8 text-gray-500">No data available</div>
+          <div className="text-center py-8 text-gray-500">{t('hc.territory_equity_table.no_data')}</div>
         )}
       </div>
     </div>

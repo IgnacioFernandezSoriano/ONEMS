@@ -54,7 +54,7 @@ export function DeliveryStandardForm({
 
     // Validation
     if (formData.origin_city_id === formData.destination_city_id) {
-      alert('Origin and destination cities must be different')
+      alert(t('hc.delivery_standard_form.cities_different'))
       return
     }
 
@@ -85,7 +85,7 @@ export function DeliveryStandardForm({
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Carrier *</label>
+          <label className="block text-sm font-medium mb-1">{t('hc.delivery_standard_form.carrier')}</label>
           <select
             required
             disabled={!!standard}
@@ -93,7 +93,7 @@ export function DeliveryStandardForm({
             onChange={(e) => setFormData({ ...formData, carrier_id: e.target.value })}
             className="w-full px-3 py-2 border rounded-md disabled:bg-gray-100"
           >
-            <option value="">Select carrier</option>
+            <option value="">{t('hc.delivery_standard_form.select_carrier')}</option>
             {carriers.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name} ({c.code})
@@ -103,7 +103,7 @@ export function DeliveryStandardForm({
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Product *</label>
+          <label className="block text-sm font-medium mb-1">{t('hc.delivery_standard_form.product')}</label>
           <select
             required
             disabled={!!standard}
@@ -111,7 +111,7 @@ export function DeliveryStandardForm({
             onChange={(e) => setFormData({ ...formData, product_id: e.target.value })}
             className="w-full px-3 py-2 border rounded-md disabled:bg-gray-100"
           >
-            <option value="">Select product</option>
+            <option value="">{t('hc.delivery_standard_form.select_product')}</option>
             {availableProducts.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.description} ({p.code})
@@ -119,14 +119,14 @@ export function DeliveryStandardForm({
             ))}
           </select>
           {formData.carrier_id && availableProducts.length === 0 && (
-            <p className="text-xs text-amber-600 mt-1">No products for this carrier</p>
+            <p className="text-xs text-amber-600 mt-1">{t('hc.delivery_standard_form.no_products')}</p>
           )}
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Origin City *</label>
+          <label className="block text-sm font-medium mb-1">{t('hc.delivery_standard_form.origin_city')}</label>
           <select
             required
             disabled={!!standard}
@@ -134,18 +134,18 @@ export function DeliveryStandardForm({
             onChange={(e) => setFormData({ ...formData, origin_city_id: e.target.value })}
             className="w-full px-3 py-2 border rounded-md disabled:bg-gray-100"
           >
-            <option value="">Select origin</option>
+            <option value="">{t('hc.delivery_standard_form.select_origin')}</option>
             {cities.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name} ({c.code})
-                {c.classification && ` - Type ${c.classification}`}
+                {c.classification && ` - ${t('hc.delivery_standard_form.type_value', { value: c.classification })}`}
               </option>
             ))}
           </select>
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Destination City *</label>
+          <label className="block text-sm font-medium mb-1">{t('hc.delivery_standard_form.destination_city')}</label>
           <select
             required
             disabled={!!standard}
@@ -153,13 +153,13 @@ export function DeliveryStandardForm({
             onChange={(e) => setFormData({ ...formData, destination_city_id: e.target.value })}
             className="w-full px-3 py-2 border rounded-md disabled:bg-gray-100"
           >
-            <option value="">Select destination</option>
+            <option value="">{t('hc.delivery_standard_form.select_destination')}</option>
             {cities
               .filter((c) => c.id !== formData.origin_city_id)
               .map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name} ({c.code})
-                  {c.classification && ` - Type ${c.classification}`}
+                  {c.classification && ` - ${t('hc.delivery_standard_form.type_value', { value: c.classification })}`}
                 </option>
               ))}
           </select>
@@ -168,14 +168,13 @@ export function DeliveryStandardForm({
 
       {standard && (
         <div className="bg-blue-50 border border-blue-200 rounded p-3 text-sm text-blue-800">
-          ℹ️ Carrier, Product, Origin and Destination cannot be changed. Delete and create a new
-          record if needed.
+          ℹ️ {t('hc.delivery_standard_form.cannot_change')}
         </div>
       )}
 
       <div className="grid grid-cols-3 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Standard Time</label>
+          <label className="block text-sm font-medium mb-1">{t('hc.delivery_standard_form.standard_time')}</label>
           <input
             type="number"
             step="0.01"
@@ -183,12 +182,12 @@ export function DeliveryStandardForm({
             value={formData.standard_time}
             onChange={(e) => setFormData({ ...formData, standard_time: e.target.value })}
             className="w-full px-3 py-2 border rounded-md"
-            placeholder="e.g., 24"
+            placeholder={t('hc.delivery_standard_form.eg_24')}
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Success %</label>
+          <label className="block text-sm font-medium mb-1">{t('hc.delivery_standard_form.success_pct')}</label>
           <input
             type="number"
             step="0.01"
@@ -197,12 +196,12 @@ export function DeliveryStandardForm({
             value={formData.success_percentage}
             onChange={(e) => setFormData({ ...formData, success_percentage: e.target.value })}
             className="w-full px-3 py-2 border rounded-md"
-            placeholder="e.g., 85"
+            placeholder={t('hc.delivery_standard_form.eg_85')}
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Time Unit *</label>
+          <label className="block text-sm font-medium mb-1">{t('hc.delivery_standard_form.time_unit')}</label>
           <select
             required
             value={formData.time_unit}
@@ -219,7 +218,7 @@ export function DeliveryStandardForm({
 
       <div className="grid grid-cols-3 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Warning %</label>
+          <label className="block text-sm font-medium mb-1">{t('hc.delivery_standard_form.warning_pct')}</label>
           <input
             type="number"
             step="0.01"
@@ -228,12 +227,12 @@ export function DeliveryStandardForm({
             value={formData.warning_threshold}
             onChange={(e) => setFormData({ ...formData, warning_threshold: e.target.value })}
             className="w-full px-3 py-2 border rounded-md"
-            placeholder="e.g., 5"
+            placeholder={t('hc.delivery_standard_form.eg_5')}
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Critical %</label>
+          <label className="block text-sm font-medium mb-1">{t('hc.delivery_standard_form.critical_pct')}</label>
           <input
             type="number"
             step="0.01"
@@ -242,19 +241,19 @@ export function DeliveryStandardForm({
             value={formData.critical_threshold}
             onChange={(e) => setFormData({ ...formData, critical_threshold: e.target.value })}
             className="w-full px-3 py-2 border rounded-md"
-            placeholder="e.g., 20"
+            placeholder={t('hc.delivery_standard_form.eg_20')}
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Type</label>
+          <label className="block text-sm font-medium mb-1">{t('hc.delivery_standard_form.type')}</label>
           <select
             value={formData.threshold_type}
             onChange={(e) => setFormData({ ...formData, threshold_type: e.target.value as 'absolute' | 'relative' })}
             className="w-full px-3 py-2 border rounded-md"
           >
-            <option value="absolute">Abs</option>
-            <option value="relative">Rel</option>
+            <option value="absolute">{t('hc.delivery_standard_form.abs')}</option>
+            <option value="relative">{t('hc.delivery_standard_form.rel')}</option>
           </select>
         </div>
       </div>
@@ -265,14 +264,14 @@ export function DeliveryStandardForm({
           onClick={onCancel}
           className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
         >
-          Cancel
+          {t('hc.delivery_standard_form.cancel')}
         </button>
         <button
           type="submit"
           disabled={loading}
           className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
         >
-          {loading ? 'Saving...' : standard ? 'Update' : 'Create'}
+          {loading ? t('hc.delivery_standard_form.saving') : standard ? t('hc.delivery_standard_form.update') : t('hc.delivery_standard_form.create')}
         </button>
       </div>
     </form>

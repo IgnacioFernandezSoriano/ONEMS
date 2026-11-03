@@ -1,4 +1,5 @@
 import { X } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
 import type { CityEquityData } from '@/types/reporting';
 import { formatNumber } from '@/lib/formatNumber';
 import { useTimeUnit } from '@/hooks/useTimeUnit';
@@ -11,6 +12,7 @@ interface CityDetailModalProps {
 }
 
 export function CityDetailModal({ city, onClose }: CityDetailModalProps) {
+  const { t } = useTranslation();
   const { unit: displayUnit } = useTimeUnit();
   // J+K en la unidad de su grupo (sin unidad = horas, regla de medida)
   const jk = (v: number, u?: TimeUnit) => formatJK(v, u ?? 'hours', displayUnit);
@@ -29,7 +31,7 @@ export function CityDetailModal({ city, onClose }: CityDetailModalProps) {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-gray-900">City Details: {city.cityName}</h2>
+          <h2 className="text-2xl font-bold text-gray-900">{t('hc.city_detail_modal.title', { city: city.cityName })}</h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -41,18 +43,18 @@ export function CityDetailModal({ city, onClose }: CityDetailModalProps) {
         <div className="p-6 space-y-6">
           {/* Basic Information */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">Basic Information</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">{t('hc.city_detail_modal.basic_information')}</h3>
             <div className="grid grid-cols-3 gap-4">
               <div>
-                <p className="text-sm text-gray-500">Region:</p>
+                <p className="text-sm text-gray-500">{t('hc.city_detail_modal.label_region')}</p>
                 <p className="font-medium text-gray-900">{city.regionName || '-'}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Classification:</p>
+                <p className="text-sm text-gray-500">{t('hc.city_detail_modal.label_classification')}</p>
                 <p className="font-medium text-gray-900">{city.classification || '-'}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Population:</p>
+                <p className="text-sm text-gray-500">{t('hc.city_detail_modal.label_population')}</p>
                 <p className="font-medium text-gray-900">
                   {city.population ? city.population.toLocaleString() : '-'}
                 </p>
@@ -62,24 +64,24 @@ export function CityDetailModal({ city, onClose }: CityDetailModalProps) {
 
           {/* Performance Metrics */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">Performance Metrics</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">{t('hc.city_detail_modal.performance_metrics')}</h3>
             <div className="grid grid-cols-3 gap-4">
               <div>
-                <p className="text-sm text-gray-500">Total Shipments:</p>
+                <p className="text-sm text-gray-500">{t('hc.city_detail_modal.label_total_shipments')}</p>
                 <p className="font-medium text-gray-900">{city.totalShipments}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Compliant:</p>
+                <p className="text-sm text-gray-500">{t('hc.city_detail_modal.label_compliant')}</p>
                 <p className="font-medium text-gray-900">
                   {city.compliantShipments} ({formatNumber(city.actualPercentage)}%)
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Standard:</p>
+                <p className="text-sm text-gray-500">{t('hc.city_detail_modal.label_standard')}</p>
                 <p className="font-medium text-gray-900">{formatNumber(city.standardPercentage)}%</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Deviation:</p>
+                <p className="text-sm text-gray-500">{t('hc.city_detail_modal.label_deviation')}</p>
                 <p
                   className={`font-medium ${
                     city.deviation >= 0 ? 'text-green-600' : 'text-red-600'
@@ -90,15 +92,15 @@ export function CityDetailModal({ city, onClose }: CityDetailModalProps) {
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Status:</p>
+                <p className="text-sm text-gray-500">{t('hc.city_detail_modal.label_status')}</p>
                 <span
                   className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${getStatusBadge(
                     city.status
                   )}`}
                 >
-                  {city.status === 'compliant' && '✅ compliant'}
-                  {city.status === 'warning' && '⚠️ warning'}
-                  {city.status === 'critical' && '🔴 critical'}
+                  {city.status === 'compliant' && '✅ ' + t('hc.city_detail_modal.status_compliant')}
+                  {city.status === 'warning' && '⚠️ ' + t('hc.city_detail_modal.status_warning')}
+                  {city.status === 'critical' && '🔴 ' + t('hc.city_detail_modal.status_critical')}
                 </span>
               </div>
             </div>
@@ -106,36 +108,36 @@ export function CityDetailModal({ city, onClose }: CityDetailModalProps) {
 
           {/* Directional Analysis */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">Directional Analysis</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">{t('hc.city_detail_modal.directional_analysis')}</h3>
             <div className="space-y-3">
               {(city.inboundShipments > 0 || city.inboundStandardDays > 0) && (
               <div className="bg-blue-50 p-4 rounded-lg">
-                <p className="text-sm font-medium text-gray-700 mb-2">Inbound (Arrivals)</p>
+                <p className="text-sm font-medium text-gray-700 mb-2">{t('hc.city_detail_modal.inbound_arrivals')}</p>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-xs text-gray-600">Shipments:</p>
-                    <p className="text-sm font-medium">{city.inboundShipments || 0} ({city.inboundCompliant || 0} compliant)</p>
+                    <p className="text-xs text-gray-600">{t('hc.city_detail_modal.label_shipments')}</p>
+                    <p className="text-sm font-medium">{t('hc.city_detail_modal.shipments_compliant', { count: city.inboundShipments || 0, compliant: city.inboundCompliant || 0 })}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-600">Actual %:</p>
+                    <p className="text-xs text-gray-600">{t('hc.city_detail_modal.label_actual_pct')}</p>
                     <p className="text-lg font-bold text-blue-600">{formatNumber(city.inboundPercentage)}%</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-600">Standard %:</p>
+                    <p className="text-xs text-gray-600">{t('hc.city_detail_modal.label_standard_pct')}</p>
                     <p className="text-sm font-medium">{formatNumber(city.inboundStandardPercentage)}%</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-600">Deviation:</p>
+                    <p className="text-xs text-gray-600">{t('hc.city_detail_modal.label_deviation')}</p>
                     <p className={`text-sm font-medium ${city.inboundDeviation >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                       {city.inboundDeviation >= 0 ? '+' : ''}{formatNumber(city.inboundDeviation)}%
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-600">J+K Std:</p>
+                    <p className="text-xs text-gray-600">{t('hc.city_detail_modal.label_jk_std')}</p>
                     <p className="text-sm font-medium">{jk(city.inboundStandardDays, city.inboundUnit)}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-600">J+K Actual:</p>
+                    <p className="text-xs text-gray-600">{t('hc.city_detail_modal.label_jk_actual')}</p>
                     <p className="text-sm font-medium">{jk(city.inboundActualDays, city.inboundUnit)}</p>
                   </div>
                 </div>
@@ -144,32 +146,32 @@ export function CityDetailModal({ city, onClose }: CityDetailModalProps) {
 
               {(city.outboundShipments > 0 || city.outboundStandardDays > 0) && (
               <div className="bg-green-50 p-4 rounded-lg">
-                <p className="text-sm font-medium text-gray-700 mb-2">Outbound (Departures)</p>
+                <p className="text-sm font-medium text-gray-700 mb-2">{t('hc.city_detail_modal.outbound_departures')}</p>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-xs text-gray-600">Shipments:</p>
-                    <p className="text-sm font-medium">{city.outboundShipments || 0} ({city.outboundCompliant || 0} compliant)</p>
+                    <p className="text-xs text-gray-600">{t('hc.city_detail_modal.label_shipments')}</p>
+                    <p className="text-sm font-medium">{t('hc.city_detail_modal.shipments_compliant', { count: city.outboundShipments || 0, compliant: city.outboundCompliant || 0 })}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-600">Actual %:</p>
+                    <p className="text-xs text-gray-600">{t('hc.city_detail_modal.label_actual_pct')}</p>
                     <p className="text-lg font-bold text-green-600">{formatNumber(city.outboundPercentage)}%</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-600">Standard %:</p>
+                    <p className="text-xs text-gray-600">{t('hc.city_detail_modal.label_standard_pct')}</p>
                     <p className="text-sm font-medium">{formatNumber(city.outboundStandardPercentage)}%</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-600">Deviation:</p>
+                    <p className="text-xs text-gray-600">{t('hc.city_detail_modal.label_deviation')}</p>
                     <p className={`text-sm font-medium ${city.outboundDeviation >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                       {city.outboundDeviation >= 0 ? '+' : ''}{formatNumber(city.outboundDeviation)}%
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-600">J+K Std:</p>
+                    <p className="text-xs text-gray-600">{t('hc.city_detail_modal.label_jk_std')}</p>
                     <p className="text-sm font-medium">{jk(city.outboundStandardDays, city.outboundUnit)}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-600">J+K Actual:</p>
+                    <p className="text-xs text-gray-600">{t('hc.city_detail_modal.label_jk_actual')}</p>
                     <p className="text-sm font-medium">{jk(city.outboundActualDays, city.outboundUnit)}</p>
                   </div>
                 </div>
@@ -181,9 +183,9 @@ export function CityDetailModal({ city, onClose }: CityDetailModalProps) {
               <div className="bg-gray-50 p-4 rounded-lg">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-600">Direction Gap:</p>
+                    <p className="text-sm text-gray-600">{t('hc.city_detail_modal.direction_gap')}</p>
                     <p className="text-xs text-gray-500">
-                      {city.directionGap > 5 ? '✅ Balanced service' : '⚠️ Imbalanced service'}
+                      {city.directionGap > 5 ? '✅ ' + t('hc.city_detail_modal.balanced_service') : '⚠️ ' + t('hc.city_detail_modal.imbalanced_service')}
                     </p>
                   </div>
                   <p className="text-2xl font-bold text-gray-700">
@@ -197,44 +199,44 @@ export function CityDetailModal({ city, onClose }: CityDetailModalProps) {
 
           {/* Carrier & Product Breakdown */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">Carrier & Product Breakdown</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">{t('hc.city_detail_modal.carrier_product_breakdown')}</h3>
             {carrierProductData.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Carrier
+                        {t('hc.city_detail_modal.th_carrier')}
                       </th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Product
+                        {t('hc.city_detail_modal.th_product')}
                       </th>
                       <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                        Shipments
+                        {t('hc.city_detail_modal.th_shipments')}
                       </th>
                       <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                        Compliant
+                        {t('hc.city_detail_modal.th_compliant')}
                       </th>
                       <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                        Actual %
+                        {t('hc.city_detail_modal.th_actual_pct')}
                       </th>
                       <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                        Standard %
+                        {t('hc.city_detail_modal.th_standard_pct')}
                       </th>
                       <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                        J+K Std
+                        {t('hc.city_detail_modal.th_jk_std')}
                       </th>
                       <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                        J+K Actual
+                        {t('hc.city_detail_modal.th_jk_actual')}
                       </th>
                       <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                        Deviation
+                        {t('hc.city_detail_modal.th_deviation')}
                       </th>
                       <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                        Inbound %
+                        {t('hc.city_detail_modal.th_inbound_pct')}
                       </th>
                       <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                        Outbound %
+                        {t('hc.city_detail_modal.th_outbound_pct')}
                       </th>
                     </tr>
                   </thead>
@@ -281,7 +283,7 @@ export function CityDetailModal({ city, onClose }: CityDetailModalProps) {
                 </table>
               </div>
             ) : (
-              <p className="text-center py-8 text-gray-500">No data available</p>
+              <p className="text-center py-8 text-gray-500">{t('hc.city_detail_modal.no_data')}</p>
             )}
           </div>
         </div>
@@ -291,7 +293,7 @@ export function CityDetailModal({ city, onClose }: CityDetailModalProps) {
             onClick={onClose}
             className="w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
           >
-            Close
+            {t('hc.city_detail_modal.close')}
           </button>
         </div>
       </div>

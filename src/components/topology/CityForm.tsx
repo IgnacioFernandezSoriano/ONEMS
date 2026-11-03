@@ -55,7 +55,7 @@ export function CityForm({ city, regionId, onSubmit, onCancel }: CityFormProps) 
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
           className="w-full px-3 py-2 border rounded-md"
-          placeholder="e.g., Madrid, Barcelona"
+          placeholder={t('hc.city_form.name_placeholder')}
         />
       </div>
 
@@ -67,7 +67,7 @@ export function CityForm({ city, regionId, onSubmit, onCancel }: CityFormProps) 
           value={formData.code}
           onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
           className="w-full px-3 py-2 border rounded-md"
-          placeholder="e.g., MAD, BCN"
+          placeholder={t('hc.city_form.code_placeholder')}
           maxLength={10}
         />
       </div>
@@ -98,7 +98,7 @@ export function CityForm({ city, regionId, onSubmit, onCancel }: CityFormProps) 
           value={formData.population}
           onChange={(e) => setFormData({ ...formData, population: e.target.value })}
           className="w-full px-3 py-2 border rounded-md"
-          placeholder="e.g., 3200000"
+          placeholder={t('hc.city_form.population_placeholder')}
         />
         <p className="text-xs text-gray-500 mt-1">
           {t('cityform.population_description')}
@@ -106,7 +106,7 @@ export function CityForm({ city, regionId, onSubmit, onCancel }: CityFormProps) 
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">Status *</label>
+        <label className="block text-sm font-medium mb-1">{t('hc.city_form.status')} *</label>
         <select
           required
           value={formData.status}

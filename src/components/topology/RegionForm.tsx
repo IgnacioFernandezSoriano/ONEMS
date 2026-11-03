@@ -33,45 +33,45 @@ export function RegionForm({ region, onSubmit, onCancel }: RegionFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium mb-1">Region Name *</label>
+        <label className="block text-sm font-medium mb-1">{t('hc.region_form.region_name')}</label>
         <input
           type="text"
           required
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
           className="w-full px-3 py-2 border rounded-md"
-          placeholder="e.g., Spain, France"
+          placeholder={t('hc.region_form.ph_name')}
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">Region Code *</label>
+        <label className="block text-sm font-medium mb-1">{t('hc.region_form.region_code')}</label>
         <input
           type="text"
           required
           value={formData.code}
           onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
           className="w-full px-3 py-2 border rounded-md"
-          placeholder="e.g., ES, FR"
+          placeholder={t('hc.region_form.ph_code')}
           maxLength={10}
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">Country Code *</label>
+        <label className="block text-sm font-medium mb-1">{t('hc.region_form.country_code')}</label>
         <input
           type="text"
           required
           value={formData.country_code}
           onChange={(e) => setFormData({ ...formData, country_code: e.target.value.toUpperCase() })}
           className="w-full px-3 py-2 border rounded-md"
-          placeholder="e.g., ES, FR"
+          placeholder={t('hc.region_form.ph_code')}
           maxLength={2}
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">Status *</label>
+        <label className="block text-sm font-medium mb-1">{t('hc.region_form.status')}</label>
         <select
           required
           value={formData.status}
@@ -95,10 +95,10 @@ export function RegionForm({ region, onSubmit, onCancel }: RegionFormProps) {
 
       <div className="flex gap-2 justify-end">
         <Button type="button" variant="secondary" onClick={onCancel}>
-          Cancel
+          {t('hc.region_form.cancel')}
         </Button>
         <Button type="submit" disabled={loading}>
-          {loading ? 'Saving...' : region ? 'Update' : 'Create'}
+          {loading ? t('hc.region_form.saving') : region ? t('hc.region_form.update') : t('hc.region_form.create')}
         </Button>
       </div>
     </form>

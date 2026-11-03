@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from '@/hooks/useTranslation'
 
 interface SegmentDetail {
   from_city: string
@@ -30,15 +31,16 @@ interface Props {
 }
 
 export default function SegmentFlowDiagram({ segments, postalCenters, onSegmentClick }: Props) {
+  const { t } = useTranslation()
   // Create center lookup map
   const centerMap = new Map(postalCenters.map(c => [c.id, c]))
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
 
   const formatJK = (minutes: number) => {
     const days = minutes / (24 * 60)
-    if (days < 1) return `${days.toFixed(2)} days`
-    else if (days === Math.floor(days)) return `${Math.floor(days)} days`
-    else return `${days.toFixed(2)} days`
+    if (days < 1) return t('hc.segment_flow_diagram.days_value', { value: days.toFixed(2) })
+    else if (days === Math.floor(days)) return t('hc.segment_flow_diagram.days_value', { value: Math.floor(days) })
+    else return t('hc.segment_flow_diagram.days_value', { value: days.toFixed(2) })
   }
 
   const formatTimeDiff = (actual: number, expected: number) => {
@@ -54,9 +56,9 @@ export default function SegmentFlowDiagram({ segments, postalCenters, onSegmentC
   }
 
   const getStatusBadge = (compliance: number) => {
-    if (compliance >= 90) return { label: 'Compliant', bg: 'bg-green-100', text: 'text-green-800' }
-    if (compliance >= 80) return { label: 'Warning', bg: 'bg-yellow-100', text: 'text-yellow-800' }
-    return { label: 'Critical', bg: 'bg-red-100', text: 'text-red-800' }
+    if (compliance >= 90) return { label: t('hc.segment_flow_diagram.status_compliant'), bg: 'bg-green-100', text: 'text-green-800' }
+    if (compliance >= 80) return { label: t('hc.segment_flow_diagram.status_warning'), bg: 'bg-yellow-100', text: 'text-yellow-800' }
+    return { label: t('hc.segment_flow_diagram.status_critical'), bg: 'bg-red-100', text: 'text-red-800' }
   }
 
   // Get origin and destination info
@@ -64,23 +66,23 @@ export default function SegmentFlowDiagram({ segments, postalCenters, onSegmentC
   const lastSegment = segments[segments.length - 1]
   
   const originCity = firstSegment?.from_city || ''
-  const originCenterName = firstSegment?.from_center_name || centerMap.get(firstSegment?.from_center_id)?.name || 'Unknown Center'
+  const originCenterName = firstSegment?.from_center_name || centerMap.get(firstSegment?.from_center_id)?.name || t('hc.segment_flow_diagram.unknown_center')
   
   const destCity = lastSegment?.to_city || lastSegment?.from_city || ''
   const destCenterId = lastSegment?.to_center_id || lastSegment?.from_center_id
-  const destCenterName = lastSegment?.to_center_name || centerMap.get(destCenterId)?.name || 'Unknown Center'
+  const destCenterName = lastSegment?.to_center_name || centerMap.get(destCenterId)?.name || t('hc.segment_flow_diagram.unknown_center')
 
   return (
     <div className="relative p-4 bg-white">
       {/* Title */}
       <div className="text-xs font-semibold text-gray-500 mb-3 uppercase tracking-wide">
-        Segment Flow
+        {t('hc.segment_flow_diagram.segment_flow')}
       </div>
       
       <div className="flex items-center gap-2 overflow-x-auto pb-2">
         {/* ORIGIN CIRCLE */}
         <div className="flex-shrink-0 flex flex-col items-center">
-          <div className="text-xs font-semibold text-blue-600 mb-1">Origin:</div>
+          <div className="text-xs font-semibold text-blue-600 mb-1">{t('hc.segment_flow_diagram.origin')}</div>
           <div className="w-20 h-20 rounded-full border-2 border-blue-400 bg-blue-50 flex flex-col items-center justify-center">
             <div className="text-[10px] font-semibold text-gray-900 text-center px-1">
               {originCity}
@@ -95,7 +97,7 @@ export default function SegmentFlowDiagram({ segments, postalCenters, onSegmentC
         {segments.map((segment, idx) => {
           const isHovered = hoveredIndex === idx
           const status = getStatusBadge(segment.compliance_rate)
-          const centerName = segment.from_center_name || centerMap.get(segment.from_center_id)?.name || 'Unknown Center'
+          const centerName = segment.from_center_name || centerMap.get(segment.from_center_id)?.name || t('hc.segment_flow_diagram.unknown_center')
           
           return (
             <div key={idx} className="flex items-center flex-shrink-0">
@@ -117,7 +119,7 @@ export default function SegmentFlowDiagram({ segments, postalCenters, onSegmentC
                       {centerName}
                     </div>
                     <div className="text-[10px] text-gray-500">{segment.from_city}</div>
-                    <div className="text-[10px] text-gray-400">Operational</div>
+                    <div className="text-[10px] text-gray-400">{t('hc.segment_flow_diagram.operational')}</div>
                     <div className={`w-2 h-2 rounded-full ${getStatusColor(segment.compliance_rate)} mt-1`}></div>
                   </div>
                 ) : (
@@ -146,17 +148,17 @@ export default function SegmentFlowDiagram({ segments, postalCenters, onSegmentC
                       </div>
                       
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Tags:</span>
+                        <span className="text-gray-600">{t('hc.segment_flow_diagram.tags')}</span>
                         <span className="font-medium">{segment.tags_count}</span>
                       </div>
                       
                       <div className="flex justify-between">
-                        <span className="text-gray-600">J+K Std:</span>
+                        <span className="text-gray-600">{t('hc.segment_flow_diagram.jk_std')}</span>
                         <span className="font-medium">{formatJK(segment.expected_time_minutes)}</span>
                       </div>
                       
                       <div className="flex justify-between">
-                        <span className="text-gray-600">J+K Natural:</span>
+                        <span className="text-gray-600">{t('hc.segment_flow_diagram.jk_natural')}</span>
                         <span className="font-medium">
                           {formatJK(segment.avg_total_time_natural)}
                           <span className={segment.avg_total_time_natural <= segment.expected_time_minutes ? 'text-green-600' : 'text-red-600'}>
@@ -166,7 +168,7 @@ export default function SegmentFlowDiagram({ segments, postalCenters, onSegmentC
                       </div>
                       
                       <div className="flex justify-between">
-                        <span className="text-gray-600">J+K Working:</span>
+                        <span className="text-gray-600">{t('hc.segment_flow_diagram.jk_working')}</span>
                         <span className="font-medium">
                           {formatJK(segment.avg_total_time_working)}
                           <span className={segment.avg_total_time_working <= segment.expected_time_minutes ? 'text-green-600' : 'text-red-600'}>
@@ -176,12 +178,12 @@ export default function SegmentFlowDiagram({ segments, postalCenters, onSegmentC
                       </div>
                       
                       <div className="flex justify-between">
-                        <span className="text-gray-600">% Std:</span>
+                        <span className="text-gray-600">{t('hc.segment_flow_diagram.pct_std')}</span>
                         <span className="font-medium">{segment.on_time_percentage_std.toFixed(0)}%</span>
                       </div>
                       
                       <div className="flex justify-between">
-                        <span className="text-gray-600">% Real:</span>
+                        <span className="text-gray-600">{t('hc.segment_flow_diagram.pct_real')}</span>
                         <span className="font-medium">
                           {segment.compliance_rate.toFixed(1)}%
                           <span className={segment.compliance_rate >= segment.on_time_percentage_std ? 'text-green-600' : 'text-red-600'}>
@@ -192,7 +194,7 @@ export default function SegmentFlowDiagram({ segments, postalCenters, onSegmentC
                       </div>
                       
                       <div className="flex justify-between items-center mt-2 pt-2 border-t">
-                        <span className="text-gray-600">Status:</span>
+                        <span className="text-gray-600">{t('hc.segment_flow_diagram.status')}</span>
                         <span className={`px-2 py-0.5 rounded text-xs font-semibold ${status.bg} ${status.text}`}>
                           {status.label}
                         </span>
@@ -217,7 +219,7 @@ export default function SegmentFlowDiagram({ segments, postalCenters, onSegmentC
 
         {/* DESTINATION CIRCLE */}
         <div className="flex-shrink-0 flex flex-col items-center">
-          <div className="text-xs font-semibold text-blue-600 mb-1">Destination:</div>
+          <div className="text-xs font-semibold text-blue-600 mb-1">{t('hc.segment_flow_diagram.destination')}</div>
           <div className="w-20 h-20 rounded-full border-2 border-blue-400 bg-blue-50 flex flex-col items-center justify-center">
             <div className="text-[10px] font-semibold text-gray-900 text-center px-1">
               {destCity}

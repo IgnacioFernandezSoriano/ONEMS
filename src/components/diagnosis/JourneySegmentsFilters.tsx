@@ -79,10 +79,10 @@ export function JourneySegmentsFilters({ onFilterChange }: JourneySegmentsFilter
         <button
           onClick={handleClearFilters}
           className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-          title="Reset all filters"
+          title={t('hc.journey_segments_filters.reset_title')}
         >
           <RotateCcw className="w-4 h-4" />
-          Reset
+          {t('hc.journey_segments_filters.reset')}
         </button>
       </div>
 

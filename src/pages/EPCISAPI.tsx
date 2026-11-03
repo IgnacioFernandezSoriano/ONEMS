@@ -18,20 +18,19 @@ export function EPCISAPI() {
   }
 
   const tabs = [
-    { id: 'overview', label: 'Overview', icon: Key },
-    { id: 'documentation', label: 'Documentation', icon: BookOpen },
-    { id: 'testing', label: 'Testing', icon: TestTube },
-    { id: 'usage', label: 'Usage', icon: BarChart3 }
+    { id: 'overview', label: t('hc.epcisapi.tab_overview'), icon: Key },
+    { id: 'documentation', label: t('hc.epcisapi.tab_documentation'), icon: BookOpen },
+    { id: 'testing', label: t('hc.epcisapi.tab_testing'), icon: TestTube },
+    { id: 'usage', label: t('hc.epcisapi.tab_usage'), icon: BarChart3 }
   ]
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">EPCIS Pipeline API</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('hc.epcisapi.title')}</h1>
         <p className="text-gray-600">
-          REST API for EPCIS event ingestion and pipeline management. Includes endpoints for manual execution,
-          status monitoring, and journey path queries.
+          {t('hc.epcisapi.subtitle')}
         </p>
       </div>
 
@@ -65,12 +64,12 @@ export function EPCISAPI() {
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center gap-2 mb-4">
               <Code className="w-5 h-5 text-blue-600" />
-              <h2 className="text-xl font-semibold text-gray-900">API Endpoint</h2>
+              <h2 className="text-xl font-semibold text-gray-900">{t('hc.epcisapi.api_endpoint')}</h2>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Base URL
+                {t('hc.epcisapi.base_url')}
               </label>
               <div className="flex gap-2">
                 <input
@@ -84,7 +83,7 @@ export function EPCISAPI() {
                   className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2"
                 >
                   {copied ? <CheckCircle className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
-                  {copied ? 'Copied' : 'Copy'}
+                  {copied ? t('hc.epcisapi.copied') : t('hc.epcisapi.copy')}
                 </button>
               </div>
             </div>
@@ -94,19 +93,19 @@ export function EPCISAPI() {
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center gap-2 mb-4">
               <Shield className="w-5 h-5 text-blue-600" />
-              <h2 className="text-xl font-semibold text-gray-900">Authentication</h2>
+              <h2 className="text-xl font-semibold text-gray-900">{t('hc.epcisapi.authentication')}</h2>
             </div>
 
             <p className="text-gray-600 mb-4">
-              All API requests require authentication using your Supabase JWT token.
+              {t('hc.epcisapi.auth_requirement')}
             </p>
 
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
               <div className="flex gap-2">
                 <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
                 <div className="text-sm text-yellow-800">
-                  <p className="font-medium mb-1">Security Note</p>
-                  <p>Use your Supabase authentication token for all API calls. The token is automatically included when using the Supabase client.</p>
+                  <p className="font-medium mb-1">{t('hc.epcisapi.security_note')}</p>
+                  <p>{t('hc.epcisapi.security_note_text')}</p>
                 </div>
               </div>
             </div>
@@ -118,7 +117,7 @@ export function EPCISAPI() {
         <div className="bg-white rounded-lg shadow p-6 space-y-8">
           {/* Available Endpoints */}
           <section>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Available Endpoints</h2>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-4">{t('hc.epcisapi.available_endpoints')}</h2>
             
             {/* Execute Pipeline Phase */}
             <div className="border border-gray-200 rounded-lg p-4 mb-4">
@@ -126,27 +125,27 @@ export function EPCISAPI() {
                 <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded">POST</span>
                 <code className="text-sm font-mono">/rpc/rpc_execute_pipeline_phase</code>
               </div>
-              <p className="text-gray-600 text-sm mb-4">Manually execute EPCIS pipeline phases</p>
+              <p className="text-gray-600 text-sm mb-4">{t('hc.epcisapi.execute_phase_desc')}</p>
 
-              <h3 className="font-semibold text-gray-900 mb-2">Parameters</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">{t('hc.epcisapi.parameters')}</h3>
               <table className="w-full text-sm mb-4">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="text-left p-2 font-semibold">Parameter</th>
-                    <th className="text-left p-2 font-semibold">Type</th>
-                    <th className="text-left p-2 font-semibold">Description</th>
+                    <th className="text-left p-2 font-semibold">{t('hc.epcisapi.parameter')}</th>
+                    <th className="text-left p-2 font-semibold">{t('hc.epcisapi.type')}</th>
+                    <th className="text-left p-2 font-semibold">{t('hc.epcisapi.description')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr className="border-t">
                     <td className="p-2 font-mono">p_phase</td>
                     <td className="p-2">TEXT</td>
-                    <td className="p-2">'consolidation', 'segments', 'aggregation', or 'all'</td>
+                    <td className="p-2">{t('hc.epcisapi.phase_values')}</td>
                   </tr>
                 </tbody>
               </table>
 
-              <h3 className="font-semibold text-gray-900 mb-2">Example Request</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">{t('hc.epcisapi.example_request')}</h3>
               <div className="bg-gray-50 rounded-lg p-4 font-mono text-sm overflow-x-auto">
                 <pre>{`POST /rest/v1/rpc/rpc_execute_pipeline_phase
 Content-Type: application/json
@@ -164,9 +163,9 @@ Authorization: Bearer YOUR_JWT_TOKEN
                 <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded">POST</span>
                 <code className="text-sm font-mono">/rpc/rpc_get_pipeline_status</code>
               </div>
-              <p className="text-gray-600 text-sm mb-4">Get current status of EPCIS pipeline</p>
+              <p className="text-gray-600 text-sm mb-4">{t('hc.epcisapi.status_desc')}</p>
 
-              <h3 className="font-semibold text-gray-900 mb-2">Example Request</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">{t('hc.epcisapi.example_request')}</h3>
               <div className="bg-gray-50 rounded-lg p-4 font-mono text-sm overflow-x-auto">
                 <pre>{`POST /rest/v1/rpc/rpc_get_pipeline_status
 Content-Type: application/json
@@ -180,54 +179,54 @@ Authorization: Bearer YOUR_JWT_TOKEN`}</pre>
                 <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded">POST</span>
                 <code className="text-sm font-mono">/rpc/rpc_query_journey_paths</code>
               </div>
-              <p className="text-gray-600 text-sm mb-4">Query aggregated journey paths with filters</p>
+              <p className="text-gray-600 text-sm mb-4">{t('hc.epcisapi.query_desc')}</p>
 
-              <h3 className="font-semibold text-gray-900 mb-2">Parameters</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">{t('hc.epcisapi.parameters')}</h3>
               <table className="w-full text-sm mb-4">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="text-left p-2 font-semibold">Parameter</th>
-                    <th className="text-left p-2 font-semibold">Type</th>
-                    <th className="text-left p-2 font-semibold">Required</th>
-                    <th className="text-left p-2 font-semibold">Description</th>
+                    <th className="text-left p-2 font-semibold">{t('hc.epcisapi.parameter')}</th>
+                    <th className="text-left p-2 font-semibold">{t('hc.epcisapi.type')}</th>
+                    <th className="text-left p-2 font-semibold">{t('hc.epcisapi.required')}</th>
+                    <th className="text-left p-2 font-semibold">{t('hc.epcisapi.description')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr className="border-t">
                     <td className="p-2 font-mono">p_carrier_id</td>
                     <td className="p-2">UUID</td>
-                    <td className="p-2">No</td>
-                    <td className="p-2">Filter by carrier</td>
+                    <td className="p-2">{t('hc.epcisapi.no')}</td>
+                    <td className="p-2">{t('hc.epcisapi.filter_carrier')}</td>
                   </tr>
                   <tr className="border-t">
                     <td className="p-2 font-mono">p_product_id</td>
                     <td className="p-2">UUID</td>
-                    <td className="p-2">No</td>
-                    <td className="p-2">Filter by product</td>
+                    <td className="p-2">{t('hc.epcisapi.no')}</td>
+                    <td className="p-2">{t('hc.epcisapi.filter_product')}</td>
                   </tr>
                   <tr className="border-t">
                     <td className="p-2 font-mono">p_origin_city</td>
                     <td className="p-2">TEXT</td>
-                    <td className="p-2">No</td>
-                    <td className="p-2">Filter by origin city</td>
+                    <td className="p-2">{t('hc.epcisapi.no')}</td>
+                    <td className="p-2">{t('hc.epcisapi.filter_origin_city')}</td>
                   </tr>
                   <tr className="border-t">
                     <td className="p-2 font-mono">p_destination_city</td>
                     <td className="p-2">TEXT</td>
-                    <td className="p-2">No</td>
-                    <td className="p-2">Filter by destination city</td>
+                    <td className="p-2">{t('hc.epcisapi.no')}</td>
+                    <td className="p-2">{t('hc.epcisapi.filter_destination_city')}</td>
                   </tr>
                   <tr className="border-t">
                     <td className="p-2 font-mono">p_min_tags</td>
                     <td className="p-2">INTEGER</td>
-                    <td className="p-2">No</td>
-                    <td className="p-2">Minimum number of tags</td>
+                    <td className="p-2">{t('hc.epcisapi.no')}</td>
+                    <td className="p-2">{t('hc.epcisapi.min_tags')}</td>
                   </tr>
                   <tr className="border-t">
                     <td className="p-2 font-mono">p_limit</td>
                     <td className="p-2">INTEGER</td>
-                    <td className="p-2">No</td>
-                    <td className="p-2">Max results (default: 100)</td>
+                    <td className="p-2">{t('hc.epcisapi.no')}</td>
+                    <td className="p-2">{t('hc.epcisapi.max_results')}</td>
                   </tr>
                 </tbody>
               </table>
@@ -239,9 +238,9 @@ Authorization: Bearer YOUR_JWT_TOKEN`}</pre>
                 <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded">POST</span>
                 <code className="text-sm font-mono">/rpc/rpc_ingest_epcis_events</code>
               </div>
-              <p className="text-gray-600 text-sm mb-4">Bulk insert EPCIS events from external system</p>
+              <p className="text-gray-600 text-sm mb-4">{t('hc.epcisapi.ingest_desc')}</p>
 
-              <h3 className="font-semibold text-gray-900 mb-2">Example Request</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">{t('hc.epcisapi.example_request')}</h3>
               <div className="bg-gray-50 rounded-lg p-4 font-mono text-sm overflow-x-auto">
                 <pre>{`POST /rest/v1/rpc/rpc_ingest_epcis_events
 Content-Type: application/json
@@ -264,17 +263,17 @@ Authorization: Bearer YOUR_JWT_TOKEN
 
       {activeTab === 'testing' && (
         <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4">API Testing</h2>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-4">{t('hc.epcisapi.api_testing')}</h2>
           <p className="text-gray-600 mb-6">
-            Use the Supabase client or any HTTP client to test the API endpoints. See the Documentation tab for request examples.
+            {t('hc.epcisapi.testing_text')}
           </p>
 
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <div className="flex gap-2">
               <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
               <div className="text-sm text-blue-800">
-                <p className="font-medium mb-1">Testing Tip</p>
-                <p>For interactive testing, navigate to the Pipeline Monitor page where you can manually execute each phase and view results.</p>
+                <p className="font-medium mb-1">{t('hc.epcisapi.testing_tip')}</p>
+                <p>{t('hc.epcisapi.testing_tip_text')}</p>
               </div>
             </div>
           </div>
@@ -283,13 +282,13 @@ Authorization: Bearer YOUR_JWT_TOKEN
 
       {activeTab === 'usage' && (
         <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4">API Usage</h2>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-4">{t('hc.epcisapi.api_usage')}</h2>
           <p className="text-gray-600 mb-6">
-            Monitor your API usage and performance metrics.
+            {t('hc.epcisapi.usage_text')}
           </p>
 
           <div className="text-center text-gray-500 py-12">
-            Usage statistics coming soon
+            {t('hc.epcisapi.usage_coming_soon')}
           </div>
         </div>
       )}

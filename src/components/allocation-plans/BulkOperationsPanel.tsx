@@ -45,7 +45,7 @@ export function BulkOperationsPanel({
       setOriginNodeId('')
       alert(t('bulk.updated_records').replace('{count}', String(selectedCount)))
     } catch (error: any) {
-      alert(`Error: ${error.message}`)
+      alert(t('hc.bulk_operations_panel.error_prefix', { message: error.message }))
     } finally {
       setProcessing(false)
     }
@@ -62,7 +62,7 @@ export function BulkOperationsPanel({
       setDestinationNodeId('')
       alert(t('bulk.updated_records').replace('{count}', String(selectedCount)))
     } catch (error: any) {
-      alert(`Error: ${error.message}`)
+      alert(t('hc.bulk_operations_panel.error_prefix', { message: error.message }))
     } finally {
       setProcessing(false)
     }
@@ -79,7 +79,7 @@ export function BulkOperationsPanel({
       setDate('')
       alert(t('bulk.updated_records').replace('{count}', String(selectedCount)))
     } catch (error: any) {
-      alert(`Error: ${error.message}`)
+      alert(t('hc.bulk_operations_panel.error_prefix', { message: error.message }))
     } finally {
       setProcessing(false)
     }
@@ -92,7 +92,7 @@ export function BulkOperationsPanel({
       await onBulkCancel()
       alert(t('bulk.cancelled_records').replace('{count}', String(selectedCount)))
     } catch (error: any) {
-      alert(`Error: ${error.message}`)
+      alert(t('hc.bulk_operations_panel.error_prefix', { message: error.message }))
     } finally {
       setProcessing(false)
     }
@@ -108,7 +108,7 @@ export function BulkOperationsPanel({
       await onBulkReprocess()
       alert(t('bulk.reprocessed_records').replace('{count}', String(errorCount)))
     } catch (error: any) {
-      alert(`Error: ${error.message}`)
+      alert(t('hc.bulk_operations_panel.error_prefix', { message: error.message }))
     } finally {
       setProcessing(false)
     }
@@ -123,7 +123,7 @@ export function BulkOperationsPanel({
       await onBulkDelete()
       alert(t('bulk.deleted_records').replace('{count}', String(selectedCount)))
     } catch (error: any) {
-      alert(`Error: ${error.message}`)
+      alert(t('hc.bulk_operations_panel.error_prefix', { message: error.message }))
     } finally {
       setProcessing(false)
     }
@@ -138,7 +138,7 @@ export function BulkOperationsPanel({
             onClick={onClearSelection}
             className="text-sm text-blue-600 hover:text-blue-800"
           >
-            Clear selection
+            {t('hc.bulk_operations_panel.clear_selection')}
           </button>
         </div>
       </div>
@@ -147,7 +147,7 @@ export function BulkOperationsPanel({
         {/* Update Origin Node */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Change Origin Node
+            {t('hc.bulk_operations_panel.change_origin_node')}
           </label>
           <div className="flex gap-2">
             <select
@@ -156,7 +156,7 @@ export function BulkOperationsPanel({
               className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm"
               disabled={processing}
             >
-              <option value="">Select node...</option>
+              <option value="">{t('hc.bulk_operations_panel.select_node')}</option>
               {nodes.map((node) => (
                 <option key={node.id} value={node.id}>
                   {node.auto_id}
@@ -168,7 +168,7 @@ export function BulkOperationsPanel({
               disabled={processing || !originNodeId}
               className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 disabled:bg-gray-300"
             >
-              Apply
+              {t('hc.bulk_operations_panel.apply')}
             </button>
           </div>
         </div>
@@ -176,7 +176,7 @@ export function BulkOperationsPanel({
         {/* Update Destination Node */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Change Destination Node
+            {t('hc.bulk_operations_panel.change_destination_node')}
           </label>
           <div className="flex gap-2">
             <select
@@ -185,7 +185,7 @@ export function BulkOperationsPanel({
               className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm"
               disabled={processing}
             >
-              <option value="">Select node...</option>
+              <option value="">{t('hc.bulk_operations_panel.select_node')}</option>
               {nodes.map((node) => (
                 <option key={node.id} value={node.id}>
                   {node.auto_id}
@@ -197,7 +197,7 @@ export function BulkOperationsPanel({
               disabled={processing || !destinationNodeId}
               className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 disabled:bg-gray-300"
             >
-              Apply
+              {t('hc.bulk_operations_panel.apply')}
             </button>
           </div>
         </div>
@@ -205,7 +205,7 @@ export function BulkOperationsPanel({
         {/* Update Date */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Change Scheduled Date
+            {t('hc.bulk_operations_panel.change_scheduled_date')}
           </label>
           <div className="flex gap-2">
             <input
@@ -220,7 +220,7 @@ export function BulkOperationsPanel({
               disabled={processing || !date}
               className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 disabled:bg-gray-300"
             >
-              Apply
+              {t('hc.bulk_operations_panel.apply')}
             </button>
           </div>
         </div>
@@ -228,14 +228,14 @@ export function BulkOperationsPanel({
         {/* Cancel */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Cancel Selected
+            {t('hc.bulk_operations_panel.cancel_selected')}
           </label>
           <button
             onClick={handleBulkCancel}
             disabled={processing}
             className="w-full px-4 py-2 bg-orange-600 text-white rounded-md text-sm hover:bg-orange-700 disabled:bg-gray-300"
           >
-            Cancel {selectedCount} records
+            {t('hc.bulk_operations_panel.cancel_n_records', { count: selectedCount })}
           </button>
         </div>
 
@@ -243,14 +243,14 @@ export function BulkOperationsPanel({
         {selectedDetails.some(d => d.status === 'transfer_error') && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Reprocess Errors
+              {t('hc.bulk_operations_panel.reprocess_errors')}
             </label>
             <button
               onClick={handleBulkReprocess}
               disabled={processing}
               className="w-full px-4 py-2 bg-purple-600 text-white rounded-md text-sm hover:bg-purple-700 disabled:bg-gray-300"
             >
-              Retry {selectedDetails.filter(d => d.status === 'transfer_error').length} errors
+              {t('hc.bulk_operations_panel.retry_n_errors', { count: selectedDetails.filter(d => d.status === 'transfer_error').length })}
             </button>
           </div>
         )}
@@ -258,14 +258,14 @@ export function BulkOperationsPanel({
         {/* Delete */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Delete Selected
+            {t('hc.bulk_operations_panel.delete_selected')}
           </label>
           <button
             onClick={handleBulkDelete}
             disabled={processing}
             className="w-full px-4 py-2 bg-red-600 text-white rounded-md text-sm hover:bg-red-700 disabled:bg-gray-300"
           >
-            Delete {selectedCount} records
+            {t('hc.bulk_operations_panel.delete_n_records', { count: selectedCount })}
           </button>
         </div>
       </div>

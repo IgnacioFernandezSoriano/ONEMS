@@ -38,7 +38,7 @@ export function MaterialCatalogPage() {
   }
 
   const handleDelete = async (id: string, name: string) => {
-    if (confirm(`Delete material "${name}"? This will remove it from all products.`)) {
+    if (confirm(t('hc.material_catalog.confirm_delete', { name }))) {
       await deleteCatalogItem(id)
     }
   }
@@ -51,11 +51,11 @@ export function MaterialCatalogPage() {
     <div className="p-8">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">{t("material_catalog.title")}</h1>
-        <p className="text-gray-600 mt-1">Manage reusable materials for all products</p>
+        <p className="text-gray-600 mt-1">{t('hc.material_catalog.subtitle')}</p>
       </div>
 
       <div className="mb-6">
-        <Button onClick={() => setModal({ title: 'Create Material', onSubmit: handleCreate })}>
+        <Button onClick={() => setModal({ title: t('hc.material_catalog.create_material'), onSubmit: handleCreate })}>
           + {t('material.add_material')}
         </Button>
       </div>
@@ -67,7 +67,7 @@ export function MaterialCatalogPage() {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('panelists.code')}</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('users.name')}</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('stock.unit')}</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Min Stock</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('hc.material_catalog.min_stock')}</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('topology.description')}</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('common.status')}</th>
               <th
@@ -121,7 +121,7 @@ export function MaterialCatalogPage() {
                   <button
                     onClick={() =>
                       setModal({
-                        title: 'Edit Material',
+                        title: t('hc.material_catalog.edit_material'),
                         material,
                         onSubmit: (data) => handleUpdate(material.id, data),
                       })
@@ -144,7 +144,7 @@ export function MaterialCatalogPage() {
 
         {catalog.length === 0 && (
           <div className="text-center py-12 text-gray-500">
-            No materials in catalog. Create your first material to get started.
+            {t('hc.material_catalog.empty')}
           </div>
         )}
       </div>

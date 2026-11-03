@@ -1,4 +1,5 @@
 import { Button } from '@/components/common/Button'
+import { useTranslation } from '@/hooks/useTranslation'
 import type { Account } from '@/lib/types'
 import { SUPPORTED_LANGUAGES } from '@/lib/types'
 
@@ -9,10 +10,12 @@ interface AccountTableProps {
 }
 
 export function AccountTable({ accounts, onEdit, onDelete }: AccountTableProps) {
+  const { t } = useTranslation()
+
   if (accounts.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
-        No accounts found
+        {t('hc.account_table.no_accounts')}
       </div>
     )
   }
@@ -23,22 +26,22 @@ export function AccountTable({ accounts, onEdit, onDelete }: AccountTableProps) 
         <thead className="bg-gray-50">
           <tr>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-              Name
+              {t('hc.account_table.name')}
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-              Slug
+              {t('hc.account_table.slug')}
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-              Default Language
+              {t('hc.account_table.default_language')}
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-              Status
+              {t('hc.account_table.status')}
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-              Created
+              {t('hc.account_table.created')}
             </th>
             <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-              Actions
+              {t('hc.account_table.actions')}
             </th>
           </tr>
         </thead>
@@ -52,7 +55,7 @@ export function AccountTable({ accounts, onEdit, onDelete }: AccountTableProps) 
                 {account.slug}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                {SUPPORTED_LANGUAGES.find(l => l.code === account.default_language)?.name || account.default_language || 'English'}
+                {SUPPORTED_LANGUAGES.find(l => l.code === account.default_language)?.name || account.default_language || t('hc.account_table.english')}
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <span
@@ -75,18 +78,18 @@ export function AccountTable({ accounts, onEdit, onDelete }: AccountTableProps) 
                   onClick={() => onEdit(account)}
                   className="mr-2"
                 >
-                  Edit
+                  {t('hc.account_table.edit')}
                 </Button>
                 <Button
                   size="sm"
                   variant="danger"
                   onClick={() => {
-                    if (confirm('Are you sure you want to delete this account?')) {
+                    if (confirm(t('hc.account_table.confirm_delete'))) {
                       onDelete(account.id)
                     }
                   }}
                 >
-                  Delete
+                  {t('hc.account_table.delete')}
                 </Button>
               </td>
             </tr>

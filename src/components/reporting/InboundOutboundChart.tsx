@@ -156,14 +156,14 @@ export function InboundOutboundChart({ data, scenarioDescription }: InboundOutbo
                   <div className="bg-white p-3 border border-gray-300 rounded shadow-lg">
                     <p className="font-semibold mb-2">{data.city}</p>
                     <div className="mb-2">
-                      <p className="text-blue-600 font-medium">Inbound:</p>
-                      <p className="text-sm ml-2">Std %: {formatNumber(data.inboundStandardPercentage)}% | Actual %: {formatNumber(data.inbound)}%</p>
-                      <p className="text-sm ml-2">J+K Std: {jkH(data.inboundStandardHours, data.inboundUnit)} | J+K Actual: {jkH(data.inboundActualHours, data.inboundUnit)}</p>
+                      <p className="text-blue-600 font-medium">{t('hc.inbound_outbound_chart.inbound')}:</p>
+                      <p className="text-sm ml-2">{t('hc.inbound_outbound_chart.std_pct')}: {formatNumber(data.inboundStandardPercentage)}% | {t('hc.inbound_outbound_chart.actual_pct')}: {formatNumber(data.inbound)}%</p>
+                      <p className="text-sm ml-2">{t('hc.inbound_outbound_chart.jk_std')}: {jkH(data.inboundStandardHours, data.inboundUnit)} | {t('hc.inbound_outbound_chart.jk_actual')}: {jkH(data.inboundActualHours, data.inboundUnit)}</p>
                     </div>
                     <div>
-                      <p className="text-green-600 font-medium">Outbound:</p>
-                      <p className="text-sm ml-2">Std %: {formatNumber(data.outboundStandardPercentage)}% | Actual %: {formatNumber(data.outbound)}%</p>
-                      <p className="text-sm ml-2">J+K Std: {jkH(data.outboundStandardHours, data.outboundUnit)} | J+K Actual: {jkH(data.outboundActualHours, data.outboundUnit)}</p>
+                      <p className="text-green-600 font-medium">{t('hc.inbound_outbound_chart.outbound')}:</p>
+                      <p className="text-sm ml-2">{t('hc.inbound_outbound_chart.std_pct')}: {formatNumber(data.outboundStandardPercentage)}% | {t('hc.inbound_outbound_chart.actual_pct')}: {formatNumber(data.outbound)}%</p>
+                      <p className="text-sm ml-2">{t('hc.inbound_outbound_chart.jk_std')}: {jkH(data.outboundStandardHours, data.outboundUnit)} | {t('hc.inbound_outbound_chart.jk_actual')}: {jkH(data.outboundActualHours, data.outboundUnit)}</p>
                     </div>
                   </div>
                 );

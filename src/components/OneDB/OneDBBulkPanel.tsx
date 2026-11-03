@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface OneDBBulkPanelProps {
   selectedCount: number;
@@ -15,6 +16,8 @@ export const OneDBBulkPanel: React.FC<OneDBBulkPanelProps> = ({
   onClearSelection,
   onDelete,
 }) => {
+  const { t } = useTranslation();
+
   if (selectedCount === 0) return null;
 
   return (
@@ -23,7 +26,7 @@ export const OneDBBulkPanel: React.FC<OneDBBulkPanelProps> = ({
         {/* Selection Info */}
         <div className="flex items-center gap-2">
           <span className="font-medium">
-            {selectedCount} of {totalCount} selected
+            {t('hc.one_db_bulk_panel.selected_of', { selected: selectedCount, total: totalCount })}
           </span>
         </div>
 
@@ -36,7 +39,7 @@ export const OneDBBulkPanel: React.FC<OneDBBulkPanelProps> = ({
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md transition-colors"
         >
           <span>⬇</span>
-          Export CSV
+          {t('hc.one_db_bulk_panel.export_csv')}
         </button>
 
         {/* Delete Button */}
@@ -45,7 +48,7 @@ export const OneDBBulkPanel: React.FC<OneDBBulkPanelProps> = ({
           className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-md transition-colors"
         >
           <span>🗑</span>
-          Delete ({selectedCount})
+          {t('hc.one_db_bulk_panel.delete_n', { count: selectedCount })}
         </button>
 
         {/* Clear Selection */}
@@ -54,7 +57,7 @@ export const OneDBBulkPanel: React.FC<OneDBBulkPanelProps> = ({
           className="flex items-center gap-2 px-3 py-2 hover:bg-gray-800 rounded-md transition-colors"
         >
           <span>✕</span>
-          Clear
+          {t('hc.one_db_bulk_panel.clear')}
         </button>
       </div>
     </div>

@@ -5,6 +5,7 @@ import { TimeUnitToggle } from '@/components/common/TimeUnitToggle';
 import { formatMinutes } from '@/lib/accountTime';
 import { supabase } from '../../lib/supabase';
 import { Layers, Clock, AlertTriangle, TrendingUp } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface SegmentOverview {
   segment_type: string;
@@ -48,6 +49,7 @@ interface SegmentAnomaly {
 }
 
 const SegmentDeepDive: React.FC = () => {
+  const { t } = useTranslation();
   const { effectiveAccountId } = useAccount();
   const { unit } = useTimeUnit();
   const [activeTab, setActiveTab] = useState<'overview' | 'time' | 'anomalies'>('overview');
@@ -153,11 +155,11 @@ const SegmentDeepDive: React.FC = () => {
   const renderOverviewTab = () => (
     <div className="space-y-6">
       {loading ? (
-        <div className="text-center py-8 text-gray-500">Loading...</div>
+        <div className="text-center py-8 text-gray-500">{t('hc.segment_deep_dive.loading')}</div>
       ) : error ? (
-        <div className="text-center py-8 text-red-500">Error: {error}</div>
+        <div className="text-center py-8 text-red-500">{t('hc.segment_deep_dive.error', { message: error })}</div>
       ) : segmentOverview.length === 0 ? (
-        <div className="text-center py-8 text-gray-500">No data available</div>
+        <div className="text-center py-8 text-gray-500">{t('hc.segment_deep_dive.no_data')}</div>
       ) : (
         <>
           {/* Summary Cards */}
@@ -166,18 +168,18 @@ const SegmentDeepDive: React.FC = () => {
               <div key={segment.segment_type} className="bg-white border border-gray-200 rounded-lg p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold text-gray-900 capitalize">
-                    {segment.segment_type} Segments
+                    {t('hc.segment_deep_dive.segments_title', { type: segment.segment_type })}
                   </h3>
                   <Layers className="h-6 w-6 text-blue-600" />
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div>
-                    <div className="text-sm text-gray-500">Total Count</div>
+                    <div className="text-sm text-gray-500">{t('hc.segment_deep_dive.total_count')}</div>
                     <div className="text-2xl font-bold text-gray-900">{segment.total_count}</div>
                   </div>
                   <div>
-                    <div className="text-sm text-gray-500">SLA Compliance</div>
+                    <div className="text-sm text-gray-500">{t('hc.segment_deep_dive.sla_compliance')}</div>
                     <div className={`text-2xl font-bold ${
                       segment.sla_compliance_rate >= 90 ? 'text-green-600' :
                       segment.sla_compliance_rate >= 75 ? 'text-yellow-600' :
@@ -190,19 +192,19 @@ const SegmentDeepDive: React.FC = () => {
 
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Avg Duration:</span>
+                    <span className="text-gray-600">{t('hc.segment_deep_dive.avg_duration')}</span>
                     <span className="font-semibold">{formatMinutes(segment.avg_duration_minutes, unit)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">P50 Duration:</span>
+                    <span className="text-gray-600">{t('hc.segment_deep_dive.p50_duration')}</span>
                     <span className="font-semibold">{formatMinutes(segment.p50_duration_minutes, unit)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">P95 Duration:</span>
+                    <span className="text-gray-600">{t('hc.segment_deep_dive.p95_duration')}</span>
                     <span className="font-semibold">{formatMinutes(segment.p95_duration_minutes, unit)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Range:</span>
+                    <span className="text-gray-600">{t('hc.segment_deep_dive.range')}</span>
                     <span className="font-semibold">
                       {formatMinutes(segment.min_duration_minutes, unit)} - {formatMinutes(segment.max_duration_minutes, unit)}
                     </span>
@@ -213,19 +215,19 @@ const SegmentDeepDive: React.FC = () => {
                   <div className="grid grid-cols-4 gap-2 text-xs">
                     <div className="text-center">
                       <div className="text-green-600 font-semibold">{segment.on_time_count}</div>
-                      <div className="text-gray-500">On Time</div>
+                      <div className="text-gray-500">{t('hc.segment_deep_dive.on_time')}</div>
                     </div>
                     <div className="text-center">
                       <div className="text-yellow-600 font-semibold">{segment.warning_count}</div>
-                      <div className="text-gray-500">Warning</div>
+                      <div className="text-gray-500">{t('hc.segment_deep_dive.warning')}</div>
                     </div>
                     <div className="text-center">
                       <div className="text-orange-600 font-semibold">{segment.critical_count}</div>
-                      <div className="text-gray-500">Critical</div>
+                      <div className="text-gray-500">{t('hc.segment_deep_dive.critical')}</div>
                     </div>
                     <div className="text-center">
                       <div className="text-red-600 font-semibold">{segment.violated_count}</div>
-                      <div className="text-gray-500">Violated</div>
+                      <div className="text-gray-500">{t('hc.segment_deep_dive.violated')}</div>
                     </div>
                   </div>
                 </div>
@@ -240,36 +242,36 @@ const SegmentDeepDive: React.FC = () => {
   const renderTimeAnalysisTab = () => (
     <div className="space-y-4">
       <div className="flex items-center gap-2 mb-4">
-        <label className="text-sm font-medium text-gray-700">Segment Type:</label>
+        <label className="text-sm font-medium text-gray-700">{t('hc.segment_deep_dive.segment_type')}</label>
         <select
           value={selectedSegmentType || 'all'}
           onChange={(e) => setSelectedSegmentType(e.target.value === 'all' ? null : e.target.value)}
           className="px-3 py-1 border border-gray-300 rounded-md text-sm"
         >
-          <option value="all">All Types</option>
-          <option value="operational">Operational</option>
-          <option value="distribution">Distribution</option>
+          <option value="all">{t('hc.segment_deep_dive.all_types')}</option>
+          <option value="operational">{t('hc.segment_deep_dive.operational')}</option>
+          <option value="distribution">{t('hc.segment_deep_dive.distribution')}</option>
         </select>
       </div>
 
       {loading ? (
-        <div className="text-center py-8 text-gray-500">Loading...</div>
+        <div className="text-center py-8 text-gray-500">{t('hc.segment_deep_dive.loading')}</div>
       ) : error ? (
-        <div className="text-center py-8 text-red-500">Error: {error}</div>
+        <div className="text-center py-8 text-red-500">{t('hc.segment_deep_dive.error', { message: error })}</div>
       ) : timeAnalysis.length === 0 ? (
-        <div className="text-center py-8 text-gray-500">No data available</div>
+        <div className="text-center py-8 text-gray-500">{t('hc.segment_deep_dive.no_data')}</div>
       ) : (
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">HOUR</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SEGMENTS</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">AVG TIME</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">P50 TIME</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">P95 TIME</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">OUTLIERS</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SLA %</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('hc.segment_deep_dive.hour')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('hc.segment_deep_dive.segments')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('hc.segment_deep_dive.avg_time')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('hc.segment_deep_dive.p50_time')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('hc.segment_deep_dive.p95_time')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('hc.segment_deep_dive.outliers')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('hc.segment_deep_dive.sla_pct')}</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -310,23 +312,23 @@ const SegmentDeepDive: React.FC = () => {
   const renderAnomaliesTab = () => (
     <div className="space-y-4">
       {loading ? (
-        <div className="text-center py-8 text-gray-500">Loading...</div>
+        <div className="text-center py-8 text-gray-500">{t('hc.segment_deep_dive.loading')}</div>
       ) : error ? (
-        <div className="text-center py-8 text-red-500">Error: {error}</div>
+        <div className="text-center py-8 text-red-500">{t('hc.segment_deep_dive.error', { message: error })}</div>
       ) : anomalies.length === 0 ? (
-        <div className="text-center py-8 text-gray-500">No anomalies detected</div>
+        <div className="text-center py-8 text-gray-500">{t('hc.segment_deep_dive.no_anomalies')}</div>
       ) : (
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TAG ID</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TYPE</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CENTER/CARRIER</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ACTUAL</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">EXPECTED</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DEVIATION</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ANOMALY</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('hc.segment_deep_dive.tag_id')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('hc.segment_deep_dive.type')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('hc.segment_deep_dive.center_carrier')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('hc.segment_deep_dive.actual')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('hc.segment_deep_dive.expected')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('hc.segment_deep_dive.deviation')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('hc.segment_deep_dive.anomaly')}</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -374,11 +376,11 @@ const SegmentDeepDive: React.FC = () => {
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <Layers className="h-6 w-6 text-blue-600" />
-            <h1 className="text-2xl font-bold text-gray-900">Segment Deep Dive</h1>
+            <h1 className="text-2xl font-bold text-gray-900">{t('hc.segment_deep_dive.title')}</h1>
           </div>
           <TimeUnitToggle />
         </div>
-        <p className="text-gray-600">Detailed analysis of journey segments by type and performance</p>
+        <p className="text-gray-600">{t('hc.segment_deep_dive.subtitle')}</p>
       </div>
 
       {/* Tabs */}
@@ -393,7 +395,7 @@ const SegmentDeepDive: React.FC = () => {
             }`}
           >
             <TrendingUp className="h-4 w-4" />
-            Overview
+            {t('hc.segment_deep_dive.tab_overview')}
           </button>
           <button
             onClick={() => setActiveTab('time')}
@@ -404,7 +406,7 @@ const SegmentDeepDive: React.FC = () => {
             }`}
           >
             <Clock className="h-4 w-4" />
-            Time Analysis
+            {t('hc.segment_deep_dive.tab_time')}
           </button>
           <button
             onClick={() => setActiveTab('anomalies')}
@@ -415,7 +417,7 @@ const SegmentDeepDive: React.FC = () => {
             }`}
           >
             <AlertTriangle className="h-4 w-4" />
-            Anomalies
+            {t('hc.segment_deep_dive.tab_anomalies')}
           </button>
         </nav>
       </div>

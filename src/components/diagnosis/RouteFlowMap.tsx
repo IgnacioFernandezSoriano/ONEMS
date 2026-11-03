@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useTranslation } from '@/hooks/useTranslation'
 
 interface SegmentDetail {
   from_city: string
@@ -63,6 +64,7 @@ interface Edge {
 }
 
 export default function RouteFlowMap({ routePaths }: Props) {
+  const { t } = useTranslation()
   const [hoveredEdge, setHoveredEdge] = useState<string | null>(null)
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
 
@@ -204,7 +206,7 @@ export default function RouteFlowMap({ routePaths }: Props) {
   if (nodes.length === 0) {
     return (
       <div className="p-12 text-center text-gray-500">
-        <p>No route data available</p>
+        <p>{t('hc.route_flow_map.no_route_data')}</p>
       </div>
     )
   }
@@ -212,9 +214,9 @@ export default function RouteFlowMap({ routePaths }: Props) {
   return (
     <div className="p-6 relative">
       <div className="mb-4">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">Flow Map</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('hc.route_flow_map.flow_map')}</h3>
         <p className="text-sm text-gray-600">
-          Line thickness represents the number of tags. Hover over lines for details.
+          {t('hc.route_flow_map.help')}
         </p>
       </div>
 
@@ -356,30 +358,30 @@ export default function RouteFlowMap({ routePaths }: Props) {
             <div className="space-y-2">
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <div className="text-gray-400 mb-1">Tags</div>
+                  <div className="text-gray-400 mb-1">{t('hc.route_flow_map.tags')}</div>
                   <div className="font-semibold">{edge.tags.toLocaleString()}</div>
                 </div>
                 <div>
-                  <div className="text-gray-400 mb-1">Paths</div>
+                  <div className="text-gray-400 mb-1">{t('hc.route_flow_map.paths')}</div>
                   <div className="font-semibold">{edge.paths.length}</div>
                 </div>
               </div>
               
               <div>
-                <div className="text-gray-400 mb-1">J+K Standard</div>
+                <div className="text-gray-400 mb-1">{t('hc.route_flow_map.jk_standard')}</div>
                 <div className="font-semibold font-mono">{formatJK(data.expected_time)}</div>
               </div>
               
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <div className="text-gray-400 mb-1">Natural Time</div>
+                  <div className="text-gray-400 mb-1">{t('hc.route_flow_map.natural_time')}</div>
                   <div className="font-semibold font-mono">{formatJK(data.avg_natural_time)}</div>
                   <div className={`text-xs ${data.avg_natural_time > data.expected_time ? 'text-red-400' : 'text-green-400'}`}>
                     {formatTimeDiff(data.avg_natural_time, data.expected_time)}
                   </div>
                 </div>
                 <div>
-                  <div className="text-gray-400 mb-1">Working Time</div>
+                  <div className="text-gray-400 mb-1">{t('hc.route_flow_map.working_time')}</div>
                   <div className="font-semibold font-mono">{formatJK(data.avg_working_time)}</div>
                   <div className={`text-xs ${data.avg_working_time > data.expected_time ? 'text-red-400' : 'text-green-400'}`}>
                     {formatTimeDiff(data.avg_working_time, data.expected_time)}
@@ -389,11 +391,11 @@ export default function RouteFlowMap({ routePaths }: Props) {
               
               <div className="grid grid-cols-3 gap-2">
                 <div>
-                  <div className="text-gray-400 mb-1">% Std</div>
+                  <div className="text-gray-400 mb-1">{t('hc.route_flow_map.pct_std')}</div>
                   <div className="font-semibold">{data.on_time_std.toFixed(0)}%</div>
                 </div>
                 <div>
-                  <div className="text-gray-400 mb-1">% Real</div>
+                  <div className="text-gray-400 mb-1">{t('hc.route_flow_map.pct_real')}</div>
                   <div className={`font-semibold ${
                     data.compliance_rate >= 90 ? 'text-green-400' :
                     data.compliance_rate >= 70 ? 'text-yellow-400' :
@@ -403,7 +405,7 @@ export default function RouteFlowMap({ routePaths }: Props) {
                   </div>
                 </div>
                 <div>
-                  <div className="text-gray-400 mb-1">Diff %</div>
+                  <div className="text-gray-400 mb-1">{t('hc.route_flow_map.diff_pct')}</div>
                   <div className={`font-semibold ${data.compliance_rate >= data.on_time_std ? 'text-green-400' : 'text-red-400'}`}>
                     {formatPercentDiff(data.compliance_rate, data.on_time_std)}
                   </div>
@@ -411,7 +413,7 @@ export default function RouteFlowMap({ routePaths }: Props) {
               </div>
               
               <div className="text-xs text-gray-400 mt-2">
-                Aggregated from {edge.paths.length} route path{edge.paths.length !== 1 ? 's' : ''}
+                {edge.paths.length === 1 ? t('hc.route_flow_map.aggregated_one') : t('hc.route_flow_map.aggregated_many', { count: edge.paths.length })}
               </div>
             </div>
           </div>
@@ -422,15 +424,15 @@ export default function RouteFlowMap({ routePaths }: Props) {
       <div className="mt-6 flex items-center justify-center gap-6 text-sm">
         <div className="flex items-center gap-2">
           <div className="w-4 h-1 bg-green-500"></div>
-          <span className="text-gray-600">≥90% SLA</span>
+          <span className="text-gray-600">{t('hc.route_flow_map.legend_high')}</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-1 bg-yellow-500"></div>
-          <span className="text-gray-600">70-89% SLA</span>
+          <span className="text-gray-600">{t('hc.route_flow_map.legend_mid')}</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-1 bg-red-500"></div>
-          <span className="text-gray-600">&lt;70% SLA</span>
+          <span className="text-gray-600">{t('hc.route_flow_map.legend_low')}</span>
         </div>
       </div>
     </div>

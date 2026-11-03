@@ -5,6 +5,7 @@ import { Filter, Map as MapIcon, List, Download } from 'lucide-react'
 import RoutePathMapLeaflet from '../../components/diagnosis/RoutePathMapLeaflet'
 import RoutePathTable from '../../components/diagnosis/RoutePathTable'
 import { TimeUnitToggle } from '../../components/common/TimeUnitToggle'
+import { useTranslation } from '@/hooks/useTranslation'
 
 interface JourneySegment {
   id: string
@@ -54,6 +55,7 @@ interface FilterState {
 
 export default function RoutePathAnalysis() {
   const { effectiveAccountId } = useAccount()
+  const { t } = useTranslation()
   const [loading, setLoading] = useState(false)
   const [routePaths, setRoutePaths] = useState<RoutePathData[]>([])
   const [routeMetrics, setRouteMetrics] = useState<Record<string, any>>({})
@@ -367,7 +369,7 @@ export default function RoutePathAnalysis() {
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Route Path Analysis</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t('hc.route_path_analysis.title')}</h1>
         <div className="flex items-center gap-3">
         <TimeUnitToggle />
         <button
@@ -375,7 +377,7 @@ export default function RoutePathAnalysis() {
           className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 flex items-center gap-2"
         >
           <Download className="w-4 h-4" />
-          Export
+          {t('hc.route_path_analysis.export')}
         </button>
         </div>
       </div>
@@ -384,20 +386,20 @@ export default function RoutePathAnalysis() {
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex items-center gap-2 mb-4">
           <Filter className="w-5 h-5 text-gray-600" />
-          <h2 className="text-lg font-semibold text-gray-900">Filters</h2>
+          <h2 className="text-lg font-semibold text-gray-900">{t('hc.route_path_analysis.filters')}</h2>
         </div>
 
         <div className="grid grid-cols-4 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Carrier
+              {t('hc.route_path_analysis.carrier')}
             </label>
             <select
               value={filters.carrier_id}
               onChange={(e) => setFilters({ ...filters, carrier_id: e.target.value })}
               className="w-full border border-gray-300 rounded-lg px-3 py-2"
             >
-              <option value="">Select carrier...</option>
+              <option value="">{t('hc.route_path_analysis.select_carrier')}</option>
               {carriers.map(carrier => (
                 <option key={carrier.id} value={carrier.id}>
                   {carrier.name}
@@ -408,14 +410,14 @@ export default function RoutePathAnalysis() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Product
+              {t('hc.route_path_analysis.product')}
             </label>
             <select
               value={filters.product_id}
               onChange={(e) => setFilters({ ...filters, product_id: e.target.value })}
               className="w-full border border-gray-300 rounded-lg px-3 py-2"
             >
-              <option value="">Select product...</option>
+              <option value="">{t('hc.route_path_analysis.select_product')}</option>
               {products.map(product => (
                 <option key={product.id} value={product.id}>
                   {product.code} - {product.description}
@@ -426,14 +428,14 @@ export default function RoutePathAnalysis() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Origin City
+              {t('hc.route_path_analysis.origin_city')}
             </label>
             <select
               value={filters.origin_city}
               onChange={(e) => setFilters({ ...filters, origin_city: e.target.value })}
               className="w-full border border-gray-300 rounded-lg px-3 py-2"
             >
-              <option value="">Select origin...</option>
+              <option value="">{t('hc.route_path_analysis.select_origin')}</option>
               {cities.map(city => (
                 <option key={city} value={city}>
                   {city}
@@ -444,14 +446,14 @@ export default function RoutePathAnalysis() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Destination City
+              {t('hc.route_path_analysis.destination_city')}
             </label>
             <select
               value={filters.destination_city}
               onChange={(e) => setFilters({ ...filters, destination_city: e.target.value })}
               className="w-full border border-gray-300 rounded-lg px-3 py-2"
             >
-              <option value="">Select destination...</option>
+              <option value="">{t('hc.route_path_analysis.select_destination')}</option>
               {cities.map(city => (
                 <option key={city} value={city}>
                   {city}
@@ -466,15 +468,15 @@ export default function RoutePathAnalysis() {
       {routePaths.length > 0 && (
         <div className="grid grid-cols-3 gap-4">
           <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-sm text-gray-600 mb-1">Total Routes</div>
+            <div className="text-sm text-gray-600 mb-1">{t('hc.route_path_analysis.total_routes')}</div>
             <div className="text-2xl font-bold text-gray-900">{routePaths.length}</div>
           </div>
           <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-sm text-gray-600 mb-1">Total Tags</div>
+            <div className="text-sm text-gray-600 mb-1">{t('hc.route_path_analysis.total_tags')}</div>
             <div className="text-2xl font-bold text-gray-900">{totalTags.toLocaleString()}</div>
           </div>
           <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-sm text-gray-600 mb-1">Avg Compliance</div>
+            <div className="text-sm text-gray-600 mb-1">{t('hc.route_path_analysis.avg_compliance')}</div>
             <div className="text-2xl font-bold text-gray-900">{avgCompliance.toFixed(1)}%</div>
           </div>
 
@@ -485,12 +487,12 @@ export default function RoutePathAnalysis() {
       {loading ? (
         <div className="bg-white rounded-lg shadow p-12 text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading route paths...</p>
+          <p className="text-gray-600">{t('hc.route_path_analysis.loading')}</p>
         </div>
       ) : routePaths.length === 0 ? (
         <div className="bg-white rounded-lg shadow p-12 text-center text-gray-500">
           <MapIcon className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-          <p>No route paths found. Try adjusting your filters.</p>
+          <p>{t('hc.route_path_analysis.none_found')}</p>
         </div>
       ) : (
         <>

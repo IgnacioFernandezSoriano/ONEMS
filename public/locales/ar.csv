@@ -3202,3 +3202,1850 @@ lb2.ref_help.example,إذا كنت تتوقع 63 عينة لكل عقدة، فه
 lb2.ref_help.usage,تُستخدم مع نسبة الانحراف لتصنيف العقد إلى عادي أو مرتفع أو مشبع.
 lb2.dev_help.desc,نسبة الانحراف المقبولة عن القيمة المرجعية.
 lb2.dev_help.example,مع المرجع=63 والنسبة=20: عادي < 75.6؛ مرتفع ≥ 75.6؛ مشبع ≥ 81.9
+hc.material_selector.select_material_qty_alert,يرجى اختيار مادة وإدخال كمية صالحة
+hc.material_selector.fill_code_name_qty_alert,يرجى إدخال الرمز والاسم والكمية
+hc.material_selector.choose_how_to_add,اختر طريقة إضافة المادة إلى هذا المنتج:
+hc.material_selector.select_from_catalog,اختيار من الكتالوج
+hc.material_selector.choose_existing,اختر مادة موجودة من الكتالوج الخاص بك
+hc.material_selector.create_new_material,إنشاء مادة جديدة
+hc.material_selector.add_new_to_catalog,أضف مادة جديدة إلى الكتالوج واربطها بالمنتج
+hc.material_selector.cancel,إلغاء
+hc.material_selector.back_to_options,← العودة إلى الخيارات
+hc.material_selector.select_material_label,اختر المادة *
+hc.material_selector.choose_a_material,-- اختر مادة --
+hc.material_selector.no_active_materials,لا توجد مواد نشطة في الكتالوج. أنشئ مادة جديدة.
+hc.material_selector.quantity_label,الكمية *
+hc.material_selector.adding,جارٍ الإضافة...
+hc.material_selector.add_to_product,إضافة إلى المنتج
+hc.material_selector.code_label,الرمز *
+hc.material_selector.name_label,الاسم *
+hc.material_selector.unit_measure,وحدة القياس
+hc.material_selector.description,الوصف
+hc.material_selector.unit_placeholder,وحدات، كغ، إلخ.
+hc.material_selector.details_placeholder,تفاصيل إضافية...
+hc.material_selector.creating,جارٍ الإنشاء...
+hc.material_selector.create_and_add,إنشاء وإضافة إلى المنتج
+hc.change_password.passwords_no_match,كلمتا المرور غير متطابقتين
+hc.change_password.min_length_error,يجب أن تتكون كلمة المرور من 8 أحرف على الأقل
+hc.change_password.success,تم تغيير كلمة المرور بنجاح!
+hc.change_password.failed,فشل تغيير كلمة المرور
+hc.change_password.title,تغيير كلمة المرور
+hc.change_password.security,الأمان
+hc.change_password.choose_strong,اختر كلمة مرور قوية لحماية حسابك
+hc.change_password.new_password_label,كلمة المرور الجديدة *
+hc.change_password.enter_new_placeholder,أدخل كلمة المرور الجديدة
+hc.change_password.min_8_chars,8 أحرف على الأقل
+hc.change_password.confirm_label,تأكيد كلمة المرور الجديدة *
+hc.change_password.confirm_placeholder,أكّد كلمة المرور الجديدة
+hc.change_password.changing,جارٍ تغيير كلمة المرور...
+hc.change_password.tips_title,نصائح لكلمة المرور:
+hc.change_password.tip_length,استخدم 8 أحرف على الأقل
+hc.change_password.tip_case,امزج بين الأحرف الكبيرة والصغيرة
+hc.change_password.tip_symbols,أضف أرقامًا ورموزًا
+hc.change_password.tip_avoid,تجنب الكلمات أو الأنماط الشائعة
+hc.translation_manager.upload_csv_error,يرجى رفع ملف CSV
+hc.translation_manager.empty_csv,ملف CSV فارغ أو غير صالح
+hc.translation_manager.missing_columns,ملف CSV تنقصه الأعمدة المطلوبة: {columns}
+hc.translation_manager.upload_failed,فشل رفع {file}: {message}
+hc.translation_manager.success,تمت معالجة {count} ترجمة ورفع {files} ملفات لغات بنجاح. ستُطبَّق التغييرات فورًا لجميع المستخدمين.
+hc.translation_manager.process_failed,فشلت معالجة ملف CSV
+hc.translation_manager.title,مدير الترجمات
+hc.translation_manager.subtitle,ارفع ملفات CSV المترجمة لتحديث ترجمات التطبيق
+hc.translation_manager.how_to_use,طريقة الاستخدام
+hc.translation_manager.step_a,نزّل قالب CSV باستخدام الزر أدناه
+hc.translation_manager.step_b,"ترجم الأعمدة الفارغة (es, fr, ar, pt) في Excel أو Google Sheets"
+hc.translation_manager.step_c,احفظ الملف بصيغة CSV (ترميز UTF-8)
+hc.translation_manager.step_d,ارفع ملف CSV المترجم هنا
+hc.translation_manager.auto_applied,تُطبَّق الترجمات تلقائيًا - لا حاجة إلى نشر!
+hc.translation_manager.step1_title,الخطوة 1: تنزيل القالب
+hc.translation_manager.step1_desc,نزّل قالب CSV الذي يحتوي على جميع نصوص التطبيق المطلوب ترجمتها
+hc.translation_manager.download_template,تنزيل قالب CSV
+hc.translation_manager.step2_title,الخطوة 2: رفع ملف CSV المترجم
+hc.translation_manager.step2_desc,ارفع ملف CSV المترجم - ستُطبَّق التغييرات فورًا
+hc.translation_manager.click_to_upload,انقر للرفع
+hc.translation_manager.or_drag_drop,أو اسحب وأفلت
+hc.translation_manager.csv_only,ملفات CSV فقط
+hc.translation_manager.processing,جارٍ معالجة ملف CSV ورفعه...
+hc.translation_manager.supported_languages,اللغات المدعومة
+hc.bulk_operations_panel.error_prefix,خطأ: {message}
+hc.bulk_operations_panel.clear_selection,مسح التحديد
+hc.bulk_operations_panel.change_origin_node,تغيير عقدة المنشأ
+hc.bulk_operations_panel.select_node,اختر عقدة...
+hc.bulk_operations_panel.apply,تطبيق
+hc.bulk_operations_panel.change_destination_node,تغيير عقدة الوجهة
+hc.bulk_operations_panel.change_scheduled_date,تغيير التاريخ المجدول
+hc.bulk_operations_panel.cancel_selected,إلغاء المحدد
+hc.bulk_operations_panel.cancel_n_records,إلغاء {count} سجلات
+hc.bulk_operations_panel.reprocess_errors,إعادة معالجة الأخطاء
+hc.bulk_operations_panel.retry_n_errors,إعادة محاولة {count} أخطاء
+hc.bulk_operations_panel.delete_selected,حذف المحدد
+hc.bulk_operations_panel.delete_n_records,حذف {count} سجلات
+hc.performance_trend_chart.default_title,اتجاه الأداء
+hc.performance_trend_chart.week_of,أسبوع {date}
+hc.performance_trend_chart.jk_actual,J+K الفعلي
+hc.performance_trend_chart.pct_actual,النسبة الفعلية %
+hc.performance_trend_chart.jk_std,J+K المعياري
+hc.performance_trend_chart.pct_std,النسبة المعيارية %
+hc.performance_trend_chart.no_data,لا توجد بيانات للفترة المحددة
+hc.performance_trend_chart.day,يوم
+hc.performance_trend_chart.week,أسبوع
+hc.performance_trend_chart.month,شهر
+hc.performance_trend_chart.percentage,النسبة المئوية %
+hc.jk_hierarchical_table.compliant,مطابق
+hc.jk_hierarchical_table.warning,تحذير
+hc.jk_hierarchical_table.critical,حرج
+hc.jk_hierarchical_table.no_data,لا توجد بيانات أداء J+K
+hc.jk_hierarchical_table.city_carrier_product,المدينة / الناقل / المنتج
+hc.jk_hierarchical_table.routes,المسارات
+hc.jk_hierarchical_table.samples,العينات
+hc.jk_hierarchical_table.jk_std_days,J+K المعياري (أيام)
+hc.jk_hierarchical_table.jk_actual_days,J+K الفعلي (أيام)
+hc.jk_hierarchical_table.deviation_days,الانحراف (أيام)
+hc.jk_hierarchical_table.on_time_pct,النسبة ضمن الوقت %
+hc.jk_hierarchical_table.std_pct,النسبة المعيارية %
+hc.jk_hierarchical_table.status,الحالة
+hc.receive_po_modal.quantity_gt_zero,يجب أن تكون الكمية أكبر من 0
+hc.receive_po_modal.title,استلام أمر الشراء
+hc.receive_po_modal.ordered,المطلوب: {quantity} {unit}
+hc.receive_po_modal.quantity_received,الكمية المستلمة
+hc.receive_po_modal.expected,المتوقع: {quantity} {unit} (الكمية المطلوبة)
+hc.receive_po_modal.info,سيؤدي هذا إلى إضافة الكمية المستلمة إلى مخزون الجهة التنظيمية وإنشاء حركة استلام ووضع علامة «تم الاستلام» على هذا الطلب.
+hc.receive_po_modal.cancel,إلغاء
+hc.receive_po_modal.confirm_receipt,تأكيد الاستلام
+hc.territory_equity_treemap.k_pop,{value}K نسمة
+hc.territory_equity_treemap.shipments_count,{count} شحنات
+hc.territory_equity_treemap.compliance,الامتثال
+hc.territory_equity_treemap.population,السكان
+hc.territory_equity_treemap.shipments,الشحنات
+hc.territory_equity_treemap.status,الحالة
+hc.territory_equity_treemap.no_data,لا توجد بيانات للخريطة الشجرية
+hc.territory_equity_table.collapse_all,طي الكل
+hc.territory_equity_table.expand_all,توسيع الكل
+hc.territory_equity_table.no_data,لا توجد بيانات
+hc.report_filters.expand_filters,توسيع المرشحات
+hc.report_filters.collapse_filters,طي المرشحات
+hc.report_filters.filters_tip,تنطبق المرشحات على جميع عروض التقارير. استخدمها لحصر التحليل في فترات أو ناقلين أو منتجات أو مسارات محددة. تعرض المرشحات الفارغة جميع البيانات المتاحة.
+hc.report_filters.reset_all_filters,إعادة تعيين جميع المرشحات
+hc.report_filters.reset,إعادة تعيين
+hc.report_filters.start_date_tip,يصفّي الشحنات المرسلة في هذا التاريخ أو بعده. اتركه فارغًا لتضمين كل البيانات التاريخية. مفيد لتحليل فترات محددة أو الأداء الحديث.
+hc.report_filters.end_date_tip,يصفّي الشحنات المرسلة في هذا التاريخ أو قبله. اتركه فارغًا لتضمين البيانات حتى اليوم. اجمعه مع تاريخ البدء لتحليل نطاق زمني محدد.
+hc.report_filters.carrier_tip,يصفّي حسب ناقل محدد (مثل DHL وFedEx). يعرض فقط الشحنات التي تولاها الناقل المختار. استخدمه لمقارنة أداء الناقلين أو للتحقيق في مشكلات ناقل بعينه.
+hc.report_filters.product_tip,يصفّي حسب نوع الخدمة (مثل Express 24h وStandard). يعرض فقط الشحنات التي تستخدم المنتج المختار. استخدمه لتحليل الأداء حسب مستوى الخدمة أو مقارنة المنتجات.
+hc.report_filters.origin_tip,يصفّي حسب مدينة المغادرة. عند اختيارها يعرض الأداء من هذه المدينة إلى جميع الوجهات (أو إلى وجهة محددة إذا جرى تصفيتها أيضًا). استخدمه لتحليل أداء الشحنات الصادرة من موقع محدد.
+hc.report_filters.destination_tip,يصفّي حسب مدينة الوصول. عند اختيارها يعرض الأداء إلى هذه المدينة من جميع نقاط المنشأ (أو من منشأ محدد إذا جرى تصفيته أيضًا). استخدمه لتحليل أداء الشحنات الواردة إلى موقع محدد.
+hc.report_filters.compliance_tip,اختر عدة حالات امتثال لتصفية المسارات. مطابق (✅ يحقق المعيار)، تحذير (⚠️ أقل من المعيار لكن أعلى من الحد الحرج)، أو حرج (🔴 أقل من الحد الحرج مع غرامة).
+hc.territory_equity_tooltips.description_label,الوصف:
+hc.territory_equity_tooltips.interpretation_label,التفسير:
+hc.territory_equity_tooltips.regulatory_use_label,الاستخدام التنظيمي:
+hc.territory_equity_tooltips.service_equity_index_title,مؤشر عدالة الخدمة
+hc.territory_equity_tooltips.service_equity_index_desc,يقيس اتساق جودة الخدمة عبر جميع المدن مرجَّحًا بعدد السكان. مقياس من 0 إلى 100 حيث تمثل 100 العدالة التامة.
+hc.territory_equity_tooltips.service_equity_index_interp,تشير القيم الأعلى إلى توزيع أكثر تجانسًا للخدمة. وتدل القيم الأقل من 80 على فوارق كبيرة بين المدن.
+hc.territory_equity_tooltips.service_equity_index_use,يثبت الامتثال لالتزامات الخدمة الشاملة. استخدمه في التقارير التنظيمية لإظهار توفير الخدمة بإنصاف عبر الأقاليم.
+hc.territory_equity_tooltips.pop_weighted_title,الامتثال المرجَّح بعدد السكان
+hc.territory_equity_tooltips.pop_weighted_desc,نسبة إجمالي السكان الذين يحصلون على الخدمة في الوقت المحدد. تُحسب بترجيح امتثال كل مدينة بعدد سكانها.
+hc.territory_equity_tooltips.pop_weighted_interp,يعكس الأثر الفعلي على المواطنين لا التغطية الجغرافية. فمدينة يبلغ عدد سكانها مليون نسمة لها وزن أكبر من مدينة عدد سكانها 10 آلاف.
+hc.territory_equity_tooltips.pop_weighted_use,المقياس الرئيسي لإثبات جودة خدمة تتمحور حول المواطن. استخدمه لإظهار نسبة السكان الذين تُقدَّم لهم الخدمة ضمن المعايير.
+hc.territory_equity_tooltips.underserved_title,المدن ناقصة الخدمة
+hc.territory_equity_tooltips.underserved_desc,عدد المدن التي يقل امتثالها عن الحد الحرج (عادةً <80%). يشير إلى إخفاقات في جودة الخدمة.
+hc.territory_equity_tooltips.underserved_interp,الهدف هو صفر. أي رقم موجب يدل على مدن تتطلب تدخلًا فوريًا.
+hc.territory_equity_tooltips.underserved_use,يحدد الأقاليم غير المطابقة لاتخاذ إجراءات إنفاذ. استخدمه لتحديد أولويات خطط تحسين الناقلين.
+hc.territory_equity_tooltips.citizens_affected_title,المواطنون المتأثرون
+hc.territory_equity_tooltips.citizens_affected_desc,إجمالي السكان الذين يعيشون في مدن ناقصة الخدمة (حالة حرجة). يقيس الأثر البشري لإخفاقات الخدمة.
+hc.territory_equity_tooltips.citizens_affected_interp,يُظهر حجم مشكلة جودة الخدمة من منظور بشري. تدل الأرقام الكبيرة على أثر واسع يتطلب إجراءً عاجلًا.
+hc.territory_equity_tooltips.citizens_affected_use,يثبت جسامة عدم الامتثال في إجراءات الإنفاذ. استخدمه لتبرير الغرامات أو متطلبات التدخل.
+hc.territory_equity_tooltips.best_served_title,أفضل 3 مدن من حيث الخدمة
+hc.territory_equity_tooltips.best_served_desc,المدن ذات أعلى انحراف إيجابي عن المعيار. توضح أين تتجاوز الخدمة التوقعات.
+hc.territory_equity_tooltips.best_served_interp,يحدد أفضل الممارسات ونماذج الخدمة الناجحة. قد تدل الانحرافات الإيجابية الكبيرة على خدمة زائدة عن الحاجة.
+hc.territory_equity_tooltips.best_served_use,أبرز قصص النجاح في التقارير التنظيمية. استخدمه لتحديد أفضل الممارسات القابلة للنقل إلى المناطق ضعيفة الأداء.
+hc.territory_equity_tooltips.worst_served_title,أسوأ 3 مدن من حيث الخدمة
+hc.territory_equity_tooltips.worst_served_desc,المدن ذات أدنى انحراف (الأكثر سلبية) عن المعيار. تعرض فقط المدن ذات الحالة الحرجة أو التحذيرية.
+hc.territory_equity_tooltips.worst_served_interp,يحدد المناطق ذات الأولوية للتدخل. يدل التكرار المستمر على مشكلات منهجية تتطلب إجراءً من الناقل.
+hc.territory_equity_tooltips.worst_served_use,وجِّه إجراءات الإنفاذ ومتطلبات التحسين. استخدمه لإثبات الحاجة إلى تدخل الناقلين أو فرض غرامات عليهم.
+hc.territory_equity_tooltips.in_out_chart_title,مخطط الامتثال الوارد مقابل الصادر
+hc.territory_equity_tooltips.in_out_chart_desc,يعرض المدن العشر ذات أكبر فرق بين معدلات الامتثال الواردة (الوصول) والصادرة (المغادرة).
+hc.territory_equity_tooltips.in_out_chart_interp,تدل الفجوات الكبيرة على اختلالات اتجاهية في الخدمة. وقد تشير إلى مشكلات خاصة بمسارات معينة أو بشبكة المحور والفروع.
+hc.territory_equity_tooltips.in_out_chart_use,حدد التحيزات الاتجاهية المنهجية التي تتطلب تحقيقًا على مستوى المسار. استخدمه لفرض تحسينات على شبكات الناقلين.
+hc.territory_equity_tooltips.city_table_title,جدول تفاصيل العدالة حسب المدينة
+hc.territory_equity_tooltips.city_table_desc,تفصيل كامل لمقاييس عدالة الخدمة لكل مدينة. انقر على اسم المدينة لعرض الأداء المفصل حسب الناقل/المنتج. تعرض الصفوف القابلة للتوسيع التفصيل حسب الناقل والمنتج.
+hc.territory_equity_tooltips.city_table_interp,رتّب حسب أي عمود لتحديد الأنماط. تشير الحالة الحمراء إلى عدم امتثال حرج. انقر على التوسيع (▼) لمعرفة الناقلين/المنتجات المسببة للمشكلات.
+hc.territory_equity_tooltips.city_table_use,أدلة مفصلة لإجراءات الإنفاذ. صدِّر إلى CSV للتقارير الرسمية. استخدم التفصيل حسب الناقل لتحديد المسؤوليات.
+hc.territory_equity_tooltips.regional_chart_title,مخطط مقارنة العدالة الإقليمية
+hc.territory_equity_tooltips.regional_chart_desc,مقارنة بصرية لمعدلات الامتثال الفعلية بين المناطق. يشير لون العمود إلى الحالة (أخضر=مطابق، كهرماني=تحذير، أحمر=حرج). ويمثل الخط الأحمر المتقطع متوسط الحد المعياري.
+hc.territory_equity_tooltips.regional_chart_interp,تشير الأعمدة الواقعة تحت الخط الأحمر إلى عدم الامتثال. وتدل مجموعات الأعمدة المنخفضة على مشكلات منهجية إقليمية.
+hc.territory_equity_tooltips.regional_chart_use,دليل بصري على الفوارق الإقليمية للعروض التقديمية. حدد ما إذا كانت التأخيرات منهجية (تتطلب تدخل الناقل) أو متفرقة (تتطلب التحقيق في حالات فردية).
+hc.territory_equity_tooltips.regional_table_title,جدول تحليل العدالة الإقليمية
+hc.territory_equity_tooltips.regional_table_desc,مقاييس عدالة الخدمة مجمَّعة حسب المنطقة. انقر على اسم المنطقة لعرض التفصيل حسب الناقل/المنتج. تعرض الصفوف القابلة للتوسيع أداء الناقل والمنتج.
+hc.territory_equity_tooltips.regional_table_interp,يساعد على تحديد الأنماط الجغرافية في جودة الخدمة. يدل ارتفاع عدد المدن ناقصة الخدمة على مشكلات إقليمية.
+hc.territory_equity_tooltips.regional_table_use,أثبت العدالة الجغرافية في تقديم الخدمة. استخدمه لتبرير تدخلات أو متطلبات استثمار خاصة بكل منطقة.
+hc.territory_equity_tooltips.treemap_title,الخريطة الشجرية لعدالة الخدمة حسب المدينة
+hc.territory_equity_tooltips.treemap_desc,تمثيل بصري يعبّر فيه حجم المستطيل عن عدد السكان ويشير اللون إلى حالة الامتثال (أخضر=مطابق، كهرماني=تحذير، أحمر=حرج).
+hc.territory_equity_tooltips.treemap_interp,تشير المستطيلات الحمراء الكبيرة إلى مدن كثيفة السكان بخدمة ضعيفة - وهي الأولوية القصوى للتدخل. وتُظهر المستطيلات الخضراء الصغيرة مدنًا مطابقة ذات أثر محدود.
+hc.territory_equity_tooltips.treemap_use,دليل بصري على أنماط الامتثال. حدد ما إذا كانت التأخيرات منهجية (تتطلب تدخل الناقل) أو متفرقة (تتطلب التحقيق في حالات فردية). استخدمه في عروض الإنفاذ لإظهار اتجاهات عدم الامتثال.
+hc.delivery_standards.updated_records,تم تحديث {count} سجلات بنجاح
+hc.delivery_standards.error_msg,خطأ: {message}
+hc.delivery_standards.confirm_delete_selected,هل تريد حذف {count} سجلات محددة؟
+hc.delivery_standards.deleted_records,تم حذف {count} سجلات بنجاح
+hc.delivery_standards.about_purpose_label,الغرض:
+hc.delivery_standards.about_purpose,يحدد أوقات التسليم المتوقعة (J+K) ومعدلات النجاح بين أزواج المدن لكل توليفة من الناقل والمنتج.
+hc.delivery_standards.about_key_metrics,المقاييس الرئيسية:
+hc.delivery_standards.about_jk_desc,وقت التسليم القياسي (مثلاً J+2 يعني يومين من الاستلام)
+hc.delivery_standards.about_std_desc,النسبة المستهدفة من عمليات التسليم التي تستوفي معيار J+K
+hc.delivery_standards.about_thresholds_label,العتبات:
+hc.delivery_standards.about_thresholds_desc,مستويات الانحراف التحذيرية والحرجة لمراقبة الأداء
+hc.delivery_standards.about_usage_label,الاستخدام:
+hc.delivery_standards.about_usage_desc,تُستخدم هذه المعايير في تقارير الامتثال وتقييم أداء الناقلين وإدارة SLA.
+hc.delivery_standards.subtitle,إدارة معايير أوقات التسليم بين المدن لكل ناقل ومنتج
+hc.delivery_standards.total_standards,إجمالي المعايير
+hc.delivery_standards.bulk_edit_records,تعديل جماعي لـ {count} سجلات
+hc.delivery_standards.standard_time,الوقت القياسي
+hc.delivery_standards.eg_value,مثال: {value}
+hc.delivery_standards.success_pct,نسبة النجاح %
+hc.delivery_standards.time_unit,وحدة الوقت
+hc.delivery_standards.warning_threshold,عتبة التحذير (%)
+hc.delivery_standards.critical_threshold,العتبة الحرجة (%)
+hc.delivery_standards.threshold_type,نوع العتبة
+hc.delivery_standards.threshold_calc_title,نوع حساب العتبات:
+hc.delivery_standards.relative_label,نسبي:
+hc.delivery_standards.relative_desc,تُحسب العتبات كنسبة مئوية من نسبة النجاح %.
+hc.delivery_standards.relative_example,مثال: النجاح=95%، التحذير=5% ← الحد=90.25% (95% - 95%×5%)
+hc.delivery_standards.absolute_label,مطلق:
+hc.delivery_standards.absolute_desc,تُحسب العتبات كنسبة مئوية من 100%.
+hc.delivery_standards.absolute_example,مثال: النجاح=95%، التحذير=10% ← الحد=90% (100% - 10%)
+hc.delivery_standards.relative_option,نسبي (% من نسبة النجاح %)
+hc.delivery_standards.absolute_option,مطلق (% من 100%)
+hc.delivery_standards.apply,تطبيق
+hc.delivery_standards.cancel,إلغاء
+hc.delivery_standards.collapse_filters,طي المرشحات
+hc.delivery_standards.expand_filters,توسيع المرشحات
+hc.delivery_standards.active,نشط
+hc.delivery_standards.create_standard,إنشاء معيار
+hc.delivery_standards.generate_combinations,إنشاء التوليفات
+hc.delivery_standards.bulk_edit,تعديل جماعي
+hc.delivery_standards.delete_selected,حذف المحدد
+hc.delivery_standards.export_csv,تصدير CSV
+hc.delivery_standards.reset_all_filters,إعادة تعيين جميع المرشحات
+hc.delivery_standards.reset,إعادة تعيين
+hc.delivery_standards.carrier,الناقل
+hc.delivery_standards.f_carrier_tip,تصفية المعايير حسب ناقل محدد. يعرض فقط معايير الناقل المحدد.
+hc.delivery_standards.all_carriers,جميع الناقلين
+hc.delivery_standards.product,المنتج
+hc.delivery_standards.f_product_tip,تصفية المعايير حسب منتج/نوع خدمة الناقل. يعرض فقط معايير المنتج المحدد.
+hc.delivery_standards.all_products,جميع المنتجات
+hc.delivery_standards.origin_city,مدينة المنشأ
+hc.delivery_standards.f_origin_tip,تصفية المعايير حسب مدينة المنشأ (حيث تُستلم الطرود). يعرض فقط المسارات التي تبدأ من المدينة المحددة.
+hc.delivery_standards.all_cities,جميع المدن
+hc.delivery_standards.destination_city,مدينة الوجهة
+hc.delivery_standards.f_dest_tip,تصفية المعايير حسب مدينة الوجهة (حيث تُسلَّم الطرود). يعرض فقط المسارات التي تنتهي في المدينة المحددة.
+hc.delivery_standards.origin_type,نوع المنشأ
+hc.delivery_standards.f_origin_type_tip,تصفية حسب تصنيف مدينة المنشأ (A أو B أو C). يعرض فقط المسارات التي تبدأ من مدن من النوع المحدد.
+hc.delivery_standards.destination_type,نوع الوجهة
+hc.delivery_standards.f_dest_type_tip,تصفية حسب تصنيف مدينة الوجهة (A أو B أو C). يعرض فقط المسارات التي تنتهي في مدن من النوع المحدد.
+hc.delivery_standards.all_types,جميع الأنواع
+hc.delivery_standards.type_letter,النوع {type}
+hc.delivery_standards.pending_only,المعلّق فقط
+hc.delivery_standards.f_pending_tip,يعرض فقط المعايير غير المهيأة بعد (قيم J+K أو Std % مفقودة). مفيد لتحديد المسارات التي تحتاج إلى تهيئة.
+hc.delivery_standards.h_carrier_tip,الناقل اللوجستي المسؤول عن التسليم (مثل DHL وFedEx)
+hc.delivery_standards.h_product_tip,منتج/نوع خدمة الناقل (مثل إكسبريس، قياسي، اقتصادي)
+hc.delivery_standards.h_origin_tip,المدينة التي يُستلم منها الطرد (مدينة المنشأ)
+hc.delivery_standards.h_dest_tip,المدينة التي يُسلَّم فيها الطرد (مدينة الوجهة)
+hc.delivery_standards.h_jk_tip,وقت التسليم القياسي (صيغة J+K). J = يوم الاستلام، K = عدد الأيام. مثال: J+2 يعني التسليم خلال يومين من الاستلام.
+hc.delivery_standards.unit,الوحدة
+hc.delivery_standards.h_unit_tip,وحدة الوقت لقيمة J+K (ساعات أو أيام)
+hc.delivery_standards.h_std_tip,النسبة المستهدفة من عمليات التسليم التي يجب أن تستوفي معيار J+K. مثال: 85% تعني أن 85 على الأقل من كل 100 عملية تسليم يجب أن تصل ضمن وقت J+K.
+hc.delivery_standards.h_warn_tip,الانحراف المقبول عن Std % دون عقوبة. مثال: إذا كانت Std % 85% والتحذير 10%، فإن أداءً بين 75-85% يُطلق تحذيراً دون عقوبة.
+hc.delivery_standards.h_crit_tip,الانحراف الحرج عن Std % الذي يُطلق العقوبات. مثال: إذا كانت Std % 85% والحرج 20%، فإن أداءً أقل من 65% يؤدي إلى عقوبات على الناقل.
+hc.delivery_standards.type,النوع
+hc.delivery_standards.h_type_tip,نوع حساب العتبة: نسبي (قائم على النسبة المئوية) أو مطلق (قيمة ثابتة)
+hc.delivery_standards.h_actions_tip,تعديل أو حذف معيار التسليم هذا
+hc.delivery_standards.rel_abbr,نسبي
+hc.delivery_standards.abs_abbr,مطلق
+hc.delivery_standards.edit,تعديل
+hc.delivery_standards.delete,حذف
+hc.delivery_standards.none_found,لم يتم العثور على معايير تسليم. أنشئ التوليفات للبدء.
+hc.delivery_standards.create_title,إنشاء معيار تسليم
+hc.delivery_standards.edit_title,تعديل معيار التسليم
+hc.route_path_map_leaflet.days_value,{value} أيام
+hc.route_path_map_leaflet.loading_map,جارٍ تحميل الخريطة...
+hc.route_path_map_leaflet.no_route_data,لا توجد بيانات مسار بإحداثيات صالحة. يرجى التأكد من أن المراكز البريدية تحتوي على بيانات خطوط الطول والعرض.
+hc.route_path_map_leaflet.type,النوع:
+hc.route_path_map_leaflet.transit,العبور
+hc.route_path_map_leaflet.tags,العلامات:
+hc.route_path_map_leaflet.natural_time,الوقت الطبيعي:
+hc.route_path_map_leaflet.working_time,وقت العمل:
+hc.route_path_map_leaflet.real_pct,% الفعلي:
+hc.route_path_map_leaflet.status,الحالة:
+hc.route_path_map_leaflet.compliant,ممتثل
+hc.route_path_map_leaflet.warning,تحذير
+hc.route_path_map_leaflet.critical,حرج
+hc.route_path_map_leaflet.transit_point,نقطة عبور (بدون بيانات تشغيلية)
+hc.route_path_map_leaflet.segment_compliance,الامتثال حسب المقطع
+hc.route_path_analysis.title,تحليل مسارات الشحن
+hc.route_path_analysis.export,تصدير
+hc.route_path_analysis.filters,المرشحات
+hc.route_path_analysis.carrier,الناقل
+hc.route_path_analysis.select_carrier,اختر الناقل...
+hc.route_path_analysis.product,المنتج
+hc.route_path_analysis.select_product,اختر المنتج...
+hc.route_path_analysis.origin_city,مدينة المنشأ
+hc.route_path_analysis.select_origin,اختر المنشأ...
+hc.route_path_analysis.destination_city,مدينة الوجهة
+hc.route_path_analysis.select_destination,اختر الوجهة...
+hc.route_path_analysis.total_routes,إجمالي المسارات
+hc.route_path_analysis.total_tags,إجمالي العلامات
+hc.route_path_analysis.avg_compliance,متوسط الامتثال
+hc.route_path_analysis.loading,جارٍ تحميل المسارات...
+hc.route_path_analysis.none_found,لم يتم العثور على مسارات. حاول تعديل المرشحات.
+hc.jk_performance_segments.from_center,مركز المنشأ
+hc.jk_performance_segments.to_center,مركز الوجهة
+hc.jk_performance_segments.all,الكل
+hc.jk_performance_segments.avg_jk_actual,متوسط J+K الفعلي
+hc.jk_performance_segments.avg_jk_standard,متوسط J+K القياسي
+hc.jk_performance_segments.on_time_pct,% في الوقت المحدد
+hc.jk_performance_segments.problematic_segments,المقاطع الإشكالية
+hc.jk_performance_segments.loading,جارٍ تحميل بيانات المقاطع...
+hc.jk_performance_segments.perf_distribution,توزيع الأداء
+hc.jk_performance_segments.cumulative_distribution,التوزيع التراكمي
+hc.jk_performance_segments.chart,رسم بياني
+hc.jk_performance_segments.table,جدول
+hc.territory_equity_filters.expand_filters,توسيع المرشحات
+hc.territory_equity_filters.collapse_filters,طي المرشحات
+hc.territory_equity_filters.filters_tip,قم بتصفية تقرير الأداء الإقليمي حسب نطاق التاريخ أو الناقل أو المنتج أو المنطقة أو الاتجاه (وارد/صادر) أو حالة الإنصاف. جميع المرشحات اختيارية.
+hc.territory_equity_filters.reset_all_filters,إعادة تعيين جميع المرشحات
+hc.territory_equity_filters.reset,إعادة تعيين
+hc.territory_equity_filters.start_date,تاريخ البدء
+hc.territory_equity_filters.start_date_tip,تصفية الشحنات المرسلة في هذا التاريخ أو بعده. اتركه فارغاً لتضمين جميع البيانات التاريخية.
+hc.territory_equity_filters.end_date,تاريخ الانتهاء
+hc.territory_equity_filters.end_date_tip,تصفية الشحنات المرسلة في هذا التاريخ أو قبله. اتركه فارغاً لتضمين البيانات حتى اليوم.
+hc.territory_equity_filters.carrier,الناقل
+hc.territory_equity_filters.carrier_tip,تصفية حسب ناقل محدد (مثل DHL). يعرض فقط الشحنات التي يتولاها الناقل المحدد.
+hc.territory_equity_filters.all_carriers,جميع الناقلين
+hc.territory_equity_filters.product,المنتج
+hc.territory_equity_filters.product_tip,تصفية حسب نوع الخدمة (مثل إكسبريس 24 ساعة). يعرض فقط الشحنات التي تستخدم المنتج المحدد.
+hc.territory_equity_filters.all_products,جميع المنتجات
+hc.territory_equity_filters.origin_city,مدينة المنشأ
+hc.territory_equity_filters.origin_city_tip,تصفية حسب مدينة المنشأ (حيث تنطلق الشحنات). يعرض فقط الشحنات المنطلقة من المدينة المحددة.
+hc.territory_equity_filters.all_origins,جميع المنشآت
+hc.territory_equity_filters.destination_city,مدينة الوجهة
+hc.territory_equity_filters.destination_city_tip,تصفية حسب مدينة الوجهة (حيث تصل الشحنات). يعرض فقط الشحنات المسلَّمة إلى المدينة المحددة.
+hc.territory_equity_filters.all_destinations,جميع الوجهات
+hc.topology_tree.collapse_region,طي المنطقة
+hc.topology_tree.expand_region,توسيع المنطقة
+hc.topology_tree.active,نشط
+hc.topology_tree.inactive,غير نشط
+hc.topology_tree.expand_all_cities,توسيع جميع المدن في هذه المنطقة
+hc.topology_tree.edit_region,تعديل المنطقة
+hc.topology_tree.delete_region_confirm,هل تريد حذف هذه المنطقة وجميع مدنها/عقدها؟
+hc.topology_tree.delete_region,حذف المنطقة
+hc.topology_tree.no_cities,لا توجد مدن في هذه المنطقة حتى الآن
+hc.topology_tree.edit_city,تعديل المدينة
+hc.topology_tree.delete_city,حذف المدينة
+hc.topology_tree.panelist_assigned,تم تعيين المشارك
+hc.topology_tree.pending_panelist,مشارك قيد الانتظار
+hc.topology_tree.edit_node,تعديل العقدة
+hc.topology_tree.delete_node,حذف العقدة
+hc.generate_combinations_modal.error_msg,خطأ: {message}
+hc.generate_combinations_modal.generation_complete,اكتمل الإنشاء
+hc.generate_combinations_modal.success,نجاح
+hc.generate_combinations_modal.new_created,توليفات جديدة تم إنشاؤها
+hc.generate_combinations_modal.already_existed,توليفات كانت موجودة بالفعل
+hc.generate_combinations_modal.generate_title,إنشاء معايير التسليم
+hc.generate_combinations_modal.smart_generation,الإنشاء الذكي:
+hc.generate_combinations_modal.smart_generation_text,جميع الحقول اختيارية. اتركها فارغة لاستخدام جميع الخيارات المتاحة. سيقوم النظام بإنشاء توليفات تراعي العلاقات بين الناقل والمنتج.
+hc.generate_combinations_modal.estimated,التوليفات المقدرة:
+hc.generate_combinations_modal.estimated_breakdown,{carriers} ناقلين × {products} منتجات × {origins} منشآت × {destinations} وجهات
+hc.generate_combinations_modal.clear_all,مسح جميع التحديدات
+hc.generate_combinations_modal.all,الكل
+hc.generate_combinations_modal.n_selected,({count} محدد)
+hc.generate_combinations_modal.carriers,الناقلون
+hc.generate_combinations_modal.deselect_all,إلغاء تحديد الكل
+hc.generate_combinations_modal.select_all,تحديد الكل
+hc.generate_combinations_modal.products,المنتجات
+hc.generate_combinations_modal.no_products_for_carriers,لا توجد منتجات للناقلين المحددين
+hc.generate_combinations_modal.no_products_available,لا توجد منتجات متاحة
+hc.generate_combinations_modal.origin_cities,مدن المنشأ
+hc.generate_combinations_modal.type_letter,النوع {type}
+hc.generate_combinations_modal.destination_cities,مدن الوجهة
+hc.generate_combinations_modal.cancel,إلغاء
+hc.generate_combinations_modal.generating,جارٍ الإنشاء...
+hc.generate_combinations_modal.generate_n,إنشاء {count} توليفات
+hc.product_analysis_table.filter_equity,التصفية حسب حالة الإنصاف
+hc.product_analysis_table.compliant,ممتثل
+hc.product_analysis_table.warning,تحذير
+hc.product_analysis_table.critical,حرج
+hc.product_analysis_table.export_samples,تصدير العينات بصيغة CSV
+hc.product_analysis_table.origin,المنشأ
+hc.product_analysis_table.destination,الوجهة
+hc.product_analysis_table.carrier,الناقل
+hc.product_analysis_table.product,المنتج
+hc.product_analysis_table.total,الإجمالي
+hc.product_analysis_table.jk_std,J+K STD
+hc.product_analysis_table.jk_actual,J+K الفعلي
+hc.product_analysis_table.standard_pct,النسبة القياسية %
+hc.product_analysis_table.actual_pct,النسبة الفعلية %
+hc.product_analysis_table.deviation,الانحراف
+hc.product_analysis_table.status,الحالة
+hc.product_analysis_table.no_data,لا توجد بيانات متاحة
+hc.order_material_modal.qty_gt_zero,يجب أن تكون الكمية أكبر من 0
+hc.order_material_modal.title,طلب مواد
+hc.order_material_modal.qty_to_order,الكمية المطلوبة
+hc.order_material_modal.suggested,المقترح: {quantity} {unit} (الكمية الصافية المطلوبة)
+hc.order_material_modal.info,"سيؤدي هذا إلى وضع علامة ""تم الطلب"" على المتطلب وتسجيل الكمية المطلوبة. يمكنك استلام أمر الشراء لاحقاً عند وصول المواد."
+hc.order_material_modal.cancel,إلغاء
+hc.order_material_modal.confirm_order,تأكيد الطلب
+hc.regional_equity_treemap.pop_k,{value}K نسمة
+hc.regional_equity_treemap.shipments_count,{count} شحنات
+hc.regional_equity_treemap.compliance,الامتثال
+hc.regional_equity_treemap.population,السكان
+hc.regional_equity_treemap.shipments,الشحنات
+hc.regional_equity_treemap.status,الحالة
+hc.regional_equity_treemap.no_data,لا توجد بيانات متاحة للخريطة الشجرية
+hc.cumulative_distribution_chart_v2.no_data,لا توجد بيانات توزيع متاحة
+hc.cumulative_distribution_chart_v2.cumulative,تراكمي
+hc.cumulative_distribution_chart_v2.jk_standard,J+K القياسي
+hc.cumulative_distribution_chart_v2.transit_days,أيام العبور (J+K)
+hc.cumulative_distribution_chart_v2.cumulative_pct,النسبة التراكمية %
+hc.cumulative_distribution_chart_v2.target,الهدف {value}%
+hc.cumulative_distribution_chart_v2.std_day,{value}ي قياسي
+hc.regional_equity_chart.compliance_pct,نسبة الامتثال %
+hc.regional_equity_chart.inbound,الوارد:
+hc.regional_equity_chart.outbound,الصادر:
+hc.regional_equity_chart.std_actual_pct,% القياسي: {std}% | % الفعلي: {actual}%
+hc.regional_equity_chart.jk_std_actual,J+K القياسي: {std} | J+K الفعلي: {actual}
+hc.regional_equity_chart.avg_standard,المتوسط القياسي ({value}%)
+hc.regional_equity_chart.actual_compliance,نسبة الامتثال الفعلية %
+hc.epcisapi.tab_overview,نظرة عامة
+hc.epcisapi.tab_documentation,التوثيق
+hc.epcisapi.tab_testing,الاختبار
+hc.epcisapi.tab_usage,الاستخدام
+hc.epcisapi.title,واجهة برمجة تطبيقات خط معالجة EPCIS
+hc.epcisapi.subtitle,واجهة REST لاستيعاب أحداث EPCIS وإدارة خط المعالجة. تتضمن نقاط وصول للتنفيذ اليدوي ومراقبة الحالة والاستعلام عن مسارات الرحلات.
+hc.epcisapi.api_endpoint,نقطة وصول الواجهة
+hc.epcisapi.base_url,العنوان الأساسي
+hc.epcisapi.copied,تم النسخ
+hc.epcisapi.copy,نسخ
+hc.epcisapi.authentication,المصادقة
+hc.epcisapi.auth_requirement,تتطلب جميع طلبات الواجهة المصادقة باستخدام رمز JWT الخاص بك من Supabase.
+hc.epcisapi.security_note,ملاحظة أمنية
+hc.epcisapi.security_note_text,استخدم رمز المصادقة الخاص بك من Supabase في جميع استدعاءات الواجهة. يُضاف الرمز تلقائيًا عند استخدام عميل Supabase.
+hc.epcisapi.available_endpoints,نقاط الوصول المتاحة
+hc.epcisapi.execute_phase_desc,تنفيذ مراحل خط معالجة EPCIS يدويًا
+hc.epcisapi.parameters,المعلمات
+hc.epcisapi.parameter,المعلمة
+hc.epcisapi.type,النوع
+hc.epcisapi.description,الوصف
+hc.epcisapi.required,مطلوب
+hc.epcisapi.phase_values,'consolidation' أو 'segments' أو 'aggregation' أو 'all'
+hc.epcisapi.example_request,مثال على الطلب
+hc.epcisapi.status_desc,الحصول على الحالة الحالية لخط معالجة EPCIS
+hc.epcisapi.query_desc,الاستعلام عن مسارات الرحلات المجمعة باستخدام عوامل التصفية
+hc.epcisapi.no,لا
+hc.epcisapi.filter_carrier,التصفية حسب الناقل
+hc.epcisapi.filter_product,التصفية حسب المنتج
+hc.epcisapi.filter_origin_city,التصفية حسب مدينة المنشأ
+hc.epcisapi.filter_destination_city,التصفية حسب مدينة الوجهة
+hc.epcisapi.min_tags,الحد الأدنى لعدد العلامات
+hc.epcisapi.max_results,الحد الأقصى للنتائج (الافتراضي: 100)
+hc.epcisapi.ingest_desc,إدراج جماعي لأحداث EPCIS من نظام خارجي
+hc.epcisapi.api_testing,اختبار الواجهة
+hc.epcisapi.testing_text,استخدم عميل Supabase أو أي عميل HTTP لاختبار نقاط وصول الواجهة. راجع تبويب التوثيق للاطلاع على أمثلة الطلبات.
+hc.epcisapi.testing_tip,نصيحة للاختبار
+hc.epcisapi.testing_tip_text,للاختبار التفاعلي، انتقل إلى صفحة مراقب خط المعالجة حيث يمكنك تنفيذ كل مرحلة يدويًا وعرض النتائج.
+hc.epcisapi.api_usage,استخدام الواجهة
+hc.epcisapi.usage_text,راقب استخدام الواجهة ومقاييس الأداء.
+hc.epcisapi.usage_coming_soon,إحصاءات الاستخدام قريبًا
+hc.info_tooltip.interpretation,التفسير
+hc.info_tooltip.regulatory_utility,الفائدة التنظيمية
+hc.account_table.no_accounts,لم يتم العثور على حسابات
+hc.account_table.name,الاسم
+hc.account_table.slug,المعرّف المختصر
+hc.account_table.default_language,اللغة الافتراضية
+hc.account_table.status,الحالة
+hc.account_table.created,تاريخ الإنشاء
+hc.account_table.actions,الإجراءات
+hc.account_table.english,الإنجليزية
+hc.account_table.edit,تعديل
+hc.account_table.delete,حذف
+hc.account_table.confirm_delete,هل أنت متأكد من أنك تريد حذف هذا الحساب؟
+hc.cumulative_distribution_chart.no_data,لا توجد بيانات توزيع متاحة
+hc.cumulative_distribution_chart.cumulative,التراكمي:
+hc.cumulative_distribution_chart.jk_standard,← معيار J+K
+hc.cumulative_distribution_chart.transit_days_jk,أيام العبور (J+K)
+hc.cumulative_distribution_chart.cumulative_pct,النسبة التراكمية %
+hc.cumulative_distribution_chart.target_label,الهدف {pct}%
+hc.cumulative_distribution_chart.std_label,معيار {days} يوم
+hc.performance_distribution_chart_v2.no_data,لا توجد بيانات أداء متاحة
+hc.performance_distribution_chart_v2.cumulative,التراكمي:
+hc.performance_distribution_chart_v2.pct_of_total,% من الإجمالي:
+hc.performance_distribution_chart_v2.target,الهدف: {pct}%
+hc.performance_distribution_chart_v2.total,الإجمالي:
+hc.performance_distribution_chart_v2.transit_days_jk,أيام العبور (J+K)
+hc.performance_distribution_chart_v2.shipments,الشحنات
+hc.performance_distribution_chart_v2.cumulative_samples,العينات التراكمية
+hc.performance_distribution_chart_v2.pct_at_day,{pct}% عند {day}
+hc.performance_distribution_chart_v2.before_standard,قبل المعيار
+hc.performance_distribution_chart_v2.on_standard,ضمن المعيار
+hc.performance_distribution_chart_v2.after_standard,بعد المعيار
+hc.performance_distribution_chart_v2.caption,توزيع الشحنات حسب زمن العبور الفعلي مقابل معيار التسليم (بيانات E2E)
+hc.performance_distribution_chart_v2.reached_summary,{carrier} - {product}: تم بلوغ {pct}% عند {day} (معيار J+K: {std})
+hc.top_cities_jk_performance.no_jk_data,لا توجد بيانات أداء J+K متاحة
+hc.top_cities_jk_performance.title,أداء J+K لأبرز المدن
+hc.top_cities_jk_performance.best_performing,الأفضل أداءً
+hc.top_cities_jk_performance.needs_improvement,يحتاج إلى تحسين
+hc.top_cities_jk_performance.city,المدينة
+hc.top_cities_jk_performance.on_time_pct,% في الموعد
+hc.top_cities_jk_performance.jk_std,معيار J+K
+hc.top_cities_jk_performance.jk_act,فعلي J+K
+hc.top_cities_jk_performance.dev,الانحراف
+hc.top_cities_jk_performance.no_data,لا توجد بيانات متاحة
+hc.top_cities_jk_performance.all_good,جميع المدن تحقق أداءً جيدًا
+hc.carrier_product_overview.loading,جارٍ التحميل...
+hc.carrier_product_overview.no_data,لا توجد بيانات متاحة
+hc.carrier_product_overview.carrier_product,الناقل / المنتج
+hc.carrier_product_overview.carrier_product_tip,توليفة الناقل والمنتج لخدمة التسليم.
+hc.carrier_product_overview.routes,المسارات
+hc.carrier_product_overview.routes_tip,عدد المسارات الفريدة (أزواج المدن) التي تخدمها توليفة الناقل والمنتج هذه.
+hc.carrier_product_overview.samples,العينات
+hc.carrier_product_overview.samples_tip,إجمالي الشحنات لتوليفة الناقل والمنتج هذه عبر جميع المسارات.
+hc.carrier_product_overview.jk_std,معيار J+K
+hc.carrier_product_overview.jk_std_tip,المتوسط المرجّح لمعايير J+K عبر جميع المسارات لتوليفة الناقل والمنتج هذه.
+hc.carrier_product_overview.jk_actual,J+K الفعلي
+hc.carrier_product_overview.jk_actual_tip,المتوسط المرجّح لأزمنة العبور الفعلية عبر جميع المسارات لتوليفة الناقل والمنتج هذه.
+hc.carrier_product_overview.deviation,الانحراف
+hc.carrier_product_overview.deviation_tip,متوسط الانحراف المرجّح (الفعلي - المعيار) عبر جميع المسارات لتوليفة الناقل والمنتج هذه.
+hc.carrier_product_overview.on_time_pct,% في الموعد
+hc.carrier_product_overview.on_time_pct_tip,نسبة جميع الشحنات المسلّمة في الموعد لتوليفة الناقل والمنتج هذه.
+hc.carrier_product_overview.problem_routes,المسارات الإشكالية
+hc.carrier_product_overview.problem_routes_tip,عدد المسارات التي يقل أداء الالتزام بالموعد فيها عن 90%.
+hc.carrier_product_overview.status,الحالة
+hc.carrier_product_overview.status_tip,مؤشر مرئي: أخضر (≥95%)، أصفر (90-95%)، أحمر (<90%).
+hc.user_form.error_submitting,حدث خطأ أثناء إرسال النموذج
+hc.user_form.email,البريد الإلكتروني
+hc.user_form.password,كلمة المرور
+hc.user_form.full_name,الاسم الكامل
+hc.user_form.role,الدور
+hc.user_form.account,الحساب
+hc.user_form.select_account,اختر حسابًا
+hc.user_form.status,الحالة
+hc.user_form.preferred_language,اللغة المفضلة
+hc.user_form.cancel,إلغاء
+hc.user_form.saving,جارٍ الحفظ...
+hc.user_form.update,تحديث
+hc.user_form.create,إنشاء
+hc.sidebar.for_regulators,للجهات التنظيمية
+hc.sidebar.expand_sidebar,توسيع الشريط الجانبي
+hc.sidebar.collapse_sidebar,طيّ الشريط الجانبي
+hc.material_requirements_tab.month_jan,يناير
+hc.material_requirements_tab.month_feb,فبراير
+hc.material_requirements_tab.month_mar,مارس
+hc.material_requirements_tab.month_apr,أبريل
+hc.material_requirements_tab.month_may,مايو
+hc.material_requirements_tab.month_jun,يونيو
+hc.material_requirements_tab.month_jul,يوليو
+hc.material_requirements_tab.month_aug,أغسطس
+hc.material_requirements_tab.month_sep,سبتمبر
+hc.material_requirements_tab.month_oct,أكتوبر
+hc.material_requirements_tab.month_nov,نوفمبر
+hc.material_requirements_tab.month_dec,ديسمبر
+hc.material_requirements_tab.confirm_mark_ordered,"هل تريد وضع علامة ""تم الطلب"" على {count} من الاحتياجات؟"
+hc.material_requirements_tab.confirm_delete,هل أنت متأكد من أنك تريد حذف هذا الاحتياج؟
+hc.material_requirements_tab.deleted_ok,تم حذف الاحتياج بنجاح
+hc.material_requirements_tab.error_deleting,خطأ أثناء حذف الاحتياج: {message}
+hc.material_requirements_tab.confirm_delete_selected,هل تريد حذف {count} من الاحتياجات؟ لا يمكن التراجع عن هذا الإجراء.
+hc.material_requirements_tab.deleted_selected_ok,تم حذف {count} من الاحتياجات بنجاح
+hc.material_requirements_tab.error_deleting_many,خطأ أثناء حذف الاحتياجات: {message}
+hc.material_requirements_tab.tip_start_date,اختر تاريخ بداية الفترة التي تريد حساب احتياجات المواد لها استنادًا إلى خطط التخصيص
+hc.material_requirements_tab.tip_end_date,اختر تاريخ نهاية الفترة. سيحلل النظام جميع خطط التخصيص ضمن هذا النطاق الزمني لتحديد احتياجات المواد
+hc.material_requirements_tab.tip_material,صفِّ الاحتياجات المحسوبة حسب مادة محددة للتركيز على عناصر فردية
+hc.material_requirements_tab.tip_status,صفِّ الاحتياجات حسب حالتها الحالية: قيد الانتظار (لم يُطلب بعد)، تم الطلب (تم إصدار أمر شراء)، أو تم الاستلام (المواد في المخزون)
+hc.material_requirements_tab.tip_months,انقر على أي شهر لتعيين تاريخي البداية والنهاية لذلك الشهر كاملًا تلقائيًا. هذه هي أسرع طريقة لحساب الاحتياجات لشهر محدد.
+hc.material_requirements_tab.first_semester,النصف الأول
+hc.material_requirements_tab.second_semester,النصف الثاني
+hc.material_requirements_tab.year,السنة
+hc.material_requirements_tab.reset,إعادة تعيين
+hc.material_requirements_tab.receive,استلام
+hc.material_requirements_tab.calc_tip_intro,يحسب احتياجات المواد للفترة المحددة. سيقوم النظام بما يلي:
+hc.material_requirements_tab.calc_tip_s1,1. تحليل جميع خطط التخصيص ضمن النطاق الزمني
+hc.material_requirements_tab.calc_tip_s2,2. حساب إجمالي المواد المطلوبة لكل منتج
+hc.material_requirements_tab.calc_tip_s3,3. خصم مخزون المشارك في اللجنة (إذا كان لديه المادة بالفعل)
+hc.material_requirements_tab.calc_tip_s4,4. خصم مخزون الجهة التنظيمية
+hc.material_requirements_tab.calc_tip_s5,5. خصم الكميات المطلوبة مسبقًا (قيد النقل)
+hc.material_requirements_tab.calc_tip_s6,6. إضافة مخزون أمان إذا كان المخزون الحالي أقل من الحد الأدنى
+hc.material_requirements_tab.calc_tip_formula,المعادلة: الكمية الصافية = (المطلوبة - مخزون المشارك - مخزون الجهة التنظيمية - المطلوبة مسبقًا) + مخزون الأمان
+hc.material_requirements_tab.calc_tip_unif_title,منطق الدمج:
+hc.material_requirements_tab.calc_tip_unif1,- إذا وُجدت عدة احتياجات قيد الانتظار لنفس المادة، فسيتم دمجها في سجل واحد
+hc.material_requirements_tab.calc_tip_unif2,- ستمتد الفترة من أقدم تاريخ بداية إلى أحدث تاريخ نهاية
+hc.material_requirements_tab.calc_tip_unif3,- سيتم جمع الكميات
+hc.route_analysis.route,المسار
+hc.route_analysis.journeys,الرحلات
+hc.route_analysis.on_time_rate,نسبة الالتزام بالموعد
+hc.route_analysis.avg_transit,متوسط العبور
+hc.route_analysis.p95_transit,عبور P95
+hc.route_analysis.sla_violations,مخالفات SLA
+hc.route_analysis.missroute_rate,نسبة الخطأ في التوجيه
+hc.route_analysis.period,الفترة
+hc.route_analysis.avg_transit_time,متوسط زمن العبور
+hc.route_analysis.total_segments,إجمالي المقاطع
+hc.route_analysis.routes_covered,المسارات المشمولة
+hc.route_analysis.daily,يومي
+hc.route_analysis.weekly,أسبوعي
+hc.route_analysis.monthly,شهري
+hc.route_analysis.title,تحليل المسارات
+hc.route_analysis.subtitle,تحليل مفصل للأداء حسب المسار والناقل
+hc.route_analysis.tab_performance,الأداء
+hc.route_analysis.tab_carrier_comparison,مقارنة الناقلين
+hc.route_analysis.tab_trends,الاتجاهات
+hc.route_analysis.error,خطأ: {message}
+hc.dashboard.current_month_label,الشهر الحالي ({month} {year})
+hc.dashboard.next_month_label,الشهر القادم ({month} {year})
+hc.dashboard.last_n_days,آخر {days} يومًا
+hc.dashboard.period_range,{start} إلى {end}
+hc.dashboard.alert_delayed,شحنات متأخرة في الفترة المحددة
+hc.dashboard.alert_availability,خطط بها مشكلات في توفر المشاركين
+hc.dashboard.alert_stock,تنبيهات مخزون ({regulator} للجهة التنظيمية، {panelist} للمشاركين)
+hc.dashboard.alert_vacation,مشاركون في إجازة حاليًا
+hc.dashboard.alert_requirements,احتياجات مواد قيد الانتظار
+hc.dashboard.tip_allocation_plans,خطط التخصيص: إدارة تخصيص الشحنات بين المشاركين. راقب الخطط قيد الانتظار وحالة الشحنات ومشكلات التوفر والشحنات المتأخرة في الفترة المحددة.
+hc.dashboard.pending,قيد الانتظار
+hc.dashboard.tip_pending,خطط بانتظار الإجراء (حالة قيد الانتظار/تم الإشعار)
+hc.dashboard.sent,مُرسَل
+hc.dashboard.received,مستلَم
+hc.dashboard.tip_availability,خطط بها مشكلات في توفر المشاركين (غير متاح، غير معيّن، غير نشط)
+hc.dashboard.unavailable,غير متاح
+hc.dashboard.no_panelist,بدون مشارك
+hc.dashboard.inactive,غير نشط
+hc.dashboard.cancelled,ملغى
+hc.dashboard.invalid,غير صالح
+hc.dashboard.transfer_error,خطأ في النقل
+hc.dashboard.tip_panelists,المشاركون والتوفر: راقب حالة المشاركين وفترات الإجازات. تتبّع المشاركين النشطين/غير النشطين والإجازات الحالية وحالات عدم التوفر القادمة لتخطيط التخصيصات بفعالية.
+hc.dashboard.tip_on_vacation,مشاركون غير متاحين حاليًا (فترة الإجازة تشمل اليوم)
+hc.dashboard.tip_upcoming,مشاركون تبدأ فترات إجازاتهم خلال الأيام الثلاثين القادمة
+hc.dashboard.tip_availability_rate,نسبة المشاركين المتاحين حاليًا (غير الموجودين في إجازة)
+hc.dashboard.tip_carriers,الناقلون والمنتجات: راقب الناقلين والمنتجات النشطة. تتبّع توليفات الناقل والمنتج المتاحة للتوجيه وتخطيط التخصيص.
+hc.dashboard.of_1_total,من أصل 1
+hc.dashboard.tip_pairs,العدد الإجمالي لتوليفات الناقل والمنتج المتاحة للتوجيه
+hc.dashboard.tip_material,إدارة المواد: تتبّع احتياجات المواد وأوامر الشراء والشحنات إلى المشاركين. راقب العناصر قيد الانتظار لضمان توفر المواد في الوقت المناسب.
+hc.dashboard.tip_po,أوامر الشراء المقدمة إلى الموردين (حالة تم الطلب)
+hc.dashboard.tip_stock,تنبيهات المخزون: راقب مستويات المخزون والتنبيهات لمواقع الجهة التنظيمية والمشاركين. عالج التنبيهات بسرعة لتجنب تأخر الشحنات.
+hc.dashboard.tip_regulator_stock,تنبيهات المخزون في مستودع الجهة التنظيمية (HAL)
+hc.dashboard.tip_standards,معايير التسليم: راقب معايير التسليم المهيأة ونطاق تغطيتها. تأكد من أن جميع المسارات لها معايير مكتملة (الزمن ونسبة النجاح) لتتبع دقيق للامتثال.
+hc.dashboard.configured_routes,المسارات المهيأة
+hc.dashboard.needing_review,تحتاج إلى مراجعة
+hc.dashboard.incomplete_standards,معايير غير مكتملة
+hc.dashboard.n_complete,{count} مكتمل
+hc.postal_center_form.name_placeholder,مركز مدريد
+hc.postal_center_form.description_placeholder,مركز التوزيع الرئيسي لمنطقة مدريد
+hc.postal_center_form.carrier,المشغّل
+hc.postal_center_form.no_carrier_assigned,-- لم يتم تعيين مشغّل --
+hc.postal_center_form.city,المدينة
+hc.postal_center_form.state,الولاية/المقاطعة
+hc.postal_center_form.country,البلد
+hc.postal_center_form.latitude,خط العرض
+hc.postal_center_form.longitude,خط الطول
+hc.postal_center_form.timezone,المنطقة الزمنية
+hc.center_analysis.loading,جارٍ التحميل...
+hc.center_analysis.error,خطأ: {message}
+hc.center_analysis.no_data,لا توجد بيانات متاحة
+hc.center_analysis.center,المركز
+hc.center_analysis.items,الإرساليات
+hc.center_analysis.avg_time,متوسط الوقت
+hc.center_analysis.p95_time,وقت P95
+hc.center_analysis.throughput,معدل المعالجة
+hc.center_analysis.efficiency,الكفاءة
+hc.center_analysis.items_per_hour,{count} إرسالية/ساعة
+hc.center_analysis.rank,المرتبة رقم {rank}
+hc.center_analysis.efficiency_label,الكفاءة
+hc.center_analysis.items_processed,الإرساليات المعالجة
+hc.center_analysis.avg_time_label,متوسط الوقت
+hc.center_analysis.code,الرمز
+hc.center_analysis.period,الفترة:
+hc.center_analysis.daily,يومي
+hc.center_analysis.weekly,أسبوعي
+hc.center_analysis.monthly,شهري
+hc.center_analysis.period_header,الفترة
+hc.center_analysis.title,تحليل المراكز
+hc.center_analysis.subtitle,تحليل الأداء التشغيلي حسب المركز
+hc.center_analysis.tab_performance,الأداء
+hc.center_analysis.tab_comparison,المقارنة
+hc.center_analysis.tab_trends,الاتجاهات
+hc.user_table.password_required,كلمة المرور مطلوبة
+hc.user_table.password_min_length,يجب أن تتكون كلمة المرور من 8 أحرف على الأقل
+hc.user_table.reset_failed,فشل إعادة تعيين كلمة المرور
+hc.user_table.no_users,لم يتم العثور على مستخدمين
+hc.user_table.email,البريد الإلكتروني
+hc.user_table.name,الاسم
+hc.user_table.role,الدور
+hc.user_table.account,الحساب
+hc.user_table.status,الحالة
+hc.user_table.actions,الإجراءات
+hc.user_table.edit,تعديل
+hc.user_table.reset_password,إعادة تعيين كلمة المرور
+hc.user_table.confirm_delete,هل أنت متأكد من حذف هذا المستخدم نهائيًا؟ لا يمكن التراجع عن هذا الإجراء.
+hc.user_table.delete,حذف
+hc.user_table.reset_user_password,إعادة تعيين كلمة مرور المستخدم
+hc.user_table.reset_password_for,إعادة تعيين كلمة المرور لـ:
+hc.user_table.new_password,كلمة المرور الجديدة
+hc.user_table.enter_new_password,أدخل كلمة المرور الجديدة
+hc.user_table.generate_password,إنشاء كلمة مرور
+hc.user_table.copy_password,نسخ كلمة المرور
+hc.user_table.remember_send,تذكّر إرسال كلمة المرور هذه إلى المستخدم عبر البريد الإلكتروني أو قناة آمنة أخرى.
+hc.user_table.cancel,إلغاء
+hc.user_table.resetting,جارٍ إعادة التعيين...
+hc.route_performance_table_v2.no_route_data,لا تتوفر بيانات للمسارات
+hc.route_performance_table_v2.title,أداء المسارات ({count} مسارات)
+hc.route_performance_table_v2.export_csv,تصدير CSV
+hc.route_performance_table_v2.route,المسار
+hc.route_performance_table_v2.route_tip,مدينة المنشأ ← مدينة الوجهة. كل مسار فريد حسب المشغّل والمنتج وزوج المدن.
+hc.route_performance_table_v2.samples,العينات
+hc.route_performance_table_v2.samples_tip,إجمالي عدد العينات لهذا المسار في النطاق الزمني المحدد.
+hc.route_performance_table_v2.jk_std,J+K المعياري
+hc.route_performance_table_v2.jk_std_tip,مدة التسليم المتوقعة بالأيام من جدول delivery_standards.
+hc.route_performance_table_v2.jk_actual,J+K الفعلي
+hc.route_performance_table_v2.jk_actual_tip,عدد الأيام اللازمة لبلوغ هدف النسبة المعيارية لهذا المسار.
+hc.route_performance_table_v2.deviation,الانحراف
+hc.route_performance_table_v2.deviation_tip,الفرق بين J+K الفعلي وJ+K المعياري (الفعلي - المعياري).
+hc.route_performance_table_v2.std_pct,النسبة المعيارية %
+hc.route_performance_table_v2.std_pct_tip,النسبة المستهدفة للتسليم في الموعد المحددة في delivery_standards لهذا المسار.
+hc.route_performance_table_v2.on_time_pct,% في الموعد
+hc.route_performance_table_v2.on_time_pct_tip,نسبة العينات المسلّمة ضمن J+K المعياري أو قبله.
+hc.route_performance_table_v2.status,الحالة
+hc.route_performance_table_v2.status_tip,مؤشر مرئي: أخضر (ملتزم)، أصفر (تحذير)، أحمر (حرج).
+hc.route_performance_table_v2.samples_download_tip,تنزيل البيانات الخام لعينات هذا المسار من ONE DB.
+hc.route_performance_table_v2.operational,تشغيلي
+hc.route_performance_table_v2.distribution,توزيع
+hc.route_performance_table_v2.download_samples,تنزيل عينات هذا المسار
+hc.route_flow_map.no_route_data,لا تتوفر بيانات للمسارات
+hc.route_flow_map.flow_map,خريطة التدفق
+hc.route_flow_map.help,يمثل سمك الخط عدد الملصقات. مرّر المؤشر فوق الخطوط لعرض التفاصيل.
+hc.route_flow_map.tags,الملصقات
+hc.route_flow_map.paths,المسارات
+hc.route_flow_map.jk_standard,J+K المعياري
+hc.route_flow_map.natural_time,الوقت الطبيعي
+hc.route_flow_map.working_time,وقت العمل
+hc.route_flow_map.pct_std,% المعياري
+hc.route_flow_map.pct_real,% الفعلي
+hc.route_flow_map.diff_pct,% الفرق
+hc.route_flow_map.aggregated_one,مجمّع من مسار طريق واحد
+hc.route_flow_map.aggregated_many,مجمّع من {count} مسارات طريق
+hc.route_flow_map.legend_high,≥90% SLA
+hc.route_flow_map.legend_mid,70-89% SLA
+hc.route_flow_map.legend_low,<70% SLA
+hc.material_catalog_form.code,الرمز
+hc.material_catalog_form.name,الاسم
+hc.material_catalog_form.name_placeholder,ملصق RFID
+hc.material_catalog_form.unit_measure,وحدة القياس
+hc.material_catalog_form.unit_placeholder,وحدات، كغ، إلخ.
+hc.material_catalog_form.min_stock,الحد الأدنى للمخزون (مخزون الأمان)
+hc.material_catalog_form.min_stock_help,الكمية الدنيا الواجب الحفاظ عليها في مخزون الجهة التنظيمية. تُستخدم لحساب احتياجات المواد.
+hc.material_catalog_form.description,الوصف
+hc.material_catalog_form.description_placeholder,تفاصيل إضافية...
+hc.material_catalog_form.status,الحالة
+hc.material_catalog_form.cancel,إلغاء
+hc.material_catalog_form.saving,جارٍ الحفظ...
+hc.material_catalog_form.update,تحديث
+hc.material_catalog_form.create,إنشاء
+hc.account_form.submit_error,حدث خطأ أثناء إرسال النموذج
+hc.account_form.account_name,اسم الحساب
+hc.account_form.slug,المعرّف النصي (Slug)
+hc.account_form.slug_help,معرّف فريد (أحرف صغيرة، بدون مسافات)
+hc.account_form.default_language,اللغة الافتراضية
+hc.account_form.default_language_help,اللغة التي يرثها المشاركون في اللجنة التابعون لهذا الحساب
+hc.account_form.manager_email,البريد الإلكتروني لمسؤول المشاركين
+hc.account_form.manager_email_help,البريد الإلكتروني للتواصل مع مسؤول المشاركين في هذا الحساب (اختياري)
+hc.account_form.status,الحالة
+hc.account_form.cancel,إلغاء
+hc.account_form.saving,جارٍ الحفظ...
+hc.account_form.update,تحديث
+hc.account_form.create,إنشاء
+hc.carrier_form.code,الرمز
+hc.carrier_form.name,الاسم
+hc.carrier_form.status,الحالة
+hc.carrier_form.code_placeholder,مثال: DHL، UPS
+hc.carrier_form.name_placeholder,مثال: DHL Express
+hc.carrier_form.type_placeholder,مثال: سريع، عادي، اقتصادي
+hc.carrier_form.cancel,إلغاء
+hc.carrier_form.saving,جارٍ الحفظ...
+hc.carrier_form.update,تحديث
+hc.carrier_form.create,إنشاء
+hc.city_classification_table.error,خطأ: {message}
+hc.city_classification_table.confirm_delete,هل أنت متأكد من حذف هذا التصنيف؟
+hc.city_classification_table.search_placeholder,البحث عن مدن...
+hc.city_classification_table.city_name,اسم المدينة
+hc.city_classification_table.classification,التصنيف
+hc.city_classification_table.actions,الإجراءات
+hc.city_classification_table.none_found,لم يتم العثور على تصنيفات للمدن
+hc.city_classification_table.showing,عرض {shown} من {total} تصنيفًا
+hc.performance_distribution_chart.no_data,لا تتوفر بيانات أداء
+hc.performance_distribution_chart.cumulative,التراكمي:
+hc.performance_distribution_chart.pct_of_total,% من الإجمالي:
+hc.performance_distribution_chart.target,الهدف: {percent}%
+hc.performance_distribution_chart.total,الإجمالي:
+hc.performance_distribution_chart.transit_days,أيام العبور (J+K)
+hc.performance_distribution_chart.shipments,الإرساليات
+hc.performance_distribution_chart.cumulative_samples,العينات التراكمية
+hc.performance_distribution_chart.pct_at,{percent}% عند {at}
+hc.performance_distribution_chart.before_standard,قبل المعيار
+hc.performance_distribution_chart.on_standard,ضمن المعيار
+hc.performance_distribution_chart.after_standard,بعد المعيار
+hc.performance_distribution_chart.caption,توزيع الإرساليات حسب زمن العبور الفعلي مقابل معيار التسليم
+hc.performance_distribution_chart.reached,{carrier} - {product}: تم بلوغ {percent}% عند {at} (J+K المعياري: {jk})
+hc.reader_form.name_placeholder,قارئ MAD 001
+hc.reader_form.description_placeholder,بوابة الدخول عند رصيف التحميل
+hc.inbound_outbound_chart.inbound,الوارد
+hc.inbound_outbound_chart.outbound,الصادر
+hc.inbound_outbound_chart.std_pct,% المعياري
+hc.inbound_outbound_chart.actual_pct,% الفعلي
+hc.inbound_outbound_chart.jk_std,J+K المعياري
+hc.inbound_outbound_chart.jk_actual,J+K الفعلي
+hc.jk_performance_v2.loading,جارٍ تحميل بيانات أداء J+K...
+hc.jk_performance_v2.error_loading,خطأ في تحميل البيانات: {message}
+hc.jk_performance_v2.header_tooltip,تقرير أداء J+K: يحلل أزمنة العبور الفعلية (J+K الفعلي) مقابل معايير التسليم (J+K المعياري) لتحديد المسارات أو المدن أو الناقلين أو المنتجات التي تعاني من تأخيرات منهجية. تحليل متعدد المستويات يعرض الأداء حسب المسار والمدينة والمنطقة والناقل والمنتج. J+K المعياري هو زمن التسليم المتوقع بالأيام من جدول delivery_standards. J+K الفعلي هو متوسط زمن العبور الفعلي بأيام العمل. الانحراف هو الفرق بين الفعلي والمعياري (القيم الموجبة تعني تأخيرًا). نسبة التسليم في الموعد هي النسبة المئوية للشحنات المسلّمة ضمن الزمن المعياري أو قبله. ترميز الألوان: أخضر (≥95%)، أصفر (90-95%)، أحمر (<90%).
+hc.jk_performance_v2.weekly_tooltip,حجم العينات الأسبوعي: يعرض عدد الشحنات المحللة أسبوعيًا ضمن النطاق الزمني المحدد. ترميز الألوان: أخضر (أعلى من المتوسط بنسبة 20%)، أزرق (أعلى من المتوسط)، أصفر (80-100% من المتوسط)، أحمر (أقل من 80% من المتوسط). استخدمه لتحديد الأسابيع ذات العينات القليلة التي قد تؤثر على الموثوقية الإحصائية. يوصى بحد أدنى 30 عينة أسبوعيًا لتحقيق الدلالة الإحصائية.
+hc.jk_performance_v2.distribution_tooltip,توزيع الأداء: يعرض كيفية توزيع الشحنات حسب زمن العبور الفعلي مقابل معيار التسليم (J+K المعياري). الفئات: بعد المعيار (أحمر، سُلّمت بعد J+K المعياري = متأخرة)، قبل المعيار/في الموعد (أخضر، سُلّمت ضمن J+K المعياري = في الموعد)، عند المعيار (أزرق، سُلّمت تمامًا في يوم J+K المعياري). استخدمه لتصور أداء الشبكة بشكل عام. تشير الأعمدة الحمراء الكبيرة إلى تأخيرات منهجية تتطلب التحقيق.
+hc.jk_performance_v2.kpi_total_desc,العدد الإجمالي للشحنات المحللة في تحديد المرشحات الحالي.
+hc.jk_performance_v2.kpi_total_interp,توفر أحجام العينات الأكبر رؤى إحصائية أكثر موثوقية. يوصى بحد أدنى 30 عينة لكل مسار لتحقيق الدلالة.
+hc.jk_performance_v2.kpi_total_util,يتحقق من موثوقية مقاييس الأداء. قد تشير أحجام العينات الصغيرة إلى بيانات غير مكتملة أو مرشحات ضيقة.
+hc.jk_performance_v2.kpi_actual_desc,المتوسط المرجح للأيام اللازمة لبلوغ هدف نسبة STD % عبر جميع المسارات في التحديد.
+hc.jk_performance_v2.kpi_actual_interp,يمثل اليوم الفعلي الذي تبلغ فيه عمليات التسليم التراكمية النسبة المستهدفة. قارنه بـ J+K المعياري لتقييم فجوة الأداء.
+hc.jk_performance_v2.kpi_actual_util,المقياس الرئيسي لتقييم سرعة بلوغ المسارات أهداف التسليم. تشير القيم الأعلى إلى بلوغ أبطأ لحدود الأداء.
+hc.jk_performance_v2.kpi_ontime_desc,النسبة المئوية للشحنات المسلّمة ضمن زمن التسليم المعياري (J+K المعياري) أو قبله.
+hc.jk_performance_v2.kpi_ontime_interp,الحدود ديناميكية ومحددة لكل مسار في جدول delivery_standards. الأخضر (≥95%) والأصفر (90-95%) والأحمر (<90%) مجرد مؤشرات بصرية.
+hc.jk_performance_v2.kpi_ontime_util,مؤشر الأداء الرئيسي لجودة الخدمة. قارنه بالنسبة المعيارية الخاصة بكل مسار (Std %) من delivery_standards.
+hc.jk_performance_v2.kpi_problem_desc,عدد المسارات التي يكون أداؤها في الموعد عند حد SLA الحرج أو أقل منه.
+hc.jk_performance_v2.kpi_problem_interp,المسارات التي لا تستوفي معايير التسليم الحرجة. لكل مسار حده الحرج الخاص المحدد في جدول delivery_standards.
+hc.jk_performance_v2.kpi_problem_util,انقر للتصفية وعرض المسارات المشكلة فقط. أداة لتحديد أولويات التحسينات التشغيلية.
+hc.jk_performance_v2.route_performance,أداء المسارات ({count} مسارات)
+hc.jk_performance_v2.city_performance,أداء المدن ({count} مدن)
+hc.jk_performance_v2.region_performance,أداء المناطق ({count} مناطق)
+hc.jk_performance_v2.carrier_performance,أداء الناقل / المنتج ({count} ناقلين)
+hc.jk_performance_v2.problematic_only,المشكلة فقط
+hc.jk_performance_v2.col_route,المسار
+hc.jk_performance_v2.col_samples,العينات
+hc.jk_performance_v2.col_jk_std,J+K المعياري
+hc.jk_performance_v2.col_jk_actual,J+K الفعلي
+hc.jk_performance_v2.col_deviation,الانحراف
+hc.jk_performance_v2.col_std_pct,STD %
+hc.jk_performance_v2.col_ontime_pct,نسبة التسليم في الموعد
+hc.jk_performance_v2.col_status,الحالة
+hc.jk_performance_v2.col_city,المدينة
+hc.jk_performance_v2.col_direction,الاتجاه
+hc.jk_performance_v2.col_region,المنطقة
+hc.jk_performance_v2.col_cities,المدن
+hc.jk_performance_v2.col_routes,المسارات
+hc.jk_performance_v2.col_carrier_product,الناقل / المنتج
+hc.jk_performance_v2.col_problem_routes,المسارات المشكلة
+hc.jk_performance_v2.tt_route_route,مدينة المصدر ← مدينة الوجهة. كل مسار فريد حسب الناقل والمنتج وزوج المدن.
+hc.jk_performance_v2.tt_route_samples,العدد الإجمالي للشحنات لهذا المسار ضمن النطاق الزمني المحدد. يوصى بحد أدنى 30 عينة لتحقيق الدلالة الإحصائية.
+hc.jk_performance_v2.tt_route_jk_std,زمن التسليم المتوقع بالأيام من جدول delivery_standards. يتم التحويل تلقائيًا من الساعات عند الحاجة (ساعات/24).
+hc.jk_performance_v2.tt_route_jk_actual,عدد الأيام اللازمة لبلوغ هدف STD % لهذا المسار. يمثل اليوم الذي تبلغ فيه النسبة التراكمية للتسليم الحد المعياري (مثلًا 85%). قارنه بـ J+K المعياري لتقييم الأداء.
+hc.jk_performance_v2.tt_route_deviation,الفرق بين J+K الفعلي وJ+K المعياري (الفعلي - المعياري). القيم الموجبة تعني تأخيرًا والسالبة تعني تسليمًا مبكرًا.
+hc.jk_performance_v2.tt_route_std_pct,النسبة المستهدفة للتسليم في الموعد المحددة في delivery_standards لهذا المسار. وهي حد الأداء المطلوب (مثلًا 85%) الذي يجب بلوغه. قارنها بعمود نسبة التسليم في الموعد لتقييم الامتثال.
+hc.jk_performance_v2.tt_route_ontime,النسبة المئوية للشحنات المسلّمة ضمن J+K المعياري أو قبله. قارنها بنسبة Std % الخاصة بالمسار من delivery_standards (غير معروضة في هذا الجدول).
+hc.jk_performance_v2.tt_route_status,مؤشر بصري: أخضر (مطابق، ≥95%)، أصفر (تحذير، 90-95%)، أحمر (حرج، <90%). هذه إرشادات عامة؛ المعايير الفعلية خاصة بكل مسار.
+hc.jk_performance_v2.tt_city_city,اسم المدينة التي تجمع كل المسارات التي تكون فيها مدينة المصدر أو الوجهة.
+hc.jk_performance_v2.tt_city_direction,وارد (المدينة هي الوجهة) أو صادر (المدينة هي المصدر). يوضح اتجاه تدفق الحركة.
+hc.jk_performance_v2.tt_city_region,المنطقة الجغرافية التي تنتمي إليها هذه المدينة (من جدول topology.regions).
+hc.jk_performance_v2.tt_city_samples,إجمالي الشحنات المجمّعة عبر جميع المسارات التي تشمل هذه المدينة في الاتجاه المحدد.
+hc.jk_performance_v2.tt_city_jk_std,المتوسط المرجح لمعايير J+K عبر جميع المسارات التي تشمل هذه المدينة. المسارات ذات الشحنات الأكثر لها وزن أكبر.
+hc.jk_performance_v2.tt_city_jk_actual,المتوسط المرجح للأيام اللازمة لبلوغ هدف STD % عبر جميع المسارات التي تشمل هذه المدينة. يمثل الأداء الفعلي مقابل زمن التسليم المعياري.
+hc.jk_performance_v2.tt_city_deviation,متوسط الانحراف المرجح (الفعلي - المعياري) عبر جميع المسارات التي تشمل هذه المدينة.
+hc.jk_performance_v2.tt_city_std_pct,متوسط النسبة المستهدفة المرجحة للتسليم في الموعد من delivery_standards لجميع المسارات التي تشمل هذه المدينة.
+hc.jk_performance_v2.tt_city_ontime,النسبة المئوية لجميع الشحنات (عبر كل المسارات) المسلّمة في الموعد لهذه المدينة.
+hc.jk_performance_v2.tt_status_pct,مؤشر بصري يعتمد على نسبة التسليم في الموعد: أخضر (≥95%)، أصفر (90-95%)، أحمر (<90%).
+hc.jk_performance_v2.tt_region_region,المنطقة الجغرافية التي تجمع كل المدن والمسارات الواقعة ضمنها (من جدول topology.regions).
+hc.jk_performance_v2.tt_region_direction,وارد (المنطقة هي الوجهة) أو صادر (المنطقة هي المصدر). يوضح تدفق الحركة الإقليمي.
+hc.jk_performance_v2.tt_region_cities,عدد المدن الفريدة في هذه المنطقة التي لديها بيانات شحنات في الاتجاه المحدد.
+hc.jk_performance_v2.tt_region_samples,إجمالي الشحنات المجمّعة عبر جميع المسارات التي تشمل مدنًا في هذه المنطقة.
+hc.jk_performance_v2.tt_region_jk_std,المتوسط المرجح لمعايير J+K عبر جميع المسارات في هذه المنطقة. المسارات ذات الشحنات الأكثر لها وزن أكبر.
+hc.jk_performance_v2.tt_region_jk_actual,المتوسط المرجح للأيام اللازمة لبلوغ هدف STD % عبر جميع المسارات في هذه المنطقة. يمثل الأداء الفعلي مقابل زمن التسليم المعياري.
+hc.jk_performance_v2.tt_region_deviation,متوسط الانحراف المرجح (الفعلي - المعياري) عبر جميع المسارات في هذه المنطقة.
+hc.jk_performance_v2.tt_region_std_pct,متوسط النسبة المستهدفة المرجحة للتسليم في الموعد عبر جميع المسارات في هذه المنطقة. وهو حد الأداء المطلوب بلوغه.
+hc.jk_performance_v2.tt_region_ontime,النسبة المئوية لجميع الشحنات (عبر كل المسارات) المسلّمة في الموعد في هذه المنطقة.
+hc.jk_performance_v2.tt_carrier_hierarchy,عرض هرمي: تعرض صفوف الناقل (خلفية زرقاء) المقاييس المجمّعة. وتعرض صفوف المنتج (المزاحة بالرمز ↳) مقاييس كل منتج تحت ذلك الناقل.
+hc.jk_performance_v2.tt_carrier_routes,عدد المسارات الفريدة (أزواج المدن) التي يخدمها هذا الناقل أو المنتج.
+hc.jk_performance_v2.tt_carrier_samples,إجمالي الشحنات لهذا الناقل أو المنتج عبر جميع المسارات.
+hc.jk_performance_v2.tt_carrier_jk_std,المتوسط المرجح لمعايير J+K عبر جميع المسارات لهذا الناقل أو المنتج.
+hc.jk_performance_v2.tt_carrier_jk_actual,المتوسط المرجح للأيام اللازمة لبلوغ هدف STD % عبر جميع المسارات لهذا الناقل أو المنتج. يمثل الأداء الفعلي مقابل زمن التسليم المعياري.
+hc.jk_performance_v2.tt_carrier_deviation,متوسط الانحراف المرجح (الفعلي - المعياري) عبر جميع المسارات لهذا الناقل أو المنتج.
+hc.jk_performance_v2.tt_carrier_std_pct,متوسط النسبة المستهدفة المرجحة للتسليم في الموعد عبر جميع المسارات لهذا الناقل أو المنتج. وهو حد الأداء المطلوب بلوغه.
+hc.jk_performance_v2.tt_carrier_ontime,النسبة المئوية لجميع الشحنات المسلّمة في الموعد لهذا الناقل أو المنتج.
+hc.jk_performance_v2.tt_carrier_problem,عدد المسارات التي يقل أداؤها في الموعد عن 90%. يُعرض على مستوى الناقل فقط (تعرض المنتجات '-').
+hc.jk_performance_v2.tt_carrier_status,مؤشر بصري: أخضر (≥95%)، أصفر (90-95%)، أحمر (<90%). يُعرض للناقلين والمنتجات على حد سواء.
+hc.panelists.confirm_activate,هل تريد تفعيل {count} من المشاركين؟
+hc.panelists.confirm_deactivate,هل تريد إلغاء تفعيل {count} من المشاركين؟
+hc.panelists.confirm_delete_many,هل تريد حذف {count} من المشاركين؟ لا يمكن التراجع عن هذا الإجراء.
+hc.panelists.error_saving,خطأ في حفظ المشارك
+hc.panelists.confirm_delete_one,هل أنت متأكد من حذف هذا المشارك؟
+hc.panelists.error_prefix,خطأ: {message}
+hc.panelists.about_tooltip,حول إدارة المشاركين - الغرض: إدارة شبكة المشاركين الذين يرسلون الشحنات ويستلمونها عبر طوبولوجيا شبكتك. الميزات الرئيسية: تسجيل المشاركين مع بيانات الاتصال، وتعيينهم إلى عقد محددة، وتتبع فترات التوفر، وإدارة تكامل Telegram للإشعارات، ومراقبة نشاط المشاركين. الاستخدام: أضف المشاركين، وعيّنهم إلى العقد، وحدد فترات عدم التوفر، وهيّئ Telegram للإشعارات الآلية، واستخدمهم في تخطيط التخصيصات.
+hc.panelists.tab_panelists_tooltip,تبويب المشاركين - اعرض وأدر جميع المشاركين في شبكتك. صفِّ حسب المدينة أو العقدة أو الحالة. استخدم العمليات الجماعية لتفعيل عدة مشاركين أو إلغاء تفعيلهم أو حذفهم دفعة واحدة.
+hc.panelists.tab_unavail_tooltip,فترات عدم التوفر - حدد الفترات الزمنية التي لا يكون فيها المشاركون متاحين للتسليم (إجازات، إجازة مرضية، إلخ). يضمن ذلك دقة تخطيط التخصيصات ويمنع التعيين لمشاركين غير متاحين.
+hc.panelists.total_panelists,إجمالي المشاركين
+hc.panelists.collapse_filters,طي المرشحات
+hc.panelists.expand_filters,توسيع المرشحات
+hc.panelists.reset_filters,إعادة تعيين كل المرشحات
+hc.panelists.search,بحث
+hc.panelists.city,المدينة
+hc.panelists.node,العقدة
+hc.panelists.status,الحالة
+hc.panelists.filtered_by_city,(مصفّى حسب المدينة)
+hc.panelists.no_node_assigned,لا توجد عقدة معيّنة
+hc.panelists.n_selected,تم تحديد {count} من المشاركين
+hc.panelists.choose_action,اختر إجراءً لتطبيقه على جميع العناصر المحددة
+hc.panelists.bulk_activate,تفعيل
+hc.panelists.bulk_deactivate,إلغاء التفعيل
+hc.panelists.bulk_delete,حذف
+hc.panelists.bulk_clear,مسح
+hc.panelists.manage_profiles,إدارة ملفات المشاركين وتعييناتهم
+hc.panelists.language,اللغة
+hc.panelists.edit_panelist,تعديل المشارك
+hc.panelists.deactivate_panelist,إلغاء تفعيل المشارك
+hc.panelists.activate_panelist,تفعيل المشارك
+hc.panelists.delete_panelist,حذف المشارك
+hc.panelists.no_panelists_found,لم يتم العثور على مشاركين.
+hc.panelists.try_adjusting_filters,جرّب تعديل المرشحات.
+hc.panelists.click_add_panelist,"انقر على ""إضافة مشارك"" لإنشاء واحد."
+hc.panelists.modal_edit,تعديل المشارك
+hc.panelists.modal_add,إضافة مشارك
+hc.panelists.panelist_code,رمز المشارك
+hc.panelists.auto_generated,(يُنشأ تلقائيًا إذا كان فارغًا)
+hc.panelists.ph_auto_generate,اتركه فارغًا للإنشاء التلقائي
+hc.panelists.name,الاسم
+hc.panelists.email,البريد الإلكتروني
+hc.panelists.mobile,الجوال
+hc.panelists.telegram_id,معرّف Telegram
+hc.panelists.address_line1,العنوان (السطر 1)
+hc.panelists.address_line2,العنوان (السطر 2)
+hc.panelists.postal_code,الرمز البريدي
+hc.panelists.country,البلد
+hc.panelists.ph_telegram,@اسم_المستخدم أو معرّف رقمي
+hc.panelists.ph_street,عنوان الشارع
+hc.panelists.ph_apartment,الشقة، الجناح، إلخ (اختياري)
+hc.panelists.ph_neighbourhood,الحي، المقاطعة، إلخ (مثال: Nairobi-GPO)
+hc.panelists.opt_no_node,— لا توجد عقدة معيّنة —
+hc.panelists.update,تحديث
+hc.panelists.create,إنشاء
+hc.panelists.cancel,إلغاء
+hc.allocation_plan_generator_form.plan_generated,تم إنشاء الخطة بنجاح مع {count} عينة!
+hc.allocation_plan_generator_form.error_message,خطأ: {message}
+hc.allocation_plan_generator_form.tt_plan_name,"معرّف فريد لخطة التخصيص هذه. استخدم أسماء وصفية مثل ""Q1_2025_Madrid_Express""."
+hc.allocation_plan_generator_form.tt_total_samples,العدد الإجمالي للعينات المراد تخصيصها عبر النطاق الزمني. ستُوزَّع وفق أنماط المدن والأنماط الموسمية.
+hc.allocation_plan_generator_form.tt_carrier,الناقل اللوجستي لخطة التخصيص هذه (مثل DHL وFedEx). يحدد المنتجات المتاحة.
+hc.allocation_plan_generator_form.tt_product,نوع منتج/خدمة الناقل (مثل Express وStandard). مُصفّى حسب الناقل المحدد.
+hc.allocation_plan_generator_form.tt_start_date,اليوم الأول من فترة التخصيص. ستُجدوَل العينات اعتبارًا من هذا التاريخ.
+hc.allocation_plan_generator_form.tt_end_date,اليوم الأخير من فترة التخصيص. ستُجدوَل العينات حتى هذا التاريخ.
+hc.allocation_plan_generator_form.tt_quick_period,انقر على أي زر شهر لتعيين تاريخي البداية والنهاية لذلك الشهر بالكامل تلقائيًا، أو استخدم أزرار الفصل النصفي/السنة للفترات الأطول.
+hc.allocation_plan_generator_form.carrier,الناقل
+hc.allocation_plan_generator_form.product,المنتج
+hc.allocation_plan_generator_form.quick_period,اختيار سريع للفترة
+hc.allocation_plan_generator_form.first_semester,الفصل النصفي الأول
+hc.allocation_plan_generator_form.second_semester,الفصل النصفي الثاني
+hc.allocation_plan_generator_form.year,السنة
+hc.allocation_plan_generator_form.month_jan,يناير
+hc.allocation_plan_generator_form.month_feb,فبراير
+hc.allocation_plan_generator_form.month_mar,مارس
+hc.allocation_plan_generator_form.month_apr,أبريل
+hc.allocation_plan_generator_form.month_may,مايو
+hc.allocation_plan_generator_form.month_jun,يونيو
+hc.allocation_plan_generator_form.month_jul,يوليو
+hc.allocation_plan_generator_form.month_aug,أغسطس
+hc.allocation_plan_generator_form.month_sep,سبتمبر
+hc.allocation_plan_generator_form.month_oct,أكتوبر
+hc.allocation_plan_generator_form.month_nov,نوفمبر
+hc.allocation_plan_generator_form.month_dec,ديسمبر
+hc.allocation_plan_generator_form.matrix_title,مصفوفة توزيع المدن
+hc.allocation_plan_generator_form.matrix_desc,يحدد النسبة المئوية للعينات المخصصة بين أزواج تصنيف المدن (A وB وC).
+hc.allocation_plan_generator_form.example,مثال:
+hc.allocation_plan_generator_form.matrix_ex_aa,• AA = 20% (مصدر من الفئة A ← وجهة من الفئة A)
+hc.allocation_plan_generator_form.matrix_ex_ab,• AB = 15% (مصدر من الفئة A ← وجهة من الفئة B)
+hc.allocation_plan_generator_form.matrix_fill_hint,املأ بعض الخلايا يدويًا، ثم انقر على {action} لتوزيع النسبة المتبقية بالتساوي على الخلايا الفارغة.
+hc.allocation_plan_generator_form.seasonal_desc,اختياري: وزّع العينات بشكل غير متساوٍ على الأشهر لتعكس الأنماط الموسمية.
+hc.allocation_plan_generator_form.seasonal_ex_dec,• ديسمبر = 15% (موسم الذروة)
+hc.allocation_plan_generator_form.seasonal_ex_jan,• يناير = 5% (موسم الركود)
+hc.allocation_plan_generator_form.seasonal_fill_hint,عند التعطيل، تُوزَّع العينات بالتساوي على جميع الأشهر. املأ بعض الأشهر يدويًا، ثم انقر على {action} لتوزيع النسبة المتبقية.
+hc.allocation_plan_generator_form.clear,مسح
+hc.allocation_plan_generator_form.auto_fill_100,إكمال تلقائي حتى 100%
+hc.territory_equity_v2.no_samples_found,لم يتم العثور على عينات للمرشحات المحددة
+hc.territory_equity_v2.export_raw_failed,فشل تصدير العينات الخام
+hc.territory_equity_v2.loading,جارٍ تحميل بيانات الإنصاف الإقليمي...
+hc.territory_equity_v2.error_loading,خطأ في تحميل البيانات: {message}
+hc.territory_equity_v2.title_route,تحليل المسار: {origin} ← {destination}
+hc.territory_equity_v2.title_outbound,تقرير الإنصاف الإقليمي: الصادر من {city}
+hc.territory_equity_v2.title_inbound,تقرير الإنصاف الإقليمي: الوارد إلى {city}
+hc.territory_equity_v2.sub_route,تحليل مفصل لأداء المسار من {origin} إلى {destination}
+hc.territory_equity_v2.sub_outbound,حلّل إنصاف الخدمة الصادرة من {city} إلى جميع الوجهات
+hc.territory_equity_v2.sub_inbound,حلّل إنصاف الخدمة الواردة إلى {city} من جميع المصادر
+hc.territory_equity_v2.export_raw_title,تصدير العينات الخام من ONE DB (للتحقق)
+hc.territory_equity_v2.export_raw,تصدير البيانات الخام
+hc.territory_equity_v2.route_compliance,امتثال المسار
+hc.territory_equity_v2.no_data,لا توجد بيانات
+hc.territory_equity_v2.jk_performance,أداء J+K
+hc.territory_equity_v2.loading_jk,جارٍ تحميل بيانات أداء J+K...
+hc.territory_equity_v2.error_loading_jk,خطأ في تحميل بيانات أداء J+K
+hc.territory_equity_v2.kpi_total_samples,إجمالي العينات
+hc.territory_equity_v2.kpi_avg_actual,متوسط J+K الفعلي
+hc.territory_equity_v2.kpi_avg_standard,متوسط J+K المعياري
+hc.territory_equity_v2.kpi_ontime,الأداء في الموعد
+hc.territory_equity_v2.perf_distribution,توزيع الأداء
+hc.territory_equity_v2.cum_distribution,التوزيع التراكمي
+hc.territory_equity_v2.route_performance,أداء المسارات
+hc.stock_alerts_tab.loading,جارٍ تحميل التنبيهات...
+hc.stock_alerts_tab.clear_filters,مسح المرشحات
+hc.stock_alerts_tab.regulator_insufficient,مخزون الجهة التنظيمية غير كافٍ
+hc.stock_alerts_tab.panelist_negative,مخزون المشارك سالب
+hc.stock_alerts_tab.col_type,النوع
+hc.stock_alerts_tab.col_material,المادة
+hc.stock_alerts_tab.col_location,الموقع
+hc.stock_alerts_tab.col_current_stock,المخزون الحالي
+hc.stock_alerts_tab.col_date,التاريخ
+hc.stock_alerts_tab.col_expected,المتوقع
+hc.stock_alerts_tab.col_notes,ملاحظات
+hc.stock_alerts_tab.regulator,الجهة التنظيمية
+hc.stock_alerts_tab.unknown_panelist,مشارك غير معروف
+hc.stock_alerts_tab.panelist_info_missing,⚠️ خطأ: معلومات المشارك مفقودة (location_id: {location})
+hc.segment_flow_diagram.days_value,{value} أيام
+hc.segment_flow_diagram.status_compliant,مطابق
+hc.segment_flow_diagram.status_warning,تحذير
+hc.segment_flow_diagram.status_critical,حرج
+hc.segment_flow_diagram.unknown_center,مركز غير معروف
+hc.segment_flow_diagram.segment_flow,تدفق المقاطع
+hc.segment_flow_diagram.origin,المصدر:
+hc.segment_flow_diagram.destination,الوجهة:
+hc.segment_flow_diagram.operational,تشغيلي
+hc.segment_flow_diagram.tags,الوسوم:
+hc.segment_flow_diagram.jk_std,J+K المعياري:
+hc.segment_flow_diagram.jk_natural,J+K الطبيعي:
+hc.segment_flow_diagram.jk_working,J+K أيام العمل:
+hc.segment_flow_diagram.pct_std,النسبة المعيارية:
+hc.segment_flow_diagram.pct_real,النسبة الفعلية:
+hc.segment_flow_diagram.status,الحالة:
+hc.shipments_tab.select_both_dates,يرجى تحديد تاريخي البداية والنهاية
+hc.shipments_tab.no_shipments_to_generate,لا توجد شحنات لإنشائها
+hc.shipments_tab.no_valid_shipments,لا توجد شحنات صالحة لإنشائها (تحتاج جميع العقد إلى مشاركين معيّنين)
+hc.shipments_tab.generated_ok,تم إنشاء {count} شحنة بنجاح بحالة معلّقة
+hc.shipments_tab.generate_error,خطأ في إنشاء الشحنات: {message}
+hc.shipments_tab.none_selected,لم يتم تحديد أي شحنات
+hc.shipments_tab.sent_ok,تم إرسال {count} شحنة بنجاح
+hc.shipments_tab.send_error,خطأ في إرسال الشحنات: {message}
+hc.shipments_tab.confirm_delete_one,هل أنت متأكد من حذف هذه الشحنة؟
+hc.shipments_tab.deleted_one_ok,تم حذف الشحنة بنجاح
+hc.shipments_tab.delete_one_error,خطأ في حذف الشحنة: {message}
+hc.shipments_tab.confirm_delete_many,هل تريد حذف {count} شحنة؟ لا يمكن التراجع عن هذا الإجراء.
+hc.shipments_tab.deleted_many_ok,تم حذف {count} شحنة بنجاح
+hc.shipments_tab.delete_many_error,خطأ في حذف الشحنات: {message}
+hc.shipments_tab.select_to_export,يرجى تحديد الشحنات المراد تصديرها
+hc.shipments_tab.select_for_packing,يرجى تحديد الشحنات لإنشاء قائمة التعبئة
+hc.shipments_tab.month_jan,يناير
+hc.shipments_tab.month_feb,فبراير
+hc.shipments_tab.month_mar,مارس
+hc.shipments_tab.month_apr,أبريل
+hc.shipments_tab.month_may,مايو
+hc.shipments_tab.month_jun,يونيو
+hc.shipments_tab.month_jul,يوليو
+hc.shipments_tab.month_aug,أغسطس
+hc.shipments_tab.month_sep,سبتمبر
+hc.shipments_tab.month_oct,أكتوبر
+hc.shipments_tab.month_nov,نوفمبر
+hc.shipments_tab.month_dec,ديسمبر
+hc.shipments_tab.metrics_overview,نظرة عامة على المقاييس
+hc.shipments_tab.tt_calc,استخدم هذا القسم لحساب احتياجات المشاركين من المواد بناءً على خطط التخصيص، ثم أنشئ الشحنات لإرسال المواد إليهم.
+hc.shipments_tab.tt_start,تاريخ بداية خطط التخصيص المراد تضمينها
+hc.shipments_tab.tt_end,تاريخ نهاية خطط التخصيص المراد تضمينها
+hc.shipments_tab.tt_filter_material,التصفية حسب مادة محددة
+hc.shipments_tab.tt_filter_node,التصفية حسب عقدة محددة
+hc.shipments_tab.tt_month,انقر على شهر لتعيين تاريخي البداية والنهاية لذلك الشهر بالكامل
+hc.shipments_tab.tt_shipments,اعرض وأدر جميع الشحنات المُنشأة. صفِّ حسب الحالة أو المشارك أو المادة للعثور على شحنات محددة. يمكن تأكيد الشحنات المعلّقة للإرسال.
+hc.shipments_tab.tt_filter_status,تصفية الشحنات حسب الحالة
+hc.shipments_tab.tt_filter_panelist,تصفية الشحنات حسب المشارك
+hc.shipments_tab.tt_filter_has_material,تصفية الشحنات التي تحتوي على مادة محددة
+hc.shipments_tab.start_date,تاريخ البداية
+hc.shipments_tab.end_date,تاريخ النهاية
+hc.shipments_tab.tt_generate,"ينشئ شحنات للمشاركين استنادًا إلى خطط التخصيص. سيقوم النظام بما يلي:  1. تحليل جميع خطط التخصيص ضمن النطاق الزمني 2. تجميع المواد حسب المشارك (بالاعتماد على origin_panelist_id) 3. حساب الكمية المطلوبة من كل مادة لكل مشارك 4. خصم مخزون المشارك (إذا كان لديه المادة بالفعل) 5. إنشاء سجلات الشحن بحالة ""معلّقة""  منطق التوحيد: - إذا كانت هناك شحنة معلّقة للمشارك نفسه، فسيتم توحيدها - ستُدمج جميع مواد ذلك المشارك في شحنة واحدة - ستُجمع الكميات - سيُحدَّث التاريخ المتوقع إلى أحدث تاريخ  ملاحظة: لن تُنشأ شحنات إلا للمشاركين الذين لديهم خطط تخصيص معيّنة"
+hc.shipments_tab.export_csv,تصدير CSV
+hc.shipments_tab.packing_list_pdf,قائمة التعبئة بصيغة PDF
+hc.shipments_tab.delete_selected,حذف {count} المحدد
+hc.shipments_tab.select,تحديد
+hc.shipments_tab.na,غير متاح
+hc.shipments_tab.no_panelist,لا يوجد مشارك
+hc.shipments_tab.edit_quantity,تعديل الكمية
+hc.shipments_tab.no_items,لا توجد عناصر
+hc.shipments_tab.empty_hint,"حدد النطاق الزمني وانقر على ""حساب"" لإنشاء الشحنات من خطط التخصيص"
+hc.register_reception_modal.error_message,خطأ: {message}
+hc.register_reception_modal.na,غير متاح
+hc.register_reception_modal.tag_id,معرّف الوسم:
+hc.register_reception_modal.sent_at,تاريخ الإرسال:
+hc.register_reception_modal.received_datetime,تاريخ ووقت الاستلام
+hc.register_reception_modal.registered_by,سُجّل بواسطة
+hc.register_reception_modal.no_panelist,لا يوجد مشارك معيّن لعقدة الوجهة
+hc.register_reception_modal.cancel,إلغاء
+hc.register_reception_modal.registering,جارٍ التسجيل...
+hc.register_reception_modal.register,تسجيل الاستلام
+hc.all_users.loading,جارٍ التحميل...
+hc.all_users.title,جميع المستخدمين
+hc.all_users.create_user,إنشاء مستخدم
+hc.all_users.edit_user,تعديل المستخدم
+hc.material_catalog.confirm_delete,"هل تريد حذف المادة ""{name}""؟ ستتم إزالتها من جميع المنتجات."
+hc.material_catalog.subtitle,إدارة المواد القابلة لإعادة الاستخدام لجميع المنتجات
+hc.material_catalog.create_material,إنشاء مادة
+hc.material_catalog.edit_material,تعديل المادة
+hc.material_catalog.min_stock,الحد الأدنى للمخزون
+hc.material_catalog.empty,لا توجد مواد في الكتالوج. أنشئ أول مادة للبدء.
+hc.product_form.ph_code,مثال: DHL-EXP-24
+hc.product_form.ph_description,مثال: تسليم سريع خلال 24 ساعة
+hc.product_form.ph_hours,مثال: 24
+hc.product_form.status,الحالة
+hc.jk_performance.loading_data,جارٍ تحميل بيانات أداء J+K...
+hc.jk_performance.error_loading,خطأ في تحميل البيانات: {message}
+hc.jk_performance.kpi_samples_desc,العدد الإجمالي للشحنات المحللة في تحديد المرشحات الحالي.
+hc.jk_performance.kpi_samples_interp,كلما زاد حجم العينة كانت الاستنتاجات الإحصائية أكثر موثوقية. يوصى بما لا يقل عن 30 عينة لكل مسار للدلالة الإحصائية.
+hc.jk_performance.kpi_samples_utility,يتحقق من موثوقية مقاييس الأداء. قد تشير العينات الصغيرة إلى بيانات غير مكتملة أو مرشحات ضيقة.
+hc.jk_performance.kpi_actual_desc,المتوسط المرجّح للأيام اللازمة لبلوغ نسبة STD % المستهدفة عبر جميع المسارات في التحديد.
+hc.jk_performance.kpi_actual_interp,يمثل اليوم الفعلي الذي تبلغ فيه التسليمات التراكمية النسبة المستهدفة. قارنه بـ J+K المعياري لتقييم فجوة الأداء.
+hc.jk_performance.kpi_actual_utility,المقياس الرئيسي لتقييم مدى سرعة بلوغ المسارات أهداف التسليم. تشير القيم الأعلى إلى بطء في بلوغ عتبات الأداء.
+hc.jk_performance.kpi_ontime_desc,نسبة الشحنات المسلّمة ضمن زمن التسليم المعياري (J+K المعياري) أو قبله.
+hc.jk_performance.kpi_ontime_interp,العتبات ديناميكية ومحددة لكل مسار في جدول delivery_standards. الأخضر (≥95%) والأصفر (90-95%) والأحمر (<90%) مجرد مؤشرات بصرية.
+hc.jk_performance.kpi_ontime_utility,مؤشر الأداء الرئيسي لجودة الخدمة. قارنه بالنسبة المعيارية الخاصة بكل مسار (STD %) من delivery_standards.
+hc.jk_performance.kpi_problem_desc,عدد المسارات التي يساوي أداؤها في الوقت المحدد عتبة SLA الحرجة الخاصة بها أو يقل عنها.
+hc.jk_performance.kpi_problem_interp,مسارات لا تستوفي معايير التسليم الحرجة الخاصة بها. لكل مسار عتبته الحرجة المحددة في جدول delivery_standards.
+hc.jk_performance.kpi_problem_utility,انقر للتصفية وعرض المسارات المشكلة فقط. أداة لتحديد أولويات التحسينات التشغيلية.
+hc.jk_performance.route_perf_title,أداء المسارات ({count} مسارات)
+hc.jk_performance.city_perf_title,أداء المدن ({count} مدن)
+hc.jk_performance.region_perf_title,أداء المناطق ({count} مناطق)
+hc.jk_performance.carrier_perf_title,أداء الناقل / المنتج ({count} ناقلين)
+hc.jk_performance.problematic_only,المشكلة فقط
+hc.jk_performance.inbound,وارد
+hc.jk_performance.outbound,صادر
+hc.jk_performance.col_route,المسار
+hc.jk_performance.col_samples,العينات
+hc.jk_performance.col_jk_std,J+K المعياري
+hc.jk_performance.col_jk_actual,J+K الفعلي
+hc.jk_performance.col_deviation,الانحراف
+hc.jk_performance.col_std_pct,STD %
+hc.jk_performance.col_ontime_pct,% في الوقت المحدد
+hc.jk_performance.col_status,الحالة
+hc.jk_performance.col_city,المدينة
+hc.jk_performance.col_direction,الاتجاه
+hc.jk_performance.col_region,المنطقة
+hc.jk_performance.col_cities,المدن
+hc.jk_performance.col_routes,المسارات
+hc.jk_performance.col_carrier_product,الناقل / المنتج
+hc.jk_performance.col_problem_routes,المسارات المشكلة
+hc.jk_performance.tip_01,تقرير أداء J+K: يحلل أزمنة العبور الفعلية (J+K الفعلي) مقابل معايير التسليم (J+K المعياري) لتحديد المسارات أو المدن أو الناقلين أو المنتجات التي تعاني من تأخيرات منتظمة. تحليل متعدد المستويات يعرض الأداء حسب المسار والمدينة والمنطقة والناقل والمنتج. J+K المعياري هو زمن التسليم المتوقع بالأيام من جدول delivery_standards. J+K الفعلي هو متوسط زمن العبور الفعلي بأيام العمل. الانحراف هو الفرق بين الفعلي والمعياري (القيم الموجبة تعني تأخيرًا). نسبة التسليم في الوقت المحدد هي نسبة الشحنات المسلّمة ضمن الزمن المعياري أو قبله. ترميز الألوان: أخضر (≥95%)، أصفر (90-95%)، أحمر (<90%).
+hc.jk_performance.tip_02,حجم العينات الأسبوعي: يعرض عدد الشحنات المحللة في كل أسبوع ضمن نطاق التواريخ المحدد. ترميز الألوان: أخضر (أعلى من المتوسط بنسبة 20%)، أزرق (أعلى من المتوسط)، أصفر (80-100% من المتوسط)، أحمر (أقل من 80% من المتوسط). استخدمه لتحديد الأسابيع ذات العينات القليلة التي قد تؤثر على الموثوقية الإحصائية. يوصى بما لا يقل عن 30 عينة في الأسبوع للدلالة الإحصائية.
+hc.jk_performance.tip_03,توزيع الأداء: يعرض كيفية توزيع الشحنات حسب زمن العبور الفعلي مقابل معيار التسليم (J+K المعياري). الفئات: بعد المعيار (أحمر، سُلّمت بعد J+K المعياري = متأخرة)، قبل المعيار/في الوقت المحدد (أخضر، سُلّمت ضمن J+K المعياري = في الوقت المحدد)، على المعيار (أزرق، سُلّمت تمامًا في يوم J+K المعياري). استخدمه لتصور أداء الشبكة ككل. تشير الأشرطة الحمراء الكبيرة إلى تأخيرات منتظمة تستدعي التحقيق.
+hc.jk_performance.tip_04,مدينة الأصل ← مدينة الوجهة. كل مسار فريد حسب الناقل والمنتج وزوج المدن.
+hc.jk_performance.tip_05,العدد الإجمالي للشحنات في هذا المسار ضمن نطاق التواريخ المحدد. يوصى بما لا يقل عن 30 عينة للدلالة الإحصائية.
+hc.jk_performance.tip_06,زمن التسليم المتوقع بالأيام من جدول delivery_standards. يُحوَّل تلقائيًا من الساعات عند الحاجة (ساعات/24).
+hc.jk_performance.tip_07,عدد الأيام اللازمة لبلوغ نسبة STD % المستهدفة لهذا المسار. يمثل اليوم الذي تبلغ فيه النسبة التراكمية للتسليمات العتبة المعيارية (مثلًا 85%). قارنه بـ J+K المعياري لتقييم الأداء.
+hc.jk_performance.tip_08,الفرق بين J+K الفعلي وJ+K المعياري (الفعلي - المعياري). تشير القيم الموجبة إلى تأخير، والسالبة إلى تسليم مبكر.
+hc.jk_performance.tip_09,النسبة المستهدفة للتسليم في الوقت المحدد المعرّفة في delivery_standards لهذا المسار. هي عتبة الأداء المطلوبة (مثلًا 85%) التي يجب بلوغها. قارنها بعمود نسبة التسليم في الوقت المحدد لتقييم الامتثال.
+hc.jk_performance.tip_10,نسبة الشحنات المسلّمة ضمن J+K المعياري أو قبله. قارنها بنسبة STD % الخاصة بالمسار من delivery_standards (غير معروضة في هذا الجدول).
+hc.jk_performance.tip_11,مؤشر بصري: أخضر (ممتثل، ≥95%)، أصفر (تحذير، 90-95%)، أحمر (حرج، <90%). هذه إرشادات عامة؛ المعايير الفعلية خاصة بكل مسار.
+hc.jk_performance.tip_12,اسم المدينة، ويجمع كل المسارات التي تكون فيها هذه المدينة أصلًا أو وجهة.
+hc.jk_performance.tip_13,وارد (المدينة هي الوجهة) أو صادر (المدينة هي الأصل). يوضح اتجاه تدفق الحركة.
+hc.jk_performance.tip_14,المنطقة الجغرافية التي تنتمي إليها هذه المدينة (من جدول topology.regions).
+hc.jk_performance.tip_15,إجمالي الشحنات المجمّعة عبر كل المسارات التي تشمل هذه المدينة في الاتجاه المحدد.
+hc.jk_performance.tip_16,المتوسط المرجّح لمعايير J+K عبر كل المسارات التي تشمل هذه المدينة. المسارات ذات الشحنات الأكثر لها وزن أكبر.
+hc.jk_performance.tip_17,المتوسط المرجّح للأيام اللازمة لبلوغ نسبة STD % المستهدفة عبر كل المسارات التي تشمل هذه المدينة. يمثل الأداء الفعلي مقابل زمن التسليم المعياري.
+hc.jk_performance.tip_18,متوسط الانحراف المرجّح (الفعلي - المعياري) عبر كل المسارات التي تشمل هذه المدينة.
+hc.jk_performance.tip_19,المتوسط المرجّح لنسبة التسليم المستهدفة في الوقت المحدد من delivery_standards لكل المسارات التي تشمل هذه المدينة.
+hc.jk_performance.tip_20,نسبة جميع الشحنات (عبر كل المسارات) المسلّمة في الوقت المحدد لهذه المدينة.
+hc.jk_performance.tip_21,مؤشر بصري يعتمد على نسبة التسليم في الوقت المحدد: أخضر (≥95%)، أصفر (90-95%)، أحمر (<90%).
+hc.jk_performance.tip_22,منطقة جغرافية تجمع كل المدن والمسارات الواقعة ضمنها (من جدول topology.regions).
+hc.jk_performance.tip_23,وارد (المنطقة هي الوجهة) أو صادر (المنطقة هي الأصل). يوضح تدفق الحركة الإقليمي.
+hc.jk_performance.tip_24,عدد المدن الفريدة في هذه المنطقة التي لها بيانات شحنات في الاتجاه المحدد.
+hc.jk_performance.tip_25,إجمالي الشحنات المجمّعة عبر كل المسارات التي تشمل مدنًا في هذه المنطقة.
+hc.jk_performance.tip_26,المتوسط المرجّح لمعايير J+K عبر كل المسارات في هذه المنطقة. المسارات ذات الشحنات الأكثر لها وزن أكبر.
+hc.jk_performance.tip_27,المتوسط المرجّح للأيام اللازمة لبلوغ نسبة STD % المستهدفة عبر كل المسارات في هذه المنطقة. يمثل الأداء الفعلي مقابل زمن التسليم المعياري.
+hc.jk_performance.tip_28,متوسط الانحراف المرجّح (الفعلي - المعياري) عبر كل المسارات في هذه المنطقة.
+hc.jk_performance.tip_29,المتوسط المرجّح لنسبة التسليم المستهدفة في الوقت المحدد عبر كل المسارات في هذه المنطقة. هي عتبة الأداء المطلوبة التي يجب بلوغها.
+hc.jk_performance.tip_30,نسبة جميع الشحنات (عبر كل المسارات) المسلّمة في الوقت المحدد في هذه المنطقة.
+hc.jk_performance.tip_31,عرض هرمي: تعرض صفوف الناقل (خلفية زرقاء) المقاييس المجمّعة. وتعرض صفوف المنتج (المزاحة بالرمز ↳) مقاييس كل منتج تابع لذلك الناقل.
+hc.jk_performance.tip_32,عدد المسارات الفريدة (أزواج المدن) التي يخدمها هذا الناقل أو المنتج.
+hc.jk_performance.tip_33,إجمالي الشحنات لهذا الناقل أو المنتج عبر كل المسارات.
+hc.jk_performance.tip_34,المتوسط المرجّح لمعايير J+K عبر كل المسارات لهذا الناقل أو المنتج.
+hc.jk_performance.tip_35,المتوسط المرجّح للأيام اللازمة لبلوغ نسبة STD % المستهدفة عبر كل المسارات لهذا الناقل أو المنتج. يمثل الأداء الفعلي مقابل زمن التسليم المعياري.
+hc.jk_performance.tip_36,متوسط الانحراف المرجّح (الفعلي - المعياري) عبر كل المسارات لهذا الناقل أو المنتج.
+hc.jk_performance.tip_37,المتوسط المرجّح لنسبة التسليم المستهدفة في الوقت المحدد عبر كل المسارات لهذا الناقل أو المنتج. هي عتبة الأداء المطلوبة التي يجب بلوغها.
+hc.jk_performance.tip_38,نسبة جميع الشحنات المسلّمة في الوقت المحدد لهذا الناقل أو المنتج.
+hc.jk_performance.tip_39,عدد المسارات التي يقل أداؤها في الوقت المحدد عن 90%. يُعرض على مستوى الناقل فقط (تعرض المنتجات '-').
+hc.jk_performance.tip_40,مؤشر بصري: أخضر (≥95%)، أصفر (90-95%)، أحمر (<90%). يُعرض للناقلين والمنتجات على حد سواء.
+hc.network_overview.loading,جارٍ تحميل نظرة عامة على الشبكة...
+hc.network_overview.error_loading,خطأ في تحميل البيانات: {message}
+hc.network_overview.no_data,لا توجد بيانات متاحة
+hc.network_overview.no_journey_data,لم يتم العثور على بيانات رحلات لهذا الحساب. يرجى التأكد من استيعاب البيانات.
+hc.network_overview.on_time_delivery,التسليم في الوقت المحدد
+hc.network_overview.transit_time,زمن العبور
+hc.network_overview.processing_time,زمن المعالجة
+hc.network_overview.data_quality,جودة البيانات
+hc.network_overview.finding_excellent,أداء ممتاز في التسليم في الوقت المحدد بنسبة {rate}%، يتجاوز معايير القطاع.
+hc.network_overview.finding_below_target,معدل التسليم في الوقت المحدد البالغ {rate}% أقل من المستهدف. يوصى بالتحقيق.
+hc.network_overview.finding_zero_sla,لم تُسجَّل أي مخالفات SLA عبر جميع المسارات.
+hc.network_overview.finding_sla_violations,تم اكتشاف {count} مخالفة SLA. راجع المسارات المتأثرة.
+hc.network_overview.finding_avg_transit,يشير متوسط زمن العبور البالغ {time} إلى كفاءة عمليات الشبكة.
+hc.network_overview.title,نظرة عامة على الشبكة
+hc.network_overview.subtitle,تقييم شامل لسلامة الشبكة البريدية
+hc.network_overview.health_score,درجة سلامة الشبكة
+hc.network_overview.health_score_desc,المتوسط المرجّح لمؤشرات الأداء الرئيسية
+hc.network_overview.out_of_100,من 100
+hc.network_overview.score_breakdown,تفصيل الدرجة
+hc.network_overview.weight,الوزن: {weight}%
+hc.network_overview.points,+{value} نقطة
+hc.network_overview.items_count,{count} عنصر
+hc.network_overview.tip_on_time,نسبة الرحلات المكتملة دون مخالفات SLA. تُحسب كالتالي: (الرحلات بدون مخالفات SLA / إجمالي الرحلات) × 100. كلما ارتفعت كان أفضل.
+hc.network_overview.avg_transit,متوسط زمن العبور
+hc.network_overview.routes_count,{count} مسارات
+hc.network_overview.tip_avg_transit,متوسط زمن العبور من البداية إلى النهاية عبر جميع الرحلات المكتملة. يُحسب من الطابع الزمني لأول حدث إلى آخر حدث. كلما انخفض كان أفضل.
+hc.network_overview.avg_processing,متوسط زمن المعالجة
+hc.network_overview.centers_count,{count} مراكز
+hc.network_overview.tip_avg_processing,متوسط الوقت الذي تقضيه الشحنات في المراكز البريدية للمعالجة. يُحسب من مقاطع المعالجة فقط. القيمة الأقل تدل على عمليات أسرع.
+hc.network_overview.data_completeness,اكتمال البيانات
+hc.network_overview.tip_data_quality,نسبة سجلات البيانات الكاملة والصالحة. تعتمد على وجود الحقول المطلوبة وفحوصات اتساق البيانات.
+hc.network_overview.auto_findings,النتائج التلقائية
+hc.network_overview.network_summary,ملخص الشبكة
+hc.network_overview.total_items,إجمالي العناصر
+hc.network_overview.active_routes,المسارات النشطة
+hc.network_overview.postal_centers,المراكز البريدية
+hc.network_overview.sla_violations,مخالفات SLA
+hc.network_overview.top5_routes,أفضل 5 مسارات
+hc.network_overview.bottom5_routes,أضعف 5 مسارات
+hc.network_overview.top5_centers,أفضل 5 مراكز
+hc.network_overview.bottom5_centers,أضعف 5 مراكز
+hc.network_overview.col_route,المسار
+hc.network_overview.col_items,العناصر
+hc.network_overview.col_on_time,في الوقت المحدد
+hc.network_overview.col_avg_time,متوسط الزمن
+hc.network_overview.col_center,المركز
+hc.network_overview.col_proc_time,زمن المعالجة
+hc.route_performance_table.no_data,لا توجد بيانات مسارات متاحة
+hc.route_performance_table.title,أداء المسارات ({count} مسارات)
+hc.route_performance_table.export_csv,تصدير CSV
+hc.route_performance_table.col_route,المسار
+hc.route_performance_table.col_samples,العينات
+hc.route_performance_table.col_jk_std,J+K المعياري
+hc.route_performance_table.col_jk_actual,J+K الفعلي
+hc.route_performance_table.col_deviation,الانحراف
+hc.route_performance_table.col_std_pct,STD %
+hc.route_performance_table.col_ontime_pct,% في الوقت المحدد
+hc.route_performance_table.col_status,الحالة
+hc.route_performance_table.tip_route,مدينة الأصل ← مدينة الوجهة. كل مسار فريد حسب الناقل والمنتج وزوج المدن.
+hc.route_performance_table.tip_samples,العدد الإجمالي للعينات في هذا المسار ضمن نطاق التواريخ المحدد.
+hc.route_performance_table.tip_jk_std,زمن التسليم المتوقع بالأيام من جدول delivery_standards.
+hc.route_performance_table.tip_jk_actual,عدد الأيام اللازمة لبلوغ نسبة STD % المستهدفة لهذا المسار.
+hc.route_performance_table.tip_deviation,الفرق بين J+K الفعلي وJ+K المعياري (الفعلي - المعياري).
+hc.route_performance_table.tip_std_pct,النسبة المستهدفة للتسليم في الوقت المحدد المعرّفة في delivery_standards لهذا المسار.
+hc.route_performance_table.tip_ontime,نسبة العينات المسلّمة ضمن J+K المعياري أو قبله.
+hc.route_performance_table.tip_status,مؤشر بصري: أخضر (ممتثل)، أصفر (تحذير)، أحمر (حرج).
+hc.route_performance_table.tip_download,نزّل البيانات الخام للعينات الخاصة بهذا المسار من ONE DB.
+hc.route_performance_table.operational,تشغيلي
+hc.route_performance_table.distribution,توزيع
+hc.route_performance_table.download_title,تنزيل عينات هذا المسار
+hc.allocation_plan_detail_row.error,خطأ: {message}
+hc.allocation_plan_detail_row.tag_id_placeholder,أدخل معرّف العلامة
+hc.allocation_plan_detail_row.unavailable,غير متاح
+hc.allocation_plan_detail_row.no_panelist,لا يوجد مشارك
+hc.allocation_plan_detail_row.inactive,غير نشط
+hc.allocation_plan_detail_row.available,متاح
+hc.allocation_plan_detail_row.invalid,غير صالح
+hc.allocation_plan_detail_row.validation_errors,أخطاء التحقق:
+hc.allocation_plan_detail_row.transfer_error,خطأ في النقل
+hc.allocation_plan_detail_row.error_label,خطأ:
+hc.carriers.error,خطأ: {message}
+hc.carriers.about_tip,حول الناقلين والمنتجات - الغرض: إدارة الناقلين اللوجستيين ومنتجات الخدمة الخاصة بهم التي ستُستخدم في خطط التخصيص. الهيكل: يحتوي الناقلون (شركات الشحن) على منتجات (خدمات التسليم)، وتتطلب هذه المنتجات مواد (تغليف وملصقات وغيرها) من كتالوج المواد. الميزات الرئيسية: تحديد بيانات الناقل، وضبط المنتجات بمعايير التسليم، وتحديد هياكل التكلفة، وإدارة متطلبات المواد. الاستخدام: أضف الناقلين، وأنشئ منتجات لكل ناقل، وعيّن المواد للمنتجات، وحدّد أزمنة التسليم والتكاليف، واستخدمها في تخطيط التخصيص.
+hc.carriers.collapse_all,طي الكل
+hc.carriers.clear_filters,مسح المرشحات
+hc.carriers.start_first_carrier,ابدأ بإنشاء أول ناقل لإدارة منتجات الشحن
+hc.carriers.adjust_search,حاول تعديل البحث أو المرشحات
+hc.carriers.download_csv,تنزيل CSV
+hc.carriers.all_have_materials,جميع المنتجات لديها مواد!
+hc.carriers.all_assigned,جميع المنتجات لديها مواد معيّنة من الكتالوج
+hc.carriers.col_product_code,رمز المنتج
+hc.carriers.col_delivery_hours,ساعات التسليم
+hc.carriers.pending_materials,مواد معلقة
+hc.segment_table.center,مركز
+hc.segment_table.transit,عبور
+hc.segment_table.loading,جارٍ تحميل المقاطع...
+hc.segment_table.error,خطأ: {message}
+hc.segment_table.none,لم يتم العثور على مقاطع
+hc.segment_table.col_segment,المقطع
+hc.segment_table.col_jk_std,J+K المعياري
+hc.segment_table.col_natural,الزمن الطبيعي
+hc.segment_table.col_working,زمن العمل
+hc.segment_table.col_pct_std,% المعياري
+hc.segment_table.col_pct_real,% الفعلي
+hc.segment_table.col_diff,الفرق %
+hc.segment_table.col_threshold,العتبة
+hc.segment_table.compliant,ممتثل
+hc.segment_table.warning,تحذير
+hc.segment_table.critical,حرج
+hc.complete_journeys_filters.reset_title,إعادة تعيين جميع المرشحات
+hc.complete_journeys_filters.reset,إعادة تعيين
+hc.complete_journeys_filters.in_progress,قيد التنفيذ
+hc.complete_journeys_filters.completed,مكتمل
+hc.complete_journeys_filters.anomalous,شاذ
+hc.complete_journeys_filters.stuck,عالق
+hc.cumulative_distribution_table.no_data,لا توجد بيانات توزيع متاحة
+hc.cumulative_distribution_table.col_route,المسار
+hc.cumulative_distribution_table.col_carrier,الناقل
+hc.cumulative_distribution_table.col_product,المنتج
+hc.cumulative_distribution_table.col_jk_st,J+K المعياري
+hc.cumulative_distribution_table.col_std_pct,STD %
+hc.cumulative_distribution_table.tip_route,زوج مدن الأصل ← الوجهة. يعرض كل مسار النسب التراكمية للتسليم حسب اليوم.
+hc.cumulative_distribution_table.tip_carrier,ناقل الشحن لهذا المسار.
+hc.cumulative_distribution_table.tip_product,منتج الخدمة (مثل Express 24 ساعة) لهذا المسار.
+hc.cumulative_distribution_table.tip_jk_st,زمن التسليم المتوقع بالأيام من delivery_standards. يتحول رأس العمود إلى اللون الأخضر عند تطابقه مع هذه القيمة.
+hc.cumulative_distribution_table.tip_std,نسبة النجاح المستهدفة من delivery_standards (مثل 85%، 95%). هذه هي العتبة التي يجب أن يستوفيها المسار.
+hc.accounts.loading,جارٍ التحميل...
+hc.accounts.title,إدارة الحسابات
+hc.accounts.create,إنشاء حساب
+hc.accounts.edit,تعديل الحساب
+hc.users.loading,جارٍ التحميل...
+hc.users.title,إدارة المستخدمين
+hc.users.create,إنشاء مستخدم
+hc.users.edit,تعديل المستخدم
+hc.sla_form.carrier,الناقل
+hc.sla_form.product,المنتج
+hc.journey_segments_filters.reset_title,إعادة تعيين جميع المرشحات
+hc.journey_segments_filters.reset,إعادة تعيين
+hc.delivery_standard_form.cities_different,يجب أن تكون مدينتا الأصل والوجهة مختلفتين
+hc.delivery_standard_form.carrier,الناقل *
+hc.delivery_standard_form.select_carrier,اختر الناقل
+hc.delivery_standard_form.product,المنتج *
+hc.delivery_standard_form.select_product,اختر المنتج
+hc.delivery_standard_form.no_products,لا توجد منتجات لهذا الناقل
+hc.delivery_standard_form.origin_city,مدينة الأصل *
+hc.delivery_standard_form.select_origin,اختر الأصل
+hc.delivery_standard_form.type_value,النوع {value}
+hc.delivery_standard_form.destination_city,مدينة الوجهة *
+hc.delivery_standard_form.select_destination,اختر الوجهة
+hc.delivery_standard_form.cannot_change,لا يمكن تغيير الناقل والمنتج والأصل والوجهة. احذف السجل وأنشئ سجلًا جديدًا عند الحاجة.
+hc.delivery_standard_form.standard_time,الزمن المعياري
+hc.delivery_standard_form.eg_24,مثال: 24
+hc.delivery_standard_form.success_pct,نسبة النجاح %
+hc.delivery_standard_form.eg_85,مثال: 85
+hc.delivery_standard_form.time_unit,وحدة الزمن *
+hc.delivery_standard_form.warning_pct,نسبة التحذير %
+hc.delivery_standard_form.eg_5,مثال: 5
+hc.delivery_standard_form.critical_pct,النسبة الحرجة %
+hc.delivery_standard_form.eg_20,مثال: 20
+hc.delivery_standard_form.type,النوع
+hc.delivery_standard_form.abs,مطلق
+hc.delivery_standard_form.rel,نسبي
+hc.delivery_standard_form.cancel,إلغاء
+hc.delivery_standard_form.saving,جارٍ الحفظ...
+hc.delivery_standard_form.update,تحديث
+hc.delivery_standard_form.create,إنشاء
+hc.segment_deep_dive.loading,جارٍ التحميل...
+hc.segment_deep_dive.error,خطأ: {message}
+hc.segment_deep_dive.no_data,لا توجد بيانات متاحة
+hc.segment_deep_dive.segments_title,مقاطع {type}
+hc.segment_deep_dive.total_count,العدد الإجمالي
+hc.segment_deep_dive.sla_compliance,الامتثال لاتفاقية SLA
+hc.segment_deep_dive.avg_duration,متوسط المدة:
+hc.segment_deep_dive.p50_duration,مدة P50:
+hc.segment_deep_dive.p95_duration,مدة P95:
+hc.segment_deep_dive.range,النطاق:
+hc.segment_deep_dive.on_time,في الوقت المحدد
+hc.segment_deep_dive.warning,تحذير
+hc.segment_deep_dive.critical,حرج
+hc.segment_deep_dive.violated,مخالف
+hc.segment_deep_dive.segment_type,نوع المقطع:
+hc.segment_deep_dive.all_types,جميع الأنواع
+hc.segment_deep_dive.operational,تشغيلي
+hc.segment_deep_dive.distribution,توزيع
+hc.segment_deep_dive.hour,الساعة
+hc.segment_deep_dive.segments,المقاطع
+hc.segment_deep_dive.avg_time,متوسط الوقت
+hc.segment_deep_dive.p50_time,وقت P50
+hc.segment_deep_dive.p95_time,وقت P95
+hc.segment_deep_dive.outliers,القيم الشاذة
+hc.segment_deep_dive.sla_pct,SLA %
+hc.segment_deep_dive.no_anomalies,لم يتم اكتشاف أي شذوذ
+hc.segment_deep_dive.tag_id,معرّف الوسم
+hc.segment_deep_dive.type,النوع
+hc.segment_deep_dive.center_carrier,المركز/الناقل
+hc.segment_deep_dive.actual,الفعلي
+hc.segment_deep_dive.expected,المتوقع
+hc.segment_deep_dive.deviation,الانحراف
+hc.segment_deep_dive.anomaly,الشذوذ
+hc.segment_deep_dive.title,تحليل معمّق للمقاطع
+hc.segment_deep_dive.subtitle,تحليل مفصل لمقاطع الرحلة حسب النوع والأداء
+hc.segment_deep_dive.tab_overview,نظرة عامة
+hc.segment_deep_dive.tab_time,التحليل الزمني
+hc.segment_deep_dive.tab_anomalies,الشذوذات
+hc.region_detail_modal.title,تفاصيل المنطقة: {name}
+hc.region_detail_modal.regional_summary,ملخص المنطقة
+hc.region_detail_modal.total_cities,إجمالي المدن:
+hc.region_detail_modal.population,عدد السكان:
+hc.region_detail_modal.total_shipments,إجمالي الشحنات:
+hc.region_detail_modal.performance_metrics,مقاييس الأداء
+hc.region_detail_modal.compliant,المطابقة:
+hc.region_detail_modal.standard,المعيار:
+hc.region_detail_modal.deviation,الانحراف:
+hc.region_detail_modal.status,الحالة:
+hc.region_detail_modal.status_compliant,✅ مطابق
+hc.region_detail_modal.status_warning,⚠️ تحذير
+hc.region_detail_modal.status_critical,🔴 حرج
+hc.region_detail_modal.underserved_cities,المدن ناقصة الخدمة:
+hc.region_detail_modal.directional_analysis,التحليل الاتجاهي
+hc.region_detail_modal.inbound,الوارد (الوصول)
+hc.region_detail_modal.actual_pct,النسبة الفعلية %:
+hc.region_detail_modal.standard_pct,النسبة المعيارية %:
+hc.region_detail_modal.jk_std,J+K المعياري:
+hc.region_detail_modal.jk_actual,J+K الفعلي:
+hc.region_detail_modal.outbound,الصادر (المغادرة)
+hc.region_detail_modal.direction_gap,فجوة الاتجاه:
+hc.region_detail_modal.imbalanced,⚠️ خدمة غير متوازنة
+hc.region_detail_modal.balanced,✅ خدمة متوازنة
+hc.region_detail_modal.carrier_product_breakdown,التوزيع حسب الناقل والمنتج
+hc.region_detail_modal.th_carrier,الناقل
+hc.region_detail_modal.th_product,المنتج
+hc.region_detail_modal.th_shipments,الشحنات
+hc.region_detail_modal.th_compliant,المطابقة
+hc.region_detail_modal.th_actual_pct,النسبة الفعلية %
+hc.region_detail_modal.th_standard_pct,النسبة المعيارية %
+hc.region_detail_modal.th_jk_std,J+K المعياري
+hc.region_detail_modal.th_jk_actual,J+K الفعلي
+hc.region_detail_modal.th_deviation,الانحراف
+hc.region_detail_modal.th_inbound_pct,الوارد %
+hc.region_detail_modal.th_outbound_pct,الصادر %
+hc.region_detail_modal.no_data,لا توجد بيانات متاحة
+hc.region_detail_modal.close,إغلاق
+hc.route_path_table.title,تفاصيل أداء المسارات
+hc.route_path_table.hint,انقر على الصفوف لتوسيع المقاطع. انقر على المقاطع لعرض تقرير J+K.
+hc.route_path_table.collapse_all,طي الكل
+hc.route_path_table.expand_all,توسيع الكل
+hc.route_path_table.th_carrier,الناقل
+hc.route_path_table.th_product,المنتج
+hc.route_path_table.th_origin,الأصل
+hc.route_path_table.th_destination,الوجهة
+hc.route_path_table.th_seg,مقطع
+hc.route_path_table.th_jk_std,J+K المعياري
+hc.route_path_table.th_natural_time,الوقت الطبيعي
+hc.route_path_table.th_working_time,وقت العمل
+hc.route_path_table.th_pct_std,% المعياري
+hc.route_path_table.th_pct_real,% الفعلي
+hc.route_path_table.th_diff_pct,الفرق %
+hc.route_path_table.th_threshold,العتبة
+hc.route_path_table.th_tags,الوسوم
+hc.route_path_table.compliant,مطابق
+hc.route_path_table.warning,تحذير
+hc.route_path_table.critical,حرج
+hc.route_path_table.segment_details,تفاصيل المقاطع
+hc.route_path_table.no_routes,لم يتم العثور على مسارات
+hc.pipeline_monitor.phase_consolidation,المرحلة 2: التوحيد
+hc.pipeline_monitor.phase_segments,المرحلة 3: بناء المقاطع
+hc.pipeline_monitor.phase_aggregation,المرحلة 4: تجميع المسارات
+hc.pipeline_monitor.phase_started,بدأت {phase}...
+hc.pipeline_monitor.phase_completed,✅ اكتملت {phase} خلال {duration} ث
+hc.pipeline_monitor.events_processed,تمت معالجة {count} حدثًا
+hc.pipeline_monitor.events_created,تم إنشاء {count} حدثًا موحدًا
+hc.pipeline_monitor.segments_created,تم إنشاء {count} مقطعًا
+hc.pipeline_monitor.paths_created,تم إنشاء {count} مسارًا فريدًا
+hc.pipeline_monitor.phase_failed,❌ فشلت {phase}: {message}
+hc.pipeline_monitor.full_started,🚀 بدء التنفيذ الكامل لخط المعالجة...
+hc.pipeline_monitor.full_completed,✅ اكتمل التنفيذ الكامل لخط المعالجة
+hc.pipeline_monitor.logs_cleared,تم مسح السجل
+hc.pipeline_monitor.never,أبدًا
+hc.pipeline_monitor.seconds_ago,قبل {n} ث
+hc.pipeline_monitor.minutes_ago,قبل {n} د
+hc.pipeline_monitor.hours_ago,قبل {n} س
+hc.pipeline_monitor.title,مراقب خط معالجة EPCIS
+hc.pipeline_monitor.auto_refresh,تحديث تلقائي (30 ث)
+hc.pipeline_monitor.raw_events,الأحداث الخام
+hc.pipeline_monitor.pending,قيد الانتظار
+hc.pipeline_monitor.processed,المعالَجة
+hc.pipeline_monitor.events,أحداث
+hc.pipeline_monitor.segments,المقاطع
+hc.pipeline_monitor.segments_unit,مقاطع
+hc.pipeline_monitor.routes,المسارات
+hc.pipeline_monitor.unique_paths,مسارات فريدة
+hc.pipeline_monitor.pipeline_phases,مراحل خط المعالجة
+hc.pipeline_monitor.status_idle,خاملة
+hc.pipeline_monitor.status_running,قيد التشغيل
+hc.pipeline_monitor.status_ready,جاهزة
+hc.pipeline_monitor.status_error,خطأ
+hc.pipeline_monitor.run_now,تشغيل الآن
+hc.pipeline_monitor.last_run,آخر تشغيل: {time}
+hc.pipeline_monitor.duration,المدة: {seconds} ث
+hc.pipeline_monitor.run_full,تشغيل خط المعالجة بالكامل
+hc.pipeline_monitor.recent_incidents,الحوادث الأخيرة
+hc.pipeline_monitor.last_10_unresolved,آخر 10 غير محلولة
+hc.pipeline_monitor.no_incidents,لا توجد حوادث حديثة
+hc.pipeline_monitor.incident_tag,| الوسم: {id}...
+hc.pipeline_monitor.execution_log,سجل التنفيذ
+hc.pipeline_monitor.clear_log,مسح السجل
+hc.pipeline_monitor.no_log,لا توجد إدخالات في السجل بعد
+hc.jk_treemap.samples_count,{count} عينة
+hc.jk_treemap.on_time,في الوقت المحدد:
+hc.jk_treemap.jk_std,J+K المعياري:
+hc.jk_treemap.jk_actual,J+K الفعلي:
+hc.jk_treemap.days_value,{value} أيام
+hc.jk_treemap.deviation,الانحراف:
+hc.jk_treemap.samples,العينات:
+hc.jk_treemap.routes,المسارات:
+hc.jk_treemap.status,الحالة:
+hc.jk_treemap.status_compliant,✅ مطابق
+hc.jk_treemap.status_warning,⚠️ تحذير
+hc.jk_treemap.status_critical,🔴 حرج
+hc.jk_treemap.no_data,لا توجد بيانات J+K متاحة للخريطة الشجرية
+hc.jk_treemap.help,يمثل حجم المدينة عدد العينات. يشير اللون إلى حالة أداء J+K.
+hc.jk_treemap.legend_compliant,مطابق
+hc.jk_treemap.legend_warning,تحذير
+hc.jk_treemap.legend_critical,حرج
+hc.carriers_tree.confirm_delete,هل أنت متأكد أنك تريد حذف {name}؟
+hc.carriers_tree.confirm_remove_material,"إزالة المادة ""{name}"" من هذا المنتج؟"
+hc.carriers_tree.prompt_quantity,"أدخل الكمية الجديدة لـ ""{name}"":"
+hc.carriers_tree.invalid_number,يرجى إدخال رقم موجب صالح
+hc.carriers_tree.collapse_carrier,طي الناقل
+hc.carriers_tree.expand_carrier,توسيع الناقل
+hc.carriers_tree.expand_all_products,توسيع جميع منتجات هذا الناقل
+hc.carriers_tree.add_product_title,إضافة منتج
+hc.carriers_tree.product_btn,منتج
+hc.carriers_tree.edit_carrier_title,تعديل الناقل
+hc.carriers_tree.edit_carrier,تعديل الناقل
+hc.carriers_tree.delete_carrier,حذف الناقل
+hc.carriers_tree.collapse_product,طي المنتج
+hc.carriers_tree.expand_product,توسيع المنتج
+hc.carriers_tree.add_material_title,إضافة مادة
+hc.carriers_tree.add_a_material,إضافة مادة
+hc.carriers_tree.edit_product_title,تعديل المنتج
+hc.carriers_tree.edit_product,تعديل المنتج
+hc.carriers_tree.delete_product,حذف المنتج
+hc.carriers_tree.product_fallback,منتج
+hc.carriers_tree.material_fallback,مادة
+hc.carriers_tree.no_materials,لم يتم تعيين أي مواد بعد
+hc.carriers_tree.unknown_material,مادة غير معروفة
+hc.carriers_tree.qty,الكمية: {qty}
+hc.carriers_tree.update_quantity,تحديث الكمية
+hc.carriers_tree.remove_material,إزالة المادة
+hc.compliance_report.export_coming_soon,تصدير تقرير التدقيق - قريبًا
+hc.compliance_report.loading,جارٍ تحميل بيانات الامتثال...
+hc.compliance_report.error_loading,خطأ في تحميل البيانات
+hc.compliance_report.coming_soon,قريبًا
+hc.compliance_report.overall_compliance,الامتثال الإجمالي
+hc.compliance_report.overall_compliance_tip,النسبة المئوية للمسارات التي تستوفي معايير الامتثال
+hc.compliance_report.routes_ratio,{compliant}/{total} مسارًا
+hc.compliance_report.compliant_routes,المسارات المطابقة
+hc.compliance_report.compliant_routes_tip,المسارات التي تستوفي المعيار
+hc.compliance_report.meeting_standard,تستوفي المعيار
+hc.compliance_report.warning_routes,المسارات التحذيرية
+hc.compliance_report.warning_routes_tip,المسارات ذات المشكلات البسيطة
+hc.compliance_report.no_penalty,بدون غرامة
+hc.compliance_report.critical_routes,المسارات الحرجة
+hc.compliance_report.critical_routes_tip,المسارات المشمولة بغرامات
+hc.compliance_report.with_penalty,مع غرامة
+hc.compliance_report.total_routes,إجمالي المسارات
+hc.compliance_report.total_routes_tip,جميع المسارات التي تم تحليلها
+hc.compliance_report.across_carriers,عبر جميع الناقلين
+hc.compliance_report.compliance_analysis,تحليل الامتثال
+hc.compliance_report.hierarchy_tip,عرض هرمي: الناقل ← المنتج ← المسار
+hc.register_shipment_modal.error,خطأ: {message}
+hc.register_shipment_modal.tag_id,معرّف الوسم
+hc.register_shipment_modal.enter_tag_id,أدخل معرّف الوسم
+hc.register_shipment_modal.sent_datetime,تاريخ ووقت الإرسال
+hc.register_shipment_modal.registered_by,سُجّل بواسطة
+hc.register_shipment_modal.no_panelist,لا يوجد مشارك معيّن لعقدة الأصل
+hc.register_shipment_modal.cancel,إلغاء
+hc.register_shipment_modal.registering,جارٍ التسجيل...
+hc.register_shipment_modal.register_shipment,تسجيل الشحنة
+hc.login_form.error_signing_in,خطأ في تسجيل الدخول
+hc.login_form.email_label,البريد الإلكتروني:
+hc.login_form.password_label,كلمة المرور:
+hc.login_form.hide_password,إخفاء كلمة المرور
+hc.login_form.show_password,إظهار كلمة المرور
+hc.login_form.signing_in,جارٍ تسجيل الدخول...
+hc.city_form.name_placeholder,مثال: مدريد، برشلونة
+hc.city_form.code_placeholder,مثال: MAD، BCN
+hc.city_form.population_placeholder,مثال: 3200000
+hc.city_form.status,الحالة
+hc.generate_combinations_modal.error_generating,خطأ في إنشاء اتفاقيات SLA
+hc.generate_combinations_modal.select_carriers,اختيار الناقلين
+hc.generate_combinations_modal.select_products,اختيار المنتجات
+hc.generate_combinations_modal.entry_exit,{name} (دخول ← خروج)
+hc.csv_handler.import_error,خطأ في الاستيراد: {message}
+hc.csv_handler.import_csv,استيراد CSV
+hc.csv_handler.download_template,تنزيل قالب CSV
+hc.material_requirements.title_tip,يحسب احتياجات المواد استنادًا إلى خطط التخصيص ضمن نطاق زمني. تعرض هذه الوحدة المواد الواجب شراؤها والمشاركين الذين يجب أن يتلقوا مواد لشحناتهم المجدولة.
+hc.material_requirements.error_calculating,خطأ في حساب الاحتياجات
+hc.material_requirements.expand_filters,توسيع عوامل التصفية
+hc.material_requirements.collapse_filters,طي عوامل التصفية
+hc.material_requirements.filters_tip,قم بتصفية احتياجات المواد حسب النطاق الزمني أو نوع المادة أو العقدة. استخدم محدد الشهر السريع لاختيار التواريخ بسهولة.
+hc.material_requirements.reset_filters,إعادة تعيين جميع عوامل التصفية
+hc.material_requirements.start_date_tip,تاريخ بداية الفترة التي سيتم حساب احتياجات المواد لها.
+hc.material_requirements.end_date_tip,تاريخ نهاية الفترة التي سيتم حساب احتياجات المواد لها.
+hc.material_requirements.material_tip,قم بتصفية النتائج لعرض مادة محددة فقط. اتركه فارغًا لعرض جميع المواد.
+hc.material_requirements.node_tip,قم بتصفية احتياجات المشاركين لعرض عقدة محددة فقط. ينطبق هذا الفلتر على تبويب احتياجات المشاركين فقط.
+hc.material_requirements.quick_period_tip,انقر على أي زر شهر لتعيين تاريخي البداية والنهاية لذلك الشهر بالكامل تلقائيًا، أو استخدم أزرار الفصل النصفي/السنة لفترات أطول.
+hc.material_requirements.purchase_tip,يعرض الكمية الإجمالية من كل مادة الواجب شراؤها لتلبية جميع خطط التخصيص ضمن النطاق الزمني المحدد.
+hc.material_requirements.panelist_tip,يعرض المواد الواجب إرسالها إلى كل مشارك/عقدة لشحناتهم المجدولة.
+hc.material_requirements.pending_assignment,← بانتظار التعيين
+hc.territory_equity.loading_data,جارٍ تحميل بيانات العدالة الإقليمية...
+hc.territory_equity.error_loading,خطأ في تحميل البيانات: {message}
+hc.territory_equity.route_title,تحليل المسار: {origin} ← {destination}
+hc.territory_equity.outbound_title,تقرير الأداء الإقليمي: الصادر من {origin}
+hc.territory_equity.inbound_title,تقرير الأداء الإقليمي: الوارد إلى {destination}
+hc.territory_equity.route_desc,تحليل مفصل لأداء المسار من {origin} إلى {destination}
+hc.territory_equity.outbound_desc,حلّل عدالة الخدمة الصادرة من {origin} إلى جميع الوجهات
+hc.territory_equity.inbound_desc,حلّل عدالة الخدمة الواردة إلى {destination} من جميع نقاط الانطلاق
+hc.territory_equity.coming_soon,قريبًا
+hc.territory_equity.hide_filters,إخفاء المرشحات والمقاييس
+hc.territory_equity.show_filters,إظهار المرشحات والمقاييس
+hc.territory_equity.of_cities,من أصل {count} مدينة
+hc.territory_equity.citizens_underserved,مواطنون في مدن غير مخدومة بشكل كافٍ
+hc.territory_equity.top_cities_performance,أداء أبرز المدن
+hc.territory_equity.top_regions_performance,أداء أبرز المناطق
+hc.territory_equity.best_served,الأفضل خدمة
+hc.territory_equity.worst_served,الأسوأ خدمة
+hc.territory_equity.col_city,المدينة
+hc.territory_equity.col_region,المنطقة
+hc.territory_equity.col_compl,الامتثال
+hc.territory_equity.col_std,المعيار
+hc.territory_equity.col_jk_std,J+K المعياري
+hc.territory_equity.col_jk_act,J+K الفعلي
+hc.territory_equity.col_inb,وارد
+hc.territory_equity.col_outb,صادر
+hc.territory_equity.regions_ranking_tooltip,ترتيب أداء المناطق بحسب الامتثال لعدالة الخدمة
+hc.territory_equity.no_underserved_regions,لا توجد مناطق غير مخدومة بشكل كافٍ
+hc.territory_equity.low_profile_routes,المسارات منخفضة الحجم
+hc.territory_equity.jk_performance,أداء J+K
+hc.territory_equity.regional_trend,اتجاه الأداء الإقليمي
+hc.territory_equity.region_filter_label,المنطقة: حلّل الشحنات الواردة إلى المدن داخل منطقة محددة
+hc.territory_equity.all_regions_treemap,جميع المناطق (عرض الخريطة الشجرية فقط)
+hc.territory_equity.cities_in_region,مدن منطقة {region}: تحليل الوارد
+hc.territory_equity.cities_in_region_tooltip,تفصيل المدن داخل المنطقة المحددة مع الشحنات الواردة ومقاييس عدالة الخدمة.
+hc.territory_equity.showing_cities_in_region,عرض مدن منطقة {region} مع تحليل الشحنات الواردة
+hc.territory_equity.low_profile_desc,تفصيل جميع المسارات حسب المشغّل والمنتج. صفِّ بحسب حالة العدالة لتحديد مشكلات الامتثال.
+hc.territory_equity.distribution_analysis,تحليل التوزيع
+hc.territory_equity.distribution_desc,تحليل مفصل لتوزيع أوقات العبور ومقاييس الأداء التراكمية.
+hc.territory_equity.performance_distribution,توزيع الأداء
+hc.territory_equity.cumulative_distribution,التوزيع التراكمي
+hc.territory_equity.chart,رسم بياني
+hc.territory_equity.table,جدول
+hc.territory_equity.route_performance,أداء المسارات
+hc.territory_equity.route_performance_desc,تفصيل جميع المسارات حسب المشغّل والمنتج.
+hc.city_detail_modal.title,تفاصيل المدينة: {city}
+hc.city_detail_modal.basic_information,المعلومات الأساسية
+hc.city_detail_modal.label_region,المنطقة:
+hc.city_detail_modal.label_classification,التصنيف:
+hc.city_detail_modal.label_population,عدد السكان:
+hc.city_detail_modal.performance_metrics,مقاييس الأداء
+hc.city_detail_modal.label_total_shipments,إجمالي الشحنات:
+hc.city_detail_modal.label_compliant,المطابقة:
+hc.city_detail_modal.label_standard,المعيار:
+hc.city_detail_modal.label_deviation,الانحراف:
+hc.city_detail_modal.label_status,الحالة:
+hc.city_detail_modal.status_compliant,مطابق
+hc.city_detail_modal.status_warning,تحذير
+hc.city_detail_modal.status_critical,حرج
+hc.city_detail_modal.directional_analysis,التحليل الاتجاهي
+hc.city_detail_modal.inbound_arrivals,الوارد (الوصول)
+hc.city_detail_modal.outbound_departures,الصادر (المغادرة)
+hc.city_detail_modal.label_shipments,الشحنات:
+hc.city_detail_modal.shipments_compliant,{count} ({compliant} مطابقة)
+hc.city_detail_modal.label_actual_pct,النسبة الفعلية %:
+hc.city_detail_modal.label_standard_pct,النسبة المعيارية %:
+hc.city_detail_modal.label_jk_std,J+K المعياري:
+hc.city_detail_modal.label_jk_actual,J+K الفعلي:
+hc.city_detail_modal.direction_gap,الفجوة بين الاتجاهين:
+hc.city_detail_modal.balanced_service,خدمة متوازنة
+hc.city_detail_modal.imbalanced_service,خدمة غير متوازنة
+hc.city_detail_modal.carrier_product_breakdown,التفصيل حسب المشغّل والمنتج
+hc.city_detail_modal.th_carrier,المشغّل
+hc.city_detail_modal.th_product,المنتج
+hc.city_detail_modal.th_shipments,الشحنات
+hc.city_detail_modal.th_compliant,المطابقة
+hc.city_detail_modal.th_actual_pct,النسبة الفعلية %
+hc.city_detail_modal.th_standard_pct,النسبة المعيارية %
+hc.city_detail_modal.th_jk_std,J+K المعياري
+hc.city_detail_modal.th_jk_actual,J+K الفعلي
+hc.city_detail_modal.th_deviation,الانحراف
+hc.city_detail_modal.th_inbound_pct,الوارد %
+hc.city_detail_modal.th_outbound_pct,الصادر %
+hc.city_detail_modal.no_data,لا توجد بيانات متاحة
+hc.city_detail_modal.close,إغلاق
+hc.account_reporting_config.warning_gt_critical,يجب أن يكون حد التحذير أكبر من الحد الحرج
+hc.account_reporting_config.loading,جارٍ تحميل الإعدادات...
+hc.account_reporting_config.error_loading,خطأ في تحميل الإعدادات: {message}
+hc.account_reporting_config.title,إعدادات التقارير للحساب
+hc.account_reporting_config.subtitle,قم بضبط حدود التقارير وتصنيفات المدن لهذا الحساب
+hc.account_reporting_config.general_settings,الإعدادات العامة
+hc.account_reporting_config.warning_threshold,حد تحذير الامتثال
+hc.account_reporting_config.warning_desc,ستعرض الشحنات الأقل من هذا الحد تحذيرًا أصفر
+hc.account_reporting_config.critical_threshold,الحد الحرج للامتثال
+hc.account_reporting_config.critical_desc,ستعرض الشحنات الأقل من هذا الحد تنبيهًا أحمر
+hc.account_reporting_config.default_period,فترة التقرير الافتراضية
+hc.account_reporting_config.default_period_desc,الفترة الزمنية الافتراضية لإنشاء التقارير
+hc.account_reporting_config.saved,تم حفظ الإعدادات بنجاح
+hc.account_reporting_config.save_error,خطأ في حفظ الإعدادات
+hc.account_reporting_config.reset,إعادة تعيين
+hc.account_reporting_config.saving,جارٍ الحفظ...
+hc.account_reporting_config.save_changes,حفظ التغييرات
+hc.account_reporting_config.city_classifications,تصنيفات المدن
+hc.account_reporting_config.city_classifications_desc,حدّد تصنيفات مدن مخصصة لهذا الحساب. ستستخدم المدن غير المدرجة هنا التصنيفات الافتراضية.
+hc.account_reporting_config.notes_title,ملاحظات الإعدادات:
+hc.account_reporting_config.note_warning,يجب أن يكون حد التحذير أكبر من الحد الحرج
+hc.account_reporting_config.note_changes,ستؤثر التغييرات في الحدود على جميع عروض التقارير
+hc.account_reporting_config.note_classifications,تتجاوز تصنيفات المدن التصنيفات الافتراضية من الطوبولوجيا
+hc.account_reporting_config.note_superadmin,يمكن لمستخدمي المشرف الأعلى فقط تعديل هذه الإعدادات
+hc.confirm_shipment_modal.min_one_material,يجب أن تبقى مادة واحدة على الأقل في الشحنة
+hc.confirm_shipment_modal.qty_gt_zero,يجب أن تكون جميع الكميات أكبر من 0
+hc.confirm_shipment_modal.error,خطأ: {message}
+hc.confirm_shipment_modal.title,تأكيد الشحنة
+hc.confirm_shipment_modal.to,إلى: {name}
+hc.confirm_shipment_modal.unknown_panelist,مشارك غير معروف
+hc.confirm_shipment_modal.sent_date,تاريخ الإرسال
+hc.confirm_shipment_modal.stock_alert,تنبيه المخزون
+hc.confirm_shipment_modal.stock_alert_desc,بعض المواد لا يتوفر منها مخزون كافٍ لدى الجهة التنظيمية. يلزم إجراء جرد للمخزون. ستُسجَّل الشحنة مع ملاحظة حادثة مخزون.
+hc.confirm_shipment_modal.materials_to_send,المواد المراد إرسالها
+hc.confirm_shipment_modal.th_material,المادة
+hc.confirm_shipment_modal.th_available_stock,المخزون المتاح
+hc.confirm_shipment_modal.th_qty_to_send,الكمية المراد إرسالها
+hc.confirm_shipment_modal.th_actions,الإجراءات
+hc.confirm_shipment_modal.insufficient,غير كافٍ
+hc.confirm_shipment_modal.cannot_remove_last,لا يمكن إزالة العنصر الأخير
+hc.confirm_shipment_modal.remove_from_shipment,إزالة من الشحنة
+hc.confirm_shipment_modal.remove,إزالة
+hc.confirm_shipment_modal.removed_materials,المواد المزالة (ستنشئ شحنة جديدة معلّقة)
+hc.confirm_shipment_modal.th_quantity,الكمية
+hc.confirm_shipment_modal.restore,استعادة
+hc.confirm_shipment_modal.cancel,إلغاء
+hc.confirm_shipment_modal.sending,جارٍ الإرسال...
+hc.confirm_shipment_modal.confirm_send,تأكيد الإرسال
+hc.country_topology.error,خطأ: {message}
+hc.country_topology.about_tooltip,حول طوبولوجيا البلد - الغرض: تعريف وإدارة التسلسل الهرمي للبنية التحتية لشبكة بلدك في هيكل من ثلاثة مستويات. الهيكل: المناطق (التقسيمات الجغرافية العليا مثل الشمال والجنوب والوسط)، والمدن (المراكز الحضرية داخل كل منطقة مثل مدريد وبرشلونة)، والعقد (نقاط التسليم أو العناوين المحددة داخل المدن). الاستخدام: تُستخدم هذه الطوبولوجيا في كامل النظام لتخطيط التخصيص وإعداد التقارير وتحليل العدالة الإقليمية.
+hc.country_topology.with_panelist,مع مشارك
+hc.country_topology.without_panelist,بدون مشارك
+hc.country_topology.collapse_all,طيّ الكل
+hc.country_topology.clear_filters,مسح المرشحات
+hc.country_topology.start_first_region,ابدأ بإنشاء أول منطقة لبناء طوبولوجيا بلدك
+hc.country_topology.adjust_search,حاول تعديل البحث أو المرشحات
+hc.country_topology.nodes_without_panelists,عقد بدون مشاركين
+hc.country_topology.nodes_need_panelist,تحتاج هذه العقد إلى تعيين مشارك لتصبح قيد التشغيل
+hc.country_topology.download_csv,تنزيل CSV
+hc.country_topology.all_nodes_have,جميع العقد لديها مشاركون!
+hc.country_topology.every_node_assigned,لكل عقدة في طوبولوجيتك مشارك معيَّن
+hc.country_topology.th_node_id,معرّف العقدة
+hc.country_topology.pending_panelist,مشارك قيد الانتظار
+hc.country_topology.error_creating_region,خطأ في إنشاء المنطقة: {message}
+hc.compliance_hierarchical_table.status_compliant,مطابق
+hc.compliance_hierarchical_table.status_warning,تحذير
+hc.compliance_hierarchical_table.status_critical,حرج
+hc.compliance_hierarchical_table.col_carrier_product_route,المشغّل / المنتج / المسار
+hc.compliance_hierarchical_table.col_samples,العيّنات
+hc.compliance_hierarchical_table.col_jk_std,J+K المعياري
+hc.compliance_hierarchical_table.col_jk_actual,J+K الفعلي
+hc.compliance_hierarchical_table.col_std_pct,% المعياري
+hc.compliance_hierarchical_table.col_actual_pct,% الفعلي
+hc.compliance_hierarchical_table.col_deviation,الانحراف
+hc.compliance_hierarchical_table.col_status,الحالة
+hc.compliance_hierarchical_table.col_actions,الإجراءات
+hc.compliance_hierarchical_table.download_samples_csv,تنزيل ملف CSV للعيّنات
+hc.compliance_hierarchical_table.no_data,لا توجد بيانات امتثال متاحة
+hc.panelist_stock_tab.no_name,بدون اسم
+hc.panelist_stock_tab.no_stock_to_export,لا توجد بيانات مخزون للتصدير
+hc.panelist_stock_tab.loading,جارٍ تحميل مخزون المشاركين...
+hc.panelist_stock_tab.no_materials_found,لم يتم العثور على مواد
+hc.panelist_stock_tab.no_panelist_stock,لا يوجد مخزون للمشاركين
+hc.panelist_stock_tab.tt_material,رمز المادة واسمها
+hc.panelist_stock_tab.tt_quantity,الكمية الحالية في مخزون المشارك
+hc.panelist_stock_tab.tt_last_movement,تاريخ آخر حركة لهذه المادة
+hc.panelist_stock_tab.total_records,إجمالي السجلات:
+hc.panelist_stock_tab.filtered_from,مصفّاة من أصل {count}
+hc.panelist_stock_tab.adjust_title,تعديل مخزون المشارك: {code}
+hc.panelist_stock_tab.panelist_line,المشارك: {name} ({code})
+hc.panelist_stock_tab.current_quantity,الكمية الحالية
+hc.panelist_stock_tab.new_quantity,الكمية الجديدة
+hc.panelist_stock_tab.new_qty_placeholder,أدخل الكمية المطلقة الجديدة
+hc.panelist_stock_tab.adjustment_note,ملاحظة التعديل
+hc.panelist_stock_tab.note_placeholder,اشرح سبب هذا التعديل...
+hc.panelist_stock_tab.change,التغيير:
+hc.panelist_stock_tab.cancel,إلغاء
+hc.panelist_stock_tab.enter_qty_and_note,يرجى إدخال الكمية الجديدة وملاحظة التعديل
+hc.panelist_stock_tab.enter_valid_qty,يرجى إدخال كمية صالحة
+hc.panelist_stock_tab.adjusted_ok,تم تعديل مخزون المشارك بنجاح
+hc.panelist_stock_tab.adjust_failed,فشل تعديل المخزون: {message}
+hc.panelist_stock_tab.adjusting,جارٍ التعديل...
+hc.panelist_stock_tab.confirm_adjustment,تأكيد التعديل
+hc.region_form.region_name,اسم المنطقة *
+hc.region_form.region_code,رمز المنطقة *
+hc.region_form.country_code,رمز البلد *
+hc.region_form.status,الحالة *
+hc.region_form.ph_name,مثال: إسبانيا، فرنسا
+hc.region_form.ph_code,مثال: ES، FR
+hc.region_form.cancel,إلغاء
+hc.region_form.saving,جارٍ الحفظ...
+hc.region_form.update,تحديث
+hc.region_form.create,إنشاء
+hc.slas_configuration.confirm_delete_n,هل تريد حذف {count} من السجلات المحددة؟
+hc.slas_configuration.deleted_n,تم حذف {count} من السجلات بنجاح
+hc.slas_configuration.error,خطأ: {message}
+hc.slas_configuration.carrier,المشغّل
+hc.slas_configuration.product,المنتج
+hc.slas_configuration.entry_exit,دخول ← خروج
+hc.slas_configuration.create_error,خطأ في إنشاء SLA
+hc.edit_shipment_item_modal.qty_gt_zero,يجب أن تكون الكمية أكبر من 0
+hc.edit_shipment_item_modal.error,خطأ: {message}
+hc.edit_shipment_item_modal.title,تعديل كمية الشحنة
+hc.edit_shipment_item_modal.unknown_material,مادة غير معروفة
+hc.edit_shipment_item_modal.no_description,بدون وصف
+hc.edit_shipment_item_modal.current_quantity,الكمية الحالية: {quantity} {unit}
+hc.edit_shipment_item_modal.units,وحدات
+hc.edit_shipment_item_modal.new_quantity,الكمية الجديدة
+hc.edit_shipment_item_modal.info,"سيؤدي هذا إلى تحديث الكمية المرسلة في هذه الشحنة. يجب أن تكون الشحنة بحالة ""قيد الانتظار"" لتتمكن من تعديلها."
+hc.edit_shipment_item_modal.cancel,إلغاء
+hc.edit_shipment_item_modal.saving,جارٍ الحفظ...
+hc.edit_shipment_item_modal.save_changes,حفظ التغييرات
+hc.movements_tab.loading,جارٍ تحميل الحركات...
+hc.movements_tab.search,بحث
+hc.movements_tab.tt_search,البحث برمز المادة أو اسمها
+hc.movements_tab.tt_filter_type,التصفية حسب نوع الحركة
+hc.movements_tab.tt_filter_panelist,التصفية حسب المشارك الوجهة
+hc.movements_tab.tt_from_date,تصفية الحركات ابتداءً من هذا التاريخ
+hc.movements_tab.tt_until_date,تصفية الحركات حتى هذا التاريخ
+hc.movements_tab.tt_date_time,تاريخ ووقت الحركة
+hc.movements_tab.tt_type,نوع الحركة (إدخال، إخراج، نقل)
+hc.movements_tab.tt_origin,موقع المنشأ للمادة
+hc.movements_tab.tt_destination,موقع الوجهة للمادة
+hc.movements_tab.panelist,مشارك
+hc.movements_tab.no_movements_found,لم يتم العثور على حركات
+hc.movements_tab.no_movements_recorded,لا توجد حركات مسجلة
+hc.movements_tab.no_name,بدون اسم
+hc.movements_tab.total_movements,إجمالي الحركات:
+hc.movements_tab.filtered_from,مصفّاة من أصل {count}
+hc.territory_equity_map.no_coords,لا توجد مدن بإحداثيات جغرافية متاحة. يرجى إضافة بيانات خطوط العرض والطول إلى المدن.
+hc.one_db_bulk_panel.selected_of,تم تحديد {selected} من أصل {total}
+hc.one_db_bulk_panel.export_csv,تصدير CSV
+hc.one_db_bulk_panel.delete_n,حذف ({count})
+hc.one_db_bulk_panel.clear,مسح
+account_config.add_holiday,إضافة عطلة
+admin.restored_records,السجلات المستعادة
+common.add,إضافة
+common.carrier,الناقل
+common.compliant,ملتزم
+common.critical,حرج
+common.destination_city,مدينة الوجهة
+common.no_results,لم يتم العثور على نتائج
+common.optional,اختياري
+common.origin_city,مدينة المنشأ
+common.product,المنتج
+common.threshold,الحد
+dashboard.active_lowercase,نشط
+diagnosis.distribution,التوزيع
+diagnosis.jk_performance_segments.description,تحليل الأداء على مستوى المقاطع بمقاييس J+K (أيام)
+diagnosis.jk_performance_segments.title,أداء J+K (المقاطع)
+diagnosis.operational,تشغيلي
+diagnosis.segment_type,نوع المقطع
+diagnosis.total_segments,إجمالي المقاطع
+panelists.select_city,— اختر المدينة —
+processed_events.paired,مقترنة
+processed_events.unpaired,غير مقترنة
+readers.unassigned,غير معيّن
+reporting.compliance_analysis_description,تحليل الالتزام بمستوى الخدمة حسب الناقل والمنتج والمسار
+reporting.regional_service_equity_treemap,العدالة الإقليمية في الخدمة (خريطة شجرية)
+slas.sla_created_successfully,تم إنشاء اتفاقية مستوى الخدمة بنجاح
+stock.auto_generate_shipments_description,ينشئ الشحنات تلقائياً عندما ينخفض مخزون المشارك
+stock.feature_not_available,الميزة معطلة - لا تُستخدم أوامر الشراء في هذه الوحدة
+stock.generate_shipments,إنشاء {count} شحنات
+stock.not_applicable_purchase_orders,غير منطبق - لا تُستخدم أوامر الشراء
+stock.stock_control_description,ينشّط مراقبة المخزون ونظام التنبيهات
+stock.used_to_calculate_delivery_dates,يُستخدم لحساب تواريخ التسليم المقدّرة

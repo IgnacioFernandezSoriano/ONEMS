@@ -175,7 +175,7 @@ export function RegionalEquityTreemap({ data, scenarioInfo, globalWarningThresho
                 strokeWidth={0.5}
                 opacity={0.9}
               >
-                {totalPopulation ? `${(totalPopulation / 1000).toFixed(0)}K pop` : `${totalShipments} shipments`}
+                {totalPopulation ? t('hc.regional_equity_treemap.pop_k', { value: (totalPopulation / 1000).toFixed(0) }) : t('hc.regional_equity_treemap.shipments_count', { count: totalShipments })}
               </text>
             )}
           </>
@@ -191,18 +191,18 @@ export function RegionalEquityTreemap({ data, scenarioInfo, globalWarningThresho
         <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3">
           <p className="font-semibold text-gray-900">{data.name}</p>
           <p className="text-sm text-gray-600">
-            Compliance: <span className="font-medium">{(data.actualPercentage || 0).toFixed(1)}%</span>
+            {t('hc.regional_equity_treemap.compliance')}: <span className="font-medium">{(data.actualPercentage || 0).toFixed(1)}%</span>
           </p>
           {data.totalPopulation && (
             <p className="text-sm text-gray-600">
-              Population: <span className="font-medium">{data.totalPopulation.toLocaleString()}</span>
+              {t('hc.regional_equity_treemap.population')}: <span className="font-medium">{data.totalPopulation.toLocaleString()}</span>
             </p>
           )}
           <p className="text-sm text-gray-600">
-            Shipments: <span className="font-medium">{data.totalShipments}</span>
+            {t('hc.regional_equity_treemap.shipments')}: <span className="font-medium">{data.totalShipments}</span>
           </p>
           <p className="text-sm">
-            Status:{' '}
+            {t('hc.regional_equity_treemap.status')}:{' '}
             <span className={`font-medium ${
               data.status === 'compliant' ? 'text-green-600' :
               data.status === 'warning' ? 'text-amber-600' :
@@ -222,7 +222,7 @@ export function RegionalEquityTreemap({ data, scenarioInfo, globalWarningThresho
   if (!data || data.length === 0) {
     return (
       <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
-        <p className="text-gray-500">No data available for treemap</p>
+        <p className="text-gray-500">{t('hc.regional_equity_treemap.no_data')}</p>
       </div>
     );
   }

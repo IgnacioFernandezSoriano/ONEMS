@@ -114,7 +114,7 @@ export default function StockAlertsTab({ onNavigateToRegulatorStock, onNavigateT
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-gray-500">Loading alerts...</div>
+        <div className="text-gray-500">{t('hc.stock_alerts_tab.loading')}</div>
       </div>
     )
   }
@@ -132,7 +132,7 @@ export default function StockAlertsTab({ onNavigateToRegulatorStock, onNavigateT
               className="ml-auto text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1"
             >
               <X className="h-3 w-3" />
-              Clear filters
+              {t('hc.stock_alerts_tab.clear_filters')}
             </button>
           )}
         </div>
@@ -147,8 +147,8 @@ export default function StockAlertsTab({ onNavigateToRegulatorStock, onNavigateT
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">{t('stock.all_types')}</option>
-              <option value="regulator_insufficient">Regulator Insufficient</option>
-              <option value="panelist_negative">Panelist Negative</option>
+              <option value="regulator_insufficient">{t('hc.stock_alerts_tab.regulator_insufficient')}</option>
+              <option value="panelist_negative">{t('hc.stock_alerts_tab.panelist_negative')}</option>
             </select>
           </div>
 
@@ -220,7 +220,7 @@ export default function StockAlertsTab({ onNavigateToRegulatorStock, onNavigateT
                     onClick={() => handleSort('alert_type')}
                   >
                     <div className="flex items-center gap-1">
-                      Type
+                      {t('hc.stock_alerts_tab.col_type')}
                       <SortIcon field="alert_type" />
                     </div>
                   </th>
@@ -230,7 +230,7 @@ export default function StockAlertsTab({ onNavigateToRegulatorStock, onNavigateT
                     onClick={() => handleSort('material_name')}
                   >
                     <div className="flex items-center gap-1">
-                      Material
+                      {t('hc.stock_alerts_tab.col_material')}
                       <SortIcon field="material_name" />
                     </div>
                   </th>
@@ -240,7 +240,7 @@ export default function StockAlertsTab({ onNavigateToRegulatorStock, onNavigateT
                     onClick={() => handleSort('panelist_name')}
                   >
                     <div className="flex items-center gap-1">
-                      Location
+                      {t('hc.stock_alerts_tab.col_location')}
                       <SortIcon field="panelist_name" />
                     </div>
                   </th>
@@ -250,7 +250,7 @@ export default function StockAlertsTab({ onNavigateToRegulatorStock, onNavigateT
                     onClick={() => handleSort('current_quantity')}
                   >
                     <div className="flex items-center justify-end gap-1">
-                      Current Stock
+                      {t('hc.stock_alerts_tab.col_current_stock')}
                       <SortIcon field="current_quantity" />
                     </div>
                   </th>
@@ -258,7 +258,7 @@ export default function StockAlertsTab({ onNavigateToRegulatorStock, onNavigateT
                     scope="col"
                     className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    Expected
+                    {t('hc.stock_alerts_tab.col_expected')}
                   </th>
                   <th
                     scope="col"
@@ -266,12 +266,12 @@ export default function StockAlertsTab({ onNavigateToRegulatorStock, onNavigateT
                     onClick={() => handleSort('created_at')}
                   >
                     <div className="flex items-center gap-1">
-                      Date
+                      {t('hc.stock_alerts_tab.col_date')}
                       <SortIcon field="created_at" />
                     </div>
                   </th>
                   <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Notes
+                    {t('hc.stock_alerts_tab.col_notes')}
                   </th>
                 </tr>
               </thead>
@@ -291,7 +291,7 @@ export default function StockAlertsTab({ onNavigateToRegulatorStock, onNavigateT
                           }`}
                         />
                         <span className="text-sm font-medium text-gray-900">
-                          {alert.alert_type === 'regulator_insufficient' ? 'Regulator Insufficient' : 'Panelist Negative'}
+                          {alert.alert_type === 'regulator_insufficient' ? t('hc.stock_alerts_tab.regulator_insufficient') : t('hc.stock_alerts_tab.panelist_negative')}
                         </span>
                       </div>
                     </td>
@@ -302,8 +302,8 @@ export default function StockAlertsTab({ onNavigateToRegulatorStock, onNavigateT
                     <td className="px-4 py-3 whitespace-nowrap">
                       <span className="text-sm text-gray-900">
                         {alert.alert_type === 'regulator_insufficient' 
-                          ? 'Regulator' 
-                          : (alert.panelist_name || <span className="text-red-600 italic">Unknown Panelist</span>)
+                          ? t('hc.stock_alerts_tab.regulator') 
+                          : (alert.panelist_name || <span className="text-red-600 italic">{t('hc.stock_alerts_tab.unknown_panelist')}</span>)
                         }
                       </span>
                     </td>
@@ -330,7 +330,7 @@ export default function StockAlertsTab({ onNavigateToRegulatorStock, onNavigateT
                       <div className="text-xs max-w-md">
                         {alert.alert_type === 'panelist_negative' && !alert.panelist_name && (
                           <div className="text-red-600 font-medium mb-1">
-                            ⚠️ ERROR: Panelist information missing (location_id: {alert.location_id || 'null'})
+                            {t('hc.stock_alerts_tab.panelist_info_missing', { location: alert.location_id || 'null' })}
                           </div>
                         )}
                         <div className="text-gray-600 truncate" title={alert.notes || ''}>

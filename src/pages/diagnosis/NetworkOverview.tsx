@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAccount } from '@/contexts/AccountContext';
 import { useTimeUnit } from '@/hooks/useTimeUnit';
+import { useTranslation } from '@/hooks/useTranslation';
 import { TimeUnitToggle } from '@/components/common/TimeUnitToggle';
 import { formatDuration } from '@/lib/accountTime';
 import { supabase } from '../../lib/supabase';
@@ -35,6 +36,7 @@ interface CenterPerformance {
 }
 
 export default function NetworkOverview() {
+  const { t } = useTranslation();
   const { effectiveAccountId } = useAccount();
   const { unit } = useTimeUnit();
   const [loading, setLoading] = useState(true);
@@ -108,7 +110,7 @@ export default function NetworkOverview() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <span className="ml-3 text-gray-600">Loading network overview...</span>
+        <span className="ml-3 text-gray-600">{t('hc.network_overview.loading')}</span>
       </div>
     );
   }
@@ -118,7 +120,7 @@ export default function NetworkOverview() {
       <div className="bg-red-50 border border-red-200 rounded-lg p-4">
         <div className="flex items-center">
           <AlertCircle className="h-5 w-5 text-red-600 mr-2" />
-          <span className="text-red-800">Error loading data: {error}</span>
+          <span className="text-red-800">{t('hc.network_overview.error_loading', { message: error })}</span>
         </div>
       </div>
     );
@@ -130,8 +132,8 @@ export default function NetworkOverview() {
         <div className="flex items-center">
           <Info className="h-5 w-5 text-yellow-600 mr-2" />
           <div>
-            <p className="font-medium text-yellow-800">No data available</p>
-            <p className="text-sm text-yellow-700">No journey data found for this account. Please ensure data has been ingested.</p>
+            <p className="font-medium text-yellow-800">{t('hc.network_overview.no_data')}</p>
+            <p className="text-sm text-yellow-700">{t('hc.network_overview.no_journey_data')}</p>
           </div>
         </div>
       </div>
@@ -146,28 +148,28 @@ export default function NetworkOverview() {
   // Calculate health score breakdown
   const dataQualityScore = 100; // Assuming 100% for now
   const breakdown = [
-    { label: 'On-time Delivery', weight: 40, value: onTimeRate, contribution: (onTimeRate * 0.4).toFixed(1) },
-    { label: 'Transit Time', weight: 30, value: Math.max(0, 100 - (avgTransit * 10)), contribution: (Math.max(0, 100 - (avgTransit * 10)) * 0.3).toFixed(1) },
-    { label: 'Processing Time', weight: 20, value: Math.max(0, 100 - (avgProcessing * 20)), contribution: (Math.max(0, 100 - (avgProcessing * 20)) * 0.2).toFixed(1) },
-    { label: 'Data Quality', weight: 10, value: dataQualityScore, contribution: (dataQualityScore * 0.1).toFixed(1) }
+    { label: t('hc.network_overview.on_time_delivery'), weight: 40, value: onTimeRate, contribution: (onTimeRate * 0.4).toFixed(1) },
+    { label: t('hc.network_overview.transit_time'), weight: 30, value: Math.max(0, 100 - (avgTransit * 10)), contribution: (Math.max(0, 100 - (avgTransit * 10)) * 0.3).toFixed(1) },
+    { label: t('hc.network_overview.processing_time'), weight: 20, value: Math.max(0, 100 - (avgProcessing * 20)), contribution: (Math.max(0, 100 - (avgProcessing * 20)) * 0.2).toFixed(1) },
+    { label: t('hc.network_overview.data_quality'), weight: 10, value: dataQualityScore, contribution: (dataQualityScore * 0.1).toFixed(1) }
   ];
 
   // Generate automatic findings
   const findings = [];
   if (onTimeRate >= 95) {
-    findings.push({ type: 'success', text: `Excellent on-time performance at ${onTimeRate.toFixed(1)}%, exceeding industry standards.` });
+    findings.push({ type: 'success', text: t('hc.network_overview.finding_excellent', { rate: onTimeRate.toFixed(1) }) });
   } else if (onTimeRate < 80) {
-    findings.push({ type: 'warning', text: `On-time delivery rate of ${onTimeRate.toFixed(1)}% is below target. Investigation recommended.` });
+    findings.push({ type: 'warning', text: t('hc.network_overview.finding_below_target', { rate: onTimeRate.toFixed(1) }) });
   }
 
   if (healthData.total_sla_violations === 0) {
-    findings.push({ type: 'success', text: 'Zero SLA violations recorded across all routes.' });
+    findings.push({ type: 'success', text: t('hc.network_overview.finding_zero_sla') });
   } else if (healthData.total_sla_violations > 10) {
-    findings.push({ type: 'warning', text: `${healthData.total_sla_violations} SLA violations detected. Review affected routes.` });
+    findings.push({ type: 'warning', text: t('hc.network_overview.finding_sla_violations', { count: healthData.total_sla_violations }) });
   }
 
   if (avgTransit < 1) {
-    findings.push({ type: 'success', text: `Average transit time of ${formatDuration(avgTransit, unit)} indicates efficient network operations.` });
+    findings.push({ type: 'success', text: t('hc.network_overview.finding_avg_transit', { time: formatDuration(avgTransit, unit) }) });
   }
 
   const topRoutes = routes.filter(r => r.rank_type === 'top');
@@ -182,11 +184,11 @@ export default function NetworkOverview() {
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-gray-900 flex items-center">
             <Activity className="h-6 w-6 mr-2 text-blue-600" />
-            Network Overview
+            {t('hc.network_overview.title')}
           </h1>
           <TimeUnitToggle />
         </div>
-        <p className="text-gray-600 mt-1">Comprehensive health assessment of the postal network</p>
+        <p className="text-gray-600 mt-1">{t('hc.network_overview.subtitle')}</p>
       </div>
 
       {/* Health Score */}
@@ -195,24 +197,24 @@ export default function NetworkOverview() {
           <div>
             <h2 className="text-lg font-semibold text-gray-900 flex items-center">
               <Activity className="h-5 w-5 mr-2 text-green-600" />
-              Network Health Score
+              {t('hc.network_overview.health_score')}
             </h2>
-            <p className="text-sm text-gray-600 mt-1">Weighted average of key performance indicators</p>
+            <p className="text-sm text-gray-600 mt-1">{t('hc.network_overview.health_score_desc')}</p>
           </div>
           <div className="text-right">
             <div className="text-5xl font-bold text-green-600">{healthScore.toFixed(1)}</div>
-            <div className="text-sm text-gray-500">out of 100</div>
+            <div className="text-sm text-gray-500">{t('hc.network_overview.out_of_100')}</div>
           </div>
         </div>
 
         {/* Health Score Breakdown */}
         <div className="mt-6 space-y-3">
-          <h3 className="text-sm font-medium text-gray-700">Score Breakdown</h3>
+          <h3 className="text-sm font-medium text-gray-700">{t('hc.network_overview.score_breakdown')}</h3>
           {breakdown.map((item, idx) => (
             <div key={idx} className="bg-white rounded-lg p-3 border border-gray-200">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">{item.label}</span>
-                <span className="text-xs text-gray-500">Weight: {item.weight}%</span>
+                <span className="text-xs text-gray-500">{t('hc.network_overview.weight', { weight: item.weight })}</span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex-1 mr-4">
@@ -225,7 +227,7 @@ export default function NetworkOverview() {
                 </div>
                 <div className="text-right">
                   <div className="text-sm font-semibold text-gray-900">{item.value.toFixed(1)}%</div>
-                  <div className="text-xs text-gray-500">+{item.contribution} pts</div>
+                  <div className="text-xs text-gray-500">{t('hc.network_overview.points', { value: item.contribution })}</div>
                 </div>
               </div>
             </div>
@@ -237,38 +239,38 @@ export default function NetworkOverview() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <KPICard
           icon="📈"
-          title="On-time Delivery"
+          title={t('hc.network_overview.on_time_delivery')}
           value={`${onTimeRate.toFixed(1)}%`}
-          subtitle={`${healthData.total_items} items`}
-          tooltip="Percentage of journeys completed without SLA violations. Calculated as: (journeys with 0 SLA violations / total journeys) × 100. Higher is better."
+          subtitle={t('hc.network_overview.items_count', { count: healthData.total_items })}
+          tooltip={t('hc.network_overview.tip_on_time')}
         />
         <KPICard
           icon="⏱️"
-          title="Avg Transit Time"
+          title={t('hc.network_overview.avg_transit')}
           value={`${formatDuration(avgTransit, unit)}`}
-          subtitle={`${healthData.total_routes} routes`}
-          tooltip="Average end-to-end transit time across all completed journeys. Calculated from first event to last event timestamp. Lower is better."
+          subtitle={t('hc.network_overview.routes_count', { count: healthData.total_routes })}
+          tooltip={t('hc.network_overview.tip_avg_transit')}
         />
         <KPICard
           icon="🏢"
-          title="Avg Processing Time"
+          title={t('hc.network_overview.avg_processing')}
           value={`${formatDuration(avgProcessing, unit)}`}
-          subtitle={`${healthData.total_centers} centers`}
-          tooltip="Average time items spend at postal centers for processing. Calculated from processing segments only. Lower indicates faster operations."
+          subtitle={t('hc.network_overview.centers_count', { count: healthData.total_centers })}
+          tooltip={t('hc.network_overview.tip_avg_processing')}
         />
         <KPICard
           icon="✅"
-          title="Data Quality"
+          title={t('hc.network_overview.data_quality')}
           value="100.0%"
-          subtitle="Data completeness"
-          tooltip="Percentage of complete and valid data records. Based on presence of required fields and data consistency checks."
+          subtitle={t('hc.network_overview.data_completeness')}
+          tooltip={t('hc.network_overview.tip_data_quality')}
         />
       </div>
 
       {/* Automatic Findings */}
       {findings.length > 0 && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h3 className="text-sm font-semibold text-blue-900 mb-3">Automatic Findings</h3>
+          <h3 className="text-sm font-semibold text-blue-900 mb-3">{t('hc.network_overview.auto_findings')}</h3>
           <div className="space-y-2">
             {findings.map((finding, idx) => (
               <div key={idx} className={`flex items-start p-2 rounded ${
@@ -284,12 +286,12 @@ export default function NetworkOverview() {
 
       {/* Network Summary */}
       <div className="bg-white border border-gray-200 rounded-lg p-4">
-        <h3 className="text-sm font-semibold text-gray-900 mb-4">Network Summary</h3>
+        <h3 className="text-sm font-semibold text-gray-900 mb-4">{t('hc.network_overview.network_summary')}</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <SummaryItem label="Total Items" value={healthData.total_items} />
-          <SummaryItem label="Active Routes" value={healthData.total_routes} />
-          <SummaryItem label="Postal Centers" value={healthData.total_centers} />
-          <SummaryItem label="SLA Violations" value={healthData.total_sla_violations} highlight={healthData.total_sla_violations > 0} />
+          <SummaryItem label={t('hc.network_overview.total_items')} value={healthData.total_items} />
+          <SummaryItem label={t('hc.network_overview.active_routes')} value={healthData.total_routes} />
+          <SummaryItem label={t('hc.network_overview.postal_centers')} value={healthData.total_centers} />
+          <SummaryItem label={t('hc.network_overview.sla_violations')} value={healthData.total_sla_violations} highlight={healthData.total_sla_violations > 0} />
         </div>
       </div>
 
@@ -297,13 +299,13 @@ export default function NetworkOverview() {
       {routes.length > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <PerformanceTable
-            title="Top 5 Routes"
+            title={t('hc.network_overview.top5_routes')}
             icon={<TrendingUp className="h-5 w-5 text-green-600" />}
             data={topRoutes}
             type="route"
           />
           <PerformanceTable
-            title="Bottom 5 Routes"
+            title={t('hc.network_overview.bottom5_routes')}
             icon={<TrendingDown className="h-5 w-5 text-red-600" />}
             data={bottomRoutes}
             type="route"
@@ -315,13 +317,13 @@ export default function NetworkOverview() {
       {centers.length > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <PerformanceTable
-            title="Top 5 Centers"
+            title={t('hc.network_overview.top5_centers')}
             icon={<TrendingUp className="h-5 w-5 text-green-600" />}
             data={topCenters}
             type="center"
           />
           <PerformanceTable
-            title="Bottom 5 Centers"
+            title={t('hc.network_overview.bottom5_centers')}
             icon={<TrendingDown className="h-5 w-5 text-red-600" />}
             data={bottomCenters}
             type="center"
@@ -362,6 +364,7 @@ function SummaryItem({ label, value, highlight }: any) {
 }
 
 function PerformanceTable({ title, icon, data, type }: any) {
+  const { t } = useTranslation();
   const { unit } = useTimeUnit();
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-4">
@@ -375,17 +378,17 @@ function PerformanceTable({ title, icon, data, type }: any) {
             <tr className="border-b border-gray-200">
               {type === 'route' ? (
                 <>
-                  <th className="text-left py-2 px-2 font-medium text-gray-700">Route</th>
-                  <th className="text-right py-2 px-2 font-medium text-gray-700">Items</th>
-                  <th className="text-right py-2 px-2 font-medium text-gray-700">On-time</th>
-                  <th className="text-right py-2 px-2 font-medium text-gray-700">Avg Time</th>
+                  <th className="text-left py-2 px-2 font-medium text-gray-700">{t('hc.network_overview.col_route')}</th>
+                  <th className="text-right py-2 px-2 font-medium text-gray-700">{t('hc.network_overview.col_items')}</th>
+                  <th className="text-right py-2 px-2 font-medium text-gray-700">{t('hc.network_overview.col_on_time')}</th>
+                  <th className="text-right py-2 px-2 font-medium text-gray-700">{t('hc.network_overview.col_avg_time')}</th>
                 </>
               ) : (
                 <>
-                  <th className="text-left py-2 px-2 font-medium text-gray-700">Center</th>
-                  <th className="text-right py-2 px-2 font-medium text-gray-700">Items</th>
-                  <th className="text-right py-2 px-2 font-medium text-gray-700">On-time</th>
-                  <th className="text-right py-2 px-2 font-medium text-gray-700">Proc Time</th>
+                  <th className="text-left py-2 px-2 font-medium text-gray-700">{t('hc.network_overview.col_center')}</th>
+                  <th className="text-right py-2 px-2 font-medium text-gray-700">{t('hc.network_overview.col_items')}</th>
+                  <th className="text-right py-2 px-2 font-medium text-gray-700">{t('hc.network_overview.col_on_time')}</th>
+                  <th className="text-right py-2 px-2 font-medium text-gray-700">{t('hc.network_overview.col_proc_time')}</th>
                 </>
               )}
             </tr>

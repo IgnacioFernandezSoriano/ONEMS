@@ -3,6 +3,7 @@ import { ColumnTooltip } from './ColumnTooltip';
 import { formatNumber } from '@/lib/formatNumber';
 import type { TimeUnit } from '@/lib/accountTime';
 import { formatJK } from '@/lib/transitMeasure';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface CarrierProductData {
   carrier: string;
@@ -27,15 +28,17 @@ interface CarrierProductOverviewProps {
 }
 
 export default function CarrierProductOverview({ data, loading, globalWarningThreshold, globalCriticalThreshold, displayUnit = 'hours' }: CarrierProductOverviewProps) {
+  const { t } = useTranslation();
+
   if (loading) {
     return (
-      <div className="text-center text-gray-500 py-8">Loading...</div>
+      <div className="text-center text-gray-500 py-8">{t('hc.carrier_product_overview.loading')}</div>
     );
   }
 
   if (data.length === 0) {
     return (
-      <div className="text-center text-gray-500 py-8">No data available</div>
+      <div className="text-center text-gray-500 py-8">{t('hc.carrier_product_overview.no_data')}</div>
     );
   }
 
@@ -48,31 +51,31 @@ export default function CarrierProductOverview({ data, loading, globalWarningThr
         <thead className="bg-gray-50">
           <tr>
             <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-              <div className="flex items-center gap-1">Carrier / Product <ColumnTooltip content="Carrier and product combination for delivery service." /></div>
+              <div className="flex items-center gap-1">{t('hc.carrier_product_overview.carrier_product')} <ColumnTooltip content={t('hc.carrier_product_overview.carrier_product_tip')} /></div>
             </th>
             <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-              <div className="flex items-center gap-1">Routes <ColumnTooltip content="Number of unique routes (city pairs) served by this carrier-product combination." /></div>
+              <div className="flex items-center gap-1">{t('hc.carrier_product_overview.routes')} <ColumnTooltip content={t('hc.carrier_product_overview.routes_tip')} /></div>
             </th>
             <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-              <div className="flex items-center gap-1">Samples <ColumnTooltip content="Total shipments for this carrier-product combination across all routes." /></div>
+              <div className="flex items-center gap-1">{t('hc.carrier_product_overview.samples')} <ColumnTooltip content={t('hc.carrier_product_overview.samples_tip')} /></div>
             </th>
             <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-              <div className="flex items-center gap-1">J+K Std <ColumnTooltip content="Weighted average of J+K standards across all routes for this carrier-product combination." /></div>
+              <div className="flex items-center gap-1">{t('hc.carrier_product_overview.jk_std')} <ColumnTooltip content={t('hc.carrier_product_overview.jk_std_tip')} /></div>
             </th>
             <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-              <div className="flex items-center gap-1">J+K Actual <ColumnTooltip content="Weighted average of actual transit times across all routes for this carrier-product combination." /></div>
+              <div className="flex items-center gap-1">{t('hc.carrier_product_overview.jk_actual')} <ColumnTooltip content={t('hc.carrier_product_overview.jk_actual_tip')} /></div>
             </th>
             <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-              <div className="flex items-center gap-1">Deviation <ColumnTooltip content="Weighted average deviation (Actual - Standard) across all routes for this carrier-product combination." /></div>
+              <div className="flex items-center gap-1">{t('hc.carrier_product_overview.deviation')} <ColumnTooltip content={t('hc.carrier_product_overview.deviation_tip')} /></div>
             </th>
             <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-              <div className="flex items-center gap-1">On-Time % <ColumnTooltip content="Percentage of all shipments delivered on-time for this carrier-product combination." /></div>
+              <div className="flex items-center gap-1">{t('hc.carrier_product_overview.on_time_pct')} <ColumnTooltip content={t('hc.carrier_product_overview.on_time_pct_tip')} /></div>
             </th>
             <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-              <div className="flex items-center gap-1">Problem Routes <ColumnTooltip content="Number of routes with on-time performance <90%." /></div>
+              <div className="flex items-center gap-1">{t('hc.carrier_product_overview.problem_routes')} <ColumnTooltip content={t('hc.carrier_product_overview.problem_routes_tip')} /></div>
             </th>
             <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-              <div className="flex items-center gap-1">Status <ColumnTooltip content="Visual indicator: Green (≥95%), Yellow (90-95%), Red (<90%)." /></div>
+              <div className="flex items-center gap-1">{t('hc.carrier_product_overview.status')} <ColumnTooltip content={t('hc.carrier_product_overview.status_tip')} /></div>
             </th>
           </tr>
         </thead>

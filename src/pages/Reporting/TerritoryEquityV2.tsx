@@ -219,7 +219,7 @@ export default function TerritoryEquity() {
 
       if (error) throw error;
       if (!data || data.length === 0) {
-        alert('No samples found for the selected filters');
+        alert(t('hc.territory_equity_v2.no_samples_found'));
         return;
       }
 
@@ -266,7 +266,7 @@ export default function TerritoryEquity() {
       URL.revokeObjectURL(url);
     } catch (err) {
       console.error('Error exporting raw samples:', err);
-      alert('Failed to export raw samples');
+      alert(t('hc.territory_equity_v2.export_raw_failed'));
     }
   };
 
@@ -615,7 +615,7 @@ export default function TerritoryEquity() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-lg text-gray-600">Loading territory equity data...</div>
+        <div className="text-lg text-gray-600">{t('hc.territory_equity_v2.loading')}</div>
       </div>
     );
   }
@@ -623,7 +623,7 @@ export default function TerritoryEquity() {
   if (error) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-lg text-red-600">Error loading data: {error.message}</div>
+        <div className="text-lg text-red-600">{t('hc.territory_equity_v2.error_loading', { message: error.message })}</div>
       </div>
     );
   }
@@ -636,22 +636,22 @@ export default function TerritoryEquity() {
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="text-3xl font-bold text-gray-900">
               {scenarioInfo.isRouteView
-                ? `Route Analysis: ${scenarioInfo.originCityName} → ${scenarioInfo.destinationCityName}`
+                ? t('hc.territory_equity_v2.title_route', { origin: scenarioInfo.originCityName, destination: scenarioInfo.destinationCityName })
                 : scenarioInfo.isOriginView
-                ? `Territory Equity Report: Outbound from ${scenarioInfo.originCityName}`
+                ? t('hc.territory_equity_v2.title_outbound', { city: scenarioInfo.originCityName })
                 : scenarioInfo.isDestinationView
-                ? `Territory Equity Report: Inbound to ${scenarioInfo.destinationCityName}`
+                ? t('hc.territory_equity_v2.title_inbound', { city: scenarioInfo.destinationCityName })
                 : t('reporting.territory_equity_report')}
             </h1>
             <TimeUnitToggle />
           </div>
           <p className="text-gray-600 mt-1">
             {scenarioInfo.isRouteView
-              ? `Detailed performance analysis for the route from ${scenarioInfo.originCityName} to ${scenarioInfo.destinationCityName}`
+              ? t('hc.territory_equity_v2.sub_route', { origin: scenarioInfo.originCityName, destination: scenarioInfo.destinationCityName })
               : scenarioInfo.isOriginView
-              ? `Analyze outbound service equity from ${scenarioInfo.originCityName} to all destinations`
+              ? t('hc.territory_equity_v2.sub_outbound', { city: scenarioInfo.originCityName })
               : scenarioInfo.isDestinationView
-              ? `Analyze inbound service equity to ${scenarioInfo.destinationCityName} from all origins`
+              ? t('hc.territory_equity_v2.sub_inbound', { city: scenarioInfo.destinationCityName })
               : t('reporting.analyze_service_equity_across_cities_and_regions')}
           </p>
         </div>
@@ -659,10 +659,10 @@ export default function TerritoryEquity() {
           <button
             onClick={handleExportRawSamples}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            title="Export raw samples from ONE DB (for validation)"
+            title={t('hc.territory_equity_v2.export_raw_title')}
           >
             <Download className="w-4 h-4" />
-            Export Raw Data
+            {t('hc.territory_equity_v2.export_raw')}
           </button>
           <button
             onClick={handleExportAuditReport}
@@ -714,7 +714,7 @@ export default function TerritoryEquity() {
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-gray-600">
-              {scenarioInfo.isRouteView ? 'Route Compliance' : t('reporting.population_weighted_compliance')}
+              {scenarioInfo.isRouteView ? t('hc.territory_equity_v2.route_compliance') : t('reporting.population_weighted_compliance')}
             </h3>
             <SmartTooltip content={tooltips.populationWeightedCompliance} />
           </div>
@@ -808,7 +808,7 @@ export default function TerritoryEquity() {
               </div>
             ))}
             {(!metrics?.topBestCities || metrics.topBestCities.length === 0) && (
-              <div className="text-sm text-gray-500 text-center py-2">No data</div>
+              <div className="text-sm text-gray-500 text-center py-2">{t('hc.territory_equity_v2.no_data')}</div>
             )}
           </div>
         </div>
@@ -911,7 +911,7 @@ export default function TerritoryEquity() {
                 }`}
               >
                 <TrendingUp className="w-4 h-4" />
-                J+K Performance
+                {t('hc.territory_equity_v2.jk_performance')}
             </button>
           </div>
         </div>
@@ -1032,18 +1032,18 @@ export default function TerritoryEquity() {
             <div className="space-y-6">
               {loading ? (
                 <div className="flex items-center justify-center h-64">
-                  <div className="text-gray-500">Loading J+K Performance data...</div>
+                  <div className="text-gray-500">{t('hc.territory_equity_v2.loading_jk')}</div>
                 </div>
               ) : error ? (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                  <p className="text-red-800">Error loading J+K Performance data</p>
+                  <p className="text-red-800">{t('hc.territory_equity_v2.error_loading_jk')}</p>
                 </div>
               ) : (
                 <>
                   {/* KPI Cards */}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <KPICard
-                      title="Total Samples"
+                      title={t('hc.territory_equity_v2.kpi_total_samples')}
                       value={jkMetrics?.totalSamples?.toLocaleString() || '0'}
                       icon={Package}
                       trend="neutral"
@@ -1051,7 +1051,7 @@ export default function TerritoryEquity() {
                       color="blue"
                     />
                     <KPICard
-                      title="Avg J+K Actual"
+                      title={t('hc.territory_equity_v2.kpi_avg_actual')}
                       value={jkMetrics ? fmtJKU(jkMetrics.avgJKActual, jkMetrics.unit) : '-'}
                       icon={Clock}
                       trend="neutral"
@@ -1059,7 +1059,7 @@ export default function TerritoryEquity() {
                       color="indigo"
                     />
                     <KPICard
-                      title="Avg J+K Standard"
+                      title={t('hc.territory_equity_v2.kpi_avg_standard')}
                       value={jkMetrics ? fmtJKU(jkMetrics.avgJKStandard, jkMetrics.unit) : '-'}
                       icon={Clock}
                       trend="neutral"
@@ -1067,7 +1067,7 @@ export default function TerritoryEquity() {
                       color="purple"
                     />
                     <KPICard
-                      title="On-Time Performance"
+                      title={t('hc.territory_equity_v2.kpi_ontime')}
                       value={`${jkMetrics?.onTimePercentage?.toFixed(1) || '0'}%`}
                       icon={CheckCircle}
                       trend={(jkMetrics?.onTimePercentage ?? 0) >= 85 ? 'up' : (jkMetrics?.onTimePercentage ?? 0) >= 75 ? 'neutral' : 'down'}
@@ -1078,7 +1078,7 @@ export default function TerritoryEquity() {
 
                   {/* Performance Distribution Chart */}
                   <div className="bg-white rounded-lg border p-6">
-                    <h3 className="text-lg font-semibold mb-4">Performance Distribution</h3>
+                    <h3 className="text-lg font-semibold mb-4">{t('hc.territory_equity_v2.perf_distribution')}</h3>
                     {hasHoursRoutes && hasDaysRoutes && (
                       <div role="group" className="inline-flex mb-3">
                         {(['hours', 'days'] as TimeUnit[]).map(u => (
@@ -1106,7 +1106,7 @@ export default function TerritoryEquity() {
 
                   {/* Cumulative Distribution Chart */}
                   <div className="bg-white rounded-lg border p-6">
-                    <h3 className="text-lg font-semibold mb-4">Cumulative Distribution</h3>
+                    <h3 className="text-lg font-semibold mb-4">{t('hc.territory_equity_v2.cum_distribution')}</h3>
                     <CumulativeDistributionChartV2
                       routes={chartRoutes}
                       maxDays={jkMaxDays}
@@ -1117,7 +1117,7 @@ export default function TerritoryEquity() {
 
                   {/* Route Performance Table */}
                   <div className="bg-white rounded-lg border p-6">
-                    <h3 className="text-lg font-semibold mb-4">Route Performance</h3>
+                    <h3 className="text-lg font-semibold mb-4">{t('hc.territory_equity_v2.route_performance')}</h3>
                     <RoutePerformanceTableV2
                       data={adaptedRouteData}
                     />

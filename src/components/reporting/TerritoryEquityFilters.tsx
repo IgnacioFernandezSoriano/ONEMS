@@ -162,7 +162,7 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
             className="p-1 hover:bg-gray-100 rounded transition-colors"
-            title={isCollapsed ? "Expand filters" : "Collapse filters"}
+            title={isCollapsed ? t('hc.territory_equity_filters.expand_filters') : t('hc.territory_equity_filters.collapse_filters')}
           >
             {isCollapsed ? (
               <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -176,15 +176,15 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
           </button>
           <Filter className="w-5 h-5 text-gray-600" />
           <h3 className="text-lg font-semibold text-gray-900">{t('stock.filters')}</h3>
-          <SmartTooltip content="Filter the Territory Performance Report by date range, carrier, product, region, direction (inbound/outbound), or equity status. All filters are optional." />
+          <SmartTooltip content={t('hc.territory_equity_filters.filters_tip')} />
         </div>
         <button
           onClick={handleReset}
           className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-          title="Reset all filters"
+          title={t('hc.territory_equity_filters.reset_all_filters')}
         >
           <RotateCcw className="w-4 h-4" />
-          Reset
+          {t('hc.territory_equity_filters.reset')}
         </button>
       </div>
       
@@ -195,8 +195,8 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             <Calendar className="w-4 h-4 inline mr-1" />
-            Start Date
-            <SmartTooltip content="Filter shipments sent on or after this date. Leave empty to include all historical data." />
+            {t('hc.territory_equity_filters.start_date')}
+            <SmartTooltip content={t('hc.territory_equity_filters.start_date_tip')} />
           </label>
           <input
             type="date"
@@ -210,8 +210,8 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             <Calendar className="w-4 h-4 inline mr-1" />
-            End Date
-            <SmartTooltip content="Filter shipments sent on or before this date. Leave empty to include data up to today." />
+            {t('hc.territory_equity_filters.end_date')}
+            <SmartTooltip content={t('hc.territory_equity_filters.end_date_tip')} />
           </label>
           <input
             type="date"
@@ -224,8 +224,8 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
         {/* Carrier */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Carrier
-            <SmartTooltip content="Filter by specific carrier (e.g., DHL). Shows only shipments handled by the selected carrier." />
+            {t('hc.territory_equity_filters.carrier')}
+            <SmartTooltip content={t('hc.territory_equity_filters.carrier_tip')} />
           </label>
           <select
             value={filters.carrier || ''}
@@ -233,7 +233,7 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             disabled={loading}
           >
-            <option value="">All Carriers</option>
+            <option value="">{t('hc.territory_equity_filters.all_carriers')}</option>
             {carriers.map(carrier => (
               <option key={carrier} value={carrier}>{carrier}</option>
             ))}
@@ -243,8 +243,8 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
         {/* Product */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Product
-            <SmartTooltip content="Filter by service type (e.g., Express 24h). Shows only shipments using the selected product." />
+            {t('hc.territory_equity_filters.product')}
+            <SmartTooltip content={t('hc.territory_equity_filters.product_tip')} />
           </label>
           <select
             value={filters.product || ''}
@@ -252,7 +252,7 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             disabled={loading}
           >
-            <option value="">All Products</option>
+            <option value="">{t('hc.territory_equity_filters.all_products')}</option>
             {filteredProducts.map(product => (
               <option key={product} value={product}>{product}</option>
             ))}
@@ -263,8 +263,8 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             <MapPin className="w-4 h-4 inline mr-1" />
-            Origin City
-            <SmartTooltip content="Filter by origin city (where shipments depart from). Shows only shipments originating from the selected city." />
+            {t('hc.territory_equity_filters.origin_city')}
+            <SmartTooltip content={t('hc.territory_equity_filters.origin_city_tip')} />
           </label>
           <select
             value={filters.originCity || ''}
@@ -272,7 +272,7 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             disabled={loading}
           >
-            <option value="">All Origins</option>
+            <option value="">{t('hc.territory_equity_filters.all_origins')}</option>
             {originCities.map(city => (
               <option key={city} value={city}>{city}</option>
             ))}
@@ -283,8 +283,8 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             <MapPin className="w-4 h-4 inline mr-1" />
-            Destination City
-            <SmartTooltip content="Filter by destination city (where shipments arrive). Shows only shipments delivered to the selected city." />
+            {t('hc.territory_equity_filters.destination_city')}
+            <SmartTooltip content={t('hc.territory_equity_filters.destination_city_tip')} />
           </label>
           <select
             value={filters.destinationCity || ''}
@@ -292,7 +292,7 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             disabled={loading}
           >
-            <option value="">All Destinations</option>
+            <option value="">{t('hc.territory_equity_filters.all_destinations')}</option>
             {destinationCities.map(city => (
               <option key={city} value={city}>{city}</option>
             ))}

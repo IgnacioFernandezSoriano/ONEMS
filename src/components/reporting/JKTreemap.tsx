@@ -123,7 +123,7 @@ export function JKTreemap({
                 strokeWidth={0.5}
                 opacity={0.9}
               >
-                {(totalSamples || 0).toLocaleString()} samples
+                {t('hc.jk_treemap.samples_count', { count: (totalSamples || 0).toLocaleString() })}
               </text>
             )}
           </>
@@ -139,35 +139,35 @@ export function JKTreemap({
         <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3">
           <p className="font-semibold text-gray-900">{data.name}</p>
           <p className="text-sm text-gray-600">
-            On-Time: <span className="font-medium">{(data.onTimePercentage || 0).toFixed(1)}%</span>
+            {t('hc.jk_treemap.on_time')} <span className="font-medium">{(data.onTimePercentage || 0).toFixed(1)}%</span>
           </p>
           <p className="text-sm text-gray-600">
-            J+K Std: <span className="font-medium">{(data.jkStandard || 0).toFixed(1)} days</span>
+            {t('hc.jk_treemap.jk_std')} <span className="font-medium">{t('hc.jk_treemap.days_value', { value: (data.jkStandard || 0).toFixed(1) })}</span>
           </p>
           <p className="text-sm text-gray-600">
-            J+K Actual: <span className="font-medium">{(data.jkActual || 0).toFixed(1)} days</span>
+            {t('hc.jk_treemap.jk_actual')} <span className="font-medium">{t('hc.jk_treemap.days_value', { value: (data.jkActual || 0).toFixed(1) })}</span>
           </p>
           <p className="text-sm text-gray-600">
-            Deviation: <span className={`font-medium ${(data.deviation || 0) > 0 ? 'text-red-600' : 'text-green-600'}`}>
-              {(data.deviation || 0) > 0 ? '+' : ''}{(data.deviation || 0).toFixed(1)} days
+            {t('hc.jk_treemap.deviation')} <span className={`font-medium ${(data.deviation || 0) > 0 ? 'text-red-600' : 'text-green-600'}`}>
+              {(data.deviation || 0) > 0 ? '+' : ''}{t('hc.jk_treemap.days_value', { value: (data.deviation || 0).toFixed(1) })}
             </span>
           </p>
           <p className="text-sm text-gray-600">
-            Samples: <span className="font-medium">{(data.totalSamples || 0).toLocaleString()}</span>
+            {t('hc.jk_treemap.samples')} <span className="font-medium">{(data.totalSamples || 0).toLocaleString()}</span>
           </p>
           <p className="text-sm text-gray-600">
-            Routes: <span className="font-medium">{data.routes || 0}</span>
+            {t('hc.jk_treemap.routes')} <span className="font-medium">{data.routes || 0}</span>
           </p>
           <p className="text-sm">
-            Status:{' '}
+            {t('hc.jk_treemap.status')}{' '}
             <span className={`font-medium ${
               data.status === 'compliant' ? 'text-green-600' :
               data.status === 'warning' ? 'text-amber-600' :
               'text-red-600'
             }`}>
-              {data.status === 'compliant' ? '✅ Compliant' :
-               data.status === 'warning' ? '⚠️ Warning' :
-               '🔴 Critical'}
+              {data.status === 'compliant' ? t('hc.jk_treemap.status_compliant') :
+               data.status === 'warning' ? t('hc.jk_treemap.status_warning') :
+               t('hc.jk_treemap.status_critical')}
             </span>
           </p>
         </div>
@@ -179,7 +179,7 @@ export function JKTreemap({
   if (!filteredData || filteredData.length === 0) {
     return (
       <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
-        <p className="text-gray-500">No J+K data available for treemap</p>
+        <p className="text-gray-500">{t('hc.jk_treemap.no_data')}</p>
       </div>
     );
   }
@@ -193,7 +193,7 @@ export function JKTreemap({
       
       <div className="mb-4">
         <p className="text-sm text-gray-600">
-          City size represents number of samples. Color indicates J+K performance status.
+          {t('hc.jk_treemap.help')}
         </p>
       </div>
 
@@ -216,15 +216,15 @@ export function JKTreemap({
       <div className="mt-4 flex items-center justify-center gap-6 text-sm">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-          <span className="text-gray-700">Compliant</span>
+          <span className="text-gray-700">{t('hc.jk_treemap.legend_compliant')}</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
-          <span className="text-gray-700">Warning</span>
+          <span className="text-gray-700">{t('hc.jk_treemap.legend_warning')}</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-          <span className="text-gray-700">Critical</span>
+          <span className="text-gray-700">{t('hc.jk_treemap.legend_critical')}</span>
         </div>
       </div>
     </div>

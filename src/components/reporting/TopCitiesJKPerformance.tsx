@@ -2,6 +2,7 @@ import React from 'react';
 import { Award, AlertTriangle } from 'lucide-react';
 import type { JKCityData } from '@/hooks/reporting/useJKPerformance';
 import type { ScenarioInfo } from '@/hooks/reporting/useFilterScenario';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface TopCitiesJKPerformanceProps {
   data: JKCityData[];
@@ -9,6 +10,7 @@ interface TopCitiesJKPerformanceProps {
 }
 
 export function TopCitiesJKPerformance({ data, scenarioInfo }: TopCitiesJKPerformanceProps) {
+  const { t } = useTranslation();
   // Filter cities based on direction from scenario
   const filteredData = React.useMemo(() => {
     if (scenarioInfo.isOriginView) {
@@ -32,7 +34,7 @@ export function TopCitiesJKPerformance({ data, scenarioInfo }: TopCitiesJKPerfor
     return (
       <div className="bg-white rounded-lg shadow p-6">
         <div className="text-center py-4 text-gray-400">
-          No J+K performance data available
+          {t('hc.top_cities_jk_performance.no_jk_data')}
         </div>
       </div>
     );
@@ -40,22 +42,22 @@ export function TopCitiesJKPerformance({ data, scenarioInfo }: TopCitiesJKPerfor
 
   return (
     <div className="bg-white rounded-lg shadow p-6">
-      <h3 className="text-lg font-semibold mb-4">Top Cities J+K Performance</h3>
+      <h3 className="text-lg font-semibold mb-4">{t('hc.top_cities_jk_performance.title')}</h3>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Best Performing Cities */}
         <div>
           <div className="flex items-center gap-2 mb-3">
             <Award className="w-5 h-5 text-green-600" />
-            <h4 className="text-sm font-medium text-green-600">Best Performing</h4>
+            <h4 className="text-sm font-medium text-green-600">{t('hc.top_cities_jk_performance.best_performing')}</h4>
           </div>
           <div className="space-y-2">
             <div className="grid grid-cols-12 gap-2 text-xs font-medium text-gray-500 border-b pb-2">
-              <div className="col-span-4">City</div>
-              <div className="col-span-2 text-right">On-Time %</div>
-              <div className="col-span-2 text-right">J+K Std</div>
-              <div className="col-span-2 text-right">J+K Act</div>
-              <div className="col-span-2 text-right">Dev</div>
+              <div className="col-span-4">{t('hc.top_cities_jk_performance.city')}</div>
+              <div className="col-span-2 text-right">{t('hc.top_cities_jk_performance.on_time_pct')}</div>
+              <div className="col-span-2 text-right">{t('hc.top_cities_jk_performance.jk_std')}</div>
+              <div className="col-span-2 text-right">{t('hc.top_cities_jk_performance.jk_act')}</div>
+              <div className="col-span-2 text-right">{t('hc.top_cities_jk_performance.dev')}</div>
             </div>
             {topBest.map((city, idx) => (
               <div key={idx} className="grid grid-cols-12 gap-2 text-xs">
@@ -80,7 +82,7 @@ export function TopCitiesJKPerformance({ data, scenarioInfo }: TopCitiesJKPerfor
             ))}
             {topBest.length === 0 && (
               <div className="text-xs text-gray-500 text-center py-2">
-                No data available
+                {t('hc.top_cities_jk_performance.no_data')}
               </div>
             )}
           </div>
@@ -90,15 +92,15 @@ export function TopCitiesJKPerformance({ data, scenarioInfo }: TopCitiesJKPerfor
         <div>
           <div className="flex items-center gap-2 mb-3">
             <AlertTriangle className="w-5 h-5 text-red-600" />
-            <h4 className="text-sm font-medium text-red-600">Needs Improvement</h4>
+            <h4 className="text-sm font-medium text-red-600">{t('hc.top_cities_jk_performance.needs_improvement')}</h4>
           </div>
           <div className="space-y-2">
             <div className="grid grid-cols-12 gap-2 text-xs font-medium text-gray-500 border-b pb-2">
-              <div className="col-span-4">City</div>
-              <div className="col-span-2 text-right">On-Time %</div>
-              <div className="col-span-2 text-right">J+K Std</div>
-              <div className="col-span-2 text-right">J+K Act</div>
-              <div className="col-span-2 text-right">Dev</div>
+              <div className="col-span-4">{t('hc.top_cities_jk_performance.city')}</div>
+              <div className="col-span-2 text-right">{t('hc.top_cities_jk_performance.on_time_pct')}</div>
+              <div className="col-span-2 text-right">{t('hc.top_cities_jk_performance.jk_std')}</div>
+              <div className="col-span-2 text-right">{t('hc.top_cities_jk_performance.jk_act')}</div>
+              <div className="col-span-2 text-right">{t('hc.top_cities_jk_performance.dev')}</div>
             </div>
             {topWorst.map((city, idx) => (
               <div key={idx} className="grid grid-cols-12 gap-2 text-xs">
@@ -123,7 +125,7 @@ export function TopCitiesJKPerformance({ data, scenarioInfo }: TopCitiesJKPerfor
             ))}
             {topWorst.length === 0 && (
               <div className="text-xs text-gray-500 text-center py-2">
-                All cities performing well
+                {t('hc.top_cities_jk_performance.all_good')}
               </div>
             )}
           </div>
