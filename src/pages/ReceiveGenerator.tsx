@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Play, AlertCircle, CheckCircle, Loader } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
+import { useEffectiveAccountId } from '../hooks/useEffectiveAccountId'
 
 import { useTranslation } from '@/hooks/useTranslation';
 interface GeneratorConfig {
@@ -18,7 +19,9 @@ interface GeneratorConfig {
 export default function ReceiveGenerator() {
   const { t } = useTranslation();
   const { profile } = useAuth()
-  const accountId = profile?.account_id
+  // Cuenta efectiva: un superadmin no tiene account_id en el perfil, usa la cuenta seleccionada
+  const effectiveAccountId = useEffectiveAccountId()
+  const accountId = effectiveAccountId || profile?.account_id
 
   const [config, setConfig] = useState<GeneratorConfig>({
     recordCount: 100,

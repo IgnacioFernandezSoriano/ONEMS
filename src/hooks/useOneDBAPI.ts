@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
+import { useEffectiveAccountId } from './useEffectiveAccountId'
 
 export interface ApiKey {
   id: string
@@ -20,17 +21,20 @@ export interface ApiUsageStats {
 
 export function useOneDBAPI() {
   const { profile } = useAuth()
+  // Cuenta efectiva: un superadmin no tiene account_id en el perfil, usa la cuenta seleccionada
+  const effectiveAccountId = useEffectiveAccountId()
+  const accountId = effectiveAccountId || profile?.account_id
   const [apiKey, setApiKey] = useState<ApiKey | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [usageStats, setUsageStats] = useState<ApiUsageStats | null>(null)
 
   useEffect(() => {
-    if (profile?.account_id) {
+    if (accountId) {
       loadApiKey()
       loadUsageStats()
     }
-  }, [profile?.account_id])
+  }, [accountId])
 
   const loadApiKey = async () => {
     try {
@@ -38,7 +42,7 @@ export function useOneDBAPI() {
       const { data, error } = await supabase
         .from('api_keys')
         .select('*')
-        .eq('account_id', profile?.account_id)
+        .eq('account_id', accountId)
         .eq('is_active', true)
         .order('created_at', { ascending: false })
         .limit(1)
@@ -64,7 +68,7 @@ export function useOneDBAPI() {
       const { data: keyData } = await supabase
         .from('api_keys')
         .select('id')
-        .eq('account_id', profile?.account_id)
+        .eq('account_id', accountId)
         .eq('is_active', true)
         .single()
 
@@ -128,12 +132,12 @@ export function useOneDBAPI() {
       const randomString = generateRandomString()
       const newApiKey = `onedb_live_${randomString}`
 
-      console.log('Attempting to create API key for account:', profile?.account_id)
+      console.log('Attempting to create API key for account:', accountId)
 
       const { data, error } = await supabase
         .from('api_keys')
         .insert({
-          account_id: profile?.account_id,
+          account_id: accountId,
           api_key: newApiKey,
           is_active: true,
           created_by: profile?.id

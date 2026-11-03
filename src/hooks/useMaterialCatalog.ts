@@ -110,7 +110,8 @@ export function useMaterialCatalog() {
       .insert({
         product_id: productId,
         material_id: materialCatalogId,
-        quantity
+        quantity,
+        ...(effectiveAccountId ? { account_id: effectiveAccountId } : {})
       })
       .select('*, material_catalog(*)')
       .single()

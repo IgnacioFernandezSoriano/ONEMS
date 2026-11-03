@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId';
 import { useAccountReportingConfig, useCityClassifications } from '@/hooks/useAccountReportingConfig';
 import { ThresholdSlider } from '@/components/settings/ThresholdSlider';
 import { CityClassificationTable } from '@/components/settings/CityClassificationTable';
@@ -9,7 +10,9 @@ import { useTranslation } from '@/hooks/useTranslation';
 export default function AccountReportingConfig() {
   const { t } = useTranslation();
   const { profile } = useAuth();
-  const accountId = profile?.account_id || undefined;
+  // Cuenta efectiva: un superadmin no tiene account_id en el perfil, usa la cuenta seleccionada
+  const effectiveAccountId = useEffectiveAccountId();
+  const accountId = effectiveAccountId || profile?.account_id || undefined;
   
   const { config, loading: configLoading, error: configError, updateConfig } = useAccountReportingConfig(accountId);
   const { classifications, loading: classLoading, error: classError, updateClassification, deleteClassification } = useCityClassifications(accountId);
