@@ -37,7 +37,13 @@ export function AllocationPlanGenerator() {
 
   const handleGenerate = async (planData: any, details: any[]) => {
     const plan = await createPlan(planData)
-    await createPlanDetails(plan.id, details)
+    try {
+      await createPlanDetails(plan.id, details)
+    } catch (err) {
+      // Si los envios no se guardan, no dejar la cabecera del plan vacia
+      await deletePlan(plan.id).catch(() => undefined)
+      throw err
+    }
   }
 
   const handleApplyPlan = async (planId: string) => {
@@ -50,7 +56,8 @@ export function AllocationPlanGenerator() {
       await applyPlan(planId, profile.id)
       alert(t('allocation_generator.plan_applied_success'))
     } catch (error: any) {
-      alert(`${t('allocation_generator.error')}: ${error.message}`)
+      const message = error.message === 'NO_DETAILS' ? t('allocation_generator.no_details_found') : error.message
+      alert(`${t('allocation_generator.error')}: ${message}`)
     }
   }
 

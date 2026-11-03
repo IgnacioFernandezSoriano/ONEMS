@@ -390,6 +390,9 @@ export function useAllocationPlans() {
       }
     }
 
+    // Un plan sin envios no se aplica: quedaria un plan aplicado vacio (caso Senegal)
+    if (allDetails.length === 0) throw new Error('NO_DETAILS')
+
     // Create applied plan
     const { data: appliedPlan, error: appliedPlanError } = await supabase
       .from('allocation_plans')
@@ -432,8 +435,13 @@ export function useAllocationPlans() {
       const { error: batchError } = await supabase
         .from('allocation_plan_details')
         .insert(batch)
-      
-      if (batchError) throw batchError
+
+      if (batchError) {
+        // No dejar un plan aplicado a medias: se retira lo ya insertado y la cabecera
+        await supabase.from('allocation_plan_details').delete().eq('plan_id', appliedPlan.id)
+        await supabase.from('allocation_plans').delete().eq('id', appliedPlan.id)
+        throw batchError
+      }
     }
 
     // Update generated plan status
