@@ -5049,3 +5049,90 @@ stock.generate_shipments,Générer {count} envois
 stock.not_applicable_purchase_orders,Sans objet : les bons de commande ne sont pas utilisés
 stock.stock_control_description,Active le suivi des stocks et le système d'alertes
 stock.used_to_calculate_delivery_dates,Utilisé pour calculer les dates de livraison estimées
+receipt_errors.menu,Réceptions
+receipt_errors.title,Erreurs de réception et suivi quotidien
+receipt_errors.refresh,Actualiser
+receipt_errors.broadcast_button,Message à tous les panélistes
+receipt_errors.card.attempts,Tentatives de réception
+receipt_errors.card.ok_first_time,Réussies du premier coup
+receipt_errors.card.fixed,Corrigées
+receipt_errors.card.compensated,Compensées
+receipt_errors.card.pending,En attente
+receipt_errors.card.needs_decision,À décider
+receipt_errors.card.informative,Informatives
+receipt_errors.by_reason,Répartition par motif
+receipt_errors.no_cases,Aucun cas
+receipt_errors.trend_title,30 derniers jours
+receipt_errors.trend_open,Ouvertes
+receipt_errors.repeaters_title,Panélistes récidivistes (30 derniers jours)
+receipt_errors.col.panelist,Panéliste
+receipt_errors.col.fails_7d,Échecs 7 jours
+receipt_errors.col.fails_30d,Échecs 30 jours
+receipt_errors.col.top_reason,Motif principal
+receipt_errors.col.last_notice,Dernier avis
+receipt_errors.col.date,Date
+receipt_errors.col.tag,Étiquette
+receipt_errors.col.reason,Motif
+receipt_errors.col.status,Statut
+receipt_errors.col.attempts,Tentatives
+receipt_errors.col.culprit,Responsable
+receipt_errors.col.origin_panelist,Panéliste d'origine
+receipt_errors.col.text,Texte
+receipt_errors.col.total,Total
+receipt_errors.col.sent,Envoyés
+receipt_errors.col.failed,Échoués
+receipt_errors.never,Jamais
+receipt_errors.send_notice,Envoyer un avis
+receipt_errors.no_repeaters,Aucun panéliste récidiviste
+receipt_errors.notice_title,Avis au panéliste
+receipt_errors.notice_language,Langue
+receipt_errors.send,Envoyer
+receipt_errors.error_generic,L'opération n'a pas pu être effectuée
+receipt_errors.broadcast_title,Message à tous les panélistes actifs
+receipt_errors.broadcast_template,Modèle
+receipt_errors.template.pobox_daily_visit_lesson,Leçon : consulter la boîte postale chaque jour
+receipt_errors.template.pobox_absent_no_visit,Réception annulée : pas de visite la veille
+receipt_errors.template.not_sent_cancelled,Expéditeur : envoi non déclaré dans le bot
+receipt_errors.template.ok_typo_fixed,Expéditeur : étiquette déclarée différente de celle de l'enveloppe
+receipt_errors.template.wrong_city_cancelled,Expéditeur : lettre arrivée dans une autre ville
+receipt_errors.broadcast_recipients,Destinataires : {count} panélistes actifs avec Telegram
+receipt_errors.broadcast_queued,Message mis en file d'attente pour {count} panélistes
+receipt_errors.broadcast_confirm,Confirmer : envoyer à {count} panélistes
+receipt_errors.broadcast_history,Messages précédents
+receipt_errors.broadcast_no_history,Aucun message envoyé pour le moment
+receipt_errors.cases_title,Cas
+receipt_errors.open_cases_title,Décisions en attente (toutes dates)
+receipt_errors.filter_all,Tous les statuts
+receipt_errors.status.fixed,Corrigé
+receipt_errors.status.compensated,Compensé
+receipt_errors.status.informative,Informatif
+receipt_errors.status.pending,En attente
+receipt_errors.status.needs_decision,À décider
+receipt_errors.status.discarded,Écarté
+receipt_errors.reason.ok,Correcte
+receipt_errors.reason.ok_typo_fixed,Faute de frappe corrigée
+receipt_errors.reason.ok_same_city,"Même ville, autre nœud"
+receipt_errors.reason.pobox_absent_unavailable,Boîte postale non consultée (indisponibilité déclarée)
+receipt_errors.reason.pobox_absent_no_visit,Boîte postale non consultée
+receipt_errors.reason.not_sent_cancelled,"Pas encore envoyée, annulée"
+receipt_errors.reason.wrong_city_cancelled,"Mauvaise ville, annulée"
+receipt_errors.reason.other_city_tag,Étiquette d'un envoi pour une autre ville
+receipt_errors.reason.already_received,Déjà reçue
+receipt_errors.reason.blocked,Bloquée
+receipt_errors.reason.not_found,Étiquette introuvable
+receipt_errors.reason.ambiguous_typo,Faute de frappe ambiguë
+receipt_errors.reason.invalid_format,Format invalide
+receipt_errors.reason.no_panelist,Utilisateur Telegram non enregistré comme panéliste
+receipt_errors.reason.no_node,Aucun nœud
+receipt_errors.role.sender,expéditeur
+receipt_errors.role.receiver,destinataire
+receipt_errors.fix,Corriger
+receipt_errors.close_case,Compenser / Écarter
+receipt_errors.fix_title,Corriger le cas : choisissez le bon envoi
+receipt_errors.fix_help,Le panéliste a déclaré l'étiquette {tag}. Choisissez l'envoi expédié vers sa ville qui correspond.
+receipt_errors.fix_no_candidates,Aucun envoi expédié vers la ville de ce panéliste.
+receipt_errors.fix_confirm,Corriger avec cet envoi
+receipt_errors.close_title,Clôturer le cas sans correction
+receipt_errors.close_help,"Étiquette {tag} : si un envoi est associé et pas encore reçu, il sera annulé et compensé ; sinon le cas est écarté."
+receipt_errors.close_note,Note (facultative)
+receipt_errors.close_confirm,Clôturer le cas

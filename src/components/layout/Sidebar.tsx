@@ -36,6 +36,7 @@ import {
   FileText,
   AlertTriangle,
   MessageSquareWarning,
+  PackageX,
   HelpCircle,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
@@ -370,6 +371,12 @@ export function Sidebar() {
           icon: AlertTriangle,
           roles: ['admin', 'superadmin'],
           tooltip: t('incidents.pending_badge_tooltip'),
+        },
+        {
+          path: '/incidents/receipts',
+          label: t('receipt_errors.menu'),
+          icon: PackageX,
+          roles: ['admin', 'superadmin'],
         },
       ],
     },

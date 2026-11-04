@@ -5049,3 +5049,90 @@ stock.generate_shipments,إنشاء {count} شحنات
 stock.not_applicable_purchase_orders,غير منطبق - لا تُستخدم أوامر الشراء
 stock.stock_control_description,ينشّط مراقبة المخزون ونظام التنبيهات
 stock.used_to_calculate_delivery_dates,يُستخدم لحساب تواريخ التسليم المقدّرة
+receipt_errors.menu,الاستلامات
+receipt_errors.title,أخطاء الاستلام والمتابعة اليومية
+receipt_errors.refresh,تحديث
+receipt_errors.broadcast_button,رسالة إلى جميع الأعضاء
+receipt_errors.card.attempts,محاولات الاستلام
+receipt_errors.card.ok_first_time,ناجحة من المرة الأولى
+receipt_errors.card.fixed,تم إصلاحها
+receipt_errors.card.compensated,تم تعويضها
+receipt_errors.card.pending,قيد الانتظار
+receipt_errors.card.needs_decision,تتطلب قراراً
+receipt_errors.card.informative,للإعلام
+receipt_errors.by_reason,التوزيع حسب السبب
+receipt_errors.no_cases,لا توجد حالات
+receipt_errors.trend_title,آخر 30 يوماً
+receipt_errors.trend_open,مفتوحة
+receipt_errors.repeaters_title,الأعضاء المتكررون (آخر 30 يوماً)
+receipt_errors.col.panelist,العضو
+receipt_errors.col.fails_7d,الإخفاقات 7 أيام
+receipt_errors.col.fails_30d,الإخفاقات 30 يوماً
+receipt_errors.col.top_reason,السبب الرئيسي
+receipt_errors.col.last_notice,آخر إشعار
+receipt_errors.col.date,التاريخ
+receipt_errors.col.tag,الملصق
+receipt_errors.col.reason,السبب
+receipt_errors.col.status,الحالة
+receipt_errors.col.attempts,المحاولات
+receipt_errors.col.culprit,المسؤول
+receipt_errors.col.origin_panelist,عضو المصدر
+receipt_errors.col.text,النص
+receipt_errors.col.total,الإجمالي
+receipt_errors.col.sent,المرسلة
+receipt_errors.col.failed,الفاشلة
+receipt_errors.never,أبداً
+receipt_errors.send_notice,إرسال إشعار
+receipt_errors.no_repeaters,لا يوجد أعضاء متكررون
+receipt_errors.notice_title,إشعار إلى العضو
+receipt_errors.notice_language,اللغة
+receipt_errors.send,إرسال
+receipt_errors.error_generic,تعذّر إكمال العملية
+receipt_errors.broadcast_title,رسالة إلى جميع الأعضاء النشطين
+receipt_errors.broadcast_template,القالب
+receipt_errors.template.pobox_daily_visit_lesson,درس: زيارة صندوق البريد كل يوم
+receipt_errors.template.pobox_absent_no_visit,استلام ملغى: لا زيارة في اليوم السابق
+receipt_errors.template.not_sent_cancelled,المُرسِل: شحنة غير مُعلَنة في البوت
+receipt_errors.template.ok_typo_fixed,المُرسِل: الملصق المُعلَن لا يطابق ملصق الظرف
+receipt_errors.template.wrong_city_cancelled,المُرسِل: وصلت الرسالة إلى مدينة أخرى
+receipt_errors.broadcast_recipients,المستلمون: {count} عضواً نشطاً لديهم تيليجرام
+receipt_errors.broadcast_queued,تمت جدولة الرسالة لـ {count} عضواً
+receipt_errors.broadcast_confirm,تأكيد: إرسال إلى {count} عضواً
+receipt_errors.broadcast_history,الرسائل السابقة
+receipt_errors.broadcast_no_history,لم يتم إرسال أي رسالة بعد
+receipt_errors.cases_title,الحالات
+receipt_errors.open_cases_title,قرارات معلّقة (أي يوم)
+receipt_errors.filter_all,جميع الحالات
+receipt_errors.status.fixed,تم إصلاحه
+receipt_errors.status.compensated,تم تعويضه
+receipt_errors.status.informative,للإعلام
+receipt_errors.status.pending,قيد الانتظار
+receipt_errors.status.needs_decision,يتطلب قراراً
+receipt_errors.status.discarded,تم تجاهله
+receipt_errors.reason.ok,صحيحة
+receipt_errors.reason.ok_typo_fixed,تم تصحيح خطأ الكتابة
+receipt_errors.reason.ok_same_city,المدينة نفسها، عقدة أخرى
+receipt_errors.reason.pobox_absent_unavailable,صندوق البريد لم يُزَر (عدم توفر مُعلَن)
+receipt_errors.reason.pobox_absent_no_visit,صندوق البريد لم يُزَر
+receipt_errors.reason.not_sent_cancelled,لم تُرسل بعد، ملغاة
+receipt_errors.reason.wrong_city_cancelled,مدينة خاطئة، ملغاة
+receipt_errors.reason.other_city_tag,ملصق شحنة موجهة إلى مدينة أخرى
+receipt_errors.reason.already_received,تم استلامها مسبقاً
+receipt_errors.reason.blocked,محظورة
+receipt_errors.reason.not_found,الملصق غير موجود
+receipt_errors.reason.ambiguous_typo,خطأ كتابة ملتبس
+receipt_errors.reason.invalid_format,تنسيق غير صالح
+receipt_errors.reason.no_panelist,مستخدم تيليجرام غير مسجَّل كعضو
+receipt_errors.reason.no_node,بلا عقدة
+receipt_errors.role.sender,مُرسِل
+receipt_errors.role.receiver,مستلِم
+receipt_errors.fix,إصلاح
+receipt_errors.close_case,تعويض / تجاهل
+receipt_errors.fix_title,إصلاح الحالة: اختر الشحنة الصحيحة
+receipt_errors.fix_help,أعلن العضو عن الملصق {tag}. اختر الشحنة المرسلة إلى مدينته والتي تطابقه.
+receipt_errors.fix_no_candidates,لا توجد شحنات مرسلة إلى مدينة هذا العضو.
+receipt_errors.fix_confirm,الإصلاح بهذه الشحنة
+receipt_errors.close_title,إغلاق الحالة دون إصلاح
+receipt_errors.close_help,الملصق {tag}: إذا كانت هناك شحنة مرتبطة لم تُستلم بعد فسيتم إلغاؤها وتعويضها؛ وإلا فسيتم تجاهل الحالة.
+receipt_errors.close_note,ملاحظة (اختيارية)
+receipt_errors.close_confirm,إغلاق الحالة

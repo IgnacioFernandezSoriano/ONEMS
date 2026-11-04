@@ -558,3 +558,70 @@ export interface ReportedIncidentDetail extends ReportedIncident {
     plan: { carrier: { name: string } | null; product: { description: string } | null } | null
   } | null
 }
+
+// ---- Errores de recepcion (RPCs rpc_receipt_* / rpc_broadcast_*) ----
+export type ReceiptCaseStatus = 'fixed' | 'compensated' | 'informative' | 'pending' | 'needs_decision' | 'discarded'
+
+export interface ReceiptDaySummary {
+  attempts: number
+  ok_first_time: number
+  fixed: number
+  compensated: number
+  pending: number
+  needs_decision: number
+  informative: number
+  by_reason: Record<string, number>
+}
+
+export interface ReceiptTrendPoint {
+  day: string
+  ok_first_time: number
+  fixed: number
+  compensated: number
+  open: number
+}
+
+export interface ReceiptRepeatPanelist {
+  panelist_id: string
+  name: string
+  panelist_code: string
+  language: string | null
+  fails_7d: number
+  fails_30d: number
+  top_reason: string | null
+  last_notice_at: string | null
+}
+
+export interface ReceiptCase {
+  id: string
+  panelist_name: string | null
+  tag_raw: string
+  tag_norm: string | null
+  reason: string
+  status: ReceiptCaseStatus
+  attempts: number
+  first_attempt_at: string
+  detail_id: string | null
+  culprit_name: string | null
+  culprit_role: 'sender' | 'receiver' | null
+  resolved_by_name: string | null
+  resolved_at: string | null
+}
+
+export interface ReceiptCandidateShipment {
+  id: string
+  tag_id: string | null
+  fecha_programada: string
+  origin_panelist_name: string | null
+}
+
+export interface BroadcastRecipientsByLang { language: string; n: number }
+
+export interface BroadcastHistoryRow {
+  broadcast_id: string
+  created_at: string
+  body_en: string | null
+  total: number
+  sent: number
+  failed: number
+}
