@@ -5166,3 +5166,6 @@ receipt_errors.close_title,Cerrar caso sin arreglo
 receipt_errors.close_help,"Etiqueta {tag}: si hay un envío asociado y aún no recibido, se anulará y se compensará; si no, el caso se descarta."
 receipt_errors.close_note,Nota (opcional)
 receipt_errors.close_confirm,Cerrar caso
+help_center.doc.receipt_errors.title,Errores de recepción
+help_center.doc.receipt_errors.desc,"Qué hace ONEMS cuando una recepción declarada no cuadra, cómo leer la pantalla Recepciones y cómo arreglar o cerrar cada caso."
+receipt_errors.help_link,Ayuda

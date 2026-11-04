@@ -5158,3 +5158,6 @@ receipt_errors.close_title,Clôturer le cas sans correction
 receipt_errors.close_help,"Étiquette {tag} : si un envoi est associé et pas encore reçu, il sera annulé et compensé ; sinon le cas est écarté."
 receipt_errors.close_note,Note (facultative)
 receipt_errors.close_confirm,Clôturer le cas
+help_center.doc.receipt_errors.title,Erreurs de réception
+help_center.doc.receipt_errors.desc,"Ce que fait ONEMS quand une réception déclarée ne correspond pas, comment lire l'écran Réceptions et comment corriger ou clôturer chaque cas."
+receipt_errors.help_link,Aide

@@ -5166,3 +5166,6 @@ receipt_errors.close_title,Fechar caso sem correção
 receipt_errors.close_help,"Etiqueta {tag}: se houver um envio associado e ainda não recebido, será anulado e compensado; caso contrário, o caso é descartado."
 receipt_errors.close_note,Nota (opcional)
 receipt_errors.close_confirm,Fechar caso
+help_center.doc.receipt_errors.title,Erros de receção
+help_center.doc.receipt_errors.desc,"O que o ONEMS faz quando uma receção declarada não coincide, como ler o ecrã Receções e como corrigir ou fechar cada caso."
+receipt_errors.help_link,Ajuda

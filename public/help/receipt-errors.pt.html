@@ -1,0 +1,702 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ajuda: Erros de receção</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<style>
+  :root {
+    --white: #ffffff; --g50: #f9fafb; --g100: #f3f4f6; --g200: #e5e7eb; --g300: #d1d5db;
+    --g400: #9ca3af; --g500: #6b7280; --g600: #4b5563; --g700: #374151; --g900: #111827;
+    --b50: #eff6ff; --b100: #dbeafe; --b600: #2563eb; --b700: #1d4ed8;
+    --r100: #fee2e2; --r700: #b91c1c; --gr100: #dcfce7; --gr700: #15803d;
+    --y100: #fef9c3; --y800: #854d0e; --p100: #f3e8ff; --p700: #7e22ce;
+    --tg-head: #517da2; --tg-wall-a: #d4e4bc; --tg-wall-b: #a9cba6; --tg-dot: rgba(255,255,255,.35);
+    --tg-in: #ffffff; --tg-out: #effdde; --tg-ink: #000000; --tg-time: #8a9aa6; --tg-time-out: #5eaf5c;
+    --tg-key: rgba(52, 92, 60, .42); --tg-ring: #ffd23f; --tg-photo: #c7d3dc;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+      'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    -webkit-font-smoothing: antialiased; background: var(--g50); color: var(--g700); line-height: 1.6; font-size: 15px;
+  }
+  .layout { display: flex; min-height: 100vh; }
+
+  /* Sidebar, same look as the ONE menu */
+  .side {
+    width: 272px; flex-shrink: 0; background: var(--white); border-right: 1px solid var(--g200);
+    position: sticky; top: 0; height: 100vh; overflow-y: auto; display: flex; flex-direction: column;
+  }
+  .brand { padding: 24px 24px 16px; }
+  .brand h1 { font-size: 24px; line-height: 32px; font-weight: 700; color: var(--g900); }
+  .brand p { font-size: 14px; color: var(--g500); margin-top: 4px; }
+  .brand .doc { margin-top: 16px; font-size: 12px; font-weight: 600; color: var(--b700); background: var(--b50);
+    display: inline-block; padding: 2px 10px; border-radius: 999px; }
+  .nav { padding: 8px 12px 24px; flex: 1; }
+  .nav h3 { font-size: 12px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--g400);
+    padding: 16px 12px 6px; }
+  .nav a {
+    display: block; padding: 8px 12px; border-radius: 8px; font-size: 14px; font-weight: 500; color: var(--g600);
+    text-decoration: none; transition: background .15s, color .15s;
+  }
+  .nav a:hover { background: var(--g100); }
+  .nav a.active { background: var(--b50); color: var(--b700); }
+  .side-foot { padding: 16px 24px; border-top: 1px solid var(--g200); font-size: 12px; color: var(--g500); }
+
+  /* Content */
+  .main { flex: 1; min-width: 0; padding: 40px 32px 80px; }
+  .page { max-width: 880px; margin: 0 auto; }
+  .page > header { margin-bottom: 32px; }
+  .page > header h2 { font-size: 30px; line-height: 38px; font-weight: 700; color: var(--g900); }
+  .page > header p { margin-top: 8px; font-size: 17px; color: var(--g600); max-width: 640px; }
+  section { margin-top: 48px; }
+  section > h2 { font-size: 22px; font-weight: 700; color: var(--g900); padding-bottom: 8px; margin-bottom: 16px;
+    border-bottom: 1px solid var(--g200); }
+  h3 { font-size: 17px; font-weight: 600; color: var(--g900); margin: 28px 0 8px; }
+  p { margin: 8px 0; }
+  ul, ol { margin: 8px 0 8px 22px; }
+  li { margin: 4px 0; }
+  strong { color: var(--g900); font-weight: 600; }
+  code, kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px;
+    background: var(--g100); border: 1px solid var(--g200); border-radius: 6px; padding: 1px 6px; color: var(--g900); }
+  .card { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 20px 24px; margin: 16px 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 16px 0; }
+  .grid .card { margin: 0; }
+  .card h4 { font-size: 15px; font-weight: 600; color: var(--g900); margin-bottom: 4px; }
+  .card p { margin: 4px 0; font-size: 14px; color: var(--g600); }
+
+  .badge { display: inline-block; font-size: 12px; font-weight: 500; padding: 1px 10px; border-radius: 999px; white-space: nowrap; }
+  .b-red { background: var(--r100); color: var(--r700); }
+  .b-blue { background: var(--b100); color: var(--b700); }
+  .b-green { background: var(--gr100); color: var(--gr700); }
+  .b-yellow { background: var(--y100); color: var(--y800); }
+  .b-gray { background: var(--g100); color: var(--g600); }
+  .b-purple { background: var(--p100); color: var(--p700); }
+  .btn { display: inline-block; font-size: 13px; font-weight: 500; padding: 2px 10px; border-radius: 8px;
+    background: var(--white); border: 1px solid var(--g300); color: var(--g700); white-space: nowrap; }
+  .btn.primary { background: var(--b600); border-color: var(--b600); color: #fff; }
+
+  .callout { border-radius: 12px; padding: 14px 18px; margin: 16px 0; font-size: 14px; border: 1px solid; }
+  .callout.info { background: var(--b50); border-color: var(--b100); color: #1e3a8a; }
+  .callout.ok { background: #f0fdf4; border-color: var(--gr100); color: #14532d; }
+  .callout.warn { background: #fffbeb; border-color: var(--y100); color: var(--y800); }
+  .callout strong { color: inherit; }
+
+  .table-wrap { overflow-x: auto; margin: 16px 0; background: var(--white); border: 1px solid var(--g200); border-radius: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--g500); background: var(--g50); padding: 10px 14px; border-bottom: 1px solid var(--g200); }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--g100); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  td:first-child { font-weight: 500; color: var(--g900); }
+
+  /* Steps */
+  ol.steps { list-style: none; margin: 12px 0; counter-reset: s; }
+  ol.steps > li { counter-increment: s; position: relative; padding: 4px 0 12px 44px; margin: 0; }
+  ol.steps > li::before {
+    content: counter(s); position: absolute; left: 0; top: 2px; width: 28px; height: 28px; border-radius: 50%;
+    background: var(--b100); color: var(--b700); font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Telegram chat mock-ups */
+  .chat { background: #e9eef5; border: 1px solid var(--g200); border-radius: 16px; padding: 16px; margin: 16px 0; max-width: 460px; }
+  .chat .who { text-align: center; font-size: 12px; color: var(--g500); margin-bottom: 8px; font-weight: 500; }
+  .msg { max-width: 85%; padding: 8px 12px; border-radius: 14px; margin: 6px 0; font-size: 14px; line-height: 1.45; box-shadow: 0 1px 1px rgba(0,0,0,.06); }
+  .msg.bot { background: var(--white); border-top-left-radius: 4px; margin-right: auto; color: var(--g900); }
+  .msg.me { background: #dbeafe; border-top-right-radius: 4px; margin-left: auto; color: var(--g900); }
+  .kb { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 8px; max-width: 85%; }
+  .kb span { flex: 1 1 auto; text-align: center; background: rgba(37,99,235,.12); color: var(--b700); font-size: 13px; font-weight: 500;
+    padding: 6px 10px; border-radius: 10px; }
+  .kb.col span { flex-basis: 100%; }
+  .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; align-items: start; }
+  .two .chat { margin: 8px 0; }
+  .cap { font-size: 13px; color: var(--g500); margin-top: -6px; max-width: 460px; }
+
+  /* Flow */
+  .flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; margin: 16px 0; }
+  .flow .node { flex: 1 1 150px; background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 12px 14px; font-size: 13px; position: relative; }
+  .flow .node b { display: block; color: var(--g900); font-size: 14px; margin-bottom: 2px; }
+  .flow .node .tag { font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--b700); }
+  .flow .arrow { align-self: center; color: var(--g400); font-size: 18px; }
+
+  details { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; margin: 8px 0; }
+  summary { cursor: pointer; padding: 14px 18px; font-weight: 600; color: var(--g900); list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: '+'; color: var(--g400); font-size: 20px; line-height: 1; }
+  details[open] summary::after { content: '\2212'; }
+  details > div { padding: 0 18px 14px; color: var(--g600); font-size: 14px; }
+
+  /* ONEMS screen drawings */
+  .app { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; overflow: hidden; margin: 16px 0 6px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .app-bar { display: flex; gap: 6px; align-items: center; background: var(--g100); border-bottom: 1px solid var(--g200); padding: 8px 12px; font-size: 12px; color: var(--g500); }
+  .app-bar i { width: 9px; height: 9px; border-radius: 50%; background: var(--g300); display: inline-block; }
+  .app-bar span { margin-left: 8px; }
+  .app-body { padding: 20px; font-size: 13px; color: var(--g700); overflow-x: auto; }
+  .app-body.cols { display: grid; grid-template-columns: 210px 1fr; padding: 0; }
+  .app-body.cols > .sb { border-right: 1px solid var(--g200); padding: 14px 10px; background: #fff; }
+  .app-body.cols > .ct { padding: 20px; }
+  .sb .t { font-size: 20px; font-weight: 700; color: var(--g900); padding: 0 8px; }
+  .sb .s { font-size: 11px; color: var(--g500); padding: 0 8px 8px; }
+  .sb h5 { font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--g400); padding: 10px 8px 4px; }
+  .mi { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 8px; font-size: 13px; color: var(--g700); }
+  .mi.on { background: var(--b50); color: var(--b600); }
+  .mi .ic { width: 14px; height: 14px; border-radius: 4px; background: var(--g300); flex-shrink: 0; }
+  .mi.on .ic { background: var(--b600); }
+  .mi .badge { margin-left: auto; font-size: 11px; padding: 0 7px; }
+  .m-h { font-size: 18px; font-weight: 700; color: var(--g900); margin-bottom: 12px; }
+  .m-h3 { font-size: 15px; font-weight: 700; color: var(--g900); margin: 0 0 6px; }
+  .m-sel { display: inline-block; border: 1px solid var(--g300); border-radius: 4px; padding: 3px 24px 3px 8px; font-size: 12px; background: #fff; color: var(--g700); margin-right: 8px; position: relative; }
+  .m-sel::after { content: '\25BE'; position: absolute; right: 8px; color: var(--g400); }
+  .m-card { border: 1px solid var(--g200); border-radius: 8px; overflow: hidden; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.05); margin: 10px 0; }
+  .app table { font-size: 12px; }
+  .app th { padding: 8px 12px; font-size: 11px; }
+  .app td { padding: 8px 12px; }
+  .app td:first-child { font-weight: 400; color: inherit; }
+  .app .num { text-align: right; }
+  .m-link { color: var(--b600); }
+  .m-box { border: 1px solid var(--g200); border-radius: 6px; padding: 14px; margin: 10px 0; }
+  .m-note { background: var(--g50); border-radius: 6px; padding: 10px 12px; margin: 8px 0; font-size: 12px; }
+  .m-muted { color: var(--g500); font-size: 12px; }
+  .m-pbtn, .m-sbtn { display: inline-block; padding: 6px 14px; border-radius: 8px; font-size: 12px; margin: 2px 6px 2px 0; }
+  .m-pbtn { background: var(--b600); color: #fff; }
+  .m-sbtn { background: var(--g200); color: var(--g700); }
+  .m-ta { border: 1px solid var(--g300); border-radius: 4px; padding: 8px; font-size: 12px; color: var(--g400); background: #fff; margin: 6px 0 10px; }
+  .m-in { display: inline-block; border: 1px solid var(--g300); border-radius: 4px; padding: 3px 8px; font-size: 12px; background: #fff; min-width: 90px; }
+  .m-bub { max-width: 80%; padding: 6px 10px; border-radius: 10px; margin: 5px 0; font-size: 12px; }
+  .m-bub small { display: block; color: var(--g500); font-size: 10px; margin-top: 2px; }
+  .m-bub.l { background: var(--g100); margin-right: auto; }
+  .m-bub.r { background: var(--b100); margin-left: auto; }
+  .pin { display: inline-flex; width: 20px; height: 20px; border-radius: 50%; background: var(--b600); color: #fff; font-size: 11px; font-weight: 700; align-items: center; justify-content: center; margin-left: 6px; vertical-align: middle; flex-shrink: 0; }
+  .legend { counter-reset: l; list-style: none; margin: 10px 0 20px; }
+  .legend li { counter-increment: l; position: relative; padding: 2px 0 6px 34px; font-size: 14px; }
+  .legend li::before { content: counter(l); position: absolute; left: 0; top: 1px; width: 20px; height: 20px; border-radius: 50%; background: var(--b600); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .heat td { text-align: center; }
+  .heat .ok { background: #f0fdf4; } .heat .hi { background: var(--y100); } .heat .sat { background: var(--r100); }
+  .heat .off { background: repeating-linear-gradient(45deg, var(--g100), var(--g100) 4px, #fff 4px, #fff 8px); color: var(--g400); }
+  .heat .now { outline: 2px solid var(--b600); outline-offset: -2px; }
+
+  /* Right-to-left (Arabic) */
+  [dir=rtl] .side { border-right: 0; border-left: 1px solid var(--g200); }
+  [dir=rtl] .app-body.cols > .sb { border-right: 0; border-left: 1px solid var(--g200); }
+  [dir=rtl] th, [dir=rtl] td, [dir=rtl] .nav a { text-align: right; }
+  [dir=rtl] ul, [dir=rtl] ol { margin: 8px 22px 8px 0; }
+  [dir=rtl] ol.steps > li { padding: 4px 44px 12px 0; }
+  [dir=rtl] ol.steps > li::before { left: auto; right: 0; }
+  [dir=rtl] .legend li { padding: 2px 34px 6px 0; }
+  [dir=rtl] .legend li::before { left: auto; right: 0; }
+  [dir=rtl] .msg.bot { border-top-left-radius: 14px; border-top-right-radius: 4px; margin-right: 0; margin-left: auto; }
+  [dir=rtl] .msg.me { border-top-right-radius: 14px; border-top-left-radius: 4px; margin-left: 0; margin-right: auto; }
+  [dir=rtl] .m-bub.l { margin-right: 0; margin-left: auto; }
+  [dir=rtl] .m-bub.r { margin-left: 0; margin-right: auto; }
+  [dir=rtl] .pin { margin-left: 0; margin-right: 6px; }
+  [dir=rtl] .m-sel { padding: 3px 8px 3px 24px; margin-right: 0; margin-left: 8px; }
+  [dir=rtl] .m-sel::after { right: auto; left: 8px; }
+  [dir=rtl] .m-pbtn, [dir=rtl] .m-sbtn { margin: 2px 0 2px 6px; }
+  [dir=rtl] .mi .badge { margin-left: 0; margin-right: auto; }
+  [dir=rtl] .app-bar span { margin-left: 0; margin-right: 8px; }
+  [dir=rtl] .flow .arrow { transform: scaleX(-1); }
+  [dir=rtl] .app td:first-child { font-weight: 400; }
+  /* Telegram (canonical, from panelist-guide) and practical cases */
+  .case { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 20px 24px; margin: 16px 0; scroll-margin-top: 24px; }
+  .case > h3 { margin: 0; display: flex; gap: 10px; align-items: center; }
+  .case > .sit { color: var(--g500); font-size: 14px; margin: 2px 0 12px; }
+  .case .callout { margin: 8px 0; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+  .chips a { text-decoration: none; font-size: 13px; font-weight: 500; padding: 4px 12px; border-radius: 999px;
+    background: var(--white); border: 1px solid var(--g200); color: var(--g700); }
+  .chips a:hover { background: var(--b50); border-color: var(--b100); color: var(--b700); }
+  .tg { max-width: 380px; border-radius: 16px; overflow: hidden; border: 1px solid var(--g200);
+    box-shadow: 0 4px 16px rgba(17,24,39,.10); background: var(--tg-in); }
+  .tg-head { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: var(--tg-head); color: #ffffff; }
+  .tg-back { font-size: 20px; line-height: 1; opacity: .9; }
+  .tg-av { width: 36px; height: 36px; border-radius: 50%; flex: none; display: grid; place-items: center;
+    background: linear-gradient(160deg, #72c2f4, #3d8fd9); color: #ffffff; font-weight: 700; font-size: 12px; }
+  .tg-name { flex: 1; min-width: 0; line-height: 1.2; }
+  .tg-name b { display: block; font-size: 15px; color: #ffffff; font-weight: 600; }
+  .tg-name small { font-size: 12.5px; opacity: .8; }
+  .tg-body { display: flex; flex-direction: column; gap: 6px; padding: 12px 10px 14px;
+    background-color: var(--tg-wall-a);
+    background-image: radial-gradient(var(--tg-dot) 1.4px, transparent 1.6px), linear-gradient(160deg, var(--tg-wall-a), var(--tg-wall-b));
+    background-size: 18px 18px, 100% 100%; }
+  .tg-msg { max-width: 84%; padding: 6px 9px 7px 10px; border-radius: 12px; font-size: 14.5px; line-height: 1.38; color: var(--tg-ink);
+    box-shadow: 0 1px 1px rgba(0,0,0,.13); overflow-wrap: anywhere; }
+  .tg-msg.in { background: var(--tg-in); align-self: flex-start; border-bottom-left-radius: 4px; }
+  .tg-msg.out { background: var(--tg-out); align-self: flex-end; border-bottom-right-radius: 4px; }
+  .tg-msg .t { float: right; font-size: 11px; color: var(--tg-time); margin: 8px 0 -4px 10px; line-height: 1; }
+  .tg-msg.out .t { color: var(--tg-time-out); }
+  .tg-msg.out .t::after { content: " \2713\2713"; letter-spacing: -2px; }
+  .tg-msg.photo { padding: 3px; }
+  .tg-msg.photo .img { display: grid; place-items: center; width: 170px; height: 104px; border-radius: 10px; background: var(--tg-photo); font-size: 30px; }
+  .tg-msg.photo .t { position: relative; margin: -18px 8px 4px 0; }
+  .tg-kb { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; align-self: flex-start; width: 84%; margin-top: -2px; }
+  .tg-kb.one { grid-template-columns: 1fr; }
+  .tg-kb span { background: var(--tg-key); color: #ffffff; border-radius: 8px; padding: 7px 6px; text-align: center; font-size: 13.5px; font-weight: 600; }
+  .tg-kb span.tap { box-shadow: inset 0 0 0 2px var(--tg-ring); }
+  .tg-kb span.tap::after { content: " \1F446"; }
+  .tg-input { display: flex; align-items: center; gap: 12px; padding: 9px 14px; background: #ffffff; color: var(--tg-time); font-size: 14px; }
+  .tg-input .ph { flex: 1; }
+  [dir=rtl] .tg-msg.in { border-bottom-left-radius: 12px; border-bottom-right-radius: 4px; }
+  [dir=rtl] .tg-msg.out { border-bottom-right-radius: 12px; border-bottom-left-radius: 4px; }
+  [dir=rtl] .tg-msg .t { float: left; margin: 8px 10px -4px 0; }
+  [dir=rtl] .tg-back { transform: scaleX(-1); }
+  @media (max-width: 900px) {
+    .case { padding: 16px; }
+    .tg { max-width: none; }
+  }
+  .mobile-top { display: none; }
+  @media (max-width: 900px) {
+    .app-body.cols { grid-template-columns: 1fr; }
+    .app-body.cols > .sb { border-right: 0; border-bottom: 1px solid var(--g200); }
+    .layout { display: block; }
+    .side { display: none; }
+    .mobile-top { display: block; position: sticky; top: 0; z-index: 5; background: var(--white); border-bottom: 1px solid var(--g200); padding: 10px 16px; }
+    .mobile-top b { font-size: 18px; color: var(--g900); }
+    .mobile-top span { font-size: 13px; color: var(--g500); margin-left: 6px; }
+    .mobile-top select { width: 100%; margin-top: 8px; padding: 8px; border: 1px solid var(--g300); border-radius: 8px; font-size: 14px; background: #fff; color: var(--g700); }
+    .main { padding: 24px 16px 64px; }
+    .page > header h2 { font-size: 24px; line-height: 32px; }
+  }
+  @media print { .side, .mobile-top { display: none; } .main { padding: 0; } body { background: #fff; } section { break-inside: avoid-page; } }
+</style>
+</head>
+<body>
+<div class="mobile-top">
+  <b>ONE</b><span>for Regulators &middot; Ajuda</span>
+  <select id="jump" aria-label="Ir para a secção"></select>
+</div>
+<div class="layout">
+  <aside class="side">
+    <div class="brand">
+      <h1>ONE</h1>
+      <p>for Regulators</p>
+      <span class="doc">Ajuda &middot; Receções</span>
+    </div>
+    <nav class="nav" id="nav">
+      <h3>Primeiros passos</h3>
+      <a href="#overview">Visão geral</a>
+      <a href="#how-it-works">Como funciona</a>
+      <a href="#where">Onde fica o ecrã</a>
+      <h3>O ecrã Receções</h3>
+      <a href="#screen">O ecrã passo a passo</a>
+      <a href="#statuses">Estados de um caso</a>
+      <a href="#reasons">Motivos e o que fazer</a>
+      <a href="#fix">Corrigir um caso</a>
+      <a href="#close">Compensar ou descartar</a>
+      <h3>Avisos aos painelistas</h3>
+      <a href="#reminders">Lembretes automáticos</a>
+      <a href="#notice">Aviso a um painelista</a>
+      <a href="#broadcast">Mensagem a todos</a>
+      <h3>No Telegram</h3>
+      <a href="#bot">O que vê o painelista</a>
+      <a href="#unreadable">Etiqueta ilegível</a>
+      <h3>Referência</h3>
+      <a href="#deadlines">Prazos e regras</a>
+      <a href="#cases">Casos práticos</a>
+      <a href="#faq">Perguntas</a>
+    </nav>
+    <div class="side-foot">Atualizado a 4 de novembro de 2026</div>
+  </aside>
+
+  <main class="main">
+  <div class="page">
+    <header>
+      <h2>Erros de receção</h2>
+      <p>O que acontece quando um painelista declara que recebeu um pacote e algo não bate certo, o que o ONEMS resolve por si só e o que decide o utilizador no ecrã <strong>Incidências &rsaquo; Receções</strong>.</p>
+    </header>
+
+    <section id="overview">
+      <h2>Visão geral</h2>
+      <div class="grid">
+        <div class="card"><h4>Nenhuma falha se perde</h4><p>Cada receção com um problema abre um <strong>caso</strong>: quem a declarou, que etiqueta escreveu, o motivo e como terminou.</p></div>
+        <div class="card"><h4>O ONEMS corrige o que é seguro</h4><p>Um dígito mal digitado ou uma receção noutro ponto da mesma cidade corrigem-se sozinhos, com a <strong>data da primeira tentativa</strong>.</p></div>
+        <div class="card"><h4>O que não serve é compensado</h4><p>Se a receção não serve para a medição, o envio é anulado e passa a <strong>compensar</strong>: o balanceamento volta a programá-lo.</p></div>
+        <div class="card"><h4>O utilizador decide o resto</h4><p>Os casos duvidosos esperam em <strong>Decisões pendentes</strong>, com os botões <em>Corrigir</em> e <em>Compensar / Descartar</em>.</p></div>
+      </div>
+    </section>
+
+    <section id="how-it-works">
+      <h2>Como funciona</h2>
+      <div class="flow">
+        <div class="node"><span class="tag">1 &middot; Telegram</span><b>O painelista declara</b>Envia a foto ou o número da etiqueta do pacote recebido.</div>
+        <div class="arrow">&rarr;</div>
+        <div class="node"><span class="tag">2 &middot; ONEMS</span><b>Procura o envio</b>Se tudo bater certo, a receção fica registada e não se abre nenhum caso.</div>
+        <div class="arrow">&rarr;</div>
+        <div class="node"><span class="tag">3 &middot; ONEMS</span><b>Classifica o problema</b>Corrige, compensa, informa ou deixa o caso pendente.</div>
+        <div class="arrow">&rarr;</div>
+        <div class="node"><span class="tag">4 &middot; ONEMS</span><b>O gestor decide</b>Apenas nos casos que o sistema não consegue resolver com segurança.</div>
+      </div>
+      <ul>
+        <li>O ONE bot responde ao painelista com o <strong>motivo real</strong> e o que fazer, no seu idioma.</li>
+        <li>Se o painelista repetir a mesma etiqueta várias vezes, é <strong>um só caso</strong>; a coluna <em>Tentativas</em> conta as vezes.</li>
+        <li>Toda a receção, também as corrigidas, passa pela <a href="#deadlines">regra da caixa postal</a>.</li>
+      </ul>
+    </section>
+
+    <section id="where">
+      <h2>Onde fica o ecrã</h2>
+      <p>No menu do ONEMS, abra o grupo <strong>Incidências</strong> e prima <strong>Receções</strong>. Veem-no os utilizadores <em>admin</em> de cada conta (e <em>superadmin</em>), e cada conta vê apenas os seus próprios painelistas.</p>
+      <div class="app">
+        <div class="app-bar"><i></i><i></i><i></i><span>ONEMS</span></div>
+        <div class="app-body cols">
+          <div class="sb">
+            <div class="t">ONEMS</div><div class="s">for Regulators</div>
+            <h5>Incidências</h5>
+            <div class="mi"><span class="ic"></span>Incidências reportadas</div>
+            <div class="mi"><span class="ic"></span>Disponibilidade dos painelistas</div>
+            <div class="mi on"><span class="ic"></span>Receções <span class="badge b-red">4</span><span class="pin">1</span></div>
+          </div>
+          <div class="ct">
+            <div class="m-h">Erros de receção e acompanhamento diário</div>
+            <p class="m-muted">Aqui abre-se o ecrã (veja a secção seguinte).</p>
+          </div>
+        </div>
+      </div>
+      <ol class="legend">
+        <li><strong>O indicador vermelho</strong> conta os casos abertos, ou seja, <span class="badge b-yellow">Pendente</span> ou <span class="badge b-red">Requer decisão</span>. Se não houver nenhum, não aparece. Atualiza-se sozinho a cada minuto e assim que o utilizador corrige ou fecha um caso.</li>
+      </ol>
+    </section>
+
+    <section id="screen">
+      <h2>O ecrã passo a passo</h2>
+      <p>O ecrã tem, de cima para baixo: a barra superior, o resumo do dia, as decisões pendentes, os painelistas reincidentes e a lista de casos do dia.</p>
+      <div class="app">
+        <div class="app-bar"><i></i><i></i><i></i><span>ONEMS &rsaquo; Incidências &rsaquo; Receções</span></div>
+        <div class="app-body">
+          <div class="m-h">Erros de receção e acompanhamento diário <span class="m-in">04/11/2026</span> <span class="m-sbtn">Atualizar</span><span class="m-pbtn">Mensagem a todos os painelistas</span><span class="pin">1</span></div>
+          <div class="m-card" style="padding:10px 12px">
+            <span class="m-muted">TENTATIVAS DE RECEÇÃO</span> <b>23</b> &nbsp;&middot;&nbsp;
+            <span class="m-muted">CORRETAS À PRIMEIRA</span> <b style="color:var(--gr700)">17</b> &nbsp;&middot;&nbsp;
+            <span class="m-muted">CORRIGIDAS</span> <b style="color:var(--b700)">2</b> &nbsp;&middot;&nbsp;
+            <span class="m-muted">COMPENSADAS</span> <b style="color:var(--y800)">1</b> &nbsp;&middot;&nbsp;
+            <span class="m-muted">PENDENTES</span> <b>1</b> &nbsp;&middot;&nbsp;
+            <span class="m-muted">REQUEREM DECISÃO</span> <b style="color:var(--r700)">1</b> &nbsp;&middot;&nbsp;
+            <span class="m-muted">INFORMATIVAS</span> <b>1</b><span class="pin">2</span>
+            <div class="m-muted" style="margin-top:6px">Repartição por motivo &middot; Últimos 30 dias (barras: corretas, corrigidas, compensadas; linha: abertas)</div>
+          </div>
+          <div class="m-h3" style="font-size:13px;margin-top:14px">Decisões pendentes (qualquer dia)<span class="pin">3</span></div>
+          <div class="m-card"><table>
+            <thead><tr><th>Data</th><th>Painelista</th><th>Etiqueta</th><th>Motivo &#9432;</th><th>Estado</th><th>Tentativas</th><th>Responsável</th><th></th></tr></thead>
+            <tbody>
+              <tr><td>2026-11-03 10:42</td><td>Grace Wanjiru</td><td><code>00010813</code></td><td>Etiqueta não encontrada</td><td>Pendente</td><td>2</td><td>-</td><td><span class="m-link">Corrigir</span> &nbsp;<span class="m-muted">Compensar / Descartar</span></td></tr>
+              <tr><td>2026-11-04 09:15</td><td>Peter Otieno</td><td><code>00010490</code></td><td>Etiqueta de um envio para outra cidade</td><td>Requer decisão</td><td>1</td><td>-</td><td><span class="m-link">Corrigir</span> &nbsp;<span class="m-muted">Compensar / Descartar</span></td></tr>
+            </tbody>
+          </table></div>
+          <div class="m-h3" style="font-size:13px;margin-top:14px">Painelistas reincidentes (últimos 30 dias)<span class="pin">4</span></div>
+          <div class="m-card"><table>
+            <thead><tr><th>Painelista</th><th class="num">Falhas 7 dias</th><th class="num">Falhas 30 dias</th><th>Motivo principal</th><th>Último aviso</th><th></th></tr></thead>
+            <tbody>
+              <tr><td>John Mwangi</td><td class="num">3</td><td class="num">5</td><td>Ainda não enviada, anulada</td><td>2026-11-03</td><td><span class="m-link">Enviar aviso</span></td></tr>
+              <tr><td>Mary Achieng</td><td class="num">1</td><td class="num">2</td><td>Caixa postal não visitada</td><td>Nunca</td><td><span class="m-link">Enviar aviso</span></td></tr>
+            </tbody>
+          </table></div>
+          <div class="m-h3" style="font-size:13px;margin-top:14px">Casos <span class="m-sel">Todos os estados</span><span class="pin">5</span></div>
+          <div class="m-card"><table>
+            <thead><tr><th>Data</th><th>Painelista</th><th>Etiqueta</th><th>Motivo &#9432;</th><th>Estado</th><th>Tentativas</th><th>Responsável</th></tr></thead>
+            <tbody>
+              <tr><td>2026-11-04 08:31</td><td>Anne Njeri</td><td><code>00010894</code></td><td>Erro de digitação corrigido</td><td>Corrigido</td><td>1</td><td>John Mwangi (remetente)</td></tr>
+              <tr><td>2026-11-04 11:05</td><td>Mary Achieng</td><td><code>00010702</code></td><td>Caixa postal não visitada</td><td>Compensado</td><td>1</td><td>Mary Achieng (destinatário)</td></tr>
+              <tr><td>2026-11-04 12:20</td><td>Samuel Kiprop</td><td><code>00010655</code></td><td>Já recebida</td><td>Informativo</td><td>2</td><td>-</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+      <ol class="legend">
+        <li><strong>Barra superior.</strong> A <strong>data</strong> escolhe o dia que mostram o resumo e a lista <em>Casos</em> (por defeito, hoje). <span class="btn">Atualizar</span> volta a carregar os dados. <span class="btn primary">Mensagem a todos os painelistas</span> abre o <a href="#broadcast">aviso geral</a>.</li>
+        <li><strong>Resumo do dia.</strong> <em>Tentativas de receção</em> do dia e como terminaram: <em>Corretas à primeira</em>, <em>Corrigidas</em>, <em>Compensadas</em>, <em>Pendentes</em>, <em>Requerem decisão</em> e <em>Informativas</em>. Em baixo, a <em>Repartição por motivo</em> e um gráfico dos <em>Últimos 30 dias</em>.</li>
+        <li><strong>Decisões pendentes (qualquer dia).</strong> Os casos abertos de <strong>qualquer data</strong>, seja qual for o dia escolhido em cima. É a sua lista de trabalho: cada caso tem <a href="#fix">Corrigir</a> e <a href="#close">Compensar / Descartar</a>. O ícone <strong>&#9432;</strong> junto a <em>Motivo</em> abre a explicação de todos os motivos.</li>
+        <li><strong>Painelistas reincidentes.</strong> Quem causa mais falhas em 7 e 30 dias, o seu motivo principal e quando foi avisado pela última vez. <span class="btn">Enviar aviso</span> abre uma <a href="#notice">mensagem individual</a>.</li>
+        <li><strong>Casos.</strong> Todos os casos do dia escolhido, também os já fechados. O seletor filtra por estado. <em>Responsável</em> é o painelista a quem se atribui a falha, com o seu papel: <em>remetente</em> ou <em>destinatário</em>.</li>
+      </ol>
+      <div class="callout info"><strong>Não vê o ícone &#9432; ou o indicador?</strong> Se o separador estava aberto antes de uma atualização do ONEMS, recarregue-o com <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd>.</div>
+    </section>
+
+    <section id="statuses">
+      <h2>Estados de um caso</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Estado</th><th>Significado</th><th>Tem de fazer alguma coisa?</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge b-yellow">Pendente</span></td><td>A etiqueta ainda não se encontra. O ONEMS continua a procurar durante alguns dias.</td><td>Pode esperar, ou corrigi-lo se já souber qual é o envio.</td></tr>
+          <tr><td><span class="badge b-red">Requer decisão</span></td><td>O ONEMS não consegue saber com segurança o que aconteceu.</td><td><strong>Sim</strong>: corrigir ou fechar.</td></tr>
+          <tr><td><span class="badge b-blue">Corrigido</span></td><td>A receção ficou registada no envio correto, com a data da primeira tentativa.</td><td>Não.</td></tr>
+          <tr><td><span class="badge b-purple">Compensado</span></td><td>A receção não serve para a medição: o envio foi anulado e passa a compensar.</td><td>Não. O balanceamento volta a programá-lo.</td></tr>
+          <tr><td><span class="badge b-gray">Informativo</span></td><td>Apenas deixa registo (já recebida, envio anulado antes, texto que não é uma etiqueta).</td><td>Não.</td></tr>
+          <tr><td><span class="badge b-gray">Descartado</span></td><td>O utilizador fechou-o sem correção e não havia envio a compensar.</td><td>Não.</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="reasons">
+      <h2>Motivos e o que fazer</h2>
+      <p>É a mesma lista que abre o ícone &#9432; do ecrã, ordenada de «é preciso agir» a «só informa».</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Motivo</th><th>Estado</th><th>O que aconteceu</th><th>Responsável</th><th>O que faz o utilizador</th></tr></thead>
+        <tbody>
+          <tr><td>Etiqueta não encontrada</td><td><span class="badge b-yellow">Pendente</span></td><td>Nenhum envio com essa etiqueta vai a caminho deste painelista. Se o remetente o declarar mais tarde, a receção regista-se sozinha.</td><td>-</td><td>Esperar. Se não aparecer, rever a etiqueta com o painelista e <em>Corrigir</em>.</td></tr>
+          <tr><td>Erro de digitação ambíguo</td><td><span class="badge b-red">Requer decisão</span></td><td>A etiqueta parece-se com vários envios que o painelista deve receber.</td><td>-</td><td><em>Corrigir</em> escolhendo o envio correto.</td></tr>
+          <tr><td>Etiqueta de um envio para outra cidade</td><td><span class="badge b-red">Requer decisão</span></td><td>A etiqueta existe, mas é de um envio para outra cidade. O envio <strong>não é alterado</strong>: pode ser uma digitação que coincide com um envio saudável.</td><td>-</td><td>Perguntar ao painelista. Se se enganou, <em>Corrigir</em>; se o pacote chegou mesmo a outra cidade, fechar.</td></tr>
+          <tr><td>Utilizador do Telegram não registado como painelista</td><td><span class="badge b-red">Requer decisão</span></td><td>Quem escreveu não está ligado a nenhum painelista.</td><td>-</td><td>Só se pode fechar. Reveja a ficha se for um painelista real.</td></tr>
+          <tr><td>Sem nó</td><td><span class="badge b-red">Requer decisão</span></td><td>O painelista não tem nenhum ponto atribuído.</td><td>-</td><td>Atribuir-lhe um ponto na sua ficha e fechar o caso.</td></tr>
+          <tr><td>Erro de digitação corrigido</td><td><span class="badge b-blue">Corrigido</span></td><td>Havia um único envio com a etiqueta quase igual (um dígito diferente ou dois trocados). O ONEMS corrigiu-a.</td><td>Remetente</td><td>Nada.</td></tr>
+          <tr><td>Mesma cidade, outro nó</td><td><span class="badge b-blue">Corrigido</span></td><td>O envio ia para outro ponto da mesma cidade. Regista-se em nome de quem o recebeu e atualiza-se o destino.</td><td>Remetente</td><td>Nada.</td></tr>
+          <tr><td>Caixa postal não visitada</td><td><span class="badge b-purple">Compensado</span></td><td>Carta de caixa postal e o painelista não declarou nenhum envio no dia útil anterior: não se sabe quando chegou.</td><td>Destinatário</td><td>Nada. Se se repetir, envie-lhe um aviso.</td></tr>
+          <tr><td>Caixa postal não visitada (indisponibilidade declarada)</td><td><span class="badge b-purple">Compensado</span></td><td>Igual, mas no dia anterior o painelista estava declarado indisponível.</td><td>-</td><td>Nada. Não é culpa do painelista.</td></tr>
+          <tr><td>Ainda não enviada, anulada</td><td><span class="badge b-purple">Compensado</span></td><td>O pacote chegou, mas o remetente nunca o declarou como enviado: falta a data de saída.</td><td>Remetente</td><td>Nada. Se se repetir, envie um aviso ao remetente.</td></tr>
+          <tr><td>Já recebida</td><td><span class="badge b-gray">Informativo</span></td><td>Essa etiqueta já estava registada como recebida.</td><td>-</td><td>Nada.</td></tr>
+          <tr><td>Bloqueada</td><td><span class="badge b-gray">Informativo</span></td><td>O envio já estava anulado (por exemplo, passou a compensar ou tem uma incidência aberta).</td><td>-</td><td>Nada.</td></tr>
+          <tr><td>Formato inválido</td><td><span class="badge b-gray">Informativo</span></td><td>O que foi escrito não tem forma de etiqueta (texto solto ou código incompleto). O bot pede que o repita.</td><td>-</td><td>Nada.</td></tr>
+          <tr><td>Cidade errada, anulada</td><td><span class="badge b-purple">Compensado</span></td><td>Apenas em casos antigos. O ONEMS já não gera este motivo.</td><td>Remetente</td><td>Nada.</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout info"><strong>Data da primeira tentativa.</strong> Quando um caso é corrigido, sozinho ou pelo utilizador, a receção regista-se com a hora em que o painelista a declarou pela primeira vez, não com a hora da correção. Assim a medição não se altera.</div>
+    </section>
+
+    <section id="fix">
+      <h2>Corrigir um caso</h2>
+      <p>Use-o quando souber qual é o envio que o painelista recebeu de facto.</p>
+      <div class="app">
+        <div class="app-bar"><i></i><i></i><i></i><span>ONEMS &rsaquo; Receções &rsaquo; Corrigir</span></div>
+        <div class="app-body">
+          <div class="m-box" style="max-width:560px;margin:0">
+            <div class="m-h3">Corrigir caso: escolha o envio correto</div>
+            <p class="m-muted">O painelista declarou a etiqueta 00010813. Escolha o envio enviado para a sua cidade que corresponda.</p>
+            <table>
+              <thead><tr><th></th><th>Etiqueta</th><th>Painelista de origem</th><th>Data</th></tr></thead>
+              <tbody>
+                <tr><td>&#9711;</td><td><code>00010790</code></td><td>Paul Kamau</td><td>2026-10-28</td></tr>
+                <tr style="background:var(--b50)"><td>&#9673;</td><td><code>00010815</code></td><td>Manasseh Ouma</td><td>2026-11-02</td></tr>
+              </tbody>
+            </table>
+            <div style="margin-top:10px;text-align:right"><span class="m-sbtn">Cancelar</span><span class="m-pbtn">Corrigir com este envio</span></div>
+          </div>
+        </div>
+      </div>
+      <ol class="steps">
+        <li>Em <em>Decisões pendentes</em>, prima <strong>Corrigir</strong> no caso.</li>
+        <li>O ONEMS lista os envios <strong>enviados</strong> para a cidade do painelista que ainda não foram recebidos, com a sua etiqueta, o painelista de origem e a data. Se não houver nenhum, indica-o: <em>Não há envios enviados para a cidade deste painelista.</em></li>
+        <li>Em caso de dúvida, pergunte ao painelista quem lhe enviou o pacote: os painelistas reconhecem o remetente, não o produto.</li>
+        <li>Marque o envio correto e prima <strong>Corrigir com este envio</strong>.</li>
+      </ol>
+      <div class="callout ok"><strong>E depois:</strong> o caso passa a <span class="badge b-blue">Corrigido</span>, a receção fica com a data da primeira tentativa e o ONEMS guarda quem o corrigiu e quando. A regra da caixa postal aplica-se na mesma: se não se cumprir, o caso termina <span class="badge b-purple">Compensado</span>.</div>
+      <div class="callout warn">Os casos <em>Utilizador do Telegram não registado como painelista</em> e <em>Sem nó</em> não têm o botão <strong>Corrigir</strong>: sem painelista ou sem ponto não há cidade onde procurar. Só se podem fechar.</div>
+    </section>
+
+    <section id="close">
+      <h2>Compensar ou descartar</h2>
+      <p>Use-o quando a receção não pode ser dada como boa.</p>
+      <ol class="steps">
+        <li>Prima <strong>Compensar / Descartar</strong> no caso.</li>
+        <li>Leia o aviso: se o caso tem um envio associado e ainda não recebido, esse envio será anulado e passará a compensar; se não tem envio, o caso é simplesmente descartado.</li>
+        <li>Escreva uma <strong>nota</strong> se quiser deixar o motivo (opcional) e prima <strong>Fechar caso</strong>.</li>
+      </ol>
+      <div class="callout ok"><strong>E depois:</strong> o caso fica <span class="badge b-purple">Compensado</span> ou <span class="badge b-gray">Descartado</span>, sai de <em>Decisões pendentes</em> e o indicador do menu desce. Um envio compensado volta a ser programado no balanceamento seguinte. Isto não se pode desfazer a partir do ecrã.</div>
+    </section>
+
+    <section id="reminders">
+      <h2>Lembretes automáticos</h2>
+      <p>O painelista que causou uma falha recebe pelo Telegram, no seu idioma, uma mensagem que explica o que aconteceu e o que deve fazer da próxima vez. O utilizador não tem de fazer nada.</p>
+      <ul>
+        <li>No máximo <strong>um lembrete por dia</strong> por painelista e motivo.</li>
+        <li>Apenas entre as <strong>08:00 e as 20:00</strong>, hora local da conta. Fora desse horário espera pelas 08:00.</li>
+        <li>A partir da <strong>terceira falha em 7 dias</strong>, a mensagem diz que o seu responsável está informado.</li>
+        <li>Não se envia se o painelista tinha declarado indisponibilidade, nem nos casos sem responsável (por exemplo, <em>Etiqueta de um envio para outra cidade</em>).</li>
+      </ul>
+    </section>
+
+    <section id="notice">
+      <h2>Aviso a um painelista</h2>
+      <ol class="steps">
+        <li>Em <em>Painelistas reincidentes</em>, prima <strong>Enviar aviso</strong> na linha do painelista.</li>
+        <li>Abre-se <em>Aviso ao painelista</em> com um texto já preparado segundo o seu motivo principal, no seu idioma. Pode mudar o <em>Idioma</em> e editar o texto.</li>
+        <li>Prima <strong>Enviar</strong>.</li>
+      </ol>
+      <div class="callout ok"><strong>E depois:</strong> a mensagem chega ao Telegram do painelista e a coluna <em>Último aviso</em> mostra a data.</div>
+    </section>
+
+    <section id="broadcast">
+      <h2>Mensagem a todos os painelistas</h2>
+      <p>Para um erro que muitos cometem, é melhor do que um aviso a cada um.</p>
+      <ol class="steps">
+        <li>Prima <span class="btn primary">Mensagem a todos os painelistas</span> na barra superior.</li>
+        <li>Escolha um <strong>Modelo</strong>: <em>Lição: visitar a caixa postal todos os dias</em>, <em>Receção anulada: sem visita no dia anterior</em>, <em>Remetente: envio não declarado no bot</em>, <em>Remetente: etiqueta declarada diferente da do envelope</em> ou <em>Remetente: a carta chegou a outra cidade</em>. Edite o texto se for preciso.</li>
+        <li>Verifique os <em>Destinatários</em>: os painelistas ativos da conta com Telegram.</li>
+        <li>Prima <strong>Confirmar: enviar a N painelistas</strong>.</li>
+      </ol>
+      <div class="callout ok"><strong>E depois:</strong> cada painelista recebe-a no seu idioma. Em <em>Mensagens anteriores</em> ficam a data, o texto e quantos foram enviados e quantos falharam.</div>
+    </section>
+
+    <section id="bot">
+      <h2>O que vê o painelista</h2>
+      <p>O painelista confirma uma receção com <strong>Confirmar uma receção</strong>, enviando a foto ou o número da etiqueta. Se algo falhar, o ONE bot diz-lhe o motivo e o que fazer.</p>
+      <div class="two">
+        <div class="tg" aria-label="Exemplo: receção com etiqueta não encontrada">
+          <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
+          <div class="tg-body">
+            <div class="tg-kb one"><span class="tap">Confirmar uma receção</span></div>
+            <div class="tg-msg out">00010813<span class="t">10:42</span></div>
+            <div class="tg-msg in">Não encontrámos nenhum envio com essa etiqueta a caminho de ti. Verifica o número e tenta de novo.<span class="t">10:42</span></div>
+          </div>
+          <div class="tg-input"><span>📎</span><span class="ph">Mensagem</span><span>🎤</span></div>
+        </div>
+        <div>
+          <h3 style="margin-top:8px">Convém saber</h3>
+          <ul>
+            <li>A resposta depende do motivo: etiqueta não encontrada, já recebida, envio não declarado pelo remetente, caixa postal não visitada, etc.</li>
+            <li>Se o ONEMS corrigir uma digitação, o painelista vê a sua receção confirmada normalmente.</li>
+            <li>Se a regra da caixa postal anular a receção, o bot <strong>não</strong> diz «recebido».</li>
+          </ul>
+        </div>
+      </div>
+      <p class="cap">As mensagens do bot podem mudar ligeiramente.</p>
+    </section>
+
+    <section id="unreadable">
+      <h2>Etiqueta ilegível</h2>
+      <p>Se o painelista não consegue ler a etiqueta, reporta-a com <strong>Reportar incidência</strong> (<em>Etiqueta / recibo ilegível</em>). O bot mostra-lhe os pacotes que tem a caminho, <strong>os mais recentes primeiro</strong>, com <strong>o remetente, a sua cidade e a data de envio</strong>, para que reconheça o seu.</p>
+      <div class="two">
+        <div class="tg" aria-label="Exemplo: escolher o pacote na lista">
+          <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
+          <div class="tg-body">
+            <div class="tg-msg in">Qual destes pacotes recebeste?<br>1. De Manasseh Ouma (Kisumu) &middot; enviado a 02/11 &middot; Carta<br>2. De Paul Kamau (Nakuru) &middot; enviado a 28/10 &middot; Carta<span class="t">11:02</span></div>
+            <div class="tg-kb"><span class="tap">1</span><span>2</span></div>
+            <div class="tg-kb one"><span>Nenhum</span></div>
+            <div class="tg-msg in">✅ Receção registada.<span class="t">11:02</span></div>
+          </div>
+          <div class="tg-input"><span>📎</span><span class="ph">Mensagem</span><span>🎤</span></div>
+        </div>
+        <div>
+          <ul>
+            <li><strong>Escolhe um:</strong> a receção fica registada e a incidência fecha-se sozinha.</li>
+            <li><strong>Prime «Nenhum»:</strong> o bot pede-lhe que o conte ao seu responsável; a incidência fica aberta para o utilizador em <em>Incidências reportadas</em>.</li>
+            <li><strong>A lista caducou:</strong> o bot pede-lhe que comece de novo.</li>
+          </ul>
+          <div class="callout info"><strong>Foto da etiqueta após duas tentativas.</strong> Se um painelista escrever uma etiqueta que não existe <strong>duas vezes em 30 minutos</strong>, o bot pede-lhe uma foto da etiqueta. O ONEMS abre (ou reutiliza) uma incidência <em>Etiqueta / recibo ilegível</em> em <strong>Incidências reportadas</strong> com a etiqueta digitada, e a foto chega à conversa dessa incidência. Com a foto pode encontrar o envio correto e corrigir o caso em Receções.</div>
+        </div>
+      </div>
+      <p class="cap">As mensagens do bot podem mudar ligeiramente.</p>
+    </section>
+
+    <section id="deadlines">
+      <h2>Prazos e regras</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Regra</th><th>O que faz o ONEMS</th></tr></thead>
+        <tbody>
+          <tr><td>Etiqueta não encontrada</td><td>Volta a procurá-la <strong>a cada 30 minutos durante 5 dias úteis</strong>, incluindo a pesquisa de digitações. Só servem envios declarados antes da primeira tentativa. Se aparecer, o caso corrige-se sozinho; se não, passa a <span class="badge b-red">Requer decisão</span>.</td></tr>
+          <tr><td>Erro de digitação</td><td>Só se corrige se houver <strong>um único</strong> envio enviado para a cidade do painelista cuja etiqueta difere num dígito ou em dois dígitos adjacentes trocados. Com vários, decide o utilizador.</td></tr>
+          <tr><td>Caixa postal</td><td>Uma carta de caixa postal só serve se o painelista declarou algum envio no dia útil anterior (sinal de que visitou a caixa postal). Se não, é anulada e compensada.</td></tr>
+          <tr><td>Pacote não recebido</td><td>Se um envio não for recebido em <strong>15 dias</strong> desde a sua saída, é anulado e o utilizador recebe um e-mail. Se depois chegar e o painelista o declarar, o envio é reativado e a receção vale com a data da tentativa.</td></tr>
+          <tr><td>Outra cidade</td><td>Um envio nunca é reatribuído a outra cidade: alteraria a rota medida. Por isso esse caso é decidido pelo utilizador.</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="cases">
+      <h2>Casos práticos</h2>
+      <p>Nomes e etiquetas ilustrativos.</p>
+      <div class="chips"><a href="#case-typo">Etiqueta com um dígito trocado</a><a href="#case-notfound">Etiqueta que não existe</a><a href="#case-notsent">Remetente que não declarou</a><a href="#case-pobox">Caixa postal não visitada</a><a href="#case-city">Etiqueta de outra cidade</a><a href="#case-repeat">Um painelista que repete</a></div>
+
+      <article class="case" id="case-typo">
+        <h3>Etiqueta com um dígito trocado</h3>
+        <p class="sit">O remetente colou a etiqueta 00010884, mas declarou 00010894 no bot.</p>
+        <ul>
+          <li>A destinatária escreve 00010884, que não existe. O ONEMS vê um único envio para a sua cidade com um dígito diferente (00010894) e corrige-o.</li>
+          <li>O caso aparece como <em>Erro de digitação corrigido</em>, <span class="badge b-blue">Corrigido</span>, com o remetente como responsável. O remetente recebe um lembrete.</li>
+          <li><strong>O utilizador:</strong> nada. Se o mesmo remetente aparecer em <em>Painelistas reincidentes</em>, envie-lhe um aviso.</li>
+        </ul>
+      </article>
+
+      <article class="case" id="case-notfound">
+        <h3>Etiqueta que não existe</h3>
+        <p class="sit">Uma painelista escreve 00010813 duas vezes. Não há nenhum envio com essa etiqueta nem nenhum parecido.</p>
+        <ol class="steps">
+          <li>O caso fica <span class="badge b-yellow">Pendente</span> e o bot pede-lhe uma foto da etiqueta. Em <em>Incidências reportadas</em> aparece uma incidência <em>Etiqueta / recibo ilegível</em> com a foto.</li>
+          <li>Na foto lê-se 00010815, enviado por Manasseh Ouma. Em Receções, prima <strong>Corrigir</strong>, escolha 00010815 e prima <strong>Corrigir com este envio</strong>.</li>
+          <li>Se não for possível saber qual é, espere: se o remetente o declarar nos próximos 5 dias úteis, corrige-se sozinho.</li>
+        </ol>
+        <div class="callout ok"><strong>E depois:</strong> resolva também a incidência em <em>Incidências reportadas</em> com uma nota.</div>
+      </article>
+
+      <article class="case" id="case-notsent">
+        <h3>Remetente que não declarou o envio</h3>
+        <p class="sit">O pacote chega, a etiqueta está correta, mas o remetente nunca o marcou como enviado.</p>
+        <ul>
+          <li>Sem data de saída não se pode medir o tempo. O envio é anulado e passa a compensar: <em>Ainda não enviada, anulada</em>, <span class="badge b-purple">Compensado</span>, responsável o remetente.</li>
+          <li><strong>O utilizador:</strong> nada. Se acontecer com vários remetentes, use o modelo <em>Remetente: envio não declarado no bot</em> na mensagem a todos.</li>
+        </ul>
+      </article>
+
+      <article class="case" id="case-pobox">
+        <h3>Caixa postal não visitada</h3>
+        <p class="sit">Um painelista com caixa postal declara uma carta na segunda-feira, mas na sexta-feira anterior não declarou nenhum envio.</p>
+        <ul>
+          <li>Não se sabe em que dia chegou a carta, por isso não serve: <em>Caixa postal não visitada</em>, <span class="badge b-purple">Compensado</span>, responsável o destinatário.</li>
+          <li>Se nessa sexta-feira estava declarado indisponível, o motivo é <em>Caixa postal não visitada (indisponibilidade declarada)</em> e não lhe é atribuído.</li>
+          <li><strong>O utilizador:</strong> nada; se muitos o cometerem, modelo <em>Lição: visitar a caixa postal todos os dias</em>.</li>
+        </ul>
+      </article>
+
+      <article class="case" id="case-city">
+        <h3>Etiqueta de outra cidade</h3>
+        <p class="sit">Um painelista de Nairobi declara uma etiqueta que corresponde a um envio para Mombaça.</p>
+        <ol class="steps">
+          <li>O caso fica <span class="badge b-red">Requer decisão</span> e o envio de Mombaça continua intacto.</li>
+          <li>Pergunte ao painelista pelo remetente ou peça-lhe uma foto. Se foi um erro de digitação, prima <strong>Corrigir</strong> e escolha o seu envio verdadeiro.</li>
+          <li>Se o pacote chegou mesmo à cidade errada, prima <strong>Compensar / Descartar</strong> e deixe uma nota.</li>
+        </ol>
+      </article>
+
+      <article class="case" id="case-repeat">
+        <h3>Um painelista que repete</h3>
+        <p class="sit">John Mwangi tem 3 falhas em 7 dias por envios não declarados.</p>
+        <ul>
+          <li>A partir da terceira falha, o seu lembrete automático diz que o seu responsável está informado.</li>
+          <li><strong>O utilizador:</strong> em <em>Painelistas reincidentes</em>, prima <strong>Enviar aviso</strong>, reveja o texto preparado e prima <strong>Enviar</strong>. Se não melhorar, telefone-lhe.</li>
+        </ul>
+      </article>
+    </section>
+
+    <section id="faq">
+      <h2>Perguntas</h2>
+      <details><summary>Porque não vejo o indicador vermelho em Receções?</summary><div>Porque não há casos abertos na conta. Só aparece quando há algum <em>Pendente</em> ou que <em>Requer decisão</em>.</div></details>
+      <details><summary>Porque é que a lista «Decisões pendentes» não muda ao escolher outra data?</summary><div>Porque mostra os casos abertos de qualquer dia. A data só altera o resumo e a lista <em>Casos</em>.</div></details>
+      <details><summary>Se corrigir um caso dias depois, o tempo é medido mal?</summary><div>Não. A receção regista-se com a hora da primeira tentativa do painelista.</div></details>
+      <details><summary>O que acontece a um envio compensado?</summary><div>É anulado e fica na lista de amostras por compensar. O balanceamento volta a programá-lo mais tarde.</div></details>
+      <details><summary>Posso desfazer um fecho?</summary><div>Não a partir do ecrã. Contacte o suporte.</div></details>
+      <details><summary>O resumo diário das 09:00 inclui estes casos?</summary><div>Não. O acompanhamento das receções é apenas neste ecrã.</div></details>
+      <details><summary>Quem vê estes casos?</summary><div>Os utilizadores admin da conta e superadmin. Cada conta vê unicamente os seus próprios painelistas.</div></details>
+    </section>
+  </div>
+  </main>
+</div>
+
+<script>
+(function () {
+  var links = Array.prototype.slice.call(document.querySelectorAll('#nav a'));
+  var sections = links.map(function (a) { return document.querySelector(a.getAttribute('href')); }).filter(Boolean);
+
+  // Mobile section picker
+  var jump = document.getElementById('jump');
+  links.forEach(function (a) {
+    var o = document.createElement('option');
+    o.value = a.getAttribute('href'); o.textContent = a.textContent; jump.appendChild(o);
+  });
+  jump.addEventListener('change', function () { location.hash = jump.value; });
+
+  // Highlight the current section in the side menu
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          links.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id); });
+          jump.value = '#' + e.target.id;
+        }
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    sections.forEach(function (s) { io.observe(s); });
+  }
+})();
+</script>
+</body>
+</html>

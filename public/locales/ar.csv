@@ -5158,3 +5158,6 @@ receipt_errors.close_title,إغلاق الحالة دون إصلاح
 receipt_errors.close_help,الملصق {tag}: إذا كانت هناك شحنة مرتبطة لم تُستلم بعد فسيتم إلغاؤها وتعويضها؛ وإلا فسيتم تجاهل الحالة.
 receipt_errors.close_note,ملاحظة (اختيارية)
 receipt_errors.close_confirm,إغلاق الحالة
+help_center.doc.receipt_errors.title,أخطاء الاستلام
+help_center.doc.receipt_errors.desc,ما يفعله ONEMS عندما لا يتطابق استلام مُصرَّح به، وكيفية قراءة شاشة الاستلامات، وكيفية إصلاح كل حالة أو إغلاقها.
+receipt_errors.help_link,مساعدة
