@@ -2952,6 +2952,9 @@ reported_incidents.status.auto_resolved,تم الحل تلقائيًا
 reported_incidents.readonly.title,تتم المعالجة تلقائيًا
 reported_incidents.readonly.no_data,لا توجد بيانات
 reported_incidents.readonly.no_candidates,لم يتم العثور على شحنات قيد النقل
+reported_incidents.readonly.none_selected,لم يتعرّف المشارك على أي من الشحنات التي عرضها البوت
+reported_incidents.readonly.invalid_pick,ضغط المشارك على زر من قائمة منتهية الصلاحية
+reported_incidents.readonly.not_found_repeat,لم يعثر البوت على الملصق بعد عدة محاولات وطلب صورة
 reported_incidents.readonly.chosen_shipment,الشحنة المختارة
 reported_incidents.contact.before,قبل
 reported_incidents.contact.after,بعد
@@ -5124,6 +5127,25 @@ receipt_errors.reason.ambiguous_typo,خطأ كتابة ملتبس
 receipt_errors.reason.invalid_format,تنسيق غير صالح
 receipt_errors.reason.no_panelist,مستخدم تيليجرام غير مسجَّل كعضو
 receipt_errors.reason.no_node,بلا عقدة
+receipt_errors.badge_tooltip,حالات استلام مفتوحة: معلّقة أو تتطلب قرارًا
+receipt_errors.reason_guide.open,ماذا يعني كل سبب
+receipt_errors.reason_guide.title,أسباب حالات الاستلام
+receipt_errors.reason_guide.intro,تُفتح حالة كلما صرّح مشارك باستلام فيه مشكلة. يوضح الملصق الملوّن الحالة النهائية: قيد الانتظار ويتطلب قراراً هما الحالتان اللتان تحتاجان إلى انتباهك.
+receipt_errors.reason_guide.close,إغلاق
+receipt_errors.reason_help.not_found,لا توجد شحنة بهذا الملصق في الطريق إلى هذا المشارك. تنتظر الحالة بضعة أيام: إذا صرّح المرسل بالشحنة لاحقًا يُسجَّل الاستلام تلقائيًا. وإن لم تظهر فراجع الملصق مع المشارك.
+receipt_errors.reason_help.ambiguous_typo,الملصق يشبه عدة شحنات يجب أن يستلمها المشارك ولا يمكن معرفة أيها المقصودة. اختر الشحنة الصحيحة عبر إصلاح.
+receipt_errors.reason_help.other_city_tag,الملصق موجود لكنه لشحنة موجهة إلى مدينة أخرى. لا يُسجَّل. تحقق مما إذا كان المشارك قد كتبه خطأ أو أن الطرد وصل فعلًا إلى مدينة خاطئة.
+receipt_errors.reason_help.no_panelist,مستخدم تيليغرام الذي كتب الملصق غير مرتبط بأي مشارك. لا يمكن إصلاحها: يمكن إغلاقها فقط.
+receipt_errors.reason_help.no_node,لا توجد نقطة مخصصة للمشارك في النظام. خصّص له نقطة في ملفه. يمكن إغلاق الحالة فقط.
+receipt_errors.reason_help.ok_typo_fixed,صرّح المرسل بالشحنة بملصق شبه مطابق (رقم مختلف أو مبدّل). يصحّحه النظام ويسجّل الاستلام. المسؤول: المرسل.
+receipt_errors.reason_help.ok_same_city,كان الملصق لشحنة موجهة إلى نقطة أخرى في المدينة نفسها. يُسجَّل باسم المشارك الذي استلمها. المسؤول: المرسل.
+receipt_errors.reason_help.pobox_absent_no_visit,رسالة صندوق بريد ولم يصرّح المشارك بأي شحنة في يوم العمل السابق: علامة على أنه لم يزر الصندوق ولا يُعرف متى وصلت الرسالة. لا تصلح للقياس وتُعوَّض بشحنة أخرى. المسؤول: المستلم.
+receipt_errors.reason_help.pobox_absent_unavailable,رسالة صندوق بريد جُمعت بعد يوم عمل كان فيه المشارك مسجلًا كغير متاح: لا يُعرف متى وصلت. لا تصلح للقياس وتُعوَّض بشحنة أخرى. ليس خطأ المشارك.
+receipt_errors.reason_help.not_sent_cancelled,وصل الطرد لكن المرسل لم يصرّح به كمُرسَل أبدًا: تاريخ الإرسال مفقود. يُلغى ويُعوَّض بشحنة أخرى. المسؤول: المرسل.
+receipt_errors.reason_help.already_received,هذا الملصق مسجل مسبقًا كمستلم. للعلم فقط: لا شيء للقيام به.
+receipt_errors.reason_help.blocked,كانت الشحنة ملغاة من قبل (مثلًا نُقلت إلى التعويض أو لديها حادثة مفتوحة) ولا يمكن تسجيلها. للعلم فقط.
+receipt_errors.reason_help.invalid_format,ما كتبه المشارك لا يشبه ملصقًا (نص عادي أو رمز ناقص). للعلم فقط.
+receipt_errors.reason_help.wrong_city_cancelled,في الحالات القديمة فقط: وصلت الشحنة إلى مدينة أخرى فأُلغيت وعُوِّضت. لم يعد النظام ينتج هذا السبب.
 receipt_errors.role.sender,مُرسِل
 receipt_errors.role.receiver,مستلِم
 receipt_errors.fix,إصلاح

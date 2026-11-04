@@ -2960,6 +2960,9 @@ reported_incidents.status.auto_resolved,Auto-resolved
 reported_incidents.readonly.title,Handled automatically
 reported_incidents.readonly.no_data,No data available
 reported_incidents.readonly.no_candidates,No shipments in transit were found
+reported_incidents.readonly.none_selected,The panelist did not recognise any of the shipments the bot showed
+reported_incidents.readonly.invalid_pick,The panelist tapped a button from an expired list
+reported_incidents.readonly.not_found_repeat,The bot could not find the label after several attempts and asked for a photo
 reported_incidents.readonly.chosen_shipment,Shipment chosen
 reported_incidents.contact.before,Before
 reported_incidents.contact.after,After
@@ -5132,6 +5135,25 @@ receipt_errors.reason.ambiguous_typo,Ambiguous typo
 receipt_errors.reason.invalid_format,Invalid format
 receipt_errors.reason.no_panelist,Telegram user not registered as a panelist
 receipt_errors.reason.no_node,No node
+receipt_errors.badge_tooltip,Open receipt cases: pending or needing a decision
+receipt_errors.reason_guide.open,What each reason means
+receipt_errors.reason_guide.title,Receipt case reasons
+receipt_errors.reason_guide.intro,A case opens every time a panelist declares a receipt with a problem. The coloured label shows the state it ends in: Pending and Needs decision are the ones that need your attention.
+receipt_errors.reason_guide.close,Close
+receipt_errors.reason_help.not_found,"No shipment with that label is on its way to this panelist. The case waits a few days: if the sender declares the shipment later, the receipt is registered automatically. If it does not appear, check the label with the panelist."
+receipt_errors.reason_help.ambiguous_typo,The label looks like several shipments the panelist has to receive and it is not possible to tell which one it is. Choose the right shipment with Fix.
+receipt_errors.reason_help.other_city_tag,The label exists but belongs to a shipment addressed to another city. It is not registered. Check whether the panelist typed it wrong or the parcel really reached the wrong city.
+receipt_errors.reason_help.no_panelist,The Telegram user who typed the label is not linked to any panelist. It cannot be fixed: only closed.
+receipt_errors.reason_help.no_node,The panelist has no point assigned in the system. Assign one in their record. The case can only be closed.
+receipt_errors.reason_help.ok_typo_fixed,The sender declared the shipment with an almost identical label (one digit different or swapped). The system corrects it and registers the receipt. Responsible: the sender.
+receipt_errors.reason_help.ok_same_city,The label belonged to a shipment addressed to another point in the same city. It is registered under the panelist who received it. Responsible: the sender.
+receipt_errors.reason_help.pobox_absent_no_visit,"PO Box letter and the panelist declared no shipment on the previous working day: a sign they did not visit the PO Box, so it is unknown when the letter arrived. It cannot be used for measurement and is compensated with another shipment. Responsible: the receiver."
+receipt_errors.reason_help.pobox_absent_unavailable,PO Box letter collected after a working day on which the panelist was declared unavailable: it is unknown when it arrived. It cannot be used for measurement and is compensated with another shipment. Not the panelist's fault.
+receipt_errors.reason_help.not_sent_cancelled,The parcel arrived but the sender never declared it as sent: the departure date is missing. It is cancelled and compensated with another shipment. Responsible: the sender.
+receipt_errors.reason_help.already_received,That label was already registered as received. Information only: nothing to do.
+receipt_errors.reason_help.blocked,"The shipment had been cancelled before (for example, it was moved to compensation or has an open incident) and cannot be registered. Information only."
+receipt_errors.reason_help.invalid_format,What the panelist typed does not look like a label (loose text or an incomplete code). Information only.
+receipt_errors.reason_help.wrong_city_cancelled,Old cases only: the shipment reached another city and was cancelled and compensated. The system no longer produces this reason.
 receipt_errors.role.sender,sender
 receipt_errors.role.receiver,receiver
 receipt_errors.fix,Fix

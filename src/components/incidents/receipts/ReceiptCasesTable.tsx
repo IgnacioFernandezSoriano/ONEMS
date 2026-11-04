@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Info } from 'lucide-react'
 import { useTranslation } from '@/hooks/useTranslation'
 import type { ReceiptCase, ReceiptCandidateShipment } from '@/lib/types'
 
@@ -14,12 +15,31 @@ interface Props {
 const OPEN_STATUSES = ['pending', 'needs_decision']
 // Sin panelista receptor o sin nodo no hay ciudad de la que elegir envio: solo se pueden cerrar.
 const NOT_FIXABLE = ['no_panelist', 'no_node']
+// Motivos y estado en que deja el caso cada uno (misma regla que public.receipt_outcome_status), en orden de
+// "hay que actuar" a "solo informa". wrong_city_cancelled ya no se produce: va al final, para casos antiguos.
+const REASON_GUIDE: Array<[string, string]> = [
+  ['not_found', 'pending'],
+  ['ambiguous_typo', 'needs_decision'],
+  ['other_city_tag', 'needs_decision'],
+  ['no_panelist', 'needs_decision'],
+  ['no_node', 'needs_decision'],
+  ['ok_typo_fixed', 'fixed'],
+  ['ok_same_city', 'fixed'],
+  ['pobox_absent_no_visit', 'compensated'],
+  ['pobox_absent_unavailable', 'compensated'],
+  ['not_sent_cancelled', 'compensated'],
+  ['already_received', 'informative'],
+  ['blocked', 'informative'],
+  ['invalid_format', 'informative'],
+  ['wrong_city_cancelled', 'compensated'],
+]
 
 export function ReceiptCasesTable({ cases, candidates, onFix, onClose, title }: Props) {
   const { t } = useTranslation()
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [fixing, setFixing] = useState<ReceiptCase | null>(null)
   const [closing, setClosing] = useState<ReceiptCase | null>(null)
+  const [showGuide, setShowGuide] = useState(false)
 
   const rows = cases.filter(c => statusFilter === 'all' || c.status === statusFilter)
   const th = 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase'
@@ -41,7 +61,15 @@ export function ReceiptCasesTable({ cases, candidates, onFix, onClose, title }: 
               <th className={th}>{t('receipt_errors.col.date')}</th>
               <th className={th}>{t('receipt_errors.col.panelist')}</th>
               <th className={th}>{t('receipt_errors.col.tag')}</th>
-              <th className={th}>{t('receipt_errors.col.reason')}</th>
+              <th className={th}>
+                <span className="inline-flex items-center gap-1">
+                  {t('receipt_errors.col.reason')}
+                  <button type="button" onClick={() => setShowGuide(true)} title={t('receipt_errors.reason_guide.open')}
+                    aria-label={t('receipt_errors.reason_guide.open')} className="text-gray-400 hover:text-blue-600">
+                    <Info className="w-4 h-4" />
+                  </button>
+                </span>
+              </th>
               <th className={th}>{t('receipt_errors.col.status')}</th>
               <th className={th}>{t('receipt_errors.col.attempts')}</th>
               <th className={th}>{t('receipt_errors.col.culprit')}</th>
@@ -77,6 +105,7 @@ export function ReceiptCasesTable({ cases, candidates, onFix, onClose, title }: 
       </div>
       {fixing && <FixDialog c={fixing} candidates={candidates} onFix={onFix} onDone={() => setFixing(null)} />}
       {closing && <CloseDialog c={closing} onClose={onClose} onDone={() => setClosing(null)} />}
+      {showGuide && <ReasonGuideDialog onDone={() => setShowGuide(false)} />}
     </div>
   )
 }
@@ -161,6 +190,45 @@ function CloseDialog({ c, onClose, onDone }: { c: ReceiptCase; onClose: Props['o
         <div className="flex justify-end gap-2 mt-4">
           <button onClick={onDone} className="px-4 py-2 text-sm border rounded">{t('common.cancel')}</button>
           <button onClick={submit} disabled={busy} className="px-4 py-2 text-sm bg-gray-800 text-white rounded disabled:opacity-50">{t('receipt_errors.close_confirm')}</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ReasonGuideDialog({ onDone }: { onDone: () => void }) {
+  const { t } = useTranslation()
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onDone() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onDone])
+  const tone: Record<string, string> = {
+    pending: 'bg-amber-100 text-amber-800',
+    needs_decision: 'bg-red-100 text-red-700',
+    fixed: 'bg-blue-100 text-blue-700',
+    compensated: 'bg-orange-100 text-orange-700',
+    informative: 'bg-gray-100 text-gray-700',
+  }
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4" onClick={onDone}>
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl p-6 max-h-[85vh] flex flex-col" onClick={e => e.stopPropagation()}
+        role="dialog" aria-modal="true" aria-labelledby="reason-guide-title">
+        <h3 id="reason-guide-title" className="text-lg font-bold mb-1">{t('receipt_errors.reason_guide.title')}</h3>
+        <p className="text-sm text-gray-600 mb-3">{t('receipt_errors.reason_guide.intro')}</p>
+        <div className="overflow-y-auto border rounded divide-y">
+          {REASON_GUIDE.map(([reason, status]) => (
+            <div key={reason} className="px-4 py-3">
+              <div className="flex flex-wrap items-center gap-2 mb-1">
+                <span className="font-medium text-sm">{t(`receipt_errors.reason.${reason}`)}</span>
+                <span className={`text-xs px-2 py-0.5 rounded-full ${tone[status] ?? tone.informative}`}>{t(`receipt_errors.status.${status}`)}</span>
+              </div>
+              <p className="text-sm text-gray-600">{t(`receipt_errors.reason_help.${reason}`)}</p>
+            </div>
+          ))}
+        </div>
+        <div className="flex justify-end mt-4">
+          <button onClick={onDone} className="px-4 py-2 text-sm border rounded">{t('receipt_errors.reason_guide.close')}</button>
         </div>
       </div>
     </div>
