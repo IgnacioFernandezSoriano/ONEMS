@@ -1,0 +1,702 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>مساعدة: أخطاء الاستلام</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<style>
+  :root {
+    --white: #ffffff; --g50: #f9fafb; --g100: #f3f4f6; --g200: #e5e7eb; --g300: #d1d5db;
+    --g400: #9ca3af; --g500: #6b7280; --g600: #4b5563; --g700: #374151; --g900: #111827;
+    --b50: #eff6ff; --b100: #dbeafe; --b600: #2563eb; --b700: #1d4ed8;
+    --r100: #fee2e2; --r700: #b91c1c; --gr100: #dcfce7; --gr700: #15803d;
+    --y100: #fef9c3; --y800: #854d0e; --p100: #f3e8ff; --p700: #7e22ce;
+    --tg-head: #517da2; --tg-wall-a: #d4e4bc; --tg-wall-b: #a9cba6; --tg-dot: rgba(255,255,255,.35);
+    --tg-in: #ffffff; --tg-out: #effdde; --tg-ink: #000000; --tg-time: #8a9aa6; --tg-time-out: #5eaf5c;
+    --tg-key: rgba(52, 92, 60, .42); --tg-ring: #ffd23f; --tg-photo: #c7d3dc;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+      'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    -webkit-font-smoothing: antialiased; background: var(--g50); color: var(--g700); line-height: 1.6; font-size: 15px;
+  }
+  .layout { display: flex; min-height: 100vh; }
+
+  /* Sidebar, same look as the ONE menu */
+  .side {
+    width: 272px; flex-shrink: 0; background: var(--white); border-right: 1px solid var(--g200);
+    position: sticky; top: 0; height: 100vh; overflow-y: auto; display: flex; flex-direction: column;
+  }
+  .brand { padding: 24px 24px 16px; }
+  .brand h1 { font-size: 24px; line-height: 32px; font-weight: 700; color: var(--g900); }
+  .brand p { font-size: 14px; color: var(--g500); margin-top: 4px; }
+  .brand .doc { margin-top: 16px; font-size: 12px; font-weight: 600; color: var(--b700); background: var(--b50);
+    display: inline-block; padding: 2px 10px; border-radius: 999px; }
+  .nav { padding: 8px 12px 24px; flex: 1; }
+  .nav h3 { font-size: 12px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--g400);
+    padding: 16px 12px 6px; }
+  .nav a {
+    display: block; padding: 8px 12px; border-radius: 8px; font-size: 14px; font-weight: 500; color: var(--g600);
+    text-decoration: none; transition: background .15s, color .15s;
+  }
+  .nav a:hover { background: var(--g100); }
+  .nav a.active { background: var(--b50); color: var(--b700); }
+  .side-foot { padding: 16px 24px; border-top: 1px solid var(--g200); font-size: 12px; color: var(--g500); }
+
+  /* Content */
+  .main { flex: 1; min-width: 0; padding: 40px 32px 80px; }
+  .page { max-width: 880px; margin: 0 auto; }
+  .page > header { margin-bottom: 32px; }
+  .page > header h2 { font-size: 30px; line-height: 38px; font-weight: 700; color: var(--g900); }
+  .page > header p { margin-top: 8px; font-size: 17px; color: var(--g600); max-width: 640px; }
+  section { margin-top: 48px; }
+  section > h2 { font-size: 22px; font-weight: 700; color: var(--g900); padding-bottom: 8px; margin-bottom: 16px;
+    border-bottom: 1px solid var(--g200); }
+  h3 { font-size: 17px; font-weight: 600; color: var(--g900); margin: 28px 0 8px; }
+  p { margin: 8px 0; }
+  ul, ol { margin: 8px 0 8px 22px; }
+  li { margin: 4px 0; }
+  strong { color: var(--g900); font-weight: 600; }
+  code, kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px;
+    background: var(--g100); border: 1px solid var(--g200); border-radius: 6px; padding: 1px 6px; color: var(--g900); }
+  .card { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 20px 24px; margin: 16px 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 16px 0; }
+  .grid .card { margin: 0; }
+  .card h4 { font-size: 15px; font-weight: 600; color: var(--g900); margin-bottom: 4px; }
+  .card p { margin: 4px 0; font-size: 14px; color: var(--g600); }
+
+  .badge { display: inline-block; font-size: 12px; font-weight: 500; padding: 1px 10px; border-radius: 999px; white-space: nowrap; }
+  .b-red { background: var(--r100); color: var(--r700); }
+  .b-blue { background: var(--b100); color: var(--b700); }
+  .b-green { background: var(--gr100); color: var(--gr700); }
+  .b-yellow { background: var(--y100); color: var(--y800); }
+  .b-gray { background: var(--g100); color: var(--g600); }
+  .b-purple { background: var(--p100); color: var(--p700); }
+  .btn { display: inline-block; font-size: 13px; font-weight: 500; padding: 2px 10px; border-radius: 8px;
+    background: var(--white); border: 1px solid var(--g300); color: var(--g700); white-space: nowrap; }
+  .btn.primary { background: var(--b600); border-color: var(--b600); color: #fff; }
+
+  .callout { border-radius: 12px; padding: 14px 18px; margin: 16px 0; font-size: 14px; border: 1px solid; }
+  .callout.info { background: var(--b50); border-color: var(--b100); color: #1e3a8a; }
+  .callout.ok { background: #f0fdf4; border-color: var(--gr100); color: #14532d; }
+  .callout.warn { background: #fffbeb; border-color: var(--y100); color: var(--y800); }
+  .callout strong { color: inherit; }
+
+  .table-wrap { overflow-x: auto; margin: 16px 0; background: var(--white); border: 1px solid var(--g200); border-radius: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--g500); background: var(--g50); padding: 10px 14px; border-bottom: 1px solid var(--g200); }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--g100); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  td:first-child { font-weight: 500; color: var(--g900); }
+
+  /* Steps */
+  ol.steps { list-style: none; margin: 12px 0; counter-reset: s; }
+  ol.steps > li { counter-increment: s; position: relative; padding: 4px 0 12px 44px; margin: 0; }
+  ol.steps > li::before {
+    content: counter(s); position: absolute; left: 0; top: 2px; width: 28px; height: 28px; border-radius: 50%;
+    background: var(--b100); color: var(--b700); font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Telegram chat mock-ups */
+  .chat { background: #e9eef5; border: 1px solid var(--g200); border-radius: 16px; padding: 16px; margin: 16px 0; max-width: 460px; }
+  .chat .who { text-align: center; font-size: 12px; color: var(--g500); margin-bottom: 8px; font-weight: 500; }
+  .msg { max-width: 85%; padding: 8px 12px; border-radius: 14px; margin: 6px 0; font-size: 14px; line-height: 1.45; box-shadow: 0 1px 1px rgba(0,0,0,.06); }
+  .msg.bot { background: var(--white); border-top-left-radius: 4px; margin-right: auto; color: var(--g900); }
+  .msg.me { background: #dbeafe; border-top-right-radius: 4px; margin-left: auto; color: var(--g900); }
+  .kb { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 8px; max-width: 85%; }
+  .kb span { flex: 1 1 auto; text-align: center; background: rgba(37,99,235,.12); color: var(--b700); font-size: 13px; font-weight: 500;
+    padding: 6px 10px; border-radius: 10px; }
+  .kb.col span { flex-basis: 100%; }
+  .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; align-items: start; }
+  .two .chat { margin: 8px 0; }
+  .cap { font-size: 13px; color: var(--g500); margin-top: -6px; max-width: 460px; }
+
+  /* Flow */
+  .flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; margin: 16px 0; }
+  .flow .node { flex: 1 1 150px; background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 12px 14px; font-size: 13px; position: relative; }
+  .flow .node b { display: block; color: var(--g900); font-size: 14px; margin-bottom: 2px; }
+  .flow .node .tag { font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--b700); }
+  .flow .arrow { align-self: center; color: var(--g400); font-size: 18px; }
+
+  details { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; margin: 8px 0; }
+  summary { cursor: pointer; padding: 14px 18px; font-weight: 600; color: var(--g900); list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: '+'; color: var(--g400); font-size: 20px; line-height: 1; }
+  details[open] summary::after { content: '\2212'; }
+  details > div { padding: 0 18px 14px; color: var(--g600); font-size: 14px; }
+
+  /* ONEMS screen drawings */
+  .app { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; overflow: hidden; margin: 16px 0 6px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .app-bar { display: flex; gap: 6px; align-items: center; background: var(--g100); border-bottom: 1px solid var(--g200); padding: 8px 12px; font-size: 12px; color: var(--g500); }
+  .app-bar i { width: 9px; height: 9px; border-radius: 50%; background: var(--g300); display: inline-block; }
+  .app-bar span { margin-left: 8px; }
+  .app-body { padding: 20px; font-size: 13px; color: var(--g700); overflow-x: auto; }
+  .app-body.cols { display: grid; grid-template-columns: 210px 1fr; padding: 0; }
+  .app-body.cols > .sb { border-right: 1px solid var(--g200); padding: 14px 10px; background: #fff; }
+  .app-body.cols > .ct { padding: 20px; }
+  .sb .t { font-size: 20px; font-weight: 700; color: var(--g900); padding: 0 8px; }
+  .sb .s { font-size: 11px; color: var(--g500); padding: 0 8px 8px; }
+  .sb h5 { font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--g400); padding: 10px 8px 4px; }
+  .mi { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 8px; font-size: 13px; color: var(--g700); }
+  .mi.on { background: var(--b50); color: var(--b600); }
+  .mi .ic { width: 14px; height: 14px; border-radius: 4px; background: var(--g300); flex-shrink: 0; }
+  .mi.on .ic { background: var(--b600); }
+  .mi .badge { margin-left: auto; font-size: 11px; padding: 0 7px; }
+  .m-h { font-size: 18px; font-weight: 700; color: var(--g900); margin-bottom: 12px; }
+  .m-h3 { font-size: 15px; font-weight: 700; color: var(--g900); margin: 0 0 6px; }
+  .m-sel { display: inline-block; border: 1px solid var(--g300); border-radius: 4px; padding: 3px 24px 3px 8px; font-size: 12px; background: #fff; color: var(--g700); margin-right: 8px; position: relative; }
+  .m-sel::after { content: '\25BE'; position: absolute; right: 8px; color: var(--g400); }
+  .m-card { border: 1px solid var(--g200); border-radius: 8px; overflow: hidden; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.05); margin: 10px 0; }
+  .app table { font-size: 12px; }
+  .app th { padding: 8px 12px; font-size: 11px; }
+  .app td { padding: 8px 12px; }
+  .app td:first-child { font-weight: 400; color: inherit; }
+  .app .num { text-align: right; }
+  .m-link { color: var(--b600); }
+  .m-box { border: 1px solid var(--g200); border-radius: 6px; padding: 14px; margin: 10px 0; }
+  .m-note { background: var(--g50); border-radius: 6px; padding: 10px 12px; margin: 8px 0; font-size: 12px; }
+  .m-muted { color: var(--g500); font-size: 12px; }
+  .m-pbtn, .m-sbtn { display: inline-block; padding: 6px 14px; border-radius: 8px; font-size: 12px; margin: 2px 6px 2px 0; }
+  .m-pbtn { background: var(--b600); color: #fff; }
+  .m-sbtn { background: var(--g200); color: var(--g700); }
+  .m-ta { border: 1px solid var(--g300); border-radius: 4px; padding: 8px; font-size: 12px; color: var(--g400); background: #fff; margin: 6px 0 10px; }
+  .m-in { display: inline-block; border: 1px solid var(--g300); border-radius: 4px; padding: 3px 8px; font-size: 12px; background: #fff; min-width: 90px; }
+  .m-bub { max-width: 80%; padding: 6px 10px; border-radius: 10px; margin: 5px 0; font-size: 12px; }
+  .m-bub small { display: block; color: var(--g500); font-size: 10px; margin-top: 2px; }
+  .m-bub.l { background: var(--g100); margin-right: auto; }
+  .m-bub.r { background: var(--b100); margin-left: auto; }
+  .pin { display: inline-flex; width: 20px; height: 20px; border-radius: 50%; background: var(--b600); color: #fff; font-size: 11px; font-weight: 700; align-items: center; justify-content: center; margin-left: 6px; vertical-align: middle; flex-shrink: 0; }
+  .legend { counter-reset: l; list-style: none; margin: 10px 0 20px; }
+  .legend li { counter-increment: l; position: relative; padding: 2px 0 6px 34px; font-size: 14px; }
+  .legend li::before { content: counter(l); position: absolute; left: 0; top: 1px; width: 20px; height: 20px; border-radius: 50%; background: var(--b600); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .heat td { text-align: center; }
+  .heat .ok { background: #f0fdf4; } .heat .hi { background: var(--y100); } .heat .sat { background: var(--r100); }
+  .heat .off { background: repeating-linear-gradient(45deg, var(--g100), var(--g100) 4px, #fff 4px, #fff 8px); color: var(--g400); }
+  .heat .now { outline: 2px solid var(--b600); outline-offset: -2px; }
+
+  /* Right-to-left (Arabic) */
+  [dir=rtl] .side { border-right: 0; border-left: 1px solid var(--g200); }
+  [dir=rtl] .app-body.cols > .sb { border-right: 0; border-left: 1px solid var(--g200); }
+  [dir=rtl] th, [dir=rtl] td, [dir=rtl] .nav a { text-align: right; }
+  [dir=rtl] ul, [dir=rtl] ol { margin: 8px 22px 8px 0; }
+  [dir=rtl] ol.steps > li { padding: 4px 44px 12px 0; }
+  [dir=rtl] ol.steps > li::before { left: auto; right: 0; }
+  [dir=rtl] .legend li { padding: 2px 34px 6px 0; }
+  [dir=rtl] .legend li::before { left: auto; right: 0; }
+  [dir=rtl] .msg.bot { border-top-left-radius: 14px; border-top-right-radius: 4px; margin-right: 0; margin-left: auto; }
+  [dir=rtl] .msg.me { border-top-right-radius: 14px; border-top-left-radius: 4px; margin-left: 0; margin-right: auto; }
+  [dir=rtl] .m-bub.l { margin-right: 0; margin-left: auto; }
+  [dir=rtl] .m-bub.r { margin-left: 0; margin-right: auto; }
+  [dir=rtl] .pin { margin-left: 0; margin-right: 6px; }
+  [dir=rtl] .m-sel { padding: 3px 8px 3px 24px; margin-right: 0; margin-left: 8px; }
+  [dir=rtl] .m-sel::after { right: auto; left: 8px; }
+  [dir=rtl] .m-pbtn, [dir=rtl] .m-sbtn { margin: 2px 0 2px 6px; }
+  [dir=rtl] .mi .badge { margin-left: 0; margin-right: auto; }
+  [dir=rtl] .app-bar span { margin-left: 0; margin-right: 8px; }
+  [dir=rtl] .flow .arrow { transform: scaleX(-1); }
+  [dir=rtl] .app td:first-child { font-weight: 400; }
+  /* Telegram (canonical, from panelist-guide) and practical cases */
+  .case { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 20px 24px; margin: 16px 0; scroll-margin-top: 24px; }
+  .case > h3 { margin: 0; display: flex; gap: 10px; align-items: center; }
+  .case > .sit { color: var(--g500); font-size: 14px; margin: 2px 0 12px; }
+  .case .callout { margin: 8px 0; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+  .chips a { text-decoration: none; font-size: 13px; font-weight: 500; padding: 4px 12px; border-radius: 999px;
+    background: var(--white); border: 1px solid var(--g200); color: var(--g700); }
+  .chips a:hover { background: var(--b50); border-color: var(--b100); color: var(--b700); }
+  .tg { max-width: 380px; border-radius: 16px; overflow: hidden; border: 1px solid var(--g200);
+    box-shadow: 0 4px 16px rgba(17,24,39,.10); background: var(--tg-in); }
+  .tg-head { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: var(--tg-head); color: #ffffff; }
+  .tg-back { font-size: 20px; line-height: 1; opacity: .9; }
+  .tg-av { width: 36px; height: 36px; border-radius: 50%; flex: none; display: grid; place-items: center;
+    background: linear-gradient(160deg, #72c2f4, #3d8fd9); color: #ffffff; font-weight: 700; font-size: 12px; }
+  .tg-name { flex: 1; min-width: 0; line-height: 1.2; }
+  .tg-name b { display: block; font-size: 15px; color: #ffffff; font-weight: 600; }
+  .tg-name small { font-size: 12.5px; opacity: .8; }
+  .tg-body { display: flex; flex-direction: column; gap: 6px; padding: 12px 10px 14px;
+    background-color: var(--tg-wall-a);
+    background-image: radial-gradient(var(--tg-dot) 1.4px, transparent 1.6px), linear-gradient(160deg, var(--tg-wall-a), var(--tg-wall-b));
+    background-size: 18px 18px, 100% 100%; }
+  .tg-msg { max-width: 84%; padding: 6px 9px 7px 10px; border-radius: 12px; font-size: 14.5px; line-height: 1.38; color: var(--tg-ink);
+    box-shadow: 0 1px 1px rgba(0,0,0,.13); overflow-wrap: anywhere; }
+  .tg-msg.in { background: var(--tg-in); align-self: flex-start; border-bottom-left-radius: 4px; }
+  .tg-msg.out { background: var(--tg-out); align-self: flex-end; border-bottom-right-radius: 4px; }
+  .tg-msg .t { float: right; font-size: 11px; color: var(--tg-time); margin: 8px 0 -4px 10px; line-height: 1; }
+  .tg-msg.out .t { color: var(--tg-time-out); }
+  .tg-msg.out .t::after { content: " \2713\2713"; letter-spacing: -2px; }
+  .tg-msg.photo { padding: 3px; }
+  .tg-msg.photo .img { display: grid; place-items: center; width: 170px; height: 104px; border-radius: 10px; background: var(--tg-photo); font-size: 30px; }
+  .tg-msg.photo .t { position: relative; margin: -18px 8px 4px 0; }
+  .tg-kb { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; align-self: flex-start; width: 84%; margin-top: -2px; }
+  .tg-kb.one { grid-template-columns: 1fr; }
+  .tg-kb span { background: var(--tg-key); color: #ffffff; border-radius: 8px; padding: 7px 6px; text-align: center; font-size: 13.5px; font-weight: 600; }
+  .tg-kb span.tap { box-shadow: inset 0 0 0 2px var(--tg-ring); }
+  .tg-kb span.tap::after { content: " \1F446"; }
+  .tg-input { display: flex; align-items: center; gap: 12px; padding: 9px 14px; background: #ffffff; color: var(--tg-time); font-size: 14px; }
+  .tg-input .ph { flex: 1; }
+  [dir=rtl] .tg-msg.in { border-bottom-left-radius: 12px; border-bottom-right-radius: 4px; }
+  [dir=rtl] .tg-msg.out { border-bottom-right-radius: 12px; border-bottom-left-radius: 4px; }
+  [dir=rtl] .tg-msg .t { float: left; margin: 8px 10px -4px 0; }
+  [dir=rtl] .tg-back { transform: scaleX(-1); }
+  @media (max-width: 900px) {
+    .case { padding: 16px; }
+    .tg { max-width: none; }
+  }
+  .mobile-top { display: none; }
+  @media (max-width: 900px) {
+    .app-body.cols { grid-template-columns: 1fr; }
+    .app-body.cols > .sb { border-right: 0; border-bottom: 1px solid var(--g200); }
+    .layout { display: block; }
+    .side { display: none; }
+    .mobile-top { display: block; position: sticky; top: 0; z-index: 5; background: var(--white); border-bottom: 1px solid var(--g200); padding: 10px 16px; }
+    .mobile-top b { font-size: 18px; color: var(--g900); }
+    .mobile-top span { font-size: 13px; color: var(--g500); margin-left: 6px; }
+    .mobile-top select { width: 100%; margin-top: 8px; padding: 8px; border: 1px solid var(--g300); border-radius: 8px; font-size: 14px; background: #fff; color: var(--g700); }
+    .main { padding: 24px 16px 64px; }
+    .page > header h2 { font-size: 24px; line-height: 32px; }
+  }
+  @media print { .side, .mobile-top { display: none; } .main { padding: 0; } body { background: #fff; } section { break-inside: avoid-page; } }
+</style>
+</head>
+<body>
+<div class="mobile-top">
+  <b>ONE</b><span>for Regulators &middot; مساعدة</span>
+  <select id="jump" aria-label="الانتقال إلى قسم"></select>
+</div>
+<div class="layout">
+  <aside class="side">
+    <div class="brand">
+      <h1>ONE</h1>
+      <p>for Regulators</p>
+      <span class="doc">مساعدة &middot; الاستلامات</span>
+    </div>
+    <nav class="nav" id="nav">
+      <h3>البدء</h3>
+      <a href="#overview">نظرة عامة</a>
+      <a href="#how-it-works">آلية العمل</a>
+      <a href="#where">أين توجد الشاشة</a>
+      <h3>شاشة الاستلامات</h3>
+      <a href="#screen">الشاشة خطوة بخطوة</a>
+      <a href="#statuses">حالات الاستلام</a>
+      <a href="#reasons">الأسباب وما يجب فعله</a>
+      <a href="#fix">إصلاح حالة</a>
+      <a href="#close">الانتقال إلى التعويض أو التجاهل</a>
+      <h3>إشعارات أعضاء اللجنة</h3>
+      <a href="#reminders">التذكيرات التلقائية</a>
+      <a href="#notice">إشعار إلى عضو</a>
+      <a href="#broadcast">رسالة إلى الجميع</a>
+      <h3>على Telegram</h3>
+      <a href="#bot">ما يراه عضو اللجنة</a>
+      <a href="#unreadable">ملصق غير مقروء</a>
+      <h3>مرجع</h3>
+      <a href="#deadlines">المهل والقواعد</a>
+      <a href="#cases">حالات عملية</a>
+      <a href="#faq">أسئلة شائعة</a>
+    </nav>
+    <div class="side-foot">آخر تحديث: 4 نوفمبر 2026</div>
+  </aside>
+
+  <main class="main">
+  <div class="page">
+    <header>
+      <h2>أخطاء الاستلام</h2>
+      <p>ماذا يحدث عندما يصرّح عضو اللجنة بأنه استلم طردًا ولا يتطابق شيء ما، وما الذي يصلحه ONEMS وحده، وما الذي تقرره أنت في شاشة <strong>الحوادث &rsaquo; الاستلامات</strong>.</p>
+    </header>
+
+    <section id="overview">
+      <h2>نظرة عامة</h2>
+      <div class="grid">
+        <div class="card"><h4>لا يضيع أي خطأ</h4><p>كل استلام فيه مشكلة يفتح <strong>حالة</strong>: من صرّح به، وأي ملصق كتب، والسبب، وكيف انتهى.</p></div>
+        <div class="card"><h4>ONEMS يصلح ما هو آمن</h4><p>رقم أُخطئ في كتابته أو استلام في نقطة أخرى من المدينة نفسها يُصحَّحان تلقائيًا، مع <strong>تاريخ المحاولة الأولى</strong>.</p></div>
+        <div class="card"><h4>ما لا يصلح يُعوَّض</h4><p>إذا لم يكن الاستلام صالحًا للقياس تُلغى الشحنة وتنتقل إلى <strong>التعويض</strong>: وموازنة الحمل تعيد جدولتها.</p></div>
+        <div class="card"><h4>أنت تقرر الباقي</h4><p>الحالات المشكوك فيها تنتظر في <strong>قرارات معلّقة</strong>، مع الزرّين <em>إصلاح</em> و<em>تعويض / تجاهل</em>.</p></div>
+      </div>
+    </section>
+
+    <section id="how-it-works">
+      <h2>آلية العمل</h2>
+      <div class="flow">
+        <div class="node"><span class="tag">1 &middot; Telegram</span><b>عضو اللجنة يصرّح</b>يرسل صورة ملصق الطرد المستلَم أو رقمه.</div>
+        <div class="arrow">&rarr;</div>
+        <div class="node"><span class="tag">2 &middot; ONEMS</span><b>يبحث عن الشحنة</b>إذا تطابق كل شيء يُسجَّل الاستلام ولا تُفتح أي حالة.</div>
+        <div class="arrow">&rarr;</div>
+        <div class="node"><span class="tag">3 &middot; ONEMS</span><b>يصنّف المشكلة</b>يصلحها، أو يعوّضها، أو يكتفي بالإعلام، أو يترك الحالة معلّقة.</div>
+        <div class="arrow">&rarr;</div>
+        <div class="node"><span class="tag">4 &middot; ONEMS</span><b>المدير يقرر</b>فقط في الحالات التي لا يستطيع النظام حلها بأمان.</div>
+      </div>
+      <ul>
+        <li>يجيب ONE bot عضو اللجنة <strong>بالسبب الحقيقي</strong> وبما يجب فعله، بلغته.</li>
+        <li>إذا كرر عضو اللجنة الملصق نفسه عدة مرات فهي <strong>حالة واحدة</strong>؛ ويحسب عمود <em>المحاولات</em> عدد المرات.</li>
+        <li>كل استلام، حتى المُصلَح، يخضع <a href="#deadlines">لقاعدة صندوق البريد</a>.</li>
+      </ul>
+    </section>
+
+    <section id="where">
+      <h2>أين توجد الشاشة</h2>
+      <p>في قائمة ONEMS، افتح مجموعة <strong>الحوادث</strong> ثم اضغط <strong>الاستلامات</strong>. يراها مستخدمو <em>admin</em> في كل حساب (و<em>superadmin</em>)، ويرى كل حساب أعضاءه فقط.</p>
+      <div class="app">
+        <div class="app-bar"><i></i><i></i><i></i><span>ONEMS</span></div>
+        <div class="app-body cols">
+          <div class="sb">
+            <div class="t">ONEMS</div><div class="s">for Regulators</div>
+            <h5>الحوادث</h5>
+            <div class="mi"><span class="ic"></span>الحوادث المبلَّغ عنها</div>
+            <div class="mi"><span class="ic"></span>توفر المحكّمين</div>
+            <div class="mi on"><span class="ic"></span>الاستلامات <span class="badge b-red">4</span><span class="pin">1</span></div>
+          </div>
+          <div class="ct">
+            <div class="m-h">أخطاء الاستلام والمتابعة اليومية</div>
+            <p class="m-muted">تُفتح الشاشة هنا (انظر القسم التالي).</p>
+          </div>
+        </div>
+      </div>
+      <ol class="legend">
+        <li><strong>الشارة الحمراء</strong> تعدّ الحالات المفتوحة، أي <span class="badge b-yellow">قيد الانتظار</span> أو <span class="badge b-red">يتطلب قراراً</span>. وإذا لم توجد أي حالة فلا تظهر. تتحدث تلقائيًا كل دقيقة وفور أن تصلح حالة أو تغلقها.</li>
+      </ol>
+    </section>
+
+    <section id="screen">
+      <h2>الشاشة خطوة بخطوة</h2>
+      <p>تتكون الشاشة من الأعلى إلى الأسفل من: الشريط العلوي، وملخص اليوم، والقرارات المعلّقة، والأعضاء المتكررين، وقائمة حالات اليوم.</p>
+      <div class="app">
+        <div class="app-bar"><i></i><i></i><i></i><span>ONEMS &rsaquo; الحوادث &rsaquo; الاستلامات</span></div>
+        <div class="app-body">
+          <div class="m-h">أخطاء الاستلام والمتابعة اليومية <span class="m-in" dir="ltr">04/11/2026</span> <span class="m-sbtn">تحديث</span><span class="m-pbtn">رسالة إلى جميع الأعضاء</span><span class="pin">1</span></div>
+          <div class="m-card" style="padding:10px 12px">
+            <span class="m-muted">محاولات الاستلام</span> <b>23</b> &nbsp;&middot;&nbsp;
+            <span class="m-muted">ناجحة من المرة الأولى</span> <b style="color:var(--gr700)">17</b> &nbsp;&middot;&nbsp;
+            <span class="m-muted">تم إصلاحها</span> <b style="color:var(--b700)">2</b> &nbsp;&middot;&nbsp;
+            <span class="m-muted">تم تعويضها</span> <b style="color:var(--y800)">1</b> &nbsp;&middot;&nbsp;
+            <span class="m-muted">قيد الانتظار</span> <b>1</b> &nbsp;&middot;&nbsp;
+            <span class="m-muted">تتطلب قراراً</span> <b style="color:var(--r700)">1</b> &nbsp;&middot;&nbsp;
+            <span class="m-muted">للإعلام</span> <b>1</b><span class="pin">2</span>
+            <div class="m-muted" style="margin-top:6px">التوزيع حسب السبب &middot; آخر 30 يوماً (الأعمدة: ناجحة، تم إصلاحها، تم تعويضها؛ الخط: مفتوحة)</div>
+          </div>
+          <div class="m-h3" style="font-size:13px;margin-top:14px">قرارات معلّقة (أي يوم)<span class="pin">3</span></div>
+          <div class="m-card"><table>
+            <thead><tr><th>التاريخ</th><th>العضو</th><th>الملصق</th><th>السبب &#9432;</th><th>الحالة</th><th>المحاولات</th><th>المسؤول</th><th></th></tr></thead>
+            <tbody>
+              <tr><td><span dir="ltr">2026-11-03 10:42</span></td><td>Grace Wanjiru</td><td><code dir="ltr">00010813</code></td><td>الملصق غير موجود</td><td>قيد الانتظار</td><td>2</td><td>-</td><td><span class="m-link">إصلاح</span> &nbsp;<span class="m-muted">تعويض / تجاهل</span></td></tr>
+              <tr><td><span dir="ltr">2026-11-04 09:15</span></td><td>Peter Otieno</td><td><code dir="ltr">00010490</code></td><td>ملصق شحنة موجهة إلى مدينة أخرى</td><td>يتطلب قراراً</td><td>1</td><td>-</td><td><span class="m-link">إصلاح</span> &nbsp;<span class="m-muted">تعويض / تجاهل</span></td></tr>
+            </tbody>
+          </table></div>
+          <div class="m-h3" style="font-size:13px;margin-top:14px">الأعضاء المتكررون (آخر 30 يوماً)<span class="pin">4</span></div>
+          <div class="m-card"><table>
+            <thead><tr><th>العضو</th><th class="num">الإخفاقات 7 أيام</th><th class="num">الإخفاقات 30 يوماً</th><th>السبب الرئيسي</th><th>آخر إشعار</th><th></th></tr></thead>
+            <tbody>
+              <tr><td>John Mwangi</td><td class="num">3</td><td class="num">5</td><td>لم تُرسل بعد، ملغاة</td><td><span dir="ltr">2026-11-03</span></td><td><span class="m-link">إرسال إشعار</span></td></tr>
+              <tr><td>Mary Achieng</td><td class="num">1</td><td class="num">2</td><td>صندوق البريد لم يُزَر</td><td>أبداً</td><td><span class="m-link">إرسال إشعار</span></td></tr>
+            </tbody>
+          </table></div>
+          <div class="m-h3" style="font-size:13px;margin-top:14px">الحالات <span class="m-sel">جميع الحالات</span><span class="pin">5</span></div>
+          <div class="m-card"><table>
+            <thead><tr><th>التاريخ</th><th>العضو</th><th>الملصق</th><th>السبب &#9432;</th><th>الحالة</th><th>المحاولات</th><th>المسؤول</th></tr></thead>
+            <tbody>
+              <tr><td><span dir="ltr">2026-11-04 08:31</span></td><td>Anne Njeri</td><td><code dir="ltr">00010894</code></td><td>تم تصحيح خطأ الكتابة</td><td>تم إصلاحه</td><td>1</td><td>John Mwangi (مُرسِل)</td></tr>
+              <tr><td><span dir="ltr">2026-11-04 11:05</span></td><td>Mary Achieng</td><td><code dir="ltr">00010702</code></td><td>صندوق البريد لم يُزَر</td><td>تم تعويضه</td><td>1</td><td>Mary Achieng (مستلِم)</td></tr>
+              <tr><td><span dir="ltr">2026-11-04 12:20</span></td><td>Samuel Kiprop</td><td><code dir="ltr">00010655</code></td><td>تم استلامها مسبقاً</td><td>للإعلام</td><td>2</td><td>-</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+      <ol class="legend">
+        <li><strong>الشريط العلوي.</strong> يختار <strong>التاريخ</strong> اليوم الذي يعرضه الملخص وقائمة <em>الحالات</em> (افتراضيًا اليوم). <span class="btn">تحديث</span> يعيد تحميل البيانات. <span class="btn primary">رسالة إلى جميع الأعضاء</span> يفتح <a href="#broadcast">الإشعار العام</a>.</li>
+        <li><strong>ملخص اليوم.</strong> <em>محاولات الاستلام</em> في اليوم وكيف انتهت: <em>ناجحة من المرة الأولى</em>، و<em>تم إصلاحها</em>، و<em>تم تعويضها</em>، و<em>قيد الانتظار</em>، و<em>تتطلب قراراً</em>، و<em>للإعلام</em>. وتحتها <em>التوزيع حسب السبب</em> ورسم بياني لـ<em>آخر 30 يوماً</em>.</li>
+        <li><strong>قرارات معلّقة (أي يوم).</strong> الحالات المفتوحة من <strong>أي تاريخ</strong>، مهما كان اليوم المختار في الأعلى. إنها قائمة عملك: لكل حالة <a href="#fix">إصلاح</a> و<a href="#close">تعويض / تجاهل</a>. والأيقونة <strong>&#9432;</strong> بجانب <em>السبب</em> تفتح شرح كل الأسباب.</li>
+        <li><strong>الأعضاء المتكررون.</strong> من يتسبب في أكبر عدد من الإخفاقات خلال 7 و30 يومًا، وسببه الرئيسي، ومتى نُبّه آخر مرة. <span class="btn">إرسال إشعار</span> يفتح <a href="#notice">رسالة فردية</a>.</li>
+        <li><strong>الحالات.</strong> كل حالات اليوم المختار، حتى المغلقة. يرشّح المحدد بحسب الحالة. <em>المسؤول</em> هو العضو الذي يُنسب إليه الإخفاق، مع دوره: <em>مُرسِل</em> أو <em>مستلِم</em>.</li>
+      </ol>
+      <div class="callout info"><strong>ألا ترى الأيقونة &#9432; أو الشارة؟</strong> إذا كان التبويب مفتوحًا قبل تحديث ONEMS فأعد تحميله بـ<kbd dir="ltr">Ctrl</kbd> + <kbd dir="ltr">Shift</kbd> + <kbd dir="ltr">R</kbd>.</div>
+    </section>
+
+    <section id="statuses">
+      <h2>حالات الاستلام</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>الحالة</th><th>المعنى</th><th>هل عليك فعل شيء؟</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge b-yellow">قيد الانتظار</span></td><td>لم يُعثر على الملصق بعد. يواصل ONEMS البحث لبضعة أيام.</td><td>يمكنك الانتظار، أو إصلاحها إذا كنت تعرف الشحنة.</td></tr>
+          <tr><td><span class="badge b-red">يتطلب قراراً</span></td><td>لا يستطيع ONEMS أن يعرف بيقين ما حدث.</td><td><strong>نعم</strong>: إصلاح أو إغلاق.</td></tr>
+          <tr><td><span class="badge b-blue">تم إصلاحه</span></td><td>سُجّل الاستلام على الشحنة الصحيحة، بتاريخ المحاولة الأولى.</td><td>لا.</td></tr>
+          <tr><td><span class="badge b-purple">تم تعويضه</span></td><td>الاستلام لا يصلح للقياس: أُلغيت الشحنة وانتقلت إلى التعويض.</td><td>لا. موازنة الحمل تعيد جدولتها.</td></tr>
+          <tr><td><span class="badge b-gray">للإعلام</span></td><td>مجرد تسجيل (استلمت مسبقًا، أو شحنة ملغاة من قبل، أو نص ليس ملصقًا).</td><td>لا.</td></tr>
+          <tr><td><span class="badge b-gray">تم تجاهله</span></td><td>أغلقتها أنت دون إصلاح ولم تكن هناك شحنة تُعوَّض.</td><td>لا.</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="reasons">
+      <h2>الأسباب وما يجب فعله</h2>
+      <p>هي القائمة نفسها التي تفتحها الأيقونة &#9432; في الشاشة، مرتبة من &laquo;يجب التصرف&raquo; إلى &laquo;للعلم فقط&raquo;.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>السبب</th><th>الحالة</th><th>ما الذي حدث</th><th>المسؤول</th><th>ما تفعله أنت</th></tr></thead>
+        <tbody>
+          <tr><td>الملصق غير موجود</td><td><span class="badge b-yellow">قيد الانتظار</span></td><td>لا توجد شحنة بهذا الملصق في طريقها إلى هذا العضو. وإذا صرّح المرسل بها لاحقًا يُسجَّل الاستلام تلقائيًا.</td><td>-</td><td>الانتظار. وإن لم تظهر، راجع الملصق مع العضو ثم <em>إصلاح</em>.</td></tr>
+          <tr><td>خطأ كتابة ملتبس</td><td><span class="badge b-red">يتطلب قراراً</span></td><td>الملصق يشبه عدة شحنات يجب أن يستلمها العضو.</td><td>-</td><td><em>إصلاح</em> باختيار الشحنة الصحيحة.</td></tr>
+          <tr><td>ملصق شحنة موجهة إلى مدينة أخرى</td><td><span class="badge b-red">يتطلب قراراً</span></td><td>الملصق موجود، لكنه لشحنة إلى مدينة أخرى. <strong>لا تُمَسّ</strong> الشحنة: قد يكون خطأ كتابة يطابق شحنة سليمة.</td><td>-</td><td>اسأل العضو. إذا أخطأ فاختر <em>إصلاح</em>؛ وإذا وصل الطرد فعلًا إلى مدينة أخرى فأغلق الحالة.</td></tr>
+          <tr><td>مستخدم تيليجرام غير مسجَّل كعضو</td><td><span class="badge b-red">يتطلب قراراً</span></td><td>من كتب غير مرتبط بأي عضو.</td><td>-</td><td>يمكن إغلاقها فقط. راجع ملفه إذا كان عضوًا حقيقيًا.</td></tr>
+          <tr><td>بلا عقدة</td><td><span class="badge b-red">يتطلب قراراً</span></td><td>العضو ليست له أي نقطة مخصصة.</td><td>-</td><td>خصّص له نقطة في ملفه ثم أغلق الحالة.</td></tr>
+          <tr><td>تم تصحيح خطأ الكتابة</td><td><span class="badge b-blue">تم إصلاحه</span></td><td>كانت هناك شحنة واحدة فقط بملصق شبه مطابق (رقم مختلف أو رقمان متبادلان). صحّحه ONEMS.</td><td>مُرسِل</td><td>لا شيء.</td></tr>
+          <tr><td>المدينة نفسها، عقدة أخرى</td><td><span class="badge b-blue">تم إصلاحه</span></td><td>كانت الشحنة متجهة إلى نقطة أخرى في المدينة نفسها. تُسجَّل باسم من استلمها ويُحدَّث الوجهة.</td><td>مُرسِل</td><td>لا شيء.</td></tr>
+          <tr><td>صندوق البريد لم يُزَر</td><td><span class="badge b-purple">تم تعويضه</span></td><td>رسالة صندوق بريد ولم يصرّح العضو بأي شحنة في يوم العمل السابق: لا يُعرف متى وصلت.</td><td>مستلِم</td><td>لا شيء. وإذا تكرر فأرسل إليه إشعارًا.</td></tr>
+          <tr><td>صندوق البريد لم يُزَر (عدم توفر مُعلَن)</td><td><span class="badge b-purple">تم تعويضه</span></td><td>الأمر نفسه، لكن العضو كان مُعلِنًا عدم توفره في اليوم السابق.</td><td>-</td><td>لا شيء. ليس خطأ العضو.</td></tr>
+          <tr><td>لم تُرسل بعد، ملغاة</td><td><span class="badge b-purple">تم تعويضه</span></td><td>وصل الطرد لكن المرسل لم يصرّح به كمُرسَل أبدًا: تاريخ الإرسال مفقود.</td><td>مُرسِل</td><td>لا شيء. وإذا تكرر فأرسل إشعارًا إلى المرسل.</td></tr>
+          <tr><td>تم استلامها مسبقاً</td><td><span class="badge b-gray">للإعلام</span></td><td>هذا الملصق مسجل مسبقًا كمستلم.</td><td>-</td><td>لا شيء.</td></tr>
+          <tr><td>محظورة</td><td><span class="badge b-gray">للإعلام</span></td><td>كانت الشحنة ملغاة من قبل (مثلًا نُقلت إلى التعويض أو لديها حادثة مفتوحة).</td><td>-</td><td>لا شيء.</td></tr>
+          <tr><td>تنسيق غير صالح</td><td><span class="badge b-gray">للإعلام</span></td><td>ما كُتب لا يشبه ملصقًا (نص عادي أو رمز ناقص). يطلب البوت إعادة الإدخال.</td><td>-</td><td>لا شيء.</td></tr>
+          <tr><td>مدينة خاطئة، ملغاة</td><td><span class="badge b-purple">تم تعويضه</span></td><td>في الحالات القديمة فقط. لم يعد ONEMS ينتج هذا السبب.</td><td>مُرسِل</td><td>لا شيء.</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout info"><strong>تاريخ المحاولة الأولى.</strong> عندما تُصلَح حالة، تلقائيًا أو بواسطتك، يُسجَّل الاستلام بالوقت الذي صرّح فيه العضو أول مرة، لا بوقت الإصلاح. وهكذا لا يتأثر القياس.</div>
+    </section>
+
+    <section id="fix">
+      <h2>إصلاح حالة</h2>
+      <p>استخدمه عندما تعرف أي شحنة استلمها العضو فعلًا.</p>
+      <div class="app">
+        <div class="app-bar"><i></i><i></i><i></i><span>ONEMS &rsaquo; الاستلامات &rsaquo; إصلاح</span></div>
+        <div class="app-body">
+          <div class="m-box" style="max-width:560px;margin:0">
+            <div class="m-h3">إصلاح الحالة: اختر الشحنة الصحيحة</div>
+            <p class="m-muted">أعلن العضو عن الملصق <span dir="ltr">00010813</span>. اختر الشحنة المرسلة إلى مدينته والتي تطابقه.</p>
+            <table>
+              <thead><tr><th></th><th>الملصق</th><th>عضو المصدر</th><th>التاريخ</th></tr></thead>
+              <tbody>
+                <tr><td>&#9711;</td><td><code dir="ltr">00010790</code></td><td>Paul Kamau</td><td><span dir="ltr">2026-10-28</span></td></tr>
+                <tr style="background:var(--b50)"><td>&#9673;</td><td><code dir="ltr">00010815</code></td><td>Manasseh Ouma</td><td><span dir="ltr">2026-11-02</span></td></tr>
+              </tbody>
+            </table>
+            <div style="margin-top:10px;text-align:right"><span class="m-sbtn">إلغاء</span><span class="m-pbtn">الإصلاح بهذه الشحنة</span></div>
+          </div>
+        </div>
+      </div>
+      <ol class="steps">
+        <li>في <em>قرارات معلّقة</em>، اضغط <strong>إصلاح</strong> في الحالة.</li>
+        <li>يعرض ONEMS الشحنات <strong>المرسلة</strong> إلى مدينة العضو التي لم تُستلم بعد، مع ملصقها وعضو المصدر والتاريخ. وإذا لم توجد أي شحنة يذكر ذلك: <em>لا توجد شحنات مرسلة إلى مدينة هذا العضو.</em></li>
+        <li>إذا كنت في شك فاسأل العضو من أرسل إليه الطرد: فأعضاء اللجنة يعرفون المرسل، لا المنتج.</li>
+        <li>حدّد الشحنة الصحيحة واضغط <strong>الإصلاح بهذه الشحنة</strong>.</li>
+      </ol>
+      <div class="callout ok"><strong>وبعد ذلك:</strong> تنتقل الحالة إلى <span class="badge b-blue">تم إصلاحه</span>، ويبقى الاستلام بتاريخ المحاولة الأولى، ويحفظ ONEMS من أصلحها ومتى. وتُطبَّق قاعدة صندوق البريد على كل حال: وإن لم تتحقق تنتهي الحالة <span class="badge b-purple">تم تعويضه</span>.</div>
+      <div class="callout warn">الحالتان <em>مستخدم تيليجرام غير مسجَّل كعضو</em> و<em>بلا عقدة</em> ليس فيهما زر <strong>إصلاح</strong>: فبلا عضو أو بلا نقطة لا توجد مدينة للبحث فيها. يمكن إغلاقهما فقط.</div>
+    </section>
+
+    <section id="close">
+      <h2>الانتقال إلى التعويض أو التجاهل</h2>
+      <p>استخدمه عندما لا يمكن اعتماد الاستلام.</p>
+      <ol class="steps">
+        <li>اضغط <strong>تعويض / تجاهل</strong> في الحالة.</li>
+        <li>اقرأ التنبيه: إذا كانت للحالة شحنة مرتبطة لم تُستلم بعد فستُلغى الشحنة وتنتقل إلى التعويض؛ وإذا لم تكن لها شحنة فتُتجاهل الحالة ببساطة.</li>
+        <li>اكتب <strong>ملاحظة</strong> إذا أردت تدوين السبب (اختيارية) ثم اضغط <strong>إغلاق الحالة</strong>.</li>
+      </ol>
+      <div class="callout ok"><strong>وبعد ذلك:</strong> تصبح الحالة <span class="badge b-purple">تم تعويضه</span> أو <span class="badge b-gray">تم تجاهله</span>، وتخرج من <em>قرارات معلّقة</em>، وتنقص الشارة في القائمة. وتُعاد جدولة الشحنة المعوَّضة في الموازنة التالية. لا يمكن التراجع عن هذا من الشاشة.</div>
+    </section>
+
+    <section id="reminders">
+      <h2>التذكيرات التلقائية</h2>
+      <p>يتلقى عضو اللجنة الذي تسبب في الخطأ عبر Telegram، بلغته، رسالة تشرح ما حدث وما عليه فعله في المرة القادمة. لا يلزمك فعل أي شيء.</p>
+      <ul>
+        <li>تذكير <strong>واحد في اليوم</strong> كحد أقصى لكل عضو ولكل سبب.</li>
+        <li>فقط بين <strong><span dir="ltr">08:00</span> و<span dir="ltr">20:00</span></strong> بالتوقيت المحلي للحساب. وخارج هذه الساعات ينتظر حتى <span dir="ltr">08:00</span>.</li>
+        <li>اعتبارًا من <strong>الإخفاق الثالث خلال 7 أيام</strong>، تذكر الرسالة أن مسؤوله على علم.</li>
+        <li>لا يُرسل إذا كان العضو قد صرّح بعدم التوفر، ولا في الحالات التي لا مسؤول فيها (مثلًا <em>ملصق شحنة موجهة إلى مدينة أخرى</em>).</li>
+      </ul>
+    </section>
+
+    <section id="notice">
+      <h2>إشعار إلى عضو</h2>
+      <ol class="steps">
+        <li>في <em>الأعضاء المتكررون</em>، اضغط <strong>إرسال إشعار</strong> في صف العضو.</li>
+        <li>يُفتح <em>إشعار إلى العضو</em> بنص جاهز بحسب سببه الرئيسي، وبلغته. يمكنك تغيير <em>اللغة</em> وتعديل النص.</li>
+        <li>اضغط <strong>إرسال</strong>.</li>
+      </ol>
+      <div class="callout ok"><strong>وبعد ذلك:</strong> تصل الرسالة إلى Telegram الخاص بالعضو ويعرض عمود <em>آخر إشعار</em> التاريخ.</div>
+    </section>
+
+    <section id="broadcast">
+      <h2>رسالة إلى جميع الأعضاء</h2>
+      <p>لخطأ يرتكبه كثيرون، وهو أفضل من إشعار لكل واحد.</p>
+      <ol class="steps">
+        <li>اضغط <span class="btn primary">رسالة إلى جميع الأعضاء</span> في الشريط العلوي.</li>
+        <li>اختر <strong>القالب</strong>: <em>درس: زيارة صندوق البريد كل يوم</em>، أو <em>استلام ملغى: لا زيارة في اليوم السابق</em>، أو <em>المُرسِل: شحنة غير مُعلَنة في البوت</em>، أو <em>المُرسِل: الملصق المُعلَن لا يطابق ملصق الظرف</em>، أو <em>المُرسِل: وصلت الرسالة إلى مدينة أخرى</em>. عدّل النص إذا لزم.</li>
+        <li>تحقق من <em>المستلمون</em>: الأعضاء النشطون في الحساب ممن لديهم تيليجرام.</li>
+        <li>اضغط <strong>تأكيد: إرسال إلى N عضواً</strong>.</li>
+      </ol>
+      <div class="callout ok"><strong>وبعد ذلك:</strong> يتلقاها كل عضو بلغته. وفي <em>الرسائل السابقة</em> يبقى التاريخ والنص وكم رسالة <em>المرسلة</em> وكم <em>الفاشلة</em>.</div>
+    </section>
+
+    <section id="bot">
+      <h2>ما يراه عضو اللجنة</h2>
+      <p>يؤكد عضو اللجنة الاستلام عبر <strong>تأكيد استلام</strong>، بإرسال صورة الملصق أو رقمه. وإذا فشل شيء، يذكر له ONE bot السبب وما يجب فعله.</p>
+      <div class="two">
+        <div class="tg" aria-label="مثال: استلام بملصق غير موجود">
+          <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
+          <div class="tg-body">
+            <div class="tg-kb one"><span class="tap">تأكيد استلام</span></div>
+            <div class="tg-msg out"><span dir="ltr">00010813</span><span class="t">10:42</span></div>
+            <div class="tg-msg in">لم نجد أي شحنة بهذا الملصق في طريقها إليك. راجع الرقم وحاول مرة أخرى.<span class="t">10:42</span></div>
+          </div>
+          <div class="tg-input"><span>📎</span><span class="ph">رسالة</span><span>🎤</span></div>
+        </div>
+        <div>
+          <h3 style="margin-top:8px">من المفيد معرفته</h3>
+          <ul>
+            <li>يعتمد الرد على السبب: ملصق غير موجود، أو تم استلامه مسبقًا، أو شحنة لم يصرّح بها المرسل، أو صندوق بريد لم يُزَر، إلخ.</li>
+            <li>إذا صحّح ONEMS خطأ كتابة، يرى عضو اللجنة استلامه مؤكدًا بشكل طبيعي.</li>
+            <li>إذا ألغت قاعدة صندوق البريد الاستلام فإن البوت <strong>لا</strong> يقول &laquo;تم الاستلام&raquo;.</li>
+          </ul>
+        </div>
+      </div>
+      <p class="cap">قد تتغير رسائل البوت قليلًا.</p>
+    </section>
+
+    <section id="unreadable">
+      <h2>ملصق غير مقروء</h2>
+      <p>إذا لم يستطع عضو اللجنة قراءة الملصق فإنه يبلّغ عنه عبر <strong>الإبلاغ عن حادثة</strong> (<em>ملصق / إيصال غير مقروء</em>). يعرض له البوت الطرود التي في طريقها، <strong>الأحدث أولًا</strong>، مع <strong>المرسل ومدينته وتاريخ الإرسال</strong>، ليتعرف على طرده.</p>
+      <div class="two">
+        <div class="tg" aria-label="مثال: اختيار الطرد من القائمة">
+          <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
+          <div class="tg-body">
+            <div class="tg-msg in">أي هذه الطرود استلمت؟<br>1. من Manasseh Ouma (Kisumu) &middot; أُرسل في <span dir="ltr">02/11</span> &middot; رسالة<br>2. من Paul Kamau (Nakuru) &middot; أُرسل في <span dir="ltr">28/10</span> &middot; رسالة<span class="t">11:02</span></div>
+            <div class="tg-kb"><span class="tap">1</span><span>2</span></div>
+            <div class="tg-kb one"><span>لا شيء منها</span></div>
+            <div class="tg-msg in">✅ تم تسجيل الاستلام.<span class="t">11:02</span></div>
+          </div>
+          <div class="tg-input"><span>📎</span><span class="ph">رسالة</span><span>🎤</span></div>
+        </div>
+        <div>
+          <ul>
+            <li><strong>يختار واحدًا:</strong> يُسجَّل الاستلام وتُغلق الحادثة تلقائيًا.</li>
+            <li><strong>يضغط &laquo;لا شيء منها&raquo;:</strong> يطلب منه البوت أن يخبر مسؤوله؛ وتبقى الحادثة مفتوحة لك في <em>الحوادث المبلَّغ عنها</em>.</li>
+            <li><strong>انتهت صلاحية القائمة:</strong> يطلب منه البوت أن يبدأ من جديد.</li>
+          </ul>
+          <div class="callout info"><strong>صورة الملصق بعد محاولتين.</strong> إذا كتب عضو اللجنة ملصقًا غير موجود <strong>مرتين خلال 30 دقيقة</strong>، يطلب منه البوت صورة الملصق. ويفتح ONEMS (أو يعيد استخدام) حادثة <em>ملصق / إيصال غير مقروء</em> في <strong>الحوادث المبلَّغ عنها</strong> مع الملصق المكتوب، وتصل الصورة إلى محادثة تلك الحادثة. وبالصورة يمكنك إيجاد الشحنة الصحيحة وإصلاح الحالة في الاستلامات.</div>
+        </div>
+      </div>
+      <p class="cap">قد تتغير رسائل البوت قليلًا.</p>
+    </section>
+
+    <section id="deadlines">
+      <h2>المهل والقواعد</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>القاعدة</th><th>ما يفعله ONEMS</th></tr></thead>
+        <tbody>
+          <tr><td>الملصق غير موجود</td><td>يعيد البحث عنه <strong>كل 30 دقيقة لمدة 5 أيام عمل</strong>، بما في ذلك البحث عن أخطاء الكتابة. لا تصلح إلا الشحنات المُصرَّح بها قبل المحاولة الأولى. إذا ظهر الملصق تُصلَح الحالة تلقائيًا؛ وإلا تنتقل إلى <span class="badge b-red">يتطلب قراراً</span>.</td></tr>
+          <tr><td>خطأ كتابة</td><td>لا يُصحَّح إلا إذا كانت هناك شحنة <strong>واحدة فقط</strong> مرسلة إلى مدينة العضو يختلف ملصقها برقم واحد أو برقمين متجاورين متبادلين. وإذا وُجد عدة فأنت تقرر.</td></tr>
+          <tr><td>صندوق البريد</td><td>لا تصلح رسالة صندوق البريد إلا إذا صرّح العضو بأي شحنة في يوم العمل السابق (علامة على أنه زار الصندوق). وإلا تُلغى وتُعوَّض.</td></tr>
+          <tr><td>طرد لم يُستلم</td><td>إذا لم تُستلم شحنة خلال <strong>15 يومًا</strong> من إرسالها، تُلغى وتصلك رسالة بريد إلكتروني. وإذا وصلت بعد ذلك وصرّح بها العضو، تُعاد الشحنة إلى النشاط ويصلح الاستلام بتاريخ المحاولة.</td></tr>
+          <tr><td>مدينة أخرى</td><td>لا تُعاد شحنة أبدًا إلى مدينة أخرى: فهذا يغيّر المسار المقيس. لذلك تقرر أنت هذه الحالة.</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="cases">
+      <h2>حالات عملية</h2>
+      <p>أسماء وملصقات توضيحية.</p>
+      <div class="chips"><a href="#case-typo">ملصق بأحد أرقامه مغيّر</a><a href="#case-notfound">ملصق غير موجود</a><a href="#case-notsent">مرسل لم يصرّح</a><a href="#case-pobox">صندوق بريد لم يُزَر</a><a href="#case-city">ملصق من مدينة أخرى</a><a href="#case-repeat">عضو يكرر الخطأ</a></div>
+
+      <article class="case" id="case-typo">
+        <h3>ملصق بأحد أرقامه مغيّر</h3>
+        <p class="sit">لصق المرسل الملصق <span dir="ltr">00010884</span> لكنه صرّح في البوت بـ <span dir="ltr">00010894</span>.</p>
+        <ul>
+          <li>تكتب المستلمة <span dir="ltr">00010884</span>، وهو غير موجود. يرى ONEMS شحنة واحدة فقط إلى مدينتها بملصق يختلف برقم واحد (<span dir="ltr">00010894</span>) فيصححه.</li>
+          <li>تظهر الحالة باسم <em>تم تصحيح خطأ الكتابة</em>، <span class="badge b-blue">تم إصلاحه</span>، والمرسل هو المسؤول. ويتلقى المرسل تذكيرًا.</li>
+          <li><strong>أنت:</strong> لا شيء. وإذا ظهر المرسل نفسه في <em>الأعضاء المتكررون</em> فأرسل إليه إشعارًا.</li>
+        </ul>
+      </article>
+
+      <article class="case" id="case-notfound">
+        <h3>ملصق غير موجود</h3>
+        <p class="sit">تكتب عضوة <span dir="ltr">00010813</span> مرتين. لا توجد أي شحنة بهذا الملصق ولا شحنة تشبهه.</p>
+        <ol class="steps">
+          <li>تبقى الحالة <span class="badge b-yellow">قيد الانتظار</span> ويطلب منها البوت صورة الملصق. وفي <em>الحوادث المبلَّغ عنها</em> تظهر حادثة <em>ملصق / إيصال غير مقروء</em> مع الصورة.</li>
+          <li>في الصورة يُقرأ <span dir="ltr">00010815</span>، أرسله Manasseh Ouma. في الاستلامات، اضغط <strong>إصلاح</strong>، واختر <span dir="ltr">00010815</span>، ثم اضغط <strong>الإصلاح بهذه الشحنة</strong>.</li>
+          <li>إذا تعذّر معرفة أيها المقصودة فانتظر: وإذا صرّح المرسل بها خلال 5 أيام العمل القادمة تُصلَح تلقائيًا.</li>
+        </ol>
+        <div class="callout ok"><strong>وبعد ذلك:</strong> حُلّ الحادثة أيضًا في <em>الحوادث المبلَّغ عنها</em> بملاحظة.</div>
+      </article>
+
+      <article class="case" id="case-notsent">
+        <h3>مرسل لم يصرّح بالشحنة</h3>
+        <p class="sit">يصل الطرد والملصق صحيح، لكن المرسل لم يحدده كمُرسَل أبدًا.</p>
+        <ul>
+          <li>بلا تاريخ إرسال لا يمكن قياس الزمن. تُلغى الشحنة وتنتقل إلى التعويض: <em>لم تُرسل بعد، ملغاة</em>، <span class="badge b-purple">تم تعويضه</span>، والمسؤول هو المُرسِل.</li>
+          <li><strong>أنت:</strong> لا شيء. وإذا حدث مع عدة مرسلين فاستخدم القالب <em>المُرسِل: شحنة غير مُعلَنة في البوت</em> في الرسالة إلى الجميع.</li>
+        </ul>
+      </article>
+
+      <article class="case" id="case-pobox">
+        <h3>صندوق بريد لم يُزَر</h3>
+        <p class="sit">عضو لديه صندوق بريد يصرّح برسالة يوم الاثنين، لكنه لم يصرّح بأي شحنة يوم الجمعة السابق.</p>
+        <ul>
+          <li>لا يُعرف في أي يوم وصلت الرسالة، فلا تصلح: <em>صندوق البريد لم يُزَر</em>، <span class="badge b-purple">تم تعويضه</span>، والمسؤول هو المستلِم.</li>
+          <li>إذا كان ذلك الجمعة مُعلِنًا عدم توفره فالسبب هو <em>صندوق البريد لم يُزَر (عدم توفر مُعلَن)</em> ولا يُنسب إليه.</li>
+          <li><strong>أنت:</strong> لا شيء؛ وإذا ارتكبه كثيرون فالقالب <em>درس: زيارة صندوق البريد كل يوم</em>.</li>
+        </ul>
+      </article>
+
+      <article class="case" id="case-city">
+        <h3>ملصق من مدينة أخرى</h3>
+        <p class="sit">عضو في Nairobi يصرّح بملصق يخص شحنة متجهة إلى Mombasa.</p>
+        <ol class="steps">
+          <li>تبقى الحالة <span class="badge b-red">يتطلب قراراً</span> وتبقى شحنة Mombasa سليمة.</li>
+          <li>اسأل العضو عن المرسل أو اطلب منه صورة. إذا كان خطأ كتابة فاضغط <strong>إصلاح</strong> واختر شحنته الحقيقية.</li>
+          <li>إذا وصل الطرد فعلًا إلى المدينة الخطأ فاضغط <strong>تعويض / تجاهل</strong> واترك ملاحظة.</li>
+        </ol>
+      </article>
+
+      <article class="case" id="case-repeat">
+        <h3>عضو يكرر الخطأ</h3>
+        <p class="sit">John Mwangi لديه 3 إخفاقات في 7 أيام بسبب شحنات غير مصرَّح بها.</p>
+        <ul>
+          <li>منذ الإخفاق الثالث يذكر تذكيره التلقائي أن مسؤوله على علم.</li>
+          <li><strong>أنت:</strong> في <em>الأعضاء المتكررون</em> اضغط <strong>إرسال إشعار</strong>، وراجع النص الجاهز واضغط <strong>إرسال</strong>. وإذا لم يتحسن فاتصل به.</li>
+        </ul>
+      </article>
+    </section>
+
+    <section id="faq">
+      <h2>أسئلة شائعة</h2>
+      <details><summary>لماذا لا أرى الشارة الحمراء في الاستلامات؟</summary><div>لأنه لا توجد حالات مفتوحة في الحساب. تظهر فقط عندما توجد حالة <em>قيد الانتظار</em> أو <em>تتطلب قراراً</em>.</div></details>
+      <details><summary>لماذا لا تتغير قائمة &laquo;قرارات معلّقة&raquo; عند اختيار تاريخ آخر؟</summary><div>لأنها تعرض الحالات المفتوحة من أي يوم. التاريخ يغيّر الملخص وقائمة <em>الحالات</em> فقط.</div></details>
+      <details><summary>إذا أصلحت حالة بعد أيام، هل يُقاس الزمن خطأً؟</summary><div>لا. يُسجَّل الاستلام بوقت المحاولة الأولى للعضو.</div></details>
+      <details><summary>ماذا يحدث لشحنة معوَّضة؟</summary><div>تُلغى وتبقى في قائمة العينات المطلوب تعويضها. وموازنة الحمل تعيد جدولتها لاحقًا.</div></details>
+      <details><summary>هل يمكنني التراجع عن إغلاق؟</summary><div>ليس من الشاشة. تواصل مع الدعم.</div></details>
+      <details><summary>هل يتضمن الملخص اليومي الساعة <span dir="ltr">09:00</span> هذه الحالات؟</summary><div>لا. متابعة الاستلامات موجودة في هذه الشاشة فقط.</div></details>
+      <details><summary>من يرى هذه الحالات؟</summary><div>مستخدمو admin في الحساب وsuperadmin. ويرى كل حساب أعضاءه فقط.</div></details>
+    </section>
+  </div>
+  </main>
+</div>
+
+<script>
+(function () {
+  var links = Array.prototype.slice.call(document.querySelectorAll('#nav a'));
+  var sections = links.map(function (a) { return document.querySelector(a.getAttribute('href')); }).filter(Boolean);
+
+  // Mobile section picker
+  var jump = document.getElementById('jump');
+  links.forEach(function (a) {
+    var o = document.createElement('option');
+    o.value = a.getAttribute('href'); o.textContent = a.textContent; jump.appendChild(o);
+  });
+  jump.addEventListener('change', function () { location.hash = jump.value; });
+
+  // Highlight the current section in the side menu
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          links.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id); });
+          jump.value = '#' + e.target.id;
+        }
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    sections.forEach(function (s) { io.observe(s); });
+  }
+})();
+</script>
+</body>
+</html>

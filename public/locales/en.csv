@@ -5166,3 +5166,6 @@ receipt_errors.close_title,Close case without fixing
 receipt_errors.close_help,Tag {tag}: if a shipment is linked and not yet received it will be cancelled and compensated; otherwise the case is discarded.
 receipt_errors.close_note,Note (optional)
 receipt_errors.close_confirm,Close case
+help_center.doc.receipt_errors.title,Receipt errors
+help_center.doc.receipt_errors.desc,"What ONEMS does when a reported receipt does not match, how to read the Receipts screen and how to fix or close each case."
+receipt_errors.help_link,Help
