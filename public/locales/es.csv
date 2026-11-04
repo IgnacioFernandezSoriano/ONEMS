@@ -5057,3 +5057,90 @@ stock.generate_shipments,Generar {count} envíos
 stock.not_applicable_purchase_orders,No aplica: no se usan órdenes de compra
 stock.stock_control_description,Activa el control de inventario y el sistema de alertas
 stock.used_to_calculate_delivery_dates,Se usa para calcular las fechas estimadas de entrega
+receipt_errors.menu,Recepciones
+receipt_errors.title,Errores de recepción y seguimiento diario
+receipt_errors.refresh,Actualizar
+receipt_errors.broadcast_button,Mensaje a todos los panelistas
+receipt_errors.card.attempts,Intentos de recepción
+receipt_errors.card.ok_first_time,Correctas a la primera
+receipt_errors.card.fixed,Arregladas
+receipt_errors.card.compensated,Compensadas
+receipt_errors.card.pending,Pendientes
+receipt_errors.card.needs_decision,Requieren decisión
+receipt_errors.card.informative,Informativas
+receipt_errors.by_reason,Reparto por motivo
+receipt_errors.no_cases,Sin casos
+receipt_errors.trend_title,Últimos 30 días
+receipt_errors.trend_open,Abiertas
+receipt_errors.repeaters_title,Panelistas reincidentes (últimos 30 días)
+receipt_errors.col.panelist,Panelista
+receipt_errors.col.fails_7d,Fallos 7 días
+receipt_errors.col.fails_30d,Fallos 30 días
+receipt_errors.col.top_reason,Motivo principal
+receipt_errors.col.last_notice,Último aviso
+receipt_errors.col.date,Fecha
+receipt_errors.col.tag,Etiqueta
+receipt_errors.col.reason,Motivo
+receipt_errors.col.status,Estado
+receipt_errors.col.attempts,Intentos
+receipt_errors.col.culprit,Responsable
+receipt_errors.col.origin_panelist,Panelista de origen
+receipt_errors.col.text,Texto
+receipt_errors.col.total,Total
+receipt_errors.col.sent,Enviados
+receipt_errors.col.failed,Fallidos
+receipt_errors.never,Nunca
+receipt_errors.send_notice,Enviar aviso
+receipt_errors.no_repeaters,No hay panelistas reincidentes
+receipt_errors.notice_title,Aviso al panelista
+receipt_errors.notice_language,Idioma
+receipt_errors.send,Enviar
+receipt_errors.error_generic,No se pudo completar la operación
+receipt_errors.broadcast_title,Mensaje a todos los panelistas activos
+receipt_errors.broadcast_template,Plantilla
+receipt_errors.template.pobox_daily_visit_lesson,Lección: visitar el apartado postal cada día
+receipt_errors.template.pobox_absent_no_visit,Recepción anulada: sin visita el día anterior
+receipt_errors.template.not_sent_cancelled,Remitente: envío no declarado en el bot
+receipt_errors.template.ok_typo_fixed,Remitente: etiqueta declarada distinta de la del sobre
+receipt_errors.template.wrong_city_cancelled,Remitente: la carta llegó a otra ciudad
+receipt_errors.broadcast_recipients,Destinatarios: {count} panelistas activos con Telegram
+receipt_errors.broadcast_queued,Mensaje puesto en cola para {count} panelistas
+receipt_errors.broadcast_confirm,Confirmar: enviar a {count} panelistas
+receipt_errors.broadcast_history,Mensajes anteriores
+receipt_errors.broadcast_no_history,Aún no se ha enviado ningún mensaje
+receipt_errors.cases_title,Casos
+receipt_errors.open_cases_title,Decisiones pendientes (cualquier día)
+receipt_errors.filter_all,Todos los estados
+receipt_errors.status.fixed,Arreglado
+receipt_errors.status.compensated,Compensado
+receipt_errors.status.informative,Informativo
+receipt_errors.status.pending,Pendiente
+receipt_errors.status.needs_decision,Requiere decisión
+receipt_errors.status.discarded,Descartado
+receipt_errors.reason.ok,Correcta
+receipt_errors.reason.ok_typo_fixed,Error de tecleo corregido
+receipt_errors.reason.ok_same_city,"Misma ciudad, otro nodo"
+receipt_errors.reason.pobox_absent_unavailable,Apartado sin visitar (indisponibilidad declarada)
+receipt_errors.reason.pobox_absent_no_visit,Apartado sin visitar
+receipt_errors.reason.not_sent_cancelled,"Aún no enviada, anulada"
+receipt_errors.reason.wrong_city_cancelled,"Ciudad equivocada, anulada"
+receipt_errors.reason.other_city_tag,Etiqueta de un envío de otra ciudad
+receipt_errors.reason.already_received,Ya recibida
+receipt_errors.reason.blocked,Bloqueada
+receipt_errors.reason.not_found,Etiqueta no encontrada
+receipt_errors.reason.ambiguous_typo,Error de tecleo ambiguo
+receipt_errors.reason.invalid_format,Formato no válido
+receipt_errors.reason.no_panelist,Usuario de Telegram no registrado como panelista
+receipt_errors.reason.no_node,Sin nodo
+receipt_errors.role.sender,emisor
+receipt_errors.role.receiver,receptor
+receipt_errors.fix,Arreglar
+receipt_errors.close_case,Pasar a compensar / Descartar
+receipt_errors.fix_title,Arreglar caso: elige el envío correcto
+receipt_errors.fix_help,El panelista declaró la etiqueta {tag}. Elige el envío enviado dirigido a su ciudad que le corresponda.
+receipt_errors.fix_no_candidates,No hay envíos enviados dirigidos a la ciudad de este panelista.
+receipt_errors.fix_confirm,Arreglar con este envío
+receipt_errors.close_title,Cerrar caso sin arreglo
+receipt_errors.close_help,"Etiqueta {tag}: si hay un envío asociado y aún no recibido, se anulará y se compensará; si no, el caso se descarta."
+receipt_errors.close_note,Nota (opcional)
+receipt_errors.close_confirm,Cerrar caso

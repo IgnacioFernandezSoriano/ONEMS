@@ -198,6 +198,7 @@
       <a href="#recordatorio">Le rappel de 09:00</a>
       <a href="#enviar">Envoyer un colis</a>
       <a href="#recibir">Recevoir un colis</a>
+      <a href="#visita">Visitez votre boîte postale chaque jour ouvré</a>
       <h3>Si vous avez un problème</h3>
       <a href="#reportar">Signaler un problème</a>
       <a href="#c-material">Il me manque du matériel</a>
@@ -325,6 +326,30 @@
         </div>
       </div>
       <div class="callout warn"><strong>Boîte postale (POBOX) :</strong> si vous récupérez vos colis dans une boîte postale (POBOX), déclarez chaque envoi et chaque réception <strong>le jour même</strong> où vous le déposez ou le récupérez. Si vous le déclarez le lendemain, ONEMS comprendra que vous n&rsquo;y êtes pas allé ce jour-là et la réception ne comptera pas.</div>
+    </section>
+
+    <section id="visita">
+      <h2>Visitez votre boîte postale chaque jour ouvré</h2>
+      <p>Le temps que met un colis se mesure <strong>du jour de l&rsquo;envoi au jour de son arrivée dans la boîte postale</strong>. ONEMS ne voit pas la boîte : il ne connaît que le jour où <strong>vous déclarez</strong>.</p>
+      <div class="callout warn"><strong>Un envoi par jour ouvré prouve votre visite.</strong> Quand vous déclarez une réception, ONEMS vérifie le <strong>jour ouvré précédent</strong>. Si vous aviez déclaré un envoi ce jour-là, la réception est valide. Sinon, elle est annulée et le colis sera renvoyé plus tard.</div>
+      <h3>Que faire</h3>
+      <ol class="steps">
+        <li>Visitez votre boîte postale <strong>chaque jour ouvré, du lundi au vendredi</strong>.</li>
+        <li>Envoyez et déclarez votre envoi <strong>le jour même</strong>.</li>
+        <li>Déclarez vos réceptions <strong>le jour même</strong> où vous les récupérez.</li>
+        <li>Si vous ne pouvez pas y aller, <strong>signalez votre indisponibilité à l&rsquo;avance</strong>.</li>
+      </ol>
+      <h3>Ce que répond le bot quand vous déclarez une réception</h3>
+      <ul>
+        <li><strong>Réception enregistrée.</strong> Tout est bon.</li>
+        <li><strong>Enregistrée après correction de l&rsquo;étiquette.</strong> L&rsquo;étiquette déclarée par l&rsquo;expéditeur ne correspondait pas au colis ; ONEMS l&rsquo;a corrigée et a enregistré votre réception. Rien à faire.</li>
+        <li><strong>Non valide : aucun envoi déclaré le jour ouvré précédent.</strong> Vous n&rsquo;aviez pas déclaré d&rsquo;envoi le jour ouvré précédent. La réception est annulée et le colis sera renvoyé.</li>
+        <li><strong>L&rsquo;expéditeur ne l&rsquo;avait pas déclaré.</strong> Il sera renvoyé. Ce n&rsquo;est pas votre faute.</li>
+        <li><strong>Colis pour une autre ville.</strong> Cette étiquette correspond à un envoi pour une autre ville : vérifiez-la et saisissez-la de nouveau ; votre responsable examinera le cas.</li>
+        <li><strong>Étiquette introuvable.</strong> Nous continuerons à chercher pendant quelques jours. Vérifiez le code et, si vous l&rsquo;avez tapé à la main, envoyez la photo du tag.</li>
+        <li><strong>Déjà reçu.</strong> Vous aviez déjà déclaré ce colis.</li>
+        <li><strong>Annulé ou avec un incident ouvert.</strong> Cet envoi est déjà pris en charge ; votre responsable vous dira si vous devez faire quelque chose.</li>
+      </ul>
     </section>
 
     <section id="reportar">

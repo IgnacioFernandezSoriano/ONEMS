@@ -247,6 +247,7 @@
       <a href="#availability-screen">O ecrã de incidências</a>
       <a href="#availability-example">Exemplo prático</a>
       <h3>Referência</h3>
+      <a href="#receipt-errors">Erros de receção</a>
       <a href="#conversation">Conversa e avisos</a>
       <a href="#faq">Perguntas</a>
     </nav>
@@ -813,6 +814,47 @@
         <li>Escreva uma nota de <em>Resolução final</em> e prima <strong>Guardar</strong>. A incidência passa a <span class="badge b-blue">Resolvida</span>; a Elena e os restantes painelistas afetados recebem o aviso pelo Telegram.</li>
       </ol>
       <div class="callout info"><strong>Indisponibilidade por falta de material.</strong> A partir de uma incidência de falta de material pode criar um período de indisponibilidade que vai desde hoje até à chegada prevista do material. Segue exatamente o mesmo processo; o motivo aparece como <em>Materiais</em>.</div>
+    </section>
+
+    <section id="receipt-errors">
+      <h2>Erros de receção</h2>
+      <p>Quando um painelista declara uma receção e algo não bate certo, o ONEMS descobre o motivo, corrige o que for seguro corrigir e deixa registo. Acompanhe em <strong>Incidências &rsaquo; Receções</strong>.</p>
+      <h3>O que o sistema corrige sozinho</h3>
+      <ul>
+        <li><strong>Um erro de digitação na etiqueta.</strong> Se a etiqueta não existe mas há um único envio enviado para a cidade do recetor cuja etiqueta difere num dígito, ou em dois dígitos adjacentes trocados, a receção é registada nesse envio com a <strong>data da primeira tentativa</strong>, não a da correção.</li>
+        <li><strong>Recebido noutro ponto da mesma cidade.</strong> A receção é válida e o destino do envio é atualizado para o ponto que realmente o recebeu.</li>
+      </ul>
+      <h3>O que passa a compensar</h3>
+      <ul>
+        <li><strong>O remetente não tinha declarado o envio.</strong> O envio é anulado e passa a compensar.</li>
+        <li><strong>Regra do apartado dos correios.</strong> O painelista declarou a receção mas no dia útil anterior não havia nenhum envio declarado: não conta e passa a compensar.</li>
+      </ul>
+      <h3>O que fica pendente da sua decisão</h3>
+      <ul>
+        <li><strong>Pacote para outra cidade.</strong> A etiqueta declarada é a de um envio para outra cidade. Pode ser um erro de digitação que coincide com um envio são ainda em trânsito, por isso <strong>o envio não é tocado</strong>: fica pendente da decisão do responsável. Verifique se o pacote chegou mesmo a essa cidade.</li>
+      </ul>
+      <h3>Etiquetas que não se encontram</h3>
+      <p>O ONEMS continua a procurar <strong>a cada 30 minutos durante 5 dias úteis</strong>. Só podem coincidir envios declarados antes da primeira tentativa. Se a etiqueta aparecer, o caso fica corrigido com a data da primeira tentativa. Se não, fica à espera da sua decisão.</p>
+      <h3>Como ler o separador</h3>
+      <ol class="steps">
+        <li><strong>Resumo do dia.</strong> Escolha uma data: tentativas, certas à primeira, corrigidas pelo sistema, passadas a compensar e pendentes de decisão, com um gráfico de 30 dias.</li>
+        <li><strong>Painelistas com problemas repetidos.</strong> Cada falha é atribuída a <em>quem a causou</em>: o <strong>remetente</strong> se for erro de digitação ou envio por declarar; o <strong>recetor</strong> se não visitou o apartado. Vê as falhas em 7 e 30 dias, o motivo principal e quando foi avisado pela última vez.</li>
+        <li><strong>Pendentes de decisão.</strong> Aqui aparecem os casos abertos de qualquer dia, seja qual for a data escolhida. Em cada caso escolha <strong>Corrigir</strong> (indique o envio certo, declarado antes da primeira tentativa; fica registado com a data da primeira tentativa) ou <strong>Compensar / Descartar</strong>: este botão único envia para compensação o envio associado quando o caso tem um e, caso contrário, descarta o caso. O ONEMS guarda quem decidiu e quando.</li>
+      </ol>
+      <h3>Lembretes automáticos</h3>
+      <p>O painelista que causou o erro recebe no Telegram, no seu idioma, um lembrete que explica o que aconteceu e o que fazer.</p>
+      <ul>
+        <li>No máximo <strong>um lembrete por dia</strong> por painelista e motivo.</li>
+        <li>Apenas entre as <strong>08:00 e as 20:00</strong> hora local; fora desse horário espera pelas 08:00.</li>
+        <li>A partir da <strong>3.ª falha em 7 dias</strong>, a mensagem diz que o responsável está informado.</li>
+        <li>Não é enviado se o painelista tinha declarado indisponibilidade.</li>
+      </ul>
+      <h3>Mensagem individual ou aviso geral</h3>
+      <ul>
+        <li><strong>Mensagem individual.</strong> A partir da lista de painelistas com problemas repetidos: um texto preparado conforme o motivo, editável e no seu idioma. Fica no seu histórico.</li>
+        <li><strong>Aviso geral.</strong> <em>Mensagem a todos os painelistas</em>: escolha um modelo (por exemplo a lição do apartado), edite-o e confirme. O ONEMS mostra quantos painelistas o vão receber e cada um recebe-o no seu idioma.</li>
+      </ul>
+      <div class="callout info"><strong>Dica.</strong> Use a mensagem individual para quem repete o mesmo erro e o aviso geral quando muitos o cometem.</div>
     </section>
 
     <section id="conversation">

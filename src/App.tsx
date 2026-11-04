@@ -54,6 +54,7 @@ import PipelineMonitor from './pages/diagnosis/PipelineMonitor'
 import RoutePathAnalysis from './pages/diagnosis/RoutePathAnalysis'
 import { PanelistAvailabilityIncidents } from './pages/incidents/PanelistAvailabilityIncidents'
 import { PanelistReportedIncidents } from './pages/incidents/PanelistReportedIncidents'
+import { ReceiptErrors } from './pages/incidents/ReceiptErrors'
 import { HelpCenter } from './pages/HelpCenter'
 
 
@@ -499,6 +500,16 @@ function App() {
                       element={
                         <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
                           <PanelistReportedIncidents />
+                        </ProtectedRoute>
+                      }
+                    />
+
+                    {/* Receipt errors - for admin and superadmin */}
+                    <Route
+                      path="/incidents/receipts"
+                      element={
+                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                          <ReceiptErrors />
                         </ProtectedRoute>
                       }
                     />

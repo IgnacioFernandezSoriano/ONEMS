@@ -247,6 +247,7 @@
       <a href="#availability-screen">L&rsquo;écran de l&rsquo;incident</a>
       <a href="#availability-example">Exemple pas à pas</a>
       <h3>Référence</h3>
+      <a href="#receipt-errors">Erreurs de réception</a>
       <a href="#conversation">Conversation et alertes</a>
       <a href="#faq">Questions</a>
     </nav>
@@ -813,6 +814,47 @@
         <li>Rédigez une note de <em>Résolution finale</em> et <strong>Enregistrer</strong>. L&rsquo;incident devient <span class="badge b-blue">Résolue</span>&nbsp;; Elena et les autres panélistes concernés sont prévenus sur Telegram.</li>
       </ol>
       <div class="callout info"><strong>Indisponibilité due à un manque de matériel.</strong> À partir d&rsquo;un incident de matériel manquant, vous pouvez créer une période d&rsquo;indisponibilité qui court d&rsquo;aujourd&rsquo;hui jusqu&rsquo;à l&rsquo;arrivée prévue du matériel. Elle suit exactement le même processus&nbsp;; la raison s&rsquo;affiche comme <em>Matériel</em>.</div>
+    </section>
+
+    <section id="receipt-errors">
+      <h2>Erreurs de réception</h2>
+      <p>Lorsqu&rsquo;un panéliste déclare une réception et que quelque chose ne concorde pas, ONEMS trouve la cause, corrige ce qui peut l&rsquo;être sans risque et garde une trace. Vous le suivez dans <strong>Incidents &rsaquo; Réceptions</strong>.</p>
+      <h3>Ce que le système corrige seul</h3>
+      <ul>
+        <li><strong>Une faute de frappe sur l&rsquo;étiquette.</strong> Si l&rsquo;étiquette n&rsquo;existe pas mais qu&rsquo;un seul envoi expédié vers la ville du destinataire a une étiquette différente d&rsquo;un chiffre, ou de deux chiffres adjacents inversés, la réception est enregistrée sur cet envoi avec la <strong>date de la première tentative</strong>, et non celle de la correction.</li>
+        <li><strong>Reçu à un autre point de la même ville.</strong> La réception est valide et la destination de l&rsquo;envoi est mise à jour avec le point qui l&rsquo;a réellement reçu.</li>
+      </ul>
+      <h3>Ce qui passe en compensation</h3>
+      <ul>
+        <li><strong>L&rsquo;expéditeur n&rsquo;avait pas déclaré l&rsquo;envoi.</strong> L&rsquo;envoi est annulé et passe en compensation.</li>
+        <li><strong>Règle de la boîte postale.</strong> Le panéliste a déclaré la réception mais aucun envoi n&rsquo;avait été déclaré le jour ouvré précédent : elle ne compte pas et passe en compensation.</li>
+      </ul>
+      <h3>Ce qui attend votre décision</h3>
+      <ul>
+        <li><strong>Colis destiné à une autre ville.</strong> L&rsquo;étiquette déclarée est celle d&rsquo;un envoi pour une autre ville. Il peut s&rsquo;agir d&rsquo;une faute de frappe qui tombe sur un envoi sain encore en transit, donc <strong>l&rsquo;envoi n&rsquo;est pas modifié</strong> : il reste en attente de la décision du responsable. Vérifiez si le colis est vraiment arrivé dans cette ville.</li>
+      </ul>
+      <h3>Étiquettes introuvables</h3>
+      <p>ONEMS continue de chercher <strong>toutes les 30 minutes pendant 5 jours ouvrés</strong>. Seuls les envois déclarés avant la première tentative peuvent correspondre. Si l&rsquo;étiquette apparaît, le cas est corrigé avec la date de la première tentative. Sinon, il attend votre décision.</p>
+      <h3>Comment lire l&rsquo;onglet</h3>
+      <ol class="steps">
+        <li><strong>Résumé du jour.</strong> Choisissez une date : tentatives, réussies du premier coup, corrigées par le système, passées en compensation et en attente de décision, avec un graphique sur 30 jours.</li>
+        <li><strong>Panélistes aux problèmes répétés.</strong> Chaque échec est attribué à <em>celui qui l&rsquo;a causé</em> : l&rsquo;<strong>expéditeur</strong> pour une faute de frappe ou un envoi non déclaré ; le <strong>destinataire</strong> s&rsquo;il n&rsquo;a pas visité la boîte postale. Vous voyez les échecs sur 7 et 30 jours, le motif principal et la date du dernier avertissement.</li>
+        <li><strong>Décisions en attente.</strong> Les cas ouverts de tous les jours apparaissent ici, quelle que soit la date choisie. Pour chaque cas, choisissez <strong>Corriger</strong> (indiquez le bon envoi, déclaré avant la première tentative ; il est enregistré avec la date de la première tentative) ou <strong>Compenser / Écarter</strong> : ce bouton unique envoie en compensation l&rsquo;envoi lié lorsque le cas en a un, et sinon écarte le cas. ONEMS conserve qui a décidé et quand.</li>
+      </ol>
+      <h3>Rappels automatiques</h3>
+      <p>Le panéliste à l&rsquo;origine de l&rsquo;erreur reçoit sur Telegram, dans sa langue, un rappel qui explique ce qui s&rsquo;est passé et ce qu&rsquo;il faut faire.</p>
+      <ul>
+        <li>Au maximum <strong>un rappel par jour</strong> pour chaque panéliste et chaque motif.</li>
+        <li>Uniquement entre <strong>08h00 et 20h00</strong> heure locale ; sinon il attend 08h00.</li>
+        <li>À partir du <strong>3e échec en 7 jours</strong>, le message indique que le responsable est informé.</li>
+        <li>Aucun rappel si le panéliste avait déclaré une indisponibilité.</li>
+      </ul>
+      <h3>Message individuel ou avis général</h3>
+      <ul>
+        <li><strong>Message individuel.</strong> Depuis la liste des panélistes aux problèmes répétés : un texte préparé selon leur motif, modifiable et dans leur langue. Il est conservé dans leur historique.</li>
+        <li><strong>Avis général.</strong> <em>Message à tous les panélistes</em> : choisissez un modèle (par exemple la leçon sur la boîte postale), modifiez-le et confirmez. ONEMS affiche combien de panélistes le recevront, et chacun le reçoit dans sa langue.</li>
+      </ul>
+      <div class="callout info"><strong>Conseil.</strong> Utilisez le message individuel pour celui qui répète la même erreur et l&rsquo;avis général quand beaucoup la commettent.</div>
     </section>
 
     <section id="conversation">

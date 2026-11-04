@@ -247,6 +247,7 @@
       <a href="#availability-screen">The incident screen</a>
       <a href="#availability-example">Worked example</a>
       <h3>Reference</h3>
+      <a href="#receipt-errors">Receipt errors</a>
       <a href="#conversation">Conversation and alerts</a>
       <a href="#faq">Questions</a>
     </nav>
@@ -813,6 +814,47 @@
         <li>Write a <em>Final resolution</em> note and <strong>Save</strong>. The incident becomes <span class="badge b-blue">Resolved</span>; Elena and the other panelists concerned are told on Telegram.</li>
       </ol>
       <div class="callout info"><strong>Unavailability because of missing material.</strong> From a missing-materials incident you can create an unavailable period that runs from today until the material is expected. It follows exactly the same process; the reason shows as <em>Materials</em>.</div>
+    </section>
+
+    <section id="receipt-errors">
+      <h2>Receipt errors</h2>
+      <p>When a panelist declares a reception and something does not match, ONEMS finds out why, fixes what it safely can and keeps a record. You follow it in <strong>Incidents &rsaquo; Receipts</strong>.</p>
+      <h3>What the system fixes on its own</h3>
+      <ul>
+        <li><strong>A typo in the label.</strong> If the tag does not exist but exactly one sent shipment to the receiver&rsquo;s city has a label that differs by one digit, or by two adjacent digits swapped, the reception is registered on that shipment. It carries the <strong>date of the first attempt</strong>, not the date of the fix.</li>
+        <li><strong>Received at another point of the same city.</strong> The reception is valid and the shipment&rsquo;s destination is updated to the point that really received it.</li>
+      </ul>
+      <h3>What goes to compensation</h3>
+      <ul>
+        <li><strong>The sender had not declared the shipment.</strong> The shipment is cancelled and sent to compensation.</li>
+        <li><strong>PO Box rule.</strong> The panelist declared the receipt but no shipment had been declared the previous working day, so it does not count and goes to compensation.</li>
+      </ul>
+      <h3>What waits for your decision</h3>
+      <ul>
+        <li><strong>Parcel for another city.</strong> The declared label belongs to a shipment for another city. It may be a typo that matches a healthy shipment still in transit, so <strong>the shipment is not touched</strong>: it stays pending the manager&rsquo;s decision. Check whether the parcel really arrived in that city.</li>
+      </ul>
+      <h3>Labels that are not found</h3>
+      <p>ONEMS keeps looking <strong>every 30 minutes for 5 working days</strong>. Only shipments declared before the first attempt can match. If the label shows up, the case is fixed with the date of the first attempt. If not, it waits for your decision.</p>
+      <h3>How to read the tab</h3>
+      <ol class="steps">
+        <li><strong>Day summary.</strong> Pick a date: attempts, right the first time, fixed by the system, sent to compensation and pending decision, with a 30-day chart.</li>
+        <li><strong>Panelists with repeated problems.</strong> Each failure is attributed to <em>who caused it</em>: the <strong>sender</strong> for a typo or an undeclared shipment; the <strong>receiver</strong> for not visiting the PO Box. You see failures in 7 and 30 days, the main reason and when they were last warned.</li>
+        <li><strong>Pending decisions.</strong> Open cases from any day are listed here, whatever date you pick. For each case choose <strong>Fix</strong> (pick the right shipment, declared before the first attempt; it is registered with the date of the first attempt) or <strong>Compensate / Discard</strong>: this single button sends the linked shipment to compensation when the case has one, and otherwise discards the case. ONEMS keeps who decided and when.</li>
+      </ol>
+      <h3>Automatic reminders</h3>
+      <p>The panelist who caused the error gets a Telegram reminder in their language explaining what happened and what to do.</p>
+      <ul>
+        <li>At most <strong>one reminder per day</strong> for each panelist and reason.</li>
+        <li>Only between <strong>08:00 and 20:00</strong> local time; otherwise it waits until 08:00.</li>
+        <li>From the <strong>3rd failure in 7 days</strong> the message says that the manager is informed.</li>
+        <li>No reminder if the panelist had declared unavailability.</li>
+      </ul>
+      <h3>Individual message or general notice</h3>
+      <ul>
+        <li><strong>Individual message.</strong> From the list of repeat panelists: a text prepared for their reason, editable, in their language. It is saved in their history.</li>
+        <li><strong>General notice.</strong> <em>Message to all panelists</em>: choose a template (for example the PO Box lesson), edit it and confirm. ONEMS shows how many panelists will receive it, and each one receives it in their own language.</li>
+      </ul>
+      <div class="callout info"><strong>Tip.</strong> Use the individual message for a panelist who repeats the same mistake and the general notice when many panelists make it.</div>
     </section>
 
     <section id="conversation">

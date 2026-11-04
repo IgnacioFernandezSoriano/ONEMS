@@ -198,6 +198,7 @@
       <a href="#recordatorio">The 09:00 reminder</a>
       <a href="#enviar">Send a parcel</a>
       <a href="#recibir">Receive a parcel</a>
+      <a href="#visita">Visit your PO Box every working day</a>
       <h3>If you have a problem</h3>
       <a href="#reportar">Report a problem</a>
       <a href="#c-material">I'm missing materials</a>
@@ -325,6 +326,30 @@
         </div>
       </div>
       <div class="callout warn"><strong>PO box (POBOX):</strong> if you collect from a post office box (POBOX), declare every shipment and every reception <strong>on the same day</strong> you drop it off or pick it up. If you declare it the next day, ONEMS will understand that you did not go that day and the reception will not count.</div>
+    </section>
+
+    <section id="visita">
+      <h2>Visit your PO Box every working day</h2>
+      <p>The time a parcel takes is measured <strong>from the day it is sent to the day it arrives in the PO Box</strong>. ONEMS cannot see the box: it only knows the day <strong>you declare</strong>.</p>
+      <div class="callout warn"><strong>One shipment per working day proves your visit.</strong> When you declare a receipt, ONEMS checks the <strong>previous working day</strong>. If you declared a shipment that day, the receipt is valid. If not, it is cancelled and the parcel will be sent again later.</div>
+      <h3>What to do</h3>
+      <ol class="steps">
+        <li>Visit your PO Box <strong>every working day, Monday to Friday</strong>.</li>
+        <li>Send and declare your shipment <strong>the same day</strong>.</li>
+        <li>Declare your receipts <strong>the same day</strong> you collect them.</li>
+        <li>If you cannot go, <strong>report your unavailability in advance</strong>.</li>
+      </ol>
+      <h3>What the bot answers when you declare a receipt</h3>
+      <ul>
+        <li><strong>Receipt registered.</strong> All good.</li>
+        <li><strong>Registered after correcting the label.</strong> The label declared by the sender did not match the parcel; ONEMS corrected it and registered your receipt. Nothing to do.</li>
+        <li><strong>Not valid: no shipment declared on the previous working day.</strong> You did not declare a shipment the previous working day. The receipt is cancelled and the parcel will be sent again.</li>
+        <li><strong>The sender had not declared it.</strong> It will be sent again. It is not your fault.</li>
+        <li><strong>Parcel for another city.</strong> That label belongs to a shipment for another city: check it and type it again; your manager will review it.</li>
+        <li><strong>Label not found.</strong> We will keep looking for a few days. Check the code, and if you typed it by hand, send the tag photo.</li>
+        <li><strong>Already received.</strong> You had already declared this parcel.</li>
+        <li><strong>Cancelled or with an open incident.</strong> That shipment is being handled; your manager will tell you if you need to do anything.</li>
+      </ul>
     </section>
 
     <section id="reportar">

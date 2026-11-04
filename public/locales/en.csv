@@ -5057,3 +5057,90 @@ stock.generate_shipments,Generate {count} shipments
 stock.not_applicable_purchase_orders,Not applicable - purchase orders are not used
 stock.stock_control_description,Activates inventory monitoring and alert system
 stock.used_to_calculate_delivery_dates,Used to calculate estimated delivery dates
+receipt_errors.menu,Receipts
+receipt_errors.title,Receipt errors and daily follow-up
+receipt_errors.refresh,Refresh
+receipt_errors.broadcast_button,Message to all panelists
+receipt_errors.card.attempts,Receipt attempts
+receipt_errors.card.ok_first_time,OK first time
+receipt_errors.card.fixed,Fixed
+receipt_errors.card.compensated,Compensated
+receipt_errors.card.pending,Pending
+receipt_errors.card.needs_decision,Need decision
+receipt_errors.card.informative,Informative
+receipt_errors.by_reason,Breakdown by reason
+receipt_errors.no_cases,No cases
+receipt_errors.trend_title,Last 30 days
+receipt_errors.trend_open,Open
+receipt_errors.repeaters_title,Repeat panelists (last 30 days)
+receipt_errors.col.panelist,Panelist
+receipt_errors.col.fails_7d,Failures 7 days
+receipt_errors.col.fails_30d,Failures 30 days
+receipt_errors.col.top_reason,Main reason
+receipt_errors.col.last_notice,Last notice
+receipt_errors.col.date,Date
+receipt_errors.col.tag,Tag
+receipt_errors.col.reason,Reason
+receipt_errors.col.status,Status
+receipt_errors.col.attempts,Attempts
+receipt_errors.col.culprit,Responsible
+receipt_errors.col.origin_panelist,Origin panelist
+receipt_errors.col.text,Text
+receipt_errors.col.total,Total
+receipt_errors.col.sent,Sent
+receipt_errors.col.failed,Failed
+receipt_errors.never,Never
+receipt_errors.send_notice,Send notice
+receipt_errors.no_repeaters,No repeat panelists
+receipt_errors.notice_title,Notice to panelist
+receipt_errors.notice_language,Language
+receipt_errors.send,Send
+receipt_errors.error_generic,The operation could not be completed
+receipt_errors.broadcast_title,Message to all active panelists
+receipt_errors.broadcast_template,Template
+receipt_errors.template.pobox_daily_visit_lesson,Lesson: visit your PO Box every day
+receipt_errors.template.pobox_absent_no_visit,Receipt cancelled: no visit the previous day
+receipt_errors.template.not_sent_cancelled,Sender: shipment not declared in the bot
+receipt_errors.template.ok_typo_fixed,Sender: declared tag did not match the envelope
+receipt_errors.template.wrong_city_cancelled,Sender: letter arrived in another city
+receipt_errors.broadcast_recipients,Recipients: {count} active panelists with Telegram
+receipt_errors.broadcast_queued,Message queued for {count} panelists
+receipt_errors.broadcast_confirm,Confirm: send to {count} panelists
+receipt_errors.broadcast_history,Previous messages
+receipt_errors.broadcast_no_history,No messages sent yet
+receipt_errors.cases_title,Cases
+receipt_errors.open_cases_title,Pending decisions (any day)
+receipt_errors.filter_all,All statuses
+receipt_errors.status.fixed,Fixed
+receipt_errors.status.compensated,Compensated
+receipt_errors.status.informative,Informative
+receipt_errors.status.pending,Pending
+receipt_errors.status.needs_decision,Needs decision
+receipt_errors.status.discarded,Discarded
+receipt_errors.reason.ok,OK
+receipt_errors.reason.ok_typo_fixed,Typo fixed
+receipt_errors.reason.ok_same_city,"Same city, other node"
+receipt_errors.reason.pobox_absent_unavailable,PO Box not visited (declared unavailable)
+receipt_errors.reason.pobox_absent_no_visit,PO Box not visited
+receipt_errors.reason.not_sent_cancelled,"Not sent yet, cancelled"
+receipt_errors.reason.wrong_city_cancelled,"Wrong city, cancelled"
+receipt_errors.reason.other_city_tag,Label of a parcel for another city
+receipt_errors.reason.already_received,Already received
+receipt_errors.reason.blocked,Blocked
+receipt_errors.reason.not_found,Tag not found
+receipt_errors.reason.ambiguous_typo,Ambiguous typo
+receipt_errors.reason.invalid_format,Invalid format
+receipt_errors.reason.no_panelist,Telegram user not registered as a panelist
+receipt_errors.reason.no_node,No node
+receipt_errors.role.sender,sender
+receipt_errors.role.receiver,receiver
+receipt_errors.fix,Fix
+receipt_errors.close_case,Compensate / Discard
+receipt_errors.fix_title,Fix case: choose the correct shipment
+receipt_errors.fix_help,The panelist declared the tag {tag}. Choose the sent shipment addressed to their city that matches.
+receipt_errors.fix_no_candidates,There are no sent shipments addressed to this panelist's city.
+receipt_errors.fix_confirm,Fix with this shipment
+receipt_errors.close_title,Close case without fixing
+receipt_errors.close_help,Tag {tag}: if a shipment is linked and not yet received it will be cancelled and compensated; otherwise the case is discarded.
+receipt_errors.close_note,Note (optional)
+receipt_errors.close_confirm,Close case
