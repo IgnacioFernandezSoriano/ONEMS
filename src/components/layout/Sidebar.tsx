@@ -68,7 +68,7 @@ export function Sidebar() {
   const { isCollapsed, setIsCollapsed } = useSidebar()
   const { t, locale, setLocale } = useLocale()
   // Un solo numero por item: incidencias en las que el manager tiene que actuar (cuenta seleccionada / propia).
-  const { reported: reportedAttention, unavailability: unavailabilityAttention } = useIncidentAttention()
+  const { reported: reportedAttention, unavailability: unavailabilityAttention, receipts: receiptsAttention } = useIncidentAttention()
   // Muestras por compensar: contador del item Load Balancing. Se consulta al montar, al cambiar de cuenta, al
   // entrar/salir de /node-load-balancing y cuando la pantalla de balanceo avisa de un apply (sin polling).
   const { summary: deferredSummary, refetch: refetchDeferred } = useDeferredSamples()
@@ -377,6 +377,7 @@ export function Sidebar() {
           label: t('receipt_errors.menu'),
           icon: PackageX,
           roles: ['admin', 'superadmin'],
+          tooltip: t('receipt_errors.badge_tooltip'),
         },
       ],
     },
@@ -647,6 +648,11 @@ export function Sidebar() {
                             {item.path === '/incidents/panelist-reported' && reportedAttention > 0 && isExpanded && (
                               <span title={t('reported_incidents.badge_tooltip')} className="ml-auto text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">
                                 {reportedAttention}
+                              </span>
+                            )}
+                            {item.path === '/incidents/receipts' && receiptsAttention > 0 && isExpanded && (
+                              <span title={t('receipt_errors.badge_tooltip')} className="ml-auto text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">
+                                {receiptsAttention}
                               </span>
                             )}
                           </Link>

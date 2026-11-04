@@ -2960,6 +2960,9 @@ reported_incidents.status.auto_resolved,Resolvida automaticamente
 reported_incidents.readonly.title,Tratada automaticamente
 reported_incidents.readonly.no_data,Sem dados disponíveis
 reported_incidents.readonly.no_candidates,Não foram encontrados envios em trânsito
+reported_incidents.readonly.none_selected,O painelista não reconheceu nenhum dos envios que o bot mostrou
+reported_incidents.readonly.invalid_pick,O painelista tocou num botão de uma lista expirada
+reported_incidents.readonly.not_found_repeat,O bot não encontrou a etiqueta após várias tentativas e pediu uma fotografia
 reported_incidents.readonly.chosen_shipment,Envio escolhido
 reported_incidents.contact.before,Antes
 reported_incidents.contact.after,Depois
@@ -5132,6 +5135,25 @@ receipt_errors.reason.ambiguous_typo,Erro de digitação ambíguo
 receipt_errors.reason.invalid_format,Formato inválido
 receipt_errors.reason.no_panelist,Utilizador do Telegram não registado como painelista
 receipt_errors.reason.no_node,Sem nó
+receipt_errors.badge_tooltip,Casos de receção abertos: pendentes ou que requerem decisão
+receipt_errors.reason_guide.open,O que significa cada motivo
+receipt_errors.reason_guide.title,Motivos dos casos de receção
+receipt_errors.reason_guide.intro,Abre-se um caso sempre que um painelista declara uma receção com um problema. A etiqueta de cor indica o estado em que fica: Pendente e Requer decisão são os que precisam da tua atenção.
+receipt_errors.reason_guide.close,Fechar
+receipt_errors.reason_help.not_found,"Não há nenhum envio com essa etiqueta a caminho deste painelista. O caso espera alguns dias: se o remetente declarar o envio depois, a receção regista-se sozinha. Se não aparecer, revê a etiqueta com o painelista."
+receipt_errors.reason_help.ambiguous_typo,A etiqueta parece-se com vários envios que o painelista tem de receber e não é possível saber qual é. Escolhe o envio correto com Corrigir.
+receipt_errors.reason_help.other_city_tag,A etiqueta existe mas é de um envio dirigido a outra cidade. Não se regista. Verifica se o painelista a escreveu mal ou se o pacote chegou mesmo à cidade errada.
+receipt_errors.reason_help.no_panelist,O utilizador de Telegram que escreveu a etiqueta não está ligado a nenhum painelista. Não se pode corrigir: só fechar.
+receipt_errors.reason_help.no_node,O painelista não tem nenhum ponto atribuído no sistema. Atribui-lhe um na sua ficha. O caso só se pode fechar.
+receipt_errors.reason_help.ok_typo_fixed,O remetente declarou o envio com uma etiqueta quase igual (um dígito diferente ou trocado). O sistema corrige-a e regista a receção. Responsável: o remetente.
+receipt_errors.reason_help.ok_same_city,A etiqueta era de um envio dirigido a outro ponto da mesma cidade. Fica registado em nome do painelista que o recebeu. Responsável: o remetente.
+receipt_errors.reason_help.pobox_absent_no_visit,Carta de apartado e o painelista não declarou nenhum envio no dia útil anterior: sinal de que não visitou o apartado e não se sabe quando chegou a carta. Não serve para a medição e é compensada com outro envio. Responsável: o recetor.
+receipt_errors.reason_help.pobox_absent_unavailable,Carta de apartado recolhida depois de um dia útil em que o painelista estava declarado como indisponível: não se sabe quando chegou. Não serve para a medição e é compensada com outro envio. Não é culpa do painelista.
+receipt_errors.reason_help.not_sent_cancelled,O pacote chegou mas o remetente nunca o declarou como enviado: falta a data de saída. É anulado e compensado com outro envio. Responsável: o remetente.
+receipt_errors.reason_help.already_received,Essa etiqueta já estava registada como recebida. Só informa: não há nada a fazer.
+receipt_errors.reason_help.blocked,"O envio tinha sido anulado antes (por exemplo, passou a compensação ou tem uma incidência aberta) e não se pode registar. Só informa."
+receipt_errors.reason_help.invalid_format,O que o painelista escreveu não tem forma de etiqueta (texto solto ou código incompleto). Só informa.
+receipt_errors.reason_help.wrong_city_cancelled,Só em casos antigos: o envio chegou a outra cidade e foi anulado e compensado. O sistema já não gera este motivo.
 receipt_errors.role.sender,remetente
 receipt_errors.role.receiver,destinatário
 receipt_errors.fix,Corrigir

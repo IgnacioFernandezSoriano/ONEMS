@@ -2952,6 +2952,9 @@ reported_incidents.status.auto_resolved,Résolue automatiquement
 reported_incidents.readonly.title,Traitée automatiquement
 reported_incidents.readonly.no_data,Aucune donnée disponible
 reported_incidents.readonly.no_candidates,Aucun envoi en transit n'a été trouvé
+reported_incidents.readonly.none_selected,Le panéliste n'a reconnu aucun des envois proposés par le bot
+reported_incidents.readonly.invalid_pick,Le panéliste a touché un bouton d'une liste expirée
+reported_incidents.readonly.not_found_repeat,Le bot n'a pas trouvé l'étiquette après plusieurs essais et a demandé une photo
 reported_incidents.readonly.chosen_shipment,Envoi choisi
 reported_incidents.contact.before,Avant
 reported_incidents.contact.after,Après
@@ -5124,6 +5127,25 @@ receipt_errors.reason.ambiguous_typo,Faute de frappe ambiguë
 receipt_errors.reason.invalid_format,Format invalide
 receipt_errors.reason.no_panelist,Utilisateur Telegram non enregistré comme panéliste
 receipt_errors.reason.no_node,Aucun nœud
+receipt_errors.badge_tooltip,Cas de réception ouverts : en attente ou à décider
+receipt_errors.reason_guide.open,Que signifie chaque motif
+receipt_errors.reason_guide.title,Motifs des cas de réception
+receipt_errors.reason_guide.intro,Un cas s'ouvre chaque fois qu'un panéliste déclare une réception avec un problème. L'étiquette de couleur indique l'état final : En attente et À décider sont ceux qui demandent votre attention.
+receipt_errors.reason_guide.close,Fermer
+receipt_errors.reason_help.not_found,"Aucun envoi avec cette étiquette n'est en route vers ce panéliste. Le cas attend quelques jours : si l'expéditeur déclare l'envoi plus tard, la réception est enregistrée automatiquement. Sinon, vérifiez l'étiquette avec le panéliste."
+receipt_errors.reason_help.ambiguous_typo,L'étiquette ressemble à plusieurs envois que le panéliste doit recevoir et on ne peut pas savoir lequel. Choisissez le bon envoi avec Corriger.
+receipt_errors.reason_help.other_city_tag,L'étiquette existe mais appartient à un envoi adressé à une autre ville. Elle n'est pas enregistrée. Vérifiez si le panéliste l'a mal saisie ou si le colis est vraiment arrivé dans la mauvaise ville.
+receipt_errors.reason_help.no_panelist,L'utilisateur Telegram qui a saisi l'étiquette n'est lié à aucun panéliste. Impossible à corriger : seulement à fermer.
+receipt_errors.reason_help.no_node,Le panéliste n'a aucun point attribué dans le système. Attribuez-lui en un dans sa fiche. Le cas ne peut qu'être fermé.
+receipt_errors.reason_help.ok_typo_fixed,L'expéditeur a déclaré l'envoi avec une étiquette presque identique (un chiffre différent ou inversé). Le système la corrige et enregistre la réception. Responsable : l'expéditeur.
+receipt_errors.reason_help.ok_same_city,L'étiquette appartenait à un envoi adressé à un autre point de la même ville. Elle est enregistrée au nom du panéliste qui l'a reçu. Responsable : l'expéditeur.
+receipt_errors.reason_help.pobox_absent_no_visit,Lettre de boîte postale et le panéliste n'a déclaré aucun envoi le jour ouvrable précédent : signe qu'il n'a pas visité la boîte et on ne sait pas quand la lettre est arrivée. Elle ne sert pas à la mesure et est compensée par un autre envoi. Responsable : le destinataire.
+receipt_errors.reason_help.pobox_absent_unavailable,Lettre de boîte postale relevée après un jour ouvrable où le panéliste était déclaré indisponible : on ne sait pas quand elle est arrivée. Elle ne sert pas à la mesure et est compensée par un autre envoi. Ce n'est pas la faute du panéliste.
+receipt_errors.reason_help.not_sent_cancelled,Le colis est arrivé mais l'expéditeur ne l'a jamais déclaré comme envoyé : la date de départ manque. Il est annulé et compensé par un autre envoi. Responsable : l'expéditeur.
+receipt_errors.reason_help.already_received,Cette étiquette était déjà enregistrée comme reçue. Pour information : rien à faire.
+receipt_errors.reason_help.blocked,"L'envoi avait été annulé auparavant (par exemple, passé en compensation ou avec un incident ouvert) et ne peut pas être enregistré. Pour information."
+receipt_errors.reason_help.invalid_format,Ce que le panéliste a saisi ne ressemble pas à une étiquette (texte libre ou code incomplet). Pour information.
+receipt_errors.reason_help.wrong_city_cancelled,Anciens cas uniquement : l'envoi est arrivé dans une autre ville et a été annulé et compensé. Le système ne produit plus ce motif.
 receipt_errors.role.sender,expéditeur
 receipt_errors.role.receiver,destinataire
 receipt_errors.fix,Corriger

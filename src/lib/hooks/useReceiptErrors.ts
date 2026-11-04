@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAccount } from '@/contexts/AccountContext'
+import { notifyIncidentAttention } from '@/lib/hooks/useIncidentAttention'
 import type {
   ReceiptDaySummary, ReceiptTrendPoint, ReceiptRepeatPanelist, ReceiptCase,
   ReceiptCandidateShipment, BroadcastRecipientsByLang, BroadcastHistoryRow,
@@ -51,6 +52,7 @@ export function useReceiptErrors(date: string) {
     const { data, error: e } = await supabase.rpc('rpc_receipt_case_fix', { p_case_id: caseId, p_detail_id: detailId })
     if (e) throw e
     await refresh()
+    notifyIncidentAttention()
     return data as string
   }, [refresh])
 
@@ -58,6 +60,7 @@ export function useReceiptErrors(date: string) {
     const { error: e } = await supabase.rpc('rpc_receipt_case_close', { p_case_id: caseId, p_note: note })
     if (e) throw e
     await refresh()
+    notifyIncidentAttention()
   }, [refresh])
 
   const sendNotice = useCallback(async (panelistId: string, body: string) => {

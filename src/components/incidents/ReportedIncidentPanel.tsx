@@ -125,6 +125,16 @@ function ReadonlyPayload({ payload, kind, t }: { payload: Record<string, any> | 
   const body = (() => {
     if (!isObj) return <p className="text-sm text-gray-500">{t('reported_incidents.readonly.no_data')}</p>
     if (kind === 'receipt') {
+      // Older rows carry no_candidates together with none_selected / invalid_pick: those flags win.
+      if (payload.source === 'not_found_repeat') {
+        return (
+          <p className="text-sm text-gray-500">
+            {t('reported_incidents.readonly.not_found_repeat')}: <span className="font-mono">{String(payload.tag || payload.typed_tag || '')}</span>
+          </p>
+        )
+      }
+      if (payload.none_selected) return <p className="text-sm text-gray-500">{t('reported_incidents.readonly.none_selected')}</p>
+      if (payload.invalid_pick) return <p className="text-sm text-gray-500">{t('reported_incidents.readonly.invalid_pick')}</p>
       if (payload.no_candidates) return <p className="text-sm text-gray-500">{t('reported_incidents.readonly.no_candidates')}</p>
       if (payload.chosen_detail_id) {
         return (

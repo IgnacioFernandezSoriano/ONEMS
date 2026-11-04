@@ -2960,6 +2960,9 @@ reported_incidents.status.auto_resolved,Resuelta automáticamente
 reported_incidents.readonly.title,Tratada automáticamente
 reported_incidents.readonly.no_data,Sin datos
 reported_incidents.readonly.no_candidates,No había envíos en camino
+reported_incidents.readonly.none_selected,El panelista no reconoció ninguno de los envíos que le mostró el bot
+reported_incidents.readonly.invalid_pick,El panelista pulsó un botón de una lista caducada
+reported_incidents.readonly.not_found_repeat,El bot no encontró la etiqueta tras varios intentos y pidió una foto
 reported_incidents.readonly.chosen_shipment,Envío elegido
 reported_incidents.contact.before,Antes
 reported_incidents.contact.after,Después
@@ -5132,6 +5135,25 @@ receipt_errors.reason.ambiguous_typo,Error de tecleo ambiguo
 receipt_errors.reason.invalid_format,Formato no válido
 receipt_errors.reason.no_panelist,Usuario de Telegram no registrado como panelista
 receipt_errors.reason.no_node,Sin nodo
+receipt_errors.badge_tooltip,Casos de recepción abiertos: pendientes o que requieren decisión
+receipt_errors.reason_guide.open,Qué significa cada motivo
+receipt_errors.reason_guide.title,Motivos de los casos de recepción
+receipt_errors.reason_guide.intro,Cada vez que un panelista declara una recepción con un problema se abre un caso. La etiqueta de color indica en qué estado queda: Pendiente y Requiere decisión son los que necesitan tu atención.
+receipt_errors.reason_guide.close,Cerrar
+receipt_errors.reason_help.not_found,"No hay ningún envío con esa etiqueta camino de este panelista. El caso espera unos días: si el remitente declara el envío después, la recepción se registra sola. Si no aparece, revisa la etiqueta con el panelista."
+receipt_errors.reason_help.ambiguous_typo,La etiqueta se parece a varios envíos que el panelista tiene que recibir y no se puede saber cuál es. Elige el envío correcto con Arreglar.
+receipt_errors.reason_help.other_city_tag,La etiqueta existe pero es de un envío dirigido a otra ciudad. No se registra. Comprueba si el panelista la escribió mal o si el paquete llegó de verdad a la ciudad equivocada.
+receipt_errors.reason_help.no_panelist,El usuario de Telegram que escribió la etiqueta no está vinculado a ningún panelista. No se puede arreglar: solo cerrar.
+receipt_errors.reason_help.no_node,El panelista no tiene ningún punto asignado en el sistema. Asígnale uno en su ficha. El caso solo se puede cerrar.
+receipt_errors.reason_help.ok_typo_fixed,El remitente declaró el envío con una etiqueta casi igual (un dígito distinto o cambiado de sitio). El sistema la corrige y registra la recepción. Responsable: el remitente.
+receipt_errors.reason_help.ok_same_city,La etiqueta era de un envío dirigido a otro punto de la misma ciudad. Se registra a nombre del panelista que lo recibió. Responsable: el remitente.
+receipt_errors.reason_help.pobox_absent_no_visit,Carta de apartado de correos y el panelista no declaró ningún envío el día laborable anterior: señal de que no visitó el apartado y no se sabe cuándo llegó la carta. No vale para la medición y se compensa con otro envío. Responsable: el receptor.
+receipt_errors.reason_help.pobox_absent_unavailable,Carta de apartado de correos recogida después de un día laborable en que el panelista estaba declarado como no disponible: no se sabe cuándo llegó. No vale para la medición y se compensa con otro envío. No es culpa del panelista.
+receipt_errors.reason_help.not_sent_cancelled,El paquete llegó pero el remitente nunca lo declaró como enviado: falta la fecha de salida. Se anula y se compensa con otro envío. Responsable: el remitente.
+receipt_errors.reason_help.already_received,Esa etiqueta ya estaba registrada como recibida. Solo informa: no hay que hacer nada.
+receipt_errors.reason_help.blocked,"El envío estaba anulado antes (por ejemplo, pasó a compensación o tiene una incidencia abierta) y no se puede registrar. Solo informa."
+receipt_errors.reason_help.invalid_format,Lo que escribió el panelista no tiene forma de etiqueta (texto suelto o un código incompleto). Solo informa.
+receipt_errors.reason_help.wrong_city_cancelled,Solo en casos antiguos: el envío llegó a otra ciudad y se anuló y compensó. El sistema ya no genera este motivo.
 receipt_errors.role.sender,emisor
 receipt_errors.role.receiver,receptor
 receipt_errors.fix,Arreglar
