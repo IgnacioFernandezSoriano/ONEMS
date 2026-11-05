@@ -29,6 +29,21 @@ INSERT INTO public.products (id, account_id, carrier_id, code, description, stan
   ('cb000000-0000-0000-0000-0000000000d1','f4d823d2-93e6-4755-9a89-9da87e7fa86e','ca000000-0000-0000-0000-0000000000d2','A POBOX','POBOX',48),
   ('cb000000-0000-0000-0000-0000000000d2','f4d823d2-93e6-4755-9a89-9da87e7fa86e','ca000000-0000-0000-0000-0000000000d2','A STANDARD','A STANDARD',48);
 
+-- un plan normal de DEMO2 con dos envios del panelista de prueba (no son de prueba: no se pueden tocar)
+INSERT INTO public.allocation_plans (id, account_id, plan_name, carrier_id, product_id, total_samples, start_date, end_date, status)
+VALUES ('cc000000-0000-0000-0000-0000000000d2','f4d823d2-93e6-4755-9a89-9da87e7fa86e','Plan normal DEMO2',
+        'ca000000-0000-0000-0000-0000000000d2','cb000000-0000-0000-0000-0000000000d2',2,'2026-10-01','2026-12-31','active');
+INSERT INTO public.allocation_plan_details (id, account_id, plan_id, origin_node_id, destination_node_id, fecha_programada, status, generation_source) VALUES
+  ('dd000000-0000-0000-0000-000000000001','f4d823d2-93e6-4755-9a89-9da87e7fa86e','cc000000-0000-0000-0000-0000000000d2',
+   'a827d7a8-78db-4d25-8326-c38b8ff3c00a','2940e6ff-f666-4cb2-8780-ffb464bce544','2026-10-27','pending','plan'),
+  ('dd000000-0000-0000-0000-000000000002','f4d823d2-93e6-4755-9a89-9da87e7fa86e','cc000000-0000-0000-0000-0000000000d2',
+   'a827d7a8-78db-4d25-8326-c38b8ff3c00a','2940e6ff-f666-4cb2-8780-ffb464bce544','2026-10-28','pending','plan');
+-- datos de antes de la prueba (en la BD real se crearon dias antes; aqui todo va en la misma transaccion)
+SET LOCAL session_replication_role = replica;  -- sin triggers: que no reescriban updated_at
+UPDATE public.allocation_plan_details SET updated_at = now() - interval '1 day'
+ WHERE id IN ('dd000000-0000-0000-0000-000000000001','dd000000-0000-0000-0000-000000000002');
+SET LOCAL session_replication_role = origin;
+
 INSERT INTO ops_test.secret(token_sha256) VALUES (encode(extensions.digest('t0ken-de-prueba','sha256'),'hex'));
 
 CREATE TEMP TABLE _snap AS
@@ -49,7 +64,7 @@ BEGIN
 
   r := public.ops_test_prepare('t0ken-de-prueba');
   PERFORM pg_temp.fail_if(r->>'send_tag' <> '73915086' OR r->>'receive_tag' <> '73915087', 'etiquetas: ' || r::text);
-  PERFORM pg_temp.fail_if(r->>'send_date' <> '05/01/2026' OR r->>'receive_date' <> '05/01/2026', 'fechas: ' || r::text);
+  PERFORM pg_temp.fail_if(r->>'send_date' <> '06/01/2020' OR r->>'receive_date' <> '06/01/2020', 'fechas: ' || r::text);
   v_send := (r->>'send_detail_id')::uuid; v_recv := (r->>'receive_detail_id')::uuid;
 
   SELECT count(*) INTO n FROM public.allocation_plan_details d JOIN public.allocation_plans p ON p.id = d.plan_id
@@ -81,6 +96,22 @@ BEGIN
   PERFORM pg_temp.fail_if(NOT (s->>'incident')::boolean, 'status incidencia: ' || s::text);
   PERFORM pg_temp.fail_if(jsonb_array_length(s->'unexpected') <> 0, 'lo esperado no es inesperado: ' || s::text);
 
+  -- el bot pasa a 'notified' los envios pendientes del panelista al listar: eso es esperado
+  UPDATE public.allocation_plan_details SET status = 'notified' WHERE id = 'dd000000-0000-0000-0000-000000000001';
+  s := public.ops_test_status('t0ken-de-prueba');
+  PERFORM pg_temp.fail_if(jsonb_array_length(s->'unexpected') <> 0, 'notified de la lista no es inesperado: ' || s::text);
+  -- pero marcar como enviado un envio que no es de prueba SI es inesperado (G5, fila equivocada)
+  UPDATE public.allocation_plan_details SET status = 'sent', tag_id = '73915086', sent_at = now()
+   WHERE id = 'dd000000-0000-0000-0000-000000000002';
+  s := public.ops_test_status('t0ken-de-prueba');
+  PERFORM pg_temp.fail_if(jsonb_array_length(s->'unexpected') <> 1 OR (s->'unexpected'->>0) NOT LIKE '%envíos de DEMO2 que no son de prueba%',
+                          'fila equivocada no detectada: ' || s::text);
+  -- deja esas dos filas como estaban (sin triggers, con su updated_at antiguo)
+  SET LOCAL session_replication_role = replica;
+  UPDATE public.allocation_plan_details SET status = 'pending', tag_id = NULL, sent_at = NULL, updated_at = now() - interval '1 day'
+   WHERE id IN ('dd000000-0000-0000-0000-000000000001','dd000000-0000-0000-0000-000000000002');
+  SET LOCAL session_replication_role = origin;
+
   -- un aviso a un panelista SI es inesperado
   INSERT INTO public.panelist_notification (account_id, panelist_id, kind, payload)
   VALUES ('f4d823d2-93e6-4755-9a89-9da87e7fa86e','9ba5739f-defd-4f3e-8bcd-f29bbec20eed','manager_notice','{}');
@@ -96,6 +127,19 @@ BEGIN
   PERFORM pg_temp.fail_if(EXISTS (SELECT 1 FROM public.panelist_context WHERE telegram_id = '7014977036'), 'queda contexto');
   -- el aviso inesperado NO se borra: queda para revisarlo
   PERFORM pg_temp.fail_if(NOT EXISTS (SELECT 1 FROM public.panelist_notification WHERE kind = 'manager_notice'), 'el aviso inesperado no debe borrarse');
+
+  -- otro envio de DEMO2 del panelista de prueba con la fecha de prueba: no prepara (el agente podria pulsarlo)
+  INSERT INTO public.allocation_plan_details (id, account_id, plan_id, origin_node_id, destination_node_id, fecha_programada, status, generation_source)
+  VALUES ('dd000000-0000-0000-0000-000000000003','f4d823d2-93e6-4755-9a89-9da87e7fa86e','cc000000-0000-0000-0000-0000000000d2',
+          '2940e6ff-f666-4cb2-8780-ffb464bce544','a827d7a8-78db-4d25-8326-c38b8ff3c00a','2020-01-06','sent','plan');
+  BEGIN
+    PERFORM public.ops_test_prepare('t0ken-de-prueba');
+    RAISE EXCEPTION 'FAIL: preparo con otra fila en la fecha de prueba';
+  EXCEPTION WHEN raise_exception THEN
+    GET STACKED DIAGNOSTICS v_err = MESSAGE_TEXT;
+    PERFORM pg_temp.fail_if(v_err NOT LIKE 'ops_test: ya hay otro envío de DEMO2 con la fecha de prueba%', 'mensaje fecha: ' || v_err);
+  END;
+  DELETE FROM public.allocation_plan_details WHERE id = 'dd000000-0000-0000-0000-000000000003';
 
   -- tope diario: ya hubo 1; 2 mas valen, la 4.a no
   PERFORM public.ops_test_prepare('t0ken-de-prueba');

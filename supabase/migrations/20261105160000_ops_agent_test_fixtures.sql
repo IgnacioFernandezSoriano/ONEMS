@@ -31,7 +31,7 @@ INSERT INTO ops_test.config VALUES (1,
   'ed98f175-853d-4a6b-a2fd-0c6d5641fd99',  -- PAN-DEM-004 (panelista de prueba)
   '7014977036',                            -- su telegram_id, fijado aqui (panelist_context no tiene cuenta)
   '9ba5739f-defd-4f3e-8bcd-f29bbec20eed',  -- PAN-DEM-003 (el otro extremo de los envíos)
-  '73915086', '73915087', DATE '2026-01-05',
+  '73915086', '73915087', DATE '2020-01-06',  -- fecha que ningun dato real usa (revision I1)
   'OPS-AGENT pruebas automáticas (no tocar)', 3)
 ON CONFLICT (id) DO NOTHING;
 
@@ -184,6 +184,13 @@ BEGIN
               WHERE d.account_id = c.account_id AND btrim(d.tag_id) IN (c.send_tag, c.receive_tag)) THEN
     RAISE EXCEPTION 'ops_test: las etiquetas de prueba ya estan usadas en DEMO2';
   END IF;
+  -- El agente elige la fila de la lista por su fecha: si otro envio del panelista de prueba la comparte, podria
+  -- pulsar ese y marcarlo como enviado. Antes de eso, no prepara.
+  IF EXISTS (SELECT 1 FROM public.allocation_plan_details d
+              WHERE d.account_id = c.account_id AND d.fecha_programada = c.fixture_date
+                AND v_tester.node_id IN (d.origin_node_id, d.destination_node_id)) THEN
+    RAISE EXCEPTION 'ops_test: ya hay otro envío de DEMO2 con la fecha de prueba %; no preparo', to_char(c.fixture_date, 'DD/MM/YYYY');
+  END IF;
 
   INSERT INTO public.allocation_plan_details
     (account_id, plan_id, origin_node_id, destination_node_id, fecha_programada, status, generation_source)
@@ -242,6 +249,15 @@ BEGIN
     IF n > 0 THEN v_unexp := v_unexp || (n || ' mensajes de incidencia (incident_message)'); END IF;
     SELECT count(*) INTO n FROM public.material_shipments x WHERE x.account_id = c.account_id AND x.created_at >= s.prepared_at;
     IF n > 0 THEN v_unexp := v_unexp || (n || ' envíos de material (material_shipments)'); END IF;
+    -- Envios del panelista de prueba que NO son de prueba y han cambiado (p. ej. el agente pulso la fila
+    -- equivocada). Lo unico esperado: el bot pasa a 'notified' sus envios pendientes al enseñar la lista.
+    SELECT count(*) INTO n FROM public.allocation_plan_details x
+     WHERE x.account_id = c.account_id AND x.plan_id IS DISTINCT FROM s.plan_id AND x.updated_at >= s.prepared_at
+       AND (SELECT node_id FROM public.panelists WHERE id = c.tester_panelist_id) IN (x.origin_node_id, x.destination_node_id)
+       AND NOT (x.status = 'notified' AND x.origin_node_id = (SELECT node_id FROM public.panelists WHERE id = c.tester_panelist_id));
+    IF n > 0 THEN v_unexp := v_unexp || (n || ' envíos de DEMO2 que no son de prueba han cambiado (allocation_plan_details)'); END IF;
+    SELECT count(*) INTO n FROM public.deferred_samples x WHERE x.account_id = c.account_id AND x.created_at >= s.prepared_at;
+    IF n > 0 THEN v_unexp := v_unexp || (n || ' muestras apartadas al registro (deferred_samples)'); END IF;
   END IF;
 
   RETURN jsonb_build_object(
