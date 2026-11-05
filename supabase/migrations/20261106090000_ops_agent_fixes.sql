@@ -112,6 +112,19 @@ BEGIN
   END IF;
 END $$;
 
+-- R3: el envio tiene filas enlazadas (incidencias, material, lecturas, recepciones, propuestas de reasignacion).
+-- Borrarlo las borraria en cascada o las dejaria huerfanas; el deshacer no lo toca (como el balanceo, que no
+-- aparta al registro envios con incidencias, material o lecturas).
+CREATE OR REPLACE FUNCTION ops_fix._apd_has_links(p_id uuid)
+RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path = '' AS $$
+  SELECT EXISTS (SELECT 1 FROM public.material_hold m WHERE m.allocation_plan_detail_id = p_id)
+      OR EXISTS (SELECT 1 FROM public.shipment_incident si WHERE si.parcel_id = p_id)
+      OR EXISTS (SELECT 1 FROM public.panelist_reassignment_proposal rp WHERE rp.allocation_plan_detail_id = p_id)
+      OR EXISTS (SELECT 1 FROM public.panelist_incident pi WHERE pi.allocation_plan_detail_id = p_id)
+      OR EXISTS (SELECT 1 FROM public.one_db o WHERE o.allocation_detail_id = p_id)
+      OR EXISTS (SELECT 1 FROM public.receipt_case rc WHERE rc.detail_id = p_id);
+$$;
+
 -- R3: ciudad (de la cuenta), "hoy" local de la cuenta y fin del plan. Solo si hoy sale en pobox_no_send.
 -- fin_del_plan = el mayor allocation_plans.end_date de los planes con envios pendientes de la ciudad que
 -- aun no han terminado.
@@ -325,7 +338,7 @@ BEGIN
 
   v_res := public.rpc_balance_city_v2(v_city, v_today, (t->>'plan_end')::date, false, v_today);
   IF NOT COALESCE((v_res->>'success')::boolean, false) THEN
-    RAISE EXCEPTION 'ops_fix: el balanceo fallo: %', v_res->>'error';
+    RAISE EXCEPTION 'ops_fix: no aplicable (el balanceo responde: %)', COALESCE(v_res->>'error', 'sin detalle');
   END IF;
 
   BEGIN
@@ -369,7 +382,8 @@ BEGIN
 END $$;
 
 -- Deshacer R3: cada fila que cambio vuelve a su copia de antes solo si su estado actual es exactamente el que
--- dejo R3 (la copia de despues); si no, se salta y se devuelve su id. Una anotacion del registro y el envio
+-- dejo R3 (la copia de despues) y, si es un envio, no tiene filas enlazadas (ops_fix._apd_has_links); si no, se
+-- salta y se devuelve su id. Una anotacion del registro y el envio
 -- que la enlaza se saltan juntos. Orden: anotaciones, envios, ciudad.
 CREATE OR REPLACE FUNCTION public.ops_fix_r3_undo(p_token text, p_log_id bigint)
 RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
@@ -396,7 +410,12 @@ BEGIN
     SELECT to_jsonb(x.*) INTO v_cur FROM public.allocation_plan_details x
      WHERE x.id = r.id::uuid AND x.account_id = l.account_id FOR UPDATE;
     IF NOT FOUND THEN v_cur := NULL; END IF;
-    IF v_cur IS DISTINCT FROM r.a THEN v_skip := v_skip || r.id; ELSE v_ok_apd := v_ok_apd || r.id; END IF;
+    -- se salta si cambio desde R3 o si (existiendo) ya tiene filas enlazadas
+    IF v_cur IS DISTINCT FROM r.a OR (v_cur IS NOT NULL AND ops_fix._apd_has_links(r.id::uuid)) THEN
+      v_skip := v_skip || r.id;
+    ELSE
+      v_ok_apd := v_ok_apd || r.id;
+    END IF;
   END LOOP;
 
   -- anotaciones del registro que cambiaron (se saltan tambien si su envio enlazado se salta)

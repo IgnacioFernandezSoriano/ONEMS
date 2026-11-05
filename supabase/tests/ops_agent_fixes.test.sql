@@ -103,11 +103,21 @@ CREATE TEMP TABLE _r3day AS
 INSERT INTO public.allocation_plan_details (account_id, plan_id, origin_node_id, destination_node_id, fecha_programada, status)
 SELECT 'a0000000-0000-0000-0000-000000000001','cc000000-0000-0000-0000-000000000003','b4000000-0000-0000-0000-000000000004',
        'b1000000-0000-0000-0000-000000000001', (SELECT d FROM _r3day), 'pending' FROM generate_series(1, 6);
+-- Envio que el balanceo aparta al registro (to_registry): destino N6 sin panelista y City3 sin alternativa.
+INSERT INTO public.allocation_plan_details (id, account_id, plan_id, origin_node_id, destination_node_id, fecha_programada, status)
+VALUES ('d7000000-0000-0000-0000-000000000007','a0000000-0000-0000-0000-000000000001','cc000000-0000-0000-0000-000000000003',
+        'b4000000-0000-0000-0000-000000000004','b6000000-0000-0000-0000-000000000006', (SELECT d FROM _r3day), 'pending');
+-- Anotacion pendiente del registro de City2 que el balanceo reintroduce (compensation).
+INSERT INTO public.deferred_samples (id, account_id, plan_id, origin_city_id, dest_city_id, origin_node_id, destination_node_id,
+                                     fecha_programada, reason, row_snapshot)
+VALUES ('d8000000-0000-0000-0000-000000000008','a0000000-0000-0000-0000-000000000001','cc000000-0000-0000-0000-000000000003',
+        'c2000000-0000-0000-0000-000000000002','c1000000-0000-0000-0000-000000000001','b4000000-0000-0000-0000-000000000004',
+        'b1000000-0000-0000-0000-000000000001', current_date - 3, 'no_valid_day', '{}'::jsonb);
 
 CREATE TEMP TABLE _m AS SELECT pg_temp.acc2_md5() AS h;
 
 DO $$
-DECLARE r jsonb; v_err text; v_log bigint; v_moved uuid; v_n int; f text;
+DECLARE r jsonb; v_err text; v_log bigint; v_moved uuid; v_linked uuid; v_comp uuid; v_n int; f text;
 BEGIN
   -- ===== token malo: todas lo rechazan
   FOREACH f IN ARRAY ARRAY['ops_fix_r1_preview(''malo'',''P1'')', 'ops_fix_r1_apply(''malo'',''P1'')',
@@ -202,9 +212,33 @@ BEGIN
                           OR EXISTS (SELECT 1 FROM public.allocation_plan_details a JOIN _apd0 b ON b.id = a.id
                                       WHERE a.fecha_programada <> b.fecha_programada), 'r3 preview escribio');
   v_n := (r->>'count')::int;
+  -- si el balanceo responde success:false, la vista previa dice "no aplicable" (la funcion se sustituye solo
+  -- dentro de esta subtransaccion, que se deshace)
+  BEGIN
+    BEGIN
+      EXECUTE $f$CREATE OR REPLACE FUNCTION public.rpc_balance_city_v2(p_city_id uuid, p_start_date date, p_end_date date,
+                   p_apply_changes boolean DEFAULT false, p_fence_until date DEFAULT NULL) RETURNS jsonb LANGUAGE sql
+                   AS 'SELECT jsonb_build_object(''success'', false, ''error'', ''City not found'')'$f$;
+      PERFORM public.ops_fix_r3_preview('t0ken-de-prueba', 'Acc', 'City2');
+      RAISE EXCEPTION 'FAIL: preview con success:false aceptada';
+    EXCEPTION WHEN raise_exception THEN
+      GET STACKED DIAGNOSTICS v_err = MESSAGE_TEXT;
+      PERFORM pg_temp.fail_if(v_err NOT LIKE 'ops_fix: no aplicable (%', 'r3 preview success:false: ' || v_err);
+    END;
+    RAISE EXCEPTION 'deshacer stub' USING ERRCODE = 'TSTUB';
+  EXCEPTION WHEN SQLSTATE 'TSTUB' THEN NULL;
+  END;
   r := public.ops_fix_r3_apply('t0ken-de-prueba', 'Acc', 'City2');
   v_log := (r->>'log_id')::bigint;
   PERFORM pg_temp.fail_if(v_log IS NULL OR jsonb_array_length(r->'moves') <> v_n, 'r3 apply (mismos movimientos que la vista previa): ' || r::text);
+  PERFORM pg_temp.fail_if(NOT (r->'moves' @> '[{"id":"d7000000-0000-0000-0000-000000000007","kind":"to_registry"}]')
+                          OR EXISTS (SELECT 1 FROM public.allocation_plan_details WHERE id = 'd7000000-0000-0000-0000-000000000007'),
+                          'r3 apply: el envio sin destino valido debia ir al registro: ' || r::text);
+  SELECT reintroduced_detail_id INTO v_comp FROM public.deferred_samples
+   WHERE id = 'd8000000-0000-0000-0000-000000000008' AND status = 'reintroduced';
+  PERFORM pg_temp.fail_if(v_comp IS NULL OR NOT EXISTS (SELECT 1 FROM public.allocation_plan_details
+                                                          WHERE id = v_comp AND generation_source = 'compensation'),
+                          'r3 apply: la anotacion debia reintroducirse como compensation');
   r := public.ops_test_checks('t0ken-de-prueba');
   PERFORM pg_temp.fail_if(r->'pobox_no_send' @> '[{"account":"Acc","city":"City2"}]', 'tras R3 City2 sigue en pobox_no_send: ' || r::text);
   PERFORM pg_temp.fail_if(NOT (r->'pobox_no_send' @> '[{"account":"Acc2","city":"City2"}]'), 'R3 no debe tocar City2 de Acc2: ' || r::text);
@@ -222,15 +256,37 @@ BEGIN
    WHERE a.fecha_programada <> b.fecha_programada ORDER BY a.fecha_programada LIMIT 1;
   PERFORM pg_temp.fail_if(v_moved IS NULL, 'r3 no movio ningun envio existente');
   UPDATE public.allocation_plan_details SET status = 'sent', sent_at = now(), tag_id = '55555555' WHERE id = v_moved;
+  -- un envio creado por R3, sin cambios pero con una fila enlazada (material_hold, ON DELETE CASCADE): el undo no
+  -- lo borra y lo devuelve en skipped
+  SELECT a.id INTO v_linked FROM public.allocation_plan_details a
+   WHERE a.account_id = 'a0000000-0000-0000-0000-000000000001' AND a.generation_source = 'pobox'
+     AND NOT EXISTS (SELECT 1 FROM _apd0 b WHERE b.id = a.id) ORDER BY a.fecha_programada LIMIT 1;
+  PERFORM pg_temp.fail_if(v_linked IS NULL, 'r3 no creo ningun envio POBOX');
+  INSERT INTO public.material_hold (allocation_plan_detail_id, account_id, panelist_id)
+  VALUES (v_linked, 'a0000000-0000-0000-0000-000000000001', 'e4000000-0000-0000-0000-000000000004');
   r := public.ops_fix_r3_undo('t0ken-de-prueba', v_log);
-  PERFORM pg_temp.fail_if(NOT (r->'skipped' @> to_jsonb(ARRAY[v_moved::text])) OR jsonb_array_length(r->'skipped') <> 1
+  PERFORM pg_temp.fail_if(NOT (r->'skipped' @> to_jsonb(ARRAY[v_moved::text, v_linked::text])) OR jsonb_array_length(r->'skipped') <> 2
                           OR (r->>'restored')::int < 1, 'r3 undo: ' || r::text);
+  PERFORM pg_temp.fail_if(NOT EXISTS (SELECT 1 FROM public.allocation_plan_details WHERE id = v_linked)
+                          OR NOT EXISTS (SELECT 1 FROM public.material_hold WHERE allocation_plan_detail_id = v_linked),
+                          'r3 undo borro un envio con fila enlazada');
+  -- to_registry: el envio vuelve y su anotacion desaparece; compensation: la fila se borra y la anotacion vuelve a pending
+  PERFORM pg_temp.fail_if(NOT EXISTS (SELECT 1 FROM public.allocation_plan_details
+                                       WHERE id = 'd7000000-0000-0000-0000-000000000007' AND status = 'pending')
+                          OR EXISTS (SELECT 1 FROM public.deferred_samples
+                                      WHERE account_id = 'a0000000-0000-0000-0000-000000000001'
+                                        AND row_snapshot->>'id' = 'd7000000-0000-0000-0000-000000000007'),
+                          'r3 undo no devolvio el envio apartado al registro');
+  PERFORM pg_temp.fail_if(EXISTS (SELECT 1 FROM public.allocation_plan_details WHERE id = v_comp)
+                          OR NOT EXISTS (SELECT 1 FROM public.deferred_samples WHERE id = 'd8000000-0000-0000-0000-000000000008'
+                                           AND status = 'pending' AND reintroduced_detail_id IS NULL),
+                          'r3 undo no deshizo la reintroduccion');
   PERFORM pg_temp.fail_if(EXISTS (SELECT 1 FROM public.allocation_plan_details a JOIN _apd0 b ON b.id = a.id
                                    WHERE a.id <> v_moved AND (a.fecha_programada <> b.fecha_programada
                                          OR a.origin_node_id <> b.origin_node_id OR a.status <> b.status)),
                           'r3 undo no restauro las fechas');
   PERFORM pg_temp.fail_if((SELECT count(*) FROM public.allocation_plan_details WHERE account_id = 'a0000000-0000-0000-0000-000000000001')
-                          <> (SELECT count(*) FROM _apd0), 'r3 undo: quedan filas creadas o faltan filas');
+                          <> (SELECT count(*) + 1 FROM _apd0), 'r3 undo: quedan filas creadas (salvo la enlazada) o faltan filas');
   PERFORM pg_temp.fail_if((SELECT status FROM public.allocation_plan_details WHERE id = v_moved) <> 'sent', 'r3 undo toco la fila enviada');
   PERFORM pg_temp.fail_if((SELECT undone_at FROM ops_fix.log WHERE id = v_log) IS NULL, 'r3 undo sin marcar');
   BEGIN
