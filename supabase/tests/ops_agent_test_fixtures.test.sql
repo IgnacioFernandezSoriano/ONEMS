@@ -18,11 +18,11 @@ INSERT INTO public.regions (id, account_id, name, code) VALUES ('e0000000-0000-0
 INSERT INTO public.cities (id, account_id, region_id, name, code) VALUES
   ('c0000000-0000-0000-0000-0000000000d2','f4d823d2-93e6-4755-9a89-9da87e7fa86e','e0000000-0000-0000-0000-0000000000d2','CityD','CD');
 INSERT INTO public.nodes (id, account_id, city_id, auto_id) VALUES
-  ('a827d7a8-78db-4d25-8326-c38b8ff3c00a','f4d823d2-93e6-4755-9a89-9da87e7fa86e','c0000000-0000-0000-0000-0000000000d2','ND4'),
-  ('2940e6ff-f666-4cb2-8780-ffb464bce544','f4d823d2-93e6-4755-9a89-9da87e7fa86e','c0000000-0000-0000-0000-0000000000d2','ND3');
+  ('2940e6ff-f666-4cb2-8780-ffb464bce544','f4d823d2-93e6-4755-9a89-9da87e7fa86e','c0000000-0000-0000-0000-0000000000d2','ND4'),
+  ('a827d7a8-78db-4d25-8326-c38b8ff3c00a','f4d823d2-93e6-4755-9a89-9da87e7fa86e','c0000000-0000-0000-0000-0000000000d2','ND3');
 INSERT INTO public.panelists (id, account_id, panelist_code, name, email, mobile, node_id, status, language, telegram_id) VALUES
-  ('ed98f175-853d-4a6b-a2fd-0c6d5641fd99','f4d823d2-93e6-4755-9a89-9da87e7fa86e','PAN-DEM-004','Tester','t4@t.l','4','a827d7a8-78db-4d25-8326-c38b8ff3c00a','active','es','7014977036'),
-  ('9ba5739f-defd-4f3e-8bcd-f29bbec20eed','f4d823d2-93e6-4755-9a89-9da87e7fa86e','PAN-DEM-003','Peer','t3@t.l','3','2940e6ff-f666-4cb2-8780-ffb464bce544','active','en','8349275418');
+  ('9ba5739f-defd-4f3e-8bcd-f29bbec20eed','f4d823d2-93e6-4755-9a89-9da87e7fa86e','PAN-DEM-003','Tester','t4@t.l','4','2940e6ff-f666-4cb2-8780-ffb464bce544','active','es','8349275418'),
+  ('ed98f175-853d-4a6b-a2fd-0c6d5641fd99','f4d823d2-93e6-4755-9a89-9da87e7fa86e','PAN-DEM-004','Peer','t3@t.l','3','a827d7a8-78db-4d25-8326-c38b8ff3c00a','active','en','7014977036');
 INSERT INTO public.carriers (id, account_id, code, name) VALUES
   ('ca000000-0000-0000-0000-0000000000d2','f4d823d2-93e6-4755-9a89-9da87e7fa86e','CD','CarrierD');
 INSERT INTO public.products (id, account_id, carrier_id, code, description, standard_delivery_hours) VALUES
@@ -35,9 +35,9 @@ VALUES ('cc000000-0000-0000-0000-0000000000d2','f4d823d2-93e6-4755-9a89-9da87e7f
         'ca000000-0000-0000-0000-0000000000d2','cb000000-0000-0000-0000-0000000000d2',2,'2026-10-01','2026-12-31','active');
 INSERT INTO public.allocation_plan_details (id, account_id, plan_id, origin_node_id, destination_node_id, fecha_programada, status, generation_source) VALUES
   ('dd000000-0000-0000-0000-000000000001','f4d823d2-93e6-4755-9a89-9da87e7fa86e','cc000000-0000-0000-0000-0000000000d2',
-   'a827d7a8-78db-4d25-8326-c38b8ff3c00a','2940e6ff-f666-4cb2-8780-ffb464bce544','2026-10-27','pending','plan'),
+   '2940e6ff-f666-4cb2-8780-ffb464bce544','a827d7a8-78db-4d25-8326-c38b8ff3c00a','2026-10-27','pending','plan'),
   ('dd000000-0000-0000-0000-000000000002','f4d823d2-93e6-4755-9a89-9da87e7fa86e','cc000000-0000-0000-0000-0000000000d2',
-   'a827d7a8-78db-4d25-8326-c38b8ff3c00a','2940e6ff-f666-4cb2-8780-ffb464bce544','2026-10-28','pending','plan');
+   '2940e6ff-f666-4cb2-8780-ffb464bce544','a827d7a8-78db-4d25-8326-c38b8ff3c00a','2026-10-28','pending','plan');
 -- datos de antes de la prueba (en la BD real se crearon dias antes; aqui todo va en la misma transaccion)
 SET LOCAL session_replication_role = replica;  -- sin triggers: que no reescriban updated_at
 UPDATE public.allocation_plan_details SET updated_at = now() - interval '1 day'
@@ -74,9 +74,9 @@ BEGIN
                                    WHERE p.plan_name = 'OPS-AGENT pruebas automáticas (no tocar)' AND pr.code ILIKE '%pobox%'),
                           'el plan de prueba no debe usar un producto POBOX');
   PERFORM pg_temp.fail_if(NOT EXISTS (SELECT 1 FROM public.allocation_plan_details WHERE id = v_send AND status = 'pending'
-                                       AND origin_node_id = 'a827d7a8-78db-4d25-8326-c38b8ff3c00a'), 'fila de envio');
+                                       AND origin_node_id = '2940e6ff-f666-4cb2-8780-ffb464bce544'), 'fila de envio');
   PERFORM pg_temp.fail_if(NOT EXISTS (SELECT 1 FROM public.allocation_plan_details WHERE id = v_recv AND status = 'sent'
-                                       AND tag_id = '73915087' AND destination_node_id = 'a827d7a8-78db-4d25-8326-c38b8ff3c00a'
+                                       AND tag_id = '73915087' AND destination_node_id = '2940e6ff-f666-4cb2-8780-ffb464bce544'
                                        AND origin_panelist_id IS NOT NULL AND destination_panelist_id IS NOT NULL), 'fila de recepcion');
 
   s := public.ops_test_status('t0ken-de-prueba');
@@ -87,8 +87,8 @@ BEGIN
   UPDATE public.allocation_plan_details SET status = 'sent', tag_id = '73915086', idtag = '73915086', sent_at = now() WHERE id = v_send;
   UPDATE public.allocation_plan_details SET status = 'received', received_at = now() WHERE id = v_recv;
   INSERT INTO public.panelist_incident (account_id, panelist_id, category, status, description, created_via)
-  VALUES ('f4d823d2-93e6-4755-9a89-9da87e7fa86e','ed98f175-853d-4a6b-a2fd-0c6d5641fd99','parcel_damaged','auto_resolved','x','telegram');
-  INSERT INTO public.panelist_context (telegram_id, context_type, context_data) VALUES ('7014977036','pending_list','{}');
+  VALUES ('f4d823d2-93e6-4755-9a89-9da87e7fa86e','9ba5739f-defd-4f3e-8bcd-f29bbec20eed','parcel_damaged','auto_resolved','x','telegram');
+  INSERT INTO public.panelist_context (telegram_id, context_type, context_data) VALUES ('8349275418','pending_list','{}');
 
   s := public.ops_test_status('t0ken-de-prueba');
   PERFORM pg_temp.fail_if(s->>'send_status' <> 'sent' OR s->>'send_tag' <> '73915086', 'status envio: ' || s::text);
@@ -114,7 +114,7 @@ BEGIN
 
   -- un aviso a un panelista SI es inesperado
   INSERT INTO public.panelist_notification (account_id, panelist_id, kind, payload)
-  VALUES ('f4d823d2-93e6-4755-9a89-9da87e7fa86e','9ba5739f-defd-4f3e-8bcd-f29bbec20eed','manager_notice','{}');
+  VALUES ('f4d823d2-93e6-4755-9a89-9da87e7fa86e','ed98f175-853d-4a6b-a2fd-0c6d5641fd99','manager_notice','{}');
   s := public.ops_test_status('t0ken-de-prueba');
   PERFORM pg_temp.fail_if(jsonb_array_length(s->'unexpected') <> 1, 'aviso inesperado no detectado: ' || s::text);
 
@@ -123,15 +123,15 @@ BEGIN
    WHERE p.plan_name = 'OPS-AGENT pruebas automáticas (no tocar)';
   PERFORM pg_temp.fail_if(n <> 0, 'tras reset quedan filas: ' || n);
   PERFORM pg_temp.fail_if(EXISTS (SELECT 1 FROM public.one_db WHERE tag_id IN ('73915086','73915087')), 'tras reset queda one_db');
-  PERFORM pg_temp.fail_if(EXISTS (SELECT 1 FROM public.panelist_incident WHERE panelist_id = 'ed98f175-853d-4a6b-a2fd-0c6d5641fd99'), 'queda incidencia');
-  PERFORM pg_temp.fail_if(EXISTS (SELECT 1 FROM public.panelist_context WHERE telegram_id = '7014977036'), 'queda contexto');
+  PERFORM pg_temp.fail_if(EXISTS (SELECT 1 FROM public.panelist_incident WHERE panelist_id = '9ba5739f-defd-4f3e-8bcd-f29bbec20eed'), 'queda incidencia');
+  PERFORM pg_temp.fail_if(EXISTS (SELECT 1 FROM public.panelist_context WHERE telegram_id = '8349275418'), 'queda contexto');
   -- el aviso inesperado NO se borra: queda para revisarlo
   PERFORM pg_temp.fail_if(NOT EXISTS (SELECT 1 FROM public.panelist_notification WHERE kind = 'manager_notice'), 'el aviso inesperado no debe borrarse');
 
   -- otro envio de DEMO2 del panelista de prueba con la fecha de prueba: no prepara (el agente podria pulsarlo)
   INSERT INTO public.allocation_plan_details (id, account_id, plan_id, origin_node_id, destination_node_id, fecha_programada, status, generation_source)
   VALUES ('dd000000-0000-0000-0000-000000000003','f4d823d2-93e6-4755-9a89-9da87e7fa86e','cc000000-0000-0000-0000-0000000000d2',
-          '2940e6ff-f666-4cb2-8780-ffb464bce544','a827d7a8-78db-4d25-8326-c38b8ff3c00a','2020-01-06','sent','plan');
+          'a827d7a8-78db-4d25-8326-c38b8ff3c00a','2940e6ff-f666-4cb2-8780-ffb464bce544','2020-01-06','sent','plan');
   BEGIN
     PERFORM public.ops_test_prepare('t0ken-de-prueba');
     RAISE EXCEPTION 'FAIL: preparo con otra fila en la fecha de prueba';
@@ -158,7 +158,7 @@ BEGIN
 
   -- el telegram del panelista de prueba cambia (p. ej. al de un panelista real): se niega a actuar
   INSERT INTO public.panelist_context (telegram_id, context_type, context_data) VALUES ('5550001','pending_list','{}');
-  UPDATE public.panelists SET telegram_id = '5550001' WHERE id = 'ed98f175-853d-4a6b-a2fd-0c6d5641fd99';
+  UPDATE public.panelists SET telegram_id = '5550001' WHERE id = '9ba5739f-defd-4f3e-8bcd-f29bbec20eed';
   BEGIN
     PERFORM public.ops_test_reset('t0ken-de-prueba');
     RAISE EXCEPTION 'FAIL: reset con telegram cambiado aceptado';
@@ -167,10 +167,10 @@ BEGIN
     PERFORM pg_temp.fail_if(v_err NOT LIKE 'ops_test: el telegram del panelista de prueba%', 'mensaje telegram: ' || v_err);
   END;
   PERFORM pg_temp.fail_if(NOT EXISTS (SELECT 1 FROM public.panelist_context WHERE telegram_id = '5550001'), 'borro el contexto de otro');
-  UPDATE public.panelists SET telegram_id = '7014977036' WHERE id = 'ed98f175-853d-4a6b-a2fd-0c6d5641fd99';
+  UPDATE public.panelists SET telegram_id = '8349275418' WHERE id = '9ba5739f-defd-4f3e-8bcd-f29bbec20eed';
 
   -- el mismo telegram en un panelista de otra cuenta: tambien se niega
-  UPDATE public.panelists SET telegram_id = '7014977036' WHERE id = 'e1000000-0000-0000-0000-000000000001';
+  UPDATE public.panelists SET telegram_id = '8349275418' WHERE id = 'e1000000-0000-0000-0000-000000000001';
   BEGIN
     PERFORM public.ops_test_reset('t0ken-de-prueba');  -- prepare ya esta en el tope; reset pasa por el mismo control
     RAISE EXCEPTION 'FAIL: telegram compartido con otra cuenta aceptado';

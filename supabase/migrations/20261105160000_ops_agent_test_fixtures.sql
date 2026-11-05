@@ -2,7 +2,7 @@
 -- Datos de prueba del agente de operaciones (fase 2) — 2026-11-05
 -- ============================================================
 -- Cada mañana el agente prepara en DEMO2 un envío y una recepción de prueba para el panelista de
--- prueba (PAN-DEM-004), recorre el bot de panelistas y lo borra todo. Estas funciones son lo único
+-- prueba (PAN-DEM-003), recorre el bot de panelistas y lo borra todo. Estas funciones son lo único
 -- que puede escribir: solo actúan sobre DEMO2, ese panelista y el plan "OPS-AGENT pruebas
 -- automáticas (no tocar)". Las llama el agente con la clave pública (anon) más un token propio,
 -- cuyo hash se guarda a mano en ops_test.secret (nunca en este archivo).
@@ -28,9 +28,9 @@ CREATE TABLE IF NOT EXISTS ops_test.config (
 );
 INSERT INTO ops_test.config VALUES (1,
   'f4d823d2-93e6-4755-9a89-9da87e7fa86e',  -- DEMO2
-  'ed98f175-853d-4a6b-a2fd-0c6d5641fd99',  -- PAN-DEM-004 (panelista de prueba)
-  '7014977036',                            -- su telegram_id, fijado aqui (panelist_context no tiene cuenta)
-  '9ba5739f-defd-4f3e-8bcd-f29bbec20eed',  -- PAN-DEM-003 (el otro extremo de los envíos)
+  '9ba5739f-defd-4f3e-8bcd-f29bbec20eed',  -- PAN-DEM-003 (panelista de prueba; su telegram es la cuenta del responsable)
+  '8349275418',                            -- su telegram_id, fijado aqui (panelist_context no tiene cuenta)
+  'ed98f175-853d-4a6b-a2fd-0c6d5641fd99',  -- PAN-DEM-004 (el otro extremo de los envíos)
   '73915086', '73915087', DATE '2020-01-06',  -- fecha que ningun dato real usa (revision I1)
   'OPS-AGENT pruebas automáticas (no tocar)', 3)
 ON CONFLICT (id) DO NOTHING;
