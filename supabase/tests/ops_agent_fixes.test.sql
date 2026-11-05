@@ -203,6 +203,7 @@ BEGIN
 
   -- ===== R3 sobre City2 (POBOX, 1 nodo, dias sin envio)
   CREATE TEMP TABLE _apd0 AS SELECT * FROM public.allocation_plan_details WHERE account_id = 'a0000000-0000-0000-0000-000000000001';
+  CREATE TEMP TABLE _ds0 AS SELECT * FROM public.deferred_samples WHERE account_id = 'a0000000-0000-0000-0000-000000000001';
   r := public.ops_fix_r3_preview('t0ken-de-prueba', 'Acc', 'City2');
   PERFORM pg_temp.fail_if(r->>'city' <> 'City2' OR (r->>'count')::int <= 0 OR jsonb_array_length(r->'moves') <> (r->>'count')::int,
                           'r3 preview: ' || r::text);
@@ -288,6 +289,26 @@ BEGIN
   PERFORM pg_temp.fail_if((SELECT count(*) FROM public.allocation_plan_details WHERE account_id = 'a0000000-0000-0000-0000-000000000001')
                           <> (SELECT count(*) + 1 FROM _apd0), 'r3 undo: quedan filas creadas (salvo la enlazada) o faltan filas');
   PERFORM pg_temp.fail_if((SELECT status FROM public.allocation_plan_details WHERE id = v_moved) <> 'sent', 'r3 undo toco la fila enviada');
+  -- Los dos caminos del deshacer que vuelven a crear filas, comparados fila a fila con la copia de antes:
+  --   to_registry: el envio borrado se reinserta (ops_fix._put modo insert) identico, columna a columna;
+  --   compensation: la anotacion del registro vuelve (modo update) identica y su fila creada desaparece.
+  PERFORM pg_temp.fail_if((SELECT to_jsonb(a.*) FROM public.allocation_plan_details a WHERE a.id = 'd7000000-0000-0000-0000-000000000007')
+                          IS DISTINCT FROM (SELECT to_jsonb(b.*) FROM _apd0 b WHERE b.id = 'd7000000-0000-0000-0000-000000000007'),
+                          'r3 undo to_registry: el envio reinsertado no es identico al de antes');
+  PERFORM pg_temp.fail_if((SELECT to_jsonb(d.*) FROM public.deferred_samples d WHERE d.id = 'd8000000-0000-0000-0000-000000000008')
+                          IS DISTINCT FROM (SELECT to_jsonb(b.*) FROM _ds0 b WHERE b.id = 'd8000000-0000-0000-0000-000000000008'),
+                          'r3 undo compensation: la anotacion restaurada no es identica a la de antes');
+  -- huella de las dos tablas: todo como antes, salvo el envio marcado a mano como enviado y el creado con fila enlazada
+  PERFORM pg_temp.fail_if(
+    (SELECT md5(string_agg(to_jsonb(a.*)::text, '|' ORDER BY a.id)) FROM public.allocation_plan_details a
+      WHERE a.account_id = 'a0000000-0000-0000-0000-000000000001' AND a.id NOT IN (v_moved, v_linked))
+    IS DISTINCT FROM (SELECT md5(string_agg(to_jsonb(b.*)::text, '|' ORDER BY b.id)) FROM _apd0 b WHERE b.id <> v_moved),
+    'r3 undo: allocation_plan_details no ha quedado como antes');
+  PERFORM pg_temp.fail_if(
+    (SELECT md5(string_agg(to_jsonb(d.*)::text, '|' ORDER BY d.id)) FROM public.deferred_samples d
+      WHERE d.account_id = 'a0000000-0000-0000-0000-000000000001')
+    IS DISTINCT FROM (SELECT md5(string_agg(to_jsonb(b.*)::text, '|' ORDER BY b.id)) FROM _ds0 b),
+    'r3 undo: deferred_samples no ha quedado como antes');
   PERFORM pg_temp.fail_if((SELECT undone_at FROM ops_fix.log WHERE id = v_log) IS NULL, 'r3 undo sin marcar');
   BEGIN
     PERFORM public.ops_fix_r3_undo('t0ken-de-prueba', v_log);
