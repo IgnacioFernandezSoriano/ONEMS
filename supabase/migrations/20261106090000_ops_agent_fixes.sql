@@ -15,6 +15,9 @@
 --      con copia completa de las filas que escribe el balanceo (allocation_plan_details pendientes de la
 --      ciudad, deferred_samples de la ciudad y la fila de cities).
 -- ops_test_checks anade panelist_no_node y stuck_context (avisos que llevan a R2 y R1).
+-- Cada *_apply recibe p_expected (lo que el responsable vio en la vista previa: R1 {"contexts": [...]},
+-- R2 {"node": "N-7"}, R3 {"moves": [...]}), lo vuelve a calcular dentro de la misma transaccion y, si no
+-- coincide, falla con 'ops_fix: ha cambiado desde la propuesta' sin cambiar nada.
 -- Cuentas por accounts.name; panelistas por panelists.panelist_code (la tabla no tiene auto_id). Si un nombre
 -- o codigo no identifica exactamente una fila, no se hace nada.
 -- ============================================================
@@ -193,6 +196,17 @@ RETURNS jsonb LANGUAGE sql STABLE SECURITY DEFINER SET search_path = '' AS $$
     FROM ch;
 $$;
 
+-- R3: forma comparable de una lista de movimientos (la de la vista previa y la de apply): cada envio con su
+-- id, de que dia sale y a que dia va, en orden fijo. Un envio que crea el balanceo tiene un id nuevo en cada
+-- calculo, asi que de esos solo cuentan los dias.
+CREATE OR REPLACE FUNCTION ops_fix._r3_key(p_moves jsonb)
+RETURNS jsonb LANGUAGE sql IMMUTABLE SET search_path = '' AS $$
+  SELECT COALESCE(jsonb_agg(o ORDER BY o::text), '[]'::jsonb)
+    FROM (SELECT jsonb_build_object('id', CASE WHEN m->>'kind' = 'created' THEN NULL ELSE m->>'id' END,
+                                    'from', m->>'from', 'to', m->>'to') AS o
+            FROM jsonb_array_elements(COALESCE(p_moves, '[]'::jsonb)) m) s;
+$$;
+
 -- ---------- R1: desatascar la conversacion de un panelista ----------
 CREATE OR REPLACE FUNCTION ops_fix._r1_panelist(p_code text)
 RETURNS public.panelists LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = '' AS $$
@@ -209,6 +223,14 @@ BEGIN
   RETURN v_p;
 END $$;
 
+-- Lo que ensena la vista previa de R1 (y lo que apply compara con p_expected->'contexts').
+CREATE OR REPLACE FUNCTION ops_fix._r1_contexts(p_telegram_id text)
+RETURNS jsonb LANGUAGE sql STABLE SECURITY DEFINER SET search_path = '' AS $$
+  SELECT COALESCE((SELECT jsonb_agg(jsonb_build_object('context_type', x.context_type, 'created_at', x.created_at)
+                                    ORDER BY x.created_at, x.id)
+                     FROM public.panelist_context x WHERE x.telegram_id = p_telegram_id), '[]'::jsonb);
+$$;
+
 CREATE OR REPLACE FUNCTION public.ops_fix_r1_preview(p_token text, p_panelist_code text)
 RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = '' AS $$
 DECLARE v_p public.panelists;
@@ -218,17 +240,19 @@ BEGIN
   RETURN jsonb_build_object(
     'panelist', v_p.panelist_code,
     'account', (SELECT a.name FROM public.accounts a WHERE a.id = v_p.account_id),
-    'contexts', COALESCE((SELECT jsonb_agg(jsonb_build_object('context_type', x.context_type, 'created_at', x.created_at)
-                                           ORDER BY x.created_at, x.id)
-                            FROM public.panelist_context x WHERE x.telegram_id = v_p.telegram_id), '[]'::jsonb));
+    'contexts', ops_fix._r1_contexts(v_p.telegram_id));
 END $$;
 
-CREATE OR REPLACE FUNCTION public.ops_fix_r1_apply(p_token text, p_panelist_code text)
+CREATE OR REPLACE FUNCTION public.ops_fix_r1_apply(p_token text, p_panelist_code text, p_expected jsonb)
 RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
 DECLARE v_p public.panelists; v_before jsonb; v_n int; v_log bigint;
 BEGIN
   PERFORM ops_test._check(p_token);
   v_p := ops_fix._r1_panelist(p_panelist_code);
+  PERFORM 1 FROM public.panelist_context x WHERE x.telegram_id = v_p.telegram_id FOR UPDATE;
+  IF ops_fix._r1_contexts(v_p.telegram_id) IS DISTINCT FROM p_expected->'contexts' THEN
+    RAISE EXCEPTION 'ops_fix: ha cambiado desde la propuesta';
+  END IF;
   SELECT COALESCE(jsonb_agg(to_jsonb(x.*) ORDER BY x.id), '[]'::jsonb) INTO v_before
     FROM public.panelist_context x WHERE x.telegram_id = v_p.telegram_id;
   DELETE FROM public.panelist_context x WHERE x.telegram_id = v_p.telegram_id;
@@ -281,13 +305,16 @@ BEGIN
   RETURN jsonb_build_object('panelist', v->'panelist', 'account', v->'account', 'city', v->'city', 'node', v->'node');
 END $$;
 
-CREATE OR REPLACE FUNCTION public.ops_fix_r2_apply(p_token text, p_panelist_code text)
+CREATE OR REPLACE FUNCTION public.ops_fix_r2_apply(p_token text, p_panelist_code text, p_expected jsonb)
 RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
 DECLARE v jsonb; v_n int; v_log bigint;
 BEGIN
   PERFORM ops_test._check(p_token);
   PERFORM 1 FROM public.panelists p WHERE p.panelist_code = p_panelist_code FOR UPDATE;
   v := ops_fix._r2_check(p_panelist_code);
+  IF (v->>'node') IS DISTINCT FROM (p_expected->>'node') THEN
+    RAISE EXCEPTION 'ops_fix: ha cambiado desde la propuesta';
+  END IF;
   UPDATE public.panelists p SET node_id = (v->>'node_id')::uuid, updated_at = now()
    WHERE p.id = (v->>'panelist_id')::uuid AND p.account_id = (v->>'account_id')::uuid AND p.node_id IS NULL;
   GET DIAGNOSTICS v_n = ROW_COUNT;
@@ -357,7 +384,7 @@ BEGIN
                                                           'pobox', v_res->'pobox', 'deferred', v_res->'deferred'));
 END $$;
 
-CREATE OR REPLACE FUNCTION public.ops_fix_r3_apply(p_token text, p_account text, p_city text)
+CREATE OR REPLACE FUNCTION public.ops_fix_r3_apply(p_token text, p_account text, p_city text, p_expected jsonb)
 RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
 DECLARE t jsonb; v_acc uuid; v_city uuid; v_today date; v_res jsonb; v_b jsonb; v_a jsonb; v_moves jsonb; v_log bigint;
 BEGIN
@@ -374,6 +401,12 @@ BEGIN
   END IF;
   v_a := ops_fix._r3_snapshot(v_acc, v_city, v_b);
   v_moves := ops_fix._r3_moves(v_b, v_a);
+  -- lo que hace ahora el balanceo debe ser exactamente lo que se enseno; si no, se deshace todo (es la
+  -- misma transaccion) y no queda nada escrito
+  IF p_expected IS NULL OR NOT (p_expected ? 'moves') OR jsonb_typeof(p_expected->'moves') <> 'array'
+     OR ops_fix._r3_key(v_moves) IS DISTINCT FROM ops_fix._r3_key(p_expected->'moves') THEN
+    RAISE EXCEPTION 'ops_fix: ha cambiado desde la propuesta';
+  END IF;
 
   INSERT INTO ops_fix.log (kind, account_id, target, before, after)
   VALUES ('r3', v_acc, t->>'city', v_b, v_a)

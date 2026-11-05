@@ -117,13 +117,13 @@ VALUES ('d8000000-0000-0000-0000-000000000008','a0000000-0000-0000-0000-00000000
 CREATE TEMP TABLE _m AS SELECT pg_temp.acc2_md5() AS h;
 
 DO $$
-DECLARE r jsonb; v_err text; v_log bigint; v_moved uuid; v_linked uuid; v_comp uuid; v_n int; f text;
+DECLARE r jsonb; v_err text; v_log bigint; v_moved uuid; v_linked uuid; v_comp uuid; v_n int; f text; v_pv jsonb;
 BEGIN
   -- ===== token malo: todas lo rechazan
-  FOREACH f IN ARRAY ARRAY['ops_fix_r1_preview(''malo'',''P1'')', 'ops_fix_r1_apply(''malo'',''P1'')',
-                           'ops_fix_r2_preview(''malo'',''P5'')', 'ops_fix_r2_apply(''malo'',''P5'')',
+  FOREACH f IN ARRAY ARRAY['ops_fix_r1_preview(''malo'',''P1'')', 'ops_fix_r1_apply(''malo'',''P1'',''{}'')',
+                           'ops_fix_r2_preview(''malo'',''P5'')', 'ops_fix_r2_apply(''malo'',''P5'',''{}'')',
                            'ops_fix_r2_undo(''malo'',1)', 'ops_fix_r3_preview(''malo'',''Acc'',''City2'')',
-                           'ops_fix_r3_apply(''malo'',''Acc'',''City2'')', 'ops_fix_r3_undo(''malo'',1)'] LOOP
+                           'ops_fix_r3_apply(''malo'',''Acc'',''City2'',''{}'')', 'ops_fix_r3_undo(''malo'',1)'] LOOP
     BEGIN
       EXECUTE 'SELECT public.' || f;
       RAISE EXCEPTION 'FAIL: token malo aceptado en %', f;
@@ -150,7 +150,21 @@ BEGIN
   r := public.ops_fix_r1_preview('t0ken-de-prueba', 'P1');
   PERFORM pg_temp.fail_if(r->>'panelist' <> 'P1' OR r->>'account' <> 'Acc' OR jsonb_array_length(r->'contexts') <> 2,
                           'r1 preview: ' || r::text);
-  r := public.ops_fix_r1_apply('t0ken-de-prueba', 'P1');
+  v_pv := jsonb_build_object('contexts', r->'contexts');
+  -- p_expected: si desde la vista previa aparece otra conversacion (o no se manda lo visto), no se borra nada
+  INSERT INTO public.panelist_context (telegram_id, context_type, created_at) VALUES ('t1', 'awaiting_city', now());
+  FOREACH f IN ARRAY ARRAY[v_pv::text, '{}', 'null'] LOOP
+    BEGIN
+      PERFORM public.ops_fix_r1_apply('t0ken-de-prueba', 'P1', f::jsonb);
+      RAISE EXCEPTION 'FAIL: r1 aplicado con algo distinto de lo visto (%)', f;
+    EXCEPTION WHEN raise_exception THEN
+      GET STACKED DIAGNOSTICS v_err = MESSAGE_TEXT;
+      PERFORM pg_temp.fail_if(v_err <> 'ops_fix: ha cambiado desde la propuesta', 'r1 p_expected: ' || v_err);
+    END;
+  END LOOP;
+  PERFORM pg_temp.fail_if((SELECT count(*) FROM public.panelist_context WHERE telegram_id = 't1') <> 3, 'r1 borro sin coincidir');
+  DELETE FROM public.panelist_context WHERE telegram_id = 't1' AND context_type = 'awaiting_city';
+  r := public.ops_fix_r1_apply('t0ken-de-prueba', 'P1', v_pv);
   PERFORM pg_temp.fail_if((r->>'deleted')::int <> 2 OR r->>'log_id' IS NULL, 'r1 apply: ' || r::text);
   PERFORM pg_temp.fail_if(EXISTS (SELECT 1 FROM public.panelist_context WHERE telegram_id = 't1'), 'r1 no borro t1');
   PERFORM pg_temp.fail_if((SELECT count(*) FROM public.panelist_context WHERE telegram_id IN ('t2', 't9')) <> 2,
@@ -166,7 +180,7 @@ BEGIN
     PERFORM pg_temp.fail_if(v_err NOT LIKE 'ops_fix: no aplicable (%', 'r2 con nodo: ' || v_err);
   END;
   BEGIN
-    PERFORM public.ops_fix_r2_apply('t0ken-de-prueba', 'P6');
+    PERFORM public.ops_fix_r2_apply('t0ken-de-prueba', 'P6', '{"node":"N1"}');
     RAISE EXCEPTION 'FAIL: r2 en ciudad con 2 nodos';
   EXCEPTION WHEN raise_exception THEN
     GET STACKED DIAGNOSTICS v_err = MESSAGE_TEXT;
@@ -183,7 +197,19 @@ BEGIN
   r := public.ops_fix_r2_preview('t0ken-de-prueba', 'P5');
   PERFORM pg_temp.fail_if(r->>'panelist' <> 'P5' OR r->>'account' <> 'Acc' OR r->>'city' <> 'City3' OR r->>'node' <> 'N5',
                           'r2 preview: ' || r::text);
-  r := public.ops_fix_r2_apply('t0ken-de-prueba', 'P5');
+  -- p_expected: otro nodo (o nada) que el que se enseno -> no se asigna
+  FOREACH f IN ARRAY ARRAY['{"node":"N6"}', '{}'] LOOP
+    BEGIN
+      PERFORM public.ops_fix_r2_apply('t0ken-de-prueba', 'P5', f::jsonb);
+      RAISE EXCEPTION 'FAIL: r2 aplicado con un nodo distinto del visto (%)', f;
+    EXCEPTION WHEN raise_exception THEN
+      GET STACKED DIAGNOSTICS v_err = MESSAGE_TEXT;
+      PERFORM pg_temp.fail_if(v_err <> 'ops_fix: ha cambiado desde la propuesta', 'r2 p_expected: ' || v_err);
+    END;
+  END LOOP;
+  PERFORM pg_temp.fail_if((SELECT node_id FROM public.panelists WHERE panelist_code = 'P5') IS NOT NULL
+                          OR EXISTS (SELECT 1 FROM ops_fix.log WHERE kind = 'r2'), 'r2 escribio sin coincidir');
+  r := public.ops_fix_r2_apply('t0ken-de-prueba', 'P5', jsonb_build_object('node', r->>'node'));
   v_log := (r->>'log_id')::bigint;
   PERFORM pg_temp.fail_if(r->>'node' <> 'N5'
                           OR (SELECT node_id FROM public.panelists WHERE panelist_code = 'P5') <> 'b5000000-0000-0000-0000-000000000005',
@@ -192,7 +218,7 @@ BEGIN
   PERFORM pg_temp.fail_if((r->>'restored')::int <> 1
                           OR (SELECT node_id FROM public.panelists WHERE panelist_code = 'P5') IS NOT NULL, 'r2 undo: ' || r::text);
   -- cambio a mano entre apply y undo: el undo no lo toca
-  r := public.ops_fix_r2_apply('t0ken-de-prueba', 'P5');
+  r := public.ops_fix_r2_apply('t0ken-de-prueba', 'P5', '{"node":"N5"}');
   v_log := (r->>'log_id')::bigint;
   UPDATE public.panelists SET node_id = 'b6000000-0000-0000-0000-000000000006' WHERE panelist_code = 'P5';
   r := public.ops_fix_r2_undo('t0ken-de-prueba', v_log);
@@ -229,7 +255,28 @@ BEGIN
     RAISE EXCEPTION 'deshacer stub' USING ERRCODE = 'TSTUB';
   EXCEPTION WHEN SQLSTATE 'TSTUB' THEN NULL;
   END;
-  r := public.ops_fix_r3_apply('t0ken-de-prueba', 'Acc', 'City2');
+  -- p_expected: los movimientos de la vista previa. Si cambia uno (un envio que ya no va al dia que se
+  -- enseno), sobra uno o falta uno, o no se manda nada, el balanceo no deja nada escrito.
+  v_pv := (SELECT public.ops_fix_r3_preview('t0ken-de-prueba', 'Acc', 'City2'));
+  FOREACH f IN ARRAY ARRAY[
+      jsonb_build_object('moves', jsonb_set(v_pv->'moves', '{0,to}', '"2001-01-01"'))::text,
+      jsonb_build_object('moves', (v_pv->'moves') - 0)::text,
+      jsonb_build_object('moves', (v_pv->'moves') || jsonb_build_array(v_pv->'moves'->0))::text,
+      '{}', '{"moves":null}'] LOOP
+    BEGIN
+      PERFORM public.ops_fix_r3_apply('t0ken-de-prueba', 'Acc', 'City2', f::jsonb);
+      RAISE EXCEPTION 'FAIL: r3 aplicado con movimientos distintos de los vistos (%)', left(f, 200);
+    EXCEPTION WHEN raise_exception THEN
+      GET STACKED DIAGNOSTICS v_err = MESSAGE_TEXT;
+      PERFORM pg_temp.fail_if(v_err <> 'ops_fix: ha cambiado desde la propuesta', 'r3 p_expected: ' || v_err);
+    END;
+  END LOOP;
+  PERFORM pg_temp.fail_if(EXISTS (SELECT 1 FROM ops_fix.log WHERE kind = 'r3')
+                          OR (SELECT md5(string_agg(to_jsonb(a.*)::text, '|' ORDER BY a.id)) FROM public.allocation_plan_details a
+                               WHERE a.account_id = 'a0000000-0000-0000-0000-000000000001')
+                             IS DISTINCT FROM (SELECT md5(string_agg(to_jsonb(b.*)::text, '|' ORDER BY b.id)) FROM _apd0 b),
+                          'r3 escribio sin coincidir con la vista previa');
+  r := public.ops_fix_r3_apply('t0ken-de-prueba', 'Acc', 'City2', jsonb_build_object('moves', v_pv->'moves'));
   v_log := (r->>'log_id')::bigint;
   PERFORM pg_temp.fail_if(v_log IS NULL OR jsonb_array_length(r->'moves') <> v_n, 'r3 apply (mismos movimientos que la vista previa): ' || r::text);
   PERFORM pg_temp.fail_if(NOT (r->'moves' @> '[{"id":"d7000000-0000-0000-0000-000000000007","kind":"to_registry"}]')
