@@ -111,6 +111,30 @@ BEGIN
     PERFORM pg_temp.fail_if(v_err NOT LIKE 'ops_test: tope diario%', 'mensaje tope: ' || v_err);
   END;
   PERFORM public.ops_test_reset('t0ken-de-prueba');
+
+  -- el telegram del panelista de prueba cambia (p. ej. al de un panelista real): se niega a actuar
+  INSERT INTO public.panelist_context (telegram_id, context_type, context_data) VALUES ('5550001','pending_list','{}');
+  UPDATE public.panelists SET telegram_id = '5550001' WHERE id = 'ed98f175-853d-4a6b-a2fd-0c6d5641fd99';
+  BEGIN
+    PERFORM public.ops_test_reset('t0ken-de-prueba');
+    RAISE EXCEPTION 'FAIL: reset con telegram cambiado aceptado';
+  EXCEPTION WHEN raise_exception THEN
+    GET STACKED DIAGNOSTICS v_err = MESSAGE_TEXT;
+    PERFORM pg_temp.fail_if(v_err NOT LIKE 'ops_test: el telegram del panelista de prueba%', 'mensaje telegram: ' || v_err);
+  END;
+  PERFORM pg_temp.fail_if(NOT EXISTS (SELECT 1 FROM public.panelist_context WHERE telegram_id = '5550001'), 'borro el contexto de otro');
+  UPDATE public.panelists SET telegram_id = '7014977036' WHERE id = 'ed98f175-853d-4a6b-a2fd-0c6d5641fd99';
+
+  -- el mismo telegram en un panelista de otra cuenta: tambien se niega
+  UPDATE public.panelists SET telegram_id = '7014977036' WHERE id = 'e1000000-0000-0000-0000-000000000001';
+  BEGIN
+    PERFORM public.ops_test_reset('t0ken-de-prueba');  -- prepare ya esta en el tope; reset pasa por el mismo control
+    RAISE EXCEPTION 'FAIL: telegram compartido con otra cuenta aceptado';
+  EXCEPTION WHEN raise_exception THEN
+    GET STACKED DIAGNOSTICS v_err = MESSAGE_TEXT;
+    PERFORM pg_temp.fail_if(v_err NOT LIKE 'ops_test: el telegram del panelista de prueba%', 'mensaje compartido: ' || v_err);
+  END;
+  UPDATE public.panelists SET telegram_id = NULL WHERE id = 'e1000000-0000-0000-0000-000000000001';
 END $$;
 
 DO $$ BEGIN

@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS ops_test.config (
   id int PRIMARY KEY DEFAULT 1 CHECK (id = 1),
   account_id uuid NOT NULL,
   tester_panelist_id uuid NOT NULL,
+  tester_telegram_id text NOT NULL,
   peer_panelist_id uuid NOT NULL,
   send_tag text NOT NULL,
   receive_tag text NOT NULL,
@@ -28,6 +29,7 @@ CREATE TABLE IF NOT EXISTS ops_test.config (
 INSERT INTO ops_test.config VALUES (1,
   'f4d823d2-93e6-4755-9a89-9da87e7fa86e',  -- DEMO2
   'ed98f175-853d-4a6b-a2fd-0c6d5641fd99',  -- PAN-DEM-004 (panelista de prueba)
+  '7014977036',                            -- su telegram_id, fijado aqui (panelist_context no tiene cuenta)
   '9ba5739f-defd-4f3e-8bcd-f29bbec20eed',  -- PAN-DEM-003 (el otro extremo de los envíos)
   '73915086', '73915087', DATE '2026-01-05',
   'OPS-AGENT pruebas automáticas (no tocar)', 3)
@@ -53,6 +55,23 @@ BEGIN
         WHERE s.token_sha256 = encode(extensions.digest(p_token, 'sha256'), 'hex')) THEN
     RAISE EXCEPTION 'ops_test: token no valido';
   END IF;
+END $$;
+
+-- Telegram del panelista de prueba, comprobado: panelist_context no lleva account_id, asi que solo
+-- se borra si el panelista de DEMO2 sigue teniendo el telegram fijado y nadie de otra cuenta lo usa.
+CREATE OR REPLACE FUNCTION ops_test._tester_telegram()
+RETURNS text LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = '' AS $$
+DECLARE c ops_test.config;
+BEGIN
+  SELECT * INTO c FROM ops_test.config WHERE id = 1;
+  IF NOT EXISTS (SELECT 1 FROM public.panelists p
+                  WHERE p.id = c.tester_panelist_id AND p.account_id = c.account_id
+                    AND p.telegram_id = c.tester_telegram_id)
+     OR EXISTS (SELECT 1 FROM public.panelists p
+                 WHERE p.telegram_id = c.tester_telegram_id AND p.id <> c.tester_panelist_id) THEN
+    RAISE EXCEPTION 'ops_test: el telegram del panelista de prueba no coincide o lo usa otro panelista; no toco nada';
+  END IF;
+  RETURN c.tester_telegram_id;
 END $$;
 
 -- Plan de prueba: se crea la primera vez (no en la migración, para no depender de los datos).
@@ -96,7 +115,7 @@ DECLARE c ops_test.config; s ops_test.state; v_tg text; v_inc uuid[]; n int;
 BEGIN
   SELECT * INTO c FROM ops_test.config WHERE id = 1;
   SELECT * INTO s FROM ops_test.state WHERE id = 1;
-  SELECT p.telegram_id INTO v_tg FROM public.panelists p WHERE p.id = c.tester_panelist_id AND p.account_id = c.account_id;
+  v_tg := ops_test._tester_telegram();
 
   IF s.plan_id IS NOT NULL THEN
     DELETE FROM public.one_db o USING public.allocation_plan_details d
