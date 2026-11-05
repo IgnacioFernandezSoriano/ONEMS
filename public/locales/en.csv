@@ -2726,6 +2726,7 @@ incidents.reason.no_alt_no_date,No alternative node or available date this month
 incidents.reason.reroute_reception,Reroute reception to another node with an available panelist
 incidents.reason.no_alt_reception,No alternative node for the reception
 incidents.reason.in_transit,Already in transit; will arrive late or may not be recorded in time
+incidents.reason.back_before_arrival,Received on the last day of the absence: the panelist is back when it arrives; nothing to change
 incidents.detail.cause,Cause
 incidents.balance.title,City balance
 incidents.balance.node,Node

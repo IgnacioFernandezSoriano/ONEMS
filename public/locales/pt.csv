@@ -2726,6 +2726,7 @@ incidents.reason.no_alt_no_date,Sem nó alternativo nem data disponível este m�
 incidents.reason.reroute_reception,Reencaminhar a receção para outro nó com um painelista disponível
 incidents.reason.no_alt_reception,Sem nó alternativo para a receção
 incidents.reason.in_transit,"Já em trânsito; chegará atrasada ou poderá não ser registada a tempo"
+incidents.reason.back_before_arrival,"Recebido no último dia da ausência: o painelista já terá voltado quando chegar; nada a alterar"
 incidents.detail.cause,Causa
 incidents.balance.title,Balanço da cidade
 incidents.balance.node,Nó

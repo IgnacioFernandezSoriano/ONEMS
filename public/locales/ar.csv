@@ -2718,6 +2718,7 @@ incidents.reason.no_alt_no_date,لا توجد عقدة بديلة ولا تار�
 incidents.reason.reroute_reception,إعادة توجيه الاستلام إلى عقدة أخرى مع محكّم متاح
 incidents.reason.no_alt_reception,لا توجد عقدة بديلة للاستلام
 incidents.reason.in_transit,قيد النقل بالفعل؛ سيصل متأخراً أو قد لا يُسجَّل في الوقت المناسب
+incidents.reason.back_before_arrival,يُستلم في آخر يوم من الغياب: سيكون المشارك قد عاد عند وصوله؛ لا حاجة لأي تغيير
 incidents.detail.cause,السبب
 incidents.balance.title,توازن المدينة
 incidents.balance.node,العقدة

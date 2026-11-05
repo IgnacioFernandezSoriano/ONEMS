@@ -251,6 +251,59 @@ END $$;
 -- (fecha_programada es NOT NULL en el esquema: no hay caso de fecha NULL que probar.)
 ROLLBACK;
 
+-- ===== La muestra pendiente sale (enviada por el bot): su linea deja de esperar al manager =====
+-- Caso Nairobi City Square (2026-11-05): la propuesta 'cancel' seguia pendiente y la pantalla daba error.
+BEGIN;
+\ir fixtures/incident_city.sql
+SELECT pg_temp.baja('2027-03-10','2027-03-12');
+SELECT pg_temp.fill('N1','2027-03-15','2027-03-29',8);
+SELECT pg_temp.fill('N2','2027-03-01','2027-03-29',8);
+SELECT pg_temp.fill('N3','2027-03-01','2027-03-29',8);
+SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N1','N4','2027-03-10');
+UPDATE public.allocation_plan_details SET status = 'sent', tag_id = '12345678', sent_at = now()
+ WHERE id = 'd0000000-0000-0000-0000-000000000001';
+DO $$
+DECLARE l public.panelist_reassignment_proposal;
+BEGIN
+  l := pg_temp.line('d0000000-0000-0000-0000-000000000001');
+  IF l.status IS DISTINCT FROM 'info' OR l.suggested_reason IS DISTINCT FROM 'already_sent' OR pg_temp.nlines() <> 1 THEN
+    RAISE EXCEPTION 'FAIL enviada: linea % / % (% lineas)', l.status, l.suggested_reason, pg_temp.nlines(); END IF;
+  IF (pg_temp.inc()).incident_status = 'pending_manager' THEN
+    RAISE EXCEPTION 'FAIL enviada: la incidencia sigue esperando al manager'; END IF;
+  RAISE NOTICE 'PASS muestra enviada cierra su linea pendiente';
+END $$;
+ROLLBACK;
+
+-- ===== Recepcion el ultimo dia de la baja: la carta llega cuando ya ha vuelto =====
+BEGIN;
+\ir fixtures/incident_city.sql
+SELECT pg_temp.baja('2027-03-10','2027-03-10');
+SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N4','N1','2027-03-10');
+DO $$
+DECLARE l public.panelist_reassignment_proposal;
+BEGIN
+  l := pg_temp.line('d0000000-0000-0000-0000-000000000001', 'destination');
+  IF l.status IS DISTINCT FROM 'info' OR l.suggested_reason IS DISTINCT FROM 'back_before_arrival'
+     OR (pg_temp.s('d0000000-0000-0000-0000-000000000001')).status <> 'pending'
+     OR (pg_temp.s('d0000000-0000-0000-0000-000000000001')).fecha_programada <> '2027-03-10' THEN
+    RAISE EXCEPTION 'FAIL vuelve antes de que llegue: linea % / %', l.status, l.suggested_reason; END IF;
+  RAISE NOTICE 'PASS recepcion el ultimo dia de la baja no se toca';
+END $$;
+ROLLBACK;
+
+-- Control: si la baja sigue al dia siguiente, la recepcion si se trata.
+BEGIN;
+\ir fixtures/incident_city.sql
+SELECT pg_temp.baja('2027-03-10','2027-03-12');
+SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N4','N1','2027-03-10');
+DO $$
+BEGIN
+  IF (pg_temp.line('d0000000-0000-0000-0000-000000000001', 'destination')).suggested_reason = 'back_before_arrival' THEN
+    RAISE EXCEPTION 'FAIL control: baja de 3 dias tratada como vuelta antes de llegar'; END IF;
+  RAISE NOTICE 'PASS control recepcion con baja larga';
+END $$;
+ROLLBACK;
+
 -- ===== Bajas no vigentes o inactivas no se recalculan =====
 BEGIN;
 \ir fixtures/incident_city.sql

@@ -2718,6 +2718,7 @@ incidents.reason.no_alt_no_date,Aucun nœud alternatif ni date disponible ce moi
 incidents.reason.reroute_reception,Réacheminer la réception vers un autre nœud avec un panéliste disponible
 incidents.reason.no_alt_reception,Aucun nœud alternatif pour la réception
 incidents.reason.in_transit,Déjà en transit ; arrivera en retard ou pourrait ne pas être enregistré à temps
+incidents.reason.back_before_arrival,Reçu le dernier jour de l’absence : le panéliste sera de retour à son arrivée ; rien à changer
 incidents.detail.cause,Cause
 incidents.balance.title,Équilibre de la ville
 incidents.balance.node,Nœud

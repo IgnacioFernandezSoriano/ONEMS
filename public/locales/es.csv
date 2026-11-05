@@ -2726,6 +2726,7 @@ incidents.reason.no_alt_no_date,Sin nodo alternativo ni fecha disponible en el m
 incidents.reason.reroute_reception,Reencaminar recepción a otro nodo con panelista disponible
 incidents.reason.no_alt_reception,Sin nodo alternativo para la recepción
 incidents.reason.in_transit,Ya en tránsito; llegará con retraso o puede no registrarse a tiempo
+incidents.reason.back_before_arrival,Se recibe el último día de la baja: el panelista ya habrá vuelto cuando llegue; no hay que cambiar nada
 incidents.detail.cause,Causa
 incidents.balance.title,Balance de la ciudad
 incidents.balance.node,Nodo
