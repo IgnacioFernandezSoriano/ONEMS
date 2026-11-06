@@ -75,6 +75,8 @@ que solo se permiten reparaciones preparadas y probadas de antemano, de una list
 | # | Reparación | Qué cambia | Límites |
 |---|---|---|---|
 | R1 | Desatascar la conversación de un panelista con el bot | Borra su estado de conversación (`panelist_context`) | Un panelista; no toca envíos ni ficha |
+
+> **Cambio 2026-11-06 (decisión del responsable tras la primera lectura real: 14 avisos, 4 eran esperas de respuesta a incidencia):** R1 va **por cuenta**, el aviso sale en **una línea por cuenta**, cuenta como atasco solo una fila de más de 24 h que no sea `pending_incident_reply`, y R1 borra solo esas filas viejas (nunca las esperas de respuesta a incidencia ni lo reciente). Migración `20261106120000_ops_agent_stuck_by_account.sql`.
 | R2 | Asignar nodo a un panelista sin nodo | `node_id` de su ficha | Solo si no tiene nodo y su ciudad tiene un único nodo activo de su cuenta |
 | R3 | Rellenar días sin envío de una ciudad POBOX | Fechas de envíos de esa ciudad, con el balanceo existente (`rpc_balance_city_v2`, fence = hoy, como el 5/11 en Moyale/Machakos/Nakuru) | Una ciudad que el aviso `pobox_no_send` señala; solo envíos pendientes |
 

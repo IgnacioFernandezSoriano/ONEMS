@@ -69,7 +69,9 @@ INSERT INTO public.panelists (id, account_id, panelist_code, name, email, mobile
 -- Conversaciones: P1 atascada (2 filas, una de hace 2 dias), P2 reciente.
 INSERT INTO public.panelist_context (telegram_id, context_type, created_at) VALUES
   ('t1', 'awaiting_tag', now() - interval '2 days'), ('t1', 'awaiting_photo', now() - interval '1 hour'),
-  ('t2', 'awaiting_tag', now() - interval '1 hour');
+  ('t2', 'awaiting_tag', now() - interval '1 hour'),
+  -- P5 espera de verdad su respuesta a una incidencia: no es atasco y R1 no lo borra.
+  ('t5', 'pending_incident_reply', now() - interval '3 days');
 
 -- Cuenta 2: tambien tiene una ciudad "City2" POBOX con un nodo, panelista, conversacion atascada y envios.
 INSERT INTO public.regions (id, account_id, name, code) VALUES
@@ -120,7 +122,7 @@ DO $$
 DECLARE r jsonb; v_err text; v_log bigint; v_moved uuid; v_linked uuid; v_comp uuid; v_n int; f text; v_pv jsonb;
 BEGIN
   -- ===== token malo: todas lo rechazan
-  FOREACH f IN ARRAY ARRAY['ops_fix_r1_preview(''malo'',''P1'')', 'ops_fix_r1_apply(''malo'',''P1'',''{}'')',
+  FOREACH f IN ARRAY ARRAY['ops_fix_r1_preview(''malo'',''Acc'')', 'ops_fix_r1_apply(''malo'',''Acc'',''{}'')',
                            'ops_fix_r2_preview(''malo'',''P5'')', 'ops_fix_r2_apply(''malo'',''P5'',''{}'')',
                            'ops_fix_r2_undo(''malo'',1)', 'ops_fix_r3_preview(''malo'',''Acc'',''City2'')',
                            'ops_fix_r3_apply(''malo'',''Acc'',''City2'',''{}'')', 'ops_fix_r3_undo(''malo'',1)'] LOOP
@@ -139,23 +141,25 @@ BEGIN
   PERFORM pg_temp.fail_if(jsonb_array_length(r->'panelist_no_node') <> 1
                           OR r->'panelist_no_node'->0->>'panelist' <> 'P5' OR r->'panelist_no_node'->0->>'account' <> 'Acc'
                           OR r->'panelist_no_node'->0->>'city' <> 'City3', 'panelist_no_node: ' || r::text);
+  -- una linea por cuenta; P2 (reciente) y P5 (espera respuesta a incidencia) no cuentan
   PERFORM pg_temp.fail_if(jsonb_array_length(r->'stuck_context') <> 2
-                          OR NOT (r->'stuck_context' @> '[{"account":"Acc","panelist":"P1"}]')
-                          OR NOT (r->'stuck_context' @> '[{"account":"Acc2","panelist":"P9"}]')
-                          OR (r->'stuck_context' @> '[{"panelist":"P2"}]'), 'stuck_context: ' || r::text);
+                          OR NOT (r->'stuck_context' @> '[{"account":"Acc","panelists":["P1"]}]')
+                          OR NOT (r->'stuck_context' @> '[{"account":"Acc2","panelists":["P9"]}]')
+                          OR jsonb_array_length(r->'stuck_context'->0->'panelists') <> 1, 'stuck_context: ' || r::text);
   PERFORM pg_temp.fail_if(NOT (r->'pobox_no_send' @> '[{"account":"Acc","city":"City2"}]'),
                           'City2 de Acc debe salir en pobox_no_send: ' || r::text);
 
-  -- ===== R1: borra solo las filas del panelista indicado
-  r := public.ops_fix_r1_preview('t0ken-de-prueba', 'P1');
-  PERFORM pg_temp.fail_if(r->>'panelist' <> 'P1' OR r->>'account' <> 'Acc' OR jsonb_array_length(r->'contexts') <> 2,
-                          'r1 preview: ' || r::text);
+  -- ===== R1 (por cuenta): borra solo las filas viejas de los atascados de esa cuenta
+  r := public.ops_fix_r1_preview('t0ken-de-prueba', 'Acc');
+  PERFORM pg_temp.fail_if(r->'panelists' <> '["P1"]'::jsonb OR r->>'account' <> 'Acc' OR r->'skipped' <> '[]'::jsonb
+                          OR jsonb_array_length(r->'contexts') <> 1 OR r->'contexts'->0->>'panelist' <> 'P1'
+                          OR r->'contexts'->0->>'context_type' <> 'awaiting_tag', 'r1 preview: ' || r::text);
   v_pv := jsonb_build_object('contexts', r->'contexts');
   -- p_expected: si desde la vista previa aparece otra conversacion (o no se manda lo visto), no se borra nada
-  INSERT INTO public.panelist_context (telegram_id, context_type, created_at) VALUES ('t1', 'awaiting_city', now());
+  INSERT INTO public.panelist_context (telegram_id, context_type, created_at) VALUES ('t1', 'awaiting_city', now() - interval '2 days');
   FOREACH f IN ARRAY ARRAY[v_pv::text, '{}', 'null'] LOOP
     BEGIN
-      PERFORM public.ops_fix_r1_apply('t0ken-de-prueba', 'P1', f::jsonb);
+      PERFORM public.ops_fix_r1_apply('t0ken-de-prueba', 'Acc', f::jsonb);
       RAISE EXCEPTION 'FAIL: r1 aplicado con algo distinto de lo visto (%)', f;
     EXCEPTION WHEN raise_exception THEN
       GET STACKED DIAGNOSTICS v_err = MESSAGE_TEXT;
@@ -164,11 +168,17 @@ BEGIN
   END LOOP;
   PERFORM pg_temp.fail_if((SELECT count(*) FROM public.panelist_context WHERE telegram_id = 't1') <> 3, 'r1 borro sin coincidir');
   DELETE FROM public.panelist_context WHERE telegram_id = 't1' AND context_type = 'awaiting_city';
-  r := public.ops_fix_r1_apply('t0ken-de-prueba', 'P1', v_pv);
-  PERFORM pg_temp.fail_if((r->>'deleted')::int <> 2 OR r->>'log_id' IS NULL, 'r1 apply: ' || r::text);
-  PERFORM pg_temp.fail_if(EXISTS (SELECT 1 FROM public.panelist_context WHERE telegram_id = 't1'), 'r1 no borro t1');
+  r := public.ops_fix_r1_apply('t0ken-de-prueba', 'Acc', v_pv);
+  PERFORM pg_temp.fail_if((r->>'deleted')::int <> 1 OR r->>'log_id' IS NULL, 'r1 apply: ' || r::text);
+  -- la fila vieja de t1 se va; la reciente (puede estar usandose) se queda
+  PERFORM pg_temp.fail_if((SELECT array_agg(context_type) FROM public.panelist_context WHERE telegram_id = 't1')
+                          IS DISTINCT FROM ARRAY['awaiting_photo'], 'r1 en t1');
   PERFORM pg_temp.fail_if((SELECT count(*) FROM public.panelist_context WHERE telegram_id IN ('t2', 't9')) <> 2,
                           'r1 borro conversaciones de otros');
+  PERFORM pg_temp.fail_if(NOT EXISTS (SELECT 1 FROM public.panelist_context WHERE telegram_id = 't5'
+                                       AND context_type = 'pending_incident_reply'), 'r1 borro la espera de incidencia');
+  PERFORM pg_temp.fail_if(jsonb_array_length(public.ops_fix_r1_preview('t0ken-de-prueba', 'Acc')->'contexts') <> 0,
+                          'r1 deja Acc sin atascos');
   PERFORM pg_temp.fail_if((SELECT kind FROM ops_fix.log WHERE id = (r->>'log_id')::bigint) <> 'r1', 'r1 sin registro');
 
   -- ===== R2
