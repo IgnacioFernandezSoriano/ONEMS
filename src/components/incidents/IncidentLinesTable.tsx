@@ -42,6 +42,22 @@ export function IncidentLinesTable({ lines, emptyText }: Props) {
     return l.final_action ? t(`incidents.final_action.${l.final_action}`, undefined, l.final_action) : '-'
   }
 
+  // Si la muestra ya no esta donde la dejo la linea (la movio el manager a mano o la otra baja de una
+  // muestra compartida), su posicion actual: fecha y nodo en el rol de la linea. Si la linea no cambio una
+  // dimension (final_* vacio), se compara con la original de la muestra. Null si sigue donde quedo.
+  const movedSince = (l: ReassignmentProposal): { date: string; node: string } | null => {
+    const d = l.detail
+    if (!d || (l.final_action !== 'shift_date' && l.final_action !== 'reroute')) return null
+    const origin = l.affected_role === 'origin'
+    const curNode = origin ? d.origin_node_id : d.destination_node_id
+    const expNode = l.final_target_node_id
+      ?? (origin ? d.original_origin_node_id : d.original_destination_node_id) ?? curNode
+    const expDate = l.final_date ?? d.original_fecha_programada ?? d.fecha_programada
+    if (curNode === expNode && d.fecha_programada === expDate) return null
+    const nodeLabel = (origin ? d.origin_node?.auto_id : d.destination_node?.auto_id) ?? '-'
+    return { date: d.fecha_programada, node: nodeLabel }
+  }
+
   const resultCell = (l: ReassignmentProposal) => {
     if (l.status === 'pending') {
       // Solo en datos antiguos: el motor ya no deja lineas pendientes.
@@ -67,11 +83,19 @@ export function IncidentLinesTable({ lines, emptyText }: Props) {
         : <div>{t('incidents.line_status.dismissed')}</div>
     }
     const manual = l.status === 'manager_resolved'
+    const now = movedSince(l)
     return (
-      <div>
-        {actionText(l, manual)}
-        {manual && <span className="ms-1 text-gray-500">{t('incidents.result.manual_suffix')}</span>}
-      </div>
+      <>
+        <div>
+          {actionText(l, manual)}
+          {manual && <span className="ms-1 text-gray-500">{t('incidents.result.manual_suffix')}</span>}
+        </div>
+        {now && (
+          <div className="text-xs text-amber-700">
+            {'→ '}{t('incidents.result.now', { date: fmtDay(now.date), node: now.node })}
+          </div>
+        )}
+      </>
     )
   }
 

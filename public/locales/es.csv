@@ -2780,6 +2780,7 @@ incidents.result.reroute_on,Pasada a {node} el {date}
 incidents.result.cancel,Anulada (sin hueco en 8 semanas)
 incidents.result.pending,Pendiente
 incidents.result.manual_suffix,(manual)
+incidents.result.now,ahora: {date} · {node}
 incidents.result.info.already_sent,Sin cambios: ya enviada
 incidents.result.info.in_transit,Sin cambios: ya en tránsito
 incidents.result.info.back_before_arrival,Sin cambios: el panelista ya habrá vuelto cuando llegue
@@ -2856,7 +2857,7 @@ incidents.move_reason.other_city,el nodo es de otra ciudad
 incidents.move_reason.other_end,es el otro extremo de la muestra (origen = destino)
 incidents.move_reason.no_day,ningún día laborable de esa semana cabe (carga o disponibilidad)
 incidents.move_reason.not_in_cell,la muestra ya no está en esa casilla
-incidents.move_reason.has_incident_line,la muestra tiene una línea pendiente en una incidencia; resuélvela allí
+incidents.move_reason.has_incident_line,la muestra tiene una línea pendiente de datos antiguos en una incidencia; se resolverá automáticamente
 incidents.move_reason.inactive_node,el nodo de destino no está activo
 incidents.balance.counts_note,Los recuentos incluyen muestras canceladas; la lista muestra solo las activas
 incidents.reason.already_sent,Ya enviada; no hay nada que cambiar

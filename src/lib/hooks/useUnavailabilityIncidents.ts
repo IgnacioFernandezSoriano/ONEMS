@@ -130,6 +130,7 @@ export function useUnavailabilityIncidents() {
         *,
         detail:allocation_plan_details!prp_detail_fkey (
           id, fecha_programada, original_fecha_programada, status, origin_node_id, destination_node_id,
+          original_origin_node_id, original_destination_node_id,
           origin_node:nodes!allocation_plan_details_origin_node_id_fkey ( auto_id ),
           destination_node:nodes!allocation_plan_details_destination_node_id_fkey ( auto_id ),
           ${PLAN_EMBED}

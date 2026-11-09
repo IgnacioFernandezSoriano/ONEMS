@@ -2780,6 +2780,7 @@ incidents.result.reroute_on,Moved to {node} on {date}
 incidents.result.cancel,Cancelled (no slot within 8 weeks)
 incidents.result.pending,Pending
 incidents.result.manual_suffix,(manual)
+incidents.result.now,now: {date} · {node}
 incidents.result.info.already_sent,No change: already sent
 incidents.result.info.in_transit,No change: already in transit
 incidents.result.info.back_before_arrival,No change: the panelist is back when it arrives
@@ -2856,7 +2857,7 @@ incidents.move_reason.other_city,the node belongs to another city
 incidents.move_reason.other_end,it is the other end of the sample (origin = destination)
 incidents.move_reason.no_day,no working day that week fits (load or availability)
 incidents.move_reason.not_in_cell,the sample is no longer in that cell
-incidents.move_reason.has_incident_line,the sample has a pending line in an incident; resolve it there
+incidents.move_reason.has_incident_line,the sample has a pending line from older data in an incident; it will be resolved automatically
 incidents.move_reason.inactive_node,the target node is not active
 incidents.balance.counts_note,Counts include cancelled samples; the list shows only active ones
 incidents.reason.already_sent,Already sent; nothing to change

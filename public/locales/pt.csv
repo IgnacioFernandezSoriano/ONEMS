@@ -2780,6 +2780,7 @@ incidents.result.reroute_on,Passada para {node} em {date}
 incidents.result.cancel,Anulada (sem vaga em 8 semanas)
 incidents.result.pending,Pendente
 incidents.result.manual_suffix,(manual)
+incidents.result.now,agora: {date} · {node}
 incidents.result.info.already_sent,Sem alteração: já enviada
 incidents.result.info.in_transit,Sem alteração: já em trânsito
 incidents.result.info.back_before_arrival,Sem alteração: o painelista já terá voltado quando chegar
@@ -2856,7 +2857,7 @@ incidents.move_reason.other_city,o nó pertence a outra cidade
 incidents.move_reason.other_end,é a outra extremidade da amostra (origem = destino)
 incidents.move_reason.no_day,nenhum dia útil dessa semana é adequado (carga ou disponibilidade)
 incidents.move_reason.not_in_cell,a amostra já não está nessa célula
-incidents.move_reason.has_incident_line,"a amostra tem uma linha pendente numa incidência; resolva-a aí"
+incidents.move_reason.has_incident_line,a amostra tem uma linha pendente de dados antigos numa incidência; será resolvida automaticamente
 incidents.move_reason.inactive_node,o nó de destino não está ativo
 incidents.balance.counts_note,"As contagens incluem amostras canceladas; a lista mostra apenas as ativas"
 incidents.reason.already_sent,"Já enviada; nada a alterar"

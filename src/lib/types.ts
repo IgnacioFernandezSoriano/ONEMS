@@ -423,6 +423,9 @@ export interface ReassignmentProposal {
     status: string
     origin_node_id: string
     destination_node_id: string
+    // nodos antes del primer cambio de nodo (null si nunca cambio)
+    original_origin_node_id?: string | null
+    original_destination_node_id?: string | null
     origin_node?: { auto_id: string } | null
     destination_node?: { auto_id: string } | null
     plan?: SamplePlanInfo | null
