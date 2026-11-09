@@ -38,6 +38,19 @@ $$;
 CREATE FUNCTION pg_temp.smp(p_id uuid) RETURNS public.allocation_plan_details LANGUAGE sql AS $$
   SELECT * FROM public.allocation_plan_details WHERE id = p_id;
 $$;
+-- 2026-11-09: el motor ya no deja pendientes. Las RPC del manager siguen existiendo y necesitan una linea
+-- 'pending': se inserta a mano (como las del motor viejo) con los triggers de incidencias desactivados.
+CREATE FUNCTION pg_temp.pline(p_detail uuid, p_action text, p_date date DEFAULT NULL, p_node uuid DEFAULT NULL,
+                              p_reason text DEFAULT NULL, p_status text DEFAULT 'pending')
+RETURNS uuid LANGUAGE sql AS $$
+  INSERT INTO public.panelist_reassignment_proposal
+    (account_id, unavailability_id, allocation_plan_detail_id, affected_role, sample_status_at_detection,
+     suggested_action, suggested_date, suggested_target_node_id, suggested_reason, status, final_action)
+  SELECT 'a0000000-0000-0000-0000-000000000001', 'f0000000-0000-0000-0000-000000000001', a.id, 'origin', a.status,
+         p_action, p_date, p_node, p_reason, p_status, CASE WHEN p_status = 'info' THEN 'none' END
+    FROM public.allocation_plan_details a WHERE a.id = p_detail
+  RETURNING id;
+$$;
 CREATE FUNCTION pg_temp.expect_err(p_sql text, p_msg text) RETURNS void LANGUAGE plpgsql AS $$
 BEGIN
   BEGIN
@@ -86,16 +99,17 @@ END $$;
 
 -- Escenario comun: baja de P1 (N1) todo marzo 2027, N2/N3 saturados en marzo (8 por semana, lunes).
 --   d1: N1 -> N4 el 10/03 (otro extremo en otra ciudad).   d2: N1 -> N2 el 11/03 (intra-ciudad).
--- Ambas lineas (rol origen) quedan pendientes.
+-- Ambas lineas (rol origen) pendientes: 2026-11-09 el motor ya no deja pendientes, se insertan a mano (pline).
 
 -- ===== Mismo nodo: semana posterior vacia -> lunes; si el lunes tiene mas muestras -> el dia mas vacio =====
 BEGIN;
 \ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
 SELECT pg_temp.baja('2027-03-01','2027-03-31');
 SELECT pg_temp.fill('N2','2027-03-01','2027-03-29',8);
 SELECT pg_temp.fill('N3','2027-03-01','2027-03-29',8);
 SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N1','N4','2027-03-10','notified');
-SELECT public.resolve_unavailability_incident('f0000000-0000-0000-0000-000000000001');
+SELECT pg_temp.pline('d0000000-0000-0000-0000-000000000001', 'shift_date', '2027-04-01', NULL, 'shift_later_week');  -- 2026-11-09: el motor ya no deja pendientes
 SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
 DO $$
 DECLARE l public.panelist_reassignment_proposal; j jsonb; s public.allocation_plan_details;
@@ -155,12 +169,14 @@ ROLLBACK;
 -- ===== Otro nodo de la ciudad (reroute + fecha), otro extremo, otra ciudad, sin dia =====
 BEGIN;
 \ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
 SELECT pg_temp.baja('2027-03-01','2027-03-31');
 SELECT pg_temp.fill('N2','2027-03-01','2027-03-29',8);
 SELECT pg_temp.fill('N3','2027-03-01','2027-03-29',8);
 SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N1','N4','2027-03-10');
 SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000002','N1','N2','2027-03-11');
-SELECT public.resolve_unavailability_incident('f0000000-0000-0000-0000-000000000001');
+SELECT pg_temp.pline('d0000000-0000-0000-0000-000000000001', 'shift_date', '2027-04-01', NULL, 'shift_later_week');  -- 2026-11-09: el motor ya no deja pendientes
+SELECT pg_temp.pline('d0000000-0000-0000-0000-000000000002', 'shift_date', '2027-04-01', NULL, 'shift_later_week');  -- 2026-11-09: el motor ya no deja pendientes
 -- P3 (N3) de baja toda la semana del 19/04 (no tiene muestras: su incidencia no crea lineas).
 INSERT INTO public.panelist_unavailability (id, account_id, panelist_id, start_date, end_date, reason, status)
 VALUES ('f0000000-0000-0000-0000-000000000003','a0000000-0000-0000-0000-000000000001',
@@ -215,9 +231,10 @@ BEGIN
   IF l1.status <> 'manager_resolved' OR l1.final_action <> 'reroute'
      OR l1.final_target_node_id <> 'b2000000-0000-0000-0000-000000000002' OR l1.final_date <> '2027-04-12' THEN
     RAISE EXCEPTION 'FAIL reroute linea % % %', l1.status, l1.final_action, l1.final_target_node_id; END IF;
-  -- Queda d2 pendiente: la incidencia sigue esperando al manager.
+  -- Queda d2 pendiente. 2026-11-09: el motor ya no deja pendientes; recompute nunca devuelve
+  -- pending_manager: con una linea del manager la incidencia ya sale resolved.
   IF j->>'final_action' <> 'reroute' OR (j->>'final_target_node_id')::uuid <> 'b2000000-0000-0000-0000-000000000002'
-     OR (j->>'final_date')::date <> '2027-04-12' OR j->>'incident_status' <> 'pending_manager' THEN
+     OR (j->>'final_date')::date <> '2027-04-12' OR j->>'incident_status' <> 'resolved' THEN
     RAISE EXCEPTION 'FAIL reroute respuesta %', j; END IF;
 
   -- d2 a N3 (misma ciudad, distinto del otro extremo) -> resuelve la incidencia.
@@ -232,11 +249,12 @@ ROLLBACK;
 -- ===== Muestra ya enviada: sample_not_movable =====
 BEGIN;
 \ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
 SELECT pg_temp.baja('2027-03-01','2027-03-31');
 SELECT pg_temp.fill('N2','2027-03-01','2027-03-29',8);
 SELECT pg_temp.fill('N3','2027-03-01','2027-03-29',8);
 SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N1','N4','2027-03-10');
-SELECT public.resolve_unavailability_incident('f0000000-0000-0000-0000-000000000001');
+SELECT pg_temp.pline('d0000000-0000-0000-0000-000000000001', 'shift_date', '2027-04-01', NULL, 'shift_later_week');  -- 2026-11-09: el motor ya no deja pendientes
 -- Linea pendiente con la muestra ya enviada: desde 20261105180000 el trigger la vuelve informativa; aqui se
 -- simula una linea antigua (de antes del arreglo) con la guarda del motor encendida.
 SELECT set_config('onems.in_incident_engine', 'on', true);
@@ -257,11 +275,12 @@ ROLLBACK;
 -- ===== Cross-tenant (actor 98) =====
 BEGIN;
 \ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
 SELECT pg_temp.baja('2027-03-01','2027-03-31');
 SELECT pg_temp.fill('N2','2027-03-01','2027-03-29',8);
 SELECT pg_temp.fill('N3','2027-03-01','2027-03-29',8);
 SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N1','N4','2027-03-10');
-SELECT public.resolve_unavailability_incident('f0000000-0000-0000-0000-000000000001');
+SELECT pg_temp.pline('d0000000-0000-0000-0000-000000000001', 'shift_date', '2027-04-01', NULL, 'shift_later_week');  -- 2026-11-09: el motor ya no deja pendientes
 DO $$
 DECLARE l uuid := (pg_temp.line('d0000000-0000-0000-0000-000000000001')).id;
 BEGIN
@@ -279,11 +298,12 @@ ROLLBACK;
 -- ===== Envoltorios como rol authenticated =====
 BEGIN;
 \ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
 SELECT pg_temp.baja('2027-03-01','2027-03-31');
 SELECT pg_temp.fill('N2','2027-03-01','2027-03-29',8);
 SELECT pg_temp.fill('N3','2027-03-01','2027-03-29',8);
 SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N1','N4','2027-03-10');
-SELECT public.resolve_unavailability_incident('f0000000-0000-0000-0000-000000000001');
+SELECT pg_temp.pline('d0000000-0000-0000-0000-000000000001', 'shift_date', '2027-04-01', NULL, 'shift_later_week');  -- 2026-11-09: el motor ya no deja pendientes
 SELECT (pg_temp.line('d0000000-0000-0000-0000-000000000001')).id AS lid \gset
 SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
 SET LOCAL ROLE authenticated;
@@ -402,11 +422,12 @@ ROLLBACK;
 -- ===== Muestra con linea de incidencia pendiente en ese lado: has_incident_line =====
 BEGIN;
 \ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
 SELECT pg_temp.baja('2027-03-01','2027-03-31');
 SELECT pg_temp.fill('N2','2027-03-01','2027-03-29',8);
 SELECT pg_temp.fill('N3','2027-03-01','2027-03-29',8);
 SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N1','N4','2027-03-10');
-SELECT public.resolve_unavailability_incident('f0000000-0000-0000-0000-000000000001');
+SELECT pg_temp.pline('d0000000-0000-0000-0000-000000000001', 'shift_date', '2027-04-01', NULL, 'shift_later_week');  -- 2026-11-09: el motor ya no deja pendientes
 SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
 DO $$
 BEGIN
@@ -587,13 +608,14 @@ ROLLBACK;
 -- ===== incident_suggest_cell: nodo destino inactivo =====
 BEGIN;
 \ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
 INSERT INTO public.nodes (id, account_id, city_id, auto_id, status) VALUES
   ('b6000000-0000-0000-0000-000000000006','a0000000-0000-0000-0000-000000000001','c1000000-0000-0000-0000-000000000001','N6','inactive');
 SELECT pg_temp.baja('2027-03-01','2027-03-31');
 SELECT pg_temp.fill('N2','2027-03-01','2027-03-29',8);
 SELECT pg_temp.fill('N3','2027-03-01','2027-03-29',8);
 SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N1','N4','2027-03-10');
-SELECT public.resolve_unavailability_incident('f0000000-0000-0000-0000-000000000001');
+SELECT pg_temp.pline('d0000000-0000-0000-0000-000000000001', 'shift_date', '2027-04-01', NULL, 'shift_later_week');  -- 2026-11-09: el motor ya no deja pendientes
 SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
 DO $$
 DECLARE l public.panelist_reassignment_proposal;
