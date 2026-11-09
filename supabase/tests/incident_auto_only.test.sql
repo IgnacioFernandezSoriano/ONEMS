@@ -304,3 +304,155 @@ BEGIN
     RAISE EXCEPTION 'FAIL estructura: permisos de incident_resolve_pending_lines'; END IF;
   RAISE NOTICE 'PASS estructura y permisos';
 END $$;
+
+-- ===================================================================================================
+-- Tarea 2: muestras compartidas entre dos bajas (A = P1/N1, la de siempre; B = P2/N2, id fijo f...02).
+-- ===================================================================================================
+CREATE FUNCTION pg_temp.baja2(p_start date, p_end date, p_status text DEFAULT 'active')
+RETURNS void LANGUAGE sql AS $$
+  INSERT INTO public.panelist_unavailability (id, account_id, panelist_id, start_date, end_date, reason, status)
+  VALUES ('f0000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000001',
+          'e2000000-0000-0000-0000-000000000002', p_start, p_end, 'vacation', p_status);
+$$;
+CREATE FUNCTION pg_temp.inc2() RETURNS public.panelist_unavailability LANGUAGE sql AS $$
+  SELECT * FROM public.panelist_unavailability WHERE id = 'f0000000-0000-0000-0000-000000000002';
+$$;
+
+-- ===== apply_cancel_already_cancelled: anular una muestra ya anulada no da error =====
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+SELECT pg_temp.baja('2027-03-22','2027-03-31');
+SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N1','N4','2027-03-24','cancelled');
+SELECT pg_temp.legacy_line('d0000000-0000-0000-0000-000000000001');
+DO $$
+DECLARE l public.panelist_reassignment_proposal;
+BEGIN
+  PERFORM public.incident_apply_cancel((pg_temp.line('d0000000-0000-0000-0000-000000000001')).id, 'manager');
+  l := pg_temp.line('d0000000-0000-0000-0000-000000000001');
+  IF l.status <> 'info' OR l.final_action IS DISTINCT FROM 'none'
+     OR l.suggested_reason IS DISTINCT FROM 'handled_by_other_incident' THEN
+    RAISE EXCEPTION 'FAIL apply_cancel_already_cancelled linea % % %', l.status, l.final_action, l.suggested_reason; END IF;
+  IF (SELECT status FROM public.allocation_plan_details WHERE id='d0000000-0000-0000-0000-000000000001') <> 'cancelled' THEN
+    RAISE EXCEPTION 'FAIL apply_cancel_already_cancelled: la muestra ha cambiado'; END IF;
+  IF (pg_temp.inc()).incident_status IS DISTINCT FROM 'auto_resolved' THEN
+    RAISE EXCEPTION 'FAIL apply_cancel_already_cancelled estado %', (pg_temp.inc()).incident_status; END IF;
+  RAISE NOTICE 'PASS apply_cancel_already_cancelled';
+END $$;
+ROLLBACK;
+
+-- ===== twin_cancel_closes_other: A anula la muestra -> la linea pendiente de B se cierra =====
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+SELECT pg_temp.baja('2027-03-08','2027-03-12');
+SELECT pg_temp.baja2('2027-03-08','2027-03-12');
+-- Sin hueco: N1 lleno desde la semana siguiente; N2 y N3 llenos todo el periodo (8 semanas incluidas).
+SELECT pg_temp.fill('N1','2027-03-15','2027-05-24',8);
+SELECT pg_temp.fill('N2','2027-03-01','2027-05-24',8);
+SELECT pg_temp.fill('N3','2027-03-01','2027-05-24',8);
+SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N1','N2','2027-03-10');
+INSERT INTO public.panelist_reassignment_proposal
+  (account_id, unavailability_id, allocation_plan_detail_id, affected_role, sample_status_at_detection,
+   suggested_action, suggested_reason, status)
+VALUES ('a0000000-0000-0000-0000-000000000001','f0000000-0000-0000-0000-000000000002',
+        'd0000000-0000-0000-0000-000000000001','destination','pending','cancel','no_slot_8_weeks','pending');
+DO $$
+DECLARE la public.panelist_reassignment_proposal; lb public.panelist_reassignment_proposal;
+BEGIN
+  PERFORM pg_temp.run();
+  la := pg_temp.line('d0000000-0000-0000-0000-000000000001','origin');
+  SELECT * INTO lb FROM public.panelist_reassignment_proposal
+   WHERE unavailability_id = 'f0000000-0000-0000-0000-000000000002'
+     AND allocation_plan_detail_id = 'd0000000-0000-0000-0000-000000000001';
+  IF la.status <> 'auto_resolved' OR la.final_action IS DISTINCT FROM 'cancel' THEN
+    RAISE EXCEPTION 'FAIL twin_cancel_closes_other A % %', la.status, la.final_action; END IF;
+  IF (SELECT status FROM public.allocation_plan_details WHERE id='d0000000-0000-0000-0000-000000000001') <> 'cancelled' THEN
+    RAISE EXCEPTION 'FAIL twin_cancel_closes_other: la muestra no se ha anulado'; END IF;
+  IF lb.status IS DISTINCT FROM 'info' OR lb.final_action IS DISTINCT FROM 'none'
+     OR lb.suggested_reason IS DISTINCT FROM 'handled_by_other_incident' THEN
+    RAISE EXCEPTION 'FAIL twin_cancel_closes_other B % % %', lb.status, lb.final_action, lb.suggested_reason; END IF;
+  IF (pg_temp.inc2()).incident_status IS DISTINCT FROM 'auto_resolved' THEN
+    RAISE EXCEPTION 'FAIL twin_cancel_closes_other estado B %', (pg_temp.inc2()).incident_status; END IF;
+  RAISE NOTICE 'PASS twin_cancel_closes_other';
+END $$;
+SELECT pg_temp.never_pending('twin_cancel_closes_other');
+ROLLBACK;
+
+-- ===== twin_move_reevaluates: A retrasa la muestra a un dia de la baja de B -> B la reevalua =====
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+SELECT pg_temp.baja('2027-03-02','2027-03-04');
+SELECT pg_temp.baja2('2027-03-05','2027-03-12');
+SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N1','N2','2027-03-03');
+DO $$
+DECLARE la public.panelist_reassignment_proposal; lb public.panelist_reassignment_proposal; n int;
+BEGIN
+  PERFORM pg_temp.run();
+  la := pg_temp.line('d0000000-0000-0000-0000-000000000001','origin');
+  IF la.status <> 'auto_resolved' OR la.final_action IS DISTINCT FROM 'shift_date'
+     OR la.final_date IS DISTINCT FROM '2027-03-05'::date THEN
+    RAISE EXCEPTION 'FAIL twin_move_reevaluates A % % %', la.status, la.final_action, la.final_date; END IF;
+  SELECT * INTO lb FROM public.panelist_reassignment_proposal
+   WHERE unavailability_id = 'f0000000-0000-0000-0000-000000000002'
+     AND allocation_plan_detail_id = 'd0000000-0000-0000-0000-000000000001';
+  IF lb.id IS NULL OR lb.status = 'pending' THEN
+    RAISE EXCEPTION 'FAIL twin_move_reevaluates B sin linea resuelta (%)', lb.status; END IF;
+  SELECT count(*) INTO n FROM public.panelist_reassignment_proposal
+   WHERE unavailability_id IN ('f0000000-0000-0000-0000-000000000001','f0000000-0000-0000-0000-000000000002')
+     AND status = 'pending';
+  IF n <> 0 THEN RAISE EXCEPTION 'FAIL twin_move_reevaluates pendientes=%', n; END IF;
+  SELECT count(*) INTO n FROM public.panelist_reassignment_proposal
+   WHERE allocation_plan_detail_id = 'd0000000-0000-0000-0000-000000000001';
+  IF n <> 2 THEN RAISE EXCEPTION 'FAIL twin_move_reevaluates lineas=% (esperadas 2, sin duplicados)', n; END IF;
+  RAISE NOTICE 'PASS twin_move_reevaluates (B: % % %)', lb.status, lb.final_action, lb.final_date;
+END $$;
+ROLLBACK;
+
+-- ===== refresh_depth_guard: con profundidad 3 no se ejecuta el motor de las otras bajas =====
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+SELECT pg_temp.baja2('2027-03-08','2027-03-12');
+SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N1','N2','2027-03-10');
+DO $$
+DECLARE n int;
+BEGIN
+  PERFORM set_config('onems.incident_refresh_depth', '3', true);
+  n := public.incident_refresh_other_incidents('d0000000-0000-0000-0000-000000000001',
+                                               'f0000000-0000-0000-0000-000000000001');
+  IF n <> 0 OR EXISTS (SELECT 1 FROM public.panelist_reassignment_proposal
+                        WHERE unavailability_id = 'f0000000-0000-0000-0000-000000000002') THEN
+    RAISE EXCEPTION 'FAIL refresh_depth_guard: ha corrido el motor (n=%)', n; END IF;
+  IF current_setting('onems.incident_refresh_depth', true) <> '3' THEN
+    RAISE EXCEPTION 'FAIL refresh_depth_guard: profundidad cambiada a %',
+      current_setting('onems.incident_refresh_depth', true); END IF;
+  -- Control: sin la guarda, la misma llamada si ejecuta el motor de B y deja la profundidad como estaba.
+  PERFORM set_config('onems.incident_refresh_depth', '', true);
+  n := public.incident_refresh_other_incidents('d0000000-0000-0000-0000-000000000001',
+                                               'f0000000-0000-0000-0000-000000000001');
+  IF n <> 1 OR NOT EXISTS (SELECT 1 FROM public.panelist_reassignment_proposal
+                            WHERE unavailability_id = 'f0000000-0000-0000-0000-000000000002') THEN
+    RAISE EXCEPTION 'FAIL refresh_depth_guard control: n=%', n; END IF;
+  IF COALESCE(current_setting('onems.incident_refresh_depth', true), '') <> '' THEN
+    RAISE EXCEPTION 'FAIL refresh_depth_guard: profundidad no restaurada (%)',
+      current_setting('onems.incident_refresh_depth', true); END IF;
+  RAISE NOTICE 'PASS refresh_depth_guard';
+END $$;
+ROLLBACK;
+
+-- ===== Estructura: funciones nuevas de la Tarea 2 solo para service_role =====
+DO $$
+DECLARE f text;
+BEGIN
+  FOREACH f IN ARRAY ARRAY['public.incident_close_twin_lines(uuid,uuid)',
+                           'public.incident_refresh_other_incidents(uuid,uuid)'] LOOP
+    IF to_regprocedure(f) IS NULL THEN RAISE EXCEPTION 'FAIL estructura: falta %', f; END IF;
+    IF NOT has_function_privilege('service_role', f, 'EXECUTE')
+       OR has_function_privilege('authenticated', f, 'EXECUTE')
+       OR has_function_privilege('anon', f, 'EXECUTE') THEN
+      RAISE EXCEPTION 'FAIL estructura: permisos de %', f; END IF;
+  END LOOP;
+  RAISE NOTICE 'PASS estructura Tarea 2';
+END $$;
