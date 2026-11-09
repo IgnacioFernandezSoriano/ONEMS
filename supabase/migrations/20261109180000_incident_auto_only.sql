@@ -15,7 +15,8 @@
 --   1. incident_resolve_pending_lines (nueva): cierra las lineas 'pending' de una baja (pasos 3 y 4).
 --   2. resolve_unavailability_incident: re-emitida desde la definicion viva (igual a 20261105180000) con dos
 --      cambios: el paso (a) ya no borra lineas de muestras anuladas, y al final llama a (1). Se quita el
---      bloque que guardaba la propuesta para el manager: ahora la calcula y la aplica (1).
+--      bloque que guardaba la propuesta para el manager: ahora la calcula y la aplica (1). Si una muestra
+--      falla antes de tener linea, se le crea una informativa 'engine_error' con el mensaje.
 --   3. incident_recompute_status: re-emitida (igual a 20261020130200); nunca devuelve 'pending_manager'.
 --   4-7. Muestras compartidas entre dos bajas: incident_close_twin_lines e incident_refresh_other_incidents
 --      (nuevas), incident_apply_cancel e incident_apply_change (re-emitidas). Ver su bloque mas abajo.
@@ -161,6 +162,7 @@ DECLARE
   v_target uuid;
   v_day date;
   v_line uuid;
+  v_err text;
 BEGIN
   SELECT * INTO v_u FROM panelist_unavailability WHERE id = p_unavailability_id;
   IF NOT FOUND THEN RETURN 0; END IF;
@@ -318,7 +320,28 @@ BEGIN
           END;
         END IF;
       EXCEPTION WHEN OTHERS THEN
+        -- 2026-11-09: el subbloque se ha deshecho (tambien la linea, si llego a crearse). La muestra no se
+        -- toca, pero la incidencia lo dice: linea informativa 'engine_error' con el mensaje (spec: ninguna
+        -- muestra afectada queda sin linea). Si incluso esto falla, solo queda el WARNING.
         RAISE WARNING 'resolve_unavailability_incident: muestra % rol % omitida: %', r.id, r.role, SQLERRM;
+        v_err := SQLERRM;
+        BEGIN
+          INSERT INTO panelist_reassignment_proposal
+            (account_id, unavailability_id, allocation_plan_detail_id, affected_role, sample_status_at_detection,
+             suggested_action, suggested_reason, status, final_action, resolution_note)
+          SELECT v_u.account_id, p_unavailability_id, a.id, r.role, a.status,
+                 'none', 'engine_error', 'info', 'none', v_err
+            FROM allocation_plan_details a
+           WHERE a.id = r.id
+             AND NOT EXISTS (SELECT 1 FROM panelist_reassignment_proposal pr
+                              WHERE pr.unavailability_id = p_unavailability_id
+                                AND pr.allocation_plan_detail_id = r.id
+                                AND pr.affected_role = r.role);
+          IF FOUND THEN v_count := v_count + 1; END IF;
+        EXCEPTION WHEN OTHERS THEN
+          RAISE WARNING 'resolve_unavailability_incident: sin linea engine_error para la muestra % rol %: %',
+            r.id, r.role, SQLERRM;
+        END;
       END;
     END LOOP;
   END IF;
@@ -449,8 +472,9 @@ GRANT EXECUTE ON FUNCTION public.incident_close_twin_lines(uuid, uuid) TO servic
 -- o anularla).
 -- Guarda de recursion: el motor de la otra baja puede mover la muestra y llamar aqui otra vez. La
 -- profundidad va en el ajuste de sesion 'onems.incident_refresh_depth' (local a la transaccion): maximo 3
--- niveles; se incrementa antes de cada llamada y se restaura despues, tambien si falla. Es independiente de
--- 'onems.in_incident_engine' (la guarda del trigger de cambios de plan), que aqui no se toca.
+-- niveles; se incrementa antes de cada llamada y se restaura despues, tambien si falla. Ademas, mientras corre
+-- el motor de la otra baja se pone 'onems.in_incident_engine' = 'on' (la guarda del trigger de cambios de
+-- plan, como hacen los triggers) y se restaura su valor anterior despues, tambien si falla.
 -- Un fallo en la otra baja no deshace el cambio de esta: se avisa con un WARNING y se sigue.
 -- Devuelve cuantas bajas ha vuelto a pasar.
 CREATE OR REPLACE FUNCTION public.incident_refresh_other_incidents(p_detail_id uuid, p_except_unavailability_id uuid)
@@ -462,6 +486,7 @@ AS $$
 DECLARE
   v_prev text := COALESCE(current_setting('onems.incident_refresh_depth', true), '');
   v_depth integer := COALESCE(NULLIF(v_prev, '')::integer, 0);
+  v_prev_engine text := COALESCE(current_setting('onems.in_incident_engine', true), '');
   v_d record;
   v_ids uuid[];
   v_id uuid;
@@ -488,6 +513,11 @@ BEGIN
   FOREACH v_id IN ARRAY v_ids LOOP
     BEGIN
       PERFORM set_config('onems.incident_refresh_depth', (v_depth + 1)::text, true);
+      -- Guarda de re-entrada del trigger de cambios de plan mientras corre el motor de la otra baja. Sin ella,
+      -- si esa baja vuelve a mover una muestra ya movida en esta transaccion (reassigned_at = now() no cambia),
+      -- el trigger lo tomaria por un cambio ajeno y pasaria el motor de esa baja a mitad de
+      -- incident_apply_change, borrando su linea aun 'pending'. Se restaura al salir, tambien si falla.
+      PERFORM set_config('onems.in_incident_engine', 'on', true);
       PERFORM resolve_unavailability_incident(v_id);
       v_count := v_count + 1;
     EXCEPTION WHEN OTHERS THEN
@@ -495,6 +525,7 @@ BEGIN
         v_id, p_detail_id, SQLERRM;
     END;
     PERFORM set_config('onems.incident_refresh_depth', v_prev, true);
+    PERFORM set_config('onems.in_incident_engine', v_prev_engine, true);
   END LOOP;
 
   RETURN v_count;
@@ -724,6 +755,7 @@ AS $$
 DECLARE
   r record;
   v_count integer := 0;
+  v_prev text := COALESCE(current_setting('onems.in_incident_engine', true), '');
 BEGIN
   FOR r IN
     SELECT u.id
@@ -735,11 +767,16 @@ BEGIN
      ORDER BY u.start_date, u.id
   LOOP
     BEGIN
+      -- Misma convencion que los triggers y que la puesta al dia de 20261020130600: guarda de re-entrada
+      -- activa mientras corre el motor (si no, el trigger de cambios de plan puede pasar el motor de otra
+      -- baja a mitad de un cambio y borrarle la linea). Se restaura despues, tambien si falla.
+      PERFORM set_config('onems.in_incident_engine', 'on', true);
       PERFORM resolve_unavailability_incident(r.id);
       v_count := v_count + 1;
     EXCEPTION WHEN OTHERS THEN
       RAISE WARNING 'incident_resolve_all_open: baja %: %', r.id, SQLERRM;
     END;
+    PERFORM set_config('onems.in_incident_engine', v_prev, true);
   END LOOP;
   RETURN v_count;
 END;

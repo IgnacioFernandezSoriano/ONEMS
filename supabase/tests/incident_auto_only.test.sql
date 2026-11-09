@@ -254,6 +254,52 @@ END $$;
 SELECT pg_temp.never_pending('engine_error_isolated');
 ROLLBACK;
 
+-- ===== main_loop_error_line: un fallo antes de crear la linea (paso 1) deja una linea info/engine_error =====
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+SELECT pg_temp.baja('2027-03-22','2027-03-31');
+SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N1','N4','2027-03-24');  -- X: falla en el paso 1
+SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000002','N1','N4','2027-03-25');  -- Y: normal
+-- Sustitucion temporal (se deshace con el ROLLBACK): incident_find_shift_date falla para la muestra del 24.
+ALTER FUNCTION public.incident_find_shift_date(uuid, date, date, numeric, numeric) RENAME TO incident_find_shift_date_orig;
+CREATE FUNCTION public.incident_find_shift_date(p_node_id uuid, p_after date, p_month_anchor date,
+                                                p_reference_load numeric, p_deviation_percent numeric)
+RETURNS date LANGUAGE plpgsql AS $$
+BEGIN
+  IF p_month_anchor = '2027-03-24' THEN RAISE EXCEPTION 'boom en el paso 1'; END IF;
+  RETURN public.incident_find_shift_date_orig(p_node_id, p_after, p_month_anchor, p_reference_load, p_deviation_percent);
+END $$;
+DO $$
+DECLARE lx public.panelist_reassignment_proposal; ly public.panelist_reassignment_proposal; n int;
+BEGIN
+  PERFORM pg_temp.run();
+  lx := pg_temp.line('d0000000-0000-0000-0000-000000000001');
+  ly := pg_temp.line('d0000000-0000-0000-0000-000000000002');
+  IF lx.id IS NULL THEN RAISE EXCEPTION 'FAIL main_loop_error_line: X sin linea'; END IF;
+  IF lx.status <> 'info' OR lx.final_action IS DISTINCT FROM 'none' OR lx.suggested_action IS DISTINCT FROM 'none'
+     OR lx.suggested_reason IS DISTINCT FROM 'engine_error' OR lx.affected_role <> 'origin'
+     OR lx.sample_status_at_detection IS DISTINCT FROM 'pending'
+     OR COALESCE(lx.resolution_note, '') NOT LIKE '%boom en el paso 1%' THEN
+    RAISE EXCEPTION 'FAIL main_loop_error_line X % % % % [%]', lx.status, lx.final_action, lx.suggested_action,
+      lx.suggested_reason, lx.resolution_note; END IF;
+  IF ly.status <> 'auto_resolved' THEN RAISE EXCEPTION 'FAIL main_loop_error_line Y %', ly.status; END IF;
+  IF (SELECT status FROM public.allocation_plan_details WHERE id='d0000000-0000-0000-0000-000000000001') <> 'pending'
+     OR (SELECT fecha_programada FROM public.allocation_plan_details WHERE id='d0000000-0000-0000-0000-000000000001') <> '2027-03-24' THEN
+    RAISE EXCEPTION 'FAIL main_loop_error_line: X ha cambiado'; END IF;
+  SELECT count(*) INTO n FROM public.panelist_reassignment_proposal
+   WHERE allocation_plan_detail_id = 'd0000000-0000-0000-0000-000000000001';
+  IF n <> 1 THEN RAISE EXCEPTION 'FAIL main_loop_error_line lineas de X=%', n; END IF;
+  -- Segunda pasada: no duplica la linea de X (ya tiene linea en ese rol).
+  PERFORM pg_temp.run();
+  SELECT count(*) INTO n FROM public.panelist_reassignment_proposal
+   WHERE allocation_plan_detail_id = 'd0000000-0000-0000-0000-000000000001';
+  IF n <> 1 THEN RAISE EXCEPTION 'FAIL main_loop_error_line lineas de X tras 2a pasada=%', n; END IF;
+  RAISE NOTICE 'PASS main_loop_error_line';
+END $$;
+SELECT pg_temp.never_pending('main_loop_error_line');
+ROLLBACK;
+
 -- ===== notified_today_resolved_sent_untouched: baja que empieza hoy (dia laborable) =====
 BEGIN;
 \ir fixtures/incident_city.sql
@@ -387,7 +433,7 @@ SELECT pg_temp.baja('2027-03-02','2027-03-04');
 SELECT pg_temp.baja2('2027-03-05','2027-03-12');
 SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N1','N2','2027-03-03');
 DO $$
-DECLARE la public.panelist_reassignment_proposal; lb public.panelist_reassignment_proposal; n int;
+DECLARE la public.panelist_reassignment_proposal; lb public.panelist_reassignment_proposal; n int; s record;
 BEGIN
   PERFORM pg_temp.run();
   la := pg_temp.line('d0000000-0000-0000-0000-000000000001','origin');
@@ -406,7 +452,48 @@ BEGIN
   SELECT count(*) INTO n FROM public.panelist_reassignment_proposal
    WHERE allocation_plan_detail_id = 'd0000000-0000-0000-0000-000000000001';
   IF n <> 2 THEN RAISE EXCEPTION 'FAIL twin_move_reevaluates lineas=% (esperadas 2, sin duplicados)', n; END IF;
+  -- La linea de B describe donde ha quedado la muestra: su fecha final es la de la muestra.
+  SELECT * INTO s FROM public.allocation_plan_details WHERE id='d0000000-0000-0000-0000-000000000001';
+  IF lb.final_date IS NULL OR s.fecha_programada IS DISTINCT FROM lb.final_date
+     OR s.fecha_programada BETWEEN '2027-03-05' AND '2027-03-12' THEN
+    RAISE EXCEPTION 'FAIL twin_move_reevaluates fecha muestra % vs linea B %', s.fecha_programada, lb.final_date; END IF;
   RAISE NOTICE 'PASS twin_move_reevaluates (B: % % %)', lb.status, lb.final_action, lb.final_date;
+END $$;
+ROLLBACK;
+
+-- ===== twin_move_with_triggers: lo mismo por la puesta al dia, con los triggers de incidencias activos =====
+-- La puesta al dia (incident_resolve_all_open) llama al motor fuera de los triggers. Cuando B vuelve a mover la
+-- muestra que A ya movio en la misma transaccion, reassigned_at (= now()) no cambia y el trigger de cambios de
+-- plan lo tomaria por un cambio ajeno: sin la guarda onems.in_incident_engine, borraba la linea de B.
+BEGIN;
+\ir fixtures/incident_city.sql
+-- Datos sin disparar el motor (guarda puesta mientras se crean).
+SELECT set_config('onems.in_incident_engine', 'on', true);
+SELECT pg_temp.baja('2027-03-02','2027-03-04');
+SELECT pg_temp.baja2('2027-03-05','2027-03-12');
+SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N1','N2','2027-03-03');
+-- Linea pendiente del motor viejo en A: la puesta al dia procesa A.
+SELECT pg_temp.legacy_line('d0000000-0000-0000-0000-000000000001');
+SELECT set_config('onems.in_incident_engine', '', true);
+DO $$
+DECLARE lb public.panelist_reassignment_proposal; s record; n int;
+BEGIN
+  PERFORM public.incident_resolve_all_open();
+  IF COALESCE(current_setting('onems.in_incident_engine', true), '') <> '' THEN
+    RAISE EXCEPTION 'FAIL twin_move_with_triggers: guarda no restaurada (%)',
+      current_setting('onems.in_incident_engine', true); END IF;
+  SELECT * INTO s FROM public.allocation_plan_details WHERE id='d0000000-0000-0000-0000-000000000001';
+  SELECT * INTO lb FROM public.panelist_reassignment_proposal
+   WHERE unavailability_id = 'f0000000-0000-0000-0000-000000000002'
+     AND allocation_plan_detail_id = 'd0000000-0000-0000-0000-000000000001';
+  IF lb.id IS NULL OR lb.status = 'pending' THEN
+    RAISE EXCEPTION 'FAIL twin_move_with_triggers B sin linea resuelta (% / muestra % %)', lb.status,
+      s.fecha_programada, s.status; END IF;
+  IF lb.final_date IS NULL OR s.fecha_programada IS DISTINCT FROM lb.final_date THEN
+    RAISE EXCEPTION 'FAIL twin_move_with_triggers fecha muestra % vs linea B %', s.fecha_programada, lb.final_date; END IF;
+  SELECT count(*) INTO n FROM public.panelist_reassignment_proposal WHERE status = 'pending';
+  IF n <> 0 THEN RAISE EXCEPTION 'FAIL twin_move_with_triggers pendientes=%', n; END IF;
+  RAISE NOTICE 'PASS twin_move_with_triggers (B: % % %)', lb.status, lb.final_action, lb.final_date;
 END $$;
 ROLLBACK;
 
