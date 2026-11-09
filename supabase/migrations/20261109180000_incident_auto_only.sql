@@ -710,3 +710,39 @@ AS $function$
         AND (pu.created_at >= now() - interval '7 days'
              OR EXISTS (SELECT 1 FROM unread u WHERE u.incident_kind = 'unavailability' AND u.incident_id = pu.id)));
 $function$;
+
+-- ===== incident_resolve_all_open (puesta al dia, 2026-11-09) =====
+-- Pasa el motor nuevo por cada baja 'active' que aun arrastre lineas 'pending' o este en 'pending_manager'
+-- (restos del motor viejo). Una baja 'active' con la fecha de fin ya pasada tambien cuenta. Orden fijo
+-- (start_date, id); cada baja en su propio subbloque: si una falla, WARNING y sigue. Devuelve cuantas trata.
+CREATE OR REPLACE FUNCTION public.incident_resolve_all_open()
+RETURNS integer
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  r record;
+  v_count integer := 0;
+BEGIN
+  FOR r IN
+    SELECT u.id
+      FROM panelist_unavailability u
+     WHERE u.status = 'active'
+       AND (u.incident_status = 'pending_manager'
+            OR EXISTS (SELECT 1 FROM panelist_reassignment_proposal pr
+                        WHERE pr.unavailability_id = u.id AND pr.status = 'pending'))
+     ORDER BY u.start_date, u.id
+  LOOP
+    BEGIN
+      PERFORM resolve_unavailability_incident(r.id);
+      v_count := v_count + 1;
+    EXCEPTION WHEN OTHERS THEN
+      RAISE WARNING 'incident_resolve_all_open: baja %: %', r.id, SQLERRM;
+    END;
+  END LOOP;
+  RETURN v_count;
+END;
+$$;
+REVOKE ALL ON FUNCTION public.incident_resolve_all_open() FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.incident_resolve_all_open() TO service_role;

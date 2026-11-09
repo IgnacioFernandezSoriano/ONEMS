@@ -456,3 +456,72 @@ BEGIN
   END LOOP;
   RAISE NOTICE 'PASS estructura Tarea 2';
 END $$;
+
+-- ===== resolve_all_open: la puesta al dia trata solo las bajas activas con lineas pending o pending_manager =====
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+SELECT pg_temp.baja('2027-03-22','2027-03-31');
+SELECT pg_temp.baja2('2027-03-08','2027-03-12');
+SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N1','N4','2027-03-24');
+SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000002','N2','N4','2027-03-10');
+SELECT pg_temp.legacy_line('d0000000-0000-0000-0000-000000000001');
+UPDATE public.panelist_unavailability SET incident_status = 'pending_manager'
+ WHERE id = 'f0000000-0000-0000-0000-000000000001';
+UPDATE public.panelist_unavailability SET incident_status = 'auto_resolved'
+ WHERE id = 'f0000000-0000-0000-0000-000000000002';
+DO $$
+DECLARE n int; p int; m int;
+BEGIN
+  n := public.incident_resolve_all_open();
+  IF n <> 1 THEN RAISE EXCEPTION 'FAIL resolve_all_open devuelve % (esperado 1)', n; END IF;
+  SELECT count(*) INTO p FROM public.panelist_reassignment_proposal WHERE status = 'pending';
+  SELECT count(*) INTO m FROM public.panelist_unavailability WHERE incident_status = 'pending_manager';
+  IF p <> 0 OR m <> 0 THEN RAISE EXCEPTION 'FAIL resolve_all_open pendientes=% pending_manager=%', p, m; END IF;
+  IF (pg_temp.inc()).incident_status <> 'auto_resolved' THEN
+    RAISE EXCEPTION 'FAIL resolve_all_open estado %', (pg_temp.inc()).incident_status; END IF;
+  -- Segunda pasada: ya no queda nada abierto.
+  IF public.incident_resolve_all_open() <> 0 THEN RAISE EXCEPTION 'FAIL resolve_all_open segunda pasada'; END IF;
+  RAISE NOTICE 'PASS resolve_all_open';
+END $$;
+ROLLBACK;
+
+-- ===== pending_lines_direct_call: lineas pending sobre muestras sent / en estado ajeno, llamada directa =====
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+SELECT pg_temp.baja('2027-03-22','2027-03-31');
+SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N1','N4','2027-03-24','sent');
+SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000002','N2','N1','2027-03-25','sent');
+SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000003','N1','N4','2027-03-26','incident');
+SELECT pg_temp.legacy_line('d0000000-0000-0000-0000-000000000001');
+INSERT INTO public.panelist_reassignment_proposal
+  (account_id, unavailability_id, allocation_plan_detail_id, affected_role, sample_status_at_detection,
+   suggested_action, suggested_reason, status)
+VALUES ('a0000000-0000-0000-0000-000000000001','f0000000-0000-0000-0000-000000000001',
+        'd0000000-0000-0000-0000-000000000002','destination','sent','cancel','x','pending');
+SELECT pg_temp.legacy_line('d0000000-0000-0000-0000-000000000003');
+DO $$
+DECLARE n int; a public.panelist_reassignment_proposal; b public.panelist_reassignment_proposal;
+        c public.panelist_reassignment_proposal; k int;
+BEGIN
+  n := public.incident_resolve_pending_lines('f0000000-0000-0000-0000-000000000001');
+  IF n <> 3 THEN RAISE EXCEPTION 'FAIL pending_lines_direct_call cerradas=% (esperadas 3)', n; END IF;
+  a := pg_temp.line('d0000000-0000-0000-0000-000000000001');
+  b := pg_temp.line('d0000000-0000-0000-0000-000000000002');
+  c := pg_temp.line('d0000000-0000-0000-0000-000000000003');
+  IF a.status <> 'info' OR a.suggested_reason IS DISTINCT FROM 'already_sent' THEN
+    RAISE EXCEPTION 'FAIL pending_lines_direct_call sent/origin % %', a.status, a.suggested_reason; END IF;
+  IF b.status <> 'info' OR b.suggested_reason IS DISTINCT FROM 'in_transit' THEN
+    RAISE EXCEPTION 'FAIL pending_lines_direct_call sent/destination % %', b.status, b.suggested_reason; END IF;
+  IF c.status <> 'info' OR c.suggested_reason IS DISTINCT FROM 'engine_error'
+     OR COALESCE(c.resolution_note, '') = '' THEN
+    RAISE EXCEPTION 'FAIL pending_lines_direct_call incident % % [%]', c.status, c.suggested_reason, c.resolution_note; END IF;
+  SELECT count(*) INTO k FROM public.allocation_plan_details
+   WHERE (id = 'd0000000-0000-0000-0000-000000000001' AND status = 'sent' AND fecha_programada = '2027-03-24')
+      OR (id = 'd0000000-0000-0000-0000-000000000002' AND status = 'sent' AND fecha_programada = '2027-03-25')
+      OR (id = 'd0000000-0000-0000-0000-000000000003' AND status = 'incident' AND fecha_programada = '2027-03-26');
+  IF k <> 3 THEN RAISE EXCEPTION 'FAIL pending_lines_direct_call muestras tocadas (intactas=%)', k; END IF;
+  RAISE NOTICE 'PASS pending_lines_direct_call';
+END $$;
+ROLLBACK;
