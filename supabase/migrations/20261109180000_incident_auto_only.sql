@@ -679,3 +679,34 @@ BEGIN
   PERFORM incident_refresh_other_incidents(v_d.id, v_prop.unavailability_id);
 END;
 $function$;
+
+
+-- 2026-11-09: el badge de "Disponibilidad de panelistas" ya no espera decision del manager (pending_manager).
+-- Ahora cuenta las bajas de la cuenta declaradas en los ultimos 7 dias, o con respuesta del panelista sin leer.
+CREATE OR REPLACE FUNCTION public.incident_attention_counts(p_account_id uuid DEFAULT NULL::uuid)
+ RETURNS TABLE(reported integer, unavailability integer)
+ LANGUAGE sql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+  WITH scope AS (
+    SELECT CASE WHEN is_superadmin() THEN p_account_id ELSE current_user_account_id() END AS acc,
+           is_superadmin() AS su
+     WHERE auth.uid() IS NOT NULL
+  ), unread AS (
+    SELECT DISTINCT m.incident_kind, m.incident_id
+      FROM incident_message m, scope s
+     WHERE m.direction = 'inbound' AND m.read_at IS NULL
+       AND NOT (m.meta ?| array['callback','report_flow']) AND coalesce(m.meta->>'kind','') NOT LIKE 'material%'
+       AND (m.account_id = s.acc OR (s.acc IS NULL AND s.su))
+  )
+  SELECT
+    (SELECT count(*)::int FROM panelist_incident i, scope s
+      WHERE (i.account_id = s.acc OR (s.acc IS NULL AND s.su))
+        AND ((i.status = 'open' AND i.manager_seen_at IS NULL)
+             OR EXISTS (SELECT 1 FROM unread u WHERE u.incident_kind = 'reported' AND u.incident_id = i.id))),
+    (SELECT count(*)::int FROM panelist_unavailability pu, scope s
+      WHERE (pu.account_id = s.acc OR (s.acc IS NULL AND s.su))
+        AND (pu.created_at >= now() - interval '7 days'
+             OR EXISTS (SELECT 1 FROM unread u WHERE u.incident_kind = 'unavailability' AND u.incident_id = pu.id)));
+$function$;
