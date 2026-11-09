@@ -3953,8 +3953,18 @@ hc.account_form.slug,Slug
 hc.account_form.slug_help,"Identifiant unique (minuscules, sans espaces)"
 hc.account_form.default_language,Langue par défaut
 hc.account_form.default_language_help,Langue héritée par les panélistes de ce compte
-hc.account_form.manager_email,E-mail du responsable des panélistes
-hc.account_form.manager_email_help,E-mail de contact du responsable des panélistes de ce compte (facultatif)
+hc.account_form.manager_email,E-mail du Panelist Manager
+hc.account_form.manager_email_help,Gère les panélistes : reçoit les alertes d'incidents, d'absences et du bot.
+hc.account_form.contacts_title,Contacts du compte
+hc.account_form.contacts_help,E-mails utilisés par les agents pour envoyer des messages automatiques. Laisser vide si le rôle n'existe pas.
+hc.account_form.account_manager_email,E-mail de l'Account Manager
+hc.account_form.account_manager_email_help,Chef de projet de ce compte. Reçoit les rapports d'opération.
+hc.account_form.materials_supplier_email,E-mail du Materials Supplier
+hc.account_form.materials_supplier_email_help,Fournit enveloppes, timbres et transpondeurs : reçoit les demandes de matériel.
+hc.account_form.do_coordinator_email,E-mail du DO coordinator
+hc.account_form.do_coordinator_email_help,Coordinateur chez l'opérateur désigné (poste du pays).
+hc.account_form.upu_account_manager_email,E-mail de l'UPU account manager
+hc.account_form.upu_account_manager_email_help,Responsable de ce compte à l'UPU.
 hc.account_form.status,Statut
 hc.account_form.cancel,Annuler
 hc.account_form.saving,Enregistrement...

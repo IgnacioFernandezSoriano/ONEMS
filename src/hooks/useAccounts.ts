@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
-import type { Account, SupportedLanguage } from '@/lib/types'
+import type { Account, AccountFormData } from '@/lib/types'
 
 export function useAccounts() {
   const [accounts, setAccounts] = useState<Account[]>([])
@@ -28,7 +28,7 @@ export function useAccounts() {
     fetchAccounts()
   }, [])
 
-  const createAccount = async (account: { name: string; slug: string; default_language?: SupportedLanguage; email_panelist_manager?: string | null }) => {
+  const createAccount = async (account: Partial<AccountFormData> & { name: string; slug: string }) => {
     const { data, error } = await supabase
       .from('accounts')
       .insert(account as any)

@@ -3953,8 +3953,18 @@ hc.account_form.slug,المعرّف النصي (Slug)
 hc.account_form.slug_help,معرّف فريد (أحرف صغيرة، بدون مسافات)
 hc.account_form.default_language,اللغة الافتراضية
 hc.account_form.default_language_help,اللغة التي يرثها المشاركون في اللجنة التابعون لهذا الحساب
-hc.account_form.manager_email,البريد الإلكتروني لمسؤول المشاركين
-hc.account_form.manager_email_help,البريد الإلكتروني للتواصل مع مسؤول المشاركين في هذا الحساب (اختياري)
+hc.account_form.manager_email,البريد الإلكتروني لمسؤول المشاركين (Panelist Manager)
+hc.account_form.manager_email_help,يدير المشاركين: يتلقى تنبيهات الحوادث والغياب والروبوت.
+hc.account_form.contacts_title,جهات اتصال الحساب
+hc.account_form.contacts_help,عناوين البريد التي يستخدمها الوكلاء لإرسال الرسائل التلقائية. اتركه فارغًا إذا لم يكن الدور موجودًا.
+hc.account_form.account_manager_email,البريد الإلكتروني لمدير الحساب (Account Manager)
+hc.account_form.account_manager_email_help,قائد المشروع في هذا الحساب. يتلقى تقارير التشغيل.
+hc.account_form.materials_supplier_email,البريد الإلكتروني لمورد المواد (Materials Supplier)
+hc.account_form.materials_supplier_email_help,يورّد الأظرف والطوابع وأجهزة الإرسال: يتلقى طلبات المواد.
+hc.account_form.do_coordinator_email,البريد الإلكتروني لمنسق المشغل المعيّن (DO coordinator)
+hc.account_form.do_coordinator_email_help,المنسق لدى المشغل المعيّن (بريد البلد).
+hc.account_form.upu_account_manager_email,البريد الإلكتروني لمدير الحساب في الاتحاد البريدي العالمي (UPU account manager)
+hc.account_form.upu_account_manager_email_help,المسؤول عن هذا الحساب في الاتحاد البريدي العالمي.
 hc.account_form.status,الحالة
 hc.account_form.cancel,إلغاء
 hc.account_form.saving,جارٍ الحفظ...

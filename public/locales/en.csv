@@ -3961,8 +3961,18 @@ hc.account_form.slug,Slug
 hc.account_form.slug_help,"Unique identifier (lowercase, no spaces)"
 hc.account_form.default_language,Default Language
 hc.account_form.default_language_help,Language inherited by panelists of this account
-hc.account_form.manager_email,Panelist Manager Email
-hc.account_form.manager_email_help,Contact email for the panelist manager of this account (optional)
+hc.account_form.manager_email,Panelist Manager email
+hc.account_form.manager_email_help,Manages the panelists: receives incident, leave and bot alerts.
+hc.account_form.contacts_title,Account contacts
+hc.account_form.contacts_help,Emails used by the agents to send automatic messages. Leave empty if the role does not exist.
+hc.account_form.account_manager_email,Account Manager email
+hc.account_form.account_manager_email_help,Project lead for this account. Receives the operations reports.
+hc.account_form.materials_supplier_email,Materials Supplier email
+hc.account_form.materials_supplier_email_help,Supplies envelopes, stamps and transponders: receives material requests.
+hc.account_form.do_coordinator_email,DO coordinator email
+hc.account_form.do_coordinator_email_help,Coordinator at the designated operator (postal service of the country).
+hc.account_form.upu_account_manager_email,UPU account manager email
+hc.account_form.upu_account_manager_email_help,Person in charge of this account at the UPU.
 hc.account_form.status,Status
 hc.account_form.cancel,Cancel
 hc.account_form.saving,Saving...

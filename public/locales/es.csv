@@ -3961,8 +3961,18 @@ hc.account_form.slug,Slug
 hc.account_form.slug_help,"Identificador único (minúsculas, sin espacios)"
 hc.account_form.default_language,Idioma por defecto
 hc.account_form.default_language_help,Idioma que heredan los panelistas de esta cuenta
-hc.account_form.manager_email,Correo del responsable de panelistas
-hc.account_form.manager_email_help,Correo de contacto del responsable de panelistas de esta cuenta (opcional)
+hc.account_form.manager_email,Correo del Panelist Manager
+hc.account_form.manager_email_help,Gestiona a los panelistas: recibe los avisos de incidencias, bajas y del bot.
+hc.account_form.contacts_title,Contactos de la cuenta
+hc.account_form.contacts_help,Correos que usan los agentes para enviar mensajes automáticos. Déjalo vacío si el rol no existe.
+hc.account_form.account_manager_email,Correo del Account Manager
+hc.account_form.account_manager_email_help,Líder del proyecto en esta cuenta. Recibe los informes de operación.
+hc.account_form.materials_supplier_email,Correo del Materials Supplier
+hc.account_form.materials_supplier_email_help,Proveedor de sobres, sellos y transpondedores: recibe las peticiones de material.
+hc.account_form.do_coordinator_email,Correo del DO coordinator
+hc.account_form.do_coordinator_email_help,Coordinador en el operador designado (correos del país).
+hc.account_form.upu_account_manager_email,Correo del UPU account manager
+hc.account_form.upu_account_manager_email_help,Responsable de esta cuenta en la UPU.
 hc.account_form.status,Estado
 hc.account_form.cancel,Cancelar
 hc.account_form.saving,Guardando...
