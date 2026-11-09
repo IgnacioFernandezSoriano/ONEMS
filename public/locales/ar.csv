@@ -2764,6 +2764,24 @@ incidents.summary.cancel,{n} أُلغيت
 incidents.summary.info,{n} للعلم فقط
 incidents.summary.pending,{n} قيد الانتظار
 incidents.summary.none,لا توجد عينات متأثرة
+incidents.summary.text,{total} عينات متأثرة: {shift} مؤجلة، {reroute} إلى عقدة أخرى، {cancel} ملغاة، {info} بدون تغيير
+incidents.summary.text_with_pending,{total} عينات متأثرة: {shift} مؤجلة، {reroute} إلى عقدة أخرى، {cancel} ملغاة، {info} بدون تغيير، {pending} قيد الانتظار
+incidents.result.shift_date,أُجّلت إلى {date}
+incidents.result.reroute,نُقلت إلى {node}
+incidents.result.reroute_on,نُقلت إلى {node} في {date}
+incidents.result.cancel,أُلغيت (لا توجد فترة متاحة خلال 8 أسابيع)
+incidents.result.pending,قيد الانتظار
+incidents.result.manual_suffix,(يدويًا)
+incidents.result.now,الآن: {date} · {node}
+incidents.result.info.already_sent,بدون تغيير: أُرسلت بالفعل
+incidents.result.info.in_transit,بدون تغيير: قيد النقل بالفعل
+incidents.result.info.back_before_arrival,بدون تغيير: سيكون المشارك قد عاد عند وصولها
+incidents.result.info.handled_by_other_incident,عولجت بالفعل في حادثة أخرى
+incidents.result.info.engine_error,تعذّرت المعالجة: يلزم التحقق
+incidents.result.info.other,بدون تغيير
+incidents.detail.lines,العينات المتأثرة
+incidents.detail.result,النتيجة
+incidents.detail.lines_week_empty,لا توجد عينات متأثرة في هذا الأسبوع
 incidents.detail.final_resolution,القرار النهائي
 incidents.detail.final_resolution_placeholder,أضف ملاحظة حول كيفية معالجة هذه الحادثة…
 incidents.detail.save,حفظ
@@ -2831,7 +2849,7 @@ incidents.move_reason.other_city,العقدة تنتمي إلى مدينة أخ�
 incidents.move_reason.other_end,إنها الطرف الآخر للعينة (المصدر = الوجهة)
 incidents.move_reason.no_day,لا يوجد يوم عمل مناسب في ذلك الأسبوع (الحمل أو التوفر)
 incidents.move_reason.not_in_cell,العينة لم تعد في تلك الخانة
-incidents.move_reason.has_incident_line,للعينة سطر معلق في حادثة؛ عالجه هناك
+incidents.move_reason.has_incident_line,للعينة سطر معلق من بيانات قديمة في حادثة؛ سيُعالج تلقائيًا
 incidents.move_reason.inactive_node,العقدة الهدف غير نشطة
 incidents.balance.counts_note,تشمل الأعداد العينات الملغاة؛ تعرض القائمة العينات النشطة فقط
 incidents.reason.already_sent,أُرسلت بالفعل؛ لا شيء لتغييره

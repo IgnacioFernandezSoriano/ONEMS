@@ -423,6 +423,9 @@ export interface ReassignmentProposal {
     status: string
     origin_node_id: string
     destination_node_id: string
+    // nodos antes del primer cambio de nodo (null si nunca cambio)
+    original_origin_node_id?: string | null
+    original_destination_node_id?: string | null
     origin_node?: { auto_id: string } | null
     destination_node?: { auto_id: string } | null
     plan?: SamplePlanInfo | null
@@ -446,7 +449,6 @@ export interface IncidentInboxRow {
   affected_count: number
   origin_count: number
   destination_count: number
-  pending_count: number
 }
 
 export interface UnavailabilityHeader {
@@ -526,6 +528,7 @@ export interface MoveDragPayload {
   plan?: SamplePlanInfo | null
 }
 
+// 'open' (new + pending_manager) ya no se ofrece en la bandeja; se conserva en el tipo.
 export type IncidentStatusFilter = 'open' | 'all' | IncidentStatus // open = new + pending_manager
 
 export interface CityLoadWeek {

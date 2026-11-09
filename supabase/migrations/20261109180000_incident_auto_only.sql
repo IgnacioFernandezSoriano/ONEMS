@@ -1,0 +1,785 @@
+-- Incidencias de baja: resolucion 100 % automatica, la incidencia solo informa.
+-- Spec: docs/superpowers/specs/2026-11-09-incidencias-baja-solo-informativas-design.md (modifica a la del
+-- 2026-10-20, incidencias-indisponibilidad-resolucion-automatica).
+--
+-- Antes el motor resolvia solo una parte de las muestras afectadas y dejaba el resto 'pending' para que el
+-- manager confirmara o anulara («Pending manager decision»). Ahora el motor decide siempre:
+--   pasos 1 y 2 como hasta ahora (retrasar dentro del mes / otro nodo de la ciudad dentro del mes);
+--   paso 3: si no cabe en el mes, se APLICA la propuesta de incident_suggest (primera fecha laborable
+--           posterior sin saturar, en el mismo nodo o en otro de la ciudad, hasta 8 semanas);
+--   paso 4: si no hay hueco en esas 8 semanas, se anula la muestra.
+-- Ninguna linea queda 'pending'. Si el motor falla en una muestra, su linea pasa a informativa
+-- ('engine_error', con el mensaje en resolution_note) y el resto sigue.
+--
+-- Contenido:
+--   1. incident_resolve_pending_lines (nueva): cierra las lineas 'pending' de una baja (pasos 3 y 4).
+--   2. resolve_unavailability_incident: re-emitida desde la definicion viva (igual a 20261105180000) con dos
+--      cambios: el paso (a) ya no borra lineas de muestras anuladas, y al final llama a (1). Se quita el
+--      bloque que guardaba la propuesta para el manager: ahora la calcula y la aplica (1). Si una muestra
+--      falla antes de tener linea, se le crea una informativa 'engine_error' con el mensaje.
+--   3. incident_recompute_status: re-emitida (igual a 20261020130200); nunca devuelve 'pending_manager'.
+--   4-7. Muestras compartidas entre dos bajas: incident_close_twin_lines e incident_refresh_other_incidents
+--      (nuevas), incident_apply_cancel e incident_apply_change (re-emitidas). Ver su bloque mas abajo.
+-- El valor 'pending_manager' sigue valiendo en los datos antiguos; simplemente deja de producirse.
+
+-- ===== 1. incident_resolve_pending_lines =====
+-- Por cada linea 'pending' de la baja (orden fecha_programada, id), cada una en su propio subbloque:
+--   * la muestra ya no esta pending/notified:
+--       cancelled      -> linea 'info', motivo 'handled_by_other_incident' (otra baja ya la anulo);
+--       sent/received  -> linea 'info', motivo 'already_sent' / 'in_transit' (misma regla del paso (b));
+--       otro estado    -> error controlado -> linea 'info' 'engine_error' (la muestra no se toca);
+--   * si no, incident_suggest: con hueco se aplica ('shift_later_week' si es el mismo nodo,
+--     'alt_node_later_week' si es otro); sin hueco se anula ('no_slot_8_weeks');
+--   * si algo falla: linea 'info', 'engine_error', resolution_note = mensaje, y un WARNING.
+-- Devuelve cuantas lineas ha cerrado.
+CREATE OR REPLACE FUNCTION public.incident_resolve_pending_lines(
+  p_unavailability_id uuid,
+  p_reference_load numeric DEFAULT 6,
+  p_deviation_percent numeric DEFAULT 20)
+RETURNS integer
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_ref numeric := COALESCE(p_reference_load, 6);
+  v_dev numeric := COALESCE(p_deviation_percent, 20);
+  v_account uuid;
+  v_count integer := 0;
+  r record;
+  v_d record;
+  v_role_node uuid;
+  v_s jsonb;
+  v_date date;
+  v_s_node uuid;
+  v_same boolean;
+BEGIN
+  SELECT u.account_id INTO v_account FROM panelist_unavailability u WHERE u.id = p_unavailability_id;
+  IF NOT FOUND THEN RETURN 0; END IF;
+
+  -- Guarda multi-tenant: service role / triggers (auth.uid() NULL) y superadmin pasan.
+  IF auth.uid() IS NOT NULL AND NOT is_superadmin()
+     AND v_account IS DISTINCT FROM (SELECT pr.account_id FROM profiles pr WHERE pr.id = auth.uid()) THEN
+    RAISE EXCEPTION 'Cross-tenant access denied';
+  END IF;
+
+  FOR r IN
+    SELECT pr.id, pr.affected_role, pr.allocation_plan_detail_id
+      FROM panelist_reassignment_proposal pr
+      JOIN allocation_plan_details a ON a.id = pr.allocation_plan_detail_id
+     WHERE pr.unavailability_id = p_unavailability_id
+       AND pr.status = 'pending'
+     ORDER BY a.fecha_programada, pr.id
+  LOOP
+    BEGIN
+      -- La linea puede haberse cerrado mientras tanto (el motor de otra baja, via
+      -- incident_refresh_other_incidents, puede volver a pasar esta misma baja): no se toca dos veces.
+      PERFORM 1 FROM panelist_reassignment_proposal WHERE id = r.id AND status = 'pending' FOR UPDATE;
+      IF NOT FOUND THEN CONTINUE; END IF;
+      -- Releer: una linea anterior de esta pasada puede haber movido o anulado la muestra.
+      SELECT * INTO v_d FROM allocation_plan_details WHERE id = r.allocation_plan_detail_id FOR UPDATE;
+
+      IF v_d.status = 'cancelled' THEN
+        -- Ya anulada (por otra baja o a mano): no hay nada que hacer, solo se informa.
+        UPDATE panelist_reassignment_proposal
+           SET status = 'info', final_action = 'none', suggested_reason = 'handled_by_other_incident',
+               updated_at = now()
+         WHERE id = r.id;
+      ELSIF v_d.status IN ('sent','received') THEN
+        -- Ya salida / recibida: nunca se toca (misma regla que el paso (b) del motor).
+        UPDATE panelist_reassignment_proposal
+           SET status = 'info', final_action = 'none',
+               suggested_reason = CASE WHEN r.affected_role = 'destination' AND v_d.status = 'sent'
+                                       THEN 'in_transit' ELSE 'already_sent' END,
+               updated_at = now()
+         WHERE id = r.id;
+      ELSIF v_d.status NOT IN ('pending','notified') THEN
+        RAISE EXCEPTION 'Sample % is % and cannot be resolved', v_d.id, v_d.status;
+      ELSE
+        v_s := incident_suggest(r.id, NULL, v_ref, v_dev);
+        IF COALESCE((v_s->>'found')::boolean, false) THEN
+          -- Paso 3: primera fecha laborable posterior con sitio. "Mismo nodo" = el nodo de la muestra en el
+          -- rol afectado, que es el de la baja (si no lo fuera, el paso (a) ya habria retirado la linea).
+          v_date := (v_s->>'date')::date;
+          v_s_node := (v_s->>'node_id')::uuid;
+          v_role_node := CASE WHEN r.affected_role = 'origin' THEN v_d.origin_node_id ELSE v_d.destination_node_id END;
+          v_same := v_s_node = v_role_node;
+          UPDATE panelist_reassignment_proposal
+             SET suggested_action = CASE WHEN v_same THEN 'shift_date' ELSE 'reroute' END,
+                 suggested_date = v_date,
+                 suggested_target_node_id = CASE WHEN v_same THEN NULL ELSE v_s_node END,
+                 suggested_reason = CASE WHEN v_same THEN 'shift_later_week' ELSE 'alt_node_later_week' END,
+                 updated_at = now()
+           WHERE id = r.id;
+          PERFORM incident_apply_change(r.id, v_date, CASE WHEN v_same THEN NULL ELSE v_s_node END, 'auto');
+        ELSE
+          -- Paso 4: sin hueco en 8 semanas -> se anula.
+          UPDATE panelist_reassignment_proposal
+             SET suggested_action = 'cancel', suggested_date = NULL, suggested_target_node_id = NULL,
+                 suggested_reason = 'no_slot_8_weeks', updated_at = now()
+           WHERE id = r.id;
+          PERFORM incident_apply_cancel(r.id, 'auto');
+        END IF;
+      END IF;
+      v_count := v_count + 1;
+    EXCEPTION WHEN OTHERS THEN
+      -- El subbloque ya se ha deshecho (la muestra queda como estaba); la linea se cierra como informativa.
+      RAISE WARNING 'incident_resolve_pending_lines: linea % (muestra %): %', r.id, r.allocation_plan_detail_id, SQLERRM;
+      UPDATE panelist_reassignment_proposal
+         SET status = 'info', final_action = 'none', suggested_reason = 'engine_error',
+             resolution_note = SQLERRM, updated_at = now()
+       WHERE id = r.id;
+      v_count := v_count + 1;
+    END;
+  END LOOP;
+
+  RETURN v_count;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.incident_resolve_pending_lines(uuid, numeric, numeric) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.incident_resolve_pending_lines(uuid, numeric, numeric) TO service_role;
+
+-- ===== 2. resolve_unavailability_incident (permisos sin cambios: CREATE OR REPLACE los conserva) =====
+CREATE OR REPLACE FUNCTION public.resolve_unavailability_incident(p_unavailability_id uuid, p_reference_load numeric DEFAULT 6, p_deviation_percent numeric DEFAULT 20)
+ RETURNS integer
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $$
+DECLARE
+  v_ref numeric := COALESCE(p_reference_load, 6);
+  v_dev numeric := COALESCE(p_deviation_percent, 20);
+  v_u record;
+  v_node uuid;
+  v_city uuid;
+  v_count integer := 0;
+  r record;
+  v_d record;
+  v_role_node uuid;
+  v_other uuid;
+  v_date date;
+  v_target uuid;
+  v_day date;
+  v_line uuid;
+  v_err text;
+BEGIN
+  SELECT * INTO v_u FROM panelist_unavailability WHERE id = p_unavailability_id;
+  IF NOT FOUND THEN RETURN 0; END IF;
+
+  -- Guarda multi-tenant: service role / triggers (auth.uid() NULL) y superadmin pasan.
+  IF auth.uid() IS NOT NULL AND NOT is_superadmin()
+     AND v_u.account_id IS DISTINCT FROM (SELECT pr.account_id FROM profiles pr WHERE pr.id = auth.uid()) THEN
+    RAISE EXCEPTION 'Cross-tenant access denied';
+  END IF;
+
+  IF v_u.status IS DISTINCT FROM 'active' THEN RETURN 0; END IF;
+
+  -- Nodo del panelista de baja (solo si sigue activo: un panelista inactivo no atiende el nodo).
+  SELECT p.node_id INTO v_node FROM panelists p WHERE p.id = v_u.panelist_id AND p.status = 'active';
+  SELECT n.city_id INTO v_city FROM nodes n WHERE n.id = v_node;
+
+  -- (a) Retirar lineas 'pending' que ya no aplican (muestra fuera de la baja, de otro nodo en ese rol,
+  --     o que ya no es pending/notified). Las resueltas e informativas no se tocan.
+  --     2026-11-09: las de muestras ANULADAS no se borran: las cierra incident_resolve_pending_lines como
+  --     informativas ('handled_by_other_incident'), para que la incidencia diga que otra baja ya la anulo.
+  DELETE FROM panelist_reassignment_proposal pr
+   USING allocation_plan_details a
+   WHERE pr.unavailability_id = p_unavailability_id
+     AND pr.status = 'pending'
+     AND a.id = pr.allocation_plan_detail_id
+     AND a.status IS DISTINCT FROM 'cancelled'
+     AND NOT COALESCE(
+           v_node IS NOT NULL
+           AND a.fecha_programada BETWEEN v_u.start_date AND v_u.end_date
+           AND a.status IN ('pending','notified')
+           AND (CASE WHEN pr.affected_role = 'origin' THEN a.origin_node_id ELSE a.destination_node_id END) = v_node
+           -- recepcion el ultimo dia de la baja: pasa a informativa en (b)
+           AND NOT (pr.affected_role = 'destination' AND a.fecha_programada >= v_u.end_date),
+           false);
+
+  -- (b)+(c) Muestras afectadas sin linea en ese rol. Orden determinista: los cambios aplicados alteran el
+  --     plan al momento y el reparto (por dias y por nodos) lee el estado real.
+  IF v_node IS NOT NULL THEN
+    FOR r IN
+      SELECT q.id, q.role FROM (
+        SELECT a.id, 'origin'::text AS role, a.fecha_programada
+          FROM allocation_plan_details a
+         WHERE a.origin_node_id = v_node
+           AND a.account_id = v_u.account_id
+           AND a.fecha_programada BETWEEN v_u.start_date AND v_u.end_date
+           AND a.status IN ('pending','notified','sent','received')
+        UNION ALL
+        SELECT a.id, 'destination'::text, a.fecha_programada
+          FROM allocation_plan_details a
+         WHERE a.destination_node_id = v_node
+           AND a.account_id = v_u.account_id
+           AND a.fecha_programada BETWEEN v_u.start_date AND v_u.end_date
+           AND a.status IN ('pending','notified','sent','received')) q
+       WHERE NOT EXISTS (SELECT 1 FROM panelist_reassignment_proposal pr
+                          WHERE pr.unavailability_id = p_unavailability_id
+                            AND pr.allocation_plan_detail_id = q.id
+                            AND pr.affected_role = q.role)
+       ORDER BY q.fecha_programada, q.id, q.role DESC  -- origin antes que destination
+    LOOP
+      BEGIN
+        -- Releer: una linea anterior de esta misma pasada puede haber movido la muestra.
+        SELECT * INTO v_d FROM allocation_plan_details WHERE id = r.id AND account_id = v_u.account_id FOR UPDATE;
+        IF NOT FOUND THEN CONTINUE; END IF;
+        -- La linea puede haber nacido mientras tanto: si el motor de otra baja vuelve a pasar esta misma
+        -- (incident_refresh_other_incidents), el bucle interno crea lineas que este bucle aun tiene en la
+        -- lista. Sin esta comprobacion saldria una linea duplicada.
+        IF EXISTS (SELECT 1 FROM panelist_reassignment_proposal pr
+                    WHERE pr.unavailability_id = p_unavailability_id
+                      AND pr.allocation_plan_detail_id = r.id
+                      AND pr.affected_role = r.role) THEN
+          CONTINUE;
+        END IF;
+        IF r.role = 'origin' THEN
+          v_role_node := v_d.origin_node_id;  v_other := v_d.destination_node_id;
+        ELSE
+          v_role_node := v_d.destination_node_id;  v_other := v_d.origin_node_id;
+        END IF;
+        IF v_role_node IS DISTINCT FROM v_node
+           OR NOT COALESCE(v_d.fecha_programada BETWEEN v_u.start_date AND v_u.end_date, false) THEN
+          CONTINUE;
+        END IF;
+
+        -- Ya salida / recibida: informativa, no bloquea.
+        IF v_d.status IN ('sent','received') THEN
+          INSERT INTO panelist_reassignment_proposal
+            (account_id, unavailability_id, allocation_plan_detail_id, affected_role, sample_status_at_detection,
+             suggested_action, suggested_reason, status, final_action)
+          VALUES (v_u.account_id, p_unavailability_id, v_d.id, r.role, v_d.status,
+                  'none', CASE WHEN r.role = 'destination' AND v_d.status = 'sent' THEN 'in_transit' ELSE 'already_sent' END,
+                  'info', 'none');
+          v_count := v_count + 1;
+          CONTINUE;
+        END IF;
+        -- cancelled / incident: sin linea.
+        IF v_d.status NOT IN ('pending','notified') THEN CONTINUE; END IF;
+
+        -- Recepcion el ultimo dia de la baja: la carta sale ese dia y llega cuando el panelista ya ha vuelto.
+        -- No hay nada que cambiar (caso Nairobi City Square, 2026-11-05).
+        IF r.role = 'destination' AND v_d.fecha_programada >= v_u.end_date THEN
+          INSERT INTO panelist_reassignment_proposal
+            (account_id, unavailability_id, allocation_plan_detail_id, affected_role, sample_status_at_detection,
+             suggested_action, suggested_reason, status, final_action)
+          VALUES (v_u.account_id, p_unavailability_id, v_d.id, r.role, v_d.status,
+                  'none', 'back_before_arrival', 'info', 'none');
+          v_count := v_count + 1;
+          CONTINUE;
+        END IF;
+
+        -- Paso 1: retrasar en el mismo nodo (nunca a una fecha pasada).
+        v_target := NULL;
+        v_date := incident_find_shift_date(v_node, GREATEST(v_u.end_date, current_date - 1),
+                                           v_d.fecha_programada, v_ref, v_dev);
+        IF v_date IS NULL THEN
+          -- Paso 2: otro nodo de la ciudad, misma fecha.
+          v_target := incident_find_node_for_sample(v_city, v_node, v_other, v_d.fecha_programada, v_ref, v_dev);
+          IF v_target IS NULL THEN
+            -- Paso 2b: otro nodo en otra fecha laborable del mes de la muestra, la mas cercana primero.
+            FOR v_day IN
+              SELECT g::date
+                FROM generate_series(date_trunc('month', v_d.fecha_programada)::date,
+                                     (date_trunc('month', v_d.fecha_programada) + interval '1 month - 1 day')::date,
+                                     interval '1 day') g
+               WHERE extract(isodow FROM g) BETWEEN 1 AND 5
+                 AND g::date <> v_d.fecha_programada
+                 AND g::date >= current_date
+               ORDER BY abs(g::date - v_d.fecha_programada), g
+            LOOP
+              v_target := incident_find_node_for_sample(v_city, v_node, v_other, v_day, v_ref, v_dev);
+              IF v_target IS NOT NULL THEN v_date := v_day; EXIT; END IF;
+            END LOOP;
+          END IF;
+        END IF;
+
+        -- La linea nace 'pending' con la decision del motor; incident_apply_change la pasa a auto_resolved.
+        -- Si los pasos 1/2 no encuentran sitio (o falla al aplicar), sigue 'pending' un instante: la cierra
+        -- incident_resolve_pending_lines al final (pasos 3 y 4: otra semana o anular).
+        INSERT INTO panelist_reassignment_proposal
+          (account_id, unavailability_id, allocation_plan_detail_id, affected_role, sample_status_at_detection,
+           suggested_action, suggested_target_node_id, suggested_date, suggested_reason)
+        VALUES (v_u.account_id, p_unavailability_id, v_d.id, r.role, v_d.status,
+                CASE WHEN v_target IS NOT NULL THEN 'reroute' WHEN v_date IS NOT NULL THEN 'shift_date' ELSE 'cancel' END,
+                v_target, v_date,
+                CASE WHEN v_target IS NOT NULL THEN 'alt_node_same_city'
+                     WHEN v_date IS NOT NULL THEN 'shift_same_month'
+                     ELSE 'no_slot_8_weeks' END)
+        RETURNING id INTO v_line;
+        v_count := v_count + 1;
+
+        IF v_date IS NOT NULL OR v_target IS NOT NULL THEN
+          BEGIN
+            PERFORM incident_apply_change(v_line, v_date, v_target, 'auto');
+          EXCEPTION WHEN OTHERS THEN
+            RAISE WARNING 'resolve_unavailability_incident: no se pudo aplicar la linea % (muestra %): %',
+              v_line, v_d.id, SQLERRM;
+          END;
+        END IF;
+      EXCEPTION WHEN OTHERS THEN
+        -- 2026-11-09: el subbloque se ha deshecho (tambien la linea, si llego a crearse). La muestra no se
+        -- toca, pero la incidencia lo dice: linea informativa 'engine_error' con el mensaje (spec: ninguna
+        -- muestra afectada queda sin linea). Si incluso esto falla, solo queda el WARNING.
+        RAISE WARNING 'resolve_unavailability_incident: muestra % rol % omitida: %', r.id, r.role, SQLERRM;
+        v_err := SQLERRM;
+        BEGIN
+          INSERT INTO panelist_reassignment_proposal
+            (account_id, unavailability_id, allocation_plan_detail_id, affected_role, sample_status_at_detection,
+             suggested_action, suggested_reason, status, final_action, resolution_note)
+          SELECT v_u.account_id, p_unavailability_id, a.id, r.role, a.status,
+                 'none', 'engine_error', 'info', 'none', v_err
+            FROM allocation_plan_details a
+           WHERE a.id = r.id
+             AND NOT EXISTS (SELECT 1 FROM panelist_reassignment_proposal pr
+                              WHERE pr.unavailability_id = p_unavailability_id
+                                AND pr.allocation_plan_detail_id = r.id
+                                AND pr.affected_role = r.role);
+          IF FOUND THEN v_count := v_count + 1; END IF;
+        EXCEPTION WHEN OTHERS THEN
+          RAISE WARNING 'resolve_unavailability_incident: sin linea engine_error para la muestra % rol %: %',
+            r.id, r.role, SQLERRM;
+        END;
+      END;
+    END LOOP;
+  END IF;
+
+  -- (c2) 2026-11-09: ninguna linea queda pendiente. Las que siguen 'pending' (sin sitio en el mes, o lineas
+  --      viejas del motor anterior) se resuelven ya: otra semana (incident_suggest) o se anulan.
+  PERFORM incident_resolve_pending_lines(p_unavailability_id, v_ref, v_dev);
+
+  -- (d) Estado de la incidencia.
+  PERFORM incident_recompute_status(p_unavailability_id);
+  RETURN v_count;
+END;
+$$;
+
+-- ===== 3. incident_recompute_status (permisos sin cambios: CREATE OR REPLACE los conserva) =====
+CREATE OR REPLACE FUNCTION public.incident_recompute_status(p_unavailability_id uuid)
+ RETURNS text
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $$
+DECLARE
+  c record;
+  v_status text;
+  v_summary text;
+  v_review text;
+BEGIN
+  SELECT count(*) FILTER (WHERE status IN ('auto_resolved','manager_resolved') AND final_action = 'shift_date') AS n_shift,
+         count(*) FILTER (WHERE status IN ('auto_resolved','manager_resolved') AND final_action = 'reroute') AS n_reroute,
+         count(*) FILTER (WHERE status IN ('auto_resolved','manager_resolved') AND final_action = 'cancel') AS n_cancel,
+         count(*) FILTER (WHERE status = 'info') AS n_info,
+         count(*) FILTER (WHERE status = 'pending') AS n_pending,
+         count(*) FILTER (WHERE status = 'manager_resolved') AS n_manager
+    INTO c
+    FROM panelist_reassignment_proposal
+   WHERE unavailability_id = p_unavailability_id;
+
+  -- 2026-11-09: nunca 'pending_manager' (el motor ya no deja pendientes). Una linea 'pending' residual no
+  -- cambia el estado, pero sigue contando en el resumen como pending=.
+  v_status := CASE WHEN c.n_manager > 0 THEN 'resolved' ELSE 'auto_resolved' END;
+  v_summary := format('shift=%s;reroute=%s;cancel=%s;info=%s;pending=%s',
+                      c.n_shift, c.n_reroute, c.n_cancel, c.n_info, c.n_pending);
+  v_review := 'reviewed';
+
+  -- Solo escribe si algo cambia (no reescribe resolved_at en llamadas repetidas).
+  UPDATE panelist_unavailability u
+     SET incident_status = v_status,
+         auto_summary = v_summary,
+         review_status = v_review,
+         resolved_at = CASE WHEN u.incident_status = v_status AND u.resolved_at IS NOT NULL THEN u.resolved_at
+                            ELSE now() END
+   WHERE u.id = p_unavailability_id
+     AND (u.incident_status IS DISTINCT FROM v_status
+          OR u.auto_summary IS DISTINCT FROM v_summary
+          OR u.review_status IS DISTINCT FROM v_review
+          OR u.resolved_at IS NULL);
+
+  RETURN v_status;
+END;
+$$;
+
+-- ===================================================================================================
+-- Muestras compartidas entre dos bajas (spec 2026-11-09, objetivo 4 y 5b).
+-- Una muestra puede estar afectada a la vez por la baja de quien la envia (rol origin) y por la de quien la
+-- recibe (rol destination). Antes, cuando una baja la anulaba o la movia, la linea de la otra baja se quedaba
+-- 'pending' y el manager veia «Sample ... is cancelled and cannot be cancelled» (13 lineas en prod).
+--   4. incident_close_twin_lines (nueva): si la muestra esta anulada, cierra como informativas las lineas
+--      'pending' de esa muestra en las OTRAS bajas.
+--   5. incident_refresh_other_incidents (nueva): vuelve a pasar el motor de las otras bajas que cubren la
+--      posicion ACTUAL de la muestra (tras moverla), con una guarda de profundidad.
+--   6. incident_apply_cancel: re-emitida desde la definicion viva; muestra ya anulada -> linea informativa
+--      sin error; si la anula, cierra las lineas gemelas (4).
+--   7. incident_apply_change: re-emitida desde la definicion viva; al final llama a (4) y (5).
+-- ===================================================================================================
+
+-- ===== 4. incident_close_twin_lines =====
+-- Solo actua si la muestra esta 'cancelled' (handled_by_other_incident se reserva para muestras anuladas).
+-- Las lineas 'pending' de la muestra en otras bajas (distintas de la de p_except_proposal_id) pasan a
+-- 'info' / 'handled_by_other_incident'; despues se recalcula el estado de cada baja tocada.
+-- Devuelve cuantas lineas ha cerrado.
+CREATE OR REPLACE FUNCTION public.incident_close_twin_lines(p_detail_id uuid, p_except_proposal_id uuid)
+RETURNS integer
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_except_unav uuid;
+  v_ids uuid[];
+  v_count integer;
+  v_id uuid;
+BEGIN
+  IF (SELECT a.status FROM allocation_plan_details a WHERE a.id = p_detail_id) IS DISTINCT FROM 'cancelled' THEN
+    RETURN 0;
+  END IF;
+
+  SELECT pr.unavailability_id INTO v_except_unav
+    FROM panelist_reassignment_proposal pr WHERE pr.id = p_except_proposal_id;
+
+  WITH upd AS (
+    UPDATE panelist_reassignment_proposal pr
+       SET status = 'info', final_action = 'none', suggested_reason = 'handled_by_other_incident',
+           updated_at = now()
+     WHERE pr.allocation_plan_detail_id = p_detail_id
+       AND pr.status = 'pending'
+       AND pr.id IS DISTINCT FROM p_except_proposal_id
+       AND pr.unavailability_id IS DISTINCT FROM v_except_unav
+    RETURNING pr.unavailability_id)
+  SELECT count(*), array_agg(DISTINCT unavailability_id) INTO v_count, v_ids FROM upd;
+
+  IF v_ids IS NOT NULL THEN
+    FOREACH v_id IN ARRAY v_ids LOOP
+      PERFORM incident_recompute_status(v_id);
+    END LOOP;
+  END IF;
+  RETURN v_count;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.incident_close_twin_lines(uuid, uuid) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.incident_close_twin_lines(uuid, uuid) TO service_role;
+
+-- ===== 5. incident_refresh_other_incidents =====
+-- Tras mover una muestra, vuelve a pasar el motor (resolve_unavailability_incident) de cada baja 'active' y
+-- vigente (end_date >= hoy), distinta de p_except_unavailability_id, cuyo panelista tenga como nodo el
+-- origen o el destino ACTUAL de la muestra y cuyo rango cubra su fecha_programada actual. Asi, si la
+-- muestra cae ahora en la baja de otro panelista, esa baja la reevalua con la misma regla (moverla otra vez
+-- o anularla).
+-- Guarda de recursion: el motor de la otra baja puede mover la muestra y llamar aqui otra vez. La
+-- profundidad va en el ajuste de sesion 'onems.incident_refresh_depth' (local a la transaccion): maximo 3
+-- niveles; se incrementa antes de cada llamada y se restaura despues, tambien si falla. Ademas, mientras corre
+-- el motor de la otra baja se pone 'onems.in_incident_engine' = 'on' (la guarda del trigger de cambios de
+-- plan, como hacen los triggers) y se restaura su valor anterior despues, tambien si falla.
+-- Un fallo en la otra baja no deshace el cambio de esta: se avisa con un WARNING y se sigue.
+-- Devuelve cuantas bajas ha vuelto a pasar.
+CREATE OR REPLACE FUNCTION public.incident_refresh_other_incidents(p_detail_id uuid, p_except_unavailability_id uuid)
+RETURNS integer
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_prev text := COALESCE(current_setting('onems.incident_refresh_depth', true), '');
+  v_depth integer := COALESCE(NULLIF(v_prev, '')::integer, 0);
+  v_prev_engine text := COALESCE(current_setting('onems.in_incident_engine', true), '');
+  v_d record;
+  v_ids uuid[];
+  v_id uuid;
+  v_count integer := 0;
+BEGIN
+  IF v_depth >= 3 THEN RETURN 0; END IF;
+
+  SELECT a.account_id, a.origin_node_id, a.destination_node_id, a.fecha_programada INTO v_d
+    FROM allocation_plan_details a WHERE a.id = p_detail_id;
+  IF NOT FOUND THEN RETURN 0; END IF;
+
+  SELECT array_agg(DISTINCT u.id ORDER BY u.id) INTO v_ids
+    FROM panelist_unavailability u
+    JOIN panelists p ON p.id = u.panelist_id AND p.account_id = u.account_id
+   WHERE u.account_id = v_d.account_id
+     AND u.status = 'active'
+     AND u.end_date >= current_date
+     AND u.id IS DISTINCT FROM p_except_unavailability_id
+     AND p.node_id IN (v_d.origin_node_id, v_d.destination_node_id)
+     AND v_d.fecha_programada BETWEEN u.start_date AND u.end_date;
+
+  IF v_ids IS NULL THEN RETURN 0; END IF;
+
+  FOREACH v_id IN ARRAY v_ids LOOP
+    BEGIN
+      PERFORM set_config('onems.incident_refresh_depth', (v_depth + 1)::text, true);
+      -- Guarda de re-entrada del trigger de cambios de plan mientras corre el motor de la otra baja. Sin ella,
+      -- si esa baja vuelve a mover una muestra ya movida en esta transaccion (reassigned_at = now() no cambia),
+      -- el trigger lo tomaria por un cambio ajeno y pasaria el motor de esa baja a mitad de
+      -- incident_apply_change, borrando su linea aun 'pending'. Se restaura al salir, tambien si falla.
+      PERFORM set_config('onems.in_incident_engine', 'on', true);
+      PERFORM resolve_unavailability_incident(v_id);
+      v_count := v_count + 1;
+    EXCEPTION WHEN OTHERS THEN
+      RAISE WARNING 'incident_refresh_other_incidents: motor fallido para la baja % (muestra %): %',
+        v_id, p_detail_id, SQLERRM;
+    END;
+    PERFORM set_config('onems.incident_refresh_depth', v_prev, true);
+    PERFORM set_config('onems.in_incident_engine', v_prev_engine, true);
+  END LOOP;
+
+  RETURN v_count;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.incident_refresh_other_incidents(uuid, uuid) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.incident_refresh_other_incidents(uuid, uuid) TO service_role;
+
+-- ===== 6. incident_apply_cancel (misma firma; permisos sin cambios: CREATE OR REPLACE los conserva) =====
+-- Re-emitida desde la definicion viva. Cambios 2026-11-09:
+--   * muestra ya 'cancelled' (la anulo otra baja o el manager): sin error; la linea pasa a 'info' /
+--     'handled_by_other_incident', se recalcula el estado de su baja y termina;
+--   * si la anula: cierra las lineas 'pending' de esa muestra en otras bajas (incident_close_twin_lines).
+-- Los demas estados distintos de pending/notified siguen dando el error de siempre.
+CREATE OR REPLACE FUNCTION public.incident_apply_cancel(p_proposal_id uuid, p_mode text)
+ RETURNS void
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+DECLARE
+  v_actor uuid := auth.uid();
+  v_prop record;
+  v_d record;
+  v_exclude uuid;
+BEGIN
+  IF p_mode IS NULL OR p_mode NOT IN ('auto','manager') THEN RAISE EXCEPTION 'Unknown mode %', p_mode; END IF;
+
+  SELECT * INTO v_prop FROM panelist_reassignment_proposal WHERE id = p_proposal_id FOR UPDATE;
+  IF NOT FOUND THEN RAISE EXCEPTION 'Proposal % not found', p_proposal_id; END IF;
+  IF v_prop.status <> 'pending' THEN RAISE EXCEPTION 'Proposal % already %', p_proposal_id, v_prop.status; END IF;
+
+  SELECT * INTO v_d FROM allocation_plan_details WHERE id = v_prop.allocation_plan_detail_id FOR UPDATE;
+  IF NOT FOUND THEN RAISE EXCEPTION 'Sample % not found', v_prop.allocation_plan_detail_id; END IF;
+  IF v_d.status = 'cancelled' THEN
+    -- Ya anulada por otra baja (o a mano): no hay nada que anular, la linea solo informa.
+    UPDATE panelist_reassignment_proposal
+       SET status = 'info', final_action = 'none', suggested_reason = 'handled_by_other_incident',
+           updated_at = now()
+     WHERE id = p_proposal_id;
+    PERFORM incident_recompute_status(v_prop.unavailability_id);
+    RETURN;
+  END IF;
+  IF v_d.status NOT IN ('pending','notified') THEN
+    RAISE EXCEPTION 'Sample % is % and cannot be cancelled', v_d.id, v_d.status;
+  END IF;
+
+  UPDATE allocation_plan_details
+     SET status = 'cancelled',
+         reassignment_reason = 'panelist_unavailable',
+         reassigned_at = now(),
+         reassigned_by = v_actor,
+         updated_at = now()
+   WHERE id = v_d.id;
+
+  UPDATE panelist_reassignment_proposal
+     SET status = CASE p_mode WHEN 'auto' THEN 'auto_resolved' ELSE 'manager_resolved' END,
+         final_action = 'cancel',
+         final_target_node_id = NULL,
+         final_date = NULL,
+         applied_at = now(),
+         confirmed_by = CASE WHEN p_mode = 'manager' THEN v_actor ELSE confirmed_by END,
+         confirmed_at = CASE WHEN p_mode = 'manager' THEN now() ELSE confirmed_at END,
+         updated_at = now()
+   WHERE id = p_proposal_id;
+
+  SELECT u.panelist_id INTO v_exclude FROM panelist_unavailability u WHERE u.id = v_prop.unavailability_id;
+  PERFORM incident_enqueue_plan_change(v_d.id, 'cancel', v_d.fecha_programada, NULL, v_exclude);
+
+  -- 2026-11-09: la muestra ya no existe para las demas bajas: sus lineas pendientes pasan a informativas.
+  PERFORM incident_close_twin_lines(v_d.id, p_proposal_id);
+END;
+$function$;
+
+-- ===== 7. incident_apply_change (misma firma; permisos sin cambios: CREATE OR REPLACE los conserva) =====
+-- Re-emitida desde la definicion viva. Cambio 2026-11-09: tras aplicar, llama a incident_close_twin_lines
+-- (no hace nada si la muestra no esta anulada) y a incident_refresh_other_incidents (si la muestra cae ahora
+-- en la baja de otro panelista, esa baja la reevalua), en ese orden.
+CREATE OR REPLACE FUNCTION public.incident_apply_change(p_proposal_id uuid, p_new_date date, p_new_node_id uuid, p_mode text)
+ RETURNS void
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+DECLARE
+  v_actor uuid := auth.uid();
+  v_prop record;
+  v_d record;
+  v_exclude uuid;
+  v_eff_date date;
+  v_date_changed boolean;
+  v_node_city uuid;
+  v_new_city uuid;
+  v_new_account uuid;
+  v_pan_id uuid;
+  v_pan_name text;
+  v_new_origin boolean;
+  v_new_dest boolean;
+  v_change text;
+BEGIN
+  IF p_mode IS NULL OR p_mode NOT IN ('auto','manager') THEN RAISE EXCEPTION 'Unknown mode %', p_mode; END IF;
+
+  SELECT * INTO v_prop FROM panelist_reassignment_proposal WHERE id = p_proposal_id FOR UPDATE;
+  IF NOT FOUND THEN RAISE EXCEPTION 'Proposal % not found', p_proposal_id; END IF;
+  IF v_prop.status <> 'pending' THEN RAISE EXCEPTION 'Proposal % already %', p_proposal_id, v_prop.status; END IF;
+
+  SELECT * INTO v_d FROM allocation_plan_details WHERE id = v_prop.allocation_plan_detail_id FOR UPDATE;
+  IF NOT FOUND THEN RAISE EXCEPTION 'Sample % not found', v_prop.allocation_plan_detail_id; END IF;
+  IF v_d.status NOT IN ('pending','notified') THEN
+    RAISE EXCEPTION 'Sample % is % and cannot be changed', v_d.id, v_d.status;
+  END IF;
+
+  v_date_changed := p_new_date IS NOT NULL AND p_new_date IS DISTINCT FROM v_d.fecha_programada;
+  IF p_new_node_id IS NULL AND NOT v_date_changed THEN
+    RAISE EXCEPTION 'Nothing to apply for proposal %', p_proposal_id;
+  END IF;
+  v_eff_date := CASE WHEN v_date_changed THEN p_new_date ELSE v_d.fecha_programada END;
+  v_new_origin := p_new_node_id IS NOT NULL AND v_prop.affected_role = 'origin';
+  v_new_dest := p_new_node_id IS NOT NULL AND v_prop.affected_role <> 'origin';
+
+  IF p_new_node_id IS NOT NULL THEN
+    -- Nunca a otra cuenta ni a otra ciudad.
+    SELECT n.city_id INTO v_node_city FROM nodes n
+     WHERE n.id = CASE WHEN v_prop.affected_role = 'origin' THEN v_d.origin_node_id ELSE v_d.destination_node_id END;
+    SELECT n.city_id, n.account_id INTO v_new_city, v_new_account FROM nodes n WHERE n.id = p_new_node_id;
+    IF v_new_account IS DISTINCT FROM v_d.account_id OR v_new_city IS DISTINCT FROM v_node_city THEN
+      RAISE EXCEPTION 'Target node % not in the same account/city', p_new_node_id;
+    END IF;
+    SELECT p.id, p.name INTO v_pan_id, v_pan_name FROM panelists p
+     WHERE p.id = incident_node_panelist(p_new_node_id, v_d.account_id) AND p.account_id = v_d.account_id;
+  END IF;
+
+  -- UNA sola sentencia: nodo, fecha, estado y reassigned_* cambian juntos (los triggers de refresco por
+  -- cambio de plan distinguen cambios del motor/manager porque reassigned_at cambia en el mismo UPDATE).
+  UPDATE allocation_plan_details
+     SET original_origin_node_id = CASE WHEN v_new_origin
+           THEN COALESCE(original_origin_node_id, origin_node_id) ELSE original_origin_node_id END,
+         origin_node_id = CASE WHEN v_new_origin THEN p_new_node_id ELSE origin_node_id END,
+         origin_panelist_name = CASE WHEN v_new_origin THEN v_pan_name ELSE origin_panelist_name END,
+         origin_panelist_id = CASE WHEN v_new_origin AND origin_panelist_id IS NOT NULL
+           THEN v_pan_id ELSE origin_panelist_id END,
+         original_destination_node_id = CASE WHEN v_new_dest
+           THEN COALESCE(original_destination_node_id, destination_node_id) ELSE original_destination_node_id END,
+         destination_node_id = CASE WHEN v_new_dest THEN p_new_node_id ELSE destination_node_id END,
+         destination_panelist_name = CASE WHEN v_new_dest THEN v_pan_name ELSE destination_panelist_name END,
+         destination_panelist_id = CASE WHEN v_new_dest AND destination_panelist_id IS NOT NULL
+           THEN v_pan_id ELSE destination_panelist_id END,
+         original_fecha_programada = CASE WHEN v_date_changed
+           THEN COALESCE(original_fecha_programada, fecha_programada) ELSE original_fecha_programada END,
+         fecha_programada = v_eff_date,
+         status = CASE WHEN status = 'notified' THEN 'pending' ELSE status END,
+         reassignment_reason = 'panelist_unavailable',
+         reassigned_at = now(),
+         reassigned_by = v_actor,
+         updated_at = now()
+   WHERE id = v_d.id;
+
+  UPDATE panelist_reassignment_proposal
+     SET status = CASE p_mode WHEN 'auto' THEN 'auto_resolved' ELSE 'manager_resolved' END,
+         final_action = CASE WHEN p_new_node_id IS NOT NULL THEN 'reroute' ELSE 'shift_date' END,
+         final_target_node_id = p_new_node_id,
+         final_date = CASE WHEN v_date_changed THEN p_new_date ELSE NULL END,
+         applied_at = now(),
+         confirmed_by = CASE WHEN p_mode = 'manager' THEN v_actor ELSE confirmed_by END,
+         confirmed_at = CASE WHEN p_mode = 'manager' THEN now() ELSE confirmed_at END,
+         updated_at = now()
+   WHERE id = p_proposal_id;
+
+  -- Aviso: el panelista de la baja no se avisa. Si cambian nodo y fecha, manda la semantica de nodo.
+  SELECT u.panelist_id INTO v_exclude FROM panelist_unavailability u WHERE u.id = v_prop.unavailability_id;
+  v_change := CASE
+                WHEN p_new_node_id IS NOT NULL AND v_prop.affected_role = 'origin' THEN 'reroute_origin'
+                WHEN p_new_node_id IS NOT NULL THEN 'reroute_destination'
+                ELSE 'shift_date' END;
+  PERFORM incident_enqueue_plan_change(v_d.id, v_change, v_d.fecha_programada, v_eff_date, v_exclude);
+
+  -- 2026-11-09: muestra compartida con otra baja. Primero se cierran las lineas gemelas si estuviera anulada
+  -- (aqui no lo esta, pero se mantiene el mismo orden que en incident_apply_cancel); despues, si la posicion
+  -- nueva cae en la baja de otro panelista, esa baja la reevalua.
+  PERFORM incident_close_twin_lines(v_d.id, p_proposal_id);
+  PERFORM incident_refresh_other_incidents(v_d.id, v_prop.unavailability_id);
+END;
+$function$;
+
+
+-- 2026-11-09: el badge de "Disponibilidad de panelistas" ya no espera decision del manager (pending_manager).
+-- Ahora cuenta las bajas de la cuenta declaradas en los ultimos 7 dias, o con respuesta del panelista sin leer.
+CREATE OR REPLACE FUNCTION public.incident_attention_counts(p_account_id uuid DEFAULT NULL::uuid)
+ RETURNS TABLE(reported integer, unavailability integer)
+ LANGUAGE sql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+  WITH scope AS (
+    SELECT CASE WHEN is_superadmin() THEN p_account_id ELSE current_user_account_id() END AS acc,
+           is_superadmin() AS su
+     WHERE auth.uid() IS NOT NULL
+  ), unread AS (
+    SELECT DISTINCT m.incident_kind, m.incident_id
+      FROM incident_message m, scope s
+     WHERE m.direction = 'inbound' AND m.read_at IS NULL
+       AND NOT (m.meta ?| array['callback','report_flow']) AND coalesce(m.meta->>'kind','') NOT LIKE 'material%'
+       AND (m.account_id = s.acc OR (s.acc IS NULL AND s.su))
+  )
+  SELECT
+    (SELECT count(*)::int FROM panelist_incident i, scope s
+      WHERE (i.account_id = s.acc OR (s.acc IS NULL AND s.su))
+        AND ((i.status = 'open' AND i.manager_seen_at IS NULL)
+             OR EXISTS (SELECT 1 FROM unread u WHERE u.incident_kind = 'reported' AND u.incident_id = i.id))),
+    (SELECT count(*)::int FROM panelist_unavailability pu, scope s
+      WHERE (pu.account_id = s.acc OR (s.acc IS NULL AND s.su))
+        AND (pu.created_at >= now() - interval '7 days'
+             OR EXISTS (SELECT 1 FROM unread u WHERE u.incident_kind = 'unavailability' AND u.incident_id = pu.id)));
+$function$;
+
+-- ===== incident_resolve_all_open (puesta al dia, 2026-11-09) =====
+-- Pasa el motor nuevo por cada baja 'active' que aun arrastre lineas 'pending' o este en 'pending_manager'
+-- (restos del motor viejo). Una baja 'active' con la fecha de fin ya pasada tambien cuenta. Orden fijo
+-- (start_date, id); cada baja en su propio subbloque: si una falla, WARNING y sigue. Devuelve cuantas trata.
+CREATE OR REPLACE FUNCTION public.incident_resolve_all_open()
+RETURNS integer
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  r record;
+  v_count integer := 0;
+  v_prev text := COALESCE(current_setting('onems.in_incident_engine', true), '');
+BEGIN
+  FOR r IN
+    SELECT u.id
+      FROM panelist_unavailability u
+     WHERE u.status = 'active'
+       AND (u.incident_status = 'pending_manager'
+            OR EXISTS (SELECT 1 FROM panelist_reassignment_proposal pr
+                        WHERE pr.unavailability_id = u.id AND pr.status = 'pending'))
+     ORDER BY u.start_date, u.id
+  LOOP
+    BEGIN
+      -- Misma convencion que los triggers y que la puesta al dia de 20261020130600: guarda de re-entrada
+      -- activa mientras corre el motor (si no, el trigger de cambios de plan puede pasar el motor de otra
+      -- baja a mitad de un cambio y borrarle la linea). Se restaura despues, tambien si falla.
+      PERFORM set_config('onems.in_incident_engine', 'on', true);
+      PERFORM resolve_unavailability_incident(r.id);
+      v_count := v_count + 1;
+    EXCEPTION WHEN OTHERS THEN
+      RAISE WARNING 'incident_resolve_all_open: baja %: %', r.id, SQLERRM;
+    END;
+    PERFORM set_config('onems.in_incident_engine', v_prev, true);
+  END LOOP;
+  RETURN v_count;
+END;
+$$;
+REVOKE ALL ON FUNCTION public.incident_resolve_all_open() FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.incident_resolve_all_open() TO service_role;
