@@ -2764,6 +2764,23 @@ incidents.summary.cancel,{n} annulés
 incidents.summary.info,{n} informatifs
 incidents.summary.pending,{n} en attente
 incidents.summary.none,Aucun échantillon concerné
+incidents.summary.text,{total} échantillons concernés : {shift} retardés, {reroute} vers un autre nœud, {cancel} annulés, {info} sans changement
+incidents.summary.text_with_pending,{total} échantillons concernés : {shift} retardés, {reroute} vers un autre nœud, {cancel} annulés, {info} sans changement, {pending} en attente
+incidents.result.shift_date,Retardé au {date}
+incidents.result.reroute,Transféré vers {node}
+incidents.result.reroute_on,Transféré vers {node} le {date}
+incidents.result.cancel,Annulé (aucun créneau sous 8 semaines)
+incidents.result.pending,En attente
+incidents.result.manual_suffix,(manuel)
+incidents.result.info.already_sent,Aucun changement : déjà envoyé
+incidents.result.info.in_transit,Aucun changement : déjà en transit
+incidents.result.info.back_before_arrival,Aucun changement : le panéliste sera de retour à son arrivée
+incidents.result.info.handled_by_other_incident,Déjà résolu dans un autre incident
+incidents.result.info.engine_error,Impossible à résoudre : à vérifier
+incidents.result.info.other,Aucun changement
+incidents.detail.lines,Échantillons concernés
+incidents.detail.result,Résultat
+incidents.detail.lines_week_empty,Aucun échantillon concerné cette semaine
 incidents.detail.final_resolution,Résolution finale
 incidents.detail.final_resolution_placeholder,Ajoutez une note sur la façon dont cet incident a été résolu…
 incidents.detail.save,Enregistrer

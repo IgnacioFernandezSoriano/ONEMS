@@ -2772,6 +2772,23 @@ incidents.summary.cancel,{n} cancelled
 incidents.summary.info,{n} informational
 incidents.summary.pending,{n} pending
 incidents.summary.none,No samples affected
+incidents.summary.text,{total} samples affected: {shift} delayed, {reroute} to another node, {cancel} cancelled, {info} unchanged
+incidents.summary.text_with_pending,{total} samples affected: {shift} delayed, {reroute} to another node, {cancel} cancelled, {info} unchanged, {pending} pending
+incidents.result.shift_date,Delayed to {date}
+incidents.result.reroute,Moved to {node}
+incidents.result.reroute_on,Moved to {node} on {date}
+incidents.result.cancel,Cancelled (no slot within 8 weeks)
+incidents.result.pending,Pending
+incidents.result.manual_suffix,(manual)
+incidents.result.info.already_sent,No change: already sent
+incidents.result.info.in_transit,No change: already in transit
+incidents.result.info.back_before_arrival,No change: the panelist is back when it arrives
+incidents.result.info.handled_by_other_incident,Already resolved in another incident
+incidents.result.info.engine_error,Could not be resolved: check it
+incidents.result.info.other,No change
+incidents.detail.lines,Affected samples
+incidents.detail.result,Result
+incidents.detail.lines_week_empty,No affected samples in this week
 incidents.detail.final_resolution,Final resolution
 incidents.detail.final_resolution_placeholder,Add a note about how this incident was resolved…
 incidents.detail.save,Save

@@ -11,8 +11,6 @@ import type {
 const INCIDENTS_CHANGED_EVENT = 'onems:incidents-changed'
 const notifyIncidentsChanged = () => { window.dispatchEvent(new Event(INCIDENTS_CHANGED_EVENT)) }
 
-export type IncidentDecision = 'accept' | 'cancel'
-
 // Carrier y producto del plan de una muestra. FKs explicitas: allocation_plans tiene FK a
 // carriers y a products (y products otra a carriers); sin hint PostgREST puede dar PGRST201.
 const PLAN_EMBED = `plan:allocation_plans!allocation_plan_details_plan_id_fkey (
@@ -20,17 +18,12 @@ const PLAN_EMBED = `plan:allocation_plans!allocation_plan_details_plan_id_fkey (
   product:products!allocation_plans_product_id_fkey ( code, description )
 )`
 
-export interface DecideManyResult {
-  ok: string[]
-  failed: { id: string; message: string }[]
-}
-
 export function useUnavailabilityIncidents() {
   const { effectiveAccountId } = useAccount()
   const [allRows, setAllRows] = useState<IncidentInboxRow[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [statusFilter, setStatusFilter] = useState<IncidentStatusFilter>('open')
+  const [statusFilter, setStatusFilter] = useState<IncidentStatusFilter>('all')
 
   // Bandeja: bajas de la cuenta con contadores de lineas calculados en JS.
   // silent: recarga en segundo plano (sin pasar por "cargando"), p. ej. tras una decision en el detalle;
@@ -67,7 +60,6 @@ export function useUnavailabilityIncidents() {
           affected_count: lines.length,
           origin_count: lines.filter(l => l.affected_role === 'origin').length,
           destination_count: lines.filter(l => l.affected_role === 'destination').length,
-          pending_count: lines.filter(l => l.status === 'pending').length,
         }
       })
       setAllRows(rows)
@@ -97,12 +89,6 @@ export function useUnavailabilityIncidents() {
     if (statusFilter === 'open') return r.incident_status === 'new' || r.incident_status === 'pending_manager'
     return r.incident_status === statusFilter
   }), [allRows, statusFilter])
-
-  // Siempre sobre todas las incidencias de la cuenta, sin aplicar el filtro de UI.
-  const pendingManagerCount = useMemo(
-    () => allRows.filter(r => r.incident_status === 'pending_manager').length,
-    [allRows],
-  )
 
   const fetchHeader = useCallback(async (unavailabilityId: string): Promise<UnavailabilityHeader | null> => {
     const { data, error: e } = await supabase
@@ -136,9 +122,7 @@ export function useUnavailabilityIncidents() {
     }
   }, [])
 
-  // Lineas de una baja. Ordenar por status en SQL no deja 'pending' primero
-  // (alfabeticamente auto_resolved < pending), asi que se reordena en JS con un
-  // sort estable que conserva el orden por rol y fecha de creacion.
+  // Lineas de una baja (solo lectura: el motor ya las ha resuelto), por rol y fecha de creacion.
   const fetchLines = useCallback(async (unavailabilityId: string): Promise<ReassignmentProposal[]> => {
     const { data, error: e } = await supabase
       .from('panelist_reassignment_proposal')
@@ -157,52 +141,7 @@ export function useUnavailabilityIncidents() {
       .order('affected_role')
       .order('created_at')
     if (e) throw e
-    const lines = (data || []) as unknown as ReassignmentProposal[]
-    const rank = (s: string) => (s === 'pending' ? 0 : 1)
-    return [...lines].sort((a, b) => rank(a.status) - rank(b.status))
-  }, [])
-
-  // Decision sobre una linea pendiente: aceptar la propuesta del sistema o anular la muestra.
-  const decide = useCallback(async (proposalId: string, decision: IncidentDecision): Promise<IncidentStatus> => {
-    const { data, error: e } = await supabase.rpc('apply_manager_decision', {
-      p_proposal_id: proposalId,
-      p_decision: decision,
-      p_week_start: null,
-      p_reference_load: 6,
-      p_deviation_percent: 20,
-    })
-    notifyIncidentsChanged()
-    if (e) throw e
-    return (data as { incident_status: IncidentStatus }).incident_status
-  }, [])
-
-  // Arrastrar una linea pendiente a una casilla (nodo x semana): propuesta (solo lectura) y aplicar.
-  const suggestForCell = useCallback(async (
-    proposalId: string, nodeId: string, weekStart: string, referenceLoad: number, deviationPercent: number,
-  ): Promise<MoveSuggestion> => {
-    const { data, error: e } = await supabase.rpc('suggest_for_cell', {
-      p_proposal_id: proposalId,
-      p_node_id: nodeId,
-      p_week_start: weekStart,
-      p_reference_load: referenceLoad,
-      p_deviation_percent: deviationPercent,
-    })
-    if (e) throw e
-    return (data || { found: false }) as MoveSuggestion
-  }, [])
-
-  const applyManagerMove = useCallback(async (
-    proposalId: string, nodeId: string, weekStart: string, referenceLoad: number, deviationPercent: number,
-  ): Promise<void> => {
-    const { error: e } = await supabase.rpc('apply_manager_move', {
-      p_proposal_id: proposalId,
-      p_node_id: nodeId,
-      p_week_start: weekStart,
-      p_reference_load: referenceLoad,
-      p_deviation_percent: deviationPercent,
-    })
-    notifyIncidentsChanged()
-    if (e) throw e
+    return (data || []) as unknown as ReassignmentProposal[]
   }, [])
 
   // Arrastrar cualquier muestra de una casilla (fromNodeId x semana) a otra.
@@ -261,22 +200,6 @@ export function useUnavailabilityIncidents() {
     return (data || []) as unknown as CellSample[]
   }, [])
 
-  // Secuencial; un error en una linea no corta las demas.
-  const decideMany = useCallback(async (
-    proposalIds: string[], decision: 'accept' | 'cancel',
-  ): Promise<DecideManyResult> => {
-    const result: DecideManyResult = { ok: [], failed: [] }
-    for (const id of proposalIds) {
-      try {
-        await decide(id, decision)
-        result.ok.push(id)
-      } catch (err: any) {
-        result.failed.push({ id, message: err?.message ?? String(err) })
-      }
-    }
-    return result
-  }, [decide])
-
   const saveResolution = useCallback(async (unavailabilityId: string, text: string): Promise<void> => {
     const { error: e } = await supabase.rpc('set_incident_resolution', {
       p_unavailability_id: unavailabilityId, p_text: text,
@@ -286,9 +209,9 @@ export function useUnavailabilityIncidents() {
   }, [])
 
   return {
-    inbox, allRows, loading, error, pendingManagerCount,
+    inbox, allRows, loading, error,
     statusFilter, setStatusFilter,
-    fetchInbox, fetchHeader, fetchLines, decide, decideMany, saveResolution,
-    suggestForCell, applyManagerMove, suggestForSampleMove, applySampleMove, fetchCellSamples,
+    fetchInbox, fetchHeader, fetchLines, saveResolution,
+    suggestForSampleMove, applySampleMove, fetchCellSamples,
   }
 }

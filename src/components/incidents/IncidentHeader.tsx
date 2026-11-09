@@ -18,15 +18,19 @@ const UNAVAIL_REASON_KEY: Record<string, string> = {
 // Codigo que la BD escribe en final_resolution al cancelar la baja (la UI lo traduce).
 const CANCELLED_CODE = 'unavailability_cancelled'
 
-// auto_summary = 'shift=1;reroute=0;cancel=0;info=2;pending=1' -> solo los contadores > 0.
-function parseSummary(s: string | null): { key: string; n: number }[] {
-  if (!s) return []
-  return s.split(';')
-    .map(part => {
-      const [k, v] = part.split('=')
-      return { key: (k ?? '').trim(), n: Number(v) }
-    })
-    .filter(e => e.key && Number.isFinite(e.n) && e.n > 0)
+interface SummaryCounts { shift: number; reroute: number; cancel: number; info: number; pending: number }
+
+// auto_summary = 'shift=1;reroute=0;cancel=0;info=2;pending=1' -> contadores (los que falten valen 0).
+function parseSummary(s: string | null): SummaryCounts | null {
+  if (!s) return null
+  const c: SummaryCounts = { shift: 0, reroute: 0, cancel: 0, info: 0, pending: 0 }
+  for (const part of s.split(';')) {
+    const [k, v] = part.split('=')
+    const key = (k ?? '').trim() as keyof SummaryCounts
+    const n = Number(v)
+    if (Object.prototype.hasOwnProperty.call(c, key) && Number.isFinite(n) && n > 0) c[key] = n
+  }
+  return c
 }
 
 // Separa el codigo de cancelacion (lineas que son exactamente el codigo) del texto libre.
@@ -56,7 +60,13 @@ export function IncidentHeader({ header, onSaveResolution }: Props) {
   useEffect(() => { setDraft(free) }, [free])
   useEffect(() => () => { if (savedTimer.current) clearTimeout(savedTimer.current) }, [])
 
-  const summary = parseSummary(header.auto_summary)
+  // Resumen legible: «16 muestras afectadas: 3 retrasadas, ...». Las pendientes solo
+  // aparecen en datos antiguos (antes de que el motor lo resolviera todo).
+  const counts = parseSummary(header.auto_summary)
+  const total = counts ? counts.shift + counts.reroute + counts.cancel + counts.info + counts.pending : 0
+  const summaryText = counts && total > 0
+    ? t(counts.pending > 0 ? 'incidents.summary.text_with_pending' : 'incidents.summary.text', { total, ...counts })
+    : t('incidents.summary.none')
 
   const handleSave = async () => {
     if (saving) return
@@ -107,9 +117,7 @@ export function IncidentHeader({ header, onSaveResolution }: Props) {
       <div>
         <div className="text-xs font-medium text-gray-500 uppercase">{t('incidents.detail.summary')}</div>
         <div className="text-sm text-gray-800">
-          {summary.length > 0
-            ? summary.map(e => t('incidents.summary.' + e.key, { n: e.n }, `${e.key}=${e.n}`)).join(' · ')
-            : t('incidents.summary.none')}
+          {summaryText}
         </div>
       </div>
 

@@ -2772,6 +2772,23 @@ incidents.summary.cancel,{n} canceladas
 incidents.summary.info,{n} informativas
 incidents.summary.pending,{n} pendentes
 incidents.summary.none,Nenhuma amostra afetada
+incidents.summary.text,{total} amostras afetadas: {shift} adiadas, {reroute} para outro nó, {cancel} anuladas, {info} sem alteração
+incidents.summary.text_with_pending,{total} amostras afetadas: {shift} adiadas, {reroute} para outro nó, {cancel} anuladas, {info} sem alteração, {pending} pendentes
+incidents.result.shift_date,Adiada para {date}
+incidents.result.reroute,Passada para {node}
+incidents.result.reroute_on,Passada para {node} em {date}
+incidents.result.cancel,Anulada (sem vaga em 8 semanas)
+incidents.result.pending,Pendente
+incidents.result.manual_suffix,(manual)
+incidents.result.info.already_sent,Sem alteração: já enviada
+incidents.result.info.in_transit,Sem alteração: já em trânsito
+incidents.result.info.back_before_arrival,Sem alteração: o painelista já terá voltado quando chegar
+incidents.result.info.handled_by_other_incident,Já resolvida noutra incidência
+incidents.result.info.engine_error,Não foi possível resolver: verificar
+incidents.result.info.other,Sem alteração
+incidents.detail.lines,Amostras afetadas
+incidents.detail.result,Resultado
+incidents.detail.lines_week_empty,Nenhuma amostra afetada nesta semana
 incidents.detail.final_resolution,Resolução final
 incidents.detail.final_resolution_placeholder,Adicione uma nota sobre como esta incidência foi resolvida…
 incidents.detail.save,Guardar

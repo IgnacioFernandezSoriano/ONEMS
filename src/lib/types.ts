@@ -446,7 +446,6 @@ export interface IncidentInboxRow {
   affected_count: number
   origin_count: number
   destination_count: number
-  pending_count: number
 }
 
 export interface UnavailabilityHeader {
@@ -526,6 +525,7 @@ export interface MoveDragPayload {
   plan?: SamplePlanInfo | null
 }
 
+// 'open' (new + pending_manager) ya no se ofrece en la bandeja; se conserva en el tipo.
 export type IncidentStatusFilter = 'open' | 'all' | IncidentStatus // open = new + pending_manager
 
 export interface CityLoadWeek {

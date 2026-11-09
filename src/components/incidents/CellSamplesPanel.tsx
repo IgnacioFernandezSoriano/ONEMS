@@ -10,7 +10,7 @@ interface Props {
   samples: CellSample[]
   loading: boolean
   error: string | null
-  // Incidencia abierta: sus lineas pendientes se mueven con el par de RPC de linea.
+  // Incidencia abierta: se marcan sus muestras.
   unavailabilityId: string
   busy: boolean
   draggingDetailId: string | null
@@ -48,12 +48,9 @@ export function CellSamplesPanel({
     const movable = s.status === 'pending' || s.status === 'notified'
     if (!movable) return { payload: null, reason: t('incidents.move_reason.sample_not_movable'), thisIncident: !!own, otherIncident: other }
     if (other) return { payload: null, reason: t('incidents.move_reason.has_incident_line'), thisIncident: !!own, otherIncident: true }
-    if (own) {
-      // Solo desde la casilla del nodo afectado de la linea (el otro extremo no se mueve con ella).
-      const affectedNode = own.affected_role === 'origin' ? s.origin_node_id : s.destination_node_id
-      if (affectedNode !== nodeId) return { payload: null, reason: t('incidents.move_reason.has_incident_line'), thisIncident: true, otherIncident: false }
-      return { payload: { kind: 'line', lineId: own.id, ...base }, reason: null, thisIncident: true, otherIncident: false }
-    }
+    // Linea pendiente de esta incidencia: solo en datos antiguos (el motor ya no las deja) y sin la
+    // via de decision del manager no se puede mover desde aqui.
+    if (own) return { payload: null, reason: t('incidents.move_reason.has_incident_line'), thisIncident: true, otherIncident: false }
     return { payload: { kind: 'sample', ...base }, reason: null, thisIncident: false, otherIncident: false }
   }
 
