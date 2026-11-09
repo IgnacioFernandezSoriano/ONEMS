@@ -237,7 +237,11 @@ SELECT pg_temp.fill('N2','2027-03-01','2027-03-29',8);
 SELECT pg_temp.fill('N3','2027-03-01','2027-03-29',8);
 SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N1','N4','2027-03-10');
 SELECT public.resolve_unavailability_incident('f0000000-0000-0000-0000-000000000001');
+-- Linea pendiente con la muestra ya enviada: desde 20261105180000 el trigger la vuelve informativa; aqui se
+-- simula una linea antigua (de antes del arreglo) con la guarda del motor encendida.
+SELECT set_config('onems.in_incident_engine', 'on', true);
 UPDATE public.allocation_plan_details SET status = 'sent' WHERE id = 'd0000000-0000-0000-0000-000000000001';
+SELECT set_config('onems.in_incident_engine', '', true);
 SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
 DO $$
 DECLARE l public.panelist_reassignment_proposal;

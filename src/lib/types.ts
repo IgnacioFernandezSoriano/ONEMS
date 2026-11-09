@@ -17,11 +17,35 @@ export interface Account {
   slug: string
   status: Status
   default_language: SupportedLanguage
+  /** Account Manager: líder del proyecto. Recibe los informes de operación del agente. */
+  email_account_manager: string | null
+  /** Panelist Manager (nombre de columna histórico; lo leen los flujos de n8n del bot). */
   email_panelist_manager: string | null
+  email_materials_supplier: string | null
+  email_do_coordinator: string | null
+  email_upu_account_manager: string | null
   timezone: string
   created_at: string
   updated_at: string
 }
+
+/** Contactos por rol de la cuenta, para los mensajes automáticos de los agentes. */
+export const ACCOUNT_CONTACT_FIELDS = [
+  'email_account_manager',
+  'email_panelist_manager',
+  'email_materials_supplier',
+  'email_do_coordinator',
+  'email_upu_account_manager',
+] as const
+
+export type AccountContactField = typeof ACCOUNT_CONTACT_FIELDS[number]
+
+export type AccountFormData = {
+  name: string
+  slug: string
+  status?: 'active' | 'inactive'
+  default_language: SupportedLanguage
+} & Record<AccountContactField, string | null>
 
 export interface Region {
   id: string

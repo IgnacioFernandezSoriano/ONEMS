@@ -2726,6 +2726,7 @@ incidents.reason.no_alt_no_date,Sem nó alternativo nem data disponível este m�
 incidents.reason.reroute_reception,Reencaminhar a receção para outro nó com um painelista disponível
 incidents.reason.no_alt_reception,Sem nó alternativo para a receção
 incidents.reason.in_transit,"Já em trânsito; chegará atrasada ou poderá não ser registada a tempo"
+incidents.reason.back_before_arrival,"Recebido no último dia da ausência: o painelista já terá voltado quando chegar; nada a alterar"
 incidents.detail.cause,Causa
 incidents.balance.title,Balanço da cidade
 incidents.balance.node,Nó
@@ -3960,8 +3961,18 @@ hc.account_form.slug,Slug
 hc.account_form.slug_help,"Identificador único (minúsculas, sem espaços)"
 hc.account_form.default_language,Idioma predefinido
 hc.account_form.default_language_help,Idioma herdado pelos painelistas desta conta
-hc.account_form.manager_email,E-mail do responsável pelos painelistas
-hc.account_form.manager_email_help,E-mail de contacto do responsável pelos painelistas desta conta (opcional)
+hc.account_form.manager_email,E-mail do Panelist Manager
+hc.account_form.manager_email_help,Gere os painelistas: recebe os avisos de incidentes, ausências e do bot.
+hc.account_form.contacts_title,Contactos da conta
+hc.account_form.contacts_help,E-mails usados pelos agentes para enviar mensagens automáticas. Deixe vazio se o papel não existir.
+hc.account_form.account_manager_email,E-mail do Account Manager
+hc.account_form.account_manager_email_help,Líder do projeto nesta conta. Recebe os relatórios de operação.
+hc.account_form.materials_supplier_email,E-mail do Materials Supplier
+hc.account_form.materials_supplier_email_help,Fornece envelopes, selos e transponders: recebe os pedidos de material.
+hc.account_form.do_coordinator_email,E-mail do DO coordinator
+hc.account_form.do_coordinator_email_help,Coordenador no operador designado (correios do país).
+hc.account_form.upu_account_manager_email,E-mail do UPU account manager
+hc.account_form.upu_account_manager_email_help,Responsável por esta conta na UPU.
 hc.account_form.status,Estado
 hc.account_form.cancel,Cancelar
 hc.account_form.saving,A guardar...

@@ -1,13 +1,28 @@
 import { useState } from 'react'
 import { Button } from '@/components/common/Button'
-import type { Account, SupportedLanguage } from '@/lib/types'
-import { SUPPORTED_LANGUAGES } from '@/lib/types'
+import type { Account, AccountContactField, AccountFormData, SupportedLanguage } from '@/lib/types'
+import { ACCOUNT_CONTACT_FIELDS, SUPPORTED_LANGUAGES } from '@/lib/types'
 import { useTranslation } from '@/hooks/useTranslation';
 
 interface AccountFormProps {
   account?: Account
-  onSubmit: (data: { name: string; slug: string; status?: 'active' | 'inactive'; default_language: SupportedLanguage; email_panelist_manager: string | null }) => Promise<void>
+  onSubmit: (data: AccountFormData) => Promise<void>
   onCancel: () => void
+}
+
+// Clave de traducción (etiqueta y ayuda) de cada contacto por rol.
+const CONTACT_I18N: Record<AccountContactField, string> = {
+  email_account_manager: 'hc.account_form.account_manager_email',
+  email_panelist_manager: 'hc.account_form.manager_email',
+  email_materials_supplier: 'hc.account_form.materials_supplier_email',
+  email_do_coordinator: 'hc.account_form.do_coordinator_email',
+  email_upu_account_manager: 'hc.account_form.upu_account_manager_email',
+}
+
+function initialContacts(account?: Account): Record<AccountContactField, string> {
+  const out = {} as Record<AccountContactField, string>
+  for (const f of ACCOUNT_CONTACT_FIELDS) out[f] = account?.[f] || ''
+  return out
 }
 
 export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
@@ -16,7 +31,7 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
   const [slug, setSlug] = useState(account?.slug || '')
   const [status, setStatus] = useState<'active' | 'inactive'>(account?.status || 'active')
   const [defaultLanguage, setDefaultLanguage] = useState<SupportedLanguage>(account?.default_language || 'en')
-  const [emailPanelistManager, setEmailPanelistManager] = useState(account?.email_panelist_manager || '')
+  const [contacts, setContacts] = useState<Record<AccountContactField, string>>(() => initialContacts(account))
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -26,13 +41,17 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
     setLoading(true)
 
     try {
-      const trimmed = emailPanelistManager.trim()
+      const emails = {} as Record<AccountContactField, string | null>
+      for (const f of ACCOUNT_CONTACT_FIELDS) {
+        const trimmed = contacts[f].trim()
+        emails[f] = trimmed === '' ? null : trimmed
+      }
       await onSubmit({
         name,
         slug,
         status,
         default_language: defaultLanguage,
-        email_panelist_manager: trimmed === '' ? null : trimmed,
+        ...emails,
       })
     } catch (err) {
       setError(err instanceof Error ? err.message : t('hc.account_form.submit_error'))
@@ -102,22 +121,28 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
         </p>
       </div>
 
-      <div>
-        <label htmlFor="email_panelist_manager" className="block text-sm font-medium mb-1">
-          {t('hc.account_form.manager_email')}
-        </label>
-        <input
-          id="email_panelist_manager"
-          type="email"
-          value={emailPanelistManager}
-          onChange={(e) => setEmailPanelistManager(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md"
-          placeholder="manager@example.com"
-        />
-        <p className="text-xs text-gray-500 mt-1">
-          {t('hc.account_form.manager_email_help')}
-        </p>
-      </div>
+      <fieldset className="space-y-3 border border-gray-200 rounded-md p-3">
+        <legend className="text-sm font-medium px-1">{t('hc.account_form.contacts_title')}</legend>
+        <p className="text-xs text-gray-500">{t('hc.account_form.contacts_help')}</p>
+        {ACCOUNT_CONTACT_FIELDS.map((field) => (
+          <div key={field}>
+            <label htmlFor={field} className="block text-sm font-medium mb-1">
+              {t(CONTACT_I18N[field])}
+            </label>
+            <input
+              id={field}
+              type="email"
+              value={contacts[field]}
+              onChange={(e) => setContacts((prev) => ({ ...prev, [field]: e.target.value }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              placeholder="name@example.com"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              {t(`${CONTACT_I18N[field]}_help`)}
+            </p>
+          </div>
+        ))}
+      </fieldset>
 
       {account && (
         <div>

@@ -5,7 +5,7 @@ import { Modal } from '@/components/common/Modal'
 import { AccountTable } from '@/components/accounts/AccountTable'
 import { AccountForm } from '@/components/accounts/AccountForm'
 import { useAccounts } from '@/hooks/useAccounts'
-import type { Account, SupportedLanguage } from '@/lib/types'
+import type { Account, AccountFormData } from '@/lib/types'
 import { useTranslation } from '@/hooks/useTranslation'
 
 export function Accounts() {
@@ -24,7 +24,7 @@ export function Accounts() {
     setIsModalOpen(true)
   }
 
-  const handleSubmit = async (data: { name: string; slug: string; status?: 'active' | 'inactive'; default_language: SupportedLanguage; email_panelist_manager: string | null }) => {
+  const handleSubmit = async (data: AccountFormData) => {
     if (selectedAccount) {
       await updateAccount(selectedAccount.id, data)
     } else {
