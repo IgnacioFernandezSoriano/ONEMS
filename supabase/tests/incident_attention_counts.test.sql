@@ -16,7 +16,7 @@ INSERT INTO public.profiles (id, email, full_name, role, account_id) VALUES
 INSERT INTO public.panelists (id, account_id, panelist_code, name, email, mobile, status, language) VALUES
   ('e9000000-0000-0000-0000-000000000009','a0000000-0000-0000-0000-000000000002','P9','Pan9','p9@t.l','9','active','en');
 -- Cuenta 1: n_open (nueva), seen (abierta y vista), prog (in_progress), res_reply (resuelta con respuesta), res (resuelta)
--- Cuenta 2: n2 (nueva). Bajas cuenta 1: pend (pending_manager), un_reply ('new' con respuesta), quiet ('new').
+-- Cuenta 2: n2 (nueva). Bajas: ver mas abajo.
 INSERT INTO public.panelist_incident (id, account_id, panelist_id, category, status, manager_seen_at) VALUES
   ('f1000000-0000-0000-0000-000000000001','a0000000-0000-0000-0000-000000000001','e1000000-0000-0000-0000-000000000001','other','open',NULL),
   ('f1000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000001','e1000000-0000-0000-0000-000000000001','other','open',now()),
@@ -24,10 +24,15 @@ INSERT INTO public.panelist_incident (id, account_id, panelist_id, category, sta
   ('f1000000-0000-0000-0000-000000000004','a0000000-0000-0000-0000-000000000001','e1000000-0000-0000-0000-000000000001','other','resolved',now()),
   ('f1000000-0000-0000-0000-000000000005','a0000000-0000-0000-0000-000000000001','e1000000-0000-0000-0000-000000000001','other','resolved',now()),
   ('f2000000-0000-0000-0000-000000000001','a0000000-0000-0000-0000-000000000002','e9000000-0000-0000-0000-000000000009','other','open',NULL);
-INSERT INTO public.panelist_unavailability (id, panelist_id, account_id, start_date, end_date, reason, status, incident_status) VALUES
-  ('f3000000-0000-0000-0000-000000000001','e2000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000001',current_date+1,current_date+5,'vacation','active','pending_manager'),
-  ('f3000000-0000-0000-0000-000000000002','e2000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000001',current_date+10,current_date+12,'vacation','active','new'),
-  ('f3000000-0000-0000-0000-000000000003','e2000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000001',current_date+20,current_date+22,'vacation','active','new');
+-- 2026-11-09: el badge de bajas ya no mira pending_manager: cuenta las creadas en los ultimos 7 dias o con respuesta sin leer.
+--   01 pending_manager hace 10 dias: NO cuenta; 02 hace 10 dias con respuesta sin leer: cuenta;
+--   03 hace 10 dias sin mensajes: NO cuenta; 04 hace 2 dias: cuenta; 05 (cuenta 2) hace 2 dias: nunca cuenta para la cuenta 1.
+INSERT INTO public.panelist_unavailability (id, panelist_id, account_id, start_date, end_date, reason, status, incident_status, created_at) VALUES
+  ('f3000000-0000-0000-0000-000000000001','e2000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000001',current_date+1,current_date+5,'vacation','active','pending_manager', now() - interval '10 days'),
+  ('f3000000-0000-0000-0000-000000000002','e2000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000001',current_date+10,current_date+12,'vacation','active','new', now() - interval '10 days'),
+  ('f3000000-0000-0000-0000-000000000003','e2000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000001',current_date+20,current_date+22,'vacation','active','new', now() - interval '10 days'),
+  ('f3000000-0000-0000-0000-000000000004','e2000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000001',current_date+30,current_date+32,'vacation','active','new', now() - interval '2 days'),
+  ('f3000000-0000-0000-0000-000000000005','e9000000-0000-0000-0000-000000000009','a0000000-0000-0000-0000-000000000002',current_date+30,current_date+32,'vacation','active','new', now() - interval '2 days');
 DO $$ DECLARE m uuid; BEGIN
   m := public.log_incident_message('reported', 'f1000000-0000-0000-0000-000000000004', 'inbound', 'panelist', 'gracias');
   m := public.log_incident_message('reported', 'f1000000-0000-0000-0000-000000000001', 'inbound', 'panelist', 'mas info');
@@ -37,18 +42,18 @@ DO $$ DECLARE m uuid; BEGIN
 END $$;
 
 DO $$ BEGIN
-  -- admin cuenta 1: n_open + res_reply (n_open con respuesta cuenta una vez); bajas: pend + un_reply. El parametro se ignora.
+  -- admin cuenta 1: n_open + res_reply (n_open con respuesta cuenta una vez); bajas: 02 (respuesta) + 04 (reciente). El parametro se ignora.
   PERFORM pg_temp.as_user('99000000-0000-0000-0000-000000000099');
   PERFORM pg_temp.fail_if(pg_temp.cnt() <> '2/2', 'cuenta 1: ' || pg_temp.cnt());
   PERFORM pg_temp.fail_if(pg_temp.cnt('a0000000-0000-0000-0000-000000000002') <> '2/2', 'cuenta 1 pidiendo la 2');
   -- admin cuenta 2: n2
   PERFORM pg_temp.as_user('98000000-0000-0000-0000-000000000098');
-  PERFORM pg_temp.fail_if(pg_temp.cnt() <> '1/0', 'cuenta 2: ' || pg_temp.cnt());
+  PERFORM pg_temp.fail_if(pg_temp.cnt() <> '1/1', 'cuenta 2: ' || pg_temp.cnt());
   -- superadmin: la cuenta seleccionada, o todas si no hay
   PERFORM pg_temp.as_user('97000000-0000-0000-0000-000000000097');
   PERFORM pg_temp.fail_if(pg_temp.cnt('a0000000-0000-0000-0000-000000000001') <> '2/2', 'super cuenta 1');
-  PERFORM pg_temp.fail_if(pg_temp.cnt('a0000000-0000-0000-0000-000000000002') <> '1/0', 'super cuenta 2');
-  PERFORM pg_temp.fail_if(pg_temp.cnt() <> '3/2', 'super todas: ' || pg_temp.cnt());
+  PERFORM pg_temp.fail_if(pg_temp.cnt('a0000000-0000-0000-0000-000000000002') <> '1/1', 'super cuenta 2');
+  PERFORM pg_temp.fail_if(pg_temp.cnt() <> '3/3', 'super todas: ' || pg_temp.cnt());
   -- sin usuario: nada
   PERFORM pg_temp.as_user(NULL);
   PERFORM pg_temp.fail_if(pg_temp.cnt('a0000000-0000-0000-0000-000000000001') <> '0/0', 'sin usuario');

@@ -11,7 +11,7 @@ import { CellSamplesPanel } from '@/components/incidents/CellSamplesPanel'
 import { IncidentLinesTable } from '@/components/incidents/IncidentLinesTable'
 import { IncidentConversation } from '@/components/incidents/IncidentConversation'
 import {
-  sampleLabel, planLabel, fmtShort, fmtWeekRange, currentMonday, addWeeksTo, defaultWindowWeeks, toMonday,
+  planLabel, fmtShort, fmtWeekRange, currentMonday, addWeeksTo, defaultWindowWeeks, toMonday,
   SATURATION_BADGE_CLASS,
 } from '@/lib/incidentFormat'
 import { startMoveDrag } from '@/lib/incidentDrag'
@@ -24,12 +24,6 @@ interface Props {
 
 interface ActionError {
   message?: string
-  failed?: { label: string; message: string }[]
-}
-
-interface ConfirmState {
-  text: string
-  run: () => void
 }
 
 // Arrastre soltado en una casilla, a la espera de confirmacion.
@@ -48,32 +42,14 @@ interface MoveState {
 
 const errMsg = (err: any) => err?.message ?? String(err)
 
-// Linea pendiente -> carga del arrastre (el nodo que se mueve es el del lado afectado).
-function linePayload(l: ReassignmentProposal): MoveDragPayload | null {
-  const d = l.detail
-  if (!d) return null
-  const origin = l.affected_role === 'origin'
-  return {
-    kind: 'line',
-    lineId: l.id,
-    detailId: d.id,
-    fromNodeId: origin ? d.origin_node_id : d.destination_node_id,
-    otherEndNodeId: origin ? d.destination_node_id : d.origin_node_id,
-    fecha: d.fecha_programada,
-    label: sampleLabel(l),
-    plan: d.plan ?? null,
-  }
-}
-
-// Detalle de una incidencia de indisponibilidad: cabecera + resolucion final, balance de la
-// ciudad por semanas (arrastrar y soltar para mover muestras), muestras de una casilla,
-// lineas pendientes (decision del manager) y resueltas.
+// Detalle de una incidencia de indisponibilidad (informativa): cabecera con resumen y resolucion
+// final, balance de la ciudad por semanas (arrastrar y soltar para corregir a mano una muestra),
+// muestras de una casilla y la tabla de lo que el motor hizo con cada muestra afectada.
 // Toda accion recarga cabecera, lineas, balance y casilla (tambien tras un error).
 export function IncidentReviewPanel({ unavailabilityId, onBack }: Props) {
   const { t } = useTranslation()
   const {
-    fetchHeader, fetchLines, decide, decideMany, saveResolution,
-    suggestForCell, applyManagerMove, suggestForSampleMove, applySampleMove, fetchCellSamples,
+    fetchHeader, fetchLines, saveResolution, suggestForSampleMove, applySampleMove, fetchCellSamples,
   } = useUnavailabilityIncidents()
 
   const [header, setHeader] = useState<UnavailabilityHeader | null>(null)
@@ -83,7 +59,6 @@ export function IncidentReviewPanel({ unavailabilityId, onBack }: Props) {
   const [actionError, setActionError] = useState<ActionError | null>(null)
   const [busyId, setBusyId] = useState<string | null>(null)
   const busyRef = useRef(false) // guarda sincrona contra el doble clic / doble soltado
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   // Se incrementa en cada recarga: refresca la casilla abierta e invalida propuestas de arrastre.
   const [dataVersion, setDataVersion] = useState(0)
   const reloadSeq = useRef(0)
@@ -110,7 +85,7 @@ export function IncidentReviewPanel({ unavailabilityId, onBack }: Props) {
     })
   }, [todayMonday])
 
-  // Cabecera de semana: filtro de las lineas pendientes.
+  // Cabecera de semana: filtro de la tabla de lineas (por fecha original o actual).
   const [weekFilter, setWeekFilter] = useState<string | null>(null)
 
   const reload = useCallback(async () => {
@@ -121,11 +96,6 @@ export function IncidentReviewPanel({ unavailabilityId, onBack }: Props) {
     setHeader(h)
     setLines(ls)
     setDataVersion(v => v + 1)
-    const pendingIds = new Set(ls.filter(l => l.status === 'pending').map(l => l.id))
-    setSelectedIds(prev => {
-      if ([...prev].every(id => pendingIds.has(id))) return prev
-      return new Set([...prev].filter(id => pendingIds.has(id)))
-    })
   }, [fetchHeader, fetchLines, unavailabilityId])
 
   useEffect(() => {
@@ -164,29 +134,11 @@ export function IncidentReviewPanel({ unavailabilityId, onBack }: Props) {
     setSelectedCell(cell)
   }, [cellNodeId, cellWeek])
 
-  const pending = lines.filter(l => l.status === 'pending')
-  const resolved = lines.filter(l => l.status !== 'pending')
   const filterEnd = weekFilter ? format(addDays(parseISO(weekFilter), 6), 'yyyy-MM-dd') : null
-  const visiblePending = weekFilter && filterEnd
-    ? pending.filter(l => {
-        const d = l.detail?.fecha_programada
-        return !!d && d >= weekFilter && d <= filterEnd
-      })
-    : pending
-  // La seleccion solo contiene lineas pendientes visibles: al cambiar el filtro (o al
-  // recargar) se quitan las ocultas, y las acciones en bloque usan solo estas.
-  const visibleKey = visiblePending.map(l => l.id).join(',')
-  useEffect(() => {
-    const visible = new Set(visibleKey ? visibleKey.split(',') : [])
-    setSelectedIds(prev => {
-      if ([...prev].every(id => visible.has(id))) return prev
-      return new Set([...prev].filter(id => visible.has(id)))
-    })
-  }, [visibleKey])
-  const selectedLines = visiblePending.filter(l => selectedIds.has(l.id))
-
-  // Paso de confirmacion para lo que anula muestras (no se puede deshacer aqui).
-  const [confirmState, setConfirmState] = useState<ConfirmState | null>(null)
+  const inWeek = (d: string | null | undefined) => !!d && !!weekFilter && !!filterEnd && d >= weekFilter && d <= filterEnd
+  const visibleLines = weekFilter
+    ? lines.filter(l => inWeek(l.detail?.original_fecha_programada) || inWeek(l.detail?.fecha_programada))
+    : lines
 
   // Arrastre en curso y propuesta tras soltar.
   const [dragging, setDragging] = useState<MoveDragPayload | null>(null)
@@ -216,70 +168,6 @@ export function IncidentReviewPanel({ unavailabilityId, onBack }: Props) {
     }
   }
 
-  const doAccept = (l: ReassignmentProposal) => runAction(l.id, async () => { await decide(l.id, 'accept') })
-  const doCancel = (l: ReassignmentProposal) => runAction(l.id, async () => { await decide(l.id, 'cancel') })
-  // Confirmar una propuesta de anulacion tambien anula la muestra: se pide confirmacion.
-  const handleAccept = (l: ReassignmentProposal) => {
-    setMove(null)
-    if (l.suggested_action === 'cancel') {
-      setConfirmState({ text: t('incidents.confirm.cancel_one'), run: () => doAccept(l) })
-    } else {
-      setConfirmState(null)
-      doAccept(l)
-    }
-  }
-  const handleCancel = (l: ReassignmentProposal) => {
-    setMove(null)
-    setConfirmState({ text: t('incidents.confirm.cancel_one'), run: () => doCancel(l) })
-  }
-
-  const doBulk = (decision: 'accept' | 'cancel', targets: ReassignmentProposal[]) => runAction('bulk', async () => {
-    const pendingById = new Map(targets.map(l => [l.id, l]))
-    const ids = targets.map(l => l.id)
-    if (ids.length === 0) return
-    const res = await decideMany(ids, decision)
-    if (res.failed.length > 0) {
-      setActionError({
-        failed: res.failed.map(f => {
-          const l = pendingById.get(f.id)
-          return { label: l ? sampleLabel(l) : f.id.slice(0, 8), message: f.message }
-        }),
-      })
-    }
-  })
-
-  const handleBulk = (decision: 'accept' | 'cancel') => {
-    // Se congela la seleccion visible en el momento del clic.
-    const targets = selectedLines
-    if (targets.length === 0) return
-    setMove(null)
-    if (decision === 'cancel') {
-      setConfirmState({
-        text: t('incidents.confirm.cancel_many', { n: targets.length }),
-        run: () => doBulk('cancel', targets),
-      })
-      return
-    }
-    const cancelling = targets.filter(l => l.suggested_action === 'cancel').length
-    if (cancelling > 0) {
-      setConfirmState({
-        text: t('incidents.confirm.accept_with_cancel', { n: cancelling }),
-        run: () => doBulk('accept', targets),
-      })
-      return
-    }
-    setConfirmState(null)
-    doBulk('accept', targets)
-  }
-
-  // Confirmar: respeta la guarda de doble clic (runAction ignora si hay otra en curso).
-  const runConfirmed = () => {
-    if (!confirmState || busyRef.current) return
-    const { run } = confirmState
-    setConfirmState(null)
-    run()
-  }
-
   const handleSaveResolution = async (text: string) => {
     // El error del guardado lo muestra la cabecera; se recarga igualmente.
     try {
@@ -299,39 +187,18 @@ export function IncidentReviewPanel({ unavailabilityId, onBack }: Props) {
     window.setTimeout(() => { if (dragActive.current) setDragging(payload) }, 0)
   }
   const handleDragEnd = () => { dragActive.current = false; setDragging(null) }
-  const handleDragStartLine = (e: DragEvent, l: ReassignmentProposal) => {
-    const p = linePayload(l)
-    if (!p) { e.preventDefault(); return }
-    handleDragStart(e, p)
-  }
 
-  // Al soltar: pedir a la BD el dia concreto. Si una muestra resulta tener una linea pendiente
-  // de ESTA incidencia en el lado de la casilla, se usa el par de RPC de linea.
+  // Al soltar: pedir a la BD el dia concreto (solo lectura) y mostrar la barra de confirmacion.
   const handleDropCell = (nodeId: string, nodeCode: string, weekStart: string, payload: MoveDragPayload) => {
     dragActive.current = false
     setDragging(null)
     if (busyRef.current) return
-    setConfirmState(null)
     const seq = ++moveSeq.current
     const ref = referenceLoad
     const dev = deviationPercent
     setMove({ seq, payload, nodeId, nodeCode, weekStart, referenceLoad: ref, deviationPercent: dev, loading: true, suggestion: null, error: null })
-    const ask = async (): Promise<{ payload: MoveDragPayload; suggestion: MoveSuggestion }> => {
-      if (payload.kind === 'line' && payload.lineId) {
-        return { payload, suggestion: await suggestForCell(payload.lineId, nodeId, weekStart, ref, dev) }
-      }
-      const s = await suggestForSampleMove(payload.detailId, payload.fromNodeId, nodeId, weekStart, ref, dev)
-      if (!s.found && s.reason === 'has_incident_line') {
-        const own = lines.find(l => l.status === 'pending' && l.detail?.id === payload.detailId)
-        const lp = own ? linePayload(own) : null
-        if (lp && lp.fromNodeId === payload.fromNodeId && lp.lineId) {
-          return { payload: lp, suggestion: await suggestForCell(lp.lineId, nodeId, weekStart, ref, dev) }
-        }
-      }
-      return { payload, suggestion: s }
-    }
-    ask()
-      .then(r => setMove(prev => (prev?.seq === seq ? { ...prev, payload: r.payload, loading: false, suggestion: r.suggestion } : prev)))
+    suggestForSampleMove(payload.detailId, payload.fromNodeId, nodeId, weekStart, ref, dev)
+      .then(suggestion => setMove(prev => (prev?.seq === seq ? { ...prev, loading: false, suggestion } : prev)))
       .catch(err => setMove(prev => (prev?.seq === seq ? { ...prev, loading: false, error: errMsg(err) } : prev)))
   }
 
@@ -342,27 +209,10 @@ export function IncidentReviewPanel({ unavailabilityId, onBack }: Props) {
     const m = move
     setMove(null)
     const p = m.payload
-    runAction(p.lineId ?? p.detailId, async () => {
-      if (p.kind === 'line' && p.lineId) {
-        await applyManagerMove(p.lineId, m.nodeId, m.weekStart, m.referenceLoad, m.deviationPercent)
-      } else {
-        await applySampleMove(p.detailId, p.fromNodeId, m.nodeId, m.weekStart, m.referenceLoad, m.deviationPercent)
-      }
+    runAction(p.detailId, async () => {
+      await applySampleMove(p.detailId, p.fromNodeId, m.nodeId, m.weekStart, m.referenceLoad, m.deviationPercent)
     })
   }
-
-  const toggleOne = (id: string) => setSelectedIds(prev => {
-    const next = new Set(prev)
-    if (next.has(id)) next.delete(id); else next.add(id)
-    return next
-  })
-  // Seleccionar/deseleccionar todas: solo afecta a las filas pendientes visibles.
-  const toggleAll = (ids: string[]) => setSelectedIds(prev => {
-    const next = new Set(prev)
-    if (ids.length > 0 && ids.every(id => prev.has(id))) ids.forEach(id => next.delete(id))
-    else ids.forEach(id => next.add(id))
-    return next
-  })
 
   if (loading) return <div className="p-6">{t('common.loading')}</div>
   if (!header) {
@@ -374,18 +224,15 @@ export function IncidentReviewPanel({ unavailabilityId, onBack }: Props) {
     )
   }
 
-  const pendingEmptyText = weekFilter && pending.length > 0
-    ? t('incidents.balance.week_filter_empty')
-    : t('incidents.detail.no_pending')
+  const linesEmptyText = weekFilter && lines.length > 0
+    ? t('incidents.detail.lines_week_empty')
+    : t('incidents.summary.none')
 
-  // Estrella solo para destinos de reencaminamiento (un nodo distinto del liberado).
-  const highlightNodeIds = pending
-    .filter(l => l.suggested_action === 'reroute' && !!l.suggested_target_node_id && l.suggested_target_node_id !== header.node_id)
-    .map(l => l.suggested_target_node_id as string)
+  // Estrella solo para el destino propuesto de un arrastre (un nodo distinto del liberado).
+  const highlightNodeIds: string[] = []
   const sugNode = move?.suggestion?.found ? move.suggestion.node_id : undefined
   if (sugNode && sugNode !== header.node_id) highlightNodeIds.push(sugNode)
 
-  const selectedPendingCount = selectedLines.length
   const cellRow = selectedCell ? rows.find(r => r.node_id === selectedCell.nodeId) : undefined
 
   // Texto de la barra de confirmacion del arrastre.
@@ -429,13 +276,6 @@ export function IncidentReviewPanel({ unavailabilityId, onBack }: Props) {
         <div role="alert" className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-4 mb-6 flex items-start justify-between gap-4">
           <div className="text-sm">
             <div className="font-medium">{t('common.error')}{actionError.message ? `: ${actionError.message}` : ''}</div>
-            {actionError.failed && actionError.failed.length > 0 && (
-              <ul className="mt-1 list-disc ps-5">
-                {actionError.failed.map((f, i) => (
-                  <li key={i}><span className="font-mono">{f.label}</span>: {f.message}</li>
-                ))}
-              </ul>
-            )}
           </div>
           <button
             type="button"
@@ -495,74 +335,7 @@ export function IncidentReviewPanel({ unavailabilityId, onBack }: Props) {
         />
       )}
 
-      {confirmState && (
-        <div
-          role="alertdialog"
-          aria-labelledby="incident-confirm-text"
-          className="bg-amber-50 border border-amber-300 rounded-lg p-4 mb-6 flex flex-wrap items-center justify-between gap-3"
-        >
-          <span id="incident-confirm-text" className="text-sm font-medium text-amber-900">{confirmState.text}</span>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              autoFocus
-              onClick={runConfirmed}
-              disabled={busyId !== null}
-              className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {t('common.confirm')}
-            </button>
-            <button
-              type="button"
-              onClick={() => setConfirmState(null)}
-              className="px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300"
-            >
-              {t('incidents.confirm.back')}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {selectedPendingCount > 0 && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex flex-wrap items-center justify-between gap-2">
-          <span className="text-sm font-medium text-blue-900">
-            {t('incidents.action.selected_count', { count: selectedPendingCount })}
-          </span>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => handleBulk('accept')}
-              disabled={busyId !== null}
-              className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {t('incidents.action.accept_selected')}
-            </button>
-            <button
-              type="button"
-              onClick={() => handleBulk('cancel')}
-              disabled={busyId !== null}
-              className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {t('incidents.action.cancel_selected')}
-            </button>
-          </div>
-          {busyId === 'bulk' && <span className="text-xs text-gray-500">{t('common.loading')}</span>}
-        </div>
-      )}
-
-      <IncidentLinesTable
-        lines={[...visiblePending, ...resolved]}
-        selectedIds={selectedIds}
-        onToggle={toggleOne}
-        onToggleAll={toggleAll}
-        onAccept={handleAccept}
-        onCancel={handleCancel}
-        busyId={busyId}
-        onDragStartLine={handleDragStartLine}
-        onDragEnd={handleDragEnd}
-        draggingLineId={dragging?.kind === 'line' ? dragging.lineId ?? null : null}
-        pendingEmptyText={pendingEmptyText}
-      />
+      <IncidentLinesTable lines={visibleLines} emptyText={linesEmptyText} />
 
       <IncidentConversation kind="unavailability" incidentId={unavailabilityId}
         panelistLanguage={header?.panelist_language} helpSection="c-vacaciones" />

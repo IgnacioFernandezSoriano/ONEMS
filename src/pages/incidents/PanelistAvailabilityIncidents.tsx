@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from '@/hooks/useTranslation'
 import { format, parseISO, isValid } from 'date-fns'
@@ -8,7 +8,8 @@ import { IncidentReviewPanel } from '@/components/incidents/IncidentReviewPanel'
 import { IncidentStatusBadge } from '@/components/incidents/IncidentStatusBadge'
 import type { IncidentStatusFilter } from '@/lib/types'
 
-const FILTER_OPTIONS: IncidentStatusFilter[] = ['open', 'all', 'new', 'auto_resolved', 'pending_manager', 'resolved']
+// Sin 'open' ni 'pending_manager': el motor resuelve todas las bajas, ya no quedan decisiones pendientes.
+const FILTER_OPTIONS: IncidentStatusFilter[] = ['all', 'new', 'auto_resolved', 'resolved']
 
 const fmt = (d: string | null) => {
   if (!d) return '-'
@@ -18,17 +19,13 @@ const fmt = (d: string | null) => {
 
 export function PanelistAvailabilityIncidents() {
   const { t } = useTranslation()
-  const { inbox: filtered, allRows, loading, error, fetchInbox, statusFilter, setStatusFilter } = useUnavailabilityIncidents()
+  const { inbox, loading, error, fetchInbox, statusFilter, setStatusFilter } = useUnavailabilityIncidents()
   const { unreadByKey } = useUnreadConversations()
-  // "Abiertas" incluye las cerradas con respuesta sin leer: son las que cuenta el menu
-  const inbox = useMemo(() => statusFilter !== 'open' ? filtered
-    : allRows.filter(r => filtered.includes(r) || (unreadByKey[`unavailability:${r.unavailability_id}`] ?? 0) > 0),
-  [filtered, allRows, statusFilter, unreadByKey])
   const [selected, setSelected] = useState<string | null>(null)
   const [params, setParams] = useSearchParams()
 
-  // Abre una baja concreta si llega por URL (?unavailability=<id>). La bandeja por defecto solo
-  // lista las abiertas: se pasa a 'all' y, una vez cargada, se abre si el id esta en la bandeja.
+  // Abre una baja concreta si llega por URL (?unavailability=<id>). Si hay otro filtro puesto
+  // se pasa a 'all' y, una vez cargada, se abre si el id esta en la bandeja.
   const linkedId = params.get('unavailability')
   useEffect(() => {
     if (linkedId && statusFilter !== 'all') setStatusFilter('all')
@@ -63,7 +60,7 @@ export function PanelistAvailabilityIncidents() {
         >
           {FILTER_OPTIONS.map((opt) => (
             <option key={opt} value={opt}>
-              {opt === 'open' || opt === 'all' ? t('incidents.filter.' + opt) : t('incidents.status.' + opt)}
+              {opt === 'all' ? t('incidents.filter.all') : t('incidents.status.' + opt)}
             </option>
           ))}
         </select>
@@ -79,7 +76,6 @@ export function PanelistAvailabilityIncidents() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('incidents.inbox.created')}</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('incidents.inbox.affected')}</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('incidents.inbox.breakdown')}</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('incidents.inbox.pending')}</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('incidents.inbox.status')}</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('incidents.inbox.review')}</th>
               </tr>
@@ -96,7 +92,6 @@ export function PanelistAvailabilityIncidents() {
                   <td className="px-6 py-4 text-sm">{fmt(row.created_at)}</td>
                   <td className="px-6 py-4 text-sm">{row.affected_count}</td>
                   <td className="px-6 py-4 text-sm">{row.origin_count} / {row.destination_count}</td>
-                  <td className="px-6 py-4 text-sm">{row.pending_count}</td>
                   <td className="px-6 py-4 text-sm"><IncidentStatusBadge status={row.incident_status} /></td>
                   <td className="px-6 py-4 text-sm">
                     <button onClick={() => setSelected(row.unavailability_id)} className="text-blue-600 hover:text-blue-800">
@@ -105,7 +100,7 @@ export function PanelistAvailabilityIncidents() {
                   </td>
                 </tr>
               )) : (
-                <tr><td colSpan={9} className="px-6 py-4 text-center text-gray-500">{t('incidents.inbox.empty')}</td></tr>
+                <tr><td colSpan={8} className="px-6 py-4 text-center text-gray-500">{t('incidents.inbox.empty')}</td></tr>
               )}
             </tbody>
           </table>

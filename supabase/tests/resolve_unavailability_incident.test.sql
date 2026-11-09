@@ -1,5 +1,6 @@
 -- Motor resolve_unavailability_incident: retrasar (paso 1), otro nodo de la ciudad (paso 2/2b),
--- propuesta al manager (incident_suggest), estado de la incidencia, aditivo/idempotente, guarda multi-tenant.
+-- otra semana o anulacion (incident_suggest aplicado; 2026-11-09: el motor ya no deja pendientes), estado de
+-- la incidencia, aditivo/idempotente, guarda multi-tenant.
 -- Cada escenario va en su propia transaccion (BEGIN ... ROLLBACK) con la fixture comun.
 -- Los triggers de incidencias (Tarea 6) se desactivan en cada transaccion (fixtures/no_incident_triggers.sql):
 -- aqui el motor se llama siempre de forma explicita. Los triggers se prueban en incident_triggers.test.sql.
@@ -50,6 +51,17 @@ $$;
 CREATE FUNCTION pg_temp.nlines() RETURNS integer LANGUAGE sql AS $$
   SELECT count(*)::int FROM public.panelist_reassignment_proposal
    WHERE unavailability_id = 'f0000000-0000-0000-0000-000000000001';
+$$;
+-- 2026-11-09: el motor ya no deja pendientes. Linea 'pending' como las del motor viejo (a mano, rol origen),
+-- para probar la retirada del paso (a) y las funciones del manager.
+CREATE FUNCTION pg_temp.pline(p_detail uuid) RETURNS uuid LANGUAGE sql AS $$
+  INSERT INTO public.panelist_reassignment_proposal
+    (account_id, unavailability_id, allocation_plan_detail_id, affected_role, sample_status_at_detection,
+     suggested_action, suggested_reason)
+  SELECT 'a0000000-0000-0000-0000-000000000001', 'f0000000-0000-0000-0000-000000000001', a.id, 'origin', a.status,
+         'cancel', 'no_slot_8_weeks'
+    FROM public.allocation_plan_details a WHERE a.id = p_detail
+  RETURNING id;
 $$;
 
 -- ===== Estructura: funcion vieja borrada, permisos =====
@@ -299,7 +311,9 @@ BEGIN
 END $$;
 ROLLBACK;
 
--- ===== Pendiente + propuesta al manager; idempotencia y aditivo sobre pendientes =====
+-- ===== Sin sitio en el mes: propuesta de otra semana APLICADA; idempotencia y aditivo =====
+-- 2026-11-09: el motor ya no deja pendientes. Antes la linea quedaba 'pending' con la propuesta (04-01);
+-- ahora la propuesta se aplica y la linea queda auto_resolved.
 BEGIN;
 \ir fixtures/incident_city.sql
 \ir fixtures/no_incident_triggers.sql
@@ -310,18 +324,19 @@ SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N1','N4','2027-03-10',
 DO $$
 DECLARE l public.panelist_reassignment_proposal; u public.panelist_unavailability; j jsonb; s record;
 BEGIN
-  IF pg_temp.run() <> 1 THEN RAISE EXCEPTION 'FAIL pendiente no devuelve 1'; END IF;
+  IF pg_temp.run() <> 1 THEN RAISE EXCEPTION 'FAIL otra semana no devuelve 1'; END IF;
   l := pg_temp.line('d0000000-0000-0000-0000-000000000001');
   u := pg_temp.inc();
   SELECT * INTO s FROM public.allocation_plan_details WHERE id='d0000000-0000-0000-0000-000000000001';
-  IF l.status <> 'pending' OR l.suggested_action <> 'shift_date' OR l.suggested_date IS DISTINCT FROM '2027-04-01'::date
-     OR l.suggested_target_node_id IS NOT NULL OR l.suggested_reason IS DISTINCT FROM 'shift_later_week'
-     OR l.final_action IS NOT NULL THEN
-    RAISE EXCEPTION 'FAIL pendiente linea % % % %', l.status, l.suggested_action, l.suggested_date, l.suggested_reason; END IF;
-  IF s.fecha_programada <> '2027-03-10' OR s.status <> 'notified' THEN RAISE EXCEPTION 'FAIL pendiente toca la muestra'; END IF;
-  IF u.incident_status <> 'pending_manager' OR u.review_status <> 'pending_review' OR u.resolved_at IS NOT NULL
-     OR u.auto_summary <> 'shift=0;reroute=0;cancel=0;info=0;pending=1' THEN
-    RAISE EXCEPTION 'FAIL pendiente incidencia % % %', u.incident_status, u.review_status, u.auto_summary; END IF;
+  -- 2026-11-09: el motor ya no deja pendientes (propuesta 04-01 aplicada).
+  IF l.status <> 'auto_resolved' OR l.final_action IS DISTINCT FROM 'shift_date' OR l.final_date IS DISTINCT FROM '2027-04-01'::date
+     OR l.final_target_node_id IS NOT NULL OR l.suggested_reason IS DISTINCT FROM 'shift_later_week' THEN
+    RAISE EXCEPTION 'FAIL otra semana linea % % % %', l.status, l.final_action, l.final_date, l.suggested_reason; END IF;
+  IF s.fecha_programada <> '2027-04-01' OR s.status <> 'pending' OR s.original_fecha_programada IS DISTINCT FROM '2027-03-10'::date THEN
+    RAISE EXCEPTION 'FAIL otra semana muestra % %', s.fecha_programada, s.status; END IF;
+  IF u.incident_status <> 'auto_resolved' OR u.review_status <> 'reviewed' OR u.resolved_at IS NULL
+     OR u.auto_summary <> 'shift=1;reroute=0;cancel=0;info=0;pending=0' THEN
+    RAISE EXCEPTION 'FAIL otra semana incidencia % % %', u.incident_status, u.review_status, u.auto_summary; END IF;
 
   -- incident_suggest con semana dada (lunes o cualquier dia de la semana).
   j := public.incident_suggest(l.id, '2027-04-12');
@@ -340,51 +355,59 @@ BEGIN
   -- Semana dentro de la baja y del mes de la muestra (ya agotado por el motor) -> found false.
   j := public.incident_suggest(l.id, '2027-03-15');
   IF (j->>'found')::boolean THEN RAISE EXCEPTION 'FAIL suggest semana dentro de la baja %', j; END IF;
-  RAISE NOTICE 'PASS pendiente + propuesta + incident_suggest';
+  RAISE NOTICE 'PASS otra semana aplicada + incident_suggest';
 END $$;
 
--- Idempotencia sobre pendientes: misma linea (id) y nada nuevo.
+-- Idempotencia: misma linea (id) y nada nuevo.
 CREATE TEMP TABLE snap AS SELECT id, allocation_plan_detail_id, status, suggested_date FROM public.panelist_reassignment_proposal;
 DO $$
 BEGIN
-  IF pg_temp.run() <> 0 THEN RAISE EXCEPTION 'FAIL idempotencia pendiente devuelve <> 0'; END IF;
+  IF pg_temp.run() <> 0 THEN RAISE EXCEPTION 'FAIL idempotencia devuelve <> 0'; END IF;
   IF EXISTS (SELECT id, allocation_plan_detail_id, status, suggested_date FROM public.panelist_reassignment_proposal
              EXCEPT SELECT * FROM snap)
      OR (SELECT count(*) FROM public.panelist_reassignment_proposal) <> (SELECT count(*) FROM snap) THEN
-    RAISE EXCEPTION 'FAIL idempotencia pendiente cambia lineas'; END IF;
-  RAISE NOTICE 'PASS idempotencia (pendiente)';
+    RAISE EXCEPTION 'FAIL idempotencia cambia lineas'; END IF;
+  RAISE NOTICE 'PASS idempotencia (otra semana aplicada)';
 END $$;
 
--- Aditivo: muestra nueva dentro de la baja -> 1; mover la pendiente fuera -> su linea desaparece.
+-- Aditivo: muestra nueva dentro de la baja -> 1 (tambien se aplica: 04-01, N1 aun cabe).
+-- 2026-11-09: el motor ya no deja pendientes; la retirada del paso (a) y el paso a informativa de una
+-- muestra que sale se prueban con lineas pendientes del motor viejo, insertadas a mano (pline).
 SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000002','N1','N4','2027-03-11');
 DO $$
 DECLARE old_id uuid := (pg_temp.line('d0000000-0000-0000-0000-000000000001')).id;
 BEGIN
   IF pg_temp.run() <> 1 THEN RAISE EXCEPTION 'FAIL aditivo muestra nueva no devuelve 1'; END IF;
-  IF (pg_temp.line('d0000000-0000-0000-0000-000000000002')).status <> 'pending' THEN RAISE EXCEPTION 'FAIL aditivo nueva no pendiente'; END IF;
+  IF (pg_temp.line('d0000000-0000-0000-0000-000000000002')).status <> 'auto_resolved'
+     OR (pg_temp.line('d0000000-0000-0000-0000-000000000002')).final_date IS DISTINCT FROM '2027-04-01'::date THEN
+    RAISE EXCEPTION 'FAIL aditivo nueva no aplicada'; END IF;
   IF (pg_temp.line('d0000000-0000-0000-0000-000000000001')).id <> old_id THEN RAISE EXCEPTION 'FAIL aditivo cambia id previo'; END IF;
-  IF (pg_temp.inc()).auto_summary <> 'shift=0;reroute=0;cancel=0;info=0;pending=2' THEN
+  IF (pg_temp.inc()).auto_summary <> 'shift=2;reroute=0;cancel=0;info=0;pending=0' THEN
     RAISE EXCEPTION 'FAIL aditivo summary %', (pg_temp.inc()).auto_summary; END IF;
 
-  UPDATE public.allocation_plan_details SET fecha_programada='2027-04-06' WHERE id='d0000000-0000-0000-0000-000000000001';
+  -- Linea pendiente vieja cuya muestra sale de la baja: el paso (a) la retira.
+  PERFORM pg_temp.mk('d0000000-0000-0000-0000-000000000003','N1','N4','2027-03-12');
+  PERFORM pg_temp.pline('d0000000-0000-0000-0000-000000000003');
+  UPDATE public.allocation_plan_details SET fecha_programada='2027-04-06' WHERE id='d0000000-0000-0000-0000-000000000003';
   IF pg_temp.run() <> 0 THEN RAISE EXCEPTION 'FAIL aditivo mover fuera devuelve <> 0'; END IF;
-  IF (pg_temp.line('d0000000-0000-0000-0000-000000000001')).id IS NOT NULL THEN RAISE EXCEPTION 'FAIL aditivo linea movida sigue'; END IF;
-  IF (pg_temp.inc()).incident_status <> 'pending_manager' THEN RAISE EXCEPTION 'FAIL aditivo estado tras mover'; END IF;
+  IF (pg_temp.line('d0000000-0000-0000-0000-000000000003')).id IS NOT NULL THEN RAISE EXCEPTION 'FAIL aditivo linea movida sigue'; END IF;
 
-  -- La pendiente que queda sale (sent): su linea pendiente se retira y pasa a informativa.
-  UPDATE public.allocation_plan_details SET status='sent' WHERE id='d0000000-0000-0000-0000-000000000002';
+  -- Linea pendiente vieja cuya muestra sale (sent): se retira y nace informativa.
+  PERFORM pg_temp.mk('d0000000-0000-0000-0000-000000000004','N1','N4','2027-03-12');
+  PERFORM pg_temp.pline('d0000000-0000-0000-0000-000000000004');
+  UPDATE public.allocation_plan_details SET status='sent' WHERE id='d0000000-0000-0000-0000-000000000004';
   IF pg_temp.run() <> 1 THEN RAISE EXCEPTION 'FAIL aditivo sent no devuelve 1'; END IF;
-  IF (pg_temp.line('d0000000-0000-0000-0000-000000000002')).status <> 'info' OR pg_temp.nlines() <> 1 THEN
+  IF (pg_temp.line('d0000000-0000-0000-0000-000000000004')).status <> 'info' OR pg_temp.nlines() <> 3 THEN
     RAISE EXCEPTION 'FAIL aditivo sent no queda info'; END IF;
   IF (pg_temp.inc()).incident_status <> 'auto_resolved' OR (pg_temp.inc()).review_status <> 'reviewed'
      OR (pg_temp.inc()).resolved_at IS NULL
-     OR (pg_temp.inc()).auto_summary <> 'shift=0;reroute=0;cancel=0;info=1;pending=0' THEN
-    RAISE EXCEPTION 'FAIL aditivo transicion a auto_resolved % %', (pg_temp.inc()).incident_status, (pg_temp.inc()).auto_summary; END IF;
-  RAISE NOTICE 'PASS aditivo (alta, retirada, sent -> info, transicion de estado)';
+     OR (pg_temp.inc()).auto_summary <> 'shift=2;reroute=0;cancel=0;info=1;pending=0' THEN
+    RAISE EXCEPTION 'FAIL aditivo estado final % %', (pg_temp.inc()).incident_status, (pg_temp.inc()).auto_summary; END IF;
+  RAISE NOTICE 'PASS aditivo (alta, retirada, sent -> info)';
 END $$;
 ROLLBACK;
 
--- ===== Propuesta en otro nodo (alt_node_later_week) =====
+-- ===== Otra semana en otro nodo (alt_node_later_week), aplicada =====
 BEGIN;
 \ir fixtures/incident_city.sql
 \ir fixtures/no_incident_triggers.sql
@@ -399,11 +422,15 @@ DECLARE l public.panelist_reassignment_proposal;
 BEGIN
   PERFORM pg_temp.run();
   l := pg_temp.line('d0000000-0000-0000-0000-000000000001');
-  IF l.status <> 'pending' OR l.suggested_action <> 'reroute' OR l.suggested_date IS DISTINCT FROM '2027-04-05'::date
-     OR l.suggested_target_node_id IS DISTINCT FROM 'b2000000-0000-0000-0000-000000000002'::uuid
+  -- 2026-11-09: el motor ya no deja pendientes (la propuesta se aplica).
+  IF l.status <> 'auto_resolved' OR l.final_action IS DISTINCT FROM 'reroute' OR l.final_date IS DISTINCT FROM '2027-04-05'::date
+     OR l.final_target_node_id IS DISTINCT FROM 'b2000000-0000-0000-0000-000000000002'::uuid
      OR l.suggested_reason IS DISTINCT FROM 'alt_node_later_week' THEN
-    RAISE EXCEPTION 'FAIL propuesta otro nodo % % % %', l.suggested_action, l.suggested_date, l.suggested_target_node_id, l.suggested_reason; END IF;
-  RAISE NOTICE 'PASS propuesta en otro nodo';
+    RAISE EXCEPTION 'FAIL otro nodo otra semana % % % %', l.final_action, l.final_date, l.final_target_node_id, l.suggested_reason; END IF;
+  IF (SELECT origin_node_id FROM public.allocation_plan_details WHERE id='d0000000-0000-0000-0000-000000000001')
+       <> 'b2000000-0000-0000-0000-000000000002' THEN
+    RAISE EXCEPTION 'FAIL otro nodo otra semana: muestra no reencaminada'; END IF;
+  RAISE NOTICE 'PASS otra semana en otro nodo';
 END $$;
 ROLLBACK;
 
@@ -420,12 +447,16 @@ DECLARE l public.panelist_reassignment_proposal;
 BEGIN
   IF pg_temp.run() <> 1 THEN RAISE EXCEPTION 'FAIL sin hueco no devuelve 1'; END IF;
   l := pg_temp.line('d0000000-0000-0000-0000-000000000001');
-  IF l.status <> 'pending' OR l.suggested_action <> 'cancel' OR l.suggested_reason IS DISTINCT FROM 'no_slot_8_weeks'
+  -- 2026-11-09: el motor ya no deja pendientes: sin hueco en 8 semanas, anula la muestra.
+  IF l.status <> 'auto_resolved' OR l.final_action IS DISTINCT FROM 'cancel' OR l.suggested_action <> 'cancel'
+     OR l.suggested_reason IS DISTINCT FROM 'no_slot_8_weeks'
      OR l.suggested_date IS NOT NULL OR l.suggested_target_node_id IS NOT NULL THEN
-    RAISE EXCEPTION 'FAIL sin hueco % % %', l.suggested_action, l.suggested_reason, l.suggested_date; END IF;
+    RAISE EXCEPTION 'FAIL sin hueco % % % %', l.status, l.final_action, l.suggested_reason, l.suggested_date; END IF;
   IF (public.incident_suggest(l.id)->>'found')::boolean THEN RAISE EXCEPTION 'FAIL sin hueco suggest found'; END IF;
-  IF (SELECT status FROM public.allocation_plan_details WHERE id='d0000000-0000-0000-0000-000000000001') <> 'pending' THEN
-    RAISE EXCEPTION 'FAIL sin hueco anula la muestra (el motor no anula)'; END IF;
+  IF (SELECT status FROM public.allocation_plan_details WHERE id='d0000000-0000-0000-0000-000000000001') <> 'cancelled' THEN
+    RAISE EXCEPTION 'FAIL sin hueco no anula la muestra'; END IF;
+  IF (pg_temp.inc()).incident_status <> 'auto_resolved' THEN
+    RAISE EXCEPTION 'FAIL sin hueco estado %', (pg_temp.inc()).incident_status; END IF;
   RAISE NOTICE 'PASS sin hueco en 8 semanas';
 END $$;
 ROLLBACK;
@@ -444,9 +475,10 @@ BEGIN
   PERFORM pg_temp.run();
   l := pg_temp.line('d0000000-0000-0000-0000-000000000001');
   -- Semana del 29/03 sigue saturada para N2/N3 -> primera semana libre: 05/04, N2.
-  IF l.suggested_action <> 'reroute' OR l.suggested_date IS DISTINCT FROM '2027-04-05'::date
-     OR l.suggested_target_node_id IS DISTINCT FROM 'b2000000-0000-0000-0000-000000000002'::uuid THEN
-    RAISE EXCEPTION 'FAIL baja larga propuesta % % %', l.suggested_action, l.suggested_date, l.suggested_target_node_id; END IF;
+  -- 2026-11-09: el motor ya no deja pendientes (se aplica).
+  IF l.status <> 'auto_resolved' OR l.final_action IS DISTINCT FROM 'reroute' OR l.final_date IS DISTINCT FROM '2027-04-05'::date
+     OR l.final_target_node_id IS DISTINCT FROM 'b2000000-0000-0000-0000-000000000002'::uuid THEN
+    RAISE EXCEPTION 'FAIL baja larga % % % %', l.status, l.final_action, l.final_date, l.final_target_node_id; END IF;
   RAISE NOTICE 'PASS baja larga -> otro nodo mes siguiente';
 END $$;
 ROLLBACK;
@@ -546,7 +578,8 @@ SELECT pg_temp.mk('d0000000-0000-0000-0000-000000000001','N1','N4','2027-03-10')
 DO $$
 DECLARE r text;
 BEGIN
-  PERFORM pg_temp.run();
+  -- 2026-11-09: el motor ya no deja pendientes: la linea pendiente se inserta a mano (no por el motor).
+  PERFORM pg_temp.pline('d0000000-0000-0000-0000-000000000001');
   PERFORM public.incident_apply_cancel((pg_temp.line('d0000000-0000-0000-0000-000000000001')).id, 'manager');
   r := public.incident_recompute_status('f0000000-0000-0000-0000-000000000001');
   IF r <> 'resolved' OR (pg_temp.inc()).incident_status <> 'resolved' OR (pg_temp.inc()).resolved_at IS NULL
