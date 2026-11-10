@@ -12,20 +12,20 @@ CREATE SCHEMA IF NOT EXISTS ops_case;
 REVOKE ALL ON SCHEMA ops_case FROM PUBLIC, anon, authenticated;
 
 -- Ficha de un panelista (para origen/destino): null si no hay panelista.
-CREATE OR REPLACE FUNCTION ops_case._party(p_id uuid)
+CREATE OR REPLACE FUNCTION ops_case._party(p_id uuid, p_account uuid)
 RETURNS jsonb LANGUAGE sql STABLE SECURITY DEFINER SET search_path = '' AS $$
   SELECT jsonb_build_object('panelist_id', p.id, 'code', p.panelist_code, 'name', p.name, 'language', p.language,
                             'city', btrim(c.name), 'node', n.auto_id)
     FROM public.panelists p
     LEFT JOIN public.nodes n ON n.id = p.node_id
     LEFT JOIN public.cities c ON c.id = n.city_id
-   WHERE p.id = p_id;
+   WHERE p.id = p_id AND p.account_id = p_account;
 $$;
 
 -- Panelista de un lado de la linea: el del detalle; si falta, el activo del nodo (el de menor codigo).
 CREATE OR REPLACE FUNCTION ops_case._side(p_panelist uuid, p_node uuid, p_account uuid)
 RETURNS uuid LANGUAGE sql STABLE SECURITY DEFINER SET search_path = '' AS $$
-  SELECT COALESCE(p_panelist,
+  SELECT COALESCE((SELECT p.id FROM public.panelists p WHERE p.id = p_panelist AND p.account_id = p_account),
            (SELECT p.id FROM public.panelists p
              WHERE p.node_id = p_node AND p.account_id = p_account AND p.status = 'active'
              ORDER BY p.panelist_code LIMIT 1));
@@ -40,25 +40,30 @@ BEGIN
   v_words := ARRAY(SELECT w FROM regexp_split_to_table(lower(btrim(COALESCE(p_name, ''))), '\s+') w WHERE length(w) >= 2);
   v_norm := CASE WHEN btrim(COALESCE(p_tag, '')) = '' THEN NULL ELSE public.normalize_tag(p_tag) END;
 
-  WITH cand AS (
+  -- La etiqueta se resuelve UNA vez: ids de panelistas que la tocan (origen/destino de la linea, con respaldo del
+  -- nodo, o con un caso de recepcion de esa etiqueta).
+  WITH tagged AS (
+    SELECT d.id AS did, d.account_id, d.origin_panelist_id, d.destination_panelist_id, d.origin_node_id, d.destination_node_id
+      FROM public.allocation_plan_details d
+     WHERE v_norm IS NOT NULL AND d.tag_id IS NOT NULL AND public.normalize_tag(d.tag_id) = v_norm),
+  tag_pan AS (
+    SELECT t.origin_panelist_id AS pid FROM tagged t WHERE t.origin_panelist_id IS NOT NULL
+    UNION SELECT t.destination_panelist_id FROM tagged t WHERE t.destination_panelist_id IS NOT NULL
+    UNION SELECT p.id FROM tagged t JOIN public.panelists p ON p.account_id = t.account_id AND p.node_id = t.origin_node_id
+           WHERE t.origin_panelist_id IS NULL
+    UNION SELECT p.id FROM tagged t JOIN public.panelists p ON p.account_id = t.account_id AND p.node_id = t.destination_node_id
+           WHERE t.destination_panelist_id IS NULL
+    UNION SELECT r.panelist_id FROM public.receipt_case r WHERE v_norm IS NOT NULL AND r.tag_norm = v_norm),
+  cand AS (
     SELECT p.id, p.panelist_code, p.name, a.name AS account, btrim(c.name) AS city,
            (cardinality(v_words) > 0 AND NOT EXISTS (
               SELECT 1 FROM unnest(v_words) w WHERE position(w IN lower(p.name)) = 0)) AS by_name,
-           (v_norm IS NOT NULL AND (
-              EXISTS (SELECT 1 FROM public.allocation_plan_details d
-                       WHERE d.account_id = p.account_id AND d.tag_id IS NOT NULL AND public.normalize_tag(d.tag_id) = v_norm
-                         AND (d.origin_panelist_id = p.id OR d.destination_panelist_id = p.id
-                              OR (d.origin_panelist_id IS NULL AND d.origin_node_id = p.node_id)
-                              OR (d.destination_panelist_id IS NULL AND d.destination_node_id = p.node_id)))
-              OR EXISTS (SELECT 1 FROM public.receipt_case r
-                          WHERE r.account_id = p.account_id AND r.panelist_id = p.id AND r.tag_norm = v_norm))) AS by_tag
+           (p.id IN (SELECT pid FROM tag_pan)) AS by_tag
       FROM public.panelists p
       JOIN public.accounts a ON a.id = p.account_id
       LEFT JOIN public.nodes n ON n.id = p.node_id
       LEFT JOIN public.cities c ON c.id = n.city_id
      WHERE p.status = 'active'),
-  -- Con nombre: solo los que coinciden por nombre (la etiqueta los ordena primero); solo si ninguno coincide por
-  -- nombre se ofrecen los que coinciden por etiqueta.
   sel AS (SELECT * FROM cand
            WHERE CASE WHEN EXISTS (SELECT 1 FROM cand c2 WHERE c2.by_name) THEN by_name ELSE by_tag END
            ORDER BY (by_name AND by_tag) DESC, by_name DESC, panelist_code LIMIT 10)
@@ -102,8 +107,8 @@ BEGIN
   SELECT COALESCE(jsonb_agg(jsonb_build_object(
       'id', d.id, 'tag', d.tag_id, 'status', d.status, 'scheduled', d.fecha_programada,
       'sent_at', d.sent_at, 'received_at', d.received_at,
-      'origin', ops_case._party(ops_case._side(d.origin_panelist_id, d.origin_node_id, v_acc)),
-      'destination', ops_case._party(ops_case._side(d.destination_panelist_id, d.destination_node_id, v_acc)),
+      'origin', ops_case._party(ops_case._side(d.origin_panelist_id, d.origin_node_id, v_acc), v_acc),
+      'destination', ops_case._party(ops_case._side(d.destination_panelist_id, d.destination_node_id, v_acc), v_acc),
       'carrier', ca.name, 'product', pr.description, 'product_code', pr.code,
       'standards', (SELECT COALESCE(jsonb_agg(jsonb_build_object('standard_time', s.standard_time, 'time_unit', s.time_unit,
                                                                   'success_percentage', s.success_percentage)
@@ -114,9 +119,9 @@ BEGIN
     ) ORDER BY d.fecha_programada, d.id), '[]'::jsonb)
     INTO v_details
     FROM public.allocation_plan_details d
-    LEFT JOIN public.allocation_plans ap ON ap.id = d.plan_id
-    LEFT JOIN public.carriers ca ON ca.id = ap.carrier_id
-    LEFT JOIN public.products pr ON pr.id = ap.product_id
+    LEFT JOIN public.allocation_plans ap ON ap.id = d.plan_id AND ap.account_id = v_acc
+    LEFT JOIN public.carriers ca ON ca.id = ap.carrier_id AND ca.account_id = v_acc
+    LEFT JOIN public.products pr ON pr.id = ap.product_id AND pr.account_id = v_acc
     LEFT JOIN public.nodes no ON no.id = d.origin_node_id
     LEFT JOIN public.nodes nd ON nd.id = d.destination_node_id
    WHERE d.id = ANY (v_detail_ids);
@@ -163,7 +168,7 @@ BEGIN
                             AND EXISTS (SELECT 1 FROM public.allocation_plan_details d WHERE d.id = ANY (v_detail_ids) AND d.origin_node_id = x.origin_node_id
                                           AND date_trunc('month', d.fecha_programada) = date_trunc('month', x.fecha_programada))
                           ORDER BY x.fecha_programada, x.tag_id LIMIT 30) s
-                   LEFT JOIN public.panelists dp ON dp.id = ops_case._side(s.destination_panelist_id, s.destination_node_id, v_acc)),
+                   LEFT JOIN public.panelists dp ON dp.account_id = v_acc AND dp.id = ops_case._side(s.destination_panelist_id, s.destination_node_id, v_acc)),
     'receipt_cases', (SELECT COALESCE(jsonb_agg(jsonb_build_object('id', q.id, 'tag_raw', q.tag_raw, 'tag_norm', q.tag_norm,
                            'reason', q.reason, 'status', q.status, 'attempts', q.attempts,
                            'first_attempt_at', q.first_attempt_at, 'last_attempt_at', q.last_attempt_at,
@@ -174,7 +179,7 @@ BEGIN
                                  AND ((v_norm IS NOT NULL AND r.tag_norm = v_norm)
                                       OR (r.panelist_id = p_panelist AND r.last_attempt_at >= now() - interval '30 days'))
                                ORDER BY r.last_attempt_at DESC LIMIT 20) q
-                        LEFT JOIN public.panelists pp ON pp.id = q.panelist_id),
+                        LEFT JOIN public.panelists pp ON pp.id = q.panelist_id AND pp.account_id = v_acc),
     'incidents', (SELECT COALESCE(jsonb_agg(jsonb_build_object('id', q.id, 'panelist_code', pp.panelist_code,
                            'category', q.category, 'status', q.status, 'reported_at', q.reported_at,
                            'description', q.description) ORDER BY q.reported_at DESC), '[]'::jsonb)
@@ -182,12 +187,12 @@ BEGIN
                            WHERE i.account_id = v_acc AND i.panelist_id = ANY (v_involved)
                              AND i.reported_at >= now() - interval '30 days'
                            ORDER BY i.reported_at DESC LIMIT 20) q
-                    JOIN public.panelists pp ON pp.id = q.panelist_id),
+                    JOIN public.panelists pp ON pp.id = q.panelist_id AND pp.account_id = v_acc),
     'unavailability', (SELECT COALESCE(jsonb_agg(jsonb_build_object('id', u.id, 'panelist_code', pp.panelist_code,
                            'start_date', u.start_date, 'end_date', u.end_date, 'reason', u.reason,
                            'review_status', u.review_status) ORDER BY u.start_date), '[]'::jsonb)
                          FROM public.panelist_unavailability u
-                         JOIN public.panelists pp ON pp.id = u.panelist_id
+                         JOIN public.panelists pp ON pp.id = u.panelist_id AND pp.account_id = v_acc
                         WHERE u.account_id = v_acc AND u.status = 'active' AND u.panelist_id = ANY (v_involved)
                           AND u.start_date <= v_today + 30 AND u.end_date >= v_today - 30),
     'messages', (SELECT COALESCE(jsonb_agg(jsonb_build_object('incident_kind', q.incident_kind, 'incident_id', q.incident_id,
@@ -196,7 +201,7 @@ BEGIN
                    FROM (SELECT m.* FROM public.incident_message m
                           WHERE m.account_id = v_acc AND m.panelist_id = ANY (v_involved)
                           ORDER BY m.created_at DESC LIMIT 20) q
-                   JOIN public.panelists pp ON pp.id = q.panelist_id),
+                   JOIN public.panelists pp ON pp.id = q.panelist_id AND pp.account_id = v_acc),
     'anchor', v_anchor
   );
 END $$;

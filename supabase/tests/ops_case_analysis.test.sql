@@ -38,13 +38,19 @@ SELECT 'a0000000-0000-0000-0000-000000000001','cc000000-0000-0000-0000-000000000
 -- caso de recepcion abierto de Samwel y baja activa
 INSERT INTO public.receipt_case (id, account_id, panelist_id, telegram_id, tag_raw, tag_norm, detail_id, reason, status, attempts, first_attempt_at, last_attempt_at)
 VALUES ('f1000000-0000-0000-0000-000000000001','a0000000-0000-0000-0000-000000000001','e3000000-0000-0000-0000-000000000003','3003',
-        '00011844','00011844','d1000000-0000-0000-0000-000000000001','not_found','needs_decision',2,now(),now());
+        '00011844','00011844','d1000000-0000-0000-0000-000000000001','other_city_tag','needs_decision',2,now(),now());
 INSERT INTO public.panelist_unavailability (id, panelist_id, account_id, start_date, end_date, reason, status)
 VALUES ('f2000000-0000-0000-0000-000000000001','e3000000-0000-0000-0000-000000000003','a0000000-0000-0000-0000-000000000001',
         current_date - 1, current_date + 6, 'vacation', 'active');
 -- incidencia de la cuenta 2
 INSERT INTO public.panelist_incident (id, account_id, panelist_id, category) VALUES
   ('f3000000-0000-0000-0000-000000000009','a0000000-0000-0000-0000-000000000002','e9000000-0000-0000-0000-000000000009','other');
+-- incidencia abierta ligada a la linea (James) y mensajes: uno de un implicado (Arbe), uno de la cuenta 2 (no debe salir)
+INSERT INTO public.panelist_incident (id, account_id, panelist_id, category, status, description, allocation_plan_detail_id) VALUES
+  ('f3000000-0000-0000-0000-000000000004','a0000000-0000-0000-0000-000000000001','e4000000-0000-0000-0000-000000000004','other','open','No llego la carta','d1000000-0000-0000-0000-000000000001');
+INSERT INTO public.incident_message (account_id, panelist_id, incident_kind, incident_id, direction, author, body, status) VALUES
+  ('a0000000-0000-0000-0000-000000000001','e1000000-0000-0000-0000-000000000001','reported','f3000000-0000-0000-0000-000000000004','inbound','panelist','Mensaje de Arbe','received'),
+  ('a0000000-0000-0000-0000-000000000002','e9000000-0000-0000-0000-000000000009','reported','f3000000-0000-0000-0000-000000000009','inbound','panelist','Mensaje de otra cuenta','received');
 
 DO $$
 DECLARE r jsonb; v_err text; t text := 't0ken-de-prueba';
@@ -79,6 +85,23 @@ BEGIN
   PERFORM pg_temp.fail_if(NOT EXISTS (SELECT 1 FROM jsonb_array_elements(r->'unavailability') u
                           WHERE u->>'id' = 'f2000000-0000-0000-0000-000000000001' AND u->>'panelist_code' = 'P3'), 'unavailability: ' || (r->'unavailability')::text);
   PERFORM pg_temp.fail_if(jsonb_typeof(r->'messages') <> 'array' OR jsonb_typeof(r->'incidents') <> 'array', 'arrays');
+
+  -- incidencias y mensajes de los implicados; nada de la cuenta 2
+  PERFORM pg_temp.fail_if(NOT EXISTS (SELECT 1 FROM jsonb_array_elements(r->'incidents') i
+            WHERE i->>'id' = 'f3000000-0000-0000-0000-000000000004' AND i->>'panelist_code' = 'P4' AND i->>'category' = 'other'
+              AND i->>'status' = 'open' AND i->>'description' = 'No llego la carta' AND i ? 'reported_at'), 'incidents: ' || (r->'incidents')::text);
+  PERFORM pg_temp.fail_if(jsonb_array_length(r->'messages') <> 1, 'messages 1: ' || (r->'messages')::text);
+  PERFORM pg_temp.fail_if(r->'messages'->0->>'body' <> 'Mensaje de Arbe' OR r->'messages'->0->>'panelist_code' <> 'P1'
+            OR r->'messages'->0->>'incident_kind' <> 'reported' OR r->'messages'->0->>'direction' <> 'inbound'
+            OR r->'messages'->0->>'author' <> 'panelist' OR NOT (r->'messages'->0 ? 'created_at')
+            OR r->'messages'->0->>'incident_id' <> 'f3000000-0000-0000-0000-000000000004', 'message keys: ' || (r->'messages'->0)::text);
+  PERFORM pg_temp.fail_if(r::text LIKE '%otra cuenta%' OR r::text LIKE '%P9%', 'fuga de cuenta 2');
+
+  -- anchor por defecto sin caso de recepcion abierto: incidencia abierta ligada a la linea
+  r := public.ops_case_data(t, 'e1000000-0000-0000-0000-000000000001', '00011844');
+  PERFORM pg_temp.fail_if(r->'anchor'->>'kind' <> 'reported' OR r->'anchor'->>'id' <> 'f3000000-0000-0000-0000-000000000004', 'anchor reported: ' || (r->'anchor')::text);
+  r := public.ops_case_data(t, 'e1000000-0000-0000-0000-000000000001', '99999999');
+  PERFORM pg_temp.fail_if(r->'anchor' <> 'null'::jsonb OR jsonb_array_length(r->'details') <> 0, 'sin etiqueta: sin anchor');
 
   -- anchor explicito y de otra cuenta
   r := public.ops_case_data(t, p_samwel, '00011844', 'unavailability', 'f2000000-0000-0000-0000-000000000001');
