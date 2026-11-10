@@ -156,3 +156,41 @@ BEGIN
   PERFORM pg_temp.expect_msg(format('SELECT public.mark_incident_conversation_read(%L,%L)', 'receipt', v_case), 'Cross-tenant');
 END $$;
 ROLLBACK;
+
+-- ===== RLS: los mensajes de casos de recepcion solo los ven admins de la cuenta (paridad con receipt_case)
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+SELECT pg_temp.setup();
+INSERT INTO auth.users (id, email) VALUES ('96000000-0000-0000-0000-000000000096','u96@t.l');
+INSERT INTO public.profiles (id, email, full_name, role, account_id)
+VALUES ('96000000-0000-0000-0000-000000000096','u96@t.l','Normal','user','a0000000-0000-0000-0000-000000000001');
+SELECT pg_temp.mk_case('e4000000-0000-0000-0000-000000000004', '00012345') AS vcase \gset
+SELECT public.log_incident_message('receipt', :'vcase', 'inbound', 'panelist', 'hola recepcion');
+INSERT INTO public.incident_message (account_id, panelist_id, incident_kind, incident_id, direction, author, body, status)
+VALUES ('a0000000-0000-0000-0000-000000000001','e4000000-0000-0000-0000-000000000004','reported',gen_random_uuid(),'inbound','panelist','rep','received');
+-- usuario normal 96
+SELECT set_config('request.jwt.claim.sub','96000000-0000-0000-0000-000000000096', true);
+SET LOCAL ROLE authenticated;
+SELECT set_config('t.r96', (SELECT count(*) FROM public.incident_message WHERE incident_kind='receipt')::text, true);
+SELECT set_config('t.p96', (SELECT count(*) FROM public.incident_message WHERE incident_kind='reported')::text, true);
+RESET ROLE;
+-- admin 99 (cuenta 1)
+SELECT set_config('request.jwt.claim.sub','99000000-0000-0000-0000-000000000099', true);
+SET LOCAL ROLE authenticated;
+SELECT set_config('t.r99', (SELECT count(*) FROM public.incident_message WHERE incident_kind='receipt')::text, true);
+RESET ROLE;
+-- admin 98 (cuenta 2)
+SELECT set_config('request.jwt.claim.sub','98000000-0000-0000-0000-000000000098', true);
+SET LOCAL ROLE authenticated;
+SELECT set_config('t.r98', (SELECT count(*) FROM public.incident_message)::text, true);
+RESET ROLE;
+DO $$
+BEGIN
+  IF current_setting('t.r96') <> '0' THEN RAISE EXCEPTION 'FAIL usuario normal ve mensajes receipt (%)', current_setting('t.r96'); END IF;
+  IF current_setting('t.p96') <> '1' THEN RAISE EXCEPTION 'FAIL usuario normal no ve reported (%)', current_setting('t.p96'); END IF;
+  IF current_setting('t.r99') <> '1' THEN RAISE EXCEPTION 'FAIL admin no ve receipt (%)', current_setting('t.r99'); END IF;
+  IF current_setting('t.r98') <> '0' THEN RAISE EXCEPTION 'FAIL admin otra cuenta ve mensajes (%)', current_setting('t.r98'); END IF;
+  RAISE NOTICE 'PASS RLS mensajes receipt';
+END $$;
+ROLLBACK;

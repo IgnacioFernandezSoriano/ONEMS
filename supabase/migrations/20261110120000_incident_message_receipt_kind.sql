@@ -114,3 +114,14 @@ BEGIN
 END; $$;
 REVOKE ALL ON FUNCTION public.mark_incident_conversation_read(text,uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.mark_incident_conversation_read(text,uuid) TO authenticated, service_role;
+
+-- ===== 7) RLS: paridad con receipt_case (solo admins de la cuenta o superadmin ven los casos de recepcion) =====
+-- Sin esto, un usuario normal de la cuenta podria leer los mensajes de los casos de recepcion.
+DROP POLICY IF EXISTS incident_message_select ON public.incident_message;
+CREATE POLICY incident_message_select ON public.incident_message
+  FOR SELECT TO authenticated
+  USING (
+    is_superadmin()
+    OR (incident_kind <> 'receipt' AND account_id = current_user_account_id())
+    OR (incident_kind = 'receipt' AND current_user_role() = 'admin' AND account_id = current_user_account_id())
+  );
