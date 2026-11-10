@@ -256,6 +256,26 @@ CREATE POLICY case_analysis_request_select ON public.case_analysis_request
 REVOKE ALL ON public.case_analysis_request FROM PUBLIC, anon, authenticated;
 GRANT SELECT ON public.case_analysis_request TO authenticated;
 
+-- ===== Puerta por cuenta =====
+-- Cuentas con análisis de casos desde ONEMS. Ampliar = migración nueva aprobada por Ignacio (igual que case.send_accounts del agente).
+CREATE OR REPLACE FUNCTION public.case_analysis_allowed(p_account uuid)
+RETURNS boolean LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = '' AS $$
+DECLARE v_allowed text[] := ARRAY['DEMO2'];
+BEGIN
+  IF p_account IS NULL THEN RETURN false; END IF;
+  IF '*' = ANY (v_allowed) THEN RETURN true; END IF;
+  RETURN EXISTS (SELECT 1 FROM public.accounts a WHERE a.id = p_account AND a.name = ANY (v_allowed));
+END $$;
+REVOKE ALL ON FUNCTION public.case_analysis_allowed(uuid) FROM PUBLIC, anon, authenticated;
+
+-- La pantalla la consulta una vez para mostrar u ocultar el análisis (la cuenta del propio usuario).
+CREATE OR REPLACE FUNCTION public.case_analysis_enabled()
+RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path = '' AS $$
+  SELECT public.case_analysis_allowed(public.current_user_account_id());
+$$;
+REVOKE ALL ON FUNCTION public.case_analysis_enabled() FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.case_analysis_enabled() TO authenticated;
+
 -- ===== ONEMS (authenticated): pedir y consultar =====
 CREATE OR REPLACE FUNCTION public.request_case_analysis(p_incident_kind text, p_incident_id uuid)
 RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
@@ -267,6 +287,8 @@ BEGIN
   IF v_account IS NULL THEN RAISE EXCEPTION 'incident not found'; END IF;
   PERFORM public.assert_same_account(v_account);
   IF p_incident_kind = 'receipt' THEN PERFORM public.receipt_mgr_check(v_account); END IF;
+  IF NOT public.case_analysis_allowed(v_account) THEN
+    RAISE EXCEPTION 'case analysis not enabled for this account' USING ERRCODE = '42501'; END IF;
   -- evita dos peticiones a la vez para la misma incidencia
   PERFORM pg_advisory_xact_lock(hashtextextended(p_incident_kind || ':' || p_incident_id::text, 0));
   SELECT r.id INTO v_id FROM public.case_analysis_request r
@@ -422,3 +444,40 @@ GRANT EXECUTE ON FUNCTION public.ops_case_claim(text) TO anon;
 GRANT EXECUTE ON FUNCTION public.ops_case_finish(text, uuid, jsonb, text, text) TO anon;
 GRANT EXECUTE ON FUNCTION public.ops_case_note(text, text, uuid, text) TO anon;
 GRANT EXECUTE ON FUNCTION public.ops_case_send(text, text, uuid, uuid, text, text) TO anon;
+
+-- ===== send_case_message con la misma puerta (solo lo usa el panel de análisis) =====
+CREATE OR REPLACE FUNCTION public.send_case_message(
+  p_incident_kind text, p_incident_id uuid, p_panelist_id uuid, p_body text, p_draft_key text DEFAULT NULL)
+RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE v_account uuid; v_new uuid;
+BEGIN
+  IF p_incident_kind NOT IN ('reported','unavailability','receipt') THEN
+    RAISE EXCEPTION 'invalid incident kind'; END IF;
+  SELECT o.account_id INTO v_account FROM public.incident_owner(p_incident_kind, p_incident_id) o;
+  IF v_account IS NULL THEN RAISE EXCEPTION 'incident not found'; END IF;
+  PERFORM assert_same_account(v_account);
+  -- la pantalla de errores de recepcion es solo para admins de la cuenta
+  IF p_incident_kind = 'receipt' THEN PERFORM public.receipt_mgr_check(v_account); END IF;
+  IF NOT public.case_analysis_allowed(v_account) THEN
+    RAISE EXCEPTION 'case analysis not enabled for this account' USING ERRCODE = '42501'; END IF;
+  IF p_panelist_id IS NULL
+     OR NOT EXISTS (SELECT 1 FROM panelists WHERE id = p_panelist_id AND account_id = v_account) THEN
+    RAISE EXCEPTION 'Cross-tenant access denied'; END IF;
+  IF NULLIF(btrim(p_body), '') IS NULL THEN RAISE EXCEPTION 'empty message'; END IF;
+  -- mismo limite que rpc_send_manager_notice y el textarea
+  IF length(p_body) > 3000 THEN RAISE EXCEPTION 'message too long'; END IF;
+  -- misma regla que ops_case_send: panelista activo con id de Telegram numerico
+  IF NOT EXISTS (SELECT 1 FROM panelists WHERE id = p_panelist_id AND status = 'active') THEN
+    RAISE EXCEPTION 'panelist not active'; END IF;
+  IF NOT EXISTS (SELECT 1 FROM panelists WHERE id = p_panelist_id AND btrim(COALESCE(telegram_id, '')) ~ '^[0-9]+$') THEN
+    RAISE EXCEPTION 'panelist has no telegram'; END IF;
+  INSERT INTO incident_message (account_id, panelist_id, incident_kind, incident_id,
+                                direction, author, body, meta, status)
+  VALUES (v_account, p_panelist_id, p_incident_kind, p_incident_id,
+          'outbound', 'manager', btrim(p_body),
+          jsonb_build_object('manager_user_id', auth.uid(), 'case_draft_key', p_draft_key), 'pending_send')
+  RETURNING id INTO v_new;
+  RETURN v_new;
+END; $$;
+REVOKE ALL ON FUNCTION public.send_case_message(text,uuid,uuid,text,text) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.send_case_message(text,uuid,uuid,text,text) TO authenticated;

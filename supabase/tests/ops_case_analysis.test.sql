@@ -10,6 +10,7 @@ BEGIN;
 \ir fixtures/incident_city.sql
 \ir fixtures/no_incident_triggers.sql
 INSERT INTO ops_test.secret(token_sha256) VALUES (encode(extensions.digest('t0ken-de-prueba','sha256'),'hex'));
+UPDATE public.accounts SET name = 'DEMO2' WHERE id = 'a0000000-0000-0000-0000-000000000001';
 UPDATE public.panelists SET name = 'Arbe Tester', telegram_id = '1001' WHERE panelist_code = 'P1';
 UPDATE public.panelists SET name = 'James Tester', language = 'fr' WHERE panelist_code = 'P4';
 UPDATE public.panelists SET name = 'Samwel Mettet', telegram_id = '3003' WHERE panelist_code = 'P3';
@@ -60,7 +61,7 @@ BEGIN
   r := public.ops_case_find_panelists(t, 'Samwel Mettet', '00011844');
   PERFORM pg_temp.fail_if(jsonb_array_length(r) <> 1, 'find 1 fila: ' || r::text);
   PERFORM pg_temp.fail_if(NOT (r->0->>'by_name')::bool OR NOT (r->0->>'by_tag')::bool, 'by_name/by_tag: ' || r::text);
-  PERFORM pg_temp.fail_if(r->0->>'code' <> 'P3' OR r->0->>'account' <> 'Acc' OR r->0->>'city' <> 'City1', 'campos find: ' || r::text);
+  PERFORM pg_temp.fail_if(r->0->>'code' <> 'P3' OR r->0->>'account' <> 'DEMO2' OR r->0->>'city' <> 'City1', 'campos find: ' || r::text);
   r := public.ops_case_find_panelists(t, 'Samwel', NULL);
   PERFORM pg_temp.fail_if(jsonb_array_length(r) <> 2, 'find Samwel 2 filas: ' || r::text);
   r := public.ops_case_find_panelists(t, NULL, '00011844');   -- solo etiqueta: origen, destino y receptor
@@ -68,7 +69,7 @@ BEGIN
 
   -- data
   r := public.ops_case_data(t, p_samwel, '00011844');
-  PERFORM pg_temp.fail_if(r->'account'->>'name' <> 'Acc', 'account: ' || (r->'account')::text);
+  PERFORM pg_temp.fail_if(r->'account'->>'name' <> 'DEMO2', 'account: ' || (r->'account')::text);
   PERFORM pg_temp.fail_if(r->'panelist'->>'code' <> 'P3' OR r->'panelist'->>'node' <> 'N3'
                           OR r->'panelist'->>'city' <> 'City1' OR NOT (r->'panelist'->>'has_telegram')::bool, 'panelist: ' || (r->'panelist')::text);
   PERFORM pg_temp.fail_if(jsonb_array_length(r->'details') <> 1, 'details 1');
@@ -169,7 +170,7 @@ BEGIN
 
   -- claim
   r := public.ops_case_claim(t);
-  PERFORM pg_temp.fail_if((r->>'request_id')::uuid <> v_req OR r->>'account' <> 'Acc' OR r->>'incident_kind' <> 'receipt'
+  PERFORM pg_temp.fail_if((r->>'request_id')::uuid <> v_req OR r->>'account' <> 'DEMO2' OR r->>'incident_kind' <> 'receipt'
      OR (r->>'incident_id')::uuid <> v_case OR r->>'tag' <> '00011844'
      OR (r->>'panelist_id')::uuid <> 'e3000000-0000-0000-0000-000000000003', 'claim: ' || r::text);
   PERFORM pg_temp.fail_if((SELECT status FROM public.case_analysis_request WHERE id = v_req) <> 'running'
@@ -423,6 +424,36 @@ BEGIN
   PERFORM pg_temp.fail_if(public.request_case_analysis('receipt', v_case) IS NULL, '99 pide receipt');
   PERFORM pg_temp.fail_if(public.send_case_message('receipt', v_case, v_arbe, 'x', 'k99') IS NULL, '99 send_case_message receipt');
   PERFORM pg_temp.fail_if(public.case_analysis_status(v_id)->>'status' IS NULL, '99 status receipt');
+END $$;
+
+-- (7) puerta por cuenta: solo DEMO2 (cuenta 1 renombrada arriba); la cuenta 2 queda fuera
+DO $$
+DECLARE v_st text;
+BEGIN
+  PERFORM pg_temp.act('99000000-0000-0000-0000-000000000099');
+  PERFORM pg_temp.fail_if(public.case_analysis_enabled() IS DISTINCT FROM true, 'enabled cuenta DEMO2');
+  PERFORM pg_temp.act('98000000-0000-0000-0000-000000000098');
+  PERFORM pg_temp.fail_if(public.case_analysis_enabled() IS DISTINCT FROM false, 'enabled cuenta 2 debe ser false');
+  UPDATE public.profiles SET role = 'admin' WHERE id = '98000000-0000-0000-0000-000000000098';
+  BEGIN
+    PERFORM public.request_case_analysis('reported', 'f3000000-0000-0000-0000-000000000009');
+    RAISE EXCEPTION 'FAIL: cuenta 2 pidio analisis';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_st = RETURNED_SQLSTATE;
+    PERFORM pg_temp.fail_if(v_st <> '42501' OR SQLERRM NOT LIKE '%not enabled%', 'request cuenta 2: ' || v_st || ' ' || SQLERRM);
+  END;
+  BEGIN
+    PERFORM public.send_case_message('reported', 'f3000000-0000-0000-0000-000000000009', 'e9000000-0000-0000-0000-000000000009', 'x', 'k98');
+    RAISE EXCEPTION 'FAIL: cuenta 2 envio mensaje';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_st = RETURNED_SQLSTATE;
+    PERFORM pg_temp.fail_if(v_st <> '42501' OR SQLERRM NOT LIKE '%not enabled%', 'send cuenta 2: ' || v_st || ' ' || SQLERRM);
+  END;
+  -- helper interno cerrado a usuarios
+  PERFORM pg_temp.fail_if(has_function_privilege('authenticated', 'public.case_analysis_allowed(uuid)', 'EXECUTE')
+    OR has_function_privilege('anon', 'public.case_analysis_allowed(uuid)', 'EXECUTE')
+    OR has_function_privilege('anon', 'public.case_analysis_enabled()', 'EXECUTE')
+    OR NOT has_function_privilege('authenticated', 'public.case_analysis_enabled()', 'EXECUTE'), 'grants puerta');
 END $$;
 
 -- RLS: el 96 (cuenta 1) ve la peticion; el 98 no. Sin escritura directa.

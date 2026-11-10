@@ -32,7 +32,26 @@ export type CaseAnalysisState = 'idle' | 'running' | 'done' | 'failed'
 
 const POLL_MS = 5000
 
+// Puerta por cuenta: el servidor decide (case_analysis_enabled); null = aun consultando o sin respuesta.
+export function useCaseAnalysisEnabled(): boolean | null {
+  const [enabled, setEnabled] = useState<boolean | null>(null)
+  useEffect(() => {
+    let alive = true
+    void (async () => {
+      try {
+        const { data, error } = await supabase.rpc('case_analysis_enabled')
+        if (alive) setEnabled(error ? false : data === true)
+      } catch {
+        if (alive) setEnabled(false)
+      }
+    })()
+    return () => { alive = false }
+  }, [])
+  return enabled
+}
+
 export function useCaseAnalysis(kind: ConversationKind, incidentId: string) {
+  const enabled = useCaseAnalysisEnabled()
   const [state, setState] = useState<CaseAnalysisState>('idle')
   const [result, setResult] = useState<CaseAnalysisResult | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -106,5 +125,5 @@ export function useCaseAnalysis(kind: ConversationKind, incidentId: string) {
     if (alive.current) setSent(prev => new Set(prev).add(draft.key))
   }, [kind, incidentId])
 
-  return { state, result, error, start, send, sent }
+  return { state, result, error, start, send, sent, enabled }
 }

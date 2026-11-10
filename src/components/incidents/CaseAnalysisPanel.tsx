@@ -55,7 +55,7 @@ function DraftEditor({ draft, sent, onSend }: {
 
 export function CaseAnalysisPanel({ kind, incidentId }: Props) {
   const { t } = useTranslation()
-  const { state, result, error, start, send, sent } = useCaseAnalysis(kind, incidentId)
+  const { state, result, error, start, send, sent, enabled } = useCaseAnalysis(kind, incidentId)
   const a = result?.analysis
   const drafts = result?.drafts ?? []
   // con borrador: su nombre; sin borrador: el que trae el agente en people ("Nombre (CÓDIGO)")
@@ -67,6 +67,9 @@ export function CaseAnalysisPanel({ kind, incidentId }: Props) {
       <p className="text-sm whitespace-pre-wrap">{text}</p>
     </div>
   ) : null
+
+  // solo cuentas habilitadas (hoy DEMO2); el servidor tambien lo exige
+  if (enabled !== true) return null
 
   return (
     <div className="border rounded p-4 mt-4 max-w-3xl">

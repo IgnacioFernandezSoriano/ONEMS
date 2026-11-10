@@ -4,6 +4,7 @@
 CREATE FUNCTION pg_temp.fail_if(p_cond boolean, p_msg text) RETURNS void LANGUAGE plpgsql AS $$
 BEGIN IF p_cond THEN RAISE EXCEPTION 'FAIL %', p_msg; END IF; END $$;
 CREATE FUNCTION pg_temp.setup() RETURNS void LANGUAGE sql AS $$
+  UPDATE public.accounts SET name = 'DEMO2' WHERE id = 'a0000000-0000-0000-0000-000000000001';
   UPDATE public.panelists SET telegram_id = ' 4004 ' WHERE id = 'e4000000-0000-0000-0000-000000000004';
   UPDATE public.panelists SET telegram_id = '1001' WHERE id = 'e1000000-0000-0000-0000-000000000001';
   UPDATE public.profiles SET role = 'admin' WHERE id IN ('99000000-0000-0000-0000-000000000099',
