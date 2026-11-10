@@ -5229,7 +5229,7 @@ case_analysis.probable_with,probable cause (likelihood: {level})
 case_analysis.problem,Problem
 case_analysis.cause,Cause
 case_analysis.solution,Solution
-case_analysis.fix_available,This case can be fixed from the agent (R4) - Ignacio applies it in Telegram
+case_analysis.fix_available,The operations agent can fix this case automatically (R4); ask the support team to do it.
 case_analysis.copy_prompt,Copy prompt for Claude Code
 case_analysis.copied,Copied
 case_analysis.show_detail,Show detail

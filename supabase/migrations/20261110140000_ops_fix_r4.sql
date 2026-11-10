@@ -26,7 +26,7 @@
 --   normalize_tag(tag_id) = tag_norm, en 'sent', sin received_at, con sent_at <= first_attempt_at; ningún otro
 --   caso abierto con la misma etiqueta; panelista del caso activo, con nodo, de la misma cuenta; y nada que
 --   impida la copia a ONE DB (panelista de origen, plan con transportista y producto, ciudades, sin copia
---   previa) ni que la regla POBOX anule la recepción.
+--   previa) ni que la regla POBOX anule la recepción (si no se puede comprobar la regla POBOX, tampoco aplica).
 -- ============================================================
 
 -- ---------- permisos previos: valores nuevos en los CHECK ----------
@@ -66,7 +66,7 @@ $$;
 
 -- Comprueba las condiciones de R4 para un caso de recepción. Falla solo si el caso no existe; si no aplica
 -- devuelve applicable = false y el motivo. Claves: applicable, reason, account_id, account, case_id,
--- case_status, tag, detail_id, origin_code, current_dest_code, new_dest_code, new_node, received_at,
+-- case_status (receipt_case.status: 'fixed' tras aplicar R4, otro valor si lo cerró otra persona), tag, detail_id, origin_code, current_dest_code, new_dest_code, new_node, received_at,
 -- sla_hours (NULL si no hay norma de entrega para el par nuevo) y, internas, panelist_id y new_node_id.
 CREATE OR REPLACE FUNCTION ops_fix._r4_check(p_case_id uuid)
 RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = '' AS $$
@@ -186,14 +186,15 @@ BEGIN
       v_sim.destination_panelist_id := p.id;
       v_sim.status := 'received';
       v_sim.received_at := c.first_attempt_at;
+      -- Si la comprobación falla, no se da por buena (fail-closed): R4 no aplica.
       BEGIN
         v_pobox := public.pobox_receipt_check(v_sim);
+        IF v_pobox IS NOT NULL THEN
+          v_reason := format('la regla POBOX anularía la recepción (%s)', v_pobox);
+        END IF;
       EXCEPTION WHEN OTHERS THEN
-        v_pobox := NULL;
+        v_reason := 'no pude comprobar la regla POBOX';
       END;
-      IF v_pobox IS NOT NULL THEN
-        v_reason := format('la regla POBOX anularía la recepción (%s)', v_pobox);
-      END IF;
     END IF;
   END IF;
 
@@ -223,6 +224,7 @@ DECLARE v jsonb;
 BEGIN
   PERFORM ops_test._check(p_token);
   v := ops_fix._r4_check(p_case_id);
+  -- case_status se devuelve siempre: el agente distingue «aplicado» (fixed) de «cerrado por otra persona».
   RETURN v - 'account_id' - 'panelist_id' - 'new_node_id';
 END $$;
 

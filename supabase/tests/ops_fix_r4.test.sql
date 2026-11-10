@@ -31,7 +31,7 @@ VALUES ('f1000000-0000-0000-0000-000000000001','a0000000-0000-0000-0000-00000000
         '11844','00011844',NULL,'other_city_tag','needs_decision',2,'2026-11-02 10:00+00','2026-11-03 10:00+00');
 
 DO $$
-DECLARE r jsonb; e jsonb; v_err text; t text := 't0ken-de-prueba'; v_log bigint; v_log2 bigint; v_s text; v_onedb uuid;
+DECLARE r jsonb; e jsonb; v_pv jsonb; v_err text; t text := 't0ken-de-prueba'; v_log bigint; v_log2 bigint; v_s text; v_onedb uuid;
   v_case uuid := 'f1000000-0000-0000-0000-000000000001';
   v_det uuid := 'd1000000-0000-0000-0000-000000000001';
   d public.allocation_plan_details; c public.receipt_case;
@@ -88,6 +88,9 @@ BEGIN
   PERFORM pg_temp.fail_if((SELECT count(*) FROM public.one_db o WHERE o.allocation_detail_id = v_det) <> 1, 'copia en one_db');
   PERFORM pg_temp.fail_if((SELECT o.destination_city_name FROM public.one_db o WHERE o.id = v_onedb) <> 'City2', 'one_db ciudad nueva');
   PERFORM pg_temp.fail_if((SELECT (l.after->>'one_db_id')::uuid FROM ops_fix.log l WHERE l.id = v_log) IS DISTINCT FROM v_onedb, 'log after one_db_id');
+  -- la vista previa tras aplicar devuelve el estado del caso (fixed) para que el agente sepa que se aplico
+  v_pv := public.ops_fix_r4_preview(t, v_case);
+  PERFORM pg_temp.fail_if((v_pv->>'applicable')::bool OR v_pv->>'case_status' IS DISTINCT FROM 'fixed', 'preview tras apply case_status: ' || v_pv::text);
 
   -- segundo apply: error
   BEGIN
@@ -145,8 +148,26 @@ BEGIN
   END;
   PERFORM pg_temp.fail_if(pg_temp.state() <> v_s, 'undo 24 h toco algo');
 
-  -- ---------- undo tras cambiar a mano la linea ----------
+  -- ---------- undo tras cambiar a mano el caso (subtransaccion que se deshace) ----------
   UPDATE ops_fix.log SET applied_at = now() WHERE id = v_log;
+  BEGIN
+    UPDATE public.receipt_case SET status = 'discarded', resolution_note = 'cerrado a mano' WHERE id = v_case;
+    v_s := pg_temp.state();
+    BEGIN
+      PERFORM public.ops_fix_r4_undo(t, v_log);
+      RAISE EXCEPTION 'FAIL: undo tras cambiar el caso a mano';
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_err = MESSAGE_TEXT;
+      PERFORM pg_temp.fail_if(v_err <> 'ops_fix: cambió después del arreglo; no lo deshago', 'mensaje caso a mano: ' || v_err);
+    END;
+    PERFORM pg_temp.fail_if(pg_temp.state() <> v_s, 'undo tras cambiar el caso toco algo');
+    -- el caso cerrado por otra persona: la vista previa lo dice con case_status
+    v_pv := public.ops_fix_r4_preview(t, v_case);
+    PERFORM pg_temp.fail_if((v_pv->>'applicable')::bool OR v_pv->>'case_status' IS DISTINCT FROM 'discarded', 'preview cerrado a mano: ' || v_pv::text);
+    RAISE EXCEPTION USING ERRCODE = 'RBACK';
+  EXCEPTION WHEN SQLSTATE 'RBACK' THEN NULL; END;
+
+  -- ---------- undo tras cambiar a mano la linea ----------
   UPDATE public.allocation_plan_details SET status = 'cancelled' WHERE id = v_det;
   v_s := pg_temp.state();
   BEGIN
@@ -252,6 +273,37 @@ BEGIN
     RAISE EXCEPTION USING ERRCODE = 'RBACK';
   EXCEPTION WHEN SQLSTATE 'RBACK' THEN NULL; END;
   PERFORM pg_temp.fail_if((r->>'applicable')::bool OR r->>'reason' NOT LIKE '%origen%', 'sin origen: ' || r::text);
+
+  -- regla POBOX: el receptor (N4, unico nodo de City2) no fue al apartado el dia laborable anterior
+  -- (viernes 30/10) y tenia un envio programado ese dia -> la recepcion se anularia (pobox_absent_no_visit)
+  BEGIN
+    UPDATE public.cities SET pobox_enabled = true WHERE id = 'c2000000-0000-0000-0000-000000000002';
+    INSERT INTO public.allocation_plan_details (account_id, plan_id, origin_node_id, destination_node_id, fecha_programada, status,
+                                                origin_panelist_id, destination_panelist_id) VALUES
+      ('a0000000-0000-0000-0000-000000000001','cc000000-0000-0000-0000-000000000001','b4000000-0000-0000-0000-000000000004','b1000000-0000-0000-0000-000000000001',
+       '2026-10-30','pending','e4000000-0000-0000-0000-000000000004','e1000000-0000-0000-0000-000000000001');
+    r := public.ops_fix_r4_preview(t, v_case);
+    RAISE EXCEPTION USING ERRCODE = 'RBACK';
+  EXCEPTION WHEN SQLSTATE 'RBACK' THEN NULL; END;
+  PERFORM pg_temp.fail_if((r->>'applicable')::bool OR r->>'reason' NOT LIKE '%POBOX anularía%pobox_absent_no_visit%', 'pobox anula: ' || r::text);
+
+  -- regla POBOX que no se puede comprobar (la funcion falla): no aplica (fail-closed)
+  BEGIN
+    CREATE OR REPLACE FUNCTION public.pobox_receipt_check(p_detail public.allocation_plan_details)
+    RETURNS text LANGUAGE plpgsql STABLE SET search_path = public AS $f$
+    BEGIN RAISE EXCEPTION 'pobox roto'; END $f$;
+    r := public.ops_fix_r4_preview(t, v_case);
+    RAISE EXCEPTION USING ERRCODE = 'RBACK';
+  EXCEPTION WHEN SQLSTATE 'RBACK' THEN NULL; END;
+  PERFORM pg_temp.fail_if((r->>'applicable')::bool OR r->>'reason' IS DISTINCT FROM 'no pude comprobar la regla POBOX', 'pobox falla: ' || r::text);
+
+  -- sin norma de entrega para el par nuevo: aplica igual, con sla_hours null
+  BEGIN
+    DELETE FROM public.delivery_standards WHERE account_id = 'a0000000-0000-0000-0000-000000000001';
+    r := public.ops_fix_r4_preview(t, v_case);
+    RAISE EXCEPTION USING ERRCODE = 'RBACK';
+  EXCEPTION WHEN SQLSTATE 'RBACK' THEN NULL; END;
+  PERFORM pg_temp.fail_if(NOT (r->>'applicable')::bool OR NOT (r ? 'sla_hours') OR r->'sla_hours' <> 'null'::jsonb, 'sin sla: ' || r::text);
 
   -- apply cuando no aplica
   BEGIN

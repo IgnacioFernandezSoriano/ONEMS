@@ -5229,7 +5229,7 @@ case_analysis.probable_with,causa provável (probabilidade: {level})
 case_analysis.problem,Problema
 case_analysis.cause,Causa
 case_analysis.solution,Solução
-case_analysis.fix_available,Este caso pode ser corrigido a partir do agente (R4) — o Ignacio aplica-o no Telegram
+case_analysis.fix_available,O agente de operações pode corrigir este caso automaticamente (R4); peça-o à equipa de suporte.
 case_analysis.copy_prompt,Copiar prompt para o Claude Code
 case_analysis.copied,Copiado
 case_analysis.show_detail,Ver detalhe

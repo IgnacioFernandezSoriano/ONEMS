@@ -5221,7 +5221,7 @@ case_analysis.probable_with,سبب محتمل (الاحتمالية: {level})
 case_analysis.problem,المشكلة
 case_analysis.cause,السبب
 case_analysis.solution,الحل
-case_analysis.fix_available,يمكن تصحيح هذه الحالة من الوكيل (R4) — يطبّقها Ignacio في Telegram
+case_analysis.fix_available,يمكن لوكيل العمليات تصحيح هذه الحالة تلقائيًا (R4)؛ اطلب ذلك من فريق الدعم.
 case_analysis.copy_prompt,نسخ الأمر لـ Claude Code
 case_analysis.copied,تم النسخ
 case_analysis.show_detail,عرض التفاصيل
