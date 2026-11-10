@@ -24,6 +24,8 @@ export interface CaseAnalysisResult {
   }
   drafts: CaseDraft[]
   anchor: { kind: string, id: string } | null
+  // panelist_id -> "Nombre (CODIGO)" de cada implicado (analisis anteriores pueden no traerlo)
+  people?: Record<string, string>
 }
 
 export type CaseAnalysisState = 'idle' | 'running' | 'done' | 'failed'

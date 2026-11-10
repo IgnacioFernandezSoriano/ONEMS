@@ -103,7 +103,7 @@ export function ReportedIncidentPanel({ incidentId, onBack }: { incidentId: stri
       {/* Conversación con el panelista */}
       <CaseAnalysisPanel kind="reported" incidentId={incidentId} />
 
-      <IncidentConversation kind="reported" incidentId={incidentId}
+      <IncidentConversation kind="reported" incidentId={incidentId} incidentPanelistId={inc.panelist_id}
         panelistLanguage={inc.panelist?.language} helpSection={HELP_SECTION[inc.category] ?? 'c-otro'} />
 
       {/* Resolver */}

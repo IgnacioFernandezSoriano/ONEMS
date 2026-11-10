@@ -58,7 +58,8 @@ export function CaseAnalysisPanel({ kind, incidentId }: Props) {
   const { state, result, error, start, send, sent } = useCaseAnalysis(kind, incidentId)
   const a = result?.analysis
   const drafts = result?.drafts ?? []
-  const nameOf = (id: string) => drafts.find(d => d.panelist_id === id)?.name ?? ''
+  // con borrador: su nombre; sin borrador: el que trae el agente en people ("Nombre (CÓDIGO)")
+  const nameOf = (id: string) => drafts.find(d => d.panelist_id === id)?.name ?? result?.people?.[id] ?? ''
 
   const section = (title: string, text: string | null | undefined) => text ? (
     <div className="mb-3">
