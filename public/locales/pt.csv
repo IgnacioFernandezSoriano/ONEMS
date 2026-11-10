@@ -5220,3 +5220,7 @@ case_analysis.role.remitente,Remetente
 case_analysis.role.receptor,Recetor
 case_analysis.role.destinatario,Destinatário
 case_analysis.recipient,Destinatário da mensagem
+case_analysis.likelihood.alta,Alta
+case_analysis.likelihood.media,Média
+case_analysis.likelihood.baja,Baixa
+case_analysis.probable_with,causa provável (probabilidade: {level})

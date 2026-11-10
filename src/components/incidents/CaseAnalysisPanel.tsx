@@ -6,6 +6,9 @@ import type { CaseDraft } from '@/lib/hooks/useCaseAnalysis'
 import type { ConversationKind } from '@/lib/hooks/useIncidentConversation'
 import { BTN_PRIMARY, BTN_SECONDARY } from './buttonStyles'
 
+const LIKELIHOODS = ['alta', 'media', 'baja']
+const ROLES = ['remitente', 'receptor', 'destinatario']
+
 interface Props {
   kind: ConversationKind
   incidentId: string
@@ -88,7 +91,7 @@ export function CaseAnalysisPanel({ kind, incidentId }: Props) {
               <ul className="list-disc ps-5 text-sm">
                 {a.causes.map((c, i) => (
                   <li key={i}>
-                    <span className="text-gray-500">({t('case_analysis.probable')}, {c.likelihood}) </span>{c.text}
+                    {c.text} <span className="text-gray-500">- {t('case_analysis.probable_with', { level: LIKELIHOODS.includes(c.likelihood) ? t(`case_analysis.likelihood.${c.likelihood}`) : '' })}</span>
                     {c.evidence && <div className="text-xs text-gray-500">{c.evidence}</div>}
                   </li>
                 ))}
@@ -107,7 +110,7 @@ export function CaseAnalysisPanel({ kind, incidentId }: Props) {
               <ul className="list-disc ps-5 text-sm">
                 {a.contacts.map((c, i) => (
                   <li key={i}>
-                    {t(`case_analysis.role.${c.role}`)}{nameOf(c.panelist_id) ? `: ${nameOf(c.panelist_id)}` : ''}
+                    {ROLES.includes(c.role) ? t(`case_analysis.role.${c.role}`) : ''}{nameOf(c.panelist_id) ? `${ROLES.includes(c.role) ? ': ' : ''}${nameOf(c.panelist_id)}` : ''}
                     {c.why && <span className="text-gray-500"> - {c.why}</span>}
                   </li>
                 ))}

@@ -5212,3 +5212,7 @@ case_analysis.role.remitente,المرسل
 case_analysis.role.receptor,المستلم
 case_analysis.role.destinatario,المرسل إليه
 case_analysis.recipient,مستلم الرسالة
+case_analysis.likelihood.alta,عالية
+case_analysis.likelihood.media,متوسطة
+case_analysis.likelihood.baja,منخفضة
+case_analysis.probable_with,سبب محتمل (الاحتمالية: {level})

@@ -5212,3 +5212,7 @@ case_analysis.role.remitente,Expéditeur
 case_analysis.role.receptor,Récepteur
 case_analysis.role.destinatario,Destinataire
 case_analysis.recipient,Destinataire du message
+case_analysis.likelihood.alta,Élevée
+case_analysis.likelihood.media,Moyenne
+case_analysis.likelihood.baja,Faible
+case_analysis.probable_with,cause probable (probabilité : {level})

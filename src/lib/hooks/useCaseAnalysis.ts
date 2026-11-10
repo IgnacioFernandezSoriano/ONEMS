@@ -51,16 +51,32 @@ export function useCaseAnalysis(kind: ConversationKind, incidentId: string) {
   useEffect(() => {
     if (state !== 'running' || !requestId) return
     let stopped = false
+    let inFlight = false
+    let netErrors = 0
     const poll = async () => {
-      const { data, error: e } = await supabase.rpc('case_analysis_status', { p_request_id: requestId })
-      if (stopped || !alive.current) return
-      if (e) { setError(e.message); setState('failed'); return }
-      const st = data as { status: string, result: CaseAnalysisResult | null, error: string | null } | null
-      if (st?.status === 'done') {
-        setResult(st.result); setError(null); setState('done')
-      } else if (st?.status === 'failed') {
-        setError(st.error ?? 'failed'); setState('failed')
-      }
+      if (inFlight) return
+      inFlight = true
+      try {
+        const { data, error: e } = await supabase.rpc('case_analysis_status', { p_request_id: requestId })
+        if (stopped || !alive.current) return
+        if (e) {
+          // Tolera hasta 2 errores seguidos de red antes de dar el analisis por fallido
+          netErrors += 1
+          if (netErrors > 2) { setError(e.message); setState('failed') }
+          return
+        }
+        netErrors = 0
+        const st = data as { status: string, result: CaseAnalysisResult | null, error: string | null } | null
+        if (st?.status === 'done') {
+          setResult(st.result); setError(null); setState('done')
+        } else if (st?.status === 'failed') {
+          setError(st.error ?? 'failed'); setState('failed')
+        }
+      } catch (err: any) {
+        if (stopped || !alive.current) return
+        netErrors += 1
+        if (netErrors > 2) { setError(err?.message ?? String(err)); setState('failed') }
+      } finally { inFlight = false }
     }
     poll()
     const id = setInterval(poll, POLL_MS)
