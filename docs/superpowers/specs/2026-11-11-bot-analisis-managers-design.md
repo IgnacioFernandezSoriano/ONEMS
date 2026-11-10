@@ -39,6 +39,7 @@ El control no se hace aprobando a cada persona ni limitando el número de consul
    - cada llamada a la IA del análisis se apunta con la cuenta y la persona;
    - al alcanzar 5 $ en el mes natural, el bot contesta «Tu cuenta ha llegado al límite de este mes» y no llama a la IA hasta el día 1;
    - en el bot de Ignacio, la orden «gastos» muestra el mes en curso por cuenta y por persona;
+  - en el bot de managers, «gastos» muestra al manager lo que lleva su cuenta este mes y su parte (petición de Ignacio del 2026-11-11), y al pasar del 80 % del tope se avisa una vez;
    - el tope global del agente (`monthly_cap_eur`) sigue funcionando por encima de todo.
 4. **Registro.** Cada análisis, mensaje y arreglo hecho por un manager queda en la incidencia o el caso como hoy. La nota indica quién lo hizo: «analizado por <correo>».
 

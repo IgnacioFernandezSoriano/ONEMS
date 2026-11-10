@@ -166,7 +166,11 @@
   2. `ops_case_account_enabled`: si es false, «Tu cuenta aún no tiene el análisis activado».
   3. Al pedir un análisis o un «Cambiar»: si `account_month_cost ≥ tope`, «Tu cuenta ha llegado al límite de este mes».
   4. Se pasa a `case_*` con el `Actor`.
-- **Órdenes del manager:** «país» (solo superadmin) muestra botones de cuentas para cambiar; «ayuda».
+- **Órdenes del manager:**
+  - «país»: solo para superadmin; muestra botones de cuentas para cambiar.
+  - «ayuda».
+  - «gastos» (petición de Ignacio del 2026-11-11): «Este mes tu cuenta lleva X $ de 5 $. Tú: Y $». Solo su cuenta. Un superadmin ve la cuenta que tiene elegida.
+- **Aviso al 80 %:** cuando el gasto de la cuenta pasa del 80 % del tope, el siguiente análisis lleva un aviso de una línea. Una vez por cuenta y mes: se apunta en `flags` como `cap80|<cuenta>|<AAAA-MM>`.
 - **Órdenes de Ignacio:** «gastos» devuelve, para el mes en curso, lo gastado por cuenta (con el tope) y por persona (correo, enmascarado salvo el dominio y las 2 primeras letras).
 - **Enviar y R4 para managers:** solo si `settings.case_send_allowed(account)`. Si no, el botón contesta «Los envíos de tu cuenta aún no están activados».
 
@@ -182,6 +186,8 @@
   - la cuenta cerrada → el mensaje correspondiente y ninguna llamada a la IA;
   - el tope alcanzado → ninguna llamada a la IA, mientras otra cuenta sí funciona;
   - «gastos» en el bot de Ignacio con dos cuentas;
+  - «gastos» de un manager: solo su cuenta y su parte;
+  - el aviso del 80 % sale una sola vez al mes;
   - ningún registro contiene el correo ni el código.
 - [ ] **Step 2:** FAIL.
 - [ ] **Step 3:** implementar.
