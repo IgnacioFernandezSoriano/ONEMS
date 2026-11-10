@@ -70,8 +70,8 @@ El control no se hace aprobando a cada persona ni limitando el número de consul
 ## 7. Restricciones
 
 - **Mismo agente y servidor (Hetzner):**
-  - el bot nuevo es un segundo token de Telegram (`MANAGER_BOT_TOKEN` en `/etc/onems-ops-agent/env`), que Ignacio pondrá allí;
-  - un proceso o un servicio más; lo decide el builder.
+  - el bot nuevo es un segundo token de Telegram (`MANAGER_BOT_TOKEN`) que Ignacio pondrá en su propio fichero de entorno, `/etc/onems-ops-agent/manager.env`, junto con `MANAGER_OPS_TOKEN` (el token de la base para los managers); no van en `/etc/onems-ops-agent/env`, que es solo del bot de Ignacio;
+  - un servicio propio (`onems-ops-agent-managerbot.service`) que corre con su propio usuario Unix (`opsmgr`, sin login ni home): no puede leer `env` ni los ficheros privados del bot de Ignacio, y solo comparte con él la base local del agente (`agent.db`, por un grupo común).
 - **Base onems-dev `sehbnpgzqljrsqimwyuz`:**
   - si hacen falta funciones nuevas (comprobar si un correo es de un rol de una cuenta), siguen el patrón de token (`ops_*`, anon + token);
   - migración con confirmación de Ignacio.
