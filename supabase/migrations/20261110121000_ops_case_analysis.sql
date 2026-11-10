@@ -303,8 +303,12 @@ BEGIN
   -- caducan las peticiones sin atender (agente caido) y las abandonadas en running
   UPDATE public.case_analysis_request SET status = 'failed', error = 'agent_timeout', finished_at = now()
    WHERE status IN ('queued','running') AND created_at < now() - interval '10 minutes';
+  -- retencion: las terminadas se borran a los 30 dias (misma regla que el agente)
+  DELETE FROM public.case_analysis_request
+   WHERE status IN ('done','failed') AND created_at < now() - interval '30 days';
+  -- solo se reclama lo que tiene al menos 2 minutos antes de caducar (a los 10)
   SELECT * INTO r FROM public.case_analysis_request
-   WHERE status = 'queued' AND created_at >= now() - interval '10 minutes'
+   WHERE status = 'queued' AND created_at > now() - interval '8 minutes'
    ORDER BY created_at LIMIT 1 FOR UPDATE SKIP LOCKED;
   IF NOT FOUND THEN RETURN '{}'::jsonb; END IF;
   UPDATE public.case_analysis_request SET status = 'running', started_at = now() WHERE id = r.id;

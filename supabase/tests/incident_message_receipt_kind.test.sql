@@ -130,6 +130,19 @@ BEGIN
   -- mensaje vacio
   PERFORM pg_temp.expect_msg(format('SELECT public.send_case_message(%L,%L,%L,%L,%L)',
     'receipt', v_case, 'e1000000-0000-0000-0000-000000000001', '  ', 'k4'), 'empty message');
+  -- mensaje de mas de 3000 caracteres (3000 justos vale)
+  PERFORM pg_temp.expect_msg(format('SELECT public.send_case_message(%L,%L,%L,%L,%L)',
+    'receipt', v_case, 'e1000000-0000-0000-0000-000000000001', repeat('a', 3001), 'k6'), 'message too long');
+  PERFORM public.send_case_message('receipt', v_case, 'e1000000-0000-0000-0000-000000000001', repeat('a', 3000), 'k7');
+  -- telegram no numerico
+  UPDATE public.panelists SET telegram_id = '@alguien' WHERE id = 'e4000000-0000-0000-0000-000000000004';
+  PERFORM pg_temp.expect_msg(format('SELECT public.send_case_message(%L,%L,%L,%L,%L)',
+    'receipt', v_case, 'e4000000-0000-0000-0000-000000000004', 'x', 'k8'), 'panelist has no telegram');
+  -- panelista no activo
+  UPDATE public.panelists SET status = 'inactive' WHERE id = 'e1000000-0000-0000-0000-000000000001';
+  PERFORM pg_temp.expect_msg(format('SELECT public.send_case_message(%L,%L,%L,%L,%L)',
+    'receipt', v_case, 'e1000000-0000-0000-0000-000000000001', 'x', 'k9'), 'panelist not active');
+  UPDATE public.panelists SET status = 'active' WHERE id = 'e1000000-0000-0000-0000-000000000001';
   -- admin de la cuenta 2
   PERFORM pg_temp.act('98000000-0000-0000-0000-000000000098');
   PERFORM pg_temp.expect_msg(format('SELECT public.send_case_message(%L,%L,%L,%L,%L)',
@@ -154,6 +167,19 @@ BEGIN
   PERFORM pg_temp.fail_if((SELECT count(*) FROM public.incident_message WHERE read_at IS NULL) <> 0, 'read_at');
   PERFORM pg_temp.act('98000000-0000-0000-0000-000000000098');
   PERFORM pg_temp.expect_msg(format('SELECT public.mark_incident_conversation_read(%L,%L)', 'receipt', v_case), 'Cross-tenant');
+  -- usuario normal 96 de la misma cuenta: los casos de recepcion son solo para admins
+  INSERT INTO auth.users (id, email) VALUES ('96000000-0000-0000-0000-000000000096','u96@t.l');
+  INSERT INTO public.profiles (id, email, full_name, role, account_id)
+  VALUES ('96000000-0000-0000-0000-000000000096','u96@t.l','Normal','user','a0000000-0000-0000-0000-000000000001');
+  PERFORM pg_temp.act('99000000-0000-0000-0000-000000000099');
+  PERFORM public.log_incident_message('receipt', v_case, 'inbound', 'panelist', 'hola3');
+  PERFORM pg_temp.act('96000000-0000-0000-0000-000000000096');
+  PERFORM pg_temp.expect_state(format('SELECT public.mark_incident_conversation_read(%L,%L)', 'receipt', v_case), '42501');
+  PERFORM pg_temp.fail_if((SELECT count(*) FROM public.incident_message WHERE read_at IS NULL) <> 1, 'read_at user 96');
+  -- el admin 99 si puede
+  PERFORM pg_temp.act('99000000-0000-0000-0000-000000000099');
+  n := public.mark_incident_conversation_read('receipt', v_case);
+  PERFORM pg_temp.fail_if(n <> 1, 'read n admin ' || n);
 END $$;
 ROLLBACK;
 

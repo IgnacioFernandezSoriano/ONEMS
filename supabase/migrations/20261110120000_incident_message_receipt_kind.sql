@@ -82,7 +82,12 @@ BEGIN
      OR NOT EXISTS (SELECT 1 FROM panelists WHERE id = p_panelist_id AND account_id = v_account) THEN
     RAISE EXCEPTION 'Cross-tenant access denied'; END IF;
   IF NULLIF(btrim(p_body), '') IS NULL THEN RAISE EXCEPTION 'empty message'; END IF;
-  IF NOT EXISTS (SELECT 1 FROM panelists WHERE id = p_panelist_id AND NULLIF(btrim(telegram_id), '') IS NOT NULL) THEN
+  -- mismo limite que rpc_send_manager_notice y el textarea
+  IF length(p_body) > 3000 THEN RAISE EXCEPTION 'message too long'; END IF;
+  -- misma regla que ops_case_send: panelista activo con id de Telegram numerico
+  IF NOT EXISTS (SELECT 1 FROM panelists WHERE id = p_panelist_id AND status = 'active') THEN
+    RAISE EXCEPTION 'panelist not active'; END IF;
+  IF NOT EXISTS (SELECT 1 FROM panelists WHERE id = p_panelist_id AND btrim(COALESCE(telegram_id, '')) ~ '^[0-9]+$') THEN
     RAISE EXCEPTION 'panelist has no telegram'; END IF;
   INSERT INTO incident_message (account_id, panelist_id, incident_kind, incident_id,
                                 direction, author, body, meta, status)
@@ -105,6 +110,8 @@ BEGIN
   SELECT o.account_id INTO v_account FROM public.incident_owner(p_incident_kind, p_incident_id) o;
   IF v_account IS NULL THEN RAISE EXCEPTION 'incident not found'; END IF;
   PERFORM assert_same_account(v_account);
+  -- los casos de recepcion son solo para admins de la cuenta (paridad con send_case_message y la RLS)
+  IF p_incident_kind = 'receipt' THEN PERFORM public.receipt_mgr_check(v_account); END IF;
   UPDATE incident_message
      SET read_at = now()
    WHERE incident_kind = p_incident_kind AND incident_id = p_incident_id

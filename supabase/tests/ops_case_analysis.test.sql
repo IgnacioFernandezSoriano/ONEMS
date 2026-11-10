@@ -334,9 +334,30 @@ BEGIN
   PERFORM pg_temp.fail_if((SELECT status || error FROM public.case_analysis_request WHERE id = v_old) <> 'failedagent_timeout', 'queued viejo failed');
   PERFORM pg_temp.fail_if((SELECT status || error FROM public.case_analysis_request WHERE id = v_req) <> 'failedagent_timeout', 'running viejo failed');
   PERFORM pg_temp.fail_if((SELECT finished_at FROM public.case_analysis_request WHERE id = v_req) IS NULL, 'finished_at al caducar');
+  -- una en cola de hace 9 minutos: no se reclama (quedaria < 2 min antes de caducar) ni se caduca aun
+  INSERT INTO public.case_analysis_request (account_id, incident_kind, incident_id, status, created_at)
+    VALUES ('a0000000-0000-0000-0000-000000000001','unavailability','f2000000-0000-0000-0000-000000000001','queued', now() - interval '9 minutes')
+    RETURNING id INTO v_old;
+  PERFORM pg_temp.fail_if(public.ops_case_claim(t) <> '{}'::jsonb, 'claim no toma una de 9 minutos');
+  PERFORM pg_temp.fail_if((SELECT status FROM public.case_analysis_request WHERE id = v_old) <> 'queued', '9 minutos sigue queued');
+  -- una de hace 7 minutos si se reclama
+  UPDATE public.case_analysis_request SET created_at = now() - interval '7 minutes' WHERE id = v_old;
+  PERFORM pg_temp.fail_if((public.ops_case_claim(t)->>'request_id')::uuid <> v_old, 'claim toma una de 7 minutos');
   INSERT INTO public.case_analysis_request (account_id, incident_kind, incident_id)
     VALUES ('a0000000-0000-0000-0000-000000000001','reported','f3000000-0000-0000-0000-000000000004') RETURNING id INTO v_req;
   PERFORM pg_temp.fail_if((public.ops_case_claim(t)->>'request_id')::uuid <> v_req, 'claim toma la fresca');
+
+  -- (3b) retencion: claim borra las terminadas de mas de 30 dias; las recientes y las vivas se quedan
+  DELETE FROM public.case_analysis_request;
+  INSERT INTO public.case_analysis_request (account_id, incident_kind, incident_id, status, created_at)
+    VALUES ('a0000000-0000-0000-0000-000000000001','reported','f3000000-0000-0000-0000-000000000004','done', now() - interval '31 days'),
+           ('a0000000-0000-0000-0000-000000000001','reported','f3000000-0000-0000-0000-000000000004','failed', now() - interval '31 days'),
+           ('a0000000-0000-0000-0000-000000000001','reported','f3000000-0000-0000-0000-000000000004','done', now() - interval '29 days'),
+           ('a0000000-0000-0000-0000-000000000001','reported','f3000000-0000-0000-0000-000000000004','failed', now() - interval '1 day');
+  PERFORM public.ops_case_claim(t);
+  PERFORM pg_temp.fail_if((SELECT count(*) FROM public.case_analysis_request WHERE created_at < now() - interval '30 days') <> 0,
+                          'retencion borra > 30 dias');
+  PERFORM pg_temp.fail_if((SELECT count(*) FROM public.case_analysis_request) <> 2, 'retencion conserva las recientes');
 
   -- (4) finish sobre un caso de recepcion sin panelista: cierra y omite la nota
   INSERT INTO public.receipt_case (account_id, panelist_id, telegram_id, tag_raw, tag_norm, reason, status, attempts, first_attempt_at, last_attempt_at)
