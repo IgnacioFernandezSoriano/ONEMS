@@ -28,6 +28,17 @@ SELECT 'a0000000-0000-0000-0000-000000000001','e1000000-0000-0000-0000-000000000
 INSERT INTO public.panelist_notification (account_id, panelist_id, kind, status, created_at, sent_at) VALUES
   ('a0000000-0000-0000-0000-000000000002','e9000000-0000-0000-0000-000000000009','send_reminder','sent', now() - interval '1 minute', now() - interval '1 minute');
 
+-- atascados (cuenta 1): 2 avisos pending_send de hace 2 h, 1 de hace 10 min (aun no), 1 con send_after futuro (no),
+-- 1 de hace 3 dias (fuera de las 24 h); 1 mensaje de incidencia pending_send de hace 3 h; DEMO2: 1 (excluido)
+INSERT INTO public.panelist_notification (account_id, panelist_id, kind, status, created_at, send_after)
+SELECT 'a0000000-0000-0000-0000-000000000001','e1000000-0000-0000-0000-000000000001','receipt_reminder','pending_send', now() - c, sa
+  FROM (VALUES (interval '2 hours', NULL::timestamptz), (interval '2 hours', NULL), (interval '10 minutes', NULL),
+               (interval '2 hours', now() + interval '1 hour'), (interval '3 days', NULL)) v(c, sa);
+INSERT INTO public.panelist_notification (account_id, panelist_id, kind, status, created_at) VALUES
+  ('a0000000-0000-0000-0000-000000000002','e9000000-0000-0000-0000-000000000009','receipt_reminder','pending_send', now() - interval '2 hours');
+INSERT INTO public.incident_message (account_id, panelist_id, incident_kind, incident_id, direction, author, body, status, created_at) VALUES
+  ('a0000000-0000-0000-0000-000000000001','e1000000-0000-0000-0000-000000000001','reported',gen_random_uuid(),'outbound','bot','g','pending_send', now() - interval '3 hours');
+
 -- mensajes de incidencias: cuenta 1 -> 2 bot enviados, 1 bot fallido, 1 manager enviado, 1 inbound (no cuenta)
 INSERT INTO public.incident_message (account_id, panelist_id, incident_kind, incident_id, direction, author, body, status, sent_at, created_at) VALUES
   ('a0000000-0000-0000-0000-000000000001','e1000000-0000-0000-0000-000000000001','reported',gen_random_uuid(),'outbound','bot','a','sent', now() - interval '1 minute', now() - interval '1 minute'),
@@ -49,6 +60,9 @@ BEGIN
       {"author":"bot","status":"failed","n":1},
       {"author":"bot","status":"sent","n":2},
       {"author":"manager","status":"sent","n":1}]'::jsonb, 'incident_messages: ' || (r->'incident_messages')::text);
+  PERFORM pg_temp.fail_if((r->>'stuck')::int <> 3, 'stuck: ' || r::text);
+  r := public.ops_messages_sent(t, now() - interval '24 hours', NULL);
+  PERFORM pg_temp.fail_if((r->>'stuck')::int <> 4, 'stuck sin exclusion: ' || r::text);
 
   -- sin exclusion: DEMO2 tambien cuenta
   r := public.ops_messages_sent(t, now() - interval '24 hours', NULL);
@@ -61,7 +75,7 @@ BEGIN
 
   -- nada en el periodo: listas vacias
   r := public.ops_messages_sent(t, now() - interval '10 seconds', ARRAY['DEMO2']);
-  PERFORM pg_temp.fail_if(r <> '{"notifications":[],"incident_messages":[]}'::jsonb, 'vacio: ' || r::text);
+  PERFORM pg_temp.fail_if(r <> '{"notifications":[],"incident_messages":[],"stuck":0}'::jsonb, 'vacio: ' || r::text);
 
   -- periodo no valido (mas de 7 dias, futuro, NULL)
   BEGIN

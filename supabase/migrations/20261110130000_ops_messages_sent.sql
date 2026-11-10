@@ -6,7 +6,9 @@
 -- panelistas desde p_since, de TODAS las cuentas salvo las de prueba (p_exclude, por nombre de cuenta;
 -- el agente pasa report.excluded_accounts de su config.yaml):
 --   - panelist_notification por tipo (kind) y estado (sent / failed);
---   - incident_message de salida (outbound) por autor (bot / manager / system) y estado (sent / failed).
+--   - incident_message de salida (outbound) por autor (bot / manager / system) y estado (sent / failed);
+--   - stuck: mensajes de las dos tablas creados desde p_since que siguen en pending_send más de 1 hora
+--     después de cuando debían salir (send_after o, si no hay, created_at).
 -- Solo cuenta: no devuelve textos, nombres ni datos de panelistas. No escribe nada.
 -- ============================================================
 
@@ -36,12 +38,22 @@ BEGIN
        AND im.direction = 'outbound'
        AND im.status IN ('sent', 'failed')
        AND COALESCE(im.sent_at, im.created_at) >= p_since
-     GROUP BY 1, 2)
+     GROUP BY 1, 2),
+  stuck AS (
+    SELECT (SELECT count(*) FROM public.panelist_notification pn
+             WHERE pn.account_id IN (SELECT id FROM acc) AND pn.status = 'pending_send'
+               AND pn.created_at >= p_since
+               AND COALESCE(pn.send_after, pn.created_at) < now() - interval '1 hour')
+         + (SELECT count(*) FROM public.incident_message im
+             WHERE im.account_id IN (SELECT id FROM acc) AND im.direction = 'outbound'
+               AND im.status = 'pending_send' AND im.created_at >= p_since
+               AND im.created_at < now() - interval '1 hour') AS n)
   SELECT jsonb_build_object(
     'notifications', COALESCE((SELECT jsonb_agg(jsonb_build_object('kind', n.kind, 'status', n.status, 'n', n.n)
                                                 ORDER BY n.kind, n.status) FROM n), '[]'::jsonb),
     'incident_messages', COALESCE((SELECT jsonb_agg(jsonb_build_object('author', m.author, 'status', m.status, 'n', m.n)
-                                                    ORDER BY m.author, m.status) FROM m), '[]'::jsonb))
+                                                    ORDER BY m.author, m.status) FROM m), '[]'::jsonb),
+    'stuck', (SELECT stuck.n FROM stuck))
     INTO v_out;
   RETURN v_out;
 END $$;
