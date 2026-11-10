@@ -170,6 +170,10 @@
   - «país»: solo para superadmin; muestra botones de cuentas para cambiar.
   - «ayuda».
   - «gastos» (petición de Ignacio del 2026-11-11): «Este mes tu cuenta lleva X $ de 5 $. Tú: Y $». Solo su cuenta. Un superadmin ve la cuenta que tiene elegida.
+- **Gasto en cada consulta** (petición de Ignacio del 2026-11-11):
+  - al final de cada análisis (y de cada «Cambiar»), el bot de managers añade una línea en el idioma de la cuenta: «💶 Este análisis: X $ · Tu cuenta este mes: Y $ de 5 $»;
+  - X es lo que costaron las llamadas a la IA de ese análisis (suma de `_charge`);
+  - Y es `account_month_cost` después de apuntarlo.
 - **Aviso al 80 %:** cuando el gasto de la cuenta pasa del 80 % del tope, el siguiente análisis lleva un aviso de una línea. Una vez por cuenta y mes: se apunta en `flags` como `cap80|<cuenta>|<AAAA-MM>`.
 - **Órdenes de Ignacio:** «gastos» devuelve, para el mes en curso, lo gastado por cuenta (con el tope) y por persona (correo, enmascarado salvo el dominio y las 2 primeras letras).
 - **Enviar y R4 para managers:** solo si `settings.case_send_allowed(account)`. Si no, el botón contesta «Los envíos de tu cuenta aún no están activados».
@@ -188,6 +192,7 @@
   - «gastos» en el bot de Ignacio con dos cuentas;
   - «gastos» de un manager: solo su cuenta y su parte;
   - el aviso del 80 % sale una sola vez al mes;
+  - cada análisis termina con la línea de gasto (lo de ese análisis y el total del mes de la cuenta);
   - ningún registro contiene el correo ni el código.
 - [ ] **Step 2:** FAIL.
 - [ ] **Step 3:** implementar.
