@@ -268,13 +268,31 @@ BEGIN
 END $$;
 REVOKE ALL ON FUNCTION public.case_analysis_allowed(uuid) FROM PUBLIC, anon, authenticated;
 
--- La pantalla la consulta una vez para mostrar u ocultar el análisis (la cuenta del propio usuario).
-CREATE OR REPLACE FUNCTION public.case_analysis_enabled()
-RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path = '' AS $$
-  SELECT public.case_analysis_allowed(public.current_user_account_id());
+-- La pantalla consulta si mostrar el análisis según la cuenta de la INCIDENCIA (no la del usuario: el superadmin puede
+-- no tener cuenta). Nunca falla: incidencia inexistente o de otra cuenta (usuario no superadmin) = false.
+CREATE OR REPLACE FUNCTION public.case_analysis_enabled(p_incident_kind text, p_incident_id uuid)
+RETURNS boolean LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = public AS $$
+DECLARE v_account uuid;
+BEGIN
+  IF p_incident_kind IS NULL OR p_incident_kind NOT IN ('reported','unavailability','receipt') OR p_incident_id IS NULL THEN
+    RETURN false; END IF;
+  SELECT o.account_id INTO v_account FROM public.incident_owner(p_incident_kind, p_incident_id) o;
+  IF v_account IS NULL THEN RETURN false; END IF;
+  IF NOT public.is_superadmin() AND v_account IS DISTINCT FROM public.current_user_account_id() THEN RETURN false; END IF;
+  RETURN public.case_analysis_allowed(v_account);
+END $$;
+REVOKE ALL ON FUNCTION public.case_analysis_enabled(text, uuid) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.case_analysis_enabled(text, uuid) TO authenticated;
+
+-- Igual para la pantalla de recepciones (no hay una incidencia única): la cuenta que se está viendo.
+CREATE OR REPLACE FUNCTION public.case_analysis_enabled_for_account(p_account uuid)
+RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
+  SELECT p_account IS NOT NULL
+     AND (public.is_superadmin() OR p_account = public.current_user_account_id())
+     AND public.case_analysis_allowed(p_account);
 $$;
-REVOKE ALL ON FUNCTION public.case_analysis_enabled() FROM PUBLIC, anon;
-GRANT EXECUTE ON FUNCTION public.case_analysis_enabled() TO authenticated;
+REVOKE ALL ON FUNCTION public.case_analysis_enabled_for_account(uuid) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.case_analysis_enabled_for_account(uuid) TO authenticated;
 
 -- ===== ONEMS (authenticated): pedir y consultar =====
 CREATE OR REPLACE FUNCTION public.request_case_analysis(p_incident_kind text, p_incident_id uuid)

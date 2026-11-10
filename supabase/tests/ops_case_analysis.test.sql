@@ -430,10 +430,30 @@ END $$;
 DO $$
 DECLARE v_st text;
 BEGIN
+  INSERT INTO auth.users (id, email) VALUES ('97000000-0000-0000-0000-000000000097','super@t.l');
+  INSERT INTO public.profiles (id, email, full_name, role, account_id)
+    VALUES ('97000000-0000-0000-0000-000000000097','super@t.l','Super','superadmin',NULL);
+  -- usuario normal: segun la incidencia de SU cuenta; sobre incidencias ajenas o inexistentes, false sin error
   PERFORM pg_temp.act('99000000-0000-0000-0000-000000000099');
-  PERFORM pg_temp.fail_if(public.case_analysis_enabled() IS DISTINCT FROM true, 'enabled cuenta DEMO2');
+  PERFORM pg_temp.fail_if(public.case_analysis_enabled('reported','f3000000-0000-0000-0000-000000000004') IS DISTINCT FROM true, 'enabled incidencia DEMO2');
+  PERFORM pg_temp.fail_if(public.case_analysis_enabled('reported','f3000000-0000-0000-0000-000000000009') IS DISTINCT FROM false, '99 sobre cuenta 2');
+  PERFORM pg_temp.fail_if(public.case_analysis_enabled('reported',gen_random_uuid()) IS DISTINCT FROM false, 'inexistente');
+  PERFORM pg_temp.fail_if(public.case_analysis_enabled('bogus',gen_random_uuid()) IS DISTINCT FROM false, 'tipo invalido');
+  PERFORM pg_temp.fail_if(public.case_analysis_enabled_for_account('a0000000-0000-0000-0000-000000000001') IS DISTINCT FROM true, 'account 99 propia');
+  PERFORM pg_temp.fail_if(public.case_analysis_enabled_for_account('a0000000-0000-0000-0000-000000000002') IS DISTINCT FROM false, 'account 99 ajena');
   PERFORM pg_temp.act('98000000-0000-0000-0000-000000000098');
-  PERFORM pg_temp.fail_if(public.case_analysis_enabled() IS DISTINCT FROM false, 'enabled cuenta 2 debe ser false');
+  PERFORM pg_temp.fail_if(public.case_analysis_enabled('reported','f3000000-0000-0000-0000-000000000004') IS DISTINCT FROM false, '98 sobre DEMO2: sin fuga');
+  PERFORM pg_temp.fail_if(public.case_analysis_enabled('reported','f3000000-0000-0000-0000-000000000009') IS DISTINCT FROM false, '98 propia no DEMO2');
+  PERFORM pg_temp.fail_if(public.case_analysis_enabled_for_account('a0000000-0000-0000-0000-000000000001') IS DISTINCT FROM false, 'account 98 sobre DEMO2');
+  PERFORM pg_temp.fail_if(public.case_analysis_enabled_for_account('a0000000-0000-0000-0000-000000000002') IS DISTINCT FROM false, 'account 98 propia');
+  PERFORM pg_temp.fail_if(public.case_analysis_enabled_for_account(NULL::uuid) IS DISTINCT FROM false, 'account null');
+  -- superadmin sin cuenta: sigue a la incidencia
+  PERFORM pg_temp.act('97000000-0000-0000-0000-000000000097');
+  PERFORM pg_temp.fail_if(public.case_analysis_enabled('reported','f3000000-0000-0000-0000-000000000004') IS DISTINCT FROM true, '97 DEMO2');
+  PERFORM pg_temp.fail_if(public.case_analysis_enabled('reported','f3000000-0000-0000-0000-000000000009') IS DISTINCT FROM false, '97 cuenta 2');
+  PERFORM pg_temp.fail_if(public.case_analysis_enabled_for_account('a0000000-0000-0000-0000-000000000001') IS DISTINCT FROM true, 'account 97 DEMO2');
+  PERFORM pg_temp.fail_if(public.case_analysis_enabled_for_account('a0000000-0000-0000-0000-000000000002') IS DISTINCT FROM false, 'account 97 cuenta 2');
+  PERFORM pg_temp.act('98000000-0000-0000-0000-000000000098');
   UPDATE public.profiles SET role = 'admin' WHERE id = '98000000-0000-0000-0000-000000000098';
   BEGIN
     PERFORM public.request_case_analysis('reported', 'f3000000-0000-0000-0000-000000000009');
@@ -452,8 +472,10 @@ BEGIN
   -- helper interno cerrado a usuarios
   PERFORM pg_temp.fail_if(has_function_privilege('authenticated', 'public.case_analysis_allowed(uuid)', 'EXECUTE')
     OR has_function_privilege('anon', 'public.case_analysis_allowed(uuid)', 'EXECUTE')
-    OR has_function_privilege('anon', 'public.case_analysis_enabled()', 'EXECUTE')
-    OR NOT has_function_privilege('authenticated', 'public.case_analysis_enabled()', 'EXECUTE'), 'grants puerta');
+    OR has_function_privilege('anon', 'public.case_analysis_enabled(text,uuid)', 'EXECUTE')
+    OR has_function_privilege('anon', 'public.case_analysis_enabled_for_account(uuid)', 'EXECUTE')
+    OR NOT has_function_privilege('authenticated', 'public.case_analysis_enabled(text,uuid)', 'EXECUTE')
+    OR NOT has_function_privilege('authenticated', 'public.case_analysis_enabled_for_account(uuid)', 'EXECUTE'), 'grants puerta');
 END $$;
 
 -- RLS: el 96 (cuenta 1) ve la peticion; el 98 no. Sin escritura directa.

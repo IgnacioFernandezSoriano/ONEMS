@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Info } from 'lucide-react'
 import { useTranslation } from '@/hooks/useTranslation'
+import { useAccount } from '@/contexts/AccountContext'
 import { ReceiptCaseDialog } from './ReceiptCaseDialog'
-import { useCaseAnalysisEnabled } from '@/lib/hooks/useCaseAnalysis'
+import { useCaseAnalysisEnabledForAccount } from '@/lib/hooks/useCaseAnalysis'
 import type { ReceiptCase, ReceiptCandidateShipment } from '@/lib/types'
 
 interface Props {
@@ -38,7 +39,8 @@ const REASON_GUIDE: Array<[string, string]> = [
 
 export function ReceiptCasesTable({ cases, candidates, onFix, onClose, title }: Props) {
   const { t } = useTranslation()
-  const analysisEnabled = useCaseAnalysisEnabled()
+  const { effectiveAccountId } = useAccount()
+  const analysisEnabled = useCaseAnalysisEnabledForAccount(effectiveAccountId)
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [fixing, setFixing] = useState<ReceiptCase | null>(null)
   const [closing, setClosing] = useState<ReceiptCase | null>(null)

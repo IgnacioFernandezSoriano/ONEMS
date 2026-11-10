@@ -32,26 +32,39 @@ export type CaseAnalysisState = 'idle' | 'running' | 'done' | 'failed'
 
 const POLL_MS = 5000
 
-// Puerta por cuenta: el servidor decide (case_analysis_enabled); null = aun consultando o sin respuesta.
-export function useCaseAnalysisEnabled(): boolean | null {
+// Puerta por cuenta: el servidor decide segun la cuenta de la incidencia (o la cuenta vista, en recepciones);
+// null = aun consultando. Un fallo cuenta como false.
+function useServerGate(fn: string, args: Record<string, unknown> | null): boolean | null {
   const [enabled, setEnabled] = useState<boolean | null>(null)
+  const key = JSON.stringify(args)
   useEffect(() => {
+    setEnabled(null)
+    if (!args) { setEnabled(false); return }
     let alive = true
     void (async () => {
       try {
-        const { data, error } = await supabase.rpc('case_analysis_enabled')
+        const { data, error } = await supabase.rpc(fn, args)
         if (alive) setEnabled(error ? false : data === true)
       } catch {
         if (alive) setEnabled(false)
       }
     })()
     return () => { alive = false }
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fn, key])
   return enabled
 }
 
+export function useCaseAnalysisEnabled(kind: ConversationKind, incidentId: string): boolean | null {
+  return useServerGate('case_analysis_enabled', { p_incident_kind: kind, p_incident_id: incidentId })
+}
+
+export function useCaseAnalysisEnabledForAccount(accountId: string | null | undefined): boolean | null {
+  return useServerGate('case_analysis_enabled_for_account', accountId ? { p_account: accountId } : null)
+}
+
 export function useCaseAnalysis(kind: ConversationKind, incidentId: string) {
-  const enabled = useCaseAnalysisEnabled()
+  const enabled = useCaseAnalysisEnabled(kind, incidentId)
   const [state, setState] = useState<CaseAnalysisState>('idle')
   const [result, setResult] = useState<CaseAnalysisResult | null>(null)
   const [error, setError] = useState<string | null>(null)
