@@ -249,7 +249,10 @@ CREATE INDEX case_analysis_request_incident_idx ON public.case_analysis_request 
 ALTER TABLE public.case_analysis_request ENABLE ROW LEVEL SECURITY;
 CREATE POLICY case_analysis_request_select ON public.case_analysis_request
   FOR SELECT TO authenticated
-  USING (account_id = public.current_user_account_id() OR public.is_superadmin());
+  USING (public.is_superadmin()
+          OR (incident_kind <> 'receipt' AND account_id = public.current_user_account_id())
+          OR (incident_kind = 'receipt' AND EXISTS (SELECT 1 FROM public.profiles pr
+                WHERE pr.id = auth.uid() AND pr.role = 'admin' AND pr.account_id = case_analysis_request.account_id)));
 REVOKE ALL ON public.case_analysis_request FROM PUBLIC, anon, authenticated;
 GRANT SELECT ON public.case_analysis_request TO authenticated;
 
@@ -263,6 +266,7 @@ BEGIN
   SELECT o.account_id INTO v_account FROM public.incident_owner(p_incident_kind, p_incident_id) o;
   IF v_account IS NULL THEN RAISE EXCEPTION 'incident not found'; END IF;
   PERFORM public.assert_same_account(v_account);
+  IF p_incident_kind = 'receipt' THEN PERFORM public.receipt_mgr_check(v_account); END IF;
   -- evita dos peticiones a la vez para la misma incidencia
   PERFORM pg_advisory_xact_lock(hashtextextended(p_incident_kind || ':' || p_incident_id::text, 0));
   SELECT r.id INTO v_id FROM public.case_analysis_request r
@@ -282,10 +286,11 @@ BEGIN
   SELECT * INTO r FROM public.case_analysis_request WHERE id = p_request_id;
   IF NOT FOUND THEN RAISE EXCEPTION 'request not found'; END IF;
   PERFORM public.assert_same_account(r.account_id);
-  IF r.status IN ('queued','running') AND r.created_at < now() - interval '10 minutes' THEN
-    UPDATE public.case_analysis_request SET status = 'failed', error = 'agent_timeout', finished_at = now()
-     WHERE id = r.id RETURNING * INTO r;
-  END IF;
+  IF r.incident_kind = 'receipt' THEN PERFORM public.receipt_mgr_check(r.account_id); END IF;
+  -- UPDATE condicionado: nunca pisa una peticion que acaba de terminar
+  UPDATE public.case_analysis_request SET status = 'failed', error = 'agent_timeout', finished_at = now()
+   WHERE id = r.id AND status IN ('queued','running') AND created_at < now() - interval '10 minutes';
+  SELECT * INTO r FROM public.case_analysis_request WHERE id = p_request_id;
   RETURN jsonb_build_object('status', r.status, 'result', r.result, 'error', r.error);
 END $$;
 
@@ -295,8 +300,12 @@ RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
 DECLARE r public.case_analysis_request; v_panelist uuid; v_tag text;
 BEGIN
   PERFORM ops_test._check(p_token);
+  -- caducan las peticiones sin atender (agente caido) y las abandonadas en running
+  UPDATE public.case_analysis_request SET status = 'failed', error = 'agent_timeout', finished_at = now()
+   WHERE status IN ('queued','running') AND created_at < now() - interval '10 minutes';
   SELECT * INTO r FROM public.case_analysis_request
-   WHERE status = 'queued' ORDER BY created_at LIMIT 1 FOR UPDATE SKIP LOCKED;
+   WHERE status = 'queued' AND created_at >= now() - interval '10 minutes'
+   ORDER BY created_at LIMIT 1 FOR UPDATE SKIP LOCKED;
   IF NOT FOUND THEN RETURN '{}'::jsonb; END IF;
   UPDATE public.case_analysis_request SET status = 'running', started_at = now() WHERE id = r.id;
   SELECT o.panelist_id INTO v_panelist FROM public.incident_owner(r.incident_kind, r.incident_id) o;
@@ -332,11 +341,15 @@ BEGIN
   PERFORM ops_test._check(p_token);
   SELECT * INTO r FROM public.case_analysis_request WHERE id = p_request_id FOR UPDATE;
   IF NOT FOUND THEN RAISE EXCEPTION 'ops_case: peticion no encontrada'; END IF;
+  -- solo se cierra una peticion viva: un reintento o un cierre tardio no hace nada
+  IF r.status NOT IN ('queued','running') THEN RETURN; END IF;
   UPDATE public.case_analysis_request
      SET status = CASE WHEN COALESCE(btrim(p_error), '') <> '' THEN 'failed' ELSE 'done' END,
          result = p_result, error = NULLIF(btrim(COALESCE(p_error, '')), ''), finished_at = now()
    WHERE id = r.id;
-  IF btrim(COALESCE(p_note, '')) <> '' THEN
+  -- sin panelista en la incidencia no hay donde colgar la nota: se omite
+  IF btrim(COALESCE(p_note, '')) <> ''
+     AND (SELECT o.panelist_id FROM public.incident_owner(r.incident_kind, r.incident_id) o) IS NOT NULL THEN
     PERFORM ops_case._note(r.incident_kind, r.incident_id, p_note);
   END IF;
 END $$;
@@ -366,22 +379,24 @@ BEGIN
     IF v_inc_acc IS NULL THEN RAISE EXCEPTION 'ops_case: incidencia no encontrada'; END IF;
     IF v_inc_acc <> v_pan_acc THEN RAISE EXCEPTION 'ops_case: otra cuenta'; END IF;
   END IF;
-  IF v_status IS DISTINCT FROM 'active' OR btrim(COALESCE(v_tg, '')) !~ '^[0-9]+$' THEN
-    RAISE EXCEPTION 'ops_case: el panelista no esta activo o no tiene Telegram'; END IF;
-
-  -- una misma draft_key se envia una sola vez (reintentos y doble pulsacion)
+  -- una misma draft_key se envia una sola vez (reintentos y doble pulsacion). El dedupe es solo por clave
+  -- (las claves llevan prefijo UUID) y va ANTES de las comprobaciones de estado: un reintento devuelve el id existente.
   PERFORM pg_advisory_xact_lock(hashtextextended('ops_case_send:' || p_draft_key, 0));
   IF p_incident_id IS NOT NULL THEN
     SELECT m.id INTO v_id FROM public.incident_message m WHERE m.meta->>'case_draft_key' = p_draft_key;
-    IF v_id IS NOT NULL THEN RETURN v_id; END IF;
+  ELSE
+    SELECT n.id INTO v_id FROM public.panelist_notification n
+     WHERE n.account_id = v_pan_acc AND n.kind = 'manager_notice' AND n.payload->>'case_draft_key' = p_draft_key;
+  END IF;
+  IF v_id IS NOT NULL THEN RETURN v_id; END IF;
+  IF v_status IS DISTINCT FROM 'active' OR btrim(COALESCE(v_tg, '')) !~ '^[0-9]+$' THEN
+    RAISE EXCEPTION 'ops_case: el panelista no esta activo o no tiene Telegram'; END IF;
+  IF p_incident_id IS NOT NULL THEN
     INSERT INTO public.incident_message (account_id, panelist_id, incident_kind, incident_id, direction, author, body, meta, status)
     VALUES (v_pan_acc, p_panelist_id, p_incident_kind, p_incident_id, 'outbound', 'manager', p_body,
             jsonb_build_object('manager_user_id', NULL, 'via', 'ops_agent', 'case_draft_key', p_draft_key), 'pending_send')
     RETURNING id INTO v_id;
   ELSE
-    SELECT n.id INTO v_id FROM public.panelist_notification n
-     WHERE n.account_id = v_pan_acc AND n.kind = 'manager_notice' AND n.payload->>'case_draft_key' = p_draft_key;
-    IF v_id IS NOT NULL THEN RETURN v_id; END IF;
     INSERT INTO public.panelist_notification (account_id, panelist_id, kind, payload, send_after)
     VALUES (v_pan_acc, p_panelist_id, 'manager_notice',
             jsonb_build_object('body', p_body, 'via', 'ops_agent', 'case_draft_key', p_draft_key), NULL)

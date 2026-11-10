@@ -290,11 +290,130 @@ BEGIN
   PERFORM pg_temp.fail_if(NOT has_function_privilege('anon', 'public.ops_case_finish(text,uuid,jsonb,text,text)', 'EXECUTE'), 'anon finish');
 END $$;
 
+-- ===== Ronda de arreglos 1: estado de finish/status/claim, nota sin panelista, dedupe antes de checks, rol admin en receipt =====
+DO $$
+DECLARE t text := 't0ken-de-prueba'; r jsonb; v_req uuid; v_old uuid; n0 int; n1 int; st text; v_case2 uuid; v_m uuid; v_m2 uuid;
+  v_case uuid := 'f1000000-0000-0000-0000-000000000001';
+  v_arbe uuid := 'e1000000-0000-0000-0000-000000000001';
+BEGIN
+  DELETE FROM public.case_analysis_request;
+  PERFORM pg_temp.act('99000000-0000-0000-0000-000000000099');
+
+  -- (1) finish dos veces = una sola nota
+  SELECT count(*) INTO n0 FROM public.incident_message WHERE incident_kind = 'receipt' AND incident_id = v_case AND direction = 'internal';
+  INSERT INTO public.case_analysis_request (account_id, incident_kind, incident_id, status)
+    VALUES ('a0000000-0000-0000-0000-000000000001','receipt',v_case,'running') RETURNING id INTO v_req;
+  PERFORM public.ops_case_finish(t, v_req, '{"x":1}', 'n-fix', NULL);
+  PERFORM public.ops_case_finish(t, v_req, '{"x":2}', 'n-fix', NULL);
+  SELECT count(*) INTO n1 FROM public.incident_message WHERE incident_kind = 'receipt' AND incident_id = v_case AND direction = 'internal';
+  PERFORM pg_temp.fail_if(n1 - n0 <> 1, 'finish doble: una nota, hay ' || (n1 - n0));
+  PERFORM pg_temp.fail_if((SELECT result->>'x' FROM public.case_analysis_request WHERE id = v_req) <> '1', 'segundo finish no pisa result');
+  -- finish tardio sobre failed/agent_timeout
+  INSERT INTO public.case_analysis_request (account_id, incident_kind, incident_id, status, created_at)
+    VALUES ('a0000000-0000-0000-0000-000000000001','receipt',v_case,'running', now() - interval '11 minutes') RETURNING id INTO v_old;
+  PERFORM public.case_analysis_status(v_old);
+  PERFORM public.ops_case_finish(t, v_old, '{"x":9}', 'n-tarde', NULL);
+  PERFORM pg_temp.fail_if((SELECT status || error FROM public.case_analysis_request WHERE id = v_old) <> 'failedagent_timeout', 'finish tardio no revive');
+  PERFORM pg_temp.fail_if(EXISTS (SELECT 1 FROM public.incident_message WHERE body = 'n-tarde'), 'finish tardio sin nota');
+
+  -- (2) status no pisa una peticion terminada aunque sea vieja
+  INSERT INTO public.case_analysis_request (account_id, incident_kind, incident_id, status, created_at, finished_at)
+    VALUES ('a0000000-0000-0000-0000-000000000001','reported','f3000000-0000-0000-0000-000000000004','done', now() - interval '11 minutes', now())
+    RETURNING id INTO v_old;
+  PERFORM pg_temp.fail_if(public.case_analysis_status(v_old)->>'status' <> 'done', 'done viejo sigue done');
+
+  -- (3) claim: caduca lo viejo y no lo reclama
+  DELETE FROM public.case_analysis_request;
+  INSERT INTO public.case_analysis_request (account_id, incident_kind, incident_id, status, created_at)
+    VALUES ('a0000000-0000-0000-0000-000000000001','reported','f3000000-0000-0000-0000-000000000004','queued', now() - interval '11 minutes')
+    RETURNING id INTO v_old;
+  INSERT INTO public.case_analysis_request (account_id, incident_kind, incident_id, status, created_at)
+    VALUES ('a0000000-0000-0000-0000-000000000001','unavailability','f2000000-0000-0000-0000-000000000001','running', now() - interval '11 minutes')
+    RETURNING id INTO v_req;
+  PERFORM pg_temp.fail_if(public.ops_case_claim(t) <> '{}'::jsonb, 'claim no toma una cola vieja');
+  PERFORM pg_temp.fail_if((SELECT status || error FROM public.case_analysis_request WHERE id = v_old) <> 'failedagent_timeout', 'queued viejo failed');
+  PERFORM pg_temp.fail_if((SELECT status || error FROM public.case_analysis_request WHERE id = v_req) <> 'failedagent_timeout', 'running viejo failed');
+  PERFORM pg_temp.fail_if((SELECT finished_at FROM public.case_analysis_request WHERE id = v_req) IS NULL, 'finished_at al caducar');
+  INSERT INTO public.case_analysis_request (account_id, incident_kind, incident_id)
+    VALUES ('a0000000-0000-0000-0000-000000000001','reported','f3000000-0000-0000-0000-000000000004') RETURNING id INTO v_req;
+  PERFORM pg_temp.fail_if((public.ops_case_claim(t)->>'request_id')::uuid <> v_req, 'claim toma la fresca');
+
+  -- (4) finish sobre un caso de recepcion sin panelista: cierra y omite la nota
+  INSERT INTO public.receipt_case (account_id, panelist_id, telegram_id, tag_raw, tag_norm, reason, status, attempts, first_attempt_at, last_attempt_at)
+    VALUES ('a0000000-0000-0000-0000-000000000001', NULL, '0', '77777777', '77777777', 'not_found', 'pending', 1, now(), now())
+    RETURNING id INTO v_case2;
+  INSERT INTO public.case_analysis_request (account_id, incident_kind, incident_id, status)
+    VALUES ('a0000000-0000-0000-0000-000000000001','receipt',v_case2,'running') RETURNING id INTO v_req;
+  PERFORM public.ops_case_finish(t, v_req, '{"x":1}', 'sin panelista', NULL);
+  PERFORM pg_temp.fail_if((SELECT status FROM public.case_analysis_request WHERE id = v_req) <> 'done', 'finish sin panelista cierra');
+  PERFORM pg_temp.fail_if(EXISTS (SELECT 1 FROM public.incident_message WHERE incident_id = v_case2), 'sin panelista no hay nota');
+
+  -- (5) reintento de send con el panelista ya sin telegram: devuelve el id existente
+  v_m := public.ops_case_send(t, 'receipt', v_case, v_arbe, 'hola', 'r5:0');
+  UPDATE public.panelists SET telegram_id = NULL WHERE id = v_arbe;
+  v_m2 := public.ops_case_send(t, 'receipt', v_case, v_arbe, 'hola', 'r5:0');
+  PERFORM pg_temp.fail_if(v_m <> v_m2, 'reintento sin telegram devuelve el mismo id');
+  -- una clave nueva sigue exigiendo telegram
+  BEGIN
+    PERFORM public.ops_case_send(t, 'receipt', v_case, v_arbe, 'hola', 'r5:1');
+    RAISE EXCEPTION 'FAIL: clave nueva sin telegram aceptada';
+  EXCEPTION WHEN OTHERS THEN
+    PERFORM pg_temp.fail_if(SQLERRM NOT LIKE 'ops_case:%Telegram%', 'clave nueva: ' || SQLERRM);
+  END;
+END $$;
+UPDATE public.panelists SET telegram_id = '1001' WHERE panelist_code = 'P1';
+
+-- (6) rol: un usuario normal no toca casos de recepcion
+DO $$
+DECLARE v_case uuid := 'f1000000-0000-0000-0000-000000000001'; v_arbe uuid := 'e1000000-0000-0000-0000-000000000001';
+  v_st text; v_id uuid;
+BEGIN
+  DELETE FROM public.case_analysis_request;
+  PERFORM pg_temp.act('96000000-0000-0000-0000-000000000096');
+  BEGIN
+    PERFORM public.request_case_analysis('receipt', v_case);
+    RAISE EXCEPTION 'FAIL: 96 pidio analisis de recepcion';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_st = RETURNED_SQLSTATE;
+    PERFORM pg_temp.fail_if(v_st <> '42501', 'request receipt 96 sqlstate ' || v_st);
+  END;
+  BEGIN
+    PERFORM public.send_case_message('receipt', v_case, v_arbe, 'x', 'k96');
+    RAISE EXCEPTION 'FAIL: 96 envio a receipt';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_st = RETURNED_SQLSTATE;
+    PERFORM pg_temp.fail_if(v_st <> '42501', 'send_case_message receipt 96 sqlstate ' || v_st);
+  END;
+  -- reported/unavailability siguen igual para el usuario normal
+  v_id := public.request_case_analysis('reported', 'f3000000-0000-0000-0000-000000000004');
+  PERFORM pg_temp.fail_if(v_id IS NULL, '96 pide analisis de incidencia reportada');
+  -- status de una peticion de recepcion ajena al rol
+  INSERT INTO public.case_analysis_request (account_id, incident_kind, incident_id)
+    VALUES ('a0000000-0000-0000-0000-000000000001','receipt',v_case) RETURNING id INTO v_id;
+  BEGIN
+    PERFORM public.case_analysis_status(v_id);
+    RAISE EXCEPTION 'FAIL: 96 leyo status receipt';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_st = RETURNED_SQLSTATE;
+    PERFORM pg_temp.fail_if(v_st <> '42501', 'status receipt 96 sqlstate ' || v_st);
+  END;
+  -- el admin 99 sigue pudiendo
+  PERFORM pg_temp.act('99000000-0000-0000-0000-000000000099');
+  PERFORM pg_temp.fail_if(public.request_case_analysis('receipt', v_case) IS NULL, '99 pide receipt');
+  PERFORM pg_temp.fail_if(public.send_case_message('receipt', v_case, v_arbe, 'x', 'k99') IS NULL, '99 send_case_message receipt');
+  PERFORM pg_temp.fail_if(public.case_analysis_status(v_id)->>'status' IS NULL, '99 status receipt');
+END $$;
+
 -- RLS: el 96 (cuenta 1) ve la peticion; el 98 no. Sin escritura directa.
 SET LOCAL ROLE authenticated;
 SELECT pg_temp.act('96000000-0000-0000-0000-000000000096');
 DO $$ BEGIN
-  PERFORM pg_temp.fail_if((SELECT count(*) FROM public.case_analysis_request) < 1, '96 no ve su peticion');
+  PERFORM pg_temp.fail_if((SELECT count(*) FROM public.case_analysis_request WHERE incident_kind = 'reported') < 1, '96 no ve su peticion');
+  PERFORM pg_temp.fail_if((SELECT count(*) FROM public.case_analysis_request WHERE incident_kind = 'receipt') <> 0, '96 ve peticiones de recepcion');
+END $$;
+SELECT pg_temp.act('99000000-0000-0000-0000-000000000099');
+DO $$ BEGIN
+  PERFORM pg_temp.fail_if((SELECT count(*) FROM public.case_analysis_request WHERE incident_kind = 'receipt') < 1, '99 admin no ve peticiones de recepcion');
 END $$;
 SELECT pg_temp.act('98000000-0000-0000-0000-000000000098');
 DO $$ BEGIN

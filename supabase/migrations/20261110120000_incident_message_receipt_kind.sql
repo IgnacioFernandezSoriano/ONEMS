@@ -76,6 +76,8 @@ BEGIN
   SELECT o.account_id INTO v_account FROM public.incident_owner(p_incident_kind, p_incident_id) o;
   IF v_account IS NULL THEN RAISE EXCEPTION 'incident not found'; END IF;
   PERFORM assert_same_account(v_account);
+  -- la pantalla de errores de recepcion es solo para admins de la cuenta
+  IF p_incident_kind = 'receipt' THEN PERFORM public.receipt_mgr_check(v_account); END IF;
   IF p_panelist_id IS NULL
      OR NOT EXISTS (SELECT 1 FROM panelists WHERE id = p_panelist_id AND account_id = v_account) THEN
     RAISE EXCEPTION 'Cross-tenant access denied'; END IF;
