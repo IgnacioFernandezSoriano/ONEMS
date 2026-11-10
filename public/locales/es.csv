@@ -5186,6 +5186,8 @@ receipt_errors.reason_help.wrong_city_cancelled,Solo en casos antiguos: el enví
 receipt_errors.role.sender,emisor
 receipt_errors.role.receiver,receptor
 receipt_errors.fix,Arreglar
+receipt_errors.analyze,Analizar
+receipt_errors.case_dialog_title,Caso {tag}
 receipt_errors.close_case,Pasar a compensar / Descartar
 receipt_errors.fix_title,Arreglar caso: elige el envío correcto
 receipt_errors.fix_help,El panelista declaró la etiqueta {tag}. Elige el envío enviado dirigido a su ciudad que le corresponda.

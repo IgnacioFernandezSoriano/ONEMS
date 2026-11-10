@@ -5178,6 +5178,8 @@ receipt_errors.reason_help.wrong_city_cancelled,في الحالات القديم
 receipt_errors.role.sender,مُرسِل
 receipt_errors.role.receiver,مستلِم
 receipt_errors.fix,إصلاح
+receipt_errors.analyze,تحليل
+receipt_errors.case_dialog_title,الحالة {tag}
 receipt_errors.close_case,تعويض / تجاهل
 receipt_errors.fix_title,إصلاح الحالة: اختر الشحنة الصحيحة
 receipt_errors.fix_help,أعلن العضو عن الملصق {tag}. اختر الشحنة المرسلة إلى مدينته والتي تطابقه.

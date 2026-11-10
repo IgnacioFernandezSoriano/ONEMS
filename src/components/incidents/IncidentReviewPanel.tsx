@@ -10,6 +10,7 @@ import type { SelectedCell } from '@/components/incidents/CityLoadPanel'
 import { CellSamplesPanel } from '@/components/incidents/CellSamplesPanel'
 import { IncidentLinesTable } from '@/components/incidents/IncidentLinesTable'
 import { IncidentConversation } from '@/components/incidents/IncidentConversation'
+import { CaseAnalysisPanel } from '@/components/incidents/CaseAnalysisPanel'
 import {
   planLabel, fmtShort, fmtWeekRange, currentMonday, addWeeksTo, defaultWindowWeeks, toMonday,
   SATURATION_BADGE_CLASS,
@@ -336,6 +337,8 @@ export function IncidentReviewPanel({ unavailabilityId, onBack }: Props) {
       )}
 
       <IncidentLinesTable lines={visibleLines} emptyText={linesEmptyText} />
+
+      <CaseAnalysisPanel kind="unavailability" incidentId={unavailabilityId} />
 
       <IncidentConversation kind="unavailability" incidentId={unavailabilityId}
         panelistLanguage={header?.panelist_language} helpSection="c-vacaciones" />

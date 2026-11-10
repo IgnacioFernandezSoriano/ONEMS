@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Info } from 'lucide-react'
 import { useTranslation } from '@/hooks/useTranslation'
+import { ReceiptCaseDialog } from './ReceiptCaseDialog'
 import type { ReceiptCase, ReceiptCandidateShipment } from '@/lib/types'
 
 interface Props {
@@ -39,6 +40,7 @@ export function ReceiptCasesTable({ cases, candidates, onFix, onClose, title }: 
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [fixing, setFixing] = useState<ReceiptCase | null>(null)
   const [closing, setClosing] = useState<ReceiptCase | null>(null)
+  const [analyzing, setAnalyzing] = useState<ReceiptCase | null>(null)
   const [showGuide, setShowGuide] = useState(false)
 
   const rows = cases.filter(c => statusFilter === 'all' || c.status === statusFilter)
@@ -87,6 +89,7 @@ export function ReceiptCasesTable({ cases, candidates, onFix, onClose, title }: 
                 <td className="px-6 py-3 text-sm">{c.attempts}</td>
                 <td className="px-6 py-3 text-sm">{c.culprit_name ? `${c.culprit_name} (${t(`receipt_errors.role.${c.culprit_role}`)})` : '-'}</td>
                 <td className="px-6 py-3 text-sm whitespace-nowrap">
+                  <button onClick={() => setAnalyzing(c)} className="text-blue-600 hover:text-blue-800 me-3">{t('receipt_errors.analyze')}</button>
                   {OPEN_STATUSES.includes(c.status) && (
                     <>
                       {!NOT_FIXABLE.includes(c.reason) && (
@@ -105,6 +108,7 @@ export function ReceiptCasesTable({ cases, candidates, onFix, onClose, title }: 
       </div>
       {fixing && <FixDialog c={fixing} candidates={candidates} onFix={onFix} onDone={() => setFixing(null)} />}
       {closing && <CloseDialog c={closing} onClose={onClose} onDone={() => setClosing(null)} />}
+      {analyzing && <ReceiptCaseDialog c={analyzing} onDone={() => setAnalyzing(null)} />}
       {showGuide && <ReasonGuideDialog onDone={() => setShowGuide(false)} />}
     </div>
   )

@@ -7,6 +7,7 @@ import { ReportedIncidentHeader } from './ReportedIncidentHeader'
 import { ReturnedSampleActions } from './ReturnedSampleActions'
 import { MissingMaterialsSections } from './MissingMaterialsSections'
 import { IncidentConversation } from './IncidentConversation'
+import { CaseAnalysisPanel } from './CaseAnalysisPanel'
 
 // Apartado de la guía del panelista (public/help/panelist-guide.*.html) para cada categoría
 const HELP_SECTION: Record<string, string> = {
@@ -100,6 +101,8 @@ export function ReportedIncidentPanel({ incidentId, onBack }: { incidentId: stri
       </div>
 
       {/* Conversación con el panelista */}
+      <CaseAnalysisPanel kind="reported" incidentId={incidentId} />
+
       <IncidentConversation kind="reported" incidentId={incidentId}
         panelistLanguage={inc.panelist?.language} helpSection={HELP_SECTION[inc.category] ?? 'c-otro'} />
 

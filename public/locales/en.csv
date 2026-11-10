@@ -5186,6 +5186,8 @@ receipt_errors.reason_help.wrong_city_cancelled,Old cases only: the shipment rea
 receipt_errors.role.sender,sender
 receipt_errors.role.receiver,receiver
 receipt_errors.fix,Fix
+receipt_errors.analyze,Analyze
+receipt_errors.case_dialog_title,Case {tag}
 receipt_errors.close_case,Compensate / Discard
 receipt_errors.fix_title,Fix case: choose the correct shipment
 receipt_errors.fix_help,The panelist declared the tag {tag}. Choose the sent shipment addressed to their city that matches.

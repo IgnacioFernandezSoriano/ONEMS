@@ -5178,6 +5178,8 @@ receipt_errors.reason_help.wrong_city_cancelled,Anciens cas uniquement : l'envoi
 receipt_errors.role.sender,expéditeur
 receipt_errors.role.receiver,destinataire
 receipt_errors.fix,Corriger
+receipt_errors.analyze,Analyser
+receipt_errors.case_dialog_title,Cas {tag}
 receipt_errors.close_case,Compenser / Écarter
 receipt_errors.fix_title,Corriger le cas : choisissez le bon envoi
 receipt_errors.fix_help,Le panéliste a déclaré l'étiquette {tag}. Choisissez l'envoi expédié vers sa ville qui correspond.
