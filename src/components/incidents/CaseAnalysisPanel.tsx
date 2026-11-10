@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import { useTranslation } from '@/hooks/useTranslation'
 import { useCaseAnalysis } from '@/lib/hooks/useCaseAnalysis'
@@ -57,6 +57,24 @@ export function CaseAnalysisPanel({ kind, incidentId }: Props) {
   const { t } = useTranslation()
   const { state, result, error, start, send, sent, enabled } = useCaseAnalysis(kind, incidentId)
   const a = result?.analysis
+  const [showDetail, setShowDetail] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  useEffect(() => () => { if (copyTimer.current) clearTimeout(copyTimer.current) }, [])
+  // nuevo analisis: detalle plegado otra vez
+  useEffect(() => { setShowDetail(false); setCopied(false) }, [result])
+  const problem = result?.problem ?? a?.problem ?? a?.summary
+  const cause = result?.cause ?? a?.cause
+  const solution = result?.solution ?? a?.solution
+  const copyPrompt = async () => {
+    if (!result?.prompt) return
+    try {
+      await navigator.clipboard.writeText(result.prompt)
+      setCopied(true)
+      if (copyTimer.current) clearTimeout(copyTimer.current)
+      copyTimer.current = setTimeout(() => setCopied(false), 2000)
+    } catch { setCopied(false) }
+  }
   const drafts = result?.drafts ?? []
   // con borrador: su nombre; sin borrador: el que trae el agente en people ("Nombre (CÓDIGO)")
   const nameOf = (id: string) => drafts.find(d => d.panelist_id === id)?.name ?? result?.people?.[id] ?? ''
@@ -85,7 +103,25 @@ export function CaseAnalysisPanel({ kind, incidentId }: Props) {
       )}
       {state === 'done' && a && (
         <div className="mt-4">
-          {section(t('case_analysis.summary'), a.summary)}
+          <div className="border rounded p-3 mb-3 bg-gray-50">
+            {section(t('case_analysis.problem'), problem)}
+            {section(t('case_analysis.cause'), cause)}
+            {section(t('case_analysis.solution'), solution)}
+            {result?.fix?.applicable && (
+              <p className="text-sm text-green-800 mb-2">{t('case_analysis.fix_available')}</p>
+            )}
+            <div className="flex flex-wrap gap-2">
+              <button type="button" className={BTN_SECONDARY} aria-expanded={showDetail} onClick={() => setShowDetail(v => !v)}>
+                {showDetail ? t('case_analysis.hide_detail') : t('case_analysis.show_detail')}
+              </button>
+              {result?.prompt && (
+                <button type="button" className={BTN_SECONDARY} onClick={() => { void copyPrompt() }}>
+                  {copied ? t('case_analysis.copied') : t('case_analysis.copy_prompt')}
+                </button>
+              )}
+            </div>
+          </div>
+          {showDetail && (<>
           {section(t('case_analysis.plan'), a.plan)}
           {section(t('case_analysis.reality'), a.reality)}
           {section(t('case_analysis.comparison'), a.comparison)}
@@ -125,6 +161,7 @@ export function CaseAnalysisPanel({ kind, incidentId }: Props) {
             <h5 className="text-xs font-semibold text-gray-600 uppercase mb-0.5">{t('case_analysis.improvement')}</h5>
             <p className="text-sm whitespace-pre-wrap">{a.improvement || t('case_analysis.no_improvement')}</p>
           </div>
+          </>)}
           {drafts.length > 0 && (
             <div>
               <h5 className="text-xs font-semibold text-gray-600 uppercase mb-1">{t('case_analysis.drafts')}</h5>

@@ -5226,3 +5226,11 @@ case_analysis.likelihood.alta,Alta
 case_analysis.likelihood.media,Média
 case_analysis.likelihood.baja,Baixa
 case_analysis.probable_with,causa provável (probabilidade: {level})
+case_analysis.problem,Problema
+case_analysis.cause,Causa
+case_analysis.solution,Solução
+case_analysis.fix_available,Este caso pode ser corrigido a partir do agente (R4) — o Ignacio aplica-o no Telegram
+case_analysis.copy_prompt,Copiar prompt para o Claude Code
+case_analysis.copied,Copiado
+case_analysis.show_detail,Ver detalhe
+case_analysis.hide_detail,Ocultar detalhe

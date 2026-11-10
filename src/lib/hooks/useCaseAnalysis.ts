@@ -13,7 +13,11 @@ export interface CaseDraft {
 
 export interface CaseAnalysisResult {
   analysis: {
-    summary: string
+    // legado: analisis antiguos aun traen summary; ya no se muestra
+    summary?: string
+    problem?: string | null
+    cause?: string | null
+    solution?: string | null
     plan: string
     reality: string
     comparison: string
@@ -26,6 +30,12 @@ export interface CaseAnalysisResult {
   anchor: { kind: string, id: string } | null
   // panelist_id -> "Nombre (CODIGO)" de cada implicado (analisis anteriores pueden no traerlo)
   people?: Record<string, string>
+  // tarjeta concisa (analisis anteriores pueden no traerla)
+  problem?: string | null
+  cause?: string | null
+  solution?: string | null
+  fix?: { applicable: boolean, reason?: string | null, tag?: string | null, new_dest_code?: string | null, sla_hours?: number | null } | null
+  prompt?: string | null
 }
 
 export type CaseAnalysisState = 'idle' | 'running' | 'done' | 'failed'
