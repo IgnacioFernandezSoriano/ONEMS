@@ -2,12 +2,13 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { notifyIncidentAttention } from '@/lib/hooks/useIncidentAttention'
 
-export type ConversationKind = 'reported' | 'unavailability'
+export type ConversationKind = 'reported' | 'unavailability' | 'receipt'
 
 export interface IncidentMessage {
   id: string
   incident_kind: ConversationKind
   incident_id: string
+  panelist_id: string
   direction: 'outbound' | 'inbound' | 'internal'
   author: 'bot' | 'panelist' | 'manager' | 'system'
   body: string
@@ -17,6 +18,7 @@ export interface IncidentMessage {
   error: string | null
   created_at: string
   read_at?: string | null
+  panelists?: { name: string, panelist_code: string } | null
 }
 
 const POLL_MS = 30000
@@ -35,6 +37,8 @@ export function useIncidentConversation(kind: ConversationKind, incidentId: stri
   const [photoUrls, setPhotoUrls] = useState<Record<string, string>>({})
   const photoRequested = useRef<Set<string>>(new Set())
   const markedFor = useRef('')
+  const namesById = useRef<Record<string, { name: string, panelist_code: string }>>({})
+  const namesKey = useRef('')
 
   const reload = useCallback(async (): Promise<void> => {
     if (inFlight.current) { again.current = true; return }
@@ -52,6 +56,20 @@ export function useIncidentConversation(kind: ConversationKind, incidentId: stri
           if (!alive.current) return
           if (e) throw e
           const list = (data || []) as IncidentMessage[]
+          // incident_message no tiene FK a panelists: los nombres van en una segunda consulta,
+          // solo cuando cambia el conjunto de ids
+          const ids = [...new Set(list.map(m => m.panelist_id).filter(Boolean))].sort()
+          const key = ids.join(',')
+          if (ids.length && key !== namesKey.current) {
+            const { data: ps } = await supabase.from('panelists').select('id,name,panelist_code').in('id', ids)
+            if (!alive.current) return
+            if (ps) {
+              namesById.current = Object.fromEntries(
+                (ps as { id: string, name: string, panelist_code: string }[]).map(p => [p.id, { name: p.name, panelist_code: p.panelist_code }]))
+              namesKey.current = key
+            }
+          }
+          for (const m of list) m.panelists = namesById.current[m.panelist_id] ?? null
           setMessages(list)
           setError(null)
           // Marca como leidos los inbound nuevos (una vez por lote, sin bucles)

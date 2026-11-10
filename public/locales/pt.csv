@@ -5198,3 +5198,25 @@ receipt_errors.close_confirm,Fechar caso
 help_center.doc.receipt_errors.title,Erros de receção
 help_center.doc.receipt_errors.desc,"O que o ONEMS faz quando uma receção declarada não coincide, como ler o ecrã Receções e como corrigir ou fechar cada caso."
 receipt_errors.help_link,Ajuda
+case_analysis.button,Analisar caso
+case_analysis.running,A analisar...
+case_analysis.failed,A análise falhou. Tente novamente.
+case_analysis.agent_timeout,O agente não responde. Tente mais tarde.
+case_analysis.summary,Resumo
+case_analysis.plan,Plano
+case_analysis.reality,O que aconteceu
+case_analysis.comparison,Comparação
+case_analysis.causes,Causas
+case_analysis.probable,provável
+case_analysis.noise,Ruído (não relevante)
+case_analysis.contacts,Quem contactar
+case_analysis.improvement,Melhoria proposta
+case_analysis.no_improvement,Não há melhoria a propor.
+case_analysis.drafts,Rascunhos de mensagem
+case_analysis.send_to,Enviar a {name}
+case_analysis.sent,Enviado
+case_analysis.send_error,Não foi possível enviar a mensagem.
+case_analysis.role.remitente,Remetente
+case_analysis.role.receptor,Recetor
+case_analysis.role.destinatario,Destinatário
+case_analysis.recipient,Destinatário da mensagem

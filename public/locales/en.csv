@@ -5198,3 +5198,25 @@ receipt_errors.close_confirm,Close case
 help_center.doc.receipt_errors.title,Receipt errors
 help_center.doc.receipt_errors.desc,"What ONEMS does when a reported receipt does not match, how to read the Receipts screen and how to fix or close each case."
 receipt_errors.help_link,Help
+case_analysis.button,Analyze case
+case_analysis.running,Analyzing...
+case_analysis.failed,The analysis failed. Try again.
+case_analysis.agent_timeout,The agent is not responding. Try again later.
+case_analysis.summary,Summary
+case_analysis.plan,Plan
+case_analysis.reality,What happened
+case_analysis.comparison,Comparison
+case_analysis.causes,Causes
+case_analysis.probable,probable
+case_analysis.noise,Noise (not relevant)
+case_analysis.contacts,Who to contact
+case_analysis.improvement,Proposed improvement
+case_analysis.no_improvement,No improvement to propose.
+case_analysis.drafts,Message drafts
+case_analysis.send_to,Send to {name}
+case_analysis.sent,Sent
+case_analysis.send_error,The message could not be sent.
+case_analysis.role.remitente,Sender
+case_analysis.role.receptor,Receiver
+case_analysis.role.destinatario,Addressee
+case_analysis.recipient,Recipient

@@ -5190,3 +5190,25 @@ receipt_errors.close_confirm,إغلاق الحالة
 help_center.doc.receipt_errors.title,أخطاء الاستلام
 help_center.doc.receipt_errors.desc,ما يفعله ONEMS عندما لا يتطابق استلام مُصرَّح به، وكيفية قراءة شاشة الاستلامات، وكيفية إصلاح كل حالة أو إغلاقها.
 receipt_errors.help_link,مساعدة
+case_analysis.button,تحليل الحالة
+case_analysis.running,جارٍ التحليل...
+case_analysis.failed,فشل التحليل. حاول مرة أخرى.
+case_analysis.agent_timeout,الوكيل لا يستجيب. حاول لاحقًا.
+case_analysis.summary,الملخص
+case_analysis.plan,الخطة
+case_analysis.reality,ما حدث
+case_analysis.comparison,المقارنة
+case_analysis.causes,الأسباب
+case_analysis.probable,محتمل
+case_analysis.noise,ضوضاء (غير ذات صلة)
+case_analysis.contacts,من يجب التواصل معه
+case_analysis.improvement,التحسين المقترح
+case_analysis.no_improvement,لا يوجد تحسين لاقتراحه.
+case_analysis.drafts,مسودات الرسائل
+case_analysis.send_to,إرسال إلى {name}
+case_analysis.sent,تم الإرسال
+case_analysis.send_error,تعذر إرسال الرسالة.
+case_analysis.role.remitente,المرسل
+case_analysis.role.receptor,المستلم
+case_analysis.role.destinatario,المرسل إليه
+case_analysis.recipient,مستلم الرسالة

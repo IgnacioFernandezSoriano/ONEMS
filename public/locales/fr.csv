@@ -5190,3 +5190,25 @@ receipt_errors.close_confirm,Clôturer le cas
 help_center.doc.receipt_errors.title,Erreurs de réception
 help_center.doc.receipt_errors.desc,"Ce que fait ONEMS quand une réception déclarée ne correspond pas, comment lire l'écran Réceptions et comment corriger ou clôturer chaque cas."
 receipt_errors.help_link,Aide
+case_analysis.button,Analyser le cas
+case_analysis.running,Analyse en cours...
+case_analysis.failed,L'analyse a échoué. Réessayez.
+case_analysis.agent_timeout,L'agent ne répond pas. Réessayez plus tard.
+case_analysis.summary,Résumé
+case_analysis.plan,Plan
+case_analysis.reality,Ce qui s'est passé
+case_analysis.comparison,Comparaison
+case_analysis.causes,Causes
+case_analysis.probable,probable
+case_analysis.noise,Bruit (sans intérêt)
+case_analysis.contacts,Qui contacter
+case_analysis.improvement,Amélioration proposée
+case_analysis.no_improvement,Aucune amélioration à proposer.
+case_analysis.drafts,Brouillons de message
+case_analysis.send_to,Envoyer à {name}
+case_analysis.sent,Envoyé
+case_analysis.send_error,Le message n'a pas pu être envoyé.
+case_analysis.role.remitente,Expéditeur
+case_analysis.role.receptor,Récepteur
+case_analysis.role.destinatario,Destinataire
+case_analysis.recipient,Destinataire du message
