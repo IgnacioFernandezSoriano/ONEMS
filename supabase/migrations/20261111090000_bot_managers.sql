@@ -23,6 +23,8 @@
 --      * Con el token 'manager', esas funciones exigen p_account (una cuenta activa; si no, "<prefijo>: falta
 --        cuenta") y p_actor_email (nuevo ultimo parametro, DEFAULT NULL): el correo debe tener uno de los tres
 --        roles en ESA cuenta o ser de un perfil superadmin; si no, "<prefijo>: sin permiso en esa cuenta".
+--        Ademas la cuenta debe tener el analisis habilitado (case_analysis_allowed), si no "<prefijo>: cuenta
+--        no habilitada" (ops_case_account_enabled no falla por eso: devuelve false).
 --        Con el token 'owner', p_account y p_actor_email siguen siendo opcionales (comportamiento de hoy).
 --      * Alta del token de managers (en el servidor, NUNCA en el repo): generar el token, guardarlo en el .env
 --        del bot y, en el editor SQL de Supabase (rol postgres), ejecutar
@@ -115,8 +117,12 @@ END $$;
 
 -- Token + cuenta + quien actua. Devuelve la cuenta (uuid) o NULL (solo token 'owner' sin p_account).
 --   owner:   p_account opcional (si viene, debe existir); p_actor_email no se mira.
---   manager: p_account obligatoria (una cuenta activa) y p_actor_email con rol en esa cuenta o superadmin.
-CREATE OR REPLACE FUNCTION ops_case._actor(p_token text, p_account text, p_actor_email text, p_prefix text)
+--   manager: p_account obligatoria (una cuenta activa), p_actor_email con rol en esa cuenta o superadmin y,
+--            salvo p_require_enabled = false (solo ops_case_account_enabled), la cuenta con el analisis
+--            habilitado (case_analysis_allowed); si no, "<prefijo>: cuenta no habilitada". El permiso se mira
+--            antes: quien no tiene permiso no sabe si la cuenta esta habilitada.
+CREATE OR REPLACE FUNCTION ops_case._actor(p_token text, p_account text, p_actor_email text, p_prefix text,
+                                           p_require_enabled boolean DEFAULT true)
 RETURNS uuid LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = '' AS $$
 DECLARE v_ids uuid[]; v_email text;
 BEGIN
@@ -135,6 +141,9 @@ BEGIN
        OR EXISTS (SELECT 1 FROM public.profiles p WHERE lower(btrim(p.email)) = v_email AND p.role = 'superadmin'
                     AND COALESCE(p.status, 'active') = 'active')) THEN
     RAISE EXCEPTION '%: sin permiso en esa cuenta', p_prefix;
+  END IF;
+  IF p_require_enabled AND NOT public.case_analysis_allowed(v_ids[1]) THEN
+    RAISE EXCEPTION '%: cuenta no habilitada', p_prefix;
   END IF;
   RETURN v_ids[1];
 END $$;
@@ -179,9 +188,10 @@ CREATE OR REPLACE FUNCTION public.ops_case_account_enabled(p_token text, p_accou
 RETURNS boolean LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = '' AS $$
 DECLARE v_ids uuid[];
 BEGIN
-  -- token de managers: cuenta y correo comprobados (falla); owner: nunca falla por la cuenta
+  -- token de managers: cuenta y correo comprobados (falla), la puerta no (la respuesta es el false);
+  -- owner: nunca falla por la cuenta
   IF ops_test._caller(p_token) = 'manager' THEN
-    PERFORM ops_case._actor(p_token, p_account, p_actor_email, 'ops_case');
+    PERFORM ops_case._actor(p_token, p_account, p_actor_email, 'ops_case', false);
   END IF;
   v_ids := ARRAY(SELECT a.id FROM public.accounts a WHERE a.name = p_account AND a.status = 'active');
   IF cardinality(v_ids) <> 1 THEN RETURN false; END IF;
@@ -301,7 +311,8 @@ BEGIN
   -- (las claves llevan prefijo UUID) y va ANTES de las comprobaciones de estado: un reintento devuelve el id existente.
   PERFORM pg_advisory_xact_lock(hashtextextended('ops_case_send:' || p_draft_key, 0));
   IF p_incident_id IS NOT NULL THEN
-    SELECT m.id INTO v_id FROM public.incident_message m WHERE m.meta->>'case_draft_key' = p_draft_key;
+    SELECT m.id INTO v_id FROM public.incident_message m
+     WHERE m.account_id = v_pan_acc AND m.meta->>'case_draft_key' = p_draft_key;
   ELSE
     SELECT n.id INTO v_id FROM public.panelist_notification n
      WHERE n.account_id = v_pan_acc AND n.kind = 'manager_notice' AND n.payload->>'case_draft_key' = p_draft_key;
@@ -310,10 +321,16 @@ BEGIN
   IF v_status IS DISTINCT FROM 'active' OR btrim(COALESCE(v_tg, '')) !~ '^[0-9]+$' THEN
     RAISE EXCEPTION 'ops_case: el panelista no esta activo o no tiene Telegram'; END IF;
   IF p_incident_id IS NOT NULL THEN
-    INSERT INTO public.incident_message (account_id, panelist_id, incident_kind, incident_id, direction, author, body, meta, status)
-    VALUES (v_pan_acc, p_panelist_id, p_incident_kind, p_incident_id, 'outbound', 'manager', p_body,
-            jsonb_build_object('manager_user_id', NULL, 'via', 'ops_agent', 'case_draft_key', p_draft_key), 'pending_send')
-    RETURNING id INTO v_id;
+    -- draft_key es unica en toda la tabla (incident_message_case_draft_key_uq): si ya la uso otra cuenta, error
+    -- (nunca se devuelve el id ajeno).
+    BEGIN
+      INSERT INTO public.incident_message (account_id, panelist_id, incident_kind, incident_id, direction, author, body, meta, status)
+      VALUES (v_pan_acc, p_panelist_id, p_incident_kind, p_incident_id, 'outbound', 'manager', p_body,
+              jsonb_build_object('manager_user_id', NULL, 'via', 'ops_agent', 'case_draft_key', p_draft_key), 'pending_send')
+      RETURNING id INTO v_id;
+    EXCEPTION WHEN unique_violation THEN
+      RAISE EXCEPTION 'ops_case: draft_key ya usada';
+    END;
   ELSE
     INSERT INTO public.panelist_notification (account_id, panelist_id, kind, payload, send_after)
     VALUES (v_pan_acc, p_panelist_id, 'manager_notice',
@@ -328,9 +345,16 @@ DROP FUNCTION IF EXISTS public.ops_fix_r4_preview(text, uuid);
 CREATE FUNCTION public.ops_fix_r4_preview(p_token text, p_case_id uuid, p_account text DEFAULT NULL,
                                           p_actor_email text DEFAULT NULL)
 RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = '' AS $$
-DECLARE v jsonb; v_acc uuid;
+DECLARE v jsonb; v_acc uuid; v_case_acc uuid;
 BEGIN
   v_acc := ops_case._actor(p_token, p_account, p_actor_email, 'ops_fix');
+  -- la cuenta del caso se mira ANTES de _r4_check: con otra cuenta no se evalua nada de sus datos
+  IF v_acc IS NOT NULL THEN
+    SELECT c.account_id INTO v_case_acc FROM public.receipt_case c WHERE c.id = p_case_id;
+    IF v_case_acc IS NOT NULL AND v_case_acc <> v_acc THEN
+      RAISE EXCEPTION 'ops_fix: otra cuenta';
+    END IF;
+  END IF;
   v := ops_fix._r4_check(p_case_id);
   IF v_acc IS NOT NULL AND (v->>'account_id')::uuid IS DISTINCT FROM v_acc THEN
     RAISE EXCEPTION 'ops_fix: otra cuenta';
@@ -495,7 +519,7 @@ END $$;
 
 -- ---------- permisos: solo anon (el agente con su token) ----------
 REVOKE ALL ON FUNCTION ops_case._account(text, text) FROM PUBLIC, anon, authenticated;
-REVOKE ALL ON FUNCTION ops_case._actor(text, text, text, text) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION ops_case._actor(text, text, text, text, boolean) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION ops_test._caller(text) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION ops_test._check(text) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION ops_test.set_manager_token_hash(text) FROM PUBLIC, anon, authenticated;

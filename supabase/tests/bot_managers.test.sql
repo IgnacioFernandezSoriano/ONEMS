@@ -194,7 +194,42 @@ BEGIN
                                   'ops_case_note','ops_fix_r4_preview','ops_fix_r4_apply','ops_fix_r4_undo','ops_case_account_enabled')) <> 8, 'una firma por funcion');
 END $$;
 
+-- ===== dedupe de ops_case_send por cuenta (rama con incidencia) =====
+INSERT INTO public.panelist_incident (id, account_id, panelist_id, category, status, description) VALUES
+  ('f3000000-0000-0000-0000-000000000009','a0000000-0000-0000-0000-000000000002','e9000000-0000-0000-0000-000000000009','other','open','y');
+INSERT INTO public.incident_message (id, account_id, panelist_id, incident_kind, incident_id, direction, author, body, meta, status) VALUES
+  ('f5000000-0000-0000-0000-000000000009','a0000000-0000-0000-0000-000000000002','e9000000-0000-0000-0000-000000000009','reported',
+   'f3000000-0000-0000-0000-000000000009','outbound','manager','de la cuenta 2','{"case_draft_key":"shared-key"}','pending_send');
+DO $$
+DECLARE v_id uuid; v_err text;
+BEGIN
+  -- la clave ya usada por la cuenta 2: nunca devuelve su id (la clave es unica en la tabla -> error claro)
+  BEGIN
+    v_id := public.ops_case_send('t0ken-de-prueba', 'reported', 'f3000000-0000-0000-0000-000000000001',
+                                 'e1000000-0000-0000-0000-000000000001', 'hi', 'shared-key', 'Acc');
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_err = MESSAGE_TEXT;
+  END;
+  PERFORM pg_temp.fail_if(v_id = 'f5000000-0000-0000-0000-000000000009', 'dedupe devuelve el id de otra cuenta');
+  PERFORM pg_temp.fail_if(v_err IS DISTINCT FROM 'ops_case: draft_key ya usada', 'clave de otra cuenta: ' || COALESCE(v_err, v_id::text));
+  PERFORM pg_temp.fail_if((SELECT count(*) FROM public.incident_message WHERE meta->>'case_draft_key' = 'shared-key') <> 1,
+                          'clave de otra cuenta no escribe');
+  -- clave propia: inserta en la cuenta propia y el reintento devuelve el mismo id
+  v_id := public.ops_case_send('t0ken-de-prueba', 'reported', 'f3000000-0000-0000-0000-000000000001',
+                               'e1000000-0000-0000-0000-000000000001', 'hi', 'own-key', 'Acc');
+  PERFORM pg_temp.fail_if(NOT EXISTS (SELECT 1 FROM public.incident_message WHERE id = v_id
+                            AND account_id = 'a0000000-0000-0000-0000-000000000001' AND meta->>'case_draft_key' = 'own-key'),
+                          'clave propia inserta');
+  PERFORM pg_temp.fail_if(public.ops_case_send('t0ken-de-prueba', 'reported', 'f3000000-0000-0000-0000-000000000001',
+                               'e1000000-0000-0000-0000-000000000001', 'hi', 'own-key', 'Acc') <> v_id, 'dedupe propia');
+END $$;
+
 -- ===== token de managers (cerrado por defecto) =====
+-- Puerta de analisis abierta para las dos cuentas del test (se deshace con el ROLLBACK).
+CREATE OR REPLACE FUNCTION public.case_analysis_allowed(p_account uuid)
+RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path = '' AS $$
+  SELECT EXISTS (SELECT 1 FROM public.accounts a WHERE a.id = p_account AND a.name IN ('Acc', 'Acc2'));
+$$;
 SELECT ops_test.set_manager_token_hash(encode(extensions.digest('t0ken-managers','sha256'),'hex'));
 DO $$
 DECLARE r jsonb; m text := 't0ken-managers'; v_arbe uuid := 'e1000000-0000-0000-0000-000000000001';
@@ -233,7 +268,10 @@ BEGIN
   PERFORM pg_temp.fail_if(r->'panelist'->>'code' <> 'P1', 'manager data propia');
   PERFORM pg_temp.fail_if(pg_temp.err(format($q$SELECT public.ops_case_data('t0ken-managers', %L, NULL, p_account => 'Acc2', p_actor_email => 'pm@x.org')$q$, v_arbe))
                           <> 'ops_case: otra cuenta', 'manager data panelista de otra cuenta');
-  PERFORM pg_temp.fail_if(public.ops_case_account_enabled(m, 'Acc', 'apm@x.org'), 'manager enabled Acc cerrada');
+  PERFORM pg_temp.fail_if(NOT public.ops_case_account_enabled(m, 'Acc', 'apm@x.org'), 'manager enabled Acc abierta');
+  -- caso R4 de la cuenta 1 pedido desde la cuenta 2 (superadmin)
+  PERFORM pg_temp.fail_if(pg_temp.err($q$SELECT public.ops_fix_r4_preview('t0ken-managers', 'f1000000-0000-0000-0000-000000000001', 'Acc2', 'boss@x.org')$q$)
+                          <> 'ops_fix: otra cuenta', 'manager preview otra cuenta');
   r := public.ops_fix_r4_preview(m, 'f1000000-0000-0000-0000-000000000001', 'Acc', 'pm@x.org');
   PERFORM pg_temp.fail_if(NOT (r->>'applicable')::bool, 'manager preview propia');
   -- superadmin: cualquier cuenta
@@ -261,6 +299,44 @@ BEGIN
   PERFORM pg_temp.fail_if(ops_test._caller('t0ken-de-prueba') <> 'owner', 'owner intacto');
   PERFORM pg_temp.fail_if(has_function_privilege('anon', 'ops_test.set_manager_token_hash(text)', 'EXECUTE')
                           OR has_function_privilege('authenticated', 'ops_test.set_manager_token_hash(text)', 'EXECUTE'), 'set hash privado');
+END $$;
+
+-- ===== cuenta sin analisis habilitado: el manager no entra; el owner si =====
+SELECT ops_test.set_manager_token_hash(encode(extensions.digest('t0ken-managers','sha256'),'hex'));
+CREATE OR REPLACE FUNCTION public.case_analysis_allowed(p_account uuid)
+RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path = '' AS $$
+  SELECT EXISTS (SELECT 1 FROM public.accounts a WHERE a.id = p_account AND a.name = 'Acc');
+$$;
+DO $$
+DECLARE r jsonb; m text := 't0ken-managers';
+BEGIN
+  PERFORM pg_temp.fail_if(pg_temp.err($q$SELECT public.ops_case_find_panelists('t0ken-managers', 'Arbe', NULL, 'Acc2', 'boss@x.org')$q$)
+                          <> 'ops_case: cuenta no habilitada', 'manager find cuenta cerrada');
+  PERFORM pg_temp.fail_if(pg_temp.err($q$SELECT public.ops_case_send('t0ken-managers', NULL, NULL, 'e9000000-0000-0000-0000-000000000009', 'hi', 'm9', 'Acc2', 'pm@x.org')$q$)
+                          <> 'ops_case: cuenta no habilitada', 'manager send cuenta cerrada');
+  PERFORM pg_temp.fail_if(pg_temp.err($q$SELECT public.ops_fix_r4_undo('t0ken-managers', 990001, 'Acc2', 'boss@x.org')$q$)
+                          <> 'ops_fix: cuenta no habilitada', 'manager undo cuenta cerrada');
+  -- un correo sin permiso no se entera de si la cuenta esta habilitada
+  PERFORM pg_temp.fail_if(pg_temp.err($q$SELECT public.ops_case_find_panelists('t0ken-managers', 'Arbe', NULL, 'Acc2', 'nadie@x.org')$q$)
+                          <> 'ops_case: sin permiso en esa cuenta', 'sin permiso antes que habilitada');
+  -- account_enabled no falla: dice false
+  PERFORM pg_temp.fail_if(public.ops_case_account_enabled(m, 'Acc2', 'boss@x.org'), 'manager enabled Acc2 cerrada');
+  PERFORM pg_temp.fail_if(NOT public.ops_case_account_enabled(m, 'Acc', 'apm@x.org'), 'manager enabled Acc abierta 2');
+  -- owner sin cambios
+  r := public.ops_case_find_panelists('t0ken-de-prueba', 'Arbe', NULL, 'Acc2');
+  PERFORM pg_temp.fail_if(jsonb_array_length(r) <> 1 OR r->0->>'code' <> 'P9', 'owner en cuenta cerrada: ' || r::text);
+END $$;
+
+-- ===== preview: la cuenta del caso se mira ANTES de _r4_check =====
+CREATE OR REPLACE FUNCTION public.case_analysis_allowed(p_account uuid)
+RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path = '' AS $$ SELECT true; $$;
+CREATE OR REPLACE FUNCTION ops_fix._r4_check(p_case_id uuid)
+RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = '' AS $$
+BEGIN RAISE EXCEPTION 'boom: _r4_check no deberia ejecutarse'; END $$;
+DO $$
+BEGIN
+  PERFORM pg_temp.fail_if(pg_temp.err($q$SELECT public.ops_fix_r4_preview('t0ken-managers', 'f1000000-0000-0000-0000-000000000001', 'Acc2', 'boss@x.org')$q$)
+                          <> 'ops_fix: otra cuenta', 'preview no mira la cuenta antes de _r4_check');
 END $$;
 
 ROLLBACK;
