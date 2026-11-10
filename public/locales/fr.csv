@@ -3983,6 +3983,8 @@ hc.account_form.do_coordinator_email,E-mail du DO coordinator
 hc.account_form.do_coordinator_email_help,Coordinateur chez l'opérateur désigné (poste du pays).
 hc.account_form.upu_account_manager_email,E-mail de l'UPU account manager
 hc.account_form.upu_account_manager_email_help,Responsable de ce compte à l'UPU.
+hc.account_form.allocation_plan_manager_email,E-mail de l'Allocation Plan Manager
+hc.account_form.allocation_plan_manager_email_help,Responsable du plan d'allocation de ce compte; utilise le bot d'analyse des cas.
 hc.account_form.status,Statut
 hc.account_form.cancel,Annuler
 hc.account_form.saving,Enregistrement...

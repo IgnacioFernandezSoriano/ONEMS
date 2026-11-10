@@ -3983,6 +3983,8 @@ hc.account_form.do_coordinator_email,البريد الإلكتروني لمنس�
 hc.account_form.do_coordinator_email_help,المنسق لدى المشغل المعيّن (بريد البلد).
 hc.account_form.upu_account_manager_email,البريد الإلكتروني لمدير الحساب في الاتحاد البريدي العالمي (UPU account manager)
 hc.account_form.upu_account_manager_email_help,المسؤول عن هذا الحساب في الاتحاد البريدي العالمي.
+hc.account_form.allocation_plan_manager_email,البريد الإلكتروني لمدير خطة التوزيع (Allocation Plan Manager)
+hc.account_form.allocation_plan_manager_email_help,المسؤول عن خطة التوزيع لهذا الحساب؛ يستخدم بوت تحليل الحالات.
 hc.account_form.status,الحالة
 hc.account_form.cancel,إلغاء
 hc.account_form.saving,جارٍ الحفظ...

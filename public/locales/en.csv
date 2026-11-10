@@ -3991,6 +3991,8 @@ hc.account_form.do_coordinator_email,DO coordinator email
 hc.account_form.do_coordinator_email_help,Coordinator at the designated operator (postal service of the country).
 hc.account_form.upu_account_manager_email,UPU account manager email
 hc.account_form.upu_account_manager_email_help,Person in charge of this account at the UPU.
+hc.account_form.allocation_plan_manager_email,Allocation Plan Manager email
+hc.account_form.allocation_plan_manager_email_help,Person in charge of the allocation plan of this account; uses the case analysis bot.
 hc.account_form.status,Status
 hc.account_form.cancel,Cancel
 hc.account_form.saving,Saving...
