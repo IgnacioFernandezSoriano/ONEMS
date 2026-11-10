@@ -134,4 +134,176 @@ BEGIN
   PERFORM pg_temp.fail_if(has_function_privilege('authenticated', 'public.ops_case_find_panelists(text,text,text)', 'EXECUTE'), 'authenticated find');
   PERFORM pg_temp.fail_if(NOT has_function_privilege('anon', 'public.ops_case_find_panelists(text,text,text)', 'EXECUTE'), 'anon find');
 END $$;
+
+-- ===== Tarea 3: cola desde ONEMS, envio y notas del agente =====
+CREATE OR REPLACE FUNCTION pg_temp.act(p text) RETURNS void LANGUAGE sql AS $$
+  SELECT set_config('request.jwt.claim.sub', p, true) $$;
+UPDATE public.profiles SET role = 'admin' WHERE id IN ('99000000-0000-0000-0000-000000000099','98000000-0000-0000-0000-000000000098');
+INSERT INTO auth.users (id, email) VALUES ('96000000-0000-0000-0000-000000000096', 'user@t.l');
+INSERT INTO public.profiles (id, email, full_name, role, account_id) VALUES
+  ('96000000-0000-0000-0000-000000000096', 'user@t.l', 'Normal', 'user', 'a0000000-0000-0000-0000-000000000001');
+UPDATE public.panelists SET telegram_id = '9009' WHERE panelist_code = 'P9';
+
+DO $$
+DECLARE t text := 't0ken-de-prueba'; v_err text; r jsonb; v_req uuid; v_req2 uuid; v_old uuid; v_m1 uuid; v_m2 uuid; n int;
+  v_case uuid := 'f1000000-0000-0000-0000-000000000001';
+  v_arbe uuid := 'e1000000-0000-0000-0000-000000000001';
+BEGIN
+  -- request: dos veces seguidas = mismo id
+  PERFORM pg_temp.act('99000000-0000-0000-0000-000000000099');
+  v_req := public.request_case_analysis('receipt', v_case);
+  v_req2 := public.request_case_analysis('receipt', v_case);
+  PERFORM pg_temp.fail_if(v_req IS NULL OR v_req <> v_req2, 'request idempotente');
+  PERFORM pg_temp.fail_if((SELECT count(*) FROM public.case_analysis_request) <> 1, 'una sola fila');
+  PERFORM pg_temp.fail_if((SELECT requested_by FROM public.case_analysis_request WHERE id = v_req) <> '99000000-0000-0000-0000-000000000099', 'requested_by');
+  -- otra cuenta
+  PERFORM pg_temp.act('98000000-0000-0000-0000-000000000098');
+  BEGIN
+    PERFORM public.request_case_analysis('receipt', v_case);
+    RAISE EXCEPTION 'FAIL: no rechazo cross-tenant';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_err = MESSAGE_TEXT;
+    PERFORM pg_temp.fail_if(v_err NOT LIKE 'Cross-tenant%', 'cross-tenant: ' || v_err);
+  END;
+  PERFORM pg_temp.act('99000000-0000-0000-0000-000000000099');
+
+  -- claim
+  r := public.ops_case_claim(t);
+  PERFORM pg_temp.fail_if((r->>'request_id')::uuid <> v_req OR r->>'account' <> 'Acc' OR r->>'incident_kind' <> 'receipt'
+     OR (r->>'incident_id')::uuid <> v_case OR r->>'tag' <> '00011844'
+     OR (r->>'panelist_id')::uuid <> 'e3000000-0000-0000-0000-000000000003', 'claim: ' || r::text);
+  PERFORM pg_temp.fail_if((SELECT status FROM public.case_analysis_request WHERE id = v_req) <> 'running'
+     OR (SELECT started_at FROM public.case_analysis_request WHERE id = v_req) IS NULL, 'running');
+  PERFORM pg_temp.fail_if(public.ops_case_claim(t) <> '{}'::jsonb, 'segundo claim vacio');
+  -- claim de una incidencia reportada: tag del plan
+  INSERT INTO public.case_analysis_request (account_id, incident_kind, incident_id)
+    VALUES ('a0000000-0000-0000-0000-000000000001','reported','f3000000-0000-0000-0000-000000000004');
+  r := public.ops_case_claim(t);
+  PERFORM pg_temp.fail_if(r->>'tag' <> '00011844' OR r->>'incident_kind' <> 'reported', 'claim reported: ' || r::text);
+  INSERT INTO public.case_analysis_request (account_id, incident_kind, incident_id)
+    VALUES ('a0000000-0000-0000-0000-000000000001','unavailability','f2000000-0000-0000-0000-000000000001');
+  r := public.ops_case_claim(t);
+  PERFORM pg_temp.fail_if(r->'tag' <> 'null'::jsonb, 'claim baja tag null: ' || r::text);
+
+  -- finish
+  PERFORM public.ops_case_finish(t, v_req, '{"x":1}', 'nota', NULL);
+  PERFORM pg_temp.fail_if((SELECT status FROM public.case_analysis_request WHERE id = v_req) <> 'done'
+     OR (SELECT result->>'x' FROM public.case_analysis_request WHERE id = v_req) <> '1'
+     OR (SELECT finished_at FROM public.case_analysis_request WHERE id = v_req) IS NULL, 'done');
+  PERFORM pg_temp.fail_if((SELECT count(*) FROM public.incident_message WHERE incident_kind = 'receipt' AND incident_id = v_case
+     AND direction = 'internal' AND author = 'system' AND status = 'sent' AND body = 'nota') <> 1, 'nota interna');
+  PERFORM pg_temp.fail_if(public.case_analysis_status(v_req)->>'status' <> 'done', 'status done');
+  -- finish con error
+  INSERT INTO public.case_analysis_request (account_id, incident_kind, incident_id, status)
+    VALUES ('a0000000-0000-0000-0000-000000000001','receipt',v_case,'running') RETURNING id INTO v_req2;
+  PERFORM public.ops_case_finish(t, v_req2, NULL, '', 'boom');
+  PERFORM pg_temp.fail_if((SELECT status || error FROM public.case_analysis_request WHERE id = v_req2) <> 'failedboom', 'failed');
+  PERFORM pg_temp.fail_if((SELECT count(*) FROM public.incident_message WHERE incident_kind = 'receipt' AND incident_id = v_case AND direction = 'internal') <> 1, 'sin nota vacia');
+
+  -- timeout
+  INSERT INTO public.case_analysis_request (account_id, incident_kind, incident_id, status, created_at)
+    VALUES ('a0000000-0000-0000-0000-000000000001','reported','f3000000-0000-0000-0000-000000000004','queued', now() - interval '11 minutes')
+    RETURNING id INTO v_old;
+  r := public.case_analysis_status(v_old);
+  PERFORM pg_temp.fail_if(r->>'status' <> 'failed' OR r->>'error' <> 'agent_timeout', 'timeout: ' || r::text);
+  -- status de otra cuenta
+  PERFORM pg_temp.act('98000000-0000-0000-0000-000000000098');
+  BEGIN
+    PERFORM public.case_analysis_status(v_req);
+    RAISE EXCEPTION 'FAIL: status cross-tenant';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_err = MESSAGE_TEXT;
+    PERFORM pg_temp.fail_if(v_err NOT LIKE 'Cross-tenant%', 'status cross: ' || v_err);
+  END;
+  PERFORM pg_temp.act('99000000-0000-0000-0000-000000000099');
+
+  -- send con incidencia: dedupe
+  v_m1 := public.ops_case_send(t, 'receipt', v_case, v_arbe, 'hi', 'r1:0');
+  v_m2 := public.ops_case_send(t, 'receipt', v_case, v_arbe, 'hi', 'r1:0');
+  PERFORM pg_temp.fail_if(v_m1 IS NULL OR v_m1 <> v_m2, 'send dedupe id');
+  PERFORM pg_temp.fail_if((SELECT count(*) FROM public.incident_message WHERE meta->>'case_draft_key' = 'r1:0') <> 1, 'una fila');
+  PERFORM pg_temp.fail_if(NOT EXISTS (SELECT 1 FROM public.incident_message WHERE id = v_m1 AND direction = 'outbound' AND author = 'manager'
+     AND status = 'pending_send' AND panelist_id = v_arbe AND meta ? 'manager_user_id' AND meta->'manager_user_id' = 'null'::jsonb
+     AND meta->>'via' = 'ops_agent'), 'send campos');
+  -- send sin incidencia
+  v_m1 := public.ops_case_send(t, NULL, NULL, v_arbe, 'hi', 'r1:1');
+  v_m2 := public.ops_case_send(t, NULL, NULL, v_arbe, 'hi', 'r1:1');
+  PERFORM pg_temp.fail_if(v_m1 <> v_m2, 'notice dedupe');
+  SELECT count(*) INTO n FROM public.panelist_notification WHERE kind = 'manager_notice' AND payload->>'case_draft_key' = 'r1:1'
+     AND payload->>'body' = 'hi' AND payload->>'via' = 'ops_agent' AND panelist_id = v_arbe;
+  PERFORM pg_temp.fail_if(n <> 1, 'notice 1 fila: ' || n);
+  -- panelista de otra cuenta
+  BEGIN
+    PERFORM public.ops_case_send(t, 'receipt', v_case, 'e9000000-0000-0000-0000-000000000009', 'hi', 'r1:2');
+    RAISE EXCEPTION 'FAIL: envio a otra cuenta';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_err = MESSAGE_TEXT;
+    PERFORM pg_temp.fail_if(v_err <> 'ops_case: otra cuenta', 'otra cuenta: ' || v_err);
+  END;
+  -- 901 caracteres, vacio, sin telegram
+  BEGIN
+    PERFORM public.ops_case_send(t, 'receipt', v_case, v_arbe, repeat('x', 901), 'r1:3');
+    RAISE EXCEPTION 'FAIL: 901 aceptado';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_err = MESSAGE_TEXT;
+    PERFORM pg_temp.fail_if(v_err NOT LIKE 'ops_case:%', '901: ' || v_err);
+  END;
+  PERFORM public.ops_case_send(t, 'receipt', v_case, v_arbe, repeat('x', 900), 'r1:4');
+  BEGIN
+    PERFORM public.ops_case_send(t, 'receipt', v_case, v_arbe, '  ', 'r1:5');
+    RAISE EXCEPTION 'FAIL: vacio aceptado';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_err = MESSAGE_TEXT;
+    PERFORM pg_temp.fail_if(v_err NOT LIKE 'ops_case:%', 'vacio: ' || v_err);
+  END;
+  BEGIN
+    PERFORM public.ops_case_send(t, 'receipt', v_case, 'e4000000-0000-0000-0000-000000000004', 'hi', 'r1:6');
+    RAISE EXCEPTION 'FAIL: sin telegram aceptado';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_err = MESSAGE_TEXT;
+    PERFORM pg_temp.fail_if(v_err NOT LIKE 'ops_case:%', 'sin telegram: ' || v_err);
+  END;
+
+  -- nota
+  v_m1 := public.ops_case_note(t, 'reported', 'f3000000-0000-0000-0000-000000000004', 'una nota');
+  PERFORM pg_temp.fail_if(NOT EXISTS (SELECT 1 FROM public.incident_message WHERE id = v_m1 AND direction = 'internal' AND author = 'system'
+     AND incident_kind = 'reported' AND body = 'una nota'), 'nota');
+
+  -- token malo
+  BEGIN
+    PERFORM public.ops_case_claim('malo');
+    RAISE EXCEPTION 'FAIL: token malo';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_err = MESSAGE_TEXT;
+    PERFORM pg_temp.fail_if(v_err NOT LIKE 'ops_test: token no valido%', 'token claim: ' || v_err);
+  END;
+
+  -- privilegios
+  PERFORM pg_temp.fail_if(NOT has_function_privilege('authenticated', 'public.request_case_analysis(text,uuid)', 'EXECUTE'), 'auth request');
+  PERFORM pg_temp.fail_if(NOT has_function_privilege('authenticated', 'public.case_analysis_status(uuid)', 'EXECUTE'), 'auth status');
+  PERFORM pg_temp.fail_if(has_function_privilege('anon', 'public.request_case_analysis(text,uuid)', 'EXECUTE'), 'anon request');
+  PERFORM pg_temp.fail_if(has_function_privilege('authenticated', 'public.ops_case_claim(text)', 'EXECUTE'), 'auth claim');
+  PERFORM pg_temp.fail_if(NOT has_function_privilege('anon', 'public.ops_case_claim(text)', 'EXECUTE'), 'anon claim');
+  PERFORM pg_temp.fail_if(has_function_privilege('authenticated', 'public.ops_case_send(text,text,uuid,uuid,text,text)', 'EXECUTE'), 'auth send');
+  PERFORM pg_temp.fail_if(NOT has_function_privilege('anon', 'public.ops_case_send(text,text,uuid,uuid,text,text)', 'EXECUTE'), 'anon send');
+  PERFORM pg_temp.fail_if(NOT has_function_privilege('anon', 'public.ops_case_note(text,text,uuid,text)', 'EXECUTE'), 'anon note');
+  PERFORM pg_temp.fail_if(NOT has_function_privilege('anon', 'public.ops_case_finish(text,uuid,jsonb,text,text)', 'EXECUTE'), 'anon finish');
+END $$;
+
+-- RLS: el 96 (cuenta 1) ve la peticion; el 98 no. Sin escritura directa.
+SET LOCAL ROLE authenticated;
+SELECT pg_temp.act('96000000-0000-0000-0000-000000000096');
+DO $$ BEGIN
+  PERFORM pg_temp.fail_if((SELECT count(*) FROM public.case_analysis_request) < 1, '96 no ve su peticion');
+END $$;
+SELECT pg_temp.act('98000000-0000-0000-0000-000000000098');
+DO $$ BEGIN
+  PERFORM pg_temp.fail_if((SELECT count(*) FROM public.case_analysis_request) <> 0, '98 ve peticiones ajenas');
+  BEGIN
+    INSERT INTO public.case_analysis_request (account_id, incident_kind, incident_id)
+      VALUES ('a0000000-0000-0000-0000-000000000002','reported','f3000000-0000-0000-0000-000000000009');
+    RAISE EXCEPTION 'FAIL: INSERT directo permitido';
+  EXCEPTION WHEN insufficient_privilege THEN NULL; END;
+END $$;
+RESET ROLE;
 ROLLBACK;

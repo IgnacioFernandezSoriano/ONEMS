@@ -227,3 +227,179 @@ REVOKE ALL ON FUNCTION public.ops_case_find_panelists(text, text, text) FROM PUB
 REVOKE ALL ON FUNCTION public.ops_case_data(text, uuid, text, text, uuid) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.ops_case_find_panelists(text, text, text) TO anon;
 GRANT EXECUTE ON FUNCTION public.ops_case_data(text, uuid, text, text, uuid) TO anon;
+
+-- ============================================================
+-- Tarea 3: cola de peticiones desde ONEMS + envio y notas del agente
+-- ============================================================
+CREATE TABLE public.case_analysis_request (
+  id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  account_id    uuid NOT NULL REFERENCES public.accounts(id) ON DELETE CASCADE,
+  requested_by  uuid,
+  incident_kind text NOT NULL CHECK (incident_kind IN ('reported','unavailability','receipt')),
+  incident_id   uuid NOT NULL,
+  status        text NOT NULL DEFAULT 'queued' CHECK (status IN ('queued','running','done','failed')),
+  result        jsonb,
+  error         text,
+  created_at    timestamptz NOT NULL DEFAULT now(),
+  started_at    timestamptz,
+  finished_at   timestamptz
+);
+CREATE INDEX case_analysis_request_queue_idx ON public.case_analysis_request (created_at) WHERE status = 'queued';
+CREATE INDEX case_analysis_request_incident_idx ON public.case_analysis_request (incident_kind, incident_id, created_at DESC);
+ALTER TABLE public.case_analysis_request ENABLE ROW LEVEL SECURITY;
+CREATE POLICY case_analysis_request_select ON public.case_analysis_request
+  FOR SELECT TO authenticated
+  USING (account_id = public.current_user_account_id() OR public.is_superadmin());
+REVOKE ALL ON public.case_analysis_request FROM PUBLIC, anon, authenticated;
+GRANT SELECT ON public.case_analysis_request TO authenticated;
+
+-- ===== ONEMS (authenticated): pedir y consultar =====
+CREATE OR REPLACE FUNCTION public.request_case_analysis(p_incident_kind text, p_incident_id uuid)
+RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
+DECLARE v_account uuid; v_id uuid;
+BEGIN
+  IF p_incident_kind IS NULL OR p_incident_kind NOT IN ('reported','unavailability','receipt') THEN
+    RAISE EXCEPTION 'invalid incident kind'; END IF;
+  SELECT o.account_id INTO v_account FROM public.incident_owner(p_incident_kind, p_incident_id) o;
+  IF v_account IS NULL THEN RAISE EXCEPTION 'incident not found'; END IF;
+  PERFORM public.assert_same_account(v_account);
+  -- evita dos peticiones a la vez para la misma incidencia
+  PERFORM pg_advisory_xact_lock(hashtextextended(p_incident_kind || ':' || p_incident_id::text, 0));
+  SELECT r.id INTO v_id FROM public.case_analysis_request r
+   WHERE r.incident_kind = p_incident_kind AND r.incident_id = p_incident_id
+     AND r.status IN ('queued','running') AND r.created_at > now() - interval '10 minutes'
+   ORDER BY r.created_at DESC LIMIT 1;
+  IF v_id IS NOT NULL THEN RETURN v_id; END IF;
+  INSERT INTO public.case_analysis_request (account_id, requested_by, incident_kind, incident_id)
+  VALUES (v_account, auth.uid(), p_incident_kind, p_incident_id) RETURNING id INTO v_id;
+  RETURN v_id;
+END $$;
+
+CREATE OR REPLACE FUNCTION public.case_analysis_status(p_request_id uuid)
+RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
+DECLARE r public.case_analysis_request;
+BEGIN
+  SELECT * INTO r FROM public.case_analysis_request WHERE id = p_request_id;
+  IF NOT FOUND THEN RAISE EXCEPTION 'request not found'; END IF;
+  PERFORM public.assert_same_account(r.account_id);
+  IF r.status IN ('queued','running') AND r.created_at < now() - interval '10 minutes' THEN
+    UPDATE public.case_analysis_request SET status = 'failed', error = 'agent_timeout', finished_at = now()
+     WHERE id = r.id RETURNING * INTO r;
+  END IF;
+  RETURN jsonb_build_object('status', r.status, 'result', r.result, 'error', r.error);
+END $$;
+
+-- ===== Agente (anon + token) =====
+CREATE OR REPLACE FUNCTION public.ops_case_claim(p_token text)
+RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
+DECLARE r public.case_analysis_request; v_panelist uuid; v_tag text;
+BEGIN
+  PERFORM ops_test._check(p_token);
+  SELECT * INTO r FROM public.case_analysis_request
+   WHERE status = 'queued' ORDER BY created_at LIMIT 1 FOR UPDATE SKIP LOCKED;
+  IF NOT FOUND THEN RETURN '{}'::jsonb; END IF;
+  UPDATE public.case_analysis_request SET status = 'running', started_at = now() WHERE id = r.id;
+  SELECT o.panelist_id INTO v_panelist FROM public.incident_owner(r.incident_kind, r.incident_id) o;
+  v_tag := CASE r.incident_kind
+    WHEN 'receipt' THEN (SELECT c.tag_norm FROM public.receipt_case c WHERE c.id = r.incident_id)
+    WHEN 'reported' THEN (SELECT public.normalize_tag(d.tag_id) FROM public.panelist_incident i
+                            JOIN public.allocation_plan_details d ON d.id = i.allocation_plan_detail_id
+                           WHERE i.id = r.incident_id AND d.tag_id IS NOT NULL)
+    ELSE NULL END;
+  RETURN jsonb_build_object('request_id', r.id,
+    'account', (SELECT a.name FROM public.accounts a WHERE a.id = r.account_id),
+    'incident_kind', r.incident_kind, 'incident_id', r.incident_id,
+    'panelist_id', v_panelist, 'tag', v_tag);
+END $$;
+
+-- Inserta una nota interna del sistema en la incidencia (cuenta y panelista salen de la incidencia).
+CREATE OR REPLACE FUNCTION ops_case._note(p_kind text, p_id uuid, p_body text)
+RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
+DECLARE v_account uuid; v_panelist uuid; v_new uuid;
+BEGIN
+  IF p_body IS NULL OR btrim(p_body) = '' THEN RAISE EXCEPTION 'ops_case: texto vacio'; END IF;
+  SELECT o.account_id, o.panelist_id INTO v_account, v_panelist FROM public.incident_owner(p_kind, p_id) o;
+  IF v_account IS NULL OR v_panelist IS NULL THEN RAISE EXCEPTION 'ops_case: incidencia no encontrada'; END IF;
+  INSERT INTO public.incident_message (account_id, panelist_id, incident_kind, incident_id, direction, author, body, status)
+  VALUES (v_account, v_panelist, p_kind, p_id, 'internal', 'system', p_body, 'sent') RETURNING id INTO v_new;
+  RETURN v_new;
+END $$;
+
+CREATE OR REPLACE FUNCTION public.ops_case_finish(p_token text, p_request_id uuid, p_result jsonb, p_note text, p_error text)
+RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
+DECLARE r public.case_analysis_request;
+BEGIN
+  PERFORM ops_test._check(p_token);
+  SELECT * INTO r FROM public.case_analysis_request WHERE id = p_request_id FOR UPDATE;
+  IF NOT FOUND THEN RAISE EXCEPTION 'ops_case: peticion no encontrada'; END IF;
+  UPDATE public.case_analysis_request
+     SET status = CASE WHEN COALESCE(btrim(p_error), '') <> '' THEN 'failed' ELSE 'done' END,
+         result = p_result, error = NULLIF(btrim(COALESCE(p_error, '')), ''), finished_at = now()
+   WHERE id = r.id;
+  IF btrim(COALESCE(p_note, '')) <> '' THEN
+    PERFORM ops_case._note(r.incident_kind, r.incident_id, p_note);
+  END IF;
+END $$;
+
+CREATE OR REPLACE FUNCTION public.ops_case_note(p_token text, p_incident_kind text, p_incident_id uuid, p_body text)
+RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
+BEGIN
+  PERFORM ops_test._check(p_token);
+  RETURN ops_case._note(p_incident_kind, p_incident_id, p_body);
+END $$;
+
+CREATE OR REPLACE FUNCTION public.ops_case_send(p_token text, p_incident_kind text, p_incident_id uuid,
+    p_panelist_id uuid, p_body text, p_draft_key text)
+RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
+DECLARE v_pan_acc uuid; v_status text; v_tg text; v_inc_acc uuid; v_id uuid;
+BEGIN
+  PERFORM ops_test._check(p_token);
+  IF p_body IS NULL OR length(btrim(p_body)) < 1 OR length(p_body) > 900 THEN
+    RAISE EXCEPTION 'ops_case: el texto debe tener entre 1 y 900 caracteres'; END IF;
+  IF btrim(COALESCE(p_draft_key, '')) = '' THEN RAISE EXCEPTION 'ops_case: falta draft_key'; END IF;
+  IF (p_incident_kind IS NULL) <> (p_incident_id IS NULL) THEN RAISE EXCEPTION 'ops_case: incidencia no valida'; END IF;
+  SELECT pa.account_id, pa.status, pa.telegram_id INTO v_pan_acc, v_status, v_tg
+    FROM public.panelists pa WHERE pa.id = p_panelist_id;
+  IF v_pan_acc IS NULL THEN RAISE EXCEPTION 'ops_case: panelista no encontrado'; END IF;
+  IF p_incident_id IS NOT NULL THEN
+    SELECT o.account_id INTO v_inc_acc FROM public.incident_owner(p_incident_kind, p_incident_id) o;
+    IF v_inc_acc IS NULL THEN RAISE EXCEPTION 'ops_case: incidencia no encontrada'; END IF;
+    IF v_inc_acc <> v_pan_acc THEN RAISE EXCEPTION 'ops_case: otra cuenta'; END IF;
+  END IF;
+  IF v_status IS DISTINCT FROM 'active' OR btrim(COALESCE(v_tg, '')) !~ '^[0-9]+$' THEN
+    RAISE EXCEPTION 'ops_case: el panelista no esta activo o no tiene Telegram'; END IF;
+
+  -- una misma draft_key se envia una sola vez (reintentos y doble pulsacion)
+  PERFORM pg_advisory_xact_lock(hashtextextended('ops_case_send:' || p_draft_key, 0));
+  IF p_incident_id IS NOT NULL THEN
+    SELECT m.id INTO v_id FROM public.incident_message m WHERE m.meta->>'case_draft_key' = p_draft_key;
+    IF v_id IS NOT NULL THEN RETURN v_id; END IF;
+    INSERT INTO public.incident_message (account_id, panelist_id, incident_kind, incident_id, direction, author, body, meta, status)
+    VALUES (v_pan_acc, p_panelist_id, p_incident_kind, p_incident_id, 'outbound', 'manager', p_body,
+            jsonb_build_object('manager_user_id', NULL, 'via', 'ops_agent', 'case_draft_key', p_draft_key), 'pending_send')
+    RETURNING id INTO v_id;
+  ELSE
+    SELECT n.id INTO v_id FROM public.panelist_notification n
+     WHERE n.account_id = v_pan_acc AND n.kind = 'manager_notice' AND n.payload->>'case_draft_key' = p_draft_key;
+    IF v_id IS NOT NULL THEN RETURN v_id; END IF;
+    INSERT INTO public.panelist_notification (account_id, panelist_id, kind, payload, send_after)
+    VALUES (v_pan_acc, p_panelist_id, 'manager_notice',
+            jsonb_build_object('body', p_body, 'via', 'ops_agent', 'case_draft_key', p_draft_key), NULL)
+    RETURNING id INTO v_id;
+  END IF;
+  RETURN v_id;
+END $$;
+
+REVOKE ALL ON ALL FUNCTIONS IN SCHEMA ops_case FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.request_case_analysis(text, uuid) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.case_analysis_status(uuid) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.ops_case_claim(text) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.ops_case_finish(text, uuid, jsonb, text, text) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.ops_case_note(text, text, uuid, text) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.ops_case_send(text, text, uuid, uuid, text, text) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.request_case_analysis(text, uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.case_analysis_status(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.ops_case_claim(text) TO anon;
+GRANT EXECUTE ON FUNCTION public.ops_case_finish(text, uuid, jsonb, text, text) TO anon;
+GRANT EXECUTE ON FUNCTION public.ops_case_note(text, text, uuid, text) TO anon;
+GRANT EXECUTE ON FUNCTION public.ops_case_send(text, text, uuid, uuid, text, text) TO anon;
