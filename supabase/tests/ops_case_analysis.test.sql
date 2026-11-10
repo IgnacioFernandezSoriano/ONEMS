@@ -130,10 +130,10 @@ BEGIN
     PERFORM pg_temp.fail_if(v_err NOT LIKE 'ops_test: token no valido%', 'mensaje token find: ' || v_err);
   END;
   -- privilegios
-  PERFORM pg_temp.fail_if(has_function_privilege('authenticated', 'public.ops_case_data(text,uuid,text,text,uuid)', 'EXECUTE'), 'authenticated data');
-  PERFORM pg_temp.fail_if(NOT has_function_privilege('anon', 'public.ops_case_data(text,uuid,text,text,uuid)', 'EXECUTE'), 'anon data');
-  PERFORM pg_temp.fail_if(has_function_privilege('authenticated', 'public.ops_case_find_panelists(text,text,text)', 'EXECUTE'), 'authenticated find');
-  PERFORM pg_temp.fail_if(NOT has_function_privilege('anon', 'public.ops_case_find_panelists(text,text,text)', 'EXECUTE'), 'anon find');
+  PERFORM pg_temp.fail_if(has_function_privilege('authenticated', 'public.ops_case_data(text,uuid,text,text,uuid,text,text)', 'EXECUTE'), 'authenticated data');
+  PERFORM pg_temp.fail_if(NOT has_function_privilege('anon', 'public.ops_case_data(text,uuid,text,text,uuid,text,text)', 'EXECUTE'), 'anon data');
+  PERFORM pg_temp.fail_if(has_function_privilege('authenticated', 'public.ops_case_find_panelists(text,text,text,text,text)', 'EXECUTE'), 'authenticated find');
+  PERFORM pg_temp.fail_if(NOT has_function_privilege('anon', 'public.ops_case_find_panelists(text,text,text,text,text)', 'EXECUTE'), 'anon find');
 END $$;
 
 -- ===== Tarea 3: cola desde ONEMS, envio y notas del agente =====
@@ -285,9 +285,9 @@ BEGIN
   PERFORM pg_temp.fail_if(has_function_privilege('anon', 'public.request_case_analysis(text,uuid)', 'EXECUTE'), 'anon request');
   PERFORM pg_temp.fail_if(has_function_privilege('authenticated', 'public.ops_case_claim(text)', 'EXECUTE'), 'auth claim');
   PERFORM pg_temp.fail_if(NOT has_function_privilege('anon', 'public.ops_case_claim(text)', 'EXECUTE'), 'anon claim');
-  PERFORM pg_temp.fail_if(has_function_privilege('authenticated', 'public.ops_case_send(text,text,uuid,uuid,text,text)', 'EXECUTE'), 'auth send');
-  PERFORM pg_temp.fail_if(NOT has_function_privilege('anon', 'public.ops_case_send(text,text,uuid,uuid,text,text)', 'EXECUTE'), 'anon send');
-  PERFORM pg_temp.fail_if(NOT has_function_privilege('anon', 'public.ops_case_note(text,text,uuid,text)', 'EXECUTE'), 'anon note');
+  PERFORM pg_temp.fail_if(has_function_privilege('authenticated', 'public.ops_case_send(text,text,uuid,uuid,text,text,text,text)', 'EXECUTE'), 'auth send');
+  PERFORM pg_temp.fail_if(NOT has_function_privilege('anon', 'public.ops_case_send(text,text,uuid,uuid,text,text,text,text)', 'EXECUTE'), 'anon send');
+  PERFORM pg_temp.fail_if(NOT has_function_privilege('anon', 'public.ops_case_note(text,text,uuid,text,text,text)', 'EXECUTE'), 'anon note');
   PERFORM pg_temp.fail_if(NOT has_function_privilege('anon', 'public.ops_case_finish(text,uuid,jsonb,text,text)', 'EXECUTE'), 'anon finish');
 END $$;
 

@@ -347,12 +347,12 @@ BEGIN
   END;
 
   -- permisos
-  PERFORM pg_temp.fail_if(has_function_privilege('authenticated', 'public.ops_fix_r4_preview(text,uuid)', 'EXECUTE'), 'authenticated preview');
-  PERFORM pg_temp.fail_if(has_function_privilege('authenticated', 'public.ops_fix_r4_apply(text,uuid,jsonb)', 'EXECUTE'), 'authenticated apply');
-  PERFORM pg_temp.fail_if(has_function_privilege('authenticated', 'public.ops_fix_r4_undo(text,bigint)', 'EXECUTE'), 'authenticated undo');
-  PERFORM pg_temp.fail_if(NOT has_function_privilege('anon', 'public.ops_fix_r4_preview(text,uuid)', 'EXECUTE'), 'anon preview');
-  PERFORM pg_temp.fail_if(NOT has_function_privilege('anon', 'public.ops_fix_r4_apply(text,uuid,jsonb)', 'EXECUTE'), 'anon apply');
-  PERFORM pg_temp.fail_if(NOT has_function_privilege('anon', 'public.ops_fix_r4_undo(text,bigint)', 'EXECUTE'), 'anon undo');
+  PERFORM pg_temp.fail_if(has_function_privilege('authenticated', 'public.ops_fix_r4_preview(text,uuid,text,text)', 'EXECUTE'), 'authenticated preview');
+  PERFORM pg_temp.fail_if(has_function_privilege('authenticated', 'public.ops_fix_r4_apply(text,uuid,jsonb,text,text)', 'EXECUTE'), 'authenticated apply');
+  PERFORM pg_temp.fail_if(has_function_privilege('authenticated', 'public.ops_fix_r4_undo(text,bigint,text,text)', 'EXECUTE'), 'authenticated undo');
+  PERFORM pg_temp.fail_if(NOT has_function_privilege('anon', 'public.ops_fix_r4_preview(text,uuid,text,text)', 'EXECUTE'), 'anon preview');
+  PERFORM pg_temp.fail_if(NOT has_function_privilege('anon', 'public.ops_fix_r4_apply(text,uuid,jsonb,text,text)', 'EXECUTE'), 'anon apply');
+  PERFORM pg_temp.fail_if(NOT has_function_privilege('anon', 'public.ops_fix_r4_undo(text,bigint,text,text)', 'EXECUTE'), 'anon undo');
   PERFORM pg_temp.fail_if(has_function_privilege('anon', 'ops_fix._r4_check(uuid)', 'EXECUTE'), 'anon _r4_check');
 END $$;
 
