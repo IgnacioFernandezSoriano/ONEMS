@@ -33,7 +33,9 @@ Se quiere que, para cada caso, el manager vea **qué pasó, por qué y qué hace
 - **Causa:** la probable, con su prueba.
 - **Solución propuesta:** qué hay que corregir y dónde.
 
-El análisis detallado (plan, realidad, comparación, ruido) va debajo, como hoy.
+Cada apartado tiene 1 o 2 frases y no repite lo que dice otro. Es una petición de Ignacio del 2026-11-10: tarjeta concisa y sin repeticiones.
+
+El análisis detallado (plan, realidad, comparación, ruido, contactos y mejora) no va en la tarjeta: se ve con el botón «📄 Ver detalle».
 
 **2. Botones de la solución:**
 - Si la solución es un arreglo del catálogo (§4): **«✅ Aplicar»** y **«❌ No aplicar»**.
