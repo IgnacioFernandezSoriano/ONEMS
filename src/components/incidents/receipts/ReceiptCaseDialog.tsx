@@ -1,7 +1,8 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from '@/hooks/useTranslation'
 import { CaseAnalysisPanel } from '@/components/incidents/CaseAnalysisPanel'
 import { IncidentConversation } from '@/components/incidents/IncidentConversation'
+import { supabase } from '@/lib/supabase'
 import type { ReceiptCase } from '@/lib/types'
 
 interface Props {
@@ -10,10 +11,17 @@ interface Props {
 }
 
 // Modal del caso de recepcion: analisis del agente y conversacion con el panelista.
-// rpc_receipt_cases no devuelve panelist_id, asi que la conversacion se abre sin el (undefined).
+// rpc_receipt_cases no devuelve panelist_id: se lee aparte (RLS de receipt_case ya limita a admins de la cuenta).
 export function ReceiptCaseDialog({ c, onDone }: Props) {
   const { t } = useTranslation()
-  const panelistId = (c as ReceiptCase & { panelist_id?: string | null }).panelist_id ?? undefined
+  const [panelistId, setPanelistId] = useState<string | undefined>(undefined)
+
+  useEffect(() => {
+    let alive = true
+    supabase.from('receipt_case').select('panelist_id').eq('id', c.id).maybeSingle()
+      .then(({ data, error }) => { if (alive && !error) setPanelistId(data?.panelist_id ?? undefined) })
+    return () => { alive = false }
+  }, [c.id])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onDone() }
@@ -29,7 +37,7 @@ export function ReceiptCaseDialog({ c, onDone }: Props) {
         <CaseAnalysisPanel kind="receipt" incidentId={c.id} />
         <IncidentConversation kind="receipt" incidentId={c.id} incidentPanelistId={panelistId} />
         <div className="flex justify-end mt-4">
-          <button onClick={onDone} className="px-4 py-2 text-sm border rounded">{t('common.cancel')}</button>
+          <button onClick={onDone} className="px-4 py-2 text-sm border rounded">{t('common.close')}</button>
         </div>
       </div>
     </div>
