@@ -1,0 +1,678 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>مساعدة: تحليل الحالات</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<style>
+  :root {
+    --white: #ffffff; --g50: #f9fafb; --g100: #f3f4f6; --g200: #e5e7eb; --g300: #d1d5db;
+    --g400: #9ca3af; --g500: #6b7280; --g600: #4b5563; --g700: #374151; --g900: #111827;
+    --b50: #eff6ff; --b100: #dbeafe; --b600: #2563eb; --b700: #1d4ed8;
+    --r100: #fee2e2; --r700: #b91c1c; --gr100: #dcfce7; --gr700: #15803d;
+    --y100: #fef9c3; --y800: #854d0e; --p100: #f3e8ff; --p700: #7e22ce;
+    --tg-head: #517da2; --tg-wall-a: #d4e4bc; --tg-wall-b: #a9cba6; --tg-dot: rgba(255,255,255,.35);
+    --tg-in: #ffffff; --tg-out: #effdde; --tg-ink: #000000; --tg-time: #8a9aa6; --tg-time-out: #5eaf5c;
+    --tg-key: rgba(52, 92, 60, .42); --tg-ring: #ffd23f; --tg-photo: #c7d3dc;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+      'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    -webkit-font-smoothing: antialiased; background: var(--g50); color: var(--g700); line-height: 1.6; font-size: 15px;
+  }
+  .layout { display: flex; min-height: 100vh; }
+
+  /* Sidebar, same look as the ONE menu */
+  .side {
+    width: 272px; flex-shrink: 0; background: var(--white); border-right: 1px solid var(--g200);
+    position: sticky; top: 0; height: 100vh; overflow-y: auto; display: flex; flex-direction: column;
+  }
+  .brand { padding: 24px 24px 16px; }
+  .brand h1 { font-size: 24px; line-height: 32px; font-weight: 700; color: var(--g900); }
+  .brand p { font-size: 14px; color: var(--g500); margin-top: 4px; }
+  .brand .doc { margin-top: 16px; font-size: 12px; font-weight: 600; color: var(--b700); background: var(--b50);
+    display: inline-block; padding: 2px 10px; border-radius: 999px; }
+  .nav { padding: 8px 12px 24px; flex: 1; }
+  .nav h3 { font-size: 12px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--g400);
+    padding: 16px 12px 6px; }
+  .nav a {
+    display: block; padding: 8px 12px; border-radius: 8px; font-size: 14px; font-weight: 500; color: var(--g600);
+    text-decoration: none; transition: background .15s, color .15s;
+  }
+  .nav a:hover { background: var(--g100); }
+  .nav a.active { background: var(--b50); color: var(--b700); }
+  .side-foot { padding: 16px 24px; border-top: 1px solid var(--g200); font-size: 12px; color: var(--g500); }
+
+  /* Content */
+  .main { flex: 1; min-width: 0; padding: 40px 32px 80px; }
+  .page { max-width: 880px; margin: 0 auto; }
+  .page > header { margin-bottom: 32px; }
+  .page > header h2 { font-size: 30px; line-height: 38px; font-weight: 700; color: var(--g900); }
+  .page > header p { margin-top: 8px; font-size: 17px; color: var(--g600); max-width: 640px; }
+  section { margin-top: 48px; }
+  section > h2 { font-size: 22px; font-weight: 700; color: var(--g900); padding-bottom: 8px; margin-bottom: 16px;
+    border-bottom: 1px solid var(--g200); }
+  h3 { font-size: 17px; font-weight: 600; color: var(--g900); margin: 28px 0 8px; }
+  p { margin: 8px 0; }
+  ul, ol { margin: 8px 0 8px 22px; }
+  li { margin: 4px 0; }
+  strong { color: var(--g900); font-weight: 600; }
+  code, kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px;
+    background: var(--g100); border: 1px solid var(--g200); border-radius: 6px; padding: 1px 6px; color: var(--g900); }
+  .card { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 20px 24px; margin: 16px 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 16px 0; }
+  .grid .card { margin: 0; }
+  .card h4 { font-size: 15px; font-weight: 600; color: var(--g900); margin-bottom: 4px; }
+  .card p { margin: 4px 0; font-size: 14px; color: var(--g600); }
+
+  .badge { display: inline-block; font-size: 12px; font-weight: 500; padding: 1px 10px; border-radius: 999px; white-space: nowrap; }
+  .b-red { background: var(--r100); color: var(--r700); }
+  .b-blue { background: var(--b100); color: var(--b700); }
+  .b-green { background: var(--gr100); color: var(--gr700); }
+  .b-yellow { background: var(--y100); color: var(--y800); }
+  .b-gray { background: var(--g100); color: var(--g600); }
+  .b-purple { background: var(--p100); color: var(--p700); }
+  .btn { display: inline-block; font-size: 13px; font-weight: 500; padding: 2px 10px; border-radius: 8px;
+    background: var(--white); border: 1px solid var(--g300); color: var(--g700); white-space: nowrap; }
+  .btn.primary { background: var(--b600); border-color: var(--b600); color: #fff; }
+
+  .callout { border-radius: 12px; padding: 14px 18px; margin: 16px 0; font-size: 14px; border: 1px solid; }
+  .callout.info { background: var(--b50); border-color: var(--b100); color: #1e3a8a; }
+  .callout.ok { background: #f0fdf4; border-color: var(--gr100); color: #14532d; }
+  .callout.warn { background: #fffbeb; border-color: var(--y100); color: var(--y800); }
+  .callout strong { color: inherit; }
+
+  .table-wrap { overflow-x: auto; margin: 16px 0; background: var(--white); border: 1px solid var(--g200); border-radius: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--g500); background: var(--g50); padding: 10px 14px; border-bottom: 1px solid var(--g200); }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--g100); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  td:first-child { font-weight: 500; color: var(--g900); }
+
+  /* Steps */
+  ol.steps { list-style: none; margin: 12px 0; counter-reset: s; }
+  ol.steps > li { counter-increment: s; position: relative; padding: 4px 0 12px 44px; margin: 0; }
+  ol.steps > li::before {
+    content: counter(s); position: absolute; left: 0; top: 2px; width: 28px; height: 28px; border-radius: 50%;
+    background: var(--b100); color: var(--b700); font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Telegram chat mock-ups */
+  .chat { background: #e9eef5; border: 1px solid var(--g200); border-radius: 16px; padding: 16px; margin: 16px 0; max-width: 460px; }
+  .chat .who { text-align: center; font-size: 12px; color: var(--g500); margin-bottom: 8px; font-weight: 500; }
+  .msg { max-width: 85%; padding: 8px 12px; border-radius: 14px; margin: 6px 0; font-size: 14px; line-height: 1.45; box-shadow: 0 1px 1px rgba(0,0,0,.06); }
+  .msg.bot { background: var(--white); border-top-left-radius: 4px; margin-right: auto; color: var(--g900); }
+  .msg.me { background: #dbeafe; border-top-right-radius: 4px; margin-left: auto; color: var(--g900); }
+  .kb { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 8px; max-width: 85%; }
+  .kb span { flex: 1 1 auto; text-align: center; background: rgba(37,99,235,.12); color: var(--b700); font-size: 13px; font-weight: 500;
+    padding: 6px 10px; border-radius: 10px; }
+  .kb.col span { flex-basis: 100%; }
+  .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; align-items: start; }
+  .two .chat { margin: 8px 0; }
+  .cap { font-size: 13px; color: var(--g500); margin-top: -6px; max-width: 460px; }
+
+  /* Flow */
+  .flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; margin: 16px 0; }
+  .flow .node { flex: 1 1 150px; background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 12px 14px; font-size: 13px; position: relative; }
+  .flow .node b { display: block; color: var(--g900); font-size: 14px; margin-bottom: 2px; }
+  .flow .node .tag { font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--b700); }
+  .flow .arrow { align-self: center; color: var(--g400); font-size: 18px; }
+
+  details { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; margin: 8px 0; }
+  summary { cursor: pointer; padding: 14px 18px; font-weight: 600; color: var(--g900); list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: '+'; color: var(--g400); font-size: 20px; line-height: 1; }
+  details[open] summary::after { content: '\2212'; }
+  details > div { padding: 0 18px 14px; color: var(--g600); font-size: 14px; }
+
+  /* ONEMS screen drawings */
+  .app { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; overflow: hidden; margin: 16px 0 6px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .app-bar { display: flex; gap: 6px; align-items: center; background: var(--g100); border-bottom: 1px solid var(--g200); padding: 8px 12px; font-size: 12px; color: var(--g500); }
+  .app-bar i { width: 9px; height: 9px; border-radius: 50%; background: var(--g300); display: inline-block; }
+  .app-bar span { margin-left: 8px; }
+  .app-body { padding: 20px; font-size: 13px; color: var(--g700); overflow-x: auto; }
+  .app-body.cols { display: grid; grid-template-columns: 210px 1fr; padding: 0; }
+  .app-body.cols > .sb { border-right: 1px solid var(--g200); padding: 14px 10px; background: #fff; }
+  .app-body.cols > .ct { padding: 20px; }
+  .sb .t { font-size: 20px; font-weight: 700; color: var(--g900); padding: 0 8px; }
+  .sb .s { font-size: 11px; color: var(--g500); padding: 0 8px 8px; }
+  .sb h5 { font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--g400); padding: 10px 8px 4px; }
+  .mi { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 8px; font-size: 13px; color: var(--g700); }
+  .mi.on { background: var(--b50); color: var(--b600); }
+  .mi .ic { width: 14px; height: 14px; border-radius: 4px; background: var(--g300); flex-shrink: 0; }
+  .mi.on .ic { background: var(--b600); }
+  .mi .badge { margin-left: auto; font-size: 11px; padding: 0 7px; }
+  .m-h { font-size: 18px; font-weight: 700; color: var(--g900); margin-bottom: 12px; }
+  .m-h3 { font-size: 15px; font-weight: 700; color: var(--g900); margin: 0 0 6px; }
+  .m-sel { display: inline-block; border: 1px solid var(--g300); border-radius: 4px; padding: 3px 24px 3px 8px; font-size: 12px; background: #fff; color: var(--g700); margin-right: 8px; position: relative; }
+  .m-sel::after { content: '\25BE'; position: absolute; right: 8px; color: var(--g400); }
+  .m-card { border: 1px solid var(--g200); border-radius: 8px; overflow: hidden; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.05); margin: 10px 0; }
+  .app table { font-size: 12px; }
+  .app th { padding: 8px 12px; font-size: 11px; }
+  .app td { padding: 8px 12px; }
+  .app td:first-child { font-weight: 400; color: inherit; }
+  .app .num { text-align: right; }
+  .m-link { color: var(--b600); }
+  .m-box { border: 1px solid var(--g200); border-radius: 6px; padding: 14px; margin: 10px 0; }
+  .m-note { background: var(--g50); border-radius: 6px; padding: 10px 12px; margin: 8px 0; font-size: 12px; }
+  .m-muted { color: var(--g500); font-size: 12px; }
+  .m-pbtn, .m-sbtn { display: inline-block; padding: 6px 14px; border-radius: 8px; font-size: 12px; margin: 2px 6px 2px 0; }
+  .m-pbtn { background: var(--b600); color: #fff; }
+  .m-sbtn { background: var(--g200); color: var(--g700); }
+  .m-ta { border: 1px solid var(--g300); border-radius: 4px; padding: 8px; font-size: 12px; color: var(--g400); background: #fff; margin: 6px 0 10px; }
+  .m-in { display: inline-block; border: 1px solid var(--g300); border-radius: 4px; padding: 3px 8px; font-size: 12px; background: #fff; min-width: 90px; }
+  .m-bub { max-width: 80%; padding: 6px 10px; border-radius: 10px; margin: 5px 0; font-size: 12px; }
+  .m-bub small { display: block; color: var(--g500); font-size: 10px; margin-top: 2px; }
+  .m-bub.l { background: var(--g100); margin-right: auto; }
+  .m-bub.r { background: var(--b100); margin-left: auto; }
+  .pin { display: inline-flex; width: 20px; height: 20px; border-radius: 50%; background: var(--b600); color: #fff; font-size: 11px; font-weight: 700; align-items: center; justify-content: center; margin-left: 6px; vertical-align: middle; flex-shrink: 0; }
+  .legend { counter-reset: l; list-style: none; margin: 10px 0 20px; }
+  .legend li { counter-increment: l; position: relative; padding: 2px 0 6px 34px; font-size: 14px; }
+  .legend li::before { content: counter(l); position: absolute; left: 0; top: 1px; width: 20px; height: 20px; border-radius: 50%; background: var(--b600); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .heat td { text-align: center; }
+  .heat .ok { background: #f0fdf4; } .heat .hi { background: var(--y100); } .heat .sat { background: var(--r100); }
+  .heat .off { background: repeating-linear-gradient(45deg, var(--g100), var(--g100) 4px, #fff 4px, #fff 8px); color: var(--g400); }
+  .heat .now { outline: 2px solid var(--b600); outline-offset: -2px; }
+
+  /* Right-to-left (Arabic) */
+  [dir=rtl] .side { border-right: 0; border-left: 1px solid var(--g200); }
+  [dir=rtl] .app-body.cols > .sb { border-right: 0; border-left: 1px solid var(--g200); }
+  [dir=rtl] th, [dir=rtl] td, [dir=rtl] .nav a { text-align: right; }
+  [dir=rtl] ul, [dir=rtl] ol { margin: 8px 22px 8px 0; }
+  [dir=rtl] ol.steps > li { padding: 4px 44px 12px 0; }
+  [dir=rtl] ol.steps > li::before { left: auto; right: 0; }
+  [dir=rtl] .legend li { padding: 2px 34px 6px 0; }
+  [dir=rtl] .legend li::before { left: auto; right: 0; }
+  [dir=rtl] .msg.bot { border-top-left-radius: 14px; border-top-right-radius: 4px; margin-right: 0; margin-left: auto; }
+  [dir=rtl] .msg.me { border-top-right-radius: 14px; border-top-left-radius: 4px; margin-left: 0; margin-right: auto; }
+  [dir=rtl] .m-bub.l { margin-right: 0; margin-left: auto; }
+  [dir=rtl] .m-bub.r { margin-left: 0; margin-right: auto; }
+  [dir=rtl] .pin { margin-left: 0; margin-right: 6px; }
+  [dir=rtl] .m-sel { padding: 3px 8px 3px 24px; margin-right: 0; margin-left: 8px; }
+  [dir=rtl] .m-sel::after { right: auto; left: 8px; }
+  [dir=rtl] .m-pbtn, [dir=rtl] .m-sbtn { margin: 2px 0 2px 6px; }
+  [dir=rtl] .mi .badge { margin-left: 0; margin-right: auto; }
+  [dir=rtl] .app-bar span { margin-left: 0; margin-right: 8px; }
+  [dir=rtl] .flow .arrow { transform: scaleX(-1); }
+  [dir=rtl] .app td:first-child { font-weight: 400; }
+  /* Telegram (canonical, from panelist-guide) and practical cases */
+  .case { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 20px 24px; margin: 16px 0; scroll-margin-top: 24px; }
+  .case > h3 { margin: 0; display: flex; gap: 10px; align-items: center; }
+  .case > .sit { color: var(--g500); font-size: 14px; margin: 2px 0 12px; }
+  .case .callout { margin: 8px 0; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+  .chips a { text-decoration: none; font-size: 13px; font-weight: 500; padding: 4px 12px; border-radius: 999px;
+    background: var(--white); border: 1px solid var(--g200); color: var(--g700); }
+  .chips a:hover { background: var(--b50); border-color: var(--b100); color: var(--b700); }
+  .tg { max-width: 380px; border-radius: 16px; overflow: hidden; border: 1px solid var(--g200);
+    box-shadow: 0 4px 16px rgba(17,24,39,.10); background: var(--tg-in); }
+  .tg-head { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: var(--tg-head); color: #ffffff; }
+  .tg-back { font-size: 20px; line-height: 1; opacity: .9; }
+  .tg-av { width: 36px; height: 36px; border-radius: 50%; flex: none; display: grid; place-items: center;
+    background: linear-gradient(160deg, #72c2f4, #3d8fd9); color: #ffffff; font-weight: 700; font-size: 12px; }
+  .tg-name { flex: 1; min-width: 0; line-height: 1.2; }
+  .tg-name b { display: block; font-size: 15px; color: #ffffff; font-weight: 600; }
+  .tg-name small { font-size: 12.5px; opacity: .8; }
+  .tg-body { display: flex; flex-direction: column; gap: 6px; padding: 12px 10px 14px;
+    background-color: var(--tg-wall-a);
+    background-image: radial-gradient(var(--tg-dot) 1.4px, transparent 1.6px), linear-gradient(160deg, var(--tg-wall-a), var(--tg-wall-b));
+    background-size: 18px 18px, 100% 100%; }
+  .tg-msg { max-width: 84%; padding: 6px 9px 7px 10px; border-radius: 12px; font-size: 14.5px; line-height: 1.38; color: var(--tg-ink);
+    box-shadow: 0 1px 1px rgba(0,0,0,.13); overflow-wrap: anywhere; }
+  .tg-msg.in { background: var(--tg-in); align-self: flex-start; border-bottom-left-radius: 4px; }
+  .tg-msg.out { background: var(--tg-out); align-self: flex-end; border-bottom-right-radius: 4px; }
+  .tg-msg .t { float: right; font-size: 11px; color: var(--tg-time); margin: 8px 0 -4px 10px; line-height: 1; }
+  .tg-msg.out .t { color: var(--tg-time-out); }
+  .tg-msg.out .t::after { content: " \2713\2713"; letter-spacing: -2px; }
+  .tg-msg.photo { padding: 3px; }
+  .tg-msg.photo .img { display: grid; place-items: center; width: 170px; height: 104px; border-radius: 10px; background: var(--tg-photo); font-size: 30px; }
+  .tg-msg.photo .t { position: relative; margin: -18px 8px 4px 0; }
+  .tg-kb { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; align-self: flex-start; width: 84%; margin-top: -2px; }
+  .tg-kb.one { grid-template-columns: 1fr; }
+  .tg-kb span { background: var(--tg-key); color: #ffffff; border-radius: 8px; padding: 7px 6px; text-align: center; font-size: 13.5px; font-weight: 600; }
+  .tg-kb span.tap { box-shadow: inset 0 0 0 2px var(--tg-ring); }
+  .tg-kb span.tap::after { content: " \1F446"; }
+  .tg-input { display: flex; align-items: center; gap: 12px; padding: 9px 14px; background: #ffffff; color: var(--tg-time); font-size: 14px; }
+  .tg-input .ph { flex: 1; }
+  [dir=rtl] .tg-msg.in { border-bottom-left-radius: 12px; border-bottom-right-radius: 4px; }
+  [dir=rtl] .tg-msg.out { border-bottom-right-radius: 12px; border-bottom-left-radius: 4px; }
+  [dir=rtl] .tg-msg .t { float: left; margin: 8px 10px -4px 0; }
+  [dir=rtl] .tg-back { transform: scaleX(-1); }
+  @media (max-width: 900px) {
+    .case { padding: 16px; }
+    .tg { max-width: none; }
+  }
+  .mobile-top { display: none; }
+  @media (max-width: 900px) {
+    .app-body.cols { grid-template-columns: 1fr; }
+    .app-body.cols > .sb { border-right: 0; border-bottom: 1px solid var(--g200); }
+    .layout { display: block; }
+    .side { display: none; }
+    .mobile-top { display: block; position: sticky; top: 0; z-index: 5; background: var(--white); border-bottom: 1px solid var(--g200); padding: 10px 16px; }
+    .mobile-top b { font-size: 18px; color: var(--g900); }
+    .mobile-top span { font-size: 13px; color: var(--g500); margin-left: 6px; }
+    .mobile-top select { width: 100%; margin-top: 8px; padding: 8px; border: 1px solid var(--g300); border-radius: 8px; font-size: 14px; background: #fff; color: var(--g700); }
+    .main { padding: 24px 16px 64px; }
+    .page > header h2 { font-size: 24px; line-height: 32px; }
+  }
+  @media print { .side, .mobile-top { display: none; } .main { padding: 0; } body { background: #fff; } section { break-inside: avoid-page; } }
+</style>
+</head>
+<body>
+<div class="mobile-top">
+  <b>ONE</b><span>for Regulators &middot; مساعدة</span>
+  <select id="jump" aria-label="الانتقال إلى قسم"></select>
+</div>
+<div class="layout">
+  <aside class="side">
+    <div class="brand">
+      <h1>ONE</h1>
+      <p>for Regulators</p>
+      <span class="doc">مساعدة &middot; تحليل الحالات</span>
+    </div>
+    <nav class="nav" id="nav">
+      <h3>البدء</h3>
+      <a href="#intro">ما هو</a>
+      <a href="#where">أين يُستخدم</a>
+      <h3>في ONEMS</h3>
+      <a href="#onems-analyse">تحليل حالة في ONEMS</a>
+      <h3>على Telegram</h3>
+      <a href="#bot-signup">التسجيل في الروبوت</a>
+      <a href="#bot-case">فتح حالة</a>
+      <a href="#bot-card">البطاقة وأزرارها</a>
+      <a href="#bot-r4">الإصلاح R4</a>
+      <a href="#bot-spend">المصاريف والحد الشهري</a>
+      <h3>الإدارة</h3>
+      <a href="#access">من لديه صلاحية الوصول</a>
+      <h3>مرجع</h3>
+      <a href="#messages">الرسائل إلى أعضاء اللجنة</a>
+      <a href="#faq">أسئلة شائعة</a>
+    </nav>
+    <div class="side-foot">آخر تحديث: 11 نوفمبر 2026</div>
+  </aside>
+
+  <main class="main">
+  <div class="page">
+    <header>
+      <h2>تحليل الحالات</h2>
+      <p>كيف تطلب من وكيل العمليات في ONEMS تحليل حالة تخص عضو لجنة، من شاشة ONEMS أو من روبوت التحليل على Telegram، وماذا تفعل بالنتيجة.</p>
+    </header>
+
+    <section id="intro">
+      <h2>ما هو</h2>
+      <p>عندما تكون لدى عضو اللجنة مشكلة (استلام لا يتطابق، أو حادثة مبلَّغ عنها، أو غياب)، يجمع وكيل العمليات في ONEMS بيانات الخطة وما حدث فعلًا ويسلّمك ردًا قصيرًا: <strong>ماذا يحدث، ولماذا، وماذا تفعل</strong>. ويعدّ لك أيضًا رسالة لكل عضو معني.</p>
+      <div class="grid">
+        <div class="card"><h4>دائمًا بطلبك</h4><p>لا يُحلَّل أي شيء من تلقاء نفسه. يبدأ التحليل عندما تضغط <strong>تحليل الحالة</strong> في ONEMS أو <strong>🔎 تحليل</strong> على Telegram.</p></div>
+        <div class="card"><h4>بطاقة قصيرة</h4><p>النتيجة بطاقة فيها <strong>المشكلة</strong> و<strong>السبب</strong> و<strong>الحل</strong>. والباقي في <strong>عرض التفاصيل</strong>.</p></div>
+        <div class="card"><h4>لا يُرسل شيء وحده</h4><p>الرسائل إلى أعضاء اللجنة مسودات. لا تخرج أي رسالة حتى تضغط <strong>إرسال</strong>.</p></div>
+        <div class="card"><h4>حد لكل حساب</h4><p>كل تحليل يكلّف بضعة سنتات. لكل حساب حد قدره <strong><span dir="ltr">5 $</span> في الشهر</strong>، يتشاركه ONEMS والروبوت.</p></div>
+      </div>
+      <div class="callout info"><strong>متاح في جميع الحسابات النشطة</strong>، بما فيها الجديدة. ما يُضبط لكل حساب هو <a href="#access">من يمكنه التسجيل في الروبوت</a> و<a href="#bot-spend">الحد الشهري</a>.</div>
+    </section>
+
+    <section id="where">
+      <h2>أين يُستخدم</h2>
+      <p>هناك طريقتان لطلب التحليل نفسه. اختر الأنسب لك: النتيجة وحد الإنفاق واحدان.</p>
+      <div class="flow">
+        <div class="node"><span class="tag">الخيار أ &middot; ONEMS</span><b>زر تحليل الحالة</b>في تفاصيل حالة: <em>الاستلامات</em> أو <em>الحوادث المبلَّغ عنها</em> أو <em>توفر المحكّمين</em>.</div>
+        <div class="arrow">&rarr;</div>
+        <div class="node"><span class="tag">الخيار ب &middot; Telegram</span><b>روبوت التحليل</b>محادثة خاصة مع <strong dir="ltr">@PanelistEventsAnalysisBot</strong> (الاسم الذي سيظهر لك: <em dir="ltr">Panelist Event Analysis</em>). لا يعمل في المجموعات.</div>
+        <div class="arrow">&rarr;</div>
+        <div class="node"><span class="tag">النتيجة</span><b>بطاقة ومسودات</b>المشكلة والسبب والحل، ورسالة لكل عضو لمراجعتها وإرسالها.</div>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>&nbsp;</th><th>في ONEMS</th><th>على Telegram</th></tr></thead>
+        <tbody>
+          <tr><td>نقطة البداية</td><td>حالة موجودة مسبقًا في ONEMS.</td><td>ما تعيد توجيهه أو تكتبه: المحادثة مع عضو اللجنة، أو لقطات شاشة، أو نص.</td></tr>
+          <tr><td>المسودات</td><td>تُعدَّل في مربع نص قبل <strong>إرسال</strong>.</td><td>يُطلب التغيير بـ <strong>✏️ تغيير</strong>.</td></tr>
+          <tr><td>الإصلاح R4</td><td>لا يُطبَّق من ONEMS.</td><td>نعم: <strong>✅ تطبيق</strong>، مع معاينة و<strong>↩️ تراجع</strong> خلال <span dir="ltr">24</span> ساعة.</td></tr>
+          <tr><td>ملاحظة التحليل</td><td>تُحفظ كملاحظة داخلية في الحالة.</td><td>تُحفظ كملاحظة داخلية في الحالة، إذا كان التحليل مرتبطًا بإحداها.</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="onems-analyse">
+      <h2>تحليل حالة في ONEMS</h2>
+      <p>يوجد الزر في تفاصيل الأنواع الثلاثة من الحالات التي تظهر في مجموعة <strong>الحوادث</strong> من القائمة:</p>
+      <ul>
+        <li><strong>الاستلامات</strong>: في صف الحالة اضغط <strong>تحليل</strong>؛ تُفتح نافذة <em>الحالة <span dir="ltr">00012345</span></em> فيها زر <strong>تحليل الحالة</strong>.</li>
+        <li><strong>الحوادث المبلَّغ عنها</strong> (<em>الحوادث المبلَّغ عنها من الأعضاء</em>): افتح الحادثة؛ يوجد زر <strong>تحليل الحالة</strong> في تفاصيلها.</li>
+        <li><strong>توفر المحكّمين</strong>: افتح الغياب أو عدم التوفر؛ يوجد زر <strong>تحليل الحالة</strong> في تفاصيله.</li>
+      </ul>
+      <div class="app">
+        <div class="app-bar"><i></i><i></i><i></i><span>ONEMS &rsaquo; الحوادث &rsaquo; الاستلامات &rsaquo; الحالة <span dir="ltr">00012345</span></span></div>
+        <div class="app-body">
+          <div class="m-box" style="max-width:640px;margin:0">
+            <div class="m-h3">الحالة <span dir="ltr">00012345</span></div>
+            <span class="m-sbtn">تحليل الحالة</span><span class="pin">1</span>
+            <div class="m-note" style="margin-top:10px">
+              <div class="m-muted"><b>المشكلة</b></div>
+              <div>سجّلت Grace Wanjiru (Nairobi) استلام الملصق <span dir="ltr">00012345</span>، لكن تلك الشحنة كانت متجهة إلى Mombasa.</div>
+              <div class="m-muted" style="margin-top:6px"><b>السبب</b></div>
+              <div>وصل الظرف إلى Nairobi بدلًا من Mombasa. الملصق محدَّد بوضوح في المصدر وفي الوجهة.</div>
+              <div class="m-muted" style="margin-top:6px"><b>الحل</b></div>
+              <div>إعادة توجيه سطر الخطة إلى Nairobi وتسجيل الاستلام. إبلاغ Grace.</div>
+              <div style="color:var(--gr700);margin:8px 0 6px">يمكن لوكيل العمليات تصحيح هذه الحالة تلقائيًا (R4)؛ اطلب ذلك من فريق الدعم.</div>
+              <span class="m-sbtn">عرض التفاصيل</span><span class="pin">2</span>
+            </div>
+            <div class="m-muted"><b>مسودات الرسائل</b></div>
+            <div class="m-muted">مستلم الرسالة: Grace Wanjiru (<span dir="ltr">PAN-KE-07</span>)</div>
+            <div class="m-ta" style="color:var(--g700)">مرحبًا Grace، الملصق <span dir="ltr">00012345</span> يخص ظرفًا موجّهًا إلى مدينة أخرى، ولذلك لم نتمكن من تسجيله. شكرًا على إبلاغنا، نتولى الأمر نحن.</div>
+            <span class="m-pbtn">إرسال إلى Grace Wanjiru</span><span class="pin">3</span>
+          </div>
+        </div>
+      </div>
+      <ol class="legend">
+        <li><span class="btn">تحليل الحالة</span> يطلق التحليل. وأثناء عمله يظهر على الزر <em>جارٍ التحليل...</em> ويُعطَّل.</li>
+        <li><span class="btn">عرض التفاصيل</span> يفتح التحليل المطوَّل (ويتحول إلى <span class="btn">إخفاء التفاصيل</span>). يكون مطويًا في كل مرة يصل فيها تحليل جديد.</li>
+        <li>كل <strong>مسودة رسالة</strong> مربع نص يمكنك تعديله. <span class="btn primary">إرسال إلى Grace Wanjiru</span> يرسلها؛ وبعد ذلك يظهر <strong>✓ تم الإرسال</strong>.</li>
+      </ol>
+      <h3>ماذا يتضمن عرض التفاصيل</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>القسم</th><th>ما يرويه</th></tr></thead>
+        <tbody>
+          <tr><td>الخطة</td><td>ما كان مقررًا للشحنة.</td></tr>
+          <tr><td>ما حدث</td><td>ما جرى في الواقع.</td></tr>
+          <tr><td>المقارنة</td><td>أين تختلف الخطة عن الواقع.</td></tr>
+          <tr><td>الأسباب</td><td>كل سبب مع احتماليته: <em>سبب محتمل (الاحتمالية: عالية / متوسطة / منخفضة)</em> والدليل الذي يستند إليه.</td></tr>
+          <tr><td>ضوضاء (غير ذات صلة)</td><td>أمور تبدو مهمة وليست كذلك في هذه الحالة.</td></tr>
+          <tr><td>من يجب التواصل معه</td><td>كل شخص مع دوره: <em>المرسل</em> أو <em>المستلم</em> أو <em>المرسل إليه</em>.</td></tr>
+          <tr><td>التحسين المقترح</td><td>ما يجب تغييره حتى لا يتكرر الأمر؛ وإن لم يكن هناك شيء فيظهر <em>لا يوجد تحسين لاقتراحه.</em></td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout ok"><strong>وبعد ذلك:</strong> يُحفظ التحليل كـ<strong>ملاحظة داخلية</strong> في الحالة. والرسائل التي ترسلها تصل عبر ONE bot إلى Telegram الخاص بعضو اللجنة وتبقى في <em>المحادثة مع العضو</em> الخاصة بالحالة.</div>
+      <div class="callout warn"><strong>إذا حدث خلل.</strong> <em>فشل التحليل. حاول مرة أخرى.</em> أو <em>الوكيل لا يستجيب. حاول لاحقًا.</em> اضغط الزر مرة أخرى. وإذا استنفد الحساب حده فسترى <em>وصل حسابك إلى حد التحليل لهذا الشهر. سيتوفر مجددًا في اليوم الأول من الشهر.</em> وإذا ظهر <em>تعذر إرسال الرسالة.</em> فاضغط <strong>إرسال</strong> مرة أخرى.</div>
+      <div class="callout info"><strong>نسخ الأمر.</strong> في بعض التحليلات يظهر أيضًا زر <em>نسخ الأمر لـ…</em>. وهو <strong>لفريق ONEMS التقني</strong>: لا تحتاج إلى استخدامه لحل الحالة.</div>
+    </section>
+
+    <section id="bot-signup">
+      <h2>التسجيل في الروبوت</h2>
+      <p>يكفي أن تفعل ذلك مرة واحدة. يجب أن يكون بريدك الإلكتروني في ONEMS مدرجًا في بطاقة حسابك بأحد <a href="#access">الأدوار المصرَّح لها</a>.</p>
+      <div class="two">
+        <ol class="steps">
+          <li>على Telegram، ابحث عن <strong dir="ltr">@PanelistEventsAnalysisBot</strong>، وافتح المحادثة واضغط <strong>ابدأ</strong> (أو اكتب <code dir="ltr">/start</code>).</li>
+          <li>يطلب منك الروبوت بريدك الإلكتروني في ONEMS. اكتبه.</li>
+          <li>يجيب الروبوت <strong>دائمًا بالرد نفسه</strong>، سواء كان البريد صالحًا أم لا. وإذا كان صالحًا فستتلقى بالبريد <strong>رمزًا من 6 أرقام</strong>.</li>
+          <li>اكتب الرمز في المحادثة.</li>
+          <li>يؤكد الروبوت الحساب الذي أنت فيه: <em>«يمكنك الآن تحليل حالات …»</em>.</li>
+        </ol>
+        <div class="tg" aria-label="مثال: التسجيل في روبوت التحليل">
+          <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">PEA</span><span class="tg-name"><b>Panelist Event Analysis</b><small>bot</small></span></div>
+          <div class="tg-body">
+            <div class="tg-msg out"><span dir="ltr">/start</span><span class="t">09:02</span></div>
+            <div class="tg-msg in">مرحبًا! للبدء، اكتب بريدك الإلكتروني في ONEMS.<span class="t">09:02</span></div>
+            <div class="tg-msg out"><span dir="ltr">responsable@correos.example</span><span class="t">09:03</span></div>
+            <div class="tg-msg in">إذا كان البريد الإلكتروني لمسؤول عن أحد الحسابات، فستتلقى رمزًا خلال دقائق. اكتبه هنا.<span class="t">09:03</span></div>
+            <div class="tg-msg out"><span dir="ltr">482913</span><span class="t">09:04</span></div>
+            <div class="tg-msg in">أهلًا بك! يمكنك الآن تحليل حالات <span dir="ltr">DEMO2</span>. أعد توجيه المحادثة مع المشارك (ولقطات الشاشة) إليّ أو اكتب لي ما حدث، واضغط «تحليل». اكتب «مساعدة» لرؤية الأوامر.<span class="t">09:04</span></div>
+          </div>
+          <div class="tg-input"><span>📎</span><span class="ph">رسالة</span><span>🎤</span></div>
+        </div>
+      </div>
+      <p class="cap">يتحدث الروبوت بلغة الحساب (الإنجليزية، الفرنسية…). تظهر هنا النصوص بالعربية. وقد تتغير رسائل الروبوت قليلًا.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>الحد</th><th>القيمة</th></tr></thead>
+        <tbody>
+          <tr><td>صلاحية الرمز</td><td><strong><span dir="ltr">15</span> دقيقة</strong>. عنوان البريد: <em>ONEMS: رمزك لروبوت التحليل</em>.</td></tr>
+          <tr><td>محاولات كتابة الرمز</td><td>حد أقصى <strong>5</strong>.</td></tr>
+          <tr><td>الرموز المطلوبة</td><td>كحد أقصى <strong>3 في الساعة</strong> (و6 في اليوم) لكل بريد إلكتروني.</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout ok"><strong>وبعد ذلك:</strong> يمكنك فتح الحالات. وفي كل مرة تستخدم فيها الروبوت يُتحقق من صلاحيتك مجددًا (مع ذاكرة مؤقتة مدتها <span dir="ltr">5</span> دقائق). وإذا أُزيل بريدك من الحساب يرد الروبوت <em>لم يعد وصولك صالحًا. للبدء من جديد، اكتب بريدك الإلكتروني في ONEMS.</em> وسيتعين عليك التسجيل مرة أخرى.</div>
+      <div class="callout warn"><strong>بريد واحد، بلد واحد.</strong> إذا كان بريدك مدرجًا في أكثر من حساب فلن يسجّلك الروبوت، وسيصلك بريد (<em>ONEMS: التسجيل في روبوت التحليل</em>) يطلب منك تصحيحه في ONEMS. حسابات الاختبار غير مقبولة.</div>
+    </section>
+
+    <section id="bot-case">
+      <h2>فتح حالة على Telegram</h2>
+      <p>الحالة هي كل ما ترسله قبل أن تضغط <strong>🔎 تحليل</strong>. فتح حالة وإضافة مواد إليها <strong>لا يكلّف شيئًا</strong>: فقط <strong>تحليل</strong> و<strong>تغيير</strong> يستهلكان من التحليل.</p>
+      <h3>ما الذي يمكنك إرساله</h3>
+      <ul>
+        <li><strong>رسائل معاد توجيهها</strong> من المحادثة مع عضو اللجنة.</li>
+        <li><strong>لقطات شاشة أو صور</strong>، حتى المرسلة كملف: حتى <span dir="ltr">5</span> ميغابايت لكل واحدة و<span dir="ltr">6</span> لكل حالة. الصورة الأكبر لا تُستخدم؛ وما زاد على السادسة يُتجاهل.</li>
+        <li><strong>نص تكتبه أنت</strong> تروي فيه ما حدث. إذا كان النص يتضمن كلمتين على الأقل أو رقمًا (مثل ملصق) فإنه يفتح حالة.</li>
+      </ul>
+      <div class="two">
+        <ol class="steps">
+          <li>أعد توجيه الرسائل أو أرسل لقطات الشاشة أو اكتب ما حدث.</li>
+          <li>يرد الروبوت <em>تم الاستلام (1)…</em> ويترك الزرّين <strong>🔎 تحليل</strong> و<strong>✖️ استبعاد</strong>. يمكنك متابعة إضافة المواد.</li>
+          <li>اضغط <strong>🔎 تحليل</strong>.</li>
+          <li>يرد الروبوت <em>جارٍ التحليل…</em> وعند الانتهاء يرسل النتيجة في رسالة جديدة.</li>
+        </ol>
+        <div class="tg" aria-label="مثال: فتح حالة بإعادة توجيه رسائل ولقطة شاشة">
+          <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">PEA</span><span class="tg-name"><b>Panelist Event Analysis</b><small>bot</small></span></div>
+          <div class="tg-body">
+            <div class="tg-msg out">استلمت الظرف <span dir="ltr">00012345</span> لكن البوت لا يسمح لي بتسجيله<span class="t">10:20</span></div>
+            <div class="tg-msg in">تم الاستلام (1). إذا لم يظهر المشارك، اكتب اسمه. اضغط «تحليل».<span class="t">10:20</span></div>
+            <div class="tg-kb"><span>🔎 تحليل</span><span>✖️ استبعاد</span></div>
+            <div class="tg-msg out photo"><div class="img">🖼️</div><span class="t">10:21</span></div>
+            <div class="tg-msg out">هي من Nairobi، Grace<span class="t">10:22</span></div>
+            <div class="tg-msg in">تم التسجيل (3). اضغط «تحليل».<span class="t">10:22</span></div>
+            <div class="tg-kb"><span class="tap">🔎 تحليل</span><span>✖️ استبعاد</span></div>
+            <div class="tg-msg in">جارٍ التحليل… ستصل النتيجة في رسالة جديدة.<span class="t">10:23</span></div>
+          </div>
+          <div class="tg-input"><span>📎</span><span class="ph">رسالة</span><span>🎤</span></div>
+        </div>
+      </div>
+      <p class="cap">مثال توضيحي. لا يرد الروبوت على كل رسالة: يؤكد الأولى ثم كل عشرة عناصر، أو عندما تكتب نصًا.</p>
+      <h3>إذا لم يعرف الروبوت من هو عضو اللجنة</h3>
+      <p>إذا لم يكن متأكدًا، يقترح عليك مرشحين من <strong>حسابك</strong>، مع الرمز والاسم والحساب والمدينة. اختر واحدًا، أو اضغط <strong>لا أحد: سأكتب الاسم</strong> واكتب اسم عضو اللجنة أو رمزه.</p>
+      <div class="two">
+        <div class="tg" aria-label="مثال: الروبوت يقترح مرشحين">
+          <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">PEA</span><span class="tg-name"><b>Panelist Event Analysis</b><small>bot</small></span></div>
+          <div class="tg-body">
+            <div class="tg-msg in">من هو المشارك؟ اختر واحدًا أو اكتب الاسم.<span class="t">10:23</span></div>
+            <div class="tg-kb one"><span class="tap"><span dir="ltr">PAN-KE-07 · Grace Wanjiru · DEMO2 · Nairobi</span></span><span><span dir="ltr">PAN-KE-31 · Grace Achieng · DEMO2 · Kisumu</span></span><span>لا أحد: سأكتب الاسم</span></div>
+          </div>
+          <div class="tg-input"><span>📎</span><span class="ph">رسالة</span><span>🎤</span></div>
+        </div>
+        <div>
+          <ul>
+            <li>إذا كان ما تكتبه لا يطابق أحدًا في حسابك، يرد الروبوت <em>لا أجد هذا المشارك في حسابك. اكتب اسمه (أو رمزه) وسأبحث عنه.</em></li>
+            <li>لا يمكن تحليل إلا <strong>أعضاء حسابك</strong>. وحالة من بلد آخر يُرد عليها بالطريقة نفسها: لا يجدها.</li>
+            <li><strong>✖️ استبعاد</strong> يغلق الحالة (<em>تم استبعاد الحالة.</em>) دون إنفاق أي شيء.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout ok"><strong>وبعد ذلك:</strong> تصل <a href="#bot-card">بطاقة التحليل</a> مع أزرارها، وتحتها مسودة لكل عضو.</div>
+    </section>
+
+    <section id="bot-card">
+      <h2>البطاقة وأزرارها</h2>
+      <p>تصل النتيجة في عدة رسائل: البطاقة، ومسودة لكل عضو يستحسن مراسلته، وفي النهاية سطر بما كلّفه التحليل.</p>
+      <div class="two">
+        <div class="tg" aria-label="مثال: بطاقة التحليل والمسودة وسطر الإنفاق">
+          <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">PEA</span><span class="tg-name"><b>Panelist Event Analysis</b><small>bot</small></span></div>
+          <div class="tg-body">
+            <div class="tg-msg in"><b>تحليل الحالة · <span dir="ltr">DEMO2</span></b><br><br><b>المشكلة</b><br>سجّلت Grace Wanjiru (Nairobi) الملصق <span dir="ltr">00012345</span>، لكن تلك الشحنة كانت متجهة إلى Mombasa.<br><br><b>السبب</b><br>وصل الظرف إلى Nairobi بدلًا من Mombasa. الملصق محدَّد بوضوح في المصدر والوجهة.<br><br><b>الحل</b><br>إعادة توجيه سطر الخطة إلى Nairobi وتسجيل الاستلام.<span class="t">10:24</span></div>
+            <div class="tg-kb"><span>📄 عرض التفاصيل</span><span>✅ تطبيق</span></div>
+            <div class="tg-msg in"><b>إلى Grace Wanjiru (<span dir="ltr">PAN-KE-07</span>) · <span dir="ltr">AR</span></b><br><br>مرحبًا Grace، الملصق <span dir="ltr">00012345</span> يخص ظرفًا موجّهًا إلى مدينة أخرى، ولذلك لم نتمكن من تسجيله. شكرًا على إبلاغنا، نتولى الأمر نحن.<span class="t">10:24</span></div>
+            <div class="tg-kb"><span class="tap">📤 إرسال إلى Grace Wanjiru</span><span>✏️ تغيير</span></div>
+            <div class="tg-msg in">💶 هذا التحليل: <span dir="ltr">0.04 $</span> · حسابك هذا الشهر: <span dir="ltr">1.32 $</span> من <span dir="ltr">5 $</span><span class="t">10:24</span></div>
+            <div class="tg-msg in">تم الإرسال إلى Grace Wanjiru. تبقى الرسالة في محادثة الحادثة.<span class="t">10:26</span></div>
+          </div>
+          <div class="tg-input"><span>📎</span><span class="ph">رسالة</span><span>🎤</span></div>
+        </div>
+        <div>
+          <ul>
+            <li><strong>البطاقة</strong> قصيرة عن قصد. لرؤية الخطة والواقع والمقارنة والأسباب مع احتماليتها والضوضاء ومن يجب التواصل معه والتحسين المقترح، اضغط <strong>📄 عرض التفاصيل</strong>.</li>
+            <li>كل <strong>مسودة</strong> تبيّن لمن تُرسل، مع رمزه ولغة الرسالة (في المثال <em dir="ltr">AR</em>).</li>
+            <li>يُرسل السطر <em>💶 هذا التحليل…</em> في نهاية كل تحليل وكل <strong>تغيير</strong>.</li>
+          </ul>
+        </div>
+      </div>
+      <p class="cap">مثال توضيحي؛ نصوص التحليل وأرقامه تتوقف على كل حالة.</p>
+      <h3>جميع الأزرار</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>الزر</th><th>ماذا يفعل</th><th>هل يستهلك؟</th></tr></thead>
+        <tbody>
+          <tr><td>🔎 تحليل</td><td>يطلق تحليل الحالة المفتوحة.</td><td>نعم</td></tr>
+          <tr><td>✖️ استبعاد</td><td>يغلق الحالة دون تحليل.</td><td>لا</td></tr>
+          <tr><td>لا أحد: سأكتب الاسم</td><td>ينتظر الروبوت أن تكتب اسم عضو اللجنة أو رمزه؛ وعند كتابته يحلل الحالة.</td><td>عند كتابة الاسم، نعم</td></tr>
+          <tr><td>📄 عرض التفاصيل</td><td>يعرض التحليل المطوَّل في رسالة جديدة (<em>تفاصيل الحالة</em>).</td><td>لا</td></tr>
+          <tr><td>📤 إرسال إلى &lt;الاسم&gt;</td><td>يرسل المسودة إلى ذلك العضو عبر ONE bot ويبقيها في محادثة الحالة. وإذا كانت قد أُرسلت: <em>تم الإرسال بالفعل.</em></td><td>لا</td></tr>
+          <tr><td>✏️ تغيير</td><td>يسأل الروبوت <em>ماذا أغيّر؟</em>؛ اكتب التعليمات (مثلًا «أقصر») فيعيد إليك المسودة بصياغة جديدة. وتنتهي صلاحية التعليمات المعلّقة بعد <span dir="ltr">30</span> دقيقة.</td><td>نعم، قليلًا</td></tr>
+          <tr><td>✅ تطبيق</td><td>لا يظهر إلا إذا كان <a href="#bot-r4">الإصلاح R4</a> ممكنًا. يعرض معاينة؛ ولا يغيّر شيئًا بعد.</td><td>لا</td></tr>
+          <tr><td>تأكيد / عدم التطبيق</td><td>يؤكدان معاينة الإصلاح R4 أو يرفضانها.</td><td>لا</td></tr>
+          <tr><td>↩️ تراجع</td><td>يتراجع عن إصلاح R4 طُبّق، خلال <span dir="ltr">24</span> ساعة.</td><td>لا</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout warn"><strong>الموجّه التقني ليس لك.</strong> يرى المشرفون العامون (superadmin) في ONEMS زرًّا إضافيًا هو <em>🧩 موجّه تقني</em>؛ وهو لفريق ONEMS التقني. مدير الحساب لا يراه في الروبوت.</div>
+    </section>
+
+    <section id="bot-r4">
+      <h2>الإصلاح R4: إعادة التوجيه وتسجيل الاستلام</h2>
+      <p>يستند إلى قاعدة: <strong>الملصق المحدَّد بوضوح في المصدر والوجهة لا يضيع أبدًا</strong>. إذا سجّل عضو لجنة ملصقًا لم يكن له (ملصق شحنة إلى مدينة أخرى) وكان سطر الخطة محدَّدًا بلا شك، يعرض الروبوت الزر <strong>✅ تطبيق</strong> في البطاقة.</p>
+      <p>وإذا لم يكن R4 ممكنًا في تلك الحالة، فإن الزر <strong>لا يظهر</strong>. يُطبَّق من Telegram فقط؛ وليس من ONEMS.</p>
+      <div class="two">
+        <ol class="steps">
+          <li>اضغط <strong>✅ تطبيق</strong>. يعرض الروبوت <strong>المعاينة</strong>: الملصق، وسطر الخطة، والوجهة الحالية والجديدة، والمصدر، وتاريخ الاستلام، ومهلة اتفاقية مستوى الخدمة (SLA).</li>
+          <li>راجعها. وإذا لم تكن ما تريده فاضغط <strong>عدم التطبيق</strong> (<em>لم يُطبَّق.</em>).</li>
+          <li>وإذا كانت صحيحة فاضغط <strong>تأكيد</strong>. ينتقل السطر إلى المرسل إليه الحقيقي، ويُسجَّل كمستلم، وتصبح حالة الاستلام <span class="badge b-blue">تم إصلاحه</span>.</li>
+          <li>خلال <span dir="ltr">24</span> ساعة يظهر <strong>↩️ تراجع</strong>.</li>
+        </ol>
+        <div class="tg" aria-label="مثال: تطبيق الإصلاح R4 مع المعاينة">
+          <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">PEA</span><span class="tg-name"><b>Panelist Event Analysis</b><small>bot</small></span></div>
+          <div class="tg-body">
+            <div class="tg-msg in">الإصلاح R4 · <span dir="ltr">DEMO2</span>: إعادة التوجيه وتسجيل الاستلام<br>الملصق <span dir="ltr">00012345</span> (حالة الاستلام <span dir="ltr">118</span>).<br>سطر الخطة <span dir="ltr">4521</span>: الوجهة <span dir="ltr">MSA-02</span> ← <span dir="ltr">NBO-03</span> (العقدة <span dir="ltr">14</span>). المصدر: <span dir="ltr">KSM-01</span>.<br>سيُسجَّل كمستلم في <span dir="ltr">10/11/2026 09:42 UTC</span>.<br>اتفاقية مستوى الخدمة للزوج الجديد: <span dir="ltr">48</span> ساعة.<br>ستُعلَّم حالة الاستلام كمصلحة. يمكن التراجع خلال <span dir="ltr">24</span> ساعة.<br>هل أطبّقه؟<span class="t">10:30</span></div>
+            <div class="tg-kb"><span class="tap">تأكيد</span><span>عدم التطبيق</span></div>
+            <div class="tg-msg in">تم التطبيق: الملصق <span dir="ltr">00012345</span> أصبح مستلمًا من <span dir="ltr">NBO-03</span>. يمكن التراجع خلال <span dir="ltr">24</span> ساعة.<span class="t">10:31</span></div>
+            <div class="tg-kb one"><span>↩️ تراجع</span></div>
+          </div>
+          <div class="tg-input"><span>📎</span><span class="ph">رسالة</span><span>🎤</span></div>
+        </div>
+      </div>
+      <p class="cap">رموز المعاينة (<span dir="ltr">MSA-02</span> و<span dir="ltr">NBO-03</span> و<span dir="ltr">KSM-01</span>) توضيحية.</p>
+      <div class="callout ok"><strong>وبعد ذلك:</strong> تُغلق حالة الاستلام كمصلحة. وإذا ضغطت <strong>↩️ تراجع</strong> خلال <span dir="ltr">24</span> الساعة التالية، يرد الروبوت <em>تم التراجع: عاد سطر الخطة وحالة الاستلام كما كانا.</em> وبعد مرور <span dir="ltr">24</span> ساعة لا يمكن التراجع من الروبوت.</div>
+      <div class="callout warn"><strong>إذا تغيّر شيء.</strong> إذا تغيّرت الحالة منذ الاقتراح، يذكر الروبوت ذلك (<em>لم يعد الإصلاح ممكنًا: …</em>). وإذا لم يصل رد واضح من ONEMS، فلا يؤكد الروبوت أنه لم يُطبَّق: بل يتحقق ويخبرك. قبل التكرار، راجع الحالة في ONEMS.</div>
+    </section>
+
+    <section id="bot-spend">
+      <h2>المصاريف والحد الشهري</h2>
+      <p>كل تحليل يكلّف بضعة سنتات. الحد هو <strong><span dir="ltr">5 $</span> لكل حساب وشهر ميلادي</strong> (بتوقيت مدريد) ويتشاركه جميع أفراد الحساب وزر <strong>تحليل الحالة</strong> في ONEMS.</p>
+      <div class="two">
+        <div class="tg" aria-label="مثال: أمر المصاريف وتنبيهات الحد">
+          <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">PEA</span><span class="tg-name"><b>Panelist Event Analysis</b><small>bot</small></span></div>
+          <div class="tg-body">
+            <div class="tg-msg out">مصاريف<span class="t">16:40</span></div>
+            <div class="tg-msg in">هذا الشهر أنفق حسابك <span dir="ltr">4.10 $</span> من <span dir="ltr">5 $</span>. أنت: <span dir="ltr">1.32 $</span>.<span class="t">16:40</span></div>
+            <div class="tg-msg in">💶 هذا التحليل: <span dir="ltr">0.05 $</span> · حسابك هذا الشهر: <span dir="ltr">4.15 $</span> من <span dir="ltr">5 $</span><br>⚠️ تجاوز حسابك <span dir="ltr">80 %</span> من حد هذا الشهر (<span dir="ltr">5 $</span>).<span class="t">16:52</span></div>
+            <div class="tg-msg in">وصل حسابك إلى حد هذا الشهر. سيتوفر التحليل مجددًا في اليوم الأول من الشهر.<span class="t">17:15</span></div>
+          </div>
+          <div class="tg-input"><span>📎</span><span class="ph">رسالة</span><span>🎤</span></div>
+        </div>
+        <div>
+          <ul>
+            <li>بعد كل تحليل، يعرض الروبوت <strong>ما كلّفه</strong> وما بلغه الحساب في الشهر.</li>
+          <li>ينبّه عند <strong><span dir="ltr">80 %</span></strong> <strong>مرة واحدة فقط</strong> في الشهر، بجانب ذلك السطر.</li>
+            <li>يعرض الأمر <strong>مصاريف</strong> ما بلغه الحساب في الشهر وحصتك منه.</li>
+            <li>عند بلوغ الحد، لا يحلل الروبوت أكثر (<em>وصل حسابك إلى حد هذا الشهر…</em>) ويعرض ONEMS <em>وصل حسابك إلى حد التحليل لهذا الشهر. سيتوفر مجددًا في اليوم الأول من الشهر.</em></li>
+          </ul>
+        </div>
+      </div>
+      <p class="cap">مثال توضيحي؛ الأرقام مختلقة.</p>
+      <h3>أوامر الروبوت</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>اكتب</th><th>ماذا يفعل</th></tr></thead>
+        <tbody>
+          <tr><td>مساعدة</td><td>يذكّرك بكيفية استخدام الروبوت: <em>أعد توجيه المحادثة مع المشارك (ولقطات الشاشة) إليّ أو اكتب لي ما حدث، واضغط «تحليل». الأوامر: «مساعدة» · «مصاريف».</em></td></tr>
+          <tr><td>مصاريف</td><td>إنفاق الحساب في الشهر وحصتك منه. لا يستهلك شيئًا.</td></tr>
+          <tr><td>بلد</td><td>للمشرفين العامين (superadmin) في ONEMS فقط: اختيار البلد الذي يعملون عليه أو تغييره. وإذا كتبه مدير حساب فيعرض له الروبوت المساعدة.</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout info"><strong>متى يعود؟</strong> في اليوم الأول من الشهر التالي، عند <span dir="ltr">00:00</span> بتوقيت مدريد. وفي الأثناء يمكنك متابعة فتح الحالات واستخدام <strong>مصاريف</strong> و<strong>مساعدة</strong>، لكن <strong>تحليل</strong> و<strong>تغيير</strong> سيكونان متوقفين.</div>
+    </section>
+
+    <section id="access">
+      <h2>من لديه صلاحية الوصول</h2>
+      <p>تُدار صلاحية الوصول إلى الروبوت <strong>في ONEMS</strong>؛ ولا شيء يُضبط في الروبوت. يمكن التسجيل لمن يكون بريده في بطاقة حسابه بأحد هذه الأدوار:</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>حقل بطاقة الحساب</th><th>فيمَ يُستخدم عمومًا</th></tr></thead>
+        <tbody>
+          <tr><td>البريد الإلكتروني لمسؤول المشاركين (Panelist Manager)</td><td>يدير المشاركين: يتلقى تنبيهات الحوادث والغياب والروبوت.</td></tr>
+          <tr><td>البريد الإلكتروني لمدير الحساب (Account Manager)</td><td>قائد المشروع في هذا الحساب. يتلقى تقارير التشغيل.</td></tr>
+          <tr><td>البريد الإلكتروني لمدير خطة التوزيع (Allocation Plan Manager)</td><td>المسؤول عن خطة التوزيع لهذا الحساب؛ يستخدم بوت تحليل الحالات.</td></tr>
+        </tbody>
+      </table></div>
+      <ol class="steps">
+        <li>يفتح <strong>مشرف عام</strong> (superadmin) في ONEMS القائمة <strong>الإدارة › الحسابات</strong> (شاشة <strong>إدارة الحسابات</strong>) ويعدّل الحساب. وإذا لم تكن مشرفًا عامًا فاطلب ذلك من مسؤولك في ONEMS.</li>
+        <li>في <strong>جهات اتصال الحساب</strong>، اكتب بريد الشخص أو احذفه في حقل الدور المناسب.</li>
+        <li>احفظ. يمكن للشخص الآن <a href="#bot-signup">التسجيل في الروبوت</a>؛ وإذا حذفت بريده فإنه يفقد الوصول في غضون دقائق على الأكثر.</li>
+      </ol>
+      <ul>
+        <li><strong>شخص واحد، بلد واحد.</strong> لا يمكن أن يرد البريد نفسه في عدة حسابات: لا يتم تسجيله ويتلقى تنبيهًا بالبريد.</li>
+        <li><strong>المشرفون العامون في ONEMS.</strong> يمكنهم العمل مع أي بلد: يختارونه بالأزرار عند التسجيل ويغيّرونه بكتابة <strong>بلد</strong>.</li>
+        <li><strong>حسابات الاختبار</strong> غير مقبولة.</li>
+        <li>يرى الحساب ويحلل <strong>أعضاءه هو فقط</strong>.</li>
+      </ul>
+      <div class="callout ok"><strong>وبعد ذلك:</strong> لا تحتاج إلى إبلاغ الروبوت. في كل استخدام يُتحقق من البريد في ONEMS مجددًا (مع ذاكرة مؤقتة مدتها <span dir="ltr">5</span> دقائق).</div>
+    </section>
+
+    <section id="messages">
+      <h2>الرسائل إلى أعضاء اللجنة</h2>
+      <p>تتبع المسودات دائمًا القواعد نفسها لتكون موجزة وواضحة. اقرأها وعدّلها عند الحاجة قبل الإرسال.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>من</th><th>ماذا يتلقى</th></tr></thead>
+        <tbody>
+          <tr><td>عضو اللجنة الذي <strong>سجّل</strong> الاستلام (المستلم)</td><td>قصيرة جدًا: السبب، والشكر، و<strong>«نتولى الأمر نحن»</strong>. ولا يُطلب منه أبدًا الاحتفاظ بالظرف أو إعادته.</td></tr>
+          <tr><td>المرسل</td><td>حاليًا <strong>لا يتلقى رسالة تلقائية</strong>. يتولى الأمر مسؤول المشاركين، بتقرير عضو اللجنة.</td></tr>
+          <tr><td>المرسل إليه</td><td>لا تُرسل إليه رسالة، إلا إذا كان عليه أن يفعل شيئًا.</td></tr>
+        </tbody>
+      </table></div>
+      <ul>
+        <li>كل مسودة تأتي <strong>بلغة عضو اللجنة</strong>.</li>
+        <li>في ONEMS يمكنك <strong>تعديلها</strong>؛ وعلى Telegram، طلب تغيير بـ <strong>✏️ تغيير</strong> (يستهلك قليلًا).</li>
+        <li>عند الإرسال، تخرج الرسالة عبر <strong>ONE bot</strong> إلى Telegram الخاص بعضو اللجنة وتبقى في <strong>محادثة الحالة</strong>.</li>
+        <li>إذا لم يؤدِّ التحليل إلى أي حالة، يرسلها الروبوت كإشعار: <em>تم الإرسال إلى … كإشعار.</em></li>
+      </ul>
+    </section>
+
+    <section id="faq">
+      <h2>أسئلة شائعة</h2>
+      <details><summary>هل أنفق شيئًا إذا اكتفيت بإعادة توجيه الرسائل؟</summary><div>لا. فتح حالة وإضافة رسائل أو لقطات شاشة أو نص إليها مجاني. ما يستهلك هو فقط <strong>🔎 تحليل</strong>، واختيار عضو اللجنة أو كتابته عندما يسأل الروبوت، و<strong>✏️ تغيير</strong>.</div></details>
+      <details><summary>هل يمكنني تحليل حالات من بلد آخر؟</summary><div>لا. لا ترى إلا أعضاء حسابك. وإذا كتبت عضوًا من بلد آخر يرد الروبوت <em>لا أجد هذا المشارك في حسابك.</em> أما المشرفون العامون في ONEMS فيمكنهم اختيار البلد.</div></details>
+      <details><summary>هل يُرسل شيء إلى أعضاء اللجنة دون علمي؟</summary><div>لا. التحليل دائمًا بطلبك، والرسائل لا تخرج إلا عندما تضغط <strong>إرسال</strong>.</div></details>
+      <details><summary>ماذا يحدث إذا أخطأت في تطبيق الإصلاح R4؟</summary><div>اضغط <strong>↩️ تراجع</strong> خلال <span dir="ltr">24</span> الساعة التالية: يعود سطر الخطة وحالة الاستلام كما كانا. وبعد <span dir="ltr">24</span> ساعة لا يمكن التراجع من الروبوت.</div></details>
+      <details><summary>لماذا يخاطبني الروبوت بالإنجليزية (أو بالفرنسية)؟</summary><div>لأنه يتحدث بلغة حسابك. وتأتي المسودات، فضلًا عن ذلك، بلغة كل عضو لجنة.</div></details>
+      <details><summary>وماذا لو لم يصل الرمز؟</summary><div>انظر في مجلد البريد غير المرغوب فيه وانتظر بضع دقائق. تحقق مع مسؤول حسابك من أن بريدك مدرج في البطاقة بأحد الأدوار المصرَّح لها. وإذا كتبته ولم يكن مدرجًا فإن الروبوت يرد بالطريقة نفسها ولا يصل شيء. تذكّر حد 3 رموز في الساعة؛ والرمز صالح <span dir="ltr">15</span> دقيقة ويقبل 5 محاولات.</div></details>
+      <details><summary>يقول لي «لم يعد وصولك صالحًا»</summary><div>أُزيل بريدك من الحساب أو لم يعد لديك دور مصرَّح له. وإذا كان ذلك خطأ، فاطلب استعادته في ONEMS وسجّل نفسك مجددًا بكتابة بريدك.</div></details>
+      <details><summary>يقول لي «التحليل غير مفعّل لحسابك بعد»</summary><div>التحليل متاح لجميع الحسابات النشطة. وإذا ظهرت لك هذه الرسالة فأبلغ فريق ONEMS.</div></details>
+      <details><summary>هل يمكنني استخدامه في مجموعة على Telegram؟</summary><div>لا. يعمل فقط في المحادثة الخاصة مع الروبوت.</div></details>
+      <details><summary>أين يبقى التحليل؟</summary><div>كـ<strong>ملاحظة داخلية</strong> في الحالة (وعلى Telegram، مع بريدك في <em>حُلِّل بواسطة</em>). والرسائل المرسلة تبقى في محادثة الحالة.</div></details>
+    </section>
+  </div>
+  </main>
+</div>
+
+<script>
+(function () {
+  var links = Array.prototype.slice.call(document.querySelectorAll('#nav a'));
+  var sections = links.map(function (a) { return document.querySelector(a.getAttribute('href')); }).filter(Boolean);
+
+  // Mobile section picker
+  var jump = document.getElementById('jump');
+  links.forEach(function (a) {
+    var o = document.createElement('option');
+    o.value = a.getAttribute('href'); o.textContent = a.textContent; jump.appendChild(o);
+  });
+  jump.addEventListener('change', function () { location.hash = jump.value; });
+
+  // Highlight the current section in the side menu
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          links.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id); });
+          jump.value = '#' + e.target.id;
+        }
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    sections.forEach(function (s) { io.observe(s); });
+  }
+})();
+</script>
+</body>
+</html>

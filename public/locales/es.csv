@@ -5237,3 +5237,5 @@ case_analysis.copied,Copiado
 case_analysis.show_detail,Ver detalle
 case_analysis.hide_detail,Ocultar detalle
 case_analysis.account_cap,Tu cuenta ha llegado al límite de análisis de este mes. Vuelve a estar disponible el día 1.
+help_center.doc.case_analysis.title,Análisis de casos
+help_center.doc.case_analysis.desc,"Analizar un caso desde ONEMS o desde el bot de análisis en Telegram: qué pasó y por qué; mensajes a los panelistas y arreglos sencillos."
