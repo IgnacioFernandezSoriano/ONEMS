@@ -3983,6 +3983,8 @@ hc.account_form.do_coordinator_email,البريد الإلكتروني لمنس�
 hc.account_form.do_coordinator_email_help,المنسق لدى المشغل المعيّن (بريد البلد).
 hc.account_form.upu_account_manager_email,البريد الإلكتروني لمدير الحساب في الاتحاد البريدي العالمي (UPU account manager)
 hc.account_form.upu_account_manager_email_help,المسؤول عن هذا الحساب في الاتحاد البريدي العالمي.
+hc.account_form.allocation_plan_manager_email,البريد الإلكتروني لمدير خطة التوزيع (Allocation Plan Manager)
+hc.account_form.allocation_plan_manager_email_help,المسؤول عن خطة التوزيع لهذا الحساب؛ يستخدم بوت تحليل الحالات.
 hc.account_form.status,الحالة
 hc.account_form.cancel,إلغاء
 hc.account_form.saving,جارٍ الحفظ...
@@ -5178,6 +5180,8 @@ receipt_errors.reason_help.wrong_city_cancelled,في الحالات القديم
 receipt_errors.role.sender,مُرسِل
 receipt_errors.role.receiver,مستلِم
 receipt_errors.fix,إصلاح
+receipt_errors.analyze,تحليل
+receipt_errors.case_dialog_title,الحالة {tag}
 receipt_errors.close_case,تعويض / تجاهل
 receipt_errors.fix_title,إصلاح الحالة: اختر الشحنة الصحيحة
 receipt_errors.fix_help,أعلن العضو عن الملصق {tag}. اختر الشحنة المرسلة إلى مدينته والتي تطابقه.
@@ -5190,3 +5194,37 @@ receipt_errors.close_confirm,إغلاق الحالة
 help_center.doc.receipt_errors.title,أخطاء الاستلام
 help_center.doc.receipt_errors.desc,ما يفعله ONEMS عندما لا يتطابق استلام مُصرَّح به، وكيفية قراءة شاشة الاستلامات، وكيفية إصلاح كل حالة أو إغلاقها.
 receipt_errors.help_link,مساعدة
+case_analysis.button,تحليل الحالة
+case_analysis.running,جارٍ التحليل...
+case_analysis.failed,فشل التحليل. حاول مرة أخرى.
+case_analysis.agent_timeout,الوكيل لا يستجيب. حاول لاحقًا.
+case_analysis.summary,الملخص
+case_analysis.plan,الخطة
+case_analysis.reality,ما حدث
+case_analysis.comparison,المقارنة
+case_analysis.causes,الأسباب
+case_analysis.probable,محتمل
+case_analysis.noise,ضوضاء (غير ذات صلة)
+case_analysis.contacts,من يجب التواصل معه
+case_analysis.improvement,التحسين المقترح
+case_analysis.no_improvement,لا يوجد تحسين لاقتراحه.
+case_analysis.drafts,مسودات الرسائل
+case_analysis.send_to,إرسال إلى {name}
+case_analysis.sent,تم الإرسال
+case_analysis.send_error,تعذر إرسال الرسالة.
+case_analysis.role.remitente,المرسل
+case_analysis.role.receptor,المستلم
+case_analysis.role.destinatario,المرسل إليه
+case_analysis.recipient,مستلم الرسالة
+case_analysis.likelihood.alta,عالية
+case_analysis.likelihood.media,متوسطة
+case_analysis.likelihood.baja,منخفضة
+case_analysis.probable_with,سبب محتمل (الاحتمالية: {level})
+case_analysis.problem,المشكلة
+case_analysis.cause,السبب
+case_analysis.solution,الحل
+case_analysis.fix_available,يمكن لوكيل العمليات تصحيح هذه الحالة تلقائيًا (R4)؛ اطلب ذلك من فريق الدعم.
+case_analysis.copy_prompt,نسخ الأمر لـ Claude Code
+case_analysis.copied,تم النسخ
+case_analysis.show_detail,عرض التفاصيل
+case_analysis.hide_detail,إخفاء التفاصيل

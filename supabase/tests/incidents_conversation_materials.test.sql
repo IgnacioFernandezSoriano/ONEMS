@@ -146,7 +146,7 @@ BEGIN
     IF NOT has_function_privilege('authenticated', f, 'EXECUTE') OR NOT has_function_privilege('service_role', f, 'EXECUTE') THEN
       RAISE EXCEPTION 'FAIL falta GRANT en %', f; END IF;
   END LOOP;
-  FOREACH f IN ARRAY ARRAY['public.log_incident_message(text,uuid,text,text,text,jsonb,text)',
+  FOREACH f IN ARRAY ARRAY['public.log_incident_message(text,uuid,text,text,text,jsonb,text,uuid)',
                            'public.mark_incident_message_sent(uuid,boolean,text,text)',
                            'public.pending_incident_messages(integer)'] LOOP
     IF has_function_privilege('anon', f, 'EXECUTE') OR has_function_privilege('authenticated', f, 'EXECUTE') THEN

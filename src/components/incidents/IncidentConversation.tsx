@@ -23,9 +23,10 @@ interface Props {
   incidentId: string
   panelistLanguage?: string | null
   helpSection?: string
+  incidentPanelistId?: string
 }
 
-export function IncidentConversation({ kind, incidentId, panelistLanguage, helpSection }: Props) {
+export function IncidentConversation({ kind, incidentId, panelistLanguage, helpSection, incidentPanelistId }: Props) {
   const { t } = useTranslation()
   const { messages, loading, error, send, photoUrls } = useIncidentConversation(kind, incidentId)
   const [text, setText] = useState('')
@@ -82,7 +83,12 @@ export function IncidentConversation({ kind, incidentId, panelistLanguage, helpS
     return (
       <div key={m.id} className={`flex ${mine ? 'justify-end' : 'justify-start'} my-1`}>
         <div className={`max-w-[80%] rounded-lg px-3 py-2 text-sm text-start ${mine ? 'bg-blue-50 border border-blue-200' : 'bg-gray-100 border border-gray-200'}`}>
-          <div className="text-xs font-medium text-gray-600 mb-0.5">{t(`incident_conversation.author.${m.author}`)}</div>
+          <div className="text-xs font-medium text-gray-600 mb-0.5">
+            {t(`incident_conversation.author.${m.author}`)}
+            {incidentPanelistId && m.panelist_id && m.panelist_id !== incidentPanelistId && m.panelists && (
+              <span className="text-gray-500"> → {m.panelists.name} ({m.panelists.panelist_code})</span>
+            )}
+          </div>
           <div className="whitespace-pre-wrap break-words">{m.body}</div>
           {photoUrl && (
             <a href={photoUrl} target="_blank" rel="noopener noreferrer" className="block mt-1">

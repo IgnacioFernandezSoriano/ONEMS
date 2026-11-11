@@ -3983,6 +3983,8 @@ hc.account_form.do_coordinator_email,E-mail du DO coordinator
 hc.account_form.do_coordinator_email_help,Coordinateur chez l'opérateur désigné (poste du pays).
 hc.account_form.upu_account_manager_email,E-mail de l'UPU account manager
 hc.account_form.upu_account_manager_email_help,Responsable de ce compte à l'UPU.
+hc.account_form.allocation_plan_manager_email,E-mail de l'Allocation Plan Manager
+hc.account_form.allocation_plan_manager_email_help,Responsable du plan d'allocation de ce compte; utilise le bot d'analyse des cas.
 hc.account_form.status,Statut
 hc.account_form.cancel,Annuler
 hc.account_form.saving,Enregistrement...
@@ -5178,6 +5180,8 @@ receipt_errors.reason_help.wrong_city_cancelled,Anciens cas uniquement : l'envoi
 receipt_errors.role.sender,expéditeur
 receipt_errors.role.receiver,destinataire
 receipt_errors.fix,Corriger
+receipt_errors.analyze,Analyser
+receipt_errors.case_dialog_title,Cas {tag}
 receipt_errors.close_case,Compenser / Écarter
 receipt_errors.fix_title,Corriger le cas : choisissez le bon envoi
 receipt_errors.fix_help,Le panéliste a déclaré l'étiquette {tag}. Choisissez l'envoi expédié vers sa ville qui correspond.
@@ -5190,3 +5194,37 @@ receipt_errors.close_confirm,Clôturer le cas
 help_center.doc.receipt_errors.title,Erreurs de réception
 help_center.doc.receipt_errors.desc,"Ce que fait ONEMS quand une réception déclarée ne correspond pas, comment lire l'écran Réceptions et comment corriger ou clôturer chaque cas."
 receipt_errors.help_link,Aide
+case_analysis.button,Analyser le cas
+case_analysis.running,Analyse en cours...
+case_analysis.failed,L'analyse a échoué. Réessayez.
+case_analysis.agent_timeout,L'agent ne répond pas. Réessayez plus tard.
+case_analysis.summary,Résumé
+case_analysis.plan,Plan
+case_analysis.reality,Ce qui s'est passé
+case_analysis.comparison,Comparaison
+case_analysis.causes,Causes
+case_analysis.probable,probable
+case_analysis.noise,Bruit (sans intérêt)
+case_analysis.contacts,Qui contacter
+case_analysis.improvement,Amélioration proposée
+case_analysis.no_improvement,Aucune amélioration à proposer.
+case_analysis.drafts,Brouillons de message
+case_analysis.send_to,Envoyer à {name}
+case_analysis.sent,Envoyé
+case_analysis.send_error,Le message n'a pas pu être envoyé.
+case_analysis.role.remitente,Expéditeur
+case_analysis.role.receptor,Récepteur
+case_analysis.role.destinatario,Destinataire
+case_analysis.recipient,Destinataire du message
+case_analysis.likelihood.alta,Élevée
+case_analysis.likelihood.media,Moyenne
+case_analysis.likelihood.baja,Faible
+case_analysis.probable_with,cause probable (probabilité : {level})
+case_analysis.problem,Problème
+case_analysis.cause,Cause
+case_analysis.solution,Solution
+case_analysis.fix_available,L'agent d'opérations peut corriger ce cas automatiquement (R4) ; demandez-le à l'équipe de support.
+case_analysis.copy_prompt,Copier le prompt pour Claude Code
+case_analysis.copied,Copié
+case_analysis.show_detail,Voir le détail
+case_analysis.hide_detail,Masquer le détail

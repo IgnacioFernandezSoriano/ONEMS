@@ -3991,6 +3991,8 @@ hc.account_form.do_coordinator_email,E-mail do DO coordinator
 hc.account_form.do_coordinator_email_help,Coordenador no operador designado (correios do país).
 hc.account_form.upu_account_manager_email,E-mail do UPU account manager
 hc.account_form.upu_account_manager_email_help,Responsável por esta conta na UPU.
+hc.account_form.allocation_plan_manager_email,E-mail do Allocation Plan Manager
+hc.account_form.allocation_plan_manager_email_help,Responsável pelo plano de alocação desta conta; usa o bot de análise de casos.
 hc.account_form.status,Estado
 hc.account_form.cancel,Cancelar
 hc.account_form.saving,A guardar...
@@ -5186,6 +5188,8 @@ receipt_errors.reason_help.wrong_city_cancelled,Só em casos antigos: o envio ch
 receipt_errors.role.sender,remetente
 receipt_errors.role.receiver,destinatário
 receipt_errors.fix,Corrigir
+receipt_errors.analyze,Analisar
+receipt_errors.case_dialog_title,Caso {tag}
 receipt_errors.close_case,Compensar / Descartar
 receipt_errors.fix_title,Corrigir caso: escolha o envio correto
 receipt_errors.fix_help,O painelista declarou a etiqueta {tag}. Escolha o envio enviado para a sua cidade que corresponda.
@@ -5198,3 +5202,37 @@ receipt_errors.close_confirm,Fechar caso
 help_center.doc.receipt_errors.title,Erros de receção
 help_center.doc.receipt_errors.desc,"O que o ONEMS faz quando uma receção declarada não coincide, como ler o ecrã Receções e como corrigir ou fechar cada caso."
 receipt_errors.help_link,Ajuda
+case_analysis.button,Analisar caso
+case_analysis.running,A analisar...
+case_analysis.failed,A análise falhou. Tente novamente.
+case_analysis.agent_timeout,O agente não responde. Tente mais tarde.
+case_analysis.summary,Resumo
+case_analysis.plan,Plano
+case_analysis.reality,O que aconteceu
+case_analysis.comparison,Comparação
+case_analysis.causes,Causas
+case_analysis.probable,provável
+case_analysis.noise,Ruído (não relevante)
+case_analysis.contacts,Quem contactar
+case_analysis.improvement,Melhoria proposta
+case_analysis.no_improvement,Não há melhoria a propor.
+case_analysis.drafts,Rascunhos de mensagem
+case_analysis.send_to,Enviar a {name}
+case_analysis.sent,Enviado
+case_analysis.send_error,Não foi possível enviar a mensagem.
+case_analysis.role.remitente,Remetente
+case_analysis.role.receptor,Recetor
+case_analysis.role.destinatario,Destinatário
+case_analysis.recipient,Destinatário da mensagem
+case_analysis.likelihood.alta,Alta
+case_analysis.likelihood.media,Média
+case_analysis.likelihood.baja,Baixa
+case_analysis.probable_with,causa provável (probabilidade: {level})
+case_analysis.problem,Problema
+case_analysis.cause,Causa
+case_analysis.solution,Solução
+case_analysis.fix_available,O agente de operações pode corrigir este caso automaticamente (R4); peça-o à equipa de suporte.
+case_analysis.copy_prompt,Copiar prompt para o Claude Code
+case_analysis.copied,Copiado
+case_analysis.show_detail,Ver detalhe
+case_analysis.hide_detail,Ocultar detalhe

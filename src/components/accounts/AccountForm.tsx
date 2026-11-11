@@ -17,6 +17,7 @@ const CONTACT_I18N: Record<AccountContactField, string> = {
   email_materials_supplier: 'hc.account_form.materials_supplier_email',
   email_do_coordinator: 'hc.account_form.do_coordinator_email',
   email_upu_account_manager: 'hc.account_form.upu_account_manager_email',
+  email_allocation_plan_manager: 'hc.account_form.allocation_plan_manager_email',
 }
 
 function initialContacts(account?: Account): Record<AccountContactField, string> {
