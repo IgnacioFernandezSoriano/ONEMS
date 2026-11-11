@@ -86,7 +86,7 @@ export function CaseAnalysisPanel({ kind, incidentId }: Props) {
     </div>
   ) : null
 
-  // solo cuentas habilitadas (hoy DEMO2); el servidor tambien lo exige
+  // solo cuentas activas (todas desde 2026-11-11); el servidor tambien lo exige
   if (enabled !== true) return null
 
   return (
@@ -98,7 +98,8 @@ export function CaseAnalysisPanel({ kind, incidentId }: Props) {
       </button>
       {state === 'failed' && (
         <p className="text-sm text-red-600 mt-2">
-          {error === 'agent_timeout' ? t('case_analysis.agent_timeout') : t('case_analysis.failed')}
+          {error === 'agent_timeout' ? t('case_analysis.agent_timeout')
+            : error === 'account_cap' ? t('case_analysis.account_cap') : t('case_analysis.failed')}
         </p>
       )}
       {state === 'done' && a && (

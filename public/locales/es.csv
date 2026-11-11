@@ -5236,3 +5236,4 @@ case_analysis.copy_prompt,Copiar prompt para Claude Code
 case_analysis.copied,Copiado
 case_analysis.show_detail,Ver detalle
 case_analysis.hide_detail,Ocultar detalle
+case_analysis.account_cap,Tu cuenta ha llegado al límite de análisis de este mes. Vuelve a estar disponible el día 1.

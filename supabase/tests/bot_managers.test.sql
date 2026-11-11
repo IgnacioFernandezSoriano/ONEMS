@@ -103,11 +103,18 @@ END $$;
 DO $$
 DECLARE t text := 't0ken-de-prueba';
 BEGIN
-  PERFORM pg_temp.fail_if(public.ops_case_account_enabled(t, 'Acc'), 'Acc cerrada');
-  UPDATE public.accounts SET name = 'DEMO2' WHERE id = 'a0000000-0000-0000-0000-000000000001';
-  PERFORM pg_temp.fail_if(NOT public.ops_case_account_enabled(t, 'DEMO2'), 'DEMO2 abierta');
+  -- desde 20261111120000 toda cuenta activa esta abierta; una inactiva o inexistente, no
+  PERFORM pg_temp.fail_if(NOT public.ops_case_account_enabled(t, 'Acc'), 'Acc abierta');
+  PERFORM pg_temp.fail_if(NOT public.ops_case_account_enabled(t, 'Acc2'), 'Acc2 abierta');
+  UPDATE public.accounts SET status = 'inactive' WHERE id = 'a0000000-0000-0000-0000-000000000002';
+  PERFORM pg_temp.fail_if(public.ops_case_account_enabled(t, 'Acc2'), 'Acc2 inactiva cerrada');
+  UPDATE public.accounts SET status = 'active' WHERE id = 'a0000000-0000-0000-0000-000000000002';
   PERFORM pg_temp.fail_if(public.ops_case_account_enabled(t, 'NoExiste'), 'inexistente');
-  UPDATE public.accounts SET name = 'Acc' WHERE id = 'a0000000-0000-0000-0000-000000000001';
+  -- lista de paises para el superadmin: activas, sin las excluidas, con token owner o manager
+  PERFORM pg_temp.fail_if(public.ops_manager_accounts(t) <> ARRAY['Acc','Acc2'], 'lista: ' || public.ops_manager_accounts(t)::text);
+  PERFORM pg_temp.fail_if(public.ops_manager_accounts(t, ARRAY['Acc2']) <> ARRAY['Acc'], 'lista sin excluidas');
+  PERFORM pg_temp.fail_if(pg_temp.err($q$SELECT public.ops_manager_accounts('malo')$q$) NOT LIKE 'ops_test: token no valido%', 'token lista');
+  PERFORM pg_temp.fail_if(has_function_privilege('authenticated', 'public.ops_manager_accounts(text,text[])', 'EXECUTE'), 'lista authenticated');
   PERFORM pg_temp.fail_if(pg_temp.err($q$SELECT public.ops_case_account_enabled('malo', 'Acc')$q$) NOT LIKE 'ops_test: token no valido%', 'token enabled');
 END $$;
 

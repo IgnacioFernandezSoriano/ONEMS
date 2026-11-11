@@ -5228,3 +5228,4 @@ case_analysis.copy_prompt,نسخ الأمر لـ Claude Code
 case_analysis.copied,تم النسخ
 case_analysis.show_detail,عرض التفاصيل
 case_analysis.hide_detail,إخفاء التفاصيل
+case_analysis.account_cap,وصل حسابك إلى حد التحليل لهذا الشهر. سيتوفر مجددًا في اليوم الأول من الشهر.
