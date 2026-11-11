@@ -185,6 +185,7 @@ Todas las conversaciones con el ONE bot se dibujan con este componente. La guía
 |---|---|---|---|
 | Incidencias y disponibilidad | Managers | `public/help/incidents-and-availability.{en,es,fr,ar}.html` | Versión antigua (`.chat`), pendiente de migrar a `.tg` |
 | Errores de recepción (pantalla Recepciones) | Managers (admin y superadmin) | `public/help/receipt-errors.{en,es,fr,ar,pt}.html`; enlazada desde la pantalla (botón «Ayuda») y desde el apartado `#receipt-errors` de Incidencias | `.tg` (canónico) |
+| Análisis de casos (botón «Analizar caso» y bot de análisis @PanelistEventsAnalysisBot) | Managers (admin y superadmin) | `public/help/case-analysis.{en,es,fr,ar,pt}.html` | `.tg` (canónico); textos del bot de `ops-agent/src/ops_agent/manager_i18n.py` y `case_i18n.py` |
 | Balanceo de carga de nodos | Managers (admin y superadmin) | `public/help/load-balancing.{en,es,fr,ar}.html` | No lleva |
 | Guía del panelista: el ONE bot en Telegram | Panelistas (pública, sin login) | `public/help/panelist-guide.{en,es,fr,ar}.html` | `.tg` (canónico) |
 

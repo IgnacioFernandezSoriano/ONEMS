@@ -37,6 +37,15 @@ export const HELP_DOCS: HelpDoc[] = [
     public: false,
   },
   {
+    id: 'case-analysis',
+    file: 'case-analysis',
+    titleKey: 'help_center.doc.case_analysis.title',
+    descKey: 'help_center.doc.case_analysis.desc',
+    audience: 'managers',
+    roles: ['admin', 'superadmin'],
+    public: false,
+  },
+  {
     id: 'load-balancing',
     file: 'load-balancing',
     titleKey: 'help_center.doc.load_balancing.title',
