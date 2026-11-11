@@ -426,10 +426,12 @@ BEGIN
   PERFORM pg_temp.fail_if(public.case_analysis_status(v_id)->>'status' IS NULL, '99 status receipt');
 END $$;
 
--- (7) puerta por cuenta: solo DEMO2 (cuenta 1 renombrada arriba); la cuenta 2 queda fuera
+-- (7) puerta por cuenta: desde 20261111120000, toda cuenta ACTIVA (la 1 = DEMO2); la cuenta 2 se pone inactiva
+-- para comprobar que una cuenta cerrada queda fuera; al final se reactiva y queda abierta
 DO $$
 DECLARE v_st text;
 BEGIN
+  UPDATE public.accounts SET status = 'inactive' WHERE id = 'a0000000-0000-0000-0000-000000000002';
   INSERT INTO auth.users (id, email) VALUES ('97000000-0000-0000-0000-000000000097','super@t.l');
   INSERT INTO public.profiles (id, email, full_name, role, account_id)
     VALUES ('97000000-0000-0000-0000-000000000097','super@t.l','Super','superadmin',NULL);
@@ -476,6 +478,15 @@ BEGIN
     OR has_function_privilege('anon', 'public.case_analysis_enabled_for_account(uuid)', 'EXECUTE')
     OR NOT has_function_privilege('authenticated', 'public.case_analysis_enabled(text,uuid)', 'EXECUTE')
     OR NOT has_function_privilege('authenticated', 'public.case_analysis_enabled_for_account(uuid)', 'EXECUTE'), 'grants puerta');
+  -- cuenta 2 activa (cualquier cuenta nueva): abierta para su admin y para el superadmin, nunca para la cuenta 1
+  UPDATE public.accounts SET status = 'active' WHERE id = 'a0000000-0000-0000-0000-000000000002';
+  PERFORM pg_temp.fail_if(public.case_analysis_enabled('reported','f3000000-0000-0000-0000-000000000009') IS DISTINCT FROM true, '98 propia activa');
+  PERFORM pg_temp.fail_if(public.case_analysis_enabled_for_account('a0000000-0000-0000-0000-000000000002') IS DISTINCT FROM true, 'account 98 propia activa');
+  PERFORM pg_temp.fail_if(public.case_analysis_enabled('reported','f3000000-0000-0000-0000-000000000004') IS DISTINCT FROM false, '98 sobre cuenta 1: sin fuga');
+  PERFORM pg_temp.act('97000000-0000-0000-0000-000000000097');
+  PERFORM pg_temp.fail_if(public.case_analysis_enabled_for_account('a0000000-0000-0000-0000-000000000002') IS DISTINCT FROM true, 'account 97 cuenta 2 activa');
+  PERFORM pg_temp.act('99000000-0000-0000-0000-000000000099');
+  PERFORM pg_temp.fail_if(public.case_analysis_enabled('reported','f3000000-0000-0000-0000-000000000009') IS DISTINCT FROM false, '99 sobre cuenta 2 activa: sin fuga');
 END $$;
 
 -- RLS: el 96 (cuenta 1) ve la peticion; el 98 no. Sin escritura directa.
