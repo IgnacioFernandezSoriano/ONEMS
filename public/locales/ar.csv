@@ -5229,3 +5229,5 @@ case_analysis.copied,تم النسخ
 case_analysis.show_detail,عرض التفاصيل
 case_analysis.hide_detail,إخفاء التفاصيل
 case_analysis.account_cap,وصل حسابك إلى حد التحليل لهذا الشهر. سيتوفر مجددًا في اليوم الأول من الشهر.
+help_center.doc.case_analysis.title,تحليل الحالات
+help_center.doc.case_analysis.desc,"تحليل حالة من ONEMS أو من بوت التحليل في Telegram: ما الذي حدث ولماذا؛ رسائل إلى المشاركين وإصلاحات بسيطة."

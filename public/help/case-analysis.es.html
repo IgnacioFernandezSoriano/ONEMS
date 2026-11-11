@@ -1,0 +1,678 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ayuda: Análisis de casos</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<style>
+  :root {
+    --white: #ffffff; --g50: #f9fafb; --g100: #f3f4f6; --g200: #e5e7eb; --g300: #d1d5db;
+    --g400: #9ca3af; --g500: #6b7280; --g600: #4b5563; --g700: #374151; --g900: #111827;
+    --b50: #eff6ff; --b100: #dbeafe; --b600: #2563eb; --b700: #1d4ed8;
+    --r100: #fee2e2; --r700: #b91c1c; --gr100: #dcfce7; --gr700: #15803d;
+    --y100: #fef9c3; --y800: #854d0e; --p100: #f3e8ff; --p700: #7e22ce;
+    --tg-head: #517da2; --tg-wall-a: #d4e4bc; --tg-wall-b: #a9cba6; --tg-dot: rgba(255,255,255,.35);
+    --tg-in: #ffffff; --tg-out: #effdde; --tg-ink: #000000; --tg-time: #8a9aa6; --tg-time-out: #5eaf5c;
+    --tg-key: rgba(52, 92, 60, .42); --tg-ring: #ffd23f; --tg-photo: #c7d3dc;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+      'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    -webkit-font-smoothing: antialiased; background: var(--g50); color: var(--g700); line-height: 1.6; font-size: 15px;
+  }
+  .layout { display: flex; min-height: 100vh; }
+
+  /* Sidebar, same look as the ONE menu */
+  .side {
+    width: 272px; flex-shrink: 0; background: var(--white); border-right: 1px solid var(--g200);
+    position: sticky; top: 0; height: 100vh; overflow-y: auto; display: flex; flex-direction: column;
+  }
+  .brand { padding: 24px 24px 16px; }
+  .brand h1 { font-size: 24px; line-height: 32px; font-weight: 700; color: var(--g900); }
+  .brand p { font-size: 14px; color: var(--g500); margin-top: 4px; }
+  .brand .doc { margin-top: 16px; font-size: 12px; font-weight: 600; color: var(--b700); background: var(--b50);
+    display: inline-block; padding: 2px 10px; border-radius: 999px; }
+  .nav { padding: 8px 12px 24px; flex: 1; }
+  .nav h3 { font-size: 12px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--g400);
+    padding: 16px 12px 6px; }
+  .nav a {
+    display: block; padding: 8px 12px; border-radius: 8px; font-size: 14px; font-weight: 500; color: var(--g600);
+    text-decoration: none; transition: background .15s, color .15s;
+  }
+  .nav a:hover { background: var(--g100); }
+  .nav a.active { background: var(--b50); color: var(--b700); }
+  .side-foot { padding: 16px 24px; border-top: 1px solid var(--g200); font-size: 12px; color: var(--g500); }
+
+  /* Content */
+  .main { flex: 1; min-width: 0; padding: 40px 32px 80px; }
+  .page { max-width: 880px; margin: 0 auto; }
+  .page > header { margin-bottom: 32px; }
+  .page > header h2 { font-size: 30px; line-height: 38px; font-weight: 700; color: var(--g900); }
+  .page > header p { margin-top: 8px; font-size: 17px; color: var(--g600); max-width: 640px; }
+  section { margin-top: 48px; }
+  section > h2 { font-size: 22px; font-weight: 700; color: var(--g900); padding-bottom: 8px; margin-bottom: 16px;
+    border-bottom: 1px solid var(--g200); }
+  h3 { font-size: 17px; font-weight: 600; color: var(--g900); margin: 28px 0 8px; }
+  p { margin: 8px 0; }
+  ul, ol { margin: 8px 0 8px 22px; }
+  li { margin: 4px 0; }
+  strong { color: var(--g900); font-weight: 600; }
+  code, kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px;
+    background: var(--g100); border: 1px solid var(--g200); border-radius: 6px; padding: 1px 6px; color: var(--g900); }
+  .card { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 20px 24px; margin: 16px 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 16px 0; }
+  .grid .card { margin: 0; }
+  .card h4 { font-size: 15px; font-weight: 600; color: var(--g900); margin-bottom: 4px; }
+  .card p { margin: 4px 0; font-size: 14px; color: var(--g600); }
+
+  .badge { display: inline-block; font-size: 12px; font-weight: 500; padding: 1px 10px; border-radius: 999px; white-space: nowrap; }
+  .b-red { background: var(--r100); color: var(--r700); }
+  .b-blue { background: var(--b100); color: var(--b700); }
+  .b-green { background: var(--gr100); color: var(--gr700); }
+  .b-yellow { background: var(--y100); color: var(--y800); }
+  .b-gray { background: var(--g100); color: var(--g600); }
+  .b-purple { background: var(--p100); color: var(--p700); }
+  .btn { display: inline-block; font-size: 13px; font-weight: 500; padding: 2px 10px; border-radius: 8px;
+    background: var(--white); border: 1px solid var(--g300); color: var(--g700); white-space: nowrap; }
+  .btn.primary { background: var(--b600); border-color: var(--b600); color: #fff; }
+
+  .callout { border-radius: 12px; padding: 14px 18px; margin: 16px 0; font-size: 14px; border: 1px solid; }
+  .callout.info { background: var(--b50); border-color: var(--b100); color: #1e3a8a; }
+  .callout.ok { background: #f0fdf4; border-color: var(--gr100); color: #14532d; }
+  .callout.warn { background: #fffbeb; border-color: var(--y100); color: var(--y800); }
+  .callout strong { color: inherit; }
+
+  .table-wrap { overflow-x: auto; margin: 16px 0; background: var(--white); border: 1px solid var(--g200); border-radius: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--g500); background: var(--g50); padding: 10px 14px; border-bottom: 1px solid var(--g200); }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--g100); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  td:first-child { font-weight: 500; color: var(--g900); }
+
+  /* Steps */
+  ol.steps { list-style: none; margin: 12px 0; counter-reset: s; }
+  ol.steps > li { counter-increment: s; position: relative; padding: 4px 0 12px 44px; margin: 0; }
+  ol.steps > li::before {
+    content: counter(s); position: absolute; left: 0; top: 2px; width: 28px; height: 28px; border-radius: 50%;
+    background: var(--b100); color: var(--b700); font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Telegram chat mock-ups */
+  .chat { background: #e9eef5; border: 1px solid var(--g200); border-radius: 16px; padding: 16px; margin: 16px 0; max-width: 460px; }
+  .chat .who { text-align: center; font-size: 12px; color: var(--g500); margin-bottom: 8px; font-weight: 500; }
+  .msg { max-width: 85%; padding: 8px 12px; border-radius: 14px; margin: 6px 0; font-size: 14px; line-height: 1.45; box-shadow: 0 1px 1px rgba(0,0,0,.06); }
+  .msg.bot { background: var(--white); border-top-left-radius: 4px; margin-right: auto; color: var(--g900); }
+  .msg.me { background: #dbeafe; border-top-right-radius: 4px; margin-left: auto; color: var(--g900); }
+  .kb { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 8px; max-width: 85%; }
+  .kb span { flex: 1 1 auto; text-align: center; background: rgba(37,99,235,.12); color: var(--b700); font-size: 13px; font-weight: 500;
+    padding: 6px 10px; border-radius: 10px; }
+  .kb.col span { flex-basis: 100%; }
+  .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; align-items: start; }
+  .two .chat { margin: 8px 0; }
+  .cap { font-size: 13px; color: var(--g500); margin-top: -6px; max-width: 460px; }
+
+  /* Flow */
+  .flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; margin: 16px 0; }
+  .flow .node { flex: 1 1 150px; background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 12px 14px; font-size: 13px; position: relative; }
+  .flow .node b { display: block; color: var(--g900); font-size: 14px; margin-bottom: 2px; }
+  .flow .node .tag { font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--b700); }
+  .flow .arrow { align-self: center; color: var(--g400); font-size: 18px; }
+
+  details { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; margin: 8px 0; }
+  summary { cursor: pointer; padding: 14px 18px; font-weight: 600; color: var(--g900); list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: '+'; color: var(--g400); font-size: 20px; line-height: 1; }
+  details[open] summary::after { content: '\2212'; }
+  details > div { padding: 0 18px 14px; color: var(--g600); font-size: 14px; }
+
+  /* ONEMS screen drawings */
+  .app { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; overflow: hidden; margin: 16px 0 6px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .app-bar { display: flex; gap: 6px; align-items: center; background: var(--g100); border-bottom: 1px solid var(--g200); padding: 8px 12px; font-size: 12px; color: var(--g500); }
+  .app-bar i { width: 9px; height: 9px; border-radius: 50%; background: var(--g300); display: inline-block; }
+  .app-bar span { margin-left: 8px; }
+  .app-body { padding: 20px; font-size: 13px; color: var(--g700); overflow-x: auto; }
+  .app-body.cols { display: grid; grid-template-columns: 210px 1fr; padding: 0; }
+  .app-body.cols > .sb { border-right: 1px solid var(--g200); padding: 14px 10px; background: #fff; }
+  .app-body.cols > .ct { padding: 20px; }
+  .sb .t { font-size: 20px; font-weight: 700; color: var(--g900); padding: 0 8px; }
+  .sb .s { font-size: 11px; color: var(--g500); padding: 0 8px 8px; }
+  .sb h5 { font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--g400); padding: 10px 8px 4px; }
+  .mi { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 8px; font-size: 13px; color: var(--g700); }
+  .mi.on { background: var(--b50); color: var(--b600); }
+  .mi .ic { width: 14px; height: 14px; border-radius: 4px; background: var(--g300); flex-shrink: 0; }
+  .mi.on .ic { background: var(--b600); }
+  .mi .badge { margin-left: auto; font-size: 11px; padding: 0 7px; }
+  .m-h { font-size: 18px; font-weight: 700; color: var(--g900); margin-bottom: 12px; }
+  .m-h3 { font-size: 15px; font-weight: 700; color: var(--g900); margin: 0 0 6px; }
+  .m-sel { display: inline-block; border: 1px solid var(--g300); border-radius: 4px; padding: 3px 24px 3px 8px; font-size: 12px; background: #fff; color: var(--g700); margin-right: 8px; position: relative; }
+  .m-sel::after { content: '\25BE'; position: absolute; right: 8px; color: var(--g400); }
+  .m-card { border: 1px solid var(--g200); border-radius: 8px; overflow: hidden; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.05); margin: 10px 0; }
+  .app table { font-size: 12px; }
+  .app th { padding: 8px 12px; font-size: 11px; }
+  .app td { padding: 8px 12px; }
+  .app td:first-child { font-weight: 400; color: inherit; }
+  .app .num { text-align: right; }
+  .m-link { color: var(--b600); }
+  .m-box { border: 1px solid var(--g200); border-radius: 6px; padding: 14px; margin: 10px 0; }
+  .m-note { background: var(--g50); border-radius: 6px; padding: 10px 12px; margin: 8px 0; font-size: 12px; }
+  .m-muted { color: var(--g500); font-size: 12px; }
+  .m-pbtn, .m-sbtn { display: inline-block; padding: 6px 14px; border-radius: 8px; font-size: 12px; margin: 2px 6px 2px 0; }
+  .m-pbtn { background: var(--b600); color: #fff; }
+  .m-sbtn { background: var(--g200); color: var(--g700); }
+  .m-ta { border: 1px solid var(--g300); border-radius: 4px; padding: 8px; font-size: 12px; color: var(--g400); background: #fff; margin: 6px 0 10px; }
+  .m-in { display: inline-block; border: 1px solid var(--g300); border-radius: 4px; padding: 3px 8px; font-size: 12px; background: #fff; min-width: 90px; }
+  .m-bub { max-width: 80%; padding: 6px 10px; border-radius: 10px; margin: 5px 0; font-size: 12px; }
+  .m-bub small { display: block; color: var(--g500); font-size: 10px; margin-top: 2px; }
+  .m-bub.l { background: var(--g100); margin-right: auto; }
+  .m-bub.r { background: var(--b100); margin-left: auto; }
+  .pin { display: inline-flex; width: 20px; height: 20px; border-radius: 50%; background: var(--b600); color: #fff; font-size: 11px; font-weight: 700; align-items: center; justify-content: center; margin-left: 6px; vertical-align: middle; flex-shrink: 0; }
+  .legend { counter-reset: l; list-style: none; margin: 10px 0 20px; }
+  .legend li { counter-increment: l; position: relative; padding: 2px 0 6px 34px; font-size: 14px; }
+  .legend li::before { content: counter(l); position: absolute; left: 0; top: 1px; width: 20px; height: 20px; border-radius: 50%; background: var(--b600); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .heat td { text-align: center; }
+  .heat .ok { background: #f0fdf4; } .heat .hi { background: var(--y100); } .heat .sat { background: var(--r100); }
+  .heat .off { background: repeating-linear-gradient(45deg, var(--g100), var(--g100) 4px, #fff 4px, #fff 8px); color: var(--g400); }
+  .heat .now { outline: 2px solid var(--b600); outline-offset: -2px; }
+
+  /* Right-to-left (Arabic) */
+  [dir=rtl] .side { border-right: 0; border-left: 1px solid var(--g200); }
+  [dir=rtl] .app-body.cols > .sb { border-right: 0; border-left: 1px solid var(--g200); }
+  [dir=rtl] th, [dir=rtl] td, [dir=rtl] .nav a { text-align: right; }
+  [dir=rtl] ul, [dir=rtl] ol { margin: 8px 22px 8px 0; }
+  [dir=rtl] ol.steps > li { padding: 4px 44px 12px 0; }
+  [dir=rtl] ol.steps > li::before { left: auto; right: 0; }
+  [dir=rtl] .legend li { padding: 2px 34px 6px 0; }
+  [dir=rtl] .legend li::before { left: auto; right: 0; }
+  [dir=rtl] .msg.bot { border-top-left-radius: 14px; border-top-right-radius: 4px; margin-right: 0; margin-left: auto; }
+  [dir=rtl] .msg.me { border-top-right-radius: 14px; border-top-left-radius: 4px; margin-left: 0; margin-right: auto; }
+  [dir=rtl] .m-bub.l { margin-right: 0; margin-left: auto; }
+  [dir=rtl] .m-bub.r { margin-left: 0; margin-right: auto; }
+  [dir=rtl] .pin { margin-left: 0; margin-right: 6px; }
+  [dir=rtl] .m-sel { padding: 3px 8px 3px 24px; margin-right: 0; margin-left: 8px; }
+  [dir=rtl] .m-sel::after { right: auto; left: 8px; }
+  [dir=rtl] .m-pbtn, [dir=rtl] .m-sbtn { margin: 2px 0 2px 6px; }
+  [dir=rtl] .mi .badge { margin-left: 0; margin-right: auto; }
+  [dir=rtl] .app-bar span { margin-left: 0; margin-right: 8px; }
+  [dir=rtl] .flow .arrow { transform: scaleX(-1); }
+  [dir=rtl] .app td:first-child { font-weight: 400; }
+  /* Telegram (canonical, from panelist-guide) and practical cases */
+  .case { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 20px 24px; margin: 16px 0; scroll-margin-top: 24px; }
+  .case > h3 { margin: 0; display: flex; gap: 10px; align-items: center; }
+  .case > .sit { color: var(--g500); font-size: 14px; margin: 2px 0 12px; }
+  .case .callout { margin: 8px 0; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+  .chips a { text-decoration: none; font-size: 13px; font-weight: 500; padding: 4px 12px; border-radius: 999px;
+    background: var(--white); border: 1px solid var(--g200); color: var(--g700); }
+  .chips a:hover { background: var(--b50); border-color: var(--b100); color: var(--b700); }
+  .tg { max-width: 380px; border-radius: 16px; overflow: hidden; border: 1px solid var(--g200);
+    box-shadow: 0 4px 16px rgba(17,24,39,.10); background: var(--tg-in); }
+  .tg-head { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: var(--tg-head); color: #ffffff; }
+  .tg-back { font-size: 20px; line-height: 1; opacity: .9; }
+  .tg-av { width: 36px; height: 36px; border-radius: 50%; flex: none; display: grid; place-items: center;
+    background: linear-gradient(160deg, #72c2f4, #3d8fd9); color: #ffffff; font-weight: 700; font-size: 12px; }
+  .tg-name { flex: 1; min-width: 0; line-height: 1.2; }
+  .tg-name b { display: block; font-size: 15px; color: #ffffff; font-weight: 600; }
+  .tg-name small { font-size: 12.5px; opacity: .8; }
+  .tg-body { display: flex; flex-direction: column; gap: 6px; padding: 12px 10px 14px;
+    background-color: var(--tg-wall-a);
+    background-image: radial-gradient(var(--tg-dot) 1.4px, transparent 1.6px), linear-gradient(160deg, var(--tg-wall-a), var(--tg-wall-b));
+    background-size: 18px 18px, 100% 100%; }
+  .tg-msg { max-width: 84%; padding: 6px 9px 7px 10px; border-radius: 12px; font-size: 14.5px; line-height: 1.38; color: var(--tg-ink);
+    box-shadow: 0 1px 1px rgba(0,0,0,.13); overflow-wrap: anywhere; }
+  .tg-msg.in { background: var(--tg-in); align-self: flex-start; border-bottom-left-radius: 4px; }
+  .tg-msg.out { background: var(--tg-out); align-self: flex-end; border-bottom-right-radius: 4px; }
+  .tg-msg .t { float: right; font-size: 11px; color: var(--tg-time); margin: 8px 0 -4px 10px; line-height: 1; }
+  .tg-msg.out .t { color: var(--tg-time-out); }
+  .tg-msg.out .t::after { content: " \2713\2713"; letter-spacing: -2px; }
+  .tg-msg.photo { padding: 3px; }
+  .tg-msg.photo .img { display: grid; place-items: center; width: 170px; height: 104px; border-radius: 10px; background: var(--tg-photo); font-size: 30px; }
+  .tg-msg.photo .t { position: relative; margin: -18px 8px 4px 0; }
+  .tg-kb { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; align-self: flex-start; width: 84%; margin-top: -2px; }
+  .tg-kb.one { grid-template-columns: 1fr; }
+  .tg-kb span { background: var(--tg-key); color: #ffffff; border-radius: 8px; padding: 7px 6px; text-align: center; font-size: 13.5px; font-weight: 600; }
+  .tg-kb span.tap { box-shadow: inset 0 0 0 2px var(--tg-ring); }
+  .tg-kb span.tap::after { content: " \1F446"; }
+  .tg-input { display: flex; align-items: center; gap: 12px; padding: 9px 14px; background: #ffffff; color: var(--tg-time); font-size: 14px; }
+  .tg-input .ph { flex: 1; }
+  [dir=rtl] .tg-msg.in { border-bottom-left-radius: 12px; border-bottom-right-radius: 4px; }
+  [dir=rtl] .tg-msg.out { border-bottom-right-radius: 12px; border-bottom-left-radius: 4px; }
+  [dir=rtl] .tg-msg .t { float: left; margin: 8px 10px -4px 0; }
+  [dir=rtl] .tg-back { transform: scaleX(-1); }
+  @media (max-width: 900px) {
+    .case { padding: 16px; }
+    .tg { max-width: none; }
+  }
+  .mobile-top { display: none; }
+  @media (max-width: 900px) {
+    .app-body.cols { grid-template-columns: 1fr; }
+    .app-body.cols > .sb { border-right: 0; border-bottom: 1px solid var(--g200); }
+    .layout { display: block; }
+    .side { display: none; }
+    .mobile-top { display: block; position: sticky; top: 0; z-index: 5; background: var(--white); border-bottom: 1px solid var(--g200); padding: 10px 16px; }
+    .mobile-top b { font-size: 18px; color: var(--g900); }
+    .mobile-top span { font-size: 13px; color: var(--g500); margin-left: 6px; }
+    .mobile-top select { width: 100%; margin-top: 8px; padding: 8px; border: 1px solid var(--g300); border-radius: 8px; font-size: 14px; background: #fff; color: var(--g700); }
+    .main { padding: 24px 16px 64px; }
+    .page > header h2 { font-size: 24px; line-height: 32px; }
+  }
+  @media print { .side, .mobile-top { display: none; } .main { padding: 0; } body { background: #fff; } section { break-inside: avoid-page; } }
+</style>
+</head>
+<body>
+<div class="mobile-top">
+  <b>ONE</b><span>for Regulators &middot; Ayuda</span>
+  <select id="jump" aria-label="Ir a la sección"></select>
+</div>
+<div class="layout">
+  <aside class="side">
+    <div class="brand">
+      <h1>ONE</h1>
+      <p>for Regulators</p>
+      <span class="doc">Ayuda &middot; Análisis de casos</span>
+    </div>
+    <nav class="nav" id="nav">
+      <h3>Primeros pasos</h3>
+      <a href="#intro">Qué es</a>
+      <a href="#where">Dónde se usa</a>
+      <h3>En ONEMS</h3>
+      <a href="#onems-analyse">Analizar un caso en ONEMS</a>
+      <h3>En Telegram</h3>
+      <a href="#bot-signup">Darse de alta en el bot</a>
+      <a href="#bot-case">Abrir un caso</a>
+      <a href="#bot-card">La tarjeta y sus botones</a>
+      <a href="#bot-r4">Arreglo R4</a>
+      <a href="#bot-spend">Gasto y límite mensual</a>
+      <h3>Administración</h3>
+      <a href="#access">Quién tiene acceso</a>
+      <h3>Referencia</h3>
+      <a href="#messages">Mensajes a panelistas</a>
+      <a href="#faq">Preguntas</a>
+    </nav>
+    <div class="side-foot">Actualizado el 11/11/2026</div>
+  </aside>
+
+  <main class="main">
+  <div class="page">
+    <header>
+      <h2>Análisis de casos</h2>
+      <p>Cómo pedir al agente de operaciones de ONEMS que analice un caso con un panelista, desde la pantalla de ONEMS o desde el bot de análisis de Telegram, y qué hacer con el resultado.</p>
+    </header>
+
+    <section id="intro">
+      <h2>Qué es</h2>
+      <p>Cuando un panelista tiene un problema (una recepción que no cuadra, una incidencia reportada, una baja), el agente de operaciones de ONEMS reúne los datos del plan y de lo ocurrido y le entrega una respuesta corta: <strong>qué pasa, por qué y qué hacer</strong>. Además le prepara un mensaje para cada panelista implicado.</p>
+      <div class="grid">
+        <div class="card"><h4>Siempre a petición</h4><p>Nunca se analiza nada solo. El análisis empieza cuando usted pulsa <strong>Analizar caso</strong> en ONEMS o <strong>🔎 Analizar</strong> en Telegram.</p></div>
+        <div class="card"><h4>Una tarjeta corta</h4><p>El resultado es una tarjeta con <strong>Problema</strong>, <strong>Causa</strong> y <strong>Solución</strong>. El resto está en <strong>Ver detalle</strong>.</p></div>
+        <div class="card"><h4>Nada se envía solo</h4><p>Los mensajes a panelistas son borradores. No sale ninguno hasta que usted pulsa <strong>Enviar</strong>.</p></div>
+        <div class="card"><h4>Un límite por cuenta</h4><p>Cada análisis cuesta unos céntimos. Cada cuenta tiene un límite de <strong>5 $ al mes</strong>, compartido entre ONEMS y el bot.</p></div>
+      </div>
+      <div class="callout info"><strong>Disponible en todas las cuentas activas</strong>, también en las nuevas. Lo que se controla por cuenta es <a href="#access">quién puede darse de alta en el bot</a> y el <a href="#bot-spend">límite mensual</a>.</div>
+    </section>
+
+    <section id="where">
+      <h2>Dónde se usa</h2>
+      <p>Hay dos formas de pedir el mismo análisis. Elija la que le resulte más cómoda: el resultado y el límite de gasto son los mismos.</p>
+      <div class="flow">
+        <div class="node"><span class="tag">Opción A &middot; ONEMS</span><b>Botón Analizar caso</b>En el detalle de un caso: <em>Recepciones</em>, <em>Incidencias reportadas</em> o <em>Disponibilidad de panelistas</em>.</div>
+        <div class="arrow">&rarr;</div>
+        <div class="node"><span class="tag">Opción B &middot; Telegram</span><b>Bot de análisis</b>Chat privado con <strong>@PanelistEventsAnalysisBot</strong> (nombre que verá: <em>Panelist Event Analysis</em>). No funciona en grupos.</div>
+        <div class="arrow">&rarr;</div>
+        <div class="node"><span class="tag">Resultado</span><b>Tarjeta y borradores</b>Problema, causa y solución, y un mensaje por panelista para revisar y enviar.</div>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>&nbsp;</th><th>En ONEMS</th><th>En Telegram</th></tr></thead>
+        <tbody>
+          <tr><td>Punto de partida</td><td>Un caso que ya existe en ONEMS.</td><td>Lo que usted reenvía o escribe: la conversación con el panelista, capturas o un texto.</td></tr>
+          <tr><td>Borradores</td><td>Se editan en un cuadro de texto antes de <strong>Enviar</strong>.</td><td>Se piden cambios con <strong>✏️ Cambiar</strong>.</td></tr>
+          <tr><td>Arreglo R4</td><td>No se aplica desde ONEMS.</td><td>Sí: <strong>✅ Aplicar</strong>, con vista previa y <strong>↩️ Deshacer</strong> durante 24 horas.</td></tr>
+          <tr><td>Nota del análisis</td><td>Se guarda como nota interna en el caso.</td><td>Se guarda como nota interna en el caso, si el análisis está unido a uno.</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="onems-analyse">
+      <h2>Analizar un caso en ONEMS</h2>
+      <p>El botón está en el detalle de los tres tipos de caso que aparecen en el grupo <strong>Incidencias</strong> del menú:</p>
+      <ul>
+        <li><strong>Recepciones</strong>: en la fila del caso, pulse <strong>Analizar</strong>; se abre una ventana <em>Caso 00012345</em> con el botón <strong>Analizar caso</strong>.</li>
+        <li><strong>Incidencias reportadas</strong> (<em>Incidencias reportadas por panelistas</em>): abra la incidencia; el botón <strong>Analizar caso</strong> está en su detalle.</li>
+        <li><strong>Disponibilidad de panelistas</strong>: abra la baja o indisponibilidad; el botón <strong>Analizar caso</strong> está en su detalle.</li>
+      </ul>
+      <div class="app">
+        <div class="app-bar"><i></i><i></i><i></i><span>ONEMS &rsaquo; Incidencias &rsaquo; Recepciones &rsaquo; Caso 00012345</span></div>
+        <div class="app-body">
+          <div class="m-box" style="max-width:640px;margin:0">
+            <div class="m-h3">Caso 00012345</div>
+            <span class="m-sbtn">Analizar caso</span><span class="pin">1</span>
+            <div class="m-note" style="margin-top:10px">
+              <div class="m-muted"><b>PROBLEMA</b></div>
+              <div>Grace Wanjiru (Nairobi) registró la recepción de la etiqueta 00012345, pero ese envío iba a Mombasa.</div>
+              <div class="m-muted" style="margin-top:6px"><b>CAUSA</b></div>
+              <div>El sobre llegó a Nairobi en lugar de Mombasa. La etiqueta está bien identificada en origen y en destino.</div>
+              <div class="m-muted" style="margin-top:6px"><b>SOLUCIÓN</b></div>
+              <div>Redirigir la línea del plan a Nairobi y registrar la recepción. Avisar a Grace.</div>
+              <div style="color:var(--gr700);margin:8px 0 6px">El agente de operaciones puede corregir este caso automáticamente (R4); pídeselo al equipo de soporte.</div>
+              <span class="m-sbtn">Ver detalle</span><span class="pin">2</span>
+            </div>
+            <div class="m-muted"><b>BORRADORES DE MENSAJE</b></div>
+            <div class="m-muted">Destinatario del mensaje: Grace Wanjiru (PAN-KE-07)</div>
+            <div class="m-ta" style="color:var(--g700)">Hola Grace, la etiqueta 00012345 era de un sobre para otra ciudad y por eso no se pudo registrar. Gracias por avisar, lo gestionamos nosotros.</div>
+            <span class="m-pbtn">Enviar a Grace Wanjiru</span><span class="pin">3</span>
+          </div>
+        </div>
+      </div>
+      <ol class="legend">
+        <li><span class="btn">Analizar caso</span> lanza el análisis. Mientras trabaja, el botón dice <em>Analizando...</em> y queda desactivado.</li>
+        <li><span class="btn">Ver detalle</span> despliega el análisis largo (y pasa a <span class="btn">Ocultar detalle</span>). Está plegado cada vez que llega un análisis nuevo.</li>
+        <li>Cada <strong>borrador de mensaje</strong> es un cuadro de texto que usted puede editar. <span class="btn primary">Enviar a Grace Wanjiru</span> lo manda; después aparece <strong>✓ Enviado</strong>.</li>
+      </ol>
+      <h3>Qué contiene Ver detalle</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Apartado</th><th>Qué cuenta</th></tr></thead>
+        <tbody>
+          <tr><td>Plan</td><td>Qué estaba previsto para el envío.</td></tr>
+          <tr><td>Lo que pasó</td><td>Qué ocurrió en la realidad.</td></tr>
+          <tr><td>Comparación</td><td>En qué se diferencian plan y realidad.</td></tr>
+          <tr><td>Causas</td><td>Cada causa con su probabilidad: <em>causa probable (probabilidad: Alta / Media / Baja)</em> y la prueba en que se apoya.</td></tr>
+          <tr><td>Ruido (no relevante)</td><td>Cosas que parecen importar y no importan para este caso.</td></tr>
+          <tr><td>A quién contactar</td><td>Cada persona con su papel: <em>Remitente</em>, <em>Receptor</em> o <em>Destinatario</em>.</td></tr>
+          <tr><td>Mejora propuesta</td><td>Qué cambiar para que no se repita; si no hay nada, dice <em>No hay mejora que proponer.</em></td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout ok"><strong>Y después:</strong> el análisis queda guardado como <strong>nota interna</strong> del caso. Los mensajes que usted envíe salen por el ONE bot al Telegram del panelista y quedan en la <em>Conversación con el panelista</em> del caso.</div>
+      <div class="callout warn"><strong>Si algo falla.</strong> <em>El análisis ha fallado. Inténtalo de nuevo.</em> o <em>El agente no responde. Inténtalo más tarde.</em> Vuelva a pulsar el botón. Si la cuenta agotó su límite, verá <em>Tu cuenta ha llegado al límite de análisis de este mes. Vuelve a estar disponible el día 1.</em> Si <em>No se pudo enviar el mensaje.</em>, pulse <strong>Enviar</strong> de nuevo.</div>
+      <div class="callout info"><strong>Copiar prompt.</strong> En algunos análisis aparece también un botón <em>Copiar prompt…</em>. Es <strong>para el equipo técnico de ONEMS</strong>: no tiene que usarlo para resolver el caso.</div>
+    </section>
+
+    <section id="bot-signup">
+      <h2>Darse de alta en el bot</h2>
+      <p>Solo hace falta hacerlo una vez. Su correo de ONEMS tiene que figurar en la ficha de su cuenta con uno de los <a href="#access">roles autorizados</a>.</p>
+      <div class="two">
+        <ol class="steps">
+          <li>En Telegram, busque <strong>@PanelistEventsAnalysisBot</strong>, abra el chat y pulse <strong>Iniciar</strong> (o escriba <code>/start</code>).</li>
+          <li>El bot le pide su correo de ONEMS. Escríbalo.</li>
+          <li>El bot responde <strong>siempre lo mismo</strong>, sea o no un correo válido. Si lo es, recibe por correo un <strong>código de 6 cifras</strong>.</li>
+          <li>Escriba el código en el chat.</li>
+          <li>El bot confirma la cuenta en la que está: <em>«Ya puedes analizar casos de …»</em>.</li>
+        </ol>
+        <div class="tg" aria-label="Ejemplo: alta en el bot de análisis">
+          <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">PEA</span><span class="tg-name"><b>Panelist Event Analysis</b><small>bot</small></span></div>
+          <div class="tg-body">
+            <div class="tg-msg out">/start<span class="t">09:02</span></div>
+            <div class="tg-msg in">¡Hola! Para empezar, escríbeme tu correo de ONEMS.<span class="t">09:02</span></div>
+            <div class="tg-msg out">responsable@correos.example<span class="t">09:03</span></div>
+            <div class="tg-msg in">Si el correo es de un responsable de una cuenta, recibirás un código en unos minutos. Escríbelo aquí.<span class="t">09:03</span></div>
+            <div class="tg-msg out">482913<span class="t">09:04</span></div>
+            <div class="tg-msg in">¡Bienvenido! Ya puedes analizar casos de DEMO2. Reenvíame la conversación con el panelista (y capturas) o escríbeme qué ha pasado, y pulsa Analizar. Escribe «ayuda» para ver las órdenes.<span class="t">09:04</span></div>
+          </div>
+          <div class="tg-input"><span>📎</span><span class="ph">Mensaje</span><span>🎤</span></div>
+        </div>
+      </div>
+      <p class="cap">El bot habla en el idioma de la cuenta (inglés, francés…). Aquí se muestran los textos en español. Los mensajes del bot pueden cambiar ligeramente.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Límite</th><th>Valor</th></tr></thead>
+        <tbody>
+          <tr><td>Validez del código</td><td><strong>15 minutos</strong>. El correo se titula <em>ONEMS: tu código para el bot de análisis</em>.</td></tr>
+          <tr><td>Intentos al escribir el código</td><td>Máximo <strong>5</strong>.</td></tr>
+          <tr><td>Códigos pedidos</td><td>Como máximo <strong>3 por hora</strong> (y 6 por día) para cada correo.</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout ok"><strong>Y después:</strong> ya puede abrir casos. Cada vez que usa el bot se vuelve a comprobar su acceso (con una memoria de 5 minutos). Si su correo se quita de la cuenta, el bot responde <em>Tu acceso ya no es válido. Para empezar de nuevo, escríbeme tu correo de ONEMS.</em> y tendrá que darse de alta otra vez.</div>
+      <div class="callout warn"><strong>Un correo, un país.</strong> Si su correo figura en más de una cuenta, el bot no le da de alta y le llega un correo (<em>ONEMS: alta en el bot de análisis</em>) que le pide corregirlo en ONEMS. Las cuentas de prueba no se admiten.</div>
+    </section>
+
+    <section id="bot-case">
+      <h2>Abrir un caso en Telegram</h2>
+      <p>Un caso es todo lo que usted manda antes de pulsar <strong>🔎 Analizar</strong>. Abrir un caso y añadirle material <strong>no cuesta nada</strong>: solo <strong>Analizar</strong> y <strong>Cambiar</strong> usan el análisis.</p>
+      <h3>Qué puede mandar</h3>
+      <ul>
+        <li><strong>Mensajes reenviados</strong> de la conversación con el panelista.</li>
+        <li><strong>Capturas o fotos</strong>, también las enviadas como archivo: hasta 5 MB cada una y 6 por caso. Una imagen mayor no se usa; las que sobran del sexto se ignoran.</li>
+        <li><strong>Texto escrito por usted</strong> contando qué ha pasado. Si el texto tiene al menos dos palabras o un número (por ejemplo, una etiqueta), abre un caso.</li>
+      </ul>
+      <div class="two">
+        <ol class="steps">
+          <li>Reenvíe los mensajes, mande las capturas o escriba lo ocurrido.</li>
+          <li>El bot contesta <em>Recibido (1)…</em> y deja los botones <strong>🔎 Analizar</strong> y <strong>✖️ Descartar</strong>. Puede seguir añadiendo material.</li>
+          <li>Pulse <strong>🔎 Analizar</strong>.</li>
+          <li>El bot responde <em>Analizando…</em> y, cuando termina, manda el resultado en un mensaje nuevo.</li>
+        </ol>
+        <div class="tg" aria-label="Ejemplo: abrir un caso reenviando mensajes y una captura">
+          <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">PEA</span><span class="tg-name"><b>Panelist Event Analysis</b><small>bot</small></span></div>
+          <div class="tg-body">
+            <div class="tg-msg out">Recibí el sobre 00012345 pero el bot no me deja registrarlo<span class="t">10:20</span></div>
+            <div class="tg-msg in">Recibido (1). Si no se ve, escribe el nombre del panelista. Pulsa Analizar.<span class="t">10:20</span></div>
+            <div class="tg-kb"><span>🔎 Analizar</span><span>✖️ Descartar</span></div>
+            <div class="tg-msg out photo"><div class="img">🖼️</div><span class="t">10:21</span></div>
+            <div class="tg-msg out">Es de Nairobi, Grace<span class="t">10:22</span></div>
+            <div class="tg-msg in">Anotado (3). Pulsa Analizar.<span class="t">10:22</span></div>
+            <div class="tg-kb"><span class="tap">🔎 Analizar</span><span>✖️ Descartar</span></div>
+            <div class="tg-msg in">Analizando… el resultado llegará en un mensaje nuevo.<span class="t">10:23</span></div>
+          </div>
+          <div class="tg-input"><span>📎</span><span class="ph">Mensaje</span><span>🎤</span></div>
+        </div>
+      </div>
+      <p class="cap">Ejemplo ilustrativo. El bot no contesta a cada mensaje: confirma el primero y luego cada diez elementos, o cuando usted escribe texto.</p>
+      <h3>Si el bot no sabe quién es el panelista</h3>
+      <p>Si no está seguro, le propone candidatos de <strong>su cuenta</strong>, con el código, el nombre, la cuenta y la ciudad. Elija uno, o pulse <strong>Ninguno: escribo el nombre</strong> y escriba el nombre o el código del panelista.</p>
+      <div class="two">
+        <div class="tg" aria-label="Ejemplo: el bot propone candidatos">
+          <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">PEA</span><span class="tg-name"><b>Panelist Event Analysis</b><small>bot</small></span></div>
+          <div class="tg-body">
+            <div class="tg-msg in">¿Quién es el panelista? Elige uno o escríbeme el nombre.<span class="t">10:23</span></div>
+            <div class="tg-kb one"><span class="tap">PAN-KE-07 · Grace Wanjiru · DEMO2 · Nairobi</span><span>PAN-KE-31 · Grace Achieng · DEMO2 · Kisumu</span><span>Ninguno: escribo el nombre</span></div>
+          </div>
+          <div class="tg-input"><span>📎</span><span class="ph">Mensaje</span><span>🎤</span></div>
+        </div>
+        <div>
+          <ul>
+            <li>Si lo que escribe no corresponde a nadie de su cuenta, el bot responde <em>No encuentro a ese panelista en tu cuenta. Escríbeme su nombre (o el código) y lo busco.</em></li>
+            <li>Solo se pueden analizar <strong>panelistas de su cuenta</strong>. Un caso de otro país se contesta igual: no lo encuentra.</li>
+            <li><strong>✖️ Descartar</strong> cierra el caso (<em>Caso descartado.</em>) sin gastar nada.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout ok"><strong>Y después:</strong> llega la <a href="#bot-card">tarjeta del análisis</a> con sus botones y, debajo, un borrador por panelista.</div>
+    </section>
+
+    <section id="bot-card">
+      <h2>La tarjeta y sus botones</h2>
+      <p>El resultado llega en varios mensajes: la tarjeta, un borrador por cada panelista a quien conviene escribir y, al final, una línea con lo que costó.</p>
+      <div class="two">
+        <div class="tg" aria-label="Ejemplo: tarjeta del análisis, borrador y línea de gasto">
+          <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">PEA</span><span class="tg-name"><b>Panelist Event Analysis</b><small>bot</small></span></div>
+          <div class="tg-body">
+            <div class="tg-msg in"><b>Análisis del caso · DEMO2</b><br><br><b>Problema</b><br>Grace Wanjiru (Nairobi) registró la etiqueta 00012345, pero ese envío iba a Mombasa.<br><br><b>Causa</b><br>El sobre llegó a Nairobi en lugar de Mombasa. La etiqueta está bien identificada en origen y destino.<br><br><b>Solución</b><br>Redirigir la línea del plan a Nairobi y registrar la recepción.<span class="t">10:24</span></div>
+            <div class="tg-kb"><span>📄 Ver detalle</span><span>✅ Aplicar</span></div>
+            <div class="tg-msg in"><b>Para Grace Wanjiru (PAN-KE-07) · ES</b><br><br>Hola Grace, la etiqueta 00012345 era de un sobre para otra ciudad y por eso no se pudo registrar. Gracias por avisar, lo gestionamos nosotros.<span class="t">10:24</span></div>
+            <div class="tg-kb"><span class="tap">📤 Enviar a Grace Wanjiru</span><span>✏️ Cambiar</span></div>
+            <div class="tg-msg in">💶 Este análisis: 0.04 $ · Tu cuenta este mes: 1.32 $ de 5 $<span class="t">10:24</span></div>
+            <div class="tg-msg in">Enviado a Grace Wanjiru. Queda en la conversación de la incidencia.<span class="t">10:26</span></div>
+          </div>
+          <div class="tg-input"><span>📎</span><span class="ph">Mensaje</span><span>🎤</span></div>
+        </div>
+        <div>
+          <ul>
+            <li>La <strong>tarjeta</strong> es corta a propósito. Para ver el plan, la realidad, la comparación, las causas con su probabilidad, el ruido, a quién contactar y la mejora propuesta, pulse <strong>📄 Ver detalle</strong>.</li>
+            <li>Cada <strong>borrador</strong> indica a quién va, con su código y el idioma del mensaje (en el ejemplo, <em>ES</em>).</li>
+            <li>La línea <em>💶 Este análisis…</em> se manda al final de cada análisis y de cada <strong>Cambiar</strong>.</li>
+          </ul>
+        </div>
+      </div>
+      <p class="cap">Ejemplo ilustrativo; los textos y los números del análisis dependen de cada caso.</p>
+      <h3>Todos los botones</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Botón</th><th>Qué hace</th><th>¿Gasta?</th></tr></thead>
+        <tbody>
+          <tr><td>🔎 Analizar</td><td>Lanza el análisis del caso abierto.</td><td>Sí</td></tr>
+          <tr><td>✖️ Descartar</td><td>Cierra el caso sin analizar.</td><td>No</td></tr>
+          <tr><td>Ninguno: escribo el nombre</td><td>El bot espera que usted escriba el nombre o el código del panelista; al escribirlo, analiza el caso.</td><td>Al escribir el nombre, sí</td></tr>
+          <tr><td>📄 Ver detalle</td><td>Muestra el análisis largo en un mensaje nuevo (<em>Detalle del caso</em>).</td><td>No</td></tr>
+          <tr><td>📤 Enviar a &lt;nombre&gt;</td><td>Envía el borrador a ese panelista por el ONE bot y lo deja en la conversación del caso. Si ya se envió: <em>Ya enviado.</em></td><td>No</td></tr>
+          <tr><td>✏️ Cambiar</td><td>El bot pregunta <em>¿Qué cambio?</em>; escriba la indicación (por ejemplo, «más breve») y le devuelve el borrador reescrito. La indicación pendiente caduca a los 30 minutos.</td><td>Sí, un poco</td></tr>
+          <tr><td>✅ Aplicar</td><td>Solo aparece si el <a href="#bot-r4">arreglo R4</a> es posible. Enseña una vista previa; todavía no cambia nada.</td><td>No</td></tr>
+          <tr><td>Confirmar / No aplicar</td><td>Confirman o rechazan la vista previa del arreglo R4.</td><td>No</td></tr>
+          <tr><td>↩️ Deshacer</td><td>Revierte un arreglo R4 aplicado, durante 24 horas.</td><td>No</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout warn"><strong>El prompt técnico no es para usted.</strong> Los superadmin de ONEMS ven además un botón <em>🧩 Prompt técnico</em>; es para el equipo técnico de ONEMS. Un manager de cuenta no lo ve en el bot.</div>
+    </section>
+
+    <section id="bot-r4">
+      <h2>Arreglo R4: redirigir y registrar la recepción</h2>
+      <p>Se basa en una regla: <strong>una etiqueta bien identificada en origen y en destino nunca se pierde</strong>. Si un panelista registró una etiqueta que no era para él (la de un envío a otra ciudad) y la línea del plan queda identificada sin duda, el bot ofrece el botón <strong>✅ Aplicar</strong> en la tarjeta.</p>
+      <p>Si R4 no es posible en ese caso, el botón <strong>no aparece</strong>. Solo se aplica desde Telegram; en ONEMS no.</p>
+      <div class="two">
+        <ol class="steps">
+          <li>Pulse <strong>✅ Aplicar</strong>. El bot enseña la <strong>vista previa</strong>: etiqueta, línea del plan, destino actual y nuevo, origen, fecha de recepción y plazo del SLA.</li>
+          <li>Revísela. Si no es lo que quiere, pulse <strong>No aplicar</strong> (<em>No se aplica.</em>).</li>
+          <li>Si es correcto, pulse <strong>Confirmar</strong>. La línea pasa al destinatario real, se registra como recibida y el caso de recepción queda <span class="badge b-blue">Arreglado</span>.</li>
+          <li>Durante 24 horas aparece <strong>↩️ Deshacer</strong>.</li>
+        </ol>
+        <div class="tg" aria-label="Ejemplo: aplicar el arreglo R4 con vista previa">
+          <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">PEA</span><span class="tg-name"><b>Panelist Event Analysis</b><small>bot</small></span></div>
+          <div class="tg-body">
+            <div class="tg-msg in">Arreglo R4 · DEMO2: redirigir y registrar la recepción<br>Etiqueta 00012345 (caso de recepción 118).<br>Línea del plan 4521: destino MSA-02 → NBO-03 (nodo 14). Origen: KSM-01.<br>Queda recibida el 10/11/2026 09:42 UTC.<br>SLA del nuevo par: 48 h.<br>El caso de recepción queda como arreglado. Se puede deshacer durante 24 h.<br>¿Lo aplico?<span class="t">10:30</span></div>
+            <div class="tg-kb"><span class="tap">Confirmar</span><span>No aplicar</span></div>
+            <div class="tg-msg in">Aplicado: la etiqueta 00012345 queda recibida por NBO-03. Se puede deshacer durante 24 h.<span class="t">10:31</span></div>
+            <div class="tg-kb one"><span>↩️ Deshacer</span></div>
+          </div>
+          <div class="tg-input"><span>📎</span><span class="ph">Mensaje</span><span>🎤</span></div>
+        </div>
+      </div>
+      <p class="cap">Los códigos de la vista previa (MSA-02, NBO-03, KSM-01) son ilustrativos.</p>
+      <div class="callout ok"><strong>Y después:</strong> el caso de recepción queda cerrado como arreglado. Si pulsa <strong>↩️ Deshacer</strong> en las 24 horas siguientes, el bot responde <em>Deshecho: la línea del plan y el caso de recepción vuelven a como estaban.</em> Pasadas las 24 horas, ya no se puede deshacer desde el bot.</div>
+      <div class="callout warn"><strong>Si algo cambió.</strong> Si el caso cambió desde la propuesta, el bot lo dice (<em>El arreglo ya no aplica: …</em>). Si no hay respuesta clara de ONEMS, el bot no afirma que no se aplicó: lo comprueba y se lo cuenta. Antes de repetir, mire el caso en ONEMS.</div>
+    </section>
+
+    <section id="bot-spend">
+      <h2>Gasto y límite mensual</h2>
+      <p>Cada análisis cuesta unos céntimos. El límite es de <strong>5 $ por cuenta y mes natural</strong> (según la hora de Madrid) y lo comparten todas las personas de la cuenta y el botón <strong>Analizar caso</strong> de ONEMS.</p>
+      <div class="two">
+        <div class="tg" aria-label="Ejemplo: orden gastos y avisos de límite">
+          <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">PEA</span><span class="tg-name"><b>Panelist Event Analysis</b><small>bot</small></span></div>
+          <div class="tg-body">
+            <div class="tg-msg out">gastos<span class="t">16:40</span></div>
+            <div class="tg-msg in">Este mes tu cuenta lleva 4.10 $ de 5 $. Tú: 1.32 $.<span class="t">16:40</span></div>
+            <div class="tg-msg in">💶 Este análisis: 0.05 $ · Tu cuenta este mes: 4.15 $ de 5 $<br>⚠️ Tu cuenta ha pasado del 80 % del límite de este mes (5 $).<span class="t">16:52</span></div>
+            <div class="tg-msg in">Tu cuenta ha llegado al límite de este mes. El análisis vuelve a estar disponible el día 1.<span class="t">17:15</span></div>
+          </div>
+          <div class="tg-input"><span>📎</span><span class="ph">Mensaje</span><span>🎤</span></div>
+        </div>
+        <div>
+          <ul>
+            <li>Tras cada análisis, el bot muestra <strong>lo que costó</strong> y lo que lleva la cuenta en el mes.</li>
+            <li>El aviso del <strong>80 %</strong> sale <strong>una sola vez</strong> al mes, junto a esa línea.</li>
+            <li>La orden <strong>gastos</strong> enseña lo que lleva la cuenta en el mes y la parte suya.</li>
+            <li>Al llegar al límite, el bot no analiza más (<em>Tu cuenta ha llegado al límite de este mes…</em>) y ONEMS muestra <em>Tu cuenta ha llegado al límite de análisis de este mes. Vuelve a estar disponible el día 1.</em></li>
+          </ul>
+        </div>
+      </div>
+      <p class="cap">Ejemplo ilustrativo; las cifras son inventadas.</p>
+      <h3>Órdenes del bot</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Escriba</th><th>Qué hace</th></tr></thead>
+        <tbody>
+          <tr><td>ayuda</td><td>Recuerda cómo usar el bot: <em>Reenvíame la conversación con el panelista (y capturas) o escríbeme qué ha pasado, y pulsa Analizar. Órdenes: «ayuda» · «gastos».</em></td></tr>
+          <tr><td>gastos</td><td>El gasto del mes de su cuenta y la parte suya. No gasta nada.</td></tr>
+          <tr><td>país</td><td>Solo para superadmin de ONEMS: elegir o cambiar el país con el que trabaja. Si lo escribe un manager de cuenta, el bot le muestra la ayuda.</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout info"><strong>¿Cuándo vuelve?</strong> El día 1 del mes siguiente, a las 00:00 de Madrid. Mientras tanto puede seguir abriendo casos y usar <strong>gastos</strong> y <strong>ayuda</strong>, pero <strong>Analizar</strong> y <strong>Cambiar</strong> estarán detenidos.</div>
+    </section>
+
+    <section id="access">
+      <h2>Quién tiene acceso</h2>
+      <p>El acceso al bot se gestiona <strong>en ONEMS</strong>; no hay nada que configurar en el bot. Pueden darse de alta las personas cuyo correo está en la ficha de su cuenta con uno de estos roles:</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Campo de la ficha de la cuenta</th><th>Para qué sirve en general</th></tr></thead>
+        <tbody>
+          <tr><td>Correo del Panelist Manager</td><td>Gestiona a los panelistas: recibe los avisos de incidencias, bajas y del bot.</td></tr>
+          <tr><td>Correo del Account Manager</td><td>Líder del proyecto en esta cuenta. Recibe los informes de operación.</td></tr>
+          <tr><td>Correo del Allocation Plan Manager</td><td>Responsable del plan de asignación de esta cuenta; usa el bot de análisis de casos.</td></tr>
+        </tbody>
+      </table></div>
+      <ol class="steps">
+        <li>Un <strong>superadmin</strong> de ONEMS abre el menú <strong>Administración › Cuentas</strong> (pantalla <strong>Gestión de cuentas</strong>) y edita la cuenta. Si usted no es superadmin, pídaselo a su responsable de ONEMS.</li>
+        <li>En <strong>Contactos de la cuenta</strong>, escriba o borre el correo de la persona en el campo del rol que corresponda.</li>
+        <li>Guarde. La persona ya puede <a href="#bot-signup">darse de alta en el bot</a>; si usted borra su correo, pierde el acceso en unos minutos como máximo.</li>
+      </ol>
+      <ul>
+        <li><strong>Una persona, un país.</strong> Un mismo correo no puede figurar en varias cuentas: no se da de alta y recibe un aviso por correo.</li>
+        <li><strong>Superadmin de ONEMS.</strong> Pueden trabajar con cualquier país: lo eligen con botones al darse de alta y lo cambian escribiendo <strong>país</strong>.</li>
+        <li>Las <strong>cuentas de prueba</strong> no se admiten.</li>
+        <li>La cuenta ve y analiza solo <strong>sus propios panelistas</strong>.</li>
+      </ul>
+      <div class="callout ok"><strong>Y después:</strong> no tiene que avisar al bot. Cada uso vuelve a comprobar el correo en ONEMS (con una memoria de 5 minutos).</div>
+    </section>
+
+    <section id="messages">
+      <h2>Mensajes a panelistas</h2>
+      <p>Los borradores siguen siempre las mismas reglas para ser breves y claros. Léalos y cámbielos si hace falta antes de enviar.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Quién</th><th>Qué recibe</th></tr></thead>
+        <tbody>
+          <tr><td>Panelista que <strong>registró</strong> la recepción (receptor)</td><td>Muy corto: la causa, las gracias y que <strong>«lo gestionamos nosotros»</strong>. Nunca se le pide guardar ni devolver el sobre.</td></tr>
+          <tr><td>Remitente</td><td>Por ahora <strong>no recibe mensaje automático</strong>. Lo gestiona el responsable de panelistas, con el informe del panelista.</td></tr>
+          <tr><td>Destinatario</td><td>No se le escribe, salvo que tenga que hacer algo.</td></tr>
+        </tbody>
+      </table></div>
+      <ul>
+        <li>Cada borrador va en el <strong>idioma del panelista</strong>.</li>
+        <li>En ONEMS puede <strong>editarlo</strong>; en Telegram, pedir un cambio con <strong>✏️ Cambiar</strong> (cuesta un poco).</li>
+        <li>Al enviarlo, el mensaje sale por el <strong>ONE bot</strong> al Telegram del panelista y queda en la <strong>conversación del caso</strong>.</li>
+        <li>Si el análisis no lleva a ningún caso, el bot lo manda como aviso: <em>Enviado a … como aviso.</em></li>
+      </ul>
+    </section>
+
+    <section id="faq">
+      <h2>Preguntas</h2>
+      <details><summary>¿Gasta algo si solo reenvío mensajes?</summary><div>No. Abrir un caso y añadirle mensajes, capturas o texto es gratis. Solo gastan <strong>🔎 Analizar</strong>, elegir o escribir el panelista cuando el bot lo pregunta, y <strong>✏️ Cambiar</strong>.</div></details>
+      <details><summary>¿Puedo analizar casos de otro país?</summary><div>No. Solo ve a los panelistas de su cuenta. Si escribe uno de otro país, el bot responde <em>No encuentro a ese panelista en tu cuenta.</em> Los superadmin de ONEMS sí pueden elegir país.</div></details>
+      <details><summary>¿Se envía algo a los panelistas sin que yo lo sepa?</summary><div>No. El análisis es siempre a petición y los mensajes solo salen cuando usted pulsa <strong>Enviar</strong>.</div></details>
+      <details><summary>¿Qué pasa si me equivoco al aplicar el arreglo R4?</summary><div>Pulse <strong>↩️ Deshacer</strong> en las 24 horas siguientes: la línea del plan y el caso de recepción vuelven a como estaban. Después de 24 horas, ya no se puede deshacer desde el bot.</div></details>
+      <details><summary>¿Por qué el bot me habla en inglés (o en francés)?</summary><div>Porque habla el idioma de su cuenta. Los borradores van, además, en el idioma de cada panelista.</div></details>
+      <details><summary>¿Y si no llega el código?</summary><div>Mire la carpeta de correo no deseado y espere unos minutos. Compruebe con quien administre su cuenta que su correo está en la ficha con uno de los roles autorizados. Si lo escribe y no figura, el bot responde igual y no llega nada. Recuerde el límite de 3 códigos por hora; un código vale 15 minutos y admite 5 intentos.</div></details>
+      <details><summary>Me dice «Tu acceso ya no es válido»</summary><div>Su correo se quitó de la cuenta o ya no tiene un rol autorizado. Si fue un error, pida que lo restauren en ONEMS y vuelva a darse de alta escribiendo su correo.</div></details>
+      <details><summary>Me dice «Tu cuenta aún no tiene el análisis activado»</summary><div>El análisis está disponible para todas las cuentas activas. Si lo ve, avise al equipo de ONEMS.</div></details>
+      <details><summary>¿Puedo usarlo en un grupo de Telegram?</summary><div>No. Solo funciona en el chat privado con el bot.</div></details>
+      <details><summary>¿Dónde queda el análisis?</summary><div>Como <strong>nota interna</strong> en el caso (en Telegram, con su correo en <em>analizado por</em>). Los mensajes enviados quedan en la conversación del caso.</div></details>
+    </section>
+  </div>
+  </main>
+</div>
+
+<script>
+(function () {
+  var links = Array.prototype.slice.call(document.querySelectorAll('#nav a'));
+  var sections = links.map(function (a) { return document.querySelector(a.getAttribute('href')); }).filter(Boolean);
+
+  // Mobile section picker
+  var jump = document.getElementById('jump');
+  links.forEach(function (a) {
+    var o = document.createElement('option');
+    o.value = a.getAttribute('href'); o.textContent = a.textContent; jump.appendChild(o);
+  });
+  jump.addEventListener('change', function () { location.hash = jump.value; });
+
+  // Highlight the current section in the side menu
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          links.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id); });
+          jump.value = '#' + e.target.id;
+        }
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    sections.forEach(function (s) { io.observe(s); });
+  }
+})();
+</script>
+</body>
+</html>
