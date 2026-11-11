@@ -122,7 +122,10 @@ BEGIN
   r := public.ops_case_find_panelists(t, 'Arbe', NULL, 'Acc2');
   PERFORM pg_temp.fail_if(jsonb_array_length(r) <> 1 OR r->0->>'code' <> 'P9', 'find cuenta 2: ' || r::text);
   r := public.ops_case_find_panelists(t, 'Arbe Tester', NULL, 'Acc2');
-  PERFORM pg_temp.fail_if(jsonb_array_length(r) <> 0, 'find cuenta 2 no ve la 1: ' || r::text);
+  -- (desde 20261111110000 sale «Arbe Otro», parecido de SU cuenta; nunca el de la cuenta 1)
+  PERFORM pg_temp.fail_if(EXISTS (SELECT 1 FROM jsonb_array_elements(r) e WHERE e->>'account' <> 'Acc2')
+                          OR EXISTS (SELECT 1 FROM jsonb_array_elements(r) e WHERE (e->>'by_name')::boolean),
+                          'find cuenta 2 no ve la 1: ' || r::text);
   r := public.ops_case_find_panelists(t, NULL, '00011844', 'Acc2');
   PERFORM pg_temp.fail_if(jsonb_array_length(r) <> 0, 'find etiqueta cuenta 2: ' || r::text);
   r := public.ops_case_find_panelists(p_token => t, p_name => 'Arbe', p_tag => NULL, p_account => 'Acc');
