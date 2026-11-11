@@ -24,6 +24,7 @@ export interface Account {
   email_materials_supplier: string | null
   email_do_coordinator: string | null
   email_upu_account_manager: string | null
+  email_allocation_plan_manager: string | null
   timezone: string
   created_at: string
   updated_at: string
@@ -36,6 +37,7 @@ export const ACCOUNT_CONTACT_FIELDS = [
   'email_materials_supplier',
   'email_do_coordinator',
   'email_upu_account_manager',
+  'email_allocation_plan_manager',
 ] as const
 
 export type AccountContactField = typeof ACCOUNT_CONTACT_FIELDS[number]

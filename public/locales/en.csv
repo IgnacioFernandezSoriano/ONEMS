@@ -3991,6 +3991,8 @@ hc.account_form.do_coordinator_email,DO coordinator email
 hc.account_form.do_coordinator_email_help,Coordinator at the designated operator (postal service of the country).
 hc.account_form.upu_account_manager_email,UPU account manager email
 hc.account_form.upu_account_manager_email_help,Person in charge of this account at the UPU.
+hc.account_form.allocation_plan_manager_email,Allocation Plan Manager email
+hc.account_form.allocation_plan_manager_email_help,Person in charge of the allocation plan of this account; uses the case analysis bot.
 hc.account_form.status,Status
 hc.account_form.cancel,Cancel
 hc.account_form.saving,Saving...
@@ -5186,6 +5188,8 @@ receipt_errors.reason_help.wrong_city_cancelled,Old cases only: the shipment rea
 receipt_errors.role.sender,sender
 receipt_errors.role.receiver,receiver
 receipt_errors.fix,Fix
+receipt_errors.analyze,Analyze
+receipt_errors.case_dialog_title,Case {tag}
 receipt_errors.close_case,Compensate / Discard
 receipt_errors.fix_title,Fix case: choose the correct shipment
 receipt_errors.fix_help,The panelist declared the tag {tag}. Choose the sent shipment addressed to their city that matches.
@@ -5198,3 +5202,37 @@ receipt_errors.close_confirm,Close case
 help_center.doc.receipt_errors.title,Receipt errors
 help_center.doc.receipt_errors.desc,"What ONEMS does when a reported receipt does not match, how to read the Receipts screen and how to fix or close each case."
 receipt_errors.help_link,Help
+case_analysis.button,Analyze case
+case_analysis.running,Analyzing...
+case_analysis.failed,The analysis failed. Try again.
+case_analysis.agent_timeout,The agent is not responding. Try again later.
+case_analysis.summary,Summary
+case_analysis.plan,Plan
+case_analysis.reality,What happened
+case_analysis.comparison,Comparison
+case_analysis.causes,Causes
+case_analysis.probable,probable
+case_analysis.noise,Noise (not relevant)
+case_analysis.contacts,Who to contact
+case_analysis.improvement,Proposed improvement
+case_analysis.no_improvement,No improvement to propose.
+case_analysis.drafts,Message drafts
+case_analysis.send_to,Send to {name}
+case_analysis.sent,Sent
+case_analysis.send_error,The message could not be sent.
+case_analysis.role.remitente,Sender
+case_analysis.role.receptor,Receiver
+case_analysis.role.destinatario,Addressee
+case_analysis.recipient,Recipient
+case_analysis.likelihood.alta,High
+case_analysis.likelihood.media,Medium
+case_analysis.likelihood.baja,Low
+case_analysis.probable_with,probable cause (likelihood: {level})
+case_analysis.problem,Problem
+case_analysis.cause,Cause
+case_analysis.solution,Solution
+case_analysis.fix_available,The operations agent can fix this case automatically (R4); ask the support team to do it.
+case_analysis.copy_prompt,Copy prompt for Claude Code
+case_analysis.copied,Copied
+case_analysis.show_detail,Show detail
+case_analysis.hide_detail,Hide detail
