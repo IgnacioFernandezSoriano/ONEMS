@@ -40,7 +40,7 @@ dando. Es evidencia razonable, no prueba absoluta (se puede falsear).
 ### 4.1 Permiso (una vez por panelista)
 Al primer momento en que tocaría pedir la ubicación (§4.2) y el panelista no tiene decisión registrada, el bot
 muestra un texto breve (5 idiomas) — qué se recoge (posición solo al declarar), para qué (comprobar que la
-declaración se hace en la oficina/apartado), quién lo ve (su cuenta), cuánto se guarda (§6) y que puede cambiar la
+declaración se hace en la oficina/apartado), quién lo ve (los responsables de su cuenta y el equipo técnico de UPU; texto v2), cuánto se guarda (§6) y que puede cambiar la
 decisión desde Ayuda — con botones inline **"✅ Acepto"** / **"❌ No acepto"**.
 - Se registra la decisión (§5.1). Acepta → sigue a §4.2. No acepta → no se le vuelve a pedir ubicación; todas sus
   declaraciones quedan `no_consent`.
@@ -120,7 +120,7 @@ para el gestor (pantalla de Incidencias de ONEMS, categoría nueva `gps_location
 
 ## 6. Privacidad y conservación
 - Solo se guarda la posición enviada al declarar; nunca seguimiento continuo (no se pide ubicación en directo).
-- Coordenadas exactas (`latitude`, `longitude`) se borran a los **12 meses** (tarea pg_cron mensual); se conservan
+- Coordenadas exactas (`latitude`, `longitude`) se borran a los **12 meses** (tarea pg_cron diaria); se conservan
   `distance_m`, `status` y el centro de referencia. Los registros de permiso se conservan siempre.
 - Solo visible para la cuenta del panelista (RLS) y el superadmin; nunca en Telegram de managers ni en el repo.
 
@@ -178,3 +178,12 @@ UPU" (móvil Android e iPhone si es posible; GPS apagado; permiso denegado; punt
 - Permiso revocable desde Ayuda; `no_answer` vuelve a preguntar en la siguiente visita.
 - Borrado de coordenadas a 12 meses.
 - Aviso "no hemos podido obtener tu posición" una sola vez por visita, después del resultado de la declaración.
+
+## 12. Cambios tras la puesta en marcha (17/11)
+- Permiso: el histórico sobrevive al borrado del panelista (`panelist_id` NULL + código y nombre guardados), migración
+  `20261117170000_gps_consent_keep`; borrado de coordenadas diario.
+- Texto del permiso v2 (quién lo ve: responsables de la cuenta y equipo técnico de UPU).
+- Registro propio de interacciones del bot en Supabase (`bot_interaction_log`, sin coordenadas, 60 días,
+  `20261117180000_bot_interaction_log`); n8n solo guarda ejecuciones con error. Sin ejecuciones n8n adicionales.
+- Tras compartir la ubicación (o "Mi GPS no funciona") el bot vuelve a mostrar el envío elegido, el modo recepción o
+  la lista.
