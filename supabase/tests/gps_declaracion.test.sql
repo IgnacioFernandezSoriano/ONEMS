@@ -498,8 +498,8 @@ BEGIN
   PERFORM pg_temp.fail_if(NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'declaration_location' AND cmd = 'SELECT'), 'policy location');
   PERFORM pg_temp.fail_if(has_table_privilege('anon', 'public.declaration_location', 'SELECT'), 'anon no lee posiciones');
   PERFORM pg_temp.fail_if(has_table_privilege('authenticated', 'public.panelist_location_consent', 'DELETE'), 'el permiso no se borra');
-  PERFORM pg_temp.fail_if(NOT EXISTS (SELECT 1 FROM cron.job WHERE schedule = '0 3 1 * *' AND command ILIKE '%gps_purge_coordinates%'),
-                          'cron mensual de purga');
+  PERFORM pg_temp.fail_if(NOT EXISTS (SELECT 1 FROM cron.job WHERE schedule = '0 3 * * *' AND command ILIKE '%gps_purge_coordinates%'),
+                          'cron diario de purga (20261117170000)');
 END $$;
 
 BEGIN;
