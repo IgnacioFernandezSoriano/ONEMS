@@ -5235,3 +5235,19 @@ case_analysis.hide_detail,إخفاء التفاصيل
 case_analysis.account_cap,وصل حسابك إلى حد التحليل لهذا الشهر. سيتوفر مجددًا في اليوم الأول من الشهر.
 help_center.doc.case_analysis.title,تحليل الحالات
 help_center.doc.case_analysis.desc,"تحليل حالة من ONEMS أو من بوت التحليل في Telegram: ما الذي حدث ولماذا؛ رسائل إلى المشاركين وإصلاحات بسيطة."
+reported_incidents.category.gps_location,الموقع الجغرافي (GPS)
+reported_incidents.gps.col.tag,البطاقة
+reported_incidents.gps.col.kind,النوع
+reported_incidents.gps.col.status,الحالة
+reported_incidents.gps.distance,المسافة عن الموقع المرجعي
+reported_incidents.gps.kind.sent,مرسل
+reported_incidents.gps.kind.received,مستلم
+reported_incidents.gps.consent_denied,لم يمنح المشارك إذنًا بتسجيل موقعه
+reported_incidents.gps.status.ok,صحيح
+reported_incidents.gps.status.far,بعيد جدًا عن الموقع المرجعي
+reported_incidents.gps.status.low_accuracy,دقة GPS منخفضة
+reported_incidents.gps.status.no_reference,لا يوجد موقع مرجعي
+reported_incidents.gps.status.no_location,لم يتم استلام الموقع
+reported_incidents.gps.status.gps_unavailable,GPS غير متاح
+reported_incidents.gps.status.no_consent,لم يتم منح الإذن
+reported_incidents.gps.status.no_answer,لا يوجد رد
