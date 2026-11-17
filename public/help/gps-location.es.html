@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ayuda: Ubicación GPS al declarar</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<style>
+  :root {
+    --white: #ffffff; --g50: #f9fafb; --g100: #f3f4f6; --g200: #e5e7eb; --g300: #d1d5db;
+    --g400: #9ca3af; --g500: #6b7280; --g600: #4b5563; --g700: #374151; --g900: #111827;
+    --b50: #eff6ff; --b100: #dbeafe; --b600: #2563eb; --b700: #1d4ed8;
+    --r100: #fee2e2; --r700: #b91c1c; --gr100: #dcfce7; --gr700: #15803d;
+    --y100: #fef9c3; --y800: #854d0e; --p100: #f3e8ff; --p700: #7e22ce;
+    --tg-head: #517da2; --tg-wall-a: #d4e4bc; --tg-wall-b: #a9cba6; --tg-dot: rgba(255,255,255,.35);
+    --tg-in: #ffffff; --tg-out: #effdde; --tg-ink: #000000; --tg-time: #8a9aa6; --tg-time-out: #5eaf5c;
+    --tg-key: rgba(52, 92, 60, .42); --tg-ring: #ffd23f; --tg-photo: #c7d3dc;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+      'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    -webkit-font-smoothing: antialiased; background: var(--g50); color: var(--g700); line-height: 1.6; font-size: 15px;
+  }
+  .layout { display: flex; min-height: 100vh; }
+
+  /* Sidebar, same look as the ONE menu */
+  .side {
+    width: 272px; flex-shrink: 0; background: var(--white); border-right: 1px solid var(--g200);
+    position: sticky; top: 0; height: 100vh; overflow-y: auto; display: flex; flex-direction: column;
+  }
+  .brand { padding: 24px 24px 16px; }
+  .brand h1 { font-size: 24px; line-height: 32px; font-weight: 700; color: var(--g900); }
+  .brand p { font-size: 14px; color: var(--g500); margin-top: 4px; }
+  .brand .doc { margin-top: 16px; font-size: 12px; font-weight: 600; color: var(--b700); background: var(--b50);
+    display: inline-block; padding: 2px 10px; border-radius: 999px; }
+  .nav { padding: 8px 12px 24px; flex: 1; }
+  .nav h3 { font-size: 12px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--g400);
+    padding: 16px 12px 6px; }
+  .nav a {
+    display: block; padding: 8px 12px; border-radius: 8px; font-size: 14px; font-weight: 500; color: var(--g600);
+    text-decoration: none; transition: background .15s, color .15s;
+  }
+  .nav a:hover { background: var(--g100); }
+  .nav a.active { background: var(--b50); color: var(--b700); }
+  .side-foot { padding: 16px 24px; border-top: 1px solid var(--g200); font-size: 12px; color: var(--g500); }
+
+  /* Content */
+  .main { flex: 1; min-width: 0; padding: 40px 32px 80px; }
+  .page { max-width: 880px; margin: 0 auto; }
+  .page > header { margin-bottom: 32px; }
+  .page > header h2 { font-size: 30px; line-height: 38px; font-weight: 700; color: var(--g900); }
+  .page > header p { margin-top: 8px; font-size: 17px; color: var(--g600); max-width: 640px; }
+  section { margin-top: 48px; }
+  section > h2 { font-size: 22px; font-weight: 700; color: var(--g900); padding-bottom: 8px; margin-bottom: 16px;
+    border-bottom: 1px solid var(--g200); }
+  h3 { font-size: 17px; font-weight: 600; color: var(--g900); margin: 28px 0 8px; }
+  p { margin: 8px 0; }
+  ul, ol { margin: 8px 0 8px 22px; }
+  li { margin: 4px 0; }
+  strong { color: var(--g900); font-weight: 600; }
+  code, kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px;
+    background: var(--g100); border: 1px solid var(--g200); border-radius: 6px; padding: 1px 6px; color: var(--g900); }
+  .card { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 20px 24px; margin: 16px 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 16px 0; }
+  .grid .card { margin: 0; }
+  .card h4 { font-size: 15px; font-weight: 600; color: var(--g900); margin-bottom: 4px; }
+  .card p { margin: 4px 0; font-size: 14px; color: var(--g600); }
+
+  .badge { display: inline-block; font-size: 12px; font-weight: 500; padding: 1px 10px; border-radius: 999px; white-space: nowrap; }
+  .b-red { background: var(--r100); color: var(--r700); }
+  .b-blue { background: var(--b100); color: var(--b700); }
+  .b-green { background: var(--gr100); color: var(--gr700); }
+  .b-yellow { background: var(--y100); color: var(--y800); }
+  .b-gray { background: var(--g100); color: var(--g600); }
+  .b-purple { background: var(--p100); color: var(--p700); }
+  .btn { display: inline-block; font-size: 13px; font-weight: 500; padding: 2px 10px; border-radius: 8px;
+    background: var(--white); border: 1px solid var(--g300); color: var(--g700); white-space: nowrap; }
+  .btn.primary { background: var(--b600); border-color: var(--b600); color: #fff; }
+
+  .callout { border-radius: 12px; padding: 14px 18px; margin: 16px 0; font-size: 14px; border: 1px solid; }
+  .callout.info { background: var(--b50); border-color: var(--b100); color: #1e3a8a; }
+  .callout.ok { background: #f0fdf4; border-color: var(--gr100); color: #14532d; }
+  .callout.warn { background: #fffbeb; border-color: var(--y100); color: var(--y800); }
+  .callout strong { color: inherit; }
+
+  .table-wrap { overflow-x: auto; margin: 16px 0; background: var(--white); border: 1px solid var(--g200); border-radius: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--g500); background: var(--g50); padding: 10px 14px; border-bottom: 1px solid var(--g200); }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--g100); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  td:first-child { font-weight: 500; color: var(--g900); }
+
+  /* Steps */
+  ol.steps { list-style: none; margin: 12px 0; counter-reset: s; }
+  ol.steps > li { counter-increment: s; position: relative; padding: 4px 0 12px 44px; margin: 0; }
+  ol.steps > li::before {
+    content: counter(s); position: absolute; left: 0; top: 2px; width: 28px; height: 28px; border-radius: 50%;
+    background: var(--b100); color: var(--b700); font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Telegram chat mock-ups */
+  .chat { background: #e9eef5; border: 1px solid var(--g200); border-radius: 16px; padding: 16px; margin: 16px 0; max-width: 460px; }
+  .chat .who { text-align: center; font-size: 12px; color: var(--g500); margin-bottom: 8px; font-weight: 500; }
+  .msg { max-width: 85%; padding: 8px 12px; border-radius: 14px; margin: 6px 0; font-size: 14px; line-height: 1.45; box-shadow: 0 1px 1px rgba(0,0,0,.06); }
+  .msg.bot { background: var(--white); border-top-left-radius: 4px; margin-right: auto; color: var(--g900); }
+  .msg.me { background: #dbeafe; border-top-right-radius: 4px; margin-left: auto; color: var(--g900); }
+  .kb { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 8px; max-width: 85%; }
+  .kb span { flex: 1 1 auto; text-align: center; background: rgba(37,99,235,.12); color: var(--b700); font-size: 13px; font-weight: 500;
+    padding: 6px 10px; border-radius: 10px; }
+  .kb.col span { flex-basis: 100%; }
+  .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; align-items: start; }
+  .two .chat { margin: 8px 0; }
+  .cap { font-size: 13px; color: var(--g500); margin-top: -6px; max-width: 460px; }
+
+  /* Flow */
+  .flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; margin: 16px 0; }
+  .flow .node { flex: 1 1 150px; background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 12px 14px; font-size: 13px; position: relative; }
+  .flow .node b { display: block; color: var(--g900); font-size: 14px; margin-bottom: 2px; }
+  .flow .node .tag { font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--b700); }
+  .flow .arrow { align-self: center; color: var(--g400); font-size: 18px; }
+
+  details { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; margin: 8px 0; }
+  summary { cursor: pointer; padding: 14px 18px; font-weight: 600; color: var(--g900); list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: '+'; color: var(--g400); font-size: 20px; line-height: 1; }
+  details[open] summary::after { content: '\2212'; }
+  details > div { padding: 0 18px 14px; color: var(--g600); font-size: 14px; }
+
+  /* ONEMS screen drawings */
+  .app { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; overflow: hidden; margin: 16px 0 6px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .app-bar { display: flex; gap: 6px; align-items: center; background: var(--g100); border-bottom: 1px solid var(--g200); padding: 8px 12px; font-size: 12px; color: var(--g500); }
+  .app-bar i { width: 9px; height: 9px; border-radius: 50%; background: var(--g300); display: inline-block; }
+  .app-bar span { margin-left: 8px; }
+  .app-body { padding: 20px; font-size: 13px; color: var(--g700); overflow-x: auto; }
+  .app-body.cols { display: grid; grid-template-columns: 210px 1fr; padding: 0; }
+  .app-body.cols > .sb { border-right: 1px solid var(--g200); padding: 14px 10px; background: #fff; }
+  .app-body.cols > .ct { padding: 20px; }
+  .sb .t { font-size: 20px; font-weight: 700; color: var(--g900); padding: 0 8px; }
+  .sb .s { font-size: 11px; color: var(--g500); padding: 0 8px 8px; }
+  .sb h5 { font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--g400); padding: 10px 8px 4px; }
+  .mi { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 8px; font-size: 13px; color: var(--g700); }
+  .mi.on { background: var(--b50); color: var(--b600); }
+  .mi .ic { width: 14px; height: 14px; border-radius: 4px; background: var(--g300); flex-shrink: 0; }
+  .mi.on .ic { background: var(--b600); }
+  .mi .badge { margin-left: auto; font-size: 11px; padding: 0 7px; }
+  .m-h { font-size: 18px; font-weight: 700; color: var(--g900); margin-bottom: 12px; }
+  .m-h3 { font-size: 15px; font-weight: 700; color: var(--g900); margin: 0 0 6px; }
+  .m-sel { display: inline-block; border: 1px solid var(--g300); border-radius: 4px; padding: 3px 24px 3px 8px; font-size: 12px; background: #fff; color: var(--g700); margin-right: 8px; position: relative; }
+  .m-sel::after { content: '\25BE'; position: absolute; right: 8px; color: var(--g400); }
+  .m-card { border: 1px solid var(--g200); border-radius: 8px; overflow: hidden; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.05); margin: 10px 0; }
+  .app table { font-size: 12px; }
+  .app th { padding: 8px 12px; font-size: 11px; }
+  .app td { padding: 8px 12px; }
+  .app td:first-child { font-weight: 400; color: inherit; }
+  .app .num { text-align: right; }
+  .m-link { color: var(--b600); }
+  .m-box { border: 1px solid var(--g200); border-radius: 6px; padding: 14px; margin: 10px 0; }
+  .m-note { background: var(--g50); border-radius: 6px; padding: 10px 12px; margin: 8px 0; font-size: 12px; }
+  .m-muted { color: var(--g500); font-size: 12px; }
+  .m-pbtn, .m-sbtn { display: inline-block; padding: 6px 14px; border-radius: 8px; font-size: 12px; margin: 2px 6px 2px 0; }
+  .m-pbtn { background: var(--b600); color: #fff; }
+  .m-sbtn { background: var(--g200); color: var(--g700); }
+  .m-ta { border: 1px solid var(--g300); border-radius: 4px; padding: 8px; font-size: 12px; color: var(--g400); background: #fff; margin: 6px 0 10px; }
+  .m-in { display: inline-block; border: 1px solid var(--g300); border-radius: 4px; padding: 3px 8px; font-size: 12px; background: #fff; min-width: 90px; }
+  .m-bub { max-width: 80%; padding: 6px 10px; border-radius: 10px; margin: 5px 0; font-size: 12px; }
+  .m-bub small { display: block; color: var(--g500); font-size: 10px; margin-top: 2px; }
+  .m-bub.l { background: var(--g100); margin-right: auto; }
+  .m-bub.r { background: var(--b100); margin-left: auto; }
+  .pin { display: inline-flex; width: 20px; height: 20px; border-radius: 50%; background: var(--b600); color: #fff; font-size: 11px; font-weight: 700; align-items: center; justify-content: center; margin-left: 6px; vertical-align: middle; flex-shrink: 0; }
+  .legend { counter-reset: l; list-style: none; margin: 10px 0 20px; }
+  .legend li { counter-increment: l; position: relative; padding: 2px 0 6px 34px; font-size: 14px; }
+  .legend li::before { content: counter(l); position: absolute; left: 0; top: 1px; width: 20px; height: 20px; border-radius: 50%; background: var(--b600); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .heat td { text-align: center; }
+  .heat .ok { background: #f0fdf4; } .heat .hi { background: var(--y100); } .heat .sat { background: var(--r100); }
+  .heat .off { background: repeating-linear-gradient(45deg, var(--g100), var(--g100) 4px, #fff 4px, #fff 8px); color: var(--g400); }
+  .heat .now { outline: 2px solid var(--b600); outline-offset: -2px; }
+
+  /* Right-to-left (Arabic) */
+  [dir=rtl] .side { border-right: 0; border-left: 1px solid var(--g200); }
+  [dir=rtl] .app-body.cols > .sb { border-right: 0; border-left: 1px solid var(--g200); }
+  [dir=rtl] th, [dir=rtl] td, [dir=rtl] .nav a { text-align: right; }
+  [dir=rtl] ul, [dir=rtl] ol { margin: 8px 22px 8px 0; }
+  [dir=rtl] ol.steps > li { padding: 4px 44px 12px 0; }
+  [dir=rtl] ol.steps > li::before { left: auto; right: 0; }
+  [dir=rtl] .legend li { padding: 2px 34px 6px 0; }
+  [dir=rtl] .legend li::before { left: auto; right: 0; }
+  [dir=rtl] .msg.bot { border-top-left-radius: 14px; border-top-right-radius: 4px; margin-right: 0; margin-left: auto; }
+  [dir=rtl] .msg.me { border-top-right-radius: 14px; border-top-left-radius: 4px; margin-left: 0; margin-right: auto; }
+  [dir=rtl] .m-bub.l { margin-right: 0; margin-left: auto; }
+  [dir=rtl] .m-bub.r { margin-left: 0; margin-right: auto; }
+  [dir=rtl] .pin { margin-left: 0; margin-right: 6px; }
+  [dir=rtl] .m-sel { padding: 3px 8px 3px 24px; margin-right: 0; margin-left: 8px; }
+  [dir=rtl] .m-sel::after { right: auto; left: 8px; }
+  [dir=rtl] .m-pbtn, [dir=rtl] .m-sbtn { margin: 2px 0 2px 6px; }
+  [dir=rtl] .mi .badge { margin-left: 0; margin-right: auto; }
+  [dir=rtl] .app-bar span { margin-left: 0; margin-right: 8px; }
+  [dir=rtl] .flow .arrow { transform: scaleX(-1); }
+  [dir=rtl] .app td:first-child { font-weight: 400; }
+  /* Telegram (canonical, from panelist-guide) and practical cases */
+  .case { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 20px 24px; margin: 16px 0; scroll-margin-top: 24px; }
+  .case > h3 { margin: 0; display: flex; gap: 10px; align-items: center; }
+  .case > .sit { color: var(--g500); font-size: 14px; margin: 2px 0 12px; }
+  .case .callout { margin: 8px 0; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+  .chips a { text-decoration: none; font-size: 13px; font-weight: 500; padding: 4px 12px; border-radius: 999px;
+    background: var(--white); border: 1px solid var(--g200); color: var(--g700); }
+  .chips a:hover { background: var(--b50); border-color: var(--b100); color: var(--b700); }
+  .tg { max-width: 380px; border-radius: 16px; overflow: hidden; border: 1px solid var(--g200);
+    box-shadow: 0 4px 16px rgba(17,24,39,.10); background: var(--tg-in); }
+  .tg-head { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: var(--tg-head); color: #ffffff; }
+  .tg-back { font-size: 20px; line-height: 1; opacity: .9; }
+  .tg-av { width: 36px; height: 36px; border-radius: 50%; flex: none; display: grid; place-items: center;
+    background: linear-gradient(160deg, #72c2f4, #3d8fd9); color: #ffffff; font-weight: 700; font-size: 12px; }
+  .tg-name { flex: 1; min-width: 0; line-height: 1.2; }
+  .tg-name b { display: block; font-size: 15px; color: #ffffff; font-weight: 600; }
+  .tg-name small { font-size: 12.5px; opacity: .8; }
+  .tg-body { display: flex; flex-direction: column; gap: 6px; padding: 12px 10px 14px;
+    background-color: var(--tg-wall-a);
+    background-image: radial-gradient(var(--tg-dot) 1.4px, transparent 1.6px), linear-gradient(160deg, var(--tg-wall-a), var(--tg-wall-b));
+    background-size: 18px 18px, 100% 100%; }
+  .tg-msg { max-width: 84%; padding: 6px 9px 7px 10px; border-radius: 12px; font-size: 14.5px; line-height: 1.38; color: var(--tg-ink);
+    box-shadow: 0 1px 1px rgba(0,0,0,.13); overflow-wrap: anywhere; }
+  .tg-msg.in { background: var(--tg-in); align-self: flex-start; border-bottom-left-radius: 4px; }
+  .tg-msg.out { background: var(--tg-out); align-self: flex-end; border-bottom-right-radius: 4px; }
+  .tg-msg .t { float: right; font-size: 11px; color: var(--tg-time); margin: 8px 0 -4px 10px; line-height: 1; }
+  .tg-msg.out .t { color: var(--tg-time-out); }
+  .tg-msg.out .t::after { content: " \2713\2713"; letter-spacing: -2px; }
+  .tg-msg.photo { padding: 3px; }
+  .tg-msg.photo .img { display: grid; place-items: center; width: 170px; height: 104px; border-radius: 10px; background: var(--tg-photo); font-size: 30px; }
+  .tg-msg.photo .t { position: relative; margin: -18px 8px 4px 0; }
+  .tg-kb { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; align-self: flex-start; width: 84%; margin-top: -2px; }
+  .tg-kb.one { grid-template-columns: 1fr; }
+  .tg-kb span { background: var(--tg-key); color: #ffffff; border-radius: 8px; padding: 7px 6px; text-align: center; font-size: 13.5px; font-weight: 600; }
+  .tg-kb span.tap { box-shadow: inset 0 0 0 2px var(--tg-ring); }
+  .tg-kb span.tap::after { content: " \1F446"; }
+  .tg-input { display: flex; align-items: center; gap: 12px; padding: 9px 14px; background: #ffffff; color: var(--tg-time); font-size: 14px; }
+  .tg-input .ph { flex: 1; }
+  [dir=rtl] .tg-msg.in { border-bottom-left-radius: 12px; border-bottom-right-radius: 4px; }
+  [dir=rtl] .tg-msg.out { border-bottom-right-radius: 12px; border-bottom-left-radius: 4px; }
+  [dir=rtl] .tg-msg .t { float: left; margin: 8px 10px -4px 0; }
+  [dir=rtl] .tg-back { transform: scaleX(-1); }
+  @media (max-width: 900px) {
+    .case { padding: 16px; }
+    .tg { max-width: none; }
+  }
+  .mobile-top { display: none; }
+  @media (max-width: 900px) {
+    .app-body.cols { grid-template-columns: 1fr; }
+    .app-body.cols > .sb { border-right: 0; border-bottom: 1px solid var(--g200); }
+    .layout { display: block; }
+    .side { display: none; }
+    .mobile-top { display: block; position: sticky; top: 0; z-index: 5; background: var(--white); border-bottom: 1px solid var(--g200); padding: 10px 16px; }
+    .mobile-top b { font-size: 18px; color: var(--g900); }
+    .mobile-top span { font-size: 13px; color: var(--g500); margin-left: 6px; }
+    .mobile-top select { width: 100%; margin-top: 8px; padding: 8px; border: 1px solid var(--g300); border-radius: 8px; font-size: 14px; background: #fff; color: var(--g700); }
+    .main { padding: 24px 16px 64px; }
+    .page > header h2 { font-size: 24px; line-height: 32px; }
+  }
+  @media print { .side, .mobile-top { display: none; } .main { padding: 0; } body { background: #fff; } section { break-inside: avoid-page; } }
+</style>
+</head>
+<body>
+<div class="mobile-top">
+  <b>ONE</b><span>for Regulators &middot; Ayuda</span>
+  <select id="jump" aria-label="Ir a la sección"></select>
+</div>
+<div class="layout">
+  <aside class="side">
+    <div class="brand">
+      <h1>ONE</h1>
+      <p>for Regulators</p>
+      <span class="doc">Ayuda &middot; Ubicación GPS</span>
+    </div>
+    <nav class="nav" id="nav">
+      <h3>Primeros pasos</h3>
+      <a href="#overview">Qué es y para qué</a>
+      <a href="#rule">La regla de oro</a>
+      <h3>Panelistas en Telegram</h3>
+      <a href="#consent">El permiso</a>
+      <a href="#share">Compartir la ubicación</a>
+      <a href="#no-position">Si no llega la posición</a>
+      <h3>Managers en ONEMS</h3>
+      <a href="#incident">Incidencia «Ubicación GPS»</a>
+      <a href="#statuses">Estados de la ubicación</a>
+      <a href="#report">Informe de operación</a>
+      <a href="#todo">Qué hacer</a>
+      <h3>Referencia</h3>
+      <a href="#privacy">Privacidad</a>
+      <a href="#faq">Preguntas</a>
+    </nav>
+    <div class="side-foot">Actualizado el 17 de noviembre de 2026</div>
+  </aside>
+
+  <main class="main">
+  <div class="page">
+    <header>
+      <h2>Ubicación GPS al declarar</h2>
+      <p>El ONE bot registra la posición del teléfono del panelista cuando declara un envío o una recepción. Así puede comprobar que lo hace en la oficina de correos o en su apartado, y ver quién no la está dando.</p>
+    </header>
+
+    <section id="overview">
+      <h2>Qué es y para qué</h2>
+      <div class="grid">
+        <div class="card"><h4>Solo al declarar</h4><p>El bot pide la ubicación al empezar a confirmar un envío o una recepción. Nunca hay seguimiento continuo.</p></div>
+        <div class="card"><h4>Se compara con la oficina</h4><p>ONEMS mide la distancia al <strong>centro postal más cercano de la ciudad del panelista</strong> que tenga coordenadas.</p></div>
+        <div class="card"><h4>Usted lo ve en dos sitios</h4><p>En <strong>Incidencias &rsaquo; Incidencias reportadas</strong> (categoría <em>Ubicación GPS</em>) y en el <strong>informe de operación</strong> por correo.</p></div>
+      </div>
+      <div class="callout warn"><strong>Es un indicio, no una prueba absoluta.</strong> Una ubicación se puede falsear con aplicaciones especiales, y la posición que da la red móvil (sin GPS) puede tener errores de cientos de metros. Úsela para detectar patrones y hablar con el panelista, no para sancionar por un caso aislado.</div>
+    </section>
+
+    <section id="rule">
+      <h2>La regla de oro</h2>
+      <div class="callout ok"><strong>Una declaración nunca se bloquea ni se pierde por el GPS.</strong> Si el panelista no da permiso, no comparte la ubicación o su GPS falla, el envío o la recepción se registran igual. Solo queda anotado el estado de la ubicación y, si hace falta, se abre una incidencia para usted.</div>
+    </section>
+
+    <section id="consent">
+      <h2>El permiso</h2>
+      <p>La primera vez que el bot va a pedir la ubicación, pregunta antes al panelista si la permite, con <strong>✅ Acepto</strong> / <strong>❌ No acepto</strong>. Se le pregunta <strong>una sola vez</strong>.</p>
+      <ul>
+        <li>Queda registrado <strong>el texto exacto</strong> que vio, en su idioma, cuándo y qué respondió. El texto vigente (versión 2) dice que la ubicación la ven <em>los responsables de su cuenta y el equipo técnico de UPU</em>.</li>
+        <li>Si no contesta y declara igualmente, se le vuelve a preguntar en la siguiente visita.</li>
+        <li>Puede cambiar su decisión cuando quiera en <strong>📖 Ayuda &rarr; 📍 Permiso de ubicación</strong>. Cada cambio queda registrado.</li>
+        <li>Si no acepta, el bot no vuelve a pedirle la ubicación y usted recibe <strong>una</strong> incidencia para hablar con él.</li>
+      </ul>
+    </section>
+
+    <section id="share">
+      <h2>Compartir la ubicación</h2>
+      <div class="two">
+        <div class="tg" aria-label="Ejemplo: permiso y ubicación compartida al confirmar un envío">
+          <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
+          <div class="tg-body">
+            <div class="tg-kb one"><span class="tap">Confirmar un envío</span></div>
+            <div class="tg-msg in">📍 Ubicación al declarar<br><br>Cuando confirmes un envío o una recepción te pediremos compartir tu ubicación, solo en ese momento (nunca de forma continua).<br>Para qué: comprobar que la declaración se hace en la oficina o en tu apartado.<br>Quién la ve: los responsables de tu cuenta y el equipo técnico de UPU.<br>Cuánto tiempo: las coordenadas se borran a los 12 meses.<br>Puedes cambiar tu decisión cuando quieras: /ayuda &rarr; 📍 Permiso de ubicación.<br><br>¿Aceptas?<span class="t">09:12</span></div>
+            <div class="tg-kb one"><span class="tap">✅ Acepto</span><span>❌ No acepto</span></div>
+            <div class="tg-msg in">📍 Comparte tu ubicación para registrar dónde declaras. Si la ubicación de tu móvil está apagada, actívala primero en Ajustes (Telegram no puede encenderla). Después pulsa el botón «📍 Compartir mi ubicación» que aparece abajo, en lugar del teclado (si no lo ves, toca el icono ⌨ junto a la caja de escribir). Puedes seguir declarando igualmente.<span class="t">09:12</span></div>
+            <div class="tg-msg in">✅ Ubicación registrada. ¡Gracias!<span class="t">09:13</span></div>
+          </div>
+          <div class="tg-kb one" style="width:100%;margin:0;padding:6px;background:var(--tg-wall-b)"><span class="tap">📍 Compartir mi ubicación</span><span>🚫 Mi GPS no funciona</span></div>
+        </div>
+        <div>
+          <ol class="steps">
+            <li>Al pulsar <span class="btn">Confirmar un envío</span> o <span class="btn">Confirmar una recepción</span>, el bot pide la ubicación <strong>una vez por visita</strong>: una posición válida sirve para todo lo que declare en los <strong>30 minutos</strong> siguientes.</li>
+            <li>Abajo, en lugar del teclado, aparece el botón <strong>📍 Compartir mi ubicación</strong>. Si no lo ve, toca el icono ⌨ junto a la caja de texto.</li>
+            <li>La ubicación del teléfono tiene que estar encendida en <strong>Ajustes</strong>: Telegram no puede encenderla.</li>
+            <li>El bot borra del chat el mensaje con la ubicación y vuelve a mostrar el envío elegido, el modo recepción o la lista, para seguir donde estaba.</li>
+          </ol>
+          <div class="callout info"><strong>Telegram en ordenador</strong> no puede enviar la ubicación. El panelista tiene que declarar desde el teléfono.</div>
+        </div>
+      </div>
+      <p class="cap">El teclado de abajo sustituye al teclado del teléfono. Los mensajes del bot pueden cambiar ligeramente.</p>
+    </section>
+
+    <section id="no-position">
+      <h2>Si no llega la posición</h2>
+      <p>El panelista puede declarar sin compartir la ubicación: nunca se le hace esperar. Si declara y la posición no ha llegado, el bot le avisa <strong>después</strong> del resultado de la declaración, una sola vez por visita, con los pasos para Android y iPhone.</p>
+      <div class="two">
+        <div class="tg" aria-label="Ejemplo: aviso de posición no obtenida">
+          <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
+          <div class="tg-body">
+            <div class="tg-msg out photo"><div class="img">🖼️</div><span class="t">10:41</span></div>
+            <div class="tg-msg in">⚠️ No hemos podido obtener tu posición.<br><br>Cómo activarla:<br>&bull; Android: Ajustes &rarr; Ubicación: activada. Telegram &rarr; Permisos &rarr; Ubicación: «Permitir solo mientras se usa» y «Ubicación precisa» activada.<br>&bull; iPhone: Ajustes &rarr; Privacidad &rarr; Localización: activada &rarr; Telegram: «Mientras se usa» y «Localización exacta» activada.<br><br>Telegram no puede encender la ubicación: actívala tú en Ajustes. Después pulsa «📍 Compartir mi ubicación», que aparece abajo en lugar del teclado (si no lo ves, toca el icono ⌨ junto a la caja de escribir), o «🚫 Mi GPS no funciona».<span class="t">10:41</span></div>
+            <div class="tg-msg out">🚫 Mi GPS no funciona<span class="t">10:42</span></div>
+            <div class="tg-msg in">Gracias, lo tenemos en cuenta. Puedes seguir declarando normalmente.<span class="t">10:42</span></div>
+          </div>
+          <div class="tg-input"><span>📎</span><span class="ph">Mensaje</span><span>🎤</span></div>
+        </div>
+        <div>
+          <ul>
+            <li>Si comparte una posición válida <strong>dentro de los 30 minutos</strong>, se aplica también a lo que ya declaró en esa visita.</li>
+            <li>Si la posición es <strong>poco precisa</strong> (más de 200 m de margen), el bot le pide que active la ubicación precisa y reintente. La segunda vez la acepta tal cual.</li>
+            <li>Si pulsa <strong>🚫 Mi GPS no funciona</strong>, el bot deja de pedírsela en esa visita y usted lo verá en la incidencia.</li>
+          </ul>
+          <div class="callout info">Al panelista nunca se le dice que está lejos de la oficina ni que se ha abierto una incidencia.</div>
+        </div>
+      </div>
+      <p class="cap">La guía del panelista explica lo mismo en el apartado <a href="panelist-guide.es.html#c-gps"><em>Ubicación (GPS)</em></a>. Los mensajes del bot pueden cambiar ligeramente.</p>
+    </section>
+
+    <section id="incident">
+      <h2>Incidencia «Ubicación GPS»</h2>
+      <p>Cada problema de GPS abre una incidencia de categoría <strong>Ubicación GPS</strong> en <strong>Incidencias &rsaquo; Incidencias reportadas</strong>.</p>
+      <ul>
+        <li><strong>Una incidencia por visita</strong>, no por paquete: agrupa todos los envíos y recepciones de esa visita, con la etiqueta, el tipo (<em>Enviado</em> / <em>Recibido</em>), el estado y la <em>Distancia a la referencia</em>.</li>
+        <li>Se abre cuando una declaración queda sin posición, con «GPS no funciona», con posición poco precisa o lejos de la oficina.</li>
+        <li>Pasa a <span class="badge b-green">Resuelta automáticamente</span> si en los 30 minutos llega una posición válida y todas sus declaraciones quedan correctas.</li>
+        <li>Si el panelista pulsa <strong>❌ No acepto</strong>, se abre <strong>una sola</strong> incidencia (no una por visita) con el texto <em>El panelista no dio permiso para registrar su ubicación</em>.</li>
+      </ul>
+      <div class="callout ok"><strong>Y después:</strong> hable con el panelista si hace falta y resuelva la incidencia con una nota, como cualquier otra. El envío o la recepción ya están registrados: no hay nada que arreglar en ellos.</div>
+    </section>
+
+    <section id="statuses">
+      <h2>Estados de la ubicación</h2>
+      <p>Cada envío y cada recepción guardan uno de estos estados. Las declaraciones anteriores a la puesta en marcha no tienen estado y no cuentan.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Estado</th><th>Qué significa</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge b-green">Correcta</span></td><td>Posición recibida, precisa y a menos de 500 m de la oficina de referencia.</td></tr>
+          <tr><td><span class="badge b-red">Demasiado lejos de la referencia</span></td><td>A más de <strong>500 m</strong> de la oficina de referencia, descontado el margen de precisión. También sale si declara en otra ciudad.</td></tr>
+          <tr><td><span class="badge b-yellow">Precisión GPS baja</span></td><td>El teléfono dio la posición con un margen de más de <strong>200 m</strong> (suele ser posición por red, sin GPS).</td></tr>
+          <tr><td><span class="badge b-gray">Sin ubicación de referencia</span></td><td>Ningún centro postal de la ciudad del panelista tiene coordenadas: no se puede medir la distancia.</td></tr>
+          <tr><td><span class="badge b-yellow">No se recibió ubicación</span></td><td>Declaró sin compartir la posición.</td></tr>
+          <tr><td><span class="badge b-yellow">GPS no disponible</span></td><td>Pulsó <strong>🚫 Mi GPS no funciona</strong>.</td></tr>
+          <tr><td><span class="badge b-red">Sin permiso concedido</span></td><td>No aceptó el permiso de ubicación.</td></tr>
+          <tr><td><span class="badge b-gray">Sin respuesta</span></td><td>Declaró sin contestar a la pregunta del permiso. Se le volverá a preguntar.</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="report">
+      <h2>Informe de operación</h2>
+      <p>El informe por correo de lunes, miércoles y viernes incluye el GPS en tres sitios.</p>
+      <h3>Columna «GPS» (anexo de panelistas)</h3>
+      <p>Muestra <code>correctas/total</code> en el periodo y, si hay, cuántas están <em>lejos</em> o si está <em>sin permiso</em>. Por ejemplo, <code>7/10 · 2 lejos</code>.</p>
+      <ul>
+        <li><span class="badge b-yellow">Naranja</span> si menos del 80 % de sus declaraciones tienen posición correcta, o si alguna está lejos.</li>
+        <li><span class="badge b-red">Rojo</span> si no dio permiso, o si tiene 3 o más declaraciones y ninguna correcta.</li>
+      </ul>
+      <h3>Sección «7. Quién no registra con GPS»</h3>
+      <p>Lista a los panelistas con su ciudad, el motivo principal y cuántas declaraciones afecta. Los motivos son: <em>no dio permiso</em>, <em>dice que su GPS no funciona</em>, <em>no envía la ubicación</em>, <em>no ha contestado a la petición de permiso</em> y <em>posición poco precisa</em>.</p>
+      <div class="callout info">Quien <strong>sí envía la posición pero lejos</strong> no aparece en esta sección: lo verá en la columna <em>GPS</em> y en la columna <em>Registro anómalo</em> («N con posición lejos de la oficina»).</div>
+      <h3>Revisión de configuración</h3>
+      <ul>
+        <li><strong>Referencia GPS: ciudades sin oficina con coordenadas</strong>: no se puede comprobar la posición de sus panelistas.</li>
+        <li><strong>Referencia GPS dudosa</strong>: en esa ciudad, la mediana de distancia de las posiciones a la oficina supera 500 m. Lo más probable es que la coordenada del centro postal esté mal, no el panelista. Corríjala en <strong>Centros Postales</strong>.</li>
+      </ul>
+    </section>
+
+    <section id="todo">
+      <h2>Qué hacer</h2>
+      <ol class="steps">
+        <li>Revise la sección <strong>Quién no registra con GPS</strong> del informe y llame a esos panelistas.</li>
+        <li>Pídales que declaren <strong>desde el teléfono</strong>, con la ubicación encendida en Ajustes, y que pulsen <strong>📍 Compartir mi ubicación</strong>. Recuérdeles que la guía del panelista tiene el apartado <em>Ubicación (GPS)</em>.</li>
+        <li>Si un panelista no dio permiso, explíquele para qué sirve y que puede cambiarlo en <strong>📖 Ayuda &rarr; 📍 Permiso de ubicación</strong>. La decisión es suya.</li>
+        <li>Si aparece <strong>Referencia GPS dudosa</strong> o <strong>ciudades sin oficina con coordenadas</strong>, revise las coordenadas de los centros postales de esa ciudad en <strong>Centros Postales</strong>.</li>
+        <li>Si un panelista sale <em>lejos</em> de forma repetida y la referencia es buena, hable con él antes de sacar conclusiones.</li>
+      </ol>
+      <div class="callout ok"><strong>Y después:</strong> el siguiente informe muestra el cambio. La revisión de referencia usa solo las posiciones del periodo del informe, así que una coordenada corregida deja de salir en el siguiente.</div>
+    </section>
+
+    <section id="privacy">
+      <h2>Privacidad</h2>
+      <ul>
+        <li>La posición se pide <strong>solo al declarar</strong>. Nunca hay seguimiento continuo ni ubicación en directo.</li>
+        <li>La ven los usuarios de la cuenta del panelista y el superadmin de UPU. Ninguna otra cuenta.</li>
+        <li>Las <strong>coordenadas exactas se borran a los 12 meses</strong> (tarea diaria). Se conservan la distancia y el estado.</li>
+        <li>El registro de cada permiso (texto mostrado, idioma, fecha y respuesta) <strong>se conserva siempre</strong>, aunque el panelista se dé de baja.</li>
+        <li>El registro de interacciones del bot no guarda coordenadas y se borra a los <strong>60 días</strong>.</li>
+      </ul>
+    </section>
+
+    <section id="faq">
+      <h2>Preguntas</h2>
+      <details><summary>¿Se puede obligar al panelista a dar la ubicación?</summary><div>No. La ubicación nunca bloquea una declaración y el permiso es decisión del panelista. Usted ve quién no la da y puede hablar con él.</div></details>
+      <details><summary>Un panelista sale «lejos» pero está en la oficina. ¿Por qué?</summary><div>Lo más habitual es que la coordenada del centro postal de referencia esté mal, o que su oficina no sea el centro postal registrado. Revise <strong>Centros Postales</strong>. También puede ser una posición por red poco exacta.</div></details>
+      <details><summary>¿Por qué hay una incidencia que se resolvió sola?</summary><div>El panelista declaró antes de compartir la ubicación y la compartió dentro de los 30 minutos. La posición se aplicó a toda la visita.</div></details>
+      <details><summary>¿Puede el panelista declarar desde el ordenador?</summary><div>Sí, pero Telegram en ordenador no envía la ubicación: esas declaraciones quedarán sin posición.</div></details>
+      <details><summary>¿Hay un mapa en ONEMS con las posiciones?</summary><div>No por ahora. La información está en la incidencia y en el informe de operación.</div></details>
+    </section>
+  </div>
+  </main>
+</div>
+
+<script>
+(function () {
+  var links = Array.prototype.slice.call(document.querySelectorAll('#nav a'));
+  var sections = links.map(function (a) { return document.querySelector(a.getAttribute('href')); }).filter(Boolean);
+
+  // Mobile section picker
+  var jump = document.getElementById('jump');
+  links.forEach(function (a) {
+    var o = document.createElement('option');
+    o.value = a.getAttribute('href'); o.textContent = a.textContent; jump.appendChild(o);
+  });
+  jump.addEventListener('change', function () { location.hash = jump.value; });
+
+  // Highlight the current section in the side menu
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          links.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id); });
+          jump.value = '#' + e.target.id;
+        }
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    sections.forEach(function (s) { io.observe(s); });
+  }
+})();
+</script>
+</body>
+</html>

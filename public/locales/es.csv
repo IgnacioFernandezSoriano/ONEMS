@@ -5243,6 +5243,8 @@ case_analysis.hide_detail,Ocultar detalle
 case_analysis.account_cap,Tu cuenta ha llegado al límite de análisis de este mes. Vuelve a estar disponible el día 1.
 help_center.doc.case_analysis.title,Análisis de casos
 help_center.doc.case_analysis.desc,"Analizar un caso desde ONEMS o desde el bot de análisis en Telegram: qué pasó y por qué; mensajes a los panelistas y arreglos sencillos."
+help_center.doc.gps_location.title,Ubicación GPS al declarar
+help_center.doc.gps_location.desc,"Qué registra el ONE bot al declarar, la regla de que nada se bloquea, la incidencia «Ubicación GPS», el informe de operación y qué hacer como manager."
 reported_incidents.category.gps_location,Ubicación GPS
 reported_incidents.gps.col.tag,Etiqueta
 reported_incidents.gps.col.kind,Tipo
