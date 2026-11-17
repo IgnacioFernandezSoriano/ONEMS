@@ -5243,3 +5243,19 @@ case_analysis.hide_detail,Ocultar detalle
 case_analysis.account_cap,Tu cuenta ha llegado al límite de análisis de este mes. Vuelve a estar disponible el día 1.
 help_center.doc.case_analysis.title,Análisis de casos
 help_center.doc.case_analysis.desc,"Analizar un caso desde ONEMS o desde el bot de análisis en Telegram: qué pasó y por qué; mensajes a los panelistas y arreglos sencillos."
+reported_incidents.category.gps_location,Ubicación GPS
+reported_incidents.gps.col.tag,Etiqueta
+reported_incidents.gps.col.kind,Tipo
+reported_incidents.gps.col.status,Estado
+reported_incidents.gps.distance,Distancia a la referencia
+reported_incidents.gps.kind.sent,Enviado
+reported_incidents.gps.kind.received,Recibido
+reported_incidents.gps.consent_denied,El panelista no dio permiso para registrar su ubicación
+reported_incidents.gps.status.ok,Correcta
+reported_incidents.gps.status.far,Demasiado lejos de la referencia
+reported_incidents.gps.status.low_accuracy,Precisión GPS baja
+reported_incidents.gps.status.no_reference,Sin ubicación de referencia
+reported_incidents.gps.status.no_location,No se recibió ubicación
+reported_incidents.gps.status.gps_unavailable,GPS no disponible
+reported_incidents.gps.status.no_consent,Sin permiso concedido
+reported_incidents.gps.status.no_answer,Sin respuesta

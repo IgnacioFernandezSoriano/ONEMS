@@ -549,7 +549,7 @@ export interface CityNodeLoadRow {
 
 export type ReportedIncidentCategory =
   | 'missing_materials' | 'unreadable_label_receipt' | 'parcel_damaged' | 'parcel_returned'
-  | 'how_to_send' | 'unavailability_request' | 'tag_photo_problem' | 'contact_data_change' | 'other'
+  | 'how_to_send' | 'unavailability_request' | 'tag_photo_problem' | 'contact_data_change' | 'gps_location' | 'other'
 
 export type ReportedIncidentStatus = 'open' | 'in_progress' | 'resolved' | 'dismissed' | 'auto_resolved'
 

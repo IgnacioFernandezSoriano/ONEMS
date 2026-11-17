@@ -18,6 +18,7 @@ const HELP_SECTION: Record<string, string> = {
   tag_photo_problem: 'c-foto',
   how_to_send: 'c-como',
   contact_data_change: 'c-datos',
+  gps_location: 'c-gps',
   other: 'c-otro',
 }
 
@@ -93,6 +94,8 @@ export function ReportedIncidentPanel({ incidentId, onBack }: { incidentId: stri
           <ReadonlyPayload payload={inc.payload} kind="contact" t={t} />
         ) : inc.category === 'unreadable_label_receipt' ? (
           <ReadonlyPayload payload={inc.payload} kind="receipt" t={t} />
+        ) : inc.category === 'gps_location' ? (
+          <GpsLocationPayload payload={inc.payload} t={t} />
         ) : (
           <p className="text-sm text-gray-500">{t('reported_incidents.action.support_only')}</p>
         )}
@@ -171,6 +174,50 @@ function ReadonlyPayload({ payload, kind, t }: { payload: Record<string, any> | 
           ))}
         </tbody>
       </table>
+    )
+  })()
+  return (
+    <div>
+      <p className="text-xs font-medium text-gray-500 mb-2">{t('reported_incidents.readonly.title')}</p>
+      {body}
+    </div>
+  )
+}
+
+function GpsLocationPayload({ payload, t }: { payload: Record<string, any> | null; t: TFn }) {
+  const isObj = payload != null && typeof payload === 'object'
+  const details: Array<Record<string, any>> = isObj && Array.isArray(payload.details) ? payload.details : []
+  const distance = isObj && typeof payload.distance_m === 'number' ? Math.round(payload.distance_m) : null
+  const body = (() => {
+    if (!isObj) return <p className="text-sm text-gray-500">{t('reported_incidents.readonly.no_data')}</p>
+    if (payload.reason === 'consent_denied') return <p className="text-sm">{t('reported_incidents.gps.consent_denied')}</p>
+    if (details.length === 0 && distance == null) return <p className="text-sm text-gray-500">{t('reported_incidents.readonly.no_data')}</p>
+    return (
+      <>
+        {details.length > 0 && (
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-start text-gray-500">
+                <th className="py-1 pe-2 font-medium">{t('reported_incidents.gps.col.tag')}</th>
+                <th className="py-1 pe-2 font-medium">{t('reported_incidents.gps.col.kind')}</th>
+                <th className="py-1 font-medium">{t('reported_incidents.gps.col.status')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {details.map((d, i) => (
+                <tr key={String(d.detail_id ?? i)} className="border-t">
+                  <td className="py-1 pe-2 font-mono">{d.tag ? String(d.tag) : '-'}</td>
+                  <td className="py-1 pe-2">{d.kind ? t(`reported_incidents.gps.kind.${d.kind}`) : '-'}</td>
+                  <td className="py-1">{d.status ? t(`reported_incidents.gps.status.${d.status}`) : '-'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+        {distance != null && (
+          <p className="text-sm mt-2">{t('reported_incidents.gps.distance')}: {distance} m</p>
+        )}
+      </>
     )
   })()
   return (
