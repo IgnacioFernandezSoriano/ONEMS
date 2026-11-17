@@ -134,7 +134,8 @@ BEGIN
   PERFORM pg_temp.fail_if(c.culprit_role IS DISTINCT FROM 'receiver'
                           OR c.culprit_panelist_id IS DISTINCT FROM 'e4000000-0000-0000-0000-000000000004', 'c1c culprit');
   PERFORM pg_temp.fail_if((SELECT count(*) FROM public.panelist_notification WHERE kind = 'receipt_reminder'
-                             AND panelist_id = 'e4000000-0000-0000-0000-000000000004') <> 1, 'c1c recordatorio al receptor');
+                             AND panelist_id = 'e4000000-0000-0000-0000-000000000004') <> 0,
+                          'c1c sin recordatorio (2026-11-17: el bot ya se lo dice al registrar)');
 END $$;
 ROLLBACK;
 
@@ -254,7 +255,7 @@ BEGIN
 END $$;
 ROLLBACK;
 
--- ===== Caso 5: tres pobox_absent_no_visit del mismo receptor resueltos en 3 dias -> 3 recordatorios; el 3.o escalated
+-- ===== Caso 5 (2026-11-17: con ok_typo_fixed; pobox_absent_no_visit ya no avisa): tres del mismo panelista resueltos en 3 dias -> 3 recordatorios; el 3.o escalated
 -- (los dos primeros se dan por encolados los dias anteriores ajustando su local_date)
 BEGIN;
 \ir fixtures/incident_city.sql
@@ -263,17 +264,17 @@ SELECT pg_temp.setup();
 DO $$
 DECLARE p4 uuid := 'e4000000-0000-0000-0000-000000000004'; c1 uuid; c2 uuid; c3 uuid; c4 uuid; r1 uuid; r2 uuid; r3 uuid;
 BEGIN
-  c1 := pg_temp.mk_case('pobox_absent_no_visit', 'compensated', p4, 'receiver', now() - interval '2 days', '00011111');
+  c1 := pg_temp.mk_case('ok_typo_fixed', 'fixed', p4, 'sender', now() - interval '2 days', '00011111');
   r1 := public.enqueue_receipt_reminder(c1);
   UPDATE public.panelist_notification
      SET payload = jsonb_set(payload, '{local_date}', to_jsonb(((now() AT TIME ZONE 'Africa/Nairobi')::date - 2)::text))
    WHERE id = r1;
-  c2 := pg_temp.mk_case('pobox_absent_no_visit', 'compensated', p4, 'receiver', now() - interval '1 day', '00022222');
+  c2 := pg_temp.mk_case('ok_typo_fixed', 'fixed', p4, 'sender', now() - interval '1 day', '00022222');
   r2 := public.enqueue_receipt_reminder(c2);
   UPDATE public.panelist_notification
      SET payload = jsonb_set(payload, '{local_date}', to_jsonb(((now() AT TIME ZONE 'Africa/Nairobi')::date - 1)::text))
    WHERE id = r2;
-  c3 := pg_temp.mk_case('pobox_absent_no_visit', 'compensated', p4, 'receiver', now(), '00033333');
+  c3 := pg_temp.mk_case('ok_typo_fixed', 'fixed', p4, 'sender', now(), '00033333');
   r3 := public.enqueue_receipt_reminder(c3);
   PERFORM pg_temp.fail_if(r1 IS NULL OR r2 IS NULL OR r3 IS NULL, 'c5 ids');
   PERFORM pg_temp.fail_if(pg_temp.n_rem() <> 3, 'c5 tres recordatorios ' || pg_temp.n_rem());
@@ -281,7 +282,7 @@ BEGIN
   PERFORM pg_temp.fail_if((SELECT (payload->>'escalated')::boolean FROM public.panelist_notification WHERE id = r2), 'c5 2.o no escalado');
   PERFORM pg_temp.fail_if(NOT (SELECT (payload->>'escalated')::boolean FROM public.panelist_notification WHERE id = r3), 'c5 3.o escalado');
   PERFORM pg_temp.fail_if(EXISTS (SELECT 1 FROM public.panelist_notification WHERE kind = 'receipt_reminder' AND panelist_id <> p4),
-                          'c5 todos al receptor');
+                          'c5 todos al mismo panelista');
   -- otro motivo del mismo panelista no cuenta para la escalada; un caso de hace 8 dias tampoco
   c4 := pg_temp.mk_case('wrong_city_cancelled', 'compensated', p4, 'sender', now(), '00044444');
   PERFORM pg_temp.fail_if((SELECT (payload->>'escalated')::boolean FROM public.panelist_notification
@@ -298,9 +299,9 @@ SELECT pg_temp.setup();
 DO $$
 DECLARE p4 uuid := 'e4000000-0000-0000-0000-000000000004'; c uuid;
 BEGIN
-  PERFORM pg_temp.mk_case('pobox_absent_no_visit', 'compensated', p4, 'receiver', now() - interval '9 days', '00011111');
-  PERFORM pg_temp.mk_case('pobox_absent_no_visit', 'compensated', p4, 'receiver', now() - interval '8 days', '00022222');
-  c := pg_temp.mk_case('pobox_absent_no_visit', 'compensated', p4, 'receiver', now(), '00033333');
+  PERFORM pg_temp.mk_case('ok_typo_fixed', 'fixed', p4, 'sender', now() - interval '9 days', '00011111');
+  PERFORM pg_temp.mk_case('ok_typo_fixed', 'fixed', p4, 'sender', now() - interval '8 days', '00022222');
+  c := pg_temp.mk_case('ok_typo_fixed', 'fixed', p4, 'sender', now(), '00033333');
   PERFORM pg_temp.fail_if((SELECT (payload->>'escalated')::boolean FROM public.panelist_notification
                             WHERE id = public.enqueue_receipt_reminder(c)), 'c5b fuera de los 7 dias');
 END $$;
@@ -491,7 +492,8 @@ BEGIN
 END $$;
 ROLLBACK;
 
--- ===== Caso 13: not_found abierto; despues aparece un envio 'sent' con esa etiqueta EXACTA pero hacia otra ciudad ->
+-- ===== Caso 13: not_found abierto; despues aparece un envio 'sent' con esa etiqueta EXACTA pero hacia otra ciudad,
+-- declarado despues de la lectura ->
 -- el reintento lo deja en needs_decision / other_city_tag, sin tocar el envio, sin compensar ni recordatorio
 BEGIN;
 \ir fixtures/incident_city.sql
@@ -501,7 +503,8 @@ DO $$
 DECLARE v_case uuid; v uuid; d0 record; d record; c record;
 BEGIN
   v_case := pg_temp.not_found_case('12345', now() - interval '1 day');
-  v := pg_temp.mk_det('N4', 'N1', 'sent', '00012345', now() - interval '3 days');
+  -- 2026-11-17: declarado DESPUES de la lectura (sin hora de origen valida) -> sigue sin aprovecharse (R1)
+  v := pg_temp.mk_det('N4', 'N1', 'sent', '00012345', now() - interval '12 hours');
   SELECT * INTO d0 FROM public.allocation_plan_details WHERE id = v;
   PERFORM pg_temp.fail_if(public.receipt_retry_pending() <> 0, 'c13 no cierra el caso');
   SELECT * INTO d FROM public.allocation_plan_details WHERE id = v;
@@ -518,5 +521,28 @@ BEGIN
   -- ya no es not_found/pending: un segundo pase no lo vuelve a tocar
   PERFORM pg_temp.fail_if(public.receipt_retry_pending() <> 0, 'c13 segundo pase');
   PERFORM pg_temp.fail_if((SELECT reason FROM public.receipt_case WHERE id = v_case) <> 'other_city_tag', 'c13 estable');
+END $$;
+ROLLBACK;
+
+-- ===== Caso 13b (2026-11-17, R1): igual pero declarado ANTES de la lectura -> el reintento lo aprovecha como mal
+-- encaminado: ok_misrouted / fixed, recibido y marcado, sin recordatorio
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+SELECT pg_temp.setup();
+DO $$
+DECLARE v_case uuid; v uuid; d record; c record;
+BEGIN
+  v_case := pg_temp.not_found_case('12345', now() - interval '1 day');
+  v := pg_temp.mk_det('N4', 'N1', 'sent', '00012345', now() - interval '3 days');
+  PERFORM pg_temp.fail_if(public.receipt_retry_pending() <> 1, 'c13b cierra el caso');
+  SELECT * INTO d FROM public.allocation_plan_details WHERE id = v;
+  PERFORM pg_temp.fail_if(d.status <> 'received' OR NOT d.misrouted
+                          OR d.original_destination_node_id IS DISTINCT FROM 'b1000000-0000-0000-0000-000000000001'
+                          OR d.received_at IS DISTINCT FROM (SELECT first_attempt_at FROM public.receipt_case WHERE id = v_case),
+                          'c13b recibido y marcado');
+  SELECT * INTO c FROM public.receipt_case WHERE id = v_case;
+  PERFORM pg_temp.fail_if(c.status <> 'fixed' OR c.reason <> 'ok_misrouted' OR c.detail_id IS DISTINCT FROM v, 'c13b caso');
+  PERFORM pg_temp.fail_if(pg_temp.n_rem() <> 0, 'c13b sin recordatorio');
 END $$;
 ROLLBACK;

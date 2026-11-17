@@ -5146,6 +5146,8 @@ receipt_errors.status.discarded,Écarté
 receipt_errors.reason.ok,Correcte
 receipt_errors.reason.ok_typo_fixed,Faute de frappe corrigée
 receipt_errors.reason.ok_same_city,"Même ville, autre nœud"
+receipt_errors.reason.ok_misrouted,Reçu dans une autre ville (mal acheminé)
+receipt_errors.reason.misrouted_dup,Colis mal acheminé réclamé par son destinataire
 receipt_errors.reason.pobox_absent_unavailable,Boîte postale non consultée (indisponibilité déclarée)
 receipt_errors.reason.pobox_absent_no_visit,Boîte postale non consultée
 receipt_errors.reason.not_sent_cancelled,"Pas encore envoyée, annulée"
@@ -5170,6 +5172,8 @@ receipt_errors.reason_help.no_panelist,L'utilisateur Telegram qui a saisi l'éti
 receipt_errors.reason_help.no_node,Le panéliste n'a aucun point attribué dans le système. Attribuez-lui en un dans sa fiche. Le cas ne peut qu'être fermé.
 receipt_errors.reason_help.ok_typo_fixed,L'expéditeur a déclaré l'envoi avec une étiquette presque identique (un chiffre différent ou inversé). Le système la corrige et enregistre la réception. Responsable : l'expéditeur.
 receipt_errors.reason_help.ok_same_city,L'étiquette appartenait à un envoi adressé à un autre point de la même ville. Elle est enregistrée au nom du panéliste qui l'a reçu. Responsable : l'expéditeur.
+receipt_errors.reason_help.ok_misrouted,"L'étiquette appartenait à un envoi adressé à une autre ville, déclaré avant son arrivée. Il est enregistré au nom du panéliste qui l'a reçu, compte pour la route vers la ville réelle et est marqué comme mal acheminé (la destination prévue est conservée). Aucun responsable."
+receipt_errors.reason_help.misrouted_dup,"Ce colis avait déjà été enregistré dans une autre ville comme mal acheminé, et son destinataire initial l'enregistre aussi. Vérifiez laquelle des deux lectures est la bonne."
 receipt_errors.reason_help.pobox_absent_no_visit,Lettre de boîte postale et le panéliste n'a déclaré aucun envoi le jour ouvrable précédent : signe qu'il n'a pas visité la boîte et on ne sait pas quand la lettre est arrivée. Elle ne sert pas à la mesure et est compensée par un autre envoi. Responsable : le destinataire.
 receipt_errors.reason_help.pobox_absent_unavailable,Lettre de boîte postale relevée après un jour ouvrable où le panéliste était déclaré indisponible : on ne sait pas quand elle est arrivée. Elle ne sert pas à la mesure et est compensée par un autre envoi. Ce n'est pas la faute du panéliste.
 receipt_errors.reason_help.not_sent_cancelled,Le colis est arrivé mais l'expéditeur ne l'a jamais déclaré comme envoyé : la date de départ manque. Il est annulé et compensé par un autre envoi. Responsable : l'expéditeur.
