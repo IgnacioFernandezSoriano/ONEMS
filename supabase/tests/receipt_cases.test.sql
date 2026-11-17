@@ -194,8 +194,86 @@ BEGIN
 END $$;
 ROLLBACK;
 
--- ===== Caso 6b: la etiqueta es la de un envio hacia otra ciudad -> other_city_tag: el envio NO se toca (puede ser un
--- tecleo que acierta un envio sano en transito), sin compensar; caso needs_decision sin envio ni culpable, sin recordatorio
+-- ===== Caso 6b (2026-11-17, R1): envio sano hacia otra ciudad, declarado antes de llegar -> ok_misrouted: se registra
+-- en quien lo recibe, cuenta, queda marcado misrouted y conserva el destino planificado; sin culpable ni recordatorio.
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+SELECT pg_temp.setup();
+UPDATE public.panelists SET telegram_id = '1001' WHERE id = 'e1000000-0000-0000-0000-000000000001';
+DO $$
+DECLARE v uuid; r jsonb; c record; d record;
+BEGIN
+  v := pg_temp.mk_det('N4', 'N1', 'sent', '00012345');
+  -- lo recibe P4 (City2) aunque iba a N1 (City1)
+  r := public.bot_receive_parcel('4004', '12345');
+  PERFORM pg_temp.fail_if(r->>'outcome' IS DISTINCT FROM 'ok_misrouted', 'c6b outcome ' || r::text);
+  PERFORM pg_temp.fail_if((r->>'registered')::boolean IS DISTINCT FROM true, 'c6b registered');
+  SELECT * INTO d FROM public.allocation_plan_details WHERE id = v;
+  PERFORM pg_temp.fail_if(d.status <> 'received' OR d.received_at IS NULL, 'c6b recibido ' || d.status);
+  PERFORM pg_temp.fail_if(NOT d.misrouted, 'c6b marcado misrouted');
+  PERFORM pg_temp.fail_if(d.destination_node_id IS DISTINCT FROM 'b4000000-0000-0000-0000-000000000004'
+                          OR d.original_destination_node_id IS DISTINCT FROM 'b1000000-0000-0000-0000-000000000001', 'c6b destinos');
+  PERFORM pg_temp.fail_if(d.destination_panelist_id IS DISTINCT FROM 'e4000000-0000-0000-0000-000000000004', 'c6b panelista');
+  SELECT * INTO c FROM public.receipt_case;
+  PERFORM pg_temp.fail_if(c.status IS DISTINCT FROM 'fixed' OR c.reason IS DISTINCT FROM 'ok_misrouted' OR c.detail_id IS DISTINCT FROM v,
+                          'c6b caso ' || c.status || '/' || c.reason);
+  PERFORM pg_temp.fail_if(c.culprit_role IS NOT NULL, 'c6b sin culpable');
+  PERFORM pg_temp.fail_if((SELECT count(*) FROM public.panelist_notification WHERE kind = 'receipt_reminder') <> 0, 'c6b sin recordatorio');
+  PERFORM pg_temp.fail_if((SELECT count(*) FROM public.v_misrouted_receipts WHERE id = v
+                             AND planned_destination_city_id = 'c1000000-0000-0000-0000-000000000001'
+                             AND actual_destination_city_id = 'c2000000-0000-0000-0000-000000000002') <> 1, 'c6b vista');
+  -- despues lo escribe su destinatario original (P1 en N1) -> misrouted_dup, decide el gestor
+  r := public.bot_receive_parcel('1001', '12345');
+  PERFORM pg_temp.fail_if(r->>'outcome' IS DISTINCT FROM 'misrouted_dup', 'c6b dup ' || r::text);
+  PERFORM pg_temp.fail_if((r->>'registered')::boolean IS DISTINCT FROM false, 'c6b dup registered');
+  PERFORM pg_temp.fail_if((SELECT status FROM public.receipt_case WHERE reason = 'misrouted_dup') IS DISTINCT FROM 'needs_decision', 'c6b dup caso');
+  -- un tercero de otra ciudad que no era su destino: ya recibido, solo informa
+  PERFORM pg_temp.fail_if((SELECT status FROM public.allocation_plan_details WHERE id = v) <> 'received', 'c6b sigue recibido');
+END $$;
+ROLLBACK;
+
+-- ===== Caso 6d (R2): la etiqueta es de un envio a otra ciudad, pero esta a una cifra de un paquete que el panelista
+-- espera -> es un tecleo: ok_typo_fixed sobre SU paquete y el envio de la otra ciudad NO se toca.
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+SELECT pg_temp.setup();
+DO $$
+DECLARE vown uuid; voth uuid; r jsonb; d record;
+BEGIN
+  vown := pg_temp.mk_det('N1', 'N4', 'sent', '00012346');
+  voth := pg_temp.mk_det('N4', 'N1', 'sent', '00012345');
+  r := public.bot_receive_parcel('4004', '12345');
+  PERFORM pg_temp.fail_if(r->>'outcome' IS DISTINCT FROM 'ok_typo_fixed', 'c6d outcome ' || r::text);
+  PERFORM pg_temp.fail_if((SELECT status FROM public.allocation_plan_details WHERE id = vown) <> 'received', 'c6d suyo recibido');
+  SELECT * INTO d FROM public.allocation_plan_details WHERE id = voth;
+  PERFORM pg_temp.fail_if(d.status <> 'sent' OR d.misrouted OR d.destination_node_id <> 'b1000000-0000-0000-0000-000000000001', 'c6d el otro intacto');
+END $$;
+ROLLBACK;
+
+-- ===== Caso 6e (R1): numero trivial o declarado despues de llegar -> other_city_tag, el envio no se toca.
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+SELECT pg_temp.setup();
+DO $$
+DECLARE v1 uuid; v2 uuid; r jsonb;
+BEGIN
+  v1 := pg_temp.mk_det('N4', 'N1', 'sent', '00000001');
+  r := public.bot_receive_parcel('4004', '1');
+  PERFORM pg_temp.fail_if(r->>'outcome' IS DISTINCT FROM 'other_city_tag', 'c6e trivial ' || r::text);
+  PERFORM pg_temp.fail_if((SELECT status FROM public.allocation_plan_details WHERE id = v1) <> 'sent'
+                          OR (SELECT misrouted FROM public.allocation_plan_details WHERE id = v1), 'c6e trivial intacto');
+  v2 := pg_temp.mk_det('N4', 'N1', 'sent', '00098765', now() + interval '1 hour');
+  r := public.bot_receive_parcel('4004', '98765');
+  PERFORM pg_temp.fail_if(r->>'outcome' IS DISTINCT FROM 'other_city_tag', 'c6e declarado despues ' || r::text);
+  PERFORM pg_temp.fail_if((SELECT status FROM public.allocation_plan_details WHERE id = v2) <> 'sent', 'c6e despues intacto');
+END $$;
+ROLLBACK;
+
+-- ===== Caso 6b-antiguo: la etiqueta es la de un envio hacia otra ciudad SIN hora de origen -> other_city_tag: el envio
+-- NO se toca, sin compensar; caso needs_decision sin envio ni culpable, sin recordatorio
 BEGIN;
 \ir fixtures/incident_city.sql
 \ir fixtures/no_incident_triggers.sql
@@ -204,6 +282,7 @@ DO $$
 DECLARE v uuid; r jsonb; c record; d record; d0 record;
 BEGIN
   v := pg_temp.mk_det('N4', 'N1', 'sent', '00012345');
+  UPDATE public.allocation_plan_details SET sent_at = NULL WHERE id = v;
   SELECT * INTO d0 FROM public.allocation_plan_details WHERE id = v;
   r := public.bot_receive_parcel('4004', '12345');
   PERFORM pg_temp.fail_if(r->>'outcome' IS DISTINCT FROM 'other_city_tag', 'c6b outcome ' || r::text);
@@ -366,6 +445,12 @@ BEGIN
   r := public.bot_receive_parcel('4004', '12345');
   PERFORM pg_temp.fail_if(r->>'outcome' IS DISTINCT FROM 'no_node', 'c8c outcome ' || r::text);
   PERFORM pg_temp.fail_if((SELECT status FROM public.receipt_case) IS DISTINCT FROM 'needs_decision', 'c8c caso');
+  -- R3 (2026-11-17): se abre una incidencia 'other' para el gestor, y solo una aunque lo intente otra vez.
+  PERFORM pg_temp.fail_if((SELECT count(*) FROM public.panelist_incident WHERE panelist_id = 'e4000000-0000-0000-0000-000000000004'
+                             AND category = 'other' AND status = 'open' AND payload->>'source' = 'no_node'
+                             AND payload->>'tag' = '00012345') <> 1, 'c8c incidencia');
+  r := public.bot_receive_parcel('4004', '54321');
+  PERFORM pg_temp.fail_if((SELECT count(*) FROM public.panelist_incident WHERE payload->>'source' = 'no_node') <> 1, 'c8c una sola incidencia');
 END $$;
 ROLLBACK;
 

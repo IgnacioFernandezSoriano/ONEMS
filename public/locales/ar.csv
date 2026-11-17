@@ -5146,6 +5146,8 @@ receipt_errors.status.discarded,تم تجاهله
 receipt_errors.reason.ok,صحيحة
 receipt_errors.reason.ok_typo_fixed,تم تصحيح خطأ الكتابة
 receipt_errors.reason.ok_same_city,المدينة نفسها، عقدة أخرى
+receipt_errors.reason.ok_misrouted,استُلم في مدينة أخرى (توجيه خاطئ)
+receipt_errors.reason.misrouted_dup,طرد موجه خطأً يطالب به مستلمه
 receipt_errors.reason.pobox_absent_unavailable,صندوق البريد لم يُزَر (عدم توفر مُعلَن)
 receipt_errors.reason.pobox_absent_no_visit,صندوق البريد لم يُزَر
 receipt_errors.reason.not_sent_cancelled,لم تُرسل بعد، ملغاة
@@ -5170,6 +5172,8 @@ receipt_errors.reason_help.no_panelist,مستخدم تيليغرام الذي ك
 receipt_errors.reason_help.no_node,لا توجد نقطة مخصصة للمشارك في النظام. خصّص له نقطة في ملفه. يمكن إغلاق الحالة فقط.
 receipt_errors.reason_help.ok_typo_fixed,صرّح المرسل بالشحنة بملصق شبه مطابق (رقم مختلف أو مبدّل). يصحّحه النظام ويسجّل الاستلام. المسؤول: المرسل.
 receipt_errors.reason_help.ok_same_city,كان الملصق لشحنة موجهة إلى نقطة أخرى في المدينة نفسها. يُسجَّل باسم المشارك الذي استلمها. المسؤول: المرسل.
+receipt_errors.reason_help.ok_misrouted,كان الملصق لشحنة موجهة إلى مدينة أخرى، صُرّح بها قبل وصولها. تُسجَّل باسم المشارك الذي استلمها، وتُحتسب في المسار إلى المدينة الفعلية، وتُعلَّم كتوجيه خاطئ (تُحفظ الوجهة المخطط لها). لا يوجد مسؤول.
+receipt_errors.reason_help.misrouted_dup,سبق تسجيل هذا الطرد في مدينة أخرى كتوجيه خاطئ، والآن يسجله أيضًا مستلمه الأصلي. تحقق من أي القراءتين هي الصحيحة.
 receipt_errors.reason_help.pobox_absent_no_visit,رسالة صندوق بريد ولم يصرّح المشارك بأي شحنة في يوم العمل السابق: علامة على أنه لم يزر الصندوق ولا يُعرف متى وصلت الرسالة. لا تصلح للقياس وتُعوَّض بشحنة أخرى. المسؤول: المستلم.
 receipt_errors.reason_help.pobox_absent_unavailable,رسالة صندوق بريد جُمعت بعد يوم عمل كان فيه المشارك مسجلًا كغير متاح: لا يُعرف متى وصلت. لا تصلح للقياس وتُعوَّض بشحنة أخرى. ليس خطأ المشارك.
 receipt_errors.reason_help.not_sent_cancelled,وصل الطرد لكن المرسل لم يصرّح به كمُرسَل أبدًا: تاريخ الإرسال مفقود. يُلغى ويُعوَّض بشحنة أخرى. المسؤول: المرسل.

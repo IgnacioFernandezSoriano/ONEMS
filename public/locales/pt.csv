@@ -5154,6 +5154,8 @@ receipt_errors.status.discarded,Descartado
 receipt_errors.reason.ok,Correta
 receipt_errors.reason.ok_typo_fixed,Erro de digitação corrigido
 receipt_errors.reason.ok_same_city,"Mesma cidade, outro nó"
+receipt_errors.reason.ok_misrouted,Recebido noutra cidade (mal encaminhado)
+receipt_errors.reason.misrouted_dup,Mal encaminhado reclamado pelo destinatário
 receipt_errors.reason.pobox_absent_unavailable,Caixa postal não visitada (indisponibilidade declarada)
 receipt_errors.reason.pobox_absent_no_visit,Caixa postal não visitada
 receipt_errors.reason.not_sent_cancelled,"Ainda não enviada, anulada"
@@ -5178,6 +5180,8 @@ receipt_errors.reason_help.no_panelist,O utilizador de Telegram que escreveu a e
 receipt_errors.reason_help.no_node,O painelista não tem nenhum ponto atribuído no sistema. Atribui-lhe um na sua ficha. O caso só se pode fechar.
 receipt_errors.reason_help.ok_typo_fixed,O remetente declarou o envio com uma etiqueta quase igual (um dígito diferente ou trocado). O sistema corrige-a e regista a receção. Responsável: o remetente.
 receipt_errors.reason_help.ok_same_city,A etiqueta era de um envio dirigido a outro ponto da mesma cidade. Fica registado em nome do painelista que o recebeu. Responsável: o remetente.
+receipt_errors.reason_help.ok_misrouted,"A etiqueta era de um envio dirigido a outra cidade, declarado antes de chegar. Fica registado em nome do painelista que o recebeu, conta na rota para a cidade real e fica marcado como mal encaminhado (guarda-se o destino planeado). Não há responsável."
+receipt_errors.reason_help.misrouted_dup,Este pacote já tinha sido registado noutra cidade como mal encaminhado e agora o seu destinatário original também o regista. Verifica qual das duas leituras é a correta.
 receipt_errors.reason_help.pobox_absent_no_visit,Carta de apartado e o painelista não declarou nenhum envio no dia útil anterior: sinal de que não visitou o apartado e não se sabe quando chegou a carta. Não serve para a medição e é compensada com outro envio. Responsável: o recetor.
 receipt_errors.reason_help.pobox_absent_unavailable,Carta de apartado recolhida depois de um dia útil em que o painelista estava declarado como indisponível: não se sabe quando chegou. Não serve para a medição e é compensada com outro envio. Não é culpa do painelista.
 receipt_errors.reason_help.not_sent_cancelled,O pacote chegou mas o remetente nunca o declarou como enviado: falta a data de saída. É anulado e compensado com outro envio. Responsável: o remetente.
