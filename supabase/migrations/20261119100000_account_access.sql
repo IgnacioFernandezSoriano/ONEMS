@@ -207,6 +207,9 @@ BEGIN
 END $$;
 
 -- 'view' se cumple con edit o view; 'edit' solo con edit.
+-- OJO fase 3: my_access/has_access devuelven vacío/false con JWT de service_role (no hay auth.uid()).
+-- Toda política o función que los use debe exceptuar explícitamente auth.role() = 'service_role'
+-- (bot n8n, crons) para no bloquearlo.
 CREATE OR REPLACE FUNCTION public.has_access(p_account_id uuid, p_option text, p_level text)
  RETURNS boolean
  LANGUAGE sql
@@ -321,6 +324,18 @@ BEGIN
 
   v_existed := EXISTS (SELECT 1 FROM public.account_user_role r
                         WHERE r.account_id = p_account_id AND r.user_id = p_user_id AND r.role = p_role);
+  -- Sin cambio real (quitar un rol que no tiene): no se toca nada ni se deja log.
+  IF NOT p_enabled AND NOT v_existed THEN
+    RETURN;
+  END IF;
+  -- Un editor de la pestaña no puede quitarse su último rol de editor (anti-objetivo del spec).
+  IF NOT p_enabled AND p_user_id = auth.uid() AND NOT public.is_superadmin()
+     AND p_role IN ('account_manager','upu_account_manager')
+     AND NOT EXISTS (SELECT 1 FROM public.account_user_role r
+                      WHERE r.account_id = p_account_id AND r.user_id = p_user_id
+                        AND r.role IN ('account_manager','upu_account_manager') AND r.role <> p_role) THEN
+    RAISE EXCEPTION 'Cannot remove your last editor role in this account' USING ERRCODE = '42501';
+  END IF;
   IF p_enabled THEN
     INSERT INTO public.account_user_role (account_id, user_id, role, provisional)
     VALUES (p_account_id, p_user_id, p_role, false)
@@ -398,6 +413,16 @@ BEGIN
   END IF;
   IF p_account_id = public.current_user_account_id() THEN
     RETURN;
+  END IF;
+  -- Hasta la fase 3 las políticas RLS heredadas dan privilegios de admin por
+  -- current_user_role() = 'admin' AND account_id = current_user_account_id(). Un admin no puede llevarse
+  -- ese poder a otra cuenta salvo que allí sea editor (account_manager o upu_account_manager).
+  IF EXISTS (SELECT 1 FROM public.profiles p WHERE p.id = v_uid AND p.role = 'admin')
+     AND NOT EXISTS (SELECT 1 FROM public.account_user_role r
+                      WHERE r.user_id = v_uid AND r.account_id = p_account_id
+                        AND r.role IN ('account_manager','upu_account_manager')) THEN
+    RAISE EXCEPTION 'Admin can only switch to accounts where they are account manager or UPU account manager'
+      USING ERRCODE = '42501';
   END IF;
   -- Permiso de un solo uso (local a la transacción) para el veto de prevent_account_id_change().
   PERFORM set_config('onems.active_account_switch', v_uid::text, true);

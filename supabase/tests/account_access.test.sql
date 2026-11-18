@@ -142,6 +142,20 @@ BEGIN
   PERFORM public.account_user_role_set(A1, NR::uuid, 'do_coordinator', false);
   PERFORM pg_temp.fail_if(EXISTS (SELECT 1 FROM public.account_user_role WHERE user_id=NR::uuid), 'rol quitado');
   PERFORM pg_temp.fail_if(NOT EXISTS (SELECT 1 FROM public.account_access_log WHERE account_id=A1 AND kind='user_role_set'), 'log rol');
+  -- Quitar un rol que no tiene: sin cambio y sin log.
+  SELECT count(*) INTO n FROM public.account_access_log WHERE account_id=A1 AND kind='user_role_set';
+  PERFORM public.account_user_role_set(A1, NR::uuid, 'materials_supplier', false);
+  PERFORM pg_temp.fail_if((SELECT count(*) FROM public.account_access_log WHERE account_id=A1 AND kind='user_role_set') <> n, 'log sin cambio');
+  -- El AM no puede quitarse su último rol de editor.
+  PERFORM pg_temp.fail_if(NOT pg_temp.raises($q$SELECT public.account_user_role_set('a0000000-0000-0000-0000-000000000001','96000000-0000-0000-0000-000000000096','account_manager',false)$q$), 'AM se quita último rol editor');
+  PERFORM pg_temp.fail_if(NOT EXISTS (SELECT 1 FROM public.account_user_role WHERE user_id=AM::uuid AND account_id=A1 AND role='account_manager'), 'AM conserva rol');
+  -- Con otro rol de editor (UPU), sí puede quitarse el de AM; y entonces no el de UPU.
+  PERFORM public.account_user_role_set(A1, AM::uuid, 'upu_account_manager', true);
+  PERFORM public.account_user_role_set(A1, AM::uuid, 'account_manager', false);
+  PERFORM pg_temp.fail_if(NOT pg_temp.raises($q$SELECT public.account_user_role_set('a0000000-0000-0000-0000-000000000001','96000000-0000-0000-0000-000000000096','upu_account_manager',false)$q$), 'UPU se quita último rol editor');
+  PERFORM public.account_user_role_set(A1, AM::uuid, 'account_manager', true);
+  PERFORM public.account_user_role_set(A1, AM::uuid, 'upu_account_manager', false);
+  PERFORM pg_temp.fail_if(NOT public.can_manage_account_access(A1), 'AM sigue editor');
   -- Usuario de otra cuenta (98 en A2): no se le asigna desde A1.
   PERFORM pg_temp.fail_if(NOT pg_temp.raises($q$SELECT public.account_user_role_set('a0000000-0000-0000-0000-000000000001','98000000-0000-0000-0000-000000000098','panelist_manager',true)$q$), 'usuario ajeno');
   -- Solo el superadmin añade por correo.
@@ -174,6 +188,15 @@ BEGIN
   PERFORM pg_temp.fail_if(NOT pg_temp.raises($q$SELECT public.set_active_account('a0000000-0000-0000-0000-000000000003')$q$), 'cuenta sin rol');
   -- El veto general del trigger sigue: un UPDATE directo de account_id falla.
   PERFORM pg_temp.fail_if(NOT pg_temp.raises($q$UPDATE public.profiles SET account_id='a0000000-0000-0000-0000-000000000002' WHERE id='94000000-0000-0000-0000-000000000094'$q$), 'update directo');
+  -- Un admin (AM de A1) con solo do_coordinator en A2 no se lleva su admin a A2.
+  INSERT INTO public.account_user_role (account_id, user_id, role) VALUES (A2, AM::uuid, 'do_coordinator');
+  PERFORM pg_temp.as_user(AM, 'authenticated');
+  PERFORM pg_temp.fail_if(NOT pg_temp.raises($q$SELECT public.set_active_account('a0000000-0000-0000-0000-000000000002')$q$), 'admin cambia a cuenta sin ser editor');
+  PERFORM pg_temp.fail_if((SELECT account_id FROM public.profiles WHERE id = AM::uuid) <> A1, 'admin sigue en A1');
+  -- Siendo editor en A2 (UPU), sí.
+  INSERT INTO public.account_user_role (account_id, user_id, role) VALUES (A2, AM::uuid, 'upu_account_manager');
+  PERFORM public.set_active_account(A2);
+  PERFORM pg_temp.fail_if((SELECT account_id FROM public.profiles WHERE id = AM::uuid) <> A2, 'admin editor cambia a A2');
   -- Usuario sin roles: my_accounts = su cuenta.
   PERFORM pg_temp.as_user(NR, 'authenticated');
   SELECT count(*) INTO n FROM public.my_accounts();
