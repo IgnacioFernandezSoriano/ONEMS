@@ -17,7 +17,7 @@ $PGBIN = "C:\Users\fernandezi\pgportable\pgsql\bin"
 $env:PGPASSWORD = "postgres"
 $H = "127.0.0.1"; $P = "5433"; $U = "postgres"
 $DB = "onems_test"
-$REPO = "c:\Users\fernandezi\projects\ONEMS"
+$REPO = if ($env:ONEMS_REPO) { $env:ONEMS_REPO } else { "c:\Users\fernandezi\projects\ONEMS" }
 $MIG  = Join-Path $REPO "supabase\migrations"
 $SHIM = Join-Path $REPO "supabase\tests\00_bootstrap_supabase_shim.sql"
 
