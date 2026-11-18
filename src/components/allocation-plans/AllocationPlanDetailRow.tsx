@@ -38,7 +38,8 @@ export function AllocationPlanDetailRow({
 
   // Determine if record is editable
   const isCompleted = detail.status === 'received'
-  // 'deferred' = fila sintetica del registro por compensar: solo lectura (sin editar, enviar, recibir ni seleccionar)
+  // 'deferred' = fila sintetica del registro por compensar: solo lectura (sin editar, enviar ni recibir); se puede
+  // seleccionar para borrarla en bloque
   const isDeferred = detail.status === 'deferred'
   const isNonEditable = isDeferred || ['sent', 'received', 'cancelled', 'invalid'].includes(detail.status) || isCompleted
   const canEdit = !isNonEditable
@@ -86,7 +87,6 @@ export function AllocationPlanDetailRow({
           type="checkbox"
           checked={selected}
           onChange={onToggleSelect}
-          disabled={isDeferred}
           className="rounded border-gray-300"
         />
       </td>

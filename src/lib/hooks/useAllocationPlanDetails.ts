@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { AllocationPlanDetailWithRelations } from '@/lib/types'
 import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId'
+import { notifyDeferredSamplesChanged } from '@/hooks/useDeferredSamples'
 
 export function useAllocationPlanDetails() {
   const effectiveAccountId = useEffectiveAccountId()
@@ -162,18 +163,32 @@ export function useAllocationPlanDetails() {
     }
   }
 
-  const bulkDeleteDetails = async (ids: string[]) => {
+  // deferredIds: filas 'deferred' de la lista (muestras por compensar, tabla deferred_samples). Se borran con la
+  // RPC delete_deferred_samples (la tabla no admite borrado directo).
+  const bulkDeleteDetails = async (ids: string[], deferredIds: string[] = []) => {
     try {
       // Validate IDs
-      if (!ids || ids.length === 0) {
+      if ((!ids || ids.length === 0) && deferredIds.length === 0) {
         throw new Error('No IDs provided for deletion')
       }
 
       // Filter out invalid IDs
-      const validIds = ids.filter(id => id && typeof id === 'string' && id.length > 0)
-      
-      if (validIds.length === 0) {
+      const validIds = (ids || []).filter(id => id && typeof id === 'string' && id.length > 0)
+      const validDeferred = deferredIds.filter(id => id && typeof id === 'string' && id.length > 0)
+
+      if (validIds.length === 0 && validDeferred.length === 0) {
         throw new Error('No valid IDs provided for deletion')
+      }
+
+      if (validDeferred.length > 0) {
+        const { data: removed, error: defError } = await supabase.rpc('delete_deferred_samples', {
+          p_ids: validDeferred,
+        })
+        if (defError) throw defError
+        notifyDeferredSamplesChanged()
+        if ((removed ?? 0) < validDeferred.length) {
+          console.warn(`Deferred samples: ${removed} of ${validDeferred.length} deleted`)
+        }
       }
 
       console.log('Attempting to delete', validIds.length, 'records')

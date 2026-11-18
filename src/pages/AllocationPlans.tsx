@@ -326,15 +326,16 @@ export function AllocationPlans() {
     }
   }
 
-  // Las filas 'deferred' son sinteticas (vienen del registro deferred_samples, no de allocation_plan_details):
-  // no se pueden seleccionar, asi que nunca llegan a las operaciones masivas.
+  // Las filas 'deferred' son sinteticas (vienen del registro deferred_samples, no de allocation_plan_details).
+  // Se pueden seleccionar solo para BORRARLAS (decision 18/11/2026: el Allocation Plan Manager decide); el resto
+  // de operaciones masivas (cambiar nodo/fecha, cancelar, reprocesar) las ignoran.
   const deferredIds = new Set(filteredDetails.filter(d => isDeferredStatus(d.status)).map(d => d.id))
-  const selectableDetails = filteredDetails.filter(d => !isDeferredStatus(d.status))
+  const selectableDetails = filteredDetails
+  const selectedPlanIds = () => Array.from(selectedIds).filter(id => !deferredIds.has(id))
 
   const handleToggleSelect = (id: string) => {
     setSelectedIds((prev) => {
       const newSet = new Set(prev)
-      if (deferredIds.has(id)) return prev // filas 'deferred' (sinteticas): solo lectura
       if (newSet.has(id)) {
         newSet.delete(id)
       } else {
@@ -357,12 +358,12 @@ export function AllocationPlans() {
   }
 
   const handleBulkUpdateOriginNode = async (nodeId: string) => {
-    await bulkUpdateDetails(Array.from(selectedIds), { origin_node_id: nodeId })
+    await bulkUpdateDetails(selectedPlanIds(), { origin_node_id: nodeId })
     setSelectedIds(new Set())
   }
 
   const handleBulkUpdateDestinationNode = async (nodeId: string) => {
-    await bulkUpdateDetails(Array.from(selectedIds), { destination_node_id: nodeId })
+    await bulkUpdateDetails(selectedPlanIds(), { destination_node_id: nodeId })
     setSelectedIds(new Set())
   }
 
@@ -373,7 +374,7 @@ export function AllocationPlans() {
     const month = dateObj.getMonth() + 1
     const year = dateObj.getFullYear()
 
-    await bulkUpdateDetails(Array.from(selectedIds), {
+    await bulkUpdateDetails(selectedPlanIds(), {
       fecha_programada: date,
       week_number: weekNumber,
       month,
@@ -383,14 +384,14 @@ export function AllocationPlans() {
   }
 
   const handleBulkCancel = async () => {
-    await bulkUpdateDetails(Array.from(selectedIds), { status: 'cancelled' })
+    await bulkUpdateDetails(selectedPlanIds(), { status: 'cancelled' })
     setSelectedIds(new Set())
   }
 
   const handleBulkReprocess = async () => {
     const { supabase } = await import('@/lib/supabase')
     
-    const idsToReprocess = Array.from(selectedIds)
+    const idsToReprocess = selectedPlanIds()
     const { data, error } = await supabase.rpc('reprocess_transfer_errors', {
       p_detail_ids: idsToReprocess
     })
@@ -403,7 +404,8 @@ export function AllocationPlans() {
   }
 
   const handleBulkDelete = async () => {
-    await bulkDeleteDetails(Array.from(selectedIds))
+    const ids = Array.from(selectedIds)
+    await bulkDeleteDetails(ids.filter(id => !deferredIds.has(id)), ids.filter(id => deferredIds.has(id)))
     setSelectedIds(new Set())
   }
 
