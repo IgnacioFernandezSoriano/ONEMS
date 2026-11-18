@@ -3,13 +3,15 @@ import { useTranslation } from '@/hooks/useTranslation'
 import { usePermissions } from '@/contexts/PermissionsContext'
 import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId'
 import { RolesAccessTab } from '@/components/accounts/RolesAccessTab'
+import { PermissionsError } from '@/components/auth/PermissionsError'
 
 /** "Roles y accesos" de la cuenta elegida. Solo para quien puede editarla (AM, UPU account manager, superadmin). */
 export function RolesAccess() {
   const { t } = useTranslation()
-  const { canManageAccess, loading } = usePermissions()
+  const { canManageAccess, loading, error } = usePermissions()
   const accountId = useEffectiveAccountId()
 
+  if (error) return <PermissionsError />
   if (loading) return <div className="p-8 text-gray-500">{t('common.loading')}</div>
   if (!canManageAccess) return <Navigate to="/" replace />
 

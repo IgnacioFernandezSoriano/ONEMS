@@ -4,6 +4,7 @@ import { Modal } from '@/components/common/Modal'
 import { ROLE_LABELS } from '@/utils/constants'
 import { useTranslation } from '@/hooks/useTranslation'
 import { useAuth } from '@/contexts/AuthContext'
+import { usePermissions } from '@/contexts/PermissionsContext'
 import type { ProfileWithAccount } from '@/lib/types'
 import { Key, RefreshCw, Copy, Check, Eye, EyeOff } from 'lucide-react'
 
@@ -18,6 +19,7 @@ interface UserTableProps {
 export function UserTable({ users, onEdit, onDelete, canDelete = true, onResetPassword }: UserTableProps) {
   const { t } = useTranslation()
   const { profile } = useAuth()
+  const { canEdit } = usePermissions()
   const [resetUserId, setResetUserId] = useState<string | null>(null)
   const [resetUserEmail, setResetUserEmail] = useState<string>('')
   const [newPassword, setNewPassword] = useState('')
@@ -26,19 +28,15 @@ export function UserTable({ users, onEdit, onDelete, canDelete = true, onResetPa
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  // Verificar si el usuario actual puede resetear la contraseña de otro usuario
+  // Edición de usuarios según la matriz de derechos (superadmin: siempre)
+  const isSuperadmin = profile?.role === 'superadmin'
+  const canEditUsers = isSuperadmin || canEdit('users')
+
+  // Resetear contraseña: superadmin, o Edit en 'users' sobre usuarios 'user' de su cuenta
+  // (mismo criterio que la edge function admin-reset-password)
   const canResetPassword = (user: ProfileWithAccount) => {
-    // Superadmin puede resetear cualquier contraseña
-    if (profile?.role === 'superadmin') return true
-    
-    // Admin puede resetear contraseñas de usuarios (no admins) de su cuenta
-    if (profile?.role === 'admin' && 
-        user.role === 'user' && 
-        user.account_id === profile.account_id) {
-      return true
-    }
-    
-    return false
+    if (isSuperadmin) return true
+    return canEditUsers && user.role === 'user' && user.account_id === profile?.account_id
   }
 
   // Generar contraseña aleatoria
@@ -182,13 +180,15 @@ export function UserTable({ users, onEdit, onDelete, canDelete = true, onResetPa
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm space-x-2">
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => onEdit(user)}
-                  >
-                    {t('hc.user_table.edit')}
-                  </Button>
+                  {canEditUsers && (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => onEdit(user)}
+                    >
+                      {t('hc.user_table.edit')}
+                    </Button>
+                  )}
                   {canResetPassword(user) && (
                     <Button
                       size="sm"
@@ -200,7 +200,7 @@ export function UserTable({ users, onEdit, onDelete, canDelete = true, onResetPa
                       <span className="hidden sm:inline">{t('hc.user_table.reset_password')}</span>
                     </Button>
                   )}
-                  {canDelete && (
+                  {canDelete && canEditUsers && (
                     <Button
                       size="sm"
                       variant="danger"

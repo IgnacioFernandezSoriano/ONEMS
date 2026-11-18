@@ -494,10 +494,11 @@ export function AllocationPlans() {
   }
 
   const handleBulkReprocess = async () => {
-    const { supabase } = await import('@/lib/supabase')
-    
+    const { rpcWithFallback } = await import('@/lib/rpcFallback')
+
     const idsToReprocess = selectedPlanIds()
-    const { data, error } = await supabase.rpc('reprocess_transfer_errors', {
+    // Envoltorio con control de cuenta y Edit; si aún no existe (migración pendiente), el original.
+    const { error } = await rpcWithFallback('reprocess_transfer_errors_for_account', 'reprocess_transfer_errors', {
       p_detail_ids: idsToReprocess
     })
     

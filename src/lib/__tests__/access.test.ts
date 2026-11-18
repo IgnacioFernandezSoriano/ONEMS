@@ -4,6 +4,7 @@ import { resolve } from 'node:path'
 import {
   ACCESS_OPTIONS, ROUTE_OPTION, firstAllowedPath, isPermissionsLoading,
   routeAccess, canAccess, landingPath, deniedRedirect, NO_ACCESS_PATH,
+  permissionsRetryDelay, permissionsStatus, PERMISSIONS_RETRY_DELAYS_MS,
   type AccessOption, type AccessLevel,
 } from '../access'
 
@@ -97,5 +98,24 @@ describe('access', () => {
     expect(deniedRedirect('/carriers', o => o === 'compliance')).toBe('/reporting/compliance')
     expect(deniedRedirect('/dashboard', o => o === 'dashboard')).toBe(NO_ACCESS_PATH)
     expect(routeAccess(NO_ACCESS_PATH)).toBe('open')
+  })
+
+  it('permissionsRetryDelay: 2 reintentos con espera creciente y luego null', () => {
+    expect(PERMISSIONS_RETRY_DELAYS_MS.length).toBe(2)
+    expect(permissionsRetryDelay(0)).toBe(1000)
+    expect(permissionsRetryDelay(1)).toBe(3000)
+    expect(permissionsRetryDelay(2)).toBeNull()
+    expect(permissionsRetryDelay(-1)).toBeNull()
+  })
+
+  it('permissionsStatus: un error no es "cargado y vacío"', () => {
+    expect(permissionsStatus(null, null, null)).toBe('ready')
+    expect(permissionsStatus('u|a1', 'u|a1', null)).toBe('ready')
+    expect(permissionsStatus('u|a1', null, null)).toBe('loading')
+    expect(permissionsStatus('u|a1', null, 'u|a1')).toBe('error')
+    // error de otra cuenta: la actual sigue cargando
+    expect(permissionsStatus('u|a2', 'u|a1', 'u|a1')).toBe('loading')
+    // derechos ya cargados ganan a un fallo posterior de recarga
+    expect(permissionsStatus('u|a1', 'u|a1', 'u|a1')).toBe('ready')
   })
 })

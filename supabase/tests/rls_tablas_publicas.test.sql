@@ -72,7 +72,8 @@ BEGIN
   PERFORM pg_temp.fail_if(has_table_privilege('anon', 'public.v_segment_details', 'SELECT'), 'anon lee v_segment_details');
 
   -- Funciones: ninguna sobrecarga ejecutable por anon; service_role sí; authenticated sí salvo las 5 de
-  -- mantenimiento entre cuentas, que desde 20261119100200 (fase 3) solo ejecuta service_role.
+  -- mantenimiento entre cuentas y reconstruct_journeys / reprocess_transfer_errors (la web usa sus envoltorios
+  -- *_for_account), que desde 20261119100200 (fase 3) solo ejecuta service_role.
   SELECT count(*) INTO n FROM pg_proc p
    WHERE p.pronamespace = 'public'::regnamespace
      AND p.proname = ANY (ARRAY['balance_node_load_matrix','cleanup_processed_rfid_events','generate_delivery_standards',
@@ -83,7 +84,8 @@ BEGIN
           OR NOT has_function_privilege('service_role', p.oid, 'EXECUTE')
           OR has_function_privilege('authenticated', p.oid, 'EXECUTE')
              <> NOT (p.proname = ANY (ARRAY['balance_node_load_matrix','cleanup_processed_rfid_events',
-                       'process_all_accounts_pipeline','process_rfid_pipeline','resolve_provider_reads'])));
+                       'process_all_accounts_pipeline','process_rfid_pipeline','resolve_provider_reads',
+                       'reconstruct_journeys','reprocess_transfer_errors'])));
   PERFORM pg_temp.fail_if(n <> 0, 'funciones con EXECUTE mal: ' || n);
   SELECT count(DISTINCT proname) INTO n FROM pg_proc
    WHERE pronamespace = 'public'::regnamespace

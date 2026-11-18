@@ -174,3 +174,23 @@ export function deniedRedirect(currentPath: string, canView: (o: AccessOption) =
   const target = landingPath(canView)
   return target === currentPath ? NO_ACCESS_PATH : target
 }
+
+/** Reintentos de la carga de derechos si my_access falla (red, timeout...). */
+export const PERMISSIONS_RETRY_DELAYS_MS = [1000, 3000]
+
+/** Espera antes del reintento nº `attempt` (0 = primer reintento); null = sin más reintentos. */
+export function permissionsRetryDelay(attempt: number): number | null {
+  return attempt >= 0 && attempt < PERMISSIONS_RETRY_DELAYS_MS.length ? PERMISSIONS_RETRY_DELAYS_MS[attempt] : null
+}
+
+/** Estado de los derechos para la clave actual: un error NUNCA cuenta como "cargado y vacío". */
+export function permissionsStatus(
+  currentKey: string | null,
+  loadedKey: string | null,
+  failedKey: string | null,
+): 'ready' | 'loading' | 'error' {
+  if (currentKey === null) return 'ready'
+  if (currentKey === loadedKey) return 'ready'
+  if (currentKey === failedKey) return 'error'
+  return 'loading'
+}

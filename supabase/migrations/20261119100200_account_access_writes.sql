@@ -21,9 +21,13 @@
 --    de rol legacy 'admin' a receipts:view.
 -- 5. Sin EXECUTE para authenticated en funciones de mantenimiento entre cuentas sin llamador web.
 -- 6. Comprobación final: no queda ninguna política de escritura no prevista en esas tablas.
+-- 7. reconstruct_journeys y reprocess_transfer_errors (SECURITY DEFINER sin guarda de cuenta): NO se reescriben
+--    (su cuerpo vivo no está verificado contra el repo). Se crean envoltorios con guarda
+--    (reconstruct_journeys_for_account, reprocess_transfer_errors_for_account) que la web llama, y se quita
+--    EXECUTE a authenticated en los originales. Los llaman también process_rfid_pipeline y
+--    rpc_execute_pipeline_phase (SECURITY DEFINER, dueño postgres) y service_role: siguen funcionando.
 --
--- Fuera de esta migración (cuerpo vivo por verificar, ver informe de la tarea 9):
---   reprocess_transfer_errors, consolidate_rfid_events, reconstruct_journeys.
+-- Fuera de esta migración (cuerpo vivo por verificar, ver informe de la tarea 9): consolidate_rfid_events.
 -- Todo en una sola transacción (incluido rpc_balance_city_v2, al final de la sección 4): no hay un momento con
 -- las tablas cerradas y alguna función sin guarda.
 
@@ -443,6 +447,9 @@ CREATE POLICY profiles_delete_users_edit ON public.profiles
 
 -- 3c. Lecturas de recepciones: del rol legacy 'admin' a receipts:view en la cuenta activa. Las ramas que no son de
 --     recepción de incident_message y case_analysis_request quedan exactamente igual.
+--     Rendimiento: aquí has_access(account_id, ...) recibe la cuenta DE LA FILA, así que no se puede sacar a un
+--     (SELECT ...) de una vez por sentencia como en 3b; se evalúa por fila (función STABLE, barata). Igual en
+--     profile_select_users_access (20261119100160, ya aplicada). Sin cambio de semántica.
 DROP POLICY IF EXISTS receipt_case_select ON public.receipt_case;
 CREATE POLICY receipt_case_select ON public.receipt_case
   FOR SELECT TO authenticated
@@ -3176,3 +3183,60 @@ BEGIN
     RAISE EXCEPTION 'Políticas de escritura no previstas (revisar antes de aplicar): %', v_bad;
   END IF;
 END $$;
+
+-- ------------------------------------------------------------------------------------------------ 7. envoltorios
+-- La web (useJourneySegments: ruta /diagnosis/journey-segments -> opción route_analysis) reconstruye viajes de
+-- SU cuenta activa con Edit en route_analysis. Sin cuenta (NULL = todas las cuentas) solo el original, que ya
+-- no ejecuta authenticated.
+CREATE OR REPLACE FUNCTION public.reconstruct_journeys_for_account(p_account_id uuid, p_tag_id text DEFAULT NULL)
+ RETURNS TABLE(segments_created bigint, events_processed bigint, execution_time_ms bigint)
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path = public
+AS $$
+BEGIN
+  IF p_account_id IS NULL THEN
+    RAISE EXCEPTION 'Account required' USING ERRCODE = '22004';
+  END IF;
+  IF NOT (public.is_superadmin()
+          OR (p_account_id = public.current_user_account_id()
+              AND public.has_access(p_account_id, 'route_analysis', 'edit'))) THEN
+    RAISE EXCEPTION 'Forbidden: edit right required (route_analysis)' USING ERRCODE = '42501';
+  END IF;
+  RETURN QUERY SELECT * FROM public.reconstruct_journeys(p_account_id, p_tag_id);
+END $$;
+
+-- La web (AllocationPlans, reprocesar envíos con error de traspaso) con Edit en allocation_plans: todos los
+-- envíos deben ser de la cuenta activa (superadmin: cualquiera). Los ids inexistentes los trata el original.
+CREATE OR REPLACE FUNCTION public.reprocess_transfer_errors_for_account(p_detail_ids uuid[])
+ RETURNS TABLE(detail_id uuid, success boolean, message text)
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path = public
+AS $$
+DECLARE v_account uuid;
+BEGIN
+  IF NOT public.is_superadmin() THEN
+    v_account := public.current_user_account_id();
+    IF v_account IS NULL OR NOT public.has_access(v_account, 'allocation_plans', 'edit') THEN
+      RAISE EXCEPTION 'Forbidden: edit right required (allocation_plans)' USING ERRCODE = '42501';
+    END IF;
+    IF EXISTS (SELECT 1 FROM public.allocation_plan_details d
+                WHERE d.id = ANY (p_detail_ids) AND d.account_id IS DISTINCT FROM v_account) THEN
+      RAISE EXCEPTION 'Forbidden: shipments not in your account' USING ERRCODE = '42501';
+    END IF;
+  END IF;
+  RETURN QUERY SELECT * FROM public.reprocess_transfer_errors(p_detail_ids);
+END $$;
+
+REVOKE ALL ON FUNCTION public.reconstruct_journeys_for_account(uuid, text) FROM PUBLIC, anon;
+REVOKE ALL ON FUNCTION public.reprocess_transfer_errors_for_account(uuid[]) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.reconstruct_journeys_for_account(uuid, text) TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.reprocess_transfer_errors_for_account(uuid[]) TO authenticated, service_role;
+
+-- Originales: sin EXECUTE para la web (PUBLIC/anon ya revocados en 20261118220000); service_role y los
+-- llamadores SECURITY DEFINER (dueño postgres) los siguen ejecutando.
+REVOKE EXECUTE ON FUNCTION public.reconstruct_journeys(uuid, text) FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.reprocess_transfer_errors(uuid[]) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.reconstruct_journeys(uuid, text) TO service_role;
+GRANT EXECUTE ON FUNCTION public.reprocess_transfer_errors(uuid[]) TO service_role;

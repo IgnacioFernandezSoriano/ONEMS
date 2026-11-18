@@ -5353,3 +5353,5 @@ roles_access.role.do_coordinator,DO coordinator
 roles_access.role.upu_account_manager,UPU account manager
 roles_access.role.allocation_plan_manager,Allocation Plan Manager
 common.read_only,View only
+roles_access.rights_load_error,Your access rights could not be loaded. Check your connection and try again.
+roles_access.rights_retry,Retry

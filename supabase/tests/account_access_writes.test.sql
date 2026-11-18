@@ -423,5 +423,85 @@ DO $$ BEGIN
     'cancel_detail sin sesión');
 END $$;
 
+-- ---------------------------------------------------------------- envoltorios de reconstruct_journeys / reprocess_transfer_errors
+-- ED: Edit en route_analysis en A1 y en A2 (pero su cuenta activa es A1); VW: solo View en route_analysis.
+INSERT INTO public.account_access (account_id, role, option, level) VALUES
+  ('a0000000-0000-0000-0000-000000000001','panelist_manager','route_analysis','edit'),
+  ('a0000000-0000-0000-0000-000000000002','panelist_manager','route_analysis','edit'),
+  ('a0000000-0000-0000-0000-000000000002','panelist_manager','allocation_plans','edit'),
+  ('a0000000-0000-0000-0000-000000000001','do_coordinator','route_analysis','view')
+ON CONFLICT (account_id, role, option) DO UPDATE SET level = EXCLUDED.level;
+-- Un envío en A2 y otro en A1. ('transfer_error' no es un estado permitido por allocation_plan_details_status_check:
+-- el original responde success=false por envío; aquí se prueba solo la guarda.)
+INSERT INTO public.allocation_plan_details (id, account_id, plan_id, origin_node_id, destination_node_id,
+    fecha_programada, status) VALUES
+  ('d5000000-0000-0000-0000-000000000005','a0000000-0000-0000-0000-000000000002','cc000000-0000-0000-0000-000000000001',
+   'b1000000-0000-0000-0000-000000000001','b4000000-0000-0000-0000-000000000004','2027-03-13','pending'),
+  ('d6000000-0000-0000-0000-000000000006','a0000000-0000-0000-0000-000000000001','cc000000-0000-0000-0000-000000000001',
+   'b1000000-0000-0000-0000-000000000001','b4000000-0000-0000-0000-000000000004','2027-03-14','pending');
+DO $$ BEGIN
+  -- authenticated ya no ejecuta los originales; sí los envoltorios. service_role, ambos.
+  PERFORM pg_temp.fail_if(has_function_privilege('authenticated', 'public.reconstruct_journeys(uuid,text)', 'EXECUTE'),
+    'authenticated ejecuta reconstruct_journeys');
+  PERFORM pg_temp.fail_if(has_function_privilege('authenticated', 'public.reprocess_transfer_errors(uuid[])', 'EXECUTE'),
+    'authenticated ejecuta reprocess_transfer_errors');
+  PERFORM pg_temp.fail_if(has_function_privilege('anon', 'public.reconstruct_journeys_for_account(uuid,text)', 'EXECUTE'),
+    'anon ejecuta reconstruct_journeys_for_account');
+  PERFORM pg_temp.fail_if(NOT has_function_privilege('authenticated', 'public.reconstruct_journeys_for_account(uuid,text)', 'EXECUTE'),
+    'authenticated sin reconstruct_journeys_for_account');
+  PERFORM pg_temp.fail_if(NOT has_function_privilege('authenticated', 'public.reprocess_transfer_errors_for_account(uuid[])', 'EXECUTE'),
+    'authenticated sin reprocess_transfer_errors_for_account');
+  PERFORM pg_temp.fail_if(NOT has_function_privilege('service_role', 'public.reconstruct_journeys(uuid,text)', 'EXECUTE')
+                          OR NOT has_function_privilege('service_role', 'public.reprocess_transfer_errors(uuid[])', 'EXECUTE'),
+    'service_role sin los originales');
+END $$;
+SET ROLE authenticated;
+-- ED (Edit en A1, cuenta activa A1): su cuenta sí; A2 no (aunque tenga Edit allí); sin cuenta, no.
+SELECT pg_temp.as_user('94000000-0000-0000-0000-000000000094', 'authenticated');
+DO $$ BEGIN
+  PERFORM pg_temp.fail_if(pg_temp.raises($q$SELECT * FROM public.reconstruct_journeys_for_account('a0000000-0000-0000-0000-000000000001')$q$),
+    'ED no reconstruye A1');
+  PERFORM pg_temp.fail_if(pg_temp.sqlstate_of($q$SELECT * FROM public.reconstruct_journeys_for_account('a0000000-0000-0000-0000-000000000002')$q$)
+                          IS DISTINCT FROM '42501', 'ED reconstruye A2');
+  PERFORM pg_temp.fail_if(NOT pg_temp.raises($q$SELECT * FROM public.reconstruct_journeys_for_account(NULL)$q$),
+    'ED reconstruye sin cuenta (todas)');
+  PERFORM pg_temp.fail_if(pg_temp.sqlstate_of($q$SELECT * FROM public.reconstruct_journeys('a0000000-0000-0000-0000-000000000002')$q$)
+                          IS DISTINCT FROM '42501', 'ED llama al original');
+  PERFORM pg_temp.fail_if(pg_temp.sqlstate_of($q$SELECT * FROM public.reprocess_transfer_errors_for_account(
+                            ARRAY['d5000000-0000-0000-0000-000000000005']::uuid[])$q$)
+                          IS DISTINCT FROM '42501', 'ED reprocesa un envío de A2');
+  PERFORM pg_temp.fail_if(pg_temp.sqlstate_of($q$SELECT * FROM public.reprocess_transfer_errors_for_account(
+                            ARRAY['d6000000-0000-0000-0000-000000000006','d5000000-0000-0000-0000-000000000005']::uuid[])$q$)
+                          IS DISTINCT FROM '42501', 'ED reprocesa una lista mixta A1+A2');
+  PERFORM pg_temp.fail_if(pg_temp.sqlstate_of($q$SELECT * FROM public.reprocess_transfer_errors(
+                            ARRAY['d5000000-0000-0000-0000-000000000005']::uuid[])$q$)
+                          IS DISTINCT FROM '42501', 'ED llama al original de reprocess');
+  PERFORM pg_temp.fail_if((SELECT count(*) FROM public.reprocess_transfer_errors_for_account(
+                            ARRAY['d6000000-0000-0000-0000-000000000006']::uuid[])) <> 1, 'ED no reprocesa su envío de A1');
+END $$;
+-- VW (solo View): ni reconstruye ni reprocesa en su cuenta.
+SELECT pg_temp.as_user('95000000-0000-0000-0000-000000000095', 'authenticated');
+DO $$ BEGIN
+  PERFORM pg_temp.fail_if(pg_temp.sqlstate_of($q$SELECT * FROM public.reconstruct_journeys_for_account('a0000000-0000-0000-0000-000000000001')$q$)
+                          IS DISTINCT FROM '42501', 'View reconstruye');
+  PERFORM pg_temp.fail_if(pg_temp.sqlstate_of($q$SELECT * FROM public.reprocess_transfer_errors_for_account(
+                            ARRAY['d6000000-0000-0000-0000-000000000006']::uuid[])$q$)
+                          IS DISTINCT FROM '42501', 'View reprocesa');
+END $$;
+-- SA: cualquier cuenta.
+SELECT pg_temp.as_user('97000000-0000-0000-0000-000000000097', 'authenticated');
+DO $$ BEGIN
+  PERFORM pg_temp.fail_if(pg_temp.raises($q$SELECT * FROM public.reconstruct_journeys_for_account('a0000000-0000-0000-0000-000000000002')$q$),
+    'superadmin no reconstruye A2');
+  PERFORM pg_temp.fail_if((SELECT count(*) FROM public.reprocess_transfer_errors_for_account(
+                            ARRAY['d5000000-0000-0000-0000-000000000005']::uuid[])) <> 1, 'superadmin no reprocesa A2');
+END $$;
+RESET ROLE;
+DO $$ BEGIN
+  -- process_rfid_pipeline (SECURITY DEFINER) sigue llamando al original sin EXECUTE de authenticated.
+  PERFORM pg_temp.fail_if(NOT has_function_privilege('postgres', 'public.reconstruct_journeys(uuid,text)', 'EXECUTE'),
+    'postgres sin reconstruct_journeys');
+END $$;
+
 ROLLBACK;
 \echo 'account_access_writes: OK'

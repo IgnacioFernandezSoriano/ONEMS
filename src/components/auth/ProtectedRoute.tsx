@@ -1,6 +1,7 @@
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { usePermissions } from '@/contexts/PermissionsContext'
+import { PermissionsError } from './PermissionsError'
 import { canAccess, deniedRedirect, landingPath, type RouteAccess } from '@/lib/access'
 
 function Loading() {
@@ -26,6 +27,8 @@ export function ProtectedRoute({ children, option = 'open' }: ProtectedRouteProp
   }
 
   if (option === 'open') return <>{children}</>
+  // Error al cargar derechos: aviso con reintento, nunca redirigir (no son "derechos vacíos").
+  if (permissions.error) return <PermissionsError />
   if (permissions.loading) return <Loading />
 
   if (!canAccess(option, profile.role === 'superadmin', permissions.canView)) {
@@ -42,6 +45,7 @@ export function HomeRedirect() {
 
   if (loading) return <Loading />
   if (!user || !profile) return <Navigate to="/login" />
+  if (permissions.error) return <PermissionsError />
   if (permissions.loading) return <Loading />
 
   return <Navigate to={landingPath(permissions.canView)} replace />
