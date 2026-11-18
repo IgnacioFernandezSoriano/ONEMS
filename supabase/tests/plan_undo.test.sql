@@ -191,6 +191,65 @@ BEGIN
 END $$;
 ROLLBACK;
 
+-- ===== 4b) dos ediciones de la misma fila en transacciones distintas: deshacer las dos =====
+-- En produccion cada accion y cada deshacer es su propia transaccion y el disparador update_updated_at
+-- pone updated_at = now() distinto en cada una. Aqui se simula moviendo updated_at (sin disparadores)
+-- entre pasos, porque todo el test vive en una sola transaccion.
+BEGIN;
+\ir fixtures/incident_city.sql
+DO $$ BEGIN PERFORM pg_temp.seed(); END $$;
+CREATE OR REPLACE FUNCTION pg_temp.tick(p_id uuid, p_hours int) RETURNS void LANGUAGE plpgsql AS $$
+BEGIN
+  PERFORM set_config('session_replication_role', 'replica', true);
+  UPDATE public.allocation_plan_details SET updated_at = now() + make_interval(hours => p_hours) WHERE id = p_id;
+  PERFORM set_config('session_replication_role', 'origin', true);
+END $$;
+DO $$
+DECLARE r jsonb;
+  A1 constant uuid := 'a0000000-0000-0000-0000-000000000001';
+  D1 constant uuid := 'd1000000-0000-0000-0000-000000000001';
+BEGIN
+  PERFORM public.plan_action_update(ARRAY[D1], '{"fecha_programada":"2027-03-20"}', 'edit');   -- accion A
+  PERFORM public.plan_action_update(ARRAY[D1], '{"fecha_programada":"2027-03-21"}', 'edit');   -- accion B
+  r := public.plan_undo_last(A1);                                                                -- deshace B
+  PERFORM pg_temp.fail_if((r->>'restored')::int <> 1, 'deshacer B: ' || r::text);
+  -- el deshacer de B ocurrio "mas tarde": su updated_at ya no es el de la foto despues de A
+  PERFORM pg_temp.tick(D1, 2);
+  r := public.plan_undo_last(A1);                                                                -- deshace A
+  PERFORM pg_temp.fail_if((r->>'restored')::int <> 1 OR (r->>'skipped')::int <> 0, 'deshacer A encadenado: ' || r::text);
+  PERFORM pg_temp.fail_if((SELECT fecha_programada FROM public.allocation_plan_details WHERE id = D1) <> '2027-03-10',
+                          'fecha original tras deshacer A y B');
+END $$;
+ROLLBACK;
+
+-- ===== 4c) un disparador que falla en una fila: esa se salta, el resto se deshace y la entrada sale de la pila =====
+BEGIN;
+\ir fixtures/incident_city.sql
+DO $$ BEGIN PERFORM pg_temp.seed(); END $$;
+DO $$
+DECLARE r jsonb; n int;
+  A1 constant uuid := 'a0000000-0000-0000-0000-000000000001';
+  D1 constant uuid := 'd1000000-0000-0000-0000-000000000001';
+  D2 constant uuid := 'd2000000-0000-0000-0000-000000000002';
+BEGIN
+  PERFORM public.plan_action_update(ARRAY[D1, D2], '{"fecha_programada":"2027-03-20"}', 'update');
+  CREATE FUNCTION pg_temp.tg_boom() RETURNS trigger LANGUAGE plpgsql AS $f$
+  BEGIN
+    IF NEW.id = 'd1000000-0000-0000-0000-000000000001' THEN RAISE EXCEPTION 'boom'; END IF;
+    RETURN NEW;
+  END $f$;
+  CREATE TRIGGER zz_boom BEFORE UPDATE ON public.allocation_plan_details
+    FOR EACH ROW EXECUTE FUNCTION pg_temp.tg_boom();
+  r := public.plan_undo_last(A1);
+  PERFORM pg_temp.fail_if((r->>'restored')::int <> 1 OR (r->>'skipped')::int <> 1
+                          OR NOT (r->'skipped_ids') @> to_jsonb(ARRAY[D1]), 'salta D1 por el disparador: ' || r::text);
+  PERFORM pg_temp.fail_if((SELECT fecha_programada FROM public.allocation_plan_details WHERE id = D2) <> '2027-03-11',
+                          'D2 restaurada');
+  SELECT count(*) INTO n FROM public.plan_undo_log WHERE account_id = A1;
+  PERFORM pg_temp.fail_if(n <> 0, 'la entrada no queda atascada: ' || n);
+END $$;
+ROLLBACK;
+
 -- ===== 5) create y deshacer =====
 BEGIN;
 \ir fixtures/incident_city.sql

@@ -122,6 +122,9 @@ END $$;
 -- Aplica una sentencia de restauración sobre un array de fotos ($1). Primero de una vez (rápido; los
 -- disparadores por sentencia corren una sola vez); si choca con una restricción (p. ej. el nodo o el plan ya no
 -- existen, o el balanceo creó el mismo id a la vez), repite fila a fila y devuelve los ids que no se pudieron.
+-- Cualquier error (restricción, disparador que lanza un error, foto antigua que ya no encaja con el esquema)
+-- solo hace saltar esa fila: si abortara el deshacer, la entrada quedaría atascada en lo alto de la pila y la
+-- cuenta ya no podría deshacer nada más.
 CREATE OR REPLACE FUNCTION public.plan_undo_apply(p_sql text, p_rows jsonb)
 RETURNS uuid[] LANGUAGE plpgsql SET search_path = '' AS $$
 DECLARE
@@ -134,13 +137,14 @@ BEGIN
   BEGIN
     EXECUTE p_sql USING p_rows;
     RETURN v_failed;
-  EXCEPTION WHEN integrity_constraint_violation THEN
-    NULL;
+  EXCEPTION WHEN OTHERS THEN
+    NULL;  -- se reintenta fila a fila para salvar las que sí se pueden
   END;
   FOR v_row IN SELECT x FROM jsonb_array_elements(p_rows) x LOOP
     BEGIN
       EXECUTE p_sql USING jsonb_build_array(v_row);
-    EXCEPTION WHEN integrity_constraint_violation THEN
+    EXCEPTION WHEN OTHERS THEN
+      RAISE WARNING 'plan_undo_apply: fila % no restaurada: % (%)', v_row->>'id', SQLERRM, SQLSTATE;
       v_failed := v_failed || (v_row->>'id')::uuid;
     END;
   END LOOP;
@@ -330,11 +334,13 @@ BEGIN
   IF e.action IN ('update','cancel','edit','create') THEN
     SELECT coalesce(array_agg((a->>'id')::uuid), '{}') INTO v_all FROM jsonb_array_elements(e.after_details) a;
     PERFORM 1 FROM public.allocation_plan_details d WHERE d.id = ANY (v_all) FOR UPDATE;
-    -- Choque con la realidad: solo se tocan las filas idénticas a la foto "después".
+    -- Choque con la realidad: solo se tocan las filas idénticas a la foto "después" (create y update).
+    -- updated_at no cuenta: el disparador update_updated_at lo pone a now() en cada UPDATE, también al
+    -- deshacer, y entonces deshacer dos acciones seguidas sobre la misma fila saltaría siempre la segunda.
     SELECT coalesce(array_agg((a->>'id')::uuid), '{}') INTO v_ok
       FROM jsonb_array_elements(e.after_details) a
      WHERE EXISTS (SELECT 1 FROM public.allocation_plan_details d
-                    WHERE d.id = (a->>'id')::uuid AND to_jsonb(d) = a);
+                    WHERE d.id = (a->>'id')::uuid AND to_jsonb(d) - 'updated_at' = a - 'updated_at');
 
     IF e.action = 'create' THEN
       DELETE FROM public.allocation_plan_details d WHERE d.id = ANY (v_ok);
