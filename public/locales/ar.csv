@@ -1046,7 +1046,7 @@ menu.delivery_standards,معايير التسليم
 menu.delivery_standards.tooltip,تحديد أوقات التسليم المتوقعة ونسب النجاح حسب الناقل والمنتج
 menu.demo_reset,إعادة تعيين العرض التوضيحي
 menu.demo_reset.tooltip,إعادة تعيين بيانات حساب العرض التوضيحي
-menu.e2e_db,E2E DBبيانات ONE
+menu.e2e_db,E2E DB
 menu.event_consolidation.tooltip,معالجة أحداث RFID واكتشاف الشذوذات
 menu.extract_e2e_db_api,Extract E2E DB API
 menu.extract_e2e_db_api.tooltip,استخراج بيانات E2E عبر REST API
