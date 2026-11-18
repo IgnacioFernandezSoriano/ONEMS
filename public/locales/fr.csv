@@ -5344,3 +5344,4 @@ roles_access.role.materials_supplier,Materials Supplier
 roles_access.role.do_coordinator,DO coordinator
 roles_access.role.upu_account_manager,UPU account manager
 roles_access.role.allocation_plan_manager,Allocation Plan Manager
+common.read_only,Consultation uniquement

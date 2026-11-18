@@ -8,12 +8,18 @@ import { Button } from '@/components/common/Button'
 import { downloadCSV, convertToCSV, type CSVExportData } from '@/lib/csvExport'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
+import { ReadOnlyBadge } from '@/components/common/ReadOnlyBadge'
+import { usePermissions } from '@/contexts/PermissionsContext'
 import { useTranslation } from '@/hooks/useTranslation'
 
 export function AllocationPlanGenerator() {
   const { t } = useTranslation()
   const { profile } = useAuth()
-  const [activeTab, setActiveTab] = useState<'generator' | 'generated' | 'applied'>('generator')
+  const { canEdit } = usePermissions()
+  const readOnly = !canEdit('allocation_generator')
+  const [activeTabState, setActiveTab] = useState<'generator' | 'generated' | 'applied'>('generator')
+  // En modo consulta la pestaña del generador no existe: se muestra la de planes generados.
+  const activeTab = readOnly && activeTabState === 'generator' ? 'generated' : activeTabState
   const {
     generatedPlans,
     carriers,
@@ -181,6 +187,7 @@ export function AllocationPlanGenerator() {
       {/* Header with Tooltip */}
       <div className="flex items-center gap-3">
         <h1 className="text-3xl font-bold text-gray-900">{t('allocation_generator.title')}</h1>
+        {readOnly && <ReadOnlyBadge />}
         <span className="group relative">
           <svg
             className="w-5 h-5 text-gray-400 cursor-help"
@@ -212,6 +219,7 @@ export function AllocationPlanGenerator() {
       {/* Tabs */}
       <div className="border-b">
         <div className="flex gap-4">
+          {!readOnly && (<>
           <button
             onClick={() => setActiveTab('generator')}
             className={`px-4 py-2 border-b-2 ${
@@ -222,6 +230,7 @@ export function AllocationPlanGenerator() {
           >
             {t('allocation_generator.tab_generator')}
           </button>
+          </>)}
           <button
             onClick={() => setActiveTab('generated')}
             className={`px-4 py-2 border-b-2 ${
@@ -246,7 +255,7 @@ export function AllocationPlanGenerator() {
       </div>
 
       {/* Tab Content */}
-      {activeTab === 'generator' && (
+      {!readOnly && activeTab === 'generator' && (
         <div className="space-y-6">
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-lg font-medium mb-4">{t('allocation_generator.automatic_generator')}</h2>
@@ -335,7 +344,7 @@ export function AllocationPlanGenerator() {
                             >
                               {t('allocation_generator.download_csv')}
                             </button>
-                            {plan.status !== 'applied' && (
+                            {!readOnly && plan.status !== 'applied' && (
                               <>
                                 <button
                                   onClick={() => handleApplyPlan(plan.id)}

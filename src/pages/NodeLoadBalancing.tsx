@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { usePermissions } from '../contexts/PermissionsContext';
+import { ReadOnlyBadge } from '../components/common/ReadOnlyBadge';
 import { useNodeLoadBalancing, type NodeDayLoad } from '../hooks/useNodeLoadBalancing';
 import { CityLoadCard, type LoadScale } from '../components/NodeLoadBalancing/CityLoadCard';
 import { BalancePreviewModal, type BalanceCityResult } from '../components/NodeLoadBalancing/BalancePreviewModal';
@@ -15,6 +17,8 @@ import { isUsablePeriod } from '../lib/dateRange';
 import { useTranslation } from '@/hooks/useTranslation';
 export default function NodeLoadBalancing() {
   const { t } = useTranslation();
+  const { canEdit } = usePermissions();
+  const readOnly = !canEdit('load_balancing');
   const { user, profile } = useAuth();
   const currentDate = new Date();
   const [startDate, setStartDate] = useState('');
@@ -432,6 +436,7 @@ export default function NodeLoadBalancing() {
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-3xl font-bold text-gray-900">{t("node_load_balancing.title")}</h1>
+            {readOnly && <ReadOnlyBadge />}
             <span className="group relative">
               <svg
                 className="w-5 h-5 text-gray-400 cursor-help"
@@ -483,6 +488,7 @@ export default function NodeLoadBalancing() {
         onChangeFence={setFenceUntil}
         poboxShares={poboxShares}
         onSavePoboxShares={savePoboxShares}
+        readOnly={readOnly}
       />
 
       {/* Filters */}
@@ -747,7 +753,8 @@ export default function NodeLoadBalancing() {
                   pobox_enabled: cityPolicies.find((c) => c.id === summary.city_id)?.pobox_enabled ?? null,
                 },
               }}
-              onCityPolicyChange={(p) => handleCityPolicyChange(summary.city_id, p)}
+              onCityPolicyChange={readOnly ? undefined : (p) => handleCityPolicyChange(summary.city_id, p)}
+              readOnly={readOnly}
             />
           ))}
         </div>
