@@ -3993,6 +3993,17 @@ hc.account_form.upu_account_manager_email,UPU account manager email
 hc.account_form.upu_account_manager_email_help,Person in charge of this account at the UPU.
 hc.account_form.allocation_plan_manager_email,Allocation Plan Manager email
 hc.account_form.allocation_plan_manager_email_help,Person in charge of the allocation plan of this account; uses the case analysis bot.
+hc.account_form.report_title,Operations report
+hc.account_form.report_help,"Email ""ONE operations report"" sent by the agent at 08:00 (Madrid time). To: all roles except Account Manager and UPU account manager, who are in copy."
+hc.account_form.report_frequency,Frequency
+hc.account_form.report_never,Never
+hc.account_form.report_weekly,Weekly
+hc.account_form.report_monthly,Monthly
+hc.account_form.report_weekdays,Days of the week
+hc.account_form.report_weekly_help,Analyses the last 7 days.
+hc.account_form.report_month_day,Day of the month
+hc.account_form.report_monthly_help,Analyses from the same day of the previous month until yesterday. In shorter months it is sent on the last day.
+hc.account_form.report_weekdays_required,Select at least one day of the week for the weekly report.
 hc.account_form.status,Status
 hc.account_form.cancel,Cancel
 hc.account_form.saving,Saving...

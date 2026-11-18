@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Button } from '@/components/common/Button'
-import type { Account, AccountContactField, AccountFormData, SupportedLanguage } from '@/lib/types'
+import type { Account, AccountContactField, AccountFormData, OpsReportFrequency, SupportedLanguage } from '@/lib/types'
 import { ACCOUNT_CONTACT_FIELDS, SUPPORTED_LANGUAGES } from '@/lib/types'
 import { useTranslation } from '@/hooks/useTranslation';
 
@@ -20,6 +20,17 @@ const CONTACT_I18N: Record<AccountContactField, string> = {
   email_allocation_plan_manager: 'hc.account_form.allocation_plan_manager_email',
 }
 
+// Días de la semana del informe semanal (ISO 1 = lunes … 7 = domingo) y su clave de traducción.
+const WEEKDAYS: { iso: number; key: string }[] = [
+  { iso: 1, key: 'common.monday' },
+  { iso: 2, key: 'common.tuesday' },
+  { iso: 3, key: 'common.wednesday' },
+  { iso: 4, key: 'common.thursday' },
+  { iso: 5, key: 'common.friday' },
+  { iso: 6, key: 'common.saturday' },
+  { iso: 7, key: 'common.sunday' },
+]
+
 function initialContacts(account?: Account): Record<AccountContactField, string> {
   const out = {} as Record<AccountContactField, string>
   for (const f of ACCOUNT_CONTACT_FIELDS) out[f] = account?.[f] || ''
@@ -33,12 +44,19 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
   const [status, setStatus] = useState<'active' | 'inactive'>(account?.status || 'active')
   const [defaultLanguage, setDefaultLanguage] = useState<SupportedLanguage>(account?.default_language || 'en')
   const [contacts, setContacts] = useState<Record<AccountContactField, string>>(() => initialContacts(account))
+  const [reportFrequency, setReportFrequency] = useState<OpsReportFrequency>(account?.ops_report_frequency || 'never')
+  const [reportWeekdays, setReportWeekdays] = useState<number[]>(account?.ops_report_weekdays || [])
+  const [reportMonthDay, setReportMonthDay] = useState<number>(account?.ops_report_month_day || 1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    if (reportFrequency === 'weekly' && reportWeekdays.length === 0) {
+      setError(t('hc.account_form.report_weekdays_required'))
+      return
+    }
     setLoading(true)
 
     try {
@@ -53,6 +71,9 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
         status,
         default_language: defaultLanguage,
         ...emails,
+        ops_report_frequency: reportFrequency,
+        ops_report_weekdays: reportFrequency === 'weekly' ? [...reportWeekdays].sort((a, b) => a - b) : [],
+        ops_report_month_day: reportFrequency === 'monthly' ? reportMonthDay : null,
       })
     } catch (err) {
       setError(err instanceof Error ? err.message : t('hc.account_form.submit_error'))
@@ -143,6 +164,66 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
             </p>
           </div>
         ))}
+      </fieldset>
+
+      <fieldset className="space-y-3 border border-gray-200 rounded-md p-3">
+        <legend className="text-sm font-medium px-1">{t('hc.account_form.report_title')}</legend>
+        <p className="text-xs text-gray-500">{t('hc.account_form.report_help')}</p>
+        <div>
+          <label htmlFor="ops_report_frequency" className="block text-sm font-medium mb-1">
+            {t('hc.account_form.report_frequency')}
+          </label>
+          <select
+            id="ops_report_frequency"
+            value={reportFrequency}
+            onChange={(e) => setReportFrequency(e.target.value as OpsReportFrequency)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+          >
+            <option value="never">{t('hc.account_form.report_never')}</option>
+            <option value="weekly">{t('hc.account_form.report_weekly')}</option>
+            <option value="monthly">{t('hc.account_form.report_monthly')}</option>
+          </select>
+        </div>
+        {reportFrequency === 'weekly' && (
+          <div>
+            <span className="block text-sm font-medium mb-1">{t('hc.account_form.report_weekdays')}</span>
+            <div className="flex flex-wrap gap-3">
+              {WEEKDAYS.map(({ iso, key }) => (
+                <label key={iso} className="inline-flex items-center gap-1 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={reportWeekdays.includes(iso)}
+                    onChange={(e) =>
+                      setReportWeekdays((prev) =>
+                        e.target.checked ? [...prev, iso] : prev.filter((d) => d !== iso)
+                      )
+                    }
+                  />
+                  {t(key)}
+                </label>
+              ))}
+            </div>
+            <p className="text-xs text-gray-500 mt-1">{t('hc.account_form.report_weekly_help')}</p>
+          </div>
+        )}
+        {reportFrequency === 'monthly' && (
+          <div>
+            <label htmlFor="ops_report_month_day" className="block text-sm font-medium mb-1">
+              {t('hc.account_form.report_month_day')}
+            </label>
+            <select
+              id="ops_report_month_day"
+              value={reportMonthDay}
+              onChange={(e) => setReportMonthDay(Number(e.target.value))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            >
+              {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
+                <option key={d} value={d}>{d}</option>
+              ))}
+            </select>
+            <p className="text-xs text-gray-500 mt-1">{t('hc.account_form.report_monthly_help')}</p>
+          </div>
+        )}
       </fieldset>
 
       {account && (
