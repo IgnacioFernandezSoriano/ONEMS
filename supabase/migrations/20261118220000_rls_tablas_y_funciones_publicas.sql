@@ -21,6 +21,10 @@
 -- ============================================================================================================
 
 
+-- No esperar bloqueos detrás del pipeline RFID ni de lecturas largas: si no se obtiene el bloqueo en 5 s, falla y
+-- se reintenta (aplicar fuera de los minutos :00/:30 del cron).
+SET LOCAL lock_timeout = '5s';
+
 -- ------------------------------------------------------------------------------------------------------------
 -- 1. Activar RLS en las 14 tablas y quitar todo privilegio a anon (ningún camino legítimo usa anon sobre ellas).
 -- ------------------------------------------------------------------------------------------------------------
@@ -54,6 +58,12 @@ GRANT ALL ON TABLE
   public.rfid_events_raw
 TO service_role;
 
+
+-- TRUNCATE no pasa por RLS: authenticated no lo necesita (tampoco REFERENCES/TRIGGER).
+REVOKE TRUNCATE, REFERENCES, TRIGGER ON TABLE
+  public.api_keys, public.api_usage_log, public.journey_segments, public.journeys, public.processed_events,
+  public.purchase_order_items, public.purchase_orders, public.rfid_events_raw
+FROM authenticated;
 
 -- ------------------------------------------------------------------------------------------------------------
 -- 2. Tablas solo de backend: RLS sin políticas y sin privilegios para authenticated.
