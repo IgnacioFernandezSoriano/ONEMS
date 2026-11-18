@@ -353,7 +353,7 @@ auth.wherequalitystarts,حيث تبدأ الجودة
 auth.your_email_com,بريدك الإلكتروني@مثال.com
 bulk.cancelled_records,السجلات الملغاة
 bulk.confirm_cancel,إلغاء السجلات المحددة؟
-bulk.confirm_delete,حذف السجلات المحددة؟
+bulk.confirm_delete,حذف {count} من السجلات؟ يمكنك التراجع عن ذلك بزر تراجع.
 bulk.confirm_reprocess,إعادة معالجة السجلات المحددة؟
 bulk.deleted_records,السجلات المحذوفة
 bulk.please_select_date,يرجى تحديد تاريخ
