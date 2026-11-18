@@ -4,6 +4,19 @@ import type { AllocationPlanDetailWithRelations } from '@/lib/types'
 import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId'
 import { notifyDeferredSamplesChanged } from '@/hooks/useDeferredSamples'
 
+// Columnas reales de allocation_plan_details que el cliente puede cambiar. Los parches de la UI pueden traer
+// campos enriquecidos (plan, origin_node, carrier_id, origin_city_id...) que plan_action_update rechazaría.
+const PLAN_DETAIL_COLUMNS = new Set([
+  'plan_id', 'origin_node_id', 'destination_node_id', 'fecha_programada', 'week_number', 'month', 'year',
+  'status', 'origin_panelist_name', 'destination_panelist_name', 'sent_date', 'delivery_date', 'idtag', 'tag_id',
+  'origin_panelist_id', 'destination_panelist_id', 'assigned_at', 'sent_at', 'delivered_at',
+  'original_origin_node_id', 'original_destination_node_id', 'reassignment_reason', 'reassigned_at',
+  'reassigned_by', 'received_at', 'validation_errors', 'transferred_to_one_db_at', 'transfer_error_message',
+])
+
+const toColumnPatch = (updates: Record<string, any>) =>
+  Object.fromEntries(Object.entries(updates).filter(([k, v]) => PLAN_DETAIL_COLUMNS.has(k) && v !== undefined))
+
 export function useAllocationPlanDetails() {
   const effectiveAccountId = useEffectiveAccountId()
   const [details, setDetails] = useState<AllocationPlanDetailWithRelations[]>([])
@@ -133,12 +146,21 @@ export function useAllocationPlanDetails() {
           .eq('id', id)
 
         if (deleteError) throw deleteError
-      } else {
-        // Normal update for other status changes
+      } else if (updates.status === 'sent') {
+        // Marcar enviado dispara la transferencia a one_db y avisos: va directo y NO entra en la pila de Deshacer
         const { error } = await supabase
           .from('allocation_plan_details')
           .update(updates)
           .eq('id', id)
+
+        if (error) throw error
+      } else {
+        // Edición normal: por RPC para que quede en la pila de Deshacer
+        const { error } = await supabase.rpc('plan_action_update', {
+          p_ids: [id],
+          p_patch: toColumnPatch(updates as Record<string, any>),
+          p_action: 'edit',
+        })
 
         if (error) throw error
       }
@@ -149,12 +171,18 @@ export function useAllocationPlanDetails() {
     }
   }
 
-  const bulkUpdateDetails = async (ids: string[], updates: Partial<AllocationPlanDetailWithRelations>) => {
+  const bulkUpdateDetails = async (
+    ids: string[],
+    updates: Partial<AllocationPlanDetailWithRelations>,
+    action: 'update' | 'cancel' = 'update'
+  ) => {
     try {
-      const { error } = await supabase
-        .from('allocation_plan_details')
-        .update(updates)
-        .in('id', ids)
+      if (!ids || ids.length === 0) return
+      const { error } = await supabase.rpc('plan_action_update', {
+        p_ids: ids,
+        p_patch: toColumnPatch(updates as Record<string, any>),
+        p_action: action,
+      })
 
       if (error) throw error
       await fetchAll()
@@ -163,8 +191,8 @@ export function useAllocationPlanDetails() {
     }
   }
 
-  // deferredIds: filas 'deferred' de la lista (muestras por compensar, tabla deferred_samples). Se borran con la
-  // RPC delete_deferred_samples (la tabla no admite borrado directo).
+  // deferredIds: filas 'deferred' de la lista (muestras por compensar, tabla deferred_samples). Se borran junto
+  // con las demás en una sola RPC (plan_action_delete), que además deja la acción en la pila de Deshacer.
   const bulkDeleteDetails = async (ids: string[], deferredIds: string[] = []) => {
     try {
       // Validate IDs
@@ -180,53 +208,13 @@ export function useAllocationPlanDetails() {
         throw new Error('No valid IDs provided for deletion')
       }
 
-      if (validDeferred.length > 0) {
-        const { data: removed, error: defError } = await supabase.rpc('delete_deferred_samples', {
-          p_ids: validDeferred,
-        })
-        if (defError) throw defError
-        notifyDeferredSamplesChanged()
-        if ((removed ?? 0) < validDeferred.length) {
-          console.warn(`Deferred samples: ${removed} of ${validDeferred.length} deleted`)
-        }
-      }
+      const { error } = await supabase.rpc('plan_action_delete', {
+        p_detail_ids: validIds,
+        p_deferred_ids: validDeferred,
+      })
+      if (error) throw error
+      if (validDeferred.length > 0) notifyDeferredSamplesChanged()
 
-      console.log('Attempting to delete', validIds.length, 'records')
-
-      // Delete records individually in parallel batches of 10 to avoid overwhelming the API
-      const batchSize = 10
-      let deletedCount = 0
-      let failedCount = 0
-      
-      for (let i = 0; i < validIds.length; i += batchSize) {
-        const batch = validIds.slice(i, i + batchSize)
-        
-        const results = await Promise.allSettled(
-          batch.map(id => 
-            supabase
-              .from('allocation_plan_details')
-              .delete()
-              .eq('id', id)
-          )
-        )
-        
-        results.forEach((result, index) => {
-          if (result.status === 'fulfilled' && !result.value.error) {
-            deletedCount++
-          } else {
-            failedCount++
-            console.error(`Failed to delete ID ${batch[index]}:`, 
-              result.status === 'fulfilled' ? result.value.error : result.reason)
-          }
-        })
-      }
-
-      console.log(`Deleted: ${deletedCount}, Failed: ${failedCount}`)
-      
-      if (failedCount > 0) {
-        throw new Error(`Deleted ${deletedCount} records, but ${failedCount} failed`)
-      }
-      
       await fetchAll()
     } catch (err: any) {
       console.error('Bulk delete error:', err)
@@ -269,13 +257,15 @@ export function useAllocationPlanDetails() {
         tag_id: newDetail.tag_id || null,
       }
 
-      const { data, error } = await supabase
-        .from('allocation_plan_details')
-        .insert([validFields])
-        .select()
-        .single()
-
+      const { data: newId, error } = await supabase.rpc('plan_action_create', { p_row: validFields })
       if (error) throw error
+
+      const { data, error: readError } = await supabase
+        .from('allocation_plan_details')
+        .select()
+        .eq('id', newId)
+        .single()
+      if (readError) throw readError
 
       // Refresh data after creation
       await fetchAll()

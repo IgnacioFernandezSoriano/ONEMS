@@ -13,6 +13,9 @@ import { SmartTooltip } from '@/components/common/SmartTooltip'
 import { useTranslation } from '@/hooks/useTranslation';
 import { useAccount } from '@/contexts/AccountContext'
 import { formatInTz } from '@/lib/accountTime'
+import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId'
+import { fetchLastUndo, undoLast, undoLabel, type UndoEntry } from '@/lib/planUndo'
+import { Undo2 } from 'lucide-react'
 export function AllocationPlans() {
   const { t } = useTranslation();
   const { accountTimezone } = useAccount();
@@ -26,13 +29,70 @@ export function AllocationPlans() {
     panelists,
     loading,
     error,
-    updateDetail,
-    createDetail,
+    updateDetail: updateDetailBase,
+    createDetail: createDetailBase,
     markAsSent,
     bulkUpdateDetails,
     bulkDeleteDetails,
     getNodesByCity,
+    refresh,
   } = useAllocationPlanDetails()
+
+  // Deshacer: última acción registrada de la cuenta (plan_undo_log). Sin cuenta efectiva (superadmin sin
+  // cuenta elegida) no hay botón.
+  const effectiveAccountId = useEffectiveAccountId()
+  const [lastUndo, setLastUndo] = useState<UndoEntry | null>(null)
+  const [undoing, setUndoing] = useState(false)
+
+  const reloadLastUndo = async () => {
+    if (!effectiveAccountId) {
+      setLastUndo(null)
+      return
+    }
+    try {
+      setLastUndo(await fetchLastUndo(effectiveAccountId))
+    } catch (err) {
+      console.error('Error loading last undo entry:', err)
+    }
+  }
+
+  useEffect(() => {
+    reloadLastUndo()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [effectiveAccountId])
+
+  // Tras cada acción de la lista se refresca la entrada de Deshacer (aunque la acción falle a medias)
+  const withUndoRefresh = <A extends any[], R>(fn: (...args: A) => Promise<R>) =>
+    async (...args: A): Promise<R> => {
+      try {
+        return await fn(...args)
+      } finally {
+        reloadLastUndo()
+      }
+    }
+  const updateDetail = withUndoRefresh(updateDetailBase)
+  const createDetail = withUndoRefresh(createDetailBase)
+
+  const handleUndo = async () => {
+    if (!lastUndo || !effectiveAccountId) return
+    const label = undoLabel(lastUndo, t)
+    if (!confirm(t('allocation_plans.undo_confirm', { label }))) return
+    try {
+      setUndoing(true)
+      const result = await undoLast(effectiveAccountId)
+      if (result) {
+        let msg = t('allocation_plans.undo_done', { count: result.restored })
+        if (result.skipped > 0) msg += '\n' + t('allocation_plans.undo_skipped', { count: result.skipped })
+        alert(msg)
+      }
+      await refresh()
+    } catch (err: any) {
+      alert(err.message)
+    } finally {
+      setUndoing(false)
+      reloadLastUndo()
+    }
+  }
 
   const [filters, setFilters] = useState({
     planId: '',
@@ -358,12 +418,20 @@ export function AllocationPlans() {
   }
 
   const handleBulkUpdateOriginNode = async (nodeId: string) => {
-    await bulkUpdateDetails(selectedPlanIds(), { origin_node_id: nodeId })
+    try {
+      await bulkUpdateDetails(selectedPlanIds(), { origin_node_id: nodeId })
+    } finally {
+      reloadLastUndo()
+    }
     setSelectedIds(new Set())
   }
 
   const handleBulkUpdateDestinationNode = async (nodeId: string) => {
-    await bulkUpdateDetails(selectedPlanIds(), { destination_node_id: nodeId })
+    try {
+      await bulkUpdateDetails(selectedPlanIds(), { destination_node_id: nodeId })
+    } finally {
+      reloadLastUndo()
+    }
     setSelectedIds(new Set())
   }
 
@@ -374,17 +442,25 @@ export function AllocationPlans() {
     const month = dateObj.getMonth() + 1
     const year = dateObj.getFullYear()
 
-    await bulkUpdateDetails(selectedPlanIds(), {
-      fecha_programada: date,
-      week_number: weekNumber,
-      month,
-      year,
-    })
+    try {
+      await bulkUpdateDetails(selectedPlanIds(), {
+        fecha_programada: date,
+        week_number: weekNumber,
+        month,
+        year,
+      })
+    } finally {
+      reloadLastUndo()
+    }
     setSelectedIds(new Set())
   }
 
   const handleBulkCancel = async () => {
-    await bulkUpdateDetails(selectedPlanIds(), { status: 'cancelled' })
+    try {
+      await bulkUpdateDetails(selectedPlanIds(), { status: 'cancelled' }, 'cancel')
+    } finally {
+      reloadLastUndo()
+    }
     setSelectedIds(new Set())
   }
 
@@ -405,7 +481,11 @@ export function AllocationPlans() {
 
   const handleBulkDelete = async () => {
     const ids = Array.from(selectedIds)
-    await bulkDeleteDetails(ids.filter(id => !deferredIds.has(id)), ids.filter(id => deferredIds.has(id)))
+    try {
+      await bulkDeleteDetails(ids.filter(id => !deferredIds.has(id)), ids.filter(id => deferredIds.has(id)))
+    } finally {
+      reloadLastUndo()
+    }
     setSelectedIds(new Set())
   }
 
@@ -796,6 +876,17 @@ export function AllocationPlans() {
                 </svg>
                 {showIdColumn ? 'Hide' : 'Show'} ID
               </button>
+              {effectiveAccountId && (
+                <button
+                  onClick={handleUndo}
+                  disabled={!lastUndo || undoing}
+                  title={lastUndo ? undoLabel(lastUndo, t) : undefined}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                >
+                  <Undo2 className="w-5 h-5" />
+                  {t('allocation_plans.undo')}
+                </button>
+              )}
               <button
                 onClick={handleExportCSV}
                 disabled={selectedIds.size === 0}
