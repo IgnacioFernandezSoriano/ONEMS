@@ -5243,6 +5243,8 @@ case_analysis.hide_detail,Hide detail
 case_analysis.account_cap,Your account has reached this month's analysis limit. It will be available again on the 1st.
 help_center.doc.case_analysis.title,Case analysis
 help_center.doc.case_analysis.desc,"Analyse a case from ONEMS or from the Telegram analysis bot: what happened and why; messages for the panelists and simple fixes."
+help_center.doc.gps_location.title,GPS location when declaring
+help_center.doc.gps_location.desc,"What the ONE bot records when declaring, the rule that nothing is blocked, the ""GPS location"" incident, the operations report and what to do as a manager."
 reported_incidents.category.gps_location,GPS location
 reported_incidents.gps.col.tag,Tag
 reported_incidents.gps.col.kind,Type

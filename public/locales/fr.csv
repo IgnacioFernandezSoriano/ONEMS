@@ -5235,6 +5235,8 @@ case_analysis.hide_detail,Masquer le détail
 case_analysis.account_cap,Votre compte a atteint la limite d'analyses de ce mois. Elle sera de nouveau disponible le 1er.
 help_center.doc.case_analysis.title,Analyse de cas
 help_center.doc.case_analysis.desc,"Analyser un cas depuis ONEMS ou depuis le bot d'analyse sur Telegram : ce qui s'est passé et pourquoi ; messages aux panélistes et corrections simples."
+help_center.doc.gps_location.title,Localisation GPS lors de la déclaration
+help_center.doc.gps_location.desc,"Ce que le ONE bot enregistre lors de la déclaration, la règle selon laquelle rien n'est bloqué, l'incident « Localisation GPS », le rapport d'opération et que faire en tant que manager."
 reported_incidents.category.gps_location,Localisation GPS
 reported_incidents.gps.col.tag,Étiquette
 reported_incidents.gps.col.kind,Type

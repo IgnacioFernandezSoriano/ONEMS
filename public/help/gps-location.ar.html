@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>مساعدة: الموقع الجغرافي (GPS) عند التصريح</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<style>
+  :root {
+    --white: #ffffff; --g50: #f9fafb; --g100: #f3f4f6; --g200: #e5e7eb; --g300: #d1d5db;
+    --g400: #9ca3af; --g500: #6b7280; --g600: #4b5563; --g700: #374151; --g900: #111827;
+    --b50: #eff6ff; --b100: #dbeafe; --b600: #2563eb; --b700: #1d4ed8;
+    --r100: #fee2e2; --r700: #b91c1c; --gr100: #dcfce7; --gr700: #15803d;
+    --y100: #fef9c3; --y800: #854d0e; --p100: #f3e8ff; --p700: #7e22ce;
+    --tg-head: #517da2; --tg-wall-a: #d4e4bc; --tg-wall-b: #a9cba6; --tg-dot: rgba(255,255,255,.35);
+    --tg-in: #ffffff; --tg-out: #effdde; --tg-ink: #000000; --tg-time: #8a9aa6; --tg-time-out: #5eaf5c;
+    --tg-key: rgba(52, 92, 60, .42); --tg-ring: #ffd23f; --tg-photo: #c7d3dc;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+      'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    -webkit-font-smoothing: antialiased; background: var(--g50); color: var(--g700); line-height: 1.6; font-size: 15px;
+  }
+  .layout { display: flex; min-height: 100vh; }
+
+  /* Sidebar, same look as the ONE menu */
+  .side {
+    width: 272px; flex-shrink: 0; background: var(--white); border-right: 1px solid var(--g200);
+    position: sticky; top: 0; height: 100vh; overflow-y: auto; display: flex; flex-direction: column;
+  }
+  .brand { padding: 24px 24px 16px; }
+  .brand h1 { font-size: 24px; line-height: 32px; font-weight: 700; color: var(--g900); }
+  .brand p { font-size: 14px; color: var(--g500); margin-top: 4px; }
+  .brand .doc { margin-top: 16px; font-size: 12px; font-weight: 600; color: var(--b700); background: var(--b50);
+    display: inline-block; padding: 2px 10px; border-radius: 999px; }
+  .nav { padding: 8px 12px 24px; flex: 1; }
+  .nav h3 { font-size: 12px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--g400);
+    padding: 16px 12px 6px; }
+  .nav a {
+    display: block; padding: 8px 12px; border-radius: 8px; font-size: 14px; font-weight: 500; color: var(--g600);
+    text-decoration: none; transition: background .15s, color .15s;
+  }
+  .nav a:hover { background: var(--g100); }
+  .nav a.active { background: var(--b50); color: var(--b700); }
+  .side-foot { padding: 16px 24px; border-top: 1px solid var(--g200); font-size: 12px; color: var(--g500); }
+
+  /* Content */
+  .main { flex: 1; min-width: 0; padding: 40px 32px 80px; }
+  .page { max-width: 880px; margin: 0 auto; }
+  .page > header { margin-bottom: 32px; }
+  .page > header h2 { font-size: 30px; line-height: 38px; font-weight: 700; color: var(--g900); }
+  .page > header p { margin-top: 8px; font-size: 17px; color: var(--g600); max-width: 640px; }
+  section { margin-top: 48px; }
+  section > h2 { font-size: 22px; font-weight: 700; color: var(--g900); padding-bottom: 8px; margin-bottom: 16px;
+    border-bottom: 1px solid var(--g200); }
+  h3 { font-size: 17px; font-weight: 600; color: var(--g900); margin: 28px 0 8px; }
+  p { margin: 8px 0; }
+  ul, ol { margin: 8px 0 8px 22px; }
+  li { margin: 4px 0; }
+  strong { color: var(--g900); font-weight: 600; }
+  code, kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px;
+    background: var(--g100); border: 1px solid var(--g200); border-radius: 6px; padding: 1px 6px; color: var(--g900); }
+  .card { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 20px 24px; margin: 16px 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 16px 0; }
+  .grid .card { margin: 0; }
+  .card h4 { font-size: 15px; font-weight: 600; color: var(--g900); margin-bottom: 4px; }
+  .card p { margin: 4px 0; font-size: 14px; color: var(--g600); }
+
+  .badge { display: inline-block; font-size: 12px; font-weight: 500; padding: 1px 10px; border-radius: 999px; white-space: nowrap; }
+  .b-red { background: var(--r100); color: var(--r700); }
+  .b-blue { background: var(--b100); color: var(--b700); }
+  .b-green { background: var(--gr100); color: var(--gr700); }
+  .b-yellow { background: var(--y100); color: var(--y800); }
+  .b-gray { background: var(--g100); color: var(--g600); }
+  .b-purple { background: var(--p100); color: var(--p700); }
+  .btn { display: inline-block; font-size: 13px; font-weight: 500; padding: 2px 10px; border-radius: 8px;
+    background: var(--white); border: 1px solid var(--g300); color: var(--g700); white-space: nowrap; }
+  .btn.primary { background: var(--b600); border-color: var(--b600); color: #fff; }
+
+  .callout { border-radius: 12px; padding: 14px 18px; margin: 16px 0; font-size: 14px; border: 1px solid; }
+  .callout.info { background: var(--b50); border-color: var(--b100); color: #1e3a8a; }
+  .callout.ok { background: #f0fdf4; border-color: var(--gr100); color: #14532d; }
+  .callout.warn { background: #fffbeb; border-color: var(--y100); color: var(--y800); }
+  .callout strong { color: inherit; }
+
+  .table-wrap { overflow-x: auto; margin: 16px 0; background: var(--white); border: 1px solid var(--g200); border-radius: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--g500); background: var(--g50); padding: 10px 14px; border-bottom: 1px solid var(--g200); }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--g100); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  td:first-child { font-weight: 500; color: var(--g900); }
+
+  /* Steps */
+  ol.steps { list-style: none; margin: 12px 0; counter-reset: s; }
+  ol.steps > li { counter-increment: s; position: relative; padding: 4px 0 12px 44px; margin: 0; }
+  ol.steps > li::before {
+    content: counter(s); position: absolute; left: 0; top: 2px; width: 28px; height: 28px; border-radius: 50%;
+    background: var(--b100); color: var(--b700); font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Telegram chat mock-ups */
+  .chat { background: #e9eef5; border: 1px solid var(--g200); border-radius: 16px; padding: 16px; margin: 16px 0; max-width: 460px; }
+  .chat .who { text-align: center; font-size: 12px; color: var(--g500); margin-bottom: 8px; font-weight: 500; }
+  .msg { max-width: 85%; padding: 8px 12px; border-radius: 14px; margin: 6px 0; font-size: 14px; line-height: 1.45; box-shadow: 0 1px 1px rgba(0,0,0,.06); }
+  .msg.bot { background: var(--white); border-top-left-radius: 4px; margin-right: auto; color: var(--g900); }
+  .msg.me { background: #dbeafe; border-top-right-radius: 4px; margin-left: auto; color: var(--g900); }
+  .kb { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 8px; max-width: 85%; }
+  .kb span { flex: 1 1 auto; text-align: center; background: rgba(37,99,235,.12); color: var(--b700); font-size: 13px; font-weight: 500;
+    padding: 6px 10px; border-radius: 10px; }
+  .kb.col span { flex-basis: 100%; }
+  .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; align-items: start; }
+  .two .chat { margin: 8px 0; }
+  .cap { font-size: 13px; color: var(--g500); margin-top: -6px; max-width: 460px; }
+
+  /* Flow */
+  .flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; margin: 16px 0; }
+  .flow .node { flex: 1 1 150px; background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 12px 14px; font-size: 13px; position: relative; }
+  .flow .node b { display: block; color: var(--g900); font-size: 14px; margin-bottom: 2px; }
+  .flow .node .tag { font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--b700); }
+  .flow .arrow { align-self: center; color: var(--g400); font-size: 18px; }
+
+  details { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; margin: 8px 0; }
+  summary { cursor: pointer; padding: 14px 18px; font-weight: 600; color: var(--g900); list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: '+'; color: var(--g400); font-size: 20px; line-height: 1; }
+  details[open] summary::after { content: '\2212'; }
+  details > div { padding: 0 18px 14px; color: var(--g600); font-size: 14px; }
+
+  /* ONEMS screen drawings */
+  .app { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; overflow: hidden; margin: 16px 0 6px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .app-bar { display: flex; gap: 6px; align-items: center; background: var(--g100); border-bottom: 1px solid var(--g200); padding: 8px 12px; font-size: 12px; color: var(--g500); }
+  .app-bar i { width: 9px; height: 9px; border-radius: 50%; background: var(--g300); display: inline-block; }
+  .app-bar span { margin-left: 8px; }
+  .app-body { padding: 20px; font-size: 13px; color: var(--g700); overflow-x: auto; }
+  .app-body.cols { display: grid; grid-template-columns: 210px 1fr; padding: 0; }
+  .app-body.cols > .sb { border-right: 1px solid var(--g200); padding: 14px 10px; background: #fff; }
+  .app-body.cols > .ct { padding: 20px; }
+  .sb .t { font-size: 20px; font-weight: 700; color: var(--g900); padding: 0 8px; }
+  .sb .s { font-size: 11px; color: var(--g500); padding: 0 8px 8px; }
+  .sb h5 { font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--g400); padding: 10px 8px 4px; }
+  .mi { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 8px; font-size: 13px; color: var(--g700); }
+  .mi.on { background: var(--b50); color: var(--b600); }
+  .mi .ic { width: 14px; height: 14px; border-radius: 4px; background: var(--g300); flex-shrink: 0; }
+  .mi.on .ic { background: var(--b600); }
+  .mi .badge { margin-left: auto; font-size: 11px; padding: 0 7px; }
+  .m-h { font-size: 18px; font-weight: 700; color: var(--g900); margin-bottom: 12px; }
+  .m-h3 { font-size: 15px; font-weight: 700; color: var(--g900); margin: 0 0 6px; }
+  .m-sel { display: inline-block; border: 1px solid var(--g300); border-radius: 4px; padding: 3px 24px 3px 8px; font-size: 12px; background: #fff; color: var(--g700); margin-right: 8px; position: relative; }
+  .m-sel::after { content: '\25BE'; position: absolute; right: 8px; color: var(--g400); }
+  .m-card { border: 1px solid var(--g200); border-radius: 8px; overflow: hidden; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.05); margin: 10px 0; }
+  .app table { font-size: 12px; }
+  .app th { padding: 8px 12px; font-size: 11px; }
+  .app td { padding: 8px 12px; }
+  .app td:first-child { font-weight: 400; color: inherit; }
+  .app .num { text-align: right; }
+  .m-link { color: var(--b600); }
+  .m-box { border: 1px solid var(--g200); border-radius: 6px; padding: 14px; margin: 10px 0; }
+  .m-note { background: var(--g50); border-radius: 6px; padding: 10px 12px; margin: 8px 0; font-size: 12px; }
+  .m-muted { color: var(--g500); font-size: 12px; }
+  .m-pbtn, .m-sbtn { display: inline-block; padding: 6px 14px; border-radius: 8px; font-size: 12px; margin: 2px 6px 2px 0; }
+  .m-pbtn { background: var(--b600); color: #fff; }
+  .m-sbtn { background: var(--g200); color: var(--g700); }
+  .m-ta { border: 1px solid var(--g300); border-radius: 4px; padding: 8px; font-size: 12px; color: var(--g400); background: #fff; margin: 6px 0 10px; }
+  .m-in { display: inline-block; border: 1px solid var(--g300); border-radius: 4px; padding: 3px 8px; font-size: 12px; background: #fff; min-width: 90px; }
+  .m-bub { max-width: 80%; padding: 6px 10px; border-radius: 10px; margin: 5px 0; font-size: 12px; }
+  .m-bub small { display: block; color: var(--g500); font-size: 10px; margin-top: 2px; }
+  .m-bub.l { background: var(--g100); margin-right: auto; }
+  .m-bub.r { background: var(--b100); margin-left: auto; }
+  .pin { display: inline-flex; width: 20px; height: 20px; border-radius: 50%; background: var(--b600); color: #fff; font-size: 11px; font-weight: 700; align-items: center; justify-content: center; margin-left: 6px; vertical-align: middle; flex-shrink: 0; }
+  .legend { counter-reset: l; list-style: none; margin: 10px 0 20px; }
+  .legend li { counter-increment: l; position: relative; padding: 2px 0 6px 34px; font-size: 14px; }
+  .legend li::before { content: counter(l); position: absolute; left: 0; top: 1px; width: 20px; height: 20px; border-radius: 50%; background: var(--b600); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .heat td { text-align: center; }
+  .heat .ok { background: #f0fdf4; } .heat .hi { background: var(--y100); } .heat .sat { background: var(--r100); }
+  .heat .off { background: repeating-linear-gradient(45deg, var(--g100), var(--g100) 4px, #fff 4px, #fff 8px); color: var(--g400); }
+  .heat .now { outline: 2px solid var(--b600); outline-offset: -2px; }
+
+  /* Right-to-left (Arabic) */
+  [dir=rtl] .side { border-right: 0; border-left: 1px solid var(--g200); }
+  [dir=rtl] .app-body.cols > .sb { border-right: 0; border-left: 1px solid var(--g200); }
+  [dir=rtl] th, [dir=rtl] td, [dir=rtl] .nav a { text-align: right; }
+  [dir=rtl] ul, [dir=rtl] ol { margin: 8px 22px 8px 0; }
+  [dir=rtl] ol.steps > li { padding: 4px 44px 12px 0; }
+  [dir=rtl] ol.steps > li::before { left: auto; right: 0; }
+  [dir=rtl] .legend li { padding: 2px 34px 6px 0; }
+  [dir=rtl] .legend li::before { left: auto; right: 0; }
+  [dir=rtl] .msg.bot { border-top-left-radius: 14px; border-top-right-radius: 4px; margin-right: 0; margin-left: auto; }
+  [dir=rtl] .msg.me { border-top-right-radius: 14px; border-top-left-radius: 4px; margin-left: 0; margin-right: auto; }
+  [dir=rtl] .m-bub.l { margin-right: 0; margin-left: auto; }
+  [dir=rtl] .m-bub.r { margin-left: 0; margin-right: auto; }
+  [dir=rtl] .pin { margin-left: 0; margin-right: 6px; }
+  [dir=rtl] .m-sel { padding: 3px 8px 3px 24px; margin-right: 0; margin-left: 8px; }
+  [dir=rtl] .m-sel::after { right: auto; left: 8px; }
+  [dir=rtl] .m-pbtn, [dir=rtl] .m-sbtn { margin: 2px 0 2px 6px; }
+  [dir=rtl] .mi .badge { margin-left: 0; margin-right: auto; }
+  [dir=rtl] .app-bar span { margin-left: 0; margin-right: 8px; }
+  [dir=rtl] .flow .arrow { transform: scaleX(-1); }
+  [dir=rtl] .app td:first-child { font-weight: 400; }
+  /* Telegram (canonical, from panelist-guide) and practical cases */
+  .case { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 20px 24px; margin: 16px 0; scroll-margin-top: 24px; }
+  .case > h3 { margin: 0; display: flex; gap: 10px; align-items: center; }
+  .case > .sit { color: var(--g500); font-size: 14px; margin: 2px 0 12px; }
+  .case .callout { margin: 8px 0; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+  .chips a { text-decoration: none; font-size: 13px; font-weight: 500; padding: 4px 12px; border-radius: 999px;
+    background: var(--white); border: 1px solid var(--g200); color: var(--g700); }
+  .chips a:hover { background: var(--b50); border-color: var(--b100); color: var(--b700); }
+  .tg { max-width: 380px; border-radius: 16px; overflow: hidden; border: 1px solid var(--g200);
+    box-shadow: 0 4px 16px rgba(17,24,39,.10); background: var(--tg-in); }
+  .tg-head { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: var(--tg-head); color: #ffffff; }
+  .tg-back { font-size: 20px; line-height: 1; opacity: .9; }
+  .tg-av { width: 36px; height: 36px; border-radius: 50%; flex: none; display: grid; place-items: center;
+    background: linear-gradient(160deg, #72c2f4, #3d8fd9); color: #ffffff; font-weight: 700; font-size: 12px; }
+  .tg-name { flex: 1; min-width: 0; line-height: 1.2; }
+  .tg-name b { display: block; font-size: 15px; color: #ffffff; font-weight: 600; }
+  .tg-name small { font-size: 12.5px; opacity: .8; }
+  .tg-body { display: flex; flex-direction: column; gap: 6px; padding: 12px 10px 14px;
+    background-color: var(--tg-wall-a);
+    background-image: radial-gradient(var(--tg-dot) 1.4px, transparent 1.6px), linear-gradient(160deg, var(--tg-wall-a), var(--tg-wall-b));
+    background-size: 18px 18px, 100% 100%; }
+  .tg-msg { max-width: 84%; padding: 6px 9px 7px 10px; border-radius: 12px; font-size: 14.5px; line-height: 1.38; color: var(--tg-ink);
+    box-shadow: 0 1px 1px rgba(0,0,0,.13); overflow-wrap: anywhere; }
+  .tg-msg.in { background: var(--tg-in); align-self: flex-start; border-bottom-left-radius: 4px; }
+  .tg-msg.out { background: var(--tg-out); align-self: flex-end; border-bottom-right-radius: 4px; }
+  .tg-msg .t { float: right; font-size: 11px; color: var(--tg-time); margin: 8px 0 -4px 10px; line-height: 1; }
+  .tg-msg.out .t { color: var(--tg-time-out); }
+  .tg-msg.out .t::after { content: " \2713\2713"; letter-spacing: -2px; }
+  .tg-msg.photo { padding: 3px; }
+  .tg-msg.photo .img { display: grid; place-items: center; width: 170px; height: 104px; border-radius: 10px; background: var(--tg-photo); font-size: 30px; }
+  .tg-msg.photo .t { position: relative; margin: -18px 8px 4px 0; }
+  .tg-kb { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; align-self: flex-start; width: 84%; margin-top: -2px; }
+  .tg-kb.one { grid-template-columns: 1fr; }
+  .tg-kb span { background: var(--tg-key); color: #ffffff; border-radius: 8px; padding: 7px 6px; text-align: center; font-size: 13.5px; font-weight: 600; }
+  .tg-kb span.tap { box-shadow: inset 0 0 0 2px var(--tg-ring); }
+  .tg-kb span.tap::after { content: " \1F446"; }
+  .tg-input { display: flex; align-items: center; gap: 12px; padding: 9px 14px; background: #ffffff; color: var(--tg-time); font-size: 14px; }
+  .tg-input .ph { flex: 1; }
+  [dir=rtl] .tg-msg.in { border-bottom-left-radius: 12px; border-bottom-right-radius: 4px; }
+  [dir=rtl] .tg-msg.out { border-bottom-right-radius: 12px; border-bottom-left-radius: 4px; }
+  [dir=rtl] .tg-msg .t { float: left; margin: 8px 10px -4px 0; }
+  [dir=rtl] .tg-back { transform: scaleX(-1); }
+  @media (max-width: 900px) {
+    .case { padding: 16px; }
+    .tg { max-width: none; }
+  }
+  .mobile-top { display: none; }
+  @media (max-width: 900px) {
+    .app-body.cols { grid-template-columns: 1fr; }
+    .app-body.cols > .sb { border-right: 0; border-bottom: 1px solid var(--g200); }
+    .layout { display: block; }
+    .side { display: none; }
+    .mobile-top { display: block; position: sticky; top: 0; z-index: 5; background: var(--white); border-bottom: 1px solid var(--g200); padding: 10px 16px; }
+    .mobile-top b { font-size: 18px; color: var(--g900); }
+    .mobile-top span { font-size: 13px; color: var(--g500); margin-left: 6px; }
+    .mobile-top select { width: 100%; margin-top: 8px; padding: 8px; border: 1px solid var(--g300); border-radius: 8px; font-size: 14px; background: #fff; color: var(--g700); }
+    .main { padding: 24px 16px 64px; }
+    .page > header h2 { font-size: 24px; line-height: 32px; }
+  }
+  @media print { .side, .mobile-top { display: none; } .main { padding: 0; } body { background: #fff; } section { break-inside: avoid-page; } }
+</style>
+</head>
+<body>
+<div class="mobile-top">
+  <b>ONE</b><span>for Regulators &middot; مساعدة</span>
+  <select id="jump" aria-label="الانتقال إلى قسم"></select>
+</div>
+<div class="layout">
+  <aside class="side">
+    <div class="brand">
+      <h1>ONE</h1>
+      <p>for Regulators</p>
+      <span class="doc">مساعدة &middot; الموقع الجغرافي (GPS)</span>
+    </div>
+    <nav class="nav" id="nav">
+      <h3>البدء</h3>
+      <a href="#overview">ما هو ولماذا</a>
+      <a href="#rule">القاعدة الذهبية</a>
+      <h3>أعضاء اللجنة على Telegram</h3>
+      <a href="#consent">الإذن</a>
+      <a href="#share">مشاركة الموقع</a>
+      <a href="#no-position">إذا لم يصل الموقع</a>
+      <h3>المديرون في ONEMS</h3>
+      <a href="#incident">حادثة «الموقع الجغرافي (GPS)»</a>
+      <a href="#statuses">حالات الموقع</a>
+      <a href="#report">تقرير التشغيل</a>
+      <a href="#todo">ما الذي يجب فعله</a>
+      <h3>مرجع</h3>
+      <a href="#privacy">الخصوصية</a>
+      <a href="#faq">أسئلة</a>
+    </nav>
+    <div class="side-foot">آخر تحديث: <span dir="ltr">18</span> نوفمبر <span dir="ltr">2026</span></div>
+  </aside>
+
+  <main class="main">
+  <div class="page">
+    <header>
+      <h2>الموقع الجغرافي (GPS) عند التصريح</h2>
+      <p>يسجّل ONE bot موقع هاتف عضو اللجنة عندما يصرّح بشحنة أو باستلام. وهكذا يمكنك التحقق من أنه يفعل ذلك في مكتب البريد أو في صندوق بريده، ومعرفة من لا يقدّم موقعه.</p>
+    </header>
+
+    <section id="overview">
+      <h2>ما هو ولماذا</h2>
+      <div class="grid">
+        <div class="card"><h4>عند التصريح فقط</h4><p>يطلب البوت الموقع عندما يبدأ عضو اللجنة بتأكيد شحنة أو استلام. لا يوجد أبدًا تتبّع مستمر.</p></div>
+        <div class="card"><h4>يُقارَن بالمكتب</h4><p>يقيس ONEMS المسافة إلى <strong>أقرب مركز بريدي في مدينة عضو اللجنة</strong> له إحداثيات.</p></div>
+        <div class="card"><h4>تراه في مكانين</h4><p>في <strong>الحوادث &rsaquo; الحوادث المبلَّغ عنها</strong> (الفئة <em>الموقع الجغرافي (GPS)</em>) وفي <strong>تقرير التشغيل</strong> المرسل بالبريد الإلكتروني.</p></div>
+      </div>
+      <div class="callout warn"><strong>إنه مؤشر وليس دليلًا قاطعًا.</strong> يمكن تزييف الموقع بتطبيقات خاصة، وقد يكون الموقع الذي تعطيه شبكة الهاتف (بدون GPS) خاطئًا بمئات الأمتار. استخدمه لاكتشاف الأنماط والتحدث مع عضو اللجنة، لا لمعاقبته على حالة منفردة.</div>
+    </section>
+
+    <section id="rule">
+      <h2>القاعدة الذهبية</h2>
+      <div class="callout ok"><strong>لا يُحجب أي تصريح ولا يضيع بسبب GPS أبدًا.</strong> إذا لم يمنح عضو اللجنة الإذن، أو لم يشارك موقعه، أو تعطّل GPS لديه، تُسجَّل الشحنة أو الاستلام رغم ذلك. تُسجَّل فقط حالة الموقع، وتُفتح لك حادثة إذا لزم الأمر.</div>
+    </section>
+
+    <section id="consent">
+      <h2>الإذن</h2>
+      <p>في المرة الأولى التي سيطلب فيها البوت الموقع، يسأل عضو اللجنة أولًا إن كان يسمح بذلك، بالزرين <strong>✅ أوافق</strong> / <strong>❌ لا أوافق</strong>. يُطرح السؤال <strong>مرة واحدة فقط</strong>.</p>
+      <ul>
+        <li>يُسجَّل <strong>النص الحرفي</strong> الذي رآه، بلغته، ووقت الرد ومضمونه. يتألف النص الحالي (الإصدار <span dir="ltr">3</span>) من قسمين: <em>ما نفعله</em> و<em>ما لا نفعله</em>: يُطلب الموقع عند التصريح فقط، ويُستخدم فقط للتحقق من مكتب البريد أو صندوق البريد، ولا يراه إلا <em>المسؤولون عن حسابه والفريق التقني للاتحاد البريدي العالمي (UPU)</em>، ويُحذف بعد 12 شهرًا، ولا تتبّع أبدًا، ولا يأخذه البوت من تلقاء نفسه، ولا يُحفظ إن لم يوافق، ولا يُشارك.</li>
+        <li><strong>الزرّان ✅ / ❌ للاستخدام مرة واحدة</strong>: بعد الضغط تتحول الرسالة إلى <em>«✅ لقد وافقت…»</em> أو <em>«❌ لم توافق…»</em>، وتعرض رسالة لاحقة <strong>📋 عرض الشحنات المعلقة</strong> و<strong>📥 تأكيد استلام</strong> و<strong>🏠 الرئيسية</strong>.</li>
+        <li>إذا لم يرد وصرّح رغم ذلك، يُطرح عليه السؤال مرة أخرى في الزيارة التالية.</li>
+        <li>يمكنه تغيير قراره في أي وقت من <strong>📖 مساعدة &larr; 📍 إذن الموقع</strong>. يُسجَّل كل تغيير.</li>
+        <li>إذا لم يوافق، لا يطلب منه البوت الموقع مرة أخرى، وتصلك <strong>حادثة واحدة</strong> للتحدث معه.</li>
+        <li><strong>يمكنه حذف بيانات موقعه</strong>: <strong>📖 مساعدة &larr; 📍 إذن الموقع &larr; 🗑 حذف بيانات موقعي</strong> ثم التأكيد. تُحذف إحداثيات <strong>جميع</strong> تصريحاته ودقتها ومسافتها (ومسافة حوادث GPS الخاصة به). تحتفظ التصريحات بحالة الموقع (سليم، بعيد، بلا موقع…) وتبقى صالحة. يُحفظ سجلّ الأذونات كدليل قانوني. يُسجَّل كل حذف (من، ومتى، وكم صفًا) في الجدول <span dir="ltr"><code>gps_erasure_log</code></span>.</li>
+        <li><strong>الحذف لا يسحب الإذن.</strong> إذا بقي عضو اللجنة على «موافق»، فستُحفظ مواقع جديدة في تصريحاته القادمة. ولتفادي ذلك عليه اختيار <strong>❌ لا أوافق</strong>.</li>
+      </ul>
+    </section>
+
+    <section id="share">
+      <h2>مشاركة الموقع</h2>
+      <div class="two">
+        <div class="tg" aria-label="مثال: الإذن ومشاركة الموقع عند تأكيد شحنة">
+          <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
+          <div class="tg-body">
+            <div class="tg-kb one"><span class="tap">تأكيد شحنة</span></div>
+            <div class="tg-msg in">📍 موقعك عند التصريح<br><br>✅ ما نفعله<br>📍 نطلب موقعك فقط عندما تؤكد إرسالية أو استلامًا.<br>🏤 نستخدمه فقط للتحقق من أنك تصرّح في مكتب البريد أو في صندوق بريدك.<br>👥 لا يراه سوى المسؤولين عن حسابك والفريق التقني للاتحاد البريدي العالمي (UPU).<br>🗓️ نحذف الإحداثيات بعد 12 شهرًا.<br><br>🚫 ما لا نفعله<br>❌ لا نتتبّعك: لا بشكل مستمر ولا في الخلفية أبدًا.<br>❌ لا نأخذه بأنفسنا أبدًا: يُرسَل فقط عندما تضغط على «📍 مشاركة موقعي».<br>❌ لا نحفظ موقعك إذا لم توافق.<br>❌ لا نشاركه مع أي جهة أخرى.<br><br>🔄 يمكنك تغيير قرارك أو حذف بياناتك في أي وقت: 📖 مساعدة ← 📍 إذن الموقع.<br><br>هل توافق؟<span class="t">09:12</span></div>
+            <div class="tg-kb one"><span class="tap">✅ أوافق</span><span>❌ لا أوافق</span></div>
+            <div class="tg-msg in">📍 شارك موقعك لتسجيل مكان التصريح. إذا كانت خدمة الموقع في هاتفك مطفأة، فعّلها أولًا من الإعدادات (لا يستطيع تيليجرام تشغيلها). ثم اضغط زر «📍 مشاركة موقعي» الذي يظهر في الأسفل بدلًا من لوحة المفاتيح (إذا لم تره، المس رمز ⌨ بجانب خانة الكتابة). يمكنك مواصلة التصريح على أي حال.<span class="t">09:12</span></div>
+            <div class="tg-msg in">✅ تم تسجيل الموقع. شكرًا!<span class="t">09:13</span></div>
+          </div>
+          <div class="tg-kb one" style="width:100%;margin:0;padding:6px;background:var(--tg-wall-b)"><span class="tap">📍 مشاركة موقعي</span><span>🚫 نظام GPS لا يعمل عندي</span></div>
+        </div>
+        <div>
+          <ol class="steps">
+            <li>عندما يضغط عضو اللجنة <span class="btn">تأكيد شحنة</span> أو <span class="btn">تأكيد استلام</span>، يطلب البوت الموقع <strong>مرة واحدة في كل زيارة</strong>: الموقع الصالح يغطي كل ما يصرّح به خلال الـ<strong><span dir="ltr">30</span> دقيقة</strong> التالية.</li>
+            <li>في الأسفل، بدلًا من لوحة المفاتيح، يظهر الزر <strong>📍 مشاركة موقعي</strong>. إذا لم يره، يلمس أيقونة ⌨ بجانب مربع النص.</li>
+            <li>يجب تشغيل الموقع في <strong>الإعدادات</strong> على الهاتف: لا يستطيع Telegram تشغيله.</li>
+            <li>يحذف البوت رسالة الموقع من المحادثة ثم يعرض من جديد الشحنة المختارة أو وضع الاستلام أو القائمة، ليتابع من حيث توقف.</li>
+          </ol>
+          <div class="callout info"><strong>Telegram على الكمبيوتر</strong> لا يستطيع إرسال الموقع. يجب أن يصرّح عضو اللجنة من الهاتف.</div>
+        </div>
+      </div>
+      <p class="cap">لوحة الأزرار في الأسفل تحل محل لوحة مفاتيح الهاتف. قد تتغير رسائل البوت قليلًا.</p>
+    </section>
+
+    <section id="no-position">
+      <h2>إذا لم يصل الموقع</h2>
+      <p>يمكن لعضو اللجنة أن يصرّح دون مشاركة موقعه: لا يُطلب منه الانتظار أبدًا. إذا صرّح ولم يصل الموقع، ينبّهه البوت <strong>بعد</strong> نتيجة التصريح، مرة واحدة في كل زيارة، مع خطوات أندرويد وآيفون.</p>
+      <div class="two">
+        <div class="tg" aria-label="مثال: تنبيه بعدم الحصول على الموقع">
+          <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
+          <div class="tg-body">
+            <div class="tg-msg out photo"><div class="img">🖼️</div><span class="t">10:41</span></div>
+            <div class="tg-msg in">⚠️ لم نتمكن من الحصول على موقعك.<br><br>طريقة التفعيل:<br>&bull; أندرويد: الإعدادات &larr; الموقع: مفعّل. تيليجرام &larr; الأذونات &larr; الموقع: «السماح أثناء استخدام التطبيق فقط» و«استخدام الموقع الدقيق» مفعّل.<br>&bull; آيفون: الإعدادات &larr; الخصوصية &larr; خدمات الموقع: مفعّلة &larr; تيليجرام: «أثناء استخدام التطبيق» و«الموقع الدقيق» مفعّل.<br><br>لا يستطيع تيليجرام تشغيل الموقع: فعّله بنفسك من الإعدادات. ثم اضغط «📍 مشاركة موقعي» الذي يظهر في الأسفل بدلًا من لوحة المفاتيح (إذا لم تره، المس رمز ⌨ بجانب خانة الكتابة)، أو «🚫 نظام GPS لا يعمل عندي».<span class="t">10:41</span></div>
+            <div class="tg-msg out">🚫 نظام GPS لا يعمل عندي<span class="t">10:42</span></div>
+            <div class="tg-msg in">شكرًا، أخذنا ذلك في الاعتبار. يمكنك مواصلة التصريح كالمعتاد.<span class="t">10:42</span></div>
+          </div>
+          <div class="tg-input"><span>📎</span><span class="ph">رسالة</span><span>🎤</span></div>
+        </div>
+        <div>
+          <ul>
+            <li>إذا شارك موقعًا صالحًا <strong>خلال <span dir="ltr">30</span> دقيقة</strong>، يُطبَّق أيضًا على ما صرّح به في تلك الزيارة.</li>
+            <li>إذا كان الموقع <strong>غير دقيق</strong> (هامش أكبر من <span dir="ltr">200 m</span>)، يطلب منه البوت تفعيل الموقع الدقيق والمحاولة مجددًا. في المرة الثانية يُقبَل كما هو.</li>
+            <li>إذا ضغط <strong>🚫 نظام GPS لا يعمل عندي</strong>، يتوقف البوت عن طلبه في تلك الزيارة، وستراه أنت في الحادثة.</li>
+          </ul>
+          <div class="callout info">لا يُقال لعضو اللجنة أبدًا إنه بعيد عن المكتب ولا إن حادثة قد فُتحت.</div>
+        </div>
+      </div>
+      <p class="cap">يشرح دليل عضو اللجنة الأمر نفسه في قسم <a href="panelist-guide.ar.html#c-gps"><em>الموقع (GPS)</em></a>. قد تتغير رسائل البوت قليلًا.</p>
+    </section>
+
+    <section id="incident">
+      <h2>حادثة «الموقع الجغرافي (GPS)»</h2>
+      <p>كل مشكلة في GPS تفتح حادثة من فئة <strong>الموقع الجغرافي (GPS)</strong> في <strong>الحوادث &rsaquo; الحوادث المبلَّغ عنها</strong>.</p>
+      <ul>
+        <li><strong>حادثة واحدة لكل زيارة</strong>، لا لكل طرد: تجمع كل الشحنات والاستلامات في تلك الزيارة، مع البطاقة والنوع (<em>مرسل</em> / <em>مستلم</em>) والحالة و<em>المسافة عن الموقع المرجعي</em>.</li>
+        <li>تُفتح عندما يبقى تصريح بلا موقع، أو مع «GPS لا يعمل»، أو بموقع غير دقيق أو بعيد عن المكتب.</li>
+        <li>تصبح <span class="badge b-green">تم الحل تلقائيًا</span> إذا وصل موقع صالح خلال <span dir="ltr">30</span> دقيقة وأصبحت كل تصريحاتها صحيحة.</li>
+        <li>إذا ضغط عضو اللجنة <strong>❌ لا أوافق</strong>، تُفتح <strong>حادثة واحدة فقط</strong> (لا واحدة لكل زيارة) بالنص <em>لم يمنح المشارك إذنًا بتسجيل موقعه</em>.</li>
+      </ul>
+      <div class="callout ok"><strong>وبعد ذلك:</strong> تحدّث مع عضو اللجنة إذا لزم الأمر وأغلق الحادثة بملاحظة، مثل أي حادثة أخرى. الشحنة أو الاستلام مسجّلان بالفعل: لا شيء لإصلاحه فيهما.</div>
+    </section>
+
+    <section id="statuses">
+      <h2>حالات الموقع</h2>
+      <p>تحتفظ كل شحنة وكل استلام بإحدى هذه الحالات. التصريحات السابقة لبدء التشغيل ليست لها حالة ولا تُحتسب.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>الحالة</th><th>المعنى</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge b-green">صحيح</span></td><td>وصل الموقع، وهو دقيق وعلى بعد أقل من <span dir="ltr">500 m</span> من المكتب المرجعي.</td></tr>
+          <tr><td><span class="badge b-red">بعيد جدًا عن الموقع المرجعي</span></td><td>على بعد أكثر من <strong><span dir="ltr">500 m</span></strong> من المكتب المرجعي بعد خصم هامش الدقة. يظهر أيضًا إذا صرّح من مدينة أخرى.</td></tr>
+          <tr><td><span class="badge b-yellow">دقة GPS منخفضة</span></td><td>أعطى الهاتف الموقع بهامش أكبر من <strong><span dir="ltr">200 m</span></strong> (عادةً موقع من الشبكة، بدون GPS).</td></tr>
+          <tr><td><span class="badge b-gray">لا يوجد موقع مرجعي</span></td><td>لا يوجد مركز بريدي له إحداثيات في مدينة عضو اللجنة: لا يمكن قياس المسافة.</td></tr>
+          <tr><td><span class="badge b-yellow">لم يتم استلام الموقع</span></td><td>صرّح دون مشاركة موقعه.</td></tr>
+          <tr><td><span class="badge b-yellow">GPS غير متاح</span></td><td>ضغط <strong>🚫 نظام GPS لا يعمل عندي</strong>.</td></tr>
+          <tr><td><span class="badge b-red">لم يتم منح الإذن</span></td><td>لم يوافق على إذن الموقع.</td></tr>
+          <tr><td><span class="badge b-gray">لا يوجد رد</span></td><td>صرّح دون الرد على سؤال الإذن. سيُطرح عليه السؤال مرة أخرى.</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="report">
+      <h2>تقرير التشغيل</h2>
+      <p>يعرض التقرير المرسل بالبريد الإلكتروني أيام الاثنين والأربعاء والجمعة معلومات GPS في ثلاثة أماكن. يُكتب التقرير بالإنجليزية أو الإسبانية أو الفرنسية؛ لذلك نذكر هنا الأسماء بالإنجليزية.</p>
+      <h3>عمود «GPS» (ملحق أعضاء اللجنة)</h3>
+      <p>يعرض <span dir="ltr"><code>ok/total</code></span> خلال الفترة، وإن وُجد، عدد المواقع البعيدة (<span dir="ltr">far</span>) أو غياب الإذن (<span dir="ltr">no permission</span>). مثال: <span dir="ltr"><code>7/10 · 2 far</code></span>.</p>
+      <ul>
+        <li><span class="badge b-yellow">برتقالي</span> إذا كان أقل من <span dir="ltr">80%</span> من تصريحاته بموقع صحيح، أو إذا كان أحدها بعيدًا.</li>
+        <li><span class="badge b-red">أحمر</span> إذا لم يمنح الإذن، أو إذا كان لديه <span dir="ltr">3</span> تصريحات أو أكثر وليس بينها أي تصريح صحيح.</li>
+      </ul>
+      <h3>القسم «<span dir="ltr">7. Who is not registering with GPS</span>» (من لا يسجّل بـ GPS)</h3>
+      <p>يسرد أعضاء اللجنة مع مدينتهم والسبب الرئيسي وعدد التصريحات المتأثرة. الأسباب هي: لم يمنح الإذن، يقول إن GPS لديه لا يعمل، لا يرسل الموقع، لم يرد على طلب الإذن، والموقع غير دقيق.</p>
+      <div class="callout info">من <strong>يرسل موقعه لكنه بعيد</strong> لا يظهر في هذا القسم: ستراه في عمود <em>GPS</em> وفي عمود <em><span dir="ltr">Unusual registration</span></em> (تسجيل غير معتاد: «<span dir="ltr">N with position far from the office</span>»).</div>
+      <h3>مراجعة الإعدادات</h3>
+      <ul>
+        <li><strong><span dir="ltr">GPS reference: cities without an office with coordinates</span></strong> (مدن بلا مكتب له إحداثيات): لا يمكن التحقق من موقع أعضاء اللجنة فيها.</li>
+        <li><strong><span dir="ltr">Doubtful GPS reference</span></strong> (مرجع GPS مشكوك فيه): في تلك المدينة يتجاوز وسيط المسافة بين المواقع والمكتب <span dir="ltr">500 m</span>. الأرجح أن إحداثيات المركز البريدي خاطئة، لا عضو اللجنة. صحّحها في <strong>المراكز البريدية</strong>.</li>
+      </ul>
+    </section>
+
+    <section id="todo">
+      <h2>ما الذي يجب فعله</h2>
+      <ol class="steps">
+        <li>راجع قسم <strong><span dir="ltr">Who is not registering with GPS</span></strong> في التقرير واتصل بأعضاء اللجنة المذكورين.</li>
+        <li>اطلب منهم التصريح <strong>من الهاتف</strong>، مع تشغيل الموقع في الإعدادات، والضغط على <strong>📍 مشاركة موقعي</strong>. ذكّرهم بأن دليل عضو اللجنة فيه قسم <em>الموقع (GPS)</em>.</li>
+        <li>إذا لم يمنح عضو اللجنة الإذن، اشرح له الغرض منه وأنه يستطيع تغييره من <strong>📖 مساعدة &larr; 📍 إذن الموقع</strong>. القرار قراره.</li>
+        <li>إذا ظهر <strong><span dir="ltr">Doubtful GPS reference</span></strong> أو <strong><span dir="ltr">cities without an office with coordinates</span></strong>، راجع إحداثيات المراكز البريدية في تلك المدينة في <strong>المراكز البريدية</strong>.</li>
+        <li>إذا ظهر عضو لجنة بعيدًا بشكل متكرر وكان المرجع صحيحًا، تحدّث معه قبل استخلاص النتائج.</li>
+      </ol>
+      <div class="callout ok"><strong>وبعد ذلك:</strong> يُظهر التقرير التالي التغيير. تستخدم مراجعة المرجع مواقع فترة التقرير فقط، لذا تختفي الإحداثية المصحَّحة من التقرير التالي.</div>
+    </section>
+
+    <section id="privacy">
+      <h2>الخصوصية</h2>
+      <ul>
+        <li>يُطلب الموقع <strong>عند التصريح فقط</strong>. لا يوجد أبدًا تتبّع مستمر ولا موقع مباشر.</li>
+        <li>يراه مستخدمو حساب عضو اللجنة والمشرف العام (<span dir="ltr">superadmin</span>) في UPU. لا يراه أي حساب آخر.</li>
+        <li><strong>تُحذف الإحداثيات الدقيقة بعد <span dir="ltr">12</span> شهرًا</strong> (مهمة يومية)، أو قبل ذلك إذا حذفها عضو اللجنة من البوت. تُحفظ المسافة والحالة.</li>
+        <li>سجلّ كل إذن (النص المعروض واللغة والتاريخ والرد) <strong>يُحفظ دائمًا</strong>، حتى إذا حُذف عضو اللجنة. ويُسجَّل أيضًا كل حذف لبيانات الموقع (<span dir="ltr"><code>gps_erasure_log</code></span>).</li>
+        <li>سجلّ تفاعلات البوت لا يحفظ أي إحداثيات ويُحذف بعد <strong><span dir="ltr">60</span> يومًا</strong>.</li>
+        <li>الموقع <strong>لا يبقى أبدًا في السجل التقني لـ <span dir="ltr">n8n</span></strong>: لا يحتفظ البوت بعمليات التنفيذ الناجحة، ولم تعد الإحداثيات تُمرَّر إلى المسارات الفرعية، وتحذف مهمة يومية على خادم العمليات أي عملية تنفيذ تحتوي على موقع (مثل عمليات التنفيذ الفاشلة) خلال 24 ساعة.</li>
+      </ul>
+    </section>
+
+    <section id="faq">
+      <h2>أسئلة</h2>
+      <details><summary>هل يمكن إجبار عضو اللجنة على إعطاء موقعه؟</summary><div>لا. الموقع لا يحجب أي تصريح أبدًا، والإذن قرار عضو اللجنة. ترى أنت من لا يعطيه ويمكنك التحدث معه.</div></details>
+      <details><summary>يظهر عضو لجنة «بعيدًا» وهو في المكتب. لماذا؟</summary><div>في الغالب تكون إحداثيات المركز البريدي المرجعي خاطئة، أو أن مكتبه ليس المركز البريدي المسجَّل. راجع <strong>المراكز البريدية</strong>. وقد يكون أيضًا موقعًا من الشبكة غير دقيق.</div></details>
+      <details><summary>لماذا توجد حادثة حُلّت وحدها؟</summary><div>صرّح عضو اللجنة قبل مشاركة موقعه ثم شاركه خلال <span dir="ltr">30</span> دقيقة. طُبّق الموقع على الزيارة كلها.</div></details>
+      <details><summary>هل يمكن لعضو اللجنة التصريح من الكمبيوتر؟</summary><div>نعم، لكن Telegram على الكمبيوتر لا يرسل الموقع: ستبقى تلك التصريحات بلا موقع.</div></details>
+      <details><summary>هل توجد خريطة للمواقع في ONEMS؟</summary><div>ليس حاليًا. المعلومات موجودة في الحادثة وفي تقرير التشغيل.</div></details>
+    </section>
+  </div>
+  </main>
+</div>
+
+<script>
+(function () {
+  var links = Array.prototype.slice.call(document.querySelectorAll('#nav a'));
+  var sections = links.map(function (a) { return document.querySelector(a.getAttribute('href')); }).filter(Boolean);
+
+  // Mobile section picker
+  var jump = document.getElementById('jump');
+  links.forEach(function (a) {
+    var o = document.createElement('option');
+    o.value = a.getAttribute('href'); o.textContent = a.textContent; jump.appendChild(o);
+  });
+  jump.addEventListener('change', function () { location.hash = jump.value; });
+
+  // Highlight the current section in the side menu
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          links.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id); });
+          jump.value = '#' + e.target.id;
+        }
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    sections.forEach(function (s) { io.observe(s); });
+  }
+})();
+</script>
+</body>
+</html>
