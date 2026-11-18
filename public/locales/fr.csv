@@ -353,7 +353,7 @@ auth.wherequalitystarts,WhereQualityStarts
 auth.your_email_com,votre@email.com
 bulk.cancelled_records,{count} enregistrements annulés
 bulk.confirm_cancel,Annuler {count} enregistrements sélectionnés ?
-bulk.confirm_delete,Êtes-vous sûr de vouloir supprimer {count} enregistrements ? Cette action est irréversible.
+bulk.confirm_delete,Supprimer {count} enregistrements ? Vous pourrez revenir en arrière avec le bouton Défaire.
 bulk.confirm_reprocess,Retraiter {count} enregistrements avec des erreurs de transfert ?
 bulk.deleted_records,{count} enregistrements supprimés
 bulk.please_select_date,Veuillez sélectionner une date
