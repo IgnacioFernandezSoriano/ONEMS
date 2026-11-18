@@ -7,6 +7,7 @@ import { ReportingFiltersProvider } from './contexts/ReportingFiltersContext'
 import { SidebarProvider } from './contexts/SidebarContext'
 import { LocaleProvider } from './contexts/LocaleContext'
 import { ProtectedRoute, HomeRedirect } from './components/auth/ProtectedRoute'
+import { DemoOnlyRoute } from './components/auth/DemoOnlyRoute'
 import { MainLayout } from './components/layout/MainLayout'
 import { Login } from './pages/Login'
 import { Dashboard } from './pages/Dashboard'
@@ -306,7 +307,9 @@ function App() {
                       path="/receive-generator"
                       element={
                         <ProtectedRoute option="account_working_days">
-                          <ReceiveGenerator />
+                          <DemoOnlyRoute>
+                            <ReceiveGenerator />
+                          </DemoOnlyRoute>
                         </ProtectedRoute>
                       }
                     />
@@ -475,7 +478,9 @@ function App() {
                       path="/admin/account-management"
                       element={
                         <ProtectedRoute option="account_working_days">
-                          <AccountManagement />
+                          <DemoOnlyRoute>
+                            <AccountManagement />
+                          </DemoOnlyRoute>
                         </ProtectedRoute>
                       }
                     />
