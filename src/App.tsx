@@ -39,6 +39,7 @@ import JKPerformance from './pages/Reporting/JKPerformance'
 import JKPerformanceV2 from './pages/Reporting/JKPerformanceV2'
 import AccountReportingConfig from './pages/Settings/AccountReportingConfig'
 import { AccountConfiguration } from './pages/Settings/AccountConfiguration'
+import { RolesAccess } from './pages/Settings/RolesAccess'
 import { PostalCenters } from './pages/PostalCenters'
 import { SLAsConfiguration } from './pages/SLAsConfiguration'
 import { EventConsolidation } from './pages/diagnosis/EventConsolidation'
@@ -451,6 +452,9 @@ function App() {
                     
                     {/* Account Configuration */}
                     <Route path="/settings/account-configuration" element={<ProtectedRoute option="account_working_days"><AccountConfiguration /></ProtectedRoute>} />
+
+                    {/* Roles y accesos de la cuenta (la página redirige si no puede gestionarla) */}
+                    <Route path="/settings/roles-access" element={<ProtectedRoute option="open"><RolesAccess /></ProtectedRoute>} />
                     
                     {/* Change Password */}
                     <Route path="/settings/change-password" element={<ProtectedRoute option="open"><ChangePassword /></ProtectedRoute>} />

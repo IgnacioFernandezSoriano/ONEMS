@@ -67,7 +67,7 @@ interface MenuGroup {
 export function Sidebar() {
   const { profile, signOut } = useAuth()
   const { selectedAccountId, setSelectedAccountId, myAccounts, switchActiveAccount } = useAccount()
-  const { canView, loading: permissionsLoading } = usePermissions()
+  const { canView, canManageAccess, loading: permissionsLoading } = usePermissions()
   const isSuperadmin = profile?.role === 'superadmin'
   const [switchingAccount, setSwitchingAccount] = useState(false)
   const [switchError, setSwitchError] = useState(false)
@@ -397,6 +397,16 @@ export function Sidebar() {
           icon: Settings,
           tooltip: t('menu.account_working_days.tooltip'),
         },
+        // Roles y accesos: solo quien puede editar la pestaña de la cuenta (AM, UPU account manager, superadmin)
+        ...(canManageAccess ? ([
+          {
+            path: '/settings/roles-access',
+            label: t('roles_access.menu'),
+            icon: Shield,
+            option: 'open',
+            tooltip: t('roles_access.menu_tooltip'),
+          },
+        ] satisfies MenuItem[]) : []),
         ...(accountName === 'DEMO2' ? ([
           {
             path: '/receive-generator',

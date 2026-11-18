@@ -5286,3 +5286,66 @@ allocation_plans.undo_action_create,Criar
 allocation_plans.undo_changed,A última ação mudou; reveja antes de desfazer.
 allocation_plans.bulk_only_deferred,As amostras a compensar só podem ser apagadas.
 menu.account_switch_error,Não foi possível mudar de conta. Tente novamente.
+roles_access.menu,Funções e acessos
+roles_access.menu_tooltip,Quem pode ver e editar cada opção do menu nesta conta
+roles_access.title,Funções e acessos
+roles_access.description,"Contactos da conta, direitos de cada função e funções de cada utilizador."
+roles_access.select_account,Selecione uma conta para gerir as suas funções e acessos.
+roles_access.tab_general,Geral
+roles_access.tab_roles,Funções e acessos
+roles_access.save_account_first,"Guarde primeiro a conta; depois poderá definir aqui os seus contactos, direitos e funções."
+roles_access.read_only,"Apenas leitura: só o Account Manager, o UPU account manager ou um superadmin podem alterar este separador."
+roles_access.load_error,Não foi possível carregar as funções e acessos: {message}
+roles_access.dismiss,Fechar
+roles_access.saving,A guardar...
+roles_access.saved,Guardado
+roles_access.contacts_save,Guardar contactos
+roles_access.matrix_title,Direitos de cada função
+roles_access.matrix_help,Edit = pode alterar dados; View = só pode consultar; — = a opção fica oculta. Um utilizador com várias funções obtém o direito mais alto. As alterações aplicam-se de imediato.
+roles_access.matrix_option,Opção do menu
+roles_access.reset,Voltar ao modelo
+roles_access.reset_confirm,Substituir todos os direitos desta conta pelos do modelo? As alterações feitas na matriz serão perdidas (as funções dos utilizadores e os contactos mantêm-se).
+roles_access.no_role,Sem função
+roles_access.no_role_help,Utilizadores da conta sem nenhuma função. É fixa: não se altera por conta.
+roles_access.level.edit,Edit
+roles_access.level.view,View
+roles_access.level.none,—
+roles_access.users_title,Utilizadores e as suas funções
+roles_access.users_help,"Marque as funções de cada utilizador desta conta. ""Provisória"" indica as funções atribuídas automaticamente no arranque: confirme-as ou altere-as."
+roles_access.user,Utilizador
+roles_access.no_users,Esta conta ainda não tem utilizadores.
+roles_access.provisional,Provisória
+roles_access.provisional_help,Atribuída automaticamente no arranque; voltar a marcar a função confirma-a.
+roles_access.other_account,Outra conta
+roles_access.other_account_help,Este utilizador trabalha sobretudo noutra conta; os seus dados não são visíveis daqui.
+roles_access.add_by_email,Adicionar um utilizador existente por email
+roles_access.add_by_email_help,Apenas superadmin. O utilizador já deve existir (por exemplo noutra conta); recebe esta função aqui.
+roles_access.role,Função
+roles_access.add,Adicionar
+roles_access.log_title,Últimas alterações
+roles_access.log_empty,Ainda não há alterações.
+roles_access.log_date,Data
+roles_access.log_who,Quem
+roles_access.log_what,Alteração
+roles_access.log_system,Sistema
+roles_access.log.access_set,{role} · {option}: {before} → {after}
+roles_access.log.access_reset,Todos os direitos repostos para o modelo
+roles_access.log.user_role_added,{user}: função {role} adicionada
+roles_access.log.user_role_removed,{user}: função {role} removida
+roles_access.log.user_added_by_email,{user} adicionado à conta como {role}
+roles_access.log.contacts_set,Contactos alterados: {fields}
+roles_access.log.contacts_unchanged,Contactos guardados sem alterações
+roles_access.log.activation,Atribuição inicial de funções ({count} atribuições)
+roles_access.log.other,Outra alteração ({kind})
+roles_access.error.last_editor_role,Não pode remover a sua última função de Account Manager / UPU account manager nesta conta: perderia a capacidade de gerir este separador. Peça a outro responsável ou a um superadmin.
+roles_access.error.not_member,Este utilizador não pertence a esta conta.
+roles_access.error.user_not_found,Não existe nenhum utilizador com esse email. Crie primeiro o utilizador.
+roles_access.error.superadmin_role,Um superadmin já tem todos os direitos e não recebe funções de conta.
+roles_access.error.forbidden,Não tem permissão para alterar funções e acessos nesta conta.
+roles_access.error.generic,Não foi possível guardar a alteração: {message}
+roles_access.role.account_manager,Account Manager
+roles_access.role.panelist_manager,Panelist Manager
+roles_access.role.materials_supplier,Materials Supplier
+roles_access.role.do_coordinator,DO coordinator
+roles_access.role.upu_account_manager,UPU account manager
+roles_access.role.allocation_plan_manager,Allocation Plan Manager

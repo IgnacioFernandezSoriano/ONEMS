@@ -1,23 +1,14 @@
 import { useState } from 'react'
 import { Button } from '@/components/common/Button'
-import type { Account, AccountContactField, AccountFormData, OpsReportFrequency, SupportedLanguage } from '@/lib/types'
-import { ACCOUNT_CONTACT_FIELDS, SUPPORTED_LANGUAGES } from '@/lib/types'
+import type { Account, AccountFormData, OpsReportFrequency, SupportedLanguage } from '@/lib/types'
+import { SUPPORTED_LANGUAGES } from '@/lib/types'
 import { useTranslation } from '@/hooks/useTranslation';
+import { RolesAccessTab } from './RolesAccessTab'
 
 interface AccountFormProps {
   account?: Account
   onSubmit: (data: AccountFormData) => Promise<void>
   onCancel: () => void
-}
-
-// Clave de traducción (etiqueta y ayuda) de cada contacto por rol.
-const CONTACT_I18N: Record<AccountContactField, string> = {
-  email_account_manager: 'hc.account_form.account_manager_email',
-  email_panelist_manager: 'hc.account_form.manager_email',
-  email_materials_supplier: 'hc.account_form.materials_supplier_email',
-  email_do_coordinator: 'hc.account_form.do_coordinator_email',
-  email_upu_account_manager: 'hc.account_form.upu_account_manager_email',
-  email_allocation_plan_manager: 'hc.account_form.allocation_plan_manager_email',
 }
 
 // Días de la semana del informe semanal (ISO 1 = lunes … 7 = domingo) y su clave de traducción.
@@ -31,19 +22,49 @@ const WEEKDAYS: { iso: number; key: string }[] = [
   { iso: 7, key: 'common.sunday' },
 ]
 
-function initialContacts(account?: Account): Record<AccountContactField, string> {
-  const out = {} as Record<AccountContactField, string>
-  for (const f of ACCOUNT_CONTACT_FIELDS) out[f] = account?.[f] || ''
-  return out
+type Tab = 'general' | 'roles'
+
+/** Formulario de cuenta del superadmin: pestaña General y pestaña Roles y accesos (contactos, matriz, roles). */
+export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
+  const { t } = useTranslation();
+  const [tab, setTab] = useState<Tab>('general')
+
+  const tabClass = (k: Tab) =>
+    `px-4 py-2 text-sm font-medium border-b-2 -mb-px ${
+      tab === k ? 'border-blue-600 text-blue-700' : 'border-transparent text-gray-500 hover:text-gray-700'
+    }`
+
+  return (
+    <div className="space-y-4">
+      <div role="tablist" className="flex border-b border-gray-200">
+        <button type="button" role="tab" aria-selected={tab === 'general'} className={tabClass('general')} onClick={() => setTab('general')}>
+          {t('roles_access.tab_general')}
+        </button>
+        <button type="button" role="tab" aria-selected={tab === 'roles'} className={tabClass('roles')} onClick={() => setTab('roles')}>
+          {t('roles_access.tab_roles')}
+        </button>
+      </div>
+      {/* General se mantiene montado (oculto) para no perder lo escrito al cambiar de pestaña. */}
+      <div hidden={tab !== 'general'} className="max-w-xl">
+        <GeneralForm account={account} onSubmit={onSubmit} onCancel={onCancel} />
+      </div>
+      {tab === 'roles' && (
+        account ? (
+          <RolesAccessTab accountId={account.id} canEdit />
+        ) : (
+          <div className="bg-amber-50 text-amber-800 p-3 rounded text-sm">{t('roles_access.save_account_first')}</div>
+        )
+      )}
+    </div>
+  )
 }
 
-export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
+function GeneralForm({ account, onSubmit, onCancel }: AccountFormProps) {
   const { t } = useTranslation();
   const [name, setName] = useState(account?.name || '')
   const [slug, setSlug] = useState(account?.slug || '')
   const [status, setStatus] = useState<'active' | 'inactive'>(account?.status || 'active')
   const [defaultLanguage, setDefaultLanguage] = useState<SupportedLanguage>(account?.default_language || 'en')
-  const [contacts, setContacts] = useState<Record<AccountContactField, string>>(() => initialContacts(account))
   const [reportFrequency, setReportFrequency] = useState<OpsReportFrequency>(account?.ops_report_frequency || 'never')
   const [reportWeekdays, setReportWeekdays] = useState<number[]>(account?.ops_report_weekdays || [])
   const [reportMonthDay, setReportMonthDay] = useState<number>(account?.ops_report_month_day || 1)
@@ -60,17 +81,11 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
     setLoading(true)
 
     try {
-      const emails = {} as Record<AccountContactField, string | null>
-      for (const f of ACCOUNT_CONTACT_FIELDS) {
-        const trimmed = contacts[f].trim()
-        emails[f] = trimmed === '' ? null : trimmed
-      }
       await onSubmit({
         name,
         slug,
         status,
         default_language: defaultLanguage,
-        ...emails,
         ops_report_frequency: reportFrequency,
         ops_report_weekdays: reportFrequency === 'weekly' ? [...reportWeekdays].sort((a, b) => a - b) : [],
         ops_report_month_day: reportFrequency === 'monthly' ? reportMonthDay : null,
@@ -142,29 +157,6 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
           {t('hc.account_form.default_language_help')}
         </p>
       </div>
-
-      <fieldset className="space-y-3 border border-gray-200 rounded-md p-3">
-        <legend className="text-sm font-medium px-1">{t('hc.account_form.contacts_title')}</legend>
-        <p className="text-xs text-gray-500">{t('hc.account_form.contacts_help')}</p>
-        {ACCOUNT_CONTACT_FIELDS.map((field) => (
-          <div key={field}>
-            <label htmlFor={field} className="block text-sm font-medium mb-1">
-              {t(CONTACT_I18N[field])}
-            </label>
-            <input
-              id={field}
-              type="email"
-              value={contacts[field]}
-              onChange={(e) => setContacts((prev) => ({ ...prev, [field]: e.target.value }))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
-              placeholder="name@example.com"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              {t(`${CONTACT_I18N[field]}_help`)}
-            </p>
-          </div>
-        ))}
-      </fieldset>
 
       <fieldset className="space-y-3 border border-gray-200 rounded-md p-3">
         <legend className="text-sm font-medium px-1">{t('hc.account_form.report_title')}</legend>
