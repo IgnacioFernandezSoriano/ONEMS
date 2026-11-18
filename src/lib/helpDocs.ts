@@ -64,6 +64,15 @@ export const HELP_DOCS: HelpDoc[] = [
     public: false,
   },
   {
+    // Para todos los usuarios con sesión: explica qué ve cada uno y a quién pedir un cambio
+    id: 'roles-access',
+    file: 'roles-access',
+    titleKey: 'help_center.doc.roles_access.title',
+    descKey: 'help_center.doc.roles_access.desc',
+    audience: 'managers',
+    public: false,
+  },
+  {
     id: 'panelist-guide',
     file: 'panelist-guide',
     titleKey: 'help_center.doc.panelist_guide.title',

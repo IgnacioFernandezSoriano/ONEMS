@@ -1,0 +1,594 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ajuda: Funções e acessos</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<style>
+  :root {
+    --white: #ffffff; --g50: #f9fafb; --g100: #f3f4f6; --g200: #e5e7eb; --g300: #d1d5db;
+    --g400: #9ca3af; --g500: #6b7280; --g600: #4b5563; --g700: #374151; --g900: #111827;
+    --b50: #eff6ff; --b100: #dbeafe; --b600: #2563eb; --b700: #1d4ed8;
+    --r100: #fee2e2; --r700: #b91c1c; --gr100: #dcfce7; --gr700: #15803d;
+    --y100: #fef9c3; --y800: #854d0e; --p100: #f3e8ff; --p700: #7e22ce;
+    --tg-head: #517da2; --tg-wall-a: #d4e4bc; --tg-wall-b: #a9cba6; --tg-dot: rgba(255,255,255,.35);
+    --tg-in: #ffffff; --tg-out: #effdde; --tg-ink: #000000; --tg-time: #8a9aa6; --tg-time-out: #5eaf5c;
+    --tg-key: rgba(52, 92, 60, .42); --tg-ring: #ffd23f; --tg-photo: #c7d3dc;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+      'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    -webkit-font-smoothing: antialiased; background: var(--g50); color: var(--g700); line-height: 1.6; font-size: 15px;
+  }
+  .layout { display: flex; min-height: 100vh; }
+
+  /* Sidebar, same look as the ONE menu */
+  .side {
+    width: 272px; flex-shrink: 0; background: var(--white); border-right: 1px solid var(--g200);
+    position: sticky; top: 0; height: 100vh; overflow-y: auto; display: flex; flex-direction: column;
+  }
+  .brand { padding: 24px 24px 16px; }
+  .brand h1 { font-size: 24px; line-height: 32px; font-weight: 700; color: var(--g900); }
+  .brand p { font-size: 14px; color: var(--g500); margin-top: 4px; }
+  .brand .doc { margin-top: 16px; font-size: 12px; font-weight: 600; color: var(--b700); background: var(--b50);
+    display: inline-block; padding: 2px 10px; border-radius: 999px; }
+  .nav { padding: 8px 12px 24px; flex: 1; }
+  .nav h3 { font-size: 12px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--g400);
+    padding: 16px 12px 6px; }
+  .nav a {
+    display: block; padding: 8px 12px; border-radius: 8px; font-size: 14px; font-weight: 500; color: var(--g600);
+    text-decoration: none; transition: background .15s, color .15s;
+  }
+  .nav a:hover { background: var(--g100); }
+  .nav a.active { background: var(--b50); color: var(--b700); }
+  .side-foot { padding: 16px 24px; border-top: 1px solid var(--g200); font-size: 12px; color: var(--g500); }
+
+  /* Content */
+  .main { flex: 1; min-width: 0; padding: 40px 32px 80px; }
+  .page { max-width: 880px; margin: 0 auto; }
+  .page > header { margin-bottom: 32px; }
+  .page > header h2 { font-size: 30px; line-height: 38px; font-weight: 700; color: var(--g900); }
+  .page > header p { margin-top: 8px; font-size: 17px; color: var(--g600); max-width: 640px; }
+  section { margin-top: 48px; }
+  section > h2 { font-size: 22px; font-weight: 700; color: var(--g900); padding-bottom: 8px; margin-bottom: 16px;
+    border-bottom: 1px solid var(--g200); }
+  h3 { font-size: 17px; font-weight: 600; color: var(--g900); margin: 28px 0 8px; }
+  p { margin: 8px 0; }
+  ul, ol { margin: 8px 0 8px 22px; }
+  li { margin: 4px 0; }
+  strong { color: var(--g900); font-weight: 600; }
+  code, kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px;
+    background: var(--g100); border: 1px solid var(--g200); border-radius: 6px; padding: 1px 6px; color: var(--g900); }
+  .card { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 20px 24px; margin: 16px 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 16px 0; }
+  .grid .card { margin: 0; }
+  .card h4 { font-size: 15px; font-weight: 600; color: var(--g900); margin-bottom: 4px; }
+  .card p { margin: 4px 0; font-size: 14px; color: var(--g600); }
+
+  .badge { display: inline-block; font-size: 12px; font-weight: 500; padding: 1px 10px; border-radius: 999px; white-space: nowrap; }
+  .b-red { background: var(--r100); color: var(--r700); }
+  .b-blue { background: var(--b100); color: var(--b700); }
+  .b-green { background: var(--gr100); color: var(--gr700); }
+  .b-yellow { background: var(--y100); color: var(--y800); }
+  .b-gray { background: var(--g100); color: var(--g600); }
+  .b-purple { background: var(--p100); color: var(--p700); }
+  .btn { display: inline-block; font-size: 13px; font-weight: 500; padding: 2px 10px; border-radius: 8px;
+    background: var(--white); border: 1px solid var(--g300); color: var(--g700); white-space: nowrap; }
+  .btn.primary { background: var(--b600); border-color: var(--b600); color: #fff; }
+
+  .callout { border-radius: 12px; padding: 14px 18px; margin: 16px 0; font-size: 14px; border: 1px solid; }
+  .callout.info { background: var(--b50); border-color: var(--b100); color: #1e3a8a; }
+  .callout.ok { background: #f0fdf4; border-color: var(--gr100); color: #14532d; }
+  .callout.warn { background: #fffbeb; border-color: var(--y100); color: var(--y800); }
+  .callout strong { color: inherit; }
+
+  .table-wrap { overflow-x: auto; margin: 16px 0; background: var(--white); border: 1px solid var(--g200); border-radius: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--g500); background: var(--g50); padding: 10px 14px; border-bottom: 1px solid var(--g200); }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--g100); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  td:first-child { font-weight: 500; color: var(--g900); }
+
+  /* Steps */
+  ol.steps { list-style: none; margin: 12px 0; counter-reset: s; }
+  ol.steps > li { counter-increment: s; position: relative; padding: 4px 0 12px 44px; margin: 0; }
+  ol.steps > li::before {
+    content: counter(s); position: absolute; left: 0; top: 2px; width: 28px; height: 28px; border-radius: 50%;
+    background: var(--b100); color: var(--b700); font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Telegram chat mock-ups */
+  .chat { background: #e9eef5; border: 1px solid var(--g200); border-radius: 16px; padding: 16px; margin: 16px 0; max-width: 460px; }
+  .chat .who { text-align: center; font-size: 12px; color: var(--g500); margin-bottom: 8px; font-weight: 500; }
+  .msg { max-width: 85%; padding: 8px 12px; border-radius: 14px; margin: 6px 0; font-size: 14px; line-height: 1.45; box-shadow: 0 1px 1px rgba(0,0,0,.06); }
+  .msg.bot { background: var(--white); border-top-left-radius: 4px; margin-right: auto; color: var(--g900); }
+  .msg.me { background: #dbeafe; border-top-right-radius: 4px; margin-left: auto; color: var(--g900); }
+  .kb { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 8px; max-width: 85%; }
+  .kb span { flex: 1 1 auto; text-align: center; background: rgba(37,99,235,.12); color: var(--b700); font-size: 13px; font-weight: 500;
+    padding: 6px 10px; border-radius: 10px; }
+  .kb.col span { flex-basis: 100%; }
+  .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; align-items: start; }
+  .two .chat { margin: 8px 0; }
+  .cap { font-size: 13px; color: var(--g500); margin-top: -6px; max-width: 460px; }
+
+  /* Flow */
+  .flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; margin: 16px 0; }
+  .flow .node { flex: 1 1 150px; background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 12px 14px; font-size: 13px; position: relative; }
+  .flow .node b { display: block; color: var(--g900); font-size: 14px; margin-bottom: 2px; }
+  .flow .node .tag { font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--b700); }
+  .flow .arrow { align-self: center; color: var(--g400); font-size: 18px; }
+
+  details { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; margin: 8px 0; }
+  summary { cursor: pointer; padding: 14px 18px; font-weight: 600; color: var(--g900); list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: '+'; color: var(--g400); font-size: 20px; line-height: 1; }
+  details[open] summary::after { content: '\2212'; }
+  details > div { padding: 0 18px 14px; color: var(--g600); font-size: 14px; }
+
+  /* ONEMS screen drawings */
+  .app { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; overflow: hidden; margin: 16px 0 6px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .app-bar { display: flex; gap: 6px; align-items: center; background: var(--g100); border-bottom: 1px solid var(--g200); padding: 8px 12px; font-size: 12px; color: var(--g500); }
+  .app-bar i { width: 9px; height: 9px; border-radius: 50%; background: var(--g300); display: inline-block; }
+  .app-bar span { margin-left: 8px; }
+  .app-body { padding: 20px; font-size: 13px; color: var(--g700); overflow-x: auto; }
+  .app-body.cols { display: grid; grid-template-columns: 210px 1fr; padding: 0; }
+  .app-body.cols > .sb { border-right: 1px solid var(--g200); padding: 14px 10px; background: #fff; }
+  .app-body.cols > .ct { padding: 20px; }
+  .sb .t { font-size: 20px; font-weight: 700; color: var(--g900); padding: 0 8px; }
+  .sb .s { font-size: 11px; color: var(--g500); padding: 0 8px 8px; }
+  .sb h5 { font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--g400); padding: 10px 8px 4px; }
+  .mi { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 8px; font-size: 13px; color: var(--g700); }
+  .mi.on { background: var(--b50); color: var(--b600); }
+  .mi .ic { width: 14px; height: 14px; border-radius: 4px; background: var(--g300); flex-shrink: 0; }
+  .mi.on .ic { background: var(--b600); }
+  .mi .badge { margin-left: auto; font-size: 11px; padding: 0 7px; }
+  .m-h { font-size: 18px; font-weight: 700; color: var(--g900); margin-bottom: 12px; }
+  .m-h3 { font-size: 15px; font-weight: 700; color: var(--g900); margin: 0 0 6px; }
+  .m-sel { display: inline-block; border: 1px solid var(--g300); border-radius: 4px; padding: 3px 24px 3px 8px; font-size: 12px; background: #fff; color: var(--g700); margin-right: 8px; position: relative; }
+  .m-sel::after { content: '\25BE'; position: absolute; right: 8px; color: var(--g400); }
+  .m-card { border: 1px solid var(--g200); border-radius: 8px; overflow: hidden; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.05); margin: 10px 0; }
+  .app table { font-size: 12px; }
+  .app th { padding: 8px 12px; font-size: 11px; }
+  .app td { padding: 8px 12px; }
+  .app td:first-child { font-weight: 400; color: inherit; }
+  .app .num { text-align: right; }
+  .m-link { color: var(--b600); }
+  .m-box { border: 1px solid var(--g200); border-radius: 6px; padding: 14px; margin: 10px 0; }
+  .m-note { background: var(--g50); border-radius: 6px; padding: 10px 12px; margin: 8px 0; font-size: 12px; }
+  .m-muted { color: var(--g500); font-size: 12px; }
+  .m-pbtn, .m-sbtn { display: inline-block; padding: 6px 14px; border-radius: 8px; font-size: 12px; margin: 2px 6px 2px 0; }
+  .m-pbtn { background: var(--b600); color: #fff; }
+  .m-sbtn { background: var(--g200); color: var(--g700); }
+  .m-ta { border: 1px solid var(--g300); border-radius: 4px; padding: 8px; font-size: 12px; color: var(--g400); background: #fff; margin: 6px 0 10px; }
+  .m-in { display: inline-block; border: 1px solid var(--g300); border-radius: 4px; padding: 3px 8px; font-size: 12px; background: #fff; min-width: 90px; }
+  .m-bub { max-width: 80%; padding: 6px 10px; border-radius: 10px; margin: 5px 0; font-size: 12px; }
+  .m-bub small { display: block; color: var(--g500); font-size: 10px; margin-top: 2px; }
+  .m-bub.l { background: var(--g100); margin-right: auto; }
+  .m-bub.r { background: var(--b100); margin-left: auto; }
+  .pin { display: inline-flex; width: 20px; height: 20px; border-radius: 50%; background: var(--b600); color: #fff; font-size: 11px; font-weight: 700; align-items: center; justify-content: center; margin-left: 6px; vertical-align: middle; flex-shrink: 0; }
+  .legend { counter-reset: l; list-style: none; margin: 10px 0 20px; }
+  .legend li { counter-increment: l; position: relative; padding: 2px 0 6px 34px; font-size: 14px; }
+  .legend li::before { content: counter(l); position: absolute; left: 0; top: 1px; width: 20px; height: 20px; border-radius: 50%; background: var(--b600); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .heat td { text-align: center; }
+  .heat .ok { background: #f0fdf4; } .heat .hi { background: var(--y100); } .heat .sat { background: var(--r100); }
+  .heat .off { background: repeating-linear-gradient(45deg, var(--g100), var(--g100) 4px, #fff 4px, #fff 8px); color: var(--g400); }
+  .heat .now { outline: 2px solid var(--b600); outline-offset: -2px; }
+
+  /* Right-to-left (Arabic) */
+  [dir=rtl] .side { border-right: 0; border-left: 1px solid var(--g200); }
+  [dir=rtl] .app-body.cols > .sb { border-right: 0; border-left: 1px solid var(--g200); }
+  [dir=rtl] th, [dir=rtl] td, [dir=rtl] .nav a { text-align: right; }
+  [dir=rtl] ul, [dir=rtl] ol { margin: 8px 22px 8px 0; }
+  [dir=rtl] ol.steps > li { padding: 4px 44px 12px 0; }
+  [dir=rtl] ol.steps > li::before { left: auto; right: 0; }
+  [dir=rtl] .legend li { padding: 2px 34px 6px 0; }
+  [dir=rtl] .legend li::before { left: auto; right: 0; }
+  [dir=rtl] .msg.bot { border-top-left-radius: 14px; border-top-right-radius: 4px; margin-right: 0; margin-left: auto; }
+  [dir=rtl] .msg.me { border-top-right-radius: 14px; border-top-left-radius: 4px; margin-left: 0; margin-right: auto; }
+  [dir=rtl] .m-bub.l { margin-right: 0; margin-left: auto; }
+  [dir=rtl] .m-bub.r { margin-left: 0; margin-right: auto; }
+  [dir=rtl] .pin { margin-left: 0; margin-right: 6px; }
+  [dir=rtl] .m-sel { padding: 3px 8px 3px 24px; margin-right: 0; margin-left: 8px; }
+  [dir=rtl] .m-sel::after { right: auto; left: 8px; }
+  [dir=rtl] .m-pbtn, [dir=rtl] .m-sbtn { margin: 2px 0 2px 6px; }
+  [dir=rtl] .mi .badge { margin-left: 0; margin-right: auto; }
+  [dir=rtl] .app-bar span { margin-left: 0; margin-right: 8px; }
+  [dir=rtl] .flow .arrow { transform: scaleX(-1); }
+  [dir=rtl] .app td:first-child { font-weight: 400; }
+  /* Telegram (canonical, from panelist-guide) and practical cases */
+  .case { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 20px 24px; margin: 16px 0; scroll-margin-top: 24px; }
+  .case > h3 { margin: 0; display: flex; gap: 10px; align-items: center; }
+  .case > .sit { color: var(--g500); font-size: 14px; margin: 2px 0 12px; }
+  .case .callout { margin: 8px 0; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+  .chips a { text-decoration: none; font-size: 13px; font-weight: 500; padding: 4px 12px; border-radius: 999px;
+    background: var(--white); border: 1px solid var(--g200); color: var(--g700); }
+  .chips a:hover { background: var(--b50); border-color: var(--b100); color: var(--b700); }
+  .tg { max-width: 380px; border-radius: 16px; overflow: hidden; border: 1px solid var(--g200);
+    box-shadow: 0 4px 16px rgba(17,24,39,.10); background: var(--tg-in); }
+  .tg-head { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: var(--tg-head); color: #ffffff; }
+  .tg-back { font-size: 20px; line-height: 1; opacity: .9; }
+  .tg-av { width: 36px; height: 36px; border-radius: 50%; flex: none; display: grid; place-items: center;
+    background: linear-gradient(160deg, #72c2f4, #3d8fd9); color: #ffffff; font-weight: 700; font-size: 12px; }
+  .tg-name { flex: 1; min-width: 0; line-height: 1.2; }
+  .tg-name b { display: block; font-size: 15px; color: #ffffff; font-weight: 600; }
+  .tg-name small { font-size: 12.5px; opacity: .8; }
+  .tg-body { display: flex; flex-direction: column; gap: 6px; padding: 12px 10px 14px;
+    background-color: var(--tg-wall-a);
+    background-image: radial-gradient(var(--tg-dot) 1.4px, transparent 1.6px), linear-gradient(160deg, var(--tg-wall-a), var(--tg-wall-b));
+    background-size: 18px 18px, 100% 100%; }
+  .tg-msg { max-width: 84%; padding: 6px 9px 7px 10px; border-radius: 12px; font-size: 14.5px; line-height: 1.38; color: var(--tg-ink);
+    box-shadow: 0 1px 1px rgba(0,0,0,.13); overflow-wrap: anywhere; }
+  .tg-msg.in { background: var(--tg-in); align-self: flex-start; border-bottom-left-radius: 4px; }
+  .tg-msg.out { background: var(--tg-out); align-self: flex-end; border-bottom-right-radius: 4px; }
+  .tg-msg .t { float: right; font-size: 11px; color: var(--tg-time); margin: 8px 0 -4px 10px; line-height: 1; }
+  .tg-msg.out .t { color: var(--tg-time-out); }
+  .tg-msg.out .t::after { content: " \2713\2713"; letter-spacing: -2px; }
+  .tg-msg.photo { padding: 3px; }
+  .tg-msg.photo .img { display: grid; place-items: center; width: 170px; height: 104px; border-radius: 10px; background: var(--tg-photo); font-size: 30px; }
+  .tg-msg.photo .t { position: relative; margin: -18px 8px 4px 0; }
+  .tg-kb { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; align-self: flex-start; width: 84%; margin-top: -2px; }
+  .tg-kb.one { grid-template-columns: 1fr; }
+  .tg-kb span { background: var(--tg-key); color: #ffffff; border-radius: 8px; padding: 7px 6px; text-align: center; font-size: 13.5px; font-weight: 600; }
+  .tg-kb span.tap { box-shadow: inset 0 0 0 2px var(--tg-ring); }
+  .tg-kb span.tap::after { content: " \1F446"; }
+  .tg-input { display: flex; align-items: center; gap: 12px; padding: 9px 14px; background: #ffffff; color: var(--tg-time); font-size: 14px; }
+  .tg-input .ph { flex: 1; }
+  [dir=rtl] .tg-msg.in { border-bottom-left-radius: 12px; border-bottom-right-radius: 4px; }
+  [dir=rtl] .tg-msg.out { border-bottom-right-radius: 12px; border-bottom-left-radius: 4px; }
+  [dir=rtl] .tg-msg .t { float: left; margin: 8px 10px -4px 0; }
+  [dir=rtl] .tg-back { transform: scaleX(-1); }
+  @media (max-width: 900px) {
+    .case { padding: 16px; }
+    .tg { max-width: none; }
+  }
+  .mobile-top { display: none; }
+  @media (max-width: 900px) {
+    .app-body.cols { grid-template-columns: 1fr; }
+    .app-body.cols > .sb { border-right: 0; border-bottom: 1px solid var(--g200); }
+    .layout { display: block; }
+    .side { display: none; }
+    .mobile-top { display: block; position: sticky; top: 0; z-index: 5; background: var(--white); border-bottom: 1px solid var(--g200); padding: 10px 16px; }
+    .mobile-top b { font-size: 18px; color: var(--g900); }
+    .mobile-top span { font-size: 13px; color: var(--g500); margin-left: 6px; }
+    .mobile-top select { width: 100%; margin-top: 8px; padding: 8px; border: 1px solid var(--g300); border-radius: 8px; font-size: 14px; background: #fff; color: var(--g700); }
+    .main { padding: 24px 16px 64px; }
+    .page > header h2 { font-size: 24px; line-height: 32px; }
+  }
+  @media print { .side, .mobile-top { display: none; } .main { padding: 0; } body { background: #fff; } section { break-inside: avoid-page; } }
+  /* Rights table (roles-access) */
+  .rights th:not(:first-child), .rights td:not(:first-child) { text-align: center; }
+  .rights tr.grp td { background: var(--g50); font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--g500); }
+  .rights td { padding: 6px 10px; } .rights th { padding: 8px 10px; }
+</style>
+</head>
+<body>
+<div class="mobile-top">
+  <b>ONE</b><span>for Regulators &middot; Ajuda</span>
+  <select id="jump" aria-label="Ir para a secção"></select>
+</div>
+<div class="layout">
+  <aside class="side">
+    <div class="brand">
+      <h1>ONE</h1>
+      <p>for Regulators</p>
+      <span class="doc">Ajuda &middot; Funções e acessos</span>
+    </div>
+    <nav class="nav" id="nav">
+      <h3>Primeiros passos</h3>
+      <a href="#roles">As seis funções</a>
+      <a href="#rights">Edit, View e sem acesso</a>
+      <a href="#no-role">Utilizadores sem função</a>
+      <a href="#accounts">Várias contas</a>
+      <a href="#ask">Pedir uma alteração</a>
+      <h3>Gerir os acessos</h3>
+      <a href="#tab">O separador</a>
+      <a href="#contacts">Contactos</a>
+      <a href="#matrix">Alterar um direito</a>
+      <a href="#users">Funções dos utilizadores</a>
+      <a href="#reset">Voltar ao modelo</a>
+      <a href="#log">Últimas alterações</a>
+      <a href="#new-user">Criar utilizadores com funções</a>
+      <h3>Referência</h3>
+      <a href="#template">Modelo de direitos</a>
+      <a href="#faq">Perguntas</a>
+    </nav>
+    <div class="side-foot">Atualizado a 18 de novembro de 2026</div>
+  </aside>
+
+  <main class="main">
+  <div class="page">
+    <header>
+      <h2>Funções e acessos</h2>
+      <p>O que cada pessoa vê e pode fazer no ONEMS depende das suas funções na conta do seu país. Esta página explica as funções, os direitos e como o Account Manager e o UPU account manager os gerem.</p>
+    </header>
+
+    <section id="roles">
+      <h2>As seis funções</h2>
+      <p>Uma <strong>função</strong> é o papel de uma pessoa na conta do seu país. Cada função dá alguns direitos: que opções do menu a pessoa vê e onde pode alterar dados. Existem sempre estas seis funções, em todas as contas.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Função</th><th>O que faz</th></tr></thead>
+        <tbody>
+          <tr><td>Account Manager</td><td>Responsável da conta. Gere quase tudo e decide os acessos da sua equipa.</td></tr>
+          <tr><td>Allocation Plan Manager</td><td>Prepara e ajusta os planos de envios: gerador, balanceamento e planos de alocação.</td></tr>
+          <tr><td>Panelist Manager</td><td>Gere os painelistas, as suas incidências e a sua disponibilidade.</td></tr>
+          <tr><td>Materials Supplier</td><td>Gere os materiais: necessidades, stock e catálogo.</td></tr>
+          <tr><td>DO coordinator</td><td>Coordena a parte RFID: centros postais, leitores e SLA de segmentos.</td></tr>
+          <tr><td>UPU account manager</td><td>Pessoa da UPU que acompanha a conta. Tem direitos amplos e também decide os acessos.</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout info">Os nomes das funções aparecem em inglês em todos os idiomas, tal como no ONEMS.</div>
+    </section>
+
+    <section id="rights">
+      <h2>Edit, View e sem acesso</h2>
+      <p>Para cada opção do menu, uma função tem um destes três direitos:</p>
+      <div class="grid">
+        <div class="card"><h4>Edit</h4><p>Vê o ecrã e pode alterar dados: criar, guardar, eliminar ou importar.</p></div>
+        <div class="card"><h4>View</h4><p>Vê o ecrã, mas não pode alterar nada. Os botões de criar, guardar e eliminar ficam ocultos e o ecrã mostra a marca <span class="badge b-gray">Somente consulta</span>.</p></div>
+        <div class="card"><h4>&mdash;</h4><p>A opção não aparece no menu.</p></div>
+      </div>
+      <h3>Várias funções somam-se</h3>
+      <p>Uma pessoa pode ter várias funções. Em cada opção ganha o direito mais alto: Edit antes de View, e View antes de nada.</p>
+      <div class="callout info"><strong>Exemplo:</strong> no modelo, o Panelist Manager tem View em <strong>Gestão de stock</strong> e o Materials Supplier tem Edit. Quem tiver as duas funções tem Edit.</div>
+    </section>
+
+    <section id="no-role">
+      <h2>Utilizadores sem função</h2>
+      <p>Um utilizador da conta sem nenhuma função só vê os relatórios e o Centro de ajuda, em View:</p>
+      <ul>
+        <li>Equidade territorial</li>
+        <li>Cumprimento</li>
+        <li>Análise de rotas</li>
+        <li>Análise de segmentos</li>
+        <li>Centro de ajuda</li>
+      </ul>
+      <p>Não vê o <strong>Painel</strong>. Ao entrar, o ONEMS abre o primeiro destes ecrãs.</p>
+      <div class="callout warn">Esta lista é igual em todas as contas e não pode ser alterada. Se alguém precisar de mais, é preciso dar-lhe uma função.</div>
+    </section>
+
+    <section id="accounts">
+      <h2>Funções em várias contas</h2>
+      <p>Uma pessoa pode ter funções em vários países; por exemplo, um UPU account manager que acompanha várias contas. Nesse caso, aparece no topo do menu o seletor <strong>Conta</strong>.</p>
+      <ol class="steps">
+        <li>Escolha a conta no seletor <strong>Conta</strong>.</li>
+        <li>A página recarrega sozinha.</li>
+        <li>Passa a ver os menus, os direitos e os dados dessa conta.</li>
+      </ol>
+      <div class="callout info">Trabalha-se com <strong>uma conta de cada vez</strong>. Se tiver o ONEMS aberto em dois separadores do navegador, os dois partilham a mesma conta: depois de mudar num, recarregue o outro.</div>
+    </section>
+
+    <section id="ask">
+      <h2>Pedir uma alteração de acesso</h2>
+      <p>Se lhe faltar uma opção do menu, ou precisar de Edit onde só tem View, peça ao <strong>Account Manager</strong> ou ao <strong>UPU account manager</strong> da sua conta. Só eles podem alterar as funções e os direitos da conta.</p>
+      <div class="callout ok"><strong>Depois:</strong> a alteração é guardada de imediato. Recarregue a página para ver o seu menu atualizado.</div>
+    </section>
+
+    <section id="tab">
+      <h2>O separador Funções e acessos</h2>
+      <p>Esta parte é para o <strong>Account Manager</strong> e o <strong>UPU account manager</strong>: são as únicas pessoas da conta que podem alterar os seus acessos. Esta permissão é fixa: não pode ser retirada na matriz de direitos.</p>
+      <h3>Onde está</h3>
+      <ul>
+        <li>No menu <strong>Administração &rsaquo; Funções e acessos</strong>. Só o Account Manager e o UPU account manager o veem. Abre o separador da conta em que está a trabalhar.</li>
+        <li>O superadmin da UPU tem-no também no formulário de cada conta, no separador <strong>Funções e acessos</strong>, ao lado de <strong>Geral</strong>.</li>
+      </ul>
+      <div class="app" role="img" aria-label="Maqueta do separador Funções e acessos">
+        <div class="app-bar"><i></i><i></i><i></i><span>ONEMS &rsaquo; Administração &rsaquo; Funções e acessos</span></div>
+        <div class="app-body">
+          <div class="m-h">Funções e acessos</div>
+          <div class="m-box">
+            <div class="m-h3">Contactos da conta<span class="pin">1</span></div>
+            <div class="m-muted">E-mail do Account Manager</div>
+            <span class="m-in" dir="ltr">am@regulator.example</span>
+            <div class="m-muted" style="margin-top:6px">E-mail do Panelist Manager</div>
+            <span class="m-in" dir="ltr">panel@regulator.example</span>
+            <div style="margin-top:8px"><span class="m-pbtn">Guardar contactos</span></div>
+          </div>
+          <div class="m-box">
+            <div class="m-h3">Direitos de cada função<span class="pin">2</span> &nbsp; <span class="m-sbtn">Voltar ao modelo</span><span class="pin">3</span></div>
+            <table>
+              <thead><tr><th>Opção do menu</th><th>Account Manager</th><th>Panelist Manager</th><th>Sem função</th></tr></thead>
+              <tbody>
+                <tr><td>Painelistas</td><td><span class="m-sel">Edit</span></td><td><span class="m-sel">Edit</span></td><td>&mdash;</td></tr>
+                <tr><td>Gestão de stock</td><td><span class="m-sel">Edit</span></td><td><span class="m-sel">View</span></td><td>&mdash;</td></tr>
+                <tr><td>Equidade territorial</td><td><span class="m-sel">View</span></td><td><span class="m-sel">&mdash;</span></td><td>View</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="m-box">
+            <div class="m-h3">Utilizadores e as suas funções</div>
+            <table>
+              <thead><tr><th>Utilizador</th><th>Account Manager</th><th>Panelist Manager</th></tr></thead>
+              <tbody>
+                <tr><td>Grace Wanjiru <span class="badge b-yellow">Provisória</span><span class="pin">4</span></td><td>&#9745;</td><td>&#9744;</td></tr>
+                <tr><td>Peter Otieno</td><td>&#9744;</td><td>&#9745;</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="m-box">
+            <div class="m-h3">Últimas alterações<span class="pin">5</span></div>
+            <table>
+              <thead><tr><th>Data</th><th>Quem</th><th>Alteração</th></tr></thead>
+              <tbody><tr><td>18/11/2026 10:42</td><td dir="ltr">am@regulator.example</td><td>Panelist Manager &middot; Painelistas: View → Edit</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <ol class="legend">
+        <li><strong>Contactos da conta</strong>: os e-mails que recebem os avisos automáticos.</li>
+        <li><strong>Direitos de cada função</strong>: um seletor por função e por opção do menu.</li>
+        <li><strong>Voltar ao modelo</strong>: desfaz todas as alterações da matriz.</li>
+        <li><strong>Provisória</strong>: função atribuída automaticamente, por confirmar.</li>
+        <li><strong>Últimas alterações</strong>: quem alterou o quê e quando.</li>
+      </ol>
+    </section>
+
+    <section id="contacts">
+      <h2>Contactos da conta</h2>
+      <p>São seis e-mails, um por função. O ONEMS envia para eles os <strong>avisos e e-mails automáticos</strong> da conta, como o relatório de operação.</p>
+      <div class="callout warn"><strong>Um contacto não é o mesmo que uma função.</strong> Pôr um e-mail nos contactos não dá acesso ao ONEMS. E ter uma função não faz receber os avisos: só os recebe o e-mail escrito nos contactos.</div>
+      <ol class="steps">
+        <li>Escreva o e-mail de cada função. Deixe-o vazio se essa função não existir na sua conta.</li>
+        <li>Clique em <strong>Guardar contactos</strong>.</li>
+      </ol>
+      <div class="callout ok"><strong>Depois:</strong> aparece <em>Guardado</em> e os próximos avisos vão para os novos e-mails. A alteração fica em <strong>Últimas alterações</strong>.</div>
+      <h3>Relatório de operação</h3>
+      <p>O e-mail «ONE operations report» vai para os contactos da conta; o Account Manager e o UPU account manager vão em cópia. Cada conta tem o seu próprio calendário: alguns dias da semana, um dia por mês ou nunca. É o superadmin da UPU que o define no separador <strong>Geral</strong> da conta. Para o alterar, peça ao seu UPU account manager.</p>
+    </section>
+
+    <section id="matrix">
+      <h2>Alterar um direito</h2>
+      <p>A tabela <strong>Direitos de cada função</strong> tem uma linha por opção do menu, agrupadas como no menu, e uma coluna por função.</p>
+      <ol class="steps">
+        <li>Procure a linha da opção do menu.</li>
+        <li>Na coluna da função, abra o seletor e escolha <strong>Edit</strong>, <strong>View</strong> ou <strong>&mdash;</strong>.</li>
+        <li>Não há botão de guardar: a alteração é guardada de imediato.</li>
+      </ol>
+      <div class="callout ok"><strong>Depois:</strong> todas as pessoas com essa função nesta conta passam a ter o novo direito. Veem-no ao recarregar a página. As outras contas não mudam.</div>
+      <div class="callout info">A coluna <strong>Sem função</strong> é fixa: é igual em todas as contas e não pode ser alterada.</div>
+    </section>
+
+    <section id="users">
+      <h2>Funções dos utilizadores</h2>
+      <p>A tabela <strong>Utilizadores e as suas funções</strong> mostra os utilizadores da conta, com uma caixa por função. Um utilizador pode ter várias funções.</p>
+      <ol class="steps">
+        <li>Procure o utilizador.</li>
+        <li>Marque a caixa da função para a atribuir, ou desmarque-a para a retirar.</li>
+        <li>A alteração é guardada de imediato.</li>
+      </ol>
+      <h3>Funções «Provisória»</h3>
+      <p>Quando as funções foram ativadas, o ONEMS atribuiu algumas automaticamente. Têm a marca <span class="badge b-yellow">Provisória</span> e a caixa a laranja. Reveja-as:</p>
+      <ul>
+        <li>Se a função estiver correta, <strong>confirme-a</strong>: desmarque a caixa e volte a marcá-la. A marca desaparece.</li>
+        <li>Se não estiver correta, desmarque-a e marque a função adequada.</li>
+      </ul>
+      <div class="callout warn"><strong>Não pode retirar a sua própria última função de gestão.</strong> Se for a sua única função de Account Manager ou UPU account manager na conta, o ONEMS não o deixa retirá-la, para que ninguém perca a capacidade de corrigir este separador. Por isso, se a sua própria função de gestão estiver Provisória, peça a outro responsável ou ao superadmin que a confirme.</div>
+      <p><strong>Adicionar um utilizador existente por email</strong> é só para o superadmin. Serve para dar uma função na sua conta a alguém que já é utilizador de outra conta. Peça à UPU.</p>
+      <div class="callout ok"><strong>Depois:</strong> o utilizador tem os novos direitos ao recarregar a página. A alteração fica em <strong>Últimas alterações</strong>.</div>
+    </section>
+
+    <section id="reset">
+      <h2>Voltar ao modelo</h2>
+      <p>Cada conta começa com o <a href="#template">modelo de direitos</a> e pode ajustá-lo. O botão <span class="btn">Voltar ao modelo</span> desfaz todas as alterações da matriz da sua conta.</p>
+      <ol class="steps">
+        <li>Clique em <strong>Voltar ao modelo</strong>.</li>
+        <li>O ONEMS pede confirmação. Aceite.</li>
+      </ol>
+      <div class="callout ok"><strong>Depois:</strong> todos os direitos da conta voltam ao modelo. As funções dos utilizadores e os contactos não mudam.</div>
+    </section>
+
+    <section id="log">
+      <h2>Últimas alterações</h2>
+      <p>A lista <strong>Últimas alterações</strong> mostra as alterações feitas no separador: <strong>Data</strong>, <strong>Quem</strong> a fez e a <strong>Alteração</strong>; por exemplo, <em>Panelist Manager &middot; Painelistas: View → Edit</em>. As alterações automáticas aparecem como <em>Sistema</em>.</p>
+    </section>
+
+    <section id="new-user">
+      <h2>Criar utilizadores com funções</h2>
+      <p>Podem criar utilizadores as pessoas com Edit em <strong>Utilizadores</strong>. No modelo, o Account Manager e o UPU account manager.</p>
+      <ol class="steps">
+        <li>Abra <strong>Administração &rsaquo; Utilizadores</strong>.</li>
+        <li>Clique em <strong>Criar utilizador</strong>.</li>
+        <li>Preencha os dados do utilizador: Email, Palavra-passe, Nome completo…</li>
+        <li>Em <strong>Funções na conta (opcional)</strong>, marque as suas funções.</li>
+        <li>Clique em <strong>Criar</strong>.</li>
+      </ol>
+      <div class="callout ok"><strong>Depois:</strong> o utilizador aparece em <strong>Utilizadores e as suas funções</strong> com essas funções. Sem nenhuma função marcada, só vê os relatórios (veja <a href="#no-role">Utilizadores sem função</a>).</div>
+      <div class="callout info">Só o Account Manager e o UPU account manager veem as caixas das funções. Se outra pessoa criar o utilizador, é preciso dar-lhe as funções depois, no separador.</div>
+    </section>
+
+    <section id="template">
+      <h2>Modelo de direitos</h2>
+      <p>Estes são os direitos com que cada conta começa. A sua conta pode tê-los alterado: os que estão em vigor estão no separador <strong>Funções e acessos</strong>.</p>
+      <p class="m-muted">AM = Account Manager &middot; APM = Allocation Plan Manager &middot; PM = Panelist Manager &middot; MS = Materials Supplier &middot; DO = DO coordinator &middot; UPU = UPU account manager. Edit = pode alterar dados &middot; View = só pode consultar &middot; &mdash; = a opção fica oculta.</p>
+      <div class="table-wrap"><table class="rights">
+        <thead><tr><th>Opção do menu</th><th>AM</th><th>APM</th><th>PM</th><th>MS</th><th>DO</th><th>UPU</th><th>Sem função</th></tr></thead>
+        <tbody>
+          <tr class="grp"><td colspan="8">Painel</td></tr>
+          <tr><td>Painel</td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr class="grp"><td colspan="8">E2E &middot; Configuração</td></tr>
+          <tr><td>Topologia do país</td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-gray">View</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr><td>Transportadoras e produtos</td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr><td>Painelistas</td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-gray">View</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr><td>E2E: SLA</td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr class="grp"><td colspan="8">E2E &middot; Alocação</td></tr>
+          <tr><td>Gerador de alocação</td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr><td>Balanceamento de carga</td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr><td>Planos de alocação</td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr class="grp"><td colspan="8">E2E &middot; Materiais</td></tr>
+          <tr><td>Necessidades de material</td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-gray">View</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr><td>Gestão de stock</td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr><td>Catálogo de materiais</td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-gray">View</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr class="grp"><td colspan="8">E2E &middot; Relatórios</td></tr>
+          <tr><td>Equidade territorial</td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td></tr>
+          <tr><td>Cumprimento</td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td></tr>
+          <tr class="grp"><td colspan="8">E2E &middot; Base de dados</td></tr>
+          <tr><td>BD E2E</td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-gray">View</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr><td>Extrair API da BD E2E</td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-gray">View</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr class="grp"><td colspan="8">Diagnóstico &middot; Configuração</td></tr>
+          <tr><td>Centros postais</td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-gray">View</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr><td>Gestão de leitores</td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-gray">View</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr><td>SLA de segmentos</td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-gray">View</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr class="grp"><td colspan="8">Diagnóstico &middot; Relatórios</td></tr>
+          <tr><td>Análise de rotas</td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td></tr>
+          <tr><td>Análise de segmentos</td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td></tr>
+          <tr class="grp"><td colspan="8">Diagnóstico &middot; Base de dados</td></tr>
+          <tr><td>API do pipeline EPCIS</td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-gray">View</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr><td>Base de dados de eventos RFID</td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-gray">View</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr class="grp"><td colspan="8">Incidências</td></tr>
+          <tr><td>Incidências reportadas</td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr><td>Disponibilidade do painelista</td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-gray">View</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-gray">View</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr><td>Receções</td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr class="grp"><td colspan="8">Administração</td></tr>
+          <tr><td>Utilizadores</td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr><td>Dias úteis da conta</td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr class="grp"><td colspan="8">Ajuda</td></tr>
+          <tr><td>Centro de ajuda</td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="faq">
+      <h2>Perguntas</h2>
+      <details><summary>Um ecrã mostra «Somente consulta». Porquê?</summary><div>As suas funções só lhe dão View nessa opção. Se precisar de alterar dados, peça Edit ao Account Manager ou ao UPU account manager da sua conta.</div></details>
+      <details><summary>Falta-me uma opção no menu.</summary><div>Nenhuma das suas funções tem acesso a ela. Peça-a ao Account Manager ou ao UPU account manager. Se tiver várias contas, confirme no seletor <strong>Conta</strong> que está na conta certa.</div></details>
+      <details><summary>Tenho a função, mas não recebo os avisos automáticos.</summary><div>Os avisos vão para os e-mails de <strong>Contactos da conta</strong>, não para os utilizadores com a função. Peça que ponham o seu e-mail nos contactos.</div></details>
+      <details><summary>Uma alteração na minha conta afeta outros países?</summary><div>Não. Cada conta tem os seus próprios direitos, contactos e funções.</div></details>
+      <details><summary>Posso criar uma função nova ou mudar-lhe o nome?</summary><div>Não. As seis funções são iguais em todas as contas. O que cada conta ajusta são os seus direitos.</div></details>
+    </section>
+  </div>
+  </main>
+</div>
+
+<script>
+(function () {
+  var links = Array.prototype.slice.call(document.querySelectorAll('#nav a'));
+  var sections = links.map(function (a) { return document.querySelector(a.getAttribute('href')); }).filter(Boolean);
+
+  // Mobile section picker
+  var jump = document.getElementById('jump');
+  links.forEach(function (a) {
+    var o = document.createElement('option');
+    o.value = a.getAttribute('href'); o.textContent = a.textContent; jump.appendChild(o);
+  });
+  jump.addEventListener('change', function () { location.hash = jump.value; });
+
+  // Highlight the current section in the side menu
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          links.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id); });
+          jump.value = '#' + e.target.id;
+        }
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    sections.forEach(function (s) { io.observe(s); });
+  }
+})();
+</script>
+</body>
+</html>

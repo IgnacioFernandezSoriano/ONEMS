@@ -1,0 +1,594 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ayuda: Roles y accesos</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<style>
+  :root {
+    --white: #ffffff; --g50: #f9fafb; --g100: #f3f4f6; --g200: #e5e7eb; --g300: #d1d5db;
+    --g400: #9ca3af; --g500: #6b7280; --g600: #4b5563; --g700: #374151; --g900: #111827;
+    --b50: #eff6ff; --b100: #dbeafe; --b600: #2563eb; --b700: #1d4ed8;
+    --r100: #fee2e2; --r700: #b91c1c; --gr100: #dcfce7; --gr700: #15803d;
+    --y100: #fef9c3; --y800: #854d0e; --p100: #f3e8ff; --p700: #7e22ce;
+    --tg-head: #517da2; --tg-wall-a: #d4e4bc; --tg-wall-b: #a9cba6; --tg-dot: rgba(255,255,255,.35);
+    --tg-in: #ffffff; --tg-out: #effdde; --tg-ink: #000000; --tg-time: #8a9aa6; --tg-time-out: #5eaf5c;
+    --tg-key: rgba(52, 92, 60, .42); --tg-ring: #ffd23f; --tg-photo: #c7d3dc;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+      'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    -webkit-font-smoothing: antialiased; background: var(--g50); color: var(--g700); line-height: 1.6; font-size: 15px;
+  }
+  .layout { display: flex; min-height: 100vh; }
+
+  /* Sidebar, same look as the ONE menu */
+  .side {
+    width: 272px; flex-shrink: 0; background: var(--white); border-right: 1px solid var(--g200);
+    position: sticky; top: 0; height: 100vh; overflow-y: auto; display: flex; flex-direction: column;
+  }
+  .brand { padding: 24px 24px 16px; }
+  .brand h1 { font-size: 24px; line-height: 32px; font-weight: 700; color: var(--g900); }
+  .brand p { font-size: 14px; color: var(--g500); margin-top: 4px; }
+  .brand .doc { margin-top: 16px; font-size: 12px; font-weight: 600; color: var(--b700); background: var(--b50);
+    display: inline-block; padding: 2px 10px; border-radius: 999px; }
+  .nav { padding: 8px 12px 24px; flex: 1; }
+  .nav h3 { font-size: 12px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--g400);
+    padding: 16px 12px 6px; }
+  .nav a {
+    display: block; padding: 8px 12px; border-radius: 8px; font-size: 14px; font-weight: 500; color: var(--g600);
+    text-decoration: none; transition: background .15s, color .15s;
+  }
+  .nav a:hover { background: var(--g100); }
+  .nav a.active { background: var(--b50); color: var(--b700); }
+  .side-foot { padding: 16px 24px; border-top: 1px solid var(--g200); font-size: 12px; color: var(--g500); }
+
+  /* Content */
+  .main { flex: 1; min-width: 0; padding: 40px 32px 80px; }
+  .page { max-width: 880px; margin: 0 auto; }
+  .page > header { margin-bottom: 32px; }
+  .page > header h2 { font-size: 30px; line-height: 38px; font-weight: 700; color: var(--g900); }
+  .page > header p { margin-top: 8px; font-size: 17px; color: var(--g600); max-width: 640px; }
+  section { margin-top: 48px; }
+  section > h2 { font-size: 22px; font-weight: 700; color: var(--g900); padding-bottom: 8px; margin-bottom: 16px;
+    border-bottom: 1px solid var(--g200); }
+  h3 { font-size: 17px; font-weight: 600; color: var(--g900); margin: 28px 0 8px; }
+  p { margin: 8px 0; }
+  ul, ol { margin: 8px 0 8px 22px; }
+  li { margin: 4px 0; }
+  strong { color: var(--g900); font-weight: 600; }
+  code, kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px;
+    background: var(--g100); border: 1px solid var(--g200); border-radius: 6px; padding: 1px 6px; color: var(--g900); }
+  .card { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 20px 24px; margin: 16px 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 16px 0; }
+  .grid .card { margin: 0; }
+  .card h4 { font-size: 15px; font-weight: 600; color: var(--g900); margin-bottom: 4px; }
+  .card p { margin: 4px 0; font-size: 14px; color: var(--g600); }
+
+  .badge { display: inline-block; font-size: 12px; font-weight: 500; padding: 1px 10px; border-radius: 999px; white-space: nowrap; }
+  .b-red { background: var(--r100); color: var(--r700); }
+  .b-blue { background: var(--b100); color: var(--b700); }
+  .b-green { background: var(--gr100); color: var(--gr700); }
+  .b-yellow { background: var(--y100); color: var(--y800); }
+  .b-gray { background: var(--g100); color: var(--g600); }
+  .b-purple { background: var(--p100); color: var(--p700); }
+  .btn { display: inline-block; font-size: 13px; font-weight: 500; padding: 2px 10px; border-radius: 8px;
+    background: var(--white); border: 1px solid var(--g300); color: var(--g700); white-space: nowrap; }
+  .btn.primary { background: var(--b600); border-color: var(--b600); color: #fff; }
+
+  .callout { border-radius: 12px; padding: 14px 18px; margin: 16px 0; font-size: 14px; border: 1px solid; }
+  .callout.info { background: var(--b50); border-color: var(--b100); color: #1e3a8a; }
+  .callout.ok { background: #f0fdf4; border-color: var(--gr100); color: #14532d; }
+  .callout.warn { background: #fffbeb; border-color: var(--y100); color: var(--y800); }
+  .callout strong { color: inherit; }
+
+  .table-wrap { overflow-x: auto; margin: 16px 0; background: var(--white); border: 1px solid var(--g200); border-radius: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--g500); background: var(--g50); padding: 10px 14px; border-bottom: 1px solid var(--g200); }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--g100); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  td:first-child { font-weight: 500; color: var(--g900); }
+
+  /* Steps */
+  ol.steps { list-style: none; margin: 12px 0; counter-reset: s; }
+  ol.steps > li { counter-increment: s; position: relative; padding: 4px 0 12px 44px; margin: 0; }
+  ol.steps > li::before {
+    content: counter(s); position: absolute; left: 0; top: 2px; width: 28px; height: 28px; border-radius: 50%;
+    background: var(--b100); color: var(--b700); font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Telegram chat mock-ups */
+  .chat { background: #e9eef5; border: 1px solid var(--g200); border-radius: 16px; padding: 16px; margin: 16px 0; max-width: 460px; }
+  .chat .who { text-align: center; font-size: 12px; color: var(--g500); margin-bottom: 8px; font-weight: 500; }
+  .msg { max-width: 85%; padding: 8px 12px; border-radius: 14px; margin: 6px 0; font-size: 14px; line-height: 1.45; box-shadow: 0 1px 1px rgba(0,0,0,.06); }
+  .msg.bot { background: var(--white); border-top-left-radius: 4px; margin-right: auto; color: var(--g900); }
+  .msg.me { background: #dbeafe; border-top-right-radius: 4px; margin-left: auto; color: var(--g900); }
+  .kb { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 8px; max-width: 85%; }
+  .kb span { flex: 1 1 auto; text-align: center; background: rgba(37,99,235,.12); color: var(--b700); font-size: 13px; font-weight: 500;
+    padding: 6px 10px; border-radius: 10px; }
+  .kb.col span { flex-basis: 100%; }
+  .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; align-items: start; }
+  .two .chat { margin: 8px 0; }
+  .cap { font-size: 13px; color: var(--g500); margin-top: -6px; max-width: 460px; }
+
+  /* Flow */
+  .flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; margin: 16px 0; }
+  .flow .node { flex: 1 1 150px; background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 12px 14px; font-size: 13px; position: relative; }
+  .flow .node b { display: block; color: var(--g900); font-size: 14px; margin-bottom: 2px; }
+  .flow .node .tag { font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--b700); }
+  .flow .arrow { align-self: center; color: var(--g400); font-size: 18px; }
+
+  details { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; margin: 8px 0; }
+  summary { cursor: pointer; padding: 14px 18px; font-weight: 600; color: var(--g900); list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: '+'; color: var(--g400); font-size: 20px; line-height: 1; }
+  details[open] summary::after { content: '\2212'; }
+  details > div { padding: 0 18px 14px; color: var(--g600); font-size: 14px; }
+
+  /* ONEMS screen drawings */
+  .app { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; overflow: hidden; margin: 16px 0 6px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .app-bar { display: flex; gap: 6px; align-items: center; background: var(--g100); border-bottom: 1px solid var(--g200); padding: 8px 12px; font-size: 12px; color: var(--g500); }
+  .app-bar i { width: 9px; height: 9px; border-radius: 50%; background: var(--g300); display: inline-block; }
+  .app-bar span { margin-left: 8px; }
+  .app-body { padding: 20px; font-size: 13px; color: var(--g700); overflow-x: auto; }
+  .app-body.cols { display: grid; grid-template-columns: 210px 1fr; padding: 0; }
+  .app-body.cols > .sb { border-right: 1px solid var(--g200); padding: 14px 10px; background: #fff; }
+  .app-body.cols > .ct { padding: 20px; }
+  .sb .t { font-size: 20px; font-weight: 700; color: var(--g900); padding: 0 8px; }
+  .sb .s { font-size: 11px; color: var(--g500); padding: 0 8px 8px; }
+  .sb h5 { font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--g400); padding: 10px 8px 4px; }
+  .mi { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 8px; font-size: 13px; color: var(--g700); }
+  .mi.on { background: var(--b50); color: var(--b600); }
+  .mi .ic { width: 14px; height: 14px; border-radius: 4px; background: var(--g300); flex-shrink: 0; }
+  .mi.on .ic { background: var(--b600); }
+  .mi .badge { margin-left: auto; font-size: 11px; padding: 0 7px; }
+  .m-h { font-size: 18px; font-weight: 700; color: var(--g900); margin-bottom: 12px; }
+  .m-h3 { font-size: 15px; font-weight: 700; color: var(--g900); margin: 0 0 6px; }
+  .m-sel { display: inline-block; border: 1px solid var(--g300); border-radius: 4px; padding: 3px 24px 3px 8px; font-size: 12px; background: #fff; color: var(--g700); margin-right: 8px; position: relative; }
+  .m-sel::after { content: '\25BE'; position: absolute; right: 8px; color: var(--g400); }
+  .m-card { border: 1px solid var(--g200); border-radius: 8px; overflow: hidden; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.05); margin: 10px 0; }
+  .app table { font-size: 12px; }
+  .app th { padding: 8px 12px; font-size: 11px; }
+  .app td { padding: 8px 12px; }
+  .app td:first-child { font-weight: 400; color: inherit; }
+  .app .num { text-align: right; }
+  .m-link { color: var(--b600); }
+  .m-box { border: 1px solid var(--g200); border-radius: 6px; padding: 14px; margin: 10px 0; }
+  .m-note { background: var(--g50); border-radius: 6px; padding: 10px 12px; margin: 8px 0; font-size: 12px; }
+  .m-muted { color: var(--g500); font-size: 12px; }
+  .m-pbtn, .m-sbtn { display: inline-block; padding: 6px 14px; border-radius: 8px; font-size: 12px; margin: 2px 6px 2px 0; }
+  .m-pbtn { background: var(--b600); color: #fff; }
+  .m-sbtn { background: var(--g200); color: var(--g700); }
+  .m-ta { border: 1px solid var(--g300); border-radius: 4px; padding: 8px; font-size: 12px; color: var(--g400); background: #fff; margin: 6px 0 10px; }
+  .m-in { display: inline-block; border: 1px solid var(--g300); border-radius: 4px; padding: 3px 8px; font-size: 12px; background: #fff; min-width: 90px; }
+  .m-bub { max-width: 80%; padding: 6px 10px; border-radius: 10px; margin: 5px 0; font-size: 12px; }
+  .m-bub small { display: block; color: var(--g500); font-size: 10px; margin-top: 2px; }
+  .m-bub.l { background: var(--g100); margin-right: auto; }
+  .m-bub.r { background: var(--b100); margin-left: auto; }
+  .pin { display: inline-flex; width: 20px; height: 20px; border-radius: 50%; background: var(--b600); color: #fff; font-size: 11px; font-weight: 700; align-items: center; justify-content: center; margin-left: 6px; vertical-align: middle; flex-shrink: 0; }
+  .legend { counter-reset: l; list-style: none; margin: 10px 0 20px; }
+  .legend li { counter-increment: l; position: relative; padding: 2px 0 6px 34px; font-size: 14px; }
+  .legend li::before { content: counter(l); position: absolute; left: 0; top: 1px; width: 20px; height: 20px; border-radius: 50%; background: var(--b600); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .heat td { text-align: center; }
+  .heat .ok { background: #f0fdf4; } .heat .hi { background: var(--y100); } .heat .sat { background: var(--r100); }
+  .heat .off { background: repeating-linear-gradient(45deg, var(--g100), var(--g100) 4px, #fff 4px, #fff 8px); color: var(--g400); }
+  .heat .now { outline: 2px solid var(--b600); outline-offset: -2px; }
+
+  /* Right-to-left (Arabic) */
+  [dir=rtl] .side { border-right: 0; border-left: 1px solid var(--g200); }
+  [dir=rtl] .app-body.cols > .sb { border-right: 0; border-left: 1px solid var(--g200); }
+  [dir=rtl] th, [dir=rtl] td, [dir=rtl] .nav a { text-align: right; }
+  [dir=rtl] ul, [dir=rtl] ol { margin: 8px 22px 8px 0; }
+  [dir=rtl] ol.steps > li { padding: 4px 44px 12px 0; }
+  [dir=rtl] ol.steps > li::before { left: auto; right: 0; }
+  [dir=rtl] .legend li { padding: 2px 34px 6px 0; }
+  [dir=rtl] .legend li::before { left: auto; right: 0; }
+  [dir=rtl] .msg.bot { border-top-left-radius: 14px; border-top-right-radius: 4px; margin-right: 0; margin-left: auto; }
+  [dir=rtl] .msg.me { border-top-right-radius: 14px; border-top-left-radius: 4px; margin-left: 0; margin-right: auto; }
+  [dir=rtl] .m-bub.l { margin-right: 0; margin-left: auto; }
+  [dir=rtl] .m-bub.r { margin-left: 0; margin-right: auto; }
+  [dir=rtl] .pin { margin-left: 0; margin-right: 6px; }
+  [dir=rtl] .m-sel { padding: 3px 8px 3px 24px; margin-right: 0; margin-left: 8px; }
+  [dir=rtl] .m-sel::after { right: auto; left: 8px; }
+  [dir=rtl] .m-pbtn, [dir=rtl] .m-sbtn { margin: 2px 0 2px 6px; }
+  [dir=rtl] .mi .badge { margin-left: 0; margin-right: auto; }
+  [dir=rtl] .app-bar span { margin-left: 0; margin-right: 8px; }
+  [dir=rtl] .flow .arrow { transform: scaleX(-1); }
+  [dir=rtl] .app td:first-child { font-weight: 400; }
+  /* Telegram (canonical, from panelist-guide) and practical cases */
+  .case { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 20px 24px; margin: 16px 0; scroll-margin-top: 24px; }
+  .case > h3 { margin: 0; display: flex; gap: 10px; align-items: center; }
+  .case > .sit { color: var(--g500); font-size: 14px; margin: 2px 0 12px; }
+  .case .callout { margin: 8px 0; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+  .chips a { text-decoration: none; font-size: 13px; font-weight: 500; padding: 4px 12px; border-radius: 999px;
+    background: var(--white); border: 1px solid var(--g200); color: var(--g700); }
+  .chips a:hover { background: var(--b50); border-color: var(--b100); color: var(--b700); }
+  .tg { max-width: 380px; border-radius: 16px; overflow: hidden; border: 1px solid var(--g200);
+    box-shadow: 0 4px 16px rgba(17,24,39,.10); background: var(--tg-in); }
+  .tg-head { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: var(--tg-head); color: #ffffff; }
+  .tg-back { font-size: 20px; line-height: 1; opacity: .9; }
+  .tg-av { width: 36px; height: 36px; border-radius: 50%; flex: none; display: grid; place-items: center;
+    background: linear-gradient(160deg, #72c2f4, #3d8fd9); color: #ffffff; font-weight: 700; font-size: 12px; }
+  .tg-name { flex: 1; min-width: 0; line-height: 1.2; }
+  .tg-name b { display: block; font-size: 15px; color: #ffffff; font-weight: 600; }
+  .tg-name small { font-size: 12.5px; opacity: .8; }
+  .tg-body { display: flex; flex-direction: column; gap: 6px; padding: 12px 10px 14px;
+    background-color: var(--tg-wall-a);
+    background-image: radial-gradient(var(--tg-dot) 1.4px, transparent 1.6px), linear-gradient(160deg, var(--tg-wall-a), var(--tg-wall-b));
+    background-size: 18px 18px, 100% 100%; }
+  .tg-msg { max-width: 84%; padding: 6px 9px 7px 10px; border-radius: 12px; font-size: 14.5px; line-height: 1.38; color: var(--tg-ink);
+    box-shadow: 0 1px 1px rgba(0,0,0,.13); overflow-wrap: anywhere; }
+  .tg-msg.in { background: var(--tg-in); align-self: flex-start; border-bottom-left-radius: 4px; }
+  .tg-msg.out { background: var(--tg-out); align-self: flex-end; border-bottom-right-radius: 4px; }
+  .tg-msg .t { float: right; font-size: 11px; color: var(--tg-time); margin: 8px 0 -4px 10px; line-height: 1; }
+  .tg-msg.out .t { color: var(--tg-time-out); }
+  .tg-msg.out .t::after { content: " \2713\2713"; letter-spacing: -2px; }
+  .tg-msg.photo { padding: 3px; }
+  .tg-msg.photo .img { display: grid; place-items: center; width: 170px; height: 104px; border-radius: 10px; background: var(--tg-photo); font-size: 30px; }
+  .tg-msg.photo .t { position: relative; margin: -18px 8px 4px 0; }
+  .tg-kb { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; align-self: flex-start; width: 84%; margin-top: -2px; }
+  .tg-kb.one { grid-template-columns: 1fr; }
+  .tg-kb span { background: var(--tg-key); color: #ffffff; border-radius: 8px; padding: 7px 6px; text-align: center; font-size: 13.5px; font-weight: 600; }
+  .tg-kb span.tap { box-shadow: inset 0 0 0 2px var(--tg-ring); }
+  .tg-kb span.tap::after { content: " \1F446"; }
+  .tg-input { display: flex; align-items: center; gap: 12px; padding: 9px 14px; background: #ffffff; color: var(--tg-time); font-size: 14px; }
+  .tg-input .ph { flex: 1; }
+  [dir=rtl] .tg-msg.in { border-bottom-left-radius: 12px; border-bottom-right-radius: 4px; }
+  [dir=rtl] .tg-msg.out { border-bottom-right-radius: 12px; border-bottom-left-radius: 4px; }
+  [dir=rtl] .tg-msg .t { float: left; margin: 8px 10px -4px 0; }
+  [dir=rtl] .tg-back { transform: scaleX(-1); }
+  @media (max-width: 900px) {
+    .case { padding: 16px; }
+    .tg { max-width: none; }
+  }
+  .mobile-top { display: none; }
+  @media (max-width: 900px) {
+    .app-body.cols { grid-template-columns: 1fr; }
+    .app-body.cols > .sb { border-right: 0; border-bottom: 1px solid var(--g200); }
+    .layout { display: block; }
+    .side { display: none; }
+    .mobile-top { display: block; position: sticky; top: 0; z-index: 5; background: var(--white); border-bottom: 1px solid var(--g200); padding: 10px 16px; }
+    .mobile-top b { font-size: 18px; color: var(--g900); }
+    .mobile-top span { font-size: 13px; color: var(--g500); margin-left: 6px; }
+    .mobile-top select { width: 100%; margin-top: 8px; padding: 8px; border: 1px solid var(--g300); border-radius: 8px; font-size: 14px; background: #fff; color: var(--g700); }
+    .main { padding: 24px 16px 64px; }
+    .page > header h2 { font-size: 24px; line-height: 32px; }
+  }
+  @media print { .side, .mobile-top { display: none; } .main { padding: 0; } body { background: #fff; } section { break-inside: avoid-page; } }
+  /* Rights table (roles-access) */
+  .rights th:not(:first-child), .rights td:not(:first-child) { text-align: center; }
+  .rights tr.grp td { background: var(--g50); font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--g500); }
+  .rights td { padding: 6px 10px; } .rights th { padding: 8px 10px; }
+</style>
+</head>
+<body>
+<div class="mobile-top">
+  <b>ONE</b><span>for Regulators &middot; Ayuda</span>
+  <select id="jump" aria-label="Ir a la sección"></select>
+</div>
+<div class="layout">
+  <aside class="side">
+    <div class="brand">
+      <h1>ONE</h1>
+      <p>for Regulators</p>
+      <span class="doc">Ayuda &middot; Roles y accesos</span>
+    </div>
+    <nav class="nav" id="nav">
+      <h3>Primeros pasos</h3>
+      <a href="#roles">Los seis roles</a>
+      <a href="#rights">Edit, View y sin acceso</a>
+      <a href="#no-role">Usuarios sin rol</a>
+      <a href="#accounts">Varias cuentas</a>
+      <a href="#ask">Pedir un cambio</a>
+      <h3>Gestionar los accesos</h3>
+      <a href="#tab">La pestaña</a>
+      <a href="#contacts">Contactos</a>
+      <a href="#matrix">Cambiar un derecho</a>
+      <a href="#users">Roles de los usuarios</a>
+      <a href="#reset">Volver a la plantilla</a>
+      <a href="#log">Últimos cambios</a>
+      <a href="#new-user">Crear usuarios con roles</a>
+      <h3>Referencia</h3>
+      <a href="#template">Plantilla de derechos</a>
+      <a href="#faq">Preguntas</a>
+    </nav>
+    <div class="side-foot">Actualizado el 18 de noviembre de 2026</div>
+  </aside>
+
+  <main class="main">
+  <div class="page">
+    <header>
+      <h2>Roles y accesos</h2>
+      <p>Lo que cada persona ve y puede hacer en ONEMS depende de sus roles en la cuenta de su país. Aquí se explican los roles, los derechos y cómo los gestionan el Account Manager y el UPU account manager.</p>
+    </header>
+
+    <section id="roles">
+      <h2>Los seis roles</h2>
+      <p>Un <strong>rol</strong> es la función de una persona en la cuenta de su país. Cada rol da unos derechos: qué opciones del menú ve y en cuáles puede cambiar datos. Los roles son siempre estos seis, en todas las cuentas.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Rol</th><th>Qué hace</th></tr></thead>
+        <tbody>
+          <tr><td>Account Manager</td><td>Responsable de la cuenta. Gestiona casi todo y decide los accesos de su equipo.</td></tr>
+          <tr><td>Allocation Plan Manager</td><td>Prepara y ajusta los planes de envíos: generador, balanceo y planes de asignación.</td></tr>
+          <tr><td>Panelist Manager</td><td>Gestiona a los panelistas, sus incidencias y su disponibilidad.</td></tr>
+          <tr><td>Materials Supplier</td><td>Gestiona los materiales: necesidades, inventario y catálogo.</td></tr>
+          <tr><td>DO coordinator</td><td>Coordina la parte RFID: centros postales, lectores y SLA de segmento.</td></tr>
+          <tr><td>UPU account manager</td><td>Persona de UPU que sigue la cuenta. Tiene derechos amplios y también decide los accesos.</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout info">Los nombres de los roles se muestran en inglés en todos los idiomas, igual que en ONEMS.</div>
+    </section>
+
+    <section id="rights">
+      <h2>Edit, View y sin acceso</h2>
+      <p>Para cada opción del menú, un rol tiene uno de estos tres derechos:</p>
+      <div class="grid">
+        <div class="card"><h4>Edit</h4><p>Ve la pantalla y puede cambiar datos: crear, guardar, borrar o importar.</p></div>
+        <div class="card"><h4>View</h4><p>Ve la pantalla, pero no puede cambiar nada. Los botones de crear, guardar o borrar no aparecen y la pantalla muestra la marca <span class="badge b-gray">Solo consulta</span>.</p></div>
+        <div class="card"><h4>&mdash;</h4><p>La opción no aparece en el menú.</p></div>
+      </div>
+      <h3>Varios roles se suman</h3>
+      <p>Una persona puede tener varios roles. En cada opción gana el derecho mayor: Edit antes que View, y View antes que nada.</p>
+      <div class="callout info"><strong>Ejemplo:</strong> con la plantilla, el Panelist Manager tiene View en <strong>Gestión de Inventario</strong> y el Materials Supplier tiene Edit. Quien tenga los dos roles tiene Edit.</div>
+    </section>
+
+    <section id="no-role">
+      <h2>Usuarios sin rol</h2>
+      <p>Un usuario de la cuenta sin ningún rol solo ve el reporting y el Centro de ayuda, en View:</p>
+      <ul>
+        <li>Equidad Territorial</li>
+        <li>Cumplimiento</li>
+        <li>Análisis de Rutas</li>
+        <li>Análisis de Segmento</li>
+        <li>Centro de ayuda</li>
+      </ul>
+      <p>No ve el <strong>Panel de control</strong>. Al entrar, ONEMS abre la primera de estas pantallas.</p>
+      <div class="callout warn">Esta lista es igual en todas las cuentas y no se puede cambiar. Si alguien necesita más, hay que darle un rol.</div>
+    </section>
+
+    <section id="accounts">
+      <h2>Roles en varias cuentas</h2>
+      <p>Una persona puede tener roles en varios países; por ejemplo, un UPU account manager que sigue varias cuentas. En ese caso, arriba del menú aparece el selector <strong>Cuenta</strong>.</p>
+      <ol class="steps">
+        <li>Elija la cuenta en el selector <strong>Cuenta</strong>.</li>
+        <li>La página se recarga sola.</li>
+        <li>Ahora ve los menús, los derechos y los datos de esa cuenta.</li>
+      </ol>
+      <div class="callout info">Se trabaja con <strong>una cuenta a la vez</strong>. Si tiene ONEMS abierto en dos pestañas del navegador, las dos comparten la misma cuenta: al cambiarla en una, recargue la otra.</div>
+    </section>
+
+    <section id="ask">
+      <h2>Pedir un cambio de acceso</h2>
+      <p>Si le falta una opción del menú, o necesita Edit donde solo tiene View, pídaselo al <strong>Account Manager</strong> o al <strong>UPU account manager</strong> de su cuenta. Solo ellos pueden cambiar los roles y los derechos de la cuenta.</p>
+      <div class="callout ok"><strong>Y después:</strong> el cambio se guarda al momento. Recargue la página para ver su menú actualizado.</div>
+    </section>
+
+    <section id="tab">
+      <h2>La pestaña Roles y accesos</h2>
+      <p>Esta parte es para el <strong>Account Manager</strong> y el <strong>UPU account manager</strong>: son los únicos de la cuenta que pueden cambiar sus accesos. Este permiso es fijo: no se puede quitar desde la matriz de derechos.</p>
+      <h3>Dónde está</h3>
+      <ul>
+        <li>En el menú <strong>Administración &rsaquo; Roles y accesos</strong>. Solo lo ven el Account Manager y el UPU account manager. Abre la pestaña de la cuenta en la que está trabajando.</li>
+        <li>El superadmin de UPU la tiene además en el formulario de cada cuenta, en la pestaña <strong>Roles y accesos</strong>, junto a <strong>General</strong>.</li>
+      </ul>
+      <div class="app" role="img" aria-label="Maqueta de la pestaña Roles y accesos">
+        <div class="app-bar"><i></i><i></i><i></i><span>ONEMS &rsaquo; Administración &rsaquo; Roles y accesos</span></div>
+        <div class="app-body">
+          <div class="m-h">Roles y accesos</div>
+          <div class="m-box">
+            <div class="m-h3">Contactos de la cuenta<span class="pin">1</span></div>
+            <div class="m-muted">Correo del Account Manager</div>
+            <span class="m-in" dir="ltr">am@regulator.example</span>
+            <div class="m-muted" style="margin-top:6px">Correo del Panelist Manager</div>
+            <span class="m-in" dir="ltr">panel@regulator.example</span>
+            <div style="margin-top:8px"><span class="m-pbtn">Guardar contactos</span></div>
+          </div>
+          <div class="m-box">
+            <div class="m-h3">Derechos de cada rol<span class="pin">2</span> &nbsp; <span class="m-sbtn">Volver a la plantilla</span><span class="pin">3</span></div>
+            <table>
+              <thead><tr><th>Opción del menú</th><th>Account Manager</th><th>Panelist Manager</th><th>Sin rol</th></tr></thead>
+              <tbody>
+                <tr><td>Panelistas</td><td><span class="m-sel">Edit</span></td><td><span class="m-sel">Edit</span></td><td>&mdash;</td></tr>
+                <tr><td>Gestión de Inventario</td><td><span class="m-sel">Edit</span></td><td><span class="m-sel">View</span></td><td>&mdash;</td></tr>
+                <tr><td>Equidad Territorial</td><td><span class="m-sel">View</span></td><td><span class="m-sel">&mdash;</span></td><td>View</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="m-box">
+            <div class="m-h3">Usuarios y sus roles</div>
+            <table>
+              <thead><tr><th>Usuario</th><th>Account Manager</th><th>Panelist Manager</th></tr></thead>
+              <tbody>
+                <tr><td>Grace Wanjiru <span class="badge b-yellow">Provisional</span><span class="pin">4</span></td><td>&#9745;</td><td>&#9744;</td></tr>
+                <tr><td>Peter Otieno</td><td>&#9744;</td><td>&#9745;</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="m-box">
+            <div class="m-h3">Últimos cambios<span class="pin">5</span></div>
+            <table>
+              <thead><tr><th>Fecha</th><th>Quién</th><th>Cambio</th></tr></thead>
+              <tbody><tr><td>18/11/2026 10:42</td><td dir="ltr">am@regulator.example</td><td>Panelist Manager &middot; Panelistas: View → Edit</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <ol class="legend">
+        <li><strong>Contactos de la cuenta</strong>: los correos que reciben los avisos automáticos.</li>
+        <li><strong>Derechos de cada rol</strong>: un selector por rol y por opción del menú.</li>
+        <li><strong>Volver a la plantilla</strong>: deshace todos los cambios de la matriz.</li>
+        <li><strong>Provisional</strong>: rol asignado automáticamente, pendiente de confirmar.</li>
+        <li><strong>Últimos cambios</strong>: quién cambió qué y cuándo.</li>
+      </ol>
+    </section>
+
+    <section id="contacts">
+      <h2>Contactos de la cuenta</h2>
+      <p>Son seis correos, uno por rol. ONEMS envía a esos correos los <strong>avisos y correos automáticos</strong> de la cuenta, como el informe de operación.</p>
+      <div class="callout warn"><strong>Un contacto no es lo mismo que un rol.</strong> Poner un correo en los contactos no da acceso a ONEMS. Y tener un rol no hace que una persona reciba los avisos: solo los recibe el correo escrito en los contactos.</div>
+      <ol class="steps">
+        <li>Escriba el correo de cada rol. Déjelo vacío si ese rol no existe en su cuenta.</li>
+        <li>Pulse <strong>Guardar contactos</strong>.</li>
+      </ol>
+      <div class="callout ok"><strong>Y después:</strong> aparece <em>Guardado</em> y los próximos avisos van a los correos nuevos. El cambio queda en <strong>Últimos cambios</strong>.</div>
+      <h3>Informe de operación</h3>
+      <p>El correo «ONE operations report» va a los contactos de la cuenta; el Account Manager y el UPU account manager van en copia. Cada cuenta tiene su propio calendario: algunos días de la semana, un día al mes o nunca. Lo configura el superadmin de UPU en la pestaña <strong>General</strong> de la cuenta. Si quiere cambiarlo, pídaselo a su UPU account manager.</p>
+    </section>
+
+    <section id="matrix">
+      <h2>Cambiar un derecho</h2>
+      <p>La tabla <strong>Derechos de cada rol</strong> tiene una fila por opción del menú, agrupadas como en el menú, y una columna por rol.</p>
+      <ol class="steps">
+        <li>Busque la fila de la opción del menú.</li>
+        <li>En la columna del rol, abra el selector y elija <strong>Edit</strong>, <strong>View</strong> o <strong>&mdash;</strong>.</li>
+        <li>No hay botón de guardar: el cambio se guarda al momento.</li>
+      </ol>
+      <div class="callout ok"><strong>Y después:</strong> todas las personas con ese rol en esta cuenta tienen el nuevo derecho. Lo verán al recargar la página. Las demás cuentas no cambian.</div>
+      <div class="callout info">La columna <strong>Sin rol</strong> es fija: es igual en todas las cuentas y no se puede cambiar.</div>
+    </section>
+
+    <section id="users">
+      <h2>Roles de los usuarios</h2>
+      <p>La tabla <strong>Usuarios y sus roles</strong> muestra los usuarios de la cuenta, con una casilla por rol. Un usuario puede tener varios roles.</p>
+      <ol class="steps">
+        <li>Busque al usuario.</li>
+        <li>Marque la casilla del rol para dárselo, o desmárquela para quitárselo.</li>
+        <li>El cambio se guarda al momento.</li>
+      </ol>
+      <h3>Roles «Provisional»</h3>
+      <p>Al poner en marcha los roles, ONEMS asignó algunos automáticamente. Llevan la marca <span class="badge b-yellow">Provisional</span> y la casilla en naranja. Revíselos:</p>
+      <ul>
+        <li>Si el rol es correcto, <strong>confírmelo</strong>: desmarque la casilla y vuelva a marcarla. La marca desaparece.</li>
+        <li>Si no es correcto, desmárquelo y marque el rol adecuado.</li>
+      </ul>
+      <div class="callout warn"><strong>No puede quitarse su propio último rol de gestión.</strong> Si es su único rol de Account Manager o UPU account manager en la cuenta, ONEMS no le deja quitarlo, para que nadie se quede sin poder corregir esta pestaña. Por eso, si su propio rol de gestión está en Provisional, pida a otro responsable o al superadmin que lo confirme.</div>
+      <p><strong>Añadir un usuario existente por correo</strong> solo lo puede hacer el superadmin. Sirve para dar un rol en su cuenta a alguien que ya es usuario de otra cuenta. Pídaselo a UPU.</p>
+      <div class="callout ok"><strong>Y después:</strong> el usuario tiene sus nuevos derechos al recargar la página. El cambio queda en <strong>Últimos cambios</strong>.</div>
+    </section>
+
+    <section id="reset">
+      <h2>Volver a la plantilla</h2>
+      <p>Cada cuenta empieza con la <a href="#template">plantilla de derechos</a> y puede ajustarla. El botón <span class="btn">Volver a la plantilla</span> deshace todos los cambios de la matriz de su cuenta.</p>
+      <ol class="steps">
+        <li>Pulse <strong>Volver a la plantilla</strong>.</li>
+        <li>ONEMS pide confirmación. Acepte.</li>
+      </ol>
+      <div class="callout ok"><strong>Y después:</strong> todos los derechos de la cuenta vuelven a la plantilla. Los roles de los usuarios y los contactos no cambian.</div>
+    </section>
+
+    <section id="log">
+      <h2>Últimos cambios</h2>
+      <p>La lista <strong>Últimos cambios</strong> muestra los cambios hechos en la pestaña: <strong>Fecha</strong>, <strong>Quién</strong> lo hizo y el <strong>Cambio</strong>; por ejemplo, <em>Panelist Manager &middot; Panelistas: View → Edit</em>. Los cambios automáticos aparecen como <em>Sistema</em>.</p>
+    </section>
+
+    <section id="new-user">
+      <h2>Crear usuarios con roles</h2>
+      <p>Pueden dar de alta usuarios quienes tengan Edit en <strong>Usuarios</strong>. Con la plantilla, el Account Manager y el UPU account manager.</p>
+      <ol class="steps">
+        <li>Abra <strong>Administración &rsaquo; Usuarios</strong>.</li>
+        <li>Pulse <strong>Crear usuario</strong>.</li>
+        <li>Rellene los datos del usuario: Correo electrónico, Contraseña, Nombre completo…</li>
+        <li>En <strong>Roles en la cuenta (opcional)</strong>, marque sus roles.</li>
+        <li>Pulse <strong>Crear</strong>.</li>
+      </ol>
+      <div class="callout ok"><strong>Y después:</strong> el usuario aparece en <strong>Usuarios y sus roles</strong> con esos roles. Si no le marca ningún rol, solo verá el reporting (vea <a href="#no-role">Usuarios sin rol</a>).</div>
+      <div class="callout info">Las casillas de roles solo las ven el Account Manager y el UPU account manager. Si otra persona crea el usuario, después hay que darle los roles en la pestaña.</div>
+    </section>
+
+    <section id="template">
+      <h2>Plantilla de derechos</h2>
+      <p>Estos son los derechos con los que empieza cada cuenta. Su cuenta puede haberlos cambiado: los vigentes están en la pestaña <strong>Roles y accesos</strong>.</p>
+      <p class="m-muted">AM = Account Manager &middot; APM = Allocation Plan Manager &middot; PM = Panelist Manager &middot; MS = Materials Supplier &middot; DO = DO coordinator &middot; UPU = UPU account manager. Edit = puede cambiar datos &middot; View = solo puede mirar &middot; &mdash; = la opción no aparece.</p>
+      <div class="table-wrap"><table class="rights">
+        <thead><tr><th>Opción del menú</th><th>AM</th><th>APM</th><th>PM</th><th>MS</th><th>DO</th><th>UPU</th><th>Sin rol</th></tr></thead>
+        <tbody>
+          <tr class="grp"><td colspan="8">Panel de control</td></tr>
+          <tr><td>Panel de control</td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr class="grp"><td colspan="8">E2E &middot; Configuración</td></tr>
+          <tr><td>Topología del País</td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-gray">View</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr><td>Operadores y productos</td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr><td>Panelistas</td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-gray">View</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr><td>E2E: SLA</td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr class="grp"><td colspan="8">E2E &middot; Asignación</td></tr>
+          <tr><td>Generador de Asignaciones</td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr><td>Balanceo de Carga</td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr><td>Planes de Asignación</td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr class="grp"><td colspan="8">E2E &middot; Materiales</td></tr>
+          <tr><td>Requisitos de Material</td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-gray">View</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr><td>Gestión de Inventario</td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr><td>Catálogo de Materiales</td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-gray">View</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr class="grp"><td colspan="8">E2E &middot; Reportes</td></tr>
+          <tr><td>Equidad Territorial</td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td></tr>
+          <tr><td>Cumplimiento</td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td></tr>
+          <tr class="grp"><td colspan="8">E2E &middot; Base de Datos</td></tr>
+          <tr><td>E2E DB</td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-gray">View</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr><td>Extract E2E DB API</td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-gray">View</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr class="grp"><td colspan="8">Diagnóstico &middot; Configuración</td></tr>
+          <tr><td>Centros Postales</td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-gray">View</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr><td>Gestión de Lectores</td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-gray">View</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr><td>SLA de Segmento</td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-gray">View</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr class="grp"><td colspan="8">Diagnóstico &middot; Reportes</td></tr>
+          <tr><td>Análisis de Rutas</td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td></tr>
+          <tr><td>Análisis de Segmento</td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td></tr>
+          <tr class="grp"><td colspan="8">Diagnóstico &middot; Base de Datos</td></tr>
+          <tr><td>API Pipeline EPCIS</td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-gray">View</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr><td>Base de Datos Eventos RFID</td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-gray">View</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr class="grp"><td colspan="8">Incidencias</td></tr>
+          <tr><td>Incidencias reportadas</td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr><td>Disponibilidad de panelistas</td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-gray">View</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-gray">View</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr><td>Recepciones</td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr class="grp"><td colspan="8">Administración</td></tr>
+          <tr><td>Usuarios</td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr><td>Días Laborables de Cuenta</td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="m-muted">&mdash;</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="badge b-blue">Edit</span></td><td><span class="m-muted">&mdash;</span></td></tr>
+          <tr class="grp"><td colspan="8">Ayuda</td></tr>
+          <tr><td>Centro de ayuda</td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td><td><span class="badge b-gray">View</span></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="faq">
+      <h2>Preguntas</h2>
+      <details><summary>Una pantalla muestra «Solo consulta». ¿Por qué?</summary><div>Sus roles solo le dan View en esa opción. Si necesita cambiar datos, pida Edit al Account Manager o al UPU account manager de su cuenta.</div></details>
+      <details><summary>Me falta una opción en el menú.</summary><div>Ninguno de sus roles tiene acceso a ella. Pídala al Account Manager o al UPU account manager. Si tiene varias cuentas, compruebe en el selector <strong>Cuenta</strong> que está en la correcta.</div></details>
+      <details><summary>Tengo el rol, pero no recibo los avisos automáticos.</summary><div>Los avisos van a los correos de <strong>Contactos de la cuenta</strong>, no a los usuarios con rol. Pida que pongan su correo en los contactos.</div></details>
+      <details><summary>¿Un cambio en mi cuenta afecta a otros países?</summary><div>No. Cada cuenta tiene sus propios derechos, contactos y roles.</div></details>
+      <details><summary>¿Puedo crear un rol nuevo o cambiarle el nombre?</summary><div>No. Los seis roles son iguales en todas las cuentas. Lo que cada cuenta ajusta son sus derechos.</div></details>
+    </section>
+  </div>
+  </main>
+</div>
+
+<script>
+(function () {
+  var links = Array.prototype.slice.call(document.querySelectorAll('#nav a'));
+  var sections = links.map(function (a) { return document.querySelector(a.getAttribute('href')); }).filter(Boolean);
+
+  // Mobile section picker
+  var jump = document.getElementById('jump');
+  links.forEach(function (a) {
+    var o = document.createElement('option');
+    o.value = a.getAttribute('href'); o.textContent = a.textContent; jump.appendChild(o);
+  });
+  jump.addEventListener('change', function () { location.hash = jump.value; });
+
+  // Highlight the current section in the side menu
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          links.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id); });
+          jump.value = '#' + e.target.id;
+        }
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    sections.forEach(function (s) { io.observe(s); });
+  }
+})();
+</script>
+</body>
+</html>

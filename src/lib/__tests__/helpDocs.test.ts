@@ -16,6 +16,6 @@ describe('canSeeHelpDoc', () => {
   })
   it('el catálogo ya no filtra por rol legacy', () => {
     expect(HELP_DOCS.every(d => !('roles' in d))).toBe(true)
-    expect(HELP_DOCS.filter(d => canSeeHelpDoc(d, none)).map(d => d.id)).toEqual(['panelist-guide'])
+    expect(HELP_DOCS.filter(d => canSeeHelpDoc(d, none)).map(d => d.id)).toEqual(['roles-access', 'panelist-guide'])
   })
 })

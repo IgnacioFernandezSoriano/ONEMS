@@ -5260,6 +5260,8 @@ help_center.doc.case_analysis.title,Análise de casos
 help_center.doc.case_analysis.desc,"Analisar um caso a partir do ONEMS ou do bot de análise no Telegram: o que aconteceu e porquê; mensagens aos panelistas e correções simples."
 help_center.doc.gps_location.title,Localização GPS ao declarar
 help_center.doc.gps_location.desc,"O que o ONE bot regista ao declarar, a regra de que nada é bloqueado, a incidência «Localização GPS», o relatório de operação e o que fazer como manager."
+help_center.doc.roles_access.title,Funções e acessos
+help_center.doc.roles_access.desc,"As seis funções da conta, o que significam Edit e View, a quem pedir uma alteração de acesso e como gerir o separador Funções e acessos."
 reported_incidents.category.gps_location,Localização GPS
 reported_incidents.gps.col.tag,Etiqueta
 reported_incidents.gps.col.kind,Tipo

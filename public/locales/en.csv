@@ -5260,6 +5260,8 @@ help_center.doc.case_analysis.title,Case analysis
 help_center.doc.case_analysis.desc,"Analyse a case from ONEMS or from the Telegram analysis bot: what happened and why; messages for the panelists and simple fixes."
 help_center.doc.gps_location.title,GPS location when declaring
 help_center.doc.gps_location.desc,"What the ONE bot records when declaring, the rule that nothing is blocked, the ""GPS location"" incident, the operations report and what to do as a manager."
+help_center.doc.roles_access.title,Roles and access
+help_center.doc.roles_access.desc,"The six account roles, what Edit and View mean, who to ask for an access change and how to manage the Roles and access tab."
 reported_incidents.category.gps_location,GPS location
 reported_incidents.gps.col.tag,Tag
 reported_incidents.gps.col.kind,Type

@@ -5252,6 +5252,8 @@ help_center.doc.case_analysis.title,تحليل الحالات
 help_center.doc.case_analysis.desc,"تحليل حالة من ONEMS أو من بوت التحليل في Telegram: ما الذي حدث ولماذا؛ رسائل إلى المشاركين وإصلاحات بسيطة."
 help_center.doc.gps_location.title,الموقع الجغرافي (GPS) عند التصريح
 help_center.doc.gps_location.desc,"ما يسجّله ONE bot عند التصريح، وقاعدة عدم حجب أي تصريح، وحادثة «الموقع الجغرافي (GPS)»، وتقرير التشغيل، وما يجب أن يفعله المدير."
+help_center.doc.roles_access.title,الأدوار والصلاحيات
+help_center.doc.roles_access.desc,"أدوار الحساب الستة، ومعنى Edit وView، ومن تطلب منه تغيير الصلاحيات، وكيفية إدارة تبويب الأدوار والصلاحيات."
 reported_incidents.category.gps_location,الموقع الجغرافي (GPS)
 reported_incidents.gps.col.tag,البطاقة
 reported_incidents.gps.col.kind,النوع
