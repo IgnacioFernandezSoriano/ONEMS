@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { addDays, format, parseISO, isValid } from 'date-fns'
 import { supabase } from '@/lib/supabase'
 import { useAccount } from '@/contexts/AccountContext'
+import { useLatestRequest } from '@/lib/latestRequest'
 import type {
   ReassignmentProposal, IncidentInboxRow, UnavailabilityHeader, IncidentStatus,
   IncidentStatusFilter, MoveSuggestion, CellSample,
@@ -20,6 +21,7 @@ const PLAN_EMBED = `plan:allocation_plans!allocation_plan_details_plan_id_fkey (
 
 export function useUnavailabilityIncidents() {
   const { effectiveAccountId } = useAccount()
+  const beginLoad = useLatestRequest()
   const [allRows, setAllRows] = useState<IncidentInboxRow[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -29,6 +31,7 @@ export function useUnavailabilityIncidents() {
   // silent: recarga en segundo plano (sin pasar por "cargando"), p. ej. tras una decision en el detalle;
   // asi el contador del menu se actualiza sin desmontar la pantalla abierta.
   const fetchInbox = useCallback(async (silent = false) => {
+    const isStale = beginLoad()
     try {
       if (!silent) setLoading(true)
       setError(null)
@@ -42,6 +45,7 @@ export function useUnavailabilityIncidents() {
         .order('created_at', { ascending: false })
       if (effectiveAccountId) q = q.eq('account_id', effectiveAccountId)
       const { data, error: e } = await q
+      if (isStale()) return
       if (e) throw e
       const rows: IncidentInboxRow[] = ((data || []) as any[]).map(u => {
         const lines: { affected_role: string; status: string }[] = u.lines || []
@@ -63,9 +67,10 @@ export function useUnavailabilityIncidents() {
         }
       })
       setAllRows(rows)
-    } catch (err: any) { setError(err.message); console.error('fetchInbox', err) }
-    finally { if (!silent) setLoading(false) }
-  }, [effectiveAccountId])
+    } catch (err: any) { if (isStale()) return; setError(err.message); console.error('fetchInbox', err) }
+    // Si una recarga silenciosa releva a una no silenciosa, esta ultima no apagaria "cargando": lo apaga la vigente.
+    finally { if (!isStale()) setLoading(false) }
+  }, [effectiveAccountId, beginLoad])
 
   useEffect(() => { fetchInbox() }, [fetchInbox])
 

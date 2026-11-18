@@ -16,6 +16,8 @@ export function ReaderStatusBadge({ reader, accountId }: ReaderStatusBadgeProps)
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
+
     if (!reader.is_active) {
       setStatus('inactive');
       setLoading(false);
@@ -33,6 +35,7 @@ export function ReaderStatusBadge({ reader, accountId }: ReaderStatusBadgeProps)
           .limit(1)
           .single();
 
+        if (cancelled) return;
         if (error || !data) {
           setStatus('unknown');
           return;
@@ -51,14 +54,18 @@ export function ReaderStatusBadge({ reader, accountId }: ReaderStatusBadgeProps)
           setStatus('offline');
         }
       } catch (err) {
+        if (cancelled) return;
         console.error('Error fetching reader status:', err);
         setStatus('unknown');
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
     fetchLastEvent();
+    return () => {
+      cancelled = true;
+    };
   }, [reader, accountId]);
 
   if (loading) {

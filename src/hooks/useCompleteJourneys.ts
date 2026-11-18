@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { useEffectiveAccountId } from './useEffectiveAccountId';
+import { useLatestRequest } from '../lib/latestRequest';
 
 // Interface matching existing journeys table schema
 export interface CompleteJourney {
@@ -47,9 +48,11 @@ export function useCompleteJourneys() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAssembling, setIsAssembling] = useState(false);
+  const beginLoad = useLatestRequest();
 
   // Fetch journeys
   const fetchJourneys = useCallback(async () => {
+    const isStale = beginLoad();
     if (!selectedAccount) {
       setJourneys([]);
       setFilteredJourneys([]);
@@ -67,17 +70,19 @@ export function useCompleteJourneys() {
         .eq('account_id', selectedAccount)
         .order('first_event_timestamp', { ascending: false });
 
+      if (isStale()) return;
       if (fetchError) throw fetchError;
 
       setJourneys(data || []);
       setFilteredJourneys(data || []);
     } catch (err: any) {
+      if (isStale()) return;
       console.error('Error fetching journeys:', err);
       setError(err.message);
     } finally {
-      setLoading(false);
+      if (!isStale()) setLoading(false);
     }
-  }, [selectedAccount]);
+  }, [selectedAccount, beginLoad]);
 
   // Run assembly function
   const runAssembly = useCallback(async () => {

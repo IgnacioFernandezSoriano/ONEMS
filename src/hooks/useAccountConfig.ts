@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAccount } from '../contexts/AccountContext'
+import { useLatestRequest } from '../lib/latestRequest'
 import type { DatePolicy } from '../lib/workingDays'
 
 export interface AccountConfig {
@@ -35,6 +36,9 @@ export interface WeeklySchedule {
 
 export function useAccountConfig() {
   const { effectiveAccountId } = useAccount()
+  const beginConfigLoad = useLatestRequest()
+  const beginNonWorkingLoad = useLatestRequest()
+  const beginScheduleLoad = useLatestRequest()
   const [config, setConfig] = useState<AccountConfig | null>(null)
   const [nonWorkingDays, setNonWorkingDays] = useState<NonWorkingDay[]>([])
   const [weeklySchedule, setWeeklySchedule] = useState<WeeklySchedule[]>([])
@@ -50,6 +54,7 @@ export function useAccountConfig() {
   }, [effectiveAccountId])
 
   const fetchAccountConfig = async () => {
+    const isStale = beginConfigLoad()
     try {
       setLoading(true)
       const { data, error: fetchError } = await supabase
@@ -58,16 +63,19 @@ export function useAccountConfig() {
         .eq('account_id', effectiveAccountId)
         .maybeSingle()
 
+      if (isStale()) return
       if (fetchError) throw fetchError
       setConfig(data)
     } catch (err: any) {
+      if (isStale()) return
       setError(err.message)
     } finally {
-      setLoading(false)
+      if (!isStale()) setLoading(false)
     }
   }
 
   const fetchNonWorkingDays = async () => {
+    const isStale = beginNonWorkingLoad()
     try {
       const { data, error: fetchError } = await supabase
         .from('non_working_days')
@@ -76,14 +84,17 @@ export function useAccountConfig() {
         .is('postal_center_id', null)
         .order('date', { ascending: true })
 
+      if (isStale()) return
       if (fetchError) throw fetchError
       setNonWorkingDays(data || [])
     } catch (err: any) {
+      if (isStale()) return
       console.error('Error fetching non-working days:', err)
     }
   }
 
   const fetchWeeklySchedule = async () => {
+    const isStale = beginScheduleLoad()
     try {
       const { data, error: fetchError } = await supabase
         .from('weekly_schedule')
@@ -93,9 +104,11 @@ export function useAccountConfig() {
         .is('postal_center_id', null)
         .order('day_of_week', { ascending: true })
 
+      if (isStale()) return
       if (fetchError) throw fetchError
       setWeeklySchedule(data || [])
     } catch (err: any) {
+      if (isStale()) return
       console.error('Error fetching weekly schedule:', err)
     }
   }

@@ -13,7 +13,15 @@ const AccountContext = createContext<AccountContextType | undefined>(undefined)
 
 export function AccountProvider({ children }: { children: ReactNode }) {
   const { profile } = useAuth()
-  const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null)
+  // Start from the saved selection so a superadmin's first load is already scoped to it (only
+  // superadmins use selectedAccountId; for everyone else effectiveAccountId ignores it).
+  const [selectedAccountId, setSelectedAccountId] = useState<string | null>(() => {
+    try {
+      return localStorage.getItem('selectedAccountId')
+    } catch {
+      return null
+    }
+  })
 
   // Calcular el account_id efectivo para filtrar datos
   const effectiveAccountId = profile?.role === 'superadmin' 
@@ -26,16 +34,6 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       localStorage.setItem('selectedAccountId', selectedAccountId)
     }
   }, [selectedAccountId, profile?.role])
-
-  // Restaurar la selección al cargar
-  useEffect(() => {
-    if (profile?.role === 'superadmin') {
-      const saved = localStorage.getItem('selectedAccountId')
-      if (saved) {
-        setSelectedAccountId(saved)
-      }
-    }
-  }, [profile?.role])
 
   // Zona horaria de la cuenta efectiva
   const [accountTimezone, setAccountTimezone] = useState<string>('UTC')

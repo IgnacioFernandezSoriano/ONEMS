@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useEffectiveAccountId } from './useEffectiveAccountId';
 import { useTranslation } from './useTranslation';
+import { useLatestRequest } from '../lib/latestRequest';
 
 export interface JourneySegment {
   id: string;
@@ -53,8 +54,10 @@ export const useJourneySegments = (accountId: string | undefined) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isReconstructing, setIsReconstructing] = useState(false);
+  const beginLoad = useLatestRequest();
 
   const fetchSegments = async () => {
+    const isStale = beginLoad();
     console.log('[useJourneySegments] fetchSegments called with activeAccountId:', activeAccountId);
 
     if (!activeAccountId) {
@@ -86,6 +89,7 @@ export const useJourneySegments = (accountId: string | undefined) => {
           .order('created_at', { ascending: false })
           .range(start, start + pageSize - 1);
 
+        if (isStale()) return;
         if (fetchError) throw fetchError;
 
         if (data && data.length > 0) {
@@ -105,10 +109,11 @@ export const useJourneySegments = (accountId: string | undefined) => {
       setSegments(allSegments);
       setFilteredSegments(allSegments);
     } catch (err: any) {
+      if (isStale()) return;
       setError(err.message);
       console.error('Error fetching journey segments:', err);
     } finally {
-      setLoading(false);
+      if (!isStale()) setLoading(false);
     }
   };
 

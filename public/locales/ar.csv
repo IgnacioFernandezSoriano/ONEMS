@@ -3657,6 +3657,7 @@ hc.epcisapi.type,النوع
 hc.epcisapi.description,الوصف
 hc.epcisapi.required,مطلوب
 hc.epcisapi.phase_values,'consolidation' أو 'segments' أو 'aggregation' أو 'all'
+hc.epcisapi.account_param,"اختياري. الحساب المطلوب؛ لا يمكن تحديد حساب آخر إلا للمشرف العام. بدونه يُستخدم حسابك."
 hc.epcisapi.example_request,مثال على الطلب
 hc.epcisapi.status_desc,الحصول على الحالة الحالية لخط معالجة EPCIS
 hc.epcisapi.query_desc,الاستعلام عن مسارات الرحلات المجمعة باستخدام عوامل التصفية
@@ -5264,3 +5265,15 @@ reported_incidents.gps.status.no_location,لم يتم استلام الموقع
 reported_incidents.gps.status.gps_unavailable,GPS غير متاح
 reported_incidents.gps.status.no_consent,لم يتم منح الإذن
 reported_incidents.gps.status.no_answer,لا يوجد رد
+allocation_plans.undo,تراجع
+allocation_plans.undo_confirm,هل تريد التراجع عن {label}؟
+allocation_plans.undo_done,تم التراجع: تمت استعادة {count} سجلات
+allocation_plans.undo_skipped,لم يتم تعديل {count} سجلات لأنها تغيّرت بعد ذلك
+allocation_plans.undo_label,{action} {count} سجلات · {user} · {time}
+allocation_plans.undo_action_delete,حذف
+allocation_plans.undo_action_update,تغيير
+allocation_plans.undo_action_cancel,إلغاء
+allocation_plans.undo_action_edit,تعديل
+allocation_plans.undo_action_create,إنشاء
+allocation_plans.undo_changed,تغيّر آخر إجراء؛ راجعه قبل التراجع.
+allocation_plans.bulk_only_deferred,العينات المطلوب تعويضها يمكن حذفها فقط.

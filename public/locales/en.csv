@@ -3665,6 +3665,7 @@ hc.epcisapi.type,Type
 hc.epcisapi.description,Description
 hc.epcisapi.required,Required
 hc.epcisapi.phase_values,"'consolidation', 'segments', 'aggregation', or 'all'"
+hc.epcisapi.account_param,"Optional. Account to work on; only a superadmin may name another account. Without it, your own account."
 hc.epcisapi.example_request,Example Request
 hc.epcisapi.status_desc,Get current status of EPCIS pipeline
 hc.epcisapi.query_desc,Query aggregated journey paths with filters
@@ -5272,3 +5273,15 @@ reported_incidents.gps.status.no_location,No location received
 reported_incidents.gps.status.gps_unavailable,GPS unavailable
 reported_incidents.gps.status.no_consent,No permission given
 reported_incidents.gps.status.no_answer,No answer
+allocation_plans.undo,Undo
+allocation_plans.undo_confirm,Undo {label}?
+allocation_plans.undo_done,Undone: {count} records restored
+allocation_plans.undo_skipped,{count} records were not touched because they changed afterwards
+allocation_plans.undo_label,{action} {count} records · {user} · {time}
+allocation_plans.undo_action_delete,Delete
+allocation_plans.undo_action_update,Change
+allocation_plans.undo_action_cancel,Cancel
+allocation_plans.undo_action_edit,Edit
+allocation_plans.undo_action_create,Create
+allocation_plans.undo_changed,The last action has changed; check it before undoing.
+allocation_plans.bulk_only_deferred,Samples to compensate can only be deleted.

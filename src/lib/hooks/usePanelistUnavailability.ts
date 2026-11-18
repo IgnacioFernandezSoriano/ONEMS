@@ -1,15 +1,19 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAccount } from '@/contexts/AccountContext'
+import { useLatestRequest } from '@/lib/latestRequest'
+import { scopeToAccount } from '@/lib/accountScope'
 import type { PanelistUnavailability, PanelistUnavailabilityWithPanelist } from '@/lib/types'
 
 export function usePanelistUnavailability(panelistId?: string) {
   const { effectiveAccountId } = useAccount()
+  const beginLoad = useLatestRequest()
   const [unavailabilityPeriods, setUnavailabilityPeriods] = useState<PanelistUnavailabilityWithPanelist[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const fetchUnavailabilityPeriods = async () => {
+    const isStale = beginLoad()
     try {
       setLoading(true)
       setError(null)
@@ -22,26 +26,30 @@ export function usePanelistUnavailability(panelistId?: string) {
         `)
         .order('start_date', { ascending: false })
 
+      query = scopeToAccount(query, effectiveAccountId)
+
       if (panelistId) {
         query = query.eq('panelist_id', panelistId)
       }
 
       const { data, error: fetchError } = await query
 
+      if (isStale()) return
       if (fetchError) throw fetchError
 
       setUnavailabilityPeriods(data || [])
     } catch (err: any) {
+      if (isStale()) return
       setError(err.message)
       console.error('Error fetching unavailability periods:', err)
     } finally {
-      setLoading(false)
+      if (!isStale()) setLoading(false)
     }
   }
 
   useEffect(() => {
     fetchUnavailabilityPeriods()
-  }, [panelistId])
+  }, [panelistId, effectiveAccountId])
 
   const createUnavailabilityPeriod = async (
     periodData: Omit<PanelistUnavailability, 'id' | 'created_at' | 'updated_at' | 'account_id'>

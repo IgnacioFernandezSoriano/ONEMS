@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useAccount } from '@/contexts/AccountContext';
 import { supabase } from '@/lib/supabase';
+import { useLatestRequest } from '@/lib/latestRequest';
 import { Filter, X, RotateCcw } from 'lucide-react';
 
 interface JourneySegmentsFiltersProps {
@@ -22,12 +23,14 @@ export function JourneySegmentsFilters({ onFilterChange }: JourneySegmentsFilter
   const [dateTo, setDateTo] = useState('');
 
   const [postalCenters, setPostalCenters] = useState<any[]>([]);
+  const beginLoad = useLatestRequest();
 
   useEffect(() => {
     loadPostalCenters();
   }, [effectiveAccountId]);
 
   const loadPostalCenters = async () => {
+    const isStale = beginLoad();
     if (!effectiveAccountId) return;
 
     try {
@@ -37,9 +40,11 @@ export function JourneySegmentsFilters({ onFilterChange }: JourneySegmentsFilter
         .eq('account_id', effectiveAccountId)
         .order('name');
 
+      if (isStale()) return;
       if (error) throw error;
       setPostalCenters(data || []);
     } catch (error) {
+      if (isStale()) return;
       console.error('Error loading postal centers:', error);
     }
   };

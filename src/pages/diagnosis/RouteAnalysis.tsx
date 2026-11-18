@@ -4,6 +4,7 @@ import { useTimeUnit } from '@/hooks/useTimeUnit';
 import { TimeUnitToggle } from '@/components/common/TimeUnitToggle';
 import { formatDuration } from '@/lib/accountTime';
 import { supabase } from '../../lib/supabase';
+import { useLatestRequest } from '../../lib/latestRequest';
 import { Route, TrendingUp, Users, Calendar } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 
@@ -44,6 +45,8 @@ const RouteAnalysis: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'performance' | 'carriers' | 'trends'>('performance');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // One tracker: the effect starts a single tab loader at a time and they share loading/error.
+  const beginLoad = useLatestRequest();
 
   // Performance tab data
   const [routePerformance, setRoutePerformance] = useState<RoutePerformance[]>([]);
@@ -67,7 +70,11 @@ const RouteAnalysis: React.FC = () => {
   }, [activeTab, effectiveAccountId, selectedRoute, trendInterval]);
 
   const loadRoutePerformance = async () => {
-    if (!effectiveAccountId) return;
+    const isStale = beginLoad();
+    if (!effectiveAccountId) {
+      setLoading(false);
+      return;
+    }
 
     try {
       setLoading(true);
@@ -77,17 +84,23 @@ const RouteAnalysis: React.FC = () => {
         p_account_id: effectiveAccountId
       });
 
+      if (isStale()) return;
       if (rpcError) throw rpcError;
       setRoutePerformance(data || []);
     } catch (err: any) {
+      if (isStale()) return;
       setError(err.message);
     } finally {
-      setLoading(false);
+      if (!isStale()) setLoading(false);
     }
   };
 
   const loadCarrierComparison = async () => {
-    if (!effectiveAccountId) return;
+    const isStale = beginLoad();
+    if (!effectiveAccountId) {
+      setLoading(false);
+      return;
+    }
 
     try {
       setLoading(true);
@@ -97,17 +110,23 @@ const RouteAnalysis: React.FC = () => {
         p_account_id: effectiveAccountId
       });
 
+      if (isStale()) return;
       if (rpcError) throw rpcError;
       setCarrierComparison(data || []);
     } catch (err: any) {
+      if (isStale()) return;
       setError(err.message);
     } finally {
-      setLoading(false);
+      if (!isStale()) setLoading(false);
     }
   };
 
   const loadRouteTrends = async () => {
-    if (!effectiveAccountId) return;
+    const isStale = beginLoad();
+    if (!effectiveAccountId) {
+      setLoading(false);
+      return;
+    }
 
     try {
       setLoading(true);
@@ -120,12 +139,14 @@ const RouteAnalysis: React.FC = () => {
         p_interval: trendInterval
       });
 
+      if (isStale()) return;
       if (rpcError) throw rpcError;
       setRouteTrends(data || []);
     } catch (err: any) {
+      if (isStale()) return;
       setError(err.message);
     } finally {
-      setLoading(false);
+      if (!isStale()) setLoading(false);
     }
   };
 

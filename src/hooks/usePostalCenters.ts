@@ -2,14 +2,17 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { PostalCenter, Reader, PostalCenterWithReaders, PostalCenterFormData, ReaderFormData } from '@/lib/types_postal_centers'
 import { useEffectiveAccountId } from './useEffectiveAccountId'
+import { useLatestRequest } from '@/lib/latestRequest'
 
 export function usePostalCenters() {
   const effectiveAccountId = useEffectiveAccountId()
+  const beginLoad = useLatestRequest()
   const [postalCenters, setPostalCenters] = useState<PostalCenterWithReaders[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const fetchAll = async () => {
+    const isStale = beginLoad()
     try {
       setLoading(true)
       setError(null)
@@ -26,6 +29,7 @@ export function usePostalCenters() {
       }
 
       const { data: centers, error: centersError } = await centersQuery
+      if (isStale()) return
 
       if (centersError) throw centersError
 
@@ -41,6 +45,7 @@ export function usePostalCenters() {
       }
 
       const { data: readers, error: readersError } = await readersQuery
+      if (isStale()) return
 
       if (readersError) throw readersError
 
@@ -61,9 +66,10 @@ export function usePostalCenters() {
 
       setPostalCenters(centersWithReaders)
     } catch (err: any) {
+      if (isStale()) return
       setError(err.message)
     } finally {
-      setLoading(false)
+      if (!isStale()) setLoading(false)
     }
   }
 

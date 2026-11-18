@@ -69,6 +69,7 @@ export default function TerritoryEquity() {
 
   // Load available regions
   useEffect(() => {
+    let cancelled = false;
     async function loadRegions() {
       if (!effectiveAccountId) return;
       
@@ -78,14 +79,17 @@ export default function TerritoryEquity() {
           .select('name')
           .eq('account_id', effectiveAccountId)
           .order('name');
+        if (cancelled) return;
         
         setAvailableRegions(data?.map(r => r.name) || []);
       } catch (error) {
+        if (cancelled) return;
         console.error('Error loading regions:', error);
       }
     }
     
     loadRegions();
+    return () => { cancelled = true; };
   }, [effectiveAccountId]);
 
   // Prepare filters based on active tab - region filter only applies in Regional Analysis

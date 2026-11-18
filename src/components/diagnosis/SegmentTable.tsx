@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase'
 import { useTimeUnit } from '../../hooks/useTimeUnit'
 import { formatMinutes } from '../../lib/accountTime'
 import { useTranslation } from '@/hooks/useTranslation'
+import { useLatestRequest } from '../../lib/latestRequest'
 
 interface SegmentData {
   segment_name: string
@@ -51,12 +52,14 @@ export default function SegmentTable({ pathId, pathSignature, accountId, carrier
   const [segments, setSegments] = React.useState<SegmentData[]>([])
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
+  const beginLoad = useLatestRequest()
 
   React.useEffect(() => {
     loadSegments()
-  }, [pathId, pathSignature])
+  }, [pathId, pathSignature, accountId])
 
   const loadSegments = async () => {
+    const isStale = beginLoad()
     setLoading(true)
     setError(null)
     
@@ -72,6 +75,7 @@ export default function SegmentTable({ pathId, pathSignature, accountId, carrier
         .eq('destination_city_name', destinationCity)
         .order('entry_timestamp')
 
+      if (isStale()) return
       if (segmentsError) throw segmentsError
 
       // Load postal centers for names
@@ -79,6 +83,8 @@ export default function SegmentTable({ pathId, pathSignature, accountId, carrier
         .from('postal_centers')
         .select('id, name')
         .eq('account_id', accountId)
+
+      if (isStale()) return
 
       const centerMap = new Map(centers?.map(c => [c.id, c.name]) || [])
 
@@ -89,6 +95,7 @@ export default function SegmentTable({ pathId, pathSignature, accountId, carrier
         .eq('account_id', accountId)
         .eq('is_active', true)
 
+      if (isStale()) return
       if (slasError) throw slasError
 
       // 3. Group segments by from_postal_center_id -> to_postal_center_id
@@ -239,10 +246,11 @@ export default function SegmentTable({ pathId, pathSignature, accountId, carrier
         }
       }
     } catch (err: any) {
+      if (isStale()) return
       console.error('Error loading segments:', err)
       setError(err.message)
     } finally {
-      setLoading(false)
+      if (!isStale()) setLoading(false)
     }
   }
 

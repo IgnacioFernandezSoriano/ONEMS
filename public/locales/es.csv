@@ -3665,6 +3665,7 @@ hc.epcisapi.type,Tipo
 hc.epcisapi.description,Descripción
 hc.epcisapi.required,Obligatorio
 hc.epcisapi.phase_values,"'consolidation', 'segments', 'aggregation' o 'all'"
+hc.epcisapi.account_param,"Opcional. Cuenta sobre la que actuar; solo un superadmin puede indicar otra cuenta. Sin él, tu propia cuenta."
 hc.epcisapi.example_request,Ejemplo de petición
 hc.epcisapi.status_desc,Obtiene el estado actual del pipeline EPCIS
 hc.epcisapi.query_desc,Consulta rutas de viaje agregadas con filtros
@@ -5272,3 +5273,15 @@ reported_incidents.gps.status.no_location,No se recibió ubicación
 reported_incidents.gps.status.gps_unavailable,GPS no disponible
 reported_incidents.gps.status.no_consent,Sin permiso concedido
 reported_incidents.gps.status.no_answer,Sin respuesta
+allocation_plans.undo,Deshacer
+allocation_plans.undo_confirm,¿Deshacer {label}?
+allocation_plans.undo_done,Deshecho: {count} registros restaurados
+allocation_plans.undo_skipped,{count} registros no se han tocado porque cambiaron después
+allocation_plans.undo_label,{action} {count} registros · {user} · {time}
+allocation_plans.undo_action_delete,Borrar
+allocation_plans.undo_action_update,Cambiar
+allocation_plans.undo_action_cancel,Cancelar
+allocation_plans.undo_action_edit,Editar
+allocation_plans.undo_action_create,Crear
+allocation_plans.undo_changed,La última acción ha cambiado; revisa antes de deshacer.
+allocation_plans.bulk_only_deferred,Las muestras por compensar solo se pueden borrar.

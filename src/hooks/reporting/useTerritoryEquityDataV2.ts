@@ -66,6 +66,8 @@ export function useTerritoryEquityDataV2(
       return;
     }
 
+    let cancelled = false;
+
     async function fetchData() {
       try {
         setLoading(true);
@@ -80,6 +82,7 @@ export function useTerritoryEquityDataV2(
             supabase.from('products').select('id, code, description').eq('account_id', activeAccountId),
             supabase.from('delivery_standards').select('*').eq('account_id', activeAccountId),
           ]);
+        if (cancelled) return;
 
         if (citiesRes.error) throw citiesRes.error;
         if (regionsRes.error) throw regionsRes.error;
@@ -173,6 +176,7 @@ export function useTerritoryEquityDataV2(
           if (filters?.destinationCity) query = query.eq('destination_city_name', filters.destinationCity)
 
           const { data, error: shipmentsError } = await query
+          if (cancelled) return
           if (shipmentsError) throw shipmentsError
 
           if (data && data.length > 0) {
@@ -1668,14 +1672,16 @@ export function useTerritoryEquityDataV2(
           totalRegions,
         });
       } catch (err) {
+        if (cancelled) return;
         console.error('Error fetching territory equity data:', err);
         setError(err as Error);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
 
     fetchData();
+    return () => { cancelled = true; };
   }, [activeAccountId, JSON.stringify(filters), accountTimezone]);
 
   // Generate scenario description

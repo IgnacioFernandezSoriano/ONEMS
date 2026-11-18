@@ -80,6 +80,8 @@ export default function RoutePathMapLeaflet({ routePaths }: Props) {
 
   // Fetch segments for all routes
   useEffect(() => {
+    let cancelled = false
+
     const fetchSegments = async () => {
       if (!effectiveAccountId || routePaths.length === 0) {
         setLoading(false)
@@ -94,6 +96,7 @@ export default function RoutePathMapLeaflet({ routePaths }: Props) {
           .eq('account_id', effectiveAccountId)
           .order('entry_timestamp')
 
+        if (cancelled) return
         if (segmentsError) throw segmentsError
 
         // Get postal centers with coordinates
@@ -102,6 +105,7 @@ export default function RoutePathMapLeaflet({ routePaths }: Props) {
           .select('id, code, name, city, latitude, longitude')
           .eq('account_id', effectiveAccountId)
 
+        if (cancelled) return
         if (centersError) throw centersError
 
         // Create lookup map for centers
@@ -114,6 +118,7 @@ export default function RoutePathMapLeaflet({ routePaths }: Props) {
           .eq('account_id', effectiveAccountId)
           .eq('is_active', true)
 
+        if (cancelled) return
         if (slasError) throw slasError
 
         // Process each route
@@ -234,13 +239,17 @@ export default function RoutePathMapLeaflet({ routePaths }: Props) {
 
         setSegments(allSegments)
       } catch (err: any) {
+        if (cancelled) return
         console.error('Error loading map segments:', err)
       } finally {
-        setLoading(false)
+        if (!cancelled) setLoading(false)
       }
     }
 
     fetchSegments()
+    return () => {
+      cancelled = true
+    }
   }, [effectiveAccountId, routePaths])
 
   // Get unique centers

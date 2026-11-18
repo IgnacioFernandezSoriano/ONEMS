@@ -1,5 +1,5 @@
 import { isPendingLike, isDeferredStatus } from '@/lib/planStatus'
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { useAllocationPlanDetails } from '@/lib/hooks/useAllocationPlanDetails'
 import { AllocationPlanFilters } from '@/components/allocation-plans/AllocationPlanFilters'
 import { AllocationPlanDetailRow } from '@/components/allocation-plans/AllocationPlanDetailRow'
@@ -13,6 +13,9 @@ import { SmartTooltip } from '@/components/common/SmartTooltip'
 import { useTranslation } from '@/hooks/useTranslation';
 import { useAccount } from '@/contexts/AccountContext'
 import { formatInTz } from '@/lib/accountTime'
+import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId'
+import { fetchLastUndo, undoLast, undoLabel, isUndoChangedError, type UndoEntry } from '@/lib/planUndo'
+import { Undo2 } from 'lucide-react'
 export function AllocationPlans() {
   const { t } = useTranslation();
   const { accountTimezone } = useAccount();
@@ -26,13 +29,82 @@ export function AllocationPlans() {
     panelists,
     loading,
     error,
-    updateDetail,
-    createDetail,
+    updateDetail: updateDetailBase,
+    createDetail: createDetailBase,
     markAsSent,
     bulkUpdateDetails,
     bulkDeleteDetails,
     getNodesByCity,
+    refresh,
   } = useAllocationPlanDetails()
+
+  // Deshacer: última acción registrada de la cuenta (plan_undo_log). Sin cuenta efectiva (superadmin sin
+  // cuenta elegida) no hay botón.
+  const effectiveAccountId = useEffectiveAccountId()
+  const [lastUndo, setLastUndo] = useState<UndoEntry | null>(null)
+  const [undoing, setUndoing] = useState(false)
+
+  // Respuestas fuera de orden (p. ej. el superadmin cambia de cuenta rápido): solo cuenta la última petición
+  const undoReqSeq = useRef(0)
+  const reloadLastUndo = async (): Promise<UndoEntry | null> => {
+    const seq = ++undoReqSeq.current
+    if (!effectiveAccountId) {
+      setLastUndo(null)
+      return null
+    }
+    try {
+      const entry = await fetchLastUndo(effectiveAccountId)
+      if (seq !== undoReqSeq.current) return null  // respuesta vieja: se ignora
+      setLastUndo(entry)
+      return entry
+    } catch (err) {
+      console.error('Error loading last undo entry:', err)
+      return null
+    }
+  }
+
+  useEffect(() => {
+    reloadLastUndo()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [effectiveAccountId])
+
+  // Tras cada acción de la lista se refresca la entrada de Deshacer (aunque la acción falle a medias)
+  const withUndoRefresh = <A extends any[], R>(fn: (...args: A) => Promise<R>) =>
+    async (...args: A): Promise<R> => {
+      try {
+        return await fn(...args)
+      } finally {
+        reloadLastUndo()
+      }
+    }
+  const updateDetail = withUndoRefresh(updateDetailBase)
+  const createDetail = withUndoRefresh(createDetailBase)
+
+  const handleUndo = async () => {
+    if (!lastUndo || !effectiveAccountId) return
+    // Antes de confirmar se vuelve a leer la última acción: se confirma (y se deshace) la que hay ahora
+    const accountId = effectiveAccountId
+    const fresh = await reloadLastUndo()
+    if (!fresh) return
+    const label = undoLabel(fresh, t)
+    if (!confirm(t('allocation_plans.undo_confirm', { label }))) return
+    try {
+      setUndoing(true)
+      const result = await undoLast(accountId, fresh.id)
+      if (result) {
+        let msg = t('allocation_plans.undo_done', { count: result.restored })
+        if (result.skipped > 0) msg += '\n' + t('allocation_plans.undo_skipped', { count: result.skipped })
+        alert(msg)
+      }
+      await refresh()
+    } catch (err: any) {
+      // Otra persona actuó o deshizo entre la confirmación y el deshacer: no se ha tocado nada
+      alert(isUndoChangedError(err) ? t('allocation_plans.undo_changed') : err.message)
+    } finally {
+      setUndoing(false)
+      reloadLastUndo()
+    }
+  }
 
   const [filters, setFilters] = useState({
     planId: '',
@@ -326,15 +398,25 @@ export function AllocationPlans() {
     }
   }
 
-  // Las filas 'deferred' son sinteticas (vienen del registro deferred_samples, no de allocation_plan_details):
-  // no se pueden seleccionar, asi que nunca llegan a las operaciones masivas.
+  // Las filas 'deferred' son sinteticas (vienen del registro deferred_samples, no de allocation_plan_details).
+  // Se pueden seleccionar solo para BORRARLAS (decision 18/11/2026: el Allocation Plan Manager decide); el resto
+  // de operaciones masivas (cambiar nodo/fecha, cancelar, reprocesar) las ignoran.
   const deferredIds = new Set(filteredDetails.filter(d => isDeferredStatus(d.status)).map(d => d.id))
-  const selectableDetails = filteredDetails.filter(d => !isDeferredStatus(d.status))
+  const selectableDetails = filteredDetails
+  const selectedPlanIds = () => Array.from(selectedIds).filter(id => !deferredIds.has(id))
+  // Si solo hay muestras por compensar seleccionadas, cambiar/cancelar no haría nada: se avisa y se mantiene
+  // la selección.
+  const onlyPlanRowsOrWarn = () => {
+    if (selectedIds.size > 0 && selectedPlanIds().length === 0) {
+      alert(t('allocation_plans.bulk_only_deferred'))
+      return false
+    }
+    return true
+  }
 
   const handleToggleSelect = (id: string) => {
     setSelectedIds((prev) => {
       const newSet = new Set(prev)
-      if (deferredIds.has(id)) return prev // filas 'deferred' (sinteticas): solo lectura
       if (newSet.has(id)) {
         newSet.delete(id)
       } else {
@@ -357,12 +439,22 @@ export function AllocationPlans() {
   }
 
   const handleBulkUpdateOriginNode = async (nodeId: string) => {
-    await bulkUpdateDetails(Array.from(selectedIds), { origin_node_id: nodeId })
+    if (!onlyPlanRowsOrWarn()) return
+    try {
+      await bulkUpdateDetails(selectedPlanIds(), { origin_node_id: nodeId })
+    } finally {
+      reloadLastUndo()
+    }
     setSelectedIds(new Set())
   }
 
   const handleBulkUpdateDestinationNode = async (nodeId: string) => {
-    await bulkUpdateDetails(Array.from(selectedIds), { destination_node_id: nodeId })
+    if (!onlyPlanRowsOrWarn()) return
+    try {
+      await bulkUpdateDetails(selectedPlanIds(), { destination_node_id: nodeId })
+    } finally {
+      reloadLastUndo()
+    }
     setSelectedIds(new Set())
   }
 
@@ -373,24 +465,34 @@ export function AllocationPlans() {
     const month = dateObj.getMonth() + 1
     const year = dateObj.getFullYear()
 
-    await bulkUpdateDetails(Array.from(selectedIds), {
-      fecha_programada: date,
-      week_number: weekNumber,
-      month,
-      year,
-    })
+    if (!onlyPlanRowsOrWarn()) return
+    try {
+      await bulkUpdateDetails(selectedPlanIds(), {
+        fecha_programada: date,
+        week_number: weekNumber,
+        month,
+        year,
+      })
+    } finally {
+      reloadLastUndo()
+    }
     setSelectedIds(new Set())
   }
 
   const handleBulkCancel = async () => {
-    await bulkUpdateDetails(Array.from(selectedIds), { status: 'cancelled' })
+    if (!onlyPlanRowsOrWarn()) return
+    try {
+      await bulkUpdateDetails(selectedPlanIds(), { status: 'cancelled' }, 'cancel')
+    } finally {
+      reloadLastUndo()
+    }
     setSelectedIds(new Set())
   }
 
   const handleBulkReprocess = async () => {
     const { supabase } = await import('@/lib/supabase')
     
-    const idsToReprocess = Array.from(selectedIds)
+    const idsToReprocess = selectedPlanIds()
     const { data, error } = await supabase.rpc('reprocess_transfer_errors', {
       p_detail_ids: idsToReprocess
     })
@@ -403,7 +505,12 @@ export function AllocationPlans() {
   }
 
   const handleBulkDelete = async () => {
-    await bulkDeleteDetails(Array.from(selectedIds))
+    const ids = Array.from(selectedIds)
+    try {
+      await bulkDeleteDetails(ids.filter(id => !deferredIds.has(id)), ids.filter(id => deferredIds.has(id)))
+    } finally {
+      reloadLastUndo()
+    }
     setSelectedIds(new Set())
   }
 
@@ -794,6 +901,17 @@ export function AllocationPlans() {
                 </svg>
                 {showIdColumn ? 'Hide' : 'Show'} ID
               </button>
+              {effectiveAccountId && (
+                <button
+                  onClick={handleUndo}
+                  disabled={!lastUndo || undoing}
+                  title={lastUndo ? undoLabel(lastUndo, t) : undefined}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                >
+                  <Undo2 className="w-5 h-5" />
+                  {t('allocation_plans.undo')}
+                </button>
+              )}
               <button
                 onClick={handleExportCSV}
                 disabled={selectedIds.size === 0}

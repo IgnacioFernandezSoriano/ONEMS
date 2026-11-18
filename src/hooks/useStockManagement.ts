@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { useEffectiveAccountId } from './useEffectiveAccountId'
+import { useLatestRequest } from '../lib/latestRequest'
 
 export interface MaterialStock {
   id: string
@@ -124,6 +125,7 @@ function incidentShipmentLocked(): Error {
 export function useStockManagement(accountIdOverride?: string) {
   const effectiveAccountId = useEffectiveAccountId()
   const { profile } = useAuth()
+  const beginLoad = useLatestRequest()
   // Use effectiveAccountId if available, otherwise fall back to profile.account_id
   const accountId = accountIdOverride ?? (effectiveAccountId || profile?.account_id)
 
@@ -142,6 +144,7 @@ export function useStockManagement(accountIdOverride?: string) {
   }, [accountId, effectiveAccountId])
 
   const loadData = async () => {
+    const isStale = beginLoad()
     try {
       setLoading(true)
       setError(null)
@@ -156,6 +159,7 @@ export function useStockManagement(accountIdOverride?: string) {
         .eq('account_id', accountId)
         .order('created_at', { ascending: false })
 
+      if (isStale()) return
       if (stocksError) throw stocksError
 
       // Load panelist stocks
@@ -169,6 +173,7 @@ export function useStockManagement(accountIdOverride?: string) {
         .eq('account_id', accountId)
         .order('created_at', { ascending: false })
 
+      if (isStale()) return
       if (panelistStocksError) throw panelistStocksError
 
       // Load movements
@@ -182,6 +187,7 @@ export function useStockManagement(accountIdOverride?: string) {
         .order('created_at', { ascending: false })
         .limit(100)
 
+      if (isStale()) return
       if (movementsError) throw movementsError
 
       // Load shipments with items
@@ -194,6 +200,7 @@ export function useStockManagement(accountIdOverride?: string) {
         .eq('account_id', accountId)
         .order('created_at', { ascending: false })
 
+      if (isStale()) return
       if (shipmentsError) throw shipmentsError
 
       // Load shipment items for each shipment
@@ -211,6 +218,7 @@ export function useStockManagement(accountIdOverride?: string) {
             return { ...shipment, items: items || [] }
           })
         )
+        if (isStale()) return
         setShipments(shipmentsWithItems)
       }
 
@@ -220,6 +228,7 @@ export function useStockManagement(accountIdOverride?: string) {
         .select('*')
         .eq('account_id', accountId)
         .single()
+      if (isStale()) return
 
       if (settingsError && settingsError.code !== 'PGRST116') {
         // PGRST116 = no rows returned, which is OK
@@ -231,10 +240,11 @@ export function useStockManagement(accountIdOverride?: string) {
       setMovements(movementsData || [])
       setSettings(settingsData)
     } catch (err: any) {
+      if (isStale()) return
       console.error('Error loading stock management data:', err)
       setError(err.message)
     } finally {
-      setLoading(false)
+      if (!isStale()) setLoading(false)
     }
   }
 

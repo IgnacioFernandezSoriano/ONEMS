@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { INCIDENT_ATTENTION_EVENT } from '@/lib/hooks/useIncidentAttention'
+import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId'
+import { useLatestRequest } from '@/lib/latestRequest'
 
 interface UnreadRow {
   incident_kind: 'reported' | 'unavailability'
@@ -16,17 +18,25 @@ let warned = false
 // no hay insignias (aviso unico en consola).
 export function useUnreadConversations() {
   const [rows, setRows] = useState<UnreadRow[]>([])
+  // Cuenta elegida (superadmin) o la propia; null = todas las cuentas (solo superadmin).
+  const effectiveAccountId = useEffectiveAccountId()
+  const beginLoad = useLatestRequest()
 
   const load = useCallback(async (): Promise<void> => {
+    const isStale = beginLoad()
     try {
-      const { data, error } = await supabase.rpc('unread_incident_conversations')
+      const { data, error } = await supabase.rpc('unread_incident_conversations', {
+        p_account_id: effectiveAccountId,
+      })
+      if (isStale()) return
       if (error) throw error
       setRows((data || []) as UnreadRow[])
     } catch (err) {
+      if (isStale()) return
       if (!warned) { warned = true; console.warn('unread_incident_conversations no disponible', err) }
       setRows([])
     }
-  }, [])
+  }, [beginLoad, effectiveAccountId])
 
   useEffect(() => {
     load()

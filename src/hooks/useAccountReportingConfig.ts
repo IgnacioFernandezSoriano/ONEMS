@@ -27,12 +27,15 @@ export function useAccountReportingConfig(accountId: string | undefined) {
       return;
     }
 
+    let cancelled = false;
+
     async function fetchConfig() {
       try {
         setLoading(true);
         const { data, error: err } = await supabase
           .rpc('get_account_reporting_config', { p_account_id: accountId });
 
+        if (cancelled) return;
         if (err) throw err;
 
         if (data && data.length > 0) {
@@ -45,13 +48,15 @@ export function useAccountReportingConfig(accountId: string | undefined) {
           });
         }
       } catch (err) {
+        if (cancelled) return;
         setError(err as Error);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
 
     fetchConfig();
+    return () => { cancelled = true; };
   }, [accountId]);
 
   const updateConfig = async (newConfig: Partial<AccountReportingConfig>) => {
@@ -103,6 +108,8 @@ export function useCityClassifications(accountId: string | undefined) {
       return;
     }
 
+    let cancelled = false;
+
     async function fetchClassifications() {
       try {
         setLoading(true);
@@ -119,6 +126,7 @@ export function useCityClassifications(accountId: string | undefined) {
           `)
           .eq('account_id', accountId);
 
+        if (cancelled) return;
         if (err) throw err;
 
         const mapped = (data || []).map(row => ({
@@ -131,13 +139,15 @@ export function useCityClassifications(accountId: string | undefined) {
 
         setClassifications(mapped);
       } catch (err) {
+        if (cancelled) return;
         setError(err as Error);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
 
     fetchClassifications();
+    return () => { cancelled = true; };
   }, [accountId]);
 
   const updateClassification = async (

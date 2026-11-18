@@ -28,8 +28,12 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
   useEffect(() => {
+    let cancelled = false;
     async function loadFilterOptions() {
-      if (!accountId) return;
+      if (!accountId) {
+        setLoading(false);
+        return;
+      }
 
       try {
         setLoading(true);
@@ -40,6 +44,7 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
           .select('carrier_name')
           .eq('account_id', accountId)
           .not('carrier_name', 'is', null);
+        if (cancelled) return;
 
         // Get unique products
         const { data: productData } = await supabase
@@ -47,12 +52,14 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
           .select('product_name')
           .eq('account_id', accountId)
           .not('product_name', 'is', null);
+        if (cancelled) return;
 
         // Get regions
         const { data: regionData } = await supabase
           .from('regions')
           .select('name')
           .eq('account_id', accountId);
+        if (cancelled) return;
 
         // Get unique origin cities
         const { data: originCityData } = await supabase
@@ -60,6 +67,7 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
           .select('origin_city_name')
           .eq('account_id', accountId)
           .not('origin_city_name', 'is', null);
+        if (cancelled) return;
 
         // Get unique destination cities
         const { data: destCityData } = await supabase
@@ -67,6 +75,7 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
           .select('destination_city_name')
           .eq('account_id', accountId)
           .not('destination_city_name', 'is', null);
+        if (cancelled) return;
 
         const uniqueCarriers = [...new Set(carrierData?.map(d => d.carrier_name) || [])];
         const uniqueProducts = [...new Set(productData?.map(d => d.product_name) || [])];
@@ -80,17 +89,20 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
         setOriginCities(uniqueOriginCities.sort());
         setDestinationCities(uniqueDestCities.sort());
       } catch (error) {
+        if (cancelled) return;
         console.error('Error loading filter options:', error);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
 
     loadFilterOptions();
+    return () => { cancelled = true; };
   }, [accountId]);
 
   // Filter products by selected carrier
   useEffect(() => {
+    let cancelled = false;
     async function filterProductsByCarrier() {
       if (!accountId) return;
       
@@ -106,6 +118,7 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
           .eq('account_id', accountId)
           .eq('carrier_name', filters.carrier)
           .not('product_name', 'is', null);
+        if (cancelled) return;
 
         const uniqueProducts = [...new Set(data?.map(d => d.product_name) || [])];
         setFilteredProducts(uniqueProducts.sort());
@@ -118,6 +131,7 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
           handleChange('product', '');
         }
       } catch (error) {
+        if (cancelled) return;
         console.error('Error filtering products:', error);
         setFilteredProducts(products);
       }
@@ -126,6 +140,7 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
     }
 
     filterProductsByCarrier();
+    return () => { cancelled = true; };
   }, [filters.carrier, products, accountId]);
 
   const handleChange = useCallback((field: keyof Filters, value: string | string[] | undefined) => {
