@@ -1,4 +1,6 @@
--- Fase 3: la base exige Edit para escribir (20261119100200_account_access_writes.sql + ..._balance.sql).
+-- Fase 3: la base exige Edit para escribir (20261119100200_account_access_writes.sql) y plantilla AM users=edit
+-- (20261119100170_template_am_users_edit.sql).
+--   Lecturas de recepciones por receipts:view (no por rol legacy); users:edit no sube roles.
 --   View en una opción -> la RLS no deja escribir (0 filas / error de política); Edit -> sí.
 --   Rol legacy 'admin' sin Edit en la matriz -> ya no escribe (las políticas por rol se han sustituido).
 --   Edit en A1 no permite escribir A2 aunque también tenga rol en A2 (se escribe solo en la cuenta activa).
@@ -34,6 +36,24 @@ BEGIN
   RETURN false;
 EXCEPTION WHEN OTHERS THEN
   RETURN true;
+END $$;
+
+-- SQLSTATE que lanza la sentencia (NULL si no falla)
+CREATE OR REPLACE FUNCTION pg_temp.sqlstate_of(p_sql text) RETURNS text LANGUAGE plpgsql AS $$
+BEGIN
+  EXECUTE p_sql;
+  RETURN NULL;
+EXCEPTION WHEN OTHERS THEN
+  RETURN SQLSTATE;
+END $$;
+
+-- Mensaje de error de la sentencia (NULL si no falla)
+CREATE OR REPLACE FUNCTION pg_temp.error_of(p_sql text) RETURNS text LANGUAGE plpgsql AS $$
+BEGIN
+  EXECUTE p_sql;
+  RETURN NULL;
+EXCEPTION WHEN OTHERS THEN
+  RETURN SQLERRM;
 END $$;
 
 BEGIN;
@@ -93,6 +113,61 @@ INSERT INTO public.account_config (account_id)
 SELECT 'a0000000-0000-0000-0000-000000000001'
  WHERE NOT EXISTS (SELECT 1 FROM public.account_config WHERE account_id = 'a0000000-0000-0000-0000-000000000001');
 
+-- Más actores, con rol legacy 'user':
+--   AM 93 account_manager de A1 (receipts:edit, users:edit desde 20261119100170)
+--   PR 92 materials_supplier de A1 + receipts:view (Edit en reported_incidents, solo View en recepciones)
+INSERT INTO auth.users (id, email) VALUES
+  ('93000000-0000-0000-0000-000000000093','am@t.l'),
+  ('92000000-0000-0000-0000-000000000092','pr@t.l'),
+  ('91000000-0000-0000-0000-000000000091','x@t.l');
+INSERT INTO public.profiles (id, email, full_name, role, account_id) VALUES
+  ('93000000-0000-0000-0000-000000000093','am@t.l','AM','user','a0000000-0000-0000-0000-000000000001'),
+  ('92000000-0000-0000-0000-000000000092','pr@t.l','PR','user','a0000000-0000-0000-0000-000000000001');
+INSERT INTO public.account_user_role (account_id, user_id, role) VALUES
+  ('a0000000-0000-0000-0000-000000000001','93000000-0000-0000-0000-000000000093','account_manager');
+INSERT INTO public.account_user_role (account_id, user_id, role) VALUES
+  ('a0000000-0000-0000-0000-000000000001','92000000-0000-0000-0000-000000000092','materials_supplier');
+INSERT INTO public.account_access (account_id, role, option, level) VALUES
+  ('a0000000-0000-0000-0000-000000000001','materials_supplier','receipts','view')
+ON CONFLICT (account_id, role, option) DO UPDATE SET level = EXCLUDED.level;
+
+-- Caso de recepción y mensajes en A1 (uno de recepción y uno de incidencia reportada).
+INSERT INTO public.receipt_case (id, account_id, panelist_id, telegram_id, tag_raw, tag_norm, reason, status,
+                                 first_attempt_at, last_attempt_at)
+VALUES ('5c000000-0000-0000-0000-000000000001','a0000000-0000-0000-0000-000000000001',
+        'e4000000-0000-0000-0000-000000000004','4004','12345678','12345678','not_found','needs_decision', now(), now());
+INSERT INTO public.incident_message (account_id, panelist_id, incident_kind, incident_id, direction, author, body, status)
+VALUES ('a0000000-0000-0000-0000-000000000001','e4000000-0000-0000-0000-000000000004','receipt',
+        '5c000000-0000-0000-0000-000000000001','inbound','panelist','rec','received'),
+       ('a0000000-0000-0000-0000-000000000001','e4000000-0000-0000-0000-000000000004','reported',
+        gen_random_uuid(),'inbound','panelist','rep','received');
+INSERT INTO public.case_analysis_request (account_id, incident_kind, incident_id)
+VALUES ('a0000000-0000-0000-0000-000000000001','receipt','5c000000-0000-0000-0000-000000000001');
+
+-- ---------------------------------------------------------------- plantilla: AM users -> edit (20261119100170)
+-- A1 vuelve al valor antiguo (view) y A2 tiene la celda personalizada (borrada): al reaplicar la migración solo
+-- cambia A1 y deja una fila de log para A1.
+UPDATE public.access_template SET level = 'view' WHERE role = 'account_manager' AND option = 'users';
+UPDATE public.account_access SET level = 'view'
+ WHERE account_id = 'a0000000-0000-0000-0000-000000000001' AND role = 'account_manager' AND option = 'users';
+DELETE FROM public.account_access
+ WHERE account_id = 'a0000000-0000-0000-0000-000000000002' AND role = 'account_manager' AND option = 'users';
+\ir ../migrations/20261119100170_template_am_users_edit.sql
+DO $$
+DECLARE n int;
+BEGIN
+  PERFORM pg_temp.fail_if((SELECT level FROM public.access_template WHERE role = 'account_manager' AND option = 'users')
+                          IS DISTINCT FROM 'edit', 'plantilla AM users');
+  PERFORM pg_temp.fail_if((SELECT level FROM public.account_access WHERE account_id = 'a0000000-0000-0000-0000-000000000001'
+                             AND role = 'account_manager' AND option = 'users') IS DISTINCT FROM 'edit', 'A1 AM users');
+  PERFORM pg_temp.fail_if(EXISTS (SELECT 1 FROM public.account_access WHERE account_id = 'a0000000-0000-0000-0000-000000000002'
+                             AND role = 'account_manager' AND option = 'users'), 'A2 personalizada tocada');
+  SELECT count(*) INTO n FROM public.account_access_log WHERE kind = 'template_update' AND changed_by IS NULL;
+  PERFORM pg_temp.fail_if(n <> 1, 'filas de log template_update: ' || n);
+  PERFORM pg_temp.fail_if(NOT EXISTS (SELECT 1 FROM public.account_access_log WHERE kind = 'template_update'
+                                        AND account_id = 'a0000000-0000-0000-0000-000000000001'), 'log de A1');
+END $$;
+
 -- ---------------------------------------------------------------- catálogo
 DO $$
 DECLARE n int;
@@ -139,8 +214,9 @@ BEGIN
   PERFORM pg_temp.fail_if(pg_temp.rows($q$UPDATE public.allocation_plan_details SET status = 'cancelled' WHERE id = 'd1000000-0000-0000-0000-000000000001'$q$) <> 0,
     'View en allocation_plans actualiza envíos');
   -- plan_action_delete (SECURITY DEFINER) con View en allocation_plans: excepción, y el envío sigue.
-  PERFORM pg_temp.fail_if(NOT pg_temp.raises($q$SELECT public.plan_action_delete(ARRAY['d1000000-0000-0000-0000-000000000001'::uuid], '{}')$q$),
-    'plan_action_delete con View');
+  PERFORM pg_temp.fail_if(pg_temp.sqlstate_of($q$SELECT public.plan_action_delete(ARRAY['d1000000-0000-0000-0000-000000000001'::uuid], '{}')$q$)
+                          IS DISTINCT FROM '42501', 'plan_action_delete con View: sqlstate '
+    || coalesce(pg_temp.sqlstate_of($q$SELECT public.plan_action_delete(ARRAY['d1000000-0000-0000-0000-000000000001'::uuid], '{}')$q$), 'ninguno'));
   -- Sí puede lo que su rol tiene en Edit (do_coordinator: readers_management, account_working_days).
   PERFORM pg_temp.fail_if(pg_temp.rows($q$UPDATE public.readers SET name = 'R1b' WHERE id = 'f1000000-0000-0000-0000-000000000001'$q$) <> 1,
     'do_coordinator no actualiza lectores');
@@ -250,6 +326,81 @@ DO $$ BEGIN
   PERFORM pg_temp.fail_if(pg_temp.raises($q$INSERT INTO public.carriers (account_id, code, name)
     VALUES ('a0000000-0000-0000-0000-000000000002','CS','CarrierS')$q$), 'superadmin no inserta en A2');
   PERFORM public.rpc_set_working_day('a0000000-0000-0000-0000-000000000002', 5, false);
+END $$;
+RESET ROLE;
+
+-- ---------------------------------------------------------------- lecturas de recepciones por la matriz
+-- AM con rol legacy 'user': ve el caso, el mensaje de recepción y la petición de análisis de recepción.
+SET ROLE authenticated;
+SELECT pg_temp.as_user('93000000-0000-0000-0000-000000000093', 'authenticated');
+DO $$ BEGIN
+  PERFORM pg_temp.fail_if((SELECT count(*) FROM public.receipt_case) <> 1, 'AM (user) no ve receipt_case');
+  PERFORM pg_temp.fail_if((SELECT count(*) FROM public.incident_message WHERE incident_kind = 'receipt') <> 1,
+    'AM (user) no ve mensajes de recepción');
+  PERFORM pg_temp.fail_if((SELECT count(*) FROM public.incident_message WHERE incident_kind = 'reported') <> 1,
+    'AM no ve mensajes de incidencia reportada');
+  PERFORM pg_temp.fail_if((SELECT count(*) FROM public.case_analysis_request WHERE incident_kind = 'receipt') <> 1,
+    'AM (user) no ve peticiones de recepción');
+END $$;
+-- Sin receipts (do_coordinator): no ve nada de recepciones; lo que no es de recepción, igual que antes.
+SELECT pg_temp.as_user('95000000-0000-0000-0000-000000000095', 'authenticated');
+DO $$ BEGIN
+  PERFORM pg_temp.fail_if((SELECT count(*) FROM public.receipt_case) <> 0, 'sin receipts ve receipt_case');
+  PERFORM pg_temp.fail_if((SELECT count(*) FROM public.incident_message WHERE incident_kind = 'receipt') <> 0,
+    'sin receipts ve mensajes de recepción');
+  PERFORM pg_temp.fail_if((SELECT count(*) FROM public.case_analysis_request WHERE incident_kind = 'receipt') <> 0,
+    'sin receipts ve peticiones de recepción');
+  PERFORM pg_temp.fail_if((SELECT count(*) FROM public.incident_message WHERE incident_kind = 'reported') <> 1,
+    'rama no-recepción de incident_message cambiada');
+END $$;
+-- Legacy admin sin matriz: ya no ve recepciones.
+SELECT pg_temp.as_user('96000000-0000-0000-0000-000000000096', 'authenticated');
+DO $$ BEGIN
+  PERFORM pg_temp.fail_if((SELECT count(*) FROM public.receipt_case) <> 0, 'legacy admin ve receipt_case');
+END $$;
+-- PR: Edit en reported_incidents pero solo View en receipts -> las RPC de caso de tipo recepción piden receipts:edit.
+SELECT pg_temp.as_user('92000000-0000-0000-0000-000000000092', 'authenticated');
+DO $$ BEGIN
+  PERFORM pg_temp.fail_if((SELECT count(*) FROM public.receipt_case) <> 1, 'receipts:view no ve receipt_case');
+  PERFORM pg_temp.fail_if(pg_temp.error_of($q$SELECT public.request_case_analysis('receipt', '5c000000-0000-0000-0000-000000000001')$q$)
+                          IS DISTINCT FROM 'Forbidden: edit right required (receipts)', 'request_case_analysis receipt sin receipts:edit');
+  PERFORM pg_temp.fail_if(pg_temp.error_of($q$SELECT public.send_case_message('receipt', '5c000000-0000-0000-0000-000000000001',
+                            'e4000000-0000-0000-0000-000000000004', 'x', 'k')$q$)
+                          IS DISTINCT FROM 'Forbidden: edit right required (receipts)', 'send_case_message receipt sin receipts:edit');
+END $$;
+RESET ROLE;
+
+-- ---------------------------------------------------------------- profiles: users:edit no sube roles
+SET ROLE authenticated;
+SELECT pg_temp.as_user('93000000-0000-0000-0000-000000000093', 'authenticated');
+DO $$ BEGIN
+  -- Edita datos de un usuario y de un admin (rol sin cambiar).
+  PERFORM pg_temp.fail_if(pg_temp.rows($q$UPDATE public.profiles SET full_name = 'Actor2' WHERE id = '99000000-0000-0000-0000-000000000099'$q$) <> 1,
+    'users:edit no edita un perfil');
+  PERFORM pg_temp.fail_if(pg_temp.rows($q$UPDATE public.profiles SET full_name = 'Legacy3' WHERE id = '96000000-0000-0000-0000-000000000096'$q$) <> 1,
+    'users:edit no edita a un admin sin cambiar el rol');
+  -- No sube a nadie a admin ni a superadmin, ni a sí mismo; no crea admins.
+  PERFORM pg_temp.fail_if(pg_temp.sqlstate_of($q$UPDATE public.profiles SET role = 'admin' WHERE id = '99000000-0000-0000-0000-000000000099'$q$)
+                          IS DISTINCT FROM '42501', 'users:edit sube user -> admin');
+  PERFORM pg_temp.fail_if(pg_temp.sqlstate_of($q$UPDATE public.profiles SET role = 'admin' WHERE id = '93000000-0000-0000-0000-000000000093'$q$)
+                          IS DISTINCT FROM '42501', 'users:edit se sube a admin');
+  PERFORM pg_temp.fail_if(NOT pg_temp.raises($q$UPDATE public.profiles SET role = 'superadmin', account_id = NULL WHERE id = '99000000-0000-0000-0000-000000000099'$q$),
+    'users:edit sube a superadmin');
+  PERFORM pg_temp.fail_if(NOT pg_temp.raises($q$INSERT INTO public.profiles (id, email, full_name, role, account_id)
+    VALUES ('91000000-0000-0000-0000-000000000091', 'x@t.l', 'X', 'admin', 'a0000000-0000-0000-0000-000000000001')$q$),
+    'users:edit crea un admin');
+END $$;
+RESET ROLE;
+DO $$ BEGIN
+  PERFORM pg_temp.fail_if((SELECT role FROM public.profiles WHERE id = '99000000-0000-0000-0000-000000000099') <> 'user', '99 cambió de rol');
+  PERFORM pg_temp.fail_if((SELECT role FROM public.profiles WHERE id = '93000000-0000-0000-0000-000000000093') <> 'user', '93 cambió de rol');
+END $$;
+-- El superadmin sí cambia el rol.
+SET ROLE authenticated;
+SELECT pg_temp.as_user('97000000-0000-0000-0000-000000000097', 'authenticated');
+DO $$ BEGIN
+  PERFORM pg_temp.fail_if(pg_temp.rows($q$UPDATE public.profiles SET role = 'admin' WHERE id = '99000000-0000-0000-0000-000000000099'$q$) <> 1,
+    'superadmin no sube user -> admin');
 END $$;
 RESET ROLE;
 

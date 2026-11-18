@@ -62,8 +62,8 @@ y que la base de datos lo haga cumplir.
 - **Añadir a una cuenta a alguien que ya es usuario de otra:** solo el superadmin (por correo, en la pestaña). Dentro de una cuenta,
   sus editores asignan roles a los usuarios que ya son de esa cuenta.
 - **Rutas no listadas en la matriz:** denegadas por defecto (salvo superadmin). Login, cambio de contraseña y perfil propio, abiertos.
-- **Alta de usuarios:** la decide la matriz: quien tenga Edit en `users` (plantilla: UPU account manager) da de alta y de baja;
-  el Account Manager tiene View pero, como edita la pestaña, puede darse Edit. `create-user`/`delete-user` comprueban
+- **Alta de usuarios:** la decide la matriz: quien tenga Edit en `users` (plantilla: Account Manager y UPU account manager;
+  el AM pasó de View a Edit el 2026-11-18, migración 20261119100170) da de alta y de baja. `create-user`/`delete-user` comprueban
   `has_access(cuenta, 'users', 'edit')` además del superadmin.
 - **Fase 3, tabla escrita por varias opciones:** se permite con Edit en cualquiera de ellas (OR). Se acepta el solape.
 - **Fase 3, alcance:** solo escrituras con JWT de usuario de ONEMS (cliente, RPC y edge functions llamadas desde la web).
@@ -101,7 +101,7 @@ APM = Allocation Plan Manager · SR = sin rol
 | reported_incidents | E | E | E | | E | E | |
 | panelist_availability | E | E | V | | E | V | |
 | receipts | E | | | | E | E | |
-| users | V | | | | E | | |
+| users | E | | | | E | | |
 | account_working_days | E | | | E | E | E | |
 | help_center | V | V | V | V | V | V | V |
 

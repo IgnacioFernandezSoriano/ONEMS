@@ -68,7 +68,7 @@ BEGIN
   SELECT count(*) INTO n FROM public.account_access WHERE account_id = A2;
   PERFORM pg_temp.fail_if(n <> (SELECT count(*) FROM public.access_template WHERE role <> 'no_role'), 'copia completa: ' || n);
   -- Celdas de muestra de la plantilla.
-  PERFORM pg_temp.fail_if((SELECT level FROM public.access_template WHERE role='account_manager' AND option='users') <> 'view', 'AM users');
+  PERFORM pg_temp.fail_if((SELECT level FROM public.access_template WHERE role='account_manager' AND option='users') <> 'edit', 'AM users (20261119100170)');
   PERFORM pg_temp.fail_if((SELECT level FROM public.access_template WHERE role='upu_account_manager' AND option='users') <> 'edit', 'UPU users');
   PERFORM pg_temp.fail_if((SELECT level FROM public.access_template WHERE role='materials_supplier' AND option='panelist_availability') <> 'view', 'MS availability');
   PERFORM pg_temp.fail_if(EXISTS (SELECT 1 FROM public.access_template WHERE role='panelist_manager' AND option='carriers'), 'PM carriers');

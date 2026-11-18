@@ -494,6 +494,9 @@ BEGIN
 END $$;
 
 -- RLS: el 96 (cuenta 1) ve la peticion; el 98 no. Sin escritura directa.
+-- Fase 3: ver las de recepcion depende de receipts:view en la matriz, no del rol legacy: 99 vuelve a 'user'
+-- (sigue siendo upu_account_manager de la cuenta 1 por el fixture).
+UPDATE public.profiles SET role = 'user' WHERE id = '99000000-0000-0000-0000-000000000099';
 SET LOCAL ROLE authenticated;
 SELECT pg_temp.act('96000000-0000-0000-0000-000000000096');
 DO $$ BEGIN
@@ -502,7 +505,7 @@ DO $$ BEGIN
 END $$;
 SELECT pg_temp.act('99000000-0000-0000-0000-000000000099');
 DO $$ BEGIN
-  PERFORM pg_temp.fail_if((SELECT count(*) FROM public.case_analysis_request WHERE incident_kind = 'receipt') < 1, '99 admin no ve peticiones de recepcion');
+  PERFORM pg_temp.fail_if((SELECT count(*) FROM public.case_analysis_request WHERE incident_kind = 'receipt') < 1, '99 (receipts:view, rol user) no ve peticiones de recepcion');
 END $$;
 SELECT pg_temp.act('98000000-0000-0000-0000-000000000098');
 DO $$ BEGIN
