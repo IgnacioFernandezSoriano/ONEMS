@@ -86,10 +86,10 @@ export const ROUTE_OPTION: Record<string, AccessOption | 'superadmin' | 'open'> 
   '/reporting/territory-equity-v2': 'territory_equity',
   '/reporting/jk-performance': 'segment_analysis',
   '/reporting/jk-performance-v2': 'segment_analysis',
-  '/settings': 'open',
+  '/settings': 'superadmin',
   '/settings/accounts': 'superadmin',
-  '/settings/users': 'users',
-  '/settings/reporting-config': 'account_working_days',
+  '/settings/users': 'superadmin',
+  '/settings/reporting-config': 'superadmin',
   '/settings/account-configuration': 'account_working_days',
   '/settings/change-password': 'open',
   '/settings/roles-access': 'open', // guarda propia (Task 5)

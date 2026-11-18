@@ -446,7 +446,7 @@ export function Sidebar() {
         path: '/settings/users',
         label: t('menu.all_users'),
         icon: Users,
-        option: 'users',
+        option: 'superadmin',
         tooltip: t('menu.all_users.tooltip'),
       },
       {

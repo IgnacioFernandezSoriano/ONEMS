@@ -419,7 +419,7 @@ function App() {
                     <Route
                       path="/settings"
                       element={
-                        <ProtectedRoute option="open">
+                        <ProtectedRoute option="superadmin">
                           <Settings />
                         </ProtectedRoute>
                       }
@@ -435,7 +435,7 @@ function App() {
                     <Route
                       path="/settings/users"
                       element={
-                        <ProtectedRoute option="users">
+                        <ProtectedRoute option="superadmin">
                           <AllUsers />
                         </ProtectedRoute>
                       }
@@ -443,7 +443,7 @@ function App() {
                     <Route
                       path="/settings/reporting-config"
                       element={
-                        <ProtectedRoute option="account_working_days">
+                        <ProtectedRoute option="superadmin">
                           <AccountReportingConfig />
                         </ProtectedRoute>
                       }

@@ -57,7 +57,6 @@ describe('access', () => {
     const pairs = [...src.matchAll(/path: '(\/[^']+)',[^{}]*?option: '([^']+)'/g)]
     expect(pairs.length).toBeGreaterThan(25)
     for (const [, path, opt] of pairs) {
-      if (path === '/settings/users') continue // solo se añade para superadmin
       expect([path, opt]).toEqual([path, ROUTE_OPTION[path]])
     }
   })
@@ -67,6 +66,13 @@ describe('access', () => {
       const path = firstAllowedPath(new Map<AccessOption, AccessLevel>([[o.key, 'view']]))!
       expect([o.key, routeAccess(path)]).toEqual([o.key, o.key])
     }
+  })
+
+  it('rutas globales (todas las cuentas) solo superadmin; /users por cuenta', () => {
+    for (const p of ['/settings', '/settings/accounts', '/settings/users', '/settings/reporting-config', '/admin/translations']) {
+      expect([p, routeAccess(p)]).toEqual([p, 'superadmin'])
+    }
+    expect(routeAccess('/users')).toBe('users')
   })
 
   it('routeAccess: rutas no mapeadas solo superadmin', () => {
