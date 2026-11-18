@@ -139,3 +139,8 @@ export function firstAllowedPath(levels: Map<AccessOption, AccessLevel>): string
   const first = ACCESS_OPTIONS.find(o => levels.has(o.key))
   return first ? OPTION_ROUTE[first.key] : null
 }
+
+/** True mientras los derechos cargados no correspondan a la clave (usuario+cuenta) actual. key null = nada que cargar. */
+export function isPermissionsLoading(currentKey: string | null, loadedKey: string | null): boolean {
+  return currentKey !== null && currentKey !== loadedKey
+}

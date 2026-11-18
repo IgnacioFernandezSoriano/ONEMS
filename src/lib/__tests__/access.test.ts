@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import {
-  ACCESS_OPTIONS, ROUTE_OPTION, firstAllowedPath,
+  ACCESS_OPTIONS, ROUTE_OPTION, firstAllowedPath, isPermissionsLoading,
   type AccessOption, type AccessLevel,
 } from '../access'
 
@@ -33,5 +33,12 @@ describe('access', () => {
     const m = new Map<AccessOption, AccessLevel>([['dashboard', 'view'], ['carriers', 'edit']])
     expect(firstAllowedPath(m)).toBe('/dashboard')
     expect(firstAllowedPath(new Map())).toBeNull()
+  })
+
+  it('isPermissionsLoading: true si la clave cargada no es la actual', () => {
+    expect(isPermissionsLoading('u|a2', 'u|a1')).toBe(true)
+    expect(isPermissionsLoading('u|a1', null)).toBe(true)
+    expect(isPermissionsLoading('u|a1', 'u|a1')).toBe(false)
+    expect(isPermissionsLoading(null, 'u|a1')).toBe(false)
   })
 })
