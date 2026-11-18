@@ -4556,6 +4556,8 @@ hc.accounts.edit,Editar conta
 hc.users.loading,A carregar...
 hc.users.title,Gestão de utilizadores
 hc.users.create,Criar utilizador
+hc.users.roles_warning,Algumas funções não puderam ser atribuídas. Defina-as em Funções e acessos.
+hc.users.delete_other_accounts,Este utilizador pertence também a outras contas; só um superadmin o pode eliminar.
 hc.users.edit,Editar utilizador
 hc.sla_form.carrier,Operador
 hc.sla_form.product,Produto

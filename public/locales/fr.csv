@@ -4548,6 +4548,8 @@ hc.accounts.edit,Modifier le compte
 hc.users.loading,Chargement...
 hc.users.title,Gestion des utilisateurs
 hc.users.create,Créer un utilisateur
+hc.users.roles_warning,Certains rôles n'ont pas pu être attribués. Définissez-les dans Rôles et accès.
+hc.users.delete_other_accounts,Cet utilisateur appartient aussi à d'autres comptes ; seul un superadmin peut le supprimer.
 hc.users.edit,Modifier l'utilisateur
 hc.sla_form.carrier,Opérateur
 hc.sla_form.product,Produit

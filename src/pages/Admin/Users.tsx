@@ -31,13 +31,19 @@ export function Users() {
     if (selectedUser) {
       await updateUser(selectedUser.id, data)
     } else {
-      await createUser(data)
+      const res = await createUser(data)
+      if (res?.roles_warning) alert(t('hc.users.roles_warning'))
     }
     setIsModalOpen(false)
   }
 
   const handleDelete = async (id: string) => {
-    await deleteUser(id)
+    try {
+      await deleteUser(id)
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : ''
+      alert(msg.includes('other accounts') ? t('hc.users.delete_other_accounts') : msg || t('hc.user_form.error_submitting'))
+    }
   }
 
   if (loading) {

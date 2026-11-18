@@ -4548,6 +4548,8 @@ hc.accounts.edit,تعديل الحساب
 hc.users.loading,جارٍ التحميل...
 hc.users.title,إدارة المستخدمين
 hc.users.create,إنشاء مستخدم
+hc.users.roles_warning,تعذر تعيين بعض الأدوار. حددها في الأدوار والوصول.
+hc.users.delete_other_accounts,هذا المستخدم ينتمي أيضا إلى حسابات أخرى؛ يمكن لمدير عام فقط حذفه.
 hc.users.edit,تعديل المستخدم
 hc.sla_form.carrier,الناقل
 hc.sla_form.product,المنتج

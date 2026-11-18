@@ -137,7 +137,7 @@ export function UserForm({ user, onSubmit, onCancel }: UserFormProps) {
         </select>
       </div>
 
-      {role !== 'superadmin' && (
+      {isSuperadmin && role !== 'superadmin' && (
         <div>
           <label htmlFor="account" className="block text-sm font-medium mb-1">
             {t('hc.user_form.account')}

@@ -4556,6 +4556,8 @@ hc.accounts.edit,Edit Account
 hc.users.loading,Loading...
 hc.users.title,User Management
 hc.users.create,Create User
+hc.users.roles_warning,Some roles could not be assigned. Set them in Roles and access.
+hc.users.delete_other_accounts,This user also belongs to other accounts; only a superadmin can delete them.
 hc.users.edit,Edit User
 hc.sla_form.carrier,Carrier
 hc.sla_form.product,Product
