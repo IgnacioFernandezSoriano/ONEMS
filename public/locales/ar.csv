@@ -3985,6 +3985,17 @@ hc.account_form.upu_account_manager_email,البريد الإلكتروني لم
 hc.account_form.upu_account_manager_email_help,المسؤول عن هذا الحساب في الاتحاد البريدي العالمي.
 hc.account_form.allocation_plan_manager_email,البريد الإلكتروني لمدير خطة التوزيع (Allocation Plan Manager)
 hc.account_form.allocation_plan_manager_email_help,المسؤول عن خطة التوزيع لهذا الحساب؛ يستخدم بوت تحليل الحالات.
+hc.account_form.report_title,تقرير التشغيل
+hc.account_form.report_help,بريد «ONE operations report» يرسله الوكيل الساعة 08:00 (بتوقيت مدريد). إلى: جميع الأدوار ما عدا Account Manager وUPU account manager، فهما في النسخة.
+hc.account_form.report_frequency,التكرار
+hc.account_form.report_never,أبدًا
+hc.account_form.report_weekly,أسبوعي
+hc.account_form.report_monthly,شهري
+hc.account_form.report_weekdays,أيام الأسبوع
+hc.account_form.report_weekly_help,يحلل آخر 7 أيام.
+hc.account_form.report_month_day,يوم الشهر
+hc.account_form.report_monthly_help,يحلل من اليوم نفسه في الشهر السابق حتى أمس. في الأشهر الأقصر يُرسل في آخر يوم.
+hc.account_form.report_weekdays_required,اختر يومًا واحدًا على الأقل من أيام الأسبوع للتقرير الأسبوعي.
 hc.account_form.status,الحالة
 hc.account_form.cancel,إلغاء
 hc.account_form.saving,جارٍ الحفظ...
