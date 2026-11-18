@@ -3754,6 +3754,7 @@ hc.user_form.email,Email
 hc.user_form.password,Palavra-passe
 hc.user_form.full_name,Nome completo
 hc.user_form.role,Perfil
+hc.user_form.account_roles,Funções na conta (opcional)
 hc.user_form.account,Conta
 hc.user_form.select_account,Selecione uma conta
 hc.user_form.status,Estado

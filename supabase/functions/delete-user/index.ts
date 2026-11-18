@@ -52,9 +52,20 @@ serve(async (req) => {
       )
     }
 
-    if (adminProfile.role !== 'admin' && adminProfile.role !== 'superadmin') {
+    const isLegacyAdmin = adminProfile.role === 'admin' || adminProfile.role === 'superadmin'
+    // Regla nueva: derecho de edición sobre 'users' en su cuenta (JWT del solicitante)
+    let hasMatrixAccess = false
+    if (!isLegacyAdmin && adminProfile.account_id) {
+      const { data: ok } = await supabaseClient.rpc('has_access', {
+        p_account_id: adminProfile.account_id,
+        p_option: 'users',
+        p_level: 'edit',
+      })
+      hasMatrixAccess = ok === true
+    }
+    if (!isLegacyAdmin && !hasMatrixAccess) {
       return new Response(
-        JSON.stringify({ error: 'Forbidden: only admins can delete users' }),
+        JSON.stringify({ error: 'Forbidden: you cannot delete users' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
@@ -91,7 +102,7 @@ serve(async (req) => {
     }
 
     // Un admin (no superadmin) solo puede borrar users de su propia cuenta
-    if (adminProfile.role === 'admin') {
+    if (adminProfile.role !== 'superadmin') {
       if (targetProfile.account_id !== adminProfile.account_id) {
         return new Response(
           JSON.stringify({ error: 'Forbidden: user not in your account' }),

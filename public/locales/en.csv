@@ -3754,6 +3754,7 @@ hc.user_form.email,Email
 hc.user_form.password,Password
 hc.user_form.full_name,Full Name
 hc.user_form.role,Role
+hc.user_form.account_roles,Roles in the account (optional)
 hc.user_form.account,Account
 hc.user_form.select_account,Select account
 hc.user_form.status,Status

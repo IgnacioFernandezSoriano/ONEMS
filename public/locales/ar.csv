@@ -3746,6 +3746,7 @@ hc.user_form.email,البريد الإلكتروني
 hc.user_form.password,كلمة المرور
 hc.user_form.full_name,الاسم الكامل
 hc.user_form.role,الدور
+hc.user_form.account_roles,الأدوار في الحساب (اختياري)
 hc.user_form.account,الحساب
 hc.user_form.select_account,اختر حسابًا
 hc.user_form.status,الحالة

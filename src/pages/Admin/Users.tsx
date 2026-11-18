@@ -7,9 +7,12 @@ import { UserForm } from '@/components/users/UserForm'
 import { useUsers } from '@/hooks/useUsers'
 import type { ProfileWithAccount } from '@/lib/types'
 import { useTranslation } from '@/hooks/useTranslation'
+import { usePermissions } from '@/contexts/PermissionsContext'
 
 export function Users() {
   const { t } = useTranslation()
+  const { canEdit } = usePermissions()
+  const canEditUsers = canEdit('users')
   const { users, loading, createUser, updateUser, deleteUser, resetPassword } = useUsers()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<ProfileWithAccount | undefined>()
@@ -46,9 +49,11 @@ export function Users() {
       <PageHeader
         title={t('hc.users.title')}
         action={
-          <Button onClick={handleCreate}>
-            {t('hc.users.create')}
-          </Button>
+          canEditUsers ? (
+            <Button onClick={handleCreate}>
+              {t('hc.users.create')}
+            </Button>
+          ) : undefined
         }
       />
 
@@ -56,6 +61,7 @@ export function Users() {
         users={users}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        canDelete={canEditUsers}
         onResetPassword={resetPassword}
       />
 

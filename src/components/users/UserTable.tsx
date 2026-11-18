@@ -11,10 +11,11 @@ interface UserTableProps {
   users: ProfileWithAccount[]
   onEdit: (user: ProfileWithAccount) => void
   onDelete: (id: string) => void
+  canDelete?: boolean
   onResetPassword: (userId: string, newPassword: string) => Promise<void>
 }
 
-export function UserTable({ users, onEdit, onDelete, onResetPassword }: UserTableProps) {
+export function UserTable({ users, onEdit, onDelete, canDelete = true, onResetPassword }: UserTableProps) {
   const { t } = useTranslation()
   const { profile } = useAuth()
   const [resetUserId, setResetUserId] = useState<string | null>(null)
@@ -199,17 +200,19 @@ export function UserTable({ users, onEdit, onDelete, onResetPassword }: UserTabl
                       <span className="hidden sm:inline">{t('hc.user_table.reset_password')}</span>
                     </Button>
                   )}
-                  <Button
-                    size="sm"
-                    variant="danger"
-                    onClick={() => {
-                      if (confirm(t('hc.user_table.confirm_delete'))) {
-                        onDelete(user.id)
-                      }
-                    }}
-                  >
-                    {t('hc.user_table.delete')}
-                  </Button>
+                  {canDelete && (
+                    <Button
+                      size="sm"
+                      variant="danger"
+                      onClick={() => {
+                        if (confirm(t('hc.user_table.confirm_delete'))) {
+                          onDelete(user.id)
+                        }
+                      }}
+                    >
+                      {t('hc.user_table.delete')}
+                    </Button>
+                  )}
                 </td>
               </tr>
             ))}

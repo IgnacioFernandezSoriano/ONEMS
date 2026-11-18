@@ -3746,6 +3746,7 @@ hc.user_form.email,E-mail
 hc.user_form.password,Mot de passe
 hc.user_form.full_name,Nom complet
 hc.user_form.role,Rôle
+hc.user_form.account_roles,Rôles dans le compte (facultatif)
 hc.user_form.account,Compte
 hc.user_form.select_account,Sélectionner un compte
 hc.user_form.status,Statut
