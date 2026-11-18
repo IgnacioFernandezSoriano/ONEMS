@@ -5272,3 +5272,15 @@ reported_incidents.gps.status.no_location,No location received
 reported_incidents.gps.status.gps_unavailable,GPS unavailable
 reported_incidents.gps.status.no_consent,No permission given
 reported_incidents.gps.status.no_answer,No answer
+allocation_plans.undo,Undo
+allocation_plans.undo_confirm,Undo {label}?
+allocation_plans.undo_done,Undone: {count} records restored
+allocation_plans.undo_skipped,{count} records were not touched because they changed afterwards
+allocation_plans.undo_label,{action} {count} records · {user} · {time}
+allocation_plans.undo_action_delete,Delete
+allocation_plans.undo_action_update,Change
+allocation_plans.undo_action_cancel,Cancel
+allocation_plans.undo_action_edit,Edit
+allocation_plans.undo_action_create,Create
+allocation_plans.undo_changed,The last action has changed; check it before undoing.
+allocation_plans.bulk_only_deferred,Samples to compensate can only be deleted.

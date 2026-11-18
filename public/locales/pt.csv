@@ -5272,3 +5272,15 @@ reported_incidents.gps.status.no_location,Localização não recebida
 reported_incidents.gps.status.gps_unavailable,GPS indisponível
 reported_incidents.gps.status.no_consent,Sem permissão concedida
 reported_incidents.gps.status.no_answer,Sem resposta
+allocation_plans.undo,Desfazer
+allocation_plans.undo_confirm,Desfazer {label}?
+allocation_plans.undo_done,Desfeito: {count} registos restaurados
+allocation_plans.undo_skipped,{count} registos não foram alterados porque mudaram depois
+allocation_plans.undo_label,{action} {count} registos · {user} · {time}
+allocation_plans.undo_action_delete,Apagar
+allocation_plans.undo_action_update,Alterar
+allocation_plans.undo_action_cancel,Cancelar
+allocation_plans.undo_action_edit,Editar
+allocation_plans.undo_action_create,Criar
+allocation_plans.undo_changed,A última ação mudou; reveja antes de desfazer.
+allocation_plans.bulk_only_deferred,As amostras a compensar só podem ser apagadas.
