@@ -12,6 +12,7 @@ const ROLES = ['remitente', 'receptor', 'destinatario']
 interface Props {
   kind: ConversationKind
   incidentId: string
+  readOnly?: boolean
 }
 
 function DraftEditor({ draft, sent, onSend }: {
@@ -53,7 +54,7 @@ function DraftEditor({ draft, sent, onSend }: {
   )
 }
 
-export function CaseAnalysisPanel({ kind, incidentId }: Props) {
+export function CaseAnalysisPanel({ kind, incidentId, readOnly = false }: Props) {
   const { t } = useTranslation()
   const { state, result, error, start, send, sent, enabled } = useCaseAnalysis(kind, incidentId)
   const a = result?.analysis
@@ -91,11 +92,11 @@ export function CaseAnalysisPanel({ kind, incidentId }: Props) {
 
   return (
     <div className="border rounded p-4 mt-4 max-w-3xl">
-      <button type="button" className={BTN_SECONDARY} disabled={state === 'running'} onClick={() => { void start() }}>
+      {!readOnly && <button type="button" className={BTN_SECONDARY} disabled={state === 'running'} onClick={() => { void start() }}>
         {state === 'running' ? (
           <span className="inline-flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" />{t('case_analysis.running')}</span>
         ) : t('case_analysis.button')}
-      </button>
+      </button>}
       {state === 'failed' && (
         <p className="text-sm text-red-600 mt-2">
           {error === 'agent_timeout' ? t('case_analysis.agent_timeout')
@@ -163,7 +164,7 @@ export function CaseAnalysisPanel({ kind, incidentId }: Props) {
             <p className="text-sm whitespace-pre-wrap">{a.improvement || t('case_analysis.no_improvement')}</p>
           </div>
           </>)}
-          {drafts.length > 0 && (
+          {!readOnly && drafts.length > 0 && (
             <div>
               <h5 className="text-xs font-semibold text-gray-600 uppercase mb-1">{t('case_analysis.drafts')}</h5>
               {drafts.map(d => (

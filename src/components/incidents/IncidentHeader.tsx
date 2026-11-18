@@ -45,9 +45,10 @@ function splitResolution(text: string | null): { cancelled: boolean; free: strin
 interface Props {
   header: UnavailabilityHeader
   onSaveResolution: (text: string) => Promise<void>
+  readOnly?: boolean
 }
 
-export function IncidentHeader({ header, onSaveResolution }: Props) {
+export function IncidentHeader({ header, onSaveResolution, readOnly = false }: Props) {
   const { t } = useTranslation()
   const { cancelled, free } = splitResolution(header.final_resolution)
   const [draft, setDraft] = useState(free)
@@ -134,9 +135,10 @@ export function IncidentHeader({ header, onSaveResolution }: Props) {
           onChange={e => { setDraft(e.target.value); setSaved(false) }}
           placeholder={t('incidents.detail.final_resolution_placeholder')}
           rows={3}
+          readOnly={readOnly}
           className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
         />
-        <div className="mt-2 flex items-center gap-3">
+        {!readOnly && <div className="mt-2 flex items-center gap-3">
           <button
             type="button"
             onClick={handleSave}
@@ -147,7 +149,7 @@ export function IncidentHeader({ header, onSaveResolution }: Props) {
           </button>
           {saved && <span className="text-sm text-green-700" role="status">{t('incidents.detail.saved')}</span>}
           {saveError && <span className="text-sm text-red-600" role="alert">{t('common.error')}: {saveError}</span>}
-        </div>
+        </div>}
       </div>
     </div>
   )

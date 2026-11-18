@@ -1,10 +1,14 @@
 import { useState, useEffect, useRef } from 'react'
 import { useAccountConfig } from '../../hooks/useAccountConfig'
 import { useLocale } from '../../contexts/LocaleContext'
+import { usePermissions } from '../../contexts/PermissionsContext'
+import { ReadOnlyBadge } from '../../components/common/ReadOnlyBadge'
 import { Save, Calendar, Clock, Settings as SettingsIcon, Plus, Trash2, Upload, Download } from 'lucide-react'
 
 export function AccountConfiguration() {
   const { t } = useLocale()
+  const { canEdit } = usePermissions()
+  const readOnly = !canEdit('account_working_days')
   const {
     config,
     nonWorkingDays,
@@ -167,7 +171,7 @@ export function AccountConfiguration() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            {t('account_config.title')}
+            {t('account_config.title')} {readOnly && <ReadOnlyBadge />}
           </h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             {t('account_config.description')}
@@ -193,6 +197,7 @@ export function AccountConfiguration() {
             <select
               value={calculationMode}
               onChange={(e) => setCalculationMode(e.target.value as 'natural_days' | 'working_days')}
+              disabled={readOnly}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
             >
               <option value="natural_days">{t('account_config.natural_days')}</option>
@@ -214,6 +219,7 @@ export function AccountConfiguration() {
               max="60"
               value={mixedReaderGap}
               onChange={(e) => setMixedReaderGap(parseInt(e.target.value))}
+              disabled={readOnly}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
             />
             <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
@@ -222,14 +228,14 @@ export function AccountConfiguration() {
           </div>
 
           {/* Save Button */}
-          <button
+          {!readOnly && <button
             onClick={handleSaveConfig}
             disabled={saving}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
           >
             <Save className="w-4 h-4" />
             {saving ? t('common.saving') : t('common.save')}
-          </button>
+          </button>}
         </div>
       </div>
 
@@ -251,13 +257,13 @@ export function AccountConfiguration() {
               <Download className="w-4 h-4" />
               {t('account_config.download_template')}
             </button>
-            <button
+            {!readOnly && <button
               onClick={() => fileInputRef.current?.click()}
               className="flex items-center gap-2 px-3 py-1.5 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700"
             >
               <Upload className="w-4 h-4" />
               {t('account_config.import_csv')}
-            </button>
+            </button>}
             <input
               ref={fileInputRef}
               type="file"
@@ -265,17 +271,17 @@ export function AccountConfiguration() {
               onChange={handleImportCSV}
               className="hidden"
             />
-            <button
+            {!readOnly && <button
               onClick={() => setShowAddHoliday(!showAddHoliday)}
               className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700"
             >
               <Plus className="w-4 h-4" />
               {t('account_config.add_holiday')}
-            </button>
+            </button>}
           </div>
         </div>
 
-        {showAddHoliday && (
+        {!readOnly && showAddHoliday && (
           <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg space-y-3">
             <input
               type="date"
@@ -324,12 +330,12 @@ export function AccountConfiguration() {
                   </p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">{holiday.reason}</p>
                 </div>
-                <button
+                {!readOnly && <button
                   onClick={() => handleDeleteHoliday(holiday.id)}
                   className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
                 >
                   <Trash2 className="w-4 h-4" />
-                </button>
+                </button>}
               </div>
             ))
           )}
@@ -362,6 +368,7 @@ export function AccountConfiguration() {
                   <input
                     type="checkbox"
                     checked={schedule?.is_working_day ?? true}
+                    disabled={readOnly}
                     onChange={(e) =>
                       handleUpdateSchedule(dayOfWeek, 'is_working_day', e.target.checked)
                     }
@@ -378,6 +385,7 @@ export function AccountConfiguration() {
                       <input
                         type="time"
                         value={schedule?.opening_hour || '08:00'}
+                        disabled={readOnly}
                         onChange={(e) =>
                           handleUpdateSchedule(dayOfWeek, 'opening_hour', e.target.value)
                         }
@@ -389,6 +397,7 @@ export function AccountConfiguration() {
                       <input
                         type="time"
                         value={schedule?.cutoff_time || '18:00'}
+                        disabled={readOnly}
                         onChange={(e) =>
                           handleUpdateSchedule(dayOfWeek, 'cutoff_time', e.target.value)
                         }

@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from '@/hooks/useTranslation'
+import { usePermissions } from '@/contexts/PermissionsContext'
+import { ReadOnlyBadge } from '@/components/common/ReadOnlyBadge'
 import { format, parseISO, isValid } from 'date-fns'
 import { useUnavailabilityIncidents } from '@/lib/hooks/useUnavailabilityIncidents'
 import { useUnreadConversations } from '@/lib/hooks/useUnreadConversations'
@@ -19,6 +21,8 @@ const fmt = (d: string | null) => {
 
 export function PanelistAvailabilityIncidents() {
   const { t } = useTranslation()
+  const { canEdit } = usePermissions()
+  const readOnly = !canEdit('panelist_availability')
   const { inbox, loading, error, fetchInbox, statusFilter, setStatusFilter } = useUnavailabilityIncidents()
   const { unreadByKey } = useUnreadConversations()
   const [selected, setSelected] = useState<string | null>(null)
@@ -42,14 +46,14 @@ export function PanelistAvailabilityIncidents() {
   if (selected) {
     return (
       <div className="p-6">
-        <IncidentReviewPanel unavailabilityId={selected} onBack={() => { setSelected(null); fetchInbox() }} />
+        <IncidentReviewPanel unavailabilityId={selected} onBack={() => { setSelected(null); fetchInbox() }} readOnly={readOnly} />
       </div>
     )
   }
 
   return (
     <div className="p-6">
-      <h2 className="text-xl font-bold mb-6">{t('incidents.title')}</h2>
+      <h2 className="text-xl font-bold mb-6">{t('incidents.title')} {readOnly && <ReadOnlyBadge />}</h2>
       <div className="mb-4 flex items-center gap-2">
         <label htmlFor="incident-status-filter" className="text-sm text-gray-600">{t('incidents.inbox.status')}</label>
         <select
