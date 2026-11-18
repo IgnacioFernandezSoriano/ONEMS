@@ -5309,7 +5309,7 @@ roles_access.no_users,لا يوجد مستخدمون في هذا الحساب ب
 roles_access.provisional,مؤقت
 roles_access.provisional_help,عُيّن تلقائيًا عند البدء؛ إعادة تحديد الدور تؤكده.
 roles_access.other_account,حساب آخر
-roles_access.other_account_help,يعمل هذا المستخدم أساسًا في حساب آخر؛ بياناته غير مرئية من هنا.
+roles_access.other_account_help,الحساب النشط لهذا المستخدم حساب آخر؛ ولديه دور في هذا الحساب أيضًا.
 roles_access.add_by_email,إضافة مستخدم موجود عبر البريد الإلكتروني
 roles_access.add_by_email_help,للمسؤول العام فقط. يجب أن يكون المستخدم موجودًا مسبقًا (مثلًا في حساب آخر)؛ ويحصل على هذا الدور هنا.
 roles_access.role,الدور

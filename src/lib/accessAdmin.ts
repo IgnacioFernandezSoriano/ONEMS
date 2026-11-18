@@ -61,8 +61,10 @@ export interface AccountUser {
   full_name: string | null
   roles: Set<AccountRole>
   provisional: Set<AccountRole>
-  /** false si el perfil no se pudo leer (RLS): solo se conoce el id (o el correo por el registro). */
+  /** false si no llegó su perfil: solo se conoce el id (o el correo por el registro). */
   profileReadable: boolean
+  /** true si su cuenta activa es esta; false = tiene rol aquí pero trabaja en otra cuenta. */
+  activeHere: boolean
 }
 
 /**
@@ -89,6 +91,7 @@ export function mergeAccountUsers(
         roles: new Set(),
         provisional: new Set(),
         profileReadable: !!p,
+        activeHere: p?.account_id === accountId,
       }
       byId.set(id, u)
     }

@@ -5317,7 +5317,7 @@ roles_access.no_users,Esta cuenta aún no tiene usuarios.
 roles_access.provisional,Provisional
 roles_access.provisional_help,Asignado automáticamente al arrancar; volver a marcar el rol lo confirma.
 roles_access.other_account,Otra cuenta
-roles_access.other_account_help,Este usuario trabaja sobre todo en otra cuenta; sus datos no se ven desde aquí.
+roles_access.other_account_help,La cuenta activa de este usuario es otra; también tiene rol en esta cuenta.
 roles_access.add_by_email,Añadir un usuario existente por correo
 roles_access.add_by_email_help,Solo superadmin. El usuario ya debe existir (por ejemplo en otra cuenta); recibe este rol aquí.
 roles_access.role,Rol

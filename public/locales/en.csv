@@ -5317,7 +5317,7 @@ roles_access.no_users,This account has no users yet.
 roles_access.provisional,Provisional
 roles_access.provisional_help,Assigned automatically at start-up; ticking the role again confirms it.
 roles_access.other_account,Other account
-roles_access.other_account_help,This user works mainly in another account; their details are not visible from here.
+roles_access.other_account_help,This user's active account is another one; they have a role in this account too.
 roles_access.add_by_email,Add an existing user by email
 roles_access.add_by_email_help,Only superadmin. The user must already exist (for example in another account); they get this role here.
 roles_access.role,Role

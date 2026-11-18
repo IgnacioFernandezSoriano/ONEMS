@@ -53,7 +53,8 @@ describe('accessAdmin', () => {
     const u1 = users.find(u => u.user_id === 'u1')!
     expect([...u1.roles].sort()).toEqual(['account_manager', 'panelist_manager'])
     expect([...u1.provisional]).toEqual(['account_manager'])
-    expect(users.find(u => u.user_id === 'u3')!).toMatchObject({ email: 'upu@x.org', profileReadable: false })
+    expect(u1.activeHere).toBe(true)
+    expect(users.find(u => u.user_id === 'u3')!).toMatchObject({ email: 'upu@x.org', profileReadable: false, activeHere: false })
     expect(users.find(u => u.user_id === 'u4')!.email).toBeNull()
   })
 

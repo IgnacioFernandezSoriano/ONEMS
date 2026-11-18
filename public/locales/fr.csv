@@ -5309,7 +5309,7 @@ roles_access.no_users,Ce compte n'a pas encore d'utilisateurs.
 roles_access.provisional,Provisoire
 roles_access.provisional_help,Attribué automatiquement au démarrage ; cocher à nouveau le rôle le confirme.
 roles_access.other_account,Autre compte
-roles_access.other_account_help,Cet utilisateur travaille surtout dans un autre compte ; ses données ne sont pas visibles d'ici.
+roles_access.other_account_help,Le compte actif de cet utilisateur est un autre ; il a aussi un rôle dans ce compte.
 roles_access.add_by_email,Ajouter un utilisateur existant par e-mail
 roles_access.add_by_email_help,Superadmin uniquement. L'utilisateur doit déjà exister (par exemple dans un autre compte) ; il reçoit ce rôle ici.
 roles_access.role,Rôle

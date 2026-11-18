@@ -5317,7 +5317,7 @@ roles_access.no_users,Esta conta ainda não tem utilizadores.
 roles_access.provisional,Provisória
 roles_access.provisional_help,Atribuída automaticamente no arranque; voltar a marcar a função confirma-a.
 roles_access.other_account,Outra conta
-roles_access.other_account_help,Este utilizador trabalha sobretudo noutra conta; os seus dados não são visíveis daqui.
+roles_access.other_account_help,A conta ativa deste utilizador é outra; também tem uma função nesta conta.
 roles_access.add_by_email,Adicionar um utilizador existente por email
 roles_access.add_by_email_help,Apenas superadmin. O utilizador já deve existir (por exemplo noutra conta); recebe esta função aqui.
 roles_access.role,Função

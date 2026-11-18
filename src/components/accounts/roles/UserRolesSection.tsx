@@ -79,7 +79,7 @@ export function UserRolesSection({ users, canEdit, isSuperadmin, onToggle, onAdd
                         {t('roles_access.provisional')}
                       </span>
                     )}
-                    {!u.profileReadable && (
+                    {!u.activeHere && (
                       <span className="text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-600" title={t('roles_access.other_account_help')}>
                         {t('roles_access.other_account')}
                       </span>

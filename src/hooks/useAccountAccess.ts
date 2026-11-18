@@ -20,7 +20,15 @@ interface AccessData {
   emails: Map<string, string>
 }
 
-const PROFILE_COLS = 'id, email, full_name, role, account_id'
+/** Fila de public.account_members (ya sin superadmins). */
+interface MemberRow {
+  user_id: string
+  email: string | null
+  full_name: string | null
+  active_here: boolean
+  roles: string[]
+  provisional: boolean
+}
 
 function emptyContacts(): Contacts {
   const c = {} as Contacts
@@ -50,40 +58,31 @@ export function useAccountAccess(accountId: string | null) {
     if (!accountId) return
     ;(async () => {
       try {
-        const [acc, tpl, roles, inAccount, account, log] = await Promise.all([
+        const [acc, tpl, roles, members, people, account, log] = await Promise.all([
           supabase.from('account_access').select('role, option, level').eq('account_id', accountId),
           supabase.from('access_template').select('option, level').eq('role', 'no_role'),
           supabase.from('account_user_role').select('user_id, role, provisional').eq('account_id', accountId),
-          supabase.from('profiles').select(PROFILE_COLS).eq('account_id', accountId),
+          // Miembros y autores del registro por RPC: la RLS de profiles no deja leerlos a un gestor
+          // con profiles.role = 'user' ni a quien tiene rol aquí con otra cuenta activa.
+          supabase.rpc('account_members', { p_account_id: accountId }),
+          supabase.rpc('account_log_people', { p_account_id: accountId }),
           supabase.from('accounts').select(ACCOUNT_CONTACT_FIELDS.join(', ')).eq('id', accountId).maybeSingle(),
           supabase.from('account_access_log').select('id, changed_by, changed_at, kind, detail')
             .eq('account_id', accountId).order('changed_at', { ascending: false }).order('id', { ascending: false })
             .limit(50),
         ])
         if (isStale()) return
-        const firstError = [acc, tpl, roles, inAccount, account, log].find(r => r.error)?.error
+        const firstError = [acc, tpl, roles, members, people, account, log].find(r => r.error)?.error
         if (firstError) throw new Error(firstError.message)
 
         const roleRows = (roles.data ?? []) as RoleRow[]
         const logRows = (log.data ?? []) as LogEntry[]
-        const profiles = [...((inAccount.data ?? []) as ProfileLite[])]
-
-        // Perfiles de usuarios con rol aquí pero de otra cuenta activa, y de quien aparece en el registro.
-        // RLS de profiles puede no dejar leerlos (solo admin de su cuenta o superadmin): se muestran por id.
-        const known = new Set(profiles.map(p => p.id))
-        const wanted = new Set<string>()
-        for (const r of roleRows) if (!known.has(r.user_id)) wanted.add(r.user_id)
-        for (const l of logRows) {
-          if (l.changed_by && !known.has(l.changed_by)) wanted.add(l.changed_by)
-          const uid = (l.detail as Record<string, unknown> | null)?.user_id
-          if (typeof uid === 'string' && !known.has(uid)) wanted.add(uid)
-        }
-        if (wanted.size) {
-          const extra = await supabase.from('profiles').select(PROFILE_COLS).in('id', [...wanted])
-          if (isStale()) return
-          if (extra.error) console.error('profiles (roles de otras cuentas)', extra.error)
-          else profiles.push(...((extra.data ?? []) as ProfileLite[]))
-        }
+        const profiles: ProfileLite[] = ((members.data ?? []) as MemberRow[]).map(m => ({
+          id: m.user_id,
+          email: m.email,
+          full_name: m.full_name,
+          account_id: m.active_here ? accountId : null,
+        }))
 
         const emails = new Map<string, string>()
         for (const l of logRows) {
@@ -92,6 +91,7 @@ export function useAccountAccess(accountId: string | null) {
             emails.set(d.user_id, d.email)
           }
         }
+        for (const p of (people.data ?? []) as { user_id: string; email: string | null }[]) if (p.email) emails.set(p.user_id, p.email)
         for (const p of profiles) if (p.email) emails.set(p.id, p.email)
 
         const contacts = emptyContacts()
