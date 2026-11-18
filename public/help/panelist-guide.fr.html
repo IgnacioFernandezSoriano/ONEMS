@@ -209,6 +209,7 @@
       <a href="#c-como">Comment envoyer un colis ?</a>
       <a href="#c-datos">Modifier mes coordonnées</a>
       <a href="#c-otro">Autre problème</a>
+      <a href="#c-gps">Localisation (GPS)</a>
       <a href="#c-vacaciones">Jours d'indisponibilité</a>
       <h3>Messages que vous pouvez recevoir</h3>
       <a href="#m-llega-material">Avez-vous reçu le matériel ?</a>
@@ -218,7 +219,7 @@
       <h3>Référence</h3>
       <a href="#preguntas">Questions</a>
     </nav>
-    <div class="side-foot">Mis à jour le 30 octobre 2026</div>
+    <div class="side-foot">Mis à jour le 18 novembre 2026</div>
   </aside>
 
   <main class="main">
@@ -274,7 +275,7 @@
           <tr><td>Signaler un incident</td><td>Vous choisissez votre problème dans une liste de boutons.</td></tr>
           <tr><td>🗓️ Jours d'indisponibilité</td><td>Vous indiquez les jours où vous ne pouvez ni envoyer ni recevoir.</td></tr>
           <tr><td>📦 Confirmer matériel reçu</td><td>Vous indiquez que du matériel vous est arrivé (enveloppes, scellés…).</td></tr>
-          <tr><td>📖 Aide</td><td>Ouvre ce guide. Vous pouvez aussi taper <code>/aide</code>.</td></tr>
+          <tr><td>📖 Aide</td><td>Ouvre un message avec le lien vers ce guide et l’option <strong>📍 Autorisation de localisation</strong>. Vous pouvez aussi taper <code>/aide</code>.</td></tr>
         </tbody>
       </table></div>
     </section>
@@ -599,6 +600,30 @@
             <div class="tg-input"><span>📎</span><span class="ph">Message</span><span>🎤</span></div>
           </div>
         </div>
+      </article>
+
+      <article class="case" id="c-gps">
+        <h3>📍 Localisation (GPS)</h3>
+        <p class="sit">Le bot vous demande votre position lorsque vous déclarez un envoi ou une réception.</p>
+        <p class="cap"><strong>✅ Ce que nous faisons</strong></p>
+        <ul><li>📍 Nous demandons votre position uniquement lorsque vous confirmez un envoi ou une réception.</li><li>🏤 Nous l’utilisons uniquement pour vérifier que vous déclarez au bureau de poste ou à votre boîte postale.</li><li>👥 Seuls les responsables de votre compte et l’équipe technique de l’UPU peuvent la voir.</li><li>🗓️ Nous effaçons les coordonnées après 12 mois.</li></ul>
+        <p class="cap"><strong>🚫 Ce que nous ne faisons pas</strong></p>
+        <ul><li>❌ Nous ne vous suivons pas : jamais en continu, jamais en arrière-plan.</li><li>❌ Nous ne la prenons jamais nous-mêmes : elle n’est envoyée que lorsque vous appuyez sur « 📍 Partager ma position ».</li><li>❌ Nous n’enregistrons pas votre position si vous n’acceptez pas.</li><li>❌ Nous ne la partageons avec personne d’autre.</li></ul>
+        <ol class="steps">
+          <li>La <strong>première fois</strong>, le bot vous demande si vous autorisez l'enregistrement de votre position, <strong>uniquement lorsque vous déclarez un envoi ou une réception</strong>. Vous pouvez accepter ou refuser. Les boutons ne fonctionnent qu'une fois : ensuite, le message affiche votre réponse.</li>
+          <li>Lorsque vous commencez à confirmer un envoi ou une réception, le bot demande votre position (une fois par visite, 30 minutes). Appuyez sur le bouton <span class="btn">📍 Partager ma position</span> qui apparaît en bas, à la place du clavier. Si vous ne le voyez pas, touchez l'icône ⌨ à côté de la zone de texte.</li>
+          <li>Le bot supprime de la conversation votre message de position après l'avoir utilisé.</li>
+        </ol>
+        <p class="cap"><strong>Changer votre décision ou supprimer vos données :</strong> à tout moment, dans <strong>📖 Aide</strong> → <strong>📍 Autorisation de localisation</strong> → <strong>🗑 Supprimer mes données de localisation</strong> → confirmer. Les coordonnées de vos déclarations sont effacées ; les déclarations elles-mêmes sont conservées. Supprimer n'est pas refuser : si vous restez sur « accepté », de nouvelles positions seront enregistrées quand vous déclarerez. Pour l'éviter, choisissez <strong>❌ Je refuse</strong>.</p>
+        <div class="callout warn"><strong>Si la localisation de votre téléphone est désactivée :</strong> Telegram ne peut pas l'activer ; activez-la d'abord dans les Réglages.
+          <ul>
+            <li><strong>Android :</strong> Paramètres → Localisation activée ; Telegram → Autorisations → Localisation → « Autoriser uniquement pendant l'utilisation de l'appli » et « Utiliser la position précise ».</li>
+            <li><strong>iPhone :</strong> Réglages → Confidentialité → Service de localisation activé ; Telegram → « Lorsque l'app est active » et « Position exacte ».</li>
+          </ul>
+          Appuyez ensuite à nouveau sur 📍.
+        </div>
+        <div class="callout warn"><strong>Si cela ne fonctionne toujours pas :</strong> appuyez sur <span class="btn">🚫 Mon GPS ne marche pas</span>. Votre responsable sera informé.</div>
+        <div class="callout info"><strong>Telegram sur ordinateur</strong> ne peut pas envoyer la position : utilisez votre téléphone.</div>
       </article>
 
       <article class="case" id="c-vacaciones">

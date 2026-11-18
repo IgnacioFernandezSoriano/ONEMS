@@ -209,6 +209,7 @@
       <a href="#c-como">How do I send a parcel?</a>
       <a href="#c-datos">Change my details</a>
       <a href="#c-otro">Another problem</a>
+      <a href="#c-gps">Location (GPS)</a>
       <a href="#c-vacaciones">Unavailable days</a>
       <h3>Messages you may get</h3>
       <a href="#m-llega-material">Did you receive the materials?</a>
@@ -218,7 +219,7 @@
       <h3>Reference</h3>
       <a href="#preguntas">Questions</a>
     </nav>
-    <div class="side-foot">Updated 30 October 2026</div>
+    <div class="side-foot">Updated 18 November 2026</div>
   </aside>
 
   <main class="main">
@@ -274,7 +275,7 @@
           <tr><td>Report incident</td><td>You pick your problem from a list of buttons.</td></tr>
           <tr><td>🗓️ Unavailable days</td><td>You tell us the days when you can't send or receive.</td></tr>
           <tr><td>📦 Confirm material received</td><td>You tell us materials (envelopes, seals…) have arrived.</td></tr>
-          <tr><td>📖 Help</td><td>Opens this guide. You can also type <code>/help</code>.</td></tr>
+          <tr><td>📖 Help</td><td>Opens a message with the link to this guide and the <strong>📍 Location permission</strong> option. You can also type <code>/help</code>.</td></tr>
         </tbody>
       </table></div>
     </section>
@@ -599,6 +600,30 @@
             <div class="tg-input"><span>📎</span><span class="ph">Message</span><span>🎤</span></div>
           </div>
         </div>
+      </article>
+
+      <article class="case" id="c-gps">
+        <h3>📍 Location (GPS)</h3>
+        <p class="sit">The bot asks for your location when you declare a shipment or a receipt.</p>
+        <p class="cap"><strong>✅ What we do</strong></p>
+        <ul><li>📍 We ask for your location only when you confirm a shipment or a receipt.</li><li>🏤 We use it only to check that you declare at the post office or at your PO box.</li><li>👥 Only your account’s managers and UPU’s technical team can see it.</li><li>🗓️ We delete the coordinates after 12 months.</li></ul>
+        <p class="cap"><strong>🚫 What we don’t do</strong></p>
+        <ul><li>❌ We don’t track you: never continuously, never in the background.</li><li>❌ We never take it ourselves: it is only sent when you press «📍 Share my location».</li><li>❌ We don’t save your location if you don’t accept.</li><li>❌ We don’t share it with anyone else.</li></ul>
+        <ol class="steps">
+          <li>The <strong>first time</strong>, the bot asks whether you allow your location to be recorded, <strong>only when you declare a shipment or a receipt</strong>. You can accept or refuse. The buttons work once: afterwards the message shows your answer.</li>
+          <li>When you start confirming a shipment or a receipt, the bot asks for your location (once per visit, 30 minutes). Press the <span class="btn">📍 Share my location</span> button that appears at the bottom, instead of the keyboard. If you do not see it, tap the ⌨ icon next to the text box.</li>
+          <li>The bot removes your location message from the chat after using it.</li>
+        </ol>
+        <p class="cap"><strong>Change your decision or delete your data:</strong> at any time, in <strong>📖 Help</strong> → <strong>📍 Location permission</strong> → <strong>🗑 Delete my location data</strong> → confirm. It erases the coordinates of your declarations; the declarations themselves are kept. Deleting is not the same as refusing: if you keep “accepted”, new positions will be saved when you declare. To stop that, choose <strong>❌ I don’t accept</strong>.</p>
+        <div class="callout warn"><strong>If your phone's location is off:</strong> Telegram cannot turn it on; turn it on first in Settings.
+          <ul>
+            <li><strong>Android:</strong> Settings → Location on; Telegram → Permissions → Location → "Allow only while using the app" and "Use precise location".</li>
+            <li><strong>iPhone:</strong> Settings → Privacy → Location Services on; Telegram → "While Using the App" and "Precise Location".</li>
+          </ul>
+          Then press 📍 again.
+        </div>
+        <div class="callout warn"><strong>If it still does not work:</strong> press <span class="btn">🚫 My GPS doesn't work</span>. Your manager will be informed.</div>
+        <div class="callout info"><strong>Telegram on a computer</strong> cannot send location: use your phone.</div>
       </article>
 
       <article class="case" id="c-vacaciones">

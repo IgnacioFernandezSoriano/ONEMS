@@ -7,7 +7,7 @@ import type { ReportedIncidentCategory, ReportedIncidentStatus } from '@/lib/typ
 
 const CATEGORIES: ReportedIncidentCategory[] = [
   'missing_materials', 'unreadable_label_receipt', 'parcel_damaged', 'parcel_returned',
-  'how_to_send', 'unavailability_request', 'tag_photo_problem', 'contact_data_change', 'other']
+  'how_to_send', 'unavailability_request', 'tag_photo_problem', 'contact_data_change', 'gps_location', 'other']
 
 export function PanelistReportedIncidents() {
   const { t } = useTranslation()

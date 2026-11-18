@@ -25,6 +25,12 @@ export interface Account {
   email_do_coordinator: string | null
   email_upu_account_manager: string | null
   email_allocation_plan_manager: string | null
+  /** Calendario del informe de operación ("ONE operations report") que envía el agente a las 08:00 Madrid. */
+  ops_report_frequency: OpsReportFrequency
+  /** Semanal: días ISO (1 = lunes … 7 = domingo). */
+  ops_report_weekdays: number[]
+  /** Mensual: día del mes (1-31; en meses más cortos, el último día). */
+  ops_report_month_day: number | null
   timezone: string
   created_at: string
   updated_at: string
@@ -42,12 +48,20 @@ export const ACCOUNT_CONTACT_FIELDS = [
 
 export type AccountContactField = typeof ACCOUNT_CONTACT_FIELDS[number]
 
+export type OpsReportFrequency = 'never' | 'weekly' | 'monthly'
+
+export type AccountReportSchedule = {
+  ops_report_frequency: OpsReportFrequency
+  ops_report_weekdays: number[]
+  ops_report_month_day: number | null
+}
+
 export type AccountFormData = {
   name: string
   slug: string
   status?: 'active' | 'inactive'
   default_language: SupportedLanguage
-} & Record<AccountContactField, string | null>
+} & Record<AccountContactField, string | null> & AccountReportSchedule
 
 export interface Region {
   id: string
@@ -549,7 +563,7 @@ export interface CityNodeLoadRow {
 
 export type ReportedIncidentCategory =
   | 'missing_materials' | 'unreadable_label_receipt' | 'parcel_damaged' | 'parcel_returned'
-  | 'how_to_send' | 'unavailability_request' | 'tag_photo_problem' | 'contact_data_change' | 'other'
+  | 'how_to_send' | 'unavailability_request' | 'tag_photo_problem' | 'contact_data_change' | 'gps_location' | 'other'
 
 export type ReportedIncidentStatus = 'open' | 'in_progress' | 'resolved' | 'dismissed' | 'auto_resolved'
 

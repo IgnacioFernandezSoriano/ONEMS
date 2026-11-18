@@ -3993,6 +3993,17 @@ hc.account_form.upu_account_manager_email,E-mail do UPU account manager
 hc.account_form.upu_account_manager_email_help,Responsável por esta conta na UPU.
 hc.account_form.allocation_plan_manager_email,E-mail do Allocation Plan Manager
 hc.account_form.allocation_plan_manager_email_help,Responsável pelo plano de alocação desta conta; usa o bot de análise de casos.
+hc.account_form.report_title,Relatório de operação
+hc.account_form.report_help,"E-mail «ONE operations report» enviado pelo agente às 08:00 (hora de Madrid). Para: todas as funções exceto Account Manager e UPU account manager, que vão em cópia."
+hc.account_form.report_frequency,Frequência
+hc.account_form.report_never,Nunca
+hc.account_form.report_weekly,Semanal
+hc.account_form.report_monthly,Mensal
+hc.account_form.report_weekdays,Dias da semana
+hc.account_form.report_weekly_help,Analisa os últimos 7 dias.
+hc.account_form.report_month_day,Dia do mês
+hc.account_form.report_monthly_help,Analisa desde o mesmo dia do mês anterior até ontem. Nos meses mais curtos sai no último dia.
+hc.account_form.report_weekdays_required,Marque pelo menos um dia da semana para o relatório semanal.
 hc.account_form.status,Estado
 hc.account_form.cancel,Cancelar
 hc.account_form.saving,A guardar...
@@ -5243,3 +5254,21 @@ case_analysis.hide_detail,Ocultar detalhe
 case_analysis.account_cap,A sua conta atingiu o limite de análises deste mês. Volta a estar disponível no dia 1.
 help_center.doc.case_analysis.title,Análise de casos
 help_center.doc.case_analysis.desc,"Analisar um caso a partir do ONEMS ou do bot de análise no Telegram: o que aconteceu e porquê; mensagens aos panelistas e correções simples."
+help_center.doc.gps_location.title,Localização GPS ao declarar
+help_center.doc.gps_location.desc,"O que o ONE bot regista ao declarar, a regra de que nada é bloqueado, a incidência «Localização GPS», o relatório de operação e o que fazer como manager."
+reported_incidents.category.gps_location,Localização GPS
+reported_incidents.gps.col.tag,Etiqueta
+reported_incidents.gps.col.kind,Tipo
+reported_incidents.gps.col.status,Estado
+reported_incidents.gps.distance,Distância à referência
+reported_incidents.gps.kind.sent,Enviado
+reported_incidents.gps.kind.received,Recebido
+reported_incidents.gps.consent_denied,O painelista não deu permissão para registar a sua localização
+reported_incidents.gps.status.ok,OK
+reported_incidents.gps.status.far,Demasiado longe da referência
+reported_incidents.gps.status.low_accuracy,Baixa precisão do GPS
+reported_incidents.gps.status.no_reference,Sem localização de referência
+reported_incidents.gps.status.no_location,Localização não recebida
+reported_incidents.gps.status.gps_unavailable,GPS indisponível
+reported_incidents.gps.status.no_consent,Sem permissão concedida
+reported_incidents.gps.status.no_answer,Sem resposta

@@ -209,6 +209,7 @@
       <a href="#c-como">Duda sobre cómo enviar</a>
       <a href="#c-datos">Cambiar mis datos</a>
       <a href="#c-otro">Otro problema</a>
+      <a href="#c-gps">Ubicación (GPS)</a>
       <a href="#c-vacaciones">Días no disponibles</a>
       <h3>Mensajes que te pueden llegar</h3>
       <a href="#m-llega-material">¿Has recibido el material?</a>
@@ -218,7 +219,7 @@
       <h3>Referencia</h3>
       <a href="#preguntas">Preguntas</a>
     </nav>
-    <div class="side-foot">Actualizado el 30 de octubre de 2026</div>
+    <div class="side-foot">Actualizado el 18 de noviembre de 2026</div>
   </aside>
 
   <main class="main">
@@ -274,7 +275,7 @@
           <tr><td>Reportar incidente</td><td>Eliges qué problema tienes en una lista de botones.</td></tr>
           <tr><td>🗓️ Días no disponibles</td><td>Avisas de los días en que no puedes enviar ni recibir.</td></tr>
           <tr><td>📦 Confirmar material recibido</td><td>Avisas de que te ha llegado material (sobres, precintos…).</td></tr>
-          <tr><td>📖 Ayuda</td><td>Abre esta guía. También puedes escribir <code>/ayuda</code>.</td></tr>
+          <tr><td>📖 Ayuda</td><td>Abre un mensaje con el enlace a esta guía y la opción <strong>📍 Permiso de ubicación</strong>. También puedes escribir <code>/ayuda</code>.</td></tr>
         </tbody>
       </table></div>
     </section>
@@ -599,6 +600,30 @@
             <div class="tg-input"><span>📎</span><span class="ph">Mensaje</span><span>🎤</span></div>
           </div>
         </div>
+      </article>
+
+      <article class="case" id="c-gps">
+        <h3>📍 Ubicación (GPS)</h3>
+        <p class="sit">El bot te pide tu ubicación cuando declaras un envío o una recepción.</p>
+        <p class="cap"><strong>✅ Qué hacemos</strong></p>
+        <ul><li>📍 Te pedimos tu ubicación solo cuando confirmas un envío o una recepción.</li><li>🏤 La usamos solo para comprobar que declaras en la oficina de correos o en tu apartado.</li><li>👥 Solo la ven los responsables de tu cuenta y el equipo técnico de UPU.</li><li>🗓️ Borramos las coordenadas a los 12 meses.</li></ul>
+        <p class="cap"><strong>🚫 Qué no hacemos</strong></p>
+        <ul><li>❌ No te rastreamos: nunca de forma continua ni en segundo plano.</li><li>❌ Nunca la tomamos nosotros: solo se envía cuando pulsas «📍 Compartir mi ubicación».</li><li>❌ No guardamos tu ubicación si no aceptas.</li><li>❌ No la compartimos con nadie más.</li></ul>
+        <ol class="steps">
+          <li>La <strong>primera vez</strong>, el bot te pregunta si permites registrar tu ubicación, <strong>solo cuando declaras un envío o una recepción</strong>. Puedes aceptar o rechazar. Los botones funcionan una sola vez: después, el mensaje muestra tu respuesta.</li>
+          <li>Al empezar a confirmar un envío o una recepción, el bot te pide la ubicación (una vez por visita, 30 minutos). Pulsa el botón <span class="btn">📍 Compartir mi ubicación</span> que aparece abajo, en lugar del teclado. Si no lo ves, toca el icono ⌨ junto a la caja de texto.</li>
+          <li>El bot borra del chat tu mensaje de ubicación después de usarlo.</li>
+        </ol>
+        <p class="cap"><strong>Cambiar tu decisión o borrar tus datos:</strong> en cualquier momento, en <strong>📖 Ayuda</strong> → <strong>📍 Permiso de ubicación</strong> → <strong>🗑 Borrar mis datos de ubicación</strong> → confirmar. Se borran las coordenadas de tus declaraciones; las declaraciones se conservan. Borrar no es lo mismo que rechazar: si sigues en «aceptado», se guardarán nuevas posiciones cuando declares. Para evitarlo, elige <strong>❌ No acepto</strong>.</p>
+        <div class="callout warn"><strong>Si la ubicación de tu teléfono está apagada:</strong> Telegram no puede encenderla; actívala antes en Ajustes.
+          <ul>
+            <li><strong>Android:</strong> Ajustes → Ubicación activada; Telegram → Permisos → Ubicación → «Permitir solo mientras se usa la app» y «Usar ubicación precisa».</li>
+            <li><strong>iPhone:</strong> Ajustes → Privacidad → Localización activada; Telegram → «Al usar la app» y «Ubicación exacta».</li>
+          </ul>
+          Después pulsa 📍 otra vez.
+        </div>
+        <div class="callout warn"><strong>Si sigue sin funcionar:</strong> pulsa <span class="btn">🚫 Mi GPS no funciona</span>. Tu responsable será informado.</div>
+        <div class="callout info"><strong>Telegram en ordenador</strong> no puede enviar la ubicación: usa el teléfono.</div>
       </article>
 
       <article class="case" id="c-vacaciones">

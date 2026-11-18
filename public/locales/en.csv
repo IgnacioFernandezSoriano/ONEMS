@@ -3993,6 +3993,17 @@ hc.account_form.upu_account_manager_email,UPU account manager email
 hc.account_form.upu_account_manager_email_help,Person in charge of this account at the UPU.
 hc.account_form.allocation_plan_manager_email,Allocation Plan Manager email
 hc.account_form.allocation_plan_manager_email_help,Person in charge of the allocation plan of this account; uses the case analysis bot.
+hc.account_form.report_title,Operations report
+hc.account_form.report_help,"Email ""ONE operations report"" sent by the agent at 08:00 (Madrid time). To: all roles except Account Manager and UPU account manager, who are in copy."
+hc.account_form.report_frequency,Frequency
+hc.account_form.report_never,Never
+hc.account_form.report_weekly,Weekly
+hc.account_form.report_monthly,Monthly
+hc.account_form.report_weekdays,Days of the week
+hc.account_form.report_weekly_help,Analyses the last 7 days.
+hc.account_form.report_month_day,Day of the month
+hc.account_form.report_monthly_help,Analyses from the same day of the previous month until yesterday. In shorter months it is sent on the last day.
+hc.account_form.report_weekdays_required,Select at least one day of the week for the weekly report.
 hc.account_form.status,Status
 hc.account_form.cancel,Cancel
 hc.account_form.saving,Saving...
@@ -5243,3 +5254,21 @@ case_analysis.hide_detail,Hide detail
 case_analysis.account_cap,Your account has reached this month's analysis limit. It will be available again on the 1st.
 help_center.doc.case_analysis.title,Case analysis
 help_center.doc.case_analysis.desc,"Analyse a case from ONEMS or from the Telegram analysis bot: what happened and why; messages for the panelists and simple fixes."
+help_center.doc.gps_location.title,GPS location when declaring
+help_center.doc.gps_location.desc,"What the ONE bot records when declaring, the rule that nothing is blocked, the ""GPS location"" incident, the operations report and what to do as a manager."
+reported_incidents.category.gps_location,GPS location
+reported_incidents.gps.col.tag,Tag
+reported_incidents.gps.col.kind,Type
+reported_incidents.gps.col.status,Status
+reported_incidents.gps.distance,Distance to reference
+reported_incidents.gps.kind.sent,Sent
+reported_incidents.gps.kind.received,Received
+reported_incidents.gps.consent_denied,The panelist did not give permission to record their location
+reported_incidents.gps.status.ok,OK
+reported_incidents.gps.status.far,Too far from reference
+reported_incidents.gps.status.low_accuracy,Low GPS accuracy
+reported_incidents.gps.status.no_reference,No reference location
+reported_incidents.gps.status.no_location,No location received
+reported_incidents.gps.status.gps_unavailable,GPS unavailable
+reported_incidents.gps.status.no_consent,No permission given
+reported_incidents.gps.status.no_answer,No answer

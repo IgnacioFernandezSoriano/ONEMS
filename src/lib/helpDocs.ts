@@ -46,6 +46,15 @@ export const HELP_DOCS: HelpDoc[] = [
     public: false,
   },
   {
+    id: 'gps-location',
+    file: 'gps-location',
+    titleKey: 'help_center.doc.gps_location.title',
+    descKey: 'help_center.doc.gps_location.desc',
+    audience: 'managers',
+    roles: ['admin', 'superadmin'],
+    public: false,
+  },
+  {
     id: 'load-balancing',
     file: 'load-balancing',
     titleKey: 'help_center.doc.load_balancing.title',

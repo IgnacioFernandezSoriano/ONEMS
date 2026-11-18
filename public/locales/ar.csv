@@ -3985,6 +3985,17 @@ hc.account_form.upu_account_manager_email,البريد الإلكتروني لم
 hc.account_form.upu_account_manager_email_help,المسؤول عن هذا الحساب في الاتحاد البريدي العالمي.
 hc.account_form.allocation_plan_manager_email,البريد الإلكتروني لمدير خطة التوزيع (Allocation Plan Manager)
 hc.account_form.allocation_plan_manager_email_help,المسؤول عن خطة التوزيع لهذا الحساب؛ يستخدم بوت تحليل الحالات.
+hc.account_form.report_title,تقرير التشغيل
+hc.account_form.report_help,بريد «ONE operations report» يرسله الوكيل الساعة 08:00 (بتوقيت مدريد). إلى: جميع الأدوار ما عدا Account Manager وUPU account manager، فهما في النسخة.
+hc.account_form.report_frequency,التكرار
+hc.account_form.report_never,أبدًا
+hc.account_form.report_weekly,أسبوعي
+hc.account_form.report_monthly,شهري
+hc.account_form.report_weekdays,أيام الأسبوع
+hc.account_form.report_weekly_help,يحلل آخر 7 أيام.
+hc.account_form.report_month_day,يوم الشهر
+hc.account_form.report_monthly_help,يحلل من اليوم نفسه في الشهر السابق حتى أمس. في الأشهر الأقصر يُرسل في آخر يوم.
+hc.account_form.report_weekdays_required,اختر يومًا واحدًا على الأقل من أيام الأسبوع للتقرير الأسبوعي.
 hc.account_form.status,الحالة
 hc.account_form.cancel,إلغاء
 hc.account_form.saving,جارٍ الحفظ...
@@ -5235,3 +5246,21 @@ case_analysis.hide_detail,إخفاء التفاصيل
 case_analysis.account_cap,وصل حسابك إلى حد التحليل لهذا الشهر. سيتوفر مجددًا في اليوم الأول من الشهر.
 help_center.doc.case_analysis.title,تحليل الحالات
 help_center.doc.case_analysis.desc,"تحليل حالة من ONEMS أو من بوت التحليل في Telegram: ما الذي حدث ولماذا؛ رسائل إلى المشاركين وإصلاحات بسيطة."
+help_center.doc.gps_location.title,الموقع الجغرافي (GPS) عند التصريح
+help_center.doc.gps_location.desc,"ما يسجّله ONE bot عند التصريح، وقاعدة عدم حجب أي تصريح، وحادثة «الموقع الجغرافي (GPS)»، وتقرير التشغيل، وما يجب أن يفعله المدير."
+reported_incidents.category.gps_location,الموقع الجغرافي (GPS)
+reported_incidents.gps.col.tag,البطاقة
+reported_incidents.gps.col.kind,النوع
+reported_incidents.gps.col.status,الحالة
+reported_incidents.gps.distance,المسافة عن الموقع المرجعي
+reported_incidents.gps.kind.sent,مرسل
+reported_incidents.gps.kind.received,مستلم
+reported_incidents.gps.consent_denied,لم يمنح المشارك إذنًا بتسجيل موقعه
+reported_incidents.gps.status.ok,صحيح
+reported_incidents.gps.status.far,بعيد جدًا عن الموقع المرجعي
+reported_incidents.gps.status.low_accuracy,دقة GPS منخفضة
+reported_incidents.gps.status.no_reference,لا يوجد موقع مرجعي
+reported_incidents.gps.status.no_location,لم يتم استلام الموقع
+reported_incidents.gps.status.gps_unavailable,GPS غير متاح
+reported_incidents.gps.status.no_consent,لم يتم منح الإذن
+reported_incidents.gps.status.no_answer,لا يوجد رد
