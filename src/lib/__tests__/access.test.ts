@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import {
   ACCESS_OPTIONS, ROUTE_OPTION, firstAllowedPath, isPermissionsLoading,
+  routeAccess, canAccess, landingPath, deniedRedirect, NO_ACCESS_PATH,
   type AccessOption, type AccessLevel,
 } from '../access'
 
@@ -40,5 +41,55 @@ describe('access', () => {
     expect(isPermissionsLoading('u|a1', null)).toBe(true)
     expect(isPermissionsLoading('u|a1', 'u|a1')).toBe(false)
     expect(isPermissionsLoading(null, 'u|a1')).toBe(false)
+  })
+
+  it('App.tsx: cada ProtectedRoute con option usa la de ROUTE_OPTION y no queda allowedRoles', () => {
+    const src = readFileSync(resolve(__dirname, '../../App.tsx'), 'utf8')
+    expect(src).not.toMatch(/allowedRoles/)
+    const pairs = [...src.matchAll(/path="([^"]+)"\s*element=\{\s*<ProtectedRoute option="([^"]+)"/g)]
+    expect(pairs.length).toBeGreaterThan(40)
+    for (const [, path, opt] of pairs) expect([path, opt]).toEqual([path, ROUTE_OPTION[path]])
+  })
+
+  it('Sidebar: sin roles y cada item enlazado lleva la opción de su ruta', () => {
+    const src = readFileSync(resolve(__dirname, '../../components/layout/Sidebar.tsx'), 'utf8')
+    expect(src).not.toMatch(/roles: \[/)
+    const pairs = [...src.matchAll(/path: '(\/[^']+)',[^{}]*?option: '([^']+)'/g)]
+    expect(pairs.length).toBeGreaterThan(25)
+    for (const [, path, opt] of pairs) {
+      if (path === '/settings/users') continue // solo se añade para superadmin
+      expect([path, opt]).toEqual([path, ROUTE_OPTION[path]])
+    }
+  })
+
+  it('cada opción entra por una ruta que exige esa misma opción', () => {
+    for (const o of ACCESS_OPTIONS) {
+      const path = firstAllowedPath(new Map<AccessOption, AccessLevel>([[o.key, 'view']]))!
+      expect([o.key, routeAccess(path)]).toEqual([o.key, o.key])
+    }
+  })
+
+  it('routeAccess: rutas no mapeadas solo superadmin', () => {
+    expect(routeAccess('/no-existe')).toBe('superadmin')
+    expect(routeAccess('/carriers')).toBe('carriers')
+  })
+
+  it('canAccess: open, superadmin y opciones', () => {
+    const only = (k: AccessOption) => (o: AccessOption) => o === k
+    expect(canAccess('open', false, () => false)).toBe(true)
+    expect(canAccess('superadmin', false, () => true)).toBe(false)
+    expect(canAccess('superadmin', true, () => false)).toBe(true)
+    expect(canAccess('carriers', false, only('carriers'))).toBe(true)
+    expect(canAccess('carriers', false, only('panelists'))).toBe(false)
+    expect(canAccess('carriers', true, () => false)).toBe(true)
+  })
+
+  it('landingPath / deniedRedirect: sin derechos -> cambiar contraseña y nunca a sí misma', () => {
+    expect(landingPath(() => false)).toBe(NO_ACCESS_PATH)
+    expect(landingPath(() => true)).toBe('/dashboard')
+    expect(landingPath(o => o === 'compliance')).toBe('/reporting/compliance')
+    expect(deniedRedirect('/carriers', o => o === 'compliance')).toBe('/reporting/compliance')
+    expect(deniedRedirect('/dashboard', o => o === 'dashboard')).toBe(NO_ACCESS_PATH)
+    expect(routeAccess(NO_ACCESS_PATH)).toBe('open')
   })
 })

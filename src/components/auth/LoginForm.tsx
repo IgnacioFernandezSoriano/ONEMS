@@ -23,7 +23,7 @@ export function LoginForm() {
       await signIn(email, password)
       // Wait a bit for profile to load before navigating
       await new Promise(resolve => setTimeout(resolve, 500))
-      navigate('/dashboard')
+      navigate('/')
     } catch (err) {
       setError(err instanceof Error ? err.message : t('hc.login_form.error_signing_in'))
     } finally {

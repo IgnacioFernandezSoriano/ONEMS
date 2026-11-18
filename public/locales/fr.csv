@@ -5277,3 +5277,4 @@ allocation_plans.undo_action_edit,Modifier
 allocation_plans.undo_action_create,Créer
 allocation_plans.undo_changed,La dernière action a changé ; vérifiez avant de défaire.
 allocation_plans.bulk_only_deferred,Les échantillons à compenser peuvent seulement être supprimés.
+menu.account_switch_error,Impossible de changer de compte. Veuillez réessayer.

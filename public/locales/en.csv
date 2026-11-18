@@ -5285,3 +5285,4 @@ allocation_plans.undo_action_edit,Edit
 allocation_plans.undo_action_create,Create
 allocation_plans.undo_changed,The last action has changed; check it before undoing.
 allocation_plans.bulk_only_deferred,Samples to compensate can only be deleted.
+menu.account_switch_error,Could not change account. Please try again.

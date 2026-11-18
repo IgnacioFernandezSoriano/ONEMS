@@ -144,3 +144,33 @@ export function firstAllowedPath(levels: Map<AccessOption, AccessLevel>): string
 export function isPermissionsLoading(currentKey: string | null, loadedKey: string | null): boolean {
   return currentKey !== null && currentKey !== loadedKey
 }
+
+export type RouteAccess = AccessOption | 'superadmin' | 'open'
+
+/** Pantalla de destino cuando el usuario no tiene ninguna opción (siempre abierta, nunca redirige). */
+export const NO_ACCESS_PATH = '/settings/change-password'
+
+/** Acceso de una ruta; las rutas no mapeadas se tratan como solo superadmin (denegar por defecto). */
+export function routeAccess(path: string): RouteAccess {
+  return Object.prototype.hasOwnProperty.call(ROUTE_OPTION, path) ? ROUTE_OPTION[path] : 'superadmin'
+}
+
+/** ¿Puede entrar? 'open' = cualquier usuario con sesión; 'superadmin' = solo superadmin; opción = canView. */
+export function canAccess(access: RouteAccess, isSuperadmin: boolean, canView: (o: AccessOption) => boolean): boolean {
+  if (access === 'open') return true
+  if (access === 'superadmin') return isSuperadmin
+  return isSuperadmin || canView(access)
+}
+
+/** Primera ruta permitida (orden del menú) según canView, o NO_ACCESS_PATH si no hay ninguna. */
+export function landingPath(canView: (o: AccessOption) => boolean): string {
+  const levels = new Map<AccessOption, AccessLevel>()
+  for (const o of ACCESS_OPTIONS) if (canView(o.key)) levels.set(o.key, 'view')
+  return firstAllowedPath(levels) ?? NO_ACCESS_PATH
+}
+
+/** Destino al denegar `currentPath`: la primera permitida, nunca la propia ruta (evita bucles). */
+export function deniedRedirect(currentPath: string, canView: (o: AccessOption) => boolean): string {
+  const target = landingPath(canView)
+  return target === currentPath ? NO_ACCESS_PATH : target
+}

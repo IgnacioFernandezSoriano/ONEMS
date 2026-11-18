@@ -5285,3 +5285,4 @@ allocation_plans.undo_action_edit,Editar
 allocation_plans.undo_action_create,Crear
 allocation_plans.undo_changed,La última acción ha cambiado; revisa antes de deshacer.
 allocation_plans.bulk_only_deferred,Las muestras por compensar solo se pueden borrar.
+menu.account_switch_error,No se pudo cambiar de cuenta. Inténtalo de nuevo.
