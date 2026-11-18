@@ -105,6 +105,9 @@ select schemaname, tablename, policyname, permissive, roles, cmd, qual, with_che
   "lock timeout", **no pasa nada** (no se ha cambiado nada): esperar un par de minutos y reintentar.
 - Si se para por "huella" o por "políticas de escritura no previstas", **no reintentar**: alguien cambió la
   base a mano. Revisar con Claude antes de seguir.
+- Justo después de aplicarla, ejecutar `NOTIFY pgrst, 'reload schema';` para que la web vea al momento las
+  funciones nuevas (`reconstruct_journeys_for_account`, `reprocess_transfer_errors_for_account`). Si no se hace,
+  durante unos minutos «Reconstruir» y «Reprocesar» pueden dar "permiso denegado" (sin riesgo de seguridad).
 
 ### d) Pedir a todos que recarguen la web
 
@@ -137,7 +140,11 @@ Con usuarios reales de una cuenta de prueba (por ejemplo DEMO2):
 - [ ] «Usuarios»: quien tiene Editar crea, edita, cambia contraseña y borra usuarios normales de su cuenta;
       quien solo tiene Ver no ve esos botones.
 - [ ] «Journey Segments» → «Reconstruir» con Editar en «Route analysis» funciona; con solo Ver el botón no aparece.
-- [ ] «Allocation Plans» → «Reprocesar» con Editar en «Allocation plans» funciona.
+- [ ] «Allocation Plans» → «Reprocesar»: con Editar en «Allocation plans» la llamada no da "permiso denegado".
+      OJO: comprobado en vivo el 18/11, la base no admite el estado `transfer_error` (la restricción de
+      `allocation_plan_details.status` solo acepta pending, notified, sent, received, cancelled, incident), así
+      que este botón **no reprocesa nada desde antes de este cambio**: siempre contesta "status is not
+      transfer_error". No es un fallo nuevo; queda como tarea aparte decidir si se arregla o se quita.
 - [ ] «Recepciones»: quien tiene Ver/Editar en «Receipts» ve los casos.
 - [ ] El superadmin sigue pudiendo con todo en todas las cuentas.
 - [ ] Los trabajos automáticos siguen: cron de RFID (cada 30 min), bot de n8n, resumen diario, informe por
