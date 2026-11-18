@@ -142,6 +142,11 @@ export function EPCISAPI() {
                     <td className="p-2">TEXT</td>
                     <td className="p-2">{t('hc.epcisapi.phase_values')}</td>
                   </tr>
+                  <tr className="border-t">
+                    <td className="p-2 font-mono">p_account_id</td>
+                    <td className="p-2">UUID</td>
+                    <td className="p-2">{t('hc.epcisapi.account_param')}</td>
+                  </tr>
                 </tbody>
               </table>
 
@@ -152,7 +157,8 @@ Content-Type: application/json
 Authorization: Bearer YOUR_JWT_TOKEN
 
 {
-  "p_phase": "all"
+  "p_phase": "all",
+  "p_account_id": "YOUR_ACCOUNT_ID"
 }`}</pre>
               </div>
             </div>
@@ -169,7 +175,11 @@ Authorization: Bearer YOUR_JWT_TOKEN
               <div className="bg-gray-50 rounded-lg p-4 font-mono text-sm overflow-x-auto">
                 <pre>{`POST /rest/v1/rpc/rpc_get_pipeline_status
 Content-Type: application/json
-Authorization: Bearer YOUR_JWT_TOKEN`}</pre>
+Authorization: Bearer YOUR_JWT_TOKEN
+
+{
+  "p_account_id": "YOUR_ACCOUNT_ID"
+}`}</pre>
               </div>
             </div>
 

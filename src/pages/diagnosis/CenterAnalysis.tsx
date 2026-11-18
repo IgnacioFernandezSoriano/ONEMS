@@ -5,6 +5,7 @@ import { useTimeUnit } from '@/hooks/useTimeUnit';
 import { TimeUnitToggle } from '@/components/common/TimeUnitToggle';
 import { formatMinutes } from '@/lib/accountTime';
 import { supabase } from '../../lib/supabase';
+import { useLatestRequest } from '../../lib/latestRequest';
 import { Building2, TrendingUp, BarChart3, Calendar } from 'lucide-react';
 
 interface CenterPerformance {
@@ -54,6 +55,8 @@ const CenterAnalysis: React.FC = () => {
   // Trends tab data
   const [centerTrends, setCenterTrends] = useState<CenterTrend[]>([]);
   const [trendPeriod, setTrendPeriod] = useState<'daily' | 'weekly' | 'monthly'>('weekly');
+  // One tracker: the effect starts a single tab loader at a time and they share loading/error.
+  const beginLoad = useLatestRequest();
 
   useEffect(() => {
     if (activeTab === 'performance') {
@@ -66,7 +69,11 @@ const CenterAnalysis: React.FC = () => {
   }, [activeTab, effectiveAccountId, trendPeriod]);
 
   const loadCenterPerformance = async () => {
-    if (!effectiveAccountId) return;
+    const isStale = beginLoad();
+    if (!effectiveAccountId) {
+      setLoading(false);
+      return;
+    }
 
     try {
       setLoading(true);
@@ -76,17 +83,23 @@ const CenterAnalysis: React.FC = () => {
         p_account_id: effectiveAccountId
       });
 
+      if (isStale()) return;
       if (rpcError) throw rpcError;
       setCenterPerformance(data || []);
     } catch (err: any) {
+      if (isStale()) return;
       setError(err.message);
     } finally {
-      setLoading(false);
+      if (!isStale()) setLoading(false);
     }
   };
 
   const loadCenterComparison = async () => {
-    if (!effectiveAccountId) return;
+    const isStale = beginLoad();
+    if (!effectiveAccountId) {
+      setLoading(false);
+      return;
+    }
 
     try {
       setLoading(true);
@@ -96,17 +109,23 @@ const CenterAnalysis: React.FC = () => {
         p_account_id: effectiveAccountId
       });
 
+      if (isStale()) return;
       if (rpcError) throw rpcError;
       setCenterComparison(data || []);
     } catch (err: any) {
+      if (isStale()) return;
       setError(err.message);
     } finally {
-      setLoading(false);
+      if (!isStale()) setLoading(false);
     }
   };
 
   const loadCenterTrends = async () => {
-    if (!effectiveAccountId) return;
+    const isStale = beginLoad();
+    if (!effectiveAccountId) {
+      setLoading(false);
+      return;
+    }
 
     try {
       setLoading(true);
@@ -117,12 +136,14 @@ const CenterAnalysis: React.FC = () => {
         p_period: trendPeriod
       });
 
+      if (isStale()) return;
       if (rpcError) throw rpcError;
       setCenterTrends(data || []);
     } catch (err: any) {
+      if (isStale()) return;
       setError(err.message);
     } finally {
-      setLoading(false);
+      if (!isStale()) setLoading(false);
     }
   };
 

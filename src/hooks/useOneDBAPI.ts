@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { useEffectiveAccountId } from './useEffectiveAccountId'
+import { useLatestRequest } from '../lib/latestRequest'
 
 export interface ApiKey {
   id: string
@@ -28,6 +29,8 @@ export function useOneDBAPI() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [usageStats, setUsageStats] = useState<ApiUsageStats | null>(null)
+  const beginKeyLoad = useLatestRequest()
+  const beginStatsLoad = useLatestRequest()
 
   useEffect(() => {
     if (accountId) {
@@ -37,6 +40,7 @@ export function useOneDBAPI() {
   }, [accountId])
 
   const loadApiKey = async () => {
+    const isStale = beginKeyLoad()
     try {
       setLoading(true)
       const { data, error } = await supabase
@@ -48,6 +52,7 @@ export function useOneDBAPI() {
         .limit(1)
         .single()
 
+      if (isStale()) return
       if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
         throw error
       }
@@ -55,14 +60,16 @@ export function useOneDBAPI() {
       setApiKey(data)
       setError(null)
     } catch (err: any) {
+      if (isStale()) return
       console.error('Error loading API key:', err)
       setError(err.message)
     } finally {
-      setLoading(false)
+      if (!isStale()) setLoading(false)
     }
   }
 
   const loadUsageStats = async () => {
+    const isStale = beginStatsLoad()
     try {
       // Get API key ID first
       const { data: keyData } = await supabase
@@ -72,6 +79,7 @@ export function useOneDBAPI() {
         .eq('is_active', true)
         .single()
 
+      if (isStale()) return
       if (!keyData) return
 
       // Get usage stats for this month
@@ -85,6 +93,7 @@ export function useOneDBAPI() {
         .eq('api_key_id', keyData.id)
         .gte('request_timestamp', startOfMonth.toISOString())
 
+      if (isStale()) return
       // Get last call
       const { data: lastCallData } = await supabase
         .from('api_usage_log')
@@ -94,6 +103,8 @@ export function useOneDBAPI() {
         .limit(1)
         .single()
 
+      if (isStale()) return
+
       // Get calls in last hour
       const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString()
       const { data: hourlyData } = await supabase
@@ -101,6 +112,8 @@ export function useOneDBAPI() {
         .select('id', { count: 'exact' })
         .eq('api_key_id', keyData.id)
         .gte('request_timestamp', oneHourAgo)
+
+      if (isStale()) return
 
       setUsageStats({
         total_calls_this_month: monthlyData?.length || 0,

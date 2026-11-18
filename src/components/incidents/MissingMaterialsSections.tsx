@@ -75,8 +75,10 @@ function StockSection({ accountId, tr, panelist, reported, onChanged, onStockCha
   useEffect(() => { reload().catch(e => setError(errMsg(t, e))) }, [reload])
   useEffect(() => {
     if (!accountId) return
+    let cancelled = false
     supabase.from('material_catalog').select('id, code, name, is_blocking').eq('account_id', accountId)
       .then(({ data, error: e }) => {
+        if (cancelled) return
         if (e) { setError(errMsg(t, e)); return }
         const map: Record<string, CatalogEntry> = {}
         ;(data || []).forEach((r: any) => {
@@ -86,6 +88,7 @@ function StockSection({ accountId, tr, panelist, reported, onChanged, onStockCha
         })
         setCatalog(map)
       })
+    return () => { cancelled = true }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accountId])
 
@@ -216,12 +219,15 @@ function SupplySection({ tr, accountId, incidentId, panelist, payload, executed,
 
   useEffect(() => {
     if (!accountId) return
+    let cancelled = false
     supabase.from('stock_settings').select('purchase_lead_time_days, shipment_lead_time_days').eq('account_id', accountId).maybeSingle()
       .then(({ data, error: e }) => {
+        if (cancelled) return
         if (e) { setError(errMsg(t, e)); return }
         setPurchaseLead(data?.purchase_lead_time_days ?? 7)
         setShipLead(data?.shipment_lead_time_days ?? 7)
       })
+    return () => { cancelled = true }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accountId])
 

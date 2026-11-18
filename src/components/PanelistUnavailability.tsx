@@ -1,11 +1,14 @@
 import { useState, useEffect, useMemo } from 'react'
 import { usePanelistUnavailability } from '@/lib/hooks/usePanelistUnavailability'
 import { supabase } from '@/lib/supabase'
+import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId'
+import { scopeToAccount } from '@/lib/accountScope'
 import type { Panelist, PanelistUnavailability } from '@/lib/types'
 
 import { useTranslation } from '@/hooks/useTranslation';
 export function PanelistUnavailabilityComponent() {
   const { t } = useTranslation();
+  const effectiveAccountId = useEffectiveAccountId()
   const { unavailabilityPeriods, loading, error, createUnavailabilityPeriod, updateUnavailabilityPeriod, cancelUnavailabilityPeriod, deleteUnavailabilityPeriod } = usePanelistUnavailability()
   const [showModal, setShowModal] = useState(false)
   const [editingPeriod, setEditingPeriod] = useState<any>(null)
@@ -35,17 +38,21 @@ export function PanelistUnavailabilityComponent() {
   })
 
   useEffect(() => {
+    let cancelled = false
+    const fetchPanelists = async () => {
+      const { data } = await scopeToAccount(
+        supabase
+          .from('panelists')
+          .select('*, node:nodes(*, city:cities(*))')
+          .eq('status', 'active'),
+        effectiveAccountId,
+      ).order('panelist_code')
+      if (cancelled) return
+      if (data) setPanelists(data as any)
+    }
     fetchPanelists()
-  }, [])
-
-  const fetchPanelists = async () => {
-    const { data } = await supabase
-      .from('panelists')
-      .select('*, node:nodes(*, city:cities(*))')
-      .eq('status', 'active')
-      .order('panelist_code')
-    if (data) setPanelists(data as any)
-  }
+    return () => { cancelled = true }
+  }, [effectiveAccountId])
 
   // Filtered periods
   const filteredPeriods = useMemo(() => {

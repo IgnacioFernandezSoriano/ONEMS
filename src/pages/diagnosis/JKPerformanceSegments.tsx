@@ -64,6 +64,8 @@ export default function JKPerformanceSegments() {
   useEffect(() => {
     if (!effectiveAccountId) return;
 
+    let cancelled = false;
+
     const loadFilters = async () => {
       // Load carriers
       const { data: carriersData } = await supabase
@@ -71,6 +73,7 @@ export default function JKPerformanceSegments() {
         .select('id, name')
         .eq('account_id', effectiveAccountId)
         .order('name');
+      if (cancelled) return;
       if (carriersData) setCarriers(carriersData);
 
       // Load products
@@ -79,21 +82,27 @@ export default function JKPerformanceSegments() {
         .select('id, code, description, carrier_id')
         .eq('account_id', effectiveAccountId)
         .order('code');
+      if (cancelled) return;
       if (productsData) setProducts(productsData);
 
-      // Load postal centers (load all centers, not filtered by account)
+      // Load postal centers of the selected account
       const { data: centersData } = await supabase
         .from('postal_centers')
-        .select('id, name, city');
+        .select('id, name, city')
+        .eq('account_id', effectiveAccountId);
+      if (cancelled) return;
       if (centersData) {
         setPostalCenters(centersData);
-        console.log(`📍 Loaded ${centersData.length} postal centers (all accounts)`);
+        console.log(`📍 Loaded ${centersData.length} postal centers`);
         const uniqueCities = [...new Set(centersData.map(c => c.city))].sort();
         setCities(uniqueCities);
       }
     };
 
     loadFilters();
+    return () => {
+      cancelled = true;
+    };
   }, [effectiveAccountId]);
 
   // Read URL params and set filters
@@ -145,7 +154,12 @@ export default function JKPerformanceSegments() {
 
   // Load segment data
   useEffect(() => {
-    if (!effectiveAccountId) return;
+    if (!effectiveAccountId) {
+      setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
 
     const loadSegments = async () => {
       setLoading(true);
@@ -195,6 +209,7 @@ export default function JKPerformanceSegments() {
 
         const { data: segments, error } = await query;
 
+        if (cancelled) return;
         if (error) throw error;
         if (!segments || segments.length === 0) {
           setSegmentData([]);
@@ -212,6 +227,7 @@ export default function JKPerformanceSegments() {
           .eq('account_id', effectiveAccountId)
           .eq('is_active', true);
 
+        if (cancelled) return;
         if (!slas) {
           setSegmentData([]);
           setLoading(false);
@@ -430,14 +446,18 @@ export default function JKPerformanceSegments() {
 
         setSegmentData(processedSegments);
       } catch (error) {
+        if (cancelled) return;
         console.error('Error loading segments:', error);
         setSegmentData([]);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
     loadSegments();
+    return () => {
+      cancelled = true;
+    };
   }, [effectiveAccountId, carrier, product, originCity, destinationCity, fromCenter, toCenter, segmentType, threshold, carriers, products, postalCenters]);
 
   // Convert SegmentData to JKRouteData format for charts

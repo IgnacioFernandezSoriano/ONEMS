@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { Reader, ReaderFormData } from '@/lib/types_postal_centers';
+import { useLatestRequest } from '@/lib/latestRequest';
 
 export interface MobileReaderSummary {
   reader_id: string;
@@ -21,8 +22,10 @@ export function useMobileReaders(accountId: string | undefined) {
   const [allReaders, setAllReaders] = useState<Reader[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const beginLoad = useLatestRequest();
 
   const fetchMobileReaders = async () => {
+    const isStale = beginLoad();
     if (!accountId) {
       setReaders([]);
       setLoading(false);
@@ -36,6 +39,7 @@ export function useMobileReaders(accountId: string | undefined) {
       const { data: summaryData, error: summaryError } = await supabase
         .rpc('get_mobile_readers_summary', { p_account_id: accountId });
 
+      if (isStale()) return;
       if (summaryError) throw summaryError;
 
       setReaders(summaryData || []);
@@ -48,15 +52,17 @@ export function useMobileReaders(accountId: string | undefined) {
         .eq('is_active', true)
         .order('name');
 
+      if (isStale()) return;
       if (readersError) throw readersError;
 
       setAllReaders(readersData || []);
       setError(null);
     } catch (err: any) {
+      if (isStale()) return;
       setError(err.message);
       console.error('Error fetching mobile readers:', err);
     } finally {
-      setLoading(false);
+      if (!isStale()) setLoading(false);
     }
   };
 

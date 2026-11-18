@@ -3665,6 +3665,7 @@ hc.epcisapi.type,Type
 hc.epcisapi.description,Description
 hc.epcisapi.required,Required
 hc.epcisapi.phase_values,"'consolidation', 'segments', 'aggregation', or 'all'"
+hc.epcisapi.account_param,"Optional. Account to work on; only a superadmin may name another account. Without it, your own account."
 hc.epcisapi.example_request,Example Request
 hc.epcisapi.status_desc,Get current status of EPCIS pipeline
 hc.epcisapi.query_desc,Query aggregated journey paths with filters

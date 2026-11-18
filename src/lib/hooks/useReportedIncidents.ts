@@ -2,15 +2,18 @@ import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAccount } from '@/contexts/AccountContext'
 import { notifyIncidentAttention } from '@/lib/hooks/useIncidentAttention'
+import { useLatestRequest } from '@/lib/latestRequest'
 import type { ReportedIncident, ReportedIncidentDetail, ReportedIncidentStatus } from '@/lib/types'
 
 export function useReportedIncidents() {
   const { effectiveAccountId } = useAccount()
+  const beginLoad = useLatestRequest()
   const [inbox, setInbox] = useState<ReportedIncident[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const fetchInbox = useCallback(async () => {
+    const isStale = beginLoad()
     try {
       setLoading(true); setError(null)
       let q = supabase
@@ -19,13 +22,14 @@ export function useReportedIncidents() {
         .order('reported_at', { ascending: false })
       if (effectiveAccountId) q = q.eq('account_id', effectiveAccountId)
       const { data, error: e } = await q
+      if (isStale()) return
       if (e) throw e
       setInbox((data || []).map((r: any) => ({
         ...r, panelist_name: r.panelist?.name ?? '-', panelist_code: r.panelist?.panelist_code ?? '-',
       })))
-    } catch (err: any) { setError(err.message); console.error('fetchInbox reported', err) }
-    finally { setLoading(false) }
-  }, [effectiveAccountId])
+    } catch (err: any) { if (isStale()) return; setError(err.message); console.error('fetchInbox reported', err) }
+    finally { if (!isStale()) setLoading(false) }
+  }, [effectiveAccountId, beginLoad])
 
   useEffect(() => { fetchInbox() }, [fetchInbox])
 

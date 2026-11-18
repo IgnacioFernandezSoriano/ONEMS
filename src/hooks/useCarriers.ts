@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { Carrier, Product, ProductMaterial } from '@/lib/types'
 import { useEffectiveAccountId } from './useEffectiveAccountId'
+import { useLatestRequest } from '@/lib/latestRequest'
 
 export function useCarriers() {
   const effectiveAccountId = useEffectiveAccountId()
+  const beginLoad = useLatestRequest()
   const [carriers, setCarriers] = useState<Carrier[]>([])
   const [products, setProducts] = useState<Product[]>([])
   const [productMaterials, setProductMaterials] = useState<ProductMaterial[]>([])
@@ -12,6 +14,7 @@ export function useCarriers() {
   const [error, setError] = useState<string | null>(null)
 
   const fetchAll = async () => {
+    const isStale = beginLoad()
     try {
       setLoading(true)
       setError(null)
@@ -33,6 +36,7 @@ export function useCarriers() {
         productMaterialsQuery.order('created_at'),
       ])
 
+      if (isStale()) return
       if (carriersRes.error) throw carriersRes.error
       if (productsRes.error) throw productsRes.error
       if (productMaterialsRes.error) throw productMaterialsRes.error
@@ -46,9 +50,10 @@ export function useCarriers() {
       setProducts(productsRes.data || [])
       setProductMaterials(productMaterialsRes.data || [])
     } catch (err: any) {
+      if (isStale()) return
       setError(err.message)
     } finally {
-      setLoading(false)
+      if (!isStale()) setLoading(false)
     }
   }
 

@@ -3,6 +3,8 @@ import { supabase } from '@/lib/supabase'
 import type { AllocationPlanDetailWithRelations } from '@/lib/types'
 import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId'
 import { notifyDeferredSamplesChanged } from '@/hooks/useDeferredSamples'
+import { useLatestRequest } from '@/lib/latestRequest'
+import { scopeToAccount } from '@/lib/accountScope'
 
 // Columnas reales de allocation_plan_details que el cliente puede cambiar. Los parches de la UI pueden traer
 // campos enriquecidos (plan, origin_node, carrier_id, origin_city_id...) que plan_action_update rechazaría.
@@ -28,8 +30,12 @@ export function useAllocationPlanDetails() {
   const [panelists, setPanelists] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  // Only the most recent load may write state: a slow earlier load (e.g. the previous account's)
+  // must not overwrite the selected account's data.
+  const beginLoad = useLatestRequest()
 
   const fetchAll = async () => {
+    const isStale = beginLoad()
     try {
       setLoading(true)
       setError(null)
@@ -55,6 +61,7 @@ export function useAllocationPlanDetails() {
           .range(page * pageSize, (page + 1) * pageSize - 1)
 
         if (detailsError) throw detailsError
+        if (isStale()) return
         
         if (detailsData && detailsData.length > 0) {
           allDetailsData.push(...detailsData)
@@ -68,7 +75,7 @@ export function useAllocationPlanDetails() {
       // Fetch additional data for filters and selectors.
       // RLS lets a superadmin see every account, so scope each list to the selected one
       // (normal users are already limited to their own account by RLS).
-      const scoped = (q: any) => (effectiveAccountId ? q.eq('account_id', effectiveAccountId) : q)
+      const scoped = (q: any) => scopeToAccount(q, effectiveAccountId)
       const [plansRes, carriersRes, productsRes, citiesRes, nodesRes, panelistsRes] = await Promise.all([
         scoped(supabase.from('allocation_plans').select('id, plan_name, carrier_id, product_id').eq('status', 'active')).order('plan_name'),
         scoped(supabase.from('carriers').select('id, code, name').eq('status', 'active')).order('name'),
@@ -78,6 +85,7 @@ export function useAllocationPlanDetails() {
         scoped(supabase.from('panelists').select('id, panelist_code, name, node_id')).order('name'),
       ])
 
+      if (isStale()) return
       if (plansRes.error) throw plansRes.error
       if (carriersRes.error) throw carriersRes.error
       if (productsRes.error) throw productsRes.error
@@ -115,10 +123,11 @@ export function useAllocationPlanDetails() {
       setNodes(nodesRes.data || [])
       setPanelists(panelistsRes.data || [])
     } catch (err: any) {
+      if (isStale()) return
       setError(err.message)
       console.error('Error fetching allocation plan details:', err)
     } finally {
-      setLoading(false)
+      if (!isStale()) setLoading(false)
     }
   }
 

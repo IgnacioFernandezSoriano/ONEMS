@@ -86,6 +86,8 @@ export function useTerritoryEquityData(
       return;
     }
 
+    let cancelled = false;
+
     async function fetchData() {
       try {
         setLoading(true);
@@ -100,6 +102,7 @@ export function useTerritoryEquityData(
             supabase.from('products').select('id, code, description').eq('account_id', activeAccountId),
             supabase.from('delivery_standards').select('*').eq('account_id', activeAccountId),
           ]);
+        if (cancelled) return;
 
         if (citiesRes.error) throw citiesRes.error;
         if (regionsRes.error) throw regionsRes.error;
@@ -200,6 +203,7 @@ export function useTerritoryEquityData(
         }
 
         const shipmentsRes = await shipmentsQuery;
+        if (cancelled) return;
         if (shipmentsRes.error) throw shipmentsRes.error;
         const shipments = shipmentsRes.data || [];
 
@@ -394,14 +398,16 @@ export function useTerritoryEquityData(
         setMetrics(globalMetrics);
 
       } catch (err) {
+        if (cancelled) return;
         console.error('Error fetching territory equity data:', err);
         setError(err instanceof Error ? err : new Error('Unknown error'));
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
 
     fetchData();
+    return () => { cancelled = true; };
   }, [
     activeAccountId,
     filters?.startDate,

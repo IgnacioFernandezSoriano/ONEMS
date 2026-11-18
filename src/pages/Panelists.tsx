@@ -9,11 +9,14 @@ import { SmartTooltip } from '@/components/common/SmartTooltip'
 import { useTranslation } from '@/hooks/useTranslation';
 import { useAccount } from '@/contexts/AccountContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLatestRequest } from '@/lib/latestRequest';
 
 export function Panelists() {
   const { t } = useTranslation();
   const { profile } = useAuth();
   const { effectiveAccountId } = useAccount();
+  const beginNodesLoad = useLatestRequest()
+  const beginCitiesLoad = useLatestRequest()
   const { panelists, loading, error, createPanelist, updatePanelist, deletePanelist } = usePanelists()
   const [showModal, setShowModal] = useState(false)
   const [editingPanelist, setEditingPanelist] = useState<any>(null)
@@ -68,6 +71,7 @@ export function Panelists() {
   }, [profile, effectiveAccountId]) // Refrescar cuando cambie el perfil o la cuenta seleccionada
 
   const fetchNodes = async (currentNodeId?: string | null) => {
+    const isStale = beginNodesLoad()
     console.log('[Panelists] fetchNodes - effectiveAccountId:', effectiveAccountId)
     
     // Construir query base
@@ -85,6 +89,7 @@ export function Panelists() {
     }
     
     const { data: nodesData } = await query.order('auto_id')
+    if (isStale()) return
     
     if (!nodesData) {
       setNodes([])
@@ -103,6 +108,7 @@ export function Panelists() {
     }
     
     const { data: assignedNodes } = await panelistsQuery
+    if (isStale()) return
     
     const assignedNodeIds = new Set(assignedNodes?.map(p => p.node_id) || [])
     
@@ -116,6 +122,7 @@ export function Panelists() {
   }
 
   const fetchCities = async () => {
+    const isStale = beginCitiesLoad()
     let query = supabase
       .from('cities')
       .select('*')
@@ -125,6 +132,7 @@ export function Panelists() {
       query = query.eq('account_id', effectiveAccountId)
     }
     const { data } = await query
+    if (isStale()) return
     if (data) setCities(data)
   }
 

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useEffectiveAccountId } from './useEffectiveAccountId'
+import { useLatestRequest } from '../lib/latestRequest'
 import { effectivePolicy, type DatePolicy } from '../lib/workingDays'
 
 export interface AccountBalancePolicy {
@@ -29,12 +30,14 @@ const DEFAULT_ACCOUNT_POLICY: AccountBalancePolicy = { date_policy: 'daily', pob
 
 export function useBalancePolicies() {
   const accountId = useEffectiveAccountId()
+  const beginLoad = useLatestRequest()
   const [account, setAccount] = useState<AccountBalancePolicy | null>(null)
   const [cities, setCities] = useState<CityBalancePolicy[]>([])
   const [poboxShares, setPoboxShares] = useState<PoboxProductShare[]>([])
   const [loading, setLoading] = useState(true)
 
   const refetch = useCallback(async () => {
+    const isStale = beginLoad()
     if (!accountId) {
       setAccount(null)
       setCities([])
@@ -45,6 +48,7 @@ export function useBalancePolicies() {
     setLoading(true)
     // Reparto de POBOX por producto (no bloquea el resto si la RPC aun no existe)
     supabase.rpc('rpc_get_pobox_product_shares', { p_account_id: accountId }).then(({ data, error }) => {
+      if (isStale()) return
       if (error) console.warn('[useBalancePolicies] rpc_get_pobox_product_shares no disponible:', error)
       setPoboxShares(error ? [] : ((data as PoboxProductShare[] | null) ?? []))
     })
@@ -55,6 +59,7 @@ export function useBalancePolicies() {
         supabase.rpc('rpc_get_account_balance_policy', { p_account_id: accountId }),
         supabase.from('cities').select('id, name, date_policy, pobox_enabled').eq('account_id', accountId).order('name'),
       ])
+      if (isStale()) return
       if (cts.error) throw cts.error
       let accountPolicy: AccountBalancePolicy = DEFAULT_ACCOUNT_POLICY
       if (!cfg.error && cfg.data) {
@@ -64,17 +69,19 @@ export function useBalancePolicies() {
         console.warn('[useBalancePolicies] rpc_get_account_balance_policy no disponible, lectura directa:', cfg.error)
         const direct = await supabase
           .from('account_config').select('date_policy, pobox_enabled').eq('account_id', accountId).maybeSingle()
+        if (isStale()) return
         if (direct.error) throw direct.error
         accountPolicy = (direct.data as AccountBalancePolicy | null) ?? DEFAULT_ACCOUNT_POLICY
       }
       setAccount(accountPolicy)
       setCities((cts.data as CityBalancePolicy[]) ?? [])
     } catch (err) {
+      if (isStale()) return
       console.error('[useBalancePolicies] Error loading policies:', err)
     } finally {
-      setLoading(false)
+      if (!isStale()) setLoading(false)
     }
-  }, [accountId])
+  }, [accountId, beginLoad])
 
   useEffect(() => {
     refetch()

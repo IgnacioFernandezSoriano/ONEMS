@@ -4,7 +4,8 @@ import { Plus, Trash2 } from 'lucide-react'
 import type { PostalCenter, PostalCenterFormData } from '@/lib/types_postal_centers'
 import { useTranslation } from '@/hooks/useTranslation'
 import { useAccountConfig } from '@/hooks/useAccountConfig'
-import { useAuth } from '@/contexts/AuthContext'
+import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId'
+import { useLatestRequest } from '@/lib/latestRequest'
 
 interface PostalCenterFormProps {
   postalCenter?: PostalCenter | null
@@ -21,7 +22,8 @@ interface WeeklyScheduleDay {
 
 export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCenterFormProps) {
   const { t } = useTranslation()
-  const { profile } = useAuth()
+  const effectiveAccountId = useEffectiveAccountId()
+  const beginCarriersLoad = useLatestRequest()
   const { config, nonWorkingDays: accountHolidays, weeklySchedule: accountWeeklySchedule } = useAccountConfig()
   
   const [formData, setFormData] = useState<PostalCenterFormData>({
@@ -59,13 +61,16 @@ export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCen
 
   useEffect(() => {
     loadCarriers()
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [effectiveAccountId])
 
   const loadCarriers = async () => {
+    const isStale = beginCarriersLoad()
     try {
       setLoadingCarriers(true)
       const { supabase } = await import('@/lib/supabase')
-      const accountId = profile?.account_id
+      if (isStale()) return
+      const accountId = effectiveAccountId
       if (!accountId) {
         console.error('No account ID available')
         return
@@ -77,14 +82,16 @@ export function PostalCenterForm({ postalCenter, onSubmit, onCancel }: PostalCen
         .eq('status', 'active')
         .order('name')
       
+      if (isStale()) return
       if (error) throw error
       if (data) {
         setCarriers(data)
       }
     } catch (err) {
+      if (isStale()) return
       console.error('Error loading carriers:', err)
     } finally {
-      setLoadingCarriers(false)
+      if (!isStale()) setLoadingCarriers(false)
     }
   }
 

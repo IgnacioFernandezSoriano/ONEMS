@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAccount } from '@/contexts/AccountContext'
 import { notifyIncidentAttention } from '@/lib/hooks/useIncidentAttention'
+import { useLatestRequest } from '@/lib/latestRequest'
 import type {
   ReceiptDaySummary, ReceiptTrendPoint, ReceiptRepeatPanelist, ReceiptCase,
   ReceiptCandidateShipment, BroadcastRecipientsByLang, BroadcastHistoryRow,
@@ -9,6 +10,7 @@ import type {
 
 export function useReceiptErrors(date: string) {
   const { effectiveAccountId } = useAccount()
+  const beginLoad = useLatestRequest()
   const [summary, setSummary] = useState<ReceiptDaySummary | null>(null)
   const [trend, setTrend] = useState<ReceiptTrendPoint[]>([])
   const [repeaters, setRepeaters] = useState<ReceiptRepeatPanelist[]>([])
@@ -19,6 +21,7 @@ export function useReceiptErrors(date: string) {
   const [error, setError] = useState<string | null>(null)
 
   const refresh = useCallback(async () => {
+    const isStale = beginLoad()
     if (!effectiveAccountId) { setLoading(false); return }
     try {
       setLoading(true); setError(null)
@@ -30,6 +33,7 @@ export function useReceiptErrors(date: string) {
         supabase.rpc('rpc_receipt_cases', { p_account_id: effectiveAccountId, p_status: 'pending', p_date: null }),
         supabase.rpc('rpc_receipt_cases', { p_account_id: effectiveAccountId, p_status: 'needs_decision', p_date: null }),
       ])
+      if (isStale()) return
       if (s.error) throw s.error
       if (tr.error) throw tr.error
       if (rp.error) throw rp.error
@@ -42,9 +46,9 @@ export function useReceiptErrors(date: string) {
       setCases((cs.data || []) as ReceiptCase[])
       setOpenCases(([...(nd.data || []), ...(op.data || [])] as ReceiptCase[])
         .sort((a, b) => b.first_attempt_at.localeCompare(a.first_attempt_at)))
-    } catch (err: any) { setError(err.message); console.error('useReceiptErrors', err) }
-    finally { setLoading(false) }
-  }, [effectiveAccountId, date])
+    } catch (err: any) { if (isStale()) return; setError(err.message); console.error('useReceiptErrors', err) }
+    finally { if (!isStale()) setLoading(false) }
+  }, [effectiveAccountId, date, beginLoad])
 
   useEffect(() => { refresh() }, [refresh])
 

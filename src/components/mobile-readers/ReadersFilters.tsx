@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Search, Filter, X } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/contexts/AuthContext';
+import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId';
 import { useTranslation } from '@/hooks/useTranslation';
 
 export interface ReadersFiltersState {
@@ -30,7 +30,7 @@ interface Carrier {
 
 export function ReadersFilters({ onFilterChange }: ReadersFiltersProps) {
   const { t } = useTranslation();
-  const { profile } = useAuth();
+  const effectiveAccountId = useEffectiveAccountId();
   const [isExpanded, setIsExpanded] = useState(false);
   const [postalCenters, setPostalCenters] = useState<PostalCenter[]>([]);
   const [carriers, setCarriers] = useState<Carrier[]>([]);
@@ -46,41 +46,53 @@ export function ReadersFilters({ onFilterChange }: ReadersFiltersProps) {
 
   // Fetch postal centers
   useEffect(() => {
+    let cancelled = false;
+
     const fetchPostalCenters = async () => {
-      if (!profile?.account_id) return;
+      if (!effectiveAccountId) return;
 
       const { data, error } = await supabase
         .from('postal_centers')
         .select('id, name, code')
-        .eq('account_id', profile.account_id)
+        .eq('account_id', effectiveAccountId)
         .order('name');
 
+      if (cancelled) return;
       if (data && !error) {
         setPostalCenters(data);
       }
     };
 
     fetchPostalCenters();
-  }, [profile?.account_id]);
+    return () => {
+      cancelled = true;
+    };
+  }, [effectiveAccountId]);
 
   // Fetch carriers
   useEffect(() => {
+    let cancelled = false;
+
     const fetchCarriers = async () => {
-      if (!profile?.account_id) return;
+      if (!effectiveAccountId) return;
 
       const { data, error } = await supabase
         .from('carriers')
         .select('id, name')
-        .eq('account_id', profile.account_id)
+        .eq('account_id', effectiveAccountId)
         .order('name');
 
+      if (cancelled) return;
       if (data && !error) {
         setCarriers(data);
       }
     };
 
     fetchCarriers();
-  }, [profile?.account_id]);
+    return () => {
+      cancelled = true;
+    };
+  }, [effectiveAccountId]);
 
   const handleFilterChange = (key: keyof ReadersFiltersState, value: string) => {
     const newFilters = { ...filters, [key]: value };

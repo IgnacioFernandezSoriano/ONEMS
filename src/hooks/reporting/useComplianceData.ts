@@ -94,6 +94,8 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
       return;
     }
 
+    let cancelled = false;
+
     async function fetchData() {
       try {
         setLoading(true);
@@ -133,6 +135,7 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
           }
 
           const { data, error: err } = await query
+          if (cancelled) return
 
           if (err) throw err
 
@@ -155,6 +158,7 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
           .from('delivery_standards')
           .select('*')
           .eq('account_id', activeAccountId);
+        if (cancelled) return;
 
         if (stdErr) {
           console.error('❌ Error loading standards:', stdErr);
@@ -165,18 +169,21 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
         console.log('📏 First standard example:', standards?.[0]);
 
         // Load lookup tables
-        const { data: carriers, error: carriersErr } = await supabase.from('carriers').select('id, name').eq('account_id', accountId);
+        const { data: carriers, error: carriersErr } = await supabase.from('carriers').select('id, name').eq('account_id', activeAccountId);
+        if (cancelled) return;
         if (carriersErr) {
           console.error('❌ Error loading carriers:', carriersErr);
         }
         
-        const { data: products, error: productsErr } = await supabase.from('products').select('id, code, description').eq('account_id', accountId);
+        const { data: products, error: productsErr } = await supabase.from('products').select('id, code, description').eq('account_id', activeAccountId);
+        if (cancelled) return;
         if (productsErr) {
           console.error('❌ Error loading products:', productsErr);
           console.error('❌ Products error details:', JSON.stringify(productsErr));
         }
         
-        const { data: cities, error: citiesErr } = await supabase.from('cities').select('id, name').eq('account_id', accountId);
+        const { data: cities, error: citiesErr } = await supabase.from('cities').select('id, name').eq('account_id', activeAccountId);
+        if (cancelled) return;
         if (citiesErr) {
           console.error('❌ Error loading cities:', citiesErr);
         }
@@ -463,14 +470,16 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
         
         setData(filteredResult);
       } catch (err) {
+        if (cancelled) return;
         console.error('❌ Error in fetchData:', err);
         setError(err as Error);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
 
     fetchData();
+    return () => { cancelled = true; };
   }, [activeAccountId, filters?.startDate, filters?.endDate, filters?.originCity, filters?.destinationCity, filters?.carrier, filters?.product, filters?.complianceStatus, accountTimezone]);
 
   return { data, loading, error, globalWarningThreshold, globalCriticalThreshold };

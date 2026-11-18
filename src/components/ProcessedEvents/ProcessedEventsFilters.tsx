@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Search, Filter, X } from 'lucide-react';
 import { ProcessedEvent, ProcessedEventsFilters as Filters } from '../../hooks/useProcessedEvents';
 import { supabase } from '../../lib/supabase';
-import { useAuth } from '../../contexts/AuthContext';
+import { useEffectiveAccountId } from '../../hooks/useEffectiveAccountId';
 import { useTranslation } from '@/hooks/useTranslation';
 
 interface ProcessedEventsFiltersProps {
@@ -18,7 +18,7 @@ interface PostalCenter {
 
 export function ProcessedEventsFilters({ records, onFilterChange }: ProcessedEventsFiltersProps) {
   const { t } = useTranslation();
-  const { profile } = useAuth();
+  const effectiveAccountId = useEffectiveAccountId();
   const [isExpanded, setIsExpanded] = useState(false);
   const [postalCenters, setPostalCenters] = useState<PostalCenter[]>([]);
 
@@ -33,22 +33,28 @@ export function ProcessedEventsFilters({ records, onFilterChange }: ProcessedEve
 
   // Fetch postal centers
   useEffect(() => {
+    let cancelled = false;
+
     const fetchPostalCenters = async () => {
-      if (!profile?.account_id) return;
+      if (!effectiveAccountId) return;
 
       const { data, error } = await supabase
         .from('postal_centers')
         .select('id, name, code')
-        .eq('account_id', profile.account_id)
+        .eq('account_id', effectiveAccountId)
         .order('name');
 
+      if (cancelled) return;
       if (data && !error) {
         setPostalCenters(data);
       }
     };
 
     fetchPostalCenters();
-  }, [profile?.account_id]);
+    return () => {
+      cancelled = true;
+    };
+  }, [effectiveAccountId]);
 
   const handleFilterChange = (key: keyof Filters, value: any) => {
     const newFilters = { ...filters, [key]: value };

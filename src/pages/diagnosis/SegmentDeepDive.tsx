@@ -4,6 +4,7 @@ import { useTimeUnit } from '@/hooks/useTimeUnit';
 import { TimeUnitToggle } from '@/components/common/TimeUnitToggle';
 import { formatMinutes } from '@/lib/accountTime';
 import { supabase } from '../../lib/supabase';
+import { useLatestRequest } from '../../lib/latestRequest';
 import { Layers, Clock, AlertTriangle, TrendingUp } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 
@@ -55,6 +56,8 @@ const SegmentDeepDive: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'overview' | 'time' | 'anomalies'>('overview');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // One tracker: the effect starts a single tab loader at a time and they share loading/error.
+  const beginLoad = useLatestRequest();
 
   // Overview tab data
   const [segmentOverview, setSegmentOverview] = useState<SegmentOverview[]>([]);
@@ -77,7 +80,11 @@ const SegmentDeepDive: React.FC = () => {
   }, [activeTab, effectiveAccountId, selectedSegmentType]);
 
   const loadSegmentOverview = async () => {
-    if (!effectiveAccountId) return;
+    const isStale = beginLoad();
+    if (!effectiveAccountId) {
+      setLoading(false);
+      return;
+    }
 
     try {
       setLoading(true);
@@ -87,17 +94,23 @@ const SegmentDeepDive: React.FC = () => {
         p_account_id: effectiveAccountId
       });
 
+      if (isStale()) return;
       if (rpcError) throw rpcError;
       setSegmentOverview(data || []);
     } catch (err: any) {
+      if (isStale()) return;
       setError(err.message);
     } finally {
-      setLoading(false);
+      if (!isStale()) setLoading(false);
     }
   };
 
   const loadTimeAnalysis = async () => {
-    if (!effectiveAccountId) return;
+    const isStale = beginLoad();
+    if (!effectiveAccountId) {
+      setLoading(false);
+      return;
+    }
 
     try {
       setLoading(true);
@@ -108,17 +121,23 @@ const SegmentDeepDive: React.FC = () => {
         p_segment_type: selectedSegmentType
       });
 
+      if (isStale()) return;
       if (rpcError) throw rpcError;
       setTimeAnalysis(data || []);
     } catch (err: any) {
+      if (isStale()) return;
       setError(err.message);
     } finally {
-      setLoading(false);
+      if (!isStale()) setLoading(false);
     }
   };
 
   const loadAnomalies = async () => {
-    if (!effectiveAccountId) return;
+    const isStale = beginLoad();
+    if (!effectiveAccountId) {
+      setLoading(false);
+      return;
+    }
 
     try {
       setLoading(true);
@@ -128,12 +147,14 @@ const SegmentDeepDive: React.FC = () => {
         p_account_id: effectiveAccountId
       });
 
+      if (isStale()) return;
       if (rpcError) throw rpcError;
       setAnomalies(data || []);
     } catch (err: any) {
+      if (isStale()) return;
       setError(err.message);
     } finally {
-      setLoading(false);
+      if (!isStale()) setLoading(false);
     }
   };
 

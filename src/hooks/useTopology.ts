@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { Region, City, Node } from '@/lib/types'
 import { useEffectiveAccountId } from './useEffectiveAccountId'
+import { useLatestRequest } from '@/lib/latestRequest'
 
 export function useTopology() {
   const effectiveAccountId = useEffectiveAccountId()
+  const beginLoad = useLatestRequest()
   const [regions, setRegions] = useState<Region[]>([])
   const [cities, setCities] = useState<City[]>([])
   const [nodes, setNodes] = useState<Node[]>([])
@@ -13,6 +15,7 @@ export function useTopology() {
   const [error, setError] = useState<string | null>(null)
 
   const fetchAll = async () => {
+    const isStale = beginLoad()
     try {
       setLoading(true)
       setError(null)
@@ -46,6 +49,7 @@ export function useTopology() {
         panelistsQuery,
       ])
 
+      if (isStale()) return
       if (regionsRes.error) throw regionsRes.error
       if (citiesRes.error) throw citiesRes.error
       if (nodesRes.error) throw nodesRes.error
@@ -56,9 +60,10 @@ export function useTopology() {
       setNodes(nodesRes.data || [])
       setPanelists(panelistsRes.data || [])
     } catch (err: any) {
+      if (isStale()) return
       setError(err.message)
     } finally {
-      setLoading(false)
+      if (!isStale()) setLoading(false)
     }
   }
 
