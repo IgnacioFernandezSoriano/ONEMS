@@ -7,6 +7,7 @@ interface OneDBBulkPanelProps {
   onExport: () => void;
   onClearSelection: () => void;
   onDelete: () => void;
+  readOnly?: boolean;
 }
 
 export const OneDBBulkPanel: React.FC<OneDBBulkPanelProps> = ({
@@ -15,6 +16,7 @@ export const OneDBBulkPanel: React.FC<OneDBBulkPanelProps> = ({
   onExport,
   onClearSelection,
   onDelete,
+  readOnly = false,
 }) => {
   const { t } = useTranslation();
 
@@ -43,13 +45,13 @@ export const OneDBBulkPanel: React.FC<OneDBBulkPanelProps> = ({
         </button>
 
         {/* Delete Button */}
-        <button
+        {!readOnly && <button
           onClick={onDelete}
           className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-md transition-colors"
         >
           <span>🗑</span>
           {t('hc.one_db_bulk_panel.delete_n', { count: selectedCount })}
-        </button>
+        </button>}
 
         {/* Clear Selection */}
         <button

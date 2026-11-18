@@ -7,7 +7,7 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
 import { downloadCSV } from '../../lib/exportUtils'
 
-export default function PanelistStockTab() {
+export default function PanelistStockTab({ readOnly = false }: { readOnly?: boolean }) {
   const { t } = useTranslation()
   const { panelistStocks, loading } = useStockManagement()
   const { user } = useAuth()
@@ -179,9 +179,9 @@ export default function PanelistStockTab() {
                           <SmartTooltip content={t('hc.panelist_stock_tab.tt_last_movement')} />
                         </div>
                       </th>
-                      <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {!readOnly && <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                         {t('common.actions')}
-                      </th>
+                      </th>}
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -213,7 +213,7 @@ export default function PanelistStockTab() {
                             }
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        {!readOnly && <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <button
                             onClick={() => {
                               setSelectedStock(stock)
@@ -226,7 +226,7 @@ export default function PanelistStockTab() {
                             <Edit className="h-4 w-4" />
                             {t('stock.adjust_stock')}
                           </button>
-                        </td>
+                        </td>}
                       </tr>
                     ))}
                   </tbody>
@@ -246,7 +246,7 @@ export default function PanelistStockTab() {
       </div>
 
       {/* Adjust Stock Modal */}
-      {showAdjustModal && selectedStock && (
+      {!readOnly && showAdjustModal && selectedStock && (
         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
             <div className="px-6 py-4 border-b border-gray-200">
