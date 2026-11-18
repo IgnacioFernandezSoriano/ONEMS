@@ -11,6 +11,7 @@ BEGIN
 END $$;
 
 BEGIN;
+\set fixture_sin_roles 1
 \ir fixtures/incident_city.sql
 INSERT INTO auth.users (id, email) VALUES
   ('96000000-0000-0000-0000-000000000096','am@t.l'),

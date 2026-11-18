@@ -29,6 +29,11 @@ INSERT INTO public.profiles (id, email, full_name, role, account_id) VALUES
   ('44444444-0000-0000-0000-000000000004', 'user.a2@test.local', 'UserA2', 'user',   'aaaaaaaa-0000-0000-0000-000000000001'),
   ('55555555-0000-0000-0000-000000000005', 'user.b@test.local',  'UserB',  'user',   'bbbbbbbb-0000-0000-0000-000000000002');
 
+-- Desde 20261119100200 (fase 3) editar usuarios exige users:edit en la matriz, no el rol legacy 'admin':
+-- AdminA es upu_account_manager de A (users:edit). Las reglas de rol (admin<->user, su cuenta) siguen igual.
+INSERT INTO public.account_user_role (account_id, user_id, role) VALUES
+  ('aaaaaaaa-0000-0000-0000-000000000001', '22222222-0000-0000-0000-000000000002', 'upu_account_manager');
+
 GRANT USAGE ON SCHEMA public TO authenticated;
 
 CREATE OR REPLACE FUNCTION pg_temp.login(p_uid text) RETURNS void

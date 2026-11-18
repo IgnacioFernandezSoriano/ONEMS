@@ -7,6 +7,7 @@ CREATE OR REPLACE FUNCTION pg_temp.fail_if(p_cond boolean, p_msg text) RETURNS v
 BEGIN IF p_cond IS NOT FALSE THEN RAISE EXCEPTION 'FAIL: %', p_msg; END IF; END $$;
 
 BEGIN;
+\set fixture_sin_roles 1
 \ir fixtures/incident_city.sql
 -- A1: contactos (con mayúsculas) para PM y MS = mismo correo; UPU para un user. El perfil PM lleva espacios.
 UPDATE public.accounts SET email_panelist_manager = 'Pm@T.L', email_materials_supplier = 'pm@t.l',

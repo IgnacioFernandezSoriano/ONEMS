@@ -21,6 +21,7 @@ EXCEPTION WHEN OTHERS THEN
 END $$;
 
 BEGIN;
+\set fixture_sin_roles 1
 \ir fixtures/incident_city.sql
 -- Superadmin, usuario PM+MS (U1 del fixture, cuenta A1), AM de A1, usuario sin rol de A1,
 -- usuario con roles en A1 y A2, y A3 (cuenta sin relación).

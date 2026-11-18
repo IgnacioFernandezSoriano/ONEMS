@@ -143,6 +143,10 @@ UPDATE public.profiles SET role = 'admin' WHERE id IN ('99000000-0000-0000-0000-
 INSERT INTO auth.users (id, email) VALUES ('96000000-0000-0000-0000-000000000096', 'user@t.l');
 INSERT INTO public.profiles (id, email, full_name, role, account_id) VALUES
   ('96000000-0000-0000-0000-000000000096', 'user@t.l', 'Normal', 'user', 'a0000000-0000-0000-0000-000000000001');
+-- Fase 3 (20261119100200): el usuario normal es panelist_manager (Edit en incidencias reportadas y de
+-- disponibilidad, sin acceso a recepciones).
+INSERT INTO public.account_user_role (account_id, user_id, role) VALUES
+  ('a0000000-0000-0000-0000-000000000001', '96000000-0000-0000-0000-000000000096', 'panelist_manager');
 UPDATE public.panelists SET telegram_id = '9009' WHERE panelist_code = 'P9';
 
 DO $$

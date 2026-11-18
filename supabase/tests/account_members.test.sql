@@ -12,6 +12,7 @@ BEGIN
 END $$;
 
 BEGIN;
+\set fixture_sin_roles 1
 \ir fixtures/incident_city.sql
 -- A1: AM con profiles.role='user' (como los usuarios nuevos), usuario sin rol, PM+MS (99 del fixture).
 -- Multi: cuenta activa A2, rol en A1 (titular de rol de otra cuenta). Superadmin. 98: usuario de A2.
