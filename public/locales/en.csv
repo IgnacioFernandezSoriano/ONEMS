@@ -353,7 +353,7 @@ auth.wherequalitystarts,WhereQualityStarts
 auth.your_email_com,your@email.com
 bulk.cancelled_records,Cancelled {count} records
 bulk.confirm_cancel,Cancel {count} selected records?
-bulk.confirm_delete,Are you sure you want to delete {count} records? This cannot be undone.
+bulk.confirm_delete,Delete {count} records? You can reverse it with the Undo button.
 bulk.confirm_reprocess,Reprocess {count} records with transfer errors?
 bulk.deleted_records,Deleted {count} records
 bulk.please_select_date,Please select a date

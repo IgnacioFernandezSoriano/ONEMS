@@ -353,7 +353,7 @@ auth.wherequalitystarts,WhereQualityStarts
 auth.your_email_com,o.seu@email.com
 bulk.cancelled_records,{count} registos cancelados
 bulk.confirm_cancel,Cancelar {count} registos selecionados?
-bulk.confirm_delete,Tem a certeza de que pretende eliminar {count} registos? Esta ação não pode ser anulada.
+bulk.confirm_delete,Eliminar {count} registos? Pode revertê-lo com o botão Desfazer.
 bulk.confirm_reprocess,Reprocessar {count} registos com erros de transferência?
 bulk.deleted_records,{count} registos eliminados
 bulk.please_select_date,Selecione uma data

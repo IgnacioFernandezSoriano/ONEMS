@@ -353,7 +353,7 @@ auth.wherequalitystarts,DondeComienzaLaCalidad
 auth.your_email_com,tu@correo.com
 bulk.cancelled_records,Registros cancelados
 bulk.confirm_cancel,¿Cancelar los registros seleccionados?
-bulk.confirm_delete,¿Eliminar los registros seleccionados?
+bulk.confirm_delete,¿Eliminar {count} registros? Podrás revertirlo con el botón Deshacer.
 bulk.confirm_reprocess,¿Reprocesar los registros seleccionados?
 bulk.deleted_records,Registros eliminados
 bulk.please_select_date,Por favor seleccione una fecha
