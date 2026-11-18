@@ -291,7 +291,7 @@
       <a href="#privacy">Privacy</a>
       <a href="#faq">Questions</a>
     </nav>
-    <div class="side-foot">Updated on 17 November 2026</div>
+    <div class="side-foot">Updated on 18 November 2026</div>
   </aside>
 
   <main class="main">
@@ -320,10 +320,13 @@
       <h2>The permission</h2>
       <p>The first time the bot is about to ask for the location, it first asks the panelist whether they allow it, with <strong>✅ I accept</strong> / <strong>❌ I don't accept</strong>. They are asked <strong>only once</strong>.</p>
       <ul>
-        <li><strong>The exact text</strong> they saw, in their language, when and what they answered is recorded. The current text (version 2) says the location is seen by <em>their account's managers and UPU's technical team</em>.</li>
+        <li><strong>The exact text</strong> they saw, in their language, when and what they answered is recorded. The current text (version 3) has two blocks, <em>What we do</em> and <em>What we don’t do</em>: location asked only when declaring, used only to check the post office or PO box, seen only by <em>their account’s managers and UPU’s technical team</em>, deleted after 12 months, never tracking, never taken by us, not saved if they do not accept, not shared.</li>
+        <li>The <strong>✅ / ❌ buttons are single-use</strong>: after pressing, the message turns into <em>“✅ You have accepted…”</em> or <em>“❌ You have not accepted…”</em> and a follow-up message offers <strong>📋 View pending shipments</strong>, <strong>📥 Confirm a reception</strong> and <strong>🏠 Home</strong>.</li>
         <li>If they do not answer and declare anyway, they are asked again on the next visit.</li>
         <li>They can change their decision at any time in <strong>📖 Help &rarr; 📍 Location permission</strong>. Every change is recorded.</li>
         <li>If they do not accept, the bot never asks them for the location again and you receive <strong>one</strong> incident so you can talk to them.</li>
+        <li><strong>They can delete their location data</strong>: <strong>📖 Help &rarr; 📍 Location permission &rarr; 🗑 Delete my location data</strong> and confirm. This erases the coordinates, accuracy and distance of <strong>all</strong> their declarations (and the distance in their GPS incidents). The declarations keep their location status (ok, far, no location…) and remain valid. The permission history is kept as legal proof. Every erasure is recorded (who, when, how many rows) in the <span dir="ltr"><code>gps_erasure_log</code></span> table.</li>
+        <li><strong>Deleting does not withdraw the permission.</strong> If the panelist keeps “accepted”, new positions will be saved on their next declarations. To stop that, they must choose <strong>❌ I don’t accept</strong>.</li>
       </ul>
     </section>
 
@@ -334,7 +337,7 @@
           <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
           <div class="tg-body">
             <div class="tg-kb one"><span class="tap">Confirm a shipment</span></div>
-            <div class="tg-msg in">📍 Location when declaring<br><br>When you confirm a shipment or a receipt we will ask you to share your location, only at that moment (never continuously).<br>Why: to check that the declaration is made at the post office or at your PO box.<br>Who sees it: your account’s managers and UPU’s technical team.<br>How long: the coordinates are deleted after 12 months.<br>You can change your decision at any time: /help &rarr; 📍 Location permission.<br><br>Do you accept?<span class="t">09:12</span></div>
+            <div class="tg-msg in">📍 Your location when declaring<br><br>✅ What we do<br>📍 We ask for your location only when you confirm a shipment or a receipt.<br>🏤 We use it only to check that you declare at the post office or at your PO box.<br>👥 Only your account’s managers and UPU’s technical team can see it.<br>🗓️ We delete the coordinates after 12 months.<br><br>🚫 What we don’t do<br>❌ We don’t track you: never continuously, never in the background.<br>❌ We never take it ourselves: it is only sent when you press «📍 Share my location».<br>❌ We don’t save your location if you don’t accept.<br>❌ We don’t share it with anyone else.<br><br>🔄 You can change your decision or delete your data at any time: 📖 Help → 📍 Location permission.<br><br>Do you accept?<span class="t">09:12</span></div>
             <div class="tg-kb one"><span class="tap">✅ I accept</span><span>❌ I don't accept</span></div>
             <div class="tg-msg in">📍 Share your location to record where you declare. If your phone’s location is off, turn it on first in Settings (Telegram can’t turn it on). Then press the “📍 Share my location” button that appears below, instead of the keyboard (if you don’t see it, tap the ⌨ icon next to the typing box). You can keep declaring anyway.<span class="t">09:12</span></div>
             <div class="tg-msg in">✅ Location recorded. Thank you!<span class="t">09:13</span></div>
@@ -446,9 +449,10 @@
       <ul>
         <li>The position is asked <strong>only when declaring</strong>. There is never continuous tracking or live location.</li>
         <li>It is visible to the users of the panelist's account and to the UPU superadmin. No other account.</li>
-        <li><strong>Exact coordinates are deleted after 12 months</strong> (daily task). The distance and the status are kept.</li>
-        <li>The record of each permission (text shown, language, date and answer) <strong>is always kept</strong>, even if the panelist is removed.</li>
+        <li><strong>Exact coordinates are deleted after 12 months</strong> (daily task), or earlier if the panelist deletes them from the bot. The distance and the status are kept.</li>
+        <li>The record of each permission (text shown, language, date and answer) <strong>is always kept</strong>, even if the panelist is removed. Each erasure of location data is also recorded (<span dir="ltr"><code>gps_erasure_log</code></span>).</li>
         <li>The bot interaction log keeps no coordinates and is deleted after <strong>60 days</strong>.</li>
+        <li>The location <strong>never stays in the technical history of n8n</strong>: the bot does not keep successful executions, the coordinates are no longer passed to sub-workflows, and a daily job on the operations server deletes any execution that contains a location (for example failed ones) within 24 hours.</li>
       </ul>
     </section>
 

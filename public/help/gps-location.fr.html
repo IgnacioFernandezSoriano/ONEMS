@@ -291,7 +291,7 @@
       <a href="#privacy">Confidentialité</a>
       <a href="#faq">Questions</a>
     </nav>
-    <div class="side-foot">Mis à jour le 17 novembre 2026</div>
+    <div class="side-foot">Mis à jour le 18 novembre 2026</div>
   </aside>
 
   <main class="main">
@@ -320,10 +320,13 @@
       <h2>L&rsquo;autorisation</h2>
       <p>La première fois que le bot va demander la position, il demande d&rsquo;abord au panéliste s&rsquo;il l&rsquo;autorise, avec <strong>✅ J'accepte</strong> / <strong>❌ Je refuse</strong>. La question n&rsquo;est posée <strong>qu&rsquo;une seule fois</strong>.</p>
       <ul>
-        <li><strong>Le texte exact</strong> qu&rsquo;il a vu, dans sa langue, la date et sa réponse sont enregistrés. Le texte en vigueur (version 2) indique que la position est vue par <em>les responsables de son compte et l&rsquo;équipe technique de l&rsquo;UPU</em>.</li>
+        <li><strong>Le texte exact</strong> qu&rsquo;il a vu, dans sa langue, la date et sa réponse sont enregistrés. Le texte en vigueur (version 3) comporte deux blocs, <em>Ce que nous faisons</em> et <em>Ce que nous ne faisons pas</em> : position demandée uniquement lors de la déclaration, utilisée uniquement pour vérifier le bureau de poste ou la boîte postale, vue seulement par <em>les responsables de son compte et l&rsquo;équipe technique de l&rsquo;UPU</em>, effacée après 12 mois, jamais de suivi, jamais prise par le bot de lui-même, non enregistrée s&rsquo;il refuse, non partagée.</li>
+        <li>Les <strong>boutons ✅ / ❌ ne s&rsquo;utilisent qu&rsquo;une fois</strong> : après l&rsquo;appui, le message devient <em>« ✅ Vous avez accepté… »</em> ou <em>« ❌ Vous n&rsquo;avez pas accepté… »</em> et un message suivant propose <strong>📋 Voir les envois en attente</strong>, <strong>📥 Confirmer une réception</strong> et <strong>🏠 Accueil</strong>.</li>
         <li>S&rsquo;il ne répond pas et déclare quand même, la question lui est reposée à la visite suivante.</li>
         <li>Il peut changer sa décision à tout moment dans <strong>📖 Aide &rarr; 📍 Autorisation de localisation</strong>. Chaque changement est enregistré.</li>
         <li>S&rsquo;il refuse, le bot ne lui redemande plus la position et vous recevez <strong>un</strong> incident pour lui parler.</li>
+        <li><strong>Il peut supprimer ses données de localisation</strong> : <strong>📖 Aide &rarr; 📍 Autorisation de localisation &rarr; 🗑 Supprimer mes données de localisation</strong>, puis confirmer. Cela efface les coordonnées, la précision et la distance de <strong>toutes</strong> ses déclarations (et la distance de ses incidents GPS). Les déclarations conservent leur statut de localisation (ok, loin, sans position…) et restent valables. L&rsquo;historique des autorisations est conservé comme preuve légale. Chaque suppression est enregistrée (qui, quand, combien de lignes) dans la table <span dir="ltr"><code>gps_erasure_log</code></span>.</li>
+        <li><strong>Supprimer ne retire pas l&rsquo;autorisation.</strong> Si le panéliste reste sur « accepté », de nouvelles positions seront enregistrées lors de ses prochaines déclarations. Pour l&rsquo;éviter, il doit choisir <strong>❌ Je refuse</strong>.</li>
       </ul>
     </section>
 
@@ -334,7 +337,7 @@
           <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
           <div class="tg-body">
             <div class="tg-kb one"><span class="tap">Confirmer un envoi</span></div>
-            <div class="tg-msg in">📍 Position lors de la déclaration<br><br>Quand vous confirmez un envoi ou une réception, nous vous demanderons de partager votre position, seulement à ce moment-là (jamais en continu).<br>Pourquoi : vérifier que la déclaration est faite au bureau de poste ou à votre boîte postale.<br>Qui la voit : les responsables de votre compte et l’équipe technique de l’UPU.<br>Combien de temps : les coordonnées sont effacées après 12 mois.<br>Vous pouvez changer votre décision à tout moment : /aide &rarr; 📍 Autorisation de localisation.<br><br>Acceptez-vous ?<span class="t">09:12</span></div>
+            <div class="tg-msg in">📍 Votre position lors de la déclaration<br><br>✅ Ce que nous faisons<br>📍 Nous demandons votre position uniquement lorsque vous confirmez un envoi ou une réception.<br>🏤 Nous l’utilisons uniquement pour vérifier que vous déclarez au bureau de poste ou à votre boîte postale.<br>👥 Seuls les responsables de votre compte et l’équipe technique de l’UPU peuvent la voir.<br>🗓️ Nous effaçons les coordonnées après 12 mois.<br><br>🚫 Ce que nous ne faisons pas<br>❌ Nous ne vous suivons pas : jamais en continu, jamais en arrière-plan.<br>❌ Nous ne la prenons jamais nous-mêmes : elle n’est envoyée que lorsque vous appuyez sur « 📍 Partager ma position ».<br>❌ Nous n’enregistrons pas votre position si vous n’acceptez pas.<br>❌ Nous ne la partageons avec personne d’autre.<br><br>🔄 Vous pouvez changer votre décision ou supprimer vos données à tout moment : 📖 Aide → 📍 Autorisation de localisation.<br><br>Acceptez-vous ?<span class="t">09:12</span></div>
             <div class="tg-kb one"><span class="tap">✅ J'accepte</span><span>❌ Je refuse</span></div>
             <div class="tg-msg in">📍 Partagez votre position pour enregistrer où vous déclarez. Si la localisation de votre téléphone est désactivée, activez-la d’abord dans Paramètres (Telegram ne peut pas l’activer). Ensuite, appuyez sur le bouton « 📍 Partager ma position » qui apparaît en bas, à la place du clavier (si vous ne le voyez pas, touchez l’icône ⌨ à côté de la zone de saisie). Vous pouvez continuer à déclarer quand même.<span class="t">09:12</span></div>
             <div class="tg-msg in">✅ Position enregistrée. Merci !<span class="t">09:13</span></div>
@@ -446,9 +449,10 @@
       <ul>
         <li>La position n&rsquo;est demandée <strong>qu&rsquo;au moment de déclarer</strong>. Il n&rsquo;y a jamais de suivi continu ni de position en direct.</li>
         <li>Elle est visible par les utilisateurs du compte du panéliste et par le superadmin de l&rsquo;UPU. Par aucun autre compte.</li>
-        <li><strong>Les coordonnées exactes sont supprimées après 12 mois</strong> (tâche quotidienne). La distance et le statut sont conservés.</li>
-        <li>L&rsquo;enregistrement de chaque autorisation (texte affiché, langue, date et réponse) <strong>est toujours conservé</strong>, même si le panéliste est supprimé.</li>
+        <li><strong>Les coordonnées exactes sont supprimées après 12 mois</strong> (tâche quotidienne), ou avant si le panéliste les supprime depuis le bot. La distance et le statut sont conservés.</li>
+        <li>L&rsquo;enregistrement de chaque autorisation (texte affiché, langue, date et réponse) <strong>est toujours conservé</strong>, même si le panéliste est supprimé. Chaque suppression de données de localisation est aussi enregistrée (<span dir="ltr"><code>gps_erasure_log</code></span>).</li>
         <li>Le journal des interactions du bot ne garde aucune coordonnée et est supprimé après <strong>60 jours</strong>.</li>
+        <li>La position <strong>ne reste jamais dans l&rsquo;historique technique de n8n</strong> : le bot ne conserve pas les exécutions réussies, les coordonnées ne sont plus transmises aux sous-flux et une tâche quotidienne sur le serveur d&rsquo;exploitation supprime toute exécution contenant une position (par exemple les exécutions en erreur) en moins de 24 heures.</li>
       </ul>
     </section>
 

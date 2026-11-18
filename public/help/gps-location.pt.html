@@ -291,7 +291,7 @@
       <a href="#privacy">Privacidade</a>
       <a href="#faq">Perguntas</a>
     </nav>
-    <div class="side-foot">Atualizado a 17 de novembro de 2026</div>
+    <div class="side-foot">Atualizado a 18 de novembro de 2026</div>
   </aside>
 
   <main class="main">
@@ -320,10 +320,13 @@
       <h2>A permissão</h2>
       <p>Na primeira vez que o bot vai pedir a localização, pergunta antes ao painelista se a permite, com <strong>✅ Aceito</strong> / <strong>❌ Não aceito</strong>. A pergunta é feita <strong>uma única vez</strong>.</p>
       <ul>
-        <li>Fica registado <strong>o texto exato</strong> que viu, no seu idioma, quando e o que respondeu. O texto em vigor (versão 2) diz que a localização é vista pelos <em>responsáveis da sua conta e pela equipa técnica da UPU</em>.</li>
+        <li>Fica registado <strong>o texto exato</strong> que viu, no seu idioma, quando e o que respondeu. O texto em vigor (versão 3) tem dois blocos, <em>O que fazemos</em> e <em>O que não fazemos</em>: a localização só é pedida ao declarar, só é usada para confirmar a estação de correios ou o apartado, só a veem <em>os responsáveis da sua conta e a equipa técnica da UPU</em>, é apagada ao fim de 12 meses, nunca há seguimento, o bot nunca a toma por si, não é guardada se não aceitar e não é partilhada.</li>
+        <li>Os <strong>botões ✅ / ❌ são de uso único</strong>: depois de premidos, a mensagem passa a <em>«✅ Aceitaste…»</em> ou <em>«❌ Não aceitaste…»</em> e uma mensagem seguinte oferece <strong>📋 Ver envios pendentes</strong>, <strong>📥 Confirmar uma receção</strong> e <strong>🏠 Início</strong>.</li>
         <li>Se não responder e declarar na mesma, a pergunta é repetida na visita seguinte.</li>
         <li>Pode mudar a decisão quando quiser em <strong>📖 Ajuda &rarr; 📍 Permissão de localização</strong>. Cada alteração fica registada.</li>
         <li>Se não aceitar, o bot não volta a pedir-lhe a localização e o utilizador recebe <strong>uma</strong> incidência para falar com ele.</li>
+        <li><strong>Pode apagar os seus dados de localização</strong>: <strong>📖 Ajuda &rarr; 📍 Permissão de localização &rarr; 🗑 Apagar os meus dados de localização</strong> e confirmar. São apagadas as coordenadas, a precisão e a distância de <strong>todas</strong> as suas declarações (e a distância das suas incidências GPS). As declarações mantêm o estado de localização (ok, longe, sem localização…) e continuam válidas. O histórico de permissões é conservado como prova legal. Cada eliminação fica registada (quem, quando, quantas linhas) na tabela <span dir="ltr"><code>gps_erasure_log</code></span>.</li>
+        <li><strong>Apagar não retira a permissão.</strong> Se o painelista continuar em «aceite», serão guardadas novas posições nas próximas declarações. Para o evitar, deve escolher <strong>❌ Não aceito</strong>.</li>
       </ul>
     </section>
 
@@ -334,7 +337,7 @@
           <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
           <div class="tg-body">
             <div class="tg-kb one"><span class="tap">Confirmar um envio</span></div>
-            <div class="tg-msg in">📍 Localização ao declarar<br><br>Quando confirmares um envio ou uma receção vamos pedir-te que partilhes a tua localização, só nesse momento (nunca de forma contínua).<br>Para quê: confirmar que a declaração é feita na estação de correios ou no teu apartado.<br>Quem a vê: os responsáveis da tua conta e a equipa técnica da UPU.<br>Durante quanto tempo: as coordenadas são apagadas ao fim de 12 meses.<br>Podes mudar a tua decisão quando quiseres: /help &rarr; 📍 Permissão de localização.<br><br>Aceitas?<span class="t">09:12</span></div>
+            <div class="tg-msg in">📍 A tua localização ao declarar<br><br>✅ O que fazemos<br>📍 Pedimos a tua localização apenas quando confirmas um envio ou uma receção.<br>🏤 Usamo-la só para confirmar que declaras na estação de correios ou no teu apartado.<br>👥 Só os responsáveis da tua conta e a equipa técnica da UPU a podem ver.<br>🗓️ Apagamos as coordenadas ao fim de 12 meses.<br><br>🚫 O que não fazemos<br>❌ Não te seguimos: nunca de forma contínua, nunca em segundo plano.<br>❌ Nunca a tiramos nós: só é enviada quando premes «📍 Partilhar a minha localização».<br>❌ Não guardamos a tua localização se não aceitares.<br>❌ Não a partilhamos com mais ninguém.<br><br>🔄 Podes mudar a tua decisão ou apagar os teus dados quando quiseres: 📖 Ajuda → 📍 Permissão de localização.<br><br>Aceitas?<span class="t">09:12</span></div>
             <div class="tg-kb one"><span class="tap">✅ Aceito</span><span>❌ Não aceito</span></div>
             <div class="tg-msg in">📍 Partilha a tua localização para registar onde declaras. Se a localização do telemóvel estiver desligada, ativa-a primeiro nas Definições (o Telegram não a consegue ligar). Depois carrega no botão «📍 Partilhar a minha localização» que aparece em baixo, em vez do teclado (se não o vires, toca no ícone ⌨ junto à caixa de escrita). Podes continuar a declarar na mesma.<span class="t">09:12</span></div>
             <div class="tg-msg in">✅ Localização registada. Obrigado!<span class="t">09:13</span></div>
@@ -446,9 +449,10 @@
       <ul>
         <li>A posição é pedida <strong>só ao declarar</strong>. Nunca há seguimento contínuo nem localização em direto.</li>
         <li>É visível para os utilizadores da conta do painelista e para o superadmin da UPU. Para nenhuma outra conta.</li>
-        <li><strong>As coordenadas exatas são apagadas ao fim de 12 meses</strong> (tarefa diária). A distância e o estado são conservados.</li>
-        <li>O registo de cada permissão (texto mostrado, idioma, data e resposta) <strong>é sempre conservado</strong>, mesmo que o painelista seja eliminado.</li>
+        <li><strong>As coordenadas exatas são apagadas ao fim de 12 meses</strong> (tarefa diária), ou antes se o painelista as apagar a partir do bot. A distância e o estado são conservados.</li>
+        <li>O registo de cada permissão (texto mostrado, idioma, data e resposta) <strong>é sempre conservado</strong>, mesmo que o painelista seja eliminado. Cada eliminação de dados de localização fica também registada (<span dir="ltr"><code>gps_erasure_log</code></span>).</li>
         <li>O registo das interações do bot não guarda coordenadas e é apagado ao fim de <strong>60 dias</strong>.</li>
+        <li>A localização <strong>nunca fica no histórico técnico do n8n</strong>: o bot não conserva as execuções bem-sucedidas, as coordenadas já não são passadas aos subfluxos e uma tarefa diária no servidor de operações apaga qualquer execução que contenha uma localização (por exemplo as falhadas) em menos de 24 horas.</li>
       </ul>
     </section>
 

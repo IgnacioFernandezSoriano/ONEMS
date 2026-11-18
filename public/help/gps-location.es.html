@@ -291,7 +291,7 @@
       <a href="#privacy">Privacidad</a>
       <a href="#faq">Preguntas</a>
     </nav>
-    <div class="side-foot">Actualizado el 17 de noviembre de 2026</div>
+    <div class="side-foot">Actualizado el 18 de noviembre de 2026</div>
   </aside>
 
   <main class="main">
@@ -320,10 +320,13 @@
       <h2>El permiso</h2>
       <p>La primera vez que el bot va a pedir la ubicación, pregunta antes al panelista si la permite, con <strong>✅ Acepto</strong> / <strong>❌ No acepto</strong>. Se le pregunta <strong>una sola vez</strong>.</p>
       <ul>
-        <li>Queda registrado <strong>el texto exacto</strong> que vio, en su idioma, cuándo y qué respondió. El texto vigente (versión 2) dice que la ubicación la ven <em>los responsables de su cuenta y el equipo técnico de UPU</em>.</li>
+        <li>Queda registrado <strong>el texto exacto</strong> que vio, en su idioma, cuándo y qué respondió. El texto vigente (versión 3) tiene dos bloques, <em>Qué hacemos</em> y <em>Qué no hacemos</em>: la ubicación se pide solo al declarar, se usa solo para comprobar la oficina o el apartado, la ven únicamente <em>los responsables de su cuenta y el equipo técnico de UPU</em>, se borra a los 12 meses, nunca hay rastreo, nunca la toma el bot por su cuenta, no se guarda si no acepta y no se comparte.</li>
+        <li>Los <strong>botones ✅ / ❌ son de un solo uso</strong>: al pulsarlos, el mensaje se transforma en <em>«✅ Has aceptado…»</em> o <em>«❌ No has aceptado…»</em> y un mensaje posterior ofrece <strong>📋 Ver envíos pendientes</strong>, <strong>📥 Confirmar una recepción</strong> y <strong>🏠 Inicio</strong>.</li>
         <li>Si no contesta y declara igualmente, se le vuelve a preguntar en la siguiente visita.</li>
         <li>Puede cambiar su decisión cuando quiera en <strong>📖 Ayuda &rarr; 📍 Permiso de ubicación</strong>. Cada cambio queda registrado.</li>
         <li>Si no acepta, el bot no vuelve a pedirle la ubicación y usted recibe <strong>una</strong> incidencia para hablar con él.</li>
+        <li><strong>Puede borrar sus datos de ubicación</strong>: <strong>📖 Ayuda &rarr; 📍 Permiso de ubicación &rarr; 🗑 Borrar mis datos de ubicación</strong> y confirmar. Se borran las coordenadas, la precisión y la distancia de <strong>todas</strong> sus declaraciones (y la distancia de sus incidencias GPS). Las declaraciones conservan su estado de ubicación (ok, lejos, sin ubicación…) y siguen siendo válidas. El historial de permisos se conserva como prueba legal. Cada borrado queda registrado (quién, cuándo, cuántas filas) en la tabla <span dir="ltr"><code>gps_erasure_log</code></span>.</li>
+        <li><strong>Borrar no retira el permiso.</strong> Si el panelista sigue en «aceptado», se guardarán nuevas posiciones en sus próximas declaraciones. Para evitarlo, debe elegir <strong>❌ No acepto</strong>.</li>
       </ul>
     </section>
 
@@ -334,7 +337,7 @@
           <div class="tg-head"><span class="tg-back">&larr;</span><span class="tg-av">ONE</span><span class="tg-name"><b>ONE bot</b><small>bot</small></span></div>
           <div class="tg-body">
             <div class="tg-kb one"><span class="tap">Confirmar un envío</span></div>
-            <div class="tg-msg in">📍 Ubicación al declarar<br><br>Cuando confirmes un envío o una recepción te pediremos compartir tu ubicación, solo en ese momento (nunca de forma continua).<br>Para qué: comprobar que la declaración se hace en la oficina o en tu apartado.<br>Quién la ve: los responsables de tu cuenta y el equipo técnico de UPU.<br>Cuánto tiempo: las coordenadas se borran a los 12 meses.<br>Puedes cambiar tu decisión cuando quieras: /ayuda &rarr; 📍 Permiso de ubicación.<br><br>¿Aceptas?<span class="t">09:12</span></div>
+            <div class="tg-msg in">📍 Tu ubicación al declarar<br><br>✅ Qué hacemos<br>📍 Te pedimos tu ubicación solo cuando confirmas un envío o una recepción.<br>🏤 La usamos solo para comprobar que declaras en la oficina de correos o en tu apartado.<br>👥 Solo la ven los responsables de tu cuenta y el equipo técnico de UPU.<br>🗓️ Borramos las coordenadas a los 12 meses.<br><br>🚫 Qué no hacemos<br>❌ No te rastreamos: nunca de forma continua ni en segundo plano.<br>❌ Nunca la tomamos nosotros: solo se envía cuando pulsas «📍 Compartir mi ubicación».<br>❌ No guardamos tu ubicación si no aceptas.<br>❌ No la compartimos con nadie más.<br><br>🔄 Puedes cambiar tu decisión o borrar tus datos cuando quieras: 📖 Ayuda → 📍 Permiso de ubicación.<br><br>¿Aceptas?<span class="t">09:12</span></div>
             <div class="tg-kb one"><span class="tap">✅ Acepto</span><span>❌ No acepto</span></div>
             <div class="tg-msg in">📍 Comparte tu ubicación para registrar dónde declaras. Si la ubicación de tu móvil está apagada, actívala primero en Ajustes (Telegram no puede encenderla). Después pulsa el botón «📍 Compartir mi ubicación» que aparece abajo, en lugar del teclado (si no lo ves, toca el icono ⌨ junto a la caja de escribir). Puedes seguir declarando igualmente.<span class="t">09:12</span></div>
             <div class="tg-msg in">✅ Ubicación registrada. ¡Gracias!<span class="t">09:13</span></div>
@@ -446,9 +449,10 @@
       <ul>
         <li>La posición se pide <strong>solo al declarar</strong>. Nunca hay seguimiento continuo ni ubicación en directo.</li>
         <li>La ven los usuarios de la cuenta del panelista y el superadmin de UPU. Ninguna otra cuenta.</li>
-        <li>Las <strong>coordenadas exactas se borran a los 12 meses</strong> (tarea diaria). Se conservan la distancia y el estado.</li>
-        <li>El registro de cada permiso (texto mostrado, idioma, fecha y respuesta) <strong>se conserva siempre</strong>, aunque el panelista se dé de baja.</li>
+        <li>Las <strong>coordenadas exactas se borran a los 12 meses</strong> (tarea diaria), o antes si el panelista las borra desde el bot. Se conservan la distancia y el estado.</li>
+        <li>El registro de cada permiso (texto mostrado, idioma, fecha y respuesta) <strong>se conserva siempre</strong>, aunque el panelista se dé de baja. Cada borrado de datos de ubicación también queda registrado (<span dir="ltr"><code>gps_erasure_log</code></span>).</li>
         <li>El registro de interacciones del bot no guarda coordenadas y se borra a los <strong>60 días</strong>.</li>
+        <li>La ubicación <strong>nunca queda en el historial técnico de n8n</strong>: el bot no conserva las ejecuciones correctas, las coordenadas ya no se pasan a los subflujos y una tarea diaria en el servidor de operaciones borra cualquier ejecución que contenga una ubicación (por ejemplo las fallidas) en menos de 24 horas.</li>
       </ul>
     </section>
 
