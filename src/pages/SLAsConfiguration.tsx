@@ -7,9 +7,13 @@ import { Modal } from '@/components/common/Modal'
 import { Button } from '@/components/common/Button'
 import type { SLAWithDetails } from '@/lib/types_slas'
 import { useTranslation } from '@/hooks/useTranslation'
+import { ReadOnlyBadge } from '@/components/common/ReadOnlyBadge'
+import { usePermissions } from '@/contexts/PermissionsContext'
 
 export function SLAsConfiguration() {
   const { t } = useTranslation()
+  const { canEdit } = usePermissions()
+  const readOnly = !canEdit('segment_sla')
   const {
     slas,
     postalCenters,
@@ -187,12 +191,16 @@ export function SLAsConfiguration() {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">{t('slas.title')}</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-bold text-gray-900">{t('slas.title')}</h1>
+          {readOnly && <ReadOnlyBadge />}
+        </div>
         <p className="text-gray-600">{t('slas.description')}</p>
       </div>
 
       {/* Actions */}
       <div className="mb-4 flex gap-3 flex-wrap">
+        {!readOnly && (<>
         <Button onClick={() => setShowCreateModal(true)}>
           {t('slas.create_sla')}
         </Button>
@@ -212,6 +220,7 @@ export function SLAsConfiguration() {
         >
           {t('common.delete_selected')} ({selectedIds.size})
         </Button>
+        </>)}
         <Button
           onClick={handleExportCSV}
           disabled={selectedIds.size === 0}
@@ -395,9 +404,9 @@ export function SLAsConfiguration() {
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                 {t('common.status')}
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              {!readOnly && <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                 {t('common.actions')}
-              </th>
+              </th>}
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -434,7 +443,7 @@ export function SLAsConfiguration() {
                   {products.find(p => p.id === sla.product_id)?.code || '-'}
                 </td>
                 <td className="px-4 py-3 text-sm">
-                  {editingCell?.id === sla.id && editingCell?.field === 'expected_time_minutes' ? (
+                  {!readOnly && editingCell?.id === sla.id && editingCell?.field === 'expected_time_minutes' ? (
                     <div className="flex gap-1">
                       <input
                         type="number"
@@ -461,14 +470,14 @@ export function SLAsConfiguration() {
                     </div>
                   ) : (
                     <span
-                      onClick={() => {
+                      onClick={readOnly ? undefined : () => {
                         setEditingCell({ id: sla.id, field: 'expected_time_minutes' })
                         // Convert minutes to days for editing
                         const days = sla.expected_time_minutes / (24 * 60)
                         setEditValue(days.toString())
                         setEditUnit('days')
                       }}
-                      className="cursor-pointer hover:bg-blue-50 px-2 py-1 rounded"
+                      className={readOnly ? 'px-2 py-1' : 'cursor-pointer hover:bg-blue-50 px-2 py-1 rounded'}
                     >
                       {(() => {
                         const days = sla.expected_time_minutes / (24 * 60)
@@ -480,7 +489,7 @@ export function SLAsConfiguration() {
                   )}
                 </td>
                 <td className="px-4 py-3 text-sm">
-                  {editingCell?.id === sla.id && editingCell?.field === 'on_time_percentage' ? (
+                  {!readOnly && editingCell?.id === sla.id && editingCell?.field === 'on_time_percentage' ? (
                     <input
                       type="number"
                       value={editValue}
@@ -495,11 +504,11 @@ export function SLAsConfiguration() {
                     />
                   ) : (
                     <span
-                      onClick={() => {
+                      onClick={readOnly ? undefined : () => {
                         setEditingCell({ id: sla.id, field: 'on_time_percentage' })
                         setEditValue(sla.on_time_percentage.toString())
                       }}
-                      className="cursor-pointer hover:bg-blue-50 px-2 py-1 rounded"
+                      className={readOnly ? 'px-2 py-1' : 'cursor-pointer hover:bg-blue-50 px-2 py-1 rounded'}
                     >
                       {sla.on_time_percentage}%
                     </span>
@@ -516,7 +525,7 @@ export function SLAsConfiguration() {
                     {sla.is_active ? t('common.active') : t('common.inactive')}
                   </span>
                 </td>
-                <td className="px-4 py-3">
+                {!readOnly && <td className="px-4 py-3">
                   <div className="flex gap-2">
                     <button
                       onClick={() => setEditingSLA(sla)}
@@ -535,7 +544,7 @@ export function SLAsConfiguration() {
                       {t('common.delete')}
                     </button>
                   </div>
-                </td>
+                </td>}
               </tr>
             ))}
           </tbody>
@@ -549,7 +558,7 @@ export function SLAsConfiguration() {
       </div>
 
       {/* Modals */}
-      {showCreateModal && (
+      {!readOnly && showCreateModal && (
         <Modal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)} title={t('slas.create_sla')}>
           <SLAForm
             postalCenters={postalCenters}
@@ -570,7 +579,7 @@ export function SLAsConfiguration() {
         </Modal>
       )}
 
-      {showGenerateModal && (
+      {!readOnly && showGenerateModal && (
         <GenerateCombinationsModal
           postalCenters={postalCenters}
           carriers={carriers}
@@ -582,7 +591,7 @@ export function SLAsConfiguration() {
       )}
 
       {/* Edit SLA Modal */}
-      {editingSLA && (
+      {!readOnly && editingSLA && (
         <Modal isOpen={!!editingSLA} onClose={() => setEditingSLA(null)} title={t('slas.edit_sla')}>
           <SLAForm
             postalCenters={postalCenters}
@@ -610,7 +619,7 @@ export function SLAsConfiguration() {
       )}
 
       {/* Bulk Edit Modal */}
-      {showBulkEditModal && (
+      {!readOnly && showBulkEditModal && (
         <Modal isOpen={showBulkEditModal} onClose={() => setShowBulkEditModal(false)} title={t('common.bulk_edit')}>
           <BulkEditForm
             selectedCount={selectedIds.size}

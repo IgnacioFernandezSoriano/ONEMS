@@ -28,6 +28,7 @@ interface IncidentDetailsRowProps {
   formatDateTime: (dateString: string) => string;
   onReprocess?: () => void;
   onResolve?: (incidentId: string) => void;
+  readOnly?: boolean;
 }
 
 export function IncidentDetailsRow({
@@ -36,6 +37,7 @@ export function IncidentDetailsRow({
   formatDateTime,
   onReprocess,
   onResolve,
+  readOnly = false,
 }: IncidentDetailsRowProps) {
   const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
@@ -265,7 +267,7 @@ export function IncidentDetailsRow({
               )}
 
               {/* Quick Actions */}
-              {!incident.resolved && (
+              {!readOnly && !incident.resolved && (
                 <div className="bg-white rounded-lg border border-gray-200 p-4">
                   <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
                     🔧 {t('diagnosis.consolidation.details.quick_actions')}

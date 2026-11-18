@@ -1,9 +1,13 @@
 import { useState } from 'react'
 import { useLocale } from '../contexts/LocaleContext'
+import { ReadOnlyBadge } from '@/components/common/ReadOnlyBadge'
+import { usePermissions } from '@/contexts/PermissionsContext'
 import { Key, Copy, RefreshCw, AlertCircle, CheckCircle, Code, BookOpen, TestTube, BarChart3, Shield, Play } from 'lucide-react'
 
 export function EPCISAPI() {
   const { t } = useLocale()
+  const { canEdit } = usePermissions()
+  const readOnly = !canEdit('epcis_api')
   const [activeTab, setActiveTab] = useState<'overview' | 'documentation' | 'testing' | 'usage'>('overview')
   const [copied, setCopied] = useState(false)
 
@@ -28,7 +32,10 @@ export function EPCISAPI() {
     <div className="p-6 max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('hc.epcisapi.title')}</h1>
+        <div className="flex items-center gap-3 mb-2">
+          <h1 className="text-3xl font-bold text-gray-900">{t('hc.epcisapi.title')}</h1>
+          {readOnly && <ReadOnlyBadge />}
+        </div>
         <p className="text-gray-600">
           {t('hc.epcisapi.subtitle')}
         </p>

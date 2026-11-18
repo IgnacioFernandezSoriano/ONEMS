@@ -11,9 +11,13 @@ import type { PostalCenterWithReaders, Reader, PostalCenterFormData, ReaderFormD
 import { useTranslation } from '@/hooks/useTranslation'
 import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId'
 import { useAccountConfig } from '@/hooks/useAccountConfig'
+import { ReadOnlyBadge } from '@/components/common/ReadOnlyBadge'
+import { usePermissions } from '@/contexts/PermissionsContext'
 
 export function PostalCenters() {
   const { t } = useTranslation()
+  const { canEdit } = usePermissions()
+  const readOnly = !canEdit('postal_centers')
   const effectiveAccountId = useEffectiveAccountId()
   const { config } = useAccountConfig()
   const {
@@ -182,13 +186,16 @@ export function PostalCenters() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{t('postal_centers.title')}</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold text-gray-900">{t('postal_centers.title')}</h1>
+            {readOnly && <ReadOnlyBadge />}
+          </div>
           <p className="text-gray-600 mt-1">{t('postal_centers.description')}</p>
         </div>
-        <Button onClick={() => setShowCreateCenterModal(true)}>
+        {!readOnly && <Button onClick={() => setShowCreateCenterModal(true)}>
           <Plus className="h-4 w-4 mr-2" />
           {t('postal_centers.create_center')}
-        </Button>
+        </Button>}
       </div>
 
       {/* Tabs */}
@@ -331,15 +338,17 @@ export function PostalCenters() {
         onAddReader={handleAddReader}
         onEditReader={handleEditReader}
         onDeleteReader={handleDeleteReader}
+        readOnly={readOnly}
       />
         </>
       )}
 
       {activeTab === 'readers' && (
-        <ReadersList accountId={effectiveAccountId || ''} />
+        <ReadersList accountId={effectiveAccountId || ''} readOnly={readOnly} />
       )}
 
       {/* Modals */}
+      {!readOnly && (<>
       <Modal
         isOpen={showCreateCenterModal}
         onClose={() => setShowCreateCenterModal(false)}
@@ -405,6 +414,7 @@ export function PostalCenters() {
           }}
         />
       </Modal>
+      </>)}
     </div>
   )
 }
