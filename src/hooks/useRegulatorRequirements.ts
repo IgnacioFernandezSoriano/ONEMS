@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 import { useEffectiveAccountId } from './useEffectiveAccountId'
+import { useLatestRequest } from '@/lib/latestRequest'
 import {
   calculateMaterialRequirements,
   calculatePanelistRequirements
@@ -37,6 +38,7 @@ export interface MaterialRequirementPeriod {
 export function useRegulatorRequirements() {
   const { profile } = useAuth()
   const effectiveAccountId = useEffectiveAccountId()
+  const beginLoad = useLatestRequest()
   // A superadmin has no profile account: use the account selected in the sidebar
   const accountId = effectiveAccountId || profile?.account_id
   const [loading, setLoading] = useState(false)
@@ -44,6 +46,7 @@ export function useRegulatorRequirements() {
   const [requirements, setRequirements] = useState<MaterialRequirementPeriod[]>([])
 
   const loadAllRequirements = useCallback(async () => {
+    const isStale = beginLoad()
     if (!accountId) return
 
     setLoading(true)
@@ -65,6 +68,7 @@ export function useRegulatorRequirements() {
           .neq('status', 'received') // Show all pending and ordered
           .order('created_at', { ascending: false })
           .range(page * pageSize, (page + 1) * pageSize - 1)
+        if (isStale()) return
 
         if (loadError) throw loadError
         
@@ -85,6 +89,7 @@ export function useRegulatorRequirements() {
         .eq('account_id', accountId)
         .eq('location_type', 'regulator')
         .in('material_id', materialIds)
+      if (isStale()) return
 
       const stockMap: Record<string, number> = {}
       if (stocks) {
@@ -107,12 +112,13 @@ export function useRegulatorRequirements() {
 
       setRequirements(formatted)
     } catch (err) {
+      if (isStale()) return
       console.error('Error loading all requirements:', err)
       setError(err instanceof Error ? err.message : 'Error loading requirements')
     } finally {
-      setLoading(false)
+      if (!isStale()) setLoading(false)
     }
-  }, [accountId])
+  }, [accountId, beginLoad])
 
   // Load all requirements on mount
   useEffect(() => {

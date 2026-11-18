@@ -4,9 +4,11 @@ import type { SLAWithDetails, SLAFormData, GenerateCombinationsRequest } from '@
 import type { PostalCenter } from '@/lib/types_postal_centers'
 import type { Carrier, Product } from '@/lib/types'
 import { useEffectiveAccountId } from './useEffectiveAccountId'
+import { useLatestRequest } from '@/lib/latestRequest'
 
 export function useSLAs() {
   const effectiveAccountId = useEffectiveAccountId()
+  const beginLoad = useLatestRequest()
   const [slas, setSLAs] = useState<SLAWithDetails[]>([])
   const [postalCenters, setPostalCenters] = useState<PostalCenter[]>([])
   const [carriers, setCarriers] = useState<Carrier[]>([])
@@ -15,6 +17,7 @@ export function useSLAs() {
   const [error, setError] = useState<string | null>(null)
 
   const fetchAll = async () => {
+    const isStale = beginLoad()
     try {
       setLoading(true)
       setError(null)
@@ -57,6 +60,7 @@ export function useSLAs() {
         productsQuery.order('code'),
       ])
 
+      if (isStale()) return
       if (slasRes.error) throw slasRes.error
       if (postalCentersRes.error) throw postalCentersRes.error
       if (carriersRes.error) throw carriersRes.error
@@ -67,9 +71,10 @@ export function useSLAs() {
       setCarriers(carriersRes.data || [])
       setProducts(productsRes.data || [])
     } catch (err: any) {
+      if (isStale()) return
       setError(err.message)
     } finally {
-      setLoading(false)
+      if (!isStale()) setLoading(false)
     }
   }
 

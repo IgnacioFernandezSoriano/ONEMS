@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { format, isValid, parseISO } from 'date-fns'
 import { supabase } from '@/lib/supabase'
 import { PURCHASE_SHIPMENT_NOTE, type PurchaseLine } from '@/lib/hooks/useMaterialsTreatment'
+import { useLatestRequest } from '@/lib/latestRequest'
 
 type TFn = (key: string, params?: Record<string, any>, fallback?: string) => string
 
@@ -48,11 +49,14 @@ export function MaterialShipmentSheet({ incidentId, accountId, receiverPanelistI
   const [receiverDesc, setReceiverDesc] = useState<string>(DASH)
   const [error, setError] = useState<string | null>(null)
   const [hasPurchaseShipment, setHasPurchaseShipment] = useState(false)
+  const beginLoad = useLatestRequest()
 
   const load = useCallback(async () => {
+    const isStale = beginLoad()
     const { data: ships, error: e1 } = await supabase.from('material_shipments')
       .select('id, status, expected_date, panelist_id, source_panelist_id, notes, created_at')
       .eq('panelist_incident_id', incidentId).eq('account_id', accountId).order('created_at')
+    if (isStale()) return
     if (e1) throw e1
     const sh = ships ?? []
     const shipIds = sh.map((s: any) => s.id)
@@ -61,6 +65,7 @@ export function MaterialShipmentSheet({ incidentId, accountId, receiverPanelistI
         .select('id, material_shipment_id, material_id, quantity_sent, quantity_received')
         .in('material_shipment_id', shipIds).eq('account_id', accountId)
       : { data: [] as any[], error: null }
+    if (isStale()) return
     if (e2) throw e2
     const matIds = Array.from(new Set((items ?? []).map((i: any) => i.material_id)))
     const panIds = Array.from(new Set([...sh.flatMap((s: any) => [s.panelist_id, s.source_panelist_id]), receiverPanelistId].filter(Boolean)))
@@ -72,12 +77,14 @@ export function MaterialShipmentSheet({ incidentId, accountId, receiverPanelistI
         ? supabase.from('panelists').select(PANELIST_COLS).eq('account_id', accountId).in('id', panIds)
         : Promise.resolve({ data: [] as any[], error: null })
     ])
+    if (isStale()) return
     if (mats.error) throw mats.error
     if (pans.error) throw pans.error
     const nodeIds = Array.from(new Set((pans.data ?? []).map((p: any) => p.node_id).filter(Boolean)))
     const nodes: Record<string, string> = {}
     if (nodeIds.length) {
       const { data: nd, error: e3 } = await supabase.from('nodes').select('id, auto_id').eq('account_id', accountId).in('id', nodeIds)
+      if (isStale()) return
       if (e3) throw e3
       ;(nd ?? []).forEach((n: any) => { nodes[n.id] = n.auto_id })
     }

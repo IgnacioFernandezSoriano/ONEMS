@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useEffectiveAccountId } from './useEffectiveAccountId'
+import { useLatestRequest } from '@/lib/latestRequest'
+import { scopeToAccount } from '@/lib/accountScope'
 import type {
   GeneratedAllocationPlan,
   GeneratedAllocationPlanDetail,
@@ -39,6 +41,7 @@ async function fetchAllRows<T>(build: (from: number, to: number) => PromiseLike<
 
 export function useAllocationPlans() {
   const effectiveAccountId = useEffectiveAccountId()
+  const beginLoad = useLatestRequest()
   const [generatedPlans, setGeneratedPlans] = useState<GeneratedAllocationPlanWithDetails[]>([])
   const [carriers, setCarriers] = useState<Carrier[]>([])
   const [products, setProducts] = useState<Product[]>([])
@@ -57,15 +60,17 @@ export function useAllocationPlans() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const fetchPolicies = async () => {
+  const fetchPolicies = async (isStale: () => boolean) => {
     // Working weekdays of the account (rows not tied to a postal center)
     try {
       let q = supabase.from('weekly_schedule').select('day_of_week, is_working_day').is('postal_center_id', null)
       if (effectiveAccountId) q = q.eq('account_id', effectiveAccountId)
       const { data, error: e } = await q
+      if (isStale()) return
       if (e) throw e
       setWorkingDows(workingDowsFromSchedule(data || []))
     } catch (err) {
+      if (isStale()) return
       console.error('[useAllocationPlans] working days:', err)
       setWorkingDows(new Set([1, 2, 3, 4, 5]))
     }
@@ -75,6 +80,7 @@ export function useAllocationPlans() {
       if (!effectiveAccountId) throw new Error('no account')
       // Por RPC: el SELECT de account_config (RLS) no deja ver la fila a un superadmin.
       const rpc = await supabase.rpc('rpc_get_account_balance_policy', { p_account_id: effectiveAccountId })
+      if (isStale()) return
       if (!rpc.error && rpc.data) {
         setAccountPolicy(rpc.data as AccountPolicyRow)
       } else {
@@ -84,10 +90,12 @@ export function useAllocationPlans() {
           .select('date_policy, pobox_enabled')
           .eq('account_id', effectiveAccountId)
           .maybeSingle()
+        if (isStale()) return
         if (e) throw e
         setAccountPolicy((data as AccountPolicyRow | null) ?? null)
       }
     } catch (err) {
+      if (isStale()) return
       console.error('[useAllocationPlans] account policy:', err)
       setAccountPolicy(null)
     }
@@ -98,8 +106,10 @@ export function useAllocationPlans() {
       const rows = await fetchAllRows<CityPolicyRow>((from, to) =>
         supabase.from('cities').select('id, date_policy, pobox_enabled').eq('account_id', effectiveAccountId).order('id').range(from, to)
       )
+      if (isStale()) return
       setCityPolicies(rows)
     } catch (err) {
+      if (isStale()) return
       console.error('[useAllocationPlans] city policies:', err)
       setCityPolicies([])
     }
@@ -111,12 +121,14 @@ export function useAllocationPlans() {
         supabase.from('panelist_unavailability').select('panelist_id, start_date, end_date')
           .eq('account_id', effectiveAccountId).eq('status', 'active').order('id').range(from, to)
       )
+      if (isStale()) return
       if (absences.length === 0) {
         setUnavailabilityByNode(new Map())
       } else {
         const panelists = await fetchAllRows<{ id: string; node_id: string | null }>((from, to) =>
           supabase.from('panelists').select('id, node_id').eq('account_id', effectiveAccountId).not('node_id', 'is', null).order('id').range(from, to)
         )
+        if (isStale()) return
         const nodeOf = new Map(panelists.map(p => [p.id, p.node_id as string]))
         const periods = absences
           .filter(a => nodeOf.has(a.panelist_id))
@@ -124,12 +136,14 @@ export function useAllocationPlans() {
         setUnavailabilityByNode(unavailabilityKeys(periods))
       }
     } catch (err) {
+      if (isStale()) return
       console.error('[useAllocationPlans] unavailability:', err)
       setUnavailabilityByNode(new Map())
     }
   }
 
   const fetchAll = async () => {
+    const isStale = beginLoad()
     try {
       setLoading(true)
       setError(null)
@@ -145,6 +159,7 @@ export function useAllocationPlans() {
       }
 
       const { data: plansData, error: plansError } = await plansQuery.order('created_at', { ascending: false })
+      if (isStale()) return
 
       if (plansError) throw plansError
 
@@ -164,45 +179,46 @@ export function useAllocationPlans() {
           }
         })
       )
+      if (isStale()) return
 
       setGeneratedPlans(plansWithCounts)
 
       // Fetch carriers
-      const { data: carriersData, error: carriersError } = await supabase
-        .from('carriers')
-        .select('*')
-        .eq('status', 'active')
-        .order('name')
+      const { data: carriersData, error: carriersError } = await scopeToAccount(
+        supabase.from('carriers').select('*').eq('status', 'active'),
+        effectiveAccountId,
+      ).order('name')
+      if (isStale()) return
 
       if (carriersError) throw carriersError
       setCarriers(carriersData || [])
 
       // Fetch products
-      const { data: productsData, error: productsError } = await supabase
-        .from('products')
-        .select('*')
-        .eq('status', 'active')
-        .order('description')
+      const { data: productsData, error: productsError } = await scopeToAccount(
+        supabase.from('products').select('*').eq('status', 'active'),
+        effectiveAccountId,
+      ).order('description')
+      if (isStale()) return
 
       if (productsError) throw productsError
       setProducts(productsData || [])
 
       // Fetch cities
-      const { data: citiesData, error: citiesError } = await supabase
-        .from('cities')
-        .select('*')
-        .eq('status', 'active')
-        .order('name')
+      const { data: citiesData, error: citiesError } = await scopeToAccount(
+        supabase.from('cities').select('*').eq('status', 'active'),
+        effectiveAccountId,
+      ).order('name')
+      if (isStale()) return
 
       if (citiesError) throw citiesError
       setCities(citiesData || [])
 
       // Fetch nodes
-      const { data: nodesData, error: nodesError } = await supabase
-        .from('nodes')
-        .select('*')
-        .eq('status', 'active')
-        .order('auto_id')
+      const { data: nodesData, error: nodesError } = await scopeToAccount(
+        supabase.from('nodes').select('*').eq('status', 'active'),
+        effectiveAccountId,
+      ).order('auto_id')
+      if (isStale()) return
 
       if (nodesError) throw nodesError
       setNodes(nodesData || [])
@@ -215,6 +231,7 @@ export function useAllocationPlans() {
         .not('node_id', 'is', null)
       if (effectiveAccountId) panelistsQuery = panelistsQuery.eq('account_id', effectiveAccountId)
       const { data: panelistsData, error: panelistsError } = await panelistsQuery
+      if (isStale()) return
       if (panelistsError) throw panelistsError
       setPanelistNodeIds(Array.from(new Set((panelistsData || []).map((p: { node_id: string }) => p.node_id))))
 
@@ -225,14 +242,16 @@ export function useAllocationPlans() {
         .is('postal_center_id', null)
       if (effectiveAccountId) nwdQuery = nwdQuery.eq('account_id', effectiveAccountId)
       const { data: nwdData, error: nwdError } = await nwdQuery
+      if (isStale()) return
       if (nwdError) throw nwdError
       setNonWorkingDays((nwdData || []).map((d: { date: string }) => d.date))
 
-      await fetchPolicies()
+      await fetchPolicies(isStale)
     } catch (err: any) {
+      if (isStale()) return
       setError(err.message)
     } finally {
-      setLoading(false)
+      if (!isStale()) setLoading(false)
     }
   }
 

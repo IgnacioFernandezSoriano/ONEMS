@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { DeliveryStandardWithDetails, Carrier, Product, City } from '@/lib/types'
 import { useEffectiveAccountId } from './useEffectiveAccountId'
+import { useLatestRequest } from '@/lib/latestRequest'
 
 export function useDeliveryStandards() {
   const effectiveAccountId = useEffectiveAccountId()
+  const beginLoad = useLatestRequest()
   const [standards, setStandards] = useState<DeliveryStandardWithDetails[]>([])
   const [carriers, setCarriers] = useState<Carrier[]>([])
   const [products, setProducts] = useState<Product[]>([])
@@ -13,6 +15,7 @@ export function useDeliveryStandards() {
   const [error, setError] = useState<string | null>(null)
 
   const fetchAll = async () => {
+    const isStale = beginLoad()
     try {
       setLoading(true)
       setError(null)
@@ -46,6 +49,7 @@ export function useDeliveryStandards() {
         citiesQuery.order('name'),
       ])
 
+      if (isStale()) return
       if (standardsRes.error) throw standardsRes.error
       if (carriersRes.error) throw carriersRes.error
       if (productsRes.error) throw productsRes.error
@@ -56,9 +60,10 @@ export function useDeliveryStandards() {
       setProducts(productsRes.data || [])
       setCities(citiesRes.data || [])
     } catch (err: any) {
+      if (isStale()) return
       setError(err.message)
     } finally {
-      setLoading(false)
+      if (!isStale()) setLoading(false)
     }
   }
 

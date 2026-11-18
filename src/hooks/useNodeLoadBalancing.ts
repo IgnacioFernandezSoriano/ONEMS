@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase';
 import { useEffectiveAccountId } from './useEffectiveAccountId'
 import { runForCities } from '../lib/balanceAll'
 import { fetchAllPages } from '../lib/fetchAllPages'
+import { useLatestRequest } from '../lib/latestRequest'
 
 export interface NodeLoadData {
   account_id: string;
@@ -152,6 +153,7 @@ export const useNodeLoadBalancing = (
   fenceUntil: string = ''
 ) => {
   const effectiveAccountId = useEffectiveAccountId()
+  const beginLoad = useLatestRequest()
   // Use effectiveAccountId if available, otherwise fall back to passed accountId
   const activeAccountId = effectiveAccountId || accountId
 
@@ -162,8 +164,10 @@ export const useNodeLoadBalancing = (
   const [error, setError] = useState<string | null>(null);
 
   const fetchLoadData = async () => {
+    const isStale = beginLoad();
     if (!activeAccountId) {
       console.log('[useNodeLoadBalancing] No accountId provided');
+      setLoading(false);
       return;
     }
 
@@ -191,6 +195,7 @@ export const useNodeLoadBalancing = (
           p_reference_load: referenceLoad,
           p_deviation_percent: deviationPercent
         });
+      if (isStale()) return;
 
       console.log('[useNodeLoadBalancing] Query result:', { 
         dataCount: data?.length || 0, 
@@ -216,7 +221,9 @@ export const useNodeLoadBalancing = (
             .order('day')
             .range(from, to)
         );
+        if (isStale()) return;
       } catch (dayError) {
+        if (isStale()) return;
         // No fatal: los datos semanales siguen funcionando si el detalle diario falla
         console.error('[useNodeLoadBalancing] Error fetching day data:', dayError);
         dayRows = [];
@@ -232,10 +239,11 @@ export const useNodeLoadBalancing = (
         setCitySummaries(summaries);
       }
     } catch (err: any) {
+      if (isStale()) return;
       console.error('[useNodeLoadBalancing] Error fetching load data:', err);
       setError(err.message);
     } finally {
-      setLoading(false);
+      if (!isStale()) setLoading(false);
     }
   };
 
@@ -383,7 +391,7 @@ export const useNodeLoadBalancing = (
 
   useEffect(() => {
     fetchLoadData();
-  }, [activeAccountId, startDate, endDate, referenceLoad, deviationPercent]);
+  }, [activeAccountId, startDate, endDate, referenceLoad, deviationPercent, beginLoad]);
 
   return {
     loadData,

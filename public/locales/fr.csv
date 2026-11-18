@@ -3657,6 +3657,7 @@ hc.epcisapi.type,Type
 hc.epcisapi.description,Description
 hc.epcisapi.required,Obligatoire
 hc.epcisapi.phase_values,"'consolidation', 'segments', 'aggregation' ou 'all'"
+hc.epcisapi.account_param,"Facultatif. Compte concerné ; seul un superadmin peut indiquer un autre compte. Sans lui, votre propre compte."
 hc.epcisapi.example_request,Exemple de requête
 hc.epcisapi.status_desc,Obtenir l'état actuel du pipeline EPCIS
 hc.epcisapi.query_desc,Consulter les parcours agrégés avec des filtres

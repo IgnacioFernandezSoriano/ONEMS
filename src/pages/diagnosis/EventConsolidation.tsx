@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useAccount } from '@/contexts/AccountContext';
 import { supabase } from '@/lib/supabase';
+import { scopeToAccount } from '@/lib/accountScope';
+import { useLatestRequest } from '@/lib/latestRequest';
 import { Button } from '@/components/common/Button';
 import { RefreshCw, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
 import { IncidentDetailsRow } from '@/components/diagnosis/IncidentDetailsRow';
@@ -34,33 +36,48 @@ export function EventConsolidation() {
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [isConsolidating, setIsConsolidating] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const beginMetricsLoad = useLatestRequest();
+  const beginIncidentsLoad = useLatestRequest();
 
   useEffect(() => {
     loadMetrics();
     loadIncidents();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [effectiveAccountId]);
 
   const loadMetrics = async () => {
+    const isStale = beginMetricsLoad();
     try {
       // Get pending events count
-      const { count: pendingCount } = await supabase
-        .from('rfid_events_raw')
-        .select('*', { count: 'exact', head: true })
-        .eq('is_processed', false);
+      const { count: pendingCount } = await scopeToAccount(
+        supabase
+          .from('rfid_events_raw')
+          .select('*', { count: 'exact', head: true })
+          .eq('is_processed', false),
+        effectiveAccountId,
+      );
+      if (isStale()) return;
 
       // Get total incidents count (only unresolved)
-      const { count: incidentsCount } = await supabase
-        .from('incidents')
-        .select('*', { count: 'exact', head: true })
-        .eq('is_resolved', false);
+      const { count: incidentsCount } = await scopeToAccount(
+        supabase
+          .from('incidents')
+          .select('*', { count: 'exact', head: true })
+          .eq('is_resolved', false),
+        effectiveAccountId,
+      );
+      if (isStale()) return;
 
       // Get last consolidation timestamp from most recent incident
-      const { data: lastIncident } = await supabase
-        .from('incidents')
-        .select('detected_at')
-        .order('detected_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      const { data: lastIncident } = await scopeToAccount(
+        supabase
+          .from('incidents')
+          .select('detected_at')
+          .order('detected_at', { ascending: false })
+          .limit(1),
+        effectiveAccountId,
+      ).maybeSingle();
+      if (isStale()) return;
 
       setMetrics({
         pending_events: pendingCount || 0,
@@ -68,17 +85,20 @@ export function EventConsolidation() {
         last_consolidation: lastIncident?.detected_at || null,
       });
     } catch (error) {
+      if (isStale()) return;
       console.error('Error loading metrics:', error);
     } finally {
-      setIsLoading(false);
+      if (!isStale()) setIsLoading(false);
     }
   };
 
   const loadIncidents = async () => {
+    const isStale = beginIncidentsLoad();
     try {
-      const { data, error } = await supabase
-        .from('incidents')
-        .select(`
+      const { data, error } = await scopeToAccount(
+        supabase
+          .from('incidents')
+          .select(`
           id,
           tag_id,
           incident_type,
@@ -88,9 +108,12 @@ export function EventConsolidation() {
           metadata,
           postal_centers!incidents_postal_center_id_fkey(name)
         `)
-        .order('detected_at', { ascending: false })
-        .limit(50);
+          .order('detected_at', { ascending: false })
+          .limit(50),
+        effectiveAccountId,
+      );
 
+      if (isStale()) return;
       if (error) throw error;
 
       const formattedIncidents = data.map((incident: any) => ({
@@ -106,6 +129,7 @@ export function EventConsolidation() {
 
       setIncidents(formattedIncidents);
     } catch (error) {
+      if (isStale()) return;
       console.error('Error loading incidents:', error);
     }
   };

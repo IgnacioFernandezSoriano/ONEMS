@@ -3,6 +3,7 @@ import { Play, AlertCircle, CheckCircle, Loader } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { useEffectiveAccountId } from '../hooks/useEffectiveAccountId'
+import { useLatestRequest } from '../lib/latestRequest'
 
 import { useTranslation } from '@/hooks/useTranslation';
 interface GeneratorConfig {
@@ -22,6 +23,7 @@ export default function ReceiveGenerator() {
   // Cuenta efectiva: un superadmin no tiene account_id en el perfil, usa la cuenta seleccionada
   const effectiveAccountId = useEffectiveAccountId()
   const accountId = effectiveAccountId || profile?.account_id
+  const beginLoad = useLatestRequest()
 
   const [config, setConfig] = useState<GeneratorConfig>({
     recordCount: 100,
@@ -48,10 +50,11 @@ export default function ReceiveGenerator() {
 
   useEffect(() => {
     loadData()
-  }, [accountId])
+  }, [accountId, beginLoad])
 
   // Load delivery standard when products change (use first product for example)
   useEffect(() => {
+    let cancelled = false
     if (config.productIds.length > 0 && accountId) {
       supabase
         .from('delivery_standards')
@@ -60,14 +63,19 @@ export default function ReceiveGenerator() {
         .eq('product_id', config.productIds[0])
         .maybeSingle()
         .then(({ data }) => {
+          if (cancelled) return
           setDeliveryStandard(data?.standard_days || null)
         })
     } else {
       setDeliveryStandard(null)
     }
+    return () => {
+      cancelled = true
+    }
   }, [config.productIds, accountId])
 
   const loadData = async () => {
+    const isStale = beginLoad()
     if (!accountId) return
 
     try {
@@ -77,6 +85,7 @@ export default function ReceiveGenerator() {
         .select('id, code, description')
         .eq('account_id', accountId)
         .order('code')
+      if (isStale()) return
 
       setProducts(productsData || [])
 
@@ -86,6 +95,7 @@ export default function ReceiveGenerator() {
         .select('id, name')
         .eq('account_id', accountId)
         .order('name')
+      if (isStale()) return
 
       setCarriers(carriersData || [])
 
@@ -95,6 +105,7 @@ export default function ReceiveGenerator() {
         .select('id, name')
         .eq('account_id', accountId)
         .order('name')
+      if (isStale()) return
 
       setCities(citiesData || [])
 
@@ -104,6 +115,7 @@ export default function ReceiveGenerator() {
         .select('id, auto_id, city_id')
         .eq('account_id', accountId)
         .order('auto_id')
+      if (isStale()) return
 
       setNodes(nodesData || [])
 
@@ -121,6 +133,7 @@ export default function ReceiveGenerator() {
         `)
         .eq('account_id', accountId)
         .order('name')
+      if (isStale()) return
 
       // Transform data to include city_id at root level
       const panelistsWithCity = panelistsData?.map(p => ({
@@ -133,6 +146,7 @@ export default function ReceiveGenerator() {
 
       setPanelists(panelistsWithCity)
     } catch (err: any) {
+      if (isStale()) return
       console.error('Error loading data:', err)
       setError(err.message)
     }

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAccount } from '../../contexts/AccountContext'
 import { supabase } from '../../lib/supabase'
+import { useLatestRequest } from '../../lib/latestRequest'
 import { Filter, Map as MapIcon, List, Download } from 'lucide-react'
 import RoutePathMapLeaflet from '../../components/diagnosis/RoutePathMapLeaflet'
 import RoutePathTable from '../../components/diagnosis/RoutePathTable'
@@ -71,6 +72,8 @@ export default function RoutePathAnalysis() {
   const [products, setProducts] = useState<any[]>([])
   const [cities, setCities] = useState<string[]>([])
   const [postalCenters, setPostalCenters] = useState<any[]>([])
+  const beginOptionsLoad = useLatestRequest()
+  const beginPathsLoad = useLatestRequest()
 
   // Load filter options
   useEffect(() => {
@@ -83,6 +86,7 @@ export default function RoutePathAnalysis() {
   }, [filters, effectiveAccountId])
 
   const loadFilterOptions = async () => {
+    const isStale = beginOptionsLoad()
     if (!effectiveAccountId) return
 
     try {
@@ -93,6 +97,7 @@ export default function RoutePathAnalysis() {
         .eq('account_id', effectiveAccountId)
         .order('name')
 
+      if (isStale()) return
       if (carriersData) setCarriers(carriersData)
 
       // Load products
@@ -102,6 +107,7 @@ export default function RoutePathAnalysis() {
         .eq('account_id', effectiveAccountId)
         .order('code')
 
+      if (isStale()) return
       if (productsData) setProducts(productsData)
 
       // Load unique cities from journey_segments
@@ -110,6 +116,7 @@ export default function RoutePathAnalysis() {
         .select('origin_city_name, destination_city_name')
         .eq('account_id', effectiveAccountId)
 
+      if (isStale()) return
       if (segmentsData) {
         const uniqueCities = new Set<string>()
         segmentsData.forEach(row => {
@@ -125,14 +132,20 @@ export default function RoutePathAnalysis() {
         .select('id, code, name, city')
         .eq('account_id', effectiveAccountId)
 
+      if (isStale()) return
       if (centersData) setPostalCenters(centersData)
     } catch (error) {
+      if (isStale()) return
       console.error('Error loading filter options:', error)
     }
   }
 
   const loadRoutePaths = async () => {
-    if (!effectiveAccountId) return
+    const isStale = beginPathsLoad()
+    if (!effectiveAccountId) {
+      setLoading(false)
+      return
+    }
 
     setLoading(true)
     try {
@@ -150,6 +163,7 @@ export default function RoutePathAnalysis() {
 
       const { data: segments, error } = await query
 
+      if (isStale()) return
       if (error) throw error
 
       // Load carriers
@@ -158,17 +172,23 @@ export default function RoutePathAnalysis() {
         .select('id, name')
         .eq('account_id', effectiveAccountId)
 
+      if (isStale()) return
+
       // Load products
       const { data: productsData } = await supabase
         .from('products')
         .select('id, code, description')
         .eq('account_id', effectiveAccountId)
 
+      if (isStale()) return
+
       // Load postal centers
       const { data: centersData } = await supabase
         .from('postal_centers')
         .select('id, name')
         .eq('account_id', effectiveAccountId)
+
+      if (isStale()) return
 
       // Create lookup maps
       const carrierMap = new Map(carriersData?.map(c => [c.id, c.name]) || [])
@@ -345,9 +365,10 @@ export default function RoutePathAnalysis() {
       
       setRoutePaths(formattedData)
     } catch (error) {
+      if (isStale()) return
       console.error('Error loading route paths:', error)
     } finally {
-      setLoading(false)
+      if (!isStale()) setLoading(false)
     }
   }
 

@@ -2,14 +2,17 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { Panelist, PanelistWithNode, Node, City, Region } from '@/lib/types'
 import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId'
+import { useLatestRequest } from '@/lib/latestRequest'
 
 export function usePanelists() {
   const effectiveAccountId = useEffectiveAccountId()
+  const beginLoad = useLatestRequest()
   const [panelists, setPanelists] = useState<PanelistWithNode[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const fetchPanelists = async () => {
+    const isStale = beginLoad()
     try {
       setLoading(true)
       setError(null)
@@ -38,6 +41,7 @@ export function usePanelists() {
 
       const { data, error: fetchError } = await query.order('created_at', { ascending: false })
 
+      if (isStale()) return
       if (fetchError) throw fetchError
 
       // Transform data to flatten relationships.
@@ -54,10 +58,11 @@ export function usePanelists() {
 
       setPanelists(transformedData)
     } catch (err: any) {
+      if (isStale()) return
       setError(err.message)
       console.error('Error fetching panelists:', err)
     } finally {
-      setLoading(false)
+      if (!isStale()) setLoading(false)
     }
   }
 

@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
 import { useEffectiveAccountId } from './useEffectiveAccountId';
+import { useLatestRequest } from '../lib/latestRequest';
 
 export interface ProcessedEvent {
   id: number;
@@ -44,8 +45,10 @@ export const useProcessedEvents = (accountId: string | undefined) => {
   const [filteredRecords, setFilteredRecords] = useState<ProcessedEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const beginLoad = useLatestRequest();
 
   const fetchRecords = async () => {
+    const isStale = beginLoad();
     console.log('[useProcessedEvents] fetchRecords called with activeAccountId:', activeAccountId);
 
     if (!activeAccountId) {
@@ -80,6 +83,7 @@ export const useProcessedEvents = (accountId: string | undefined) => {
           .order('timestamp', { ascending: false })
           .range(start, start + pageSize - 1);
 
+        if (isStale()) return;
         if (fetchError) throw fetchError;
 
         if (data && data.length > 0) {
@@ -123,10 +127,11 @@ export const useProcessedEvents = (accountId: string | undefined) => {
       setRecords(recordsWithPairing);
       setFilteredRecords(recordsWithPairing);
     } catch (err: any) {
+      if (isStale()) return;
       setError(err.message);
       console.error('Error fetching processed events:', err);
     } finally {
-      setLoading(false);
+      if (!isStale()) setLoading(false);
     }
   };
 

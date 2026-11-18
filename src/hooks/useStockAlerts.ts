@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
-import { useAuth } from '../contexts/AuthContext'
+import { useEffectiveAccountId } from './useEffectiveAccountId'
+import { useLatestRequest } from '../lib/latestRequest'
 
 export interface StockAlert {
   id: string
@@ -23,15 +24,19 @@ export interface StockAlert {
 }
 
 export function useStockAlerts() {
-  const { profile } = useAuth()
-  const accountId = profile?.account_id
+  const accountId = useEffectiveAccountId()
+  const beginLoad = useLatestRequest()
 
   const [alerts, setAlerts] = useState<StockAlert[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const loadAlerts = async () => {
-    if (!accountId) return
+    const isStale = beginLoad()
+    if (!accountId) {
+      setLoading(false)
+      return
+    }
 
     try {
       setLoading(true)
@@ -43,6 +48,7 @@ export function useStockAlerts() {
         .select('*')
         .eq('account_id', accountId)
         .order('created_at', { ascending: false })
+      if (isStale()) return
 
       if (fetchError) throw fetchError
 
@@ -65,6 +71,7 @@ export function useStockAlerts() {
             .select('id, name, panelist_code')
             .eq('account_id', accountId)
             .in('id', panelistIds)
+          if (isStale()) return
 
           console.log('[Stock Alerts] Panelists fetched:', panelists?.length || 0)
 
@@ -102,10 +109,11 @@ export function useStockAlerts() {
 
       setAlerts(data || [])
     } catch (err: any) {
+      if (isStale()) return
       console.error('Error loading stock alerts:', err)
       setError(err.message)
     } finally {
-      setLoading(false)
+      if (!isStale()) setLoading(false)
     }
   }
 
@@ -161,7 +169,7 @@ export function useStockAlerts() {
 
   useEffect(() => {
     loadAlerts()
-  }, [accountId])
+  }, [accountId, beginLoad])
 
   return {
     alerts,

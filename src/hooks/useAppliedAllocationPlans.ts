@@ -2,14 +2,17 @@ import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { AllocationPlanWithDetails } from '@/lib/types'
 import { useEffectiveAccountId } from './useEffectiveAccountId'
+import { useLatestRequest } from '@/lib/latestRequest'
 
 export function useAppliedAllocationPlans() {
   const effectiveAccountId = useEffectiveAccountId()
+  const beginLoad = useLatestRequest()
   const [appliedPlans, setAppliedPlans] = useState<AllocationPlanWithDetails[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const fetchAll = useCallback(async () => {
+    const isStale = beginLoad()
     try {
       setLoading(true)
       setError(null)
@@ -26,6 +29,7 @@ export function useAppliedAllocationPlans() {
       }
 
       const { data: plansData, error: plansError } = await plansQuery
+      if (isStale()) return
 
       if (plansError) throw plansError
 
@@ -45,14 +49,16 @@ export function useAppliedAllocationPlans() {
           }
         })
       )
+      if (isStale()) return
 
       setAppliedPlans(plansWithCounts)
     } catch (err: any) {
+      if (isStale()) return
       setError(err.message)
     } finally {
-      setLoading(false)
+      if (!isStale()) setLoading(false)
     }
-  }, [effectiveAccountId])
+  }, [effectiveAccountId, beginLoad])
 
   useEffect(() => {
     fetchAll()

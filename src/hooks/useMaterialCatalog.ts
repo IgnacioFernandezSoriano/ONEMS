@@ -2,14 +2,16 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { MaterialCatalog, ProductMaterial } from '@/lib/types'
 import { useEffectiveAccountId } from './useEffectiveAccountId'
+import { useLatestRequest } from '@/lib/latestRequest'
 
 export function useMaterialCatalog() {
   const effectiveAccountId = useEffectiveAccountId()
+  const beginLoad = useLatestRequest()
   const [catalog, setCatalog] = useState<MaterialCatalog[]>([])
   const [productMaterials, setProductMaterials] = useState<ProductMaterial[]>([])
   const [loading, setLoading] = useState(true)
 
-  const fetchCatalog = async () => {
+  const fetchCatalog = async (isStale: () => boolean = () => false) => {
     let query = supabase.from('material_catalog').select('*')
 
     if (effectiveAccountId) {
@@ -17,12 +19,13 @@ export function useMaterialCatalog() {
     }
 
     const { data, error } = await query.order('name')
+    if (isStale()) return
     
     if (error) throw error
     setCatalog(data || [])
   }
 
-  const fetchProductMaterials = async (productId?: string) => {
+  const fetchProductMaterials = async (productId?: string, isStale: () => boolean = () => false) => {
     let query = supabase
       .from('product_materials')
       .select('*, material_catalog(*)')
@@ -38,23 +41,25 @@ export function useMaterialCatalog() {
     query = query.order('created_at')
 
     const { data, error } = await query
+    if (isStale()) return
     
     if (error) throw error
     setProductMaterials(data || [])
   }
 
   const fetchAll = async () => {
+    const isStale = beginLoad()
     setLoading(true)
     try {
-      await Promise.all([fetchCatalog(), fetchProductMaterials()])
+      await Promise.all([fetchCatalog(isStale), fetchProductMaterials(undefined, isStale)])
     } finally {
-      setLoading(false)
+      if (!isStale()) setLoading(false)
     }
   }
 
   useEffect(() => {
     fetchAll()
-  }, [effectiveAccountId])
+  }, [effectiveAccountId, beginLoad])
 
   const createCatalogItem = async (data: Partial<MaterialCatalog>) => {
     const { data: newItem, error } = await supabase

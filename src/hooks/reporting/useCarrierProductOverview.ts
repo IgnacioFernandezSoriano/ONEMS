@@ -48,6 +48,8 @@ export function useCarrierProductOverview(accountId: string | undefined, filters
       return;
     }
 
+    let cancelled = false;
+
     async function fetchData() {
       try {
         setLoading(true);
@@ -63,6 +65,7 @@ export function useCarrierProductOverview(accountId: string | undefined, filters
             product:products(id, code, description)
           `)
           .eq('account_id', activeAccountId);
+        if (cancelled) return;
 
         if (stdError) throw stdError;
 
@@ -154,6 +157,7 @@ export function useCarrierProductOverview(accountId: string | undefined, filters
           }
 
           const { data, error: err } = await query
+          if (cancelled) return
 
           if (err) throw err
 
@@ -316,13 +320,15 @@ export function useCarrierProductOverview(accountId: string | undefined, filters
 
         setData(result);
       } catch (err) {
+        if (cancelled) return;
         setError(err as Error);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
 
     fetchData();
+    return () => { cancelled = true; };
   }, [activeAccountId, filters.dateFrom, filters.dateTo, filters.routeType, filters.originCity, filters.destinationCity, filters.carrier, filters.product, accountTimezone]);
 
   return { data, loading, error, globalWarningThreshold, globalCriticalThreshold };

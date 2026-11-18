@@ -30,8 +30,12 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
     async function loadFilterOptions() {
-      if (!accountId) return;
+      if (!accountId) {
+        setLoading(false);
+        return;
+      }
 
       try {
         setLoading(true);
@@ -42,6 +46,7 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
           .select('carrier_name')
           .eq('account_id', accountId)
           .not('carrier_name', 'is', null);
+        if (cancelled) return;
 
         // Get unique products from one_db for this account
         const { data: productData } = await supabase
@@ -49,6 +54,7 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
           .select('product_name')
           .eq('account_id', accountId)
           .not('product_name', 'is', null);
+        if (cancelled) return;
 
         // Get unique origin cities
         const { data: originData } = await supabase
@@ -56,6 +62,7 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
           .select('origin_city_name')
           .eq('account_id', accountId)
           .not('origin_city_name', 'is', null);
+        if (cancelled) return;
 
         // Get unique destination cities
         const { data: destinationData } = await supabase
@@ -63,6 +70,7 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
           .select('destination_city_name')
           .eq('account_id', accountId)
           .not('destination_city_name', 'is', null);
+        if (cancelled) return;
 
         // Extract unique values
         const uniqueCarriers = [...new Set(carrierData?.map(d => d.carrier_name) || [])];
@@ -75,13 +83,15 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
         setOriginCities(uniqueOrigins.sort());
         setDestinationCities(uniqueDestinations.sort());
       } catch (error) {
+        if (cancelled) return;
         console.error('Error loading filter options:', error);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
 
     loadFilterOptions();
+    return () => { cancelled = true; };
   }, [accountId]);
 
   const handleChange = (field: string, value: string) => {

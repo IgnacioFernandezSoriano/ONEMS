@@ -31,6 +31,8 @@ export function useReportingGeneral(accountId: string | undefined, filters?: Fil
       return;
     }
 
+    let cancelled = false;
+
     async function fetchData() {
       try {
         setLoading(true);
@@ -69,6 +71,7 @@ export function useReportingGeneral(accountId: string | undefined, filters?: Fil
           }
 
           const { data, error: err } = await query
+          if (cancelled) return
 
           if (err) throw err
 
@@ -127,13 +130,15 @@ export function useReportingGeneral(accountId: string | undefined, filters?: Fil
 
         setData(mapped);
       } catch (err) {
+        if (cancelled) return;
         setError(err as Error);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
 
     fetchData();
+    return () => { cancelled = true; };
   }, [activeAccountId, filters?.originCity, filters?.destinationCity, filters?.carrier, filters?.product, filters?.dateFrom, filters?.dateTo, accountTimezone]);
 
   return { data, loading, error };

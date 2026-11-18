@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useAccount } from '../../contexts/AccountContext'
+import { useLatestRequest } from '../../lib/latestRequest'
 import { supabase } from '../../lib/supabase'
 import { Play, RefreshCw, AlertCircle, CheckCircle, Clock, Database, GitBranch, Map, Zap } from 'lucide-react'
 import { useTranslation } from '@/hooks/useTranslation'
@@ -63,40 +64,49 @@ export default function PipelineMonitor() {
   
   const [logs, setLogs] = useState<LogEntry[]>([])
   const [recentIncidents, setRecentIncidents] = useState<any[]>([])
+  const beginMetricsLoad = useLatestRequest()
+  const beginIncidentsLoad = useLatestRequest()
 
   // Load metrics
   const loadMetrics = async () => {
+    const isStale = beginMetricsLoad()
     if (!effectiveAccountId) return
 
     try {
-      const { data: status } = await supabase.rpc('rpc_get_pipeline_status')
+      const { data: status } = await supabase.rpc('rpc_get_pipeline_status', {
+        p_account_id: effectiveAccountId
+      })
+      if (isStale()) return
       
-      if (status) {
+      if (status?.success) {
         setMetrics({
-          rawEventsPending: status.raw_events_pending || 0,
-          processedEvents: status.processed_events || 0,
-          journeySegments: status.journey_segments || 0,
-          uniqueRoutes: status.unique_routes || 0
+          rawEventsPending: status.raw_events?.pending || 0,
+          processedEvents: status.processed_events?.total || 0,
+          journeySegments: status.segments?.total || 0,
+          uniqueRoutes: status.paths?.total || 0
         })
       }
     } catch (error) {
+      if (isStale()) return
       console.error('Error loading metrics:', error)
     }
   }
 
   // Load recent incidents
   const loadIncidents = async () => {
+    const isStale = beginIncidentsLoad()
     if (!effectiveAccountId) return
 
     try {
       const { data } = await supabase.rpc('rpc_get_recent_incidents', {
-        p_limit: 10
+        p_limit: 10,
+        p_account_id: effectiveAccountId
       })
+      if (isStale()) return
       
-      if (data) {
-        setRecentIncidents(data)
-      }
+      setRecentIncidents(Array.isArray(data?.incidents) ? data.incidents : [])
     } catch (error) {
+      if (isStale()) return
       console.error('Error loading incidents:', error)
     }
   }
@@ -122,10 +132,12 @@ export default function PipelineMonitor() {
 
     try {
       const { data, error } = await supabase.rpc('rpc_execute_pipeline_phase', {
-        p_phase: phaseKey
+        p_phase: phaseKey,
+        p_account_id: effectiveAccountId
       })
 
       if (error) throw error
+      if (data?.success === false) throw new Error(data.error || 'Pipeline phase failed')
 
       const duration = data.duration_seconds || 0
       
@@ -191,7 +203,7 @@ export default function PipelineMonitor() {
 
       return () => clearInterval(interval)
     }
-  }, [autoRefresh])
+  }, [autoRefresh, effectiveAccountId])
 
   // Initial load
   useEffect(() => {

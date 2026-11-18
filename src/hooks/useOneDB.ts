@@ -4,6 +4,7 @@ import { useEffectiveAccountId } from './useEffectiveAccountId'
 import { formatInTz, toUnit, unitSuffix, TimeUnit } from '../lib/accountTime'
 import { startOfDayInTz, endOfDayInTz } from '../lib/dateUtils'
 import { useAccount } from '../contexts/AccountContext'
+import { useLatestRequest } from '../lib/latestRequest'
 
 export interface OneDBRecord {
   id: string;
@@ -49,8 +50,10 @@ export const useOneDB = (accountId: string | undefined) => {
   const [filteredRecords, setFilteredRecords] = useState<OneDBRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const beginLoad = useLatestRequest();
 
   const fetchRecords = async () => {
+    const isStale = beginLoad();
     console.log('[useOneDB] fetchRecords called with activeAccountId:', activeAccountId);
     
     if (!activeAccountId) {
@@ -79,6 +82,7 @@ export const useOneDB = (accountId: string | undefined) => {
           .order('created_at', { ascending: false })
           .range(start, start + pageSize - 1)
 
+        if (isStale()) return
         if (fetchError) throw fetchError
 
         if (data && data.length > 0) {
@@ -98,10 +102,11 @@ export const useOneDB = (accountId: string | undefined) => {
       setRecords(allRecords);
       setFilteredRecords(allRecords);
     } catch (err: any) {
+      if (isStale()) return;
       setError(err.message);
       console.error('Error fetching ONE DB records:', err);
     } finally {
-      setLoading(false);
+      if (!isStale()) setLoading(false);
     }
   };
 

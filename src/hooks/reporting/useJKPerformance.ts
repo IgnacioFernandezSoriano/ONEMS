@@ -192,6 +192,8 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
       return;
     }
 
+    let cancelled = false;
+
     async function fetchData() {
       try {
         setLoading(true);
@@ -218,6 +220,7 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
           if (filters?.product) query = query.eq('product_name', filters.product)
 
           const { data, error: shipmentsErr } = await query
+          if (cancelled) return
           if (shipmentsErr) throw shipmentsErr
 
           if (data && data.length > 0) {
@@ -236,6 +239,7 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
           .from('delivery_standards')
           .select('*')
           .eq('account_id', activeAccountId);
+        if (cancelled) return;
         if (stdErr) throw stdErr;
 
         // 3. Load lookup tables
@@ -245,6 +249,7 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
           supabase.from('cities').select('id, name, region_id').eq('account_id', activeAccountId),
           supabase.from('regions').select('id, name').eq('account_id', activeAccountId),
         ]);
+        if (cancelled) return;
 
         if (carriersRes.error) throw carriersRes.error;
         if (productsRes.error) throw productsRes.error;
@@ -1173,13 +1178,15 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
         setWeeklySamples(weekly);
         setMetrics(globalMetrics);
       } catch (err) {
+        if (cancelled) return;
         setError(err as Error);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
 
     fetchData();
+    return () => { cancelled = true; };
   }, [
     activeAccountId,
     filters?.startDate,
