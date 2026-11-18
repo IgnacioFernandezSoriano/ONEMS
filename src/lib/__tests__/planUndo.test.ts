@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 
 // undoLabel es pura: no hace falta el cliente real (necesita window)
 vi.mock('@/lib/supabase', () => ({ supabase: {} }))
-import { undoLabel, type UndoEntry } from '../planUndo'
+import { undoLabel, isUndoChangedError, type UndoEntry } from '../planUndo'
 
 const t = (k: string, p?: Record<string, unknown>) => `${k}|${JSON.stringify(p ?? {})}`
 
@@ -33,5 +33,17 @@ describe('undoLabel', () => {
     const hh = String(d.getHours()).padStart(2, '0')
     const mm = String(d.getMinutes()).padStart(2, '0')
     expect(undoLabel(entry(), t)).toContain(`"time":"${hh}:${mm}"`)
+  })
+})
+
+describe('isUndoChangedError', () => {
+  it('reconoce el error de la BD por código o por mensaje', () => {
+    expect(isUndoChangedError({ code: 'PU001', message: 'x' })).toBe(true)
+    expect(isUndoChangedError({ message: 'plan_undo_changed: la última acción ya no es la 7' })).toBe(true)
+  })
+
+  it('no confunde otros errores', () => {
+    expect(isUndoChangedError({ code: '42501', message: 'Sin permiso sobre la cuenta' })).toBe(false)
+    expect(isUndoChangedError(null)).toBe(false)
   })
 })

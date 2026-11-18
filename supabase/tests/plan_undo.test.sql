@@ -5,6 +5,10 @@ SET client_min_messages = error;
 CREATE OR REPLACE FUNCTION pg_temp.fail_if(p_cond boolean, p_msg text) RETURNS void LANGUAGE plpgsql AS $$
 BEGIN IF p_cond IS NOT FALSE THEN RAISE EXCEPTION 'FAIL: %', p_msg; END IF; END $$;
 
+-- Id de la entrada que esta en lo alto de la pila de la cuenta (lo que la pantalla confirma antes de deshacer).
+CREATE OR REPLACE FUNCTION pg_temp.top(p_account uuid) RETURNS bigint LANGUAGE sql AS $$
+  SELECT max(id) FROM public.plan_undo_log WHERE account_id = p_account $$;
+
 -- Tres envíos pendientes de la cuenta 1 (D1, D2: N1->N4; D3: N2->N4) y el actor 99 (cuenta 1).
 CREATE OR REPLACE FUNCTION pg_temp.seed() RETURNS void LANGUAGE plpgsql AS $$
 BEGIN
@@ -42,7 +46,7 @@ BEGIN
                           OR jsonb_array_length(e.before_details) <> 2 OR jsonb_array_length(e.after_details) <> 2,
                           'entrada del diario: ' || row_to_json(e)::text);
 
-  r := public.plan_undo_last(A1);
+  r := public.plan_undo_last(A1, pg_temp.top(A1));
   PERFORM pg_temp.fail_if(r->>'action' <> 'update' OR (r->>'restored')::int <> 2 OR (r->>'skipped')::int <> 0
                           OR jsonb_array_length(r->'skipped_ids') <> 0, 'resultado: ' || r::text);
   SELECT count(*) INTO n FROM public.allocation_plan_details WHERE id IN (D1, D2) AND destination_node_id = N4;
@@ -79,7 +83,7 @@ BEGIN
   PERFORM pg_temp.fail_if(n <> 0, 'muestra borrada: ' || n);
   PERFORM pg_temp.fail_if((SELECT n_rows FROM public.plan_undo_log WHERE account_id = A1) <> 3, 'n_rows = 3');
 
-  r := public.plan_undo_last(A1);
+  r := public.plan_undo_last(A1, pg_temp.top(A1));
   PERFORM pg_temp.fail_if(r->>'action' <> 'delete' OR (r->>'restored')::int <> 3 OR (r->>'skipped')::int <> 0,
                           'deshacer delete: ' || r::text);
   SELECT jsonb_agg(to_jsonb(d) ORDER BY d.id) INTO v_after_d FROM public.allocation_plan_details d WHERE d.id IN (D1, D2);
@@ -105,7 +109,7 @@ BEGIN
       fecha_programada, status) VALUES
     (D1,'a0000000-0000-0000-0000-000000000001','cc000000-0000-0000-0000-000000000001',
      'b1000000-0000-0000-0000-000000000001','b3000000-0000-0000-0000-000000000003','2027-03-20','pending');
-  r := public.plan_undo_last(A1);
+  r := public.plan_undo_last(A1, pg_temp.top(A1));
   PERFORM pg_temp.fail_if((r->>'restored')::int <> 1 OR (r->>'skipped')::int <> 1
                           OR NOT (r->'skipped_ids') @> to_jsonb(ARRAY[D1]), 'salta D1: ' || r::text);
   PERFORM pg_temp.fail_if((SELECT fecha_programada FROM public.allocation_plan_details WHERE id = D1) <> '2027-03-20',
@@ -131,7 +135,7 @@ BEGIN
      'b4000000-0000-0000-0000-000000000004', '2027-04-15', 'dest_no_panelist', '{}');
   r := public.plan_action_delete(ARRAY[D1], ARRAY[F3]);
   DELETE FROM public.allocation_plans WHERE id = 'cc000000-0000-0000-0000-000000000002';
-  r := public.plan_undo_last(A1);
+  r := public.plan_undo_last(A1, pg_temp.top(A1));
   PERFORM pg_temp.fail_if((r->>'restored')::int <> 1 OR (r->>'skipped')::int <> 1
                           OR NOT (r->'skipped_ids') @> to_jsonb(ARRAY[F3]), 'salta F3: ' || r::text);
   PERFORM pg_temp.fail_if(NOT EXISTS (SELECT 1 FROM public.allocation_plan_details WHERE id = D1), 'D1 restaurada');
@@ -150,7 +154,7 @@ BEGIN
   n := public.plan_action_update(ARRAY[D1], '{"fecha_programada":"2027-03-20","tag_id":"12345678"}', 'edit');
   PERFORM pg_temp.fail_if(n <> 1, 'edit devuelve 1: ' || n);
   UPDATE public.allocation_plan_details SET status = 'sent', sent_at = now() WHERE id = D1;
-  r := public.plan_undo_last(A1);
+  r := public.plan_undo_last(A1, pg_temp.top(A1));
   PERFORM pg_temp.fail_if(r->>'action' <> 'edit' OR (r->>'restored')::int <> 0 OR (r->>'skipped')::int <> 1
                           OR NOT (r->'skipped_ids') @> to_jsonb(ARRAY[D1]), 'skipped: ' || r::text);
   PERFORM pg_temp.fail_if((SELECT status FROM public.allocation_plan_details WHERE id = D1) <> 'sent', 'sigue sent');
@@ -166,7 +170,7 @@ BEGIN;
 \ir fixtures/incident_city.sql
 DO $$ BEGIN PERFORM pg_temp.seed(); END $$;
 DO $$
-DECLARE r jsonb; n int; i int;
+DECLARE r jsonb; n int; i int; ok boolean;
   A1 constant uuid := 'a0000000-0000-0000-0000-000000000001';
   D1 constant uuid := 'd1000000-0000-0000-0000-000000000001';
 BEGIN
@@ -178,14 +182,17 @@ BEGIN
   PERFORM pg_temp.fail_if(n <> 5, '5 entradas: ' || n);
 
   FOR i IN REVERSE 6..2 LOOP
-    r := public.plan_undo_last(A1);
+    r := public.plan_undo_last(A1, pg_temp.top(A1));
     PERFORM pg_temp.fail_if(r IS NULL OR (r->>'restored')::int <> 1, 'deshacer accion ' || i || ': ' || coalesce(r::text, 'NULL'));
     -- tras deshacer la accion i, la fecha es la que dejo la accion i-1
     PERFORM pg_temp.fail_if((SELECT fecha_programada FROM public.allocation_plan_details WHERE id = D1)
                             <> make_date(2027, 3, 10 + i - 1), 'orden al deshacer ' || i);
   END LOOP;
-  r := public.plan_undo_last(A1);
-  PERFORM pg_temp.fail_if(r IS NOT NULL, 'pila vacia => NULL: ' || coalesce(r::text, 'NULL'));
+  -- pila vacia: lo que se confirmo ya no esta => error 'cambiado' (PU001)
+  ok := false;
+  BEGIN PERFORM public.plan_undo_last(A1, 12345);
+  EXCEPTION WHEN SQLSTATE 'PU001' THEN ok := true; END;
+  PERFORM pg_temp.fail_if(NOT ok, 'pila vacia => error PU001');
   PERFORM pg_temp.fail_if((SELECT fecha_programada FROM public.allocation_plan_details WHERE id = D1) <> '2027-03-11',
                           'la 1a accion ya no se puede deshacer');
 END $$;
@@ -211,11 +218,11 @@ DECLARE r jsonb;
 BEGIN
   PERFORM public.plan_action_update(ARRAY[D1], '{"fecha_programada":"2027-03-20"}', 'edit');   -- accion A
   PERFORM public.plan_action_update(ARRAY[D1], '{"fecha_programada":"2027-03-21"}', 'edit');   -- accion B
-  r := public.plan_undo_last(A1);                                                                -- deshace B
+  r := public.plan_undo_last(A1, pg_temp.top(A1));                                                                -- deshace B
   PERFORM pg_temp.fail_if((r->>'restored')::int <> 1, 'deshacer B: ' || r::text);
   -- el deshacer de B ocurrio "mas tarde": su updated_at ya no es el de la foto despues de A
   PERFORM pg_temp.tick(D1, 2);
-  r := public.plan_undo_last(A1);                                                                -- deshace A
+  r := public.plan_undo_last(A1, pg_temp.top(A1));                                                                -- deshace A
   PERFORM pg_temp.fail_if((r->>'restored')::int <> 1 OR (r->>'skipped')::int <> 0, 'deshacer A encadenado: ' || r::text);
   PERFORM pg_temp.fail_if((SELECT fecha_programada FROM public.allocation_plan_details WHERE id = D1) <> '2027-03-10',
                           'fecha original tras deshacer A y B');
@@ -240,7 +247,7 @@ BEGIN
   END $f$;
   CREATE TRIGGER zz_boom BEFORE UPDATE ON public.allocation_plan_details
     FOR EACH ROW EXECUTE FUNCTION pg_temp.tg_boom();
-  r := public.plan_undo_last(A1);
+  r := public.plan_undo_last(A1, pg_temp.top(A1));
   PERFORM pg_temp.fail_if((r->>'restored')::int <> 1 OR (r->>'skipped')::int <> 1
                           OR NOT (r->'skipped_ids') @> to_jsonb(ARRAY[D1]), 'salta D1 por el disparador: ' || r::text);
   PERFORM pg_temp.fail_if((SELECT fecha_programada FROM public.allocation_plan_details WHERE id = D2) <> '2027-03-11',
@@ -265,7 +272,7 @@ BEGIN
   PERFORM pg_temp.fail_if(v_id IS NULL, 'id devuelto');
   PERFORM pg_temp.fail_if((SELECT status FROM public.allocation_plan_details WHERE id = v_id) <> 'pending',
                           'defaults aplicados');
-  r := public.plan_undo_last(A1);
+  r := public.plan_undo_last(A1, pg_temp.top(A1));
   PERFORM pg_temp.fail_if(r->>'action' <> 'create' OR (r->>'restored')::int <> 1, 'deshacer create: ' || r::text);
   PERFORM pg_temp.fail_if(EXISTS (SELECT 1 FROM public.allocation_plan_details WHERE id = v_id), 'fila borrada');
 END $$;
@@ -292,7 +299,7 @@ BEGIN
   EXCEPTION WHEN OTHERS THEN ok := true; END;
   PERFORM pg_temp.fail_if(NOT ok, 'delete de otra cuenta');
   ok := false;
-  BEGIN PERFORM public.plan_undo_last(A1);
+  BEGIN PERFORM public.plan_undo_last(A1, pg_temp.top(A1));
   EXCEPTION WHEN OTHERS THEN ok := true; END;
   PERFORM pg_temp.fail_if(NOT ok, 'deshacer de otra cuenta');
   ok := false;
@@ -372,7 +379,7 @@ DO $$
 DECLARE f text;
 BEGIN
   FOREACH f IN ARRAY ARRAY['public.plan_action_update(uuid[],jsonb,text)', 'public.plan_action_delete(uuid[],uuid[])',
-                           'public.plan_action_create(jsonb)', 'public.plan_undo_last(uuid)'] LOOP
+                           'public.plan_action_create(jsonb)', 'public.plan_undo_last(uuid,bigint)'] LOOP
     PERFORM pg_temp.fail_if(NOT has_function_privilege('authenticated', f, 'EXECUTE'), 'authenticated EXECUTE ' || f);
     PERFORM pg_temp.fail_if(has_function_privilege('anon', f, 'EXECUTE'), 'anon sin EXECUTE ' || f);
   END LOOP;
@@ -384,4 +391,47 @@ BEGIN
   PERFORM pg_temp.fail_if(has_table_privilege('anon', 'public.plan_undo_log', 'SELECT'), 'anon sin SELECT');
   PERFORM pg_temp.fail_if((SELECT count(*) FROM pg_policies WHERE tablename = 'plan_undo_log') <> 1, 'una sola politica');
   PERFORM pg_temp.fail_if(to_regprocedure('public.delete_deferred_samples(uuid[])') IS NOT NULL, 'delete_deferred_samples no existe');
+  PERFORM pg_temp.fail_if(to_regprocedure('public.plan_undo_last(uuid)') IS NOT NULL, 'plan_undo_last(uuid) de 1 argumento no existe');
 END $$;
+
+-- ===== 10) id esperado: si lo alto de la pila no es lo confirmado, error y nada cambia =====
+BEGIN;
+\ir fixtures/incident_city.sql
+DO $$ BEGIN PERFORM pg_temp.seed(); END $$;
+DO $$
+DECLARE r jsonb; n int; ok boolean; v_first bigint; v_top bigint;
+  A1 constant uuid := 'a0000000-0000-0000-0000-000000000001';
+  D1 constant uuid := 'd1000000-0000-0000-0000-000000000001';
+  D2 constant uuid := 'd2000000-0000-0000-0000-000000000002';
+BEGIN
+  PERFORM public.plan_action_update(ARRAY[D1], '{"fecha_programada":"2027-04-01"}', 'edit');
+  v_first := pg_temp.top(A1);                 -- lo que el usuario vio y confirmo
+  PERFORM public.plan_action_update(ARRAY[D2], '{"fecha_programada":"2027-04-02"}', 'edit');  -- otro manager actua
+  v_top := pg_temp.top(A1);
+
+  ok := false;
+  BEGIN PERFORM public.plan_undo_last(A1, v_first);
+  EXCEPTION WHEN SQLSTATE 'PU001' THEN
+    ok := SQLERRM LIKE 'plan_undo_changed:%';
+  END;
+  PERFORM pg_temp.fail_if(NOT ok, 'id esperado distinto => error PU001 plan_undo_changed');
+  SELECT count(*) INTO n FROM public.plan_undo_log WHERE account_id = A1;
+  PERFORM pg_temp.fail_if(n <> 2, 'pila intacta tras el error: ' || n);
+  PERFORM pg_temp.fail_if((SELECT fecha_programada FROM public.allocation_plan_details WHERE id = D1) <> '2027-04-01'
+                          OR (SELECT fecha_programada FROM public.allocation_plan_details WHERE id = D2) <> '2027-04-02',
+                          'filas intactas tras el error');
+
+  ok := false;
+  BEGIN PERFORM public.plan_undo_last(A1, NULL);
+  EXCEPTION WHEN SQLSTATE 'PU001' THEN ok := true; END;
+  PERFORM pg_temp.fail_if(NOT ok, 'id esperado NULL => error PU001');
+
+  r := public.plan_undo_last(A1, v_top);
+  PERFORM pg_temp.fail_if(r->>'action' <> 'edit' OR (r->>'restored')::int <> 1, 'id correcto deshace: ' || r::text);
+  PERFORM pg_temp.fail_if((SELECT fecha_programada FROM public.allocation_plan_details WHERE id = D2) <> '2027-03-11',
+                          'D2 restaurada');
+  PERFORM pg_temp.fail_if((SELECT fecha_programada FROM public.allocation_plan_details WHERE id = D1) <> '2027-04-01',
+                          'D1 sin tocar');
+  PERFORM pg_temp.fail_if(pg_temp.top(A1) <> v_first, 'queda la entrada de D1 arriba');
+END $$;
+ROLLBACK;

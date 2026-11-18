@@ -155,10 +155,13 @@ export function useAllocationPlanDetails() {
 
         if (error) throw error
       } else {
-        // Edición normal: por RPC para que quede en la pila de Deshacer
+        // Edición normal: por RPC para que quede en la pila de Deshacer. Si el parche no trae ninguna columna
+        // real no hay nada que cambiar (la RPC rechazaría el cambio vacío).
+        const patch = toColumnPatch(updates as Record<string, any>)
+        if (Object.keys(patch).length === 0) return
         const { error } = await supabase.rpc('plan_action_update', {
           p_ids: [id],
-          p_patch: toColumnPatch(updates as Record<string, any>),
+          p_patch: patch,
           p_action: 'edit',
         })
 

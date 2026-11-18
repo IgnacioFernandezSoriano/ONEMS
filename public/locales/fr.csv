@@ -5264,9 +5264,9 @@ reported_incidents.gps.status.no_location,Aucune position reçue
 reported_incidents.gps.status.gps_unavailable,GPS indisponible
 reported_incidents.gps.status.no_consent,Aucune permission donnée
 reported_incidents.gps.status.no_answer,Sans réponse
-allocation_plans.undo,Annuler
-allocation_plans.undo_confirm,Annuler {label} ?
-allocation_plans.undo_done,Annulé : {count} enregistrements restaurés
+allocation_plans.undo,Défaire
+allocation_plans.undo_confirm,Défaire {label} ?
+allocation_plans.undo_done,Défait : {count} enregistrements restaurés
 allocation_plans.undo_skipped,{count} enregistrements n'ont pas été modifiés car ils ont changé depuis
 allocation_plans.undo_label,{action} {count} enregistrements · {user} · {time}
 allocation_plans.undo_action_delete,Supprimer
@@ -5274,3 +5274,5 @@ allocation_plans.undo_action_update,Modifier en masse
 allocation_plans.undo_action_cancel,Annuler (statut)
 allocation_plans.undo_action_edit,Modifier
 allocation_plans.undo_action_create,Créer
+allocation_plans.undo_changed,La dernière action a changé ; vérifiez avant de défaire.
+allocation_plans.bulk_only_deferred,Les échantillons à compenser peuvent seulement être supprimés.

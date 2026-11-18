@@ -137,13 +137,17 @@ BEGIN
   BEGIN
     EXECUTE p_sql USING p_rows;
     RETURN v_failed;
-  EXCEPTION WHEN OTHERS THEN
+  EXCEPTION
+    WHEN query_canceled THEN RAISE;  -- tiempo agotado / cancelación: abortar, no reintentar
+    WHEN OTHERS THEN
     NULL;  -- se reintenta fila a fila para salvar las que sí se pueden
   END;
   FOR v_row IN SELECT x FROM jsonb_array_elements(p_rows) x LOOP
     BEGIN
       EXECUTE p_sql USING jsonb_build_array(v_row);
-    EXCEPTION WHEN OTHERS THEN
+    EXCEPTION
+      WHEN query_canceled THEN RAISE;
+      WHEN OTHERS THEN
       RAISE WARNING 'plan_undo_apply: fila % no restaurada: % (%)', v_row->>'id', SQLERRM, SQLSTATE;
       v_failed := v_failed || (v_row->>'id')::uuid;
     END;
@@ -307,9 +311,12 @@ END $$;
 
 -- ===================== Deshacer =====================
 
--- Deshace la entrada más reciente de la cuenta y la quita de la pila. NULL si la pila está vacía.
+-- Deshace la entrada más reciente de la cuenta y la quita de la pila.
+-- p_expected_id = id de la entrada que el usuario vio y confirmó. Si lo alto de la pila ya no es esa entrada
+-- (otro manager actuó o deshizo entretanto, o la pila está vacía), no cambia nada y lanza el error
+-- SQLSTATE 'PU001' con mensaje 'plan_undo_changed: ...'; la pantalla lo traduce y recarga la entrada.
 -- Devuelve {"action", "restored", "skipped", "skipped_ids"}.
-CREATE OR REPLACE FUNCTION public.plan_undo_last(p_account_id uuid)
+CREATE OR REPLACE FUNCTION public.plan_undo_last(p_account_id uuid, p_expected_id bigint)
 RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' SET "TimeZone" = 'UTC' AS $$
 DECLARE
   e public.plan_undo_log%ROWTYPE;
@@ -327,8 +334,10 @@ BEGIN
 
   SELECT * INTO e FROM public.plan_undo_log l
    WHERE l.account_id = p_account_id ORDER BY l.id DESC LIMIT 1 FOR UPDATE;
-  IF NOT FOUND THEN
-    RETURN NULL;
+  IF NOT FOUND OR p_expected_id IS NULL OR e.id <> p_expected_id THEN
+    RAISE EXCEPTION 'plan_undo_changed: la última acción ya no es la % (ahora: %)', p_expected_id,
+      CASE WHEN FOUND THEN e.id::text ELSE 'ninguna' END
+      USING ERRCODE = 'PU001';
   END IF;
 
   IF e.action IN ('update','cancel','edit','create') THEN
@@ -387,11 +396,11 @@ END $$;
 REVOKE ALL ON FUNCTION public.plan_action_update(uuid[], jsonb, text) FROM PUBLIC, anon;
 REVOKE ALL ON FUNCTION public.plan_action_delete(uuid[], uuid[]) FROM PUBLIC, anon;
 REVOKE ALL ON FUNCTION public.plan_action_create(jsonb) FROM PUBLIC, anon;
-REVOKE ALL ON FUNCTION public.plan_undo_last(uuid) FROM PUBLIC, anon;
+REVOKE ALL ON FUNCTION public.plan_undo_last(uuid, bigint) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.plan_action_update(uuid[], jsonb, text) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.plan_action_delete(uuid[], uuid[]) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.plan_action_create(jsonb) TO authenticated;
-GRANT EXECUTE ON FUNCTION public.plan_undo_last(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.plan_undo_last(uuid, bigint) TO authenticated;
 
 COMMENT ON FUNCTION public.plan_action_update(uuid[], jsonb, text) IS
   'Lista de Allocation Plans: cambia/cancela/edita filas y lo apunta en el diario de deshacer de la cuenta.';
@@ -399,5 +408,5 @@ COMMENT ON FUNCTION public.plan_action_delete(uuid[], uuid[]) IS
   'Lista de Allocation Plans: borra envíos y muestras por compensar pending y lo apunta en el diario de deshacer.';
 COMMENT ON FUNCTION public.plan_action_create(jsonb) IS
   'Lista de Allocation Plans: crea un registro y lo apunta en el diario de deshacer.';
-COMMENT ON FUNCTION public.plan_undo_last(uuid) IS
+COMMENT ON FUNCTION public.plan_undo_last(uuid, bigint) IS
   'Deshace la última acción de la cuenta en la lista de Allocation Plans; salta las filas que cambiaron después.';

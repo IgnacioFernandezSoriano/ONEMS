@@ -1,5 +1,5 @@
 import { isPendingLike, isDeferredStatus } from '@/lib/planStatus'
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { useAllocationPlanDetails } from '@/lib/hooks/useAllocationPlanDetails'
 import { AllocationPlanFilters } from '@/components/allocation-plans/AllocationPlanFilters'
 import { AllocationPlanDetailRow } from '@/components/allocation-plans/AllocationPlanDetailRow'
@@ -14,7 +14,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { useAccount } from '@/contexts/AccountContext'
 import { formatInTz } from '@/lib/accountTime'
 import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId'
-import { fetchLastUndo, undoLast, undoLabel, type UndoEntry } from '@/lib/planUndo'
+import { fetchLastUndo, undoLast, undoLabel, isUndoChangedError, type UndoEntry } from '@/lib/planUndo'
 import { Undo2 } from 'lucide-react'
 export function AllocationPlans() {
   const { t } = useTranslation();
@@ -44,15 +44,22 @@ export function AllocationPlans() {
   const [lastUndo, setLastUndo] = useState<UndoEntry | null>(null)
   const [undoing, setUndoing] = useState(false)
 
-  const reloadLastUndo = async () => {
+  // Respuestas fuera de orden (p. ej. el superadmin cambia de cuenta rápido): solo cuenta la última petición
+  const undoReqSeq = useRef(0)
+  const reloadLastUndo = async (): Promise<UndoEntry | null> => {
+    const seq = ++undoReqSeq.current
     if (!effectiveAccountId) {
       setLastUndo(null)
-      return
+      return null
     }
     try {
-      setLastUndo(await fetchLastUndo(effectiveAccountId))
+      const entry = await fetchLastUndo(effectiveAccountId)
+      if (seq !== undoReqSeq.current) return null  // respuesta vieja: se ignora
+      setLastUndo(entry)
+      return entry
     } catch (err) {
       console.error('Error loading last undo entry:', err)
+      return null
     }
   }
 
@@ -75,11 +82,15 @@ export function AllocationPlans() {
 
   const handleUndo = async () => {
     if (!lastUndo || !effectiveAccountId) return
-    const label = undoLabel(lastUndo, t)
+    // Antes de confirmar se vuelve a leer la última acción: se confirma (y se deshace) la que hay ahora
+    const accountId = effectiveAccountId
+    const fresh = await reloadLastUndo()
+    if (!fresh) return
+    const label = undoLabel(fresh, t)
     if (!confirm(t('allocation_plans.undo_confirm', { label }))) return
     try {
       setUndoing(true)
-      const result = await undoLast(effectiveAccountId)
+      const result = await undoLast(accountId, fresh.id)
       if (result) {
         let msg = t('allocation_plans.undo_done', { count: result.restored })
         if (result.skipped > 0) msg += '\n' + t('allocation_plans.undo_skipped', { count: result.skipped })
@@ -87,7 +98,8 @@ export function AllocationPlans() {
       }
       await refresh()
     } catch (err: any) {
-      alert(err.message)
+      // Otra persona actuó o deshizo entre la confirmación y el deshacer: no se ha tocado nada
+      alert(isUndoChangedError(err) ? t('allocation_plans.undo_changed') : err.message)
     } finally {
       setUndoing(false)
       reloadLastUndo()
@@ -392,6 +404,15 @@ export function AllocationPlans() {
   const deferredIds = new Set(filteredDetails.filter(d => isDeferredStatus(d.status)).map(d => d.id))
   const selectableDetails = filteredDetails
   const selectedPlanIds = () => Array.from(selectedIds).filter(id => !deferredIds.has(id))
+  // Si solo hay muestras por compensar seleccionadas, cambiar/cancelar no haría nada: se avisa y se mantiene
+  // la selección.
+  const onlyPlanRowsOrWarn = () => {
+    if (selectedIds.size > 0 && selectedPlanIds().length === 0) {
+      alert(t('allocation_plans.bulk_only_deferred'))
+      return false
+    }
+    return true
+  }
 
   const handleToggleSelect = (id: string) => {
     setSelectedIds((prev) => {
@@ -418,6 +439,7 @@ export function AllocationPlans() {
   }
 
   const handleBulkUpdateOriginNode = async (nodeId: string) => {
+    if (!onlyPlanRowsOrWarn()) return
     try {
       await bulkUpdateDetails(selectedPlanIds(), { origin_node_id: nodeId })
     } finally {
@@ -427,6 +449,7 @@ export function AllocationPlans() {
   }
 
   const handleBulkUpdateDestinationNode = async (nodeId: string) => {
+    if (!onlyPlanRowsOrWarn()) return
     try {
       await bulkUpdateDetails(selectedPlanIds(), { destination_node_id: nodeId })
     } finally {
@@ -442,6 +465,7 @@ export function AllocationPlans() {
     const month = dateObj.getMonth() + 1
     const year = dateObj.getFullYear()
 
+    if (!onlyPlanRowsOrWarn()) return
     try {
       await bulkUpdateDetails(selectedPlanIds(), {
         fecha_programada: date,
@@ -456,6 +480,7 @@ export function AllocationPlans() {
   }
 
   const handleBulkCancel = async () => {
+    if (!onlyPlanRowsOrWarn()) return
     try {
       await bulkUpdateDetails(selectedPlanIds(), { status: 'cancelled' }, 'cancel')
     } finally {

@@ -19,24 +19,33 @@ export interface UndoResult {
   skipped_ids: string[]
 }
 
-// Última acción de la cuenta. Nunca se piden las columnas jsonb (pueden pesar mucho).
+// Última acción de la cuenta (la de id más alto: es la que deshace plan_undo_last). Nunca se piden las columnas jsonb (pueden pesar mucho).
 export async function fetchLastUndo(accountId: string): Promise<UndoEntry | null> {
   const { data, error } = await supabase
     .from('plan_undo_log')
     .select('id, action, n_rows, user_name, created_at')
     .eq('account_id', accountId)
-    .order('created_at', { ascending: false })
     .order('id', { ascending: false })
     .limit(1)
   if (error) throw error
   return (data && data[0] ? (data[0] as UndoEntry) : null)
 }
 
-// Revierte la última acción de la cuenta; null si no había ninguna.
-export async function undoLast(accountId: string): Promise<UndoResult | null> {
-  const { data, error } = await supabase.rpc('plan_undo_last', { p_account_id: accountId })
+// Revierte la última acción de la cuenta, solo si sigue siendo expectedId (la que el usuario confirmó). Si en
+// medio otra persona actuó o deshizo, la BD no cambia nada y lanza el error PU001 (ver isUndoChangedError).
+export async function undoLast(accountId: string, expectedId: number): Promise<UndoResult | null> {
+  const { data, error } = await supabase.rpc('plan_undo_last', {
+    p_account_id: accountId,
+    p_expected_id: expectedId,
+  })
   if (error) throw error
   return (data as UndoResult | null) ?? null
+}
+
+// Error de plan_undo_last cuando la última acción ya no es la confirmada.
+export function isUndoChangedError(err: unknown): boolean {
+  const e = err as { code?: string; message?: string } | null
+  return e?.code === 'PU001' || (typeof e?.message === 'string' && e.message.includes('plan_undo_changed'))
 }
 
 // Texto de la entrada: "<acción> <n> registros · <usuario> · HH:mm" (hora local del navegador, 24 h).
