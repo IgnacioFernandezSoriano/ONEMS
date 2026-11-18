@@ -156,17 +156,17 @@ export function OneDBAPI() {
                   <div className="flex gap-2">
                     <input
                       type="text"
-                      value={apiKey.api_key}
+                      value={readOnly ? `${'•'.repeat(12)}${apiKey.api_key.slice(-4)}` : apiKey.api_key}
                       readOnly
                       className="flex-1 px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 font-mono text-sm"
                     />
-                    <button
+                    {!readOnly && <button
                       onClick={handleCopyApiKey}
                       className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2"
                     >
                       {copied ? <CheckCircle className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
                       {copied ? t('onedb_api.copied') : t('onedb_api.copy')}
-                    </button>
+                    </button>}
                   </div>
                   <p className="text-xs text-gray-500 mt-2">
                     {t('onedb_api.created_at')}: {new Date(apiKey.created_at).toLocaleString()}
