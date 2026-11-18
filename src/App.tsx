@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import { AccountProvider } from './contexts/AccountContext'
+import { PermissionsProvider } from './contexts/PermissionsContext'
 import { TimeUnitProvider } from './contexts/TimeUnitContext'
 import { ReportingFiltersProvider } from './contexts/ReportingFiltersContext'
 import { SidebarProvider } from './contexts/SidebarContext'
@@ -63,6 +64,7 @@ function App() {
     <AuthProvider>
       <LocaleProvider>
         <AccountProvider>
+        <PermissionsProvider>
         <TimeUnitProvider>
           <BrowserRouter>
           <Routes>
@@ -535,6 +537,7 @@ function App() {
           </Routes>
         </BrowserRouter>
         </TimeUnitProvider>
+        </PermissionsProvider>
         </AccountProvider>
       </LocaleProvider>
     </AuthProvider>
