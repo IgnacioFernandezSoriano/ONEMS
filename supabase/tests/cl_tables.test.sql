@@ -15,6 +15,9 @@ END $$;
 CREATE OR REPLACE FUNCTION pg_temp.raises(p_sql text) RETURNS boolean LANGUAGE plpgsql AS $$
 BEGIN EXECUTE p_sql; RETURN false; EXCEPTION WHEN OTHERS THEN RETURN true; END $$;
 
+CREATE OR REPLACE FUNCTION pg_temp.sqlstate_of(p_sql text) RETURNS text LANGUAGE plpgsql AS $$
+BEGIN EXECUTE p_sql; RETURN NULL; EXCEPTION WHEN OTHERS THEN RETURN SQLSTATE; END $$;
+
 BEGIN;
 \set fixture_sin_roles 1
 \ir fixtures/incident_city.sql
@@ -139,8 +142,29 @@ BEGIN
   -- cl_samples solo View para AM: no escribe. cl_monitor Edit: escribe alertas.
   PERFORM pg_temp.ok(pg_temp.raises($q$INSERT INTO public.cl_samples (account_id, item_id) VALUES ('a0000000-0000-0000-0000-000000000001','ZZ')$q$),
     'AM (View en cl_samples) no inserta muestras');
-  PERFORM pg_temp.ok(NOT pg_temp.raises($q$INSERT INTO public.cl_alerts (account_id, alert_type, severity) VALUES ('a0000000-0000-0000-0000-000000000001','y','low')$q$),
-    'AM (Edit en cl_monitor) inserta alertas');
+  PERFORM pg_temp.ok(pg_temp.raises($q$INSERT INTO public.cl_alerts (account_id, alert_type, severity) VALUES ('a0000000-0000-0000-0000-000000000001','y','low')$q$),
+    'AM no inserta alertas (solo funciones)');
+  PERFORM pg_temp.ok(pg_temp.raises($q$INSERT INTO public.cl_demands (account_id, plan_id, feed_id, random_seed, payload)
+    VALUES ('a0000000-0000-0000-0000-000000000001','90000000-0000-0000-0000-0000000000a1','f0000000-0000-0000-0000-0000000000a1','s','{}')$q$),
+    'AM no inserta demandas');
+  PERFORM pg_temp.ok(pg_temp.raises($q$DELETE FROM public.cl_samples WHERE account_id = 'a0000000-0000-0000-0000-000000000001'$q$),
+    'AM no borra muestras');
+  PERFORM pg_temp.ok(pg_temp.raises($q$UPDATE public.cl_samples SET status = 'voided'$q$), 'AM no actualiza muestras');
+  UPDATE public.cl_alerts SET status = 'acknowledged', acknowledged_by = auth.uid(), acknowledged_at = now()
+   WHERE account_id = 'a0000000-0000-0000-0000-000000000001';
+  PERFORM pg_temp.ok((SELECT count(*) FROM public.cl_alerts WHERE status = 'acknowledged') = 1, 'AM actualiza cl_alerts.status');
+  PERFORM pg_temp.ok(pg_temp.raises($q$UPDATE public.cl_alerts SET alert_type = 'z'$q$), 'AM no actualiza cl_alerts.alert_type');
+  PERFORM pg_temp.ok(pg_temp.raises($q$DELETE FROM public.cl_alerts$q$), 'AM no borra alertas');
+  -- referencias de otra cuenta
+  PERFORM pg_temp.ok(pg_temp.sqlstate_of($q$INSERT INTO public.cl_plans (account_id, plan_name, carrier_id, product_id, total_samples, start_date, end_date)
+    VALUES ('a0000000-0000-0000-0000-000000000001','Y','ca000000-0000-0000-0000-000000000002','cb000000-0000-0000-0000-000000000001',5,'2027-04-01','2027-04-30')$q$) = '23514', 'plan con carrier de B');
+  PERFORM pg_temp.ok(pg_temp.sqlstate_of($q$INSERT INTO public.cl_plans (account_id, plan_name, carrier_id, product_id, total_samples, start_date, end_date)
+    VALUES ('a0000000-0000-0000-0000-000000000001','Y','ca000000-0000-0000-0000-000000000001','cb000000-0000-0000-0000-000000000002',5,'2027-04-01','2027-04-30')$q$) = '23514', 'plan con producto de B');
+  PERFORM pg_temp.ok(pg_temp.sqlstate_of($q$INSERT INTO public.cl_plans (account_id, plan_name, carrier_id, product_id, total_samples, start_date, end_date, feed_id)
+    VALUES ('a0000000-0000-0000-0000-000000000001','Y','ca000000-0000-0000-0000-000000000001','cb000000-0000-0000-0000-000000000001',5,'2027-04-01','2027-04-30','f0000000-0000-0000-0000-0000000000a2')$q$) = '23514', 'plan con feed de B');
+  PERFORM pg_temp.ok(pg_temp.sqlstate_of($q$INSERT INTO public.cl_value_mappings (account_id, carrier_id, kind, carrier_value, onems_value)
+    VALUES ('a0000000-0000-0000-0000-000000000001','ca000000-0000-0000-0000-000000000002','product','Q','PR')$q$) = '23514', 'mapeo con carrier de B');
+  PERFORM pg_temp.ok(pg_temp.sqlstate_of($q$UPDATE public.cl_plans SET carrier_id = 'ca000000-0000-0000-0000-000000000002' WHERE plan_name = 'Nuevo'$q$) = '23514', 'UPDATE de carrier a B');
   DELETE FROM public.cl_feeds WHERE name = 'Otro';
   PERFORM pg_temp.ok(NOT EXISTS (SELECT 1 FROM public.cl_feeds WHERE name = 'Otro'), 'AM borra su feed');
 END $$;
@@ -154,8 +178,9 @@ DECLARE n int;
 BEGIN
   INSERT INTO public.cl_plans (account_id, plan_name, carrier_id, product_id, total_samples, start_date, end_date)
     VALUES ('a0000000-0000-0000-0000-000000000001','Plan APM','ca000000-0000-0000-0000-000000000001','cb000000-0000-0000-0000-000000000001',5,'2027-05-01','2027-05-31');
-  INSERT INTO public.cl_plan_quotas (account_id, plan_id, origin_city_id, destination_city_id, iso_year, iso_week, period_start, period_end, samples_planned)
-    VALUES ('a0000000-0000-0000-0000-000000000001','90000000-0000-0000-0000-0000000000a1','c2000000-0000-0000-0000-000000000002','c1000000-0000-0000-0000-000000000001',2027,10,'2027-03-08','2027-03-14',3);
+  PERFORM pg_temp.ok(pg_temp.raises($q$INSERT INTO public.cl_plan_quotas (account_id, plan_id, origin_city_id, destination_city_id, iso_year, iso_week, period_start, period_end, samples_planned)
+    VALUES ('a0000000-0000-0000-0000-000000000001','90000000-0000-0000-0000-0000000000a1','c2000000-0000-0000-0000-000000000002','c1000000-0000-0000-0000-000000000001',2027,10,'2027-03-08','2027-03-14',3)$q$),
+    'APM no inserta cuotas (solo funciones)');
   PERFORM pg_temp.ok(pg_temp.raises($q$INSERT INTO public.cl_feeds (account_id, carrier_id, name) VALUES ('a0000000-0000-0000-0000-000000000001','ca000000-0000-0000-0000-000000000001','nope')$q$),
     'APM no inserta en cl_feeds');
   SELECT count(*) INTO n FROM public.cl_feeds;
@@ -164,8 +189,9 @@ BEGIN
   PERFORM pg_temp.ok(n = 1, 'APM ve cl_samples (View)');
   SELECT count(*) INTO n FROM public.cl_alerts;
   PERFORM pg_temp.ok(n >= 1, 'APM ve cl_alerts (View)');
-  PERFORM pg_temp.ok(pg_temp.raises($q$INSERT INTO public.cl_alerts (account_id, alert_type, severity) VALUES ('a0000000-0000-0000-0000-000000000001','y','low')$q$),
-    'APM (View en cl_monitor) no inserta alertas');
+  UPDATE public.cl_alerts SET status = 'dismissed';
+  GET DIAGNOSTICS n = ROW_COUNT;
+  PERFORM pg_temp.ok(n = 0, 'APM (View en cl_monitor) no actualiza alertas');
   -- UPDATE sin permiso no cambia filas
   UPDATE public.cl_feeds SET name = 'hack';
   GET DIAGNOSTICS n = ROW_COUNT;
@@ -203,6 +229,15 @@ BEGIN
 END $$;
 RESET ROLE;
 
+-- 6b. Ciudad de otra cuenta en una cuota (como postgres; el trigger vale para cualquiera).
+INSERT INTO public.regions (id, account_id, name, code) VALUES ('e0000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000002','Reg2','R2');
+INSERT INTO public.cities (id, account_id, region_id, name, code) VALUES ('c3000000-0000-0000-0000-000000000003','a0000000-0000-0000-0000-000000000002','e0000000-0000-0000-0000-000000000002','City3','C3');
+DO $$
+BEGIN
+  PERFORM pg_temp.ok(pg_temp.sqlstate_of($q$INSERT INTO public.cl_plan_quotas (account_id, plan_id, origin_city_id, destination_city_id, iso_year, iso_week, period_start, period_end, samples_planned)
+    VALUES ('a0000000-0000-0000-0000-000000000001','90000000-0000-0000-0000-0000000000a1','c1000000-0000-0000-0000-000000000001','c3000000-0000-0000-0000-000000000003',2027,11,'2027-03-15','2027-03-21',1)$q$) = '23514', 'cuota con ciudad de B');
+END $$;
+
 -- 7. Muestras: unicidad entre activas; vale si la anterior esta anulada; borrar muestra borra one_db.
 DO $$
 BEGIN
@@ -222,8 +257,10 @@ VALUES ('a0000000-0000-0000-0000-000000000001','ITEM1','P','Carrier','Prod','Cit
 DO $$
 BEGIN
   PERFORM pg_temp.ok((SELECT count(*) FROM public.one_db WHERE cl_sample_id = '94000000-0000-0000-0000-0000000000b1') = 1, 'one_db enlazada');
+  PERFORM pg_temp.ok(pg_temp.sqlstate_of($q$DELETE FROM public.cl_samples WHERE id = '94000000-0000-0000-0000-0000000000b1'$q$) = '23503', 'borrar muestra con one_db: RESTRICT');
+  DELETE FROM public.one_db WHERE cl_sample_id = '94000000-0000-0000-0000-0000000000b1';
   DELETE FROM public.cl_samples WHERE id = '94000000-0000-0000-0000-0000000000b1';
-  PERFORM pg_temp.ok((SELECT count(*) FROM public.one_db WHERE cl_sample_id = '94000000-0000-0000-0000-0000000000b1') = 0, 'borrar muestra borra one_db');
+  PERFORM pg_temp.ok(NOT EXISTS (SELECT 1 FROM public.cl_samples WHERE id = '94000000-0000-0000-0000-0000000000b1'), 'muestra borrada tras quitar one_db');
 END $$;
 
 -- 8. Restricciones de forma.
@@ -282,8 +319,10 @@ DO $$
 BEGIN
   PERFORM pg_temp.ok((SELECT count(*) FROM public.api_keys WHERE feed_id = 'f0000000-0000-0000-0000-0000000000a1') = 2, 'dos claves del feed A1');
   DELETE FROM public.cl_demands WHERE feed_id = 'f0000000-0000-0000-0000-0000000000a1';
+  PERFORM pg_temp.ok(pg_temp.sqlstate_of($q$DELETE FROM public.cl_feeds WHERE id = 'f0000000-0000-0000-0000-0000000000a1'$q$) = '23503', 'feed con claves: RESTRICT');
+  DELETE FROM public.api_keys WHERE feed_id = 'f0000000-0000-0000-0000-0000000000a1';
   DELETE FROM public.cl_feeds WHERE id = 'f0000000-0000-0000-0000-0000000000a1';
-  PERFORM pg_temp.ok(NOT EXISTS (SELECT 1 FROM public.api_keys WHERE feed_id = 'f0000000-0000-0000-0000-0000000000a1'), 'borrar feed borra sus claves (CASCADE)');
+  PERFORM pg_temp.ok(NOT EXISTS (SELECT 1 FROM public.cl_feeds WHERE id = 'f0000000-0000-0000-0000-0000000000a1'), 'feed borrado tras quitar claves');
 END $$;
 
 -- 10. Reset de cuenta borra cl_* y puntos de lectura de transportista.
@@ -294,6 +333,12 @@ INSERT INTO public.cl_feeds (id, account_id, carrier_id, name) VALUES
   ('f0000000-0000-0000-0000-0000000000a3','a0000000-0000-0000-0000-000000000001','ca000000-0000-0000-0000-000000000001','F3');
 INSERT INTO public.cl_samples (account_id, carrier_id, item_id, start_reader_id)
   VALUES ('a0000000-0000-0000-0000-000000000001','ca000000-0000-0000-0000-000000000001','ITEM9', (SELECT id FROM public.readers WHERE name = 'P1'));
+INSERT INTO public.api_keys (account_id, key_hash, scope, feed_id)
+  VALUES ('a0000000-0000-0000-0000-000000000001', repeat('9',64), 'carrier_feed', 'f0000000-0000-0000-0000-0000000000a3');
+INSERT INTO public.one_db (account_id, tag_id, plan_name, carrier_name, product_name, origin_city_name, destination_city_name,
+                           sent_at, received_at, total_transit_days, source_data_snapshot, source, cl_sample_id, carrier_id)
+VALUES ('a0000000-0000-0000-0000-000000000001','ITEM9','P','Carrier','Prod','City1','City2', now() - interval '2 day', now(), 2, '{}',
+        'carrier',(SELECT id FROM public.cl_samples WHERE item_id = 'ITEM9'),'ca000000-0000-0000-0000-000000000001');
 DO $$
 DECLARE r jsonb;
 BEGIN
@@ -305,7 +350,11 @@ BEGIN
   PERFORM pg_temp.ok(NOT EXISTS (SELECT 1 FROM public.readers WHERE capture_source = 'carrier_scan' AND account_id = 'a0000000-0000-0000-0000-000000000001'), 'reset borra puntos carrier_scan');
   PERFORM pg_temp.ok(EXISTS (SELECT 1 FROM public.readers WHERE reader_id = 'RFID1'), 'reset conserva lectores RFID');
   PERFORM pg_temp.ok(EXISTS (SELECT 1 FROM public.cl_plans WHERE account_id = 'a0000000-0000-0000-0000-000000000002'), 'reset no toca A2');
+  PERFORM pg_temp.ok(NOT EXISTS (SELECT 1 FROM public.api_keys WHERE feed_id = 'f0000000-0000-0000-0000-0000000000a3'), 'reset borra claves de feeds');
   PERFORM pg_temp.ok(pg_get_functiondef('public.admin_reset_demo2()'::regprocedure) LIKE '%cl_samples%', 'admin_reset_demo2 borra cl_*');
+  PERFORM pg_temp.ok((SELECT proconfig FROM pg_proc WHERE oid = 'public.admin_reset_demo2()'::regprocedure) @> ARRAY['search_path=public','row_security=off'], 'admin_reset_demo2 conserva su config');
+  PERFORM pg_temp.ok((SELECT proconfig FROM pg_proc WHERE oid = 'public.admin_reset_account_data(text)'::regprocedure) @> ARRAY['search_path=public'], 'admin_reset_account_data search_path');
+  PERFORM pg_temp.ok((SELECT proconfig FROM pg_proc WHERE oid = 'public.admin_reset_and_seed_demo2()'::regprocedure) @> ARRAY['search_path=public'], 'admin_reset_and_seed_demo2 search_path');
   PERFORM pg_temp.ok(pg_get_functiondef('public.admin_reset_and_seed_demo2()'::regprocedure) LIKE '%cl_samples%', 'admin_reset_and_seed_demo2 borra cl_*');
 END $$;
 

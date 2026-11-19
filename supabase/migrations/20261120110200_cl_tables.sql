@@ -155,6 +155,8 @@ CREATE TABLE public.cl_alerts (
   severity   text NOT NULL CHECK (severity IN ('low','medium','high')),
   details    jsonb,
   status     text NOT NULL DEFAULT 'open' CHECK (status IN ('open','acknowledged','dismissed')),
+  acknowledged_by uuid REFERENCES auth.users(id) ON DELETE SET NULL,
+  acknowledged_at timestamptz,
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
@@ -193,7 +195,7 @@ CREATE TABLE public.cl_sample_scans (
 );
 
 ALTER TABLE public.one_db
-  ADD CONSTRAINT one_db_cl_sample_id_fkey FOREIGN KEY (cl_sample_id) REFERENCES public.cl_samples(id) ON DELETE CASCADE;
+  ADD CONSTRAINT one_db_cl_sample_id_fkey FOREIGN KEY (cl_sample_id) REFERENCES public.cl_samples(id) ON DELETE RESTRICT;
 
 -- Indices por clave foranea y cuenta.
 CREATE INDEX cl_feeds_account_idx          ON public.cl_feeds (account_id);
@@ -207,45 +209,105 @@ CREATE INDEX cl_samples_batch_idx          ON public.cl_samples (batch_id);
 CREATE INDEX cl_sample_scans_sample_idx    ON public.cl_sample_scans (sample_id);
 CREATE INDEX cl_alerts_plan_idx            ON public.cl_alerts (plan_id);
 
+-- ---------------------------------------------------------------- misma cuenta en todas las referencias
+-- Cada referencia (columna, tabla) debe apuntar a una fila de la misma cuenta; si no existe o es de otra: 23514.
+CREATE OR REPLACE FUNCTION public.cl_check_same_account()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path = public, extensions
+AS $$
+DECLARE
+  i int := 0;
+  v_id text;
+  v_ok boolean;
+BEGIN
+  WHILE i + 1 < TG_NARGS LOOP
+    v_id := to_jsonb(NEW) ->> TG_ARGV[i];
+    IF v_id IS NOT NULL THEN
+      EXECUTE format('SELECT EXISTS (SELECT 1 FROM public.%I t WHERE t.id = $1::uuid AND t.account_id = $2)', TG_ARGV[i + 1])
+        INTO v_ok USING v_id, NEW.account_id;
+      IF NOT v_ok THEN
+        RAISE EXCEPTION '% % debe pertenecer a la misma cuenta (%)', TG_TABLE_NAME, TG_ARGV[i], TG_ARGV[i + 1]
+          USING ERRCODE = 'check_violation';
+      END IF;
+    END IF;
+    i := i + 2;
+  END LOOP;
+  RETURN NEW;
+END $$;
+REVOKE ALL ON FUNCTION public.cl_check_same_account() FROM PUBLIC, anon, authenticated;
+
+DO $$
+DECLARE r record;
+BEGIN
+  FOR r IN SELECT * FROM (VALUES
+    ('cl_feeds',          'carrier_id,carriers'),
+    ('cl_field_mappings', 'carrier_id,carriers'),
+    ('cl_value_mappings', 'carrier_id,carriers'),
+    ('cl_extra_fields',   'carrier_id,carriers'),
+    ('cl_plans',          'carrier_id,carriers,product_id,products,feed_id,cl_feeds'),
+    ('cl_plan_quotas',    'plan_id,cl_plans,origin_city_id,cities,destination_city_id,cities'),
+    ('cl_demands',        'plan_id,cl_plans,feed_id,cl_feeds'),
+    ('cl_batches',        'demand_id,cl_demands'),
+    ('cl_batch_scans',    'batch_id,cl_batches,stratum_id,cl_plan_quotas,product_id,products,reader_id,readers'),
+    ('cl_sampling_runs',  'demand_id,cl_demands,batch_id,cl_batches,stratum_id,cl_plan_quotas'),
+    ('cl_alerts',         'plan_id,cl_plans,batch_id,cl_batches,quota_id,cl_plan_quotas'),
+    ('cl_samples',        'plan_id,cl_plans,quota_id,cl_plan_quotas,batch_id,cl_batches,carrier_id,carriers,product_id,products,start_reader_id,readers,end_reader_id,readers,origin_city_id,cities,destination_city_id,cities'),
+    ('cl_sample_scans',   'sample_id,cl_samples,reader_id,readers')
+  ) t(tbl, args) LOOP
+    EXECUTE format('CREATE TRIGGER cl_same_account BEFORE INSERT OR UPDATE ON public.%I FOR EACH ROW EXECUTE FUNCTION public.cl_check_same_account(%s)',
+                   r.tbl, (SELECT string_agg(quote_literal(x), ',') FROM unnest(string_to_array(r.args, ',')) x));
+  END LOOP;
+END $$;
+
 -- ---------------------------------------------------------------- privilegios y RLS
--- SELECT: superadmin o (cuenta activa y View/Edit en la opcion); escritura: Edit. Sin privilegios para anon.
+-- Configuracion (feeds, mapeos, planes): el usuario escribe con Edit en la opcion.
+-- Motor (cuotas, demandas, lotes, escaneos, muestreos, muestras): el usuario solo lee; escriben funciones SECURITY DEFINER.
+-- cl_alerts: el usuario solo actualiza status/acknowledged_*. Sin privilegios para anon.
 -- has_any_access(..., 'view') ya acepta tambien Edit.
 DO $$
 DECLARE r record; v_sel text; v_edit text;
 BEGIN
   FOR r IN SELECT * FROM (VALUES
-    ('cl_feeds',          'cl_connectors'),
-    ('cl_field_mappings', 'cl_connectors'),
-    ('cl_value_mappings', 'cl_connectors'),
-    ('cl_extra_fields',   'cl_connectors'),
-    ('cl_plans',          'cl_plans'),
-    ('cl_plan_quotas',    'cl_plans'),
-    ('cl_demands',        'cl_monitor'),
-    ('cl_batches',        'cl_monitor'),
-    ('cl_batch_scans',    'cl_monitor'),
-    ('cl_sampling_runs',  'cl_monitor'),
-    ('cl_alerts',         'cl_monitor'),
-    ('cl_samples',        'cl_samples'),
-    ('cl_sample_scans',   'cl_samples')
-  ) t(tbl, opt) LOOP
+    ('cl_feeds',          'cl_connectors', 'rw'),
+    ('cl_field_mappings', 'cl_connectors', 'rw'),
+    ('cl_value_mappings', 'cl_connectors', 'rw'),
+    ('cl_extra_fields',   'cl_connectors', 'rw'),
+    ('cl_plans',          'cl_plans',      'rw'),
+    ('cl_plan_quotas',    'cl_plans',      'ro'),
+    ('cl_demands',        'cl_monitor',    'ro'),
+    ('cl_batches',        'cl_monitor',    'ro'),
+    ('cl_batch_scans',    'cl_monitor',    'ro'),
+    ('cl_sampling_runs',  'cl_monitor',    'ro'),
+    ('cl_alerts',         'cl_monitor',    'alerts'),
+    ('cl_samples',        'cl_samples',    'ro'),
+    ('cl_sample_scans',   'cl_samples',    'ro')
+  ) t(tbl, opt, mode) LOOP
     EXECUTE format('ALTER TABLE public.%I ENABLE ROW LEVEL SECURITY', r.tbl);
-    EXECUTE format('REVOKE ALL ON public.%I FROM PUBLIC, anon', r.tbl);
-    EXECUTE format('GRANT SELECT, INSERT, UPDATE, DELETE ON public.%I TO authenticated', r.tbl);
+    EXECUTE format('REVOKE ALL ON public.%I FROM PUBLIC, anon, authenticated', r.tbl);
+    EXECUTE format('GRANT SELECT ON public.%I TO authenticated', r.tbl);
     EXECUTE format('GRANT ALL ON public.%I TO service_role', r.tbl);
     v_sel  := format('(SELECT public.is_superadmin()) OR (account_id = (SELECT public.current_user_account_id()) '
                      'AND (SELECT public.has_any_access(public.current_user_account_id(), ''view'', %L)))', r.opt);
     v_edit := format('(SELECT public.is_superadmin()) OR (account_id = (SELECT public.current_user_account_id()) '
                      'AND (SELECT public.has_any_access(public.current_user_account_id(), ''edit'', %L)))', r.opt);
     EXECUTE format('CREATE POLICY %I ON public.%I FOR SELECT TO authenticated USING (%s)', r.tbl || '_select_access', r.tbl, v_sel);
-    EXECUTE format('CREATE POLICY %I ON public.%I FOR INSERT TO authenticated WITH CHECK (%s)', r.tbl || '_insert_edit', r.tbl, v_edit);
-    EXECUTE format('CREATE POLICY %I ON public.%I FOR UPDATE TO authenticated USING (%s) WITH CHECK (%s)', r.tbl || '_update_edit', r.tbl, v_edit, v_edit);
-    EXECUTE format('CREATE POLICY %I ON public.%I FOR DELETE TO authenticated USING (%s)', r.tbl || '_delete_edit', r.tbl, v_edit);
+    IF r.mode = 'rw' THEN
+      EXECUTE format('GRANT INSERT, UPDATE, DELETE ON public.%I TO authenticated', r.tbl);
+      EXECUTE format('CREATE POLICY %I ON public.%I FOR INSERT TO authenticated WITH CHECK (%s)', r.tbl || '_insert_edit', r.tbl, v_edit);
+      EXECUTE format('CREATE POLICY %I ON public.%I FOR UPDATE TO authenticated USING (%s) WITH CHECK (%s)', r.tbl || '_update_edit', r.tbl, v_edit, v_edit);
+      EXECUTE format('CREATE POLICY %I ON public.%I FOR DELETE TO authenticated USING (%s)', r.tbl || '_delete_edit', r.tbl, v_edit);
+    ELSIF r.mode = 'alerts' THEN
+      GRANT UPDATE (status, acknowledged_by, acknowledged_at) ON public.cl_alerts TO authenticated;
+      EXECUTE format('CREATE POLICY %I ON public.%I FOR UPDATE TO authenticated USING (%s) WITH CHECK (%s)', r.tbl || '_update_edit', r.tbl, v_edit, v_edit);
+    END IF;
   END LOOP;
 END $$;
 
 -- ---------------------------------------------------------------- api_keys <-> cl_feeds
 ALTER TABLE public.api_keys
-  ADD CONSTRAINT api_keys_feed_id_fkey FOREIGN KEY (feed_id) REFERENCES public.cl_feeds(id) ON DELETE CASCADE;
+  ADD CONSTRAINT api_keys_feed_id_fkey FOREIGN KEY (feed_id) REFERENCES public.cl_feeds(id) ON DELETE RESTRICT;
 ALTER TABLE public.api_keys
   ADD CONSTRAINT api_keys_scope_feed_check CHECK ((scope = 'carrier_feed') = (feed_id IS NOT NULL));
 
@@ -301,6 +363,7 @@ CREATE OR REPLACE FUNCTION public.admin_reset_account_data(p_account_identifier 
  RETURNS jsonb
  LANGUAGE plpgsql
  SECURITY DEFINER
+ SET search_path TO 'public'
 AS $function$
 DECLARE
   v_account_id UUID;
@@ -362,6 +425,7 @@ BEGIN
   DELETE FROM cl_value_mappings WHERE account_id = v_account_id;
   DELETE FROM cl_field_mappings WHERE account_id = v_account_id;
   DELETE FROM cl_extra_fields WHERE account_id = v_account_id;
+  DELETE FROM api_keys WHERE account_id = v_account_id AND feed_id IS NOT NULL;
   DELETE FROM cl_feeds WHERE account_id = v_account_id;
   DELETE FROM readers WHERE account_id = v_account_id AND capture_source = 'carrier_scan';
 
@@ -420,6 +484,7 @@ CREATE OR REPLACE FUNCTION public.admin_reset_and_seed_demo2()
  RETURNS jsonb
  LANGUAGE plpgsql
  SECURITY DEFINER
+ SET search_path TO 'public'
 AS $function$
 DECLARE
   v_account_id UUID;
@@ -500,6 +565,7 @@ BEGIN
   DELETE FROM cl_value_mappings WHERE account_id = v_account_id;
   DELETE FROM cl_field_mappings WHERE account_id = v_account_id;
   DELETE FROM cl_extra_fields WHERE account_id = v_account_id;
+  DELETE FROM api_keys WHERE account_id = v_account_id AND feed_id IS NOT NULL;
   DELETE FROM cl_feeds WHERE account_id = v_account_id;
   DELETE FROM readers WHERE account_id = v_account_id AND capture_source = 'carrier_scan';
   
@@ -796,6 +862,7 @@ BEGIN
   DELETE FROM cl_value_mappings WHERE account_id = v_account_id;
   DELETE FROM cl_field_mappings WHERE account_id = v_account_id;
   DELETE FROM cl_extra_fields WHERE account_id = v_account_id;
+  DELETE FROM api_keys WHERE account_id = v_account_id AND feed_id IS NOT NULL;
   DELETE FROM cl_feeds WHERE account_id = v_account_id;
   DELETE FROM readers WHERE account_id = v_account_id AND capture_source = 'carrier_scan';
 
