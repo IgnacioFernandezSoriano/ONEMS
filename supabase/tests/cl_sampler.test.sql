@@ -260,7 +260,8 @@ BEGIN
                         AND details->'item_ids' = '["C4"]'::jsonb) = 1, 'alerta possible_misrouting solo con C4');
 END $$;
 
--- 7. Cierre del lote: sampled; demanda partial (Q3 incompleta); Q1 y Q2 fulfilled, Q3 sigue open.
+-- 7. Cierre del lote: sampled; demanda partial (Q3 incompleta); Q1 y Q2 fulfilled; Q3 se liquida (tarea 9): poblacion 4 =
+--    recibidos 4 y no hay cuotas posteriores de la ruta -> unfilled.
 DO $$
 DECLARE f jsonb; f2 jsonb;
 BEGIN
@@ -270,7 +271,7 @@ BEGIN
   PERFORM pg_temp.ok((SELECT status FROM public.cl_demands) = 'partial', 'demanda partial');
   PERFORM pg_temp.ok((SELECT status FROM public.cl_plan_quotas WHERE id = pg_temp.q('City1','City2',43)) = 'fulfilled', 'Q1 fulfilled');
   PERFORM pg_temp.ok((SELECT status FROM public.cl_plan_quotas WHERE id = pg_temp.q('City2','City1',43)) = 'fulfilled', 'Q2 fulfilled');
-  PERFORM pg_temp.ok((SELECT status = 'open' AND samples_obtained = 3 FROM public.cl_plan_quotas WHERE id = pg_temp.q('City1','City2',44)), 'Q3 open con 3');
+  PERFORM pg_temp.ok((SELECT status = 'unfilled' AND samples_obtained = 3 FROM public.cl_plan_quotas WHERE id = pg_temp.q('City1','City2',44)), 'Q3 unfilled con 3');
   f2 := public.cl_finish_batch(current_setting('t.batch')::uuid);
   PERFORM pg_temp.ok(f2 = f, 'finish idempotente');
   -- un lote ya muestreado devuelve el resumen guardado
