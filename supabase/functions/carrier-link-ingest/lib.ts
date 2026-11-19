@@ -59,7 +59,7 @@ export function extractApiKey(headers: Headers): string | null {
 }
 
 // Sampling is (re)run only while the stored batch is still 'validated'. A replayed batch that is
-// 'sampled', 'undone' or 'rejected' just returns its stored summary.
+// 'sampled', 'undone', 'rejected' or 'expired' (its demand timed out) just returns its stored summary.
 export function needsSampling(batchStatus: unknown): boolean {
   return batchStatus === 'validated'
 }

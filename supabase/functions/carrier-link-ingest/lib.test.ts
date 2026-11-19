@@ -67,7 +67,7 @@ Deno.test('extractApiKey: Bearer fallback, none, empty bearer', () => {
 })
 Deno.test('needsSampling only for validated', () => {
   assertEquals(needsSampling('validated'), true)
-  for (const s of ['sampled', 'undone', 'rejected', 'received', null, undefined]) assertEquals(needsSampling(s), false)
+  for (const s of ['sampled', 'undone', 'rejected', 'received', 'expired', null, undefined]) assertEquals(needsSampling(s), false)
 })
 Deno.test('summaryStratumIds', () => {
   assertEquals(summaryStratumIds({ strata: [{ stratum_id: 'a' }, { stratum_id: 'b' }, {}] }), ['a', 'b'])

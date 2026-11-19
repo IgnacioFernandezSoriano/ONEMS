@@ -33,11 +33,12 @@ export function usePostalCenters() {
 
       if (centersError) throw centersError
 
-      // Fetch readers for all centers (exclude soft-deleted)
+      // Fetch RFID readers for all centers (exclude soft-deleted and carrier reading points)
       let readersQuery = supabase
         .from('readers')
         .select('*')
         .is('deleted_at', null)
+        .eq('capture_source', 'rfid')
         .order('name')
 
       if (effectiveAccountId) {
