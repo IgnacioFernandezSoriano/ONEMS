@@ -1250,18 +1250,22 @@ onedb.total_records,Total Records
 onedb.transit_days,Transit Days
 onedb.transit_time,Transit time
 onedb.validated_postal_quality_analytics_repository,Validated postal quality analytics repository
-onedb_api.api_key_label,Your API Key
 onedb_api.api_tester_title,API Tester
 onedb_api.auth_note,"Note: The Authorization header uses the Supabase anon key (provided by the system), while X-API-Key contains your personal API key."
 onedb_api.authentication_description,All API requests must include your API key in the Authorization header using Bearer authentication.
 onedb_api.authentication_title,Authentication
 onedb_api.base_url,Base URL
 onedb_api.calls_last_hour,Calls in Last Hour
-onedb_api.confirm_regenerate,Are you sure you want to regenerate your API key? The old key will be deactivated immediately.
+onedb_api.col_expires,Expires
+onedb_api.col_key,Key
+onedb_api.col_name,Name
+onedb_api.col_status,Status
+onedb_api.confirm_deactivate,Are you sure you want to deactivate this API key? Applications using it will stop working.
 onedb_api.copied,Copied!
 onedb_api.copy,Copy
 onedb_api.created_at,Created
 onedb_api.credentials_section,API Credentials
+onedb_api.deactivate_key,Deactivate
 onedb_api.description,"REST API for querying and extracting ONE DB data. Read-only access with date filtering and pagination. Limited to 10,000 records per request and 10 requests per minute."
 onedb_api.end_date,End Date
 onedb_api.end_date_desc,End date for filtering records (format: YYYY-MM-DD)
@@ -1273,6 +1277,11 @@ onedb_api.examples_title,Request Examples
 onedb_api.generate_key,Generate API Key
 onedb_api.generate_key_first,Please generate an API key first to use the tester.
 onedb_api.generating,Generating...
+onedb_api.key_name_label,Key name
+onedb_api.key_name_placeholder,e.g. BI dashboard
+onedb_api.key_name_required,Enter a name for the key.
+onedb_api.key_name_too_long,The name can have at most 80 characters.
+onedb_api.keys_list_title,API keys
 onedb_api.last_call,Last API Call
 onedb_api.limit,Limit
 onedb_api.limit_10_per_minute,Limit: 10 per minute
@@ -1280,6 +1289,9 @@ onedb_api.limit_desc,Maximum number of records to return (default: 100
 onedb_api.loading_stats,Loading statistics...
 onedb_api.max_records_note,"Note: The API returns a maximum of 10,000 records total. Use more specific date ranges if you need to access more data."
 onedb_api.never,Never
+onedb_api.new_key_dismiss,"I have copied it, close"
+onedb_api.new_key_title,Your new API key
+onedb_api.new_key_warning,Copy it now and store it somewhere safe. For security reasons it cannot be shown again; if you lose it you will have to issue a new one.
 onedb_api.no,No
 onedb_api.no_api_key,You don't have an active API key yet. Generate one to start using the API.
 onedb_api.offset,Offset
@@ -1289,7 +1301,8 @@ onedb_api.query_parameters,Query Parameters
 onedb_api.rate_limit_info,Rate Limit: 10 requests per minute
 onedb_api.rate_limiting_description,To ensure fair usage and system stability
 onedb_api.rate_limiting_title,Rate Limiting
-onedb_api.regenerate_key,Regenerate API Key
+onedb_api.replace_hint,A new key will be issued and this one will be deactivated immediately.
+onedb_api.replace_key,Replace
 onedb_api.required,Required
 onedb_api.response,Response
 onedb_api.response_format,Response Format
@@ -1302,12 +1315,16 @@ onedb_api.status_400,Bad Request - Invalid parameters or date format
 onedb_api.status_401,Unauthorized - Invalid or missing API key
 onedb_api.status_429,Too Many Requests - Rate limit exceeded
 onedb_api.status_500,Internal Server Error - Something went wrong on our end
+onedb_api.status_active,Active
 onedb_api.status_code,Status Code
+onedb_api.status_inactive,Deactivated
 onedb_api.tab_documentation,Documentation
 onedb_api.tab_overview,Overview
 onedb_api.tab_testing,Testing
 onedb_api.tab_usage,Usage
 onedb_api.test_api,Test API Request
+onedb_api.tester_key_label,API key to test with
+onedb_api.tester_key_placeholder,Paste an API key (keys cannot be retrieved after creation)
 onedb_api.testing,Testing...
 onedb_api.title,GET API - ONE DB
 onedb_api.total_calls_month,Total Calls This Month

@@ -6,12 +6,20 @@ import { useLatestRequest } from '../lib/latestRequest'
 
 export interface ApiKey {
   id: string
-  account_id: string
-  api_key: string
+  name: string | null
+  key_prefix: string | null
+  scope: string
   is_active: boolean
   created_at: string
   last_used_at: string | null
   usage_count: number
+  expires_at: string | null
+}
+
+/** Resultado de emitir una clave: es la única vez que se conoce el texto completo. */
+export interface IssuedApiKey {
+  id: string
+  api_key: string
 }
 
 export interface ApiUsageStats {
@@ -25,7 +33,7 @@ export function useOneDBAPI() {
   // Cuenta efectiva: un superadmin no tiene account_id en el perfil, usa la cuenta seleccionada
   const effectiveAccountId = useEffectiveAccountId()
   const accountId = effectiveAccountId || profile?.account_id
-  const [apiKey, setApiKey] = useState<ApiKey | null>(null)
+  const [apiKeys, setApiKeys] = useState<ApiKey[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [usageStats, setUsageStats] = useState<ApiUsageStats | null>(null)
@@ -45,19 +53,15 @@ export function useOneDBAPI() {
       setLoading(true)
       const { data, error } = await supabase
         .from('api_keys')
-        .select('*')
+        .select('id, name, key_prefix, scope, is_active, created_at, last_used_at, usage_count, expires_at')
         .eq('account_id', accountId)
-        .eq('is_active', true)
+        .eq('scope', 'onedb_read')
         .order('created_at', { ascending: false })
-        .limit(1)
-        .single()
 
       if (isStale()) return
-      if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
-        throw error
-      }
+      if (error) throw error
 
-      setApiKey(data)
+      setApiKeys((data || []) as ApiKey[])
       setError(null)
     } catch (err: any) {
       if (isStale()) return
@@ -71,16 +75,15 @@ export function useOneDBAPI() {
   const loadUsageStats = async () => {
     const isStale = beginStatsLoad()
     try {
-      // Get API key ID first
-      const { data: keyData } = await supabase
+      const { data: keysData } = await supabase
         .from('api_keys')
         .select('id')
         .eq('account_id', accountId)
-        .eq('is_active', true)
-        .single()
+        .eq('scope', 'onedb_read')
 
       if (isStale()) return
-      if (!keyData) return
+      const keyIds = (keysData || []).map((k: { id: string }) => k.id)
+      if (keyIds.length === 0) { setUsageStats(null); return }
 
       // Get usage stats for this month
       const startOfMonth = new Date()
@@ -90,7 +93,7 @@ export function useOneDBAPI() {
       const { data: monthlyData, error: monthlyError } = await supabase
         .from('api_usage_log')
         .select('id', { count: 'exact' })
-        .eq('api_key_id', keyData.id)
+        .in('api_key_id', keyIds)
         .gte('request_timestamp', startOfMonth.toISOString())
 
       if (isStale()) return
@@ -98,10 +101,10 @@ export function useOneDBAPI() {
       const { data: lastCallData } = await supabase
         .from('api_usage_log')
         .select('request_timestamp')
-        .eq('api_key_id', keyData.id)
+        .in('api_key_id', keyIds)
         .order('request_timestamp', { ascending: false })
         .limit(1)
-        .single()
+        .maybeSingle()
 
       if (isStale()) return
 
@@ -110,7 +113,7 @@ export function useOneDBAPI() {
       const { data: hourlyData } = await supabase
         .from('api_usage_log')
         .select('id', { count: 'exact' })
-        .eq('api_key_id', keyData.id)
+        .in('api_key_id', keyIds)
         .gte('request_timestamp', oneHourAgo)
 
       if (isStale()) return
@@ -125,113 +128,57 @@ export function useOneDBAPI() {
     }
   }
 
-  const generateApiKey = async () => {
+  /** Emite una clave nueva. Devuelve el texto completo, que no se vuelve a poder consultar. */
+  const generateApiKey = async (name: string): Promise<IssuedApiKey> => {
     try {
-      setLoading(true)
       setError(null)
-      
-      // Generate random API key using a more compatible method
-      const generateRandomString = () => {
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-        let result = ''
-        const randomValues = new Uint8Array(32)
-        crypto.getRandomValues(randomValues)
-        for (let i = 0; i < 32; i++) {
-          result += chars[randomValues[i] % chars.length]
-        }
-        return result
-      }
-      
-      const randomString = generateRandomString()
-      const newApiKey = `onedb_live_${randomString}`
-
-      console.log('Attempting to create API key for account:', accountId)
-
-      const { data, error } = await supabase
-        .from('api_keys')
-        .insert({
-          account_id: accountId,
-          api_key: newApiKey,
-          is_active: true,
-          created_by: profile?.id
-        })
-        .select()
-        .single()
-
-      if (error) {
-        console.error('Supabase error:', error)
-        throw new Error(`Failed to create API key: ${error.message}`)
-      }
-
-      console.log('API key created successfully:', data)
-      setApiKey(data)
-      setError(null)
-      return data
+      const { data, error } = await supabase.rpc('api_key_issue', {
+        p_account_id: accountId,
+        p_name: name.trim()
+      })
+      if (error) throw error
+      const issued = Array.isArray(data) ? data[0] : data
+      if (!issued?.api_key) throw new Error('API key was not returned')
+      await loadApiKey()
+      loadUsageStats()
+      return { id: issued.id, api_key: issued.api_key }
     } catch (err: any) {
       console.error('Error generating API key:', err)
-      const errorMessage = err.message || 'Failed to generate API key. Please ensure the database migration has been run.'
-      setError(errorMessage)
-      alert(errorMessage) // Show error to user
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const regenerateApiKey = async () => {
-    try {
-      setLoading(true)
-
-      // Deactivate old key
-      if (apiKey) {
-        await supabase
-          .from('api_keys')
-          .update({ is_active: false })
-          .eq('id', apiKey.id)
-      }
-
-      // Generate new key
-      const newKey = await generateApiKey()
-      return newKey
-    } catch (err: any) {
-      console.error('Error regenerating API key:', err)
       setError(err.message)
       throw err
-    } finally {
-      setLoading(false)
     }
   }
 
-  const deactivateApiKey = async () => {
+  const deactivateApiKey = async (id: string) => {
     try {
-      if (!apiKey) return
-
-      setLoading(true)
+      setError(null)
       const { error } = await supabase
         .from('api_keys')
         .update({ is_active: false })
-        .eq('id', apiKey.id)
-
+        .eq('id', id)
       if (error) throw error
-
-      setApiKey(null)
-      setError(null)
+      await loadApiKey()
     } catch (err: any) {
       console.error('Error deactivating API key:', err)
       setError(err.message)
       throw err
-    } finally {
-      setLoading(false)
     }
   }
 
+  /** Sustituir = emitir una clave nueva y desactivar la anterior. */
+  const replaceApiKey = async (oldId: string, name: string): Promise<IssuedApiKey> => {
+    const issued = await generateApiKey(name)
+    await deactivateApiKey(oldId)
+    return issued
+  }
+
   return {
-    apiKey,
+    apiKeys,
     loading,
     error,
     usageStats,
     generateApiKey,
-    regenerateApiKey,
+    replaceApiKey,
     deactivateApiKey,
     refreshStats: loadUsageStats
   }

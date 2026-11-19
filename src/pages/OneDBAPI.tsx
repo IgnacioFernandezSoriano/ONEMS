@@ -1,18 +1,26 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useOneDBAPI } from '../hooks/useOneDBAPI'
 import { useLocale } from '../contexts/LocaleContext'
 import { ReadOnlyBadge } from '../components/common/ReadOnlyBadge'
 import { usePermissions } from '../contexts/PermissionsContext'
-import { Key, Copy, RefreshCw, AlertCircle, CheckCircle, Code, BookOpen, TestTube, BarChart3, Shield } from 'lucide-react'
+import { Key, Copy, RefreshCw, Ban, AlertCircle, CheckCircle, Code, BookOpen, TestTube, BarChart3, Shield } from 'lucide-react'
 
 export function OneDBAPI() {
   const { t } = useLocale()
   const { canEdit } = usePermissions()
   const readOnly = !canEdit('e2e_db_api')
-  const { apiKey, loading, error, usageStats, generateApiKey, regenerateApiKey, refreshStats } = useOneDBAPI()
+  const { apiKeys, loading, usageStats, generateApiKey, replaceApiKey, deactivateApiKey, refreshStats } = useOneDBAPI()
   const [activeTab, setActiveTab] = useState<'overview' | 'documentation' | 'testing' | 'usage'>('overview')
   const [copied, setCopied] = useState(false)
   const [generating, setGenerating] = useState(false)
+  // Formulario de nombre: null = cerrado, 'create' = clave nueva, otro valor = id de la clave a sustituir
+  const [formMode, setFormMode] = useState<null | string>(null)
+  const [keyName, setKeyName] = useState('')
+  const [nameError, setNameError] = useState<string | null>(null)
+  // Clave completa recién emitida: solo vive aquí hasta que el usuario la cierra
+  const [issuedKey, setIssuedKey] = useState<string | null>(null)
+  const issuedInputRef = useRef<HTMLInputElement>(null)
+  const [testKey, setTestKey] = useState('')
   const [testStartDate, setTestStartDate] = useState('2024-01-01')
   const [testEndDate, setTestEndDate] = useState('2024-12-31')
   const [testLimit, setTestLimit] = useState('100')
@@ -21,46 +29,65 @@ export function OneDBAPI() {
 
   const apiEndpoint = 'https://sehbnpgzqljrsqimwyuz.supabase.co/functions/v1/onedb-api'
 
-  const handleCopyApiKey = () => {
-    if (apiKey) {
-      navigator.clipboard.writeText(apiKey.api_key)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    }
-  }
+  const activeKeys = apiKeys.filter(k => k.is_active)
 
-  const handleCopyEndpoint = () => {
-    navigator.clipboard.writeText(apiEndpoint)
+  const flashCopied = () => {
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const handleGenerateKey = async () => {
+  const handleCopyIssuedKey = () => {
+    if (!issuedKey) return
+    navigator.clipboard.writeText(issuedKey).then(flashCopied).catch(() => {
+      issuedInputRef.current?.select()
+    })
+  }
+
+  const handleCopyEndpoint = () => {
+    navigator.clipboard.writeText(apiEndpoint).then(flashCopied).catch(() => {})
+  }
+
+  const openForm = (mode: string) => {
+    setFormMode(mode)
+    setKeyName('')
+    setNameError(null)
+  }
+
+  const handleSubmitKey = async () => {
+    const name = keyName.trim()
+    if (!name) { setNameError(t('onedb_api.key_name_required')); return }
+    if (name.length > 80) { setNameError(t('onedb_api.key_name_too_long')); return }
     try {
       setGenerating(true)
-      await generateApiKey()
+      const issued = formMode === 'create'
+        ? await generateApiKey(name)
+        : await replaceApiKey(formMode as string, name)
+      setIssuedKey(issued.api_key)
+      setFormMode(null)
+      setKeyName('')
     } catch (err) {
-      console.error('Failed to generate API key:', err)
+      console.error('Failed to issue API key:', err)
     } finally {
       setGenerating(false)
     }
   }
 
-  const handleRegenerateKey = async () => {
-    if (!confirm(t('onedb_api.confirm_regenerate'))) return
-    
+  const handleDismissIssued = () => {
+    setIssuedKey(null)
+    setCopied(false)
+  }
+
+  const handleDeactivate = async (id: string) => {
+    if (!confirm(t('onedb_api.confirm_deactivate'))) return
     try {
-      setGenerating(true)
-      await regenerateApiKey()
+      await deactivateApiKey(id)
     } catch (err) {
-      console.error('Failed to regenerate API key:', err)
-    } finally {
-      setGenerating(false)
+      console.error('Failed to deactivate API key:', err)
     }
   }
 
   const handleTestApi = async () => {
-    if (!apiKey) return
+    if (!testKey.trim()) return
 
     try {
       setTesting(true)
@@ -69,7 +96,7 @@ export function OneDBAPI() {
       const response = await fetch(url, {
         headers: {
           'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNlaGJucGd6cWxqcnNxaW13eXV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ4OTQzMTEsImV4cCI6MjA4MDQ3MDMxMX0.C-LsSmfOo38Tqc_PwP1c-nFyK1PeVj_mCBqanYsgoeg',
-          'X-API-Key': apiKey.api_key,
+          'X-API-Key': testKey.trim(),
           'Content-Type': 'application/json'
         }
       })
@@ -135,64 +162,154 @@ export function OneDBAPI() {
               <h2 className="text-xl font-semibold text-gray-900">{t('onedb_api.credentials_section')}</h2>
             </div>
 
-            {!apiKey ? (
-              <div className="space-y-4">
-                <p className="text-gray-600">{t('onedb_api.no_api_key')}</p>
-                {!readOnly && <button
-                  onClick={handleGenerateKey}
+            <div className="space-y-4">
+              {issuedKey && (
+                <div className="bg-green-50 border border-green-300 rounded-lg p-4 space-y-3">
+                  <p className="font-medium text-green-900">{t('onedb_api.new_key_title')}</p>
+                  <div className="flex gap-2">
+                    <input
+                      ref={issuedInputRef}
+                      type="text"
+                      value={issuedKey}
+                      readOnly
+                      onFocus={(e) => e.currentTarget.select()}
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg bg-white font-mono text-sm"
+                    />
+                    <button
+                      onClick={handleCopyIssuedKey}
+                      className="px-4 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 flex items-center gap-2"
+                    >
+                      {copied ? <CheckCircle className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
+                      {copied ? t('onedb_api.copied') : t('onedb_api.copy')}
+                    </button>
+                  </div>
+                  <p className="text-sm text-green-900">{t('onedb_api.new_key_warning')}</p>
+                  <button
+                    onClick={handleDismissIssued}
+                    className="px-4 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800"
+                  >
+                    {t('onedb_api.new_key_dismiss')}
+                  </button>
+                </div>
+              )}
+
+              {formMode && !readOnly && (
+                <div className="border border-gray-200 rounded-lg p-4 space-y-3">
+                  <label className="block text-sm font-medium text-gray-700">
+                    {t('onedb_api.key_name_label')}
+                  </label>
+                  <input
+                    type="text"
+                    value={keyName}
+                    maxLength={80}
+                    placeholder={t('onedb_api.key_name_placeholder')}
+                    onChange={(e) => { setKeyName(e.target.value); setNameError(null) }}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  />
+                  {formMode !== 'create' && (
+                    <p className="text-xs text-gray-500">{t('onedb_api.replace_hint')}</p>
+                  )}
+                  {nameError && <p className="text-sm text-red-600">{nameError}</p>}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleSubmitKey}
+                      disabled={generating}
+                      className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                    >
+                      <Key className="w-4 h-4" />
+                      {generating ? t('onedb_api.generating') : t('onedb_api.generate_key')}
+                    </button>
+                    <button
+                      onClick={() => setFormMode(null)}
+                      disabled={generating}
+                      className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                    >
+                      {t('common.cancel')}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {!formMode && !readOnly && (
+                <button
+                  onClick={() => openForm('create')}
                   disabled={generating || loading}
                   className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
                 >
                   <Key className="w-4 h-4" />
-                  {generating ? t('onedb_api.generating') : t('onedb_api.generate_key')}
-                </button>}
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {t('onedb_api.api_key_label')}
-                  </label>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={readOnly ? `${'•'.repeat(12)}${apiKey.api_key.slice(-4)}` : apiKey.api_key}
-                      readOnly
-                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 font-mono text-sm"
-                    />
-                    {!readOnly && <button
-                      onClick={handleCopyApiKey}
-                      className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2"
-                    >
-                      {copied ? <CheckCircle className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
-                      {copied ? t('onedb_api.copied') : t('onedb_api.copy')}
-                    </button>}
-                  </div>
-                  <p className="text-xs text-gray-500 mt-2">
-                    {t('onedb_api.created_at')}: {new Date(apiKey.created_at).toLocaleString()}
-                  </p>
-                </div>
+                  {t('onedb_api.generate_key')}
+                </button>
+              )}
 
-                {!readOnly && <button
-                  onClick={handleRegenerateKey}
-                  disabled={generating}
-                  className="flex items-center gap-2 px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50"
-                >
-                  <RefreshCw className="w-4 h-4" />
-                  {t('onedb_api.regenerate_key')}
-                </button>}
+              <div>
+                <h3 className="text-sm font-medium text-gray-700 mb-2">{t('onedb_api.keys_list_title')}</h3>
+                {apiKeys.length === 0 ? (
+                  <p className="text-gray-600">{t('onedb_api.no_api_key')}</p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="text-left p-2 font-semibold">{t('onedb_api.col_name')}</th>
+                          <th className="text-left p-2 font-semibold">{t('onedb_api.col_key')}</th>
+                          <th className="text-left p-2 font-semibold">{t('onedb_api.created_at')}</th>
+                          <th className="text-left p-2 font-semibold">{t('onedb_api.last_call')}</th>
+                          <th className="text-left p-2 font-semibold">{t('onedb_api.col_expires')}</th>
+                          <th className="text-left p-2 font-semibold">{t('onedb_api.col_status')}</th>
+                          {!readOnly && <th className="p-2" />}
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200">
+                        {apiKeys.map((k) => (
+                          <tr key={k.id} className={k.is_active ? '' : 'text-gray-400'}>
+                            <td className="p-2">{k.name || '—'}</td>
+                            <td className="p-2 font-mono">{k.key_prefix ? `${k.key_prefix}…` : '—'}</td>
+                            <td className="p-2">{new Date(k.created_at).toLocaleString()}</td>
+                            <td className="p-2">{k.last_used_at ? new Date(k.last_used_at).toLocaleString() : t('onedb_api.never')}</td>
+                            <td className="p-2">{k.expires_at ? new Date(k.expires_at).toLocaleDateString() : '—'}</td>
+                            <td className="p-2">{k.is_active ? t('onedb_api.status_active') : t('onedb_api.status_inactive')}</td>
+                            {!readOnly && (
+                              <td className="p-2 whitespace-nowrap text-right">
+                                {k.is_active && (
+                                  <>
+                                    <button
+                                      onClick={() => openForm(k.id)}
+                                      disabled={generating}
+                                      className="inline-flex items-center gap-1 px-2 py-1 mr-2 border border-gray-300 rounded hover:bg-gray-50 text-gray-700"
+                                    >
+                                      <RefreshCw className="w-3 h-3" />
+                                      {t('onedb_api.replace_key')}
+                                    </button>
+                                    <button
+                                      onClick={() => handleDeactivate(k.id)}
+                                      disabled={generating}
+                                      className="inline-flex items-center gap-1 px-2 py-1 border border-red-300 text-red-700 rounded hover:bg-red-50"
+                                    >
+                                      <Ban className="w-3 h-3" />
+                                      {t('onedb_api.deactivate_key')}
+                                    </button>
+                                  </>
+                                )}
+                              </td>
+                            )}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
 
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                  <div className="flex gap-2">
-                    <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
-                    <div className="text-sm text-yellow-800">
-                      <p className="font-medium mb-1">{t('onedb_api.security_warning_title')}</p>
-                      <p>{t('onedb_api.security_warning_text')}</p>
-                    </div>
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <div className="flex gap-2">
+                  <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm text-yellow-800">
+                    <p className="font-medium mb-1">{t('onedb_api.security_warning_title')}</p>
+                    <p>{t('onedb_api.security_warning_text')}</p>
                   </div>
                 </div>
               </div>
-            )}
+            </div>
           </div>
 
           {/* API Endpoint */}
@@ -461,12 +578,20 @@ if (data.success) {
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">{t('onedb_api.api_tester_title')}</h2>
           
-          {!apiKey ? (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <p className="text-yellow-800">{t('onedb_api.generate_key_first')}</p>
-            </div>
-          ) : (
-            <div className="space-y-6">
+          <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('onedb_api.tester_key_label')}
+                </label>
+                <input
+                  type="password"
+                  autoComplete="off"
+                  value={testKey}
+                  onChange={(e) => setTestKey(e.target.value)}
+                  placeholder={t('onedb_api.tester_key_placeholder')}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg font-mono text-sm"
+                />
+              </div>
               {/* Test Form */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
@@ -508,7 +633,7 @@ if (data.success) {
 
               <button
                 onClick={handleTestApi}
-                disabled={testing}
+                disabled={testing || !testKey.trim()}
                 className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
               >
                 <TestTube className="w-5 h-5" />
@@ -524,8 +649,7 @@ if (data.success) {
                   </div>
                 </div>
               )}
-            </div>
-          )}
+          </div>
         </div>
       )}
 
@@ -533,7 +657,7 @@ if (data.success) {
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">{t('onedb_api.usage_statistics')}</h2>
           
-          {!apiKey ? (
+          {activeKeys.length === 0 && !usageStats ? (
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
               <p className="text-yellow-800">{t('onedb_api.generate_key_first')}</p>
             </div>
