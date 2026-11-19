@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useOneDBAPI } from '../hooks/useOneDBAPI'
 import { useLocale } from '../contexts/LocaleContext'
 import { ReadOnlyBadge } from '../components/common/ReadOnlyBadge'
@@ -8,8 +8,9 @@ import { Key, Copy, RefreshCw, Ban, AlertCircle, CheckCircle, Code, BookOpen, Te
 export function OneDBAPI() {
   const { t } = useLocale()
   const { canEdit } = usePermissions()
-  const readOnly = !canEdit('e2e_db_api')
-  const { apiKeys, loading, usageStats, generateApiKey, replaceApiKey, deactivateApiKey, refreshStats } = useOneDBAPI()
+  const { accountId, hasAccount, apiKeys, loading, usageStats, generateApiKey, replaceApiKey, deactivateApiKey, refreshStats } = useOneDBAPI()
+  const readOnly = !canEdit('e2e_db_api') || !hasAccount
+  const [actionError, setActionError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'overview' | 'documentation' | 'testing' | 'usage'>('overview')
   const [copied, setCopied] = useState(false)
   const [generating, setGenerating] = useState(false)
@@ -28,6 +29,13 @@ export function OneDBAPI() {
   const [testing, setTesting] = useState(false)
 
   const apiEndpoint = 'https://sehbnpgzqljrsqimwyuz.supabase.co/functions/v1/onedb-api'
+
+  // Al cambiar de cuenta no se arrastra una clave emitida ni errores de la cuenta anterior
+  useEffect(() => {
+    setIssuedKey(null)
+    setFormMode(null)
+    setActionError(null)
+  }, [accountId])
 
   const activeKeys = apiKeys.filter(k => k.is_active)
 
@@ -57,16 +65,25 @@ export function OneDBAPI() {
     const name = keyName.trim()
     if (!name) { setNameError(t('onedb_api.key_name_required')); return }
     if (name.length > 80) { setNameError(t('onedb_api.key_name_too_long')); return }
+    setActionError(null)
     try {
       setGenerating(true)
-      const issued = formMode === 'create'
-        ? await generateApiKey(name)
-        : await replaceApiKey(formMode as string, name)
+      let issued: { api_key: string }
+      let oldStillActive = false
+      if (formMode === 'create') {
+        issued = await generateApiKey(name)
+      } else {
+        const r = await replaceApiKey(formMode as string, name)
+        issued = r
+        oldStillActive = r.deactivateFailed
+      }
       setIssuedKey(issued.api_key)
       setFormMode(null)
       setKeyName('')
+      if (oldStillActive) setActionError(t('onedb_api.error_replace_old_active'))
     } catch (err) {
       console.error('Failed to issue API key:', err)
+      setActionError(t('onedb_api.error_issue'))
     } finally {
       setGenerating(false)
     }
@@ -79,10 +96,12 @@ export function OneDBAPI() {
 
   const handleDeactivate = async (id: string) => {
     if (!confirm(t('onedb_api.confirm_deactivate'))) return
+    setActionError(null)
     try {
       await deactivateApiKey(id)
     } catch (err) {
       console.error('Failed to deactivate API key:', err)
+      setActionError(t('onedb_api.error_deactivate'))
     }
   }
 
@@ -190,6 +209,12 @@ export function OneDBAPI() {
                   >
                     {t('onedb_api.new_key_dismiss')}
                   </button>
+                </div>
+              )}
+
+              {actionError && (
+                <div role="alert" className="bg-red-50 border border-red-300 rounded-lg p-3 text-sm text-red-800">
+                  {actionError}
                 </div>
               )}
 

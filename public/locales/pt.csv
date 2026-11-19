@@ -1273,6 +1273,9 @@ onedb_api.endpoint_description,Obter registos da ONE DB filtrados por intervalo 
 onedb_api.endpoint_section,Endpoint da API
 onedb_api.endpoints_title,Endpoints disponíveis
 onedb_api.error_codes_title,Códigos de estado HTTP
+onedb_api.error_deactivate,Não foi possível desativar a chave de API. Tente novamente.
+onedb_api.error_issue,Não foi possível emitir a chave de API. Tente novamente.
+onedb_api.error_replace_old_active,"A nova chave foi emitida (copie-a abaixo), mas a chave anterior não pôde ser desativada e continua ativa. Desative-a a partir da lista."
 onedb_api.examples_title,Exemplos de pedidos
 onedb_api.generate_key,Gerar chave de API
 onedb_api.generate_key_first,Gere primeiro uma chave de API para utilizar o testador.

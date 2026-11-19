@@ -1273,6 +1273,9 @@ onedb_api.endpoint_description,Retrieve ONE DB records filtered by date range
 onedb_api.endpoint_section,API Endpoint
 onedb_api.endpoints_title,Available Endpoints
 onedb_api.error_codes_title,HTTP Status Codes
+onedb_api.error_deactivate,The API key could not be deactivated. Please try again.
+onedb_api.error_issue,The API key could not be issued. Please try again.
+onedb_api.error_replace_old_active,"The new key was issued (copy it below), but the previous key could not be deactivated and is still active. Deactivate it from the list."
 onedb_api.examples_title,Request Examples
 onedb_api.generate_key,Generate API Key
 onedb_api.generate_key_first,Please generate an API key first to use the tester.

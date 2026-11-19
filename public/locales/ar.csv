@@ -1273,6 +1273,9 @@ onedb_api.endpoint_description,استرجاع سجلات ONE DB مصفاة حس�
 onedb_api.endpoint_section,نقطة نهاية API
 onedb_api.endpoints_title,النقاط النهائية المتاحة
 onedb_api.error_codes_title,رموز حالة HTTP
+onedb_api.error_deactivate,تعذّر تعطيل مفتاح API. يرجى المحاولة مرة أخرى.
+onedb_api.error_issue,تعذّر إصدار مفتاح API. يرجى المحاولة مرة أخرى.
+onedb_api.error_replace_old_active,تم إصدار المفتاح الجديد (انسخه أدناه)، لكن تعذّر تعطيل المفتاح السابق وما زال نشطًا. عطّله من القائمة.
 onedb_api.examples_title,أمثلة الطلبات
 onedb_api.generate_key,إنشاء مفتاح API
 onedb_api.generate_key_first,يرجى إنشاء مفتاح API أولاً لاستخدام المختبر.

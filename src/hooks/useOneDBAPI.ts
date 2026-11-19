@@ -130,6 +130,7 @@ export function useOneDBAPI() {
 
   /** Emite una clave nueva. Devuelve el texto completo, que no se vuelve a poder consultar. */
   const generateApiKey = async (name: string): Promise<IssuedApiKey> => {
+    if (!accountId) throw new Error('No active account')
     try {
       setError(null)
       const { data, error } = await supabase.rpc('api_key_issue', {
@@ -150,6 +151,7 @@ export function useOneDBAPI() {
   }
 
   const deactivateApiKey = async (id: string) => {
+    if (!accountId) throw new Error('No active account')
     try {
       setError(null)
       const { error } = await supabase
@@ -165,14 +167,23 @@ export function useOneDBAPI() {
     }
   }
 
-  /** Sustituir = emitir una clave nueva y desactivar la anterior. */
-  const replaceApiKey = async (oldId: string, name: string): Promise<IssuedApiKey> => {
+  /**
+   * Sustituir = emitir una clave nueva y desactivar la anterior. Si la desactivación falla,
+   * la clave nueva NO se pierde: se devuelve con deactivateFailed=true (la vieja sigue activa).
+   */
+  const replaceApiKey = async (oldId: string, name: string): Promise<IssuedApiKey & { deactivateFailed: boolean }> => {
     const issued = await generateApiKey(name)
-    await deactivateApiKey(oldId)
-    return issued
+    try {
+      await deactivateApiKey(oldId)
+      return { ...issued, deactivateFailed: false }
+    } catch {
+      return { ...issued, deactivateFailed: true }
+    }
   }
 
   return {
+    accountId,
+    hasAccount: !!accountId,
     apiKeys,
     loading,
     error,

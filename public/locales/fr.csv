@@ -1273,6 +1273,9 @@ onedb_api.endpoint_description,Récupérer les enregistrements ONE DB filtrés p
 onedb_api.endpoint_section,Point de terminaison API
 onedb_api.endpoints_title,Points de terminaison disponibles
 onedb_api.error_codes_title,Codes de statut HTTP
+onedb_api.error_deactivate,Impossible de désactiver la clé API. Veuillez réessayer.
+onedb_api.error_issue,Impossible d'émettre la clé API. Veuillez réessayer.
+onedb_api.error_replace_old_active,"La nouvelle clé a été émise (copiez-la ci-dessous), mais l'ancienne clé n'a pas pu être désactivée et reste active. Désactivez-la depuis la liste."
 onedb_api.examples_title,Exemples de requêtes
 onedb_api.generate_key,Générer une clé API
 onedb_api.generate_key_first,Veuillez d'abord générer une clé API pour utiliser le testeur.

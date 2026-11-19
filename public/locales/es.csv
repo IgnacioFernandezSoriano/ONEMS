@@ -1273,6 +1273,9 @@ onedb_api.endpoint_description,Recuperar registros de ONE DB filtrados por rango
 onedb_api.endpoint_section,Endpoint de la API
 onedb_api.endpoints_title,Endpoints disponibles
 onedb_api.error_codes_title,Códigos de estado HTTP
+onedb_api.error_deactivate,No se pudo desactivar la clave de API. Inténtalo de nuevo.
+onedb_api.error_issue,No se pudo emitir la clave de API. Inténtalo de nuevo.
+onedb_api.error_replace_old_active,"La clave nueva se emitió (cópiala abajo), pero la clave anterior no se pudo desactivar y sigue activa. Desactívala desde la lista."
 onedb_api.examples_title,Ejemplos de solicitud
 onedb_api.generate_key,Generar clave API
 onedb_api.generate_key_first,"Por favor, genere una clave API primero para usar el probador."
