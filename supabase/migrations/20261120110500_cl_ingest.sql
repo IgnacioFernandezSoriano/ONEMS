@@ -6,7 +6,9 @@
 -- (cl_extra_fields). El resto se descarta antes de tocar cualquier tabla, incluido raw_payload, que guarda el lote
 -- ya filtrado (para trazar valores originales, p. ej. una hora mal formada) y nunca el cuerpo recibido tal cual.
 -- Limites: maximo 5000 lecturas por lote; item_id / place_ref / mode_ref de mas de 200 caracteres -> lectura
--- rechazada (bad_value) y guardada sin ese valor; un campo adicional solo se guarda si es escalar y <= 500 caracteres.
+-- rechazada (bad_value) y ese valor se sustituye por NULL desde la entrada (tabla temporal, cl_batch_scans y
+-- raw_payload), asi ningun valor gigante llega a un indice; un campo adicional solo se guarda si es escalar y
+-- <= 500 caracteres.
 
 -- Campos permitidos de cada lectura (Task 8 los copia a cl_samples.extra).
 ALTER TABLE public.cl_batch_scans ADD COLUMN extra jsonb;
@@ -83,12 +85,6 @@ BEGIN
     RAISE EXCEPTION 'CL_BAD_PAYLOAD: batch_id is required (max 200 characters)' USING ERRCODE = '22023';
   END IF;
 
-  -- 0. Conector pausado: no acepta lotes (ni de prueba).
-  SELECT f.* INTO v_feed FROM public.cl_feeds f WHERE f.id = p_feed_id;
-  IF FOUND AND v_feed.status = 'paused' THEN
-    RAISE EXCEPTION 'CL_FEED_PAUSED: the connector is paused' USING ERRCODE = '22023';
-  END IF;
-
   -- 1. La demanda tiene que ser del conector autenticado (p_feed_id viene de la clave, nunca del cuerpo).
   --    El bloqueo serializa dos entregas simultaneas de la misma demanda.
   SELECT d.* INTO v_demand FROM public.cl_demands d
@@ -106,6 +102,12 @@ BEGIN
   END IF;
   IF v_demand.status <> 'open' THEN
     RAISE EXCEPTION 'CL_DEMAND_NOT_OPEN: demand is %', v_demand.status USING ERRCODE = 'P0001';
+  END IF;
+
+  -- 2b. Conector pausado: no acepta lotes nuevos (ni de prueba); los ya guardados se devuelven arriba.
+  SELECT f.* INTO v_feed FROM public.cl_feeds f WHERE f.id = p_feed_id;
+  IF v_feed.status = 'paused' THEN
+    RAISE EXCEPTION 'CL_FEED_PAUSED: the connector is paused' USING ERRCODE = '22023';
   END IF;
 
   SELECT p.* INTO v_plan FROM public.cl_plans p WHERE p.id = v_demand.plan_id;
@@ -209,6 +211,7 @@ BEGIN
     scan_at     timestamptz,
     reader_id   uuid,
     resolved_mode text,    -- modo del punto resuelto por D4 (NULL = punto "cualquier modo")
+    oversize    boolean NOT NULL,  -- item_id / place_ref / mode_ref de mas de c_max_id (ya sustituido por NULL)
     is_start    boolean NOT NULL DEFAULT false,
     is_end      boolean NOT NULL DEFAULT false,
     row_reason  text,      -- motivo propio de la lectura
@@ -226,10 +229,15 @@ BEGIN
     reason      text
   ) ON COMMIT DROP;
 
-  INSERT INTO pg_temp.cl_ingest_rows (s_ord, r_ord, stratum_id, is_obj, row_obj, extra, item_id, product_raw, scan_raw, place_ref, mode_ref)
+  INSERT INTO pg_temp.cl_ingest_rows (s_ord, r_ord, stratum_id, is_obj, row_obj, extra, item_id, product_raw, scan_raw,
+                                      place_ref, mode_ref, oversize)
   SELECT s.o, r.o, (s.e->>'stratum_id')::uuid, jsonb_typeof(r.v) = 'object',
          CASE WHEN jsonb_typeof(r.v) = 'object' THEN
-           (SELECT jsonb_object_agg(j.key, j.value) FROM jsonb_each(r.v) j
+           (SELECT jsonb_object_agg(j.key,
+                     CASE WHEN (j.key = f_item AND length(j.value #>> '{}') > c_max_id)
+                            OR (j.key IN (f_place, f_mode) AND length(btrim(j.value #>> '{}')) > c_max_id)
+                          THEN 'null'::jsonb ELSE j.value END)
+              FROM jsonb_each(r.v) j
              WHERE j.key = ANY (v_allowed)
                AND (j.key = ANY (v_mapped)
                     OR (jsonb_typeof(j.value) IN ('string','number','boolean') AND length(j.value #>> '{}') <= c_max_extra))) END,
@@ -237,13 +245,18 @@ BEGIN
            (SELECT jsonb_object_agg(j.key, j.value) FROM jsonb_each(r.v) j
              WHERE j.key = ANY (v_extra)
                AND jsonb_typeof(j.value) IN ('string','number','boolean') AND length(j.value #>> '{}') <= c_max_extra) END,
-         CASE WHEN jsonb_typeof(r.v) = 'object' THEN r.v->>f_item END,
+         CASE WHEN length(x.it) > c_max_id THEN NULL ELSE x.it END,
          CASE WHEN jsonb_typeof(r.v) = 'object' AND f_product IS NOT NULL THEN r.v->>f_product END,
          CASE WHEN jsonb_typeof(r.v) = 'object' THEN r.v->>f_scan END,
-         CASE WHEN jsonb_typeof(r.v) = 'object' THEN NULLIF(btrim(r.v->>f_place), '') END,
-         CASE WHEN jsonb_typeof(r.v) = 'object' AND f_mode IS NOT NULL THEN NULLIF(btrim(r.v->>f_mode), '') END
+         CASE WHEN length(x.pl) > c_max_id THEN NULL ELSE x.pl END,
+         CASE WHEN length(x.md) > c_max_id THEN NULL ELSE x.md END,
+         COALESCE(length(x.it), 0) > c_max_id OR COALESCE(length(x.pl), 0) > c_max_id OR COALESCE(length(x.md), 0) > c_max_id
     FROM jsonb_array_elements(v_strata) WITH ORDINALITY s(e, o)
-   CROSS JOIN LATERAL jsonb_array_elements(s.e->'rows') WITH ORDINALITY r(v, o);
+   CROSS JOIN LATERAL jsonb_array_elements(s.e->'rows') WITH ORDINALITY r(v, o)
+   CROSS JOIN LATERAL (SELECT
+           CASE WHEN jsonb_typeof(r.v) = 'object' THEN r.v->>f_item END AS it,
+           CASE WHEN jsonb_typeof(r.v) = 'object' THEN NULLIF(btrim(r.v->>f_place), '') END AS pl,
+           CASE WHEN jsonb_typeof(r.v) = 'object' AND f_mode IS NOT NULL THEN NULLIF(btrim(r.v->>f_mode), '') END AS md) x;
 
   UPDATE pg_temp.cl_ingest_rows t SET scan_at = public.cl_parse_scan_at(t.scan_raw, v_fmt, v_scan_tz)
    WHERE t.scan_raw IS NOT NULL AND btrim(t.scan_raw) <> '';
@@ -277,16 +290,16 @@ BEGIN
        AND (r.carrier_mode_ref = t.mode_ref OR r.carrier_mode_ref IS NULL)
      ORDER BY (r.carrier_mode_ref IS NULL), r.id
      LIMIT 1)
-   WHERE t.place_ref IS NOT NULL AND length(t.place_ref) <= c_max_id;
+   WHERE t.place_ref IS NOT NULL;
 
   -- 6. Motivo por lectura.
   UPDATE pg_temp.cl_ingest_rows t SET row_reason = CASE
+      WHEN t.oversize THEN 'bad_value'
       WHEN NOT t.is_obj
         OR t.item_id IS NULL OR btrim(t.item_id) = ''
         OR t.scan_raw IS NULL OR btrim(t.scan_raw) = ''
         OR t.place_ref IS NULL OR btrim(t.place_ref) = ''
         OR (f_product IS NOT NULL AND (t.product_raw IS NULL OR btrim(t.product_raw) = '')) THEN 'missing_field'
-      WHEN length(t.item_id) > c_max_id OR length(t.place_ref) > c_max_id OR length(t.mode_ref) > c_max_id THEN 'bad_value'
       WHEN t.scan_at IS NULL   THEN 'bad_timestamp'
       WHEN t.product_id IS NULL THEN 'unknown_product'
       WHEN t.reader_id IS NULL THEN 'unknown_reading_point'
@@ -313,14 +326,14 @@ BEGIN
          COALESCE(bool_or(t.row_reason = 'unknown_product'), false),
          COALESCE(bool_or(t.row_reason IS NULL AND t.product_id <> v_plan.product_id), false)
     FROM pg_temp.cl_ingest_rows t
-   WHERE t.item_id IS NOT NULL AND btrim(t.item_id) <> '' AND length(t.item_id) <= c_max_id
+   WHERE t.item_id IS NOT NULL AND btrim(t.item_id) <> ''
    GROUP BY t.stratum_id, t.item_id;
 
   UPDATE pg_temp.cl_ingest_cands c SET start_r_ord = x.r_ord, start_at = x.scan_at
     FROM (SELECT DISTINCT ON (t.stratum_id, t.item_id) t.stratum_id, t.item_id, t.r_ord, t.scan_at
             FROM pg_temp.cl_ingest_rows t
            WHERE t.row_reason IS NULL AND t.is_start
-           ORDER BY t.stratum_id, t.item_id, t.scan_at, t.r_ord) x
+           ORDER BY t.stratum_id, t.item_id, t.scan_at, t.is_end, t.r_ord) x   -- a igual hora gana la lectura solo de inicio
    WHERE x.stratum_id = c.stratum_id AND x.item_id = c.item_id;
 
   UPDATE pg_temp.cl_ingest_cands c SET
@@ -400,9 +413,7 @@ BEGIN
   INSERT INTO public.cl_batch_scans (account_id, batch_id, stratum_id, item_id, product_id, scan_at, place_ref, mode_ref,
                                      reader_id, status, reject_reason, extra)
   SELECT v_plan.account_id, v_batch, t.stratum_id,
-         CASE WHEN length(t.item_id) > c_max_id THEN NULL ELSE t.item_id END, t.product_id, t.scan_at,
-         CASE WHEN length(t.place_ref) > c_max_id THEN NULL ELSE t.place_ref END,
-         CASE WHEN length(t.mode_ref) > c_max_id THEN NULL ELSE t.mode_ref END,
+         t.item_id, t.product_id, t.scan_at, t.place_ref, t.mode_ref,
          t.reader_id, CASE WHEN t.reject_reason IS NULL THEN 'valid' ELSE 'rejected' END, t.reject_reason, t.extra
     FROM pg_temp.cl_ingest_rows t
    ORDER BY t.s_ord, t.r_ord;

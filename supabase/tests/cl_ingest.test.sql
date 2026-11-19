@@ -230,8 +230,10 @@ END $$;
 -- 8b. Precedencia D4, lugar con espacios, hora mala, campo ausente, valores enormes y extras no escalares.
 DO $$
 DECLARE r jsonb; s jsonb; v_batch uuid;
+  v_huge text := (SELECT string_agg(md5(i::text), '') FROM generate_series(1, 94) i);   -- ~3000 caracteres incompresibles
 BEGIN
   r := public.cl_ingest_batch('f0000000-0000-0000-0000-0000000000a1', pg_temp.mk('B-MISC', jsonb_build_array(
+         pg_temp.rd(v_huge, 'EXP', '21/10/2026 08:00', 'NBO', 'ADM'),
          pg_temp.rd('C1', 'EXP', '21/10/2026 08:00', 'NBO', 'ADM') || jsonb_build_object('weight', jsonb_build_object('a', 1)),
          pg_temp.rd('C1', 'EXP', '22/10/2026 08:00', 'MBA ', 'DLV') || jsonb_build_object('weight', repeat('w', 501)),
          pg_temp.rd('C2', 'EXP', 'garbage',          'NBO', 'ADM'),
@@ -249,14 +251,18 @@ BEGIN
   s := r->'strata'->0;
   PERFORM pg_temp.ok((s->>'candidates')::int = 6 AND (s->>'candidates_valid')::int = 2, 'C1 y C8 validos de 6: ' || s::text);
   PERFORM pg_temp.ok(s->'rejected' = '{"no_start":2,"no_end":2}'::jsonb, 'motivos B-MISC: ' || (s->'rejected')::text);
-  PERFORM pg_temp.ok(s->'rows_rejected' = '{"bad_timestamp":1,"missing_field":1,"bad_value":2}'::jsonb, 'filas B-MISC: ' || (s->'rows_rejected')::text);
+  PERFORM pg_temp.ok(s->'rows_rejected' = '{"bad_timestamp":1,"missing_field":1,"bad_value":3}'::jsonb, 'filas B-MISC: ' || (s->'rows_rejected')::text);
   PERFORM pg_temp.ok((SELECT reader_id FROM public.cl_batch_scans WHERE batch_id = v_batch AND item_id = 'C1' AND place_ref = 'MBA')
                      = 'ad000000-0000-0000-0000-000000000003', 'lugar con espacio final recortado y resuelto');
   PERFORM pg_temp.ok((SELECT bool_and(status = 'valid' AND extra IS NULL) FROM public.cl_batch_scans WHERE batch_id = v_batch AND item_id = 'C1'),
                      'extras no escalares o largos descartados, fila conservada');
   PERFORM pg_temp.ok((SELECT reject_reason FROM public.cl_batch_scans WHERE batch_id = v_batch AND item_id = 'C2' AND place_ref = 'NBO') = 'bad_timestamp', 'bad_timestamp');
   PERFORM pg_temp.ok((SELECT reject_reason FROM public.cl_batch_scans WHERE batch_id = v_batch AND item_id = 'C3' AND place_ref = 'MBA') = 'missing_field', 'missing_field');
-  PERFORM pg_temp.ok((SELECT count(*) FROM public.cl_batch_scans WHERE batch_id = v_batch AND item_id IS NULL AND reject_reason = 'bad_value') = 1, 'item_id enorme: bad_value sin valor');
+  PERFORM pg_temp.ok((SELECT count(*) FROM public.cl_batch_scans WHERE batch_id = v_batch AND item_id IS NULL AND reject_reason = 'bad_value') = 2, 'item_id enorme (incluido uno incompresible): bad_value sin valor');
+  PERFORM pg_temp.ok((SELECT raw_payload->'strata'->0->'rows'->0->'trk' FROM public.cl_batches WHERE id = v_batch) = 'null'::jsonb
+                     AND position(v_huge IN (SELECT raw_payload::text FROM public.cl_batches WHERE id = v_batch)) = 0
+                     AND position(repeat('P', 201) IN (SELECT raw_payload::text FROM public.cl_batches WHERE id = v_batch)) = 0,
+                     'raw_payload sin los valores gigantes');
   PERFORM pg_temp.ok((SELECT count(*) FROM public.cl_batch_scans WHERE batch_id = v_batch AND item_id = 'C5' AND place_ref IS NULL AND reject_reason = 'bad_value') = 1, 'place_ref enorme: bad_value sin valor');
   PERFORM pg_temp.ok((SELECT reader_id FROM public.cl_batch_scans WHERE batch_id = v_batch AND item_id = 'C7' AND place_ref = 'KSM')
                      = 'ad000000-0000-0000-0000-000000000005', 'KSM SRT -> punto especifico intermedio');
@@ -273,15 +279,20 @@ BEGIN
   r := public.cl_ingest_batch('f0000000-0000-0000-0000-0000000000a1', pg_temp.mk('B-BOTH', jsonb_build_array(
          pg_temp.rd('S1', 'EXP', '21/10/2026 08:00', 'NBO', 'BTH'),
          pg_temp.rd('S2', 'EXP', '21/10/2026 08:00', 'NBO', 'BTH'),
-         pg_temp.rd('S2', 'EXP', '21/10/2026 10:00', 'NBO', 'BTH')), p_stratum => '91000000-0000-0000-0000-0000000000b2'));
-  PERFORM pg_temp.ok((r->'strata'->0->>'candidates_valid')::int = 1, 'S2 valido: ' || r::text);
+         pg_temp.rd('S2', 'EXP', '21/10/2026 10:00', 'NBO', 'BTH'),
+         -- misma hora: la lectura solo de inicio (ADM) es el inicio y la de BTH el fin
+         pg_temp.rd('S3', 'EXP', '21/10/2026 08:00', 'NBO', 'BTH'),
+         pg_temp.rd('S3', 'EXP', '21/10/2026 08:00', 'NBO', 'ADM')), p_stratum => '91000000-0000-0000-0000-0000000000b2'));
+  PERFORM pg_temp.ok((r->'strata'->0->>'candidates_valid')::int = 2, 'S2 y S3 validos: ' || r::text);
   PERFORM pg_temp.ok(r->'strata'->0->'rejected' = '{"same_reading":1}'::jsonb, 'S1 same_reading');
 END $$;
 
--- 8d. Conector pausado: ni lote ni prueba; testing acepta.
+-- 8d. Conector pausado: ni lote nuevo ni prueba (un lote ya guardado si se devuelve); testing acepta.
 DO $$
 BEGIN
   UPDATE public.cl_feeds SET status = 'paused' WHERE id = 'f0000000-0000-0000-0000-0000000000a1';
+  PERFORM pg_temp.ok(public.cl_ingest_batch('f0000000-0000-0000-0000-0000000000a1', pg_temp.mk('B1', pg_temp.rows_main()))
+                     = (SELECT summary FROM public.cl_batches WHERE connector_batch_id = 'B1'), 'pausado: reenvio de un lote guardado devuelve su resumen');
   PERFORM pg_temp.ok(pg_temp.errmsg_of(format('SELECT public.cl_ingest_batch(%L, %L::jsonb)', 'f0000000-0000-0000-0000-0000000000a1',
                      pg_temp.mk('B-P', pg_temp.rows_main()))) LIKE 'CL_FEED_PAUSED%', 'pausado rechaza el lote');
   PERFORM pg_temp.ok(pg_temp.sqlstate_of(format('SELECT public.cl_ingest_batch(%L, %L::jsonb, true)', 'f0000000-0000-0000-0000-0000000000a1',
