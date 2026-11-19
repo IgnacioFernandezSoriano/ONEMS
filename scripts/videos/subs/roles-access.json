@@ -1,0 +1,380 @@
+{
+  "langs": [
+    "en",
+    "es",
+    "fr",
+    "ar",
+    "pt"
+  ],
+  "cues": [
+    {
+      "start": "00:00:00.650",
+      "end": "00:00:03.210",
+      "en": "Roles and access in ONEMS.",
+      "es": "Roles and access en ONEMS.",
+      "fr": "Roles and access dans ONEMS.",
+      "ar": "Roles and access في ONEMS.",
+      "pt": "Roles and access no ONEMS."
+    },
+    {
+      "start": "00:00:04.150",
+      "end": "00:00:06.720",
+      "en": "What each person sees, and what they can do,",
+      "es": "Lo que cada persona ve y lo que puede hacer",
+      "fr": "Ce que chaque personne voit et ce qu'elle peut faire",
+      "ar": "ما يراه كل شخص وما يمكنه القيام به",
+      "pt": "O que cada pessoa vê e o que pode fazer"
+    },
+    {
+      "start": "00:00:06.770",
+      "end": "00:00:09.590",
+      "en": "depends on their roles in their country's account.",
+      "es": "depende de sus roles en la cuenta de su país.",
+      "fr": "dépend de ses rôles dans le compte de son pays.",
+      "ar": "يعتمد على أدواره في حساب بلده.",
+      "pt": "depende das suas funções na conta do seu país."
+    },
+    {
+      "start": "00:00:09.740",
+      "end": "00:00:11.090",
+      "en": "Here is how it works.",
+      "es": "Así es como funciona.",
+      "fr": "Voici comment cela fonctionne.",
+      "ar": "إليكم كيفية عمل ذلك.",
+      "pt": "Veja como funciona."
+    },
+    {
+      "start": "00:00:12.730",
+      "end": "00:00:15.630",
+      "en": "Every account has the same six roles.",
+      "es": "Cada cuenta tiene los mismos seis roles.",
+      "fr": "Chaque compte possède les six mêmes rôles.",
+      "ar": "يحتوي كل حساب على نفس الأدوار الستة.",
+      "pt": "Cada conta tem as mesmas seis funções."
+    },
+    {
+      "start": "00:00:15.880",
+      "end": "00:00:19.770",
+      "en": "The Account Manager heads the account and decides the team's access.",
+      "es": "El Account Manager dirige la cuenta y decide el acceso del equipo.",
+      "fr": "L'Account Manager dirige le compte et décide des accès de l'équipe.",
+      "ar": "يترأس الـ Account Manager الحساب ويحدد صلاحيات وصول الفريق.",
+      "pt": "O Account Manager chefia a conta e decide o acesso da equipe."
+    },
+    {
+      "start": "00:00:20.210",
+      "end": "00:00:23.510",
+      "en": "The Allocation Plan Manager prepares the shipment plans.",
+      "es": "El Allocation Plan Manager prepara los planes de envío.",
+      "fr": "L'Allocation Plan Manager prépare les plans d'expédition.",
+      "ar": "يقوم الـ Allocation Plan Manager بإعداد خطط الشحن.",
+      "pt": "O Allocation Plan Manager prepara os planos de remessa."
+    },
+    {
+      "start": "00:00:23.740",
+      "end": "00:00:28.410",
+      "en": "The Panelist Manager looks after the panelists, their incidents and their availability.",
+      "es": "El Panelist Manager se encarga de los panelistas, sus incidencias y su disponibilidad.",
+      "fr": "Le Panelist Manager s'occupe des panélistes, de leurs incidents et de leur disponibilité.",
+      "ar": "يتولى الـ Panelist Manager شؤون المشاركين وحوادثهم ومدى توفرهم.",
+      "pt": "O Panelist Manager cuida dos painelistas, de seus incidentes e de sua disponibilidade."
+    },
+    {
+      "start": "00:00:29.130",
+      "end": "00:00:31.550",
+      "en": "The Materials Supplier manages materials.",
+      "es": "El Materials Supplier gestiona los materiales.",
+      "fr": "Le Materials Supplier gère le matériel.",
+      "ar": "يدير الـ Materials Supplier المواد.",
+      "pt": "O Materials Supplier gerencia os materiais."
+    },
+    {
+      "start": "00:00:31.600",
+      "end": "00:00:35.330",
+      "en": "The DO coordinator handles the RFID side.",
+      "es": "El DO coordinator se encarga de la parte RFID.",
+      "fr": "Le DO coordinator gère la partie RFID.",
+      "ar": "يتولى الـ DO coordinator الجانب المتعلق بـ RFID.",
+      "pt": "O DO coordinator cuida da parte de RFID."
+    },
+    {
+      "start": "00:00:35.550",
+      "end": "00:00:39.090",
+      "en": "And the UPU account manager follows the account for the UPU.",
+      "es": "Y el UPU account manager hace el seguimiento de la cuenta para la UPU.",
+      "fr": "Et l'UPU account manager suit le compte pour l'UPU.",
+      "ar": "ويتابع الـ UPU account manager الحساب لصالح UPU.",
+      "pt": "E o UPU account manager acompanha a conta para a UPU."
+    },
+    {
+      "start": "00:00:40.850",
+      "end": "00:00:44.610",
+      "en": "For each menu option, a role gives one of three rights.",
+      "es": "Para cada opción del menú, un rol otorga uno de tres derechos.",
+      "fr": "Pour chaque option du menu, un rôle donne l'un des trois droits.",
+      "ar": "لكل خيار في القائمة، يمنح الدور حقاً من ثلاثة حقوق.",
+      "pt": "Para cada opção de menu, uma função dá um de três direitos."
+    },
+    {
+      "start": "00:00:44.700",
+      "end": "00:00:47.930",
+      "en": "Edit: you see the screen and you can change data.",
+      "es": "Edit: usted ve la pantalla y puede modificar los datos.",
+      "fr": "Edit : vous voyez l'écran et vous pouvez modifier les données.",
+      "ar": "Edit: يمكنك رؤية الشاشة وتغيير البيانات.",
+      "pt": "Edit: você vê a tela e pode alterar os dados."
+    },
+    {
+      "start": "00:00:48.170",
+      "end": "00:00:51.000",
+      "en": "View: you see the screen, but the create, save",
+      "es": "View: usted ve la pantalla, pero los botones de crear, guardar",
+      "fr": "View : vous voyez l'écran, mais les boutons créer, enregistrer",
+      "ar": "View: يمكنك رؤية الشاشة، لكن أزرار الإنشاء والحفظ",
+      "pt": "View: você vê a tela, mas os botões criar, salvar"
+    },
+    {
+      "start": "00:00:51.050",
+      "end": "00:00:55.370",
+      "en": "and delete buttons are hidden, and a View only badge appears.",
+      "es": "y eliminar están ocultos, y aparece una etiqueta de View only.",
+      "fr": "et supprimer sont masqués, et un badge View only apparaît.",
+      "ar": "والحذف تكون مخفية، وتظهر شارة View only.",
+      "pt": "e excluir ficam ocultos, e um selo View only aparece."
+    },
+    {
+      "start": "00:00:55.670",
+      "end": "00:00:59.050",
+      "en": "Or no access: the option does not appear in the menu.",
+      "es": "O sin acceso: la opción no aparece en el menú.",
+      "fr": "Ou aucun accès : l'option n'apparaît pas dans le menu.",
+      "ar": "أو عدم وجود صلاحية وصول: لا يظهر الخيار في القائمة.",
+      "pt": "Ou sem acesso: a opção não aparece no menu."
+    },
+    {
+      "start": "00:00:59.480",
+      "end": "00:01:02.730",
+      "en": "If you have several roles, the highest right wins.",
+      "es": "Si usted tiene varios roles, prevalece el derecho más alto.",
+      "fr": "Si vous avez plusieurs rôles, le droit le plus élevé l'emporte.",
+      "ar": "إذا كان لديك عدة أدوار، فسيُطبق الحق الأعلى.",
+      "pt": "Se você tiver várias funções, o direito mais alto prevalece."
+    },
+    {
+      "start": "00:01:02.810",
+      "end": "00:01:06.780",
+      "en": "For example, the Panelist Manager has View on Stock Management,",
+      "es": "Por ejemplo, el Panelist Manager tiene View en Stock Management,",
+      "fr": "Par exemple, le Panelist Manager a le droit View sur Stock Management,",
+      "ar": "على سبيل المثال، يمتلك الـ Panelist Manager حق View في Stock Management،",
+      "pt": "Por exemplo, o Panelist Manager tem View em Stock Management,"
+    },
+    {
+      "start": "00:01:06.830",
+      "end": "00:01:09.220",
+      "en": "and the Materials Supplier has Edit.",
+      "es": "y el Materials Supplier tiene Edit.",
+      "fr": "et le Materials Supplier a le droit Edit.",
+      "ar": "ويمتلك الـ Materials Supplier حق Edit.",
+      "pt": "e o Materials Supplier tem Edit."
+    },
+    {
+      "start": "00:01:09.270",
+      "end": "00:01:11.770",
+      "en": "With both roles, you have Edit.",
+      "es": "Con ambos roles, usted tiene Edit.",
+      "fr": "Avec les deux rôles, vous avez Edit.",
+      "ar": "بوجود كلا الدورين، ستحصل على حق Edit.",
+      "pt": "Com ambas as funções, você tem Edit."
+    },
+    {
+      "start": "00:01:12.230",
+      "end": "00:01:16.350",
+      "en": "And a user with no role only sees the reporting screens and the Help centre.",
+      "es": "Y un usuario sin rol solo ve las pantallas de informes y el Help centre.",
+      "fr": "Et un utilisateur sans rôle ne voit que les écrans de rapports et le Help centre.",
+      "ar": "والمستخدم الذي ليس لديه أي دور يرى فقط شاشات التقارير و Help centre.",
+      "pt": "E um usuário sem função só vê as telas de relatórios e o Help centre."
+    },
+    {
+      "start": "00:01:18.170",
+      "end": "00:01:23.210",
+      "en": "If a menu option is missing, or you need Edit where you only have View,",
+      "es": "Si falta una opción del menú, o si necesita Edit donde solo tiene View,",
+      "fr": "S'il manque une option de menu, ou si vous avez besoin de Edit là où vous n'avez que View,",
+      "ar": "إذا كان أحد خيارات القائمة مفقوداً، أو كنت بحاجة إلى Edit بينما لديك View فقط،",
+      "pt": "Se faltar uma opção de menu, ou se precisar de Edit onde só tem View,"
+    },
+    {
+      "start": "00:01:23.340",
+      "end": "00:01:27.730",
+      "en": "ask the Account Manager or the UPU account manager of your account.",
+      "es": "solicítelo al Account Manager o al UPU account manager de su cuenta.",
+      "fr": "demandez au Account Manager ou au UPU account manager de votre compte.",
+      "ar": "فاطلب ذلك من Account Manager أو UPU account manager الخاص بحسابك.",
+      "pt": "peça ao Account Manager ou ao UPU account manager da sua conta."
+    },
+    {
+      "start": "00:01:27.920",
+      "end": "00:01:30.410",
+      "en": "Only they can change its roles and rights.",
+      "es": "Solo ellos pueden cambiar los roles y derechos de la cuenta.",
+      "fr": "Eux seuls peuvent modifier ses rôles et droits.",
+      "ar": "فهم وحدهم من يمكنهم تغيير أدواره وصلاحياته.",
+      "pt": "Apenas eles podem alterar suas funções e direitos."
+    },
+    {
+      "start": "00:01:30.730",
+      "end": "00:01:32.540",
+      "en": "The change is saved at once.",
+      "es": "El cambio se guarda de inmediato.",
+      "fr": "La modification est enregistrée immédiatement.",
+      "ar": "يتم حفظ التغيير على الفور.",
+      "pt": "A alteração é salva imediatamente."
+    },
+    {
+      "start": "00:01:32.590",
+      "end": "00:01:35.170",
+      "en": "Reload the page to see your updated menu.",
+      "es": "Recargue la página para ver su menú actualizado.",
+      "fr": "Rechargez la page pour voir votre menu mis à jour.",
+      "ar": "أعد تحميل الصفحة لرؤية قائمتك المحدثة.",
+      "pt": "Recarregue a página para ver o seu menu atualizado."
+    },
+    {
+      "start": "00:01:36.730",
+      "end": "00:01:40.540",
+      "en": "Account Managers and UPU account managers use the tab",
+      "es": "Los Account Managers y los UPU account managers utilizan la pestaña",
+      "fr": "Les Account Managers et les UPU account managers utilisent l'onglet",
+      "ar": "يستخدم الـ Account Managers والـ UPU account managers علامة التبويب",
+      "pt": "Os Account Managers e os UPU account managers utilizam a aba"
+    },
+    {
+      "start": "00:01:40.590",
+      "end": "00:01:43.090",
+      "en": "Administration, Roles and access.",
+      "es": "Administration, Roles and access.",
+      "fr": "Administration, Roles and access.",
+      "ar": "Administration, Roles and access.",
+      "pt": "Administration, Roles and access."
+    },
+    {
+      "start": "00:01:43.680",
+      "end": "00:01:48.110",
+      "en": "In Account contacts, type the emails that receive the automatic notices.",
+      "es": "En Account contacts, escriba los correos que reciben los avisos automáticos.",
+      "fr": "Dans Account contacts, saisissez les e-mails qui reçoivent les notifications automatiques.",
+      "ar": "في Account contacts، اكتب رسائل البريد الإلكتروني التي تتلقى الإشعارات التلقائية.",
+      "pt": "Em Account contacts, digite os e-mails que recebem os avisos automáticos."
+    },
+    {
+      "start": "00:01:48.320",
+      "end": "00:01:50.490",
+      "en": "A contact does not give access to ONEMS.",
+      "es": "Un contacto no otorga acceso a ONEMS.",
+      "fr": "Un contact ne donne pas accès à ONEMS.",
+      "ar": "لا تمنح جهة الاتصال صلاحية الوصول إلى ONEMS.",
+      "pt": "Um contato não dá acesso ao ONEMS."
+    },
+    {
+      "start": "00:01:51.670",
+      "end": "00:01:57.390",
+      "en": "In Rights of each role, choose Edit, View or no access for each menu option.",
+      "es": "En Rights of each role, elija Edit, View o sin acceso para cada opción del menú.",
+      "fr": "Dans Rights of each role, choisissez Edit, View ou aucun accès pour chaque option de menu.",
+      "ar": "في Rights of each role، اختر Edit أو View أو عدم السماح بالوصول لكل خيار في القائمة.",
+      "pt": "Em Rights of each role, escolha Edit, View ou sem acesso para cada opção de menu."
+    },
+    {
+      "start": "00:01:57.710",
+      "end": "00:01:59.250",
+      "en": "There is no save button:",
+      "es": "No hay botón de guardar:",
+      "fr": "Il n'y a pas de bouton d'enregistrement :",
+      "ar": "لا يوجد زر للحفظ:",
+      "pt": "Não há botão de salvar:"
+    },
+    {
+      "start": "00:01:59.400",
+      "end": "00:02:01.010",
+      "en": "the change is saved at once.",
+      "es": "el cambio se guarda de inmediato.",
+      "fr": "la modification est enregistrée immédiatement.",
+      "ar": "يتم حفظ التغيير على الفور.",
+      "pt": "a alteração é salva imediatamente."
+    },
+    {
+      "start": "00:02:01.480",
+      "end": "00:02:05.950",
+      "en": "In Users and their roles, tick or untick a role for each user.",
+      "es": "En Users and their roles, marque o desmarque un rol para cada usuario.",
+      "fr": "Dans Users and their roles, cochez ou décochez un rôle pour chaque utilisateur.",
+      "ar": "في Users and their roles، حدد أو ألغِ تحديد دور لكل مستخدم.",
+      "pt": "Em Users and their roles, marque ou desmarque uma função para cada usuário."
+    },
+    {
+      "start": "00:02:06.190",
+      "end": "00:02:08.880",
+      "en": "Review any role marked Provisional:",
+      "es": "Revise cualquier rol marcado como Provisional:",
+      "fr": "Vérifiez tout rôle marqué Provisional :",
+      "ar": "راجع أي دور يحمل علامة Provisional:",
+      "pt": "Revise qualquer função marcada como Provisional:"
+    },
+    {
+      "start": "00:02:08.930",
+      "end": "00:02:12.150",
+      "en": "confirm it, or replace it with the right one.",
+      "es": "confírmelo o reemplácelo por el correcto.",
+      "fr": "confirmez-le, ou remplacez-le par le bon.",
+      "ar": "قم بتأكيده، أو استبدله بالدور الصحيح.",
+      "pt": "confirme-a ou substitua-a pela correta."
+    },
+    {
+      "start": "00:02:12.500",
+      "end": "00:02:15.710",
+      "en": "Back to template undoes all changes to the rights.",
+      "es": "Back to template deshace todos los cambios en los derechos.",
+      "fr": "Back to template annule toutes les modifications des droits.",
+      "ar": "يؤدي خيار Back to template إلى التراجع عن جميع التغييرات في الصلاحيات.",
+      "pt": "Back to template desfaz todas as alterações nos direitos."
+    },
+    {
+      "start": "00:02:15.980",
+      "end": "00:02:19.630",
+      "en": "And Latest changes shows who changed what, and when.",
+      "es": "Y Latest changes muestra quién cambió qué y cuándo.",
+      "fr": "Et Latest changes montre qui a modifié quoi, et quand.",
+      "ar": "ويعرض خيار Latest changes من قام بالتغيير وماذا غيّر ومتى.",
+      "pt": "E Latest changes mostra quem alterou o quê, e quando."
+    },
+    {
+      "start": "00:02:21.090",
+      "end": "00:02:25.130",
+      "en": "Each account keeps its own rights, contacts and roles.",
+      "es": "Cada cuenta mantiene sus propios derechos, contactos y roles.",
+      "fr": "Chaque compte conserve ses propres droits, contacts et rôles.",
+      "ar": "يحتفظ كل حساب بصلاحياته وجهات اتصاله وأدواره الخاصة.",
+      "pt": "Cada conta mantém seus próprios direitos, contatos e funções."
+    },
+    {
+      "start": "00:02:25.330",
+      "end": "00:02:28.130",
+      "en": "A change in yours does not affect other countries.",
+      "es": "Un cambio en la suya no afecta a otros países.",
+      "fr": "Une modification du vôtre n'affecte pas les autres pays.",
+      "ar": "أي تغيير في حسابك لا يؤثر على البلدان الأخرى.",
+      "pt": "Uma alteração na sua não afeta outros países."
+    },
+    {
+      "start": "00:02:28.540",
+      "end": "00:02:32.350",
+      "en": "For the full guide, open Roles and access in the Help centre.",
+      "es": "Para la guía completa, abra Roles and access en el Help centre.",
+      "fr": "Pour le guide complet, ouvrez Roles and access dans le Help centre.",
+      "ar": "للحصول على الدليل الكامل، افتح Roles and access في Help centre.",
+      "pt": "Para o guia completo, abra Roles and access no Help centre."
+    }
+  ]
+}
