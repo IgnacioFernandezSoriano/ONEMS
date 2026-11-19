@@ -27,6 +27,8 @@ INSERT INTO public.postal_centers (id, account_id, code, name, city, city_id) VA
   ('d1000000-0000-0000-0000-0000000000c1','a0000000-0000-0000-0000-000000000001','PC1','Center 1','City1','c1000000-0000-0000-0000-000000000001');
 INSERT INTO public.postal_centers (id, account_id, code, name, city) VALUES
   ('d1000000-0000-0000-0000-0000000000c0','a0000000-0000-0000-0000-000000000001','PC0','Center 0','Nowhere');
+INSERT INTO public.carriers (id, account_id, code, name) VALUES
+  ('ca000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000002','CB','Carrier2');
 INSERT INTO public.readers (id, account_id, postal_center_id, reader_id, name, type) VALUES
   ('f1000000-0000-0000-0000-000000000001','a0000000-0000-0000-0000-000000000001','d1000000-0000-0000-0000-0000000000c1','LPI1','R1','Mixed');
 
@@ -58,11 +60,27 @@ DO $$ BEGIN
   -- reader_id explícito se respeta
   INSERT INTO public.readers (account_id, reader_id, name, type, capture_source, carrier_id, carrier_place_ref)
   VALUES ('a0000000-0000-0000-0000-000000000001','CUSTOM1','P3','Exit','carrier_scan','ca000000-0000-0000-0000-000000000001','KIS');
-  PERFORM pg_temp.fail_if((SELECT reader_id FROM public.readers WHERE name = 'P3') IS DISTINCT FROM 'CUSTOM1', 'reader_id explícito');
+  PERFORM pg_temp.fail_if((SELECT reader_id FROM public.readers WHERE name = 'P3') IS DISTINCT FROM 'CL:acc:CA:KIS', 'reader_id explícito se ignora');
+  UPDATE public.readers SET carrier_place_ref = 'KIS2', reader_id = 'HAND' WHERE name = 'P3';
+  PERFORM pg_temp.fail_if((SELECT reader_id FROM public.readers WHERE name = 'P3') IS DISTINCT FROM 'CL:acc:CA:KIS2', 'update regenera reader_id');
+  PERFORM pg_temp.fail_if(pg_temp.sqlstate_of($q$INSERT INTO public.readers (account_id, reader_id, name, type)
+    VALUES ('a0000000-0000-0000-0000-000000000001','CL:acc:CA:FAKE','F','Entry')$q$) IS DISTINCT FROM '23514', 'rfid con CL:');
 END $$;
 
 -- 3. Forma del punto.
 DO $$ BEGIN
+  -- carrier de otra cuenta (CB es de A2) -> check_violation
+  PERFORM pg_temp.fail_if(pg_temp.sqlstate_of($q$INSERT INTO public.readers (account_id, name, type, capture_source, carrier_id, carrier_place_ref)
+    VALUES ('a0000000-0000-0000-0000-000000000001','XC','Entry','carrier_scan','ca000000-0000-0000-0000-000000000002','XC1')$q$)
+    IS DISTINCT FROM '23514', 'carrier de otra cuenta');
+  -- modo en blanco -> NULL, sin ':' final
+  INSERT INTO public.readers (account_id, name, type, capture_source, carrier_id, carrier_place_ref, carrier_mode_ref)
+  VALUES ('a0000000-0000-0000-0000-000000000001','BL','Entry','carrier_scan','ca000000-0000-0000-0000-000000000001','BLK','  ');
+  PERFORM pg_temp.fail_if((SELECT reader_id FROM public.readers WHERE name = 'BL') IS DISTINCT FROM 'CL:acc:CA:BLK', 'modo blanco');
+  PERFORM pg_temp.fail_if((SELECT carrier_mode_ref FROM public.readers WHERE name = 'BL') IS NOT NULL, 'modo blanco no es NULL');
+  UPDATE public.readers SET carrier_mode_ref = ' ' WHERE name = 'BL';
+  PERFORM pg_temp.fail_if((SELECT carrier_mode_ref FROM public.readers WHERE name = 'BL') IS NOT NULL
+                          OR (SELECT reader_id FROM public.readers WHERE name = 'BL') <> 'CL:acc:CA:BLK', 'update modo blanco');
   PERFORM pg_temp.fail_if(NOT pg_temp.raises($q$INSERT INTO public.readers (account_id, name, type, capture_source, carrier_id, carrier_place_ref)
     VALUES ('a0000000-0000-0000-0000-000000000001','M','Mixed','carrier_scan','ca000000-0000-0000-0000-000000000001','XXX')$q$), 'carrier_scan Mixed pasa');
   PERFORM pg_temp.fail_if(NOT pg_temp.raises($q$INSERT INTO public.readers (account_id, reader_id, name, type, carrier_id)
@@ -83,6 +101,9 @@ DO $$ BEGIN
   PERFORM pg_temp.fail_if(pg_temp.sqlstate_of($q$INSERT INTO public.readers (account_id, name, type, capture_source, carrier_id, carrier_place_ref, e2e_role)
     VALUES ('a0000000-0000-0000-0000-000000000001','O2','Entry','carrier_scan','ca000000-0000-0000-0000-000000000001','ZZ2','destination')$q$)
     IS DISTINCT FROM '23514', 'e2e_role sin centro');
+  PERFORM pg_temp.fail_if(pg_temp.sqlstate_of($q$INSERT INTO public.readers (account_id, postal_center_id, name, type, capture_source, carrier_id, carrier_place_ref, e2e_role)
+    VALUES ('a0000000-0000-0000-0000-000000000002','d1000000-0000-0000-0000-0000000000c1','O4','Entry','carrier_scan','ca000000-0000-0000-0000-000000000002','ZZ4','origin')$q$)
+    IS DISTINCT FROM '23514', 'e2e_role con centro de otra cuenta');
   INSERT INTO public.readers (account_id, postal_center_id, name, type, capture_source, carrier_id, carrier_place_ref, e2e_role)
   VALUES ('a0000000-0000-0000-0000-000000000001','d1000000-0000-0000-0000-0000000000c1','O3','Entry','carrier_scan','ca000000-0000-0000-0000-000000000001','ZZ3','both');
   -- UPDATE a un centro sin ciudad tambien falla
@@ -153,8 +174,23 @@ DO $$ BEGIN
   PERFORM pg_temp.fail_if(pg_temp.raises($q$INSERT INTO public.readers (account_id, name, type, capture_source, carrier_id, carrier_place_ref)
     VALUES ('a0000000-0000-0000-0000-000000000001','DOP','Entry','carrier_scan','ca000000-0000-0000-0000-000000000001','DOP')$q$),
     'DO con cl_reading_points edit no inserta punto');
+  UPDATE public.readers SET name = 'DOP2' WHERE name = 'DOP';
+  PERFORM pg_temp.fail_if(NOT EXISTS (SELECT 1 FROM public.readers WHERE name = 'DOP2'), 'DO no actualiza punto');
+  PERFORM pg_temp.fail_if(NOT pg_temp.raises($q$INSERT INTO public.readers (account_id, reader_id, name, type)
+    VALUES ('a0000000-0000-0000-0000-000000000001','RFX','X','Entry')$q$), 'DO inserta lector rfid');
+  UPDATE public.readers SET name = 'hack' WHERE id = 'f1000000-0000-0000-0000-000000000001';
+  PERFORM pg_temp.fail_if((SELECT name FROM public.readers WHERE id = 'f1000000-0000-0000-0000-000000000001') <> 'R1', 'DO actualiza lector rfid');
+  PERFORM pg_temp.raises($q$UPDATE public.readers SET capture_source = 'carrier_scan', carrier_id = 'ca000000-0000-0000-0000-000000000001',
+    carrier_place_ref = 'HJK', type = 'Entry' WHERE id = 'f1000000-0000-0000-0000-000000000001'$q$);
+  PERFORM pg_temp.fail_if((SELECT capture_source FROM public.readers WHERE id = 'f1000000-0000-0000-0000-000000000001') <> 'rfid', 'rfid convertido en punto');
+  PERFORM pg_temp.raises($q$UPDATE public.readers SET capture_source = 'rfid', carrier_id = NULL, carrier_place_ref = NULL, reader_id = 'ZED' WHERE name = 'DOP2'$q$);
+  PERFORM pg_temp.fail_if((SELECT capture_source FROM public.readers WHERE name = 'DOP2') <> 'carrier_scan', 'punto convertido en rfid');
+  PERFORM pg_temp.fail_if(NOT pg_temp.raises($q$INSERT INTO public.postal_centers (account_id, code, name, city)
+    VALUES ('a0000000-0000-0000-0000-000000000001','PCX','X','X')$q$), 'DO inserta centro');
+  UPDATE public.postal_centers SET name = 'hack' WHERE id = 'd1000000-0000-0000-0000-0000000000c1';
+  PERFORM pg_temp.fail_if((SELECT name FROM public.postal_centers WHERE id = 'd1000000-0000-0000-0000-0000000000c1') <> 'Center 1', 'DO actualiza centro');
   PERFORM pg_temp.fail_if(NOT pg_temp.raises($q$INSERT INTO public.readers (account_id, name, type, capture_source, carrier_id, carrier_place_ref)
-    VALUES ('a0000000-0000-0000-0000-000000000002','DOX','Entry','carrier_scan','ca000000-0000-0000-0000-000000000001','DOX')$q$),
+    VALUES ('a0000000-0000-0000-0000-000000000002','DOX','Entry','carrier_scan','ca000000-0000-0000-0000-000000000002','DOX')$q$),
     'DO inserta en otra cuenta');
 END $$;
 SELECT pg_temp.as_user('93000000-0000-0000-0000-000000000093', 'authenticated');

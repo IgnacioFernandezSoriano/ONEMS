@@ -16,6 +16,7 @@ ALTER TABLE public.readers
 ALTER TABLE public.readers
   ADD CONSTRAINT readers_capture_source_check CHECK (capture_source IN ('rfid','carrier_scan')),
   ADD CONSTRAINT readers_e2e_role_check CHECK (e2e_role IN ('origin','destination','both','none')),
+  ADD CONSTRAINT readers_cl_mode_not_blank CHECK (carrier_mode_ref IS NULL OR btrim(carrier_mode_ref) <> ''),
   ADD CONSTRAINT readers_cl_shape CHECK (
     (capture_source = 'rfid'
        AND carrier_id IS NULL AND carrier_place_ref IS NULL AND carrier_mode_ref IS NULL AND e2e_role = 'none')
@@ -28,7 +29,10 @@ CREATE UNIQUE INDEX readers_cl_point_key
   ON public.readers (account_id, carrier_id, carrier_place_ref, COALESCE(carrier_mode_ref, ''))
   WHERE capture_source = 'carrier_scan' AND deleted_at IS NULL;
 
--- reader_id automático para puntos de transportista: CL:<slug cuenta>:<código carrier>:<lugar>[:<modo>].
+-- SECURITY DEFINER (decisión): lee accounts y carriers sin depender de la RLS del que inserta; es seguro porque
+-- readers_cl_check_city (se ejecuta antes, orden alfabético) ya exige que el carrier sea de la misma cuenta,
+-- así que nunca se vuelca el código de un carrier ajeno.
+-- reader_id automático (siempre, en INSERT y UPDATE) para puntos de transportista: CL:<slug cuenta>:<código carrier>:<lugar>[:<modo>].
 -- Lleva el slug de la cuenta, así es único aunque uq_readers_reader_id_active sea global.
 CREATE OR REPLACE FUNCTION public.readers_cl_defaults()
  RETURNS trigger
@@ -37,16 +41,21 @@ CREATE OR REPLACE FUNCTION public.readers_cl_defaults()
  SET search_path = public, extensions
 AS $$
 BEGIN
-  IF NEW.capture_source = 'carrier_scan' AND NULLIF(btrim(COALESCE(NEW.reader_id, '')), '') IS NULL THEN
+  -- Modo en blanco = sin modo (evita un ':' final en el reader_id).
+  NEW.carrier_mode_ref := NULLIF(btrim(NEW.carrier_mode_ref), '');
+  IF NEW.capture_source = 'carrier_scan' THEN
+    -- Siempre generado (se ignora el valor del que escribe): el espacio CL: es solo de los puntos de transportista.
     NEW.reader_id := 'CL:' || (SELECT a.slug FROM public.accounts a WHERE a.id = NEW.account_id)
                   || ':' || (SELECT c.code FROM public.carriers c WHERE c.id = NEW.carrier_id)
                   || ':' || NEW.carrier_place_ref
                   || COALESCE(':' || NEW.carrier_mode_ref, '');
+  ELSIF NEW.reader_id LIKE 'CL:%' THEN
+    RAISE EXCEPTION 'reader_id prefix CL: is reserved for carrier_scan points' USING ERRCODE = 'check_violation';
   END IF;
   RETURN NEW;
 END $$;
 
--- Un punto con rol E2E (origen/destino) necesita un centro postal con ciudad.
+-- El carrier debe ser de la misma cuenta; un punto con rol E2E (origen/destino) necesita un centro postal con ciudad.
 CREATE OR REPLACE FUNCTION public.readers_cl_check_city()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -54,10 +63,15 @@ CREATE OR REPLACE FUNCTION public.readers_cl_check_city()
  SET search_path = public, extensions
 AS $$
 BEGIN
+  IF NEW.carrier_id IS NOT NULL AND NOT EXISTS (
+       SELECT 1 FROM public.carriers c WHERE c.id = NEW.carrier_id AND c.account_id = NEW.account_id) THEN
+    RAISE EXCEPTION 'carrier_id must belong to the same account' USING ERRCODE = 'check_violation';
+  END IF;
   IF NEW.e2e_role <> 'none' THEN
     IF NEW.postal_center_id IS NULL
        OR NOT EXISTS (SELECT 1 FROM public.postal_centers pc
-                       WHERE pc.id = NEW.postal_center_id AND pc.city_id IS NOT NULL) THEN
+                       WHERE pc.id = NEW.postal_center_id AND pc.city_id IS NOT NULL
+                          AND pc.account_id = NEW.account_id) THEN
       RAISE EXCEPTION 'e2e_role % requires a postal center with a city', NEW.e2e_role
         USING ERRCODE = 'check_violation';
     END IF;
@@ -69,7 +83,7 @@ REVOKE ALL ON FUNCTION public.readers_cl_defaults() FROM PUBLIC, anon;
 REVOKE ALL ON FUNCTION public.readers_cl_check_city() FROM PUBLIC, anon;
 
 CREATE TRIGGER readers_cl_defaults
-  BEFORE INSERT ON public.readers
+  BEFORE INSERT OR UPDATE ON public.readers
   FOR EACH ROW EXECUTE FUNCTION public.readers_cl_defaults();
 CREATE TRIGGER readers_cl_check_city
   BEFORE INSERT OR UPDATE ON public.readers
@@ -127,33 +141,20 @@ SELECT a.id, t.role, t.option, t.level
  WHERE t.role <> 'no_role' AND t.option LIKE 'cl\_%'
 ON CONFLICT DO NOTHING;
 
--- ---------------------------------------------------------------- políticas de escritura (readers, postal_centers)
--- Mismo generador que 20261119100200 (nombre, TO authenticated, expresión) con 'cl_reading_points' añadido a la
--- lista de opciones de cada una.
+-- ---------------------------------------------------------------- políticas de escritura (readers)
+-- postal_centers NO se toca (sigue exactamente como en 20261119100200). readers: mismo generador y formato que
+-- 20261119100200, pero cl_reading_points solo alcanza filas carrier_scan (en USING y en WITH CHECK, así no se
+-- convierte un lector RFID en punto de transportista ni al revés).
 DO $$
-DECLARE r record; v_opts text; v_expr text; c text;
+DECLARE v_expr text; v_rfid text := '''postal_centers'', ''readers_management''';
 BEGIN
-  FOR r IN SELECT * FROM (VALUES
-    ('postal_centers', ARRAY['postal_centers','cl_reading_points'],                       ARRAY['INSERT','UPDATE']),
-    ('readers',        ARRAY['postal_centers','readers_management','cl_reading_points'], ARRAY['INSERT','UPDATE','DELETE'])
-  ) t(tbl, opts, cmds) LOOP
-    SELECT string_agg(quote_literal(o), ', ') INTO v_opts FROM unnest(r.opts) o;
-    v_expr := format('(SELECT public.is_superadmin()) OR (account_id = (SELECT public.current_user_account_id()) '
-                     'AND (SELECT public.has_any_access(public.current_user_account_id(), ''edit'', %s)))', v_opts);
-    FOREACH c IN ARRAY r.cmds LOOP
-      IF c = 'INSERT' THEN
-        EXECUTE format('DROP POLICY %I ON public.%I', r.tbl || '_insert_edit', r.tbl);
-        EXECUTE format('CREATE POLICY %I ON public.%I FOR INSERT TO authenticated WITH CHECK (%s)',
-                       r.tbl || '_insert_edit', r.tbl, v_expr);
-      ELSIF c = 'UPDATE' THEN
-        EXECUTE format('DROP POLICY %I ON public.%I', r.tbl || '_update_edit', r.tbl);
-        EXECUTE format('CREATE POLICY %I ON public.%I FOR UPDATE TO authenticated USING (%s) WITH CHECK (%s)',
-                       r.tbl || '_update_edit', r.tbl, v_expr, v_expr);
-      ELSE
-        EXECUTE format('DROP POLICY %I ON public.%I', r.tbl || '_delete_edit', r.tbl);
-        EXECUTE format('CREATE POLICY %I ON public.%I FOR DELETE TO authenticated USING (%s)',
-                       r.tbl || '_delete_edit', r.tbl, v_expr);
-      END IF;
-    END LOOP;
-  END LOOP;
+  v_expr := format('(SELECT public.is_superadmin()) OR (account_id = (SELECT public.current_user_account_id()) '
+                   'AND ((SELECT public.has_any_access(public.current_user_account_id(), ''edit'', %s)) '
+                   'OR (capture_source = ''carrier_scan'' AND (SELECT public.has_any_access(public.current_user_account_id(), ''edit'', ''cl_reading_points'')))))', v_rfid);
+  DROP POLICY readers_insert_edit ON public.readers;
+  DROP POLICY readers_update_edit ON public.readers;
+  DROP POLICY readers_delete_edit ON public.readers;
+  EXECUTE format('CREATE POLICY readers_insert_edit ON public.readers FOR INSERT TO authenticated WITH CHECK (%s)', v_expr);
+  EXECUTE format('CREATE POLICY readers_update_edit ON public.readers FOR UPDATE TO authenticated USING (%s) WITH CHECK (%s)', v_expr, v_expr);
+  EXECUTE format('CREATE POLICY readers_delete_edit ON public.readers FOR DELETE TO authenticated USING (%s)', v_expr);
 END $$;
