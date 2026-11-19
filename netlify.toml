@@ -16,3 +16,9 @@
   from = "/*"
   to = "/index.html"
   status = 200
+
+# Subtítulos de los vídeos de formación (Firefox exige este tipo).
+[[headers]]
+  for = "/videos/subs/*"
+  [headers.values]
+    Content-Type = "text/vtt; charset=utf-8"
