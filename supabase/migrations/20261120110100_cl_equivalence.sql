@@ -28,6 +28,10 @@ BEGIN
     NEW.business_transit_days := NULL;
     NEW.sent_at_local := NULL;
     NEW.received_at_local := NULL;
+    NEW.measured_total_hours := NULL;
+    NEW.measured_total_days := NULL;
+    NEW.measured_business_hours := NULL;
+    NEW.measured_business_days := NULL;
     RETURN NEW;
   END IF;
 
@@ -83,13 +87,16 @@ REVOKE ALL ON FUNCTION public.cl_equivalence(uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.cl_equivalence(uuid) TO authenticated, service_role;
 
 -- ---------------------------------------------------------------- propagacion al cambiar un estandar
--- AFTER INSERT OR UPDATE en delivery_standards. El nombre 'cl_…' va antes que 'trigger_recalculate_on_time_on_sla_change'
--- (los triggers del mismo evento se disparan por orden alfabetico): primero se fija la equivalencia en las filas
--- carrier de la ruta (lo que dispara one_db_compute_transit y recalcula medido + equivalencia) y despues el
--- trigger existente recalcula on_time_delivery con esos tiempos.
--- Casa la ruta igual que recalculate_on_time_delivery_on_sla_change (producto y ciudades por nombre, btrim), pero el
--- transportista por carrier_id y solo filas source = 'carrier'.
--- SECURITY DEFINER por el mismo motivo que ese recalculo: con RLS un admin de cuenta no veria las filas de one_db.
+-- AFTER INSERT OR UPDATE en delivery_standards. Para las filas source = 'carrier' de la ruta del estandar:
+--   1) fija equivalence_hours/days (dispara one_db_compute_transit: medido + equivalencia, desde sent/received);
+--   2) recalcula on_time_delivery con esos tiempos y el estandar (one_db_on_time), aqui mismo.
+-- El paso 2 no se delega en trigger_recalculate_on_time_on_sla_change: esa funcion no garantiza permisos propios
+-- (en el repo puede ser SECURITY INVOKER y la unica politica UPDATE de one_db es de superadmin), asi que para un
+-- editor no superadmin podria tocar 0 filas y dejar on_time viejo con tiempos nuevos. Ese trigger se sigue
+-- ejecutando despues (orden alfabetico) y, si llega a las filas, escribe el mismo valor.
+-- Ruta: transportista por carrier_id, cuenta, y producto/ciudades por nombre con btrim (la funcion existente compara
+-- sin btrim; aqui se normalizan espacios, y como el on_time de estas filas se calcula aqui es coherente).
+-- SECURITY DEFINER: actua sobre one_db sin depender de la RLS del editor del estandar.
 CREATE OR REPLACE FUNCTION public.cl_equivalence_on_sla_change()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -113,6 +120,16 @@ BEGIN
      AND btrim(one_db.origin_city_name) IN (SELECT btrim(name) FROM cities WHERE id = NEW.origin_city_id)
      AND btrim(one_db.destination_city_name) IN (SELECT btrim(name) FROM cities WHERE id = NEW.destination_city_id)
      AND (one_db.equivalence_hours IS DISTINCT FROM v_h OR one_db.equivalence_days IS DISTINCT FROM v_d);
+
+  UPDATE public.one_db
+     SET on_time_delivery = one_db_on_time(one_db.business_transit_hours, one_db.business_transit_days, NEW.standard_time, NEW.time_unit)
+   WHERE one_db.source = 'carrier'
+     AND one_db.account_id = NEW.account_id
+     AND one_db.carrier_id = NEW.carrier_id
+     AND EXISTS (SELECT 1 FROM carriers cx WHERE cx.id = NEW.carrier_id AND cx.account_id = NEW.account_id)
+     AND btrim(one_db.product_name) IN (SELECT btrim(description) FROM products WHERE id = NEW.product_id)
+     AND btrim(one_db.origin_city_name) IN (SELECT btrim(name) FROM cities WHERE id = NEW.origin_city_id)
+     AND btrim(one_db.destination_city_name) IN (SELECT btrim(name) FROM cities WHERE id = NEW.destination_city_id);
   RETURN NEW;
 END $$;
 

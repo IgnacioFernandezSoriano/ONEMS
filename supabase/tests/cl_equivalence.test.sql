@@ -119,3 +119,74 @@ UPDATE public.delivery_standards SET cl_last_mile_time = 0 WHERE id = 'd1000000-
 SELECT pg_temp.fail_if((SELECT (business_transit_hours, business_transit_days, on_time_delivery) FROM one_db WHERE tag_id = 'C1')
                        IS DISTINCT FROM (41.94::numeric(10,2), 2, true), 'E4 C1 vuelta a 0');
 ROLLBACK;
+
+-- ===== E5: editor NO superadmin (authenticated, e2e_sla:edit en su cuenta) cambia el ultimo tramo:
+--          la fila carrier recibe la equivalencia y su on_time pasa a false; la panelist no cambia.
+CREATE FUNCTION pg_temp.as_user(p_uid text, p_role text) RETURNS void LANGUAGE plpgsql AS $$
+BEGIN
+  PERFORM set_config('request.jwt.claim.sub', coalesce(p_uid, ''), true);
+  PERFORM set_config('request.jwt.claim.role', coalesce(p_role, ''), true);
+END $$;
+CREATE FUNCTION pg_temp.e5_setup() RETURNS void LANGUAGE plpgsql AS $$
+BEGIN
+  INSERT INTO auth.users (id, email) VALUES ('98000000-0000-0000-0000-000000000098','sla@t.l');
+  INSERT INTO public.profiles (id, email, full_name, role, account_id) VALUES
+    ('98000000-0000-0000-0000-000000000098','sla@t.l','Sla','user','a0000000-0000-0000-0000-000000000003');
+  INSERT INTO public.account_user_role (account_id, user_id, role) VALUES
+    ('a0000000-0000-0000-0000-000000000003','98000000-0000-0000-0000-000000000098','panelist_manager');
+  INSERT INTO public.account_access (account_id, role, option, level) VALUES
+    ('a0000000-0000-0000-0000-000000000003','panelist_manager','e2e_sla','edit')
+  ON CONFLICT (account_id, role, option) DO UPDATE SET level = EXCLUDED.level;
+  PERFORM pg_temp.row('C1', 'carrier',  'Economy delivery within 48hrs', '2026-10-27 13:44:18Z', '2026-10-29 07:40:57Z', 0, 0);
+  PERFORM pg_temp.row('P1', 'panelist', 'Economy delivery within 48hrs', '2026-10-27 13:44:18Z', '2026-10-29 07:40:57Z', NULL, NULL);
+  UPDATE public.delivery_standards SET standard_time = 48 WHERE id = 'd1000000-0000-0000-0000-000000000003';
+  PERFORM pg_temp.fail_if((SELECT on_time_delivery FROM one_db WHERE tag_id = 'C1') IS DISTINCT FROM true, 'E5 C1 previo a tiempo');
+END $$;
+
+BEGIN;
+\ir fixtures/one_db_kenya.sql
+GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
+SELECT pg_temp.e5_setup();
+SET LOCAL ROLE authenticated;
+SELECT pg_temp.as_user('98000000-0000-0000-0000-000000000098', 'authenticated');
+UPDATE public.delivery_standards SET cl_last_mile_time = 12 WHERE id = 'd1000000-0000-0000-0000-000000000003';
+RESET ROLE;
+SELECT pg_temp.fail_if((SELECT cl_last_mile_time FROM delivery_standards WHERE id = 'd1000000-0000-0000-0000-000000000003')
+                       IS DISTINCT FROM 12::numeric, 'E5 el editor e2e_sla no pudo actualizar el estandar');
+SELECT pg_temp.fail_if((SELECT (equivalence_hours, business_transit_hours, on_time_delivery) FROM one_db WHERE tag_id = 'C1')
+                       IS DISTINCT FROM (12::numeric, 53.94::numeric(10,2), false), 'E5 C1 equivalente y tarde (editor no superadmin)');
+SELECT pg_temp.fail_if((SELECT (business_transit_hours, on_time_delivery) FROM one_db WHERE tag_id = 'P1')
+                       IS DISTINCT FROM (41.94::numeric(10,2), true), 'E5 P1 sin cambios');
+ROLLBACK;
+
+-- ===== E5b: igual pero sin el trigger existente de recalculo: el on_time de la fila carrier lo fija cl_equivalence_on_sla_change
+BEGIN;
+\ir fixtures/one_db_kenya.sql
+GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
+SELECT pg_temp.e5_setup();
+ALTER TABLE public.delivery_standards DISABLE TRIGGER trigger_recalculate_on_time_on_sla_change;
+SET LOCAL ROLE authenticated;
+SELECT pg_temp.as_user('98000000-0000-0000-0000-000000000098', 'authenticated');
+UPDATE public.delivery_standards SET cl_last_mile_time = 12 WHERE id = 'd1000000-0000-0000-0000-000000000003';
+RESET ROLE;
+SELECT pg_temp.fail_if((SELECT (equivalence_hours, business_transit_hours, on_time_delivery) FROM one_db WHERE tag_id = 'C1')
+                       IS DISTINCT FROM (12::numeric, 53.94::numeric(10,2), false), 'E5b on_time recalculado por cl_equivalence_on_sla_change');
+ROLLBACK;
+
+-- ===== E6: rama sent_at/received_at NULL (one_db no la admite por NOT NULL: se prueba el trigger sobre una copia
+--          temporal sin NOT NULL): tiempos y measured_* quedan NULL aunque vinieran informados.
+BEGIN;
+CREATE TEMP TABLE e6_one_db (LIKE public.one_db INCLUDING DEFAULTS) ON COMMIT DROP;
+ALTER TABLE e6_one_db ALTER COLUMN sent_at DROP NOT NULL, ALTER COLUMN received_at DROP NOT NULL,
+                      ALTER COLUMN total_transit_days DROP NOT NULL;
+CREATE TRIGGER e6_compute BEFORE INSERT OR UPDATE ON e6_one_db FOR EACH ROW EXECUTE FUNCTION public.one_db_compute_transit();
+INSERT INTO e6_one_db (account_id, tag_id, plan_name, carrier_name, product_name, origin_city_name, destination_city_name,
+                       sent_at, received_at, source_data_snapshot, source, total_transit_hours, total_transit_days,
+                       measured_total_hours, measured_total_days, measured_business_hours, measured_business_days, equivalence_hours)
+VALUES (gen_random_uuid(), 'N1', 'P', 'C', 'X', 'O', 'D', '2026-10-27 13:44:18Z', NULL, '{}', 'carrier', 5, 1, 5, 1, 5, 1, 24);
+SELECT pg_temp.fail_if((SELECT (total_transit_hours, total_transit_days, business_transit_hours, business_transit_days,
+                                measured_total_hours, measured_total_days, measured_business_hours, measured_business_days)
+                          FROM e6_one_db)
+                       IS DISTINCT FROM (NULL::numeric(10,2), NULL::integer, NULL::numeric(10,2), NULL::integer,
+                                         NULL::numeric, NULL::integer, NULL::numeric, NULL::integer), 'E6 rama NULL deja measured_* NULL');
+ROLLBACK;
