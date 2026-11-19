@@ -150,9 +150,21 @@ BEGIN
   PERFORM pg_temp.ok(pg_temp.raises($q$DELETE FROM public.cl_samples WHERE account_id = 'a0000000-0000-0000-0000-000000000001'$q$),
     'AM no borra muestras');
   PERFORM pg_temp.ok(pg_temp.raises($q$UPDATE public.cl_samples SET status = 'voided'$q$), 'AM no actualiza muestras');
-  UPDATE public.cl_alerts SET status = 'acknowledged', acknowledged_by = auth.uid(), acknowledged_at = now()
-   WHERE account_id = 'a0000000-0000-0000-0000-000000000001';
-  PERFORM pg_temp.ok((SELECT count(*) FROM public.cl_alerts WHERE status = 'acknowledged') = 1, 'AM actualiza cl_alerts.status');
+  PERFORM pg_temp.ok(pg_temp.raises($q$UPDATE public.cl_alerts SET acknowledged_by = '97000000-0000-0000-0000-000000000097'$q$), 'AM no fija acknowledged_by');
+  PERFORM pg_temp.ok(pg_temp.raises($q$UPDATE public.cl_alerts SET acknowledged_at = now()$q$), 'AM no fija acknowledged_at');
+  UPDATE public.cl_alerts SET status = 'acknowledged' WHERE account_id = 'a0000000-0000-0000-0000-000000000001';
+  PERFORM pg_temp.ok((SELECT count(*) FROM public.cl_alerts WHERE status = 'acknowledged'
+                        AND acknowledged_by = '93000000-0000-0000-0000-000000000093' AND acknowledged_at IS NOT NULL) = 1,
+                     'AM reconoce: acknowledged_by = su id y acknowledged_at fijado');
+  UPDATE public.cl_alerts SET status = 'open' WHERE account_id = 'a0000000-0000-0000-0000-000000000001';
+  PERFORM pg_temp.ok((SELECT count(*) FROM public.cl_alerts WHERE status = 'open' AND acknowledged_by IS NULL AND acknowledged_at IS NULL) = 1,
+                     'volver a open limpia acknowledged_*');
+  UPDATE public.cl_alerts SET status = 'acknowledged' WHERE account_id = 'a0000000-0000-0000-0000-000000000001';
+  -- oraculo entre cuentas: cuenta ajena con id existente o inexistente da el mismo 42501
+  PERFORM pg_temp.ok(pg_temp.sqlstate_of($q$INSERT INTO public.cl_plans (account_id, plan_name, carrier_id, product_id, total_samples, start_date, end_date)
+    VALUES ('a0000000-0000-0000-0000-000000000002','Z','ca000000-0000-0000-0000-000000000002','cb000000-0000-0000-0000-000000000002',5,'2027-04-01','2027-04-30')$q$) = '42501', 'cuenta ajena con ids existentes: 42501');
+  PERFORM pg_temp.ok(pg_temp.sqlstate_of($q$INSERT INTO public.cl_plans (account_id, plan_name, carrier_id, product_id, total_samples, start_date, end_date)
+    VALUES ('a0000000-0000-0000-0000-000000000002','Z','ca000000-0000-0000-0000-00000000dead','cb000000-0000-0000-0000-00000000dead',5,'2027-04-01','2027-04-30')$q$) = '42501', 'cuenta ajena con ids inexistentes: 42501');
   PERFORM pg_temp.ok(pg_temp.raises($q$UPDATE public.cl_alerts SET alert_type = 'z'$q$), 'AM no actualiza cl_alerts.alert_type');
   PERFORM pg_temp.ok(pg_temp.raises($q$DELETE FROM public.cl_alerts$q$), 'AM no borra alertas');
   -- referencias de otra cuenta
