@@ -184,12 +184,20 @@ DECLARE
   v_mis    jsonb := '[]'::jsonb;
   v_n      bigint;
   v_all_ok boolean;
+  v_nocity jsonb;
+  v_acc    uuid;
+  v_car    uuid;
 BEGIN
-  -- Serializa los sorteos de un mismo lote.
-  SELECT * INTO v_batch FROM public.cl_batches WHERE id = p_batch_id FOR UPDATE;
+  -- Serializa los sorteos de la misma cuenta y carrier (dos lotes no pueden elegir a la vez el mismo item_id, D12)
+  -- y, despues, los de un mismo lote.
+  SELECT p.account_id, p.carrier_id INTO v_acc, v_car
+    FROM public.cl_batches b JOIN public.cl_demands d ON d.id = b.demand_id JOIN public.cl_plans p ON p.id = d.plan_id
+   WHERE b.id = p_batch_id;
   IF NOT FOUND THEN
     RAISE EXCEPTION 'CL_BATCH_NOT_FOUND: batch not found' USING ERRCODE = '22023';
   END IF;
+  PERFORM pg_advisory_xact_lock(hashtext('cl_sample:' || v_acc::text || ':' || v_car::text));
+  SELECT * INTO v_batch FROM public.cl_batches WHERE id = p_batch_id FOR UPDATE;
 
   -- Idempotente por (lote, estrato).
   SELECT * INTO v_run FROM public.cl_sampling_runs WHERE batch_id = p_batch_id AND stratum_id = p_stratum_id;
@@ -217,27 +225,49 @@ BEGIN
   CREATE TEMP TABLE cl_sampler_rows ON COMMIT DROP AS
     SELECT * FROM public.cl_stratum_endpoints(p_batch_id, p_stratum_id);
 
-  -- Candidatos: item_id con inicio y fin; los que ya son muestra activa del carrier (p. ej. el mismo envio en otro
-  -- estrato del mismo lote) se descartan como en D12.
-  SELECT count(*) INTO v_valid FROM (
-    SELECT DISTINCT r.item_id FROM pg_temp.cl_sampler_rows r
-     WHERE r.start_scan_id IS NOT NULL AND r.end_scan_id IS NOT NULL
-       AND NOT EXISTS (SELECT 1 FROM public.cl_samples sm
+  -- Candidatos (se calculan una vez y sirven para candidates_valid y para el sorteo): item_id con inicio y fin;
+  -- los que ya son muestra activa del carrier (p. ej. el mismo envio en otro estrato del mismo lote) se descartan
+  -- como en D12.
+  DROP TABLE IF EXISTS pg_temp.cl_sampler_cands;
+  CREATE TEMP TABLE cl_sampler_cands ON COMMIT DROP AS
+    SELECT DISTINCT r.item_id, r.start_scan_id, r.end_scan_id,
+           a.reader_id AS start_reader_id, a.city_id AS start_city_id,
+           z.reader_id AS end_reader_id, z.city_id AS end_city_id
+      FROM pg_temp.cl_sampler_rows r
+      JOIN pg_temp.cl_sampler_rows a ON a.scan_id = r.start_scan_id
+      JOIN pg_temp.cl_sampler_rows z ON z.scan_id = r.end_scan_id
+     WHERE NOT EXISTS (SELECT 1 FROM public.cl_samples sm
                         WHERE sm.account_id = v_plan.account_id AND sm.carrier_id = v_plan.carrier_id
-                          AND sm.item_id = r.item_id AND sm.status = 'active')) c;
+                          AND sm.item_id = r.item_id AND sm.status = 'active');
+
+  -- Un punto de inicio/fin cuyo centro postal no tiene ciudad no da ciudades reales (D6): ese candidato no se sortea
+  -- y se avisa (asi un punto mal dado de alta no bloquea el estrato para siempre).
+  SELECT jsonb_build_object(
+           'batch_id', p_batch_id,
+           'reader_ids', (SELECT jsonb_agg(DISTINCT x.rid) FROM pg_temp.cl_sampler_cands c2
+                            CROSS JOIN LATERAL (VALUES (CASE WHEN c2.start_city_id IS NULL THEN c2.start_reader_id END),
+                                                       (CASE WHEN c2.end_city_id IS NULL THEN c2.end_reader_id END)) x(rid)
+                           WHERE x.rid IS NOT NULL),
+           'item_ids', jsonb_agg(c.item_id ORDER BY c.item_id COLLATE "C"))
+    INTO v_nocity
+    FROM pg_temp.cl_sampler_cands c
+   WHERE c.start_city_id IS NULL OR c.end_city_id IS NULL
+  HAVING count(*) > 0;
+  IF v_nocity IS NOT NULL THEN
+    DELETE FROM pg_temp.cl_sampler_cands WHERE start_city_id IS NULL OR end_city_id IS NULL;
+    PERFORM public.cl_raise_alert(v_plan.id, p_stratum_id, 'reader_without_city', 'high', v_nocity);
+  END IF;
+
+  SELECT count(*) INTO v_valid FROM pg_temp.cl_sampler_cands;
 
   SELECT COALESCE(array_agg(c.item_id ORDER BY c.k, c.item_id COLLATE "C"), ARRAY[]::text[]) INTO v_sel
     FROM (SELECT c0.item_id, md5(v_demand.random_seed || ':' || c0.item_id) AS k
-            FROM (SELECT DISTINCT r.item_id FROM pg_temp.cl_sampler_rows r
-                   WHERE r.start_scan_id IS NOT NULL AND r.end_scan_id IS NOT NULL
-                     AND NOT EXISTS (SELECT 1 FROM public.cl_samples sm
-                                      WHERE sm.account_id = v_plan.account_id AND sm.carrier_id = v_plan.carrier_id
-                                        AND sm.item_id = r.item_id AND sm.status = 'active')) c0
+            FROM pg_temp.cl_sampler_cands c0
            ORDER BY k, c0.item_id COLLATE "C"
            LIMIT v_req) c;
 
   FOREACH v_item IN ARRAY v_sel LOOP
-    SELECT s.start_scan_id, s.end_scan_id INTO v_st FROM pg_temp.cl_sampler_rows s WHERE s.item_id = v_item LIMIT 1;
+    SELECT c.start_scan_id, c.end_scan_id INTO v_st FROM pg_temp.cl_sampler_cands c WHERE c.item_id = v_item;
 
     INSERT INTO public.cl_samples (account_id, plan_id, quota_id, batch_id, carrier_id, product_id, item_id,
                                    start_reader_id, start_at, end_reader_id, end_at, origin_city_id, destination_city_id,
@@ -268,13 +298,18 @@ BEGIN
      WHERE r.item_id = v_item AND (r.is_start OR r.is_end OR r.live_start OR r.live_end)
      ORDER BY r.row_ord;
 
-    -- Posible mal encaminado (D5): mas de un punto de inicio, mas de un punto de fin, o ciudad distinta de la cuota.
+    -- Posible mal encaminado (D5, regla del controlador): (a) la ciudad real de inicio o de fin no es la de la cuota,
+    -- o (b) alguna lectura de inicio o de fin en un punto de una ciudad que no es ni el origen ni el destino de la
+    -- cuota. Varias lecturas dentro de las ciudades de la propia ruta (admision + expedicion, un punto "cualquier
+    -- modo" con otro papel en la misma ciudad) NO lo son. Una lectura no elegida en un punto sin ciudad no decide.
     UPDATE public.cl_samples sm SET possible_misrouting = true
      WHERE sm.id = v_sid
-       AND ((SELECT count(DISTINCT x.reader_id) FROM public.cl_sample_scans x WHERE x.sample_id = v_sid AND x.role = 'start') > 1
-         OR (SELECT count(DISTINCT x.reader_id) FROM public.cl_sample_scans x WHERE x.sample_id = v_sid AND x.role = 'end') > 1
-         OR sm.origin_city_id IS DISTINCT FROM v_quota.origin_city_id
-         OR sm.destination_city_id IS DISTINCT FROM v_quota.destination_city_id);
+       AND (sm.origin_city_id IS DISTINCT FROM v_quota.origin_city_id
+         OR sm.destination_city_id IS DISTINCT FROM v_quota.destination_city_id
+         OR EXISTS (SELECT 1 FROM pg_temp.cl_sampler_rows r
+                     WHERE r.item_id = v_item AND (r.is_start OR r.is_end OR r.live_start OR r.live_end)
+                       AND r.city_id IS NOT NULL
+                       AND r.city_id NOT IN (v_quota.origin_city_id, v_quota.destination_city_id)));
     IF FOUND THEN
       v_mis := v_mis || jsonb_build_array(jsonb_build_object('sample_id', v_sid, 'item_id', v_item));
     END IF;
@@ -311,6 +346,7 @@ BEGIN
   END IF;
 
   DROP TABLE pg_temp.cl_sampler_rows;
+  DROP TABLE pg_temp.cl_sampler_cands;
   RETURN public.cl_run_summary(v_run);
 END $$;
 REVOKE ALL ON FUNCTION public.cl_sample_stratum(uuid, uuid) FROM PUBLIC, anon, authenticated;

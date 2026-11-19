@@ -34,14 +34,18 @@ BEGIN
   INSERT INTO public.postal_centers (id, account_id, code, name, city, city_id) VALUES
     ('d1000000-0000-0000-0000-0000000000c1','a0000000-0000-0000-0000-000000000001','PC1','Center 1','City1','c1000000-0000-0000-0000-000000000001'),
     ('d2000000-0000-0000-0000-0000000000c2','a0000000-0000-0000-0000-000000000001','PC2','Center 2','City2','c2000000-0000-0000-0000-000000000002'),
-    ('d3000000-0000-0000-0000-0000000000c3','a0000000-0000-0000-0000-000000000001','PC3','Center 3','City3','c3000000-0000-0000-0000-000000000003');
+    ('d3000000-0000-0000-0000-0000000000c3','a0000000-0000-0000-0000-000000000001','PC3','Center 3','City3','c3000000-0000-0000-0000-000000000003'),
+    ('d4000000-0000-0000-0000-0000000000c4','a0000000-0000-0000-0000-000000000001','PC4','Center 4','City2','c2000000-0000-0000-0000-000000000002');
   INSERT INTO public.readers (id, account_id, postal_center_id, name, type, capture_source, carrier_id, carrier_place_ref, carrier_mode_ref, e2e_role) VALUES
     ('ad000000-0000-0000-0000-000000000001','a0000000-0000-0000-0000-000000000001','d1000000-0000-0000-0000-0000000000c1','NBO ADM','Entry','carrier_scan','ca000000-0000-0000-0000-000000000001','NBO','ADM','origin'),
     ('ad000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000001','d2000000-0000-0000-0000-0000000000c2','MBA any','Exit','carrier_scan','ca000000-0000-0000-0000-000000000001','MBA',NULL,'destination'),
     ('ad000000-0000-0000-0000-000000000003','a0000000-0000-0000-0000-000000000001','d2000000-0000-0000-0000-0000000000c2','KSM any','Exit','carrier_scan','ca000000-0000-0000-0000-000000000001','KSM',NULL,'destination'),
     ('ad000000-0000-0000-0000-000000000004','a0000000-0000-0000-0000-000000000001','d2000000-0000-0000-0000-0000000000c2','MBA ADM','Entry','carrier_scan','ca000000-0000-0000-0000-000000000001','MBA','ADM','origin'),
     ('ad000000-0000-0000-0000-000000000005','a0000000-0000-0000-0000-000000000001','d1000000-0000-0000-0000-0000000000c1','NBO any','Exit','carrier_scan','ca000000-0000-0000-0000-000000000001','NBO',NULL,'destination'),
-    ('ad000000-0000-0000-0000-000000000006','a0000000-0000-0000-0000-000000000001','d1000000-0000-0000-0000-0000000000c1','ELD any','Exit','carrier_scan','ca000000-0000-0000-0000-000000000001','ELD',NULL,'destination');
+    ('ad000000-0000-0000-0000-000000000006','a0000000-0000-0000-0000-000000000001','d1000000-0000-0000-0000-0000000000c1','ELD any','Exit','carrier_scan','ca000000-0000-0000-0000-000000000001','ELD',NULL,'destination'),
+    -- LMU: destino en City2 (su centro se quedara sin ciudad); GAR: destino en City3 (ajeno a todas las rutas).
+    ('ad000000-0000-0000-0000-000000000007','a0000000-0000-0000-0000-000000000001','d4000000-0000-0000-0000-0000000000c4','LMU any','Exit','carrier_scan','ca000000-0000-0000-0000-000000000001','LMU',NULL,'destination'),
+    ('ad000000-0000-0000-0000-000000000008','a0000000-0000-0000-0000-000000000001','d3000000-0000-0000-0000-0000000000c3','GAR any','Exit','carrier_scan','ca000000-0000-0000-0000-000000000001','GAR',NULL,'destination');
   INSERT INTO public.cl_feeds (id, account_id, carrier_id, name, status) VALUES
     ('f0000000-0000-0000-0000-0000000000a1','a0000000-0000-0000-0000-000000000001','ca000000-0000-0000-0000-000000000001','Feed A1','active');
   INSERT INTO public.cl_field_mappings (account_id, carrier_id, standard_field, carrier_field) VALUES
@@ -87,11 +91,17 @@ CREATE OR REPLACE FUNCTION pg_temp.batch_main(p_q1_rows jsonb) RETURNS jsonb LAN
       pg_temp.rd('B2',       '2026-10-20T08:00:00Z', 'MBA', 'ADM'), pg_temp.rd('B2',       '2026-10-21T08:00:00Z', 'NBO', 'DLV'),
       pg_temp.rd('B3',       '2026-10-20T08:00:00Z', 'MBA', 'ADM'), pg_temp.rd('B3',       '2026-10-21T08:00:00Z', 'NBO', 'DLV'),
       pg_temp.rd('B4',       '2026-10-20T08:00:00Z', 'MBA', 'ADM'), pg_temp.rd('B4',       '2026-10-21T08:00:00Z', 'ELD', 'DLV'))),
-    -- City1 -> City2 W44 (cuota 5, solo 2 validos): C1 con fin en dos puntos (MBA y KSM), C2 de 12 h.
-    pg_temp.stratum(pg_temp.q('City1','City2',44), 2, jsonb_build_array(
+    -- City1 -> City2 W44 (cuota 5, 4 con inicio y fin): C1 con fin en dos puntos de City2 (MBA y KSM); C2 de 12 h con
+    -- una lectura mas en City1 (otro modo -> punto "cualquier modo" NBO, de destino); C3 termina en LMU, cuyo centro se
+    -- queda sin ciudad; C4 pasa por GAR (destino en City3) antes de llegar a MBA.
+    pg_temp.stratum(pg_temp.q('City1','City2',44), 4, jsonb_build_array(
       pg_temp.rd('C1', '2026-10-26T08:00:00Z', 'NBO', 'ADM'), pg_temp.rd('C1', '2026-10-27T08:00:00Z', 'MBA', 'DLV'),
       pg_temp.rd('C1', '2026-10-27T10:00:00Z', 'KSM', 'DLV'),
-      pg_temp.rd('C2', '2026-10-26T08:00:00Z', 'NBO', 'ADM'), pg_temp.rd('C2', '2026-10-26T20:00:00Z', 'MBA', 'DLV')))))
+      pg_temp.rd('C2', '2026-10-26T08:00:00Z', 'NBO', 'ADM'), pg_temp.rd('C2', '2026-10-26T09:00:00Z', 'NBO', 'DSP'),
+      pg_temp.rd('C2', '2026-10-26T20:00:00Z', 'MBA', 'DLV'),
+      pg_temp.rd('C3', '2026-10-26T08:00:00Z', 'NBO', 'ADM'), pg_temp.rd('C3', '2026-10-27T08:00:00Z', 'LMU', 'DLV'),
+      pg_temp.rd('C4', '2026-10-26T08:00:00Z', 'NBO', 'ADM'), pg_temp.rd('C4', '2026-10-26T12:00:00Z', 'GAR', 'DLV'),
+      pg_temp.rd('C4', '2026-10-27T08:00:00Z', 'MBA', 'DLV')))))
 $$;
 
 -- ===================================================================== Escenario principal
@@ -103,6 +113,8 @@ SELECT pg_temp.setup(4);
 -- El punto ELD se corrige a un centro de City3 despues de emitir (el punto sigue en la foto de la demanda).
 UPDATE public.readers SET postal_center_id = 'd3000000-0000-0000-0000-0000000000c3' WHERE id = 'ad000000-0000-0000-0000-000000000006';
 SELECT set_config('t.batch', (public.cl_ingest_batch('f0000000-0000-0000-0000-0000000000a1', pg_temp.batch_main(pg_temp.rows_q1(10)))->>'batch'), true);
+-- El centro de LMU pierde la ciudad despues de la entrada.
+UPDATE public.postal_centers SET city_id = NULL WHERE id = 'd4000000-0000-0000-0000-0000000000c4';
 
 -- 1. Permisos.
 DO $$
@@ -218,20 +230,34 @@ BEGIN
   PERFORM pg_temp.ok(NOT (SELECT bool_or(possible_misrouting) FROM public.cl_samples WHERE quota_id = v_q AND item_id <> 'B4'), 'el resto no');
 END $$;
 
--- 6. Pocos candidatos (2 para 5): se toman todos, alerta insufficient_candidates; C1 con fin en dos puntos.
+-- 6. Pocos candidatos (3 sorteables para 5): se toman todos, alerta insufficient_candidates.
+--    C3 (fin en un punto sin ciudad) no se sortea y avisa reader_without_city.
+--    Mal encaminado solo fuera de la ruta: C1 (dos fines en City2) y C2 (otra lectura en City1) no; C4 (GAR, City3) si.
 DO $$
 DECLARE r jsonb; v_q uuid := pg_temp.q('City1','City2',44);
 BEGIN
   r := public.cl_sample_stratum(current_setting('t.batch')::uuid, v_q);
-  PERFORM pg_temp.ok((r->>'samples_selected')::int = 2 AND (r->>'samples_required')::int = 5, 'Q3: 2 de 5: ' || r::text);
+  PERFORM pg_temp.ok((r->>'samples_selected')::int = 3 AND (r->>'samples_required')::int = 5 AND (r->>'candidates_valid')::int = 3, 'Q3: 3 de 5: ' || r::text);
   PERFORM pg_temp.ok(EXISTS (SELECT 1 FROM public.cl_alerts WHERE alert_type = 'insufficient_candidates' AND quota_id = v_q), 'alerta insufficient_candidates');
-  PERFORM pg_temp.ok((SELECT possible_misrouting AND end_reader_id = 'ad000000-0000-0000-0000-000000000003' AND end_at = '2026-10-27 10:00Z'
+  PERFORM pg_temp.ok(NOT EXISTS (SELECT 1 FROM public.cl_samples WHERE item_id = 'C3'), 'C3 no se sortea');
+  PERFORM pg_temp.ok((SELECT count(*) FROM public.cl_alerts WHERE alert_type = 'reader_without_city' AND quota_id = v_q
+                        AND details->'item_ids' = '["C3"]'::jsonb AND details->'reader_ids' = '["ad000000-0000-0000-0000-000000000007"]'::jsonb) = 1,
+                     'alerta reader_without_city con el punto y el envio');
+  PERFORM pg_temp.ok((SELECT NOT possible_misrouting AND end_reader_id = 'ad000000-0000-0000-0000-000000000003' AND end_at = '2026-10-27 10:00Z'
                              AND destination_city_id = 'c2000000-0000-0000-0000-000000000002'
-                        FROM public.cl_samples WHERE item_id = 'C1'), 'C1: fin = ultima lectura de fin, dos puntos de fin -> misrouting');
+                        FROM public.cl_samples WHERE item_id = 'C1'), 'C1: fin = ultima lectura de fin; dos fines en la ciudad de destino no es mal encaminado');
   PERFORM pg_temp.ok((SELECT count(*) FROM public.cl_sample_scans x JOIN public.cl_samples s ON s.id = x.sample_id
                        WHERE s.item_id = 'C1' AND x.role = 'end') = 2, 'C1 guarda sus dos lecturas de fin');
-  PERFORM pg_temp.ok((SELECT NOT possible_misrouting FROM public.cl_samples WHERE item_id = 'C2'), 'C2 normal');
+  PERFORM pg_temp.ok((SELECT NOT possible_misrouting FROM public.cl_samples WHERE item_id = 'C2'), 'C2: otra lectura en la ciudad de origen no es mal encaminado');
+  PERFORM pg_temp.ok((SELECT count(*) FROM public.cl_sample_scans x JOIN public.cl_samples s ON s.id = x.sample_id
+                       WHERE s.item_id = 'C2' AND x.reader_id = 'ad000000-0000-0000-0000-000000000005') = 1, 'C2 guarda la lectura del punto NBO cualquier modo');
   PERFORM pg_temp.ok((SELECT on_time_delivery AND business_transit_hours = 24 FROM public.one_db WHERE tag_id = 'C2'), 'C2: 12 + 12 = 24 h, en plazo');
+  PERFORM pg_temp.ok((SELECT possible_misrouting AND origin_city_id = 'c1000000-0000-0000-0000-000000000001' AND destination_city_id = 'c2000000-0000-0000-0000-000000000002'
+                        FROM public.cl_samples WHERE item_id = 'C4'), 'C4: lectura en City3 -> mal encaminado aunque inicio y fin encajen');
+  PERFORM pg_temp.ok(EXISTS (SELECT 1 FROM public.cl_sample_scans x JOIN public.cl_samples s ON s.id = x.sample_id
+                              WHERE s.item_id = 'C4' AND x.reader_id = 'ad000000-0000-0000-0000-000000000008'), 'C4 guarda la lectura de GAR');
+  PERFORM pg_temp.ok((SELECT count(*) FROM public.cl_alerts WHERE alert_type = 'possible_misrouting' AND quota_id = v_q
+                        AND details->'item_ids' = '["C4"]'::jsonb) = 1, 'alerta possible_misrouting solo con C4');
 END $$;
 
 -- 7. Cierre del lote: sampled; demanda partial (Q3 incompleta); Q1 y Q2 fulfilled, Q3 sigue open.
@@ -244,11 +270,11 @@ BEGIN
   PERFORM pg_temp.ok((SELECT status FROM public.cl_demands) = 'partial', 'demanda partial');
   PERFORM pg_temp.ok((SELECT status FROM public.cl_plan_quotas WHERE id = pg_temp.q('City1','City2',43)) = 'fulfilled', 'Q1 fulfilled');
   PERFORM pg_temp.ok((SELECT status FROM public.cl_plan_quotas WHERE id = pg_temp.q('City2','City1',43)) = 'fulfilled', 'Q2 fulfilled');
-  PERFORM pg_temp.ok((SELECT status = 'open' AND samples_obtained = 2 FROM public.cl_plan_quotas WHERE id = pg_temp.q('City1','City2',44)), 'Q3 open con 2');
+  PERFORM pg_temp.ok((SELECT status = 'open' AND samples_obtained = 3 FROM public.cl_plan_quotas WHERE id = pg_temp.q('City1','City2',44)), 'Q3 open con 3');
   f2 := public.cl_finish_batch(current_setting('t.batch')::uuid);
   PERFORM pg_temp.ok(f2 = f, 'finish idempotente');
   -- un lote ya muestreado devuelve el resumen guardado
-  PERFORM pg_temp.ok((public.cl_sample_stratum(current_setting('t.batch')::uuid, pg_temp.q('City1','City2',44))->>'samples_selected')::int = 2, 'resumen tras sampled');
+  PERFORM pg_temp.ok((public.cl_sample_stratum(current_setting('t.batch')::uuid, pg_temp.q('City1','City2',44))->>'samples_selected')::int = 3, 'resumen tras sampled');
   PERFORM pg_temp.ok(NOT EXISTS (SELECT 1 FROM public.cl_alerts WHERE alert_type = 'suspicious_distribution'), 'n < 20: sin suspicious_distribution');
 END $$;
 
