@@ -4,10 +4,14 @@ import { useMaterialRequirements } from '../hooks/useMaterialRequirements'
 import { SmartTooltip } from '../components/common/SmartTooltip'
 import { useMaterialCatalog } from '../hooks/useMaterialCatalog'
 import { useAuth } from '../contexts/AuthContext'
+import { ReadOnlyBadge } from '@/components/common/ReadOnlyBadge'
+import { usePermissions } from '@/contexts/PermissionsContext'
 
 import { useTranslation } from '@/hooks/useTranslation';
 export default function MaterialRequirements() {
   const { t } = useTranslation();
+  const { canEdit } = usePermissions()
+  const readOnly = !canEdit('material_requirements')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [selectedMaterialId, setSelectedMaterialId] = useState('')
@@ -177,6 +181,7 @@ export default function MaterialRequirements() {
         <div className="flex items-center gap-2">
           <h1 className="text-2xl font-bold text-gray-900">{t('material_requirements.title')}</h1>
           <SmartTooltip content={t('hc.material_requirements.title_tip')} />
+          {readOnly && <ReadOnlyBadge />}
         </div>
       </div>
 

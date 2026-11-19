@@ -3754,6 +3754,7 @@ hc.user_form.email,Email
 hc.user_form.password,Password
 hc.user_form.full_name,Full Name
 hc.user_form.role,Role
+hc.user_form.account_roles,Roles in the account (optional)
 hc.user_form.account,Account
 hc.user_form.select_account,Select account
 hc.user_form.status,Status
@@ -4555,6 +4556,8 @@ hc.accounts.edit,Edit Account
 hc.users.loading,Loading...
 hc.users.title,User Management
 hc.users.create,Create User
+hc.users.roles_warning,Some roles could not be assigned. Set them in Roles and access.
+hc.users.delete_other_accounts,This user also belongs to other accounts; only a superadmin can delete them.
 hc.users.edit,Edit User
 hc.sla_form.carrier,Carrier
 hc.sla_form.product,Product
@@ -5257,6 +5260,8 @@ help_center.doc.case_analysis.title,Case analysis
 help_center.doc.case_analysis.desc,"Analyse a case from ONEMS or from the Telegram analysis bot: what happened and why; messages for the panelists and simple fixes."
 help_center.doc.gps_location.title,GPS location when declaring
 help_center.doc.gps_location.desc,"What the ONE bot records when declaring, the rule that nothing is blocked, the ""GPS location"" incident, the operations report and what to do as a manager."
+help_center.doc.roles_access.title,Roles and access
+help_center.doc.roles_access.desc,"The six account roles, what Edit and View mean, who to ask for an access change and how to manage the Roles and access tab."
 reported_incidents.category.gps_location,GPS location
 reported_incidents.gps.col.tag,Tag
 reported_incidents.gps.col.kind,Type
@@ -5285,3 +5290,71 @@ allocation_plans.undo_action_edit,Edit
 allocation_plans.undo_action_create,Create
 allocation_plans.undo_changed,The last action has changed; check it before undoing.
 allocation_plans.bulk_only_deferred,Samples to compensate can only be deleted.
+menu.account_switch_error,Could not change account. Please try again.
+roles_access.menu,Roles and access
+roles_access.menu_tooltip,Who can see and edit each menu option in this account
+roles_access.title,Roles and access
+roles_access.description,"Account contacts, rights of each role and the roles of each user."
+roles_access.select_account,Select an account to manage its roles and access.
+roles_access.tab_general,General
+roles_access.tab_roles,Roles and access
+roles_access.save_account_first,"Save the account first; then you can set its contacts, rights and roles here."
+roles_access.read_only,"Read only: only the Account Manager, the UPU account manager or a superadmin can change this tab."
+roles_access.load_error,Could not load roles and access: {message}
+roles_access.dismiss,Close
+roles_access.saving,Saving...
+roles_access.saved,Saved
+roles_access.contacts_save,Save contacts
+roles_access.matrix_title,Rights of each role
+roles_access.matrix_help,Edit = can change data; View = can only look; — = the option is hidden. A user with several roles gets the highest right. Changes apply at once.
+roles_access.matrix_option,Menu option
+roles_access.reset,Back to template
+roles_access.reset_confirm,Replace all the rights of this account with the template? Your changes to the matrix will be lost (user roles and contacts stay).
+roles_access.no_role,No role
+roles_access.no_role_help,Users of the account without any role. Fixed: it cannot be changed per account.
+roles_access.level.edit,Edit
+roles_access.level.view,View
+roles_access.level.none,—
+roles_access.users_title,Users and their roles
+roles_access.users_help,"Tick the roles of each user of this account. ""Provisional"" marks roles assigned automatically at start-up: confirm or change them."
+roles_access.user,User
+roles_access.no_users,This account has no users yet.
+roles_access.provisional,Provisional
+roles_access.provisional_help,Assigned automatically at start-up. Press Confirm to make it permanent.
+roles_access.confirm_provisional,Confirm
+roles_access.other_account,Other account
+roles_access.other_account_help,This user's active account is another one; they have a role in this account too.
+roles_access.add_by_email,Add an existing user by email
+roles_access.add_by_email_help,Only superadmin. The user must already exist (for example in another account); they get this role here.
+roles_access.role,Role
+roles_access.add,Add
+roles_access.log_title,Latest changes
+roles_access.log_empty,No changes yet.
+roles_access.log_date,Date
+roles_access.log_who,Who
+roles_access.log_what,Change
+roles_access.log_system,System
+roles_access.log.access_set,{role} · {option}: {before} → {after}
+roles_access.log.access_reset,All rights reset to the template
+roles_access.log.user_role_added,{user}: role {role} added
+roles_access.log.user_role_removed,{user}: role {role} removed
+roles_access.log.user_added_by_email,{user} added to the account as {role}
+roles_access.log.contacts_set,Contacts changed: {fields}
+roles_access.log.contacts_unchanged,Contacts saved without changes
+roles_access.log.activation,Initial role assignment ({count} assignments)
+roles_access.log.other,Other change ({kind})
+roles_access.error.last_editor_role,You cannot remove your last Account Manager / UPU account manager role in this account: you would lose the ability to manage this tab. Ask another manager or a superadmin.
+roles_access.error.not_member,This user does not belong to this account.
+roles_access.error.user_not_found,No user with that email exists. Create the user first.
+roles_access.error.superadmin_role,A superadmin already has every right and does not take account roles.
+roles_access.error.forbidden,You are not allowed to change roles and access in this account.
+roles_access.error.generic,The change could not be saved: {message}
+roles_access.role.account_manager,Account Manager
+roles_access.role.panelist_manager,Panelist Manager
+roles_access.role.materials_supplier,Materials Supplier
+roles_access.role.do_coordinator,DO coordinator
+roles_access.role.upu_account_manager,UPU account manager
+roles_access.role.allocation_plan_manager,Allocation Plan Manager
+common.read_only,View only
+roles_access.rights_load_error,Your access rights could not be loaded. Check your connection and try again.
+roles_access.rights_retry,Retry

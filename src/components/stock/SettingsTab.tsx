@@ -4,7 +4,7 @@ import { useStockManagement } from '../../hooks/useStockManagement'
 import { SmartTooltip } from '../common/SmartTooltip'
 
 import { useTranslation } from '@/hooks/useTranslation';
-export default function SettingsTab() {
+export default function SettingsTab({ readOnly = false }: { readOnly?: boolean }) {
   const { t } = useTranslation();
   const { settings, loading, updateSettings } = useStockManagement()
   const [formData, setFormData] = useState({
@@ -56,6 +56,7 @@ export default function SettingsTab() {
     <div className="space-y-6">
       <div className="max-w-3xl">
         <form onSubmit={handleSubmit} className="space-y-6">
+         <fieldset disabled={readOnly} className="space-y-6 border-0 p-0 m-0 min-w-0">
           {/* Stock Control */}
           <div className="bg-white border border-gray-200 rounded-lg p-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">{t('stock.stock_control')}</h3>
@@ -206,7 +207,7 @@ export default function SettingsTab() {
           )}
 
           {/* Save Button */}
-          <div className="flex justify-end">
+          {!readOnly && <div className="flex justify-end">
             <button
               type="submit"
               disabled={saving}
@@ -215,7 +216,8 @@ export default function SettingsTab() {
               <Save className="h-4 w-4 mr-2" />
               {saving ? t('common.saving') : t('stock.save_settings')}
             </button>
-          </div>
+          </div>}
+         </fieldset>
         </form>
       </div>
     </div>

@@ -4,6 +4,8 @@ import { useLatestRequest } from '../../lib/latestRequest'
 import { supabase } from '../../lib/supabase'
 import { Play, RefreshCw, AlertCircle, CheckCircle, Clock, Database, GitBranch, Map, Zap } from 'lucide-react'
 import { useTranslation } from '@/hooks/useTranslation'
+import { ReadOnlyBadge } from '@/components/common/ReadOnlyBadge'
+import { usePermissions } from '@/contexts/PermissionsContext'
 
 interface PhaseStatus {
   name: string
@@ -27,6 +29,8 @@ interface LogEntry {
 }
 
 export default function PipelineMonitor() {
+  const { canEdit } = usePermissions()
+  const readOnly = !canEdit('epcis_api')
   const { t } = useTranslation()
   const { effectiveAccountId } = useAccount()
   const phaseLabel = (key: string) => t(`hc.pipeline_monitor.phase_${key}`)
@@ -247,7 +251,10 @@ export default function PipelineMonitor() {
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-gray-900">{t('hc.pipeline_monitor.title')}</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-3xl font-bold text-gray-900">{t('hc.pipeline_monitor.title')}</h1>
+          {readOnly && <ReadOnlyBadge />}
+        </div>
         <div className="flex items-center gap-2">
           <label className="flex items-center gap-2 text-sm text-gray-600">
             <input
@@ -321,14 +328,14 @@ export default function PipelineMonitor() {
                     {t(`hc.pipeline_monitor.status_${phase.status}`)}
                   </span>
                 </div>
-                <button
+                {!readOnly && <button
                   onClick={() => runPhase(key)}
                   disabled={phase.status === 'running'}
                   className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Play className="w-4 h-4" />
                   {t('hc.pipeline_monitor.run_now')}
-                </button>
+                </button>}
               </div>
               
               <div className="flex items-center gap-4 text-sm text-gray-600">
@@ -345,7 +352,7 @@ export default function PipelineMonitor() {
           ))}
         </div>
 
-        <div className="mt-6">
+        {!readOnly && <div className="mt-6">
           <button
             onClick={runFullPipeline}
             className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-semibold"
@@ -353,7 +360,7 @@ export default function PipelineMonitor() {
             <Zap className="w-5 h-5" />
             {t('hc.pipeline_monitor.run_full')}
           </button>
-        </div>
+        </div>}
       </div>
 
       {/* Recent Incidents */}

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { rpcWithFallback } from '@/lib/rpcFallback';
 import { useEffectiveAccountId } from './useEffectiveAccountId';
 import { useTranslation } from './useTranslation';
 import { useLatestRequest } from '../lib/latestRequest';
@@ -252,7 +253,8 @@ export const useJourneySegments = (accountId: string | undefined) => {
 
     try {
       // Call the reconstruction function
-      const { data, error: rpcError } = await supabase.rpc('reconstruct_journeys', {
+      // Envoltorio con control de cuenta y Edit; si aún no existe (migración pendiente), el original.
+      const { data, error: rpcError } = await rpcWithFallback<any[]>('reconstruct_journeys_for_account', 'reconstruct_journeys', {
         p_account_id: activeAccountId,
       });
 
@@ -286,6 +288,8 @@ export const useJourneySegments = (accountId: string | undefined) => {
 
   useEffect(() => {
     fetchSegments();
+    // Recarga solo al cambiar de cuenta (fetchSegments no está memoizada).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeAccountId]);
 
   return {

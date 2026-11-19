@@ -10,12 +10,16 @@ import MovementsTab from '../components/stock/MovementsTab'
 import ShipmentsTab from '../components/stock/ShipmentsTab'
 import SettingsTab from '../components/stock/SettingsTab'
 import StockAlertsTab from '../components/stock/StockAlertsTab'
+import { ReadOnlyBadge } from '../components/common/ReadOnlyBadge'
+import { usePermissions } from '../contexts/PermissionsContext'
 
 import { useTranslation } from '@/hooks/useTranslation';
 type TabType = 'requirements' | 'regulator' | 'shipments' | 'panelist' | 'movements' | 'alerts' | 'settings'
 
 export default function StockManagement() {
   const { t } = useTranslation();
+  const { canEdit } = usePermissions()
+  const readOnly = !canEdit('stock_management')
   const [activeTab, setActiveTab] = useState<TabType>('requirements')
   const { shipments, loading } = useStockManagement()
   const { getAlertCounts } = useStockAlerts()
@@ -73,7 +77,10 @@ export default function StockManagement() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">{t('stock.title')}</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-gray-900">{t('stock.title')}</h1>
+          {readOnly && <ReadOnlyBadge />}
+        </div>
         <p className="mt-1 text-sm text-gray-500">
           {t('stock.manage_description')}
         </p>
@@ -150,10 +157,10 @@ export default function StockManagement() {
         </div>
 
         <div className="p-6">
-          {activeTab === 'requirements' && <MaterialRequirementsTab />}
-          {activeTab === 'regulator' && <RegulatorStockTab />}
-          {activeTab === 'shipments' && <ShipmentsTab />}
-          {activeTab === 'panelist' && <PanelistStockTab />}
+          {activeTab === 'requirements' && <MaterialRequirementsTab readOnly={readOnly} />}
+          {activeTab === 'regulator' && <RegulatorStockTab readOnly={readOnly} />}
+          {activeTab === 'shipments' && <ShipmentsTab readOnly={readOnly} />}
+          {activeTab === 'panelist' && <PanelistStockTab readOnly={readOnly} />}
           {activeTab === 'movements' && <MovementsTab />}
           {activeTab === 'alerts' && (
             <StockAlertsTab
@@ -167,7 +174,7 @@ export default function StockManagement() {
               }}
             />
           )}
-          {activeTab === 'settings' && <SettingsTab />}
+          {activeTab === 'settings' && <SettingsTab readOnly={readOnly} />}
         </div>
       </div>
     </div>

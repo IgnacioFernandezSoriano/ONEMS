@@ -7,9 +7,13 @@ import { ProcessedEventsBulkPanel } from '../components/ProcessedEvents/Processe
 import { Database, CheckCircle, Activity, Link2, Download } from 'lucide-react';
 import { SmartTooltip } from '../components/common/SmartTooltip';
 import { useTranslation } from '@/hooks/useTranslation';
+import { ReadOnlyBadge } from '@/components/common/ReadOnlyBadge';
+import { usePermissions } from '@/contexts/PermissionsContext';
 
 export default function ProcessedEvents() {
   const { t } = useTranslation();
+  const { canEdit } = usePermissions();
+  const readOnly = !canEdit('rfid_events_db');
   const { profile } = useAuth();
   const { records, filteredRecords, loading, error, refetch, applyFilters, exportToCSV } =
     useProcessedEvents(profile?.account_id || undefined);
@@ -103,6 +107,7 @@ export default function ProcessedEvents() {
               <h1 className="text-2xl font-bold text-gray-900">
                 {t('processed_events.title')}
               </h1>
+              {readOnly && <ReadOnlyBadge />}
               <SmartTooltip content={t('processed_events.tooltip')} />
             </div>
             <p className="text-sm text-gray-600 mt-1">{t('processed_events.description')}</p>

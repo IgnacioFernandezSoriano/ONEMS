@@ -12,6 +12,7 @@ interface PostalCentersListProps {
   onAddReader: (centerId: string) => void
   onEditReader: (reader: Reader) => void
   onDeleteReader: (readerId: string) => void
+  readOnly?: boolean
 }
 
 export function PostalCentersList({
@@ -20,7 +21,8 @@ export function PostalCentersList({
   onDeleteCenter,
   onAddReader,
   onEditReader,
-  onDeleteReader
+  onDeleteReader,
+  readOnly = false
 }: PostalCentersListProps) {
   const { t } = useTranslation()
   const { config } = useAccountConfig()
@@ -133,6 +135,7 @@ export function PostalCentersList({
                   </div>
                 </div>
 
+                {!readOnly && (
                 <div className="flex items-center gap-2">
                   <Button
                     variant="secondary"
@@ -163,6 +166,7 @@ export function PostalCentersList({
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
+                )}
               </div>
             </div>
 
@@ -204,6 +208,7 @@ export function PostalCentersList({
                         </div>
                       </div>
 
+                      {!readOnly && (
                       <div className="flex items-center gap-2">
                         <Button
                           variant="secondary"
@@ -226,6 +231,7 @@ export function PostalCentersList({
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -237,6 +243,7 @@ export function PostalCentersList({
               <div className="border-t border-gray-200 bg-gray-50 px-4 py-6 text-center text-gray-500">
                 <Radio className="mx-auto h-8 w-8 text-gray-400 mb-2" />
                 <p className="text-sm">{t('readers.no_readers_found')}</p>
+                {!readOnly && (
                 <Button
                   variant="secondary"
                   size="sm"
@@ -246,6 +253,7 @@ export function PostalCentersList({
                   <Plus className="h-4 w-4 mr-1" />
                   {t('readers.add_first_reader')}
                 </Button>
+                )}
               </div>
             )}
           </div>

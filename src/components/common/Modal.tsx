@@ -5,9 +5,11 @@ interface ModalProps {
   onClose: () => void
   title: string
   children: ReactNode
+  /** Clase de ancho máximo del panel (por defecto max-w-md). */
+  maxWidthClass?: string
 }
 
-export function Modal({ isOpen, onClose, title, children }: ModalProps) {
+export function Modal({ isOpen, onClose, title, children, maxWidthClass = 'max-w-md' }: ModalProps) {
   if (!isOpen) return null
 
   return (
@@ -15,7 +17,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
       <div className="flex min-h-screen items-center justify-center p-4">
         <div className="fixed inset-0 bg-black bg-opacity-50" onClick={onClose} />
         
-        <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+        <div className={`relative bg-white rounded-lg shadow-xl ${maxWidthClass} w-full p-6`}>
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold">{title}</h3>
             <button

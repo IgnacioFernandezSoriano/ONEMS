@@ -24,9 +24,10 @@ interface Props {
   panelistLanguage?: string | null
   helpSection?: string
   incidentPanelistId?: string
+  readOnly?: boolean
 }
 
-export function IncidentConversation({ kind, incidentId, panelistLanguage, helpSection, incidentPanelistId }: Props) {
+export function IncidentConversation({ kind, incidentId, panelistLanguage, helpSection, incidentPanelistId, readOnly = false }: Props) {
   const { t } = useTranslation()
   const { messages, loading, error, send, photoUrls } = useIncidentConversation(kind, incidentId)
   const [text, setText] = useState('')
@@ -120,6 +121,7 @@ export function IncidentConversation({ kind, incidentId, panelistLanguage, helpS
         ) : messages.map(renderMessage)}
       </div>
       {error && <p className="text-xs text-red-600 mb-2">{t('common.error')}: {error}</p>}
+      {!readOnly && (<>
       <textarea
         className="w-full border rounded p-2 text-sm mb-2"
         rows={2}
@@ -143,6 +145,7 @@ export function IncidentConversation({ kind, incidentId, panelistLanguage, helpS
           {t('incident_conversation.insert_help')}
         </button>
       </div>
+      </>)}
     </div>
   )
 }

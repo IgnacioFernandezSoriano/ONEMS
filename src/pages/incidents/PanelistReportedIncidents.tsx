@@ -1,5 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useTranslation } from '@/hooks/useTranslation'
+import { usePermissions } from '@/contexts/PermissionsContext'
+import { ReadOnlyBadge } from '@/components/common/ReadOnlyBadge'
 import { useReportedIncidents } from '@/lib/hooks/useReportedIncidents'
 import { useUnreadConversations } from '@/lib/hooks/useUnreadConversations'
 import { ReportedIncidentPanel } from '@/components/incidents/ReportedIncidentPanel'
@@ -11,6 +13,8 @@ const CATEGORIES: ReportedIncidentCategory[] = [
 
 export function PanelistReportedIncidents() {
   const { t } = useTranslation()
+  const { canEdit } = usePermissions()
+  const readOnly = !canEdit('reported_incidents')
   const { inbox, loading, error, fetchInbox } = useReportedIncidents()
   const { unreadByKey } = useUnreadConversations()
   const [selected, setSelected] = useState<string | null>(null)
@@ -31,13 +35,13 @@ export function PanelistReportedIncidents() {
   if (error) return <div className="p-6 text-red-600">{t('common.error')}: {error}</div>
   if (selected) return (
     <div className="p-6">
-      <ReportedIncidentPanel incidentId={selected} onBack={() => { setSelected(null); fetchInbox() }} />
+      <ReportedIncidentPanel incidentId={selected} onBack={() => { setSelected(null); fetchInbox() }} readOnly={readOnly} />
     </div>
   )
 
   return (
     <div className="p-6">
-      <h2 className="text-xl font-bold mb-4">{t('reported_incidents.title')}</h2>
+      <h2 className="text-xl font-bold mb-4">{t('reported_incidents.title')} {readOnly && <ReadOnlyBadge />}</h2>
       <div className="flex gap-3 mb-4">
         <select className="border rounded px-2 py-1 text-sm" value={catFilter} onChange={e => setCatFilter(e.target.value as ReportedIncidentCategory | 'all')}>
           <option value="all">{t('reported_incidents.filter.all_categories')}</option>

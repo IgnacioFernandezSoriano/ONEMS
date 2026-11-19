@@ -66,6 +66,7 @@ export function useUsers() {
     role?: string
     account_id?: string
     preferred_language?: string
+    roles?: string[]
   }) => {
     // La creación se hace en la Edge Function `create-user`, que usa service_role
     // para: (a) crear el usuario ya confirmado (email_confirm: true), sin enviar
@@ -78,6 +79,7 @@ export function useUsers() {
         role: userData.role,
         account_id: userData.account_id,
         preferred_language: userData.preferred_language,
+        roles: userData.roles,
       },
     })
 

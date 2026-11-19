@@ -61,7 +61,7 @@ export type AccountFormData = {
   slug: string
   status?: 'active' | 'inactive'
   default_language: SupportedLanguage
-} & Record<AccountContactField, string | null> & AccountReportSchedule
+} & Partial<Record<AccountContactField, string | null>> & AccountReportSchedule  // contactos: se guardan con account_contacts_set (pestaña Roles y accesos)
 
 export interface Region {
   id: string

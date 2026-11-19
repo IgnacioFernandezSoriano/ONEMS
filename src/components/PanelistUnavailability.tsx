@@ -6,7 +6,7 @@ import { scopeToAccount } from '@/lib/accountScope'
 import type { Panelist, PanelistUnavailability } from '@/lib/types'
 
 import { useTranslation } from '@/hooks/useTranslation';
-export function PanelistUnavailabilityComponent() {
+export function PanelistUnavailabilityComponent({ readOnly = false }: { readOnly?: boolean } = {}) {
   const { t } = useTranslation();
   const effectiveAccountId = useEffectiveAccountId()
   const { unavailabilityPeriods, loading, error, createUnavailabilityPeriod, updateUnavailabilityPeriod, cancelUnavailabilityPeriod, deleteUnavailabilityPeriod } = usePanelistUnavailability()
@@ -280,12 +280,14 @@ export function PanelistUnavailabilityComponent() {
             {t('unavailability.description')}
           </p>
         </div>
+        {!readOnly && (<>
         <button
           onClick={() => handleOpenModal()}
           className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
         >
           {t('unavailability.add_period')}
         </button>
+        </>)}
       </div>
 
       {/* Filters */}
@@ -442,7 +444,7 @@ export function PanelistUnavailabilityComponent() {
       </div>
 
       {/* Bulk Operations Panel */}
-      {selectedIds.size > 0 && (
+      {!readOnly && selectedIds.size > 0 && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex items-center justify-between">
           <span className="text-sm font-medium text-blue-900">
             {t('unavailability.selected_count').replace('{count}', String(selectedIds.size))}
@@ -480,12 +482,14 @@ export function PanelistUnavailabilityComponent() {
             <thead className="bg-gray-50 border-b">
               <tr>
                 <th className="px-6 py-3 text-left">
+                  {!readOnly && (<>
                   <input
                     type="checkbox"
                     checked={selectedIds.size === filteredPeriods.length && filteredPeriods.length > 0}
                     onChange={handleSelectAll}
                     className="rounded"
                   />
+                  </>)}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('stock.panelist')}</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('unavailability.start_date')}</th>
@@ -506,12 +510,14 @@ export function PanelistUnavailabilityComponent() {
                   return (
                     <tr key={period.id} className={`hover:bg-gray-50 ${isCurrent ? 'bg-yellow-50' : ''}`}>
                       <td className="px-6 py-4">
+                        {!readOnly && (<>
                         <input
                           type="checkbox"
                           checked={selectedIds.has(period.id)}
                           onChange={() => handleSelectOne(period.id)}
                           className="rounded"
                         />
+                        </>)}
                       </td>
                       <td className="px-6 py-4 text-sm">
                         <div className="font-medium">{period.panelist?.name || '-'}</div>
@@ -536,6 +542,7 @@ export function PanelistUnavailabilityComponent() {
                       <td className="px-6 py-4 text-sm max-w-xs truncate">{period.notes || '-'}</td>
                       <td className="px-6 py-4 text-sm">
                         <div className="flex gap-2">
+                          {!readOnly && (<>
                           <button
                             onClick={() => handleOpenModal(period)}
                             className="text-blue-600 hover:text-blue-800"
@@ -557,6 +564,7 @@ export function PanelistUnavailabilityComponent() {
                               {t('unavailability.delete')}
                             </button>
                           )}
+                          </>)}
                         </div>
                       </td>
                     </tr>

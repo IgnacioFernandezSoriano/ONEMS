@@ -3746,6 +3746,7 @@ hc.user_form.email,E-mail
 hc.user_form.password,Mot de passe
 hc.user_form.full_name,Nom complet
 hc.user_form.role,Rôle
+hc.user_form.account_roles,Rôles dans le compte (facultatif)
 hc.user_form.account,Compte
 hc.user_form.select_account,Sélectionner un compte
 hc.user_form.status,Statut
@@ -4547,6 +4548,8 @@ hc.accounts.edit,Modifier le compte
 hc.users.loading,Chargement...
 hc.users.title,Gestion des utilisateurs
 hc.users.create,Créer un utilisateur
+hc.users.roles_warning,Certains rôles n'ont pas pu être attribués. Définissez-les dans Rôles et accès.
+hc.users.delete_other_accounts,Cet utilisateur appartient aussi à d'autres comptes ; seul un superadmin peut le supprimer.
 hc.users.edit,Modifier l'utilisateur
 hc.sla_form.carrier,Opérateur
 hc.sla_form.product,Produit
@@ -5249,6 +5252,8 @@ help_center.doc.case_analysis.title,Analyse de cas
 help_center.doc.case_analysis.desc,"Analyser un cas depuis ONEMS ou depuis le bot d'analyse sur Telegram : ce qui s'est passé et pourquoi ; messages aux panélistes et corrections simples."
 help_center.doc.gps_location.title,Localisation GPS lors de la déclaration
 help_center.doc.gps_location.desc,"Ce que le ONE bot enregistre lors de la déclaration, la règle selon laquelle rien n'est bloqué, l'incident « Localisation GPS », le rapport d'opération et que faire en tant que manager."
+help_center.doc.roles_access.title,Rôles et accès
+help_center.doc.roles_access.desc,"Les six rôles du compte, ce que signifient Edit et View, à qui demander un changement d’accès et comment gérer l’onglet Rôles et accès."
 reported_incidents.category.gps_location,Localisation GPS
 reported_incidents.gps.col.tag,Étiquette
 reported_incidents.gps.col.kind,Type
@@ -5277,3 +5282,71 @@ allocation_plans.undo_action_edit,Modifier
 allocation_plans.undo_action_create,Créer
 allocation_plans.undo_changed,La dernière action a changé ; vérifiez avant de défaire.
 allocation_plans.bulk_only_deferred,Les échantillons à compenser peuvent seulement être supprimés.
+menu.account_switch_error,Impossible de changer de compte. Veuillez réessayer.
+roles_access.menu,Rôles et accès
+roles_access.menu_tooltip,Qui peut voir et modifier chaque option du menu dans ce compte
+roles_access.title,Rôles et accès
+roles_access.description,"Contacts du compte, droits de chaque rôle et rôles de chaque utilisateur."
+roles_access.select_account,Sélectionnez un compte pour gérer ses rôles et accès.
+roles_access.tab_general,Général
+roles_access.tab_roles,Rôles et accès
+roles_access.save_account_first,"Enregistrez d'abord le compte ; vous pourrez ensuite définir ici ses contacts, droits et rôles."
+roles_access.read_only,"Lecture seule : seuls l'Account Manager, l'UPU account manager ou un superadmin peuvent modifier cet onglet."
+roles_access.load_error,Impossible de charger les rôles et accès : {message}
+roles_access.dismiss,Fermer
+roles_access.saving,Enregistrement...
+roles_access.saved,Enregistré
+roles_access.contacts_save,Enregistrer les contacts
+roles_access.matrix_title,Droits de chaque rôle
+roles_access.matrix_help,Edit = peut modifier les données ; View = peut seulement consulter ; — = l'option est masquée. Un utilisateur avec plusieurs rôles obtient le droit le plus élevé. Les changements s'appliquent immédiatement.
+roles_access.matrix_option,Option du menu
+roles_access.reset,Revenir au modèle
+roles_access.reset_confirm,Remplacer tous les droits de ce compte par ceux du modèle ? Les modifications de la matrice seront perdues (les rôles des utilisateurs et les contacts sont conservés).
+roles_access.no_role,Sans rôle
+roles_access.no_role_help,Utilisateurs du compte sans aucun rôle. Fixe : ne se modifie pas par compte.
+roles_access.level.edit,Edit
+roles_access.level.view,View
+roles_access.level.none,—
+roles_access.users_title,Utilisateurs et leurs rôles
+roles_access.users_help,Cochez les rôles de chaque utilisateur de ce compte. « Provisoire » signale les rôles attribués automatiquement au démarrage : confirmez-les ou modifiez-les.
+roles_access.user,Utilisateur
+roles_access.no_users,Ce compte n'a pas encore d'utilisateurs.
+roles_access.provisional,Provisoire
+roles_access.provisional_help,Attribué automatiquement au démarrage. Cliquez sur Confirmer pour le rendre définitif.
+roles_access.confirm_provisional,Confirmer
+roles_access.other_account,Autre compte
+roles_access.other_account_help,Le compte actif de cet utilisateur est un autre ; il a aussi un rôle dans ce compte.
+roles_access.add_by_email,Ajouter un utilisateur existant par e-mail
+roles_access.add_by_email_help,Superadmin uniquement. L'utilisateur doit déjà exister (par exemple dans un autre compte) ; il reçoit ce rôle ici.
+roles_access.role,Rôle
+roles_access.add,Ajouter
+roles_access.log_title,Dernières modifications
+roles_access.log_empty,Aucune modification pour l'instant.
+roles_access.log_date,Date
+roles_access.log_who,Qui
+roles_access.log_what,Modification
+roles_access.log_system,Système
+roles_access.log.access_set,{role} · {option} : {before} → {after}
+roles_access.log.access_reset,Tous les droits remis au modèle
+roles_access.log.user_role_added,{user} : rôle {role} ajouté
+roles_access.log.user_role_removed,{user} : rôle {role} retiré
+roles_access.log.user_added_by_email,{user} ajouté au compte en tant que {role}
+roles_access.log.contacts_set,Contacts modifiés : {fields}
+roles_access.log.contacts_unchanged,Contacts enregistrés sans modification
+roles_access.log.activation,Attribution initiale des rôles ({count} attributions)
+roles_access.log.other,Autre modification ({kind})
+roles_access.error.last_editor_role,Vous ne pouvez pas retirer votre dernier rôle d'Account Manager / UPU account manager dans ce compte : vous perdriez la possibilité de gérer cet onglet. Demandez-le à un autre responsable ou à un superadmin.
+roles_access.error.not_member,Cet utilisateur n'appartient pas à ce compte.
+roles_access.error.user_not_found,Aucun utilisateur n'existe avec cet e-mail. Créez d'abord l'utilisateur.
+roles_access.error.superadmin_role,Un superadmin a déjà tous les droits et ne prend pas de rôles de compte.
+roles_access.error.forbidden,Vous n'êtes pas autorisé à modifier les rôles et accès de ce compte.
+roles_access.error.generic,La modification n'a pas pu être enregistrée : {message}
+roles_access.role.account_manager,Account Manager
+roles_access.role.panelist_manager,Panelist Manager
+roles_access.role.materials_supplier,Materials Supplier
+roles_access.role.do_coordinator,DO coordinator
+roles_access.role.upu_account_manager,UPU account manager
+roles_access.role.allocation_plan_manager,Allocation Plan Manager
+common.read_only,Consultation uniquement
+roles_access.rights_load_error,Impossible de charger vos droits d'accès. Vérifiez votre connexion et réessayez.
+roles_access.rights_retry,Réessayer

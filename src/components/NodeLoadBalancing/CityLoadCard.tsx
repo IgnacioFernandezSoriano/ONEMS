@@ -28,6 +28,8 @@ interface CityLoadCardProps {
   onScaleChange?: (s: LoadScale) => void;
   policy?: CityPolicyView;
   onCityPolicyChange?: (p: { date_policy?: DatePolicy | null; pobox_enabled?: boolean | null }) => void;
+  /** Modo consulta: sin boton de balanceo */
+  readOnly?: boolean;
 }
 
 const FINDING_BULLET: Record<Severity, string> = {
@@ -52,6 +54,7 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
   onScaleChange,
   policy,
   onCityPolicyChange,
+  readOnly = false,
 }) => {
   const { t } = useTranslation();
   const dayView = React.useMemo(() => buildDayView(dayData), [dayData]);
@@ -592,6 +595,7 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
 
       {/* Actions */}
       <div className="bg-gray-50 px-6 py-4 border-t border-gray-200 flex items-center gap-3">
+        {!readOnly && (<>
         <div className="group relative">
           <button
             onClick={onBalance}
@@ -647,6 +651,7 @@ export const CityLoadCard: React.FC<CityLoadCardProps> = ({
             <p className="text-yellow-300">⚠️ {t('lb2.help.preview_warning')}</p>
           </div>
         </span>
+        </>)}
       </div>
     </div>
   );

@@ -12,8 +12,12 @@ import { useTimeUnit } from '../hooks/useTimeUnit';
 import { TimeUnitToggle } from '../components/common/TimeUnitToggle';
 import { formatDuration } from '../lib/accountTime';
 import { useTranslation } from '@/hooks/useTranslation';
+import { ReadOnlyBadge } from '../components/common/ReadOnlyBadge';
+import { usePermissions } from '../contexts/PermissionsContext';
 export default function OneDB() {
   const { t } = useTranslation();
+  const { canEdit } = usePermissions();
+  const readOnly = !canEdit('e2e_db');
   const { user, profile } = useAuth();
   const { accountTimezone } = useAccount();
   const { unit } = useTimeUnit();
@@ -126,6 +130,7 @@ export default function OneDB() {
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-2xl font-bold text-gray-900">{t("one_db.title")}</h1>
+              {readOnly && <ReadOnlyBadge />}
               <SmartTooltip content="ONE DB stores all validated shipment records with complete transit information, delivery performance metrics, and quality analytics for reporting and compliance tracking." />
             </div>
             <p className="text-sm text-gray-600 mt-1">
@@ -226,6 +231,7 @@ export default function OneDB() {
         onExport={handleExport}
         onClearSelection={handleClearSelection}
         onDelete={handleDelete}
+        readOnly={readOnly}
       />
 
       {/* Footer Info */}

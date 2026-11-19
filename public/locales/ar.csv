@@ -1046,7 +1046,7 @@ menu.delivery_standards,معايير التسليم
 menu.delivery_standards.tooltip,تحديد أوقات التسليم المتوقعة ونسب النجاح حسب الناقل والمنتج
 menu.demo_reset,إعادة تعيين العرض التوضيحي
 menu.demo_reset.tooltip,إعادة تعيين بيانات حساب العرض التوضيحي
-menu.e2e_db,E2E DBبيانات ONE
+menu.e2e_db,E2E DB
 menu.event_consolidation.tooltip,معالجة أحداث RFID واكتشاف الشذوذات
 menu.extract_e2e_db_api,Extract E2E DB API
 menu.extract_e2e_db_api.tooltip,استخراج بيانات E2E عبر REST API
@@ -3746,6 +3746,7 @@ hc.user_form.email,البريد الإلكتروني
 hc.user_form.password,كلمة المرور
 hc.user_form.full_name,الاسم الكامل
 hc.user_form.role,الدور
+hc.user_form.account_roles,الأدوار في الحساب (اختياري)
 hc.user_form.account,الحساب
 hc.user_form.select_account,اختر حسابًا
 hc.user_form.status,الحالة
@@ -4547,6 +4548,8 @@ hc.accounts.edit,تعديل الحساب
 hc.users.loading,جارٍ التحميل...
 hc.users.title,إدارة المستخدمين
 hc.users.create,إنشاء مستخدم
+hc.users.roles_warning,تعذر تعيين بعض الأدوار. حددها في الأدوار والوصول.
+hc.users.delete_other_accounts,هذا المستخدم ينتمي أيضا إلى حسابات أخرى؛ يمكن لمدير عام فقط حذفه.
 hc.users.edit,تعديل المستخدم
 hc.sla_form.carrier,الناقل
 hc.sla_form.product,المنتج
@@ -5249,6 +5252,8 @@ help_center.doc.case_analysis.title,تحليل الحالات
 help_center.doc.case_analysis.desc,"تحليل حالة من ONEMS أو من بوت التحليل في Telegram: ما الذي حدث ولماذا؛ رسائل إلى المشاركين وإصلاحات بسيطة."
 help_center.doc.gps_location.title,الموقع الجغرافي (GPS) عند التصريح
 help_center.doc.gps_location.desc,"ما يسجّله ONE bot عند التصريح، وقاعدة عدم حجب أي تصريح، وحادثة «الموقع الجغرافي (GPS)»، وتقرير التشغيل، وما يجب أن يفعله المدير."
+help_center.doc.roles_access.title,الأدوار والصلاحيات
+help_center.doc.roles_access.desc,"أدوار الحساب الستة، ومعنى Edit وView، ومن تطلب منه تغيير الصلاحيات، وكيفية إدارة تبويب الأدوار والصلاحيات."
 reported_incidents.category.gps_location,الموقع الجغرافي (GPS)
 reported_incidents.gps.col.tag,البطاقة
 reported_incidents.gps.col.kind,النوع
@@ -5277,3 +5282,71 @@ allocation_plans.undo_action_edit,تعديل
 allocation_plans.undo_action_create,إنشاء
 allocation_plans.undo_changed,تغيّر آخر إجراء؛ راجعه قبل التراجع.
 allocation_plans.bulk_only_deferred,العينات المطلوب تعويضها يمكن حذفها فقط.
+menu.account_switch_error,تعذّر تغيير الحساب. حاول مرة أخرى.
+roles_access.menu,الأدوار والصلاحيات
+roles_access.menu_tooltip,من يمكنه عرض كل خيار من القائمة وتعديله في هذا الحساب
+roles_access.title,الأدوار والصلاحيات
+roles_access.description,جهات اتصال الحساب وصلاحيات كل دور وأدوار كل مستخدم.
+roles_access.select_account,اختر حسابًا لإدارة أدواره وصلاحياته.
+roles_access.tab_general,عام
+roles_access.tab_roles,الأدوار والصلاحيات
+roles_access.save_account_first,احفظ الحساب أولًا؛ بعد ذلك يمكنك تحديد جهات الاتصال والصلاحيات والأدوار هنا.
+roles_access.read_only,للقراءة فقط: لا يمكن تعديل هذا التبويب إلا من قبل Account Manager أو UPU account manager أو مسؤول عام.
+roles_access.load_error,تعذر تحميل الأدوار والصلاحيات: {message}
+roles_access.dismiss,إغلاق
+roles_access.saving,جارٍ الحفظ...
+roles_access.saved,تم الحفظ
+roles_access.contacts_save,حفظ جهات الاتصال
+roles_access.matrix_title,صلاحيات كل دور
+roles_access.matrix_help,Edit = يمكنه تعديل البيانات؛ View = يمكنه العرض فقط؛ — = الخيار مخفي. المستخدم الذي لديه عدة أدوار يحصل على أعلى صلاحية. تُطبَّق التغييرات فورًا.
+roles_access.matrix_option,خيار القائمة
+roles_access.reset,العودة إلى النموذج
+roles_access.reset_confirm,هل تريد استبدال جميع صلاحيات هذا الحساب بصلاحيات النموذج؟ ستفقد التغييرات التي أجريتها على المصفوفة (تبقى أدوار المستخدمين وجهات الاتصال).
+roles_access.no_role,بدون دور
+roles_access.no_role_help,مستخدمو الحساب الذين ليس لديهم أي دور. ثابتة: لا يمكن تغييرها لكل حساب.
+roles_access.level.edit,Edit
+roles_access.level.view,View
+roles_access.level.none,—
+roles_access.users_title,المستخدمون وأدوارهم
+roles_access.users_help,"حدد أدوار كل مستخدم في هذا الحساب. تشير ""مؤقت"" إلى الأدوار المعيّنة تلقائيًا عند البدء: أكّدها أو غيّرها."
+roles_access.user,المستخدم
+roles_access.no_users,لا يوجد مستخدمون في هذا الحساب بعد.
+roles_access.provisional,مؤقت
+roles_access.provisional_help,عُيّن تلقائيًا عند البدء. اضغط تأكيد لتثبيته.
+roles_access.confirm_provisional,تأكيد
+roles_access.other_account,حساب آخر
+roles_access.other_account_help,الحساب النشط لهذا المستخدم حساب آخر؛ ولديه دور في هذا الحساب أيضًا.
+roles_access.add_by_email,إضافة مستخدم موجود عبر البريد الإلكتروني
+roles_access.add_by_email_help,للمسؤول العام فقط. يجب أن يكون المستخدم موجودًا مسبقًا (مثلًا في حساب آخر)؛ ويحصل على هذا الدور هنا.
+roles_access.role,الدور
+roles_access.add,إضافة
+roles_access.log_title,آخر التغييرات
+roles_access.log_empty,لا توجد تغييرات بعد.
+roles_access.log_date,التاريخ
+roles_access.log_who,من
+roles_access.log_what,التغيير
+roles_access.log_system,النظام
+roles_access.log.access_set,{role} · {option}: من {before} إلى {after}
+roles_access.log.access_reset,أُعيدت جميع الصلاحيات إلى النموذج
+roles_access.log.user_role_added,{user}: أُضيف الدور {role}
+roles_access.log.user_role_removed,{user}: أُزيل الدور {role}
+roles_access.log.user_added_by_email,أُضيف {user} إلى الحساب بدور {role}
+roles_access.log.contacts_set,تم تغيير جهات الاتصال: {fields}
+roles_access.log.contacts_unchanged,حُفظت جهات الاتصال دون تغييرات
+roles_access.log.activation,التعيين الأولي للأدوار ({count} تعيينات)
+roles_access.log.other,تغيير آخر ({kind})
+roles_access.error.last_editor_role,لا يمكنك إزالة آخر دور Account Manager / UPU account manager لديك في هذا الحساب: ستفقد القدرة على إدارة هذا التبويب. اطلب ذلك من مسؤول آخر أو من مسؤول عام.
+roles_access.error.not_member,هذا المستخدم لا ينتمي إلى هذا الحساب.
+roles_access.error.user_not_found,لا يوجد مستخدم بهذا البريد الإلكتروني. أنشئ المستخدم أولًا.
+roles_access.error.superadmin_role,يملك المسؤول العام جميع الصلاحيات ولا يأخذ أدوارًا في الحساب.
+roles_access.error.forbidden,ليس لديك إذن لتغيير الأدوار والصلاحيات في هذا الحساب.
+roles_access.error.generic,تعذر حفظ التغيير: {message}
+roles_access.role.account_manager,Account Manager
+roles_access.role.panelist_manager,Panelist Manager
+roles_access.role.materials_supplier,Materials Supplier
+roles_access.role.do_coordinator,DO coordinator
+roles_access.role.upu_account_manager,UPU account manager
+roles_access.role.allocation_plan_manager,Allocation Plan Manager
+common.read_only,للاطلاع فقط
+roles_access.rights_load_error,تعذّر تحميل صلاحيات الوصول الخاصة بك. تحقّق من اتصالك وحاول مرة أخرى.
+roles_access.rights_retry,إعادة المحاولة

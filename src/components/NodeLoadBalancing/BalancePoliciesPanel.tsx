@@ -23,6 +23,8 @@ interface BalancePoliciesPanelProps {
   /** Reparto de las muestras POBOX extra por producto (se muestra solo con POBOX activo) */
   poboxShares: PoboxProductShare[];
   onSavePoboxShares: (shares: { product_id: string; pct: number }[]) => Promise<{ success: boolean; error?: string }>;
+  /** Modo consulta: controles de politica bloqueados y sin balanceo ni guardado */
+  readOnly?: boolean;
 }
 
 const WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0];
@@ -43,9 +45,11 @@ export function BalancePoliciesPanel({
   onChangeFence,
   poboxShares,
   onSavePoboxShares,
+  readOnly = false,
 }: BalancePoliciesPanelProps) {
   const { t } = useTranslation();
   const running = !!balancingAll;
+  const lockedAll = locked || readOnly;
   const policies: DatePolicy[] = ['daily', 'weekly'];
 
   return (
@@ -55,6 +59,7 @@ export function BalancePoliciesPanel({
     >
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-gray-900">{t('lb2.policies_title')}</h2>
+        {!readOnly && (<>
         <button
           type="button"
           onClick={onBalanceAll}
@@ -66,6 +71,7 @@ export function BalancePoliciesPanel({
             ? t('lb2.balance_all_progress', { done: balancingAll!.done, total: balancingAll!.total })
             : t('lb2.balance_all')}
         </button>
+        </>)}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -82,7 +88,7 @@ export function BalancePoliciesPanel({
                   key={dow}
                   type="button"
                   aria-pressed={on}
-                  disabled={locked}
+                  disabled={lockedAll}
                   onClick={() => onToggleDay(dow, !on)}
                   className={`px-3 py-1.5 text-sm font-medium rounded-full border transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${FOCUS} ${
                     on
@@ -105,7 +111,7 @@ export function BalancePoliciesPanel({
           <div
             role="radiogroup"
             aria-labelledby="lb2-date-policy"
-            aria-disabled={pobox || locked}
+            aria-disabled={pobox || lockedAll}
             title={pobox ? t('lb2.pobox_forces_daily') : undefined}
             className="inline-flex rounded-lg border border-gray-300 overflow-hidden"
           >
@@ -117,7 +123,7 @@ export function BalancePoliciesPanel({
                   type="button"
                   role="radio"
                   aria-checked={selected}
-                  disabled={pobox || locked}
+                  disabled={pobox || lockedAll}
                   onClick={() => onChangePolicy({ date_policy: p })}
                   className={`px-4 py-1.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS} ${
                     selected ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'
@@ -141,7 +147,7 @@ export function BalancePoliciesPanel({
             <input
               type="checkbox"
               checked={pobox}
-              disabled={locked}
+              disabled={lockedAll}
               onChange={(e) => onChangePolicy({ pobox_enabled: e.target.checked })}
               className={`h-4 w-4 rounded border-gray-300 text-blue-600 disabled:opacity-50 disabled:cursor-not-allowed ${FOCUS}`}
             />
@@ -151,7 +157,7 @@ export function BalancePoliciesPanel({
         </div>
 
         {/* Fence */}
-        <div>
+        {!readOnly && <div>
           <label htmlFor="lb2-fence-until" className="block text-sm font-medium text-gray-700 mb-2">
             {t('node_load_balancing.fence_until')}
           </label>
@@ -164,10 +170,10 @@ export function BalancePoliciesPanel({
             className={`block w-full border border-gray-300 rounded-md shadow-sm py-1.5 px-3 text-sm disabled:opacity-50 disabled:cursor-not-allowed ${FOCUS}`}
           />
           <p className="text-xs text-gray-500 mt-2">{t('node_load_balancing.fence_until_hint')}</p>
-        </div>
+        </div>}
       </div>
 
-      {pobox && <PoboxProductShares shares={poboxShares} onSave={onSavePoboxShares} locked={locked} />}
+      {pobox && <PoboxProductShares shares={poboxShares} onSave={onSavePoboxShares} locked={lockedAll} readOnly={readOnly} />}
     </section>
   );
 }

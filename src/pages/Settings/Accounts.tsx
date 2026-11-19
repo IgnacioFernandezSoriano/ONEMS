@@ -62,6 +62,7 @@ export function Accounts() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         title={selectedAccount ? t('hc.accounts.edit') : t('hc.accounts.create')}
+        maxWidthClass={selectedAccount ? 'max-w-6xl' : 'max-w-md'}
       >
         <AccountForm
           account={selectedAccount}

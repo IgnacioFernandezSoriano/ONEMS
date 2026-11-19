@@ -20,6 +20,7 @@ interface CarriersTreeProps {
   onAddMaterialToProduct: (data: { product_id: string; material_id: string; quantity: number }) => Promise<void>
   onUpdateProductMaterial: (id: string, data: { quantity: number }) => Promise<void>
   onRemoveProductMaterial: (id: string) => Promise<void>
+  readOnly?: boolean
 }
 
 export function CarriersTree({
@@ -36,6 +37,7 @@ export function CarriersTree({
   onAddMaterialToProduct,
   onUpdateProductMaterial,
   onRemoveProductMaterial,
+  readOnly = false,
 }: CarriersTreeProps) {
   const { t } = useTranslation()
   const [expandedCarriers, setExpandedCarriers] = useState<Set<string>>(new Set())
@@ -207,6 +209,7 @@ export function CarriersTree({
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
                     </svg>
                   </button>
+                  {!readOnly && (<>
                   <button
                     onClick={() =>
                       setModal({
@@ -248,6 +251,7 @@ export function CarriersTree({
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
                   </button>
+                  </>)}
                 </div>
               </div>
 
@@ -330,6 +334,7 @@ export function CarriersTree({
 
                           {/* Action Buttons */}
                           <div className="flex items-center gap-2">
+                            {!readOnly && (<>
                             <button
                               onClick={() =>
                                 setModal({
@@ -372,6 +377,7 @@ export function CarriersTree({
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                               </svg>
                             </button>
+                            </>)}
                           </div>
                         </div>
 
@@ -409,6 +415,7 @@ export function CarriersTree({
 
                                 {/* Action Buttons */}
                                 <div className="flex items-center gap-1">
+                                  {!readOnly && (<>
                                   <button
                                     onClick={() => handleUpdateQuantity(pm.id, pm.quantity, pm.material_catalog?.name || t('hc.carriers_tree.material_fallback'))}
                                     className="p-1 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
@@ -427,6 +434,7 @@ export function CarriersTree({
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                     </svg>
                                   </button>
+                                  </>)}
                                 </div>
                               </div>
                             ))}

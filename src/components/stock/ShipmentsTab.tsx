@@ -10,7 +10,7 @@ import ConfirmShipmentModal from './ConfirmShipmentModal'
 import type { MaterialShipmentItem, MaterialShipment } from '../../hooks/useStockManagement'
 
 import { useTranslation } from '@/hooks/useTranslation';
-export default function ShipmentsTab() {
+export default function ShipmentsTab({ readOnly = false }: { readOnly?: boolean }) {
   const { t } = useTranslation();
   const { shipments, regulatorStocks, loading: loadingShipments, createShipment, updateShipmentStatus, confirmShipment, updateShipmentItem, deleteShipment, reload } = useStockManagement()
   const { proposedShipments, loading: loadingProposed, calculate } = useProposedShipments()
@@ -550,7 +550,7 @@ export default function ShipmentsTab() {
                 {loadingProposed ? t('stock.calculating') : t('common.calculate')}
               </button>
 
-              {filteredProposedShipments.length > 0 && (
+              {!readOnly && filteredProposedShipments.length > 0 && (
                 <>
                   <button
                     onClick={handleGenerateShipments}
@@ -678,13 +678,13 @@ export default function ShipmentsTab() {
             </h3>
             {selectedShipmentIds.size > 0 && (
               <div className="flex items-center gap-2">
-                <button
+                {!readOnly && <button
                   onClick={handleSendSelected}
                   className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
                   <Send className="h-4 w-4 mr-1" />
                   {t('stock.send_selected', { count: selectedShipmentIds.size })}
-                </button>
+                </button>}
                 <button
                   onClick={handleExportCSV}
                   className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
@@ -699,13 +699,13 @@ export default function ShipmentsTab() {
                   <FileText className="h-4 w-4 mr-1" />
                   {t('hc.shipments_tab.packing_list_pdf')}
                 </button>
-                <button
+                {!readOnly && <button
                   onClick={handleDeleteSelected}
                   className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                 >
                   <Trash2 className="h-4 w-4 mr-1" />
                   {t('hc.shipments_tab.delete_selected', { count: selectedShipmentIds.size })}
-                </button>
+                </button>}
               </div>
             )}
           </div>
@@ -739,9 +739,9 @@ export default function ShipmentsTab() {
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     {t('stock.expected_date')}
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {!readOnly && <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     {t('common.actions')}
-                  </th>
+                  </th>}
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -797,7 +797,7 @@ export default function ShipmentsTab() {
                                     </span>
                                   )}
                                 </span>
-                                {shipment.status === 'pending' && (
+                                {!readOnly && shipment.status === 'pending' && (
                                   <button
                                     onClick={() => {
                                       setEditingItem(item)
@@ -825,7 +825,7 @@ export default function ShipmentsTab() {
                         }
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    {!readOnly && <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleSendShipment(shipment.id)}
@@ -841,7 +841,7 @@ export default function ShipmentsTab() {
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
-                    </td>
+                    </td>}
                   </tr>
                 ))}
               </tbody>
@@ -858,7 +858,7 @@ export default function ShipmentsTab() {
       )}
 
       {/* Edit Shipment Item Modal */}
-      {showEditModal && editingItem && (
+      {!readOnly && showEditModal && editingItem && (
         <EditShipmentItemModal
           item={editingItem}
           onClose={() => {
@@ -874,7 +874,7 @@ export default function ShipmentsTab() {
       )}
 
       {/* Confirm Shipment Modal */}
-      {showConfirmModal && confirmingShipment && (
+      {!readOnly && showConfirmModal && confirmingShipment && (
         <ConfirmShipmentModal
           shipment={confirmingShipment}
           regulatorStocks={regulatorStocks}

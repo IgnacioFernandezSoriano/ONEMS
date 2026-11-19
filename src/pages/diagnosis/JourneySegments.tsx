@@ -9,9 +9,16 @@ import { JourneySegmentsFilters } from '@/components/diagnosis/JourneySegmentsFi
 import { JourneySegmentsTable } from '@/components/diagnosis/JourneySegmentsTable';
 import { Map, CheckCircle, AlertTriangle, XCircle, Clock } from 'lucide-react';
 import { SmartTooltip } from '@/components/common/SmartTooltip';
+import { usePermissions } from '@/contexts/PermissionsContext';
+import { ROUTE_OPTION, type AccessOption } from '@/lib/access';
+
+// Ejecutar (reconstruir/ensamblar) escribe datos: exige Edit en la opción de esta ruta.
+const RUN_OPTION = ROUTE_OPTION['/diagnosis/journey-segments'] as AccessOption;
 
 export default function JourneySegments() {
   const { t } = useTranslation();
+  const { canEdit } = usePermissions();
+  const canRun = canEdit(RUN_OPTION);
   const { effectiveAccountId } = useAccount();
   const { unit } = useTimeUnit();
   const {
@@ -117,15 +124,17 @@ export default function JourneySegments() {
         </div>
         <div className="flex items-center gap-3">
           <TimeUnitToggle />
-          <button
-            onClick={handleRunReconstruction}
-            disabled={isReconstructing}
-            className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-            title={t('journey_segments.run_reconstruction_tooltip')}
-          >
-            <Map className={`w-4 h-4 ${isReconstructing ? 'animate-spin' : ''}`} />
-            {t('journey_segments.run_reconstruction')}
-          </button>
+          {canRun && (
+            <button
+              onClick={handleRunReconstruction}
+              disabled={isReconstructing}
+              className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+              title={t('journey_segments.run_reconstruction_tooltip')}
+            >
+              <Map className={`w-4 h-4 ${isReconstructing ? 'animate-spin' : ''}`} />
+              {t('journey_segments.run_reconstruction')}
+            </button>
+          )}
           <button
             onClick={handleExport}
             disabled={selectedSegments.length === 0}
